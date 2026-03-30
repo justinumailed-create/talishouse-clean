@@ -1,5 +1,8 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import { getAssociates, saveAssociates } from "@/lib/db";
 
 function generateFastCode(name: string): string {
@@ -53,6 +56,18 @@ export async function POST(req: Request) {
     }
 
     // Try Supabase first, fallback to file on error
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      return NextResponse.json(
+        { error: "Supabase not configured" },
+        { status: 500 }
+      );
+    }
+
+    const supabaseClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    );
+
     let useFileStorage = false;
     let newAssociate: any = null;
 
@@ -70,7 +85,7 @@ export async function POST(req: Request) {
         created_at: new Date().toISOString(),
       };
 
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from("users")
         .insert([payload])
         .select()

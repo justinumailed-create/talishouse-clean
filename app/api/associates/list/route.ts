@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getAssociates } from "@/lib/db";
 
 export async function GET() {
