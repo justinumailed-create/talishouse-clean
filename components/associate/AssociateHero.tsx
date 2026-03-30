@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MapComponent from "@/components/MapComponent";
 
 interface PageConfig {
   heroType: "map" | "image" | "gallery" | "pdf" | "video";
@@ -88,17 +89,7 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
   const renderHeroContent = () => {
     switch (config.heroType) {
       case "map":
-        return (
-          <iframe
-            src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
-            allow="geolocation 'self' https://my.atlist.com"
-            frameBorder="0"
-            scrolling="no"
-            allowFullScreen
-            title="Talishouse property discovery map"
-            className="w-full h-full"
-          />
-        );
+        return <MapComponent associateId={fastCode} />;
       case "image":
         return config.heroContent ? (
           <img src={config.heroContent as string} alt="Hero" className="w-full h-full object-cover" />
@@ -131,17 +122,7 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
           <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">No video set</div>
         );
       default:
-        return (
-          <iframe
-            src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
-            allow="geolocation 'self' https://my.atlist.com"
-            frameBorder="0"
-            scrolling="no"
-            allowFullScreen
-            title="Talishouse property discovery map"
-            className="w-full h-full"
-          />
-        );
+        return <MapComponent associateId={fastCode} />;
     }
   };
 

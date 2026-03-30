@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { isAuthorized, getRole, clearFastCode, isSuperAdmin } from "@/lib/fast-code";
+import { useAuth } from "@/context/AuthContext";
 import FastCodeGate from "@/components/FastCodeGate";
 
 const adminNavItems = [
@@ -19,10 +19,11 @@ const adminNavItems = [
 
 function AdminSidebar({ role, isOpen, onClose }: { role: string; isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname();
-  const superAdmin = isSuperAdmin();
+  const { logout, fastCode } = useAuth();
+  const superAdmin = fastCode === "ADMIN123";
 
   const handleLogout = () => {
-    clearFastCode();
+    logout();
     window.location.href = "/";
   };
 
@@ -108,16 +109,10 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [authorized, setAuthorized] = useState<boolean | null>(null);
-  const [role, setRole] = useState<string | null>(null);
+  const { authorized, role, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  useEffect(() => {
-    setAuthorized(isAuthorized());
-    setRole(getRole());
-  }, []);
-
-  if (authorized === null) return null;
+  if (loading || authorized === null) return null;
 
   if (!authorized) {
     return <FastCodeGate />;

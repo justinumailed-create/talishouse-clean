@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { setFastCode, isSuperAdmin } from "@/lib/fast-code";
+import { setFastCode } from "@/lib/fast-code";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 /**
  * FastCodeGate Component
@@ -10,6 +11,7 @@ import { supabase } from "@/lib/supabase";
  */
 
 export default function FastCodeGate() {
+  const { login } = useAuth();
   const [inputCode, setInputCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -29,8 +31,7 @@ export default function FastCodeGate() {
     try {
       // 1. Check if it's Super Admin
       if (code === "ADMIN123") {
-        setFastCode(code);
-        localStorage.setItem("role", "admin");
+        login(code, "admin");
         window.location.reload();
         return;
       }
@@ -50,9 +51,7 @@ export default function FastCodeGate() {
       }
 
       if (associate) {
-        setFastCode(code);
-        localStorage.setItem("role", "associate");
-        localStorage.setItem("associateId", associate.id);
+        login(code, "associate", associate.id);
         window.location.reload();
         return;
       }

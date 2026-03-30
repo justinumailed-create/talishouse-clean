@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AssociateProvider } from "@/context/AssociateContext";
+import { AuthProvider } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FloatingContactButton from "@/components/FloatingContactButton";
@@ -38,15 +39,17 @@ export default function RootLayout({
       <body
         className={`${inter.variable} min-h-screen flex flex-col antialiased bg-white text-black`}
       >
-        <CartProvider>
-          <AssociateProvider>
-            <Header />
-            <main className="flex-grow page-wrapper container-main">{children}</main>
-            <Footer />
-            <FloatingContactButton />
-            <CartDrawer />
-          </AssociateProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <AssociateProvider>
+              <Header />
+              <main className="flex-grow page-wrapper container-main">{children}</main>
+              <Footer />
+              <FloatingContactButton />
+              <CartDrawer />
+            </AssociateProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,8 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
-import { isSupabaseConfigured } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { getAssociates, saveAssociates } from "@/lib/db";
 
 function generateFastCode(name: string): string {
@@ -22,10 +21,10 @@ export async function POST(req: Request) {
       );
     }
 
+    const fastCode = generateFastCode(body.name);
+
     // Use file storage if Supabase not configured
     if (!isSupabaseConfigured()) {
-      const fastCode = generateFastCode(body.name);
-      
       const associates = getAssociates();
       const newAssociate = {
         id: Date.now().toString(),
@@ -55,93 +54,49 @@ export async function POST(req: Request) {
       });
     }
 
-    // Try Supabase first, fallback to file on error
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      return NextResponse.json(
-        { error: "Supabase not configured" },
-        { status: 500 }
-      );
-    }
-
-    const supabaseClient = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    );
-
-    let useFileStorage = false;
-    let newAssociate: any = null;
-
+    // Try Supabase first
     try {
-      const fastCode = generateFastCode(body.name);
-
       const payload = {
         name: body.name,
         email: body.email,
         fast_code: fastCode,
-        slug: fastCode,
-        role: "associate",
-        role_type: "partner",
-        is_page_enabled: true,
         created_at: new Date().toISOString(),
+        is_page_enabled: true,
+        page_headline: `Partnered with ${body.name}`,
+        page_contact_cta: "Propose a Project"
       };
 
-      const { data, error } = await supabaseClient
-        .from("users")
+      const { data, error } = await supabase
+        .from("associates")
         .insert([payload])
         .select()
         .single();
 
       if (error) {
-        console.error("Supabase error, falling back to file:", error);
-        useFileStorage = true;
-      } else {
-        console.log("API HIT (supabase):", body);
-        return NextResponse.json({
-          success: true,
-          fastCode: data.fast_code,
-          associate: {
-            id: data.id,
-            name: data.name,
-            email: data.email,
-            fastCode: data.fast_code,
-          }
-        });
+        console.error("Supabase insert error:", error);
+        return NextResponse.json(
+          { error: error.message || "Failed to create associate in database" },
+          { status: 500 }
+        );
       }
-    } catch (supabaseErr) {
-      console.error("Supabase connection failed:", supabaseErr);
-      useFileStorage = true;
-    }
 
-    // Fallback to file storage
-    if (useFileStorage) {
-      const fastCode = generateFastCode(body.name);
-      const associates = getAssociates();
-      newAssociate = {
-        id: Date.now().toString(),
-        name: body.name,
-        email: body.email,
-        fastCode,
-        createdAt: new Date().toISOString(),
-        pageConfig: {
-          heroType: "map",
-          heroContent: "",
-          headline: "TALISHOUSE™ HOMES",
-          subtext: "",
-          ctaText: "Propose a Project",
-          showForm: false,
-          showVideo: false,
-          videoUrl: ""
-        }
-      };
-      associates.push(newAssociate);
-      saveAssociates(associates);
-
-      console.log("API HIT (file fallback):", body);
+      console.log("API HIT (supabase):", body);
       return NextResponse.json({
         success: true,
-        fastCode: newAssociate.fastCode,
-        associate: newAssociate
+        fastCode: data.fast_code,
+        associate: {
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          fastCode: data.fast_code,
+        }
       });
+    } catch (supabaseErr) {
+      console.error("Supabase connection failed:", supabaseErr);
+      return NextResponse.json(
+        { error: "Database connection failed" },
+        { status: 500 }
+      );
     }
 
   } catch (err) {

@@ -1,16 +1,24 @@
 import React from "react";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
 
 async function getAssociates() {
-  const res = await fetch("http://localhost:3000/api/associates/list", {
-    cache: "no-store",
-  });
+  try {
+    const { data, error } = await supabase
+      .from("associates")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (!res.ok) {
+    if (error) {
+      console.error("Supabase error fetching associates:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (err) {
+    console.error("Unexpected error fetching associates:", err);
     return [];
   }
-
-  return res.json();
 }
 
 export default async function AssociatesPage() {
@@ -31,7 +39,7 @@ export default async function AssociatesPage() {
         </Link>
       </div>
 
-      {data.length === 0 ? (
+      {!data || data.length === 0 ? (
         <div className="border border-gray-200 rounded-xl p-6 text-center text-gray-500">
           No associates yet.
         </div>
@@ -50,10 +58,10 @@ export default async function AssociatesPage() {
               <div className="text-right flex items-center gap-4">
                 <div>
                   <p className="text-sm font-medium text-blue-600">
-                    {a.fastCode}
+                    {a.fast_code}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {new Date(a.createdAt).toLocaleDateString()}
+                    {a.created_at ? new Date(a.created_at).toLocaleDateString() : "N/A"}
                   </p>
                 </div>
                 <Link

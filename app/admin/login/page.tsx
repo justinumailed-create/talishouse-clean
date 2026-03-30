@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/context/AuthContext";
 
 const SUPER_ADMIN_CODE = "ADMIN123";
 
 export default function LoginPage() {
+  const { login } = useAuth();
   const [fastCode, setFastCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,8 +30,7 @@ export default function LoginPage() {
 
       // Super Admin login
       if (code === SUPER_ADMIN_CODE) {
-        localStorage.setItem("role", "admin");
-        localStorage.setItem("fastCode", code);
+        login(code, "admin");
         window.location.href = "/admin/dashboard";
         return;
       }
@@ -42,9 +43,7 @@ export default function LoginPage() {
         .maybeSingle();
 
       if (associate) {
-        localStorage.setItem("role", "associate");
-        localStorage.setItem("associateId", associate.id);
-        localStorage.setItem("fastCode", code);
+        login(code, "associate", associate.id);
         
         // Redirect to associate portal or dashboard
         window.location.href = `/admin/dashboard`;

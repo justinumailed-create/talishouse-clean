@@ -1,6 +1,25 @@
 import { NextResponse } from "next/server";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
+export async function GET() {
+  try {
+    const { data, error } = await supabase
+      .from("associates")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return NextResponse.json(data);
+  } catch (err) {
+    console.error("GET ASSOCIATES ERROR:", err);
+    return NextResponse.json(
+      { error: "Failed to fetch associates" },
+      { status: 500 }
+    );
+  }
+}
+
 function generateFastCode(name: string): string {
   const base = name.replace(/\s+/g, "").toUpperCase().slice(0, 5);
   const random = Math.floor(100 + Math.random() * 900);
