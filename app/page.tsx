@@ -1,65 +1,158 @@
-import Image from "next/image";
+"use client";
+
+import { useRef, useState, useEffect } from "react";
+import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { useAssociate } from "@/context/AssociateContext";
 
 export default function Home() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleEnded = () => setIsPlaying(false);
+
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("ended", handleEnded);
+
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("ended", handleEnded);
+    };
+  }, []);
+
+  async function handleLeadSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
+    const phone = formData.get("phone") as string;
+    const email = formData.get("email") as string;
+
+    if (!name || !phone) {
+      setError("Name and phone are required");
+      setLoading(false);
+      return;
+    }
+
+    const data = {
+      name,
+      phone,
+      email: email || null,
+      location: formData.get("location") as string || "Not specified",
+      source: "homepage",
+      status: "new",
+    };
+
+    const { error: insertError } = await supabase
+      .from("leads")
+      .insert([data]);
+
+    if (insertError) {
+      setError(`Submission failed: ${insertError.message}`);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(false);
+    window.location.href = "/project-received";
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch w-full">
+        <div className="lg:col-span-2 h-full">
+          <div className="w-full h-full min-h-[400px] lg:min-h-[500px] rounded-xl overflow-hidden bg-gray-200">
+            <iframe
+              src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
+              allow="geolocation 'self' https://my.atlist.com"
+              frameBorder="0"
+              scrolling="no"
+              allowFullScreen
+              title="Talishouse property discovery map"
+              className="w-full h-full"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
         </div>
-      </main>
+
+        <div className="lg:col-span-1 flex flex-col h-full">
+          <div className="flex-shrink-0 bg-white border rounded-xl p-6 shadow-sm">
+            <p className="text-xs uppercase tracking-[0.25em] text-[#1E4ED8] mb-4 font-bold">
+              Global Overview
+            </p>
+
+            <h1 className="leading-tight mb-6">
+              <span className="block text-2xl md:text-3xl font-extrabold tracking-[0.15em] uppercase text-gray-900">
+                TALISHOUSE&trade;
+              </span>
+              <span className="block text-sm md:text-base font-light tracking-[0.3em] uppercase text-gray-500">
+                Homes and Cottages
+              </span>
+            </h1>
+            
+            <ul className="space-y-3 mb-6">
+              <li className="flex items-start text-base font-medium text-gray-800">
+                <span className="mr-3 text-gray-900 font-bold">•</span>
+                <span>From $58.50 per sq.ft.</span>
+              </li>
+              <li className="flex items-start text-base font-medium text-gray-800">
+                <span className="mr-3 text-gray-900 font-bold">•</span>
+                <span>Typically up in a day and move in ready in a week</span>
+              </li>
+              <li className="flex items-start text-base font-medium text-gray-800">
+                <span className="mr-3 text-gray-900 font-bold">•</span>
+                <span>Lease-To-Own terms available, OAC</span>
+              </li>
+            </ul>
+
+            <Link
+              href="/propose-project"
+              className="block w-full text-center text-base font-medium text-white bg-[#1E4ED8] hover:bg-[#1d4ed8] rounded-lg px-6 py-4 transition-colors"
+              style={{ backgroundColor: '#1E4ED8', color: '#ffffff' }}
+            >
+              Add A Project
+            </Link>
+          </div>
+
+          <div className="flex-1 relative bg-black rounded-xl overflow-hidden mt-6">
+            <video
+              ref={videoRef}
+              src="/videos/homepage.mp4"
+              controls
+              playsInline
+              className="w-full h-full object-cover"
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setIsPlaying(false)}
+            >
+              Your browser does not support the video tag.
+            </video>
+            {!isPlaying && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <button
+                  onClick={() => videoRef.current?.play()}
+                  className="w-16 h-16 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors pointer-events-auto"
+                >
+                  <svg className="w-6 h-6 ml-1 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

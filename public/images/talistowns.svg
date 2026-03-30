@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" fill="none">
+  <rect width="800" height="450" fill="#f3f4f6"/>
+  <rect x="50" y="100" width="700" height="250" rx="8" fill="#d1d5db"/>
+  <g fill="#9ca3af">
+    <rect x="80" y="130" width="60" height="60" rx="4"/>
+    <rect x="160" y="130" width="60" height="60" rx="4"/>
+    <rect x="240" y="130" width="60" height="60" rx="4"/>
+    <rect x="320" y="130" width="60" height="60" rx="4"/>
+    <rect x="400" y="130" width="60" height="60" rx="4"/>
+    <rect x="480" y="130" width="60" height="60" rx="4"/>
+    <rect x="560" y="130" width="60" height="60" rx="4"/>
+    <rect x="640" y="130" width="60" height="60" rx="4"/>
+    <rect x="80" y="260" width="60" height="60" rx="4"/>
+    <rect x="160" y="260" width="60" height="60" rx="4"/>
+    <rect x="240" y="260" width="60" height="60" rx="4"/>
+    <rect x="320" y="260" width="60" height="60" rx="4"/>
+    <rect x="400" y="260" width="60" height="60" rx="4"/>
+    <rect x="480" y="260" width="60" height="60" rx="4"/>
+    <rect x="560" y="260" width="60" height="60" rx="4"/>
+    <rect x="640" y="260" width="60" height="60" rx="4"/>
+  </g>
+  <text x="50%" y="88%" dominant-baseline="middle" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" fill="#6b7280">TalisTowns™</text>
+</svg>

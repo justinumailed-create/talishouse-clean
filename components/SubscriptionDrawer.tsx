@@ -1,0 +1,141 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getFastCode } from "@/lib/fast-code";
+
+interface SubscriptionDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  type: "referral" | "wholesale";
+}
+
+export default function SubscriptionDrawer({ isOpen, onClose, type }: SubscriptionDrawerProps) {
+  const [fastCode, setFastCodeState] = useState("");
+
+  useEffect(() => {
+    const code = getFastCode();
+    if (code) {
+      setFastCodeState(code);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const isReferral = type === "referral";
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div 
+        className="absolute inset-0 bg-black/30"
+        onClick={onClose}
+      />
+      
+      <div className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl overflow-y-auto">
+        <div className="p-6 sm:p-8">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
+              View Details
+            </span>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 text-2xl leading-none transition-colors"
+            >
+              ×
+            </button>
+          </div>
+
+          <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+            {isReferral ? "Subscribe as Referral Partner" : "Register as Wholesale Partner"}
+          </h2>
+
+          <div className="mb-4">
+            {isReferral ? (
+              <>
+                <p className="text-3xl font-bold text-gray-900">$95.00/mo</p>
+                <p className="text-sm text-gray-500 mt-1">Then, starting in 1 month, $95.00/mo</p>
+              </>
+            ) : (
+              <>
+                <p className="text-3xl font-bold text-gray-900">$1,995.00</p>
+                <p className="text-sm text-gray-500 mt-1">One-time registration fee</p>
+              </>
+            )}
+          </div>
+
+          <div className="space-y-6 text-gray-600 max-w-sm leading-relaxed">
+            {isReferral ? (
+              <>
+                <p>
+                  Subscribe as a Referral Partner to start earning commissions on referred projects.
+                </p>
+
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    Benefits:
+                  </h3>
+                  <ul className="space-y-2.5">
+                    <li>Commission-based referral fees</li>
+                    <li>Access to exclusive project leads</li>
+                    <li>Marketing materials and support</li>
+                    <li>Real-time referral tracking dashboard</li>
+                    <li>Priority support from our team</li>
+                  </ul>
+                </div>
+              </>
+            ) : (
+              <>
+                <p>
+                  Register as a Wholesale Partner for bulk pricing and volume discounts on Talishouse™ products.
+                </p>
+
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    Benefits:
+                  </h3>
+                  <ul className="space-y-2.5">
+                    <li>Wholesale pricing on all units</li>
+                    <li>Volume discounts and tiered pricing</li>
+                    <li>Priority manufacturing scheduling</li>
+                    <li>Dedicated account manager</li>
+                    <li>Early access to new product lines</li>
+                  </ul>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="mt-8">
+            <a
+              href={`/business-office/register${fastCode ? `?fast=${fastCode}` : ""}`}
+              className={`block w-full text-center rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] transition-colors ${
+                isReferral
+                  ? "bg-[#1279c9] text-white hover:bg-[#0f6bb1]"
+                  : "bg-black text-white hover:bg-gray-800"
+              }`}
+            >
+              {isReferral ? "Subscribe Now" : "Register Now"}
+            </a>
+
+            <p className="text-xs text-gray-400 text-center mt-4">
+              {isReferral 
+                ? "Cancel anytime. Commission rates vary by project type."
+                : "Volume pricing available. Contact us for enterprise deals."
+              }
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

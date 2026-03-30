@@ -1,0 +1,135 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import SubscriptionDrawer from "@/components/SubscriptionDrawer";
+
+export default function SubscriptionPage() {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [drawerType, setDrawerType] = useState<"referral" | "wholesale">("referral");
+
+  const openDrawer = (type: "referral" | "wholesale") => {
+    setDrawerType(type);
+    setDrawerOpen(true);
+  };
+
+  return (
+    <div className="min-h-[70vh] bg-white py-12">
+      <div className="mx-auto max-w-4xl">
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
+            Partner Programs
+          </h1>
+          <p className="mt-4 text-lg text-gray-600">
+            Join our network of partners and grow with Talishouse™
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
+            <div className="flex items-center justify-between bg-black px-6 py-5 text-white">
+              <p className="text-sm font-bold uppercase tracking-[0.25em]">
+                Referral Partner
+              </p>
+            </div>
+
+            <div className="space-y-6 p-6 sm:p-8">
+              <div>
+                <p className="text-3xl font-bold text-gray-900">$95/mo</p>
+                <p className="text-sm text-gray-500">per month</p>
+              </div>
+
+              <div className="space-y-4 text-gray-600">
+                <p>
+                  Subscribe as a Referral Partner to start earning commissions on
+                  referred projects.
+                </p>
+
+                <h3 className="font-semibold text-gray-900 mt-6">
+                  Benefits:
+                </h3>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>Commission-based referral fees</li>
+                  <li>Access to exclusive project leads</li>
+                  <li>Marketing materials and support</li>
+                  <li>Real-time referral tracking dashboard</li>
+                  <li>Priority support from our team</li>
+                </ul>
+              </div>
+
+              <button
+                onClick={() => openDrawer("referral")}
+                className="w-full bg-[#1279c9] text-white rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] hover:bg-[#0f6bb1] transition-colors text-center block"
+              >
+                View Details
+              </button>
+
+              <p className="text-xs text-gray-400 text-center">
+                Cancel anytime. Commission rates vary by project type.
+              </p>
+            </div>
+          </section>
+
+          <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
+            <div className="flex items-center justify-between bg-[#1279c9] px-6 py-5 text-white">
+              <p className="text-sm font-bold uppercase tracking-[0.25em]">
+                Wholesale Partner
+              </p>
+            </div>
+
+            <div className="space-y-6 p-6 sm:p-8">
+              <div>
+                <p className="text-3xl font-bold text-gray-900">One-Time</p>
+                <p className="text-sm text-gray-500">registration fee</p>
+              </div>
+
+              <div className="space-y-4 text-gray-600">
+                <p>
+                  Register as a Wholesale Partner for bulk pricing and volume
+                  discounts on Talishouse™ products.
+                </p>
+
+                <h3 className="font-semibold text-gray-900 mt-6">
+                  Benefits:
+                </h3>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>Wholesale pricing on all units</li>
+                  <li>Volume discounts and tiered pricing</li>
+                  <li>Priority manufacturing scheduling</li>
+                  <li>Dedicated account manager</li>
+                  <li>Early access to new product lines</li>
+                </ul>
+              </div>
+
+              <button
+                onClick={() => openDrawer("wholesale")}
+                className="w-full bg-[#1279c9] text-white rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] hover:bg-[#0f6bb1] transition-colors text-center block"
+              >
+                View Details
+              </button>
+
+              <p className="text-xs text-gray-400 text-center">
+                Volume pricing available. Contact us for enterprise deals.
+              </p>
+            </div>
+          </section>
+        </div>
+
+        <div className="mt-12 text-center">
+          <Link
+            href="/lease-to-own"
+            className="text-sm text-gray-600 hover:text-black underline"
+          >
+            Looking for financing? Learn about Lease-to-Own →
+          </Link>
+        </div>
+      </div>
+
+      <SubscriptionDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        type={drawerType}
+      />
+    </div>
+  );
+}
