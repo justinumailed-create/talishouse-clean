@@ -10,16 +10,13 @@ export async function GET() {
 
     if (error) {
       console.error("Associates fetch error:", error);
-      return NextResponse.json([]);
+      return Response.json([], { status: 200 });
     }
 
-    return NextResponse.json(data || []);
+    return Response.json(data);
   } catch (err) {
-    console.error("GET ASSOCIATES ERROR:", err);
-    return NextResponse.json(
-      { error: "Failed to fetch associates" },
-      { status: 500 }
-    );
+    console.error("Unexpected error:", err);
+    return Response.json([], { status: 200 });
   }
 }
 
