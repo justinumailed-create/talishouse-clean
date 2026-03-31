@@ -6,14 +6,15 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { useAssociate } from "@/context/AssociateContext";
 
-const sizes = ["420", "850"];
-const installations = ["Permanent", "Mobile"];
+const sizes = ["160", "200", "400", "800", "1600", "2400"];
 const finishes = ["Delivery only", "Roof tight", "Turn key"];
-const usages = ["Own use", "Resale", "Business Use"];
+const usages = ["Personal use", "Resale", "Commercial use"];
+const permanentInstallations = ["Screw piles", "Piers", "Slab"];
+const mobileInstallations = ["20 ft – dual axle", "40 ft – triple axle"];
 const termsOptions = [
-  "Retail: purchase for own use; receive up to 10% in discounts.",
-  "Wholesale*: purchase for resale; receive up to 20% in DIY margins.",
-  "Lease To Own**: a retail option - pay half now, half over up to five years."
+  "Retail purchase for private use",
+  "Purchase for commercial use or resale",
+  "Pay half now, half over five years"
 ];
 
 export default function ProposeProjectPage() {
@@ -21,6 +22,8 @@ export default function ProposeProjectPage() {
   const { fastCode, associateId } = useAssociate();
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedInstallation, setSelectedInstallation] = useState("");
+  const [selectedPermanentInstall, setSelectedPermanentInstall] = useState("");
+  const [selectedMobileInstall, setSelectedMobileInstall] = useState("");
   const [selectedFinish, setSelectedFinish] = useState("");
   const [selectedUsage, setSelectedUsage] = useState("");
   const [selectedTerms, setSelectedTerms] = useState("");
@@ -62,6 +65,7 @@ export default function ProposeProjectPage() {
       return;
     }
 
+    const installationType = selectedInstallation || selectedPermanentInstall || selectedMobileInstall || "";
     const data = {
       name: `${firstName} ${lastName}`,
       phone,
@@ -72,7 +76,7 @@ export default function ProposeProjectPage() {
       status: "new",
       associate_id: associateId,
       project_size: selectedSize,
-      installation_type: selectedInstallation,
+      installation_type: installationType,
       finish_level: selectedFinish,
       usage_type: selectedUsage,
       terms_type: selectedTerms,
@@ -108,7 +112,7 @@ export default function ProposeProjectPage() {
       <div className="max-w-[640px] mx-auto space-y-6">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-            Propose a Project
+            Add a Project
           </h1>
           <p className="text-gray-500 text-sm mt-2">
             Let&apos;s start by establishing preliminary aspects of your vision
@@ -118,7 +122,7 @@ export default function ProposeProjectPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] overflow-hidden">
           <div className="bg-black px-6 py-4">
             <p className="text-sm font-semibold text-white tracking-wide">
-              PROPOSE A PROJECT
+              ADD A PROJECT
             </p>
           </div>
 
@@ -126,17 +130,22 @@ export default function ProposeProjectPage() {
             {/* ROW 1: Date + Terms */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Date</label>
-                <p className="text-[11px] text-gray-400">First come, first serve.</p>
+                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                  Date <span className="text-gray-400">*</span>
+                </label>
+                <p className="text-[11px] text-gray-400">First come, first serve</p>
                 <input
                   type="text"
                   name="date"
+                  required
                   placeholder="DD / MM / YYYY"
                   className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Preferred Terms</label>
+                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                  Preferred Terms <span className="text-gray-400">*</span>
+                </label>
                 <div className="space-y-2">
                   {termsOptions.map((option, idx) => (
                     <label
@@ -165,7 +174,9 @@ export default function ProposeProjectPage() {
             {/* ROW 2: First Name + Last Name */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">First Name *</label>
+                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                  First Name <span className="text-gray-400">*</span>
+                </label>
                 <input
                   required
                   type="text"
@@ -175,7 +186,9 @@ export default function ProposeProjectPage() {
                 />
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Last Name *</label>
+                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                  Last Name <span className="text-gray-400">*</span>
+                </label>
                 <input
                   required
                   type="text"
@@ -189,7 +202,9 @@ export default function ProposeProjectPage() {
             {/* ROW 3: Phone + Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile Phone *</label>
+                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                  Mobile Phone <span className="text-gray-400">*</span>
+                </label>
                 <div className="flex rounded-xl border border-gray-200 overflow-hidden focus-within:border-[#0070ba] focus-within:ring-2 focus-within:ring-[#0070ba]/10">
                   <span className="flex items-center px-3 bg-gray-50 text-sm text-gray-500 border-r">+1</span>
                   <input
@@ -202,7 +217,9 @@ export default function ProposeProjectPage() {
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Email *</label>
+                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                  Email <span className="text-gray-400">*</span>
+                </label>
                 <input
                   required
                   type="email"
@@ -212,14 +229,18 @@ export default function ProposeProjectPage() {
                 />
               </div>
             </div>
+            <p className="text-[11px] text-gray-400 -mt-2">Request a FAST Code</p>
 
             {/* ROW 4: Address */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Address</label>
-              <p className="text-[11px] text-gray-400">A Google recognized street address is required...</p>
+              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                Address <span className="text-gray-400">*</span>
+              </label>
+              <p className="text-[11px] text-gray-400">A Google recognized street address if available.</p>
               <input
                 type="text"
                 name="address"
+                required
                 placeholder="Street Address"
                 className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10"
               />
@@ -227,12 +248,12 @@ export default function ProposeProjectPage() {
 
             {/* ROW 5: Geo Location */}
             <div className="space-y-1">
-              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Geo Location</label>
-              <p className="text-[11px] text-gray-400">Required if address is not a Google recognized street address</p>
+              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">Latitude / Longitude</label>
+              <p className="text-[11px] text-gray-400">Required if address is not a Google recognized street address.</p>
               <input
                 type="text"
                 name="geoLocation"
-                placeholder="Lat/Long or landmark"
+                placeholder="Latitude / Longitude"
                 className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10"
               />
             </div>
@@ -247,50 +268,85 @@ export default function ProposeProjectPage() {
             )}
 
             {/* ROW 6: Size */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Size (sq.ft.)</label>
-              <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                Size <span className="text-gray-400">*</span>
+              </label>
+              <select
+                value={selectedSize}
+                onChange={(e) => setSelectedSize(e.target.value)}
+                required
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10 bg-white"
+              >
+                <option value="">Select Size</option>
                 {sizes.map((size) => (
-                  <button
-                    key={size}
-                    type="button"
-                    onClick={() => setSelectedSize(size)}
-                    className={`py-3 rounded-xl text-sm font-medium transition duration-200 hover:scale-[1.02] ${
-                      selectedSize === size
-                        ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
+                  <option key={size} value={size}>
                     {size}
-                  </button>
+                  </option>
                 ))}
-              </div>
+              </select>
             </div>
 
             {/* ROW 7: Installation */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Installation</label>
-              <div className="grid grid-cols-2 gap-3">
-                {installations.map((inst) => (
-                  <button
-                    key={inst}
-                    type="button"
-                    onClick={() => setSelectedInstallation(inst)}
-                    className={`py-3 rounded-xl text-sm font-medium transition duration-200 hover:scale-[1.02] ${
-                      selectedInstallation === inst
-                        ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {inst}
-                  </button>
-                ))}
+            <div className="space-y-3">
+              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                Installation <span className="text-gray-400">*</span>
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="text-[11px] text-gray-400 uppercase tracking-wider">Permanent</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {permanentInstallations.map((inst) => (
+                      <button
+                        key={inst}
+                        type="button"
+                        onClick={() => {
+                          setSelectedInstallation("Permanent");
+                          setSelectedPermanentInstall(inst);
+                          setSelectedMobileInstall("");
+                        }}
+                        className={`py-3 rounded-xl text-xs font-medium transition duration-200 hover:scale-[1.02] ${
+                          selectedInstallation === "Permanent" && selectedPermanentInstall === inst
+                            ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {inst}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-[11px] text-gray-400 uppercase tracking-wider">Mobile</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {mobileInstallations.map((inst) => (
+                      <button
+                        key={inst}
+                        type="button"
+                        onClick={() => {
+                          setSelectedInstallation("Mobile");
+                          setSelectedMobileInstall(inst);
+                          setSelectedPermanentInstall("");
+                        }}
+                        className={`py-3 rounded-xl text-xs font-medium transition duration-200 hover:scale-[1.02] ${
+                          selectedInstallation === "Mobile" && selectedMobileInstall === inst
+                            ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        }`}
+                      >
+                        {inst}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* ROW 8: Finish */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Finish</label>
+              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                Finish <span className="text-gray-400">*</span>
+              </label>
               <div className="grid grid-cols-3 gap-3">
                 {finishes.map((finish) => (
                   <button
@@ -311,7 +367,9 @@ export default function ProposeProjectPage() {
 
             {/* ROW 9: Usage */}
             <div className="space-y-2">
-              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Usage</label>
+              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
+                Usage <span className="text-gray-400">*</span>
+              </label>
               <div className="grid grid-cols-3 gap-3">
                 {usages.map((usage) => (
                   <button
@@ -347,8 +405,7 @@ export default function ProposeProjectPage() {
                   className="text-sm text-gray-500 leading-relaxed cursor-pointer"
                 >
                   I acknowledge and accept that not every location will be suitable for 
-                  installation and that final approval is subject to site inspection. I 
-                  understand that pricing is estimates only and subject to change.
+                  delivery and that final approval is subject to site inspection.
                   <span className="text-red-500 ml-0.5">*</span>
                 </label>
               </div>

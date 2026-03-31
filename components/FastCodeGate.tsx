@@ -66,27 +66,29 @@ export default function FastCodeGate() {
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-white flex items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-extrabold tracking-tighter uppercase mb-2">TALISHOUSE&trade;</h2>
+    <div className="fixed inset-0 z-[9999] bg-white flex items-start justify-center pt-16 md:pt-20 px-4 overflow-y-auto">
+      <div className="w-full max-w-sm my-8">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tighter uppercase mb-2">TALISHOUSE&trade;</h2>
           <p className="text-sm text-[#6e6e73] tracking-[0.1em] uppercase">Business Office Access</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <input
-              type="text"
-              value={inputCode}
-              onChange={(e) => {
-                setInputCode(e.target.value);
-                setError("");
-              }}
-              className="w-full bg-[#f5f5f7] border border-[#e5e5e5] rounded-xl px-4 py-4 text-center text-xl font-mono tracking-widest outline-none focus:border-[#1E4ED8] transition-all"
-              placeholder="ENTER FAST CODE"
-              autoFocus
-              required
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={inputCode}
+                onChange={(e) => {
+                  setInputCode(e.target.value);
+                  setError("");
+                }}
+                className="w-full bg-[#f5f5f7] border border-[#e5e5e5] rounded-xl px-4 py-4 text-center text-xl font-mono tracking-widest outline-none focus:border-[#1E4ED8] transition-all"
+                placeholder="ENTER FAST CODE"
+                autoFocus
+                required
+              />
+            </div>
             {error && (
               <p className="text-xs text-red-500 text-center font-medium animate-pulse">
                 {error}

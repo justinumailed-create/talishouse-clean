@@ -196,6 +196,11 @@ button a {
   color: inherit !important;
 }
 
+/* Prevent text opacity issues in buttons */
+button:not(:disabled) {
+  opacity: 1 !important;
+}
+
 /* Selection-style buttons (for options like sizes) */
 .btn-selectable {
   background-color: #ffffff;

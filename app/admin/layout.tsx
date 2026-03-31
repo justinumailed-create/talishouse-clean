@@ -36,11 +36,12 @@ function AdminSidebar({ role, isOpen, onClose }: { role: string; isOpen: boolean
     <>
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 z-40 lg:hidden backdrop-blur-sm"
           onClick={onClose}
+          style={{ marginTop: '0px' }}
         />
       )}
-      <div className={`w-56 bg-white border-r border-[#e5e5e5] flex flex-col h-screen sticky top-0 fixed lg:static inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      <div className={`w-56 bg-white border-r border-[#e5e5e5] flex flex-col h-[calc(100vh-0px)] sticky top-0 fixed lg:static inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-6 border-b border-[#e5e5e5] flex items-center justify-between">
           <div>
             <h1 className="text-base font-semibold tracking-tight">Talishouse</h1>
@@ -127,10 +128,10 @@ export default function AdminLayout({
       />
       
       <div className="flex-1 flex flex-col">
-        <div className="lg:hidden flex items-center gap-4 p-4 bg-white border-b border-[#e5e5e5]">
+        <div className="lg:hidden flex items-center gap-4 p-4 pb-3 bg-white border-b border-[#e5e5e5] sticky top-0 z-30">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-2 text-gray-600 hover:text-gray-900"
+            className="p-2 text-gray-600 hover:text-gray-900 -ml-2"
             aria-label="Open sidebar"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

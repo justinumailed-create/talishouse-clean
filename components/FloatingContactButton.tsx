@@ -5,9 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { getFastCode } from "@/lib/fast-code";
 import { useAssociate } from "@/context/AssociateContext";
 
-const DEFAULT_PHONE = "+1 (555) 123-4567";
-
-const AUTO_MESSAGE = "Typically we respond within a few minutes. However, please leave your email address for us to follow up just in case you have reached us after hours, or that all of our Associates are busy serving other clients";
+const AUTO_MESSAGE = "Typically we respond within 24 hours";
 
 interface FloatingContactButtonProps {
   fastCode?: string;
@@ -25,8 +23,6 @@ export default function FloatingContactButton({ fastCode: propFastCode }: Floati
   const [fastCode, setFastCodeState] = useState<string>(propFastCode || "");
   const { associate } = useAssociate();
 
-  const displayPhone = associate?.phone || DEFAULT_PHONE;
-
   useEffect(() => {
     if (!propFastCode) {
       const code = getFastCode();
@@ -35,14 +31,6 @@ export default function FloatingContactButton({ fastCode: propFastCode }: Floati
       }
     }
   }, [propFastCode]);
-
-  const handleCall = async () => {
-    await supabase.from("contact_logs").insert([{
-      fast_code: fastCode || null,
-      message: `Phone call initiated - ${new Date().toISOString()}`,
-    }]);
-    window.location.href = `tel:${displayPhone}`;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,15 +136,6 @@ export default function FloatingContactButton({ fastCode: propFastCode }: Floati
                     Submit
                   </button>
                 </form>
-
-                <div className="mt-4 pt-4 border-t">
-                  <button
-                    onClick={handleCall}
-                    className="w-full border border-gray-200 text-gray-700 rounded-xl py-3 font-medium text-sm hover:bg-gray-50"
-                  >
-                    Call {displayPhone}
-                  </button>
-                </div>
               </>
             ) : (
               <div className="text-center py-8">

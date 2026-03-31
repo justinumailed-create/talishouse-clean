@@ -36,7 +36,11 @@ export default function GatedLink({ href, children, className }: GatedLinkProps)
         {children}
       </Link>
       
-      {showGate && <FastCodeGate />}
+      {showGate && (
+        <div className="relative z-[9999]">
+          <FastCodeGate />
+        </div>
+      )}
     </>
   );
 }
