@@ -60,7 +60,7 @@ export default function Home() {
       .insert([data]);
 
     if (insertError) {
-      setError(`Submission failed: ${insertError.message}`);
+      setError(`Creation failed: ${insertError.message}`);
       setLoading(false);
       return;
     }

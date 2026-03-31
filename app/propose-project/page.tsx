@@ -98,7 +98,7 @@ export default function ProposeProjectPage() {
         insertError?.details ||
         insertError?.hint ||
         "Unknown insert error";
-      setError(`Submission failed: ${errorMessage}`);
+      setError(`Creation failed: ${errorMessage}`);
       setLoading(false);
       return;
     }

@@ -61,14 +61,14 @@ export async function POST(req: Request) {
         .single();
 
       if (error) {
-        console.error("Supabase update error:", error);
+        console.error("Associates update error:", error);
         return Response.json({ error: error.message }, { status: 500 });
       }
 
       return Response.json({ success: true, associate: data });
     } catch (supabaseErr) {
       console.error("Supabase connection failed:", supabaseErr);
-      return Response.json({ error: "Database connection failed" }, { status: 500 });
+      return Response.json([], { status: 200 });
     }
 
   } catch (err) {

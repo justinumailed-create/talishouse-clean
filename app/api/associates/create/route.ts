@@ -23,6 +23,13 @@ export async function POST(req: Request) {
 
     const fastCode = generateFastCode(body.name);
 
+    if (!fastCode) {
+      return NextResponse.json(
+        { error: "FAST code required" },
+        { status: 400 }
+      );
+    }
+
     // Use file storage if Supabase not configured
     if (!isSupabaseConfigured()) {
       const associates = getAssociates();
@@ -57,23 +64,16 @@ export async function POST(req: Request) {
     // Try Supabase first
     try {
       const payload = {
+        fast_code: fastCode,
         name: body.name,
         email: body.email,
         phone: body.phone || null,
-        fast_code: fastCode,
-        created_at: new Date().toISOString(),
-        is_page_enabled: true,
-        page_headline: body.pageHeadline || `Partnered with ${body.name}`,
-        page_subtext: body.pageSubtext || null,
-        page_contact_cta: body.pageContactCta || "Propose a Project",
-        page_footer_note: body.pageFooterNote || null,
-        page_custom_message: body.pageCustomMessage || null,
-        intro_message: body.introMessage || null,
+        footer_note: body.footerNote || null,
+        custom_message: body.customMessage || null,
         video_url: body.videoUrl || null,
-        hero_type: "map",
-        show_form: true,
-        show_video: !!body.videoUrl
       };
+
+      console.log("Creating associate:", payload);
 
       const { data, error } = await supabase
         .from("associates")

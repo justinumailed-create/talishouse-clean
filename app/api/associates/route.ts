@@ -8,9 +8,12 @@ export async function GET() {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error) throw error;
+    if (error) {
+      console.error("Associates fetch error:", error);
+      return NextResponse.json([]);
+    }
 
-    return NextResponse.json(data);
+    return NextResponse.json(data || []);
   } catch (err) {
     console.error("GET ASSOCIATES ERROR:", err);
     return NextResponse.json(
@@ -33,24 +36,24 @@ export async function POST(req: Request) {
 
     const fastCode = body.fastCode || "FAST-" + Math.random().toString(36).substring(2, 8).toUpperCase();
 
+    if (!fastCode) {
+      return NextResponse.json(
+        { error: "FAST code required" },
+        { status: 400 }
+      );
+    }
+
     const payload = {
+      fast_code: fastCode,
       name: body.name,
       email: body.email,
       phone: body.phone || null,
-      fast_code: fastCode,
-      is_page_enabled: true,
-      page_headline: body.pageHeadline || `Partnered with ${body.name}`,
-      page_subtext: body.pageSubtext || null,
-      page_contact_cta: body.pageContactCta || "Propose a Project",
-      page_footer_note: body.pageFooterNote || null,
-      page_custom_message: body.pageCustomMessage || null,
-      intro_message: body.introMessage || null,
+      footer_note: body.footerNote || null,
+      custom_message: body.customMessage || null,
       video_url: body.videoUrl || null,
-      hero_type: "map",
-      show_form: true,
-      show_video: !!body.videoUrl,
-      created_at: new Date().toISOString(),
     };
+
+    console.log("Creating associate:", payload);
 
     const { data, error } = await supabase
       .from("associates")
