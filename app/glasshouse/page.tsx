@@ -75,6 +75,7 @@ export default function GlasshousePage() {
     <ProductLayout
       productName={model?.name || "Glasshouse™"}
       productImage={model?.image || ""}
+      productSize="glasshouse-200"
       familyDescription={
         glasshouseFamily?.gridDescription ||
         productFamilies?.glasshouse?.gridDescription ||

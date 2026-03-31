@@ -61,6 +61,7 @@ export default function TalistownsPage() {
     <ProductLayout
       productName={talistownsFamily?.name || productFamilies?.talistowns?.name || "TalisTowns™"}
       productImage={talistownsFamily?.image || productFamilies?.talistowns?.image || ""}
+      productSize="talistowns"
       familyDescription={
         talistownsFamily?.gridDescription ||
         productFamilies?.talistowns?.gridDescription ||

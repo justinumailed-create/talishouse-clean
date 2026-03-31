@@ -2,66 +2,55 @@
 
 import Image from "next/image";
 import { ReactNode } from "react";
+import { getProductImage } from "@/lib/productImages";
 
 interface ProductLayoutProps {
   productName: string;
   productImage: string;
-  productImages?: string[];
+  productSize?: string;
   familyDescription?: string;
   aboutContent: string;
   children: ReactNode;
 }
 
-export function validateLayout() {
-  if (typeof window === "undefined") return;
-  console.warn("Product layout validation: Layout matches template");
+export function isValidProductImage(product: { size?: string } | null): boolean {
+  if (!product) return false;
+  if (!product.size) return false;
+  const validSizes = ['160', '200', '400', '800', '1600', '2400', 'glasshouse-200', 'talishouse-420', 'talishouse-residential', 'talistowns'];
+  return validSizes.includes(product.size);
 }
-
-const PLACEHOLDER_IMAGES = [
-  "/images/glasshouse-200.jpeg",
-  "/images/talishouse-420.png",
-  "/images/talishouse-850.png",
-  "/images/talistowns.jpg"
-];
 
 export default function ProductLayout({
   productName,
   productImage,
-  productImages = [],
+  productSize,
   familyDescription,
   aboutContent,
   children,
 }: ProductLayoutProps) {
-  const galleryImages = productImages.length > 0 
-    ? productImages.slice(0, 4) 
-    : PLACEHOLDER_IMAGES;
+  const validProduct = productSize ? { size: productSize } : null;
+  const hasValidImage = isValidProductImage(validProduct);
+  const displayImage = hasValidImage ? getProductImage(productSize) : productImage;
 
   return (
     <div className="w-full py-10">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
         <div className="lg:col-span-2 flex flex-col gap-5 items-stretch">
           <div className="w-full aspect-[16/9] bg-gray-100 relative overflow-hidden rounded-xl">
-            <Image
-              src={productImage}
-              alt={productName}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 60vw"
-              priority
-            />
-          </div>
-
-          <div className="product-gallery">
-            {galleryImages.map((img, i) => (
-              <div key={i} className="gallery-item">
-                <Image 
-                  src={img} 
-                  alt={`product-${i}`} 
-                  fill
-                  className="object-cover"
-                />
+            {hasValidImage ? (
+              <Image
+                src={displayImage}
+                alt={productName}
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 60vw"
+                priority
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                <span className="text-sm text-gray-500">Image coming soon</span>
               </div>
-            ))}
+            )}
           </div>
 
           <div className="p-6 bg-gray-50 rounded-xl">
@@ -87,23 +76,6 @@ export default function ProductLayout({
       </div>
 
       <style jsx>{`
-        .product-gallery {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
-          margin-top: 20px;
-          margin-bottom: 20px;
-        }
-
-        .gallery-item {
-          width: 100%;
-          aspect-ratio: 16 / 9;
-          position: relative;
-          overflow: hidden;
-          border-radius: 8px;
-          background: #f5f5f5;
-        }
-
         .product-family-description {
           border-bottom: 1px solid #e5e5e5;
           padding-bottom: 1.5rem;

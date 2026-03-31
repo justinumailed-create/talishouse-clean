@@ -130,6 +130,7 @@ function TalishouseContent() {
     <ProductLayout
       productName={currentProduct?.name || "Talishouse™"}
       productImage={currentProduct?.image || ""}
+      productSize={currentProduct?.id}
       familyDescription={
         talishouseFamily?.gridDescription ||
         productFamilies?.talishouse?.gridDescription ||
