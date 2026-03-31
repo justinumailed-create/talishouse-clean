@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { getProductImage } from "@/lib/productImages";
 
 interface ProductLayoutProps {
@@ -28,16 +28,38 @@ export default function ProductLayout({
   aboutContent,
   children,
 }: ProductLayoutProps) {
+  const [dbImageUrl, setDbImageUrl] = useState<string | null>(null);
   const validProduct = productSize ? { size: productSize } : null;
   const hasValidImage = isValidProductImage(validProduct);
-  const displayImage = hasValidImage ? getProductImage(productSize) : productImage;
+
+  useEffect(() => {
+    if (productSize) {
+      fetch(`/api/product-images`)
+        .then((res) => res.json())
+        .then((images) => {
+          if (images[productSize]) {
+            setDbImageUrl(images[productSize]);
+          }
+        })
+        .catch((err) => console.error("Error fetching product image:", err));
+    }
+  }, [productSize]);
+
+  const getDisplayImage = () => {
+    if (dbImageUrl) return dbImageUrl;
+    if (hasValidImage) return getProductImage(productSize);
+    return productImage;
+  };
+
+  const displayImage = getDisplayImage();
+  const showImage = hasValidImage || dbImageUrl;
 
   return (
     <div className="w-full py-10">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
         <div className="lg:col-span-2 flex flex-col gap-5 items-stretch">
           <div className="w-full aspect-[16/9] bg-gray-100 relative overflow-hidden rounded-xl">
-            {hasValidImage ? (
+            {showImage ? (
               <Image
                 src={displayImage}
                 alt={productName}
