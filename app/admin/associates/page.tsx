@@ -64,12 +64,16 @@ export default async function AssociatesPage() {
                     {a.created_at ? new Date(a.created_at).toLocaleDateString() : "N/A"}
                   </p>
                 </div>
-                <Link
-                  href={`/admin/associates/${a.id}`}
-                  className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-                >
-                  Edit
-                </Link>
+                {a.id ? (
+                  <Link
+                    href={`/admin/associates/${a.id}`}
+                    className="px-3 py-1.5 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                  >
+                    Edit
+                  </Link>
+                ) : (
+                  <span className="text-xs text-red-500">Invalid ID</span>
+                )}
               </div>
             </div>
           ))}

@@ -1,13 +1,24 @@
 export const dynamic = "force-dynamic";
 
+import { NextRequest } from "next/server";
 import { supabase } from "@/lib/supabase";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const { data, error } = await supabase
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+
+    let query = supabase
       .from("associates")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("*");
+
+    if (id) {
+      query = query.eq("id", id);
+    } else {
+      query = query.order("created_at", { ascending: false });
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Supabase error in LIST API:", error);
@@ -30,6 +41,10 @@ export async function GET() {
         videoUrl: a.video_url || ""
       }
     }));
+
+    if (id && mapped.length > 0) {
+      return Response.json(mapped[0]);
+    }
 
     return Response.json(mapped);
   } catch (err) {

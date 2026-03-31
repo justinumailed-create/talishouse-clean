@@ -59,11 +59,20 @@ export async function POST(req: Request) {
       const payload = {
         name: body.name,
         email: body.email,
+        phone: body.phone || null,
         fast_code: fastCode,
         created_at: new Date().toISOString(),
         is_page_enabled: true,
-        page_headline: `Partnered with ${body.name}`,
-        page_contact_cta: "Propose a Project"
+        page_headline: body.pageHeadline || `Partnered with ${body.name}`,
+        page_subtext: body.pageSubtext || null,
+        page_contact_cta: body.pageContactCta || "Propose a Project",
+        page_footer_note: body.pageFooterNote || null,
+        page_custom_message: body.pageCustomMessage || null,
+        intro_message: body.introMessage || null,
+        video_url: body.videoUrl || null,
+        hero_type: "map",
+        show_form: true,
+        show_video: !!body.videoUrl
       };
 
       const { data, error } = await supabase

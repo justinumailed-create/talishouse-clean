@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { isAuthorized, getRole, isSuperAdmin, getFastCode } from "@/lib/fast-code";
+import { isAuthorized, getRole, getFastCode } from "@/lib/fast-code";
 
 interface AuthContextType {
   authorized: boolean | null;
@@ -20,18 +20,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [fastCode, setFastCode] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const auth = isAuthorized();
-      const r = getRole();
-      const code = getFastCode();
-      
-      setAuthorized(auth);
-      setRole(r);
-      setFastCode(code);
-      setLoading(false);
-    };
+  const checkAuth = () => {
+    if (typeof window === "undefined") return;
+    
+    const auth = isAuthorized();
+    const r = getRole() as "admin" | "associate" | null;
+    const code = getFastCode();
+    
+    setAuthorized(auth);
+    setRole(r);
+    setFastCode(code);
+    setLoading(false);
+  };
 
+  useEffect(() => {
     checkAuth();
     
     // Listen for storage events to sync across tabs
@@ -40,23 +42,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = (code: string, r: string, id?: string) => {
-    localStorage.setItem("fast_code", code.toUpperCase());
+    if (typeof window === "undefined") return;
+    
+    const normalizedCode = (code || "").toUpperCase().trim();
+    if (!normalizedCode) return;
+
+    localStorage.setItem("fast_code", normalizedCode);
     localStorage.setItem("role", r);
     if (id) localStorage.setItem("associateId", id);
     
-    // Set cookie for middleware/persistence
-    document.cookie = `admin_session=${code.toUpperCase()}; path=/; max-age=86400; SameSite=Lax`;
+    // Set cookie for middleware/persistence - Secure + SameSite=Lax
+    const secure = window.location.protocol === "https:" ? "Secure;" : "";
+    document.cookie = `admin_session=${normalizedCode}; path=/; max-age=86400; ${secure} SameSite=Lax`;
     
     setAuthorized(true);
     setRole(r as any);
-    setFastCode(code.toUpperCase());
+    setFastCode(normalizedCode);
   };
 
   const logout = () => {
+    if (typeof window === "undefined") return;
+    
     localStorage.removeItem("fast_code");
     localStorage.removeItem("role");
     localStorage.removeItem("associateId");
-    document.cookie = "admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+    document.cookie = "admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
     
     setAuthorized(false);
     setRole(null);

@@ -15,7 +15,18 @@ interface PageConfig {
 
 export default async function AssociatePage({ params }: { params: Promise<{ fastCode?: string }> }) {
   const resolvedParams = await params;
-  const fastCode = resolvedParams?.fastCode?.toUpperCase().trim() || "PREVIEW";
+  const fastCode = resolvedParams?.fastCode?.toUpperCase().trim();
+
+  if (!fastCode || fastCode === "UNDEFINED") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold mb-2">Invalid Associate Code</h1>
+          <p className="text-gray-600">Please check the URL and try again.</p>
+        </div>
+      </div>
+    );
+  }
 
   let pageConfig: PageConfig | undefined;
 

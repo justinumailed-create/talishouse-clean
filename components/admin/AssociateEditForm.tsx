@@ -31,15 +31,21 @@ export default function EditAssociateContent({ id }: { id: string }) {
   });
 
   useEffect(() => {
+    if (!id || id === "undefined") {
+      setLoading(false);
+      return;
+    }
+
     async function fetchAssociate() {
       try {
-        const res = await fetch("/api/associates/list");
-        const data = await res.json();
-        const found = data.find((a: any) => a.id === id);
+        const res = await fetch(`/api/associates/list?id=${id}`);
+        if (!res.ok) throw new Error("Failed to fetch");
         
-        if (found) {
-          setAssociate(found);
-          setConfig(found.pageConfig || {
+        const data = await res.json();
+        
+        if (data && !data.error) {
+          setAssociate(data);
+          setConfig(data.pageConfig || {
             heroType: "map",
             heroContent: "",
             headline: "TALISHOUSE™ HOMES",
@@ -52,8 +58,9 @@ export default function EditAssociateContent({ id }: { id: string }) {
         }
       } catch (err) {
         console.error("Fetch error:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
 
     fetchAssociate();

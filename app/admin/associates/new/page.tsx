@@ -21,7 +21,7 @@ export default function NewAssociatePage() {
   const [videoUrl, setVideoUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>("");
-  const [success, setSuccess] = useState<{fastCode: string; slug: string} | false>(false);
+  const [success, setSuccess] = useState<boolean>(false);
   const [generatedCode, setGeneratedCode] = useState("");
 
   useEffect(() => {
@@ -45,21 +45,17 @@ export default function NewAssociatePage() {
 
     const payload = {
       name: form.name.trim(),
-      slug: slug,
       email: form.email.trim(),
       phone: form.phone.trim() || null,
-      fast_code: fastCode,
-      intro_message: form.introMessage.trim() || null,
-      video_url: videoUrl.trim() || null,
-      page_headline: form.pageHeadline.trim() || null,
-      page_subtext: form.pageSubtext.trim() || null,
-      page_contact_cta: form.pageContactCta.trim() || null,
-      page_footer_note: form.pageFooterNote.trim() || null,
-      page_custom_message: form.pageCustomMessage.trim() || null,
-      created_at: new Date().toISOString()
+      fastCode: form.fastCode.trim().toUpperCase() || null,
+      introMessage: form.introMessage.trim() || null,
+      videoUrl: videoUrl.trim() || null,
+      pageHeadline: form.pageHeadline.trim() || null,
+      pageSubtext: form.pageSubtext.trim() || null,
+      pageContactCta: form.pageContactCta.trim() || null,
+      pageFooterNote: form.pageFooterNote.trim() || null,
+      pageCustomMessage: form.pageCustomMessage.trim() || null,
     };
-
-    console.log("SENDING:", { name: form.name, email: form.email });
 
     try {
       const res = await fetch("/api/associates/create", {
@@ -67,35 +63,31 @@ export default function NewAssociatePage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email
-        })
+        body: JSON.stringify(payload)
       });
-
-      console.log("STATUS:", res.status);
 
       if (!res.ok) {
         const text = await res.text();
-        console.error("API FAILED:", text);
-        alert("API failed: " + text);
+        setError("Creation failed: " + text);
         setIsLoading(false);
         return;
       }
 
       const data = await res.json();
-
-      console.log("API RESPONSE:", data);
-
-      router.push("/admin/associates");
-      router.refresh();
-
+      
+      if (data.success) {
+        setGeneratedCode(data.fastCode);
+        setSuccess(true);
+        router.refresh();
+      } else {
+        setError(data.error || "Failed to create associate");
+      }
     } catch (err) {
       console.error("FETCH ERROR:", err);
-      alert("API not reachable - check console for details");
+      setError("API not reachable - check console for details");
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const copyLink = () => {
