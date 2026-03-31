@@ -36,11 +36,21 @@ export interface ProductFamily {
 
 export { ADDONS as addons, getAddonsForProduct, getAddonById, addonsRecord } from "@/lib/config/addons";
 
+import { PRODUCT_IMAGE_MAP } from "@/lib/productImages";
+
+const IMAGES = {
+  'glasshouse': '/images/glasshouse-200.jpeg',
+  'glasshouse-200': '/images/glasshouse-200.jpeg',
+  'talishouse-420': '/images/talishouse-420.png',
+  'talishouse-residential': '/images/talishouse-850.png',
+  'talistowns': '/images/talistowns.jpg',
+};
+
 export const glasshouseFamily: ProductFamily = {
   id: "glasshouse",
   name: "Glasshouse™",
   slug: "glasshouse",
-  image: "/images/glasshouse-200.jpeg",
+  image: IMAGES['glasshouse'],
   gridDescription: `Glasshouse™ : The quick start option:
 - Up to five units shipped together with up to five optional deck platforms in one sea-can container.
 - Size and appearance: 10 x 20 ft. each, one, two or three sides glass.
@@ -56,7 +66,7 @@ export const glasshouseModels: ProductModel[] = [
     name: "Glasshouse™ 200",
     category: "glasshouse",
     price: 19950,
-    image: "/images/glasshouse-200.jpeg",
+    image: IMAGES['glasshouse-200'],
     description: `Description:
 8' x 20' or 10' x 20' steel structures featuring one, two or three sides glass.
 Great as short-term rental cottages with a view or home offices.`,
@@ -78,7 +88,7 @@ export const talishouseFamily: ProductFamily = {
   id: "talishouse",
   name: "Talishouse™",
   slug: "talishouse",
-  image: "/images/talishouse-420.png",
+  image: IMAGES['talishouse-420'],
   gridDescription: `Talishouse™ : The flexible modular home system:
 - 21' x 20' steel structures assembled in one day and move-in ready in one week.
 - Two bedrooms, one bath, open concept living-dining-kitchen.
@@ -93,7 +103,7 @@ export const talishouseModels: ProductModel[] = [
     name: "Talishouse™ 420",
     category: "talishouse-420",
     price: 39950,
-    image: "/images/talishouse-420.png",
+    image: IMAGES['talishouse-420'],
     description: `Description:
 21' x 20' steel structures assembled in one day and move-in ready in one week.
 Two bedrooms, one bath, open concept living-dining-kitchen.`,
@@ -114,7 +124,7 @@ Two bedrooms, one bath, open concept living-dining-kitchen.`,
     name: "Talishouse™ Residential",
     category: "talishouse-residential",
     price: 39975,
-    image: "/images/talishouse-850.png",
+    image: IMAGES['talishouse-residential'],
     description: `Description:
 Expanded residential living solution with additional square footage.
 Two bedrooms, one bath, open concept living-dining-kitchen with extra space.`,
@@ -141,7 +151,7 @@ export const talistownsFamily: ProductFamily = {
   id: "talistowns",
   name: "TalisTowns™",
   slug: "talistowns",
-  image: "/images/talistowns.jpg",
+  image: IMAGES['talistowns'],
   gridDescription: `TalisTowns™ : Moonlighting made easy:
 - Seen here: 20 units in 10 structures, high rise gable roofs added locally.
 - Units are 21x20 in size, two bedrooms, one bath, open concept living - dining - kitchen.
@@ -160,7 +170,7 @@ export const talistownsModels: ProductModel[] = [
     name: "TalisTowns™",
     category: "talistowns",
     price: 39950,
-    image: "/images/talistowns.jpg",
+    image: IMAGES['talistowns'],
     description: `Description:
 TalisTowns™ community development system using multiple Talishouse™ 420 units.
 Scalable from single structures to complete communities.`,

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
+import { getProductImage } from "@/lib/productImages";
 
 const glasshouseProducts = [
   {
     id: "glasshouse-160",
     name: "Glasshouse 160",
-    image: "/images/glasshouse-200.jpeg",
+    image: getProductImage("glasshouse-160"),
     price: "$19,995",
     size: "8' x 20'",
     spec: "one side glass",
@@ -14,7 +15,7 @@ const glasshouseProducts = [
   {
     id: "glasshouse-200",
     name: "Glasshouse 200",
-    image: "/images/glasshouse-200.jpeg",
+    image: getProductImage("glasshouse-200"),
     price: "$24,995",
     size: "10' x 20'",
     spec: "one side glass",
@@ -26,7 +27,7 @@ const cottageProducts = [
   {
     id: "talishouse-400",
     name: "Talishouse 400",
-    image: "/images/talishouse-420.png",
+    image: getProductImage("400"),
     price: "$49,995",
     size: "20' x 20'",
     href: "/talishouse?product=420",
@@ -34,7 +35,7 @@ const cottageProducts = [
   {
     id: "talishouse-800",
     name: "Talishouse 800",
-    image: "/images/talishouse-420.png",
+    image: getProductImage("800"),
     price: "$79,995",
     size: "40' x 20'",
     href: "/talishouse?product=420",
@@ -45,14 +46,14 @@ const residentialProducts = [
   {
     id: "talishouse-1600",
     name: "Talishouse 1,600",
-    image: "/images/talishouse-850.png",
+    image: getProductImage("1600"),
     price: "$109,995",
     href: "/talishouse?product=residential",
   },
   {
     id: "talishouse-2400",
     name: "Talishouse 2,400",
-    image: "/images/talishouse-850.png",
+    image: getProductImage("2400"),
     price: "$139,995",
     href: "/talishouse?product=residential",
   },
@@ -284,7 +285,7 @@ export default function CatalogPage() {
           >
             <div className="aspect-[16/10] relative bg-gray-100">
               <Image
-                src="/images/talistowns.jpg"
+                src={getProductImage("talistowns")}
                 alt="TalisTowns"
                 fill
                 className="object-cover"
