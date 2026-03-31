@@ -12,9 +12,9 @@ const usages = ["Personal use", "Resale", "Commercial use"];
 const permanentInstallations = ["Screw piles", "Piers", "Slab"];
 const mobileInstallations = ["20 ft – dual axle", "40 ft – triple axle"];
 const termsOptions = [
-  "Retail purchase for private use",
-  "Purchase for commercial use or resale",
-  "Pay half now, half over five years"
+  "purchase for personal use",
+  "purchase for commercial use or resale",
+  "pay half now, half over up to five years"
 ];
 
 export default function ProposeProjectPage() {
@@ -122,7 +122,7 @@ export default function ProposeProjectPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] overflow-hidden">
           <div className="bg-black px-6 py-4">
             <p className="text-sm font-semibold text-white tracking-wide">
-              ADD A PROJECT
+              First come, first serve
             </p>
           </div>
 
@@ -133,7 +133,6 @@ export default function ProposeProjectPage() {
                 <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
                   Date <span className="text-gray-400">*</span>
                 </label>
-                <p className="text-[11px] text-gray-400">First come, first serve</p>
                 <input
                   type="text"
                   name="date"
@@ -229,7 +228,6 @@ export default function ProposeProjectPage() {
                 />
               </div>
             </div>
-            <p className="text-[11px] text-gray-400 -mt-2">Request a FAST Code</p>
 
             {/* ROW 4: Address */}
             <div className="space-y-1">
@@ -257,15 +255,6 @@ export default function ProposeProjectPage() {
                 className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10"
               />
             </div>
-
-            {/* FAST Code Detection */}
-            {fastCode && (
-              <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3">
-                <p className="text-xs text-green-700">
-                  FAST Code <span className="font-mono font-semibold">{fastCode}</span> detected and will be attached to your submission.
-                </p>
-              </div>
-            )}
 
             {/* ROW 6: Size */}
             <div className="space-y-1">

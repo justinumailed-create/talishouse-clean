@@ -108,24 +108,24 @@ export default function MapComponent({ associateId, location }: MapComponentProp
 
   if (error) {
     return (
-      <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-500 flex-col p-4 text-center">
-        <svg className="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div className="w-full h-full min-h-[300px] lg:min-h-[500px] bg-gray-100 flex items-center justify-center text-gray-500 flex-col p-4 text-center">
+        <svg className="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
         </svg>
-        <p>{error}</p>
+        <p className="text-sm font-medium">Map unavailable</p>
       </div>
     );
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full min-h-[300px] lg:min-h-[500px]">
       {loading && (
         <div className="absolute inset-0 bg-gray-100 flex items-center justify-center text-gray-500 z-10">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
           Loading map...
         </div>
       )}
-      <div ref={mapRef} className="w-full h-full" />
+      <div ref={mapRef} className="w-full h-full min-h-[300px] lg:min-h-[500px]" />
     </div>
   );
 }

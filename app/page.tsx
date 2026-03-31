@@ -70,10 +70,10 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch w-full">
+    <div className="w-full overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 items-stretch w-full">
         <div className="lg:col-span-2 h-full">
-          <div className="w-full h-full min-h-[400px] lg:min-h-[500px] rounded-xl overflow-hidden bg-gray-200">
+          <div className="w-full h-full min-h-[300px] lg:min-h-[500px] rounded-xl overflow-hidden bg-gray-200">
             <iframe
               src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
               allow="geolocation 'self' https://my.atlist.com"
@@ -81,7 +81,7 @@ export default function Home() {
               scrolling="no"
               allowFullScreen
               title="Talishouse property discovery map"
-              className="w-full h-full"
+              className="w-full h-full min-h-[300px] lg:min-h-[500px]"
             />
           </div>
         </div>
@@ -108,7 +108,7 @@ export default function Home() {
               </li>
               <li className="flex items-start text-base font-medium text-gray-800">
                 <span className="mr-3 text-gray-900 font-bold">•</span>
-                <span>Typically up in a day and move in ready in a week</span>
+                <span>Up in a day and move in ready in a week</span>
               </li>
               <li className="flex items-start text-base font-medium text-gray-800">
                 <span className="mr-3 text-gray-900 font-bold">•</span>

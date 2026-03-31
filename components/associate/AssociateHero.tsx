@@ -1,10 +1,12 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import MapComponent from "@/components/MapComponent";
+
+const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: false });
 
 interface PageConfig {
   heroType: "map" | "image" | "gallery" | "pdf" | "video";
