@@ -145,11 +145,11 @@ export default function ProposeProjectPage() {
                 <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
                   Preferred Terms <span className="text-gray-400">*</span>
                 </label>
-                <div className="space-y-2">
+                <div className="space-y-2 w-full max-w-full overflow-hidden">
                   {termsOptions.map((option, idx) => (
                     <label
                       key={idx}
-                      className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition option-card ${
+                      className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition option-card w-full max-w-full overflow-hidden ${
                         selectedTerms === option
                           ? "bg-[#0070ba]/10 border border-[#0070ba]"
                           : "border border-transparent hover:bg-gray-50"
@@ -163,7 +163,7 @@ export default function ProposeProjectPage() {
                         onChange={(e) => setSelectedTerms(e.target.value)}
                         className="mt-1 accent-[#0070ba] flex-shrink-0"
                       />
-                      <span className="text-xs text-gray-700 leading-tight option-text flex-1 max-w-full break-words">{option}</span>
+                      <span className="text-xs text-gray-700 leading-tight option-text flex-1 min-w-0 break-words">{option}</span>
                     </label>
                   ))}
                 </div>

@@ -27,6 +27,9 @@ export const metadata: Metadata = {
     "Modern homes and cottages starting from $58.50 per sq.ft. . Built in a day, move-in ready in a week. Lease-to-own options available.",
   keywords:
     "modular homes,cottages,prefab homes,tiny homes,affordable housing,lease to own homes",
+  icons: {
+    icon: "/favicon.png",
+  },
 };
 
 export default function RootLayout({

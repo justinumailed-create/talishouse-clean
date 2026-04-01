@@ -33,40 +33,40 @@ export default function Header() {
         <nav className="flex-1 py-6 px-4 flex flex-col gap-4">
           <Link
             href={ROUTES.CATALOG}
-            className={`text-[17px] font-medium transition-all py-2 ${
+            className={`text-[14px] font-medium transition-all py-2 uppercase tracking-[0.08em] ${
               pathname.startsWith("/catalog")
-                ? "text-[#111]"
-                : "text-[#222] hover:text-black"
+                ? "text-black"
+                : "text-[#2b2b2b] hover:text-black"
             }`}
           >
             Catalogue
           </Link>
           <Link
             href={ROUTES.LEASE_TO_OWN}
-            className={`text-[17px] font-medium transition-all py-2 ${
+            className={`text-[14px] font-medium transition-all py-2 uppercase tracking-[0.08em] ${
               pathname.startsWith("/lease-to-own")
-                ? "text-[#111]"
-                : "text-[#222] hover:text-black"
+                ? "text-black"
+                : "text-[#2b2b2b] hover:text-black"
             }`}
           >
             Lease-To-Own
           </Link>
           <GatedLink
             href={ROUTES.BUSINESS_OFFICE}
-            className={`text-[17px] font-medium transition-all py-2 ${
+            className={`text-[14px] font-medium transition-all py-2 uppercase tracking-[0.08em] ${
               pathname.startsWith("/business-office")
-                ? "text-[#111]"
-                : "text-[#222] hover:text-black"
+                ? "text-black"
+                : "text-[#2b2b2b] hover:text-black"
             }`}
           >
             Business Office
           </GatedLink>
           <Link
             href={ROUTES.ADD_PROJECT}
-            className={`text-[17px] font-medium transition-all py-2 ${
+            className={`text-[14px] font-medium transition-all py-2 uppercase tracking-[0.08em] ${
               pathname.startsWith("/add-project")
-                ? "text-[#111]"
-                : "text-[#222] hover:text-black"
+                ? "text-black"
+                : "text-[#2b2b2b] hover:text-black"
             }`}
           >
             Add A Project
@@ -79,7 +79,7 @@ export default function Header() {
             onClick={openCart}
             className="w-full flex items-center justify-between py-3 px-4 bg-white border border-[#e5e5e5] rounded-lg hover:border-gray-400 transition-all"
           >
-            <span className="text-[15px] font-medium text-[#222]">Cart</span>
+            <span className="text-[15px] font-medium text-[#2b2b2b]">Cart</span>
             {itemCount > 0 && (
               <span className="bg-[#0071e3] text-white text-[12px] font-semibold px-2 py-0.5 rounded-full">
                 {itemCount}

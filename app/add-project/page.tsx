@@ -160,8 +160,8 @@ export default function AddProjectPage() {
                 <p className="text-sm text-red-600 text-center">{error}</p>
               )}
 
-              <div className="space-y-4 pt-4 acknowledgement-container w-full max-w-full">
-                <label className="flex items-start gap-3 cursor-pointer acknowledgement">
+              <div className="space-y-4 pt-4 acknowledgement-container w-full max-w-full overflow-hidden">
+                <label className="flex items-start gap-3 cursor-pointer acknowledgement w-full">
                   <input
                     type="checkbox"
                     checked={deliveryAcknowledgement}
@@ -173,12 +173,12 @@ export default function AddProjectPage() {
                     }}
                     className="mt-1 w-5 h-5 rounded border-gray-300 text-[#1279c9] focus:ring-[#1279c9] cursor-pointer flex-shrink-0"
                   />
-                  <span className="text-sm text-gray-600 leading-relaxed acknowledgement-text flex-1 max-w-full break-words">
+                  <span className="text-sm text-gray-600 leading-relaxed acknowledgement-text flex-1 min-w-0 break-words">
                     I acknowledge and accept that not every location will be suitable for delivery right to a building site. I understand that pricing is to the nearest suitable location at our sole discretion.
                   </span>
                 </label>
 
-                <label className="flex items-start gap-3 cursor-pointer acknowledgement">
+                <label className="flex items-start gap-3 cursor-pointer acknowledgement w-full">
                   <input
                     type="checkbox"
                     checked={smsConsent}
@@ -190,7 +190,7 @@ export default function AddProjectPage() {
                     }}
                     className="mt-1 w-5 h-5 rounded border-gray-300 text-[#1279c9] focus:ring-[#1279c9] cursor-pointer flex-shrink-0"
                   />
-                  <span className="text-sm text-gray-600 leading-relaxed acknowledgement-text flex-1 max-w-full break-words">
+                  <span className="text-sm text-gray-600 leading-relaxed acknowledgement-text flex-1 min-w-0 break-words">
                     I agree to receive promotional messages sent via an autodialer - 4 Msgs/Month. Msg & Data Rates may apply. Text STOP to opt out anytime. Text Help for more information. Agreement to this feature is not a condition of purchase. I also agree to the Terms of Service and Privacy Policy of Talishouse Homes & Cottages.
                   </span>
                 </label>
