@@ -1,23 +1,30 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { getProductImage } from "@/lib/productImages";
+import { useEffect, useState } from "react";
+
+interface ProductImages {
+  [key: string]: string;
+}
 
 const glasshouseProducts = [
   {
     id: "glasshouse-160",
     name: "Glasshouse 160",
-    image: getProductImage("glasshouse-160"),
+    size: "glasshouse-160",
     price: "$19,995",
-    size: "8' x 20'",
+    sizeLabel: "8' x 20'",
     spec: "one side glass",
     href: "/glasshouse",
   },
   {
     id: "glasshouse-200",
     name: "Glasshouse 200",
-    image: getProductImage("glasshouse-200"),
+    size: "glasshouse-200",
     price: "$24,995",
-    size: "10' x 20'",
+    sizeLabel: "10' x 20'",
     spec: "one side glass",
     href: "/glasshouse",
   },
@@ -27,17 +34,17 @@ const cottageProducts = [
   {
     id: "talishouse-400",
     name: "Talishouse 400",
-    image: getProductImage("400"),
+    size: "400",
+    sizeLabel: "20' x 20'",
     price: "$49,995",
-    size: "20' x 20'",
     href: "/talishouse?product=420",
   },
   {
     id: "talishouse-800",
     name: "Talishouse 800",
-    image: getProductImage("800"),
+    size: "800",
+    sizeLabel: "40' x 20'",
     price: "$79,995",
-    size: "40' x 20'",
     href: "/talishouse?product=420",
   },
 ];
@@ -46,14 +53,16 @@ const residentialProducts = [
   {
     id: "talishouse-1600",
     name: "Talishouse 1,600",
-    image: getProductImage("1600"),
+    size: "1600",
+    sizeLabel: "40' x 20' (2 units)",
     price: "$109,995",
     href: "/talishouse?product=residential",
   },
   {
     id: "talishouse-2400",
     name: "Talishouse 2,400",
-    image: getProductImage("2400"),
+    size: "2400",
+    sizeLabel: "60' x 20' (3 units)",
     price: "$139,995",
     href: "/talishouse?product=residential",
   },
@@ -67,6 +76,19 @@ const purchasingOptions = [
 ];
 
 export default function CatalogPage() {
+  const [productImages, setProductImages] = useState<ProductImages>({});
+
+  useEffect(() => {
+    fetch("/api/product-images")
+      .then((res) => res.json())
+      .then((data) => setProductImages(data || {}))
+      .catch((err) => console.error("Error fetching product images:", err));
+  }, []);
+
+  const getImage = (size: string) => {
+    return productImages[size] || getProductImage(size);
+  };
+
   return (
     <div className="bg-[#f5f5f7] min-h-screen">
       {/* SECTION 1: HERO */}
@@ -127,12 +149,18 @@ export default function CatalogPage() {
                 "
               >
                 <div className="aspect-[16/10] relative bg-gray-100">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
+                  {getImage(product.size) ? (
+                    <Image
+                      src={getImage(product.size)}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                      Image coming soon
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-medium text-gray-900">
@@ -142,11 +170,13 @@ export default function CatalogPage() {
                     {product.price}
                   </p>
                   <p className="text-sm text-gray-500 mt-2">
-                    Size: {product.size}
+                    Size: {product.sizeLabel}
                   </p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Spec: {product.spec}
-                  </p>
+                  {product.spec && (
+                    <p className="text-xs text-gray-400 mt-1">
+                      Spec: {product.spec}
+                    </p>
+                  )}
                   <div className="mt-5">
                     <span className="inline-block w-full py-2.5 rounded-xl text-sm font-medium text-center bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white transition group-hover:opacity-90">
                       Select Model
@@ -185,12 +215,18 @@ export default function CatalogPage() {
                 "
               >
                 <div className="aspect-[16/10] relative bg-gray-100">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
+                  {getImage(product.size) ? (
+                    <Image
+                      src={getImage(product.size)}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                      Image coming soon
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-medium text-gray-900">
@@ -200,7 +236,7 @@ export default function CatalogPage() {
                     {product.price}
                   </p>
                   <p className="text-sm text-gray-500 mt-2">
-                    Size: {product.size}
+                    Size: {product.sizeLabel}
                   </p>
                   <div className="mt-5">
                     <span className="inline-block w-full py-2.5 rounded-xl text-sm font-medium text-center bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white transition group-hover:opacity-90">
@@ -241,12 +277,18 @@ export default function CatalogPage() {
                 "
               >
                 <div className="aspect-[16/10] relative bg-gray-100">
-                  <Image
-                    src={product.image}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                  />
+                  {getImage(product.size) ? (
+                    <Image
+                      src={getImage(product.size)}
+                      alt={product.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                      Image coming soon
+                    </div>
+                  )}
                 </div>
                 <div className="p-6">
                   <h3 className="text-lg font-medium text-gray-900">
