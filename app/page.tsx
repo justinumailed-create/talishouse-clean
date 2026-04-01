@@ -114,9 +114,6 @@ export default function Home() {
                 <span className="mr-3 text-gray-900 font-bold">•</span>
                 <span>Lease-To-Own terms available, OAC</span>
               </li>
-              <li className="flex items-start text-lg font-bold text-gray-900 mt-4 pt-4 border-t border-gray-200">
-                Just add ambition
-              </li>
             </ul>
 
             <Link

@@ -113,6 +113,11 @@ export default function TalistownsPage() {
             </div>
           )}
 
+          <div className="py-4 text-center space-y-1">
+            <p className="text-sm text-gray-600">Just add ambition</p>
+            <p className="text-sm text-gray-600">Moonlighting is lucrative</p>
+          </div>
+
           <button
             onClick={handleAddToCart}
             className="btn-primary w-full text-lg"

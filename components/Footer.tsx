@@ -159,9 +159,6 @@ export default function Footer() {
             Powered by TalisU
           </a>
         </div>
-        <div className="pt-4 text-center">
-          <p className="text-sm font-semibold text-gray-700">Moonlighting is lucrative</p>
-        </div>
       </div>
     </footer>
   );
