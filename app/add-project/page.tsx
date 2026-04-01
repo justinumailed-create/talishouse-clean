@@ -11,9 +11,17 @@ export default function AddProjectPage() {
   const { fastCode, associateId } = useAssociate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [deliveryAcknowledgement, setDeliveryAcknowledgement] = useState(false);
+  const [smsConsent, setSmsConsent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    
+    if (!deliveryAcknowledgement || !smsConsent) {
+      setError("You must accept the terms to continue");
+      return;
+    }
+
     setLoading(true);
     setError("");
 
@@ -21,6 +29,7 @@ export default function AddProjectPage() {
     const name = formData.get("name") as string;
     const phone = formData.get("phone") as string;
     const location = formData.get("location") as string;
+    const preferredFastCode = formData.get("preferredFastCode") as string;
 
     if (!name || !phone || !location) {
       setError("All fields are required");
@@ -36,6 +45,9 @@ export default function AddProjectPage() {
       source: "add-project",
       status: "new",
       associate_id: associateId,
+      delivery_acknowledgement: deliveryAcknowledgement,
+      sms_consent: smsConsent,
+      preferred_fast_code: preferredFastCode || null,
     };
 
     console.log("Submitting lead:", JSON.stringify(data, null, 2));
@@ -61,6 +73,8 @@ export default function AddProjectPage() {
     console.log("Lead created:", JSON.stringify(insertData, null, 2));
     router.push("/project-received");
   }
+
+  const isFormValid = deliveryAcknowledgement && smsConsent;
 
   return (
     <div className="min-h-[70vh] bg-white py-12">
@@ -146,19 +160,50 @@ export default function AddProjectPage() {
                 <p className="text-sm text-red-600 text-center">{error}</p>
               )}
 
-              <div className="space-y-3 pt-4">
-                <p className="text-xs text-gray-500 leading-relaxed">
-                  I acknowledge and accept that not every location will be suitable for delivery right to a building site. I understand that pricing is to the nearest suitable location at our sole discretion.
-                </p>
-                <p className="text-xs text-gray-500 leading-relaxed">
-                  I agree to receive promotional messages sent via an autodialer - 4 Msgs/Month. Msg & Data Rates may apply. Text STOP to opt out anytime. Text Help for more information. Agreement to this feature is not a condition of purchase. I also agree to the Terms of Service and Privacy Policy of Talishouse Homes & Cottages.
-                </p>
+              <div className="space-y-4 pt-4">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={deliveryAcknowledgement}
+                    onChange={(e) => {
+                      setDeliveryAcknowledgement(e.target.checked);
+                      if (error === "You must accept the terms to continue") {
+                        setError("");
+                      }
+                    }}
+                    className="mt-1 w-5 h-5 rounded border-gray-300 text-[#1279c9] focus:ring-[#1279c9] cursor-pointer"
+                  />
+                  <span className="text-sm text-gray-600 leading-relaxed">
+                    I acknowledge and accept that not every location will be suitable for delivery right to a building site. I understand that pricing is to the nearest suitable location at our sole discretion.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={smsConsent}
+                    onChange={(e) => {
+                      setSmsConsent(e.target.checked);
+                      if (error === "You must accept the terms to continue") {
+                        setError("");
+                      }
+                    }}
+                    className="mt-1 w-5 h-5 rounded border-gray-300 text-[#1279c9] focus:ring-[#1279c9] cursor-pointer"
+                  />
+                  <span className="text-sm text-gray-600 leading-relaxed">
+                    I agree to receive promotional messages sent via an autodialer - 4 Msgs/Month. Msg & Data Rates may apply. Text STOP to opt out anytime. Text Help for more information. Agreement to this feature is not a condition of purchase. I also agree to the Terms of Service and Privacy Policy of Talishouse Homes & Cottages.
+                  </span>
+                </label>
               </div>
 
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full rounded-2xl bg-[#1279c9] px-6 py-4 text-xs font-bold uppercase tracking-[0.28em] text-white transition hover:bg-[#0f6bb1] disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={loading || !isFormValid}
+                className={`w-full rounded-2xl px-6 py-4 text-xs font-bold uppercase tracking-[0.28em] transition ${
+                  isFormValid
+                    ? "bg-[#1279c9] text-white hover:bg-[#0f6bb1]"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                } disabled:cursor-not-allowed disabled:opacity-60`}
               >
                 {loading ? "Submitting..." : "SUBMIT"}
               </button>
