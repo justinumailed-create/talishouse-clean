@@ -140,7 +140,7 @@ export default function LeaseToOwnPage() {
 
   if (leaseState.status === "selecting") {
     return (
-      <div className="min-h-[70vh] bg-white py-12">
+      <div className="container py-12">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
             Lease-to-Own
@@ -270,7 +270,7 @@ export default function LeaseToOwnPage() {
   }
 
   return (
-    <div className="min-h-[70vh] bg-white py-12">
+    <div className="container py-12">
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
           Your Lease

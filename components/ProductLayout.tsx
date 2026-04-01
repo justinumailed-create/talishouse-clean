@@ -55,7 +55,7 @@ export default function ProductLayout({
   const showImage = hasValidImage || dbImageUrl;
 
   return (
-    <div className="w-full py-6">
+    <div className="container py-6">
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-12 w-full">
         <div className="lg:col-span-7 flex flex-col gap-6 items-stretch">
           <div className="w-full aspect-[16/9] bg-gray-50 relative overflow-hidden rounded-2xl border border-gray-100">

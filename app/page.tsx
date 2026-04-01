@@ -70,7 +70,7 @@ export default function Home() {
   }
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="container">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 items-stretch w-full">
         <div className="lg:col-span-2 h-full">
           <div className="w-full h-full min-h-[300px] lg:min-h-[500px] rounded-xl overflow-hidden bg-gray-200">

@@ -48,7 +48,7 @@ export default function RootLayout({
           <CartProvider>
             <AssociateProvider>
               <Header />
-              <main className="flex-grow page-wrapper container-main mt-20 py-8 w-full">{children}</main>
+              <main className="flex-grow page-wrapper container mt-20 py-8 w-full">{children}</main>
               <Footer />
               <FloatingContactButton />
               <CartDrawer />

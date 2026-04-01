@@ -76,7 +76,7 @@ export default function CatalogPage() {
     <div className="bg-[#f5f5f7] min-h-screen">
       {/* SECTION 1: HERO */}
       <section className="bg-[#f5f5f7] py-16 px-4">
-        <div className="container-main text-center">
+        <div className="container text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
             Talishouse™ Product Catalog
           </h1>
@@ -88,7 +88,7 @@ export default function CatalogPage() {
 
       {/* SECTION 2: DESTINATION CHARGE */}
       <section className="py-10 px-4">
-        <div className="container-main">
+        <div className="container">
           <div className="bg-white rounded-2xl p-8 shadow-sm border border-[rgba(0,0,0,0.05)]">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
@@ -110,7 +110,7 @@ export default function CatalogPage() {
 
       {/* SECTION 3: PRODUCT CATEGORIES */}
       <section className="py-10 px-4">
-        <div className="container-main">
+        <div className="container">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {productCategories.map((category) => (
               <Link
@@ -163,7 +163,7 @@ export default function CatalogPage() {
 
       {/* SECTION 4: SITE REQUIREMENTS */}
       <section className="py-10 px-4">
-        <div className="max-w-2xl mx-auto text-center">
+        <div className="container text-center">
           <h2 className="text-lg font-medium text-gray-900 mb-3">Site Requirements</h2>
           <p className="text-sm text-gray-600 leading-relaxed">
             Typically site preparation includes a driveway, building site, power hook up, water and disposal systems. Optionally, off grid and office systems are available.
@@ -179,7 +179,7 @@ export default function CatalogPage() {
 
       {/* SECTION 5: PURCHASING OPTIONS */}
       <section className="py-10 px-4 pb-20">
-        <div className="container-main">
+        <div className="container">
           <h2 className="text-lg font-medium text-gray-900 mb-6">Purchasing Options</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {purchasingOptions.map((option) => (
@@ -198,7 +198,7 @@ export default function CatalogPage() {
 
       {/* SECTION 6: FOOTER */}
       <section className="py-10 px-4 pb-24">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="container text-center">
           <p className="text-gray-400 text-xs mt-3 text-center">Just add ambition…!</p>
           <p className="text-gray-400 text-xs text-center">Moonlighting is lucrative…!</p>
         </div>

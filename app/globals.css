@@ -30,25 +30,37 @@
 }
 
 @layer components {
-  .container-main {
+  .container {
     width: 100%;
     max-width: 1400px;
-    margin: 0 auto;
-    padding-left: 24px;
-    padding-right: 24px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 16px;
+    padding-right: 16px;
     box-sizing: border-box;
   }
   
+  .main-layout {
+    display: grid;
+    grid-template-columns: 70% 30%;
+    gap: 24px;
+  }
+
   .page-wrapper {
     @apply w-full overflow-x-hidden;
   }
 }
 
-html, body {
+* {
+  box-sizing: border-box;
+  border-color: var(--border-subtle);
   max-width: 100%;
+}
+
+html, body {
+  width: 100%;
   overflow-x: hidden !important;
   position: relative;
-  width: 100%;
 }
 
 body {
@@ -58,11 +70,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  padding-bottom: 100px;
+  padding-bottom: 90px; /* Fix contact bar overlap */
 }
 
 /* Force text visibility and wrapping */
-p, label, span {
+p, span, label {
   max-width: 100%;
   overflow-wrap: break-word;
   word-wrap: break-word;
@@ -74,12 +86,6 @@ input, textarea, select {
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
-}
-
-* {
-  border-color: var(--border-subtle);
-  max-width: 100%;
-  box-sizing: border-box;
 }
 
 /* ========================================
@@ -130,7 +136,30 @@ input, textarea, select {
   transition: transform 0.2s ease;
 }
 
-.option-card, .acknowledgement {
+.option-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  gap: 12px !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  align-items: flex-start !important;
+}
+
+.option-card input {
+  flex-shrink: 0 !important;
+  margin-top: 4px !important;
+  width: auto !important; /* Reset width for checkbox/radio */
+}
+
+.option-card label {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+}
+
+.acknowledgement {
   width: 100% !important;
   max-width: 100% !important;
   overflow: hidden !important;
@@ -141,13 +170,13 @@ input, textarea, select {
   box-sizing: border-box !important;
 }
 
-.option-card input, .acknowledgement input {
+.acknowledgement input {
   flex-shrink: 0 !important;
   margin-top: 4px !important;
-  width: auto !important; /* Reset width for checkbox/radio */
+  width: auto !important;
 }
 
-.option-text, .acknowledgement-text, .option-card label, .acknowledgement label {
+.option-text, .acknowledgement-text {
   flex: 1 1 0% !important;
   min-width: 0 !important;
   word-break: break-word !important;
@@ -160,7 +189,7 @@ input, textarea, select {
 
 @media (max-width: 768px) {
   .page-wrapper,
-  .container-main,
+  .container,
   .layout,
   .main,
   .form-container {

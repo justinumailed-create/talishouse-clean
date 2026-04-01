@@ -77,7 +77,7 @@ export default function AddProjectPage() {
   const isFormValid = deliveryAcknowledgement && smsConsent;
 
   return (
-    <div className="min-h-[70vh] bg-white py-12 px-4">
+    <div className="container py-12">
       <div className="mx-auto max-w-md w-full">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
