@@ -5,8 +5,6 @@ import Image from "next/image";
 import { getProductImage } from "@/lib/productImages";
 import { useEffect, useState } from "react";
 
-export const revalidate = 0;
-
 interface ProductImages {
   [key: string]: string;
 }

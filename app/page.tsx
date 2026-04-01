@@ -5,8 +5,6 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useAssociate } from "@/context/AssociateContext";
 
-export const revalidate = 0;
-
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
