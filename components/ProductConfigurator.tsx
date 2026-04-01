@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 
 const roofingOptions = [
@@ -9,21 +9,21 @@ const roofingOptions = [
 ];
 
 const kitchenOptions = [
-  { id: "KC01", label: "Bright White", image: "/images/kitchen/KC01.png" },
-  { id: "KC02", label: "Classic White", image: "/images/kitchen/KC02.png" },
-  { id: "KC03", label: "Modern White", image: "/images/kitchen/KC03.png" },
-  { id: "KC04", label: "Warm Wood", image: "/images/kitchen/KC04.png" },
-  { id: "KC05", label: "Dark Modern", image: "/images/kitchen/KC05.png" },
-  { id: "KC06", label: "Minimalist", image: "/images/kitchen/KC06.png" }
+  { id: "KC01", label: "Bright White", image: "/images/glasshouse-200.jpeg" },
+  { id: "KC02", label: "Classic White", image: "/images/talishouse-420.png" },
+  { id: "KC03", label: "Modern White", image: "/images/talishouse-850.png" },
+  { id: "KC04", label: "Warm Wood", image: "/images/talistowns.jpg" },
+  { id: "KC05", label: "Dark Modern", image: "/images/glasshouse-200.jpeg" },
+  { id: "KC06", label: "Minimalist", image: "/images/talishouse-420.png" },
 ];
 
 const bathOptions = [
-  { id: "TL01", label: "Bath Option 1", image: "/images/bath/TL01.png" },
-  { id: "TL02", label: "Bath Option 2", image: "/images/bath/TL02.png" },
-  { id: "TL03", label: "Bath Option 3", image: "/images/bath/TL03.png" },
-  { id: "TL04", label: "Bath Option 4", image: "/images/bath/TL04.png" },
-  { id: "TL05", label: "Bath Option 5", image: "/images/bath/TL05.png" },
-  { id: "TL06", label: "Bath Option 6", image: "/images/bath/TL06.png" }
+  { id: "TL01", label: "Option 1", image: "/images/glasshouse-200.jpeg" },
+  { id: "TL02", label: "Option 2", image: "/images/talishouse-420.png" },
+  { id: "TL03", label: "Option 3", image: "/images/talishouse-850.png" },
+  { id: "TL04", label: "Option 4", image: "/images/talistowns.jpg" },
+  { id: "TL05", label: "Option 5", image: "/images/glasshouse-200.jpeg" },
+  { id: "TL06", label: "Option 6", image: "/images/talishouse-420.png" },
 ];
 
 const flooringOptions = [
@@ -41,11 +41,6 @@ interface ProductConfiguratorProps {
 
 export function ProductConfigurator({ selectedOptions, onOptionChange }: ProductConfiguratorProps) {
   const [sidingCode, setSidingCode] = useState("");
-
-  useEffect(() => {
-    console.log("Kitchen loaded:", kitchenOptions);
-    console.log("Bath loaded:", bathOptions);
-  }, []);
 
   return (
     <div className="space-y-8">
@@ -69,7 +64,7 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
         </div>
       </div>
 
-      {/* KITCHEN - VISUAL IMAGE GRID */}
+      {/* KITCHEN - VISUAL IMAGE GRID (NO LABELS) */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-gray-900">Kitchen Style</p>
         <div className="grid grid-cols-3 gap-3">
@@ -87,23 +82,15 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
                   }
                 `}
               >
-                <div className="absolute inset-0">
-                  <Image
-                    src={item.image}
-                    alt={item.label}
-                    fill
-                    className="object-cover"
-                    unoptimized={true}
-                  />
-                  <div className={`absolute inset-0 bg-black/10 transition-opacity ${isSelected ? "opacity-0" : "opacity-0 group-hover:opacity-20"}`} />
-                </div>
-                <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] p-2">
-                  <span className={`text-[10px] uppercase tracking-wider font-bold text-white block text-center truncate`}>
-                    {item.label}
-                  </span>
-                </div>
+                <Image
+                  src={item.image}
+                  alt={item.label}
+                  fill
+                  className="object-cover"
+                  unoptimized={true}
+                />
                 {isSelected && (
-                  <div className="absolute top-2 right-2 w-5 h-5 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border border-white/50">
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border-2 border-white">
                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
@@ -115,7 +102,7 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
         </div>
       </div>
 
-      {/* BATH - VISUAL IMAGE GRID */}
+      {/* BATH - VISUAL IMAGE GRID (NO LABELS) */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-gray-900">Bath Style</p>
         <div className="grid grid-cols-3 gap-3">
@@ -133,23 +120,15 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
                   }
                 `}
               >
-                <div className="absolute inset-0">
-                  <Image
-                    src={item.image}
-                    alt={item.label}
-                    fill
-                    className="object-cover"
-                    unoptimized={true}
-                  />
-                  <div className={`absolute inset-0 bg-black/10 transition-opacity ${isSelected ? "opacity-0" : "opacity-0 group-hover:opacity-20"}`} />
-                </div>
-                <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] p-2">
-                  <span className={`text-[10px] uppercase tracking-wider font-bold text-white block text-center truncate`}>
-                    {item.label}
-                  </span>
-                </div>
+                <Image
+                  src={item.image}
+                  alt={item.label}
+                  fill
+                  className="object-cover"
+                  unoptimized={true}
+                />
                 {isSelected && (
-                  <div className="absolute top-2 right-2 w-5 h-5 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border border-white/50">
+                  <div className="absolute top-2 right-2 w-6 h-6 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border-2 border-white">
                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
