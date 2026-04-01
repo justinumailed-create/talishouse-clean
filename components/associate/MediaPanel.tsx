@@ -1,6 +1,6 @@
 export default function MediaPanel() {
   return (
-    <div className="p-4 group">
+    <div className="p-4 group form-container">
       <div className="relative aspect-video w-full rounded-xl bg-gray-200 overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center text-gray-400">
           <span className="text-lg">Main Product Image</span>

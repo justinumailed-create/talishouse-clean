@@ -119,7 +119,7 @@ export default function ProposeProjectPage() {
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] overflow-hidden w-full max-w-full">
           <div className="bg-black px-6 py-4">
             <p className="text-sm font-semibold text-white tracking-wide">
               First come, first serve
@@ -149,7 +149,7 @@ export default function ProposeProjectPage() {
                   {termsOptions.map((option, idx) => (
                     <label
                       key={idx}
-                      className={`flex items-start gap-2 p-2 rounded-lg cursor-pointer transition ${
+                      className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition option-card ${
                         selectedTerms === option
                           ? "bg-[#0070ba]/10 border border-[#0070ba]"
                           : "border border-transparent hover:bg-gray-50"
@@ -161,9 +161,9 @@ export default function ProposeProjectPage() {
                         value={option}
                         checked={selectedTerms === option}
                         onChange={(e) => setSelectedTerms(e.target.value)}
-                        className="mt-1 accent-[#0070ba]"
+                        className="mt-1 accent-[#0070ba] flex-shrink-0"
                       />
-                      <span className="text-xs text-gray-700 leading-tight">{option}</span>
+                      <span className="text-xs text-gray-700 leading-tight option-text flex-1 max-w-full break-words">{option}</span>
                     </label>
                   ))}
                 </div>

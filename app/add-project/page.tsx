@@ -77,15 +77,15 @@ export default function AddProjectPage() {
   const isFormValid = deliveryAcknowledgement && smsConsent;
 
   return (
-    <div className="min-h-[70vh] bg-white py-12">
-      <div className="mx-auto max-w-md">
+    <div className="min-h-[70vh] bg-white py-12 px-4">
+      <div className="mx-auto max-w-md w-full">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
             ADD A PROJECT
           </h1>
         </div>
 
-        <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
+        <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)] w-full max-w-full">
           <div className="flex items-center justify-between bg-black px-6 py-5 text-white">
             <p className="text-sm font-bold uppercase tracking-[0.25em]">
               SUBMIT DETAILS
@@ -160,8 +160,8 @@ export default function AddProjectPage() {
                 <p className="text-sm text-red-600 text-center">{error}</p>
               )}
 
-              <div className="space-y-4 pt-4">
-                <label className="flex items-start gap-3 cursor-pointer">
+              <div className="space-y-4 pt-4 acknowledgement-container w-full max-w-full">
+                <label className="flex items-start gap-3 cursor-pointer acknowledgement">
                   <input
                     type="checkbox"
                     checked={deliveryAcknowledgement}
@@ -171,14 +171,14 @@ export default function AddProjectPage() {
                         setError("");
                       }
                     }}
-                    className="mt-1 w-5 h-5 rounded border-gray-300 text-[#1279c9] focus:ring-[#1279c9] cursor-pointer"
+                    className="mt-1 w-5 h-5 rounded border-gray-300 text-[#1279c9] focus:ring-[#1279c9] cursor-pointer flex-shrink-0"
                   />
-                  <span className="text-sm text-gray-600 leading-relaxed">
+                  <span className="text-sm text-gray-600 leading-relaxed acknowledgement-text flex-1 max-w-full break-words">
                     I acknowledge and accept that not every location will be suitable for delivery right to a building site. I understand that pricing is to the nearest suitable location at our sole discretion.
                   </span>
                 </label>
 
-                <label className="flex items-start gap-3 cursor-pointer">
+                <label className="flex items-start gap-3 cursor-pointer acknowledgement">
                   <input
                     type="checkbox"
                     checked={smsConsent}
@@ -188,9 +188,9 @@ export default function AddProjectPage() {
                         setError("");
                       }
                     }}
-                    className="mt-1 w-5 h-5 rounded border-gray-300 text-[#1279c9] focus:ring-[#1279c9] cursor-pointer"
+                    className="mt-1 w-5 h-5 rounded border-gray-300 text-[#1279c9] focus:ring-[#1279c9] cursor-pointer flex-shrink-0"
                   />
-                  <span className="text-sm text-gray-600 leading-relaxed">
+                  <span className="text-sm text-gray-600 leading-relaxed acknowledgement-text flex-1 max-w-full break-words">
                     I agree to receive promotional messages sent via an autodialer - 4 Msgs/Month. Msg & Data Rates may apply. Text STOP to opt out anytime. Text Help for more information. Agreement to this feature is not a condition of purchase. I also agree to the Terms of Service and Privacy Policy of Talishouse Homes & Cottages.
                   </span>
                 </label>
