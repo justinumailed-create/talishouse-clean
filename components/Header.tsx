@@ -13,8 +13,8 @@ export default function Header() {
 
   return (
     <>
-      {/* LEFT SIDEBAR */}
-      <aside className="fixed left-0 top-0 w-[220px] h-screen bg-[#f5f5f5] border-r border-[#e5e5e5] z-50 flex flex-col">
+      {/* LEFT SIDEBAR - HIDDEN ON MOBILE */}
+      <aside className="hidden md:flex fixed left-0 top-0 w-[220px] h-screen bg-[#f5f5f5] border-r border-[#e5e5e5] z-50 flex flex-col">
         {/* LOGO */}
         <div className="p-5 border-b border-[#e5e5e5]">
           <Link href={ROUTES.HOME}>
@@ -35,7 +35,7 @@ export default function Header() {
             href={ROUTES.CATALOG}
             className={`text-[17px] font-medium transition-all py-2 ${
               pathname.startsWith("/catalog")
-                ? "text-[#0070ba]"
+                ? "text-[#111]"
                 : "text-[#222] hover:text-black"
             }`}
           >
@@ -45,7 +45,7 @@ export default function Header() {
             href={ROUTES.LEASE_TO_OWN}
             className={`text-[17px] font-medium transition-all py-2 ${
               pathname.startsWith("/lease-to-own")
-                ? "text-[#0070ba]"
+                ? "text-[#111]"
                 : "text-[#222] hover:text-black"
             }`}
           >
@@ -55,7 +55,7 @@ export default function Header() {
             href={ROUTES.BUSINESS_OFFICE}
             className={`text-[17px] font-medium transition-all py-2 ${
               pathname.startsWith("/business-office")
-                ? "text-[#0070ba]"
+                ? "text-[#111]"
                 : "text-[#222] hover:text-black"
             }`}
           >
@@ -65,7 +65,7 @@ export default function Header() {
             href={ROUTES.ADD_PROJECT}
             className={`text-[17px] font-medium transition-all py-2 ${
               pathname.startsWith("/add-project")
-                ? "text-[#0070ba]"
+                ? "text-[#111]"
                 : "text-[#222] hover:text-black"
             }`}
           >
@@ -89,9 +89,22 @@ export default function Header() {
         </div>
       </aside>
 
-      {/* TOP RIGHT HEADER CONTAINER */}
-      <header className="fixed top-0 right-0 left-[220px] h-16 bg-white border-b border-[#e5e5e5] z-40">
-        <div className="header-right h-full flex items-center justify-end px-6">
+      {/* TOP HEADER CONTAINER - ADJUSTED FOR MOBILE */}
+      <header className="fixed top-0 right-0 left-0 md:left-[220px] h-16 bg-white border-b border-[#e5e5e5] z-40">
+        <div className="header-right h-full flex items-center justify-between md:justify-end px-6">
+          {/* MOBILE LOGO */}
+          <div className="md:hidden">
+            <Link href={ROUTES.HOME}>
+              <Image
+                src="/logo.png"
+                alt="TALISHOUSE logo"
+                width={32}
+                height={32}
+                className="w-auto h-8 object-contain"
+                priority
+              />
+            </Link>
+          </div>
           {/* Empty - for future social media icons */}
         </div>
       </header>

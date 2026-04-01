@@ -70,7 +70,7 @@ export default function FloatingContactButton({ fastCode: propFastCode }: Floati
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 bg-[#1E4ED8] text-white px-6 py-3 rounded-full shadow-lg font-medium text-sm hover:bg-[#1d4ed8] transition-colors"
+        className="fixed bottom-4 left-4 right-4 md:bottom-6 md:right-6 md:left-auto z-50 bg-[#1E4ED8] text-white px-6 py-4 md:py-3 rounded-xl md:rounded-full shadow-lg font-bold md:font-medium text-sm hover:bg-[#1d4ed8] transition-colors"
       >
         Contact Us
       </button>

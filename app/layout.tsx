@@ -37,13 +37,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} min-h-screen flex flex-col antialiased bg-white text-black`}
+        className={`${inter.variable} min-h-screen flex flex-col antialiased bg-white text-black font-sans`}
       >
         <AuthProvider>
           <CartProvider>
             <AssociateProvider>
               <Header />
-              <main className="flex-grow page-wrapper container-main ml-[220px] mt-16">{children}</main>
+              <main className="flex-grow page-wrapper container-main md:ml-[220px] mt-16 px-4 md:px-6">{children}</main>
               <Footer />
               <FloatingContactButton />
               <CartDrawer />
