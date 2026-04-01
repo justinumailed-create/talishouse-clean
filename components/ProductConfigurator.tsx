@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 const roofingOptions = [
@@ -9,21 +9,21 @@ const roofingOptions = [
 ];
 
 const kitchenOptions = [
-  { id: "KC01", label: "KC01" },
-  { id: "KC02", label: "KC02" },
-  { id: "KC03", label: "KC03" },
-  { id: "KC04", label: "KC04" },
-  { id: "KC05", label: "KC05" },
-  { id: "KC06", label: "KC06" },
+  { id: "KC01", label: "Bright White", image: "/images/kitchen/KC01.png" },
+  { id: "KC02", label: "Classic White", image: "/images/kitchen/KC02.png" },
+  { id: "KC03", label: "Modern White", image: "/images/kitchen/KC03.png" },
+  { id: "KC04", label: "Warm Wood", image: "/images/kitchen/KC04.png" },
+  { id: "KC05", label: "Dark Modern", image: "/images/kitchen/KC05.png" },
+  { id: "KC06", label: "Minimalist", image: "/images/kitchen/KC06.png" }
 ];
 
 const bathOptions = [
-  { id: "TL01", label: "TL01" },
-  { id: "TL02", label: "TL02" },
-  { id: "TL03", label: "TL03" },
-  { id: "TL04", label: "TL04" },
-  { id: "TL05", label: "TL05" },
-  { id: "TL06", label: "TL06" },
+  { id: "TL01", label: "Bath Option 1", image: "/images/bath/TL01.png" },
+  { id: "TL02", label: "Bath Option 2", image: "/images/bath/TL02.png" },
+  { id: "TL03", label: "Bath Option 3", image: "/images/bath/TL03.png" },
+  { id: "TL04", label: "Bath Option 4", image: "/images/bath/TL04.png" },
+  { id: "TL05", label: "Bath Option 5", image: "/images/bath/TL05.png" },
+  { id: "TL06", label: "Bath Option 6", image: "/images/bath/TL06.png" }
 ];
 
 const flooringOptions = [
@@ -41,6 +41,11 @@ interface ProductConfiguratorProps {
 
 export function ProductConfigurator({ selectedOptions, onOptionChange }: ProductConfiguratorProps) {
   const [sidingCode, setSidingCode] = useState("");
+
+  useEffect(() => {
+    console.log("Kitchen loaded:", kitchenOptions);
+    console.log("Bath loaded:", bathOptions);
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -81,9 +86,18 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
                     : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
                   }
                 `}
-                >
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200" />
-                <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-[2px] p-2">
+              >
+                <div className="absolute inset-0">
+                  <Image
+                    src={item.image}
+                    alt={item.label}
+                    fill
+                    className="object-cover"
+                    unoptimized={true}
+                  />
+                  <div className={`absolute inset-0 bg-black/10 transition-opacity ${isSelected ? "opacity-0" : "opacity-0 group-hover:opacity-20"}`} />
+                </div>
+                <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] p-2">
                   <span className={`text-[10px] uppercase tracking-wider font-bold text-white block text-center truncate`}>
                     {item.label}
                   </span>
@@ -119,8 +133,17 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
                   }
                 `}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200" />
-                <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-[2px] p-2">
+                <div className="absolute inset-0">
+                  <Image
+                    src={item.image}
+                    alt={item.label}
+                    fill
+                    className="object-cover"
+                    unoptimized={true}
+                  />
+                  <div className={`absolute inset-0 bg-black/10 transition-opacity ${isSelected ? "opacity-0" : "opacity-0 group-hover:opacity-20"}`} />
+                </div>
+                <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] p-2">
                   <span className={`text-[10px] uppercase tracking-wider font-bold text-white block text-center truncate`}>
                     {item.label}
                   </span>
