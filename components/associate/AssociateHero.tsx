@@ -144,7 +144,7 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
           {/* RIGHT 30% - CTA Section */}
           <div className="lg:col-span-1 flex flex-col h-full">
             <div className="flex-shrink-0 bg-white border rounded-xl p-6 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.25em] text-[#1E4ED8] mb-4 font-bold">
+              <p className="text-xs uppercase tracking-[0.25em] text-[#444] mb-4 font-bold">
                 Global Overview
               </p>
 
@@ -174,8 +174,8 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
 
               <Link
                 href={`/propose-project?fast=${fastCode}`}
-                className="block w-full text-center text-base font-medium text-white bg-[#1E4ED8] hover:bg-[#1d4ed8] rounded-lg px-6 py-4 transition-colors"
-                style={{ backgroundColor: '#1E4ED8', color: '#ffffff' }}
+                className="block w-full text-center text-base font-medium text-white bg-black hover:bg-[#2b2b2b] rounded-lg px-6 py-4 transition-colors"
+                style={{ backgroundColor: '#000000', color: '#ffffff' }}
               >
                 {config.ctaText || "Propose a Project"}
               </Link>
@@ -190,19 +190,19 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
                     placeholder="Describe your project..."
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-[#1E4ED8]"
+                    className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-black"
                     rows={3}
                   />
                   <input
                     placeholder="Location / Address"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-[#1E4ED8]"
+                    className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-black"
                   />
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full py-2 bg-[#1E4ED8] text-white rounded-lg text-sm font-medium hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+                    className="w-full py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-[#2b2b2b] transition-colors disabled:opacity-50"
                   >
                     {submitting ? "Submitting..." : "Submit"}
                   </button>

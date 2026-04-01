@@ -255,7 +255,7 @@ export default function CartDrawer() {
           {items.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-[#6e6e73] mb-4">Your cart is empty</p>
-              <Link href="/catalog" onClick={closeCart} className="text-[#0070ba] hover:underline">
+              <Link href="/catalog" onClick={closeCart} className="text-black hover:underline">
                 Browse Products
               </Link>
             </div>
@@ -326,7 +326,7 @@ export default function CartDrawer() {
                       value={promoInput}
                       onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
                       placeholder="Promo code"
-                      className="flex-1 px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white text-sm outline-none transition-all duration-200 focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/20"
+                      className="flex-1 px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white text-sm outline-none transition-all duration-200 focus:border-black focus:ring-2 focus:ring-black/20"
                     />
                     <button
                       onClick={handleApplyPromo}
@@ -412,8 +412,8 @@ export default function CartDrawer() {
                 onClick={() => setPaymentType("full")}
                 className={`w-full p-3 rounded-xl border transition-all duration-300 ${
                   paymentType === "full"
-                    ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white border-transparent shadow-md"
-                    : "bg-white border-[rgba(0,0,0,0.08)] text-[#1d1d1f] hover:border-[#0070ba]/30"
+                    ? "bg-black text-white border-transparent shadow-md"
+                    : "bg-white border-[rgba(0,0,0,0.08)] text-[#1d1d1f] hover:border-black/30"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -429,8 +429,8 @@ export default function CartDrawer() {
                 onClick={() => setPaymentType("partial")}
                 className={`w-full p-3 rounded-xl border transition-all duration-300 ${
                   paymentType === "partial"
-                    ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white border-transparent shadow-md"
-                    : "bg-white border-[rgba(0,0,0,0.08)] text-[#1d1d1f] hover:border-[#0070ba]/30"
+                    ? "bg-black text-white border-transparent shadow-md"
+                    : "bg-white border-[rgba(0,0,0,0.08)] text-[#1d1d1f] hover:border-black/30"
                 }`}
               >
                 <div className="flex items-center justify-between">
@@ -453,7 +453,7 @@ export default function CartDrawer() {
               <div className="space-y-3">
                 <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
                   <PayPalButtons
-                    style={{ layout: "horizontal", color: "blue", shape: "rect" }}
+                    style={{ layout: "horizontal", color: "black", shape: "rect" }}
                     createOrder={(data, actions) => {
                       return actions.order.create({
                         intent: "CAPTURE",

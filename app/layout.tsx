@@ -28,7 +28,9 @@ export const metadata: Metadata = {
   keywords:
     "modular homes,cottages,prefab homes,tiny homes,affordable housing,lease to own homes",
   icons: {
-    icon: "/favicon.png",
+    icon: "/favicon-v2.ico",
+    shortcut: "/favicon-v2.ico",
+    apple: "/favicon-v2.png",
   },
 };
 
@@ -46,7 +48,7 @@ export default function RootLayout({
           <CartProvider>
             <AssociateProvider>
               <Header />
-              <main className="flex-grow page-wrapper container-main md:ml-[220px] mt-16 px-4 md:px-6">{children}</main>
+              <main className="flex-grow page-wrapper container-main mt-20 py-8 w-full">{children}</main>
               <Footer />
               <FloatingContactButton />
               <CartDrawer />

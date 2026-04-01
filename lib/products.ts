@@ -71,10 +71,10 @@ export { ADDONS as addons, getAddonsForProduct, getAddonById, addonsRecord } fro
 import { PRODUCT_IMAGE_MAP } from "@/lib/productImages";
 
 const IMAGES = {
-  'glasshouse': '/images/glasshouse-200.jpeg',
-  'glasshouse-200': '/images/glasshouse-200.jpeg',
-  'talishouse-420': '/images/talishouse-420.png',
-  'talishouse-residential': '/images/talishouse-850.png',
+  'glasshouse': '/images/glasshouse/hero.png',
+  'glasshouse-200': '/images/glasshouse/models/200.png',
+  'talishouse-420': '/images/talishouse-420.svg',
+  'talishouse-residential': '/images/talishouse/residential/hero.png',
   'talistowns': '/images/talistowns.jpg',
 };
 

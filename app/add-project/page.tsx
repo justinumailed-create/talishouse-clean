@@ -161,7 +161,7 @@ export default function AddProjectPage() {
               )}
 
               <div className="space-y-4 pt-4 acknowledgement-container w-full max-w-full overflow-hidden">
-                <label className="flex items-start gap-3 cursor-pointer acknowledgement w-full">
+                <label className="flex items-start gap-3 cursor-pointer acknowledgement w-full max-w-full">
                   <input
                     type="checkbox"
                     checked={deliveryAcknowledgement}
@@ -178,7 +178,7 @@ export default function AddProjectPage() {
                   </span>
                 </label>
 
-                <label className="flex items-start gap-3 cursor-pointer acknowledgement w-full">
+                <label className="flex items-start gap-3 cursor-pointer acknowledgement w-full max-w-full">
                   <input
                     type="checkbox"
                     checked={smsConsent}

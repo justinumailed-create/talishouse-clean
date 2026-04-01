@@ -166,7 +166,7 @@ export default function CheckoutPage() {
     <div className="min-h-[70vh] bg-[#f5f5f7] py-12">
       <div className="container-main">
         <div className="flex items-center justify-between mb-8">
-          <Link href={ROUTES.CATALOG} className="text-sm text-[#6e6e73] hover:text-[#0070ba] transition-colors">
+          <Link href={ROUTES.CATALOG} className="text-sm text-[#6e6e73] hover:text-black transition-colors">
             ← Continue Shopping
           </Link>
           <h1 className="text-2xl font-semibold text-[#1d1d1f] tracking-tight">Checkout</h1>
@@ -178,7 +178,7 @@ export default function CheckoutPage() {
           <div className="w-full">
             <div className="bg-white rounded-2xl border border-[rgba(0,0,0,0.06)] shadow-sm p-6 space-y-6">
               <div className="flex items-center gap-4 pb-6 border-b border-[rgba(0,0,0,0.06)]">
-                <div className="w-12 h-12 rounded-full bg-[linear-gradient(135deg,#0070ba,#1546a0)] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
@@ -205,8 +205,8 @@ export default function CheckoutPage() {
                 </li>
               </ul>
 
-              <div className="bg-[rgba(0,112,186,0.06)] rounded-xl p-4">
-                <p className="text-sm text-[#0070ba]">
+              <div className="bg-gray-100 rounded-xl p-4">
+                <p className="text-sm text-black">
                   <span className="font-semibold">Note:</span> Additional features like platforms, roofs, patios, and verandas may incur extra shipping or cost.
                 </p>
               </div>
@@ -214,7 +214,7 @@ export default function CheckoutPage() {
               <div className="pt-4 border-t border-[rgba(0,0,0,0.06)]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center">
-                    <svg className="w-5 h-5 text-[#0070ba]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                   </div>
@@ -297,7 +297,7 @@ export default function CheckoutPage() {
                       value={promoInput}
                       onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
                       placeholder="Enter code"
-                      className="flex-1 px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white text-sm outline-none transition-all duration-200 focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/20"
+                      className="flex-1 px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white text-sm outline-none transition-all duration-200 focus:border-black focus:ring-2 focus:ring-black/20"
                     />
                     <button
                       onClick={handleApplyPromo}
@@ -388,8 +388,8 @@ export default function CheckoutPage() {
                   onClick={() => setPaymentType("full")}
                   className={`w-full p-4 rounded-xl border transition-all duration-300 ${
                     paymentType === "full"
-                      ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white border-transparent shadow-md"
-                      : "bg-white border-[rgba(0,0,0,0.08)] text-[#1d1d1f] hover:border-[#0070ba]/30"
+                      ? "bg-black text-white border-transparent shadow-md"
+                      : "bg-white border-[rgba(0,0,0,0.08)] text-[#1d1d1f] hover:border-black/30"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -405,8 +405,8 @@ export default function CheckoutPage() {
                   onClick={() => setPaymentType("partial")}
                   className={`w-full p-4 rounded-xl border transition-all duration-300 ${
                     paymentType === "partial"
-                      ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white border-transparent shadow-md"
-                      : "bg-white border-[rgba(0,0,0,0.08)] text-[#1d1d1f] hover:border-[#0070ba]/30"
+                      ? "bg-black text-white border-transparent shadow-md"
+                      : "bg-white border-[rgba(0,0,0,0.08)] text-[#1d1d1f] hover:border-black/30"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -423,7 +423,7 @@ export default function CheckoutPage() {
             <div className="bg-white rounded-2xl border border-[rgba(0,0,0,0.06)] shadow-sm p-6">
               <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: "CAD" }}>
                 <PayPalButtons
-                  style={{ layout: "horizontal", color: "blue", shape: "rect", label: "pay" }}
+                  style={{ layout: "horizontal", color: "black", shape: "rect", label: "pay" }}
                   createOrder={(data, actions) => {
                     return actions.order.create({
                       intent: "CAPTURE",

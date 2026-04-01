@@ -64,19 +64,18 @@ function OptionCard({
   showLabel?: boolean;
 }) {
   if (!image) {
-    console.error(`Flooring image not found: ${image || 'undefined'}`);
     return (
       <button
         onClick={onClick}
         className={`
-          relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200
+          relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
           ${isSelected 
-            ? "border-[#0070ba] ring-2 ring-[#0070ba]/30 scale-[1.02]" 
-            : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
+            ? "border-black ring-2 ring-black/10" 
+            : "border-gray-100 hover:border-gray-300"
           }
         `}
       >
-        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+        <div className="w-full h-full bg-gray-50 flex items-center justify-center">
           <span className="text-gray-400 text-xs">No image</span>
         </div>
       </button>
@@ -87,10 +86,10 @@ function OptionCard({
     <button
       onClick={onClick}
       className={`
-        relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200
+        relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 group
         ${isSelected 
-          ? "border-[#0070ba] ring-2 ring-[#0070ba]/30 scale-[1.02]" 
-          : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
+          ? "border-black ring-2 ring-black/10 shadow-md" 
+          : "border-gray-100 hover:border-gray-300"
         }
       `}
     >
@@ -98,18 +97,18 @@ function OptionCard({
         src={image}
         alt={alt}
         fill
-        className="object-cover"
+        className="object-cover transition-transform duration-300 group-hover:scale-110"
         unoptimized={true}
       />
       {showLabel && (
-        <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-sm p-2">
-          <span className="text-[10px] uppercase tracking-wider font-bold text-white block text-center">
+        <div className="absolute inset-x-0 bottom-0 p-2 text-center">
+          <span className="text-[10px] uppercase tracking-wider font-bold text-gray-900 block bg-white/80 backdrop-blur-sm rounded py-1 px-2">
             {alt}
           </span>
         </div>
       )}
       {isSelected && (
-        <div className="absolute top-2 right-2 w-6 h-6 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+        <div className="absolute top-2 right-2 w-6 h-6 bg-black rounded-full flex items-center justify-center shadow-lg border-2 border-white">
           <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
@@ -132,19 +131,19 @@ function ColorSwatch({
     <button
       onClick={onClick}
       className={`
-        relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200
+        relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300
         ${isSelected 
-          ? "border-[#0070ba] ring-2 ring-[#0070ba]/30 scale-[1.02]" 
-          : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
+          ? "border-black ring-2 ring-black/10 shadow-md" 
+          : "border-gray-100 hover:border-gray-300"
         }
       `}
     >
       <div 
-        className="w-full h-full"
+        className="w-full h-full transition-transform duration-300 hover:scale-110"
         style={{ backgroundColor: color }}
       />
       {isSelected && (
-        <div className="absolute top-2 right-2 w-6 h-6 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+        <div className="absolute top-2 right-2 w-6 h-6 bg-black rounded-full flex items-center justify-center shadow-lg border-2 border-white">
           <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
           </svg>
@@ -157,20 +156,28 @@ function ColorSwatch({
 export function ProductConfigurator({ selectedOptions, onOptionChange }: ProductConfiguratorProps) {
   const [sidingCode, setSidingCode] = useState("");
 
+  const handleToggle = (category: string, option: string) => {
+    if (selectedOptions[category] === option) {
+      onOptionChange(category, "");
+    } else {
+      onOptionChange(category, option);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* ROOFING - SEGMENTED CONTROL */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-900">Roofing, Gutter & Windows</p>
-        <div className="flex rounded-xl border border-gray-200 overflow-hidden">
+      <div className="space-y-3">
+        <p className="text-[15px] font-semibold text-gray-900">Roofing, Gutter & Windows</p>
+        <div className="flex p-1 bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
           {roofingOptions.map((option) => (
             <button
               key={option}
-              onClick={() => onOptionChange("Roofing, Gutter & Windows Colour", option)}
-              className={`flex-1 py-3 text-sm font-medium transition duration-200 ${
+              onClick={() => handleToggle("Roofing, Gutter & Windows Colour", option)}
+              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${
                 selectedOptions["Roofing, Gutter & Windows Colour"] === option
-                  ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white"
-                  : "bg-white text-gray-600 hover:bg-gray-50"
+                  ? "bg-black text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-900"
               }`}
             >
               {option}
@@ -180,8 +187,8 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
       </div>
 
       {/* KITCHEN - VISUAL IMAGE GRID */}
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-gray-900">Kitchen Style</p>
+      <div className="space-y-4">
+        <p className="text-[15px] font-semibold text-gray-900">Kitchen Style</p>
         <div className="grid grid-cols-3 gap-3">
           {kitchenOptions.map((option) => (
             <OptionCard
@@ -189,15 +196,15 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
               image={option.image}
               alt={option.label}
               isSelected={selectedOptions["Kitchen Style"] === option.id}
-              onClick={() => onOptionChange("Kitchen Style", option.id)}
+              onClick={() => handleToggle("Kitchen Style", option.id)}
             />
           ))}
         </div>
       </div>
 
       {/* BATH - VISUAL IMAGE GRID */}
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-gray-900">Bath Style</p>
+      <div className="space-y-4">
+        <p className="text-[15px] font-semibold text-gray-900">Bath Style</p>
         <div className="grid grid-cols-3 gap-3">
           {bathOptions.map((option) => (
             <OptionCard
@@ -205,15 +212,15 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
               image={option.image}
               alt={option.label}
               isSelected={selectedOptions["Bath Style"] === option.id}
-              onClick={() => onOptionChange("Bath Style", option.id)}
+              onClick={() => handleToggle("Bath Style", option.id)}
             />
           ))}
         </div>
       </div>
 
       {/* FLOORING - MATERIAL SECTION */}
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-gray-900">Flooring Material</p>
+      <div className="space-y-4">
+        <p className="text-[15px] font-semibold text-gray-900">Flooring Material</p>
         <div className="grid grid-cols-2 gap-3">
           {flooringMaterials.map((material) => (
             <OptionCard
@@ -221,7 +228,7 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
               image={material.image}
               alt={material.label}
               isSelected={selectedOptions["Flooring Material"] === material.id}
-              onClick={() => onOptionChange("Flooring Material", material.id)}
+              onClick={() => handleToggle("Flooring Material", material.id)}
               showLabel={true}
             />
           ))}
@@ -229,36 +236,36 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
       </div>
 
       {/* FLOORING - COLOUR SECTION (VISUAL ONLY) */}
-      <div className="space-y-3">
-        <p className="text-sm font-medium text-gray-900">Flooring Style</p>
-        <div className="grid grid-cols-3 gap-3">
+      <div className="space-y-4">
+        <p className="text-[15px] font-semibold text-gray-900">Flooring Style</p>
+        <div className="grid grid-cols-5 gap-2">
           {flooringColors.map((color) => (
             <ColorSwatch
               key={color.id}
               color={color.color}
               isSelected={selectedOptions["Flooring Colour"] === color.id}
-              onClick={() => onOptionChange("Flooring Colour", color.id)}
+              onClick={() => handleToggle("Flooring Colour", color.id)}
             />
           ))}
         </div>
       </div>
 
       {/* SIDING - INPUT */}
-      <div className="space-y-2">
-        <p className="text-sm font-medium text-gray-900">Siding Colour Code</p>
+      <div className="space-y-3">
+        <p className="text-[15px] font-semibold text-gray-900">Siding Colour Code</p>
         <input
           type="text"
-          placeholder="Enter siding colour code"
+          placeholder="Enter siding colour code (e.g. #717171)"
           value={sidingCode}
           onChange={(e) => {
             setSidingCode(e.target.value);
             onOptionChange("Siding Options", e.target.value);
           }}
           className="
-            w-full px-4 py-3 rounded-xl border border-gray-200
-            focus:ring-2 focus:ring-[#0070ba]/20 focus:border-[#0070ba] outline-none
+            w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50
+            focus:ring-2 focus:ring-black/5 focus:border-black outline-none
             text-sm text-gray-700 placeholder:text-gray-400
-            transition duration-200
+            transition-all duration-200
           "
         />
       </div>

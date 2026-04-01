@@ -161,8 +161,8 @@ export default function LeaseToOwnPage() {
                 onClick={() => handleProductSelect(product.id)}
                 className={`w-full p-6 rounded-2xl transition-all min-h-[48px] text-left border-2 ${
                   selectedProduct === product.id
-                    ? "bg-[#1E4ED8] text-white border-[#1E4ED8]"
-                    : "border-gray-200 hover:bg-gray-200 hover:border-gray-400 bg-gray-100 text-black"
+                    ? "bg-black text-white border-black shadow-lg"
+                    : "border-gray-100 hover:border-gray-300 bg-gray-50 text-black"
                 }`}
               >
                 <h3 className={`font-bold ${selectedProduct === product.id ? "text-white" : "text-black"}`}>{product.name}</h3>
@@ -195,8 +195,8 @@ export default function LeaseToOwnPage() {
                     onClick={() => handleDurationSelect(duration)}
                     className={`w-full min-h-[48px] p-4 rounded-xl border-2 text-center transition-all ${
                       selectedDuration === duration
-                        ? "bg-[#1E4ED8] text-white border-[#1E4ED8]"
-                        : "border-gray-200 hover:bg-gray-200 hover:border-gray-400 bg-gray-100 text-black"
+                        ? "bg-black text-white border-black shadow-md"
+                        : "border-gray-100 hover:border-gray-300 bg-gray-50 text-black"
                     }`}
                   >
                     <p className="text-2xl font-bold">{duration}</p>

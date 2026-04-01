@@ -5,8 +5,8 @@ export const PRODUCT_IMAGE_MAP: Record<string, string> = {
   'glasshouse-200': '/images/glasshouse/models/200.png',
   
   // Talishouse Recreational
-  'recreational': '/images/talishouse/recreational/hero.jpg',
-  'talishouse-420': '/images/talishouse/recreational/models/420.png',
+  'recreational': '/images/talishouse-420.svg',
+  'talishouse-420': '/images/talishouse-420.svg',
   'talishouse-800': '/images/talishouse/recreational/models/800.png',
   
   // Talishouse Residential

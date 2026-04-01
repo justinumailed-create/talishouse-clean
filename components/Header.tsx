@@ -12,102 +12,69 @@ export default function Header() {
   const { openCart, itemCount } = useCart();
 
   return (
-    <>
-      {/* LEFT SIDEBAR - HIDDEN ON MOBILE */}
-      <aside className="hidden md:flex fixed left-0 top-0 w-[220px] h-screen bg-[#f5f5f5] border-r border-[#e5e5e5] z-50 flex flex-col">
-        {/* LOGO */}
-        <div className="p-5 border-b border-[#e5e5e5]">
-          <Link href={ROUTES.HOME}>
+    <header className="fixed top-0 left-0 right-0 h-20 bg-white/95 backdrop-blur-md border-b border-gray-100 z-50 transition-all duration-300">
+      <div className="container-main h-full flex items-center justify-between">
+        {/* LOGO (LEFT) */}
+        <div className="flex-shrink-0">
+          <Link href={ROUTES.HOME} className="flex items-center">
             <Image
               src="/logo.png"
               alt="TALISHOUSE logo"
-              width={40}
-              height={40}
+              width={42}
+              height={42}
               className="w-auto h-10 object-contain"
               priority
             />
           </Link>
         </div>
 
-        {/* NAVIGATION */}
-        <nav className="flex-1 py-6 px-4 flex flex-col gap-4">
-          <Link
-            href={ROUTES.CATALOG}
-            className={`text-[14px] font-medium transition-all py-2 uppercase tracking-[0.08em] ${
-              pathname.startsWith("/catalog")
-                ? "text-black"
-                : "text-[#2b2b2b] hover:text-black"
-            }`}
-          >
-            Catalogue
-          </Link>
-          <Link
-            href={ROUTES.LEASE_TO_OWN}
-            className={`text-[14px] font-medium transition-all py-2 uppercase tracking-[0.08em] ${
-              pathname.startsWith("/lease-to-own")
-                ? "text-black"
-                : "text-[#2b2b2b] hover:text-black"
-            }`}
-          >
-            Lease-To-Own
-          </Link>
-          <GatedLink
-            href={ROUTES.BUSINESS_OFFICE}
-            className={`text-[14px] font-medium transition-all py-2 uppercase tracking-[0.08em] ${
-              pathname.startsWith("/business-office")
-                ? "text-black"
-                : "text-[#2b2b2b] hover:text-black"
-            }`}
-          >
-            Business Office
-          </GatedLink>
-          <Link
-            href={ROUTES.ADD_PROJECT}
-            className={`text-[14px] font-medium transition-all py-2 uppercase tracking-[0.08em] ${
-              pathname.startsWith("/add-project")
-                ? "text-black"
-                : "text-[#2b2b2b] hover:text-black"
-            }`}
-          >
-            Add A Project
-          </Link>
-        </nav>
+        {/* NAVIGATION & CART (RIGHT) */}
+        <div className="flex items-center gap-8">
+          <nav className="hidden md:flex items-center gap-8">
+            <Link
+              href={ROUTES.HOME}
+              className={`text-[15px] font-medium transition-colors hover:text-black ${
+                pathname === "/" ? "text-black" : "text-[#444]"
+              }`}
+            >
+              Home
+            </Link>
+            <Link
+              href={ROUTES.CATALOG}
+              className={`text-[15px] font-medium transition-colors hover:text-black ${
+                pathname.startsWith("/catalog") || pathname.startsWith("/catalogue")
+                  ? "text-black"
+                  : "text-[#444]"
+              }`}
+            >
+              Catalogue
+            </Link>
+            <GatedLink
+              href={ROUTES.BUSINESS_OFFICE}
+              className={`text-[15px] font-medium transition-colors hover:text-black ${
+                pathname.startsWith("/business-office")
+                  ? "text-black"
+                  : "text-[#444]"
+              }`}
+            >
+              Business Office
+            </GatedLink>
+          </nav>
 
-        {/* CART BUTTON */}
-        <div className="p-4 border-t border-[#e5e5e5]">
+          {/* CART (FAR RIGHT) */}
           <button
             onClick={openCart}
-            className="w-full flex items-center justify-between py-3 px-4 bg-white border border-[#e5e5e5] rounded-lg hover:border-gray-400 transition-all"
+            className="group flex items-center gap-2 py-2 px-4 rounded-full border border-gray-200 hover:border-gray-900 transition-all duration-200"
           >
-            <span className="text-[15px] font-medium text-[#2b2b2b]">Cart</span>
+            <span className="text-[14px] font-medium text-[#444] group-hover:text-black">Cart</span>
             {itemCount > 0 && (
-              <span className="bg-[#0071e3] text-white text-[12px] font-semibold px-2 py-0.5 rounded-full">
+              <span className="flex items-center justify-center min-w-[20px] h-[20px] bg-black text-white text-[11px] font-bold rounded-full px-1">
                 {itemCount}
               </span>
             )}
           </button>
         </div>
-      </aside>
-
-      {/* TOP HEADER CONTAINER - ADJUSTED FOR MOBILE */}
-      <header className="fixed top-0 right-0 left-0 md:left-[220px] h-16 bg-white border-b border-[#e5e5e5] z-40">
-        <div className="header-right h-full flex items-center justify-between md:justify-end px-6">
-          {/* MOBILE LOGO */}
-          <div className="md:hidden">
-            <Link href={ROUTES.HOME}>
-              <Image
-                src="/logo.png"
-                alt="TALISHOUSE logo"
-                width={32}
-                height={32}
-                className="w-auto h-8 object-contain"
-                priority
-              />
-            </Link>
-          </div>
-          {/* Empty - for future social media icons */}
-        </div>
-      </header>
-    </>
+      </div>
+    </header>
   );
 }

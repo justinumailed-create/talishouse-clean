@@ -70,7 +70,7 @@ export default function FloatingContactButton({ fastCode: propFastCode }: Floati
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 left-4 right-4 md:bottom-6 md:right-6 md:left-auto z-50 bg-[#1E4ED8] text-white px-6 py-4 md:py-3 rounded-xl md:rounded-full shadow-lg font-bold md:font-medium text-sm hover:bg-[#1d4ed8] transition-colors"
+        className="fixed bottom-4 left-4 right-4 md:bottom-6 md:right-6 md:left-auto z-50 bg-black text-white px-6 py-4 md:py-3 rounded-xl md:rounded-full shadow-lg font-bold md:font-medium text-sm hover:bg-[#2b2b2b] transition-colors"
       >
         Contact Us
       </button>
@@ -131,7 +131,7 @@ export default function FloatingContactButton({ fastCode: propFastCode }: Floati
                   />
                   <button
                     type="submit"
-                    className="w-full bg-[#1E4ED8] text-white rounded-xl py-3 font-medium text-sm hover:bg-[#1d4ed8]"
+                    className="w-full bg-black text-white rounded-xl py-3 font-medium text-sm hover:bg-[#2b2b2b]"
                   >
                     Submit
                   </button>
@@ -150,7 +150,7 @@ export default function FloatingContactButton({ fastCode: propFastCode }: Floati
                 </p>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="mt-4 text-sm text-[#1E4ED8]"
+                  className="mt-4 text-sm text-black hover:underline"
                 >
                   Close
                 </button>

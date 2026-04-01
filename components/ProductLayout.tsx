@@ -55,43 +55,43 @@ export default function ProductLayout({
   const showImage = hasValidImage || dbImageUrl;
 
   return (
-    <div className="w-full py-10">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 w-full">
-        <div className="lg:col-span-2 flex flex-col gap-5 items-stretch">
-          <div className="w-full aspect-[16/9] bg-gray-100 relative overflow-hidden rounded-xl">
+    <div className="w-full py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-10 gap-12 w-full">
+        <div className="lg:col-span-7 flex flex-col gap-6 items-stretch">
+          <div className="w-full aspect-[16/9] bg-gray-50 relative overflow-hidden rounded-2xl border border-gray-100">
             {showImage ? (
               <Image
                 src={displayImage}
                 alt={productName}
                 fill
                 className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 60vw"
+                sizes="(max-width: 1024px) 100vw, 70vw"
                 priority
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                <span className="text-sm text-gray-500">Image coming soon</span>
+              <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                <span className="text-sm text-gray-400">Image coming soon</span>
               </div>
             )}
           </div>
 
-          <div className="p-6 bg-gray-50 rounded-xl">
-            <h2 className="text-lg font-bold mb-3">About {productName}</h2>
+          <div className="p-8 bg-white border border-gray-100 rounded-2xl shadow-sm">
+            <h2 className="text-xl font-bold mb-4 text-gray-900">About {productName}</h2>
             
             {familyDescription && (
-              <div className="product-family-description mb-6 text-sm text-gray-800 leading-relaxed font-medium">
+              <div className="product-family-description mb-6 text-sm text-gray-700 leading-relaxed font-medium">
                 {familyDescription}
               </div>
             )}
 
-            <p className="text-sm text-gray-600 whitespace-pre-line">
+            <p className="text-[15px] text-gray-600 whitespace-pre-line leading-relaxed">
               {aboutContent}
             </p>
           </div>
         </div>
 
-        <div className="lg:col-span-1 relative">
-          <div className="lg:sticky lg:top-20">
+        <div className="lg:col-span-3 relative">
+          <div className="lg:sticky lg:top-24">
             {children}
           </div>
         </div>

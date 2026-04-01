@@ -76,7 +76,7 @@ export default function CatalogPage() {
     <div className="bg-[#f5f5f7] min-h-screen">
       {/* SECTION 1: HERO */}
       <section className="bg-[#f5f5f7] py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="container-main text-center">
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
             Talishouse™ Product Catalog
           </h1>
@@ -88,19 +88,21 @@ export default function CatalogPage() {
 
       {/* SECTION 2: DESTINATION CHARGE */}
       <section className="py-10 px-4">
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl p-8 shadow-sm border border-[rgba(0,0,0,0.05)]">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">Destination Charge</h2>
-              <p className="text-gray-500 text-sm mt-1">
-                When paid it reserves spots in production and shipping queues.
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-semibold text-gray-900">$1,995</p>
-              <span className="inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                Required to start
-              </span>
+        <div className="container-main">
+          <div className="bg-white rounded-2xl p-8 shadow-sm border border-[rgba(0,0,0,0.05)]">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Destination Charge</h2>
+                <p className="text-gray-500 text-sm mt-1">
+                  When paid it reserves spots in production and shipping queues.
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-2xl font-semibold text-gray-900">$1,995</p>
+                <span className="inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                  Required to start
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -108,52 +110,54 @@ export default function CatalogPage() {
 
       {/* SECTION 3: PRODUCT CATEGORIES */}
       <section className="py-10 px-4">
-        <div className="max-w-4xl mx-auto">
-          {productCategories.map((category) => (
-            <Link
-              key={category.id}
-              href={category.href}
-              className="block bg-white rounded-2xl overflow-hidden border border-[rgba(0,0,0,0.06)] hover:shadow-md transition-all duration-300 hover:-translate-y-[2px] mb-8 last:mb-0"
-            >
-              <div className="flex flex-col md:flex-row">
-                <div className="md:w-1/2 aspect-[16/10] relative bg-gray-100">
-                  {getImage(category.id) ? (
-                    <Image
-                      src={getImage(category.id)}
-                      alt={category.name}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                      Image coming soon
+        <div className="container-main">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {productCategories.map((category) => (
+              <Link
+                key={category.id}
+                href={category.href}
+                className="block bg-white rounded-2xl overflow-hidden border border-[rgba(0,0,0,0.06)] hover:shadow-md transition-all duration-300 hover:-translate-y-[2px]"
+              >
+                <div className="flex flex-col h-full">
+                  <div className="aspect-[16/10] relative bg-gray-100">
+                    {getImage(category.id) ? (
+                      <Image
+                        src={getImage(category.id)}
+                        alt={category.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                        Image coming soon
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-8 flex flex-col flex-1">
+                    <div className="text-left">
+                      <h3 className="text-xl font-semibold text-gray-900">
+                        {category.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 font-medium mt-1">
+                        {category.subtitle}
+                      </p>
+                      <p className="text-sm text-gray-500 mt-3 leading-relaxed">
+                        {category.description}
+                      </p>
+                      <p className="text-2xl font-bold text-gray-900 mt-6">
+                        {category.price}
+                      </p>
                     </div>
-                  )}
-                </div>
-                <div className="md:w-1/2 p-6 flex flex-col justify-center">
-                  <div className="text-center md:text-left">
-                    <h3 className="text-xl font-semibold text-gray-900">
-                      {category.name}
-                    </h3>
-                    <p className="text-sm text-[#0070ba] font-medium mt-1">
-                      {category.subtitle}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-3">
-                      {category.description}
-                    </p>
-                    <p className="text-xl font-bold text-gray-900 mt-4">
-                      {category.price}
-                    </p>
-                  </div>
-                  <div className="mt-6">
-                    <span className="inline-block w-full py-2.5 rounded-xl text-sm font-medium text-center bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white transition">
-                      View Models
-                    </span>
+                    <div className="mt-8">
+                      <span className="inline-block w-full py-3.5 rounded-xl text-sm font-semibold text-center bg-black text-white transition hover:bg-gray-900">
+                        View Models
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -175,14 +179,14 @@ export default function CatalogPage() {
 
       {/* SECTION 5: PURCHASING OPTIONS */}
       <section className="py-10 px-4 pb-20">
-        <div className="max-w-4xl mx-auto">
+        <div className="container-main">
           <h2 className="text-lg font-medium text-gray-900 mb-6">Purchasing Options</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {purchasingOptions.map((option) => (
               <Link
                 key={option.id}
                 href={option.id === "lto" ? "/lease-to-own" : "/business-office"}
-                className="bg-white rounded-xl p-4 border border-gray-200 hover:border-[#0070ba] transition-colors"
+                className="bg-white rounded-xl p-4 border border-gray-100 hover:border-black transition-colors"
               >
                 <p className="font-semibold text-gray-900">{option.name}</p>
                 <p className="text-xs text-gray-500 mt-1">{option.desc}</p>

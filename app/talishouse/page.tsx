@@ -12,7 +12,7 @@ const CATEGORY_CONFIG = {
   recreational: {
     name: "Talishouse™ Recreational",
     slug: "420",
-    image: "/images/talishouse-420.png",
+    image: "/images/talishouse-420.svg",
     size: "talishouse-420",
     description: `Talishouse™ Recreational : The flexible modular home system:
 - 21' x 20' steel structures assembled in one day and move-in ready in one week.
@@ -24,7 +24,7 @@ const CATEGORY_CONFIG = {
   residential: {
     name: "Talishouse™ Residential",
     slug: "residential",
-    image: "/images/talishouse-850.png",
+    image: "/images/talishouse/residential/hero.png",
     size: "talishouse-residential",
     description: `Talishouse™ Residential : Scalable living solutions:
 - Multi-unit residential developments
@@ -130,7 +130,7 @@ function TalishouseContent() {
                 onClick={() => setSelectedModel(model)}
                 className={`p-3 rounded-lg border text-sm font-medium transition-all ${
                   selectedModel.id === model.id
-                    ? "border-[#0070ba] bg-[#0070ba]/10 text-[#0070ba]"
+                    ? "border-black bg-black text-white"
                     : "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
                 }`}
               >
@@ -164,8 +164,8 @@ function TalishouseContent() {
                     onClick={() => toggleAddon(addon.id)}
                     className={`w-full p-4 rounded-xl border text-sm font-medium transition duration-200 flex items-center justify-between hover:scale-[1.01] ${
                       selectedAddons[addon.id]
-                        ? "border-[#0070ba] bg-[#0070ba]/10"
-                        : "border-gray-200 bg-white hover:bg-gray-50"
+                        ? "border-black bg-gray-50 ring-1 ring-black/5"
+                        : "border-gray-100 bg-white hover:bg-gray-50"
                     }`}
                   >
                     <div>

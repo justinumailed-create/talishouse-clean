@@ -88,7 +88,7 @@ export default function Home() {
 
         <div className="lg:col-span-1 flex flex-col h-full">
           <div className="flex-shrink-0 bg-white border rounded-xl p-6 shadow-sm">
-            <p className="text-xs uppercase tracking-[0.25em] text-[#1E4ED8] mb-4 font-bold">
+            <p className="text-xs uppercase tracking-[0.25em] text-[#444] mb-4 font-bold">
               Global Overview
             </p>
 
@@ -118,8 +118,8 @@ export default function Home() {
 
             <Link
               href="/add-project"
-              className="block w-full text-center text-base font-medium text-white bg-[#1E4ED8] hover:bg-[#1d4ed8] rounded-lg px-6 py-4 transition-colors"
-              style={{ backgroundColor: '#1E4ED8', color: '#ffffff' }}
+              className="block w-full text-center text-base font-medium text-white bg-black hover:bg-[#2b2b2b] rounded-lg px-6 py-4 transition-colors"
+              style={{ backgroundColor: '#000000', color: '#ffffff' }}
             >
               Add A Project
             </Link>

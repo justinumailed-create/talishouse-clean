@@ -67,7 +67,7 @@ export default function ApplyPage() {
             
             <Link
               href="/business-office"
-              className="inline-block px-6 py-3 bg-[#1E4ED8] text-white rounded-xl font-medium hover:bg-[#1d4ed8]"
+              className="inline-block px-8 py-4 bg-black text-white rounded-xl font-semibold hover:bg-gray-900 transition-all"
             >
               Back to Business Office
             </Link>

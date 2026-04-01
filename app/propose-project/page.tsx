@@ -138,7 +138,7 @@ export default function ProposeProjectPage() {
                   name="date"
                   required
                   placeholder="DD / MM / YYYY"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
                 />
               </div>
               <div className="space-y-2">
@@ -181,7 +181,7 @@ export default function ProposeProjectPage() {
                   type="text"
                   name="firstName"
                   placeholder="First Name"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
                 />
               </div>
               <div className="space-y-1">
@@ -193,7 +193,7 @@ export default function ProposeProjectPage() {
                   type="text"
                   name="lastName"
                   placeholder="Last Name"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
                 />
               </div>
             </div>
@@ -204,7 +204,7 @@ export default function ProposeProjectPage() {
                 <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
                   Mobile Phone <span className="text-gray-400">*</span>
                 </label>
-                <div className="flex rounded-xl border border-gray-200 overflow-hidden focus-within:border-[#0070ba] focus-within:ring-2 focus-within:ring-[#0070ba]/10">
+                <div className="flex rounded-xl border border-gray-200 overflow-hidden focus-within:border-black focus-within:ring-2 focus-within:ring-black/10">
                   <span className="flex items-center px-3 bg-gray-50 text-sm text-gray-500 border-r">+1</span>
                   <input
                     required
@@ -224,7 +224,7 @@ export default function ProposeProjectPage() {
                   type="email"
                   name="email"
                   placeholder="email@example.com"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10"
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
                 />
               </div>
             </div>
@@ -240,7 +240,7 @@ export default function ProposeProjectPage() {
                 name="address"
                 required
                 placeholder="Street Address"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
               />
             </div>
 
@@ -252,7 +252,7 @@ export default function ProposeProjectPage() {
                 type="text"
                 name="geoLocation"
                 placeholder="Latitude / Longitude"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
               />
             </div>
 
@@ -265,7 +265,7 @@ export default function ProposeProjectPage() {
                 value={selectedSize}
                 onChange={(e) => setSelectedSize(e.target.value)}
                 required
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/10 bg-white"
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10 bg-white"
               >
                 <option value="">Select Size</option>
                 {sizes.map((size) => (
