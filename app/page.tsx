@@ -5,6 +5,8 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { useAssociate } from "@/context/AssociateContext";
 
+export const revalidate = 0;
+
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -113,6 +115,9 @@ export default function Home() {
               <li className="flex items-start text-base font-medium text-gray-800">
                 <span className="mr-3 text-gray-900 font-bold">•</span>
                 <span>Lease-To-Own terms available, OAC</span>
+              </li>
+              <li className="flex items-start text-lg font-bold text-gray-900 mt-4 pt-4 border-t border-gray-200">
+                Just add ambition
               </li>
             </ul>
 

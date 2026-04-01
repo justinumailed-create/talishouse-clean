@@ -103,6 +103,14 @@ export default function FastCodeGate() {
           >
             {loading ? "Verifying..." : "Enter Dashboard"}
           </button>
+
+          <a
+            href="/add-project"
+            id="obtain-fast-code"
+            className="block w-full py-3 px-4 text-center rounded-xl bg-[#f5f5f7] border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-100 hover:border-gray-300 transition-all"
+          >
+            Add A Project
+          </a>
         </form>
 
         <div className="mt-8 text-center">

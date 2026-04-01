@@ -67,7 +67,7 @@ export default function AddProjectPage() {
       <div className="mx-auto max-w-md">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
-            ADD YOUR PROJECT
+            ADD A PROJECT
           </h1>
         </div>
 
@@ -130,9 +130,30 @@ export default function AddProjectPage() {
                 />
               </label>
 
+              <label className="block">
+                <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
+                  Request Preferred FAST Code
+                </span>
+                <input
+                  type="text"
+                  name="preferredFastCode"
+                  placeholder="Enter preferred FAST code (optional)"
+                  className="w-full rounded-2xl border border-gray-200 px-4 py-4 text-sm text-gray-900 outline-none transition focus:border-black"
+                />
+              </label>
+
               {error && (
                 <p className="text-sm text-red-600 text-center">{error}</p>
               )}
+
+              <div className="space-y-3 pt-4">
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  I acknowledge and accept that not every location will be suitable for delivery right to a building site. I understand that pricing is to the nearest suitable location at our sole discretion.
+                </p>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  I agree to receive promotional messages sent via an autodialer - 4 Msgs/Month. Msg & Data Rates may apply. Text STOP to opt out anytime. Text Help for more information. Agreement to this feature is not a condition of purchase. I also agree to the Terms of Service and Privacy Policy of Talishouse Homes & Cottages.
+                </p>
+              </div>
 
               <button
                 type="submit"

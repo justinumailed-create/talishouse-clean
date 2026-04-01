@@ -5,6 +5,8 @@ import Image from "next/image";
 import { getProductImage } from "@/lib/productImages";
 import { useEffect, useState } from "react";
 
+export const revalidate = 0;
+
 interface ProductImages {
   [key: string]: string;
 }
@@ -79,7 +81,7 @@ export default function CatalogPage() {
   const [productImages, setProductImages] = useState<ProductImages>({});
 
   useEffect(() => {
-    fetch("/api/product-images")
+    fetch("/api/product-images", { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => setProductImages(data || {}))
       .catch((err) => console.error("Error fetching product images:", err));
@@ -356,9 +358,14 @@ export default function CatalogPage() {
       <section className="py-10 px-4">
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-lg font-medium text-gray-900 mb-3">Site Requirements</h2>
-          <p className="text-sm text-gray-500 leading-relaxed">
-            All units require a level foundation, electrical connection (200A service recommended), 
-            and access to municipal water/sewage. Professional installation available through our partner network.
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Typically site preparation includes a driveway, building site, power hook up, water and disposal systems. Optionally, off grid and office systems are available.
+          </p>
+          <p className="text-sm text-gray-600 leading-relaxed mt-3">
+            Mobile installations may negate the need for Building Permits in many jurisdictions.
+          </p>
+          <p className="text-sm text-gray-600 leading-relaxed mt-3">
+            Professional installation is available through our partner network.
           </p>
         </div>
       </section>

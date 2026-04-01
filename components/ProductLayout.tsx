@@ -34,7 +34,7 @@ export default function ProductLayout({
 
   useEffect(() => {
     if (productSize) {
-      fetch(`/api/product-images`)
+      fetch(`/api/product-images`, { cache: 'no-store' })
         .then((res) => res.json())
         .then((images) => {
           if (images[productSize]) {
