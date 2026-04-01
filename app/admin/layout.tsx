@@ -17,7 +17,7 @@ const adminNavItems = [
   { href: "/admin/pricing", label: "Pricing", superAdmin: true },
 ];
 
-function AdminSidebar({ role, isOpen, onClose }: { role: string; isOpen: boolean; onClose: () => void }) {
+function AdminSidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname();
   const { logout, fastCode } = useAuth();
   const superAdmin = fastCode === "ADMIN123";
@@ -34,14 +34,21 @@ function AdminSidebar({ role, isOpen, onClose }: { role: string; isOpen: boolean
 
   return (
     <>
+      {/* MOBILE OVERLAY */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/30 z-40 lg:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-200"
           onClick={onClose}
-          style={{ marginTop: '0px' }}
         />
       )}
-      <div className={`w-56 bg-white border-r border-[#e5e5e5] flex flex-col h-[calc(100vh-0px)] sticky top-0 fixed lg:static inset-y-0 left-0 z-50 transform transition-transform duration-200 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+      
+      {/* SIDEBAR */}
+      <aside className={`
+        fixed lg:static inset-y-0 left-0 z-50
+        w-64 bg-white border-r border-[#e5e5e5] flex flex-col h-full
+        transform transition-transform duration-200 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
         <div className="p-6 border-b border-[#e5e5e5] flex items-center justify-between">
           <div>
             <h1 className="text-base font-semibold tracking-tight">Talishouse</h1>
@@ -100,7 +107,7 @@ function AdminSidebar({ role, isOpen, onClose }: { role: string; isOpen: boolean
             Logout
           </button>
         </div>
-      </div>
+      </aside>
     </>
   );
 }
@@ -110,7 +117,7 @@ export default function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { authorized, role, loading } = useAuth();
+  const { authorized, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   if (loading || authorized === null) return null;
@@ -120,15 +127,14 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-white">
+    <div className="flex min-h-screen bg-white overflow-x-hidden">
       <AdminSidebar 
-        role={role || "associate"} 
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
       
-      <div className="flex-1 flex flex-col">
-        <div className="lg:hidden flex items-center gap-4 p-4 pb-3 bg-white border-b border-[#e5e5e5] sticky top-0 z-30">
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="lg:hidden flex items-center gap-4 p-4 bg-white border-b border-[#e5e5e5] sticky top-0 z-30">
           <button
             onClick={() => setSidebarOpen(true)}
             className="p-2 text-gray-600 hover:text-gray-900 -ml-2"
@@ -138,10 +144,10 @@ export default function AdminLayout({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="text-sm font-medium text-gray-900">Admin Menu</span>
-        </div>
+          <span className="text-sm font-medium text-gray-900">Admin Console</span>
+        </header>
 
-        <main className="flex-1 bg-[#f5f5f7] p-4 lg:p-8 overflow-auto">
+        <main className="flex-1 bg-[#f5f5f7] p-4 lg:p-8 overflow-y-auto pb-[120px]">
           <div className="max-w-5xl mx-auto">
             {children}
           </div>
