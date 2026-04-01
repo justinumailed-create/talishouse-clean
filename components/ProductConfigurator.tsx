@@ -9,21 +9,21 @@ const roofingOptions = [
 ];
 
 const kitchenOptions = [
-  { id: "KC01", label: "Bright White", image: "/images/glasshouse-200.jpeg" },
-  { id: "KC02", label: "Classic White", image: "/images/talishouse-420.png" },
-  { id: "KC03", label: "Modern White", image: "/images/talishouse-850.png" },
-  { id: "KC04", label: "Warm Wood", image: "/images/talistowns.jpg" },
-  { id: "KC05", label: "Dark Modern", image: "/images/glasshouse-200.jpeg" },
-  { id: "KC06", label: "Minimalist", image: "/images/talishouse-420.png" },
+  { id: "KC01", label: "Bright White", image: "/images/kitchen/kc01.jpg" },
+  { id: "KC02", label: "Classic White", image: "/images/kitchen/kc02.jpg" },
+  { id: "KC03", label: "Modern White", image: "/images/kitchen/kc03.jpg" },
+  { id: "KC04", label: "Warm Wood", image: "/images/kitchen/kc04.jpg" },
+  { id: "KC05", label: "Dark Modern", image: "/images/kitchen/kc05.jpg" },
+  { id: "KC06", label: "Minimalist", image: "/images/kitchen/kc06.jpg" },
 ];
 
 const bathOptions = [
-  { id: "TL01", label: "Option 1", image: "/images/glasshouse-200.jpeg" },
-  { id: "TL02", label: "Option 2", image: "/images/talishouse-420.png" },
-  { id: "TL03", label: "Option 3", image: "/images/talishouse-850.png" },
-  { id: "TL04", label: "Option 4", image: "/images/talistowns.jpg" },
-  { id: "TL05", label: "Option 5", image: "/images/glasshouse-200.jpeg" },
-  { id: "TL06", label: "Option 6", image: "/images/talishouse-420.png" },
+  { id: "TL01", label: "Option 1", image: "/images/bath/tl01.jpg" },
+  { id: "TL02", label: "Option 2", image: "/images/bath/tl02.jpg" },
+  { id: "TL03", label: "Option 3", image: "/images/bath/tl03.jpg" },
+  { id: "TL04", label: "Option 4", image: "/images/bath/tl04.jpg" },
+  { id: "TL05", label: "Option 5", image: "/images/bath/tl05.jpg" },
+  { id: "TL06", label: "Option 6", image: "/images/bath/tl06.jpg" },
 ];
 
 const flooringOptions = [
@@ -34,9 +34,71 @@ const flooringOptions = [
   { name: "White Pine", color: "#f1e9dc" }
 ];
 
+console.log("Kitchen options:", kitchenOptions);
+console.log("Bath options:", bathOptions);
+
 interface ProductConfiguratorProps {
   selectedOptions: Record<string, string>;
   onOptionChange: (category: string, option: string) => void;
+}
+
+function OptionCard({ 
+  image, 
+  alt, 
+  isSelected, 
+  onClick 
+}: { 
+  image?: string; 
+  alt: string; 
+  isSelected: boolean; 
+  onClick: () => void;
+}) {
+  if (!image) {
+    return (
+      <button
+        onClick={onClick}
+        className={`
+          relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200
+          ${isSelected 
+            ? "border-[#0070ba] ring-2 ring-[#0070ba]/30 scale-[1.02]" 
+            : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
+          }
+        `}
+      >
+        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+          <span className="text-gray-400 text-xs">No image</span>
+        </div>
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200
+        ${isSelected 
+          ? "border-[#0070ba] ring-2 ring-[#0070ba]/30 scale-[1.02]" 
+          : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
+        }
+      `}
+    >
+      <Image
+        src={image}
+        alt={alt}
+        fill
+        className="object-cover"
+        unoptimized={true}
+      />
+      {isSelected && (
+        <div className="absolute top-2 right-2 w-6 h-6 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+          <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      )}
+    </button>
+  );
 }
 
 export function ProductConfigurator({ selectedOptions, onOptionChange }: ProductConfiguratorProps) {
@@ -64,79 +126,35 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
         </div>
       </div>
 
-      {/* KITCHEN - VISUAL IMAGE GRID (NO LABELS) */}
+      {/* KITCHEN - VISUAL IMAGE GRID */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-gray-900">Kitchen Style</p>
         <div className="grid grid-cols-3 gap-3">
-          {kitchenOptions.map((item) => {
-            const isSelected = selectedOptions["Kitchen Style"] === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onOptionChange("Kitchen Style", item.id)}
-                className={`
-                  relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200
-                  ${isSelected 
-                    ? "border-[#0070ba] ring-2 ring-[#0070ba]/30 scale-[1.02]" 
-                    : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
-                  }
-                `}
-              >
-                <Image
-                  src={item.image}
-                  alt={item.label}
-                  fill
-                  className="object-cover"
-                  unoptimized={true}
-                />
-                {isSelected && (
-                  <div className="absolute top-2 right-2 w-6 h-6 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border-2 border-white">
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                )}
-              </button>
-            );
-          })}
+          {kitchenOptions.map((option) => (
+            <OptionCard
+              key={option.id}
+              image={option.image}
+              alt={option.label}
+              isSelected={selectedOptions["Kitchen Style"] === option.id}
+              onClick={() => onOptionChange("Kitchen Style", option.id)}
+            />
+          ))}
         </div>
       </div>
 
-      {/* BATH - VISUAL IMAGE GRID (NO LABELS) */}
+      {/* BATH - VISUAL IMAGE GRID */}
       <div className="space-y-3">
         <p className="text-sm font-medium text-gray-900">Bath Style</p>
         <div className="grid grid-cols-3 gap-3">
-          {bathOptions.map((item) => {
-            const isSelected = selectedOptions["Bath Style"] === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => onOptionChange("Bath Style", item.id)}
-                className={`
-                  relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200
-                  ${isSelected 
-                    ? "border-[#0070ba] ring-2 ring-[#0070ba]/30 scale-[1.02]" 
-                    : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
-                  }
-                `}
-              >
-                <Image
-                  src={item.image}
-                  alt={item.label}
-                  fill
-                  className="object-cover"
-                  unoptimized={true}
-                />
-                {isSelected && (
-                  <div className="absolute top-2 right-2 w-6 h-6 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border-2 border-white">
-                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                )}
-              </button>
-            );
-          })}
+          {bathOptions.map((option) => (
+            <OptionCard
+              key={option.id}
+              image={option.image}
+              alt={option.label}
+              isSelected={selectedOptions["Bath Style"] === option.id}
+              onClick={() => onOptionChange("Bath Style", option.id)}
+            />
+          ))}
         </div>
       </div>
 
