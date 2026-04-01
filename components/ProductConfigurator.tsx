@@ -9,21 +9,21 @@ const roofingOptions = [
 ];
 
 const kitchenOptions = [
-  { id: "KC-01", label: "Option 1" },
-  { id: "KC-02", label: "Option 2" },
-  { id: "KC-03", label: "Option 3" },
-  { id: "KC-04", label: "Option 4" },
-  { id: "KC-05", label: "Option 5" },
-  { id: "KC-06", label: "Option 6" },
+  { id: "KC01", label: "Bright White", image: "/images/talishouse-420.png" },
+  { id: "KC02", label: "Classic White", image: "/images/talishouse-420.png" },
+  { id: "KC03", label: "Modern White", image: "/images/talishouse-420.png" },
+  { id: "KC04", label: "Warm Wood", image: "/images/talishouse-420.png" },
+  { id: "KC05", label: "Dark Modern", image: "/images/talishouse-420.png" },
+  { id: "KC06", label: "Minimalist", image: "/images/talishouse-420.png" },
 ];
 
 const bathOptions = [
-  { id: "TL-01", label: "Option 1" },
-  { id: "TL-02", label: "Option 2" },
-  { id: "TL-03", label: "Option 3" },
-  { id: "TL-04", label: "Option 4" },
-  { id: "TL-05", label: "Option 5" },
-  { id: "TL-06", label: "Option 6" },
+  { id: "TL01", label: "Option 1", image: "/images/talishouse-850.png" },
+  { id: "TL02", label: "Option 2", image: "/images/talishouse-850.png" },
+  { id: "TL03", label: "Option 3", image: "/images/talishouse-850.png" },
+  { id: "TL04", label: "Option 4", image: "/images/talishouse-850.png" },
+  { id: "TL05", label: "Option 5", image: "/images/talishouse-850.png" },
+  { id: "TL06", label: "Option 6", image: "/images/talishouse-850.png" },
 ];
 
 const flooringOptions = [
@@ -82,14 +82,22 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
                   }
                 `}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className={`text-xs font-medium ${isSelected ? "text-[#0070ba]" : "text-gray-500"}`}>
+                <div className="absolute inset-0">
+                  <Image
+                    src={item.image}
+                    alt={item.label}
+                    fill
+                    className="object-cover"
+                  />
+                  <div className={`absolute inset-0 bg-black/10 transition-opacity ${isSelected ? "opacity-0" : "opacity-0 group-hover:opacity-20"}`} />
+                </div>
+                <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] p-2">
+                  <span className={`text-[10px] uppercase tracking-wider font-bold text-white block text-center truncate`}>
                     {item.label}
                   </span>
                 </div>
                 {isSelected && (
-                  <div className="absolute top-2 right-2 w-5 h-5 bg-[#0070ba] rounded-full flex items-center justify-center">
+                  <div className="absolute top-2 right-2 w-5 h-5 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border border-white/50">
                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
@@ -119,14 +127,19 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
                   }
                 `}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className={`text-xs font-medium ${isSelected ? "text-[#0070ba]" : "text-gray-500"}`}>
+                <Image
+                  src={item.image}
+                  alt={item.label}
+                  fill
+                  className="object-cover"
+                />
+                <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] p-2">
+                  <span className={`text-[10px] uppercase tracking-wider font-bold text-white block text-center truncate`}>
                     {item.label}
                   </span>
                 </div>
                 {isSelected && (
-                  <div className="absolute top-2 right-2 w-5 h-5 bg-[#0070ba] rounded-full flex items-center justify-center">
+                  <div className="absolute top-2 right-2 w-5 h-5 bg-[#0070ba] rounded-full flex items-center justify-center shadow-lg border border-white/50">
                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
