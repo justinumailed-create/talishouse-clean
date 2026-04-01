@@ -43,7 +43,7 @@ export default function RootLayout({
           <CartProvider>
             <AssociateProvider>
               <Header />
-              <main className="flex-grow page-wrapper container-main">{children}</main>
+              <main className="flex-grow page-wrapper container-main ml-[220px] mt-16">{children}</main>
               <Footer />
               <FloatingContactButton />
               <CartDrawer />

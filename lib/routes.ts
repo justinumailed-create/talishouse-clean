@@ -1,6 +1,7 @@
 export const ROUTES = {
   HOME: "/",
   CATALOG: "/catalog",
+  ADD_PROJECT: "/add-project",
   BUSINESS_OFFICE: "/business-office",
   BUSINESS_OFFICE_APPLY: "/business-office/apply",
   BUSINESS_OFFICE_REGISTER: "/business-office/register",
