@@ -31,7 +31,11 @@ const flooringMaterials = [
   { id: "spc", label: "SPC", image: "/images/flooring/SPC.png" },
 ];
 
-console.log("Flooring materials:", flooringMaterials);
+flooringMaterials.forEach((mat: { label: string; image: string }) => {
+  console.log(`Flooring material: ${mat.label} -> ${mat.image}`);
+});
+
+console.log("Flooring material paths:", flooringMaterials.map(m => m.image));
 
 const flooringColors = [
   { id: "ash", color: "#cfcfcf" },
@@ -60,6 +64,7 @@ function OptionCard({
   showLabel?: boolean;
 }) {
   if (!image) {
+    console.error(`Flooring image not found: ${image || 'undefined'}`);
     return (
       <button
         onClick={onClick}
