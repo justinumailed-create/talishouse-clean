@@ -9,21 +9,21 @@ const roofingOptions = [
 ];
 
 const kitchenOptions = [
-  { id: "KC01", label: "Bright White", image: "/images/talishouse-420.png" },
-  { id: "KC02", label: "Classic White", image: "/images/talishouse-420.png" },
-  { id: "KC03", label: "Modern White", image: "/images/talishouse-420.png" },
-  { id: "KC04", label: "Warm Wood", image: "/images/talishouse-420.png" },
-  { id: "KC05", label: "Dark Modern", image: "/images/talishouse-420.png" },
-  { id: "KC06", label: "Minimalist", image: "/images/talishouse-420.png" },
+  { id: "KC01", label: "KC01" },
+  { id: "KC02", label: "KC02" },
+  { id: "KC03", label: "KC03" },
+  { id: "KC04", label: "KC04" },
+  { id: "KC05", label: "KC05" },
+  { id: "KC06", label: "KC06" },
 ];
 
 const bathOptions = [
-  { id: "TL01", label: "Option 1", image: "/images/talishouse-850.png" },
-  { id: "TL02", label: "Option 2", image: "/images/talishouse-850.png" },
-  { id: "TL03", label: "Option 3", image: "/images/talishouse-850.png" },
-  { id: "TL04", label: "Option 4", image: "/images/talishouse-850.png" },
-  { id: "TL05", label: "Option 5", image: "/images/talishouse-850.png" },
-  { id: "TL06", label: "Option 6", image: "/images/talishouse-850.png" },
+  { id: "TL01", label: "TL01" },
+  { id: "TL02", label: "TL02" },
+  { id: "TL03", label: "TL03" },
+  { id: "TL04", label: "TL04" },
+  { id: "TL05", label: "TL05" },
+  { id: "TL06", label: "TL06" },
 ];
 
 const flooringOptions = [
@@ -81,17 +81,9 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
                     : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
                   }
                 `}
-              >
-                <div className="absolute inset-0">
-                  <Image
-                    src={item.image}
-                    alt={item.label}
-                    fill
-                    className="object-cover"
-                  />
-                  <div className={`absolute inset-0 bg-black/10 transition-opacity ${isSelected ? "opacity-0" : "opacity-0 group-hover:opacity-20"}`} />
-                </div>
-                <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] p-2">
+                >
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200" />
+                <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-[2px] p-2">
                   <span className={`text-[10px] uppercase tracking-wider font-bold text-white block text-center truncate`}>
                     {item.label}
                   </span>
@@ -127,13 +119,8 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
                   }
                 `}
               >
-                <Image
-                  src={item.image}
-                  alt={item.label}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-x-0 bottom-0 bg-black/40 backdrop-blur-[2px] p-2">
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200" />
+                <div className="absolute inset-x-0 bottom-0 bg-black/50 backdrop-blur-[2px] p-2">
                   <span className={`text-[10px] uppercase tracking-wider font-bold text-white block text-center truncate`}>
                     {item.label}
                   </span>
