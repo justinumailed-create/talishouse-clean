@@ -27,9 +27,11 @@ const bathOptions = [
 ];
 
 const flooringMaterials = [
-  { id: "vinyl", label: "Vinyl", image: "/images/glasshouse-200.jpeg" },
-  { id: "spc", label: "SPC", image: "/images/talishouse-420.png" },
+  { id: "vinyl", label: "Vinyl", image: "/images/flooring/VINYL.png" },
+  { id: "spc", label: "SPC", image: "/images/flooring/SPC.png" },
 ];
+
+console.log("Flooring materials:", flooringMaterials);
 
 const flooringColors = [
   { id: "ash", color: "#cfcfcf" },
@@ -206,7 +208,7 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
 
       {/* FLOORING - MATERIAL SECTION */}
       <div className="space-y-3">
-        <p className="text-sm font-medium text-gray-900">Material</p>
+        <p className="text-sm font-medium text-gray-900">Flooring Material</p>
         <div className="grid grid-cols-2 gap-3">
           {flooringMaterials.map((material) => (
             <OptionCard
@@ -223,7 +225,7 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
 
       {/* FLOORING - COLOUR SECTION (VISUAL ONLY) */}
       <div className="space-y-3">
-        <p className="text-sm font-medium text-gray-900">Colour</p>
+        <p className="text-sm font-medium text-gray-900">Flooring Style</p>
         <div className="grid grid-cols-3 gap-3">
           {flooringColors.map((color) => (
             <ColorSwatch
