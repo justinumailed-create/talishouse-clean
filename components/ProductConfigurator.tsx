@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 
 const roofingOptions = [
   "Bright, white & white",
@@ -8,21 +9,21 @@ const roofingOptions = [
 ];
 
 const kitchenOptions = [
-  "KC-01",
-  "KC-02",
-  "KC-03",
-  "KC-04",
-  "KC-05",
-  "KC-06"
+  { id: "KC-01", label: "Option 1" },
+  { id: "KC-02", label: "Option 2" },
+  { id: "KC-03", label: "Option 3" },
+  { id: "KC-04", label: "Option 4" },
+  { id: "KC-05", label: "Option 5" },
+  { id: "KC-06", label: "Option 6" },
 ];
 
 const bathOptions = [
-  "TL-01",
-  "TL-02",
-  "TL-03",
-  "TL-04",
-  "TL-05",
-  "TL-06"
+  { id: "TL-01", label: "Option 1" },
+  { id: "TL-02", label: "Option 2" },
+  { id: "TL-03", label: "Option 3" },
+  { id: "TL-04", label: "Option 4" },
+  { id: "TL-05", label: "Option 5" },
+  { id: "TL-06", label: "Option 6" },
 ];
 
 const flooringOptions = [
@@ -42,16 +43,16 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
   const [sidingCode, setSidingCode] = useState("");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* ROOFING - SEGMENTED CONTROL */}
       <div className="space-y-2">
-        <p className="text-sm text-gray-600">Roofing, Gutter & Windows</p>
+        <p className="text-sm font-medium text-gray-900">Roofing, Gutter & Windows</p>
         <div className="flex rounded-xl border border-gray-200 overflow-hidden">
           {roofingOptions.map((option) => (
             <button
               key={option}
               onClick={() => onOptionChange("Roofing, Gutter & Windows Colour", option)}
-              className={`flex-1 py-3 text-sm font-medium transition duration-200 hover:scale-[1.02] ${
+              className={`flex-1 py-3 text-sm font-medium transition duration-200 ${
                 selectedOptions["Roofing, Gutter & Windows Colour"] === option
                   ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white"
                   : "bg-white text-gray-600 hover:bg-gray-50"
@@ -63,65 +64,99 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
         </div>
       </div>
 
-      {/* KITCHEN - GRID BUTTONS */}
-      <div className="space-y-2">
-        <p className="text-sm text-gray-600">Kitchen Style</p>
+      {/* KITCHEN - VISUAL IMAGE GRID */}
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-gray-900">Kitchen Style</p>
         <div className="grid grid-cols-3 gap-3">
-          {kitchenOptions.map((item) => (
-            <button
-              key={item}
-              onClick={() => onOptionChange("Kitchen Style", item)}
-              className={`p-3 rounded-xl border text-sm font-medium transition duration-200 hover:scale-[1.02] ${
-                selectedOptions["Kitchen Style"] === item
-                  ? "border-[#0070ba] bg-[#0070ba]/10 text-[#0070ba]"
-                  : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
+          {kitchenOptions.map((item) => {
+            const isSelected = selectedOptions["Kitchen Style"] === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onOptionChange("Kitchen Style", item.id)}
+                className={`
+                  relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200
+                  ${isSelected 
+                    ? "border-[#0070ba] ring-2 ring-[#0070ba]/30 scale-[1.02]" 
+                    : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
+                  }
+                `}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={`text-xs font-medium ${isSelected ? "text-[#0070ba]" : "text-gray-500"}`}>
+                    {item.label}
+                  </span>
+                </div>
+                {isSelected && (
+                  <div className="absolute top-2 right-2 w-5 h-5 bg-[#0070ba] rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* BATH - GRID BUTTONS */}
-      <div className="space-y-2">
-        <p className="text-sm text-gray-600">Bath Style</p>
+      {/* BATH - VISUAL IMAGE GRID */}
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-gray-900">Bath Style</p>
         <div className="grid grid-cols-3 gap-3">
-          {bathOptions.map((item) => (
-            <button
-              key={item}
-              onClick={() => onOptionChange("Bath Style", item)}
-              className={`p-3 rounded-xl border text-sm font-medium transition duration-200 hover:scale-[1.02] ${
-                selectedOptions["Bath Style"] === item
-                  ? "border-[#0070ba] bg-[#0070ba]/10 text-[#0070ba]"
-                  : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
+          {bathOptions.map((item) => {
+            const isSelected = selectedOptions["Bath Style"] === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => onOptionChange("Bath Style", item.id)}
+                className={`
+                  relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-200
+                  ${isSelected 
+                    ? "border-[#0070ba] ring-2 ring-[#0070ba]/30 scale-[1.02]" 
+                    : "border-gray-200 hover:border-gray-400 hover:scale-[1.01]"
+                  }
+                `}
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={`text-xs font-medium ${isSelected ? "text-[#0070ba]" : "text-gray-500"}`}>
+                    {item.label}
+                  </span>
+                </div>
+                {isSelected && (
+                  <div className="absolute top-2 right-2 w-5 h-5 bg-[#0070ba] rounded-full flex items-center justify-center">
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* FLOORING - VISUAL SELECTOR */}
-      <div className="space-y-2">
-        <p className="text-sm text-gray-600">Flooring</p>
+      <div className="space-y-3">
+        <p className="text-sm font-medium text-gray-900">Flooring</p>
         <div className="grid grid-cols-2 gap-3">
           {flooringOptions.map((item) => (
             <button
               key={item.name}
               onClick={() => onOptionChange("Flooring Colour", item.name)}
-              className={`flex items-center gap-3 p-3 rounded-xl border transition duration-200 hover:scale-[1.02] ${
+              className={`flex items-center gap-3 p-4 rounded-xl border transition duration-200 ${
                 selectedOptions["Flooring Colour"] === item.name
-                  ? "border-[#0070ba] bg-[#0070ba]/10"
-                  : "border-gray-200 bg-white"
+                  ? "border-[#0070ba] bg-[#0070ba]/5"
+                  : "border-gray-200 bg-white hover:border-gray-400"
               }`}
             >
               <div
-                className="w-6 h-6 rounded-full border"
+                className="w-8 h-8 rounded-full border shadow-sm"
                 style={{ background: item.color }}
               />
-              <span className="text-sm text-gray-700">{item.name}</span>
+              <span className="text-sm font-medium text-gray-700">{item.name}</span>
             </button>
           ))}
         </div>
@@ -129,7 +164,7 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
 
       {/* SIDING - INPUT */}
       <div className="space-y-2">
-        <p className="text-sm text-gray-600">Siding Colour Code</p>
+        <p className="text-sm font-medium text-gray-900">Siding Colour Code</p>
         <input
           type="text"
           placeholder="Enter siding colour code"
