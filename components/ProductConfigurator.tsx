@@ -9,21 +9,21 @@ const roofingOptions = [
 ];
 
 const kitchenOptions = [
-  { id: "KC01", label: "Bright White", image: "/images/kitchen/kc01.jpg" },
-  { id: "KC02", label: "Classic White", image: "/images/kitchen/kc02.jpg" },
-  { id: "KC03", label: "Modern White", image: "/images/kitchen/kc03.jpg" },
-  { id: "KC04", label: "Warm Wood", image: "/images/kitchen/kc04.jpg" },
-  { id: "KC05", label: "Dark Modern", image: "/images/kitchen/kc05.jpg" },
-  { id: "KC06", label: "Minimalist", image: "/images/kitchen/kc06.jpg" },
+  { id: "KC01", label: "Bright White", image: "/images/kitchen/KC01.png" },
+  { id: "KC02", label: "Classic White", image: "/images/kitchen/KC02.png" },
+  { id: "KC03", label: "Modern White", image: "/images/kitchen/KC03.png" },
+  { id: "KC04", label: "Warm Wood", image: "/images/kitchen/KC04.png" },
+  { id: "KC05", label: "Dark Modern", image: "/images/kitchen/KC05.png" },
+  { id: "KC06", label: "Minimalist", image: "/images/kitchen/KC06.png" },
 ];
 
 const bathOptions = [
-  { id: "TL01", label: "Option 1", image: "/images/bath/tl01.jpg" },
-  { id: "TL02", label: "Option 2", image: "/images/bath/tl02.jpg" },
-  { id: "TL03", label: "Option 3", image: "/images/bath/tl03.jpg" },
-  { id: "TL04", label: "Option 4", image: "/images/bath/tl04.jpg" },
-  { id: "TL05", label: "Option 5", image: "/images/bath/tl05.jpg" },
-  { id: "TL06", label: "Option 6", image: "/images/bath/tl06.jpg" },
+  { id: "TL01", label: "Option 1", image: "/images/bath/TL01.png" },
+  { id: "TL02", label: "Option 2", image: "/images/bath/TL02.png" },
+  { id: "TL03", label: "Option 3", image: "/images/bath/TL03.png" },
+  { id: "TL04", label: "Option 4", image: "/images/bath/TL04.png" },
+  { id: "TL05", label: "Option 5", image: "/images/bath/TL05.png" },
+  { id: "TL06", label: "Option 6", image: "/images/bath/TL06.png" },
 ];
 
 const flooringOptions = [
