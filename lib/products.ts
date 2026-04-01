@@ -34,6 +34,38 @@ export interface ProductFamily {
   models: string[];
 }
 
+export interface CategoryModel {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+}
+
+export const PRODUCT_CATEGORIES: Record<string, CategoryModel[]> = {
+  glasshouse: [
+    { id: "160", name: "Glasshouse™ 160", price: 19995 },
+    { id: "200", name: "Glasshouse™ 200", price: 24995 }
+  ],
+  recreational: [
+    { id: "420", name: "Talishouse™ 420", price: 39950 },
+    { id: "800", name: "Talishouse™ 800", price: 79995 }
+  ],
+  residential: [
+    { id: "1600", name: "Talishouse™ 1600", price: 109995 },
+    { id: "2400", name: "Talishouse™ 2400", price: 139995 }
+  ]
+};
+
+export function getModelsByCategory(category: string): CategoryModel[] {
+  return PRODUCT_CATEGORIES[category] || [];
+}
+
+export function getDefaultModel(category: string): CategoryModel | undefined {
+  const models = PRODUCT_CATEGORIES[category];
+  if (!models || models.length === 0) return undefined;
+  return models[0];
+}
+
 export { ADDONS as addons, getAddonsForProduct, getAddonById, addonsRecord } from "@/lib/config/addons";
 
 import { PRODUCT_IMAGE_MAP } from "@/lib/productImages";

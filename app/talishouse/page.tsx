@@ -5,80 +5,68 @@ import { useSearchParams } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 import ProductLayout from "@/components/ProductLayout";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
-import {
-  talishouseModels,
-  talishouseFamily,
-  type Bundle,
-} from "@/lib/products";
+import { getModelsByCategory, getDefaultModel, type CategoryModel } from "@/lib/products";
 import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
-import { productFamilies } from "@/lib/productFamilies";
 
-const EXPECTED_CATEGORY_PREFIX = "talishouse";
-
-const PRODUCT_SLUG_MAP: Record<string, string> = {
-  "420": "talishouse-420",
-  "residential": "talishouse-residential",
-  "talishouse-420": "talishouse-420",
-  "talishouse-residential": "talishouse-residential",
+const CATEGORY_CONFIG = {
+  recreational: {
+    name: "Talishouse™ Recreational",
+    slug: "420",
+    image: "/images/talishouse-420.png",
+    size: "talishouse-420",
+    description: `Talishouse™ Recreational : The flexible modular home system:
+- 21' x 20' steel structures assembled in one day and move-in ready in one week.
+- Two bedrooms, one bath, open concept living-dining-kitchen.
+- Scalable from single units to multi-unit developments.
+- Retail, Wholesale and Lease-To-Own purchasing terms.`,
+    productId: "talishouse-420",
+  },
+  residential: {
+    name: "Talishouse™ Residential",
+    slug: "residential",
+    image: "/images/talishouse-850.png",
+    size: "talishouse-residential",
+    description: `Talishouse™ Residential : Scalable living solutions:
+- Multi-unit residential developments
+- 21' x 20' steel structures assembled in one day
+- Two bedrooms, one bath, open concept living-dining-kitchen
+- From single units to complete communities
+- Retail, Wholesale and Lease-To-Own purchasing terms.`,
+    productId: "talishouse-residential",
+  },
 };
 
-function resolveProductId(param: string | null): string {
-  if (!param) return "talishouse-420";
-  const mapped = PRODUCT_SLUG_MAP[param];
-  if (mapped && talishouseModels.some((m) => m.id === mapped)) {
-    return mapped;
-  }
-  if (talishouseModels.some((m) => m.id === param)) {
-    return param;
-  }
-  return "talishouse-420";
-}
+type CategoryType = "recreational" | "residential";
 
 function TalishouseContent() {
   const searchParams = useSearchParams();
   const productParam = searchParams.get("product");
   
-  const resolvedModelId = resolveProductId(productParam);
-  console.log("Opening product:", resolvedModelId);
+  const category: CategoryType = productParam === "residential" ? "residential" : "recreational";
+  const config = CATEGORY_CONFIG[category];
+  const models = getModelsByCategory(category);
+  const defaultModel = getDefaultModel(category)!;
   
-  const [selectedModelId, setSelectedModelId] = useState<string>(resolvedModelId);
-  const [selectedBundleId, setSelectedBundleId] = useState<string>("residential-800");
+  const [selectedModel, setSelectedModel] = useState<CategoryModel>(defaultModel);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
   const [wholesaleRequested, setWholesaleRequested] = useState(false);
   const { addToCart } = useCart();
 
-  const currentProduct = talishouseModels.find((m) => m.id === selectedModelId);
-
   useEffect(() => {
     const param = searchParams.get("product");
-    const resolved = resolveProductId(param);
-    if (resolved && resolved !== selectedModelId) {
-      setSelectedModelId(resolved);
+    const newCategory: CategoryType = param === "residential" ? "residential" : "recreational";
+    const newModels = getModelsByCategory(newCategory);
+    const newDefault = newModels[0];
+    if (newDefault && newDefault.id !== selectedModel.id) {
+      setSelectedModel(newDefault);
       setSelectedOptions({});
       setSelectedAddons({});
     }
-  }, [searchParams, selectedModelId]);
+  }, [searchParams]);
 
-  if (!currentProduct) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-500">Product not found</p>
-      </div>
-    );
-  }
-
-  if (!currentProduct.category.startsWith(EXPECTED_CATEGORY_PREFIX)) {
-    throw new Error(`Product layout mismatch: expected ${EXPECTED_CATEGORY_PREFIX}, got ${currentProduct.category}`);
-  }
-
-  const selectedBundle = currentProduct.bundles?.find((b: Bundle) => b.id === selectedBundleId);
-  const calculatedPrice = selectedBundle 
-    ? selectedBundle.units * selectedBundle.basePrice
-    : currentProduct.price;
-
-  const toggleOption = (category: string, option: string) => {
-    setSelectedOptions((prev) => ({ ...prev, [category]: option }));
+  const toggleOption = (cat: string, option: string) => {
+    setSelectedOptions((prev) => ({ ...prev, [cat]: option }));
   };
 
   const toggleAddon = (addonId: string) => {
@@ -91,7 +79,7 @@ function TalishouseContent() {
   };
 
   const calculateTotal = (): number => {
-    let total = calculatedPrice;
+    let total = selectedModel.price || 0;
     Object.keys(selectedAddons).forEach((addonId) => {
       if (selectedAddons[addonId]) {
         total += getAddonPrice(addonId);
@@ -107,80 +95,58 @@ function TalishouseContent() {
       .map((id) => addonsRecord[id]?.name)
       .filter(Boolean);
 
-    const productName = selectedBundle 
-      ? `${selectedBundle.name} (${selectedBundle.units} units)`
-      : currentProduct.name;
-
     addToCart({
-      id: `${currentProduct.id}-${selectedBundleId}-${Object.entries(selectedOptions).map(([, v]) => v).join("-")}-${Object.entries(selectedAddons).filter(([,v]) => v).map(([k]) => k).join("-")}`,
-      name: `${productName}${wholesaleRequested ? " (Wholesale)" : ""}`,
+      id: `talishouse-${category}-${selectedModel.id}`,
+      name: selectedModel.name,
       price: total,
-      image: currentProduct?.image || "/images/talishouse-420.png",
+      image: config.image,
       options: selectedOptions,
       addons: selectedAddonNames,
       wholesaleRequested,
     });
   };
 
-  const productAddons = getAddonsForProduct(currentProduct.id);
-
-  const filteredBundles = currentProduct.bundles || [];
+  const productAddons = getAddonsForProduct(config.productId);
 
   return (
     <ProductLayout
-      productName={currentProduct?.name || "Talishouse™"}
-      productImage={currentProduct?.image || ""}
-      productSize={currentProduct?.id}
-      familyDescription={
-        talishouseFamily?.gridDescription ||
-        productFamilies?.talishouse?.gridDescription ||
-        currentProduct?.description ||
-        "Flexible modular housing solutions designed for modern living."
-      }
-      aboutContent={currentProduct?.description || ""}
+      productName={config.name}
+      productImage={config.image}
+      productSize={config.size}
+      familyDescription={config.description}
+      aboutContent={`${selectedModel.name}: ${config.description.split(':')[1]?.split('.')[0] || 'Modern modular living solution'}`}
     >
       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold tracking-tighter text-gray-900">
-            {currentProduct.name}
-          </h1>
-        </div>
+        <h1 className="text-2xl font-bold tracking-tighter text-gray-900">
+          {selectedModel.name}
+        </h1>
 
-        {filteredBundles.length > 0 && (
-          <div className="mb-6">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
-              Select Bundle Size
-            </h3>
-            <div className="grid grid-cols-2 gap-2">
-              {filteredBundles.map((bundle: Bundle) => (
-                <button
-                  key={bundle.id}
-                  onClick={() => setSelectedBundleId(bundle.id)}
-                  className={`p-4 rounded-xl border text-sm font-medium transition duration-200 hover:scale-[1.01] ${
-                    selectedBundleId === bundle.id
-                      ? "border-[#0070ba] bg-[#0070ba]/10 text-[#0070ba]"
-                      : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {bundle.name.replace("Talishouse™ ", "")}
-                </button>
-              ))}
-            </div>
+        {/* MODEL SELECTOR */}
+        <div className="mt-4 mb-2">
+          <div className="grid grid-cols-2 gap-2">
+            {models.map((model) => (
+              <button
+                key={model.id}
+                onClick={() => setSelectedModel(model)}
+                className={`p-3 rounded-lg border text-sm font-medium transition-all ${
+                  selectedModel.id === model.id
+                    ? "border-[#0070ba] bg-[#0070ba]/10 text-[#0070ba]"
+                    : "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
+                }`}
+              >
+                {model.name.replace("Talishouse™ ", "")}
+              </button>
+            ))}
           </div>
-        )}
-
-        <div className="mb-6">
-          <p className="text-2xl text-gray-900 font-bold">
-            CAD ${calculatedPrice.toLocaleString()}
-          </p>
-          {selectedBundle && (
-            <p className="text-xs text-gray-500">
-              {selectedBundle.units} x CAD ${selectedBundle.basePrice.toLocaleString()}
-            </p>
-          )}
         </div>
 
-        <div className="space-y-6">
+        <div className="mt-4">
+          <p className="text-2xl text-gray-900 font-bold">
+            CAD ${selectedModel.price.toLocaleString()}
+          </p>
+        </div>
+
+        <div className="mt-6 space-y-6">
           <ProductConfigurator
             selectedOptions={selectedOptions}
             onOptionChange={toggleOption}
@@ -233,17 +199,19 @@ function TalishouseContent() {
 
           <button
             onClick={handleAddToCart}
-            className="btn-primary w-full text-lg"
+            className="btn-primary w-full"
           >
-            ADD TO CART — CAD ${calculateTotal().toLocaleString()}
+            ADD TO CART — {selectedModel.name} — CAD ${calculateTotal().toLocaleString()}
           </button>
 
-          <a
-            href={`/lease-to-own?productId=${currentProduct.id}`}
-            className="block w-full text-center btn-secondary"
-          >
-            Start Lease-to-Own →
-          </a>
+          <div className="text-center">
+            <a
+              href="/lease-to-own"
+              className="text-xs text-gray-500 hover:text-black underline"
+            >
+              Interested in financing? Learn about Lease-to-Own →
+            </a>
+          </div>
         </div>
       </div>
     </ProductLayout>
@@ -252,11 +220,7 @@ function TalishouseContent() {
 
 export default function TalishousePage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
-      </div>
-    }>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
       <TalishouseContent />
     </Suspense>
   );

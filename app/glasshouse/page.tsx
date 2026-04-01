@@ -4,23 +4,20 @@ import { useState } from "react";
 import ProductLayout from "@/components/ProductLayout";
 import { useCart } from "@/context/CartContext";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
-import {
-  glasshouseModels,
-  glasshouseFamily,
-  type ProductModel,
-} from "@/lib/products";
+import { getModelsByCategory, getDefaultModel, PRODUCT_CATEGORIES } from "@/lib/products";
 import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
-import { productFamilies } from "@/lib/productFamilies";
 
 export const dynamic = "force-dynamic";
 
 export default function GlasshousePage() {
+  const models = getModelsByCategory("glasshouse");
+  const defaultModel = getDefaultModel("glasshouse")!;
+  
+  const [selectedModel, setSelectedModel] = useState(defaultModel);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
   const [wholesaleRequested, setWholesaleRequested] = useState(false);
   const { addToCart } = useCart();
-
-  const model = glasshouseModels[0] as ProductModel;
 
   const toggleOption = (category: string, option: string) => {
     setSelectedOptions((prev) => ({
@@ -42,7 +39,7 @@ export default function GlasshousePage() {
   };
 
   const calculateTotal = (): number => {
-    let total = model?.price || 0;
+    let total = selectedModel.price || 0;
     Object.keys(selectedAddons).forEach((addonId) => {
       if (selectedAddons[addonId]) {
         total += getAddonPrice(addonId);
@@ -59,39 +56,60 @@ export default function GlasshousePage() {
       .filter(Boolean);
 
     addToCart({
-      id: `${model.id}-${Object.entries(selectedOptions).map(([, v]) => v).join("-")}-${Object.entries(selectedAddons).filter(([,v]) => v).map(([k]) => k).join("-")}`,
-      name: `${model.name}${wholesaleRequested ? " (Wholesale/Lease-to-Own)" : ""}`,
+      id: `glasshouse-${selectedModel.id}-${Object.entries(selectedOptions).map(([, v]) => v).join("-")}`,
+      name: selectedModel.name,
       price: total,
-      image: model?.image || "/images/glasshouse-200.jpeg",
+      image: "/images/glasshouse-200.jpeg",
       options: selectedOptions,
       addons: selectedAddonNames,
       wholesaleRequested,
     });
   };
 
-  const productAddons = getAddonsForProduct(model.id);
+  const productAddons = getAddonsForProduct("glasshouse-200");
 
   return (
     <ProductLayout
-      productName={model?.name || "Glasshouse™"}
-      productImage={model?.image || ""}
+      productName="Glasshouse™"
+      productImage="/images/glasshouse-200.jpeg"
       productSize="glasshouse-200"
-      familyDescription={
-        glasshouseFamily?.gridDescription ||
-        productFamilies?.glasshouse?.gridDescription ||
-        model?.description ||
-        "Modern glass living spaces with natural light."
-      }
-      aboutContent={model?.description || ""}
+      familyDescription={`Glasshouse™ : The quick start option:
+- Up to five units shipped together with up to five optional deck platforms in one sea-can container.
+- Size and appearance: 10 x 20 ft. each, one, two or three sides glass.
+- Most commonly arranged L-shaped, U-shaped or parallel.
+- Most suitable as "VIEW" cottages, for own use, or in short term rental applications.
+- Retail, Wholesale and Lease-To-Own purchasing terms.`}
+      aboutContent={`Glasshouse™: Modern glass living spaces with natural light.
+8' x 20' or 10' x 20' steel structures featuring one, two or three sides glass.
+Great as short-term rental cottages with a view or home offices.`}
     >
       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
         <h1 className="text-2xl font-bold tracking-tighter text-gray-900">
-          {model.name}
+          {selectedModel.name}
         </h1>
 
-        <div className="mt-2">
-          <p className="text-xl text-gray-900 font-bold">
-            CAD ${model.price.toLocaleString()}
+        {/* MODEL SELECTOR */}
+        <div className="mt-4 mb-2">
+          <div className="grid grid-cols-2 gap-2">
+            {models.map((model) => (
+              <button
+                key={model.id}
+                onClick={() => setSelectedModel(model)}
+                className={`p-3 rounded-lg border text-sm font-medium transition-all ${
+                  selectedModel.id === model.id
+                    ? "border-[#0070ba] bg-[#0070ba]/10 text-[#0070ba]"
+                    : "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
+                }`}
+              >
+                {model.name.replace("Glasshouse™ ", "")}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4">
+          <p className="text-2xl text-gray-900 font-bold">
+            CAD ${selectedModel.price.toLocaleString()}
           </p>
         </div>
 
@@ -150,7 +168,7 @@ export default function GlasshousePage() {
             onClick={handleAddToCart}
             className="btn-primary w-full"
           >
-            ADD TO CART — {model.name} — CAD ${calculateTotal().toLocaleString()}
+            ADD TO CART — {selectedModel.name} — CAD ${calculateTotal().toLocaleString()}
           </button>
 
           <div className="text-center">
