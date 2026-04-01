@@ -120,7 +120,7 @@ export default function Home() {
             </ul>
 
             <Link
-              href="/propose-project"
+              href="/add-project"
               className="block w-full text-center text-base font-medium text-white bg-[#1E4ED8] hover:bg-[#1d4ed8] rounded-lg px-6 py-4 transition-colors"
               style={{ backgroundColor: '#1E4ED8', color: '#ffffff' }}
             >

@@ -109,13 +109,13 @@ export default function ProposeProjectPage() {
 
   return (
     <div className="min-h-[70vh] bg-[#f5f5f7] py-12 px-4">
-      <div className="max-w-[640px] mx-auto space-y-6">
+        <div className="max-w-[640px] mx-auto space-y-6">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-            Add a Project
+            Propose a Project
           </h1>
           <p className="text-gray-500 text-sm mt-2">
-            Let&apos;s start by establishing preliminary aspects of your vision
+            Detailed project specifications for business inquiries
           </p>
         </div>
 
