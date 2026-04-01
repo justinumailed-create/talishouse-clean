@@ -46,6 +46,36 @@
     gap: 24px;
   }
 
+  .checkout-layout {
+    display: grid;
+    grid-template-columns: 60% 40%;
+    gap: 32px;
+  }
+
+  .checkout-right {
+    max-width: 420px;
+    margin-left: auto;
+    width: 100%;
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    gap: 24px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 24px;
+  }
+
   .page-wrapper {
     @apply w-full overflow-x-hidden;
   }

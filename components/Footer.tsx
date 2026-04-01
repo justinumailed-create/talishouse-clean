@@ -6,7 +6,7 @@ import { ROUTES } from "@/lib/routes";
 export default function Footer() {
   return (
     <footer className="w-full border-t border-[rgba(0,0,0,0.06)] bg-[#f5f5f7] py-12 text-[#2b2b2b]">
-      <div className="container-main">
+      <div className="container">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
             <div className="w-full overflow-hidden">

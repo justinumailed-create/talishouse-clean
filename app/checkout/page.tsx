@@ -164,7 +164,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-[70vh] bg-[#f5f5f7] py-12">
-      <div className="container-main">
+      <div className="container">
         <div className="flex items-center justify-between mb-8">
           <Link href={ROUTES.CATALOG} className="text-sm text-[#6e6e73] hover:text-black transition-colors">
             ← Continue Shopping
@@ -173,9 +173,9 @@ export default function CheckoutPage() {
           <div className="w-32" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="checkout-layout">
           {/* LEFT: Information Panel */}
-          <div className="w-full">
+          <div className="checkout-left space-y-6">
             <div className="bg-white rounded-2xl border border-[rgba(0,0,0,0.06)] shadow-sm p-6 space-y-6">
               <div className="flex items-center gap-4 pb-6 border-b border-[rgba(0,0,0,0.06)]">
                 <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center">
@@ -228,7 +228,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* RIGHT: Cart & Payment */}
-          <div className="space-y-6">
+          <div className="checkout-right space-y-6">
             {/* Cart Items */}
             <div className="bg-white rounded-2xl border border-[rgba(0,0,0,0.06)] shadow-sm p-6">
               <h2 className="font-semibold text-[#1d1d1f] mb-4 tracking-tight">Your Order ({items.length})</h2>
@@ -236,20 +236,13 @@ export default function CheckoutPage() {
               <div className="space-y-4">
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4 pb-4 border-b border-[rgba(0,0,0,0.06)] last:border-0">
-                    <div className="w-20 h-20 bg-[#f5f5f7] rounded-xl flex-shrink-0 overflow-hidden">
-                      {item.image ? (
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          width={80}
-                          height={80}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="text-gray-400 text-xs">No image</span>
-                        </div>
-                      )}
+                    <div className="w-20 h-20 bg-[#f5f5f7] rounded-xl flex-shrink-0 overflow-hidden relative">
+                      <Image
+                        src={item.image || "/logo.png"}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-medium text-sm text-[#1d1d1f]">{item.name}</h3>
