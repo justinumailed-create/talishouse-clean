@@ -18,15 +18,17 @@ const productCategories = [
     image: getProductImage("glasshouse-200"),
     price: "From $19,995",
     href: "/glasshouse",
+    models: ["160", "200"],
   },
   {
-    id: "cottages",
-    name: "Talishouse™ Cottages / Offices",
+    id: "recreational",
+    name: "Talishouse™ Recreational",
     subtitle: "Flexible modular home system",
     description: "21' x 20' steel structures assembled in one day. Two bedrooms, one bath.",
     image: getProductImage("talishouse-420"),
     price: "From $49,995",
     href: "/talishouse?product=420",
+    models: ["420", "800"],
   },
   {
     id: "residential",
@@ -36,6 +38,7 @@ const productCategories = [
     image: getProductImage("talishouse-residential"),
     price: "From $109,995",
     href: "/talishouse?product=residential",
+    models: ["1600", "2400"],
   },
   {
     id: "talistowns",
