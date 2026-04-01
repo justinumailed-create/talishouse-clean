@@ -132,17 +132,18 @@ export default function Header() {
             >
               Catalogue
             </Link>
-            <GatedLink
-              href={ROUTES.BUSINESS_OFFICE}
-              onClick={() => setIsMenuOpen(false)}
-              className={`text-base font-medium uppercase tracking-[0.05em] px-2 transition-colors hover:text-black ${
-                pathname.startsWith("/business-office")
-                  ? "text-black"
-                  : "text-[#444]"
-              }`}
-            >
-              Business Office
-            </GatedLink>
+            <div onClick={() => setIsMenuOpen(false)}>
+              <GatedLink
+                href={ROUTES.BUSINESS_OFFICE}
+                className={`text-base font-medium uppercase tracking-[0.05em] px-2 transition-colors hover:text-black ${
+                  pathname.startsWith("/business-office")
+                    ? "text-black"
+                    : "text-[#444]"
+                }`}
+              >
+                Business Office
+              </GatedLink>
+            </div>
           </nav>
         )}
       </div>
