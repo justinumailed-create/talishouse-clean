@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import SubscriptionDrawer from "@/components/SubscriptionDrawer";
+import { formatCAD } from "@/utils/currency";
 
 export default function SubscriptionPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -36,7 +37,7 @@ export default function SubscriptionPage() {
             <div className="flex-1 space-y-6 p-6 sm:p-8">
               <div className="mb-2">
                 <div className="text-2xl font-semibold text-black">
-                  $95.00
+                  {formatCAD(95)}
                 </div>
                 <div className="text-xs text-gray-500">
                   per month
@@ -86,7 +87,7 @@ export default function SubscriptionPage() {
             <div className="flex-1 space-y-6 p-6 sm:p-8">
               <div className="mb-2">
                 <div className="text-2xl font-semibold text-black">
-                  $1,995.00
+                  {formatCAD(1995)}
                 </div>
                 <div className="text-xs text-gray-500">
                   One-time registration fee
@@ -95,7 +96,7 @@ export default function SubscriptionPage() {
 
               <div className="mt-2">
                 <div className="text-sm text-black">
-                  Then, starting in 1 month, $95.00/mo
+                  Then, starting in 1 month, {formatCAD(95)}/mo
                 </div>
               </div>
 

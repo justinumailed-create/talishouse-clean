@@ -58,7 +58,7 @@ export default function AssociateStatusPage() {
             </div>
 
             <Link
-              href="/subscription"
+              href="/business-office/apply"
               className="w-full bg-black text-white rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] hover:bg-gray-900 transition-colors text-center block"
             >
               Apply for Associate Status

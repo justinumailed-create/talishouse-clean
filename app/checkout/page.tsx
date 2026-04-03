@@ -10,6 +10,7 @@ import { syncTransactionToSplits } from "@/lib/splits";
 import { getPricingConfig } from "@/lib/utils/pricingEngine";
 import { ROUTES } from "@/lib/routes";
 import { UI } from "@/styles/design-system";
+import { formatCAD } from "@/utils/currency";
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test";
 
@@ -208,14 +209,14 @@ export default function CheckoutPage() {
 
               <div>
                 <p className="text-sm text-[#6e6e73] leading-relaxed">
-                  <span className="font-semibold text-[#1d1d1f]">Talishouse™</span> starts from $58.80 per sq.ft. 
-                  Base model ≈ <span className="font-semibold">$99,950.00</span> for 1,700 sq.ft.
+                  <span className="font-semibold text-[#1d1d1f]">Talishouse™</span> starts from {formatCAD(58.80)} per sq.ft. 
+                  Base model ≈ <span className="font-semibold">{formatCAD(99950)}</span> for 1,700 sq.ft.
                 </p>
               </div>
 
               <ul className="text-sm text-[#6e6e73] space-y-3 list-disc pl-4">
                 <li>
-                  The base charge of $8,500 covers sea-container shipping and up to 14 days after pickup from destination port.
+                  The base charge of {formatCAD(8500)} covers sea-container shipping and up to 14 days after pickup from destination port.
                 </li>
                 <li>
                   Includes incidental costs except customs clearance, taxes, and inland transport.

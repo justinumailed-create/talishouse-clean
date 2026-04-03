@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import ProductList from "@/components/ProductList";
 import { UI } from "@/styles/design-system";
+import { formatCAD } from "@/utils/currency";
 
 interface ContentBlock {
   id: string;
@@ -68,7 +69,7 @@ if (fetchError && fetchError.message) {
   }
 
   return (
-    <div className="container-main py-6 md:py-10">
+    <div className="w-full px-6 lg:px-12 py-6 md:py-10">
       <div className="grid grid-cols-12 gap-8">
       {error && (
         <div className="col-span-12 mb-6 p-4 bg-red-50 text-red-600 rounded-lg text-sm">
@@ -110,7 +111,7 @@ if (fetchError && fetchError.message) {
           <ul className="space-y-4 mb-8">
             <li className="flex items-start text-base font-medium text-gray-800">
               <span className="mr-3 text-gray-900 font-bold">•</span>
-              <span>{content['homepage_stats_price'] || "From $58.50 per sq.ft."}</span>
+              <span>{content['homepage_stats_price'] || `From ${formatCAD(58.50)} per sq.ft.`}</span>
             </li>
             <li className="flex items-start text-base font-medium text-gray-800">
               <span className="mr-3 text-gray-900 font-bold">•</span>
@@ -159,8 +160,7 @@ if (fetchError && fetchError.message) {
       </div>
 
       {/* Products Section */}
-      <div className="col-span-12 mt-12">
-        <h2 className="text-xl font-semibold mb-4">Products</h2>
+      <div className="col-span-12">
         <ProductList />
       </div>
 

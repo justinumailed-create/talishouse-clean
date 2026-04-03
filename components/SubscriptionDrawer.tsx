@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { getFastCode } from "@/lib/fast-code";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import { formatCAD } from "@/utils/currency";
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
@@ -65,12 +66,12 @@ export default function SubscriptionDrawer({ isOpen, onClose, type }: Subscripti
           <div className="mb-4">
             {isReferral ? (
               <>
-                <p className="text-3xl font-bold text-gray-900">$95.00/mo</p>
-                <p className="text-sm text-gray-500 mt-1">Then, starting in 1 month, $95.00/mo</p>
+                <p className="text-3xl font-bold text-gray-900">{formatCAD(95)}/mo</p>
+                <p className="text-sm text-gray-500 mt-1">Then, starting in 1 month, {formatCAD(95)}/mo</p>
               </>
             ) : (
               <>
-                <p className="text-3xl font-bold text-gray-900">$1,995.00</p>
+                <p className="text-3xl font-bold text-gray-900">{formatCAD(1995)}</p>
                 <p className="text-sm text-gray-500 mt-1">One-time registration fee</p>
               </>
             )}

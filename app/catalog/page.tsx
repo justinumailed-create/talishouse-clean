@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { formatCAD } from "@/utils/currency";
 
 const categories = [
   { name: "Glasshouse™", href: "/glasshouse", image: "/images/glasshouse/hero.png" },
@@ -18,7 +19,7 @@ const purchasingOptions = [
 export default function CatalogPage() {
   return (
     <div className="bg-[#f5f5f7] min-h-screen">
-      <div className="container-main">
+      <div className="w-full px-6 lg:px-12">
         <section className="py-12">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-gray-900">Product Catalog</h1>
@@ -34,7 +35,7 @@ export default function CatalogPage() {
                 <p className="text-gray-500 text-sm mt-1">Reserves spots in production and shipping queues.</p>
               </div>
               <div className="text-right">
-                <p className="text-xl font-semibold text-gray-900">$1,995</p>
+                <p className="text-xl font-semibold text-gray-900">{formatCAD(1995)}</p>
                 <span className="inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Required to start</span>
               </div>
             </div>
@@ -91,7 +92,7 @@ export default function CatalogPage() {
       </div>
 
       <section className="py-8 pb-24">
-        <div className="container-main text-center">
+        <div className="w-full px-6 lg:px-12 text-center">
           <p className="text-gray-400 text-xs">Just add ambition…!</p>
           <p className="text-gray-400 text-xs mt-1">Moonlighting is lucrative…!</p>
         </div>

@@ -55,7 +55,7 @@ export default function ProductLayout({
   const showImage = hasValidImage || dbImageUrl || productImage;
 
   return (
-    <div className="container-main py-8">
+    <div className="w-full px-6 lg:px-12 py-8">
       <div className="grid grid-cols-12 gap-8">
         {/* Left - Image - 8 cols */}
         <div className="col-span-12 lg:col-span-8">

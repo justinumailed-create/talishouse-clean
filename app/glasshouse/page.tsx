@@ -6,16 +6,20 @@ import { useCart } from "@/context/CartContext";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
 import { getModelsByCategory, getDefaultModel, PRODUCT_CATEGORIES } from "@/lib/products";
 import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
+import SuccessToast from "@/components/SuccessToast";
+import { formatCAD } from "@/utils/currency";
 
 
 export default function GlasshousePage() {
-  const models = getModelsByCategory("glasshouse");
+  const allModels = getModelsByCategory("glasshouse");
+  const models = allModels.filter(m => m.id === "160" || m.id === "200");
   
   const [selectedModel, setSelectedModel] = useState<any>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
   const [wholesaleRequested, setWholesaleRequested] = useState(false);
   const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { addToCart } = useCart();
 
 useEffect(() => {
@@ -69,7 +73,7 @@ useEffect(() => {
       wholesaleRequested,
       leaseToOwnRequested,
     });
-    alert("Quote requested successfully");
+    setSuccess(true);
   };
 
   const productAddons = getAddonsForProduct("glasshouse-200").filter(
@@ -93,21 +97,30 @@ useEffect(() => {
   if (!selectedModel) return null;
 
   return (
-    <ProductLayout
-      productName="Glasshouse™"
-      productImage={getProductImage()}
-      productSize="glasshouse-200"
-      familyDescription={`Glasshouse™ : The quick start option:
+    <>
+      <SuccessToast
+        show={success}
+        message="Quote requested successfully"
+        onClose={() => setSuccess(false)}
+      />
+      <ProductLayout
+        productName="Glasshouse™"
+        productImage={getProductImage()}
+        productSize="glasshouse-200"
+        familyDescription={`Glasshouse™ : The quick start option:
 - Up to five units shipped together with up to five optional deck platforms in one sea-can container.
 - Size and appearance: 10 x 20 ft. each, one, two or three sides glass.
-- Most commonly arranged L-shaped, U-shaped or parallel.
-- Most suitable as "VIEW" cottages, for own use, or in short term rental applications.
-- Retail, Wholesale and Lease-To-Own purchasing terms.`}
-      aboutContent={`Glasshouse™: Modern glass living spaces with natural light.
-8' x 20' or 10' x 20' steel structures featuring one, two or three sides glass.
-Great as short-term rental cottages with a view or home offices.`}
-    >
-      <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
+- All needed hardware, instructions and glue included.
+- Easy 15-minute setup with 2 people.
+- Full modular system: add units to configure larger spaces.
+- Includes a 25-year structural warranty.
+
+Select options below to customize your Glasshouse™`}
+        aboutContent={`Glasshouse™: The quick start option for modern modular living.
+10 x 20 ft. steel structures with glass walls.
+Perfect for short-term rentals, home offices, or additional living space.`}
+      >
+        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
         <h1 className="text-2xl font-semibold text-gray-900">
           {selectedModel?.name || 'Select a Model'}
         </h1>
@@ -119,14 +132,14 @@ Great as short-term rental cottages with a view or home offices.`}
               <button
                 key={model.id}
                 onClick={() => {
-  if (selectedModel?.id === model.id) {
-    setSelectedModel(null);
-  } else {
-    setSelectedModel(model);
-  }
-}}
+                  if (selectedModel?.id === model.id) {
+                    setSelectedModel(null);
+                  } else {
+                    setSelectedModel(model);
+                  }
+                }}
                 className={`p-4 rounded-xl border text-sm font-medium transition-all duration-200 hover:scale-[1.02] hover:shadow-md ${
-                  selectedModel.id === model.id
+                  selectedModel?.id === model.id
                     ? "border-gray-900 bg-gray-900 text-white"
                     : "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
                 }`}
@@ -138,7 +151,7 @@ Great as short-term rental cottages with a view or home offices.`}
         </div>
 
         <p className="text-2xl font-bold text-gray-900">
-          CAD ${calculateTotal().toLocaleString()}
+          {formatCAD(calculateTotal())}
         </p>
 
         <div className="space-y-8">
@@ -152,7 +165,7 @@ Great as short-term rental cottages with a view or home offices.`}
               <h3 className="text-sm uppercase tracking-wide text-gray-500">
                 Available Add-Ons
               </h3>
-              <div className="space-y-3">
+              <div className="space-y-3 mt-4">
                 {productAddons.map((addon) => (
                   <button
                     key={addon.id}
@@ -168,7 +181,7 @@ Great as short-term rental cottages with a view or home offices.`}
                       <p className={`text-xs mt-0.5 ${selectedAddons[addon.id] ? "text-white/70" : "text-gray-500"}`}>{addon.description}</p>
                     </div>
                     <span className={`font-semibold ${selectedAddons[addon.id] ? "text-white" : "text-gray-900"}`}>
-                      +CAD ${addon.price.toLocaleString()}
+                      +{formatCAD(addon.price)}
                     </span>
                   </button>
                 ))}
@@ -225,7 +238,8 @@ Great as short-term rental cottages with a view or home offices.`}
             </a>
           </div>
         </div>
-      </div>
-    </ProductLayout>
+        </div>
+      </ProductLayout>
+    </>
   );
 }

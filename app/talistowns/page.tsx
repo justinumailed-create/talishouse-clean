@@ -10,11 +10,13 @@ import {
 import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
 import { productFamilies } from "@/lib/productFamilies";
 import { useCart } from "@/context/CartContext";
+import SuccessToast from "@/components/SuccessToast";
 
 export default function TalistownsPage() {
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
   const [wholesaleRequested, setWholesaleRequested] = useState(false);
   const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { addToCart } = useCart();
 
   const model = talistownsModels[0];
@@ -57,28 +59,34 @@ export default function TalistownsPage() {
       wholesaleRequested,
       leaseToOwnRequested,
     });
-    alert("Quote requested successfully");
+    setSuccess(true);
   };
 
   const productAddons = getAddonsForProduct("talistowns");
 
   return (
-    <ProductLayout
-      productName={talistownsFamily?.name || productFamilies?.talistowns?.name || "TalisTowns™"}
-      productImage={talistownsFamily?.image || productFamilies?.talistowns?.image || ""}
-      productSize="talistowns"
-      familyDescription={
-        talistownsFamily?.gridDescription ||
-        productFamilies?.talistowns?.gridDescription ||
-        "Community development system using multiple Talishouse™ units."
-      }
-      aboutContent={
-        talistownsFamily?.gridDescription ||
-        productFamilies?.talistowns?.gridDescription ||
-        "Scalable from single structures to complete communities."
-      }
-    >
-      <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
+    <>
+      <SuccessToast
+        show={success}
+        message="Quote requested successfully"
+        onClose={() => setSuccess(false)}
+      />
+      <ProductLayout
+        productName={talistownsFamily?.name || productFamilies?.talistowns?.name || "TalisTowns™"}
+        productImage={talistownsFamily?.image || productFamilies?.talistowns?.image || ""}
+        productSize="talistowns"
+        familyDescription={
+          talistownsFamily?.gridDescription ||
+          productFamilies?.talistowns?.gridDescription ||
+          "Community development system using multiple Talishouse™ units."
+        }
+        aboutContent={
+          talistownsFamily?.gridDescription ||
+          productFamilies?.talistowns?.gridDescription ||
+          "Scalable from single structures to complete communities."
+        }
+      >
+        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
         <h1 className="text-2xl font-semibold text-gray-900">
           {talistownsFamily?.name || productFamilies?.talistowns?.name || "TalisTowns™"} Bundle
         </h1>
@@ -157,6 +165,7 @@ export default function TalistownsPage() {
           </button>
         </div>
       </div>
-    </ProductLayout>
+      </ProductLayout>
+    </>
   );
 }

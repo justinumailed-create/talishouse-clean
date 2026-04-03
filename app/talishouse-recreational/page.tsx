@@ -6,6 +6,7 @@ import { useCart } from "@/context/CartContext";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
 import { getModelsByCategory } from "@/lib/products";
 import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
+import SuccessToast from "@/components/SuccessToast";
 
 export default function TalishouseRecreationalPage() {
   const allModels = getModelsByCategory("recreational");
@@ -16,6 +17,7 @@ export default function TalishouseRecreationalPage() {
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
   const [wholesaleRequested, setWholesaleRequested] = useState(false);
   const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { addToCart } = useCart();
 
   const toggleOption = (category: string, option: string) => {
@@ -65,7 +67,7 @@ export default function TalishouseRecreationalPage() {
       wholesaleRequested,
       leaseToOwnRequested,
     });
-    alert("Quote requested successfully");
+    setSuccess(true);
   };
 
   const productAddons = getAddonsForProduct("talishouse-400");
@@ -73,20 +75,26 @@ export default function TalishouseRecreationalPage() {
   if (!selectedModel) return null;
 
   return (
-    <ProductLayout
-      productName="Talishouse™ Recreational"
-      productImage={selectedModel.image}
-      productSize={selectedModel.id}
-      familyDescription={`Talishouse™ Recreational : The flexible modular home system:
+    <>
+      <SuccessToast
+        show={success}
+        message="Quote requested successfully"
+        onClose={() => setSuccess(false)}
+      />
+      <ProductLayout
+        productName="Talishouse™ Recreational"
+        productImage={selectedModel.image}
+        productSize={selectedModel.id}
+        familyDescription={`Talishouse™ Recreational : The flexible modular home system:
 - 21' x 20' steel structures assembled in one day and move-in ready in one week.
 - Two bedrooms, one bath, open concept living-dining-kitchen.
 - Scalable from single units to multi-unit developments.
 - Retail, Wholesale and Lease-To-Own purchasing terms.`}
-      aboutContent={`Talishouse™ Recreational: Modern modular living for flexible lifestyles.
+        aboutContent={`Talishouse™ Recreational: Modern modular living for flexible lifestyles.
 21' x 20' steel structures featuring open concept design.
 Perfect for cottages, home offices, or investment properties.`}
-    >
-      <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
+      >
+        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
         <h1 className="text-2xl font-semibold text-gray-900">
           {selectedModel?.name || 'Select a Model'}
         </h1>
@@ -205,6 +213,7 @@ Perfect for cottages, home offices, or investment properties.`}
           </div>
         </div>
       </div>
-    </ProductLayout>
+      </ProductLayout>
+    </>
   );
 }

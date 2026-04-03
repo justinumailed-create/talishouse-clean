@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase, safeInsertLead } from "@/lib/supabase";
 import { useAssociate } from "@/context/AssociateContext";
 import { UI } from "@/styles/design-system";
+import { formatCAD } from "@/utils/currency";
 
 export default function AddProjectPage() {
   const router = useRouter();
@@ -197,7 +198,7 @@ export default function AddProjectPage() {
         </section>
 
         <p className="text-center text-xs text-gray-500 mt-6">
-          Talishouse Homes & Cottages start at $58.50 per sq.ft.. Typically they are up in a day and move-in ready in a week. Lease-To-Own is available, OAC.
+          Talishouse Homes & Cottages start at {formatCAD(58.50)} per sq.ft.. Typically they are up in a day and move-in ready in a week. Lease-To-Own is available, OAC.
         </p>
       </div>
     </div>

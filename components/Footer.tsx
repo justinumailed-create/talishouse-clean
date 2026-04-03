@@ -2,11 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import GatedLink from "./GatedLink";
 import { ROUTES } from "@/lib/routes";
+import { formatCAD } from "@/utils/currency";
 
 export default function Footer() {
   return (
     <footer className="w-full border-t border-gray-100 bg-gray-50 py-12 text-gray-700">
-      <div className="container-main">
+      <div className="w-full px-6 lg:px-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
           <div className="space-y-4">
             <div className="w-full overflow-hidden">
@@ -19,7 +20,7 @@ export default function Footer() {
               />
             </div>
             <p className="text-sm text-gray-500 leading-relaxed">
-              Modern homes and cottages starting from $58.50 per sq.ft. Built in a
+              Modern homes and cottages starting from {formatCAD(58.50)} per sq.ft. Built in a
               day, move-in ready in a week.
             </p>
           </div>

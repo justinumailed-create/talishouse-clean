@@ -7,6 +7,7 @@ import ProductLayout from "@/components/ProductLayout";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
 import { getModelsByCategory, getDefaultModel, type CategoryModel } from "@/lib/products";
 import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
+import SuccessToast from "@/components/SuccessToast";
 
 const CATEGORY_CONFIG = {
   recreational: {
@@ -52,6 +53,7 @@ function TalishouseContent() {
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
   const [wholesaleRequested, setWholesaleRequested] = useState(false);
   const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -108,13 +110,19 @@ function TalishouseContent() {
       wholesaleRequested,
       leaseToOwnRequested,
     });
-    alert("Quote requested successfully");
+    setSuccess(true);
   };
 
   const productAddons = getAddonsForProduct(config.productId);
 
   return (
-    <ProductLayout
+    <>
+      <SuccessToast
+        show={success}
+        message="Quote requested successfully"
+        onClose={() => setSuccess(false)}
+      />
+      <ProductLayout
       productName={config.name}
       productImage={config.image}
       productSize={config.size}
@@ -239,8 +247,9 @@ function TalishouseContent() {
             </a>
           </div>
         </div>
-      </div>
-    </ProductLayout>
+        </div>
+      </ProductLayout>
+    </>
   );
 }
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { supabase } from "@/lib/supabase";
+import { formatCAD } from "@/utils/currency";
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test";
 
@@ -159,7 +160,7 @@ export default function Transactions() {
                     </p>
 
                     <p className="text-sm">
-                      SPLITS Amount — fixed at CAD $1
+                      SPLITS Amount — {formatCAD(splitsAmount)}
                     </p>
 
                     <p className="text-sm">

@@ -96,7 +96,7 @@ export default function ProposeProjectPage() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] py-12">
-      <div className="container-main">
+      <div className="w-full px-6 lg:px-12">
         <div className="grid grid-cols-12 gap-8">
         
         {/* Header */}

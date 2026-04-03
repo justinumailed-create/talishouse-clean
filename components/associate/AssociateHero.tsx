@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { formatCAD } from "@/utils/currency";
 
 const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: false });
 
@@ -161,7 +162,7 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
               <ul className="space-y-3 mb-6">
                 <li className="flex items-start text-base font-medium text-gray-800">
                   <span className="mr-3 text-gray-900 font-bold">•</span>
-                  <span>From $58.50 per sq.ft.</span>
+                  <span>From {formatCAD(58.50)} per sq.ft.</span>
                 </li>
                 <li className="flex items-start text-base font-medium text-gray-800">
                   <span className="mr-3 text-gray-900 font-bold">•</span>

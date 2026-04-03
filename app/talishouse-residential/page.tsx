@@ -6,6 +6,7 @@ import { useCart } from "@/context/CartContext";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
 import { getModelsByCategory, getDefaultModel } from "@/lib/products";
 import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
+import SuccessToast from "@/components/SuccessToast";
 
 export default function TalishouseResidentialPage() {
   const allModels = getModelsByCategory("residential");
@@ -16,6 +17,7 @@ export default function TalishouseResidentialPage() {
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
   const [wholesaleRequested, setWholesaleRequested] = useState(false);
   const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
+  const [success, setSuccess] = useState(false);
   const { addToCart } = useCart();
 
   useEffect(() => {
@@ -70,7 +72,7 @@ export default function TalishouseResidentialPage() {
       wholesaleRequested,
       leaseToOwnRequested,
     });
-    alert("Quote requested successfully");
+    setSuccess(true);
   };
 
   const productAddons = getAddonsForProduct("talishouse-residential");
@@ -96,21 +98,27 @@ export default function TalishouseResidentialPage() {
   if (!selectedModel) return null;
 
   return (
-    <ProductLayout
-      productName="Talishouse™ Residential"
-      productImage={getProductImage()}
-      productSize="talishouse-residential"
-      familyDescription={`Talishouse™ Residential : Scalable living solutions:
+    <>
+      <SuccessToast
+        show={success}
+        message="Quote requested successfully"
+        onClose={() => setSuccess(false)}
+      />
+      <ProductLayout
+        productName="Talishouse™ Residential"
+        productImage={getProductImage()}
+        productSize="talishouse-residential"
+        familyDescription={`Talishouse™ Residential : Scalable living solutions:
 - Multi-unit residential developments
 - 21' x 20' steel structures assembled in one day
 - Two bedrooms, one bath, open concept living-dining-kitchen
 - From single units to complete communities
 - Retail, Wholesale and Lease-To-Own purchasing terms.`}
-      aboutContent={`Talishouse™ Residential: Modern modular living for permanent homes.
+        aboutContent={`Talishouse™ Residential: Modern modular living for permanent homes.
 21' x 20' steel structures with scalable configurations.
 Perfect for multi-unit developments and residential communities.`}
-    >
-      <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
+      >
+        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
         <h1 className="text-2xl font-semibold text-gray-900">
           {selectedModel?.name || 'Select a Model'}
         </h1>
@@ -229,6 +237,7 @@ Perfect for multi-unit developments and residential communities.`}
           </div>
         </div>
       </div>
-    </ProductLayout>
+      </ProductLayout>
+    </>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from "@/lib/supabase";
+import { formatCAD } from "@/utils/currency";
 
 interface LeadData {
   intent: string;
@@ -53,9 +54,9 @@ const SIZE_OPTIONS = [
 ];
 
 const BUDGET_OPTIONS = [
-  { value: 'under_25k', label: 'Under $25k' },
-  { value: '25k_75k', label: '$25k–$75k' },
-  { value: 'over_75k', label: '$75k+' },
+  { value: 'under_25k', label: `Under ${formatCAD(25000)}` },
+  { value: '25k_75k', label: `${formatCAD(25000)}–${formatCAD(75000)}` },
+  { value: 'over_75k', label: `${formatCAD(75000)}+` },
 ];
 
 const FINISH_OPTIONS = [

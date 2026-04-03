@@ -16,8 +16,8 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-[100] bg-white border-b border-gray-100">
-      <div className="container-main">
-        <div className="flex items-center justify-between h-16">
+      <div className="w-full px-6 lg:px-12">
+        <div className="flex justify-between items-center h-16">
           {/* LEFT: Logo + Navigation */}
           <div className="flex items-center gap-8">
             <Link href={ROUTES.HOME} className="flex-shrink-0">

@@ -81,12 +81,6 @@
   box-sizing: border-box;
 }
 
-.container-main {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding-left: 24px;
-  padding-right: 24px;
-}
 
 html, body {
   margin: 0;
@@ -135,4 +129,19 @@ body {
     padding: 16px;
     border-radius: 12px;
   }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
 }

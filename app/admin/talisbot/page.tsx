@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from "@/lib/supabase";
+import { formatCAD } from "@/utils/currency";
 
 interface TalisBotLead {
   id: string;
@@ -125,9 +126,9 @@ export default function TalisBotAnalytics() {
   };
 
   const budgetLabels: Record<string, string> = {
-    under_25k: 'Under $25k',
-    '25k_75k': '$25k–$75k',
-    over_75k: '$75k+',
+    under_25k: `Under ${formatCAD(25000)}`,
+    '25k_75k': `${formatCAD(25000)}–${formatCAD(75000)}`,
+    over_75k: `${formatCAD(75000)}+`,
   };
 
   const stepLabels: Record<string, string> = {
