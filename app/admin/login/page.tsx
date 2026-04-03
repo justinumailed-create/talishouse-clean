@@ -2,13 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/context/AuthContext";
-
-const SUPER_ADMIN_CODE = "ADMIN123";
+import { isValidAdminFastCode, normalizeFastCode, setAdminSession } from "@/lib/fast-code";
 
 export default function LoginPage() {
-  const { login } = useAuth();
   const [fastCode, setFastCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -17,43 +13,23 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
-    if (!fastCode || fastCode.trim() === "") {
-      setError("Enter FAST Code");
+
+    const normalizedCode = normalizeFastCode(fastCode);
+    if (!normalizedCode) {
+      setError("Enter your FAST code");
       return;
     }
 
     setLoading(true);
 
     try {
-      const code = fastCode.trim().toUpperCase();
-
-      // Super Admin login
-      if (code === SUPER_ADMIN_CODE) {
-        login(code, "admin");
-        window.location.href = "/admin/dashboard";
+      if (!isValidAdminFastCode(normalizedCode)) {
+        setError("Invalid FAST code");
         return;
       }
 
-      // Associate login (soft check)
-      const { data: associate, error: supabaseError } = await supabase
-        .from("associates")
-        .select("*")
-        .eq("fast_code", code)
-        .maybeSingle();
-
-      if (associate) {
-        login(code, "associate", associate.id);
-        
-        // Redirect to associate portal or dashboard
-        window.location.href = `/admin/dashboard`;
-        return;
-      }
-
-      setError("FAST Code not found, try again");
-    } catch (err) {
-      console.error("Login error:", err);
-      setError("Login failed. Please try again.");
+      setAdminSession();
+      router.replace("/admin/dashboard");
     } finally {
       setLoading(false);
     }
@@ -61,8 +37,8 @@ export default function LoginPage() {
 
   return (
     <div className="w-full max-w-sm px-6">
-      <h1 className="text-2xl font-semibold text-center mb-8">Admin</h1>
-      
+      <h1 className="text-2xl font-semibold text-center mb-8">Admin Login</h1>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <input
@@ -72,31 +48,23 @@ export default function LoginPage() {
               setFastCode(e.target.value);
               setError("");
             }}
-            className={`input text-center text-xl tracking-widest font-mono ${
-              error ? "border-red-500" : ""
-            }`}
-            placeholder="FAST Code"
+            className={`input text-center font-mono uppercase tracking-[0.3em] ${error ? "border-red-500" : ""}`}
+            placeholder="FAST CODE"
+            autoCorrect="off"
+            autoCapitalize="characters"
             autoFocus
           />
-          {error && (
-            <p className="text-red-500 text-sm text-center font-medium">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-primary w-full"
-        >
+        <button type="submit" disabled={loading} className="btn-primary w-full">
           {loading ? "Loading..." : "Continue"}
         </button>
       </form>
 
       <div className="mt-8 text-center">
-        <button 
-          onClick={() => window.location.href = "/"}
+        <button
+          onClick={() => router.replace("/")}
           className="text-sm text-[#6e6e73] hover:text-[#111] transition-colors"
         >
           Back to Home

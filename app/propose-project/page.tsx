@@ -1,448 +1,310 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { safeInsertLead } from "@/lib/supabase";
 import { useAssociate } from "@/context/AssociateContext";
 
-const sizes = ["160", "200", "400", "800", "1600", "2400"];
-const finishes = ["Delivery only", "Roof tight", "Turn key"];
-const usages = ["Personal use", "Resale", "Commercial use"];
-const permanentInstallations = ["Screw piles", "Piers", "Slab"];
-const mobileInstallations = ["20 ft – dual axle", "40 ft – triple axle"];
 const termsOptions = [
-  "purchase for personal use",
-  "purchase for commercial use or resale",
-  "pay half now, half over up to five years"
+  { value: "personal", label: "purchase for personal use" },
+  { value: "commercial", label: "purchase for commercial use or resale" },
+  { value: "installment", label: "pay half now, half over up to five years" },
 ];
+
+const sizes = ["160", "200", "400", "800", "1600", "2400"];
+
+const installationOptions = [
+  { value: "screw-piles", label: "Screw piles", detail: "Permanent" },
+  { value: "piers", label: "Piers", detail: "Permanent" },
+  { value: "slab", label: "Slab", detail: "Permanent" },
+  { value: "20-ft-dual-axle", label: "20 ft dual axle", detail: "Mobile" },
+  { value: "40-ft-triple-axle", label: "40 ft triple axle", detail: "Mobile" },
+];
+
+type FieldErrors = Partial<Record<string, string>>;
 
 export default function ProposeProjectPage() {
   const router = useRouter();
-  const { fastCode, associateId } = useAssociate();
+  const { fastCode } = useAssociate();
+
+  const [selectedTerms, setSelectedTerms] = useState("");
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedInstallation, setSelectedInstallation] = useState("");
-  const [selectedPermanentInstall, setSelectedPermanentInstall] = useState("");
-  const [selectedMobileInstall, setSelectedMobileInstall] = useState("");
-  const [selectedFinish, setSelectedFinish] = useState("");
-  const [selectedUsage, setSelectedUsage] = useState("");
-  const [selectedTerms, setSelectedTerms] = useState("");
   const [acceptanceChecked, setAcceptanceChecked] = useState(false);
   const [termsChecked, setTermsChecked] = useState(false);
+
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+  const [submitted, setSubmitted] = useState(false);
 
-  async function handleProjectSubmit(e: React.FormEvent<HTMLFormElement>) {
+  const showError = (field: string) => submitted && fieldErrors[field];
+
+  const validate = (formData: FormData): FieldErrors => {
+    const errors: FieldErrors = {};
+
+    if (!selectedTerms) errors.terms = "Please select your preferred terms.";
+    if (!formData.get("firstName")?.toString().trim()) errors.firstName = "First name is required.";
+    if (!formData.get("lastName")?.toString().trim()) errors.lastName = "Last name is required.";
+    if (!formData.get("email")?.toString().trim()) errors.email = "Email is required.";
+    if (!formData.get("phone")?.toString().trim()) errors.phone = "Phone number is required.";
+    
+    if (!formData.get("address")?.toString().trim()) errors.address = "Street address is required.";
+    if (!selectedSize) errors.size = "Please select a project size.";
+    if (!selectedInstallation) errors.installation = "Please select an installation type.";
+    if (!acceptanceChecked) errors.acceptance = "Please acknowledge the disclaimer.";
+    if (!termsChecked) errors.consent = "Please accept terms and communication.";
+
+    return errors;
+  };
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError("");
+    setSubmitted(true);
 
-    if (!acceptanceChecked) {
-      setError("Please accept the project disclaimer");
-      setLoading(false);
-      return;
-    }
+    const formData = new FormData(e.currentTarget);
+    const errors = validate(formData);
+    setFieldErrors(errors);
 
-    if (!termsChecked) {
-      setError("Please accept terms & communication consent");
-      setLoading(false);
-      return;
-    }
+    if (Object.keys(errors).length > 0) return;
 
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const firstName = formData.get("firstName") as string;
-    const lastName = formData.get("lastName") as string;
-    const phone = formData.get("phone") as string;
-    const email = formData.get("email") as string;
-    const address = formData.get("address") as string;
-    const geoLocation = formData.get("geoLocation") as string;
-    const date = formData.get("date") as string;
-
-    if (!firstName || !lastName || !phone || !email) {
-      setError("Please fill in all required fields");
-      setLoading(false);
-      return;
-    }
-
-    const installationType = selectedInstallation || selectedPermanentInstall || selectedMobileInstall || "";
-    const data = {
-      name: `${firstName} ${lastName}`,
-      phone,
-      email,
-      location: address || geoLocation || "",
-      fast_code: fastCode || "DIRECT",
+    const payload = {
+      name: `${formData.get("firstName")} ${formData.get("lastName")}`,
+      email: formData.get("email")?.toString().trim() || "",
+      phone: formData.get("phone")?.toString().trim() || "",
+      location: formData.get("address")?.toString().trim() || "",
       source: "propose",
       status: "new",
-      associate_id: associateId,
-      project_size: selectedSize,
-      installation_type: installationType,
-      finish_level: selectedFinish,
-      usage_type: selectedUsage,
-      terms_type: selectedTerms,
-      proposed_date: date,
+      deal_status: "pending",
+      fast_code: fastCode || "DIRECT",
+      created_at: new Date().toISOString(),
+      project_value: selectedSize ? parseInt(selectedSize, 10) : null,
+      preferred_terms: selectedTerms,
+      installation_type: selectedInstallation,
     };
 
-    console.log("Submitting lead:", JSON.stringify(data, null, 2));
-
-    const { data: insertData, error: insertError } = await supabase
-      .from("leads")
-      .insert([data])
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error("INSERT ERROR:", insertError?.message || insertError);
-      const errorMessage = 
-        insertError?.message ||
-        insertError?.details ||
-        insertError?.hint ||
-        "Unknown insert error";
-      setError(`Creation failed: ${errorMessage}`);
+    try {
+      await safeInsertLead(payload);
+      router.push("/project-received");
+    } catch (err) {
+      console.error("Submit error:", err);
+      setFieldErrors({ submit: "Failed to submit. Please try again." });
       setLoading(false);
-      return;
     }
-
-    console.log("Lead created:", JSON.stringify(insertData, null, 2));
-    router.push("/project-received");
   }
 
   return (
-    <div className="min-h-[70vh] bg-[#f5f5f7] py-12 px-4">
-        <div className="max-w-[640px] mx-auto space-y-6">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
-            Propose a Project
-          </h1>
-          <p className="text-gray-500 text-sm mt-2">
-            Detailed project specifications for business inquiries
-          </p>
+    <div className="min-h-screen bg-[#f5f5f5] py-12">
+      <div className="container-main">
+        <div className="grid grid-cols-12 gap-8">
+        
+        {/* Header */}
+        <div className="col-span-12 text-center mb-12">
+          <h1 className="text-2xl font-semibold text-gray-900">Propose a Project</h1>
+          <p className="text-sm text-gray-500 mt-2">Detailed project specifications for business inquiries</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] overflow-hidden w-full max-w-full">
-          <div className="bg-black px-6 py-4">
-            <p className="text-sm font-semibold text-white tracking-wide">
-              First come, first serve
-            </p>
+        {/* Form - Left Side */}
+        <div className="col-span-7">
+          <form onSubmit={handleSubmit} noValidate className="space-y-8">
+            
+            {/* Preferred Terms */}
+            <div className="space-y-4">
+              <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Preferred Terms</h2>
+              <div className="flex flex-wrap gap-3">
+                {termsOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setSelectedTerms(option.value)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    selectedTerms === option.value
+                      ? "bg-black text-white"
+                      : "border border-gray-200 bg-white text-gray-700 hover:border-gray-400"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            {showError("terms") && <p className="text-sm text-red-600">{fieldErrors.terms}</p>}
           </div>
 
-          <form onSubmit={handleProjectSubmit} className="p-6 sm:p-8 space-y-6">
-            {/* ROW 1: Date + Terms */}
+          {/* Personal Information */}
+          <div className="space-y-4">
+            <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Personal Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                  Date <span className="text-gray-400">*</span>
-                </label>
+              <div>
                 <input
-                  type="text"
-                  name="date"
-                  required
-                  placeholder="DD / MM / YYYY"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                  Preferred Terms <span className="text-gray-400">*</span>
-                </label>
-                <div className="space-y-2 w-full max-w-full overflow-hidden">
-                  {termsOptions.map((option, idx) => (
-                    <label
-                      key={idx}
-                      className={`flex items-start gap-3 p-2 rounded-lg cursor-pointer transition option-card w-full max-w-full overflow-hidden ${
-                        selectedTerms === option
-                          ? "bg-[#0070ba]/10 border border-[#0070ba]"
-                          : "border border-transparent hover:bg-gray-50"
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="terms"
-                        value={option}
-                        checked={selectedTerms === option}
-                        onChange={(e) => setSelectedTerms(e.target.value)}
-                        className="mt-1 accent-[#0070ba] flex-shrink-0"
-                      />
-                      <span className="text-xs text-gray-700 leading-tight option-text flex-1 min-w-0 break-words">{option}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* ROW 2: First Name + Last Name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                  First Name <span className="text-gray-400">*</span>
-                </label>
-                <input
-                  required
                   type="text"
                   name="firstName"
                   placeholder="First Name"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-black transition"
                 />
+                {showError("firstName") && <p className="text-sm text-red-600 mt-1">{fieldErrors.firstName}</p>}
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                  Last Name <span className="text-gray-400">*</span>
-                </label>
+              <div>
                 <input
-                  required
                   type="text"
                   name="lastName"
                   placeholder="Last Name"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-black transition"
                 />
+                {showError("lastName") && <p className="text-sm text-red-600 mt-1">{fieldErrors.lastName}</p>}
               </div>
-            </div>
-
-            {/* ROW 3: Phone + Email */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                  Mobile Phone <span className="text-gray-400">*</span>
-                </label>
-                <div className="flex rounded-xl border border-gray-200 overflow-hidden focus-within:border-black focus-within:ring-2 focus-within:ring-black/10">
-                  <span className="flex items-center px-3 bg-gray-50 text-sm text-gray-500 border-r">+1</span>
+              <div>
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Email"
+                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-black transition"
+                />
+                {showError("email") && <p className="text-sm text-red-600 mt-1">{fieldErrors.email}</p>}
+              </div>
+              <div className="flex gap-2">
+                <div className="w-16 flex-shrink-0">
                   <input
-                    required
+                    type="text"
+                    value="+91"
+                    readOnly
+                    className="w-full border border-gray-200 rounded-lg px-3 py-3 text-sm bg-gray-50 text-gray-500 text-center"
+                  />
+                </div>
+                <div className="flex-1">
+                  <input
                     type="tel"
                     name="phone"
-                    placeholder="(555) 000-0000"
-                    className="flex-1 px-3 py-3 text-sm text-gray-900 outline-none"
+                    placeholder="Mobile Number"
+                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-black transition"
                   />
                 </div>
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                  Email <span className="text-gray-400">*</span>
-                </label>
-                <input
-                  required
-                  type="email"
-                  name="email"
-                  placeholder="email@example.com"
-                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
-                />
-              </div>
+              {showError("phone") && <p className="text-sm text-red-600 mt-1 col-span-2">{fieldErrors.phone}</p>}
             </div>
+          </div>
 
-            {/* ROW 4: Address */}
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                Address <span className="text-gray-400">*</span>
-              </label>
-              <p className="text-[11px] text-gray-400">A Google recognized street address if available.</p>
+          {/* FAST Code Helper */}
+          {fastCode && (
+            <div className="text-xs text-gray-400">
+              FAST Code: <span className="font-mono font-medium">{fastCode}</span>
+            </div>
+          )}
+
+          {/* Address */}
+          <div className="space-y-4">
+            <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Address</h2>
+            <div>
               <input
                 type="text"
                 name="address"
-                required
                 placeholder="Street Address"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
+                className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-black transition"
               />
+              {showError("address") && <p className="text-sm text-red-600 mt-1">{fieldErrors.address}</p>}
             </div>
+          </div>
 
-            {/* ROW 5: Geo Location */}
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">Latitude / Longitude</label>
-              <p className="text-[11px] text-gray-400">Required if address is not a Google recognized street address.</p>
+          {/* Project Configuration */}
+          <div className="space-y-4">
+            <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Project Configuration</h2>
+            <div className="flex flex-wrap gap-3">
+              {sizes.map((size) => (
+                <button
+                  key={size}
+                  type="button"
+                  onClick={() => setSelectedSize(size)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    selectedSize === size
+                      ? "bg-black text-white"
+                      : "border border-gray-200 bg-white text-gray-700 hover:border-gray-400"
+                  }`}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+            {showError("size") && <p className="text-sm text-red-600">{fieldErrors.size}</p>}
+          </div>
+
+          {/* Installation Type */}
+          <div className="space-y-4">
+            <h2 className="text-xs font-medium text-gray-500 uppercase tracking-wide">Installation Type</h2>
+            <div className="flex flex-wrap gap-3">
+              {installationOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setSelectedInstallation(option.value)}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+                    selectedInstallation === option.value
+                      ? "bg-black text-white"
+                      : "border border-gray-200 bg-white text-gray-700 hover:border-gray-400"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            {showError("installation") && <p className="text-sm text-red-600">{fieldErrors.installation}</p>}
+          </div>
+
+          {/* reCAPTCHA Placeholder */}
+          <div className="h-12 border border-gray-200 rounded-lg bg-white flex items-center justify-center">
+            <span className="text-xs text-gray-400">reCAPTCHA placeholder</span>
+          </div>
+
+          {/* Acceptance */}
+          <div className="space-y-3">
+            <label className="flex items-start gap-3 text-sm text-gray-600">
               <input
-                type="text"
-                name="geoLocation"
-                placeholder="Latitude / Longitude"
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10"
+                type="checkbox"
+                checked={acceptanceChecked}
+                onChange={(e) => setAcceptanceChecked(e.target.checked)}
+                className="mt-1 accent-black"
               />
-            </div>
+              <span>I acknowledge that not every location will be suitable for delivery and that final approval is subject to site inspection.</span>
+            </label>
+            {showError("acceptance") && <p className="text-sm text-red-600">{fieldErrors.acceptance}</p>}
 
-            {/* ROW 6: Size */}
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                Size <span className="text-gray-400">*</span>
-              </label>
-              <select
-                value={selectedSize}
-                onChange={(e) => setSelectedSize(e.target.value)}
-                required
-                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-black focus:ring-2 focus:ring-black/10 bg-white"
-              >
-                <option value="">Select Size</option>
-                {sizes.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <label className="flex items-start gap-3 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={termsChecked}
+                onChange={(e) => setTermsChecked(e.target.checked)}
+                className="mt-1 accent-black"
+              />
+              <span>I agree to receive promotional messages. I also agree to the Terms of Service and Privacy Policy.</span>
+            </label>
+            {showError("consent") && <p className="text-sm text-red-600">{fieldErrors.consent}</p>}
+          </div>
 
-            {/* ROW 7: Installation */}
-            <div className="space-y-3">
-              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                Installation <span className="text-gray-400">*</span>
-              </label>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <p className="text-[11px] text-gray-400 uppercase tracking-wider">Permanent</p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {permanentInstallations.map((inst) => (
-                      <button
-                        key={inst}
-                        type="button"
-                        onClick={() => {
-                          setSelectedInstallation("Permanent");
-                          setSelectedPermanentInstall(inst);
-                          setSelectedMobileInstall("");
-                        }}
-                        className={`py-3 rounded-xl text-xs font-medium transition duration-200 hover:scale-[1.02] ${
-                          selectedInstallation === "Permanent" && selectedPermanentInstall === inst
-                            ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                      >
-                        {inst}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <p className="text-[11px] text-gray-400 uppercase tracking-wider">Mobile</p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {mobileInstallations.map((inst) => (
-                      <button
-                        key={inst}
-                        type="button"
-                        onClick={() => {
-                          setSelectedInstallation("Mobile");
-                          setSelectedMobileInstall(inst);
-                          setSelectedPermanentInstall("");
-                        }}
-                        className={`py-3 rounded-xl text-xs font-medium transition duration-200 hover:scale-[1.02] ${
-                          selectedInstallation === "Mobile" && selectedMobileInstall === inst
-                            ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                        }`}
-                      >
-                        {inst}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-black text-white py-3 rounded-lg text-sm font-medium hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Submitting..." : "Submit Request"}
+          </button>
 
-            {/* ROW 8: Finish */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                Finish <span className="text-gray-400">*</span>
-              </label>
-              <div className="grid grid-cols-3 gap-3">
-                {finishes.map((finish) => (
-                  <button
-                    key={finish}
-                    type="button"
-                    onClick={() => setSelectedFinish(finish)}
-                    className={`py-3 rounded-xl text-xs font-medium transition duration-200 hover:scale-[1.02] ${
-                      selectedFinish === finish
-                        ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {finish}
-                  </button>
-                ))}
-              </div>
-            </div>
+          {showError("submit") && (
+            <p className="text-sm text-red-600 text-center">{fieldErrors.submit}</p>
+          )}
 
-            {/* ROW 9: Usage */}
-            <div className="space-y-2">
-              <label className="text-xs font-medium text-[#86868b] uppercase tracking-wider">
-                Usage <span className="text-gray-400">*</span>
-              </label>
-              <div className="grid grid-cols-3 gap-3">
-                {usages.map((usage) => (
-                  <button
-                    key={usage}
-                    type="button"
-                    onClick={() => setSelectedUsage(usage)}
-                    className={`py-3 rounded-xl text-xs font-medium transition duration-200 hover:scale-[1.02] ${
-                      selectedUsage === usage
-                        ? "bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
-                  >
-                    {usage}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Legal Disclaimer + Checkboxes */}
-            <div className="space-y-3 mt-4">
-              {/* Acceptance Checkbox */}
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  id="acceptance"
-                  checked={acceptanceChecked}
-                  onChange={(e) => setAcceptanceChecked(e.target.checked)}
-                  className="mt-1 w-[18px] h-[18px] accent-[#0071e3] flex-shrink-0 cursor-pointer"
-                />
-
-                <label
-                  htmlFor="acceptance"
-                  className="text-sm text-gray-500 leading-relaxed cursor-pointer"
-                >
-                  I acknowledge and accept that not every location will be suitable for 
-                  delivery and that final approval is subject to site inspection.
-                  <span className="text-red-500 ml-0.5">*</span>
-                </label>
-              </div>
-
-              {/* Terms Checkbox */}
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  id="terms"
-                  checked={termsChecked}
-                  onChange={(e) => setTermsChecked(e.target.checked)}
-                  className="mt-1 w-[18px] h-[18px] accent-[#0071e3] flex-shrink-0 cursor-pointer"
-                />
-
-                <label
-                  htmlFor="terms"
-                  className="text-sm text-gray-500 leading-relaxed cursor-pointer"
-                >
-                  I agree to receive promotional messages sent via an autodialer, and this agreement isn&apos;t a condition of any purchase. I also agree to the{" "}
-                  <a href="/terms" className="underline text-[#0070ba]">Terms of Service</a>{" "}
-                  and{" "}
-                  <a href="/privacy" className="underline text-[#0070ba]">Privacy Policy</a>. 
-                  4 Msgs/Month. Msg & Data Rates may apply. Text STOP to opt out anytime. 
-                  Text Help for more information.
-                </label>
-              </div>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <p className="text-sm text-red-600 text-center">{error}</p>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={!acceptanceChecked || !termsChecked || loading}
-              className="w-full py-3 rounded-xl bg-[linear-gradient(135deg,#0070ba,#1546a0)] text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading ? "Submitting..." : "Submit"}
-            </button>
           </form>
         </div>
 
-        <div className="text-center">
-          <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">
-            ← Back to Home
-          </Link>
+        {/* Right Sidebar - Info / Empty */}
+        <div className="col-span-5">
+          <div className="sticky top-24 space-y-6">
+            <div className="bg-white rounded-xl p-6 border border-gray-200">
+              <h3 className="text-sm font-medium text-gray-900 mb-2">Need Help?</h3>
+              <p className="text-xs text-gray-500">Contact our team for assistance with your project proposal.</p>
+            </div>
+          </div>
+        </div>
+
         </div>
       </div>
     </div>

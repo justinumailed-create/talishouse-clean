@@ -16,7 +16,7 @@ interface ProductLayoutProps {
 export function isValidProductImage(product: { size?: string } | null): boolean {
   if (!product) return false;
   if (!product.size) return false;
-  const validSizes = ['160', '200', '400', '800', '1600', '2400', 'glasshouse-200', 'talishouse-420', 'talishouse-residential', 'talistowns'];
+  const validSizes = ['160', '200', '400', '800', '1600', '2400', 'glasshouse-200', 'talishouse-400', 'talishouse-residential', 'talistowns'];
   return validSizes.includes(product.size);
 }
 
@@ -52,20 +52,21 @@ export default function ProductLayout({
   };
 
   const displayImage = getDisplayImage();
-  const showImage = hasValidImage || dbImageUrl;
+  const showImage = hasValidImage || dbImageUrl || productImage;
 
   return (
-    <div className="container py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-12 w-full">
-        <div className="lg:col-span-7 flex flex-col gap-6 items-stretch">
-          <div className="w-full aspect-[16/9] bg-gray-50 relative overflow-hidden rounded-2xl border border-gray-100">
-            {showImage ? (
+    <div className="container-main py-8">
+      <div className="grid grid-cols-12 gap-8">
+        {/* Left - Image - 8 cols */}
+        <div className="col-span-12 lg:col-span-8">
+          <div className="w-full aspect-[16/9] bg-gray-50 relative overflow-hidden rounded-xl border border-gray-100">
+            {displayImage ? (
               <Image
                 src={displayImage}
                 alt={productName}
                 fill
                 className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 70vw"
+                sizes="(max-width: 1024px) 100vw, 66vw"
                 priority
               />
             ) : (
@@ -75,23 +76,24 @@ export default function ProductLayout({
             )}
           </div>
 
-          <div className="p-8 bg-white border border-gray-100 rounded-2xl shadow-sm">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">About {productName}</h2>
+          <div className="p-6 bg-white border border-gray-100 rounded-xl shadow-sm">
+            <h2 className="text-lg font-semibold mb-4 text-gray-900">About {productName}</h2>
             
             {familyDescription && (
-              <div className="product-family-description mb-6 text-sm text-gray-700 leading-relaxed font-medium">
+              <div className="product-family-description mb-5 text-sm text-gray-600 leading-relaxed">
                 {familyDescription}
               </div>
             )}
 
-            <p className="text-[15px] text-gray-600 whitespace-pre-line leading-relaxed">
+            <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
               {aboutContent}
             </p>
           </div>
         </div>
 
-        <div className="lg:col-span-3 relative">
-          <div className="lg:sticky lg:top-24">
+        {/* Right - Configurator - 4 cols */}
+        <div className="col-span-12 lg:col-span-4">
+          <div className="sticky top-24 h-fit bg-white border rounded-xl p-6 shadow-sm">
             {children}
           </div>
         </div>
@@ -99,8 +101,8 @@ export default function ProductLayout({
 
       <style jsx>{`
         .product-family-description {
-          border-bottom: 1px solid #e5e5e5;
-          padding-bottom: 1.5rem;
+          border-bottom: 1px solid #f0f0f0;
+          padding-bottom: 1.25rem;
         }
       `}</style>
     </div>

@@ -5,7 +5,7 @@ export const revalidate = 0;
 
 export async function GET() {
   try {
-    if (!isSupabaseConfigured()) {
+    if (!isSupabaseConfigured) {
       return NextResponse.json({});
     }
 

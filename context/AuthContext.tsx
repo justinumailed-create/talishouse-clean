@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { isAuthorized, getRole, getFastCode } from "@/lib/fast-code";
+import { clearAdminSession, getFastCode, getRole, isAuthorized, normalizeFastCode } from "@/lib/fast-code";
 
 interface AuthContextType {
   authorized: boolean | null;
@@ -14,60 +14,67 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [authorized, setAuthorized] = useState<boolean | null>(null);
-  const [role, setRole] = useState<"admin" | "associate" | null>(null);
-  const [fastCode, setFastCode] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+function getInitialAuthState() {
+  if (typeof window === "undefined") {
+    return {
+      authorized: null,
+      role: null,
+      fastCode: null,
+      loading: true,
+    };
+  }
 
-  const checkAuth = () => {
-    if (typeof window === "undefined") return;
-    
-    const auth = isAuthorized();
-    const r = getRole() as "admin" | "associate" | null;
-    const code = getFastCode();
-    
-    setAuthorized(auth);
-    setRole(r);
-    setFastCode(code);
-    setLoading(false);
+  return {
+    authorized: isAuthorized(),
+    role: getRole(),
+    fastCode: getFastCode(),
+    loading: false,
   };
+}
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const initialState = getInitialAuthState();
+  const [authorized, setAuthorized] = useState<boolean | null>(initialState.authorized);
+  const [role, setRole] = useState<"admin" | "associate" | null>(initialState.role);
+  const [fastCode, setFastCode] = useState<string | null>(initialState.fastCode);
+  const [loading] = useState(initialState.loading);
 
   useEffect(() => {
-    checkAuth();
-    
-    // Listen for storage events to sync across tabs
-    window.addEventListener("storage", checkAuth);
-    return () => window.removeEventListener("storage", checkAuth);
+    const syncAuth = () => {
+      setAuthorized(isAuthorized());
+      setRole(getRole());
+      setFastCode(getFastCode());
+    };
+
+    window.addEventListener("storage", syncAuth);
+    return () => {
+      window.removeEventListener("storage", syncAuth);
+    };
   }, []);
 
   const login = (code: string, r: string, id?: string) => {
     if (typeof window === "undefined") return;
-    
-    const normalizedCode = (code || "").toUpperCase().trim();
+
+    const normalizedCode = normalizeFastCode(code);
     if (!normalizedCode) return;
 
     localStorage.setItem("fast_code", normalizedCode);
     localStorage.setItem("role", r);
-    if (id) localStorage.setItem("associateId", id);
-    
-    // Set cookie for middleware/persistence - Secure + SameSite=Lax
-    const secure = window.location.protocol === "https:" ? "Secure;" : "";
-    document.cookie = `admin_session=${normalizedCode}; path=/; max-age=86400; ${secure} SameSite=Lax`;
-    
+    if (id) {
+      localStorage.setItem("associateId", id);
+    } else {
+      localStorage.removeItem("associateId");
+    }
+
     setAuthorized(true);
-    setRole(r as any);
+    setRole(r as "admin" | "associate");
     setFastCode(normalizedCode);
   };
 
   const logout = () => {
     if (typeof window === "undefined") return;
-    
-    localStorage.removeItem("fast_code");
-    localStorage.removeItem("role");
-    localStorage.removeItem("associateId");
-    document.cookie = "admin_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax";
-    
+
+    clearAdminSession();
     setAuthorized(false);
     setRole(null);
     setFastCode(null);

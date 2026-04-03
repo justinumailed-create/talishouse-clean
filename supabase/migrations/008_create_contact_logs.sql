@@ -1,6 +1,6 @@
 -- Create contact_logs table
 CREATE TABLE IF NOT EXISTS contact_logs (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   fast_code TEXT,
   message TEXT NOT NULL,
   timestamp TIMESTAMP DEFAULT NOW()

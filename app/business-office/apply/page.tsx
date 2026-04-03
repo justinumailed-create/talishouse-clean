@@ -28,7 +28,7 @@ export default function ApplyPage() {
       return;
     }
 
-    const { error: insertError } = await supabase.from("associate_applications").insert([{
+    const payload = {
       name: formData.name.trim(),
       email: formData.email.trim(),
       phone: formData.phone.trim(),
@@ -36,13 +36,18 @@ export default function ApplyPage() {
       preferred_fast_code: formData.preferredFastCode.trim() || null,
       role_type: formData.roleType,
       status: "pending",
-    }]);
+    };
+    console.log("ASSOCIATE APPLICATION INSERT - Payload:", JSON.stringify(payload, null, 2));
+
+    const { error: insertError } = await supabase.from("associate_applications").insert([payload]);
 
     if (insertError) {
+      console.error("ASSOCIATE APPLICATION INSERT ERROR:", JSON.stringify(insertError, null, 2));
       setError(insertError.message);
       setIsSubmitting(false);
       return;
     }
+    console.log("ASSOCIATE APPLICATION INSERT SUCCESS");
 
     setSuccess(true);
     setIsSubmitting(false);

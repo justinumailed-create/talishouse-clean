@@ -25,6 +25,7 @@ export interface CartItem {
   options?: Record<string, string>;
   addons?: string[];
   wholesaleRequested?: boolean;
+  leaseToOwnRequested?: boolean;
 }
 
 const DEFAULT_PRODUCT_IMAGE = "/images/placeholder.png";

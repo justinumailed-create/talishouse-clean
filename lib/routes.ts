@@ -16,8 +16,6 @@ export const ROUTES = {
   ASSOCIATE_STATUS: "/associate-status",
   ADMIN: "/admin",
   ADMIN_DASHBOARD: "/admin/dashboard",
-  ADMIN_ASSOCIATES: "/admin/associates",
-  ADMIN_ASSOCIATES_NEW: "/admin/associates/new",
   ADMIN_LEADS: "/admin/leads",
   ADMIN_LEADS_SIMULATION: "/admin/leads-simulation",
   ADMIN_PRICING: "/admin/pricing",

@@ -72,23 +72,39 @@ export async function syncTransactionToSplits(
   const splits = calculateSplits(basePrice, addonsValue);
 
   if (splits.msrpReward > 0) {
-    await supabase.from("earnings").insert([{
+    const msrpPayload = {
       user_id: user.id,
       deal_id: dealId,
       fast_code: fastCode.toUpperCase(),
       amount: splits.msrpReward,
       type: "msrp",
-    }]);
+    };
+    console.log("EARNINGS MSRP INSERT - Payload:", JSON.stringify(msrpPayload, null, 2));
+
+    const { error: msrpError } = await supabase.from("earnings").insert([msrpPayload]);
+    if (msrpError) {
+      console.error("EARNINGS MSRP INSERT ERROR:", JSON.stringify(msrpError, null, 2));
+    } else {
+      console.log("EARNINGS MSRP INSERT SUCCESS");
+    }
   }
 
   if (splits.addonsReward > 0) {
-    await supabase.from("earnings").insert([{
+    const addonsPayload = {
       user_id: user.id,
       deal_id: dealId,
       fast_code: fastCode.toUpperCase(),
       amount: splits.addonsReward,
       type: "addons",
-    }]);
+    };
+    console.log("EARNINGS ADDONS INSERT - Payload:", JSON.stringify(addonsPayload, null, 2));
+
+    const { error: addonsError } = await supabase.from("earnings").insert([addonsPayload]);
+    if (addonsError) {
+      console.error("EARNINGS ADDONS INSERT ERROR:", JSON.stringify(addonsError, null, 2));
+    } else {
+      console.log("EARNINGS ADDONS INSERT SUCCESS");
+    }
   }
 }
 

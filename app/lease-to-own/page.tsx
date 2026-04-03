@@ -13,8 +13,8 @@ interface LeaseProduct {
 
 const products: LeaseProduct[] = [
   {
-    id: "talishouse-420",
-    name: "Talishouse™ 420",
+    id: "talishouse-400",
+    name: "Talishouse™ 400",
     price: 39950,
     description: "21' x 20' steel structure, two bedrooms, one bath, open concept living.",
   },

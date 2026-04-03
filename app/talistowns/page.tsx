@@ -13,6 +13,8 @@ import { useCart } from "@/context/CartContext";
 
 export default function TalistownsPage() {
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
+  const [wholesaleRequested, setWholesaleRequested] = useState(false);
+  const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
   const { addToCart } = useCart();
 
   const model = talistownsModels[0];
@@ -52,7 +54,10 @@ export default function TalistownsPage() {
       image: talistownsFamily?.image || productFamilies?.talistowns?.image || "/images/talistowns.jpg",
       options: {},
       addons: selectedAddonNames,
+      wholesaleRequested,
+      leaseToOwnRequested,
     });
+    alert("Quote requested successfully");
   };
 
   const productAddons = getAddonsForProduct("talistowns");
@@ -73,29 +78,27 @@ export default function TalistownsPage() {
         "Scalable from single structures to complete communities."
       }
     >
-      <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-        <h1 className="text-2xl font-bold tracking-tighter text-gray-900">
+      <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
+        <h1 className="text-2xl font-semibold text-gray-900">
           {talistownsFamily?.name || productFamilies?.talistowns?.name || "TalisTowns™"} Bundle
         </h1>
 
-        <div className="mt-4">
-          <p className="text-2xl text-gray-900 font-bold">
-            CAD ${bundlePrice.toLocaleString()}
-          </p>
-        </div>
+        <p className="text-xl font-bold text-gray-900">
+          CAD ${bundlePrice.toLocaleString()}
+        </p>
 
-        <div className="mt-6 space-y-6">
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-            <p className="text-xs text-gray-600 mb-3">
-              Selecting TalisTowns™ automatically adds 2 x Talishouse™ 420 and
+        <div className="space-y-6">
+          <div className="rounded-lg border border-gray-100 bg-gray-50 p-4">
+            <p className="text-sm text-gray-600">
+              Selecting TalisTowns™ automatically adds 2 x Talishouse™ 400 and
               1 x Gable Roof to the cart. Optional compatible add-ons can be layered
               on top.
             </p>
           </div>
 
           {productAddons.length > 0 && (
-            <div className="border-b border-gray-100 pb-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
+            <div>
+              <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-4">
                 Available Add-Ons
               </h3>
               <div className="space-y-3">
@@ -113,16 +116,44 @@ export default function TalistownsPage() {
             </div>
           )}
 
-          <div className="py-4 text-center space-y-1">
-            <p className="text-sm text-gray-600">Just add ambition</p>
-            <p className="text-sm text-gray-600">Moonlighting is lucrative</p>
+          <div className="space-y-3">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="wholesale"
+                checked={wholesaleRequested}
+                onChange={(e) => setWholesaleRequested(e.target.checked)}
+                className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black cursor-pointer"
+              />
+              <label
+                htmlFor="wholesale"
+                className="ml-3 text-sm text-gray-700 cursor-pointer"
+              >
+                Request wholesale pricing
+              </label>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="leaseToOwn"
+                checked={leaseToOwnRequested}
+                onChange={(e) => setLeaseToOwnRequested(e.target.checked)}
+                className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black cursor-pointer"
+              />
+              <label
+                htmlFor="leaseToOwn"
+                className="ml-3 text-sm text-gray-700 cursor-pointer"
+              >
+                Request lease-to-own
+              </label>
+            </div>
           </div>
 
           <button
             onClick={handleAddToCart}
-            className="btn-primary w-full text-lg"
+            className="btn-primary w-full text-lg font-semibold"
           >
-            ADD TO CART — CAD ${calculateTotal().toLocaleString()}
+            Request a Quote
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, safeInsertLead } from "@/lib/supabase";
 import { ToastContainer, useToast } from "@/components/Toast";
 import Link from "next/link";
 
@@ -124,32 +124,30 @@ export default function LeadsSimulationPage() {
         return;
       }
 
-      const leadsToInsert = leads.map(lead => ({
-        name: lead.name,
-        email: lead.email,
-        phone: lead.phone,
-        location: lead.location,
-        fast_code: lead.fast_code,
-        source: "simulation",
-        status: "new",
-        project_value: parsePriceRange(lead.price_range),
-      }));
+      const insertPromises = leads.map(lead => 
+        safeInsertLead({
+          name: lead.name,
+          phone: lead.phone,
+          location: lead.location || "unknown",
+          source: "simulation",
+          status: "new",
+          deal_status: "pending",
+          fast_code: lead.fast_code || null,
+          project_value: parsePriceRange(lead.price_range) || null,
+          commission_rate: null,
+          split_percentage: null,
+        }).catch(err => {
+          console.error("LEAD FAIL FULL:", JSON.stringify(err, null, 2));
+        })
+      );
 
-      const { error: insertError } = await supabase
-        .from("leads")
-        .insert(leadsToInsert);
-
-      if (insertError) {
-        console.error("Insert error:", insertError);
-        error("Failed to import leads: " + insertError.message);
-      } else {
-        setImportedLeads(leads);
-        success(`${leads.length} leads imported successfully!`);
-        fetchLeadsCount();
-      }
+      await Promise.all(insertPromises);
+      setImportedLeads(leads);
+      success(`${leads.length} leads imported successfully!`);
+      fetchLeadsCount();
     } catch (err) {
       console.error("File read error:", err);
-      error("Failed to read file");
+      error("Failed to import leads. Check console for details.");
     }
     
     setIsProcessing(false);
@@ -188,32 +186,30 @@ export default function LeadsSimulationPage() {
         };
       });
 
-      const leadsToInsert = selectedLeads.map(lead => ({
-        name: lead.name,
-        email: lead.email,
-        phone: lead.phone,
-        location: lead.location,
-        fast_code: lead.fast_code,
-        source: "simulation",
-        status: "new",
-        project_value: parsePriceRange(lead.price_range),
-      }));
+      const insertPromises = selectedLeads.map(lead => 
+        safeInsertLead({
+          name: lead.name,
+          phone: lead.phone,
+          location: lead.location || "unknown",
+          source: "simulation",
+          status: "new",
+          deal_status: "pending",
+          fast_code: lead.fast_code || null,
+          project_value: parsePriceRange(lead.price_range) || null,
+          commission_rate: null,
+          split_percentage: null,
+        }).catch(err => {
+          console.error("LEAD FAIL FULL:", JSON.stringify(err, null, 2));
+        })
+      );
 
-      const { error: insertError } = await supabase
-        .from("leads")
-        .insert(leadsToInsert);
-
-      if (insertError) {
-        console.error("Simulate error:", insertError);
-        error("Failed to simulate leads: " + insertError.message);
-      } else {
-        setImportedLeads(selectedLeads);
-        success(`${selectedLeads.length} demo leads created successfully!`);
-        fetchLeadsCount();
-      }
+      await Promise.all(insertPromises);
+      setImportedLeads(selectedLeads);
+      success(`${selectedLeads.length} demo leads created successfully!`);
+      fetchLeadsCount();
     } catch (err) {
       console.error("Simulate error:", err);
-      error("Failed to create demo leads");
+      error("Failed to simulate leads. Check console for details.");
     }
     
     setIsSimulating(false);

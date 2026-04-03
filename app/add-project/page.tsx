@@ -3,14 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { supabase, safeInsertLead } from "@/lib/supabase";
 import { useAssociate } from "@/context/AssociateContext";
+import { UI } from "@/styles/design-system";
 
 export default function AddProjectPage() {
   const router = useRouter();
   const { fastCode, associateId } = useAssociate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [deliveryAcknowledgement, setDeliveryAcknowledgement] = useState(false);
   const [smsConsent, setSmsConsent] = useState(false);
 
@@ -37,48 +39,36 @@ export default function AddProjectPage() {
       return;
     }
 
-    const data = {
+    const payload = {
       name,
       phone,
-      location,
-      fast_code: fastCode || "DIRECT",
+      location: location || "unknown",
       source: "add-project",
       status: "new",
-      associate_id: associateId,
-      delivery_acknowledgement: deliveryAcknowledgement,
-      sms_consent: smsConsent,
-      preferred_fast_code: preferredFastCode || null,
+      deal_status: "pending",
+      fast_code: fastCode || "DIRECT",
+      created_at: new Date().toISOString(),
+      project_value: null,
+      commission_rate: null,
+      split_percentage: null,
     };
 
-    console.log("Submitting lead:", JSON.stringify(data, null, 2));
-
-    const { data: insertData, error: insertError } = await supabase
-      .from("leads")
-      .insert([data])
-      .select()
-      .single();
-
-    if (insertError) {
-      console.error("INSERT ERROR:", insertError?.message || insertError);
-      const errorMessage = 
-        insertError?.message ||
-        insertError?.details ||
-        insertError?.hint ||
-        "Unknown insert error";
-      setError(`Creation failed: ${errorMessage}`);
+    try {
+      await safeInsertLead(payload);
+      setStatus("success");
+      router.push("/project-received");
+    } catch (err) {
+      console.error("LEAD FAIL FULL:", JSON.stringify(err, null, 2));
+      setStatus("error");
       setLoading(false);
-      return;
     }
-
-    console.log("Lead created:", JSON.stringify(insertData, null, 2));
-    router.push("/project-received");
   }
 
   const isFormValid = deliveryAcknowledgement && smsConsent;
 
   return (
-    <div className="container py-12">
-      <div className="mx-auto max-w-md w-full">
+    <div className="container py-12 px-4">
+      <div className="mx-auto max-w-md px-4 w-full">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
             ADD A PROJECT
@@ -105,59 +95,57 @@ export default function AddProjectPage() {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-              <label className="block">
-                <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                  Name
-                </span>
-                <input
-                  required
-                  type="text"
-                  name="name"
-                  placeholder="Full Name"
-                  className="w-full rounded-2xl border border-gray-200 px-4 py-4 text-sm text-gray-900 outline-none transition focus:border-black"
-                />
-              </label>
+              <div className="space-y-3">
+                <label className="block">
+                  <span className={UI.label}>Name</span>
+                  <input
+                    required
+                    type="text"
+                    name="name"
+                    placeholder="Full Name"
+                    className={UI.input}
+                  />
+                </label>
 
-              <label className="block">
-                <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                  Location
-                </span>
-                <input
-                  required
-                  type="text"
-                  name="location"
-                  placeholder="City, State"
-                  className="w-full rounded-2xl border border-gray-200 px-4 py-4 text-sm text-gray-900 outline-none transition focus:border-black"
-                />
-              </label>
+                <label className="block">
+                  <span className={UI.label}>Location</span>
+                  <input
+                    required
+                    type="text"
+                    name="location"
+                    placeholder="City, State"
+                    className={UI.input}
+                  />
+                </label>
 
-              <label className="block">
-                <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                  Mobile Phone
-                </span>
-                <input
-                  required
-                  type="tel"
-                  name="phone"
-                  placeholder="(555) 000-0000"
-                  className="w-full rounded-2xl border border-gray-200 px-4 py-4 text-sm text-gray-900 outline-none transition focus:border-black"
-                />
-              </label>
+                <label className="block">
+                  <span className={UI.label}>Mobile Phone</span>
+                  <input
+                    required
+                    type="tel"
+                    name="phone"
+                    placeholder="(555) 000-0000"
+                    className={UI.input}
+                  />
+                </label>
 
-              <label className="block">
-                <span className="mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400">
-                  Request Preferred FAST Code
-                </span>
-                <input
-                  type="text"
-                  name="preferredFastCode"
-                  placeholder="Enter preferred FAST code (optional)"
-                  className="w-full rounded-2xl border border-gray-200 px-4 py-4 text-sm text-gray-900 outline-none transition focus:border-black"
-                />
-              </label>
+                <label className="block">
+                  <span className={UI.label}>Request Preferred FAST Code (optional)</span>
+                  <input
+                    type="text"
+                    name="preferredFastCode"
+                    placeholder="Enter preferred FAST code"
+                    className={UI.input}
+                  />
+                </label>
+              </div>
 
-              {error && (
-                <p className="text-sm text-red-600 text-center">{error}</p>
+              {status === "success" && (
+                <p className="text-green-600 text-xs mt-2">✓ Saved successfully</p>
+              )}
+
+              {status === "error" && (
+                <p className="text-red-600 text-xs mt-2">{error}</p>
               )}
 
               <div className="space-y-4 pt-4 acknowledgement-container w-full max-w-full overflow-hidden">
@@ -199,11 +187,8 @@ export default function AddProjectPage() {
               <button
                 type="submit"
                 disabled={loading || !isFormValid}
-                className={`w-full rounded-2xl px-6 py-4 text-xs font-bold uppercase tracking-[0.28em] transition ${
-                  isFormValid
-                    ? "bg-[#1279c9] text-white hover:bg-[#0f6bb1]"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                } disabled:cursor-not-allowed disabled:opacity-60`}
+                className={UI.button}
+                style={{ backgroundColor: isFormValid ? undefined : '#d1d5db', color: isFormValid ? undefined : '#6b7280' }}
               >
                 {loading ? "Submitting..." : "SUBMIT"}
               </button>

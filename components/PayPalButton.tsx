@@ -24,18 +24,22 @@ export default function PayPalButton({
 
   const savePayment = async (transactionId: string) => {
     try {
-      const { error } = await supabase.from("payments").insert([{
+      const payload = {
         product_name: productName,
         amount: amount,
         user_name: userName,
         status: "completed",
-      }]);
+      };
+      console.log("PAYPAL PAYMENT INSERT - Payload:", JSON.stringify(payload, null, 2));
 
+      const { error } = await supabase.from("payments").insert([payload]);
       if (error) {
-        console.error("Error saving payment:", error);
+        console.error("PAYPAL PAYMENT INSERT ERROR:", JSON.stringify(error, null, 2));
+      } else {
+        console.log("PAYPAL PAYMENT INSERT SUCCESS");
       }
     } catch (err) {
-      console.error("Error saving payment:", err);
+      console.error("Payment save failed:", err);
     }
   };
 
@@ -61,19 +65,18 @@ export default function PayPalButton({
             try {
               if (actions.order) {
                 const details = await actions.order.capture();
-                console.log("Payment captured:", details);
                 await savePayment(details.id || "");
                 onSuccess?.();
               }
-            } catch (err) {
-              console.error("Error capturing payment:", err);
+            } catch (err: any) {
+              console.warn("Payment capture failed:", err?.message || err);
               setError("Payment failed. Please try again.");
             } finally {
               setLoading(false);
             }
           }}
-          onError={(err) => {
-            console.error("PayPal error:", err);
+          onError={(err: any) => {
+            console.warn("PayPal error:", err?.message || err);
             setError("Payment failed. Please try again.");
           }}
         />

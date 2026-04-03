@@ -1,30 +1,30 @@
 export const PRODUCT_IMAGE_MAP: Record<string, string> = {
   // Glasshouse
   'glasshouse': '/images/glasshouse/hero.png',
-  'glasshouse-160': '/images/glasshouse/models/160.png',
+  'glasshouse-160': '/images/glasshouse/hero.png',
   'glasshouse-200': '/images/glasshouse/models/200.png',
   
   // Talishouse Recreational
-  'recreational': '/images/talishouse-420.svg',
-  'talishouse-420': '/images/talishouse-420.svg',
-  'talishouse-800': '/images/talishouse-850.svg',
+  'recreational': '/images/talishouse/recreational/hero.png',
+  'talishouse-400': '/images/talishouse/recreational/hero.png',
+  'talishouse-800': '/images/talishouse/recreational/models/800.png',
   
   // Talishouse Residential
   'residential': '/images/talishouse/residential/hero.png',
   'talishouse-residential': '/images/talishouse/residential/hero.png',
   'talishouse-1600': '/images/talishouse/residential/models/1600.png',
-  'talishouse-2400': '/images/talishouse/residential/models/2400.png',
+  'talishouse-2400': '/images/talishouse/residential/models/1600.png',
   
   // TalisTowns
   'talistowns': '/images/talistowns.jpg',
   
   // Legacy size codes
-  '160': '/images/glasshouse/models/160.png',
+  '160': '/images/glasshouse/hero.png',
   '200': '/images/glasshouse/models/200.png',
-  '420': '/images/talishouse/recreational/models/420.png',
+  '400': '/images/talishouse/recreational/hero.png',
   '800': '/images/talishouse/recreational/models/800.png',
   '1600': '/images/talishouse/residential/models/1600.png',
-  '2400': '/images/talishouse/residential/models/2400.png',
+  '2400': '/images/talishouse/residential/models/1600.png',
 };
 
 export function getProductImage(size?: string, type?: string) {
@@ -37,7 +37,7 @@ export function getProductImage(size?: string, type?: string) {
     return path;
   }
   
-  if (type === 'recreational' || (size && size.includes('420'))) {
+  if (type === 'recreational' || (size && size.includes('400'))) {
     const path = PRODUCT_IMAGE_MAP['recreational'];
     console.log(`[ImageLookup] Recreational -> ${path}`);
     return path;

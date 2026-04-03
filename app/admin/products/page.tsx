@@ -1,266 +1,138 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import Image from "next/image";
+import { supabase } from "@/lib/supabaseClient";
 
-interface ProductImage {
-  id: string;
-  size: string;
-  type: string;
-  image_url: string;
-  created_at: string;
-}
-
-const DEFAULT_PRODUCTS = [
-  { size: "160", type: "glasshouse", name: "Glasshouse 160" },
-  { size: "200", type: "glasshouse", name: "Glasshouse 200" },
-  { size: "400", type: "talishouse", name: "Talishouse 400" },
-  { size: "800", type: "talishouse", name: "Talishouse 800" },
-  { size: "1600", type: "talishouse-residential", name: "Talishouse 1600" },
-  { size: "2400", type: "talishouse-residential", name: "Talishouse 2400" },
-  { size: "glasshouse", type: "glasshouse", name: "Glasshouse Family" },
-  { size: "talishouse-420", type: "talishouse", name: "Talishouse 420" },
-  { size: "talishouse-residential", type: "talishouse-residential", name: "Talishouse Residential" },
-  { size: "talistowns", type: "talistowns", name: "TalisTowns" },
+const VALID_PRODUCT_IDS = [
+  "glasshouse-160",
+  "glasshouse-200",
+  "talishouse-400",
+  "talishouse-800",
+  "talishouse-1600",
+  "talistowns",
 ];
 
-export default function ProductImagesPage() {
-  const [productImages, setProductImages] = useState<ProductImage[]>([]);
+const PRODUCT_NAMES: Record<string, string> = {
+  "glasshouse-160": "Glasshouse™ 160",
+  "glasshouse-200": "Glasshouse™ 200",
+  "talishouse-400": "Talishouse™ 400",
+  "talishouse-800": "Talishouse™ 800",
+  "talishouse-1600": "2x Talishouse™ 800",
+  "talistowns": "TalisTowns™ Bundle",
+};
+
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Record<string, { price: number | null; image_url: string }>>({});
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [saving, setSaving] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isSupabaseConfigured()) {
-      fetchProductImages();
-    } else {
-      setLoading(false);
-    }
+    fetchProducts();
   }, []);
 
-  const fetchProductImages = async () => {
-    const { data, error } = await supabase
-      .from("product_images")
-      .select("*")
-      .order("size", { ascending: true });
-
-    if (error) {
-      console.error("Error fetching product images:", error);
-    } else {
-      setProductImages(data || []);
+  const fetchProducts = async () => {
+    const { data } = await supabase.from("products").select("id, price, image_url");
+    
+    if (data) {
+      const map: Record<string, { price: number | null; image_url: string }> = {};
+      data.forEach((p) => {
+        if (VALID_PRODUCT_IDS.includes(p.id)) {
+          map[p.id] = { price: p.price, image_url: p.image_url || "" };
+        }
+      });
+      setProducts(map);
     }
     setLoading(false);
   };
 
-  const handleUpload = async (product: { size: string; type: string }, file: File) => {
-    if (!file) return;
-    
-    setUploading(product.size);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const fileExt = file.name.split(".").pop();
-      const filePath = `products/${product.size}-${Date.now()}.${fileExt}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: urlData } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(filePath);
-
-      const existingImage = productImages.find(
-        (img) => img.size === product.size && img.type === product.type
-      );
-
-      if (existingImage) {
-        const { error: updateError } = await supabase
-          .from("product_images")
-          .update({ image_url: urlData.publicUrl, updated_at: new Date().toISOString() })
-          .eq("id", existingImage.id);
-
-        if (updateError) throw updateError;
-      } else {
-        const { error: insertError } = await supabase
-          .from("product_images")
-          .insert([{
-            size: product.size,
-            type: product.type,
-            image_url: urlData.publicUrl,
-          }]);
-
-        if (insertError) throw insertError;
-      }
-
-      setSuccess(`Image for ${product.size} updated successfully!`);
-      fetchProductImages();
-    } catch (err: any) {
-        if (err) console.error("Upload error:", err);
-        setError(err?.message || "Failed to upload image");
-    } finally {
-      setUploading(null);
-    }
+  const handlePriceChange = (id: string, value: string) => {
+    const price = value === "" ? null : parseInt(value, 10);
+    setProducts((prev) => ({ ...prev, [id]: { ...prev[id], price } }));
   };
 
-  const handleDelete = async (imageId: string, size: string) => {
-    if (!confirm(`Remove image for ${size}?`)) return;
+  const handleImageChange = (id: string, value: string) => {
+    setProducts((prev) => ({ ...prev, [id]: { ...prev[id], image_url: value } }));
+  };
 
+  const handleSave = async (id: string) => {
+    setSaving(id);
+    const product = products[id];
+    
     const { error } = await supabase
-      .from("product_images")
-      .delete()
-      .eq("id", imageId);
+      .from("products")
+      .upsert({ 
+        id, 
+        price: product?.price, 
+        image_url: product?.image_url 
+      }, { onConflict: "id" });
 
     if (error) {
-      setError(error.message);
+      alert("Failed to save: " + error.message);
     } else {
-      setSuccess(`Image for ${size} removed`);
-      fetchProductImages();
+      alert("Saved successfully!");
     }
-  };
-
-  const getImageUrl = (size: string, type: string) => {
-    const img = productImages.find((i) => i.size === size && i.type === type);
-    return img?.image_url || null;
+    setSaving(null);
   };
 
   if (loading) {
-    return (
-      <div className="p-8 text-center">
-        <p className="text-gray-500">Loading...</p>
-      </div>
-    );
-  }
-
-  if (!isSupabaseConfigured()) {
-    return (
-      <div className="p-8 max-w-4xl mx-auto">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-          <p className="text-yellow-800">
-            Supabase is not configured. Product images cannot be managed.
-          </p>
-        </div>
-      </div>
-    );
+    return <div className="p-8">Loading...</div>;
   }
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Product Images</h1>
-        <p className="text-gray-500 mt-1">
-          Upload and manage product images for the storefront
-        </p>
-      </div>
+    <div className="p-8">
+      <h1 className="text-2xl font-bold mb-6">Product Pricing</h1>
+      <p className="text-sm text-gray-600 mb-6">
+        Override price and image for each product. These values will appear on the catalog page.
+      </p>
 
-      {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-          <p className="text-red-800">{error}</p>
-        </div>
-      )}
-
-      {success && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-          <p className="text-green-800">{success}</p>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {DEFAULT_PRODUCTS.map((product) => {
-          const imageUrl = getImageUrl(product.size, product.type);
-          const isGlasshouse = product.type === "glasshouse" || product.size === "glasshouse";
-
-          return (
-            <div
-              key={product.size}
-              className="bg-white border border-gray-200 rounded-xl overflow-hidden"
-            >
-              <div className="aspect-video bg-gray-100 relative">
-                {imageUrl ? (
-                  <Image
-                    src={imageUrl}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
+      <div className="overflow-x-auto">
+        <table className="min-w-full border">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-2 text-left text-sm font-medium">Product</th>
+              <th className="px-4 py-2 text-left text-sm font-medium">ID</th>
+              <th className="px-4 py-2 text-left text-sm font-medium">Price ($)</th>
+              <th className="px-4 py-2 text-left text-sm font-medium">Image URL</th>
+              <th className="px-4 py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {VALID_PRODUCT_IDS.map((id) => (
+              <tr key={id} className="border-t">
+                <td className="px-4 py-3 font-medium">{PRODUCT_NAMES[id]}</td>
+                <td className="px-4 py-3 text-gray-500 text-sm">{id}</td>
+                <td className="px-4 py-3">
+                  <input
+                    type="number"
+                    value={products[id]?.price ?? ""}
+                    onChange={(e) => handlePriceChange(id, e.target.value)}
+                    placeholder="Use default"
+                    className="border rounded px-2 py-1 w-32"
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">No image</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="p-4">
-                <h3 className="font-medium text-gray-900">{product.name}</h3>
-                <p className="text-xs text-gray-500 mt-1">
-                  Size: {product.size} • Type: {product.type}
-                </p>
-
-                <div className="mt-4 flex gap-2">
-                  <label className="flex-1">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleUpload(product, file);
-                      }}
-                      disabled={uploading === product.size}
-                    />
-                    <span
-                      className={`block w-full text-center py-2 text-sm font-medium rounded-lg cursor-pointer ${
-                        uploading === product.size
-                          ? "bg-gray-100 text-gray-400"
-                          : "bg-[#0070ba] text-white hover:bg-[#005a8c]"
-                      }`}
-                    >
-                      {uploading === product.size
-                        ? "Uploading..."
-                        : imageUrl
-                        ? "Replace"
-                        : "Upload"}
-                    </span>
-                  </label>
-
-                  {imageUrl && (
-                    <button
-                      onClick={() => {
-                        const img = productImages.find(
-                          (i) => i.size === product.size && i.type === product.type
-                        );
-                        if (img) handleDelete(img.id, product.size);
-                      }}
-                      className="px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-
-                {isGlasshouse && imageUrl && (
-                  <p className="text-xs text-blue-600 mt-2">
-                    Glasshouse: Single image mode
-                  </p>
-                )}
-              </div>
-            </div>
-          );
-        })}
+                </td>
+                <td className="px-4 py-3">
+                  <input
+                    type="text"
+                    value={products[id]?.image_url ?? ""}
+                    onChange={(e) => handleImageChange(id, e.target.value)}
+                    placeholder="Use default"
+                    className="border rounded px-2 py-1 w-64"
+                  />
+                </td>
+                <td className="px-4 py-3">
+                  <button
+                    onClick={() => handleSave(id)}
+                    disabled={saving === id}
+                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {saving === id ? "Saving..." : "Save"}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-
-      {productImages.length > 0 && (
-        <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">
-            {productImages.length} product image(s) configured in database
-          </p>
-        </div>
-      )}
     </div>
   );
 }

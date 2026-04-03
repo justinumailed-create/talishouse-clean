@@ -27,7 +27,6 @@ export default function BusinessOfficePage() {
   const cardItems = [
     { title: "Propose a Project", desc: "Start a new build proposal", href: ROUTES.BUSINESS_OFFICE_PROPOSE_PROJECT },
     { title: "Apply for Associate", desc: "Join as a partner", href: ROUTES.BUSINESS_OFFICE_APPLY },
-    { title: "Register", desc: "Create your account", href: ROUTES.BUSINESS_OFFICE_REGISTER },
     { title: "SPLITS Portal", desc: "Manage transactions", href: ROUTES.BUSINESS_OFFICE_TRANSACTIONS },
     { title: "Partner Programs", desc: "Explore collaborations", href: ROUTES.SUBSCRIPTION },
     { title: "Lease-to-Own", desc: "Flexible ownership plans", href: ROUTES.LEASE_TO_OWN }

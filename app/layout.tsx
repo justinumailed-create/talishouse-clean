@@ -1,17 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Poppins } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AssociateProvider } from "@/context/AssociateContext";
 import { AuthProvider } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import FloatingContactButton from "@/components/FloatingContactButton";
 import CartDrawer from "@/components/CartDrawer";
+import TalisBotChat from "@/components/TalisBotChat";
 
-const inter = Inter({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const viewport: Viewport = {
@@ -41,17 +41,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${inter.variable} min-h-screen flex flex-col antialiased bg-white text-black font-sans`}
-      >
+      <body className={poppins.className}>
         <AuthProvider>
           <CartProvider>
             <AssociateProvider>
               <Header />
-              <main className="flex-grow page-wrapper container mt-20 py-8 w-full">{children}</main>
+              <main>{children}</main>
               <Footer />
-              <FloatingContactButton />
               <CartDrawer />
+              <TalisBotChat />
             </AssociateProvider>
           </CartProvider>
         </AuthProvider>

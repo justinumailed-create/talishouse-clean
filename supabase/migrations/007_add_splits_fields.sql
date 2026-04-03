@@ -5,7 +5,7 @@ ALTER TABLE deals ADD COLUMN IF NOT EXISTS source TEXT DEFAULT 'website';
 
 -- Create transactions table
 CREATE TABLE IF NOT EXISTS transactions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   deal_id UUID REFERENCES deals(id) ON DELETE SET NULL,
   fast_code TEXT NOT NULL,
   amount NUMERIC NOT NULL,
@@ -34,7 +34,7 @@ CREATE INDEX IF NOT EXISTS idx_transactions_fast_code ON transactions(fast_code)
 
 -- Create earnings table
 CREATE TABLE IF NOT EXISTS earnings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE SET NULL,
   deal_id UUID REFERENCES deals(id) ON DELETE SET NULL,
   fast_code TEXT NOT NULL,

@@ -1,30 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error("Missing Supabase environment variables:", {
-    hasUrl: !!supabaseUrl,
-    hasKey: !!supabaseAnonKey,
-  });
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  global: {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  },
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-});
-
-export function isSupabaseConfigured(): boolean {
-  return !!supabaseUrl && !!supabaseAnonKey;
-}
+import { supabase, isSupabaseConfigured } from "./supabaseClient";
+export { supabase, isSupabaseConfigured };
 
 export interface Project {
   id: string;
@@ -49,19 +24,16 @@ export interface FastCode {
 export interface Lead {
   id: string;
   name: string;
-  email?: string | null;
   phone: string;
   location: string;
   fast_code: string | null;
   source: string;
   status: "new" | "contacted" | "converted";
   created_at: string;
-  project_value?: number;
-  commission_rate?: number;
-  split_percentage?: number;
+  project_value?: number | null;
+  commission_rate?: number | null;
+  split_percentage?: number | null;
   deal_status?: "none" | "pending" | "active" | "completed" | "cancelled";
-  interest?: string | null;
-  price_range?: string | null;
 }
 
 export interface Associate {
@@ -174,4 +146,63 @@ export interface ContactLog {
   fast_code: string | null;
   message: string;
   timestamp: string;
+}
+
+export interface LeadPayload {
+  name: string;
+  phone: string;
+  location: string;
+  source: string;
+  status: string;
+  deal_status: string;
+  created_at?: string;
+  fast_code?: string | null;
+  project_value?: number | null;
+  commission_rate?: number | null;
+  split_percentage?: number | null;
+}
+
+export async function safeInsertLead(payload: LeadPayload) {
+  try {
+    console.log("RAW PAYLOAD:", payload);
+
+    const allowedFields = [
+      "name",
+      "phone",
+      "location",
+      "source",
+      "status",
+      "deal_status",
+      "created_at",
+      "fast_code",
+      "project_value",
+      "commission_rate",
+      "split_percentage"
+    ];
+
+    const cleanedPayload = Object.fromEntries(
+      Object.entries(payload)
+        .filter(([key]) => allowedFields.includes(key))
+        .map(([key, value]) => [key, value ?? null])
+    );
+
+    console.log("CLEANED PAYLOAD:", cleanedPayload);
+
+    const { data, error } = await supabase
+      .from("leads")
+      .insert([cleanedPayload])
+      .select();
+
+    if (error) {
+      console.error("SUPABASE ERROR FULL:", JSON.stringify(error, null, 2));
+      throw new Error(JSON.stringify(error));
+    }
+
+    console.log("INSERT SUCCESS:", data);
+    return data;
+
+  } catch (err: any) {
+    console.error("FINAL INSERT ERROR:", err?.message || err);
+    throw err;
+  }
 }

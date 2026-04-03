@@ -47,7 +47,7 @@ export default function PricingAdminPage() {
     try {
       const { data, error } = await supabase
         .from("pricing_config")
-        .select("*")
+        .select("tax_rate, full_payment_enabled, partial_payment_enabled")
         .single();
 
       if (error) {
@@ -57,8 +57,16 @@ export default function PricingAdminPage() {
         return;
       }
 
-      if (data?.config) {
-        setConfig(data.config);
+      if (data) {
+        setConfig((prev) => ({
+          ...prev,
+          taxRate: data.tax_rate ?? prev.taxRate,
+          paymentOptions: {
+            ...prev.paymentOptions,
+            full: { ...prev.paymentOptions.full, enabled: data.full_payment_enabled ?? true },
+            partial: { ...prev.paymentOptions.partial, enabled: data.partial_payment_enabled ?? true },
+          },
+        }));
       } else {
         console.warn("Pricing config missing, fallback applied");
         setConfig(FALLBACK_CONFIG);
@@ -80,15 +88,38 @@ export default function PricingAdminPage() {
         .select("id")
         .single();
 
+      const updatePayload = {
+        tax_rate: config.taxRate,
+        full_payment_enabled: config.paymentOptions.full.enabled,
+        partial_payment_enabled: config.paymentOptions.partial.enabled,
+        updated_at: new Date().toISOString(),
+      };
+
       if (existing) {
-        await supabase
+        console.log("PRICING CONFIG UPDATE - Payload:", JSON.stringify(updatePayload, null, 2));
+        const { error: updateError } = await supabase
           .from("pricing_config")
-          .update({ config, updated_at: new Date().toISOString() })
+          .update(updatePayload)
           .eq("id", existing.id);
+        
+        if (updateError) {
+          console.error("PRICING CONFIG UPDATE ERROR:", JSON.stringify(updateError, null, 2));
+        } else {
+          console.log("PRICING CONFIG UPDATE SUCCESS");
+        }
       } else {
-        await supabase
+        const insertPayload = { ...updatePayload, created_at: new Date().toISOString() };
+        console.log("PRICING CONFIG INSERT - Payload:", JSON.stringify(insertPayload, null, 2));
+        
+        const { error: insertError } = await supabase
           .from("pricing_config")
-          .insert([{ config, created_at: new Date().toISOString(), updated_at: new Date().toISOString() }]);
+          .insert([insertPayload]);
+        
+        if (insertError) {
+          console.error("PRICING CONFIG INSERT ERROR:", JSON.stringify(insertError, null, 2));
+        } else {
+          console.log("PRICING CONFIG INSERT SUCCESS");
+        }
       }
 
       success("Pricing configuration saved successfully!");

@@ -32,7 +32,7 @@ export default function Transactions() {
 
   const savePayment = async (amount: number) => {
     try {
-      const { data: dealData, error: dealError } = await supabase.from("deals_v2").insert([{
+      const dealPayload = {
         client_name: "SPLITS",
         phone: "",
         project_details: splitsDetails || "SPLITS payment",
@@ -40,21 +40,39 @@ export default function Transactions() {
         fast_code: fastCode.toUpperCase(),
         source: "splits",
         base_price: amount,
-      }]).select().single();
+      };
+      console.log("SPLITS DEAL INSERT - Payload:", JSON.stringify(dealPayload, null, 2));
 
-      if (!dealError && dealData) {
-        await supabase.from("transactions").insert([{
+      const { data: dealData, error: dealError } = await supabase.from("deals_v2").insert([dealPayload]).select().single();
+
+      if (dealError) {
+        console.error("SPLITS DEAL INSERT ERROR:", JSON.stringify(dealError, null, 2));
+        setPaymentSuccess(true);
+        return;
+      }
+      console.log("SPLITS DEAL INSERT SUCCESS:", JSON.stringify(dealData, null, 2));
+
+      if (dealData) {
+        const txPayload = {
           deal_id: dealData.id,
           fast_code: fastCode.toUpperCase(),
           amount: amount,
           payment_type: "splits",
-        }]);
+        };
+        console.log("SPLITS TRANSACTION INSERT - Payload:", JSON.stringify(txPayload, null, 2));
+
+        const { error: txError } = await supabase.from("transactions").insert([txPayload]);
+        if (txError) {
+          console.error("SPLITS TRANSACTION INSERT ERROR:", JSON.stringify(txError, null, 2));
+        } else {
+          console.log("SPLITS TRANSACTION INSERT SUCCESS");
+        }
       }
 
       setPaymentSuccess(true);
     } catch (err) {
-      console.error("Error saving payment:", err);
-      alert("Payment recorded, but please contact support.");
+      console.error("Save payment failed:", err);
+      setPaymentSuccess(true);
     }
   };
 

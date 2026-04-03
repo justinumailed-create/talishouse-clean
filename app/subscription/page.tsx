@@ -25,18 +25,22 @@ export default function SubscriptionPage() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
-            <div className="flex items-center justify-between bg-black px-6 py-5 text-white">
+        <div className="grid md:grid-cols-2 gap-8 items-stretch">
+          <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)] flex flex-col">
+            <div className="flex items-center justify-between bg-gray-900 px-6 py-5 text-white">
               <p className="text-sm font-bold uppercase tracking-[0.25em]">
                 Referral Partner
               </p>
             </div>
 
-            <div className="space-y-6 p-6 sm:p-8">
-              <div>
-                <p className="text-3xl font-bold text-gray-900">$95/mo</p>
-                <p className="text-sm text-gray-500">per month</p>
+            <div className="flex-1 space-y-6 p-6 sm:p-8">
+              <div className="mb-2">
+                <div className="text-2xl font-semibold text-black">
+                  $95.00
+                </div>
+                <div className="text-xs text-gray-500">
+                  per month
+                </div>
               </div>
 
               <div className="space-y-4 text-gray-600">
@@ -56,31 +60,43 @@ export default function SubscriptionPage() {
                   <li>Priority support from our team</li>
                 </ul>
               </div>
+            </div>
 
+            <div className="p-6 sm:p-8 pt-0">
               <button
                 onClick={() => openDrawer("referral")}
-                className="w-full bg-[#1279c9] text-white rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] hover:bg-[#0f6bb1] transition-colors text-center block"
+                className="w-full bg-black text-white rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] hover:bg-gray-900 transition-colors text-center block"
               >
                 View Details
               </button>
 
-              <p className="text-xs text-gray-400 text-center">
+              <p className="text-xs text-gray-400 text-center mt-4">
                 Cancel anytime. Commission rates vary by project type.
               </p>
             </div>
           </section>
 
-          <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
-            <div className="flex items-center justify-between bg-[#1279c9] px-6 py-5 text-white">
+          <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)] flex flex-col">
+            <div className="flex items-center justify-between bg-gray-900 px-6 py-5 text-white">
               <p className="text-sm font-bold uppercase tracking-[0.25em]">
                 Wholesale Partner
               </p>
             </div>
 
-            <div className="space-y-6 p-6 sm:p-8">
-              <div>
-                <p className="text-3xl font-bold text-gray-900">One-Time</p>
-                <p className="text-sm text-gray-500">registration fee</p>
+            <div className="flex-1 space-y-6 p-6 sm:p-8">
+              <div className="mb-2">
+                <div className="text-2xl font-semibold text-black">
+                  $1,995.00
+                </div>
+                <div className="text-xs text-gray-500">
+                  One-time registration fee
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <div className="text-sm text-black">
+                  Then, starting in 1 month, $95.00/mo
+                </div>
               </div>
 
               <div className="space-y-4 text-gray-600">
@@ -100,15 +116,17 @@ export default function SubscriptionPage() {
                   <li>Early access to new product lines</li>
                 </ul>
               </div>
+            </div>
 
+            <div className="p-6 sm:p-8 pt-0">
               <button
                 onClick={() => openDrawer("wholesale")}
-                className="w-full bg-[#1279c9] text-white rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] hover:bg-[#0f6bb1] transition-colors text-center block"
+                className="w-full bg-black text-white rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] hover:bg-gray-900 transition-colors text-center block"
               >
                 View Details
               </button>
 
-              <p className="text-xs text-gray-400 text-center">
+              <p className="text-xs text-gray-400 text-center mt-4">
                 Volume pricing available. Contact us for enterprise deals.
               </p>
             </div>

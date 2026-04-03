@@ -22,6 +22,10 @@ export default function AdminDashboard() {
           supabase.from("payments").select("id"),
         ]);
 
+        if (projectsRes.error) console.warn("Projects fetch error:", projectsRes.error.message);
+        if (fastCodesRes.error) console.warn("FastCodes fetch error:", fastCodesRes.error.message);
+        if (paymentsRes.error) console.warn("Payments fetch error:", paymentsRes.error.message);
+
         setStats({
           projects: projectsRes.data?.length || 0,
           fastCodes: fastCodesRes.data?.length || 0,
@@ -29,8 +33,8 @@ export default function AdminDashboard() {
           payments: paymentsRes.data?.length || 0,
           recentProjects: projectsRes.data || [],
         });
-      } catch (error) {
-        console.error("Error fetching stats:", error);
+      } catch (error: any) {
+        console.warn("Stats fetch failed:", error?.message || error);
       } finally {
         setLoading(false);
       }

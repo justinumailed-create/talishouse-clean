@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase, User } from "@/lib/supabase";
+import { supabase, User, safeInsertLead } from "@/lib/supabase";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -82,42 +82,32 @@ export default function AssociateClient({
     e.preventDefault();
     setFormSubmitting(true);
 
-    const leadData = {
-      name: formData.name?.trim() || "",
-      email: formData.email?.trim() || "",
-      phone: formData.phone?.trim() || "",
-      location: formData.message?.trim() || "Not specified",
-      source: "associate_page_contact",
-      status: "new",
-      fast_code: fastCode,
-      associate_id: associate?.id || null,
-    };
-
     try {
-      await supabase.from("leads").insert([leadData]);
+      await safeInsertLead({
+        name: formData.name?.trim() || "",
+        phone: formData.phone?.trim() || "",
+        location: formData.message?.trim() || "Not specified",
+        source: "associate_page_contact",
+        status: "new",
+        deal_status: "pending",
+        fast_code: fastCode,
+      });
     } catch (err) {
-      console.error("Lead insert error:", err);
-    }
-
-    const dealData: Record<string, unknown> = {
-      client_name: formData.name?.trim() || "",
-      phone: formData.phone?.trim() || "",
-      email: formData.email?.trim() || "",
-      project_details: formData.message?.trim() || "Contact Form",
-      project_type: "Contact",
-      status: "new",
-      fast_code: fastCode,
-      source: "associate_page",
-    };
-
-    if (associate?.id) {
-      dealData.user_id = associate.id;
+      console.error("LEAD FAIL FULL:", JSON.stringify(err, null, 2));
     }
 
     try {
-      await supabase.from("deals_v2").insert([dealData]);
+      await safeInsertLead({
+        name: formData.name?.trim() || "",
+        phone: formData.phone?.trim() || "",
+        location: formData.message?.trim() || "Contact Form",
+        source: "associate_page",
+        status: "new",
+        deal_status: "pending",
+        fast_code: fastCode,
+      });
     } catch (err) {
-      console.error("Deal insert error:", err);
+      console.error("LEAD FAIL FULL:", JSON.stringify(err, null, 2));
     }
 
     setFormSuccess(true);
@@ -271,65 +261,7 @@ export default function AssociateClient({
                   Submit Another
                 </button>
               </div>
-            ) : (
-              <form onSubmit={handleContactSubmit} className="bg-white rounded-xl border border-[#e5e5e5] p-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5">Name *</label>
-                    <input
-                      type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-sm outline-none focus:border-[#1E4ED8]"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5">Email *</label>
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-sm outline-none focus:border-[#1E4ED8]"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5">Phone *</label>
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-sm outline-none focus:border-[#1E4ED8]"
-                      required
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium mb-1.5">Message</label>
-                    <textarea
-                      value={formData.message}
-                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      className="w-full px-4 py-2.5 border border-[#e5e5e5] rounded-lg text-sm outline-none focus:border-[#1E4ED8] resize-none"
-                      rows={4}
-                      placeholder="Tell us about your project..."
-                    />
-                  </div>
-                </div>
-
-                <div className="mt-6">
-                  <button
-                    type="submit"
-                    disabled={formSubmitting}
-                    className="btn-primary w-full"
-                  >
-                    {formSubmitting ? "Submitting..." : "Submit"}
-                  </button>
-                </div>
-              </form>
-            )}
+            ) : null}
           </div>
         </section>
       )}
@@ -342,7 +274,7 @@ export default function AssociateClient({
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 { name: "Glasshouse", desc: "Modern glass enclosed spaces", href: "/glasshouse" },
-                { name: "Talishouse 420", desc: "Premium residential units", href: "/talishouse" },
+                { name: "Talishouse 400", desc: "Premium residential units", href: "/talishouse" },
                 { name: "Talishouse Residential", desc: "Full-size family homes", href: "/talishouse" },
                 { name: "TalisTowns", desc: "Community living solutions", href: "/talistowns" },
               ].map((product) => (

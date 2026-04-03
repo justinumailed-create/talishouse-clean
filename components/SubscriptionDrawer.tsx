@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { getFastCode } from "@/lib/fast-code";
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+
+const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
 
 interface SubscriptionDrawerProps {
   isOpen: boolean;
@@ -116,16 +119,33 @@ export default function SubscriptionDrawer({ isOpen, onClose, type }: Subscripti
           </div>
 
           <div className="mt-8">
-            <a
-              href={`/business-office/register${fastCode ? `?fast=${fastCode}` : ""}`}
-              className={`block w-full text-center rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] transition-colors ${
-                isReferral
-                  ? "bg-[#1279c9] text-white hover:bg-[#0f6bb1]"
-                  : "bg-black text-white hover:bg-gray-800"
-              }`}
-            >
-              {isReferral ? "Subscribe Now" : "Register Now"}
-            </a>
+            <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, vault: true, intent: "subscription" }}>
+              {isReferral ? (
+                <PayPalButtons
+                  style={{ shape: "pill", color: "black", layout: "horizontal", label: "subscribe" }}
+                  createSubscription={(data, actions) => {
+                    return actions.subscription.create({
+                      plan_id: "P-8VX74484S9432983MNG55CRI",
+                    });
+                  }}
+                  onApprove={async (data) => {
+                    window.location.href = "/success?subscription_id=" + data.subscriptionID;
+                  }}
+                />
+              ) : (
+                <PayPalButtons
+                  style={{ shape: "pill", color: "black", layout: "horizontal", label: "subscribe" }}
+                  createSubscription={(data, actions) => {
+                    return actions.subscription.create({
+                      plan_id: "P-8T371356N79130635NG55HAI",
+                    });
+                  }}
+                  onApprove={async (data) => {
+                    window.location.href = "/success?plan=wholesale&subscription_id=" + data.subscriptionID;
+                  }}
+                />
+              )}
+            </PayPalScriptProvider>
 
             <p className="text-xs text-gray-400 text-center mt-4">
               {isReferral 

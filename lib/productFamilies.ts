@@ -3,7 +3,7 @@ export const productFamilies = {
     id: "talishouse",
     name: "Talishouse™",
     slug: "talishouse",
-    image: "/images/talishouse-420.png",
+    image: "/images/talishouse-400.png",
     gridDescription: "Flexible modular housing solutions designed for modern living. 21' x 20' steel structures assembled in one day.",
   },
   glasshouse: {

@@ -31,7 +31,7 @@ export default async function AssociatePage({ params }: { params: Promise<{ fast
   let pageConfig: PageConfig | undefined;
 
   // Try Supabase first
-  if (isSupabaseConfigured()) {
+  if (isSupabaseConfigured) {
     try {
       const { data, error } = await supabase
         .from("associates")

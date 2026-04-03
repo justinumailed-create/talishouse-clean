@@ -46,16 +46,23 @@ export default function UsersPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      const { error } = await supabase.from("fast_codes").insert([{ 
+      const payload = {
         ...formData, 
         active: true,
         code: formData.code.toUpperCase()
-      }]);
-      if (!error) {
-        setShowForm(false);
-        setFormData({ name: "", code: "", phone: "", email: "" });
-        fetchUsers();
+      };
+      console.log("FAST CODE INSERT - Payload:", JSON.stringify(payload, null, 2));
+
+      const { error } = await supabase.from("fast_codes").insert([payload]);
+      if (error) {
+        console.error("FAST CODE INSERT ERROR:", JSON.stringify(error, null, 2));
+        return;
       }
+      console.log("FAST CODE INSERT SUCCESS");
+      
+      setShowForm(false);
+      setFormData({ name: "", code: "", phone: "", email: "" });
+      fetchUsers();
     } catch (error) {
       console.error("Error creating user:", error);
     }

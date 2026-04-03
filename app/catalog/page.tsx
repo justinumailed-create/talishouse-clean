@@ -1,54 +1,11 @@
 "use client";
-
 import Link from "next/link";
-import Image from "next/image";
-import { getProductImage } from "@/lib/productImages";
-import { useEffect, useState } from "react";
 
-interface ProductImages {
-  [key: string]: string;
-}
-
-const productCategories = [
-  {
-    id: "glasshouse",
-    name: "Glasshouse™",
-    subtitle: "Our quintessential view-models",
-    description: "Be where you want to be. Short-term rentals on a budget.",
-    image: getProductImage("glasshouse-200"),
-    price: "From $19,995",
-    href: "/glasshouse",
-    models: ["160", "200"],
-  },
-  {
-    id: "recreational",
-    name: "Talishouse™ Recreational",
-    subtitle: "Flexible modular home system",
-    description: "21' x 20' steel structures assembled in one day. Two bedrooms, one bath.",
-    image: getProductImage("talishouse-420"),
-    price: "From $49,995",
-    href: "/talishouse?product=420",
-    models: ["420", "800"],
-  },
-  {
-    id: "residential",
-    name: "Talishouse™ Residential",
-    subtitle: "Scalable living solutions",
-    description: "Multi-unit residential developments. From single units to complete communities.",
-    image: getProductImage("talishouse-residential"),
-    price: "From $109,995",
-    href: "/talishouse?product=residential",
-    models: ["1600", "2400"],
-  },
-  {
-    id: "talistowns",
-    name: "TalisTowns™",
-    subtitle: "Moonlighting made easy",
-    description: "Community development system. High ROI potential for investors.",
-    image: getProductImage("talistowns"),
-    price: "From $189,900",
-    href: "/talistowns",
-  },
+const categories = [
+  { name: "Glasshouse™", href: "/glasshouse", image: "/images/glasshouse/hero.png" },
+  { name: "Talishouse™ Recreational", href: "/talishouse-recreational", image: "/images/talishouse-400.png" },
+  { name: "Talishouse™ Residential", href: "/talishouse-residential", image: "/images/talishouse/residential/hero.png" },
+  { name: "TalisTowns™", href: "/talistowns", image: "/images/talistowns.jpg" },
 ];
 
 const purchasingOptions = [
@@ -59,128 +16,65 @@ const purchasingOptions = [
 ];
 
 export default function CatalogPage() {
-  const [productImages, setProductImages] = useState<ProductImages>({});
-
-  useEffect(() => {
-    fetch("/api/product-images", { cache: 'no-store' })
-      .then((res) => res.json())
-      .then((data) => setProductImages(data || {}))
-      .catch((err) => console.error("Error fetching product images:", err));
-  }, []);
-
-  const getImage = (size: string) => {
-    return productImages[size] || getProductImage(size);
-  };
-
   return (
     <div className="bg-[#f5f5f7] min-h-screen">
-      {/* SECTION 1: HERO */}
-      <section className="bg-[#f5f5f7] py-16 px-4">
-        <div className="container text-center">
-          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
-            Talishouse™ Product Catalog
-          </h1>
-          <p className="text-gray-500 text-sm mt-2">
-            Modular living. Built to scale.
-          </p>
-        </div>
-      </section>
+      <div className="container-main">
+        <section className="py-12">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold text-gray-900">Product Catalog</h1>
+            <p className="text-gray-500 text-sm mt-2">Modular living. Built to scale.</p>
+          </div>
+        </section>
 
-      {/* SECTION 2: DESTINATION CHARGE */}
-      <section className="py-10 px-4">
-        <div className="container">
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-[rgba(0,0,0,0.05)]">
+        <section className="pb-8">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-[rgba(0,0,0,0.05)]">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">Destination Charge</h2>
-                <p className="text-gray-500 text-sm mt-1">
-                  When paid it reserves spots in production and shipping queues.
-                </p>
+                <h2 className="text-lg font-semibold text-gray-900">Destination Charge</h2>
+                <p className="text-gray-500 text-sm mt-1">Reserves spots in production and shipping queues.</p>
               </div>
               <div className="text-right">
-                <p className="text-2xl font-semibold text-gray-900">$1,995</p>
-                <span className="inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                  Required to start
-                </span>
+                <p className="text-xl font-semibold text-gray-900">$1,995</p>
+                <span className="inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Required to start</span>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* SECTION 3: PRODUCT CATEGORIES */}
-      <section className="py-10 px-4">
-        <div className="container">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {productCategories.map((category) => (
-              <Link
-                key={category.id}
-                href={category.href}
-                className="block bg-white rounded-2xl overflow-hidden border border-[rgba(0,0,0,0.06)] hover:shadow-md transition-all duration-300 hover:-translate-y-[2px]"
-              >
-                <div className="flex flex-col h-full">
-                  <div className="aspect-[16/10] relative bg-gray-100">
-                    {getImage(category.id) ? (
-                      <Image
-                        src={getImage(category.id)}
-                        alt={category.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                        Image coming soon
-                      </div>
-                    )}
+        <section className="pb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {categories.map((cat) => (
+              <Link key={cat.name} href={cat.href}>
+                <div className="group bg-white border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
+                  <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-xl">
+                    <img
+                      src={cat.image}
+                      alt={cat.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
                   </div>
-                  <div className="p-8 flex flex-col flex-1">
-                    <div className="text-left">
-                      <h3 className="text-xl font-semibold text-gray-900">
-                        {category.name}
-                      </h3>
-                      <p className="text-sm text-gray-500 font-medium mt-1">
-                        {category.subtitle}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-3 leading-relaxed">
-                        {category.description}
-                      </p>
-                      <p className="text-2xl font-bold text-gray-900 mt-6">
-                        {category.price}
-                      </p>
-                    </div>
-                    <div className="mt-8">
-                      <span className="inline-block w-full py-3.5 rounded-xl text-sm font-semibold text-center bg-black text-white transition hover:bg-gray-900">
-                        View Models
-                      </span>
-                    </div>
+                  <div className="p-4">
+                    <h3 className="text-base font-semibold tracking-tight">
+                      {cat.name}
+                    </h3>
                   </div>
                 </div>
               </Link>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* SECTION 4: SITE REQUIREMENTS */}
-      <section className="py-10 px-4">
-        <div className="container text-center">
-          <h2 className="text-lg font-medium text-gray-900 mb-3">Site Requirements</h2>
-          <p className="text-sm text-gray-600 leading-relaxed">
-            Typically site preparation includes a driveway, building site, power hook up, water and disposal systems. Optionally, off grid and office systems are available.
-          </p>
-          <p className="text-sm text-gray-600 leading-relaxed mt-3">
-            Mobile installations may negate the need for Building Permits in many jurisdictions.
-          </p>
-          <p className="text-sm text-gray-600 leading-relaxed mt-3">
-            Professional installation is available through our partner network.
-          </p>
-        </div>
-      </section>
+        <section className="pb-8">
+          <div className="text-center">
+            <h2 className="text-base font-medium text-gray-900 mb-3">Site Requirements</h2>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Site preparation includes driveway, building site, power hook up, water and disposal systems. Mobile installations may negate the need for Building Permits.
+            </p>
+          </div>
+        </section>
 
-      {/* SECTION 5: PURCHASING OPTIONS */}
-      <section className="py-10 px-4 pb-20">
-        <div className="container">
-          <h2 className="text-lg font-medium text-gray-900 mb-6">Purchasing Options</h2>
+        <section className="pb-20">
+          <h2 className="text-base font-medium text-gray-900 mb-4">Purchasing Options</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {purchasingOptions.map((option) => (
               <Link
@@ -193,14 +87,13 @@ export default function CatalogPage() {
               </Link>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+      </div>
 
-      {/* SECTION 6: FOOTER */}
-      <section className="py-10 px-4 pb-24">
-        <div className="container text-center">
-          <p className="text-gray-400 text-xs mt-3 text-center">Just add ambition…!</p>
-          <p className="text-gray-400 text-xs text-center">Moonlighting is lucrative…!</p>
+      <section className="py-8 pb-24">
+        <div className="container-main text-center">
+          <p className="text-gray-400 text-xs">Just add ambition…!</p>
+          <p className="text-gray-400 text-xs mt-1">Moonlighting is lucrative…!</p>
         </div>
       </section>
     </div>

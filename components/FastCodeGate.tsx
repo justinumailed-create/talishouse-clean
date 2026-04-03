@@ -1,14 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { setFastCode } from "@/lib/fast-code";
-import { supabase } from "@/lib/supabase";
 import { useAuth } from "@/context/AuthContext";
-
-/**
- * FastCodeGate Component
- * Centered modal gate for FAST Code access control.
- */
+import { supabase } from "@/lib/supabase";
+import { isValidAdminFastCode, normalizeFastCode, setAdminSession } from "@/lib/fast-code";
 
 export default function FastCodeGate() {
   const { login } = useAuth();
@@ -19,8 +15,8 @@ export default function FastCodeGate() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    
-    const code = inputCode.trim().toUpperCase();
+
+    const code = normalizeFastCode(inputCode);
     if (!code) {
       setError("Please enter an access code");
       return;
@@ -29,14 +25,13 @@ export default function FastCodeGate() {
     setLoading(true);
 
     try {
-      // 1. Check if it's Super Admin
-      if (code === "ADMIN123") {
+      if (isValidAdminFastCode(code)) {
+        setAdminSession();
         login(code, "admin");
         window.location.reload();
         return;
       }
 
-      // 2. Check if it's a valid Associate code
       const { data: associate, error: dbError } = await supabase
         .from("associates")
         .select("*")
@@ -44,21 +39,16 @@ export default function FastCodeGate() {
         .maybeSingle();
 
       if (dbError) {
-        console.error("Auth check error:", dbError);
-        setError("An error occurred. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      if (associate) {
+        console.warn("Associate lookup failed:", dbError.message);
+      } else if (associate) {
         login(code, "associate", associate.id);
         window.location.reload();
         return;
       }
 
       setError("Invalid access code. Please try again.");
-    } catch (err) {
-      console.error("Gate error:", err);
+    } catch (err: any) {
+      console.warn("Gate error:", err?.message || err);
       setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
@@ -83,8 +73,8 @@ export default function FastCodeGate() {
                   setInputCode(e.target.value);
                   setError("");
                 }}
-                className={`w-full bg-[#f5f5f7] border ${error ? 'border-red-500' : 'border-[#e5e5e5]'} rounded-2xl px-4 py-5 text-center text-2xl font-mono font-bold tracking-[0.3em] outline-none focus:border-[#1E4ED8] transition-all`}
-                placeholder="••••••"
+                className={`w-full bg-[#f5f5f7] border ${error ? "border-red-500" : "border-[#e5e5e5]"} rounded-2xl px-4 py-5 text-center text-2xl font-mono font-bold tracking-[0.3em] outline-none focus:border-[#1E4ED8] transition-all`}
+                placeholder="••••••••"
                 autoFocus
                 required
               />
@@ -104,21 +94,21 @@ export default function FastCodeGate() {
             {loading ? "Verifying..." : "Authorize Entry"}
           </button>
 
-          <a
+          <Link
             href="/add-project"
             className="block w-full py-4 text-center rounded-2xl bg-[#f5f5f7] text-sm font-bold text-gray-700 hover:bg-gray-100 transition-all uppercase tracking-widest"
           >
             Obtain Fast Code
-          </a>
+          </Link>
         </form>
 
         <div className="mt-12 text-center">
-          <a 
-            href="/" 
+          <Link
+            href="/"
             className="text-xs font-bold text-[#6e6e73] hover:text-black underline underline-offset-8 uppercase tracking-widest"
           >
             Return to Homepage
-          </a>
+          </Link>
         </div>
       </div>
     </div>

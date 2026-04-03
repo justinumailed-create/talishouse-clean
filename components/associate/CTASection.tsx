@@ -31,16 +31,16 @@ export default function CTASection({ fastCode }: CTASectionProps) {
         })
       });
 
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      console.log("PROJECT RESPONSE:", data);
 
       if (data.success) {
         alert(`Project submitted! Code: ${data.projectCode}`);
         setMessage("");
         setAddress("");
       }
-    } catch (err) {
-      console.error("Submit error:", err);
+    } catch (err: any) {
+      console.warn("Project submit failed:", err?.message || err);
     }
 
     setLoading(false);

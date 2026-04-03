@@ -39,6 +39,7 @@ export interface CategoryModel {
   name: string;
   price: number;
   description?: string;
+  image?: string;
 }
 
 export const PRODUCT_CATEGORIES: Record<string, CategoryModel[]> = {
@@ -47,8 +48,8 @@ export const PRODUCT_CATEGORIES: Record<string, CategoryModel[]> = {
     { id: "200", name: "Glasshouse™ 200", price: 24995 }
   ],
   recreational: [
-    { id: "420", name: "Talishouse™ 420", price: 39950 },
-    { id: "800", name: "Talishouse™ 800", price: 79995 }
+    { id: "talishouse-400", name: "Talishouse™ 400", price: 39950, image: "/images/talishouse/recreational/400.png" },
+    { id: "talishouse-800", name: "Talishouse™ 800", price: 79995, image: "/images/talishouse/recreational/800.png" }
   ],
   residential: [
     { id: "1600", name: "Talishouse™ 1600", price: 109995 },
@@ -73,7 +74,7 @@ import { PRODUCT_IMAGE_MAP } from "@/lib/productImages";
 const IMAGES = {
   'glasshouse': '/images/glasshouse/hero.png',
   'glasshouse-200': '/images/glasshouse/models/200.png',
-  'talishouse-420': '/images/talishouse-420.svg',
+  'talishouse-400': '/images/talishouse/recreational/hero.jpg',
   'talishouse-residential': '/images/talishouse/residential/hero.png',
   'talistowns': '/images/talistowns.jpg',
 };
@@ -120,22 +121,22 @@ export const talishouseFamily: ProductFamily = {
   id: "talishouse",
   name: "Talishouse™",
   slug: "talishouse",
-  image: IMAGES['talishouse-420'],
+  image: IMAGES['talishouse-400'],
   gridDescription: `Talishouse™ : The flexible modular home system:
 - 21' x 20' steel structures assembled in one day and move-in ready in one week.
 - Two bedrooms, one bath, open concept living-dining-kitchen.
 - Scalable from single units to multi-unit developments.
 - Retail, Wholesale and Lease-To-Own purchasing terms.`,
-  models: ["talishouse-420", "talishouse-residential"],
+  models: ["talishouse-400", "talishouse-residential"],
 };
 
 export const talishouseModels: ProductModel[] = [
   {
-    id: "talishouse-420",
-    name: "Talishouse™ 420",
-    category: "talishouse-420",
+    id: "talishouse-400",
+    name: "Talishouse™ 400",
+    category: "talishouse-400",
     price: 39950,
-    image: IMAGES['talishouse-420'],
+    image: IMAGES['talishouse-400'],
     description: `Description:
 21' x 20' steel structures assembled in one day and move-in ready in one week.
 Two bedrooms, one bath, open concept living-dining-kitchen.`,
@@ -149,7 +150,7 @@ Two bedrooms, one bath, open concept living-dining-kitchen.`,
       "Flooring Colour": ["Light Oak", "Dark Walnut"],
       "Siding Options": ["Color Code Options", "Monochrome / Single Color"],
     },
-    addons: ["talishouse-420-pergola", "talishouse-420-roofing", "talishouse-420-interior"],
+    addons: ["talishouse-400-pergola", "talishouse-400-roofing", "talishouse-400-interior"],
   },
   {
     id: "talishouse-residential",
@@ -204,7 +205,7 @@ export const talistownsModels: ProductModel[] = [
     price: 39950,
     image: IMAGES['talistowns'],
     description: `Description:
-TalisTowns™ community development system using multiple Talishouse™ 420 units.
+TalisTowns™ community development system using multiple Talishouse™ 400 units.
 Scalable from single structures to complete communities.`,
     addons: ["talistowns-bulk", "talistowns-infrastructure", "talistowns-planning"],
   },

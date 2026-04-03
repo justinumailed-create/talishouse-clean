@@ -76,13 +76,14 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
         })
       });
 
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (data.success) {
         alert("Project submitted successfully!");
         setFormData({ message: "", location: "" });
       }
-    } catch (err) {
-      console.error("Form submit error:", err);
+    } catch (err: any) {
+      console.warn("Project submit failed:", err?.message || err);
     }
 
     setSubmitting(false);
@@ -149,10 +150,10 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
               </p>
 
               <h1 className="leading-tight mb-6">
-                <span className="block text-2xl md:text-3xl font-extrabold tracking-[0.15em] uppercase text-gray-900">
+                <span className="block text-2xl md:text-3xl font-semibold tracking-[0.15em] uppercase text-gray-900">
                   {config.headline || "TALISHOUSE™"}
                 </span>
-                <span className="block text-sm md:text-base font-light tracking-[0.3em] uppercase text-gray-500">
+                <span className="block text-sm md:text-base text-gray-500">
                   {config.subtext || "Homes and Cottages"}
                 </span>
               </h1>

@@ -22,7 +22,6 @@
   --color-bg-secondary: #f5f5f7;
   --color-danger: #ff3b30;
 
-  /* Custom breakpoints for iPad optimization */
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
@@ -35,215 +34,105 @@
     max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 24px;
+    padding-right: 24px;
     box-sizing: border-box;
   }
   
-  .main-layout {
-    display: grid;
-    grid-template-columns: 70% 30%;
-    gap: 24px;
-  }
-
-  .checkout-layout {
-    display: grid;
-    grid-template-columns: 60% 40%;
-    gap: 32px;
-  }
-
-  .checkout-right {
-    max-width: 420px;
-    margin-left: auto;
-    width: 100%;
-  }
-
-  .nav-inner {
-    display: flex;
+  .btn-primary {
+    background: #1a1a1a;
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 14px 24px;
+    font-weight: 500;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
+    text-decoration: none;
+    min-height: 48px;
   }
 
-  .nav-right {
-    display: flex;
-    align-items: center;
-    margin-left: auto;
-    gap: 24px;
+  .btn-primary:hover {
+    background: #000000;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
 
-  .nav-links {
-    display: flex;
-    gap: 24px;
+  .card {
+    background: #ffffff;
+    border: 1px solid #f0f0f0;
+    border-radius: 16px;
+    padding: 24px;
+    box-sizing: border-box;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
   }
 
-  .page-wrapper {
-    @apply w-full overflow-x-hidden;
+  .card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
 }
 
 * {
   box-sizing: border-box;
-  border-color: var(--border-subtle);
-  max-width: 100%;
+}
+
+.container-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
 }
 
 html, body {
-  width: 100%;
-  overflow-x: hidden !important;
-  position: relative;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
   color: #444;
   background-color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  padding-bottom: 90px; /* Fix contact bar overlap */
+  padding-bottom: 90px;
 }
 
-/* Force text visibility and wrapping */
-p, span, label {
-  max-width: 100%;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  word-break: break-word;
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Prevent inputs from overflowing */
-input, textarea, select {
-  width: 100% !important;
-  max-width: 100% !important;
-  box-sizing: border-box !important;
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* ========================================
-   BUTTON STYLES
-   ======================================== */
-
-.btn-primary {
-  background: #2b2b2b !important;
-  color: #ffffff !important;
-  border-radius: 8px !important;
-  padding: 12px 24px !important;
-  font-weight: 500 !important;
-  font-size: 15px !important;
-  transition: all 0.2s ease !important;
-  border: none !important;
-  cursor: pointer;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none !important;
-  min-height: 44px;
+.shadow-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06);
 }
 
-.btn-primary:hover {
-  background: #000000 !important;
-  transform: translateY(-1px);
+.shadow-card-hover:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
 }
-
-/* ========================================
-   CARD & OPTION BOX STYLES
-   ======================================== */
-
-.card {
-  background: #ffffff;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
-  padding: 24px;
-  width: 100%;
-  box-sizing: border-box;
-  transition: transform 0.2s ease;
-}
-
-.card:hover img {
-  transform: scale(1.05);
-}
-
-.card img {
-  transition: transform 0.2s ease;
-}
-
-.option-card {
-  width: 100% !important;
-  max-width: 100% !important;
-  display: flex !important;
-  gap: 12px !important;
-  padding: 16px !important;
-  box-sizing: border-box !important;
-  align-items: flex-start !important;
-}
-
-.option-card input {
-  flex-shrink: 0 !important;
-  margin-top: 4px !important;
-  width: auto !important; /* Reset width for checkbox/radio */
-}
-
-.option-card label {
-  flex: 1 1 0% !important;
-  min-width: 0 !important;
-  overflow-wrap: break-word !important;
-  word-break: break-word !important;
-}
-
-.acknowledgement {
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow: hidden !important;
-  display: flex !important;
-  align-items: flex-start !important;
-  gap: 12px !important;
-  padding: 16px !important;
-  box-sizing: border-box !important;
-}
-
-.acknowledgement input {
-  flex-shrink: 0 !important;
-  margin-top: 4px !important;
-  width: auto !important;
-}
-
-.option-text, .acknowledgement-text {
-  flex: 1 1 0% !important;
-  min-width: 0 !important;
-  word-break: break-word !important;
-  overflow-wrap: break-word !important;
-}
-
-/* ========================================
-   MOBILE OVERFLOW & LAYOUT FIXES
-   ======================================== */
 
 @media (max-width: 768px) {
-  .page-wrapper,
-  .container,
-  .layout,
-  .main,
-  .form-container {
-    margin-left: 0 !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    width: 100% !important;
-    max-width: 100% !important;
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
-  h1 { font-size: 1.75rem !important; }
-  h2 { font-size: 1.5rem !important; }
-  h3 { font-size: 1.25rem !important; }
-  
   .card {
-    padding: 16px !important;
+    padding: 16px;
+    border-radius: 12px;
   }
 }
-
-/* ========================================
-   UTILITY CLASSES
-   ======================================== */
-
-.text-primary { color: #444 !important; }
-.text-success { color: #34c759 !important; }
-.text-error { color: #ff3b30 !important; }
-.bg-primary { background: linear-gradient(135deg, #0070ba, #1546a0); }

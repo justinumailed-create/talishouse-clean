@@ -14,7 +14,7 @@ export function useProductImages() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured) {
       fetchImages();
     } else {
       setLoading(false);

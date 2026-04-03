@@ -38,17 +38,26 @@ export default function FastCodesPage() {
   async function createFastCode(e: React.FormEvent) {
     e.preventDefault();
     try {
+      const payload = {
+        code: formData.code.toUpperCase(),
+        name: formData.name,
+        phone: formData.phone || null,
+        email: formData.email || null,
+      };
+      console.log("FAST CODE CREATE INSERT - Payload:", JSON.stringify(payload, null, 2));
+
       const { data, error } = await supabase
         .from("fast_codes")
-        .insert([{
-          code: formData.code.toUpperCase(),
-          name: formData.name,
-          phone: formData.phone || null,
-          email: formData.email || null,
-        }])
+        .insert([payload])
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("FAST CODE CREATE INSERT ERROR:", JSON.stringify(error, null, 2));
+        alert("Error creating FAST code. Code may already exist.");
+        return;
+      }
+      console.log("FAST CODE CREATE INSERT SUCCESS:", JSON.stringify(data, null, 2));
+
       if (data) {
         setFastCodes([data[0], ...fastCodes]);
         setFormData({ code: "", name: "", phone: "", email: "" });

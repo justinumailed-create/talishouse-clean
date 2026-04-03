@@ -65,7 +65,7 @@ export default function ApplicationsPage() {
       }
     }
 
-    const { error: insertError } = await supabase.from("users").insert([{
+    const payload = {
       name: app.name,
       email: app.email,
       phone: app.phone,
@@ -73,18 +73,25 @@ export default function ApplicationsPage() {
       role: "associate",
       role_type: app.role_type,
       location: app.location,
-    }]);
+    };
+    console.log("USER INSERT - Payload:", JSON.stringify(payload, null, 2));
 
-    if (!insertError) {
-      await supabase
-        .from("associate_applications")
-        .update({ status: "approved" })
-        .eq("id", app.id);
-      
-      setShowSuccess({ fastCode, name: app.name });
-      fetchApplications();
+    const { error: insertError } = await supabase.from("users").insert([payload]);
+
+    if (insertError) {
+      console.error("USER INSERT ERROR:", JSON.stringify(insertError, null, 2));
+      setProcessingId(null);
+      return;
     }
+    console.log("USER INSERT SUCCESS");
 
+    await supabase
+      .from("associate_applications")
+      .update({ status: "approved" })
+      .eq("id", app.id);
+    
+    setShowSuccess({ fastCode, name: app.name });
+    fetchApplications();
     setProcessingId(null);
   };
 

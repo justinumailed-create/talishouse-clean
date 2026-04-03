@@ -2,7 +2,7 @@
 -- Creates the leads table for capturing lead submissions
 
 CREATE TABLE IF NOT EXISTS leads (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   phone TEXT NOT NULL,
   location TEXT DEFAULT '',

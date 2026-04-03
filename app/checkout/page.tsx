@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { syncTransactionToSplits } from "@/lib/splits";
 import { getPricingConfig } from "@/lib/utils/pricingEngine";
 import { ROUTES } from "@/lib/routes";
+import { UI } from "@/styles/design-system";
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test";
 
@@ -61,16 +62,24 @@ export default function CheckoutPage() {
 
   const savePayment = async () => {
     try {
-      await supabase.from("payments").insert([{
+      const paymentPayload = {
         product_name: items.map(i => i.name).join(", "),
         amount: finalAmount,
         user_name: "Checkout Purchase",
         status: "pending",
-      }]);
+      };
+      console.log("CHECKOUT PAYMENT INSERT - Payload:", JSON.stringify(paymentPayload, null, 2));
+
+      const { error: paymentError } = await supabase.from("payments").insert([paymentPayload]);
+      if (paymentError) {
+        console.error("CHECKOUT PAYMENT INSERT ERROR:", JSON.stringify(paymentError, null, 2));
+      } else {
+        console.log("CHECKOUT PAYMENT INSERT SUCCESS");
+      }
 
       const fastCode = promoCode || "DIRECT";
       
-      await supabase.from("deals_v2").insert([{
+      const dealPayload = {
         client_name: "Checkout Purchase",
         phone: "",
         project_details: items.map(i => `${i.name} x${i.quantity}`).join(", "),
@@ -79,7 +88,15 @@ export default function CheckoutPage() {
         source: "checkout",
         base_price: rawSubtotal,
         addons_value: 0,
-      }]);
+      };
+      console.log("CHECKOUT DEAL INSERT - Payload:", JSON.stringify(dealPayload, null, 2));
+
+      const { error: dealError } = await supabase.from("deals_v2").insert([dealPayload]);
+      if (dealError) {
+        console.error("CHECKOUT DEAL INSERT ERROR:", JSON.stringify(dealError, null, 2));
+      } else {
+        console.log("CHECKOUT DEAL INSERT SUCCESS");
+      }
     } catch (err) {
       console.error("Error saving payment:", err);
     }
@@ -294,7 +311,7 @@ export default function CheckoutPage() {
                     />
                     <button
                       onClick={handleApplyPromo}
-                      className="btn-secondary px-4"
+                      className={UI.buttonSecondary}
                     >
                       Apply
                     </button>
