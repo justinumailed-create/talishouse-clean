@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from "@/lib/supabase";
-import { formatCAD } from "@/utils/currency";
 
 interface TalisBotLead {
   id: string;
@@ -39,10 +38,11 @@ export default function TalisBotAnalytics() {
   useEffect(() => {
     async function fetchData() {
       const { data } = await supabase
-        .from('assistant_leads')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100);
+  .from('leads')
+  .select('*')
+  .eq('source', 'talisbot')
+  .order('created_at', { ascending: false })
+  .limit(100);
 
       if (data) {
         setLeads(data);
@@ -126,9 +126,9 @@ export default function TalisBotAnalytics() {
   };
 
   const budgetLabels: Record<string, string> = {
-    under_25k: `Under ${formatCAD(25000)}`,
-    '25k_75k': `${formatCAD(25000)}–${formatCAD(75000)}`,
-    over_75k: `${formatCAD(75000)}+`,
+    under_25k: 'Under $25k',
+    '25k_75k': '$25k–$75k',
+    over_75k: '$75k+',
   };
 
   const stepLabels: Record<string, string> = {

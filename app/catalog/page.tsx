@@ -32,10 +32,10 @@ export default function CatalogPage() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">Destination Charge</h2>
-                <p className="text-gray-500 text-sm mt-1">Reserves spots in production and shipping queues.</p>
+                <p className="text-gray-500 text-sm mt-1">Standardised shipping charge & reserves a spot in production and shipping queues.</p>
               </div>
               <div className="text-right">
-                <p className="text-xl font-semibold text-gray-900">{formatCAD(1995)}</p>
+                <p className="text-xl font-semibold text-gray-900">{formatCAD(8500)}</p>
                 <span className="inline-block mt-1 px-3 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">Required to start</span>
               </div>
             </div>
