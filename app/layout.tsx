@@ -45,9 +45,11 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <AssociateProvider>
-              <Header />
-              <main>{children}</main>
-              <Footer />
+              <div className="site-container">
+                <Header />
+                <main>{children}</main>
+                <Footer />
+              </div>
               <CartDrawer />
               <TalisBotChat />
             </AssociateProvider>
