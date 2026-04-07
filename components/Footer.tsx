@@ -19,9 +19,10 @@ export default function Footer() {
                 className="h-8 md:h-10 w-auto object-contain"
               />
             </div>
-            <p className="text-[18px] md:text-[20px] text-gray-600 leading-relaxed max-w-md">
-              Modern homes and cottages starting from {formatCAD(58.50, false)} per sq.ft. Built in a
-              day, move-in ready in a week.
+            <p className="text-[18px] md:text-[20px] text-gray-600 leading-relaxed max-w-sm">
+              Glasshouse™ and Talishouse™ Homes & Cottages from 160 sq.ft. to 3,200 sq.ft.,<br />
+              modular, from $58.50 per sq.ft.. Up in a day, move in ready in a week. Lease-To-Own<br />
+              available, OAC.
             </p>
           </div>
 
