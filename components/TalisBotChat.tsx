@@ -324,7 +324,14 @@ console.log("TEST SELECT:", { data, error });
       return (
         <div className="flex flex-col items-center justify-center h-full text-center p-4 animate-fade-in">
           <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center mb-4">
-            <span className="text-white text-2xl">🏠</span>
+            <Image
+              src="/logo.png"
+              alt="TalisBOT Logo"
+              width={40}
+              height={40}
+              className="w-10 h-10 object-contain invert"
+              priority
+            />
           </div>
           <h3 className="font-semibold text-gray-900 mb-2">Hi, I'm TalisBOT</h3>
           <p className="text-xs text-gray-500 mb-4">I'll help you find the right home in under 60 seconds.</p>
