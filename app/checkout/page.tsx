@@ -216,7 +216,7 @@ export default function CheckoutPage() {
 
               <ul className="text-sm text-[#6e6e73] space-y-3 list-disc pl-4">
                 <li>
-                  The base charge of {formatCAD(8500)} covers sea-container shipping and up to 14 days after pickup from destination port.
+                  The base charge of {formatCAD(8995, false)} covers sea-container shipping and up to 14 days after pickup from destination port.
                 </li>
                 <li>
                   Includes incidental costs except customs clearance, taxes, and inland transport.

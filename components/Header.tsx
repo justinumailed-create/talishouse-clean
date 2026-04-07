@@ -16,46 +16,46 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-[100] bg-white border-b border-gray-100">
-      <div className="w-full px-6 lg:px-12">
-        <div className="flex justify-between items-center h-16">
+      <div className="max-w-[1400px] mx-auto w-full px-6 lg:px-16">
+        <div className="flex justify-between items-center h-20">
           {/* LEFT: Logo + Navigation */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-12">
             <Link href={ROUTES.HOME} className="flex-shrink-0">
               <Image
                 src="/logo.png"
                 alt="TALISHOUSE logo"
-                width={36}
-                height={36}
-                className="h-9 w-auto object-contain"
+                width={140}
+                height={38}
+                className="h-9.5 w-auto object-contain"
                 priority
               />
             </Link>
 
-            <nav className="hidden md:flex items-center gap-6">
+            <nav className="hidden md:flex items-center gap-10">
               <Link
                 href={ROUTES.HOME}
-                className={`text-gray-700 uppercase tracking-wide text-sm font-medium hover:text-black transition-colors ${
-                  pathname === "/" ? "text-black" : ""
+                className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
+                  pathname === "/" ? "text-black" : "text-gray-500"
                 }`}
               >
                 Home
               </Link>
               <Link
                 href={ROUTES.CATALOG}
-                className={`text-gray-700 uppercase tracking-wide text-sm font-medium hover:text-black transition-colors ${
+                className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
                   pathname.startsWith("/catalog") || pathname.startsWith("/catalogue")
                     ? "text-black"
-                    : ""
+                    : "text-gray-500"
                 }`}
               >
                 Catalogue
               </Link>
               <GatedLink
                 href={ROUTES.BUSINESS_OFFICE}
-                className={`text-gray-700 uppercase tracking-wide text-sm font-medium hover:text-black transition-colors ${
+                className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
                   pathname.startsWith("/business-office")
                     ? "text-black"
-                    : ""
+                    : "text-gray-500"
                 }`}
               >
                 Business Office
@@ -64,14 +64,15 @@ export default function Header() {
           </div>
 
           {/* RIGHT: Cart + Mobile Toggle */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <button
               onClick={openCart}
-              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+              className="relative p-2 text-gray-500 hover:text-black transition-colors"
+              aria-label="View cart"
             >
-              <ShoppingCart size={20} />
+              <ShoppingCart size={22} strokeWidth={2} />
               {itemCount > 0 && (
-                <span className="flex items-center justify-center min-w-[20px] h-5 px-1 bg-gray-900 text-white text-[11px] font-bold rounded-full">
+                <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 bg-gray-900 text-white text-[10px] font-bold rounded-full">
                   {itemCount}
                 </span>
               )}

@@ -27,12 +27,12 @@ export function SelectionCard({ label, description, price, selected, onClick }: 
         }
       `}
     >
-      <div className="flex-1">
-        <span className={`text-sm font-medium ${selected ? "text-white" : "text-gray-900"}`}>
+      <div className="flex-1 min-w-0">
+        <span className={`text-sm font-medium break-words ${selected ? "text-white" : "text-gray-900"}`}>
           {label}
         </span>
         {description && (
-          <p className={`text-xs mt-1 leading-relaxed ${selected ? "text-white/70" : "text-gray-500"}`}>
+          <p className={`text-xs mt-1 leading-relaxed break-words ${selected ? "text-white/70" : "text-gray-500"}`}>
             {description}
           </p>
         )}

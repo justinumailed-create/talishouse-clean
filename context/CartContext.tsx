@@ -41,7 +41,7 @@ export type PromoCode =
 
 export type PaymentStrategy = "full" | "deposit" | "lto";
 
-export const BASE_BUILD_PRICE = 8500;
+export const BASE_BUILD_PRICE = 8995;
 
 export interface PromoCodeInfo {
   code: PromoCode;
