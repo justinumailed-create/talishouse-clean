@@ -19,11 +19,11 @@ export default function FloatingContactButton() {
       className="fixed bottom-8 right-8 z-50 flex items-center gap-3 bg-black text-white px-6 py-4 rounded-full shadow-2xl hover:scale-105 transition-transform"
     >
       <Image
-        src="/logo-windswept-white.svg"
-        alt="Windswept"
+        src="/logo.png"
+        alt="Windswept Logo"
         width={100}
         height={28}
-        className="h-7 w-auto object-contain brightness-0 invert"
+        className="h-6 w-auto object-contain brightness-0 invert"
       />
     </Link>
   );

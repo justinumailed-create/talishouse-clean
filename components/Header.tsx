@@ -19,14 +19,14 @@ export default function Header() {
       <div className="w-full px-6 lg:px-16">
         <div className="flex justify-between items-center h-24">
           {/* LEFT: Logo + Navigation */}
-          <div className="flex items-center gap-12">
-            <Link href={ROUTES.HOME} className="flex-shrink-0">
+          <div className="flex items-center gap-8">
+            <Link href={ROUTES.HOME} className="flex items-center flex-shrink-0">
               <Image
-                src="/logo-windswept-white.svg"
-                alt="Windswept"
-                width={160}
-                height={44}
-                className="h-11 w-auto object-contain"
+                src="/logo.png"
+                alt="Windswept Logo"
+                width={120}
+                height={32}
+                className="h-6 md:h-8 w-auto object-contain"
                 priority
               />
             </Link>

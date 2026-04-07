@@ -12,11 +12,11 @@ export default function Footer() {
           <div className="space-y-10 pr-12">
             <div className="w-full overflow-hidden">
               <Image
-                src="/logo-windswept-white.svg"
-                alt="Windswept"
-                width={180}
-                height={50}
-                className="h-12 w-auto object-contain"
+                src="/logo.png"
+                alt="Windswept Logo"
+                width={120}
+                height={32}
+                className="h-8 md:h-10 w-auto object-contain"
               />
             </div>
             <p className="text-[18px] text-gray-600 leading-relaxed max-w-sm">
