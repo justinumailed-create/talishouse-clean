@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { supabase } from "@/lib/supabase";
 import { formatCAD } from "@/utils/currency";
 
@@ -618,7 +619,14 @@ console.log("TEST SELECT:", { data, error });
           onClick={() => setOpen(true)}
           className="bg-black text-white rounded-full w-14 h-14 flex items-center justify-center shadow-xl hover:scale-105 transition-transform"
         >
-          <span className="text-lg">🏠</span>
+          <Image
+            src="/logo.png"
+            alt="Windswept Logo"
+            width={32}
+            height={32}
+            className="w-8 h-8 object-contain invert"
+            priority
+          />
         </button>
       )}
 
