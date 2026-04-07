@@ -7,6 +7,7 @@ import { ProductConfigurator } from "@/components/ProductConfigurator";
 import { getModelsByCategory } from "@/lib/products";
 import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
 import SuccessToast from "@/components/SuccessToast";
+import { formatCAD } from "@/utils/currency";
 
 export default function TalishouseRecreationalPage() {
   const allModels = getModelsByCategory("recreational");
@@ -125,8 +126,9 @@ Perfect for cottages, home offices, or investment properties.`}
         </div>
 
         <p className="text-2xl font-bold text-gray-900">
-          CAD ${calculateTotal().toLocaleString()}
+          {formatCAD(calculateTotal())}
         </p>
+        <p className="text-xs text-gray-500">CAD 58.50 per sq.ft. from</p>
 
         <div className="space-y-8">
           <ProductConfigurator
@@ -155,7 +157,7 @@ Perfect for cottages, home offices, or investment properties.`}
                       <p className={`text-xs mt-0.5 ${selectedAddons[addon.id] ? "text-white/70" : "text-gray-500"}`}>{addon.description}</p>
                     </div>
                     <span className={`font-semibold ${selectedAddons[addon.id] ? "text-white" : "text-gray-900"}`}>
-                      +CAD ${addon.price.toLocaleString()}
+                      +{formatCAD(addon.price)}
                     </span>
                   </button>
                 ))}
@@ -176,7 +178,7 @@ Perfect for cottages, home offices, or investment properties.`}
                 htmlFor="wholesale"
                 className="ml-3 text-sm text-gray-700 cursor-pointer"
               >
-                Request wholesale pricing
+                Request Wholesale Terms
               </label>
             </div>
             <div className="flex items-center">
@@ -191,7 +193,7 @@ Perfect for cottages, home offices, or investment properties.`}
                 htmlFor="leaseToOwn"
                 className="ml-3 text-sm text-gray-700 cursor-pointer"
               >
-                Request lease-to-own
+                Request Lease-To-Own
               </label>
             </div>
           </div>

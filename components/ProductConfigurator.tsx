@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { SidingSelector } from "./ui/SidingSelector";
 
 const roofingOptions = [
   "Bright, white & white",
@@ -26,23 +27,12 @@ const bathOptions = [
   { id: "TL06", label: "Option 6", image: "/images/bath/TL06.png" },
 ];
 
-const flooringMaterials = [
-  { id: "vinyl", label: "Vinyl", image: "/images/flooring/VINYL.png" },
-  { id: "spc", label: "SPC", image: "/images/flooring/SPC.png" },
-];
-
-flooringMaterials.forEach((mat: { label: string; image: string }) => {
-  console.log(`Flooring material: ${mat.label} -> ${mat.image}`);
-});
-
-console.log("Flooring material paths:", flooringMaterials.map(m => m.image));
-
 const flooringColors = [
-  { id: "ash", color: "#cfcfcf" },
-  { id: "grey", color: "#6b6b6b" },
-  { id: "pine", color: "#f2e6d8" },
-  { id: "palm", color: "#c49a6c" },
-  { id: "maple", color: "#d2a679" },
+  { id: "ash", color: "#cfcfcf", label: "Ash" },
+  { id: "grey", color: "#6b6b6b", label: "Grey" },
+  { id: "pine", color: "#f2e6d8", label: "Pine" },
+  { id: "palm", color: "#c49a6c", label: "Palm" },
+  { id: "maple", color: "#d2a679", label: "Maple" },
 ];
 
 interface ProductConfiguratorProps {
@@ -224,68 +214,50 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
         </div>
       </div>
 
-      {/* FLOORING - MATERIAL SECTION */}
-      <div className="space-y-4">
-        <p className="text-[15px] font-semibold text-gray-900">Flooring Material</p>
-        <p className="text-xs text-gray-500 -mt-2">Click to select, click again to deselect</p>
-        <div className="grid grid-cols-2 gap-4">
-          {flooringMaterials.map((material) => (
-            <OptionCard
-              key={material.id}
-              image={material.image}
-              alt={material.label}
-              isSelected={selectedOptions["Flooring Material"] === material.id}
-              onClick={() => handleToggle("Flooring Material", material.id)}
-              showLabel={true}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* FLOORING - COLOUR SECTION (VISUAL ONLY) */}
       <div className="space-y-4">
         <p className="text-[15px] font-semibold text-gray-900">Flooring Style</p>
-        <p className="text-xs text-gray-500 -mt-2">Click to select, click again to deselect</p>
+        <p className="text-xs text-gray-500 -mt-2">Default: SPC flooring. Click to select, click again to deselect</p>
         <div className="grid grid-cols-5 gap-3">
           {flooringColors.map((color) => (
-            <ColorSwatch
+            <button
               key={color.id}
-              color={color.color}
-              isSelected={selectedOptions["Flooring Colour"] === color.id}
               onClick={() => handleToggle("Flooring Colour", color.id)}
-            />
+              title={color.label}
+              className={`
+                relative aspect-square rounded-xl overflow-hidden border-2 transition-all duration-300 cursor-pointer
+                ${selectedOptions["Flooring Colour"] === color.id
+                  ? "border-black ring-2 ring-black/20 shadow-md" 
+                  : "border-gray-200 hover:border-gray-400"
+                }
+              `}
+            >
+              <div 
+                className="w-full h-full transition-transform duration-300 hover:scale-110"
+                style={{ backgroundColor: color.color }}
+              />
+              {selectedOptions["Flooring Colour"] === color.id && (
+                <div className="absolute top-2 right-2 w-5 h-5 bg-black rounded-full flex items-center justify-center shadow-lg border-2 border-white">
+                  <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+              <div className="absolute inset-x-0 bottom-0 p-1.5 bg-gradient-to-t from-black/60 to-transparent">
+                <span className="text-[9px] font-medium text-white uppercase tracking-wide block text-center">
+                  {color.label}
+                </span>
+              </div>
+            </button>
           ))}
         </div>
       </div>
 
-      {/* SIDING - OPTION SELECTION */}
-      <div className="space-y-4">
-        <p className="text-[15px] font-semibold text-gray-900">Siding Options</p>
-        <p className="text-xs text-gray-500 -mt-2">Click to select, click again to deselect</p>
-        <div className="flex gap-3 flex-wrap">
-          {[
-            { id: "vinyl", label: "Vinyl", color: "#e8e4df" },
-            { id: "metal", label: "Metal", color: "#4a4a4a" },
-            { id: "fiber-cement", label: "Fiber Cement", color: "#c4b8a8" },
-            { id: "wood", label: "Wood", color: "#8b7355" },
-            { id: "composite", label: "Composite", color: "#6b5b4f" },
-            { id: "monochrome", label: "Monochrome", color: "#2d2d2d" },
-          ].map((siding) => (
-            <button
-              key={siding.id}
-              type="button"
-              onClick={() => handleToggle("Siding Options", siding.id)}
-              title={siding.label}
-              className={`w-10 h-10 rounded-full border-2 transition ${
-                selectedOptions["Siding Options"] === siding.id
-                  ? "border-black scale-110"
-                  : "border-gray-300 hover:border-gray-400"
-              }`}
-              style={{ backgroundColor: siding.color }}
-            />
-          ))}
-        </div>
-      </div>
+      {/* SIDING - USING REUSABLE COMPONENT */}
+      <SidingSelector
+        selectedSiding={selectedOptions["Siding Options"] || ""}
+        onSidingChange={(code) => handleToggle("Siding Options", code)}
+      />
     </div>
   );
 }

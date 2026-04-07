@@ -55,18 +55,18 @@ export default function ProductLayout({
   const showImage = hasValidImage || dbImageUrl || productImage;
 
   return (
-    <div className="w-full px-6 lg:px-12 py-8">
+    <div className="w-full px-6 lg:px-[75px] py-8">
       <div className="grid grid-cols-12 gap-8">
-        {/* Left - Image - 8 cols */}
-        <div className="col-span-12 lg:col-span-8">
-          <div className="w-full aspect-[16/9] bg-gray-50 relative overflow-hidden rounded-xl border border-gray-100">
+        {/* Left - Image + Description - 6 cols (60%) */}
+        <div className="col-span-12 lg:col-span-7">
+          <div className="w-full aspect-video bg-gray-50 relative overflow-hidden rounded-xl border border-gray-100">
             {displayImage ? (
               <Image
                 src={displayImage}
                 alt={productName}
                 fill
                 className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 66vw"
+                sizes="(max-width: 1024px) 100vw, 58vw"
                 priority
               />
             ) : (
@@ -91,8 +91,8 @@ export default function ProductLayout({
           </div>
         </div>
 
-        {/* Right - Configurator - 4 cols */}
-        <div className="col-span-12 lg:col-span-4">
+        {/* Right - Configurator - 5 cols (40%) */}
+        <div className="col-span-12 lg:col-span-5">
           <div className="sticky top-24 h-fit bg-white border rounded-xl p-6 shadow-sm">
             {children}
           </div>

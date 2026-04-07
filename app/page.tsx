@@ -69,7 +69,7 @@ if (fetchError && fetchError.message) {
   }
 
   return (
-    <div className="w-full px-6 lg:px-12 py-6 md:py-10">
+    <div className="w-full px-6 lg:px-[75px] py-6 md:py-10">
       <div className="grid grid-cols-12 gap-8">
       {error && (
         <div className="col-span-12 mb-6 p-4 bg-red-50 text-red-600 rounded-lg text-sm">
@@ -79,7 +79,7 @@ if (fetchError && fetchError.message) {
 
       {/* Left Column - Map + Content */}
       <div className="col-span-12 lg:col-span-8 h-full">
-        <div className="w-full h-full min-h-[350px] lg:min-h-[500px] rounded-2xl overflow-hidden bg-gray-200 shadow-sm">
+        <div className="w-full h-full min-h-[280px] lg:min-h-[400px] rounded-2xl overflow-hidden bg-gray-200 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
           <iframe
             src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
             allow="geolocation 'self' https://my.atlist.com"
@@ -87,7 +87,7 @@ if (fetchError && fetchError.message) {
             scrolling="no"
             allowFullScreen
             title="Talishouse property discovery map"
-            className="w-full h-full min-h-[350px] lg:min-h-[500px]"
+            className="w-full h-full min-h-[280px] lg:min-h-[400px]"
           />
         </div>
       </div>
@@ -98,7 +98,6 @@ if (fetchError && fetchError.message) {
           <p className="text-xs uppercase tracking-[0.25em] text-[#444] mb-4 font-bold">
             Global Overview
           </p>
-
           <h1 className="leading-tight mb-6">
             <span className="block text-2xl md:text-3xl font-semibold tracking-[0.15em] uppercase text-gray-900">
               {content['homepage_hero_title'] || 'TALISHOUSE™'}
@@ -107,7 +106,7 @@ if (fetchError && fetchError.message) {
               {content['homepage_hero_subtitle'] || 'Homes and Cottages'}
             </span>
           </h1>
-          
+
           <ul className="space-y-4 mb-8">
             <li className="flex items-start text-base font-medium text-gray-800">
               <span className="mr-3 text-gray-900 font-bold">•</span>
@@ -131,7 +130,7 @@ if (fetchError && fetchError.message) {
           </Link>
         </div>
 
-        <div className="relative bg-black rounded-2xl overflow-hidden min-h-[200px] md:min-h-[250px]">
+        <div className="relative bg-black rounded-2xl overflow-hidden min-h-[160px] md:min-h-[200px]">
           <video
             ref={videoRef}
             src="/videos/homepage.mp4"

@@ -107,15 +107,18 @@ useEffect(() => {
         productName="Glasshouse™"
         productImage={getProductImage()}
         productSize="glasshouse-200"
-        familyDescription={`Glasshouse™ : The quick start option:
-- Up to five units shipped together with up to five optional deck platforms in one sea-can container.
-- Size and appearance: 10 x 20 ft. each, one, two or three sides glass.
-- All needed hardware, instructions and glue included.
-- Easy 15-minute setup with 2 people.
-- Full modular system: add units to configure larger spaces.
-- Includes a 25-year structural warranty.
+        familyDescription={`Glasshouse™ modules are a budget friendly quick start option, 
+when unfurnished space with a view are the objective.
 
-Select options below to customize your Glasshouse™`}
+Up to five units shipped in one sea-can container.
+
+Two sizes: 8' x 20' or 10' x 20', one side glass. 
+Hardware and instructions included.
+
+Up in a day, finished in a week.
+
+Add units to configure larger spaces: side by side, 
+back to back, L-shaped and off-set parallel.`}
         aboutContent={`Glasshouse™: The quick start option for modern modular living.
 10 x 20 ft. steel structures with glass walls.
 Perfect for short-term rentals, home offices, or additional living space.`}
@@ -153,6 +156,7 @@ Perfect for short-term rentals, home offices, or additional living space.`}
         <p className="text-2xl font-bold text-gray-900">
           {formatCAD(calculateTotal())}
         </p>
+        <p className="text-xs text-gray-500">CAD 58.50 per sq.ft. from</p>
 
         <div className="space-y-8">
           <ProductConfigurator
@@ -198,12 +202,12 @@ Perfect for short-term rentals, home offices, or additional living space.`}
                 onChange={(e) => setWholesaleRequested(e.target.checked)}
                 className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black cursor-pointer"
               />
-              <label
-                htmlFor="wholesale"
-                className="ml-3 text-sm text-gray-700 cursor-pointer"
-              >
-                Request wholesale pricing
-              </label>
+                <label
+                  htmlFor="wholesale"
+                  className="ml-3 text-sm text-gray-700 cursor-pointer"
+                >
+                  Request Wholesale Terms
+                </label>
             </div>
             <div className="flex items-center">
               <input
@@ -217,7 +221,7 @@ Perfect for short-term rentals, home offices, or additional living space.`}
                 htmlFor="leaseToOwn"
                 className="ml-3 text-sm text-gray-700 cursor-pointer"
               >
-                Request lease-to-own
+                Request Lease-To-Own
               </label>
             </div>
           </div>

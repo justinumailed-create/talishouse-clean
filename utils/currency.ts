@@ -1,3 +1,3 @@
-export const formatCAD = (amount: number, showDecimals: boolean = true) => {
-  return `CAD $${showDecimals ? amount.toFixed(2) : Math.round(amount).toLocaleString()}`
+export const formatCAD = (amount: number, showDecimals: boolean = false) => {
+  return `CAD $${Math.round(amount).toLocaleString()}`
 }

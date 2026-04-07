@@ -3,29 +3,39 @@ export interface Addon {
   name: string;
   description: string;
   price: number;
+  sizes?: { size: string; price: number }[];
   compatibleWith: string[];
+  volume?: number;
 }
 
 export const ADDONS: Addon[] = [
   {
-    id: "glasshouse-deck",
-    name: "Deck Platform (10ft / 20ft)",
-    description: "Custom deck platform for Glasshouse™ 200 units.",
-    price: 9450,
+    id: "glasshouse-deck-8x20",
+    name: "Deck Platform",
+    description: "8' x 20' deck platform for Glasshouse™ units.",
+    price: 9995,
+    sizes: [
+      { size: "8x20", price: 9995 },
+      { size: "10x20", price: 11995 },
+    ],
     compatibleWith: ["glasshouse-200"],
   },
   {
-    id: "glasshouse-glass-upgrade",
-    name: "Glass Upgrade Options",
-    description: "Enhanced glass options for better insulation and views.",
-    price: 4500,
+    id: "glasshouse-mobile-platform-8x20",
+    name: "Mobile Platform",
+    description: "8' x 20' mobile platform for Glasshouse™ units.",
+    price: 19995,
+    sizes: [
+      { size: "8x20", price: 19995 },
+      { size: "10x20", price: 24995 },
+    ],
     compatibleWith: ["glasshouse-200"],
   },
   {
-    id: "glasshouse-climate",
-    name: "Smart Climate Kit",
-    description: "Smart climate control system for optimal temperature management.",
-    price: 3500,
+    id: "glasshouse-pergola-8x20",
+    name: "Pergola",
+    description: "8' x 20' pergola for outdoor coverage.",
+    price: 14995,
     compatibleWith: ["glasshouse-200"],
   },
   {
@@ -33,20 +43,20 @@ export const ADDONS: Addon[] = [
     name: "Pergola / Veranda",
     description: "Stylish covered outdoor area perfect for relaxation and entertaining.",
     price: 14450,
-    compatibleWith: ["talishouse-400"],
+    compatibleWith: ["talishouse-400", "talishouse-800"],
   },
   {
     id: "talishouse-400-roofing",
     name: "Roofing Upgrade",
     description: "Premium roofing options for enhanced aesthetics and durability.",
     price: 8950,
-    compatibleWith: ["talishouse-400"],
+    compatibleWith: ["talishouse-400", "talishouse-800"],
   },
   {
     id: "talishouse-residential-platform",
-    name: "Permanent 40ft Platform",
+    name: "Permanent Platform",
     description: "Heavy-duty permanent platform for Talishouse™ Residential units.",
-    price: 14950,
+    price: 24995,
     compatibleWith: ["talishouse-residential"],
   },
   {

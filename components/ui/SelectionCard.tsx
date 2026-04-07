@@ -1,3 +1,5 @@
+import { formatCAD } from "@/utils/currency";
+
 interface SelectionCardProps {
   label: string;
   description?: string;
@@ -39,7 +41,7 @@ export function SelectionCard({ label, description, price, selected, onClick }: 
       </div>
       {price !== undefined && (
         <span className={`text-sm font-semibold ml-4 ${selected ? "text-white" : "text-gray-900"}`}>
-          {price > 0 ? `+CAD $${price.toLocaleString()}` : "Included"}
+          {price > 0 ? `+${formatCAD(price)}` : "Included"}
         </span>
       )}
     </div>

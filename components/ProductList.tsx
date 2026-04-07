@@ -48,18 +48,18 @@ export default function ProductList() {
           <Link
             key={product.id}
             href={`/catalog?product=${product.id}`}
-            className="block bg-white rounded-2xl overflow-hidden border border-[rgba(0,0,0,0.06)] hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+            className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition-all duration-500"
           >
-            <div className="aspect-[4/3] relative bg-gray-100">
+            <div className="aspect-video relative bg-gray-50 overflow-hidden">
               {product.image_url ? (
                 <Image
                   src={product.image_url}
                   alt={product.name}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">
                   No image
                 </div>
               )}
@@ -76,7 +76,7 @@ export default function ProductList() {
               <div className="flex items-center justify-between mt-2">
                 {product.price && (
                   <span className="text-lg font-semibold text-gray-900">
-                    ${product.price.toLocaleString()}
+                    CAD ${product.price.toLocaleString()}
                   </span>
                 )}
                 {product.size && (

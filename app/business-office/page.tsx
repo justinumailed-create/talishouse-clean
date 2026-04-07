@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import GatedLink from "@/components/GatedLink";
+import Link from "next/link";
 import { isAuthorized, clearFastCode } from "@/lib/fast-code";
-import FastCodeGate from "@/components/FastCodeGate";
 import { ROUTES } from "@/lib/routes";
 
 export default function BusinessOfficePage() {
@@ -20,17 +19,18 @@ export default function BusinessOfficePage() {
 
   if (authorized === null) return null;
 
-  if (!authorized) {
-    return <FastCodeGate />;
-  }
+  const publicItems = [
+    { title: "Obtain FAST Code", desc: "Get your access code to proceed", href: ROUTES.ADD_PROJECT },
+    { title: "Return to Homepage", desc: "Go back to main site", href: ROUTES.HOME },
+    { title: "Lease-to-Own", desc: "Flexible ownership plans", href: ROUTES.LEASE_TO_OWN },
+  ];
 
-  const cardItems = [
+  const gatedItems = authorized ? [
     { title: "Propose a Project", desc: "Start a new build proposal", href: ROUTES.BUSINESS_OFFICE_PROPOSE_PROJECT },
     { title: "Apply for Associate", desc: "Join as a partner", href: ROUTES.BUSINESS_OFFICE_APPLY },
     { title: "SPLITS Portal", desc: "Manage transactions", href: ROUTES.BUSINESS_OFFICE_TRANSACTIONS },
     { title: "Partner Programs", desc: "Explore collaborations", href: ROUTES.SUBSCRIPTION },
-    { title: "Lease-to-Own", desc: "Flexible ownership plans", href: ROUTES.LEASE_TO_OWN }
-  ];
+  ] : [];
 
   return (
     <div className="container py-12">
@@ -38,31 +38,68 @@ export default function BusinessOfficePage() {
         Business Office
       </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {cardItems.map((item, i) => (
-          <div
-            key={i}
-            className="
-              rounded-2xl border border-[rgba(0,0,0,0.06)]
-              bg-white p-6 transition-all duration-300
-              hover:shadow-md hover:-translate-y-[2px]
-            "
-          >
-            <h2 className="text-lg font-medium mb-1">
-              {item.title}
-            </h2>
-            <p className="text-sm text-gray-500 mb-4">
-              {item.desc}
-            </p>
+      {gatedItems.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-medium mb-4 text-gray-700">Authorized Access</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {gatedItems.map((item, i) => (
+              <div
+                key={i}
+                className="
+                  rounded-2xl border border-[rgba(0,0,0,0.06)]
+                  bg-white p-6 transition-all duration-300
+                  hover:shadow-md hover:-translate-y-[2px]
+                "
+              >
+                <h3 className="text-lg font-medium mb-1">
+                  {item.title}
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  {item.desc}
+                </p>
 
-            <GatedLink
-              href={item.href}
-              className="w-full py-2.5 rounded-xl text-sm font-medium transition text-center block bg-gray-100 hover:bg-gray-200 text-gray-900"
-            >
-              Open
-            </GatedLink>
+                <Link
+                  href={item.href}
+                  className="w-full py-2.5 rounded-xl text-sm font-medium transition text-center block bg-gray-100 hover:bg-gray-200 text-gray-900"
+                >
+                  Open
+                </Link>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
+      )}
+
+      <div>
+        <h2 className="text-lg font-medium mb-4 text-gray-700">
+          {authorized ? "General Access" : "Quick Links"}
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {publicItems.map((item, i) => (
+            <div
+              key={i}
+              className="
+                rounded-2xl border border-[rgba(0,0,0,0.06)]
+                bg-white p-6 transition-all duration-300
+                hover:shadow-md hover:-translate-y-[2px]
+              "
+            >
+              <h3 className="text-lg font-medium mb-1">
+                {item.title}
+              </h3>
+              <p className="text-sm text-gray-500 mb-4">
+                {item.desc}
+              </p>
+
+              <Link
+                href={item.href}
+                className="w-full py-2.5 rounded-xl text-sm font-medium transition text-center block bg-gray-100 hover:bg-gray-200 text-gray-900"
+              >
+                Open
+              </Link>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="text-center mt-10">

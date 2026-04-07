@@ -9,17 +9,10 @@ const categories = [
   { name: "TalisTowns™", href: "/talistowns", image: "/images/talistowns.jpg" },
 ];
 
-const purchasingOptions = [
-  { id: "fast5", name: "FAST5", desc: "5% down payment program" },
-  { id: "pac", name: "PAC+", desc: "Pre-approved credit financing" },
-  { id: "splits", name: "SPLITS", desc: "ECommerce revenue sharing" },
-  { id: "lto", name: "Lease-to-Own", desc: "Flexible ownership plans" },
-];
-
 export default function CatalogPage() {
   return (
     <div className="bg-[#f5f5f7] min-h-screen">
-      <div className="w-full px-6 lg:px-12">
+      <div className="w-full px-6 lg:px-[75px]">
         <section className="py-12">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-gray-900">Catalog</h1>
@@ -28,12 +21,10 @@ export default function CatalogPage() {
 
         <section className="pb-12">
           <div className="bg-white rounded-[2.5rem] p-8 md:p-14 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative overflow-hidden group hover:shadow-[0_30px_60px_rgba(0,0,0,0.06)] transition-all duration-700">
-            {/* Elegant Background Accents */}
             <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-gray-50/40 to-transparent pointer-events-none" />
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-gray-50/50 rounded-full blur-3xl pointer-events-none" />
             
             <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-10 md:gap-0">
-              {/* Left Side: 80% Width */}
               <div className="md:flex-[0_0_80%] min-w-0 md:pr-16 space-y-5 text-left">
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="flex items-center gap-3">
@@ -50,17 +41,19 @@ export default function CatalogPage() {
                   </span>
                 </div>
                 <p className="text-gray-500 text-[16px] md:text-[17px] leading-[1.7] font-normal break-words max-w-5xl">
-                  A non-negotiable fee added to the price of each sea-can container to cover the cost of transporting it from the manufacturer&apos;s assembly plant to the port of entry in Canada. This amount assumes one unit. Taxes or tariﬀs extra.
+                  Standardised shipping charge &amp; reserves a spot in production and shipping queues.
+                </p>
+                <p className="text-gray-400 text-sm italic">
+                  A mandatory, non-negotiable fee added to the price of each sea-can container to cover the cost of transporting it from the manufacturer&apos;s assembly plant to the port of entry in Canada. This amount assumes one unit. Taxes or tariffs extra.
                 </p>
               </div>
 
-              {/* Right Side: 20% Width */}
               <div className="md:flex-[0_0_20%] min-w-0 flex-shrink-0">
                 <div className="flex flex-col items-start md:items-end justify-center w-full border-t md:border-t-0 md:border-l border-gray-100 pt-8 md:pt-0 md:pl-12">
                   <div className="space-y-1 text-left md:text-right w-full">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">Amount due</p>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">CAD</p>
                     <p className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter whitespace-nowrap">
-                      {formatCAD(8995, false)}
+                      8,995
                     </p>
                     <div className="pt-4">
                       <span className="inline-flex items-center px-5 py-2 bg-gray-900 text-white text-[11px] font-bold uppercase tracking-widest rounded-full shadow-xl shadow-gray-200 whitespace-nowrap hover:scale-105 transition-transform cursor-default">
@@ -79,7 +72,7 @@ export default function CatalogPage() {
             {categories.map((cat) => (
               <Link key={cat.name} href={cat.href}>
                 <div className="group bg-white border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
-                  <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-xl">
+                  <div className="relative w-full aspect-video overflow-hidden rounded-t-xl">
                     <img
                       src={cat.image}
                       alt={cat.name}
@@ -97,38 +90,13 @@ export default function CatalogPage() {
           </div>
         </section>
 
-        <section className="pb-8">
-          <div className="text-center">
-            <h2 className="text-base font-medium text-gray-900 mb-3">Site Requirements</h2>
-            <p className="text-sm text-gray-600 leading-relaxed">
-              Site preparation includes driveway, building site, power hook up, water and disposal systems. Mobile installations may negate the need for Building Permits.
-            </p>
-          </div>
-        </section>
-
-        <section className="pb-20">
-          <h2 className="text-base font-medium text-gray-900 mb-4">Purchasing Options</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {purchasingOptions.map((option) => (
-              <Link
-                key={option.id}
-                href={option.id === "lto" ? "/lease-to-own" : "/business-office"}
-                className="bg-white rounded-xl p-4 border border-gray-100 hover:border-black transition-colors"
-              >
-                <p className="font-semibold text-gray-900">{option.name}</p>
-                <p className="text-xs text-gray-500 mt-1">{option.desc}</p>
-              </Link>
-            ))}
+        <section className="py-8 pb-24">
+          <div className="w-full text-center">
+            <p className="text-gray-400 text-xs">Just add ambition…!</p>
+            <p className="text-gray-400 text-xs mt-1">Moonlighting is lucrative…!</p>
           </div>
         </section>
       </div>
-
-      <section className="py-8 pb-24">
-        <div className="w-full px-6 lg:px-12 text-center">
-          <p className="text-gray-400 text-xs">Just add ambition…!</p>
-          <p className="text-gray-400 text-xs mt-1">Moonlighting is lucrative…!</p>
-        </div>
-      </section>
     </div>
   );
 }

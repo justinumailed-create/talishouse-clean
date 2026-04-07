@@ -16,17 +16,17 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-[100] bg-white border-b border-gray-100">
-      <div className="max-w-[1400px] mx-auto w-full px-6 lg:px-16">
-        <div className="flex justify-between items-center h-20">
+      <div className="w-full px-6 lg:px-16">
+        <div className="flex justify-between items-center h-24">
           {/* LEFT: Logo + Navigation */}
           <div className="flex items-center gap-12">
             <Link href={ROUTES.HOME} className="flex-shrink-0">
               <Image
-                src="/logo.png"
-                alt="TALISHOUSE logo"
-                width={140}
-                height={38}
-                className="h-9.5 w-auto object-contain"
+                src="/logo-windswept-white.svg"
+                alt="Windswept"
+                width={160}
+                height={44}
+                className="h-11 w-auto object-contain"
                 priority
               />
             </Link>

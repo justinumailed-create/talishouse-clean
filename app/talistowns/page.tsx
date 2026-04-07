@@ -11,6 +11,7 @@ import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
 import { productFamilies } from "@/lib/productFamilies";
 import { useCart } from "@/context/CartContext";
 import SuccessToast from "@/components/SuccessToast";
+import { formatCAD } from "@/utils/currency";
 
 export default function TalistownsPage() {
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
@@ -92,8 +93,9 @@ export default function TalistownsPage() {
         </h1>
 
         <p className="text-xl font-bold text-gray-900">
-          CAD ${bundlePrice.toLocaleString()}
+          {formatCAD(bundlePrice)}
         </p>
+        <p className="text-xs text-gray-500">CAD 58.50 per sq.ft. from</p>
 
         <div className="space-y-6">
           <div className="rounded-lg border border-gray-100 bg-gray-50 p-4">
@@ -137,7 +139,7 @@ export default function TalistownsPage() {
                 htmlFor="wholesale"
                 className="ml-3 text-sm text-gray-700 cursor-pointer"
               >
-                Request wholesale pricing
+                Request Wholesale Terms
               </label>
             </div>
             <div className="flex items-center">
@@ -152,7 +154,7 @@ export default function TalistownsPage() {
                 htmlFor="leaseToOwn"
                 className="ml-3 text-sm text-gray-700 cursor-pointer"
               >
-                Request lease-to-own
+                Request Lease-To-Own
               </label>
             </div>
           </div>
