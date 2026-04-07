@@ -72,7 +72,7 @@ export default function AddProjectPage() {
       <div className="mx-auto max-w-md px-4 w-full">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
-            ADD A PROJECT
+            JOIN US
           </h1>
         </div>
 
@@ -84,7 +84,7 @@ export default function AddProjectPage() {
             <Link
               href="/"
               className="text-xl leading-none text-white/70 transition hover:text-white"
-              aria-label="Close add project"
+              aria-label="Close join us"
             >
               ×
             </Link>

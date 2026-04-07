@@ -78,8 +78,8 @@ if (fetchError && fetchError.message) {
       )}
 
       {/* Left Column - Map + Content */}
-      <div className="col-span-12 lg:col-span-8 h-full">
-        <div className="w-full h-full min-h-[280px] lg:min-h-[400px] rounded-2xl overflow-hidden bg-gray-200 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+      <div className="col-span-12 lg:col-span-8">
+        <div className="w-full h-full min-h-[240px] lg:min-h-[340px] rounded-2xl overflow-hidden bg-gray-200 shadow-sm transition-transform duration-500 hover:scale-[1.01]">
           <iframe
             src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
             allow="geolocation 'self' https://my.atlist.com"
@@ -87,7 +87,7 @@ if (fetchError && fetchError.message) {
             scrolling="no"
             allowFullScreen
             title="Talishouse property discovery map"
-            className="w-full h-full min-h-[280px] lg:min-h-[400px]"
+            className="w-full h-[240px] lg:h-[340px]"
           />
         </div>
       </div>
@@ -126,17 +126,17 @@ if (fetchError && fetchError.message) {
             href="/add-project"
             className={UI.button}
           >
-            Add A Project
+            Join Us
           </Link>
         </div>
 
-        <div className="relative bg-black rounded-2xl overflow-hidden min-h-[160px] md:min-h-[200px]">
+        <div className="relative bg-black rounded-2xl overflow-hidden h-[160px] md:h-[180px]">
           <video
             ref={videoRef}
             src="/videos/homepage.mp4"
             controls
             playsInline
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-[center_20%]"
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
             onEnded={() => setIsPlaying(false)}
@@ -155,6 +155,27 @@ if (fetchError && fetchError.message) {
               </button>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Hero Text Block */}
+      <div className="col-span-12 py-8">
+        <div className="max-w-3xl space-y-1">
+          <p className="text-xl md:text-2xl font-semibold text-gray-900 leading-tight">
+            Glasshouse™ and Talishouse™ Homes & Cottages
+          </p>
+          <p className="text-lg md:text-xl text-gray-600 font-medium">
+            from 160 sq.ft. to 3,200 sq.ft.
+          </p>
+          <p className="text-lg md:text-xl text-gray-600 font-medium">
+            Modular, from CAD $58.50 per sq.ft.
+          </p>
+          <p className="text-lg md:text-xl text-gray-600 font-medium">
+            Up in a day, move in ready in a week.
+          </p>
+          <p className="text-lg md:text-xl text-gray-600 font-medium">
+            Lease-To-Own available, OAC.
+          </p>
         </div>
       </div>
 
