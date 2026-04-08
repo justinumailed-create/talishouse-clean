@@ -119,7 +119,6 @@ export default function TalishouseResidentialPage() {
 21' x 20' steel structures with scalable configurations.
 Perfect for multi-unit developments and residential communities.`}
       >
-        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
         <h1 className="text-2xl font-semibold text-gray-900">
           {selectedModel?.name || 'Select a Model'}
         </h1>
@@ -238,7 +237,6 @@ Perfect for multi-unit developments and residential communities.`}
             </a>
           </div>
         </div>
-      </div>
       </ProductLayout>
     </>
   );

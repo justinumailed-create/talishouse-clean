@@ -129,8 +129,7 @@ function TalishouseContent() {
       productSize={config.size}
       familyDescription={config.description}
       aboutContent={`${selectedModel?.name || 'Product'}: ${config.description.split(':')[1]?.split('.')[0] || 'Modern modular living solution'}`}
-    >
-      <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
+      >
         <h1 className="text-2xl font-semibold text-gray-900">
           {selectedModel?.name || 'Select a Model'}
         </h1>
@@ -142,12 +141,12 @@ function TalishouseContent() {
               <button
                 key={model.id}
                 onClick={() => {
-  if (selectedModel?.id === model.id) {
-    setSelectedModel(null);
-  } else {
-    setSelectedModel(model);
-  }
-}}
+                  if (selectedModel?.id === model.id) {
+                    setSelectedModel(null);
+                  } else {
+                    setSelectedModel(model);
+                  }
+                }}
                 className={`p-4 rounded-xl border text-sm font-medium transition-all duration-200 hover:scale-[1.02] hover:shadow-md ${
                   selectedModel?.id === model.id
                     ? "border-gray-900 bg-gray-900 text-white"
@@ -248,7 +247,6 @@ function TalishouseContent() {
               Interested in financing? Learn about Lease-to-Own →
             </a>
           </div>
-        </div>
         </div>
       </ProductLayout>
     </>

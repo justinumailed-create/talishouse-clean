@@ -38,6 +38,7 @@ const flooringColors = [
 interface ProductConfiguratorProps {
   selectedOptions: Record<string, string>;
   onOptionChange: (category: string, option: string) => void;
+  hideSections?: boolean;
 }
 
 function OptionCard({ 
@@ -149,7 +150,11 @@ function ColorSwatch({
   );
 }
 
-export function ProductConfigurator({ selectedOptions, onOptionChange }: ProductConfiguratorProps) {
+export function ProductConfigurator({ 
+  selectedOptions, 
+  onOptionChange,
+  hideSections = false 
+}: ProductConfiguratorProps) {
   const handleToggle = (category: string, option: string) => {
     if (selectedOptions[category] === option) {
       onOptionChange(category, "");
@@ -157,6 +162,8 @@ export function ProductConfigurator({ selectedOptions, onOptionChange }: Product
       onOptionChange(category, option);
     }
   };
+
+  if (hideSections) return null;
 
   return (
     <div className="space-y-8">

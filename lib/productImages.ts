@@ -10,8 +10,8 @@ export const PRODUCT_IMAGE_MAP: Record<string, string> = {
   'talishouse-800': '/images/talishouse/recreational/models/800.png',
   
   // Talishouse Residential
-  'residential': '/images/talishouse/residential/hero.png',
-  'talishouse-residential': '/images/talishouse/residential/hero.png',
+  'residential': '/images/talishouse/residential/hero.jpg',
+  'talishouse-residential': '/images/talishouse/residential/hero.jpg',
   'talishouse-1600': '/images/talishouse/residential/models/1600.png',
   'talishouse-2400': '/images/talishouse/residential/models/1600.png',
   

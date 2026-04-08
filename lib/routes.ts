@@ -32,6 +32,8 @@ export const ROUTES = {
   DEALERS: "/dealers",
   PRIVACY: "/privacy",
   TERMS: "/terms",
+  FIND_YOUR_HOME: "/find-your-home",
+  MATCH_RESULTS: "/match-results",
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

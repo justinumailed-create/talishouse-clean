@@ -95,7 +95,6 @@ export default function TalishouseRecreationalPage() {
 21' x 20' steel structures featuring open concept design.
 Perfect for cottages, home offices, or investment properties.`}
       >
-        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
         <h1 className="text-2xl font-semibold text-gray-900">
           {selectedModel?.name || 'Select a Model'}
         </h1>
@@ -214,7 +213,6 @@ Perfect for cottages, home offices, or investment properties.`}
             </a>
           </div>
         </div>
-      </div>
       </ProductLayout>
     </>
   );

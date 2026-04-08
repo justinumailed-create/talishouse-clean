@@ -75,7 +75,7 @@ const IMAGES = {
   'glasshouse': '/images/glasshouse/hero.png',
   'glasshouse-200': '/images/glasshouse/models/200.png',
   'talishouse-400': '/images/talishouse/recreational/hero.jpg',
-  'talishouse-residential': '/images/talishouse/residential/hero.png',
+  'talishouse-residential': '/images/talishouse/residential/hero.jpg',
   'talistowns': '/images/talistowns.jpg',
 };
 

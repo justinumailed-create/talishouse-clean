@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { formatCAD } from "@/utils/currency";
 
 const categories = [
   { name: "Glasshouse™", href: "/glasshouse", image: "/images/glasshouse/hero.png" },
   { name: "Talishouse™ Recreational", href: "/talishouse-recreational", image: "/images/talishouse-400.png" },
-  { name: "Talishouse™ Residential", href: "/talishouse-residential", image: "/images/talishouse/residential/hero.png" },
+  { name: "Talishouse™ Residential", href: "/talishouse-residential", image: "/images/talishouse/residential/hero.jpg" },
   { name: "TalisTowns™", href: "/talistowns", image: "/images/talistowns.jpg" },
 ];
 
@@ -27,22 +28,17 @@ export default function CatalogPage() {
             <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-10 md:gap-0">
               <div className="md:flex-[0_0_80%] min-w-0 md:pr-16 space-y-5 text-left">
                 <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight break-words">Destination Charge</h2>
+                  <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight break-words">Destination Charge</h2>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded-full border border-blue-100/50">
+                      <span className="w-1 h-1 rounded-full bg-blue-600 animate-pulse" />
+                      Mandatory
+                    </span>
+                    <span className="inline-flex items-center px-3 py-1 bg-[#FFF3C4] text-[#8A6D00] text-[10px] font-bold uppercase tracking-widest rounded-full border border-[#FFE082]/30">
+                      Required to start
+                    </span>
                   </div>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded-full border border-blue-100/50">
-                    <span className="w-1 h-1 rounded-full bg-blue-600 animate-pulse" />
-                    Mandatory
-                  </span>
                 </div>
-                <p className="text-gray-500 text-[16px] md:text-[17px] leading-[1.7] font-normal break-words max-w-5xl">
-                  Standardised shipping charge &amp; reserves a spot in production and shipping queues.
-                </p>
                 <p className="text-gray-400 text-sm italic">
                   A mandatory, non-negotiable fee added to the price of each sea-can container to cover the cost of transporting it from the manufacturer&apos;s assembly plant to the port of entry in Canada. This amount assumes one unit. Taxes or tariffs extra.
                 </p>
@@ -51,15 +47,9 @@ export default function CatalogPage() {
               <div className="md:flex-[0_0_20%] min-w-0 flex-shrink-0">
                 <div className="flex flex-col items-start md:items-end justify-center w-full border-t md:border-t-0 md:border-l border-gray-100 pt-8 md:pt-0 md:pl-12">
                   <div className="space-y-1 text-left md:text-right w-full">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">CAD</p>
-                    <p className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter whitespace-nowrap">
-                      8,995
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">
+                      CAD <span className="text-gray-900 text-sm font-black tracking-normal ml-1">8,995</span>
                     </p>
-                    <div className="pt-4">
-                      <span className="inline-flex items-center px-5 py-2 bg-gray-900 text-white text-[11px] font-bold uppercase tracking-widest rounded-full shadow-xl shadow-gray-200 whitespace-nowrap hover:scale-105 transition-transform cursor-default">
-                        Required to start
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -72,11 +62,12 @@ export default function CatalogPage() {
             {categories.map((cat) => (
               <Link key={cat.name} href={cat.href}>
                 <div className="group bg-white border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
-                  <div className="relative w-full aspect-video overflow-hidden rounded-t-xl">
-                    <img
+                  <div className="relative w-full h-[260px] overflow-hidden rounded-t-xl">
+                    <Image
                       src={cat.image}
                       alt={cat.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-4">

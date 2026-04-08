@@ -16,7 +16,6 @@ interface ContentBlock {
 
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [content, setContent] = useState<Record<string, string>>({});
@@ -70,7 +69,7 @@ if (fetchError && fetchError.message) {
 
   return (
     <div className="w-full px-6 lg:px-[75px] py-6 md:py-10">
-      <div className="grid grid-cols-12 gap-8">
+      <div className="grid grid-cols-12 gap-10 lg:gap-12">
       {error && (
         <div className="col-span-12 mb-6 p-4 bg-red-50 text-red-600 rounded-lg text-sm">
           {error}
@@ -78,8 +77,8 @@ if (fetchError && fetchError.message) {
       )}
 
       {/* Left Column - Map + Content */}
-      <div className="col-span-12 lg:col-span-8">
-        <div className="w-full h-full min-h-[240px] lg:min-h-[340px] rounded-2xl overflow-hidden bg-gray-200 shadow-sm transition-transform duration-500 hover:scale-[1.01]">
+      <div className="col-span-12 lg:col-span-7">
+        <div className="w-full h-full rounded-2xl overflow-hidden bg-gray-200 shadow-sm transition-transform duration-500 hover:scale-[1.01]">
           <iframe
             src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
             allow="geolocation 'self' https://my.atlist.com"
@@ -87,14 +86,14 @@ if (fetchError && fetchError.message) {
             scrolling="no"
             allowFullScreen
             title="Talishouse property discovery map"
-            className="w-full h-[240px] lg:h-[340px]"
+            className="w-full aspect-video lg:aspect-auto lg:h-full min-h-[400px]"
           />
         </div>
       </div>
 
       {/* Right Column - Info + Video */}
-      <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
-        <div className="bg-white border rounded-2xl p-6 md:p-8 shadow-sm">
+      <div className="col-span-12 lg:col-span-5 flex flex-col gap-3 w-full">
+        <div className="w-full bg-white border rounded-2xl p-6 md:p-8 shadow-sm">
           <p className="text-xs uppercase tracking-[0.25em] text-[#444] mb-4 font-bold">
             Global Overview
           </p>
@@ -114,7 +113,7 @@ if (fetchError && fetchError.message) {
             </li>
             <li className="flex items-start text-base font-medium text-gray-800">
               <span className="mr-3 text-gray-900 font-bold">•</span>
-              <span>{content['homepage_stats_speed'] || "Up in a day and move in ready in a week"}</span>
+              <span>{content['homepage_stats_speed'] || "Up in a day, move in ready in a week"}</span>
             </li>
             <li className="flex items-start text-base font-medium text-gray-800">
               <span className="mr-3 text-gray-900 font-bold">•</span>
@@ -130,53 +129,15 @@ if (fetchError && fetchError.message) {
           </Link>
         </div>
 
-        <div className="relative bg-black rounded-2xl overflow-hidden h-[160px] md:h-[180px]">
-          <video
-            ref={videoRef}
-            src="/videos/homepage.mp4"
-            controls
-            playsInline
-            className="w-full h-full object-cover object-[center_20%]"
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-            onEnded={() => setIsPlaying(false)}
-          >
-            Your browser does not support the video tag.
-          </video>
-          {!isPlaying && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <button
-                onClick={() => videoRef.current?.play()}
-                className="w-16 h-16 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors pointer-events-auto"
-              >
-                <svg className="w-6 h-6 ml-1 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Hero Text Block */}
-      <div className="col-span-12 py-8">
-        <div className="max-w-3xl space-y-1">
-          <p className="text-xl md:text-2xl font-semibold text-gray-900 leading-tight">
-            Glasshouse™ and Talishouse™ Homes & Cottages
-          </p>
-          <p className="text-lg md:text-xl text-gray-600 font-medium">
-            from 160 sq.ft. to 3,200 sq.ft.
-          </p>
-          <p className="text-lg md:text-xl text-gray-600 font-medium">
-            Modular, from CAD $58.50 per sq.ft.
-          </p>
-          <p className="text-lg md:text-xl text-gray-600 font-medium">
-            Up in a day, move in ready in a week.
-          </p>
-          <p className="text-lg md:text-xl text-gray-600 font-medium">
-            Lease-To-Own available, OAC.
-          </p>
-        </div>
+        <video
+          ref={videoRef}
+          src="/videos/homepage.mp4"
+          controls
+          playsInline
+          className="w-full h-auto object-cover object-[50%_10%] rounded-lg mt-[-4px]"
+        >
+          Your browser does not support the video tag.
+        </video>
       </div>
 
       {/* Products Section */}

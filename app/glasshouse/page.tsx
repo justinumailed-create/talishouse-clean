@@ -119,11 +119,8 @@ Up in a day, finished in a week.
 
 Add units to configure larger spaces: side by side, 
 back to back, L-shaped and off-set parallel.`}
-        aboutContent={`Glasshouse™: The quick start option for modern modular living.
-10 x 20 ft. steel structures with glass walls.
-Perfect for short-term rentals, home offices, or additional living space.`}
+        aboutContent=""
       >
-        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
         <h1 className="text-2xl font-semibold text-gray-900">
           {selectedModel?.name || 'Select a Model'}
         </h1>
@@ -162,6 +159,7 @@ Perfect for short-term rentals, home offices, or additional living space.`}
           <ProductConfigurator
             selectedOptions={selectedOptions}
             onOptionChange={toggleOption}
+            hideSections={true}
           />
 
           {productAddons.length > 0 && (
@@ -241,7 +239,6 @@ Perfect for short-term rentals, home offices, or additional living space.`}
               Interested in financing? Learn about Lease-to-Own →
             </a>
           </div>
-        </div>
         </div>
       </ProductLayout>
     </>

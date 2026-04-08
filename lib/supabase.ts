@@ -141,6 +141,81 @@ export interface Earning {
   created_at: string;
 }
 
+export interface MatchLead {
+  id: string;
+  goal: string | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  timeline: string | null;
+  location: string | null;
+  home_type: string | null;
+  home_size_sqft: string | null;
+  financing_needed: boolean | null;
+  land_owned: boolean | null;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  recommended_product: string | null;
+  created_at: string;
+}
+
+export interface MatchLeadPayload {
+  goal: string;
+  budget_min?: number;
+  budget_max?: number;
+  timeline: string;
+  location?: string;
+  home_type: string;
+  home_size_sqft?: string;
+  financing_needed?: boolean;
+  land_owned?: boolean;
+  name: string;
+  email: string;
+  phone: string;
+  recommended_product?: string;
+}
+
+export async function safeInsertMatchLead(payload: MatchLeadPayload) {
+  try {
+    const allowedFields = [
+      "goal",
+      "budget_min",
+      "budget_max",
+      "timeline",
+      "location",
+      "home_type",
+      "home_size_sqft",
+      "financing_needed",
+      "land_owned",
+      "name",
+      "email",
+      "phone",
+      "recommended_product",
+    ];
+
+    const cleanedPayload = Object.fromEntries(
+      Object.entries(payload)
+        .filter(([key]) => allowedFields.includes(key))
+        .map(([key, value]) => [key, value ?? null])
+    );
+
+    const { data, error } = await supabase
+      .from("leads_match")
+      .insert([cleanedPayload])
+      .select();
+
+    if (error) {
+      console.error("SUPABASE ERROR:", JSON.stringify(error, null, 2));
+      throw new Error(JSON.stringify(error));
+    }
+
+    return data;
+  } catch (err: any) {
+    console.error("INSERT ERROR:", err?.message || err);
+    throw err;
+  }
+}
+
 export interface ContactLog {
   id: string;
   fast_code: string | null;
