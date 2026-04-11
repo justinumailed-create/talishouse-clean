@@ -135,123 +135,68 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
       <Header />
       
       <div className="flex-1 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch w-full">
-          {/* LEFT 70% - Hero Content */}
-          <div className="lg:col-span-2 h-full">
-            <div className="w-full h-full min-h-[400px] lg:min-h-[500px] rounded-xl overflow-hidden bg-gray-200">
-              {renderHeroContent()}
-            </div>
-          </div>
+        <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
 
-          {/* RIGHT 30% - CTA Section */}
-          <div className="lg:col-span-1 flex flex-col h-full">
-            <div className="flex-shrink-0 bg-white border rounded-xl p-6 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.25em] text-[#444] mb-4 font-bold">
-                Global Overview
-              </p>
+            <div className="flex flex-col self-stretch min-h-0 gap-4">
 
-              <h1 className="leading-tight mb-6">
-                <span className="block text-2xl md:text-3xl font-semibold tracking-[0.15em] uppercase text-gray-900">
-                  {config.headline || "TALISHOUSE™"}
-                </span>
-                <span className="block text-sm md:text-base text-gray-500">
-                  {config.subtext || "Homes and Cottages"}
-                </span>
-              </h1>
-              
-              <ul className="space-y-3 mb-6">
-                <li className="flex items-start text-base font-medium text-gray-800">
-                  <span className="mr-3 text-gray-900 font-bold">•</span>
-                  <span>From {formatCAD(58.50)} per sq.ft.</span>
-                </li>
-                <li className="flex items-start text-base font-medium text-gray-800">
-                  <span className="mr-3 text-gray-900 font-bold">•</span>
-                  <span>Typically up in a day and move in ready in a week</span>
-                </li>
-                <li className="flex items-start text-base font-medium text-gray-800">
-                  <span className="mr-3 text-gray-900 font-bold">•</span>
-                  <span>Lease-To-Own terms available, OAC</span>
-                </li>
-              </ul>
+              <div className="flex-[2] rounded-2xl bg-white/5 backdrop-blur-xl p-4 flex flex-col justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.25em] text-[#444] mb-2 font-bold">
+                    Global Overview
+                  </p>
+                  <h1 className="leading-tight">
+                    <span className="block text-xl md:text-2xl font-semibold tracking-[0.15em] uppercase text-gray-900">
+                      {config.headline || "TALISHOUSE™"}
+                    </span>
+                    <span className="block text-sm text-gray-500">
+                      {config.subtext || "Homes and Cottages"}
+                    </span>
+                  </h1>
+                </div>
+                
+                <div>
+                  <ul className="space-y-1 mb-3">
+                    <li className="flex items-start text-sm font-medium text-gray-800">
+                      <span className="mr-2 text-gray-900 font-bold">•</span>
+                      <span>From {formatCAD(58.50)}/sq.ft.</span>
+                    </li>
+                    <li className="flex items-start text-sm font-medium text-gray-800">
+                      <span className="mr-2 text-gray-900 font-bold">•</span>
+                      <span>Move in ready in a week</span>
+                    </li>
+                  </ul>
 
-              <Link
-                href={`/propose-project?fast=${fastCode}`}
-                className="block w-full text-center text-base font-medium text-white bg-black hover:bg-[#2b2b2b] rounded-lg px-6 py-4 transition-colors"
-                style={{ backgroundColor: '#000000', color: '#ffffff' }}
-              >
-                {config.ctaText || "Propose a Project"}
-              </Link>
-            </div>
-
-            {/* Optional Form */}
-            {config.showForm && (
-              <div className="flex-shrink-0 bg-white border rounded-xl p-6 shadow-sm mt-4">
-                <h3 className="font-semibold mb-4">Start Your Project</h3>
-                <form onSubmit={handleFormSubmit} className="space-y-3">
-                  <textarea
-                    placeholder="Describe your project..."
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-black"
-                    rows={3}
-                  />
-                  <input
-                    placeholder="Location / Address"
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    className="w-full px-4 py-2 border rounded-lg text-sm focus:outline-none focus:border-black"
-                  />
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-2 bg-black text-white rounded-lg text-sm font-medium hover:bg-[#2b2b2b] transition-colors disabled:opacity-50"
+                  <Link
+                    href={`/propose-project?fast=${fastCode}`}
+                    className="block w-full text-center text-sm font-medium text-white bg-black hover:bg-[#2b2b2b] rounded-lg px-4 py-3 transition-colors"
+                    style={{ backgroundColor: '#000000', color: '#ffffff' }}
                   >
-                    {submitting ? "Submitting..." : "Submit"}
-                  </button>
-                </form>
+                    {config.ctaText || "Propose a Project"}
+                  </Link>
+                </div>
               </div>
-            )}
 
-            {/* Optional Video */}
-            {config.showVideo && config.videoUrl && (
-              <div className="flex-1 relative bg-black rounded-xl overflow-hidden mt-4">
-                <iframe 
-                  src={config.videoUrl} 
-                  className="w-full h-full absolute inset-0" 
-                  allowFullScreen
-                  title="Promo video"
-                />
+              <div className="flex-[8] rounded-2xl overflow-hidden">
+                {renderHeroContent()}
               </div>
-            )}
+            </div>
 
-            {!config.showVideo && (
-              <div className="flex-1 relative bg-black rounded-xl overflow-hidden mt-4">
-                <video
-                  ref={videoRef}
-                  src="/videos/homepage.mp4"
-                  controls
-                  playsInline
-                  className="w-full h-full object-cover"
-                  onPlay={() => setIsPlaying(true)}
-                  onPause={() => setIsPlaying(false)}
-                  onEnded={() => setIsPlaying(false)}
-                >
-                  Your browser does not support the video tag.
-                </video>
-                {!isPlaying && (
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <button
-                      onClick={() => videoRef.current?.play()}
-                      className="w-16 h-16 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors pointer-events-auto"
-                    >
-                      <svg className="w-6 h-6 ml-1 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+            <div className="self-start">
+              <video
+                ref={videoRef}
+                src="/videos/homepage.mp4"
+                controls
+                playsInline
+                className="block w-full h-auto rounded-2xl"
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => setIsPlaying(false)}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+
           </div>
         </div>
       </div>

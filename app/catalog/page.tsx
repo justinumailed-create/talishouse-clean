@@ -12,8 +12,8 @@ const categories = [
 
 export default function CatalogPage() {
   return (
-    <div className="bg-[#f5f5f7] min-h-screen">
-      <div className="w-full px-6 lg:px-[75px]">
+    <div className="bg-white min-h-screen">
+      <div className="w-full px-6 lg:px-[80px]">
         <section className="py-12">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-gray-900">Catalog</h1>
@@ -27,20 +27,9 @@ export default function CatalogPage() {
             
             <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-10 md:gap-0">
               <div className="md:flex-[0_0_80%] min-w-0 md:pr-16 space-y-5 text-left">
-                <div className="flex flex-wrap items-center gap-4">
-                  <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight break-words">Destination Charge</h2>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest rounded-full border border-blue-100/50">
-                      <span className="w-1 h-1 rounded-full bg-blue-600 animate-pulse" />
-                      Mandatory
-                    </span>
-                    <span className="inline-flex items-center px-3 py-1 bg-[#FFF3C4] text-[#8A6D00] text-[10px] font-bold uppercase tracking-widest rounded-full border border-[#FFE082]/30">
-                      Required to start
-                    </span>
-                  </div>
-                </div>
+                <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight break-words">Destination Charge</h2>
                 <p className="text-gray-400 text-sm italic">
-                  A mandatory, non-negotiable fee added to the price of each sea-can container to cover the cost of transporting it from the manufacturer&apos;s assembly plant to the port of entry in Canada. This amount assumes one unit. Taxes or tariffs extra.
+                  It is a mandatory, non-negotiable fee added to the price of each sea-can container to cover the cost of transporting product from the manufacturer&apos;s assembly plant to the port of entry in Canada. This amount assumes one unit. Custom Clearance extra.
                 </p>
               </div>
 
@@ -78,13 +67,6 @@ export default function CatalogPage() {
                 </div>
               </Link>
             ))}
-          </div>
-        </section>
-
-        <section className="py-8 pb-24">
-          <div className="w-full text-center">
-            <p className="text-gray-400 text-xs">Just add ambition…!</p>
-            <p className="text-gray-400 text-xs mt-1">Moonlighting is lucrative…!</p>
           </div>
         </section>
       </div>

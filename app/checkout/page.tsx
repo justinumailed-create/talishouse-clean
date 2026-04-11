@@ -112,7 +112,7 @@ export default function CheckoutPage() {
 
   if (items.length === 0 && !paymentSuccess) {
     return (
-      <div className="min-h-[70vh] bg-[#f5f5f7] flex items-center justify-center">
+      <div className="min-h-[70vh] bg-white flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-semibold text-[#1d1d1f] mb-4 tracking-tight">Your cart is empty</h1>
           <Link href={ROUTES.CATALOG} className="btn-primary inline-block">
@@ -125,55 +125,57 @@ export default function CheckoutPage() {
 
   if (paymentSuccess) {
     return (
-      <div className="min-h-[70vh] bg-[#f5f5f7] py-12">
-        <div className="mx-auto max-w-md">
-          <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] p-8 text-center transition-all duration-300">
-            <div className="w-16 h-16 bg-[rgba(52,199,89,0.1)] rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-[#34c759]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-semibold text-[#1d1d1f] mb-2 tracking-tight">
-              Payment Successful!
-            </h2>
-            <p className="text-[#6e6e73] mb-6">
-              Thank you for your purchase. You will receive a confirmation email shortly.
-            </p>
-            
-            {purchasedItems.length > 0 && (
-              <div className="w-full max-w-xs mx-auto mb-6">
-                <h3 className="text-sm font-semibold text-[#6e6e73] mb-3">Order Summary</h3>
-                <div className="space-y-3">
-                  {purchasedItems.map((item) => (
-                    <div key={item.id} className="flex items-center gap-3 text-left bg-[#f5f5f7] rounded-xl p-3">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                        {item.image ? (
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={48}
-                            height={48}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-400 text-xs">No img</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-[#1d1d1f] truncate">{item.name}</p>
-                        <p className="text-xs text-[#6e6e73]">CAD ${item.price.toLocaleString()}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+      <div className="min-h-[70vh] bg-white py-12">
+        <div className="w-full max-w-none px-6 lg:px-[80px]">
+          <div className="mx-auto max-w-md">
+            <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] p-8 text-center transition-all duration-300">
+              <div className="w-16 h-16 bg-[rgba(52,199,89,0.1)] rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-8 h-8 text-[#34c759]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
               </div>
-            )}
-            
-            <Link href={ROUTES.CATALOG} className="btn-primary inline-block">
-              Continue Shopping
-            </Link>
+              <h2 className="text-2xl font-semibold text-[#1d1d1f] mb-2 tracking-tight">
+                Payment Successful!
+              </h2>
+              <p className="text-[#6e6e73] mb-6">
+                Thank you for your purchase. You will receive a confirmation email shortly.
+              </p>
+              
+              {purchasedItems.length > 0 && (
+                <div className="w-full max-w-xs mx-auto mb-6">
+                  <h3 className="text-sm font-semibold text-[#6e6e73] mb-3">Order Summary</h3>
+                  <div className="space-y-3">
+                    {purchasedItems.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3 text-left bg-gray-50 rounded-xl p-3">
+                        <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                          {item.image ? (
+                            <Image
+                              src={item.image}
+                              alt={item.name}
+                              width={48}
+                              height={48}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                              <span className="text-gray-400 text-xs">No img</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-[#1d1d1f] truncate">{item.name}</p>
+                          <p className="text-xs text-[#6e6e73]">CAD ${item.price.toLocaleString()}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              <Link href={ROUTES.CATALOG} className="btn-primary inline-block">
+                Continue Shopping
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -181,8 +183,8 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-[70vh] bg-[#f5f5f7] py-12">
-      <div className="container">
+    <div className="min-h-[70vh] bg-white py-12">
+      <div className="w-full max-w-none px-6 lg:px-[80px]">
         <div className="flex items-center justify-between mb-8">
           <Link href={ROUTES.CATALOG} className="text-sm text-[#6e6e73] hover:text-black transition-colors">
             ← Continue Shopping
@@ -231,7 +233,7 @@ export default function CheckoutPage() {
 
               <div className="pt-4 border-t border-[rgba(0,0,0,0.06)]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#f5f5f7] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center">
                     <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
@@ -254,7 +256,7 @@ export default function CheckoutPage() {
               <div className="space-y-4">
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4 pb-4 border-b border-[rgba(0,0,0,0.06)] last:border-0">
-                    <div className="w-20 h-20 bg-[#f5f5f7] rounded-xl flex-shrink-0 overflow-hidden relative">
+                    <div className="w-20 h-20 bg-gray-50 rounded-xl flex-shrink-0 overflow-hidden relative">
                       <Image
                         src={item.image || "/logo.png"}
                         alt={item.name}
@@ -273,14 +275,14 @@ export default function CheckoutPage() {
                       <div className="flex items-center gap-2 mt-2">
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                          className="w-6 h-6 border border-[rgba(0,0,0,0.08)] rounded-lg flex items-center justify-center text-xs text-[#6e6e73] hover:bg-[#f5f5f7] transition"
+                          className="w-6 h-6 border border-[rgba(0,0,0,0.08)] rounded-lg flex items-center justify-center text-xs text-[#6e6e73] hover:bg-gray-50 transition"
                         >
                           -
                         </button>
                         <span className="text-sm text-[#1d1d1f]">{item.quantity}</span>
                         <button
                           onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                          className="w-6 h-6 border border-[rgba(0,0,0,0.08)] rounded-lg flex items-center justify-center text-xs text-[#6e6e73] hover:bg-[#f5f5f7] transition"
+                          className="w-6 h-6 border border-[rgba(0,0,0,0.08)] rounded-lg flex items-center justify-center text-xs text-[#6e6e73] hover:bg-gray-50 transition"
                         >
                           +
                         </button>

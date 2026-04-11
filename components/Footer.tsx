@@ -5,12 +5,12 @@ import { ROUTES } from "@/lib/routes";
 
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-gray-100 bg-gray-50 text-gray-700">
-      <div className="max-w-[1600px] mx-auto px-[48px] py-[48px] grid grid-cols-[28%_24%_24%_24%] gap-16 items-start">
+    <footer className="w-full border-t border-gray-100 bg-white text-gray-700">
+      <div className="w-full px-6 lg:px-[80px] pt-8 pb-8 grid grid-cols-[28%_24%_24%_24%] gap-16 items-start">
         <div className="flex flex-col justify-start items-start">
           <div className="mb-3">
             <Image
-              src="/375c073b-4fa6-4a06-82b2-43d11b6b988e.JPG"
+              src="/logo.png"
               alt="Windswept Logo"
               width={120}
               height={32}
@@ -18,11 +18,8 @@ export default function Footer() {
             />
           </div>
           <div className="mt-7">
-            <p className="text-[15px] leading-[1.7] text-neutral-700 max-w-[400px]">
-              Glasshouse™ and Talishouse™ Homes & Cottages from 160 sq.ft. to 3,200 sq.ft.,<br />
-              modular, from $58.50 per sq.ft.. Up in a day, move in ready<br />
-              in a week. Lease-To-Own<br />
-              available, OAC.
+            <p className="footer-text text-[15px] text-neutral-700">
+              Glasshouse™ and Talishouse™ Homes & Cottages from 160{"\u00A0"}sq.{"\u00A0"}ft. to 3,200{"\u00A0"}sq.{"\u00A0"}ft., modular, from $58.50 per{"\u00A0"}sq.{"\u00A0"}ft.. Up in a day, move in ready in a week. Lease-To-Own available, OAC.
             </p>
           </div>
         </div>
@@ -142,7 +139,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-[48px] pb-[36px]">
+      <div className="w-full px-6 lg:px-[80px] pb-8">
         <div className="pt-6 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-gray-400">
             &copy; {new Date().getFullYear()} Talishouse. All rights reserved.

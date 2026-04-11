@@ -55,10 +55,10 @@ export default function ProductLayout({
   const showImage = hasValidImage || dbImageUrl || productImage;
 
   return (
-    <div className="w-full px-6 lg:px-[48px] py-8">
+    <div className="w-full px-6 lg:px-[80px] py-8">
       <div className="grid grid-cols-12 gap-10 lg:gap-12 items-start">
         <div className="col-span-12 lg:col-span-7 space-y-8">
-          <div className="w-full aspect-video bg-gray-50 relative overflow-hidden rounded-xl border border-gray-100">
+          <div className="w-full aspect-video bg-white relative overflow-hidden rounded-xl border border-gray-100">
             {displayImage ? (
               <Image
                 src={displayImage}
@@ -69,7 +69,7 @@ export default function ProductLayout({
                 priority
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-50">
+              <div className="w-full h-full flex items-center justify-center bg-white">
                 <span className="text-sm text-gray-400">Image coming soon</span>
               </div>
             )}

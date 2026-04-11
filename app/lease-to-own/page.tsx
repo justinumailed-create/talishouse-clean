@@ -140,7 +140,7 @@ export default function LeaseToOwnPage() {
 
   if (leaseState.status === "selecting") {
     return (
-      <div className="container py-12">
+      <div className="w-full max-w-none px-6 lg:px-[80px] py-12">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
             Lease-to-Own
@@ -162,7 +162,7 @@ export default function LeaseToOwnPage() {
                 className={`w-full p-6 rounded-2xl transition-all min-h-[48px] text-left border-2 ${
                   selectedProduct === product.id
                     ? "bg-black text-white border-black shadow-lg"
-                    : "border-gray-100 hover:border-gray-300 bg-gray-50 text-black"
+                    : "border-gray-100 hover:border-gray-300 bg-white text-black"
                 }`}
               >
                 <h3 className={`font-bold ${selectedProduct === product.id ? "text-white" : "text-black"}`}>{product.name}</h3>
@@ -196,7 +196,7 @@ export default function LeaseToOwnPage() {
                     className={`w-full min-h-[48px] p-4 rounded-xl border-2 text-center transition-all ${
                       selectedDuration === duration
                         ? "bg-black text-white border-black shadow-md"
-                        : "border-gray-100 hover:border-gray-300 bg-gray-50 text-black"
+                        : "border-gray-100 hover:border-gray-300 bg-white text-black"
                     }`}
                   >
                     <p className="text-2xl font-bold">{duration}</p>
@@ -218,7 +218,7 @@ export default function LeaseToOwnPage() {
             <h2 className="text-lg font-bold text-gray-900 mb-4">
               3. Review Your Lease
             </h2>
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-6">
+            <div className="rounded-2xl border border-gray-200 bg-white p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div>
                   <p className="text-sm text-gray-500">Product</p>
@@ -270,7 +270,7 @@ export default function LeaseToOwnPage() {
   }
 
   return (
-    <div className="container py-12">
+    <div className="w-full max-w-none px-6 lg:px-[80px] py-12">
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
           Your Lease
@@ -310,7 +310,7 @@ export default function LeaseToOwnPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-4 bg-gray-50 rounded-xl">
+            <div className="p-4 bg-white border border-gray-100 rounded-xl">
               <p className="text-xs text-gray-500 uppercase tracking-wider">
                 Total Paid
               </p>
@@ -318,7 +318,7 @@ export default function LeaseToOwnPage() {
                 CAD ${leaseState.totalPaid.toLocaleString()}
               </p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-xl">
+            <div className="p-4 bg-white border border-gray-100 rounded-xl">
               <p className="text-xs text-gray-500 uppercase tracking-wider">
                 Remaining
               </p>
@@ -326,7 +326,7 @@ export default function LeaseToOwnPage() {
                 CAD ${leaseState.remainingBalance.toLocaleString()}
               </p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-xl">
+            <div className="p-4 bg-white border border-gray-100 rounded-xl">
               <p className="text-xs text-gray-500 uppercase tracking-wider">
                 Monthly Payment
               </p>
@@ -334,7 +334,7 @@ export default function LeaseToOwnPage() {
                 CAD ${leaseState.monthlyPayment.toLocaleString()}
               </p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-xl">
+            <div className="p-4 bg-white border border-gray-100 rounded-xl">
               <p className="text-xs text-gray-500 uppercase tracking-wider">
                 Months Left
               </p>

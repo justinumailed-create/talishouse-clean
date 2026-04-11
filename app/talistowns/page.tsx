@@ -98,7 +98,7 @@ export default function TalistownsPage() {
         <p className="text-xs text-gray-500">CAD 58.50 per sq.ft. from</p>
 
         <div className="space-y-6">
-          <div className="rounded-lg border border-gray-100 bg-gray-50 p-4">
+          <div className="rounded-lg border border-gray-100 bg-white p-4">
             <p className="text-sm text-gray-600">
               Selecting TalisTowns™ automatically adds 2 x Talishouse™ 400 and
               1 x Gable Roof to the cart. Optional compatible add-ons can be layered
