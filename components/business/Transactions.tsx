@@ -10,9 +10,8 @@ const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test";
 
 export default function Transactions() {
   const [fastCode, setFastCode] = useState("");
-  const [splitsAmount, setSplitsAmount] = useState<number>(1);
+  const [splitsAmount, setSplitsAmount] = useState("");
   const [splitsDetails, setSplitsDetails] = useState("");
-  const [splitsAdditionalFastCode, setSplitsAdditionalFastCode] = useState("");
   const [splitsAdditionalAmounts, setSplitsAdditionalAmounts] = useState("");
   const [splitsAdditionalInfo, setSplitsAdditionalInfo] = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -21,13 +20,13 @@ export default function Transactions() {
   const MIN_AMOUNT = 1;
 
   const step1 = fastCode.trim().length > 0 ? 1 : 0;
-  const step2 = splitsAmount >= 1 ? 1 : 0;
+  const step2 = Number(splitsAmount) >= 1 ? 1 : 0;
   const step3 = splitsDetails.trim().length > 0 ? 1 : 0;
   const progress = ((step1 + step2 + step3) / 3) * 100;
 
   const getPaymentAmount = (): number => {
-    const amount = Math.max(splitsAmount, MIN_AMOUNT);
-    console.log(`SPLITS PAYING AMOUNT:`, amount);
+    const amount = Math.max(Number(splitsAmount) || 0, MIN_AMOUNT);
+    console.log("SPLITS PAYING AMOUNT:", amount);
     return amount;
   };
 
@@ -81,7 +80,7 @@ export default function Transactions() {
   const handlePayPalApprove = async (_data: any, actions: any) => {
     await actions.order.capture();
     const amount = getPaymentAmount();
-    console.log(`SPLITS PAYPAL CAPTURE AMOUNT:`, amount);
+    console.log("SPLITS PAYPAL CAPTURE AMOUNT:", amount);
     await savePayment(amount);
   };
 
@@ -163,7 +162,7 @@ export default function Transactions() {
                       </p>
 
                       <p className="text-sm">
-                        SPLITS Amount — {formatCAD(splitsAmount)}
+                        SPLITS Amount — {formatCAD(Number(splitsAmount) || 0)}
                       </p>
 
                       <p className="text-sm">
@@ -215,38 +214,17 @@ export default function Transactions() {
                         <span className="pl-4 pr-2 text-[#6e6e73] text-base">$</span>
 
                         <input
-                          type="number"
-                          min={1}
-                          step="1"
+                          type="text"
                           value={splitsAmount}
-                          onFocus={() => setFocused(true)}
-                          onBlur={() => setFocused(false)}
-                          onChange={(e) => {
-                            const val = Number(e.target.value);
-                            setSplitsAmount(val < 1 ? 1 : val);
+                          onFocus={() => {
+                            setFocused(true);
+                            setSplitsAmount("");
                           }}
-                          className="
-                            w-full py-3 pr-10 bg-transparent outline-none text-base
-                            appearance-none
-                          "
+                          onBlur={() => setFocused(false)}
+                          onChange={(e) => setSplitsAmount(e.target.value.replace(/[^0-9]/g, ""))}
+                          placeholder="Enter amount"
+                          className="w-full py-3 pr-4 bg-transparent outline-none text-base"
                         />
-
-                        <div className="flex flex-col pr-2">
-                          <button
-                            type="button"
-                            onClick={() => setSplitsAmount((prev) => prev + 1)}
-                            className="text-[#6e6e73] hover:text-[#0070ba] transition text-xs leading-none"
-                          >
-                            ▲
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSplitsAmount((prev) => Math.max(1, prev - 1))}
-                            className="text-[#6e6e73] hover:text-[#0070ba] transition text-xs leading-none"
-                          >
-                            ▼
-                          </button>
-                        </div>
                       </div>
                     </div>
 
@@ -272,20 +250,6 @@ export default function Transactions() {
                       <h3 className="text-sm font-semibold text-gray-600 bg-gray-50 px-3 py-2 rounded-xl mb-4">
                         Additional info
                       </h3>
-
-                      {/* FAST Code */}
-                      <div className="mb-4">
-                        <label className="block text-sm text-gray-700 mb-1">
-                          Please enter FAST Code, if applicable{" "}
-                          <span className="text-gray-400">(Optional)</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={splitsAdditionalFastCode}
-                          onChange={(e) => setSplitsAdditionalFastCode(e.target.value)}
-                          className="w-full border border-[#d2d2d7] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0070ba]/20"
-                        />
-                      </div>
 
                       {/* SPLITS Amounts */}
                       <div className="mb-4">
@@ -328,7 +292,7 @@ export default function Transactions() {
                       style={{ layout: "horizontal", color: "blue", shape: "rect", label: "pay" }}
                       createOrder={(_, actions) => {
                         const amount = getPaymentAmount();
-                        console.log(`SPLITS PAYPAL CREATE ORDER AMOUNT:`, amount);
+                        console.log("SPLITS PAYPAL CREATE ORDER AMOUNT:", amount);
                         return actions.order.create({
                           intent: "CAPTURE",
                           purchase_units: [

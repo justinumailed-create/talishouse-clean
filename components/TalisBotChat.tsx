@@ -334,7 +334,7 @@ console.log("TEST SELECT:", { data, error });
             />
           </div>
           <h3 className="font-semibold text-gray-900 mb-2">Hi, I'm TalisBOT</h3>
-          <p className="text-xs text-gray-500 mb-4">I'll help you find the right home in under 60 seconds.</p>
+          <p className="text-xs text-gray-500 mb-4">I’ll help you choose project parameters in under 60 seconds</p>
           <button onClick={startBot} className="bg-black text-white px-6 py-2.5 rounded-full text-sm font-medium hover:opacity-90 transition">
             Get Started
           </button>
