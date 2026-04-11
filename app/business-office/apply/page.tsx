@@ -113,9 +113,9 @@ export default function ApplyPage() {
                 required
               >
                 <option value="">Select level...</option>
-                <option value="referral">Referral Partner</option>
-                <option value="resale">Resale Partner</option>
-                <option value="fulfillment">Fulfillment Partner</option>
+                <option value="referral">Referral Partner - upto 10% in Referral Fees and CSI Rewards</option>
+                <option value="resale">Resale Partner - upto 20% in Procurement Margin</option>
+                <option value="fulfillment">Fulfilment Partner - upto 25% Procurement Margin plus SPLITS profits*</option>
               </select>
             </div>
 
@@ -196,26 +196,27 @@ export default function ApplyPage() {
               <p className="text-red-500 text-sm">{error}</p>
             )}
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full py-4 bg-[#1E4ED8] text-white rounded-xl font-medium hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
-            >
-              {isSubmitting ? "Submitting..." : "Submit Application"}
-            </button>
+            <div className="flex flex-col gap-2">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-[#1E4ED8] text-white rounded-xl font-medium hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+              >
+                {isSubmitting ? "Submitting..." : "Submit Application"}
+              </button>
+              <p className="text-[11px] text-[#6e6e73] text-right">
+                <strong>*SPLITS = Simple Project Lead & Input Trading System</strong>
+              </p>
+            </div>
           </form>
 
           <div className="mt-12 p-6 bg-white border border-gray-100 rounded-xl">
             <h3 className="font-semibold text-sm mb-3">How the Associate System Works</h3>
-            <p className="text-sm text-[#6e6e73] leading-relaxed mb-4">
-              Associates are onboarded through the Business Office application process.
-            </p>
-            <p className="text-sm text-[#6e6e73] leading-relaxed mb-4">
-              Each approved associate is assigned a FAST Code (Fast Access Standard Tracking Code), which acts as their unique identity within the Talishouse ecosystem.
-            </p>
-            <p className="text-sm text-[#6e6e73] leading-relaxed">
-              This FAST Code powers a personalized, white-labeled associate page where prospects can engage directly. When a prospect submits a project or expresses interest, the lead is automatically tagged with the associate's FAST Code, ensuring accurate attribution and commission eligibility.
-            </p>
+            <div className="space-y-4 text-sm text-[#6e6e73] leading-relaxed">
+              <p>Associates are onboarded through the Business Office application process.</p>
+              <p>Each approved associate is assigned a FAST Code (Fast Access Standard Tracking Code), which acts as their unique identifier within the Talispros™ ecosystem.</p>
+              <p>This FAST Code powers a personalized, white-labeled associate page where their prospects can engage directly. When a prospect submits a project or expresses interest, the lead is automatically tagged with that associate's FAST Code, ensuring accurate attribution and commission eligibility guaranteed.</p>
+            </div>
           </div>
         </div>
       </div>
