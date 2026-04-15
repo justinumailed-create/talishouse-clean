@@ -99,13 +99,13 @@ function TalishouseContent() {
       .map((id) => addonsRecord[id]?.name)
       .filter(Boolean);
 
+    if (!selectedModel) return;
+
     const configSummary = {
-      model: selectedModel.name,
+      model: selectedModel?.name || "",
       ...selectedOptions,
       addons: selectedAddonNames.join(", ")
     };
-
-    if (!selectedModel) return;
     
     addToCart({
       id: `talishouse-${category}-${selectedModel.id}`,

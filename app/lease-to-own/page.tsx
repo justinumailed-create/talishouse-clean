@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getPricingConfig, calculateLeaseToOwn } from "@/lib/utils/pricingEngine";
@@ -47,7 +47,7 @@ interface LeaseState {
   status: "selecting" | "active" | "owned";
 }
 
-export default function LeaseToOwnPage() {
+function LeaseToOwnPageContent() {
   const router = useRouter();
   const config = getPricingConfig();
   const searchParams = useSearchParams();
@@ -411,5 +411,13 @@ export default function LeaseToOwnPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function LeaseToOwnPage() {
+  return (
+    <Suspense fallback={null}>
+      <LeaseToOwnPageContent />
+    </Suspense>
   );
 }
