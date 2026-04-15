@@ -45,7 +45,7 @@ export default async function AssociatePage({ params }: { params: Promise<{ fast
           heroContent: data.hero_content || "",
           headline: data.page_headline || "",
           subtext: data.page_subtext || "",
-          ctaText: data.page_contact_cta || "Propose a Project",
+          ctaText: data.page_contact_cta || "Refer a Project",
           showForm: data.show_form || false,
           showVideo: data.show_video || false,
           videoUrl: data.video_url || ""

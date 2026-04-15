@@ -7,6 +7,16 @@
   --text-secondary: #6e6e73;
   --border-subtle: rgba(0,0,0,0.08);
   --accent-gradient: linear-gradient(135deg, #0070ba, #1546a0);
+
+  /* Apple-style 8pt Spacing System */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-7: 56px;
+  --space-8: 64px;
 }
 
 @theme inline {
@@ -37,19 +47,37 @@
 
   .container {
     width: 100%;
-    max-width: none;
+    max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 75px;
-    padding-right: 75px;
+    padding-left: 20px;
+    padding-right: 20px;
     box-sizing: border-box;
+  }
+
+  .section {
+    margin-bottom: var(--space-6);
+  }
+
+  .tight-section {
+    margin-bottom: var(--space-4);
+  }
+
+  .hero-section {
+    margin-bottom: var(--space-7);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 2.4fr 1fr;
+    gap: var(--space-3);
   }
   
   .btn-primary {
     background: #1a1a1a;
     color: #ffffff;
     border-radius: 10px;
-    padding: 14px 24px;
+    padding: var(--space-1) var(--space-3);
     font-weight: 500;
     font-size: 14px;
     transition: all 0.2s ease;
@@ -72,10 +100,14 @@
     background: #ffffff;
     border: 1px solid #f0f0f0;
     border-radius: 16px;
-    padding: 24px;
+    padding: var(--space-3);
     box-sizing: border-box;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .card-tight {
+    padding: var(--space-2);
   }
 
   .card:hover {
@@ -86,6 +118,12 @@
     white-space: normal;
     line-height: 1.6;
     max-width: 520px;
+  }
+
+  .flex-center {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
   }
 }
 
@@ -102,17 +140,28 @@ html, body {
 body {
   font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   font-size: 16px;
-  line-height: 1.6;
-  color: #555;
+  line-height: 1.5;
+  color: #1d1d1f;
   background-color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
 }
 
+h1, h2, h3 {
+  margin-bottom: var(--space-2);
+  color: var(--text-primary);
+}
+
 p {
-  color: #555;
-  line-height: 1.6;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--space-2);
+}
+
+.small-text {
+  margin-bottom: var(--space-1);
+  font-size: 0.875rem;
 }
 
 @keyframes fadeIn {
@@ -142,16 +191,21 @@ p {
     padding-right: 16px;
   }
 
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
   .card {
-    padding: 16px;
+    padding: var(--space-2);
     border-radius: 12px;
   }
 }
 
 @media (max-width: 1024px) {
   .container {
-    padding-left: 24px;
-    padding-right: 24px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }
 

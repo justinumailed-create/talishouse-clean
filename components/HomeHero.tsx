@@ -25,14 +25,14 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
 
   return (
     <section className="pt-6 pb-8 bg-[#f8f8f7]">
-      <div className="w-full px-6 lg:px-[80px]">
-        <div className="grid grid-cols-[70%_30%] gap-6 items-stretch w-full">
+      <div className="max-w-[1400px] mx-auto px-5">
+        <div className="flex flex-col md:grid md:grid-cols-[2fr_1fr] items-stretch gap-4 md:gap-6 w-full">
           
-          {/* LEFT COLUMN */}
+          {/* LEFT COLUMN WRAPPER */}
           <div className="flex flex-col h-full gap-4">
             
-            {/* TEXT CARD (TOP) */}
-            <div className="p-6 border rounded-2xl bg-white">
+            {/* TEXT CARD (SMALL) */}
+            <div className="w-full h-[180px] md:h-[200px] rounded-xl overflow-hidden flex flex-col justify-center p-4 md:p-5 border bg-white">
               <style dangerouslySetInnerHTML={{ __html: `
                 .fade-line {
                   opacity: 0;
@@ -51,47 +51,48 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
                   }
                 }
               `}} />
-              <div className="grid grid-cols-2 gap-6 items-start">
+              <div className="flex flex-col md:flex-row gap-3 md:gap-5 w-full">
                 
-                {/* LEFT COLUMN */}
-                <div className="flex flex-col gap-2">
-                  <p className="text-xs tracking-[0.2em] text-neutral-400 uppercase">
+                {/* LEFT SIDE */}
+                <div className="flex flex-col gap-1 text-left flex-1">
+                  <p className="text-[10px] md:text-xs tracking-[0.15em] text-neutral-400 uppercase">
                     GLOBAL OVERVIEW
                   </p>
-                  <div className="flex items-center gap-4">
-                    <h1 className="text-[26px] font-semibold tracking-tight">
-                      {title}
-                    </h1>
-                  </div>
-                  <p className="text-sm text-neutral-500">
+                  <h1 className="text-[22px] md:text-[28px] font-semibold tracking-tight leading-tight">
+                    {title}
+                  </h1>
+                  <p className="text-[12px] md:text-[13px] text-neutral-500 leading-relaxed">
                     {subtitle}
                   </p>
                   <Link 
                     href="/add-project"
-                    className="inline-block bg-black text-white text-sm px-4 py-2 rounded-full hover:bg-neutral-800 transition-colors w-fit mt-2"
+                    className="inline-block bg-black text-white text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full hover:bg-neutral-800 transition-colors w-fit mt-1 md:mt-2"
                   >
-                    Join Us
+                    Propose a Project
                   </Link>
                 </div>
 
-                {/* RIGHT COLUMN */}
-                <div className="flex flex-col gap-2 text-right">
-                  <p className="fade-line delay-1 text-sm text-neutral-600">
-                    From CAD $59 per sq.ft.
+                {/* RIGHT SIDE */}
+                <div className="flex flex-col gap-1 text-left md:text-right">
+                  <p className="text-[10px] md:text-xs tracking-[0.15em] text-neutral-400 uppercase">
+                    FEATURES
                   </p>
-                  <p className="fade-line delay-2 text-sm text-neutral-600">
-                    Up in a day, move in ready in a week
+                  <p className="fade-line delay-1 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
+                    From CAD $59/sq.ft.
                   </p>
-                  <p className="fade-line delay-3 text-sm text-neutral-600">
-                    Lease-To-Own terms available, OAC
+                  <p className="fade-line delay-2 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
+                    Up in a day, move-in ready in a week
+                  </p>
+                  <p className="fade-line delay-3 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
+                    Lease-To-Own, OAC
                   </p>
                 </div>
 
               </div>
             </div>
 
-            {/* MAP BLOCK (BOTTOM) */}
-            <div className="flex-1 rounded-2xl overflow-hidden">
+            {/* MAP BLOCK (FLEX FILL) */}
+            <div className="w-full flex-1 min-h-0 rounded-xl overflow-hidden">
               <iframe
                 src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
                 allow="geolocation 'self' https://my.atlist.com"
@@ -99,10 +100,11 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
                 title="Talishouse property discovery map"
               />
             </div>
+
           </div>
 
-          {/* RIGHT COLUMN (VIDEO) */}
-          <div className="h-full rounded-2xl overflow-hidden relative group cursor-pointer">
+          {/* VIDEO */}
+          <div className="w-full aspect-video md:h-full md:aspect-auto rounded-xl overflow-hidden relative group cursor-pointer">
             <video
               ref={videoRef}
               src="/videos/homepage.mp4"

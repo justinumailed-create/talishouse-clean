@@ -54,7 +54,7 @@ export default function Home() {
   return (
     <div className="w-full bg-white">
       {error && (
-        <div className="w-full px-6 lg:px-[80px]">
+        <div className="w-full px-5">
           <div className="p-4 bg-red-50 text-red-600 rounded-lg text-sm">
             {error}
           </div>
@@ -68,7 +68,7 @@ export default function Home() {
 
       {/* Products Section */}
       <section className="pb-8">
-        <div className="w-full px-6 lg:px-[80px]">
+        <div className="max-w-[1400px] mx-auto px-5">
           <ProductList />
         </div>
       </section>

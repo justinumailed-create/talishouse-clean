@@ -1,18 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import SubscriptionDrawer from "@/components/SubscriptionDrawer";
 import { formatCAD } from "@/utils/currency";
+import { isAuthorized } from "@/lib/fast-code";
 
 export default function SubscriptionPage() {
+  const router = useRouter();
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerType, setDrawerType] = useState<"referral" | "wholesale">("referral");
+
+  useEffect(() => {
+    setAuthorized(isAuthorized());
+  }, []);
+
+  useEffect(() => {
+    if (authorized === false) {
+      router.push("/business-office");
+    }
+  }, [authorized, router]);
 
   const openDrawer = (type: "referral" | "wholesale") => {
     setDrawerType(type);
     setDrawerOpen(true);
   };
+
+  if (authorized === null) {
+    return null;
+  }
 
   return (
     <div className="container py-12">

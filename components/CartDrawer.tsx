@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useCart, PaymentStrategy, BASE_BUILD_PRICE } from "@/context/CartContext";
+import { useCart, PaymentStrategy, DESTINATION_CHARGE, BUILD_AND_PRICE, PromoCode } from "@/context/CartContext";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { supabase } from "@/lib/supabase";
 import { syncTransactionToSplits } from "@/lib/splits";
 import { getPricingConfig, calculateLeaseToOwn } from "@/lib/utils/pricingEngine";
+import { DISCOUNT_CODES, formatDiscount } from "@/lib/utils/discounts";
 import { UI } from "@/styles/design-system";
 
 const DEFAULT_PRODUCT_IMAGE = "/images/placeholder.png";
@@ -23,22 +24,26 @@ export default function CartDrawer() {
     closeCart,
     rawSubtotal,
     discountedSubtotal,
-    subtotalWithBase,
+    subtotalWithCharge,
     tax,
     grandTotal,
     promoCode,
     promoInfo,
+    appliedDiscounts,
+    totalDiscount,
+    removePromoCode,
     setDiscount,
     paymentStrategy,
     ltoTermMonths,
     ltoMonthlyPayment,
-    removePromoCode,
     setPaymentStrategy,
     setLtoTermMonths,
     getPaymentAmount,
     removeFromCart,
     updateQuantity,
     clearCart,
+    applyPromoCode,
+    stackConfig,
   } = useCart();
 
   const [promoInput, setPromoInput] = useState("");
@@ -50,26 +55,11 @@ export default function CartDrawer() {
 
   const handleApplyPromo = () => {
     if (!promoInput.trim()) return;
-    const upperCode = promoInput.toUpperCase().trim();
-    
-    const PROMO_CODES: Record<string, { discountPercent: number; message: string }> = {
-      FAST5: { discountPercent: 0, message: "FAST5 applied: 5% Deposit mode activated." },
-      PAC3: { discountPercent: 3, message: "PAC3 applied: 3% discount activated. Pre-payment required within 30 days." },
-      PAC5: { discountPercent: 5, message: "PAC5 applied: 5% discount activated. Pre-payment required within 10 days." },
-      PAC10: { discountPercent: 10, message: "PAC10 applied: 10% discount activated. Valid for 2+ units within 12 months." },
-      SPLITS: { discountPercent: 20, message: "SPLITS applied: 20% wholesale procurement margin activated." },
-      OAC: { discountPercent: 0, message: "Lease-to-Own selected. 50% down payment required." },
-    };
-
-    const promo = PROMO_CODES[upperCode];
-    if (!promo) {
-      setPromoMessage({ type: "error", text: "Invalid promo code. Please try again." });
-      return;
+    const result = applyPromoCode(promoInput.trim());
+    setPromoMessage({ type: result.success ? "success" : "error", text: result.message });
+    if (result.success) {
+      setPromoInput("");
     }
-
-    setDiscount({ code: upperCode, percent: promo.discountPercent });
-    setPromoMessage({ type: "success", text: promo.message });
-    setPromoInput("");
   };
 
   const savePayment = async (transactionId: string) => {
@@ -307,9 +297,18 @@ export default function CartDrawer() {
                   <div className="flex-1">
                     <h3 className="font-medium text-sm text-gray-900">{item.name}</h3>
                     <p className="text-gray-500 text-sm">CAD ${item.price.toLocaleString()}</p>
-                    {item.options && Object.keys(item.options).length > 0 && (
+                    {item.metadata && (
+                      <div className="mt-1 space-y-0.5">
+                        {Object.entries(item.metadata).map(([key, value]) => (
+                          <p key={key} className="text-[10px] leading-tight text-gray-400">
+                            <span className="font-medium uppercase tracking-wider">{key}:</span> {String(value)}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    {!item.metadata && item.options && Object.keys(item.options).length > 0 && (
                       <p className="text-xs text-gray-400 mt-1">
-                        {Object.values(item.options).slice(0, 2).join(", ")}
+                        {Object.values(item.options).join(", ")}
                       </p>
                     )}
                     <div className="flex items-center gap-2 mt-2">
@@ -344,13 +343,14 @@ export default function CartDrawer() {
           <div className="border-t border-gray-100 p-6 space-y-4">
             {/* Promo Code Section */}
             <div className="space-y-2">
-              {!promoCode ? (
+              {appliedDiscounts.length === 0 ? (
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={promoInput}
                     onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-                    placeholder="Promo code"
+                    placeholder="Apply Discount Code"
+                    onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
                     className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
                   />
                   <button
@@ -361,21 +361,61 @@ export default function CartDrawer() {
                   </button>
                 </div>
               ) : (
-                <div className="bg-green-50 rounded-xl p-3">
+                <div className="bg-green-50 rounded-xl p-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-medium text-sm text-gray-900">{promoCode}</span>
-                      {promoInfo && (
-                        <p className="text-xs text-green-600 mt-1">{promoInfo.message}</p>
-                      )}
-                    </div>
+                    <span className="text-xs text-green-600 font-medium">
+                      {appliedDiscounts.length} discount{appliedDiscounts.length > 1 ? "s" : ""} applied
+                    </span>
                     <button
-                      onClick={removePromoCode}
-                      className="text-gray-400 hover:text-red-500 text-sm transition-colors"
+                      onClick={() => removePromoCode()}
+                      className="text-gray-400 hover:text-red-500 text-xs transition-colors"
                     >
-                      Remove
+                      Clear All
                     </button>
                   </div>
+                  {appliedDiscounts.map((discount) => {
+                    const discountInfo = DISCOUNT_CODES[discount.code];
+                    return (
+                      <div key={discount.code} className="flex items-center justify-between bg-white rounded-lg p-2">
+                        <div>
+                          <span className="font-medium text-sm text-gray-900">{discount.code}</span>
+                          <p className="text-xs text-green-600">{discount.label}</p>
+                          {discountInfo?.timeCondition && (
+                            <p className="text-xs text-gray-400">{discountInfo.timeCondition.message}</p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <span className="text-sm text-green-600 font-medium">
+                            -CAD ${discount.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          </span>
+                          <button
+                            onClick={() => removePromoCode(discount.code)}
+                            className="block text-xs text-gray-400 hover:text-red-500 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  {appliedDiscounts.length < stackConfig.maxDiscounts && (
+                    <div className="flex gap-2 pt-2">
+                      <input
+                        type="text"
+                        value={promoInput}
+                        onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
+                        placeholder="Add another code"
+                        onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none transition-all duration-200 focus:border-gray-900"
+                      />
+                      <button
+                        onClick={handleApplyPromo}
+                        className="px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
               {promoMessage && (
@@ -388,32 +428,36 @@ export default function CartDrawer() {
             {/* Order Summary */}
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-500">Subtotal:</span>
+                <span className="text-gray-500">Initial Estimated Price:</span>
                 <span className="text-gray-900">CAD ${rawSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
               
-              {promoInfo && promoInfo.discountPercent > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>Discount ({promoInfo.code} -{promoInfo.discountPercent}%):</span>
-                  <span>- CAD ${(rawSubtotal - discountedSubtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
+              {appliedDiscounts.length > 0 && (
+                <>
+                  <div className="flex justify-between text-green-600">
+                    <span>Total Discounts:</span>
+                    <span>- CAD ${totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Discounted Subtotal:</span>
+                    <span className="text-gray-900">CAD ${discountedSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </>
               )}
               
-              {promoInfo && (
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Discounted Subtotal:</span>
-                  <span className="text-gray-900">CAD ${discountedSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                </div>
-              )}
-              
+              <div className="flex justify-between pt-1 border-t border-gray-50">
+                <span className="text-gray-900 font-medium">Build & Price (Shipping)</span>
+                <span className="text-gray-900">CAD ${BUILD_AND_PRICE.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              </div>
+
               <div className="flex justify-between">
-                <span className="text-gray-900 font-medium">Build & Price</span>
-                <span className="text-gray-900">CAD ${BASE_BUILD_PRICE.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <span className="text-gray-900 font-medium">Destination Charge</span>
+                <span className="text-gray-900">CAD ${DESTINATION_CHARGE.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
               
-              <div className="flex justify-between">
-                <span className="text-gray-500">Subtotal with Build</span>
-                <span className="text-gray-900">CAD ${subtotalWithBase.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <div className="flex justify-between pt-1 border-t border-gray-50">
+                <span className="text-gray-500">Subtotal with Charges</span>
+                <span className="text-gray-900">CAD ${subtotalWithCharge.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
               
               <div className="flex justify-between">
@@ -458,7 +502,7 @@ export default function CartDrawer() {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-sm">5% Initial Payment</span>
+                  <span className="font-medium text-sm">Deposit (5% of total)</span>
                   <span className={`text-xs ${paymentType === "partial" ? "text-white/70" : "text-gray-500"}`}>
                     CAD ${(grandTotal * 0.05).toLocaleString()}
                   </span>

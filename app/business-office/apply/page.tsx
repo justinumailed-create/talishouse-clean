@@ -56,7 +56,7 @@ export default function ApplyPage() {
   if (success) {
     return (
       <div className="min-h-screen bg-white py-12">
-        <div className="w-full max-w-none px-6 lg:px-[80px]">
+        <div className="max-w-[1400px] mx-auto px-6">
           <div className="mx-auto max-w-md">
             <div className="text-center">
               <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
@@ -86,7 +86,7 @@ export default function ApplyPage() {
 
   return (
     <div className="min-h-screen bg-white py-12">
-      <div className="w-full max-w-none px-6 lg:px-[80px]">
+      <div className="max-w-[1400px] mx-auto px-6">
         <div className="mx-auto max-w-lg">
           <div className="mb-8">
             <Link href="/business-office" className="text-sm text-[#1E4ED8] hover:underline">
@@ -205,7 +205,7 @@ export default function ApplyPage() {
                 {isSubmitting ? "Submitting..." : "Submit Application"}
               </button>
               <p className="text-[11px] text-[#6e6e73] text-right">
-                <strong>*SPLITS = Simple Project Lead & Input Trading System</strong>
+                <strong>*SPLITS = Simple Project Lead & Input Tracking System</strong>
               </p>
             </div>
           </form>

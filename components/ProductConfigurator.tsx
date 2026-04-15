@@ -29,7 +29,7 @@ const bathOptions = [
 
 const flooringColors = [
   { id: "ash", color: "#cfcfcf", label: "Ash" },
-  { id: "grey", color: "#6b6b6b", label: "Grey" },
+  { id: "dark_gray", color: "#6b6b6b", label: "Dark Gray" },
   { id: "pine", color: "#f2e6d8", label: "Pine" },
   { id: "palm", color: "#c49a6c", label: "Palm" },
   { id: "maple", color: "#d2a679", label: "Maple" },

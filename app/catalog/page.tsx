@@ -13,7 +13,7 @@ const categories = [
 export default function CatalogPage() {
   return (
     <div className="bg-white min-h-screen">
-      <div className="w-full px-6 lg:px-[80px]">
+      <div className="max-w-[1400px] mx-auto px-6">
         <section className="py-12">
           <div className="text-center">
             <h1 className="text-2xl font-semibold text-gray-900">Catalog</h1>
@@ -51,12 +51,12 @@ export default function CatalogPage() {
             {categories.map((cat) => (
               <Link key={cat.name} href={cat.href}>
                 <div className="group bg-white border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
-                  <div className="relative w-full h-[260px] overflow-hidden rounded-t-xl">
+                  <div className="relative w-full aspect-video overflow-hidden rounded-t-xl bg-white">
                     <Image
                       src={cat.image}
                       alt={cat.name}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-contain transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-4">

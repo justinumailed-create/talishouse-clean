@@ -1,37 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getPricingConfig, calculateLeaseToOwn } from "@/lib/utils/pricingEngine";
+import { isAuthorized } from "@/lib/fast-code";
 
 interface LeaseProduct {
   id: string;
   name: string;
   price: number;
-  description: string;
+  available: boolean;
 }
 
-const products: LeaseProduct[] = [
-  {
-    id: "talishouse-400",
-    name: "Talishouse™ 400",
-    price: 39950,
-    description: "21' x 20' steel structure, two bedrooms, one bath, open concept living.",
-  },
-  {
-    id: "talishouse-residential",
-    name: "Talishouse™ Residential",
-    price: 79950,
-    description: "Expanded residential living with extra square footage.",
-  },
+const PRODUCTS: LeaseProduct[] = [
+  { id: "g160", name: "Glasshouse 160", price: 39950, available: true },
+  { id: "g200", name: "Glasshouse 200", price: 49950, available: true },
+  { id: "t400", name: "Talishouse 400", price: 79950, available: true },
+  { id: "t800", name: "Talishouse 800", price: 119950, available: true },
+  { id: "t1600", name: "Talishouse 1600", price: 199950, available: false },
+  { id: "t2400", name: "Talishouse 2400", price: 249950, available: false },
+  { id: "t3200", name: "Talishouse 3200", price: 299950, available: false },
 ];
 
-function getAvailableDurations(maxMonths: number): number[] {
-  const durations: number[] = [];
-  for (let months = 12; months <= maxMonths; months += 12) {
-    durations.push(months);
-  }
-  return durations;
+const TERMS = [12, 24, 36, 48, 60];
+
+function calculateMonthly(price: number, months: number): number {
+  return Math.round(price / months);
+}
+
+function getValidTerms(price: number): { months: number; monthly: number }[] {
+  return TERMS.map((months) => ({
+    months,
+    monthly: calculateMonthly(price, months),
+  })).filter(({ monthly }) => monthly >= 500 && monthly <= 2000);
 }
 
 interface LeaseState {
@@ -46,9 +48,12 @@ interface LeaseState {
 }
 
 export default function LeaseToOwnPage() {
+  const router = useRouter();
   const config = getPricingConfig();
-  const availableDurations = getAvailableDurations(config.leaseToOwn.maxMonths);
+  const searchParams = useSearchParams();
   
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
+
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [leaseState, setLeaseState] = useState<LeaseState>({
@@ -62,10 +67,32 @@ export default function LeaseToOwnPage() {
     status: "selecting",
   });
 
-  const selectedProductData = products.find((p) => p.id === selectedProduct);
+  useEffect(() => {
+    setAuthorized(isAuthorized());
+  }, []);
+
+  useEffect(() => {
+    if (authorized === false) {
+      router.push("/business-office");
+    }
+  }, [authorized, router]);
+
+  useEffect(() => {
+    const productParam = searchParams.get("product");
+    if (productParam && PRODUCTS.find((p) => p.id === productParam)?.available) {
+      setSelectedProduct(productParam);
+    }
+  }, [searchParams]);
+
+  if (authorized === null) {
+    return null;
+  }
+
+  const selectedProductData = PRODUCTS.find((p) => p.id === selectedProduct);
+  const validTerms = selectedProductData ? getValidTerms(selectedProductData.price) : [];
 
   const calculateLease = (productId: string, duration: number) => {
-    const product = products.find((p) => p.id === productId);
+    const product = PRODUCTS.find((p) => p.id === productId);
     if (!product) return;
 
     const leaseCalc = calculateLeaseToOwn({
@@ -87,6 +114,8 @@ export default function LeaseToOwnPage() {
   };
 
   const handleProductSelect = (productId: string) => {
+    const product = PRODUCTS.find((p) => p.id === productId);
+    if (!product?.available) return;
     setSelectedProduct(productId);
     setSelectedDuration(null);
   };
@@ -102,7 +131,7 @@ export default function LeaseToOwnPage() {
 
     const monthly = leaseState.monthlyPayment;
     const newCredits = leaseState.credits + monthly;
-    const product = products.find((p) => p.id === leaseState.productId);
+    const product = PRODUCTS.find((p) => p.id === leaseState.productId);
 
     if (!product) return;
 
@@ -132,7 +161,7 @@ export default function LeaseToOwnPage() {
           100,
           Math.round(
             (leaseState.credits /
-              (products.find((p) => p.id === leaseState.productId)?.price || 1)) *
+              (PRODUCTS.find((p) => p.id === leaseState.productId)?.price || 1)) *
               100
           )
         )
@@ -140,7 +169,7 @@ export default function LeaseToOwnPage() {
 
   if (leaseState.status === "selecting") {
     return (
-      <div className="w-full max-w-none px-6 lg:px-[80px] py-12">
+      <div className="max-w-[1400px] mx-auto px-6 py-12">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
             Lease-to-Own
@@ -155,22 +184,22 @@ export default function LeaseToOwnPage() {
             1. Select Your Product
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {products.map((product) => (
+            {PRODUCTS.map((product) => (
               <button
                 key={product.id}
                 onClick={() => handleProductSelect(product.id)}
+                disabled={!product.available}
                 className={`w-full p-6 rounded-2xl transition-all min-h-[48px] text-left border-2 ${
-                  selectedProduct === product.id
+                  !product.available
+                    ? "opacity-40 pointer-events-none border-gray-100 bg-white text-black"
+                    : selectedProduct === product.id
                     ? "bg-black text-white border-black shadow-lg"
                     : "border-gray-100 hover:border-gray-300 bg-white text-black"
                 }`}
               >
                 <h3 className={`font-bold ${selectedProduct === product.id ? "text-white" : "text-black"}`}>{product.name}</h3>
-                <p className={`text-2xl font-bold mt-2 ${selectedProduct === product.id ? "text-white" : "text-black"}`}>
-                  CAD ${product.price.toLocaleString()}
-                </p>
-                  <p className={`text-sm mt-2 ${selectedProduct === product.id ? "text-white" : "text-gray-600"}`}>
-                  {product.description}
+                <p className={`text-sm font-medium mt-2 ${selectedProduct === product.id ? "text-white" : "text-black"}`}>
+                  {product.available ? "INITIAL PAYMENT" : "NOT AVAILABLE"}
                 </p>
               </button>
             ))}
@@ -182,34 +211,40 @@ export default function LeaseToOwnPage() {
             <h2 className="text-lg font-bold text-gray-900 mb-4">
               2. Select Payment Term
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {availableDurations.map((duration) => {
-                const leaseCalc = calculateLeaseToOwn({
-                  totalAmount: selectedProductData.price,
-                  months: duration,
-                  config,
-                });
-                return (
-                  <button
-                    key={duration}
-                    onClick={() => handleDurationSelect(duration)}
-                    className={`w-full min-h-[48px] p-4 rounded-xl border-2 text-center transition-all ${
-                      selectedDuration === duration
-                        ? "bg-black text-white border-black shadow-md"
-                        : "border-gray-100 hover:border-gray-300 bg-white text-black"
-                    }`}
-                  >
-                    <p className="text-2xl font-bold">{duration}</p>
-                    <p className={`text-xs ${selectedDuration === duration ? "text-white" : "text-gray-600"}`}>
-                      months
-                    </p>
-                    <p className={`text-lg font-bold mt-2 ${selectedDuration === duration ? "text-white" : "text-black"}`}>
-                      CAD ${Math.ceil(leaseCalc.monthlyPayment).toLocaleString()}/mo
-                    </p>
-                  </button>
-                );
-              })}
-            </div>
+            {validTerms.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {validTerms.map(({ months, monthly }) => {
+                  const leaseCalc = calculateLeaseToOwn({
+                    totalAmount: selectedProductData.price,
+                    months,
+                    config,
+                  });
+                  return (
+                    <button
+                      key={months}
+                      onClick={() => handleDurationSelect(months)}
+                      className={`w-full min-h-[48px] p-4 rounded-xl border-2 text-center transition-all ${
+                        selectedDuration === months
+                          ? "bg-black text-white border-black shadow-md"
+                          : "border-gray-100 hover:border-gray-300 bg-white text-black"
+                      }`}
+                    >
+                      <p className="text-2xl font-bold">{months}</p>
+                      <p className={`text-xs ${selectedDuration === months ? "text-white" : "text-gray-600"}`}>
+                        months
+                      </p>
+                      <p className={`text-lg font-bold mt-2 ${selectedDuration === months ? "text-white" : "text-black"}`}>
+                        CAD ${Math.ceil(leaseCalc.monthlyPayment).toLocaleString()}/mo
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-6 text-center border border-gray-200 rounded-xl bg-gray-50">
+                <p className="text-gray-600 font-medium">Not Available for Lease-to-Own</p>
+              </div>
+            )}
           </div>
         )}
 
@@ -270,7 +305,7 @@ export default function LeaseToOwnPage() {
   }
 
   return (
-    <div className="w-full max-w-none px-6 lg:px-[80px] py-12">
+    <div className="max-w-[1400px] mx-auto px-6 py-12">
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
           Your Lease
@@ -289,7 +324,7 @@ export default function LeaseToOwnPage() {
           <p className="text-sm font-bold uppercase tracking-[0.25em]">
             {leaseState.status === "owned"
               ? "✓ Owned"
-              : `Lease Active — ${products.find((p) => p.id === leaseState.productId)?.name || ""}`}
+              : `Lease Active — ${PRODUCTS.find((p) => p.id === leaseState.productId)?.name || ""}`}
           </p>
         </div>
 

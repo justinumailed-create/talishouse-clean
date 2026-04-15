@@ -92,12 +92,37 @@ export default function TalistownsPage() {
           {talistownsFamily?.name || productFamilies?.talistowns?.name || "TalisTowns™"} Bundle
         </h1>
 
-        <p className="text-xl font-bold text-gray-900">
-          {formatCAD(bundlePrice)}
-        </p>
-        <p className="text-xs text-gray-500">CAD 58.50 per sq.ft. from</p>
+        <div className="mt-8 mb-4 border-b border-gray-100 pb-6">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Initial Estimated Price</p>
+          <p className="text-sm font-medium text-gray-500 mb-1">Destination Charge: CAD $8,995</p>
+          <p className="text-3xl font-bold text-gray-900 mb-4">
+            {formatCAD(bundlePrice + 8995)}
+          </p>
+          
+          <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-600">Deposit (5% of total)</span>
+              <span className="text-lg font-bold text-black">
+                {formatCAD((bundlePrice + 8995) * 0.05)}
+              </span>
+            </div>
+          </div>
+        </div>
 
         <div className="space-y-6">
+          {/* LEASE TO OWN PREVIEW */}
+          <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100/50">
+            <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3">Lease-to-Own Estimate</h3>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-black text-blue-900">
+                {formatCAD(((bundlePrice + 8995) * 0.6) / 60)}
+              </span>
+              <span className="text-sm font-medium text-blue-700">/ month</span>
+            </div>
+            <p className="text-[11px] text-blue-600/80 mt-2 leading-relaxed">
+              *Estimated based on 60 months with 50% down payment and 5% admin fee. Subject to OAC.
+            </p>
+          </div>
           <div className="rounded-lg border border-gray-100 bg-white p-4">
             <p className="text-sm text-gray-600">
               Selecting TalisTowns™ automatically adds 2 x Talishouse™ 400 and

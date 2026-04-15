@@ -49,7 +49,7 @@ export default function CTASection({ fastCode }: CTASectionProps) {
   return (
     <div className="p-4 md:p-6 flex flex-col gap-4 form-container">
       <h1 className="text-2xl font-semibold">
-        Propose a Project
+        Refer a Project
       </h1>
 
       <div className="aspect-video bg-gray-200 rounded-xl flex items-center justify-center">

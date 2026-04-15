@@ -55,16 +55,16 @@ export default function ProductLayout({
   const showImage = hasValidImage || dbImageUrl || productImage;
 
   return (
-    <div className="w-full px-6 lg:px-[80px] py-8">
+    <div className="max-w-[1400px] mx-auto px-6 py-8">
       <div className="grid grid-cols-12 gap-10 lg:gap-12 items-start">
         <div className="col-span-12 lg:col-span-7 space-y-8">
-          <div className="w-full aspect-video bg-white relative overflow-hidden rounded-xl border border-gray-100">
+          <div className="w-full aspect-video bg-white relative overflow-hidden rounded-xl border border-gray-100 shadow-sm">
             {displayImage ? (
               <Image
                 src={displayImage}
                 alt={productName}
                 fill
-                className="object-cover"
+                className="object-contain"
                 sizes="(max-width: 1024px) 100vw, 60vw"
                 priority
               />

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useCart, BASE_BUILD_PRICE } from "@/context/CartContext";
+import { useCart, DESTINATION_CHARGE, BUILD_AND_PRICE } from "@/context/CartContext";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { supabase } from "@/lib/supabase";
 import { syncTransactionToSplits } from "@/lib/splits";
@@ -20,7 +20,7 @@ export default function CheckoutPage() {
     items,
     rawSubtotal,
     discountedSubtotal,
-    subtotalWithBase,
+    subtotalWithCharge,
     tax,
     grandTotal,
     promoCode,
@@ -126,7 +126,7 @@ export default function CheckoutPage() {
   if (paymentSuccess) {
     return (
       <div className="min-h-[70vh] bg-white py-12">
-        <div className="w-full max-w-none px-6 lg:px-[80px]">
+        <div className="max-w-[1400px] mx-auto px-6">
           <div className="mx-auto max-w-md">
             <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] p-8 text-center transition-all duration-300">
               <div className="w-16 h-16 bg-[rgba(52,199,89,0.1)] rounded-full flex items-center justify-center mx-auto mb-6">
@@ -184,7 +184,7 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-[70vh] bg-white py-12">
-      <div className="w-full max-w-none px-6 lg:px-[80px]">
+      <div className="max-w-[1400px] mx-auto px-6">
         <div className="flex items-center justify-between mb-8">
           <Link href={ROUTES.CATALOG} className="text-sm text-[#6e6e73] hover:text-black transition-colors">
             ← Continue Shopping
@@ -210,24 +210,18 @@ export default function CheckoutPage() {
               </div>
 
               <div>
-                <p className="text-sm text-[#6e6e73] leading-relaxed">
-                  <span className="font-semibold text-[#1d1d1f]">Talishouse™</span> starts from {formatCAD(58.80)} per sq.ft. 
-                  Base model ≈ <span className="font-semibold">{formatCAD(99950)}</span> for 1,700 sq.ft.
-                </p>
+                <p className="text-sm font-semibold text-[#1d1d1f] mb-2">Build & Price includes:</p>
+                <ul className="text-sm text-[#6e6e73] space-y-2 list-disc pl-4">
+                  <li>One sea-can container rental for shipping</li>
+                  <li>Up to 14 days after pickup from destination port</li>
+                  <li>All incidental costs except customs clearance, taxes, and inland transport</li>
+                </ul>
               </div>
 
-              <ul className="text-sm text-[#6e6e73] space-y-3 list-disc pl-4">
-                <li>
-                  The base charge of {formatCAD(8995, false)} covers sea-container shipping and up to 14 days after pickup from destination port.
-                </li>
-                <li>
-                  Includes incidental costs except customs clearance, taxes, and inland transport.
-                </li>
-              </ul>
-
-              <div className="bg-gray-100 rounded-xl p-4">
-                <p className="text-sm text-black">
-                  <span className="font-semibold">Note:</span> Additional features like platforms, roofs, patios, and verandas may incur extra shipping or cost.
+              <div className="bg-gray-50 rounded-xl p-4 border border-[rgba(0,0,0,0.04)]">
+                <p className="text-[11px] leading-relaxed text-[#6e6e73]">
+                  <span className="font-semibold text-[#1d1d1f] block mb-1 uppercase tracking-wider">Additional Notes:</span>
+                  Platforms, mobile platforms, gable roofs, rooftop patios, and covered verandas are optional add-ons and may ship separately. Additional containers may result in extra shipping charges.
                 </p>
               </div>
 
@@ -267,9 +261,18 @@ export default function CheckoutPage() {
                     <div className="flex-1">
                       <h3 className="font-medium text-sm text-[#1d1d1f]">{item.name}</h3>
                       <p className="text-[#6e6e73] text-sm">CAD ${item.price.toLocaleString()}</p>
-                      {item.options && Object.keys(item.options).length > 0 && (
+                      {item.metadata && (
+                        <div className="mt-2 space-y-1">
+                          {Object.entries(item.metadata).map(([key, value]) => (
+                            <p key={key} className="text-[10px] leading-tight text-[#86868b]">
+                              <span className="font-medium uppercase tracking-wider">{key}:</span> {String(value)}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                      {!item.metadata && item.options && Object.keys(item.options).length > 0 && (
                         <p className="text-xs text-[#86868b] mt-1">
-                          {Object.values(item.options).slice(0, 2).join(", ")}
+                          {Object.values(item.options).join(", ")}
                         </p>
                       )}
                       <div className="flex items-center gap-2 mt-2">
@@ -330,7 +333,7 @@ export default function CheckoutPage() {
                       )}
                     </div>
                     <button
-                      onClick={removePromoCode}
+                      onClick={() => removePromoCode(promoCode || undefined)}
                       className="text-xs text-[#6e6e73] hover:text-[#ff3b30] transition"
                     >
                       Remove
@@ -351,7 +354,7 @@ export default function CheckoutPage() {
               
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-[#6e6e73]">Subtotal:</span>
+                  <span className="text-[#6e6e73]">Initial Estimated Price:</span>
                   <span className="text-[#1d1d1f]">CAD ${rawSubtotal.toLocaleString()}</span>
                 </div>
                 
@@ -369,14 +372,19 @@ export default function CheckoutPage() {
                   </div>
                 )}
                 
+                <div className="flex justify-between pt-2 border-t border-gray-50">
+                  <span className="text-[#1d1d1f] font-medium">Build & Price (Shipping Setup)</span>
+                  <span className="text-[#1d1d1f]">CAD ${BUILD_AND_PRICE.toLocaleString()}</span>
+                </div>
+
                 <div className="flex justify-between">
-                  <span className="text-[#1d1d1f] font-medium">Build & Price</span>
-                  <span className="text-[#1d1d1f]">CAD ${BASE_BUILD_PRICE.toLocaleString()}</span>
+                  <span className="text-[#1d1d1f] font-medium">Destination Charge (Delivery to Canada)</span>
+                  <span className="text-[#1d1d1f]">CAD ${DESTINATION_CHARGE.toLocaleString()}</span>
                 </div>
                 
-                <div className="flex justify-between">
-                  <span className="text-[#6e6e73]">Subtotal with Build</span>
-                  <span className="text-[#1d1d1f]">CAD ${subtotalWithBase.toLocaleString()}</span>
+                <div className="flex justify-between pt-2 border-t border-gray-50">
+                  <span className="text-[#6e6e73]">Subtotal with Charges</span>
+                  <span className="text-[#1d1d1f]">CAD ${subtotalWithCharge.toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between">
@@ -423,7 +431,7 @@ export default function CheckoutPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">5% Initial Payment</span>
+                    <span className="font-medium">Deposit (5% of total)</span>
                     <span className={`text-sm ${paymentType === "partial" ? "text-white/80" : "text-[#6e6e73]"}`}>
                       CAD ${(grandTotal * 0.05).toLocaleString()}
                     </span>

@@ -15,6 +15,14 @@ import {
   calculatePartialPayment,
   type PricingConfig,
 } from "@/lib/utils/pricingEngine";
+import {
+  DISCOUNT_CODES,
+  validateDiscountCode,
+  applyDiscounts,
+  type AppliedDiscount,
+  type DiscountStackConfig,
+  DEFAULT_STACK_CONFIG,
+} from "@/lib/utils/discounts";
 
 export interface CartItem {
   id: string;
@@ -24,6 +32,7 @@ export interface CartItem {
   quantity: number;
   options?: Record<string, string>;
   addons?: string[];
+  metadata?: Record<string, any>;
   wholesaleRequested?: boolean;
   leaseToOwnRequested?: boolean;
 }
@@ -31,17 +40,20 @@ export interface CartItem {
 const DEFAULT_PRODUCT_IMAGE = "/images/placeholder.png";
 
 export type PromoCode = 
+  | "310"
   | "FAST5" 
   | "PAC3" 
   | "PAC5" 
   | "PAC10" 
+  | "PTC10"
   | "SPLITS" 
   | "OAC"
   | null;
 
 export type PaymentStrategy = "full" | "deposit" | "lto";
 
-export const BASE_BUILD_PRICE = 8995;
+export const DESTINATION_CHARGE = 8995;
+export const BUILD_AND_PRICE = 8500;
 
 export interface PromoCodeInfo {
   code: PromoCode;
@@ -50,84 +62,40 @@ export interface PromoCodeInfo {
   message: string;
   allowsPayment: ("full" | "deposit" | "lto")[];
   isWholesale: boolean;
+  timeCondition?: {
+    days: number;
+    message: string;
+  };
 }
-
-const PROMO_CODES: Record<string, PromoCodeInfo> = {
-  FAST5: {
-    code: "FAST5",
-    discountPercent: 0,
-    label: "5% Deposit",
-    message: "Deposits turn into Down Payments when you sign off on the project.",
-    allowsPayment: ["full", "deposit"],
-    isWholesale: false,
-  },
-  PAC3: {
-    code: "PAC3",
-    discountPercent: 3,
-    label: "PAC3",
-    message: "PAC3 applied: 3% discount activated. Pre-payment required within 30 days of your order.",
-    allowsPayment: ["full"],
-    isWholesale: false,
-  },
-  PAC5: {
-    code: "PAC5",
-    discountPercent: 5,
-    label: "PAC5",
-    message: "PAC5 applied: 5% discount activated. Pre-payment required within 10 days of your order.",
-    allowsPayment: ["full"],
-    isWholesale: false,
-  },
-  PAC10: {
-    code: "PAC10",
-    discountPercent: 10,
-    label: "PAC10",
-    message: "PAC10 applied: 10% discount activated. Valid for 2+ units purchased within 12 months.",
-    allowsPayment: ["full"],
-    isWholesale: false,
-  },
-  SPLITS: {
-    code: "SPLITS",
-    discountPercent: 20,
-    label: "SPLITS",
-    message: "SPLITS applied: 20% wholesale procurement margin activated. This order is flagged for wholesale review.",
-    allowsPayment: ["full", "deposit"],
-    isWholesale: true,
-  },
-  OAC: {
-    code: "OAC",
-    discountPercent: 0,
-    label: "Lease-to-Own",
-    message: "Lease-to-Own selected. 50% down payment required.",
-    allowsPayment: ["full", "lto"],
-    isWholesale: false,
-  },
-};
 
 interface CartContextType {
   items: CartItem[];
   isOpen: boolean;
   rawSubtotal: number;
   discountedSubtotal: number;
-  subtotalWithBase: number;
+  subtotalWithCharge: number;
   tax: number;
   grandTotal: number;
   itemCount: number;
   promoCode: PromoCode;
+  appliedDiscounts: AppliedDiscount[];
+  totalDiscount: number;
   promoInfo: PromoCodeInfo | null;
   paymentStrategy: PaymentStrategy;
   ltoTermMonths: number;
   ltoMonthlyPayment: number;
+  stackConfig: DiscountStackConfig;
   addToCart: (item: Omit<CartItem, "quantity">) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   applyPromoCode: (code: string) => { success: boolean; message: string };
+  removePromoCode: (code?: string) => void;
   setDiscount: (options: { code: string; percent: number }) => void;
-  removePromoCode: () => void;
   setPaymentStrategy: (strategy: PaymentStrategy) => void;
   setLtoTermMonths: (months: number) => void;
   getPaymentAmount: () => number;
-  getSubtotalWithBase: () => number;
+  getSubtotalWithCharge: () => number;
   openCart: () => void;
   closeCart: () => void;
   getCheckoutMetadata: () => Record<string, unknown>;
@@ -143,9 +111,10 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [promoCode, setPromoCode] = useState<PromoCode>(null);
+  const [appliedDiscountCodes, setAppliedDiscountCodes] = useState<PromoCode[]>([]);
   const [paymentStrategy, setPaymentStrategy] = useState<PaymentStrategy>("full");
   const [ltoTermMonths, setLtoTermMonths] = useState(config.leaseToOwn.maxMonths);
+  const [stackConfig] = useState<DiscountStackConfig>(DEFAULT_STACK_CONFIG);
 
   useEffect(() => {
     const stored = localStorage.getItem(CART_STORAGE_KEY);
@@ -155,10 +124,10 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
       try {
         const parsed = JSON.parse(stored);
         const itemsToSet = parsed.items || [];
-        const promoToSet = parsed.promoCode || null;
+        const promoToSet = parsed.appliedDiscountCodes || [];
         setTimeout(() => {
           if (itemsToSet.length > 0) setItems(itemsToSet);
-          if (promoToSet) setPromoCode(promoToSet);
+          if (promoToSet.length > 0) setAppliedDiscountCodes(promoToSet);
           hydrate();
         }, 0);
       } catch (e) {
@@ -172,34 +141,45 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
 
   useEffect(() => {
     if (isHydrated) {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items, promoCode }));
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items, appliedDiscountCodes }));
     }
-  }, [items, promoCode, isHydrated]);
+  }, [items, appliedDiscountCodes, isHydrated]);
 
   const rawSubtotal = useMemo(() => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }, [items]);
 
-  const promoInfo = useMemo(() => {
-    return promoCode ? PROMO_CODES[promoCode] : null;
+  const { appliedDiscounts, totalDiscount, discountedSubtotal } = useMemo(() => {
+    return applyDiscounts(appliedDiscountCodes.filter(Boolean) as string[], rawSubtotal, stackConfig);
+  }, [appliedDiscountCodes, rawSubtotal, stackConfig]);
+
+  const promoCode = appliedDiscountCodes[0] || null;
+
+  const promoInfo = useMemo((): PromoCodeInfo | null => {
+    if (!promoCode || !DISCOUNT_CODES[promoCode]) return null;
+    const discount = DISCOUNT_CODES[promoCode];
+    return {
+      code: promoCode,
+      discountPercent: discount.type === "percentage" ? discount.value * 100 : 0,
+      label: discount.label,
+      message: discount.description,
+      allowsPayment: discount.validPaymentModes as ("full" | "deposit" | "lto")[],
+      isWholesale: !discount.stackable,
+      timeCondition: discount.timeCondition,
+    };
   }, [promoCode]);
 
-  const discountedSubtotal = useMemo(() => {
-    if (!promoInfo) return rawSubtotal;
-    return rawSubtotal * (1 - promoInfo.discountPercent / 100);
-  }, [rawSubtotal, promoInfo]);
-
-  const subtotalWithBase = useMemo(() => {
-    return discountedSubtotal + BASE_BUILD_PRICE;
+  const subtotalWithCharge = useMemo(() => {
+    return discountedSubtotal + BUILD_AND_PRICE + DESTINATION_CHARGE;
   }, [discountedSubtotal]);
 
   const tax = useMemo(() => {
-    return subtotalWithBase * config.taxRate;
-  }, [subtotalWithBase, config.taxRate]);
+    return subtotalWithCharge * config.taxRate;
+  }, [subtotalWithCharge, config.taxRate]);
 
   const grandTotal = useMemo(() => {
-    return subtotalWithBase + tax;
-  }, [subtotalWithBase, tax]);
+    return subtotalWithCharge + tax;
+  }, [subtotalWithCharge, tax]);
 
   const ltoMonthlyPayment = useMemo(() => {
     const leaseCalc = calculateLeaseToOwn({
@@ -243,34 +223,47 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
 
   const clearCart = useCallback(() => {
     setItems([]);
-    setPromoCode(null);
+    setAppliedDiscountCodes([]);
     setPaymentStrategy("full");
   }, []);
 
   const applyPromoCode = useCallback((code: string): { success: boolean; message: string } => {
     const upperCode = code.toUpperCase().trim();
-    const promo = PROMO_CODES[upperCode];
+    const validation = validateDiscountCode(upperCode, config);
     
-    if (!promo) {
-      return { success: false, message: "Invalid promo code. Please try again." };
+    if (!validation.valid || !validation.discount) {
+      return { success: false, message: validation.message || "Invalid promo code. Please try again." };
     }
 
-    setPromoCode(upperCode as PromoCode);
+    const discount = validation.discount;
     
+    if (!stackConfig.allowStacking && appliedDiscountCodes.length > 0) {
+      setAppliedDiscountCodes([upperCode as PromoCode]);
+    } else if (!appliedDiscountCodes.includes(upperCode as PromoCode)) {
+      if (discountedSubtotal > 0) {
+        setAppliedDiscountCodes((prev) => [...prev, upperCode as PromoCode]);
+      } else {
+        setAppliedDiscountCodes([upperCode as PromoCode]);
+      }
+    }
+
     if (upperCode === "OAC") {
       setPaymentStrategy("lto");
-    } else if (promo.allowsPayment.includes("deposit") && !promo.allowsPayment.includes("full")) {
+    } else if (discount.validPaymentModes.includes("deposit")) {
       setPaymentStrategy("deposit");
     } else {
       setPaymentStrategy("full");
     }
 
-    return { success: true, message: promo.message };
-  }, []);
+    return { success: true, message: discount.description };
+  }, [config, stackConfig, appliedDiscountCodes, discountedSubtotal]);
 
-  const removePromoCode = useCallback(() => {
-    setPromoCode(null);
-    setPaymentStrategy("full");
+  const removePromoCode = useCallback((code?: string) => {
+    if (code) {
+      setAppliedDiscountCodes((prev) => prev.filter((c) => c !== code));
+    } else {
+      setAppliedDiscountCodes([]);
+    }
   }, []);
 
   const getPaymentAmount = useCallback(() => {
@@ -290,9 +283,9 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     }
   }, [paymentStrategy, grandTotal, ltoTermMonths, config]);
 
-  const getSubtotalWithBase = useCallback(() => {
-    return subtotalWithBase;
-  }, [subtotalWithBase]);
+  const getSubtotalWithCharge = useCallback(() => {
+    return subtotalWithCharge;
+  }, [subtotalWithCharge]);
 
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
@@ -317,32 +310,30 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   }, []);
 
   const setDiscount = useCallback((options: { code: string; percent: number }) => {
-    const { code, percent } = options;
-    const promoInfo: PromoCodeInfo = {
-      code: code as PromoCode,
-      discountPercent: percent,
-      label: code,
-      message: `${code} applied: ${percent}% discount activated.`,
-      allowsPayment: ["full"],
-      isWholesale: false,
-    };
-    setPromoCode(code as PromoCode);
-  }, []);
+    const { code } = options;
+    const upperCode = code.toUpperCase();
+    if (!appliedDiscountCodes.includes(upperCode as PromoCode)) {
+      setAppliedDiscountCodes((prev) => [...prev, upperCode as PromoCode]);
+    }
+  }, [appliedDiscountCodes]);
 
   const value = useMemo(() => ({
     items,
     isOpen,
     rawSubtotal,
     discountedSubtotal,
-    subtotalWithBase,
+    subtotalWithCharge,
     tax,
     grandTotal,
     itemCount,
     promoCode,
+    appliedDiscounts,
+    totalDiscount,
     promoInfo,
     paymentStrategy,
     ltoTermMonths,
     ltoMonthlyPayment,
+    stackConfig,
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -353,7 +344,7 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     setPaymentStrategy,
     setLtoTermMonths,
     getPaymentAmount,
-    getSubtotalWithBase,
+    getSubtotalWithCharge,
     openCart,
     closeCart,
     getCheckoutMetadata,
@@ -362,15 +353,18 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     isOpen,
     rawSubtotal,
     discountedSubtotal,
-    subtotalWithBase,
+    subtotalWithCharge,
     tax,
     grandTotal,
     itemCount,
     promoCode,
+    appliedDiscounts,
+    totalDiscount,
     promoInfo,
     paymentStrategy,
     ltoTermMonths,
     ltoMonthlyPayment,
+    stackConfig,
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -381,7 +375,7 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     setPaymentStrategy,
     setLtoTermMonths,
     getPaymentAmount,
-    getSubtotalWithBase,
+    getSubtotalWithCharge,
     openCart,
     closeCart,
     getCheckoutMetadata,

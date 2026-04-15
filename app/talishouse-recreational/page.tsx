@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import ProductLayout from "@/components/ProductLayout";
-import { useCart } from "@/context/CartContext";
+import { useCart, DESTINATION_CHARGE, BUILD_AND_PRICE } from "@/context/CartContext";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
 import { getModelsByCategory } from "@/lib/products";
 import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
@@ -58,6 +58,12 @@ export default function TalishouseRecreationalPage() {
       .map((id) => addonsRecord[id]?.name)
       .filter(Boolean);
 
+    const configSummary = {
+      model: selectedModel.name,
+      ...selectedOptions,
+      addons: selectedAddonNames.join(", ")
+    };
+
     addToCart({
       id: `talishouse-recreational-${selectedModel.id}`,
       name: selectedModel.name,
@@ -67,6 +73,7 @@ export default function TalishouseRecreationalPage() {
       addons: selectedAddonNames,
       wholesaleRequested,
       leaseToOwnRequested,
+      metadata: configSummary
     });
     setSuccess(true);
   };
@@ -124,12 +131,40 @@ Perfect for cottages, home offices, or investment properties.`}
           </div>
         </div>
 
-        <p className="text-2xl font-bold text-gray-900">
-          {formatCAD(calculateTotal())}
-        </p>
-        <p className="text-xs text-gray-500">CAD 58.50 per sq.ft. from</p>
+        <div className="mt-8 mb-4 border-b border-gray-100 pb-6">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Initial Estimated Price</p>
+          <div className="space-y-1 mb-3">
+            <p className="text-[11px] font-medium text-gray-400">Build & Price: {formatCAD(BUILD_AND_PRICE)}</p>
+            <p className="text-[11px] font-medium text-gray-400">Destination Charge: {formatCAD(DESTINATION_CHARGE)}</p>
+          </div>
+          <p className="text-3xl font-bold text-gray-900 mb-4">
+            {formatCAD(calculateTotal() + DESTINATION_CHARGE + BUILD_AND_PRICE)}
+          </p>
+          
+          <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-gray-600">Deposit (5% of total)</span>
+              <span className="text-lg font-bold text-black">
+                {formatCAD((calculateTotal() + DESTINATION_CHARGE + BUILD_AND_PRICE) * 0.05)}
+              </span>
+            </div>
+          </div>
+        </div>
 
         <div className="space-y-8">
+          {/* LEASE TO OWN PREVIEW */}
+          <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100/50">
+            <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3">Lease-to-Own Estimate</h3>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-black text-blue-900">
+                {formatCAD(((calculateTotal() + DESTINATION_CHARGE + BUILD_AND_PRICE) * 0.6) / 60)}
+              </span>
+              <span className="text-sm font-medium text-blue-700">/ month</span>
+            </div>
+            <p className="text-[11px] text-blue-600/80 mt-2 leading-relaxed">
+              *Estimated based on 60 months with 50% down payment and 5% admin fee. Subject to OAC.
+            </p>
+          </div>
           <ProductConfigurator
             selectedOptions={selectedOptions}
             onOptionChange={toggleOption}

@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { supabase } from "@/lib/supabase";
 import { formatCAD } from "@/utils/currency";
+import { isAuthorized } from "@/lib/fast-code";
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test";
 
 export default function Transactions() {
+  const router = useRouter();
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
   const [fastCode, setFastCode] = useState("");
   const [splitsAmount, setSplitsAmount] = useState("");
   const [splitsDetails, setSplitsDetails] = useState("");
@@ -16,6 +20,16 @@ export default function Transactions() {
   const [splitsAdditionalInfo, setSplitsAdditionalInfo] = useState("");
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    setAuthorized(isAuthorized());
+  }, []);
+
+  useEffect(() => {
+    if (authorized === false) {
+      router.push("/business-office");
+    }
+  }, [authorized, router]);
 
   const MIN_AMOUNT = 1;
 
@@ -84,10 +98,14 @@ export default function Transactions() {
     await savePayment(amount);
   };
 
+  if (authorized === null) {
+    return null;
+  }
+
   if (paymentSuccess) {
     return (
       <div className="min-h-[70vh] bg-white py-12">
-        <div className="w-full max-w-none px-6 lg:px-[80px]">
+        <div className="max-w-[1400px] mx-auto px-6">
           <div className="mx-auto max-w-md">
             <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] p-8 text-center transition-all duration-300">
               <div className="w-16 h-16 bg-[rgba(52,199,89,0.1)] rounded-full flex items-center justify-center mx-auto mb-6">
@@ -113,7 +131,7 @@ export default function Transactions() {
 
   return (
     <div className="min-h-[70vh] bg-white py-12">
-      <div className="w-full max-w-none px-6 lg:px-[80px]">
+      <div className="max-w-[1400px] mx-auto px-6">
         <div className="mx-auto max-w-2xl">
           <Link 
             href="/business-office" 
@@ -125,27 +143,22 @@ export default function Transactions() {
           <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] overflow-hidden transition-all duration-300">
             <div className="bg-[linear-gradient(135deg,#0070ba,#1546a0)] px-6 py-5 text-white">
               <h1 className="text-xl font-semibold tracking-wide">
-                SPLITS Portal
+                E-commerce Portal
               </h1>
             </div>
 
             <div className="p-6 sm:p-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* LEFT: Info */}
                 <div className="bg-gray-50 rounded-2xl p-6">
-                  <h3 className="font-semibold text-[#1d1d1f] mb-4 tracking-tight">
-                    For SPLITS Transactions
-                  </h3>
-                  <p className="text-3xl font-semibold text-[#0070ba] mb-4">${MIN_AMOUNT.toFixed(2)}</p>
-                  
                   <div className="space-y-4 text-sm text-[#6e6e73]">
-                    <p>
-                      <strong className="text-[#1d1d1f]">SPLITS</strong> facilitates Business Office eCommerce for value added and pass-through revenues.
+                    <p className="leading-relaxed">
+                      E-commerce transaction tracking system with integrated reward attribution and payment handling.
                     </p>
                       
-                    <div className="mb-4">
+                    <div className="py-4">
                       <div className="flex justify-between text-xs text-[#6e6e73] mb-1">
-                        <span>Setup Progress</span>
+                        <span>Form Progress</span>
                         <span>{Math.round(progress)}%</span>
                       </div>
                       <div className="w-full h-2 bg-[rgba(0,0,0,0.08)] rounded-full overflow-hidden">
@@ -155,26 +168,6 @@ export default function Transactions() {
                         />
                       </div>
                     </div>
-
-                    <div className="space-y-3">
-                      <p className="text-sm">
-                        Enter your <b>FAST Code</b> — for transaction attribution
-                      </p>
-
-                      <p className="text-sm">
-                        SPLITS Amount — {formatCAD(Number(splitsAmount) || 0)}
-                      </p>
-
-                      <p className="text-sm">
-                        Add SPLITS Details — for pre-approval clarity
-                      </p>
-                    </div>
-
-                    <div className="bg-[rgba(0,112,186,0.08)] rounded-xl p-4">
-                      <p className="text-[#0070ba] text-xs">
-                        All transactions are processed securely through PayPal
-                      </p>
-                    </div>
                   </div>
                 </div>
 
@@ -183,25 +176,23 @@ export default function Transactions() {
                   <form className="space-y-5">
                     {/* FAST Code */}
                     <div>
-                      <label className="block text-sm font-medium text-[#1d1d1f] mb-2">
+                      <label className="block text-sm font-semibold text-[#1d1d1f] mb-1.5">
                         FAST Code <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         value={fastCode}
                         onChange={(e) => setFastCode(e.target.value.toUpperCase())}
-                        placeholder="e.g. FAST-ABC123"
+                        placeholder="Used to attribute transactions & rewards"
                         className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white text-sm outline-none transition-all duration-200 focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/20"
+                        required
                       />
-                      <p className="text-xs text-[#6e6e73] mt-1">
-                        For transaction attribution
-                      </p>
                     </div>
 
-                    {/* SPLITS Amount */}
+                    {/* SPLITS COST */}
                     <div className="w-full">
-                      <label className="block text-sm text-[#6e6e73] mb-2">
-                        SPLITS Amount (CAD)
+                      <label className="block text-sm font-semibold text-[#1d1d1f] mb-1.5">
+                        SPLITS COST <span className="text-red-500">*</span>
                       </label>
 
                       <div
@@ -218,104 +209,104 @@ export default function Transactions() {
                           value={splitsAmount}
                           onFocus={() => {
                             setFocused(true);
-                            setSplitsAmount("");
                           }}
                           onBlur={() => setFocused(false)}
-                          onChange={(e) => setSplitsAmount(e.target.value.replace(/[^0-9]/g, ""))}
-                          placeholder="Enter amount"
+                          onChange={(e) => setSplitsAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                          placeholder="0.00"
                           className="w-full py-3 pr-4 bg-transparent outline-none text-base"
+                          required
                         />
                       </div>
                     </div>
 
-                    {/* SPLITS Details */}
+                    {/* Discount Code */}
                     <div>
-                      <label className="block text-sm font-medium text-[#1d1d1f] mb-2">
-                        SPLITS Details
+                      <label className="block text-sm font-semibold text-[#1d1d1f] mb-1.5">
+                        Discount Code <span className="text-gray-400 font-normal">(Optional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={splitsAdditionalInfo}
+                        onChange={(e) => setSplitsAdditionalInfo(e.target.value)}
+                        placeholder="Enter discount or promo code"
+                        className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white text-sm outline-none transition-all duration-200 focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/20"
+                      />
+                    </div>
+
+                    {/* SPLITS details */}
+                    <div>
+                      <label className="block text-sm font-semibold text-[#1d1d1f] mb-1.5">
+                        SPLITS details <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         value={splitsDetails}
-                        onChange={(e) => setSplitsDetails(e.target.value)}
-                        placeholder="Enter SPLITS details to simplify pre-approvals..."
-                        rows={3}
+                        onChange={(e) => setSplitsDetails(e.target.value.slice(0, 1000))}
+                        placeholder="Enter transaction details or notes..."
+                        rows={4}
                         className="w-full px-4 py-3 rounded-xl border border-[rgba(0,0,0,0.08)] bg-white text-sm outline-none transition-all duration-200 focus:border-[#0070ba] focus:ring-2 focus:ring-[#0070ba]/20 resize-none"
+                        required
                       />
-                      <p className="text-xs text-[#6e6e73] mt-1">
-                        Optional details for pre-approvals
-                      </p>
+                      <div className="flex justify-between mt-1">
+                        <p className="text-[10px] text-[#6e6e73]">
+                          Briefly detail the project lead source.
+                        </p>
+                        <p className={`text-[10px] ${splitsDetails.length >= 1000 ? "text-red-500" : "text-[#6e6e73]"}`}>
+                          {splitsDetails.length}/1000
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Additional Info Section */}
-                    <div className="mt-6">
-                      <h3 className="text-sm font-semibold text-gray-600 bg-gray-50 px-3 py-2 rounded-xl mb-4">
-                        Additional info
-                      </h3>
-
-                      {/* SPLITS Amounts */}
-                      <div className="mb-4">
-                        <label className="block text-sm text-gray-700 mb-1">
-                          Please enter SPLITS Amounts, if applicable{" "}
-                          <span className="text-gray-400">(Optional)</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={splitsAdditionalAmounts}
-                          onChange={(e) => setSplitsAdditionalAmounts(e.target.value)}
-                          className="w-full border border-[#d2d2d7] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0070ba]/20"
-                        />
-                      </div>
-
-                      {/* SPLITS Info */}
-                      <div className="mb-4">
-                        <label className="block text-sm text-gray-700 mb-1">
-                          Please detail SPLITS Information, if applicable{" "}
-                          <span className="text-gray-400">(Optional)</span>
-                        </label>
-                        <input
-                          type="text"
-                          value={splitsAdditionalInfo}
-                          onChange={(e) => setSplitsAdditionalInfo(e.target.value)}
-                          className="w-full border border-[#d2d2d7] rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0070ba]/20"
-                        />
+                    <div className="pt-4 border-t border-[rgba(0,0,0,0.06)]">
+                      <p className="text-xs font-medium text-[#1d1d1f] mb-3 text-center">
+                        Submit Transaction
+                      </p>
+                      {/* PayPal Button Container */}
+                      <div className="relative z-10">
+                        <PayPalScriptProvider
+                          options={{
+                            clientId: PAYPAL_CLIENT_ID,
+                            currency: "CAD",
+                          }}
+                        >
+                          <PayPalButtons
+                            style={{ layout: "horizontal", color: "blue", shape: "rect", label: "pay" }}
+                            createOrder={(_, actions) => {
+                              const amount = getPaymentAmount();
+                              return actions.order.create({
+                                intent: "CAPTURE",
+                                purchase_units: [
+                                  {
+                                    amount: {
+                                      currency_code: "CAD",
+                                      value: amount.toFixed(2),
+                                    },
+                                  },
+                                ],
+                              });
+                            }}
+                            onApprove={handlePayPalApprove}
+                            onError={() => {
+                              alert("Payment failed. Please try again.");
+                            }}
+                            onClick={(data, actions) => {
+                              if (!fastCode.trim()) {
+                                alert("Please enter FAST code");
+                                return actions.reject();
+                              }
+                              if (!splitsAmount) {
+                                alert("Please enter transaction amount");
+                                return actions.reject();
+                              }
+                              if (!splitsDetails.trim()) {
+                                alert("Please enter details");
+                                return actions.reject();
+                              }
+                            }}
+                          />
+                        </PayPalScriptProvider>
                       </div>
                     </div>
                   </form>
-
-                  {/* PayPal Button */}
-                  <PayPalScriptProvider
-                    options={{
-                      clientId: PAYPAL_CLIENT_ID,
-                      currency: "CAD",
-                    }}
-                  >
-                    <PayPalButtons
-                      style={{ layout: "horizontal", color: "blue", shape: "rect", label: "pay" }}
-                      createOrder={(_, actions) => {
-                        const amount = getPaymentAmount();
-                        console.log("SPLITS PAYPAL CREATE ORDER AMOUNT:", amount);
-                        return actions.order.create({
-                          intent: "CAPTURE",
-                          purchase_units: [
-                            {
-                              amount: {
-                                currency_code: "CAD",
-                                value: amount.toFixed(2),
-                              },
-                            },
-                          ],
-                        });
-                      }}
-                      onApprove={handlePayPalApprove}
-                      onError={() => {
-                        alert("Payment failed. Please try again.");
-                      }}
-                      onClick={() => {
-                        if (!fastCode.trim()) {
-                          alert("Please enter your FAST Code");
-                        }
-                      }}
-                    />
-                  </PayPalScriptProvider>
                 </div>
               </div>
             </div>

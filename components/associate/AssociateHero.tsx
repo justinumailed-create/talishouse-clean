@@ -30,7 +30,7 @@ const defaultConfig: PageConfig = {
   heroContent: "",
   headline: "TALISHOUSE™ HOMES",
   subtext: "",
-  ctaText: "Propose a Project",
+  ctaText: "Refer a Project",
   showForm: false,
   showVideo: false,
   videoUrl: ""
@@ -135,7 +135,7 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
       <Header />
       
       <div className="flex-1 w-full">
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="max-w-[1400px] mx-auto px-6 py-10">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
 
             <div className="flex flex-col self-stretch min-h-0 gap-4">
@@ -172,7 +172,7 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
                     className="block w-full text-center text-sm font-medium text-white bg-black hover:bg-[#2b2b2b] rounded-lg px-4 py-3 transition-colors"
                     style={{ backgroundColor: '#000000', color: '#ffffff' }}
                   >
-                    {config.ctaText || "Propose a Project"}
+                    {config.ctaText || "Refer a Project"}
                   </Link>
                 </div>
               </div>

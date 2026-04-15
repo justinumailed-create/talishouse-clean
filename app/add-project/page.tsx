@@ -72,8 +72,13 @@ export default function AddProjectPage() {
       <div className="mx-auto max-w-md px-4 w-full">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
-            JOIN US
+            PROPOSE A PROJECT
           </h1>
+          <p className="text-sm text-gray-500 mt-4">
+            Tell us about your project and we'll help you bring it to life.
+            <br />
+            Our team will review your request and guide you through the next steps.
+          </p>
         </div>
 
         <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)] w-full max-w-full">
