@@ -10,47 +10,25 @@ export interface Addon {
 
 export const ADDONS: Addon[] = [
   {
-    id: "glasshouse-deck-8x20",
-    name: "Deck Platform",
-    description: "8' x 20' deck platform for Glasshouse™ units.",
-    price: 9995,
-    sizes: [
-      { size: "8x20", price: 9995 },
-      { size: "10x20", price: 11995 },
-    ],
-    compatibleWith: ["glasshouse-200"],
+    id: "gable_roof",
+    name: "Gable Roof",
+    price: 14950,
+    description: "Recommended for all Talishouse™ models (TH) placed on permanent foundations: screw piles, piers and slabs. The price reflects price per unit (TH 800 = 1; TH 1,600 = 2; TH 2,400 = 3; TH 3200 = 4).",
+    compatibleWith: ["glasshouse-200", "talishouse-400", "talishouse-800"],
   },
   {
-    id: "glasshouse-mobile-platform-8x20",
-    name: "Mobile Platform",
-    description: "8' x 20' mobile platform for Glasshouse™ units.",
-    price: 19995,
-    sizes: [
-      { size: "8x20", price: 19995 },
-      { size: "10x20", price: 24995 },
-    ],
-    compatibleWith: ["glasshouse-200"],
+    id: "roof_top_patio",
+    name: "Roof Top Patio",
+    price: 14950,
+    description: "Roof Top Patio's are available for Talishouse™ 400 modules, permanent placement only (stairs must be anchored to ensure long term safety).",
+    compatibleWith: ["glasshouse-200", "talishouse-400", "talishouse-800"],
   },
   {
-    id: "glasshouse-pergola-8x20",
-    name: "Pergola",
-    description: "8' x 20' pergola for outdoor coverage.",
-    price: 14995,
-    compatibleWith: ["glasshouse-200"],
-  },
-  {
-    id: "talishouse-400-pergola",
-    name: "Pergola / Veranda",
-    description: "Stylish covered outdoor area perfect for relaxation and entertaining.",
-    price: 14450,
-    compatibleWith: ["talishouse-400", "talishouse-800"],
-  },
-  {
-    id: "talishouse-400-roofing",
-    name: "Roofing Upgrade",
-    description: "Premium roofing options for enhanced aesthetics and durability.",
-    price: 8950,
-    compatibleWith: ["talishouse-400", "talishouse-800"],
+    id: "deck_veranda",
+    name: "Deck or Veranda",
+    price: 9950,
+    description: "Decks and Verandas are 8' x 20' or 10' x 20' in size, depending upon the product they complement. Typically they require their own foundations.",
+    compatibleWith: ["glasshouse-200", "talishouse-400", "talishouse-800"],
   },
   {
     id: "talishouse-residential-platform",
@@ -93,6 +71,20 @@ export const ADDONS: Addon[] = [
     description: "Professional layout planning services for optimal community design.",
     price: 15000,
     compatibleWith: ["talistowns"],
+  },
+  {
+    id: "mobile_platform_20",
+    name: "20 ft. Mobile Platform",
+    price: 14950,
+    description: "The 20 ft. mobile platform is matched to the Talishouse™ 400 product to maintain its ability to be placed anywhere without necessarily requiring Building Permits.",
+    compatibleWith: ["talishouse-400"],
+  },
+  {
+    id: "mobile_platform_40",
+    name: "40 ft. Mobile Platform",
+    price: 19950,
+    description: "The 40 ft. mobile platform is matched to the Talishouse™ 800 product to maintain its ability to be placed anywhere without necessarily requiring Building Permits.",
+    compatibleWith: ["talishouse-800"],
   },
 ];
 

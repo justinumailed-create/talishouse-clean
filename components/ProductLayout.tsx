@@ -8,7 +8,6 @@ interface ProductLayoutProps {
   productName: string;
   productImage: string;
   productSize?: string;
-  familyDescription?: string;
   aboutContent: string;
   children: ReactNode;
 }
@@ -24,7 +23,6 @@ export default function ProductLayout({
   productName,
   productImage,
   productSize,
-  familyDescription,
   aboutContent,
   children,
 }: ProductLayoutProps) {
@@ -58,13 +56,13 @@ export default function ProductLayout({
     <div className="max-w-[1400px] mx-auto px-6 py-8">
       <div className="grid grid-cols-12 gap-10 lg:gap-12 items-start">
         <div className="col-span-12 lg:col-span-7 space-y-8">
-          <div className="w-full aspect-video bg-white relative overflow-hidden rounded-xl border border-gray-100 shadow-sm">
+          <div className="w-full aspect-video relative overflow-hidden rounded-xl border border-gray-100 shadow-sm">
             {displayImage ? (
               <Image
                 src={displayImage}
                 alt={productName}
                 fill
-                className="object-contain"
+                className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 60vw"
                 priority
               />
@@ -78,12 +76,6 @@ export default function ProductLayout({
           <div className="p-6 bg-white border border-gray-100 rounded-xl shadow-sm">
             <h2 className="text-lg font-semibold mb-4 text-gray-900">About {productName}</h2>
             
-            {familyDescription && (
-              <div className="product-family-description mb-5 text-sm text-gray-600 leading-relaxed">
-                {familyDescription}
-              </div>
-            )}
-
             <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
               {aboutContent}
             </p>
@@ -96,13 +88,6 @@ export default function ProductLayout({
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .product-family-description {
-          border-bottom: 1px solid #f0f0f0;
-          padding-bottom: 1.25rem;
-        }
-      `}</style>
     </div>
   );
 }

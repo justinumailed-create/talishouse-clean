@@ -78,13 +78,16 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
                     FEATURES
                   </p>
                   <p className="fade-line delay-1 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
-                    From CAD $59/sq.ft.
+                    From CAD $62.50/sq.ft.
                   </p>
                   <p className="fade-line delay-2 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
-                    Up in a day, move-in ready in a week
+                    Up in a day, finished in a week
                   </p>
                   <p className="fade-line delay-3 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
-                    Lease-To-Own, OAC
+                    Retail and Wholesale Terms available
+                  </p>
+                  <p className="fade-line delay-3 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
+                    Lease-To-Own, OAC.
                   </p>
                 </div>
 
@@ -111,11 +114,15 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
               className="w-full h-full object-cover"
               playsInline
               controls={false}
+              onClick={toggleVideo}
               onTouchStart={toggleVideo}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onEnded={() => setIsPlaying(false)}
             />
             <div
               onClick={toggleVideo}
-              className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 ease-out"
+              className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isPlaying ? "opacity-0 pointer-events-none" : "opacity-100"}`}
             >
               <div className="
                 w-16 h-16
@@ -125,8 +132,8 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
                 border border-white/40
                 flex items-center justify-center
                 transition-all duration-300 ease-out
-                group-hover:scale-110
-                group-hover:bg-white/40
+                hover:scale-110
+                hover:bg-white/40
                 shadow-[0_10px_40px_rgba(0,0,0,0.08)]
               ">
                 {isPlaying ? (

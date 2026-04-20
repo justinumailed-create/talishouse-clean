@@ -18,7 +18,7 @@ export default function Footer() {
             />
           </Link>
           <p className="text-[15px] leading-relaxed text-neutral-600 max-w-sm">
-            Glasshouse™ and Talishouse™ Homes & Cottages from 160 sq. ft. to 3,200 sq. ft.. Modular. From $58.50 per sq. ft.. Up in a day, move in ready in a week. Lease-To-Own available, OAC.
+            Glasshouse™ 160 and 200, Talishouse™ 400 and 800, and Talishouse™ 1,600 plus. Modular. From $62.50 per sq. ft.. Up in a day, finished in a week. Lease-To-Own available, OAC.
           </p>
         </div>
 

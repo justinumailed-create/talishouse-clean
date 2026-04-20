@@ -52,8 +52,9 @@ export type PromoCode =
 
 export type PaymentStrategy = "full" | "deposit" | "lto";
 
-export const DESTINATION_CHARGE = 8995;
-export const BUILD_AND_PRICE = 8500;
+export const SHIPPING_CLEARANCE = 10000;
+export const BUILD_AND_PRICE = 1950;
+export const TAX_RATE = 0.14;
 
 export interface PromoCodeInfo {
   code: PromoCode;
@@ -170,12 +171,12 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   }, [promoCode]);
 
   const subtotalWithCharge = useMemo(() => {
-    return discountedSubtotal + BUILD_AND_PRICE + DESTINATION_CHARGE;
+    return discountedSubtotal + BUILD_AND_PRICE + SHIPPING_CLEARANCE;
   }, [discountedSubtotal]);
 
   const tax = useMemo(() => {
-    return subtotalWithCharge * config.taxRate;
-  }, [subtotalWithCharge, config.taxRate]);
+    return subtotalWithCharge * TAX_RATE;
+  }, [subtotalWithCharge]);
 
   const grandTotal = useMemo(() => {
     return subtotalWithCharge + tax;

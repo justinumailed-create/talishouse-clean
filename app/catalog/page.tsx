@@ -1,13 +1,12 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { formatCAD } from "@/utils/currency";
 
 const categories = [
-  { name: "Glasshouse™", href: "/glasshouse", image: "/images/glasshouse/hero.png" },
-  { name: "Talishouse™ Recreational", href: "/talishouse-recreational", image: "/images/talishouse-400.png" },
-  { name: "Talishouse™ Residential", href: "/talishouse-residential", image: "/images/talishouse/residential/hero.jpg" },
-  { name: "TalisTowns™", href: "/talistowns", image: "/images/talistowns.jpg" },
+  { name: "Glasshouse™ 160 and 200", href: "/glasshouse", image: "/images/glasshouse/hero.png" },
+  { name: "Talishouse™ 400 and 800", href: "/talishouse-recreational", image: "/images/talishouse-400.png" },
+  { name: "Talishouse™ 1,600 plus", href: "/talishouse-residential", image: "/images/talishouse/residential/hero.jpg" },
+  { name: "Talistowns™", href: "/talistowns", image: "/images/talistowns.jpg" },
 ];
 
 export default function CatalogPage() {
@@ -20,43 +19,17 @@ export default function CatalogPage() {
           </div>
         </section>
 
-        <section className="pb-12">
-          <div className="bg-white rounded-[2.5rem] p-8 md:p-14 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 relative overflow-hidden group hover:shadow-[0_30px_60px_rgba(0,0,0,0.06)] transition-all duration-700">
-            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-gray-50/40 to-transparent pointer-events-none" />
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-gray-50/50 rounded-full blur-3xl pointer-events-none" />
-            
-            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-10 md:gap-0">
-              <div className="md:flex-[0_0_80%] min-w-0 md:pr-16 space-y-5 text-left">
-                <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight break-words">Destination Charge</h2>
-                <p className="text-gray-400 text-sm italic">
-                  It is a mandatory, non-negotiable fee added to the price of each sea-can container to cover the cost of transporting product from the manufacturer&apos;s assembly plant to the port of entry in Canada. This amount assumes one unit. Custom Clearance extra.
-                </p>
-              </div>
-
-              <div className="md:flex-[0_0_20%] min-w-0 flex-shrink-0">
-                <div className="flex flex-col items-start md:items-end justify-center w-full border-t md:border-t-0 md:border-l border-gray-100 pt-8 md:pt-0 md:pl-12">
-                  <div className="space-y-1 text-left md:text-right w-full">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] whitespace-nowrap">
-                      CAD <span className="text-gray-900 text-sm font-black tracking-normal ml-1">8,995</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         <section className="pb-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {categories.map((cat) => (
               <Link key={cat.name} href={cat.href}>
                 <div className="group bg-white border rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300">
-                  <div className="relative w-full aspect-video overflow-hidden rounded-t-xl bg-white">
+                  <div className="relative w-full aspect-video overflow-hidden rounded-t-xl">
                     <Image
                       src={cat.image}
                       alt={cat.name}
                       fill
-                      className="object-contain transition-transform duration-500 group-hover:scale-105"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   </div>
                   <div className="p-4">

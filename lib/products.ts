@@ -84,12 +84,11 @@ export const glasshouseFamily: ProductFamily = {
   name: "Glasshouse™",
   slug: "glasshouse",
   image: IMAGES['glasshouse'],
-  gridDescription: `Glasshouse™ : The quick start option:
-- Up to five units shipped together with up to five optional deck platforms in one sea-can container.
-- Size and appearance: 10 x 20 ft. each, one, two or three sides glass.
-- Most commonly arranged L-shaped, U-shaped or parallel.
-- Most suitable as "VIEW" cottages, for own use, or in short term rental applications.
-- Retail, Wholesale and Lease-To-Own purchasing terms.`,
+  gridDescription: `160 sq.ft & 200 sq.ft., one, two or three sides glass.  
+Open concept, three season rated.  
+Permanent installation only, deck or pergola optional.  
+Up in a day, finished in a week.  
+Characterization: it is finished open space. Dividing walls, amenities and furniture are added to taste after completion.`,
   models: ["glasshouse-200"],
 };
 
@@ -113,7 +112,7 @@ Great as short-term rental cottages with a view or home offices.`,
       "Flooring Colour": ["Light Oak", "Dark Walnut"],
       "Siding Options": ["Color Code Options", "Monochrome / Single Color"],
     },
-    addons: ["glasshouse-deck", "glasshouse-glass-upgrade", "glasshouse-climate"],
+    addons: ["gable_roof", "roof_top_patio", "deck_veranda"],
   },
 ];
 
@@ -122,11 +121,11 @@ export const talishouseFamily: ProductFamily = {
   name: "Talishouse™",
   slug: "talishouse",
   image: IMAGES['talishouse-400'],
-  gridDescription: `Talishouse™ : The flexible modular home system:
-- 21' x 20' steel structures assembled in one day and move-in ready in one week.
-- Two bedrooms, one bath, open concept living-dining-kitchen.
-- Scalable from single units to multi-unit developments.
-- Retail, Wholesale and Lease-To-Own purchasing terms.`,
+  gridDescription: `400 - 800 sq.ft.. Permanent or mobile installation (on wheeled platforms. Mobile installation may negate the need for Building Permits in many Canadian jurisdictions).  
+Up in a day, finished in a week.  
+Characterization: it includes an efficiency kitchen and four-piece bath, however, the number of bedrooms is size dependent.  
+Open concept kitchen - living - dining areas.  
+Furniture is added to taste after completion.`,
   models: ["talishouse-400", "talishouse-residential"],
 };
 
@@ -150,7 +149,28 @@ Two bedrooms, one bath, open concept living-dining-kitchen.`,
       "Flooring Colour": ["Light Oak", "Dark Walnut"],
       "Siding Options": ["Color Code Options", "Monochrome / Single Color"],
     },
-    addons: ["talishouse-400-pergola", "talishouse-400-roofing", "talishouse-400-interior"],
+    addons: ["gable_roof", "roof_top_patio", "deck_veranda", "mobile_platform_20"],
+  },
+  {
+    id: "talishouse-800",
+    name: "Talishouse™ 800",
+    category: "talishouse-800",
+    price: 79995,
+    image: IMAGES['talishouse-400'],
+    description: `Description:
+Double module steel structures assembled in one day.
+Four bedrooms, two baths, expanded living areas.`,
+    options: {
+      "Roofing, Gutter & Windows Colour": [
+        "Dark / Dark / Dark",
+        "Bright / White / White",
+      ],
+      "Kitchen Style": ["KC01", "KC02", "KC03", "KC04", "KC05", "KC06"],
+      "Bath Style": ["TL01", "TL02", "TL03", "TL04", "TL05", "TL06"],
+      "Flooring Colour": ["Light Oak", "Dark Walnut"],
+      "Siding Options": ["Color Code Options", "Monochrome / Single Color"],
+    },
+    addons: ["gable_roof", "roof_top_patio", "deck_veranda", "mobile_platform_40"],
   },
   {
     id: "talishouse-residential",
@@ -182,31 +202,27 @@ Two bedrooms, one bath, open concept living-dining-kitchen with extra space.`,
 
 export const talistownsFamily: ProductFamily = {
   id: "talistowns",
-  name: "TalisTowns™",
+  name: "Talistowns™",
   slug: "talistowns",
   image: IMAGES['talistowns'],
-  gridDescription: `TalisTowns™ : Moonlighting made easy:
-- Seen here: 20 units in 10 structures, high rise gable roofs added locally.
-- Units are 21x20 in size, two bedrooms, one bath, open concept living - dining - kitchen.
-
-Intended for:
-- Residential use: $1,000 per month at 100% occupancy = $240,000 per year gross.
-- Short term rental: $200 per night at 70% occupancy = $715,400 per year gross.
-
-- Retail, Wholesale and Lease-To-Own purchasing terms.`,
+  gridDescription: `Talistowns™ consist of Talishouse™ 400 modules, two units under one roof. Permanent or mobile installation. Gable roofs are an extra charge option.
+- A 12 months short-term rental season at $200 per night and 70% occupancy generates $51,100 in revenue per unit per year.
+- A 12 months long-term rental season at $2,000 per month and 100% occupancy generates $24,000 in revenue per unit per year.
+Conclusion: Talistowns™ are a great way to "moonlight" towards lifestyle goals and financial independence…!`,
   models: ["talistowns"],
 };
 
 export const talistownsModels: ProductModel[] = [
   {
     id: "talistowns",
-    name: "TalisTowns™",
+    name: "Talistowns™",
     category: "talistowns",
-    price: 39950,
-    image: IMAGES['talistowns'],
-    description: `Description:
-TalisTowns™ community development system using multiple Talishouse™ 400 units.
-Scalable from single structures to complete communities.`,
+    price: 0,
+    image: "/images/talistowns.jpg",
+    description: `Talistowns™ consist of Talishouse™ 400 modules, two units under one roof. Permanent or mobile installation. Gable roofs are an extra charge option.
+- A 12 months short-term rental season at $200 per night and 70% occupancy generates $51,100 in revenue per unit per year.
+- A 12 months long-term rental season at $2,000 per month and 100% occupancy generates $24,000 in revenue per unit per year.
+Conclusion: Talistowns™ are a great way to "moonlight" towards lifestyle goals and financial independence…!`,
     addons: ["talistowns-bulk", "talistowns-infrastructure", "talistowns-planning"],
   },
 ];

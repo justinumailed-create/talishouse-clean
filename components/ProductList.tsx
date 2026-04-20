@@ -50,13 +50,13 @@ export default function ProductList() {
             href={`/catalog?product=${product.id}`}
             className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition-all duration-500"
           >
-            <div className="aspect-video relative bg-white overflow-hidden">
+            <div className="aspect-video relative overflow-hidden">
               {product.image_url ? (
                 <Image
                   src={product.image_url}
                   alt={product.name}
                   fill
-                  className="object-contain transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">

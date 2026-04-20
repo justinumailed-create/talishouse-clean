@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { useCart, DESTINATION_CHARGE, BUILD_AND_PRICE } from "@/context/CartContext";
+import { useCart, SHIPPING_CLEARANCE, BUILD_AND_PRICE } from "@/context/CartContext";
 import ProductLayout from "@/components/ProductLayout";
 import { ProductConfigurator } from "@/components/ProductConfigurator";
 import { getModelsByCategory, getDefaultModel, type CategoryModel } from "@/lib/products";
@@ -12,28 +12,26 @@ import { formatCAD } from "@/utils/currency";
 
 const CATEGORY_CONFIG = {
   recreational: {
-    name: "Talishouse™ Recreational",
+    name: "Talishouse™ 400 and 800",
     slug: "400",
     image: "/images/talishouse-400.svg",
     size: "talishouse-400",
-    description: `Talishouse™ Recreational : The flexible modular home system:
-- 21' x 20' steel structures assembled in one day and move-in ready in one week.
-- Two bedrooms, one bath, open concept living-dining-kitchen.
-- Scalable from single units to multi-unit developments.
-- Retail, Wholesale and Lease-To-Own purchasing terms.`,
+    description: `400 - 800 sq.ft.. Permanent or mobile installation (on wheeled platforms. Mobile installation may negate the need for Building Permits in many Canadian jurisdictions).  
+Up in a day, finished in a week.  
+Characterization: it includes an efficiency kitchen and four-piece bath, however, the number of bedrooms is size dependent.  
+Open concept kitchen - living - dining areas.  
+Furniture is added to taste after completion.`,
     productId: "talishouse-400",
   },
   residential: {
-    name: "Talishouse™ Residential",
+    name: "Talishouse™ 1,600 - 2,400 - 3,200",
     slug: "residential",
     image: "/images/talishouse/residential/hero.png",
     size: "talishouse-residential",
-    description: `Talishouse™ Residential : Scalable living solutions:
-- Multi-unit residential developments
-- 21' x 20' steel structures assembled in one day
-- Two bedrooms, one bath, open concept living-dining-kitchen
-- From single units to complete communities
-- Retail, Wholesale and Lease-To-Own purchasing terms.`,
+    description: `1,600 - 2,400 - 3200 sq.ft.. Permanent installation only (on screw piles, piers or slabs). Three bedrooms, two baths standard. Open concept kitchen - living - dining areas. Module arrangement: parallel, off-set parallel or L-shaped. Up in a week, finished in a month.  
+Characterization: it includes an efficiency kitchen and four-piece bath, however, the number of bedrooms is size dependent.  
+Open concept kitchen - living - dining areas.  
+Furniture is added to taste after completion.`,
     productId: "talishouse-residential",
   },
 };
@@ -135,8 +133,7 @@ function TalishouseContent() {
       productName={config.name}
       productImage={config.image}
       productSize={config.size}
-      familyDescription={config.description}
-      aboutContent={`${selectedModel?.name || 'Product'}: ${config.description.split(':')[1]?.split('.')[0] || 'Modern modular living solution'}`}
+      aboutContent={config.description}
       >
         <h1 className="text-2xl font-semibold text-gray-900">
           {selectedModel?.name || 'Select a Model'}
@@ -171,17 +168,17 @@ function TalishouseContent() {
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Initial Estimated Price</p>
           <div className="space-y-1 mb-3">
             <p className="text-[11px] font-medium text-gray-400">Build & Price: {formatCAD(BUILD_AND_PRICE)}</p>
-            <p className="text-[11px] font-medium text-gray-400">Destination Charge: {formatCAD(DESTINATION_CHARGE)}</p>
+            <p className="text-[11px] font-medium text-gray-400">Shipping & Custom Clearance: {formatCAD(SHIPPING_CLEARANCE)}</p>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-4">
-            {formatCAD(calculateTotal() + DESTINATION_CHARGE + BUILD_AND_PRICE)}
+            {formatCAD(calculateTotal() + SHIPPING_CLEARANCE + BUILD_AND_PRICE)}
           </p>
           
           <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-gray-600">Deposit (5% of total)</span>
               <span className="text-lg font-bold text-black">
-                {formatCAD((calculateTotal() + DESTINATION_CHARGE + BUILD_AND_PRICE) * 0.05)}
+                {formatCAD((calculateTotal() + SHIPPING_CLEARANCE + BUILD_AND_PRICE) * 0.05)}
               </span>
             </div>
           </div>
@@ -193,7 +190,7 @@ function TalishouseContent() {
             <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3">Lease-to-Own Estimate</h3>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-black text-blue-900">
-                {formatCAD(((calculateTotal() + DESTINATION_CHARGE + BUILD_AND_PRICE) * 0.6) / 60)}
+                {formatCAD(((calculateTotal() + SHIPPING_CLEARANCE + BUILD_AND_PRICE) * 0.6) / 60)}
               </span>
               <span className="text-sm font-medium text-blue-700">/ month</span>
             </div>

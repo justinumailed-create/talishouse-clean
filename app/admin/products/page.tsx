@@ -13,12 +13,9 @@ const VALID_PRODUCT_IDS = [
 ];
 
 const PRODUCT_NAMES: Record<string, string> = {
-  "glasshouse-160": "Glasshouse™ 160",
+"glasshouse-160": "Glasshouse™ 160",
   "glasshouse-200": "Glasshouse™ 200",
-  "talishouse-400": "Talishouse™ 400",
-  "talishouse-800": "Talishouse™ 800",
-  "talishouse-1600": "2x Talishouse™ 800",
-  "talistowns": "TalisTowns™ Bundle",
+  "talistowns": "Talistowns™ Bundle",
 };
 
 export default function ProductsPage() {

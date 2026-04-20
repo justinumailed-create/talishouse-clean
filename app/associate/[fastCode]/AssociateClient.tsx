@@ -276,7 +276,7 @@ export default function AssociateClient({
                 { name: "Glasshouse", desc: "Modern glass enclosed spaces", href: "/glasshouse" },
                 { name: "Talishouse 400", desc: "Premium residential units", href: "/talishouse" },
                 { name: "Talishouse Residential", desc: "Full-size family homes", href: "/talishouse" },
-                { name: "TalisTowns", desc: "Community living solutions", href: "/talistowns" },
+                { name: "Talistowns", desc: "Community living solutions", href: "/talistowns" },
               ].map((product) => (
                 <Link
                   key={product.name}

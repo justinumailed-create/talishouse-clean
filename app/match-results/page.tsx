@@ -67,7 +67,7 @@ export default function MatchResultsPage() {
   const homeTypeLabels: Record<string, string> = {
     glasshouse: "Glasshouse",
     talishouse_residential: "Talishouse Residential",
-    talistowns: "TalisTowns",
+    talistowns: "Talistowns",
     not_sure: "Open to Recommendations"
   };
 

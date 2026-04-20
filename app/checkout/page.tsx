@@ -3,7 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useCart, DESTINATION_CHARGE, BUILD_AND_PRICE } from "@/context/CartContext";
+import { useCart } from "@/context/CartContext";
+
+const CHECKOUT_BUILD_AND_PRICE = 1950;
+const CHECKOUT_SHIPPING_CLEARANCE = 10000;
+const CHECKOUT_TAX_RATE = 0.14;
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { supabase } from "@/lib/supabase";
 import { syncTransactionToSplits } from "@/lib/splits";
@@ -373,13 +377,13 @@ export default function CheckoutPage() {
                 )}
                 
                 <div className="flex justify-between pt-2 border-t border-gray-50">
-                  <span className="text-[#1d1d1f] font-medium">Build & Price (Shipping Setup)</span>
-                  <span className="text-[#1d1d1f]">CAD ${BUILD_AND_PRICE.toLocaleString()}</span>
+                  <span className="text-[#1d1d1f] font-medium">Build & Price</span>
+                  <span className="text-[#1d1d1f]">CAD ${CHECKOUT_BUILD_AND_PRICE.toLocaleString()}</span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span className="text-[#1d1d1f] font-medium">Destination Charge (Delivery to Canada)</span>
-                  <span className="text-[#1d1d1f]">CAD ${DESTINATION_CHARGE.toLocaleString()}</span>
+                  <span className="text-[#1d1d1f] font-medium">Shipping & Custom Clearance</span>
+                  <span className="text-[#1d1d1f]">CAD ${CHECKOUT_SHIPPING_CLEARANCE.toLocaleString()}</span>
                 </div>
                 
                 <div className="flex justify-between pt-2 border-t border-gray-50">

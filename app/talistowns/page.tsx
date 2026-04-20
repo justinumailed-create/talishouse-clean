@@ -2,196 +2,130 @@
 
 import { useState } from "react";
 import ProductLayout from "@/components/ProductLayout";
-import { SelectionCard } from "@/components/ui/SelectionCard";
-import {
-  talistownsFamily,
-  talistownsModels,
-} from "@/lib/products";
-import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
 import { productFamilies } from "@/lib/productFamilies";
-import { useCart } from "@/context/CartContext";
-import SuccessToast from "@/components/SuccessToast";
-import { formatCAD } from "@/utils/currency";
+import { useRouter } from "next/navigation";
+import { useAssociate } from "@/context/AssociateContext";
 
 export default function TalistownsPage() {
-  const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
-  const [wholesaleRequested, setWholesaleRequested] = useState(false);
-  const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const { addToCart } = useCart();
+  const router = useRouter();
+  const { fastCode } = useAssociate();
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const model = talistownsModels[0];
+  const talistownsFamily = productFamilies?.talistowns;
 
-  const bundlePrice = 2 * 39950 + 8950;
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
 
-  const toggleAddon = (addonId: string) => {
-    setSelectedAddons((prev) => ({ ...prev, [addonId]: !prev[addonId] }));
+    const formData = new FormData(e.currentTarget);
+    const payload = {
+      name: formData.get("name"),
+      phone: formData.get("phone"),
+      email: formData.get("email"),
+      message: formData.get("message"),
+      source: "talistowns-inquiry",
+      fast_code: fastCode || "DIRECT",
+      created_at: new Date().toISOString(),
+    };
+
+    try {
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const getAddonPrice = (addonId: string): number => {
-    const addon = addonsRecord[addonId];
-    return addon ? addon.price : 0;
-  };
-
-  const calculateTotal = (): number => {
-    let total = bundlePrice;
-    Object.keys(selectedAddons).forEach((addonId) => {
-      if (selectedAddons[addonId]) {
-        total += getAddonPrice(addonId);
-      }
-    });
-    return total;
-  };
-
-  const handleAddToCart = () => {
-    const total = calculateTotal();
-    const selectedAddonNames = Object.keys(selectedAddons)
-      .filter((id) => selectedAddons[id])
-      .map((id) => addonsRecord[id]?.name)
-      .filter(Boolean);
-
-    addToCart({
-      id: `talistowns-${Object.entries(selectedAddons).filter(([,v]) => v).map(([k]) => k).join("-")}`,
-      name: `${talistownsFamily?.name || productFamilies?.talistowns?.name || "TalisTowns™"} Bundle`,
-      price: total,
-      image: talistownsFamily?.image || productFamilies?.talistowns?.image || "/images/talistowns.jpg",
-      options: {},
-      addons: selectedAddonNames,
-      wholesaleRequested,
-      leaseToOwnRequested,
-    });
-    setSuccess(true);
-  };
-
-  const productAddons = getAddonsForProduct("talistowns");
 
   return (
     <>
-      <SuccessToast
-        show={success}
-        message="Quote requested successfully"
-        onClose={() => setSuccess(false)}
-      />
       <ProductLayout
-        productName={talistownsFamily?.name || productFamilies?.talistowns?.name || "TalisTowns™"}
-        productImage={talistownsFamily?.image || productFamilies?.talistowns?.image || ""}
+        productName={talistownsFamily?.name || "Talistowns™"}
+        productImage={talistownsFamily?.image || ""}
         productSize="talistowns"
-        familyDescription={
-          talistownsFamily?.gridDescription ||
-          productFamilies?.talistowns?.gridDescription ||
-          "Community development system using multiple Talishouse™ units."
-        }
         aboutContent={
           talistownsFamily?.gridDescription ||
-          productFamilies?.talistowns?.gridDescription ||
-          "Scalable from single structures to complete communities."
+          `Talistowns™ consist of Talishouse™ 400 modules, two units under one roof. Permanent or mobile installation. Gable roofs are an extra charge option.
+- A 12 months short-term rental season at $200 per night and 70% occupancy generates $51,100 in revenue per unit per year.
+- A 12 months long-term rental season at $2,000 per month and 100% occupancy generates $24,000 in revenue per unit per year.
+Conclusion: Talistowns™ are a great way to "moonlight" towards lifestyle goals and financial independence…!`
         }
       >
         <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {talistownsFamily?.name || productFamilies?.talistowns?.name || "TalisTowns™"} Bundle
-        </h1>
+          <h1 className="text-2xl font-semibold text-gray-900">
+            {talistownsFamily?.name || "Talistowns™"} Bundle
+          </h1>
 
-        <div className="mt-8 mb-4 border-b border-gray-100 pb-6">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Initial Estimated Price</p>
-          <p className="text-sm font-medium text-gray-500 mb-1">Destination Charge: CAD $8,995</p>
-          <p className="text-3xl font-bold text-gray-900 mb-4">
-            {formatCAD(bundlePrice + 8995)}
-          </p>
-          
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-600">Deposit (5% of total)</span>
-              <span className="text-lg font-bold text-black">
-                {formatCAD((bundlePrice + 8995) * 0.05)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          {/* LEASE TO OWN PREVIEW */}
-          <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100/50">
-            <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3">Lease-to-Own Estimate</h3>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-blue-900">
-                {formatCAD(((bundlePrice + 8995) * 0.6) / 60)}
-              </span>
-              <span className="text-sm font-medium text-blue-700">/ month</span>
-            </div>
-            <p className="text-[11px] text-blue-600/80 mt-2 leading-relaxed">
-              *Estimated based on 60 months with 50% down payment and 5% admin fee. Subject to OAC.
+          <div className="p-4 rounded-lg border border-blue-100 bg-blue-50">
+            <p className="text-sm text-blue-800 font-medium">
+              Contact Us to get your Best Deal
             </p>
-          </div>
-          <div className="rounded-lg border border-gray-100 bg-white p-4">
-            <p className="text-sm text-gray-600">
-              Selecting TalisTowns™ automatically adds 2 x Talishouse™ 400 and
-              1 x Gable Roof to the cart. Optional compatible add-ons can be layered
-              on top.
+            <p className="text-xs text-blue-600 mt-1">
+              Custom configurations and volume pricing available. Our team will work with you to find the best solution for your project.
             </p>
           </div>
 
-          {productAddons.length > 0 && (
-            <div>
-              <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-4">
-                Available Add-Ons
-              </h3>
-              <div className="space-y-3">
-                {productAddons.map((addon) => (
-                  <SelectionCard
-                    key={addon.id}
-                    label={addon.name}
-                    description={addon.description}
-                    price={addon.price}
-                    selected={!!selectedAddons[addon.id]}
-                    onClick={() => toggleAddon(addon.id)}
-                  />
-                ))}
+          {submitted ? (
+            <div className="text-center py-8">
+              <p className="text-lg font-semibold text-green-600">Thank you for your inquiry!</p>
+              <p className="text-sm text-gray-500 mt-2">Our team will contact you shortly with your custom quote.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  required
+                  type="text"
+                  name="name"
+                  placeholder="Your name"
+                  className="w-full p-3 rounded-lg border border-gray-200 text-sm"
+                />
               </div>
-            </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  required
+                  type="email"
+                  name="email"
+                  placeholder="your@email.com"
+                  className="w-full p-3 rounded-lg border border-gray-200 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input
+                  required
+                  type="tel"
+                  name="phone"
+                  placeholder="(555) 000-0000"
+                  className="w-full p-3 rounded-lg border border-gray-200 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tell us about your project</label>
+                <textarea
+                  name="message"
+                  rows={4}
+                  placeholder="Number of units, intended use, location..."
+                  className="w-full p-3 rounded-lg border border-gray-200 text-sm"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full text-lg font-semibold"
+              >
+                {loading ? "Sending..." : "Contact Us"}
+              </button>
+            </form>
           )}
-
-          <div className="space-y-3">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="wholesale"
-                checked={wholesaleRequested}
-                onChange={(e) => setWholesaleRequested(e.target.checked)}
-                className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black cursor-pointer"
-              />
-              <label
-                htmlFor="wholesale"
-                className="ml-3 text-sm text-gray-700 cursor-pointer"
-              >
-                Request Wholesale Terms
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="leaseToOwn"
-                checked={leaseToOwnRequested}
-                onChange={(e) => setLeaseToOwnRequested(e.target.checked)}
-                className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black cursor-pointer"
-              />
-              <label
-                htmlFor="leaseToOwn"
-                className="ml-3 text-sm text-gray-700 cursor-pointer"
-              >
-                Request Lease-To-Own
-              </label>
-            </div>
-          </div>
-
-          <button
-            onClick={handleAddToCart}
-            className="btn-primary w-full text-lg font-semibold"
-          >
-            Request a Quote
-          </button>
         </div>
-      </div>
       </ProductLayout>
     </>
   );

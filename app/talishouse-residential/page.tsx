@@ -1,276 +1,124 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import ProductLayout from "@/components/ProductLayout";
-import { useCart, DESTINATION_CHARGE, BUILD_AND_PRICE } from "@/context/CartContext";
-import { ProductConfigurator } from "@/components/ProductConfigurator";
-import { getModelsByCategory, getDefaultModel } from "@/lib/products";
-import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
-import SuccessToast from "@/components/SuccessToast";
-import { formatCAD } from "@/utils/currency";
+import { useRouter } from "next/navigation";
+import { useAssociate } from "@/context/AssociateContext";
 
 export default function TalishouseResidentialPage() {
-  const allModels = getModelsByCategory("residential");
-  const models = allModels.filter(m => m.id === "1600" || m.id === "2400" || m.id === "3200");
-  
-  const [selectedModel, setSelectedModel] = useState<any>(null);
-  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
-  const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
-  const [wholesaleRequested, setWholesaleRequested] = useState(false);
-  const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const { addToCart } = useCart();
+  const router = useRouter();
+  const { fastCode } = useAssociate();
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  useEffect(() => {
-    const defaultModel = getDefaultModel("residential");
-    setSelectedModel(defaultModel);
-  }, []);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true);
 
-  const toggleOption = (category: string, option: string) => {
-    setSelectedOptions((prev) => ({
-      ...prev,
-      [category]: option,
-    }));
-  };
-
-  const toggleAddon = (addonId: string) => {
-    setSelectedAddons((prev) => ({
-      ...prev,
-      [addonId]: !prev[addonId],
-    }));
-  };
-
-  const getAddonPrice = (addonId: string): number => {
-    const addon = addonsRecord[addonId];
-    return addon ? addon.price : 0;
-  };
-
-  const calculateTotal = (): number => {
-    let total = selectedModel?.price || 0;
-    Object.keys(selectedAddons).forEach((addonId) => {
-      if (selectedAddons[addonId]) {
-        total += getAddonPrice(addonId);
-      }
-    });
-    return total;
-  };
-
-  const handleAddToCart = () => {
-    if (!selectedModel) return;
-    const total = calculateTotal();
-    const selectedAddonNames = Object.keys(selectedAddons)
-      .filter((id) => selectedAddons[id])
-      .map((id) => addonsRecord[id]?.name)
-      .filter(Boolean);
-
-    const configSummary = {
-      model: selectedModel.name,
-      ...selectedOptions,
-      addons: selectedAddonNames.join(", ")
+    const formData = new FormData(e.currentTarget);
+    const payload = {
+      name: formData.get("name"),
+      phone: formData.get("phone"),
+      email: formData.get("email"),
+      message: formData.get("message"),
+      source: "talishouse-residential-inquiry",
+      fast_code: fastCode || "DIRECT",
+      created_at: new Date().toISOString(),
     };
 
-    addToCart({
-      id: `talishouse-residential-${selectedModel.id}`,
-      name: selectedModel.name,
-      price: total,
-      image: getProductImage(),
-      options: selectedOptions,
-      addons: selectedAddonNames,
-      wholesaleRequested,
-      leaseToOwnRequested,
-      metadata: configSummary
-    });
-    setSuccess(true);
+    try {
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const productAddons = getAddonsForProduct("talishouse-residential");
-
-  const getProductImage = () => {
-    if (!selectedModel) return "/images/talishouse/residential/hero.png";
-
-    if (selectedModel.name.includes("1600")) {
-      return "/images/talishouse/residential/models/1600.png";
-    }
-
-    if (selectedModel.name.includes("2400")) {
-      return "/images/talishouse/residential/models/2400.png";
-    }
-
-    if (selectedModel.name.includes("3200")) {
-      return "/images/talishouse/residential/models/3200.png";
-    }
-
-    return "/images/talishouse/residential/hero.png";
-  };
-
-  if (!selectedModel) return null;
 
   return (
     <>
-      <SuccessToast
-        show={success}
-        message="Quote requested successfully"
-        onClose={() => setSuccess(false)}
-      />
       <ProductLayout
-        productName="Talishouse™ Residential"
-        productImage={getProductImage()}
+        productName="Talishouse™ 1,600 - 2,400 - 3,200"
+        productImage="/images/talishouse/residential/hero.png"
         productSize="talishouse-residential"
-        familyDescription={`Talishouse™ Residential : Scalable living solutions:
-- Multi-unit residential developments
-- 21' x 20' steel structures assembled in one day
-- Two bedrooms, one bath, open concept living-dining-kitchen
-- From single units to complete communities
-- Retail, Wholesale and Lease-To-Own purchasing terms.`}
-        aboutContent={`Talishouse™ Residential: Modern modular living for permanent homes.
-21' x 20' steel structures with scalable configurations.
-Perfect for multi-unit developments and residential communities.`}
+        aboutContent={`1,600 - 2,400 - 3200 sq.ft.. Permanent installation only (on screw piles, piers or slabs). Three bedrooms, two baths standard. Open concept kitchen - living - dining areas. Module arrangement: parallel, off-set parallel or L-shaped. Up in a week, finished in a month.  
+Characterization: it includes an efficiency kitchen and four-piece bath, however, the number of bedrooms is size dependent.  
+Open concept kitchen - living - dining areas.  
+Furniture is added to taste after completion.`}
       >
-        <h1 className="text-2xl font-semibold text-gray-900">
-          {selectedModel?.name || 'Select a Model'}
-        </h1>
+        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
+          <h1 className="text-2xl font-semibold text-gray-900">
+            Talishouse™ 1,600 - 2,400 - 3,200
+          </h1>
 
-        {/* MODEL SELECTOR */}
-        <div className="mt-3 mb-1">
-          <div className="grid grid-cols-2 gap-2">
-            {models.map((model) => (
-              <button
-                key={model.id}
-                onClick={() => {
-                  if (selectedModel?.id === model.id) {
-                    setSelectedModel(null);
-                  } else {
-                    setSelectedModel(model);
-                  }
-                }}
-                className={`p-4 rounded-xl border text-sm font-medium transition-all duration-200 hover:scale-[1.02] hover:shadow-md ${
-                  selectedModel?.id === model.id
-                    ? "border-gray-900 bg-gray-900 text-white"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
-                }`}
-              >
-                {model.name.replace("Talishouse™ ", "")}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-8 mb-4 border-b border-gray-100 pb-6">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Initial Estimated Price</p>
-          <div className="space-y-1 mb-3">
-            <p className="text-[11px] font-medium text-gray-400">Build & Price: {formatCAD(BUILD_AND_PRICE)}</p>
-            <p className="text-[11px] font-medium text-gray-400">Destination Charge: {formatCAD(DESTINATION_CHARGE)}</p>
-          </div>
-          <p className="text-3xl font-bold text-gray-900 mb-4">
-            {formatCAD(calculateTotal() + DESTINATION_CHARGE + BUILD_AND_PRICE)}
-          </p>
-          
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-gray-600">Deposit (5% of total)</span>
-              <span className="text-lg font-bold text-black">
-                {formatCAD((calculateTotal() + DESTINATION_CHARGE + BUILD_AND_PRICE) * 0.05)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-8">
-          {/* LEASE TO OWN PREVIEW */}
-          <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100/50">
-            <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3">Lease-to-Own Estimate</h3>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-blue-900">
-                {formatCAD(((calculateTotal() + DESTINATION_CHARGE + BUILD_AND_PRICE) * 0.6) / 60)}
-              </span>
-              <span className="text-sm font-medium text-blue-700">/ month</span>
-            </div>
-            <p className="text-[11px] text-blue-600/80 mt-2 leading-relaxed">
-              *Estimated based on 60 months with 50% down payment and 5% admin fee. Subject to OAC.
+          <div className="p-4 rounded-lg border border-blue-100 bg-blue-50">
+            <p className="text-sm text-blue-800 font-medium">
+              Contact Us to get your Best Deal
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              Custom configurations and volume pricing available. Our team will work with you to find the best solution for your project.
             </p>
           </div>
-          <ProductConfigurator
-            selectedOptions={selectedOptions}
-            onOptionChange={toggleOption}
-          />
 
-          {productAddons.length > 0 && (
-            <div className="border-t border-gray-100 pt-6">
-              <h3 className="text-sm uppercase tracking-wide text-gray-500">
-                Available Add-Ons
-              </h3>
-              <div className="space-y-3 mt-4">
-                {productAddons.map((addon) => (
-                  <button
-                    key={addon.id}
-                    onClick={() => toggleAddon(addon.id)}
-                    className={`w-full p-4 rounded-xl border text-sm font-medium transition duration-200 flex items-center justify-between ${
-                      selectedAddons[addon.id]
-                        ? "border-gray-900 bg-gray-900 text-white"
-                        : "border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300"
-                    }`}
-                  >
-                    <div>
-                      <p className={`font-medium ${selectedAddons[addon.id] ? "text-white" : "text-gray-900"}`}>{addon.name}</p>
-                      <p className={`text-xs mt-0.5 ${selectedAddons[addon.id] ? "text-white/70" : "text-gray-500"}`}>{addon.description}</p>
-                    </div>
-                    <span className={`font-semibold ${selectedAddons[addon.id] ? "text-white" : "text-gray-900"}`}>
-                      +{formatCAD(addon.price)}
-                    </span>
-                  </button>
-                ))}
+          {submitted ? (
+            <div className="text-center py-8">
+              <p className="text-lg font-semibold text-green-600">Thank you for your inquiry!</p>
+              <p className="text-sm text-gray-500 mt-2">Our team will contact you shortly with your custom quote.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  required
+                  type="text"
+                  name="name"
+                  placeholder="Your name"
+                  className="w-full p-3 rounded-lg border border-gray-200 text-sm"
+                />
               </div>
-            </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  required
+                  type="email"
+                  name="email"
+                  placeholder="your@email.com"
+                  className="w-full p-3 rounded-lg border border-gray-200 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input
+                  required
+                  type="tel"
+                  name="phone"
+                  placeholder="(555) 000-0000"
+                  className="w-full p-3 rounded-lg border border-gray-200 text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tell us about your project</label>
+                <textarea
+                  name="message"
+                  rows={4}
+                  placeholder="Number of units, intended use, location..."
+                  className="w-full p-3 rounded-lg border border-gray-200 text-sm"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary w-full text-lg font-semibold"
+              >
+                {loading ? "Sending..." : "Contact Us"}
+              </button>
+            </form>
           )}
-
-          <div className="space-y-3">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="wholesale"
-                checked={wholesaleRequested}
-                onChange={(e) => setWholesaleRequested(e.target.checked)}
-                className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black cursor-pointer"
-              />
-              <label
-                htmlFor="wholesale"
-                className="ml-3 text-sm text-gray-700 cursor-pointer"
-              >
-                Request Wholesale Terms
-              </label>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="leaseToOwn"
-                checked={leaseToOwnRequested}
-                onChange={(e) => setLeaseToOwnRequested(e.target.checked)}
-                className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black cursor-pointer"
-              />
-              <label
-                htmlFor="leaseToOwn"
-                className="ml-3 text-sm text-gray-700 cursor-pointer"
-              >
-                Request Lease-To-Own
-              </label>
-            </div>
-          </div>
-
-          <button
-            onClick={handleAddToCart}
-            className="btn-primary w-full text-lg font-semibold"
-          >
-            Request a Quote
-          </button>
-
-          <div className="text-center">
-            <a
-              href="/lease-to-own"
-              className="text-xs text-gray-500 hover:text-gray-900 transition-colors"
-            >
-              Interested in financing? Learn about Lease-to-Own →
-            </a>
-          </div>
         </div>
       </ProductLayout>
     </>

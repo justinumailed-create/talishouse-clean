@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useCart, PaymentStrategy, DESTINATION_CHARGE, BUILD_AND_PRICE, PromoCode } from "@/context/CartContext";
+import { useCart, PaymentStrategy, SHIPPING_CLEARANCE, BUILD_AND_PRICE, PromoCode } from "@/context/CartContext";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { supabase } from "@/lib/supabase";
 import { syncTransactionToSplits } from "@/lib/splits";
@@ -446,13 +446,13 @@ export default function CartDrawer() {
               )}
               
               <div className="flex justify-between pt-1 border-t border-gray-50">
-                <span className="text-gray-900 font-medium">Build & Price (Shipping)</span>
+                <span className="text-gray-900 font-medium">Build & Price</span>
                 <span className="text-gray-900">CAD ${BUILD_AND_PRICE.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
 
               <div className="flex justify-between">
-                <span className="text-gray-900 font-medium">Destination Charge</span>
-                <span className="text-gray-900">CAD ${DESTINATION_CHARGE.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <span className="text-gray-900 font-medium">Shipping & Custom Clearance</span>
+                <span className="text-gray-900">CAD ${SHIPPING_CLEARANCE.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
               
               <div className="flex justify-between pt-1 border-t border-gray-50">

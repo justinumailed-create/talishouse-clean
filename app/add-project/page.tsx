@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { supabase, safeInsertLead } from "@/lib/supabase";
 import { useAssociate } from "@/context/AssociateContext";
 import { UI } from "@/styles/design-system";
-import { formatCAD } from "@/utils/currency";
 
 export default function AddProjectPage() {
   const router = useRouter();
@@ -14,13 +13,13 @@ export default function AddProjectPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
-  const [deliveryAcknowledgement, setDeliveryAcknowledgement] = useState(false);
-  const [smsConsent, setSmsConsent] = useState(false);
+  const [deliveryAcknowledgement, setDeliveryAcknowledgement] = useState(true);
+  const [smsConsent, setSmsConsent] = useState(true);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     
-    if (!deliveryAcknowledgement || !smsConsent) {
+    if (!deliveryAcknowledgement) {
       setError("You must accept the terms to continue");
       return;
     }
@@ -65,7 +64,7 @@ export default function AddProjectPage() {
     }
   }
 
-  const isFormValid = deliveryAcknowledgement && smsConsent;
+  const isFormValid = deliveryAcknowledgement;
 
   return (
     <div className="container py-12 px-4">
@@ -75,20 +74,18 @@ export default function AddProjectPage() {
             PROPOSE A PROJECT
           </h1>
           <p className="text-sm text-gray-500 mt-4">
-            Tell us about your project and we'll help you bring it to life.
-            <br />
-            Our team will review your request and guide you through the next steps.
+            Tell us about your project and we will help you bring it to life. Our placement team will guide you through the entire process, from inception to completion. Thank you for working with us.
           </p>
         </div>
 
         <section className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.12)] w-full max-w-full">
           <div className="flex items-center justify-between bg-black px-6 py-5 text-white">
-            <p className="text-sm font-bold uppercase tracking-[0.25em]">
+            <p className="text-sm font-bold uppercase tracking-[0.25em] self-center">
               SUBMIT DETAILS
             </p>
             <Link
               href="/"
-              className="text-xl leading-none text-white/70 transition hover:text-white"
+              className="text-xl leading-none text-white/70 transition hover:text-white self-center"
               aria-label="Close join us"
             >
               ×
@@ -119,9 +116,12 @@ export default function AddProjectPage() {
                     required
                     type="text"
                     name="location"
-                    placeholder="City, State"
+                    placeholder="Enter location"
                     className={UI.input}
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    a Google recognized street address, or geo-coordinates.
+                  </p>
                 </label>
 
                 <label className="block">
@@ -143,6 +143,9 @@ export default function AddProjectPage() {
                     placeholder="Enter preferred FAST code"
                     className={UI.input}
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    FAST Code stands for "Fast Access - Standard Tracking". It is a means to allocate discounts or rewards to projects you propose. Some conditions apply.
+                  </p>
                 </label>
               </div>
 
@@ -168,7 +171,7 @@ export default function AddProjectPage() {
                     className="mt-1 w-5 h-5 rounded border-gray-300 text-[#1279c9] focus:ring-[#1279c9] cursor-pointer flex-shrink-0"
                   />
                   <span className="text-sm text-gray-600 leading-relaxed acknowledgement-text flex-1 min-w-0 break-words">
-                    I acknowledge and accept that not every location will be suitable for delivery right to a building site. I understand that pricing is to the nearest suitable location at our sole discretion.
+                    I agree to the <a href="/terms-of-service" className="underline">Terms of Service</a> and <a href="/privacy-policy" className="underline">Privacy Policy</a> of Talishouse Homes & Cottages.
                   </span>
                 </label>
 
@@ -185,7 +188,7 @@ export default function AddProjectPage() {
                     className="mt-1 w-5 h-5 rounded border-gray-300 text-[#1279c9] focus:ring-[#1279c9] cursor-pointer flex-shrink-0"
                   />
                   <span className="text-sm text-gray-600 leading-relaxed acknowledgement-text flex-1 min-w-0 break-words">
-                    I agree to receive promotional messages sent via an autodialer - 4 Msgs/Month. Msg & Data Rates may apply. Text STOP to opt out anytime. Text Help for more information. Agreement to this feature is not a condition of purchase. I also agree to the Terms of Service and Privacy Policy of Talishouse Homes & Cottages.
+                    I agree to receive messages from Talishouse™, including tech and product bulletins and project updates or introductions near me. Message & Data Rates may apply. Text STOP to opt out anytime. Text Help for more information. Agreement to this option is not a condition of purchase.
                   </span>
                 </label>
               </div>
@@ -201,10 +204,6 @@ export default function AddProjectPage() {
             </form>
           </div>
         </section>
-
-        <p className="text-center text-xs text-gray-500 mt-6">
-          Talishouse Homes & Cottages start at {formatCAD(58.50)} per sq.ft.. Typically they are up in a day and move-in ready in a week. Lease-To-Own is available, OAC.
-        </p>
       </div>
     </div>
   );

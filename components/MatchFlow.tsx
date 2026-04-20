@@ -127,7 +127,7 @@ export default function MatchFlow({ onComplete }: MatchFlowProps) {
   const homeTypes = [
     { id: "glasshouse", label: "Glasshouse", desc: "Premium glass enclosure" },
     { id: "talishouse_residential", label: "Talishouse Residential", desc: "Full residential home" },
-    { id: "talistowns", label: "TalisTowns", desc: "Community living" },
+    { id: "talistowns", label: "Talistowns", desc: "Community living" },
     { id: "not_sure", label: "Not sure", desc: "Recommend for me" }
   ];
 
