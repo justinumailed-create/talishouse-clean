@@ -66,10 +66,10 @@ export default function Footer() {
           <ul className="space-y-3">
             <li>
               <GatedLink
-                href={ROUTES.BUSINESS_OFFICE_PROPOSE_PROJECT}
+                href={ROUTES.LEASE_TO_OWN}
                 className="text-[15px] text-neutral-600 hover:text-gray-900 transition-colors"
               >
-                Refer a Project
+                Lease-to-Own
               </GatedLink>
             </li>
             <li>
@@ -77,7 +77,7 @@ export default function Footer() {
                 href={ROUTES.BUSINESS_OFFICE_TRANSACTIONS}
                 className="text-[15px] text-neutral-600 hover:text-gray-900 transition-colors"
               >
-                E-commerce Portal
+                E-Commerce
               </GatedLink>
             </li>
             <li>
@@ -90,10 +90,10 @@ export default function Footer() {
             </li>
             <li>
               <GatedLink
-                href={ROUTES.LEASE_TO_OWN}
+                href={ROUTES.BUSINESS_OFFICE_APPLY}
                 className="text-[15px] text-neutral-600 hover:text-gray-900 transition-colors"
               >
-                Lease-to-Own
+                Propose a Project
               </GatedLink>
             </li>
           </ul>

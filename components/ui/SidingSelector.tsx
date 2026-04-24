@@ -10,6 +10,7 @@ export interface SidingOption {
 
 export const sidingOptions: SidingOption[] = [
   { code: "D-053", name: "Snow White", color: "#f5f5f5" },
+  { code: "D-PALE", name: "Pale Yellow", color: "#f5f0c0" },
   { code: "D-054", name: "Cream", color: "#f2e8d5" },
   { code: "D-055", name: "Sandstone", color: "#d4c4a8" },
   { code: "D-056", name: "Dove Gray", color: "#8b8680" },

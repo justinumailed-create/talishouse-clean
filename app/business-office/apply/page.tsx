@@ -95,7 +95,7 @@ export default function ApplyPage() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Apply for Associate Status</h1>
+            <h1 className="text-3xl font-bold mb-2">Propose a Project</h1>
             <p className="text-[#6e6e73]">
               Join the Talishouse partner network
             </p>
@@ -200,24 +200,12 @@ export default function ApplyPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-4 bg-[#1E4ED8] text-white rounded-xl font-medium hover:bg-[#1d4ed8] transition-colors disabled:opacity-50"
+                className="w-full py-3 bg-black text-white rounded-lg font-medium hover:opacity-90 transition disabled:opacity-50"
               >
-                {isSubmitting ? "Submitting..." : "Submit Application"}
+                {isSubmitting ? "Submitting..." : "Submit"}
               </button>
-              <p className="text-[11px] text-[#6e6e73] text-right">
-                <strong>*SPLITS = Simple Project Lead & Input Tracking System</strong>
-              </p>
             </div>
           </form>
-
-          <div className="mt-12 p-6 bg-white border border-gray-100 rounded-xl">
-            <h3 className="font-semibold text-sm mb-3">How the Associate System Works</h3>
-            <div className="space-y-4 text-sm text-[#6e6e73] leading-relaxed">
-              <p>Associates are onboarded through the Business Office application process.</p>
-              <p>Each approved associate is assigned a FAST Code (Fast Access Standard Tracking Code), which acts as their unique identifier within the Talispros™ ecosystem.</p>
-              <p>This FAST Code powers a personalized, white-labeled associate page where their prospects can engage directly. When a prospect submits a project or expresses interest, the lead is automatically tagged with that associate's FAST Code, ensuring accurate attribution and commission eligibility guaranteed.</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -65,7 +65,7 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
                     {subtitle}
                   </p>
                   <Link 
-                    href="/add-project"
+                    href="/business-office/apply"
                     className="inline-block bg-black text-white text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full hover:bg-neutral-800 transition-colors w-fit mt-1 md:mt-2"
                   >
                     Propose a Project
@@ -95,7 +95,7 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
             </div>
 
             {/* MAP BLOCK (FLEX FILL) */}
-            <div className="w-full flex-1 min-h-0 rounded-xl overflow-hidden">
+            <div className="w-full flex-1 min-h-0 sm:min-h-[300px] rounded-xl overflow-hidden">
               <iframe
                 src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
                 allow="geolocation 'self' https://my.atlist.com"

@@ -86,6 +86,8 @@ interface CartContextType {
   ltoTermMonths: number;
   ltoMonthlyPayment: number;
   stackConfig: DiscountStackConfig;
+  splitsAmount: number;
+  splitsDetails: string;
   addToCart: (item: Omit<CartItem, "quantity">) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -95,6 +97,8 @@ interface CartContextType {
   setDiscount: (options: { code: string; percent: number }) => void;
   setPaymentStrategy: (strategy: PaymentStrategy) => void;
   setLtoTermMonths: (months: number) => void;
+  updateSplitsAmount: (amount: number) => void;
+  updateSplitsDetails: (details: string) => void;
   getPaymentAmount: () => number;
   getSubtotalWithCharge: () => number;
   openCart: () => void;
@@ -116,6 +120,8 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   const [paymentStrategy, setPaymentStrategy] = useState<PaymentStrategy>("full");
   const [ltoTermMonths, setLtoTermMonths] = useState(config.leaseToOwn.maxMonths);
   const [stackConfig] = useState<DiscountStackConfig>(DEFAULT_STACK_CONFIG);
+  const [splitsAmount, setSplitsAmount] = useState(0);
+  const [splitsDetails, setSplitsDetails] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem(CART_STORAGE_KEY);
@@ -126,9 +132,13 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
         const parsed = JSON.parse(stored);
         const itemsToSet = parsed.items || [];
         const promoToSet = parsed.appliedDiscountCodes || [];
+        const splitsToSet = parsed.splitsAmount || 0;
+        const splitsDetailsToSet = parsed.splitsDetails || '';
         setTimeout(() => {
           if (itemsToSet.length > 0) setItems(itemsToSet);
           if (promoToSet.length > 0) setAppliedDiscountCodes(promoToSet);
+          if (splitsToSet > 0) setSplitsAmount(splitsToSet);
+          if (splitsDetailsToSet) setSplitsDetails(splitsDetailsToSet);
           hydrate();
         }, 0);
       } catch (e) {
@@ -142,9 +152,9 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
 
   useEffect(() => {
     if (isHydrated) {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items, appliedDiscountCodes }));
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items, appliedDiscountCodes, splitsAmount, splitsDetails }));
     }
-  }, [items, appliedDiscountCodes, isHydrated]);
+  }, [items, appliedDiscountCodes, isHydrated, splitsAmount, splitsDetails]);
 
   const rawSubtotal = useMemo(() => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -171,7 +181,7 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   }, [promoCode]);
 
   const subtotalWithCharge = useMemo(() => {
-    return discountedSubtotal + BUILD_AND_PRICE + SHIPPING_CLEARANCE;
+    return discountedSubtotal + BUILD_AND_PRICE;
   }, [discountedSubtotal]);
 
   const tax = useMemo(() => {
@@ -304,10 +314,20 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
         fastCode: associate?.fastCode || null,
         associateId: associate?.id || null,
         associateName: associate?.name || null,
+        splitsAmount: splitsAmount,
+        splitsDetails: splitsDetails,
       };
     } catch {
       return {};
     }
+  }, [splitsAmount, splitsDetails]);
+
+  const updateSplitsAmount = useCallback((amount: number) => {
+    setSplitsAmount(amount);
+  }, []);
+
+  const updateSplitsDetails = useCallback((details: string) => {
+    setSplitsDetails(details.slice(0, 200));
   }, []);
 
   const setDiscount = useCallback((options: { code: string; percent: number }) => {
@@ -335,6 +355,8 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     ltoTermMonths,
     ltoMonthlyPayment,
     stackConfig,
+    splitsAmount,
+    splitsDetails,
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -344,6 +366,8 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     removePromoCode,
     setPaymentStrategy,
     setLtoTermMonths,
+    updateSplitsAmount,
+    updateSplitsDetails,
     getPaymentAmount,
     getSubtotalWithCharge,
     openCart,

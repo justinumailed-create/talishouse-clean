@@ -10,18 +10,25 @@ export interface Addon {
 
 export const ADDONS: Addon[] = [
   {
+    id: "shipping_clearance",
+    name: "Shipping & Custom Clearance",
+    price: 10000,
+    description: "Shipping logistics and customs clearance for delivery to your location.",
+    compatibleWith: ["glasshouse-160", "glasshouse-200", "talishouse-400", "talishouse-800"],
+  },
+  {
     id: "gable_roof",
     name: "Gable Roof",
     price: 14950,
     description: "Recommended for all Talishouse™ models (TH) placed on permanent foundations: screw piles, piers and slabs. The price reflects price per unit (TH 800 = 1; TH 1,600 = 2; TH 2,400 = 3; TH 3200 = 4).",
-    compatibleWith: ["glasshouse-200", "talishouse-400", "talishouse-800"],
+    compatibleWith: ["talishouse-400", "talishouse-800"],
   },
   {
     id: "roof_top_patio",
     name: "Roof Top Patio",
     price: 14950,
     description: "Roof Top Patio's are available for Talishouse™ 400 modules, permanent placement only (stairs must be anchored to ensure long term safety).",
-    compatibleWith: ["glasshouse-200", "talishouse-400", "talishouse-800"],
+    compatibleWith: ["glasshouse-200"],
   },
   {
     id: "deck_veranda",

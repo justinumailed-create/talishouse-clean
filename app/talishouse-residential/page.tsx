@@ -2,14 +2,19 @@
 
 import { useState } from "react";
 import ProductLayout from "@/components/ProductLayout";
-import { useRouter } from "next/navigation";
 import { useAssociate } from "@/context/AssociateContext";
 
+const SIZES = [
+  { value: "1600", label: "1,600 sq ft" },
+  { value: "2400", label: "2,400 sq ft" },
+  { value: "3200", label: "3,200 sq ft" },
+];
+
 export default function TalishouseResidentialPage() {
-  const router = useRouter();
   const { fastCode } = useAssociate();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [selectedSize, setSelectedSize] = useState("1600");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,18 +51,33 @@ Characterization: it includes an efficiency kitchen and four-piece bath, however
 Open concept kitchen - living - dining areas.  
 Furniture is added to taste after completion.`}
       >
-        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
-          <h1 className="text-2xl font-semibold text-gray-900">
+        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-4">
+          <h2 className="text-xl font-semibold text-gray-900">
             Talishouse™ 1,600 - 2,400 - 3,200
-          </h1>
+          </h2>
 
-          <div className="p-4 rounded-lg border border-blue-100 bg-blue-50">
-            <p className="text-sm text-blue-800 font-medium">
+          <div className="bg-gray-100 border border-gray-200 rounded-lg p-4">
+            <p className="text-sm font-medium text-gray-900">
               Contact Us to get your Best Deal
             </p>
-            <p className="text-xs text-blue-600 mt-1">
+            <p className="text-sm text-gray-600 mt-1">
               Custom configurations and volume pricing available. Our team will work with you to find the best solution for your project.
             </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Select Size</label>
+            <select
+              value={selectedSize}
+              onChange={(e) => setSelectedSize(e.target.value)}
+              className="w-full p-3 rounded-lg border border-gray-200 text-sm"
+            >
+              {SIZES.map((size) => (
+                <option key={size.value} value={size.value}>
+                  {size.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           {submitted ? (

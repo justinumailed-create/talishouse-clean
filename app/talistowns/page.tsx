@@ -52,16 +52,16 @@ export default function TalistownsPage() {
 Conclusion: Talistowns™ are a great way to "moonlight" towards lifestyle goals and financial independence…!`
         }
       >
-        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-6">
+        <div className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm space-y-4">
           <h1 className="text-2xl font-semibold text-gray-900">
             {talistownsFamily?.name || "Talistowns™"} Bundle
           </h1>
 
-          <div className="p-4 rounded-lg border border-blue-100 bg-blue-50">
-            <p className="text-sm text-blue-800 font-medium">
+          <div className="bg-gray-100 border border-gray-200 rounded-lg p-4">
+            <p className="text-sm font-medium text-gray-900">
               Contact Us to get your Best Deal
             </p>
-            <p className="text-xs text-blue-600 mt-1">
+            <p className="text-sm text-gray-600 mt-1">
               Custom configurations and volume pricing available. Our team will work with you to find the best solution for your project.
             </p>
           </div>

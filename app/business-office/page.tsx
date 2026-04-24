@@ -24,10 +24,9 @@ export default function BusinessOfficePage() {
 
   const gatedItems = [
     { title: "Lease-to-Own", desc: "Refer projects for in-house financing", href: ROUTES.LEASE_TO_OWN },
-    { title: "Refer a Project", desc: "Associate Status Required", href: ROUTES.BUSINESS_OFFICE_PROPOSE_PROJECT },
     { title: "E-Commerce", desc: "Collect on your projects", href: ROUTES.BUSINESS_OFFICE_TRANSACTIONS },
     { title: "Partner Programs", desc: "Register an Associate account", href: ROUTES.SUBSCRIPTION },
-    { title: "Apply for Associate Status", desc: "Start a side-business with Talispros™", href: ROUTES.BUSINESS_OFFICE_APPLY },
+    { title: "Propose a Project", desc: "Start a side-business with Talispros™", href: ROUTES.BUSINESS_OFFICE_APPLY },
   ];
 
   return (

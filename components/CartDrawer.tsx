@@ -44,6 +44,10 @@ export default function CartDrawer() {
     clearCart,
     applyPromoCode,
     stackConfig,
+    splitsAmount,
+    splitsDetails,
+    updateSplitsAmount,
+    updateSplitsDetails,
   } = useCart();
 
   const [promoInput, setPromoInput] = useState("");
@@ -92,6 +96,8 @@ export default function CartDrawer() {
         source: "cart",
         base_price: basePrice,
         addons_value: addonsValue,
+        splits_amount: splitsAmount || undefined,
+        splits_details: splitsDetails || undefined,
       };
       console.log("DEAL INSERT - Payload:", JSON.stringify(dealPayload, null, 2));
 
@@ -138,7 +144,7 @@ export default function CartDrawer() {
     setIsCheckingOut(false);
   };
 
-  const paymentAmount = paymentType === "partial" ? grandTotal * 0.05 : grandTotal;
+  const paymentAmount = paymentType === "partial" ? (grandTotal + splitsAmount) * 0.05 : grandTotal + splitsAmount;
 
   const getPaymentLabel = () => {
     const initialPaymentPercent = (config.paymentOptions.partial.percentage * 100).toFixed(0);
@@ -431,10 +437,50 @@ export default function CartDrawer() {
                 <span className="text-gray-500">Initial Estimated Price:</span>
                 <span className="text-gray-900">CAD ${rawSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
+
+              {/* SPLITS Amount */}
+              {items.length > 0 && (
+                <div className="mt-3">
+                  <p className="text-sm text-gray-900 font-medium">SPLITS Amount</p>
+                  <input
+                    type="number"
+                    value={splitsAmount || ""}
+                    onChange={(e) => {
+                      const val = Number(e.target.value) || 0;
+                      const capped = Math.min(val, grandTotal);
+                      updateSplitsAmount(capped);
+                    }}
+                    placeholder="Enter SPLITS amount"
+                    className="w-full border border-gray-200 rounded-md p-2 mt-1 text-sm"
+                  />
+                  {splitsAmount > 0 && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      SPLITS Amount: CAD {splitsAmount.toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* SPLITS Details */}
+              {items.length > 0 && (
+                <div className="mt-2">
+                  <textarea
+                    value={splitsDetails}
+                    maxLength={200}
+                    onChange={(e) => updateSplitsDetails(e.target.value)}
+                    placeholder="Enter SPLITS details (max 200 characters)"
+                    className="w-full border border-gray-200 rounded-md p-2 text-sm"
+                    rows={2}
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    {splitsDetails.length}/200
+                  </p>
+                </div>
+              )}
               
               {appliedDiscounts.length > 0 && (
                 <>
-                  <div className="flex justify-between text-green-600">
+                  <div className="flex justify-between text-green-600 pt-2">
                     <span>Total Discounts:</span>
                     <span>- CAD ${totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                   </div>
@@ -446,20 +492,15 @@ export default function CartDrawer() {
               )}
               
               <div className="flex justify-between pt-1 border-t border-gray-50">
-                <span className="text-gray-900 font-medium">Build & Price</span>
+                <span className="text-gray-900 font-medium">Destination Charge</span>
                 <span className="text-gray-900">CAD ${BUILD_AND_PRICE.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-900 font-medium">Shipping & Custom Clearance</span>
-                <span className="text-gray-900">CAD ${SHIPPING_CLEARANCE.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
               
               <div className="flex justify-between pt-1 border-t border-gray-50">
                 <span className="text-gray-500">Subtotal with Charges</span>
                 <span className="text-gray-900">CAD ${subtotalWithCharge.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
-              
+
               <div className="flex justify-between">
                 <span className="text-gray-500">Tax ({(config.taxRate * 100).toFixed(0)}%):</span>
                 <span className="text-gray-900">CAD ${tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
@@ -467,8 +508,21 @@ export default function CartDrawer() {
               
               <div className="flex justify-between font-semibold text-base pt-2 border-t border-gray-100">
                 <span className="text-gray-900">TOTAL:</span>
-                <span className="text-gray-900">CAD ${grandTotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                <span className="text-gray-900">CAD ${(grandTotal + splitsAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
+              
+              {splitsAmount > 0 && (
+                <>
+                  <div className="flex justify-between text-sm text-red-500 pt-2 border-t border-gray-50">
+                    <span>SPLITS Allocation:</span>
+                    <span>- CAD ${splitsAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-medium text-green-600">
+                    <span>Eligible Value:</span>
+                    <span>CAD ${(grandTotal - splitsAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Payment Type */}

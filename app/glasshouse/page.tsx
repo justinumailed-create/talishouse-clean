@@ -10,7 +10,6 @@ import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
 import SuccessToast from "@/components/SuccessToast";
 import { formatCAD } from "@/utils/currency";
 
-const SHIPPING_CLEARANCE = 10000;
 const BUILD_AND_PRICE = 1950;
 const TAX_RATE = 0.14;
 
@@ -23,11 +22,10 @@ export default function GlasshousePage() {
   const [selectedModel, setSelectedModel] = useState<any>(null);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
-  const [splitsCost, setSplitsCost] = useState(0);
   const [wholesaleRequested, setWholesaleRequested] = useState(false);
   const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
   const [success, setSuccess] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart, openCart } = useCart();
 
   useEffect(() => {
     const defaultModel = getDefaultModel("glasshouse");
@@ -73,12 +71,11 @@ export default function GlasshousePage() {
 
   const calculateFinal = (): number => {
     const subtotal = calculateSubtotal();
-    const final = subtotal - splitsCost;
-    return Math.max(0, final);
+    return subtotal;
   };
 
   const calculateSubtotalWithUpsell = (): number => {
-    return BUILD_AND_PRICE + calculateFinal() + SHIPPING_CLEARANCE;
+    return BUILD_AND_PRICE + calculateFinal();
   };
 
   const calculateTax = (): number => {
@@ -107,8 +104,7 @@ export default function GlasshousePage() {
     const configSummary = {
       model: selectedModel.name,
       ...selectedOptions,
-      addons: selectedAddonNames.join(", "),
-      splitsApplied: splitsCost > 0 ? splitsCost : undefined
+      addons: selectedAddonNames.join(", ")
     };
 
     addToCart({
@@ -165,7 +161,7 @@ Characterization: it is finished open space. Dividing walls, amenities and furni
 
         {/* STEP INDICATOR */}
         <div className="flex items-center gap-2 mt-4 mb-6">
-          {[1, 2, 3, 4, 5].map((step) => (
+          {[1, 2, 3].map((step) => (
             <div
               key={step}
               className={`flex-1 h-1 rounded-full transition-colors ${
@@ -208,7 +204,6 @@ Characterization: it is finished open space. Dividing walls, amenities and furni
                 <li>• Steel frame structure</li>
                 <li>• Glass panels (one, two, or three sides)</li>
                 <li>• Hardware and instructions</li>
-                <li>• Up to 5 units per sea-can</li>
               </ul>
             </div>
             <ProductConfigurator
@@ -255,96 +250,6 @@ Characterization: it is finished open space. Dividing walls, amenities and furni
           </div>
         )}
 
-        {/* STEP 4: SPLITS INPUT */}
-        {currentStep === 4 && (
-          <div className="space-y-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">SPLITS Cost (Optional)</p>
-            <div className="p-4 rounded-lg border border-gray-100 bg-gray-50">
-              <p className="text-sm text-gray-600 mb-3">
-                SPLITS is a cost reduction program. Enter your SPLITS code to deduct from the total.
-              </p>
-              <input
-                type="number"
-                value={splitsCost || ""}
-                onChange={(e) => setSplitsCost(Number(e.target.value) || 0)}
-                placeholder="Enter SPLITS amount"
-                className="w-full p-3 rounded-lg border border-gray-200 text-sm"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Current deduction: {formatCAD(splitsCost)}
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* STEP 5: FINAL UPSELL */}
-        {currentStep === 5 && (
-          <div className="space-y-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">Final Pricing</p>
-            
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Build & Price</span>
-                <span className="font-medium">{formatCAD(BUILD_AND_PRICE)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Base ({selectedModel?.name})</span>
-                <span className="font-medium">{formatCAD(calculateBase())}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Add-ons</span>
-                <span className="font-medium">{formatCAD(calculateAddons())}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Shipping & Custom Clearance</span>
-                <span className="font-medium">{formatCAD(SHIPPING_CLEARANCE)}</span>
-              </div>
-              {splitsCost > 0 && (
-                <div className="flex justify-between text-green-600">
-                  <span>SPLITS Deduction</span>
-                  <span>-{formatCAD(splitsCost)}</span>
-                </div>
-              )}
-              <div className="flex justify-between border-t pt-2">
-                <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">{formatCAD(calculateSubtotalWithUpsell())}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Tax (14%)</span>
-                <span className="font-medium">{formatCAD(calculateTax())}</span>
-              </div>
-              <div className="flex justify-between text-lg font-bold border-t pt-2">
-                <span>Total</span>
-                <span>{formatCAD(calculateTotalWithUpsell())}</span>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">Deposit (5%)</span>
-                <span className="text-lg font-bold text-black">
-                  {formatCAD(calculateTotalWithUpsell() * 0.05)}
-                </span>
-              </div>
-            </div>
-
-            {leaseToOwnRequested && (
-              <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100/50">
-                <h3 className="text-sm font-bold text-blue-900 uppercase tracking-wider mb-3">Lease-to-Own Estimate</h3>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-blue-900">
-                    {formatCAD((calculateTotalWithUpsell() * 0.6) / 60)}
-                  </span>
-                  <span className="text-sm font-medium text-blue-700">/ month</span>
-                </div>
-                <p className="text-[11px] text-blue-600/80 mt-2 leading-relaxed">
-                  *Estimated based on 60 months with 50% down payment and 5% admin fee. Subject to OAC.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
         {/* NAVIGATION */}
         <div className="flex gap-3 mt-6">
           {currentStep > 1 && (
@@ -356,59 +261,40 @@ Characterization: it is finished open space. Dividing walls, amenities and furni
             </button>
           )}
           
-          {currentStep < 5 ? (
-            currentStep === 4 ? (
-              <button
-                onClick={() => router.push("/checkout")}
-                className="flex-1 py-3 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800"
-              >
-                Continue to Checkout
-              </button>
-            ) : (
-              <button
-                onClick={() => setCurrentStep(currentStep + 1)}
-                disabled={!canProceed()}
-                className="flex-1 py-3 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
-              >
-                Continue
-              </button>
-            )
+          {currentStep < 3 ? (
+            <button
+              onClick={() => setCurrentStep(currentStep + 1)}
+              disabled={!canProceed()}
+              className="flex-1 py-3 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
+            >
+              Continue
+            </button>
           ) : (
-            <div className="space-y-3 flex-1">
-              <div className="space-y-2">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="wholesale"
-                    checked={wholesaleRequested}
-                    onChange={(e) => setWholesaleRequested(e.target.checked)}
-                    className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black cursor-pointer"
-                  />
-                  <label htmlFor="wholesale" className="ml-3 text-sm text-gray-700 cursor-pointer">
-                    Request Wholesale Terms
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="leaseToOwn"
-                    checked={leaseToOwnRequested}
-                    onChange={(e) => setLeaseToOwnRequested(e.target.checked)}
-                    className="h-4 w-4 text-black border-gray-300 rounded focus:ring-black cursor-pointer"
-                  />
-                  <label htmlFor="leaseToOwn" className="ml-3 text-sm text-gray-700 cursor-pointer">
-                    Request Lease-To-Own
-                  </label>
-                </div>
-              </div>
-              
-              <button
-                onClick={handleAddToCart}
-                className="btn-primary w-full text-lg font-semibold"
-              >
-                Request a Quote
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                const final = calculateFinal();
+                if (!final) return;
+                
+                const selectedAddonNames = Object.keys(selectedAddons)
+                  .filter((id) => selectedAddons[id])
+                  .map((id) => addonsRecord[id]?.name)
+                  .filter(Boolean);
+
+                addToCart({
+                  id: `glasshouse-${selectedModel?.id}`,
+                  name: selectedModel?.name || "Glasshouse",
+                  price: final,
+                  image: selectedModel?.image,
+                  options: selectedOptions,
+                  addons: selectedAddonNames,
+                  wholesaleRequested,
+                  leaseToOwnRequested,
+                });
+              }}
+              className="flex-1 py-3 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800"
+            >
+              Continue to Checkout
+            </button>
           )}
         </div>
       </ProductLayout>

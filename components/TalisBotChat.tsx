@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 interface LeadData {
   purpose: string;
   size: string;
-  budget: string;
+  productType: string;
   location: string;
   name: string;
   phone: string;
@@ -17,18 +17,18 @@ interface LeadData {
 const STEP_OPTIONS = {
   purpose: [
     { value: 'personal', label: 'Personal Home / Cottage' },
-    { value: 'rental', label: 'Rental (Short/Long)' },
-    { value: 'commercial', label: 'Commercial / Office' },
+    { value: 'rental', label: 'Short / Long Term Rental' },
+    { value: 'commercial', label: 'Office Space / Commercial Use' },
   ],
   size: [
-    { value: 'under_400', label: '<= 400 sq ft' },
-    { value: '401_800', label: '401–800 sq ft' },
-    { value: 'over_800', label: '801+ sq ft' },
+    { value: 'under_400', label: '399 sq. ft. or less' },
+    { value: '401_800', label: '400 to 800 sq. ft.' },
+    { value: 'over_800', label: '801+ sq. ft.' },
   ],
-  budget: [
-    { value: 'under_50k', label: '< $50,000' },
-    { value: '50k_90k', label: '$50,000–$90,000' },
-    { value: 'over_90k', label: '$90,000+' },
+  productType: [
+    { value: 'glasshouse', label: 'Glasshouse' },
+    { value: 'talishouse_recreational', label: 'Talishouse (Recreational)' },
+    { value: 'talishouse_residential', label: 'Talishouse (Residential)' },
   ]
 };
 
@@ -36,12 +36,12 @@ const OPTION_CLASS = "w-full text-left px-4 py-3 rounded-xl border border-gray-1
 
 export default function TalisBotChat() {
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<'greeting' | 'purpose' | 'size' | 'budget' | 'location' | 'contact' | 'complete'>('greeting');
+  const [step, setStep] = useState<'greeting' | 'purpose' | 'size' | 'productType' | 'location' | 'contact' | 'complete'>('greeting');
   const [loading, setLoading] = useState(false);
   const [leadData, setLeadData] = useState<LeadData>({
     purpose: '',
     size: '',
-    budget: '',
+    productType: '',
     location: '',
     name: '',
     phone: '',
@@ -76,7 +76,7 @@ export default function TalisBotChat() {
       status: "new",
       deal_status: "pending",
       fast_code: fastCode,
-      notes: `Purpose: ${leadData.purpose}, Size: ${leadData.size}, Budget: ${leadData.budget}`,
+      notes: `Purpose: ${leadData.purpose}, Size: ${leadData.size}, Product Type: ${leadData.productType}`,
       created_at: new Date().toISOString()
     };
 
@@ -102,7 +102,7 @@ export default function TalisBotChat() {
     setLeadData({
       purpose: '',
       size: '',
-      budget: '',
+      productType: '',
       location: '',
       name: '',
       phone: '',
@@ -120,7 +120,7 @@ export default function TalisBotChat() {
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">TalisBOT</h3>
             <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-              Configure your Talishouse in under 60 seconds
+              Configure your project in under 60 seconds
             </p>
             <button 
               onClick={() => setStep('purpose')}
@@ -162,7 +162,7 @@ export default function TalisBotChat() {
                   key={opt.value}
                   onClick={() => {
                     setLeadData({ ...leadData, size: opt.label });
-                    setStep('budget');
+                    setStep('productType');
                   }}
                   className={OPTION_CLASS}
                 >
@@ -173,16 +173,16 @@ export default function TalisBotChat() {
           </div>
         );
 
-      case 'budget':
+      case 'productType':
         return (
           <div className="space-y-4 p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <h4 className="text-[15px] font-semibold text-gray-900 px-1">What is your target budget?</h4>
+            <h4 className="text-[15px] font-semibold text-gray-900 px-1">Select Product Type</h4>
             <div className="grid gap-2">
-              {STEP_OPTIONS.budget.map((opt) => (
+              {STEP_OPTIONS.productType.map((opt) => (
                 <button
                   key={opt.value}
                   onClick={() => {
-                    setLeadData({ ...leadData, budget: opt.label });
+                    setLeadData({ ...leadData, productType: opt.label });
                     setStep('location');
                   }}
                   className={OPTION_CLASS}
@@ -197,12 +197,12 @@ export default function TalisBotChat() {
       case 'location':
         return (
           <div className="space-y-4 p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <h4 className="text-[15px] font-semibold text-gray-900 px-1">Where is the project located?</h4>
+            <h4 className="text-[15px] font-semibold text-gray-900 px-1">Where is your project located?</h4>
             <div className="space-y-4">
               <input
                 type="text"
                 autoFocus
-                placeholder="Enter project address..."
+                placeholder="Enter a full street address..."
                 className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-sm focus:outline-none focus:border-black focus:ring-0 transition"
                 value={leadData.location}
                 onChange={(e) => setLeadData({ ...leadData, location: e.target.value })}
@@ -325,8 +325,8 @@ export default function TalisBotChat() {
           {/* Progress Indicator */}
           {step !== 'greeting' && step !== 'complete' && (
             <div className="px-6 py-4 bg-gray-50/50 flex gap-1.5">
-              {['purpose', 'size', 'budget', 'location', 'contact'].map((s, i) => {
-                const steps = ['purpose', 'size', 'budget', 'location', 'contact'];
+              {['purpose', 'size', 'productType', 'location', 'contact'].map((s, i) => {
+                const steps = ['purpose', 'size', 'productType', 'location', 'contact'];
                 const currentIndex = steps.indexOf(step);
                 return (
                   <div 

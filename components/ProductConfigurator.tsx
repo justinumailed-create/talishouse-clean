@@ -6,7 +6,7 @@ import { SidingSelector } from "./ui/SidingSelector";
 
 const roofingOptions = [
   "Bright, white & white",
-  "Dark, dark & dark"
+  "Charcoal, dark & dark"
 ];
 
 const kitchenOptions = [
@@ -28,7 +28,7 @@ const bathOptions = [
 ];
 
 const flooringColors = [
-  { id: "ash", color: "#cfcfcf", label: "Ash" },
+  { id: "gray", color: "#cfcfcf", label: "Gray" },
   { id: "dark_gray", color: "#6b6b6b", label: "Dark Gray" },
   { id: "pine", color: "#f2e6d8", label: "Pine" },
   { id: "palm", color: "#c49a6c", label: "Palm" },

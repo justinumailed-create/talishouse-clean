@@ -10,7 +10,6 @@ import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
 import SuccessToast from "@/components/SuccessToast";
 import { formatCAD } from "@/utils/currency";
 
-const SHIPPING_CLEARANCE = 10000;
 const BUILD_AND_PRICE = 1950;
 const TAX_RATE = 0.14;
 
@@ -23,11 +22,10 @@ export default function TalishouseRecreationalPage() {
   const [selectedModel, setSelectedModel] = useState<any>(models[0]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
-  const [splitsCost, setSplitsCost] = useState(0);
   const [wholesaleRequested, setWholesaleRequested] = useState(false);
   const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
   const [success, setSuccess] = useState(false);
-  const { addToCart } = useCart();
+  const { addToCart, openCart } = useCart();
 
   const toggleOption = (category: string, option: string) => {
     setSelectedOptions((prev) => ({
@@ -68,12 +66,11 @@ export default function TalishouseRecreationalPage() {
 
   const calculateFinal = (): number => {
     const subtotal = calculateSubtotal();
-    const final = subtotal - splitsCost;
-    return Math.max(0, final);
+    return subtotal;
   };
 
   const calculateSubtotalWithUpsell = (): number => {
-    return BUILD_AND_PRICE + calculateFinal() + SHIPPING_CLEARANCE;
+    return BUILD_AND_PRICE + calculateFinal();
   };
 
   const calculateTax = (): number => {
@@ -100,8 +97,7 @@ export default function TalishouseRecreationalPage() {
     const configSummary = {
       model: selectedModel.name,
       ...selectedOptions,
-      addons: selectedAddonNames.join(", "),
-      splitsApplied: splitsCost > 0 ? splitsCost : undefined
+      addons: selectedAddonNames.join(", ")
     };
 
     addToCart({
@@ -116,11 +112,6 @@ export default function TalishouseRecreationalPage() {
       metadata: configSummary
     });
     setSuccess(true);
-  };
-
-  const handleContinueToCheckout = () => {
-    handleAddToCart();
-    router.push("/checkout");
   };
 
   const productAddons = getAddonsForProduct(selectedModel.id);
@@ -150,7 +141,7 @@ Furniture is added to taste after completion.`}
 
         {/* STEP INDICATOR */}
         <div className="flex items-center gap-2 mt-4 mb-6">
-          {[1, 2, 3, 4].map((step) => (
+          {[1, 2, 3].map((step) => (
             <div
               key={step}
               className={`flex-1 h-1 rounded-full transition-colors ${
@@ -190,7 +181,7 @@ Furniture is added to taste after completion.`}
                 Base configuration included with your selection.
               </p>
               <ul className="mt-3 space-y-2 text-sm text-gray-500">
-                <li>• 21' x 20' steel structure</li>
+                <li>• 20' x 20' steel structure</li>
                 <li>• Efficiency kitchen</li>
                 <li>• Four-piece bath</li>
                 <li>• Open concept living-dining-kitchen</li>
@@ -240,77 +231,6 @@ Furniture is added to taste after completion.`}
           </div>
         )}
 
-        {/* STEP 4: SPLITS INPUT */}
-        {currentStep === 4 && (
-          <div className="space-y-4">
-            <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">SPLITS Cost (Optional)</p>
-            <div className="p-4 rounded-lg border border-gray-100 bg-gray-50">
-              <p className="text-sm text-gray-600 mb-3">
-                SPLITS is a cost reduction program. Enter your SPLITS code to deduct from the total.
-              </p>
-              <input
-                type="number"
-                value={splitsCost || ""}
-                onChange={(e) => setSplitsCost(Number(e.target.value) || 0)}
-                placeholder="Enter SPLITS amount"
-                className="w-full p-3 rounded-lg border border-gray-200 text-sm"
-              />
-              <p className="text-xs text-gray-500 mt-2">
-                Current deduction: {formatCAD(splitsCost)}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-lg border border-gray-100 bg-gray-50">
-              <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">Final Pricing</p>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Build & Price</span>
-                  <span className="font-medium">{formatCAD(BUILD_AND_PRICE)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Base ({selectedModel?.name})</span>
-                  <span className="font-medium">{formatCAD(calculateBase())}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Add-ons</span>
-                  <span className="font-medium">{formatCAD(calculateAddons())}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping & Custom Clearance</span>
-                  <span className="font-medium">{formatCAD(SHIPPING_CLEARANCE)}</span>
-                </div>
-                {splitsCost > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>SPLITS Deduction</span>
-                    <span>-{formatCAD(splitsCost)}</span>
-                  </div>
-                )}
-                <div className="flex justify-between border-t pt-2">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span className="font-medium">{formatCAD(calculateSubtotalWithUpsell())}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tax (14%)</span>
-                  <span className="font-medium">{formatCAD(calculateTax())}</span>
-                </div>
-                <div className="flex justify-between text-lg font-bold border-t pt-2">
-                  <span>Total</span>
-                  <span>{formatCAD(calculateTotalWithUpsell())}</span>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 mt-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-600">Deposit (5%)</span>
-                  <span className="text-lg font-bold text-black">
-                    {formatCAD(calculateTotalWithUpsell() * 0.05)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* NAVIGATION */}
         <div className="flex gap-3 mt-6">
           {currentStep > 1 && (
@@ -322,9 +242,11 @@ Furniture is added to taste after completion.`}
             </button>
           )}
           
-          {currentStep === 4 ? (
+          {currentStep === 3 ? (
             <button
-              onClick={handleContinueToCheckout}
+              onClick={() => {
+                handleAddToCart();
+              }}
               className="flex-1 py-3 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800"
             >
               Continue to Checkout
