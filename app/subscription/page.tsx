@@ -62,21 +62,29 @@ export default function SubscriptionPage() {
                 </div>
               </div>
 
+              <div className="text-sm text-black">
+                Maintain access at {formatCAD(95)}/mo
+              </div>
+
               <div className="space-y-4 text-gray-600">
                 <p>
                   Subscribe as a Referral Partner to start earning commissions on
                   referred projects.
                 </p>
 
+                <div className="text-sm text-gray-500 mb-2">
+                  For Referral partners
+                </div>
+
                 <h3 className="font-semibold text-gray-900 mt-6">
                   Benefits:
                 </h3>
                 <ul className="list-disc pl-5 space-y-2">
-                  <li>Commission-based referral fees</li>
-                  <li>Access to exclusive project leads</li>
+                  <li>Upto 10% of MSRP</li>
+                  <li>Exclusive project leads</li>
                   <li>Marketing materials and support</li>
                   <li>Real-time referral tracking dashboard</li>
-                  <li>Priority support from our team</li>
+                  <li>Same day support from our team</li>
                 </ul>
               </div>
             </div>
@@ -114,7 +122,7 @@ export default function SubscriptionPage() {
 
               <div className="mt-2">
                 <div className="text-sm text-black">
-                  Then, starting in 1 month, {formatCAD(95)}/mo
+                  Maintain access at {formatCAD(95)}/mo
                 </div>
               </div>
 
@@ -124,13 +132,17 @@ export default function SubscriptionPage() {
                   discounts on Talishouse™ products.
                 </p>
 
+                <div className="text-sm text-gray-500 mb-2">
+                  For Resale and fulfilment partners
+                </div>
+
                 <h3 className="font-semibold text-gray-900 mt-6">
                   Benefits:
                 </h3>
                 <ul className="list-disc pl-5 space-y-2">
-                  <li>Wholesale pricing on all units</li>
-                  <li>Volume discounts and tiered pricing</li>
-                  <li>Priority manufacturing scheduling</li>
+                  <li>Wholesale pricing</li>
+                  <li>Your own dedicated Mapsite™</li>
+                  <li>Priority production & delivery scheduling</li>
                   <li>Dedicated account manager</li>
                   <li>Early access to new product lines</li>
                 </ul>
