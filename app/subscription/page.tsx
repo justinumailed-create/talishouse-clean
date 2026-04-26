@@ -3,15 +3,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import SubscriptionDrawer from "@/components/SubscriptionDrawer";
 import { formatCAD } from "@/utils/currency";
 import { isAuthorized } from "@/lib/fast-code";
+
+const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "sb";
 
 export default function SubscriptionPage() {
   const router = useRouter();
   const [authorized, setAuthorized] = useState<boolean | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [drawerType, setDrawerType] = useState<"referral" | "wholesale">("referral");
+  const [buttonsRendered, setButtonsRendered] = useState(false);
 
   useEffect(() => {
     setAuthorized(isAuthorized());
@@ -23,10 +23,60 @@ export default function SubscriptionPage() {
     }
   }, [authorized, router]);
 
-  const openDrawer = (type: "referral" | "wholesale") => {
-    setDrawerType(type);
-    setDrawerOpen(true);
-  };
+  useEffect(() => {
+    if (!document.getElementById("paypal-sdk")) {
+      const script = document.createElement("script");
+      script.id = "paypal-sdk";
+      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
+      script.async = true;
+      script.onload = () => setButtonsRendered(true);
+      document.body.appendChild(script);
+    } else if (window.paypal) {
+      setButtonsRendered(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (buttonsRendered && (window.paypal as any)) {
+      (window.paypal as any)
+        .Buttons({
+          style: {
+            layout: "horizontal",
+            shape: "pill",
+            color: "black",
+            label: "subscribe",
+          },
+          createSubscription: function (_data: any, actions: any) {
+            return actions.subscription.create({
+              plan_id: "P-REFERRAL-95",
+            });
+          },
+          onApprove: function (data: any) {
+            console.log("Referral Subscription ID:", data.subscriptionID);
+          },
+        })
+        .render("#paypal-referral-button");
+
+      (window.paypal as any)
+        .Buttons({
+          style: {
+            layout: "horizontal",
+            shape: "pill",
+            color: "black",
+            label: "subscribe",
+          },
+          createSubscription: function (_data: any, actions: any) {
+            return actions.subscription.create({
+              plan_id: "P-WHOLESALE-95",
+            });
+          },
+          onApprove: function (data: any) {
+            console.log("Wholesale Subscription ID:", data.subscriptionID);
+          },
+        })
+        .render("#paypal-wholesale-button");
+    }
+  }, [buttonsRendered]);
 
   if (authorized === null) {
     return null;
@@ -90,16 +140,12 @@ export default function SubscriptionPage() {
             </div>
 
             <div className="p-6 sm:p-8 pt-0">
-              <button
-                onClick={() => openDrawer("referral")}
-                className="w-full bg-black text-white rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] hover:bg-gray-900 transition-colors text-center block"
-              >
-                View Details
-              </button>
-
-              <p className="text-xs text-gray-400 text-center mt-4">
-                Cancel anytime. Commission rates vary by project type.
-              </p>
+              <div className="mt-4 mb-2">
+                <div
+                  id="paypal-referral-button"
+                  className="w-full h-[48px]"
+                ></div>
+              </div>
             </div>
           </section>
 
@@ -150,16 +196,12 @@ export default function SubscriptionPage() {
             </div>
 
             <div className="p-6 sm:p-8 pt-0">
-              <button
-                onClick={() => openDrawer("wholesale")}
-                className="w-full bg-black text-white rounded-2xl py-4 text-xs font-bold uppercase tracking-[0.28em] hover:bg-gray-900 transition-colors text-center block"
-              >
-                View Details
-              </button>
-
-              <p className="text-xs text-gray-400 text-center mt-4">
-                Volume pricing available. Contact us for enterprise deals.
-              </p>
+              <div className="mt-4 mb-2">
+                <div
+                  id="paypal-wholesale-button"
+                  className="w-full h-[48px]"
+                ></div>
+              </div>
             </div>
           </section>
         </div>
@@ -173,12 +215,6 @@ export default function SubscriptionPage() {
           </Link>
         </div>
       </div>
-
-      <SubscriptionDrawer
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        type={drawerType}
-      />
     </div>
   );
 }
