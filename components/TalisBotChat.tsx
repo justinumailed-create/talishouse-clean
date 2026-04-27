@@ -281,12 +281,14 @@ export default function TalisBotChat() {
   return (
     <div className="fixed bottom-6 right-6 z-[1000] font-sans">
       {!open ? (
-        <button
-          onClick={() => setOpen(true)}
-          className="bg-black text-white rounded-2xl w-14 h-14 flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300"
-        >
-          <Image src="/logo.png" alt="Bot" width={28} height={28} className="invert" />
-        </button>
+        <div className="bg-white/80 backdrop-blur-md p-1.5 rounded-[22px] shadow-2xl border border-white/50">
+          <button
+            onClick={() => setOpen(true)}
+            className="bg-black text-white rounded-2xl w-14 h-14 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 group"
+          >
+            <Image src="/logo.png" alt="Bot" width={28} height={28} className="invert group-hover:rotate-12 transition-transform" />
+          </button>
+        </div>
       ) : (
         <div className="w-[340px] max-h-[580px] bg-white rounded-[32px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-300 origin-bottom-right">
           

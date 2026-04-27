@@ -25,6 +25,8 @@ export interface Lead {
   id: string;
   name: string;
   phone: string;
+  email?: string | null;
+  message?: string | null;
   location: string;
   fast_code: string | null;
   source: string;
@@ -108,6 +110,17 @@ export interface User {
   page_contact_cta?: string | null;
   page_footer_note?: string | null;
   page_custom_message?: string | null;
+}
+
+export interface Application {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  participation_level: string;
+  status: string;
+  created_at: string;
 }
 
 export interface AssociateApplication {
@@ -226,6 +239,8 @@ export interface ContactLog {
 export interface LeadPayload {
   name: string;
   phone: string;
+  email?: string | null;
+  message?: string | null;
   location: string;
   source: string;
   status: string;
@@ -244,6 +259,8 @@ export async function safeInsertLead(payload: LeadPayload) {
     const allowedFields = [
       "name",
       "phone",
+      "email",
+      "message",
       "location",
       "source",
       "status",

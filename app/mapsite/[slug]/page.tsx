@@ -1,4 +1,3 @@
-import { getAssociates } from "@/lib/db";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import AssociateHero from "@/components/associate/AssociateHero";
 
@@ -16,15 +15,15 @@ interface PageConfig {
   phone?: string;
 }
 
-export default async function AssociatePage({ params }: { params: Promise<{ fastCode?: string }> }) {
+export default async function MapsitePage({ params }: { params: Promise<{ slug?: string }> }) {
   const resolvedParams = await params;
-  const fastCode = resolvedParams?.fastCode?.toUpperCase().trim();
+  const slug = resolvedParams?.slug?.toLowerCase().trim();
 
-  if (!fastCode || fastCode === "UNDEFINED") {
+  if (!slug) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold mb-2">Invalid Associate Code</h1>
+          <h1 className="text-2xl font-semibold mb-2">Invalid Mapsite Slug</h1>
           <p className="text-gray-600">Please check the URL and try again.</p>
         </div>
       </div>
@@ -32,22 +31,23 @@ export default async function AssociatePage({ params }: { params: Promise<{ fast
   }
 
   let pageConfig: PageConfig | undefined;
+  let fastCode: string = "GLOBAL";
 
-  // Try Supabase first
   if (isSupabaseConfigured) {
     try {
       const { data, error } = await supabase
         .from("associates")
         .select("*")
-        .eq("fast_code", fastCode)
+        .eq("mapsite_slug", slug)
         .maybeSingle();
 
       if (data && !error) {
+        fastCode = data.fast_code;
         pageConfig = {
           contentType: data.hero_type || "map",
           contentUrl: data.hero_content || "",
-          headline: data.page_headline || "",
-          subtext: data.page_subtext || "",
+          headline: data.page_headline || data.name || "Mapsite",
+          subtext: data.page_subtext || "Property Discovery Map",
           ctaText: data.page_contact_cta || "Refer a Project",
           showForm: data.show_form || false,
           showVideo: data.show_video || false,
@@ -58,15 +58,19 @@ export default async function AssociatePage({ params }: { params: Promise<{ fast
         };
       }
     } catch (err) {
-      console.error("Supabase fetch error for associate page:", err);
+      console.error("Supabase fetch error for mapsite page:", err);
     }
   }
 
-  // Fallback to file storage if not found in Supabase
   if (!pageConfig) {
-    const associates = getAssociates();
-    const associate = associates.find(a => a.fastCode === fastCode);
-    pageConfig = associate?.pageConfig;
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <h1 className="text-2xl font-semibold mb-2">Mapsite Not Found</h1>
+            <p className="text-gray-600">The requested mapsite could not be located.</p>
+          </div>
+        </div>
+      );
   }
 
   return <AssociateHero fastCode={fastCode} pageConfig={pageConfig} />;

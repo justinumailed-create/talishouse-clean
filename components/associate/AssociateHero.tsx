@@ -6,18 +6,22 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { formatCAD } from "@/utils/currency";
+import { supabase } from "@/lib/supabase";
 
 const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: false });
 
 interface PageConfig {
-  heroType: "map" | "image" | "gallery" | "pdf" | "video";
-  heroContent: string | string[];
+  contentType: "map" | "pdf" | "image";
+  contentUrl?: string;
   headline: string;
   subtext: string;
   ctaText: string;
   showForm: boolean;
   showVideo: boolean;
   videoUrl?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
 }
 
 interface AssociateHeroProps {
@@ -26,22 +30,26 @@ interface AssociateHeroProps {
 }
 
 const defaultConfig: PageConfig = {
-  heroType: "map",
-  heroContent: "",
+  contentType: "map",
+  contentUrl: "",
   headline: "TALISHOUSE™ HOMES",
-  subtext: "",
+  subtext: "Property discovery and modular home solutions.",
   ctaText: "Refer a Project",
   showForm: false,
   showVideo: false,
-  videoUrl: ""
+  videoUrl: "",
+  name: "Associate",
+  email: "",
+  phone: ""
 };
 
 export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroProps) {
   const config = pageConfig || defaultConfig;
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [formData, setFormData] = useState({ message: "", location: "" });
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", message: "", location: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -67,141 +75,242 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
     setSubmitting(true);
 
     try {
-      const res = await fetch("/api/projects/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fastCode,
-          message: formData.message,
-          location: formData.location
-        })
-      });
+      const { error } = await supabase.from("leads").insert([{
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        message: formData.message,
+        location: formData.location || "Associate Page",
+        fast_code: fastCode,
+        source: "associate_page",
+        status: "new"
+      }]);
 
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      if (data.success) {
-        alert("Project submitted successfully!");
-        setFormData({ message: "", location: "" });
-      }
+      if (error) throw error;
+      
+      setSubmitted(true);
+      setFormData({ name: "", email: "", phone: "", message: "", location: "" });
+      alert("Thank you! Your interest has been recorded.");
     } catch (err: any) {
-      console.warn("Project submit failed:", err?.message || err);
+      console.error("Lead submission failed:", err?.message || err);
+      alert("Failed to submit. Please try again.");
     }
 
     setSubmitting(false);
   };
 
   const renderHeroContent = () => {
-    switch (config.heroType) {
-      case "map":
-        return <MapComponent associateId={fastCode} />;
+    if (config.contentType === "map") {
+      return <div className="w-full h-full min-h-[500px]"><MapComponent associateId={fastCode} /></div>;
+    }
+
+    if (!config.contentUrl) {
+      return (
+        <div className="w-full h-full bg-[#fcfcfc] flex flex-col items-center justify-center text-neutral-400 rounded-2xl p-10 text-center border-2 border-dashed border-neutral-100">
+          <svg className="w-12 h-12 mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p className="text-sm font-medium">Content Area</p>
+          <p className="text-xs mt-1">Asset will appear here</p>
+        </div>
+      );
+    }
+
+    switch (config.contentType) {
       case "image":
-        return config.heroContent ? (
-          <img src={config.heroContent as string} alt="Hero" className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">No image set</div>
-        );
-      case "gallery":
-        const images = typeof config.heroContent === "string" 
-          ? config.heroContent.split(",").filter(Boolean)
-          : (config.heroContent as string[]) || [];
         return (
-          <div className="grid grid-cols-2 gap-2 h-full">
-            {images.length > 0 ? images.slice(0, 4).map((img, i) => (
-              <img key={i} src={img.trim()} alt={`Gallery ${i}`} className="w-full h-full object-cover rounded" />
-            )) : (
-              <div className="col-span-2 bg-gray-200 flex items-center justify-center text-gray-400">No gallery images</div>
-            )}
-          </div>
+          <img 
+            src={config.contentUrl} 
+            alt="Associate Project" 
+            className="w-full h-full object-cover rounded-2xl"
+          />
         );
       case "pdf":
-        return config.heroContent ? (
-          <iframe src={config.heroContent as string} className="w-full h-full" title="PDF Document" />
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">No PDF set</div>
-        );
-      case "video":
-        return config.heroContent ? (
-          <video src={config.heroContent as string} controls className="w-full h-full object-contain" />
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">No video set</div>
+        return (
+          <iframe 
+            src={config.contentUrl} 
+            className="w-full h-full rounded-2xl border-0 min-h-[500px]" 
+            title="Project Document" 
+          />
         );
       default:
-        return <MapComponent associateId={fastCode} />;
+        return <div className="w-full h-full min-h-[500px]"><MapComponent associateId={fastCode} /></div>;
     }
   };
 
+  const renderMediaArea = () => {
+    if (config.showVideo && config.videoUrl) {
+      const isYoutube = config.videoUrl.includes("youtube.com") || config.videoUrl.includes("youtu.be");
+      if (isYoutube) {
+        let videoId = "";
+        if (config.videoUrl.includes("v=")) {
+          videoId = config.videoUrl.split("v=")[1].split("&")[0];
+        } else if (config.videoUrl.includes("youtu.be/")) {
+          videoId = config.videoUrl.split("youtu.be/")[1].split("?")[0];
+        }
+        
+        return (
+          <iframe
+            src={`https://www.youtube.com/embed/${videoId}`}
+            className="w-full h-full rounded-2xl border-0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        );
+      }
+      return (
+        <video
+          src={config.videoUrl}
+          controls
+          className="w-full h-full object-cover rounded-2xl"
+        />
+      );
+    }
+
+    // Gallery Fallback (using comma-separated list)
+    const images = typeof config.contentUrl === "string" 
+      ? config.contentUrl.split(",").filter(img => img.trim().length > 0 && !img.trim().toLowerCase().endsWith('.pdf'))
+      : [];
+    
+    if (images.length > 0) {
+      return (
+        <div className="grid grid-cols-2 gap-2 h-full overflow-y-auto pr-1">
+          {images.slice(0, 10).map((img, i) => (
+            <img key={i} src={img.trim()} alt={`Gallery ${i}`} className="w-full aspect-square object-cover rounded-xl" />
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full h-full bg-[#fcfcfc] flex items-center justify-center text-neutral-400 rounded-2xl border-2 border-dashed border-neutral-100">
+        <span className="text-xs font-medium">Media Gallery</span>
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      
-      <div className="flex-1 w-full">
-        <div className="max-w-[1400px] mx-auto px-6 py-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-
-            <div className="flex flex-col self-stretch min-h-0 gap-4">
-
-              <div className="flex-[2] rounded-2xl bg-white/5 backdrop-blur-xl p-4 flex flex-col justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-[#444] mb-2 font-bold">
-                    Global Overview
-                  </p>
-                  <h1 className="leading-tight">
-                    <span className="block text-xl md:text-2xl font-semibold tracking-[0.15em] uppercase text-gray-900">
-                      {config.headline || "TALISHOUSE™"}
-                    </span>
-                    <span className="block text-sm text-gray-500">
-                      {config.subtext || "Homes and Cottages"}
-                    </span>
-                  </h1>
-                </div>
-                
-                <div>
-                  <ul className="space-y-1 mb-3">
-                    <li className="flex items-start text-sm font-medium text-gray-800">
-                      <span className="mr-2 text-gray-900 font-bold">•</span>
-                      <span>From {formatCAD(58.50)}/sq.ft.</span>
-                    </li>
-                    <li className="flex items-start text-sm font-medium text-gray-800">
-                      <span className="mr-2 text-gray-900 font-bold">•</span>
-                      <span>Move in ready in a week</span>
-                    </li>
-                  </ul>
-
-                  <Link
-                    href={`/propose-project?fast=${fastCode}`}
-                    className="block w-full text-center text-sm font-medium text-white bg-black hover:bg-[#2b2b2b] rounded-lg px-4 py-3 transition-colors"
-                    style={{ backgroundColor: '#000000', color: '#ffffff' }}
-                  >
-                    {config.ctaText || "Refer a Project"}
-                  </Link>
-                </div>
-              </div>
-
-              <div className="flex-[8] rounded-2xl overflow-hidden">
-                {renderHeroContent()}
-              </div>
-            </div>
-
-            <div className="self-start">
-              <video
-                ref={videoRef}
-                src="/videos/homepage.mp4"
-                controls
-                playsInline
-                className="block w-full h-auto rounded-2xl"
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
-                onEnded={() => setIsPlaying(false)}
-              >
-                Your browser does not support the video tag.
-              </video>
-            </div>
-
+    <div className="min-h-screen bg-[#f8f8f7] py-10 md:py-16 px-4 md:px-8">
+      <div className="max-w-[1500px] mx-auto">
+        {/* Associate Demo Frame Label */}
+        <div className="mb-4 flex items-center justify-between px-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+            <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-500">
+              Associate Mapsite™ Preview
+            </span>
+          </div>
+          <div className="hidden sm:block">
+            <span className="text-[10px] font-medium text-neutral-400 bg-neutral-100 px-2 py-1 rounded-full uppercase tracking-wider">
+              Live Preview
+            </span>
           </div>
         </div>
-      </div>
 
-      <Footer />
+        {/* Premium Framed Container */}
+        <div className="bg-white rounded-[2rem] md:rounded-[3rem] border border-neutral-200 shadow-md overflow-hidden flex flex-col">
+          <Header />
+          
+          <main className="flex-1 w-full max-w-[1400px] mx-auto px-5 py-6">
+            <div className="flex flex-col lg:grid lg:grid-cols-[7fr_3fr] gap-6 items-stretch h-full">
+
+              {/* LEFT 70% - Associate Selected Content */}
+              <div className="flex flex-col gap-4 min-h-[500px]">
+                <div className="flex-1 bg-white rounded-2xl border border-[#e5e5e5] overflow-hidden shadow-sm">
+                  {renderHeroContent()}
+                </div>
+                
+                {/* Headline/Subtext Overlay styled like HomeHero */}
+                <div className="bg-white rounded-2xl border border-[#e5e5e5] p-6 shadow-sm">
+                  <p className="text-[10px] tracking-[0.2em] text-neutral-400 uppercase mb-2">
+                    Associate Project
+                  </p>
+                  <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-neutral-900 mb-2">
+                    {config.headline || "TALISHOUSE™"}
+                  </h1>
+                  <p className="text-sm text-neutral-500 max-w-2xl leading-relaxed">
+                    {config.subtext || "Property discovery and modular home solutions."}
+                  </p>
+                </div>
+              </div>
+
+              {/* RIGHT 30% - Lead Form & Media */}
+              <div className="flex flex-col gap-6">
+                
+                {/* Top Half: Lead Acquisition Form */}
+                <div className="bg-white rounded-2xl border border-[#e5e5e5] p-6 shadow-sm flex flex-col gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold tracking-tight">Get in Touch</h3>
+                    <p className="text-xs text-neutral-500">Submit your interest for this project.</p>
+                  </div>
+                  <form onSubmit={handleFormSubmit} className="flex flex-col gap-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        placeholder="Full Name"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#e5e5e5] text-sm focus:outline-none focus:border-black transition-colors"
+                      />
+                      <input
+                        type="email"
+                        placeholder="Email Address"
+                        required
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#e5e5e5] text-sm focus:outline-none focus:border-black transition-colors"
+                      />
+                    </div>
+                    <input
+                      type="tel"
+                      placeholder="Phone Number"
+                      required
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#e5e5e5] text-sm focus:outline-none focus:border-black transition-colors"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Location / Address"
+                      value={formData.location}
+                      onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#e5e5e5] text-sm focus:outline-none focus:border-black transition-colors"
+                    />
+                    <textarea
+                      placeholder="Tell us about your project"
+                      required
+                      rows={3}
+                      value={formData.message}
+                      onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-[#e5e5e5] text-sm focus:outline-none focus:border-black transition-colors resize-none"
+                    />
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full py-3 bg-black text-white text-sm font-medium rounded-full hover:bg-neutral-800 transition-all disabled:opacity-50 shadow-sm"
+                    >
+                      {submitting ? "Submitting..." : config.ctaText || "Refer a Project"}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Bottom Half: Media Area */}
+                <div className="flex-1 min-h-[300px] bg-white rounded-2xl border border-[#e5e5e5] overflow-hidden shadow-sm p-2">
+                  <div className="w-full h-full">
+                    {renderMediaArea()}
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </main>
+
+          <Footer />
+        </div>
+      </div>
     </div>
   );
+
 }

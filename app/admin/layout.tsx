@@ -7,6 +7,7 @@ import { clearAdminSession, hasAdminSession } from "@/lib/fast-code";
 
 const adminNavItems = [
   { href: "/admin/dashboard", label: "Dashboard" },
+  { href: "/admin/associates", label: "Associates" },
   { href: "/admin/talisbot", label: "TalisBOT" },
   { href: "/admin/products", label: "Products" },
   { href: "/admin/content", label: "Content" },
@@ -14,8 +15,10 @@ const adminNavItems = [
   { href: "/admin/leads-simulation", label: "Leads Simulation" },
   { href: "/admin/deals", label: "Deals" },
   { href: "/admin/users", label: "Users" },
-  { href: "/admin/applications", label: "Applications" },
+  { href: "/admin/applications", label: "Associate Apps" },
+  { href: "/admin/project-applications", label: "Project Apps" },
   { href: "/admin/pricing", label: "Pricing" },
+  { href: "/admin/fast-codes", label: "FAST Codes" },
 ];
 
 function subscribeToAdminSession(onStoreChange: () => void) {

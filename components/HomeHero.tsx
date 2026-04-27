@@ -106,45 +106,67 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
 
           </div>
 
-          {/* VIDEO */}
-          <div className="w-full aspect-video md:h-full md:aspect-auto rounded-xl overflow-hidden relative group cursor-pointer">
-            <video
-              ref={videoRef}
-              src="/videos/homepage.mp4"
-              className="w-full h-full object-cover"
-              playsInline
-              controls={false}
-              onClick={toggleVideo}
-              onTouchStart={toggleVideo}
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              onEnded={() => setIsPlaying(false)}
-            />
-            <div
-              onClick={toggleVideo}
-              className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isPlaying ? "opacity-0 pointer-events-none" : "opacity-100"}`}
-            >
-              <div className="
-                w-16 h-16
-                rounded-full
-                backdrop-blur-xl
-                bg-white/30
-                border border-white/40
-                flex items-center justify-center
-                transition-all duration-300 ease-out
-                hover:scale-110
-                hover:bg-white/40
-                shadow-[0_10px_40px_rgba(0,0,0,0.08)]
-              ">
-                {isPlaying ? (
-                  <div className="w-3 h-3 bg-black" />
-                ) : (
-                  <div className="ml-1 w-0 h-0 border-l-[10px] border-l-black border-y-[6px] border-y-transparent" />
-                )}
+          {/* VIDEO & BUTTON COLUMN */}
+          <div className="flex flex-col gap-3">
+            <div className="w-full aspect-video md:h-full md:aspect-auto rounded-xl overflow-hidden relative group cursor-pointer min-h-[300px]">
+              <video
+                ref={videoRef}
+                src="/videos/homepage.mp4"
+                className="w-full h-full object-cover"
+                playsInline
+                controls={false}
+                onClick={toggleVideo}
+                onTouchStart={toggleVideo}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => setIsPlaying(false)}
+              />
+              <div
+                onClick={toggleVideo}
+                className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ease-out ${isPlaying ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+              >
+                <div className="
+                  w-16 h-16
+                  rounded-full
+                  backdrop-blur-xl
+                  bg-white/30
+                  border border-white/40
+                  flex items-center justify-center
+                  transition-all duration-300 ease-out
+                  hover:scale-110
+                  hover:bg-white/40
+                  shadow-[0_10px_40px_rgba(0,0,0,0.08)]
+                ">
+                  {isPlaying ? (
+                    <div className="w-3 h-3 bg-black" />
+                  ) : (
+                    <div className="ml-1 w-0 h-0 border-l-[10px] border-l-black border-y-[6px] border-y-transparent" />
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
+            <Link
+              href="/mapsite"
+              className="
+                w-full
+                h-[48px]
+                rounded-full
+                bg-white
+                border border-[#e5e5e5]
+                text-gray-900
+                text-sm font-medium
+                shadow-sm
+                hover:shadow-md
+                transition-all
+                duration-200
+                flex items-center justify-center
+                tracking-tight
+              "
+            >
+              Explore Mapsite™
+            </Link>
+          </div>
         </div>
       </div>
     </section>

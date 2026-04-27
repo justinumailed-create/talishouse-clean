@@ -260,6 +260,7 @@ export default function LeadsPage() {
             <option value="all">All Sources</option>
             <option value="talisbot">TalisBOT</option>
             <option value="website">Website</option>
+            <option value="associate_page">Associate Page</option>
           </select>
         </div>
       </div>

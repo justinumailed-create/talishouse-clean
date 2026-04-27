@@ -45,9 +45,10 @@ export default function CartDrawer() {
     applyPromoCode,
     stackConfig,
     splitsAmount,
-    splitsDetails,
-    updateSplitsAmount,
-    updateSplitsDetails,
+    splitsJobs,
+    addSplitsJob,
+    removeSplitsJob,
+    updateSplitsJob,
   } = useCart();
 
   const [promoInput, setPromoInput] = useState("");
@@ -74,18 +75,11 @@ export default function CartDrawer() {
         user_name: "Cart Purchase",
         status: paymentStrategy === "deposit" ? "deposit" : paymentStrategy === "lto" ? "lto" : "completed",
       };
-      console.log("PAYMENT INSERT - Payload:", JSON.stringify(paymentPayload, null, 2));
 
       const { error: paymentError } = await supabase.from("payments").insert([paymentPayload]);
-      if (paymentError) {
-        console.error("PAYMENT INSERT ERROR:", JSON.stringify(paymentError, null, 2));
-      } else {
-        console.log("PAYMENT INSERT SUCCESS");
-      }
-
+      
       const fastCode = promoCode || "DIRECT";
       const basePrice = rawSubtotal;
-      const addonsValue = 0;
 
       const dealPayload = {
         client_name: "Cart Purchase",
@@ -95,19 +89,17 @@ export default function CartDrawer() {
         fast_code: fastCode,
         source: "cart",
         base_price: basePrice,
-        addons_value: addonsValue,
+        addons_value: 0,
         splits_amount: splitsAmount || undefined,
-        splits_details: splitsDetails || undefined,
+        splits_details: JSON.stringify(splitsJobs),
       };
-      console.log("DEAL INSERT - Payload:", JSON.stringify(dealPayload, null, 2));
 
       const { data: dealData, error: dealError } = await supabase.from("deals_v2").insert([dealPayload]).select().single();
 
       if (dealError) {
-        console.error("DEAL INSERT ERROR:", JSON.stringify(dealError, null, 2));
+        console.error("DEAL INSERT ERROR:", dealError);
         return;
       }
-      console.log("DEAL INSERT SUCCESS:", JSON.stringify(dealData, null, 2));
 
       if (dealData) {
         const txPayload = {
@@ -116,14 +108,8 @@ export default function CartDrawer() {
           amount: getPaymentAmount(),
           payment_type: paymentStrategy,
         };
-        console.log("TRANSACTION INSERT - Payload:", JSON.stringify(txPayload, null, 2));
 
-        const { error: txError } = await supabase.from("transactions").insert([txPayload]);
-        if (txError) {
-          console.error("TRANSACTION INSERT ERROR:", JSON.stringify(txError, null, 2));
-        } else {
-          console.log("TRANSACTION INSERT SUCCESS");
-        }
+        await supabase.from("transactions").insert([txPayload]);
 
         await syncTransactionToSplits(
           dealData.id,
@@ -144,50 +130,8 @@ export default function CartDrawer() {
     setIsCheckingOut(false);
   };
 
-  const paymentAmount = paymentType === "partial" ? (grandTotal + splitsAmount) * 0.05 : grandTotal + splitsAmount;
-
-  const getPaymentLabel = () => {
-    const initialPaymentPercent = (config.paymentOptions.partial.percentage * 100).toFixed(0);
-    const downPaymentPercent = (config.leaseToOwn.downPaymentPercent * 100).toFixed(0);
-    
-    switch (paymentStrategy) {
-      case "full":
-        return `Full Payment — CAD $${paymentAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      case "deposit":
-        return `${initialPaymentPercent}% Deposit — CAD $${paymentAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-      case "lto":
-        return `LTO — CAD $${paymentAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} down (${downPaymentPercent}%) + CAD $${ltoMonthlyPayment.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mo × ${ltoTermMonths} months`;
-      default:
-        return "";
-    }
-  };
-
-  const getAvailablePaymentOptions = () => {
-    const initialPaymentPercent = (config.paymentOptions.partial.percentage * 100).toFixed(0);
-    const downPaymentPercent = (config.leaseToOwn.downPaymentPercent * 100).toFixed(0);
-    
-    if (!promoInfo) {
-      return [
-        { value: "full" as PaymentStrategy, label: "Full Payment" },
-        { value: "deposit" as PaymentStrategy, label: `${initialPaymentPercent}% Initial Payment` },
-      ];
-    }
-    
-    const options: { value: PaymentStrategy; label: string }[] = [];
-    
-    if (promoInfo.allowsPayment.includes("full")) {
-      options.push({ value: "full", label: "Full Payment" });
-    }
-    if (promoInfo.allowsPayment.includes("deposit")) {
-      const label = promoCode === "FAST5" ? `${initialPaymentPercent}% Deposit` : `${initialPaymentPercent}% Initial Payment`;
-      options.push({ value: "deposit", label });
-    }
-    if (promoInfo.allowsPayment.includes("lto")) {
-      options.push({ value: "lto", label: `Lease-to-Own (${downPaymentPercent}% down)` });
-    }
-    
-    return options;
-  };
+  const totalWithSplits = grandTotal + splitsAmount;
+  const paymentAmount = paymentType === "partial" ? totalWithSplits * 0.05 : totalWithSplits;
 
   if (!isOpen) return null;
 
@@ -196,61 +140,19 @@ export default function CartDrawer() {
       <div className="fixed inset-0 z-50 flex items-center justify-end">
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeCart} />
         <div className="relative w-full max-w-md bg-white h-full shadow-2xl p-6 flex flex-col">
-          <button
-            onClick={closeCart}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-100"
-          >
+          <button onClick={closeCart} className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-2">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <div className="flex-1 flex flex-col items-center justify-center text-center overflow-y-auto">
-            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="flex-1 flex flex-col items-center justify-center text-center">
+            <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-4 text-green-600">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Payment Successful!</h2>
-            <p className="text-gray-500 mb-6">Thank you for your purchase. You will receive a confirmation email shortly.</p>
-            
-            {purchasedItems.length > 0 && (
-              <div className="w-full max-w-xs mx-auto mb-6">
-                <h3 className="text-sm font-medium text-gray-500 mb-3">Order Summary</h3>
-                <div className="space-y-3">
-                  {purchasedItems.map((item) => (
-                    <div key={item.id} className="flex items-center gap-3 text-left bg-gray-50 rounded-xl p-3">
-                      <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                        {item.image ? (
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={48}
-                            height={48}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                            <span className="text-gray-400 text-xs">No img</span>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{item.name}</p>
-                        <p className="text-xs text-gray-500">CAD ${item.price.toLocaleString()}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-            
-            <Link
-              href="/"
-              onClick={closeCart}
-              className="btn-primary"
-            >
-              Continue Shopping
-            </Link>
+            <h2 className="text-2xl font-semibold mb-2">Payment Successful!</h2>
+            <Link href="/" onClick={closeCart} className="btn-primary mt-6">Continue Shopping</Link>
           </div>
         </div>
       </div>
@@ -261,353 +163,143 @@ export default function CartDrawer() {
     <div className="fixed inset-0 z-50 flex items-center justify-end">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeCart} />
       <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col">
-        <div className="flex items-center justify-between p-6 border-b border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-900">Your Cart ({items.length})</h2>
-          <button
-            onClick={closeCart}
-            className="text-gray-400 hover:text-gray-900 transition-colors p-2 rounded-lg hover:bg-gray-100"
-          >
+        <div className="flex items-center justify-between p-6 border-b">
+          <h2 className="text-lg font-semibold">Your Cart ({items.length})</h2>
+          <button onClick={closeCart} className="text-gray-400 hover:text-gray-900 p-2">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {items.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 mb-4">Your cart is empty</p>
-              <Link href="/catalog" onClick={closeCart} className="text-gray-900 hover:underline font-medium">
-                Browse Products
-              </Link>
+              <Link href="/catalog" onClick={closeCart} className="text-gray-900 hover:underline font-medium">Browse Products</Link>
             </div>
           ) : (
-            <div className="space-y-4">
-              {items.map((item) => (
-                <div key={item.id} className="flex gap-4 pb-4 border-b border-gray-100 last:border-0">
-                  <div className="w-20 h-20 bg-gray-50 rounded-xl flex-shrink-0 overflow-hidden">
-                    {item.image ? (
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        width={80}
-                        height={80}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">No image</span>
+            <>
+              <div className="space-y-4">
+                {items.map((item) => (
+                  <div key={item.id} className="flex gap-4 pb-4 border-b last:border-0">
+                    <div className="w-20 h-20 bg-gray-50 rounded-xl flex-shrink-0 overflow-hidden relative">
+                      {item.image && <Image src={item.image} alt={item.name} fill className="object-cover" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-sm truncate">{item.name}</h3>
+                      <p className="text-gray-500 text-sm">CAD ${item.price.toLocaleString()}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 border rounded flex items-center justify-center">-</button>
+                        <span className="text-sm w-6 text-center">{item.quantity}</span>
+                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-7 h-7 border rounded flex items-center justify-center">+</button>
                       </div>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium text-sm text-gray-900">{item.name}</h3>
-                    <p className="text-gray-500 text-sm">CAD ${item.price.toLocaleString()}</p>
-                    {item.metadata && (
-                      <div className="mt-1 space-y-0.5">
-                        {Object.entries(item.metadata).map(([key, value]) => (
-                          <p key={key} className="text-[10px] leading-tight text-gray-400">
-                            <span className="font-medium uppercase tracking-wider">{key}:</span> {String(value)}
-                          </p>
-                        ))}
-                      </div>
-                    )}
-                    {!item.metadata && item.options && Object.keys(item.options).length > 0 && (
-                      <p className="text-xs text-gray-400 mt-1">
-                        {Object.values(item.options).join(", ")}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-2 mt-2">
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-7 h-7 border border-gray-200 rounded-lg flex items-center justify-center text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-                      >
-                        -
-                      </button>
-                      <span className="text-sm text-gray-900 w-6 text-center">{item.quantity}</span>
-                      <button
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-7 h-7 border border-gray-200 rounded-lg flex items-center justify-center text-sm text-gray-600 hover:bg-gray-100 transition-colors"
-                      >
-                        +
-                      </button>
-                      <button
-                        onClick={() => removeFromCart(item.id)}
-                        className="ml-auto text-xs text-red-500 hover:text-red-700 transition-colors"
-                      >
-                        Remove
-                      </button>
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* SPLITS Jobs */}
+              <div className="bg-gray-50 rounded-2xl p-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">SPLITS Allocation (Max 10)</h3>
+                  <button
+                    onClick={addSplitsJob}
+                    disabled={splitsJobs.length >= 10}
+                    className="text-xs font-bold text-blue-600 hover:underline disabled:text-gray-400"
+                  >
+                    + ADD JOB
+                  </button>
                 </div>
-              ))}
-            </div>
+
+                {splitsJobs.map((job, index) => {
+                  const runningTotal = splitsJobs.slice(0, index + 1).reduce((sum, j) => sum + j.amount, 0);
+                  return (
+                    <div key={index} className="bg-white rounded-xl p-3 border border-gray-100 relative group">
+                      <button onClick={() => removeSplitsJob(index)} className="absolute top-2 right-2 text-gray-300 hover:text-red-500">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </button>
+                      <div className="space-y-2">
+                        <input
+                          type="number"
+                          value={job.amount || ""}
+                          onChange={(e) => updateSplitsJob(index, { amount: Number(e.target.value) || 0 })}
+                          placeholder="Amount (CAD)"
+                          className="w-full text-sm font-medium border-b focus:border-black outline-none pb-1"
+                        />
+                        <textarea
+                          value={job.details}
+                          onChange={(e) => updateSplitsJob(index, { details: e.target.value })}
+                          placeholder="Job details / reference"
+                          rows={1}
+                          className="w-full text-xs text-gray-500 outline-none resize-none"
+                        />
+                        <div className="flex justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider pt-1">
+                          <span>Job #{index + 1}</span>
+                          <span>Running: CAD ${runningTotal.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
 
         {items.length > 0 && (
-          <div className="border-t border-gray-100 p-6 space-y-4">
-            {/* Promo Code Section */}
-            <div className="space-y-2">
-              {appliedDiscounts.length === 0 ? (
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={promoInput}
-                    onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-                    placeholder="Apply Discount Code"
-                    onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
-                    className="flex-1 px-4 py-3 rounded-xl border border-gray-200 bg-white text-sm outline-none transition-all duration-200 focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
-                  />
-                  <button
-                    onClick={handleApplyPromo}
-                    className="px-4 py-3 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 transition-colors"
-                  >
-                    Apply
-                  </button>
-                </div>
-              ) : (
-                <div className="bg-green-50 rounded-xl p-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-green-600 font-medium">
-                      {appliedDiscounts.length} discount{appliedDiscounts.length > 1 ? "s" : ""} applied
-                    </span>
-                    <button
-                      onClick={() => removePromoCode()}
-                      className="text-gray-400 hover:text-red-500 text-xs transition-colors"
-                    >
-                      Clear All
-                    </button>
-                  </div>
-                  {appliedDiscounts.map((discount) => {
-                    const discountInfo = DISCOUNT_CODES[discount.code];
-                    return (
-                      <div key={discount.code} className="flex items-center justify-between bg-white rounded-lg p-2">
-                        <div>
-                          <span className="font-medium text-sm text-gray-900">{discount.code}</span>
-                          <p className="text-xs text-green-600">{discount.label}</p>
-                          {discountInfo?.timeCondition && (
-                            <p className="text-xs text-gray-400">{discountInfo.timeCondition.message}</p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <span className="text-sm text-green-600 font-medium">
-                            -CAD ${discount.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                          </span>
-                          <button
-                            onClick={() => removePromoCode(discount.code)}
-                            className="block text-xs text-gray-400 hover:text-red-500 transition-colors"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {appliedDiscounts.length < stackConfig.maxDiscounts && (
-                    <div className="flex gap-2 pt-2">
-                      <input
-                        type="text"
-                        value={promoInput}
-                        onChange={(e) => setPromoInput(e.target.value.toUpperCase())}
-                        placeholder="Add another code"
-                        onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
-                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-xs outline-none transition-all duration-200 focus:border-gray-900"
-                      />
-                      <button
-                        onClick={handleApplyPromo}
-                        className="px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 transition-colors"
-                      >
-                        +
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-              {promoMessage && (
-                <p className={`text-xs ${promoMessage.type === "error" ? "text-red-500" : "text-green-600"}`}>
-                  {promoMessage.text}
-                </p>
-              )}
-            </div>
-
-            {/* Order Summary */}
+          <div className="p-6 border-t bg-white space-y-4">
             <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Initial Estimated Price:</span>
-                <span className="text-gray-900">CAD ${rawSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <div className="flex justify-between text-gray-500">
+                <span>Subtotal:</span>
+                <span>CAD ${rawSubtotal.toLocaleString()}</span>
               </div>
-
-              {/* SPLITS Amount */}
-              {items.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-sm text-gray-900 font-medium">SPLITS Amount</p>
-                  <input
-                    type="number"
-                    value={splitsAmount || ""}
-                    onChange={(e) => {
-                      const val = Number(e.target.value) || 0;
-                      const capped = Math.min(val, grandTotal);
-                      updateSplitsAmount(capped);
-                    }}
-                    placeholder="Enter SPLITS amount"
-                    className="w-full border border-gray-200 rounded-md p-2 mt-1 text-sm"
-                  />
-                  {splitsAmount > 0 && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      SPLITS Amount: CAD {splitsAmount.toLocaleString()}
-                    </p>
-                  )}
+              {totalDiscount > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Discounts:</span>
+                  <span>-CAD ${totalDiscount.toLocaleString()}</span>
                 </div>
               )}
-
-              {/* SPLITS Details */}
-              {items.length > 0 && (
-                <div className="mt-2">
-                  <textarea
-                    value={splitsDetails}
-                    maxLength={200}
-                    onChange={(e) => updateSplitsDetails(e.target.value)}
-                    placeholder="Enter SPLITS details (max 200 characters)"
-                    className="w-full border border-gray-200 rounded-md p-2 text-sm"
-                    rows={2}
-                  />
-                  <p className="text-xs text-gray-400 mt-1">
-                    {splitsDetails.length}/200
-                  </p>
-                </div>
-              )}
-              
-              {appliedDiscounts.length > 0 && (
-                <>
-                  <div className="flex justify-between text-green-600 pt-2">
-                    <span>Total Discounts:</span>
-                    <span>- CAD ${totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Discounted Subtotal:</span>
-                    <span className="text-gray-900">CAD ${discountedSubtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  </div>
-                </>
-              )}
-              
-              <div className="flex justify-between pt-1 border-t border-gray-50">
-                <span className="text-gray-900 font-medium">Destination Charge</span>
-                <span className="text-gray-900">CAD ${BUILD_AND_PRICE.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <div className="flex justify-between font-bold text-lg pt-2 border-t">
+                <span>Total:</span>
+                <span>CAD ${totalWithSplits.toLocaleString()}</span>
               </div>
-              
-              <div className="flex justify-between pt-1 border-t border-gray-50">
-                <span className="text-gray-500">Subtotal with Charges</span>
-                <span className="text-gray-900">CAD ${subtotalWithCharge.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-
-              <div className="flex justify-between">
-                <span className="text-gray-500">Tax ({(config.taxRate * 100).toFixed(0)}%):</span>
-                <span className="text-gray-900">CAD ${tax.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-              
-              <div className="flex justify-between font-semibold text-base pt-2 border-t border-gray-100">
-                <span className="text-gray-900">TOTAL:</span>
-                <span className="text-gray-900">CAD ${(grandTotal + splitsAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-              </div>
-              
-              {splitsAmount > 0 && (
-                <>
-                  <div className="flex justify-between text-sm text-red-500 pt-2 border-t border-gray-50">
-                    <span>SPLITS Allocation:</span>
-                    <span>- CAD ${splitsAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-medium text-green-600">
-                    <span>Eligible Value:</span>
-                    <span>CAD ${(grandTotal - splitsAmount).toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-                  </div>
-                </>
-              )}
             </div>
 
-            {/* Payment Type */}
-            <div className="space-y-3">
-              <p className="font-medium text-sm text-gray-900">Payment Type</p>
-              
+            <div className="grid grid-cols-2 gap-2">
               <button
-                type="button"
                 onClick={() => setPaymentType("full")}
-                className={`w-full p-4 rounded-xl border transition-all duration-200 ${
-                  paymentType === "full"
-                    ? "bg-gray-900 text-white border-transparent shadow-lg"
-                    : "bg-white border-gray-200 text-gray-900 hover:border-gray-400"
-                }`}
+                className={`py-3 rounded-xl text-xs font-bold transition-all ${paymentType === "full" ? "bg-black text-white" : "bg-gray-100 text-gray-600"}`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-sm">Full Payment</span>
-                  <span className={`text-xs ${paymentType === "full" ? "text-white/70" : "text-gray-500"}`}>
-                    CAD ${grandTotal.toLocaleString()}
-                  </span>
-                </div>
+                FULL PAYMENT
               </button>
-
               <button
-                type="button"
                 onClick={() => setPaymentType("partial")}
-                className={`w-full p-4 rounded-xl border transition-all duration-200 ${
-                  paymentType === "partial"
-                    ? "bg-gray-900 text-white border-transparent shadow-lg"
-                    : "bg-white border-gray-200 text-gray-900 hover:border-gray-400"
-                }`}
+                className={`py-3 rounded-xl text-xs font-bold transition-all ${paymentType === "partial" ? "bg-black text-white" : "bg-gray-100 text-gray-600"}`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-sm">Deposit (5% of total)</span>
-                  <span className={`text-xs ${paymentType === "partial" ? "text-white/70" : "text-gray-500"}`}>
-                    CAD ${(grandTotal * 0.05).toLocaleString()}
-                  </span>
-                </div>
+                5% DEPOSIT
               </button>
             </div>
 
             {!isCheckingOut ? (
-              <button
-                onClick={() => setIsCheckingOut(true)}
-                className="btn-primary w-full"
-              >
-                Proceed to Checkout — CAD ${paymentAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+              <button onClick={() => setIsCheckingOut(true)} className="btn-primary w-full py-4 rounded-full font-bold">
+                CHECKOUT — CAD ${paymentAmount.toLocaleString()}
               </button>
             ) : (
-              <div className="space-y-3">
-                <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
-                  <PayPalButtons
-                    style={{ layout: "horizontal", color: "black", shape: "rect" }}
-                    createOrder={(data, actions) => {
-                      return actions.order.create({
-                        intent: "CAPTURE",
-                        purchase_units: [{
-                          description: "Talishouse Products",
-                          amount: {
-                            currency_code: "CAD",
-                            value: paymentAmount.toFixed(2),
-                          },
-                        }],
-                      });
-                    }}
-                    onApprove={async (data, actions) => {
-                      if (actions.order) {
-                        const details = await actions.order.capture();
-                        console.log("Payment captured:", details);
-                        await savePayment(details.id || "");
-                        handlePaymentSuccess();
-                      }
-                    }}
-                    onError={(err: any) => {
-                      console.warn("PayPal error:", err?.message || err);
-                    }}
-                  />
-                </PayPalScriptProvider>
-                <button
-                  onClick={() => setIsCheckingOut(false)}
-                  className="w-full text-sm text-gray-500 hover:text-gray-900 transition-colors"
-                >
-                  Back to Cart
-                </button>
-              </div>
+              <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: "CAD" }}>
+                <PayPalButtons
+                  style={{ layout: "horizontal", color: "black", shape: "pill", label: "checkout" }}
+                  createOrder={(data, actions) => actions.order.create({
+                    intent: "CAPTURE",
+                    purchase_units: [{ amount: { currency_code: "CAD", value: paymentAmount.toFixed(2) } }]
+                  })}
+                  onApprove={async (data, actions) => {
+                    const details = await actions?.order?.capture();
+                    await savePayment(details?.id || "");
+                    handlePaymentSuccess();
+                  }}
+                />
+              </PayPalScriptProvider>
             )}
           </div>
         )}

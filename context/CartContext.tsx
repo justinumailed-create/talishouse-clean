@@ -37,7 +37,10 @@ export interface CartItem {
   leaseToOwnRequested?: boolean;
 }
 
-const DEFAULT_PRODUCT_IMAGE = "/images/placeholder.png";
+export interface SplitsJob {
+  amount: number;
+  details: string;
+}
 
 export type PromoCode = 
   | "310"
@@ -87,7 +90,7 @@ interface CartContextType {
   ltoMonthlyPayment: number;
   stackConfig: DiscountStackConfig;
   splitsAmount: number;
-  splitsDetails: string;
+  splitsJobs: SplitsJob[];
   addToCart: (item: Omit<CartItem, "quantity">) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
@@ -97,8 +100,9 @@ interface CartContextType {
   setDiscount: (options: { code: string; percent: number }) => void;
   setPaymentStrategy: (strategy: PaymentStrategy) => void;
   setLtoTermMonths: (months: number) => void;
-  updateSplitsAmount: (amount: number) => void;
-  updateSplitsDetails: (details: string) => void;
+  addSplitsJob: () => void;
+  removeSplitsJob: (index: number) => void;
+  updateSplitsJob: (index: number, job: Partial<SplitsJob>) => void;
   getPaymentAmount: () => number;
   getSubtotalWithCharge: () => number;
   openCart: () => void;
@@ -120,8 +124,11 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   const [paymentStrategy, setPaymentStrategy] = useState<PaymentStrategy>("full");
   const [ltoTermMonths, setLtoTermMonths] = useState(config.leaseToOwn.maxMonths);
   const [stackConfig] = useState<DiscountStackConfig>(DEFAULT_STACK_CONFIG);
-  const [splitsAmount, setSplitsAmount] = useState(0);
-  const [splitsDetails, setSplitsDetails] = useState("");
+  const [splitsJobs, setSplitsJobs] = useState<SplitsJob[]>([]);
+
+  const splitsAmount = useMemo(() => {
+    return splitsJobs.reduce((sum, job) => sum + job.amount, 0);
+  }, [splitsJobs]);
 
   useEffect(() => {
     const stored = localStorage.getItem(CART_STORAGE_KEY);
@@ -132,13 +139,12 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
         const parsed = JSON.parse(stored);
         const itemsToSet = parsed.items || [];
         const promoToSet = parsed.appliedDiscountCodes || [];
-        const splitsToSet = parsed.splitsAmount || 0;
-        const splitsDetailsToSet = parsed.splitsDetails || '';
+        const splitsJobsToSet = parsed.splitsJobs || [];
+        
         setTimeout(() => {
           if (itemsToSet.length > 0) setItems(itemsToSet);
           if (promoToSet.length > 0) setAppliedDiscountCodes(promoToSet);
-          if (splitsToSet > 0) setSplitsAmount(splitsToSet);
-          if (splitsDetailsToSet) setSplitsDetails(splitsDetailsToSet);
+          if (splitsJobsToSet.length > 0) setSplitsJobs(splitsJobsToSet);
           hydrate();
         }, 0);
       } catch (e) {
@@ -152,9 +158,9 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
 
   useEffect(() => {
     if (isHydrated) {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items, appliedDiscountCodes, splitsAmount, splitsDetails }));
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items, appliedDiscountCodes, splitsJobs }));
     }
-  }, [items, appliedDiscountCodes, isHydrated, splitsAmount, splitsDetails]);
+  }, [items, appliedDiscountCodes, isHydrated, splitsJobs]);
 
   const rawSubtotal = useMemo(() => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -236,6 +242,7 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     setItems([]);
     setAppliedDiscountCodes([]);
     setPaymentStrategy("full");
+    setSplitsJobs([]);
   }, []);
 
   const applyPromoCode = useCallback((code: string): { success: boolean; message: string } => {
@@ -278,21 +285,22 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   }, []);
 
   const getPaymentAmount = useCallback(() => {
+    const totalWithSplits = grandTotal + splitsAmount;
     switch (paymentStrategy) {
       case "full":
-        return grandTotal;
+        return totalWithSplits;
       case "deposit": {
-        const partial = calculatePartialPayment({ total: grandTotal, config });
+        const partial = calculatePartialPayment({ total: totalWithSplits, config });
         return partial.initialPayment;
       }
       case "lto": {
-        const lease = calculateLeaseToOwn({ totalAmount: grandTotal, months: ltoTermMonths, config });
+        const lease = calculateLeaseToOwn({ totalAmount: totalWithSplits, months: ltoTermMonths, config });
         return lease.downPayment;
       }
       default:
-        return grandTotal;
+        return totalWithSplits;
     }
-  }, [paymentStrategy, grandTotal, ltoTermMonths, config]);
+  }, [paymentStrategy, grandTotal, splitsAmount, ltoTermMonths, config]);
 
   const getSubtotalWithCharge = useCallback(() => {
     return subtotalWithCharge;
@@ -315,19 +323,28 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
         associateId: associate?.id || null,
         associateName: associate?.name || null,
         splitsAmount: splitsAmount,
-        splitsDetails: splitsDetails,
+        splitsJobs: splitsJobs,
       };
     } catch {
       return {};
     }
-  }, [splitsAmount, splitsDetails]);
+  }, [splitsAmount, splitsJobs]);
 
-  const updateSplitsAmount = useCallback((amount: number) => {
-    setSplitsAmount(amount);
+  const addSplitsJob = useCallback(() => {
+    setSplitsJobs((prev) => {
+      if (prev.length >= 10) return prev;
+      return [...prev, { amount: 0, details: "" }];
+    });
   }, []);
 
-  const updateSplitsDetails = useCallback((details: string) => {
-    setSplitsDetails(details.slice(0, 200));
+  const removeSplitsJob = useCallback((index: number) => {
+    setSplitsJobs((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const updateSplitsJob = useCallback((index: number, updatedJob: Partial<SplitsJob>) => {
+    setSplitsJobs((prev) =>
+      prev.map((job, i) => (i === index ? { ...job, ...updatedJob } : job))
+    );
   }, []);
 
   const setDiscount = useCallback((options: { code: string; percent: number }) => {
@@ -356,7 +373,7 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     ltoMonthlyPayment,
     stackConfig,
     splitsAmount,
-    splitsDetails,
+    splitsJobs,
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -366,8 +383,9 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     removePromoCode,
     setPaymentStrategy,
     setLtoTermMonths,
-    updateSplitsAmount,
-    updateSplitsDetails,
+    addSplitsJob,
+    removeSplitsJob,
+    updateSplitsJob,
     getPaymentAmount,
     getSubtotalWithCharge,
     openCart,
@@ -390,6 +408,8 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     ltoTermMonths,
     ltoMonthlyPayment,
     stackConfig,
+    splitsAmount,
+    splitsJobs,
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -404,6 +424,9 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     openCart,
     closeCart,
     getCheckoutMetadata,
+    addSplitsJob,
+    removeSplitsJob,
+    updateSplitsJob
   ]);
 
   return (

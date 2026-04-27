@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { supabase, safeInsertLead } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { useAssociate } from "@/context/AssociateContext";
 import { UI } from "@/styles/design-system";
 
@@ -41,24 +41,22 @@ export default function AddProjectPage() {
 
     const payload = {
       name,
+      email: "", // email not collected in this form version
       phone,
       location: location || "unknown",
-      source: "add-project",
-      status: "new",
-      deal_status: "pending",
-      fast_code: fastCode || "DIRECT",
+      participation_level: "referral",
+      status: "pending",
       created_at: new Date().toISOString(),
-      project_value: null,
-      commission_rate: null,
-      split_percentage: null,
     };
 
     try {
-      await safeInsertLead(payload);
+      const { error: insertError } = await supabase.from("applications").insert([payload]);
+      if (insertError) throw insertError;
+      
       setStatus("success");
       router.push("/project-received");
     } catch (err) {
-      console.error("LEAD FAIL FULL:", JSON.stringify(err, null, 2));
+      console.error("APPLICATION FAIL FULL:", JSON.stringify(err, null, 2));
       setStatus("error");
       setLoading(false);
     }
