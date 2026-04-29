@@ -19,9 +19,9 @@ export default function SubscriptionPage() {
 
   useEffect(() => {
     if (authorized === false) {
-      router.push("/business-office");
+      window.location.href = "/business-office";
     }
-  }, [authorized, router]);
+  }, [authorized]);
 
   useEffect(() => {
     if (!document.getElementById("paypal-sdk")) {

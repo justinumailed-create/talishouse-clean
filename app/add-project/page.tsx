@@ -55,6 +55,7 @@ export default function AddProjectPage() {
       
       setStatus("success");
       router.push("/project-received");
+      router.refresh();
     } catch (err) {
       console.error("APPLICATION FAIL FULL:", JSON.stringify(err, null, 2));
       setStatus("error");

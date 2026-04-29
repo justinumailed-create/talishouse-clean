@@ -1,7 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { FeatureSlider } from "@/components/FeatureSlider";
 
 interface HomeHeroProps {
   title: string;
@@ -9,6 +12,7 @@ interface HomeHeroProps {
 }
 
 export default function HomeHero({ title, subtitle }: HomeHeroProps) {
+  const router = useRouter();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -32,74 +36,55 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
           <div className="flex flex-col h-full gap-4">
             
             {/* TEXT CARD (SMALL) */}
-            <div className="w-full h-[180px] md:h-[200px] rounded-xl overflow-hidden flex flex-col justify-center p-4 md:p-5 border bg-white">
-              <style dangerouslySetInnerHTML={{ __html: `
-                .fade-line {
-                  opacity: 0;
-                  transform: translateY(20px);
-                  filter: blur(6px);
-                  animation: appleFadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-                }
-                .delay-1 { animation-delay: 0.2s; }
-                .delay-2 { animation-delay: 0.4s; }
-                .delay-3 { animation-delay: 0.6s; }
-                @keyframes appleFadeUp {
-                  to {
-                    opacity: 1;
-                    transform: translateY(0);
-                    filter: blur(0);
-                  }
-                }
-              `}} />
-              <div className="flex flex-col md:flex-row gap-3 md:gap-5 w-full">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="w-full h-[140px] md:h-[160px] rounded-xl overflow-hidden flex items-center p-3 md:p-4 border bg-white"
+            >
+              <div className="grid grid-cols-3 items-center w-full">
                 
-                {/* LEFT SIDE */}
-                <div className="flex flex-col gap-1 text-left flex-1">
+                {/* LEFT COLUMN */}
+                <div className="flex flex-col gap-1 text-left">
                   <p className="text-[10px] md:text-xs tracking-[0.15em] text-neutral-400 uppercase">
                     GLOBAL OVERVIEW
                   </p>
-                  <h1 className="text-[22px] md:text-[28px] font-semibold tracking-tight leading-tight">
+                  <h1 className="text-2xl md:text-3xl font-bold tracking-tight leading-tight">
                     {title}
                   </h1>
-                  <p className="text-[12px] md:text-[13px] text-neutral-500 leading-relaxed">
+                  <p className="text-sm md:text-base text-neutral-500 leading-relaxed">
                     {subtitle}
                   </p>
-                  <Link 
-                    href="/business-office/apply"
-                    className="inline-block bg-black text-white text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded-full hover:bg-neutral-800 transition-colors w-fit mt-1 md:mt-2"
-                  >
-                    Propose a Project
-                  </Link>
                 </div>
 
-                {/* RIGHT SIDE */}
-                <div className="flex flex-col gap-1 text-left md:text-right">
-                  <p className="text-[10px] md:text-xs tracking-[0.15em] text-neutral-400 uppercase">
-                    FEATURES
-                  </p>
-                  <p className="fade-line delay-1 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
-                    From CAD $62.50/sq.ft.
-                  </p>
-                  <p className="fade-line delay-2 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
-                    Up in a day, finished in a week
-                  </p>
-                  <p className="fade-line delay-3 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
-                    Retail and Wholesale Terms available
-                  </p>
-                  <p className="fade-line delay-3 text-[12px] md:text-[14px] font-medium tracking-tight text-neutral-700">
-                    Lease-To-Own, OAC.
-                  </p>
+                {/* CENTER COLUMN */}
+                <div className="flex justify-center items-center">
+                  <FeatureSlider />
+                </div>
+
+                {/* RIGHT COLUMN */}
+                <div className="flex justify-end items-center">
+                  <button
+                    onClick={() => {
+                      router.replace("/business-office/apply");
+                      router.refresh();
+                    }}
+                    className="inline-block bg-black text-white text-sm md:text-base px-6 py-3 rounded-full hover:bg-neutral-800 transition-colors cursor-pointer shadow-md hover:shadow-lg"
+                  >
+                    Propose a Project
+                  </button>
                 </div>
 
               </div>
-            </div>
+            </motion.div>
 
             {/* MAP BLOCK (FLEX FILL) */}
-            <div className="w-full flex-1 min-h-0 sm:min-h-[300px] rounded-xl overflow-hidden">
+            <div className="map-container flex-1 min-h-0 sm:min-h-[300px]">
               <iframe
                 src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
                 allow="geolocation 'self' https://my.atlist.com"
                 className="block w-full h-full border-0"
+                style={{ width: '100%', height: '100%' }}
                 title="Talishouse property discovery map"
               />
             </div>

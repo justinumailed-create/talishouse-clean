@@ -43,25 +43,24 @@ export default function ProductList() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+       <div className="catalog-grid">
         {products.map((product) => (
-          <Link
-            key={product.id}
-            href={`/catalog?product=${product.id}`}
-            className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition-all duration-500"
-          >
-            <div className="aspect-video relative overflow-hidden">
+           <Link
+             key={product.id}
+             href={`/catalog?product=${product.id}`}
+             className="catalog-card group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition-all duration-500"
+           >
+            <div className="catalog-image">
               {product.image_url ? (
                 <Image
                   src={product.image_url}
                   alt={product.name}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  style={{ objectFit: "cover" }}
+                  className="transition-transform duration-700 group-hover:scale-105"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-300 text-sm">
-                  No image
-                </div>
+                <div className="w-full h-full flex items-center justify-center bg-gray-50" />
               )}
             </div>
             <div className="p-4">

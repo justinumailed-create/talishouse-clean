@@ -73,9 +73,9 @@ function LeaseToOwnPageContent() {
 
   useEffect(() => {
     if (authorized === false) {
-      router.push("/business-office");
+      window.location.href = "/business-office";
     }
-  }, [authorized, router]);
+  }, [authorized]);
 
   useEffect(() => {
     const productParam = searchParams.get("product");

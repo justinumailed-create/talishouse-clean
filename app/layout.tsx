@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import TalisBotChat from "@/components/TalisBotChat";
+import PageTransition from "@/components/PageTransition";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -47,7 +48,11 @@ export default function RootLayout({
             <AssociateProvider>
               <div className="site-container">
                 <Header />
-                <main>{children}</main>
+                <main>
+                  <PageTransition>
+                    {children}
+                  </PageTransition>
+                </main>
                 <Footer />
               </div>
               <CartDrawer />

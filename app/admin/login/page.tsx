@@ -29,7 +29,8 @@ export default function LoginPage() {
       }
 
       setAdminSession();
-      router.replace("/admin/dashboard");
+      router.push("/admin/dashboard");
+      router.refresh();
     } finally {
       setLoading(false);
     }
@@ -64,7 +65,10 @@ export default function LoginPage() {
 
       <div className="mt-8 text-center">
         <button
-          onClick={() => router.replace("/")}
+          onClick={() => {
+            router.push("/");
+            router.refresh();
+          }}
           className="text-sm text-[#6e6e73] hover:text-[#111] transition-colors"
         >
           Back to Home

@@ -1,12 +1,14 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { isValidAdminFastCode, normalizeFastCode, setAdminSession } from "@/lib/fast-code";
 
 export default function FastCodeGate() {
+  const router = useRouter();
   const { login } = useAuth();
   const [inputCode, setInputCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,11 @@ export default function FastCodeGate() {
       if (isValidAdminFastCode(code)) {
         setAdminSession();
         login(code, "admin");
-        window.location.reload();
+        localStorage.setItem("auth", "true");
+        document.cookie = "auth=true; path=/; max-age=86400; SameSite=Lax";
+        console.log("AUTH:", localStorage.getItem("auth"));
+        // Auth flow → dashboard only
+        router.replace("/business-office");
         return;
       }
 
@@ -42,7 +48,11 @@ export default function FastCodeGate() {
         console.warn("Associate lookup failed:", dbError.message);
       } else if (associate) {
         login(code, "associate", associate.id);
-        window.location.reload();
+        localStorage.setItem("auth", "true");
+        document.cookie = "auth=true; path=/; max-age=86400; SameSite=Lax";
+        console.log("AUTH:", localStorage.getItem("auth"));
+        // Auth flow → dashboard only
+        router.replace("/business-office");
         return;
       }
 
@@ -86,29 +96,19 @@ export default function FastCodeGate() {
             )}
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full py-4 text-base font-bold shadow-lg shadow-blue-600/20"
-          >
-            {loading ? "Verifying..." : "Authorize Entry"}
-          </button>
-
-          <Link
-            href="/add-project"
-            className="block w-full py-4 text-center rounded-2xl bg-[#f5f5f7] text-sm font-bold text-gray-700 hover:bg-gray-100 transition-all uppercase tracking-widest"
-          >
-            Obtain Fast Code
-          </Link>
+          <p className="text-center text-sm text-gray-500 font-medium">
+            Enter your FAST code to continue
+          </p>
         </form>
 
-        <div className="mt-12 text-center">
-          <Link
-            href="/"
-            className="text-xs font-bold text-[#6e6e73] hover:text-black underline underline-offset-8 uppercase tracking-widest"
+        <div className="mt-12 text-center pointer-events-auto">
+          <button
+            type="button"
+            onClick={() => window.location.href = "/"}
+            className="text-xs font-bold text-[#6e6e73] hover:text-black underline underline-offset-8 uppercase tracking-widest pointer-events-auto"
           >
             Return to Homepage
-          </Link>
+          </button>
         </div>
       </div>
     </div>

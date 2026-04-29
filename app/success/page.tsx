@@ -49,12 +49,12 @@ function SuccessContent() {
               Complete Your Profile
             </Link>
 
-            <Link
-              href="/"
-              className="text-sm text-gray-500 hover:text-black underline block"
+            <button
+              onClick={() => window.location.href = "/"}
+              className="text-sm text-gray-500 hover:text-black underline block pointer-events-auto"
             >
               Return to Homepage
-            </Link>
+            </button>
           </div>
         </section>
       </div>

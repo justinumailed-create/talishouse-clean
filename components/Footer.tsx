@@ -89,12 +89,12 @@ export default function Footer() {
               </GatedLink>
             </li>
             <li>
-              <GatedLink
+              <Link
                 href={ROUTES.BUSINESS_OFFICE_APPLY}
                 className="text-[15px] text-neutral-600 hover:text-gray-900 transition-colors"
               >
                 Propose a Project
-              </GatedLink>
+              </Link>
             </li>
           </ul>
         </div>

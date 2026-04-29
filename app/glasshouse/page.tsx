@@ -155,12 +155,12 @@ Permanent installation only, deck or pergola optional.
 Up in a day, finished in a week.  
 Characterization: it is finished open space. Dividing walls, amenities and furniture are added to taste after completion.`}
       >
-        <h1 className="text-2xl font-semibold text-gray-900">
+        <h1 className="text-xl md:text-2xl font-semibold text-gray-900">
           {selectedModel?.name || 'Select a Model'}
         </h1>
 
         {/* STEP INDICATOR */}
-        <div className="flex items-center gap-2 mt-4 mb-6">
+        <div className="flex items-center gap-2 mt-4 mb-4 md:mb-6">
           {[1, 2, 3].map((step) => (
             <div
               key={step}
@@ -180,10 +180,10 @@ Characterization: it is finished open space. Dividing walls, amenities and furni
                 <button
                   key={model.id}
                   onClick={() => setSelectedModel(model)}
-                  className={`p-4 rounded-xl border text-sm font-medium transition-all duration-200 hover:scale-[1.02] hover:shadow-md ${
+                  className={`p-3 md:p-4 rounded-xl border text-sm font-medium transition-all duration-200 active:scale-[0.98] md:active:scale-100 ${
                     selectedModel?.id === model.id
                       ? "border-gray-900 bg-gray-900 text-white"
-                      : "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
+                      : "border-gray-200 bg-white text-gray-700 md:hover:border-gray-400"
                   }`}
                 >
                   {model.name.replace("Glasshouse™ ", "")}
@@ -225,10 +225,10 @@ Characterization: it is finished open space. Dividing walls, amenities and furni
                     <button
                       key={addon.id}
                       onClick={() => toggleAddon(addon.id)}
-                      className={`w-full p-4 rounded-xl border text-sm font-medium transition duration-200 flex items-center justify-between ${
+                      className={`w-full p-3 md:p-4 rounded-xl border text-sm font-medium transition duration-200 flex items-center justify-between ${
                         selectedAddons[addon.id]
                           ? "border-gray-900 bg-gray-900 text-white"
-                          : "border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300"
+                          : "border-gray-200 bg-white active:bg-gray-50 md:hover:border-gray-300"
                       }`}
                     >
                       <div>
@@ -251,11 +251,11 @@ Characterization: it is finished open space. Dividing walls, amenities and furni
         )}
 
         {/* NAVIGATION */}
-        <div className="flex gap-3 mt-6">
+        <div className="flex gap-3 mt-4 md:mt-6">
           {currentStep > 1 && (
             <button
               onClick={() => setCurrentStep(currentStep - 1)}
-              className="flex-1 py-3 rounded-lg border border-gray-200 text-sm font-medium hover:bg-gray-50"
+              className="flex-1 py-3 rounded-lg border border-gray-200 text-sm font-medium active:bg-gray-50 md:hover:bg-gray-50"
             >
               Back
             </button>
@@ -265,7 +265,7 @@ Characterization: it is finished open space. Dividing walls, amenities and furni
             <button
               onClick={() => setCurrentStep(currentStep + 1)}
               disabled={!canProceed()}
-              className="flex-1 py-3 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800 disabled:opacity-50"
+              className="flex-1 py-3 rounded-lg bg-gray-900 text-white text-sm font-medium active:bg-gray-800 md:hover:bg-gray-800 disabled:opacity-50"
             >
               Continue
             </button>
@@ -291,7 +291,7 @@ Characterization: it is finished open space. Dividing walls, amenities and furni
                   leaseToOwnRequested,
                 });
               }}
-              className="flex-1 py-3 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800"
+              className="flex-1 py-3 rounded-lg bg-gray-900 text-white text-sm font-medium active:bg-gray-800 md:hover:bg-gray-800"
             >
               Continue to Checkout
             </button>

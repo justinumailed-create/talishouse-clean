@@ -49,6 +49,7 @@ export function getProductImage(size?: string, type?: string) {
     return path;
   }
   
+  // TalisTowns - Strictly restricted to explicit 'talistowns' key
   if (size === 'talistowns') {
     const path = PRODUCT_IMAGE_MAP['talistowns'];
     console.log(`[ImageLookup] TalisTowns -> ${path}`);
@@ -62,5 +63,5 @@ export function getProductImage(size?: string, type?: string) {
   }
   
   console.warn(`[ImageLookup] Missing product image for:`, { size, type });
-  return '/images/glasshouse/hero.png';
+  return ''; // Return empty for neutral fallback
 }

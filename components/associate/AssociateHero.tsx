@@ -101,7 +101,7 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
 
   const renderHeroContent = () => {
     if (config.contentType === "map") {
-      return <div className="w-full h-full min-h-[500px]"><MapComponent associateId={fastCode} /></div>;
+      return <div className="map-container" style={{ minHeight: '500px' }}><MapComponent associateId={fastCode} /></div>;
     }
 
     if (!config.contentUrl) {
@@ -119,72 +119,62 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
     switch (config.contentType) {
       case "image":
         return (
-          <img 
-            src={config.contentUrl} 
-            alt="Associate Project" 
-            className="w-full h-full object-cover rounded-2xl"
-          />
+          <div className="map-container" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <iframe
+              src="https://my.atlist.com/map/dd00462f-d929-4aac-a777-32017c2523b1?share=true"
+              style={{ border: 'none', flex: 1, width: '100%', height: '100%' }}
+              loading="lazy"
+              title="Property Map"
+            />
+          </div>
         );
       case "pdf":
         return (
           <iframe 
             src={config.contentUrl} 
-            className="w-full h-full rounded-2xl border-0 min-h-[500px]" 
+            className="map-container"
+            style={{ minHeight: '500px' }}
             title="Project Document" 
           />
         );
       default:
-        return <div className="w-full h-full min-h-[500px]"><MapComponent associateId={fastCode} /></div>;
+        return <div className="map-container" style={{ minHeight: '500px' }}><MapComponent associateId={fastCode} /></div>;
     }
   };
 
   const renderMediaArea = () => {
-    if (config.showVideo && config.videoUrl) {
-      const isYoutube = config.videoUrl.includes("youtube.com") || config.videoUrl.includes("youtu.be");
-      if (isYoutube) {
-        let videoId = "";
-        if (config.videoUrl.includes("v=")) {
-          videoId = config.videoUrl.split("v=")[1].split("&")[0];
-        } else if (config.videoUrl.includes("youtu.be/")) {
-          videoId = config.videoUrl.split("youtu.be/")[1].split("?")[0];
-        }
-        
-        return (
-          <iframe
-            src={`https://www.youtube.com/embed/${videoId}`}
-            className="w-full h-full rounded-2xl border-0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        );
-      }
-      return (
-        <video
-          src={config.videoUrl}
-          controls
-          className="w-full h-full object-cover rounded-2xl"
-        />
-      );
-    }
-
-    // Gallery Fallback (using comma-separated list)
-    const images = typeof config.contentUrl === "string" 
-      ? config.contentUrl.split(",").filter(img => img.trim().length > 0 && !img.trim().toLowerCase().endsWith('.pdf'))
-      : [];
-    
-    if (images.length > 0) {
-      return (
-        <div className="grid grid-cols-2 gap-2 h-full overflow-y-auto pr-1">
-          {images.slice(0, 10).map((img, i) => (
-            <img key={i} src={img.trim()} alt={`Gallery ${i}`} className="w-full aspect-square object-cover rounded-xl" />
-          ))}
-        </div>
-      );
-    }
-
     return (
-      <div className="w-full h-full bg-[#fcfcfc] flex items-center justify-center text-neutral-400 rounded-2xl border-2 border-dashed border-neutral-100">
-        <span className="text-xs font-medium">Media Gallery</span>
+      <div className="relative w-full h-full">
+        <img 
+          src="/images/mapsite-bottom-right.jpg" 
+          alt="Affiliate Media"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            borderRadius: '12px'
+          }}
+        />
+        <div 
+          style={{
+            position: 'absolute',
+            bottom: '12px',
+            left: '12px',
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
+            borderRadius: '12px',
+            padding: '10px 14px',
+            fontSize: '12px',
+            fontWeight: 500,
+            color: '#fff',
+            maxWidth: '70%',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+          }}
+        >
+          Your file type can be YouTube, PDF or JPG / PNG.
+        </div>
       </div>
     );
   };
@@ -215,21 +205,22 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
             <div className="flex flex-col lg:grid lg:grid-cols-[7fr_3fr] gap-6 items-stretch h-full">
 
               {/* LEFT 70% - Associate Selected Content */}
-              <div className="flex flex-col gap-4 min-h-[500px]">
-                <div className="flex-1 bg-white rounded-2xl border border-[#e5e5e5] overflow-hidden shadow-sm">
+              <div className="flex flex-col gap-4" style={{ minHeight: '500px' }}>
+                <div className="flex-1 bg-white rounded-2xl border border-[#e5e5e5] overflow-hidden shadow-sm" style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '420px' }}>
                   {renderHeroContent()}
                 </div>
                 
                 {/* Headline/Subtext Overlay styled like HomeHero */}
                 <div className="bg-white rounded-2xl border border-[#e5e5e5] p-6 shadow-sm">
                   <p className="text-[10px] tracking-[0.2em] text-neutral-400 uppercase mb-2">
-                    Associate Project
+                    Affiliate Mapsite™
                   </p>
-                  <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-neutral-900 mb-2">
-                    {config.headline || "TALISHOUSE™"}
-                  </h1>
-                  <p className="text-sm text-neutral-500 max-w-2xl leading-relaxed">
-                    {config.subtext || "Property discovery and modular home solutions."}
+                  <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-2">
+                    Demo Sample
+                  </h2>
+                  <p className="section-description">
+                    Opt in to qualify for our premium marketing tools, including a Mapsite™. 
+                    "Moonlight" towards a more rewarding lifestyle, or start a sideline to complement your primary business interests.
                   </p>
                 </div>
               </div>

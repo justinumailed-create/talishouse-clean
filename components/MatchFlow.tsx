@@ -104,6 +104,7 @@ export default function MatchFlow({ onComplete }: MatchFlowProps) {
         onComplete();
       } else {
         router.push(ROUTES.MATCH_RESULTS);
+        router.refresh();
       }
     } catch (err: any) {
       setError(err.message || "Something went wrong. Please try again.");

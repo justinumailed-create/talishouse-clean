@@ -58,6 +58,7 @@ export default function PartnerViewPage() {
       if (insertError) throw insertError;
       
       router.push("/success");
+      router.refresh();
     } catch (err) {
       console.error("APPLICATION FAIL:", JSON.stringify(err, null, 2));
       setError("Failed to submit. Please try again.");
@@ -71,11 +72,12 @@ export default function PartnerViewPage() {
         <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6">
 
           {/* LEFT PANEL - MAP */}
-          <div className="w-full h-[300px] md:h-full md:min-h-[600px] rounded-2xl overflow-hidden bg-gray-100">
+          <div className="map-container w-full min-h-[300px] md:min-h-[600px]">
             <iframe
               src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
               allow="geolocation 'self' https://my.atlist.com"
               className="block w-full h-full border-0"
+              style={{ width: '100%', height: '100%' }}
               title="Talishouse property discovery map"
             />
           </div>

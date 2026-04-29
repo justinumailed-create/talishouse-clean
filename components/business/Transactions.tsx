@@ -27,9 +27,9 @@ export default function Transactions() {
 
   useEffect(() => {
     if (authorized === false) {
-      router.push("/business-office");
+      window.location.href = "/business-office";
     }
-  }, [authorized, router]);
+  }, [authorized]);
 
   const MIN_AMOUNT = 1;
 

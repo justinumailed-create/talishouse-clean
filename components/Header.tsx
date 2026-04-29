@@ -41,9 +41,9 @@ export default function Header() {
                 Home
               </Link>
               <Link
-                href={ROUTES.CATALOG}
+                href="/catalogue"
                 className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
-                  pathname.startsWith("/catalog") || pathname.startsWith("/catalogue")
+                  pathname.startsWith("/catalogue") || pathname.startsWith("/catalog")
                     ? "text-black"
                     : "text-gray-500"
                 }`}

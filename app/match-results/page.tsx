@@ -142,7 +142,10 @@ export default function MatchResultsPage() {
             Talk to Advisor
           </Link>
           <button
-            onClick={() => router.push(ROUTES.BUSINESS_OFFICE_PROPOSE_PROJECT)}
+            onClick={() => {
+              router.push(ROUTES.BUSINESS_OFFICE_PROPOSE_PROJECT);
+              router.refresh();
+            }}
             className="block w-full py-4 px-6 bg-white/10 text-white rounded-xl font-medium text-center hover:bg-white/20 transition-colors border border-white/20"
           >
             Get Proposal

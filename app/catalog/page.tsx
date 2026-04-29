@@ -12,21 +12,22 @@ const categories = [
 export default function CatalogPage() {
   return (
     <div className="bg-white">
-      <div className="max-w-[1400px] mx-auto px-5 py-6">
-        <div className="grid grid-cols-2 gap-6">
+      <div className="max-w-[1400px] mx-auto md:px-5 py-6">
+        <div className="catalog-grid px-4 md:px-0">
           {categories.map((cat) => (
-            <Link key={cat.name} href={cat.href}>
-              <div className="group bg-white border rounded-xl overflow-hidden hover:shadow-md transition-all duration-300">
-                <div className="relative w-full aspect-video overflow-hidden">
-                  <Image
-                    src={cat.image}
-                    alt={cat.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
+            <Link key={cat.name} href={cat.href} className="block">
+               <div className="catalog-card rounded-xl border border-gray-200 overflow-hidden bg-white transition-all duration-300 active:scale-[0.98] md:active:scale-100 md:hover:shadow-md">
+                 <div className="catalog-image">
+                   <Image
+                     src={cat.image}
+                     alt={cat.name}
+                     fill
+                     style={{ objectFit: "cover" }}
+                     className="transition-transform duration-500 md:group-hover:scale-105"
+                   />
+                 </div>
                 <div className="p-3">
-                  <p className="text-sm text-gray-600 font-medium">
+                  <p className="text-sm font-medium text-gray-600 line-clamp-2">
                     {cat.name}
                   </p>
                 </div>

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function BusinessOfficeProposeProject() {
-  redirect("/propose-project");
+  redirect("/business-office/apply");
 }

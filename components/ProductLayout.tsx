@@ -53,19 +53,19 @@ export default function ProductLayout({
   const showImage = hasValidImage || dbImageUrl || productImage;
 
   return (
-    <div className="max-w-[1400px] mx-auto px-6 py-8">
-      <div className="grid grid-cols-12 gap-10 lg:gap-12 items-start">
-        <div className="col-span-12 lg:col-span-7 space-y-8">
-          <div className="w-full aspect-video relative overflow-hidden rounded-xl border border-gray-100 shadow-sm">
-            {displayImage ? (
-              <Image
-                src={displayImage}
-                alt={productName}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 60vw"
-                priority
-              />
+    <div className="max-w-[1400px] mx-auto md:px-6 py-4 md:py-8">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-10 lg:gap-12 items-start px-4 md:px-0">
+        <div className="col-span-1 md:col-span-7 space-y-4 md:space-y-8">
+           <div className="catalog-image rounded-xl border border-gray-100 shadow-sm">
+             {displayImage ? (
+               <Image
+                 src={displayImage}
+                 alt={productName}
+                 fill
+                 style={{ objectFit: "cover" }}
+                 sizes="(max-width: 1024px) 100vw, 60vw"
+                 priority
+               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-white">
                 <span className="text-sm text-gray-400">Image coming soon</span>
@@ -73,7 +73,7 @@ export default function ProductLayout({
             )}
           </div>
 
-          <div className="p-6 bg-white border border-gray-100 rounded-xl shadow-sm">
+          <div className="p-4 md:p-6 bg-white border border-gray-100 rounded-xl shadow-sm">
             <h2 className="text-lg font-semibold mb-4 text-gray-900">About {productName}</h2>
             
             <p className="text-sm text-gray-600 whitespace-pre-line leading-relaxed">
@@ -82,8 +82,8 @@ export default function ProductLayout({
           </div>
         </div>
 
-        <div className="col-span-12 lg:col-span-5 flex flex-col gap-3 w-full">
-          <div className="w-full bg-white border border-gray-100 rounded-xl p-6 md:p-8 shadow-sm">
+        <div className="col-span-1 md:col-span-5 flex flex-col gap-3 w-full">
+          <div className="w-full bg-white border border-gray-100 rounded-xl p-4 md:p-6 lg:p-8 shadow-sm">
             {children}
           </div>
         </div>

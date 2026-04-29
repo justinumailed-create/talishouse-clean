@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import Link from "next/link";
 
-export default function ApplyPage() {
+export default function ApplyClient() {
   const [formData, setFormData] = useState({
     roleType: "",
     name: "",
