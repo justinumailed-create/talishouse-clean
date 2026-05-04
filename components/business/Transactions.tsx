@@ -8,8 +8,7 @@ import { supabase } from "@/lib/supabase";
 import { formatCAD } from "@/utils/currency";
 import { isAuthorized } from "@/lib/fast-code";
 
-const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test";
-console.log("PAYPAL CLIENT ID:", PAYPAL_CLIENT_ID);
+
 
 export default function Transactions() {
   const router = useRouter();
@@ -265,7 +264,7 @@ export default function Transactions() {
                       <div className="relative z-10">
                         <PayPalScriptProvider
                           options={{
-                            "client-id": PAYPAL_CLIENT_ID,
+                            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
                             currency: "CAD",
                           }}
                         >

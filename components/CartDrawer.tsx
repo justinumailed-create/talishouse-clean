@@ -15,8 +15,7 @@ import { addonsRecord } from "@/lib/config/addons";
 
 const DEFAULT_PRODUCT_IMAGE = "/images/placeholder.png";
 
-const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test";
-console.log("PAYPAL CLIENT ID:", PAYPAL_CLIENT_ID);
+
 
 export default function CartDrawer() {
   const config = getPricingConfig();
@@ -442,7 +441,13 @@ export default function CartDrawer() {
                 {paymentStrategy === "deposit" ? "Pay Deposit" : paymentStrategy === "lto" ? "Start Lease" : "Proceed to Checkout"} — {formatCAD(getPaymentAmount())}
               </button>
             ) : (
-              <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "CAD" }}>
+              <PayPalScriptProvider
+              options={{
+                clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID!,
+                currency: "CAD",
+                intent: "capture"
+              }}
+            >
                 <PayPalButtons
                   style={{ layout: "horizontal", color: "black", shape: "pill", label: "checkout" }}
                   createOrder={(data, actions) => actions.order.create({
