@@ -32,7 +32,7 @@ export const ROUTES = {
   DEALERS: "/dealers",
   PRIVACY: "/privacy",
   TERMS: "/terms",
-  FIND_YOUR_HOME: "/find-your-home",
+  FIND_YOUR_MARKET: "/find-your-market",
   MATCH_RESULTS: "/match-results",
 } as const;
 

@@ -12,6 +12,11 @@ export default function ApplyClient() {
     phone: "",
     location: "",
     preferredFastCode: "",
+    leadCapture: {
+      receiveUpdates: false,
+      receiveOffers: false,
+      shareWithPartners: false,
+    },
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -35,6 +40,7 @@ export default function ApplyClient() {
       location: formData.location.trim(),
       participation_level: formData.roleType,
       status: "pending",
+      lead_capture: formData.leadCapture,
     };
     console.log("APPLICATION INSERT - Payload:", JSON.stringify(payload, null, 2));
 
@@ -54,8 +60,8 @@ export default function ApplyClient() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-white py-12">
-        <div className="max-w-[1400px] mx-auto px-6">
+      <div className="min-h-screen bg-white py-12 flex items-center justify-center">
+        <div className="w-full max-w-[1400px] mx-auto px-6">
           <div className="mx-auto max-w-md">
             <div className="text-center">
               <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
@@ -84,16 +90,16 @@ export default function ApplyClient() {
   }
 
   return (
-    <div className="min-h-screen bg-white py-12">
-      <div className="max-w-[1400px] mx-auto px-6">
+    <div className="min-h-screen bg-white py-12 flex items-center justify-center">
+      <div className="w-full max-w-[1400px] mx-auto px-6">
         <div className="mx-auto max-w-lg">
-          <div className="mb-8">
+          <div className="mb-8 text-center">
             <Link href="/business-office" className="text-sm text-[#1E4ED8] hover:underline">
               ← Back to Business Office
             </Link>
           </div>
 
-          <div className="mb-8">
+          <div className="mb-8 text-center">
             <h1 className="text-3xl font-bold mb-2">Propose a Project</h1>
             <p className="text-[#6e6e73]">
               Join the Talishouse partner network
@@ -189,6 +195,48 @@ export default function ApplyClient() {
               <p className="text-xs text-[#6e6e73] mt-1">
                 If not available, we'll generate one for you
               </p>
+            </div>
+
+            <div className="border-t border-[#e5e5e5] pt-5 mt-5">
+              <p className="text-sm font-medium mb-3">Communication Preferences</p>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.leadCapture.receiveUpdates}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      leadCapture: { ...formData.leadCapture, receiveUpdates: e.target.checked }
+                    })}
+                    className="w-4 h-4 rounded border-[#e5e5e5] text-black focus:ring-black cursor-pointer"
+                  />
+                  <span className="text-sm text-[#1d1d1f]">Receive project updates and newsletters</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.leadCapture.receiveOffers}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      leadCapture: { ...formData.leadCapture, receiveOffers: e.target.checked }
+                    })}
+                    className="w-4 h-4 rounded border-[#e5e5e5] text-black focus:ring-black cursor-pointer"
+                  />
+                  <span className="text-sm text-[#1d1d1f]">Receive exclusive offers and promotions</span>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.leadCapture.shareWithPartners}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      leadCapture: { ...formData.leadCapture, shareWithPartners: e.target.checked }
+                    })}
+                    className="w-4 h-4 rounded border-[#e5e5e5] text-black focus:ring-black cursor-pointer"
+                  />
+                  <span className="text-sm text-[#1d1d1f]">Allow sharing my information with trusted partners</span>
+                </label>
+              </div>
             </div>
 
             {error && (

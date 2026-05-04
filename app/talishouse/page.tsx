@@ -166,9 +166,12 @@ function TalishouseContent() {
 
         <div className="mt-8 mb-4 border-b border-gray-100 pb-6">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Initial Estimated Price</p>
-          <div className="space-y-1 mb-3">
+          <div className="mb-3">
             <p className="text-[11px] font-medium text-gray-400">Build & Price: {formatCAD(BUILD_AND_PRICE)}</p>
-            <p className="text-[11px] font-medium text-gray-400">Shipping & Custom Clearance: {formatCAD(SHIPPING_CLEARANCE)}</p>
+            <hr className="border-t border-gray-200 my-3" />
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <p className="text-[11px] font-semibold text-amber-800">Shipping & Customs Clearance: {formatCAD(SHIPPING_CLEARANCE)}</p>
+            </div>
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-4">
             {formatCAD(calculateTotal() + SHIPPING_CLEARANCE + BUILD_AND_PRICE)}
@@ -205,7 +208,7 @@ function TalishouseContent() {
 
           {productAddons.length > 0 && (
             <div className="border-t border-gray-100 pt-6">
-              <h3 className="text-sm uppercase tracking-wide text-gray-500">
+              <h3 className="text-sm uppercase tracking-wide text-gray-500 mb-4">
                 Available Add-Ons
               </h3>
               <div className="space-y-3">

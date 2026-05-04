@@ -13,7 +13,7 @@ export const ADDONS: Addon[] = [
     id: "shipping_clearance",
     name: "Shipping & Custom Clearance",
     price: 10000,
-    description: "shipping and custom clearance to your port of entry. Taxes, tariffs and inland transport extra.",
+    description: "Shipping and custom clearance to your port of entry. Taxes and inland transport extra.",
     compatibleWith: ["glasshouse-160", "glasshouse-200", "talishouse-400", "talishouse-800"],
   },
   {

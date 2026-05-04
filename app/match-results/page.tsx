@@ -41,7 +41,7 @@ export default function MatchResultsPage() {
         <div className="text-center">
           <div className="text-white/60 mb-4">No results found</div>
           <Link 
-            href={ROUTES.FIND_YOUR_HOME}
+            href={ROUTES.FIND_YOUR_MARKET}
             className="text-white hover:text-white/80 transition-colors"
           >
             Start matching →
@@ -77,7 +77,7 @@ export default function MatchResultsPage() {
         <Link href={ROUTES.HOME} className="text-white/80 hover:text-white transition-colors text-sm">
           ← Back to Home
         </Link>
-        <Link href={ROUTES.FIND_YOUR_HOME} className="text-white/80 hover:text-white transition-colors text-sm">
+        <Link href={ROUTES.FIND_YOUR_MARKET} className="text-white/80 hover:text-white transition-colors text-sm">
           Start Over →
         </Link>
       </header>

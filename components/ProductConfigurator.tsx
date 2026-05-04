@@ -4,11 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { SidingSelector } from "./ui/SidingSelector";
 
-const roofingOptions = [
-  "Bright, white & white",
-  "Charcoal, dark & dark"
-];
-
 const kitchenOptions = [
   { id: "KC01", label: "Bright White", image: "/images/kitchen/KC01.png" },
   { id: "KC02", label: "Classic White", image: "/images/kitchen/KC02.png" },
@@ -153,7 +148,7 @@ function ColorSwatch({
 export function ProductConfigurator({ 
   selectedOptions, 
   onOptionChange,
-  hideSections = false 
+  hideSections = false
 }: ProductConfiguratorProps) {
   const handleToggle = (category: string, option: string) => {
     if (selectedOptions[category] === option) {
@@ -167,26 +162,6 @@ export function ProductConfigurator({
 
   return (
     <div className="space-y-8">
-      {/* ROOFING - SEGMENTED CONTROL */}
-      <div className="space-y-3">
-        <p className="text-[15px] font-semibold text-gray-900">Roofing, Gutter & Windows</p>
-        <div className="flex p-1 bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
-          {roofingOptions.map((option) => (
-            <button
-              key={option}
-              onClick={() => handleToggle("Roofing, Gutter & Windows Colour", option)}
-              className={`flex-1 py-3 text-sm font-medium transition-all duration-200 rounded-lg ${
-                selectedOptions["Roofing, Gutter & Windows Colour"] === option
-                  ? "bg-black text-white shadow-sm"
-                  : "text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* KITCHEN - VISUAL IMAGE GRID */}
       <div className="space-y-4">
         <p className="text-[15px] font-semibold text-gray-900">Kitchen Style</p>

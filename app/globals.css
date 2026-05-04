@@ -7,6 +7,7 @@
   --text-secondary: #6e6e73;
   --border-subtle: rgba(0,0,0,0.08);
   --accent-gradient: linear-gradient(135deg, #0070ba, #1546a0);
+  --bg-ad-image: none;
 
   /* Apple-style 8pt Spacing System */
   --space-1: 8px;
@@ -41,8 +42,10 @@
 @layer components {
   .site-container {
     width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
     background: #ffffff;
-    min-height: auto;
+    min-height: 100vh;
   }
 
   .container {
@@ -445,10 +448,14 @@ body {
   font-size: 16px;
   line-height: 1.5;
   color: #1d1d1f;
-  background-color: #ffffff;
+  background-color: #f5f5f5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  background-image: var(--bg-ad-image);
+  background-position: center top;
+  background-repeat: no-repeat;
+  background-size: 1920px auto;
 }
 
 h1, h2, h3 {

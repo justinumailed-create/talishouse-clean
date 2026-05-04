@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Talishouse | Homes & Cottages",
   description:
-    "Modern homes and cottages starting from $58.50 per sq.ft. . Built in a day, move-in ready in a week. Lease-to-own options available.",
+    "Modern homes and cottages starting from $58.50 per sq. ft.. Built in a day, move-in ready in a week. Lease-to-own options available.",
   keywords:
     "modular homes,cottages,prefab homes,tiny homes,affordable housing,lease to own homes",
   icons: {

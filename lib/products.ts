@@ -103,10 +103,6 @@ export const glasshouseModels: ProductModel[] = [
 8' x 20' or 10' x 20' steel structures featuring one, two or three sides glass.
 Great as short-term rental cottages with a view or home offices.`,
     options: {
-      "Roofing, Gutter & Windows Colour": [
-        "Dark / Dark / Dark",
-        "Bright / White / White",
-      ],
       "Kitchen Style": ["KC01", "KC02", "KC03", "KC04", "KC05", "KC06"],
       "Bath Style": ["TL01", "TL02", "TL03", "TL04", "TL05", "TL06"],
       "Flooring Colour": ["Light Oak", "Dark Walnut"],
@@ -140,10 +136,6 @@ export const talishouseModels: ProductModel[] = [
 21' x 20' steel structures assembled in one day and move-in ready in one week.
 Two bedrooms, one bath, open concept living-dining-kitchen.`,
     options: {
-      "Roofing, Gutter & Windows Colour": [
-        "Dark / Dark / Dark",
-        "Bright / White / White",
-      ],
       "Kitchen Style": ["KC01", "KC02", "KC03", "KC04", "KC05", "KC06"],
       "Bath Style": ["TL01", "TL02", "TL03", "TL04", "TL05", "TL06"],
       "Flooring Colour": ["Light Oak", "Dark Walnut"],
@@ -161,10 +153,6 @@ Two bedrooms, one bath, open concept living-dining-kitchen.`,
 Double module steel structures assembled in one day.
 Four bedrooms, two baths, expanded living areas.`,
     options: {
-      "Roofing, Gutter & Windows Colour": [
-        "Dark / Dark / Dark",
-        "Bright / White / White",
-      ],
       "Kitchen Style": ["KC01", "KC02", "KC03", "KC04", "KC05", "KC06"],
       "Bath Style": ["TL01", "TL02", "TL03", "TL04", "TL05", "TL06"],
       "Flooring Colour": ["Light Oak", "Dark Walnut"],
@@ -182,10 +170,6 @@ Four bedrooms, two baths, expanded living areas.`,
 Expanded residential living solution with additional square footage.
 Two bedrooms, one bath, open concept living-dining-kitchen with extra space.`,
     options: {
-      "Roofing, Gutter & Windows Colour": [
-        "Dark / Dark / Dark",
-        "Bright / White / White",
-      ],
       "Kitchen Style": ["KC01", "KC02", "KC03", "KC04", "KC05", "KC06"],
       "Bath Style": ["TL01", "TL02", "TL03", "TL04", "TL05", "TL06"],
       "Flooring Colour": ["Light Oak", "Dark Walnut"],

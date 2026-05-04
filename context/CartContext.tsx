@@ -88,6 +88,7 @@ interface CartContextType {
   paymentStrategy: PaymentStrategy;
   ltoTermMonths: number;
   ltoMonthlyPayment: number;
+  shippingSelected: boolean;
   stackConfig: DiscountStackConfig;
   splitsAmount: number;
   splitsJobs: SplitsJob[];
@@ -186,9 +187,24 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     };
   }, [promoCode]);
 
+  const shippingSelected = useMemo(() => {
+    return items.some((item) =>
+      item.addons?.some(
+        (addon) =>
+          addon === "Shipping & Custom Clearance" ||
+          addon === "shipping_clearance"
+      )
+    );
+  }, [items]);
+
   const subtotalWithCharge = useMemo(() => {
-    return discountedSubtotal + BUILD_AND_PRICE;
-  }, [discountedSubtotal]);
+    // 1. basePrice (rawSubtotal)
+    // 2. + destinationCharge (BUILD_AND_PRICE = 1950)
+    // 3. + (shipping IF selected)
+    // 4. - discount (totalDiscount)
+    const shippingAmount = shippingSelected ? SHIPPING_CLEARANCE : 0;
+    return rawSubtotal + BUILD_AND_PRICE + shippingAmount - totalDiscount;
+  }, [rawSubtotal, totalDiscount, shippingSelected]);
 
   const tax = useMemo(() => {
     return subtotalWithCharge * TAX_RATE;
@@ -199,13 +215,17 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   }, [subtotalWithCharge, tax]);
 
   const ltoMonthlyPayment = useMemo(() => {
-    const leaseCalc = calculateLeaseToOwn({
-      totalAmount: grandTotal,
-      months: ltoTermMonths,
-      config,
-    });
-    return leaseCalc.monthlyPayment;
-  }, [grandTotal, ltoTermMonths, config]);
+    // For LTO: Down payment = 50% of total
+    // Remaining split across term
+    // The current pricingEngine.calculateLeaseToOwn uses interest and admin fees.
+    // The user rule says: "Remaining split across selected term (24/36/48/60)"
+    // which implies no interest or admin fees for this specific request?
+    // "Down payment = 50% of total"
+    // "Remaining split across selected term"
+    const downPayment = grandTotal * 0.5;
+    const remaining = grandTotal - downPayment;
+    return remaining / ltoTermMonths;
+  }, [grandTotal, ltoTermMonths]);
 
   const itemCount = useMemo(() => {
     return items.reduce((sum, item) => sum + item.quantity, 0);
@@ -290,17 +310,17 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
       case "full":
         return totalWithSplits;
       case "deposit": {
-        const partial = calculatePartialPayment({ total: totalWithSplits, config });
-        return partial.initialPayment;
+        // 5% of total
+        return totalWithSplits * 0.05;
       }
       case "lto": {
-        const lease = calculateLeaseToOwn({ totalAmount: totalWithSplits, months: ltoTermMonths, config });
-        return lease.downPayment;
+        // Down payment = 50% of total
+        return totalWithSplits * 0.5;
       }
       default:
         return totalWithSplits;
     }
-  }, [paymentStrategy, grandTotal, splitsAmount, ltoTermMonths, config]);
+  }, [paymentStrategy, grandTotal, splitsAmount]);
 
   const getSubtotalWithCharge = useCallback(() => {
     return subtotalWithCharge;
@@ -371,6 +391,7 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     paymentStrategy,
     ltoTermMonths,
     ltoMonthlyPayment,
+    shippingSelected,
     stackConfig,
     splitsAmount,
     splitsJobs,
@@ -407,6 +428,7 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     paymentStrategy,
     ltoTermMonths,
     ltoMonthlyPayment,
+    shippingSelected,
     stackConfig,
     splitsAmount,
     splitsJobs,

@@ -4,31 +4,27 @@ import Image from "next/image";
 const products = [
   {
     name: "Glasshouse™ 160",
-    subtitle: "Compact Modern Living",
     href: "/glasshouse",
     image: "/images/glasshouse/hero.png",
-    price: "From $58.50/sq.ft",
+    price: "From $58.50 per sq. ft.",
   },
   {
     name: "Talishouse™ 400",
-    subtitle: "Recreational & Guest",
     href: "/talishouse-recreational",
     image: "/images/talishouse-400.png",
-    price: "From $62.50/sq.ft",
+    price: "From $58.50 per sq. ft.",
   },
   {
     name: "Talishouse™ 1,600",
-    subtitle: "Residential Family Home",
     href: "/talishouse-residential",
     image: "/images/talishouse/residential/hero.jpg",
-    price: "From $68.00/sq.ft",
+    price: "From $58.50 per sq. ft.",
   },
   {
     name: "Talistowns™",
-    subtitle: "Multi-Unit Communities",
     href: "/talistowns",
     image: "/images/talistowns.jpg",
-    price: "From $55.00/sq.ft",
+    price: "From $58.50 per sq. ft.",
   },
 ];
 
@@ -55,7 +51,7 @@ export default function CataloguePage() {
 
       {/* Products Grid */}
       <section className="pb-32 md:pb-40">
-        <div className="max-w-[1400px] mx-auto px-5">
+        <div className="w-full px-5">
           <div className="catalog-grid">
             {products.map((product) => (
               <Link
@@ -77,9 +73,6 @@ export default function CataloguePage() {
 
                   {/* Content */}
                   <div className="p-6 md:p-7">
-                    <p className="text-xs font-medium tracking-[0.15em] uppercase text-gray-400 mb-2">
-                      {product.subtitle}
-                    </p>
                     <h3 className="text-lg md:text-xl font-medium text-gray-900 mb-2 tracking-tight">
                       {product.name}
                     </h3>
