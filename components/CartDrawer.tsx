@@ -380,22 +380,22 @@ export default function CartDrawer() {
               <div className="space-y-4 pt-2">
                 <div className="grid grid-cols-3 gap-2 p-1 bg-gray-100 rounded-2xl">
                   <button
-                    onClick={() => { setPaymentType("full"); setPaymentStrategy("full"); }}
-                    className={`py-3 rounded-xl text-[10px] font-black transition-all uppercase tracking-wider ${paymentStrategy === "full" ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
-                  >
-                    Full
-                  </button>
-                  <button
                     onClick={() => { setPaymentType("partial"); setPaymentStrategy("deposit"); }}
                     className={`py-3 rounded-xl text-[10px] font-black transition-all uppercase tracking-wider ${paymentStrategy === "deposit" ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
                   >
-                    Deposit
+                    5% Deposit
                   </button>
                   <button
                     onClick={() => { setPaymentType("full"); setPaymentStrategy("lto"); }}
                     className={`py-3 rounded-xl text-[10px] font-black transition-all uppercase tracking-wider ${paymentStrategy === "lto" ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
                   >
-                    Lease
+                    Lease-to-Own
+                  </button>
+                  <button
+                    onClick={() => { setPaymentType("full"); setPaymentStrategy("full"); }}
+                    className={`py-3 rounded-xl text-[10px] font-black transition-all uppercase tracking-wider ${paymentStrategy === "full" ? "bg-white text-black shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                  >
+                    Full Payment
                   </button>
                 </div>
 
