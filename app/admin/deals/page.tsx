@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase, DealV2 } from "@/lib/supabase";
+import { formatCAD } from "@/utils/currency";
 
 interface DealWithUser extends DealV2 {
   userInfo?: {
@@ -111,7 +112,7 @@ export default function DealsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-white border border-[#e5e5e5] rounded-xl p-6" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
           <p className="text-sm text-[#6e6e73]">Total Value</p>
-          <p className="text-2xl font-semibold mt-2">${stats.totalValue.toLocaleString()}</p>
+          <p className="text-2xl font-semibold mt-2">{formatCAD(stats.totalValue)}</p>
         </div>
         <div className="bg-white border border-[#e5e5e5] rounded-xl p-6" style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
           <p className="text-sm text-[#6e6e73]">New</p>
@@ -161,7 +162,7 @@ export default function DealsPage() {
                     )}
                   </td>
                   <td className="py-3 px-4 text-[#6e6e73]">
-                    ${(deal.value || 0).toLocaleString()}
+                    {formatCAD(deal.value || 0)}
                   </td>
                   <td className="py-3 px-4">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${

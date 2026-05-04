@@ -3,6 +3,7 @@ import {
   DEFAULT_PRICING_CONFIG,
   type PricingConfig,
 } from "@/lib/config/pricing";
+import { formatCAD } from "@/utils/currency";
 
 const PRICING_CONFIG_KEY = "pricing_config";
 
@@ -213,10 +214,7 @@ export function validateDiscountCode(
 }
 
 export function formatCurrency(amount: number): string {
-  return `CAD $${amount.toLocaleString("en-CA", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
+  return formatCAD(amount);
 }
 
 export function formatPercent(rate: number): string {

@@ -1,4 +1,5 @@
 import { PricingConfig, DEFAULT_PRICING_CONFIG } from "@/lib/config/pricing";
+import { formatCAD } from "@/utils/currency";
 
 export type DiscountType = "percentage" | "fixed";
 export type PaymentMode = "full" | "deposit" | "lto";
@@ -233,7 +234,8 @@ export function formatDiscount(code: string, subtotal: number): string {
   if (!discount) return "";
 
   if (discount.type === "percentage") {
-    return `-${(discount.value * 100).toFixed(0)}% (CAD $${calculateDiscountAmount(code, subtotal).toLocaleString(undefined, { minimumFractionDigits: 2 })})`;
+    const amount = calculateDiscountAmount(code, subtotal);
+    return `-${(discount.value * 100).toFixed(0)}% (${formatCAD(amount)})`;
   }
-  return `-CAD $${discount.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  return `-${formatCAD(discount.value)}`;
 }

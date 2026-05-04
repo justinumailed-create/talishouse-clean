@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useCart, PaymentStrategy, SHIPPING_CLEARANCE, BUILD_AND_PRICE, PromoCode } from "@/context/CartContext";
@@ -9,6 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { syncTransactionToSplits } from "@/lib/splits";
 import { getPricingConfig, calculateLeaseToOwn } from "@/lib/utils/pricingEngine";
 import { DISCOUNT_CODES, formatDiscount } from "@/lib/utils/discounts";
+import { formatCAD } from "@/utils/currency";
 import { UI } from "@/styles/design-system";
 
 const DEFAULT_PRODUCT_IMAGE = "/images/placeholder.png";
@@ -54,6 +55,14 @@ export default function CartDrawer() {
 
   const [promoInput, setPromoInput] = useState("");
   const [promoMessage, setPromoMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Sync promoInput with applied promoCode when drawer opens
+  useEffect(() => {
+    if (isOpen && promoCode) {
+      setPromoInput(promoCode);
+    }
+  }, [isOpen, promoCode]);
+
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [purchasedItems, setPurchasedItems] = useState<typeof items>([]);
@@ -65,9 +74,6 @@ export default function CartDrawer() {
     if (!promoInput.trim()) return;
     const result = applyPromoCode(promoInput.trim());
     setPromoMessage({ type: result.success ? "success" : "error", text: result.message });
-    if (result.success) {
-      setPromoInput("");
-    }
   };
 
   const savePayment = async (transactionId: string) => {
@@ -140,9 +146,9 @@ export default function CartDrawer() {
 
   if (paymentSuccess) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-end">
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeCart} />
-        <div className="relative w-full max-w-md bg-white h-full shadow-2xl p-6 flex flex-col">
+      <div className="fixed inset-0 z-30 pointer-events-none flex justify-end">
+        <div className="absolute inset-0 bg-black/40 pointer-events-auto" onClick={closeCart} />
+        <div className="absolute right-0 top-24 bottom-0 w-full max-w-md bg-white shadow-2xl p-6 flex flex-col pointer-events-auto">
           <button onClick={closeCart} className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-2">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -163,9 +169,9 @@ export default function CartDrawer() {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-end">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeCart} />
-      <div className="relative w-full max-w-md bg-white h-full shadow-2xl flex flex-col">
+    <div className="fixed inset-0 z-30 pointer-events-none flex justify-end">
+      <div className="absolute inset-0 bg-black/40 pointer-events-auto" onClick={closeCart} />
+      <div className="absolute right-0 top-24 bottom-0 w-full max-w-md bg-white shadow-2xl flex flex-col pointer-events-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-lg font-semibold">Your Cart ({items.length})</h2>
           <button onClick={closeCart} className="text-gray-400 hover:text-gray-900 p-2">
@@ -191,7 +197,7 @@ export default function CartDrawer() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm truncate">{item.name}</h3>
-                      <p className="text-gray-500 text-sm">CAD ${item.price.toLocaleString()}</p>
+                      <p className="text-gray-500 text-sm">{formatCAD(item.price)}</p>
                       
                       {item.options && Object.keys(item.options).length > 0 && (
                         <div className="mt-1 space-y-0.5">
@@ -273,7 +279,7 @@ export default function CartDrawer() {
                         />
                         <div className="flex justify-between text-[10px] text-gray-400 font-bold uppercase tracking-wider pt-1">
                           <span>Job #{index + 1}</span>
-                          <span>Running: CAD ${runningTotal.toLocaleString()}</span>
+                          <span>Running: {formatCAD(runningTotal)}</span>
                         </div>
                       </div>
                     </div>
@@ -291,22 +297,29 @@ export default function CartDrawer() {
              <div className="space-y-2 text-sm">
                <div className="flex justify-between text-gray-500">
                  <span>Initial Estimated Price:</span>
-                 <span>CAD ${rawSubtotal.toLocaleString()}</span>
+                 <span>{formatCAD(rawSubtotal)}</span>
                </div>
                <div className="flex justify-between text-gray-500">
                  <span>Destination Charge:</span>
-                 <span>CAD ${BUILD_AND_PRICE.toLocaleString()}</span>
+                 <span>{formatCAD(BUILD_AND_PRICE)}</span>
                </div>
                {shippingSelected && (
                  <div className="flex justify-between text-gray-500">
                    <span>Shipping & Custom Clearance:</span>
-                   <span>CAD ${SHIPPING_CLEARANCE.toLocaleString()}</span>
+                   <span>{formatCAD(SHIPPING_CLEARANCE)}</span>
                  </div>
                )}
                <div className="flex justify-between font-semibold text-gray-900 pt-2 border-t">
-                 <span>Subtotal with Charges:</span>
-                 <span>CAD ${subtotalWithCharge.toLocaleString()}</span>
+                 <span>Subtotal:</span>
+                 <span>{formatCAD(subtotalWithCharge + totalDiscount)}</span>
                </div>
+
+               {totalDiscount > 0 && (
+                 <div className="flex justify-between items-center bg-green-50 text-green-700 px-3 py-2 rounded-lg text-sm font-medium mt-2">
+                   <span>Discount Applied</span>
+                   <span>-{formatCAD(totalDiscount)}</span>
+                 </div>
+               )}
 
                {/* Promo Code Input */}
                <div className="pt-2">
@@ -325,26 +338,21 @@ export default function CartDrawer() {
                      APPLY
                    </button>
                  </div>
-                 {promoMessage && (
-                   <p className={`mt-1 text-[10px] font-bold uppercase tracking-wider ${promoMessage.type === "success" ? "text-green-600" : "text-red-500"}`}>
+
+                 {promoMessage && promoMessage.type === "error" && (
+                   <p className="mt-2 text-[10px] font-bold uppercase tracking-wider text-red-500">
                      {promoMessage.text}
                    </p>
                  )}
                </div>
 
-               {totalDiscount > 0 && (
-                 <div className="flex justify-between text-green-600">
-                   <span>Discount Code:</span>
-                   <span>-CAD ${totalDiscount.toLocaleString()}</span>
-                 </div>
-               )}
                <div className="flex justify-between text-gray-500 pt-1">
                  <span>Tax:</span>
-                 <span>CAD ${tax.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                 <span>{formatCAD(tax)}</span>
                </div>
               <div className="flex justify-between font-bold text-lg pt-2 border-t border-gray-900">
                 <span>Total:</span>
-                <span>CAD ${totalWithSplits.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <span>{formatCAD(totalWithSplits)}</span>
               </div>
             </div>
 
@@ -374,7 +382,7 @@ export default function CartDrawer() {
                <div className="bg-gray-50 rounded-2xl p-4 space-y-3">
                  <div className="flex justify-between text-sm">
                    <span></span>
-                   <span className="font-bold">CAD ${(totalWithSplits * 0.5).toLocaleString()}</span>
+                   <span className="font-bold">{formatCAD(totalWithSplits * 0.5)}</span>
                  </div>
                  <div className="flex items-center justify-between">
                    <span className="text-sm">Term:</span>
@@ -391,14 +399,14 @@ export default function CartDrawer() {
                  </div>
                  <div className="flex justify-between text-sm pt-2 border-t">
                    <span>Monthly Payment:</span>
-                   <span className="font-bold">CAD ${ltoMonthlyPayment.toLocaleString(undefined, { maximumFractionDigits: 2 })}</span>
+                   <span className="font-bold">{formatCAD(ltoMonthlyPayment)}</span>
                  </div>
                </div>
              )}
 
             {!isCheckingOut ? (
-              <button onClick={() => setIsCheckingOut(true)} className="btn-primary w-full py-4 rounded-full font-bold">
-                {paymentStrategy === "deposit" ? "PROCEED WITH DEPOSIT" : paymentStrategy === "lto" ? "PROCEED WITH LEASE-TO-OWN" : "PROCEED TO CHECKOUT"} — CAD ${getPaymentAmount().toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <button onClick={() => setIsCheckingOut(true)} className="btn-primary w-full py-4 rounded-full font-bold uppercase">
+                {paymentStrategy === "deposit" ? "PROCEED WITH DEPOSIT" : paymentStrategy === "lto" ? "PROCEED WITH LEASE-TO-OWN" : "PROCEED TO CHECKOUT"} — {formatCAD(getPaymentAmount())}
               </button>
             ) : (
               <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, currency: "CAD" }}>

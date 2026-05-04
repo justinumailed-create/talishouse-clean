@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { supabase } from "@/lib/supabase";
+import { formatCAD } from "@/utils/currency";
 
 interface Product {
   id: string;
@@ -75,7 +76,7 @@ export default function ProductList() {
               <div className="flex items-center justify-between mt-2">
                 {product.price && (
                   <span className="text-lg font-semibold text-gray-900">
-                    CAD ${product.price.toLocaleString()}
+                    {formatCAD(product.price)}
                   </span>
                 )}
                 {product.size && (

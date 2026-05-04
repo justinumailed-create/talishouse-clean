@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { formatCAD } from "@/utils/currency";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -55,7 +56,7 @@ export default function AdminDashboard() {
     { label: "Total Deals", value: stats.totalDeals },
     { label: "Active Deals", value: stats.activeDeals },
     { label: "Closed Deals", value: stats.closedDeals },
-    { label: "Earnings", value: "$" + stats.earnings.toLocaleString() },
+    { label: "Earnings", value: formatCAD(stats.earnings) },
   ];
 
   return (

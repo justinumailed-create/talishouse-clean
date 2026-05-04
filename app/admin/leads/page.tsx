@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase, Lead } from "@/lib/supabase";
+import { formatCAD } from "@/utils/currency";
 
 interface FastCodeInfo {
   id: string;
@@ -73,7 +74,7 @@ function DealModal({ lead, onClose, onSave }: DealModalProps) {
 
           <div className="bg-[#f5f5f7] p-4 rounded-xl">
             <p className="text-sm text-[#6e6e73]">Estimated Earnings</p>
-            <p className="text-2xl font-semibold mt-1">${earnings.toLocaleString()}</p>
+            <p className="text-2xl font-semibold mt-1">{formatCAD(earnings)}</p>
           </div>
         </div>
 
@@ -328,7 +329,7 @@ export default function LeadsPage() {
                       )}
                     </td>
                     <td className="py-3 px-4 text-gray-500 hidden lg:table-cell">
-                      {lead.project_value ? `$${lead.project_value.toLocaleString()}` : "—"}
+                      {lead.project_value ? formatCAD(lead.project_value) : "—"}
                     </td>
                     <td className="py-3 px-4">
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${

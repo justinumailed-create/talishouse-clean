@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { getPricingConfig, calculateLeaseToOwn } from "@/lib/utils/pricingEngine";
 import { isAuthorized } from "@/lib/fast-code";
+import { formatCAD } from "@/utils/currency";
 
 interface LeaseProduct {
   id: string;
@@ -234,7 +235,7 @@ function LeaseToOwnPageContent() {
                         months
                       </p>
                       <p className={`text-lg font-bold mt-2 ${selectedDuration === months ? "text-white" : "text-black"}`}>
-                        CAD ${Math.ceil(leaseCalc.monthlyPayment).toLocaleString()}/mo
+                        {formatCAD(leaseCalc.monthlyPayment)}/mo
                       </p>
                     </button>
                   );
@@ -262,7 +263,7 @@ function LeaseToOwnPageContent() {
                 <div>
                   <p className="text-sm text-gray-500">Product Price</p>
                   <p className="font-bold text-gray-900">
-                    CAD ${selectedProductData.price.toLocaleString()}
+                    {formatCAD(selectedProductData.price)}
                   </p>
                 </div>
                 <div>
@@ -272,7 +273,7 @@ function LeaseToOwnPageContent() {
                 <div>
                   <p className="text-sm text-gray-500">Monthly Payment</p>
                   <p className="font-bold text-gray-900">
-                    CAD ${leaseState.monthlyPayment.toLocaleString()}
+                    {formatCAD(leaseState.monthlyPayment)}
                   </p>
                 </div>
               </div>
@@ -350,7 +351,7 @@ function LeaseToOwnPageContent() {
                 Total Paid
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                CAD ${leaseState.totalPaid.toLocaleString()}
+                {formatCAD(leaseState.totalPaid)}
               </p>
             </div>
             <div className="p-4 bg-white border border-gray-100 rounded-xl">
@@ -358,7 +359,7 @@ function LeaseToOwnPageContent() {
                 Remaining
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                CAD ${leaseState.remainingBalance.toLocaleString()}
+                {formatCAD(leaseState.remainingBalance)}
               </p>
             </div>
             <div className="p-4 bg-white border border-gray-100 rounded-xl">
@@ -366,7 +367,7 @@ function LeaseToOwnPageContent() {
                 Monthly Payment
               </p>
               <p className="text-2xl font-bold text-gray-900">
-                CAD ${leaseState.monthlyPayment.toLocaleString()}
+                {formatCAD(leaseState.monthlyPayment)}
               </p>
             </div>
             <div className="p-4 bg-white border border-gray-100 rounded-xl">
@@ -384,7 +385,7 @@ function LeaseToOwnPageContent() {
               onClick={handleMakePayment}
               className="w-full btn-primary text-lg"
             >
-              Make Payment — CAD ${leaseState.monthlyPayment.toLocaleString()}
+              Make Payment — {formatCAD(leaseState.monthlyPayment)}
             </button>
           )}
 

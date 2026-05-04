@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useEffect, useState } from "react"
 
 const features = [
-  "From CAD $58.50/sq.ft.",
+  "From $58.50 per sq. ft.",
   "Up in a day, finished in a week",
   "Retail and Wholesale Terms available",
   "Lease-To-Own, OAC."

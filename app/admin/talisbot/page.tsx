@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from "@/lib/supabase";
+import { formatCAD } from "@/utils/currency";
 
 interface TalisBotLead {
   id: string;
@@ -81,7 +82,7 @@ export default function TalisBotAnalytics() {
           return sum + (budgetValues[key] || 0) * count;
         }, 0);
         if (totalLeads > 0) {
-          avgBudget = `$${(budgetSum / totalLeads).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+          avgBudget = formatCAD(budgetSum / totalLeads);
         }
 
         setStats({

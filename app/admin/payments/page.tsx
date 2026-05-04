@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase, Payment } from "@/lib/supabase";
+import { formatCAD } from "@/utils/currency";
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -66,7 +67,7 @@ export default function PaymentsPage() {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
           <p className="text-sm text-gray-500">Total Revenue</p>
           <p className="text-3xl font-bold mt-1">
-            CAD ${totalAmount.toLocaleString()}
+            {formatCAD(totalAmount)}
           </p>
         </div>
       </div>
@@ -91,7 +92,7 @@ export default function PaymentsPage() {
                   <tr key={payment.id} className="border-b border-gray-50 hover:bg-gray-50">
                     <td className="py-3 px-4 font-medium">{payment.product_name}</td>
                     <td className="py-3 px-4 text-gray-600">{payment.user_name}</td>
-                    <td className="py-3 px-4 font-bold">CAD ${payment.amount.toLocaleString()}</td>
+                    <td className="py-3 px-4 font-bold">{formatCAD(payment.amount)}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         payment.status === "completed" ? "bg-green-100 text-green-700" :

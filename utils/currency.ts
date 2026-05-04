@@ -1,3 +1,6 @@
-export const formatCAD = (amount: number, showDecimals: boolean = false) => {
-  return `CAD $${Math.round(amount).toLocaleString()}`
-}
+export const formatCAD = (amount: number) => {
+  return `CAD $${amount.toLocaleString("en-CA", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+};

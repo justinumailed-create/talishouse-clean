@@ -11,16 +11,21 @@ import { ShoppingCart } from "lucide-react";
 
 export default function Header() {
   const pathname = usePathname();
-  const { openCart, itemCount } = useCart();
+  const { openCart, closeCart, itemCount } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  const handleLinkClick = () => {
+    setIsMenuOpen(false);
+    closeCart();
+  };
+
   return (
-    <header className="sticky top-0 z-[100] bg-white border-b border-gray-100">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
       <div className="max-w-[1400px] mx-auto px-5">
         <div className="flex justify-between items-center h-24">
           {/* LEFT: Logo + Navigation */}
           <div className="flex items-center gap-8">
-            <Link href={ROUTES.HOME} className="flex items-center flex-shrink-0">
+            <Link href={ROUTES.HOME} onClick={handleLinkClick} className="flex items-center flex-shrink-0">
               <Image
                 src="/logo.png"
                 alt="Windswept Logo"
@@ -34,6 +39,7 @@ export default function Header() {
             <nav className="hidden md:flex items-center gap-10">
               <Link
                 href={ROUTES.HOME}
+                onClick={handleLinkClick}
                 className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
                   pathname === "/" ? "text-black" : "text-gray-500"
                 }`}
@@ -42,6 +48,7 @@ export default function Header() {
               </Link>
               <Link
                 href="/catalogue"
+                onClick={handleLinkClick}
                 className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
                   pathname.startsWith("/catalogue") || pathname.startsWith("/catalog")
                     ? "text-black"
@@ -50,16 +57,18 @@ export default function Header() {
               >
                 Catalogue
               </Link>
-              <GatedLink
-                href={ROUTES.BUSINESS_OFFICE}
-                className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
-                  pathname.startsWith("/business-office")
-                    ? "text-black"
-                    : "text-gray-500"
-                }`}
-              >
-                Business Office
-              </GatedLink>
+              <div onClick={handleLinkClick}>
+                <GatedLink
+                  href={ROUTES.BUSINESS_OFFICE}
+                  className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
+                    pathname.startsWith("/business-office")
+                      ? "text-black"
+                      : "text-gray-500"
+                  }`}
+                >
+                  Business Office
+                </GatedLink>
+              </div>
             </nav>
           </div>
 
@@ -113,7 +122,7 @@ export default function Header() {
           <nav className="md:hidden py-4 border-t border-gray-100 flex flex-col gap-3">
             <Link
               href={ROUTES.HOME}
-              onClick={() => setIsMenuOpen(false)}
+              onClick={handleLinkClick}
               className={`text-gray-700 uppercase tracking-wide text-sm font-medium px-2 transition-colors hover:text-black ${
                 pathname === "/" ? "text-black" : ""
               }`}
@@ -122,7 +131,7 @@ export default function Header() {
             </Link>
             <Link
               href={ROUTES.CATALOG}
-              onClick={() => setIsMenuOpen(false)}
+              onClick={handleLinkClick}
               className={`text-gray-700 uppercase tracking-wide text-sm font-medium px-2 transition-colors hover:text-black ${
                 pathname.startsWith("/catalog") || pathname.startsWith("/catalogue")
                   ? "text-black"
@@ -131,7 +140,7 @@ export default function Header() {
             >
               Catalogue
             </Link>
-            <div onClick={() => setIsMenuOpen(false)}>
+            <div onClick={handleLinkClick}>
               <GatedLink
                 href={ROUTES.BUSINESS_OFFICE}
                 className={`text-gray-700 uppercase tracking-wide text-sm font-medium px-2 transition-colors hover:text-black ${
