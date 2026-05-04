@@ -5,6 +5,7 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { supabase } from "@/lib/supabase";
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "test";
+console.log("PAYPAL CLIENT ID:", PAYPAL_CLIENT_ID);
 
 interface PayPalButtonProps {
   amount: number;
@@ -44,7 +45,7 @@ export default function PayPalButton({
   };
 
   return (
-    <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID }}>
+    <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "CAD", intent: "capture" }}>
       <div className="space-y-3">
         <PayPalButtons
           style={{ layout: "vertical", color: "blue", shape: "rect" }}

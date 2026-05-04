@@ -6,6 +6,7 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { formatCAD } from "@/utils/currency";
 
 const PAYPAL_CLIENT_ID = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "";
+console.log("PAYPAL CLIENT ID:", PAYPAL_CLIENT_ID);
 
 interface SubscriptionDrawerProps {
   isOpen: boolean;
@@ -120,7 +121,7 @@ export default function SubscriptionDrawer({ isOpen, onClose, type }: Subscripti
           </div>
 
           <div className="mt-8">
-            <PayPalScriptProvider options={{ clientId: PAYPAL_CLIENT_ID, vault: true, intent: "subscription" }}>
+            <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, vault: true, intent: "subscription" }}>
               {isReferral ? (
                 <PayPalButtons
                   style={{ shape: "pill", color: "black", layout: "horizontal", label: "subscribe" }}
