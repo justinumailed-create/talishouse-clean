@@ -6,7 +6,7 @@ import { ROUTES } from "@/lib/routes";
 export default function Footer() {
   return (
     <footer className="w-full border-t border-gray-100 bg-white text-gray-700 mt-12">
-      <div className="max-w-[1400px] mx-auto px-5 py-14 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
+      <div className="w-full px-5 py-14 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
         <div className="flex flex-col gap-6">
           <Link href={ROUTES.HOME} className="flex-shrink-0">
             <Image
@@ -137,7 +137,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="max-w-[1400px] mx-auto px-5 pb-8">
+      <div className="w-full px-5 pb-8">
         <div className="pt-6 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-gray-400">
             &copy; {new Date().getFullYear()} Talishouse. All rights reserved.

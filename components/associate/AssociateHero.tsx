@@ -201,7 +201,7 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
         <div className="bg-white rounded-[2rem] md:rounded-[3rem] border border-neutral-200 shadow-md overflow-hidden flex flex-col">
           <Header />
           
-          <main className="flex-1 w-full max-w-[1400px] mx-auto px-5 py-6">
+          <main className="flex-1 w-full px-5 py-6">
             <div className="flex flex-col lg:grid lg:grid-cols-[7fr_3fr] gap-6 items-stretch h-full">
 
               {/* LEFT 70% - Associate Selected Content */}

@@ -53,7 +53,7 @@ export default function ProductLayout({
   const showImage = hasValidImage || dbImageUrl || productImage;
 
   return (
-    <div className="max-w-[1400px] mx-auto md:px-6 py-4 md:py-8">
+    <div className="w-full md:px-6 py-4 md:py-8">
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-10 lg:gap-12 items-start px-4 md:px-0">
         <div className="col-span-1 md:col-span-7 space-y-4 md:space-y-8">
            <div className="catalog-image rounded-xl border border-gray-100 shadow-sm">

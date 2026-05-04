@@ -61,7 +61,7 @@ export default function ApplyClient() {
   if (success) {
     return (
       <div className="min-h-screen bg-white py-12 flex items-center justify-center">
-        <div className="w-full max-w-[1400px] mx-auto px-6">
+        <div className="w-full px-6">
           <div className="mx-auto max-w-md">
             <div className="text-center">
               <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-6">
@@ -91,7 +91,7 @@ export default function ApplyClient() {
 
   return (
     <div className="min-h-screen bg-white py-12 flex items-center justify-center">
-      <div className="w-full max-w-[1400px] mx-auto px-6">
+      <div className="w-full px-6">
         <div className="mx-auto max-w-lg">
           <div className="mb-8 text-center">
             <Link href="/business-office" className="text-sm text-[#1E4ED8] hover:underline">

@@ -35,7 +35,7 @@ export default function BusinessOfficePage() {
 
   return (
     <AuthGuard>
-      <div className="max-w-[1400px] mx-auto px-6 py-12">
+      <div className="w-full px-6 py-12">
         <h1 className="text-2xl font-semibold tracking-tight mb-8">
           Join Us <span className="font-normal text-gray-400">Moonlighting is Lucrative!</span>
         </h1>

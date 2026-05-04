@@ -69,9 +69,8 @@ export default function Home() {
           subtitle={content["homepage_hero_subtitle"] || "Homes and Cottages"}
         />
 
-        {/* Products Section */}
         <section className="pb-8">
-          <div className="max-w-[1400px] mx-auto px-5">
+          <div className="w-full px-5">
             <ProductList />
           </div>
         </section>

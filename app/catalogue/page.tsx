@@ -33,7 +33,7 @@ export default function CataloguePage() {
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="pt-32 pb-20 md:pt-40 md:pb-28">
-        <div className="max-w-[1400px] mx-auto px-5">
+        <div className="w-full px-5">
           <div className="max-w-3xl">
             <p className="text-sm font-medium tracking-[0.2em] uppercase text-gray-400 mb-4">
               Collection

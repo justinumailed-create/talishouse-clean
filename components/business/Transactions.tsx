@@ -105,7 +105,7 @@ export default function Transactions() {
   if (paymentSuccess) {
     return (
       <div className="min-h-[70vh] bg-white py-12">
-        <div className="max-w-[1400px] mx-auto px-6">
+        <div className="w-full px-6">
           <div className="mx-auto max-w-md">
             <div className="bg-white rounded-2xl shadow-sm border border-[rgba(0,0,0,0.06)] p-8 text-center transition-all duration-300">
               <div className="w-16 h-16 bg-[rgba(52,199,89,0.1)] rounded-full flex items-center justify-center mx-auto mb-6">
@@ -131,7 +131,7 @@ export default function Transactions() {
 
   return (
     <div className="min-h-[70vh] bg-white py-12">
-      <div className="max-w-[1400px] mx-auto px-6">
+      <div className="w-full px-6">
         <div className="mx-auto max-w-2xl">
           <Link 
             href="/business-office" 

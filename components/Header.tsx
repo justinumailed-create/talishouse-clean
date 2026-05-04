@@ -21,7 +21,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
-      <div className="max-w-[1400px] mx-auto px-5">
+      <div className="w-full px-5">
         <div className="flex justify-between items-center h-24">
           {/* LEFT: Logo + Navigation */}
           <div className="flex items-center gap-8">

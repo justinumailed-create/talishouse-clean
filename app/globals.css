@@ -42,15 +42,19 @@
 @layer components {
   .site-container {
     width: 100%;
-    max-width: 1400px;
     margin: 0 auto;
     background: #ffffff;
     min-height: 100vh;
   }
 
+  @media (min-width: 1024px) {
+    .site-container {
+      max-width: calc(100% - 520px);
+    }
+  }
+
   .container {
     width: 100%;
-    max-width: 1400px;
     margin-left: auto;
     margin-right: auto;
     padding-left: 20px;

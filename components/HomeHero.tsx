@@ -29,7 +29,7 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
 
   return (
     <section className="pt-6 pb-8 bg-[#f8f8f7]">
-      <div className="max-w-[1400px] mx-auto px-5">
+      <div className="w-full px-5">
         <div className="flex flex-col md:grid md:grid-cols-[2fr_1fr] items-stretch gap-4 md:gap-6 w-full">
           
           {/* LEFT COLUMN WRAPPER */}

@@ -68,7 +68,7 @@ export default function PartnerViewPage() {
 
   return (
     <div className="min-h-screen bg-[#f8f8f7] py-8 md:py-12">
-      <div className="max-w-[1400px] mx-auto px-5">
+      <div className="w-full px-5">
         <div className="flex flex-col md:grid md:grid-cols-2 gap-4 md:gap-6">
 
           {/* LEFT PANEL - MAP */}

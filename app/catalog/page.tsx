@@ -12,7 +12,7 @@ const categories = [
 export default function CatalogPage() {
   return (
     <div className="bg-white">
-      <div className="max-w-[1400px] mx-auto md:px-5 py-6">
+      <div className="w-full md:px-5 py-6">
         <div className="catalog-grid px-4 md:px-0">
           {categories.map((cat) => (
             <Link key={cat.name} href={cat.href} className="block">

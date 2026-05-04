@@ -170,7 +170,7 @@ function LeaseToOwnPageContent() {
 
   if (leaseState.status === "selecting") {
     return (
-      <div className="max-w-[1400px] mx-auto px-6 py-12">
+      <div className="w-full px-6 py-12">
         <div className="mb-10 text-center">
           <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
             Lease-to-Own
@@ -306,7 +306,7 @@ function LeaseToOwnPageContent() {
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto px-6 py-12">
+    <div className="w-full px-6 py-12">
       <div className="mb-10 text-center">
         <h1 className="text-4xl font-bold tracking-tighter uppercase text-gray-900">
           Your Lease
