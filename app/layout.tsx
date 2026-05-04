@@ -8,7 +8,6 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import TalisBotChat from "@/components/TalisBotChat";
-import PageTransition from "@/components/PageTransition";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -25,7 +24,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Talishouse | Homes & Cottages",
   description:
-    "Modern homes and cottages starting from $58.50 per sq. ft.. Built in a day, move-in ready in a week. Lease-to-own options available.",
+    "Modern homes and cottages starting from $58.50 per sq.ft. . Built in a day, move-in ready in a week. Lease-to-own options available.",
   keywords:
     "modular homes,cottages,prefab homes,tiny homes,affordable housing,lease to own homes",
   icons: {
@@ -48,11 +47,7 @@ export default function RootLayout({
             <AssociateProvider>
               <div className="site-container">
                 <Header />
-                <main>
-                  <PageTransition>
-                    {children}
-                  </PageTransition>
-                </main>
+                <main>{children}</main>
                 <Footer />
               </div>
               <CartDrawer />
