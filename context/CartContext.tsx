@@ -121,7 +121,7 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   const [items, setItems] = useState<CartItem[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-  const [appliedDiscountCodes, setAppliedDiscountCodes] = useState<PromoCode[]>([]);
+  const [appliedDiscountCode, setAppliedDiscountCode] = useState<PromoCode>(null);
   const [paymentStrategy, setPaymentStrategy] = useState<PaymentStrategy>("full");
   const [ltoTermMonths, setLtoTermMonths] = useState(config.leaseToOwn.maxMonths);
   const [stackConfig] = useState<DiscountStackConfig>(DEFAULT_STACK_CONFIG);
@@ -139,12 +139,12 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
       try {
         const parsed = JSON.parse(stored);
         const itemsToSet = parsed.items || [];
-        const promoToSet = parsed.appliedDiscountCodes || [];
+        const promoToSet = parsed.appliedDiscountCode || null;
         const splitsJobsToSet = parsed.splitsJobs || [];
         
         setTimeout(() => {
           if (itemsToSet.length > 0) setItems(itemsToSet);
-          if (promoToSet.length > 0) setAppliedDiscountCodes(promoToSet);
+          if (promoToSet) setAppliedDiscountCode(promoToSet);
           if (splitsJobsToSet.length > 0) setSplitsJobs(splitsJobsToSet);
           hydrate();
         }, 0);
@@ -159,19 +159,20 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
 
   useEffect(() => {
     if (isHydrated) {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items, appliedDiscountCodes, splitsJobs }));
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items, appliedDiscountCode, splitsJobs }));
     }
-  }, [items, appliedDiscountCodes, isHydrated, splitsJobs]);
+  }, [items, appliedDiscountCode, isHydrated, splitsJobs]);
 
   const rawSubtotal = useMemo(() => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }, [items]);
 
   const { appliedDiscounts, totalDiscount, discountedSubtotal } = useMemo(() => {
-    return applyDiscounts(appliedDiscountCodes.filter(Boolean) as string[], rawSubtotal, stackConfig);
-  }, [appliedDiscountCodes, rawSubtotal, stackConfig]);
+    const codes = appliedDiscountCode ? [appliedDiscountCode] : [];
+    return applyDiscounts(codes as string[], rawSubtotal, stackConfig);
+  }, [appliedDiscountCode, rawSubtotal, stackConfig]);
 
-  const promoCode = appliedDiscountCodes[0] || null;
+  const promoCode = appliedDiscountCode;
 
   const promoInfo = useMemo((): PromoCodeInfo | null => {
     if (!promoCode || !DISCOUNT_CODES[promoCode]) return null;
@@ -260,7 +261,7 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
 
   const clearCart = useCallback(() => {
     setItems([]);
-    setAppliedDiscountCodes([]);
+    setAppliedDiscountCode(null);
     setPaymentStrategy("full");
     setSplitsJobs([]);
   }, []);
@@ -275,15 +276,8 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
 
     const discount = validation.discount;
     
-    if (!stackConfig.allowStacking && appliedDiscountCodes.length > 0) {
-      setAppliedDiscountCodes([upperCode as PromoCode]);
-    } else if (!appliedDiscountCodes.includes(upperCode as PromoCode)) {
-      if (discountedSubtotal > 0) {
-        setAppliedDiscountCodes((prev) => [...prev, upperCode as PromoCode]);
-      } else {
-        setAppliedDiscountCodes([upperCode as PromoCode]);
-      }
-    }
+    // Always replace with the new code
+    setAppliedDiscountCode(upperCode as PromoCode);
 
     if (upperCode === "OAC") {
       setPaymentStrategy("lto");
@@ -294,14 +288,10 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     }
 
     return { success: true, message: discount.description };
-  }, [config, stackConfig, appliedDiscountCodes, discountedSubtotal]);
+  }, [config]);
 
-  const removePromoCode = useCallback((code?: string) => {
-    if (code) {
-      setAppliedDiscountCodes((prev) => prev.filter((c) => c !== code));
-    } else {
-      setAppliedDiscountCodes([]);
-    }
+  const removePromoCode = useCallback(() => {
+    setAppliedDiscountCode(null);
   }, []);
 
   const getPaymentAmount = useCallback(() => {
@@ -370,10 +360,8 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   const setDiscount = useCallback((options: { code: string; percent: number }) => {
     const { code } = options;
     const upperCode = code.toUpperCase();
-    if (!appliedDiscountCodes.includes(upperCode as PromoCode)) {
-      setAppliedDiscountCodes((prev) => [...prev, upperCode as PromoCode]);
-    }
-  }, [appliedDiscountCodes]);
+    setAppliedDiscountCode(upperCode as PromoCode);
+  }, []);
 
   const value = useMemo(() => ({
     items,
