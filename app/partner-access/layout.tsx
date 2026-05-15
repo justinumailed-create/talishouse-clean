@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
 
 export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
   themeColor: "#000000",
 };
 
 export const metadata: Metadata = {
-  title: "TalisHouse Partner Access | Fast Code MapSite Portal",
+  title: "TalisU™ Partner Access | Fast Code MapSite Portal",
   description: "Access dedicated TalisU™ MapSites™ using Fast Codes. Secure onboarding, partner access routing, lead generation workflows, and premium geospatial business experiences powered by TalisHouse.",
   keywords: [
     "TalisHouse",
@@ -32,14 +34,15 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: "TalisHouse Partner Access",
+    title: "TalisU™ Partner Access | Fast Code MapSite Portal",
     description: "Access dedicated TalisU™ MapSites™ using Fast Codes.",
     url: "https://www.talishouse.com/partner-access",
-    type: "website",
     siteName: "TalisHouse",
+    locale: "en_US",
+    type: "website",
     images: [
       {
-        url: "/images/talishouse-400.png",
+        url: "/og/partner-access-og.jpg",
         width: 1200,
         height: 630,
         alt: "TalisHouse Partner Access",
@@ -50,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "TalisHouse Partner Access",
     description: "Access dedicated TalisU™ MapSites™ using Fast Codes.",
-    images: ["/images/talishouse-400.png"],
+    images: ["/og/partner-access-og.jpg"],
   },
 };
 
