@@ -323,7 +323,7 @@ export default function PartnerAccessPage() {
       <section className="py-24 text-center">
         <div className="max-w-xl mx-auto px-6">
           <p className="text-sm text-neutral-400 font-medium tracking-widest uppercase mb-8">
-            Enterprise Ready Geospatial Logic
+            TalisU™ Partner Access
           </p>
           <div className="flex justify-center items-center gap-10 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700">
              <Building2 className="w-6 h-6" />
