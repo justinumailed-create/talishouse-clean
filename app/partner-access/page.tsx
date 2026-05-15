@@ -127,8 +127,7 @@ export default function PartnerAccessPage() {
             transition={{ duration: 0.8, delay: 0.1, ease }}
             className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight leading-[1.1]"
           >
-            Access dedicated TalisU™ <br className="hidden md:block" />
-            <span className="font-normal">MapSites™</span> using Fast Codes
+            Wholesale Partner Access
           </motion.h1>
 
           {/* Subtext */}
@@ -138,7 +137,7 @@ export default function PartnerAccessPage() {
             transition={{ duration: 0.8, delay: 0.2, ease }}
             className="text-lg md:text-xl text-neutral-500 font-light max-w-2xl mx-auto leading-relaxed"
           >
-            Secure dynamic access routing for curated geospatial experiences.
+            Access dedicated TalisU™ MapSites™ using Fast Codes.
           </motion.p>
 
           {/* THE CENTERPIECE — INPUT */}
