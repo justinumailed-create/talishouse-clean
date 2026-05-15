@@ -3,6 +3,7 @@
 import { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
+  ArrowRight,
   Map, 
   Zap, 
   ShieldCheck, 
@@ -32,7 +33,7 @@ const BackgroundDecoration = () => (
       transition={{ duration: 2, delay: 0.5 }}
       className="absolute bottom-[-5%] right-[-5%] w-[35%] h-[35%] rounded-full bg-gradient-to-tl from-neutral-100 to-transparent blur-[100px]"
     />
-    
+
     {/* Subtle Grid Pattern */}
     <div 
       className="absolute inset-0 opacity-[0.03]"
@@ -81,7 +82,7 @@ export default function PartnerAccessPage() {
     setError("");
 
     const normalizedCode = fastCode.trim().toLowerCase();
-    
+
     // Validation: lowercase alphanumeric + hyphen
     const isValid = /^[a-z0-9-]+$/.test(normalizedCode);
 
@@ -107,7 +108,7 @@ export default function PartnerAccessPage() {
       {/* SECTION 1 — HERO & CENTERPIECE */}
       <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 flex flex-col items-center justify-center overflow-hidden">
         <div className="max-w-4xl w-full text-center space-y-8 relative z-10">
-          
+
           {/* Brand Label */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -150,7 +151,7 @@ export default function PartnerAccessPage() {
             <div className="relative group">
               {/* Cinematic Glow Effect */}
               <div className="absolute -inset-1 bg-gradient-to-r from-neutral-200 to-neutral-100 rounded-[2.5rem] blur-xl opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
-              
+
               <form 
                 onSubmit={handleRedirect}
                 className="relative flex flex-col sm:flex-row items-center gap-3 p-2 bg-white/70 backdrop-blur-3xl border border-neutral-100 rounded-[2.2rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)]"
@@ -170,7 +171,7 @@ export default function PartnerAccessPage() {
                     autoComplete="off"
                   />
                 </div>
-                
+
                 <button
                   type="submit"
                   disabled={isSubmitting || !fastCode.trim()}
@@ -202,32 +203,21 @@ export default function PartnerAccessPage() {
               </AnimatePresence>
             </div>
 
-            {/* Examples */}
-            <div className="mt-8 flex flex-wrap justify-center items-center gap-4 text-xs tracking-wider text-neutral-400 font-medium uppercase">
-              <span>Examples:</span>
-              <button 
-                onClick={() => setFastCode("jm-ttv")}
-                className="hover:text-neutral-900 transition-colors border-b border-transparent hover:border-neutral-900"
+            {/* CTA */}
+            <div className="mt-8 flex justify-center items-center gap-4 text-xs tracking-[0.2em] text-neutral-400 font-bold uppercase">
+              <a 
+                href="https://talisu.com/ob/claim/" 
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-neutral-900 transition-colors flex items-center gap-2 group"
               >
-                jm-ttv
-              </button>
-              <button 
-                onClick={() => setFastCode("miami-demo")}
-                className="hover:text-neutral-900 transition-colors border-b border-transparent hover:border-neutral-900"
-              >
-                miami-demo
-              </button>
-              <button 
-                onClick={() => setFastCode("atlanta-01")}
-                className="hover:text-neutral-900 transition-colors border-b border-transparent hover:border-neutral-900"
-              >
-                atlanta-01
-              </button>
+                Request a Fast Code
+                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+              </a>
             </div>
           </motion.div>
         </div>
       </section>
-
       {/* SECTION 2 — HOW IT WORKS */}
       <section className="py-24 px-6 relative border-t border-neutral-50/50">
         <div className="max-w-6xl mx-auto">
