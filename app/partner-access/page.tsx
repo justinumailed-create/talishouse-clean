@@ -43,12 +43,11 @@ const BackgroundDecoration = () => (
 );
 
 const featureHighlights = [
-  "Dynamic Map Access",
-  "Fast Code Routing",
-  "Mobile Optimized",
-  "Secure Launch",
-  "Geospatial Experiences",
-  "Enterprise Ready"
+  "TalisU™",
+  "TalisPros™",
+  "Talishouse™",
+  "Talistowns™",
+  "TalisWebs™"
 ];
 
 const howItWorks = [
