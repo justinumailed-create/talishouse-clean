@@ -4,14 +4,11 @@ import { useState, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight,
-  Map, 
   Zap, 
   ShieldCheck, 
   Smartphone, 
   Globe, 
   Building2,
-  Lock,
-  Search,
   ChevronRight
 } from "lucide-react";
 
@@ -54,23 +51,43 @@ const featureHighlights = [
   "Enterprise Ready"
 ];
 
-const steps = [
+const howItWorks = [
   {
-    icon: <Lock className="w-5 h-5" />,
-    title: "Receive Fast Code",
-    desc: "Obtain your unique access key from the TalisU team."
+    title: "Receive Your Fast Code",
+    text: "Fast Codes are issued directly by the Talishouse onboarding team.",
   },
   {
-    icon: <Search className="w-5 h-5" />,
-    title: "Enter Access Code",
-    desc: "Input your code into our secure gateway portal."
+    title: "Access Your Dedicated MapSite",
+    text: "Each partner receives a dedicated isolated onboarding environment.",
   },
   {
-    icon: <Map className="w-5 h-5" />,
-    title: "Launch MapSite",
-    desc: "Experience your dedicated geospatial environment."
-  }
+    title: "Launch & Manage Your Presence",
+    text: "Manage listings, videos, leads, and outreach through your MapSite.",
+  },
 ];
+
+const workflowSteps = [
+  { step: 1, title: "Partner Acquisition", text: "Tina acquires partner through outreach and evaluation." },
+  { step: 2, title: "Fast Code Assigned", text: "A unique Fast Code is generated for the partner." },
+  { step: 3, title: "MapSite Activated", text: "The dedicated MapSite environment is provisioned." },
+  { step: 4, title: "Pins & Content Configured", text: "Initial content and location pins are set up." },
+  { step: 5, title: "Partner Outreach Begins", text: "Partner starts using their MapSite for outreach." },
+  { step: 6, title: "Lead Generation", text: "Real-time leads begin flowing to the partner dashboard." },
+];
+
+const fadeUp = {
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-80px" },
+  transition: { duration: 0.6, ease },
+};
+
+const staggerFadeUp = (i: number) => ({
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-80px" },
+  transition: { duration: 0.5, delay: i * 0.1, ease },
+});
 
 export default function PartnerAccessPage() {
   const [fastCode, setFastCode] = useState("");
@@ -102,7 +119,7 @@ export default function PartnerAccessPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
+    <div className="min-h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white overflow-x-hidden">
       <BackgroundDecoration />
 
       {/* SECTION 1 — HERO & CENTERPIECE */}
@@ -217,31 +234,59 @@ export default function PartnerAccessPage() {
           </motion.div>
         </div>
       </section>
-      {/* SECTION 2 — HOW IT WORKS */}
-      <section className="py-24 px-6 relative border-t border-neutral-50/50">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-            {steps.map((step, idx) => (
+
+      {/* SECTION 1 — HOW THE FLOW WORKS */}
+      <section className="py-24 bg-[#fafafa] border-y border-neutral-100/50">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div className="text-center mb-16" {...fadeUp}>
+            <h2 className="text-3xl md:text-4xl font-light mb-4">How the Flow Works</h2>
+            <p className="text-neutral-500 font-light">A streamlined process for our wholesale partners.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {howItWorks.map((item, i) => (
               <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.6, delay: idx * 0.1, ease }}
-                className="group relative p-10 rounded-[2.5rem] bg-white border border-neutral-100/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 overflow-hidden"
+                key={item.title}
+                className="bg-white p-10 rounded-[2.5rem] border border-neutral-100 shadow-[0_10px_40px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-500 group"
+                {...staggerFadeUp(i)}
               >
-                {/* Number Indicator */}
-                <div className="absolute top-10 right-10 text-5xl font-black text-neutral-50 group-hover:text-neutral-100/50 transition-colors pointer-events-none">
-                  0{idx + 1}
+                <div className="w-12 h-12 rounded-2xl bg-neutral-50 flex items-center justify-center text-xl font-bold text-neutral-900 mb-8 group-hover:bg-black group-hover:text-white transition-colors duration-500">
+                  0{i + 1}
                 </div>
-                
-                <div className="w-12 h-12 rounded-2xl bg-neutral-50 flex items-center justify-center text-neutral-900 mb-8 group-hover:bg-black group-hover:text-white transition-colors duration-500">
-                  {step.icon}
+                <h3 className="text-2xl font-bold mb-4 tracking-tight">{item.title}</h3>
+                <p className="text-neutral-500 leading-relaxed font-light">{item.text}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 2 — WORKFLOW OVERVIEW */}
+      <section className="py-32 bg-white">
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div className="text-center mb-24" {...fadeUp}>
+            <h2 className="text-3xl md:text-4xl font-light mb-4">Workflow Overview</h2>
+            <p className="text-neutral-500 font-light">From initial contact to active lead generation.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-16 relative">
+            {/* Visual connector line for desktop (optional, keeping it minimal) */}
+            
+            {workflowSteps.map((step, i) => (
+              <motion.div
+                key={step.title}
+                className="relative"
+                {...staggerFadeUp(i)}
+              >
+                <div className="flex items-start gap-8">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-black text-white flex items-center justify-center font-bold text-lg shadow-lg">
+                    {step.step}
+                  </div>
+                  <div className="pt-2">
+                    <h4 className="font-bold text-xl mb-3 tracking-tight">{step.title}</h4>
+                    <p className="text-neutral-500 font-light leading-relaxed max-w-md">{step.text}</p>
+                  </div>
                 </div>
-                <h3 className="text-xl font-medium mb-3 tracking-tight">{step.title}</h3>
-                <p className="text-neutral-500 font-light leading-relaxed">
-                  {step.desc}
-                </p>
               </motion.div>
             ))}
           </div>
@@ -275,9 +320,9 @@ export default function PartnerAccessPage() {
       `}</style>
 
       {/* FOOTER-ISH BRANDING */}
-      <section className="py-20 text-center">
+      <section className="py-24 text-center">
         <div className="max-w-xl mx-auto px-6">
-          <p className="text-sm text-neutral-400 font-medium tracking-widest uppercase mb-6">
+          <p className="text-sm text-neutral-400 font-medium tracking-widest uppercase mb-8">
             Enterprise Ready Geospatial Logic
           </p>
           <div className="flex justify-center items-center gap-10 opacity-30 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-700">
