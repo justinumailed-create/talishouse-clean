@@ -7,8 +7,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Wholesale Partner Access | TalisU",
-  description: "Access dedicated TalisU MapSites using Fast Codes.",
+  title: "Wholesale Partner Access | TalisU™",
+  description: "Access dedicated TalisU™ MapSites™ using Fast Codes.",
   keywords: [
     "TalisHouse",
     "TalisU",
@@ -34,8 +34,8 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: "Wholesale Partner Access | TalisU",
-    description: "Access dedicated TalisU MapSites using Fast Codes.",
+    title: "Wholesale Partner Access | TalisU™",
+    description: "Access dedicated TalisU™ MapSites™ using Fast Codes.",
     url: "https://www.talishouse.com/partner-access",
     siteName: "TalisHouse",
     locale: "en_US",
@@ -45,14 +45,14 @@ export const metadata: Metadata = {
         url: "/seo/partner-access-og.png",
         width: 1200,
         height: 630,
-        alt: "Wholesale Partner Access | TalisU",
+        alt: "Wholesale Partner Access | TalisU™",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Wholesale Partner Access | TalisU",
-    description: "Access dedicated TalisU MapSites using Fast Codes.",
+    title: "Wholesale Partner Access | TalisU™",
+    description: "Access dedicated TalisU™ MapSites™ using Fast Codes.",
     images: ["/seo/partner-access-og.png"],
   },
 };
