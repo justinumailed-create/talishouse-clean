@@ -1,9 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import GatedLink from "./GatedLink";
 import { ROUTES } from "@/lib/routes";
 
 export default function Footer() {
+  const pathname = usePathname();
+  
+  if (pathname === "/partner-access") return null;
+
   return (
     <footer className="w-full border-t border-gray-100 bg-white text-gray-700 mt-12">
       <div className="w-full px-5 py-14 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">

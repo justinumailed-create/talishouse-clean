@@ -19,6 +19,8 @@ export default function Header() {
     closeCart();
   };
 
+  if (pathname === "/partner-access") return null;
+
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
       <div className="w-full px-5">
