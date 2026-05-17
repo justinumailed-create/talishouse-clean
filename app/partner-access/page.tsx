@@ -56,11 +56,11 @@ const howItWorks = [
     text: "Fast Codes are issued directly by the Talishouse onboarding team.",
   },
   {
-    title: "Access Your Dedicated MapSite",
+    title: "Access Your MapSite™",
     text: "Each partner receives a dedicated isolated onboarding environment.",
   },
   {
-    title: "Launch & Manage Your Presence",
+    title: "Manage Your Presence",
     text: "Manage listings, videos, leads, and outreach through your MapSite.",
   },
 ];
@@ -97,12 +97,14 @@ export default function PartnerAccessPage() {
     e.preventDefault();
     setError("");
 
-    const normalizedCode = fastCode.trim().toLowerCase();
+    const normalized = fastCode
+      .trim()
+      .toLowerCase()
+      .replace(/^\/+|\/+$/g, "");
 
-    // Validation: lowercase alphanumeric + hyphen
-    const isValid = /^[a-z0-9-]+$/.test(normalizedCode);
+    const isValid = /^[a-z0-9-]+$/.test(normalized);
 
-    if (!normalizedCode) {
+    if (!normalized) {
       setError("Please enter a Fast Code");
       return;
     }
@@ -113,8 +115,8 @@ export default function PartnerAccessPage() {
     }
 
     setIsSubmitting(true);
-    // Dynamic redirect to TalisU ecosystem
-    window.location.href = `https://talisu.com/ma/${normalizedCode}`;
+    const targetUrl = `https://talisu.com/ma/${normalized}`;
+    window.open(targetUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -122,19 +124,8 @@ export default function PartnerAccessPage() {
       <BackgroundDecoration />
 
       {/* SECTION 1 — HERO & CENTERPIECE */}
-      <section className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 flex flex-col items-center justify-center overflow-hidden">
+      <section className="relative pt-20 pb-16 md:pt-36 md:pb-28 px-6 flex flex-col items-center justify-center overflow-hidden">
         <div className="max-w-4xl w-full text-center space-y-8 relative z-10">
-
-          {/* Brand Label */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease }}
-          >
-            <span className="text-[13px] font-semibold tracking-[0.3em] uppercase text-neutral-400">
-              TalisU™
-            </span>
-          </motion.div>
 
           {/* Headline */}
           <motion.h1
@@ -143,7 +134,7 @@ export default function PartnerAccessPage() {
             transition={{ duration: 0.8, delay: 0.1, ease }}
             className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight leading-[1.1]"
           >
-            Wholesale Partner Access
+            Partner Access
           </motion.h1>
 
           {/* Subtext */}
@@ -153,7 +144,7 @@ export default function PartnerAccessPage() {
             transition={{ duration: 0.8, delay: 0.2, ease }}
             className="text-lg md:text-xl text-neutral-500 font-light max-w-2xl mx-auto leading-relaxed"
           >
-            Access dedicated TalisU™ MapSites™ using Fast Codes.
+            Access TalisU™ MapSites™ using Fast Codes
           </motion.p>
 
           {/* THE CENTERPIECE — INPUT */}
@@ -181,7 +172,7 @@ export default function PartnerAccessPage() {
                     onChange={(e) => setFastCode(e.target.value)}
                     placeholder="Enter Fast Code"
                     disabled={isSubmitting}
-                    className="w-full h-16 pl-14 pr-6 bg-transparent text-xl font-light placeholder:text-neutral-300 focus:outline-none transition-all disabled:opacity-50"
+                    className="w-full h-16 pl-14 pr-6 bg-transparent text-black text-xl font-normal placeholder:text-neutral-500 focus:outline-none transition-all disabled:opacity-50"
                     spellCheck={false}
                     autoComplete="off"
                   />
@@ -219,15 +210,15 @@ export default function PartnerAccessPage() {
             </div>
 
             {/* CTA */}
-            <div className="mt-8 flex justify-center items-center gap-4 text-xs tracking-[0.2em] text-neutral-400 font-bold uppercase">
+            <div className="mt-8 flex justify-center items-center gap-4 text-sm tracking-[0.15em] text-neutral-500 font-bold uppercase">
               <a 
                 href="https://talisu.com/ob/claim/" 
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-neutral-900 transition-colors flex items-center gap-2 group"
+                className="hover:text-black transition-colors flex items-center gap-2 group"
               >
                 Request a Fast Code
-                <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </a>
             </div>
           </motion.div>
@@ -235,7 +226,7 @@ export default function PartnerAccessPage() {
       </section>
 
       {/* SECTION 1 — HOW THE FLOW WORKS */}
-      <section className="py-24 bg-[#fafafa] border-y border-neutral-100/50">
+      <section className="pt-24 pb-20 bg-[#fafafa] border-y border-neutral-100/50">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div className="text-center mb-16" {...fadeUp}>
             <h2 className="text-3xl md:text-4xl font-light mb-4">How the Flow Works</h2>
@@ -261,7 +252,7 @@ export default function PartnerAccessPage() {
       </section>
 
       {/* SECTION 2 — WORKFLOW OVERVIEW */}
-      <section className="py-32 bg-white">
+      {false && <section className="py-32 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <motion.div className="text-center mb-24" {...fadeUp}>
             <h2 className="text-3xl md:text-4xl font-light mb-4">Workflow Overview</h2>
@@ -290,10 +281,10 @@ export default function PartnerAccessPage() {
             ))}
           </div>
         </div>
-      </section>
+      </section>}
 
       {/* SECTION 3 — FEATURE STRIP */}
-      <section className="py-12 border-y border-neutral-100 bg-neutral-50/30 overflow-hidden whitespace-nowrap">
+      {false && <section className="py-12 border-y border-neutral-100 bg-neutral-50/30 overflow-hidden whitespace-nowrap">
         <div className="flex animate-marquee gap-12 items-center">
           {[...featureHighlights, ...featureHighlights].map((feat, i) => (
             <div key={i} className="flex items-center gap-4 px-4">
@@ -304,10 +295,10 @@ export default function PartnerAccessPage() {
             </div>
           ))}
         </div>
-      </section>
+      </section>}
 
       {/* Styling for Marquee Animation */}
-      <style jsx global>{`
+      {false && <style jsx global>{`
         @keyframes marquee {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
@@ -316,10 +307,10 @@ export default function PartnerAccessPage() {
           animation: marquee 40s linear infinite;
           width: fit-content;
         }
-      `}</style>
+      `}</style>}
 
       {/* FOOTER-ISH BRANDING */}
-      <section className="py-24 text-center">
+      {false && <section className="py-24 text-center">
         <div className="max-w-xl mx-auto px-6">
           <p className="text-sm text-neutral-400 font-medium tracking-widest uppercase mb-8">
             TalisU™ Partner Access
@@ -331,7 +322,7 @@ export default function PartnerAccessPage() {
              <Globe className="w-6 h-6" />
           </div>
         </div>
-      </section>
+      </section>}
     </div>
   );
 }
