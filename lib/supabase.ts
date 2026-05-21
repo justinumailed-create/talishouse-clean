@@ -154,6 +154,17 @@ export interface Earning {
   created_at: string;
 }
 
+export interface FastCodeRegistration {
+  id: string;
+  fast_code: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  cell_phone: string;
+  street_address: string;
+  created_at: string;
+}
+
 export interface MatchLead {
   id: string;
   goal: string | null;

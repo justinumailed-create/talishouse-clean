@@ -115,7 +115,7 @@ export default function PartnerAccessPage() {
     }
 
     setIsSubmitting(true);
-    const targetUrl = `https://talisu.com/ma/${normalized}`;
+    const targetUrl = `https://talispros.com/ma/${normalized}`;
     window.open(targetUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -144,7 +144,7 @@ export default function PartnerAccessPage() {
             transition={{ duration: 0.8, delay: 0.2, ease }}
             className="text-lg md:text-xl text-neutral-500 font-light max-w-2xl mx-auto leading-relaxed"
           >
-            Access TalisU™ MapSites™ using Fast Codes
+            Access MapSites™ using Fast Codes
           </motion.p>
 
           {/* THE CENTERPIECE — INPUT */}
@@ -225,14 +225,9 @@ export default function PartnerAccessPage() {
         </div>
       </section>
 
-      {/* SECTION 1 — HOW THE FLOW WORKS */}
+      {/* CARDS */}
       <section className="pt-24 pb-20 bg-[#fafafa] border-y border-neutral-100/50">
         <div className="max-w-6xl mx-auto px-6">
-          <motion.div className="text-center mb-16" {...fadeUp}>
-            <h2 className="text-3xl md:text-4xl font-light mb-4">How the Flow Works</h2>
-            <p className="text-neutral-500 font-light">A streamlined process for our wholesale partners.</p>
-          </motion.div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {howItWorks.map((item, i) => (
               <motion.div

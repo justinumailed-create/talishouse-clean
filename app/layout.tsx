@@ -4,10 +4,7 @@ import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AssociateProvider } from "@/context/AssociateContext";
 import { AuthProvider } from "@/context/AuthContext";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import CartDrawer from "@/components/CartDrawer";
-import TalisBotChat from "@/components/TalisBotChat";
+import RootShell from "@/components/RootShell";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -46,13 +43,7 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <AssociateProvider>
-              <div className="site-container">
-                <Header />
-                <main>{children}</main>
-                <Footer />
-              </div>
-              <CartDrawer />
-              <TalisBotChat />
+              <RootShell>{children}</RootShell>
             </AssociateProvider>
           </CartProvider>
         </AuthProvider>
