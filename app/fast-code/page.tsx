@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { ArrowRight, Copy, Check, ExternalLink, Zap } from "lucide-react";
+import { ArrowRight, Copy, Check, ExternalLink } from "lucide-react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { registerFastCode, type FormFields, type ActionResult } from "./actions";
 
 type Phase = "form" | "success" | "error";
@@ -14,6 +16,7 @@ export default function FastCodeGeneratorPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
+  const router = useRouter();
 
   const [fields, setFields] = useState<FormFields>({
     firstName: "",
@@ -85,6 +88,15 @@ export default function FastCodeGeneratorPage() {
     setFieldErrors({});
   }
 
+  function handlePartnerAccess() {
+    const url = "/partner-access";
+    if (window.top !== window) {
+      window.top.location.href = url;
+    } else {
+      router.push(url);
+    }
+  }
+
   function setField(key: keyof FormFields, value: string) {
     setFields((prev) => ({ ...prev, [key]: value }));
     if (fieldErrors[key]) {
@@ -97,9 +109,14 @@ export default function FastCodeGeneratorPage() {
       <div className="mx-auto max-w-lg w-full px-5 py-8 md:py-10">
         {/* HEADER */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-neutral-900 text-white mb-4">
-            <Zap className="w-5 h-5 fill-current" />
-          </div>
+          <Image
+            src="/logo.png"
+            alt="TalisPros"
+            width={150}
+            height={40}
+            className="h-10 md:h-[52px] w-auto object-contain mx-auto mb-5"
+            priority
+          />
           <h1 className="text-2xl md:text-3xl font-light tracking-tight">Get Your Fast Code</h1>
           <p className="text-sm text-neutral-500 font-light mt-2 max-w-sm mx-auto">
             Enter your details to generate a unique Fast Code and access your MapSite™.
@@ -243,8 +260,21 @@ export default function FastCodeGeneratorPage() {
           </div>
         )}
 
+        {/* SECONDARY ACCESS */}
+        <div className="text-center space-y-4 mt-10 mb-6">
+          <p className="text-sm text-neutral-500 font-light">
+            Already have a Fast Code?
+          </p>
+          <button
+            onClick={handlePartnerAccess}
+            className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
+          >
+            Access MapSite&trade;
+          </button>
+        </div>
+
         {/* FOOTER NOTE */}
-        <p className="mt-8 text-center text-xs text-neutral-300 font-medium tracking-wider uppercase">
+        <p className="text-center text-xs text-neutral-300 font-medium tracking-wider uppercase">
           TalisPros &mdash; Fast Code Onboarding
         </p>
       </div>
