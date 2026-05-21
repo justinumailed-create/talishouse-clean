@@ -89,11 +89,14 @@ export default function FastCodeGeneratorPage() {
   }
 
   function handlePartnerAccess() {
-    const url = "/partner-access";
-    if (window.top !== window) {
-      window.top.location.href = url;
-    } else {
-      router.push(url);
+    if (typeof window !== "undefined") {
+      const targetUrl = "/partner-access";
+
+      if (window.top && window.top !== window) {
+        window.top.location.href = targetUrl;
+      } else {
+        router.push(targetUrl);
+      }
     }
   }
 
