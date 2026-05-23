@@ -9,6 +9,7 @@ export interface FormFields {
   email: string;
   phone: string;
   address: string;
+  province: string;
 }
 
 export interface ActionResult {
@@ -24,6 +25,7 @@ function validate(data: FormFields): string | null {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email.trim())) return "Invalid email format";
   if (!data.phone.trim()) return "Phone number is required";
   if (!data.address.trim()) return "Address is required";
+  if (!data.province.trim()) return "State / Province is required";
   return null;
 }
 
@@ -86,6 +88,7 @@ export async function registerFastCode(data: FormFields): Promise<ActionResult> 
           email: data.email.trim(),
           cell_phone: data.phone.trim(),
           street_address: data.address.trim(),
+          province: data.province.trim(),
         },
       ]);
 
@@ -120,8 +123,9 @@ export async function registerFastCode(data: FormFields): Promise<ActionResult> 
               first_name: data.firstName.trim(),
               last_name: data.lastName.trim(),
               email: data.email.trim(),
-              phone: data.phone.trim(),
-              address: data.address.trim(),
+              cell_phone: data.phone.trim(),
+              street_address: data.address.trim(),
+              province: data.province.trim(),
             },
           ]);
 

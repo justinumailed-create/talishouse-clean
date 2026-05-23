@@ -162,6 +162,7 @@ export interface FastCodeRegistration {
   email: string;
   cell_phone: string;
   street_address: string;
+  province: string;
   created_at: string;
 }
 

@@ -24,6 +24,7 @@ export default function FastCodeGeneratorPage() {
     email: "",
     phone: "",
     address: "",
+    province: "",
   });
 
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof FormFields, string>>>({});
@@ -36,6 +37,7 @@ export default function FastCodeGeneratorPage() {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim())) errs.email = "Invalid email";
     if (!fields.phone.trim()) errs.phone = "Required";
     if (!fields.address.trim()) errs.address = "Required";
+    if (!fields.province.trim()) errs.province = "Required";
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -84,7 +86,7 @@ export default function FastCodeGeneratorPage() {
     setFastCode("");
     setErrorMsg("");
     setCopied(false);
-    setFields({ firstName: "", lastName: "", email: "", phone: "", address: "" });
+    setFields({ firstName: "", lastName: "", email: "", phone: "", address: "", province: "" });
     setFieldErrors({});
   }
 
@@ -143,7 +145,7 @@ export default function FastCodeGeneratorPage() {
                 value={fields.lastName}
                 onChange={(v) => setField("lastName", v)}
                 error={fieldErrors.lastName}
-                placeholder="Meyer"
+                placeholder="Smith"
                 autoComplete="family-name"
               />
             </div>
@@ -173,8 +175,17 @@ export default function FastCodeGeneratorPage() {
               value={fields.address}
               onChange={(v) => setField("address", v)}
               error={fieldErrors.address}
-              placeholder="123 Main St, City, State ZIP"
+              placeholder="123 Main St"
               autoComplete="street-address"
+            />
+
+            <FieldBox
+              label="State / Province"
+              value={fields.province}
+              onChange={(v) => setField("province", v)}
+              error={fieldErrors.province}
+              placeholder="Ontario"
+              autoComplete="address-level1"
             />
 
             {errorMsg && (
