@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useRef, FormEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ArrowRight,
@@ -92,6 +92,7 @@ export default function PartnerAccessPage() {
   const [fastCode, setFastCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleRedirect = (e: FormEvent) => {
     e.preventDefault();
@@ -117,6 +118,10 @@ export default function PartnerAccessPage() {
     setIsSubmitting(true);
     const targetUrl = `https://talispros.com/ma/${normalized}`;
     window.open(targetUrl, "_blank", "noopener,noreferrer");
+
+    setIsSubmitting(false);
+    setFastCode("");
+    inputRef.current?.focus();
   };
 
   return (
@@ -167,6 +172,7 @@ export default function PartnerAccessPage() {
                     <Zap className="w-5 h-5 fill-current" />
                   </div>
                   <input
+                    ref={inputRef}
                     type="text"
                     value={fastCode}
                     onChange={(e) => setFastCode(e.target.value)}
