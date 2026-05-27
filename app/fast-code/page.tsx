@@ -8,7 +8,21 @@ import { registerFastCode, type FormFields, type ActionResult } from "./actions"
 
 type Phase = "form" | "success" | "error";
 
-const MAPSITE_DOMAIN = "https://talispros.com";
+const PROVINCES = [
+  "Ontario",
+  "British Columbia",
+  "Alberta",
+  "Quebec",
+  "Nova Scotia",
+  "Manitoba",
+  "Saskatchewan",
+  "New Brunswick",
+  "Prince Edward Island",
+  "Newfoundland and Labrador",
+  "Northwest Territories",
+  "Nunavut",
+  "Yukon",
+];
 
 export default function FastCodeGeneratorPage() {
   const [phase, setPhase] = useState<Phase>("form");
@@ -46,6 +60,11 @@ export default function FastCodeGeneratorPage() {
     e.preventDefault();
     if (!validate()) return;
 
+    if (fields.province === "admin-apply") {
+      window.location.href = "mailto:welcome@talispros.com?subject=National Super Admin Application";
+      return;
+    }
+
     setSubmitting(true);
     setErrorMsg("");
 
@@ -55,6 +74,10 @@ export default function FastCodeGeneratorPage() {
       if (result.success && result.fastCode) {
         setFastCode(result.fastCode);
         setPhase("success");
+        // Automatic redirect after short delay to show success state, or immediate as per requirement
+        setTimeout(() => {
+          window.location.href = `https://www.talispros.com/bo/register/?code=${result.fastCode}`;
+        }, 1500);
       } else {
         setErrorMsg(result.error || "Something went wrong.");
         setPhase("error");
@@ -68,11 +91,6 @@ export default function FastCodeGeneratorPage() {
     }
 
     setSubmitting(false);
-  }
-
-  function handleAccessMapSite() {
-    const url = `${MAPSITE_DOMAIN}/ma/${fastCode.toLowerCase()}`;
-    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   function handleCopy() {
@@ -92,13 +110,7 @@ export default function FastCodeGeneratorPage() {
 
   function handlePartnerAccess() {
     if (typeof window !== "undefined") {
-      const targetUrl = "/partner-access";
-
-      if (window.top && window.top !== window) {
-        window.top.location.href = targetUrl;
-      } else {
-        router.push(targetUrl);
-      }
+      router.push("/partner-access");
     }
   }
 
@@ -179,14 +191,24 @@ export default function FastCodeGeneratorPage() {
               autoComplete="street-address"
             />
 
-            <FieldBox
-              label="State / Province"
-              value={fields.province}
-              onChange={(v) => setField("province", v)}
-              error={fieldErrors.province}
-              placeholder="Ontario"
-              autoComplete="address-level1"
-            />
+            <div>
+              <label className="text-xs font-medium text-neutral-500 mb-1.5 block">State / Province</label>
+              <select
+                value={fields.province}
+                onChange={(e) => setField("province", e.target.value)}
+                className={`w-full h-12 px-4 bg-white border rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all ${
+                  fieldErrors.province ? "border-red-300" : "border-neutral-200"
+                }`}
+              >
+                <option value="">Select State / Province</option>
+                {PROVINCES.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+                <option disabled>──────────</option>
+                <option value="admin-apply">National Super Admin. wanted, apply here</option>
+              </select>
+              {fieldErrors.province && <p className="text-xs text-red-500 mt-1">{fieldErrors.province}</p>}
+            </div>
 
             {errorMsg && (
               <p className="text-xs font-medium text-red-500 text-center">{errorMsg}</p>
@@ -235,20 +257,18 @@ export default function FastCodeGeneratorPage() {
             </div>
 
             <p className="text-sm text-neutral-500 font-light">
-              Your MapSite is ready. Click below to access it.
+              Your MapSite is ready. Redirecting to registration...
             </p>
 
             <button
-              onClick={handleAccessMapSite}
+              onClick={() => {
+                window.location.href = `https://www.talispros.com/bo/register/?code=${fastCode}`;
+              }}
               className="w-full h-14 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
             >
-              Access MapSite
+              Finish Registration
               <ExternalLink className="w-4 h-4" />
             </button>
-
-            <p className="text-xs text-neutral-400">
-              Opens in a new tab — {MAPSITE_DOMAIN}/ma/{fastCode.toLowerCase()}
-            </p>
 
             <button
               onClick={handleReset}

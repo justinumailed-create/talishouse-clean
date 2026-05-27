@@ -217,15 +217,13 @@ export default function PartnerAccessPage() {
 
             {/* CTA */}
             <div className="mt-8 flex justify-center items-center gap-4 text-sm tracking-[0.15em] text-neutral-500 font-bold uppercase">
-              <a 
-                href="https://talisu.com/ob/claim/" 
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-black transition-colors flex items-center gap-2 group"
+              <button 
+                onClick={() => window.location.href = "https://www.talispros.com/access/"}
+                className="hover:text-black transition-colors flex items-center gap-2 group cursor-pointer"
               >
                 Request a Fast Code
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-              </a>
+              </button>
             </div>
           </motion.div>
         </div>
