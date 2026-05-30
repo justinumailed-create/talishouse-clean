@@ -74,9 +74,13 @@ export default function FastCodeGeneratorPage() {
       if (result.success && result.fastCode) {
         setFastCode(result.fastCode);
         setPhase("success");
-        // Automatic redirect after short delay to show success state, or immediate as per requirement
         setTimeout(() => {
-          window.location.href = `https://www.talispros.com/bo/register/?code=${result.fastCode}`;
+          const url = `https://www.talispros.com/bo/register/?code=${result.fastCode}`;
+          if (window.self !== window.top) {
+            window.top?.location.assign(url);
+          } else {
+            window.location.href = url;
+          }
         }, 1500);
       } else {
         setErrorMsg(result.error || "Something went wrong.");
@@ -262,7 +266,12 @@ export default function FastCodeGeneratorPage() {
 
             <button
               onClick={() => {
-                window.location.href = `https://www.talispros.com/bo/register/?code=${fastCode}`;
+                const url = `https://www.talispros.com/bo/register/?code=${fastCode}`;
+                if (window.self !== window.top) {
+                  window.top?.location.assign(url);
+                } else {
+                  window.location.href = url;
+                }
               }}
               className="w-full h-14 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
             >
