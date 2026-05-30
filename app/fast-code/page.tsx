@@ -75,11 +75,13 @@ export default function FastCodeGeneratorPage() {
         setFastCode(result.fastCode);
         setPhase("success");
         setTimeout(() => {
-          const url = `https://www.talispros.com/bo/register/?code=${result.fastCode}`;
-          if (window.self !== window.top) {
-            window.top?.location.assign(url);
+          const registerUrl = `https://www.talispros.com/bo/register/?code=${result.fastCode}`;
+          console.log("Inside iframe:", window.top !== window.self);
+          console.log("Redirecting to:", registerUrl);
+          if (window.top && window.top !== window.self) {
+            window.top.location.href = registerUrl;
           } else {
-            window.location.href = url;
+            window.location.href = registerUrl;
           }
         }, 1500);
       } else {
@@ -266,11 +268,13 @@ export default function FastCodeGeneratorPage() {
 
             <button
               onClick={() => {
-                const url = `https://www.talispros.com/bo/register/?code=${fastCode}`;
-                if (window.self !== window.top) {
-                  window.top?.location.assign(url);
+                const registerUrl = `https://www.talispros.com/bo/register/?code=${fastCode}`;
+                console.log("Inside iframe:", window.top !== window.self);
+                console.log("Redirecting to:", registerUrl);
+                if (window.top && window.top !== window.self) {
+                  window.top.location.href = registerUrl;
                 } else {
-                  window.location.href = url;
+                  window.location.href = registerUrl;
                 }
               }}
               className="w-full h-14 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
