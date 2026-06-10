@@ -2,7 +2,6 @@
 
 import { useState, FormEvent } from "react";
 import { ArrowRight, Copy, Check, ExternalLink } from "lucide-react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { registerFastCode, type FormFields, type ActionResult } from "./actions";
 
@@ -30,7 +29,6 @@ export default function FastCodeGeneratorPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
-  const router = useRouter();
 
   const [fields, setFields] = useState<FormFields>({
     firstName: "",
@@ -112,12 +110,6 @@ export default function FastCodeGeneratorPage() {
     setCopied(false);
     setFields({ firstName: "", lastName: "", email: "", phone: "", address: "", province: "" });
     setFieldErrors({});
-  }
-
-  function handlePartnerAccess() {
-    if (typeof window !== "undefined") {
-      router.push("/partner-access");
-    }
   }
 
   function setField(key: keyof FormFields, value: string) {
@@ -306,19 +298,6 @@ export default function FastCodeGeneratorPage() {
             </button>
           </div>
         )}
-
-        {/* SECONDARY ACCESS */}
-        <div className="text-center space-y-4 mt-10 mb-6">
-          <p className="text-sm text-neutral-500 font-light">
-            Already have a Fast Code?
-          </p>
-          <button
-            onClick={handlePartnerAccess}
-            className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
-          >
-            Access MapSite&trade;
-          </button>
-        </div>
 
         {/* FOOTER NOTE */}
         <p className="text-center text-xs text-neutral-300 font-medium tracking-wider uppercase">
