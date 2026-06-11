@@ -23,6 +23,19 @@ const PROVINCES = [
   "Yukon",
 ];
 
+const US_STATES = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California",
+  "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
+  "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+  "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+  "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
+  "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
+  "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
+  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
+  "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
+  "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
+];
+
 export default function FastCodeGeneratorPage() {
   const [phase, setPhase] = useState<Phase>("form");
   const [fastCode, setFastCode] = useState("");
@@ -120,27 +133,25 @@ export default function FastCodeGeneratorPage() {
   }
 
   return (
-    <div className="min-h-dvh bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white flex items-center justify-center">
-      <div className="mx-auto max-w-lg w-full px-5 py-8 md:py-10">
-        {/* HEADER */}
-        <div className="text-center mb-8">
+    <div className="font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
+      <div className="mx-auto max-w-lg w-full px-5 py-4">
+        <div className="text-center mb-4">
           <Image
             src="/logo.png"
             alt="TalisPros"
             width={150}
             height={40}
-            className="h-10 md:h-[52px] w-auto object-contain mx-auto mb-5"
+            className="h-10 md:h-[52px] w-auto object-contain mx-auto mb-3"
             priority
           />
-          <h1 className="text-2xl md:text-3xl font-light tracking-tight">Get Your Fast Code</h1>
-          <p className="text-sm text-neutral-500 font-light mt-2 max-w-sm mx-auto">
-            Enter your details to generate a unique Fast Code and access your MapSite™.
+          <h1 className="text-xl md:text-2xl font-light tracking-tight">Generate FAST Code</h1>
+          <p className="text-sm text-neutral-500 font-light mt-1 max-w-sm mx-auto">
+            Enter your details to be issued a unique Gateway.
           </p>
         </div>
 
-        {/* FORM PHASE */}
         {phase === "form" && (
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+          <form onSubmit={handleSubmit} className="space-y-3" noValidate>
             <div className="grid grid-cols-2 gap-3">
               <FieldBox
                 label="First Name"
@@ -199,9 +210,16 @@ export default function FastCodeGeneratorPage() {
                 }`}
               >
                 <option value="">Select State / Province</option>
-                {PROVINCES.map((p) => (
-                  <option key={p} value={p}>{p}</option>
-                ))}
+                <optgroup label="Canada">
+                  {PROVINCES.map((p) => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="United States">
+                  {US_STATES.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </optgroup>
                 <option disabled>──────────</option>
                 <option value="admin-apply">National Super Admin. wanted, apply here</option>
               </select>
@@ -215,13 +233,13 @@ export default function FastCodeGeneratorPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="mt-2 w-full h-14 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all disabled:opacity-50 shadow-sm"
+              className="mt-2 w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all disabled:opacity-50 shadow-sm"
             >
               {submitting ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  Generate Fast Code
+                  Proceed
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -229,9 +247,8 @@ export default function FastCodeGeneratorPage() {
           </form>
         )}
 
-        {/* SUCCESS PHASE */}
         {phase === "success" && (
-          <div className="text-center space-y-6">
+          <div className="text-center space-y-4">
             <div className="bg-neutral-50 border border-neutral-100 rounded-2xl p-6 md:p-8 shadow-sm">
               <p className="text-xs font-medium text-neutral-400 tracking-widest uppercase mb-3">
                 Your Fast Code
@@ -269,7 +286,7 @@ export default function FastCodeGeneratorPage() {
                   window.location.href = registerUrl;
                 }
               }}
-              className="w-full h-14 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
+              className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
             >
               Finish Registration
               <ExternalLink className="w-4 h-4" />
@@ -284,25 +301,19 @@ export default function FastCodeGeneratorPage() {
           </div>
         )}
 
-        {/* ERROR PHASE */}
         {phase === "error" && (
-          <div className="text-center space-y-5">
+          <div className="text-center space-y-4">
             <div className="bg-red-50 border border-red-100 rounded-2xl p-6">
               <p className="text-sm font-medium text-red-700">{errorMsg}</p>
             </div>
             <button
               onClick={() => setPhase("form")}
-              className="w-full h-14 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
+              className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
             >
               Try Again
             </button>
           </div>
         )}
-
-        {/* FOOTER NOTE */}
-        <p className="text-center text-xs text-neutral-300 font-medium tracking-wider uppercase">
-          TalisPros &mdash; Fast Code Onboarding
-        </p>
       </div>
     </div>
   );
