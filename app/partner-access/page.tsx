@@ -66,7 +66,7 @@ export default function PartnerAccessPage() {
               onChange={(e) => setFastCode(e.target.value)}
               placeholder="Enter Fast Code"
               disabled={isSubmitting}
-              className="w-full h-12 px-4 bg-white border border-neutral-200 rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all disabled:opacity-50"
+              className="w-full h-12 px-4 bg-transparent border border-neutral-300 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all disabled:opacity-50"
               spellCheck={false}
               autoComplete="off"
             />
@@ -75,7 +75,7 @@ export default function PartnerAccessPage() {
           <button
             type="submit"
             disabled={isSubmitting || !fastCode.trim()}
-            className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all disabled:opacity-50 shadow-sm"
+            className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all disabled:opacity-50"
           >
             {isSubmitting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

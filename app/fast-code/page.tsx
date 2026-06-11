@@ -205,8 +205,8 @@ export default function FastCodeGeneratorPage() {
               <select
                 value={fields.province}
                 onChange={(e) => setField("province", e.target.value)}
-                className={`w-full h-12 px-4 bg-white border rounded-xl text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all ${
-                  fieldErrors.province ? "border-red-300" : "border-neutral-200"
+                className={`w-full h-12 px-4 bg-transparent border text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all ${
+                  fieldErrors.province ? "border-red-300" : "border-neutral-300"
                 }`}
               >
                 <option value="">Select State / Province</option>
@@ -233,7 +233,7 @@ export default function FastCodeGeneratorPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="mt-2 w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all disabled:opacity-50 shadow-sm"
+              className="mt-2 w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all disabled:opacity-50"
             >
               {submitting ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -249,7 +249,7 @@ export default function FastCodeGeneratorPage() {
 
         {phase === "success" && (
           <div className="text-center space-y-4">
-            <div className="bg-neutral-50 border border-neutral-100 rounded-2xl p-6 md:p-8 shadow-sm">
+            <div className="border border-neutral-200 p-6 md:p-8">
               <p className="text-xs font-medium text-neutral-400 tracking-widest uppercase mb-3">
                 Your Fast Code
               </p>
@@ -259,7 +259,7 @@ export default function FastCodeGeneratorPage() {
                 </span>
                 <button
                   onClick={handleCopy}
-                  className="flex-shrink-0 w-9 h-9 rounded-lg border border-neutral-200 flex items-center justify-center hover:bg-neutral-100 transition-colors"
+                  className="flex-shrink-0 w-9 h-9 border border-neutral-300 flex items-center justify-center hover:bg-neutral-100 transition-colors"
                   title="Copy Fast Code"
                 >
                   {copied ? (
@@ -286,7 +286,7 @@ export default function FastCodeGeneratorPage() {
                   window.location.href = registerUrl;
                 }
               }}
-              className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
+              className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all"
             >
               Finish Registration
               <ExternalLink className="w-4 h-4" />
@@ -303,12 +303,12 @@ export default function FastCodeGeneratorPage() {
 
         {phase === "error" && (
           <div className="text-center space-y-4">
-            <div className="bg-red-50 border border-red-100 rounded-2xl p-6">
+            <div className="border border-red-200 p-6">
               <p className="text-sm font-medium text-red-700">{errorMsg}</p>
             </div>
             <button
               onClick={() => setPhase("form")}
-              className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-sm"
+              className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wider uppercase flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all"
             >
               Try Again
             </button>
@@ -345,8 +345,8 @@ function FieldBox({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className={`w-full h-12 px-4 bg-white border rounded-xl text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all ${
-          error ? "border-red-300" : "border-neutral-200"
+        className={`w-full h-12 px-4 bg-transparent border text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all ${
+          error ? "border-red-300" : "border-neutral-300"
         }`}
       />
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
