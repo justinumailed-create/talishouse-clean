@@ -8,7 +8,7 @@ import TalisBotChat from "@/components/TalisBotChat";
 
 export default function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isEmbed = pathname.startsWith("/fast-code");
+  const isEmbed = pathname.startsWith("/fast-code") || pathname.startsWith("/partner-access");
   const hideTalisBot = pathname === "/partner-access";
 
   if (isEmbed) {
