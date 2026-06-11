@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { ArrowRight, Copy, Check, ExternalLink } from "lucide-react";
 import Image from "next/image";
 import { registerFastCode, type FormFields, type ActionResult } from "./actions";
@@ -37,6 +37,12 @@ const US_STATES = [
 ];
 
 export default function FastCodeGeneratorPage() {
+  useEffect(() => {
+    document.documentElement.style.height = "auto";
+    document.body.style.minHeight = "auto";
+    document.body.style.backgroundColor = "#ffffff";
+  }, []);
+
   const [phase, setPhase] = useState<Phase>("form");
   const [fastCode, setFastCode] = useState("");
   const [errorMsg, setErrorMsg] = useState("");

@@ -1,9 +1,14 @@
 "use client";
 
-import { useState, useRef, FormEvent } from "react";
+import { useState, useRef, useEffect, FormEvent } from "react";
 import Image from "next/image";
 
 export default function PartnerAccessPage() {
+  useEffect(() => {
+    document.documentElement.style.height = "auto";
+    document.body.style.minHeight = "auto";
+    document.body.style.backgroundColor = "#ffffff";
+  }, []);
   const [fastCode, setFastCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
