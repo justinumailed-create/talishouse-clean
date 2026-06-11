@@ -40,7 +40,7 @@ export default function PartnerAccessPage() {
   };
 
   return (
-    <div className="font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
+    <div className="bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
       <div className="mx-auto max-w-lg w-full px-5 py-4">
         <div className="text-center mb-4">
           <Image
