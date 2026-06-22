@@ -72,11 +72,7 @@ export async function registerFastCode(data: FormFields): Promise<ActionResult> 
 
     const existingCodes = (existing || []).map((r) => r.fast_code);
 
-    const fastCode = generateFastCode(
-      data.firstName,
-      data.lastName,
-      existingCodes
-    );
+    const fastCode = generateFastCode(existingCodes);
 
     const { error: insertError } = await supabase
       .from("fast_code_registrations")
@@ -109,11 +105,7 @@ export async function registerFastCode(data: FormFields): Promise<ActionResult> 
         }
 
         const retryCodes = (retryExisting || []).map((r) => r.fast_code);
-        const retryCode = generateFastCode(
-          data.firstName,
-          data.lastName,
-          retryCodes
-        );
+        const retryCode = generateFastCode(retryCodes);
 
         const { error: retryError } = await supabase
           .from("fast_code_registrations")

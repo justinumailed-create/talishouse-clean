@@ -1,25 +1,21 @@
-export function extractInitials(firstName: string, lastName: string): string {
-  const first = firstName.trim().charAt(0).toUpperCase();
-  const last = lastName.trim().charAt(0).toUpperCase();
-  return `${first}${last}`;
+const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+function randomChar(): string {
+  return CHARS[Math.floor(Math.random() * CHARS.length)];
 }
 
-export function generateFastCode(
-  firstName: string,
-  lastName: string,
-  existingCodes: string[]
-): string {
-  const prefix = extractInitials(firstName, lastName);
+export function generateFastCode(existingCodes: string[]): string {
+  const seen = new Set(existingCodes.map((c) => c.toUpperCase().trim()));
 
-  const samePrefixCount = existingCodes.filter((code) =>
-    code.toUpperCase().startsWith(prefix)
-  ).length;
-
-  let number = 14 + samePrefixCount;
-
-  if (number === 13) {
-    number = 14;
+  for (let attempt = 0; attempt < 200; attempt++) {
+    let code = "";
+    for (let i = 0; i < 4; i++) {
+      code += randomChar();
+    }
+    if (!seen.has(code)) {
+      return code;
+    }
   }
 
-  return `${prefix}${number}-ttv`;
+  throw new Error("Failed to generate a unique FAST code after 200 attempts");
 }

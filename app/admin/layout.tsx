@@ -19,6 +19,8 @@ const adminNavItems = [
   { href: "/admin/project-applications", label: "Project Apps" },
   { href: "/admin/pricing", label: "Pricing" },
   { href: "/admin/fast-codes", label: "FAST Codes" },
+  { href: "/admin/build-requests", label: "Build Requests" },
+  { href: "/admin/production-queue", label: "Production Queue" },
 ];
 
 function subscribeToAdminSession(onStoreChange: () => void) {
