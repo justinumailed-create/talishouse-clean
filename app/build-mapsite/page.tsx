@@ -8,9 +8,9 @@ import {
   ArrowRight,
   AlertCircle,
   Copy,
-  ExternalLink,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { submitBuildRequest, type ActionResult as BuildResult } from "./actions";
 import { registerFastCode, type ActionResult as FastCodeResult } from "@/app/fast-code/actions";
 
@@ -43,97 +43,84 @@ const US_STATES = [
   "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
 ];
 
-const HERO_OPTIONS = [
-  { value: "map", label: "Interactive Map" },
-  { value: "image", label: "Hero Image" },
-  { value: "video", label: "Hero Video" },
-  { value: "pdf", label: "PDF Brochure" },
-];
-
-const MEDIA_FOCUS_OPTIONS = [
-  { value: "residential", label: "Residential" },
-  { value: "recreational", label: "Recreational" },
-  { value: "commercial", label: "Commercial / Wholesale" },
-  { value: "land", label: "Land / Development" },
-  { value: "hybrid", label: "Hybrid / Mixed-Use" },
-];
-
-const FUTURE_FEATURES = [
-  { value: "ecommerce", label: "E-Commerce Integration" },
-  { value: "booking", label: "Booking / Scheduling" },
-  { value: "analytics", label: "Advanced Analytics" },
-  { value: "multi_lang", label: "Multi-Language Support" },
-  { value: "virtual_tour", label: "Virtual Tour / 3D Walkthrough" },
-  { value: "lead_api", label: "Lead API / CRM Sync" },
-  { value: "custom_domain", label: "Custom Domain" },
-  { value: "ssr", label: "SEO / SSR Optimization" },
-];
-
 const ACCOUNT_TYPES = [
-  { value: "individual", label: "Individual / Solo" },
-  { value: "team", label: "Small Team (2-5)" },
-  { value: "agency", label: "Agency / Brokerage" },
-  { value: "developer", label: "Developer / Builder" },
+  {
+    value: "root",
+    label: "Root Account",
+    description: "up to 100 Derivative Accounts, SPLITS",
+  },
+  {
+    value: "derivative",
+    label: "Derivative Account",
+    description: "multi-PIN Accounts, SPLITS",
+  },
+  {
+    value: "adpros",
+    label: "Adpros Account",
+    description: "individual PINs, no SPLITS",
+  },
 ];
 
 const STORAGE_KEY = "talispros_build_mapsite";
 
 interface FormData {
-  firstName: string;
-  lastName: string;
+  date: string;
   email: string;
-  phone: string;
-  address: string;
-  city: string;
-  province: string;
-  postalCode: string;
-  country: string;
   accountType: string;
-  preferredFastCode: string;
-  mapsiteTitle: string;
-  mapsiteTagline: string;
-  heroType: string;
-  mediaFocus: string[];
-  futureFeatures: string[];
-  comments: string;
-  consent: boolean;
+  fastCode: string;
+  homePin: string;
+  homeAddress: string;
+  homeCity: string;
+  homeProvince: string;
+  homePostalCode: string;
+  homeCountry: string;
+  helpPreference: string;
+  additionalComments: string;
+  consentCommunications: boolean;
+  consentData: boolean;
 }
 
 interface FileState {
-  profileImage: File | null;
-  logoImage: File | null;
-  pinImage: File | null;
-  monologuePdf: File | null;
-  ebookPdf: File | null;
+  picture: File | null;
+  logo: File | null;
+  ttvMonologuePdf: File | null;
+  ttvBackgroundImage: File | null;
+  tebWriteUpPdf: File | null;
+  tebPictures: File[];
+}
+
+function todayString(): string {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 const defaultForm: FormData = {
-  firstName: "",
-  lastName: "",
+  date: todayString(),
   email: "",
-  phone: "",
-  address: "",
-  city: "",
-  province: "",
-  postalCode: "",
-  country: "Canada",
   accountType: "",
-  preferredFastCode: "",
-  mapsiteTitle: "",
-  mapsiteTagline: "",
-  heroType: "map",
-  mediaFocus: [],
-  futureFeatures: [],
-  comments: "",
-  consent: false,
+  fastCode: "",
+  homePin: "",
+  homeAddress: "",
+  homeCity: "",
+  homeProvince: "",
+  homePostalCode: "",
+  homeCountry: "Canada",
+  helpPreference: "",
+  additionalComments: "",
+  consentCommunications: false,
+  consentData: false,
 };
 
 const defaultFiles: FileState = {
-  profileImage: null,
-  logoImage: null,
-  pinImage: null,
-  monologuePdf: null,
-  ebookPdf: null,
+  picture: null,
+  logo: null,
+  ttvMonologuePdf: null,
+  ttvBackgroundImage: null,
+  tebWriteUpPdf: null,
+  tebPictures: [],
 };
 
 function SectionCard({
@@ -245,105 +232,6 @@ function InputField({
   );
 }
 
-function SelectField({
-  label,
-  required,
-  value,
-  onChange,
-  options,
-  placeholder,
-  error,
-}: {
-  label: string;
-  required?: boolean;
-  value: string;
-  onChange: (v: string) => void;
-  options: { value: string; label: string }[];
-  placeholder?: string;
-  error?: string;
-}) {
-  return (
-    <div>
-      <FieldLabel label={label} required={required} />
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full h-11 px-4 bg-white border text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-xl appearance-none ${
-          error ? "border-red-300" : "border-neutral-200"
-        } ${!value ? "text-neutral-400" : ""}`}
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "right 16px center",
-          paddingRight: "40px",
-        }}
-      >
-        <option value="">{placeholder || "Select..."}</option>
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-    </div>
-  );
-}
-
-function CheckboxGroup({
-  label,
-  options,
-  selected,
-  onChange,
-}: {
-  label: string;
-  options: { value: string; label: string }[];
-  selected: string[];
-  onChange: (selected: string[]) => void;
-}) {
-  function toggle(value: string) {
-    if (selected.includes(value)) {
-      onChange(selected.filter((v) => v !== value));
-    } else {
-      onChange([...selected, value]);
-    }
-  }
-
-  return (
-    <div>
-      <FieldLabel label={label} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {options.map((opt) => {
-          const isActive = selected.includes(opt.value);
-          return (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => toggle(opt.value)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl border text-sm text-left transition-all ${
-                isActive
-                  ? "border-neutral-900 bg-neutral-900/5 text-neutral-900 font-medium"
-                  : "border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
-              }`}
-            >
-              <span
-                className={`flex-shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
-                  isActive
-                    ? "bg-neutral-900 border-neutral-900"
-                    : "border-neutral-300"
-                }`}
-              >
-                {isActive && <Check className="w-3.5 h-3.5 text-white" />}
-              </span>
-              {opt.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
 function FileUpload({
   label,
   file,
@@ -391,6 +279,60 @@ function FileUpload({
         onChange={(e) => {
           const f = e.target.files?.[0];
           onChange(f || null);
+        }}
+      />
+    </div>
+  );
+}
+
+function MultiFileUpload({
+  label,
+  files,
+  onChange,
+  accept,
+}: {
+  label: string;
+  files: File[];
+  onChange: (files: File[]) => void;
+  accept?: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const fileNames = files.map((f) => f.name).join(", ");
+
+  return (
+    <div>
+      <FieldLabel label={label} />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-dashed border-neutral-300 text-sm text-neutral-500 hover:border-neutral-400 hover:text-neutral-700 hover:bg-neutral-50 transition-all"
+      >
+        <Upload className="w-4 h-4 flex-shrink-0" />
+        <span className="flex-1 truncate">
+          {fileNames || "Click to upload"}
+        </span>
+        {files.length > 0 && (
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              onChange([]);
+              if (inputRef.current) inputRef.current.value = "";
+            }}
+            className="text-xs text-red-400 hover:text-red-600 ml-2 flex-shrink-0"
+          >
+            Remove all
+          </span>
+        )}
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept={accept}
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          const selected = Array.from(e.target.files || []);
+          onChange(selected);
         }}
       />
     </div>
@@ -511,6 +453,25 @@ function loadStoredFiles(): FileState {
   return defaultFiles;
 }
 
+function RegisterCta() {
+  return (
+    <a
+      href="/register-account"
+      className="block text-center px-6 py-6 mb-8 rounded-xl border-2 border-[#c92026] bg-white cursor-pointer hover:translate-y-[-2px] hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] transition-all duration-200 ease-in-out no-underline"
+    >
+      <p className="text-[18px] leading-relaxed text-neutral-800 mb-4">
+        Build a &apos;done-for-you&apos; MapSite™
+        without obligation. We will follow
+        up within two business days to
+        optimize and publish.
+      </p>
+      <span className="block font-bold text-[20px] text-neutral-900">
+        Register Account
+      </span>
+    </a>
+  );
+}
+
 function FastCodeSidebar() {
   const [fcFirstName, setFcFirstName] = useState("");
   const [fcLastName, setFcLastName] = useState("");
@@ -562,7 +523,9 @@ function FastCodeSidebar() {
 
   if (fcCode) {
     return (
-      <div className="text-center">
+      <div>
+        <RegisterCta />
+        <div className="text-center">
         <Image
           src="/logo.png"
           alt="TalisPros"
@@ -596,11 +559,13 @@ function FastCodeSidebar() {
           Use this code to access your MapSite™.
         </p>
       </div>
+      </div>
     );
   }
 
   return (
     <div>
+      <RegisterCta />
       <Image
         src="/logo.png"
         alt="TalisPros"
@@ -718,6 +683,124 @@ function FastCodeSidebar() {
   );
 }
 
+function TurnstileWidget({
+  onToken,
+}: {
+  onToken: (token: string) => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (!siteKey) {
+      const id = setTimeout(() => setLoaded(true), 0);
+      return () => clearTimeout(id);
+    }
+
+    if (document.getElementById("cf-turnstile-script")) {
+      setLoaded(true);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.id = "cf-turnstile-script";
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => setLoaded(true);
+    document.body.appendChild(script);
+
+    return () => {
+      const el = document.getElementById("cf-turnstile-script");
+      if (el) el.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!loaded || !ref.current) return;
+    const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    if (!siteKey) {
+      return;
+    }
+    const win = window as unknown as { turnstile?: { render: (el: HTMLElement, opts: { sitekey: string; callback: (token: string) => void }) => void } };
+    if (win.turnstile) {
+      win.turnstile.render(ref.current, {
+        sitekey: siteKey,
+        callback: onToken,
+      });
+    }
+  }, [loaded, onToken]);
+
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+
+  if (!siteKey) {
+    return (
+      <div className="border border-dashed border-neutral-300 rounded-xl p-4 text-center text-xs text-neutral-400">
+        Turnstile widget — site key not configured
+      </div>
+    );
+  }
+
+  return <div ref={ref} />;
+}
+
+function AccountTypeSelector({
+  value,
+  onChange,
+  error,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  error?: string;
+}) {
+  return (
+    <div>
+      <FieldLabel label="Type of Account" required />
+      <div className="space-y-2">
+        {ACCOUNT_TYPES.map((opt) => {
+          const isActive = value === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onChange(opt.value)}
+              className={`w-full flex items-start gap-4 px-4 py-4 rounded-xl border text-left transition-all ${
+                isActive
+                  ? "border-neutral-900 bg-neutral-900/5"
+                  : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"
+              }`}
+            >
+              <span
+                className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all ${
+                  isActive
+                    ? "border-neutral-900"
+                    : "border-neutral-300"
+                }`}
+              >
+                {isActive && <span className="w-2.5 h-2.5 rounded-full bg-neutral-900" />}
+              </span>
+              <div className="flex-1 min-w-0">
+                <span
+                  className={`block text-sm font-medium ${
+                    isActive ? "text-neutral-900" : "text-neutral-700"
+                  }`}
+                >
+                  {opt.label}
+                </span>
+                <span className="block text-xs text-neutral-500 mt-0.5 leading-relaxed">
+                  {opt.description}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+    </div>
+  );
+}
+
 export default function BuildMapsitePage() {
   useEffect(() => {
     document.documentElement.style.height = "auto";
@@ -740,6 +823,7 @@ export default function BuildMapsitePage() {
   const [submitError, setSubmitError] = useState("");
   const [generatedFastCode, setGeneratedFastCode] = useState("");
   const [copied, setCopied] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [form, setForm] = useState<FormData>(loadStoredForm);
   const [files, setFiles] = useState<FileState>(loadStoredFiles);
 
@@ -789,15 +873,18 @@ export default function BuildMapsitePage() {
 
   function validate(): boolean {
     const errs: Partial<Record<string, string>> = {};
-    if (!form.firstName.trim()) errs.firstName = "Required";
-    if (!form.lastName.trim()) errs.lastName = "Required";
     if (!form.email.trim()) errs.email = "Required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
       errs.email = "Invalid email";
-    if (!form.phone.trim()) errs.phone = "Required";
-    if (!form.province.trim()) errs.province = "Required";
     if (!form.accountType) errs.accountType = "Select an account type";
-    if (!form.consent) errs.consent = "You must agree to continue";
+    if (!form.fastCode.trim()) errs.fastCode = "Required";
+    if (!form.homePin.trim()) errs.homePin = "Required";
+    if (!form.homeAddress.trim()) errs.homeAddress = "Required";
+    if (!form.homeCity.trim()) errs.homeCity = "Required";
+    if (!form.homeProvince.trim()) errs.homeProvince = "Required";
+    if (!form.homePostalCode.trim()) errs.homePostalCode = "Required";
+    if (!form.consentData) errs.consentData = "You must agree to the data processing terms";
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) errs.turnstile = "Please complete the security check";
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -812,7 +899,7 @@ export default function BuildMapsitePage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!validate()) {
-      setOpenSections(new Set([1, 2, 3, 4, 5, 6, 7, 8]));
+      setOpenSections(new Set([1, 2, 3]));
       return;
     }
 
@@ -821,28 +908,30 @@ export default function BuildMapsitePage() {
 
     try {
       const fd = new FormData();
-      fd.append("firstName", form.firstName);
-      fd.append("lastName", form.lastName);
+      fd.append("date", form.date);
       fd.append("email", form.email);
-      fd.append("phone", form.phone);
-      fd.append("address", form.address);
-      fd.append("city", form.city);
-      fd.append("province", form.province);
-      fd.append("postalCode", form.postalCode);
-      fd.append("country", form.country);
       fd.append("accountType", form.accountType);
-      fd.append("preferredFastCode", form.preferredFastCode);
-      fd.append("mapsiteTitle", form.mapsiteTitle);
-      fd.append("mapsiteTagline", form.mapsiteTagline);
-      fd.append("heroType", form.heroType);
-      fd.append("mediaFocus", JSON.stringify(form.mediaFocus));
-      fd.append("futureFeatures", JSON.stringify(form.futureFeatures));
-      fd.append("comments", form.comments);
-      if (files.profileImage) fd.append("profileImage", files.profileImage);
-      if (files.logoImage) fd.append("logoImage", files.logoImage);
-      if (files.pinImage) fd.append("pinImage", files.pinImage);
-      if (files.monologuePdf) fd.append("monologuePdf", files.monologuePdf);
-      if (files.ebookPdf) fd.append("ebookPdf", files.ebookPdf);
+      fd.append("fastCode", form.fastCode);
+      fd.append("homePin", form.homePin);
+      fd.append("homeAddress", form.homeAddress);
+      fd.append("homeCity", form.homeCity);
+      fd.append("homeProvince", form.homeProvince);
+      fd.append("homePostalCode", form.homePostalCode);
+      fd.append("homeCountry", form.homeCountry);
+      fd.append("helpPreference", form.helpPreference);
+      fd.append("additionalComments", form.additionalComments);
+      fd.append("consentCommunications", String(form.consentCommunications));
+      fd.append("consentData", String(form.consentData));
+      fd.append("turnstileToken", turnstileToken);
+      if (files.picture) fd.append("picture", files.picture);
+      if (files.logo) fd.append("logo", files.logo);
+      if (files.ttvMonologuePdf) fd.append("ttvMonologuePdf", files.ttvMonologuePdf);
+      if (files.ttvBackgroundImage) fd.append("ttvBackgroundImage", files.ttvBackgroundImage);
+      if (files.tebWriteUpPdf) fd.append("tebWriteUpPdf", files.tebWriteUpPdf);
+      for (let i = 0; i < files.tebPictures.length; i++) {
+        fd.append(`tebPicture_${i}`, files.tebPictures[i]);
+      }
+      fd.append("helpPreference", form.helpPreference);
 
       const result: BuildResult = await submitBuildRequest(fd);
 
@@ -894,16 +983,15 @@ export default function BuildMapsitePage() {
             <Check className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight mb-3">
-            MapSite™ Request Submitted
+            Your Build A MapSite™ Request Has Been Received
           </h1>
           <p className="text-neutral-500 text-sm sm:text-base leading-relaxed mb-8 max-w-sm mx-auto">
-            Your MapSite™ build request has been received. We will follow up
-            within two business days to optimize and publish your MapSite™.
+            We will review your request and contact you within two business days.
           </p>
 
           <div className="border border-neutral-200 rounded-2xl bg-white p-6 sm:p-8 text-left mb-8">
             <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-3">
-              Your Fast Code
+              Request Number
             </p>
             <div className="flex items-center justify-center gap-3">
               <span className="text-3xl sm:text-4xl font-bold tracking-tight text-neutral-900">
@@ -912,7 +1000,7 @@ export default function BuildMapsitePage() {
               <button
                 onClick={handleCopy}
                 className="flex-shrink-0 w-10 h-10 border border-neutral-300 rounded-xl flex items-center justify-center hover:bg-neutral-100 transition-colors"
-                title="Copy Fast Code"
+                title="Copy Request Number"
               >
                 {copied ? (
                   <Check className="w-4 h-4 text-green-600" />
@@ -924,28 +1012,24 @@ export default function BuildMapsitePage() {
             <div className="mt-4 pt-4 border-t border-neutral-100">
               <p className="text-xs text-neutral-400 mb-1">Submitted as</p>
               <p className="text-sm text-neutral-900 font-medium">
-                {form.firstName} {form.lastName}
+                {form.email}
               </p>
-              <p className="text-sm text-neutral-500">{form.email}</p>
             </div>
           </div>
 
           <div className="flex flex-col gap-3">
-            <a
-              href={`https://talispros.com/ma/${generatedFastCode}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all"
+            <Link
+              href="/"
+              className="w-full h-12 bg-[#2563eb] text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-[#1d4ed8] active:scale-[0.98] transition-all"
             >
-              Access Your MapSite™
-              <ExternalLink className="w-4 h-4" />
-            </a>
+              Return to Home
+            </Link>
             <button
               type="button"
               onClick={handleReset}
               className="text-sm text-neutral-400 hover:text-neutral-900 transition-colors underline underline-offset-2"
             >
-              Build Another MapSite™
+              Submit Another Request
             </button>
           </div>
         </div>
@@ -992,8 +1076,8 @@ export default function BuildMapsitePage() {
                 Build A MapSite™
               </h1>
               <p className="text-sm sm:text-base text-neutral-500 mt-2 max-w-md mx-auto leading-relaxed">
-                Build a done-for-you MapSite™ without obligation. We will follow up
-                within two business days to optimize and publish.
+                Set up your MapSite™ account. Enter the required information below
+                and we will process your request within two business days.
               </p>
             </div>
 
@@ -1001,283 +1085,305 @@ export default function BuildMapsitePage() {
               <SectionCard
                 number={1}
                 title="General Information"
-                description="Your contact details and account setup."
+                description="Account identification and type."
                 isOpen={openSections.has(1)}
                 onToggle={() => toggleSection(1)}
               >
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField
-                      label="First Name"
-                      required
-                      value={form.firstName}
-                      onChange={(v) => updateField("firstName", v)}
-                      placeholder="John"
-                      autoComplete="given-name"
-                      error={errors.firstName}
-                    />
-                    <InputField
-                      label="Last Name"
-                      required
-                      value={form.lastName}
-                      onChange={(v) => updateField("lastName", v)}
-                      placeholder="Smith"
-                      autoComplete="family-name"
-                      error={errors.lastName}
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField
-                      label="Email"
-                      required
-                      type="email"
-                      value={form.email}
-                      onChange={(v) => updateField("email", v)}
-                      placeholder="john@example.com"
-                      autoComplete="email"
-                      error={errors.email}
-                    />
-                    <InputField
-                      label="Phone"
-                      required
-                      type="tel"
-                      value={form.phone}
-                      onChange={(v) => updateField("phone", v)}
-                      placeholder="(555) 123-4567"
-                      autoComplete="tel"
-                      error={errors.phone}
-                    />
-                  </div>
                   <InputField
-                    label="Street Address"
-                    value={form.address}
-                    onChange={(v) => updateField("address", v)}
-                    placeholder="123 Main St"
-                    autoComplete="street-address"
-                  />
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <InputField
-                      label="City"
-                      value={form.city}
-                      onChange={(v) => updateField("city", v)}
-                      placeholder="Toronto"
-                      autoComplete="address-level2"
-                    />
-                    <ProvinceSelect
-                      value={form.province}
-                      onChange={(v) => updateField("province", v)}
-                      country={form.country}
-                      error={errors.province}
-                    />
-                    <InputField
-                      label="Postal Code"
-                      value={form.postalCode}
-                      onChange={(v) => updateField("postalCode", v)}
-                      placeholder="A1A 1A1"
-                      autoComplete="postal-code"
-                    />
-                  </div>
-                  <CountrySelect
-                    value={form.country}
-                    onChange={(v) => updateField("country", v)}
-                  />
-                  <SelectField
-                    label="Account Type"
+                    label="Date"
                     required
+                    type="date"
+                    value={form.date}
+                    onChange={(v) => updateField("date", v)}
+                  />
+                  <InputField
+                    label="Email Address"
+                    required
+                    type="email"
+                    value={form.email}
+                    onChange={(v) => updateField("email", v)}
+                    placeholder="john@example.com"
+                    autoComplete="email"
+                    error={errors.email}
+                  />
+                  <AccountTypeSelector
                     value={form.accountType}
                     onChange={(v) => updateField("accountType", v)}
-                    options={ACCOUNT_TYPES}
-                    placeholder="Select account type"
                     error={errors.accountType}
                   />
+                  <InputField
+                    label="FAST Code"
+                    required
+                    value={form.fastCode}
+                    onChange={(v) => updateField("fastCode", v)}
+                    placeholder="e.g. JOHN-TORONTO"
+                    error={errors.fastCode}
+                  />
+                  <p className="text-xs text-neutral-400 -mt-2">
+                    Identifies an Account
+                  </p>
                 </div>
               </SectionCard>
 
               <SectionCard
                 number={2}
-                title="MapSite™ Personalization"
-                description="Customize your MapSite™ look and feel."
+                title="MapSite Personalization"
+                description="Your branding assets."
                 isOpen={openSections.has(2)}
                 onToggle={() => toggleSection(2)}
               >
                 <div className="space-y-4">
-                  <InputField
-                    label="Preferred Fast Code"
-                    value={form.preferredFastCode}
-                    onChange={(v) => updateField("preferredFastCode", v)}
-                    placeholder="e.g. JOHN-TORONTO"
+                  <FileUpload
+                    label="Your Picture"
+                    file={files.picture}
+                    onChange={(f) => updateFile("picture", f)}
+                    accept="image/*"
                   />
-                  <InputField
-                    label="MapSite™ Title / Headline"
-                    value={form.mapsiteTitle}
-                    onChange={(v) => updateField("mapsiteTitle", v)}
-                    placeholder="Your main headline"
-                  />
-                  <InputField
-                    label="MapSite™ Tagline / Subtext"
-                    value={form.mapsiteTagline}
-                    onChange={(v) => updateField("mapsiteTagline", v)}
-                    placeholder="A short description of your market"
-                  />
-                  <SelectField
-                    label="Hero Content Type"
-                    value={form.heroType}
-                    onChange={(v) => updateField("heroType", v)}
-                    options={HERO_OPTIONS}
+                  <FileUpload
+                    label="Your Logo"
+                    file={files.logo}
+                    onChange={(f) => updateFile("logo", f)}
+                    accept="image/*"
                   />
                 </div>
               </SectionCard>
 
               <SectionCard
                 number={3}
-                title="Media Focus"
-                description="What type of properties or market will your MapSite™ highlight?"
+                title="Home PIN Location"
+                description="Property Identification Number and location."
                 isOpen={openSections.has(3)}
                 onToggle={() => toggleSection(3)}
               >
-                <CheckboxGroup
-                  label="Focus Areas"
-                  options={MEDIA_FOCUS_OPTIONS}
-                  selected={form.mediaFocus}
-                  onChange={(v) => updateField("mediaFocus", v)}
-                />
-              </SectionCard>
-
-              <SectionCard
-                number={4}
-                title="TTV Uploads"
-                description="Upload your TalisTV media assets."
-                isOpen={openSections.has(4)}
-                onToggle={() => toggleSection(4)}
-              >
                 <div className="space-y-4">
-                  <FileUpload
-                    label="Profile Image"
-                    file={files.profileImage}
-                    onChange={(f) => updateFile("profileImage", f)}
-                    accept="image/*"
+                  <InputField
+                    label="Property PIN"
+                    required
+                    value={form.homePin}
+                    onChange={(v) => updateField("homePin", v)}
+                    placeholder="e.g. 12345-6789"
+                    error={errors.homePin}
                   />
-                  <FileUpload
-                    label="Logo Image"
-                    file={files.logoImage}
-                    onChange={(f) => updateFile("logoImage", f)}
-                    accept="image/*"
+                  <InputField
+                    label="Street Address"
+                    required
+                    value={form.homeAddress}
+                    onChange={(v) => updateField("homeAddress", v)}
+                    placeholder="123 Main St"
+                    autoComplete="street-address"
+                    error={errors.homeAddress}
                   />
-                  <FileUpload
-                    label="Pin Image (Map Marker)"
-                    file={files.pinImage}
-                    onChange={(f) => updateFile("pinImage", f)}
-                    accept="image/*"
-                  />
-                </div>
-              </SectionCard>
-
-              <SectionCard
-                number={5}
-                title="TEB Uploads"
-                description="Upload your Talis E-Book and presentation assets."
-                isOpen={openSections.has(5)}
-                onToggle={() => toggleSection(5)}
-              >
-                <div className="space-y-4">
-                  <FileUpload
-                    label="Monologue / Script (PDF)"
-                    file={files.monologuePdf}
-                    onChange={(f) => updateFile("monologuePdf", f)}
-                    accept=".pdf"
-                  />
-                  <FileUpload
-                    label="E-Book (PDF)"
-                    file={files.ebookPdf}
-                    onChange={(f) => updateFile("ebookPdf", f)}
-                    accept=".pdf"
-                  />
-                </div>
-              </SectionCard>
-
-              <SectionCard
-                number={6}
-                title="Future Preferences"
-                description="What features would you like to see on your MapSite™?"
-                isOpen={openSections.has(6)}
-                onToggle={() => toggleSection(6)}
-              >
-                <div className="space-y-4">
-                  <CheckboxGroup
-                    label="Desired Features"
-                    options={FUTURE_FEATURES}
-                    selected={form.futureFeatures}
-                    onChange={(v) => updateField("futureFeatures", v)}
-                  />
-                </div>
-              </SectionCard>
-
-              <SectionCard
-                number={7}
-                title="Additional Comments"
-                description="Anything else we should know about your MapSite™?"
-                isOpen={openSections.has(7)}
-                onToggle={() => toggleSection(7)}
-              >
-                <TextAreaField
-                  label="Comments"
-                  value={form.comments}
-                  onChange={(v) => updateField("comments", v)}
-                  placeholder="Tell us about your vision, target market, or any specific requirements..."
-                  rows={5}
-                />
-              </SectionCard>
-
-              <SectionCard
-                number={8}
-                title="Consent"
-                description="Review and agree to our terms."
-                isOpen={openSections.has(8)}
-                onToggle={() => toggleSection(8)}
-              >
-                <div className="space-y-5">
-                  <div className="bg-neutral-50 rounded-xl p-4 text-sm text-neutral-600 leading-relaxed space-y-2">
-                    <p>
-                      By submitting this form, you consent to TalisPros processing
-                      your information to build and manage your MapSite™. We will
-                      follow up within two business days to optimize and publish your
-                      MapSite™.
-                    </p>
-                    <p>
-                      Your data will be handled in accordance with our{" "}
-                      <a
-                        href="/privacy"
-                        target="_blank"
-                        className="text-neutral-900 underline underline-offset-2 hover:text-neutral-700"
-                      >
-                        Privacy Policy
-                      </a>
-                      .
-                    </p>
-                  </div>
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={form.consent}
-                      onChange={(e) =>
-                        updateField("consent", e.target.checked)
-                      }
-                      className="mt-0.5 w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <InputField
+                      label="City"
+                      required
+                      value={form.homeCity}
+                      onChange={(v) => updateField("homeCity", v)}
+                      placeholder="Toronto"
+                      autoComplete="address-level2"
+                      error={errors.homeCity}
                     />
-                    <span className="text-sm text-neutral-600 leading-relaxed">
-                      I agree to the terms and consent to the processing of my data
-                      for the purpose of building and managing my MapSite™.{" "}
-                      <span className="text-red-400">*</span>
-                    </span>
-                  </label>
-                  {errors.consent && (
-                    <div className="flex items-center gap-2 text-sm text-red-500">
-                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                      {errors.consent}
-                    </div>
-                  )}
+                    <ProvinceSelect
+                      value={form.homeProvince}
+                      onChange={(v) => updateField("homeProvince", v)}
+                      country={form.homeCountry}
+                      error={errors.homeProvince}
+                    />
+                    <InputField
+                      label="Postal Code"
+                      required
+                      value={form.homePostalCode}
+                      onChange={(v) => updateField("homePostalCode", v)}
+                      placeholder="A1A 1A1"
+                      autoComplete="postal-code"
+                      error={errors.homePostalCode}
+                    />
+                  </div>
+                  <CountrySelect
+                    value={form.homeCountry}
+                    onChange={(v) => updateField("homeCountry", v)}
+                  />
                 </div>
               </SectionCard>
+
+              <div className="py-6">
+                <h3 className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight mb-5">
+                  Talis TV (TTV)
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <FileUpload
+                    label="A Monologue in PDF"
+                    file={files.ttvMonologuePdf}
+                    onChange={(f) => updateFile("ttvMonologuePdf", f)}
+                    accept=".pdf"
+                  />
+                  <FileUpload
+                    label="A JPG or PNG background for your Monologue."
+                    file={files.ttvBackgroundImage}
+                    onChange={(f) => updateFile("ttvBackgroundImage", f)}
+                    accept=".jpg,.jpeg,.png"
+                  />
+                </div>
+                <p className="text-xs text-neutral-500 leading-relaxed mt-4">
+                  TTV Segments should be at least 90 seconds and no more than three minutes in length. As a rough estimate figure about 1,200 characters per minute. Segments over three minutes in length will be edited down.
+                </p>
+              </div>
+
+              <div className="py-6">
+                <h3 className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight mb-5">
+                  Talis E-Books (TEB)
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <FileUpload
+                    label="A Write-Up in PDF."
+                    file={files.tebWriteUpPdf}
+                    onChange={(f) => updateFile("tebWriteUpPdf", f)}
+                    accept=".pdf"
+                  />
+                  <MultiFileUpload
+                    label="Up to 22 pictures for your E-Book."
+                    files={files.tebPictures}
+                    onChange={(f) => setFiles((prev) => ({ ...prev, tebPictures: f }))}
+                    accept=".jpg,.jpeg,.png"
+                  />
+                </div>
+                <p className="text-xs text-neutral-500 leading-relaxed mt-4">
+                  TEB Publications should be no less than 12 pages and no more than 22 pages, including covers. Pictures should be 16 over 9 in dimension (full HD) and landscape in orientation. Please rename pictures from P1 to P22 before submitting, that communicates to us in which order they should be used (P1 = Front Cover; P2 = Back Cover; P3..P22 inside pictures).
+                </p>
+              </div>
+
+              <div className="py-6">
+                <h3 className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight mb-3">
+                  Help Us Improve
+                </h3>
+                <p className="text-sm text-neutral-500 mb-1">
+                  Possible future levels of media functionality.
+                </p>
+                <p className="text-xs text-neutral-400 mb-4">
+                  Which best represents your preference?
+                </p>
+                <div className="space-y-3">
+                  {[
+                    {
+                      value: "done-for-me",
+                      label:
+                        "I prefer the 'done-for-me' option: I provide images and write ups and my media is generated for me within 48 hours at a modest cost.",
+                    },
+                    {
+                      value: "outsourced",
+                      label:
+                        "I prefer the 'outsourced' option: I can attach additional media I have created myself somewhere else at no additional cost.",
+                    },
+                    {
+                      value: "real-time",
+                      label:
+                        "I prefer the 'real time' option: I can build my own online media in app in real time at a slightly less modest cost.",
+                    },
+                  ].map((opt) => {
+                    const isActive = form.helpPreference === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        onClick={() => updateField("helpPreference", opt.value)}
+                        className={`w-full flex items-start gap-3 px-4 py-3 rounded-xl border text-left text-sm leading-relaxed transition-all ${
+                          isActive
+                            ? "border-neutral-900 bg-neutral-900/5 text-neutral-900"
+                            : "border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
+                        }`}
+                      >
+                        <span
+                          className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 transition-all ${
+                            isActive ? "border-neutral-900" : "border-neutral-300"
+                          }`}
+                        >
+                          {isActive && (
+                            <span className="w-2.5 h-2.5 rounded-full bg-neutral-900" />
+                          )}
+                        </span>
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-5">
+                  <TextAreaField
+                    label="Additional Comments or Suggestions"
+                    value={form.additionalComments}
+                    onChange={(v) => updateField("additionalComments", v)}
+                    placeholder="Enter your comments or suggestions..."
+                    rows={4}
+                  />
+                </div>
+              </div>
+
+              <div className="py-6">
+                <h3 className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight mb-4">
+                  Terms
+                </h3>
+
+                <p className="text-sm text-neutral-600 mb-4 leading-relaxed">
+                  By checking the boxes below, you agree to receive communications from Talispros™. You can unsubscribe anytime.
+                </p>
+
+                <label className="flex items-start gap-3 cursor-pointer mb-5">
+                  <input
+                    type="checkbox"
+                    checked={form.consentCommunications}
+                    onChange={(e) => updateField("consentCommunications", e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
+                  />
+                  <span className="text-sm text-neutral-600 leading-relaxed">
+                    I agree to receive communications from Talispros™.
+                  </span>
+                </label>
+
+                <p className="text-sm text-neutral-600 mb-4 leading-relaxed">
+                  To process your request, we need your permission to store and process your personal data. Please check the box below to confirm your consent:
+                </p>
+
+                <label className="flex items-start gap-3 cursor-pointer mb-5">
+                  <input
+                    type="checkbox"
+                    checked={form.consentData}
+                    onChange={(e) => updateField("consentData", e.target.checked)}
+                    className="mt-0.5 w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
+                  />
+                  <span className="text-sm text-neutral-600 leading-relaxed">
+                    I agree to allow Talispros™ to store and process my personal data.{" "}
+                    <span className="text-red-400">*</span>
+                  </span>
+                </label>
+                {errors.consentData && (
+                  <div className="flex items-center gap-2 text-sm text-red-500 mb-4">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    {errors.consentData}
+                  </div>
+                )}
+
+                <p className="text-sm text-neutral-500 leading-relaxed">
+                  We care about your privacy. Learn how we handle your data in our{" "}
+                  <a
+                    href="/privacy"
+                    target="_blank"
+                    className="text-neutral-900 underline underline-offset-2 hover:text-neutral-700"
+                  >
+                    Privacy Policy
+                  </a>
+                  .
+                </p>
+              </div>
+
+              <div className="py-6">
+                <TurnstileWidget onToken={setTurnstileToken} />
+                {errors.turnstile && (
+                  <div className="flex items-center gap-2 text-sm text-red-500 mt-2">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    {errors.turnstile}
+                  </div>
+                )}
+              </div>
 
               <div className="pt-2 pb-8">
                 {submitError && (
@@ -1287,26 +1393,22 @@ export default function BuildMapsitePage() {
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="w-full h-12 sm:h-14 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all disabled:opacity-50 shadow-sm"
-                >
-                  {saving ? (
-                    <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Submitting...</span>
-                    </div>
-                  ) : (
-                    <>
-                      Submit MapSite™ Request
-                      <ArrowRight className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-                <p className="text-xs text-neutral-400 text-center mt-3">
-                  Your progress is saved automatically.
-                </p>
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className="w-full sm:w-auto px-10 h-12 bg-[#2563eb] text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-[#1d4ed8] active:scale-[0.98] transition-all disabled:opacity-50 shadow-sm"
+                  >
+                    {saving ? (
+                      <div className="flex items-center gap-3">
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Submitting...</span>
+                      </div>
+                    ) : (
+                      <>Submit</>
+                    )}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

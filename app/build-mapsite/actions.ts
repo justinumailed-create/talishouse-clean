@@ -15,34 +15,35 @@ export interface ActionResult {
 }
 
 export interface BuildFields {
-  firstName: string;
-  lastName: string;
+  date: string;
   email: string;
-  phone: string;
-  address: string;
-  city: string;
-  province: string;
-  postalCode: string;
-  country: string;
   accountType: string;
-  preferredFastCode: string;
-  mapsiteTitle: string;
-  mapsiteTagline: string;
-  heroType: string;
-  mediaFocus: string[];
-  futureFeatures: string[];
-  comments: string;
+  fastCode: string;
+  homePin: string;
+  homeAddress: string;
+  homeCity: string;
+  homeProvince: string;
+  homePostalCode: string;
+  homeCountry: string;
+  helpPreference: string;
+  additionalComments: string;
+  consentCommunications: boolean;
+  consentData: boolean;
+  turnstileToken: string;
 }
 
 function validate(fields: BuildFields): string | null {
-  if (!fields.firstName.trim()) return "First name is required";
-  if (!fields.lastName.trim()) return "Last name is required";
   if (!fields.email.trim()) return "Email is required";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim()))
     return "Invalid email format";
-  if (!fields.phone.trim()) return "Phone number is required";
-  if (!fields.province.trim()) return "Province / State is required";
   if (!fields.accountType) return "Account type is required";
+  if (!fields.fastCode.trim()) return "FAST Code is required";
+  if (!fields.homePin.trim()) return "Property PIN is required";
+  if (!fields.homeAddress.trim()) return "Home address is required";
+  if (!fields.homeCity.trim()) return "Home city is required";
+  if (!fields.homeProvince.trim()) return "Home province is required";
+  if (!fields.homePostalCode.trim()) return "Home postal code is required";
+  if (!fields.consentData) return "Data processing consent is required";
   return null;
 }
 
@@ -84,25 +85,21 @@ export async function submitBuildRequest(
   formData: FormData
 ): Promise<ActionResult> {
   const fields: BuildFields = {
-    firstName: (formData.get("firstName") as string) || "",
-    lastName: (formData.get("lastName") as string) || "",
+    date: (formData.get("date") as string) || "",
     email: (formData.get("email") as string) || "",
-    phone: (formData.get("phone") as string) || "",
-    address: (formData.get("address") as string) || "",
-    city: (formData.get("city") as string) || "",
-    province: (formData.get("province") as string) || "",
-    postalCode: (formData.get("postalCode") as string) || "",
-    country: (formData.get("country") as string) || "",
     accountType: (formData.get("accountType") as string) || "",
-    preferredFastCode: (formData.get("preferredFastCode") as string) || "",
-    mapsiteTitle: (formData.get("mapsiteTitle") as string) || "",
-    mapsiteTagline: (formData.get("mapsiteTagline") as string) || "",
-    heroType: (formData.get("heroType") as string) || "map",
-    mediaFocus: JSON.parse((formData.get("mediaFocus") as string) || "[]"),
-    futureFeatures: JSON.parse(
-      (formData.get("futureFeatures") as string) || "[]"
-    ),
-    comments: (formData.get("comments") as string) || "",
+    fastCode: (formData.get("fastCode") as string) || "",
+    homePin: (formData.get("homePin") as string) || "",
+    homeAddress: (formData.get("homeAddress") as string) || "",
+    homeCity: (formData.get("homeCity") as string) || "",
+    homeProvince: (formData.get("homeProvince") as string) || "",
+    homePostalCode: (formData.get("homePostalCode") as string) || "",
+    homeCountry: (formData.get("homeCountry") as string) || "Canada",
+    helpPreference: (formData.get("helpPreference") as string) || "",
+    additionalComments: (formData.get("additionalComments") as string) || "",
+    consentCommunications: formData.get("consentCommunications") === "true",
+    consentData: formData.get("consentData") === "true",
+    turnstileToken: (formData.get("turnstileToken") as string) || "",
   };
 
   const validationError = validate(fields);
@@ -115,11 +112,11 @@ export async function submitBuildRequest(
     const requestId = crypto.randomUUID();
 
     const fileFields = [
-      "profileImage",
-      "logoImage",
-      "pinImage",
-      "monologuePdf",
-      "ebookPdf",
+      "picture",
+      "logo",
+      "ttvMonologuePdf",
+      "ttvBackgroundImage",
+      "tebWriteUpPdf",
     ] as const;
 
     const fileUrls: Record<string, string | null> = {};
@@ -130,20 +127,28 @@ export async function submitBuildRequest(
       }
     }
 
+    const tebPictureUrls: string[] = [];
+    for (let i = 0; ; i++) {
+      const file = formData.get(`tebPicture_${i}`) as File | null;
+      if (!file || file.size === 0) break;
+      const url = await uploadFile(requestId, `tebPicture_${i}`, file);
+      if (url) tebPictureUrls.push(url);
+    }
+
     const buildRequest: Database["public"]["Tables"]["build_requests"]["Insert"] = {
       id: requestId,
-      first_name: fields.firstName.trim(),
-      last_name: fields.lastName.trim(),
+      first_name: fields.fastCode.trim(),
+      last_name: fields.accountType,
       email: fields.email.trim(),
-      phone: fields.phone.trim(),
+      phone: "",
       account_type: fields.accountType,
-      media_focus: JSON.stringify(fields.mediaFocus),
-      address: fields.address.trim(),
+      media_focus: null,
+      address: fields.homeAddress.trim(),
       geo_location: [
-        fields.city.trim(),
-        fields.province.trim(),
-        fields.postalCode.trim(),
-        fields.country.trim(),
+        fields.homeCity.trim(),
+        fields.homeProvince.trim(),
+        fields.homePostalCode.trim(),
+        fields.homeCountry.trim(),
       ]
         .filter(Boolean)
         .join(", "),
@@ -173,8 +178,8 @@ export async function submitBuildRequest(
     const existing = (existingCodes || []).map((r) => r.code);
 
       let fastCode: string;
-      if (fields.preferredFastCode.trim()) {
-        const preferred = fields.preferredFastCode.trim().toUpperCase();
+      if (fields.fastCode.trim()) {
+        const preferred = fields.fastCode.trim().toUpperCase();
         if (existing.includes(preferred)) {
           fastCode = generateFastCode(existing);
         } else {
@@ -198,7 +203,7 @@ export async function submitBuildRequest(
       console.error("[build-mapsite] Fast code insert error:", fcError);
     }
 
-    const clientName = fields.firstName.trim();
+    const clientName = fields.fastCode.trim();
 
     sendBuildRequestReceived({
       to: fields.email.trim(),
@@ -221,14 +226,14 @@ export async function submitBuildRequest(
       }
     });
 
-    if (Object.keys(fileUrls).length > 0) {
+    if (Object.keys(fileUrls).length > 0 || tebPictureUrls.length > 0) {
       const assetRecord: Database["public"]["Tables"]["mapsite_assets"]["Insert"] = {
         request_id: requestId,
-        profile_image: fileUrls.profileImage ?? null,
-        logo_image: fileUrls.logoImage ?? null,
-        pin_image: fileUrls.pinImage ?? null,
-        monologue_pdf: fileUrls.monologuePdf ?? null,
-        ebook_pdf: fileUrls.ebookPdf ?? null,
+        profile_image: fileUrls.picture ?? null,
+        logo_image: fileUrls.logo ?? null,
+        monologue_pdf: fileUrls.ttvMonologuePdf ?? null,
+        pin_image: fileUrls.ttvBackgroundImage ?? null,
+        ebook_pdf: fileUrls.tebWriteUpPdf ?? null,
       };
 
       const { error: assetError } = await supabaseAdmin
@@ -272,7 +277,17 @@ export async function submitBuildRequest(
       table_name: "build_requests",
       record_id: requestId,
       action: "created",
-      details: { fastCode },
+      details: {
+        fastCode,
+        helpPreference: fields.helpPreference,
+        additionalComments: fields.additionalComments,
+        consentCommunications: fields.consentCommunications,
+        consentData: fields.consentData,
+        consentTimestamp: new Date().toISOString(),
+        turnstileToken: fields.turnstileToken,
+        tebPictureCount: tebPictureUrls.length,
+        tebPictureUrls: tebPictureUrls.length > 0 ? tebPictureUrls : undefined,
+      },
     };
 
     const { error: logError } = await supabaseAdmin
