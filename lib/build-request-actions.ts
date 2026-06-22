@@ -76,7 +76,7 @@ export async function assignBuildRequest(
     const clientName = `${buildData.first_name} ${buildData.last_name}`;
 
     sendMapSiteAssigned({
-      to: associateData.email,
+      to: associateData.email ?? "",
       recipientName: associateData.name || "Associate",
       clientName,
       fastCode,

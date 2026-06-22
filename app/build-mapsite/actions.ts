@@ -1,6 +1,7 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import type { Database } from "@/lib/database.types";
 import { generateFastCode } from "@/lib/fast-code-generator";
 import {
   sendBuildRequestReceived,
@@ -129,27 +130,29 @@ export async function submitBuildRequest(
       }
     }
 
+    const buildRequest: Database["public"]["Tables"]["build_requests"]["Insert"] = {
+      id: requestId,
+      first_name: fields.firstName.trim(),
+      last_name: fields.lastName.trim(),
+      email: fields.email.trim(),
+      phone: fields.phone.trim(),
+      account_type: fields.accountType,
+      media_focus: JSON.stringify(fields.mediaFocus),
+      address: fields.address.trim(),
+      geo_location: [
+        fields.city.trim(),
+        fields.province.trim(),
+        fields.postalCode.trim(),
+        fields.country.trim(),
+      ]
+        .filter(Boolean)
+        .join(", "),
+      status: "pending",
+    };
+
     const { error: buildError } = await supabaseAdmin
       .from("build_requests")
-      .insert({
-        id: requestId,
-        first_name: fields.firstName.trim(),
-        last_name: fields.lastName.trim(),
-        email: fields.email.trim(),
-        phone: fields.phone.trim(),
-        account_type: fields.accountType,
-        media_focus: fields.mediaFocus,
-        address: fields.address.trim(),
-        geo_location: [
-          fields.city.trim(),
-          fields.province.trim(),
-          fields.postalCode.trim(),
-          fields.country.trim(),
-        ]
-          .filter(Boolean)
-          .join(", "),
-        status: "pending",
-      });
+      .insert(buildRequest);
 
     if (buildError) {
       console.error("[build-mapsite] Build request insert error:", buildError);
@@ -181,13 +184,15 @@ export async function submitBuildRequest(
         fastCode = generateFastCode(existing);
       }
 
+    const fastCodeRecord: Database["public"]["Tables"]["fast_codes"]["Insert"] = {
+      code: fastCode,
+      type: "mapsite",
+      request_id: requestId,
+    };
+
     const { error: fcError } = await supabaseAdmin
       .from("fast_codes")
-      .insert({
-        code: fastCode,
-        type: "mapsite",
-        request_id: requestId,
-      });
+      .insert(fastCodeRecord);
 
     if (fcError) {
       console.error("[build-mapsite] Fast code insert error:", fcError);
@@ -217,12 +222,14 @@ export async function submitBuildRequest(
     });
 
     if (Object.keys(fileUrls).length > 0) {
-      const assetRecord: Record<string, string | null> = { request_id: requestId };
-      if (fileUrls.profileImage) assetRecord.profile_image = fileUrls.profileImage;
-      if (fileUrls.logoImage) assetRecord.logo_image = fileUrls.logoImage;
-      if (fileUrls.pinImage) assetRecord.pin_image = fileUrls.pinImage;
-      if (fileUrls.monologuePdf) assetRecord.monologue_pdf = fileUrls.monologuePdf;
-      if (fileUrls.ebookPdf) assetRecord.ebook_pdf = fileUrls.ebookPdf;
+      const assetRecord: Database["public"]["Tables"]["mapsite_assets"]["Insert"] = {
+        request_id: requestId,
+        profile_image: fileUrls.profileImage ?? null,
+        logo_image: fileUrls.logoImage ?? null,
+        pin_image: fileUrls.pinImage ?? null,
+        monologue_pdf: fileUrls.monologuePdf ?? null,
+        ebook_pdf: fileUrls.ebookPdf ?? null,
+      };
 
       const { error: assetError } = await supabaseAdmin
         .from("mapsite_assets")
@@ -233,38 +240,44 @@ export async function submitBuildRequest(
       }
     }
 
+    const mapsiteRequest: Database["public"]["Tables"]["mapsite_requests"]["Insert"] = {
+      request_id: requestId,
+      type: "standard",
+      status: "pending",
+    };
+
     const { error: msError } = await supabaseAdmin
       .from("mapsite_requests")
-      .insert({
-        request_id: requestId,
-        type: "standard",
-        status: "pending",
-      });
+      .insert(mapsiteRequest);
 
     if (msError) {
       console.error("[build-mapsite] Mapsite request insert error:", msError);
     }
 
+    const queueItem: Database["public"]["Tables"]["production_queue"]["Insert"] = {
+      request_id: requestId,
+      priority: 0,
+      status: "queued",
+    };
+
     const { error: pqError } = await supabaseAdmin
       .from("production_queue")
-      .insert({
-        request_id: requestId,
-        priority: 0,
-        status: "queued",
-      });
+      .insert(queueItem);
 
     if (pqError) {
       console.error("[build-mapsite] Production queue insert error:", pqError);
     }
 
+    const logEntry: Database["public"]["Tables"]["activity_logs"]["Insert"] = {
+      table_name: "build_requests",
+      record_id: requestId,
+      action: "created",
+      details: { fastCode },
+    };
+
     const { error: logError } = await supabaseAdmin
       .from("activity_logs")
-      .insert({
-        table_name: "build_requests",
-        record_id: requestId,
-        action: "created",
-        details: { fastCode },
-      });
+      .insert(logEntry);
 
     if (logError) {
       console.error("[build-mapsite] Activity log insert error:", logError);
