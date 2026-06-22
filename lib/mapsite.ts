@@ -1,4 +1,4 @@
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 export interface MapSiteRecord {
   fastCode: string;
@@ -30,6 +30,7 @@ export async function getMapSiteByFastCode(
     return { notFound: true, message: "FAST code is required" };
   }
 
+  const supabaseAdmin = getSupabaseAdmin();
   const { data: fcData, error: fcError } = await supabaseAdmin
     .from("fast_codes")
     .select("id, code, request_id")

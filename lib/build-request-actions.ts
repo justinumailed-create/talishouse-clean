@@ -1,6 +1,6 @@
 "use server";
 
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   sendMapSiteAssigned,
   sendMapSiteCompleted,
@@ -16,6 +16,7 @@ export async function assignBuildRequest(
   associateId: string
 ): Promise<EmailActionResult> {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     const { data: buildData, error: buildError } = await supabaseAdmin
       .from("build_requests")
       .select("id, first_name, last_name, email, status")
@@ -97,6 +98,7 @@ export async function completeBuildRequest(
   requestId: string
 ): Promise<EmailActionResult> {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     const { data: buildData, error: buildError } = await supabaseAdmin
       .from("build_requests")
       .select("id, first_name, last_name, email, status")

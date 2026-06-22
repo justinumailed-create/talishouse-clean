@@ -2,6 +2,8 @@ import { getMapSiteByFastCode } from "@/lib/mapsite";
 import Image from "next/image";
 import { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "MapSite | TalisPros",
 };

@@ -1,6 +1,6 @@
 "use server";
 
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { generateFastCode } from "@/lib/fast-code-generator";
 import {
   sendBuildRequestReceived,
@@ -51,6 +51,7 @@ async function uploadFile(
   file: File
 ): Promise<string | null> {
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     const ext = file.name.split(".").pop() || "bin";
     const timestamp = Date.now();
     const path = `${requestId}/${fieldName}-${timestamp}.${ext}`;
@@ -109,6 +110,7 @@ export async function submitBuildRequest(
   }
 
   try {
+    const supabaseAdmin = getSupabaseAdmin();
     const requestId = crypto.randomUUID();
 
     const fileFields = [
