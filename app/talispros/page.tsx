@@ -1,13 +1,9 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import {
-  Check,
-  ArrowRight,
-  AlertCircle,
-  Copy,
-} from "lucide-react";
+import Link from "next/link";
 import Image from "next/image";
+import { Check, ArrowRight, AlertCircle, Copy } from "lucide-react";
 
 const PROVINCES = [
   "Ontario", "British Columbia", "Alberta", "Quebec",
@@ -35,25 +31,6 @@ function FieldLabel({ label, required }: { label: string; required?: boolean }) 
       {label}
       {required && <span className="text-red-400 ml-0.5">*</span>}
     </label>
-  );
-}
-
-function RegisterCta() {
-  return (
-    <a
-      href="/talispros/register"
-      className="block text-center px-6 py-6 mb-8 rounded-xl border-2 border-[#c92026] bg-white cursor-pointer hover:translate-y-[-2px] hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] transition-all duration-200 ease-in-out no-underline"
-    >
-      <p className="text-[18px] leading-relaxed text-neutral-800 mb-4">
-        Our Mapsites™ are industry adjacent market places that can formalize referral and co-promotion networks in real estate.
-      </p>
-      <a
-        href="#welcome-content"
-        className="block font-bold text-[20px] text-neutral-900 hover:text-neutral-700 transition-colors"
-      >
-        Explore Further
-      </a>
-    </a>
   );
 }
 
@@ -102,33 +79,26 @@ function FastCodeSidebar() {
 
   if (fcCode) {
     return (
-      <div>
-        <RegisterCta />
-        <div className="text-center">
-          <Image src="/logo.png" alt="TalisPros™" width={120} height={32} className="h-7 w-auto object-contain mx-auto mb-6" priority />
-          <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <Check className="w-6 h-6 text-green-600" />
-          </div>
-          <p className="text-[11px] text-neutral-400 uppercase tracking-widest font-medium mb-2">Your Gateway Code</p>
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <span className="text-2xl font-bold tracking-tight text-neutral-900">{fcCode}</span>
-            <button onClick={handleFcCopy} className="flex-shrink-0 w-8 h-8 border border-neutral-300 rounded-lg flex items-center justify-center hover:bg-neutral-100 transition-colors">
-              {fcCopied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5 text-neutral-400" />}
-            </button>
-          </div>
-          <p className="text-xs text-neutral-500">Use this code to access your MapSite™.</p>
+      <div className="text-center">
+        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+          <Check className="w-6 h-6 text-green-600" />
         </div>
+        <p className="text-[11px] text-neutral-400 uppercase tracking-widest font-medium mb-2">Your Gateway Code</p>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <span className="text-2xl font-bold tracking-tight text-neutral-900">{fcCode}</span>
+          <button onClick={handleFcCopy} className="flex-shrink-0 w-8 h-8 border border-neutral-300 rounded-lg flex items-center justify-center hover:bg-neutral-100 transition-colors">
+            {fcCopied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5 text-neutral-400" />}
+          </button>
+        </div>
+        <p className="text-xs text-neutral-500">Use this code to access your MapSite™.</p>
       </div>
     );
   }
 
   return (
     <div>
-      <RegisterCta />
-      <Image src="/logo.png" alt="TalisPros™" width={120} height={32} className="h-7 w-auto object-contain mb-6" priority />
-      <h2 className="text-lg font-semibold text-neutral-900 tracking-tight mb-1">Generate FAST Code</h2>
-      <p className="text-sm text-neutral-500 mb-6 leading-relaxed">Enter your details to be issued a unique Gateway.</p>
-      <form onSubmit={handleFastCode} className="space-y-3.5">
+      <Image src="/logo.png" alt="TalisPros™" width={120} height={32} className="h-7 w-auto object-contain mb-4" priority />
+      <form onSubmit={handleFastCode} className="space-y-3">
         <div>
           <FieldLabel label="First Name" required />
           <input type="text" value={fcFirstName} onChange={(e) => setFcFirstName(e.target.value)} placeholder="John" className="w-full h-10 px-3.5 bg-white border border-neutral-200 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-lg" />
@@ -163,7 +133,7 @@ function FastCodeSidebar() {
         </div>
         {fcError && <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700"><AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" /><span>{fcError}</span></div>}
         <button type="submit" disabled={fcSubmitting} className="w-full h-10 bg-neutral-900 text-white rounded-lg text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all disabled:opacity-50">
-          {fcSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>PROCEED<ArrowRight className="w-3.5 h-3.5" /></>}
+          {fcSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>Generate<ArrowRight className="w-3.5 h-3.5" /></>}
         </button>
       </form>
     </div>
@@ -172,28 +142,40 @@ function FastCodeSidebar() {
 
 export default function TalisprosWelcomePage() {
   return (
-    <div className="flex flex-col min-h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
-      {/* Main Content — 75/25 Layout */}
-      <div className="flex flex-1 overflow-hidden" id="welcome-content">
-        {/* Left Panel — Welcome Content */}
-        <div className="w-full lg:w-[75%] overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-5 py-12 sm:py-16 lg:py-20">
-            {/* Hero Section */}
-            <div className="text-center mb-12">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-neutral-900 mb-3">
-                Talispros™ PMC
+    <div className="flex flex-col h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
+      <div className="flex flex-col lg:flex-row flex-1 lg:overflow-hidden">
+        {/* Main Content */}
+        <div className="w-full lg:w-[70%] lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="max-w-2xl mx-auto px-5 py-8 sm:py-12 lg:py-16">
+            {/* Hero */}
+            <section className="text-center mb-12 sm:mb-16">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-neutral-900 mb-4">
+                TalisPros™ PMC
               </h1>
-              <p className="text-sm sm:text-base text-neutral-500 max-w-xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-lg text-neutral-500 mb-3">
                 Industry Adjacent Market Places for Real Estate Professionals
               </p>
+            </section>
+
+            <hr className="border-t border-neutral-200 mb-12 sm:mb-16" />
+
+            {/* Hero Image Placeholder */}
+            <div className="mt-12 mb-12">
+              <div className="relative aspect-[16/9] rounded-xl overflow-hidden bg-neutral-100">
+                <Image
+                  src="/images/mapsite-bottom-right.jpg"
+                  alt="TalisPros™ PMC"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 672px) 100vw, 672px"
+                />
+              </div>
             </div>
 
-            <hr className="border-t border-neutral-200 mb-12" />
-
-            {/* Placeholder Content Sections */}
-            <section className="mb-12">
-              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 mb-4">
-                Why work with us…?
+            {/* Why work with us */}
+            <section className="mb-12 sm:mb-16">
+              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 mb-6">
+                Why work with us&hellip;
               </h2>
               <ul className="space-y-3">
                 {[
@@ -209,9 +191,10 @@ export default function TalisprosWelcomePage() {
               </ul>
             </section>
 
-            <hr className="border-t border-neutral-200 mb-12" />
+            <hr className="border-t border-neutral-200 mb-12 sm:mb-16" />
 
-            <section className="mb-12">
+            {/* Hyper-Local Lead Generation */}
+            <section className="mb-12 sm:mb-16">
               <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 mb-4">
                 Hyper-Local Lead Generation
               </h2>
@@ -222,9 +205,10 @@ export default function TalisprosWelcomePage() {
               </div>
             </section>
 
-            <hr className="border-t border-neutral-200 mb-12" />
+            <hr className="border-t border-neutral-200 mb-12 sm:mb-16" />
 
-            <section className="mb-12">
+            {/* Exclusive Audience Access */}
+            <section className="mb-12 sm:mb-16">
               <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 mb-4">
                 Exclusive Audience Access
               </h2>
@@ -235,9 +219,10 @@ export default function TalisprosWelcomePage() {
               </div>
             </section>
 
-            <hr className="border-t border-neutral-200 mb-12" />
+            <hr className="border-t border-neutral-200 mb-12 sm:mb-16" />
 
-            <section className="mb-12">
+            {/* Enhanced Authority and Trust */}
+            <section className="mb-12 sm:mb-16">
               <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 mb-4">
                 Enhanced Authority and Trust
               </h2>
@@ -248,9 +233,10 @@ export default function TalisprosWelcomePage() {
               </div>
             </section>
 
-            <hr className="border-t border-neutral-200 mb-12" />
+            <hr className="border-t border-neutral-200 mb-12 sm:mb-16" />
 
-            <section className="mb-12">
+            {/* Cost Effective Marketing */}
+            <section className="mb-12 sm:mb-16">
               <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 mb-4">
                 Cost Effective Marketing
               </h2>
@@ -261,29 +247,30 @@ export default function TalisprosWelcomePage() {
               </div>
             </section>
 
-            <hr className="border-t border-neutral-200 mb-12" />
+            <hr className="border-t border-neutral-200 mb-12 sm:mb-16" />
 
-            <section className="mb-16 text-center">
+            {/* Ready to build */}
+            <section className="text-center mb-12 sm:mb-16">
               <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 mb-3">
                 Ready to build your MapSite™?
               </h2>
               <p className="text-sm text-neutral-500 mb-6 max-w-md mx-auto leading-relaxed">
                 Click below to start building your MapSite™ — a done-for-you property discovery page.
               </p>
-              <a
+              <Link
                 href="/talispros/build-mapsite"
                 className="inline-flex h-12 px-8 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wide items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all"
               >
                 Build My MapSite™
-              </a>
+              </Link>
             </section>
 
-            <hr className="border-t border-neutral-200 mb-12" />
+            <hr className="border-t border-neutral-200 mb-12 sm:mb-16" />
 
-            {/* Products Section */}
-            <section className="mb-16">
-              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 text-center mb-10">
-                Talispros™ Products
+            {/* Products */}
+            <section className="mb-12 sm:mb-16">
+              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 text-center mb-8">
+                TalisPros™ Products
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
@@ -294,10 +281,10 @@ export default function TalisprosWelcomePage() {
                   { title: "Partner Access™", description: "Referral and co-promotion networks.", href: "/partner-access" },
                 ].map((product) => (
                   <a key={product.title} href={product.href}
-                    className="block bg-neutral-50 rounded-2xl p-6 border border-neutral-200 hover:border-neutral-300 hover:shadow-sm transition-all no-underline"
+                    className="block bg-neutral-50 rounded-2xl p-5 border border-neutral-200 hover:border-neutral-300 hover:shadow-sm transition-all no-underline"
                   >
-                    <h3 className="text-base font-semibold text-neutral-900 mb-1">{product.title}</h3>
-                    <p className="text-sm text-neutral-500 leading-relaxed">{product.description}</p>
+                    <h3 className="text-sm font-semibold text-neutral-900 mb-1">{product.title}</h3>
+                    <p className="text-xs text-neutral-500 leading-relaxed">{product.description}</p>
                   </a>
                 ))}
               </div>
@@ -305,23 +292,32 @@ export default function TalisprosWelcomePage() {
           </div>
         </div>
 
-        {/* Right Panel — CTA Card + FAST Code Generator (Sticky) */}
-        <div className="hidden lg:block lg:w-[25%] bg-[#fafafa] border-l border-[#e5e5e5] p-8 overflow-y-auto sticky top-0 self-start max-h-screen">
-          <FastCodeSidebar />
+        {/* Right Sidebar */}
+        <div className="w-full lg:w-[30%] bg-[#f7f8fa] lg:border-l border-[#e5e5e5] p-8 lg:sticky lg:top-0 lg:self-start lg:max-h-screen lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <div className="space-y-6">
+            {/* CTA Card */}
+            <div className="bg-white rounded-xl shadow-sm p-6 border-2 border-red-400 text-center">
+              <p className="text-sm text-neutral-900 leading-relaxed mb-4">
+                Our MapSites™ are industry adjacent market places that can formalize referral and co-promotion networks in real estate.
+              </p>
+              <Link
+                href="/talispros/claim-a-market"
+                className="inline-flex h-10 px-6 bg-neutral-900 text-white rounded-lg text-sm font-medium tracking-wide items-center justify-center gap-1.5 hover:bg-neutral-800 active:scale-[0.98] transition-all"
+              >
+                <span>Explore further</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            {/* FAST Code™ */}
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h3 className="text-base font-semibold text-neutral-900 mb-1">FAST Code™</h3>
+              <p className="text-xs text-neutral-500 mb-4">Generate your marketplace gateway.</p>
+              <FastCodeSidebar />
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="flex-shrink-0 bg-white border-t border-neutral-200 py-6 text-center">
-        <p className="text-xs text-neutral-400">
-          Powered by{" "}
-          <a href="/talispros/forms" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-2 transition-colors">
-            TalisForms™
-          </a>
-          <br />
-          <span className="text-[10px] text-neutral-300">A Talispros™ Product</span>
-        </p>
-      </footer>
     </div>
   );
 }

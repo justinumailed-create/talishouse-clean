@@ -49,6 +49,8 @@ export interface Database {
           code: string
           type: string
           request_id: string | null
+          account_type: string | null
+          mapsite_id: string | null
           assigned_at: string
         }
         Insert: {
@@ -56,6 +58,8 @@ export interface Database {
           code: string
           type: string
           request_id?: string | null
+          account_type?: string | null
+          mapsite_id?: string | null
           assigned_at?: string
         }
         Update: {
@@ -63,6 +67,8 @@ export interface Database {
           code?: string
           type?: string
           request_id?: string | null
+          account_type?: string | null
+          mapsite_id?: string | null
           assigned_at?: string
         }
         Relationships: []
@@ -219,6 +225,243 @@ export interface Database {
           created_at?: string
         }
         Relationships: []
+      }
+      payments: {
+        Row: {
+          id: string
+          product_name: string
+          amount: number
+          user_name: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          product_name: string
+          amount: number
+          user_name: string
+          status: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          product_name?: string
+          amount?: number
+          user_name?: string
+          status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      registrations: {
+        Row: {
+          id: string
+          user_id: string | null
+          email: string
+          account_type: string
+          fast_code: string | null
+          amount_paid: number
+          monthly_subscription: number
+          registration_number: string
+          paypal_order_id: string | null
+          paypal_capture_id: string | null
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          email: string
+          account_type: string
+          fast_code?: string | null
+          amount_paid: number
+          monthly_subscription: number
+          registration_number: string
+          paypal_order_id?: string | null
+          paypal_capture_id?: string | null
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          email?: string
+          account_type?: string
+          fast_code?: string | null
+          amount_paid?: number
+          monthly_subscription?: number
+          registration_number?: string
+          paypal_order_id?: string | null
+          paypal_capture_id?: string | null
+          status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      talispros_payments: {
+        Row: {
+          id: string
+          email: string
+          plan_type: string
+          paypal_order_id: string | null
+          paypal_capture_id: string | null
+          payment_status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          plan_type: string
+          paypal_order_id?: string | null
+          paypal_capture_id?: string | null
+          payment_status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          plan_type?: string
+          paypal_order_id?: string | null
+          paypal_capture_id?: string | null
+          payment_status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      mapsites: {
+        Row: {
+          id: string
+          fast_code: string
+          slug: string
+          account_type: string
+          owner_first_name: string
+          owner_last_name: string
+          email: string
+          phone: string
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          fast_code: string
+          slug: string
+          account_type?: string
+          owner_first_name: string
+          owner_last_name: string
+          email: string
+          phone?: string
+          status?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          fast_code?: string
+          slug?: string
+          account_type?: string
+          owner_first_name?: string
+          owner_last_name?: string
+          email?: string
+          phone?: string
+          status?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          color: string
+          description: string
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          color: string
+          description?: string
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          color?: string
+          description?: string
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
+      pins: {
+        Row: {
+          id: string
+          mapsite_id: string
+          name: string
+          description: string
+          category_id: string | null
+          latitude: number
+          longitude: number
+          address: string
+          city: string
+          province: string
+          postal_code: string
+          country: string
+          website: string
+          phone: string
+          email: string
+          featured: boolean
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          mapsite_id: string
+          name: string
+          description?: string
+          category_id?: string | null
+          latitude: number
+          longitude: number
+          address?: string
+          city?: string
+          province?: string
+          postal_code?: string
+          country?: string
+          website?: string
+          phone?: string
+          email?: string
+          featured?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          mapsite_id?: string
+          name?: string
+          description?: string
+          category_id?: string | null
+          latitude?: number
+          longitude?: number
+          address?: string
+          city?: string
+          province?: string
+          postal_code?: string
+          country?: string
+          website?: string
+          phone?: string
+          email?: string
+          featured?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "pins_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] },
+          { foreignKeyName: "pins_category_id_fkey"; columns: ["category_id"]; referencedRelation: "categories"; referencedColumns: ["id"] }
+        ]
       }
     }
     Views: Record<string, never>

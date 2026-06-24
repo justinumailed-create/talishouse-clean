@@ -6,11 +6,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Fast Code Generator | TalisPros™",
-  description: "Generate your unique Fast Code to access your TalisPros™ MapSite.",
+  title: "Register Your MapSite™ | TalisPros™",
+  description:
+    "Register your MapSite™ account and activate your TalisPros™ presence with payment.",
 };
 
-export default function FastCodeLayout({
+export default function TalisprosRegisterLayout({
   children,
 }: {
   children: React.ReactNode;

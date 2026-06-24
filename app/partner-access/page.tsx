@@ -50,7 +50,7 @@ export default function PartnerAccessPage() {
         <div className="text-center mb-4">
           <Image
             src="/logo.png"
-            alt="TalisPros"
+            alt="TalisPros™"
             width={150}
             height={40}
             className="h-10 md:h-[52px] w-auto object-contain mx-auto mb-3"

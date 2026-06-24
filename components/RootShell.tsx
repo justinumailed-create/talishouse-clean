@@ -8,7 +8,7 @@ import TalisBotChat from "@/components/TalisBotChat";
 
 export default function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isEmbed = pathname.startsWith("/fast-code") || pathname.startsWith("/partner-access") || pathname.startsWith("/build-mapsite") || pathname.startsWith("/associate/dashboard") || pathname.startsWith("/associate/login") || pathname.startsWith("/ma/") || pathname.startsWith("/crm/");
+  const isEmbed = pathname.startsWith("/fast-code") || pathname.startsWith("/partner-access") || pathname.startsWith("/talispros") || pathname.startsWith("/associate/dashboard") || pathname.startsWith("/associate/login") || pathname.startsWith("/ma/") || pathname.startsWith("/crm/");
   const hideTalisBot = pathname === "/partner-access";
 
   if (isEmbed) {

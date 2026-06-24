@@ -1,4 +1,7 @@
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { generateMapSiteSlug } from "@/lib/slug-generator";
+import { getDefaultSections } from "@/lib/mapsite-template";
+import type { Database } from "@/lib/database.types";
 
 export interface MapSiteRecord {
   fastCode: string;
@@ -20,6 +23,24 @@ export interface MapSiteRecord {
 export interface MapSiteError {
   notFound: true;
   message: string;
+}
+
+export interface MapSiteCreateInput {
+  fastCode: string;
+  accountType: string;
+  ownerFirstName: string;
+  ownerLastName: string;
+  email: string;
+  phone?: string;
+  city?: string;
+  province?: string;
+}
+
+export interface MapSiteCreateResult {
+  id: string;
+  fastCode: string;
+  slug: string;
+  url: string;
 }
 
 export async function getMapSiteByFastCode(
@@ -89,5 +110,104 @@ export async function getMapSiteByFastCode(
     monologuePdfUrl: assetData?.monologue_pdf || null,
     ebookPdfUrl: assetData?.ebook_pdf || null,
     createdAt: brData?.created_at || "",
+  };
+}
+
+export async function getMapSiteBySlug(
+  slug: string
+): Promise<MapSiteRecord | MapSiteError> {
+  const cleanSlug = slug.trim().toUpperCase();
+  if (!cleanSlug) {
+    return { notFound: true, message: "Slug is required" };
+  }
+
+  const supabaseAdmin = getSupabaseAdmin();
+
+  const { data: mapsite, error: msError } = await supabaseAdmin
+    .from("mapsites")
+    .select("*")
+    .eq("slug", cleanSlug)
+    .maybeSingle();
+
+  if (msError || !mapsite) {
+    return {
+      notFound: true,
+      message: msError
+        ? `Database error: ${msError.message}`
+        : `MapSite with slug "${cleanSlug}" not found`,
+    };
+  }
+
+  const sections = getDefaultSections({
+    firstName: mapsite.owner_first_name,
+    lastName: mapsite.owner_last_name,
+    email: mapsite.email,
+    phone: mapsite.phone || "",
+    fastCode: mapsite.fast_code,
+  });
+
+  const heroSection = sections.find((s) => s.type === "hero");
+
+  return {
+    fastCode: mapsite.fast_code,
+    firstName: mapsite.owner_first_name,
+    lastName: mapsite.owner_last_name,
+    email: mapsite.email,
+    phone: mapsite.phone || "",
+    description: heroSection?.content?.subtext || "",
+    mediaType: "mapsite",
+    status: mapsite.status,
+    profileImageUrl: null,
+    logoImageUrl: null,
+    pinImageUrl: null,
+    monologuePdfUrl: null,
+    ebookPdfUrl: null,
+    createdAt: mapsite.created_at,
+  };
+}
+
+export async function createMapSite(
+  input: MapSiteCreateInput
+): Promise<MapSiteCreateResult> {
+  const supabaseAdmin = getSupabaseAdmin();
+
+  const { data: existingSlugs, error: slugError } = await supabaseAdmin
+    .from("mapsites")
+    .select("slug");
+
+  if (slugError) {
+    throw new Error(`Failed to fetch existing slugs: ${slugError.message}`);
+  }
+
+  const slug = await generateMapSiteSlug(
+    (existingSlugs || []).map((r) => r.slug)
+  );
+
+  const record: Database["public"]["Tables"]["mapsites"]["Insert"] = {
+    fast_code: input.fastCode.trim().toUpperCase(),
+    slug,
+    account_type: input.accountType,
+    owner_first_name: input.ownerFirstName.trim(),
+    owner_last_name: input.ownerLastName.trim(),
+    email: input.email.trim().toLowerCase(),
+    phone: input.phone?.trim() || "",
+    status: "active",
+  };
+
+  const { data: created, error: insertError } = await supabaseAdmin
+    .from("mapsites")
+    .insert(record)
+    .select()
+    .single();
+
+  if (insertError || !created) {
+    throw new Error(`Failed to create MapSite: ${insertError?.message || "Unknown error"}`);
+  }
+
+  return {
+    id: created.id,
+    fastCode: created.fast_code,
+    slug: created.slug,
+    url: `/ma/${created.slug}`,
   };
 }

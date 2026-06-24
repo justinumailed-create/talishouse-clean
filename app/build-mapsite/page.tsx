@@ -43,22 +43,11 @@ const US_STATES = [
   "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
 ];
 
-const ACCOUNT_TYPES = [
-  {
-    value: "root",
-    label: "Root Account",
-    description: "up to 100 Derivative Accounts, SPLITS",
-  },
-  {
-    value: "derivative",
-    label: "Derivative Account",
-    description: "multi-PIN Accounts, SPLITS",
-  },
-  {
-    value: "adpros",
-    label: "Adpros Account",
-    description: "individual PINs, no SPLITS",
-  },
+const ADPRE_TYPES = [
+  { value: "single", label: "Single AdPro™ PIN", description: "Individual business placement." },
+  { value: "up-to-10", label: "Up To 10 AdPro™ PINs", description: "Ideal for small teams and multi-location operators." },
+  { value: "up-to-100", label: "Up To 100 AdPro™ PINs", description: "Suitable for brokerages, agencies, franchises and regional organizations." },
+  { value: "unlimited", label: "Unlimited AdPro™ PINs", description: "Enterprise-scale deployment." },
 ];
 
 const STORAGE_KEY = "talispros_build_mapsite";
@@ -758,7 +747,7 @@ function AccountTypeSelector({
     <div>
       <FieldLabel label="Type of Account" required />
       <div className="space-y-2">
-        {ACCOUNT_TYPES.map((opt) => {
+        {ADPRE_TYPES.map((opt) => {
           const isActive = value === opt.value;
           return (
             <button

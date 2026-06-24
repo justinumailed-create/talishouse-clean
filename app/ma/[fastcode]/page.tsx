@@ -1,37 +1,38 @@
-import { getMapSiteByFastCode } from "@/lib/mapsite";
-import Image from "next/image";
-import { Metadata } from "next";
+import { getTalisMapsData } from "@/lib/talismaps";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "MapSite | TalisPros",
+const ACCOUNT_TYPE_LABELS: Record<string, string> = {
+  ROOT_ACCOUNT: "Root Account™",
+  DERIVATIVE_ACCOUNT: "Derivative Account™",
+  ADPRO_SINGLE: "Single AdPro™ PIN",
+  ADPRO_10: "Up To 10 AdPro™ PINs",
+  ADPRO_100: "Up To 100 AdPro™ PINs",
+  ADPRO_UNLIMITED: "Unlimited AdPro™ PINs",
 };
 
-function PlaceholderIcon({ label }: { label: string }) {
-  return (
-    <div className="w-full aspect-[4/3] bg-neutral-100 rounded-xl flex items-center justify-center">
-      <div className="text-center px-4">
-        <div className="w-10 h-10 bg-neutral-200 rounded-full flex items-center justify-center mx-auto mb-2">
-          <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        </div>
-        <p className="text-xs text-neutral-400 font-medium">{label}</p>
-      </div>
-    </div>
-  );
+function formatAccountType(type: string): string {
+  return ACCOUNT_TYPE_LABELS[type] || type;
 }
 
-export default async function MapSitePage({
-  params,
-}: {
-  params: Promise<{ fastcode: string }>;
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ fastcode: string }> }): Promise<Metadata> {
   const { fastcode } = await params;
-  const result = await getMapSiteByFastCode(fastcode);
+  const data = await getTalisMapsData(fastcode);
+  if (data.notFound || !data.mapsite) {
+    return { title: "MapSite Not Found | TalisMaps™" };
+  }
+  return {
+    title: `MapSite ${data.mapsite.fastCode} | TalisMaps™`,
+    description: `MapSite™ with FAST Code ${data.mapsite.fastCode}`,
+  };
+}
 
-  if ("notFound" in result) {
+export default async function TalisMapsPage({ params }: { params: Promise<{ fastcode: string }> }) {
+  const { fastcode } = await params;
+  const data = await getTalisMapsData(fastcode);
+
+  if (data.notFound || !data.mapsite) {
     return (
       <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center px-5">
         <div className="text-center max-w-sm">
@@ -40,183 +41,70 @@ export default async function MapSitePage({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-neutral-900 mb-2">
-            MapSite Not Found
-          </h1>
-          <p className="text-sm text-neutral-500">{result.message}</p>
+          <h1 className="text-xl font-semibold text-neutral-900 mb-2">MapSite Not Found</h1>
+          <p className="text-sm text-neutral-500">{data.message}</p>
         </div>
       </div>
     );
   }
 
-  const displayName = `${result.firstName} ${result.lastName}`.trim() || "Untitled";
+  const ms = data.mapsite;
 
   return (
     <div className="min-h-screen bg-[#f5f5f7]">
-      <header className="bg-white border-b border-neutral-200">
-        <div className="max-w-5xl mx-auto px-5 h-14 flex items-center justify-between">
-          <span className="text-sm font-semibold tracking-tight text-neutral-900">
-            TalisPros MapSite
-          </span>
-          <span className="font-mono text-xs text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md font-semibold">
-            {result.fastCode}
-          </span>
-        </div>
-      </header>
-
-      <main className="max-w-5xl mx-auto px-5 py-8">
-        <div className="mb-8">
+      <div className="max-w-2xl mx-auto px-5 py-12 sm:py-16">
+        <div className="text-center mb-10">
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900">
-            {displayName}
+            Welcome To Your MapSite™
           </h1>
-          <p className="text-sm text-neutral-500 mt-1">
-            {result.description || "No description provided"}
-          </p>
-          <div className="flex items-center gap-3 mt-3">
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
-              {result.mediaType}
-            </span>
-            <StatusBadge status={result.status} />
-          </div>
+          <p className="text-sm text-neutral-500 mt-2">Your TalisPros™ account is active and ready.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-          <AssetCard
-            label="Profile Image"
-            url={result.profileImageUrl}
-            placeholder="No profile image uploaded"
-          />
-          <AssetCard
-            label="Logo"
-            url={result.logoImageUrl}
-            placeholder="No logo uploaded"
-          />
-          <AssetCard
-            label="PIN Image"
-            url={result.pinImageUrl}
-            placeholder="No PIN image uploaded"
-          />
-          <AssetCard
-            label="Monologue / Script"
-            url={result.monologuePdfUrl}
-            placeholder="No script uploaded"
-            isPdf
-          />
-          <AssetCard
-            label="E-Book"
-            url={result.ebookPdfUrl}
-            placeholder="No e-book uploaded"
-            isPdf
-          />
-          <InfoCard
-            label="Contact"
-            lines={[
-              { label: "Email", value: result.email },
-              { label: "Phone", value: result.phone },
-            ]}
-          />
-        </div>
-
-        <div className="border border-dashed border-neutral-300 rounded-xl p-6 text-center">
-          <p className="text-sm text-neutral-400">
-            Full Atlas MapSite experience coming soon
-          </p>
-        </div>
-      </main>
-    </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    pending: "bg-yellow-100 text-yellow-700",
-    processing: "bg-blue-100 text-blue-700",
-    ready_for_review: "bg-purple-100 text-purple-700",
-    completed: "bg-green-100 text-green-700",
-  };
-
-  return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
-        styles[status] || "bg-neutral-100 text-neutral-600"
-      }`}
-    >
-      {status.replace(/_/g, " ")}
-    </span>
-  );
-}
-
-function AssetCard({
-  label,
-  url,
-  placeholder,
-  isPdf,
-}: {
-  label: string;
-  url: string | null;
-  placeholder: string;
-  isPdf?: boolean;
-}) {
-  return (
-    <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
-      <div className="p-1">
-        {url ? (
-          isPdf ? (
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full aspect-[4/3] bg-neutral-50 rounded-lg flex items-center justify-center hover:bg-neutral-100 transition-colors"
-            >
-              <div className="text-center">
-                <svg className="w-8 h-8 text-red-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-                <p className="text-xs text-neutral-500 font-medium">Open PDF</p>
-              </div>
-            </a>
-          ) : (
-            <div className="relative w-full aspect-[4/3] bg-neutral-50 rounded-lg overflow-hidden">
-              <Image
-                src={url}
-                alt={label}
-                fill
-                className="object-cover"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                unoptimized
-              />
+        <div className="bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 shadow-sm mb-8">
+          <dl className="space-y-4">
+            <div className="flex items-center justify-between py-2 border-b border-neutral-100">
+              <dt className="text-xs text-neutral-400 uppercase tracking-wider font-medium">FAST Code</dt>
+              <dd className="text-sm font-mono font-semibold text-neutral-900">{ms.fastCode}</dd>
             </div>
-          )
-        ) : (
-          <PlaceholderIcon label={placeholder} />
-        )}
-      </div>
-      <div className="px-3 pb-3">
-        <p className="text-xs font-medium text-neutral-500">{label}</p>
-      </div>
-    </div>
-  );
-}
+            <div className="flex items-center justify-between py-2 border-b border-neutral-100">
+              <dt className="text-xs text-neutral-400 uppercase tracking-wider font-medium">Account Type</dt>
+              <dd className="text-sm font-semibold text-neutral-900">{formatAccountType(ms.accountType)}</dd>
+            </div>
+            <div className="flex items-center justify-between py-2">
+              <dt className="text-xs text-neutral-400 uppercase tracking-wider font-medium">Status</dt>
+              <dd className="text-sm font-semibold text-green-600">{ms.status.toUpperCase()}</dd>
+            </div>
+          </dl>
 
-function InfoCard({
-  label,
-  lines,
-}: {
-  label: string;
-  lines: { label: string; value: string }[];
-}) {
-  return (
-    <div className="bg-white border border-neutral-200 rounded-xl p-5">
-      <p className="text-xs font-medium text-neutral-400 uppercase tracking-wider mb-3">
-        {label}
-      </p>
-      <div className="space-y-2">
-        {lines.map((line) => (
-          <div key={line.label}>
-            <p className="text-[11px] text-neutral-400">{line.label}</p>
-            <p className="text-sm text-neutral-900">{line.value || "—"}</p>
+          <div className="mt-6 pt-4 border-t border-neutral-100 text-center">
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-3">
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-neutral-900">MapSite™ successfully created.</p>
           </div>
-        ))}
+        </div>
+
+        <div className="bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+          <h2 className="text-lg font-semibold text-neutral-900 mb-4">TalisMaps™</h2>
+          <div className="bg-neutral-50 rounded-xl border border-dashed border-neutral-300 p-8 text-center">
+            <div className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-neutral-500 mb-1">TalisMaps™ Loading...</p>
+            <p className="text-xs text-neutral-400">Future versions will display:</p>
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 mt-2 text-xs text-neutral-400">
+              <span>Property Pins</span>
+              <span>AdPro™ Pins</span>
+              <span>Categories</span>
+              <span>Search</span>
+              <span>Market Overlays</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

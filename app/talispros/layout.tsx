@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import TalisprosHeader from "@/components/talispros/TalisprosHeader";
 
 const poppins = Poppins({
