@@ -1,15 +1,17 @@
 import type { Metadata, Viewport } from "next";
+import { createMetadata } from "@/lib/seo";
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
 };
 
-export const metadata: Metadata = {
-  title: "Register Your MapSite™ | TalisPros™",
+export const metadata: Metadata = createMetadata({
+  title: "Register Your MapSite™ | Talispros™",
   description:
-    "Register your MapSite™ account and activate your TalisPros™ presence with payment.",
-};
+    "Choose your account level and activate your MapSite™ through secure online registration.",
+  path: "/talispros/register",
+});
 
 export default function TalisprosRegisterLayout({
   children,

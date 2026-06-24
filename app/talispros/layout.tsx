@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "../globals.css";
 import TalisprosHeader from "@/components/talispros/TalisprosHeader";
+import { siteConfig, createMetadata } from "@/lib/seo";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -16,12 +17,12 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.talishouse.com"),
-  title: "Talispros PMC | Industry Adjacent Market Places for Real Estate Professionals",
-  description:
-    "Industry Adjacent Market Places for Real Estate Professionals",
-  keywords:
-    "real estate, market places, Talispros, MapSite, FAST Code",
+  ...createMetadata({
+    title: "Talispros™ | Industry Adjacent Market Places for Real Estate Professionals",
+    description:
+      "Build referral networks, co-promotion ecosystems, and industry-adjacent marketplaces using MapSites™, FAST Codes™, TalisForms™, and TalisMaps™.",
+    path: "/talispros",
+  }),
   icons: {
     icon: "/favicon-v2.ico",
     shortcut: "/favicon-v2.ico",
