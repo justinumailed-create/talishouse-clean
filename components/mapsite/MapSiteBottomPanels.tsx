@@ -1,6 +1,7 @@
-import MapSiteContactForm from "./MapSiteContactForm";
 import MapSiteGalleryLightbox from "./MapSiteGalleryLightbox";
+import MapSiteContextPanel from "./MapSiteContextPanel";
 import MapSiteVideoSection from "./MapSiteVideoSection";
+import type { OfferedSubscriptionTier } from "@/lib/mapsite-subscription";
 
 interface MapSiteBottomPanelsProps {
   videoUrl: string | null;
@@ -9,6 +10,9 @@ interface MapSiteBottomPanelsProps {
   fastCode: string;
   agentName: string;
   agentEmail: string;
+  visitorHasSubscribed: boolean;
+  offeredSubscriptionTier: OfferedSubscriptionTier;
+  interestFormEnabled: boolean;
 }
 
 function PanelHeader({ title }: { title: string }) {
@@ -28,9 +32,12 @@ export default function MapSiteBottomPanels({
   fastCode,
   agentName,
   agentEmail,
+  visitorHasSubscribed,
+  offeredSubscriptionTier,
+  interestFormEnabled,
 }: MapSiteBottomPanelsProps) {
   return (
-    <section className="bg-[#f8f8f7] pb-8 sm:pb-10">
+    <section className="pb-8 sm:pb-10">
       <div className="max-w-7xl mx-auto px-5 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:items-stretch">
           <div className="flex flex-col gap-4 sm:gap-6 min-h-0 lg:h-full">
@@ -58,18 +65,14 @@ export default function MapSiteBottomPanels({
             </div>
           </div>
 
-          <div className="flex flex-col min-h-0 rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white lg:h-full">
-            <PanelHeader title="Express an Interest" />
-            <div className="flex-1 min-h-0 flex flex-col">
-              <MapSiteContactForm
-                fastCode={fastCode}
-                agentName={agentName}
-                agentEmail={agentEmail}
-                embedded
-                fillHeight
-              />
-            </div>
-          </div>
+          <MapSiteContextPanel
+            fastCode={fastCode}
+            agentName={agentName}
+            agentEmail={agentEmail}
+            offeredSubscriptionTier={offeredSubscriptionTier}
+            interestFormEnabled={interestFormEnabled}
+            initialHasSubscribed={visitorHasSubscribed}
+          />
         </div>
       </div>
     </section>

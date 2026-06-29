@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "../globals.css";
-import TalisprosHeader from "@/components/talispros/TalisprosHeader";
-import TalisprosFooter from "@/components/talispros/TalisprosFooter";
+import TalisprosLayoutClient from "@/components/talispros/TalisprosLayoutClient";
 import { siteConfig, createMetadata } from "@/lib/seo";
 
 const poppins = Poppins({
@@ -38,11 +37,7 @@ export default function TalisprosLayout({
 }>) {
   return (
     <div className={poppins.className}>
-      <TalisprosHeader />
-      <main className="min-h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white [&:has(.mapsite-layout)]:p-0">
-        {children}
-      </main>
-      <TalisprosFooter />
+      <TalisprosLayoutClient>{children}</TalisprosLayoutClient>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { createRootAccount } from "./account-service";
 import { createMapSiteFromAccount } from "./mapsite-service";
+import { getSupabaseAdmin } from "./supabaseAdmin";
 import { createUser, updateUserFastCode } from "./user-service";
 
 export interface CompleteRootAccountRegistrationInput {
@@ -43,6 +44,12 @@ export async function completeRootAccountRegistration(
     phone: input.phone,
     accountType: "root",
   });
+
+  const supabase = getSupabaseAdmin();
+  await supabase
+    .from("mapsites")
+    .update({ status: "active" })
+    .eq("id", mapsite.id);
 
   return {
     userId: user.id,

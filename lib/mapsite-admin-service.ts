@@ -1,8 +1,8 @@
 "use server";
 
 import type { Database } from "./database.types";
-import { requireAdminSession } from "./admin-auth";
-import { getSupabaseAdmin } from "./supabaseAdmin";
+import { requireMapSiteEditAccess } from "./mapsite-edit-auth";
+import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
 import { getMapSiteByFastCode } from "./mapsite-service";
 
 export interface MapSiteAdminInput {
@@ -28,11 +28,24 @@ export interface MapSiteAdminInput {
   metaDescription?: string;
   ogImageUrl?: string;
   atlistMapUrl?: string;
+  offeredSubscriptionTier?: string;
+  interestFormEnabled?: boolean;
 }
 
 export interface MapSiteAdminActionResult {
   success: boolean;
   error?: string;
+}
+
+const SERVICE_ROLE_ERROR =
+  "SUPABASE_SERVICE_ROLE_KEY is not configured. Add it to .env.local and restart the dev server.";
+
+function requireServiceRoleClient(): ReturnType<typeof getSupabaseAdmin> | MapSiteAdminActionResult {
+  if (!isSupabaseAdminConfigured()) {
+    return { success: false, error: SERVICE_ROLE_ERROR };
+  }
+
+  return getSupabaseAdmin();
 }
 
 function parseCoordinate(value: string | undefined): number | null {
@@ -53,7 +66,12 @@ async function uploadMapSiteFile(
   fieldName: string,
   file: File
 ): Promise<string | null> {
-  const supabase = getSupabaseAdmin();
+  const client = requireServiceRoleClient();
+  if ("success" in client) {
+    return null;
+  }
+
+  const supabase = client;
   const ext = file.name.split(".").pop() || "bin";
   const path = `mapsites/${fastCode.toLowerCase()}/${fieldName}-${Date.now()}.${ext}`;
 
@@ -76,8 +94,13 @@ async function uploadMapSiteFile(
 async function upsertPrimaryPin(
   mapsiteId: string,
   input: MapSiteAdminInput
-): Promise<void> {
-  const supabase = getSupabaseAdmin();
+): Promise<MapSiteAdminActionResult | void> {
+  const client = requireServiceRoleClient();
+  if ("success" in client) {
+    return client;
+  }
+
+  const supabase = client;
   const latitude = parseCoordinate(input.latitude);
   const longitude = parseCoordinate(input.longitude);
 
@@ -130,7 +153,7 @@ export async function updateMapSiteAdmin(
   input: MapSiteAdminInput
 ): Promise<MapSiteAdminActionResult> {
   try {
-    await requireAdminSession();
+    await requireMapSiteEditAccess(input.fastCode);
   } catch {
     return { success: false, error: "Unauthorized" };
   }
@@ -140,7 +163,12 @@ export async function updateMapSiteAdmin(
     return { success: false, error: "MapSite not found" };
   }
 
-  const supabase = getSupabaseAdmin();
+  const client = requireServiceRoleClient();
+  if ("success" in client) {
+    return client;
+  }
+
+  const supabase = client;
   const update: Database["public"]["Tables"]["mapsites"]["Update"] = {
     status: input.status,
     property_title: input.propertyTitle?.trim() || null,
@@ -163,6 +191,8 @@ export async function updateMapSiteAdmin(
     meta_description: input.metaDescription?.trim() || null,
     og_image_url: input.ogImageUrl?.trim() || null,
     atlist_map_url: input.atlistMapUrl?.trim() || null,
+    offered_subscription_tier: input.offeredSubscriptionTier || "root",
+    interest_form_enabled: input.interestFormEnabled ?? true,
   };
 
   const { error } = await supabase
@@ -174,7 +204,11 @@ export async function updateMapSiteAdmin(
     return { success: false, error: error.message };
   }
 
-  await upsertPrimaryPin(mapsite.id, input);
+  const pinResult = await upsertPrimaryPin(mapsite.id, input);
+  if (pinResult && "success" in pinResult && !pinResult.success) {
+    return pinResult;
+  }
+
   return { success: true };
 }
 
@@ -194,7 +228,7 @@ export async function unpublishMapSite(
   fastCode: string
 ): Promise<MapSiteAdminActionResult> {
   try {
-    await requireAdminSession();
+    await requireMapSiteEditAccess(fastCode);
   } catch {
     return { success: false, error: "Unauthorized" };
   }
@@ -204,8 +238,12 @@ export async function unpublishMapSite(
     return { success: false, error: "MapSite not found" };
   }
 
-  const supabase = getSupabaseAdmin();
-  const { error } = await supabase
+  const client = requireServiceRoleClient();
+  if ("success" in client) {
+    return client;
+  }
+
+  const { error } = await client
     .from("mapsites")
     .update({ status: "inactive" })
     .eq("id", mapsite.id);
@@ -220,18 +258,23 @@ export async function unpublishMapSite(
 export async function uploadMapSiteAsset(
   formData: FormData
 ): Promise<MapSiteAdminActionResult & { url?: string }> {
+  const fastCode = (formData.get("fastCode") as string) || "";
+
   try {
-    await requireAdminSession();
+    await requireMapSiteEditAccess(fastCode);
   } catch {
     return { success: false, error: "Unauthorized" };
   }
 
-  const fastCode = (formData.get("fastCode") as string) || "";
   const fieldName = (formData.get("fieldName") as string) || "";
   const file = formData.get("file") as File | null;
 
   if (!fastCode || !fieldName || !file || file.size === 0) {
     return { success: false, error: "Missing upload data" };
+  }
+
+  if (!isSupabaseAdminConfigured()) {
+    return { success: false, error: SERVICE_ROLE_ERROR };
   }
 
   const url = await uploadMapSiteFile(fastCode, fieldName, file);
@@ -247,7 +290,7 @@ export async function updateMapSiteGallery(
   galleryImages: string[]
 ): Promise<MapSiteAdminActionResult> {
   try {
-    await requireAdminSession();
+    await requireMapSiteEditAccess(fastCode);
   } catch {
     return { success: false, error: "Unauthorized" };
   }
@@ -257,8 +300,12 @@ export async function updateMapSiteGallery(
     return { success: false, error: "MapSite not found" };
   }
 
-  const supabase = getSupabaseAdmin();
-  const { error } = await supabase
+  const client = requireServiceRoleClient();
+  if ("success" in client) {
+    return client;
+  }
+
+  const { error } = await client
     .from("mapsites")
     .update({ gallery_images: galleryImages })
     .eq("id", mapsite.id);

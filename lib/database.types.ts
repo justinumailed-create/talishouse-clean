@@ -382,6 +382,8 @@ export interface Database {
           og_image_url: string | null
           agent_name: string | null
           atlist_map_url: string | null
+          offered_subscription_tier: string
+          interest_form_enabled: boolean
           created_at: string
           updated_at: string
         }
@@ -414,6 +416,8 @@ export interface Database {
           og_image_url?: string | null
           agent_name?: string | null
           atlist_map_url?: string | null
+          offered_subscription_tier?: string
+          interest_form_enabled?: boolean
           created_at?: string
           updated_at?: string
         }
@@ -446,6 +450,8 @@ export interface Database {
           og_image_url?: string | null
           agent_name?: string | null
           atlist_map_url?: string | null
+          offered_subscription_tier?: string
+          interest_form_enabled?: boolean
           created_at?: string
           updated_at?: string
         }

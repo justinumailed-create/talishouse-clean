@@ -19,7 +19,6 @@ const adminNavItems = [
   { href: "/admin/project-applications", label: "Project Apps" },
   { href: "/admin/pricing", label: "Pricing" },
   { href: "/admin/fast-codes", label: "FAST Codes" },
-  { href: "/admin/mapsites/lrg1", label: "MapSites" },
   { href: "/admin/build-requests", label: "Build Requests" },
   { href: "/admin/production-queue", label: "Production Queue" },
 ];
@@ -91,9 +90,7 @@ function AdminSidebar({ isOpen, onClose, hidden }: { isOpen: boolean; onClose: (
                   href={item.href}
                   onClick={onClose}
                   className={`block px-3 py-2 rounded-lg text-sm transition-all ${
-                    pathname === item.href ||
-                    (item.href === "/admin/mapsites/lrg1" &&
-                      pathname.startsWith("/admin/mapsites/"))
+                    pathname === item.href
                       ? "bg-[#f5f5f7] text-[#111] font-semibold"
                       : "text-[#6e6e73] hover:text-[#111] hover:bg-[#f5f5f7]"
                   }`}

@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import MapSiteLayout from "@/components/mapsite/MapSiteLayout";
 import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
+import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
+import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import { getPublicMapSiteByFastCode } from "@/lib/mapsite-service";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +49,16 @@ export default async function TalisprosMapSitePage({
   }
 
   const layoutData = buildMapSiteLayoutData(mapsite);
+  const [visitorStatus, editAccess] = await Promise.all([
+    getMapSiteVisitorAccountStatus(),
+    getMapSiteEditToolbarState(fastCode),
+  ]);
 
-  return <MapSiteLayout data={layoutData} />;
+  return (
+    <MapSiteLayout
+      data={layoutData}
+      visitorHasSubscribed={visitorStatus.hasSubscribed}
+      editAccess={editAccess}
+    />
+  );
 }

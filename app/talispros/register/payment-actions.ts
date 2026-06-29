@@ -1,9 +1,14 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { generateFastCode } from "@/lib/fast-code-generator";
 import { createMapSite } from "@/lib/mapsite";
 import { completeRootAccountRegistration } from "@/lib/root-account-registration-service";
+import {
+  MAPSITE_ROOT_ACCOUNT_COOKIE,
+  MAPSITE_ROOT_ACCOUNT_MAX_AGE,
+} from "@/lib/mapsite-account-session";
 
 export interface ProcessPaymentInput {
   email: string;
@@ -19,7 +24,19 @@ export interface ProcessPaymentResult {
   transactionId?: string;
   redirectUrl?: string;
   mapsiteId?: string;
+  fastCode?: string;
   error?: string;
+}
+
+async function setSubscriberSession(fastCode: string): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set(MAPSITE_ROOT_ACCOUNT_COOKIE, fastCode.toLowerCase(), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: MAPSITE_ROOT_ACCOUNT_MAX_AGE,
+  });
 }
 
 export async function processPayment(
@@ -62,11 +79,14 @@ export async function processPayment(
         email: input.email,
       });
 
+      await setSubscriberSession(registration.fastCode);
+
       return {
         success: true,
         transactionId: input.paypalCaptureId || input.paypalOrderId,
         redirectUrl: registration.redirectUrl,
         mapsiteId: registration.mapsiteId,
+        fastCode: registration.fastCode,
       };
     }
 
@@ -97,11 +117,14 @@ export async function processPayment(
       throw new Error(`FAST Code record failed: ${fcError.message}`);
     }
 
+    await setSubscriberSession(fastCode);
+
     return {
       success: true,
       transactionId: input.paypalCaptureId || input.paypalOrderId,
-      redirectUrl: `/ma/${fastCode}`,
+      redirectUrl: `/talispros/mapsites/${fastCode.toLowerCase()}`,
       mapsiteId: mapsite.id,
+      fastCode,
     };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown server error";

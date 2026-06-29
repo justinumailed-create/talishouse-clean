@@ -1,23 +1,10 @@
-import { notFound } from "next/navigation";
-import MapSiteAdminEditor from "@/components/admin/MapSiteAdminEditor";
-import { requireAdminPage } from "@/lib/admin-auth";
-import { getMapSiteByFastCode } from "@/lib/mapsite-service";
+import { redirect } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
-export default async function AdminMapSitePage({
+export default async function LegacyAdminMapSiteRedirect({
   params,
 }: {
   params: Promise<{ fastCode: string }>;
 }) {
-  await requireAdminPage();
-
   const { fastCode } = await params;
-  const mapsite = await getMapSiteByFastCode(fastCode);
-
-  if (!mapsite) {
-    notFound();
-  }
-
-  return <MapSiteAdminEditor mapsite={mapsite} />;
+  redirect(`/talispros/admin/mapsites/${fastCode}`);
 }

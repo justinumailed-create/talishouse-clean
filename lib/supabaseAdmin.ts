@@ -2,6 +2,27 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from './database.types'
 
 let cachedClient: SupabaseClient<Database> | null = null
+let adminClientDisabled = false
+
+export function isSupabaseAdminConfigured(): boolean {
+  return Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+  )
+}
+
+export function disableSupabaseAdminClient(): void {
+  adminClientDisabled = true
+  cachedClient = null
+}
+
+export function tryGetSupabaseAdmin(): SupabaseClient<Database> | null {
+  if (!isSupabaseAdminConfigured() || adminClientDisabled) {
+    return null
+  }
+
+  return getSupabaseAdmin()
+}
 
 export function getSupabaseAdmin(): SupabaseClient<Database> {
   if (cachedClient) return cachedClient

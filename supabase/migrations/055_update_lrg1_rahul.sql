@@ -9,8 +9,8 @@ SET
   property_address = 'Lot 8, South Head Rd., Homeville, Nova Scotia, Canada',
   property_description = 'This eBook is a great way to learn more about this property and the next steps to take if you are interested.',
   price = '$129,000',
-  email = 'rahul@talispros.com',
-  phone = '+1 (902) 555-0142',
+  email = 'rahulc@talispros.com',
+  phone = '(888)-858-1273',
   atlist_map_url = 'https://my.atlist.com/map/300bf957-4e2b-4834-a7ba-bc135ff8a9f3?share=true',
   logo_url = '/images/mapsites/header-fallback-logo.jpeg',
   header_image_url = COALESCE(
@@ -31,6 +31,6 @@ SET
   city = 'Homeville',
   province = 'NS',
   country = 'Canada',
-  email = 'rahul@talispros.com',
-  phone = '+1 (902) 555-0142'
+  email = 'rahulc@talispros.com',
+  phone = '(888)-858-1273'
 WHERE mapsite_id IN (SELECT id FROM mapsites WHERE lower(fast_code) = 'lrg1');

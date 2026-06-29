@@ -1,5 +1,7 @@
 import type { MapSitePinView, MapSiteView } from "./mapsite-service";
 import type { TalisMapsPin } from "./talismaps";
+import type { OfferedSubscriptionTier } from "./mapsite-subscription";
+import { parseOfferedSubscriptionTier } from "./mapsite-subscription";
 
 export const MAPSITE_HEADER_FALLBACK_LOGO =
   "/images/mapsites/header-fallback-logo.jpeg";
@@ -50,6 +52,8 @@ export interface MapSiteLayoutData {
   atlistMapUrl: string | null;
   pinLabel: string;
   overlayImageUrl: string | null;
+  offeredSubscriptionTier: OfferedSubscriptionTier;
+  interestFormEnabled: boolean;
 }
 
 const DEFAULT_PIN_COLOR = "#6B7280";
@@ -257,5 +261,9 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
       mapsite.headerImageUrl ||
       mapsite.galleryImages[0] ||
       null,
+    offeredSubscriptionTier: parseOfferedSubscriptionTier(
+      mapsite.offeredSubscriptionTier
+    ),
+    interestFormEnabled: mapsite.interestFormEnabled,
   };
 }

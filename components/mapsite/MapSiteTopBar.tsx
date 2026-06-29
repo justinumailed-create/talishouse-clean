@@ -10,12 +10,7 @@ interface MapSiteTopBarProps {
   agent: MapSiteAgentData;
 }
 
-function formatContactLine(agent: MapSiteAgentData): string {
-  const parts = [agent.name];
-  if (agent.phone?.trim()) parts.push(agent.phone.trim());
-  if (agent.email?.trim()) parts.push(agent.email.trim());
-  return parts.join(" · ");
-}
+const HEADER_SIDE_HEIGHT = "h-32 sm:h-40 md:h-48";
 
 export default function MapSiteTopBar({
   propertyTitle,
@@ -26,39 +21,51 @@ export default function MapSiteTopBar({
 
   return (
     <header className="bg-[#f8f8f7] border-b border-neutral-200/80">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-5 sm:py-6">
-        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 sm:gap-8">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-neutral-200/80 border border-neutral-200 flex items-center justify-center overflow-hidden shrink-0">
+      <div className="px-5 sm:px-8 py-5 sm:py-6">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-4 sm:gap-6">
+          <div className={`relative ${HEADER_SIDE_HEIGHT} shrink-0 bg-transparent`}>
             <Image
               src={headerLogo}
               alt="MapSite logo"
-              width={80}
-              height={80}
-              className="w-full h-full object-contain p-2"
+              width={192}
+              height={192}
+              className={`${HEADER_SIDE_HEIGHT} w-auto object-contain bg-transparent mix-blend-multiply`}
             />
           </div>
 
-          <div className="min-w-0 text-center sm:text-left">
-            <h1 className="text-lg sm:text-2xl font-semibold text-neutral-900 leading-tight tracking-tight">
+          <div className="min-w-0 text-center px-2">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-neutral-900 leading-tight tracking-tight">
               {propertyTitle}
             </h1>
-            <p className="text-sm text-neutral-600 mt-2">
-              <span className="text-neutral-500">Offered by:</span>{" "}
-              {formatContactLine(agent)}
+            <p className="text-xs text-neutral-500 mt-4 sm:mt-5 tracking-wide">
+              Offered by
             </p>
+            {agent.name && (
+              <p className="text-base sm:text-lg font-medium text-neutral-800 mt-1">
+                {agent.name}
+              </p>
+            )}
+            {agent.phone?.trim() && (
+              <p className="text-sm text-neutral-600 mt-1">{agent.phone.trim()}</p>
+            )}
+            {agent.email?.trim() && (
+              <p className="text-sm text-neutral-600 mt-1">{agent.email.trim()}</p>
+            )}
           </div>
 
-          <div className="w-16 h-20 sm:w-24 sm:h-28 rounded-lg overflow-hidden border border-neutral-200 bg-neutral-100 shrink-0">
+          <div
+            className={`relative ${HEADER_SIDE_HEIGHT} aspect-square shrink-0 overflow-hidden rounded-lg -translate-x-2 sm:-translate-x-4`}
+          >
             {agent.profileImageUrl ? (
               <Image
                 src={agent.profileImageUrl}
                 alt={agent.name}
-                width={96}
-                height={112}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover object-top"
+                sizes="(max-width: 768px) 128px, 192px"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs">
+              <div className="w-full h-full flex items-center justify-center bg-neutral-100 text-neutral-400 text-xs">
                 Agent
               </div>
             )}

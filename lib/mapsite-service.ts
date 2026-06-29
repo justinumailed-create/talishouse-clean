@@ -1,7 +1,8 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
 import type { CreateAccountResult } from "./account-service";
 import { generateMapSiteSlug } from "./slug-generator";
-import { getSupabaseAdmin } from "./supabaseAdmin";
+import { disableSupabaseAdminClient, getSupabaseAdmin, tryGetSupabaseAdmin } from "./supabaseAdmin";
 import { supabase } from "./supabaseClient";
 
 export interface CreateMapSiteForAccountInput {
@@ -41,6 +42,12 @@ export interface MapSitePinView {
   sortOrder: number;
 }
 
+export interface MapSiteListItem {
+  fastCode: string;
+  status: string;
+  propertyTitle: string | null;
+}
+
 export interface MapSiteView {
   id: string;
   fastCode: string;
@@ -70,38 +77,121 @@ export interface MapSiteView {
   metaDescription: string | null;
   ogImageUrl: string | null;
   atlistMapUrl: string | null;
+  offeredSubscriptionTier: string;
+  interestFormEnabled: boolean;
   createdAt: string;
   updatedAt: string;
   pins: MapSitePinView[];
 }
 
+function isServiceRolePermissionError(message: string): boolean {
+  return message.toLowerCase().includes("permission denied for schema public");
+}
+
+async function queryWithAdminFallback<T>(
+  run: (
+    client: SupabaseClient<Database>
+  ) => PromiseLike<{ data: T | null; error: { message: string } | null }>
+): Promise<{ data: T | null; error: string | null }> {
+  const admin = tryGetSupabaseAdmin();
+  if (admin) {
+    const adminResult = await run(admin);
+    if (!adminResult.error) {
+      return { data: adminResult.data, error: null };
+    }
+    if (isServiceRolePermissionError(adminResult.error.message)) {
+      disableSupabaseAdminClient();
+    }
+  }
+
+  const anonResult = await run(supabase);
+  return {
+    data: anonResult.data,
+    error: anonResult.error?.message ?? null,
+  };
+}
+
+export async function listMapSitesForAdmin(): Promise<MapSiteListItem[]> {
+  const { data, error } = await queryWithAdminFallback((client) =>
+    client
+      .from("mapsites")
+      .select("fast_code, status, property_title")
+      .order("created_at", { ascending: false })
+  );
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map((row) => ({
+    fastCode: row.fast_code,
+    status: row.status,
+    propertyTitle: row.property_title,
+  }));
+}
+
 export async function getMapSiteByFastCode(
   fastCode: string
 ): Promise<MapSiteView | null> {
+  const result = await getMapSiteByFastCodeResult(fastCode);
+  return result.mapsite;
+}
+
+export async function getMapSiteByFastCodeResult(
+  fastCode: string
+): Promise<{ mapsite: MapSiteView | null; error: string | null }> {
   const code = fastCode.trim();
   if (!code) {
-    return null;
+    return { mapsite: null, error: null };
   }
 
-  const supabase = getSupabaseAdmin();
+  const admin = tryGetSupabaseAdmin();
+  if (admin) {
+    const adminResult = await fetchMapSiteByFastCode(admin, code);
+    if (!adminResult.error || adminResult.mapsite) {
+      return adminResult;
+    }
+    if (adminResult.error && isServiceRolePermissionError(adminResult.error)) {
+      disableSupabaseAdminClient();
+    }
+  }
 
-  const { data: mapsite, error } = await supabase
+  return fetchMapSiteByFastCode(supabase, code);
+}
+
+async function fetchMapSiteByFastCode(
+  client: SupabaseClient<Database>,
+  code: string
+): Promise<{ mapsite: MapSiteView | null; error: string | null }> {
+  const { data: mapsite, error } = await client
     .from("mapsites")
     .select("*")
     .ilike("fast_code", code)
     .maybeSingle();
 
-  if (error || !mapsite) {
-    return null;
+  if (error) {
+    return { mapsite: null, error: error.message };
   }
 
-  const { data: pinRows } = await supabase
+  if (!mapsite) {
+    return { mapsite: null, error: null };
+  }
+
+  const mapsiteView = await buildMapSiteView(client, mapsite);
+  return { mapsite: mapsiteView, error: null };
+}
+
+async function buildMapSiteView(
+  client: SupabaseClient<Database>,
+  mapsite: Database["public"]["Tables"]["mapsites"]["Row"]
+): Promise<MapSiteView> {
+  const { data: pinRows } = await client
     .from("pins")
     .select("*")
     .eq("mapsite_id", mapsite.id)
     .order("sort_order");
 
-  const { data: fastCodeRow } = await supabase
+  const { data: fastCodeRow } = await client
     .from("fast_codes")
     .select("request_id")
     .eq("mapsite_id", mapsite.id)
@@ -114,7 +204,7 @@ export async function getMapSiteByFastCode(
   } | null = null;
 
   if (fastCodeRow?.request_id) {
-    const { data: assetRow } = await supabase
+    const { data: assetRow } = await client
       .from("mapsite_assets")
       .select("profile_image, logo_image, pin_image")
       .eq("request_id", fastCodeRow.request_id)
@@ -170,6 +260,8 @@ export async function getMapSiteByFastCode(
     metaDescription: mapsite.meta_description,
     ogImageUrl: mapsite.og_image_url,
     atlistMapUrl: mapsite.atlist_map_url,
+    offeredSubscriptionTier: mapsite.offered_subscription_tier ?? "root",
+    interestFormEnabled: mapsite.interest_form_enabled ?? true,
     createdAt: mapsite.created_at,
     updatedAt: mapsite.updated_at,
     pins,
@@ -248,6 +340,8 @@ export async function getPublicMapSiteByFastCode(
     metaDescription: mapsite.meta_description,
     ogImageUrl: mapsite.og_image_url,
     atlistMapUrl: mapsite.atlist_map_url,
+    offeredSubscriptionTier: mapsite.offered_subscription_tier ?? "root",
+    interestFormEnabled: mapsite.interest_form_enabled ?? true,
     createdAt: mapsite.created_at,
     updatedAt: mapsite.updated_at,
     pins,
