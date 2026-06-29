@@ -13,6 +13,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { submitBuildRequest, type ActionResult as BuildResult } from "./actions";
 import { registerFastCode, type ActionResult as FastCodeResult } from "@/app/fast-code/actions";
+import HomePinLocationSection, {
+  validateHomePinLocation,
+} from "@/components/build-mapsite/HomePinLocationSection";
+import { defaultHomePinLocationValues } from "@/components/build-mapsite/home-pin-types";
 
 const PROVINCES = [
   "Ontario",
@@ -57,12 +61,14 @@ interface FormData {
   email: string;
   accountType: string;
   fastCode: string;
-  homePin: string;
-  homeAddress: string;
-  homeCity: string;
-  homeProvince: string;
-  homePostalCode: string;
-  homeCountry: string;
+  streetAddress: string;
+  latitude: string;
+  longitude: string;
+  pinWriteup: string;
+  futurePinColor: string | null;
+  futurePinIcon: string | null;
+  futurePinBorder: string | null;
+  futurePinLabel: string | null;
   helpPreference: string;
   additionalComments: string;
   consentCommunications: boolean;
@@ -72,6 +78,7 @@ interface FormData {
 interface FileState {
   picture: File | null;
   logo: File | null;
+  pinImage: File | null;
   ttvMonologuePdf: File | null;
   ttvBackgroundImage: File | null;
   tebWriteUpPdf: File | null;
@@ -91,12 +98,7 @@ const defaultForm: FormData = {
   email: "",
   accountType: "",
   fastCode: "",
-  homePin: "",
-  homeAddress: "",
-  homeCity: "",
-  homeProvince: "",
-  homePostalCode: "",
-  homeCountry: "Canada",
+  ...defaultHomePinLocationValues,
   helpPreference: "",
   additionalComments: "",
   consentCommunications: false,
@@ -106,6 +108,7 @@ const defaultForm: FormData = {
 const defaultFiles: FileState = {
   picture: null,
   logo: null,
+  pinImage: null,
   ttvMonologuePdf: null,
   ttvBackgroundImage: null,
   tebWriteUpPdf: null,
@@ -159,7 +162,7 @@ function SectionCard({
         role="region"
         className={`transition-all duration-200 ease-in-out ${
           isOpen
-            ? "max-h-[2000px] opacity-100"
+            ? "max-h-[5000px] opacity-100"
             : "max-h-0 opacity-0 overflow-hidden"
         }`}
       >
@@ -328,76 +331,6 @@ function MultiFileUpload({
   );
 }
 
-function ProvinceSelect({
-  value,
-  onChange,
-  country,
-  error,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  country: string;
-  error?: string;
-}) {
-  const options = country === "United States" ? US_STATES : PROVINCES;
-  const label = country === "United States" ? "State" : "Province";
-
-  return (
-    <div>
-      <FieldLabel label={label} required />
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full h-11 px-4 bg-white border text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-xl appearance-none ${
-          error ? "border-red-300" : "border-neutral-200"
-        } ${!value ? "text-neutral-400" : ""}`}
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "right 16px center",
-          paddingRight: "40px",
-        }}
-      >
-        <option value="">Select {label}</option>
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-    </div>
-  );
-}
-
-function CountrySelect({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div>
-      <FieldLabel label="Country" required />
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full h-11 px-4 bg-white border border-neutral-200 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-xl appearance-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "right 16px center",
-          paddingRight: "40px",
-        }}
-      >
-        <option value="Canada">Canada</option>
-        <option value="United States">United States</option>
-      </select>
-    </div>
-  );
-}
-
 function TextAreaField({
   label,
   value,
@@ -430,7 +363,12 @@ function loadStoredForm(): FormData {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      return { ...defaultForm, ...parsed.form };
+      const stored = parsed.form ?? {};
+      return {
+        ...defaultForm,
+        ...stored,
+        streetAddress: stored.streetAddress ?? stored.homeAddress ?? "",
+      };
     }
   } catch {
     // ignore corrupt data
@@ -867,11 +805,19 @@ export default function BuildMapsitePage() {
       errs.email = "Invalid email";
     if (!form.accountType) errs.accountType = "Select an account type";
     if (!form.fastCode.trim()) errs.fastCode = "Required";
-    if (!form.homePin.trim()) errs.homePin = "Required";
-    if (!form.homeAddress.trim()) errs.homeAddress = "Required";
-    if (!form.homeCity.trim()) errs.homeCity = "Required";
-    if (!form.homeProvince.trim()) errs.homeProvince = "Required";
-    if (!form.homePostalCode.trim()) errs.homePostalCode = "Required";
+    Object.assign(
+      errs,
+      validateHomePinLocation({
+        streetAddress: form.streetAddress,
+        latitude: form.latitude,
+        longitude: form.longitude,
+        pinWriteup: form.pinWriteup,
+        futurePinColor: form.futurePinColor,
+        futurePinIcon: form.futurePinIcon,
+        futurePinBorder: form.futurePinBorder,
+        futurePinLabel: form.futurePinLabel,
+      })
+    );
     if (!form.consentData) errs.consentData = "You must agree to the data processing terms";
     if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) errs.turnstile = "Please complete the security check";
     setErrors(errs);
@@ -901,12 +847,14 @@ export default function BuildMapsitePage() {
       fd.append("email", form.email);
       fd.append("accountType", form.accountType);
       fd.append("fastCode", form.fastCode);
-      fd.append("homePin", form.homePin);
-      fd.append("homeAddress", form.homeAddress);
-      fd.append("homeCity", form.homeCity);
-      fd.append("homeProvince", form.homeProvince);
-      fd.append("homePostalCode", form.homePostalCode);
-      fd.append("homeCountry", form.homeCountry);
+      fd.append("streetAddress", form.streetAddress);
+      fd.append("latitude", form.latitude);
+      fd.append("longitude", form.longitude);
+      fd.append("pinWriteup", form.pinWriteup);
+      fd.append("futurePinColor", form.futurePinColor ?? "");
+      fd.append("futurePinIcon", form.futurePinIcon ?? "");
+      fd.append("futurePinBorder", form.futurePinBorder ?? "");
+      fd.append("futurePinLabel", form.futurePinLabel ?? "");
       fd.append("helpPreference", form.helpPreference);
       fd.append("additionalComments", form.additionalComments);
       fd.append("consentCommunications", String(form.consentCommunications));
@@ -914,6 +862,7 @@ export default function BuildMapsitePage() {
       fd.append("turnstileToken", turnstileToken);
       if (files.picture) fd.append("picture", files.picture);
       if (files.logo) fd.append("logo", files.logo);
+      if (files.pinImage) fd.append("pinImage", files.pinImage);
       if (files.ttvMonologuePdf) fd.append("ttvMonologuePdf", files.ttvMonologuePdf);
       if (files.ttvBackgroundImage) fd.append("ttvBackgroundImage", files.ttvBackgroundImage);
       if (files.tebWriteUpPdf) fd.append("tebWriteUpPdf", files.tebWriteUpPdf);
@@ -1141,59 +1090,35 @@ export default function BuildMapsitePage() {
               <SectionCard
                 number={3}
                 title="Home PIN Location"
-                description="Property Identification Number and location."
+                description="Choose the exact location of your Home PIN. You may enter an address or paste GPS coordinates. In a future TalisMaps™ update, you'll be able to personalize your pin style, branding, colors and map appearance."
                 isOpen={openSections.has(3)}
                 onToggle={() => toggleSection(3)}
               >
-                <div className="space-y-4">
-                  <InputField
-                    label="Property PIN"
-                    required
-                    value={form.homePin}
-                    onChange={(v) => updateField("homePin", v)}
-                    placeholder="e.g. 12345-6789"
-                    error={errors.homePin}
-                  />
-                  <InputField
-                    label="Street Address"
-                    required
-                    value={form.homeAddress}
-                    onChange={(v) => updateField("homeAddress", v)}
-                    placeholder="123 Main St"
-                    autoComplete="street-address"
-                    error={errors.homeAddress}
-                  />
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <InputField
-                      label="City"
-                      required
-                      value={form.homeCity}
-                      onChange={(v) => updateField("homeCity", v)}
-                      placeholder="Toronto"
-                      autoComplete="address-level2"
-                      error={errors.homeCity}
-                    />
-                    <ProvinceSelect
-                      value={form.homeProvince}
-                      onChange={(v) => updateField("homeProvince", v)}
-                      country={form.homeCountry}
-                      error={errors.homeProvince}
-                    />
-                    <InputField
-                      label="Postal Code"
-                      required
-                      value={form.homePostalCode}
-                      onChange={(v) => updateField("homePostalCode", v)}
-                      placeholder="A1A 1A1"
-                      autoComplete="postal-code"
-                      error={errors.homePostalCode}
-                    />
-                  </div>
-                  <CountrySelect
-                    value={form.homeCountry}
-                    onChange={(v) => updateField("homeCountry", v)}
-                  />
-                </div>
+                <HomePinLocationSection
+                  values={{
+                    streetAddress: form.streetAddress,
+                    latitude: form.latitude,
+                    longitude: form.longitude,
+                    pinWriteup: form.pinWriteup,
+                    futurePinColor: form.futurePinColor,
+                    futurePinIcon: form.futurePinIcon,
+                    futurePinBorder: form.futurePinBorder,
+                    futurePinLabel: form.futurePinLabel,
+                  }}
+                  pinImage={files.pinImage}
+                  onChange={(values) => {
+                    setForm((prev) => ({ ...prev, ...values }));
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      for (const key of Object.keys(values)) {
+                        delete next[key];
+                      }
+                      return next;
+                    });
+                  }}
+                  onPinImageChange={(file) => updateFile("pinImage", file)}
+                  errors={errors}
+                />
               </SectionCard>
 
               <div className="py-6">

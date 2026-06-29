@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "../globals.css";
 import TalisprosHeader from "@/components/talispros/TalisprosHeader";
+import TalisprosFooter from "@/components/talispros/TalisprosFooter";
 import { siteConfig, createMetadata } from "@/lib/seo";
 
 const poppins = Poppins({
@@ -36,23 +37,12 @@ export default function TalisprosLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={poppins.className}>
-        <TalisprosHeader />
-        <main className="min-h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
-          {children}
-        </main>
-        <footer className="flex-shrink-0 bg-white border-t border-neutral-200 py-6 text-center">
-          <p className="text-xs text-neutral-400">
-            Powered by{" "}
-            <a href="/talispros/forms" className="text-neutral-600 hover:text-neutral-900 underline underline-offset-2 transition-colors">
-              TalisForms™
-            </a>
-            <br />
-            <span className="text-[10px] text-neutral-300">A Talispros™ Product</span>
-          </p>
-        </footer>
-      </body>
-    </html>
+    <div className={poppins.className}>
+      <TalisprosHeader />
+      <main className="min-h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white [&:has(.mapsite-layout)]:p-0">
+        {children}
+      </main>
+      <TalisprosFooter />
+    </div>
   );
 }

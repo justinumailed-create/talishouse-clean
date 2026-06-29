@@ -65,7 +65,7 @@ function normalizeColor(color: string): string {
 export async function getTalisMapsData(
   fastCode: string
 ): Promise<TalisMapsData> {
-  const code = fastCode.trim().toUpperCase();
+  const code = fastCode.trim();
   if (!code) {
     return { mapsite: null, pins: [], categories: [], notFound: true, message: "FAST code is required" };
   }
@@ -75,7 +75,7 @@ export async function getTalisMapsData(
   const { data: mapsite } = await supabase
     .from("mapsites")
     .select("*")
-    .eq("fast_code", code)
+    .ilike("fast_code", code)
     .maybeSingle();
 
   if (!mapsite) {

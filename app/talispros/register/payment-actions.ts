@@ -3,6 +3,7 @@
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { generateFastCode } from "@/lib/fast-code-generator";
 import { createMapSite } from "@/lib/mapsite";
+import { completeRootAccountRegistration } from "@/lib/root-account-registration-service";
 
 export interface ProcessPaymentInput {
   email: string;
@@ -17,6 +18,7 @@ export interface ProcessPaymentResult {
   success: boolean;
   transactionId?: string;
   redirectUrl?: string;
+  mapsiteId?: string;
   error?: string;
 }
 
@@ -53,6 +55,21 @@ export async function processPayment(
       throw new Error(`Payment record failed: ${paymentError.message}`);
     }
 
+    if (input.planType === "ROOT_ACCOUNT") {
+      const registration = await completeRootAccountRegistration({
+        firstName: input.firstName,
+        lastName: input.lastName,
+        email: input.email,
+      });
+
+      return {
+        success: true,
+        transactionId: input.paypalCaptureId || input.paypalOrderId,
+        redirectUrl: registration.redirectUrl,
+        mapsiteId: registration.mapsiteId,
+      };
+    }
+
     const { data: existingCodes } = await supabaseAdmin
       .from("fast_codes")
       .select("code");
@@ -84,6 +101,7 @@ export async function processPayment(
       success: true,
       transactionId: input.paypalCaptureId || input.paypalOrderId,
       redirectUrl: `/ma/${fastCode}`,
+      mapsiteId: mapsite.id,
     };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown server error";

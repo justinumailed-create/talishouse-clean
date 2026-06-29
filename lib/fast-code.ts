@@ -1,7 +1,8 @@
 "use client";
 
-export const ADMIN_FAST_CODE = "ADMIN123";
-export const ADMIN_SESSION_COOKIE = "admin_session";
+import { ADMIN_FAST_CODE, ADMIN_SESSION_COOKIE } from "./admin-constants";
+
+export { ADMIN_FAST_CODE, ADMIN_SESSION_COOKIE };
 
 const isBrowser = () => typeof window !== "undefined";
 

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { formatCAD } from "@/utils/currency";
 import Link from "next/link";
+import FastCodeSidebarCard from "@/components/talispros/FastCodeSidebarCard";
 import { Check, ChevronDown } from "lucide-react";
 import { processPayment } from "./payment-actions";
 
@@ -120,6 +121,8 @@ function RegisterSidebar() {
           title="Partner Access"
         />
       </div>
+
+      <FastCodeSidebarCard />
     </div>
   );
 }
@@ -512,7 +515,7 @@ function RegisterForm() {
           </div>
         </div>
 
-        <div className="w-full lg:w-[30%] bg-[#f7f8fa] lg:border-l border-[#e5e5e5] p-8 lg:sticky lg:top-0 lg:self-start lg:max-h-screen lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="w-full lg:w-[30%] bg-[#e2e5ea] lg:border-l border-[#e5e5e5] p-8 lg:sticky lg:top-0 lg:self-start lg:max-h-screen lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <RegisterSidebar />
         </div>
       </div>

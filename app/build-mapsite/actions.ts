@@ -19,12 +19,14 @@ export interface BuildFields {
   email: string;
   accountType: string;
   fastCode: string;
-  homePin: string;
-  homeAddress: string;
-  homeCity: string;
-  homeProvince: string;
-  homePostalCode: string;
-  homeCountry: string;
+  streetAddress: string;
+  latitude: string;
+  longitude: string;
+  pinWriteup: string;
+  futurePinColor: string;
+  futurePinIcon: string;
+  futurePinBorder: string;
+  futurePinLabel: string;
   helpPreference: string;
   additionalComments: string;
   consentCommunications: boolean;
@@ -38,11 +40,26 @@ function validate(fields: BuildFields): string | null {
     return "Invalid email format";
   if (!fields.accountType) return "Account type is required";
   if (!fields.fastCode.trim()) return "FAST Code is required";
-  if (!fields.homePin.trim()) return "Property PIN is required";
-  if (!fields.homeAddress.trim()) return "Home address is required";
-  if (!fields.homeCity.trim()) return "Home city is required";
-  if (!fields.homeProvince.trim()) return "Home province is required";
-  if (!fields.homePostalCode.trim()) return "Home postal code is required";
+
+  const hasAddress = fields.streetAddress.trim().length > 0;
+  const lat = Number.parseFloat(fields.latitude);
+  const lng = Number.parseFloat(fields.longitude);
+  const hasCoords =
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180;
+
+  if (!hasAddress && !hasCoords) {
+    return "Street address or GPS coordinates are required";
+  }
+
+  if (fields.pinWriteup.length > 170) {
+    return "PIN write-up must be 170 characters or fewer";
+  }
+
   if (!fields.consentData) return "Data processing consent is required";
   return null;
 }
@@ -89,12 +106,14 @@ export async function submitBuildRequest(
     email: (formData.get("email") as string) || "",
     accountType: (formData.get("accountType") as string) || "",
     fastCode: (formData.get("fastCode") as string) || "",
-    homePin: (formData.get("homePin") as string) || "",
-    homeAddress: (formData.get("homeAddress") as string) || "",
-    homeCity: (formData.get("homeCity") as string) || "",
-    homeProvince: (formData.get("homeProvince") as string) || "",
-    homePostalCode: (formData.get("homePostalCode") as string) || "",
-    homeCountry: (formData.get("homeCountry") as string) || "Canada",
+    streetAddress: (formData.get("streetAddress") as string) || "",
+    latitude: (formData.get("latitude") as string) || "",
+    longitude: (formData.get("longitude") as string) || "",
+    pinWriteup: (formData.get("pinWriteup") as string) || "",
+    futurePinColor: (formData.get("futurePinColor") as string) || "",
+    futurePinIcon: (formData.get("futurePinIcon") as string) || "",
+    futurePinBorder: (formData.get("futurePinBorder") as string) || "",
+    futurePinLabel: (formData.get("futurePinLabel") as string) || "",
     helpPreference: (formData.get("helpPreference") as string) || "",
     additionalComments: (formData.get("additionalComments") as string) || "",
     consentCommunications: formData.get("consentCommunications") === "true",
@@ -114,6 +133,7 @@ export async function submitBuildRequest(
     const fileFields = [
       "picture",
       "logo",
+      "pinImage",
       "ttvMonologuePdf",
       "ttvBackgroundImage",
       "tebWriteUpPdf",
@@ -135,6 +155,11 @@ export async function submitBuildRequest(
       if (url) tebPictureUrls.push(url);
     }
 
+    const parsedLatitude = Number.parseFloat(fields.latitude);
+    const parsedLongitude = Number.parseFloat(fields.longitude);
+    const hasCoordinates =
+      Number.isFinite(parsedLatitude) && Number.isFinite(parsedLongitude);
+
     const buildRequest: Database["public"]["Tables"]["build_requests"]["Insert"] = {
       id: requestId,
       first_name: fields.fastCode.trim(),
@@ -143,15 +168,18 @@ export async function submitBuildRequest(
       phone: "",
       account_type: fields.accountType,
       media_focus: null,
-      address: fields.homeAddress.trim(),
-      geo_location: [
-        fields.homeCity.trim(),
-        fields.homeProvince.trim(),
-        fields.homePostalCode.trim(),
-        fields.homeCountry.trim(),
-      ]
-        .filter(Boolean)
-        .join(", "),
+      address: fields.streetAddress.trim() || null,
+      geo_location: hasCoordinates
+        ? `${parsedLatitude},${parsedLongitude}`
+        : null,
+      street_address: fields.streetAddress.trim() || null,
+      latitude: hasCoordinates ? parsedLatitude : null,
+      longitude: hasCoordinates ? parsedLongitude : null,
+      pin_writeup: fields.pinWriteup.trim() || null,
+      future_pin_color: fields.futurePinColor.trim() || null,
+      future_pin_icon: fields.futurePinIcon.trim() || null,
+      future_pin_border: fields.futurePinBorder.trim() || null,
+      future_pin_label: fields.futurePinLabel.trim() || null,
       status: "pending",
     };
 
@@ -232,7 +260,7 @@ export async function submitBuildRequest(
         profile_image: fileUrls.picture ?? null,
         logo_image: fileUrls.logo ?? null,
         monologue_pdf: fileUrls.ttvMonologuePdf ?? null,
-        pin_image: fileUrls.ttvBackgroundImage ?? null,
+        pin_image: fileUrls.pinImage ?? null,
         ebook_pdf: fileUrls.tebWriteUpPdf ?? null,
       };
 
@@ -281,6 +309,11 @@ export async function submitBuildRequest(
         fastCode,
         helpPreference: fields.helpPreference,
         additionalComments: fields.additionalComments,
+        streetAddress: fields.streetAddress,
+        latitude: fields.latitude,
+        longitude: fields.longitude,
+        pinWriteup: fields.pinWriteup,
+        ttvBackgroundImageUrl: fileUrls.ttvBackgroundImage ?? undefined,
         consentCommunications: fields.consentCommunications,
         consentData: fields.consentData,
         consentTimestamp: new Date().toISOString(),

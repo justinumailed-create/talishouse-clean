@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -13,7 +14,12 @@ const NAV_ITEMS = [
 ];
 
 export default function TalisprosHeader() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  if (pathname.startsWith("/talispros/mapsites/")) {
+    return null;
+  }
 
   return (
     <header className="flex-shrink-0 bg-white border-b border-neutral-200">

@@ -1,16 +1,18 @@
 import { describe, it, expect } from "vitest";
 import { generateFastCode } from "../lib/fast-code-generator";
 
-describe("generateFastCode", () => {
-  it("returns a 4-character string", () => {
+const LEGACY_FAST_CODE_PATTERN = /^[A-Z]{2}-[A-Z]{3}-\d{4}$/;
+
+describe("generateFastCode (legacy random format)", () => {
+  it("returns a code in XX-XXX-XXXX format", () => {
     const code = generateFastCode([]);
-    expect(code).toHaveLength(4);
+    expect(code).toMatch(LEGACY_FAST_CODE_PATTERN);
   });
 
-  it("contains only uppercase letters and digits", () => {
+  it("contains only uppercase letters and digits in the expected segments", () => {
     for (let i = 0; i < 50; i++) {
       const code = generateFastCode([]);
-      expect(code).toMatch(/^[A-Z0-9]{4}$/);
+      expect(code).toMatch(LEGACY_FAST_CODE_PATTERN);
     }
   });
 
@@ -19,59 +21,45 @@ describe("generateFastCode", () => {
     for (let i = 0; i < 50; i++) {
       codes.add(generateFastCode([]));
     }
-    // With 36^4 = 1,679,616 possibilities, 50 calls should all be unique
     expect(codes.size).toBe(50);
   });
 
   it("does not return codes from the existing list", () => {
-    const existing = ["ABC1", "XYZ9", "LRG1", "TTV7"];
+    const existing = ["AB-CDE-1234", "XY-ZAB-9876", "LR-GAB-0001"];
     for (let i = 0; i < 100; i++) {
       const code = generateFastCode(existing);
       expect(existing).not.toContain(code);
     }
   });
 
-  it("handles a full set of existing codes gracefully", () => {
-    const many: string[] = [];
-    for (let i = 0; i < 100; i++) {
-      many.push(`A${i}B`.padEnd(4, "X").slice(0, 4));
-    }
-    // Should still succeed since 36^4 >> 100
+  it("handles many existing codes gracefully", () => {
+    const many = Array.from({ length: 100 }, (_, i) =>
+      `A${String(i).padStart(1, "0")}-BCD-${String(1000 + i).padStart(4, "0")}`.slice(0, 11)
+    );
     const code = generateFastCode(many);
-    expect(code).toHaveLength(4);
+    expect(code).toMatch(LEGACY_FAST_CODE_PATTERN);
     expect(many).not.toContain(code);
   });
 
   it("normalizes existing codes to uppercase before checking", () => {
-    const existing = ["abc1", "LrG1", "ttv7"];
+    const existing = ["ab-cde-1234", "Xy-Zab-9876"];
     for (let i = 0; i < 50; i++) {
       const code = generateFastCode(existing);
-      expect(code).not.toBe("ABC1");
-      expect(code).not.toBe("LRG1");
-      expect(code).not.toBe("TTV7");
-      expect(code).not.toBe("abc1");
-      expect(code).not.toBe("lrg1");
-      expect(code).not.toBe("ttv7");
+      expect(code).not.toBe("AB-CDE-1234");
+      expect(code).not.toBe("XY-ZAB-9876");
+      expect(code).not.toBe("ab-cde-1234");
+      expect(code).not.toBe("xy-zab-9876");
     }
   });
 
-  it("throws when it cannot find a unique code", () => {
-    // Fill the entire 36^4 space — impractical, but test the throw path
-    // by mocking via a very constrained space
-    const allButOne = new Set<string>();
-    // Generate 36^2 - 1 = 1295 codes for a 2-char space to trigger the throw
-    for (let i = 0; i < 36; i++) {
-      for (let j = 0; j < 36; j++) {
-        const c1 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[i];
-        const c2 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"[j];
-        allButOne.add(`${c1}${c2}XX`);
-      }
-    }
-    const existing = [...allButOne];
-    // With 1296 codes covering all 2-char prefixes of a 4-char code,
-    // the generator should still find a unique one (36^4 >> 1296)
+  it("finds a unique code even when many prefixes are taken", () => {
+    const existing = Array.from({ length: 200 }, (_, i) => {
+      const a = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i % 26];
+      const b = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[(i + 3) % 26];
+      return `${a}${b}-AAA-0001`;
+    });
     const code = generateFastCode(existing);
-    expect(code).toHaveLength(4);
+    expect(code).toMatch(LEGACY_FAST_CODE_PATTERN);
     expect(existing).not.toContain(code);
   });
 });

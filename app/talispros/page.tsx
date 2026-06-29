@@ -1,144 +1,7 @@
-"use client";
-
-import { useState, FormEvent } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, ArrowRight, AlertCircle, Copy } from "lucide-react";
-
-const PROVINCES = [
-  "Ontario", "British Columbia", "Alberta", "Quebec",
-  "Nova Scotia", "Manitoba", "Saskatchewan", "New Brunswick",
-  "Prince Edward Island", "Newfoundland and Labrador",
-  "Northwest Territories", "Nunavut", "Yukon",
-];
-
-const US_STATES = [
-  "Alabama", "Alaska", "Arizona", "Arkansas", "California",
-  "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
-  "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
-  "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
-  "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
-  "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
-  "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
-  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
-  "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
-  "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
-];
-
-function FieldLabel({ label, required }: { label: string; required?: boolean }) {
-  return (
-    <label className="text-xs font-medium text-neutral-500 mb-1.5 block">
-      {label}
-      {required && <span className="text-red-400 ml-0.5">*</span>}
-    </label>
-  );
-}
-
-function FastCodeSidebar() {
-  const [fcFirstName, setFcFirstName] = useState("");
-  const [fcLastName, setFcLastName] = useState("");
-  const [fcEmail, setFcEmail] = useState("");
-  const [fcPhone, setFcPhone] = useState("");
-  const [fcAddress, setFcAddress] = useState("");
-  const [fcProvince, setFcProvince] = useState("");
-  const [fcSubmitting, setFcSubmitting] = useState(false);
-  const [fcError, setFcError] = useState("");
-  const [fcCode, setFcCode] = useState("");
-  const [fcCopied, setFcCopied] = useState(false);
-
-  async function handleFastCode(e: FormEvent) {
-    e.preventDefault();
-    setFcError("");
-    if (!fcFirstName.trim() || !fcLastName.trim() || !fcEmail.trim() || !fcPhone.trim() || !fcAddress.trim() || !fcProvince.trim()) {
-      setFcError("All fields are required.");
-      return;
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fcEmail.trim())) {
-      setFcError("Invalid email format.");
-      return;
-    }
-    setFcSubmitting(true);
-    const result = await new Promise<{ success: boolean; fastCode?: string; error?: string }>((resolve) => {
-      setTimeout(() => {
-        resolve({ success: true, fastCode: "FAST-12345" });
-      }, 1000);
-    });
-    setFcSubmitting(false);
-    if (result.success && result.fastCode) {
-      setFcCode(result.fastCode);
-    } else {
-      setFcError(result.error || "Something went wrong.");
-    }
-  }
-
-  function handleFcCopy() {
-    navigator.clipboard.writeText(fcCode);
-    setFcCopied(true);
-    setTimeout(() => setFcCopied(false), 2000);
-  }
-
-  if (fcCode) {
-    return (
-      <div className="text-center">
-        <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-          <Check className="w-6 h-6 text-green-600" />
-        </div>
-        <p className="text-[11px] text-neutral-400 uppercase tracking-widest font-medium mb-2">Your Gateway Code</p>
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <span className="text-2xl font-bold tracking-tight text-neutral-900">{fcCode}</span>
-          <button onClick={handleFcCopy} className="flex-shrink-0 w-8 h-8 border border-neutral-300 rounded-lg flex items-center justify-center hover:bg-neutral-100 transition-colors">
-            {fcCopied ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5 text-neutral-400" />}
-          </button>
-        </div>
-        <p className="text-xs text-neutral-500">Use this code to access your MapSite™.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div>
-      <Image src="/logo.png" alt="TalisPros™" width={120} height={32} className="h-7 w-auto object-contain mb-4" priority />
-      <form onSubmit={handleFastCode} className="space-y-3">
-        <div>
-          <FieldLabel label="First Name" required />
-          <input type="text" value={fcFirstName} onChange={(e) => setFcFirstName(e.target.value)} placeholder="John" className="w-full h-10 px-3.5 bg-white border border-neutral-200 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-lg" />
-        </div>
-        <div>
-          <FieldLabel label="Last Name" required />
-          <input type="text" value={fcLastName} onChange={(e) => setFcLastName(e.target.value)} placeholder="Smith" className="w-full h-10 px-3.5 bg-white border border-neutral-200 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-lg" />
-        </div>
-        <div>
-          <FieldLabel label="Email" required />
-          <input type="email" value={fcEmail} onChange={(e) => setFcEmail(e.target.value)} placeholder="john@example.com" className="w-full h-10 px-3.5 bg-white border border-neutral-200 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-lg" />
-        </div>
-        <div>
-          <FieldLabel label="Cell Phone" required />
-          <input type="tel" value={fcPhone} onChange={(e) => setFcPhone(e.target.value)} placeholder="(555) 123-4567" className="w-full h-10 px-3.5 bg-white border border-neutral-200 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-lg" />
-        </div>
-        <div>
-          <FieldLabel label="Street Address" required />
-          <input type="text" value={fcAddress} onChange={(e) => setFcAddress(e.target.value)} placeholder="123 Main St" className="w-full h-10 px-3.5 bg-white border border-neutral-200 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-lg" />
-        </div>
-        <div>
-          <FieldLabel label="State / Province" required />
-          <select
-            value={fcProvince} onChange={(e) => setFcProvince(e.target.value)}
-            className={`w-full h-10 px-3.5 bg-white border border-neutral-200 text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-lg appearance-none ${!fcProvince ? "text-neutral-400" : ""}`}
-            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center", paddingRight: "32px" }}
-          >
-            <option value="">Select Province / State</option>
-            {PROVINCES.map((p) => <option key={p} value={p}>{p}</option>)}
-            {US_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-        </div>
-        {fcError && <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700"><AlertCircle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" /><span>{fcError}</span></div>}
-        <button type="submit" disabled={fcSubmitting} className="w-full h-10 bg-neutral-900 text-white rounded-lg text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all disabled:opacity-50">
-          {fcSubmitting ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <>Generate<ArrowRight className="w-3.5 h-3.5" /></>}
-        </button>
-      </form>
-    </div>
-  );
-}
+import { ArrowRight } from "lucide-react";
+import FastCodeSidebarCard from "@/components/talispros/FastCodeSidebarCard";
 
 export default function TalisprosWelcomePage() {
   return (
@@ -293,7 +156,7 @@ export default function TalisprosWelcomePage() {
         </div>
 
         {/* Right Sidebar */}
-        <div className="w-full lg:w-[30%] bg-[#f7f8fa] lg:border-l border-[#e5e5e5] p-8 lg:sticky lg:top-0 lg:self-start lg:max-h-screen lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="w-full lg:w-[30%] bg-[#e2e5ea] lg:border-l border-[#e5e5e5] p-8 lg:sticky lg:top-0 lg:self-start lg:max-h-screen lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div className="space-y-6">
             {/* CTA Card */}
             <div className="bg-white rounded-xl shadow-sm p-6 border-2 border-red-400 text-center">
@@ -309,12 +172,7 @@ export default function TalisprosWelcomePage() {
               </Link>
             </div>
 
-            {/* FAST Code™ */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h3 className="text-base font-semibold text-neutral-900 mb-1">FAST Code™</h3>
-              <p className="text-xs text-neutral-500 mb-4">Generate your marketplace gateway.</p>
-              <FastCodeSidebar />
-            </div>
+            <FastCodeSidebarCard />
           </div>
         </div>
       </div>

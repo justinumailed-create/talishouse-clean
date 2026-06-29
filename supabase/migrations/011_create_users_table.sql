@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS users (
   email TEXT,
   fast_code TEXT UNIQUE,
   role TEXT DEFAULT 'associate',
+  intro_message TEXT,
+  images TEXT[] DEFAULT '{}',
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -13,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
 -- Policy for authenticated users
+DROP POLICY IF EXISTS "Authenticated users can manage users" ON users;
 CREATE POLICY "Authenticated users can manage users" ON users
   FOR ALL
   TO authenticated
@@ -20,6 +23,7 @@ CREATE POLICY "Authenticated users can manage users" ON users
   WITH CHECK (true);
 
 -- Policy for anon users
+DROP POLICY IF EXISTS "Anon users can view users" ON users;
 CREATE POLICY "Anon users can view users" ON users
   FOR SELECT
   TO anon
@@ -27,3 +31,4 @@ CREATE POLICY "Anon users can view users" ON users
 
 -- Create index for fast_code lookup
 CREATE INDEX IF NOT EXISTS idx_users_fast_code ON users(fast_code);
+CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);

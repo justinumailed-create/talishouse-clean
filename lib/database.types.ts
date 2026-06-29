@@ -12,6 +12,14 @@ export interface Database {
           media_focus: string | null
           address: string | null
           geo_location: string | null
+          street_address: string | null
+          latitude: number | null
+          longitude: number | null
+          pin_writeup: string | null
+          future_pin_color: string | null
+          future_pin_icon: string | null
+          future_pin_border: string | null
+          future_pin_label: string | null
           status: string
           created_at: string
         }
@@ -25,6 +33,14 @@ export interface Database {
           media_focus?: string | null
           address?: string | null
           geo_location?: string | null
+          street_address?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          pin_writeup?: string | null
+          future_pin_color?: string | null
+          future_pin_icon?: string | null
+          future_pin_border?: string | null
+          future_pin_label?: string | null
           status?: string
           created_at?: string
         }
@@ -38,6 +54,14 @@ export interface Database {
           media_focus?: string | null
           address?: string | null
           geo_location?: string | null
+          street_address?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          pin_writeup?: string | null
+          future_pin_color?: string | null
+          future_pin_icon?: string | null
+          future_pin_border?: string | null
+          future_pin_label?: string | null
           status?: string
           created_at?: string
         }
@@ -339,7 +363,27 @@ export interface Database {
           email: string
           phone: string
           status: string
+          account_id: string | null
+          property_title: string | null
+          profile_image_url: string | null
+          video_url: string | null
+          gallery_images: string[]
+          property_address: string | null
+          property_description: string | null
+          latitude: number | null
+          longitude: number | null
+          price: string | null
+          logo_url: string | null
+          header_image_url: string | null
+          website: string | null
+          map_zoom: number | null
+          meta_title: string | null
+          meta_description: string | null
+          og_image_url: string | null
+          agent_name: string | null
+          atlist_map_url: string | null
           created_at: string
+          updated_at: string
         }
         Insert: {
           id?: string
@@ -351,7 +395,27 @@ export interface Database {
           email: string
           phone?: string
           status?: string
+          account_id?: string | null
+          property_title?: string | null
+          profile_image_url?: string | null
+          video_url?: string | null
+          gallery_images?: string[]
+          property_address?: string | null
+          property_description?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          price?: string | null
+          logo_url?: string | null
+          header_image_url?: string | null
+          website?: string | null
+          map_zoom?: number | null
+          meta_title?: string | null
+          meta_description?: string | null
+          og_image_url?: string | null
+          agent_name?: string | null
+          atlist_map_url?: string | null
           created_at?: string
+          updated_at?: string
         }
         Update: {
           id?: string
@@ -363,9 +427,31 @@ export interface Database {
           email?: string
           phone?: string
           status?: string
+          account_id?: string | null
+          property_title?: string | null
+          profile_image_url?: string | null
+          video_url?: string | null
+          gallery_images?: string[]
+          property_address?: string | null
+          property_description?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          price?: string | null
+          logo_url?: string | null
+          header_image_url?: string | null
+          website?: string | null
+          map_zoom?: number | null
+          meta_title?: string | null
+          meta_description?: string | null
+          og_image_url?: string | null
+          agent_name?: string | null
+          atlist_map_url?: string | null
           created_at?: string
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          { foreignKeyName: "mapsites_account_id_fkey"; columns: ["account_id"]; referencedRelation: "accounts"; referencedColumns: ["id"] }
+        ]
       }
       categories: {
         Row: {
@@ -396,6 +482,44 @@ export interface Database {
           created_at?: string
         }
         Relationships: []
+      }
+      accounts: {
+        Row: {
+          id: string
+          first_name: string
+          middle_name: string | null
+          last_name: string
+          fast_code: string
+          email: string | null
+          user_id: string | null
+          account_type: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          first_name: string
+          middle_name?: string | null
+          last_name: string
+          fast_code: string
+          email?: string | null
+          user_id?: string | null
+          account_type?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          first_name?: string
+          middle_name?: string | null
+          last_name?: string
+          fast_code?: string
+          email?: string | null
+          user_id?: string | null
+          account_type?: string
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "accounts_user_id_fkey"; columns: ["user_id"]; referencedRelation: "users"; referencedColumns: ["id"] }
+        ]
       }
       pins: {
         Row: {
