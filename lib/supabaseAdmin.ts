@@ -11,6 +11,29 @@ export function isSupabaseAdminConfigured(): boolean {
   )
 }
 
+export function getMapSiteAdminWritesState(): {
+  enabled: boolean;
+  message: string | null;
+} {
+  if (isSupabaseAdminConfigured()) {
+    return { enabled: true, message: null };
+  }
+
+  if (process.env.VERCEL) {
+    return {
+      enabled: false,
+      message:
+        "Read-only mode: add SUPABASE_SERVICE_ROLE_KEY in the Vercel project settings (Production, Preview, and Development), then redeploy.",
+    };
+  }
+
+  return {
+    enabled: false,
+    message:
+      "Read-only mode: add SUPABASE_SERVICE_ROLE_KEY to .env.local and restart the dev server to save changes.",
+  };
+}
+
 export function disableSupabaseAdminClient(): void {
   adminClientDisabled = true
   cachedClient = null

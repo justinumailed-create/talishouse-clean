@@ -20,6 +20,7 @@ import {
 interface MapSiteAdminEditorProps {
   mapsite: MapSiteView;
   adminWritesEnabled?: boolean;
+  adminWritesMessage?: string | null;
   backHref?: string;
 }
 
@@ -49,6 +50,7 @@ const textareaClass =
 export default function MapSiteAdminEditor({
   mapsite,
   adminWritesEnabled = true,
+  adminWritesMessage = null,
   backHref,
 }: MapSiteAdminEditorProps) {
   const [form, setForm] = useState({
@@ -120,11 +122,9 @@ export default function MapSiteAdminEditor({
 
   return (
     <div className="space-y-8">
-      {!adminWritesEnabled ? (
+      {!adminWritesEnabled && adminWritesMessage ? (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Read-only mode: add <code className="font-mono text-xs">SUPABASE_SERVICE_ROLE_KEY</code>{" "}
-          to <code className="font-mono text-xs">.env.local</code> and restart the dev server to
-          save changes.
+          {adminWritesMessage}
         </div>
       ) : null}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
