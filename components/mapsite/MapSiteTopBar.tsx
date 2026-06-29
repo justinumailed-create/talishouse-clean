@@ -11,6 +11,7 @@ interface MapSiteTopBarProps {
 }
 
 const HEADER_SIDE_HEIGHT = "h-32 sm:h-40 md:h-48";
+const HEADER_SIDE_WIDTH = "w-32 sm:w-40 md:w-48";
 
 export default function MapSiteTopBar({
   propertyTitle,
@@ -54,14 +55,15 @@ export default function MapSiteTopBar({
           </div>
 
           <div
-            className={`relative ${HEADER_SIDE_HEIGHT} aspect-square shrink-0 overflow-hidden rounded-lg -translate-x-2 sm:-translate-x-4`}
+            className={`relative ${HEADER_SIDE_HEIGHT} ${HEADER_SIDE_WIDTH} shrink-0 overflow-hidden rounded-lg`}
           >
             {agent.profileImageUrl ? (
               <Image
                 src={agent.profileImageUrl}
                 alt={agent.name}
-                fill
-                className="object-cover object-top"
+                width={192}
+                height={192}
+                className={`${HEADER_SIDE_HEIGHT} ${HEADER_SIDE_WIDTH} object-cover object-top`}
                 sizes="(max-width: 768px) 128px, 192px"
               />
             ) : (
