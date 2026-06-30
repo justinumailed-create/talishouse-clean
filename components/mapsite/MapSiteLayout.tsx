@@ -19,7 +19,7 @@ export default function MapSiteLayout({
 }: MapSiteLayoutProps) {
   return (
     <div className="min-h-screen bg-neutral-200">
-      <div className="mapsite-layout mx-auto w-full max-w-7xl min-h-screen border-x-[50px] border-neutral-300 bg-[#f8f8f7] flex flex-col">
+      <div className="mapsite-layout mx-auto w-full max-w-7xl min-h-screen border-x-0 md:border-x-[50px] border-neutral-300 bg-[#f8f8f7] flex flex-col pb-20 md:pb-0">
         <MapSiteTopBar
           propertyTitle={data.propertyTitle}
           logoUrl={data.logoUrl}

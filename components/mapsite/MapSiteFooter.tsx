@@ -21,7 +21,7 @@ export default function MapSiteFooter({
 }: MapSiteFooterProps) {
   return (
     <footer className="bg-white border-t border-neutral-200">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-8 sm:py-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-6 sm:py-10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-neutral-900">{agentName}</p>

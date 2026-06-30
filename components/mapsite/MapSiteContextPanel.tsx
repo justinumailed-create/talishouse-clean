@@ -18,7 +18,7 @@ interface MapSiteContextPanelProps {
 function PanelHeader({ title }: { title: string }) {
   return (
     <div className="px-5 py-3 border-b border-neutral-100 bg-neutral-50 shrink-0">
-      <h2 className="text-sm sm:text-base font-semibold text-neutral-800 text-center">
+      <h2 className="text-xs sm:text-base font-semibold text-neutral-800 text-center leading-snug px-1">
         {title}
       </h2>
     </div>

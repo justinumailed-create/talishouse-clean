@@ -18,7 +18,7 @@ interface MapSiteBottomPanelsProps {
 function PanelHeader({ title }: { title: string }) {
   return (
     <div className="px-5 py-3 border-b border-neutral-100 bg-neutral-50 shrink-0">
-      <h2 className="text-sm sm:text-base font-semibold text-neutral-800 text-center">
+      <h2 className="text-xs sm:text-base font-semibold text-neutral-800 text-center leading-snug px-1">
         {title}
       </h2>
     </div>
@@ -38,7 +38,7 @@ export default function MapSiteBottomPanels({
 }: MapSiteBottomPanelsProps) {
   return (
     <section className="pb-8 sm:pb-10">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:items-stretch">
           <div className="flex flex-col gap-4 sm:gap-6 min-h-0 lg:h-full">
             <div className="flex flex-1 flex-col min-h-[220px] rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white">

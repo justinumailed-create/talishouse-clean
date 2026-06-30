@@ -152,7 +152,7 @@ export default function MapSiteGalleryLightbox({
               key={`${src}-${index}`}
               type="button"
               onClick={() => setActiveIndex(index)}
-              className="relative shrink-0 snap-start h-full aspect-[4/3] w-[30cqw] min-w-[30cqw] rounded-lg overflow-hidden border border-neutral-200/80 bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+              className="relative shrink-0 snap-start h-full aspect-[4/3] w-[42vw] max-w-[140px] sm:w-[30cqw] sm:max-w-none sm:min-w-[30cqw] rounded-lg overflow-hidden border border-neutral-200/80 bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
               aria-label={`Open gallery image ${index + 1}`}
             >
               <Image

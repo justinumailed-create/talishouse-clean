@@ -27,8 +27,8 @@ export default function MapSiteAtlistMap({
 
   return (
     <section className="bg-[#f8f8f7]">
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-6 sm:py-8">
-        <div className="relative rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white min-h-[420px] sm:min-h-[560px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 sm:py-8">
+        <div className="relative rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white min-h-[280px] sm:min-h-[420px] md:min-h-[560px]">
           {embedUrl ? (
             <iframe
               src={embedUrl}
