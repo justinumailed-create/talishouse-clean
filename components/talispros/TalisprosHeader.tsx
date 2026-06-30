@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 const NAV_ITEMS = [
-  { label: "Welcome", href: "/talispros" },
+  { label: "Welcome", href: "/talispros/welcome" },
   { label: "Claim A Market™", href: "/talispros/claim-a-market" },
   { label: "Build A MapSite™", href: "/talispros/build-mapsite" },
   { label: "Register Account", href: "/talispros/register" },
@@ -17,7 +17,7 @@ export default function TalisprosHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  if (pathname.startsWith("/talispros/mapsites/")) {
+  if (pathname.startsWith("/talispros/mapsites/") || pathname === "/talispros/start") {
     return null;
   }
 

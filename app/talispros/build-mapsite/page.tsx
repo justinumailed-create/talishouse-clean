@@ -337,6 +337,17 @@ export default function BuildMapsitePage() {
   const [files, setFiles] = useState<FileState>(loadStoredFiles);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const fastCode = params.get("fastCode");
+    if (!fastCode) return;
+    setForm((prev) =>
+      prev.fastCode
+        ? prev
+        : { ...prev, fastCode: fastCode.trim().toUpperCase() }
+    );
+  }, []);
+
+  useEffect(() => {
     const timeout = setTimeout(() => {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ form }));
     }, 300);

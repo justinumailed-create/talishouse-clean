@@ -6,6 +6,7 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { ChevronDown } from "lucide-react";
 import { formatCAD } from "@/utils/currency";
 import { processPayment } from "@/app/talispros/register/payment-actions";
+import { routeRegistrationByFastCode } from "@/app/talispros/register/fast-code-actions";
 import { setFastCode } from "@/lib/fast-code";
 import type { OfferedSubscriptionTier } from "@/lib/mapsite-subscription";
 import {
@@ -18,11 +19,13 @@ import {
 interface RootAccountRegistrationFormProps {
   variant?: "page" | "panel";
   allowedTier?: OfferedSubscriptionTier;
+  parentFastCode?: string;
 }
 
 export default function RootAccountRegistrationForm({
   variant = "page",
   allowedTier,
+  parentFastCode,
 }: RootAccountRegistrationFormProps) {
   const router = useRouter();
   const isPanel = variant === "panel";
@@ -43,8 +46,33 @@ export default function RootAccountRegistrationForm({
   const [accountCategory, setAccountCategory] = useState<
     "root" | "derivative" | "adpro"
   >(allowedTier ?? "root");
+  const [sponsorFastCode, setSponsorFastCode] = useState("");
+  const [routingFastCode, setRoutingFastCode] = useState(false);
 
   const isAdpro = accountCategory === "adpro";
+  const showFastCodeRouting =
+    allowedTier === "root" || allowedTier === "derivative";
+
+  async function handleFastCodeRouting() {
+    if (!allowedTier) return;
+    const code = sponsorFastCode.trim();
+    if (!code) {
+      setError("Enter a FAST Code to continue.");
+      return;
+    }
+
+    setRoutingFastCode(true);
+    setError("");
+
+    const result = await routeRegistrationByFastCode(code, allowedTier);
+    if (result.ok) {
+      router.push(result.redirectTo);
+      return;
+    }
+
+    setError(result.error);
+    setRoutingFastCode(false);
+  }
 
   function validate(): string | null {
     if (!firstName.trim()) return "First name is required";
@@ -112,6 +140,46 @@ export default function RootAccountRegistrationForm({
       )}
 
       <div className={isPanel ? "space-y-4" : "space-y-5"}>
+        {parentFastCode && (
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
+            Registering under sponsor FAST Code{" "}
+            <span className="font-mono font-semibold text-neutral-900">
+              {parentFastCode.toUpperCase()}
+            </span>
+            .
+          </div>
+        )}
+
+        {showFastCodeRouting && (
+          <div className={`bg-white rounded-xl border border-neutral-200 ${isPanel ? "p-4" : "p-6 sm:p-8 shadow-sm"}`}>
+            <h3 className={`font-semibold text-neutral-900 ${isPanel ? "text-sm mb-2" : "text-lg mb-2"}`}>
+              FAST Code™
+            </h3>
+            <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
+              {allowedTier === "root"
+                ? "Enter your sponsor's Root Account™ FAST Code to register as a Derivative Account™ instead."
+                : "Enter your sponsor's Derivative Account™ FAST Code to register as an AdPro™ account instead."}
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                value={sponsorFastCode}
+                onChange={(e) => setSponsorFastCode(e.target.value.toUpperCase())}
+                placeholder="Enter FAST Code"
+                className={inputClass}
+              />
+              <button
+                type="button"
+                onClick={handleFastCodeRouting}
+                disabled={routingFastCode}
+                className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-neutral-900 px-6 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:opacity-60"
+              >
+                {routingFastCode ? "Checking..." : "Continue"}
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className={`bg-white rounded-xl border border-neutral-200 ${isPanel ? "p-4" : "p-6 sm:p-8 shadow-sm"}`}>
           <h3 className={`font-semibold text-neutral-900 ${isPanel ? "text-sm mb-3" : "text-lg mb-5"}`}>
             Personal Info

@@ -9,6 +9,7 @@ import {
   MAPSITE_ROOT_ACCOUNT_COOKIE,
   MAPSITE_ROOT_ACCOUNT_MAX_AGE,
 } from "@/lib/mapsite-account-session";
+import { buildMapsiteRedirectUrl } from "@/lib/registration-fast-code-routing";
 
 export interface ProcessPaymentInput {
   email: string;
@@ -84,7 +85,7 @@ export async function processPayment(
       return {
         success: true,
         transactionId: input.paypalCaptureId || input.paypalOrderId,
-        redirectUrl: registration.redirectUrl,
+        redirectUrl: buildMapsiteRedirectUrl(registration.fastCode),
         mapsiteId: registration.mapsiteId,
         fastCode: registration.fastCode,
       };
@@ -122,7 +123,7 @@ export async function processPayment(
     return {
       success: true,
       transactionId: input.paypalCaptureId || input.paypalOrderId,
-      redirectUrl: `/talispros/mapsites/${fastCode.toLowerCase()}`,
+      redirectUrl: buildMapsiteRedirectUrl(fastCode),
       mapsiteId: mapsite.id,
       fastCode,
     };

@@ -2,22 +2,27 @@
 
 import { Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import FastCodeSidebarCard from "@/components/talispros/FastCodeSidebarCard";
 import RootAccountRegistrationForm from "@/components/talispros/RootAccountRegistrationForm";
+import {
+  OFFERED_SUBSCRIPTION_TIER_LABELS,
+  parseOfferedSubscriptionTier,
+} from "@/lib/mapsite-subscription";
 
 function RegisterSidebar() {
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm p-6 border-2 border-[#c92026] text-center">
         <p className="text-sm text-neutral-900 leading-relaxed mb-4">
-          Finally, choose an account level in the self check-out
-          (select &ldquo;View Details&rdquo; to learn about differences between account types).
+          After registration, you will continue to Build A MapSite™ to submit
+          your production request.
         </p>
         <Link
           href="/talispros/build-mapsite"
           className="inline-flex h-10 px-6 bg-neutral-900 text-white rounded-lg text-sm font-medium tracking-wide items-center justify-center hover:bg-neutral-800 active:scale-[0.98] transition-all"
         >
-          Enter MapSite™
+          Build A MapSite™
         </Link>
       </div>
 
@@ -37,6 +42,11 @@ function RegisterSidebar() {
 }
 
 function RegisterForm() {
+  const searchParams = useSearchParams();
+  const plan = parseOfferedSubscriptionTier(searchParams.get("plan"));
+  const parentFastCode = searchParams.get("parentFastCode") || undefined;
+  const planLabel = OFFERED_SUBSCRIPTION_TIER_LABELS[plan];
+
   return (
     <div className="flex flex-col h-screen lg:h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
       <div className="flex flex-col lg:flex-row flex-1 lg:overflow-hidden">
@@ -44,14 +54,19 @@ function RegisterForm() {
           <div className="max-w-2xl mx-auto px-5 py-8 sm:py-12 lg:py-16">
             <div className="text-center mb-8 sm:mb-10">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-neutral-900">
-                Register Your MapSite™
+                Register {planLabel}
               </h1>
               <p className="text-sm sm:text-base text-neutral-500 mt-2">
-                Choose your account type and complete payment to activate.
+                Complete payment to activate your account, then continue to Build
+                A MapSite™.
               </p>
             </div>
 
-            <RootAccountRegistrationForm variant="page" />
+            <RootAccountRegistrationForm
+              variant="page"
+              allowedTier={plan}
+              parentFastCode={parentFastCode}
+            />
 
             <div className="mt-8 bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
               <h2 className="text-lg font-semibold text-neutral-900 mb-3">
