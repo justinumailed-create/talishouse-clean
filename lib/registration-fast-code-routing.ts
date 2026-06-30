@@ -64,7 +64,7 @@ export async function lookupFastCodeRegistrationTier(
     .ilike("fast_code", code)
     .maybeSingle();
 
-  if (registrationRow) {
+  if (registrationRow?.fast_code) {
     return {
       found: true,
       tier: tierFromAccountType(registrationRow.account_type),
