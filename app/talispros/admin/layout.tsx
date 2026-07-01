@@ -2,23 +2,18 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useSyncExternalStore } from "react";
-import { clearAdminSession, hasAdminSession } from "@/lib/fast-code";
+import { useState } from "react";
+import { clearAdminSession } from "@/lib/fast-code";
+import { clearTalisprosAdminAuthSession } from "./actions";
 
-const navItems = [{ href: "/talispros/admin", label: "Overview" }];
-
-function subscribe(onStoreChange: () => void) {
-  window.addEventListener("storage", onStoreChange);
-  return () => window.removeEventListener("storage", onStoreChange);
-}
-
-function getSnapshot() {
-  return hasAdminSession();
-}
-
-function getServerSnapshot() {
-  return false;
-}
+const navItems = [
+  { href: "/talispros/admin", label: "Overview" },
+  { href: "/talispros/admin/pricing", label: "Pricing" },
+  { href: "/talispros/admin/fast-codes", label: "FAST Codes" },
+  { href: "/talispros/admin/forms-manager", label: "Forms Manager" },
+  { href: "/talispros/admin/production-queue", label: "Production Queue" },
+  { href: "/talispros/admin/registrations", label: "Registrations" },
+];
 
 export default function TalisprosAdminLayout({
   children,
@@ -27,26 +22,8 @@ export default function TalisprosAdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const isAuthenticated = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot
-  );
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const isLoginPage = pathname === "/talispros/admin/login";
-
-  useEffect(() => {
-    if (!isLoginPage && !isAuthenticated) {
-      router.replace("/talispros/admin/login");
-    }
-  }, [isAuthenticated, isLoginPage, router]);
-
-  if (!isLoginPage && !isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   if (isLoginPage) {
     return (
@@ -84,13 +61,17 @@ export default function TalisprosAdminLayout({
         </nav>
         <button
           type="button"
-          onClick={() => {
+          disabled={isSigningOut}
+          onClick={async () => {
+            setIsSigningOut(true);
+            await clearTalisprosAdminAuthSession();
             clearAdminSession();
             router.push("/talispros/admin/login");
+            router.refresh();
           }}
-          className="text-sm text-neutral-500 hover:text-neutral-900 text-left"
+          className="text-sm text-neutral-500 hover:text-neutral-900 text-left disabled:opacity-50"
         >
-          Sign out
+          {isSigningOut ? "Signing out..." : "Sign out"}
         </button>
       </aside>
       <main className="flex-1 p-6 sm:p-8 overflow-y-auto">{children}</main>

@@ -2,6 +2,12 @@ import type { MapSitePinView, MapSiteView } from "./mapsite-service";
 import type { TalisMapsPin } from "./talismaps";
 import type { OfferedSubscriptionTier } from "./mapsite-subscription";
 import { parseOfferedSubscriptionTier } from "./mapsite-subscription";
+import { resolveMapsiteAtlistMapUrl } from "./mapsite-atlist";
+import {
+  toDisplayGalleryUrl,
+  visibleGalleryDisplayItems,
+  type MapSiteGalleryDisplayItem,
+} from "./mapsite-gallery";
 
 export const MAPSITE_HEADER_FALLBACK_LOGO =
   "/images/mapsites/header-fallback-logo.jpeg";
@@ -43,13 +49,14 @@ export interface MapSiteLayoutData {
   mapCenter: [number, number] | undefined;
   mapZoom: number;
   videoUrl: string | null;
+  galleryItems: MapSiteGalleryDisplayItem[];
   galleryImages: string[];
   createdAt: string;
   updatedAt: string;
   metaTitle: string | null;
   metaDescription: string | null;
   ogImageUrl: string | null;
-  atlistMapUrl: string | null;
+  atlistMapUrl: string;
   pinLabel: string;
   overlayImageUrl: string | null;
   offeredSubscriptionTier: OfferedSubscriptionTier;
@@ -127,18 +134,29 @@ function toTalisMapsPin(pin: MapSitePinView): TalisMapsPin {
 }
 
 function resolveGalleryImages(mapsite: MapSiteView): string[] {
-  const explicit = mapsite.galleryImages.filter(Boolean);
-  if (explicit.length > 0) {
-    return explicit;
-  }
+  const explicit = visibleGalleryDisplayItems(mapsite.galleryItems).map(
+    (item) => item.url
+  );
 
   const derived = [
     mapsite.profileImageUrl,
     mapsite.logoUrl,
     mapsite.headerImageUrl,
-  ].filter((url): url is string => Boolean(url?.trim()));
+  ]
+    .filter((url): url is string => Boolean(url?.trim()))
+    .map((url) => toDisplayGalleryUrl(url));
 
-  return [...new Set(derived)];
+  const base = explicit.length > 0 ? explicit : derived;
+  const unique = [...new Set(base)];
+
+  const header = mapsite.headerImageUrl?.trim();
+  if (!header) {
+    return unique;
+  }
+
+  const displayHeader = toDisplayGalleryUrl(header);
+  const remainder = unique.filter((url) => url !== displayHeader);
+  return [displayHeader, ...remainder];
 }
 
 function resolveVideoUrl(
@@ -248,18 +266,19 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
     mapCenter: resolveMapCenter(mapsite, primaryPin),
     mapZoom: mapsite.mapZoom ?? DEFAULT_MAP_ZOOM,
     videoUrl: resolveVideoUrl(mapsite, primaryPin),
+    galleryItems: visibleGalleryDisplayItems(mapsite.galleryItems),
     galleryImages: resolveGalleryImages(mapsite),
     createdAt: mapsite.createdAt,
     updatedAt: mapsite.updatedAt,
     metaTitle: mapsite.metaTitle,
     metaDescription: mapsite.metaDescription,
     ogImageUrl: mapsite.ogImageUrl,
-    atlistMapUrl: mapsite.atlistMapUrl?.trim() || null,
+    atlistMapUrl: resolveMapsiteAtlistMapUrl(mapsite.atlistMapUrl),
     pinLabel:
       primaryPin?.name?.trim() || mapsite.fastCode.toUpperCase(),
     overlayImageUrl:
       mapsite.headerImageUrl ||
-      mapsite.galleryImages[0] ||
+      visibleGalleryDisplayItems(mapsite.galleryItems)[0]?.url ||
       null,
     offeredSubscriptionTier: parseOfferedSubscriptionTier(
       mapsite.offeredSubscriptionTier

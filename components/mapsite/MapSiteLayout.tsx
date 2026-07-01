@@ -9,12 +9,14 @@ import MapSiteEditToolbar from "./MapSiteEditToolbar";
 interface MapSiteLayoutProps {
   data: MapSiteLayoutData;
   visitorHasSubscribed: boolean;
+  visitorFastCode: string | null;
   editAccess: MapSiteEditToolbarState;
 }
 
 export default function MapSiteLayout({
   data,
   visitorHasSubscribed,
+  visitorFastCode,
   editAccess,
 }: MapSiteLayoutProps) {
   return (
@@ -26,22 +28,20 @@ export default function MapSiteLayout({
           agent={data.agent}
         />
 
-        <main className="flex-1">
+        <main className="flex-1 flex flex-col">
           <MapSiteAtlistMap
             atlistMapUrl={data.atlistMapUrl}
             propertyTitle={data.propertyTitle}
-            latitude={data.mapCenter?.[0]}
-            longitude={data.mapCenter?.[1]}
-            zoom={data.mapZoom}
           />
           <MapSiteBottomPanels
             videoUrl={data.videoUrl}
-            galleryImages={data.galleryImages}
+            galleryItems={data.galleryItems}
             propertyTitle={data.propertyTitle}
             fastCode={data.fastCode}
             agentName={data.agent.name}
             agentEmail={data.agent.email}
             visitorHasSubscribed={visitorHasSubscribed}
+            visitorFastCode={visitorFastCode}
             offeredSubscriptionTier={data.offeredSubscriptionTier}
             interestFormEnabled={data.interestFormEnabled}
           />
@@ -54,7 +54,12 @@ export default function MapSiteLayout({
           updatedAt={data.updatedAt}
         />
       </div>
-      <MapSiteEditToolbar fastCode={data.fastCode} editAccess={editAccess} />
+      <MapSiteEditToolbar
+        fastCode={data.fastCode}
+        editAccess={editAccess}
+        initialHasSubscribed={visitorHasSubscribed}
+        initialVisitorFastCode={visitorFastCode}
+      />
     </div>
   );
 }

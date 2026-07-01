@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
 import type { OfferedSubscriptionTier } from "@/lib/mapsite-subscription";
 import ExpressInterestPanel from "./ExpressInterestPanel";
+import MapSitePanelHeader from "./MapSitePanelHeader";
 import RootAccountRegistrationPanel from "./RootAccountRegistrationPanel";
 
 interface MapSiteContextPanelProps {
@@ -13,16 +14,7 @@ interface MapSiteContextPanelProps {
   offeredSubscriptionTier: OfferedSubscriptionTier;
   interestFormEnabled: boolean;
   initialHasSubscribed: boolean;
-}
-
-function PanelHeader({ title }: { title: string }) {
-  return (
-    <div className="px-5 py-3 border-b border-neutral-100 bg-neutral-50 shrink-0">
-      <h2 className="text-xs sm:text-base font-semibold text-neutral-800 text-center leading-snug px-1">
-        {title}
-      </h2>
-    </div>
-  );
+  initialVisitorFastCode?: string | null;
 }
 
 export default function MapSiteContextPanel({
@@ -32,8 +24,12 @@ export default function MapSiteContextPanel({
   offeredSubscriptionTier,
   interestFormEnabled,
   initialHasSubscribed,
+  initialVisitorFastCode = null,
 }: MapSiteContextPanelProps) {
   const [hasSubscribed, setHasSubscribed] = useState(initialHasSubscribed);
+  const [visitorFastCode, setVisitorFastCode] = useState<string | null>(
+    initialVisitorFastCode
+  );
   const [checking, setChecking] = useState(false);
 
   const refreshAccountStatus = useCallback(async () => {
@@ -41,6 +37,7 @@ export default function MapSiteContextPanel({
     try {
       const status = await getMapSiteVisitorAccountStatus();
       setHasSubscribed(status.hasSubscribed);
+      setVisitorFastCode(status.fastCode);
     } finally {
       setChecking(false);
     }
@@ -67,14 +64,24 @@ export default function MapSiteContextPanel({
     };
   }, [refreshAccountStatus]);
 
-  const showInterestForm = hasSubscribed && interestFormEnabled;
+  const ownsThisMapsite =
+    hasSubscribed &&
+    visitorFastCode !== null &&
+    visitorFastCode.trim().toLowerCase() === fastCode.trim().toLowerCase();
+
+  const showInterestForm = ownsThisMapsite && interestFormEnabled;
   const title = showInterestForm
     ? "Express an Interest"
     : "Register Your MapSite™";
 
   return (
     <div className="flex flex-col min-h-0 rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white lg:h-full">
-      <PanelHeader title={title} />
+      <MapSitePanelHeader
+        title={title}
+        className="bg-neutral-400 border-neutral-300"
+        titleClassName="text-white"
+        useLatoBold
+      />
       <div className="flex-1 min-h-0 flex flex-col">
         {checking && hasSubscribed === initialHasSubscribed ? (
           <div className="flex-1 flex items-center justify-center text-sm text-neutral-400">
@@ -88,7 +95,7 @@ export default function MapSiteContextPanel({
             embedded
             fillHeight
           />
-        ) : hasSubscribed && !interestFormEnabled ? (
+        ) : ownsThisMapsite && !interestFormEnabled ? (
           <div className="p-6 text-sm text-neutral-600 text-center">
             Your subscription is active. The interest form is not enabled for
             this MapSite.

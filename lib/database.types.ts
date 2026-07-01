@@ -368,6 +368,7 @@ export interface Database {
           profile_image_url: string | null
           video_url: string | null
           gallery_images: string[]
+          gallery_items: unknown
           property_address: string | null
           property_description: string | null
           latitude: number | null
@@ -402,6 +403,7 @@ export interface Database {
           profile_image_url?: string | null
           video_url?: string | null
           gallery_images?: string[]
+          gallery_items?: unknown
           property_address?: string | null
           property_description?: string | null
           latitude?: number | null
@@ -436,6 +438,7 @@ export interface Database {
           profile_image_url?: string | null
           video_url?: string | null
           gallery_images?: string[]
+          gallery_items?: unknown
           property_address?: string | null
           property_description?: string | null
           latitude?: number | null

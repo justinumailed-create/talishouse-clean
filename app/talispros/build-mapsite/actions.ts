@@ -2,20 +2,31 @@
 
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { Database } from "@/lib/database.types";
-import { generateFastCode } from "@/lib/fast-code-generator";
+import { publishBuildMapSite } from "@/lib/build-mapsite-publish";
+import { uploadBuildMapsiteAsset } from "@/lib/build-mapsite-upload";
+import {
+  lookupFastCodeRegistrationTier,
+  buildMapsiteRedirectUrl,
+  type RegistrationFastCodeTier,
+} from "@/lib/registration-fast-code-routing";
 import {
   sendBuildRequestReceived,
   sendFastCodeGenerated,
 } from "@/lib/email";
+import { generateFastCode } from "@/services/fast-code.service";
+import { FastCodeValidationError } from "@/validators/fast-code.validator";
 
 export interface ActionResult {
   success: boolean;
   fastCode?: string;
+  redirectUrl?: string;
   error?: string;
 }
 
 export interface BuildFields {
   date: string;
+  firstName: string;
+  lastName: string;
   email: string;
   accountType: string;
   fastCode: string;
@@ -34,12 +45,69 @@ export interface BuildFields {
   turnstileToken: string;
 }
 
+function requiresFastCodeValidation(accountType: string): boolean {
+  return accountType === "derivative" || accountType.startsWith("adpro");
+}
+
+function expectedTierForAccountType(
+  accountType: string
+): RegistrationFastCodeTier | null {
+  if (accountType === "derivative") return "derivative";
+  if (accountType.startsWith("adpro")) return "adpro";
+  return null;
+}
+
+export async function validateBuildMapsiteFastCode(
+  code: string,
+  accountType: string
+): Promise<{ ok: true; code: string } | { ok: false; error: string }> {
+  const expected = expectedTierForAccountType(accountType);
+  if (!expected) {
+    return {
+      ok: false,
+      error: "FAST Code validation is not required for Root accounts.",
+    };
+  }
+
+  const lookup = await lookupFastCodeRegistrationTier(code);
+  if (!lookup.found) {
+    return {
+      ok: false,
+      error: "FAST Code not recognized. Check the code and try again.",
+    };
+  }
+
+  if (!lookup.tier) {
+    return {
+      ok: false,
+      error:
+        "FAST Code found but has no account type. Set Account Type in admin FAST Codes.",
+    };
+  }
+
+  if (lookup.tier !== expected) {
+    return {
+      ok: false,
+      error:
+        expected === "derivative"
+          ? "This FAST Code is not linked to a Derivative Account™."
+          : "This FAST Code is not linked to an AdPro™ account.",
+    };
+  }
+
+  return { ok: true, code: lookup.code };
+}
+
 function validate(fields: BuildFields): string | null {
+  if (!fields.firstName.trim()) return "First name is required";
+  if (!fields.lastName.trim()) return "Last name is required";
   if (!fields.email.trim()) return "Email is required";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim()))
     return "Invalid email format";
   if (!fields.accountType) return "Account type is required";
-  if (!fields.fastCode.trim()) return "FAST Code is required";
+  if (requiresFastCodeValidation(fields.accountType) && !fields.fastCode.trim()) {
+    return "FAST Code is required";
+  }
 
   const hasAddress = fields.streetAddress.trim().length > 0;
   const lat = Number.parseFloat(fields.latitude);
@@ -69,32 +137,24 @@ async function uploadFile(
   fieldName: string,
   file: File
 ): Promise<string | null> {
+  return uploadBuildMapsiteAsset(requestId, fieldName, file);
+}
+
+function readUploadedUrl(formData: FormData, fieldName: string): string | null {
+  const value = formData.get(`${fieldName}Url`);
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function readTebPictureUrls(formData: FormData): string[] {
+  const raw = formData.get("tebPictureUrls");
+  if (typeof raw !== "string" || !raw.trim()) return [];
+
   try {
-    const supabaseAdmin = getSupabaseAdmin();
-    const ext = file.name.split(".").pop() || "bin";
-    const timestamp = Date.now();
-    const path = `${requestId}/${fieldName}-${timestamp}.${ext}`;
-
-    const { error } = await supabaseAdmin.storage
-      .from("mapsite-assets")
-      .upload(path, file, {
-        contentType: file.type,
-        upsert: false,
-      });
-
-    if (error) {
-      console.error(`[build-mapsite] Upload failed for ${fieldName}:`, error);
-      return null;
-    }
-
-    const { data: urlData } = supabaseAdmin.storage
-      .from("mapsite-assets")
-      .getPublicUrl(path);
-
-    return urlData?.publicUrl || null;
-  } catch (err) {
-    console.error(`[build-mapsite] Upload error for ${fieldName}:`, err);
-    return null;
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((url): url is string => typeof url === "string" && url.trim().length > 0);
+  } catch {
+    return [];
   }
 }
 
@@ -103,6 +163,8 @@ export async function submitBuildRequest(
 ): Promise<ActionResult> {
   const fields: BuildFields = {
     date: (formData.get("date") as string) || "",
+    firstName: (formData.get("firstName") as string) || "",
+    lastName: (formData.get("lastName") as string) || "",
     email: (formData.get("email") as string) || "",
     accountType: (formData.get("accountType") as string) || "",
     fastCode: (formData.get("fastCode") as string) || "",
@@ -126,9 +188,25 @@ export async function submitBuildRequest(
     return { success: false, error: validationError };
   }
 
+  let sponsorFastCode: string | null = null;
+  if (requiresFastCodeValidation(fields.accountType)) {
+    const fastCodeValidation = await validateBuildMapsiteFastCode(
+      fields.fastCode,
+      fields.accountType
+    );
+    if (!fastCodeValidation.ok) {
+      return { success: false, error: fastCodeValidation.error };
+    }
+    sponsorFastCode = fastCodeValidation.code;
+  }
+
   try {
     const supabaseAdmin = getSupabaseAdmin();
-    const requestId = crypto.randomUUID();
+    const requestIdValue = formData.get("requestId");
+    const requestId =
+      typeof requestIdValue === "string" && requestIdValue.trim()
+        ? requestIdValue.trim()
+        : crypto.randomUUID();
 
     const fileFields = [
       "picture",
@@ -141,18 +219,26 @@ export async function submitBuildRequest(
 
     const fileUrls: Record<string, string | null> = {};
     for (const fieldName of fileFields) {
+      const preUploadedUrl = readUploadedUrl(formData, fieldName);
+      if (preUploadedUrl) {
+        fileUrls[fieldName] = preUploadedUrl;
+        continue;
+      }
+
       const file = formData.get(fieldName) as File | null;
       if (file && file.size > 0) {
         fileUrls[fieldName] = await uploadFile(requestId, fieldName, file);
       }
     }
 
-    const tebPictureUrls: string[] = [];
-    for (let i = 0; ; i++) {
-      const file = formData.get(`tebPicture_${i}`) as File | null;
-      if (!file || file.size === 0) break;
-      const url = await uploadFile(requestId, `tebPicture_${i}`, file);
-      if (url) tebPictureUrls.push(url);
+    let tebPictureUrls = readTebPictureUrls(formData);
+    if (tebPictureUrls.length === 0) {
+      for (let i = 0; ; i++) {
+        const file = formData.get(`tebPicture_${i}`) as File | null;
+        if (!file || file.size === 0) break;
+        const url = await uploadFile(requestId, `tebPicture_${i}`, file);
+        if (url) tebPictureUrls.push(url);
+      }
     }
 
     const parsedLatitude = Number.parseFloat(fields.latitude);
@@ -162,8 +248,8 @@ export async function submitBuildRequest(
 
     const buildRequest: Database["public"]["Tables"]["build_requests"]["Insert"] = {
       id: requestId,
-      first_name: fields.fastCode.trim(),
-      last_name: fields.accountType,
+      first_name: fields.firstName.trim(),
+      last_name: fields.lastName.trim(),
       email: fields.email.trim(),
       phone: "",
       account_type: fields.accountType,
@@ -195,32 +281,48 @@ export async function submitBuildRequest(
       };
     }
 
-    const { data: existingCodes, error: codesError } = await supabaseAdmin
-      .from("fast_codes")
-      .select("code");
-
-    if (codesError) {
-      console.error("[build-mapsite] Failed to fetch existing codes:", codesError);
+    let fastCode: string;
+    try {
+      fastCode = await generateFastCode({
+        firstName: fields.firstName,
+        lastName: fields.lastName,
+      });
+    } catch (err) {
+      const message =
+        err instanceof FastCodeValidationError
+          ? err.message
+          : err instanceof Error
+            ? err.message
+            : "Unable to generate FAST Code";
+      return { success: false, error: message };
     }
 
-    const existing = (existingCodes || []).map((r) => r.code);
+    const published = await publishBuildMapSite({
+      fastCode,
+      firstName: fields.firstName,
+      lastName: fields.lastName,
+      email: fields.email,
+      accountType: fields.accountType,
+      streetAddress: fields.streetAddress,
+      latitude: hasCoordinates ? parsedLatitude : null,
+      longitude: hasCoordinates ? parsedLongitude : null,
+      pinWriteup: fields.pinWriteup,
+      futurePinLabel: fields.futurePinLabel,
+      profileImageUrl: fileUrls.picture ?? null,
+      logoImageUrl: fileUrls.logo ?? null,
+      headerImageUrl: fileUrls.ttvBackgroundImage ?? null,
+      galleryImageUrls: tebPictureUrls,
+      sponsorFastCode,
+    });
 
-      let fastCode: string;
-      if (fields.fastCode.trim()) {
-        const preferred = fields.fastCode.trim().toUpperCase();
-        if (existing.includes(preferred)) {
-          fastCode = generateFastCode(existing);
-        } else {
-          fastCode = preferred;
-        }
-      } else {
-        fastCode = generateFastCode(existing);
-      }
+    fastCode = published.fastCode;
 
     const fastCodeRecord: Database["public"]["Tables"]["fast_codes"]["Insert"] = {
       code: fastCode,
       type: "mapsite",
       request_id: requestId,
+      mapsite_id: published.mapsiteId,
+      account_type: fields.accountType,
     };
 
     const { error: fcError } = await supabaseAdmin
@@ -229,13 +331,21 @@ export async function submitBuildRequest(
 
     if (fcError) {
       console.error("[build-mapsite] Fast code insert error:", fcError);
+      return {
+        success: false,
+        error: `Failed to save FAST Code: ${fcError.message}`,
+      };
     }
 
-    const clientName = fields.fastCode.trim();
+    const recipientName = `${fields.firstName.trim()} ${fields.lastName.trim()}`.trim();
+    const redirectUrl = buildMapsiteRedirectUrl(fastCode);
+    const mapsiteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+      "https://talispros.com";
 
     sendBuildRequestReceived({
       to: fields.email.trim(),
-      recipientName: clientName,
+      recipientName,
       requestId,
     }).then((result) => {
       if (!result.sent) {
@@ -245,9 +355,9 @@ export async function submitBuildRequest(
 
     sendFastCodeGenerated({
       to: fields.email.trim(),
-      recipientName: clientName,
+      recipientName,
       fastCode,
-      mapsiteUrl: `https://talispros.com/ma/${fastCode}`,
+      mapsiteUrl: `${mapsiteUrl}${redirectUrl}`,
     }).then((result) => {
       if (!result.sent) {
         console.warn("[build-mapsite] Fast code email not sent:", result.error);
@@ -307,6 +417,9 @@ export async function submitBuildRequest(
       action: "created",
       details: {
         fastCode,
+        sponsorFastCode: sponsorFastCode ?? undefined,
+        mapsiteId: published.mapsiteId,
+        redirectUrl,
         helpPreference: fields.helpPreference,
         additionalComments: fields.additionalComments,
         streetAddress: fields.streetAddress,
@@ -331,7 +444,7 @@ export async function submitBuildRequest(
       console.error("[build-mapsite] Activity log insert error:", logError);
     }
 
-    return { success: true, fastCode };
+    return { success: true, fastCode, redirectUrl };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown server error";
     console.error("[build-mapsite] Submission error:", err);

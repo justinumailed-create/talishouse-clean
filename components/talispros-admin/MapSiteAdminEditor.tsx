@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { ExternalLink, Loader2 } from "lucide-react";
+import { ExternalLink, Loader2, Upload } from "lucide-react";
 import type { MapSiteView } from "@/lib/mapsite-service";
 import {
   publishMapSite,
@@ -16,12 +17,14 @@ import {
   OFFERED_SUBSCRIPTION_TIER_LABELS,
   type OfferedSubscriptionTier,
 } from "@/lib/mapsite-subscription";
+import { DEFAULT_MAPSITE_ATLIST_MAP_URL } from "@/lib/mapsite-atlist";
 
 interface MapSiteAdminEditorProps {
   mapsite: MapSiteView;
   adminWritesEnabled?: boolean;
   adminWritesMessage?: string | null;
   backHref?: string;
+  showVisitorSubscriptionPanel?: boolean;
 }
 
 function Field({
@@ -47,11 +50,35 @@ const inputClass =
 const textareaClass =
   "w-full px-4 py-3 bg-white border border-neutral-200 text-sm text-neutral-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20 resize-y";
 
+const BRANDING_IMAGE_FIELDS = [
+  {
+    key: "logoUrl",
+    label: "Logo",
+    hint: "Shown in the MapSite header.",
+    previewClassName: "object-contain p-1",
+  },
+  {
+    key: "headerImageUrl",
+    label: "Header image",
+    hint: "Optional hero or banner image.",
+    previewClassName: "object-cover",
+  },
+  {
+    key: "profileImageUrl",
+    label: "Agent profile photo",
+    hint: "Shown in the header contact area.",
+    previewClassName: "object-cover object-top",
+  },
+] as const;
+
+type BrandingImageKey = (typeof BRANDING_IMAGE_FIELDS)[number]["key"];
+
 export default function MapSiteAdminEditor({
   mapsite,
   adminWritesEnabled = true,
   adminWritesMessage = null,
   backHref,
+  showVisitorSubscriptionPanel = false,
 }: MapSiteAdminEditorProps) {
   const [form, setForm] = useState({
     propertyTitle: mapsite.propertyTitle || "",
@@ -77,7 +104,9 @@ export default function MapSiteAdminEditor({
     interestFormEnabled: mapsite.interestFormEnabled ?? true,
     status: mapsite.status,
   });
-  const [galleryImages, setGalleryImages] = useState(mapsite.galleryImages);
+  const [galleryItems, setGalleryItems] = useState(mapsite.galleryItems);
+  const [uploadingBrandingField, setUploadingBrandingField] =
+    useState<BrandingImageKey | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -86,8 +115,26 @@ export default function MapSiteAdminEditor({
     return {
       fastCode: mapsite.fastCode,
       ...form,
-      galleryImages,
+      galleryItems,
+      offeredSubscriptionTier: showVisitorSubscriptionPanel
+        ? form.offeredSubscriptionTier
+        : mapsite.offeredSubscriptionTier || "root",
+      interestFormEnabled: showVisitorSubscriptionPanel
+        ? form.interestFormEnabled
+        : mapsite.interestFormEnabled ?? true,
     };
+  }
+
+  async function handleBrandingUpload(
+    fieldName: BrandingImageKey,
+    file: File
+  ) {
+    setUploadingBrandingField(fieldName);
+    try {
+      await handleUpload(fieldName, file, fieldName);
+    } finally {
+      setUploadingBrandingField(null);
+    }
   }
 
   async function handleUpload(fieldName: string, file: File, formKey: keyof typeof form) {
@@ -173,46 +220,48 @@ export default function MapSiteAdminEditor({
         </Field>
       </section>
 
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-neutral-900">
-          Visitor Subscription Panel
-        </h2>
-        <p className="text-sm text-neutral-500">
-          Control which subscription visitors see on this MapSite and whether the
-          Express an Interest form appears after they subscribe.
-        </p>
-        <Field label="Offered Subscription">
-          <select
-            className={inputClass}
-            value={form.offeredSubscriptionTier}
-            onChange={(e) =>
-              setForm((p) => ({
-                ...p,
-                offeredSubscriptionTier: e.target.value as OfferedSubscriptionTier,
-              }))
-            }
-          >
-            {(Object.keys(OFFERED_SUBSCRIPTION_TIER_LABELS) as OfferedSubscriptionTier[]).map(
-              (tier) => (
-                <option key={tier} value={tier}>
-                  {OFFERED_SUBSCRIPTION_TIER_LABELS[tier]}
-                </option>
-              )
-            )}
-          </select>
-        </Field>
-        <label className="flex items-center gap-3 text-sm text-neutral-700">
-          <input
-            type="checkbox"
-            checked={form.interestFormEnabled}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, interestFormEnabled: e.target.checked }))
-            }
-            className="h-4 w-4 rounded border-neutral-300"
-          />
-          Enable Express an Interest form after subscription
-        </label>
-      </section>
+      {showVisitorSubscriptionPanel ? (
+        <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
+          <h2 className="text-lg font-semibold text-neutral-900">
+            Visitor Subscription Panel
+          </h2>
+          <p className="text-sm text-neutral-500">
+            Control which subscription visitors see on this MapSite and whether the
+            Express an Interest form appears after they subscribe.
+          </p>
+          <Field label="Offered Subscription">
+            <select
+              className={inputClass}
+              value={form.offeredSubscriptionTier}
+              onChange={(e) =>
+                setForm((p) => ({
+                  ...p,
+                  offeredSubscriptionTier: e.target.value as OfferedSubscriptionTier,
+                }))
+              }
+            >
+              {(Object.keys(OFFERED_SUBSCRIPTION_TIER_LABELS) as OfferedSubscriptionTier[]).map(
+                (tier) => (
+                  <option key={tier} value={tier}>
+                    {OFFERED_SUBSCRIPTION_TIER_LABELS[tier]}
+                  </option>
+                )
+              )}
+            </select>
+          </Field>
+          <label className="flex items-center gap-3 text-sm text-neutral-700">
+            <input
+              type="checkbox"
+              checked={form.interestFormEnabled}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, interestFormEnabled: e.target.checked }))
+              }
+              className="h-4 w-4 rounded border-neutral-300"
+            />
+            Enable Express an Interest form after subscription
+          </label>
+        </section>
+      ) : null}
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
         <h2 className="text-lg font-semibold text-neutral-900">Property</h2>
@@ -246,6 +295,17 @@ export default function MapSiteAdminEditor({
             />
           </Field>
         </div>
+        <Field label="Atlist Map URL">
+          <input
+            className={inputClass}
+            value={form.atlistMapUrl}
+            onChange={(e) => setForm((p) => ({ ...p, atlistMapUrl: e.target.value }))}
+            placeholder={DEFAULT_MAPSITE_ATLIST_MAP_URL}
+          />
+          <p className="text-xs text-neutral-500 mt-1.5">
+            Leave blank to use the default Talispros Atlist map embed.
+          </p>
+        </Field>
         <Field label="Price">
           <input
             className={inputClass}
@@ -253,39 +313,74 @@ export default function MapSiteAdminEditor({
             onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))}
           />
         </Field>
-        <Field label="Description">
-          <textarea
-            className={textareaClass}
-            rows={5}
-            value={form.propertyDescription}
-            onChange={(e) =>
-              setForm((p) => ({ ...p, propertyDescription: e.target.value }))
-            }
-          />
-        </Field>
       </section>
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
         <h2 className="text-lg font-semibold text-neutral-900">Branding</h2>
-        {(["logoUrl", "headerImageUrl", "profileImageUrl"] as const).map((key) => (
-          <div key={key} className="space-y-2">
-            <Field label={key}>
-              <input
-                className={inputClass}
-                value={form[key]}
-                onChange={(e) => setForm((p) => ({ ...p, [key]: e.target.value }))}
-              />
-            </Field>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void handleUpload(key, file, key);
-              }}
-            />
-          </div>
-        ))}
+        {BRANDING_IMAGE_FIELDS.map(({ key, label, hint, previewClassName }) => {
+          const imageUrl = form[key];
+          const isUploading = uploadingBrandingField === key;
+
+          return (
+            <div
+              key={key}
+              className="rounded-xl border border-neutral-200 p-4 space-y-3"
+            >
+              <div>
+                <p className="text-sm font-medium text-neutral-900">{label}</p>
+                <p className="text-xs text-neutral-500 mt-0.5">{hint}</p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4">
+                {imageUrl ? (
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+                    <Image
+                      src={imageUrl}
+                      alt={label}
+                      fill
+                      className={previewClassName}
+                      unoptimized
+                    />
+                  </div>
+                ) : (
+                  <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border border-dashed border-neutral-300 bg-neutral-50 text-xs text-neutral-400">
+                    No image
+                  </div>
+                )}
+
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-neutral-300 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50">
+                  <Upload className="h-4 w-4" />
+                  {isUploading
+                    ? "Uploading..."
+                    : imageUrl
+                      ? "Replace image"
+                      : "Upload image"}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    disabled={uploadingBrandingField !== null}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleBrandingUpload(key, file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+
+                {imageUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => setForm((prev) => ({ ...prev, [key]: "" }))}
+                    className="text-sm text-red-600 hover:text-red-700"
+                  >
+                    Remove
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          );
+        })}
       </section>
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
@@ -302,8 +397,8 @@ export default function MapSiteAdminEditor({
           <h3 className="text-sm font-medium text-neutral-700 mb-3">Gallery</h3>
           <MapSiteGalleryEditor
             fastCode={mapsite.fastCode}
-            images={galleryImages}
-            onChange={setGalleryImages}
+            items={galleryItems}
+            onChange={setGalleryItems}
           />
         </div>
       </section>
@@ -343,25 +438,12 @@ export default function MapSiteAdminEditor({
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
         <h2 className="text-lg font-semibold text-neutral-900">Map</h2>
-        <Field label="Atlist Map URL">
-          <input
-            className={inputClass}
-            value={form.atlistMapUrl}
-            onChange={(e) => setForm((p) => ({ ...p, atlistMapUrl: e.target.value }))}
-            placeholder="https://my.atlist.com/map/..."
-          />
-          <p className="text-xs text-neutral-500 mt-1.5">
-            Paste the share link from Atlist. This map appears in the centre of the
-            public MapSite page.
+        <div>
+          <p className="text-xs font-medium text-neutral-500 mb-1.5">TalisMaps™️</p>
+          <p className="text-sm text-neutral-600">
+            Your map link will be generated by Talispros backend team.
           </p>
-        </Field>
-        <Field label="Default Zoom (Google Maps fallback)">
-          <input
-            className={inputClass}
-            value={form.mapZoom}
-            onChange={(e) => setForm((p) => ({ ...p, mapZoom: e.target.value }))}
-          />
-        </Field>
+        </div>
       </section>
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">

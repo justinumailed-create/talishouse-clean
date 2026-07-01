@@ -35,6 +35,48 @@ interface UserRecord {
   email: string;
 }
 
+function toErrorLogObject(err: unknown): Record<string, unknown> {
+  if (err instanceof Error) {
+    return {
+      name: err.name,
+      message: err.message,
+      stack: err.stack,
+      ...Object.fromEntries(
+        Object.getOwnPropertyNames(err).map((key) => [key, (err as Record<string, unknown>)[key]])
+      ),
+    };
+  }
+
+  if (typeof err === "object" && err !== null) {
+    const maybe = err as {
+      code?: unknown;
+      message?: unknown;
+      details?: unknown;
+      hint?: unknown;
+      status?: unknown;
+      statusText?: unknown;
+      error?: unknown;
+      cause?: unknown;
+    };
+
+    const extracted: Record<string, unknown> = {
+      code: maybe.code ?? null,
+      message: maybe.message ?? null,
+      details: maybe.details ?? null,
+      hint: maybe.hint ?? null,
+      status: maybe.status ?? null,
+      statusText: maybe.statusText ?? null,
+      stringValue: String(err),
+    };
+
+    if (maybe.error) extracted.error = toErrorLogObject(maybe.error);
+    if (maybe.cause) extracted.cause = toErrorLogObject(maybe.cause);
+    return extracted;
+  }
+
+  return { message: String(err) };
+}
+
 type ColumnId = "new" | "assigned" | "in_progress" | "ready_for_review" | "completed";
 
 const COLUMNS: { id: ColumnId; label: string; description: string }[] = [
@@ -193,6 +235,7 @@ export default function ProductionQueuePage() {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [users, setUsers] = useState<UserRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchWarning, setFetchWarning] = useState<string | null>(null);
   const [activeItem, setActiveItem] = useState<QueueItem | null>(null);
   const [assignModal, setAssignModal] = useState<{ item: QueueItem } | null>(null);
 
@@ -220,6 +263,7 @@ export default function ProductionQueuePage() {
 
   async function fetchQueue() {
     setLoading(true);
+    setFetchWarning(null);
     try {
       const { data: pqData, error } = await supabase
         .from("production_queue")
@@ -293,7 +337,9 @@ export default function ProductionQueuePage() {
 
       setItems(mapped);
     } catch (err) {
-      console.error("Error fetching queue:", err);
+      console.warn("Production queue fetch warning:", toErrorLogObject(err));
+      setFetchWarning("Production queue could not be fully loaded right now.");
+      setItems([]);
     } finally {
       setLoading(false);
     }
@@ -434,6 +480,12 @@ export default function ProductionQueuePage() {
           Refresh
         </button>
       </div>
+
+      {fetchWarning && (
+        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {fetchWarning}
+        </div>
+      )}
 
       <DndContext
         sensors={sensors}

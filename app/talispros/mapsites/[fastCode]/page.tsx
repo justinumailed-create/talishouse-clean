@@ -58,6 +58,7 @@ export default async function TalisprosMapSitePage({
     <MapSiteLayout
       data={layoutData}
       visitorHasSubscribed={visitorStatus.hasSubscribed}
+      visitorFastCode={visitorStatus.fastCode}
       editAccess={editAccess}
     />
   );

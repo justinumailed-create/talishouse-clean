@@ -33,7 +33,7 @@ export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
   DERIVATIVE_ACCOUNT: {
     label: "Derivative Account™",
     price: 198.5,
-    monthly: 19.5,
+    monthly: 98.5,
     description: "Multi-PIN account under a Root Account™.",
     bullets: [
       "Multi-PIN support",

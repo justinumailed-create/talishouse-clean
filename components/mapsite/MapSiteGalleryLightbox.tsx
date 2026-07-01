@@ -4,16 +4,17 @@ import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import type { MapSiteGalleryDisplayItem } from "@/lib/mapsite-gallery";
 
 interface MapSiteGalleryLightboxProps {
-  images: string[];
+  items: MapSiteGalleryDisplayItem[];
   propertyTitle: string;
 }
 
 const GALLERY_OPEN_CLASS = "mapsite-gallery-open";
 
 export default function MapSiteGalleryLightbox({
-  images,
+  items,
   propertyTitle,
 }: MapSiteGalleryLightboxProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -29,15 +30,15 @@ export default function MapSiteGalleryLightbox({
 
   const showPrevious = useCallback(() => {
     setActiveIndex((current) =>
-      current == null ? null : (current - 1 + images.length) % images.length
+      current == null ? null : (current - 1 + items.length) % items.length
     );
-  }, [images.length]);
+  }, [items.length]);
 
   const showNext = useCallback(() => {
     setActiveIndex((current) =>
-      current == null ? null : (current + 1) % images.length
+      current == null ? null : (current + 1) % items.length
     );
-  }, [images.length]);
+  }, [items.length]);
 
   useEffect(() => {
     if (activeIndex == null) {
@@ -67,7 +68,7 @@ export default function MapSiteGalleryLightbox({
     };
   }, [activeIndex, closeLightbox, showNext, showPrevious]);
 
-  if (images.length === 0) {
+  if (items.length === 0) {
     return (
       <div className="w-full h-full flex items-center justify-center bg-neutral-100 text-sm text-neutral-400 px-6 text-center">
         Gallery images coming soon
@@ -75,8 +76,10 @@ export default function MapSiteGalleryLightbox({
     );
   }
 
+  const activeItem = activeIndex != null ? items[activeIndex] : null;
+
   const lightbox =
-    activeIndex != null ? (
+    activeIndex != null && activeItem ? (
       <div
         className="fixed inset-0 z-[2147483000] flex flex-col bg-black/95"
         role="dialog"
@@ -85,7 +88,7 @@ export default function MapSiteGalleryLightbox({
       >
         <div className="flex items-center justify-between px-4 py-3 text-white shrink-0">
           <p className="text-sm text-white/80">
-            {activeIndex + 1} / {images.length}
+            {activeIndex + 1} / {items.length}
           </p>
           <button
             type="button"
@@ -98,7 +101,7 @@ export default function MapSiteGalleryLightbox({
         </div>
 
         <div className="relative flex flex-1 items-center justify-center min-h-0 px-14 sm:px-20 pb-6">
-          {images.length > 1 ? (
+          {items.length > 1 ? (
             <button
               type="button"
               onClick={showPrevious}
@@ -110,16 +113,16 @@ export default function MapSiteGalleryLightbox({
           ) : null}
 
           <div
-            className="relative w-full h-full max-w-6xl"
+            className="relative w-full h-full max-w-6xl flex flex-col"
             onClick={closeLightbox}
           >
             <div
-              className="relative w-full h-full"
+              className="relative flex-1 min-h-0"
               onClick={(event) => event.stopPropagation()}
             >
               <Image
-                src={images[activeIndex]}
-                alt={`${propertyTitle} ${activeIndex + 1}`}
+                src={activeItem.url}
+                alt={activeItem.description || `${propertyTitle} ${activeIndex + 1}`}
                 fill
                 className="object-contain"
                 sizes="100vw"
@@ -127,9 +130,14 @@ export default function MapSiteGalleryLightbox({
                 unoptimized
               />
             </div>
+            {activeItem.description ? (
+              <p className="mt-4 px-2 text-center text-sm text-white/85 leading-relaxed">
+                {activeItem.description}
+              </p>
+            ) : null}
           </div>
 
-          {images.length > 1 ? (
+          {items.length > 1 ? (
             <button
               type="button"
               onClick={showNext}
@@ -146,21 +154,25 @@ export default function MapSiteGalleryLightbox({
   return (
     <>
       <div className="@container h-full w-full overflow-x-auto overscroll-x-contain snap-x snap-mandatory [scrollbar-width:thin]">
-        <div className="flex h-full gap-2 p-2 w-max min-h-0">
-          {images.map((src, index) => (
+        <div className="flex h-full items-stretch gap-2 p-2 w-max min-h-0">
+          {items.map((item, index) => (
             <button
-              key={`${src}-${index}`}
+              key={`${item.url}-${index}`}
               type="button"
               onClick={() => setActiveIndex(index)}
-              className="relative shrink-0 snap-start h-full aspect-[4/3] w-[42vw] max-w-[140px] sm:w-[30cqw] sm:max-w-none sm:min-w-[30cqw] rounded-lg overflow-hidden border border-neutral-200/80 bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-              aria-label={`Open gallery image ${index + 1}`}
+              className="relative h-full aspect-square shrink-0 snap-start rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+              aria-label={
+                item.description
+                  ? `Open gallery image: ${item.description}`
+                  : `Open gallery image ${index + 1}`
+              }
             >
               <Image
-                src={src}
-                alt={`${propertyTitle} ${index + 1}`}
+                src={item.url}
+                alt={item.description || `${propertyTitle} ${index + 1}`}
                 fill
-                className="object-cover hover:scale-105 transition-transform duration-300"
-                sizes="30vw"
+                className="object-cover hover:scale-[1.02] transition-transform duration-300"
+                sizes="(max-width: 640px) 40vh, 320px"
                 unoptimized
               />
             </button>

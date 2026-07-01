@@ -4,8 +4,8 @@ import { MousePointerClick } from "lucide-react";
 
 const SEGMENTS = [
   {
-    title: '"I am a licensed Real Estate Professional."',
-    href: "/talispros/register?plan=root",
+    title: '"I am a Licensed Real Estate Professional."',
+    href: "/talispros/register?market=listings",
     bullets: [
       "I want my Mapsite™ to establish service floors for real estate fees and listing term lengths.",
       "I want Talispros PMC to promote my real estate listings, globally.",
@@ -13,7 +13,7 @@ const SEGMENTS = [
   },
   {
     title: '"I represent Talishouse™ Homes & Cottages, locally."',
-    href: "/talispros/register?plan=derivative",
+    href: "/talispros/register?market=homes",
     bullets: [
       "I want my Mapsite™ to identify new tiny home objects or projects, globally.",
       "I want Talispros PMC to promote fractional ownership opportunities.",
@@ -21,7 +21,7 @@ const SEGMENTS = [
   },
   {
     title: '"I am a For-Sale-By-Owner selling something special."',
-    href: "/talispros/register?plan=adpro",
+    href: "/talispros/register?market=fsbos",
     bullets: [
       "I want my Mapsite™ help me avoid expensive real estate fees and commitments.",
       "I want Talispros PMC to extend my FSBO advertising reach, globally.",
@@ -31,7 +31,7 @@ const SEGMENTS = [
 
 export default function TalisprosStartPage() {
   return (
-    <div className="min-h-screen bg-white text-neutral-900">
+    <div className="min-h-screen bg-white text-neutral-900 overflow-x-hidden">
       <header className="bg-white border-b border-neutral-200">
         <div className="px-6 py-10 sm:py-12 text-center">
           <Image
@@ -51,19 +51,21 @@ export default function TalisprosStartPage() {
         </div>
       </header>
 
-      <section className="w-full">
-        <Image
-          src="/images/glasshouse/hero.png"
-          alt="Glasshouse™ cabin in the forest"
-          width={1200}
-          height={674}
-          priority
-          className="w-full h-auto"
-          sizes="100vw"
-        />
+      <section className="w-full overflow-hidden bg-neutral-50">
+        <div className="relative mx-auto w-full max-w-[1200px]">
+          <Image
+            src="/images/glasshouse/glasshouse.png"
+            alt="Glasshouse™ cabin in the forest"
+            width={1200}
+            height={668}
+            priority
+            className="block w-full h-auto max-w-full"
+            sizes="100vw"
+          />
+        </div>
       </section>
 
-      <section className="px-[75px] py-8 sm:py-12">
+      <section className="px-6 sm:px-[75px] py-8 sm:py-12">
         <h2 className="text-2xl sm:text-4xl font-medium text-center tracking-tight mb-8 sm:mb-10">
           What best describes you?
         </h2>

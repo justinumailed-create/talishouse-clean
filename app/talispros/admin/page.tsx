@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireTalisprosAdminPage } from "@/lib/talispros-admin-auth";
 import { listMapSitesForAdmin } from "@/lib/mapsite-service";
+import TalisprosAdminLogoutButton from "./TalisprosAdminLogoutButton";
 
 export const dynamic = "force-dynamic";
 
@@ -11,13 +12,35 @@ export default async function TalisprosAdminOverviewPage() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-semibold text-neutral-900 mb-2">
-        Talispros™ Admin
-      </h1>
+      <div className="mb-2 flex items-start justify-between gap-3">
+        <h1 className="text-2xl font-semibold text-neutral-900">Talispros™ Admin</h1>
+        <TalisprosAdminLogoutButton />
+      </div>
       <p className="text-sm text-neutral-600 mb-8">
         Configure MapSite templates, subscription tiers shown to visitors, and
         when the Express an Interest form is enabled.
       </p>
+
+      <section className="grid gap-3 sm:grid-cols-2 mb-6">
+        <Link
+          href="/talispros/admin/forms-manager"
+          className="rounded-xl border border-neutral-200 bg-white px-4 py-3 hover:bg-neutral-50"
+        >
+          <p className="text-sm font-semibold text-neutral-900">Forms Manager</p>
+          <p className="text-xs text-neutral-500 mt-1">
+            View Build a MapSite™ submissions and registration checkouts.
+          </p>
+        </Link>
+        <Link
+          href="/talispros/admin/registrations"
+          className="rounded-xl border border-neutral-200 bg-white px-4 py-3 hover:bg-neutral-50"
+        >
+          <p className="text-sm font-semibold text-neutral-900">Registrations</p>
+          <p className="text-xs text-neutral-500 mt-1">
+            Mark purchases completed individually or in bulk.
+          </p>
+        </Link>
+      </section>
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6">
         <h2 className="text-lg font-semibold text-neutral-900 mb-4">MapSites</h2>

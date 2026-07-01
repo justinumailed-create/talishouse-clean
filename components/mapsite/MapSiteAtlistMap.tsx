@@ -1,11 +1,8 @@
-import MapSiteInteractiveMap from "./MapSiteInteractiveMap";
+import { resolveMapsiteAtlistMapUrl } from "@/lib/mapsite-atlist";
 
 interface MapSiteAtlistMapProps {
   atlistMapUrl: string | null;
   propertyTitle: string;
-  latitude?: number;
-  longitude?: number;
-  zoom?: number;
 }
 
 function normalizeAtlistUrl(url: string): string {
@@ -19,39 +16,24 @@ function normalizeAtlistUrl(url: string): string {
 export default function MapSiteAtlistMap({
   atlistMapUrl,
   propertyTitle,
-  latitude,
-  longitude,
-  zoom,
 }: MapSiteAtlistMapProps) {
-  const embedUrl = atlistMapUrl ? normalizeAtlistUrl(atlistMapUrl) : null;
+  const embedUrl = normalizeAtlistUrl(resolveMapsiteAtlistMapUrl(atlistMapUrl));
 
   return (
     <section className="bg-[#f8f8f7]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 sm:py-8">
-        <div className="relative rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white min-h-[280px] sm:min-h-[420px] md:min-h-[560px]">
-          {embedUrl ? (
-            <iframe
-              src={embedUrl}
-              allow="geolocation 'self' https://my.atlist.com"
-              className="absolute inset-0 w-full h-full border-0"
-              loading="lazy"
-              frameBorder={0}
-              scrolling="no"
-              allowFullScreen
-              id="atlist-embed"
-              title={`${propertyTitle} map`}
-            />
-          ) : (
-            <div className="absolute inset-0">
-              <MapSiteInteractiveMap
-                latitude={latitude}
-                longitude={longitude}
-                zoom={zoom}
-                propertyTitle={propertyTitle}
-                embedded
-              />
-            </div>
-          )}
+      <div className="px-4 sm:px-8">
+        <div className="relative rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white min-h-[300px] sm:min-h-[440px] md:min-h-[520px]">
+          <iframe
+            src={embedUrl}
+            allow="geolocation 'self' https://my.atlist.com"
+            className="absolute inset-0 w-full h-full border-0"
+            loading="lazy"
+            frameBorder={0}
+            scrolling="no"
+            allowFullScreen
+            id="atlist-embed"
+            title={`${propertyTitle} map`}
+          />
         </div>
       </div>
     </section>

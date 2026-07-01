@@ -1,5 +1,7 @@
 "use server";
 
+import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { isTalisprosAdminAuthenticated } from "@/lib/talispros-admin-auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   sendMapSiteAssigned,
@@ -11,11 +13,23 @@ export interface EmailActionResult {
   error?: string;
 }
 
+async function requireBuildRequestAdminAccess(): Promise<void> {
+  const [legacyAdmin, talisprosAdmin] = await Promise.all([
+    isAdminAuthenticated(),
+    isTalisprosAdminAuthenticated(),
+  ]);
+
+  if (!legacyAdmin && !talisprosAdmin) {
+    throw new Error("Unauthorized");
+  }
+}
+
 export async function assignBuildRequest(
   requestId: string,
   associateId: string
 ): Promise<EmailActionResult> {
   try {
+    await requireBuildRequestAdminAccess();
     const supabaseAdmin = getSupabaseAdmin();
     const { data: buildData, error: buildError } = await supabaseAdmin
       .from("build_requests")
@@ -98,6 +112,7 @@ export async function completeBuildRequest(
   requestId: string
 ): Promise<EmailActionResult> {
   try {
+    await requireBuildRequestAdminAccess();
     const supabaseAdmin = getSupabaseAdmin();
     const { data: buildData, error: buildError } = await supabaseAdmin
       .from("build_requests")

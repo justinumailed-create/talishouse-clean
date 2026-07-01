@@ -11,13 +11,58 @@ export function tierFromAccountType(
   accountType: string | null | undefined
 ): RegistrationFastCodeTier | null {
   if (!accountType) return null;
-  const value = accountType.trim().toUpperCase();
-  if (value === "ROOT" || value === "ROOT_ACCOUNT") return "root";
-  if (value === "DERIVATIVE" || value === "DERIVATIVE_ACCOUNT") {
+
+  const value = accountType
+    .trim()
+    .toUpperCase()
+    .replace(/™/g, "")
+    .replace(/[^A-Z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
+  if (!value) return null;
+  if (value === "ROOT" || value === "ROOT_ACCOUNT" || value.startsWith("ROOT")) {
+    return "root";
+  }
+  if (
+    value === "DERIVATIVE" ||
+    value === "DERIVATIVE_ACCOUNT" ||
+    value.startsWith("DERIVATIVE")
+  ) {
     return "derivative";
   }
-  if (value === "ADPRO" || value.startsWith("ADPRO_")) return "adpro";
+  if (value === "ADPRO" || value.startsWith("ADPRO")) {
+    return "adpro";
+  }
   return null;
+}
+
+async function resolveFastCodeTier(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  code: string,
+  accountType: string | null | undefined,
+  mapsiteId: string | null | undefined
+): Promise<RegistrationFastCodeTier | null> {
+  const directTier = tierFromAccountType(accountType);
+  if (directTier) return directTier;
+
+  if (mapsiteId) {
+    const { data: linkedMapsite } = await supabase
+      .from("mapsites")
+      .select("account_type")
+      .eq("id", mapsiteId)
+      .maybeSingle();
+
+    const linkedTier = tierFromAccountType(linkedMapsite?.account_type);
+    if (linkedTier) return linkedTier;
+  }
+
+  const { data: mapsiteRow } = await supabase
+    .from("mapsites")
+    .select("account_type")
+    .ilike("fast_code", code)
+    .maybeSingle();
+
+  return tierFromAccountType(mapsiteRow?.account_type);
 }
 
 export async function lookupFastCodeRegistrationTier(
@@ -32,14 +77,21 @@ export async function lookupFastCodeRegistrationTier(
 
   const { data: fastCodeRow } = await supabase
     .from("fast_codes")
-    .select("code, account_type")
+    .select("code, account_type, mapsite_id")
     .ilike("code", code)
     .maybeSingle();
 
   if (fastCodeRow) {
+    const tier = await resolveFastCodeTier(
+      supabase,
+      code,
+      fastCodeRow.account_type,
+      fastCodeRow.mapsite_id
+    );
+
     return {
       found: true,
-      tier: tierFromAccountType(fastCodeRow.account_type),
+      tier,
       code: fastCodeRow.code.toUpperCase(),
     };
   }
@@ -90,23 +142,83 @@ export async function lookupFastCodeRegistrationTier(
 }
 
 export function buildMapsiteRedirectUrl(fastCode: string): string {
-  return `/talispros/build-mapsite?fastCode=${encodeURIComponent(
+  return `/talispros/mapsites/${encodeURIComponent(
     fastCode.trim().toLowerCase()
   )}`;
 }
 
 export function nextRegistrationUrl(
   currentPlan: OfferedSubscriptionTier,
-  parentCode: string
+  parentCode: string,
+  market: string = "listings"
 ): string | null {
   const code = encodeURIComponent(normalizeCode(parentCode));
+  const marketParam = encodeURIComponent(market);
   if (currentPlan === "root") {
-    return `/talispros/register?plan=derivative&parentFastCode=${code}`;
+    return `/talispros/register?market=${marketParam}&account=derivative&sponsor=${code}`;
   }
   if (currentPlan === "derivative") {
-    return `/talispros/register?plan=adpro&parentFastCode=${code}`;
+    return `/talispros/register?market=${marketParam}&account=adpro&sponsor=${code}`;
   }
   return null;
+}
+
+export async function validateRegistrationSponsorFastCode(
+  rawCode: string,
+  accountCategory: "derivative" | "adpro"
+): Promise<{ ok: true; code: string } | { ok: false; error: string }> {
+  const currentPlan: OfferedSubscriptionTier =
+    accountCategory === "derivative" ? "root" : "derivative";
+
+  const lookup = await lookupFastCodeRegistrationTier(rawCode);
+  if (!lookup.found) {
+    return {
+      ok: false,
+      error: "FAST Code not recognized. Check the code and try again.",
+    };
+  }
+
+  if (!lookup.tier) {
+    return {
+      ok: false,
+      error:
+        "FAST Code found but has no account type. Set Account Type to root in admin FAST Codes.",
+    };
+  }
+
+  if (!isValidSponsorTier(currentPlan, lookup.tier)) {
+    return {
+      ok: false,
+      error: invalidSponsorTierMessage(currentPlan),
+    };
+  }
+
+  return { ok: true, code: lookup.code };
+}
+
+export function isValidSponsorTier(
+  currentPlan: OfferedSubscriptionTier,
+  sponsorTier: RegistrationFastCodeTier
+): boolean {
+  if (currentPlan === "root") {
+    return sponsorTier === "root";
+  }
+
+  if (currentPlan === "derivative") {
+    return sponsorTier === "root" || sponsorTier === "derivative";
+  }
+
+  return false;
+}
+
+function invalidSponsorTierMessage(
+  currentPlan: OfferedSubscriptionTier
+): string {
+  if (currentPlan === "root") {
+    return "This FAST Code is not linked to a Root Account™.";
+  }
+
+  return "This FAST Code is not linked to a Root Account™ or Derivative Account™.";
 }
 
 export async function resolveRegistrationFastCodeRedirect(
@@ -121,24 +233,25 @@ export async function resolveRegistrationFastCodeRedirect(
   }
 
   const lookup = await lookupFastCodeRegistrationTier(code);
-  if (!lookup.found || !lookup.tier) {
+  if (!lookup.found) {
     return {
       ok: false,
       error: "FAST Code not recognized. Check the code and try again.",
     };
   }
 
-  if (currentPlan === "root" && lookup.tier !== "root") {
+  if (!lookup.tier) {
     return {
       ok: false,
-      error: "This FAST Code is not linked to a Root Account™.",
+      error:
+        "FAST Code found but has no account type. Set Account Type to root in admin FAST Codes.",
     };
   }
 
-  if (currentPlan === "derivative" && lookup.tier !== "derivative") {
+  if (!isValidSponsorTier(currentPlan, lookup.tier)) {
     return {
       ok: false,
-      error: "This FAST Code is not linked to a Derivative Account™.",
+      error: invalidSponsorTierMessage(currentPlan),
     };
   }
 

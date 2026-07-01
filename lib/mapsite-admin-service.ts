@@ -1,7 +1,12 @@
 "use server";
 
-import type { Database } from "./database.types";
+import type { MapSiteGalleryItem } from "./mapsite-gallery";
+import {
+  galleryItemsToLegacyUrls,
+  normalizeGalleryItemsForSave,
+} from "./mapsite-gallery";
 import { requireMapSiteEditAccess } from "./mapsite-edit-auth";
+import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
 import { getMapSiteByFastCode } from "./mapsite-service";
 
@@ -19,6 +24,7 @@ export interface MapSiteAdminInput {
   profileImageUrl?: string;
   videoUrl?: string;
   galleryImages?: string[];
+  galleryItems?: MapSiteGalleryItem[];
   agentName?: string;
   email?: string;
   phone?: string;
@@ -169,6 +175,18 @@ export async function updateMapSiteAdmin(
   }
 
   const supabase = client;
+  const canManageVisitorSubscription = await isTalisprosAdminAuthenticated();
+  const galleryItems = normalizeGalleryItemsForSave(
+    input.galleryItems ??
+      mapsite.galleryItems ??
+      (input.galleryImages ?? mapsite.galleryImages).map((url, index) => ({
+        url,
+        description: "",
+        sortOrder: index,
+        visible: true,
+      }))
+  );
+
   const update: Database["public"]["Tables"]["mapsites"]["Update"] = {
     status: input.status,
     property_title: input.propertyTitle?.trim() || null,
@@ -181,7 +199,8 @@ export async function updateMapSiteAdmin(
     header_image_url: input.headerImageUrl?.trim() || null,
     profile_image_url: input.profileImageUrl?.trim() || null,
     video_url: input.videoUrl?.trim() || null,
-    gallery_images: input.galleryImages ?? mapsite.galleryImages,
+    gallery_items: galleryItems,
+    gallery_images: galleryItemsToLegacyUrls(galleryItems),
     agent_name: input.agentName?.trim() || null,
     email: input.email?.trim() || mapsite.email,
     phone: input.phone?.trim() || "",
@@ -191,8 +210,12 @@ export async function updateMapSiteAdmin(
     meta_description: input.metaDescription?.trim() || null,
     og_image_url: input.ogImageUrl?.trim() || null,
     atlist_map_url: input.atlistMapUrl?.trim() || null,
-    offered_subscription_tier: input.offeredSubscriptionTier || "root",
-    interest_form_enabled: input.interestFormEnabled ?? true,
+    offered_subscription_tier: canManageVisitorSubscription
+      ? input.offeredSubscriptionTier || "root"
+      : mapsite.offeredSubscriptionTier || "root",
+    interest_form_enabled: canManageVisitorSubscription
+      ? (input.interestFormEnabled ?? true)
+      : (mapsite.interestFormEnabled ?? true),
   };
 
   const { error } = await supabase
@@ -287,7 +310,7 @@ export async function uploadMapSiteAsset(
 
 export async function updateMapSiteGallery(
   fastCode: string,
-  galleryImages: string[]
+  galleryItems: MapSiteGalleryItem[]
 ): Promise<MapSiteAdminActionResult> {
   try {
     await requireMapSiteEditAccess(fastCode);
@@ -305,9 +328,14 @@ export async function updateMapSiteGallery(
     return client;
   }
 
+  const normalized = normalizeGalleryItemsForSave(galleryItems);
+
   const { error } = await client
     .from("mapsites")
-    .update({ gallery_images: galleryImages })
+    .update({
+      gallery_items: normalized,
+      gallery_images: galleryItemsToLegacyUrls(normalized),
+    })
     .eq("id", mapsite.id);
 
   if (error) {

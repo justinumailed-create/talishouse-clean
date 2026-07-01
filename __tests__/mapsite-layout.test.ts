@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { buildMapSiteLayoutData } from "../lib/mapsite-layout";
 import type { MapSiteView } from "../lib/mapsite-service";
+import { DEFAULT_MAPSITE_ATLIST_MAP_URL } from "../lib/mapsite-atlist";
 
 const baseMapsite: MapSiteView = {
   id: "mapsite-1",
@@ -26,11 +27,14 @@ const baseMapsite: MapSiteView = {
   headerImageUrl: null,
   videoUrl: null,
   galleryImages: [],
+  galleryItems: [],
   mapZoom: null,
   metaTitle: null,
   metaDescription: null,
   ogImageUrl: null,
   atlistMapUrl: null,
+  offeredSubscriptionTier: "root",
+  interestFormEnabled: true,
   createdAt: "2026-01-01T00:00:00.000Z",
   updatedAt: "2026-01-02T00:00:00.000Z",
   pins: [
@@ -72,6 +76,14 @@ describe("buildMapSiteLayoutData", () => {
       ...baseMapsite,
       videoUrl: null,
       galleryImages: ["https://cdn.example.com/photo-1.jpg"],
+      galleryItems: [
+        {
+          url: "https://cdn.example.com/photo-1.jpg",
+          description: "",
+          sortOrder: 0,
+          visible: true,
+        },
+      ],
       profileImageUrl: "https://cdn.example.com/agent.jpg",
       pins: [
         {
@@ -83,6 +95,9 @@ describe("buildMapSiteLayoutData", () => {
 
     expect(layout.videoUrl).toBeNull();
     expect(layout.galleryImages).toEqual(["https://cdn.example.com/photo-1.jpg"]);
+    expect(layout.galleryItems).toEqual([
+      { url: "https://cdn.example.com/photo-1.jpg", description: "" },
+    ]);
     expect(layout.agent.profileImageUrl).toBe("https://cdn.example.com/agent.jpg");
   });
 
@@ -90,6 +105,12 @@ describe("buildMapSiteLayoutData", () => {
     const layout = buildMapSiteLayoutData(baseMapsite);
 
     expect(layout.videoUrl).toBe("https://www.youtube.com/embed/dQw4w9WgXcQ");
+  });
+
+  it("uses the default Atlist map when none is configured", () => {
+    const layout = buildMapSiteLayoutData(baseMapsite);
+
+    expect(layout.atlistMapUrl).toBe(DEFAULT_MAPSITE_ATLIST_MAP_URL);
   });
 
   it("exposes atlist map url and overlay card fields", () => {

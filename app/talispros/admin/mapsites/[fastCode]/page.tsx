@@ -27,6 +27,7 @@ export default async function TalisprosAdminMapSitePage({
       mapsite={mapsite}
       adminWritesEnabled={writesState.enabled}
       adminWritesMessage={writesState.message}
+      showVisitorSubscriptionPanel
     />
   );
 }

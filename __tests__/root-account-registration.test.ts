@@ -188,7 +188,7 @@ describe("completeRootAccountRegistration", () => {
       accountId: "account-1",
       fastCode: "ar01",
       mapsiteId: "mapsite-1",
-      redirectUrl: "/talispros/build-mapsite?fastCode=ar01",
+      redirectUrl: "/talispros/mapsites/ar01",
     });
 
     expect(mockUsersInsert).toHaveBeenCalled();

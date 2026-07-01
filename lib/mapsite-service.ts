@@ -1,5 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
+import {
+  galleryItemsToLegacyUrls,
+  resolveMapsiteGalleryItems,
+  type MapSiteGalleryItem,
+} from "./mapsite-gallery";
 import type { CreateAccountResult } from "./account-service";
 import { generateMapSiteSlug } from "./slug-generator";
 import { disableSupabaseAdminClient, getSupabaseAdmin, tryGetSupabaseAdmin } from "./supabaseAdmin";
@@ -72,6 +77,7 @@ export interface MapSiteView {
   headerImageUrl: string | null;
   videoUrl: string | null;
   galleryImages: string[];
+  galleryItems: MapSiteGalleryItem[];
   mapZoom: number | null;
   metaTitle: string | null;
   metaDescription: string | null;
@@ -230,6 +236,11 @@ async function buildMapSiteView(
     sortOrder: pin.sort_order || 0,
   }));
 
+  const galleryItems = resolveMapsiteGalleryItems(
+    mapsite.gallery_items,
+    mapsite.gallery_images || []
+  );
+
   return {
     id: mapsite.id,
     fastCode: mapsite.fast_code,
@@ -254,7 +265,8 @@ async function buildMapSiteView(
     logoUrl: mapsite.logo_url || assets?.logo_image || null,
     headerImageUrl: mapsite.header_image_url || null,
     videoUrl: mapsite.video_url,
-    galleryImages: mapsite.gallery_images || [],
+    galleryImages: galleryItemsToLegacyUrls(galleryItems),
+    galleryItems,
     mapZoom: mapsite.map_zoom,
     metaTitle: mapsite.meta_title,
     metaDescription: mapsite.meta_description,
@@ -311,6 +323,11 @@ export async function getPublicMapSiteByFastCode(
     sortOrder: pin.sort_order || 0,
   }));
 
+  const galleryItems = resolveMapsiteGalleryItems(
+    mapsite.gallery_items,
+    mapsite.gallery_images || []
+  );
+
   return {
     id: mapsite.id,
     fastCode: mapsite.fast_code,
@@ -334,7 +351,8 @@ export async function getPublicMapSiteByFastCode(
     logoUrl: mapsite.logo_url,
     headerImageUrl: mapsite.header_image_url || null,
     videoUrl: mapsite.video_url,
-    galleryImages: mapsite.gallery_images || [],
+    galleryImages: galleryItemsToLegacyUrls(galleryItems),
+    galleryItems,
     mapZoom: mapsite.map_zoom,
     metaTitle: mapsite.meta_title,
     metaDescription: mapsite.meta_description,
