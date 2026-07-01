@@ -42,7 +42,7 @@ function toErrorLogObject(err: unknown): Record<string, unknown> {
       message: err.message,
       stack: err.stack,
       ...Object.fromEntries(
-        Object.getOwnPropertyNames(err).map((key) => [key, (err as Record<string, unknown>)[key]])
+        Object.getOwnPropertyNames(err).map((key) => [key, Reflect.get(err, key)])
       ),
     };
   }

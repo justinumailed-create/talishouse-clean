@@ -28,7 +28,7 @@ export interface FormsManagerRegistrationRow {
   accountType: string;
   status: string;
   createdAt: string;
-  fastCode: string;
+  fastCode: string | null;
   amountPaid: number;
   registrationNumber: string;
 }

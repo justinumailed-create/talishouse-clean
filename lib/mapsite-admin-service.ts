@@ -1,5 +1,6 @@
 "use server";
 
+import type { Database } from "./database.types";
 import type { MapSiteGalleryItem } from "./mapsite-gallery";
 import {
   galleryItemsToLegacyUrls,

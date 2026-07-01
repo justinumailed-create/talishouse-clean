@@ -30,7 +30,7 @@ function toErrorLogObject(err: unknown): Record<string, unknown> {
       message: err.message,
       stack: err.stack,
       ...Object.fromEntries(
-        Object.getOwnPropertyNames(err).map((key) => [key, (err as Record<string, unknown>)[key]])
+        Object.getOwnPropertyNames(err).map((key) => [key, Reflect.get(err, key)])
       ),
     };
   }
@@ -150,9 +150,9 @@ export default function FastCodesPage() {
         request_id: row.request_id ?? null,
         account_type: row.account_type ?? null,
         mapsite_id: row.mapsite_id ?? null,
-        name: row.name ?? null,
-        email: row.email ?? null,
-        phone: row.phone ?? null,
+        name: null,
+        email: null,
+        phone: null,
         timestamp: row.assigned_at,
       }));
 

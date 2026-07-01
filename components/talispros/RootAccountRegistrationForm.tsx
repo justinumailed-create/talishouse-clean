@@ -101,7 +101,7 @@ export default function RootAccountRegistrationForm({
 
   function sponsorCategoryForPlan(
     planType: PlanType
-  ): RegistrationAccountCategory | null {
+  ): "derivative" | "adpro" | null {
     if (planType === "DERIVATIVE_ACCOUNT") return "derivative";
     if (planType.startsWith("ADPRO_")) return "adpro";
     return null;
