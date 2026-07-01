@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { MapSiteGalleryDisplayItem } from "@/lib/mapsite-gallery";
@@ -19,10 +19,29 @@ export default function MapSiteGalleryLightbox({
 }: MapSiteGalleryLightboxProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [thumbSize, setThumbSize] = useState<number | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const node = scrollRef.current;
+    if (!node) {
+      return;
+    }
+
+    const updateThumbSize = () => {
+      const nextSize = node.clientHeight - 16;
+      setThumbSize(nextSize > 0 ? nextSize : null);
+    };
+
+    updateThumbSize();
+    const observer = new ResizeObserver(updateThumbSize);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [items.length]);
 
   const closeLightbox = useCallback(() => {
     setActiveIndex(null);
@@ -153,14 +172,22 @@ export default function MapSiteGalleryLightbox({
 
   return (
     <>
-      <div className="@container h-full w-full overflow-x-auto overscroll-x-contain snap-x snap-mandatory [scrollbar-width:thin]">
-        <div className="flex h-full items-stretch gap-2 p-2 w-max min-h-0">
+      <div
+        ref={scrollRef}
+        className="h-full w-full overflow-x-auto overscroll-x-contain snap-x snap-mandatory p-2 [scrollbar-width:thin]"
+      >
+        <div className="flex h-full gap-2 w-max min-h-0">
           {items.map((item, index) => (
             <button
               key={`${item.url}-${index}`}
               type="button"
               onClick={() => setActiveIndex(index)}
-              className="relative h-full aspect-square shrink-0 snap-start rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+              style={{
+                width: thumbSize ?? 200,
+                height: thumbSize ?? 200,
+                flexShrink: 0,
+              }}
+              className="relative shrink-0 snap-start rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
               aria-label={
                 item.description
                   ? `Open gallery image: ${item.description}`
