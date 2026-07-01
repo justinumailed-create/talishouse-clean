@@ -107,6 +107,7 @@ export default function MapSiteAdminEditor({
   const [galleryItems, setGalleryItems] = useState(mapsite.galleryItems);
   const [uploadingBrandingField, setUploadingBrandingField] =
     useState<BrandingImageKey | null>(null);
+  const [uploadingOgImage, setUploadingOgImage] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -134,6 +135,15 @@ export default function MapSiteAdminEditor({
       await handleUpload(fieldName, file, fieldName);
     } finally {
       setUploadingBrandingField(null);
+    }
+  }
+
+  async function handleOgImageUpload(file: File) {
+    setUploadingOgImage(true);
+    try {
+      await handleUpload("ogImageUrl", file, "ogImageUrl");
+    } finally {
+      setUploadingOgImage(false);
     }
   }
 
@@ -463,13 +473,71 @@ export default function MapSiteAdminEditor({
             onChange={(e) => setForm((p) => ({ ...p, metaDescription: e.target.value }))}
           />
         </Field>
-        <Field label="OpenGraph Image URL">
-          <input
-            className={inputClass}
-            value={form.ogImageUrl}
-            onChange={(e) => setForm((p) => ({ ...p, ogImageUrl: e.target.value }))}
-          />
-        </Field>
+        <div className="rounded-xl border border-neutral-200 p-4 space-y-3">
+          <div>
+            <p className="text-sm font-medium text-neutral-900">OpenGraph image</p>
+            <p className="text-xs text-neutral-500 mt-0.5">
+              Shown when this MapSite is shared on social media. Recommended 1200×630.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4">
+            {form.ogImageUrl ? (
+              <div className="relative h-20 w-36 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+                <Image
+                  src={form.ogImageUrl}
+                  alt="OpenGraph preview"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="flex h-20 w-36 shrink-0 items-center justify-center rounded-lg border border-dashed border-neutral-300 bg-neutral-50 text-xs text-neutral-400">
+                No image
+              </div>
+            )}
+
+            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-neutral-300 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50">
+              <Upload className="h-4 w-4" />
+              {uploadingOgImage
+                ? "Uploading..."
+                : form.ogImageUrl
+                  ? "Replace image"
+                  : "Upload image"}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                disabled={uploadingOgImage || uploadingBrandingField !== null}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) void handleOgImageUpload(file);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+
+            {form.ogImageUrl ? (
+              <button
+                type="button"
+                onClick={() => setForm((prev) => ({ ...prev, ogImageUrl: "" }))}
+                className="text-sm text-red-600 hover:text-red-700"
+              >
+                Remove
+              </button>
+            ) : null}
+          </div>
+
+          <Field label="Or paste image URL">
+            <input
+              className={inputClass}
+              value={form.ogImageUrl}
+              onChange={(e) => setForm((p) => ({ ...p, ogImageUrl: e.target.value }))}
+              placeholder="https://..."
+            />
+          </Field>
+        </div>
       </section>
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6">
