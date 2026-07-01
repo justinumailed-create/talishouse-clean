@@ -54,13 +54,13 @@ export default function TalisprosStartPage() {
       <section className="w-full overflow-hidden bg-neutral-50">
         <div className="relative mx-auto w-full max-w-[1200px]">
           <Image
-            src="/images/glasshouse/hero-hd.webp"
+            src="/images/glasshouse/glasshouse.png"
             alt="Glasshouse™ cabin in the forest"
-            width={2400}
-            height={1348}
+            width={1200}
+            height={668}
             priority
             className="block w-full h-auto max-w-full"
-            sizes="100vw"
+            sizes="(min-width: 1200px) 1200px, 100vw"
           />
         </div>
       </section>
