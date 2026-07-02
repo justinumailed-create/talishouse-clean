@@ -5,6 +5,7 @@ import {
   MAPSITE_OWNER_MAX_AGE,
   MAPSITE_ROOT_ACCOUNT_COOKIE,
 } from "./mapsite-account-session";
+import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
 
 export async function getMapSiteOwnerSession(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -23,8 +24,14 @@ function normalizeFastCode(fastCode: string): string {
   return fastCode.trim().toLowerCase();
 }
 
+async function isMapSiteAdmin(): Promise<boolean> {
+  return (
+    (await isAdminAuthenticated()) || (await isTalisprosAdminAuthenticated())
+  );
+}
+
 export async function canEditMapSite(fastCode: string): Promise<boolean> {
-  if (await isAdminAuthenticated()) {
+  if (await isMapSiteAdmin()) {
     return true;
   }
 
@@ -62,7 +69,7 @@ export interface MapSiteEditToolbarState {
 export async function getMapSiteEditToolbarState(
   fastCode: string
 ): Promise<MapSiteEditToolbarState> {
-  const isAdmin = await isAdminAuthenticated();
+  const isAdmin = await isMapSiteAdmin();
   const ownerSession = await getMapSiteOwnerSession();
   const registeredFastCode = await getRegisteredMapSiteFastCode();
   const target = normalizeFastCode(fastCode);
