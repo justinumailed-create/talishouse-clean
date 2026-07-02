@@ -52,13 +52,37 @@ export function parseGalleryItems(raw: unknown): MapSiteGalleryItem[] {
   return orderGalleryItemsBySortOrder(items);
 }
 
+export function mergeGalleryItemsWithLegacy(
+  items: MapSiteGalleryItem[],
+  legacyUrls: string[]
+): MapSiteGalleryItem[] {
+  const legacy = galleryItemsFromLegacyUrls(legacyUrls);
+  if (legacy.length <= items.length) {
+    return items;
+  }
+
+  const knownUrls = new Set(items.map((item) => item.url));
+  const extras = legacy.filter((item) => !knownUrls.has(item.url));
+  if (extras.length === 0) {
+    return items;
+  }
+
+  return orderGalleryItemsBySortOrder([
+    ...items,
+    ...extras.map((item, index) => ({
+      ...item,
+      sortOrder: items.length + index,
+    })),
+  ]);
+}
+
 export function resolveMapsiteGalleryItems(
   galleryItems: unknown,
   legacyUrls: string[]
 ): MapSiteGalleryItem[] {
   const parsed = parseGalleryItems(galleryItems);
   if (parsed.length > 0) {
-    return parsed;
+    return mergeGalleryItemsWithLegacy(parsed, legacyUrls);
   }
   return galleryItemsFromLegacyUrls(legacyUrls);
 }

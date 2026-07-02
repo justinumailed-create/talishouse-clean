@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   galleryItemsFromLegacyUrls,
+  mergeGalleryItemsWithLegacy,
   normalizeGalleryItemsForSave,
   orderGalleryItemsBySortOrder,
   parseGalleryItems,
+  resolveMapsiteGalleryItems,
   visibleGalleryDisplayItems,
 } from "../lib/mapsite-gallery";
 
@@ -88,5 +90,54 @@ describe("mapsite-gallery", () => {
     ]);
 
     expect(ordered.map((item) => item.url)).toEqual(["/a.png", "/c.png"]);
+  });
+
+  it("keeps more than 12 gallery items when saving", () => {
+    const items = Array.from({ length: 15 }, (_, index) => ({
+      url: `/images/${index + 1}.png`,
+      description: "",
+      sortOrder: index,
+      visible: true,
+    }));
+
+    const normalized = normalizeGalleryItemsForSave(items);
+
+    expect(normalized).toHaveLength(15);
+    expect(normalized.map((item) => item.sortOrder)).toEqual(
+      Array.from({ length: 15 }, (_, index) => index)
+    );
+  });
+
+  it("merges legacy gallery URLs missing from gallery_items", () => {
+    const merged = mergeGalleryItemsWithLegacy(
+      galleryItemsFromLegacyUrls(
+        Array.from({ length: 12 }, (_, index) => `/legacy/${index + 1}.png`)
+      ),
+      [
+        ...Array.from({ length: 12 }, (_, index) => `/legacy/${index + 1}.png`),
+        "/legacy/13.png",
+        "/legacy/14.png",
+      ]
+    );
+
+    expect(merged).toHaveLength(14);
+    expect(merged.at(-1)?.url).toBe("/legacy/14.png");
+  });
+
+  it("resolves gallery items from structured storage with legacy fallback", () => {
+    const resolved = resolveMapsiteGalleryItems(
+      [
+        { url: "/a.png", description: "Front", sortOrder: 0, visible: true },
+        { url: "/b.png", description: "", sortOrder: 1, visible: true },
+      ],
+      ["/a.png", "/b.png", "/c.png"]
+    );
+
+    expect(resolved.map((item) => item.url)).toEqual([
+      "/a.png",
+      "/b.png",
+      "/c.png",
+    ]);
+    expect(resolved[0]?.description).toBe("Front");
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import {
   ChevronDown,
@@ -23,44 +23,101 @@ interface MapSiteGalleryEditorProps {
   onChange: (items: MapSiteGalleryItem[]) => void;
 }
 
+const ACCEPTED_IMAGE_TYPES = "image/jpeg,image/png,image/webp";
+
 export default function MapSiteGalleryEditor({
   fastCode,
   items,
   onChange,
 }: MapSiteGalleryEditorProps) {
   const [uploading, setUploading] = useState(false);
+  const [replacingIndex, setReplacingIndex] = useState<number | null>(null);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [savingIndex, setSavingIndex] = useState<number | null>(null);
+  const [error, setError] = useState("");
+  const replaceInputRefs = useRef<Record<number, HTMLInputElement | null>>({});
 
-  async function persist(next: MapSiteGalleryItem[]) {
+  async function persist(next: MapSiteGalleryItem[]): Promise<boolean> {
     const normalized = normalizeGalleryItemsForSave(next);
+    const result = await updateMapSiteGallery(fastCode, normalized);
+    if (!result.success) {
+      setError(result.error || "Failed to save gallery");
+      return false;
+    }
+
     onChange(normalized);
-    await updateMapSiteGallery(fastCode, normalized);
+    setError("");
+    return true;
   }
 
-  async function handleUpload(file: File) {
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("fastCode", fastCode);
-      formData.append("fieldName", "gallery");
-      formData.append("file", file);
+  async function uploadGalleryFile(file: File): Promise<string | null> {
+    const formData = new FormData();
+    formData.append("fastCode", fastCode);
+    formData.append("fieldName", "gallery");
+    formData.append("file", file);
 
-      const result = await uploadMapSiteAsset(formData);
-      if (result.success && result.url) {
-        const next = normalizeGalleryItemsForSave([
-          ...items,
+    const result = await uploadMapSiteAsset(formData);
+    if (!result.success || !result.url) {
+      setError(result.error || `Failed to upload ${file.name}`);
+      return null;
+    }
+
+    return result.url;
+  }
+
+  async function handleUpload(files: FileList | File[]) {
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) {
+      return;
+    }
+
+    setUploading(true);
+    setError("");
+
+    try {
+      let next = [...items];
+
+      for (const file of fileArray) {
+        const url = await uploadGalleryFile(file);
+        if (!url) {
+          break;
+        }
+
+        next = normalizeGalleryItemsForSave([
+          ...next,
           {
-            url: result.url,
+            url,
             description: "",
-            sortOrder: items.length,
+            sortOrder: next.length,
             visible: true,
           },
         ]);
+      }
+
+      if (next.length > items.length) {
         await persist(next);
       }
     } finally {
       setUploading(false);
+    }
+  }
+
+  async function handleReplace(index: number, file: File) {
+    setReplacingIndex(index);
+    setError("");
+
+    try {
+      const url = await uploadGalleryFile(file);
+      if (!url) {
+        return;
+      }
+
+      const next = items.map((item, itemIndex) =>
+        itemIndex === index ? { ...item, url } : item
+      );
+      await persist(next);
+    } finally {
+      setReplacingIndex(null);
     }
   }
 
@@ -70,7 +127,10 @@ export default function MapSiteGalleryEditor({
   }
 
   async function handleReorder(fromIndex: number, toIndex: number) {
-    if (fromIndex === toIndex) return;
+    if (fromIndex === toIndex || toIndex < 0 || toIndex >= items.length) {
+      return;
+    }
+
     const next = [...items];
     const [moved] = next.splice(fromIndex, 1);
     next.splice(toIndex, 0, moved);
@@ -92,23 +152,40 @@ export default function MapSiteGalleryEditor({
     }
   }
 
+  const isBusy = uploading || replacingIndex !== null;
+
   return (
     <div className="space-y-4">
-      <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-neutral-300 text-sm text-neutral-600 hover:bg-neutral-50 cursor-pointer">
-        <Upload className="w-4 h-4" />
-        {uploading ? "Uploading..." : "Upload gallery image"}
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          className="hidden"
-          disabled={uploading}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) void handleUpload(file);
-            e.target.value = "";
-          }}
-        />
-      </label>
+      <div className="flex flex-wrap items-center gap-3">
+        <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-dashed border-neutral-300 text-sm text-neutral-600 hover:bg-neutral-50 cursor-pointer">
+          <Upload className="w-4 h-4" />
+          {uploading ? "Uploading..." : "Upload gallery images"}
+          <input
+            type="file"
+            accept={ACCEPTED_IMAGE_TYPES}
+            multiple
+            className="hidden"
+            disabled={isBusy}
+            onChange={(e) => {
+              const files = e.target.files;
+              if (files && files.length > 0) {
+                void handleUpload(files);
+              }
+              e.target.value = "";
+            }}
+          />
+        </label>
+        <p className="text-xs text-neutral-500">
+          {items.length} image{items.length === 1 ? "" : "s"} · select one or
+          many files
+        </p>
+      </div>
+
+      {error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {error}
+        </div>
+      ) : null}
 
       <div className="space-y-3">
         {items.map((item, index) => (
@@ -148,7 +225,7 @@ export default function MapSiteGalleryEditor({
                     <button
                       type="button"
                       onClick={() => void handleReorder(index, index - 1)}
-                      disabled={index === 0}
+                      disabled={index === 0 || isBusy}
                       className="p-1.5 text-neutral-500 hover:bg-neutral-100 rounded-md disabled:opacity-30"
                       aria-label="Move image up"
                     >
@@ -157,7 +234,7 @@ export default function MapSiteGalleryEditor({
                     <button
                       type="button"
                       onClick={() => void handleReorder(index, index + 1)}
-                      disabled={index === items.length - 1}
+                      disabled={index === items.length - 1 || isBusy}
                       className="p-1.5 text-neutral-500 hover:bg-neutral-100 rounded-md disabled:opacity-30"
                       aria-label="Move image down"
                     >
@@ -168,7 +245,8 @@ export default function MapSiteGalleryEditor({
                       onClick={() =>
                         void updateItem(index, { visible: !item.visible })
                       }
-                      className="p-1.5 text-neutral-500 hover:bg-neutral-100 rounded-md"
+                      disabled={isBusy}
+                      className="p-1.5 text-neutral-500 hover:bg-neutral-100 rounded-md disabled:opacity-30"
                       aria-label={item.visible ? "Hide image" : "Show image"}
                     >
                       {item.visible ? (
@@ -179,8 +257,33 @@ export default function MapSiteGalleryEditor({
                     </button>
                     <button
                       type="button"
+                      onClick={() => replaceInputRefs.current[index]?.click()}
+                      disabled={isBusy}
+                      className="px-2 py-1.5 text-xs text-neutral-600 hover:bg-neutral-100 rounded-md disabled:opacity-30"
+                    >
+                      {replacingIndex === index ? "Replacing..." : "Replace"}
+                    </button>
+                    <input
+                      ref={(element) => {
+                        replaceInputRefs.current[index] = element;
+                      }}
+                      type="file"
+                      accept={ACCEPTED_IMAGE_TYPES}
+                      className="hidden"
+                      disabled={isBusy}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          void handleReplace(index, file);
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                    <button
+                      type="button"
                       onClick={() => void handleDelete(index)}
-                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-md"
+                      disabled={isBusy}
+                      className="p-1.5 text-red-500 hover:bg-red-50 rounded-md disabled:opacity-30"
                       aria-label="Delete image"
                     >
                       <Trash2 className="w-4 h-4" />
