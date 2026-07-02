@@ -7,7 +7,6 @@ import { ChevronDown } from "lucide-react";
 import { formatCAD } from "@/utils/currency";
 import { processPayment } from "@/app/talispros/register/payment-actions";
 import {
-  routeRegistrationByFastCode,
   validateSponsorFastCode,
 } from "@/app/talispros/register/fast-code-actions";
 import { setFastCode } from "@/lib/fast-code";
@@ -35,8 +34,6 @@ interface RootAccountRegistrationFormProps {
 
 const DERIVATIVE_SPONSOR_COPY =
   "Join an existing Root Account™. Sponsor FAST Code required.";
-const ADPRO_SPONSOR_COPY =
-  "Join an existing marketing network. Sponsor FAST Code required.";
 const ADPRO_ACCOUNT_DESCRIPTION =
   "Place your business on the map with individual or multi-PIN AdPro™ packages under an established marketing network.";
 
@@ -50,12 +47,18 @@ export default function RootAccountRegistrationForm({
 }: RootAccountRegistrationFormProps) {
   const router = useRouter();
   const isPanel = variant === "panel";
-  const unifiedMode = Boolean(market) && !isPanel;
+  const unifiedMode = Boolean(market) || isPanel;
+  const showAllOptionsInPanel = isPanel;
 
-  const showRoot = unifiedMode || !allowedTier || allowedTier === "root";
+  const showRoot =
+    showAllOptionsInPanel || unifiedMode || !allowedTier || allowedTier === "root";
   const showDerivative =
-    unifiedMode || !allowedTier || allowedTier === "derivative";
+    showAllOptionsInPanel ||
+    unifiedMode ||
+    !allowedTier ||
+    allowedTier === "derivative";
   const showAdpro =
+    showAllOptionsInPanel ||
     unifiedMode ||
     !allowedTier ||
     allowedTier === "adpro" ||
@@ -84,8 +87,6 @@ export default function RootAccountRegistrationForm({
   const [adproSponsorFastCode, setAdproSponsorFastCode] = useState(
     initialAccount === "adpro" || initialSponsorCode ? initialSponsorCode : ""
   );
-  const [sponsorFastCode, setSponsorFastCode] = useState(initialSponsorCode);
-  const [routingFastCode, setRoutingFastCode] = useState(false);
   const [validatingSponsor, setValidatingSponsor] = useState(false);
   const [sponsorValidated, setSponsorValidated] = useState(false);
   const [validatedSponsorCode, setValidatedSponsorCode] = useState("");
@@ -94,11 +95,6 @@ export default function RootAccountRegistrationForm({
   const [showAdproAfterValidate, setShowAdproAfterValidate] = useState(true);
 
   const isAdpro = accountCategory === "adpro";
-  const showFastCodeRouting =
-    !unifiedMode &&
-    (allowedTier === "root" || allowedTier === "derivative") &&
-    !parentFastCode;
-
   function sponsorCategoryForPlan(
     planType: PlanType
   ): "derivative" | "adpro" | null {
@@ -113,7 +109,7 @@ export default function RootAccountRegistrationForm({
     if (unifiedMode && sponsorValidated) return validatedSponsorCode;
     if (category === "derivative") return derivativeSponsorFastCode;
     if (category === "adpro") return adproSponsorFastCode;
-    return sponsorFastCode;
+    return "";
   }
 
   function setSponsorCodeForCategory(
@@ -128,7 +124,6 @@ export default function RootAccountRegistrationForm({
       setAdproSponsorFastCode(code);
       return;
     }
-    setSponsorFastCode(code);
   }
 
   async function handleValidateUnifiedSponsor() {
@@ -184,27 +179,6 @@ export default function RootAccountRegistrationForm({
     if (sponsorValidated) {
       resetSponsorValidation();
     }
-  }
-
-  async function handleFastCodeRouting() {
-    if (!allowedTier) return;
-    const code = sponsorFastCode.trim();
-    if (!code) {
-      setError("Enter a FAST Code to continue.");
-      return;
-    }
-
-    setRoutingFastCode(true);
-    setError("");
-
-    const result = await routeRegistrationByFastCode(code, allowedTier);
-    if (result.ok) {
-      router.push(result.redirectTo);
-      return;
-    }
-
-    setError(result.error);
-    setRoutingFastCode(false);
   }
 
   function validatePersonalInfo(): string | null {
@@ -510,10 +484,7 @@ export default function RootAccountRegistrationForm({
                 <h3 className="font-semibold text-neutral-900 text-lg">
                   AdPro™ Account
                 </h3>
-                <p className="text-xs text-neutral-500 mt-1 leading-relaxed">
-                  {ADPRO_SPONSOR_COPY}
-                </p>
-                <p className="text-xs text-neutral-500 mt-2 leading-relaxed">
+                <p className="text-xs text-neutral-500 mt-2 leading-relaxed text-center">
                   {ADPRO_ACCOUNT_DESCRIPTION}
                 </p>
               </div>
@@ -599,42 +570,6 @@ export default function RootAccountRegistrationForm({
               {parentFastCode.toUpperCase()}
             </span>
             .
-          </div>
-        )}
-
-        {showFastCodeRouting && (
-          <div
-            className={`bg-white rounded-xl border border-neutral-200 ${isPanel ? "p-4" : "p-6 sm:p-8 shadow-sm"}`}
-          >
-            <h3
-              className={`font-semibold text-neutral-900 ${isPanel ? "text-sm mb-2" : "text-lg mb-2"}`}
-            >
-              FAST Code™
-            </h3>
-            <p className="text-xs text-neutral-500 mb-4 leading-relaxed">
-              {allowedTier === "root"
-                ? "Enter your sponsor's Root Account™ FAST Code to register as a Derivative Account™ instead."
-                : "Enter your sponsor's Root Account™ or Derivative Account™ FAST Code to register as an AdPro™ account instead."}
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <input
-                type="text"
-                value={sponsorFastCode}
-                onChange={(e) =>
-                  setSponsorFastCode(e.target.value.toUpperCase())
-                }
-                placeholder="Enter FAST Code"
-                className={inputClass}
-              />
-              <button
-                type="button"
-                onClick={handleFastCodeRouting}
-                disabled={routingFastCode}
-                className="inline-flex h-11 shrink-0 items-center justify-center rounded-xl bg-neutral-900 px-6 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:opacity-60"
-              >
-                {routingFastCode ? "Checking..." : "Continue"}
-              </button>
-            </div>
           </div>
         )}
 

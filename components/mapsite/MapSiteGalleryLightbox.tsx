@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { MapSiteGalleryDisplayItem } from "@/lib/mapsite-gallery";
@@ -18,30 +18,7 @@ export default function MapSiteGalleryLightbox({
   propertyTitle,
 }: MapSiteGalleryLightboxProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [mounted, setMounted] = useState(false);
-  const [thumbSize, setThumbSize] = useState<number | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const node = scrollRef.current;
-    if (!node) {
-      return;
-    }
-
-    const updateThumbSize = () => {
-      const nextSize = node.clientHeight - 16;
-      setThumbSize(nextSize > 0 ? nextSize : null);
-    };
-
-    updateThumbSize();
-    const observer = new ResizeObserver(updateThumbSize);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [items.length]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const closeLightbox = useCallback(() => {
     setActiveIndex(null);
@@ -95,6 +72,8 @@ export default function MapSiteGalleryLightbox({
     );
   }
 
+  const safeSelectedIndex = Math.min(selectedIndex, items.length - 1);
+  const selectedItem = items[safeSelectedIndex];
   const activeItem = activeIndex != null ? items[activeIndex] : null;
 
   const lightbox =
@@ -173,41 +152,71 @@ export default function MapSiteGalleryLightbox({
   return (
     <>
       <div
-        ref={scrollRef}
-        className="h-full w-full overflow-x-auto overscroll-x-contain snap-x snap-mandatory p-2 [scrollbar-width:thin]"
+        className="h-full w-full min-h-0 bg-neutral-100 flex flex-col"
       >
-        <div className="flex h-full gap-2 w-max min-h-0">
-          {items.map((item, index) => (
-            <button
-              key={`${item.url}-${index}`}
-              type="button"
-              onClick={() => setActiveIndex(index)}
-              style={{
-                width: thumbSize ?? 200,
-                height: thumbSize ?? 200,
-                flexShrink: 0,
-              }}
-              className="relative shrink-0 snap-start rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-              aria-label={
-                item.description
-                  ? `Open gallery image: ${item.description}`
-                  : `Open gallery image ${index + 1}`
-              }
-            >
-              <Image
-                src={item.url}
-                alt={item.description || `${propertyTitle} ${index + 1}`}
-                fill
-                className="object-cover hover:scale-[1.02] transition-transform duration-300"
-                sizes="(max-width: 640px) 40vh, 320px"
-                unoptimized
-              />
-            </button>
-          ))}
+        <button
+          type="button"
+          onClick={() => setActiveIndex(safeSelectedIndex)}
+          className="relative flex-1 min-h-[240px] overflow-hidden bg-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+          aria-label={
+            selectedItem.description
+              ? `Open gallery image: ${selectedItem.description}`
+              : `Open gallery image ${selectedIndex + 1}`
+          }
+        >
+          <Image
+            src={selectedItem.url}
+            alt={
+              selectedItem.description || `${propertyTitle} ${selectedIndex + 1}`
+            }
+            fill
+            className="object-cover"
+            sizes="(max-width: 1024px) 100vw, 50vw"
+            unoptimized
+            priority
+          />
+        </button>
+
+        <div className="h-[64px] shrink-0 border-t border-neutral-200 bg-neutral-50 p-1.5 overflow-x-auto overscroll-x-contain [scrollbar-width:thin]">
+          <div className="flex h-full items-center gap-2 w-max min-h-0">
+            {items.map((item, index) => (
+              <button
+                key={`${item.url}-${index}`}
+                type="button"
+                onClick={() => setSelectedIndex(index)}
+                className={`relative h-10 w-14 shrink-0 overflow-hidden rounded-md border bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 ${
+                  index === safeSelectedIndex
+                    ? "border-neutral-900 ring-1 ring-neutral-900/40"
+                    : "border-neutral-200"
+                }`}
+                aria-label={
+                  item.description
+                    ? `Select gallery image: ${item.description}`
+                    : `Select gallery image ${index + 1}`
+                }
+                aria-current={index === safeSelectedIndex}
+              >
+                <Image
+                  src={item.url}
+                  alt={item.description || `${propertyTitle} ${index + 1}`}
+                  fill
+                  className={`object-cover transition-all duration-300 ${
+                    index === safeSelectedIndex
+                      ? "blur-0"
+                      : "blur-[1.6px] hover:blur-[1px]"
+                  }`}
+                  sizes="56px"
+                  unoptimized
+                />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {mounted && lightbox ? createPortal(lightbox, document.body) : null}
+      {typeof document !== "undefined" && lightbox
+        ? createPortal(lightbox, document.body)
+        : null}
     </>
   );
 }

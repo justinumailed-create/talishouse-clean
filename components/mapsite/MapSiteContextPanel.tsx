@@ -75,7 +75,7 @@ export default function MapSiteContextPanel({
     : "Register Your MapSite™";
 
   return (
-    <div className="flex flex-col min-h-0 rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white lg:h-full">
+    <div className="flex flex-col min-h-0 rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white h-full">
       <MapSitePanelHeader
         title={title}
         className="bg-neutral-400 border-neutral-300"

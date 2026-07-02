@@ -32,10 +32,10 @@ export default function MapSiteBottomPanels({
 }: MapSiteBottomPanelsProps) {
   return (
     <section className="border-t border-neutral-200">
-      <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-stretch">
-        <div className="bg-[#f8f8f7] px-4 sm:px-8 py-6 sm:py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-start">
+        <div className="bg-[#f8f8f7] px-4 sm:px-8 py-6 sm:py-8 lg:h-[calc(100vh-3rem)]">
           <div className="flex flex-col gap-6 min-h-0 lg:h-full">
-            <div className="flex flex-1 flex-col min-h-[240px] rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white">
+            <div className="flex flex-col min-h-[240px] lg:flex-1 rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white">
               <MapSitePanelHeader
                 title="Play Video"
                 className="bg-neutral-400 border-neutral-300"
@@ -53,7 +53,7 @@ export default function MapSiteBottomPanels({
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col min-h-[240px] rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white">
+            <div className="flex flex-col min-h-[240px] lg:flex-1 rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white">
               <MapSitePanelHeader
                 title="Image Gallery"
                 className="bg-neutral-400 border-neutral-300"
@@ -70,7 +70,7 @@ export default function MapSiteBottomPanels({
           </div>
         </div>
 
-        <div className="bg-[#e2e5ea] px-4 sm:px-8 py-6 sm:py-8 lg:border-l border-neutral-200">
+        <div className="bg-[#e2e5ea] px-4 sm:px-8 py-6 sm:py-8 lg:border-l border-neutral-200 lg:sticky lg:top-6 lg:h-[calc(100vh-3rem)] lg:overflow-hidden lg:flex lg:flex-col">
           <MapSiteContextPanel
             fastCode={fastCode}
             agentName={agentName}

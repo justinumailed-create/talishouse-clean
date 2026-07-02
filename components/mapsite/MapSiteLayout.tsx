@@ -28,7 +28,7 @@ export default function MapSiteLayout({
           agent={data.agent}
         />
 
-        <main className="flex-1 flex flex-col">
+        <main className="flex flex-col">
           <MapSiteAtlistMap
             atlistMapUrl={data.atlistMapUrl}
             propertyTitle={data.propertyTitle}
