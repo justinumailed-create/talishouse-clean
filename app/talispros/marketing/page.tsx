@@ -1,8 +1,18 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { requireMarketingManagerPage } from "@/lib/marketing-manager-auth";
 import { listActiveMapSitesForMarketing } from "@/lib/client-marketing-service";
+import { createMetadata } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = createMetadata({
+  title: "Client Dashboards | Marketing Manager | Talispros™",
+  description:
+    "Select a MapSite™ client to post daily marketing metrics and checklist updates.",
+  path: "/talispros/marketing",
+  private: true,
+});
 
 export default async function MarketingHomePage() {
   await requireMarketingManagerPage();

@@ -26,8 +26,23 @@ export function createMetadata(overrides: {
   title: string;
   description: string;
   path: string;
+  private?: boolean;
 }): Metadata {
   const url = `${SITE_URL}${overrides.path}`;
+  const robots = overrides.private
+    ? { index: false as const, follow: false as const }
+    : {
+        index: true as const,
+        follow: true as const,
+        googleBot: {
+          index: true as const,
+          follow: true as const,
+          "max-video-preview": -1 as const,
+          "max-image-preview": "large" as const,
+          "max-snippet": -1 as const,
+        },
+      };
+
   return {
     metadataBase: new URL(SITE_URL),
     title: overrides.title,
@@ -49,16 +64,6 @@ export function createMetadata(overrides: {
       description: overrides.description,
       images: [OG_IMAGE],
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
+    robots,
   };
 }
