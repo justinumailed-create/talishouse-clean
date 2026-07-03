@@ -1,15 +1,11 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { finalizeRegistrationClientAccess } from "@/lib/client-analytics-auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { generateFastCode } from "@/lib/fast-code-generator";
 import { createMapSite } from "@/lib/mapsite";
 import { completeRootAccountRegistration } from "@/lib/root-account-registration-service";
-import {
-  MAPSITE_ROOT_ACCOUNT_COOKIE,
-  MAPSITE_ROOT_ACCOUNT_MAX_AGE,
-} from "@/lib/mapsite-account-session";
-import { buildMapsiteRedirectUrl } from "@/lib/registration-fast-code-routing";
 
 export interface ProcessPaymentInput {
   email: string;
@@ -27,17 +23,6 @@ export interface ProcessPaymentResult {
   mapsiteId?: string;
   fastCode?: string;
   error?: string;
-}
-
-async function setSubscriberSession(fastCode: string): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.set(MAPSITE_ROOT_ACCOUNT_COOKIE, fastCode.toLowerCase(), {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: MAPSITE_ROOT_ACCOUNT_MAX_AGE,
-  });
 }
 
 export async function processPayment(
@@ -80,12 +65,15 @@ export async function processPayment(
         email: input.email,
       });
 
-      await setSubscriberSession(registration.fastCode);
+      const { redirectUrl } = await finalizeRegistrationClientAccess(
+        input.email,
+        registration.fastCode
+      );
 
       return {
         success: true,
         transactionId: input.paypalCaptureId || input.paypalOrderId,
-        redirectUrl: buildMapsiteRedirectUrl(registration.fastCode),
+        redirectUrl,
         mapsiteId: registration.mapsiteId,
         fastCode: registration.fastCode,
       };
@@ -118,12 +106,15 @@ export async function processPayment(
       throw new Error(`FAST Code record failed: ${fcError.message}`);
     }
 
-    await setSubscriberSession(fastCode);
+    const { redirectUrl } = await finalizeRegistrationClientAccess(
+      input.email,
+      fastCode
+    );
 
     return {
       success: true,
       transactionId: input.paypalCaptureId || input.paypalOrderId,
-      redirectUrl: buildMapsiteRedirectUrl(fastCode),
+      redirectUrl,
       mapsiteId: mapsite.id,
       fastCode,
     };

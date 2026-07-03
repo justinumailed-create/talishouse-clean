@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { isAdminAuthenticated } from "./admin-auth";
 import {
   MAPSITE_OWNER_COOKIE,
-  MAPSITE_OWNER_MAX_AGE,
   MAPSITE_ROOT_ACCOUNT_COOKIE,
 } from "./mapsite-account-session";
 import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
@@ -31,18 +30,7 @@ async function isMapSiteAdmin(): Promise<boolean> {
 }
 
 export async function canEditMapSite(fastCode: string): Promise<boolean> {
-  if (await isMapSiteAdmin()) {
-    return true;
-  }
-
-  const target = normalizeFastCode(fastCode);
-  const ownerCode = await getMapSiteOwnerSession();
-  if (ownerCode === target) {
-    return true;
-  }
-
-  const registeredCode = await getRegisteredMapSiteFastCode();
-  return registeredCode === target;
+  return isMapSiteAdmin();
 }
 
 export async function requireMapSiteEditAccess(fastCode: string): Promise<void> {
@@ -55,7 +43,7 @@ export async function setMapSiteOwnerSession(fastCode: string): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set(MAPSITE_OWNER_COOKIE, fastCode.trim().toLowerCase(), {
     path: "/",
-    maxAge: MAPSITE_OWNER_MAX_AGE,
+    maxAge: 60 * 60 * 24 * 30,
     sameSite: "lax",
   });
 }
@@ -81,6 +69,6 @@ export async function getMapSiteEditToolbarState(
   return {
     isAdmin,
     isOwner: hasOwnerSession || isRegisteredOwner,
-    showToolbar: hasOwnerSession || isRegisteredOwner,
+    showToolbar: isAdmin || hasOwnerSession || isRegisteredOwner,
   };
 }

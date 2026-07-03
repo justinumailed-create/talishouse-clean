@@ -106,7 +106,7 @@ function RegisterForm() {
     const result = await saveRegistration(input);
 
     if (result.success && result.mapsite) {
-      router.push(result.mapsite.url);
+      router.push(result.redirectUrl || "/talispros/client/dashboard");
     } else {
       setError(result.error || "Registration failed. Please contact support.");
       setStep("form");

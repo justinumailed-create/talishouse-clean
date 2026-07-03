@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Check } from "lucide-react";
+import { CLIENT_DASHBOARD_PATH } from "@/lib/mapsite-account-session";
 import { formatCAD } from "@/utils/currency";
 
 function SuccessContent() {
@@ -76,10 +77,10 @@ function SuccessContent() {
 
         <div className="mt-8">
           <Link
-            href="/ma/default"
+            href={CLIENT_DASHBOARD_PATH}
             className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-neutral-800 transition-all"
           >
-            Access My MapSite
+            View Marketing Dashboard
           </Link>
         </div>
 

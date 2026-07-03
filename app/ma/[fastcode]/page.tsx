@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getTalisMapsData } from "@/lib/talismaps";
 import type { Metadata } from "next";
 
@@ -83,6 +84,12 @@ export default async function TalisMapsPage({ params }: { params: Promise<{ fast
               </svg>
             </div>
             <p className="text-sm font-medium text-neutral-900">MapSite™ successfully created.</p>
+            <Link
+              href="/talispros/client/login"
+              className="mt-4 inline-flex items-center justify-center h-10 px-5 rounded-xl bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800"
+            >
+              View Marketing Dashboard
+            </Link>
           </div>
         </div>
 

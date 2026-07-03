@@ -2,7 +2,7 @@ import { createRootAccount } from "./account-service";
 import { createMapSiteFromAccount } from "./mapsite-service";
 import { getSupabaseAdmin } from "./supabaseAdmin";
 import { createUser, updateUserFastCode } from "./user-service";
-import { buildMapsiteRedirectUrl } from "./registration-fast-code-routing";
+import { CLIENT_DASHBOARD_PATH } from "./mapsite-account-session";
 
 export interface CompleteRootAccountRegistrationInput {
   firstName: string;
@@ -57,6 +57,6 @@ export async function completeRootAccountRegistration(
     accountId: account.id,
     fastCode: account.fastCode,
     mapsiteId: mapsite.id,
-    redirectUrl: buildMapsiteRedirectUrl(account.fastCode),
+    redirectUrl: CLIENT_DASHBOARD_PATH,
   };
 }

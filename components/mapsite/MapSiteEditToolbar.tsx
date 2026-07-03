@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { BarChart3, Pencil } from "lucide-react";
 import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
 import type { MapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 
@@ -64,18 +64,28 @@ export default function MapSiteEditToolbar({
     return null;
   }
 
-  const editHref = editAccess.isAdmin
-    ? `/talispros/admin/mapsites/${fastCode}`
-    : `/talispros/mapsites/${fastCode}/edit`;
+  if (editAccess.isAdmin) {
+    return (
+      <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-40 max-w-[calc(100vw-2rem)]">
+        <Link
+          href={`/talispros/admin/mapsites/${fastCode}`}
+          className="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium text-white shadow-lg hover:bg-neutral-800"
+        >
+          <Pencil className="h-4 w-4" />
+          Edit MapSite
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-40 max-w-[calc(100vw-2rem)]">
       <Link
-        href={editHref}
+        href="/talispros/client/login"
         className="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium text-white shadow-lg hover:bg-neutral-800"
       >
-        <Pencil className="h-4 w-4" />
-        Edit MapSite
+        <BarChart3 className="h-4 w-4" />
+        View Analytics
       </Link>
     </div>
   );

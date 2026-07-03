@@ -1,7 +1,8 @@
+import { redirect } from "next/navigation";
 import MapSiteAdminEditor from "@/components/talispros-admin/MapSiteAdminEditor";
 import MapSiteAdminMissing from "@/components/talispros-admin/MapSiteAdminMissing";
-import MapSiteEditGate from "@/components/mapsite/MapSiteEditGate";
 import { canEditMapSite } from "@/lib/mapsite-edit-auth";
+import { CLIENT_LOGIN_PATH } from "@/lib/mapsite-account-session";
 import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 
@@ -15,7 +16,7 @@ export default async function MapSiteOwnerEditPage({
   const { fastCode } = await params;
 
   if (!(await canEditMapSite(fastCode))) {
-    return <MapSiteEditGate fastCode={fastCode} />;
+    redirect(CLIENT_LOGIN_PATH);
   }
 
   const { mapsite, error } = await getMapSiteByFastCodeResult(fastCode);

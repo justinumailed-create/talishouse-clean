@@ -67,12 +67,7 @@ function RegisterMapsiteForm() {
 
     if (result.success && result.mapsite) {
       setMapsiteResult(result.mapsite);
-      const params = new URLSearchParams({
-        fastCode: result.mapsite.fastCode,
-        slug: result.mapsite.slug,
-        url: result.mapsite.url,
-      });
-      router.push(`/registration-success?${params.toString()}`);
+      router.push(result.redirectUrl || "/talispros/client/dashboard");
     } else {
       setError(result.error || "Registration failed. Please contact support.");
       setStep("payment");

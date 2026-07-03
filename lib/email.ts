@@ -4,6 +4,7 @@ import {
   fastCodeGeneratedHtml,
   mapSiteAssignedHtml,
   mapSiteCompletedHtml,
+  weeklyMarketingReportHtml,
 } from "./email-templates";
 
 const resendApiKey = process.env.RESEND_API_KEY;
@@ -116,6 +117,23 @@ export async function sendMapSiteCompleted(params: {
       recipientName: params.recipientName,
       fastCode: params.fastCode,
       mapsiteUrl: params.mapsiteUrl,
+    })
+  );
+}
+
+export async function sendWeeklyMarketingReport(params: {
+  to: string;
+  recipientName: string;
+  fastCode: string;
+  summaryText: string;
+}): Promise<SendResult> {
+  return send(
+    params.to,
+    `Weekly Marketing Summary — ${params.fastCode.toUpperCase()}`,
+    weeklyMarketingReportHtml({
+      recipientName: params.recipientName,
+      fastCode: params.fastCode,
+      summaryText: params.summaryText,
     })
   );
 }

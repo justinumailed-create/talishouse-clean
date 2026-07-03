@@ -21,6 +21,11 @@ interface MapSiteCompletedProps extends BaseEmailProps {
   mapsiteUrl: string;
 }
 
+interface WeeklyMarketingReportProps extends BaseEmailProps {
+  fastCode: string;
+  summaryText: string;
+}
+
 function wrap(content: string) {
   return `<!DOCTYPE html>
 <html>
@@ -222,6 +227,40 @@ export function mapSiteCompletedHtml({ recipientName, fastCode, mapsiteUrl }: Ma
         <p style="margin:16px 0 0;font-size:13px;color:#8e8e93">
           If the button doesn't work, copy and paste this link into your browser:<br>
           <a href="${mapsiteUrl}" style="color:#1d4ed8;font-size:13px">${mapsiteUrl}</a>
+        </p>
+      </td>
+    </tr>
+  `);
+}
+
+export function weeklyMarketingReportHtml({
+  recipientName,
+  fastCode,
+  summaryText,
+}: WeeklyMarketingReportProps) {
+  return wrap(`
+    <tr>
+      <td style="padding-top:24px">
+        <h2 style="margin:0 0 8px;font-size:22px;font-weight:600;color:#111;letter-spacing:-0.3px">
+          Weekly Marketing Summary
+        </h2>
+        <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
+          Hi ${recipientName},
+        </p>
+        <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
+          Here is your weekly performance summary for FAST Code ${fastCode.toUpperCase()}.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="background-color:#f5f5f7;border-radius:10px;padding:16px;margin-bottom:16px">
+          <tr>
+            <td>
+              <p style="margin:0;font-size:15px;color:#111;line-height:1.6">
+                ${summaryText}
+              </p>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:0;font-size:13px;color:#8e8e93">
+          Sign in to your client analytics dashboard anytime for the full breakdown.
         </p>
       </td>
     </tr>

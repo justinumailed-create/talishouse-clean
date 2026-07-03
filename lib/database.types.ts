@@ -596,6 +596,96 @@ export interface Database {
           { foreignKeyName: "pins_category_id_fkey"; columns: ["category_id"]; referencedRelation: "categories"; referencedColumns: ["id"] }
         ]
       }
+      client_marketing_metrics: {
+        Row: {
+          id: string
+          fast_code: string
+          report_date: string
+          facebook_impressions: number
+          instagram_impressions: number
+          total_reach: number
+          emails_received: number
+          texts_received: number
+          pipeline_status: string
+          checklist_notes: string | null
+          posted_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          fast_code: string
+          report_date: string
+          facebook_impressions?: number
+          instagram_impressions?: number
+          total_reach?: number
+          emails_received?: number
+          texts_received?: number
+          pipeline_status?: string
+          checklist_notes?: string | null
+          posted_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          fast_code?: string
+          report_date?: string
+          facebook_impressions?: number
+          instagram_impressions?: number
+          total_reach?: number
+          emails_received?: number
+          texts_received?: number
+          pipeline_status?: string
+          checklist_notes?: string | null
+          posted_by?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      client_weekly_reports: {
+        Row: {
+          id: string
+          fast_code: string
+          week_start: string
+          week_end: string
+          summary_text: string
+          facebook_impressions_total: number
+          instagram_impressions_total: number
+          total_reach_total: number
+          emails_received_total: number
+          texts_received_total: number
+          pipeline_status: string
+          generated_at: string
+        }
+        Insert: {
+          id?: string
+          fast_code: string
+          week_start: string
+          week_end: string
+          summary_text: string
+          facebook_impressions_total?: number
+          instagram_impressions_total?: number
+          total_reach_total?: number
+          emails_received_total?: number
+          texts_received_total?: number
+          pipeline_status?: string
+          generated_at?: string
+        }
+        Update: {
+          id?: string
+          fast_code?: string
+          week_start?: string
+          week_end?: string
+          summary_text?: string
+          facebook_impressions_total?: number
+          instagram_impressions_total?: number
+          total_reach_total?: number
+          emails_received_total?: number
+          texts_received_total?: number
+          pipeline_status?: string
+          generated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

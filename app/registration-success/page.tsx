@@ -8,11 +8,13 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Check, ExternalLink } from "lucide-react";
 
+import { CLIENT_DASHBOARD_PATH } from "@/lib/mapsite-account-session";
+
 function RegistrationSuccessContent() {
   const searchParams = useSearchParams();
   const fastCode = searchParams.get("fastCode") || "";
   const slug = searchParams.get("slug") || "";
-  const url = searchParams.get("url") || `/ma/${slug}`;
+  const url = searchParams.get("url") || CLIENT_DASHBOARD_PATH;
   const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
@@ -63,7 +65,7 @@ function RegistrationSuccessContent() {
 
         <div className="mt-8 p-4 bg-neutral-50 rounded-xl">
           <p className="text-sm text-neutral-500">
-            Redirecting to your MapSite in <span className="font-bold text-neutral-900">{countdown}</span>...
+            Redirecting to your marketing dashboard in <span className="font-bold text-neutral-900">{countdown}</span>...
           </p>
         </div>
 
@@ -72,7 +74,7 @@ function RegistrationSuccessContent() {
             href={url}
             className="w-full h-12 bg-[#2563eb] text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-[#1d4ed8] transition-all"
           >
-            Go to MapSite Now
+            Go to Marketing Dashboard
           </Link>
         </div>
       </div>

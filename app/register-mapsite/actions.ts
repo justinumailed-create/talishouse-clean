@@ -4,6 +4,7 @@
 // Kept for backward compatibility; will be removed in a future release.
 
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { finalizeRegistrationClientAccess } from "@/lib/client-analytics-auth";
 import { createMapSite } from "@/lib/mapsite";
 
 export interface RegisterMapsiteInput {
@@ -25,6 +26,7 @@ export interface RegisterMapsiteResult {
     slug: string;
     url: string;
   };
+  redirectUrl?: string;
   error?: string;
 }
 
@@ -72,9 +74,15 @@ export async function registerMapsite(
       province: input.province,
     });
 
+    const { redirectUrl } = await finalizeRegistrationClientAccess(
+      input.email,
+      mapsite.fastCode
+    );
+
     return {
       success: true,
       mapsite,
+      redirectUrl,
     };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown server error";
