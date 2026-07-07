@@ -1,24 +1,4 @@
-ALTER TABLE build_requests
-  ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT NOW(),
-  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW(),
-  ADD COLUMN IF NOT EXISTS company TEXT,
-  ADD COLUMN IF NOT EXISTS market_type TEXT,
-  ADD COLUMN IF NOT EXISTS property_title TEXT,
-  ADD COLUMN IF NOT EXISTS logo TEXT,
-  ADD COLUMN IF NOT EXISTS gallery_images TEXT[] DEFAULT '{}'::TEXT[],
-  ADD COLUMN IF NOT EXISTS video TEXT,
-  ADD COLUMN IF NOT EXISTS description TEXT,
-  ADD COLUMN IF NOT EXISTS requested_account_type TEXT,
-  ADD COLUMN IF NOT EXISTS requested_fast_code TEXT,
-  ADD COLUMN IF NOT EXISTS assigned_marketing_manager TEXT,
-  ADD COLUMN IF NOT EXISTS notes TEXT,
-  ADD COLUMN IF NOT EXISTS approval_status TEXT,
-  ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS activated_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS linked_account_id UUID,
-  ADD COLUMN IF NOT EXISTS linked_mapsite_id UUID,
-  ADD COLUMN IF NOT EXISTS registration_link TEXT;
-
+-- Repair partially-applied 067 migration: normalize legacy statuses before constraint.
 ALTER TABLE build_requests DROP CONSTRAINT IF EXISTS build_requests_status_check;
 
 UPDATE build_requests
