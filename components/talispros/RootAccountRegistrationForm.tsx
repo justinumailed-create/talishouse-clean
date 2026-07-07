@@ -30,6 +30,7 @@ interface RootAccountRegistrationFormProps {
   market?: RegistrationMarket;
   initialAccount?: RegistrationAccountCategory;
   initialSponsor?: string;
+  buildRequestId?: string;
 }
 
 const DERIVATIVE_SPONSOR_COPY =
@@ -44,6 +45,7 @@ export default function RootAccountRegistrationForm({
   market,
   initialAccount = "root",
   initialSponsor,
+  buildRequestId,
 }: RootAccountRegistrationFormProps) {
   const router = useRouter();
   const isPanel = variant === "panel";
@@ -251,6 +253,7 @@ export default function RootAccountRegistrationForm({
       planType,
       paypalOrderId: details.id,
       paypalCaptureId: details.captureId || details.id,
+      buildRequestId,
     });
 
     if (result.success && result.redirectUrl) {

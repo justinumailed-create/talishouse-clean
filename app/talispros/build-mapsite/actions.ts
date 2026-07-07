@@ -2,24 +2,13 @@
 
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { Database } from "@/lib/database.types";
-import { publishBuildMapSite } from "@/lib/build-mapsite-publish";
 import { uploadBuildMapsiteAsset } from "@/lib/build-mapsite-upload";
-import {
-  lookupFastCodeRegistrationTier,
-  buildMapsiteRedirectUrl,
-  type RegistrationFastCodeTier,
-} from "@/lib/registration-fast-code-routing";
-import {
-  sendBuildRequestReceived,
-  sendFastCodeGenerated,
-} from "@/lib/email";
-import { generateFastCode } from "@/services/fast-code.service";
-import { FastCodeValidationError } from "@/validators/fast-code.validator";
+import { lookupFastCodeRegistrationTier, type RegistrationFastCodeTier } from "@/lib/registration-fast-code-routing";
+import { sendBuildRequestReceived } from "@/lib/email";
 
 export interface ActionResult {
   success: boolean;
-  fastCode?: string;
-  redirectUrl?: string;
+  requestId?: string;
   error?: string;
 }
 
@@ -246,7 +235,7 @@ export async function submitBuildRequest(
     const hasCoordinates =
       Number.isFinite(parsedLatitude) && Number.isFinite(parsedLongitude);
 
-    const buildRequest: Database["public"]["Tables"]["build_requests"]["Insert"] = {
+    const buildRequest = {
       id: requestId,
       first_name: fields.firstName.trim(),
       last_name: fields.lastName.trim(),
@@ -266,7 +255,19 @@ export async function submitBuildRequest(
       future_pin_icon: fields.futurePinIcon.trim() || null,
       future_pin_border: fields.futurePinBorder.trim() || null,
       future_pin_label: fields.futurePinLabel.trim() || null,
-      status: "pending",
+      status: "Submitted",
+      submitted_at: new Date().toISOString(),
+      requested_account_type: fields.accountType,
+      requested_fast_code: sponsorFastCode,
+      approval_status: "Pending",
+      notes: fields.additionalComments.trim() || null,
+      description: fields.pinWriteup.trim() || null,
+      company: null,
+      market_type: null,
+      property_title: fields.futurePinLabel.trim() || null,
+      logo: fileUrls.logo ?? null,
+      gallery_images: tebPictureUrls,
+      video: fileUrls.ttvBackgroundImage ?? null,
     };
 
     const { error: buildError } = await supabaseAdmin
@@ -281,67 +282,7 @@ export async function submitBuildRequest(
       };
     }
 
-    let fastCode: string;
-    try {
-      fastCode = await generateFastCode({
-        firstName: fields.firstName,
-        lastName: fields.lastName,
-      });
-    } catch (err) {
-      const message =
-        err instanceof FastCodeValidationError
-          ? err.message
-          : err instanceof Error
-            ? err.message
-            : "Unable to generate FAST Code";
-      return { success: false, error: message };
-    }
-
-    const published = await publishBuildMapSite({
-      fastCode,
-      firstName: fields.firstName,
-      lastName: fields.lastName,
-      email: fields.email,
-      accountType: fields.accountType,
-      streetAddress: fields.streetAddress,
-      latitude: hasCoordinates ? parsedLatitude : null,
-      longitude: hasCoordinates ? parsedLongitude : null,
-      pinWriteup: fields.pinWriteup,
-      futurePinLabel: fields.futurePinLabel,
-      profileImageUrl: fileUrls.picture ?? null,
-      logoImageUrl: fileUrls.logo ?? null,
-      headerImageUrl: fileUrls.ttvBackgroundImage ?? null,
-      galleryImageUrls: tebPictureUrls,
-      sponsorFastCode,
-    });
-
-    fastCode = published.fastCode;
-
-    const fastCodeRecord: Database["public"]["Tables"]["fast_codes"]["Insert"] = {
-      code: fastCode,
-      type: "mapsite",
-      request_id: requestId,
-      mapsite_id: published.mapsiteId,
-      account_type: fields.accountType,
-    };
-
-    const { error: fcError } = await supabaseAdmin
-      .from("fast_codes")
-      .insert(fastCodeRecord);
-
-    if (fcError) {
-      console.error("[build-mapsite] Fast code insert error:", fcError);
-      return {
-        success: false,
-        error: `Failed to save FAST Code: ${fcError.message}`,
-      };
-    }
-
     const recipientName = `${fields.firstName.trim()} ${fields.lastName.trim()}`.trim();
-    const redirectUrl = buildMapsiteRedirectUrl(fastCode);
-    const mapsiteUrl =
-      process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
-      "https://talispros.com";
 
     sendBuildRequestReceived({
       to: fields.email.trim(),
@@ -350,17 +291,6 @@ export async function submitBuildRequest(
     }).then((result) => {
       if (!result.sent) {
         console.warn("[build-mapsite] Build request email not sent:", result.error);
-      }
-    });
-
-    sendFastCodeGenerated({
-      to: fields.email.trim(),
-      recipientName,
-      fastCode,
-      mapsiteUrl: `${mapsiteUrl}${redirectUrl}`,
-    }).then((result) => {
-      if (!result.sent) {
-        console.warn("[build-mapsite] Fast code email not sent:", result.error);
       }
     });
 
@@ -416,10 +346,8 @@ export async function submitBuildRequest(
       record_id: requestId,
       action: "created",
       details: {
-        fastCode,
+        requestId,
         sponsorFastCode: sponsorFastCode ?? undefined,
-        mapsiteId: published.mapsiteId,
-        redirectUrl,
         helpPreference: fields.helpPreference,
         additionalComments: fields.additionalComments,
         streetAddress: fields.streetAddress,
@@ -444,7 +372,7 @@ export async function submitBuildRequest(
       console.error("[build-mapsite] Activity log insert error:", logError);
     }
 
-    return { success: true, fastCode, redirectUrl };
+    return { success: true, requestId };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown server error";
     console.error("[build-mapsite] Submission error:", err);

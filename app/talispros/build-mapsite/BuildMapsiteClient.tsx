@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useSyncExternalStore, FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import {
   ChevronDown,
   Upload,
@@ -353,8 +352,6 @@ function AccountTypeSelector({ value, onChange, error }: { value: string; onChan
 }
 
 export default function BuildMapsiteClient() {
-  const router = useRouter();
-
   useEffect(() => {
     document.documentElement.style.height = "auto";
     document.body.style.minHeight = "auto";
@@ -367,7 +364,7 @@ export default function BuildMapsiteClient() {
   const [openSections, setOpenSections] = useState<Set<number>>(new Set([1]));
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [submitError, setSubmitError] = useState("");
-  const [generatedFastCode, setGeneratedFastCode] = useState("");
+  const [submittedRequestId, setSubmittedRequestId] = useState("");
   const [copied, setCopied] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [form, setForm] = useState<FormData>(loadStoredForm);
@@ -474,8 +471,8 @@ export default function BuildMapsiteClient() {
     return Object.keys(errs).length === 0;
   }
   function handleCopy() {
-    if (!generatedFastCode) return;
-    navigator.clipboard.writeText(generatedFastCode);
+    if (!submittedRequestId) return;
+    navigator.clipboard.writeText(submittedRequestId);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -553,22 +550,9 @@ export default function BuildMapsiteClient() {
         fd.append("tebPictureUrls", JSON.stringify(tebPictureUrls));
       }
       const result: BuildResult = await submitBuildRequest(fd);
-      if (result.success) {
-        const destination =
-          result.redirectUrl ||
-          (result.fastCode
-            ? `/talispros/mapsites/${result.fastCode.trim().toLowerCase()}`
-            : null);
-        if (destination) {
-          localStorage.removeItem(STORAGE_KEY);
-          localStorage.removeItem("talispros_build_mapsite_submitted");
-          router.replace(destination);
-          return;
-        }
-      }
-      if (result.success && result.fastCode) {
-        setGeneratedFastCode(result.fastCode);
-        localStorage.setItem("talispros_build_mapsite_submitted", JSON.stringify({ form, submittedAt: new Date().toISOString(), fastCode: result.fastCode }));
+      if (result.success && result.requestId) {
+        setSubmittedRequestId(result.requestId);
+        localStorage.setItem("talispros_build_mapsite_submitted", JSON.stringify({ form, submittedAt: new Date().toISOString(), requestId: result.requestId }));
         setSubmitted(true);
       } else {
         setSubmitError(result.error || "Something went wrong. Please try again.");
@@ -592,7 +576,7 @@ export default function BuildMapsiteClient() {
     setOpenSections(new Set([1]));
     setSubmitted(false);
     setSubmitError("");
-    setGeneratedFastCode("");
+    setSubmittedRequestId("");
     setFastCodeValidated(false);
     setValidatedFastCode("");
     localStorage.removeItem(STORAGE_KEY);
@@ -615,12 +599,12 @@ export default function BuildMapsiteClient() {
             Your Build A MapSite™ Request Has Been Received
           </h1>
           <p className="text-neutral-500 text-sm sm:text-base leading-relaxed mb-8 max-w-sm mx-auto">
-            We will review your request and contact you within two business days.
+            Thank you! Your request has been received. A Marketing Manager will review your submission and contact you before your MapSite™ is published.
           </p>
           <div className="border border-neutral-200 rounded-2xl bg-white p-6 sm:p-8 text-left mb-8">
-            <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-3">Request Number</p>
+            <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-3">Build Request ID</p>
             <div className="flex items-center justify-center gap-3">
-              <span className="text-3xl sm:text-4xl font-bold tracking-tight text-neutral-900">{generatedFastCode}</span>
+              <span className="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900">{submittedRequestId}</span>
               <button onClick={handleCopy} className="flex-shrink-0 w-10 h-10 border border-neutral-300 rounded-xl flex items-center justify-center hover:bg-neutral-100 transition-colors" title="Copy Request Number">
                 {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4 text-neutral-400" />}
               </button>
@@ -631,11 +615,6 @@ export default function BuildMapsiteClient() {
             </div>
           </div>
           <div className="flex flex-col gap-3">
-            <Link href={`/talispros/mapsites/${generatedFastCode.toLowerCase()}`}
-              className="w-full h-12 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all"
-            >
-              Open Your MapSite™ →
-            </Link>
             <Link href="/" className="w-full h-12 bg-[#2563eb] text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-[#1d4ed8] active:scale-[0.98] transition-all">
               Return to Home
             </Link>
@@ -659,8 +638,7 @@ export default function BuildMapsiteClient() {
                 Build A MapSite™
               </h1>
               <p className="text-sm sm:text-base text-neutral-500 mt-2 max-w-md mx-auto leading-relaxed">
-                Set up your MapSite™ account. Enter the required information below
-                and we will process your request within two business days.
+                Submit your onboarding request for Marketing Manager review before publication.
               </p>
             </div>
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
@@ -841,7 +819,7 @@ export default function BuildMapsiteClient() {
                   <button type="submit" disabled={saving}
                     className="w-full sm:w-auto px-10 h-12 bg-[#2563eb] text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-[#1d4ed8] active:scale-[0.98] transition-all disabled:opacity-50 shadow-sm"
                   >
-                    {saving ? <div className="flex items-center gap-3"><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /><span>Submitting...</span></div> : <>Submit</>}
+                    {saving ? <div className="flex items-center gap-3"><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /><span>Submitting...</span></div> : <>Submit Build Request</>}
                   </button>
                 </div>
               </div>

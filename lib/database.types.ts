@@ -21,6 +21,25 @@ export interface Database {
           future_pin_border: string | null
           future_pin_label: string | null
           status: string
+          submitted_at: string | null
+          updated_at: string | null
+          company: string | null
+          market_type: string | null
+          property_title: string | null
+          logo: string | null
+          gallery_images: string[]
+          video: string | null
+          description: string | null
+          requested_account_type: string | null
+          requested_fast_code: string | null
+          assigned_marketing_manager: string | null
+          notes: string | null
+          approval_status: string | null
+          approved_at: string | null
+          activated_at: string | null
+          linked_account_id: string | null
+          linked_mapsite_id: string | null
+          registration_link: string | null
           created_at: string
         }
         Insert: {
@@ -42,6 +61,25 @@ export interface Database {
           future_pin_border?: string | null
           future_pin_label?: string | null
           status?: string
+          submitted_at?: string | null
+          updated_at?: string | null
+          company?: string | null
+          market_type?: string | null
+          property_title?: string | null
+          logo?: string | null
+          gallery_images?: string[]
+          video?: string | null
+          description?: string | null
+          requested_account_type?: string | null
+          requested_fast_code?: string | null
+          assigned_marketing_manager?: string | null
+          notes?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          activated_at?: string | null
+          linked_account_id?: string | null
+          linked_mapsite_id?: string | null
+          registration_link?: string | null
           created_at?: string
         }
         Update: {
@@ -63,7 +101,53 @@ export interface Database {
           future_pin_border?: string | null
           future_pin_label?: string | null
           status?: string
+          submitted_at?: string | null
+          updated_at?: string | null
+          company?: string | null
+          market_type?: string | null
+          property_title?: string | null
+          logo?: string | null
+          gallery_images?: string[]
+          video?: string | null
+          description?: string | null
+          requested_account_type?: string | null
+          requested_fast_code?: string | null
+          assigned_marketing_manager?: string | null
+          notes?: string | null
+          approval_status?: string | null
+          approved_at?: string | null
+          activated_at?: string | null
+          linked_account_id?: string | null
+          linked_mapsite_id?: string | null
+          registration_link?: string | null
           created_at?: string
+        }
+        Relationships: []
+      }
+      build_request_registrations: {
+        Row: {
+          id: string
+          build_request_id: string
+          registration_link: string
+          status: string
+          created_at: string
+          completed_at: string | null
+        }
+        Insert: {
+          id?: string
+          build_request_id: string
+          registration_link: string
+          status?: string
+          created_at?: string
+          completed_at?: string | null
+        }
+        Update: {
+          id?: string
+          build_request_id?: string
+          registration_link?: string
+          status?: string
+          created_at?: string
+          completed_at?: string | null
         }
         Relationships: []
       }

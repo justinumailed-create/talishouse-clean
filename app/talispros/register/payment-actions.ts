@@ -1,6 +1,5 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { finalizeRegistrationClientAccess } from "@/lib/client-analytics-auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { generateFastCode } from "@/lib/fast-code-generator";
@@ -14,6 +13,7 @@ export interface ProcessPaymentInput {
   planType: string;
   paypalOrderId?: string;
   paypalCaptureId?: string;
+  buildRequestId?: string;
 }
 
 export interface ProcessPaymentResult {
@@ -58,7 +58,7 @@ export async function processPayment(
       throw new Error(`Payment record failed: ${paymentError.message}`);
     }
 
-    if (input.planType === "ROOT_ACCOUNT") {
+    if (input.planType === "ROOT_ACCOUNT" && !input.buildRequestId) {
       const registration = await completeRootAccountRegistration({
         firstName: input.firstName,
         lastName: input.lastName,
@@ -79,17 +79,34 @@ export async function processPayment(
       };
     }
 
-    const { data: existingCodes } = await supabaseAdmin
-      .from("fast_codes")
-      .select("code");
+    let fastCode = "";
+    let buildRequestPlan = input.planType;
+    if (input.buildRequestId) {
+      const { data: buildRequest } = await supabaseAdmin
+        .from("build_requests")
+        .select("id, requested_fast_code, requested_account_type")
+        .eq("id", input.buildRequestId)
+        .single();
+      if (buildRequest?.requested_fast_code) {
+        fastCode = buildRequest.requested_fast_code;
+      }
+      if (buildRequest?.requested_account_type) {
+        buildRequestPlan = buildRequest.requested_account_type;
+      }
+      await supabaseAdmin
+        .from("build_requests")
+        .update({ status: "Registered" })
+        .eq("id", input.buildRequestId);
+    }
 
-    const fastCode = generateFastCode(
-      (existingCodes || []).map((r) => r.code)
-    );
+    if (!fastCode) {
+      const { data: existingCodes } = await supabaseAdmin.from("fast_codes").select("code");
+      fastCode = generateFastCode((existingCodes || []).map((r) => r.code));
+    }
 
     const mapsite = await createMapSite({
       fastCode,
-      accountType: input.planType,
+      accountType: buildRequestPlan,
       ownerFirstName: input.firstName,
       ownerLastName: input.lastName,
       email: input.email,
@@ -98,9 +115,25 @@ export async function processPayment(
     const { error: fcError } = await supabaseAdmin.from("fast_codes").insert({
       code: fastCode,
       type: "mapsite",
-      account_type: input.planType,
+      account_type: buildRequestPlan,
       mapsite_id: mapsite.id,
     });
+    if (input.buildRequestId) {
+      await supabaseAdmin
+        .from("build_request_registrations")
+        .update({ status: "completed", completed_at: new Date().toISOString() })
+        .eq("build_request_id", input.buildRequestId);
+      await supabaseAdmin
+        .from("build_requests")
+        .update({
+          status: "MapSite Active",
+          activated_at: new Date().toISOString(),
+          linked_mapsite_id: mapsite.id,
+          requested_fast_code: fastCode,
+        })
+        .eq("id", input.buildRequestId);
+    }
+
 
     if (fcError) {
       throw new Error(`FAST Code record failed: ${fcError.message}`);

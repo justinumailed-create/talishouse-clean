@@ -65,6 +65,7 @@ function RegisterForm() {
     searchParams.get("parentFastCode") ||
     undefined;
   const marketCopy = REGISTRATION_MARKET_COPY[market];
+  const buildRequestId = searchParams.get("request") || undefined;
 
   return (
     <div className="flex flex-col h-screen lg:h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
@@ -88,6 +89,7 @@ function RegisterForm() {
               market={market}
               initialAccount={initialAccount}
               initialSponsor={sponsor}
+              buildRequestId={buildRequestId}
             />
           </div>
         </div>
