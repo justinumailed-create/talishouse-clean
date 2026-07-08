@@ -283,87 +283,10 @@ async function buildMapSiteView(
 export async function getPublicMapSiteByFastCode(
   fastCode: string
 ): Promise<MapSiteView | null> {
-  const code = fastCode.trim();
-  if (!code) {
-    return null;
-  }
-
-  const { data: mapsite, error } = await supabase
-    .from("mapsites")
-    .select("*")
-    .ilike("fast_code", code)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (error || !mapsite) {
-    return null;
-  }
-
-  const { data: pinRows } = await supabase
-    .from("pins")
-    .select("*")
-    .eq("mapsite_id", mapsite.id)
-    .order("sort_order");
-
-  const pins: MapSitePinView[] = (pinRows || []).map((pin) => ({
-    id: pin.id,
-    name: pin.name,
-    description: pin.description || "",
-    latitude: pin.latitude,
-    longitude: pin.longitude,
-    address: pin.address || "",
-    city: pin.city || "",
-    province: pin.province || "",
-    postalCode: pin.postal_code || "",
-    country: pin.country || "",
-    website: pin.website || "",
-    phone: pin.phone || "",
-    email: pin.email || "",
-    featured: pin.featured || false,
-    sortOrder: pin.sort_order || 0,
-  }));
-
-  const galleryItems = resolveMapsiteGalleryItems(
-    mapsite.gallery_items,
-    mapsite.gallery_images || []
-  );
-
-  return {
-    id: mapsite.id,
-    fastCode: mapsite.fast_code,
-    accountId: mapsite.account_id,
-    slug: mapsite.slug,
-    accountType: mapsite.account_type,
-    ownerFirstName: mapsite.owner_first_name,
-    ownerLastName: mapsite.owner_last_name,
-    agentName: mapsite.agent_name,
-    email: mapsite.email,
-    phone: mapsite.phone || "",
-    website: mapsite.website,
-    status: mapsite.status,
-    propertyTitle: mapsite.property_title,
-    propertyAddress: mapsite.property_address,
-    propertyDescription: mapsite.property_description,
-    latitude: mapsite.latitude,
-    longitude: mapsite.longitude,
-    price: mapsite.price,
-    profileImageUrl: mapsite.profile_image_url,
-    logoUrl: mapsite.logo_url,
-    headerImageUrl: mapsite.header_image_url || null,
-    videoUrl: mapsite.video_url,
-    galleryImages: galleryItemsToLegacyUrls(galleryItems),
-    galleryItems,
-    mapZoom: mapsite.map_zoom,
-    metaTitle: mapsite.meta_title,
-    metaDescription: mapsite.meta_description,
-    ogImageUrl: mapsite.og_image_url,
-    atlistMapUrl: mapsite.atlist_map_url,
-    offeredSubscriptionTier: mapsite.offered_subscription_tier ?? "root",
-    interestFormEnabled: mapsite.interest_form_enabled ?? true,
-    createdAt: mapsite.created_at,
-    updatedAt: mapsite.updated_at,
-    pins,
-  };
+  const mapsite = await getMapSiteByFastCode(fastCode);
+  if (!mapsite) return null;
+  if (mapsite.status !== "active" && mapsite.status !== "draft") return null;
+  return mapsite;
 }
 
 export async function createMapSiteForAccount(

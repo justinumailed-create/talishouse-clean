@@ -15,6 +15,7 @@ interface MapSiteContextPanelProps {
   interestFormEnabled: boolean;
   initialHasSubscribed: boolean;
   initialVisitorFastCode?: string | null;
+  buildRequestId?: string;
 }
 
 export default function MapSiteContextPanel({
@@ -25,6 +26,7 @@ export default function MapSiteContextPanel({
   interestFormEnabled,
   initialHasSubscribed,
   initialVisitorFastCode = null,
+  buildRequestId,
 }: MapSiteContextPanelProps) {
   const [hasSubscribed, setHasSubscribed] = useState(initialHasSubscribed);
   const [visitorFastCode, setVisitorFastCode] = useState<string | null>(
@@ -101,7 +103,10 @@ export default function MapSiteContextPanel({
             this MapSite.
           </div>
         ) : (
-          <RootAccountRegistrationPanel allowedTier={offeredSubscriptionTier} />
+          <RootAccountRegistrationPanel
+            allowedTier={offeredSubscriptionTier}
+            buildRequestId={buildRequestId}
+          />
         )}
       </div>
     </div>

@@ -16,6 +16,7 @@ interface MapSiteBottomPanelsProps {
   visitorFastCode: string | null;
   offeredSubscriptionTier: OfferedSubscriptionTier;
   interestFormEnabled: boolean;
+  buildRequestId?: string;
 }
 
 export default function MapSiteBottomPanels({
@@ -29,6 +30,7 @@ export default function MapSiteBottomPanels({
   visitorFastCode,
   offeredSubscriptionTier,
   interestFormEnabled,
+  buildRequestId,
 }: MapSiteBottomPanelsProps) {
   return (
     <section className="border-t border-neutral-200">
@@ -79,6 +81,7 @@ export default function MapSiteBottomPanels({
             interestFormEnabled={interestFormEnabled}
             initialHasSubscribed={visitorHasSubscribed}
             initialVisitorFastCode={visitorFastCode}
+            buildRequestId={buildRequestId}
           />
         </div>
       </div>

@@ -5,6 +5,7 @@ import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
 import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
 import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import { getPublicMapSiteByFastCode } from "@/lib/mapsite-service";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 export const dynamic = "force-dynamic";
 
@@ -44,14 +45,21 @@ export default async function TalisprosMapSitePage({
   const { fastCode } = await params;
   const mapsite = await getPublicMapSiteByFastCode(fastCode);
 
-  if (!mapsite || mapsite.status !== "active") {
+  if (!mapsite || (mapsite.status !== "active" && mapsite.status !== "draft")) {
     notFound();
   }
 
   const layoutData = buildMapSiteLayoutData(mapsite);
-  const [visitorStatus, editAccess] = await Promise.all([
+  const [visitorStatus, editAccess, buildRequestLink] = await Promise.all([
     getMapSiteVisitorAccountStatus(),
     getMapSiteEditToolbarState(fastCode),
+    getSupabaseAdmin()
+      .from("build_requests")
+      .select("id")
+      .or(`linked_mapsite_id.eq.${mapsite.id},requested_fast_code.eq.${mapsite.fastCode}`)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   return (
@@ -60,6 +68,7 @@ export default async function TalisprosMapSitePage({
       visitorHasSubscribed={visitorStatus.hasSubscribed}
       visitorFastCode={visitorStatus.fastCode}
       editAccess={editAccess}
+      buildRequestId={buildRequestLink.data?.id}
     />
   );
 }

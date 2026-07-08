@@ -1,10 +1,12 @@
 "use server";
 
+import { createRootAccount } from "@/lib/account-service";
 import { finalizeRegistrationClientAccess } from "@/lib/client-analytics-auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { generateFastCode } from "@/lib/fast-code-generator";
 import { createMapSite } from "@/lib/mapsite";
 import { completeRootAccountRegistration } from "@/lib/root-account-registration-service";
+import { createUser, updateUserFastCode } from "@/lib/user-service";
 
 export interface ProcessPaymentInput {
   email: string;
@@ -83,24 +85,23 @@ export async function processPayment(
     }
 
     let fastCode = "";
-    let buildRequestPlan =
-      input.planType === "TEST_ACCOUNT" ? "ROOT_ACCOUNT" : input.planType;
+    let accountTypeLabel = "root";
+    let linkedMapsiteId: string | null = null;
     if (input.buildRequestId) {
       const { data: buildRequest } = await supabaseAdmin
         .from("build_requests")
-        .select("id, requested_fast_code, requested_account_type")
+        .select("id, requested_fast_code, requested_account_type, linked_mapsite_id")
         .eq("id", input.buildRequestId)
         .single();
       if (buildRequest?.requested_fast_code) {
         fastCode = buildRequest.requested_fast_code;
       }
       if (buildRequest?.requested_account_type) {
-        buildRequestPlan = buildRequest.requested_account_type;
+        accountTypeLabel = buildRequest.requested_account_type;
+      } else if (input.planType === "TEST_ACCOUNT" || input.planType === "ROOT_ACCOUNT") {
+        accountTypeLabel = "root";
       }
-      await supabaseAdmin
-        .from("build_requests")
-        .update({ status: "Registered" })
-        .eq("id", input.buildRequestId);
+      linkedMapsiteId = buildRequest?.linked_mapsite_id ?? null;
     }
 
     if (!fastCode) {
@@ -108,20 +109,64 @@ export async function processPayment(
       fastCode = generateFastCode((existingCodes || []).map((r) => r.code));
     }
 
-    const mapsite = await createMapSite({
-      fastCode,
-      accountType: buildRequestPlan,
-      ownerFirstName: input.firstName,
-      ownerLastName: input.lastName,
+    const mapsite = linkedMapsiteId
+      ? {
+          id: linkedMapsiteId,
+          fastCode,
+        }
+      : await createMapSite({
+          fastCode,
+          accountType: accountTypeLabel,
+          ownerFirstName: input.firstName,
+          ownerLastName: input.lastName,
+          email: input.email,
+        });
+
+    const user = await createUser({
+      firstName: input.firstName,
+      lastName: input.lastName,
       email: input.email,
+      role: accountTypeLabel === "root" || input.planType === "TEST_ACCOUNT" ? "root" : "user",
     });
 
-    const { error: fcError } = await supabaseAdmin.from("fast_codes").insert({
-      code: fastCode,
-      type: "mapsite",
-      account_type: buildRequestPlan,
-      mapsite_id: mapsite.id,
+    const account = await createRootAccount({
+      firstName: input.firstName,
+      lastName: input.lastName,
+      email: input.email,
+      userId: user.id,
+      fastCode,
     });
+    await updateUserFastCode(user.id, account.fastCode);
+
+    await supabaseAdmin
+      .from("mapsites")
+      .update({
+        fast_code: account.fastCode,
+        account_id: account.id,
+        account_type:
+          input.planType === "TEST_ACCOUNT" ? "TEST Account" : accountTypeLabel,
+        owner_first_name: input.firstName,
+        owner_last_name: input.lastName,
+        email: input.email,
+        status: "active",
+        interest_form_enabled: true,
+      })
+      .eq("id", mapsite.id);
+
+    const { error: fcError } = await supabaseAdmin.from("fast_codes").upsert(
+      {
+        code: account.fastCode,
+        type: "mapsite",
+        account_type: accountTypeLabel,
+        mapsite_id: mapsite.id,
+        request_id: input.buildRequestId ?? null,
+      },
+      { onConflict: "code" }
+    );
+    if (fcError) {
+      throw new Error(`FAST Code record failed: ${fcError.message}`);
+    }
+
     if (input.buildRequestId) {
       await supabaseAdmin
         .from("build_request_registrations")
@@ -130,22 +175,18 @@ export async function processPayment(
       await supabaseAdmin
         .from("build_requests")
         .update({
-          status: "MapSite Active",
+          status: "Registered",
           activated_at: new Date().toISOString(),
           linked_mapsite_id: mapsite.id,
-          requested_fast_code: fastCode,
+          linked_account_id: account.id,
+          requested_fast_code: account.fastCode,
         })
         .eq("id", input.buildRequestId);
     }
 
-
-    if (fcError) {
-      throw new Error(`FAST Code record failed: ${fcError.message}`);
-    }
-
     const { redirectUrl } = await finalizeRegistrationClientAccess(
       input.email,
-      fastCode
+      account.fastCode
     );
 
     return {
@@ -153,7 +194,7 @@ export async function processPayment(
       transactionId: input.paypalCaptureId || input.paypalOrderId,
       redirectUrl,
       mapsiteId: mapsite.id,
-      fastCode,
+      fastCode: account.fastCode,
     };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown server error";

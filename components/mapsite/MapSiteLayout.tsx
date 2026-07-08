@@ -11,6 +11,7 @@ interface MapSiteLayoutProps {
   visitorHasSubscribed: boolean;
   visitorFastCode: string | null;
   editAccess: MapSiteEditToolbarState;
+  buildRequestId?: string;
 }
 
 export default function MapSiteLayout({
@@ -18,6 +19,7 @@ export default function MapSiteLayout({
   visitorHasSubscribed,
   visitorFastCode,
   editAccess,
+  buildRequestId,
 }: MapSiteLayoutProps) {
   return (
     <div className="min-h-screen bg-neutral-200">
@@ -44,6 +46,7 @@ export default function MapSiteLayout({
             visitorFastCode={visitorFastCode}
             offeredSubscriptionTier={data.offeredSubscriptionTier}
             interestFormEnabled={data.interestFormEnabled}
+            buildRequestId={buildRequestId}
           />
         </main>
 

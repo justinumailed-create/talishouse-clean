@@ -1,49 +1,51 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 import {
   assignFastCode,
   generateDraftMapSite,
+  listBuildRequests,
   sendRegistration,
   setBuildRequestStatus,
+  type BuildRequestListRow,
 } from "./actions";
 
-type BuildRequestRow = {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone: string | null;
-  company: string | null;
-  market_type: string | null;
-  requested_account_type: string | null;
-  requested_fast_code: string | null;
-  registration_link: string | null;
-  status: string;
-  created_at: string;
-};
+type BuildRequestRow = BuildRequestListRow;
 
 export default function AdminMarketingPage() {
   const [rows, setRows] = useState<BuildRequestRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [pending, startTransition] = useTransition();
+  const [queryError, setQueryError] = useState<string | null>(null);
 
-  async function refresh() {
-    const { data } = await supabase
-      .from("build_requests")
-      .select(
-        "id, first_name, last_name, email, phone, company, market_type, requested_account_type, requested_fast_code, registration_link, status, created_at"
-      )
-      .order("created_at", { ascending: false });
-    setRows((data as BuildRequestRow[]) || []);
-    setLoading(false);
+  async function fetchRows(): Promise<{ data: BuildRequestRow[]; error: string | null }> {
+    const result = await listBuildRequests();
+    if (!result.ok) return { data: [], error: result.error || "Unable to load build requests" };
+    return { data: result.data, error: null };
   }
 
-  useEffect(() => {
-    void refresh();
+  const refresh = useCallback(async () => {
+    const { data, error } = await fetchRows();
+    setRows(data);
+    setQueryError(error);
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    const initialLoad = window.setTimeout(() => {
+      void refresh();
+    }, 0);
+
+    const poll = window.setInterval(() => {
+      void refresh();
+    }, 5000);
+
+    return () => {
+      window.clearTimeout(initialLoad);
+      window.clearInterval(poll);
+    };
+  }, [refresh]);
 
   const runAction = (action: () => Promise<{ ok: boolean; error?: string }>) => {
     startTransition(async () => {
@@ -60,24 +62,40 @@ export default function AdminMarketingPage() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Marketing Manager</h1>
-        <p className="text-sm text-gray-500 mt-1">Build Requests production queue</p>
+        <p className="text-sm text-gray-500 mt-1">Manage production workflow and registration handoff</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-x-auto">
+      <section className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
+        <div className="px-4 py-3 border-b border-neutral-200 bg-neutral-50 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-neutral-900">Build Requests</h2>
+            <p className="text-xs text-neutral-500">Submissions from /talispros/build-mapsite</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => void refresh()}
+            className="px-3 py-1.5 text-xs rounded bg-white border border-neutral-300 hover:bg-neutral-100"
+            disabled={pending}
+          >
+            Refresh
+          </button>
+        </div>
+        {queryError ? (
+          <div className="px-4 py-3 border-b border-red-200 bg-red-50 text-sm text-red-700">
+            Failed to load build requests: {queryError}
+          </div>
+        ) : null}
+        <div className="overflow-x-auto">
         {loading ? (
           <div className="p-6 text-sm text-neutral-500">Loading build requests...</div>
         ) : (
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-neutral-50 border-b border-neutral-200">
-                <th className="text-left py-3 px-4">FAST Code</th>
                 <th className="text-left py-3 px-4">Client Name</th>
-                <th className="text-left py-3 px-4">Company</th>
                 <th className="text-left py-3 px-4">Email</th>
-                <th className="text-left py-3 px-4">Phone</th>
-                <th className="text-left py-3 px-4">Requested Market</th>
-                <th className="text-left py-3 px-4">Submission Date</th>
                 <th className="text-left py-3 px-4">Requested Account Type</th>
+                <th className="text-left py-3 px-4">Submission Date</th>
                 <th className="text-left py-3 px-4">Status</th>
                 <th className="text-left py-3 px-4">Actions</th>
               </tr>
@@ -85,14 +103,12 @@ export default function AdminMarketingPage() {
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id} className="border-b border-neutral-100">
-                  <td className="py-3 px-4 font-mono text-xs">{row.requested_fast_code || "—"}</td>
                   <td className="py-3 px-4">{row.first_name} {row.last_name}</td>
-                  <td className="py-3 px-4">{row.company || "—"}</td>
                   <td className="py-3 px-4">{row.email}</td>
-                  <td className="py-3 px-4">{row.phone || "—"}</td>
-                  <td className="py-3 px-4">{row.market_type || "—"}</td>
-                  <td className="py-3 px-4">{new Date(row.created_at).toLocaleDateString()}</td>
                   <td className="py-3 px-4">{row.requested_account_type || "—"}</td>
+                  <td className="py-3 px-4">
+                    {new Date(row.submitted_at || row.created_at || new Date().toISOString()).toLocaleDateString()}
+                  </td>
                   <td className="py-3 px-4">{row.status}</td>
                   <td className="py-3 px-4">
                     <div className="flex flex-wrap gap-2">
@@ -120,7 +136,8 @@ export default function AdminMarketingPage() {
             </tbody>
           </table>
         )}
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

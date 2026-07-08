@@ -7,6 +7,32 @@ import { generateFastCode } from "@/services/fast-code.service";
 
 type ActionResult = { ok: boolean; error?: string };
 
+export type BuildRequestListRow = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  requested_account_type: string | null;
+  requested_fast_code: string | null;
+  registration_link: string | null;
+  status: string;
+  submitted_at: string | null;
+  created_at: string | null;
+};
+
+export async function listBuildRequests(): Promise<{ ok: boolean; data: BuildRequestListRow[]; error?: string }> {
+  const supabaseAdmin = getSupabaseAdmin();
+  const { data, error } = await supabaseAdmin
+    .from("build_requests")
+    .select(
+      "id, first_name, last_name, email, requested_account_type, requested_fast_code, registration_link, status, submitted_at, created_at"
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) return { ok: false, data: [], error: error.message };
+  return { ok: true, data: (data as BuildRequestListRow[]) || [] };
+}
+
 async function reserveFastCodeForRequest(requestId: string): Promise<{ ok: boolean; code?: string; error?: string }> {
   try {
     const supabaseAdmin = getSupabaseAdmin();

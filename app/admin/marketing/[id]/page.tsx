@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 import {
+  getBuildRequestDetails,
   updateBuildRequestAssets,
   updateBuildRequestDetails,
 } from "../actions";
@@ -53,15 +53,8 @@ export default function MarketingBuildRequestDetailsPage() {
 
   useEffect(() => {
     async function load() {
-      const [{ data: req }, { data: asset }] = await Promise.all([
-        supabase.from("build_requests").select("*").eq("id", requestId).single(),
-        supabase
-          .from("mapsite_assets")
-          .select("profile_image, logo_image, pin_image, monologue_pdf, ebook_pdf")
-          .eq("request_id", requestId)
-          .maybeSingle(),
-      ]);
-      setRequest(req as BuildRequest);
+      const { request: req, assets: asset } = await getBuildRequestDetails(requestId);
+      setRequest((req as BuildRequest) || null);
       setAssets((asset as MapSiteAsset) || null);
     }
     void load();

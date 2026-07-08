@@ -453,6 +453,8 @@ export default function BuildMapsiteClient() {
     if (!form.lastName.trim()) errs.lastName = "Required";
     if (!form.email.trim()) errs.email = "Required";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) errs.email = "Invalid email";
+    if (!form.phone.trim()) errs.phone = "Required";
+    if (!form.company.trim()) errs.company = "Required";
     if (!form.accountType) errs.accountType = "Select an account type";
     if (requiresFastCodeValidation(form.accountType)) {
       if (!form.fastCode.trim()) errs.fastCode = "Required";

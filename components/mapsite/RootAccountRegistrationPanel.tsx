@@ -4,10 +4,12 @@ import { OFFERED_SUBSCRIPTION_TIER_LABELS } from "@/lib/mapsite-subscription";
 
 interface RootAccountRegistrationPanelProps {
   allowedTier: OfferedSubscriptionTier;
+  buildRequestId?: string;
 }
 
 export default function RootAccountRegistrationPanel({
   allowedTier,
+  buildRequestId,
 }: RootAccountRegistrationPanelProps) {
   return (
     <div className="p-4 sm:p-5 overflow-y-auto flex-1 min-h-0 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-neutral-300">
@@ -21,7 +23,11 @@ export default function RootAccountRegistrationPanel({
         multi-PIN options. After checkout you will be redirected to your new
         property page.
       </p>
-      <RootAccountRegistrationForm variant="panel" allowedTier={allowedTier} />
+      <RootAccountRegistrationForm
+        variant="panel"
+        allowedTier={allowedTier}
+        buildRequestId={buildRequestId}
+      />
     </div>
   );
 }

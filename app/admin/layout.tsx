@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { redirect, usePathname, useRouter } from "next/navigation";
-import { useSyncExternalStore, useState } from "react";
+import { useEffect, useSyncExternalStore, useState } from "react";
 import { clearAdminSession, hasAdminSession } from "@/lib/fast-code";
 
 const adminNavItems = [
@@ -138,21 +138,26 @@ function AdminSidebar({ isOpen, onClose, hidden }: { isOpen: boolean; onClose: (
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const hasSession = useSyncExternalStore(
     subscribeToAdminSession,
     getAdminSessionSnapshot,
     getAdminSessionServerSnapshot,
   );
 
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
   const currentPath = pathname.split("?")[0].trim();
   const isLoginPage = currentPath === "/admin/login";
   const isProtectedAdminRoute = currentPath.startsWith("/admin") && !isLoginPage;
 
-  if (isLoginPage && hasSession) {
+  if (hydrated && isLoginPage && hasSession) {
     redirect("/admin/dashboard");
   }
 
-  if (isProtectedAdminRoute && !hasSession) {
+  if (hydrated && isProtectedAdminRoute && !hasSession) {
     redirect("/admin/login");
   }
 
