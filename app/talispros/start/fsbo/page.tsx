@@ -36,11 +36,11 @@ export default function FsboPage() {
 
       <div id="learn-more">
         <ExplanationSections
-          planLabel="AdPro™ Account"
+          planLabel="Adpro PIN"
           price={49.95}
           bullets={FSBO_BULLETS}
           ctaHref="/talispros/register?plan=adpro"
-          ctaLabel="Choose AdPro™ Account"
+          ctaLabel="Choose Adpro PIN"
         />
       </div>
     </div>

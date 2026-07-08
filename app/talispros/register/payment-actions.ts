@@ -58,7 +58,10 @@ export async function processPayment(
       throw new Error(`Payment record failed: ${paymentError.message}`);
     }
 
-    if (input.planType === "ROOT_ACCOUNT" && !input.buildRequestId) {
+    if (
+      (input.planType === "ROOT_ACCOUNT" || input.planType === "TEST_ACCOUNT") &&
+      !input.buildRequestId
+    ) {
       const registration = await completeRootAccountRegistration({
         firstName: input.firstName,
         lastName: input.lastName,
@@ -80,7 +83,8 @@ export async function processPayment(
     }
 
     let fastCode = "";
-    let buildRequestPlan = input.planType;
+    let buildRequestPlan =
+      input.planType === "TEST_ACCOUNT" ? "ROOT_ACCOUNT" : input.planType;
     if (input.buildRequestId) {
       const { data: buildRequest } = await supabaseAdmin
         .from("build_requests")

@@ -1,6 +1,7 @@
 export const REGISTRATION_TAX_RATE = 0.14;
 
 export type PlanType =
+  | "TEST_ACCOUNT"
   | "ROOT_ACCOUNT"
   | "DERIVATIVE_ACCOUNT"
   | "ADPRO_SINGLE"
@@ -17,6 +18,17 @@ export interface PlanDetail {
 }
 
 export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
+  TEST_ACCOUNT: {
+    label: "TEST Account",
+    price: 10,
+    monthly: 0,
+    description: "Demonstration and QA account (Root-equivalent behavior).",
+    bullets: [
+      "Demo-only Root-equivalent onboarding",
+      "CAD $10 one-time registration",
+      "For demonstrations and QA",
+    ],
+  },
   ROOT_ACCOUNT: {
     label: "Root Account™",
     price: 998.5,
@@ -43,22 +55,22 @@ export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
     ],
   },
   ADPRO_SINGLE: {
-    label: "Single AdPro™ PIN",
+    label: "Single Adpro PIN",
     price: 49.95,
     description: "Individual business placement.",
   },
   ADPRO_10: {
-    label: "Up To 10 AdPro™ PINs",
+    label: "Up To 10 Adpro PINs",
     price: 249.95,
     description: "Small teams and multi-location operators.",
   },
   ADPRO_100: {
-    label: "Up To 100 AdPro™ PINs",
+    label: "Up To 100 Adpro PINs",
     price: 499.95,
     description: "Brokerages, franchises, regional organizations.",
   },
   ADPRO_UNLIMITED: {
-    label: "Unlimited AdPro™ PINs",
+    label: "Unlimited Adpro PINs",
     price: 999.95,
     description: "Enterprise deployment.",
   },

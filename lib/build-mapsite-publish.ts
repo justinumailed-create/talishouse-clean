@@ -37,7 +37,7 @@ export function offeredTierFromBuildAccountType(
 export function accountTypeLabelFromBuildAccountType(accountType: string): string {
   if (accountType === "root") return "Root Account™";
   if (accountType === "derivative") return "Derivative Account™";
-  if (accountType.startsWith("adpro")) return "AdPro™";
+  if (accountType.startsWith("adpro")) return "Adpro PIN";
   return accountType;
 }
 

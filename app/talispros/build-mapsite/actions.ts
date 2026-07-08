@@ -17,6 +17,9 @@ export interface BuildFields {
   firstName: string;
   lastName: string;
   email: string;
+  phone: string;
+  company: string;
+  marketType: string;
   accountType: string;
   fastCode: string;
   streetAddress: string;
@@ -93,6 +96,8 @@ function validate(fields: BuildFields): string | null {
   if (!fields.email.trim()) return "Email is required";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim()))
     return "Invalid email format";
+  if (!fields.phone.trim()) return "Phone is required";
+  if (!fields.company.trim()) return "Company is required";
   if (!fields.accountType) return "Account type is required";
   if (requiresFastCodeValidation(fields.accountType) && !fields.fastCode.trim()) {
     return "FAST Code is required";
@@ -155,6 +160,9 @@ export async function submitBuildRequest(
     firstName: (formData.get("firstName") as string) || "",
     lastName: (formData.get("lastName") as string) || "",
     email: (formData.get("email") as string) || "",
+    phone: (formData.get("phone") as string) || "",
+    company: (formData.get("company") as string) || "",
+    marketType: (formData.get("marketType") as string) || "",
     accountType: (formData.get("accountType") as string) || "",
     fastCode: (formData.get("fastCode") as string) || "",
     streetAddress: (formData.get("streetAddress") as string) || "",
@@ -240,7 +248,7 @@ export async function submitBuildRequest(
       first_name: fields.firstName.trim(),
       last_name: fields.lastName.trim(),
       email: fields.email.trim(),
-      phone: "",
+      phone: fields.phone.trim(),
       account_type: fields.accountType,
       media_focus: null,
       address: fields.streetAddress.trim() || null,
@@ -262,8 +270,8 @@ export async function submitBuildRequest(
       approval_status: "Pending",
       notes: fields.additionalComments.trim() || null,
       description: fields.pinWriteup.trim() || null,
-      company: null,
-      market_type: null,
+      company: fields.company.trim(),
+      market_type: fields.marketType.trim() || null,
       property_title: fields.futurePinLabel.trim() || null,
       logo: fileUrls.logo ?? null,
       gallery_images: tebPictureUrls,
@@ -293,6 +301,25 @@ export async function submitBuildRequest(
         console.warn("[build-mapsite] Build request email not sent:", result.error);
       }
     });
+
+    const marketingEmails = (process.env.MARKETING_MANAGER_EMAILS || "")
+      .split(",")
+      .map((email) => email.trim())
+      .filter(Boolean);
+    for (const marketingEmail of marketingEmails) {
+      sendBuildRequestReceived({
+        to: marketingEmail,
+        recipientName: "Marketing Manager",
+        requestId,
+      }).then((result) => {
+        if (!result.sent) {
+          console.warn(
+            "[build-mapsite] Marketing notification email not sent:",
+            result.error
+          );
+        }
+      });
+    }
 
     if (Object.keys(fileUrls).length > 0 || tebPictureUrls.length > 0) {
       const assetRecord: Database["public"]["Tables"]["mapsite_assets"]["Insert"] = {
@@ -350,6 +377,9 @@ export async function submitBuildRequest(
         sponsorFastCode: sponsorFastCode ?? undefined,
         helpPreference: fields.helpPreference,
         additionalComments: fields.additionalComments,
+        company: fields.company,
+        phone: fields.phone,
+        marketType: fields.marketType,
         streetAddress: fields.streetAddress,
         latitude: fields.latitude,
         longitude: fields.longitude,

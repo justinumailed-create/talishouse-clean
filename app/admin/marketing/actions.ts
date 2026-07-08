@@ -1,29 +1,122 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import { publishBuildMapSite } from "@/lib/build-mapsite-publish";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { generateFastCode } from "@/services/fast-code.service";
 
-export async function approveBuildRequest(requestId: string): Promise<{ ok: boolean; error?: string }> {
+type ActionResult = { ok: boolean; error?: string };
+
+async function reserveFastCodeForRequest(requestId: string): Promise<{ ok: boolean; code?: string; error?: string }> {
   try {
     const supabaseAdmin = getSupabaseAdmin();
     const { data: existing, error: fetchError } = await supabaseAdmin
       .from("build_requests")
-      .select("id, status, first_name, last_name, email, requested_fast_code")
+      .select("id, first_name, last_name, requested_fast_code, requested_account_type")
       .eq("id", requestId)
       .single();
 
     if (fetchError || !existing) {
-      return { ok: false, error: "Build request not found." };
+      return { ok: false, error: "Build request not found" };
     }
 
     const reservedFastCode =
       existing.requested_fast_code ||
       (await generateFastCode({ firstName: existing.first_name, lastName: existing.last_name }));
-    const registrationLink = `/talispros/register?request=${existing.id}`;
+    const { error: fastCodeError } = await supabaseAdmin.from("fast_codes").upsert(
+      {
+        code: reservedFastCode,
+        type: "mapsite",
+        request_id: existing.id,
+        account_type: existing.requested_account_type || null,
+      },
+      { onConflict: "code" }
+    );
+    if (fastCodeError) {
+      return { ok: false, error: fastCodeError.message };
+    }
 
+    const { error: updateError } = await supabaseAdmin
+      .from("build_requests")
+      .update({ requested_fast_code: reservedFastCode })
+      .eq("id", existing.id);
+    if (updateError) {
+      return { ok: false, error: updateError.message };
+    }
+
+    return { ok: true, code: reservedFastCode };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Unknown error" };
+  }
+}
+
+export async function assignFastCode(requestId: string): Promise<ActionResult> {
+  const result = await reserveFastCodeForRequest(requestId);
+  if (!result.ok) return result;
+  revalidatePath("/admin/marketing");
+  return { ok: true };
+}
+
+export async function generateDraftMapSite(requestId: string): Promise<ActionResult> {
+  try {
+    const supabaseAdmin = getSupabaseAdmin();
+    const { data: buildRequest, error: requestError } = await supabaseAdmin
+      .from("build_requests")
+      .select(
+        "id, first_name, last_name, email, street_address, latitude, longitude, pin_writeup, future_pin_label, requested_account_type, requested_fast_code, status, linked_mapsite_id"
+      )
+      .eq("id", requestId)
+      .single();
+    if (requestError || !buildRequest) {
+      return { ok: false, error: "Build request not found" };
+    }
+    if (buildRequest.linked_mapsite_id) {
+      return { ok: false, error: "Draft MapSite already generated for this request." };
+    }
+
+    const fastCodeReservation = await reserveFastCodeForRequest(requestId);
+    if (!fastCodeReservation.ok || !fastCodeReservation.code) {
+      return { ok: false, error: fastCodeReservation.error || "Unable to reserve FAST code" };
+    }
+
+    const { data: assets } = await supabaseAdmin
+      .from("mapsite_assets")
+      .select("profile_image, logo_image, monologue_pdf, pin_image, ebook_pdf")
+      .eq("request_id", requestId)
+      .maybeSingle();
+
+    const { data: requestMedia } = await supabaseAdmin
+      .from("build_requests")
+      .select("gallery_images, logo, video")
+      .eq("id", requestId)
+      .single();
+
+    const published = await publishBuildMapSite({
+      fastCode: fastCodeReservation.code,
+      firstName: buildRequest.first_name,
+      lastName: buildRequest.last_name,
+      email: buildRequest.email,
+      accountType: buildRequest.requested_account_type || "root",
+      streetAddress: buildRequest.street_address || "",
+      latitude: buildRequest.latitude,
+      longitude: buildRequest.longitude,
+      pinWriteup: buildRequest.pin_writeup || "",
+      futurePinLabel: buildRequest.future_pin_label || "",
+      profileImageUrl: assets?.profile_image ?? null,
+      logoImageUrl: requestMedia?.logo ?? assets?.logo_image ?? null,
+      headerImageUrl: requestMedia?.video ?? null,
+      galleryImageUrls: requestMedia?.gallery_images ?? [],
+    });
+
+    await supabaseAdmin
+      .from("mapsites")
+      .update({ status: "draft", property_title: buildRequest.future_pin_label || null })
+      .eq("id", published.mapsiteId);
+
+    const registrationLink = `/talispros/register?request=${buildRequest.id}`;
     await supabaseAdmin.from("build_request_registrations").upsert(
       {
-        build_request_id: existing.id,
+        build_request_id: buildRequest.id,
         registration_link: registrationLink,
         status: "pending",
       },
@@ -36,19 +129,52 @@ export async function approveBuildRequest(requestId: string): Promise<{ ok: bool
         status: "Awaiting Registration",
         approval_status: "Approved",
         approved_at: new Date().toISOString(),
-        requested_fast_code: reservedFastCode,
-        registration_link: registrationLink,
+        requested_fast_code: fastCodeReservation.code,
+        linked_mapsite_id: published.mapsiteId,
+        registration_link: registrationLink
       })
-      .eq("id", existing.id);
+      .eq("id", buildRequest.id);
 
     if (updateError) {
       return { ok: false, error: updateError.message };
     }
 
+    const { error: codeLinkError } = await supabaseAdmin
+      .from("fast_codes")
+      .update({ mapsite_id: published.mapsiteId })
+      .eq("request_id", buildRequest.id)
+      .eq("code", fastCodeReservation.code);
+    if (codeLinkError) {
+      return { ok: false, error: codeLinkError.message };
+    }
+
+    revalidatePath("/admin/marketing");
     return { ok: true };
   } catch (error) {
     return { ok: false, error: error instanceof Error ? error.message : "Unknown error" };
   }
+}
+
+export async function sendRegistration(requestId: string): Promise<ActionResult> {
+  const supabaseAdmin = getSupabaseAdmin();
+  const reservation = await reserveFastCodeForRequest(requestId);
+  if (!reservation.ok) return reservation;
+  const registrationLink = `/talispros/register?request=${requestId}`;
+  await supabaseAdmin.from("build_request_registrations").upsert(
+    {
+      build_request_id: requestId,
+      registration_link: registrationLink,
+      status: "pending",
+    },
+    { onConflict: "build_request_id" }
+  );
+  const { error } = await supabaseAdmin
+    .from("build_requests")
+    .update({ status: "Awaiting Registration", registration_link: registrationLink })
+    .eq("id", requestId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/marketing");
+  return { ok: true };
 }
 
 export async function setBuildRequestStatus(
@@ -61,11 +187,65 @@ export async function setBuildRequestStatus(
     | "Published"
 ): Promise<{ ok: boolean; error?: string }> {
   const supabaseAdmin = getSupabaseAdmin();
-  const payload: Record<string, string> = { status };
+  const payload: Record<string, string | null> = { status };
   if (status === "Published") {
     payload.activated_at = new Date().toISOString();
   }
+  if (status === "Rejected") {
+    payload.approval_status = "Rejected";
+  }
   const { error } = await supabaseAdmin.from("build_requests").update(payload).eq("id", requestId);
   if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/marketing");
+  return { ok: true };
+}
+
+export async function getBuildRequestDetails(requestId: string) {
+  const supabaseAdmin = getSupabaseAdmin();
+  const { data: request } = await supabaseAdmin
+    .from("build_requests")
+    .select("*")
+    .eq("id", requestId)
+    .single();
+  const { data: assets } = await supabaseAdmin
+    .from("mapsite_assets")
+    .select("*")
+    .eq("request_id", requestId)
+    .maybeSingle();
+  return { request, assets };
+}
+
+export async function updateBuildRequestDetails(
+  requestId: string,
+  updates: Record<string, unknown>
+): Promise<ActionResult> {
+  const supabaseAdmin = getSupabaseAdmin();
+  const { error } = await supabaseAdmin.from("build_requests").update(updates).eq("id", requestId);
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/admin/marketing/${requestId}`);
+  revalidatePath("/admin/marketing");
+  return { ok: true };
+}
+
+export async function updateBuildRequestAssets(
+  requestId: string,
+  updates: Record<string, string | null>
+): Promise<ActionResult> {
+  const supabaseAdmin = getSupabaseAdmin();
+  const { error } = await supabaseAdmin
+    .from("mapsite_assets")
+    .upsert(
+      {
+        request_id: requestId,
+        profile_image: updates.profile_image ?? null,
+        logo_image: updates.logo_image ?? null,
+        pin_image: updates.pin_image ?? null,
+        monologue_pdf: updates.monologue_pdf ?? null,
+        ebook_pdf: updates.ebook_pdf ?? null,
+      },
+      { onConflict: "request_id" }
+    );
+  if (error) return { ok: false, error: error.message };
+  revalidatePath(`/admin/marketing/${requestId}`);
   return { ok: true };
 }

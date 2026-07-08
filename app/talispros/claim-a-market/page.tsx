@@ -164,10 +164,10 @@ export default function ClaimAMarketPage() {
             </div>
           </section>
 
-          {/* AdPro™ Section */}
+          {/* Adpro PIN Section */}
           <section className="mb-12">
             <div className="rounded-2xl border-2 border-neutral-200 p-6 sm:p-8">
-              <h2 className="text-xl font-semibold text-neutral-900 mb-1">AdPro™ Account</h2>
+              <h2 className="text-xl font-semibold text-neutral-900 mb-1">Adpro PIN</h2>
               <p className="text-sm text-neutral-500 mb-5">Individual and multi-PIN packages. No SPLITS.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                 {ADPRE_PACKAGES.map((pkg) => (
@@ -182,7 +182,7 @@ export default function ClaimAMarketPage() {
                 href="/talispros/register"
                 className="inline-flex h-11 w-full rounded-xl bg-neutral-900 text-white text-sm font-medium tracking-wide items-center justify-center hover:bg-neutral-800 active:scale-[0.98] transition-all"
               >
-                Choose AdPro™ Package
+                Choose Adpro PIN Package
               </Link>
             </div>
           </section>

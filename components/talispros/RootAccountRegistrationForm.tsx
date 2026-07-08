@@ -36,7 +36,7 @@ interface RootAccountRegistrationFormProps {
 const DERIVATIVE_SPONSOR_COPY =
   "Join an existing Root Account™. Sponsor FAST Code required.";
 const ADPRO_ACCOUNT_DESCRIPTION =
-  "Place your business on the map with individual or multi-PIN AdPro™ packages under an established marketing network.";
+  "Place your business on the map with individual or multi-PIN Adpro PIN packages under an established marketing network.";
 
 export default function RootAccountRegistrationForm({
   variant = "page",
@@ -54,6 +54,7 @@ export default function RootAccountRegistrationForm({
 
   const showRoot =
     showAllOptionsInPanel || unifiedMode || !allowedTier || allowedTier === "root";
+  const showTest = showRoot;
   const showDerivative =
     showAllOptionsInPanel ||
     unifiedMode ||
@@ -410,6 +411,34 @@ export default function RootAccountRegistrationForm({
   function renderUnifiedStackedPaymentSections() {
     return (
       <div className="space-y-6">
+        {showTest && (
+          <div className="bg-white rounded-xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
+            <div className="flex items-start justify-between gap-3 mb-4">
+              <div>
+                <h3 className="font-semibold text-neutral-900 text-lg">
+                  TEST Account
+                </h3>
+                <p className="text-xs text-neutral-500 mt-1">
+                  Demonstration-only Root-equivalent account for QA and demos.
+                </p>
+              </div>
+              {renderSetupFeeBlock(
+                PLAN_DETAILS.TEST_ACCOUNT.price,
+                PLAN_DETAILS.TEST_ACCOUNT.monthly
+              )}
+            </div>
+            {PLAN_DETAILS.TEST_ACCOUNT.bullets
+              ? renderPlanBullets(PLAN_DETAILS.TEST_ACCOUNT.bullets)
+              : null}
+            {renderPayPalButtons(
+              "TEST_ACCOUNT",
+              "TEST Account Registration",
+              PLAN_DETAILS.TEST_ACCOUNT.price,
+              45
+            )}
+          </div>
+        )}
+
         {!sponsorValidated && showRoot && (
           <div className="bg-white rounded-xl border border-neutral-200 p-6 sm:p-8 shadow-sm">
             <div className="flex items-start justify-between gap-3 mb-4">
@@ -485,7 +514,7 @@ export default function RootAccountRegistrationForm({
             <div className="flex items-start justify-between gap-3 mb-3">
               <div>
                 <h3 className="font-semibold text-neutral-900 text-lg">
-                  AdPro™ Account
+                  Adpro PIN
                 </h3>
                 <p className="text-xs text-neutral-500 mt-2 leading-relaxed text-center">
                   {ADPRO_ACCOUNT_DESCRIPTION}
@@ -500,7 +529,7 @@ export default function RootAccountRegistrationForm({
             {!sponsorValidated ? (
               <p className="text-xs text-neutral-400 leading-relaxed">
                 Validate your Sponsor FAST Code in the Derivative Account™
-                section above to unlock AdPro™ subscription options.
+                section above to unlock Adpro PIN subscription options.
               </p>
             ) : showAdproAfterValidate ? (
               <>
@@ -509,7 +538,7 @@ export default function RootAccountRegistrationForm({
                   onClick={() => setAdproExpanded(!adproExpanded)}
                   className="mb-3 flex w-full items-center justify-between rounded-lg border border-neutral-200 px-3 py-2 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
                 >
-                  <span>Choose an AdPro™ package</span>
+                  <span>Choose an Adpro PIN package</span>
                   <ChevronDown
                     className={`w-4 h-4 text-neutral-400 transition-transform ${adproExpanded ? "rotate-180" : ""}`}
                   />
@@ -648,6 +677,41 @@ export default function RootAccountRegistrationForm({
             renderUnifiedStackedPaymentSections()
           ) : (
             <div className={isPanel ? "space-y-3" : "space-y-6"}>
+              {showTest && (
+                <div
+                  className={cardClass(accountCategory === "root")}
+                >
+                  <div className={isPanel ? "p-4" : "p-6 sm:p-8"}>
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <div>
+                        <h3
+                          className={`font-semibold text-neutral-900 ${isPanel ? "text-sm" : "text-xl"}`}
+                        >
+                          TEST Account
+                        </h3>
+                        <p className="text-xs text-neutral-500 mt-1">
+                          Demonstration and QA flow.
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div
+                          className={`font-bold text-neutral-900 ${isPanel ? "text-sm" : "text-lg"}`}
+                        >
+                          {formatCAD(PLAN_DETAILS.TEST_ACCOUNT.price)}
+                        </div>
+                        <div className="text-[10px] text-neutral-400">setup</div>
+                      </div>
+                    </div>
+                    {renderPayPalButtons(
+                      "TEST_ACCOUNT",
+                      "TEST Account Registration",
+                      PLAN_DETAILS.TEST_ACCOUNT.price,
+                      isPanel ? 40 : 45
+                    )}
+                  </div>
+                </div>
+              )}
+
               {showRoot && (
                 <div
                   className={cardClass(accountCategory === "root" && !isAdpro)}
@@ -741,10 +805,10 @@ export default function RootAccountRegistrationForm({
                         <h3
                           className={`font-semibold text-neutral-900 ${isPanel ? "text-sm" : "text-xl"}`}
                         >
-                          AdPro™ Account
+                          Adpro PIN
                         </h3>
                         <p className="text-xs text-neutral-500 mt-1">
-                          Individual and multi-PIN packages.
+                          Individual and multi-PIN options.
                         </p>
                       </div>
                       <button

@@ -31,6 +31,9 @@ interface FormData {
   firstName: string;
   lastName: string;
   email: string;
+  phone: string;
+  company: string;
+  marketType: string;
   accountType: string;
   fastCode: string;
   streetAddress: string;
@@ -70,6 +73,9 @@ const defaultForm: FormData = {
   firstName: "",
   lastName: "",
   email: "",
+  phone: "",
+  company: "",
+  marketType: "",
   accountType: "",
   fastCode: "",
   ...defaultHomePinLocationValues,
@@ -308,7 +314,7 @@ function AccountTypeSelector({ value, onChange, error }: { value: string; onChan
           </div>
         </button>
 
-        {/* AdPro™ Account Section */}
+        {/* Adpro PIN Section */}
         <div className={`rounded-xl border transition-all ${isAdpro ? "border-neutral-900 bg-neutral-900/5" : "border-neutral-200"}`}>
           <button type="button"
             onClick={() => { setAdproExpanded(!adproExpanded); if (!isAdpro) { onChange("adpro-single"); } }}
@@ -318,7 +324,7 @@ function AccountTypeSelector({ value, onChange, error }: { value: string; onChan
               {isAdpro && <span className="w-2.5 h-2.5 rounded-full bg-neutral-900" />}
             </span>
             <div className="flex-1 min-w-0">
-              <span className={`block text-sm font-medium ${isAdpro ? "text-neutral-900" : "text-neutral-700"}`}>AdPro™ Account</span>
+              <span className={`block text-sm font-medium ${isAdpro ? "text-neutral-900" : "text-neutral-700"}`}>Adpro PIN</span>
               <span className="block text-xs text-neutral-500 mt-0.5">Individual and multi-PIN packages. No SPLITS.</span>
             </div>
             <ChevronDown className={`flex-shrink-0 w-5 h-5 text-neutral-400 mt-1 transition-transform duration-200 ${adproExpanded ? "rotate-180" : ""}`} />
@@ -523,6 +529,9 @@ export default function BuildMapsiteClient() {
       fd.append("firstName", form.firstName);
       fd.append("lastName", form.lastName);
       fd.append("email", form.email);
+      fd.append("phone", form.phone);
+      fd.append("company", form.company);
+      fd.append("marketType", form.marketType);
       fd.append("accountType", form.accountType);
       fd.append("fastCode", form.fastCode);
       fd.append("streetAddress", form.streetAddress);
@@ -650,6 +659,9 @@ export default function BuildMapsiteClient() {
                       <InputField label="Last Name" required value={form.lastName} onChange={(v) => updateField("lastName", v)} placeholder="Smith" autoComplete="family-name" error={errors.lastName} />
                     </div>
                     <InputField label="Email Address" required type="email" value={form.email} onChange={(v) => updateField("email", v)} placeholder="john@example.com" autoComplete="email" error={errors.email} />
+                    <InputField label="Phone Number" required value={form.phone} onChange={(v) => updateField("phone", v)} placeholder="+1 555 123 4567" autoComplete="tel" error={errors.phone} />
+                    <InputField label="Company" required value={form.company} onChange={(v) => updateField("company", v)} placeholder="Acme Realty" autoComplete="organization" error={errors.company} />
+                    <InputField label="Requested Market" value={form.marketType} onChange={(v) => updateField("marketType", v)} placeholder="Downtown Vancouver" error={errors.marketType} />
                     <AccountTypeSelector value={form.accountType} onChange={(v) => updateField("accountType", v)} error={errors.accountType} />
                     {requiresFastCodeValidation(form.accountType) && (
                       <div>
@@ -684,7 +696,7 @@ export default function BuildMapsiteClient() {
                           Enter your registered FAST Code to identify your{" "}
                           {form.accountType === "derivative"
                             ? "Derivative Account™"
-                            : "AdPro™ account"}
+                            : "Adpro PIN"}
                           .
                         </p>
                       </div>
