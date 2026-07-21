@@ -2,10 +2,10 @@
 
 import dynamic from "next/dynamic";
 
-const GoogleMapSiteMap = dynamic(() => import("./GoogleMapSiteMap"), {
+const TalisMapsEmbed = dynamic(() => import("@/components/talismaps/TalisMapsEmbed"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full min-h-[320px] bg-neutral-100 animate-pulse" />
+    <div className="h-full min-h-[320px] w-full animate-pulse bg-neutral-100" />
   ),
 });
 
@@ -30,35 +30,36 @@ export default function MapSiteInteractiveMap({
     Number.isFinite(latitude) &&
     Number.isFinite(longitude);
 
-  const mapContent = hasCoords ? (
-    <GoogleMapSiteMap
-      latitude={latitude!}
-      longitude={longitude!}
+  const mapContent = (
+    <TalisMapsEmbed
+      latitude={hasCoords ? latitude : undefined}
+      longitude={hasCoords ? longitude : undefined}
       zoom={zoom}
-      title={propertyTitle}
+      pinLabel={propertyTitle}
+      className="h-full w-full"
+      minHeightClassName="min-h-[320px]"
+      emptyMessage={
+        embedded
+          ? "Set coordinates or add Home PINs to display this property on TalisMaps™."
+          : "Location coordinates not yet available."
+      }
     />
-  ) : (
-    <div className="w-full h-full flex items-center justify-center bg-neutral-50 text-sm text-neutral-500">
-      {embedded
-        ? "Add an Atlist map URL in admin, or set coordinates for Google Maps."
-        : "Location coordinates not yet available."}
-    </div>
   );
 
   if (embedded) {
-    return <div className="w-full h-full min-h-[420px]">{mapContent}</div>;
+    return <div className="h-full min-h-[420px] w-full">{mapContent}</div>;
   }
 
   return (
     <section className="bg-[#f8f8f7]">
-      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-8 sm:py-10">
-        <div className="rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white">
-          <div className="px-5 py-4 border-b border-neutral-100">
+      <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 sm:py-10">
+        <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+          <div className="border-b border-neutral-100 px-5 py-4">
             <h2 className="text-lg font-semibold text-neutral-900">
               Interactive Map
             </h2>
             {hasCoords && (
-              <p className="text-sm text-neutral-500 mt-1 font-mono">
+              <p className="mt-1 font-mono text-sm text-neutral-500">
                 {latitude?.toFixed(6)}, {longitude?.toFixed(6)}
               </p>
             )}

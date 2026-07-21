@@ -1,95 +1,67 @@
 import Link from "next/link";
 import Image from "next/image";
-import { MousePointerClick } from "lucide-react";
-
-const SEGMENTS = [
-  {
-    title: '"I am a Licensed Real Estate Professional."',
-    href: "/talispros/register?market=listings",
-    bullets: [
-      "I want my Mapsite™ to establish service floors for real estate fees and listing term lengths.",
-      "I want Talispros PMC to promote my real estate listings, globally.",
-    ],
-  },
-  {
-    title: '"I represent Talishouse™ Homes & Cottages, locally."',
-    href: "/talispros/register?market=homes",
-    bullets: [
-      "I want my Mapsite™ to identify new tiny home objects or projects, globally.",
-      "I want Talispros PMC to promote fractional ownership opportunities.",
-    ],
-  },
-  {
-    title: '"I am a For-Sale-By-Owner selling something special."',
-    href: "/talispros/register?market=fsbos",
-    bullets: [
-      "I want my Mapsite™ help me avoid expensive real estate fees and commitments.",
-      "I want Talispros PMC to extend my FSBO advertising reach, globally.",
-    ],
-  },
-];
+import TalisprosMarketsDropdown from "@/components/talispros/TalisprosMarketsDropdown";
+import TalisprosStartSidebar from "@/components/talispros/TalisprosStartSidebar";
+import { TALISPROS_START_INTRO, TALISPROS_START_SLOGAN } from "@/lib/talispros/start-content";
 
 export default function TalisprosStartPage() {
   return (
-    <div className="min-h-screen bg-white text-neutral-900 overflow-x-hidden">
-      <header className="bg-white border-b border-neutral-200">
-        <div className="px-6 py-10 sm:py-12 text-center">
-          <Image
-            src="/logo.png"
-            alt="TalisPros PMC"
-            width={48}
-            height={48}
-            className="mx-auto mb-5 h-12 w-12 object-contain"
-            priority
-          />
-          <h1 className="text-3xl sm:text-4xl font-light tracking-[0.35em] text-neutral-900 uppercase">
-            Talispros PMC
-          </h1>
-          <p className="mt-3 text-sm sm:text-base font-light tracking-[0.2em] text-neutral-400 uppercase">
-            Prospect - Manage - Colaborate
-          </p>
-        </div>
-      </header>
-
-      <section className="w-full overflow-hidden bg-neutral-50">
-        <div className="relative mx-auto w-full max-w-[1200px]">
-          <Image
-            src="/images/glasshouse/glasshouse.png"
-            alt="Glasshouse™ cabin in the forest"
-            width={1200}
-            height={668}
-            priority
-            className="block w-full h-auto max-w-full"
-            sizes="(min-width: 1200px) 1200px, 100vw"
-          />
-        </div>
-      </section>
-
-      <section className="px-6 sm:px-[75px] py-8 sm:py-12">
-        <h2 className="text-2xl sm:text-4xl font-medium text-center tracking-tight mb-8 sm:mb-10">
-          What best describes you?
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {SEGMENTS.map((segment) => (
+    <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-white text-neutral-900 lg:grid lg:grid-cols-[minmax(0,1fr)_350px]">
+      {/* Left column */}
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        <nav className="flex-shrink-0 border-b border-neutral-200 px-6 py-4">
+          <div className="flex items-center justify-center gap-8">
             <Link
-              key={segment.title}
-              href={segment.href}
-              className="h-full border border-[#d9d9d9] px-4 py-5 text-center flex flex-col"
+              href="/talispros/start"
+              className="text-[11px] tracking-[0.08em] text-neutral-500 hover:text-neutral-900 transition-colors"
             >
-              <h3 className="text-lg sm:text-xl leading-snug font-semibold mb-4 min-h-[4.5rem]">
-                {segment.title}
-              </h3>
-              <MousePointerClick className="mx-auto h-10 w-10 mb-4" strokeWidth={1.8} />
-              <ul className="list-disc text-left text-sm sm:text-base leading-relaxed pl-5 space-y-2.5">
-                {segment.bullets.map((bullet) => (
-                  <li key={bullet}>{bullet}</li>
-                ))}
-              </ul>
+              Welcome
             </Link>
-          ))}
+            <TalisprosMarketsDropdown />
+          </div>
+        </nav>
+
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          <header className="border-b border-neutral-200 px-6 text-center">
+            <p className="mx-auto max-w-xs pt-8 text-[15px] leading-6 tracking-[0.06em] text-neutral-400 sm:pt-10">
+              {TALISPROS_START_SLOGAN}
+            </p>
+            <Image
+              src="/logo.png"
+              alt="TalisPros PMC"
+              width={48}
+              height={48}
+              className="mx-auto my-5 h-12 w-12 object-contain"
+              priority
+            />
+            <h1 className="pb-6 text-[34px] leading-[1.15] tracking-[0.12em] text-neutral-900 sm:text-[53px] sm:leading-[70px]">
+              Talispros PMC
+            </h1>
+          </header>
+
+          <section className="px-4 pb-10 pt-4 sm:px-6">
+            <div className="mx-auto w-full max-w-[1200px]">
+              <Image
+                src="/images/glasshouse/glasshouse.png"
+                alt="Glasshouse™ cabin in the forest"
+                width={1200}
+                height={668}
+                priority
+                className="mx-auto block h-auto w-full max-w-full"
+                sizes="(min-width: 1200px) 1200px, calc(100vw - 350px)"
+              />
+            </div>
+          </section>
+
+          <section className="px-6 pb-16 text-center">
+            <p className="mx-auto max-w-3xl text-xs leading-relaxed text-neutral-900 sm:text-sm">
+              {TALISPROS_START_INTRO}
+            </p>
+          </section>
         </div>
-      </section>
+      </div>
+
+      <TalisprosStartSidebar />
     </div>
   );
 }

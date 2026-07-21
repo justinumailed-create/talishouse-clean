@@ -36,6 +36,15 @@ export async function requireMarketingManagerSession(): Promise<MarketingManager
   return session;
 }
 
+export async function isMarketingManagerAuthenticated(): Promise<boolean> {
+  try {
+    await requireMarketingManagerSession();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function requireMarketingManagerPage(): Promise<MarketingManagerSession> {
   const session = await getTalisprosAdminSession();
   if (!session) {

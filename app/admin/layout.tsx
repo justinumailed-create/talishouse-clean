@@ -19,6 +19,8 @@ const adminNavItems = [
   { href: "/admin/project-applications", label: "Project Apps" },
   { href: "/admin/registrations", label: "Registrations" },
   { href: "/admin/marketing", label: "Marketing" },
+  { href: "/admin/talismaps", label: "TalisMaps™" },
+  { href: "/admin/talisbooks", label: "TalisBooks™" },
 ];
 
 function subscribeToAdminSession(onStoreChange: () => void) {
@@ -151,7 +153,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const currentPath = pathname.split("?")[0].trim();
   const isLoginPage = currentPath === "/admin/login";
-  const isProtectedAdminRoute = currentPath.startsWith("/admin") && !isLoginPage;
+  const isTalisMapsAdmin = currentPath.startsWith("/admin/talismaps");
+  const isTalisBooksAdmin = currentPath.startsWith("/admin/talisbooks");
+  const isStandaloneProductAdmin = isTalisMapsAdmin || isTalisBooksAdmin;
+  const isProtectedAdminRoute =
+    currentPath.startsWith("/admin") && !isLoginPage && !isStandaloneProductAdmin;
 
   if (hydrated && isLoginPage && hasSession) {
     redirect("/admin/dashboard");
@@ -159,6 +165,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (hydrated && isProtectedAdminRoute && !hasSession) {
     redirect("/admin/login");
+  }
+
+  if (isStandaloneProductAdmin) {
+    return <>{children}</>;
   }
 
   return (

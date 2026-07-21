@@ -555,3 +555,2829 @@ body.mapsite-gallery-open [data-paypal-button] {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+/* TalisMaps™ Leaflet pin icons — apple-quality soft markers */
+.talismaps-pin-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+.talismaps-pin-icon--highlighted {
+  z-index: 600 !important;
+}
+
+.talismaps-pin-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.talismaps-pin-body {
+  position: relative;
+  flex-shrink: 0;
+  transform-origin: center center;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.talismaps-pin--selected .talismaps-pin-body {
+  transform: scale(1.04);
+}
+
+.talismaps-pin-marker img.talismaps-pin-svg,
+.talismaps-pin-marker svg.talismaps-pin-svg {
+  display: block;
+}
+
+.talismaps-pin-logo {
+  position: absolute;
+  inset: 28%;
+  display: block;
+  border-radius: 9999px;
+  object-fit: cover;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+}
+
+.talismaps-pin-label {
+  max-width: 128px;
+  width: max-content;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  border: none;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+  color: #1c1c1e;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  backdrop-filter: blur(8px);
+}
+
+.talismaps-pin-badge {
+  max-width: 128px;
+  width: max-content;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  background: rgba(28, 28, 30, 0.92);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 650;
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.talismaps-pin--pulse .talismaps-pin-body {
+  animation: talismaps-pin-pulse 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+.talismaps-pin--breathe .talismaps-pin-body {
+  animation: talismaps-pin-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes talismaps-pin-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes talismaps-pin-breathe {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.92;
+    transform: scale(1.03);
+  }
+}
+
+/* ─── TalisBooks™ Premium Cover Templates ─────────────────────────────────── */
+
+.talisbooks-cover {
+  --tb-cover-margin-top: 8%;
+  --tb-cover-margin-bottom: 8%;
+  --tb-cover-title-weight: 600;
+  --tb-cover-title-tracking: -0.03em;
+  --tb-cover-subtitle-weight: 400;
+  --tb-cover-subtitle-tracking: 0.08em;
+  --tb-cover-aspect: 3 / 4;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  aspect-ratio: var(--tb-cover-aspect);
+  overflow: hidden;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 12px 32px rgba(0, 0, 0, 0.08);
+  font-family: var(--font-sans);
+  isolation: isolate;
+}
+
+.talisbooks-cover--selected {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+.talisbooks-cover__margin {
+  flex-shrink: 0;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  padding-inline: clamp(0.75rem, 4vw, 1.5rem);
+}
+
+.talisbooks-cover__margin--top {
+  min-height: var(--tb-cover-margin-top);
+  height: var(--tb-cover-margin-top);
+}
+
+.talisbooks-cover__margin--bottom {
+  min-height: var(--tb-cover-margin-bottom);
+  height: var(--tb-cover-margin-bottom);
+}
+
+.talisbooks-cover__hero {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.talisbooks-cover__hero-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.12) 0%,
+    rgba(0, 0, 0, 0.08) 40%,
+    rgba(0, 0, 0, 0.45) 100%
+  );
+  pointer-events: none;
+}
+
+.talisbooks-cover__hero-content {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  padding: clamp(0.85rem, 4vw, 1.75rem);
+}
+
+.talisbooks-cover__hero-content--center {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.talisbooks-cover__hero-content--lower-left {
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.talisbooks-cover__copy {
+  width: 100%;
+}
+
+.talisbooks-cover__copy--title-left .talisbooks-cover__title,
+.talisbooks-cover__copy--subtitle-left .talisbooks-cover__subtitle {
+  text-align: left;
+}
+
+.talisbooks-cover__copy--title-center .talisbooks-cover__title,
+.talisbooks-cover__copy--subtitle-center .talisbooks-cover__subtitle {
+  text-align: center;
+}
+
+.talisbooks-cover__copy--title-right .talisbooks-cover__title,
+.talisbooks-cover__copy--subtitle-right .talisbooks-cover__subtitle {
+  text-align: right;
+}
+
+.talisbooks-cover__title {
+  margin: 0;
+  font-size: clamp(1rem, 3.6vw, 1.85rem);
+  line-height: 1.1;
+  font-weight: var(--tb-cover-title-weight);
+  letter-spacing: var(--tb-cover-title-tracking);
+}
+
+.talisbooks-cover__title--upper {
+  text-transform: uppercase;
+}
+
+.talisbooks-cover__subtitle {
+  margin: 0.35em 0 0;
+  font-size: clamp(0.65rem, 1.8vw, 0.8rem);
+  line-height: 1.35;
+  font-weight: var(--tb-cover-subtitle-weight);
+  letter-spacing: var(--tb-cover-subtitle-tracking);
+  text-transform: uppercase;
+}
+
+.talisbooks-cover__copy--dark .talisbooks-cover__title,
+.talisbooks-cover__copy--dark .talisbooks-cover__subtitle {
+  color: #171717;
+}
+
+.talisbooks-cover__copy--inverse .talisbooks-cover__title,
+.talisbooks-cover__copy--inverse .talisbooks-cover__subtitle {
+  color: #ffffff;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.35);
+}
+
+.talisbooks-cover--aurora-frame .talisbooks-cover__hero-scrim {
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0.28) 0%,
+    rgba(0, 0, 0, 0.18) 50%,
+    rgba(0, 0, 0, 0.42) 100%
+  );
+}
+
+.talisbooks-cover--horizon-caption .talisbooks-cover__margin--bottom {
+  align-items: flex-start;
+  padding-block: clamp(0.35rem, 1.5vw, 0.65rem);
+}
+
+.talisbooks-cover--masthead-rise .talisbooks-cover__margin--top {
+  align-items: flex-end;
+  padding-block: clamp(0.35rem, 1.5vw, 0.65rem);
+}
+
+.talisbooks-cover--masthead-rise .talisbooks-cover__subtitle {
+  letter-spacing: 0.16em;
+}
+
+.talisbooks-cover--cascade-editorial .talisbooks-cover__margin--top {
+  justify-content: flex-start;
+}
+
+.talisbooks-cover--cascade-editorial .talisbooks-cover__margin--bottom {
+  justify-content: flex-end;
+}
+
+.talisbooks-cover--vista-overlay .talisbooks-cover__hero-content--lower-left {
+  padding-bottom: clamp(1rem, 4vw, 1.75rem);
+}
+
+@media (max-width: 639px) {
+  .talisbooks-cover {
+    border-radius: 0.625rem;
+  }
+
+  .talisbooks-cover__title {
+    font-size: clamp(0.95rem, 5.2vw, 1.35rem);
+  }
+
+  .talisbooks-cover__subtitle {
+    font-size: clamp(0.58rem, 2.6vw, 0.7rem);
+  }
+}
+
+/* ─── TalisBooks™ Viewer ──────────────────────────────────────────────────── */
+
+.talisbooks-viewer {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 18%, #f7f5f1 0%, transparent 55%),
+    linear-gradient(180deg, #ebe7e0 0%, #d9d3c9 48%, #cfc8bc 100%);
+  color: #171717;
+  padding: clamp(0.55rem, 1.4vw, 0.95rem) clamp(0.75rem, 2vw, 1.35rem);
+}
+
+.talisbooks-viewer__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  max-width: 96rem;
+  margin: 0 auto 0.55rem;
+}
+
+.talisbooks-viewer__eyebrow {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #78716c;
+}
+
+.talisbooks-viewer__title {
+  margin: 0.1rem 0 0;
+  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+.talisbooks-viewer__subtitle {
+  margin: 0.12rem 0 0;
+  font-size: 0.78rem;
+  color: #57534e;
+  line-height: 1.3;
+}
+
+.talisbooks-viewer__back {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #44403c;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.talisbooks-viewer__back:hover {
+  color: #171717;
+}
+
+.talisbooks-viewer__layout {
+  display: grid;
+  gap: 0.85rem;
+  max-width: 96rem;
+  margin: 0 auto;
+  align-items: stretch;
+}
+
+@media (min-width: 1100px) {
+  .talisbooks-viewer__layout {
+    grid-template-columns: minmax(0, 1fr) 14.5rem;
+    align-items: stretch;
+  }
+}
+
+.talisbooks-viewer__empty {
+  max-width: 40rem;
+  margin: 4rem auto;
+  text-align: center;
+  color: #737373;
+}
+
+/* Open book stage */
+.talisbooks-viewer-stage__desk {
+  border-radius: 1.15rem;
+  padding: clamp(0.85rem, 2vw, 1.35rem) clamp(1rem, 2.5vw, 1.75rem);
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(255, 252, 245, 0.7) 0%, transparent 52%),
+    linear-gradient(165deg, #efeae2 0%, #e4ddd3 46%, #d8d0c4 100%);
+  border: 1px solid rgba(28, 25, 23, 0.07);
+  overflow: visible;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  min-height: min(84vh, 860px);
+}
+
+.talisbooks-viewer-stage {
+  position: relative;
+  z-index: 1;
+  border-radius: 1.35rem;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  overflow: visible;
+}
+
+.talisbooks-viewer-stage__perspective {
+  perspective: 2200px;
+  perspective-origin: 50% 45%;
+  overflow: visible;
+  min-height: min(78vh, 760px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.talisbooks-viewer-stage--closed .talisbooks-viewer-stage__perspective {
+  min-height: min(80vh, 820px);
+}
+
+.talisbooks-viewer-stage__closed,
+.talisbooks-viewer-stage__open {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Closed hard cover — physical hardcover magazine */
+.talisbooks-viewer-hardcover {
+  --hardcover-radius: 0.22rem;
+  --hardcover-board: #2c241c;
+  --hardcover-cloth: #17130f;
+  --hardcover-pages: #f3eee6;
+  position: relative;
+  width: min(68%, 32rem);
+  aspect-ratio: 3 / 3.9;
+  border: 0;
+  padding: 0;
+  margin: 1rem 1.75rem 1.15rem;
+  background: transparent;
+  cursor: pointer;
+  transform-style: preserve-3d;
+}
+
+.talisbooks-viewer-hardcover--front {
+  transform: perspective(1500px) rotateY(-22deg) rotateX(9deg) rotateZ(-0.8deg);
+}
+
+.talisbooks-viewer-hardcover--back {
+  transform: perspective(1500px) rotateY(22deg) rotateX(9deg) rotateZ(0.8deg);
+}
+
+.talisbooks-viewer-hardcover__cast {
+  position: absolute;
+  left: 10%;
+  right: 0%;
+  bottom: -0.85rem;
+  height: 1.55rem;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 40% 40%,
+      rgba(28, 25, 23, 0.62) 0%,
+      rgba(28, 25, 23, 0.28) 36%,
+      transparent 72%
+    );
+  filter: blur(4px);
+  transform: skewX(-14deg) scaleY(0.7);
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__cast {
+  left: 0%;
+  right: 10%;
+  transform: skewX(14deg) scaleY(0.7);
+}
+
+.talisbooks-viewer-hardcover__case {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform-style: preserve-3d;
+}
+
+.talisbooks-viewer-hardcover__board {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--hardcover-radius);
+  background:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E"),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, transparent 24%),
+    linear-gradient(180deg, #3d342c 0%, var(--hardcover-board) 42%, var(--hardcover-cloth) 100%);
+  background-blend-mode: soft-light, normal, normal;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 -3px 6px rgba(0, 0, 0, 0.4) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.65),
+    12px 18px 28px rgba(28, 25, 23, 0.28),
+    0 2px 4px rgba(28, 25, 23, 0.2);
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__board {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 -3px 6px rgba(0, 0, 0, 0.4) inset,
+    0 0 0 1px rgba(0, 0, 0, 0.65),
+    -12px 18px 28px rgba(28, 25, 23, 0.28),
+    0 2px 4px rgba(28, 25, 23, 0.2);
+}
+
+.talisbooks-viewer-hardcover__rim {
+  position: absolute;
+  inset: 0.34rem;
+  z-index: 2;
+  border-radius: 0.05rem;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 0 0 0.34rem rgba(10, 8, 6, 0.88);
+}
+
+.talisbooks-viewer-hardcover__edge {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(180deg, #4a4036 0%, #241e18 55%, #100e0c 100%);
+}
+
+.talisbooks-viewer-hardcover__edge--top {
+  top: -0.2rem;
+  left: 0.15rem;
+  right: 0.15rem;
+  height: 0.22rem;
+  border-radius: 0.08rem 0.08rem 0 0;
+  background: linear-gradient(90deg, #1a1511 0%, #4a4036 35%, #2a231c 100%);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12) inset;
+}
+
+.talisbooks-viewer-hardcover__edge--bottom {
+  bottom: -0.22rem;
+  left: 0.2rem;
+  right: 0.2rem;
+  height: 0.28rem;
+  border-radius: 0 0 0.1rem 0.1rem;
+  background: linear-gradient(90deg, #120f0c 0%, #2a231c 40%, #1a1511 100%);
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.35);
+}
+
+.talisbooks-viewer-hardcover__edge--fore {
+  top: 0.12rem;
+  bottom: 0.12rem;
+  width: 0.3rem;
+  background:
+    linear-gradient(90deg, #3a322a 0%, #1a1511 55%, #0a0908 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 30%);
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.35);
+}
+
+.talisbooks-viewer-hardcover--front .talisbooks-viewer-hardcover__edge--fore {
+  right: -0.22rem;
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__edge--fore {
+  left: -0.22rem;
+  background:
+    linear-gradient(270deg, #3a322a 0%, #1a1511 55%, #0a0908 100%);
+  box-shadow: -1px 0 2px rgba(0, 0, 0, 0.35);
+}
+
+.talisbooks-viewer-hardcover__spine {
+  position: absolute;
+  top: 0.04rem;
+  bottom: 0.04rem;
+  width: 1.25rem;
+  z-index: 5;
+  border-radius: 0.7rem / 0.42rem;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      90deg,
+      #050403 0%,
+      #16120f 12%,
+      #3a3229 34%,
+      #6a5d4f 47%,
+      #3a3229 58%,
+      #17130f 78%,
+      #060504 100%
+    );
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    4px 0 14px rgba(0, 0, 0, 0.38);
+}
+
+.talisbooks-viewer-hardcover--front .talisbooks-viewer-hardcover__spine {
+  left: -0.72rem;
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__spine {
+  right: -0.72rem;
+  background:
+    linear-gradient(
+      270deg,
+      #050403 0%,
+      #16120f 12%,
+      #3a3229 34%,
+      #6a5d4f 47%,
+      #3a3229 58%,
+      #17130f 78%,
+      #060504 100%
+    );
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.6),
+    -4px 0 14px rgba(0, 0, 0, 0.38);
+}
+
+.talisbooks-viewer-hardcover__spine-ridge {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0 11px,
+      rgba(255, 255, 255, 0.035) 11px 12px
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.14) 46%,
+      transparent 58%
+    );
+  opacity: 0.9;
+}
+
+.talisbooks-viewer-hardcover__block {
+  position: absolute;
+  top: 0.48rem;
+  bottom: 0.48rem;
+  width: 1.45rem;
+  z-index: 4;
+  transform-style: preserve-3d;
+}
+
+.talisbooks-viewer-hardcover--front .talisbooks-viewer-hardcover__block {
+  right: -1.2rem;
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__block {
+  left: -1.2rem;
+}
+
+.talisbooks-viewer-hardcover__block-sheet {
+  position: absolute;
+  top: 0.08rem;
+  bottom: 0.08rem;
+  width: 100%;
+  border-radius: 0 0.05rem 0.05rem 0;
+  background: linear-gradient(90deg, #e8e0d4, #d4caba);
+  box-shadow: 0 0 0 1px rgba(68, 64, 60, 0.18);
+}
+
+.talisbooks-viewer-hardcover--front .talisbooks-viewer-hardcover__block-sheet--a {
+  right: -0.18rem;
+  opacity: 0.85;
+}
+
+.talisbooks-viewer-hardcover--front .talisbooks-viewer-hardcover__block-sheet--b {
+  right: -0.32rem;
+  opacity: 0.55;
+  background: linear-gradient(90deg, #ddd4c6, #c8bdae);
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__block-sheet {
+  border-radius: 0.05rem 0 0 0.05rem;
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__block-sheet--a {
+  left: -0.18rem;
+  opacity: 0.85;
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__block-sheet--b {
+  left: -0.32rem;
+  opacity: 0.55;
+  background: linear-gradient(270deg, #ddd4c6, #c8bdae);
+}
+
+.talisbooks-viewer-hardcover__block-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 0 0.06rem 0.06rem 0;
+  background-color: #f1ebe1;
+  background-image:
+    repeating-linear-gradient(
+      180deg,
+      rgba(90, 78, 64, 0.22) 0px,
+      rgba(90, 78, 64, 0.22) 1px,
+      transparent 1px,
+      transparent 2.5px
+    ),
+    linear-gradient(
+      90deg,
+      #cfc4b4 0%,
+      #f4efe6 14%,
+      #ebe3d6 55%,
+      #c4b7a5 100%
+    );
+  box-shadow:
+    0 0 0 1px rgba(68, 64, 60, 0.32),
+    4px 0 10px rgba(0, 0, 0, 0.24),
+    inset -5px 0 10px rgba(110, 98, 82, 0.28);
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__block-face {
+  border-radius: 0.06rem 0 0 0.06rem;
+  box-shadow:
+    0 0 0 1px rgba(68, 64, 60, 0.28),
+    -3px 0 8px rgba(0, 0, 0, 0.22),
+    inset 4px 0 8px rgba(120, 110, 95, 0.25);
+}
+
+.talisbooks-viewer-hardcover__block-top,
+.talisbooks-viewer-hardcover__block-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0.34rem;
+  background:
+    linear-gradient(90deg, #faf7f1 0%, #e7e0d4 50%, #b9ae9e 100%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18);
+}
+
+.talisbooks-viewer-hardcover__block-top {
+  top: -0.16rem;
+  transform: skewX(-28deg);
+  transform-origin: left center;
+  clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 100%);
+}
+
+.talisbooks-viewer-hardcover__block-bottom {
+  bottom: -0.16rem;
+  transform: skewX(28deg);
+  transform-origin: left center;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 60%);
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__block-top {
+  transform: skewX(28deg);
+  transform-origin: right center;
+  clip-path: polygon(0 0, 100% 40%, 100% 100%, 0 100%);
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__block-bottom {
+  transform: skewX(-28deg);
+  transform-origin: right center;
+  clip-path: polygon(0 0, 100% 0, 100% 60%, 0 100%);
+}
+
+.talisbooks-viewer-hardcover__wrap {
+  position: absolute;
+  inset: 0.5rem 0.5rem 0.5rem 0.62rem;
+  z-index: 6;
+  border-radius: 0.03rem;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    inset 0 0 48px rgba(0, 0, 0, 0.14);
+}
+
+.talisbooks-viewer-hardcover--back .talisbooks-viewer-hardcover__wrap {
+  inset: 0.5rem 0.62rem 0.5rem 0.5rem;
+}
+
+.talisbooks-viewer-hardcover__art {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.02) contrast(1.06) brightness(0.98);
+}
+
+.talisbooks-viewer-hardcover__grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  mix-blend-mode: soft-light;
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E"),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.025) 0 1px,
+      transparent 1px 2px
+    );
+  background-size: 160px 160px, auto;
+}
+
+.talisbooks-viewer-hardcover__sheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      112deg,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.06) 18%,
+      transparent 36%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(12, 10, 9, 0.18) 0%,
+      transparent 26%,
+      transparent 52%,
+      rgba(12, 10, 9, 0.62) 100%
+    );
+}
+
+.talisbooks-viewer-hardcover__copy {
+  position: absolute;
+  left: 0.95rem;
+  right: 0.95rem;
+  bottom: 1rem;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+  color: #fff;
+  text-align: left;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.5);
+}
+
+.talisbooks-viewer-hardcover__title {
+  font-size: clamp(1.25rem, 3.2vw, 1.7rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.12;
+}
+
+.talisbooks-viewer-hardcover__subtitle {
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.84);
+  max-width: 16rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .talisbooks-viewer-hardcover--front,
+  .talisbooks-viewer-hardcover--back {
+    transform: none;
+  }
+}
+
+.talisbooks-viewer-book {
+  --book-page-radius: 0.12rem;
+  position: relative;
+  width: min(100%, 68rem);
+  aspect-ratio: 3 / 2.05;
+  transform: rotateX(8deg) scale(0.98);
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 32px 48px rgba(28, 25, 23, 0.32));
+}
+
+.talisbooks-viewer-book--single {
+  width: min(100%, 34rem);
+  aspect-ratio: 3 / 4.05;
+  transform: rotateX(5deg) scale(1);
+  /* filter flattens preserve-3d — keep shadow off the 3D leaf */
+  filter: none;
+  box-shadow: 0 28px 44px rgba(28, 25, 23, 0.3);
+}
+
+.talisbooks-viewer-stage--single .talisbooks-viewer-stage__perspective {
+  perspective: 1600px;
+}
+
+.talisbooks-viewer-book__shadow {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  bottom: -1.35rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(28, 25, 23, 0.42) 0%, transparent 72%);
+  filter: blur(6px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.talisbooks-viewer-book__edge {
+  position: absolute;
+  top: 0.8%;
+  bottom: 0.8%;
+  width: 0.7rem;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.talisbooks-viewer-book__edge--left {
+  left: -0.45rem;
+  border-radius: 0.28rem 0 0 0.28rem;
+  background:
+    linear-gradient(90deg, #0c0a09 0%, #292524 42%, #57534e 78%, #a8a29e 100%);
+  box-shadow:
+    inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    -2px 0 6px rgba(0, 0, 0, 0.25);
+}
+
+.talisbooks-viewer-book__edge--right {
+  right: -0.45rem;
+  border-radius: 0 0.28rem 0.28rem 0;
+  background: repeating-linear-gradient(
+    180deg,
+    #fafaf9 0 1.5px,
+    #e7e5e4 1.5px 3px,
+    #d6d3d1 3px 3.5px
+  );
+  box-shadow:
+    2px 0 6px rgba(0, 0, 0, 0.18),
+    inset -1px 0 0 rgba(255, 255, 255, 0.65);
+}
+
+.talisbooks-viewer-book__spread {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.2rem;
+  overflow: visible;
+  background: #faf8f5;
+  box-shadow:
+    0 0 0 1px rgba(28, 25, 23, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(28, 25, 23, 0.06);
+  transform-style: preserve-3d;
+}
+
+.talisbooks-viewer-book__page {
+  position: relative;
+  overflow: hidden;
+  background: #fffefb;
+  transform-style: preserve-3d;
+}
+
+.talisbooks-viewer-book__page--left {
+  border-radius: var(--book-page-radius) 0 0 var(--book-page-radius);
+  box-shadow:
+    inset -28px 0 36px rgba(28, 25, 23, 0.12),
+    inset 0 0 40px rgba(28, 25, 23, 0.03);
+}
+
+.talisbooks-viewer-book__page--right {
+  border-radius: 0 var(--book-page-radius) var(--book-page-radius) 0;
+  box-shadow:
+    inset 28px 0 36px rgba(28, 25, 23, 0.12),
+    inset 0 0 40px rgba(28, 25, 23, 0.03);
+}
+
+.talisbooks-viewer-book__gutter {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 3.2rem;
+  transform: translateX(-50%);
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(28, 25, 23, 0.22) 0%,
+    rgba(28, 25, 23, 0.1) 22%,
+    rgba(255, 255, 255, 0.18) 48%,
+    rgba(255, 255, 255, 0.05) 52%,
+    rgba(28, 25, 23, 0.1) 78%,
+    rgba(28, 25, 23, 0.22) 100%
+  );
+}
+
+.talisbooks-viewer-book__gutter::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    180deg,
+    rgba(28, 25, 23, 0.05) 0%,
+    rgba(28, 25, 23, 0.35) 18%,
+    rgba(28, 25, 23, 0.4) 50%,
+    rgba(28, 25, 23, 0.35) 82%,
+    rgba(28, 25, 23, 0.05) 100%
+  );
+}
+
+.talisbooks-viewer-book__face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.talisbooks-viewer-book__face .talisbooks-viewer-page {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+.talisbooks-viewer-book__hit {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 46%;
+  z-index: 6;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.talisbooks-viewer-book__hit--left {
+  left: 0;
+}
+
+.talisbooks-viewer-book__hit--right {
+  right: 0;
+}
+
+.talisbooks-viewer-book__single {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  border-radius: 0.2rem;
+  overflow: visible;
+  background: #faf8f5;
+  box-shadow:
+    0 0 0 1px rgba(28, 25, 23, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(28, 25, 23, 0.06);
+  transform-style: preserve-3d;
+}
+
+.talisbooks-viewer-book__page--single {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--book-page-radius);
+  box-shadow:
+    inset 18px 0 28px rgba(28, 25, 23, 0.08),
+    inset -10px 0 22px rgba(28, 25, 23, 0.05);
+}
+
+.talisbooks-viewer-book__hit--single {
+  left: 0;
+  width: 100%;
+  z-index: 7;
+}
+
+.talisbooks-viewer-book--grabbing,
+.talisbooks-viewer-book--grabbing .talisbooks-viewer-book__hit {
+  cursor: grabbing;
+}
+
+/* Flipping leaf — two-phase single-sided turn (no mirrored verso plane) */
+.talisbooks-viewer-book__leaf {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  z-index: 8;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Forward: right page folds away, then left destination unfolds */
+.talisbooks-viewer-book__leaf--fwd-out {
+  left: 50%;
+  transform-origin: left center;
+}
+
+.talisbooks-viewer-book__leaf--fwd-in {
+  left: 0;
+  transform-origin: right center;
+}
+
+/* Backward: left page folds away, then right destination unfolds */
+.talisbooks-viewer-book__leaf--bwd-out {
+  left: 0;
+  transform-origin: right center;
+}
+
+.talisbooks-viewer-book__leaf--bwd-in {
+  left: 50%;
+  transform-origin: left center;
+}
+
+.talisbooks-viewer-book__leaf--single {
+  left: 0;
+  width: 100%;
+}
+
+.talisbooks-viewer-book__leaf--single-fwd {
+  transform-origin: left center;
+}
+
+.talisbooks-viewer-book__leaf--single-bwd {
+  transform-origin: right center;
+}
+
+.talisbooks-viewer-book__leaf-face--single {
+  border-radius: var(--book-page-radius);
+}
+
+.talisbooks-viewer-book__leaf-face {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow:
+    0 18px 40px rgba(28, 25, 23, 0.28),
+    0 0 0 1px rgba(28, 25, 23, 0.08);
+}
+
+.talisbooks-viewer-book__leaf-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(28, 25, 23, 0.28) 0%,
+    rgba(28, 25, 23, 0.1) 22%,
+    rgba(255, 255, 255, 0.08) 48%,
+    transparent 70%
+  );
+}
+
+.talisbooks-viewer-book__leaf-shade--rtl {
+  background: linear-gradient(
+    270deg,
+    rgba(28, 25, 23, 0.28) 0%,
+    rgba(28, 25, 23, 0.1) 22%,
+    rgba(255, 255, 255, 0.08) 48%,
+    transparent 70%
+  );
+}
+
+.talisbooks-viewer-book__leaf-face .talisbooks-viewer-page {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .talisbooks-viewer-book {
+    transform: none;
+  }
+
+  .talisbooks-viewer-book__leaf {
+    transition: none !important;
+  }
+}
+
+.talisbooks-viewer-page--endpaper {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 0;
+  background:
+    radial-gradient(ellipse at 28% 18%, rgba(255, 255, 255, 0.5) 0%, transparent 48%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(120, 113, 108, 0.03) 0 1px,
+      transparent 1px 3px
+    ),
+    linear-gradient(145deg, #f3ebe0 0%, #e7dccb 45%, #d4c4ae 100%);
+}
+
+.talisbooks-viewer-page--endpaper-left {
+  box-shadow: inset -20px 0 36px rgba(68, 64, 60, 0.1);
+}
+
+.talisbooks-viewer-page--endpaper-right {
+  box-shadow: inset 20px 0 36px rgba(68, 64, 60, 0.1);
+}
+
+.talisbooks-viewer-stage__folio {
+  position: absolute;
+  right: 0.7rem;
+  bottom: 0.55rem;
+  z-index: 3;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(28, 25, 23, 0.45);
+  text-shadow: none;
+  pointer-events: none;
+}
+
+.talisbooks-viewer-stage__folio--light {
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+
+.talisbooks-viewer-stage__hint {
+  margin: 0.55rem 0 0;
+  text-align: center;
+  font-size: 0.72rem;
+  color: #57534e;
+}
+
+.talisbooks-viewer-controls {
+  position: relative;
+  z-index: 20;
+  width: 100%;
+  flex: 0 0 auto;
+  border-radius: 1rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+  padding: 0.8rem 0.85rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.talisbooks-viewer-controls__view {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  padding: 0.2rem;
+  border-radius: 0.7rem;
+  background: #f5f5f4;
+}
+
+.talisbooks-viewer-controls__view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: #57534e;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+
+.talisbooks-viewer-controls__view-btn:hover {
+  color: #1c1917;
+}
+
+.talisbooks-viewer-controls__view-btn--active {
+  background: #ffffff;
+  color: #1c1917;
+  box-shadow: 0 1px 3px rgba(28, 25, 23, 0.12);
+}
+
+.talisbooks-viewer__sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-height: min(84vh, 860px);
+  align-self: stretch;
+}
+
+.talisbooks-viewer-live-edit {
+  position: relative;
+  z-index: 20;
+  flex: 1 1 auto;
+  min-height: 12rem;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.talisbooks-viewer-live-edit__header {
+  flex: 0 0 auto;
+  padding: 0.75rem 0.85rem 0.55rem;
+  border-bottom: 1px solid rgba(28, 25, 23, 0.08);
+}
+
+.talisbooks-viewer-live-edit__eyebrow {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #78716c;
+}
+
+.talisbooks-viewer-live-edit__title {
+  margin: 0.2rem 0 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #171717;
+}
+
+.talisbooks-viewer-live-edit__context {
+  margin: 0.25rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: #78716c;
+}
+
+.talisbooks-viewer-live-edit__add-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.55rem;
+  min-height: 1.9rem;
+  padding: 0 0.65rem;
+  border: 1px solid rgba(28, 25, 23, 0.12);
+  border-radius: 0.55rem;
+  background: #fafaf9;
+  color: #1c1917;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.talisbooks-viewer-live-edit__add-page:hover {
+  background: #f5f5f4;
+}
+
+.talisbooks-viewer-live-edit__empty-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.talisbooks-image-field-file-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.talisbooks-viewer-image-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.talisbooks-viewer-image-field__label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.talisbooks-viewer-image-field__preview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 0.55rem;
+  background:
+    linear-gradient(145deg, #f5f5f4 0%, #e7e5e4 100%);
+  border: 1px solid rgba(28, 25, 23, 0.1);
+}
+
+.talisbooks-viewer-image-field__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.talisbooks-viewer-image-field__placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  color: #78716c;
+}
+
+.talisbooks-viewer-image-field__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.talisbooks-viewer-image-field__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 1.75rem;
+  padding: 0 0.55rem;
+  border: 1px solid rgba(28, 25, 23, 0.12);
+  border-radius: 0.45rem;
+  background: #fff;
+  color: #292524;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.talisbooks-viewer-image-field__btn:hover:not(:disabled) {
+  background: #fafaf9;
+}
+
+.talisbooks-viewer-image-field__btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.talisbooks-viewer-image-field__btn--primary {
+  background: #1c1917;
+  border-color: #1c1917;
+  color: #fff;
+}
+
+.talisbooks-viewer-image-field__btn--primary:hover:not(:disabled) {
+  background: #292524;
+}
+
+.talisbooks-viewer-image-field__error {
+  margin: 0;
+  font-size: 0.68rem;
+  color: #b91c1c;
+}
+
+.talisbooks-viewer-image-field__dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(28, 25, 23, 0.55);
+}
+
+.talisbooks-viewer-image-field__dialog-card {
+  width: min(100%, 26rem);
+  max-height: min(92vh, 40rem);
+  overflow: auto;
+  border-radius: 0.9rem;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  padding: 0.85rem 0.9rem 1rem;
+}
+
+.talisbooks-viewer-image-field__dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.talisbooks-viewer-image-field__dialog-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1c1917;
+}
+
+.talisbooks-viewer-image-field__icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border: 0;
+  border-radius: 999px;
+  background: #f5f5f4;
+  color: #44403c;
+  cursor: pointer;
+}
+
+.talisbooks-viewer-image-field__presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.3rem;
+  margin-bottom: 0.65rem;
+}
+
+.talisbooks-viewer-image-field__preset {
+  min-height: 1.7rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: #f5f5f4;
+  color: #57534e;
+  font-size: 0.68rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.talisbooks-viewer-image-field__preset--active {
+  background: #1c1917;
+  color: #fff;
+}
+
+.talisbooks-viewer-image-field__crop-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.05;
+  overflow: hidden;
+  border-radius: 0.65rem;
+  background: #0c0a09;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.talisbooks-viewer-image-field__crop-stage img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform-origin: center center;
+  margin-left: -50%;
+  margin-top: -50%;
+  pointer-events: none;
+}
+
+.talisbooks-viewer-image-field__crop-frame {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 999px rgba(0, 0, 0, 0.45);
+  border: 1.5px solid rgba(255, 255, 255, 0.92);
+  pointer-events: none;
+}
+
+.talisbooks-viewer-image-field__zoom {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.65rem;
+  font-size: 0.7rem;
+  color: #57534e;
+}
+
+.talisbooks-viewer-image-field__zoom input {
+  flex: 1;
+}
+
+.talisbooks-viewer-image-field__dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+}
+
+.talisbooks-viewer-live-edit__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.7rem 0.75rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  scrollbar-width: thin;
+}
+
+.talisbooks-viewer-live-edit__empty {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #78716c;
+}
+
+.talisbooks-viewer-live-edit__card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.65rem 0.6rem 0.7rem;
+  border-radius: 0.75rem;
+  background: #fafaf9;
+  border: 1px solid rgba(28, 25, 23, 0.06);
+}
+
+.talisbooks-viewer-live-edit__card-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-bottom: 0.1rem;
+}
+
+.talisbooks-viewer-live-edit__side {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #171717;
+}
+
+.talisbooks-viewer-live-edit__page-meta {
+  margin: 0;
+  font-size: 0.64rem;
+  color: #78716c;
+  text-transform: capitalize;
+}
+
+.talisbooks-viewer-live-edit__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.talisbooks-viewer-live-edit__label {
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #78716c;
+}
+
+.talisbooks-viewer-live-edit__input,
+.talisbooks-viewer-live-edit__textarea {
+  width: 100%;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #171717;
+  font: inherit;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  padding: 0.4rem 0.5rem;
+}
+
+.talisbooks-viewer-live-edit__textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+}
+
+.talisbooks-viewer-live-edit__input:focus,
+.talisbooks-viewer-live-edit__textarea:focus {
+  outline: 2px solid rgba(28, 25, 23, 0.18);
+  outline-offset: 1px;
+  border-color: #a8a29e;
+}
+
+.talisbooks-viewer-page {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 0.85rem;
+  background: #ffffff;
+}
+
+.talisbooks-viewer-page--cover .talisbooks-cover {
+  width: 100%;
+  height: 100%;
+  border-radius: 0.85rem;
+}
+
+.talisbooks-viewer-page--teb-cover {
+  display: flex;
+  flex-direction: column;
+  background: #1c1917;
+}
+
+.talisbooks-viewer-page__teb-band {
+  flex: 0 0 auto;
+  padding: 0.85rem 1.1rem;
+  background: #1c1917;
+  color: #fff;
+}
+
+.talisbooks-viewer-page__teb-band--top {
+  padding-top: 1.15rem;
+  padding-bottom: 1rem;
+}
+
+.talisbooks-viewer-page__teb-band--bottom {
+  padding-top: 0.85rem;
+  padding-bottom: 1.1rem;
+  text-align: center;
+}
+
+.talisbooks-viewer-page__teb-title {
+  margin: 0;
+  font-size: clamp(1.45rem, 4vw, 2.1rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  color: #fff;
+}
+
+.talisbooks-viewer-page__teb-caption {
+  margin: 0;
+  font-size: clamp(0.72rem, 1.8vw, 0.88rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #d6d3d1;
+}
+
+.talisbooks-viewer-page__teb-hero {
+  flex: 1;
+  min-height: 0;
+  background-size: cover;
+  background-position: center;
+}
+
+.talisbooks-viewer-page--agent {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.talisbooks-viewer-page--agent-intro {
+  display: flex;
+  flex-direction: column;
+  background: #f7f7f8;
+}
+
+.talisbooks-viewer-page__logo-band {
+  position: relative;
+  flex: 0 0 32%;
+  background-color: #1c1917;
+  background-size: cover;
+  background-position: center;
+}
+
+.talisbooks-viewer-page__logo-scrim {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1rem 1.15rem 1.1rem;
+  background: linear-gradient(180deg, rgba(12, 10, 9, 0.15) 0%, rgba(12, 10, 9, 0.72) 100%);
+  color: #fff;
+}
+
+.talisbooks-viewer-page__logo-label {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.talisbooks-viewer-page__logo-name {
+  margin: 0.25rem 0 0;
+  font-size: clamp(1rem, 2.8vw, 1.35rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.talisbooks-viewer-page__agent-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 0.85rem;
+  padding: 0.95rem 1rem 1.05rem;
+  min-height: 0;
+}
+
+.talisbooks-viewer-page__portrait-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.talisbooks-viewer-page__portrait {
+  aspect-ratio: 1;
+  width: 100%;
+  border-radius: 0.55rem;
+  background: #d6d3d1 center/cover no-repeat;
+  box-shadow: 0 8px 20px rgba(28, 25, 23, 0.12);
+}
+
+.talisbooks-viewer-page__agent-name {
+  margin: 0.55rem 0 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.talisbooks-viewer-page__agent-role {
+  margin: 0.2rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  color: #78716c;
+}
+
+.talisbooks-viewer-page__agent-contact {
+  margin: 0.15rem 0 0;
+  font-size: 0.68rem;
+  color: #57534e;
+}
+
+.talisbooks-viewer-page__mission-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding-top: 0.15rem;
+}
+
+.talisbooks-viewer-page__slogan {
+  margin: 0;
+  font-size: clamp(1.05rem, 2.8vw, 1.35rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.talisbooks-viewer-page__slogan--soft {
+  margin-top: 0.55rem;
+  color: #57534e;
+  font-size: clamp(0.95rem, 2.4vw, 1.15rem);
+}
+
+.talisbooks-viewer-page__mission {
+  margin: 0.7rem 0 0;
+  font-size: clamp(0.72rem, 1.8vw, 0.84rem);
+  line-height: 1.55;
+  color: #57534e;
+}
+
+.talisbooks-viewer-page--agent-summary {
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(165deg, #fafaf9 0%, #ffffff 55%, #f5f5f4 100%);
+}
+
+.talisbooks-viewer-page__summary-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.25rem, 4.5vw, 2.1rem);
+}
+
+.talisbooks-viewer-page__summary-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.4rem;
+}
+
+.talisbooks-viewer-page__summary-agent {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.talisbooks-viewer-page__summary-avatar {
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 999px;
+  background: #d6d3d1 center/cover no-repeat;
+  flex-shrink: 0;
+}
+
+.talisbooks-viewer-page__band {
+  height: 8%;
+  background: #ffffff;
+}
+
+.talisbooks-viewer-page__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(1.25rem, 5vw, 2.5rem);
+  background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+}
+
+.talisbooks-viewer-page__eyebrow {
+  margin: 0 0 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #a3a3a3;
+}
+
+.talisbooks-viewer-page__title {
+  margin: 0;
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.talisbooks-viewer-page__subtitle {
+  margin: 0.5rem 0 0;
+  font-size: 0.95rem;
+  color: #737373;
+}
+
+.talisbooks-viewer-page__divider {
+  width: 3rem;
+  height: 1px;
+  margin: 1.25rem 0;
+  background: #d4d4d4;
+}
+
+.talisbooks-viewer-page__brokerage {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.talisbooks-viewer-page__meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: #737373;
+}
+
+.talisbooks-viewer-page--property {
+  display: flex;
+  flex-direction: column;
+}
+
+.talisbooks-viewer-page--maps {
+  display: flex;
+  flex-direction: column;
+  background: #0c0a09;
+}
+
+.talisbooks-viewer-page__maps-stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.talisbooks-viewer-page__maps-loading {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(145deg, #1c1917 0%, #292524 48%, #44403c 100%);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.talisbooks-viewer-page__maps-caption {
+  flex: 0 0 auto;
+  padding: clamp(0.85rem, 2.5vw, 1.15rem);
+  background: linear-gradient(180deg, rgba(12, 10, 9, 0.92) 0%, #0c0a09 100%);
+  color: #fafaf9;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.talisbooks-viewer-page__maps-caption .talisbooks-viewer-page__eyebrow {
+  color: rgba(250, 250, 249, 0.62);
+}
+
+.talisbooks-viewer-page__maps-caption .talisbooks-viewer-page__title {
+  color: #fff;
+  margin-top: 0.15rem;
+}
+
+.talisbooks-viewer-page__maps-address {
+  margin: 0.35rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgba(250, 250, 249, 0.88);
+}
+
+.talisbooks-viewer-page__maps-coords {
+  margin: 0.25rem 0 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  color: rgba(250, 250, 249, 0.55);
+}
+
+.talisbooks-viewer-page__maps-caption .talisbooks-viewer-page__body-text {
+  margin-top: 0.55rem;
+  color: rgba(250, 250, 249, 0.78);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.talisbooks-viewer-page__hero {
+  flex: 1.4;
+  background-size: cover;
+  background-position: center;
+  min-height: 0;
+}
+
+.talisbooks-viewer-page__caption {
+  flex: 0.7;
+  padding: clamp(1rem, 3.5vw, 1.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #ffffff;
+}
+
+.talisbooks-viewer-page--bleed {
+  position: relative;
+}
+
+.talisbooks-viewer-page__bleed-hero {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.talisbooks-viewer-page__bleed-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+  padding: 2.4rem 1.15rem 1.15rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(12, 10, 9, 0.78) 72%);
+  color: #fff;
+}
+
+.talisbooks-viewer-page--bleed .talisbooks-viewer-page__title {
+  color: #fff;
+  font-size: clamp(1.15rem, 3.2vw, 1.55rem);
+}
+
+.talisbooks-viewer-page--bleed .talisbooks-viewer-page__body-text {
+  color: rgba(255, 255, 255, 0.86);
+}
+
+/* Pre-split halves: keep the seam edge (right of left, left of right). */
+.talisbooks-viewer-page--fold-left:not(.talisbooks-viewer-page--fold-continuous)
+  .talisbooks-viewer-page__bleed-hero {
+  background-position: right center;
+}
+
+.talisbooks-viewer-page--fold-right:not(.talisbooks-viewer-page--fold-continuous)
+  .talisbooks-viewer-page__bleed-hero {
+  background-position: left center;
+}
+
+/* Full original shared across both pages — guaranteed join at the gutter. */
+.talisbooks-viewer-page--fold-continuous .talisbooks-viewer-page__bleed-hero {
+  background-size: 200% 100%;
+}
+
+.talisbooks-viewer-page--fold-continuous.talisbooks-viewer-page--fold-left
+  .talisbooks-viewer-page__bleed-hero {
+  background-position: left center;
+}
+
+.talisbooks-viewer-page--fold-continuous.talisbooks-viewer-page--fold-right
+  .talisbooks-viewer-page__bleed-hero {
+  background-position: right center;
+}
+
+.talisbooks-viewer-page__body-text {
+  margin: 0.55rem 0 0;
+  font-size: clamp(0.8rem, 2vw, 0.92rem);
+  line-height: 1.5;
+  color: #525252;
+}
+
+.talisbooks-viewer-controls__row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.talisbooks-viewer-controls__icon-btn,
+.talisbooks-viewer-controls__play-btn,
+.talisbooks-viewer-controls__preset {
+  border: 1px solid #e5e5e5;
+  background: #ffffff;
+  color: #171717;
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.talisbooks-viewer-controls__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 0.65rem;
+}
+
+.talisbooks-viewer-controls__play-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  height: 2.15rem;
+  padding: 0 0.7rem;
+  border-radius: 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  background: #171717;
+  color: #ffffff;
+  border-color: #171717;
+}
+
+.talisbooks-viewer-controls__icon-btn:hover,
+.talisbooks-viewer-controls__preset:hover {
+  background: #f5f5f5;
+}
+
+.talisbooks-viewer-controls__play-btn:hover {
+  background: #2a2a2a;
+}
+
+.talisbooks-viewer-controls__meta {
+  text-align: center;
+}
+
+.talisbooks-viewer-controls__page {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.talisbooks-viewer-controls__status {
+  margin: 0.15rem 0 0;
+  font-size: 0.68rem;
+  color: #737373;
+}
+
+.talisbooks-viewer-controls__speed-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: #525252;
+  margin-bottom: 0.3rem;
+}
+
+.talisbooks-viewer-controls__slider {
+  width: 100%;
+  accent-color: #171717;
+}
+
+.talisbooks-viewer-controls__presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.3rem;
+  margin-top: 0.45rem;
+}
+
+.talisbooks-viewer-controls__preset {
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.2rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+
+.talisbooks-viewer-controls__preset--active {
+  background: #171717;
+  color: #ffffff;
+  border-color: #171717;
+}
+
+@media (max-width: 639px) {
+  .talisbooks-viewer {
+    padding: 0.65rem;
+  }
+
+  .talisbooks-viewer-controls {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .talisbooks-viewer__sidebar {
+    max-height: none;
+  }
+
+  .talisbooks-viewer-live-edit {
+    max-height: 22rem;
+  }
+
+  .talisbooks-viewer-hardcover {
+    width: min(78%, 22rem);
+  }
+
+  .talisbooks-viewer-book {
+    transform: rotateX(3deg);
+    aspect-ratio: 3 / 2.2;
+  }
+
+  .talisbooks-viewer-stage__desk {
+    min-height: min(68vh, 620px);
+  }
+
+  .talisbooks-viewer-stage__perspective {
+    min-height: min(58vh, 480px);
+  }
+
+  .talisbooks-viewer-controls__row {
+    gap: 0.35rem;
+  }
+}
+
+/* ─── TalisBooks™ Library — physical recessed bookshelf ───────────────────── */
+
+.talisbooks-library {
+  --library-ink: #1c1917;
+  --library-muted: #78716c;
+  --library-wall: #ffffff;
+  --library-alcove: #f3f3f4;
+  --library-line: rgba(28, 25, 23, 0.08);
+  min-height: 100%;
+  color: var(--library-ink);
+}
+
+.talisbooks-library__topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.talisbooks-library__eyebrow {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a8a29e;
+}
+
+.talisbooks-library__title {
+  margin: 0.15rem 0 0;
+  font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.talisbooks-library__search {
+  position: relative;
+  flex: 1 1 14rem;
+  max-width: 18rem;
+}
+
+.talisbooks-library__search-icon {
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  width: 0.9rem;
+  height: 0.9rem;
+  transform: translateY(-50%);
+  color: #a8a29e;
+  pointer-events: none;
+}
+
+.talisbooks-library__search-input {
+  width: 100%;
+  border: 1px solid rgba(28, 25, 23, 0.08);
+  border-radius: 999px;
+  background: #f5f5f4;
+  padding: 0.6rem 1rem 0.6rem 2.3rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+
+.talisbooks-library__search-input:focus {
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(28, 25, 23, 0.06);
+}
+
+.talisbooks-library__capacity {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.08rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.talisbooks-library__capacity-label {
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #a8a29e;
+}
+
+.talisbooks-library__capacity strong {
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.talisbooks-library__capacity-value {
+  font-size: 0.68rem;
+  color: var(--library-muted);
+}
+
+/* Outer bookcase = continuous white wall the niches are carved into */
+.talisbooks-library__case {
+  background: var(--library-wall);
+  border-radius: 1.35rem;
+  padding: 0.7rem;
+  box-shadow:
+    0 0 0 1px rgba(28, 25, 23, 0.04),
+    0 1px 2px rgba(28, 25, 23, 0.03);
+}
+
+.talisbooks-library__split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+  min-height: min(78vh, 860px);
+}
+
+@media (min-width: 960px) {
+  .talisbooks-library__split {
+    grid-template-columns: minmax(13.5rem, 0.72fr) 0.85rem minmax(0, 1.9fr);
+    gap: 0;
+  }
+}
+
+.talisbooks-library__mullion {
+  display: none;
+  background: var(--library-wall);
+}
+
+@media (min-width: 960px) {
+  .talisbooks-library__mullion {
+    display: block;
+  }
+}
+
+/* Recessed alcove — ambient occlusion in corners */
+.talisbooks-library__niche {
+  position: relative;
+  min-height: 22rem;
+  border-radius: 1.05rem;
+  overflow: hidden;
+  background: var(--library-alcove);
+}
+
+.talisbooks-library__niche-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 0.9rem 1.1rem 0.85rem;
+}
+
+/* Soft vignette / AO simulating depth into the wall */
+.talisbooks-library__niche::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(115% 85% at 50% 32%, rgba(255, 255, 255, 0.88) 0%, transparent 58%),
+    linear-gradient(
+      90deg,
+      rgba(68, 64, 60, 0.2) 0%,
+      rgba(68, 64, 60, 0.06) 10%,
+      transparent 22%,
+      transparent 78%,
+      rgba(68, 64, 60, 0.06) 90%,
+      rgba(68, 64, 60, 0.2) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(68, 64, 60, 0.18) 0%,
+      rgba(68, 64, 60, 0.05) 12%,
+      transparent 28%,
+      transparent 74%,
+      rgba(68, 64, 60, 0.06) 88%,
+      rgba(68, 64, 60, 0.2) 100%
+    );
+  z-index: 0;
+}
+
+.talisbooks-library__niche::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+    inset 14px 0 36px rgba(41, 37, 36, 0.1),
+    inset -14px 0 36px rgba(41, 37, 36, 0.1),
+    inset 0 18px 42px rgba(41, 37, 36, 0.11),
+    inset 0 -22px 48px rgba(41, 37, 36, 0.12);
+  z-index: 2;
+}
+
+.talisbooks-library__niche-header {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 0.35rem;
+  min-height: 1.75rem;
+}
+
+.talisbooks-library__niche-header--end {
+  justify-content: flex-end;
+}
+
+.talisbooks-library__layout-toggle,
+.talisbooks-library__sort-pills {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.talisbooks-library__layout-toggle button,
+.talisbooks-library__sort-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  border: none;
+  border-radius: 999px;
+  background: rgba(41, 37, 36, 0.78);
+  padding: 0.32rem 0.7rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #fafaf9;
+  backdrop-filter: blur(8px);
+  transition: background 140ms ease, opacity 140ms ease;
+}
+
+.talisbooks-library__layout-toggle button:not(.is-active),
+.talisbooks-library__sort-pill:not(.is-active) {
+  background: rgba(68, 64, 60, 0.45);
+  opacity: 0.85;
+}
+
+.talisbooks-library__layout-toggle button.is-active,
+.talisbooks-library__sort-pill.is-active {
+  background: rgba(28, 25, 23, 0.92);
+  opacity: 1;
+}
+
+.talisbooks-library__sort-icon {
+  width: 0.7rem;
+  height: 0.7rem;
+  opacity: 0.75;
+}
+
+.talisbooks-library__alcove {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: clamp(1.1rem, 2.8vh, 2rem);
+  padding: 0.55rem 0.35rem 0.85rem;
+}
+
+.talisbooks-library__featured {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: clamp(1.1rem, 2.8vh, 2rem);
+  flex: 1;
+}
+
+.talisbooks-library__niche-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.25rem;
+  color: var(--library-muted);
+  font-size: 0.88rem;
+  text-align: center;
+}
+
+.talisbooks-library__niche-empty > p {
+  margin: 0 0 0.25rem;
+}
+
+/* One physical shelf bay: books standing on a floating plank */
+.talisbooks-library__shelf-bay {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.talisbooks-library__shelf-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: clamp(0.65rem, 1.6vw, 1.15rem);
+  padding: 0 0.55rem;
+  min-height: 4.5rem;
+  /* Seat books onto the plank face */
+  margin-bottom: -0.12rem;
+  z-index: 2;
+}
+
+.talisbooks-library__shelf-row--hero {
+  min-height: 12rem;
+}
+
+.talisbooks-library__shelf-row--compact {
+  min-height: 5.1rem;
+  justify-content: space-evenly;
+  gap: clamp(0.4rem, 1.1vw, 0.85rem);
+}
+
+.talisbooks-library__shelf-slot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+/* Floating white shelf plank with soft shadow on the back wall */
+.talisbooks-library__plank {
+  position: relative;
+  z-index: 1;
+  height: 0.62rem;
+  margin-top: 0;
+}
+
+.talisbooks-library__plank-face {
+  display: block;
+  height: 100%;
+  border-radius: 0.12rem;
+  background: linear-gradient(180deg, #ffffff 0%, #fafaf9 48%, #f0efed 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 1) inset,
+    0 -1px 0 rgba(28, 25, 23, 0.05) inset,
+    0 1px 2px rgba(28, 25, 23, 0.06);
+}
+
+.talisbooks-library__plank-shadow {
+  display: block;
+  position: absolute;
+  left: 1%;
+  right: 1%;
+  top: calc(100% - 1px);
+  height: 1.55rem;
+  background: linear-gradient(
+    180deg,
+    rgba(28, 25, 23, 0.2) 0%,
+    rgba(28, 25, 23, 0.08) 38%,
+    transparent 100%
+  );
+  filter: blur(2.5px);
+  pointer-events: none;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+}
+
+.talisbooks-library__pager {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+  font-size: 0.7rem;
+  color: #78716c;
+  font-variant-numeric: tabular-nums;
+}
+
+.talisbooks-library__pager-actions {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.talisbooks-library__pager-actions button {
+  border: none;
+  border-radius: 999px;
+  background: rgba(41, 37, 36, 0.7);
+  color: #fafaf9;
+  padding: 0.22rem 0.6rem;
+  font-size: 0.65rem;
+  font-weight: 500;
+}
+
+.talisbooks-library__pager-actions button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.talisbooks-library__account-switch {
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+}
+
+.talisbooks-library__account-switch a {
+  border-radius: 0.65rem;
+  padding: 0.38rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #57534e;
+  background: #f5f5f4;
+  text-decoration: none;
+}
+
+.talisbooks-library__account-switch a.is-active {
+  background: #1c1917;
+  color: #fff;
+}
+
+/* Books standing upright on the shelf */
+.talisbooks-standing-book {
+  width: auto;
+  opacity: 0;
+  animation: talisbooks-library-rise 460ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.talisbooks-standing-book--hero {
+  width: clamp(7.5rem, 18vw, 10.75rem);
+}
+
+.talisbooks-standing-book--featured {
+  width: clamp(4.4rem, 9vw, 5.6rem);
+}
+
+.talisbooks-standing-book--compact {
+  width: clamp(3.35rem, 6.5vw, 4.55rem);
+}
+
+@keyframes talisbooks-library-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.talisbooks-standing-book__link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.talisbooks-standing-book__scene {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.talisbooks-standing-book__volume {
+  --book-cover: linear-gradient(160deg, #1c1917, #44403c);
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4.2;
+  transform-style: preserve-3d;
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+  filter: drop-shadow(0 6px 10px rgba(28, 25, 23, 0.16));
+}
+
+.talisbooks-standing-book__link:hover .talisbooks-standing-book__volume,
+.talisbooks-standing-book__link:focus-visible .talisbooks-standing-book__volume {
+  transform: translateY(-5px) scale(1.015);
+}
+
+/* Thin spine edge for physical thickness */
+.talisbooks-standing-book__spine {
+  position: absolute;
+  left: -0.2rem;
+  top: 0.06rem;
+  bottom: 0.06rem;
+  width: 0.24rem;
+  border-radius: 0.05rem 0 0 0.05rem;
+  background: linear-gradient(90deg, #0c0a09 0%, #292524 55%, #57534e 100%);
+  box-shadow: -1px 0 2px rgba(0, 0, 0, 0.18);
+}
+
+.talisbooks-standing-book__cover {
+  position: absolute;
+  inset: 0;
+  border-radius: 0.06rem 0.16rem 0.16rem 0.06rem;
+  overflow: hidden;
+  background: #111;
+  box-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.1),
+    inset -1px 0 0 rgba(255, 255, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.talisbooks-standing-book__cover-image,
+.talisbooks-standing-book__cover-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background-size: cover;
+  background-position: center;
+}
+
+.talisbooks-standing-book__cover-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.04) 30%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.talisbooks-standing-book__cover-copy {
+  position: absolute;
+  left: 9%;
+  right: 9%;
+  bottom: 9%;
+  z-index: 1;
+}
+
+.talisbooks-standing-book__cover-title {
+  margin: 0;
+  font-size: clamp(0.48rem, 1.1vw, 0.72rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
+  color: #fff;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.talisbooks-standing-book--hero .talisbooks-standing-book__cover-title {
+  font-size: clamp(0.85rem, 1.7vw, 1.15rem);
+}
+
+.talisbooks-standing-book--compact .talisbooks-standing-book__cover-title {
+  font-size: 0.46rem;
+  -webkit-line-clamp: 2;
+}
+
+.talisbooks-standing-book__cover-subtitle {
+  margin: 0.25rem 0 0;
+  font-size: 0.48rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Page block on the right edge */
+.talisbooks-standing-book__pages {
+  position: absolute;
+  top: 0.12rem;
+  bottom: 0.12rem;
+  right: -0.16rem;
+  width: 0.2rem;
+  border-radius: 0 0.06rem 0.06rem 0;
+  background: repeating-linear-gradient(
+    180deg,
+    #fafaf9 0 1px,
+    #e7e5e4 1px 2px
+  );
+  box-shadow: 1px 0 2px rgba(0, 0, 0, 0.08);
+}
+
+/* Contact shadow where book meets the plank */
+.talisbooks-standing-book__contact-shadow {
+  width: 92%;
+  height: 0.42rem;
+  margin-top: 0.02rem;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(28, 25, 23, 0.34) 0%, transparent 70%);
+  filter: blur(0.8px);
+  opacity: 0.9;
+  transition: opacity 220ms ease;
+}
+
+.talisbooks-standing-book__link:hover .talisbooks-standing-book__contact-shadow {
+  opacity: 0.45;
+}
+
+.talisbooks-standing-book__meta {
+  margin-top: 0.4rem;
+  text-align: center;
+}
+
+.talisbooks-standing-book__title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .talisbooks-standing-book {
+    animation: none;
+    opacity: 1;
+  }
+
+  .talisbooks-standing-book__volume {
+    transition: none;
+  }
+}

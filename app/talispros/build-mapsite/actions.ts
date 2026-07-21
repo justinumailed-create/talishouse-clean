@@ -3,12 +3,15 @@
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { Database } from "@/lib/database.types";
 import { uploadBuildMapsiteAsset } from "@/lib/build-mapsite-upload";
+import { encodePinStyleInNotes } from "@/lib/build-request-pin-style-notes";
 import { lookupFastCodeRegistrationTier, type RegistrationFastCodeTier } from "@/lib/registration-fast-code-routing";
 import { sendBuildRequestReceived } from "@/lib/email";
+import { generateFastCode } from "@/services/fast-code.service";
 
 export interface ActionResult {
   success: boolean;
   requestId?: string;
+  fastCode?: string;
   error?: string;
 }
 
@@ -25,11 +28,16 @@ export interface BuildFields {
   streetAddress: string;
   latitude: string;
   longitude: string;
+  manualPlacement: boolean;
+  reverseGeocodedAddress: string;
   pinWriteup: string;
   futurePinColor: string;
   futurePinIcon: string;
   futurePinBorder: string;
   futurePinLabel: string;
+  futurePinWhiteCenter: boolean;
+  futurePinAnimated: boolean;
+  futurePinCategoryBadge: string;
   helpPreference: string;
   additionalComments: string;
   consentCommunications: boolean;
@@ -103,7 +111,6 @@ function validate(fields: BuildFields): string | null {
     return "FAST Code is required";
   }
 
-  const hasAddress = fields.streetAddress.trim().length > 0;
   const lat = Number.parseFloat(fields.latitude);
   const lng = Number.parseFloat(fields.longitude);
   const hasCoords =
@@ -114,8 +121,8 @@ function validate(fields: BuildFields): string | null {
     lng >= -180 &&
     lng <= 180;
 
-  if (!hasAddress && !hasCoords) {
-    return "Street address or GPS coordinates are required";
+  if (!hasCoords) {
+    return "GPS coordinates are required (address is optional for vacant land)";
   }
 
   if (fields.pinWriteup.length > 170) {
@@ -168,11 +175,17 @@ export async function submitBuildRequest(
     streetAddress: (formData.get("streetAddress") as string) || "",
     latitude: (formData.get("latitude") as string) || "",
     longitude: (formData.get("longitude") as string) || "",
+    manualPlacement: formData.get("manualPlacement") === "true",
+    reverseGeocodedAddress:
+      (formData.get("reverseGeocodedAddress") as string) || "",
     pinWriteup: (formData.get("pinWriteup") as string) || "",
     futurePinColor: (formData.get("futurePinColor") as string) || "",
     futurePinIcon: (formData.get("futurePinIcon") as string) || "",
     futurePinBorder: (formData.get("futurePinBorder") as string) || "",
     futurePinLabel: (formData.get("futurePinLabel") as string) || "",
+    futurePinWhiteCenter: formData.get("futurePinWhiteCenter") === "true",
+    futurePinAnimated: formData.get("futurePinAnimated") === "true",
+    futurePinCategoryBadge: (formData.get("futurePinCategoryBadge") as string) || "",
     helpPreference: (formData.get("helpPreference") as string) || "",
     additionalComments: (formData.get("additionalComments") as string) || "",
     consentCommunications: formData.get("consentCommunications") === "true",
@@ -258,6 +271,9 @@ export async function submitBuildRequest(
       street_address: fields.streetAddress.trim() || null,
       latitude: hasCoordinates ? parsedLatitude : null,
       longitude: hasCoordinates ? parsedLongitude : null,
+      manual_placement: fields.manualPlacement,
+      reverse_geocoded_address:
+        fields.reverseGeocodedAddress.trim() || null,
       pin_writeup: fields.pinWriteup.trim() || null,
       future_pin_color: fields.futurePinColor.trim() || null,
       future_pin_icon: fields.futurePinIcon.trim() || null,
@@ -268,7 +284,19 @@ export async function submitBuildRequest(
       requested_account_type: fields.accountType,
       requested_fast_code: sponsorFastCode,
       approval_status: "Pending",
-      notes: fields.additionalComments.trim() || null,
+      notes: encodePinStyleInNotes(
+        fields.additionalComments,
+        {
+          whiteCenter: fields.futurePinWhiteCenter,
+          animated: fields.futurePinAnimated,
+          categoryBadge: fields.futurePinCategoryBadge.trim() || null,
+        },
+        {
+          manualPlacement: fields.manualPlacement,
+          reverseGeocodedAddress:
+            fields.reverseGeocodedAddress.trim() || null,
+        }
+      ),
       description: fields.pinWriteup.trim() || null,
       company: fields.company.trim(),
       market_type: fields.marketType.trim() || null,
@@ -278,9 +306,24 @@ export async function submitBuildRequest(
       video: fileUrls.ttvBackgroundImage ?? null,
     };
 
-    const { error: buildError } = await supabaseAdmin
+    let { error: buildError } = await supabaseAdmin
       .from("build_requests")
       .insert(buildRequest);
+
+    if (
+      buildError &&
+      /manual_placement|reverse_geocoded_address/i.test(buildError.message)
+    ) {
+      const {
+        manual_placement: _manualPlacement,
+        reverse_geocoded_address: _reverseGeocodedAddress,
+        ...compatibleRequest
+      } = buildRequest;
+      const retry = await supabaseAdmin
+        .from("build_requests")
+        .insert(compatibleRequest);
+      buildError = retry.error;
+    }
 
     if (buildError) {
       console.error("[build-mapsite] Build request insert error:", buildError);
@@ -383,6 +426,8 @@ export async function submitBuildRequest(
         streetAddress: fields.streetAddress,
         latitude: fields.latitude,
         longitude: fields.longitude,
+        manualPlacement: fields.manualPlacement,
+        reverseGeocodedAddress: fields.reverseGeocodedAddress,
         pinWriteup: fields.pinWriteup,
         ttvBackgroundImageUrl: fileUrls.ttvBackgroundImage ?? undefined,
         consentCommunications: fields.consentCommunications,
@@ -402,7 +447,47 @@ export async function submitBuildRequest(
       console.error("[build-mapsite] Activity log insert error:", logError);
     }
 
-    return { success: true, requestId };
+    let issuedFastCode: string | undefined = sponsorFastCode ?? undefined;
+
+    if (!requiresFastCodeValidation(fields.accountType)) {
+      try {
+        const generatedCode = await generateFastCode({
+          firstName: fields.firstName.trim(),
+          lastName: fields.lastName.trim(),
+        });
+
+        const { error: fastCodeError } = await supabaseAdmin.from("fast_codes").upsert(
+          {
+            code: generatedCode,
+            type: "mapsite",
+            request_id: requestId,
+            account_type: fields.accountType,
+          },
+          { onConflict: "code" }
+        );
+
+        if (fastCodeError) {
+          console.error("[build-mapsite] Fast code insert error:", fastCodeError);
+        } else {
+          issuedFastCode = generatedCode;
+          const { error: updateError } = await supabaseAdmin
+            .from("build_requests")
+            .update({ requested_fast_code: generatedCode })
+            .eq("id", requestId);
+
+          if (updateError) {
+            console.error("[build-mapsite] Fast code update error:", updateError);
+          }
+        }
+      } catch (fastCodeGenerationError) {
+        console.error(
+          "[build-mapsite] Fast code generation error:",
+          fastCodeGenerationError
+        );
+      }
+    }
+
+    return { success: true, requestId, fastCode: issuedFastCode };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown server error";
     console.error("[build-mapsite] Submission error:", err);

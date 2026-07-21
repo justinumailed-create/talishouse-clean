@@ -2,7 +2,6 @@ import type { MapSitePinView, MapSiteView } from "./mapsite-service";
 import type { TalisMapsPin } from "./talismaps";
 import type { OfferedSubscriptionTier } from "./mapsite-subscription";
 import { parseOfferedSubscriptionTier } from "./mapsite-subscription";
-import { resolveMapsiteAtlistMapUrl } from "./mapsite-atlist";
 import {
   toDisplayGalleryUrl,
   visibleGalleryDisplayItems,
@@ -56,7 +55,6 @@ export interface MapSiteLayoutData {
   metaTitle: string | null;
   metaDescription: string | null;
   ogImageUrl: string | null;
-  atlistMapUrl: string;
   pinLabel: string;
   overlayImageUrl: string | null;
   offeredSubscriptionTier: OfferedSubscriptionTier;
@@ -273,7 +271,6 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
     metaTitle: mapsite.metaTitle,
     metaDescription: mapsite.metaDescription,
     ogImageUrl: mapsite.ogImageUrl,
-    atlistMapUrl: resolveMapsiteAtlistMapUrl(mapsite.atlistMapUrl),
     pinLabel:
       primaryPin?.name?.trim() || mapsite.fastCode.toUpperCase(),
     overlayImageUrl:

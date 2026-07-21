@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { publishBuildMapSite } from "@/lib/build-mapsite-publish";
+import { resolvePinStyleExtras } from "@/lib/build-request-pin-style-notes";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { generateFastCode } from "@/services/fast-code.service";
 
@@ -12,6 +13,7 @@ export type BuildRequestListRow = {
   first_name: string;
   last_name: string;
   email: string;
+  market_type: string | null;
   requested_account_type: string | null;
   requested_fast_code: string | null;
   registration_link: string | null;
@@ -25,7 +27,7 @@ export async function listBuildRequests(): Promise<{ ok: boolean; data: BuildReq
   const { data, error } = await supabaseAdmin
     .from("build_requests")
     .select(
-      "id, first_name, last_name, email, requested_account_type, requested_fast_code, registration_link, status, submitted_at, created_at"
+      "id, first_name, last_name, email, market_type, requested_account_type, requested_fast_code, registration_link, status, submitted_at, created_at"
     )
     .order("created_at", { ascending: false });
 
@@ -89,7 +91,7 @@ export async function generateDraftMapSite(requestId: string): Promise<ActionRes
     const { data: buildRequest, error: requestError } = await supabaseAdmin
       .from("build_requests")
       .select(
-        "id, first_name, last_name, email, street_address, latitude, longitude, pin_writeup, future_pin_label, requested_account_type, requested_fast_code, status, linked_mapsite_id"
+        "id, first_name, last_name, email, street_address, latitude, longitude, pin_writeup, future_pin_label, future_pin_color, future_pin_icon, future_pin_border, notes, requested_account_type, requested_fast_code, status, linked_mapsite_id"
       )
       .eq("id", requestId)
       .single();
@@ -117,6 +119,8 @@ export async function generateDraftMapSite(requestId: string): Promise<ActionRes
       .eq("id", requestId)
       .single();
 
+    const pinStyleExtras = resolvePinStyleExtras(buildRequest);
+
     const published = await publishBuildMapSite({
       fastCode: fastCodeReservation.code,
       firstName: buildRequest.first_name,
@@ -128,6 +132,13 @@ export async function generateDraftMapSite(requestId: string): Promise<ActionRes
       longitude: buildRequest.longitude,
       pinWriteup: buildRequest.pin_writeup || "",
       futurePinLabel: buildRequest.future_pin_label || "",
+      futurePinColor: buildRequest.future_pin_color,
+      futurePinIcon: buildRequest.future_pin_icon,
+      futurePinBorder: buildRequest.future_pin_border,
+      futurePinWhiteCenter: pinStyleExtras.whiteCenter,
+      futurePinAnimated: pinStyleExtras.animated,
+      futurePinCategoryBadge: pinStyleExtras.categoryBadge,
+      pinImageUrl: assets?.pin_image ?? null,
       profileImageUrl: assets?.profile_image ?? null,
       logoImageUrl: requestMedia?.logo ?? assets?.logo_image ?? null,
       headerImageUrl: requestMedia?.video ?? null,

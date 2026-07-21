@@ -10,4 +10,5 @@ export const CLIENT_DASHBOARD_PATH = "/talispros/client/dashboard";
 export const CLIENT_LOGIN_PATH = "/talispros/client/login";
 export const MARKETING_LOGIN_PATH = "/talispros/marketing/login";
 export const MARKETING_HOME_PATH = "/talispros/marketing";
+export const MARKETING_ADMIN_PATH = "/talispros/marketing/admin";
 export const MARKETING_UNAUTHORIZED_PATH = "/talispros/marketing/unauthorized";

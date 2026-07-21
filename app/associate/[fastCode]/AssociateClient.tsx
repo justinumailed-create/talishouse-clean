@@ -1,10 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { supabase, User, safeInsertLead } from "@/lib/supabase";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+
+const TalisMapsEmbed = dynamic(() => import("@/components/talismaps/TalisMapsEmbed"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full min-h-[300px] w-full items-center justify-center bg-neutral-100 text-sm text-neutral-500">
+      Loading map...
+    </div>
+  ),
+});
 
 interface AssociateUser extends User {
   page_headline?: string | null;
@@ -178,14 +188,12 @@ export default function AssociateClient({
         <section className="py-8 px-4">
           <div className="max-w-4xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="map-container w-full min-h-[300px] lg:min-h-[400px]">
-                <iframe
-                  src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
-                  allow="geolocation 'self' https://my.atlist.com"
-                  allowFullScreen
-                  title="Talishouse property discovery map"
-                  className="w-full h-full border-0"
-                  style={{ width: '100%', height: '100%' }}
+              <div className="map-container min-h-[300px] w-full lg:min-h-[400px]">
+                <TalisMapsEmbed
+                  marketing
+                  className="h-full w-full"
+                  minHeightClassName="min-h-[300px] lg:min-h-[400px]"
+                  pinLabel="Talishouse property discovery"
                 />
               </div>
               {videoUrl && (

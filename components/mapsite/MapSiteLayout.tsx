@@ -1,7 +1,7 @@
 import type { MapSiteLayoutData } from "@/lib/mapsite-layout";
 import type { MapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import MapSiteTopBar from "./MapSiteTopBar";
-import MapSiteAtlistMap from "./MapSiteAtlistMap";
+import MapSiteTalisMaps from "./MapSiteTalisMaps";
 import MapSiteBottomPanels from "./MapSiteBottomPanels";
 import MapSiteFooter from "./MapSiteFooter";
 import MapSiteEditToolbar from "./MapSiteEditToolbar";
@@ -31,8 +31,10 @@ export default function MapSiteLayout({
         />
 
         <main className="flex flex-col">
-          <MapSiteAtlistMap
-            atlistMapUrl={data.atlistMapUrl}
+          <MapSiteTalisMaps
+            pins={data.pins}
+            mapCenter={data.mapCenter}
+            mapZoom={data.mapZoom}
             propertyTitle={data.propertyTitle}
           />
           <MapSiteBottomPanels

@@ -16,10 +16,17 @@ export default function TalisprosLayoutClient({
     return <>{children}</>;
   }
 
+  const isFullBleedPage =
+    pathname === "/talispros/start" || pathname.startsWith("/talispros/markets/");
+
   return (
     <>
       <TalisprosHeader />
-      <main className="min-h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white [&:has(.mapsite-layout)]:p-0">
+      <main
+        className={`bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white [&:has(.mapsite-layout)]:p-0 ${
+          isFullBleedPage ? "h-dvh overflow-hidden" : "min-h-screen"
+        }`}
+      >
         {children}
       </main>
       <TalisprosFooter />

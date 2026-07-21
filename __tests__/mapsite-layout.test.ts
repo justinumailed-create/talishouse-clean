@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { buildMapSiteLayoutData } from "../lib/mapsite-layout";
 import type { MapSiteView } from "../lib/mapsite-service";
-import { DEFAULT_MAPSITE_ATLIST_MAP_URL } from "../lib/mapsite-atlist";
 
 const baseMapsite: MapSiteView = {
   id: "mapsite-1",
@@ -107,22 +106,15 @@ describe("buildMapSiteLayoutData", () => {
     expect(layout.videoUrl).toBe("https://www.youtube.com/embed/dQw4w9WgXcQ");
   });
 
-  it("uses the default Atlist map when none is configured", () => {
-    const layout = buildMapSiteLayoutData(baseMapsite);
-
-    expect(layout.atlistMapUrl).toBe(DEFAULT_MAPSITE_ATLIST_MAP_URL);
-  });
-
-  it("exposes atlist map url and overlay card fields", () => {
+  it("exposes map center and overlay card fields", () => {
     const layout = buildMapSiteLayoutData({
       ...baseMapsite,
-      atlistMapUrl: "https://my.atlist.com/map/test-id",
       headerImageUrl: "https://cdn.example.com/hero.jpg",
       price: "$129,000",
       pins: [{ ...baseMapsite.pins[0], name: "LRG1-TTV" }],
     });
 
-    expect(layout.atlistMapUrl).toBe("https://my.atlist.com/map/test-id");
+    expect(layout.mapCenter).toEqual([43.65, -79.38]);
     expect(layout.pinLabel).toBe("LRG1-TTV");
     expect(layout.overlayImageUrl).toBe("https://cdn.example.com/hero.jpg");
     expect(layout.summary.price).toBe("$129,000");

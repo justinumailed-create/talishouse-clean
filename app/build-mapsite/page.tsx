@@ -64,11 +64,16 @@ interface FormData {
   streetAddress: string;
   latitude: string;
   longitude: string;
+  manualPlacement: boolean;
+  reverseGeocodedAddress: string;
   pinWriteup: string;
   futurePinColor: string | null;
   futurePinIcon: string | null;
   futurePinBorder: string | null;
   futurePinLabel: string | null;
+  futurePinWhiteCenter: boolean;
+  futurePinAnimated: boolean;
+  futurePinCategoryBadge: string | null;
   helpPreference: string;
   additionalComments: string;
   consentCommunications: boolean;
@@ -811,11 +816,16 @@ export default function BuildMapsitePage() {
         streetAddress: form.streetAddress,
         latitude: form.latitude,
         longitude: form.longitude,
+        manualPlacement: form.manualPlacement,
+        reverseGeocodedAddress: form.reverseGeocodedAddress,
         pinWriteup: form.pinWriteup,
         futurePinColor: form.futurePinColor,
         futurePinIcon: form.futurePinIcon,
         futurePinBorder: form.futurePinBorder,
         futurePinLabel: form.futurePinLabel,
+        futurePinWhiteCenter: form.futurePinWhiteCenter,
+        futurePinAnimated: form.futurePinAnimated,
+        futurePinCategoryBadge: form.futurePinCategoryBadge,
       })
     );
     if (!form.consentData) errs.consentData = "You must agree to the data processing terms";
@@ -850,11 +860,16 @@ export default function BuildMapsitePage() {
       fd.append("streetAddress", form.streetAddress);
       fd.append("latitude", form.latitude);
       fd.append("longitude", form.longitude);
+      fd.append("manualPlacement", String(form.manualPlacement));
+      fd.append("reverseGeocodedAddress", form.reverseGeocodedAddress);
       fd.append("pinWriteup", form.pinWriteup);
       fd.append("futurePinColor", form.futurePinColor ?? "");
       fd.append("futurePinIcon", form.futurePinIcon ?? "");
       fd.append("futurePinBorder", form.futurePinBorder ?? "");
       fd.append("futurePinLabel", form.futurePinLabel ?? "");
+      fd.append("futurePinWhiteCenter", String(form.futurePinWhiteCenter));
+      fd.append("futurePinAnimated", String(form.futurePinAnimated));
+      fd.append("futurePinCategoryBadge", form.futurePinCategoryBadge ?? "");
       fd.append("helpPreference", form.helpPreference);
       fd.append("additionalComments", form.additionalComments);
       fd.append("consentCommunications", String(form.consentCommunications));
@@ -1090,7 +1105,7 @@ export default function BuildMapsitePage() {
               <SectionCard
                 number={3}
                 title="Home PIN Location"
-                description="Choose the exact location of your Home PIN. You may enter an address or paste GPS coordinates. In a future TalisMaps™ update, you'll be able to personalize your pin style, branding, colors and map appearance."
+                description="Place your Home PIN with an optional address, coordinates, or by clicking the map. Coordinates are required — works for vacant land without a street address."
                 isOpen={openSections.has(3)}
                 onToggle={() => toggleSection(3)}
               >
@@ -1099,11 +1114,16 @@ export default function BuildMapsitePage() {
                     streetAddress: form.streetAddress,
                     latitude: form.latitude,
                     longitude: form.longitude,
+                    manualPlacement: form.manualPlacement,
+                    reverseGeocodedAddress: form.reverseGeocodedAddress,
                     pinWriteup: form.pinWriteup,
                     futurePinColor: form.futurePinColor,
                     futurePinIcon: form.futurePinIcon,
                     futurePinBorder: form.futurePinBorder,
                     futurePinLabel: form.futurePinLabel,
+                    futurePinWhiteCenter: form.futurePinWhiteCenter,
+                    futurePinAnimated: form.futurePinAnimated,
+                    futurePinCategoryBadge: form.futurePinCategoryBadge,
                   }}
                   pinImage={files.pinImage}
                   onChange={(values) => {

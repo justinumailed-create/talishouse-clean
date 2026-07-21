@@ -5,7 +5,11 @@ import { usePathname } from "next/navigation";
 export default function TalisprosFooter() {
   const pathname = usePathname();
 
-  if (pathname.startsWith("/talispros/mapsites/")) {
+  if (
+    pathname.startsWith("/talispros/mapsites/") ||
+    pathname === "/talispros/start" ||
+    pathname.startsWith("/talispros/markets/")
+  ) {
     return null;
   }
 

@@ -17,7 +17,6 @@ import {
   OFFERED_SUBSCRIPTION_TIER_LABELS,
   type OfferedSubscriptionTier,
 } from "@/lib/mapsite-subscription";
-import { DEFAULT_MAPSITE_ATLIST_MAP_URL } from "@/lib/mapsite-atlist";
 
 interface MapSiteAdminEditorProps {
   mapsite: MapSiteView;
@@ -99,7 +98,6 @@ export default function MapSiteAdminEditor({
     metaTitle: mapsite.metaTitle || "",
     metaDescription: mapsite.metaDescription || "",
     ogImageUrl: mapsite.ogImageUrl || "",
-    atlistMapUrl: mapsite.atlistMapUrl || "",
     offeredSubscriptionTier: (mapsite.offeredSubscriptionTier || "root") as OfferedSubscriptionTier,
     interestFormEnabled: mapsite.interestFormEnabled ?? true,
     status: mapsite.status,
@@ -305,17 +303,9 @@ export default function MapSiteAdminEditor({
             />
           </Field>
         </div>
-        <Field label="Atlist Map URL">
-          <input
-            className={inputClass}
-            value={form.atlistMapUrl}
-            onChange={(e) => setForm((p) => ({ ...p, atlistMapUrl: e.target.value }))}
-            placeholder={DEFAULT_MAPSITE_ATLIST_MAP_URL}
-          />
-          <p className="text-xs text-neutral-500 mt-1.5">
-            Leave blank to use the default Talispros Atlist map embed.
-          </p>
-        </Field>
+        <p className="text-xs text-neutral-500">
+          Public MapSites render through TalisMaps™ using these coordinates and any saved Home PINs.
+        </p>
         <Field label="Price">
           <input
             className={inputClass}

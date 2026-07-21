@@ -4,7 +4,17 @@ import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { FeatureSlider } from "@/components/FeatureSlider";
+
+const TalisMapsEmbed = dynamic(() => import("@/components/talismaps/TalisMapsEmbed"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-full min-h-[300px] w-full items-center justify-center bg-neutral-100 text-sm text-neutral-500">
+      Loading map...
+    </div>
+  ),
+});
 
 interface HomeHeroProps {
   title: string;
@@ -79,13 +89,12 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
             </motion.div>
 
             {/* MAP BLOCK (FLEX FILL) */}
-            <div className="map-container flex-1 min-h-0 sm:min-h-[300px]">
-              <iframe
-                src="https://my.atlist.com/map/23edf5cc-e0b4-4d44-85fe-469f9606e876?share=true"
-                allow="geolocation 'self' https://my.atlist.com"
-                className="block w-full h-full border-0"
-                style={{ width: '100%', height: '100%' }}
-                title="Talishouse property discovery map"
+            <div className="map-container min-h-0 flex-1 sm:min-h-[300px]">
+              <TalisMapsEmbed
+                marketing
+                className="h-full w-full"
+                minHeightClassName="min-h-[300px]"
+                pinLabel="Talishouse property discovery"
               />
             </div>
 

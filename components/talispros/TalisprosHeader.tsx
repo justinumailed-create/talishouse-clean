@@ -8,6 +8,7 @@ import { Menu, X } from "lucide-react";
 
 const NAV_ITEMS = [
   { label: "Welcome", href: "/talispros/welcome" },
+  { label: "TalisMaps™", href: "/talismaps" },
   { label: "Claim A Market™", href: "/talispros/claim-a-market" },
   { label: "Build A MapSite™", href: "/talispros/build-mapsite" },
   { label: "Register Account", href: "/talispros/register" },
@@ -17,7 +18,11 @@ export default function TalisprosHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
-  if (pathname.startsWith("/talispros/mapsites/") || pathname === "/talispros/start") {
+  if (
+    pathname.startsWith("/talispros/mapsites/") ||
+    pathname === "/talispros/start" ||
+    pathname.startsWith("/talispros/markets/")
+  ) {
     return null;
   }
 

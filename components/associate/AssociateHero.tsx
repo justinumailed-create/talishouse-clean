@@ -9,6 +9,9 @@ import { formatCAD } from "@/utils/currency";
 import { supabase } from "@/lib/supabase";
 
 const MapComponent = dynamic(() => import("@/components/MapComponent"), { ssr: false });
+const TalisMapsEmbed = dynamic(() => import("@/components/talismaps/TalisMapsEmbed"), {
+  ssr: false,
+});
 
 interface PageConfig {
   contentType: "map" | "pdf" | "image";
@@ -119,12 +122,12 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
     switch (config.contentType) {
       case "image":
         return (
-          <div className="map-container" style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-            <iframe
-              src="https://my.atlist.com/map/dd00462f-d929-4aac-a777-32017c2523b1?share=true"
-              style={{ border: 'none', flex: 1, width: '100%', height: '100%' }}
-              loading="lazy"
-              title="Property Map"
+          <div className="map-container flex flex-1 overflow-hidden">
+            <TalisMapsEmbed
+              marketing
+              className="h-full w-full flex-1"
+              minHeightClassName="min-h-[500px]"
+              pinLabel="Property map"
             />
           </div>
         );

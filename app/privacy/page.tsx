@@ -115,8 +115,13 @@ export default function PrivacyPage() {
           .
         </p>
 
-        <p className="text-gray-400 text-sm mt-8">
-          Last updated: {new Date().toLocaleDateString()}
+        <p className="text-gray-400 text-sm mt-8" suppressHydrationWarning>
+          Last updated: {new Date().toLocaleDateString("en-CA", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            timeZone: "UTC",
+          })}
         </p>
 
         <hr className="my-8" />

@@ -14,6 +14,13 @@ export interface PublishBuildMapSiteInput {
   longitude: number | null;
   pinWriteup: string;
   futurePinLabel: string;
+  futurePinColor?: string | null;
+  futurePinIcon?: string | null;
+  futurePinBorder?: string | null;
+  futurePinWhiteCenter?: boolean;
+  futurePinAnimated?: boolean;
+  futurePinCategoryBadge?: string | null;
+  pinImageUrl?: string | null;
   profileImageUrl: string | null;
   logoImageUrl: string | null;
   headerImageUrl: string | null;

@@ -34,6 +34,21 @@ export const ROUTES = {
   TERMS: "/terms",
   FIND_YOUR_MARKET: "/find-your-market",
   MATCH_RESULTS: "/match-results",
+  TALISMAPS: "/talismaps",
+  TALISMAPS_DASHBOARD: "/talismaps/dashboard",
+  TALISMAPS_EDITOR: "/talismaps/editor",
+  TALISMAPS_SETTINGS: "/talismaps/settings",
+  TALISMAPS_ADMIN: "/admin/talismaps",
+  TALISBOOKS: "/talisbooks",
+  TALISBOOKS_DASHBOARD: "/talisbooks/dashboard",
+  TALISBOOKS_LIBRARY: "/talisbooks/library",
+  TALISBOOKS_EDITOR: "/talisbooks/editor",
+  TALISBOOKS_VIEWER: "/talisbooks/viewer",
+  TALISBOOKS_SETTINGS: "/talisbooks/settings",
+  TALISBOOKS_ADMIN: "/admin/talisbooks",
+  TALISBOOKS_ADMIN_CENTERFOLDS: "/admin/talisbooks/centerfolds",
+  TALISBOOKS_CLIENT_BOOKS: "/client/books",
+  TALISTV: "/talistv",
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

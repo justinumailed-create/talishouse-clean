@@ -1,0 +1,306 @@
+===== PAGE 1 =====
+Headline:
+Sample E-Book
+Every time a Listing is entered, an E-Book is auto-generated.
+Typically it is positioned on your Mapsite based upon its
+Google Maps street address. When noE street address is
+available, geo-coordinates can be used.
+G
+E-Book COVER PAGE components:
+• HEADLINE = (top) Sample E-Book
+A
+• CAPTION = (bottom) Street Address or Geo-coordinates
+M
+• IMAGE PLACEHOLDER = (in this case) the background. It
+consists of the centre of your primary picture (more about
+submitting pictures later).
+I
+Mapsite Lay-out:
+Mapsites are centred around all PINs (Point of Interest
+Nodes) in all categories (up to 100 PINs in up to 10
+categories per Mapsite).
+Google Maps Street Address
+
+===== PAGE 2 =====
+Brokerage Logo
+Ideally 16 over 9 in dimension (i.e.: 960 x 540 pixels)
+Display: if a different ratio or size is supplied, the E-Book tool will
+automatically adjust for it to fit this space and placing it in front
+of a background that has 16 over 9 dimensions.
+Legal: our E-Books auto-play, so this Logo typically satisfies
+real estate industry identification and display rules in most North
+American jurisdictions, but please do confirm.
+Slogan and Mission
+Statement:
+• A Slogan is a catchy phrase
+that helps keep you top-of-
+mind, locally.
+• A Mission Statement is a
+concise, action-oriented
+declaration that defines your
+business model and target
+audience. It answers why you
+do what you do, including
+JPG or PNG; ideally 540x540 in size what can be expected of you.
+Account Holder specified Image* • Page 3 is the beginning of the
+picture book, or a more
+Name & Contact Info complete corporate summary.
+
+===== PAGE 3 =====
+* Why Account Holder specified Image?
+• Root Account Holders typically are Brokers or Team Leaders.
+They generally place market or office photos in the portrait
+spot on page two. Theirs are top-level Mapsites - all PINs on
+down-level Mapsites belong to them. Hence, they “license”
+Derivative Account Holders to operate their own Mapsites
+under distinct FAST Codes, SPLITS enabled (Simple Project
+E
+Lead & Input Tracking System) - they share in derivative
+revenue, typically receiving 30% gross.
+G
+• Derivative Account Holders are Real Estate Professionals,
+licensed or nAot. They most commonly will place pictures of
+themselves in the portrait spot. Their Mapsites are “granted”
+by Root Account Holders (unless they themselves are Root
+M
+Account Holders operating industry adjacent). As DerPivative
+Account Holders they split Mrapsite revenue with Root
+I
+Account Holders, typically paying 30% gross. U
+o
+• For Sale By Owners (FSBO) are a sub-set of Root Account
+-
+Holders that do not have Derivative Accounts in their down-
+E
+level pipeline. They will typically deselect pages two and
+three, since they have no corporate agenda. Consequently,
+T
+they are not SPLITS enabled. Instead, they singularly benefit
+from ‘no real estate fees’ when seIlling.
+R
+• Adpro: Referral & Co-Promotion Partners are a sub-set of
+Derivative Account Holders, whose purpose it is to be found
+W
+near up-level Derivative Account Holders. They generally
+place “Adpro in action” photos in the portrait spot on page
+two to reduce action thresholds.
+Adpros in part rely on referrals or co-promotion, so…
+- Mortgage Brokers, Lawyers, Surveyors and Inspectors
+might be Referral Partners.
+- Hospitality and local Adventure and Experience businesses
+might be Co-Promoters.
+
+===== PAGE 4 =====
+Building Your E-Books
+We limit E-Books in size: from 12 to 22 pages, plus front
+and back cover.
+Why…?
+• A 12 page E-Book with page 2 and 3 promotional
+contents has five centrefolds, which is the bare
+E
+minimum to encourage meaningful engagement by
+stimulating the imagination.
+• An 22 page E-Book with pGage 2 and 3 promotional
+contents has 10 centrefolds, which confirms interest an
+encourages contact to explore further. This page
+number is most suited to stimulate the imagination.
+A
+Call-To-Action…?
+M
+The ‘Parting Shot’ captures the essence of that Listing. It
+makes it desirable and encourages inquiries or contact.
+I
+TEB (E-Books) auto-generate based
+upon input from you:
+1. Select up to 12 pictures that show every impression you
+want to convey via E-Book. Rename them ONE to
+TWELVE in JPG or PGN format.
+2. Upload them to the E-Book generator app..
+• The centre section of ‘Image ONE’ becomes the front
+cover.
+• The centre section of ‘Image TWO’ becomes the back
+cover.
+
+===== PAGE 5 =====
+3. The Inside Front Cover and Page 3 can toggled on and
+off - neither FSBO, nor Adpro Accounts will need them.
+4. The Inside Front Cover is populated by the ‘Logo’ and
+‘Portrait / Image’ fields from the ‘Build Mapsite’ tool.
+5. Page 3 is populated by the ‘Image’ or ‘PDF’ fields from
+the ‘Build Mapsite’ tool.
+6. Image THREE is Page 4 and 5, the first centrefold.
+7. Image FOUR is Page 6 and 7, the second centrefold.
+E
+8. Image FIVE is Page 8 and 9, the third centrefold.
+9. Image SIX is Page 10 and 11, the fourth centrefold.
+G
+10.Image SEVEN is Page 12 and 13, the fifth centrefold.
+This makes a 12 page E-Book, when the Inside Cover
+A
+and Page THREE are toggled off.
+11.Image EIGHT is Page 14 and 15, the sixth centrefold.
+M
+12.Image NINE is Page 16 and 17, the seventh centrefold.
+13.Image TEN is Page 18 and 19, the eighth centrefold.
+I
+14.Image ELEVEN is Page 20 and 21, the ninth centrefold.
+15.Image TWELVE is Page 22 and 23, the tenth centrefold
+and ‘Parting Shot’.
+This makes it a 24 page E-Book, when the Inside Cover
+and Page THREE are NOT toggled off.
+
+===== PAGE 6 =====
+Whichever configuration is chosen, TEB is the third
+‘button’ inside of ‘Mapsite Flags’:
+URL - MLS - TEB - TTV.
+Active buttons that link somewhere are ‘LIVE’ (subject to
+Corporate confirmation - toggle “ON” or “OFF” to switch
+‘BLIND').
+Those that do not link anywhere, or have been toggled
+‘OFF’, are visually greyed out.
+E
+The Meaning of Buttons
+G
+• URL: link to that listing in a Brokerage website.
+• MLS: link to that Listing in MLS®.
+A
+• TEB: link to that Listing’s E-Book.
+• TTV: link to that Derivative Account Holder’s TTV
+M
+Schedule.
+The SPLITS Effect
+I
+• Corporate typically retains 30% of revenue processed
+by Root Accounts.
+Root Accounts and their sub-sets are $998. 50 plus tax
+per year, plus $98.50 plus tax per month.
+• Root Account typically retain 30% of revenue processed
+by Derivative Accounts.
+Derivative Accounts and their sub-sets are $198.50 plus
+tax per year, plus $98.50 plus tax per month.
+• Derivative Accounts typically retain 70% of revenue
+derived from Adpro Accounts.
+
+===== PAGE 7 =====
+Adpro Account Holders typically pay $49.50 plus tax per
+month, or $498.50 plus tax per year.
+Derivative Account Holders receive 10 Listings free as
+part of their account registration, however they pay
+$9.85 plus tax per week per additional inventory Listing
+to ensure sold listings are archived within seven days.
+• FSBO Account Holders, as a sub-set of Root Accounts,
+pay $998. 50 plus tax per year, plus $98.50 plus tax per
+month for advertising. There is no real estate fee.
+E
+This compares to an average of 5% of selling / purchase
+prices when selling through traditional real estate.
+G
+A
+M
+I
+
+===== PAGE 8 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 9 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 10 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 11 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 12 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 13 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 14 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 15 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 16 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 17 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 18 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 19 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 20 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 21 =====
+EE
+GG
+AA
+MM
+II
+
+===== PAGE 22 =====
+Logo
+from Page 2
+Portrait
+from Page 2
+Name & Contact Info
+Slogan

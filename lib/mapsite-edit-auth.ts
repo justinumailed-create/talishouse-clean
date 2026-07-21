@@ -4,6 +4,7 @@ import {
   MAPSITE_OWNER_COOKIE,
   MAPSITE_ROOT_ACCOUNT_COOKIE,
 } from "./mapsite-account-session";
+import { isMarketingManagerAuthenticated } from "./marketing-manager-auth";
 import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
 
 export async function getMapSiteOwnerSession(): Promise<string | null> {
@@ -25,7 +26,9 @@ function normalizeFastCode(fastCode: string): string {
 
 async function isMapSiteAdmin(): Promise<boolean> {
   return (
-    (await isAdminAuthenticated()) || (await isTalisprosAdminAuthenticated())
+    (await isAdminAuthenticated()) ||
+    (await isTalisprosAdminAuthenticated()) ||
+    (await isMarketingManagerAuthenticated())
   );
 }
 

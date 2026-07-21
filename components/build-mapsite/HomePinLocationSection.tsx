@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import Image from "next/image";
 import {
@@ -14,9 +14,10 @@ import {
   PIN_WRITEUP_MAX_LENGTH,
   type HomePinLocationValues,
 } from "./home-pin-types";
-import TalisMapsComingSoonCard from "./TalisMapsComingSoonCard";
+import TalisMapsPinStyleSection from "./TalisMapsPinStyleSection";
+import type { TalisMapsPinLocationUpdate } from "./TalisMapsPinPicker";
 
-const GoogleMapsPinPicker = dynamic(() => import("./GoogleMapsPinPicker"), {
+const TalisMapsPinPicker = dynamic(() => import("./TalisMapsPinPicker"), {
   ssr: false,
   loading: () => (
     <div className="w-full h-[280px] sm:h-[320px] rounded-xl border border-neutral-200 bg-neutral-50 flex items-center justify-center text-sm text-neutral-500">
@@ -28,15 +29,20 @@ const GoogleMapsPinPicker = dynamic(() => import("./GoogleMapsPinPicker"), {
 function FieldLabel({
   label,
   required,
+  hint,
 }: {
   label: string;
   required?: boolean;
+  hint?: string;
 }) {
   return (
-    <label className="text-xs font-medium text-neutral-500 mb-1.5 block">
-      {label}
-      {required && <span className="text-red-400 ml-0.5">*</span>}
-    </label>
+    <div className="mb-1.5">
+      <label className="text-xs font-medium text-neutral-500 block">
+        {label}
+        {required && <span className="text-red-400 ml-0.5">*</span>}
+      </label>
+      {hint ? <p className="mt-0.5 text-xs text-neutral-400">{hint}</p> : null}
+    </div>
   );
 }
 
@@ -48,6 +54,7 @@ function InputField({
   placeholder,
   error,
   onBlur,
+  hint,
 }: {
   label: string;
   required?: boolean;
@@ -56,10 +63,11 @@ function InputField({
   placeholder?: string;
   error?: string;
   onBlur?: () => void;
+  hint?: string;
 }) {
   return (
     <div>
-      <FieldLabel label={label} required={required} />
+      <FieldLabel label={label} required={required} hint={hint} />
       <input
         type="text"
         value={value}
@@ -105,9 +113,18 @@ export default function HomePinLocationSection({
     return () => URL.revokeObjectURL(objectUrl);
   }, [pinImage]);
 
-  const handleCoordinatesChange = useCallback(
-    (latitude: string, longitude: string) => {
-      onChange({ latitude, longitude });
+  const handleLocationChange = useCallback(
+    (update: TalisMapsPinLocationUpdate) => {
+      onChange({
+        latitude: update.latitude,
+        longitude: update.longitude,
+        manualPlacement: update.manualPlacement,
+        ...(update.reverseGeocodedAddress !== undefined
+          ? {
+              reverseGeocodedAddress: update.reverseGeocodedAddress ?? "",
+            }
+          : {}),
+      });
     },
     [onChange]
   );
@@ -121,34 +138,119 @@ export default function HomePinLocationSection({
       onChange({
         latitude: parsed.latitude,
         longitude: parsed.longitude,
+        manualPlacement: false,
       });
       return;
     }
 
-    onChange({ [field]: rawValue });
+    onChange({
+      [field]: rawValue,
+      manualPlacement: false,
+    });
   }
+
+  // When coordinates are entered (option 2), reverse-geocode for metadata only.
+  // Never overwrite the optional street address field.
+  useEffect(() => {
+    if (!hasValidCoordinates(values.latitude, values.longitude)) return;
+    if (values.manualPlacement) return;
+
+    const timeout = window.setTimeout(async () => {
+      try {
+        const response = await fetch(
+          `/api/talismaps/geocode?lat=${encodeURIComponent(values.latitude)}&lon=${encodeURIComponent(values.longitude)}`
+        );
+        if (!response.ok) return;
+        const payload = (await response.json()) as {
+          found?: boolean;
+          address?: string | null;
+        };
+        if (!payload.found) {
+          onChange({ reverseGeocodedAddress: "" });
+          return;
+        }
+        const resolved = payload.address?.trim() || "";
+        if (resolved !== values.reverseGeocodedAddress) {
+          onChange({ reverseGeocodedAddress: resolved });
+        }
+      } catch {
+        // Best-effort reverse geocode.
+      }
+    }, 700);
+
+    return () => window.clearTimeout(timeout);
+    // Intentionally omit reverseGeocodedAddress / onChange to avoid loops.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- coord-driven reverse geocode
+  }, [values.latitude, values.longitude, values.manualPlacement]);
 
   function handlePinWriteupChange(value: string) {
     onChange({ pinWriteup: value.slice(0, PIN_WRITEUP_MAX_LENGTH) });
   }
 
   const writeupLength = values.pinWriteup.length;
+  const [customLogo, setCustomLogo] = useState<File | null>(null);
+  const [customLogoPreview, setCustomLogoPreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!customLogo) {
+      setCustomLogoPreview(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(customLogo);
+    setCustomLogoPreview(objectUrl);
+
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [customLogo]);
+
+  const pinPickerStyle = useMemo(
+    () => ({
+      color: values.futurePinColor,
+      label: values.futurePinLabel,
+      icon: values.futurePinIcon,
+      border: values.futurePinBorder,
+      whiteCenter: values.futurePinWhiteCenter,
+      animated: values.futurePinAnimated,
+      categoryBadge: values.futurePinCategoryBadge,
+      customLogoUrl: customLogoPreview,
+    }),
+    [
+      values.futurePinColor,
+      values.futurePinLabel,
+      values.futurePinIcon,
+      values.futurePinBorder,
+      values.futurePinWhiteCenter,
+      values.futurePinAnimated,
+      values.futurePinCategoryBadge,
+      customLogoPreview,
+    ]
+  );
+
+  const hasCoords = hasValidCoordinates(values.latitude, values.longitude);
 
   return (
     <div className="space-y-6">
       <InputField
         label="Street Address"
+        hint="Optional — leave blank for vacant land or undeveloped parcels."
         value={values.streetAddress}
-        onChange={(streetAddress) => onChange({ streetAddress })}
-        placeholder="123 Main Street"
+        onChange={(streetAddress) =>
+          onChange({ streetAddress, manualPlacement: false })
+        }
+        placeholder="123 Main Street (optional)"
         error={errors.streetAddress}
       />
 
       <div>
-        <FieldLabel label="Geo Coordinates" />
+        <FieldLabel
+          label="Geo Coordinates"
+          required
+          hint="Primary source of truth for the Home PIN. Paste both, type either, or place on the map."
+        />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <InputField
             label="Latitude"
+            required
             value={values.latitude}
             onChange={(value) => handleCoordinateInput("latitude", value)}
             placeholder="46.088287"
@@ -156,6 +258,7 @@ export default function HomePinLocationSection({
           />
           <InputField
             label="Longitude"
+            required
             value={values.longitude}
             onChange={(value) => handleCoordinateInput("longitude", value)}
             placeholder="-59.882749"
@@ -170,20 +273,44 @@ export default function HomePinLocationSection({
       </div>
 
       <div>
-        <FieldLabel label="Interactive Map Preview" />
-        <GoogleMapsPinPicker
+        <FieldLabel
+          label="Interactive Map Preview"
+          hint="Click the map to place the PIN. Drag the marker to fine-tune. Coordinates update automatically."
+        />
+        <TalisMapsPinPicker
           latitude={values.latitude}
           longitude={values.longitude}
           streetAddress={values.streetAddress}
-          onCoordinatesChange={handleCoordinatesChange}
+          pinStyle={pinPickerStyle}
+          onLocationChange={handleLocationChange}
         />
-        <p className="text-xs text-neutral-400 mt-2">
-          Drag the marker to fine-tune your Home PIN location. Coordinates update
-          automatically.
-        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-400">
+          <span>Powered by TalisMaps™</span>
+          {values.manualPlacement ? (
+            <span className="text-neutral-600">Manual placement</span>
+          ) : null}
+          {hasCoords && values.reverseGeocodedAddress ? (
+            <span className="truncate" title={values.reverseGeocodedAddress}>
+              Nearby: {values.reverseGeocodedAddress}
+            </span>
+          ) : null}
+        </div>
       </div>
 
-      <TalisMapsComingSoonCard />
+      <TalisMapsPinStyleSection
+        values={{
+          futurePinColor: values.futurePinColor,
+          futurePinIcon: values.futurePinIcon,
+          futurePinBorder: values.futurePinBorder,
+          futurePinLabel: values.futurePinLabel,
+          futurePinWhiteCenter: values.futurePinWhiteCenter,
+          futurePinAnimated: values.futurePinAnimated,
+          futurePinCategoryBadge: values.futurePinCategoryBadge,
+        }}
+        customLogo={customLogo}
+        onChange={onChange}
+        onCustomLogoChange={setCustomLogo}
+      />
 
       <div>
         <FieldLabel label="Home PIN Image" />
@@ -266,13 +393,9 @@ export function validateHomePinLocation(values: HomePinLocationValues): Partial<
 > {
   const errors: Partial<Record<keyof HomePinLocationValues, string>> = {};
 
-  const hasAddress = values.streetAddress.trim().length > 0;
-  const hasCoords = hasValidCoordinates(values.latitude, values.longitude);
-
-  if (!hasAddress && !hasCoords) {
-    errors.streetAddress = "Enter an address or coordinates";
-    errors.latitude = "Required without address";
-    errors.longitude = "Required without address";
+  if (!hasValidCoordinates(values.latitude, values.longitude)) {
+    errors.latitude = "Latitude is required";
+    errors.longitude = "Longitude is required";
   }
 
   if (values.latitude.trim() && !isValidLatitude(values.latitude)) {
