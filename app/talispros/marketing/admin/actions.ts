@@ -42,7 +42,7 @@ export async function listMarketingRegistrations(): Promise<{
   const result = await listBuildRequests();
   if (!result.ok) return result;
 
-  const marketTypes = new Set(["listings", "homes", "fsbos"]);
+  const marketTypes = new Set(["listings", "homes", "fsbos", "brokers", "adpro"]);
   const filtered = result.data.filter(
     (row) => row.market_type && marketTypes.has(row.market_type)
   );

@@ -1,4 +1,9 @@
-export type RegistrationMarket = "listings" | "homes" | "fsbos";
+export type RegistrationMarket =
+  | "listings"
+  | "homes"
+  | "fsbos"
+  | "brokers"
+  | "adpro";
 
 export type RegistrationAccountCategory = "root" | "derivative" | "adpro";
 
@@ -26,6 +31,16 @@ export const REGISTRATION_MARKET_COPY: Record<
     subtitle:
       "Register your Talispros™ account to extend your FSBO reach and avoid expensive listing commitments.",
   },
+  brokers: {
+    label: "Real Estate Broker or Owner",
+    subtitle:
+      "Register your Talispros™ Root Account so licensed professionals beneath you qualify for SPLITS ads.",
+  },
+  adpro: {
+    label: "Adpro Service Provider",
+    subtitle:
+      "Register as a Referral Partner or Co-Promoter to serve brokers, professionals, and FSBO sellers.",
+  },
 };
 
 const MARKET_ALIASES: Record<string, RegistrationMarket> = {
@@ -41,6 +56,12 @@ const MARKET_ALIASES: Record<string, RegistrationMarket> = {
   builders: "homes",
   fsbos: "fsbos",
   fsbo: "fsbos",
+  brokers: "brokers",
+  broker: "brokers",
+  owners: "brokers",
+  owner: "brokers",
+  adpro: "adpro",
+  adpros: "adpro",
 };
 
 export function parseRegistrationMarket(

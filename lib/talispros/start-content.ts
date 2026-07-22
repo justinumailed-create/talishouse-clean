@@ -7,21 +7,27 @@ export const TALISPROS_START_INTRO =
 
 export const TALISPROS_START_SEGMENTS = [
   {
-    title: "I am a licensed Real Estate Professional.",
+    title: "I am a Real Estate Broker or Owner",
+    href: `${MAPSITE_APP_PATH}?audience=brokers`,
+    description:
+      "Licensed Real Estate Professionals work beneath me and qualify for SPLITS ads.",
+  },
+  {
+    title: "I am a Real Estate Professional",
     href: `${MAPSITE_APP_PATH}?audience=listings`,
     description:
-      "I want my Mapsite™ to establish service floors for real estate fees and listing term lengths.",
+      "Industry licensed, or not. I place pins on my Mapsite and promote SPLITS ads.",
   },
   {
-    title: "I build Talishouse™ Homes & Cottages.",
-    href: `${MAPSITE_APP_PATH}?audience=homes`,
-    description:
-      "I want my Mapsite™ to market new tiny home objects or projects, globally.",
-  },
-  {
-    title: "I am a For-Sale-By-Owner (FSBO).",
+    title: "I am a For-Sale-By-Owner Seller",
     href: `${MAPSITE_APP_PATH}?audience=fsbos`,
     description:
-      "I want my Mapsite™ help me avoid expensive real estate fees and commitments.",
+      "Promoting my way to professionals and private buyers helps me save on fees.",
+  },
+  {
+    title: "I am an Adpro Service Provider",
+    href: `${MAPSITE_APP_PATH}?audience=adpro`,
+    description:
+      "As Referral Partner or Co-Promoter I work with all of the above to serve their clients.",
   },
 ] as const;
