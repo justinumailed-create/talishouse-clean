@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
-export const runtime = "edge";
+/** Node runtime — @vercel/og/Satori exceeds the 1 MB Edge bundle limit on Hobby. */
+export const runtime = "nodejs";
 
 export async function GET() {
   return new ImageResponse(
