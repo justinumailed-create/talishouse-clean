@@ -59,11 +59,11 @@ export default function MapSiteApplication({
     syncListingTileTop();
 
     const listingCard = listingCardRef.current;
-    const observer =
-      listingCard && typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(syncListingTileTop)
-        : null;
-    observer?.observe(listingCard);
+    let observer: ResizeObserver | null = null;
+    if (listingCard && typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(syncListingTileTop);
+      observer.observe(listingCard);
+    }
 
     window.addEventListener("resize", syncListingTileTop);
     return () => {
