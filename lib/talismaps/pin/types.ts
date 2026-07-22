@@ -9,6 +9,7 @@ export type TalisMapsPinIcon =
   | "building"
   | "map-pin"
   | "landmark"
+  | "flag"
   | "dot";
 
 export type TalisMapsPinAnimation = "none" | "pulse" | "breathe";
@@ -20,8 +21,10 @@ export interface TalisMapsPinVisualProps {
   pinColor?: string | null;
   /** Optional hairline border color. Defaults to a soft white rim. */
   pinBorderColor?: string | null;
-  /** Glyph rendered in the white center. */
+  /** Glyph rendered in the white center (classic) or as a white flag icon (flag mode). */
   pinIcon?: TalisMapsPinIcon | string | null;
+  /** Classic = white center + small glyph. Flag = solid color body + large white icon. */
+  whiteCenter?: boolean | null;
   /** Nominal size. `"md"` is the new default (~1.5× prior). */
   pinSize?: TalisMapsPinSize | null;
   /** Caption under the pin body. */
@@ -40,6 +43,7 @@ export interface ResolvedTalisMapsPinVisual {
   pinColor: string;
   pinBorderColor: string;
   pinIcon: string;
+  whiteCenter: boolean;
   pinSize: number;
   pinLabel: string | null;
   pinAnimation: TalisMapsPinAnimation;

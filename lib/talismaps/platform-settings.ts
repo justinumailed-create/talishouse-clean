@@ -3,6 +3,8 @@ import {
   DEFAULT_MAP_PROVIDER_ID,
   isMapBasemapView,
   isMapProviderId,
+  normalizeLegacyBasemapView,
+  normalizeLegacyProviderId,
   resolveProviderBasemapView,
   type MapBasemapView,
   type MapProviderId,
@@ -29,13 +31,17 @@ function normalizeSettings(row: {
   updated_at?: string | null;
   updated_by?: string | null;
 } | null): TalisMapsPlatformSettings {
-  const providerId = isMapProviderId(row?.default_provider_id)
-    ? row.default_provider_id
-    : FALLBACK_PLATFORM_SETTINGS.defaultProviderId;
+  const providerId =
+    normalizeLegacyProviderId(row?.default_provider_id) ??
+    (isMapProviderId(row?.default_provider_id)
+      ? row.default_provider_id
+      : FALLBACK_PLATFORM_SETTINGS.defaultProviderId);
 
-  const preferredView = isMapBasemapView(row?.default_basemap_view)
-    ? row.default_basemap_view
-    : FALLBACK_PLATFORM_SETTINGS.defaultBasemapView;
+  const preferredView =
+    normalizeLegacyBasemapView(row?.default_basemap_view) ??
+    (isMapBasemapView(row?.default_basemap_view)
+      ? row.default_basemap_view
+      : FALLBACK_PLATFORM_SETTINGS.defaultBasemapView);
 
   return {
     defaultProviderId: providerId,
@@ -71,17 +77,21 @@ export async function updateTalisMapsPlatformSettings(input: {
   defaultBasemapView: MapBasemapView;
   updatedBy?: string | null;
 }): Promise<{ ok: true; settings: TalisMapsPlatformSettings } | { ok: false; error: string }> {
-  if (!isMapProviderId(input.defaultProviderId)) {
+  const providerId =
+    normalizeLegacyProviderId(input.defaultProviderId) ??
+    (isMapProviderId(input.defaultProviderId) ? input.defaultProviderId : null);
+  if (!providerId) {
     return { ok: false, error: "Invalid map provider." };
   }
-  if (!isMapBasemapView(input.defaultBasemapView)) {
-    return { ok: false, error: "Invalid map view." };
+
+  const preferredView =
+    normalizeLegacyBasemapView(input.defaultBasemapView) ??
+    (isMapBasemapView(input.defaultBasemapView) ? input.defaultBasemapView : null);
+  if (!preferredView) {
+    return { ok: false, error: "Invalid map style." };
   }
 
-  const basemapView = resolveProviderBasemapView(
-    input.defaultProviderId,
-    input.defaultBasemapView
-  );
+  const basemapView = resolveProviderBasemapView(providerId, preferredView);
 
   try {
     const supabase = getSupabaseAdmin();
@@ -90,7 +100,7 @@ export async function updateTalisMapsPlatformSettings(input: {
       .upsert(
         {
           id: "global",
-          default_provider_id: input.defaultProviderId,
+          default_provider_id: providerId,
           default_basemap_view: basemapView,
           updated_at: new Date().toISOString(),
           updated_by: input.updatedBy ?? null,

@@ -14,8 +14,18 @@ export async function submitMarketRegistration(formData: FormData) {
   }
 
   formData.set("marketType", market);
+
+  const existingComments = formData.get("additionalComments");
+  const fromMapSite = Boolean(formData.get("mapsiteId"));
   formData.set("helpPreference", "marketing_manager_review");
-  formData.set("additionalComments", `Submitted from market page: ${market}`);
+  formData.set(
+    "additionalComments",
+    typeof existingComments === "string" && existingComments.trim()
+      ? existingComments
+      : fromMapSite
+        ? `Submitted from MapSite™ application: ${market}`
+        : `Submitted from market page: ${market}`
+  );
 
   return submitBuildRequest(formData);
 }

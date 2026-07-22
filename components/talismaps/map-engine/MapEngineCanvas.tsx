@@ -71,7 +71,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     if (!container) return;
 
     const generation = ++mountGenerationRef.current;
-    let cancelled = false;
+    const abortController = new AbortController();
     const provider = createMapProvider(providerId);
 
     const handleViewportChange: MapEngineEventHandler = (payload) => {
@@ -118,9 +118,13 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
         selectedPinId: selectedPinIdRef.current,
         draggablePinIds: draggablePinIdsRef.current,
         basemapView: basemapViewRef.current,
+        signal: abortController.signal,
       })
       .then((instance) => {
-        if (cancelled || generation !== mountGenerationRef.current) {
+        if (
+          abortController.signal.aborted ||
+          generation !== mountGenerationRef.current
+        ) {
           instance.destroy();
           return;
         }
@@ -139,7 +143,16 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
         }
       })
       .catch((error) => {
-        if (cancelled || generation !== mountGenerationRef.current) {
+        if (
+          abortController.signal.aborted ||
+          generation !== mountGenerationRef.current
+        ) {
+          return;
+        }
+        if (
+          error instanceof DOMException &&
+          error.name === "AbortError"
+        ) {
           return;
         }
         console.error("[MapEngineCanvas] failed to mount provider:", error);
@@ -150,7 +163,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
       });
 
     return () => {
-      cancelled = true;
+      abortController.abort();
       registerMapInstanceRef.current(null);
       instanceRef.current?.destroy();
       instanceRef.current = null;

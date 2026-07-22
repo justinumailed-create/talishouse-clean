@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useState, useTransition } from "react";
 import {
   listMarketingRegistrations,
+  marketingActivateMapSite,
+  marketingApproveBuildRequest,
   marketingAssignFastCode,
   marketingGenerateDraftMapSite,
   marketingSendRegistration,
@@ -61,9 +63,11 @@ export default function MarketingAdminQueue() {
     <section className="overflow-hidden rounded-xl border border-neutral-200 bg-white">
       <div className="flex items-center justify-between gap-3 border-b border-neutral-200 bg-neutral-50 px-4 py-3">
         <div>
-          <h2 className="text-sm font-semibold text-neutral-900">Submissions</h2>
+          <h2 className="text-sm font-semibold text-neutral-900">
+            Pending Build Requests
+          </h2>
           <p className="text-xs text-neutral-500">
-            From Real Estate, Builders, and FSBO market pages
+            MapSite™ claims from Start → fullscreen map onboarding
           </p>
         </div>
         <button
@@ -127,6 +131,16 @@ export default function MarketingAdminQueue() {
                       </Link>
                       <button
                         type="button"
+                        className="rounded bg-emerald-100 px-2 py-1 text-emerald-800"
+                        onClick={() =>
+                          runAction(() => marketingApproveBuildRequest(row.id))
+                        }
+                        disabled={pending}
+                      >
+                        Approve
+                      </button>
+                      <button
+                        type="button"
                         className="rounded bg-indigo-100 px-2 py-1 text-indigo-800"
                         onClick={() => runAction(() => marketingAssignFastCode(row.id))}
                         disabled={pending}
@@ -141,7 +155,17 @@ export default function MarketingAdminQueue() {
                         }
                         disabled={pending}
                       >
-                        Create MapSite
+                        Convert to Active MapSite
+                      </button>
+                      <button
+                        type="button"
+                        className="rounded bg-teal-100 px-2 py-1 text-teal-900"
+                        onClick={() =>
+                          runAction(() => marketingActivateMapSite(row.id))
+                        }
+                        disabled={pending}
+                      >
+                        Activate MapSite
                       </button>
                       <button
                         type="button"

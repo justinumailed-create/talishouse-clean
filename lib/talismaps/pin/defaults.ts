@@ -59,6 +59,7 @@ export function resolvePinVisual(
     pinColor: props.pinColor?.trim() || TALISMAPS_PIN_DEFAULT_COLOR,
     pinBorderColor: props.pinBorderColor?.trim() || TALISMAPS_PIN_DEFAULT_BORDER,
     pinIcon: props.pinIcon?.trim() || TALISMAPS_PIN_DEFAULT_ICON,
+    whiteCenter: props.whiteCenter !== false,
     pinSize,
     pinLabel: props.pinLabel?.trim() || null,
     pinAnimation: animation,

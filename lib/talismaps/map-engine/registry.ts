@@ -1,28 +1,47 @@
-import { DEFAULT_MAP_BASEMAP_VIEW, isMapProviderId } from "./basemap";
-import { LeafletOpenStreetMapProvider } from "./providers/leaflet-osm-provider";
 import {
-  EsriProvider,
-  GoogleMapsProvider,
-  MapboxProvider,
-} from "./providers/stub-providers";
+  DEFAULT_MAP_BASEMAP_VIEW,
+  isMapProviderId,
+  normalizeLegacyProviderId,
+} from "./basemap";
+import { EsriProvider, MapboxProvider } from "./providers/stub-providers";
 import type {
   MapBasemapView,
+  MapMountOptions,
   MapProvider,
   MapProviderDescriptor,
   MapProviderId,
 } from "./types";
 
+/**
+ * Lazy MapLibre adapter — keeps maplibre-gl out of Edge / middleware graphs.
+ */
+const MapLibreLazyProvider: MapProvider = {
+  id: "maplibre",
+  label: "MapLibre GL JS",
+  description:
+    "Open-source vector rendering engine with interchangeable tile styles (MapTiler Satellite by default).",
+  supportedBasemapViews: ["satellite", "street", "terrain", "light", "dark"],
+  isAvailable() {
+    return typeof window !== "undefined";
+  },
+  async mount(container: HTMLElement, options: MapMountOptions) {
+    const { MapLibreProvider } = await import("./providers/maplibre-provider");
+    return new MapLibreProvider().mount(container, options);
+  },
+};
+
 const PROVIDERS: Record<MapProviderId, MapProvider> = {
-  "leaflet-osm": new LeafletOpenStreetMapProvider(),
+  maplibre: MapLibreLazyProvider,
   mapbox: MapboxProvider,
-  "google-maps": GoogleMapsProvider,
   esri: EsriProvider,
 };
 
 function resolveEnvProviderId(): MapProviderId {
   const raw = process.env.NEXT_PUBLIC_TALISMAPS_MAP_PROVIDER;
+  const normalized = normalizeLegacyProviderId(raw);
+  if (normalized) return normalized;
   if (isMapProviderId(raw)) return raw;
-  return "leaflet-osm";
+  return "maplibre";
 }
 
 export const DEFAULT_MAP_PROVIDER_ID: MapProviderId = resolveEnvProviderId();
@@ -55,7 +74,7 @@ export function getDefaultMapProvider(): MapProvider {
   if (preferred.isAvailable()) {
     return preferred;
   }
-  return createMapProvider("leaflet-osm");
+  return createMapProvider("maplibre");
 }
 
 export function resolveProviderBasemapView(
@@ -67,7 +86,7 @@ export function resolveProviderBasemapView(
     return preferred;
   }
   return (
-    provider.supportedBasemapViews.find((view) => view === "street") ??
+    provider.supportedBasemapViews.find((view) => view === "satellite") ??
     provider.supportedBasemapViews[0] ??
     DEFAULT_MAP_BASEMAP_VIEW
   );

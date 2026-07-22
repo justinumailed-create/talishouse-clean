@@ -60,6 +60,7 @@ function toPinVisualProps(
     pinColor: pin.color,
     pinBorderColor: style.pinBorderColor,
     pinIcon: style.customLogoUrl ? "dot" : style.icon,
+    whiteCenter: style.whiteCenter,
     pinSize: style.pinSize,
     pinLabel: pin.label,
     pinAnimation: animation,

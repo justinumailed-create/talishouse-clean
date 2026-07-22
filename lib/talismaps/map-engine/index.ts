@@ -25,9 +25,29 @@ export {
   MAP_BASEMAP_VIEW_OPTIONS,
   isMapBasemapView,
   isMapProviderId,
+  normalizeLegacyBasemapView,
+  normalizeLegacyProviderId,
   parseMapBasemapView,
+  parseMapStyleId,
   providerSupportsUnrestrictedSatellite,
 } from "./basemap";
+
+export {
+  ALL_MAP_STYLE_IDS,
+  DEFAULT_MAP_STYLE_ID,
+  MAP_STYLE_DEFINITIONS,
+  MapStyleManager,
+  getCustomStyleUrlOverride,
+  getMapStyleManager,
+  getMapTilerApiKey,
+  getTileVendorId,
+  isMapStyleId,
+  resetMapStyleManager,
+  type MapStyleDefinition,
+  type MapStyleId,
+  type ResolvedMapStyle,
+  type TalisMapsTileVendorId,
+} from "./styles";
 
 export { toMapEnginePin, toMapEnginePins } from "./pin-adapters";
 export {
@@ -37,4 +57,9 @@ export {
   listMapProviders,
   resolveProviderBasemapView,
 } from "./registry";
-export { LeafletOpenStreetMapProvider } from "./providers/leaflet-osm-provider";
+
+/** Lazy accessor — prefer createMapProvider("maplibre") in app code. */
+export async function loadMapLibreProvider() {
+  const { MapLibreProvider } = await import("./providers/maplibre-provider");
+  return new MapLibreProvider();
+}

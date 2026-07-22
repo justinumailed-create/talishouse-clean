@@ -12,6 +12,11 @@ import { REGISTRATION_MARKET_COPY } from "@/lib/registration-market";
 
 interface TalisprosMarketRegistrationFormProps {
   market: RegistrationMarket;
+  /** When set, associates the Build Request with this MapSite™ record. */
+  mapsiteId?: string;
+  /** `panel` keeps the user on MapSite™ and invokes onSuccess instead of a full success page. */
+  variant?: "page" | "panel";
+  onSuccess?: (result: { requestId?: string; fastCode?: string }) => void;
 }
 
 const ACCOUNT_OPTIONS = [
@@ -56,9 +61,13 @@ function FieldLabel({
 
 export default function TalisprosMarketRegistrationForm({
   market,
+  mapsiteId,
+  variant = "page",
+  onSuccess,
 }: TalisprosMarketRegistrationFormProps) {
   const marketCopy = REGISTRATION_MARKET_COPY[market];
   const requestId = useMemo(() => crypto.randomUUID(), []);
+  const isPanel = variant === "panel";
 
   const [date, setDate] = useState("");
   useEffect(() => {
@@ -151,6 +160,9 @@ export default function TalisprosMarketRegistrationForm({
       formData.set("futurePinCategoryBadge", pinLocation.futurePinCategoryBadge ?? "");
       formData.set("consentData", "true");
       formData.set("consentCommunications", "false");
+      if (mapsiteId) {
+        formData.set("mapsiteId", mapsiteId);
+      }
 
       if (picture) {
         const pictureUrl = await uploadFile("picture", picture);
@@ -174,6 +186,13 @@ export default function TalisprosMarketRegistrationForm({
         return;
       }
       setIssuedFastCode(result.fastCode || fastCode.trim());
+      if (onSuccess) {
+        onSuccess({
+          requestId: result.requestId,
+          fastCode: result.fastCode,
+        });
+        return;
+      }
       setSuccess(true);
     } catch (error) {
       const message =
@@ -195,7 +214,7 @@ export default function TalisprosMarketRegistrationForm({
     }
   }
 
-  if (success) {
+  if (success && !isPanel) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-10 text-center sm:px-6">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -236,7 +255,14 @@ export default function TalisprosMarketRegistrationForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-3xl px-4 pb-12 sm:px-6">
+    <form
+      onSubmit={handleSubmit}
+      className={
+        isPanel
+          ? "mx-auto max-w-3xl px-5 pb-10 pt-4"
+          : "mx-auto max-w-3xl px-4 pb-12 sm:px-6"
+      }
+    >
       {error ? (
         <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
@@ -390,7 +416,11 @@ export default function TalisprosMarketRegistrationForm({
         disabled={submitting}
         className="w-full rounded-lg bg-neutral-900 px-4 py-3 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60 sm:w-auto"
       >
-        {submitting ? "Submitting..." : "Submit Registration"}
+        {submitting
+          ? "Submitting..."
+          : isPanel
+            ? "Submit Build Request"
+            : "Submit Registration"}
       </button>
     </form>
   );

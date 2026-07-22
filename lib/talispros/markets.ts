@@ -1,14 +1,14 @@
 export const TALISPROS_MARKET_OPTIONS = [
   {
     label: "Real Estate Professionals",
-    href: "/talispros/markets/real-estate-professionals",
+    href: "/talispros/mapsite?audience=listings",
   },
   {
     label: "Talishouse™ Builders",
-    href: "/talispros/markets/talishouse-builders",
+    href: "/talispros/mapsite?audience=homes",
   },
   {
     label: "For Sale By Owners",
-    href: "/talispros/markets/for-sale-by-owners",
+    href: "/talispros/mapsite?audience=fsbos",
   },
 ] as const;

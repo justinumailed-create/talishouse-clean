@@ -25,11 +25,11 @@ export const defaultHomePinLocationValues: HomePinLocationValues = {
   manualPlacement: true,
   reverseGeocodedAddress: MAPSITE_DEMO_LOCATION.streetAddress,
   pinWriteup: "",
-  futurePinColor: "#1C1C1E",
-  futurePinIcon: "dot",
+  futurePinColor: "#1A73E8",
+  futurePinIcon: "flag",
   futurePinBorder: "none",
   futurePinLabel: "",
-  futurePinWhiteCenter: true,
+  futurePinWhiteCenter: false,
   futurePinAnimated: false,
   futurePinCategoryBadge: null,
 };
@@ -37,7 +37,7 @@ export const defaultHomePinLocationValues: HomePinLocationValues = {
 export const PIN_WRITEUP_MAX_LENGTH = 170;
 
 export const PIN_ICON_OPTIONS = [
-  { value: "dot", label: "Dot" },
+  { value: "flag", label: "Flag / Sign" },
   { value: "home", label: "Home" },
   { value: "star", label: "Star" },
   { value: "building", label: "Building" },

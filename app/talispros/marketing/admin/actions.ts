@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import {
+  activateMapSiteForRequest,
+  approveBuildRequestForMarketing,
   assignFastCode,
   generateDraftMapSite,
   getBuildRequestDetails,
@@ -10,6 +12,7 @@ import {
   setBuildRequestStatus,
   updateBuildRequestAssets,
   updateBuildRequestDetails,
+  updateLinkedMapSiteResources,
   type BuildRequestListRow,
 } from "@/app/admin/marketing/actions";
 import { requireMarketingManagerSession } from "@/lib/marketing-manager-auth";
@@ -18,10 +21,13 @@ import {
   MARKETING_ADMIN_PATH,
   MARKETING_HOME_PATH,
 } from "@/lib/mapsite-account-session";
+import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
+import type { MapSiteResourceUpdates } from "@/lib/talispros/mapsite-platform";
 
 function revalidateMarketingAdmin(requestId?: string) {
   revalidatePath(MARKETING_ADMIN_PATH);
   revalidatePath(MARKETING_HOME_PATH);
+  revalidatePath(MAPSITE_APP_PATH);
   if (requestId) {
     revalidatePath(`${MARKETING_ADMIN_PATH}/${requestId}`);
   }
@@ -140,4 +146,28 @@ export async function marketingSetPaymentLink(
 
   revalidateMarketingAdmin(requestId);
   return { ok: true };
+}
+
+export async function marketingApproveBuildRequest(requestId: string) {
+  await requireMarketingManagerSession();
+  const result = await approveBuildRequestForMarketing(requestId);
+  if (result.ok) revalidateMarketingAdmin(requestId);
+  return result;
+}
+
+export async function marketingActivateMapSite(requestId: string) {
+  await requireMarketingManagerSession();
+  const result = await activateMapSiteForRequest(requestId);
+  if (result.ok) revalidateMarketingAdmin(requestId);
+  return result;
+}
+
+export async function marketingUpdateLinkedMapSite(
+  requestId: string,
+  updates: MapSiteResourceUpdates
+) {
+  await requireMarketingManagerSession();
+  const result = await updateLinkedMapSiteResources(requestId, updates);
+  if (result.ok) revalidateMarketingAdmin(requestId);
+  return result;
 }

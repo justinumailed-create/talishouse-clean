@@ -7,11 +7,14 @@ import { encodePinStyleInNotes } from "@/lib/build-request-pin-style-notes";
 import { lookupFastCodeRegistrationTier, type RegistrationFastCodeTier } from "@/lib/registration-fast-code-routing";
 import { sendBuildRequestReceived } from "@/lib/email";
 import { generateFastCode } from "@/services/fast-code.service";
+import { markMapSiteClaimedByBuildRequest } from "@/lib/talispros/mapsite-platform";
+import { DEMO_MAPSITE_ID } from "@/lib/talispros/mapsite-state";
 
 export interface ActionResult {
   success: boolean;
   requestId?: string;
   fastCode?: string;
+  mapsiteId?: string;
   error?: string;
 }
 
@@ -218,6 +221,12 @@ export async function submitBuildRequest(
         ? requestIdValue.trim()
         : crypto.randomUUID();
 
+    const mapsiteIdValue = formData.get("mapsiteId");
+    const mapsiteId =
+      typeof mapsiteIdValue === "string" && mapsiteIdValue.trim()
+        ? mapsiteIdValue.trim()
+        : null;
+
     const fileFields = [
       "picture",
       "logo",
@@ -304,6 +313,7 @@ export async function submitBuildRequest(
       logo: fileUrls.logo ?? null,
       gallery_images: tebPictureUrls,
       video: fileUrls.ttvBackgroundImage ?? null,
+      linked_mapsite_id: mapsiteId,
     };
 
     let { error: buildError } = await supabaseAdmin
@@ -487,7 +497,47 @@ export async function submitBuildRequest(
       }
     }
 
-    return { success: true, requestId, fastCode: issuedFastCode };
+    let resolvedMapSiteId = mapsiteId;
+    if (mapsiteId) {
+      const claimed = await markMapSiteClaimedByBuildRequest({
+        mapsiteId,
+        buildRequestId: requestId,
+        fastCode: issuedFastCode ?? null,
+        latitude: hasCoordinates ? parsedLatitude : null,
+        longitude: hasCoordinates ? parsedLongitude : null,
+        propertyTitle: fields.futurePinLabel.trim() || null,
+        propertyAddress:
+          fields.streetAddress.trim() ||
+          fields.reverseGeocodedAddress.trim() ||
+          null,
+        propertyDescription: fields.pinWriteup.trim() || null,
+        coverImage: fileUrls.picture ?? fileUrls.pinImage ?? null,
+      });
+      resolvedMapSiteId = claimed?.id ?? mapsiteId;
+    } else if (formData.get("claimDemonstration") === "true") {
+      const claimed = await markMapSiteClaimedByBuildRequest({
+        mapsiteId: DEMO_MAPSITE_ID,
+        buildRequestId: requestId,
+        fastCode: issuedFastCode ?? null,
+        latitude: hasCoordinates ? parsedLatitude : null,
+        longitude: hasCoordinates ? parsedLongitude : null,
+        propertyTitle: fields.futurePinLabel.trim() || null,
+        propertyAddress:
+          fields.streetAddress.trim() ||
+          fields.reverseGeocodedAddress.trim() ||
+          null,
+        propertyDescription: fields.pinWriteup.trim() || null,
+        coverImage: fileUrls.picture ?? fileUrls.pinImage ?? null,
+      });
+      resolvedMapSiteId = claimed?.id ?? DEMO_MAPSITE_ID;
+    }
+
+    return {
+      success: true,
+      requestId,
+      fastCode: issuedFastCode,
+      mapsiteId: resolvedMapSiteId ?? undefined,
+    };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown server error";
     console.error("[build-mapsite] Submission error:", err);

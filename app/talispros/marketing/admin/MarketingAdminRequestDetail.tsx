@@ -4,12 +4,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   getMarketingRegistrationDetails,
+  marketingActivateMapSite,
+  marketingApproveBuildRequest,
   marketingAssignFastCode,
   marketingGenerateDraftMapSite,
   marketingSendRegistration,
   marketingSetPaymentLink,
   marketingUpdateBuildRequestAssets,
   marketingUpdateBuildRequestDetails,
+  marketingUpdateLinkedMapSite,
 } from "./actions";
 import {
   CLIENT_LOGIN_PATH,
@@ -50,6 +53,20 @@ type MapSiteAsset = {
   ebook_pdf: string | null;
 };
 
+type LinkedMapSite = {
+  id: string;
+  fast_code: string;
+  status: string;
+  property_title: string | null;
+  cover_image: string | null;
+  header_image_url: string | null;
+  mls_url: string | null;
+  broker_url: string | null;
+  teb_url: string | null;
+  ttv_url: string | null;
+  assigned_marketing_manager: string | null;
+};
+
 export default function MarketingAdminRequestDetail({
   requestId,
 }: {
@@ -57,6 +74,7 @@ export default function MarketingAdminRequestDetail({
 }) {
   const [request, setRequest] = useState<BuildRequest | null>(null);
   const [assets, setAssets] = useState<MapSiteAsset | null>(null);
+  const [mapsite, setMapSite] = useState<LinkedMapSite | null>(null);
   const [paymentLink, setPaymentLink] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,11 +83,12 @@ export default function MarketingAdminRequestDetail({
 
   useEffect(() => {
     async function load() {
-      const { request: req, assets: asset } =
+      const { request: req, assets: asset, mapsite: linked } =
         await getMarketingRegistrationDetails(requestId);
       const typedRequest = (req as BuildRequest) || null;
       setRequest(typedRequest);
       setAssets((asset as MapSiteAsset) || null);
+      setMapSite((linked as LinkedMapSite) || null);
       setPaymentLink(typedRequest?.registration_link || "");
     }
     void load();
@@ -146,11 +165,12 @@ export default function MarketingAdminRequestDetail({
       setActionPending(false);
       return;
     }
-    const { request: req, assets: asset } =
+    const { request: req, assets: asset, mapsite: linked } =
       await getMarketingRegistrationDetails(requestId);
     const typedRequest = (req as BuildRequest) || null;
     setRequest(typedRequest);
     setAssets((asset as MapSiteAsset) || null);
+    setMapSite((linked as LinkedMapSite) || null);
     setPaymentLink(typedRequest?.registration_link || "");
     setActionPending(false);
   }
@@ -192,6 +212,16 @@ export default function MarketingAdminRequestDetail({
           <button
             type="button"
             disabled={actionPending}
+            onClick={() =>
+              runWorkflowAction(() => marketingApproveBuildRequest(request.id))
+            }
+            className="rounded bg-emerald-100 px-3 py-2 text-sm text-emerald-800 disabled:opacity-50"
+          >
+            Approve
+          </button>
+          <button
+            type="button"
+            disabled={actionPending}
             onClick={() => runWorkflowAction(() => marketingAssignFastCode(request.id))}
             className="rounded bg-indigo-100 px-3 py-2 text-sm text-indigo-800 disabled:opacity-50"
           >
@@ -205,7 +235,17 @@ export default function MarketingAdminRequestDetail({
             }
             className="rounded bg-green-100 px-3 py-2 text-sm text-green-800 disabled:opacity-50"
           >
-            Create MapSite
+            Convert to Active MapSite
+          </button>
+          <button
+            type="button"
+            disabled={actionPending}
+            onClick={() =>
+              runWorkflowAction(() => marketingActivateMapSite(request.id))
+            }
+            className="rounded bg-teal-100 px-3 py-2 text-sm text-teal-900 disabled:opacity-50"
+          >
+            Activate MapSite
           </button>
           <button
             type="button"
@@ -446,6 +486,132 @@ export default function MarketingAdminRequestDetail({
           />
         </label>
       </div>
+
+      {mapsite ? (
+        <section className="space-y-4 rounded-xl border border-neutral-200 bg-white p-4">
+          <div>
+            <h2 className="font-semibold text-neutral-900">MapSite™ Configuration</h2>
+            <p className="mt-1 text-xs text-neutral-500">
+              Status: {mapsite.status} · FAST Code: {mapsite.fast_code || "—"}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <label className="text-sm">
+              Assign FAST Code
+              <input
+                className="mt-1 w-full rounded border px-3 py-2 uppercase"
+                value={mapsite.fast_code || ""}
+                onChange={(event) =>
+                  setMapSite({
+                    ...mapsite,
+                    fast_code: event.target.value.toUpperCase(),
+                  })
+                }
+              />
+            </label>
+            <label className="text-sm">
+              Assigned Marketing Manager
+              <input
+                className="mt-1 w-full rounded border px-3 py-2"
+                value={mapsite.assigned_marketing_manager || ""}
+                onChange={(event) =>
+                  setMapSite({
+                    ...mapsite,
+                    assigned_marketing_manager: event.target.value,
+                  })
+                }
+              />
+            </label>
+            <label className="text-sm lg:col-span-2">
+              Cover Image URL
+              <input
+                className="mt-1 w-full rounded border px-3 py-2"
+                value={mapsite.cover_image || mapsite.header_image_url || ""}
+                onChange={(event) =>
+                  setMapSite({ ...mapsite, cover_image: event.target.value })
+                }
+              />
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                const url = await uploadAndAttach("cover_image", file);
+                if (!url) return;
+                setMapSite({ ...mapsite, cover_image: url });
+                await marketingUpdateLinkedMapSite(request.id, { cover_image: url });
+              }}
+            />
+            <label className="text-sm">
+              MLS URL
+              <input
+                className="mt-1 w-full rounded border px-3 py-2"
+                value={mapsite.mls_url || ""}
+                onChange={(event) =>
+                  setMapSite({ ...mapsite, mls_url: event.target.value })
+                }
+              />
+            </label>
+            <label className="text-sm">
+              Broker URL
+              <input
+                className="mt-1 w-full rounded border px-3 py-2"
+                value={mapsite.broker_url || ""}
+                onChange={(event) =>
+                  setMapSite({ ...mapsite, broker_url: event.target.value })
+                }
+              />
+            </label>
+            <label className="text-sm">
+              TEB™ URL
+              <input
+                className="mt-1 w-full rounded border px-3 py-2"
+                value={mapsite.teb_url || ""}
+                onChange={(event) =>
+                  setMapSite({ ...mapsite, teb_url: event.target.value })
+                }
+              />
+            </label>
+            <label className="text-sm">
+              TTV™ URL
+              <input
+                className="mt-1 w-full rounded border px-3 py-2"
+                value={mapsite.ttv_url || ""}
+                onChange={(event) =>
+                  setMapSite({ ...mapsite, ttv_url: event.target.value })
+                }
+              />
+            </label>
+          </div>
+          <button
+            type="button"
+            disabled={actionPending}
+            onClick={() =>
+              runWorkflowAction(() =>
+                marketingUpdateLinkedMapSite(request.id, {
+                  fast_code: mapsite.fast_code,
+                  cover_image: mapsite.cover_image,
+                  mls_url: mapsite.mls_url,
+                  broker_url: mapsite.broker_url,
+                  teb_url: mapsite.teb_url,
+                  ttv_url: mapsite.ttv_url,
+                  assigned_marketing_manager: mapsite.assigned_marketing_manager,
+                })
+              )
+            }
+            className="rounded bg-neutral-800 px-4 py-2 text-sm text-white disabled:opacity-50"
+          >
+            Save MapSite Configuration
+          </button>
+        </section>
+      ) : (
+        <p className="rounded-xl border border-dashed border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
+          No linked MapSite™ yet. Claims from the fullscreen map associate
+          automatically; otherwise use Convert to Active MapSite.
+        </p>
+      )}
 
       {uploading ? <p className="text-sm text-blue-700">Uploading {uploading}…</p> : null}
       {error ? <p className="text-sm text-red-700">{error}</p> : null}

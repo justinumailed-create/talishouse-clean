@@ -1,3 +1,9 @@
+import {
+  DEFAULT_MAP_STYLE_ID,
+  MAP_STYLE_DEFINITIONS,
+  isMapStyleId,
+  type MapStyleId,
+} from "./styles";
 import type {
   MapBasemapView,
   MapBasemapViewOption,
@@ -5,72 +11,68 @@ import type {
 } from "./types";
 
 /**
- * Canonical basemap view catalog.
+ * Canonical basemap / style catalog.
  * Providers declare which of these they support — callers never pick tile URLs.
  */
-export const MAP_BASEMAP_VIEW_OPTIONS: MapBasemapViewOption[] = [
-  {
-    id: "street",
-    label: "Street",
-    description: "Standard road and label cartography.",
-    availability: "available",
-  },
-  {
-    id: "satellite",
-    label: "Satellite",
-    description: "Aerial / satellite imagery basemap.",
-    availability: "available",
-  },
-  {
-    id: "hybrid",
-    label: "Hybrid",
-    description: "Satellite imagery with road / place labels overlaid.",
-    availability: "future",
-  },
-  {
-    id: "terrain",
-    label: "Terrain",
-    description: "Topographic relief and elevation cues.",
-    availability: "future",
-  },
-];
+export const MAP_BASEMAP_VIEW_OPTIONS: MapBasemapViewOption[] =
+  MAP_STYLE_DEFINITIONS.map((style) => ({
+    id: style.id,
+    label: style.label,
+    description: style.description,
+    availability: "available" as const,
+  }));
 
-export const DEFAULT_MAP_BASEMAP_VIEW: MapBasemapView = "street";
+export const DEFAULT_MAP_BASEMAP_VIEW: MapBasemapView = DEFAULT_MAP_STYLE_ID;
 
 export function isMapBasemapView(value: unknown): value is MapBasemapView {
-  return (
-    value === "street" ||
-    value === "satellite" ||
-    value === "hybrid" ||
-    value === "terrain"
-  );
+  return isMapStyleId(value);
 }
 
 export function isMapProviderId(value: unknown): value is MapProviderId {
-  return (
-    value === "leaflet-osm" ||
-    value === "mapbox" ||
-    value === "google-maps" ||
-    value === "esri"
-  );
+  return value === "maplibre" || value === "mapbox" || value === "esri";
+}
+
+/**
+ * Accept legacy stored ids from older platform settings rows.
+ */
+export function normalizeLegacyProviderId(value: unknown): MapProviderId | null {
+  if (isMapProviderId(value)) return value;
+  if (value === "leaflet-osm" || value === "google-maps") {
+    return "maplibre";
+  }
+  return null;
+}
+
+/**
+ * Accept legacy basemap ids (e.g. hybrid) from older settings.
+ */
+export function normalizeLegacyBasemapView(value: unknown): MapBasemapView | null {
+  if (isMapBasemapView(value)) return value;
+  if (value === "hybrid") return "satellite";
+  return null;
 }
 
 export function parseMapBasemapView(
   value: unknown,
   fallback: MapBasemapView = DEFAULT_MAP_BASEMAP_VIEW
 ): MapBasemapView {
-  return isMapBasemapView(value) ? value : fallback;
+  return normalizeLegacyBasemapView(value) ?? fallback;
+}
+
+export function parseMapStyleId(
+  value: unknown,
+  fallback: MapStyleId = DEFAULT_MAP_STYLE_ID
+): MapStyleId {
+  return isMapStyleId(value) ? value : fallback;
 }
 
 /**
- * Whether free, unrestricted commercial satellite imagery exists for a provider
- * without paid credentials. Used for production defaults.
+ * Whether free, unrestricted commercial satellite imagery exists without paid credentials.
  */
 export function providerSupportsUnrestrictedSatellite(
   providerId: MapProviderId
 ): boolean {
-  // OpenStreetMap tiles are street-only; Esri/Mapbox/Google satellite require
-  // accounts and paid/commercial licensing for production apps.
+  // MapLibre + MapTiler satellite requires a MapTiler key for production.
   void providerId;
   return false;
 }

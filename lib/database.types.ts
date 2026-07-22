@@ -475,6 +475,13 @@ export interface Database {
           price: string | null
           logo_url: string | null
           header_image_url: string | null
+          cover_image: string | null
+          mls_url: string | null
+          broker_url: string | null
+          teb_url: string | null
+          ttv_url: string | null
+          assigned_marketing_manager: string | null
+          is_demonstration: boolean
           website: string | null
           map_zoom: number | null
           meta_title: string | null
@@ -510,6 +517,13 @@ export interface Database {
           price?: string | null
           logo_url?: string | null
           header_image_url?: string | null
+          cover_image?: string | null
+          mls_url?: string | null
+          broker_url?: string | null
+          teb_url?: string | null
+          ttv_url?: string | null
+          assigned_marketing_manager?: string | null
+          is_demonstration?: boolean
           website?: string | null
           map_zoom?: number | null
           meta_title?: string | null
@@ -545,6 +559,13 @@ export interface Database {
           price?: string | null
           logo_url?: string | null
           header_image_url?: string | null
+          cover_image?: string | null
+          mls_url?: string | null
+          broker_url?: string | null
+          teb_url?: string | null
+          ttv_url?: string | null
+          assigned_marketing_manager?: string | null
+          is_demonstration?: boolean
           website?: string | null
           map_zoom?: number | null
           meta_title?: string | null

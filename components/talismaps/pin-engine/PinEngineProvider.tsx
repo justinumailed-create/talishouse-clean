@@ -12,6 +12,7 @@ import {
 } from "react";
 import { MapEngineProvider } from "@/components/talismaps/map-engine/MapEngineProvider";
 import type { MapViewport } from "@/lib/talismaps/map-engine";
+import { useTalisMapsMapDefaults } from "@/lib/talismaps/use-map-defaults";
 import { pinRecordsToMapEnginePins } from "@/lib/talismaps/pin-engine";
 import type {
   PinSaveState,
@@ -41,6 +42,7 @@ interface PinEngineContextValue {
 const PinEngineContext = createContext<PinEngineContextValue | null>(null);
 
 export function PinEngineProvider({ children }: { children: ReactNode }) {
+  const defaults = useTalisMapsMapDefaults();
   const [isLoading, setIsLoading] = useState(true);
   const [bootstrap, setBootstrap] = useState<TalisMapsEditorBootstrap | null>(null);
   const [pins, setPins] = useState<TalisMapsPinRecord[]>([]);
@@ -62,6 +64,8 @@ export function PinEngineProvider({ children }: { children: ReactNode }) {
     refresh()
       .catch((error) => {
         console.error("[PinEngineProvider]", error);
+        setBootstrap(null);
+        setPins([]);
       })
       .finally(() => setIsLoading(false));
   }, [refresh]);
@@ -267,6 +271,8 @@ export function PinEngineProvider({ children }: { children: ReactNode }) {
   return (
     <PinEngineContext.Provider value={value}>
       <MapEngineProvider
+        providerId={defaults.providerId}
+        basemapView={defaults.basemapView}
         initialPins={enginePins}
         initialViewport={initialViewport}
         selectedPinId={selectedPinId}

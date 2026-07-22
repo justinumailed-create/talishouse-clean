@@ -50,3 +50,16 @@ export const FOR_SALE_BY_OWNERS_MARKET: TalisprosMarketPageContent = {
     "Selling real estate the traditional way is expensive and invasive. Selling privately is always an option, but your reach and adequate levels of publicity is typically difficult, when not professionally managed. Enter Talispros PMC: Rahul promotes via your own platform and as a professional advertiser, which spreads the word broadly and reliably. When you sell, you sell privately through your lawyer - no real estate fees become due.",
   metadataTitle: "Talispros™ | Under Construction...",
 };
+
+export const CLAIM_A_MARKET_PAGE: TalisprosMarketPageContent = {
+  slug: "claim-a-market",
+  title: "Claim a Market",
+  registrationMarket: "listings",
+  marketPartner: "Market Partner: Rahul C.",
+  partnerImage: "/images/mapsites/lrg1-rahul.jpeg",
+  partnerImageAlt: "Market partner portrait",
+  whyHeading: "Why claim your market on MapSite™.",
+  whyBody:
+    "MapSite™ is the centre of Talispros™. Submit your Build Request here to receive a FAST Code™, begin marketing review, and unlock MLS®, URL, TEB™, and TTV™ actions on your pin — without leaving the map-first workflow.",
+  metadataTitle: "Talispros™ | Claim a Market",
+};

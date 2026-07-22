@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import MapEngineCanvas from "@/components/talismaps/map-engine/MapEngineCanvas";
-import { MapEngineProvider } from "@/components/talismaps/map-engine/MapEngineProvider";
+import {
+  MapEngineProvider,
+  useMapEngine,
+} from "@/components/talismaps/map-engine/MapEngineProvider";
 import type { MapEnginePin, MapViewport } from "@/lib/talismaps/map-engine";
 import { pinStyleCacheKey } from "@/lib/talismaps/map-engine/pin-marker-icon";
 import { useTalisMapsMapDefaults } from "@/lib/talismaps/use-map-defaults";
@@ -33,6 +36,8 @@ export interface TalisMapsPinPickerProps {
   latitude: string;
   longitude: string;
   streetAddress: string;
+  /** When true, the PIN was placed on the map — address edits should not move it. */
+  manualPlacement?: boolean;
   pinStyle?: TalisMapsPinPickerPinStyle;
   onLocationChange: (update: TalisMapsPinLocationUpdate) => void;
 }
@@ -90,10 +95,40 @@ async function reverseGeocodeAddress(
   }
 }
 
+function PinPickerViewportSync({
+  latitude,
+  longitude,
+}: {
+  latitude: string;
+  longitude: string;
+}) {
+  const { setViewport, isReady } = useMapEngine();
+  const lastSyncedKeyRef = useRef("");
+
+  useEffect(() => {
+    if (!isReady || !hasValidCoordinates(latitude, longitude)) return;
+
+    const syncKey = `${latitude},${longitude}`;
+    if (syncKey === lastSyncedKeyRef.current) return;
+    lastSyncedKeyRef.current = syncKey;
+
+    setViewport({
+      center: {
+        latitude: Number.parseFloat(latitude),
+        longitude: Number.parseFloat(longitude),
+      },
+      zoom: 15,
+    });
+  }, [isReady, latitude, longitude, setViewport]);
+
+  return null;
+}
+
 function TalisMapsPinPickerMap({
   latitude,
   longitude,
   streetAddress,
+  manualPlacement = false,
   pinStyle,
   onLocationChange,
 }: TalisMapsPinPickerProps) {
@@ -184,10 +219,10 @@ function TalisMapsPinPickerMap({
     [enginePin]
   );
 
-  // Option 1: optional street address → forward geocode into coordinates.
+  // Street address → forward geocode into coordinates (unless PIN was placed manually).
   useEffect(() => {
     const address = streetAddress.trim();
-    if (!address || hasValidCoordinates(latitude, longitude)) return;
+    if (!address || manualPlacement) return;
     if (skipGeocodeRef.current) {
       skipGeocodeRef.current = false;
       return;
@@ -206,17 +241,19 @@ function TalisMapsPinPickerMap({
           found?: boolean;
           latitude?: string;
           longitude?: string;
+          address?: string | null;
         };
 
         if (!payload.found || !payload.latitude || !payload.longitude) return;
 
         lastGeocodedAddressRef.current = address;
         skipGeocodeRef.current = true;
+        lastReverseKeyRef.current = `${payload.latitude},${payload.longitude}`;
         onLocationChangeRef.current({
           latitude: formatCoordinate(payload.latitude),
           longitude: formatCoordinate(payload.longitude),
           manualPlacement: false,
-          reverseGeocodedAddress: null,
+          reverseGeocodedAddress: payload.address?.trim() || null,
         });
       } catch {
         // Geocoding is best-effort; users can still place the pin on the map.
@@ -224,7 +261,7 @@ function TalisMapsPinPickerMap({
     }, 600);
 
     return () => window.clearTimeout(timeout);
-  }, [streetAddress, latitude, longitude]);
+  }, [streetAddress, manualPlacement]);
 
   return (
     <div className="h-full w-full touch-none">
@@ -238,6 +275,7 @@ function TalisMapsPinPickerMap({
         onPinDragStart={handlePinDragStart}
         onMapClick={handleMapClick}
       >
+        <PinPickerViewportSync latitude={latitude} longitude={longitude} />
         <MapEngineCanvas className="h-full w-full touch-none" />
       </MapEngineProvider>
     </div>

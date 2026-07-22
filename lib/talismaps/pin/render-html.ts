@@ -27,11 +27,7 @@ function categoryBadgeLabel(value: string): string {
   return CATEGORY_LABELS[value] ?? value.replaceAll("-", " ");
 }
 
-/**
- * Soft, apple-quality circular PIN body.
- * White center, thin rim, layered shadow — no thick borders.
- */
-export function buildPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
+function buildClassicPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
   const { bodySize: size, ringRadius, centerRadius, pinColor, pinBorderColor } =
     visual;
   const c = size / 2;
@@ -50,7 +46,52 @@ export function buildPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
         ? `<circle cx="${c}" cy="${c}" r="${Math.max(2.5, centerRadius * 0.28)}" fill="${escapePinHtml(pinColor)}" opacity="0.85"/>`
         : "";
 
-  // Soft contact shadow (ellipse) + ambient halo — rendered as SVG filters
+  return `<g filter="url(#pinShadow)">
+    <circle cx="${c}" cy="${c}" r="${ringRadius + 2.5}" fill="#ffffff" opacity="0.55"/>
+    <circle cx="${c}" cy="${c}" r="${ringRadius}" fill="${escapePinHtml(pinColor)}" opacity="${ringOpacity}"/>
+    <circle cx="${c}" cy="${c}" r="${ringRadius}" fill="none" stroke="${escapePinHtml(pinBorderColor)}" stroke-width="1"/>
+    <circle cx="${c}" cy="${c}" r="${centerRadius}" fill="#ffffff"/>
+    ${glyph}
+  </g>`;
+}
+
+/** Flag-style marker: solid brand color with a large white icon (reference UI). */
+function buildFlagPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
+  const { bodySize: size, ringRadius, pinColor } = visual;
+  const c = size / 2;
+  const includeGlyph = !visual.customLogoUrl && visual.pinIcon !== "dot";
+  const iconPath = getPinIconPath(visual.pinIcon);
+  const iconScale = 0.58 * (size / 66);
+  const iconOffset = c - 12 * iconScale;
+  const ringOpacity = visual.selectedState ? 1 : 0.98;
+
+  const glyph =
+    includeGlyph && iconPath
+      ? `<g transform="translate(${iconOffset} ${iconOffset}) scale(${iconScale})">
+           <path d="${iconPath}" fill="#ffffff"/>
+         </g>`
+      : !visual.customLogoUrl
+        ? `<circle cx="${c}" cy="${c}" r="${Math.max(3, ringRadius * 0.18)}" fill="#ffffff" opacity="0.95"/>`
+        : "";
+
+  return `<g filter="url(#pinShadow)">
+    <circle cx="${c}" cy="${c}" r="${ringRadius + 3}" fill="#ffffff" opacity="0.92"/>
+    <circle cx="${c}" cy="${c}" r="${ringRadius}" fill="${escapePinHtml(pinColor)}" opacity="${ringOpacity}"/>
+    <circle cx="${c}" cy="${c}" r="${ringRadius}" fill="none" stroke="#ffffff" stroke-width="2.25" opacity="0.95"/>
+    ${glyph}
+  </g>`;
+}
+
+/**
+ * Soft, apple-quality circular PIN body.
+ * Classic: white center + colored glyph. Flag: solid color + large white icon.
+ */
+export function buildPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
+  const { bodySize: size } = visual;
+  const body = visual.whiteCenter
+    ? buildClassicPinBodySvg(visual)
+    : buildFlagPinBodySvg(visual);
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
   <defs>
     <filter id="pinShadow" x="-40%" y="-20%" width="180%" height="180%">
@@ -58,13 +99,7 @@ export function buildPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
       <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#000000" flood-opacity="0.10"/>
     </filter>
   </defs>
-  <g filter="url(#pinShadow)">
-    <circle cx="${c}" cy="${c}" r="${ringRadius + 2.5}" fill="#ffffff" opacity="0.55"/>
-    <circle cx="${c}" cy="${c}" r="${ringRadius}" fill="${escapePinHtml(pinColor)}" opacity="${ringOpacity}"/>
-    <circle cx="${c}" cy="${c}" r="${ringRadius}" fill="none" stroke="${escapePinHtml(pinBorderColor)}" stroke-width="1"/>
-    <circle cx="${c}" cy="${c}" r="${centerRadius}" fill="#ffffff"/>
-    ${glyph}
-  </g>
+  ${body}
 </svg>`;
 }
 
@@ -137,6 +172,7 @@ export function pinVisualCacheKey(props: TalisMapsPinVisualProps): string {
     visual.pinColor,
     visual.pinBorderColor,
     visual.pinIcon,
+    visual.whiteCenter ? 1 : 0,
     visual.pinSize,
     visual.pinLabel ?? "",
     visual.pinAnimation,

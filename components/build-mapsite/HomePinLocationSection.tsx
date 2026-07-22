@@ -281,6 +281,7 @@ export default function HomePinLocationSection({
           latitude={values.latitude}
           longitude={values.longitude}
           streetAddress={values.streetAddress}
+          manualPlacement={values.manualPlacement}
           pinStyle={pinPickerStyle}
           onLocationChange={handleLocationChange}
         />

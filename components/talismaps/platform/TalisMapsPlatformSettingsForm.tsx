@@ -78,8 +78,8 @@ export default function TalisMapsPlatformSettingsForm({
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
         <h2 className="text-base font-semibold text-neutral-900">Default Provider</h2>
         <p className="mt-1 text-sm text-neutral-500">
-          Choose the MapProvider used by TalisMaps™ surfaces. OpenStreetMap (Leaflet) is the
-          production default and requires no API key.
+          TalisMaps™ renders with MapLibre GL JS. Tile styles come from interchangeable
+          vendors (MapTiler by default). Google Maps is not supported.
         </p>
 
         <div className="mt-5 space-y-3">
@@ -101,9 +101,9 @@ export default function TalisMapsPlatformSettingsForm({
                   setProviderId(provider.id);
                   if (!provider.supportedBasemapViews.includes(basemapView)) {
                     setBasemapView(
-                      provider.supportedBasemapViews.includes("street")
-                        ? "street"
-                        : provider.supportedBasemapViews[0] ?? "street"
+                      provider.supportedBasemapViews.includes("satellite")
+                        ? "satellite"
+                        : provider.supportedBasemapViews[0] ?? "satellite"
                     );
                   }
                 }}
@@ -134,10 +134,10 @@ export default function TalisMapsPlatformSettingsForm({
       </section>
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-neutral-900">Default View</h2>
+        <h2 className="text-base font-semibold text-neutral-900">Default Map Style</h2>
         <p className="mt-1 text-sm text-neutral-500">
-          Street is the recommended default. Satellite imagery is available through licensed
-          providers; free unrestricted commercial satellite is not available via OpenStreetMap.
+          Satellite is the production default (MapTiler Satellite via MapLibre). Streets,
+          Terrain, Light, and Dark are interchangeable through the Style Manager.
         </p>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -147,7 +147,7 @@ export default function TalisMapsPlatformSettingsForm({
               className={`flex items-start gap-3 rounded-xl border px-4 py-3 ${
                 option.disabled
                   ? "cursor-not-allowed border-neutral-100 bg-neutral-50 opacity-60"
-                  : providerId && basemapView === option.id
+                  : basemapView === option.id
                     ? "cursor-pointer border-neutral-900 bg-neutral-50"
                     : "cursor-pointer border-neutral-200 hover:border-neutral-300"
               }`}

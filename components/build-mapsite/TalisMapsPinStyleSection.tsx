@@ -3,6 +3,7 @@
 import { Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import Pin from "@/components/talismaps/pin/Pin";
 import {
   PIN_BORDER_OPTIONS,
   PIN_CATEGORY_BADGE_OPTIONS,
@@ -59,8 +60,20 @@ export default function TalisMapsPinStyleSection({
         TalisMaps™ PIN Style
       </h3>
       <p className="mb-4 mt-1 text-xs text-neutral-500">
-        Personalize your Home PIN appearance before your MapSite™ is published.
+        Personalize your Home PIN. Uncheck white center to use flag-style markers
+        where your icon fills the colored circle (like MapSite™ reference pins).
       </p>
+
+      <div className="mb-5 flex items-center justify-center rounded-xl border border-neutral-200 bg-white py-6">
+        <Pin
+          pinColor={values.futurePinColor || "#1A73E8"}
+          pinIcon={values.futurePinIcon || "flag"}
+          whiteCenter={values.futurePinWhiteCenter}
+          categoryBadge={values.futurePinCategoryBadge}
+          pinAnimation={values.futurePinAnimated ? "pulse" : "none"}
+          customLogoUrl={customLogoPreview}
+        />
+      </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
@@ -91,7 +104,7 @@ export default function TalisMapsPinStyleSection({
         <div>
           <FieldLabel label="Pin Icon" />
           <select
-            value={values.futurePinIcon || "home"}
+            value={values.futurePinIcon || "flag"}
             onChange={(event) => onChange({ futurePinIcon: event.target.value })}
             className="h-11 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900"
           >
@@ -187,8 +200,13 @@ export default function TalisMapsPinStyleSection({
               }
               className="h-4 w-4 rounded border-neutral-300"
             />
-            <span className="text-sm text-neutral-700">White Center Marker</span>
+            <span className="text-sm text-neutral-700">
+              Classic white-center marker
+            </span>
           </label>
+          <p className="text-xs text-neutral-500">
+            Off = flag-style pin with a large white icon on your brand color.
+          </p>
 
           <label className="flex h-11 items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4">
             <input

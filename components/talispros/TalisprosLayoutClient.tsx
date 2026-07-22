@@ -11,8 +11,10 @@ export default function TalisprosLayoutClient({
 }) {
   const pathname = usePathname();
   const isAdminRoute = pathname?.startsWith("/talispros/admin");
+  const isMapSiteApp =
+    pathname === "/talispros/mapsite" || pathname?.startsWith("/talispros/mapsite/");
 
-  if (isAdminRoute) {
+  if (isAdminRoute || isMapSiteApp) {
     return <>{children}</>;
   }
 

@@ -1,18 +1,16 @@
-export type MapProviderId =
-  | "leaflet-osm"
-  | "mapbox"
-  | "google-maps"
-  | "esri";
+export type MapProviderId = "maplibre" | "mapbox" | "esri";
 
 /**
- * Provider-agnostic map visual mode.
- * Providers translate these into their own tile/style APIs.
+ * Provider-agnostic map visual / style mode.
+ * Providers translate these into MapLibre style URLs or their own style APIs.
+ * Never pass vendor SDK types across this boundary.
  */
 export type MapBasemapView =
-  | "street"
   | "satellite"
-  | "hybrid"
-  | "terrain";
+  | "street"
+  | "terrain"
+  | "light"
+  | "dark";
 
 export type MapBasemapViewAvailability = "available" | "future" | "unavailable";
 
@@ -49,8 +47,13 @@ export interface MapMountOptions {
   pins?: MapEnginePin[];
   selectedPinId?: string | null;
   draggablePinIds?: string[];
-  /** Preferred visual mode — providers map this to their own tiles/styles. */
+  /** Preferred visual mode — providers map this to their own styles/tiles. */
   basemapView?: MapBasemapView;
+  /**
+   * Abort in-flight mounts (React Strict Mode remounts).
+   * When aborted, the provider must not clear a container owned by a newer mount.
+   */
+  signal?: AbortSignal;
 }
 
 export type MapEngineEvent =
@@ -109,12 +112,13 @@ export interface MapInstance {
 /**
  * Provider-agnostic map engine contract.
  * All TalisMaps™ surfaces mount maps through this interface.
+ * Implementations may use MapLibre, Mapbox GL, etc. — never Google Maps.
  */
 export interface MapProvider {
   readonly id: MapProviderId;
   readonly label: string;
   readonly description: string;
-  /** Basemap views this provider can render today. */
+  /** Basemap / style views this provider can render today. */
   readonly supportedBasemapViews: MapBasemapView[];
   isAvailable(): boolean;
   mount(container: HTMLElement, options: MapMountOptions): Promise<MapInstance>;

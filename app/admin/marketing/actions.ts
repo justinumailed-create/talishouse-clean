@@ -5,6 +5,12 @@ import { publishBuildMapSite } from "@/lib/build-mapsite-publish";
 import { resolvePinStyleExtras } from "@/lib/build-request-pin-style-notes";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { generateFastCode } from "@/services/fast-code.service";
+import {
+  transitionMapSiteStatus,
+  updateMapSiteResources,
+  type MapSiteResourceUpdates,
+} from "@/lib/talispros/mapsite-platform";
+import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
 type ActionResult = { ok: boolean; error?: string };
 
@@ -233,7 +239,28 @@ export async function setBuildRequestStatus(
   }
   const { error } = await supabaseAdmin.from("build_requests").update(payload).eq("id", requestId);
   if (error) return { ok: false, error: error.message };
+
+  if (status === "Rejected") {
+    const mapsiteId = await resolveLinkedMapSiteId(requestId);
+    if (mapsiteId) {
+      const archived = await transitionMapSiteStatus(mapsiteId, "ARCHIVED");
+      if (!archived.ok) {
+        await supabaseAdmin
+          .from("mapsites")
+          .update({ status: "archived", updated_at: new Date().toISOString() })
+          .eq("id", mapsiteId);
+      }
+    }
+  }
+  if (status === "Under Review") {
+    const mapsiteId = await resolveLinkedMapSiteId(requestId);
+    if (mapsiteId) {
+      await transitionMapSiteStatus(mapsiteId, "MARKETING_REVIEW");
+    }
+  }
+
   revalidatePath("/admin/marketing");
+  revalidatePath(MAPSITE_APP_PATH);
   return { ok: true };
 }
 
@@ -249,7 +276,20 @@ export async function getBuildRequestDetails(requestId: string) {
     .select("*")
     .eq("request_id", requestId)
     .maybeSingle();
-  return { request, assets };
+
+  let mapsite = null;
+  if (request?.linked_mapsite_id) {
+    const { data } = await supabaseAdmin
+      .from("mapsites")
+      .select(
+        "id, fast_code, status, latitude, longitude, property_title, cover_image, header_image_url, mls_url, broker_url, website, teb_url, ttv_url, assigned_marketing_manager, is_demonstration, created_at, updated_at"
+      )
+      .eq("id", request.linked_mapsite_id)
+      .maybeSingle();
+    mapsite = data;
+  }
+
+  return { request, assets, mapsite };
 }
 
 export async function updateBuildRequestDetails(
@@ -284,5 +324,112 @@ export async function updateBuildRequestAssets(
     );
   if (error) return { ok: false, error: error.message };
   revalidatePath(`/admin/marketing/${requestId}`);
+  return { ok: true };
+}
+
+async function resolveLinkedMapSiteId(requestId: string): Promise<string | null> {
+  const supabaseAdmin = getSupabaseAdmin();
+  const { data } = await supabaseAdmin
+    .from("build_requests")
+    .select("linked_mapsite_id")
+    .eq("id", requestId)
+    .maybeSingle();
+  return data?.linked_mapsite_id ?? null;
+}
+
+export async function approveBuildRequestForMarketing(
+  requestId: string
+): Promise<ActionResult> {
+  const supabaseAdmin = getSupabaseAdmin();
+  const { error } = await supabaseAdmin
+    .from("build_requests")
+    .update({
+      status: "Under Review",
+      approval_status: "Approved",
+      approved_at: new Date().toISOString(),
+    })
+    .eq("id", requestId);
+  if (error) return { ok: false, error: error.message };
+
+  const mapsiteId = await resolveLinkedMapSiteId(requestId);
+  if (mapsiteId) {
+    await transitionMapSiteStatus(mapsiteId, "MARKETING_REVIEW");
+  }
+
+  revalidatePath("/admin/marketing");
+  revalidatePath(MAPSITE_APP_PATH);
+  return { ok: true };
+}
+
+export async function activateMapSiteForRequest(
+  requestId: string
+): Promise<ActionResult> {
+  const supabaseAdmin = getSupabaseAdmin();
+  const mapsiteId = await resolveLinkedMapSiteId(requestId);
+  if (!mapsiteId) {
+    return {
+      ok: false,
+      error: "No linked MapSite™. Create a MapSite or claim from the map first.",
+    };
+  }
+
+  const { getMapSitePlatformById } = await import("@/lib/talispros/mapsite-platform");
+  const { toDbStatus } = await import("@/lib/talispros/mapsite-state");
+  const current = await getMapSitePlatformById(mapsiteId);
+  if (!current) {
+    return { ok: false, error: "Linked MapSite™ was not found." };
+  }
+
+  if (current.status !== "ACTIVE") {
+    // Force ACTIVE for marketing activation (admin override of intermediate states).
+    const { error: statusError } = await supabaseAdmin
+      .from("mapsites")
+      .update({
+        status: toDbStatus("ACTIVE"),
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", mapsiteId);
+    if (statusError) return { ok: false, error: statusError.message };
+  }
+
+  const { error } = await supabaseAdmin
+    .from("build_requests")
+    .update({
+      status: "MapSite Active",
+      approval_status: "Approved",
+      activated_at: new Date().toISOString(),
+    })
+    .eq("id", requestId);
+
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/admin/marketing");
+  revalidatePath(MAPSITE_APP_PATH);
+  return { ok: true };
+}
+
+export async function updateLinkedMapSiteResources(
+  requestId: string,
+  updates: MapSiteResourceUpdates
+): Promise<ActionResult> {
+  const mapsiteId = await resolveLinkedMapSiteId(requestId);
+  if (!mapsiteId) {
+    return { ok: false, error: "No linked MapSite™ for this Build Request." };
+  }
+
+  const result = await updateMapSiteResources(mapsiteId, updates);
+  if (!result.ok) return result;
+
+  if (updates.fast_code) {
+    const supabaseAdmin = getSupabaseAdmin();
+    await supabaseAdmin
+      .from("build_requests")
+      .update({ requested_fast_code: updates.fast_code })
+      .eq("id", requestId);
+  }
+
+  revalidatePath(`/admin/marketing/${requestId}`);
+  revalidatePath("/admin/marketing");
+  revalidatePath(MAPSITE_APP_PATH);
   return { ok: true };
 }

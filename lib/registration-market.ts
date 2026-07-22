@@ -31,9 +31,14 @@ export const REGISTRATION_MARKET_COPY: Record<
 const MARKET_ALIASES: Record<string, RegistrationMarket> = {
   listings: "listings",
   listing: "listings",
+  professional: "listings",
+  professionals: "listings",
+  "real-estate": "listings",
   homes: "homes",
   home: "homes",
   cottages: "homes",
+  builder: "homes",
+  builders: "homes",
   fsbos: "fsbos",
   fsbo: "fsbos",
 };

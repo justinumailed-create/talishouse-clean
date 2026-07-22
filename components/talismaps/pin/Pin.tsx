@@ -24,8 +24,10 @@ export default function Pin({
   const size = visual.bodySize;
   const c = size / 2;
   const iconPath = getPinIconPath(visual.pinIcon);
-  const showGlyph = !visual.customLogoUrl && visual.pinIcon !== "dot" && iconPath;
-  const iconScale = 0.42 * (size / 66);
+  const showGlyph =
+    !visual.customLogoUrl && visual.pinIcon !== "dot" && Boolean(iconPath);
+  const isFlagStyle = !visual.whiteCenter;
+  const iconScale = (isFlagStyle ? 0.58 : 0.42) * (size / 66);
   const iconOffset = c - 12 * iconScale;
 
   const animationClass =
@@ -81,46 +83,91 @@ export default function Pin({
             </filter>
           </defs>
           <g filter={`url(#${shadowId})`}>
-            <circle
-              cx={c}
-              cy={c}
-              r={visual.ringRadius + 2.5}
-              fill="#ffffff"
-              opacity={0.55}
-            />
-            <circle
-              cx={c}
-              cy={c}
-              r={visual.ringRadius}
-              fill={visual.pinColor}
-              opacity={visual.selectedState ? 1 : 0.96}
-            />
-            <circle
-              cx={c}
-              cy={c}
-              r={visual.ringRadius}
-              fill="none"
-              stroke={visual.pinBorderColor}
-              strokeWidth={1}
-            />
-            <circle cx={c} cy={c} r={visual.centerRadius} fill="#ffffff" />
-            {showGlyph ? (
-              <g
-                transform={`translate(${iconOffset} ${iconOffset}) scale(${iconScale})`}
-                opacity={0.88}
-              >
-                <path d={iconPath} fill={visual.pinColor} />
-              </g>
-            ) : null}
-            {visual.pinIcon === "dot" && !visual.customLogoUrl ? (
-              <circle
-                cx={c}
-                cy={c}
-                r={Math.max(2.5, visual.centerRadius * 0.28)}
-                fill={visual.pinColor}
-                opacity={0.85}
-              />
-            ) : null}
+            {isFlagStyle ? (
+              <>
+                <circle
+                  cx={c}
+                  cy={c}
+                  r={visual.ringRadius + 3}
+                  fill="#ffffff"
+                  opacity={0.92}
+                />
+                <circle
+                  cx={c}
+                  cy={c}
+                  r={visual.ringRadius}
+                  fill={visual.pinColor}
+                  opacity={visual.selectedState ? 1 : 0.98}
+                />
+                <circle
+                  cx={c}
+                  cy={c}
+                  r={visual.ringRadius}
+                  fill="none"
+                  stroke="#ffffff"
+                  strokeWidth={2.25}
+                  opacity={0.95}
+                />
+                {showGlyph ? (
+                  <g
+                    transform={`translate(${iconOffset} ${iconOffset}) scale(${iconScale})`}
+                  >
+                    <path d={iconPath} fill="#ffffff" />
+                  </g>
+                ) : !visual.customLogoUrl ? (
+                  <circle
+                    cx={c}
+                    cy={c}
+                    r={Math.max(3, visual.ringRadius * 0.18)}
+                    fill="#ffffff"
+                    opacity={0.95}
+                  />
+                ) : null}
+              </>
+            ) : (
+              <>
+                <circle
+                  cx={c}
+                  cy={c}
+                  r={visual.ringRadius + 2.5}
+                  fill="#ffffff"
+                  opacity={0.55}
+                />
+                <circle
+                  cx={c}
+                  cy={c}
+                  r={visual.ringRadius}
+                  fill={visual.pinColor}
+                  opacity={visual.selectedState ? 1 : 0.96}
+                />
+                <circle
+                  cx={c}
+                  cy={c}
+                  r={visual.ringRadius}
+                  fill="none"
+                  stroke={visual.pinBorderColor}
+                  strokeWidth={1}
+                />
+                <circle cx={c} cy={c} r={visual.centerRadius} fill="#ffffff" />
+                {showGlyph ? (
+                  <g
+                    transform={`translate(${iconOffset} ${iconOffset}) scale(${iconScale})`}
+                    opacity={0.88}
+                  >
+                    <path d={iconPath} fill={visual.pinColor} />
+                  </g>
+                ) : null}
+                {visual.pinIcon === "dot" && !visual.customLogoUrl ? (
+                  <circle
+                    cx={c}
+                    cy={c}
+                    r={Math.max(2.5, visual.centerRadius * 0.28)}
+                    fill={visual.pinColor}
+                    opacity={0.85}
+                  />
+                ) : null}
+              </>
+            )}
           </g>
         </svg>
 
