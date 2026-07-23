@@ -83,6 +83,7 @@ import {
   MAPSITE_DEMO_GALLERY,
   MAPSITE_DEMO_LISTING_IMAGE,
   MAPSITE_LISTING_IMAGE_CLASS,
+  shouldReplaceDemoListingMedia,
 } from "@/lib/talispros/mapsite-listing-media";
 
 const DEMO_DESCRIPTION =
@@ -120,16 +121,25 @@ export function createFallbackDemoMapSite(
 export const MAPSITE_DEMO_SIDEBAR_BLURB = DEMO_SIDEBAR_BLURB;
 
 function mapRow(row: MapSiteRow): MapSitePlatformRecord {
-  const gallery =
+  let gallery =
     Array.isArray(row.gallery_images) && row.gallery_images.length > 0
       ? row.gallery_images
       : [...MAPSITE_DEMO_GALLERY];
 
-  const cover =
+  let cover =
     row.cover_image ||
     row.header_image_url ||
     gallery[0] ||
     MAPSITE_DEMO_LISTING_IMAGE;
+
+  // Unclaimed demo still on legacy coastal photos → Talishouse™ product gallery.
+  if (
+    Boolean(row.is_demonstration) &&
+    shouldReplaceDemoListingMedia(cover, gallery)
+  ) {
+    gallery = [...MAPSITE_DEMO_GALLERY];
+    cover = MAPSITE_DEMO_LISTING_IMAGE;
+  }
 
   return {
     id: row.id,

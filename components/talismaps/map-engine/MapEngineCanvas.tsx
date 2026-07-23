@@ -36,6 +36,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     onPinDragStart,
     onMapClick,
     registerMapInstance,
+    lockCenter,
   } = useMapEngine();
 
   const setViewportRef = useRef(setViewport);
@@ -50,6 +51,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
   const selectedPinIdRef = useRef(selectedPinId);
   const draggablePinIdsRef = useRef(draggablePinIds);
   const basemapViewRef = useRef(basemapView);
+  const lockCenterRef = useRef(lockCenter);
 
   useEffect(() => {
     setViewportRef.current = setViewport;
@@ -64,6 +66,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     selectedPinIdRef.current = selectedPinId;
     draggablePinIdsRef.current = draggablePinIds;
     basemapViewRef.current = basemapView;
+    lockCenterRef.current = lockCenter;
   });
 
   useEffect(() => {
@@ -118,6 +121,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
         selectedPinId: selectedPinIdRef.current,
         draggablePinIds: draggablePinIdsRef.current,
         basemapView: basemapViewRef.current,
+        lockCenter: lockCenterRef.current,
         signal: abortController.signal,
       })
       .then((instance) => {
@@ -172,7 +176,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
         setReadyRef.current(false);
       }
     };
-  }, [providerId]);
+  }, [providerId, lockCenter]);
 
   useEffect(() => {
     const instance = instanceRef.current;

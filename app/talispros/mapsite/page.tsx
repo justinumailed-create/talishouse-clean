@@ -40,6 +40,7 @@ export default async function TalisprosMapSitePage({
     <MapSiteApplication
       initialMapSite={mapsite}
       audience={audience}
+      requestId={firstParam(params.requestId) ?? null}
       openPinOnLoad
     />
   );

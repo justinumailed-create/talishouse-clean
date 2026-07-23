@@ -50,6 +50,11 @@ export interface MapMountOptions {
   /** Preferred visual mode — providers map this to their own styles/tiles. */
   basemapView?: MapBasemapView;
   /**
+   * Keep the map center fixed on `center` (zoom allowed, pan disabled).
+   * Used by MapSite™ so the pin stays under the floating card pointer.
+   */
+  lockCenter?: boolean;
+  /**
    * Abort in-flight mounts (React Strict Mode remounts).
    * When aborted, the provider must not clear a container owned by a newer mount.
    */

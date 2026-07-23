@@ -102,6 +102,8 @@ function createHtmlPinOverlayClass() {
       this.container.style.transform = `translate(${-options.anchorX}px, ${-options.anchorY}px)`;
       this.container.style.cursor = this.dragEnabled ? "grab" : "pointer";
       this.container.style.pointerEvents = "auto";
+      // Keep pins above map imagery within Google overlay panes.
+      this.container.style.zIndex = "500";
       this.container.innerHTML = options.html;
     }
 
@@ -295,9 +297,32 @@ export class GoogleMapsProvider implements MapProvider {
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
+      // Pan disabled when center is locked so the pin stays under the card pointer.
+      draggable: !options.lockCenter,
       gestureHandling: "greedy",
       clickableIcons: false,
+      keyboardShortcuts: !options.lockCenter,
+      scrollwheel: true,
     });
+
+    const lockedCenter = options.lockCenter
+      ? {
+          lat: options.center.latitude,
+          lng: options.center.longitude,
+        }
+      : null;
+
+    const enforceLockedCenter = () => {
+      if (!lockedCenter || isCancelled()) return;
+      const current = map.getCenter();
+      if (!current) return;
+      if (
+        Math.abs(current.lat() - lockedCenter.lat) > 1e-8 ||
+        Math.abs(current.lng() - lockedCenter.lng) > 1e-8
+      ) {
+        map.setCenter(lockedCenter);
+      }
+    };
 
     const emit = (
       event: MapEngineEvent,
@@ -307,11 +332,21 @@ export class GoogleMapsProvider implements MapProvider {
     };
 
     const getViewport = (): MapViewport => {
-      const center = map.getCenter();
+      const center = lockedCenter
+        ? lockedCenter
+        : map.getCenter()
+          ? {
+              lat: map.getCenter()!.lat(),
+              lng: map.getCenter()!.lng(),
+            }
+          : {
+              lat: options.center.latitude,
+              lng: options.center.longitude,
+            };
       return {
         center: {
-          latitude: center?.lat() ?? options.center.latitude,
-          longitude: center?.lng() ?? options.center.longitude,
+          latitude: center.lat,
+          longitude: center.lng,
         },
         zoom: map.getZoom() ?? options.zoom,
       };
@@ -399,8 +434,22 @@ export class GoogleMapsProvider implements MapProvider {
     };
 
     const idleListener = map.addListener("idle", () => {
+      enforceLockedCenter();
       emit("viewportchange", { viewport: getViewport() });
     });
+
+    // Zoom-toward-cursor and residual pan must not move the locked pin off screen center.
+    const centerListener = options.lockCenter
+      ? map.addListener("center_changed", () => {
+          enforceLockedCenter();
+        })
+      : null;
+
+    const zoomListener = options.lockCenter
+      ? map.addListener("zoom_changed", () => {
+          enforceLockedCenter();
+        })
+      : null;
 
     const clickListener = map.addListener(
       "click",
@@ -421,6 +470,8 @@ export class GoogleMapsProvider implements MapProvider {
       destroy() {
         disposed = true;
         idleListener.remove();
+        centerListener?.remove();
+        zoomListener?.remove();
         clickListener.remove();
         for (const pinId of [...markers.keys()]) {
           removeMarker(pinId);
@@ -440,6 +491,14 @@ export class GoogleMapsProvider implements MapProvider {
         }
       },
       setViewport(viewport: Partial<MapViewport>) {
+        if (lockedCenter) {
+          // Center stays fixed — only zoom may change.
+          if (viewport.zoom !== undefined) {
+            map.setZoom(viewport.zoom);
+          }
+          map.setCenter(lockedCenter);
+          return;
+        }
         if (viewport.center && viewport.zoom !== undefined) {
           map.setCenter({
             lat: viewport.center.latitude,

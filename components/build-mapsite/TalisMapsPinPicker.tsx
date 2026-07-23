@@ -38,6 +38,8 @@ export interface TalisMapsPinPickerProps {
   streetAddress: string;
   /** When true, the PIN was placed on the map — address edits should not move it. */
   manualPlacement?: boolean;
+  /** Increment to force a forward-geocode of streetAddress (e.g. Enter key). */
+  addressLookupNonce?: number;
   pinStyle?: TalisMapsPinPickerPinStyle;
   onLocationChange: (update: TalisMapsPinLocationUpdate) => void;
 }
@@ -129,15 +131,21 @@ function TalisMapsPinPickerMap({
   longitude,
   streetAddress,
   manualPlacement = false,
+  addressLookupNonce = 0,
   pinStyle,
   onLocationChange,
 }: TalisMapsPinPickerProps) {
   const skipGeocodeRef = useRef(false);
   const lastGeocodedAddressRef = useRef("");
+  const lastLookupNonceRef = useRef(0);
   const lastReverseKeyRef = useRef("");
   const onLocationChangeRef = useRef(onLocationChange);
   const isPinDraggingRef = useRef(false);
-  const defaults = useTalisMapsMapDefaults();
+  const defaults = useTalisMapsMapDefaults({
+    // Match MapSite: Google satellite for claim / Home PIN placement.
+    providerId: "google-maps",
+    basemapView: "satellite",
+  });
 
   useEffect(() => {
     onLocationChangeRef.current = onLocationChange;
@@ -220,48 +228,65 @@ function TalisMapsPinPickerMap({
   );
 
   // Street address → forward geocode into coordinates (unless PIN was placed manually).
+  // addressLookupNonce forces an immediate refresh (Enter on the address field).
   useEffect(() => {
     const address = streetAddress.trim();
-    if (!address || manualPlacement) return;
+    if (!address) return;
+
+    const forced =
+      addressLookupNonce > 0 &&
+      addressLookupNonce !== lastLookupNonceRef.current;
+
+    if (forced) {
+      lastLookupNonceRef.current = addressLookupNonce;
+      lastGeocodedAddressRef.current = "";
+      skipGeocodeRef.current = false;
+    } else if (manualPlacement) {
+      return;
+    }
+
     if (skipGeocodeRef.current) {
       skipGeocodeRef.current = false;
       return;
     }
     if (isPinDraggingRef.current) return;
-    if (address === lastGeocodedAddressRef.current) return;
+    if (!forced && address === lastGeocodedAddressRef.current) return;
 
-    const timeout = window.setTimeout(async () => {
-      try {
-        const response = await fetch(
-          `/api/talismaps/geocode?q=${encodeURIComponent(address)}`
-        );
-        if (!response.ok) return;
+    const timeout = window.setTimeout(
+      async () => {
+        try {
+          const response = await fetch(
+            `/api/talismaps/geocode?q=${encodeURIComponent(address)}`
+          );
+          if (!response.ok) return;
 
-        const payload = (await response.json()) as {
-          found?: boolean;
-          latitude?: string;
-          longitude?: string;
-          address?: string | null;
-        };
+          const payload = (await response.json()) as {
+            found?: boolean;
+            latitude?: string;
+            longitude?: string;
+            address?: string | null;
+          };
 
-        if (!payload.found || !payload.latitude || !payload.longitude) return;
+          if (!payload.found || !payload.latitude || !payload.longitude) return;
 
-        lastGeocodedAddressRef.current = address;
-        skipGeocodeRef.current = true;
-        lastReverseKeyRef.current = `${payload.latitude},${payload.longitude}`;
-        onLocationChangeRef.current({
-          latitude: formatCoordinate(payload.latitude),
-          longitude: formatCoordinate(payload.longitude),
-          manualPlacement: false,
-          reverseGeocodedAddress: payload.address?.trim() || null,
-        });
-      } catch {
-        // Geocoding is best-effort; users can still place the pin on the map.
-      }
-    }, 600);
+          lastGeocodedAddressRef.current = address;
+          skipGeocodeRef.current = true;
+          lastReverseKeyRef.current = `${payload.latitude},${payload.longitude}`;
+          onLocationChangeRef.current({
+            latitude: formatCoordinate(payload.latitude),
+            longitude: formatCoordinate(payload.longitude),
+            manualPlacement: false,
+            reverseGeocodedAddress: payload.address?.trim() || null,
+          });
+        } catch {
+          // Geocoding is best-effort; users can still place the pin on the map.
+        }
+      },
+      forced ? 0 : 600
+    );
 
     return () => window.clearTimeout(timeout);
-  }, [streetAddress, manualPlacement]);
+  }, [streetAddress, manualPlacement, addressLookupNonce]);
 
   return (
     <div className="h-full w-full touch-none">

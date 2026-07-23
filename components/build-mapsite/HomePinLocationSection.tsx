@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { Upload } from "lucide-react";
 import Image from "next/image";
 import {
@@ -54,6 +54,7 @@ function InputField({
   placeholder,
   error,
   onBlur,
+  onKeyDown,
   hint,
 }: {
   label: string;
@@ -63,6 +64,7 @@ function InputField({
   placeholder?: string;
   error?: string;
   onBlur?: () => void;
+  onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
   hint?: string;
 }) {
   return (
@@ -73,6 +75,7 @@ function InputField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
+        onKeyDown={onKeyDown}
         placeholder={placeholder}
         className={`w-full h-11 px-4 bg-white border text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-xl ${
           error ? "border-red-300" : "border-neutral-200"
@@ -100,6 +103,7 @@ export default function HomePinLocationSection({
 }: HomePinLocationSectionProps) {
   const pinImageInputRef = useRef<HTMLInputElement>(null);
   const [pinImagePreview, setPinImagePreview] = useState<string | null>(null);
+  const [addressLookupNonce, setAddressLookupNonce] = useState(0);
 
   useEffect(() => {
     if (!pinImage) {
@@ -232,11 +236,18 @@ export default function HomePinLocationSection({
     <div className="space-y-6">
       <InputField
         label="Street Address"
-        hint="Optional — leave blank for vacant land or undeveloped parcels."
+        hint="Optional — leave blank for vacant land. Press Enter to update the map and coordinates."
         value={values.streetAddress}
         onChange={(streetAddress) =>
           onChange({ streetAddress, manualPlacement: false })
         }
+        onKeyDown={(event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          if (!values.streetAddress.trim()) return;
+          onChange({ manualPlacement: false });
+          setAddressLookupNonce((current) => current + 1);
+        }}
         placeholder="123 Main Street (optional)"
         error={errors.streetAddress}
       />
@@ -282,6 +293,7 @@ export default function HomePinLocationSection({
           longitude={values.longitude}
           streetAddress={values.streetAddress}
           manualPlacement={values.manualPlacement}
+          addressLookupNonce={addressLookupNonce}
           pinStyle={pinPickerStyle}
           onLocationChange={handleLocationChange}
         />

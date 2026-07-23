@@ -9,8 +9,8 @@ export const TALISMAPS_PIN_ICON_PATHS: Record<string, string> = {
   "map-pin":
     "M12 3 C8.5 3 6 5.8 6 9 C6 13 12 20 12 20 C12 20 18 13 18 9 C18 5.8 15.5 3 12 3 Z M12 11.2 C10.7 11.2 9.8 10.3 9.8 9 C9.8 7.7 10.7 6.8 12 6.8 C13.3 6.8 14.2 7.7 14.2 9 C14.2 10.3 13.3 11.2 12 11.2 Z",
   landmark: "M12 4 L16 20 H8 Z M7 20 H17",
-  /** Real-estate yard sign — post + board (reference flag marker). */
-  flag: "M12 21.5 V10 M6.5 10 H17.5 V4.5 H6.5 Z",
+  /** Real-estate yard sign — thick post + board (fill-only SVG, no strokes). */
+  flag: "M11 22 V9 H13 V22 Z M5 9.25 H19 V3.25 H5 Z",
 };
 
 export function getPinIconPath(icon: string): string {

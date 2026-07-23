@@ -37,6 +37,7 @@ interface MapEngineContextValue {
   draggablePinIds: string[];
   viewport: MapViewport;
   isReady: boolean;
+  lockCenter: boolean;
   setProviderId: (providerId: MapProviderId) => void;
   setBasemapView: (view: MapBasemapView) => void;
   setPins: (pins: MapEnginePin[]) => void;
@@ -61,6 +62,8 @@ interface MapEngineProviderProps {
   initialViewport?: MapViewport;
   selectedPinId?: string | null;
   draggablePinIds?: string[];
+  /** Keep map center fixed (zoom only) so overlays stay anchored to the pin. */
+  lockCenter?: boolean;
   onViewportChange?: (viewport: MapViewport) => void;
   onPinSelect?: (pinId: string | null) => void;
   onPinDrag?: (pinId: string, coordinates: MapViewport["center"]) => void;
@@ -76,6 +79,7 @@ export function MapEngineProvider({
   initialViewport = DEFAULT_VIEWPORT,
   selectedPinId: controlledSelectedPinId,
   draggablePinIds: controlledDraggablePinIds = [],
+  lockCenter = false,
   onViewportChange,
   onPinSelect,
   onPinDrag,
@@ -91,6 +95,8 @@ export function MapEngineProvider({
   const [viewport, setViewportState] = useState<MapViewport>(initialViewport);
   const [isReady, setReady] = useState(false);
   const mapInstanceRef = useRef<MapInstance | null>(null);
+  const viewportRef = useRef(viewport);
+  viewportRef.current = viewport;
 
   const registerMapInstance = useCallback((instance: MapInstance | null) => {
     mapInstanceRef.current = instance;
@@ -160,19 +166,25 @@ export function MapEngineProvider({
 
   const setViewport = useCallback(
     (nextViewport: MapViewport) => {
+      const resolved = lockCenter
+        ? {
+            ...nextViewport,
+            center: viewportRef.current.center,
+          }
+        : nextViewport;
       setViewportState((current) => {
         if (
-          current.center.latitude === nextViewport.center.latitude &&
-          current.center.longitude === nextViewport.center.longitude &&
-          current.zoom === nextViewport.zoom
+          current.center.latitude === resolved.center.latitude &&
+          current.center.longitude === resolved.center.longitude &&
+          current.zoom === resolved.zoom
         ) {
           return current;
         }
-        return nextViewport;
+        return resolved;
       });
-      onViewportChange?.(nextViewport);
+      onViewportChange?.(resolved);
     },
-    [onViewportChange]
+    [onViewportChange, lockCenter]
   );
 
   const handlePinDrag = useCallback(
@@ -205,6 +217,7 @@ export function MapEngineProvider({
       draggablePinIds,
       viewport,
       isReady,
+      lockCenter,
       setProviderId: setActiveProviderId,
       setBasemapView: setActiveBasemapView,
       setPins,
@@ -226,6 +239,7 @@ export function MapEngineProvider({
       draggablePinIds,
       viewport,
       isReady,
+      lockCenter,
       setSelectedPinId,
       setViewport,
       setReadyState,

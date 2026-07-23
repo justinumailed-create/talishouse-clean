@@ -22,7 +22,8 @@ describe("TalisMaps flag pin style", () => {
 
     expect(svg).toContain('fill="#1A73E8"');
     expect(svg).toContain('fill="#ffffff"');
-    expect(svg).toContain("M12 21.5 V10");
+    expect(svg).toContain("M11 22 V9 H13 V22 Z");
+    expect(svg).toContain("M5 9.25 H19 V3.25 H5 Z");
     expect(svg).not.toContain('r="11.088"');
   });
 
