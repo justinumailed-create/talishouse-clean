@@ -116,6 +116,7 @@ export default function MapSiteApplication({
     <div ref={containerRef} className="relative h-dvh w-screen overflow-hidden bg-neutral-900">
       <MapEngineProvider
         key={`${mapsite.lat.toFixed(6)}-${mapsite.lng.toFixed(6)}`}
+        providerId="google-maps"
         initialPins={pins}
         initialViewport={viewport}
         selectedPinId={selectedPinId}

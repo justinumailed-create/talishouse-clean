@@ -58,6 +58,14 @@ export {
   resolveProviderBasemapView,
 } from "./registry";
 
+/** Lazy accessor — prefer createMapProvider("google-maps") in app code. */
+export async function loadGoogleMapsProvider() {
+  const { GoogleMapsProvider } = await import(
+    "./providers/google-maps-provider"
+  );
+  return new GoogleMapsProvider();
+}
+
 /** Lazy accessor — prefer createMapProvider("maplibre") in app code. */
 export async function loadMapLibreProvider() {
   const { MapLibreProvider } = await import("./providers/maplibre-provider");

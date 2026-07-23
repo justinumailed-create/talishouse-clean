@@ -1,8 +1,8 @@
-export type MapProviderId = "maplibre" | "mapbox" | "esri";
+export type MapProviderId = "google-maps" | "maplibre" | "mapbox" | "esri";
 
 /**
  * Provider-agnostic map visual / style mode.
- * Providers translate these into MapLibre style URLs or their own style APIs.
+ * Providers translate these into Google map types or MapLibre style URLs.
  * Never pass vendor SDK types across this boundary.
  */
 export type MapBasemapView =
@@ -112,7 +112,7 @@ export interface MapInstance {
 /**
  * Provider-agnostic map engine contract.
  * All TalisMaps™ surfaces mount maps through this interface.
- * Implementations may use MapLibre, Mapbox GL, etc. — never Google Maps.
+ * Implementations may use Google Maps, MapLibre, Mapbox GL, etc.
  */
 export interface MapProvider {
   readonly id: MapProviderId;

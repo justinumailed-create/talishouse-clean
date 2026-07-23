@@ -66,7 +66,8 @@ describe("TalisMaps MapLibre style manager", () => {
 
   it("normalizes legacy provider and basemap ids", () => {
     expect(normalizeLegacyProviderId("leaflet-osm")).toBe("maplibre");
-    expect(normalizeLegacyProviderId("google-maps")).toBe("maplibre");
+    expect(normalizeLegacyProviderId("google-maps")).toBe("google-maps");
+    expect(normalizeLegacyProviderId("google")).toBe("google-maps");
     expect(normalizeLegacyBasemapView("hybrid")).toBe("satellite");
     expect(parseMapBasemapView("street")).toBe("street");
     expect(parseMapBasemapView("unknown")).toBe("satellite");

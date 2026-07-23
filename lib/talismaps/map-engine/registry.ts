@@ -13,6 +13,30 @@ import type {
 } from "./types";
 
 /**
+ * Lazy Google Maps adapter — keeps @googlemaps/js-api-loader out of Edge graphs.
+ */
+const GoogleMapsLazyProvider: MapProvider = {
+  id: "google-maps",
+  label: "Google Maps",
+  description:
+    "Google Maps JavaScript API with satellite hybrid imagery. Requires NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.",
+  supportedBasemapViews: ["satellite", "street", "terrain", "light", "dark"],
+  isAvailable() {
+    if (typeof window === "undefined") return false;
+    const key =
+      process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim() ||
+      process.env.NEXT_PUBLIC_TALISMAPS_GOOGLE_MAPS_API_KEY?.trim();
+    return Boolean(key);
+  },
+  async mount(container: HTMLElement, options: MapMountOptions) {
+    const { GoogleMapsProvider } = await import(
+      "./providers/google-maps-provider"
+    );
+    return new GoogleMapsProvider().mount(container, options);
+  },
+};
+
+/**
  * Lazy MapLibre adapter — keeps maplibre-gl out of Edge / middleware graphs.
  */
 const MapLibreLazyProvider: MapProvider = {
@@ -31,6 +55,7 @@ const MapLibreLazyProvider: MapProvider = {
 };
 
 const PROVIDERS: Record<MapProviderId, MapProvider> = {
+  "google-maps": GoogleMapsLazyProvider,
   maplibre: MapLibreLazyProvider,
   mapbox: MapboxProvider,
   esri: EsriProvider,
@@ -41,6 +66,13 @@ function resolveEnvProviderId(): MapProviderId {
   const normalized = normalizeLegacyProviderId(raw);
   if (normalized) return normalized;
   if (isMapProviderId(raw)) return raw;
+  // Prefer Google Maps when a key is configured; otherwise MapLibre.
+  if (
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_TALISMAPS_GOOGLE_MAPS_API_KEY?.trim()
+  ) {
+    return "google-maps";
+  }
   return "maplibre";
 }
 
@@ -74,6 +106,7 @@ export function getDefaultMapProvider(): MapProvider {
   if (preferred.isAvailable()) {
     return preferred;
   }
+  // Fall back to MapLibre if Google key is missing.
   return createMapProvider("maplibre");
 }
 

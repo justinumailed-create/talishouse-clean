@@ -29,7 +29,12 @@ export function isMapBasemapView(value: unknown): value is MapBasemapView {
 }
 
 export function isMapProviderId(value: unknown): value is MapProviderId {
-  return value === "maplibre" || value === "mapbox" || value === "esri";
+  return (
+    value === "google-maps" ||
+    value === "maplibre" ||
+    value === "mapbox" ||
+    value === "esri"
+  );
 }
 
 /**
@@ -37,9 +42,8 @@ export function isMapProviderId(value: unknown): value is MapProviderId {
  */
 export function normalizeLegacyProviderId(value: unknown): MapProviderId | null {
   if (isMapProviderId(value)) return value;
-  if (value === "leaflet-osm" || value === "google-maps") {
-    return "maplibre";
-  }
+  if (value === "google" || value === "gmaps") return "google-maps";
+  if (value === "leaflet-osm") return "maplibre";
   return null;
 }
 
@@ -72,7 +76,7 @@ export function parseMapStyleId(
 export function providerSupportsUnrestrictedSatellite(
   providerId: MapProviderId
 ): boolean {
-  // MapLibre + MapTiler satellite requires a MapTiler key for production.
+  // Google Maps / MapTiler satellite both require paid API credentials.
   void providerId;
   return false;
 }

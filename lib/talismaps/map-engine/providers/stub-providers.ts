@@ -20,7 +20,7 @@ function createStubProvider(config: {
     isAvailable: config.isAvailable,
     async mount(_container: HTMLElement, _options: MapMountOptions) {
       throw new Error(
-        `${config.label} provider is registered but not mounted yet. Configure credentials and enable the adapter to use it through MapProvider. Google Maps is not supported.`
+        `${config.label} provider is registered but not mounted yet. Configure credentials and enable the adapter to use it through MapProvider.`
       );
     },
   };
