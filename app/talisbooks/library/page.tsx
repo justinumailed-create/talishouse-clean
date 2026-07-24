@@ -27,9 +27,5 @@ export default async function TalisBooksLibraryPage({
   const accountType = params.accountType === "derivative" ? "derivative" : "root";
   const bookshelf = await getTalisBooksBookshelf({ accountType });
 
-  return (
-    <div className="mx-auto max-w-[72rem] px-2 sm:px-3">
-      <TalisBooksLibraryShell bookshelf={bookshelf} />
-    </div>
-  );
+  return <TalisBooksLibraryShell bookshelf={bookshelf} />;
 }

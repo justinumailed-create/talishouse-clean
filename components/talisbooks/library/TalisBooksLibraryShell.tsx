@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useDeferredValue, useMemo, useState, useTransition } from "react";
 import { ArrowDownUp, Search } from "lucide-react";
 import TalisBooksStandingBook from "@/components/talisbooks/library/TalisBooksStandingBook";
 import {
-  TALISBOOKS_ECOSYSTEM_SHELF_PROFILES,
   TALISBOOKS_LIBRARY_BOOK_PRICE_USD,
   TALISBOOKS_LIBRARY_GENERAL_COLUMNS,
   TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
@@ -104,9 +102,6 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
 
   const stocked = Math.min(bookshelf.books.length, TALISBOOKS_LIBRARY_SHELF_CAPACITY);
   const monthlyEstimate = Math.round(stocked * TALISBOOKS_LIBRARY_BOOK_PRICE_USD * 100) / 100;
-  const ttvProfile = TALISBOOKS_ECOSYSTEM_SHELF_PROFILES.find(
-    (entry) => entry.productCode === "TTV",
-  );
 
   const heroBook = featuredLayout === "hero-plus-4" ? featured[0] : null;
   const featuredRest =
@@ -151,39 +146,6 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
           </span>
         </div>
       </header>
-
-      {ttvProfile ? (
-        <section className="mb-6 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">
-                Ecosystem Shelf Framework
-              </p>
-              <h2 className="mt-1 text-base font-semibold text-neutral-900">
-                TalisTV™ Video Shelf is pre-wired
-              </h2>
-              <p className="mt-1 text-sm text-neutral-500">
-                Same split-shelf layout model, tuned for premium video monetization.
-              </p>
-              <Link
-                href="/talistv"
-                className="mt-2 inline-block text-xs font-medium text-neutral-700 underline underline-offset-4 hover:text-neutral-900"
-              >
-                Preview TalisTV shelf profile
-              </Link>
-            </div>
-            <div className="rounded-xl bg-neutral-900 px-3 py-2 text-right text-white">
-              <p className="text-[11px] uppercase tracking-[0.14em] text-neutral-300">
-                Upcoming TTV Capacity
-              </p>
-              <p className="text-sm font-semibold">
-                {ttvProfile.capacity} {ttvProfile.unitLabel} · $
-                {ttvProfile.monthlyCapacityUsd.toFixed(2)}/mo
-              </p>
-            </div>
-          </div>
-        </section>
-      ) : null}
 
       <div className="talisbooks-library__case">
         <div className="talisbooks-library__split">
