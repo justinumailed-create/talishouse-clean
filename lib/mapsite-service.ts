@@ -362,26 +362,21 @@ async function buildMapSiteView(
   };
 }
 
+import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
+
 /** Public claimed MapSite URL used after Claim a Market / from admin. */
 export function buildClaimedMapSiteHref(options: {
   mapsiteId: string;
   fastCode: string;
   requestId?: string | null;
   audience?: string | null;
+  accountType?: string | null;
 }): string {
-  const params = new URLSearchParams({
-    claimed: "1",
-    view: "pin",
-    mapsiteId: options.mapsiteId,
+  return buildClaimedMapSitePath({
     fastCode: options.fastCode,
+    accountType: options.accountType,
+    audience: options.audience,
   });
-  if (options.audience?.trim()) {
-    params.set("audience", options.audience.trim());
-  }
-  if (options.requestId?.trim()) {
-    params.set("requestId", options.requestId.trim());
-  }
-  return `/talispros/mapsite?${params.toString()}`;
 }
 
 export async function getPublicMapSiteByFastCode(

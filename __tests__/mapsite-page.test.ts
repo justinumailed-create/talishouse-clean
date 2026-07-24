@@ -274,7 +274,7 @@ describe("getMapSiteByFastCode", () => {
         requestId: result!.requestId,
         audience: result!.claimAudience,
       })
-    ).toContain("fastCode=lg01");
+    ).toContain("/talispros/mapsite/listings/lg01");
     expect(
       buildClaimedMapSiteHref({
         mapsiteId: result!.id,
@@ -282,20 +282,28 @@ describe("getMapSiteByFastCode", () => {
         requestId: result!.requestId,
         audience: result!.claimAudience,
       })
-    ).toContain("requestId=req-lg01");
+    ).not.toContain("requestId=");
   });
 });
 
 describe("buildClaimedMapSiteHref", () => {
-  it("matches the production claimed MapSite query shape", () => {
+  it("uses the short /talispros/mapsite/{accountType}/{fastCode} path", () => {
     const href = buildClaimedMapSiteHref({
       mapsiteId: "00000000-0000-4000-8000-000000000001",
       fastCode: "lg01",
       requestId: "da2ffada-d634-4759-8cd0-92428e1aac50",
       audience: "listings",
     });
-    expect(href).toBe(
-      "/talispros/mapsite?claimed=1&view=pin&mapsiteId=00000000-0000-4000-8000-000000000001&fastCode=lg01&audience=listings&requestId=da2ffada-d634-4759-8cd0-92428e1aac50"
-    );
+    expect(href).toBe("/talispros/mapsite/listings/lg01");
+  });
+
+  it("normalizes root-1 claims to /root/{fastCode} when no audience is set", () => {
+    expect(
+      buildClaimedMapSiteHref({
+        mapsiteId: "abc",
+        fastCode: "RC08",
+        accountType: "root-1",
+      })
+    ).toBe("/talispros/mapsite/root/rc08");
   });
 });

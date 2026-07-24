@@ -108,3 +108,80 @@ export const DEMO_MAPSITE_ID = "00000000-0000-4000-8000-000000000001";
 export const DEMO_MAPSITE_FAST_CODE = "DEMO";
 
 export const MAPSITE_APP_PATH = "/talispros/mapsite";
+
+/**
+ * Claimed MapSite path segment for account / market type.
+ * Accepts claim account types (root, derivative, adpro) and audiences (listings, …).
+ */
+export function mapsiteAccountTypeSegment(
+  value: string | null | undefined
+): string {
+  const normalized = value?.trim().toLowerCase() || "";
+  if (!normalized) return "listings";
+
+  if (normalized === "root-1" || normalized === "root_1" || normalized === "test") {
+    return "root";
+  }
+  if (normalized === "root") return "root";
+  if (normalized === "derivative") return "derivative";
+  if (normalized.startsWith("adpro")) return "adpro";
+
+  if (
+    normalized === "listings" ||
+    normalized === "homes" ||
+    normalized === "fsbos" ||
+    normalized === "brokers" ||
+    normalized === "adpro"
+  ) {
+    return normalized;
+  }
+
+  return "listings";
+}
+
+/** Short claimed MapSite URL: /talispros/mapsite/{accountType}/{fastCode} */
+export function buildClaimedMapSitePath(options: {
+  fastCode: string;
+  accountType?: string | null;
+  audience?: string | null;
+}): string {
+  const fastCode = options.fastCode.trim().toLowerCase();
+  const accountType = mapsiteAccountTypeSegment(
+    options.audience || options.accountType
+  );
+  return `${MAPSITE_APP_PATH}/${encodeURIComponent(accountType)}/${encodeURIComponent(fastCode)}`;
+}
+
+/**
+ * Claim a Market™ registration invite (pre-claim / share for registration).
+ * Recipient submits the form, then lands on the post-claim MapSite (PayPal).
+ */
+export function buildClaimRegistrationHref(options: {
+  mapsiteId: string;
+  audience?: string | null;
+  accountType?: string | null;
+}): string {
+  const audience = mapsiteAccountTypeSegment(
+    options.audience || options.accountType
+  );
+  const params = new URLSearchParams({
+    mapsiteId: options.mapsiteId,
+    audience,
+    returnTo: MAPSITE_APP_PATH,
+  });
+  return `/talispros/markets/claim-a-market?${params.toString()}`;
+}
+
+/** Absolute share URL for admin copy/paste (falls back to path-only on server). */
+export function toShareableAbsoluteUrl(
+  path: string,
+  origin?: string | null
+): string {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const base =
+    origin?.replace(/\/$/, "") ||
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
+    "";
+  return base ? `${base}${normalizedPath}` : normalizedPath;
+}

@@ -20,6 +20,7 @@ interface TalisprosMarketRegistrationFormProps {
     requestId?: string;
     fastCode?: string;
     mapsiteId?: string;
+    accountType?: string;
   }) => void;
 }
 
@@ -201,6 +202,7 @@ export default function TalisprosMarketRegistrationForm({
           requestId: result.requestId,
           fastCode: result.fastCode,
           mapsiteId: result.mapsiteId,
+          accountType,
         });
         return;
       }

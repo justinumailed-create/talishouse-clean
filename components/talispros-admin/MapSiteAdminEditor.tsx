@@ -15,6 +15,7 @@ import {
 } from "@/lib/mapsite-admin-service";
 import MapSiteGalleryEditor from "@/components/admin/MapSiteGalleryEditor";
 import TalisMapsPinPicker from "@/components/build-mapsite/TalisMapsPinPicker";
+import MapSiteAdminShareLinks from "@/components/talispros-admin/MapSiteAdminShareLinks";
 import {
   OFFERED_SUBSCRIPTION_TIER_LABELS,
   type OfferedSubscriptionTier,
@@ -26,6 +27,8 @@ interface MapSiteAdminEditorProps {
   adminWritesMessage?: string | null;
   backHref?: string;
   showVisitorSubscriptionPanel?: boolean;
+  /** Completed PayPal payment on file for this claim. */
+  paymentReceived?: boolean;
 }
 
 function Field({
@@ -80,6 +83,7 @@ export default function MapSiteAdminEditor({
   adminWritesMessage = null,
   backHref,
   showVisitorSubscriptionPanel = false,
+  paymentReceived = false,
 }: MapSiteAdminEditorProps) {
   const [form, setForm] = useState({
     propertyTitle: mapsite.propertyTitle || "",
@@ -246,6 +250,14 @@ export default function MapSiteAdminEditor({
           <input className={inputClass} value={form.status} readOnly />
         </Field>
       </section>
+
+      <MapSiteAdminShareLinks
+        mapsiteId={mapsite.id}
+        fastCode={mapsite.fastCode}
+        audience={mapsite.claimAudience}
+        accountType={mapsite.accountType}
+        paymentReceived={paymentReceived}
+      />
 
       {showVisitorSubscriptionPanel ? (
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">

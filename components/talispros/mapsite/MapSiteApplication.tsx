@@ -15,7 +15,6 @@ import {
 import type { MapEnginePin } from "@/lib/talismaps/map-engine";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import type { PlanType } from "@/lib/registration-plans";
-import { isMapSitePaid } from "@/lib/talispros/mapsite-audience";
 import {
   MAPSITE_MIN_CARD_HEIGHT_PX,
   MAPSITE_PIN_TIP_CLEARANCE_PX,
@@ -55,6 +54,8 @@ interface MapSiteApplicationProps {
   openPinOnLoad?: boolean;
   /** Claim-form plan for PayPal (e.g. ROOT_ACCOUNT_1). */
   paymentPlanType?: PlanType;
+  /** Completed PayPal payment on file — unlocks Express Interest. */
+  paymentReceived?: boolean;
 }
 
 export default function MapSiteApplication({
@@ -63,6 +64,7 @@ export default function MapSiteApplication({
   requestId = null,
   openPinOnLoad = false,
   paymentPlanType = "ROOT_ACCOUNT",
+  paymentReceived = false,
 }: MapSiteApplicationProps) {
   const [mapsite] = useState(initialMapSite);
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
@@ -145,6 +147,7 @@ export default function MapSiteApplication({
         requestId={requestId}
         openPinOnLoad={openPinOnLoad}
         paymentPlanType={paymentPlanType}
+        paymentReceived={paymentReceived}
         selectedPinId={selectedPinId}
         setSelectedPinId={setSelectedPinId}
         beginFocusGuard={beginFocusGuard}
@@ -159,6 +162,7 @@ function MapSiteChrome({
   requestId,
   openPinOnLoad,
   paymentPlanType,
+  paymentReceived,
   selectedPinId,
   setSelectedPinId,
   beginFocusGuard,
@@ -168,6 +172,7 @@ function MapSiteChrome({
   requestId: string | null;
   openPinOnLoad: boolean;
   paymentPlanType: PlanType;
+  paymentReceived: boolean;
   selectedPinId: string | null;
   setSelectedPinId: (id: string | null) => void;
   beginFocusGuard: () => void;
@@ -305,7 +310,8 @@ function MapSiteChrome({
   ]);
 
   const claimed = !isClaimable(mapsite.status);
-  const paid = isMapSitePaid(mapsite.status);
+  // PayPal stays until a completed payment note exists (not merely ACTIVE status).
+  const paid = paymentReceived;
 
   const claimHref = useMemo(() => {
     const params = new URLSearchParams({

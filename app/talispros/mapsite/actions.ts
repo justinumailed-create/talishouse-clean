@@ -15,7 +15,10 @@ import {
   mergeMapSiteWithSubmittedLocation,
   type MapSitePlatformRecord,
 } from "@/lib/talispros/mapsite-platform";
-import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
+import {
+  buildClaimedMapSitePath,
+  MAPSITE_APP_PATH,
+} from "@/lib/talispros/mapsite-state";
 
 export async function loadMapSiteApplicationState(options?: {
   mapsiteId?: string | null;
@@ -72,6 +75,7 @@ export async function loadMapSiteApplicationState(options?: {
 export async function resolveMapSitePaymentPlanType(options?: {
   requestId?: string | null;
   mapsiteId?: string | null;
+  fastCode?: string | null;
 }): Promise<PlanType> {
   if (!isSupabaseAdminConfigured()) return "ROOT_ACCOUNT";
 
@@ -79,6 +83,7 @@ export async function resolveMapSitePaymentPlanType(options?: {
     const supabase = getSupabaseAdmin();
     const requestId = options?.requestId?.trim() || null;
     const mapsiteId = options?.mapsiteId?.trim() || null;
+    const fastCode = options?.fastCode?.trim() || null;
 
     if (requestId) {
       const { data } = await supabase
@@ -89,6 +94,27 @@ export async function resolveMapSitePaymentPlanType(options?: {
       const accountType =
         data?.requested_account_type || data?.account_type || "";
       if (accountType) return planTypeForClaimAccountType(accountType);
+    }
+
+    if (fastCode) {
+      const { data: codeRow } = await supabase
+        .from("fast_codes")
+        .select("request_id, account_type")
+        .ilike("code", fastCode)
+        .maybeSingle();
+      if (codeRow?.account_type) {
+        return planTypeForClaimAccountType(codeRow.account_type);
+      }
+      if (codeRow?.request_id) {
+        const { data } = await supabase
+          .from("build_requests")
+          .select("requested_account_type, account_type")
+          .eq("id", codeRow.request_id)
+          .maybeSingle();
+        const accountType =
+          data?.requested_account_type || data?.account_type || "";
+        if (accountType) return planTypeForClaimAccountType(accountType);
+      }
     }
 
     if (mapsiteId) {
@@ -108,6 +134,45 @@ export async function resolveMapSitePaymentPlanType(options?: {
   }
 
   return "ROOT_ACCOUNT";
+}
+
+/** Resolve build request id for a claimed FAST Code. */
+export async function resolveMapSiteRequestId(options?: {
+  requestId?: string | null;
+  fastCode?: string | null;
+  mapsiteId?: string | null;
+}): Promise<string | null> {
+  if (options?.requestId?.trim()) return options.requestId.trim();
+  if (!isSupabaseAdminConfigured()) return null;
+
+  try {
+    const supabase = getSupabaseAdmin();
+    const fastCode = options?.fastCode?.trim() || null;
+    if (fastCode) {
+      const { data } = await supabase
+        .from("fast_codes")
+        .select("request_id")
+        .ilike("code", fastCode)
+        .maybeSingle();
+      if (data?.request_id) return data.request_id;
+    }
+
+    const mapsiteId = options?.mapsiteId?.trim() || null;
+    if (mapsiteId) {
+      const { data } = await supabase
+        .from("build_requests")
+        .select("id")
+        .eq("linked_mapsite_id", mapsiteId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data?.id) return data.id;
+    }
+  } catch (error) {
+    console.warn("[mapsite] resolveMapSiteRequestId failed:", error);
+  }
+
+  return null;
 }
 
 export async function refreshMapSiteApplicationState(
@@ -269,19 +334,18 @@ export async function processMapSiteRootPaypalPayment(input: {
       })
       .eq("id", resolvedRequestId);
 
-    const params = new URLSearchParams({
-      claimed: "1",
-      view: "pin",
-      mapsiteId: result.mapsiteId || mapsiteId,
-      audience: input.audience,
-    });
-    if (result.fastCode) params.set("fastCode", result.fastCode);
-    params.set("requestId", resolvedRequestId);
+    const fastCode = result.fastCode || null;
+    const redirectUrl = fastCode
+      ? buildClaimedMapSitePath({
+          fastCode,
+          audience: input.audience,
+        })
+      : `${MAPSITE_APP_PATH}?claimed=1&view=pin&mapsiteId=${encodeURIComponent(result.mapsiteId || mapsiteId)}&audience=${encodeURIComponent(input.audience)}`;
 
     return {
       success: true,
       fastCode: result.fastCode,
-      redirectUrl: `${MAPSITE_APP_PATH}?${params.toString()}`,
+      redirectUrl,
     };
   } catch (error) {
     const message =

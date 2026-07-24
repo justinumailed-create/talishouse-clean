@@ -4,6 +4,7 @@ import { requireTalisprosAdminPage } from "@/lib/talispros-admin-auth";
 import { isMarketingManagerAuthenticated } from "@/lib/marketing-manager-auth";
 import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
+import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,12 @@ export default async function TalisprosAdminMapSitePage({
   }
 
   const writesState = getMapSiteAdminWritesState();
+  const paymentReceived = await hasCompletedMapSitePaypalPayment({
+    email: mapsite.email,
+    mapsiteId: mapsite.id,
+    fastCode: mapsite.fastCode,
+    requestId: mapsite.requestId,
+  });
 
   return (
     <MapSiteAdminEditor
@@ -35,6 +42,7 @@ export default async function TalisprosAdminMapSitePage({
       adminWritesMessage={writesState.message}
       backHref="/talispros/admin/pmc"
       showVisitorSubscriptionPanel
+      paymentReceived={paymentReceived}
     />
   );
 }

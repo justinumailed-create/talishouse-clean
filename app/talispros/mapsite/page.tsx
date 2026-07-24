@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { createMetadata } from "@/lib/seo";
 import { parseRegistrationMarket } from "@/lib/registration-market";
 import { getTalisprosAdminSession } from "@/lib/talispros-admin-auth";
 import { isMarketingManagerAuthenticated } from "@/lib/marketing-manager-auth";
 import { listPmcRegionalPins } from "@/lib/talispros/pmc-pins-service";
-import { loadMapSiteApplicationState, resolveMapSitePaymentPlanType } from "./actions";
+import {
+  buildClaimedMapSitePath,
+  mapsiteAccountTypeSegment,
+} from "@/lib/talispros/mapsite-state";
+import {
+  loadMapSiteApplicationState,
+  resolveMapSitePaymentPlanType,
+} from "./actions";
+import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 import MapSitePmcApplication from "@/components/talispros/mapsite/MapSitePmcApplication";
 
@@ -45,6 +54,16 @@ export default async function TalisprosMapSitePage({
   const fastCode = firstParam(params.fastCode)?.trim() || null;
   const requestId = firstParam(params.requestId)?.trim() || null;
 
+  // Prefer the short claimed URL: /talispros/mapsite/{accountType}/{fastCode}
+  if (fastCode && (claimed || view === "pin" || requestId || mapsiteId)) {
+    redirect(
+      buildClaimedMapSitePath({
+        fastCode,
+        audience: mapsiteAccountTypeSegment(audience),
+      })
+    );
+  }
+
   // PMC multi-pin is brokers browse only. Any claim / FAST-code / pin view
   // must use the single-pin MapSite (user pin + MLS/URL/TEB/TTV card).
   const showSinglePinMap =
@@ -79,7 +98,14 @@ export default async function TalisprosMapSitePage({
 
   const paymentPlanType = await resolveMapSitePaymentPlanType({
     requestId,
+    fastCode,
     mapsiteId: mapsite.id,
+  });
+
+  const paymentReceived = await hasCompletedMapSitePaypalPayment({
+    mapsiteId: mapsite.id,
+    fastCode,
+    requestId,
   });
 
   return (
@@ -88,6 +114,7 @@ export default async function TalisprosMapSitePage({
       audience={audience}
       requestId={requestId}
       paymentPlanType={paymentPlanType}
+      paymentReceived={paymentReceived}
       openPinOnLoad
     />
   );
