@@ -18,50 +18,74 @@ import MapSitePhotoGallery from "./MapSitePhotoGallery";
 
 type ResourceKey = "mls" | "url" | "teb" | "ttv";
 
-const TALISPROS_START = "/talispros/start";
-
 const RESOURCES: {
   key: ResourceKey;
   label: string;
-  resolveHref: (site: MapSitePlatformRecord) => string;
+  resolveHref: (site: MapSitePlatformRecord) => string | null;
 }[] = [
   {
     key: "mls",
     label: "MLS®",
-    resolveHref: (site) => site.mls_url?.trim() || TALISPROS_START,
+    resolveHref: (site) => site.mls_url?.trim() || null,
   },
   {
     key: "url",
     label: "URL",
-    resolveHref: (site) => site.broker_url?.trim() || TALISPROS_START,
+    resolveHref: (site) => site.broker_url?.trim() || null,
   },
   {
     key: "teb",
     label: "TEB™",
-    resolveHref: (site) =>
-      site.teb_url?.trim() || ROUTES.TALISBOOKS_LIBRARY,
+    resolveHref: (site) => site.teb_url?.trim() || ROUTES.TALISBOOKS_LIBRARY,
   },
   {
     key: "ttv",
     label: "TTV™",
-    resolveHref: (site) => site.ttv_url?.trim() || TALISPROS_START,
+    resolveHref: (site) => site.ttv_url?.trim() || ROUTES.TALISTV,
   },
 ];
 
-function ResourceButton({ href, label }: { href: string; label: string }) {
-  const className =
-    "rounded-lg border border-neutral-200/80 bg-white/75 px-2.5 py-2 text-center text-sm font-medium text-neutral-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)] backdrop-blur-sm transition hover:border-neutral-300 hover:bg-white/85";
+function ResourceButton({
+  href,
+  label,
+}: {
+  href: string | null;
+  label: string;
+}) {
+  const disabled = !href;
+  const className = disabled
+    ? "mapsite-paypal-btn mapsite-paypal-btn--disabled"
+    : "mapsite-paypal-btn";
+
+  if (disabled) {
+    return (
+      <span
+        className={className}
+        aria-label={`${label} unavailable`}
+        aria-disabled="true"
+        title={`${label} not configured yet`}
+      >
+        {label}
+      </span>
+    );
+  }
 
   if (href.startsWith("/")) {
     return (
-      <Link href={href} className={className}>
+      <Link href={href} className={className} aria-label={label}>
         {label}
       </Link>
     );
   }
 
   return (
-    <a href={href} target="_blank" rel="noreferrer" className={className}>
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className={className}
+      aria-label={label}
+    >
       {label}
     </a>
   );
@@ -72,20 +96,26 @@ interface MapSitePropertyPopupProps {
   claimHref: string;
   /** Top of the FAST Code card — shared with pin popup. */
   alignTop?: number;
+  /** Horizontal center of the popup in root coordinates (px). */
+  centerX?: number | null;
   /** Matched height with the FAST Code card so the tip stays above the pin. */
   cardHeight?: number | null;
+  /** Narrow layout: slightly tighter hero so the card fits above the shifted pin. */
+  compact?: boolean;
   onClose: () => void;
 }
 
 /**
- * Floating listing card. Top + height match the left FAST Code card.
- * Tip hangs below the shared bottom edge, just above the map-center pin.
+ * Floating listing card. Top + height match the FAST Code card on wide screens;
+ * on compact screens it sits below the left stack with the tip above the pin.
  */
 export default function MapSitePropertyPopup({
   mapsite,
   claimHref,
   alignTop = MAPSITE_LISTING_TILE_TOP_FALLBACK_PX,
+  centerX = null,
   cardHeight = null,
+  compact = false,
   onClose,
 }: MapSitePropertyPopupProps) {
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -100,14 +130,21 @@ export default function MapSitePropertyPopup({
       <div
         role="dialog"
         aria-label={mapsite.property_title}
-        className={`pointer-events-none absolute left-1/2 z-30 ${MAPSITE_LISTING_CARD_WIDTH_CLASS} -translate-x-1/2`}
-        style={{ top: alignTop }}
+        className={`pointer-events-none absolute z-30 ${MAPSITE_LISTING_CARD_WIDTH_CLASS} -translate-x-1/2`}
+        style={{
+          top: alignTop,
+          left: centerX == null ? "50%" : centerX,
+        }}
       >
         <div
           className="pointer-events-auto flex flex-col overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm"
           style={cardHeight ? { height: cardHeight } : undefined}
         >
-          <div className="relative h-36 w-full shrink-0 bg-neutral-200/80">
+          <div
+            className={`relative w-full shrink-0 bg-neutral-200/80 ${
+              showActions ? "h-[120px]" : compact ? "h-28" : "h-36"
+            }`}
+          >
             <button
               type="button"
               onClick={() => setGalleryOpen(true)}
@@ -156,11 +193,11 @@ export default function MapSitePropertyPopup({
             </button>
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-gradient-to-b from-white/65 to-white/75 px-4 pb-3 pt-2.5">
-            <h2 className="shrink-0 text-[16px] font-semibold leading-snug tracking-tight text-black">
+          <div className="flex min-h-0 flex-1 flex-col bg-gradient-to-b from-white/65 to-white/75 px-4 pb-3 pt-2.5">
+            <h2 className="shrink-0 text-[15px] font-semibold leading-snug tracking-tight text-black">
               {mapsite.property_title}
             </h2>
-            <p className="mt-1.5 line-clamp-3 text-[12px] leading-[1.4] text-black">
+            <p className="mt-1 min-h-0 shrink line-clamp-2 text-[12px] leading-[1.35] text-black">
               {mapsite.property_description ||
                 "Welcome to Talispros™. Choose your market and begin onboarding."}
             </p>
@@ -175,7 +212,7 @@ export default function MapSitePropertyPopup({
             ) : null}
 
             {showActions ? (
-              <div className="mt-auto grid shrink-0 grid-cols-2 gap-1.5 pt-2.5">
+              <div className="mt-auto grid shrink-0 grid-cols-4 gap-1.5 pt-2.5">
                 {RESOURCES.map((resource) => (
                   <ResourceButton
                     key={resource.key}

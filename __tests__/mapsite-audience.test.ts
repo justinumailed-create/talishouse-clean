@@ -4,7 +4,9 @@ import {
   audiencePlanSummary,
   buildMapSitePaymentHref,
   isMapSitePaid,
+  mapsiteClaimPlanSummary,
   planTypeForAudience,
+  planTypeForClaimAccountType,
   rootAccountPlanSummary,
 } from "../lib/talispros/mapsite-audience";
 
@@ -49,5 +51,14 @@ describe("MapSite audience payment helpers", () => {
     expect(audiencePlanSummary("listings").planLabel).toContain("Derivative");
     expect(rootAccountPlanSummary().planLabel).toBe("Root Account™");
     expect(rootAccountPlanSummary().priceLabel).toContain("998.50");
+  });
+
+  it("maps claim root-1 to the $1 + GST plan", () => {
+    expect(planTypeForClaimAccountType("root-1")).toBe("ROOT_ACCOUNT_1");
+    const summary = mapsiteClaimPlanSummary("ROOT_ACCOUNT_1");
+    expect(summary.price).toBe(1);
+    expect(summary.total).toBe(1.14);
+    expect(summary.totalLabel).toContain("GST");
+    expect(summary.planLabel).toContain("$1");
   });
 });

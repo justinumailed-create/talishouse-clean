@@ -556,6 +556,171 @@ body.mapsite-gallery-open [data-paypal-button] {
   pointer-events: none !important;
 }
 
+/*
+ * MapSite resource actions — PayPal blue / gold, squared, compact row.
+ */
+.mapsite-paypal-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: 30px;
+  padding: 0 4px;
+  border-radius: 4px;
+  border: 1px solid #003087;
+  background: #0070ba;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0, 48, 135, 0.28);
+  transition:
+    background-color 120ms ease,
+    filter 120ms ease;
+}
+
+.mapsite-paypal-btn:nth-child(even) {
+  border-color: #d4a017;
+  background: #ffc439;
+  color: #003087;
+  box-shadow: 0 1px 2px rgba(0, 48, 135, 0.18);
+}
+
+.mapsite-paypal-btn:hover {
+  filter: brightness(1.06);
+}
+
+.mapsite-paypal-btn:active {
+  filter: brightness(0.96);
+}
+
+.mapsite-paypal-btn--disabled,
+.mapsite-paypal-btn.mapsite-paypal-btn--disabled:nth-child(even) {
+  border-color: #c4c4c4;
+  background: #d4d4d4;
+  color: #8a8a8a;
+  box-shadow: none;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: none;
+}
+
+.mapsite-paypal-btn--disabled:hover,
+.mapsite-paypal-btn--disabled:active {
+  filter: none;
+}
+
+/* Legacy metal buttons kept for any remaining call sites */
+.mapsite-metal-btn {
+  --metal-rail: #5c5e63;
+  --metal-rail-edge: #3f4146;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 38px;
+  padding: 0 10px 0 18px;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: 11px;
+  border: 1px solid rgba(40, 42, 46, 0.55);
+  text-decoration: none;
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.22),
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.18) inset;
+  background:
+    radial-gradient(
+      120% 90% at 58% 42%,
+      #f4f5f7 0%,
+      #d5d7db 28%,
+      #aeb2b8 52%,
+      #c8ccd1 72%,
+      #9a9ea6 100%
+    );
+  transition:
+    filter 140ms ease,
+    box-shadow 140ms ease,
+    transform 100ms ease;
+}
+
+.mapsite-metal-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+  background:
+    repeating-conic-gradient(
+      from 0deg at 52% 48%,
+      rgba(255, 255, 255, 0.22) 0deg 1.2deg,
+      rgba(0, 0, 0, 0.08) 1.2deg 2.4deg
+    );
+  mix-blend-mode: soft-light;
+}
+
+.mapsite-metal-btn::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  left: 1px;
+  z-index: 1;
+  width: 9px;
+  border-radius: 9px 3px 3px 9px;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    #7a7d84 0%,
+    var(--metal-rail) 35%,
+    var(--metal-rail-edge) 70%,
+    #6a6d74 100%
+  );
+  box-shadow:
+    1px 0 0 rgba(255, 255, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+    inset 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.mapsite-metal-btn__label {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  color: #4a4d54;
+  text-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7),
+    0 -1px 0 rgba(0, 0, 0, 0.35),
+    0 0 1px rgba(0, 0, 0, 0.15);
+}
+
+.mapsite-metal-btn:hover {
+  filter: brightness(1.04);
+  box-shadow:
+    0 3px 8px rgba(0, 0, 0, 0.26),
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.18) inset;
+}
+
+.mapsite-metal-btn:active {
+  transform: translateY(1px);
+  filter: brightness(0.97);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 1px 0 rgba(255, 255, 255, 0.4) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.22) inset;
+}
+
 /* TalisMaps™ Leaflet pin icons — apple-quality soft markers */
 .talismaps-pin-icon {
   background: transparent !important;
@@ -592,7 +757,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talismaps-pin-logo {
   position: absolute;
-  inset: 28%;
+  inset: 18%;
   display: block;
   border-radius: 9999px;
   object-fit: cover;

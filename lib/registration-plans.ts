@@ -3,6 +3,7 @@ export const REGISTRATION_TAX_RATE = 0.14;
 export type PlanType =
   | "TEST_ACCOUNT"
   | "ROOT_ACCOUNT"
+  | "ROOT_ACCOUNT_1"
   | "DERIVATIVE_ACCOUNT"
   | "ADPRO_SINGLE"
   | "ADPRO_10"
@@ -15,6 +16,8 @@ export interface PlanDetail {
   monthly?: number;
   bullets?: string[];
   description?: string;
+  /** Prefer "GST" vs generic "tax" in checkout copy. */
+  taxLabel?: "tax" | "GST";
 }
 
 export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
@@ -27,6 +30,20 @@ export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
       "Demo-only Root-equivalent onboarding",
       "CAD $10 one-time registration",
       "For demonstrations and QA",
+    ],
+  },
+  ROOT_ACCOUNT_1: {
+    label: "Root Account™ ($1)",
+    price: 1,
+    monthly: 0,
+    taxLabel: "GST",
+    description:
+      "CAD $1 Root Account™ activation — unlock Express Interest and admin MapSite™ management.",
+    bullets: [
+      "CAD $1.00 + GST one-time activation",
+      "Enables Express an Interest form",
+      "Activates MapSite™ for admin management",
+      "Root-equivalent FAST Code generation",
     ],
   },
   ROOT_ACCOUNT: {
@@ -84,5 +101,65 @@ export const ADPRO_PLANS: PlanType[] = [
 ];
 
 export function registrationTotalFor(price: number): number {
-  return price + price * REGISTRATION_TAX_RATE;
+  return Math.round((price + price * REGISTRATION_TAX_RATE) * 100) / 100;
+}
+
+export function registrationTaxAmountFor(price: number): number {
+  return Math.round(price * REGISTRATION_TAX_RATE * 100) / 100;
+}
+
+export function isRootPlanType(planType: string): boolean {
+  return (
+    planType === "ROOT_ACCOUNT" ||
+    planType === "ROOT_ACCOUNT_1" ||
+    planType === "TEST_ACCOUNT"
+  );
+}
+
+export function planSummaryFor(planType: PlanType): {
+  planLabel: string;
+  priceLabel: string;
+  taxLabel: string;
+  totalLabel: string;
+  price: number;
+  tax: number;
+  total: number;
+} {
+  const plan = PLAN_DETAILS[planType];
+  const tax = registrationTaxAmountFor(plan.price);
+  const total = registrationTotalFor(plan.price);
+  const taxWord = plan.taxLabel === "GST" ? "GST" : "tax";
+  return {
+    planLabel: plan.label,
+    priceLabel: `CAD $${plan.price.toFixed(2)}`,
+    taxLabel: `CAD $${tax.toFixed(2)} ${taxWord}`,
+    totalLabel: `CAD $${total.toFixed(2)} (incl. ${taxWord})`,
+    price: plan.price,
+    tax,
+    total,
+  };
+}
+
+/** Claim-form accountType → PayPal plan. */
+export function planTypeForClaimAccountType(accountType: string): PlanType {
+  const normalized = accountType.trim().toLowerCase();
+  if (normalized === "root-1" || normalized === "root_1") {
+    return "ROOT_ACCOUNT_1";
+  }
+  if (normalized === "root" || normalized === "test") {
+    return normalized === "test" ? "TEST_ACCOUNT" : "ROOT_ACCOUNT";
+  }
+  if (normalized.startsWith("adpro")) return "ADPRO_SINGLE";
+  if (normalized === "derivative") return "DERIVATIVE_ACCOUNT";
+  return "ROOT_ACCOUNT";
+}
+
+export function isRootLikeClaimAccountType(accountType: string): boolean {
+  const normalized = accountType.trim().toLowerCase();
+  return (
+    normalized === "root" ||
+    normalized === "root-1" ||
+    normalized === "root_1" ||
+    normalized === "test"
+  );
 }

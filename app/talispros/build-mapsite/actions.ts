@@ -9,6 +9,7 @@ import { sendBuildRequestReceived } from "@/lib/email";
 import { generateFastCode } from "@/services/fast-code.service";
 import { markMapSiteClaimedByBuildRequest } from "@/lib/talispros/mapsite-platform";
 import { DEMO_MAPSITE_ID } from "@/lib/talispros/mapsite-state";
+import { clampMapZoom, HOME_PIN_DEFAULT_MAP_ZOOM } from "@/lib/home-pin-coordinates";
 
 export interface ActionResult {
   success: boolean;
@@ -31,6 +32,7 @@ export interface BuildFields {
   streetAddress: string;
   latitude: string;
   longitude: string;
+  mapZoom: number;
   manualPlacement: boolean;
   reverseGeocodedAddress: string;
   pinWriteup: string;
@@ -178,6 +180,7 @@ export async function submitBuildRequest(
     streetAddress: (formData.get("streetAddress") as string) || "",
     latitude: (formData.get("latitude") as string) || "",
     longitude: (formData.get("longitude") as string) || "",
+    mapZoom: Number.parseInt(String(formData.get("mapZoom") || ""), 10) || 0,
     manualPlacement: formData.get("manualPlacement") === "true",
     reverseGeocodedAddress:
       (formData.get("reverseGeocodedAddress") as string) || "",
@@ -264,6 +267,10 @@ export async function submitBuildRequest(
     const parsedLongitude = Number.parseFloat(fields.longitude);
     const hasCoordinates =
       Number.isFinite(parsedLatitude) && Number.isFinite(parsedLongitude);
+    const mapZoom =
+      fields.mapZoom > 0
+        ? clampMapZoom(fields.mapZoom)
+        : HOME_PIN_DEFAULT_MAP_ZOOM;
 
     const buildRequest = {
       id: requestId,
@@ -472,6 +479,7 @@ export async function submitBuildRequest(
             type: "mapsite",
             request_id: requestId,
             account_type: fields.accountType,
+            ...(mapsiteId ? { mapsite_id: mapsiteId } : {}),
           },
           { onConflict: "code" }
         );
@@ -505,6 +513,7 @@ export async function submitBuildRequest(
         fastCode: issuedFastCode ?? null,
         latitude: hasCoordinates ? parsedLatitude : null,
         longitude: hasCoordinates ? parsedLongitude : null,
+        mapZoom,
         propertyTitle: fields.futurePinLabel.trim() || null,
         propertyAddress:
           fields.streetAddress.trim() ||
@@ -521,6 +530,7 @@ export async function submitBuildRequest(
         fastCode: issuedFastCode ?? null,
         latitude: hasCoordinates ? parsedLatitude : null,
         longitude: hasCoordinates ? parsedLongitude : null,
+        mapZoom,
         propertyTitle: fields.futurePinLabel.trim() || null,
         propertyAddress:
           fields.streetAddress.trim() ||

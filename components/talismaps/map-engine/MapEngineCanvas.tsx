@@ -35,8 +35,11 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     onPinDrag,
     onPinDragStart,
     onMapClick,
+    onMapDragStart,
+    onMapZoom,
     registerMapInstance,
     lockCenter,
+    lockCenterOffset,
   } = useMapEngine();
 
   const setViewportRef = useRef(setViewport);
@@ -44,6 +47,8 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
   const onPinDragRef = useRef(onPinDrag);
   const onPinDragStartRef = useRef(onPinDragStart);
   const onMapClickRef = useRef(onMapClick);
+  const onMapDragStartRef = useRef(onMapDragStart);
+  const onMapZoomRef = useRef(onMapZoom);
   const registerMapInstanceRef = useRef(registerMapInstance);
   const setReadyRef = useRef(setReady);
   const viewportRef = useRef(viewport);
@@ -52,6 +57,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
   const draggablePinIdsRef = useRef(draggablePinIds);
   const basemapViewRef = useRef(basemapView);
   const lockCenterRef = useRef(lockCenter);
+  const lockCenterOffsetRef = useRef(lockCenterOffset);
 
   useEffect(() => {
     setViewportRef.current = setViewport;
@@ -59,6 +65,8 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     onPinDragRef.current = onPinDrag;
     onPinDragStartRef.current = onPinDragStart;
     onMapClickRef.current = onMapClick;
+    onMapDragStartRef.current = onMapDragStart;
+    onMapZoomRef.current = onMapZoom;
     registerMapInstanceRef.current = registerMapInstance;
     setReadyRef.current = setReady;
     viewportRef.current = viewport;
@@ -67,6 +75,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     draggablePinIdsRef.current = draggablePinIds;
     basemapViewRef.current = basemapView;
     lockCenterRef.current = lockCenter;
+    lockCenterOffsetRef.current = lockCenterOffset;
   });
 
   useEffect(() => {
@@ -113,6 +122,14 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
       }
     };
 
+    const handleMapDragStart: MapEngineEventHandler = () => {
+      onMapDragStartRef.current?.();
+    };
+
+    const handleMapZoom: MapEngineEventHandler = () => {
+      onMapZoomRef.current?.();
+    };
+
     void provider
       .mount(container, {
         center: viewportRef.current.center,
@@ -122,6 +139,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
         draggablePinIds: draggablePinIdsRef.current,
         basemapView: basemapViewRef.current,
         lockCenter: lockCenterRef.current,
+        lockCenterOffset: lockCenterOffsetRef.current,
         signal: abortController.signal,
       })
       .then((instance) => {
@@ -140,6 +158,8 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
         instance.on("mapclick", handleMapClick);
         instance.on("pindrag", handlePinDrag);
         instance.on("pindragstart", handlePinDragStart);
+        instance.on("mapdragstart", handleMapDragStart);
+        instance.on("mapzoom", handleMapZoom);
 
         if (!readyRef.current) {
           readyRef.current = true;
@@ -185,6 +205,21 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     instance.setPins(pins);
   }, [pins, draggablePinIds]);
 
+  // Apply programmatic viewport changes (e.g. claim-form address geocode → pan map).
+  // Skip when center is locked (MapSite pin under tip) — that path owns the camera.
+  // Skip when the instance already matches to avoid fighting user pan/zoom echoes.
+  useEffect(() => {
+    if (lockCenter) return;
+    const instance = instanceRef.current;
+    if (!instance) return;
+    const current = instance.getViewport();
+    const sameCenter =
+      Math.abs(current.center.latitude - viewport.center.latitude) < 1e-7 &&
+      Math.abs(current.center.longitude - viewport.center.longitude) < 1e-7;
+    if (sameCenter && current.zoom === viewport.zoom) return;
+    instance.setViewport(viewport);
+  }, [viewport, lockCenter]);
+
   useEffect(() => {
     instanceRef.current?.setSelectedPinId(selectedPinId);
   }, [selectedPinId]);
@@ -192,6 +227,10 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
   useEffect(() => {
     instanceRef.current?.setBasemapView?.(basemapView);
   }, [basemapView]);
+
+  useEffect(() => {
+    instanceRef.current?.setLockCenterOffset?.(lockCenterOffset);
+  }, [lockCenterOffset]);
 
   return (
     <div

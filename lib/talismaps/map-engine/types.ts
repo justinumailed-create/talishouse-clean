@@ -55,6 +55,12 @@ export interface MapMountOptions {
    */
   lockCenter?: boolean;
   /**
+   * When `lockCenter` is set, place the locked lat/lng at
+   * `(viewportCenterX + x, viewportCenterY + y)` instead of dead center.
+   * Used so the pin tracks a shifted popup tip on responsive layouts.
+   */
+  lockCenterOffset?: { x: number; y: number };
+  /**
    * Abort in-flight mounts (React Strict Mode remounts).
    * When aborted, the provider must not clear a container owned by a newer mount.
    */
@@ -66,7 +72,9 @@ export type MapEngineEvent =
   | "pinclick"
   | "mapclick"
   | "pindrag"
-  | "pindragstart";
+  | "pindragstart"
+  | "mapdragstart"
+  | "mapzoom";
 
 export interface MapViewportChangeEvent {
   viewport: MapViewport;
@@ -108,6 +116,8 @@ export interface MapInstance {
   setDraggablePinIds(pinIds: string[]): void;
   setBasemapView?(view: MapBasemapView): void;
   getBasemapView?(): MapBasemapView;
+  /** Update locked-pin screen offset without remounting (MapSite responsive layout). */
+  setLockCenterOffset?(offset: { x: number; y: number }): void;
   fitToPins(padding?: number): void;
   fitToCoordinates(coordinates: MapCoordinates[], padding?: number): void;
   on(event: MapEngineEvent, handler: MapEngineEventHandler): void;

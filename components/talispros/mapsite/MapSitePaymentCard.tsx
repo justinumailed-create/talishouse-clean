@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import type { RegistrationMarket } from "@/lib/registration-market";
-import { PLAN_DETAILS, registrationTotalFor } from "@/lib/registration-plans";
-import { rootAccountPlanSummary } from "@/lib/talispros/mapsite-audience";
+import type { PlanType } from "@/lib/registration-plans";
+import { mapsiteClaimPlanSummary } from "@/lib/talispros/mapsite-audience";
 import { MAPSITE_LISTING_CARD_WIDTH_CLASS } from "@/lib/talispros/mapsite-listing-media";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 import { processMapSiteRootPaypalPayment } from "@/app/talispros/mapsite/actions";
@@ -15,6 +15,8 @@ interface MapSitePaymentCardProps {
   mapsiteId: string;
   fastCode?: string | null;
   requestId?: string | null;
+  /** Plan chosen on Claim a Market (defaults to full Root). */
+  planType?: PlanType;
 }
 
 export default function MapSitePaymentCard({
@@ -22,11 +24,10 @@ export default function MapSitePaymentCard({
   mapsiteId,
   fastCode,
   requestId,
+  planType = "ROOT_ACCOUNT",
 }: MapSitePaymentCardProps) {
   const router = useRouter();
-  const summary = rootAccountPlanSummary();
-  const rootPrice = PLAN_DETAILS.ROOT_ACCOUNT.price;
-  const total = registrationTotalFor(rootPrice);
+  const summary = mapsiteClaimPlanSummary(planType);
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID?.trim() || "";
 
   const [paypalKey, setPaypalKey] = useState(0);
@@ -44,6 +45,7 @@ export default function MapSitePaymentCard({
       mapsiteId,
       requestId,
       audience,
+      planType: summary.planType,
       paypalOrderId: details.id,
       paypalCaptureId: details.captureId || details.id,
     });
@@ -66,9 +68,12 @@ export default function MapSitePaymentCard({
         Complete registration
       </p>
       <h3 className="mt-1 flex items-baseline justify-between gap-3 text-base font-semibold text-black">
-        <span>Root Account™</span>
+        <span>{summary.planLabel}</span>
         <span className="shrink-0 text-sm font-semibold">{summary.priceLabel}</span>
       </h3>
+      <p className="mt-1 text-xs text-neutral-600">
+        {summary.priceLabel} + {summary.taxLabel} = {summary.totalLabel}
+      </p>
 
       {!clientId ? (
         <p className="mt-3 text-sm text-red-600">
@@ -98,10 +103,10 @@ export default function MapSitePaymentCard({
                   intent: "CAPTURE",
                   purchase_units: [
                     {
-                      description: `Talispros™ Root Account™ — MapSite ${fastCode || mapsiteId}`,
+                      description: `Talispros™ ${summary.planLabel} — MapSite ${fastCode || mapsiteId}`,
                       amount: {
                         currency_code: "CAD",
-                        value: total.toFixed(2),
+                        value: summary.total.toFixed(2),
                       },
                     },
                   ],
@@ -138,8 +143,9 @@ export default function MapSitePaymentCard({
       ) : null}
 
       <p className="mt-2 text-[11px] leading-snug text-neutral-500">
-        PayPal charges {summary.totalLabel}. After payment you&apos;ll return to{" "}
-        {MAPSITE_APP_PATH} with Express Interest unlocked.
+        PayPal charges {summary.totalLabel}. After payment, Express an Interest
+        unlocks and this MapSite™ becomes active for admin management on{" "}
+        {MAPSITE_APP_PATH}.
       </p>
     </div>
   );

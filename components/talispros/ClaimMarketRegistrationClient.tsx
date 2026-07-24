@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import TalisprosMarketRegistrationForm from "@/components/talispros/TalisprosMarketRegistrationForm";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
@@ -14,10 +13,7 @@ interface ClaimMarketRegistrationClientProps {
 export default function ClaimMarketRegistrationClient({
   market,
   mapsiteId,
-  returnTo,
 }: ClaimMarketRegistrationClientProps) {
-  const router = useRouter();
-
   return (
     <TalisprosMarketRegistrationForm
       market={market}
@@ -26,7 +22,8 @@ export default function ClaimMarketRegistrationClient({
       onSuccess={(result) => {
         const params = new URLSearchParams({
           claimed: "1",
-          mapsiteId,
+          view: "pin",
+          mapsiteId: result.mapsiteId || mapsiteId,
           audience: market,
         });
         if (result.fastCode) {
@@ -35,11 +32,8 @@ export default function ClaimMarketRegistrationClient({
         if (result.requestId) {
           params.set("requestId", result.requestId);
         }
-        const base =
-          returnTo.startsWith(MAPSITE_APP_PATH) || returnTo === MAPSITE_APP_PATH
-            ? MAPSITE_APP_PATH
-            : MAPSITE_APP_PATH;
-        router.push(`${base}?${params.toString()}`);
+        // Full navigation so brokers PMC browse state cannot win over soft nav.
+        window.location.assign(`${MAPSITE_APP_PATH}?${params.toString()}`);
       }}
     />
   );

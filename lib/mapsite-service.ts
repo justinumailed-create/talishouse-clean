@@ -88,6 +88,14 @@ export interface MapSiteView {
   createdAt: string;
   updatedAt: string;
   pins: MapSitePinView[];
+  mlsUrl: string | null;
+  brokerUrl: string | null;
+  tebUrl: string | null;
+  ttvUrl: string | null;
+  /** Build request linked to this FAST Code (for claimed MapSite URLs). */
+  requestId?: string | null;
+  /** Market audience from the claim form (listings, brokers, …). */
+  claimAudience?: string | null;
 }
 
 function isServiceRolePermissionError(message: string): boolean {
@@ -169,7 +177,13 @@ async function fetchMapSiteByFastCode(
   client: SupabaseClient<Database>,
   code: string
 ): Promise<{ mapsite: MapSiteView | null; error: string | null }> {
-  const { data: mapsite, error } = await client
+  const { data: fastCodeRow } = await client
+    .from("fast_codes")
+    .select("mapsite_id, request_id, code")
+    .ilike("code", code)
+    .maybeSingle();
+
+  const { data: mapsiteByCode, error } = await client
     .from("mapsites")
     .select("*")
     .ilike("fast_code", code)
@@ -179,43 +193,105 @@ async function fetchMapSiteByFastCode(
     return { mapsite: null, error: error.message };
   }
 
-  if (!mapsite) {
+  let linkedId = mapsiteByCode?.id ?? fastCodeRow?.mapsite_id ?? null;
+
+  if (!linkedId && fastCodeRow?.request_id) {
+    const { data: buildRequest } = await client
+      .from("build_requests")
+      .select("linked_mapsite_id")
+      .eq("id", fastCodeRow.request_id)
+      .maybeSingle();
+    linkedId = buildRequest?.linked_mapsite_id ?? null;
+  }
+
+  let mapsiteRow = mapsiteByCode;
+
+  if (!mapsiteRow && linkedId) {
+    const { data: linkedMapsite, error: linkedError } = await client
+      .from("mapsites")
+      .select("*")
+      .eq("id", linkedId)
+      .maybeSingle();
+
+    if (linkedError) {
+      return { mapsite: null, error: linkedError.message };
+    }
+    mapsiteRow = linkedMapsite;
+  }
+
+  if (!mapsiteRow) {
     return { mapsite: null, error: null };
   }
 
-  const mapsiteView = await buildMapSiteView(client, mapsite);
+  // Always present the looked-up FAST Code (claims can overwrite mapsites.fast_code).
+  const mapsiteView = await buildMapSiteView(client, mapsiteRow, {
+    displayFastCode: code,
+    requestId: fastCodeRow?.request_id ?? null,
+  });
   return { mapsite: mapsiteView, error: null };
 }
 
 async function buildMapSiteView(
   client: SupabaseClient<Database>,
-  mapsite: Database["public"]["Tables"]["mapsites"]["Row"]
+  mapsite: Database["public"]["Tables"]["mapsites"]["Row"],
+  options?: {
+    displayFastCode?: string;
+    requestId?: string | null;
+  }
 ): Promise<MapSiteView> {
+  const displayFastCode =
+    options?.displayFastCode?.trim() || mapsite.fast_code;
+
   const { data: pinRows } = await client
     .from("pins")
     .select("*")
     .eq("mapsite_id", mapsite.id)
     .order("sort_order");
 
-  const { data: fastCodeRow } = await client
-    .from("fast_codes")
-    .select("request_id")
-    .eq("mapsite_id", mapsite.id)
-    .maybeSingle();
+  let requestId = options?.requestId?.trim() || null;
+
+  if (!requestId) {
+    const { data: fastCodeRow } = await client
+      .from("fast_codes")
+      .select("request_id")
+      .ilike("code", displayFastCode)
+      .maybeSingle();
+    requestId = fastCodeRow?.request_id ?? null;
+  }
+
+  if (!requestId) {
+    const { data: fastCodeByMapsite } = await client
+      .from("fast_codes")
+      .select("request_id")
+      .eq("mapsite_id", mapsite.id)
+      .order("assigned_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    requestId = fastCodeByMapsite?.request_id ?? null;
+  }
 
   let assets: {
     profile_image: string | null;
     logo_image: string | null;
     pin_image: string | null;
   } | null = null;
+  let claimAudience: string | null = null;
 
-  if (fastCodeRow?.request_id) {
-    const { data: assetRow } = await client
-      .from("mapsite_assets")
-      .select("profile_image, logo_image, pin_image")
-      .eq("request_id", fastCodeRow.request_id)
-      .maybeSingle();
+  if (requestId) {
+    const [{ data: assetRow }, { data: buildRequest }] = await Promise.all([
+      client
+        .from("mapsite_assets")
+        .select("profile_image, logo_image, pin_image")
+        .eq("request_id", requestId)
+        .maybeSingle(),
+      client
+        .from("build_requests")
+        .select("market_type, status")
+        .eq("id", requestId)
+        .maybeSingle(),
+    ]);
     assets = assetRow;
+    claimAudience = buildRequest?.market_type?.trim() || null;
   }
 
   const pins: MapSitePinView[] = (pinRows || []).map((pin) => ({
@@ -243,7 +319,7 @@ async function buildMapSiteView(
 
   return {
     id: mapsite.id,
-    fastCode: mapsite.fast_code,
+    fastCode: displayFastCode,
     accountId: mapsite.account_id,
     slug: mapsite.slug,
     accountType: mapsite.account_type,
@@ -277,7 +353,35 @@ async function buildMapSiteView(
     createdAt: mapsite.created_at,
     updatedAt: mapsite.updated_at,
     pins,
+    mlsUrl: mapsite.mls_url ?? null,
+    brokerUrl: mapsite.broker_url ?? null,
+    tebUrl: mapsite.teb_url ?? null,
+    ttvUrl: mapsite.ttv_url ?? null,
+    requestId,
+    claimAudience,
   };
+}
+
+/** Public claimed MapSite URL used after Claim a Market / from admin. */
+export function buildClaimedMapSiteHref(options: {
+  mapsiteId: string;
+  fastCode: string;
+  requestId?: string | null;
+  audience?: string | null;
+}): string {
+  const params = new URLSearchParams({
+    claimed: "1",
+    view: "pin",
+    mapsiteId: options.mapsiteId,
+    fastCode: options.fastCode,
+  });
+  if (options.audience?.trim()) {
+    params.set("audience", options.audience.trim());
+  }
+  if (options.requestId?.trim()) {
+    params.set("requestId", options.requestId.trim());
+  }
+  return `/talispros/mapsite?${params.toString()}`;
 }
 
 export async function getPublicMapSiteByFastCode(

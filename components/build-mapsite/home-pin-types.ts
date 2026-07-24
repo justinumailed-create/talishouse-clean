@@ -8,6 +8,8 @@ export interface HomePinLocationValues {
   manualPlacement: boolean;
   /** Address resolved from coordinates; never overwrites streetAddress. */
   reverseGeocodedAddress: string;
+  /** User-controlled preview zoom — carried onto the created MapSite. */
+  mapZoom: number;
   pinWriteup: string;
   futurePinColor: string | null;
   futurePinIcon: string | null;
@@ -24,6 +26,7 @@ export const defaultHomePinLocationValues: HomePinLocationValues = {
   longitude: String(MAPSITE_DEMO_LOCATION.longitude),
   manualPlacement: true,
   reverseGeocodedAddress: MAPSITE_DEMO_LOCATION.streetAddress,
+  mapZoom: MAPSITE_DEMO_LOCATION.mapZoom,
   pinWriteup: "",
   futurePinColor: "#1A73E8",
   futurePinIcon: "flag",

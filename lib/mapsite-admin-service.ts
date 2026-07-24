@@ -37,6 +37,10 @@ export interface MapSiteAdminInput {
   atlistMapUrl?: string;
   offeredSubscriptionTier?: string;
   interestFormEnabled?: boolean;
+  mlsUrl?: string;
+  brokerUrl?: string;
+  tebUrl?: string;
+  ttvUrl?: string;
 }
 
 export interface MapSiteAdminActionResult {
@@ -217,6 +221,10 @@ export async function updateMapSiteAdmin(
     interest_form_enabled: canManageVisitorSubscription
       ? (input.interestFormEnabled ?? true)
       : (mapsite.interestFormEnabled ?? true),
+    mls_url: input.mlsUrl?.trim() || null,
+    broker_url: input.brokerUrl?.trim() || null,
+    teb_url: input.tebUrl?.trim() || null,
+    ttv_url: input.ttvUrl?.trim() || null,
   };
 
   const { error } = await supabase

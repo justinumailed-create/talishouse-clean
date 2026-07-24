@@ -39,6 +39,17 @@ export function formatCoordinate(value: string): string {
   return String(num);
 }
 
+/**
+ * Default zoom only when the user has not chosen a zoom yet.
+ * Never force this on pin move — preserve the preview camera zoom.
+ */
+export const HOME_PIN_DEFAULT_MAP_ZOOM = 18;
+
+export function clampMapZoom(zoom: number): number {
+  if (!Number.isFinite(zoom)) return HOME_PIN_DEFAULT_MAP_ZOOM;
+  return Math.min(21, Math.max(3, Math.round(zoom)));
+}
+
 export function hasValidCoordinates(
   latitude: string,
   longitude: string

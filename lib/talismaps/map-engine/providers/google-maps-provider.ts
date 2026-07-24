@@ -312,16 +312,32 @@ export class GoogleMapsProvider implements MapProvider {
         }
       : null;
 
-    const enforceLockedCenter = () => {
-      if (!lockedCenter || isCancelled()) return;
-      const current = map.getCenter();
-      if (!current) return;
-      if (
-        Math.abs(current.lat() - lockedCenter.lat) > 1e-8 ||
-        Math.abs(current.lng() - lockedCenter.lng) > 1e-8
-      ) {
-        map.setCenter(lockedCenter);
+    let screenOffset = {
+      x: options.lockCenterOffset?.x ?? 0,
+      y: options.lockCenterOffset?.y ?? 0,
+    };
+    let placingLockedPin = false;
+    /** Ignore zoom/drag events caused by setViewport (not user gestures). */
+    let suppressCameraGestureEvents = false;
+
+    const placeLockedPin = () => {
+      if (!lockedCenter || placingLockedPin || isCancelled()) return;
+      placingLockedPin = true;
+      map.setCenter(lockedCenter);
+      if (screenOffset.x !== 0 || screenOffset.y !== 0) {
+        // panBy moves the map; negate so the lat/lng shifts on-screen by offset.
+        map.panBy(-screenOffset.x, -screenOffset.y);
       }
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          placingLockedPin = false;
+        });
+      });
+    };
+
+    const enforceLockedCenter = () => {
+      if (!lockedCenter || isCancelled() || placingLockedPin) return;
+      placeLockedPin();
     };
 
     const emit = (
@@ -434,22 +450,37 @@ export class GoogleMapsProvider implements MapProvider {
     };
 
     const idleListener = map.addListener("idle", () => {
-      enforceLockedCenter();
       emit("viewportchange", { viewport: getViewport() });
     });
 
-    // Zoom-toward-cursor and residual pan must not move the locked pin off screen center.
+    // Zoom-toward-cursor and residual pan must not move the locked pin off its tip target.
     const centerListener = options.lockCenter
       ? map.addListener("center_changed", () => {
+          if (placingLockedPin) return;
           enforceLockedCenter();
         })
       : null;
 
     const zoomListener = options.lockCenter
       ? map.addListener("zoom_changed", () => {
+          if (placingLockedPin) return;
           enforceLockedCenter();
         })
-      : null;
+      : map.addListener("zoom_changed", () => {
+          if (suppressCameraGestureEvents) return;
+          emit("mapzoom");
+        });
+
+    const dragStartListener = options.lockCenter
+      ? null
+      : map.addListener("dragstart", () => {
+          if (suppressCameraGestureEvents) return;
+          emit("mapdragstart");
+        });
+
+    if (options.lockCenter) {
+      placeLockedPin();
+    }
 
     const clickListener = map.addListener(
       "click",
@@ -472,6 +503,7 @@ export class GoogleMapsProvider implements MapProvider {
         idleListener.remove();
         centerListener?.remove();
         zoomListener?.remove();
+        dragStartListener?.remove();
         clickListener.remove();
         for (const pinId of [...markers.keys()]) {
           removeMarker(pinId);
@@ -490,31 +522,41 @@ export class GoogleMapsProvider implements MapProvider {
           )[CONTAINER_OWNER_KEY];
         }
       },
+      setLockCenterOffset(offset: { x: number; y: number }) {
+        screenOffset = { x: offset.x, y: offset.y };
+        placeLockedPin();
+      },
       setViewport(viewport: Partial<MapViewport>) {
-        if (lockedCenter) {
-          // Center stays fixed — only zoom may change.
+        suppressCameraGestureEvents = true;
+        try {
+          if (lockedCenter) {
+            // Center stays fixed — only zoom may change.
+            if (viewport.zoom !== undefined) {
+              map.setZoom(viewport.zoom);
+            }
+            placeLockedPin();
+            return;
+          }
+          if (viewport.center && viewport.zoom !== undefined) {
+            map.setCenter({
+              lat: viewport.center.latitude,
+              lng: viewport.center.longitude,
+            });
+            map.setZoom(viewport.zoom);
+            return;
+          }
+          if (viewport.center) {
+            map.panTo({
+              lat: viewport.center.latitude,
+              lng: viewport.center.longitude,
+            });
+          }
           if (viewport.zoom !== undefined) {
             map.setZoom(viewport.zoom);
           }
-          map.setCenter(lockedCenter);
-          return;
-        }
-        if (viewport.center && viewport.zoom !== undefined) {
-          map.setCenter({
-            lat: viewport.center.latitude,
-            lng: viewport.center.longitude,
-          });
-          map.setZoom(viewport.zoom);
-          return;
-        }
-        if (viewport.center) {
-          map.panTo({
-            lat: viewport.center.latitude,
-            lng: viewport.center.longitude,
-          });
-        }
-        if (viewport.zoom !== undefined) {
-          map.setZoom(viewport.zoom);
+        } finally {
+          // zoom_changed / related listeners fire synchronously during setZoom.
+          suppressCameraGestureEvents = false;
         }
       },
       getViewport,

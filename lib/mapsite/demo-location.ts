@@ -3,5 +3,6 @@ export const MAPSITE_DEMO_LOCATION = {
   streetAddress: "2447 Meat Cove Rd, Pleasant Bay, NS B0E 2P0",
   latitude: 47.026177,
   longitude: -60.558897,
-  mapZoom: 14,
+  /** Zoomed-in property view (matches claim-form preview starting depth). */
+  mapZoom: 18,
 } as const;

@@ -6,6 +6,10 @@ import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { generateFastCode } from "@/lib/fast-code-generator";
 import { createMapSite } from "@/lib/mapsite";
 import { completeRootAccountRegistration } from "@/lib/root-account-registration-service";
+import {
+  isRootLikeClaimAccountType,
+  isRootPlanType,
+} from "@/lib/registration-plans";
 import { createUser, updateUserFastCode } from "@/lib/user-service";
 
 export interface ProcessPaymentInput {
@@ -60,10 +64,7 @@ export async function processPayment(
       throw new Error(`Payment record failed: ${paymentError.message}`);
     }
 
-    if (
-      (input.planType === "ROOT_ACCOUNT" || input.planType === "TEST_ACCOUNT") &&
-      !input.buildRequestId
-    ) {
+    if (isRootPlanType(input.planType) && !input.buildRequestId) {
       const registration = await completeRootAccountRegistration({
         firstName: input.firstName,
         lastName: input.lastName,
@@ -98,8 +99,9 @@ export async function processPayment(
       }
       if (buildRequest?.requested_account_type) {
         accountTypeLabel = buildRequest.requested_account_type;
-      } else if (input.planType === "TEST_ACCOUNT" || input.planType === "ROOT_ACCOUNT") {
-        accountTypeLabel = "root";
+      } else if (isRootPlanType(input.planType)) {
+        accountTypeLabel =
+          input.planType === "ROOT_ACCOUNT_1" ? "root-1" : "root";
       }
       linkedMapsiteId = buildRequest?.linked_mapsite_id ?? null;
     }
@@ -109,6 +111,16 @@ export async function processPayment(
       fastCode = generateFastCode((existingCodes || []).map((r) => r.code));
     }
 
+    const rootLike = isRootLikeClaimAccountType(accountTypeLabel) || isRootPlanType(input.planType);
+    const mapsiteAccountType =
+      input.planType === "TEST_ACCOUNT"
+        ? "TEST Account"
+        : input.planType === "ROOT_ACCOUNT_1"
+          ? "root-1"
+          : rootLike
+            ? "root"
+            : accountTypeLabel;
+
     const mapsite = linkedMapsiteId
       ? {
           id: linkedMapsiteId,
@@ -116,7 +128,7 @@ export async function processPayment(
         }
       : await createMapSite({
           fastCode,
-          accountType: accountTypeLabel,
+          accountType: mapsiteAccountType,
           ownerFirstName: input.firstName,
           ownerLastName: input.lastName,
           email: input.email,
@@ -126,7 +138,7 @@ export async function processPayment(
       firstName: input.firstName,
       lastName: input.lastName,
       email: input.email,
-      role: accountTypeLabel === "root" || input.planType === "TEST_ACCOUNT" ? "root" : "user",
+      role: rootLike ? "root" : "user",
     });
 
     const account = await createRootAccount({
@@ -143,8 +155,7 @@ export async function processPayment(
       .update({
         fast_code: account.fastCode,
         account_id: account.id,
-        account_type:
-          input.planType === "TEST_ACCOUNT" ? "TEST Account" : accountTypeLabel,
+        account_type: mapsiteAccountType,
         owner_first_name: input.firstName,
         owner_last_name: input.lastName,
         email: input.email,

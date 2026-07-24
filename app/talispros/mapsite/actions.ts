@@ -2,7 +2,12 @@
 
 import { processPayment } from "@/app/talispros/register/payment-actions";
 import type { RegistrationMarket } from "@/lib/registration-market";
-import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import {
+  isRootPlanType,
+  planTypeForClaimAccountType,
+  type PlanType,
+} from "@/lib/registration-plans";
+import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
   getDemonstrationMapSite,
   getMapSitePlatformByFastCode,
@@ -60,6 +65,51 @@ export async function loadMapSiteApplicationState(options?: {
   return mapsite;
 }
 
+/**
+ * Resolve PayPal plan from the Claim a Market build request
+ * (e.g. root-1 → ROOT_ACCOUNT_1).
+ */
+export async function resolveMapSitePaymentPlanType(options?: {
+  requestId?: string | null;
+  mapsiteId?: string | null;
+}): Promise<PlanType> {
+  if (!isSupabaseAdminConfigured()) return "ROOT_ACCOUNT";
+
+  try {
+    const supabase = getSupabaseAdmin();
+    const requestId = options?.requestId?.trim() || null;
+    const mapsiteId = options?.mapsiteId?.trim() || null;
+
+    if (requestId) {
+      const { data } = await supabase
+        .from("build_requests")
+        .select("requested_account_type, account_type")
+        .eq("id", requestId)
+        .maybeSingle();
+      const accountType =
+        data?.requested_account_type || data?.account_type || "";
+      if (accountType) return planTypeForClaimAccountType(accountType);
+    }
+
+    if (mapsiteId) {
+      const { data } = await supabase
+        .from("build_requests")
+        .select("requested_account_type, account_type")
+        .eq("linked_mapsite_id", mapsiteId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const accountType =
+        data?.requested_account_type || data?.account_type || "";
+      if (accountType) return planTypeForClaimAccountType(accountType);
+    }
+  } catch (error) {
+    console.warn("[mapsite] resolveMapSitePaymentPlanType failed:", error);
+  }
+
+  return "ROOT_ACCOUNT";
+}
+
 export async function refreshMapSiteApplicationState(
   mapsiteId: string
 ): Promise<MapSitePlatformRecord | null> {
@@ -76,6 +126,7 @@ export async function processMapSiteRootPaypalPayment(input: {
   mapsiteId: string;
   requestId?: string | null;
   audience: RegistrationMarket;
+  planType?: PlanType;
   paypalOrderId: string;
   paypalCaptureId: string;
 }): Promise<{
@@ -101,11 +152,14 @@ export async function processMapSiteRootPaypalPayment(input: {
     let lastName = "Owner";
     let email = "";
     let resolvedRequestId = requestId;
+    let accountTypeFromRequest = "";
 
     if (!resolvedRequestId) {
       const { data: linkedRequest } = await supabase
         .from("build_requests")
-        .select("id, first_name, last_name, email, linked_mapsite_id")
+        .select(
+          "id, first_name, last_name, email, linked_mapsite_id, requested_account_type, account_type"
+        )
         .eq("linked_mapsite_id", mapsiteId)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -115,13 +169,19 @@ export async function processMapSiteRootPaypalPayment(input: {
         firstName = linkedRequest.first_name?.trim() || firstName;
         lastName = linkedRequest.last_name?.trim() || lastName;
         email = linkedRequest.email?.trim() || email;
+        accountTypeFromRequest =
+          linkedRequest.requested_account_type ||
+          linkedRequest.account_type ||
+          "";
       }
     }
 
     if (resolvedRequestId) {
       const { data: request } = await supabase
         .from("build_requests")
-        .select("id, first_name, last_name, email, linked_mapsite_id")
+        .select(
+          "id, first_name, last_name, email, linked_mapsite_id, requested_account_type, account_type"
+        )
         .eq("id", resolvedRequestId)
         .maybeSingle();
 
@@ -132,13 +192,18 @@ export async function processMapSiteRootPaypalPayment(input: {
       firstName = request.first_name?.trim() || firstName;
       lastName = request.last_name?.trim() || lastName;
       email = request.email?.trim() || email;
+      accountTypeFromRequest =
+        request.requested_account_type || request.account_type || "";
 
       if (!request.linked_mapsite_id) {
         await supabase
           .from("build_requests")
           .update({
             linked_mapsite_id: mapsiteId,
-            requested_account_type: "root",
+            requested_account_type:
+              request.requested_account_type ||
+              accountTypeFromRequest ||
+              "root",
           })
           .eq("id", resolvedRequestId);
       }
@@ -164,11 +229,18 @@ export async function processMapSiteRootPaypalPayment(input: {
       };
     }
 
+    const planType: PlanType =
+      input.planType && isRootPlanType(input.planType)
+        ? input.planType
+        : accountTypeFromRequest
+          ? planTypeForClaimAccountType(accountTypeFromRequest)
+          : "ROOT_ACCOUNT";
+
     const result = await processPayment({
       email,
       firstName,
       lastName,
-      planType: "ROOT_ACCOUNT",
+      planType,
       paypalOrderId: input.paypalOrderId,
       paypalCaptureId: input.paypalCaptureId,
       buildRequestId: resolvedRequestId,
@@ -187,8 +259,19 @@ export async function processMapSiteRootPaypalPayment(input: {
       })
       .eq("id", result.mapsiteId || mapsiteId);
 
+    await supabase
+      .from("build_requests")
+      .update({
+        status: "MapSite Active",
+        approval_status: "Approved",
+        activated_at: new Date().toISOString(),
+        linked_mapsite_id: result.mapsiteId || mapsiteId,
+      })
+      .eq("id", resolvedRequestId);
+
     const params = new URLSearchParams({
       claimed: "1",
+      view: "pin",
       mapsiteId: result.mapsiteId || mapsiteId,
       audience: input.audience,
     });

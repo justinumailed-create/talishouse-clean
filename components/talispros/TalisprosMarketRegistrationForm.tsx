@@ -16,13 +16,21 @@ interface TalisprosMarketRegistrationFormProps {
   mapsiteId?: string;
   /** `panel` keeps the user on MapSite™ and invokes onSuccess instead of a full success page. */
   variant?: "page" | "panel";
-  onSuccess?: (result: { requestId?: string; fastCode?: string }) => void;
+  onSuccess?: (result: {
+    requestId?: string;
+    fastCode?: string;
+    mapsiteId?: string;
+  }) => void;
 }
 
 const ACCOUNT_OPTIONS = [
   {
+    value: "root-1",
+    label: "Root Account™ — $1 activation (CAD $1.00 + GST)",
+  },
+  {
     value: "root",
-    label: "Root Account (up to 100 Derivative Accounts; SPLITS enabled)",
+    label: "Root Account™ (up to 100 Derivative Accounts; SPLITS enabled)",
   },
   {
     value: "derivative",
@@ -77,7 +85,7 @@ export default function TalisprosMarketRegistrationForm({
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [accountType, setAccountType] = useState("root");
+  const [accountType, setAccountType] = useState("root-1");
   const [fastCode, setFastCode] = useState("");
   const [picture, setPicture] = useState<File | null>(null);
   const [logo, setLogo] = useState<File | null>(null);
@@ -92,6 +100,7 @@ export default function TalisprosMarketRegistrationForm({
 
   const requiresFastCode =
     accountType === "derivative" || accountType.startsWith("adpro");
+  const isDollarRoot = accountType === "root-1";
 
   async function uploadFile(fieldName: string, file: File): Promise<string | null> {
     const body = new FormData();
@@ -142,6 +151,7 @@ export default function TalisprosMarketRegistrationForm({
       formData.set("streetAddress", pinLocation.streetAddress);
       formData.set("latitude", pinLocation.latitude);
       formData.set("longitude", pinLocation.longitude);
+      formData.set("mapZoom", String(pinLocation.mapZoom));
       formData.set(
         "manualPlacement",
         pinLocation.manualPlacement ? "true" : "false"
@@ -190,6 +200,7 @@ export default function TalisprosMarketRegistrationForm({
         onSuccess({
           requestId: result.requestId,
           fastCode: result.fastCode,
+          mapsiteId: result.mapsiteId,
         });
         return;
       }
@@ -340,6 +351,13 @@ export default function TalisprosMarketRegistrationForm({
                 </label>
               ))}
             </div>
+            {isDollarRoot ? (
+              <p className="mt-2 text-xs leading-relaxed text-neutral-500">
+                After submit, your MapSite™ shows a CAD $1.00 + GST PayPal
+                checkout. Payment enables Express an Interest and activates the
+                MapSite™ for admin management.
+              </p>
+            ) : null}
           </div>
           {requiresFastCode ? (
             <div className="sm:col-span-2">

@@ -39,6 +39,7 @@ interface FormData {
   streetAddress: string;
   latitude: string;
   longitude: string;
+  mapZoom: number;
   manualPlacement: boolean;
   reverseGeocodedAddress: string;
   pinWriteup: string;
@@ -252,7 +253,7 @@ function TurnstileWidget({ onToken }: { onToken: (token: string) => void }) {
 }
 
 function isRootAccountType(accountType: string): boolean {
-  return accountType === "root";
+  return accountType === "root" || accountType === "root-1";
 }
 
 function requiresFastCodeValidation(accountType: string): boolean {
@@ -473,6 +474,7 @@ export default function BuildMapsiteClient() {
         longitude: form.longitude,
         manualPlacement: form.manualPlacement,
         reverseGeocodedAddress: form.reverseGeocodedAddress,
+        mapZoom: form.mapZoom,
         pinWriteup: form.pinWriteup,
         futurePinColor: form.futurePinColor,
         futurePinIcon: form.futurePinIcon,
@@ -549,6 +551,7 @@ export default function BuildMapsiteClient() {
       fd.append("streetAddress", form.streetAddress);
       fd.append("latitude", form.latitude);
       fd.append("longitude", form.longitude);
+      fd.append("mapZoom", String(form.mapZoom));
       fd.append("manualPlacement", String(form.manualPlacement));
       fd.append("reverseGeocodedAddress", form.reverseGeocodedAddress);
       fd.append("pinWriteup", form.pinWriteup);
@@ -736,6 +739,7 @@ export default function BuildMapsiteClient() {
                       longitude: form.longitude,
                       manualPlacement: form.manualPlacement,
                       reverseGeocodedAddress: form.reverseGeocodedAddress,
+                      mapZoom: form.mapZoom,
                       pinWriteup: form.pinWriteup,
                       futurePinColor: form.futurePinColor,
                       futurePinIcon: form.futurePinIcon,

@@ -23,6 +23,15 @@ export default async function TalisprosAdminOverviewPage() {
 
       <section className="grid gap-3 sm:grid-cols-2 mb-6">
         <Link
+          href="/talispros/admin/pmc"
+          className="rounded-xl border border-neutral-200 bg-white px-4 py-3 hover:bg-neutral-50"
+        >
+          <p className="text-sm font-semibold text-neutral-900">PMC MapSite™ admin</p>
+          <p className="text-xs text-neutral-500 mt-1">
+            Edit claimed MapSite pins on a map, plus Canada/USA regional Root pins.
+          </p>
+        </Link>
+        <Link
           href="/talispros/admin/forms-manager"
           className="rounded-xl border border-neutral-200 bg-white px-4 py-3 hover:bg-neutral-50"
         >

@@ -10,8 +10,10 @@ import type { MapEnginePin, MapViewport } from "@/lib/talismaps/map-engine";
 import { pinStyleCacheKey } from "@/lib/talismaps/map-engine/pin-marker-icon";
 import { useTalisMapsMapDefaults } from "@/lib/talismaps/use-map-defaults";
 import {
+  clampMapZoom,
   formatCoordinate,
   hasValidCoordinates,
+  HOME_PIN_DEFAULT_MAP_ZOOM,
 } from "@/lib/home-pin-coordinates";
 
 export interface TalisMapsPinPickerPinStyle {
@@ -30,6 +32,7 @@ export interface TalisMapsPinLocationUpdate {
   longitude: string;
   manualPlacement: boolean;
   reverseGeocodedAddress?: string | null;
+  mapZoom?: number;
 }
 
 export interface TalisMapsPinPickerProps {
@@ -40,14 +43,18 @@ export interface TalisMapsPinPickerProps {
   manualPlacement?: boolean;
   /** Increment to force a forward-geocode of streetAddress (e.g. Enter key). */
   addressLookupNonce?: number;
+  /** Last zoom chosen by the user on this preview (preserved across pin moves). */
+  mapZoom?: number;
   pinStyle?: TalisMapsPinPickerPinStyle;
   onLocationChange: (update: TalisMapsPinLocationUpdate) => void;
+  /** Fired when the user zooms the preview (scroll / controls). */
+  onMapZoomChange?: (zoom: number) => void;
 }
 
 const HOME_PIN_ID = "home-pin";
 const DEFAULT_VIEWPORT: MapViewport = {
   center: { latitude: 43.6532, longitude: -79.3832 },
-  zoom: 10,
+  zoom: HOME_PIN_DEFAULT_MAP_ZOOM,
 };
 
 function buildHomePin(
@@ -100,28 +107,50 @@ async function reverseGeocodeAddress(
 function PinPickerViewportSync({
   latitude,
   longitude,
+  mapZoom,
 }: {
   latitude: string;
   longitude: string;
+  mapZoom: number;
 }) {
-  const { setViewport, isReady } = useMapEngine();
-  const lastSyncedKeyRef = useRef("");
+  const { setViewport, viewport, isReady } = useMapEngine();
+  const lastSyncedCoordKeyRef = useRef("");
 
   useEffect(() => {
     if (!isReady || !hasValidCoordinates(latitude, longitude)) return;
 
-    const syncKey = `${latitude},${longitude}`;
-    if (syncKey === lastSyncedKeyRef.current) return;
-    lastSyncedKeyRef.current = syncKey;
+    const coordKey = `${latitude},${longitude}`;
+    if (coordKey === lastSyncedCoordKeyRef.current) return;
+    lastSyncedCoordKeyRef.current = coordKey;
 
+    // Re-center only — keep the user's zoom (never force a zoom-out on pin move).
     setViewport({
       center: {
         latitude: Number.parseFloat(latitude),
         longitude: Number.parseFloat(longitude),
       },
-      zoom: 15,
+      zoom: clampMapZoom(viewport.zoom || mapZoom),
     });
-  }, [isReady, latitude, longitude, setViewport]);
+  }, [isReady, latitude, longitude, mapZoom, viewport.zoom, setViewport]);
+
+  return null;
+}
+
+function PinPickerZoomReporter({
+  onZoomChange,
+}: {
+  onZoomChange: (zoom: number) => void;
+}) {
+  const { viewport, isReady } = useMapEngine();
+  const lastZoomRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isReady) return;
+    const zoom = clampMapZoom(viewport.zoom);
+    if (lastZoomRef.current === zoom) return;
+    lastZoomRef.current = zoom;
+    onZoomChange(zoom);
+  }, [isReady, viewport.zoom, onZoomChange]);
 
   return null;
 }
@@ -132,15 +161,19 @@ function TalisMapsPinPickerMap({
   streetAddress,
   manualPlacement = false,
   addressLookupNonce = 0,
+  mapZoom = HOME_PIN_DEFAULT_MAP_ZOOM,
   pinStyle,
   onLocationChange,
+  onMapZoomChange,
 }: TalisMapsPinPickerProps) {
   const skipGeocodeRef = useRef(false);
   const lastGeocodedAddressRef = useRef("");
   const lastLookupNonceRef = useRef(0);
   const lastReverseKeyRef = useRef("");
   const onLocationChangeRef = useRef(onLocationChange);
+  const onMapZoomChangeRef = useRef(onMapZoomChange);
   const isPinDraggingRef = useRef(false);
+  const mapZoomRef = useRef(mapZoom);
   const defaults = useTalisMapsMapDefaults({
     // Match MapSite: Google satellite for claim / Home PIN placement.
     providerId: "google-maps",
@@ -151,6 +184,21 @@ function TalisMapsPinPickerMap({
     onLocationChangeRef.current = onLocationChange;
   }, [onLocationChange]);
 
+  useEffect(() => {
+    onMapZoomChangeRef.current = onMapZoomChange;
+  }, [onMapZoomChange]);
+
+  useEffect(() => {
+    mapZoomRef.current = mapZoom;
+  }, [mapZoom]);
+
+  const reportZoom = useCallback((zoom: number) => {
+    const next = clampMapZoom(zoom);
+    if (next === mapZoomRef.current) return;
+    mapZoomRef.current = next;
+    onMapZoomChangeRef.current?.(next);
+  }, []);
+
   const applyManualCoordinates = useCallback(
     async (nextLatitude: string, nextLongitude: string) => {
       skipGeocodeRef.current = true;
@@ -158,6 +206,7 @@ function TalisMapsPinPickerMap({
         latitude: nextLatitude,
         longitude: nextLongitude,
         manualPlacement: true,
+        mapZoom: mapZoomRef.current,
       });
 
       const reverseKey = `${nextLatitude},${nextLongitude}`;
@@ -170,6 +219,7 @@ function TalisMapsPinPickerMap({
         longitude: nextLongitude,
         manualPlacement: true,
         reverseGeocodedAddress: resolved,
+        mapZoom: mapZoomRef.current,
       });
     },
     []
@@ -210,11 +260,11 @@ function TalisMapsPinPickerMap({
           latitude: Number.parseFloat(latitude),
           longitude: Number.parseFloat(longitude),
         },
-        zoom: 15,
+        zoom: clampMapZoom(mapZoom),
       };
     }
     return DEFAULT_VIEWPORT;
-  }, [latitude, longitude]);
+  }, [latitude, longitude, mapZoom]);
 
   const enginePin = useMemo(
     () => buildHomePin(latitude, longitude, pinStyle),
@@ -277,6 +327,7 @@ function TalisMapsPinPickerMap({
             longitude: formatCoordinate(payload.longitude),
             manualPlacement: false,
             reverseGeocodedAddress: payload.address?.trim() || null,
+            mapZoom: mapZoomRef.current,
           });
         } catch {
           // Geocoding is best-effort; users can still place the pin on the map.
@@ -300,7 +351,12 @@ function TalisMapsPinPickerMap({
         onPinDragStart={handlePinDragStart}
         onMapClick={handleMapClick}
       >
-        <PinPickerViewportSync latitude={latitude} longitude={longitude} />
+        <PinPickerViewportSync
+          latitude={latitude}
+          longitude={longitude}
+          mapZoom={mapZoom}
+        />
+        <PinPickerZoomReporter onZoomChange={reportZoom} />
         <MapEngineCanvas className="h-full w-full touch-none" />
       </MapEngineProvider>
     </div>

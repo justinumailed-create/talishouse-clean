@@ -38,6 +38,7 @@ interface MapEngineContextValue {
   viewport: MapViewport;
   isReady: boolean;
   lockCenter: boolean;
+  lockCenterOffset: { x: number; y: number };
   setProviderId: (providerId: MapProviderId) => void;
   setBasemapView: (view: MapBasemapView) => void;
   setPins: (pins: MapEnginePin[]) => void;
@@ -50,6 +51,8 @@ interface MapEngineContextValue {
   onPinDrag?: (pinId: string, coordinates: MapViewport["center"]) => void;
   onPinDragStart?: (pinId: string) => void;
   onMapClick?: (coordinates: MapViewport["center"]) => void;
+  onMapDragStart?: () => void;
+  onMapZoom?: () => void;
 }
 
 const MapEngineContext = createContext<MapEngineContextValue | null>(null);
@@ -62,13 +65,19 @@ interface MapEngineProviderProps {
   initialViewport?: MapViewport;
   selectedPinId?: string | null;
   draggablePinIds?: string[];
-  /** Keep map center fixed (zoom only) so overlays stay anchored to the pin. */
+  /** Keep map center fixed (zoom only) so overlays stay anchored to the tip. */
   lockCenter?: boolean;
+  /** Screen-pixel offset from viewport center for the locked pin. */
+  lockCenterOffset?: { x: number; y: number };
   onViewportChange?: (viewport: MapViewport) => void;
   onPinSelect?: (pinId: string | null) => void;
   onPinDrag?: (pinId: string, coordinates: MapViewport["center"]) => void;
   onPinDragStart?: (pinId: string) => void;
   onMapClick?: (coordinates: MapViewport["center"]) => void;
+  /** User started panning the map (not pin drag). */
+  onMapDragStart?: () => void;
+  /** User changed zoom (scroll / controls). */
+  onMapZoom?: () => void;
 }
 
 export function MapEngineProvider({
@@ -80,11 +89,14 @@ export function MapEngineProvider({
   selectedPinId: controlledSelectedPinId,
   draggablePinIds: controlledDraggablePinIds = [],
   lockCenter = false,
+  lockCenterOffset = { x: 0, y: 0 },
   onViewportChange,
   onPinSelect,
   onPinDrag,
   onPinDragStart,
   onMapClick,
+  onMapDragStart,
+  onMapZoom,
 }: MapEngineProviderProps) {
   const [activeProviderId, setActiveProviderId] = useState<MapProviderId>(providerId);
   const [activeBasemapView, setActiveBasemapView] =
@@ -208,6 +220,14 @@ export function MapEngineProvider({
     [onMapClick]
   );
 
+  const handleMapDragStart = useCallback(() => {
+    onMapDragStart?.();
+  }, [onMapDragStart]);
+
+  const handleMapZoom = useCallback(() => {
+    onMapZoom?.();
+  }, [onMapZoom]);
+
   const value = useMemo(
     () => ({
       providerId: activeProviderId,
@@ -218,6 +238,7 @@ export function MapEngineProvider({
       viewport,
       isReady,
       lockCenter,
+      lockCenterOffset,
       setProviderId: setActiveProviderId,
       setBasemapView: setActiveBasemapView,
       setPins,
@@ -230,6 +251,8 @@ export function MapEngineProvider({
       onPinDrag: handlePinDrag,
       onPinDragStart: handlePinDragStart,
       onMapClick: handleMapClick,
+      onMapDragStart: handleMapDragStart,
+      onMapZoom: handleMapZoom,
     }),
     [
       activeProviderId,
@@ -240,6 +263,7 @@ export function MapEngineProvider({
       viewport,
       isReady,
       lockCenter,
+      lockCenterOffset,
       setSelectedPinId,
       setViewport,
       setReadyState,
@@ -248,6 +272,8 @@ export function MapEngineProvider({
       handlePinDrag,
       handlePinDragStart,
       handleMapClick,
+      handleMapDragStart,
+      handleMapZoom,
     ]
   );
 

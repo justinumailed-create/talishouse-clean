@@ -4,9 +4,9 @@ import type {
 } from "@/lib/registration-market";
 import { REGISTRATION_MARKET_COPY } from "@/lib/registration-market";
 import {
-  PLAN_DETAILS,
   type PlanType,
-  registrationTotalFor,
+  planSummaryFor,
+  planTypeForClaimAccountType,
 } from "@/lib/registration-plans";
 
 /** Map Start / MapSite audience → registration account category. */
@@ -34,29 +34,48 @@ export function audiencePlanSummary(audience: RegistrationMarket): {
   priceLabel: string;
   totalLabel: string;
 } {
-  const plan = PLAN_DETAILS[planTypeForAudience(audience)];
-  const total = registrationTotalFor(plan.price);
+  const summary = planSummaryFor(planTypeForAudience(audience));
   return {
-    planLabel: plan.label,
-    priceLabel: `CAD $${plan.price.toFixed(2)}`,
-    totalLabel: `CAD $${total.toFixed(2)} (incl. tax)`,
+    planLabel: summary.planLabel,
+    priceLabel: summary.priceLabel,
+    totalLabel: summary.totalLabel,
   };
 }
 
-/** MapSite claim payment is always Root Account™ (PayPal on /talispros/register). */
+/** Default MapSite claim payment (full Root) when no claim selection is known. */
 export function rootAccountPlanSummary(): {
   planLabel: string;
   priceLabel: string;
   totalLabel: string;
+  taxLabel: string;
 } {
-  const plan = PLAN_DETAILS.ROOT_ACCOUNT;
-  const total = registrationTotalFor(plan.price);
+  const summary = planSummaryFor("ROOT_ACCOUNT");
   return {
-    planLabel: plan.label,
-    priceLabel: `CAD $${plan.price.toFixed(2)}`,
-    totalLabel: `CAD $${total.toFixed(2)} (incl. tax)`,
+    planLabel: summary.planLabel,
+    priceLabel: summary.priceLabel,
+    totalLabel: summary.totalLabel,
+    taxLabel: summary.taxLabel,
   };
 }
+
+export function mapsiteClaimPlanSummary(planType: PlanType = "ROOT_ACCOUNT"): {
+  planLabel: string;
+  priceLabel: string;
+  totalLabel: string;
+  taxLabel: string;
+  planType: PlanType;
+  price: number;
+  tax: number;
+  total: number;
+} {
+  const summary = planSummaryFor(planType);
+  return {
+    ...summary,
+    planType,
+  };
+}
+
+export { planTypeForClaimAccountType };
 
 /**
  * PayPal Root Account™ checkout for MapSite™ claims.

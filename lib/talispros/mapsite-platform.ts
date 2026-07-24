@@ -1,4 +1,5 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { HOME_PIN_DEFAULT_MAP_ZOOM, clampMapZoom } from "@/lib/home-pin-coordinates";
 import {
   DEMO_MAPSITE_FAST_CODE,
   DEMO_MAPSITE_ID,
@@ -14,6 +15,7 @@ export type MapSitePlatformRecord = {
   status: MapSitePlatformStatus;
   lat: number;
   lng: number;
+  map_zoom: number;
   property_title: string;
   property_address: string | null;
   property_description: string | null;
@@ -60,6 +62,7 @@ type MapSiteRow = {
   status: string;
   latitude: number | null;
   longitude: number | null;
+  map_zoom?: number | null;
   property_title: string | null;
   property_address?: string | null;
   property_description?: string | null;
@@ -101,6 +104,7 @@ export function createFallbackDemoMapSite(
     status: "UNCLAIMED",
     lat: 46.088287,
     lng: -59.882749,
+    map_zoom: HOME_PIN_DEFAULT_MAP_ZOOM,
     property_title: "Lot + optional Tiny Home",
     property_address: DEMO_MAPSITE_ADDRESS,
     property_description: DEMO_DESCRIPTION,
@@ -151,6 +155,10 @@ function mapRow(row: MapSiteRow): MapSitePlatformRecord {
     status: toPlatformStatus(row.status),
     lat: row.latitude ?? 46.088287,
     lng: row.longitude ?? -59.882749,
+    map_zoom:
+      row.map_zoom != null && Number.isFinite(row.map_zoom)
+        ? clampMapZoom(row.map_zoom)
+        : HOME_PIN_DEFAULT_MAP_ZOOM,
     property_title: row.property_title || "Lot + optional Tiny Home",
     property_address:
       row.property_address || DEMO_MAPSITE_ADDRESS,
@@ -378,7 +386,7 @@ export async function mergeMapSiteWithSubmittedLocation(
 }
 
 const SELECT_COLUMNS =
-  "id, fast_code, status, latitude, longitude, property_title, property_address, property_description, cover_image, header_image_url, gallery_images, mls_url, broker_url, website, teb_url, ttv_url, assigned_marketing_manager, is_demonstration, created_at, updated_at";
+  "id, fast_code, status, latitude, longitude, map_zoom, property_title, property_address, property_description, cover_image, header_image_url, gallery_images, mls_url, broker_url, website, teb_url, ttv_url, assigned_marketing_manager, is_demonstration, created_at, updated_at";
 
 export async function getDemonstrationMapSite(): Promise<MapSitePlatformRecord> {
   if (!isSupabaseAdminConfigured()) {
@@ -540,6 +548,7 @@ export async function markMapSiteClaimedByBuildRequest(params: {
   fastCode?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  mapZoom?: number | null;
   propertyTitle?: string | null;
   propertyAddress?: string | null;
   propertyDescription?: string | null;
@@ -551,6 +560,10 @@ export async function markMapSiteClaimedByBuildRequest(params: {
       fast_code: params.fastCode || null,
       lat: params.latitude ?? DEMO_MAPSITE_COORDINATES.lat,
       lng: params.longitude ?? DEMO_MAPSITE_COORDINATES.lng,
+      map_zoom:
+        params.mapZoom != null && Number.isFinite(params.mapZoom)
+          ? clampMapZoom(params.mapZoom)
+          : HOME_PIN_DEFAULT_MAP_ZOOM,
       property_title: params.propertyTitle || "Lot + optional Tiny Home",
       property_address: params.propertyAddress || null,
       property_description: params.propertyDescription || null,
@@ -624,6 +637,9 @@ export async function markMapSiteClaimedByBuildRequest(params: {
   if (params.longitude != null && Number.isFinite(params.longitude)) {
     patch.longitude = params.longitude;
   }
+  if (params.mapZoom != null && Number.isFinite(params.mapZoom)) {
+    patch.map_zoom = clampMapZoom(params.mapZoom);
+  }
   if (params.propertyTitle) patch.property_title = params.propertyTitle;
   if (params.propertyAddress) patch.property_address = params.propertyAddress;
   if (params.propertyDescription) {
@@ -649,6 +665,13 @@ export async function markMapSiteClaimedByBuildRequest(params: {
     .from("build_requests")
     .update({ linked_mapsite_id: params.mapsiteId })
     .eq("id", params.buildRequestId);
+
+  if (params.fastCode) {
+    await supabase
+      .from("fast_codes")
+      .update({ mapsite_id: params.mapsiteId })
+      .ilike("code", params.fastCode);
+  }
 
   if (data) return mapRow(data as MapSiteRow);
 

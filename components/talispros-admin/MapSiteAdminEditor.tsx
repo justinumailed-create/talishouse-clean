@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ExternalLink, Loader2, Upload } from "lucide-react";
 import type { MapSiteView } from "@/lib/mapsite-service";
+import { buildClaimedMapSiteHref } from "@/lib/mapsite-service";
 import {
   publishMapSite,
   saveMapSiteDraft,
@@ -13,6 +14,7 @@ import {
   type MapSiteAdminInput,
 } from "@/lib/mapsite-admin-service";
 import MapSiteGalleryEditor from "@/components/admin/MapSiteGalleryEditor";
+import TalisMapsPinPicker from "@/components/build-mapsite/TalisMapsPinPicker";
 import {
   OFFERED_SUBSCRIPTION_TIER_LABELS,
   type OfferedSubscriptionTier,
@@ -101,6 +103,10 @@ export default function MapSiteAdminEditor({
     offeredSubscriptionTier: (mapsite.offeredSubscriptionTier || "root") as OfferedSubscriptionTier,
     interestFormEnabled: mapsite.interestFormEnabled ?? true,
     status: mapsite.status,
+    mlsUrl: mapsite.mlsUrl || "",
+    brokerUrl: mapsite.brokerUrl || "",
+    tebUrl: mapsite.tebUrl || "",
+    ttvUrl: mapsite.ttvUrl || "",
   });
   const [galleryItems, setGalleryItems] = useState(mapsite.galleryItems);
   const [uploadingBrandingField, setUploadingBrandingField] =
@@ -198,11 +204,24 @@ export default function MapSiteAdminEditor({
           <p className="text-sm text-neutral-500 mt-1 font-mono">{mapsite.fastCode}</p>
         </div>
         <Link
+          href={buildClaimedMapSiteHref({
+            mapsiteId: mapsite.id,
+            fastCode: mapsite.fastCode,
+            requestId: mapsite.requestId,
+            audience: mapsite.claimAudience || "listings",
+          })}
+          target="_blank"
+          className="inline-flex items-center gap-2 text-sm text-neutral-700 hover:text-neutral-900"
+        >
+          Open claimed MapSite
+          <ExternalLink className="w-4 h-4" />
+        </Link>
+        <Link
           href={`/talispros/mapsites/${mapsite.fastCode}`}
           target="_blank"
           className="inline-flex items-center gap-2 text-sm text-neutral-700 hover:text-neutral-900"
         >
-          View live page
+          View published page
           <ExternalLink className="w-4 h-4" />
         </Link>
       </div>
@@ -303,14 +322,102 @@ export default function MapSiteAdminEditor({
             />
           </Field>
         </div>
+        <Field label="Map zoom">
+          <input
+            className={inputClass}
+            type="number"
+            min={1}
+            max={21}
+            value={form.mapZoom}
+            onChange={(e) => setForm((p) => ({ ...p, mapZoom: e.target.value }))}
+          />
+        </Field>
+        <div className="overflow-hidden rounded-xl border border-neutral-200">
+          <div className="border-b border-neutral-200 bg-neutral-50 px-4 py-2 text-sm font-medium text-neutral-800">
+            Editable map pin
+          </div>
+          <div className="h-[360px] w-full bg-neutral-100">
+            <TalisMapsPinPicker
+              latitude={form.latitude}
+              longitude={form.longitude}
+              streetAddress={form.propertyAddress}
+              mapZoom={Number.parseInt(form.mapZoom, 10) || 15}
+              pinStyle={{
+                label: form.propertyTitle || mapsite.fastCode,
+                icon: "home",
+                whiteCenter: true,
+              }}
+              onLocationChange={(update) => {
+                setForm((prev) => ({
+                  ...prev,
+                  latitude: update.latitude,
+                  longitude: update.longitude,
+                  propertyAddress:
+                    update.reverseGeocodedAddress?.trim() ||
+                    prev.propertyAddress,
+                  mapZoom:
+                    update.mapZoom != null
+                      ? String(update.mapZoom)
+                      : prev.mapZoom,
+                }));
+              }}
+              onMapZoomChange={(mapZoom) =>
+                setForm((prev) => ({ ...prev, mapZoom: String(mapZoom) }))
+              }
+            />
+          </div>
+        </div>
         <p className="text-xs text-neutral-500">
-          Public MapSites render through TalisMaps™ using these coordinates and any saved Home PINs.
+          Drag the pin or search an address. Saved coordinates and zoom drive the
+          claimed MapSite™ pin card.
         </p>
         <Field label="Price">
           <input
             className={inputClass}
             value={form.price}
             onChange={(e) => setForm((p) => ({ ...p, price: e.target.value }))}
+          />
+        </Field>
+      </section>
+
+      <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-neutral-900">
+          Pin resource buttons
+        </h2>
+        <p className="text-sm text-neutral-500">
+          MLS® and URL stay greyed out on the MapSite until these are set. TEB™ and
+          TTV™ use platform defaults when empty.
+        </p>
+        <Field label="MLS® URL">
+          <input
+            className={inputClass}
+            value={form.mlsUrl}
+            onChange={(e) => setForm((p) => ({ ...p, mlsUrl: e.target.value }))}
+            placeholder="https://"
+          />
+        </Field>
+        <Field label="URL (broker / listing)">
+          <input
+            className={inputClass}
+            value={form.brokerUrl}
+            onChange={(e) => setForm((p) => ({ ...p, brokerUrl: e.target.value }))}
+            placeholder="https://"
+          />
+        </Field>
+        <Field label="TEB™ URL (optional override)">
+          <input
+            className={inputClass}
+            value={form.tebUrl}
+            onChange={(e) => setForm((p) => ({ ...p, tebUrl: e.target.value }))}
+            placeholder="/talisbooks/library"
+          />
+        </Field>
+        <Field label="TTV™ URL (optional override)">
+          <input
+            className={inputClass}
+            value={form.ttvUrl}
+            onChange={(e) => setForm((p) => ({ ...p, ttvUrl: e.target.value }))}
+            placeholder="/talistv"
           />
         </Field>
       </section>

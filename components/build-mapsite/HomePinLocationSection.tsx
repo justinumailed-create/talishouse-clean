@@ -123,6 +123,7 @@ export default function HomePinLocationSection({
         latitude: update.latitude,
         longitude: update.longitude,
         manualPlacement: update.manualPlacement,
+        ...(update.mapZoom != null ? { mapZoom: update.mapZoom } : {}),
         ...(update.reverseGeocodedAddress !== undefined
           ? {
               reverseGeocodedAddress: update.reverseGeocodedAddress ?? "",
@@ -236,11 +237,16 @@ export default function HomePinLocationSection({
     <div className="space-y-6">
       <InputField
         label="Street Address"
-        hint="Optional — leave blank for vacant land. Press Enter to update the map and coordinates."
+        hint="Optional — leave blank for vacant land. Address auto-detects coordinates and updates the map preview."
         value={values.streetAddress}
         onChange={(streetAddress) =>
           onChange({ streetAddress, manualPlacement: false })
         }
+        onBlur={() => {
+          if (!values.streetAddress.trim()) return;
+          onChange({ manualPlacement: false });
+          setAddressLookupNonce((current) => current + 1);
+        }}
         onKeyDown={(event) => {
           if (event.key !== "Enter") return;
           event.preventDefault();
@@ -286,7 +292,7 @@ export default function HomePinLocationSection({
       <div>
         <FieldLabel
           label="Interactive Map Preview"
-          hint="Click the map to place the PIN. Drag the marker to fine-tune. Coordinates update automatically."
+          hint="Zoom to the view you want — placing or moving the PIN keeps that zoom. The created MapSite opens at the same depth."
         />
         <TalisMapsPinPicker
           latitude={values.latitude}
@@ -294,8 +300,10 @@ export default function HomePinLocationSection({
           streetAddress={values.streetAddress}
           manualPlacement={values.manualPlacement}
           addressLookupNonce={addressLookupNonce}
+          mapZoom={values.mapZoom}
           pinStyle={pinPickerStyle}
           onLocationChange={handleLocationChange}
+          onMapZoomChange={(mapZoom) => onChange({ mapZoom })}
         />
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-400">
           <span>Powered by TalisMaps™</span>
