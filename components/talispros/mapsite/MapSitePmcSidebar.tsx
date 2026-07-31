@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import {
   PMC_ACCOUNT_BULLETS,
+  pmcPinMarketType,
   pmcPinsByRegionGroup,
   type PmcRegionalPin,
   type PmcRegionGroup,
@@ -39,10 +40,20 @@ export default function MapSitePmcSidebar({
 
   const canadaPins = pmcPinsByRegionGroup(filtered, "canada");
   const usaPins = pmcPinsByRegionGroup(filtered, "usa");
+  const canadaRootPins = canadaPins.filter(
+    (pin) => pmcPinMarketType(pin) === "root"
+  );
+  const canadaCorporatePins = canadaPins.filter(
+    (pin) => pmcPinMarketType(pin) === "corporate"
+  );
+  const usaRootPins = usaPins.filter((pin) => pmcPinMarketType(pin) === "root");
+  const usaCorporatePins = usaPins.filter(
+    (pin) => pmcPinMarketType(pin) === "corporate"
+  );
 
   return (
-    <aside className="pointer-events-none absolute left-3 top-3 z-20 flex w-[min(92vw,20.5rem)] flex-col gap-3 sm:left-4 sm:top-4">
-      <div className="pointer-events-auto flex items-center gap-2 rounded-full bg-white px-3 py-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.16)] ring-1 ring-black/5">
+    <aside className="pointer-events-none absolute left-3 top-3 z-20 flex w-[min(94vw,21.5rem)] flex-col gap-3 sm:left-4 sm:top-4 sm:w-[min(92vw,20.5rem)]">
+      <div className="pointer-events-auto flex min-h-11 items-center gap-2 rounded-full bg-white px-3 py-2.5 shadow-[0_8px_24px_rgba(0,0,0,0.16)] ring-1 ring-black/5">
         <svg
           viewBox="0 0 24 24"
           className="h-4 w-4 shrink-0 text-neutral-500"
@@ -59,12 +70,12 @@ export default function MapSitePmcSidebar({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search..."
-          className="w-full bg-transparent text-sm text-neutral-800 outline-none placeholder:text-neutral-400"
+          className="w-full bg-transparent text-base text-neutral-800 outline-none placeholder:text-neutral-400 sm:text-sm"
           aria-label="Search Root Account markets"
         />
       </div>
 
-      <div className="pointer-events-auto max-h-[min(78dvh,42rem)] overflow-y-auto rounded-2xl bg-white px-4 pb-4 pt-3.5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] ring-1 ring-black/5">
+      <div className="pointer-events-auto max-h-[min(70dvh,42rem)] overflow-y-auto rounded-2xl bg-white px-4 pb-4 pt-3.5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:max-h-[min(78dvh,42rem)]">
         <h1 className="text-[17px] font-semibold tracking-tight text-neutral-950">
           Talispros™ PMC
         </h1>
@@ -88,7 +99,7 @@ export default function MapSitePmcSidebar({
               setCanadaOpen(true);
               onFocusRegion("canada");
             }}
-            className="block w-full rounded-md px-1 py-1 text-left text-[13px] font-medium text-sky-700 underline-offset-2 hover:underline"
+            className="block w-full rounded-md px-1 py-2 text-left text-[14px] font-medium text-sky-700 underline-offset-2 hover:underline sm:py-1 sm:text-[13px]"
           >
             Root Accounts: Canada
           </button>
@@ -98,7 +109,7 @@ export default function MapSitePmcSidebar({
               setUsaOpen(true);
               onFocusRegion("usa");
             }}
-            className="block w-full rounded-md px-1 py-1 text-left text-[13px] font-medium text-sky-700 underline-offset-2 hover:underline"
+            className="block w-full rounded-md px-1 py-2 text-left text-[14px] font-medium text-sky-700 underline-offset-2 hover:underline sm:py-1 sm:text-[13px]"
           >
             Root Accounts: USA
           </button>
@@ -110,17 +121,32 @@ export default function MapSitePmcSidebar({
             open={canadaOpen}
             onToggle={() => setCanadaOpen((current) => !current)}
           >
-            {canadaPins.map((pin) => (
-              <RegionRow
-                key={pin.id}
-                label={pin.label}
-                selected={selectedPinId === pin.id}
-                onClick={() => onSelectPin(pin.id)}
-              />
-            ))}
-            {canadaPins.length === 0 ? (
-              <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
-            ) : null}
+            <RegionSubfolder label="Root Markets">
+              {canadaRootPins.map((pin) => (
+                <RegionRow
+                  key={pin.id}
+                  label={pin.label}
+                  selected={selectedPinId === pin.id}
+                  onClick={() => onSelectPin(pin.id)}
+                />
+              ))}
+              {canadaRootPins.length === 0 ? (
+                <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
+              ) : null}
+            </RegionSubfolder>
+            <RegionSubfolder label="Corporate Markets">
+              {canadaCorporatePins.map((pin) => (
+                <RegionRow
+                  key={pin.id}
+                  label={pin.label}
+                  selected={selectedPinId === pin.id}
+                  onClick={() => onSelectPin(pin.id)}
+                />
+              ))}
+              {canadaCorporatePins.length === 0 ? (
+                <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
+              ) : null}
+            </RegionSubfolder>
           </RegionFolder>
 
           <RegionFolder
@@ -128,21 +154,53 @@ export default function MapSitePmcSidebar({
             open={usaOpen}
             onToggle={() => setUsaOpen((current) => !current)}
           >
-            {usaPins.map((pin) => (
-              <RegionRow
-                key={pin.id}
-                label={pin.label}
-                selected={selectedPinId === pin.id}
-                onClick={() => onSelectPin(pin.id)}
-              />
-            ))}
-            {usaPins.length === 0 ? (
-              <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
-            ) : null}
+            <RegionSubfolder label="Root Markets">
+              {usaRootPins.map((pin) => (
+                <RegionRow
+                  key={pin.id}
+                  label={pin.label}
+                  selected={selectedPinId === pin.id}
+                  onClick={() => onSelectPin(pin.id)}
+                />
+              ))}
+              {usaRootPins.length === 0 ? (
+                <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
+              ) : null}
+            </RegionSubfolder>
+            <RegionSubfolder label="Corporate Markets">
+              {usaCorporatePins.map((pin) => (
+                <RegionRow
+                  key={pin.id}
+                  label={pin.label}
+                  selected={selectedPinId === pin.id}
+                  onClick={() => onSelectPin(pin.id)}
+                />
+              ))}
+              {usaCorporatePins.length === 0 ? (
+                <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
+              ) : null}
+            </RegionSubfolder>
           </RegionFolder>
         </div>
       </div>
     </aside>
+  );
+}
+
+function RegionSubfolder({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="py-1">
+      <p className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-neutral-500">
+        {label}
+      </p>
+      <div className="space-y-0.5">{children}</div>
+    </div>
   );
 }
 
@@ -162,7 +220,7 @@ function RegionFolder({
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center gap-2 rounded-md px-1 py-1.5 text-left text-[13px] font-medium text-neutral-900 hover:bg-neutral-50"
+        className="flex w-full items-center gap-2 rounded-md px-1 py-2 text-left text-[14px] font-medium text-neutral-900 hover:bg-neutral-50 sm:py-1.5 sm:text-[13px]"
         aria-expanded={open}
       >
         <span className="text-neutral-500" aria-hidden>
@@ -193,7 +251,7 @@ function RegionRow({
     <button
       type="button"
       onClick={onClick}
-      className={`block w-full rounded-md px-2 py-1 text-left text-[12.5px] leading-snug transition ${
+      className={`block w-full rounded-md px-2 py-2 text-left text-[13.5px] leading-snug transition sm:py-1 sm:text-[12.5px] ${
         selected
           ? "bg-sky-50 font-medium text-sky-900"
           : "text-neutral-800 hover:bg-neutral-50"

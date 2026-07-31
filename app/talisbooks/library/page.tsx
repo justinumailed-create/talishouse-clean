@@ -17,6 +17,7 @@ export const dynamic = "force-dynamic";
 interface TalisBooksLibraryPageProps {
   searchParams: Promise<{
     accountType?: string;
+    fastCode?: string;
   }>;
 }
 
@@ -24,8 +25,12 @@ export default async function TalisBooksLibraryPage({
   searchParams,
 }: TalisBooksLibraryPageProps) {
   const params = await searchParams;
+  const fastCode = params.fastCode?.trim() || null;
   const accountType = params.accountType === "derivative" ? "derivative" : "root";
-  const bookshelf = await getTalisBooksBookshelf({ accountType });
+  const bookshelf = await getTalisBooksBookshelf({
+    accountType,
+    fastCode,
+  });
 
   return <TalisBooksLibraryShell bookshelf={bookshelf} />;
 }

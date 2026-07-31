@@ -135,12 +135,14 @@ function PropertyContentPageView({ page }: { page: TalisBooksViewerPage }) {
     layout !== "centerfold_left";
 
   if (isBleed) {
+    const exact = page.exactPdfPage === true;
     return (
       <div
         className={[
           "talisbooks-viewer-page",
           "talisbooks-viewer-page--property",
           "talisbooks-viewer-page--bleed",
+          exact ? "talisbooks-viewer-page--exact-pdf" : "",
           layout === "centerfold_left" ? "talisbooks-viewer-page--fold-left" : "",
           layout === "centerfold_right" ? "talisbooks-viewer-page--fold-right" : "",
           usesContinuousSpread ? "talisbooks-viewer-page--fold-continuous" : "",
@@ -159,7 +161,7 @@ function PropertyContentPageView({ page }: { page: TalisBooksViewerPage }) {
                 }
           }
         />
-        {showCaption ? (
+        {!exact && showCaption ? (
           <div className="talisbooks-viewer-page__bleed-caption">
             {page.title?.trim() ? (
               <h2 className="talisbooks-viewer-page__title">{page.title}</h2>

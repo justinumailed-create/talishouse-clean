@@ -38,6 +38,8 @@ interface TalisBooksViewerStageProps {
   navIndex: number;
   navCount: number;
   direction: 1 | -1;
+  /** Issuu soft-cover magazine: no hardcover spine / closed case. */
+  magazine?: boolean;
   onHoverChange: (hovered: boolean) => void;
   onFlippingChange?: (flipping: boolean) => void;
   onRequestNext: () => void;
@@ -46,6 +48,21 @@ interface TalisBooksViewerStageProps {
 }
 
 const FLIP_EASE: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
+
+function SoftBlank({ side }: { side: "left" | "right" }) {
+  return (
+    <div
+      className={[
+        "talisbooks-viewer-page",
+        "talisbooks-viewer-page--soft-blank",
+        side === "left"
+          ? "talisbooks-viewer-page--soft-blank-left"
+          : "talisbooks-viewer-page--soft-blank-right",
+      ].join(" ")}
+      aria-hidden="true"
+    />
+  );
+}
 
 function Endpaper({ side }: { side: "left" | "right" }) {
   return (
@@ -65,12 +82,14 @@ function Endpaper({ side }: { side: "left" | "right" }) {
 function BookPageFace({
   page,
   side,
+  magazine = false,
 }: {
   page: TalisBooksViewerPage | null;
   side: "left" | "right";
+  magazine?: boolean;
 }) {
   if (!page) {
-    return <Endpaper side={side} />;
+    return magazine ? <SoftBlank side={side} /> : <Endpaper side={side} />;
   }
 
   const darkFolio =
@@ -105,11 +124,13 @@ function FlipLeaf({
   front,
   back,
   progress,
+  magazine = false,
 }: {
   direction: 1 | -1;
   front: TalisBooksViewerPage | null;
   back: TalisBooksViewerPage | null;
   progress: MotionValue<number>;
+  magazine?: boolean;
 }) {
   const forward = direction > 0;
 
@@ -146,7 +167,7 @@ function FlipLeaf({
         }}
       >
         <div className="talisbooks-viewer-book__leaf-face">
-          <BookPageFace page={front} side={forward ? "right" : "left"} />
+          <BookPageFace page={front} side={forward ? "right" : "left"} magazine={magazine} />
           <motion.span
             className={[
               "talisbooks-viewer-book__leaf-shade",
@@ -174,7 +195,7 @@ function FlipLeaf({
         }}
       >
         <div className="talisbooks-viewer-book__leaf-face">
-          <BookPageFace page={back} side={forward ? "left" : "right"} />
+          <BookPageFace page={back} side={forward ? "left" : "right"} magazine={magazine} />
           <motion.span
             className={[
               "talisbooks-viewer-book__leaf-shade",
@@ -196,10 +217,12 @@ function SingleFlipLeaf({
   direction,
   page,
   progress,
+  magazine = false,
 }: {
   direction: 1 | -1;
   page: TalisBooksViewerPage | null;
   progress: MotionValue<number>;
+  magazine?: boolean;
 }) {
   const forward = direction > 0;
   const rotateY = useTransform(progress, [0, 1], forward ? [0, -118] : [0, 118]);
@@ -225,7 +248,7 @@ function SingleFlipLeaf({
       }}
     >
       <div className="talisbooks-viewer-book__leaf-face talisbooks-viewer-book__leaf-face--single">
-        <BookPageFace page={page} side={forward ? "right" : "left"} />
+        <BookPageFace page={page} side={forward ? "right" : "left"} magazine={magazine} />
         <motion.span
           className={[
             "talisbooks-viewer-book__leaf-shade",
@@ -356,6 +379,7 @@ function OpenBookSpread({
   navIndex,
   navCount,
   direction,
+  magazine = false,
   onRequestNext,
   onRequestPrevious,
   onFlippingChange,
@@ -364,6 +388,7 @@ function OpenBookSpread({
   navIndex: number;
   navCount: number;
   direction: 1 | -1;
+  magazine?: boolean;
   onRequestNext: () => void;
   onRequestPrevious: () => void;
   onFlippingChange?: (flipping: boolean) => void;
@@ -474,7 +499,6 @@ function OpenBookSpread({
 
   const cancelGestureFlip = () => {
     clearGestureTimers();
-    const gesture = gestureRef.current;
     gestureRef.current = null;
     setGrabbing(false);
 
@@ -609,9 +633,16 @@ function OpenBookSpread({
     }
 
     if (!gesture.dragging) {
-      // Short click / tap on stage — do not advance pages.
+      // Short click / tap: magazine navigation by clicked page half.
+      const spread = getViewerSpread(book.pages, displayedIndex);
+      const clickedSide = gesture.side;
       clearGestureTimers();
       gestureRef.current = null;
+      if (clickedSide === "right" && spread.right) {
+        onRequestNext();
+      } else if (clickedSide === "left" && spread.left) {
+        onRequestPrevious();
+      }
       return;
     }
 
@@ -653,22 +684,32 @@ function OpenBookSpread({
   const labelSpread: TalisBooksViewerSpread =
     flipping && incoming && flip && flip.to !== flip.from ? incoming : current;
 
+  const soloRight = !labelSpread.left && Boolean(labelSpread.right);
+  const soloLeft = Boolean(labelSpread.left) && !labelSpread.right;
+
   return (
     <>
       <motion.div
         className={[
           "talisbooks-viewer-book",
+          magazine ? "talisbooks-viewer-book--magazine" : "",
+          magazine && soloRight ? "talisbooks-viewer-book--solo-right" : "",
+          magazine && soloLeft ? "talisbooks-viewer-book--solo-left" : "",
           grabbing ? "talisbooks-viewer-book--grabbing" : "",
         ]
           .filter(Boolean)
           .join(" ")}
-        aria-label="Open book"
+        aria-label={magazine ? "Open magazine" : "Open book"}
         initial={{ opacity: 0.7, rotateY: -8, scale: 0.96 }}
         animate={{ opacity: 1, rotateY: 0, scale: 1 }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="talisbooks-viewer-book__edge talisbooks-viewer-book__edge--left" />
-        <div className="talisbooks-viewer-book__edge talisbooks-viewer-book__edge--right" />
+        {magazine ? null : (
+          <>
+            <div className="talisbooks-viewer-book__edge talisbooks-viewer-book__edge--left" />
+            <div className="talisbooks-viewer-book__edge talisbooks-viewer-book__edge--right" />
+          </>
+        )}
         <div className="talisbooks-viewer-book__shadow" aria-hidden="true" />
 
         <div className="talisbooks-viewer-book__spread" ref={spreadNodeRef}>
@@ -692,13 +733,13 @@ function OpenBookSpread({
           />
 
           <div className="talisbooks-viewer-book__page talisbooks-viewer-book__page--left">
-            <BookPageFace page={leftPage} side="left" />
+            <BookPageFace page={leftPage} side="left" magazine={magazine} />
           </div>
 
           <div className="talisbooks-viewer-book__gutter" aria-hidden="true" />
 
           <div className="talisbooks-viewer-book__page talisbooks-viewer-book__page--right">
-            <BookPageFace page={rightPage} side="right" />
+            <BookPageFace page={rightPage} side="right" magazine={magazine} />
           </div>
 
           <AnimatePresence>
@@ -709,6 +750,7 @@ function OpenBookSpread({
                 front={flipFront}
                 back={flipBack}
                 progress={flipProgress}
+                magazine={magazine}
               />
             ) : null}
           </AnimatePresence>
@@ -716,7 +758,7 @@ function OpenBookSpread({
       </motion.div>
 
       <p className="talisbooks-viewer-stage__hint" aria-live="polite">
-        Press & drag to turn · {describeViewerSpread(labelSpread)} · Spread{" "}
+        Click right to advance · click left to go back · {describeViewerSpread(labelSpread)} · Spread{" "}
         {Math.min(displayedIndex, navCount - 1) + 1} of {navCount}
       </p>
     </>
@@ -728,6 +770,7 @@ function OpenBookSingle({
   navIndex,
   navCount,
   direction,
+  magazine = false,
   onRequestNext,
   onRequestPrevious,
   onFlippingChange,
@@ -736,6 +779,7 @@ function OpenBookSingle({
   navIndex: number;
   navCount: number;
   direction: 1 | -1;
+  magazine?: boolean;
   onRequestNext: () => void;
   onRequestPrevious: () => void;
   onFlippingChange?: (flipping: boolean) => void;
@@ -1033,17 +1077,22 @@ function OpenBookSingle({
         className={[
           "talisbooks-viewer-book",
           "talisbooks-viewer-book--single",
+          magazine ? "talisbooks-viewer-book--magazine" : "",
           grabbing ? "talisbooks-viewer-book--grabbing" : "",
         ]
           .filter(Boolean)
           .join(" ")}
-        aria-label="Open book · single page"
+        aria-label={magazine ? "Open magazine · single page" : "Open book · single page"}
         initial={{ opacity: 0.7, rotateY: -6, scale: 0.96 }}
         animate={{ opacity: 1, rotateY: 0, scale: 1 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="talisbooks-viewer-book__edge talisbooks-viewer-book__edge--left" />
-        <div className="talisbooks-viewer-book__edge talisbooks-viewer-book__edge--right" />
+        {magazine ? null : (
+          <>
+            <div className="talisbooks-viewer-book__edge talisbooks-viewer-book__edge--left" />
+            <div className="talisbooks-viewer-book__edge talisbooks-viewer-book__edge--right" />
+          </>
+        )}
         <div className="talisbooks-viewer-book__shadow" aria-hidden="true" />
 
         <div className="talisbooks-viewer-book__single" ref={pageNodeRef}>
@@ -1058,7 +1107,11 @@ function OpenBookSingle({
           />
 
           <div className="talisbooks-viewer-book__page talisbooks-viewer-book__page--single">
-            <BookPageFace page={basePage} side={forward ? "left" : "right"} />
+            <BookPageFace
+              page={basePage}
+              side={forward ? "left" : "right"}
+              magazine={magazine}
+            />
           </div>
 
           <AnimatePresence>
@@ -1068,6 +1121,7 @@ function OpenBookSingle({
                 direction={flip!.direction}
                 page={leafPage}
                 progress={flipProgress}
+                magazine={magazine}
               />
             ) : null}
           </AnimatePresence>
@@ -1089,6 +1143,7 @@ export default function TalisBooksViewerStage({
   navIndex,
   navCount,
   direction,
+  magazine = false,
   onHoverChange,
   onFlippingChange,
   onRequestNext,
@@ -1106,6 +1161,7 @@ export default function TalisBooksViewerStage({
           ? "talisbooks-viewer-stage--open"
           : "talisbooks-viewer-stage--closed",
         viewMode === "single" ? "talisbooks-viewer-stage--single" : "",
+        magazine ? "talisbooks-viewer-stage--magazine" : "",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -1121,7 +1177,7 @@ export default function TalisBooksViewerStage({
       <div className="talisbooks-viewer-stage__desk">
         <div className="talisbooks-viewer-stage__perspective">
           <AnimatePresence mode="wait">
-            {binding === "closed-front" ? (
+            {!magazine && binding === "closed-front" ? (
               <motion.div
                 key="closed-front"
                 className="talisbooks-viewer-stage__closed"
@@ -1143,7 +1199,7 @@ export default function TalisBooksViewerStage({
               </motion.div>
             ) : null}
 
-            {binding === "closed-back" ? (
+            {!magazine && binding === "closed-back" ? (
               <motion.div
                 key="closed-back"
                 className="talisbooks-viewer-stage__closed"
@@ -1165,7 +1221,7 @@ export default function TalisBooksViewerStage({
               </motion.div>
             ) : null}
 
-            {binding === "open" ? (
+            {binding === "open" || magazine ? (
               <motion.div
                 key={`open-book-${viewMode}`}
                 className="talisbooks-viewer-stage__open"
@@ -1180,6 +1236,7 @@ export default function TalisBooksViewerStage({
                     navIndex={navIndex}
                     navCount={navCount}
                     direction={direction}
+                    magazine={magazine}
                     onRequestNext={onRequestNext}
                     onRequestPrevious={onRequestPrevious}
                     onFlippingChange={onFlippingChange}
@@ -1190,6 +1247,7 @@ export default function TalisBooksViewerStage({
                     navIndex={navIndex}
                     navCount={navCount}
                     direction={direction}
+                    magazine={magazine}
                     onRequestNext={onRequestNext}
                     onRequestPrevious={onRequestPrevious}
                     onFlippingChange={onFlippingChange}

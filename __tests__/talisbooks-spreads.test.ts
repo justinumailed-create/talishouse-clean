@@ -52,7 +52,8 @@ describe("TalisBooks open-book spreads", () => {
 
   it("describes spreads for the controls label", () => {
     const pages = makePages(4);
-    expect(describeViewerSpread(getViewerSpread(pages, 0))).toBe("Page 1");
+    expect(describeViewerSpread(getViewerSpread(pages, 0))).toBe("Front cover");
     expect(describeViewerSpread(getViewerSpread(pages, 1))).toBe("Pages 2–3");
+    expect(describeViewerSpread(getViewerSpread(pages, 2))).toBe("Back cover");
   });
 });

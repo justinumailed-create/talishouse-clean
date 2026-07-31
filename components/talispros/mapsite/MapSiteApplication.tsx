@@ -24,16 +24,27 @@ import {
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import { MAPSITE_LISTING_TILE_TOP_FALLBACK_PX } from "@/lib/talispros/mapsite-listing-media";
 import {
+  accountTypeForAudience,
+  type MapSiteCapabilityAccountType,
+} from "@/lib/talispros/account-capabilities";
+import {
   isClaimable,
   MAPSITE_APP_PATH,
   pinPhaseLabel,
-  showsResourceActions,
 } from "@/lib/talispros/mapsite-state";
+import {
+  getMapSiteOnboardingPhase,
+} from "@/lib/talispros/mapsite-onboarding-phase";
+import { ROUTES } from "@/lib/routes";
 import MapSiteExpressInterestCard from "./MapSiteExpressInterestCard";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
 import MapSiteMarketPartnerCard from "./MapSiteMarketPartnerCard";
 import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
+import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
+
+/** Auto-reveal PayPal registration under the sidebar after MapSite load. */
+const PAYPAL_REGISTER_REVEAL_DELAY_MS = 10_000;
 
 const PIN_COLORS: Record<string, string> = {
   UNCLAIMED: "#1A73E8",
@@ -51,11 +62,26 @@ interface MapSiteApplicationProps {
   initialMapSite: MapSitePlatformRecord;
   audience: RegistrationMarket;
   requestId?: string | null;
+  /** Owner MapSite™ only: select primary PIN and open the property flag on load. */
   openPinOnLoad?: boolean;
+  /** Owner MapSite™ only: one-time guided prompt above the open property flag. */
+  showStartHere?: boolean;
   /** Claim-form plan for PayPal (e.g. ROOT_ACCOUNT_1). */
   paymentPlanType?: PlanType;
   /** Completed PayPal payment on file — unlocks Express Interest. */
   paymentReceived?: boolean;
+  /** Whether a TalisBook™ exists for this MapSite / FAST Code. */
+  hasTalisBook?: boolean;
+  /** Viewer path for View Your TalisBook™. */
+  talisBookHref?: string | null;
+  /** Show PayPal immediately (Activate Your MapSite™); otherwise reveals after 10s. */
+  showActivatePayment?: boolean;
+  /** Entry-point choice: user setup vs done-for-you request. */
+  onboardingMode?: "self" | "assisted";
+  /** Original audience page where prospect entered (for context). */
+  sourceAudience?: RegistrationMarket | null;
+  /** Capability account type that drives permissions and UI visibility. */
+  accountType?: MapSiteCapabilityAccountType;
 }
 
 export default function MapSiteApplication({
@@ -63,8 +89,15 @@ export default function MapSiteApplication({
   audience,
   requestId = null,
   openPinOnLoad = false,
+  showStartHere = false,
   paymentPlanType = "ROOT_ACCOUNT",
   paymentReceived = false,
+  hasTalisBook = false,
+  talisBookHref = null,
+  showActivatePayment = false,
+  onboardingMode = "self",
+  sourceAudience = null,
+  accountType,
 }: MapSiteApplicationProps) {
   const [mapsite] = useState(initialMapSite);
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
@@ -144,10 +177,17 @@ export default function MapSiteApplication({
       <MapSiteChrome
         mapsite={mapsite}
         audience={audience}
+        accountType={accountType ?? accountTypeForAudience(audience)}
+        onboardingMode={onboardingMode}
+        sourceAudience={sourceAudience}
         requestId={requestId}
         openPinOnLoad={openPinOnLoad}
+        showStartHere={showStartHere}
         paymentPlanType={paymentPlanType}
         paymentReceived={paymentReceived}
+        hasTalisBook={hasTalisBook}
+        talisBookHref={talisBookHref}
+        showActivatePayment={showActivatePayment}
         selectedPinId={selectedPinId}
         setSelectedPinId={setSelectedPinId}
         beginFocusGuard={beginFocusGuard}
@@ -159,20 +199,34 @@ export default function MapSiteApplication({
 function MapSiteChrome({
   mapsite,
   audience,
+  accountType,
+  onboardingMode,
+  sourceAudience,
   requestId,
   openPinOnLoad,
+  showStartHere,
   paymentPlanType,
   paymentReceived,
+  hasTalisBook,
+  talisBookHref,
+  showActivatePayment,
   selectedPinId,
   setSelectedPinId,
   beginFocusGuard,
 }: {
   mapsite: MapSitePlatformRecord;
   audience: RegistrationMarket;
+  accountType: MapSiteCapabilityAccountType;
+  onboardingMode: "self" | "assisted";
+  sourceAudience: RegistrationMarket | null;
   requestId: string | null;
   openPinOnLoad: boolean;
+  showStartHere: boolean;
   paymentPlanType: PlanType;
   paymentReceived: boolean;
+  hasTalisBook: boolean;
+  talisBookHref: string | null;
+  showActivatePayment: boolean;
   selectedPinId: string | null;
   setSelectedPinId: (id: string | null) => void;
   beginFocusGuard: () => void;
@@ -185,6 +239,7 @@ function MapSiteChrome({
   const lastFocusedForSelectionRef = useRef<string | null>(null);
 
   const [compact, setCompact] = useState(false);
+  const [showDelayedPayment, setShowDelayedPayment] = useState(false);
   const [alignTop, setAlignTop] = useState(MAPSITE_LISTING_TILE_TOP_FALLBACK_PX);
   const [popupCenterX, setPopupCenterX] = useState<number | null>(null);
   const [expandedCardHeight, setExpandedCardHeight] = useState<number | null>(
@@ -312,23 +367,70 @@ function MapSiteChrome({
   const claimed = !isClaimable(mapsite.status);
   // PayPal stays until a completed payment note exists (not merely ACTIVE status).
   const paid = paymentReceived;
+  const onboardingPhase = getMapSiteOnboardingPhase({
+    status: mapsite.status,
+    paymentReceived: paid,
+    hasTalisBook: hasTalisBook || Boolean(talisBookHref || mapsite.teb_url),
+  });
+
+  // Unpaid claimed MapSites: reveal PayPal after load delay (or immediately via Activate).
+  useEffect(() => {
+    if (!claimed || paid) {
+      setShowDelayedPayment(false);
+      return;
+    }
+    if (showActivatePayment) {
+      setShowDelayedPayment(true);
+      return;
+    }
+    setShowDelayedPayment(false);
+    const timer = window.setTimeout(() => {
+      setShowDelayedPayment(true);
+    }, PAYPAL_REGISTER_REVEAL_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [claimed, paid, showActivatePayment, mapsite.id]);
+
+  const bookHref =
+    talisBookHref ||
+    (typeof mapsite.teb_url === "string" && mapsite.teb_url.trim()
+      ? mapsite.teb_url.trim()
+      : hasTalisBook && mapsite.fast_code
+        ? `${ROUTES.TALISBOOKS_LIBRARY}?fastCode=${encodeURIComponent(
+            mapsite.fast_code.trim()
+          )}`
+        : null);
 
   const claimHref = useMemo(() => {
+    if (onboardingMode === "assisted") {
+      const params = new URLSearchParams({
+        audience: "listings",
+      });
+      if (sourceAudience) {
+        params.set("sourceAudience", sourceAudience);
+      }
+      return `/talispros/build-mapsite?${params.toString()}`;
+    }
     const params = new URLSearchParams({
       mapsiteId: mapsite.id,
       audience,
       returnTo: MAPSITE_APP_PATH,
     });
     return `/talispros/markets/claim-a-market?${params.toString()}`;
-  }, [mapsite.id, audience]);
+  }, [mapsite.id, audience, onboardingMode, sourceAudience]);
+  const claimLabel =
+    onboardingMode === "assisted"
+      ? "Have It Built — No Charge"
+      : "Build My MapSite™";
 
+  // Express Interest only after payment. PayPal uses claim-form planType;
+  // auto-reveals under the sidebar 10s after load (or immediately via Activate).
   const registrationCard =
     claimed && paid && mapsite.fast_code ? (
       <MapSiteExpressInterestCard
         fastCode={mapsite.fast_code}
         propertyTitle={mapsite.property_title}
       />
-    ) : claimed && showsResourceActions(mapsite.status) ? (
+    ) : claimed && !paid && showDelayedPayment ? (
       <MapSitePaymentCard
         audience={audience}
         mapsiteId={mapsite.id}
@@ -349,7 +451,7 @@ function MapSiteChrome({
         ref={sidebarStackRef}
         className={
           compact
-            ? "pointer-events-none absolute inset-x-0 top-0 z-20 h-[min(48%,28rem)] p-3"
+            ? "pointer-events-none absolute inset-x-0 top-0 z-20 h-[min(52%,30rem)] p-3 sm:h-[min(48%,28rem)]"
             : "pointer-events-none absolute inset-0 z-20"
         }
       >
@@ -373,15 +475,30 @@ function MapSiteChrome({
       </div>
 
       {selectedPinId === mapsite.id ? (
-        <MapSitePropertyPopup
-          mapsite={mapsite}
-          claimHref={claimHref}
-          alignTop={alignTop}
-          centerX={popupCenterX}
-          cardHeight={expandedCardHeight}
-          compact={compact}
-          onClose={() => setSelectedPinId(null)}
-        />
+        <>
+          <MapSitePropertyPopup
+            mapsite={mapsite}
+            claimHref={claimHref}
+            claimLabel={claimLabel}
+            accountType={accountType}
+            onboardingPhase={onboardingPhase}
+            talisBookHref={bookHref}
+            alignTop={alignTop}
+            centerX={popupCenterX}
+            cardHeight={expandedCardHeight}
+            compact={compact}
+            onClose={() => setSelectedPinId(null)}
+          />
+          <MapSiteStartHereOverlay
+            mapsiteId={mapsite.id}
+            fastCode={mapsite.fast_code}
+            accountType={audience}
+            requestId={requestId}
+            tipTop={alignTop}
+            centerX={popupCenterX}
+            enabled={showStartHere && onboardingPhase === "ACTIVE"}
+          />
+        </>
       ) : null}
     </div>
   );

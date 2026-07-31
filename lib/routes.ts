@@ -49,6 +49,9 @@ export const ROUTES = {
   TALISBOOKS_ADMIN_CENTERFOLDS: "/admin/talisbooks/centerfolds",
   TALISBOOKS_CLIENT_BOOKS: "/client/books",
   TALISTV: "/talistv",
+  TALISPROS_EBOOK_CHOICE: "/talispros/ebook-choice",
+  TALISPROS_EBOOK_GENERATE: "/talispros/ebook-generate",
+  TALISPROS_EBOOK_RAHUL: "/talispros/ebook-rahul",
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

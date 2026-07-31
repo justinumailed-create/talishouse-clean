@@ -13,10 +13,19 @@ import {
   MAPSITE_LISTING_TILE_TOP_FALLBACK_PX,
 } from "@/lib/talispros/mapsite-listing-media";
 import { ROUTES } from "@/lib/routes";
-import { isClaimable, showsResourceActions } from "@/lib/talispros/mapsite-state";
+import { isClaimable } from "@/lib/talispros/mapsite-state";
+import {
+  capabilitiesForAccountType,
+  type MapSiteCapabilityAccountType,
+  type MapSiteResourceKey,
+} from "@/lib/talispros/account-capabilities";
+import {
+  showsActiveResourceButtons,
+  type MapSiteOnboardingPhase,
+} from "@/lib/talispros/mapsite-onboarding-phase";
 import MapSitePhotoGallery from "./MapSitePhotoGallery";
 
-type ResourceKey = "mls" | "url" | "teb" | "ttv";
+type ResourceKey = MapSiteResourceKey;
 
 const RESOURCES: {
   key: ResourceKey;
@@ -36,7 +45,17 @@ const RESOURCES: {
   {
     key: "teb",
     label: "TEB™",
-    resolveHref: (site) => site.teb_url?.trim() || ROUTES.TALISBOOKS_LIBRARY,
+    resolveHref: (site) => {
+      const custom = site.teb_url?.trim() || "";
+      const code = site.fast_code?.trim();
+      // Prefer FAST-code shelf unless admin set a fully custom absolute TEB URL.
+      if (custom && /^https?:\/\//i.test(custom)) return custom;
+      if (code) {
+        return `${ROUTES.TALISBOOKS_LIBRARY}?fastCode=${encodeURIComponent(code)}`;
+      }
+      if (custom.startsWith("/")) return custom;
+      return ROUTES.TALISBOOKS_LIBRARY;
+    },
   },
   {
     key: "ttv",
@@ -94,6 +113,12 @@ function ResourceButton({
 interface MapSitePropertyPopupProps {
   mapsite: MapSitePlatformRecord;
   claimHref: string;
+  claimLabel?: string;
+  accountType?: MapSiteCapabilityAccountType;
+  /** UI onboarding phase (derived; not a DB status). */
+  onboardingPhase: MapSiteOnboardingPhase;
+  /** Viewer href for View Your TalisBook™ (pending / book-ready). */
+  talisBookHref?: string | null;
   /** Top of the FAST Code card — shared with pin popup. */
   alignTop?: number;
   /** Horizontal center of the popup in root coordinates (px). */
@@ -112,6 +137,10 @@ interface MapSitePropertyPopupProps {
 export default function MapSitePropertyPopup({
   mapsite,
   claimHref,
+  claimLabel = "Build My MapSite™",
+  accountType = "derivative",
+  onboardingPhase,
+  talisBookHref = null,
   alignTop = MAPSITE_LISTING_TILE_TOP_FALLBACK_PX,
   centerX = null,
   cardHeight = null,
@@ -120,10 +149,27 @@ export default function MapSitePropertyPopup({
 }: MapSitePropertyPopupProps) {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const claimable = isClaimable(mapsite.status);
-  const showActions = showsResourceActions(mapsite.status);
+  const showActiveResources = showsActiveResourceButtons(onboardingPhase);
+  const capabilities = capabilitiesForAccountType(accountType);
+  const visibleResources = RESOURCES.filter((resource) =>
+    capabilities.resourceButtons.includes(resource.key)
+  );
   const heroImage = getMapSiteListingHeroImage(mapsite);
   const galleryImages = getMapSiteListingGalleryImages(mapsite);
   const photoCount = getMapSiteListingPhotoCount(mapsite);
+  const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
+  const address =
+    mapsite.property_address?.trim() ||
+    mapsite.property_title?.trim() ||
+    null;
+  const showPendingActions =
+    onboardingPhase === "BUILD_SUBMITTED" || onboardingPhase === "BOOK_READY";
+  const showBookButton = Boolean(talisBookHref);
+  const pendingHasActions =
+    showPendingActions &&
+    (showBookButton || onboardingPhase === "BUILD_SUBMITTED");
+  const showActiveBookButton =
+    showActiveResources && showBookButton && Boolean(talisBookHref);
 
   return (
     <>
@@ -142,7 +188,11 @@ export default function MapSitePropertyPopup({
         >
           <div
             className={`relative w-full shrink-0 bg-neutral-200/80 ${
-              showActions ? "h-[120px]" : compact ? "h-28" : "h-36"
+              showActiveResources || pendingHasActions || showActiveBookButton
+                ? "h-[120px]"
+                : compact
+                  ? "h-28"
+                  : "h-36"
             }`}
           >
             <button
@@ -167,7 +217,7 @@ export default function MapSitePropertyPopup({
             <button
               type="button"
               onClick={onClose}
-              className="absolute right-2.5 top-2.5 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white/50 text-[15px] leading-none text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition hover:bg-white/70"
+              className="absolute right-2.5 top-2.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/50 text-[17px] leading-none text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition hover:bg-white/70"
               aria-label="Close"
             >
               ×
@@ -176,7 +226,7 @@ export default function MapSitePropertyPopup({
             <button
               type="button"
               onClick={() => setGalleryOpen(true)}
-              className="absolute bottom-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-full bg-black/75 px-2.5 py-1 text-[11px] font-medium text-white transition hover:bg-black/90"
+              className="absolute bottom-2.5 right-2.5 z-10 inline-flex min-h-8 items-center gap-1 rounded-full bg-black/75 px-2.5 py-1 text-[11px] font-medium text-white transition hover:bg-black/90"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -197,29 +247,83 @@ export default function MapSitePropertyPopup({
             <h2 className="shrink-0 text-[15px] font-semibold leading-snug tracking-tight text-black">
               {mapsite.property_title}
             </h2>
-            <p className="mt-1 min-h-0 shrink line-clamp-2 text-[12px] leading-[1.35] text-black">
-              {mapsite.property_description ||
-                "Welcome to Talispros™. Choose your market and begin onboarding."}
-            </p>
+            {fastCode ? (
+              <p className="mt-1 shrink-0 text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-500">
+                FAST Code: {fastCode}
+              </p>
+            ) : (
+              <p className="mt-1 shrink-0 text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-500">
+                {capabilities.displayName}
+              </p>
+            )}
+            {address ? (
+              <p className="mt-1 min-h-0 shrink line-clamp-2 text-[12px] leading-[1.35] text-black">
+                {address}
+              </p>
+            ) : (
+              <p className="mt-1 min-h-0 shrink line-clamp-2 text-[12px] leading-[1.35] text-black">
+                {mapsite.property_description ||
+                  "Welcome to Talispros™. Choose your market and begin onboarding."}
+              </p>
+            )}
 
             {claimable ? (
               <Link
                 href={claimHref}
-                className="mt-auto flex w-full shrink-0 items-center justify-center rounded-xl border border-neutral-200/80 bg-white/75 px-4 py-2 text-sm font-medium text-neutral-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)] backdrop-blur-sm transition hover:border-neutral-300 hover:bg-white/85"
+                className="mt-auto flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-neutral-200/80 bg-white/75 px-4 py-2 text-sm font-medium text-neutral-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)] backdrop-blur-sm transition hover:border-neutral-300 hover:bg-white/85"
               >
-                Claim a Market
+                {claimLabel}
               </Link>
             ) : null}
 
-            {showActions ? (
-              <div className="mt-auto grid shrink-0 grid-cols-4 gap-1.5 pt-2.5">
-                {RESOURCES.map((resource) => (
-                  <ResourceButton
-                    key={resource.key}
-                    href={resource.resolveHref(mapsite)}
-                    label={resource.label}
-                  />
-                ))}
+            {showPendingActions ? (
+              <div className="mt-auto flex shrink-0 flex-col gap-2 pt-2.5">
+                {onboardingPhase === "BUILD_SUBMITTED" && !showBookButton ? (
+                  <p className="text-[12px] leading-snug text-neutral-600">
+                    Your first TalisBook™ is being prepared. You&apos;ll see View
+                    Your TalisBook™ here when it&apos;s ready.
+                  </p>
+                ) : null}
+                {showBookButton && talisBookHref ? (
+                  <Link
+                    href={talisBookHref}
+                    className="flex min-h-11 w-full items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
+                  >
+                    View Your TalisBook™
+                  </Link>
+                ) : null}
+              </div>
+            ) : null}
+
+            {showActiveResources ? (
+              <div
+                className={`mt-auto flex shrink-0 flex-col gap-2 ${
+                  showPendingActions ? "pt-0" : "pt-2.5"
+                }`}
+              >
+                {showActiveBookButton && talisBookHref ? (
+                  <Link
+                    href={talisBookHref}
+                    className="flex min-h-11 w-full items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
+                  >
+                    View Your TalisBook™
+                  </Link>
+                ) : null}
+                {visibleResources.length > 0 ? (
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {visibleResources.map((resource) => (
+                      <ResourceButton
+                        key={resource.key}
+                        href={
+                          resource.key === "teb" && talisBookHref
+                            ? talisBookHref
+                            : resource.resolveHref(mapsite)
+                        }
+                        label={resource.label}
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
             ) : null}
           </div>

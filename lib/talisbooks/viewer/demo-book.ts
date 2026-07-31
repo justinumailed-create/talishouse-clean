@@ -1,22 +1,8 @@
 import type { TalisBooksViewerBook, TalisBooksViewerPage } from "./types";
 import { MAPSITE_DEMO_LOCATION } from "@/lib/mapsite/demo-location";
+import { ensurePermanentClosingPages } from "@/lib/talisbooks/permanent-pages";
 
 const ASSET = "/talisbooks/sample/clean";
-
-const AGENT = {
-  name: "Ralf Meyer",
-  title: "Root Account Holder · Coastal Listings",
-  phone: "902-317-2223",
-  email: "remecom@mac.com",
-  photoUrl: `${ASSET}/portrait.jpg`,
-  brokerageName: "Talispros™ Partner Realty",
-  brokerageLine: "Cape Breton · Meat Cove · Atlantic Shore",
-  brokerageLogoUrl: `${ASSET}/brokerage-banner.jpg`,
-  slogan: "Where the Atlantic finds you.",
-  mission:
-    "We connect buyers and guests with coastal places worth staying for - honest photos, clear location, and a Mapsite PIN that opens the full story.",
-} as const;
-
 const ADDRESS = MAPSITE_DEMO_LOCATION.streetAddress;
 
 function centerfoldPair(
@@ -67,127 +53,110 @@ function propertyPage(
 }
 
 /**
- * Sample E-Book for live demos — structured from TEB-TWO2 bones + Ralf's photo set.
- * 16 pages within official 12–22 bounds: cover, pages 2–3 brokerage, interiors, closing = page 3.
+ * FSBO demonstration TalisBook™ — optimized for owner-seller onboarding.
+ *
+ * Intentionally omits broker branding, corporate pages, and pages 2–3 brokerage
+ * layouts. Those remain scaffolded in `brokerage-scaffold.ts` for a future
+ * brokerage demonstration mode.
+ *
+ * Shape: cover → MapSite location → property story → Glasshouse brochure (permanent)
+ * → soft back cover. ensurePermanentClosingPages() injects brochure before back cover.
  */
 export function createDemoViewerBook(): TalisBooksViewerBook {
-  const page2: TalisBooksViewerPage = {
-    id: "p2",
-    pageNumber: 2,
-    pageRole: "agent_brokerage",
-    layout: "agent_intro",
-    title: "Your Listing Host",
-    agentName: AGENT.name,
-    agentTitle: AGENT.title,
-    agentPhone: AGENT.phone,
-    agentEmail: AGENT.email,
-    agentPhotoUrl: AGENT.photoUrl,
-    brokerageName: AGENT.brokerageName,
-    brokerageLine: AGENT.brokerageLine,
-    brokerageLogoUrl: AGENT.brokerageLogoUrl,
-    slogan: AGENT.slogan,
-    mission: AGENT.mission,
-  };
-
-  const page3: TalisBooksViewerPage = {
-    id: "p3",
-    pageNumber: 3,
-    pageRole: "property_content",
-    layout: "maps",
-    title: "Property Location",
-    address: MAPSITE_DEMO_LOCATION.streetAddress,
-    latitude: MAPSITE_DEMO_LOCATION.latitude,
-    longitude: MAPSITE_DEMO_LOCATION.longitude,
-    mapZoom: MAPSITE_DEMO_LOCATION.mapZoom,
-    body: "Street address or geo-coordinates place the Mapsite PIN — tap through to the full interactive property story.",
-  };
-
-  const closingBrokeragePage: TalisBooksViewerPage = {
-    id: "p16",
-    pageNumber: 16,
-    pageRole: "agent_brokerage",
-    layout: "agent_summary",
-    title: "Continue the Conversation",
-    agentName: AGENT.name,
-    agentTitle: AGENT.title,
-    agentPhone: AGENT.phone,
-    agentEmail: AGENT.email,
-    agentPhotoUrl: AGENT.photoUrl,
-    brokerageName: AGENT.brokerageName,
-    brokerageLine: AGENT.brokerageLine,
-    brokerageLogoUrl: AGENT.brokerageLogoUrl,
-    slogan: AGENT.slogan,
-    mission:
-      "Every listing auto-generates a TalisBooks E-Book on your Mapsite - street address or geo-coordinates place the PIN, and up to twelve photos become cover, centerfolds, and parting shot.",
-    body: `${AGENT.slogan} Reach ${AGENT.name} at ${AGENT.phone} or ${AGENT.email}. Mapsite flags: URL · MLS · TEB · TTV.`,
-  };
-
-  const pages: TalisBooksViewerPage[] = [
+  const storyPages: TalisBooksViewerPage[] = [
     {
       id: "p1",
       pageNumber: 1,
       pageRole: "cover",
       layout: "cover",
-      title: "Sample E-Book",
+      title: "Meat Cove Retreat",
       subtitle: ADDRESS,
       address: ADDRESS,
       coverTemplateId: "horizon-caption",
       heroImageUrl: `${ASSET}/cover.jpg`,
     },
-    page2,
-    page3,
-    ...centerfoldPair(4, "03", {
+    {
+      id: "p2",
+      pageNumber: 2,
+      pageRole: "property_content",
+      layout: "maps",
+      title: "Find it on the map",
+      address: MAPSITE_DEMO_LOCATION.streetAddress,
+      latitude: MAPSITE_DEMO_LOCATION.latitude,
+      longitude: MAPSITE_DEMO_LOCATION.longitude,
+      mapZoom: MAPSITE_DEMO_LOCATION.mapZoom,
+      body: "Your MapSite™ PIN marks the property. Tap through for the full interactive story — no brokerage page required.",
+    },
+    ...centerfoldPair(3, "03", {
       title: "Cabins on the Ridge",
-      body: "Three arched-roof cabins sit on the grassy ridge - dark cedar, quiet porches, and an open horizon to the Atlantic.",
+      body: "Three arched-roof cabins sit on the grassy ridge — dark cedar, quiet porches, and an open horizon to the Atlantic.",
     }),
-    ...centerfoldPair(6, "02", {
+    ...centerfoldPair(5, "02", {
       title: "The Cove",
       body: "A crescent beach tucked between cliffs and forest. Turquoise shallows, pebble shore, room to breathe.",
     }),
     propertyPage(
-      8,
+      7,
       "07.jpg",
       "Cliffside Picnic",
       "A red table on the grass above the bay. Lunch with a cliff-line view and nowhere urgent to be.",
       "full_bleed",
     ),
     propertyPage(
-      9,
+      8,
       "04.jpg",
       "Inside the Cabin",
       "Light wood walls, vaulted ceiling, and a doorway that opens straight to grass, deck, and sky.",
       "caption",
     ),
-    ...centerfoldPair(10, "01", {
+    ...centerfoldPair(9, "01", {
       title: "Open Water",
-      body: "Pale sky, deep Atlantic, and a dark evergreen ridge - the cover landscape, now as a full centerfold.",
+      body: "Pale sky, deep Atlantic, and a dark evergreen ridge — the cover landscape as a full centerfold.",
     }),
     propertyPage(
-      12,
+      11,
       "05.jpg",
       "Forest Edge",
-      "Shade and scrub meet the lawn - the soft boundary between cabin life and the trail to the beach.",
+      "Shade and scrub meet the lawn — the soft boundary between cabin life and the trail to the beach.",
       "caption",
     ),
     propertyPage(
-      13,
+      12,
       "08.jpg",
       "Afternoon Stillness",
-      "Wide water and quiet air. A pause page before the parting shot.",
+      "Wide water and quiet air. A pause before the last look at the place.",
       "full_bleed",
     ),
-    ...centerfoldPair(14, "12", {
-      title: "Parting Shot",
-      body: `The essence of the listing - water, light, and the promise of return. ${AGENT.name} · ${AGENT.phone}`,
-    }),
-    closingBrokeragePage,
+    propertyPage(
+      13,
+      "09.jpg",
+      "Last Light",
+      "One more frame of the property before the Glasshouse™ brochure and back cover.",
+      "parting",
+    ),
+    {
+      id: "p-back",
+      pageNumber: 14,
+      pageRole: "cover",
+      layout: "cover",
+      title: "Meat Cove Retreat",
+      subtitle: ADDRESS,
+      address: ADDRESS,
+      coverTemplateId: "horizon-caption",
+      heroImageUrl: `${ASSET}/back-cover.jpg`,
+      body: "Listed by the owner · Open the MapSite™ PIN for details.",
+    },
   ];
+
+  const pages = ensurePermanentClosingPages(storyPages);
 
   return {
     id: "demo-sample-ebook",
     slug: "sample-ebook",
-    title: "Sample E-Book",
+    title: "Meat Cove Retreat",
     subtitle: ADDRESS,
+    listingProfile: "fsbo",
+    viewerStyle: "magazine",
     frontCoverImageUrl: `${ASSET}/cover.jpg`,
     backCoverImageUrl: `${ASSET}/back-cover.jpg`,
     pages,

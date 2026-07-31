@@ -44,7 +44,7 @@ export default function MapSiteListingSidebar({
         className="pointer-events-auto flex h-full min-h-0 max-h-full flex-1 flex-col gap-3 overflow-y-auto overscroll-y-contain touch-pan-y pr-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         onWheel={stopMapScrollSteal}
       >
-        <div className="flex shrink-0 items-center gap-2 rounded-full bg-white/50 px-3 py-2 shadow-md ring-1 ring-black/5 backdrop-blur-sm">
+        <div className="flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-white/50 px-3 py-2 shadow-md ring-1 ring-black/5 backdrop-blur-sm">
           <svg
             viewBox="0 0 24 24"
             className="h-4 w-4 shrink-0 text-neutral-500"
@@ -59,7 +59,7 @@ export default function MapSiteListingSidebar({
           <input
             type="search"
             placeholder="Search..."
-            className="w-full bg-transparent text-sm text-neutral-700 outline-none placeholder:text-neutral-400"
+            className="w-full bg-transparent text-base text-neutral-700 outline-none placeholder:text-neutral-400 sm:text-sm"
             aria-label="Search MapSite"
           />
         </div>

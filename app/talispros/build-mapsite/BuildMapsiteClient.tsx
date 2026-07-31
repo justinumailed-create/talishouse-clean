@@ -12,10 +12,15 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { submitBuildRequest, validateBuildMapsiteFastCode, type ActionResult as BuildResult } from "./actions";
+import { openMapSiteAfterBuildRequest } from "./success-actions";
 import HomePinLocationSection, {
   validateHomePinLocation,
 } from "@/components/build-mapsite/HomePinLocationSection";
 import { defaultHomePinLocationValues } from "@/components/build-mapsite/home-pin-types";
+import {
+  ADPRO_CATEGORY_OPTIONS,
+  normalizeAdproCategoryCode,
+} from "@/lib/talispros/adpro-categories";
 
 const ADPRE_PACKAGES = [
   { value: "adpro-single", label: "Single AdPro™ PIN", description: "Individual business placement." },
@@ -35,6 +40,7 @@ interface FormData {
   company: string;
   marketType: string;
   accountType: string;
+  adproCategory: string;
   fastCode: string;
   streetAddress: string;
   latitude: string;
@@ -83,6 +89,7 @@ const defaultForm: FormData = {
   company: "",
   marketType: "",
   accountType: "",
+  adproCategory: "",
   fastCode: "",
   ...defaultHomePinLocationValues,
   helpPreference: "",
@@ -260,6 +267,10 @@ function requiresFastCodeValidation(accountType: string): boolean {
   return accountType === "derivative" || accountType.startsWith("adpro-");
 }
 
+function isAdproAccountType(accountType: string): boolean {
+  return accountType.startsWith("adpro-");
+}
+
 async function uploadBuildMapsiteFile(
   requestId: string,
   fieldName: string,
@@ -363,7 +374,15 @@ function AccountTypeSelector({ value, onChange, error }: { value: string; onChan
   );
 }
 
-export default function BuildMapsiteClient() {
+interface BuildMapsiteClientProps {
+  initialAudienceType?: string;
+  onboardingMode?: "standard" | "self";
+}
+
+export default function BuildMapsiteClient({
+  initialAudienceType = "",
+  onboardingMode = "standard",
+}: BuildMapsiteClientProps) {
   useEffect(() => {
     document.documentElement.style.height = "auto";
     document.body.style.minHeight = "auto";
@@ -384,13 +403,26 @@ export default function BuildMapsiteClient() {
   const [fastCodeValidated, setFastCodeValidated] = useState(false);
   const [validatingFastCode, setValidatingFastCode] = useState(false);
   const [validatedFastCode, setValidatedFastCode] = useState("");
+  const skipFastCodeValidation = onboardingMode === "self";
 
   useEffect(() => {
-    if (!requiresFastCodeValidation(form.accountType)) {
+    if (!requiresFastCodeValidation(form.accountType) || skipFastCodeValidation) {
       setFastCodeValidated(false);
       setValidatedFastCode("");
     }
-  }, [form.accountType]);
+  }, [form.accountType, skipFastCodeValidation]);
+
+  useEffect(() => {
+    if (!initialAudienceType) return;
+    setForm((prev) =>
+      prev.marketType.trim()
+        ? prev
+        : {
+            ...prev,
+            marketType: initialAudienceType,
+          }
+    );
+  }, [initialAudienceType]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -410,6 +442,9 @@ export default function BuildMapsiteClient() {
       if (key === "accountType" && requiresFastCodeValidation(String(value))) {
         next.fastCode = isRootAccountType(prev.accountType) ? "" : prev.fastCode;
       }
+      if (key === "accountType" && !isAdproAccountType(String(value))) {
+        next.adproCategory = "";
+      }
       return next;
     });
     if (key === "accountType") {
@@ -423,7 +458,7 @@ export default function BuildMapsiteClient() {
     if (errors[key]) setErrors((prev) => { const next = { ...prev }; delete next[key]; return next; });
   }
   async function handleValidateFastCode() {
-    if (!requiresFastCodeValidation(form.accountType)) return;
+    if (!requiresFastCodeValidation(form.accountType) || skipFastCodeValidation) return;
     const code = form.fastCode.trim();
     if (!code) {
       setErrors((prev) => ({ ...prev, fastCode: "Required" }));
@@ -462,7 +497,13 @@ export default function BuildMapsiteClient() {
     if (!form.phone.trim()) errs.phone = "Required";
     if (!form.company.trim()) errs.company = "Required";
     if (!form.accountType) errs.accountType = "Select an account type";
-    if (requiresFastCodeValidation(form.accountType)) {
+    if (
+      isAdproAccountType(form.accountType) &&
+      !normalizeAdproCategoryCode(form.adproCategory)
+    ) {
+      errs.adproCategory = "Select an Adpros category";
+    }
+    if (requiresFastCodeValidation(form.accountType) && !skipFastCodeValidation) {
       if (!form.fastCode.trim()) errs.fastCode = "Required";
       else if (!fastCodeValidated) errs.fastCode = "Validate your FAST Code before submitting";
     }
@@ -547,6 +588,7 @@ export default function BuildMapsiteClient() {
       fd.append("company", form.company);
       fd.append("marketType", form.marketType);
       fd.append("accountType", form.accountType);
+      fd.append("adproCategory", form.adproCategory);
       fd.append("fastCode", form.fastCode);
       fd.append("streetAddress", form.streetAddress);
       fd.append("latitude", form.latitude);
@@ -578,11 +620,27 @@ export default function BuildMapsiteClient() {
       if (tebPictureUrls.length > 0) {
         fd.append("tebPictureUrls", JSON.stringify(tebPictureUrls));
       }
+      if (skipFastCodeValidation) {
+        fd.append("skipFastCodeValidation", "true");
+      }
       const result: BuildResult = await submitBuildRequest(fd);
       if (result.success && result.requestId) {
         setSubmittedRequestId(result.requestId);
         localStorage.setItem("talispros_build_mapsite_submitted", JSON.stringify({ form, submittedAt: new Date().toISOString(), requestId: result.requestId }));
-        setSubmitted(true);
+        // Open the client's MapSite™ immediately — first visible success.
+        try {
+          const opened = await openMapSiteAfterBuildRequest({
+            requestId: result.requestId,
+            fastCode: result.fastCode ?? form.fastCode ?? null,
+            accountType: form.accountType || null,
+            successPath: "self-ebook",
+          });
+          window.location.assign(opened.href);
+          return;
+        } catch (openError) {
+          console.error("[build-mapsite] MapSite open failed:", openError);
+          setSubmitted(true);
+        }
       } else {
         setSubmitError(result.error || "Something went wrong. Please try again.");
       }
@@ -644,8 +702,15 @@ export default function BuildMapsiteClient() {
             </div>
           </div>
           <div className="flex flex-col gap-3">
-            <Link href="/" className="w-full h-12 bg-[#2563eb] text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-[#1d4ed8] active:scale-[0.98] transition-all">
-              Return to Home
+            <Link
+              href={
+                submittedRequestId
+                  ? `/talispros/mapsite?claimed=1&view=pin&requestId=${encodeURIComponent(submittedRequestId)}`
+                  : "/talispros/mapsite?claimed=1&view=pin"
+              }
+              className="w-full h-12 bg-[#2563eb] text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-[#1d4ed8] active:scale-[0.98] transition-all"
+            >
+              View Your MapSite™
             </Link>
             <button type="button" onClick={handleReset} className="text-sm text-neutral-400 hover:text-neutral-900 transition-colors underline underline-offset-2">
               Submit Another Request
@@ -683,7 +748,40 @@ export default function BuildMapsiteClient() {
                     <InputField label="Company" required value={form.company} onChange={(v) => updateField("company", v)} placeholder="Acme Realty" autoComplete="organization" error={errors.company} />
                     <InputField label="Requested Market" value={form.marketType} onChange={(v) => updateField("marketType", v)} placeholder="Downtown Vancouver" error={errors.marketType} />
                     <AccountTypeSelector value={form.accountType} onChange={(v) => updateField("accountType", v)} error={errors.accountType} />
-                    {requiresFastCodeValidation(form.accountType) && (
+                    {isAdproAccountType(form.accountType) && (
+                      <div>
+                        <FieldLabel label="Adpros Category" required />
+                        <select
+                          value={form.adproCategory}
+                          onChange={(event) =>
+                            updateField("adproCategory", event.target.value)
+                          }
+                          className={`w-full h-11 px-4 bg-white border text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-xl ${
+                            errors.adproCategory
+                              ? "border-red-300"
+                              : "border-neutral-200"
+                          }`}
+                        >
+                          <option value="">Select category</option>
+                          {ADPRO_CATEGORY_OPTIONS.map((option) => (
+                            <option key={option.code} value={option.code}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                        {errors.adproCategory ? (
+                          <p className="text-xs text-red-500 mt-1">
+                            {errors.adproCategory}
+                          </p>
+                        ) : (
+                          <p className="text-xs text-neutral-400 mt-2">
+                            Category is used by Admin for Adpros organization and
+                            filtering.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {requiresFastCodeValidation(form.accountType) && !skipFastCodeValidation && (
                       <div>
                         <FieldLabel label="FAST Code" required />
                         <div className="flex flex-col sm:flex-row gap-3">

@@ -8,6 +8,7 @@ import TalisBooksViewerStage, {
   type TalisBooksViewerBinding,
 } from "@/components/talisbooks/viewer/TalisBooksViewerStage";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
+import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
 import {
   convertViewerNavIndex,
   createEmptyNarrationController,
@@ -26,22 +27,31 @@ import {
 
 interface TalisBooksViewerShellProps {
   book: TalisBooksViewerBook;
+  /** Owner / admin: show playback sidebar controls. */
+  canEditTools?: boolean;
+  /** After payment (or admin): show Live Edit panel. */
+  canLiveEdit?: boolean;
+  /** After payment (or admin): show Dashboard link. */
+  showDashboard?: boolean;
   /** Reserved for future audio narration — unused in playback today. */
   narration?: TalisBooksNarrationController | null;
 }
 
 export default function TalisBooksViewerShell({
   book: initialBook,
+  canEditTools = false,
+  canLiveEdit = false,
+  showDashboard = false,
   narration = null,
 }: TalisBooksViewerShellProps) {
-  const narrationRef = useRef(narration ?? createEmptyNarrationController());
-  narrationRef.current = narration ?? createEmptyNarrationController();
+  const narrationController = narration ?? createEmptyNarrationController();
 
   const [book, setBook] = useState<TalisBooksViewerBook>(initialBook);
   const [viewMode, setViewMode] = useState<TalisBooksViewerViewMode>("spread");
-  const [pendingNav, setPendingNav] = useState<number | null>(null);
   const viewModeRef = useRef(viewMode);
-  viewModeRef.current = viewMode;
+  useEffect(() => {
+    viewModeRef.current = viewMode;
+  }, [viewMode]);
 
   const spreadCount = useMemo(
     () => getViewerSpreadCount(book.pages.length),
@@ -55,7 +65,11 @@ export default function TalisBooksViewerShell({
     [viewMode, book.pages.length, spreadCount],
   );
 
-  const [binding, setBinding] = useState<TalisBooksViewerBinding>("closed-front");
+  const isMagazine = true;
+
+  const [binding, setBinding] = useState<TalisBooksViewerBinding>(
+    isMagazine ? "open" : "closed-front",
+  );
   const [direction, setDirection] = useState<1 | -1>(1);
   const previousNavRef = useRef(0);
   const stageHoverRef = useRef(false);
@@ -79,7 +93,9 @@ export default function TalisBooksViewerShell({
     onReachEnd: () => {
       setDirection(1);
       setAutoPlaying(false);
-      setBinding("closed-back");
+      if (!isMagazine) {
+        setBinding("closed-back");
+      }
     },
     onPageChange: (nextNavIndex) => {
       const mode = viewModeRef.current;
@@ -89,19 +105,19 @@ export default function TalisBooksViewerShell({
         const leavePage = previous.right ?? previous.left;
         const enterPage = next.left ?? next.right;
         if (leavePage) {
-          notifyNarrationPageLeave(narrationRef.current, leavePage.pageNumber);
+          notifyNarrationPageLeave(narrationController, leavePage.pageNumber);
         }
         if (enterPage) {
-          notifyNarrationPageEnter(narrationRef.current, enterPage.pageNumber);
+          notifyNarrationPageEnter(narrationController, enterPage.pageNumber);
         }
       } else {
         const leavePage = book.pages[previousNavRef.current];
         const enterPage = book.pages[nextNavIndex];
         if (leavePage) {
-          notifyNarrationPageLeave(narrationRef.current, leavePage.pageNumber);
+          notifyNarrationPageLeave(narrationController, leavePage.pageNumber);
         }
         if (enterPage) {
-          notifyNarrationPageEnter(narrationRef.current, enterPage.pageNumber);
+          notifyNarrationPageEnter(narrationController, enterPage.pageNumber);
         }
       }
       previousNavRef.current = nextNavIndex;
@@ -109,20 +125,21 @@ export default function TalisBooksViewerShell({
   });
 
   const goToRef = useRef(goTo);
-  goToRef.current = goTo;
-
   useEffect(() => {
-    if (pendingNav == null) {
-      return;
-    }
-    goToRef.current(pendingNav);
-    previousNavRef.current = pendingNav;
-    setPendingNav(null);
-  }, [viewMode, navCount, pendingNav]);
+    goToRef.current = goTo;
+  }, [goTo]);
 
   const syncStagePause = () => {
     setPausedByHover(stageHoverRef.current || flippingRef.current);
   };
+
+  const effectiveNavIndex = navIndex;
+  const lastNavIndex = Math.max(navCount - 1, 0);
+  const spread =
+    book.pages.length > 0
+      ? getViewerSpread(book.pages, effectiveNavIndex)
+      : { index: 0, left: null, right: null };
+  const singlePage = book.pages[effectiveNavIndex] ?? null;
 
   if (book.pages.length === 0 || spreadCount === 0) {
     return (
@@ -131,18 +148,6 @@ export default function TalisBooksViewerShell({
       </div>
     );
   }
-
-  const effectiveNavIndex = pendingNav ?? navIndex;
-  const lastNavIndex = navCount - 1;
-  const spread = getViewerSpread(book.pages, effectiveNavIndex);
-  const singlePage = book.pages[effectiveNavIndex] ?? null;
-
-  const bindingRef = useRef(binding);
-  bindingRef.current = binding;
-  const navIndexRef = useRef(effectiveNavIndex);
-  navIndexRef.current = effectiveNavIndex;
-  const lastNavIndexRef = useRef(lastNavIndex);
-  lastNavIndexRef.current = lastNavIndex;
 
   const openBook = (toNav = 0) => {
     setBinding("open");
@@ -161,23 +166,26 @@ export default function TalisBooksViewerShell({
       effectiveNavIndex,
       book.pages.length,
     );
-    setPendingNav(target);
     setViewMode(nextMode);
+    goToRef.current(target);
+    previousNavRef.current = target;
   };
 
   const handleNext = () => {
-    if (bindingRef.current === "closed-front") {
+    if (!isMagazine && binding === "closed-front") {
       openBook(0);
       return;
     }
-    if (bindingRef.current === "closed-back") {
-      openBook(lastNavIndexRef.current);
+    if (!isMagazine && binding === "closed-back") {
+      openBook(lastNavIndex);
       return;
     }
-    if (navIndexRef.current >= lastNavIndexRef.current) {
+    if (effectiveNavIndex >= lastNavIndex) {
       setDirection(1);
       setAutoPlaying(false);
-      setBinding("closed-back");
+      if (!isMagazine) {
+        setBinding("closed-back");
+      }
       return;
     }
     setDirection(1);
@@ -186,17 +194,19 @@ export default function TalisBooksViewerShell({
   };
 
   const handlePrevious = () => {
-    if (bindingRef.current === "closed-back") {
-      openBook(lastNavIndexRef.current);
+    if (!isMagazine && binding === "closed-back") {
+      openBook(lastNavIndex);
       return;
     }
-    if (bindingRef.current === "closed-front") {
+    if (!isMagazine && binding === "closed-front") {
       return;
     }
-    if (navIndexRef.current <= 0) {
+    if (effectiveNavIndex <= 0) {
       setDirection(-1);
       setAutoPlaying(false);
-      setBinding("closed-front");
+      if (!isMagazine) {
+        setBinding("closed-front");
+      }
       return;
     }
     setDirection(-1);
@@ -205,7 +215,7 @@ export default function TalisBooksViewerShell({
   };
 
   const handleToggleAutoplay = () => {
-    if (binding !== "open") {
+    if (!isMagazine && binding !== "open") {
       openBook(binding === "closed-back" ? lastNavIndex : 0);
       setAutoPlaying(true);
       return;
@@ -218,20 +228,26 @@ export default function TalisBooksViewerShell({
   };
 
   const handleUpdatePage = (pageId: string, patch: Partial<TalisBooksViewerPage>) => {
-    setBook((current) => ({
-      ...current,
-      pages: current.pages.map((page) =>
-        page.id === pageId ? { ...page, ...patch } : page,
-      ),
-      title:
-        pageId === current.pages[0]?.id && patch.title != null
-          ? patch.title
-          : current.title,
-      subtitle:
-        pageId === current.pages[0]?.id && patch.subtitle !== undefined
-          ? patch.subtitle
-          : current.subtitle,
-    }));
+    setBook((current) => {
+      const target = current.pages.find((page) => page.id === pageId);
+      if (target && isPermanentViewerPage(target)) {
+        return current;
+      }
+      return {
+        ...current,
+        pages: current.pages.map((page) =>
+          page.id === pageId ? { ...page, ...patch } : page,
+        ),
+        title:
+          pageId === current.pages[0]?.id && patch.title != null
+            ? patch.title
+            : current.title,
+        subtitle:
+          pageId === current.pages[0]?.id && patch.subtitle !== undefined
+            ? patch.subtitle
+            : current.subtitle,
+      };
+    });
   };
 
   const handleAddPage = (afterPageId: string | null) => {
@@ -252,6 +268,18 @@ export default function TalisBooksViewerShell({
             insertAt = found + 1;
           }
         }
+      }
+    }
+
+    // Never insert into/after permanent brochure or back-cover system block.
+    const firstLocked = book.pages.findIndex((page) => isPermanentViewerPage(page));
+    if (firstLocked >= 0 && insertAt > firstLocked) {
+      insertAt = firstLocked;
+    }
+    if (firstLocked >= 0 && insertAt === firstLocked && afterPageId) {
+      const after = book.pages.find((page) => page.id === afterPageId);
+      if (after && isPermanentViewerPage(after)) {
+        insertAt = firstLocked;
       }
     }
 
@@ -282,18 +310,24 @@ export default function TalisBooksViewerShell({
     setAutoPlaying(false);
 
     if (viewMode === "single") {
-      setPendingNav(insertAt);
+      goToRef.current(insertAt);
+      previousNavRef.current = insertAt;
     } else {
-      setPendingNav(
-        convertViewerNavIndex("single", "spread", insertAt, book.pages.length + 1),
+      const spreadTarget = convertViewerNavIndex(
+        "single",
+        "spread",
+        insertAt,
+        book.pages.length + 1,
       );
+      goToRef.current(spreadTarget);
+      previousNavRef.current = spreadTarget;
     }
   };
 
   const pageLabel =
-    binding === "closed-front"
+    !isMagazine && binding === "closed-front"
       ? "Closed · Front hard cover"
-      : binding === "closed-back"
+      : !isMagazine && binding === "closed-back"
         ? "Closed · Back hard cover"
         : viewMode === "single"
           ? `${describeViewerPage(singlePage)} · ${effectiveNavIndex + 1}/${navCount}`
@@ -309,28 +343,42 @@ export default function TalisBooksViewerShell({
     binding === "open" && viewMode === "spread" ? spread.right : null;
 
   return (
-    <div className="talisbooks-viewer">
+    <div
+      className={[
+        "talisbooks-viewer",
+        isMagazine ? "talisbooks-viewer--magazine" : "talisbooks-viewer--hardcover",
+      ].join(" ")}
+    >
       <header className="talisbooks-viewer__header">
         <div>
-          <p className="talisbooks-viewer__eyebrow">TalisBooks™ Viewer</p>
+          <p className="talisbooks-viewer__eyebrow">
+            {isMagazine
+              ? book.listingProfile === "fsbo"
+                ? "TalisBooks™ FSBO Demo"
+                : "TalisBooks™ Magazine"
+              : "TalisBooks™ Viewer"}
+          </p>
           <h1 className="talisbooks-viewer__title">{book.title}</h1>
           {book.subtitle ? (
             <p className="talisbooks-viewer__subtitle">{book.subtitle}</p>
           ) : null}
         </div>
-        <Link href={TALISBOOKS_ROUTES.DASHBOARD} className="talisbooks-viewer__back">
-          Dashboard
-        </Link>
+        {showDashboard ? (
+          <Link href={TALISBOOKS_ROUTES.DASHBOARD} className="talisbooks-viewer__back">
+            Dashboard
+          </Link>
+        ) : null}
       </header>
 
       <div className="talisbooks-viewer__layout">
         <TalisBooksViewerStage
           book={book}
-          binding={binding}
+          binding={isMagazine ? "open" : binding}
           viewMode={viewMode}
           navIndex={effectiveNavIndex}
           navCount={navCount}
           direction={direction}
+          magazine={isMagazine}
           onHoverChange={(hovered) => {
             stageHoverRef.current = hovered;
             syncStagePause();
@@ -343,28 +391,32 @@ export default function TalisBooksViewerShell({
           onRequestPrevious={handlePrevious}
           onOpenBook={handleOpenBook}
         />
-        <aside className="talisbooks-viewer__sidebar">
-          <TalisBooksViewerControls
-            pageLabel={pageLabel}
-            viewMode={viewMode}
-            autoPlaying={autoPlaying}
-            pausedByHover={pausedByHover}
-            intervalMs={intervalMs}
-            onViewModeChange={handleViewModeChange}
-            onToggleAutoplay={handleToggleAutoplay}
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            onIntervalChange={setIntervalMs}
-          />
-          <TalisBooksViewerLiveEditor
-            leftPage={editorLeft}
-            rightPage={editorRight}
-            bindingLabel={pageLabel}
-            viewMode={viewMode}
-            onUpdatePage={handleUpdatePage}
-            onAddPage={handleAddPage}
-          />
-        </aside>
+        {canEditTools ? (
+          <aside className="talisbooks-viewer__sidebar">
+            <TalisBooksViewerControls
+              pageLabel={pageLabel}
+              viewMode={viewMode}
+              autoPlaying={autoPlaying}
+              pausedByHover={pausedByHover}
+              intervalMs={intervalMs}
+              onViewModeChange={handleViewModeChange}
+              onToggleAutoplay={handleToggleAutoplay}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              onIntervalChange={setIntervalMs}
+            />
+            {canLiveEdit ? (
+              <TalisBooksViewerLiveEditor
+                leftPage={editorLeft}
+                rightPage={editorRight}
+                bindingLabel={pageLabel}
+                viewMode={viewMode}
+                onUpdatePage={handleUpdatePage}
+                onAddPage={handleAddPage}
+              />
+            ) : null}
+          </aside>
+        ) : null}
       </div>
     </div>
   );

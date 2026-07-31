@@ -8,15 +8,6 @@ import type {
   TalisBooksLayoutPlacement,
 } from "./types";
 
-function sameOrientationFamily(a: TalisBooksClassifiedAsset, b: TalisBooksClassifiedAsset): boolean {
-  if (a.orientation === b.orientation) {
-    return true;
-  }
-  // Landscape halves from a centerfold share a family with landscape originals.
-  const landscapeFamily = new Set(["landscape", "panorama"]);
-  return landscapeFamily.has(a.orientation) && landscapeFamily.has(b.orientation);
-}
-
 function isGalleryCandidate(asset: TalisBooksClassifiedAsset): boolean {
   if (asset.mediaKind !== "image") {
     return false;
@@ -113,7 +104,7 @@ export function decidePlacementForAsset(asset: TalisBooksClassifiedAsset): Talis
     return {
       placement: "centered",
       assets: [asset],
-      reason: "Portrait images are centered with breathing room.",
+      reason: "Portrait images remain upright on a single page.",
     };
   }
 
@@ -125,11 +116,12 @@ export function decidePlacementForAsset(asset: TalisBooksClassifiedAsset): Talis
     };
   }
 
-  // Standard landscape (not panorama): full-bleed single page.
+  // Standard landscape (not panorama): full-bleed when unpaired.
+  // Paired landscapes become double spreads; processed halves become centerfolds.
   return {
     placement: "full_bleed",
     assets: [asset],
-    reason: "Landscape images use full-bleed property pages.",
+    reason: "Unpaired landscape uses a full-bleed page (spreads use centerfold halves).",
   };
 }
 
@@ -206,7 +198,8 @@ export function decidePlacements(
       continue;
     }
 
-    // Pair two compatible landscapes or portraits into a double placement.
+    // Pair two compatible landscapes into a double spread.
+    // Portraits are never paired — they remain upright single pages.
     const next = queue[0];
     if (
       next &&
@@ -215,15 +208,15 @@ export function decidePlacements(
       !isCenterfoldHalf(next) &&
       next.mediaKind === "image" &&
       current.mediaKind === "image" &&
-      sameOrientationFamily(current, next) &&
-      next.orientation !== "panorama"
+      current.orientation === "landscape" &&
+      next.orientation === "landscape"
     ) {
       const pair = [current, queue.shift()!];
       if (pair.length === TALISBOOKS_DOUBLE_IMAGE_COUNT) {
         decisions.push({
           placement: "double",
           assets: pair,
-          reason: "Two compatible images paired automatically.",
+          reason: "Two landscape images paired into a spread.",
         });
         continue;
       }

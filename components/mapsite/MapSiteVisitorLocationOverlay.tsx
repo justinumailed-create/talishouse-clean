@@ -32,14 +32,14 @@ export default function MapSiteVisitorLocationOverlay({
       ) : null}
 
       {nearbyListings.length > 0 ? (
-        <div className="pointer-events-auto absolute right-4 top-4 z-[500] w-[min(100%,18rem)]">
+        <div className="pointer-events-auto absolute inset-x-4 top-4 z-[500] w-auto sm:inset-x-auto sm:right-4 sm:w-[min(100%,18rem)]">
           <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white/95 shadow-lg backdrop-blur">
             <div className="border-b border-neutral-100 px-3 py-2.5">
               <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
                 Nearby properties
               </p>
             </div>
-            <ul className="max-h-52 overflow-y-auto">
+            <ul className="max-h-48 overflow-y-auto sm:max-h-52">
               {nearbyListings.map((listing) => (
                 <li
                   key={listing.pin.id}
@@ -68,7 +68,7 @@ export default function MapSiteVisitorLocationOverlay({
       ) : null}
 
       {showLocationNotice ? (
-        <div className="pointer-events-auto absolute inset-x-4 bottom-4 z-[500]">
+        <div className="pointer-events-auto absolute inset-x-3 bottom-3 z-[500] sm:inset-x-4 sm:bottom-4">
           <div className="flex items-start gap-3 rounded-xl border border-neutral-200 bg-white/95 px-4 py-3 text-sm text-neutral-600 shadow-md backdrop-blur">
             <Navigation
               className="mt-0.5 h-4 w-4 flex-shrink-0 text-neutral-400"

@@ -10,6 +10,10 @@ import { generateFastCode } from "@/services/fast-code.service";
 import { markMapSiteClaimedByBuildRequest } from "@/lib/talispros/mapsite-platform";
 import { DEMO_MAPSITE_ID } from "@/lib/talispros/mapsite-state";
 import { clampMapZoom, HOME_PIN_DEFAULT_MAP_ZOOM } from "@/lib/home-pin-coordinates";
+import {
+  normalizeAdproCategoryCode,
+  type AdproCategoryCode,
+} from "@/lib/talispros/adpro-categories";
 
 export interface ActionResult {
   success: boolean;
@@ -28,6 +32,7 @@ export interface BuildFields {
   company: string;
   marketType: string;
   accountType: string;
+  adproCategory: string;
   fastCode: string;
   streetAddress: string;
   latitude: string;
@@ -50,8 +55,23 @@ export interface BuildFields {
   turnstileToken: string;
 }
 
+export interface AssistedBuildRequestFields {
+  name: string;
+  email: string;
+  phone: string;
+  propertyAddress: string;
+  audienceType: string;
+  requestedAccountType: string;
+  propertyType?: string;
+  notes?: string;
+}
+
 function requiresFastCodeValidation(accountType: string): boolean {
   return accountType === "derivative" || accountType.startsWith("adpro");
+}
+
+function isAdproAccountType(accountType: string): boolean {
+  return accountType.startsWith("adpro");
 }
 
 function expectedTierForAccountType(
@@ -103,7 +123,10 @@ export async function validateBuildMapsiteFastCode(
   return { ok: true, code: lookup.code };
 }
 
-function validate(fields: BuildFields): string | null {
+function validate(
+  fields: BuildFields,
+  options: { skipFastCodeValidation?: boolean } = {}
+): string | null {
   if (!fields.firstName.trim()) return "First name is required";
   if (!fields.lastName.trim()) return "Last name is required";
   if (!fields.email.trim()) return "Email is required";
@@ -112,7 +135,18 @@ function validate(fields: BuildFields): string | null {
   if (!fields.phone.trim()) return "Phone is required";
   if (!fields.company.trim()) return "Company is required";
   if (!fields.accountType) return "Account type is required";
-  if (requiresFastCodeValidation(fields.accountType) && !fields.fastCode.trim()) {
+  if (
+    isAdproAccountType(fields.accountType) &&
+    !options.skipFastCodeValidation &&
+    !normalizeAdproCategoryCode(fields.adproCategory)
+  ) {
+    return "Adpro category is required";
+  }
+  if (
+    requiresFastCodeValidation(fields.accountType) &&
+    !options.skipFastCodeValidation &&
+    !fields.fastCode.trim()
+  ) {
     return "FAST Code is required";
   }
 
@@ -164,9 +198,83 @@ function readTebPictureUrls(formData: FormData): string[] {
   }
 }
 
+function splitName(fullName: string): { firstName: string; lastName: string } {
+  const normalized = fullName.trim().replace(/\s+/g, " ");
+  if (!normalized) {
+    return { firstName: "", lastName: "" };
+  }
+  const parts = normalized.split(" ");
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: parts[0] };
+  }
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(" "),
+  };
+}
+
+export async function submitAssistedBuildRequest(
+  fields: AssistedBuildRequestFields
+): Promise<ActionResult> {
+  const { firstName, lastName } = splitName(fields.name);
+  const address = fields.propertyAddress.trim();
+  const audience = fields.audienceType.trim().toLowerCase();
+  const requestedAccountType = fields.requestedAccountType.trim().toLowerCase();
+
+  const requestFormData = new FormData();
+  requestFormData.set("requestId", crypto.randomUUID());
+  requestFormData.set("date", new Date().toISOString().slice(0, 10));
+  requestFormData.set("firstName", firstName);
+  requestFormData.set("lastName", lastName);
+  requestFormData.set("email", fields.email.trim());
+  requestFormData.set("phone", fields.phone.trim());
+  requestFormData.set("company", "Assisted Build Request");
+  requestFormData.set("marketType", audience || "listings");
+  requestFormData.set("accountType", requestedAccountType || "root");
+  requestFormData.set("adproCategory", "");
+  requestFormData.set("fastCode", "");
+  requestFormData.set("streetAddress", address);
+  requestFormData.set("latitude", "46.088287");
+  requestFormData.set("longitude", "-59.882749");
+  requestFormData.set("mapZoom", String(HOME_PIN_DEFAULT_MAP_ZOOM));
+  requestFormData.set("manualPlacement", "false");
+  requestFormData.set("reverseGeocodedAddress", address);
+  requestFormData.set("pinWriteup", (fields.notes || "").trim().slice(0, 170));
+  requestFormData.set("futurePinColor", "");
+  requestFormData.set("futurePinIcon", "");
+  requestFormData.set("futurePinBorder", "");
+  requestFormData.set(
+    "futurePinLabel",
+    (fields.propertyType || "").trim() || "Requested Property"
+  );
+  requestFormData.set("futurePinWhiteCenter", "true");
+  requestFormData.set("futurePinAnimated", "false");
+  requestFormData.set("futurePinCategoryBadge", "");
+  requestFormData.set("helpPreference", "done-for-me");
+  requestFormData.set(
+    "additionalComments",
+    [
+      "Assisted onboarding request",
+      `Audience Type: ${audience || "listings"}`,
+      `Requested Account Type: ${requestedAccountType || "root"}`,
+      fields.notes?.trim() ? `Notes: ${fields.notes.trim()}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n")
+  );
+  requestFormData.set("consentCommunications", "true");
+  requestFormData.set("consentData", "true");
+  requestFormData.set("turnstileToken", "");
+  // Allows assisted onboarding to request derivative/adpro without sponsor FAST code.
+  requestFormData.set("skipFastCodeValidation", "true");
+
+  return submitBuildRequest(requestFormData);
+}
+
 export async function submitBuildRequest(
   formData: FormData
 ): Promise<ActionResult> {
+  const skipFastCodeValidation = formData.get("skipFastCodeValidation") === "true";
   const fields: BuildFields = {
     date: (formData.get("date") as string) || "",
     firstName: (formData.get("firstName") as string) || "",
@@ -176,6 +284,7 @@ export async function submitBuildRequest(
     company: (formData.get("company") as string) || "",
     marketType: (formData.get("marketType") as string) || "",
     accountType: (formData.get("accountType") as string) || "",
+    adproCategory: (formData.get("adproCategory") as string) || "",
     fastCode: (formData.get("fastCode") as string) || "",
     streetAddress: (formData.get("streetAddress") as string) || "",
     latitude: (formData.get("latitude") as string) || "",
@@ -199,13 +308,16 @@ export async function submitBuildRequest(
     turnstileToken: (formData.get("turnstileToken") as string) || "",
   };
 
-  const validationError = validate(fields);
+  const validationError = validate(fields, { skipFastCodeValidation });
   if (validationError) {
     return { success: false, error: validationError };
   }
 
   let sponsorFastCode: string | null = null;
-  if (requiresFastCodeValidation(fields.accountType)) {
+  if (
+    requiresFastCodeValidation(fields.accountType) &&
+    !skipFastCodeValidation
+  ) {
     const fastCodeValidation = await validateBuildMapsiteFastCode(
       fields.fastCode,
       fields.accountType
@@ -253,8 +365,9 @@ export async function submitBuildRequest(
       }
     }
 
-    let tebPictureUrls = readTebPictureUrls(formData);
-    if (tebPictureUrls.length === 0) {
+    const tebPictureUrlsFromForm = readTebPictureUrls(formData);
+    const tebPictureUrls = [...tebPictureUrlsFromForm];
+    if (tebPictureUrlsFromForm.length === 0) {
       for (let i = 0; ; i++) {
         const file = formData.get(`tebPicture_${i}`) as File | null;
         if (!file || file.size === 0) break;
@@ -265,6 +378,11 @@ export async function submitBuildRequest(
 
     const parsedLatitude = Number.parseFloat(fields.latitude);
     const parsedLongitude = Number.parseFloat(fields.longitude);
+    const adproCategory: AdproCategoryCode | null = isAdproAccountType(
+      fields.accountType
+    )
+      ? normalizeAdproCategoryCode(fields.adproCategory)
+      : null;
     const hasCoordinates =
       Number.isFinite(parsedLatitude) && Number.isFinite(parsedLongitude);
     const mapZoom =
@@ -299,6 +417,7 @@ export async function submitBuildRequest(
       submitted_at: new Date().toISOString(),
       requested_account_type: fields.accountType,
       requested_fast_code: sponsorFastCode,
+      adpro_category: adproCategory,
       approval_status: "Pending",
       notes: encodePinStyleInNotes(
         fields.additionalComments,
@@ -326,6 +445,14 @@ export async function submitBuildRequest(
     let { error: buildError } = await supabaseAdmin
       .from("build_requests")
       .insert(buildRequest);
+
+    if (buildError && /adpro_category/i.test(buildError.message)) {
+      const { adpro_category: _adproCategory, ...legacyRequest } = buildRequest;
+      const retry = await supabaseAdmin
+        .from("build_requests")
+        .insert(legacyRequest);
+      buildError = retry.error;
+    }
 
     if (
       buildError &&
@@ -440,6 +567,7 @@ export async function submitBuildRequest(
         company: fields.company,
         phone: fields.phone,
         marketType: fields.marketType,
+        adproCategory: adproCategory ?? undefined,
         streetAddress: fields.streetAddress,
         latitude: fields.latitude,
         longitude: fields.longitude,
@@ -466,7 +594,7 @@ export async function submitBuildRequest(
 
     let issuedFastCode: string | undefined = sponsorFastCode ?? undefined;
 
-    if (!requiresFastCodeValidation(fields.accountType)) {
+    if (!requiresFastCodeValidation(fields.accountType) || skipFastCodeValidation) {
       try {
         const generatedCode = await generateFastCode({
           firstName: fields.firstName.trim(),

@@ -26,6 +26,13 @@ export {
 } from "./auto-page-turn";
 export { createDemoViewerBook } from "./demo-book";
 export {
+  TALISBOOKS_BROKERAGE_DEMO_AGENT,
+  createBrokerageClosingScaffold,
+  createBrokeragePage2Scaffold,
+  createBrokeragePage3Scaffold,
+} from "./brokerage-scaffold";
+export { getViewerBookBySlug, resolveViewerBookBySlug } from "./load-book";
+export {
   convertViewerNavIndex,
   describeViewerPage,
   describeViewerSpread,

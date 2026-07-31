@@ -21,6 +21,7 @@ export type BuildRequestListRow = {
   email: string;
   market_type: string | null;
   requested_account_type: string | null;
+  adpro_category: string | null;
   requested_fast_code: string | null;
   registration_link: string | null;
   status: string;
@@ -33,7 +34,7 @@ export async function listBuildRequests(): Promise<{ ok: boolean; data: BuildReq
   const { data, error } = await supabaseAdmin
     .from("build_requests")
     .select(
-      "id, first_name, last_name, email, market_type, requested_account_type, requested_fast_code, registration_link, status, submitted_at, created_at"
+      "id, first_name, last_name, email, market_type, requested_account_type, adpro_category, requested_fast_code, registration_link, status, submitted_at, created_at"
     )
     .order("created_at", { ascending: false });
 

@@ -5,19 +5,31 @@ import { TALISPROS_START_SEGMENTS } from "@/lib/talispros/start-content";
 export default function TalisprosStartSidebar() {
   return (
     <aside className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#f2f2f0] text-black lg:h-full lg:flex-none lg:border-l lg:border-[#dedede] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-      <div className="flex min-h-[295px] items-end justify-center px-4 pb-6 lg:px-5">
-        <h2 className="max-w-[19rem] text-center text-[36px] leading-[1.05] text-black sm:text-[42px] lg:text-[46px]">
-          What best describes you?
+      <div className="flex min-h-[220px] items-end justify-center px-4 pb-8 pt-5 lg:min-h-[295px] lg:px-5 lg:pb-7 lg:pt-4">
+        <h2 className="max-w-[19rem] text-center text-black sm:max-w-[20.5rem]">
+          <span className="block text-[42px] leading-[0.96] tracking-[-0.01em] sm:text-[52px] lg:text-[58px]">
+            Join Us
+          </span>
+          <span className="mt-5 block text-[26px] leading-[1.1] tracking-[-0.008em] sm:mt-6 sm:text-[30px] lg:text-[34px]">
+            <span className="block whitespace-nowrap">Get Your Own</span>
+            <span className="block whitespace-nowrap">Mapsite Market™</span>
+          </span>
+          <span className="mt-5 block text-[22px] leading-[1.1] tracking-[-0.008em] sm:mt-6 sm:text-[26px] lg:text-[30px]">
+            What Best
+            <br />
+            Describes You?
+          </span>
         </h2>
       </div>
 
-      <div className="space-y-5 px-5 pb-10">
+      <div className="space-y-4 px-4 pb-10 sm:space-y-5 sm:px-5">
         {TALISPROS_START_SEGMENTS.map((segment) => (
           <Link
             key={segment.href}
             href={segment.href}
-            className="group block border border-[#dedede] bg-white px-4 py-6 text-center transition-[border-width,border-color] hover:border-2 hover:border-black"
+            className="group block min-h-[176px] border-2 border-[#dedede] bg-white px-4 py-6 text-center transition-colors hover:border-black"
           >
+            <p className="mb-3 text-[11px] uppercase tracking-[0.12em] text-neutral-500">{segment.label}</p>
             <h3 className="mb-5 text-[22px] leading-snug text-black sm:text-[24px]">
               {segment.title}
             </h3>
@@ -28,7 +40,14 @@ export default function TalisprosStartSidebar() {
               height={56}
               className="mx-auto mb-5 h-14 w-14 object-contain"
             />
-            <p className="text-[12px] leading-[22px] text-black">{segment.description}</p>
+            <p className="mx-auto text-[18px] leading-[1.35] text-black">
+              <span className="block whitespace-nowrap">
+                {segment.descriptionLines[0]}
+              </span>
+              <span className="block whitespace-nowrap">
+                {segment.descriptionLines[1]}
+              </span>
+            </p>
           </Link>
         ))}
       </div>

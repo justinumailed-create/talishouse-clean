@@ -10,6 +10,7 @@ import {
 import type { RegistrationMarket } from "@/lib/registration-market";
 import {
   PMC_MAP_VIEWPORT,
+  pmcPinEntryWorkflow,
   pmcPinsByRegionGroup,
   pmcPinsToMapEnginePins,
   type PmcRegionalPin,
@@ -176,7 +177,10 @@ function MapSitePmcChrome({
     return () => observer.disconnect();
   }, []);
 
-  const claimHref = useMemo(() => {
+  const actionHref = useMemo(() => {
+    if (selectedPin && pmcPinEntryWorkflow(selectedPin) === "corporate-admin-auth") {
+      return "/talispros/admin/login";
+    }
     const params = new URLSearchParams({
       audience,
       mapsiteId: DEMO_MAPSITE_ID,
@@ -206,7 +210,7 @@ function MapSitePmcChrome({
       {selectedPin ? (
         <MapSitePmcPinPopup
           pin={selectedPin}
-          claimHref={claimHref}
+          actionHref={actionHref}
           rootHeight={rootHeight}
           onClose={() => setSelectedPinId(null)}
         />
@@ -215,7 +219,7 @@ function MapSitePmcChrome({
       {canEdit ? (
         <Link
           href="/talispros/admin/pmc"
-          className="absolute right-3 top-3 z-30 inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-neutral-900 shadow-[0_8px_24px_rgba(0,0,0,0.16)] ring-1 ring-black/5 transition hover:bg-neutral-50 sm:right-4 sm:top-4"
+          className="absolute right-3 top-3 z-30 inline-flex min-h-11 items-center gap-1.5 rounded-full bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 shadow-[0_8px_24px_rgba(0,0,0,0.16)] ring-1 ring-black/5 transition hover:bg-neutral-50 sm:right-4 sm:top-4"
         >
           <svg
             viewBox="0 0 24 24"

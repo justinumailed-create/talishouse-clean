@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 import {
   buildRequestReceivedHtml,
+  ebookCompletedHtml,
   fastCodeGeneratedHtml,
   mapSiteAssignedHtml,
   mapSiteCompletedHtml,
@@ -117,6 +118,23 @@ export async function sendMapSiteCompleted(params: {
       recipientName: params.recipientName,
       fastCode: params.fastCode,
       mapsiteUrl: params.mapsiteUrl,
+    })
+  );
+}
+
+export async function sendEbookCompleted(params: {
+  to: string;
+  recipientName: string;
+  fastCode: string;
+  ebookUrl: string;
+}): Promise<SendResult> {
+  return send(
+    params.to,
+    "Your TalisBook™ is Ready",
+    ebookCompletedHtml({
+      recipientName: params.recipientName,
+      fastCode: params.fastCode,
+      ebookUrl: params.ebookUrl,
     })
   );
 }

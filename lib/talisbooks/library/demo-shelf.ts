@@ -34,8 +34,8 @@ const ROOT_TITLES: Array<{
   pageCount?: number;
 }> = [
   {
-    title: "Sample E-Book",
-    subtitle: "2447 Meat Cove Rd, Pleasant Bay, NS",
+    title: "Meat Cove Retreat",
+    subtitle: "FSBO · 2447 Meat Cove Rd, Pleasant Bay, NS",
     status: "scheduled",
     views: 3120,
     clicks: 840,

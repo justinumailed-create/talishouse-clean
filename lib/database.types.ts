@@ -36,6 +36,7 @@ export interface Database {
           video: string | null
           description: string | null
           requested_account_type: string | null
+          adpro_category: string | null
           requested_fast_code: string | null
           assigned_marketing_manager: string | null
           notes: string | null
@@ -81,6 +82,7 @@ export interface Database {
           video?: string | null
           description?: string | null
           requested_account_type?: string | null
+          adpro_category?: string | null
           requested_fast_code?: string | null
           assigned_marketing_manager?: string | null
           notes?: string | null
@@ -126,6 +128,7 @@ export interface Database {
           video?: string | null
           description?: string | null
           requested_account_type?: string | null
+          adpro_category?: string | null
           requested_fast_code?: string | null
           assigned_marketing_manager?: string | null
           notes?: string | null
@@ -648,6 +651,76 @@ export interface Database {
         }
         Relationships: [
           { foreignKeyName: "accounts_user_id_fkey"; columns: ["user_id"]; referencedRelation: "users"; referencedColumns: ["id"] }
+        ]
+      }
+      corporate_markets: {
+        Row: {
+          id: string
+          code: string
+          name: string
+          country: string | null
+          region: string | null
+          pmc_pin_id: string | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          name: string
+          country?: string | null
+          region?: string | null
+          pmc_pin_id?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          code?: string
+          name?: string
+          country?: string | null
+          region?: string | null
+          pmc_pin_id?: string | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      corporate_market_memberships: {
+        Row: {
+          id: string
+          corporate_market_id: string
+          account_id: string
+          account_role: string
+          parent_account_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          corporate_market_id: string
+          account_id: string
+          account_role: string
+          parent_account_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          corporate_market_id?: string
+          account_id?: string
+          account_role?: string
+          parent_account_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "corporate_market_memberships_corporate_market_id_fkey"; columns: ["corporate_market_id"]; referencedRelation: "corporate_markets"; referencedColumns: ["id"] },
+          { foreignKeyName: "corporate_market_memberships_account_id_fkey"; columns: ["account_id"]; referencedRelation: "accounts"; referencedColumns: ["id"] },
+          { foreignKeyName: "corporate_market_memberships_parent_account_id_fkey"; columns: ["parent_account_id"]; referencedRelation: "accounts"; referencedColumns: ["id"] }
         ]
       }
       pins: {

@@ -5,6 +5,8 @@ import { isMarketingManagerAuthenticated } from "@/lib/marketing-manager-auth";
 import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
+import { listAdminEbookPages } from "@/lib/talisbooks/admin-ebook-pages";
 
 export const dynamic = "force-dynamic";
 
@@ -28,12 +30,19 @@ export default async function TalisprosAdminMapSitePage({
   }
 
   const writesState = getMapSiteAdminWritesState();
-  const paymentReceived = await hasCompletedMapSitePaypalPayment({
-    email: mapsite.email,
-    mapsiteId: mapsite.id,
-    fastCode: mapsite.fastCode,
-    requestId: mapsite.requestId,
-  });
+  const [paymentReceived, ebookContext] = await Promise.all([
+    hasCompletedMapSitePaypalPayment({
+      email: mapsite.email,
+      mapsiteId: mapsite.id,
+      fastCode: mapsite.fastCode,
+      requestId: mapsite.requestId,
+    }),
+    getMapSiteEbookContext(mapsite.fastCode),
+  ]);
+
+  const ebookPages = ebookContext?.primaryEbook?.id
+    ? await listAdminEbookPages(ebookContext.primaryEbook.id)
+    : [];
 
   return (
     <MapSiteAdminEditor
@@ -43,6 +52,8 @@ export default async function TalisprosAdminMapSitePage({
       backHref="/talispros/admin/pmc"
       showVisitorSubscriptionPanel
       paymentReceived={paymentReceived}
+      ebook={ebookContext?.primaryEbook ?? null}
+      ebookPages={ebookPages}
     />
   );
 }

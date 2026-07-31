@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { PmcRegionalPin } from "@/lib/talispros/pmc-regional-pins";
+import { pmcPinEntryWorkflow, pmcPinMarketType } from "@/lib/talispros/pmc-regional-pins";
 import {
   MAPSITE_MIN_CARD_HEIGHT_PX,
   MAPSITE_PIN_TIP_CLEARANCE_PX,
@@ -10,17 +11,25 @@ import {
 
 interface MapSitePmcPinPopupProps {
   pin: PmcRegionalPin;
-  claimHref: string;
+  actionHref: string;
   rootHeight: number;
   onClose: () => void;
 }
 
 export default function MapSitePmcPinPopup({
   pin,
-  claimHref,
+  actionHref,
   rootHeight,
   onClose,
 }: MapSitePmcPinPopupProps) {
+  const isCorporate = pmcPinMarketType(pin) === "corporate";
+  const opensCorporateAdminAuth =
+    pmcPinEntryWorkflow(pin) === "corporate-admin-auth";
+  const actionLabel = opensCorporateAdminAuth
+    ? "Corporate Admin Sign In"
+    : isCorporate
+      ? "Apply for this corporate market"
+      : "Claim this market";
   const tipPointY = Math.round(rootHeight / 2 - MAPSITE_PIN_TIP_CLEARANCE_PX);
   const cardBottom = tipPointY - MAPSITE_POPUP_TIP_HEIGHT_PX;
   const top = Math.max(12, cardBottom - 220);
@@ -46,7 +55,7 @@ export default function MapSitePmcPinPopup({
           />
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-medium uppercase tracking-wide text-neutral-500">
-              Root Account™
+              {isCorporate ? "Corporate Market™" : "Root Account™"}
             </p>
             <h2 className="truncate text-[15px] font-semibold text-neutral-950">
               {pin.label}
@@ -55,7 +64,7 @@ export default function MapSitePmcPinPopup({
           <button
             type="button"
             onClick={onClose}
-            className="flex h-7 w-7 items-center justify-center rounded-full bg-neutral-100 text-[15px] text-neutral-700 hover:bg-neutral-200"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100 text-[17px] text-neutral-700 hover:bg-neutral-200"
             aria-label="Close"
           >
             ×
@@ -67,10 +76,10 @@ export default function MapSitePmcPinPopup({
             {pin.description}
           </p>
           <Link
-            href={claimHref}
-            className="mt-auto flex w-full items-center justify-center rounded-xl bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800"
+            href={actionHref}
+            className="mt-auto flex min-h-11 w-full items-center justify-center rounded-xl bg-neutral-950 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800"
           >
-            Claim this market
+            {actionLabel}
           </Link>
         </div>
       </div>

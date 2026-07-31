@@ -68,8 +68,8 @@ function RegisterForm() {
   const buildRequestId = searchParams.get("request") || undefined;
 
   return (
-    <div className="flex flex-col h-screen lg:h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
-      <div className="flex flex-col lg:flex-row flex-1 lg:overflow-hidden">
+    <div className="flex min-h-dvh flex-col bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white lg:h-screen">
+      <div className="flex flex-1 flex-col lg:flex-row lg:overflow-hidden">
         <div className="w-full lg:w-[70%] lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <div className="max-w-2xl mx-auto px-5 py-8 sm:py-12 lg:py-16">
             <div className="text-center mb-8 sm:mb-10">
@@ -94,7 +94,7 @@ function RegisterForm() {
           </div>
         </div>
 
-        <div className="w-full lg:w-[30%] bg-[#e2e5ea] lg:border-l border-[#e5e5e5] p-8 lg:sticky lg:top-0 lg:self-start lg:max-h-screen lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <div className="w-full bg-[#e2e5ea] p-5 lg:w-[30%] lg:border-l lg:border-[#e5e5e5] lg:p-8 lg:sticky lg:top-0 lg:self-start lg:max-h-screen lg:overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
           <RegisterSidebar />
         </div>
       </div>

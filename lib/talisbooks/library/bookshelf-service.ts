@@ -116,7 +116,7 @@ async function loadAnalyticsCounts(
 
 /**
  * Personal bookshelf for a Root or Derivative account.
- * Falls back to a polished demo shelf when the account has no books yet.
+ * When `fastCode` is set (MapSite TEB™), returns only that code's ebooks — not the demo library.
  */
 export async function getTalisBooksBookshelf(options?: {
   accountId?: string | null;
@@ -126,6 +126,48 @@ export async function getTalisBooksBookshelf(options?: {
 }): Promise<TalisBooksBookshelf> {
   const accountType = options?.accountType ?? "root";
   const accountId = options?.accountId ?? null;
+  const fastCode = options?.fastCode?.trim().toLowerCase() || null;
+
+  if (fastCode) {
+    const { getMapSiteEbookContext } = await import("../mapsite-ebook-service");
+    const { getTalisBooksEntitlementSnapshot } = await import("../entitlements");
+    const [context, entitlements] = await Promise.all([
+      getMapSiteEbookContext(fastCode),
+      getTalisBooksEntitlementSnapshot(fastCode),
+    ]);
+    if (!context) {
+      const { buildClaimedMapSitePath } = await import("@/lib/talispros/mapsite-state");
+      return {
+        accountId: null,
+        accountType,
+        accountName: `${fastCode.toUpperCase()} TEB™`,
+        fastCode,
+        mapsiteId: null,
+        scopedToFastCode: true,
+        paymentReceived: false,
+        registrationHref: buildClaimedMapSitePath({
+          fastCode,
+          audience: "listings",
+        }),
+        entitlements,
+        primaryEbook: null,
+        books: [],
+      };
+    }
+    return {
+      accountId: null,
+      accountType: context.accountType,
+      accountName: `${fastCode.toUpperCase()} TEB™ shelf`,
+      fastCode: context.fastCode,
+      mapsiteId: context.mapsiteId,
+      scopedToFastCode: true,
+      paymentReceived: context.paymentReceived,
+      registrationHref: context.registrationHref,
+      entitlements,
+      primaryEbook: context.primaryEbook,
+      books: context.books,
+    };
+  }
 
   if (!accountId) {
     return createDemoBookshelf(accountType);

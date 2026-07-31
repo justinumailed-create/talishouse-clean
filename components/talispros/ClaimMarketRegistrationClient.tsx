@@ -2,7 +2,8 @@
 
 import TalisprosMarketRegistrationForm from "@/components/talispros/TalisprosMarketRegistrationForm";
 import type { RegistrationMarket } from "@/lib/registration-market";
-import { buildClaimedMapSitePath, MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
+import { buildSelfEbookContinueHref } from "@/lib/talispros/ebook-choice";
+import { establishOwnerMapSiteSession } from "@/app/talispros/build-mapsite/success-actions";
 
 interface ClaimMarketRegistrationClientProps {
   market: RegistrationMarket;
@@ -20,27 +21,22 @@ export default function ClaimMarketRegistrationClient({
       mapsiteId={mapsiteId}
       variant="page"
       onSuccess={(result) => {
-        const fastCode = result.fastCode?.trim();
-        // Full navigation so brokers PMC browse state cannot win over soft nav.
-        if (fastCode) {
+        void (async () => {
+          const fastCode = result.fastCode?.trim();
+          if (fastCode) {
+            await establishOwnerMapSiteSession(fastCode);
+          }
+
+          // First success: Self-Service TalisBook™ Creator (not Registration / PayPal).
           window.location.assign(
-            buildClaimedMapSitePath({
-              fastCode,
-              accountType: result.accountType,
-              audience: market,
+            buildSelfEbookContinueHref({
+              fastCode: fastCode || null,
+              mapsiteId: result.mapsiteId || mapsiteId,
+              accountType: result.accountType || market,
+              requestId: result.requestId || null,
             })
           );
-          return;
-        }
-
-        const params = new URLSearchParams({
-          claimed: "1",
-          view: "pin",
-          mapsiteId: result.mapsiteId || mapsiteId,
-          audience: market,
-        });
-        if (result.requestId) params.set("requestId", result.requestId);
-        window.location.assign(`${MAPSITE_APP_PATH}?${params.toString()}`);
+        })();
       }}
     />
   );

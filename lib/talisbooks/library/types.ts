@@ -1,5 +1,6 @@
 import type { TalisBooksAccountType, TalisBooksPublishStatus } from "../types";
 import type { TalisBooksCoverTemplateId } from "../covers/constants";
+import type { TalisBooksEntitlements } from "../entitlements";
 
 export type TalisBooksLibrarySort =
   | "published_desc"
@@ -33,10 +34,26 @@ export interface TalisBooksLibraryBook {
 }
 
 export interface TalisBooksBookshelf {
-  accountId: string;
+  accountId: string | null;
   accountType: Extract<TalisBooksAccountType, "root" | "derivative">;
   accountName: string;
   fastCode: string | null;
+  mapsiteId?: string | null;
+  /** When set, this shelf is scoped to a MapSite TEB™ FAST Code. */
+  scopedToFastCode?: boolean;
+  paymentReceived?: boolean;
+  registrationHref?: string | null;
+  /** Activation + account-type book entitlements (independent of PayPal helpers). */
+  entitlements?: TalisBooksEntitlements | null;
+  /** Draft metadata for create/edit panel when shelf is FAST-code scoped. */
+  primaryEbook?: {
+    id: string;
+    slug: string;
+    title: string;
+    subtitle: string;
+    description: string;
+    coverImageUrl: string | null;
+  } | null;
   books: TalisBooksLibraryBook[];
 }
 

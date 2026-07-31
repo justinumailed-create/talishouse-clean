@@ -2,20 +2,31 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createMetadata } from "@/lib/seo";
 import { parseRegistrationMarket } from "@/lib/registration-market";
+import {
+  accountTypeForAudience,
+  type MapSiteCapabilityAccountType,
+} from "@/lib/talispros/account-capabilities";
 import { getTalisprosAdminSession } from "@/lib/talispros-admin-auth";
 import { isMarketingManagerAuthenticated } from "@/lib/marketing-manager-auth";
 import { listPmcRegionalPins } from "@/lib/talispros/pmc-pins-service";
 import {
   buildClaimedMapSitePath,
+  DEMO_MAPSITE_ID,
+  MAPSITE_APP_PATH,
   mapsiteAccountTypeSegment,
 } from "@/lib/talispros/mapsite-state";
+import { isOwnMapSite } from "@/lib/mapsite-edit-auth";
 import {
   loadMapSiteApplicationState,
   resolveMapSitePaymentPlanType,
 } from "./actions";
 import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
+import { ROUTES } from "@/lib/routes";
+import { ACTIVATE_QUERY, BOOK_PENDING_QUERY } from "@/lib/talispros/ebook-choice";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 import MapSitePmcApplication from "@/components/talispros/mapsite/MapSitePmcApplication";
+import MapSiteOnboardingEntry from "@/components/talispros/mapsite/MapSiteOnboardingEntry";
 
 export const dynamic = "force-dynamic";
 
@@ -53,14 +64,30 @@ export default async function TalisprosMapSitePage({
   const mapsiteId = firstParam(params.mapsiteId)?.trim() || null;
   const fastCode = firstParam(params.fastCode)?.trim() || null;
   const requestId = firstParam(params.requestId)?.trim() || null;
+  const showStartHere = isTruthyParam(firstParam(params.startHere));
+  const showActivatePayment = isTruthyParam(firstParam(params[ACTIVATE_QUERY]));
+  const bookSlug = firstParam(params.book)?.trim() || null;
+  const setup = firstParam(params.setup)?.trim().toLowerCase() ?? null;
+  const sourceAudience =
+    parseRegistrationMarket(firstParam(params.sourceAudience)) ?? null;
 
   // Prefer the short claimed URL: /talispros/mapsite/{accountType}/{fastCode}
   if (fastCode && (claimed || view === "pin" || requestId || mapsiteId)) {
+    const redirectParams = new URLSearchParams();
+    if (showStartHere) redirectParams.set("startHere", "1");
+    if (showActivatePayment) redirectParams.set(ACTIVATE_QUERY, "1");
+    if (isTruthyParam(firstParam(params[BOOK_PENDING_QUERY]))) {
+      redirectParams.set(BOOK_PENDING_QUERY, "1");
+    }
+    if (requestId) redirectParams.set("requestId", requestId);
+    if (mapsiteId) redirectParams.set("mapsiteId", mapsiteId);
+    if (bookSlug) redirectParams.set("book", bookSlug);
+    const query = redirectParams.toString();
     redirect(
-      buildClaimedMapSitePath({
+      `${buildClaimedMapSitePath({
         fastCode,
         audience: mapsiteAccountTypeSegment(audience),
-      })
+      })}${query ? `?${query}` : ""}`
     );
   }
 
@@ -73,7 +100,47 @@ export default async function TalisprosMapSitePage({
     Boolean(fastCode) ||
     Boolean(requestId);
 
-  if (audience === "brokers" && !showSinglePinMap) {
+  const isAudienceEntryPage = !showSinglePinMap;
+  if (
+    isAudienceEntryPage &&
+    (audience === "brokers" ||
+      audience === "listings" ||
+      audience === "fsbos" ||
+      audience === "adpro") &&
+    setup !== "self" &&
+    setup !== "assisted"
+  ) {
+    return <MapSiteOnboardingEntry audience={audience} />;
+  }
+
+  // Backward-compatible setup URLs now enter dedicated onboarding flows first.
+  // Existing MapSite visual/state route remains the post-build success state.
+  if (isAudienceEntryPage && setup === "self") {
+    const params = new URLSearchParams({
+      audience,
+      mapsiteId: DEMO_MAPSITE_ID,
+      returnTo: MAPSITE_APP_PATH,
+    });
+    redirect(`/talispros/markets/claim-a-market?${params.toString()}`);
+  }
+  if (isAudienceEntryPage && setup === "assisted") {
+    const params = new URLSearchParams({
+      audience,
+      setup: "assisted",
+    });
+    if (sourceAudience) {
+      params.set("sourceAudience", sourceAudience);
+    }
+    redirect(`/talispros/build-mapsite/assisted?${params.toString()}`);
+  }
+
+  const onboardingMode: "self" | "assisted" =
+    setup === "assisted" ? "assisted" : "self";
+  const flowAudience = isAudienceEntryPage ? "listings" : audience;
+  const accountType: MapSiteCapabilityAccountType =
+    accountTypeForAudience(flowAudience);
+
+  if (flowAudience === "brokers" && !showSinglePinMap) {
     const [pins, adminSession, marketingManager] = await Promise.all([
       listPmcRegionalPins(),
       getTalisprosAdminSession(),
@@ -83,7 +150,7 @@ export default async function TalisprosMapSitePage({
     return (
       <MapSitePmcApplication
         pins={pins}
-        audience={audience}
+        audience={flowAudience}
         canEdit={Boolean(adminSession) || marketingManager}
       />
     );
@@ -95,6 +162,10 @@ export default async function TalisprosMapSitePage({
     requestId,
     claimed: claimed || view === "pin" || Boolean(requestId),
   });
+
+  const ownerCode = mapsite.fast_code || fastCode;
+  const isOwner =
+    showStartHere || (await isOwnMapSite(ownerCode));
 
   const paymentPlanType = await resolveMapSitePaymentPlanType({
     requestId,
@@ -108,14 +179,32 @@ export default async function TalisprosMapSitePage({
     requestId,
   });
 
+  const ebookContext = ownerCode
+    ? await getMapSiteEbookContext(ownerCode)
+    : null;
+  const primarySlug = ebookContext?.primaryEbook?.slug || bookSlug;
+  const hasTalisBook = Boolean(
+    primarySlug || mapsite.teb_url?.trim() || ebookContext?.books?.length
+  );
+  const talisBookHref = primarySlug
+    ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}`
+    : mapsite.teb_url?.trim() || null;
+
   return (
     <MapSiteApplication
       initialMapSite={mapsite}
-      audience={audience}
+      audience={flowAudience}
+      accountType={accountType}
+      onboardingMode={onboardingMode}
+      sourceAudience={sourceAudience}
       requestId={requestId}
       paymentPlanType={paymentPlanType}
       paymentReceived={paymentReceived}
-      openPinOnLoad
+      hasTalisBook={hasTalisBook}
+      talisBookHref={talisBookHref}
+      showActivatePayment={showActivatePayment}
+      openPinOnLoad={isOwner || claimed || view === "pin"}
+      showStartHere={false}
     />
   );
 }

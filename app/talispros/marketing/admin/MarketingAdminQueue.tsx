@@ -15,6 +15,10 @@ import type { BuildRequestListRow } from "@/app/admin/marketing/actions";
 import { MARKETING_ADMIN_PATH } from "@/lib/mapsite-account-session";
 import { REGISTRATION_MARKET_COPY } from "@/lib/registration-market";
 import type { RegistrationMarket } from "@/lib/registration-market";
+import {
+  ADPRO_CATEGORY_OPTIONS,
+  adproCategoryLabel,
+} from "@/lib/talispros/adpro-categories";
 
 function marketLabel(marketType: string | null): string {
   if (!marketType) return "—";
@@ -27,6 +31,7 @@ export default function MarketingAdminQueue() {
   const [loading, setLoading] = useState(true);
   const [pending, startTransition] = useTransition();
   const [queryError, setQueryError] = useState<string | null>(null);
+  const [adproCategoryFilter, setAdproCategoryFilter] = useState("all");
 
   const refresh = useCallback(async () => {
     const result = await listMarketingRegistrations();
@@ -86,9 +91,30 @@ export default function MarketingAdminQueue() {
         </div>
       ) : null}
 
+      <div className="border-b border-neutral-200 bg-white px-4 py-3">
+        <label className="flex flex-col gap-1 text-xs font-medium uppercase tracking-wide text-neutral-500 sm:max-w-xs">
+          Adpros category
+          <select
+            value={adproCategoryFilter}
+            onChange={(event) => setAdproCategoryFilter(event.target.value)}
+            className="h-9 rounded border border-neutral-300 px-2 text-sm font-normal tracking-normal text-neutral-900"
+          >
+            <option value="all">All categories</option>
+            {ADPRO_CATEGORY_OPTIONS.map((option) => (
+              <option key={option.code} value={option.code}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       {loading ? (
         <div className="p-6 text-sm text-neutral-500">Loading registrations...</div>
-      ) : rows.length === 0 ? (
+      ) : rows.filter((row) => {
+          if (adproCategoryFilter === "all") return true;
+          return row.adpro_category === adproCategoryFilter;
+        }).length === 0 ? (
         <div className="p-8 text-center text-sm text-neutral-500">
           No registrations yet.
         </div>
@@ -101,13 +127,19 @@ export default function MarketingAdminQueue() {
                 <th className="px-4 py-3 text-left">Email</th>
                 <th className="px-4 py-3 text-left">Market</th>
                 <th className="px-4 py-3 text-left">Account</th>
+                <th className="px-4 py-3 text-left">Adpros Category</th>
                 <th className="px-4 py-3 text-left">Submitted</th>
                 <th className="px-4 py-3 text-left">Status</th>
                 <th className="px-4 py-3 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => (
+              {rows
+                .filter((row) => {
+                  if (adproCategoryFilter === "all") return true;
+                  return row.adpro_category === adproCategoryFilter;
+                })
+                .map((row) => (
                 <tr key={row.id} className="border-b border-neutral-100">
                   <td className="px-4 py-3">
                     {row.first_name} {row.last_name}
@@ -115,6 +147,9 @@ export default function MarketingAdminQueue() {
                   <td className="px-4 py-3">{row.email}</td>
                   <td className="px-4 py-3">{marketLabel(row.market_type)}</td>
                   <td className="px-4 py-3">{row.requested_account_type || "—"}</td>
+                  <td className="px-4 py-3">
+                    {adproCategoryLabel(row.adpro_category) || "—"}
+                  </td>
                   <td className="px-4 py-3">
                     {new Date(
                       row.submitted_at || row.created_at || new Date().toISOString()

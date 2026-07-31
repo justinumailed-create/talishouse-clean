@@ -56,9 +56,11 @@ export const TALISBOOKS_FUTURE_FEATURES = [
 ] as const;
 
 /**
- * Official TalisBooks™ page sequence (enforced before publishing).
+ * Official brokerage publish sequence (scaffolded — not used by FSBO demo).
  * Book size: 12–22 pages (10–20 content + front cover + back cover).
  * Pages 2–3 require full brokerage compliance; final page duplicates page 3.
+ *
+ * Live sample / FSBO onboarding uses TALISBOOKS_FSBO_DEMO_PAGE_STRUCTURE instead.
  */
 export const TALISBOOKS_PAGE_STRUCTURE = [
   { page: 1, role: "cover", label: "Cover" },
@@ -74,6 +76,23 @@ export const TALISBOOKS_PAGE_STRUCTURE = [
   },
   { page: "4–21", role: "property_content", label: "Property Content" },
   { page: "final", role: "agent_brokerage", label: "Duplicate Page 3 layout" },
+] as const;
+
+/**
+ * FSBO demonstration sequence (sample viewer + owner-seller onboarding).
+ * Broker branding and pages 2–3 brokerage layouts are intentionally omitted.
+ * Permanent Glasshouse™ brochure pages always sit before the back cover.
+ */
+export const TALISBOOKS_FSBO_DEMO_PAGE_STRUCTURE = [
+  { page: 1, role: "cover", label: "Cover" },
+  { page: 2, role: "property_content", label: "MapSite™ location" },
+  { page: "3–(n-3)", role: "property_content", label: "Property story" },
+  {
+    page: "(n-2)–(n-1)",
+    role: "property_content",
+    label: "Glasshouse™ brochure (permanent)",
+  },
+  { page: "final", role: "cover", label: "Soft back cover" },
 ] as const;
 
 /** Mandatory brokerage fields on pages 2, 3, and the final page. */

@@ -21,6 +21,11 @@ interface MapSiteCompletedProps extends BaseEmailProps {
   mapsiteUrl: string;
 }
 
+interface EbookCompletedProps extends BaseEmailProps {
+  fastCode: string;
+  ebookUrl: string;
+}
+
 interface WeeklyMarketingReportProps extends BaseEmailProps {
   fastCode: string;
   summaryText: string;
@@ -227,6 +232,49 @@ export function mapSiteCompletedHtml({ recipientName, fastCode, mapsiteUrl }: Ma
         <p style="margin:16px 0 0;font-size:13px;color:#8e8e93">
           If the button doesn't work, copy and paste this link into your browser:<br>
           <a href="${mapsiteUrl}" style="color:#1d4ed8;font-size:13px">${mapsiteUrl}</a>
+        </p>
+      </td>
+    </tr>
+  `);
+}
+
+export function ebookCompletedHtml({ recipientName, fastCode, ebookUrl }: EbookCompletedProps) {
+  return wrap(`
+    <tr>
+      <td style="padding-top:24px">
+        <h2 style="margin:0 0 8px;font-size:22px;font-weight:600;color:#111;letter-spacing:-0.3px">
+          Your TalisBook™ is Ready
+        </h2>
+        <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
+          Hi ${recipientName},
+        </p>
+        <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
+          Rahul has finished your E-Book. You can open it with the link below.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="background-color:#f0fdf4;border-radius:12px;padding:20px;margin-bottom:16px">
+          <tr>
+            <td align="center">
+              <p style="margin:0 0 4px;font-size:12px;color:#555;text-transform:uppercase;letter-spacing:0.5px">
+                FAST Code
+              </p>
+              <p style="margin:0;font-size:28px;font-weight:700;color:#16a34a;letter-spacing:2px;font-family:monospace">
+                ${fastCode}
+              </p>
+            </td>
+          </tr>
+        </table>
+        <table cellpadding="0" cellspacing="0">
+          <tr>
+            <td style="background-color:#111;border-radius:10px;padding:12px 24px">
+              <a href="${ebookUrl}" style="color:#fff;text-decoration:none;font-size:14px;font-weight:500;display:inline-block">
+                Open My E-Book
+              </a>
+            </td>
+          </tr>
+        </table>
+        <p style="margin:16px 0 0;font-size:13px;color:#8e8e93">
+          If the button doesn't work, copy and paste this link into your browser:<br>
+          <a href="${ebookUrl}" style="color:#1d4ed8;font-size:13px">${ebookUrl}</a>
         </p>
       </td>
     </tr>

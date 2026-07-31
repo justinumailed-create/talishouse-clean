@@ -20,7 +20,8 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      bodySizeLimit: "4mb",
+      // Self-service ebook uploads (images + PDF page rasters) can exceed 4mb.
+      bodySizeLimit: "25mb",
     },
     proxyClientMaxBodySize: "25mb",
   },

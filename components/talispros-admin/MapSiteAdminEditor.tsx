@@ -16,10 +16,13 @@ import {
 import MapSiteGalleryEditor from "@/components/admin/MapSiteGalleryEditor";
 import TalisMapsPinPicker from "@/components/build-mapsite/TalisMapsPinPicker";
 import MapSiteAdminShareLinks from "@/components/talispros-admin/MapSiteAdminShareLinks";
+import MapSiteAdminEbookPanel from "@/components/talispros-admin/MapSiteAdminEbookPanel";
 import {
   OFFERED_SUBSCRIPTION_TIER_LABELS,
   type OfferedSubscriptionTier,
 } from "@/lib/mapsite-subscription";
+import type { MapSiteEbookDraft } from "@/lib/talisbooks/mapsite-ebook-service";
+import type { AdminEbookPageRow } from "@/lib/talisbooks/admin-ebook-pages";
 
 interface MapSiteAdminEditorProps {
   mapsite: MapSiteView;
@@ -29,6 +32,8 @@ interface MapSiteAdminEditorProps {
   showVisitorSubscriptionPanel?: boolean;
   /** Completed PayPal payment on file for this claim. */
   paymentReceived?: boolean;
+  ebook?: MapSiteEbookDraft | null;
+  ebookPages?: AdminEbookPageRow[];
 }
 
 function Field({
@@ -84,6 +89,8 @@ export default function MapSiteAdminEditor({
   backHref,
   showVisitorSubscriptionPanel = false,
   paymentReceived = false,
+  ebook = null,
+  ebookPages = [],
 }: MapSiteAdminEditorProps) {
   const [form, setForm] = useState({
     propertyTitle: mapsite.propertyTitle || "",
@@ -259,6 +266,13 @@ export default function MapSiteAdminEditor({
         paymentReceived={paymentReceived}
       />
 
+      <MapSiteAdminEbookPanel
+        fastCode={mapsite.fastCode}
+        initialEbook={ebook}
+        initialPages={ebookPages}
+        adminWritesEnabled={adminWritesEnabled}
+      />
+
       {showVisitorSubscriptionPanel ? (
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
           <h2 className="text-lg font-semibold text-neutral-900">
@@ -421,7 +435,7 @@ export default function MapSiteAdminEditor({
             className={inputClass}
             value={form.tebUrl}
             onChange={(e) => setForm((p) => ({ ...p, tebUrl: e.target.value }))}
-            placeholder="/talisbooks/library"
+            placeholder="Leave blank for this FAST Code shelf"
           />
         </Field>
         <Field label="TTV™ URL (optional override)">

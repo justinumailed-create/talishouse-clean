@@ -7,10 +7,11 @@ export interface TalisBooksViewerSpread {
 }
 
 /**
- * Western open-book spreads:
- * - Spread 0: blank endpaper | cover (page 1)
- * - Spread 1: page 2 | page 3
- * - Spread n: page 2n | page 2n+1
+ * Issuu / soft-cover magazine spreads (Western):
+ * - Spread 0: single front cover (page 1 alone)
+ * - Spread 1: pages 2–3 (first interior spread)
+ * - Spread n: facing interior leaves
+ * - Last: single back cover when page count is even
  */
 export function getViewerSpreadCount(pageCount: number): number {
   if (pageCount <= 0) {
@@ -63,6 +64,12 @@ export function describeViewerSpread(spread: TalisBooksViewerSpread): string {
   const right = spread.right?.pageNumber;
   if (left != null && right != null) {
     return `Pages ${left}–${right}`;
+  }
+  if (right != null && spread.index === 0) {
+    return "Front cover";
+  }
+  if (left != null && right == null) {
+    return "Back cover";
   }
   if (right != null) {
     return `Page ${right}`;

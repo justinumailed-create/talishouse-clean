@@ -1,24 +1,48 @@
 import { notFound } from "next/navigation";
 import TalisBooksViewerShell from "@/components/talisbooks/viewer/TalisBooksViewerShell";
-import { createDemoViewerBook } from "@/lib/talisbooks/viewer";
+import { resolveViewerBookBySlug } from "@/lib/talisbooks/viewer/load-book";
+import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
+import { isMarketingManagerAuthenticated } from "@/lib/marketing-manager-auth";
+import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
 
 interface TalisBooksViewerSlugPageProps {
   params: Promise<{ slug: string }>;
 }
 
-const DEMO_SLUGS = new Set(["sample-ebook", "demo", "preview"]);
-
 export default async function TalisBooksViewerSlugPage({
   params,
 }: TalisBooksViewerSlugPageProps) {
   const { slug } = await params;
-  const demo = createDemoViewerBook();
+  const [book, isMarketingAdmin] = await Promise.all([
+    resolveViewerBookBySlug(slug),
+    isMarketingManagerAuthenticated(),
+  ]);
 
-  // Future: load published book by slug from talisbooks_books.
-  // Demo slugs keep the viewer usable before catalog data exists.
-  if (!DEMO_SLUGS.has(slug)) {
+  if (!book) {
     notFound();
   }
 
-  return <TalisBooksViewerShell book={{ ...demo, slug: demo.slug }} />;
+  const editState = book.fastCode
+    ? await getMapSiteEditToolbarState(book.fastCode)
+    : { isAdmin: false, isOwner: false, showToolbar: false };
+
+  const isAdmin = isMarketingAdmin || editState.isAdmin;
+  const canEditTools = isAdmin || editState.showToolbar;
+
+  const paymentReceived = book.fastCode
+    ? await hasCompletedMapSitePaypalPayment({ fastCode: book.fastCode })
+    : false;
+
+  // Dashboard + Live Edit only after payment (Marketing Admin bypass).
+  const showDashboard = isAdmin || paymentReceived;
+  const canLiveEdit = isAdmin || (paymentReceived && canEditTools);
+
+  return (
+    <TalisBooksViewerShell
+      book={book}
+      canEditTools={canEditTools}
+      canLiveEdit={canLiveEdit}
+      showDashboard={showDashboard}
+    />
+  );
 }

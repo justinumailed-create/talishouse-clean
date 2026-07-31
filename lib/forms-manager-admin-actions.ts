@@ -11,6 +11,7 @@ export interface FormsManagerBuildMapsiteRow {
   source: "build_mapsite";
   email: string;
   accountType: string;
+  adproCategory: string | null;
   status: string;
   createdAt: string;
   fastCode: string | null;
@@ -82,7 +83,7 @@ export async function listFormsManagerSubmissions(): Promise<ListFormsManagerRes
   const { data: buildData, error: buildError } = await supabase
     .from("build_requests")
     .select(
-      "id, first_name, last_name, email, account_type, status, created_at, street_address, pin_writeup"
+      "id, first_name, last_name, email, account_type, adpro_category, status, created_at, street_address, pin_writeup"
     )
     .order("created_at", { ascending: false });
 
@@ -136,6 +137,7 @@ export async function listFormsManagerSubmissions(): Promise<ListFormsManagerRes
       source: "build_mapsite",
       email: row.email,
       accountType: row.account_type || row.last_name || "—",
+      adproCategory: row.adpro_category ?? null,
       status: row.status,
       createdAt: row.created_at,
       fastCode: fcMap[row.id] ?? (row.first_name || null),

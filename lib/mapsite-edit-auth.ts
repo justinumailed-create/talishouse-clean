@@ -75,3 +75,11 @@ export async function getMapSiteEditToolbarState(
     showToolbar: isAdmin || hasOwnerSession || isRegisteredOwner,
   };
 }
+
+/** True when the current browser session belongs to this MapSite™ owner. */
+export async function isOwnMapSite(fastCode: string | null | undefined): Promise<boolean> {
+  const code = fastCode?.trim();
+  if (!code) return false;
+  const state = await getMapSiteEditToolbarState(code);
+  return state.isOwner;
+}

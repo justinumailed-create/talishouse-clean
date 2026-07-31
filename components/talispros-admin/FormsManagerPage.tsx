@@ -10,6 +10,10 @@ import {
   type FormsManagerRow,
   type FormsManagerSource,
 } from "@/lib/forms-manager-admin-actions";
+import {
+  ADPRO_CATEGORY_OPTIONS,
+  adproCategoryLabel,
+} from "@/lib/talispros/adpro-categories";
 
 type SortKey = "fastCode" | "email" | "accountType" | "status" | "createdAt" | "form";
 type SortDir = "asc" | "desc";
@@ -63,13 +67,10 @@ export default function FormsManagerPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formFilter, setFormFilter] = useState<FormFilter>("all");
+  const [adproCategoryFilter, setAdproCategoryFilter] = useState("all");
   const [sortKey, setSortKey] = useState<SortKey>("createdAt");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    void fetchSubmissions();
-  }, []);
 
   async function fetchSubmissions() {
     setLoading(true);
@@ -94,6 +95,10 @@ export default function FormsManagerPage() {
     setRows(combined);
     setLoading(false);
   }
+
+  useEffect(() => {
+    void fetchSubmissions();
+  }, []);
 
   async function handleResetStatus(requestId: string) {
     const buildResult = await updateBuildRequestStatusAdmin(requestId, "pending");
@@ -162,6 +167,13 @@ export default function FormsManagerPage() {
       result = result.filter((row) => displayStatus(row) === statusFilter);
     }
 
+    if (adproCategoryFilter !== "all") {
+      result = result.filter((row) => {
+        if (row.source !== "build_mapsite") return false;
+        return row.adproCategory === adproCategoryFilter;
+      });
+    }
+
     result.sort((a, b) => {
       let cmp = 0;
       switch (sortKey) {
@@ -189,7 +201,15 @@ export default function FormsManagerPage() {
     });
 
     return result;
-  }, [rows, search, statusFilter, formFilter, sortKey, sortDir]);
+  }, [
+    rows,
+    search,
+    statusFilter,
+    formFilter,
+    adproCategoryFilter,
+    sortKey,
+    sortDir,
+  ]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -283,6 +303,21 @@ export default function FormsManagerPage() {
           className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black text-sm"
         />
         <div className="flex gap-2 flex-wrap">
+          <select
+            value={adproCategoryFilter}
+            onChange={(e) => {
+              setAdproCategoryFilter(e.target.value);
+              setPage(1);
+            }}
+            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black text-sm"
+          >
+            <option value="all">All Adpros Categories</option>
+            {ADPRO_CATEGORY_OPTIONS.map((option) => (
+              <option key={option.code} value={option.code}>
+                {option.label}
+              </option>
+            ))}
+          </select>
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.value}
@@ -370,7 +405,12 @@ export default function FormsManagerPage() {
                       {row.email}
                     </td>
                     <td className="py-3 px-4 text-gray-500 text-sm whitespace-nowrap">
-                      {row.accountType || "—"}
+                      <div>{row.accountType || "—"}</div>
+                      {row.source === "build_mapsite" && row.adproCategory ? (
+                        <div className="text-xs text-gray-400">
+                          {adproCategoryLabel(row.adproCategory)}
+                        </div>
+                      ) : null}
                     </td>
                     <td className="py-3 px-4">{statusBadge(row)}</td>
                     <td className="py-3 px-4 text-gray-500 text-sm whitespace-nowrap">

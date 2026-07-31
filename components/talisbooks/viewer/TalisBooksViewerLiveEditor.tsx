@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import TalisBooksImageField from "@/components/talisbooks/viewer/TalisBooksImageField";
+import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
 import type { TalisBooksViewerPage, TalisBooksViewerPageLayout } from "@/lib/talisbooks/viewer";
 
 const LAYOUT_OPTIONS: Array<{ value: TalisBooksViewerPageLayout; label: string }> = [
@@ -13,8 +14,8 @@ const LAYOUT_OPTIONS: Array<{ value: TalisBooksViewerPageLayout; label: string }
   { value: "parting", label: "Parting" },
   { value: "maps", label: "Maps" },
   { value: "cover", label: "Cover" },
-  { value: "agent_intro", label: "Agent intro" },
-  { value: "agent_summary", label: "Agent summary" },
+  { value: "agent_intro", label: "Agent intro (brokerage scaffold)" },
+  { value: "agent_summary", label: "Agent summary (brokerage scaffold)" },
 ];
 
 interface TalisBooksViewerLiveEditorProps {
@@ -53,6 +54,29 @@ function PageEditorCard({
   onUpdatePage: (pageId: string, patch: Partial<TalisBooksViewerPage>) => void;
 }) {
   const layout = page.layout ?? "caption";
+  const locked = isPermanentViewerPage(page);
+
+  if (locked) {
+    return (
+      <section className="talisbooks-viewer-live-edit__card talisbooks-viewer-live-edit__card--locked">
+        <header className="talisbooks-viewer-live-edit__card-head">
+          <p className="talisbooks-viewer-live-edit__side">{sideLabel}</p>
+          <p className="talisbooks-viewer-live-edit__page-meta">
+            Page {page.pageNumber}
+            {page.layout ? ` · ${page.layout.replaceAll("_", " ")}` : ""}
+          </p>
+        </header>
+        <p className="talisbooks-viewer-live-edit__locked-title">
+          {page.title || "Permanent page"}
+        </p>
+        <p className="talisbooks-viewer-live-edit__locked-note">
+          Glasshouse™ brochure — permanent system page. Clients cannot edit this.
+          Administrators can replace it globally later.
+        </p>
+      </section>
+    );
+  }
+
   const isPropertyLike =
     page.pageRole === "property_content" ||
     page.pageRole === "cover" ||

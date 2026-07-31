@@ -2,11 +2,15 @@ import type { MapEnginePin } from "@/lib/talismaps/map-engine";
 
 export type PmcCountry = "CA" | "US";
 export type PmcRegionGroup = "canada" | "usa";
+export type PmcPinMarketType = "root" | "corporate";
+export type PmcPinEntryWorkflow = "apply" | "corporate-admin-auth";
 
 export interface PmcRegionalPin {
   id: string;
   country: PmcCountry;
   regionGroup: PmcRegionGroup;
+  marketType?: PmcPinMarketType;
+  entryWorkflow?: PmcPinEntryWorkflow;
   label: string;
   latitude: number;
   longitude: number;
@@ -259,6 +263,182 @@ export const PMC_DEFAULT_REGIONAL_PINS: readonly PmcRegionalPin[] = [
     sortOrder: 200,
     description: "Root Account™ market for the United States.",
   },
+  {
+    id: "ca-corporate",
+    country: "CA",
+    regionGroup: "canada",
+    marketType: "corporate",
+    entryWorkflow: "corporate-admin-auth",
+    label: "Canada Corporate Market",
+    latitude: 56.796447,
+    longitude: -88.979786,
+    mapZoom: 5,
+    pinColor: "#B22222",
+    logoUrl: PMC_FLAG_CA,
+    visible: true,
+    sortOrder: 260,
+    description: "Corporate Market™ entry point for Canada.",
+  },
+  {
+    id: "us-corporate-new-england",
+    country: "US",
+    regionGroup: "usa",
+    marketType: "corporate",
+    entryWorkflow: "apply",
+    label: "New England",
+    latitude: 43.8,
+    longitude: -71.5,
+    mapZoom: 5,
+    pinColor: "#3C3B6E",
+    logoUrl: PMC_FLAG_US,
+    visible: true,
+    sortOrder: 300,
+    description: "Future Corporate Market™ ownership opportunity for New England.",
+  },
+  {
+    id: "us-corporate-mid-atlantic",
+    country: "US",
+    regionGroup: "usa",
+    marketType: "corporate",
+    entryWorkflow: "apply",
+    label: "Mid-Atlantic",
+    latitude: 40.2,
+    longitude: -75.2,
+    mapZoom: 5,
+    pinColor: "#3C3B6E",
+    logoUrl: PMC_FLAG_US,
+    visible: true,
+    sortOrder: 310,
+    description: "Future Corporate Market™ ownership opportunity for the Mid-Atlantic.",
+  },
+  {
+    id: "us-corporate-southeast",
+    country: "US",
+    regionGroup: "usa",
+    marketType: "corporate",
+    entryWorkflow: "apply",
+    label: "Southeast",
+    latitude: 33.6,
+    longitude: -84.4,
+    mapZoom: 5,
+    pinColor: "#3C3B6E",
+    logoUrl: PMC_FLAG_US,
+    visible: true,
+    sortOrder: 320,
+    description: "Future Corporate Market™ ownership opportunity for the Southeast.",
+  },
+  {
+    id: "us-corporate-deep-south",
+    country: "US",
+    regionGroup: "usa",
+    marketType: "corporate",
+    entryWorkflow: "apply",
+    label: "Deep South",
+    latitude: 32.7,
+    longitude: -90.0,
+    mapZoom: 5,
+    pinColor: "#3C3B6E",
+    logoUrl: PMC_FLAG_US,
+    visible: true,
+    sortOrder: 330,
+    description: "Future Corporate Market™ ownership opportunity for the Deep South.",
+  },
+  {
+    id: "us-corporate-midwest",
+    country: "US",
+    regionGroup: "usa",
+    marketType: "corporate",
+    entryWorkflow: "apply",
+    label: "Midwest",
+    latitude: 41.9,
+    longitude: -87.7,
+    mapZoom: 5,
+    pinColor: "#3C3B6E",
+    logoUrl: PMC_FLAG_US,
+    visible: true,
+    sortOrder: 340,
+    description: "Future Corporate Market™ ownership opportunity for the Midwest.",
+  },
+  {
+    id: "us-corporate-great-plains",
+    country: "US",
+    regionGroup: "usa",
+    marketType: "corporate",
+    entryWorkflow: "apply",
+    label: "Great Plains",
+    latitude: 40.7,
+    longitude: -99.1,
+    mapZoom: 5,
+    pinColor: "#3C3B6E",
+    logoUrl: PMC_FLAG_US,
+    visible: true,
+    sortOrder: 350,
+    description: "Future Corporate Market™ ownership opportunity for the Great Plains.",
+  },
+  {
+    id: "us-corporate-south-central",
+    country: "US",
+    regionGroup: "usa",
+    marketType: "corporate",
+    entryWorkflow: "apply",
+    label: "South Central",
+    latitude: 32.8,
+    longitude: -96.8,
+    mapZoom: 5,
+    pinColor: "#3C3B6E",
+    logoUrl: PMC_FLAG_US,
+    visible: true,
+    sortOrder: 360,
+    description: "Future Corporate Market™ ownership opportunity for South Central.",
+  },
+  {
+    id: "us-corporate-mountain-west",
+    country: "US",
+    regionGroup: "usa",
+    marketType: "corporate",
+    entryWorkflow: "apply",
+    label: "Mountain West",
+    latitude: 39.7,
+    longitude: -111.9,
+    mapZoom: 5,
+    pinColor: "#3C3B6E",
+    logoUrl: PMC_FLAG_US,
+    visible: true,
+    sortOrder: 370,
+    description: "Future Corporate Market™ ownership opportunity for the Mountain West.",
+  },
+  {
+    id: "us-corporate-pacific-southwest",
+    country: "US",
+    regionGroup: "usa",
+    marketType: "corporate",
+    entryWorkflow: "apply",
+    label: "Pacific Southwest",
+    latitude: 34.1,
+    longitude: -118.2,
+    mapZoom: 5,
+    pinColor: "#3C3B6E",
+    logoUrl: PMC_FLAG_US,
+    visible: true,
+    sortOrder: 380,
+    description: "Future Corporate Market™ ownership opportunity for the Pacific Southwest.",
+  },
+  {
+    id: "us-corporate-pacific-northwest",
+    country: "US",
+    regionGroup: "usa",
+    marketType: "corporate",
+    entryWorkflow: "apply",
+    label: "Pacific Northwest",
+    latitude: 47.6,
+    longitude: -122.3,
+    mapZoom: 5,
+    pinColor: "#3C3B6E",
+    logoUrl: PMC_FLAG_US,
+    visible: true,
+    sortOrder: 390,
+    description: "Future Corporate Market™ ownership opportunity for the Pacific Northwest.",
+  },
 ] as const;
 
 export function sortPmcPins(pins: PmcRegionalPin[]): PmcRegionalPin[] {
@@ -274,6 +454,17 @@ export function pmcPinsByRegionGroup(
   group: PmcRegionGroup
 ): PmcRegionalPin[] {
   return visiblePmcPins(pins).filter((pin) => pin.regionGroup === group);
+}
+
+export function pmcPinMarketType(pin: PmcRegionalPin): PmcPinMarketType {
+  return pin.marketType ?? "root";
+}
+
+export function pmcPinEntryWorkflow(pin: PmcRegionalPin): PmcPinEntryWorkflow {
+  if (pin.entryWorkflow) return pin.entryWorkflow;
+  return pmcPinMarketType(pin) === "corporate"
+    ? "apply"
+    : "apply";
 }
 
 export function pmcPinToMapEnginePin(pin: PmcRegionalPin): MapEnginePin {

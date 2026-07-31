@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useMemo, useState, useTransition } from "react";
 import { ArrowDownUp, Search } from "lucide-react";
+import TalisBooksCreateEbookPanel from "@/components/talisbooks/library/TalisBooksCreateEbookPanel";
 import TalisBooksStandingBook from "@/components/talisbooks/library/TalisBooksStandingBook";
 import {
   TALISBOOKS_LIBRARY_BOOK_PRICE_USD,
@@ -78,6 +79,7 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
   const [featuredCapacity, setFeaturedCapacity] = useState<5 | 6>(5);
   const [, startTransition] = useTransition();
   const deferredSearch = useDeferredValue(search);
+  const scoped = Boolean(bookshelf.scopedToFastCode && bookshelf.fastCode);
 
   const { featured, general, featuredLayout } = useMemo(
     () => partitionBookshelf(bookshelf.books, { featuredCapacity }),
@@ -106,16 +108,25 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
   const heroBook = featuredLayout === "hero-plus-4" ? featured[0] : null;
   const featuredRest =
     featuredLayout === "hero-plus-4" ? featured.slice(1) : featured;
+  const primary = bookshelf.primaryEbook;
 
   return (
     <div className="talisbooks-library">
       <header className="talisbooks-library__topbar">
         <div className="talisbooks-library__brand">
           <p className="talisbooks-library__eyebrow">
-            {bookshelf.accountType === "root" ? "Root Account" : "Derivative Account"}
-            {bookshelf.fastCode ? ` · ${bookshelf.fastCode.toUpperCase()}` : ""}
+            {scoped
+              ? `TEB™ · ${bookshelf.fastCode!.toUpperCase()}`
+              : bookshelf.accountType === "root"
+                ? "Root Account"
+                : "Derivative Account"}
+            {!scoped && bookshelf.fastCode
+              ? ` · ${bookshelf.fastCode.toUpperCase()}`
+              : ""}
           </p>
-          <h1 className="talisbooks-library__title">Bookshelf</h1>
+          <h1 className="talisbooks-library__title">
+            {scoped ? bookshelf.accountName : "Bookshelf"}
+          </h1>
         </div>
 
         <label className="talisbooks-library__search">
@@ -127,7 +138,7 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
               setSearch(event.target.value);
               startTransition(() => setPage(1));
             }}
-            placeholder="Search library…"
+            placeholder={scoped ? "Search this shelf…" : "Search library…"}
             className="talisbooks-library__search-input"
           />
         </label>
@@ -147,9 +158,48 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
         </div>
       </header>
 
-      <div className="talisbooks-library__case">
+      {scoped && bookshelf.fastCode && bookshelf.registrationHref ? (
+        <TalisBooksCreateEbookPanel
+          fastCode={bookshelf.fastCode}
+          paymentReceived={Boolean(bookshelf.paymentReceived)}
+          registrationHref={bookshelf.registrationHref}
+          entitlements={bookshelf.entitlements}
+          initialTitle={primary?.title || ""}
+          initialSubtitle={primary?.subtitle || ""}
+          initialDescription={primary?.description || ""}
+          hasExistingBook={Boolean(primary)}
+        />
+      ) : null}
+
+      {scoped && bookshelf.entitlements && !bookshelf.entitlements.activated ? (
+        <div className="mx-auto mb-6 max-w-3xl rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
+          <p className="font-medium text-neutral-900">Bookshelf locked</p>
+          <p className="mt-1 text-neutral-600">
+            Full bookshelf features, publishing, global marketing, additional uploads,
+            derivative books, and Adpro books unlock after account activation. Your first
+            draft remains available now.
+          </p>
+        </div>
+      ) : null}
+
+      {scoped && bookshelf.entitlements?.activated ? (
+        <div className="mx-auto mb-4 max-w-3xl text-xs text-neutral-500">
+          Activated {bookshelf.entitlements.accountKind} · quota{" "}
+          {bookshelf.entitlements.bookCount}/{bookshelf.entitlements.bookQuota} books
+        </div>
+      ) : null}
+
+      <div
+        className={[
+          "talisbooks-library__case",
+          scoped && bookshelf.entitlements && !bookshelf.entitlements.canUseBookshelf
+            ? "talisbooks-library__case--locked"
+            : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
         <div className="talisbooks-library__split">
-          {/* Left alcove — Highlighted / Scheduled */}
           <section
             className="talisbooks-library__niche talisbooks-library__niche--featured"
             aria-label="Highlighted and scheduled books"
@@ -181,7 +231,11 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
               <div className="talisbooks-library__alcove">
                 {featured.length === 0 ? (
                   <div className="talisbooks-library__niche-empty">
-                    <p>No highlighted books yet</p>
+                    <p>
+                      {scoped
+                        ? "No ebook on this FAST Code shelf yet"
+                        : "No highlighted books yet"}
+                    </p>
                   </div>
                 ) : featuredLayout === "hero-plus-4" && heroBook ? (
                   <div className="talisbooks-library__featured talisbooks-library__featured--hero">
@@ -209,7 +263,6 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
 
           <div className="talisbooks-library__mullion" aria-hidden="true" />
 
-          {/* Right alcove — General Library 4×5 */}
           <section
             className="talisbooks-library__niche talisbooks-library__niche--general"
             aria-label="General library"
@@ -247,7 +300,6 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
                 {generalResult.books.length === 0 ? (
                   <div className="talisbooks-library__niche-empty">
                     <p>No books match{deferredSearch ? ` “${deferredSearch}”` : ""}</p>
-                    {/* Empty shelf still shows physical planks */}
                     {Array.from({ length: 3 }).map((_, index) => (
                       <div key={index} className="talisbooks-library__shelf-bay">
                         <div className="talisbooks-library__shelf-row talisbooks-library__shelf-row--compact" />
@@ -300,20 +352,22 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
         </div>
       </div>
 
-      <div className="talisbooks-library__account-switch">
-        <a
-          href="/talisbooks/library?accountType=root"
-          className={bookshelf.accountType === "root" ? "is-active" : ""}
-        >
-          Root shelf
-        </a>
-        <a
-          href="/talisbooks/library?accountType=derivative"
-          className={bookshelf.accountType === "derivative" ? "is-active" : ""}
-        >
-          Derivative shelf
-        </a>
-      </div>
+      {!scoped ? (
+        <div className="talisbooks-library__account-switch">
+          <a
+            href="/talisbooks/library?accountType=root"
+            className={bookshelf.accountType === "root" ? "is-active" : ""}
+          >
+            Root shelf
+          </a>
+          <a
+            href="/talisbooks/library?accountType=derivative"
+            className={bookshelf.accountType === "derivative" ? "is-active" : ""}
+          >
+            Derivative shelf
+          </a>
+        </div>
+      ) : null}
     </div>
   );
 }

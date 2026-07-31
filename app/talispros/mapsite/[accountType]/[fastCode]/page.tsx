@@ -6,20 +6,40 @@ import {
   type RegistrationMarket,
 } from "@/lib/registration-market";
 import {
+  accountTypeForAudience,
+  type MapSiteCapabilityAccountType,
+} from "@/lib/talispros/account-capabilities";
+import {
   mapsiteAccountTypeSegment,
   MAPSITE_APP_PATH,
 } from "@/lib/talispros/mapsite-state";
+import { isOwnMapSite } from "@/lib/mapsite-edit-auth";
 import {
   loadMapSiteApplicationState,
   resolveMapSitePaymentPlanType,
   resolveMapSiteRequestId,
 } from "../../actions";
 import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
+import { ROUTES } from "@/lib/routes";
+import { ACTIVATE_QUERY, BOOK_PENDING_QUERY } from "@/lib/talispros/ebook-choice";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 
 export const dynamic = "force-dynamic";
 
 type RouteParams = Promise<{ accountType: string; fastCode: string }>;
+
+function firstParam(
+  value: string | string[] | undefined
+): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function isTruthyParam(value: string | undefined): boolean {
+  if (!value) return false;
+  const normalized = value.trim().toLowerCase();
+  return normalized === "1" || normalized === "true" || normalized === "yes";
+}
 
 function audienceForAccountTypeSegment(segment: string): RegistrationMarket {
   const market = parseRegistrationMarket(segment);
@@ -51,10 +71,13 @@ export async function generateMetadata({
  */
 export default async function ClaimedMapSiteByAccountTypePage({
   params,
+  searchParams,
 }: {
   params: RouteParams;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { accountType: rawAccountType, fastCode: rawFastCode } = await params;
+  const query = await searchParams;
   const accountType = mapsiteAccountTypeSegment(rawAccountType);
   const fastCode = rawFastCode?.trim() || "";
 
@@ -62,14 +85,33 @@ export default async function ClaimedMapSiteByAccountTypePage({
     notFound();
   }
 
+  const showActivatePayment = isTruthyParam(firstParam(query[ACTIVATE_QUERY]));
+  const bookPending = isTruthyParam(firstParam(query[BOOK_PENDING_QUERY]));
+  const bookSlug = firstParam(query.book)?.trim() || null;
+  const onboardingMode: "self" | "assisted" = bookPending ? "assisted" : "self";
+
   const audience = audienceForAccountTypeSegment(accountType);
-  const requestId = await resolveMapSiteRequestId({ fastCode });
+  const capabilityAccountType: MapSiteCapabilityAccountType =
+    accountTypeForAudience(audience);
+  const requestIdParam = firstParam(query.requestId);
+  const requestId =
+    (await resolveMapSiteRequestId({
+      requestId: requestIdParam,
+      fastCode,
+    })) || null;
 
   const mapsite = await loadMapSiteApplicationState({
     fastCode,
     requestId,
     claimed: true,
   });
+
+  const forceOpenPin =
+    firstParam(query.view)?.trim().toLowerCase() === "pin" ||
+    bookPending ||
+    Boolean(bookSlug) ||
+    showActivatePayment;
+  const isOwner = forceOpenPin || (await isOwnMapSite(fastCode));
 
   const paymentPlanType = await resolveMapSitePaymentPlanType({
     requestId,
@@ -83,6 +125,15 @@ export default async function ClaimedMapSiteByAccountTypePage({
     requestId,
   });
 
+  const ebookContext = await getMapSiteEbookContext(fastCode);
+  const primarySlug = ebookContext?.primaryEbook?.slug || bookSlug;
+  const hasTalisBook = Boolean(
+    primarySlug || mapsite.teb_url?.trim() || ebookContext?.books?.length
+  );
+  const talisBookHref = primarySlug
+    ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}`
+    : mapsite.teb_url?.trim() || null;
+
   return (
     <MapSiteApplication
       initialMapSite={{
@@ -90,10 +141,16 @@ export default async function ClaimedMapSiteByAccountTypePage({
         fast_code: mapsite.fast_code || fastCode.toUpperCase(),
       }}
       audience={audience}
+      accountType={capabilityAccountType}
+      onboardingMode={onboardingMode}
       requestId={requestId}
       paymentPlanType={paymentPlanType}
       paymentReceived={paymentReceived}
-      openPinOnLoad
+      hasTalisBook={hasTalisBook}
+      talisBookHref={talisBookHref}
+      showActivatePayment={showActivatePayment}
+      openPinOnLoad={isOwner}
+      showStartHere={false}
     />
   );
 }

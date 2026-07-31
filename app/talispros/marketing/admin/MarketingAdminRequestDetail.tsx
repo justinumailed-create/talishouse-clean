@@ -18,6 +18,10 @@ import {
   CLIENT_LOGIN_PATH,
   MARKETING_ADMIN_PATH,
 } from "@/lib/mapsite-account-session";
+import {
+  ADPRO_CATEGORY_OPTIONS,
+  adproCategoryLabel,
+} from "@/lib/talispros/adpro-categories";
 
 type BuildRequest = {
   id: string;
@@ -28,6 +32,7 @@ type BuildRequest = {
   company: string | null;
   market_type: string | null;
   requested_account_type: string | null;
+  adpro_category: string | null;
   requested_fast_code: string | null;
   street_address: string | null;
   latitude: number | null;
@@ -103,6 +108,7 @@ export default function MarketingAdminRequestDetail({
       phone: request.phone,
       market_type: request.market_type,
       requested_account_type: request.requested_account_type,
+      adpro_category: request.adpro_category,
       street_address: request.street_address,
       latitude: request.latitude,
       longitude: request.longitude,
@@ -362,6 +368,31 @@ export default function MarketingAdminRequestDetail({
           />
         </label>
         <label className="text-sm">
+          Adpros Category
+          <select
+            className="mt-1 w-full rounded border px-3 py-2"
+            value={request.adpro_category || ""}
+            onChange={(event) =>
+              setRequest({
+                ...request,
+                adpro_category: event.target.value || null,
+              })
+            }
+          >
+            <option value="">None</option>
+            {ADPRO_CATEGORY_OPTIONS.map((option) => (
+              <option key={option.code} value={option.code}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          {request.adpro_category ? (
+            <p className="mt-1 text-xs text-neutral-500">
+              Selected: {adproCategoryLabel(request.adpro_category)}
+            </p>
+          ) : null}
+        </label>
+        <label className="text-sm">
           Market
           <input
             className="mt-1 w-full rounded border px-3 py-2"
@@ -574,6 +605,14 @@ export default function MarketingAdminRequestDetail({
                 }
               />
             </label>
+            {mapsite.fast_code ? (
+              <a
+                href={`/talispros/admin/mapsites/${encodeURIComponent(mapsite.fast_code)}`}
+                className="inline-flex text-sm font-medium text-neutral-900 underline underline-offset-2"
+              >
+                Open TalisBooks™ manager (create, images, reorder, publish, attach)
+              </a>
+            ) : null}
             <label className="text-sm">
               TTV™ URL
               <input
