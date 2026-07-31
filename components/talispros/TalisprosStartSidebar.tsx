@@ -4,7 +4,7 @@ import { TALISPROS_START_SEGMENTS } from "@/lib/talispros/start-content";
 
 export default function TalisprosStartSidebar() {
   return (
-    <aside className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#f2f2f0] text-black lg:h-full lg:flex-none lg:border-l lg:border-[#dedede] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <aside className="flex-none bg-[#f2f2f0] text-black lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:border-l lg:border-[#dedede] lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
       <div className="flex min-h-[220px] items-end justify-center px-4 pb-8 pt-5 lg:min-h-[295px] lg:px-5 lg:pb-7 lg:pt-4">
         <h2 className="max-w-[19rem] text-center text-black sm:max-w-[20.5rem]">
           <span className="block text-[42px] leading-[0.96] tracking-[-0.01em] sm:text-[52px] lg:text-[58px]">

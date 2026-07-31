@@ -19,5 +19,9 @@ export default function TalisprosMarketsLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div className={`${libreBaskerville.className} h-full min-h-0`}>{children}</div>;
+  return (
+    <div className={`${libreBaskerville.className} min-h-dvh lg:h-full lg:min-h-0`}>
+      {children}
+    </div>
+  );
 }

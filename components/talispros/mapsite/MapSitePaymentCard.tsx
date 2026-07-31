@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import { PayPalButtons, PayPalScriptProvider } from "@paypal/react-paypal-js";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import type { PlanType } from "@/lib/registration-plans";
@@ -17,6 +17,30 @@ interface MapSitePaymentCardProps {
   requestId?: string | null;
   /** Plan chosen on Claim a Market (defaults to full Root). */
   planType?: PlanType;
+  /** Phone-only compact card so the map pin remains visible. */
+  compact?: boolean;
+}
+
+const PHONE_QUERY = "(max-width: 639px)";
+/** Short phones can't spare the vertical PayPal stack without covering the pin. */
+const SHORT_PHONE_QUERY = "(max-width: 639px) and (max-height: 700px)";
+
+/** Compact layout must not depend on parent measurement timing. */
+function useMediaQuery(query: string) {
+  const subscribe = useCallback(
+    (onChange: () => void) => {
+      const list = window.matchMedia(query);
+      list.addEventListener("change", onChange);
+      return () => list.removeEventListener("change", onChange);
+    },
+    [query],
+  );
+
+  return useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
 }
 
 export default function MapSitePaymentCard({
@@ -25,9 +49,12 @@ export default function MapSitePaymentCard({
   fastCode,
   requestId,
   planType = "ROOT_ACCOUNT",
+  compact: compactProp = false,
 }: MapSitePaymentCardProps) {
   const router = useRouter();
   const summary = mapsiteClaimPlanSummary(planType);
+  const shortPhone = useMediaQuery(SHORT_PHONE_QUERY);
+  const compact = useMediaQuery(PHONE_QUERY) || compactProp;
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID?.trim() || "";
 
   const [paypalKey, setPaypalKey] = useState(0);
@@ -62,16 +89,29 @@ export default function MapSitePaymentCard({
 
   return (
     <div
-      className={`pointer-events-auto ${MAPSITE_LISTING_CARD_WIDTH_CLASS} rounded-2xl bg-white/75 p-4 shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-sm`}
+      className={`mapsite-pay-card pointer-events-auto ${MAPSITE_LISTING_CARD_WIDTH_CLASS} rounded-2xl bg-white/75 shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-sm ${
+        compact ? "px-3 py-2" : "p-4"
+      }`}
     >
-      <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-        Complete registration
-      </p>
-      <h3 className="mt-1 flex items-baseline justify-between gap-3 text-base font-semibold text-black">
+      <div className={compact ? "flex items-baseline justify-between gap-3" : ""}>
+        <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+          {compact ? summary.planLabel : "Complete registration"}
+        </p>
+        {compact ? (
+          <span className="shrink-0 text-sm font-semibold text-black">
+            {summary.totalLabel}
+          </span>
+        ) : null}
+      </div>
+      <h3
+        className={`items-baseline justify-between gap-3 text-base font-semibold text-black ${
+          compact ? "hidden" : "mt-1 flex"
+        }`}
+      >
         <span>{summary.planLabel}</span>
         <span className="shrink-0 text-sm font-semibold">{summary.priceLabel}</span>
       </h3>
-      <p className="mt-1 text-xs text-neutral-600">
+      <p className={compact ? "hidden" : "mt-1 text-xs text-neutral-600"}>
         {summary.priceLabel} + {summary.taxLabel} = {summary.totalLabel}
       </p>
 
@@ -80,7 +120,7 @@ export default function MapSitePaymentCard({
           PayPal is not configured. Set NEXT_PUBLIC_PAYPAL_CLIENT_ID.
         </p>
       ) : (
-        <div className="mt-3">
+        <div className={compact ? "mt-2" : "mt-3"}>
           <PayPalScriptProvider
             options={{
               clientId,
@@ -89,14 +129,17 @@ export default function MapSitePaymentCard({
             }}
           >
             <PayPalButtons
-              key={paypalKey}
+              key={`${paypalKey}-${compact ? "compact" : "full"}-${
+                shortPhone ? "short" : "tall"
+              }`}
               disabled={processing}
               style={{
-                layout: "vertical",
+                layout: shortPhone ? "horizontal" : "vertical",
                 color: "blue",
                 shape: "rect",
                 label: "pay",
-                height: 42,
+                height: compact ? 36 : 42,
+                ...(shortPhone ? { tagline: false } : {}),
               }}
               createOrder={async (_data, actions) =>
                 actions.order.create({
@@ -142,11 +185,13 @@ export default function MapSitePaymentCard({
         <p className="mt-2 text-center text-xs text-red-600">{error}</p>
       ) : null}
 
-      <p className="mt-2 text-[11px] leading-snug text-neutral-500">
-        PayPal charges {summary.totalLabel}. After payment, Express an Interest
-        unlocks and this MapSite™ becomes active for admin management on{" "}
-        {MAPSITE_APP_PATH}.
-      </p>
+      {!compact ? (
+        <p className="mt-2 text-[11px] leading-snug text-neutral-500">
+          PayPal charges {summary.totalLabel}. After payment, Express an Interest
+          unlocks and this MapSite™ becomes active for admin management on{" "}
+          {MAPSITE_APP_PATH}.
+        </p>
+      ) : null}
     </div>
   );
 }

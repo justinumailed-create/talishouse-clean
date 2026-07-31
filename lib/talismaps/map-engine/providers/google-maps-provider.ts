@@ -142,6 +142,23 @@ function createHtmlPinOverlayClass() {
       this.draw();
     }
 
+    private moveToClientPoint(clientX: number, clientY: number) {
+      const projection = this.getProjection();
+      const map = this.getMap();
+      const mapDiv = map instanceof google.maps.Map ? map.getDiv() : null;
+      if (!projection || !mapDiv) return;
+      const bounds = mapDiv.getBoundingClientRect();
+      const point = new google.maps.Point(
+        clientX - bounds.left,
+        clientY - bounds.top
+      );
+      const latLng = projection.fromContainerPixelToLatLng(point);
+      if (latLng) {
+        this.position = latLng;
+        this.draw();
+      }
+    }
+
     onAdd() {
       const panes = this.getPanes();
       panes?.overlayMouseTarget.appendChild(this.container);
@@ -160,24 +177,12 @@ function createHtmlPinOverlayClass() {
         this.onDragStart?.();
 
         const map = this.getMap();
-        const mapDiv = map instanceof google.maps.Map ? map.getDiv() : null;
         if (map instanceof google.maps.Map) {
           map.setOptions({ draggable: false });
         }
 
         const onMove = (moveEvent: MouseEvent) => {
-          const projection = this.getProjection();
-          if (!projection || !mapDiv) return;
-          const bounds = mapDiv.getBoundingClientRect();
-          const point = new google.maps.Point(
-            moveEvent.clientX - bounds.left,
-            moveEvent.clientY - bounds.top
-          );
-          const latLng = projection.fromContainerPixelToLatLng(point);
-          if (latLng) {
-            this.position = latLng;
-            this.draw();
-          }
+          this.moveToClientPoint(moveEvent.clientX, moveEvent.clientY);
         };
 
         const onUp = () => {
@@ -196,6 +201,61 @@ function createHtmlPinOverlayClass() {
         window.addEventListener("mousemove", onMove);
         window.addEventListener("mouseup", onUp);
       });
+
+      this.container.addEventListener(
+        "touchstart",
+        (event) => {
+          if (!this.dragEnabled) return;
+          const touch = event.touches[0];
+          if (!touch || event.touches.length > 1) return;
+          // Stops the map from panning and blocks the synthetic click after drop.
+          event.preventDefault();
+          event.stopPropagation();
+          const pointerId = touch.identifier;
+          this.dragging = true;
+          this.onDragStart?.();
+
+          const map = this.getMap();
+          if (map instanceof google.maps.Map) {
+            map.setOptions({ draggable: false });
+          }
+
+          const trackedTouch = (touchEvent: TouchEvent) =>
+            Array.from(touchEvent.changedTouches).find(
+              (candidate) => candidate.identifier === pointerId
+            ) ?? null;
+
+          const onMove = (moveEvent: TouchEvent) => {
+            const active = trackedTouch(moveEvent);
+            if (!active) return;
+            moveEvent.preventDefault();
+            this.moveToClientPoint(active.clientX, active.clientY);
+          };
+
+          const onEnd = (endEvent: TouchEvent) => {
+            const active = trackedTouch(endEvent);
+            if (!active) return;
+            window.removeEventListener("touchmove", onMove);
+            window.removeEventListener("touchend", onEnd);
+            window.removeEventListener("touchcancel", onEnd);
+            if (map instanceof google.maps.Map) {
+              map.setOptions({ draggable: true });
+            }
+            if (endEvent.type !== "touchcancel") {
+              this.moveToClientPoint(active.clientX, active.clientY);
+              this.onDragEnd?.(this.position);
+            }
+            window.setTimeout(() => {
+              this.dragging = false;
+            }, 0);
+          };
+
+          window.addEventListener("touchmove", onMove, { passive: false });
+          window.addEventListener("touchend", onEnd);
+          window.addEventListener("touchcancel", onEnd);
+        },
+        { passive: false }
+      );
     }
 
     draw() {

@@ -4,10 +4,10 @@ import { TALISPROS_START_INTRO } from "@/lib/talispros/start-content";
 
 export default function TalisprosStartPage() {
   return (
-    <div className="flex min-h-dvh min-h-0 flex-col overflow-hidden bg-white text-neutral-900 lg:h-dvh lg:grid lg:grid-cols-[minmax(0,1fr)_350px]">
+    <div className="flex min-h-dvh flex-col bg-white text-neutral-900 lg:h-dvh lg:min-h-0 lg:grid lg:grid-cols-[minmax(0,1fr)_350px] lg:overflow-hidden">
       {/* Left column */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div className="flex flex-none flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden">
+        <div className="lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:overscroll-contain lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
           <header className="border-b border-neutral-200 px-6 pt-4 text-center sm:pt-5">
             <Image
               src="/logo.png"
@@ -34,11 +34,11 @@ export default function TalisprosStartPage() {
                   className="mx-auto block h-auto w-full max-w-full"
                   sizes="(min-width: 1200px) 1200px, calc(100vw - 350px)"
                 />
-                <div className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-black/50 px-3 py-3 sm:gap-4 sm:px-5">
-                  <div className="min-w-0 flex-1 text-center text-base font-bold leading-relaxed tracking-[0.03em] text-white sm:text-lg">
+                <div className="flex items-center gap-3 bg-white px-3 py-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:gap-4 sm:bg-black/50 sm:px-5 sm:py-3">
+                  <div className="min-w-0 flex-1 text-center text-base font-bold leading-relaxed tracking-[0.03em] text-neutral-900 sm:text-lg sm:text-white">
                     {TALISPROS_START_INTRO}
                   </div>
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black ring-2 ring-white sm:h-14 sm:w-14">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black ring-2 ring-neutral-900 sm:h-14 sm:w-14 sm:ring-white">
                     <Image
                       src="/logo.png"
                       alt="Talishouse™"

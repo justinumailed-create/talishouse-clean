@@ -183,11 +183,11 @@ export default function MapSitePropertyPopup({
         }}
       >
         <div
-          className="pointer-events-auto flex flex-col overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm"
+          className="mapsite-popup-card pointer-events-auto flex flex-col overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm"
           style={cardHeight ? { height: cardHeight } : undefined}
         >
           <div
-            className={`relative w-full shrink-0 bg-neutral-200/80 ${
+            className={`mapsite-popup-hero relative w-full shrink-0 bg-neutral-200/80 ${
               showActiveResources || pendingHasActions || showActiveBookButton
                 ? "h-[120px]"
                 : compact

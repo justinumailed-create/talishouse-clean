@@ -7,7 +7,7 @@ interface TalisprosMarketSidebarProps {
 
 export default function TalisprosMarketSidebar({ content }: TalisprosMarketSidebarProps) {
   return (
-    <aside className="min-h-0 flex-1 overflow-y-auto overscroll-contain bg-[#f2f2f0] text-black lg:h-full lg:flex-none lg:border-l lg:border-[#dedede] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <aside className="flex-none bg-[#f2f2f0] text-black lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:border-l lg:border-[#dedede] lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
       <div className="px-5 pb-10 pt-8 text-center sm:px-6 sm:pt-10">
         <h2 className="text-[26px] leading-snug text-black">{content.marketPartner}</h2>
 

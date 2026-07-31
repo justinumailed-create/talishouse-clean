@@ -10,6 +10,8 @@ interface MapSiteListingSidebarProps {
   listingCardRef?: RefObject<HTMLDivElement | null>;
   /** Narrow viewports: full-width stacked overlay instead of left float. */
   compact?: boolean;
+  /** Phone layout: search at top and manager summary strip at bottom. */
+  mobileOverlay?: boolean;
   onSelectListing: () => void;
   /** Partner / FAST card content (claimed). */
   aboveCard?: ReactNode;
@@ -26,6 +28,7 @@ export default function MapSiteListingSidebar({
   mapsite,
   listingCardRef,
   compact = false,
+  mobileOverlay = false,
   onSelectListing,
   aboveCard,
   belowCard,
@@ -35,16 +38,22 @@ export default function MapSiteListingSidebar({
   return (
     <aside
       className={
-        compact
+        mobileOverlay
+          ? `pointer-events-none relative z-20 mx-auto flex h-full min-h-0 w-full ${MAPSITE_LISTING_CARD_WIDTH_CLASS} flex-col`
+          : compact
           ? `pointer-events-none relative z-20 mx-auto flex h-full min-h-0 max-h-full w-full ${MAPSITE_LISTING_CARD_WIDTH_CLASS} flex-col overflow-hidden`
           : `pointer-events-none absolute bottom-3 left-3 top-3 z-20 flex min-h-0 w-[min(92vw,22rem)] flex-col overflow-hidden sm:left-4 sm:top-4 sm:bottom-4`
       }
     >
       <div
-        className="pointer-events-auto flex h-full min-h-0 max-h-full flex-1 flex-col gap-3 overflow-y-auto overscroll-y-contain touch-pan-y pr-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className={
+          mobileOverlay
+            ? "pointer-events-none flex h-full min-h-0 flex-1 flex-col gap-3"
+            : "pointer-events-auto flex h-full min-h-0 max-h-full flex-1 flex-col gap-3 overflow-y-auto overscroll-y-contain touch-pan-y pr-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        }
         onWheel={stopMapScrollSteal}
       >
-        <div className="flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-white/50 px-3 py-2 shadow-md ring-1 ring-black/5 backdrop-blur-sm">
+        <div className="pointer-events-auto flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-white/50 px-3 py-2 shadow-md ring-1 ring-black/5 backdrop-blur-sm">
           <svg
             viewBox="0 0 24 24"
             className="h-4 w-4 shrink-0 text-neutral-500"
@@ -64,8 +73,22 @@ export default function MapSiteListingSidebar({
           />
         </div>
 
+        {mobileOverlay && belowCard ? (
+          <div className="pointer-events-auto mt-auto shrink-0 translate-x-1 pb-1">
+            {belowCard}
+          </div>
+        ) : null}
+
         {claimed ? (
-          aboveCard
+          <div
+            className={
+              mobileOverlay
+                ? "pointer-events-auto w-full shrink-0 translate-x-1"
+                : undefined
+            }
+          >
+            {aboveCard}
+          </div>
         ) : (
           <div ref={listingCardRef} className="w-full shrink-0">
             <button
@@ -83,7 +106,13 @@ export default function MapSiteListingSidebar({
           </div>
         )}
 
-        {belowCard ? <div className="shrink-0 pb-1">{belowCard}</div> : null}
+        {!mobileOverlay && belowCard ? (
+          <div
+            className="shrink-0 pb-1"
+          >
+            {belowCard}
+          </div>
+        ) : null}
       </div>
     </aside>
   );

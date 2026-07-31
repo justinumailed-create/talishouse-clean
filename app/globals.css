@@ -3134,6 +3134,30 @@ body.mapsite-gallery-open [data-paypal-button] {
     aspect-ratio: 3 / 4.1;
   }
 
+  .talisbooks-viewer-page--fold-continuous.talisbooks-viewer-page--fold-right
+    .talisbooks-viewer-page__bleed-caption {
+    padding: 1rem 0.55rem 0.55rem;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(12, 10, 9, 0.55) 35%,
+      rgba(12, 10, 9, 0.88) 100%
+    );
+  }
+
+  .talisbooks-viewer-page--fold-continuous.talisbooks-viewer-page--fold-right
+    .talisbooks-viewer-page__title {
+    font-size: 0.78rem;
+  }
+
+  .talisbooks-viewer-page--fold-continuous.talisbooks-viewer-page--fold-right
+    .talisbooks-viewer-page__body-text {
+    margin-top: 0.25rem;
+    font-size: 0.62rem;
+    line-height: 1.3;
+    -webkit-line-clamp: 4;
+  }
+
   .talisbooks-viewer-stage__desk {
     min-height: min(64vh, 560px);
   }
@@ -3756,5 +3780,50 @@ body.mapsite-gallery-open [data-paypal-button] {
 
   .talisbooks-standing-book__volume {
     transition: none;
+  }
+}
+
+/* ─── MapSite™ phone overlays ─────────────────────────────────────────────── */
+/* The map pin sits at the vertical centre, so the bottom stack (registration
+   card + manager strip) must never grow tall enough to reach it. Short phones
+   drop the secondary copy first. */
+
+/* The base `p` rule adds a 0.5rem bottom margin that bloats these dense cards. */
+.mapsite-manager-strip p {
+  margin-bottom: 0;
+}
+
+@media (max-width: 639px) {
+  .mapsite-pay-card p,
+  .mapsite-popup-card p,
+  .mapsite-popup-card h2 {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 639px) and (max-height: 700px) {
+  .mapsite-manager-strip__why {
+    display: none;
+  }
+
+  /* The popup is clamped above the pin; give its body room for the CTA. */
+  .mapsite-popup-hero {
+    height: 5.25rem;
+  }
+}
+
+@media (max-width: 639px) and (max-height: 600px) {
+  .mapsite-manager-strip__blurb {
+    display: none;
+  }
+
+  .mapsite-manager-strip__photo {
+    height: 3.5rem;
+    width: 3rem;
+  }
+
+  .mapsite-pay-card {
+    padding-top: 0.375rem;
+    padding-bottom: 0.375rem;
   }
 }

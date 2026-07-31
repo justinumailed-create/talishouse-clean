@@ -239,7 +239,8 @@ function MapSiteChrome({
   const lastFocusedForSelectionRef = useRef<string | null>(null);
 
   const [compact, setCompact] = useState(false);
-  const [showDelayedPayment, setShowDelayedPayment] = useState(false);
+  const [mobileOverlay, setMobileOverlay] = useState(false);
+  const [paymentDelayElapsed, setPaymentDelayElapsed] = useState(false);
   const [alignTop, setAlignTop] = useState(MAPSITE_LISTING_TILE_TOP_FALLBACK_PX);
   const [popupCenterX, setPopupCenterX] = useState<number | null>(null);
   const [expandedCardHeight, setExpandedCardHeight] = useState<number | null>(
@@ -304,6 +305,7 @@ function MapSiteChrome({
       const cardRect = card.getBoundingClientRect();
       const stackRect = stack?.getBoundingClientRect();
       const popupOpen = selectedPinId === mapsite.id;
+      const isMobileOverlay = rootRect.width < 640;
 
       const layout = computeMapSiteOverlayLayout({
         rootWidth: rootRect.width,
@@ -317,6 +319,31 @@ function MapSiteChrome({
       });
 
       setCompact(layout.compact);
+      setMobileOverlay(isMobileOverlay);
+
+      // Phone-only composition: search at top, manager strip at bottom,
+      // and the property card above the centered map pin.
+      if (popupOpen && isMobileOverlay) {
+        // Anchored under the search bar, but never tall enough to reach the pin.
+        const tipPointY = Math.round(
+          rootRect.height / 2 - MAPSITE_PIN_TIP_CLEARANCE_PX
+        );
+        const top = MAPSITE_LISTING_TILE_TOP_FALLBACK_PX;
+        const height = Math.max(
+          MAPSITE_MIN_CARD_HEIGHT_PX,
+          Math.min(
+            MAPSITE_POPUP_MIN_HEIGHT_PX,
+            tipPointY - MAPSITE_POPUP_TIP_HEIGHT_PX - top
+          )
+        );
+        setAlignTop((prev) => (prev === top ? prev : top));
+        setExpandedCardHeight((prev) => (prev === height ? prev : height));
+        setPopupCenterX((prev) => {
+          const next = Math.round(rootRect.width / 2);
+          return prev === next ? prev : next;
+        });
+        return;
+      }
 
       if (popupOpen) {
         const tipPointY = Math.round(
@@ -375,20 +402,14 @@ function MapSiteChrome({
 
   // Unpaid claimed MapSites: reveal PayPal after load delay (or immediately via Activate).
   useEffect(() => {
-    if (!claimed || paid) {
-      setShowDelayedPayment(false);
-      return;
-    }
-    if (showActivatePayment) {
-      setShowDelayedPayment(true);
-      return;
-    }
-    setShowDelayedPayment(false);
+    if (!claimed || paid || showActivatePayment) return;
     const timer = window.setTimeout(() => {
-      setShowDelayedPayment(true);
+      setPaymentDelayElapsed(true);
     }, PAYPAL_REGISTER_REVEAL_DELAY_MS);
     return () => window.clearTimeout(timer);
   }, [claimed, paid, showActivatePayment, mapsite.id]);
+
+  const showDelayedPayment = showActivatePayment || paymentDelayElapsed;
 
   const bookHref =
     talisBookHref ||
@@ -437,6 +458,7 @@ function MapSiteChrome({
         fastCode={mapsite.fast_code}
         requestId={requestId}
         planType={paymentPlanType}
+        compact={mobileOverlay}
       />
     ) : null;
 
@@ -450,8 +472,10 @@ function MapSiteChrome({
       <div
         ref={sidebarStackRef}
         className={
-          compact
-            ? "pointer-events-none absolute inset-x-0 top-0 z-20 h-[min(52%,30rem)] p-3 sm:h-[min(48%,28rem)]"
+          mobileOverlay
+            ? "pointer-events-none absolute inset-0 z-20 p-3"
+            : compact
+              ? "pointer-events-none absolute inset-x-0 top-0 z-20 h-[min(52%,30rem)] p-3 sm:h-[min(48%,28rem)]"
             : "pointer-events-none absolute inset-0 z-20"
         }
       >
@@ -459,6 +483,7 @@ function MapSiteChrome({
           mapsite={mapsite}
           listingCardRef={listingCardRef}
           compact={compact}
+          mobileOverlay={mobileOverlay}
           onSelectListing={focusPinAndOpen}
           aboveCard={
             claimed ? (

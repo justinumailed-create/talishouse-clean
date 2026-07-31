@@ -26,7 +26,9 @@ export default function TalisprosLayoutClient({
       <TalisprosHeader />
       <main
         className={`bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white [&:has(.mapsite-layout)]:p-0 ${
-          isFullBleedPage ? "h-dvh overflow-hidden" : "min-h-screen"
+          isFullBleedPage
+            ? "min-h-dvh lg:h-dvh lg:overflow-hidden"
+            : "min-h-screen"
         }`}
       >
         {children}

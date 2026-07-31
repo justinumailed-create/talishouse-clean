@@ -71,7 +71,44 @@ export default function MapSiteMarketPartnerCard({
         tabIndex={onSelect ? 0 : undefined}
         onClick={onSelect}
         onKeyDown={onSelect ? handleKeyDown : undefined}
-        className="w-full cursor-pointer overflow-hidden rounded-2xl bg-[#f2f2f0] px-4 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 transition hover:bg-[#ecece8] sm:px-5"
+        className="mapsite-manager-strip flex w-full cursor-pointer gap-3 overflow-hidden rounded-2xl bg-[#f2f2f0] p-3 text-left shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 transition hover:bg-[#ecece8] sm:hidden"
+      >
+        <div className="mapsite-manager-strip__photo relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-neutral-200">
+          <Image
+            src={content.partnerImage}
+            alt={content.partnerImageAlt}
+            fill
+            className="object-cover object-top"
+            sizes="64px"
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[13px] font-bold uppercase tracking-wide text-black">
+            {fastCode ? `FAST CODE: ${fastCode}` : "Claim received"}
+          </p>
+          {address ? (
+            <p className="mt-0.5 truncate text-[11px] font-bold uppercase tracking-wide text-neutral-700">
+              {address}
+            </p>
+          ) : null}
+          <p className="mapsite-manager-strip__why mt-1 line-clamp-2 text-[11px] leading-snug text-neutral-700">
+            {content.whyBody}
+          </p>
+          <p className="mt-1 text-[13px] font-semibold leading-snug text-black">
+            {content.marketPartner}
+          </p>
+          <p className="mapsite-manager-strip__blurb mt-0.5 line-clamp-2 text-[11px] leading-snug text-neutral-600">
+            {MAPSITE_DEMO_SIDEBAR_BLURB}
+          </p>
+        </div>
+      </div>
+
+      <div
+        role={onSelect ? "button" : undefined}
+        tabIndex={onSelect ? 0 : undefined}
+        onClick={onSelect}
+        onKeyDown={onSelect ? handleKeyDown : undefined}
+        className="hidden w-full cursor-pointer overflow-hidden rounded-2xl bg-[#f2f2f0] px-4 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 transition hover:bg-[#ecece8] sm:block sm:px-5"
       >
         {fastCode ? (
           <p className="text-[15px] font-bold uppercase tracking-wide text-black">
