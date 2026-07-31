@@ -38,7 +38,7 @@ export default function TalisprosStartPage() {
                   <div className="min-w-0 flex-1 text-center text-base font-bold leading-relaxed tracking-[0.03em] text-neutral-900 sm:text-lg sm:text-white">
                     {TALISPROS_START_INTRO}
                   </div>
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black ring-2 ring-neutral-900 sm:h-14 sm:w-14 sm:ring-white">
+                  <div className="hidden h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black ring-2 ring-neutral-900 sm:flex sm:h-14 sm:w-14 sm:ring-white">
                     <Image
                       src="/logo.png"
                       alt="Talishouse™"
