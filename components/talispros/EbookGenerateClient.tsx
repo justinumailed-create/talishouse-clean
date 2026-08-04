@@ -422,8 +422,13 @@ export default function EbookGenerateClient({
               ? "Generating…"
               : converting
                 ? "Converting PDF…"
-                : "Generate TalisBook™"}
+                : "Generate Talisbook™"}
           </button>
+          {saving ? (
+            <p className="text-center text-xs text-neutral-400">
+              Optimizing images and building your 22-page draft…
+            </p>
+          ) : null}
         </form>
       </div>
     </div>

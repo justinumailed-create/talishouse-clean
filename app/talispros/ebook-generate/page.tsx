@@ -5,6 +5,9 @@ import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin
 
 export const dynamic = "force-dynamic";
 
+/** Image encode + storage uploads need more than the default serverless window. */
+export const maxDuration = 60;
+
 export const metadata: Metadata = createMetadata({
   title: "Generate E-Book | Talispros™",
   description:

@@ -37,6 +37,36 @@ function uniqueSlug(scope: string, title: string): string {
   return `${base}-${suffix}`;
 }
 
+/** Keep serverless CPU under control while still overlapping I/O. */
+const IMAGE_PROCESS_CONCURRENCY = 3;
+/** Agent headshot / logo never need full spread resolution. */
+const AGENT_ASSET_MAX_EDGE_PX = 960;
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T, index: number) => Promise<R>
+): Promise<R[]> {
+  if (items.length === 0) return [];
+  const results = new Array<R>(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await mapper(items[index]!, index);
+    }
+  }
+
+  const workers = Array.from(
+    { length: Math.min(concurrency, items.length) },
+    () => worker()
+  );
+  await Promise.all(workers);
+  return results;
+}
+
 async function uploadBuffer(options: {
   scope: string;
   id: string;
@@ -68,6 +98,14 @@ async function uploadBuffer(options: {
     );
   }
 
+  // Prefer the primary bucket; only fall back when the bucket is missing.
+  const missingBucket =
+    /bucket|not found|does not exist/i.test(primary.error.message || "");
+  if (!missingBucket) {
+    console.error("[auto-draft-ebook] Upload failed:", primary.error.message);
+    return null;
+  }
+
   const fallback = await supabase.storage.from("mapsite-assets").upload(path, options.buffer, {
     contentType: options.mimeType,
     cacheControl: TALISBOOKS_ASSET_CACHE_CONTROL,
@@ -96,14 +134,15 @@ interface PreparedPageImage {
 /**
  * Camera uploads run 4–12 MP, which the viewer then downloads in full for every
  * page turn. Bake them down to display size once, at generation time.
- * `rotate()` bakes in EXIF orientation, which the re-encode would otherwise drop.
+ * Prefer fast encodes over maximum compression — generation latency matters.
  */
 async function prepareViewerPageImage(
   buffer: Buffer,
-  mimeType: string
+  mimeType: string,
+  maxEdgePx: number = TALISBOOKS_PAGE_IMAGE_MAX_EDGE_PX
 ): Promise<PreparedPageImage> {
   try {
-    const source = sharp(buffer, { failOn: "none" }).rotate();
+    const source = sharp(buffer, { failOn: "none", sequentialRead: true }).rotate();
     const meta = await source.metadata();
     const width = meta.width ?? 0;
     const height = meta.height ?? 0;
@@ -112,8 +151,8 @@ async function prepareViewerPageImage(
     }
 
     const longEdge = Math.max(width, height);
-    const scale = Math.min(1, TALISBOOKS_PAGE_IMAGE_MAX_EDGE_PX / longEdge);
-    const resized =
+    const scale = Math.min(1, maxEdgePx / longEdge);
+    const pipeline =
       scale < 1
         ? source.resize({
             width: Math.round(width * scale),
@@ -125,14 +164,16 @@ async function prepareViewerPageImage(
 
     const keepAlpha = Boolean(meta.hasAlpha) && mimeType !== "image/jpeg";
     const encoded = keepAlpha
-      ? await resized
-          .png({ compressionLevel: 9, palette: true })
+      ? await pipeline
+          // Level 6 is ~3–5× faster than 9 with nearly the same size.
+          .png({ compressionLevel: 6 })
           .toBuffer({ resolveWithObject: true })
-      : await resized
+      : await pipeline
           .jpeg({
             quality: TALISBOOKS_PAGE_IMAGE_QUALITY,
-            mozjpeg: true,
-            progressive: true,
+            // mozjpeg/progressive are much slower on serverless CPUs.
+            mozjpeg: false,
+            progressive: false,
           })
           .toBuffer({ resolveWithObject: true });
 
@@ -167,39 +208,50 @@ async function processUploadsForSelfServiceSpreads(options: {
   coverImageUrl: string | null;
   galleryUrls: string[];
 }> {
+  const processed = await mapWithConcurrency(
+    options.files,
+    IMAGE_PROCESS_CONCURRENCY,
+    async (file) => {
+      const source = Buffer.from(await file.arrayBuffer());
+      const prepared = await prepareViewerPageImage(
+        source,
+        file.type || "image/jpeg"
+      );
+      const imageId = crypto.randomUUID();
+      const originalUrl = await uploadBuffer({
+        scope: options.scope,
+        id: imageId,
+        suffix: "original",
+        buffer: prepared.buffer,
+        mimeType: prepared.mimeType,
+      });
+      if (!originalUrl) return null;
+      return {
+        url: originalUrl,
+        width: prepared.width,
+        height: prepared.height,
+      };
+    }
+  );
+
   const landscapes: SelfServiceLandscapeAsset[] = [];
   const galleryUrls: string[] = [];
   let coverImageUrl: string | null = null;
   let firstPortraitUrl: string | null = null;
 
-  for (let i = 0; i < options.files.length; i += 1) {
-    const file = options.files[i]!;
-    const source = Buffer.from(await file.arrayBuffer());
-    const prepared = await prepareViewerPageImage(source, file.type || "image/jpeg");
-    const { width, height } = prepared;
-    const imageId = crypto.randomUUID();
+  for (const item of processed) {
+    if (!item) continue;
+    galleryUrls.push(item.url);
+    if (!coverImageUrl) coverImageUrl = item.url;
 
-    const originalUrl = await uploadBuffer({
-      scope: options.scope,
-      id: imageId,
-      suffix: "original",
-      buffer: prepared.buffer,
-      mimeType: prepared.mimeType,
-    });
-    if (!originalUrl) continue;
-
-    galleryUrls.push(originalUrl);
-    if (!coverImageUrl) coverImageUrl = originalUrl;
-
-    if (isSelfServiceSpreadCandidate(width, height)) {
+    if (isSelfServiceSpreadCandidate(item.width, item.height)) {
       if (landscapes.length < SELF_SERVICE_MAX_LANDSCAPE_SPREADS) {
-        landscapes.push({ url: originalUrl, width, height });
+        landscapes.push(item);
       }
-      // Extra landscapes beyond the 22-page budget are ignored.
       continue;
     }
 
-    if (!firstPortraitUrl) firstPortraitUrl = originalUrl;
+    if (!firstPortraitUrl) firstPortraitUrl = item.url;
   }
 
   if (!coverImageUrl) {
@@ -221,38 +273,45 @@ async function processUploadsAsExactPages(options: {
   coverImageUrl: string | null;
   galleryUrls: string[];
 }> {
+  const processed = await mapWithConcurrency(
+    options.files,
+    IMAGE_PROCESS_CONCURRENCY,
+    async (file, i) => {
+      const source = Buffer.from(await file.arrayBuffer());
+      const prepared = await prepareViewerPageImage(
+        source,
+        file.type || "image/jpeg"
+      );
+      const imageId = crypto.randomUUID();
+      const originalUrl = await uploadBuffer({
+        scope: options.scope,
+        id: imageId,
+        suffix: "exact",
+        buffer: prepared.buffer,
+        mimeType: prepared.mimeType,
+      });
+      if (!originalUrl) return null;
+      return {
+        id: imageId,
+        url: originalUrl,
+        width: prepared.width,
+        height: prepared.height,
+        altText: `${options.altPrefix} page ${i + 1}`,
+        mediaKind: "image" as const,
+        role: "original" as const,
+      };
+    }
+  );
+
   const refs: TalisBooksLayoutImageRef[] = [];
   const galleryUrls: string[] = [];
   let coverImageUrl: string | null = null;
 
-  for (let i = 0; i < options.files.length; i += 1) {
-    const file = options.files[i]!;
-    const source = Buffer.from(await file.arrayBuffer());
-    const prepared = await prepareViewerPageImage(source, file.type || "image/jpeg");
-    const { width, height } = prepared;
-    const imageId = crypto.randomUUID();
-
-    const originalUrl = await uploadBuffer({
-      scope: options.scope,
-      id: imageId,
-      suffix: "exact",
-      buffer: prepared.buffer,
-      mimeType: prepared.mimeType,
-    });
-    if (!originalUrl) continue;
-
-    galleryUrls.push(originalUrl);
-    if (!coverImageUrl) coverImageUrl = originalUrl;
-
-    refs.push({
-      id: imageId,
-      url: originalUrl,
-      width,
-      height,
-      altText: `${options.altPrefix} page ${i + 1}`,
-      mediaKind: "image",
-      role: "original",
-    });
+  for (const ref of processed) {
+    if (!ref) continue;
+    refs.push(ref);
+    galleryUrls.push(ref.url);
+    if (!coverImageUrl) coverImageUrl = ref.url;
   }
 
   return { refs, coverImageUrl, galleryUrls };
@@ -266,7 +325,11 @@ async function uploadOptionalAgentImage(options: {
   const file = options.file;
   if (!file || file.size === 0) return undefined;
   const source = Buffer.from(await file.arrayBuffer());
-  const prepared = await prepareViewerPageImage(source, file.type || "image/jpeg");
+  const prepared = await prepareViewerPageImage(
+    source,
+    file.type || "image/jpeg",
+    AGENT_ASSET_MAX_EDGE_PX
+  );
   const url = await uploadBuffer({
     scope: options.fastCode,
     id: crypto.randomUUID(),
@@ -298,16 +361,20 @@ async function loadSelfServiceAgentDetails(input: {
     email: input.agentEmail?.trim() || "",
     phone: input.agentPhone?.trim() || "",
   };
-  const uploadedPhotoUrl = await uploadOptionalAgentImage({
-    fastCode: input.fastCode,
-    file: input.agentPhoto,
-    suffix: "agent-photo",
-  });
-  const uploadedLogoUrl = await uploadOptionalAgentImage({
-    fastCode: input.fastCode,
-    file: input.brokerageLogo,
-    suffix: "brokerage-logo",
-  });
+
+  // Upload agent assets in parallel with DB lookups.
+  const [uploadedPhotoUrl, uploadedLogoUrl] = await Promise.all([
+    uploadOptionalAgentImage({
+      fastCode: input.fastCode,
+      file: input.agentPhoto,
+      suffix: "agent-photo",
+    }),
+    uploadOptionalAgentImage({
+      fastCode: input.fastCode,
+      file: input.brokerageLogo,
+      suffix: "brokerage-logo",
+    }),
+  ]);
 
   if (!isSupabaseAdminConfigured()) {
     return {
@@ -352,41 +419,28 @@ async function loadSelfServiceAgentDetails(input: {
   }
 
   const resolvedMapsiteId = input.mapsiteId || request?.linked_mapsite_id || null;
-  let mapsite: {
-    owner_first_name: string | null;
-    owner_last_name: string | null;
-    email: string | null;
-    phone: string | null;
-    agent_name: string | null;
-    profile_image_url: string | null;
-    logo_url: string | null;
-    property_address: string | null;
-  } | null = null;
 
-  if (resolvedMapsiteId) {
-    const mapsiteResult = await supabase
-      .from("mapsites")
-      .select(
-        "owner_first_name, owner_last_name, email, phone, agent_name, profile_image_url, logo_url, property_address",
-      )
-      .eq("id", resolvedMapsiteId)
-      .maybeSingle();
-    mapsite = mapsiteResult.data;
-  }
+  const [mapsiteResult, assetsResult] = await Promise.all([
+    resolvedMapsiteId
+      ? supabase
+          .from("mapsites")
+          .select(
+            "owner_first_name, owner_last_name, email, phone, agent_name, profile_image_url, logo_url, property_address",
+          )
+          .eq("id", resolvedMapsiteId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    request?.id
+      ? supabase
+          .from("mapsite_assets")
+          .select("profile_image, logo_image")
+          .eq("request_id", request.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
 
-  let assets: {
-    profile_image: string | null;
-    logo_image: string | null;
-  } | null = null;
-
-  if (request?.id) {
-    const assetsResult = await supabase
-      .from("mapsite_assets")
-      .select("profile_image, logo_image")
-      .eq("request_id", request.id)
-      .maybeSingle();
-    assets = assetsResult.data;
-  }
+  const mapsite = mapsiteResult.data;
+  const assets = assetsResult.data;
 
   const requestName = [request?.first_name, request?.last_name]
     .filter(Boolean)
@@ -478,7 +532,17 @@ export async function autoGenerateDraftTalisBook(
     return { success: false, error: "Database is not configured." };
   }
 
-  const entitlements = await getTalisBooksEntitlementSnapshot(fastCode);
+  const entitlementsPromise = getTalisBooksEntitlementSnapshot(fastCode);
+  // Skip the heavy MapSite context lookup when the form already supplied IDs.
+  const contextPromise =
+    input.mapsiteId?.trim() && input.accountType?.trim()
+      ? Promise.resolve(null)
+      : getMapSiteEbookContext(fastCode);
+
+  const [entitlements, context] = await Promise.all([
+    entitlementsPromise,
+    contextPromise,
+  ]);
   if (entitlements) {
     const createGate = assertTalisBooksFeature(
       entitlements,
@@ -495,7 +559,6 @@ export async function autoGenerateDraftTalisBook(
     }
   }
 
-  const context = await getMapSiteEbookContext(fastCode);
   const mapsiteId = input.mapsiteId?.trim() || context?.mapsiteId || null;
   const accountType =
     input.accountType?.toLowerCase() === "derivative"
@@ -620,12 +683,23 @@ export async function autoGenerateDraftTalisBook(
     };
   }
 
-  const { landscapes, coverImageUrl, galleryUrls } =
-    await processUploadsForSelfServiceSpreads({
+  const [{ landscapes, coverImageUrl, galleryUrls }, agent] = await Promise.all([
+    processUploadsForSelfServiceSpreads({
       scope: fastCode,
       files: input.images,
       altPrefix: title,
-    });
+    }),
+    loadSelfServiceAgentDetails({
+      fastCode,
+      requestId: input.requestId?.trim() || null,
+      mapsiteId,
+      agentName: input.agentName,
+      agentEmail: input.agentEmail,
+      agentPhone: input.agentPhone,
+      agentPhoto: input.agentPhoto,
+      brokerageLogo: input.brokerageLogo,
+    }),
+  ]);
 
   if (!coverImageUrl && landscapes.length === 0) {
     return {
@@ -634,16 +708,6 @@ export async function autoGenerateDraftTalisBook(
     };
   }
 
-  const agent = await loadSelfServiceAgentDetails({
-    fastCode,
-    requestId: input.requestId?.trim() || null,
-    mapsiteId,
-    agentName: input.agentName,
-    agentEmail: input.agentEmail,
-    agentPhone: input.agentPhone,
-    agentPhoto: input.agentPhoto,
-    brokerageLogo: input.brokerageLogo,
-  });
   const planned = buildSelfServiceEbookPageRows({
     title,
     description,
