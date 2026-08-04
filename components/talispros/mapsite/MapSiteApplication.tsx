@@ -422,9 +422,11 @@ function MapSiteChrome({
         : null);
 
   const claimHref = useMemo(() => {
+    const targetAudience = sourceAudience || audience;
     if (onboardingMode === "assisted") {
       const params = new URLSearchParams({
-        audience: "listings",
+        audience: targetAudience,
+        accountType: accountTypeForAudience(targetAudience),
       });
       if (sourceAudience) {
         params.set("sourceAudience", sourceAudience);
@@ -433,15 +435,16 @@ function MapSiteChrome({
     }
     const params = new URLSearchParams({
       mapsiteId: mapsite.id,
-      audience,
+      audience: targetAudience,
+      accountType: accountTypeForAudience(targetAudience),
       returnTo: MAPSITE_APP_PATH,
     });
     return `/talispros/markets/claim-a-market?${params.toString()}`;
   }, [mapsite.id, audience, onboardingMode, sourceAudience]);
   const claimLabel =
     onboardingMode === "assisted"
-      ? "Have It Built — No Charge"
-      : "Build My MapSite™";
+      ? "Register Account now"
+      : "Register Account now";
 
   // Express Interest only after payment. PayPal uses claim-form planType;
   // auto-reveals under the sidebar 10s after load (or immediately via Activate).
@@ -505,6 +508,7 @@ function MapSiteChrome({
             mapsite={mapsite}
             claimHref={claimHref}
             claimLabel={claimLabel}
+            genericOnboardingCard={!paid}
             accountType={accountType}
             onboardingPhase={onboardingPhase}
             talisBookHref={bookHref}

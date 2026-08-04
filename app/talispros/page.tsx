@@ -124,7 +124,7 @@ export default function TalisprosWelcomePage() {
                 href="/talispros/build-mapsite"
                 className="inline-flex h-12 px-8 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wide items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all"
               >
-                Build My MapSite™
+                Build My Mapsite™
               </Link>
             </section>
 

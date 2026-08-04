@@ -14,6 +14,8 @@ import {
 
 const mockAccountsLike = vi.fn();
 const mockRegistrationsLike = vi.fn();
+const mockMapsitesLike = vi.fn();
+const mockFastCodesLike = vi.fn();
 
 vi.mock("@/lib/supabaseAdmin", () => ({
   getSupabaseAdmin: () => ({
@@ -30,6 +32,22 @@ vi.mock("@/lib/supabaseAdmin", () => ({
         return {
           select: () => ({
             like: mockRegistrationsLike,
+          }),
+        };
+      }
+
+      if (table === "mapsites") {
+        return {
+          select: () => ({
+            like: mockMapsitesLike,
+          }),
+        };
+      }
+
+      if (table === "fast_codes") {
+        return {
+          select: () => ({
+            like: mockFastCodesLike,
           }),
         };
       }
@@ -101,6 +119,8 @@ describe("generateFastCode", () => {
     vi.clearAllMocks();
     mockAccountsLike.mockResolvedValue({ data: [], error: null });
     mockRegistrationsLike.mockResolvedValue({ data: [], error: null });
+    mockMapsitesLike.mockResolvedValue({ data: [], error: null });
+    mockFastCodesLike.mockResolvedValue({ data: [], error: null });
   });
 
   it("generates rd01 without a middle name", async () => {

@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { Database } from "@/lib/database.types";
 import {
+  TALISBOOKS_ASSET_CACHE_CONTROL,
   TALISBOOKS_IMAGE_STORAGE_BUCKET,
   detectImageOrientation,
   processImageBuffer,
@@ -68,6 +69,7 @@ async function uploadImageAsset(
     .from(TALISBOOKS_IMAGE_STORAGE_BUCKET)
     .upload(storagePath, buffer, {
       contentType: mimeType,
+      cacheControl: TALISBOOKS_ASSET_CACHE_CONTROL,
       upsert: false,
     });
 

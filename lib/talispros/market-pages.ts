@@ -53,7 +53,7 @@ export const FOR_SALE_BY_OWNERS_MARKET: TalisprosMarketPageContent = {
 
 export const CLAIM_A_MARKET_PAGE: TalisprosMarketPageContent = {
   slug: "claim-a-market",
-  title: "Build My MapSite™",
+  title: "Build My Mapsite™",
   registrationMarket: "listings",
   marketPartner: "Market Partner: Rahul C.",
   partnerImage: "/images/mapsites/lrg1-rahul.jpeg",
@@ -61,5 +61,5 @@ export const CLAIM_A_MARKET_PAGE: TalisprosMarketPageContent = {
   whyHeading: "Why build your MapSite™.",
   whyBody:
     "MapSite™ is the centre of Talispros™. Submit your Build Request here to receive a FAST Code™, create your first TalisBook™, and unlock MLS®, URL, TEB™, and TTV™ actions on your pin after activation — without leaving the map-first workflow.",
-  metadataTitle: "Talispros™ | Build My MapSite™",
+  metadataTitle: "Talispros™ | Build My Mapsite™",
 };

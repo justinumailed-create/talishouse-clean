@@ -82,6 +82,34 @@ function sharpenRasterImagery(map: MapLibreMap): void {
   }
 }
 
+/** Hide place / business / transit layers so only TalisMaps™ pins brand the map. */
+function hideThirdPartyPoiLayers(map: MapLibreMap): void {
+  try {
+    const style = map.getStyle();
+    for (const layer of style?.layers ?? []) {
+      const id = layer.id.toLowerCase();
+      if (
+        id.includes("poi") ||
+        id.includes("transit") ||
+        id.includes("housenumber")
+      ) {
+        try {
+          map.setLayoutProperty(layer.id, "visibility", "none");
+        } catch {
+          // Layer may not support layout visibility.
+        }
+      }
+    }
+  } catch {
+    // Style may still be swapping; ignore.
+  }
+}
+
+function applyBasemapPresentation(map: MapLibreMap): void {
+  sharpenRasterImagery(map);
+  hideThirdPartyPoiLayers(map);
+}
+
 const CONTAINER_OWNER_KEY = "__talismapsMapOwner" as const;
 
 function waitForMapLoad(
@@ -421,7 +449,7 @@ export class MapLibreProvider implements MapProvider {
 
     map.on("load", () => {
       styleReady = true;
-      sharpenRasterImagery(map);
+      applyBasemapPresentation(map);
       if (pendingSync) {
         pendingSync = false;
         syncMarkers();
@@ -430,7 +458,7 @@ export class MapLibreProvider implements MapProvider {
 
     map.on("style.load", () => {
       styleReady = true;
-      sharpenRasterImagery(map);
+      applyBasemapPresentation(map);
       if (pendingSync) {
         pendingSync = false;
         syncMarkers();

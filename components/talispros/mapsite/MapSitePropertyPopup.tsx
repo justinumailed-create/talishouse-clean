@@ -11,6 +11,7 @@ import {
   MAPSITE_LISTING_CARD_WIDTH_CLASS,
   MAPSITE_LISTING_IMAGE_CLASS,
   MAPSITE_LISTING_TILE_TOP_FALLBACK_PX,
+  shouldReplaceDemoListingMedia,
 } from "@/lib/talispros/mapsite-listing-media";
 import { ROUTES } from "@/lib/routes";
 import { isClaimable } from "@/lib/talispros/mapsite-state";
@@ -114,6 +115,7 @@ interface MapSitePropertyPopupProps {
   mapsite: MapSitePlatformRecord;
   claimHref: string;
   claimLabel?: string;
+  genericOnboardingCard?: boolean;
   accountType?: MapSiteCapabilityAccountType;
   /** UI onboarding phase (derived; not a DB status). */
   onboardingPhase: MapSiteOnboardingPhase;
@@ -138,6 +140,7 @@ export default function MapSitePropertyPopup({
   mapsite,
   claimHref,
   claimLabel = "Build My MapSite™",
+  genericOnboardingCard = false,
   accountType = "derivative",
   onboardingPhase,
   talisBookHref = null,
@@ -157,6 +160,13 @@ export default function MapSitePropertyPopup({
   const heroImage = getMapSiteListingHeroImage(mapsite);
   const galleryImages = getMapSiteListingGalleryImages(mapsite);
   const photoCount = getMapSiteListingPhotoCount(mapsite);
+  const genericHeroImage = "/talisbooks/sample/img-11-1280x720.jpeg";
+  const useGenericCard = genericOnboardingCard || claimable;
+  const hasUploadedPropertyMedia = !shouldReplaceDemoListingMedia(
+    mapsite.cover_image,
+    mapsite.gallery_images
+  );
+  const showPhotoBadge = !useGenericCard && hasUploadedPropertyMedia;
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
   const address =
     mapsite.property_address?.trim() ||
@@ -170,6 +180,16 @@ export default function MapSitePropertyPopup({
     (showBookButton || onboardingPhase === "BUILD_SUBMITTED");
   const showActiveBookButton =
     showActiveResources && showBookButton && Boolean(talisBookHref);
+  const popupHeroImage = useGenericCard ? genericHeroImage : heroImage;
+  const popupTitle = useGenericCard
+    ? "The first of many E-Books"
+    : mapsite.property_title;
+  const popupWriteup = useGenericCard
+    ? "Upon registration your Mapsite™ will be able to promote up to 10 categories containing 100 PINs generating 1,000 views, monthly. No referral fees - ever"
+    : address ||
+      mapsite.property_description ||
+      "Welcome to Talispros™. Choose your market and begin onboarding.";
+  const popupClaimLabel = useGenericCard ? "Register Account now" : claimLabel;
 
   return (
     <>
@@ -188,7 +208,9 @@ export default function MapSitePropertyPopup({
         >
           <div
             className={`mapsite-popup-hero relative w-full shrink-0 bg-neutral-200/80 ${
-              showActiveResources || pendingHasActions || showActiveBookButton
+              useGenericCard
+                ? "aspect-video"
+                : showActiveResources || pendingHasActions || showActiveBookButton
                 ? "h-[120px]"
                 : compact
                   ? "h-28"
@@ -197,14 +219,21 @@ export default function MapSitePropertyPopup({
           >
             <button
               type="button"
-              onClick={() => setGalleryOpen(true)}
+              onClick={() => {
+                if (!showPhotoBadge) return;
+                setGalleryOpen(true);
+              }}
               className="absolute inset-0 z-0"
-              aria-label={`View ${photoCount} photo${photoCount === 1 ? "" : "s"}`}
+              aria-label={
+                showPhotoBadge
+                  ? `View ${photoCount} photo${photoCount === 1 ? "" : "s"}`
+                  : "Property image"
+              }
             >
               <span className="relative block h-full w-full">
                 <Image
-                  src={heroImage}
-                  alt={mapsite.property_title}
+                  src={popupHeroImage}
+                  alt={popupTitle}
                   fill
                   className={MAPSITE_LISTING_IMAGE_CLASS}
                   sizes="352px"
@@ -223,31 +252,33 @@ export default function MapSitePropertyPopup({
               ×
             </button>
 
-            <button
-              type="button"
-              onClick={() => setGalleryOpen(true)}
-              className="absolute bottom-2.5 right-2.5 z-10 inline-flex min-h-8 items-center gap-1 rounded-full bg-black/75 px-2.5 py-1 text-[11px] font-medium text-white transition hover:bg-black/90"
-            >
-              <svg
-                viewBox="0 0 24 24"
-                className="h-3 w-3"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                aria-hidden
+            {showPhotoBadge ? (
+              <button
+                type="button"
+                onClick={() => setGalleryOpen(true)}
+                className="absolute bottom-2.5 right-2.5 z-10 inline-flex min-h-8 items-center gap-1 rounded-full bg-black/75 px-2.5 py-1 text-[11px] font-medium text-white transition hover:bg-black/90"
               >
-                <path d="M4 7h3l1.5-2h7L17 7h3v12H4V7Z" />
-                <circle cx="12" cy="13" r="3.25" />
-              </svg>
-              {photoCount} Photo{photoCount === 1 ? "" : "s"}
-            </button>
+                <svg
+                  viewBox="0 0 24 24"
+                  className="h-3 w-3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  aria-hidden
+                >
+                  <path d="M4 7h3l1.5-2h7L17 7h3v12H4V7Z" />
+                  <circle cx="12" cy="13" r="3.25" />
+                </svg>
+                {photoCount} Photo{photoCount === 1 ? "" : "s"}
+              </button>
+            ) : null}
           </div>
 
           <div className="flex min-h-0 flex-1 flex-col bg-gradient-to-b from-white/65 to-white/75 px-4 pb-3 pt-2.5">
             <h2 className="shrink-0 text-[15px] font-semibold leading-snug tracking-tight text-black">
-              {mapsite.property_title}
+              {popupTitle}
             </h2>
-            {fastCode ? (
+            {useGenericCard ? null : fastCode ? (
               <p className="mt-1 shrink-0 text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-500">
                 FAST Code: {fastCode}
               </p>
@@ -256,27 +287,37 @@ export default function MapSitePropertyPopup({
                 {capabilities.displayName}
               </p>
             )}
-            {address ? (
-              <p className="mt-1 min-h-0 shrink line-clamp-2 text-[12px] leading-[1.35] text-black">
-                {address}
-              </p>
-            ) : (
-              <p className="mt-1 min-h-0 shrink line-clamp-2 text-[12px] leading-[1.35] text-black">
-                {mapsite.property_description ||
-                  "Welcome to Talispros™. Choose your market and begin onboarding."}
+            {useGenericCard ? null : (
+              <p
+                className={`mt-1 min-h-0 shrink text-[12px] leading-[1.35] text-black ${
+                  useGenericCard ? "line-clamp-4" : "line-clamp-3"
+                }`}
+              >
+                {popupWriteup}
               </p>
             )}
 
-            {claimable ? (
+            {useGenericCard ? (
+              <div className="mt-auto flex justify-center pt-2">
+                <Link
+                  href={talisBookHref || "/talisbooks/library"}
+                  className="inline-flex min-h-8 items-center justify-center rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800"
+                >
+                  View Talisbook™
+                </Link>
+              </div>
+            ) : null}
+
+            {!useGenericCard && claimable ? (
               <Link
                 href={claimHref}
                 className="mt-auto flex min-h-11 w-full shrink-0 items-center justify-center rounded-xl border border-neutral-200/80 bg-white/75 px-4 py-2 text-sm font-medium text-neutral-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)] backdrop-blur-sm transition hover:border-neutral-300 hover:bg-white/85"
               >
-                {claimLabel}
+                {popupClaimLabel}
               </Link>
             ) : null}
 
-            {showPendingActions ? (
+            {!useGenericCard && showPendingActions ? (
               <div className="mt-auto flex shrink-0 flex-col gap-2 pt-2.5">
                 {onboardingPhase === "BUILD_SUBMITTED" && !showBookButton ? (
                   <p className="text-[12px] leading-snug text-neutral-600">
@@ -295,7 +336,7 @@ export default function MapSitePropertyPopup({
               </div>
             ) : null}
 
-            {showActiveResources ? (
+            {!useGenericCard && showActiveResources ? (
               <div
                 className={`mt-auto flex shrink-0 flex-col gap-2 ${
                   showPendingActions ? "pt-0" : "pt-2.5"

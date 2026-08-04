@@ -35,11 +35,11 @@ describe("TalisMaps MapLibre style manager", () => {
     );
   });
 
-  it("resolves MapTiler hybrid style URL for the satellite style id", () => {
+  it("resolves MapTiler satellite style URL for the satellite style id", () => {
     const manager = new MapStyleManager();
     const resolved = manager.resolve("satellite");
     expect(resolved.vendor).toBe("maptiler");
-    expect(resolved.styleUrl).toContain("api.maptiler.com/maps/hybrid/style.json");
+    expect(resolved.styleUrl).toContain("api.maptiler.com/maps/satellite/style.json");
     expect(resolved.styleUrl).toContain("key=YOUR_MAPTILER_API_KEY");
     expect(resolved.usingPlaceholderKey).toBe(true);
   });

@@ -20,8 +20,19 @@ export async function generateSelfServiceEbookAction(formData: FormData): Promis
   const title = String(formData.get("title") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const location = String(formData.get("location") || "").trim();
+  const agentName = String(formData.get("agentName") || "").trim();
+  const agentEmail = String(formData.get("agentEmail") || "").trim();
+  const agentPhone = String(formData.get("agentPhone") || "").trim();
   const uploadModeRaw = String(formData.get("uploadMode") || "").trim().toLowerCase();
   const uploadMode = uploadModeRaw === "pdf" ? "pdf" : "images";
+  const brokerageLogoRaw = formData.get("brokerageLogo");
+  const brokerageLogo =
+    brokerageLogoRaw instanceof File && brokerageLogoRaw.size > 0
+      ? brokerageLogoRaw
+      : null;
+  const agentPhotoRaw = formData.get("agentPhoto");
+  const agentPhoto =
+    agentPhotoRaw instanceof File && agentPhotoRaw.size > 0 ? agentPhotoRaw : null;
 
   const images = formData
     .getAll("images")
@@ -35,6 +46,11 @@ export async function generateSelfServiceEbookAction(formData: FormData): Promis
     title,
     description,
     location,
+    agentName,
+    agentEmail,
+    agentPhone,
+    brokerageLogo,
+    agentPhoto,
     images,
     uploadMode,
   });

@@ -12,6 +12,11 @@ export type GenerateSelfServiceEbookInput = {
   title: string;
   description: string;
   location: string;
+  agentName?: string;
+  agentEmail?: string;
+  agentPhone?: string;
+  brokerageLogo?: File | null;
+  agentPhoto?: File | null;
   images: File[];
   /** `pdf` skips ebook layout rules and renders exact page rasters. */
   uploadMode?: AutoDraftUploadMode;
@@ -44,6 +49,11 @@ export async function generateSelfServiceEbook(
     title: input.title,
     description: input.description,
     location: input.location,
+    agentName: input.agentName,
+    agentEmail: input.agentEmail,
+    agentPhone: input.agentPhone,
+    brokerageLogo: input.brokerageLogo,
+    agentPhoto: input.agentPhoto,
     images: input.images,
     source: uploadMode === "pdf" ? "self-service-pdf" : "self-service-teb",
     uploadMode,

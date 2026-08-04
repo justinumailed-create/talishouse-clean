@@ -13,9 +13,9 @@ type StyleUrlMap = Record<MapStyleId, string>;
 function mapTilerStyleUrls(apiKey: string): StyleUrlMap {
   const key = encodeURIComponent(apiKey);
   return {
-    // Hybrid = high-res satellite-v2 imagery + road/place labels (matches Google-style reference).
-    // Plain `satellite` alone looks soft when overzoomed and has no street context.
-    satellite: `https://api.maptiler.com/maps/hybrid/style.json?key=${key}`,
+    // Pure satellite imagery — no place / business labels (TalisMaps™ pins only).
+    // Hybrid includes third-party POI branding we must not show.
+    satellite: `https://api.maptiler.com/maps/satellite/style.json?key=${key}`,
     street: `https://api.maptiler.com/maps/streets-v2/style.json?key=${key}`,
     terrain: `https://api.maptiler.com/maps/outdoor-v2/style.json?key=${key}`,
     light: `https://api.maptiler.com/maps/basic-v2/style.json?key=${key}`,

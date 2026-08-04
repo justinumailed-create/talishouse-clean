@@ -19,7 +19,7 @@ const GoogleMapsLazyProvider: MapProvider = {
   id: "google-maps",
   label: "Google Maps",
   description:
-    "Google Maps JavaScript API with satellite hybrid imagery. Requires NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.",
+    "Google Maps JavaScript API with satellite imagery (no third-party POI labels). Requires NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.",
   supportedBasemapViews: ["satellite", "street", "terrain", "light", "dark"],
   isAvailable() {
     if (typeof window === "undefined") return false;

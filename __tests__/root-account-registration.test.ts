@@ -1,6 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createMapSiteForAccount } from "../lib/mapsite-service";
-import { completeRootAccountRegistration } from "../lib/root-account-registration-service";
 
 const mockUsersInsert = vi.fn();
 const mockUsersUpdate = vi.fn();
@@ -9,9 +7,18 @@ const mockMapsitesInsert = vi.fn();
 const mockMapsitesInsertPayload = vi.fn();
 const mockMapsitesSelect = vi.fn();
 const mockAccountsLike = vi.fn();
+const mockMapsitesLike = vi.fn();
+const mockFastCodesLike = vi.fn();
 
 vi.mock("../lib/slug-generator", () => ({
   generateMapSiteSlug: vi.fn(async () => "ABCD"),
+}));
+
+vi.mock("../lib/supabaseClient", () => ({
+  supabase: {
+    from: vi.fn(),
+  },
+  isSupabaseConfigured: true,
 }));
 
 vi.mock("../lib/supabaseAdmin", () => ({
@@ -53,7 +60,16 @@ vi.mock("../lib/supabaseAdmin", () => ({
 
       if (table === "mapsites") {
         return {
-          select: mockMapsitesSelect,
+          select: (...args: unknown[]) => {
+            // createMapSiteForAccount awaits .select("slug") directly
+            if (args[0] === "slug") {
+              return mockMapsitesSelect();
+            }
+            // generateFastCode uses .select("fast_code").like(...)
+            return {
+              like: mockMapsitesLike,
+            };
+          },
           insert: (record: unknown) => {
             mockMapsitesInsertPayload(record);
             return {
@@ -62,17 +78,35 @@ vi.mock("../lib/supabaseAdmin", () => ({
               }),
             };
           },
+          update: () => ({
+            eq: vi.fn().mockResolvedValue({ data: null, error: null }),
+          }),
+        };
+      }
+
+      if (table === "fast_codes") {
+        return {
+          select: () => ({
+            like: mockFastCodesLike,
+          }),
         };
       }
 
       throw new Error(`Unexpected table: ${table}`);
     },
   }),
+  tryGetSupabaseAdmin: () => null,
+  disableSupabaseAdminClient: false,
 }));
+
+import { createMapSiteForAccount } from "../lib/mapsite-service";
+import { completeRootAccountRegistration } from "../lib/root-account-registration-service";
 
 describe("createMapSiteForAccount", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockMapsitesLike.mockResolvedValue({ data: [], error: null });
+    mockFastCodesLike.mockResolvedValue({ data: [], error: null });
     mockMapsitesSelect.mockReturnValue({
       data: [],
       error: null,
@@ -142,6 +176,8 @@ describe("completeRootAccountRegistration", () => {
     mockUsersUpdate.mockResolvedValue({ error: null });
 
     mockAccountsLike.mockResolvedValue({ data: [], error: null });
+    mockMapsitesLike.mockResolvedValue({ data: [], error: null });
+    mockFastCodesLike.mockResolvedValue({ data: [], error: null });
 
     mockAccountsInsert.mockResolvedValue({
       data: {
@@ -188,7 +224,7 @@ describe("completeRootAccountRegistration", () => {
       accountId: "account-1",
       fastCode: "ar01",
       mapsiteId: "mapsite-1",
-      redirectUrl: "/talispros/mapsites/ar01",
+      redirectUrl: "/talispros/client/dashboard",
     });
 
     expect(mockUsersInsert).toHaveBeenCalled();

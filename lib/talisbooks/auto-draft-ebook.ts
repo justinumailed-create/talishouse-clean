@@ -2,7 +2,12 @@ import sharp from "sharp";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { ROUTES } from "@/lib/routes";
 import type { TalisBooksLayoutImageRef } from "@/lib/talisbooks/layout-engine/types";
-import { TALISBOOKS_IMAGE_STORAGE_BUCKET } from "@/lib/talisbooks/image-engine";
+import {
+  TALISBOOKS_ASSET_CACHE_CONTROL,
+  TALISBOOKS_IMAGE_STORAGE_BUCKET,
+  TALISBOOKS_PAGE_IMAGE_MAX_EDGE_PX,
+  TALISBOOKS_PAGE_IMAGE_QUALITY,
+} from "@/lib/talisbooks/image-engine";
 import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
 import {
   assertTalisBooksFeature,
@@ -52,6 +57,7 @@ async function uploadBuffer(options: {
     .from(TALISBOOKS_IMAGE_STORAGE_BUCKET)
     .upload(path, options.buffer, {
       contentType: options.mimeType,
+      cacheControl: TALISBOOKS_ASSET_CACHE_CONTROL,
       upsert: false,
     });
 
@@ -64,6 +70,7 @@ async function uploadBuffer(options: {
 
   const fallback = await supabase.storage.from("mapsite-assets").upload(path, options.buffer, {
     contentType: options.mimeType,
+    cacheControl: TALISBOOKS_ASSET_CACHE_CONTROL,
     upsert: false,
   });
   if (fallback.error) {
@@ -77,6 +84,72 @@ async function uploadBuffer(options: {
   return (
     supabase.storage.from("mapsite-assets").getPublicUrl(path).data.publicUrl || null
   );
+}
+
+interface PreparedPageImage {
+  buffer: Buffer;
+  mimeType: string;
+  width: number;
+  height: number;
+}
+
+/**
+ * Camera uploads run 4–12 MP, which the viewer then downloads in full for every
+ * page turn. Bake them down to display size once, at generation time.
+ * `rotate()` bakes in EXIF orientation, which the re-encode would otherwise drop.
+ */
+async function prepareViewerPageImage(
+  buffer: Buffer,
+  mimeType: string
+): Promise<PreparedPageImage> {
+  try {
+    const source = sharp(buffer, { failOn: "none" }).rotate();
+    const meta = await source.metadata();
+    const width = meta.width ?? 0;
+    const height = meta.height ?? 0;
+    if (!width || !height) {
+      return { buffer, mimeType, width: 1600, height: 1200 };
+    }
+
+    const longEdge = Math.max(width, height);
+    const scale = Math.min(1, TALISBOOKS_PAGE_IMAGE_MAX_EDGE_PX / longEdge);
+    const resized =
+      scale < 1
+        ? source.resize({
+            width: Math.round(width * scale),
+            height: Math.round(height * scale),
+            fit: "inside",
+            withoutEnlargement: true,
+          })
+        : source;
+
+    const keepAlpha = Boolean(meta.hasAlpha) && mimeType !== "image/jpeg";
+    const encoded = keepAlpha
+      ? await resized
+          .png({ compressionLevel: 9, palette: true })
+          .toBuffer({ resolveWithObject: true })
+      : await resized
+          .jpeg({
+            quality: TALISBOOKS_PAGE_IMAGE_QUALITY,
+            mozjpeg: true,
+            progressive: true,
+          })
+          .toBuffer({ resolveWithObject: true });
+
+    // A tiny source can encode larger than it started; keep whichever is smaller.
+    if (encoded.data.byteLength >= buffer.byteLength && scale === 1) {
+      return { buffer, mimeType, width, height };
+    }
+
+    return {
+      buffer: encoded.data,
+      mimeType: keepAlpha ? "image/png" : "image/jpeg",
+      width: encoded.info.width,
+      height: encoded.info.height,
+    };
+  } catch {
+    return { buffer, mimeType, width: 1600, height: 1200 };
+  }
 }
 
 /**
@@ -101,28 +174,17 @@ async function processUploadsForSelfServiceSpreads(options: {
 
   for (let i = 0; i < options.files.length; i += 1) {
     const file = options.files[i]!;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const mimeType = file.type || "image/jpeg";
+    const source = Buffer.from(await file.arrayBuffer());
+    const prepared = await prepareViewerPageImage(source, file.type || "image/jpeg");
+    const { width, height } = prepared;
     const imageId = crypto.randomUUID();
-
-    let width = 1600;
-    let height = 1200;
-    try {
-      const meta = await sharp(buffer).metadata();
-      if (meta.width && meta.height) {
-        width = meta.width;
-        height = meta.height;
-      }
-    } catch {
-      // Keep defaults if metadata fails.
-    }
 
     const originalUrl = await uploadBuffer({
       scope: options.scope,
       id: imageId,
       suffix: "original",
-      buffer,
-      mimeType,
+      buffer: prepared.buffer,
+      mimeType: prepared.mimeType,
     });
     if (!originalUrl) continue;
 
@@ -165,28 +227,17 @@ async function processUploadsAsExactPages(options: {
 
   for (let i = 0; i < options.files.length; i += 1) {
     const file = options.files[i]!;
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const mimeType = file.type || "image/jpeg";
+    const source = Buffer.from(await file.arrayBuffer());
+    const prepared = await prepareViewerPageImage(source, file.type || "image/jpeg");
+    const { width, height } = prepared;
     const imageId = crypto.randomUUID();
-
-    let width = 1600;
-    let height = 1200;
-    try {
-      const meta = await sharp(buffer).metadata();
-      if (meta.width && meta.height) {
-        width = meta.width;
-        height = meta.height;
-      }
-    } catch {
-      // Keep defaults if metadata fails.
-    }
 
     const originalUrl = await uploadBuffer({
       scope: options.scope,
       id: imageId,
       suffix: "exact",
-      buffer,
-      mimeType,
+      buffer: prepared.buffer,
+      mimeType: prepared.mimeType,
     });
     if (!originalUrl) continue;
 
@@ -207,43 +258,164 @@ async function processUploadsAsExactPages(options: {
   return { refs, coverImageUrl, galleryUrls };
 }
 
-async function loadSelfServiceAgentDetails(
-  mapsiteId: string | null,
-): Promise<SelfServiceAgentDetails> {
+async function uploadOptionalAgentImage(options: {
+  fastCode: string;
+  file: File | null | undefined;
+  suffix: string;
+}): Promise<string | undefined> {
+  const file = options.file;
+  if (!file || file.size === 0) return undefined;
+  const source = Buffer.from(await file.arrayBuffer());
+  const prepared = await prepareViewerPageImage(source, file.type || "image/jpeg");
+  const url = await uploadBuffer({
+    scope: options.fastCode,
+    id: crypto.randomUUID(),
+    suffix: options.suffix,
+    buffer: prepared.buffer,
+    mimeType: prepared.mimeType,
+  });
+  return url || undefined;
+}
+
+async function loadSelfServiceAgentDetails(input: {
+  fastCode: string;
+  requestId: string | null;
+  mapsiteId: string | null;
+  agentName?: string | null;
+  agentEmail?: string | null;
+  agentPhone?: string | null;
+  agentPhoto?: File | null;
+  brokerageLogo?: File | null;
+}): Promise<SelfServiceAgentDetails> {
   const fallback: SelfServiceAgentDetails = {
     name: "Listing contact",
     title: "MapSite™ owner",
     brokerageName: "Talispros™",
   };
 
-  if (!mapsiteId || !isSupabaseAdminConfigured()) {
-    return fallback;
+  const overrides = {
+    name: input.agentName?.trim() || "",
+    email: input.agentEmail?.trim() || "",
+    phone: input.agentPhone?.trim() || "",
+  };
+  const uploadedPhotoUrl = await uploadOptionalAgentImage({
+    fastCode: input.fastCode,
+    file: input.agentPhoto,
+    suffix: "agent-photo",
+  });
+  const uploadedLogoUrl = await uploadOptionalAgentImage({
+    fastCode: input.fastCode,
+    file: input.brokerageLogo,
+    suffix: "brokerage-logo",
+  });
+
+  if (!isSupabaseAdminConfigured()) {
+    return {
+      ...fallback,
+      name: overrides.name || fallback.name,
+      email: overrides.email || undefined,
+      phone: overrides.phone || undefined,
+      photoUrl: uploadedPhotoUrl,
+      brokerageLogoUrl: uploadedLogoUrl,
+    };
   }
 
   const supabase = getSupabaseAdmin();
-  const { data } = await supabase
-    .from("mapsites")
-    .select(
-      "owner_first_name, owner_last_name, email, phone, agent_name, profile_image_url, property_address",
-    )
-    .eq("id", mapsiteId)
-    .maybeSingle();
+  let request: {
+    id: string;
+    first_name: string | null;
+    last_name: string | null;
+    email: string | null;
+    phone: string | null;
+    logo: string | null;
+    linked_mapsite_id: string | null;
+  } | null = null;
 
-  if (!data) return fallback;
+  if (input.requestId) {
+    const byId = await supabase
+      .from("build_requests")
+      .select("id, first_name, last_name, email, phone, logo, linked_mapsite_id")
+      .eq("id", input.requestId)
+      .maybeSingle();
+    request = byId.data;
+  }
 
-  const ownerName = [data.owner_first_name, data.owner_last_name]
+  if (!request && input.fastCode) {
+    const byFastCode = await supabase
+      .from("build_requests")
+      .select("id, first_name, last_name, email, phone, logo, linked_mapsite_id")
+      .ilike("requested_fast_code", input.fastCode)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    request = byFastCode.data;
+  }
+
+  const resolvedMapsiteId = input.mapsiteId || request?.linked_mapsite_id || null;
+  let mapsite: {
+    owner_first_name: string | null;
+    owner_last_name: string | null;
+    email: string | null;
+    phone: string | null;
+    agent_name: string | null;
+    profile_image_url: string | null;
+    logo_url: string | null;
+    property_address: string | null;
+  } | null = null;
+
+  if (resolvedMapsiteId) {
+    const mapsiteResult = await supabase
+      .from("mapsites")
+      .select(
+        "owner_first_name, owner_last_name, email, phone, agent_name, profile_image_url, logo_url, property_address",
+      )
+      .eq("id", resolvedMapsiteId)
+      .maybeSingle();
+    mapsite = mapsiteResult.data;
+  }
+
+  let assets: {
+    profile_image: string | null;
+    logo_image: string | null;
+  } | null = null;
+
+  if (request?.id) {
+    const assetsResult = await supabase
+      .from("mapsite_assets")
+      .select("profile_image, logo_image")
+      .eq("request_id", request.id)
+      .maybeSingle();
+    assets = assetsResult.data;
+  }
+
+  const requestName = [request?.first_name, request?.last_name]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const ownerName = [mapsite?.owner_first_name, mapsite?.owner_last_name]
     .filter(Boolean)
     .join(" ")
     .trim();
 
   return {
-    name: (data.agent_name || ownerName || fallback.name).trim(),
-    title: data.agent_name ? "Listing agent" : "Property owner",
-    phone: data.phone || undefined,
-    email: data.email || undefined,
-    photoUrl: data.profile_image_url || undefined,
+    name:
+      overrides.name ||
+      mapsite?.agent_name?.trim() ||
+      requestName ||
+      ownerName ||
+      fallback.name,
+    title: mapsite?.agent_name ? "Listing agent" : "Property owner",
+    phone: overrides.phone || request?.phone || mapsite?.phone || undefined,
+    email: overrides.email || request?.email || mapsite?.email || undefined,
+    photoUrl:
+      uploadedPhotoUrl ||
+      assets?.profile_image ||
+      mapsite?.profile_image_url ||
+      undefined,
     brokerageName: "Talispros™",
-    brokerageLine: data.property_address || undefined,
+    brokerageLine: mapsite?.property_address || undefined,
+    brokerageLogoUrl:
+      uploadedLogoUrl || request?.logo || assets?.logo_image || mapsite?.logo_url || undefined,
   };
 }
 
@@ -257,6 +429,11 @@ export type AutoDraftEbookInput = {
   title: string;
   description?: string | null;
   location?: string | null;
+  agentName?: string | null;
+  agentEmail?: string | null;
+  agentPhone?: string | null;
+  brokerageLogo?: File | null;
+  agentPhoto?: File | null;
   images: File[];
   /** Provenance tag stored in metadata.source */
   source?: string;
@@ -457,7 +634,16 @@ export async function autoGenerateDraftTalisBook(
     };
   }
 
-  const agent = await loadSelfServiceAgentDetails(mapsiteId);
+  const agent = await loadSelfServiceAgentDetails({
+    fastCode,
+    requestId: input.requestId?.trim() || null,
+    mapsiteId,
+    agentName: input.agentName,
+    agentEmail: input.agentEmail,
+    agentPhone: input.agentPhone,
+    agentPhoto: input.agentPhoto,
+    brokerageLogo: input.brokerageLogo,
+  });
   const planned = buildSelfServiceEbookPageRows({
     title,
     description,

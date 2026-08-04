@@ -50,6 +50,8 @@ export default function MapSiteMarketPartnerCard({
   onSelect,
 }: MapSiteMarketPartnerCardProps) {
   const content = contentForAudience(audience);
+  const genericWriteup =
+    "Upon registration your Mapsite™ will be able to promote up to 10 categories containing 100 PINs generating 1,000 views, monthly. No referral fees - ever";
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
   const address = mapsite.property_address?.trim().toUpperCase() || null;
 
@@ -92,7 +94,7 @@ export default function MapSiteMarketPartnerCard({
             </p>
           ) : null}
           <p className="mapsite-manager-strip__why mt-1 line-clamp-2 text-[11px] leading-snug text-neutral-700">
-            {content.whyBody}
+            {genericWriteup}
           </p>
           <p className="mt-1 text-[13px] font-semibold leading-snug text-black">
             {content.marketPartner}
@@ -137,8 +139,8 @@ export default function MapSiteMarketPartnerCard({
           />
         </div>
 
-        <p className="mx-auto mt-4 max-w-[17rem] text-left text-[11.5px] leading-[1.45] text-neutral-800 sm:text-center">
-          {content.whyBody}
+        <p className="mx-auto mt-4 max-w-[17rem] text-left text-[14px] leading-[1.45] text-neutral-800 sm:text-center">
+          {genericWriteup}
         </p>
 
         <p className="mt-4 text-[14px] font-semibold leading-snug text-black">

@@ -132,7 +132,6 @@ function validate(
   if (!fields.email.trim()) return "Email is required";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email.trim()))
     return "Invalid email format";
-  if (!fields.phone.trim()) return "Phone is required";
   if (!fields.company.trim()) return "Company is required";
   if (!fields.accountType) return "Account type is required";
   if (
@@ -159,9 +158,10 @@ function validate(
     lat <= 90 &&
     lng >= -180 &&
     lng <= 180;
+  const hasAddress = Boolean(fields.streetAddress.trim());
 
-  if (!hasCoords) {
-    return "GPS coordinates are required (address is optional for vacant land)";
+  if (!hasCoords && !hasAddress) {
+    return "Enter a Google-recognised street address or geo-coordinates";
   }
 
   if (fields.pinWriteup.length > 170) {

@@ -29,6 +29,8 @@ export default function Pin({
   const isFlagStyle = !visual.whiteCenter;
   const iconScale = (isFlagStyle ? 0.58 : 0.42) * (size / 66);
   const iconOffset = c - 12 * iconScale;
+  const hollowCutoutCy = size * 0.4;
+  const hollowCutoutR = size * 0.24;
 
   const animationClass =
     visual.pinAnimation === "pulse"
@@ -37,6 +39,7 @@ export default function Pin({
         ? "talismaps-pin--breathe"
         : "";
   const selectedClass = visual.selectedState ? "talismaps-pin--selected" : "";
+  const isHollowDrop = visual.pinIcon === "none";
 
   return (
     <div
@@ -83,7 +86,19 @@ export default function Pin({
             </filter>
           </defs>
           <g filter={`url(#${shadowId})`}>
-            {isFlagStyle ? (
+            {isHollowDrop ? (
+              <>
+                <path
+                  d={`M ${size / 2} ${size * 0.96}
+                    L ${size * 0.18} ${size * 0.58}
+                    C ${size * 0.03} ${size * 0.42}, ${size * 0.05} ${size * 0.14}, ${size / 2} ${size * 0.1}
+                    C ${size * 0.95} ${size * 0.14}, ${size * 0.97} ${size * 0.42}, ${size * 0.82} ${size * 0.58}
+                    Z`}
+                  fill={visual.pinColor}
+                />
+                <circle cx={c} cy={hollowCutoutCy} r={hollowCutoutR} fill="#ffffff" />
+              </>
+            ) : isFlagStyle ? (
               <>
                 <circle
                   cx={c}

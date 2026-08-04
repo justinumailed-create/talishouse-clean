@@ -1,14 +1,15 @@
 "use client";
 
 import { useMemo, useState, useEffect, type FormEvent } from "react";
-import { Check, Copy } from "lucide-react";
+import { Check } from "lucide-react";
 import HomePinLocationSection, {
   validateHomePinLocation,
 } from "@/components/build-mapsite/HomePinLocationSection";
-import { defaultHomePinLocationValues } from "@/components/build-mapsite/home-pin-types";
+import type { HomePinLocationValues } from "@/components/build-mapsite/home-pin-types";
 import { submitMarketRegistration } from "@/app/talispros/markets/actions";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import { REGISTRATION_MARKET_COPY } from "@/lib/registration-market";
+import { hasValidCoordinates } from "@/lib/home-pin-coordinates";
 
 interface TalisprosMarketRegistrationFormProps {
   market: RegistrationMarket;
@@ -24,24 +25,22 @@ interface TalisprosMarketRegistrationFormProps {
   }) => void;
 }
 
-const ACCOUNT_OPTIONS = [
-  {
-    value: "root-1",
-    label: "Root Account™ — $1 activation (CAD $1.00 + GST)",
-  },
-  {
-    value: "root",
-    label: "Root Account™ (up to 100 Derivative Accounts; SPLITS enabled)",
-  },
-  {
-    value: "derivative",
-    label: "Derivative Account (multi-PIN Accounts; SPLITS enabled)",
-  },
-  {
-    value: "adpro-single",
-    label: "Adpros Account (individual PINs, no SPLITS)",
-  },
-] as const;
+const EMPTY_PIN_LOCATION: HomePinLocationValues = {
+  streetAddress: "",
+  latitude: "",
+  longitude: "",
+  manualPlacement: false,
+  reverseGeocodedAddress: "",
+  mapZoom: 16,
+  pinWriteup: "",
+  futurePinColor: "#1A73E8",
+  futurePinIcon: "none",
+  futurePinBorder: "none",
+  futurePinLabel: "",
+  futurePinWhiteCenter: false,
+  futurePinAnimated: false,
+  futurePinCategoryBadge: null,
+};
 
 function todayString(): string {
   const d = new Date();
@@ -68,6 +67,29 @@ function FieldLabel({
   );
 }
 
+async function resolveCoordinatesFromAddress(address: string): Promise<{
+  latitude: string;
+  longitude: string;
+  address: string;
+} | null> {
+  const response = await fetch(
+    `/api/talismaps/geocode?q=${encodeURIComponent(address)}`
+  );
+  if (!response.ok) return null;
+  const payload = (await response.json()) as {
+    found?: boolean;
+    latitude?: string;
+    longitude?: string;
+    address?: string | null;
+  };
+  if (!payload.found || !payload.latitude || !payload.longitude) return null;
+  return {
+    latitude: payload.latitude,
+    longitude: payload.longitude,
+    address: payload.address?.trim() || address,
+  };
+}
+
 export default function TalisprosMarketRegistrationForm({
   market,
   mapsiteId,
@@ -77,6 +99,7 @@ export default function TalisprosMarketRegistrationForm({
   const marketCopy = REGISTRATION_MARKET_COPY[market];
   const requestId = useMemo(() => crypto.randomUUID(), []);
   const isPanel = variant === "panel";
+  const accountType = "root-1";
 
   const [date, setDate] = useState("");
   useEffect(() => {
@@ -85,110 +108,112 @@ export default function TalisprosMarketRegistrationForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [accountType, setAccountType] = useState("root-1");
-  const [fastCode, setFastCode] = useState("");
-  const [picture, setPicture] = useState<File | null>(null);
-  const [logo, setLogo] = useState<File | null>(null);
   const [pinImage, setPinImage] = useState<File | null>(null);
-  const [pinLocation, setPinLocation] = useState(defaultHomePinLocationValues);
+  const [pinLocation, setPinLocation] =
+    useState<HomePinLocationValues>(EMPTY_PIN_LOCATION);
   const [consentData, setConsentData] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [issuedFastCode, setIssuedFastCode] = useState("");
-  const [copiedFastCode, setCopiedFastCode] = useState(false);
 
-  const requiresFastCode =
-    accountType === "derivative" || accountType.startsWith("adpro");
-  const isDollarRoot = accountType === "root-1";
+  async function ensurePinLocation(): Promise<HomePinLocationValues | null> {
+    if (hasValidCoordinates(pinLocation.latitude, pinLocation.longitude)) {
+      return pinLocation;
+    }
 
-  async function uploadFile(fieldName: string, file: File): Promise<string | null> {
-    const body = new FormData();
-    body.set("requestId", requestId);
-    body.set("fieldName", fieldName);
-    body.set("file", file);
-    const response = await fetch("/api/talispros/build-mapsite/upload", {
-      method: "POST",
-      body,
-    });
-    if (!response.ok) return null;
-    const payload = (await response.json()) as { url?: string };
-    return payload.url ?? null;
+    const address = pinLocation.streetAddress.trim();
+    if (!address) {
+      setError("Enter a street address or place a PIN with geo-coordinates.");
+      return null;
+    }
+
+    const resolved = await resolveCoordinatesFromAddress(address);
+    if (!resolved) {
+      setError(
+        "Could not recognise that address. Enter a map-recognised address or add geo-coordinates."
+      );
+      return null;
+    }
+
+    const next = {
+      ...pinLocation,
+      streetAddress: resolved.address,
+      latitude: resolved.latitude,
+      longitude: resolved.longitude,
+      reverseGeocodedAddress: resolved.address,
+      manualPlacement: false,
+    };
+    setPinLocation(next);
+    return next;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
-    const pinErrors = validateHomePinLocation(pinLocation);
-    const firstPinError = Object.values(pinErrors)[0];
-    if (firstPinError) {
-      setError(firstPinError);
-      return;
-    }
     if (!consentData) {
       setError("Data processing consent is required.");
-      return;
-    }
-    if (requiresFastCode && !fastCode.trim()) {
-      setError("FAST Code is required for this account type.");
       return;
     }
 
     setSubmitting(true);
     try {
+      const resolvedLocation = await ensurePinLocation();
+      if (!resolvedLocation) {
+        return;
+      }
+
+      const pinErrors = validateHomePinLocation(resolvedLocation);
+      const firstPinError = Object.values(pinErrors)[0];
+      if (firstPinError) {
+        setError(firstPinError);
+        return;
+      }
+
       const formData = new FormData();
       formData.set("requestId", requestId);
       formData.set("date", date);
       formData.set("firstName", firstName);
       formData.set("lastName", lastName);
       formData.set("email", email);
-      formData.set("phone", phone);
+      formData.set("phone", "");
       formData.set("company", marketCopy.label);
       formData.set("marketType", market);
       formData.set("accountType", accountType);
-      formData.set("fastCode", fastCode);
-      formData.set("streetAddress", pinLocation.streetAddress);
-      formData.set("latitude", pinLocation.latitude);
-      formData.set("longitude", pinLocation.longitude);
-      formData.set("mapZoom", String(pinLocation.mapZoom));
+      formData.set("fastCode", "");
+      formData.set("streetAddress", resolvedLocation.streetAddress);
+      formData.set("latitude", resolvedLocation.latitude);
+      formData.set("longitude", resolvedLocation.longitude);
+      formData.set("mapZoom", String(resolvedLocation.mapZoom));
       formData.set(
         "manualPlacement",
-        pinLocation.manualPlacement ? "true" : "false"
+        resolvedLocation.manualPlacement ? "true" : "false"
       );
       formData.set(
         "reverseGeocodedAddress",
-        pinLocation.reverseGeocodedAddress
+        resolvedLocation.reverseGeocodedAddress
       );
-      formData.set("pinWriteup", pinLocation.pinWriteup);
-      formData.set("futurePinColor", pinLocation.futurePinColor ?? "");
-      formData.set("futurePinIcon", pinLocation.futurePinIcon ?? "");
-      formData.set("futurePinBorder", pinLocation.futurePinBorder ?? "");
-      formData.set("futurePinLabel", pinLocation.futurePinLabel ?? "");
-      formData.set("futurePinWhiteCenter", pinLocation.futurePinWhiteCenter ? "true" : "false");
-      formData.set("futurePinAnimated", pinLocation.futurePinAnimated ? "true" : "false");
-      formData.set("futurePinCategoryBadge", pinLocation.futurePinCategoryBadge ?? "");
+      formData.set("pinWriteup", resolvedLocation.pinWriteup);
+      formData.set("futurePinColor", resolvedLocation.futurePinColor ?? "");
+      formData.set("futurePinIcon", resolvedLocation.futurePinIcon ?? "");
+      formData.set("futurePinBorder", resolvedLocation.futurePinBorder ?? "");
+      formData.set("futurePinLabel", resolvedLocation.futurePinLabel ?? "");
+      formData.set(
+        "futurePinWhiteCenter",
+        resolvedLocation.futurePinWhiteCenter ? "true" : "false"
+      );
+      formData.set(
+        "futurePinAnimated",
+        resolvedLocation.futurePinAnimated ? "true" : "false"
+      );
+      formData.set(
+        "futurePinCategoryBadge",
+        resolvedLocation.futurePinCategoryBadge ?? ""
+      );
       formData.set("consentData", "true");
       formData.set("consentCommunications", "false");
       if (mapsiteId) {
         formData.set("mapsiteId", mapsiteId);
-      }
-
-      if (picture) {
-        const pictureUrl = await uploadFile("picture", picture);
-        if (pictureUrl) formData.set("pictureUrl", pictureUrl);
-        else formData.set("picture", picture);
-      }
-      if (logo) {
-        const logoUrl = await uploadFile("logo", logo);
-        if (logoUrl) formData.set("logoUrl", logoUrl);
-        else formData.set("logo", logo);
-      }
-      if (pinImage) {
-        const pinImageUrl = await uploadFile("pinImage", pinImage);
-        if (pinImageUrl) formData.set("pinImageUrl", pinImageUrl);
-        else formData.set("pinImage", pinImage);
       }
 
       const result = await submitMarketRegistration(formData);
@@ -196,7 +221,6 @@ export default function TalisprosMarketRegistrationForm({
         setError(result.error || "Submission failed. Please try again.");
         return;
       }
-      setIssuedFastCode(result.fastCode || fastCode.trim());
       if (onSuccess) {
         onSuccess({
           requestId: result.requestId,
@@ -207,23 +231,14 @@ export default function TalisprosMarketRegistrationForm({
         return;
       }
       setSuccess(true);
-    } catch (error) {
+    } catch (submitError) {
       const message =
-        error instanceof Error ? error.message : "Submission failed. Please try again.";
+        submitError instanceof Error
+          ? submitError.message
+          : "Submission failed. Please try again.";
       setError(message);
     } finally {
       setSubmitting(false);
-    }
-  }
-
-  async function copyFastCode() {
-    if (!issuedFastCode) return;
-    try {
-      await navigator.clipboard.writeText(issuedFastCode);
-      setCopiedFastCode(true);
-      window.setTimeout(() => setCopiedFastCode(false), 2000);
-    } catch {
-      setError("Could not copy FAST Code. Please copy it manually.");
     }
   }
 
@@ -235,34 +250,9 @@ export default function TalisprosMarketRegistrationForm({
         </div>
         <h2 className="text-2xl text-neutral-900">Registration received</h2>
         <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-          Thank you. Your {marketCopy.label} registration has been submitted. A
-          marketing manager will review your information, prepare your MapSite™,
-          and send a payment link when ready.
+          Thank you. Your {marketCopy.label} MapSite™ setup has started from your
+          essentials. We have emailed your MapSite™ details to {email}.
         </p>
-        {issuedFastCode ? (
-          <div className="mx-auto mt-8 max-w-md rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-4 text-left">
-            <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-              Your FAST Code
-            </p>
-            <div className="mt-2 flex items-center gap-2">
-              <code className="flex-1 rounded-lg border border-neutral-200 bg-white px-3 py-2 font-mono text-sm text-neutral-900">
-                {issuedFastCode}
-              </code>
-              <button
-                type="button"
-                onClick={copyFastCode}
-                className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
-              >
-                <Copy className="h-4 w-4" />
-                {copiedFastCode ? "Copied" : "Copy"}
-              </button>
-            </div>
-            <p className="mt-2 text-xs text-neutral-500">
-              Save this code. You will use it to access your MapSite™ and client
-              portal.
-            </p>
-          </div>
-        ) : null}
       </div>
     );
   }
@@ -282,8 +272,14 @@ export default function TalisprosMarketRegistrationForm({
         </div>
       ) : null}
 
-      <section className="mb-10">
-        <h2 className="mb-6 text-lg font-semibold text-neutral-900">General Information</h2>
+      <section className="mb-8">
+        <h2 className="mb-2 text-lg font-semibold text-neutral-900">
+          General Information
+        </h2>
+        <p className="mb-6 text-sm text-neutral-500">
+          Complete these essentials to create your Mapsite™ — personalization can
+          wait until after your first success.
+        </p>
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
             <FieldLabel label="Date" hint="First come, first serve." required />
@@ -297,7 +293,11 @@ export default function TalisprosMarketRegistrationForm({
             />
           </div>
           <div>
-            <FieldLabel label="Email Address" hint="Establishes an Account." required />
+            <FieldLabel
+              label="Email Address"
+              hint="Establishes an Account."
+              required
+            />
             <input
               type="email"
               value={email}
@@ -326,95 +326,18 @@ export default function TalisprosMarketRegistrationForm({
               className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
             />
           </div>
-          <div>
-            <FieldLabel label="Phone" required />
-            <input
-              type="tel"
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              required
-              className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <FieldLabel label="Type of Account" required />
-            <div className="space-y-2">
-              {ACCOUNT_OPTIONS.map((option) => (
-                <label key={option.value} className="flex items-start gap-2 text-sm text-neutral-700">
-                  <input
-                    type="radio"
-                    name="accountType"
-                    value={option.value}
-                    checked={accountType === option.value}
-                    onChange={() => setAccountType(option.value)}
-                    className="mt-1"
-                  />
-                  <span>{option.label}</span>
-                </label>
-              ))}
-            </div>
-            {isDollarRoot ? (
-              <p className="mt-2 text-xs leading-relaxed text-neutral-500">
-                After submit, your MapSite™ shows a CAD $1.00 + GST PayPal
-                checkout. Payment enables Express an Interest and activates the
-                MapSite™ for admin management.
-              </p>
-            ) : null}
-          </div>
-          {requiresFastCode ? (
-            <div className="sm:col-span-2">
-              <FieldLabel label="FAST Code" hint="Identifies an Account." required />
-              <input
-                type="text"
-                value={fastCode}
-                onChange={(event) => setFastCode(event.target.value.toUpperCase())}
-                required
-                className="w-full rounded border border-neutral-300 px-3 py-2 text-sm uppercase"
-              />
-            </div>
-          ) : null}
-        </div>
-      </section>
-
-      <section className="mb-10">
-        <h2 className="mb-6 text-lg font-semibold text-neutral-900">
-          Mapsite™ Personalization
-        </h2>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <FieldLabel
-              label="Your Picture"
-              hint="Be sure to choose a picture with good lighting and a high contrast background."
-            />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(event) => setPicture(event.target.files?.[0] ?? null)}
-              className="w-full text-sm"
-            />
-          </div>
-          <div>
-            <FieldLabel
-              label="Your Logo"
-              hint="Choose JPG or PNG file format, ideally square in dimensions."
-            />
-            <input
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              onChange={(event) => setLogo(event.target.files?.[0] ?? null)}
-              className="w-full text-sm"
-            />
-          </div>
         </div>
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-6 text-lg font-semibold text-neutral-900">PIN Location</h2>
         <HomePinLocationSection
           values={pinLocation}
           pinImage={pinImage}
-          onChange={(values) => setPinLocation((current) => ({ ...current, ...values }))}
+          onChange={(values) =>
+            setPinLocation((current) => ({ ...current, ...values }))
+          }
           onPinImageChange={setPinImage}
+          mode="essentials"
         />
       </section>
 
@@ -427,7 +350,7 @@ export default function TalisprosMarketRegistrationForm({
         />
         <span>
           I consent to Talispros™ processing my registration data to prepare my
-          MapSite™ and coordinate payment and onboarding.
+          Mapsite™ and coordinate payment and onboarding.
         </span>
       </label>
 
@@ -440,7 +363,7 @@ export default function TalisprosMarketRegistrationForm({
           ? "Submitting..."
           : isPanel
             ? "Submit Build Request"
-            : "Submit Registration"}
+            : "Create My Mapsite™"}
       </button>
     </form>
   );

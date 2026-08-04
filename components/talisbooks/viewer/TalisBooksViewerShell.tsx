@@ -2,6 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import {
+  orderedViewerImageUrls,
+  warmViewerImages,
+} from "@/lib/talisbooks/viewer/image-preloader";
 import TalisBooksViewerControls from "@/components/talisbooks/viewer/TalisBooksViewerControls";
 import TalisBooksViewerLiveEditor from "@/components/talisbooks/viewer/TalisBooksViewerLiveEditor";
 import TalisBooksViewerStage, {
@@ -9,6 +13,7 @@ import TalisBooksViewerStage, {
 } from "@/components/talisbooks/viewer/TalisBooksViewerStage";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
+import { MAPSITE_APP_PATH, buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 import {
   convertViewerNavIndex,
   createEmptyNarrationController,
@@ -140,6 +145,19 @@ export default function TalisBooksViewerShell({
       ? getViewerSpread(book.pages, effectiveNavIndex)
       : { index: 0, left: null, right: null };
   const singlePage = book.pages[effectiveNavIndex] ?? null;
+
+  // Faces paint from CSS backgrounds, so an unwarmed page turns into a blank
+  // leaf mid-flip. Keep downloads running ahead of wherever the reader is.
+  const activePageIndex =
+    viewMode === "single"
+      ? effectiveNavIndex
+      : (spread.left ?? spread.right)
+        ? book.pages.indexOf((spread.left ?? spread.right)!)
+        : 0;
+
+  useEffect(() => {
+    warmViewerImages(orderedViewerImageUrls(book, Math.max(activePageIndex, 0)));
+  }, [book, activePageIndex]);
 
   if (book.pages.length === 0 || spreadCount === 0) {
     return (
@@ -341,6 +359,13 @@ export default function TalisBooksViewerShell({
       : null;
   const editorRight =
     binding === "open" && viewMode === "spread" ? spread.right : null;
+  const backToMapSiteHref =
+    book.fastCode && book.fastCode.trim().toLowerCase() !== "demo"
+      ? buildClaimedMapSitePath({
+          fastCode: book.fastCode,
+          accountType: book.accountType,
+        })
+      : MAPSITE_APP_PATH;
 
   return (
     <div
@@ -363,11 +388,16 @@ export default function TalisBooksViewerShell({
             <p className="talisbooks-viewer__subtitle">{book.subtitle}</p>
           ) : null}
         </div>
-        {showDashboard ? (
-          <Link href={TALISBOOKS_ROUTES.DASHBOARD} className="talisbooks-viewer__back">
-            Dashboard
+        <div className="talisbooks-viewer__header-actions">
+          <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
+            Back to Mapsite™
           </Link>
-        ) : null}
+          {showDashboard ? (
+            <Link href={TALISBOOKS_ROUTES.DASHBOARD} className="talisbooks-viewer__back">
+              Dashboard
+            </Link>
+          ) : null}
+        </div>
       </header>
 
       <div className="talisbooks-viewer__layout">

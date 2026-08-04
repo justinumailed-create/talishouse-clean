@@ -10,10 +10,18 @@ const CATEGORY_LABELS: Record<string, string> = {
   fsbo: "FSBO",
 };
 
-const PIN_LABEL_MAX_WIDTH = 128;
+const PIN_LABEL_MAX_WIDTH = 200;
 const PIN_BADGE_HEIGHT = 18;
-const PIN_LABEL_HEIGHT = 20;
+const PIN_LABEL_LINE_HEIGHT = 14;
+const PIN_LABEL_VERTICAL_PAD = 8;
 const PIN_MARKER_GAP = 4;
+/** Approx. chars per wrapped line at 11px / 200px max-width. */
+const PIN_LABEL_CHARS_PER_LINE = 26;
+
+function estimatePinLabelHeight(label: string): number {
+  const lines = Math.max(1, Math.ceil(label.length / PIN_LABEL_CHARS_PER_LINE));
+  return lines * PIN_LABEL_LINE_HEIGHT + PIN_LABEL_VERTICAL_PAD;
+}
 
 export function escapePinHtml(value: string): string {
   return value
@@ -25,6 +33,31 @@ export function escapePinHtml(value: string): string {
 
 function categoryBadgeLabel(value: string): string {
   return CATEGORY_LABELS[value] ?? value.replaceAll("-", " ");
+}
+
+function buildHollowDropPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
+  const { bodySize: size, pinColor } = visual;
+  const w = size;
+  const h = size;
+  const cx = w / 2;
+  const top = h * 0.1;
+  const tipY = h * 0.96;
+  const leftX = w * 0.18;
+  const rightX = w * 0.82;
+  const shoulderY = h * 0.58;
+  // Keep a clear colored rim at the top; avoid over-cutting the cap.
+  const cutoutCy = h * 0.40;
+  const cutoutR = h * 0.24;
+
+  return `<g filter="url(#pinShadow)">
+    <path d="M ${cx} ${tipY}
+      L ${leftX} ${shoulderY}
+      C ${w * 0.03} ${h * 0.42}, ${w * 0.05} ${h * 0.14}, ${cx} ${top}
+      C ${w * 0.95} ${h * 0.14}, ${w * 0.97} ${h * 0.42}, ${rightX} ${shoulderY}
+      Z"
+      fill="${escapePinHtml(pinColor)}"/>
+    <circle cx="${cx}" cy="${cutoutCy}" r="${cutoutR}" fill="#ffffff"/>
+  </g>`;
 }
 
 function buildClassicPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
@@ -88,7 +121,9 @@ function buildFlagPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
  */
 export function buildPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
   const { bodySize: size } = visual;
-  const body = visual.whiteCenter
+  const body = visual.pinIcon === "none"
+    ? buildHollowDropPinBodySvg(visual)
+    : visual.whiteCenter
     ? buildClassicPinBodySvg(visual)
     : buildFlagPinBodySvg(visual);
 
@@ -144,7 +179,9 @@ export function renderPinMarkerHtml(
 
   const markerWidth = Math.max(size, PIN_LABEL_MAX_WIDTH);
   const badgeBlockHeight = badge ? PIN_BADGE_HEIGHT + PIN_MARKER_GAP : 0;
-  const labelBlockHeight = label ? PIN_LABEL_HEIGHT + PIN_MARKER_GAP : 0;
+  const labelBlockHeight = label
+    ? estimatePinLabelHeight(label) + PIN_MARKER_GAP
+    : 0;
   const totalHeight = badgeBlockHeight + size + labelBlockHeight;
   const pinBodyTop = badgeBlockHeight;
   const anchorY = pinBodyTop + size / 2;

@@ -70,7 +70,7 @@ function buildHomePin(
     id: HOME_PIN_ID,
     latitude: Number.parseFloat(latitude),
     longitude: Number.parseFloat(longitude),
-    label: pinStyle.label?.trim() || "Home PIN",
+    label: pinStyle.label?.trim() || undefined,
     color: pinStyle.color?.trim() || "#1C1C1E",
     featured: true,
     metadata: {

@@ -11,9 +11,12 @@ describe("pmc-regional-pins", () => {
   it("includes Canada provinces and USA", () => {
     const canada = pmcPinsByRegionGroup([...PMC_DEFAULT_REGIONAL_PINS], "canada");
     const usa = pmcPinsByRegionGroup([...PMC_DEFAULT_REGIONAL_PINS], "usa");
-    expect(canada.length).toBe(15);
-    expect(usa).toHaveLength(1);
-    expect(usa[0]?.id).toBe("usa");
+    // 15 provinces/territories + Canada Corporate Market
+    expect(canada.length).toBe(16);
+    expect(canada.some((pin) => pin.id === "ca-corporate")).toBe(true);
+    // National USA pin + 10 regional Corporate Market pins
+    expect(usa).toHaveLength(11);
+    expect(usa.some((pin) => pin.id === "usa")).toBe(true);
   });
 
   it("maps visible pins to map-engine markers with flag logos", () => {

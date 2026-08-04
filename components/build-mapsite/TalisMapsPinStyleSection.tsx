@@ -2,7 +2,7 @@
 
 import { Upload } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import Pin from "@/components/talismaps/pin/Pin";
 import {
   PIN_BORDER_OPTIONS,
@@ -27,6 +27,20 @@ interface TalisMapsPinStyleSectionProps {
   onCustomLogoChange: (file: File | null) => void;
 }
 
+const PIN_COLOR_SWATCHES = [
+  { color: "#EC28CD", label: "Pink" },
+  { color: "#FF9A08", label: "Orange" },
+  { color: "#FF330E", label: "Red-Orange" },
+  { color: "#2738EB", label: "Blue" },
+  { color: "#35B000", label: "Green" },
+  { color: "#000000", label: "Black" },
+  { color: "#9D36F4", label: "Purple" },
+  { color: "#FFF500", label: "Yellow" },
+  { color: "#36FF00", label: "Lime" },
+  { color: "#1FA2E7", label: "Sky Blue" },
+  { color: "#C61B06", label: "Deep Red" },
+] as const;
+
 function FieldLabel({ label }: { label: string }) {
   return (
     <label className="mb-1.5 block text-xs font-medium text-neutral-500">{label}</label>
@@ -40,19 +54,17 @@ export default function TalisMapsPinStyleSection({
   onCustomLogoChange,
 }: TalisMapsPinStyleSectionProps) {
   const customLogoInputRef = useRef<HTMLInputElement>(null);
-  const [customLogoPreview, setCustomLogoPreview] = useState<string | null>(null);
+  const customLogoPreview = useMemo(
+    () => (customLogo ? URL.createObjectURL(customLogo) : null),
+    [customLogo]
+  );
 
-  useEffect(() => {
-    if (!customLogo) {
-      setCustomLogoPreview(null);
-      return;
-    }
-
-    const objectUrl = URL.createObjectURL(customLogo);
-    setCustomLogoPreview(objectUrl);
-
-    return () => URL.revokeObjectURL(objectUrl);
-  }, [customLogo]);
+  useEffect(
+    () => () => {
+      if (customLogoPreview) URL.revokeObjectURL(customLogoPreview);
+    },
+    [customLogoPreview]
+  );
 
   return (
     <div className="rounded-xl border border-neutral-200 bg-neutral-50/80 p-4 sm:p-5">
@@ -76,6 +88,45 @@ export default function TalisMapsPinStyleSection({
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="sm:col-span-2">
+          <FieldLabel label="Choose from Pin Palette" />
+          <div className="grid grid-cols-6 gap-2 sm:grid-cols-8">
+            {PIN_COLOR_SWATCHES.map((swatch) => {
+              const selected =
+                (values.futurePinColor || "").toLowerCase() ===
+                swatch.color.toLowerCase();
+              return (
+                <button
+                  key={swatch.color}
+                  type="button"
+                  onClick={() =>
+                    onChange({
+                      futurePinColor: swatch.color,
+                      futurePinIcon: "none",
+                      futurePinWhiteCenter: true,
+                    })
+                  }
+                  className={`rounded-lg border bg-white p-1 transition ${
+                    selected
+                      ? "border-neutral-900 ring-1 ring-neutral-900"
+                      : "border-neutral-200 hover:border-neutral-400"
+                  }`}
+                  title={swatch.label}
+                  aria-label={`Use ${swatch.label} pin color`}
+                >
+                  <svg viewBox="0 0 100 130" className="h-10 w-full">
+                    <path
+                      d="M50 126 L21 82 C11 67 8 59 8 48 C8 24 26 8 50 8 C74 8 92 24 92 48 C92 59 89 67 79 82 Z"
+                      fill={swatch.color}
+                    />
+                    <circle cx="50" cy="46" r="29" fill="#ffffff" />
+                  </svg>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         <div>
           <FieldLabel label="Pin Color" />
           <input

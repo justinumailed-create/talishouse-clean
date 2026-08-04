@@ -14,6 +14,9 @@ interface EbookGenerateClientProps {
   mapsiteId: string | null;
   accountType: string | null;
   requestId: string | null;
+  initialAgentName: string;
+  initialAgentEmail: string;
+  initialAgentPhone: string;
 }
 
 type SelectedUpload = {
@@ -32,13 +35,23 @@ export default function EbookGenerateClient({
   mapsiteId,
   accountType,
   requestId,
+  initialAgentName,
+  initialAgentEmail,
+  initialAgentPhone,
 }: EbookGenerateClientProps) {
   const router = useRouter();
   const inputId = useId();
+  const logoInputId = useId();
+  const agentPhotoInputId = useId();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [agentName, setAgentName] = useState(initialAgentName);
+  const [agentEmail, setAgentEmail] = useState(initialAgentEmail);
+  const [agentPhone, setAgentPhone] = useState(initialAgentPhone);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [agentPhotoFile, setAgentPhotoFile] = useState<File | null>(null);
   const [uploads, setUploads] = useState<SelectedUpload[]>([]);
   const [converting, setConverting] = useState(false);
   const [convertProgress, setConvertProgress] = useState("");
@@ -167,9 +180,14 @@ export default function EbookGenerateClient({
     );
     fd.set("description", fromPdf ? description.trim() : description.trim());
     fd.set("location", fromPdf ? location.trim() : location.trim());
+    fd.set("agentName", agentName.trim());
+    fd.set("agentEmail", agentEmail.trim());
+    fd.set("agentPhone", agentPhone.trim());
     for (const item of uploads) {
       fd.append("images", item.file);
     }
+    if (logoFile) fd.set("brokerageLogo", logoFile);
+    if (agentPhotoFile) fd.set("agentPhoto", agentPhotoFile);
     fd.set("uploadMode", fromPdf ? "pdf" : "images");
 
     const result = await generateSelfServiceEbookAction(fd);
@@ -313,6 +331,83 @@ export default function EbookGenerateClient({
                   placeholder="Street, city, province"
                 />
               </label>
+
+              <label className="block text-sm">
+                <span className="mb-1.5 block text-xs font-medium text-neutral-500">
+                  Agent Name
+                </span>
+                <input
+                  value={agentName}
+                  onChange={(event) => setAgentName(event.target.value)}
+                  className="h-11 w-full rounded-xl border border-neutral-200 px-3 text-sm"
+                  placeholder="Agent Image, Name & Contact Info"
+                />
+              </label>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="block text-sm">
+                  <span className="mb-1.5 block text-xs font-medium text-neutral-500">
+                    Agent Email
+                  </span>
+                  <input
+                    value={agentEmail}
+                    onChange={(event) => setAgentEmail(event.target.value)}
+                    className="h-11 w-full rounded-xl border border-neutral-200 px-3 text-sm"
+                    placeholder="name@brokerage.com"
+                  />
+                </label>
+                <label className="block text-sm">
+                  <span className="mb-1.5 block text-xs font-medium text-neutral-500">
+                    Agent Phone
+                  </span>
+                  <input
+                    value={agentPhone}
+                    onChange={(event) => setAgentPhone(event.target.value)}
+                    className="h-11 w-full rounded-xl border border-neutral-200 px-3 text-sm"
+                    placeholder="(555) 555-5555"
+                  />
+                </label>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="block text-sm">
+                  <label htmlFor={logoInputId} className="mb-1.5 block text-xs font-medium text-neutral-500">
+                    Brokerage Logo
+                  </label>
+                  <input
+                    id={logoInputId}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                    disabled={converting || saving}
+                    onChange={(event) =>
+                      setLogoFile(event.target.files?.[0] || null)
+                    }
+                    className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
+                  />
+                  <p className="mt-1.5 truncate text-xs text-neutral-400">
+                    {logoFile ? logoFile.name : "Optional"}
+                  </p>
+                </div>
+
+                <div className="block text-sm">
+                  <label htmlFor={agentPhotoInputId} className="mb-1.5 block text-xs font-medium text-neutral-500">
+                    Agent Image
+                  </label>
+                  <input
+                    id={agentPhotoInputId}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                    disabled={converting || saving}
+                    onChange={(event) =>
+                      setAgentPhotoFile(event.target.files?.[0] || null)
+                    }
+                    className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
+                  />
+                  <p className="mt-1.5 truncate text-xs text-neutral-400">
+                    {agentPhotoFile ? agentPhotoFile.name : "Optional"}
+                  </p>
+                </div>
+              </div>
             </>
           ) : null}
 

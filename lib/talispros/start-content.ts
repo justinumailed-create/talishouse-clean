@@ -1,13 +1,13 @@
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
 export const TALISPROS_START_INTRO =
-  "Every Mapsite™ automatically includes a Talishouse™ Homes & Cottages market of 50 miles around a centre point with up to 100,000 people population base.";
+  "Seen here, a Glasshouse™ optimized for short-term rental purposes. A Mapsite™ of 50 miles around a centre point, or up to 100,000 people population base, is automatically included with every Account.*";
 
 export const TALISPROS_START_SEGMENTS = [
   {
     label: "Broker",
     title: "I am a Broker or Team Leader",
-    href: `${MAPSITE_APP_PATH}?audience=brokers`,
+    href: `${MAPSITE_APP_PATH}?audience=brokers&accountType=root`,
     descriptionLines: [
       "Licensed Real Estate",
       "Professionals work for me",
@@ -16,7 +16,7 @@ export const TALISPROS_START_SEGMENTS = [
   {
     label: "Professional",
     title: "I am a Real Estate Professional",
-    href: `${MAPSITE_APP_PATH}?audience=listings`,
+    href: `${MAPSITE_APP_PATH}?audience=brokers&accountType=root`,
     descriptionLines: [
       "Builder or Agent — I sell and",
       "broker real estate",

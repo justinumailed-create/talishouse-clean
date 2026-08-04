@@ -1,6 +1,5 @@
 import Image from "next/image";
 import TalisprosStartSidebar from "@/components/talispros/TalisprosStartSidebar";
-import { TALISPROS_START_INTRO } from "@/lib/talispros/start-content";
 
 export default function TalisprosStartPage() {
   return (
@@ -35,8 +34,10 @@ export default function TalisprosStartPage() {
                   sizes="(min-width: 1200px) 1200px, calc(100vw - 350px)"
                 />
                 <div className="flex items-center gap-3 bg-white px-3 py-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:gap-4 sm:bg-black/50 sm:px-5 sm:py-3">
-                  <div className="min-w-0 flex-1 text-center text-base font-bold leading-relaxed tracking-[0.03em] text-neutral-900 sm:text-lg sm:text-white">
-                    {TALISPROS_START_INTRO}
+                  <div className="min-w-0 flex-1 text-center text-sm font-bold leading-snug tracking-[0.03em] text-neutral-900 sm:text-base sm:text-white">
+                    Seen here, a Glasshouse™ optimized for short-term rental purposes. A
+                    Mapsite™ of 50 miles around a centre point, or up to 100,000 people
+                    population base, is automatically included with every Account.*
                   </div>
                   <div className="hidden h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black ring-2 ring-neutral-900 sm:flex sm:h-14 sm:w-14 sm:ring-white">
                     <Image
@@ -50,7 +51,7 @@ export default function TalisprosStartPage() {
                 </div>
               </div>
               <p className="pt-4 text-center text-sm font-medium text-neutral-900 sm:text-base">
-                Seen: A Glasshouse™ Tiny Home available from $58.50 per sq.ft.
+                * Some limitations apply. Please follow what best describes you to learn more.
               </p>
             </div>
           </section>

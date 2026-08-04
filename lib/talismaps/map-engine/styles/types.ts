@@ -29,12 +29,12 @@ export const MAP_STYLE_DEFINITIONS: MapStyleDefinition[] = [
     id: "satellite",
     label: "Satellite",
     description:
-      "High-resolution aerial imagery with road labels (MapTiler Hybrid / satellite-v2).",
+      "High-resolution aerial imagery without place or business labels (TalisMaps™ pins only).",
   },
   {
     id: "street",
     label: "Streets",
-    description: "Road network, places, and navigation cartography.",
+    description: "Road network cartography without third-party business POIs.",
   },
   {
     id: "terrain",

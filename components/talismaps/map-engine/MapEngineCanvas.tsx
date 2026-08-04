@@ -235,7 +235,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
   return (
     <div
       ref={containerRef}
-      className={`relative isolate touch-none ${className}`}
+      className={`talismaps-map-canvas relative isolate touch-none ${className}`}
       style={{ width: "100%", height: "100%", minHeight: "inherit" }}
     />
   );

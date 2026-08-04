@@ -74,45 +74,34 @@ function AgentIntroPageView({ page }: { page: TalisBooksViewerPage }) {
 }
 
 function AgentSummaryPageView({ page }: { page: TalisBooksViewerPage }) {
+  const contactLine = [page.agentPhone, page.agentEmail].filter(Boolean).join(" · ");
+  const summaryLine = [page.agentName, contactLine].filter(Boolean).join(", ");
+
   return (
     <div className="talisbooks-viewer-page talisbooks-viewer-page--agent-summary">
-      <div className="talisbooks-viewer-page__summary-inner">
-        <p className="talisbooks-viewer-page__eyebrow">Account · Brokerage</p>
-        <h2 className="talisbooks-viewer-page__title">{page.title}</h2>
-        {page.slogan ? (
-          <p className="talisbooks-viewer-page__slogan talisbooks-viewer-page__slogan--soft">
-            {page.slogan}
-          </p>
-        ) : null}
-        <div className="talisbooks-viewer-page__divider" />
-        {page.mission ? (
-          <p className="talisbooks-viewer-page__mission">{page.mission}</p>
-        ) : null}
-        {page.body ? (
-          <p className="talisbooks-viewer-page__body-text">{page.body}</p>
-        ) : null}
-        <div className="talisbooks-viewer-page__summary-footer">
-          <div>
-            <p className="talisbooks-viewer-page__brokerage">{page.brokerageName}</p>
-            {page.brokerageLine ? (
-              <p className="talisbooks-viewer-page__meta">{page.brokerageLine}</p>
-            ) : null}
-          </div>
-          <div className="talisbooks-viewer-page__summary-agent">
-            {page.agentPhotoUrl ? (
-              <div
-                className="talisbooks-viewer-page__summary-avatar"
-                style={{ backgroundImage: `url(${page.agentPhotoUrl})` }}
-              />
-            ) : null}
-            <div>
-              <p className="talisbooks-viewer-page__agent-name">{page.agentName}</p>
-              {page.agentPhone ? (
-                <p className="talisbooks-viewer-page__agent-contact">{page.agentPhone}</p>
-              ) : null}
-            </div>
-          </div>
-        </div>
+      <div
+        className="talisbooks-viewer-page__summary-brand-banner"
+        style={
+          page.brokerageLogoUrl
+            ? { backgroundImage: `url(${page.brokerageLogoUrl})` }
+            : undefined
+        }
+      />
+      <div className="talisbooks-viewer-page__summary-template-body">
+        <div
+          className="talisbooks-viewer-page__summary-template-photo"
+          style={
+            page.agentPhotoUrl
+              ? { backgroundImage: `url(${page.agentPhotoUrl})` }
+              : undefined
+          }
+        />
+        <p className="talisbooks-viewer-page__summary-template-agent">
+          {summaryLine || "Agent Image, Name & Contact Info"}
+        </p>
+        <p className="talisbooks-viewer-page__summary-template-slogan">
+          {page.slogan || "Slogan"}
+        </p>
       </div>
     </div>
   );

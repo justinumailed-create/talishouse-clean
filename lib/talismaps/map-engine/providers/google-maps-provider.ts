@@ -24,10 +24,23 @@ export function getGoogleMapsApiKey(): string {
   );
 }
 
+/** Hide third-party business / POI branding — TalisMaps™ pins are the only markers. */
+const NO_THIRD_PARTY_POI_STYLES: google.maps.MapTypeStyle[] = [
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "poi.business", stylers: [{ visibility: "off" }] },
+  { featureType: "poi.attraction", stylers: [{ visibility: "off" }] },
+  { featureType: "poi.place_of_worship", stylers: [{ visibility: "off" }] },
+  { featureType: "poi.school", stylers: [{ visibility: "off" }] },
+  { featureType: "poi.sports_complex", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { featureType: "transit.station", stylers: [{ visibility: "off" }] },
+];
+
 function basemapToMapTypeId(view: MapBasemapView): string {
   switch (view) {
     case "satellite":
-      return "hybrid";
+      // Pure satellite — not hybrid — so Google POI / business labels never appear.
+      return "satellite";
     case "terrain":
       return "terrain";
     case "street":
@@ -36,6 +49,12 @@ function basemapToMapTypeId(view: MapBasemapView): string {
     default:
       return "roadmap";
   }
+}
+
+function stylesForBasemap(view: MapBasemapView): google.maps.MapTypeStyle[] {
+  // Satellite imagery ignores styles; still attach for roadmap/terrain modes.
+  if (view === "satellite") return [];
+  return NO_THIRD_PARTY_POI_STYLES;
 }
 
 function resolveBasemapView(
@@ -99,6 +118,7 @@ function createHtmlPinOverlayClass() {
       this.container.style.position = "absolute";
       this.container.style.width = `${options.width}px`;
       this.container.style.height = `${options.height}px`;
+      this.container.style.overflow = "visible";
       this.container.style.transform = `translate(${-options.anchorX}px, ${-options.anchorY}px)`;
       this.container.style.cursor = this.dragEnabled ? "grab" : "pointer";
       this.container.style.pointerEvents = "auto";
@@ -281,7 +301,7 @@ export class GoogleMapsProvider implements MapProvider {
   readonly id = "google-maps" as const;
   readonly label = "Google Maps";
   readonly description =
-    "Google Maps JavaScript API with satellite hybrid imagery. Requires NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.";
+    "Google Maps JavaScript API with satellite imagery (no third-party POI labels). Requires NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.";
   readonly supportedBasemapViews: MapBasemapView[] = [
     "satellite",
     "street",
@@ -352,18 +372,25 @@ export class GoogleMapsProvider implements MapProvider {
       },
       zoom: options.zoom,
       mapTypeId: basemapToMapTypeId(basemapView),
-      disableDefaultUI: false,
+      styles: stylesForBasemap(basemapView),
+      // Platform chrome only — hide Google default UI / attribution chrome.
+      disableDefaultUI: true,
       zoomControl: true,
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
+      scaleControl: false,
+      rotateControl: false,
       // Pan disabled when center is locked so the pin stays under the card pointer.
       draggable: !options.lockCenter,
       gestureHandling: "greedy",
       clickableIcons: false,
-      keyboardShortcuts: !options.lockCenter,
+      keyboardShortcuts: false,
       scrollwheel: true,
     });
+
+    // Soft-hide residual Google logo / terms chrome if the API still injects it.
+    container.classList.add("talismaps-map-host");
 
     const lockedCenter = options.lockCenter
       ? {
@@ -641,6 +668,7 @@ export class GoogleMapsProvider implements MapProvider {
           "dark",
         ]);
         map.setMapTypeId(basemapToMapTypeId(basemapView));
+        map.setOptions({ styles: stylesForBasemap(basemapView) });
       },
       getBasemapView() {
         return basemapView;

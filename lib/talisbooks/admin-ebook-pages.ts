@@ -5,7 +5,10 @@
 
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { ROUTES } from "@/lib/routes";
-import { TALISBOOKS_IMAGE_STORAGE_BUCKET } from "@/lib/talisbooks/image-engine";
+import {
+  TALISBOOKS_ASSET_CACHE_CONTROL,
+  TALISBOOKS_IMAGE_STORAGE_BUCKET,
+} from "@/lib/talisbooks/image-engine";
 import type { TalisBooksPublishStatus } from "@/lib/talisbooks/types";
 import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
 
@@ -188,6 +191,7 @@ async function uploadAdminPageImage(options: {
     .from(TALISBOOKS_IMAGE_STORAGE_BUCKET)
     .upload(path, buffer, {
       contentType: mimeType,
+      cacheControl: TALISBOOKS_ASSET_CACHE_CONTROL,
       upsert: false,
     });
 
@@ -200,6 +204,7 @@ async function uploadAdminPageImage(options: {
 
   const fallback = await supabase.storage.from("mapsite-assets").upload(path, buffer, {
     contentType: mimeType,
+    cacheControl: TALISBOOKS_ASSET_CACHE_CONTROL,
     upsert: false,
   });
   if (fallback.error) {

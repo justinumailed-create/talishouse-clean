@@ -14,6 +14,7 @@ import {
   PIN_WRITEUP_MAX_LENGTH,
   type HomePinLocationValues,
 } from "./home-pin-types";
+import GoogleAddressInput from "./GoogleAddressInput";
 import TalisMapsPinStyleSection from "./TalisMapsPinStyleSection";
 import type { TalisMapsPinLocationUpdate } from "./TalisMapsPinPicker";
 
@@ -37,11 +38,11 @@ function FieldLabel({
 }) {
   return (
     <div className="mb-1.5">
-      <label className="text-xs font-medium text-neutral-500 block">
+      <label className="text-sm font-medium text-neutral-800">
         {label}
-        {required && <span className="text-red-400 ml-0.5">*</span>}
+        {required ? <span className="text-red-500"> *</span> : null}
       </label>
-      {hint ? <p className="mt-0.5 text-xs text-neutral-400">{hint}</p> : null}
+      {hint ? <p className="mt-0.5 text-xs text-neutral-500">{hint}</p> : null}
     </div>
   );
 }
@@ -91,6 +92,7 @@ export interface HomePinLocationSectionProps {
   pinImage: File | null;
   onChange: (values: Partial<HomePinLocationValues>) => void;
   onPinImageChange: (file: File | null) => void;
+  mode?: "full" | "essentials";
   errors?: Partial<Record<keyof HomePinLocationValues | "pinImage", string>>;
 }
 
@@ -99,6 +101,7 @@ export default function HomePinLocationSection({
   pinImage,
   onChange,
   onPinImageChange,
+  mode = "full",
   errors = {},
 }: HomePinLocationSectionProps) {
   const pinImageInputRef = useRef<HTMLInputElement>(null);
@@ -129,6 +132,19 @@ export default function HomePinLocationSection({
               reverseGeocodedAddress: update.reverseGeocodedAddress ?? "",
             }
           : {}),
+      });
+    },
+    [onChange]
+  );
+
+  const handleGooglePlaceSelected = useCallback(
+    (place: { address: string; latitude: string; longitude: string }) => {
+      onChange({
+        streetAddress: place.address,
+        latitude: place.latitude,
+        longitude: place.longitude,
+        manualPlacement: false,
+        reverseGeocodedAddress: place.address,
       });
     },
     [onChange]
@@ -211,7 +227,11 @@ export default function HomePinLocationSection({
   const pinPickerStyle = useMemo(
     () => ({
       color: values.futurePinColor,
-      label: values.futurePinLabel,
+      // Prefer the PIN write-up so map text matches what the user entered.
+      label:
+        values.pinWriteup.trim() ||
+        values.futurePinLabel?.trim() ||
+        null,
       icon: values.futurePinIcon,
       border: values.futurePinBorder,
       whiteCenter: values.futurePinWhiteCenter,
@@ -221,6 +241,7 @@ export default function HomePinLocationSection({
     }),
     [
       values.futurePinColor,
+      values.pinWriteup,
       values.futurePinLabel,
       values.futurePinIcon,
       values.futurePinBorder,
@@ -232,18 +253,26 @@ export default function HomePinLocationSection({
   );
 
   const hasCoords = hasValidCoordinates(values.latitude, values.longitude);
+  const hasGeoInput = Boolean(values.latitude.trim() || values.longitude.trim());
+  const [showOptionalGeo, setShowOptionalGeo] = useState(hasGeoInput);
+
+  useEffect(() => {
+    if (hasGeoInput) setShowOptionalGeo(true);
+  }, [hasGeoInput]);
 
   return (
     <div className="space-y-6">
-      <InputField
+      <GoogleAddressInput
         label="Street Address"
-        hint="Optional — leave blank for vacant land. Address auto-detects coordinates and updates the map preview."
         value={values.streetAddress}
         onChange={(streetAddress) =>
           onChange({ streetAddress, manualPlacement: false })
         }
+        onPlaceSelected={handleGooglePlaceSelected}
         onBlur={() => {
           if (!values.streetAddress.trim()) return;
+          // Fallback geocode when Places wasn't used (or key unavailable).
+          if (hasValidCoordinates(values.latitude, values.longitude)) return;
           onChange({ manualPlacement: false });
           setAddressLookupNonce((current) => current + 1);
         }}
@@ -251,48 +280,19 @@ export default function HomePinLocationSection({
           if (event.key !== "Enter") return;
           event.preventDefault();
           if (!values.streetAddress.trim()) return;
+          if (hasValidCoordinates(values.latitude, values.longitude)) return;
           onChange({ manualPlacement: false });
           setAddressLookupNonce((current) => current + 1);
         }}
-        placeholder="123 Main Street (optional)"
+        placeholder="123 Main Street"
         error={errors.streetAddress}
+        required
       />
 
       <div>
         <FieldLabel
-          label="Geo Coordinates"
-          required
-          hint="Primary source of truth for the Home PIN. Paste both, type either, or place on the map."
-        />
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <InputField
-            label="Latitude"
-            required
-            value={values.latitude}
-            onChange={(value) => handleCoordinateInput("latitude", value)}
-            placeholder="46.088287"
-            error={errors.latitude}
-          />
-          <InputField
-            label="Longitude"
-            required
-            value={values.longitude}
-            onChange={(value) => handleCoordinateInput("longitude", value)}
-            placeholder="-59.882749"
-            error={errors.longitude}
-          />
-        </div>
-        <p className="text-xs text-neutral-400 mt-2">
-          Paste coordinates like{" "}
-          <span className="font-mono text-neutral-500">46.088287, -59.882749</span>{" "}
-          into either field to auto-fill both.
-        </p>
-      </div>
-
-      <div>
-        <FieldLabel
-          label="Interactive Map Preview"
-          hint="Zoom to the view you want — placing or moving the PIN keeps that zoom. The created MapSite opens at the same depth."
+          label="PIN selector"
+          hint="Zoom to the view you want — placing or moving the PIN keeps that zoom. The created Mapsite™ opens at the same depth."
         />
         <TalisMapsPinPicker
           latitude={values.latitude}
@@ -306,7 +306,7 @@ export default function HomePinLocationSection({
           onMapZoomChange={(mapZoom) => onChange({ mapZoom })}
         />
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-400">
-          <span>Powered by TalisMaps™</span>
+          <span>Powered by Talismaps™</span>
           {values.manualPlacement ? (
             <span className="text-neutral-600">Manual placement</span>
           ) : null}
@@ -318,6 +318,52 @@ export default function HomePinLocationSection({
         </div>
       </div>
 
+      <div>
+        <button
+          type="button"
+          onClick={() => setShowOptionalGeo((open) => !open)}
+          className="inline-flex items-center justify-center rounded-xl border border-neutral-300 bg-white px-4 py-2.5 text-sm font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-50"
+        >
+          {showOptionalGeo
+            ? "Hide optional geo-coordinates"
+            : "Optional: add geo-coordinates"}
+        </button>
+        {showOptionalGeo ? (
+          <div className="mt-3 grid gap-4 rounded-xl border border-neutral-200 bg-neutral-50 p-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <FieldLabel label="Geo Coordinates" />
+            </div>
+            <InputField
+              label="Latitude"
+              value={values.latitude}
+              onChange={(value) => handleCoordinateInput("latitude", value)}
+              placeholder="46.088287"
+              error={errors.latitude}
+            />
+            <InputField
+              label="Longitude"
+              value={values.longitude}
+              onChange={(value) => handleCoordinateInput("longitude", value)}
+              placeholder="-59.882749"
+              error={errors.longitude}
+            />
+            <p className="text-xs text-neutral-500 sm:col-span-2">
+              Use only when you need vacant-land placement or want to override
+              the Google address pin.
+            </p>
+            <p className="text-xs text-neutral-400 sm:col-span-2">
+              Paste coordinates like{" "}
+              <span className="font-mono text-neutral-500">
+                46.088287, -59.882749
+              </span>{" "}
+              into either field to auto-fill both.
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      {mode === "essentials" ? null : (
+        <>
       <TalisMapsPinStyleSection
         values={{
           futurePinColor: values.futurePinColor,
@@ -405,6 +451,8 @@ export default function HomePinLocationSection({
           <p className="text-xs text-red-500 mt-1">{errors.pinWriteup}</p>
         )}
       </div>
+        </>
+      )}
     </div>
   );
 }
@@ -413,10 +461,14 @@ export function validateHomePinLocation(values: HomePinLocationValues): Partial<
   Record<keyof HomePinLocationValues, string>
 > {
   const errors: Partial<Record<keyof HomePinLocationValues, string>> = {};
+  const hasAddress = Boolean(values.streetAddress.trim());
+  const hasCoords = hasValidCoordinates(values.latitude, values.longitude);
 
-  if (!hasValidCoordinates(values.latitude, values.longitude)) {
-    errors.latitude = "Latitude is required";
-    errors.longitude = "Longitude is required";
+  // Street address or coordinates — geo alone is enough for vacant land.
+  if (!hasAddress && !hasCoords) {
+    errors.streetAddress = "Enter a street address or geo-coordinates";
+    errors.latitude = "Latitude is required without an address";
+    errors.longitude = "Longitude is required without an address";
   }
 
   if (values.latitude.trim() && !isValidLatitude(values.latitude)) {

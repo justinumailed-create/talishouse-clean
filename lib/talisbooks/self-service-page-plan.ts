@@ -40,6 +40,7 @@ export type SelfServiceAgentDetails = {
   phone?: string;
   email?: string;
   photoUrl?: string;
+  brokerageLogoUrl?: string;
   brokerageName?: string;
   brokerageLine?: string;
 };
@@ -212,6 +213,7 @@ export function buildSelfServiceEbookPageRows(
       agentPhone: agent.phone,
       agentEmail: agent.email,
       agentPhotoUrl: agent.photoUrl,
+      brokerageLogoUrl: agent.brokerageLogoUrl,
       brokerageName: agent.brokerageName || "Talispros™",
       brokerageLine: agent.brokerageLine || input.location || undefined,
       address: input.location || undefined,

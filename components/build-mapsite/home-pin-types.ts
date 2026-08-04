@@ -29,7 +29,7 @@ export const defaultHomePinLocationValues: HomePinLocationValues = {
   mapZoom: MAPSITE_DEMO_LOCATION.mapZoom,
   pinWriteup: "",
   futurePinColor: "#1A73E8",
-  futurePinIcon: "flag",
+  futurePinIcon: "none",
   futurePinBorder: "none",
   futurePinLabel: "",
   futurePinWhiteCenter: false,
@@ -40,6 +40,7 @@ export const defaultHomePinLocationValues: HomePinLocationValues = {
 export const PIN_WRITEUP_MAX_LENGTH = 170;
 
 export const PIN_ICON_OPTIONS = [
+  { value: "none", label: "None (hollow)" },
   { value: "flag", label: "Flag / Sign" },
   { value: "home", label: "Home" },
   { value: "star", label: "Star" },
