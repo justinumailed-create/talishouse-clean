@@ -627,11 +627,18 @@ export default function BuildMapsiteClient({
       if (result.success && result.requestId) {
         setSubmittedRequestId(result.requestId);
         localStorage.setItem("talispros_build_mapsite_submitted", JSON.stringify({ form, submittedAt: new Date().toISOString(), requestId: result.requestId }));
+        const issuedFastCode = (result.fastCode ?? form.fastCode ?? "").trim();
+        if (!/^[a-z]{2,3}\d{2}$/i.test(issuedFastCode)) {
+          setSubmitError(
+            "Your Build Request was saved, but a FAST Code was not issued. Please try again — the E-Book generator cannot continue without a FAST Code."
+          );
+          return;
+        }
         // Open the client's MapSite™ immediately — first visible success.
         try {
           const opened = await openMapSiteAfterBuildRequest({
             requestId: result.requestId,
-            fastCode: result.fastCode ?? form.fastCode ?? null,
+            fastCode: issuedFastCode,
             accountType: form.accountType || null,
             successPath: "self-ebook",
           });
@@ -639,6 +646,11 @@ export default function BuildMapsiteClient({
           return;
         } catch (openError) {
           console.error("[build-mapsite] MapSite open failed:", openError);
+          setSubmitError(
+            openError instanceof Error
+              ? openError.message
+              : "Could not open the E-Book generator. Please try again."
+          );
           setSubmitted(true);
         }
       } else {

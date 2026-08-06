@@ -4,6 +4,7 @@ import TalisprosMarketRegistrationForm from "@/components/talispros/TalisprosMar
 import type { RegistrationMarket } from "@/lib/registration-market";
 import { buildSelfEbookContinueHref } from "@/lib/talispros/ebook-choice";
 import { establishOwnerMapSiteSession } from "@/app/talispros/build-mapsite/success-actions";
+import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 
 interface ClaimMarketRegistrationClientProps {
   market: RegistrationMarket;
@@ -22,18 +23,34 @@ export default function ClaimMarketRegistrationClient({
       variant="page"
       onSuccess={(result) => {
         void (async () => {
-          const fastCode = result.fastCode?.trim();
-          if (fastCode) {
-            await establishOwnerMapSiteSession(fastCode);
+          const requestId = result.requestId?.trim() || null;
+          const fastCode = result.fastCode?.trim() || null;
+
+          if (!requestId) {
+            window.alert(
+              "Your submission did not return a Build Request ID. Please try again."
+            );
+            return;
           }
 
-          // First success: Self-Service TalisBook™ Creator (not Registration / PayPal).
+          if (!isIssuedFastCode(fastCode)) {
+            console.error(
+              "[claim-market] Refusing ebook redirect without issued FAST Code",
+              { requestId, mapsiteId: result.mapsiteId }
+            );
+            window.alert(
+              `Your Build Request was saved (ID: ${requestId}), but a FAST Code was not issued. Please try again — the E-Book generator cannot continue without a FAST Code.`
+            );
+            return;
+          }
+
+          // Owner cookie is a convenience for MapSite toolbar — not required for ebook.
+          await establishOwnerMapSiteSession(fastCode);
+
+          // Canonical handoff: requestId only.
           window.location.assign(
             buildSelfEbookContinueHref({
-              fastCode: fastCode || null,
-              mapsiteId: result.mapsiteId || mapsiteId,
-              accountType: result.accountType || market,
-              requestId: result.requestId || null,
+              requestId,
             })
           );
         })();

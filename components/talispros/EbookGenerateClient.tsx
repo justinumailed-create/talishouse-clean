@@ -2,14 +2,24 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useId, useRef, useState } from "react";
-import { generateSelfServiceEbookAction } from "@/app/talispros/ebook-generate/actions";
 import {
   classifyUploadFile,
   convertPdfFileToImageFiles,
   MAX_EBOOK_UPLOAD_PAGES,
 } from "@/lib/talisbooks/pdf-pages-to-images";
+import {
+  EBOOK_GENERATION_STAGES,
+  EBOOK_GENERATION_STAGE_LABELS,
+  type EbookGenerationProgressEvent,
+  type EbookGenerationStage,
+} from "@/lib/talispros/ebook-generation-stages";
+import {
+  ONBOARDING_JOB_TIMEOUT_MS,
+  formatOnboardingDuration,
+} from "@/lib/onboarding-timing";
 
 interface EbookGenerateClientProps {
+  /** Server-resolved FAST Code (display / titles only — never trusted on submit). */
   fastCode: string | null;
   mapsiteId: string | null;
   accountType: string | null;
@@ -17,6 +27,13 @@ interface EbookGenerateClientProps {
   initialAgentName: string;
   initialAgentEmail: string;
   initialAgentPhone: string;
+  bootstrapError?: string | null;
+  bootstrapMeta?: {
+    requestId: string | null;
+    fastCode: string | null;
+    mapsiteId: string | null;
+    stage: string;
+  } | null;
 }
 
 type SelectedUpload = {
@@ -26,18 +43,36 @@ type SelectedUpload = {
   label: string;
 };
 
+/** Format digits into North American (XXX) XXX-XXXX as the user types. */
+function formatNorthAmericanPhone(value: string): string {
+  const digits = value.replace(/\D/g, "").slice(0, 10);
+  if (digits.length === 0) return "";
+  if (digits.length < 4) return `(${digits}`;
+  if (digits.length < 7) {
+    return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  }
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+const STAGE_ORDER = EBOOK_GENERATION_STAGES;
+
+function stageIndex(stage: EbookGenerationStage | null): number {
+  if (!stage || stage === "failed") return -1;
+  return STAGE_ORDER.indexOf(stage);
+}
+
 /**
  * Self-service first TalisBook™ generator — images / PDF pages, title, description, location.
- * No payment. Book gets a private viewer URL and links to the pending MapSite™.
+ * Business identity comes from requestId (Build Request) resolved on the server.
  */
 export default function EbookGenerateClient({
   fastCode,
-  mapsiteId,
-  accountType,
   requestId,
   initialAgentName,
   initialAgentEmail,
   initialAgentPhone,
+  bootstrapError = null,
+  bootstrapMeta = null,
 }: EbookGenerateClientProps) {
   const router = useRouter();
   const inputId = useId();
@@ -49,17 +84,24 @@ export default function EbookGenerateClient({
   const [location, setLocation] = useState("");
   const [agentName, setAgentName] = useState(initialAgentName);
   const [agentEmail, setAgentEmail] = useState(initialAgentEmail);
-  const [agentPhone, setAgentPhone] = useState(initialAgentPhone);
+  const [agentPhone, setAgentPhone] = useState(
+    formatNorthAmericanPhone(initialAgentPhone)
+  );
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [agentPhotoFile, setAgentPhotoFile] = useState<File | null>(null);
   const [uploads, setUploads] = useState<SelectedUpload[]>([]);
   const [converting, setConverting] = useState(false);
   const [convertProgress, setConvertProgress] = useState("");
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
+  const [activeStage, setActiveStage] = useState<EbookGenerationStage | null>(
+    null
+  );
+  const [error, setError] = useState(bootstrapError || "");
+  const [errorMeta, setErrorMeta] = useState(bootstrapMeta);
 
   const isPdfUpload =
     uploads.length > 0 && uploads.every((item) => item.source === "pdf-page");
+  const canGenerate = Boolean(requestId && fastCode && !bootstrapError);
 
   function removeUpload(id: string) {
     setUploads((current) => current.filter((item) => item.id !== id));
@@ -73,6 +115,7 @@ export default function EbookGenerateClient({
 
   async function handleFilesSelected(fileList: FileList | null) {
     setError("");
+    setErrorMeta(null);
     if (!fileList || fileList.length === 0) return;
 
     const remaining = Math.max(0, MAX_EBOOK_UPLOAD_PAGES - uploads.length);
@@ -92,7 +135,7 @@ export default function EbookGenerateClient({
         const kind = classifyUploadFile(file);
 
         if (kind === "other") {
-          setError(`Unsupported file: ${file.name}. Use JPG, PNG, WEBP, or PDF.`);
+          setError(`Unsupported file: ${file.name}. Use JPG, PNG, or PDF.`);
           continue;
         }
 
@@ -150,9 +193,18 @@ export default function EbookGenerateClient({
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError("");
+    setErrorMeta(null);
 
+    if (!requestId) {
+      setError(
+        "Build Request ID is required. Return to the Build Form and complete onboarding again."
+      );
+      return;
+    }
     if (!fastCode) {
-      setError("A FAST Code is required to generate your E-Book.");
+      setError(
+        "A FAST Code was not issued for this Build Request. Return to the Build Form and try again."
+      );
       return;
     }
     if (uploads.length === 0) {
@@ -162,16 +214,18 @@ export default function EbookGenerateClient({
 
     const fromPdf = uploads.every((item) => item.source === "pdf-page");
     if (!fromPdf && (!title.trim() || !description.trim() || !location.trim())) {
-      setError("Title, description, and location are required.");
+      setError("Title, description, and headline are required.");
       return;
     }
 
     setSaving(true);
+    setActiveStage("upload_complete");
+    const generateStarted =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+
     const fd = new FormData();
-    fd.set("fastCode", fastCode);
-    if (mapsiteId) fd.set("mapsiteId", mapsiteId);
-    if (accountType) fd.set("accountType", accountType);
-    if (requestId) fd.set("requestId", requestId);
+    // Canonical key only — server resolves FAST Code / MapSite from the Build Request.
+    fd.set("requestId", requestId);
     fd.set(
       "title",
       fromPdf
@@ -190,22 +244,118 @@ export default function EbookGenerateClient({
     if (agentPhotoFile) fd.set("agentPhoto", agentPhotoFile);
     fd.set("uploadMode", fromPdf ? "pdf" : "images");
 
-    const result = await generateSelfServiceEbookAction(fd);
-    setSaving(false);
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      controller.abort();
+    }, ONBOARDING_JOB_TIMEOUT_MS);
 
-    if (!result.success) {
-      setError(result.error || "Could not generate your E-Book.");
-      return;
-    }
+    try {
+      const response = await fetch("/api/talispros/ebook-generate", {
+        method: "POST",
+        body: fd,
+        signal: controller.signal,
+      });
 
-    if (result.mapsiteHref) {
-      window.location.assign(result.mapsiteHref);
-      return;
-    }
-    if (result.viewerUrl) {
-      router.push(result.viewerUrl);
+      if (!response.ok || !response.body) {
+        throw new Error(
+          `Generation request failed (${response.status}). Please try again.`
+        );
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let finalEvent: EbookGenerationProgressEvent | null = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) continue;
+          let event: EbookGenerationProgressEvent;
+          try {
+            event = JSON.parse(trimmed) as EbookGenerationProgressEvent;
+          } catch {
+            continue;
+          }
+          setActiveStage(event.stage);
+          finalEvent = event;
+          if (event.stage === "failed") {
+            setError(event.error);
+            setErrorMeta({
+              requestId: event.requestId,
+              fastCode: event.fastCode,
+              mapsiteId: event.mapsiteId,
+              stage: event.failedStage,
+            });
+          }
+        }
+      }
+
+      const elapsed =
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) -
+        generateStarted;
+      console.info(
+        `[onboarding] Ebook client wait ...... ${formatOnboardingDuration(elapsed)}${elapsed >= 5000 ? " ⚠ SLOW" : ""}`
+      );
+
+      if (!finalEvent) {
+        setError("Generation ended without a result. Please try again.");
+        setActiveStage("failed");
+        return;
+      }
+
+      if (finalEvent.stage === "failed") {
+        setActiveStage("failed");
+        return;
+      }
+
+      if (finalEvent.stage === "completed") {
+        setActiveStage("completed");
+        if (finalEvent.mapsiteHref) {
+          window.location.assign(finalEvent.mapsiteHref);
+          return;
+        }
+        if (finalEvent.viewerUrl) {
+          router.push(finalEvent.viewerUrl);
+        }
+      }
+    } catch (generateError) {
+      const elapsed =
+        (typeof performance !== "undefined" ? performance.now() : Date.now()) -
+        generateStarted;
+      const aborted =
+        generateError instanceof DOMException &&
+        generateError.name === "AbortError";
+      const message = aborted
+        ? `Ebook generation timed out after ${formatOnboardingDuration(ONBOARDING_JOB_TIMEOUT_MS)}. Please try again with fewer or smaller images.`
+        : generateError instanceof Error
+          ? generateError.message
+          : "Could not generate your E-Book. Please try again.";
+      console.error(
+        `[onboarding] Ebook client wait ...... failed after ${formatOnboardingDuration(elapsed)}`,
+        generateError
+      );
+      setActiveStage("failed");
+      setError(message);
+      setErrorMeta({
+        requestId,
+        fastCode,
+        mapsiteId: null,
+        stage: aborted ? "timeout" : "ebook_client",
+      });
+    } finally {
+      window.clearTimeout(timeoutId);
+      setSaving(false);
     }
   }
+
+  const activeIndex = stageIndex(activeStage);
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-white px-5 py-12 text-neutral-900">
@@ -223,161 +373,176 @@ export default function EbookGenerateClient({
           {fastCode ? (
             <p className="mt-2 text-xs text-neutral-400">
               FAST Code {fastCode.toUpperCase()}
+              {requestId ? (
+                <span className="ml-2 text-neutral-300">
+                  · Request {requestId.slice(0, 8)}
+                </span>
+              ) : null}
             </p>
-          ) : null}
+          ) : (
+            <p className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {bootstrapError ||
+                "A FAST Code is required. Return to the Build Form and complete onboarding again — this page cannot create or discover a FAST Code on its own."}
+            </p>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-          <div className="block text-sm">
-            <label htmlFor={inputId} className="mb-1.5 block text-xs font-medium text-neutral-500">
-              Property Images or PDF
-            </label>
-            <input
-              id={inputId}
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,application/pdf,.pdf"
-              multiple
-              disabled={converting || saving}
-              onChange={(event) => void handleFilesSelected(event.target.files)}
-              className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
-            />
-            <p className="mt-1.5 text-xs text-neutral-400">
-              JPG, PNG, WEBP, or PDF. Up to {MAX_EBOOK_UPLOAD_PAGES} pages.
-            </p>
+          {!canGenerate ? null : (
+            <>
+              <div className="block text-sm">
+                <label
+                  htmlFor={inputId}
+                  className="mb-1.5 block text-xs font-medium text-neutral-500"
+                >
+                  Property Images or PDF
+                </label>
+                <input
+                  id={inputId}
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,application/pdf,.pdf"
+                  multiple
+                  disabled={converting || saving}
+                  onChange={(event) => void handleFilesSelected(event.target.files)}
+                  className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
+                />
+                <p className="mt-1.5 text-xs text-neutral-400">
+                  JPG, PNG, or PDF. Up to {MAX_EBOOK_UPLOAD_PAGES} pages.
+                </p>
 
-            {converting ? (
-              <p className="mt-2 text-xs text-neutral-500">
-                {convertProgress || "Converting PDF pages…"}
-              </p>
-            ) : null}
-
-            {uploads.length > 0 ? (
-              <div className="mt-3 rounded-xl border border-neutral-200 bg-neutral-50/80 p-3">
-                <div className="mb-2 flex items-center justify-between gap-2">
-                  <p className="text-xs font-medium text-neutral-600">
-                    {uploads.length} page{uploads.length === 1 ? "" : "s"} selected
+                {converting ? (
+                  <p className="mt-2 text-xs text-neutral-500">
+                    {convertProgress || "Converting PDF…"}
                   </p>
-                  <button
-                    type="button"
-                    onClick={clearUploads}
-                    className="text-xs font-medium text-neutral-500 underline-offset-2 hover:text-neutral-800 hover:underline"
-                  >
-                    Clear all
-                  </button>
-                </div>
-                <ul className="max-h-48 space-y-1.5 overflow-y-auto">
-                  {uploads.map((item) => (
-                    <li
-                      key={item.id}
-                      className="flex items-center gap-2 rounded-lg bg-white px-2.5 py-2 text-xs text-neutral-700 ring-1 ring-neutral-200/80"
-                    >
-                      <span className="min-w-0 flex-1 truncate" title={item.label}>
-                        {item.source === "pdf-page" ? "PDF · " : ""}
-                        {item.label}
-                      </span>
+                ) : null}
+
+                {uploads.length > 0 ? (
+                  <ul className="mt-3 space-y-1.5">
+                    {uploads.map((item) => (
+                      <li
+                        key={item.id}
+                        className="flex items-center justify-between gap-3 text-xs text-neutral-600"
+                      >
+                        <span className="truncate">{item.label}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeUpload(item.id)}
+                          disabled={saving || converting}
+                          className="shrink-0 text-neutral-400 hover:text-neutral-700"
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))}
+                    <li>
                       <button
                         type="button"
-                        onClick={() => removeUpload(item.id)}
-                        className="shrink-0 rounded-md px-2 py-1 font-medium text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-900"
+                        onClick={clearUploads}
+                        disabled={saving || converting}
+                        className="text-xs text-neutral-400 hover:text-neutral-700"
                       >
-                        Remove
+                        Clear all
                       </button>
                     </li>
-                  ))}
-                </ul>
+                  </ul>
+                ) : null}
               </div>
-            ) : null}
-          </div>
 
-          {!isPdfUpload ? (
-            <>
-              <label className="block text-sm">
-                <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-                  Property Title
-                </span>
-                <input
-                  required
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  className="h-11 w-full rounded-xl border border-neutral-200 px-3 text-sm"
-                  placeholder="Lot + optional Tiny Home"
-                />
-              </label>
+              {!isPdfUpload ? (
+                <>
+                  <label className="block text-sm">
+                    <span className="mb-1.5 block text-xs font-medium text-neutral-500">
+                      Title
+                    </span>
+                    <input
+                      value={title}
+                      onChange={(event) => setTitle(event.target.value)}
+                      disabled={saving || converting}
+                      className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    <span className="mb-1.5 block text-xs font-medium text-neutral-500">
+                      Description
+                    </span>
+                    <textarea
+                      value={description}
+                      onChange={(event) => setDescription(event.target.value)}
+                      disabled={saving || converting}
+                      rows={3}
+                      className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+                    />
+                  </label>
+                  <label className="block text-sm">
+                    <span className="mb-1.5 block text-xs font-medium text-neutral-500">
+                      Headline
+                    </span>
+                    <input
+                      value={location}
+                      onChange={(event) => setLocation(event.target.value)}
+                      disabled={saving || converting}
+                      className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+                    />
+                  </label>
+                </>
+              ) : null}
 
-              <label className="block text-sm">
-                <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-                  Description
-                </span>
-                <textarea
-                  required
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  rows={4}
-                  className="w-full rounded-xl border border-neutral-200 px-3 py-2 text-sm"
-                  placeholder="Short property story"
-                />
-              </label>
-
-              <label className="block text-sm">
-                <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-                  Location
-                </span>
-                <input
-                  required
-                  value={location}
-                  onChange={(event) => setLocation(event.target.value)}
-                  className="h-11 w-full rounded-xl border border-neutral-200 px-3 text-sm"
-                  placeholder="Street, city, province"
-                />
-              </label>
-
-              <label className="block text-sm">
-                <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-                  Agent Name
-                </span>
-                <input
-                  value={agentName}
-                  onChange={(event) => setAgentName(event.target.value)}
-                  className="h-11 w-full rounded-xl border border-neutral-200 px-3 text-sm"
-                  placeholder="Agent Image, Name & Contact Info"
-                />
-              </label>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="block text-sm">
+              <div className="grid gap-4 sm:grid-cols-3">
+                <label className="block text-sm sm:col-span-1">
                   <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-                    Agent Email
+                    Agent name
                   </span>
                   <input
+                    value={agentName}
+                    onChange={(event) => setAgentName(event.target.value)}
+                    disabled={saving || converting}
+                    className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+                  />
+                </label>
+                <label className="block text-sm sm:col-span-1">
+                  <span className="mb-1.5 block text-xs font-medium text-neutral-500">
+                    Email
+                  </span>
+                  <input
+                    type="email"
                     value={agentEmail}
                     onChange={(event) => setAgentEmail(event.target.value)}
-                    className="h-11 w-full rounded-xl border border-neutral-200 px-3 text-sm"
-                    placeholder="name@brokerage.com"
+                    disabled={saving || converting}
+                    className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
                   />
                 </label>
-                <label className="block text-sm">
+                <label className="block text-sm sm:col-span-1">
                   <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-                    Agent Phone
+                    Phone
                   </span>
                   <input
-                    value={agentPhone}
-                    onChange={(event) => setAgentPhone(event.target.value)}
-                    className="h-11 w-full rounded-xl border border-neutral-200 px-3 text-sm"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
                     placeholder="(555) 555-5555"
+                    value={agentPhone}
+                    onChange={(event) =>
+                      setAgentPhone(formatNorthAmericanPhone(event.target.value))
+                    }
+                    disabled={saving || converting}
+                    className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
                   />
                 </label>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="block text-sm">
-                  <label htmlFor={logoInputId} className="mb-1.5 block text-xs font-medium text-neutral-500">
-                    Brokerage Logo
+                  <label
+                    htmlFor={logoInputId}
+                    className="mb-1.5 block text-xs font-medium text-neutral-500"
+                  >
+                    Brokerage logo
                   </label>
                   <input
                     id={logoInputId}
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                    accept="image/jpeg,image/png,image/webp"
                     disabled={converting || saving}
                     onChange={(event) =>
                       setLogoFile(event.target.files?.[0] || null)
@@ -388,15 +553,17 @@ export default function EbookGenerateClient({
                     {logoFile ? logoFile.name : "Optional"}
                   </p>
                 </div>
-
                 <div className="block text-sm">
-                  <label htmlFor={agentPhotoInputId} className="mb-1.5 block text-xs font-medium text-neutral-500">
-                    Agent Image
+                  <label
+                    htmlFor={agentPhotoInputId}
+                    className="mb-1.5 block text-xs font-medium text-neutral-500"
+                  >
+                    Agent photo
                   </label>
                   <input
                     id={agentPhotoInputId}
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                    accept="image/jpeg,image/png,image/webp"
                     disabled={converting || saving}
                     onChange={(event) =>
                       setAgentPhotoFile(event.target.files?.[0] || null)
@@ -408,27 +575,72 @@ export default function EbookGenerateClient({
                   </p>
                 </div>
               </div>
+
+              {error ? (
+                <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  <p>{error}</p>
+                  {errorMeta ? (
+                    <p className="mt-1 text-xs text-red-500">
+                      Request {errorMeta.requestId || "—"}
+                      {errorMeta.fastCode
+                        ? ` · FAST ${errorMeta.fastCode.toUpperCase()}`
+                        : ""}
+                      {errorMeta.mapsiteId
+                        ? ` · MapSite ${errorMeta.mapsiteId.slice(0, 8)}`
+                        : ""}
+                      {errorMeta.stage ? ` · Stage ${errorMeta.stage}` : ""}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+
+              {(saving || activeStage) && (
+                <ol className="space-y-1.5 rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm">
+                  {STAGE_ORDER.map((stage, index) => {
+                    const done =
+                      activeStage === "completed" ||
+                      (activeIndex >= 0 && index < activeIndex);
+                    const current = activeStage === stage;
+                    return (
+                      <li
+                        key={stage}
+                        className={`flex items-center justify-between gap-3 ${
+                          done
+                            ? "text-neutral-800"
+                            : current
+                              ? "font-medium text-neutral-900"
+                              : "text-neutral-400"
+                        }`}
+                      >
+                        <span>{EBOOK_GENERATION_STAGE_LABELS[stage]}</span>
+                        <span className="text-xs">
+                          {done ? "✓" : current ? "…" : ""}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+
+              <button
+                type="submit"
+                disabled={!canGenerate || saving || converting}
+                className="w-full rounded-2xl bg-neutral-900 px-5 py-3.5 text-base font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
+              >
+                {saving
+                  ? activeStage && activeStage !== "failed"
+                    ? `${EBOOK_GENERATION_STAGE_LABELS[
+                        activeStage === "completed"
+                          ? "completed"
+                          : activeStage
+                      ]}…`
+                    : "Generating…"
+                  : converting
+                    ? "Converting PDF…"
+                    : "Generate Talisbook™"}
+              </button>
             </>
-          ) : null}
-
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-          <button
-            type="submit"
-            disabled={saving || converting}
-            className="w-full rounded-2xl bg-neutral-900 px-5 py-3.5 text-base font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
-          >
-            {saving
-              ? "Generating…"
-              : converting
-                ? "Converting PDF…"
-                : "Generate Talisbook™"}
-          </button>
-          {saving ? (
-            <p className="text-center text-xs text-neutral-400">
-              Optimizing images and building your 22-page draft…
-            </p>
-          ) : null}
+          )}
         </form>
       </div>
     </div>

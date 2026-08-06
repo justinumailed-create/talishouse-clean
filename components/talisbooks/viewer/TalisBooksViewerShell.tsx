@@ -19,6 +19,7 @@ import {
   createEmptyNarrationController,
   describeViewerPage,
   describeViewerSpread,
+  enrichCoverPagesWithAgentBranding,
   getViewerSpread,
   getViewerSpreadCount,
   notifyNarrationPageEnter,
@@ -42,6 +43,13 @@ interface TalisBooksViewerShellProps {
   narration?: TalisBooksNarrationController | null;
 }
 
+function withCoverBranding(book: TalisBooksViewerBook): TalisBooksViewerBook {
+  return {
+    ...book,
+    pages: enrichCoverPagesWithAgentBranding(book.pages),
+  };
+}
+
 export default function TalisBooksViewerShell({
   book: initialBook,
   canEditTools = false,
@@ -51,7 +59,14 @@ export default function TalisBooksViewerShell({
 }: TalisBooksViewerShellProps) {
   const narrationController = narration ?? createEmptyNarrationController();
 
-  const [book, setBook] = useState<TalisBooksViewerBook>(initialBook);
+  const [book, setBook] = useState<TalisBooksViewerBook>(() =>
+    withCoverBranding(initialBook),
+  );
+
+  useEffect(() => {
+    setBook(withCoverBranding(initialBook));
+  }, [initialBook]);
+
   const [viewMode, setViewMode] = useState<TalisBooksViewerViewMode>("spread");
   const viewModeRef = useRef(viewMode);
   useEffect(() => {
@@ -79,6 +94,7 @@ export default function TalisBooksViewerShell({
   const previousNavRef = useRef(0);
   const stageHoverRef = useRef(false);
   const flippingRef = useRef(false);
+  const goToRef = useRef<(index: number) => void>(() => {});
 
   const {
     pageIndex: navIndex,
@@ -98,9 +114,12 @@ export default function TalisBooksViewerShell({
     onReachEnd: () => {
       setDirection(1);
       setAutoPlaying(false);
-      if (!isMagazine) {
-        setBinding("closed-back");
+      if (isMagazine) {
+        goToRef.current(0);
+        previousNavRef.current = 0;
+        return;
       }
+      setBinding("closed-back");
     },
     onPageChange: (nextNavIndex) => {
       const mode = viewModeRef.current;
@@ -129,7 +148,6 @@ export default function TalisBooksViewerShell({
     },
   });
 
-  const goToRef = useRef(goTo);
   useEffect(() => {
     goToRef.current = goTo;
   }, [goTo]);
@@ -201,9 +219,13 @@ export default function TalisBooksViewerShell({
     if (effectiveNavIndex >= lastNavIndex) {
       setDirection(1);
       setAutoPlaying(false);
-      if (!isMagazine) {
-        setBinding("closed-back");
+      if (isMagazine) {
+        // Last spread → restart at the front cover.
+        goTo(0);
+        previousNavRef.current = 0;
+        return;
       }
+      setBinding("closed-back");
       return;
     }
     setDirection(1);

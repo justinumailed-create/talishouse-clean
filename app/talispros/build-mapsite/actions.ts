@@ -14,6 +14,11 @@ import {
   normalizeAdproCategoryCode,
   type AdproCategoryCode,
 } from "@/lib/talispros/adpro-categories";
+import {
+  logOnboardingStep,
+  onboardingNow,
+  timedOnboardingStep,
+} from "@/lib/onboarding-timing";
 
 export interface ActionResult {
   success: boolean;
@@ -274,6 +279,7 @@ export async function submitAssistedBuildRequest(
 export async function submitBuildRequest(
   formData: FormData
 ): Promise<ActionResult> {
+  const pipelineStarted = onboardingNow();
   const skipFastCodeValidation = formData.get("skipFastCodeValidation") === "true";
   const fields: BuildFields = {
     date: (formData.get("date") as string) || "",
@@ -593,14 +599,19 @@ export async function submitBuildRequest(
     }
 
     let issuedFastCode: string | undefined = sponsorFastCode ?? undefined;
+    const mustIssueFastCode =
+      !requiresFastCodeValidation(fields.accountType) || skipFastCodeValidation;
 
-    if (!requiresFastCodeValidation(fields.accountType) || skipFastCodeValidation) {
+    if (mustIssueFastCode) {
+      const fastStarted = onboardingNow();
       try {
         const generatedCode = await generateFastCode({
           firstName: fields.firstName.trim(),
           lastName: fields.lastName.trim(),
         });
+        logOnboardingStep("FAST generation", fastStarted, { code: generatedCode });
 
+        const upsertStarted = onboardingNow();
         const { error: fastCodeError } = await supabaseAdmin.from("fast_codes").upsert(
           {
             code: generatedCode,
@@ -613,62 +624,119 @@ export async function submitBuildRequest(
         );
 
         if (fastCodeError) {
+          logOnboardingStep("FAST DB write", upsertStarted, {
+            failed: true,
+            error: fastCodeError.message,
+          });
           console.error("[build-mapsite] Fast code insert error:", fastCodeError);
-        } else {
-          issuedFastCode = generatedCode;
-          const { error: updateError } = await supabaseAdmin
-            .from("build_requests")
-            .update({ requested_fast_code: generatedCode })
-            .eq("id", requestId);
+          return {
+            success: false,
+            requestId,
+            error: `FAST Code could not be saved: ${fastCodeError.message}`,
+          };
+        }
 
-          if (updateError) {
-            console.error("[build-mapsite] Fast code update error:", updateError);
-          }
+        issuedFastCode = generatedCode;
+        const { error: updateError } = await supabaseAdmin
+          .from("build_requests")
+          .update({ requested_fast_code: generatedCode })
+          .eq("id", requestId);
+
+        logOnboardingStep("FAST DB write", upsertStarted, {
+          code: generatedCode,
+          requestUpdated: !updateError,
+        });
+
+        if (updateError) {
+          console.error("[build-mapsite] Fast code update error:", updateError);
+          return {
+            success: false,
+            requestId,
+            fastCode: generatedCode,
+            error: `FAST Code was created but not linked to the build request: ${updateError.message}`,
+          };
         }
       } catch (fastCodeGenerationError) {
+        logOnboardingStep("FAST generation", fastStarted, {
+          failed: true,
+          error:
+            fastCodeGenerationError instanceof Error
+              ? fastCodeGenerationError.message
+              : String(fastCodeGenerationError),
+        });
         console.error(
           "[build-mapsite] Fast code generation error:",
           fastCodeGenerationError
         );
+        return {
+          success: false,
+          requestId,
+          error:
+            fastCodeGenerationError instanceof Error
+              ? `FAST Code generation failed: ${fastCodeGenerationError.message}`
+              : "FAST Code generation failed.",
+        };
       }
+    }
+
+    if (!issuedFastCode) {
+      logOnboardingStep("submitBuildRequest", pipelineStarted, {
+        failed: true,
+        reason: "missing_fast_code",
+      });
+      return {
+        success: false,
+        requestId,
+        error: "FAST Code is required before continuing to MapSite™ or E-Book.",
+      };
     }
 
     let resolvedMapSiteId = mapsiteId;
     if (mapsiteId) {
-      const claimed = await markMapSiteClaimedByBuildRequest({
-        mapsiteId,
-        buildRequestId: requestId,
-        fastCode: issuedFastCode ?? null,
-        latitude: hasCoordinates ? parsedLatitude : null,
-        longitude: hasCoordinates ? parsedLongitude : null,
-        mapZoom,
-        propertyTitle: fields.futurePinLabel.trim() || null,
-        propertyAddress:
-          fields.streetAddress.trim() ||
-          fields.reverseGeocodedAddress.trim() ||
-          null,
-        propertyDescription: fields.pinWriteup.trim() || null,
-        coverImage: fileUrls.picture ?? fileUrls.pinImage ?? null,
-      });
+      const claimed = await timedOnboardingStep("MapSite claim", () =>
+        markMapSiteClaimedByBuildRequest({
+          mapsiteId,
+          buildRequestId: requestId,
+          fastCode: issuedFastCode ?? null,
+          latitude: hasCoordinates ? parsedLatitude : null,
+          longitude: hasCoordinates ? parsedLongitude : null,
+          mapZoom,
+          propertyTitle: fields.futurePinLabel.trim() || null,
+          propertyAddress:
+            fields.streetAddress.trim() ||
+            fields.reverseGeocodedAddress.trim() ||
+            null,
+          propertyDescription: fields.pinWriteup.trim() || null,
+          coverImage: fileUrls.picture ?? fileUrls.pinImage ?? null,
+        })
+      );
       resolvedMapSiteId = claimed?.id ?? mapsiteId;
     } else if (formData.get("claimDemonstration") === "true") {
-      const claimed = await markMapSiteClaimedByBuildRequest({
-        mapsiteId: DEMO_MAPSITE_ID,
-        buildRequestId: requestId,
-        fastCode: issuedFastCode ?? null,
-        latitude: hasCoordinates ? parsedLatitude : null,
-        longitude: hasCoordinates ? parsedLongitude : null,
-        mapZoom,
-        propertyTitle: fields.futurePinLabel.trim() || null,
-        propertyAddress:
-          fields.streetAddress.trim() ||
-          fields.reverseGeocodedAddress.trim() ||
-          null,
-        propertyDescription: fields.pinWriteup.trim() || null,
-        coverImage: fileUrls.picture ?? fileUrls.pinImage ?? null,
-      });
+      const claimed = await timedOnboardingStep("MapSite claim demo", () =>
+        markMapSiteClaimedByBuildRequest({
+          mapsiteId: DEMO_MAPSITE_ID,
+          buildRequestId: requestId,
+          fastCode: issuedFastCode ?? null,
+          latitude: hasCoordinates ? parsedLatitude : null,
+          longitude: hasCoordinates ? parsedLongitude : null,
+          mapZoom,
+          propertyTitle: fields.futurePinLabel.trim() || null,
+          propertyAddress:
+            fields.streetAddress.trim() ||
+            fields.reverseGeocodedAddress.trim() ||
+            null,
+          propertyDescription: fields.pinWriteup.trim() || null,
+          coverImage: fileUrls.picture ?? fileUrls.pinImage ?? null,
+        })
+      );
       resolvedMapSiteId = claimed?.id ?? DEMO_MAPSITE_ID;
     }
+
+    logOnboardingStep("submitBuildRequest", pipelineStarted, {
+      requestId,
+      fastCode: issuedFastCode,
+      mapsiteId: resolvedMapSiteId ?? null,
+    });
 
     return {
       success: true,
@@ -679,6 +747,10 @@ export async function submitBuildRequest(
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown server error";
     console.error("[build-mapsite] Submission error:", err);
+    logOnboardingStep("submitBuildRequest", pipelineStarted, {
+      failed: true,
+      error: msg,
+    });
     return { success: false, error: msg };
   }
 }

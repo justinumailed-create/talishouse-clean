@@ -50,6 +50,7 @@ interface TalisBooksViewerStageProps {
 const FLIP_EASE: [number, number, number, number] = [0.22, 0.61, 0.36, 1];
 
 function SoftBlank({ side }: { side: "left" | "right" }) {
+  /* Placeholder only for flip geometry; solo cover/back CSS collapses the empty leaf. */
   return (
     <div
       className={[
@@ -119,6 +120,10 @@ function BookPageFace({
   );
 }
 
+/**
+ * Flat spine hinge turn — no corner curl.
+ * 0→50%: outgoing page folds to the gutter; 50→100%: incoming unfolds.
+ */
 function FlipLeaf({
   direction,
   front,
@@ -134,9 +139,6 @@ function FlipLeaf({
 }) {
   const forward = direction > 0;
 
-  // Two single-sided leaves (no rotateY(180) verso) — avoids mirrored HTML.
-  // 0→50%: outgoing page folds to the gutter edge.
-  // 50→100%: incoming page unfolds from the gutter onto its destination side.
   const outgoingRotateY = useTransform(
     progress,
     [0, 0.5, 1],
@@ -212,7 +214,7 @@ function FlipLeaf({
   );
 }
 
-/** Single-page peel: current leaf over destination base (no mirrored verso). */
+/** Single-page flat hinge peel. */
 function SingleFlipLeaf({
   direction,
   page,
@@ -228,7 +230,6 @@ function SingleFlipLeaf({
   const rotateY = useTransform(progress, [0, 1], forward ? [0, -118] : [0, 118]);
   const opacity = useTransform(progress, [0, 0.72, 1], [1, 1, 0]);
   const shade = useTransform(progress, [0, 0.35, 0.75, 1], [0.06, 0.4, 0.28, 0.1]);
-  const lift = useTransform(progress, [0, 0.45, 1], [0, 28, 6]);
 
   return (
     <motion.div
@@ -244,7 +245,6 @@ function SingleFlipLeaf({
         backfaceVisibility: "hidden",
         rotateY,
         opacity,
-        z: lift,
       }}
     >
       <div className="talisbooks-viewer-book__leaf-face talisbooks-viewer-book__leaf-face--single">
@@ -447,6 +447,14 @@ function OpenBookSpread({
       return;
     }
 
+    // Last → first wrap jumps to the front cover (no reverse leaf flip).
+    if (magazine && displayedIndex === navCount - 1 && navIndex === 0) {
+      setDisplayedIndex(0);
+      flipProgress.set(0);
+      notifyFlipping(false);
+      return;
+    }
+
     const flipDirection = direction;
     setFlip({
       from: displayedIndex,
@@ -633,14 +641,13 @@ function OpenBookSpread({
     }
 
     if (!gesture.dragging) {
-      // Short click / tap: magazine navigation by clicked page half.
-      const spread = getViewerSpread(book.pages, displayedIndex);
+      // Short click / tap: right advances (wraps to cover on last spread), left goes back.
       const clickedSide = gesture.side;
       clearGestureTimers();
       gestureRef.current = null;
-      if (clickedSide === "right" && spread.right) {
+      if (clickedSide === "right") {
         onRequestNext();
-      } else if (clickedSide === "left" && spread.left) {
+      } else {
         onRequestPrevious();
       }
       return;
@@ -831,6 +838,16 @@ function OpenBookSingle({
       return;
     }
     if (gestureRef.current?.dragging) {
+      return;
+    }
+
+    // Last → first wrap jumps to the front cover (no reverse leaf flip).
+    if (magazine && displayedIndex === navCount - 1 && navIndex === 0) {
+      setDisplayedIndex(0);
+      flipRef.current = null;
+      setFlip(null);
+      flipProgress.set(0);
+      notifyFlipping(false);
       return;
     }
 

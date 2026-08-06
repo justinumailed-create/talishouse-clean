@@ -42,13 +42,24 @@ export function buildEbookChoiceHref(options: {
   return query ? `${EBOOK_CHOICE_PATH}?${query}` : EBOOK_CHOICE_PATH;
 }
 
-/** Continue after “Generate My Own E-Book”. */
+/** Continue after “Generate My Own E-Book”.
+ * Canonical handoff: requestId only. Server resolves FAST Code / MapSite from DB.
+ * Legacy fastCode/mapsiteId/accountType query params are ignored by the page
+ * when requestId is present (kept optional only for older bookmarks).
+ */
 export function buildSelfEbookContinueHref(options: {
   fastCode?: string | null;
   mapsiteId?: string | null;
   accountType?: string | null;
   requestId?: string | null;
 }): string {
+  const requestId = options.requestId?.trim();
+  if (requestId) {
+    const params = new URLSearchParams({ requestId });
+    return `/talispros/ebook-generate?${params.toString()}`;
+  }
+
+  // Legacy fallback when callers have not yet adopted requestId-only handoff.
   const params = new URLSearchParams();
   if (options.fastCode?.trim()) {
     params.set("fastCode", options.fastCode.trim());
@@ -58,9 +69,6 @@ export function buildSelfEbookContinueHref(options: {
   }
   if (options.accountType?.trim()) {
     params.set("accountType", options.accountType.trim());
-  }
-  if (options.requestId?.trim()) {
-    params.set("requestId", options.requestId.trim());
   }
   const query = params.toString();
   return query

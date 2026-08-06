@@ -44,12 +44,17 @@ export default function EbookChoiceClient({
     setPending(choice);
     persistChoice(fastCode, choice);
 
+    if (choice === "self" && !requestId?.trim()) {
+      setPending(null);
+      window.alert(
+        "Build Request ID is missing. Return to the Build Form and complete onboarding again."
+      );
+      return;
+    }
+
     const href =
       choice === "self"
         ? buildSelfEbookContinueHref({
-            fastCode,
-            mapsiteId,
-            accountType,
             requestId,
           })
         : buildRahulEbookContinueHref({

@@ -21,6 +21,11 @@ import {
   DEMO_MAPSITE_ID,
   MAPSITE_APP_PATH,
 } from "@/lib/talispros/mapsite-state";
+import {
+  logOnboardingStep,
+  onboardingNow,
+} from "@/lib/onboarding-timing";
+import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 
 export type EnsureClientMapSiteResult = {
   ok: true;
@@ -45,10 +50,8 @@ function buildSuccessHref(options: {
   const successPath = options.successPath ?? "mapsite";
 
   if (successPath === "self-ebook") {
+    // Canonical handoff: Build Request ID only — server recovers the rest.
     return buildSelfEbookContinueHref({
-      fastCode,
-      mapsiteId: options.mapsiteId,
-      accountType: options.accountType,
       requestId: options.requestId,
     });
   }
@@ -98,6 +101,7 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
   /** Where to send the client after MapSite + owner association. */
   successPath?: PostBuildSuccessPath;
 }): Promise<EnsureClientMapSiteResult> {
+  const ensureStarted = onboardingNow();
   const requestId = options.requestId.trim();
   const successPath = options.successPath ?? "mapsite";
   if (!requestId) {
@@ -146,10 +150,29 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
       request.account_type ||
       null;
 
-    const fastCode =
+    // Prefer issued codes only — never promote provisional ms{slug} placeholders
+    // into the ebook redirect query string.
+    const candidateFastCode =
       options.fastCode?.trim() ||
       request.requested_fast_code?.trim() ||
       null;
+    const fastCode = isIssuedFastCode(candidateFastCode)
+      ? candidateFastCode.trim().toLowerCase()
+      : null;
+
+    if (successPath === "self-ebook" && !fastCode) {
+      logOnboardingStep("MapSite creation", ensureStarted, {
+        failed: true,
+        reason: "missing_issued_fast_code",
+        requestId,
+      });
+      return {
+        ok: false,
+        error:
+          "FAST Code was not issued for this Build Request. Resubmit the Build Form before opening the E-Book generator.",
+        href: fallbackHref,
+      };
+    }
 
     const location = await getMapSiteLocationFromBuildRequest({ requestId });
     const coverImage = location?.coverImage || MAPSITE_DEMO_LISTING_IMAGE;
@@ -178,8 +201,7 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
     const mapZoom = HOME_PIN_DEFAULT_MAP_ZOOM;
 
     let mapsiteId = request.linked_mapsite_id?.trim() || null;
-    let resolvedCode =
-      fastCode && fastCode.toLowerCase() !== "demo" ? fastCode : null;
+    let resolvedCode = fastCode;
 
     if (mapsiteId) {
       // Already linked (e.g. Claim a Market™) — refresh property fields only.
@@ -196,7 +218,9 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
         coverImage,
       });
       mapsiteId = claimed?.id ?? mapsiteId;
-      resolvedCode = resolvedCode || claimed?.fast_code || null;
+      if (!resolvedCode && isIssuedFastCode(claimed?.fast_code)) {
+        resolvedCode = claimed.fast_code.trim().toLowerCase();
+      }
     } else {
       // Create the client's MapSite™ for immediate open without linking yet,
       // so Marketing Admin can still Generate / review the official draft.
@@ -207,6 +231,8 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
         (existingSlugs || []).map((row) => row.slug)
       );
 
+      // MapSite row may carry a provisional placeholder only when no issued
+      // FAST Code exists yet (non self-ebook paths). Self-ebook already gated above.
       const provisionalCode =
         resolvedCode?.toLowerCase() || `ms${slug.toLowerCase()}`;
 
@@ -262,9 +288,18 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
         mapsiteId = DEMO_MAPSITE_ID;
       } else {
         mapsiteId = created.id;
-        resolvedCode = resolvedCode || created.fast_code || null;
+        // Never promote provisional ms{slug} into the returned FAST Code.
+        if (!resolvedCode && isIssuedFastCode(created.fast_code)) {
+          resolvedCode = created.fast_code.trim().toLowerCase();
+        }
       }
     }
+
+    logOnboardingStep("MapSite ensure", ensureStarted, {
+      mapsiteId,
+      fastCode: resolvedCode,
+      successPath,
+    });
 
     return {
       ok: true,
@@ -281,6 +316,10 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
     };
   } catch (error) {
     console.error("[ensure-client-mapsite] Failed:", error);
+    logOnboardingStep("MapSite ensure", ensureStarted, {
+      failed: true,
+      error: error instanceof Error ? error.message : String(error),
+    });
     return {
       ok: false,
       error: error instanceof Error ? error.message : "Unable to open MapSite.",

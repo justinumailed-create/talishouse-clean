@@ -25,6 +25,7 @@ export {
   speedPercentToIntervalMs,
 } from "./auto-page-turn";
 export { createDemoViewerBook } from "./demo-book";
+export { enrichCoverPagesWithAgentBranding } from "./cover-branding";
 export {
   TALISBOOKS_BROKERAGE_DEMO_AGENT,
   createBrokerageClosingScaffold,

@@ -21,7 +21,7 @@ export default function TalisprosFooter() {
           href="/talispros/forms"
           className="text-neutral-600 hover:text-neutral-900 underline underline-offset-2 transition-colors"
         >
-          TalisForms™
+          Talisforms™
         </a>
         <br />
         <span className="text-[10px] text-neutral-300">A Talispros™ Product</span>

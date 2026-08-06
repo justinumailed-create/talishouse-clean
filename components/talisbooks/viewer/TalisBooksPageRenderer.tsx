@@ -74,34 +74,60 @@ function AgentIntroPageView({ page }: { page: TalisBooksViewerPage }) {
 }
 
 function AgentSummaryPageView({ page }: { page: TalisBooksViewerPage }) {
-  const contactLine = [page.agentPhone, page.agentEmail].filter(Boolean).join(" · ");
-  const summaryLine = [page.agentName, contactLine].filter(Boolean).join(", ");
+  const brokerageLabel =
+    page.brokerageName?.trim() || page.brokerageLine?.trim() || "Brokerage Name";
 
   return (
     <div className="talisbooks-viewer-page talisbooks-viewer-page--agent-summary">
-      <div
-        className="talisbooks-viewer-page__summary-brand-banner"
-        style={
-          page.brokerageLogoUrl
-            ? { backgroundImage: `url(${page.brokerageLogoUrl})` }
-            : undefined
-        }
-      />
-      <div className="talisbooks-viewer-page__summary-template-body">
+      <header className="talisbooks-viewer-page__summary-header">
         <div
-          className="talisbooks-viewer-page__summary-template-photo"
+          className="talisbooks-viewer-page__summary-header-logo"
+          style={
+            page.brokerageLogoUrl
+              ? { backgroundImage: `url(${page.brokerageLogoUrl})` }
+              : undefined
+          }
+          aria-hidden={!page.brokerageLogoUrl}
+        />
+        <p className="talisbooks-viewer-page__summary-header-name">{brokerageLabel}</p>
+      </header>
+
+      <div className="talisbooks-viewer-page__summary-agent">
+        <div
+          className="talisbooks-viewer-page__summary-agent-photo"
           style={
             page.agentPhotoUrl
               ? { backgroundImage: `url(${page.agentPhotoUrl})` }
               : undefined
           }
         />
-        <p className="talisbooks-viewer-page__summary-template-agent">
-          {summaryLine || "Agent Image, Name & Contact Info"}
-        </p>
-        <p className="talisbooks-viewer-page__summary-template-slogan">
-          {page.slogan || "Slogan"}
-        </p>
+        <div className="talisbooks-viewer-page__summary-agent-copy">
+          <h2 className="talisbooks-viewer-page__summary-agent-name">
+            {page.agentName?.trim() || "Agent Name"}
+          </h2>
+          {page.agentTitle?.trim() ? (
+            <p className="talisbooks-viewer-page__summary-agent-title">
+              {page.agentTitle.trim()}
+            </p>
+          ) : null}
+          <div className="talisbooks-viewer-page__summary-agent-contacts">
+            {page.agentPhone?.trim() ? (
+              <p className="talisbooks-viewer-page__summary-agent-contact">
+                {page.agentPhone.trim()}
+              </p>
+            ) : null}
+            {page.agentEmail?.trim() ? (
+              <p className="talisbooks-viewer-page__summary-agent-contact">
+                {page.agentEmail.trim()}
+              </p>
+            ) : null}
+          </div>
+          {page.slogan?.trim() ? (
+            <p className="talisbooks-viewer-page__summary-agent-slogan">
+              {page.slogan.trim()}
+            </p>
+          ) : null}
+        </div>
       </div>
     </div>
   );
@@ -186,22 +212,74 @@ function PropertyContentPageView({ page }: { page: TalisBooksViewerPage }) {
 }
 
 function TebCoverPageView({ page }: { page: TalisBooksViewerPage }) {
+  const agencyName = page.brokerageName?.trim() || page.brokerageLine?.trim();
+  const agentName = page.agentName?.trim();
+  const hasAgency = Boolean(page.brokerageLogoUrl?.trim() || agencyName);
+  const hasAgent = Boolean(agentName || page.agentPhotoUrl?.trim());
+
   return (
     <div className="talisbooks-viewer-page talisbooks-viewer-page--teb-cover">
       <div className="talisbooks-viewer-page__teb-band talisbooks-viewer-page__teb-band--top">
         <h2 className="talisbooks-viewer-page__teb-title">{page.title}</h2>
+
+        {hasAgency ? (
+          <div className="talisbooks-viewer-page__teb-brand">
+            {page.brokerageLogoUrl ? (
+              <div
+                className="talisbooks-viewer-page__teb-brand-logo"
+                style={{ backgroundImage: `url(${page.brokerageLogoUrl})` }}
+                aria-hidden="true"
+              />
+            ) : null}
+            {agencyName ? (
+              <p className="talisbooks-viewer-page__teb-brand-name">{agencyName}</p>
+            ) : null}
+          </div>
+        ) : null}
+
+        {hasAgent ? (
+          <div className="talisbooks-viewer-page__teb-agent">
+            {page.agentPhotoUrl ? (
+              <div
+                className="talisbooks-viewer-page__teb-agent-photo"
+                style={{ backgroundImage: `url(${page.agentPhotoUrl})` }}
+                aria-hidden="true"
+              />
+            ) : null}
+            <div className="talisbooks-viewer-page__teb-agent-copy">
+              {agentName ? (
+                <p className="talisbooks-viewer-page__teb-agent-name">{agentName}</p>
+              ) : null}
+              {page.agentTitle?.trim() ? (
+                <p className="talisbooks-viewer-page__teb-agent-title">
+                  {page.agentTitle.trim()}
+                </p>
+              ) : null}
+              {page.agentPhone?.trim() ? (
+                <p className="talisbooks-viewer-page__teb-agent-contact">
+                  {page.agentPhone.trim()}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </div>
-      <div
-        className="talisbooks-viewer-page__teb-hero"
-        style={
-          page.heroImageUrl
-            ? { backgroundImage: `url(${page.heroImageUrl})` }
-            : {
-                backgroundImage:
-                  "linear-gradient(145deg, #1c1917 0%, #44403c 48%, #a8a29e 100%)",
-              }
-        }
-      />
+
+      <div className="talisbooks-viewer-page__teb-hero">
+        {page.heroImageUrl ? (
+          <img
+            className="talisbooks-viewer-page__teb-hero-image"
+            src={page.heroImageUrl}
+            alt={page.title}
+            draggable={false}
+          />
+        ) : (
+          <div
+            className="talisbooks-viewer-page__teb-hero-fallback"
+            aria-hidden="true"
+          />
+        )}
+      </div>
       <div className="talisbooks-viewer-page__teb-band talisbooks-viewer-page__teb-band--bottom">
         <p className="talisbooks-viewer-page__teb-caption">
           {page.subtitle ?? page.address ?? ""}

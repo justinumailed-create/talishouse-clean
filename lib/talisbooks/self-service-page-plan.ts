@@ -148,6 +148,7 @@ export function buildSelfServiceEbookPageRows(
 
   const rows: SelfServicePageRowContent[] = [];
 
+  const agent = input.agent;
   rows.push({
     title: input.title,
     slug: "lot-info",
@@ -162,6 +163,14 @@ export function buildSelfServiceEbookPageRows(
       address: input.location || undefined,
       heroImageUrl: coverImageUrl || undefined,
       coverTemplateId: "horizon-caption",
+      agentName: agent.name,
+      agentTitle: agent.title,
+      agentPhone: agent.phone,
+      agentEmail: agent.email,
+      agentPhotoUrl: agent.photoUrl,
+      brokerageLogoUrl: agent.brokerageLogoUrl,
+      brokerageName: agent.brokerageName || "Talispros™",
+      brokerageLine: agent.brokerageLine || input.location || undefined,
     },
   });
 
@@ -198,7 +207,6 @@ export function buildSelfServiceEbookPageRows(
     }),
   );
 
-  const agent = input.agent;
   rows.push({
     title: agent.name || "Agent details",
     slug: "agent-details",

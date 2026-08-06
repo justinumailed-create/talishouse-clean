@@ -16,7 +16,7 @@ export const TALISPROS_START_SEGMENTS = [
   {
     label: "Professional",
     title: "I am a Real Estate Professional",
-    href: `${MAPSITE_APP_PATH}?audience=brokers&accountType=root`,
+    href: `${MAPSITE_APP_PATH}?audience=listings`,
     descriptionLines: [
       "Builder or Agent — I sell and",
       "broker real estate",

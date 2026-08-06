@@ -25,7 +25,7 @@ export default function TalisprosStartSidebar() {
       <div className="space-y-4 px-4 pb-10 sm:space-y-5 sm:px-5">
         {TALISPROS_START_SEGMENTS.map((segment) => (
           <Link
-            key={segment.href}
+            key={segment.label}
             href={segment.href}
             className="group block min-h-[176px] border-2 border-[#dedede] bg-white px-4 py-6 text-center transition-colors hover:border-black"
           >

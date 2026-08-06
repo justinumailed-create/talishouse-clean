@@ -10,6 +10,10 @@ import { requireMapSiteEditAccess } from "./mapsite-edit-auth";
 import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
 import { getMapSiteByFastCode } from "./mapsite-service";
+import {
+  isLogoUploadField,
+  stripLogoBackground,
+} from "./media/strip-logo-background";
 
 export interface MapSiteAdminInput {
   fastCode: string;
@@ -83,13 +87,29 @@ async function uploadMapSiteFile(
   }
 
   const supabase = client;
-  const ext = file.name.split(".").pop() || "bin";
+  let uploadBody: Buffer | File = file;
+  let contentType = file.type;
+  let ext = file.name.split(".").pop() || "bin";
+
+  if (isLogoUploadField(fieldName)) {
+    try {
+      const stripped = await stripLogoBackground(
+        Buffer.from(await file.arrayBuffer())
+      );
+      uploadBody = stripped.buffer;
+      contentType = stripped.mimeType;
+      ext = "png";
+    } catch (err) {
+      console.error(`[mapsite-admin] Logo background strip failed:`, err);
+    }
+  }
+
   const path = `mapsites/${fastCode.toLowerCase()}/${fieldName}-${Date.now()}.${ext}`;
 
   const { error } = await supabase.storage
     .from("mapsite-assets")
-    .upload(path, file, {
-      contentType: file.type,
+    .upload(path, uploadBody, {
+      contentType,
       upsert: false,
     });
 

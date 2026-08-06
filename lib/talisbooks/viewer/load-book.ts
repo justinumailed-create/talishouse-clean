@@ -4,6 +4,7 @@ import {
   hydratePermanentViewerPages,
 } from "@/lib/talisbooks/permanent-pages";
 import { createDemoViewerBook } from "./demo-book";
+import { enrichCoverPagesWithAgentBranding } from "./cover-branding";
 import type {
   TalisBooksViewerBook,
   TalisBooksViewerPage,
@@ -225,9 +226,11 @@ export async function getViewerBookBySlug(
     subtitle: book.subtitle,
     frontCoverImageUrl: coverImageUrl || undefined,
     backCoverImageUrl: coverImageUrl || undefined,
-    pages: skipPermanentPages
-      ? viewerPages
-      : ensurePermanentClosingPages(hydratePermanentViewerPages(viewerPages)),
+    pages: enrichCoverPagesWithAgentBranding(
+      skipPermanentPages
+        ? viewerPages
+        : ensurePermanentClosingPages(hydratePermanentViewerPages(viewerPages)),
+    ),
   };
 }
 

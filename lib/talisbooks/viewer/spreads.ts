@@ -8,7 +8,7 @@ export interface TalisBooksViewerSpread {
 
 /**
  * Issuu / soft-cover magazine spreads (Western):
- * - Spread 0: single front cover (page 1 alone)
+ * - Spread 0: single front cover (page 1 alone on the right; no left leaf until turned)
  * - Spread 1: pages 2–3 (first interior spread)
  * - Spread n: facing interior leaves
  * - Last: single back cover when page count is even
