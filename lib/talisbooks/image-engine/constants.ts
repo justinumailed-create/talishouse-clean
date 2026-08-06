@@ -13,11 +13,11 @@ export const TALISBOOKS_DERIVED_IMAGE_QUALITY = 92;
  */
 export const TALISBOOKS_ASSET_CACHE_CONTROL = "31536000";
 
-/** Widest a spread is ever painted (two pages at 2x); larger is wasted bytes. */
-export const TALISBOOKS_PAGE_IMAGE_MAX_EDGE_PX = 2560;
+/** Widest a property photo is stored after upload optimization. */
+export const TALISBOOKS_PAGE_IMAGE_MAX_EDGE_PX = 2048;
 
-/** Re-encode quality for page art served to the viewer. */
-export const TALISBOOKS_PAGE_IMAGE_QUALITY = 82;
+/** Default re-encode quality for page art (adaptive optimizer may vary 78–88). */
+export const TALISBOOKS_PAGE_IMAGE_QUALITY = 86;
 
 /**
  * Preferred single-page landscape aspect (width / height).

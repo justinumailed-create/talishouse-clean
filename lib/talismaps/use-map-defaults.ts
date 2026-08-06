@@ -19,7 +19,7 @@ const FALLBACK_DEFAULTS: TalisMapsMapDefaults = {
 };
 
 /**
- * Loads global TalisMaps™ map defaults for client surfaces.
+ * Loads global Talismaps™ map defaults for client surfaces.
  * Falls back to env/registry defaults if the settings API is unavailable.
  */
 export function useTalisMapsMapDefaults(

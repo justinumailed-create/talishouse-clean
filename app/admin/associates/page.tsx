@@ -172,7 +172,7 @@ export default function AssociatesPage() {
                 <tr className="border-b border-gray-100">
                   <th className="text-left py-2 px-3 text-xs font-medium text-gray-500">Name</th>
                   <th className="text-left py-2 px-3 text-xs font-medium text-gray-500">FAST Code</th>
-                  <th className="text-left py-2 px-3 text-xs font-medium text-gray-500">Mapsite Slug</th>
+                  <th className="text-left py-2 px-3 text-xs font-medium text-gray-500">Mapsite™ Slug</th>
                   <th className="text-left py-2 px-3 text-xs font-medium text-gray-500">Email</th>
                   <th className="text-left py-2 px-3 text-xs font-medium text-gray-500">Created</th>
                   <th className="text-left py-2 px-3 text-xs font-medium text-gray-500">Links</th>
@@ -214,7 +214,7 @@ export default function AssociatesPage() {
                           target="_blank"
                           className="text-green-600 hover:text-green-800 text-xs underline font-medium"
                         >
-                          Open Mapsite
+                          Open Mapsite™
                         </Link>
                       </div>
                     </td>

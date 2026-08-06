@@ -53,12 +53,12 @@ export default function MapSiteEditToolbar({
     };
   }, [refreshAccountStatus]);
 
-  const ownsThisMapsite =
+  const ownsThisMapSite =
     hasSubscribed &&
     visitorFastCode !== null &&
     normalizeFastCode(visitorFastCode) === normalizeFastCode(fastCode);
 
-  const showToolbar = editAccess.showToolbar && ownsThisMapsite;
+  const showToolbar = editAccess.showToolbar && ownsThisMapSite;
 
   if (!showToolbar) {
     return null;
@@ -72,7 +72,7 @@ export default function MapSiteEditToolbar({
           className="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium text-white shadow-lg hover:bg-neutral-800"
         >
           <Pencil className="h-4 w-4" />
-          Edit MapSite
+          Edit Mapsite™
         </Link>
       </div>
     );

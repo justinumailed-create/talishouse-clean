@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = createMetadata({
   title: "Rahul Assisted E-Book | Talispros™",
   description:
-    "Upload agent photo, logo, property images, and details so Rahul can build your TalisBooks™ E-Book from Marketing Admin.",
+    "Upload agent photo, logo, property images, and details so Rahul can build your Talisbooks™ E-Book from Marketing Admin.",
   path: "/talispros/ebook-rahul",
   private: true,
 });

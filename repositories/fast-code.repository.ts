@@ -38,7 +38,7 @@ export async function findFastCodesByPrefix(prefix: string): Promise<string[]> {
 
   if (mapsitesResult.error) {
     throw new Error(
-      `Failed to query MapSite FAST Codes: ${mapsitesResult.error.message}`
+      `Failed to query Mapsite™ FAST Codes: ${mapsitesResult.error.message}`
     );
   }
 

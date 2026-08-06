@@ -191,7 +191,7 @@ export async function updateMapSiteAdmin(
 
   const mapsite = await getMapSiteByFastCode(input.fastCode);
   if (!mapsite) {
-    return { success: false, error: "MapSite not found" };
+    return { success: false, error: "Mapsite™ not found" };
   }
 
   const client = requireServiceRoleClient();
@@ -287,7 +287,7 @@ export async function unpublishMapSite(
 
   const mapsite = await getMapSiteByFastCode(fastCode);
   if (!mapsite) {
-    return { success: false, error: "MapSite not found" };
+    return { success: false, error: "Mapsite™ not found" };
   }
 
   const client = requireServiceRoleClient();
@@ -349,7 +349,7 @@ export async function updateMapSiteGallery(
 
   const mapsite = await getMapSiteByFastCode(fastCode);
   if (!mapsite) {
-    return { success: false, error: "MapSite not found" };
+    return { success: false, error: "Mapsite™ not found" };
   }
 
   const client = requireServiceRoleClient();

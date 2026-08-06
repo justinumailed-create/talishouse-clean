@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { TALISMAPS_ROUTES } from "./routes";
 
-export const TALISMAPS_PRODUCT_NAME = "TalisMaps™";
+export const TALISMAPS_PRODUCT_NAME = "Talismaps™";
 
 export const TALISMAPS_SIDEBAR_ITEMS = [
   { href: TALISMAPS_ROUTES.DASHBOARD, label: "Dashboard", icon: LayoutDashboard },

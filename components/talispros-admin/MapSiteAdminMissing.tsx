@@ -10,10 +10,10 @@ export default function MapSiteAdminMissing({
   return (
     <div className="max-w-xl rounded-2xl border border-neutral-200 bg-white p-8">
       <h1 className="text-xl font-semibold text-neutral-900 mb-2">
-        MapSite not found
+        Mapsite™ not found
       </h1>
       <p className="text-sm text-neutral-600 mb-4">
-        No MapSite exists for FAST code{" "}
+        No Mapsite™ exists for FAST code{" "}
         <span className="font-mono font-medium">{fastCode}</span>.
       </p>
       {dbError ? (

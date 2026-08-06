@@ -146,7 +146,7 @@ export default function CrmDashboard() {
           {[
             { href: "/crm/leads", label: "Leads" },
             { href: "/crm/build-requests", label: "Build Requests" },
-            { href: "/crm/mapsites", label: "MapSites" },
+            { href: "/crm/mapsites", label: "Mapsites™" },
             { href: "/crm/associates", label: "Associates" },
             { href: "/crm/production-queue", label: "Production Queue" },
             { href: "/crm/activity-logs", label: "Activity Logs" },

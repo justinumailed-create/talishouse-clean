@@ -40,7 +40,7 @@ export default function MapSiteInteractiveMap({
       minHeightClassName="min-h-[320px]"
       emptyMessage={
         embedded
-          ? "Set coordinates or add Home PINs to display this property on TalisMaps™."
+          ? "Set coordinates or add Home PINs to display this property on Talismaps™."
           : "Location coordinates not yet available."
       }
     />

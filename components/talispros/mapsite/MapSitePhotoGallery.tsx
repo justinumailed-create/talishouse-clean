@@ -11,7 +11,7 @@ interface MapSitePhotoGalleryProps {
 }
 
 /**
- * Full-viewport closable photo gallery for MapSite™ listing media.
+ * Full-viewport closable photo gallery for Mapsite™ listing media.
  */
 export default function MapSitePhotoGallery({
   title,

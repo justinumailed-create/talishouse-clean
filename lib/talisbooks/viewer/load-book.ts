@@ -101,7 +101,7 @@ function buildFallbackPages(input: {
 }
 
 /**
- * Load a published TalisBooks™ viewer book by slug.
+ * Load a published Talisbooks™ viewer book by slug.
  * Falls back to null when not found (caller may use demo for known demo slugs).
  */
 export async function getViewerBookBySlug(

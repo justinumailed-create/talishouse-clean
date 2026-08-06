@@ -1,5 +1,5 @@
 /**
- * Fixed 22-page plan for self-service (image-upload) TalisBook™ generation.
+ * Fixed 22-page plan for self-service (image-upload) Talisbook™ generation.
  *
  * Page map:
  *  1       Lot information (cover)

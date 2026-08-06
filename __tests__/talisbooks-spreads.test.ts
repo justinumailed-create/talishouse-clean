@@ -17,7 +17,7 @@ function makePages(count: number): TalisBooksViewerPage[] {
   }));
 }
 
-describe("TalisBooks open-book spreads", () => {
+describe("Talisbooks™ open-book spreads", () => {
   it("counts spreads with a leading blank for the cover", () => {
     expect(getViewerSpreadCount(1)).toBe(1);
     expect(getViewerSpreadCount(2)).toBe(2);

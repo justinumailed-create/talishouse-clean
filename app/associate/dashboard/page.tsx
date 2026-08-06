@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAssociate } from "@/context/AssociateContext";
 import { supabase } from "@/lib/supabase";
 
-interface MapsiteRecord {
+interface MapSiteRecord {
   id: string;
   type: string;
   status: string;
@@ -66,12 +66,12 @@ export default function AssociateDashboardPage() {
         return;
       }
 
-      const mapsiteRecords = msData as MapsiteRecord[];
+      const mapsiteRecords = msData as MapSiteRecord[];
       const requestIds = mapsiteRecords.map((m) => m.request_id);
 
-      const requestIdToMapsite: Record<string, MapsiteRecord> = {};
+      const requestIdToMapSite: Record<string, MapSiteRecord> = {};
       mapsiteRecords.forEach((m) => {
-        requestIdToMapsite[m.request_id] = m;
+        requestIdToMapSite[m.request_id] = m;
       });
 
       const { data: brData } = await supabase

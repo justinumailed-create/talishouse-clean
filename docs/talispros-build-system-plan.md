@@ -83,8 +83,8 @@
 | Partner Access page | `app/partner-access/page.tsx` | Fast code entry form → redirects to `https://talispros.com/ma/{code}` |
 | Partner View | `app/partner-view/page.tsx` | Map + video + lead form for partners |
 | TTV Access | `app/ttvaccess/[fastCode]/page.tsx` | Server component, fetches associate data, renders partner view |
-| MapSite by slug | `app/mapsite/[slug]/page.tsx` | Server component, fetches associate by `mapsite_slug`, renders `AssociateHero` |
-| MapSite router | `app/mapsite/page.tsx` | Redirects to first associate or shows demo |
+| Mapsite™ by slug | `app/mapsite/[slug]/page.tsx` | Server component, fetches associate by `mapsite_slug`, renders `AssociateHero` |
+| Mapsite™ router | `app/mapsite/page.tsx` | Redirects to first associate or shows demo |
 | Fast code redirect | `app/a/[fastCode]/page.tsx` | Server component, redirects to `/associate/[fastCode]` |
 | Associate page | `app/associate/[fastCode]/page.tsx` | Server component, fetches associate, renders `AssociateView` |
 | Associate page config | `lib/associateConfig.ts` | Hardcoded per-associate UI config |
@@ -251,7 +251,7 @@ app/build/
 ```
 app/fast-code/
 ├── page.tsx              # Public registration page (existing)
-├── success/page.tsx      # Post-registration success with MapSite redirect
+├── success/page.tsx      # Post-registration success with Mapsite™ redirect
 └── admin/
     ├── page.tsx          # Existing /admin/fast-codes
     └── [id]/page.tsx     # Detail view for a FAST code registration
@@ -261,7 +261,7 @@ app/fast-code/
 1. **Email notification** on registration (welcome + next steps)
 2. **Admin approval workflow**: `fast_code_registrations.status` → `pending` / `approved` / `rejected`
 3. **Auto-provision** associate record in `associates` table upon approval
-4. **MapSite auto-creation**: generate `mapsite_slug` from fast code automatically
+4. **Mapsite™ auto-creation**: generate `mapsite_slug` from fast code automatically
 5. **Rate limiting** on the `registerFastCode` server action
 6. **Duplicate detection** by email + phone before allowing re-registration
 
@@ -271,21 +271,21 @@ app/fast-code/
 
 ---
 
-### 4.3 MapSite Production Queue
+### 4.3 Mapsite™ Production Queue
 
-**Status:** Currently ad-hoc — MapSites are created via admin CMS or seed script
+**Status:** Currently ad-hoc — Mapsites™ are created via admin CMS or seed script
 
 **Recommended Architecture:**
 
 ```
 app/admin/mapsites/
-├── page.tsx              # Queue dashboard — all MapSites with statuses
+├── page.tsx              # Queue dashboard — all Mapsites™ with statuses
 ├── [id]/
-│   ├── page.tsx          # MapSite detail + preview
+│   ├── page.tsx          # Mapsite™ detail + preview
 │   └── settings/page.tsx # Advanced settings
 └── api/
-    ├── queue/route.ts    # POST: enqueue MapSite for production
-    └── deploy/route.ts   # POST: deploy/provision a MapSite
+    ├── queue/route.ts    # POST: enqueue Mapsite™ for production
+    └── deploy/route.ts   # POST: deploy/provision a Mapsite™
 ```
 
 **Suggested Table:**
@@ -314,7 +314,7 @@ draft → pending → building → deployed
 
 **Generation steps:**
 1. Select associate → create queue entry (`draft`)
-2. Fill MapSite config (hero type, content, video, form toggle) → move to `pending`
+2. Fill Mapsite™ config (hero type, content, video, form toggle) → move to `pending`
 3. Build process (could be async job or webhook) → `building`
 4. Deploy to CDN or update DB → `deployed`
 5. Associate URL: `/mapsite/{slug}` (already exists)
@@ -346,7 +346,7 @@ app/admin/
 ├── content/              # Existing
 ├── talisbot/             # Existing
 ├── fast-codes/           # Existing
-├── mapsites/             # NEW: MapSite queue management
+├── mapsites/             # NEW: Mapsite™ queue management
 ├── applications/         # Existing
 ├── project-applications/ # Existing
 └── partners/             # NEW: Partner management hub
@@ -387,7 +387,7 @@ app/associate/
 │   ├── earnings/
 │   │   └── page.tsx      # Commission history (from earnings table)
 │   ├── mapsite/
-│   │   └── page.tsx      # Edit their MapSite (hero, content, images)
+│   │   └── page.tsx      # Edit their Mapsite™ (hero, content, images)
 │   ├── referrals/
 │   │   └── page.tsx      # Referral link + QR code generator
 │   └── settings/
@@ -413,7 +413,7 @@ supabase
 
 **Key Features:**
 - **Lead notifications**: Real-time or polling for new leads attributed to their FAST code
-- **MapSite editor**: Change hero type (map/image/video), headline, CTA, contact form toggle
+- **Mapsite™ editor**: Change hero type (map/image/video), headline, CTA, contact form toggle
 - **Referral tools**: Shareable link (`/a/{fastCode}`), QR code download
 - **Earnings dashboard**: From `earnings` table, with 20/80 split breakdown
 - **Mobile-friendly**: Responsive design for on-the-go access
@@ -436,7 +436,7 @@ supabase
 **Recommendation:** Add `lib/email.ts` with Resend (recommended) or SendGrid.
 
 **Send triggers:**
-- FAST code registration → welcome email with MapSite link
+- FAST code registration → welcome email with Mapsite™ link
 - Lead capture → notify assigned associate
 - Deal won/lost → notify associate
 - Admin creates associate → credentials email
@@ -450,7 +450,7 @@ supabase
 |---|---|---|
 | `associate-images` | Associate profile images | Public read, authenticated write |
 | `product-images` | Product photos | Public read, admin write |
-| `mapsite-media` | MapSite hero images/videos | Public read, associate write |
+| `mapsite-media` | Mapsite™ hero images/videos | Public read, associate write |
 | `admin-documents` | Project docs, contracts | Authenticated read/write |
 
 Implement via `app/api/upload/route.ts` using Supabase Storage SDK.
@@ -488,7 +488,7 @@ Implement via `app/api/upload/route.ts` using Supabase Storage SDK.
 | **Auth (associate)** | Client-side localStorage | 🔴 Critical |
 | **Email system** | Not implemented | 🔴 Critical |
 | **File upload** | Not implemented | 🟡 High |
-| **MapSite production queue** | Not implemented | 🟡 High |
+| **Mapsite™ production queue** | Not implemented | 🟡 High |
 | **Build form** | Fragmented across 3 routes | 🟡 High |
 | **Associate dashboard** | Minimal (/business-office) | 🟡 High |
 | **Admin dashboard** | Functional but unpolished | 🟢 Medium |

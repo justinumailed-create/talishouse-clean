@@ -19,8 +19,8 @@ const adminNavItems = [
   { href: "/admin/project-applications", label: "Project Apps" },
   { href: "/admin/registrations", label: "Registrations" },
   { href: "/admin/marketing", label: "Marketing" },
-  { href: "/admin/talismaps", label: "TalisMaps™" },
-  { href: "/admin/talisbooks", label: "TalisBooks™" },
+  { href: "/admin/talismaps", label: "Talismaps™" },
+  { href: "/admin/talisbooks", label: "Talisbooks™" },
 ];
 
 function subscribeToAdminSession(onStoreChange: () => void) {

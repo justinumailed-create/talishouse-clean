@@ -242,7 +242,7 @@ describe("failure recovery — structured errors", () => {
     expect(result.fastCode).toBe("ar01");
   });
 
-  it("empty images fails at preparing_images", async () => {
+  it("empty images fails at uploading_images", async () => {
     resolveMock.mockResolvedValue({
       ok: true,
       context: {
@@ -279,7 +279,7 @@ describe("failure recovery — structured errors", () => {
 
     expect(result.stage).toBe("failed");
     if (result.stage !== "failed") return;
-    expect(result.failedStage).toBe("preparing_images");
+    expect(result.failedStage).toBe("uploading_images");
   });
 });
 

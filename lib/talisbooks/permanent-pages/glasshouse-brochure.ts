@@ -1,7 +1,7 @@
 /**
  * Permanent Glasshouse™ brochure closing pages.
  *
- * Always appear as the last two pages before the back cover in every TalisBook™.
+ * Always appear as the last two pages before the back cover in every Talisbook™.
  * Clients cannot edit them. Administrators replace the global source later
  * (see setGlasshouseBrochureSourceOverride) without rewriting each book.
  */
@@ -124,7 +124,7 @@ export function createGlasshouseBrochurePages(
 }
 
 /**
- * DB / content JSON payload for one brochure leaf (auto-draft + MapSite seeds).
+ * DB / content JSON payload for one brochure leaf (auto-draft + Mapsite™ seeds).
  */
 export function glasshouseBrochureContentPayload(
   leaf: TalisBooksGlasshouseBrochureLeaf,

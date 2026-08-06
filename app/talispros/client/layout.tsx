@@ -9,7 +9,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = createMetadata({
   title: "Client Analytics | Talispros™",
   description:
-    "Sign in to view your MapSite™ marketing performance, weekly reports, and daily campaign updates.",
+    "Sign in to view your Mapsite™ marketing performance, weekly reports, and daily campaign updates.",
   path: "/talispros/client",
 });
 

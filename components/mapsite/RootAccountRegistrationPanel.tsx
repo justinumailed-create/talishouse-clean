@@ -18,7 +18,7 @@ export default function RootAccountRegistrationPanel({
         <span className="font-medium text-neutral-800">
           {OFFERED_SUBSCRIPTION_TIER_LABELS[allowedTier]}
         </span>{" "}
-        to activate your own MapSite™. You can also continue under a sponsor as
+        to activate your own Mapsite™. You can also continue under a sponsor as
         a Derivative Account™, or select AdPro™ packages as individual PIN or
         multi-PIN options. After checkout you will be redirected to your new
         property page.

@@ -64,7 +64,7 @@ export async function getMapSiteByFastCode(
       notFound: true,
       message: fcError
         ? `Database error: ${fcError.message}`
-        : `MapSite with code "${code}" not found`,
+        : `Mapsite™ with code "${code}" not found`,
     };
   }
 
@@ -134,7 +134,7 @@ export async function getMapSiteBySlug(
       notFound: true,
       message: msError
         ? `Database error: ${msError.message}`
-        : `MapSite with slug "${cleanSlug}" not found`,
+        : `Mapsite™ with slug "${cleanSlug}" not found`,
     };
   }
 
@@ -201,7 +201,7 @@ export async function createMapSite(
     .single();
 
   if (insertError || !created) {
-    throw new Error(`Failed to create MapSite: ${insertError?.message || "Unknown error"}`);
+    throw new Error(`Failed to create Mapsite™: ${insertError?.message || "Unknown error"}`);
   }
 
   return {

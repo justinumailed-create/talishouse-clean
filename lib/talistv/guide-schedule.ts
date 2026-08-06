@@ -27,7 +27,7 @@ export const TALISTV_GUIDE_SLOTS: TalisTvGuideSlot[] = [
     show: {
       id: "show-open",
       title: "Market Open",
-      subtitle: "Daily briefing across featured MapSites™",
+      subtitle: "Daily briefing across featured Mapsites™",
       durationMinutes: 30,
       category: "News",
       status: "later",
@@ -84,7 +84,7 @@ export const TALISTV_GUIDE_SLOTS: TalisTvGuideSlot[] = [
     timeLabel: "8:45",
     show: {
       id: "show-teb",
-      title: "TalisBooks™ Preview",
+      title: "Talisbooks™ Preview",
       subtitle: "Lookbook pages from tonight’s featured pin",
       durationMinutes: 30,
       category: "Preview",

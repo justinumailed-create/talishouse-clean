@@ -51,7 +51,7 @@ function LogoMark({ logoUrl }: { logoUrl: string }) {
     <div className={`relative shrink-0 overflow-hidden ${AVATAR_SIZE}`}>
       <Image
         src={logoUrl}
-        alt="MapSite logo"
+        alt="Mapsite™ logo"
         fill
         className={`object-contain object-center scale-[1.42] ${blend ? "mix-blend-multiply" : ""}`}
         sizes="(max-width: 768px) 112px, 176px"

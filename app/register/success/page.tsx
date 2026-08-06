@@ -35,7 +35,7 @@ function SuccessContent() {
           Registration Successful
         </h1>
         <p className="text-neutral-500 text-sm sm:text-base mb-8 max-w-sm mx-auto">
-          Your MapSite™ account has been registered.
+          Your Mapsite™ account has been registered.
         </p>
 
         <div className="border border-neutral-200 rounded-2xl bg-white p-6 sm:p-8 text-left space-y-4">

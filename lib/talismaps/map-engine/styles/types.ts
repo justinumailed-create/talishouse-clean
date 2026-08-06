@@ -1,5 +1,5 @@
 /**
- * Tile / style configuration for TalisMaps™.
+ * Tile / style configuration for Talismaps™.
  *
  * MapLibre GL JS is the rendering engine. MapTiler Cloud supplies style URLs —
  * business logic never imports the MapTiler SDK.
@@ -29,7 +29,7 @@ export const MAP_STYLE_DEFINITIONS: MapStyleDefinition[] = [
     id: "satellite",
     label: "Satellite",
     description:
-      "High-resolution aerial imagery without place or business labels (TalisMaps™ pins only).",
+      "High-resolution aerial imagery without place or business labels (Talismaps™ pins only).",
   },
   {
     id: "street",

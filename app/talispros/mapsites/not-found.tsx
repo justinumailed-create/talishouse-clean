@@ -6,10 +6,10 @@ export default function MapSiteNotFound() {
       <div className="text-center max-w-md">
         <p className="text-6xl font-semibold text-neutral-200 mb-4">404</p>
         <h1 className="text-2xl font-semibold text-neutral-900 mb-2">
-          MapSite Not Found
+          Mapsite™ Not Found
         </h1>
         <p className="text-sm text-neutral-500 mb-8">
-          No MapSite exists for this FAST Code.
+          No Mapsite™ exists for this FAST Code.
         </p>
         <Link
           href="/talispros"

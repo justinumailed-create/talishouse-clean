@@ -53,7 +53,7 @@ export function PinEngineProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     const response = await fetch("/api/talismaps/editor/bootstrap");
     if (!response.ok) {
-      throw new Error("Failed to load TalisMaps™ editor");
+      throw new Error("Failed to load Talismaps™ editor");
     }
     const data = (await response.json()) as TalisMapsEditorBootstrap;
     setBootstrap(data);
@@ -263,7 +263,7 @@ export function PinEngineProvider({ children }: { children: ReactNode }) {
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#f5f5f7] text-sm text-neutral-500">
-        Loading TalisMaps™ PIN Engine…
+        Loading Talismaps™ PIN Engine…
       </div>
     );
   }

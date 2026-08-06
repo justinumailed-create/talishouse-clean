@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = createMetadata({
   title: "Registrations | Marketing Manager | Talispros™",
   description:
-    "Review market registrations, create MapSites™, and send payment links.",
+    "Review market registrations, create Mapsites™, and send payment links.",
   path: MARKETING_ADMIN_PATH,
   private: true,
 });
@@ -22,7 +22,7 @@ export default async function MarketingAdminPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-neutral-900">Market Registrations</h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Review submissions from market pages, generate MapSites™, and send payment links.
+          Review submissions from market pages, generate Mapsites™, and send payment links.
         </p>
       </div>
       <MarketingAdminQueue />

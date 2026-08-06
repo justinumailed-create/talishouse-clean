@@ -548,7 +548,7 @@ p {
   animation: slide-in 0.3s ease-out;
 }
 
-/* Hide PayPal iframes while MapSite gallery lightbox is open */
+/* Hide PayPal iframes while Mapsite™ gallery lightbox is open */
 body.mapsite-gallery-open iframe[src*="paypal.com"],
 body.mapsite-gallery-open [id^="zoid-paypal"],
 body.mapsite-gallery-open [data-paypal-button] {
@@ -557,7 +557,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 /*
- * MapSite resource actions — PayPal blue / gold, squared, compact row.
+ * Mapsite™ resource actions — PayPal blue / gold, squared, compact row.
  */
 .mapsite-paypal-btn {
   display: flex;
@@ -721,7 +721,7 @@ body.mapsite-gallery-open [data-paypal-button] {
     0 -1px 0 rgba(0, 0, 0, 0.22) inset;
 }
 
-/* TalisMaps™ Leaflet pin icons — apple-quality soft markers */
+/* Talismaps™ Leaflet pin icons — apple-quality soft markers */
 .talismaps-pin-icon {
   background: transparent !important;
   border: none !important;
@@ -826,8 +826,8 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 /*
- * TalisMaps™ map chrome — hide vendor branding / attribution UI.
- * Keep zoom controls; show only platform-added branding (e.g. Powered by TalisMaps™).
+ * Talismaps™ map chrome — hide vendor branding / attribution UI.
+ * Keep zoom controls; show only platform-added branding (e.g. Powered by Talismaps™).
  */
 .talismaps-map-canvas .gm-style-cc,
 .talismaps-map-canvas .gmnoscreen,
@@ -885,7 +885,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 }
 
-/* MapSite™ owner guided onboarding prompt — gentle float toward the property flag. */
+/* Mapsite™ owner guided onboarding prompt — gentle float toward the property flag. */
 @keyframes mapsite-guided-prompt-float {
   0%,
   100% {
@@ -924,7 +924,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 }
 
-/* ─── TalisBooks™ Premium Cover Templates ─────────────────────────────────── */
+/* ─── Talisbooks™ Premium Cover Templates ─────────────────────────────────── */
 
 .talisbooks-cover {
   --tb-cover-margin-top: 8%;
@@ -1114,7 +1114,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 }
 
-/* ─── TalisBooks™ Viewer ──────────────────────────────────────────────────── */
+/* ─── Talisbooks™ Viewer ──────────────────────────────────────────────────── */
 
 .talisbooks-viewer {
   min-height: 100vh;
@@ -3454,7 +3454,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 }
 
-/* ─── TalisBooks™ Library — physical recessed bookshelf ───────────────────── */
+/* ─── Talisbooks™ Library — physical recessed bookshelf ───────────────────── */
 
 .talisbooks-library {
   --library-ink: #1c1917;
@@ -4066,7 +4066,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 }
 
-/* ─── MapSite™ phone overlays ─────────────────────────────────────────────── */
+/* ─── Mapsite™ phone overlays ─────────────────────────────────────────────── */
 /* The map pin sits at the vertical centre, so the bottom stack (registration
    card + manager strip) must never grow tall enough to reach it. Short phones
    drop the secondary copy first. */

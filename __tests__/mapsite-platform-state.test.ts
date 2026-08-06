@@ -8,7 +8,7 @@ import {
   toPlatformStatus,
 } from "../lib/talispros/mapsite-state";
 
-describe("MapSite platform state machine", () => {
+describe("Mapsite™ platform state machine", () => {
   it("maps database statuses to platform statuses", () => {
     expect(toPlatformStatus("unclaimed")).toBe("UNCLAIMED");
     expect(toPlatformStatus("build_request_submitted")).toBe(

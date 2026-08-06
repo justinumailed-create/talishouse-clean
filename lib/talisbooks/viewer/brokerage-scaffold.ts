@@ -23,7 +23,7 @@ export const TALISBOOKS_BROKERAGE_DEMO_AGENT = {
   brokerageLogoUrl: `${ASSET}/brokerage-banner.jpg`,
   slogan: "Where the Atlantic finds you.",
   mission:
-    "We connect buyers and guests with coastal places worth staying for - honest photos, clear location, and a Mapsite PIN that opens the full story.",
+    "We connect buyers and guests with coastal places worth staying for - honest photos, clear location, and a Mapsite™ PIN that opens the full story.",
 } as const;
 
 /**
@@ -55,7 +55,7 @@ export function createBrokeragePage2Scaffold(
 
 /**
  * Official brokerage page 3 — agent summary (compliance mirror for closing).
- * Not used by the FSBO sample viewer (FSBO page 2 is MapSite location instead).
+ * Not used by the FSBO sample viewer (FSBO page 2 is Mapsite™ location instead).
  */
 export function createBrokeragePage3Scaffold(
   pageNumber = 3,

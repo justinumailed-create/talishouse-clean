@@ -87,7 +87,7 @@ export async function processPayment(
 
     let fastCode = "";
     let accountTypeLabel = "root";
-    let linkedMapsiteId: string | null = null;
+    let linkedMapSiteId: string | null = null;
     if (input.buildRequestId) {
       const { data: buildRequest } = await supabaseAdmin
         .from("build_requests")
@@ -103,7 +103,7 @@ export async function processPayment(
         accountTypeLabel =
           input.planType === "ROOT_ACCOUNT_1" ? "root-1" : "root";
       }
-      linkedMapsiteId = buildRequest?.linked_mapsite_id ?? null;
+      linkedMapSiteId = buildRequest?.linked_mapsite_id ?? null;
     }
 
     if (!fastCode) {
@@ -121,9 +121,9 @@ export async function processPayment(
             ? "root"
             : accountTypeLabel;
 
-    const mapsite = linkedMapsiteId
+    const mapsite = linkedMapSiteId
       ? {
-          id: linkedMapsiteId,
+          id: linkedMapSiteId,
           fastCode,
         }
       : await createMapSite({

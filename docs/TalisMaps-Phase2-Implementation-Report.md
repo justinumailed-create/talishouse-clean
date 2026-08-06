@@ -1,4 +1,4 @@
-# TalisMaps™ Phase 2 Implementation Report
+# Talismaps™ Phase 2 Implementation Report
 
 
 | Field              | Value                                                                                                   |
@@ -9,13 +9,13 @@
 | **Developer**      | Arun Rachuri / Cursor Agent (Phase 2 implementation session)                                            |
 
 
-> **Important:** TalisMaps™ Phase 2 work exists as **uncommitted local changes** on `main`. It is not yet included in `6a2c626`. QA should use the working tree containing the TalisMaps files listed in Sections 15–16.
+> **Important:** Talismaps™ Phase 2 work exists as **uncommitted local changes** on `main`. It is not yet included in `6a2c626`. QA should use the working tree containing the Talismaps™ files listed in Sections 15–16.
 
 ---
 
 ## 1. EXECUTIVE SUMMARY
 
-Phase 2 establishes **TalisMaps™** as a standalone product within the Talispros™ ecosystem — separate from MapSite™ admin, with its own routes, database schema, dashboard, map editor, map engine abstraction, and PIN engine.
+Phase 2 establishes **Talismaps™** as a standalone product within the Talispros™ ecosystem — separate from Mapsite™ admin, with its own routes, database schema, dashboard, map editor, map engine abstraction, and PIN engine.
 
 ### What was completed
 
@@ -31,15 +31,15 @@ Phase 2 establishes **TalisMaps™** as a standalone product within the Talispro
 
 
 
-### How TalisMaps™ replaces Atlist over time
+### How Talismaps™ replaces Atlist over time
 
-Today, public MapSites still embed **Atlist** iframes (`MapSiteAtlistMap.tsx`, `atlist_map_url` on `mapsites`). Phase 2 lays the **replacement platform**:
+Today, public Mapsites™ still embed **Atlist** iframes (`MapSiteAtlistMap.tsx`, `atlist_map_url` on `mapsites`). Phase 2 lays the **replacement platform**:
 
-1. **Now:** TalisMaps™ product shell, data model, editor, and PIN CRUD on native tables (`talismaps_`*).
-2. **Next:** Publish maps from TalisMaps™ and swap MapSite embeds from Atlist URL → TalisMaps public map URL.
+1. **Now:** Talismaps™ product shell, data model, editor, and PIN CRUD on native tables (`talismaps_`*).
+2. **Next:** Publish maps from Talismaps™ and swap Mapsite™ embeds from Atlist URL → Talismaps™ public map URL.
 3. **Later:** Import tooling (Atlist migration), analytics, QR, and marketing integrations complete parity.
 
-Atlist remains in production for existing MapSites until explicit migration and embed cutover in a future phase.
+Atlist remains in production for existing Mapsites™ until explicit migration and embed cutover in a future phase.
 
 ---
 
@@ -51,7 +51,7 @@ Atlist remains in production for existing MapSites until explicit migration and 
 
 ### Design rationale
 
-TalisMaps™ was built as a **product boundary**, not a feature inside Talispros™:
+Talismaps™ was built as a **product boundary**, not a feature inside Talispros™:
 
 - **Isolated routes** under `/talismaps/`* with dedicated layout and chrome
 - **Namespaced database** (`talismaps_`* tables) separate from legacy `pins` / `categories`
@@ -209,9 +209,9 @@ Swap via `NEXT_PUBLIC_TALISMAPS_MAP_PROVIDER` without touching editor components
 
 ### Navigation integration
 
-- `TalisprosHeader` — added **TalisMaps™** link
+- `TalisprosHeader` — added **Talismaps™** link
 - `RootShell` — `/talismaps` uses product chrome (no main site header/footer)
-- Legacy `app/admin/layout.tsx` — TalisMaps™ nav link; `/admin/talismaps` bypasses FAST-code gate
+- Legacy `app/admin/layout.tsx` — Talismaps™ nav link; `/admin/talismaps` bypasses FAST-code gate
 - `lib/routes.ts` — `TALISMAPS_*` constants
 
 ---
@@ -385,7 +385,7 @@ npx supabase db push --include-all
 
 ### Legacy tables (unchanged)
 
-Pre-existing `pins` and `categories` tables (MapSite/Leaflet prototype) remain separate from `talismaps_*`.
+Pre-existing `pins` and `categories` tables (Mapsite™/Leaflet prototype) remain separate from `talismaps_*`.
 
 ---
 
@@ -633,7 +633,7 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 
 | Feature                                 | Status                      |
 | --------------------------------------- | --------------------------- |
-| TalisMaps™ product routes               | ✅                           |
+| Talismaps™ product routes               | ✅                           |
 | Marketing page (`/talismaps`)           | ✅                           |
 | Dashboard command center                | ✅                           |
 | Dashboard sidebar navigation            | ✅                           |
@@ -655,14 +655,14 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 | Default categories seeding              | ✅                           |
 | Talispros™ nav link                     | ✅                           |
 | RootShell isolation                     | ✅                           |
-| Legacy Atlist embeds on MapSites        | ✅ (unchanged — coexistence) |
+| Legacy Atlist embeds on Mapsites™        | ✅ (unchanged — coexistence) |
 | Dashboard placeholder sub-pages         | ✅ (shell only)              |
 | Google Maps / Mapbox providers          | ❌ stubs only                |
 | Pin clustering                          | ❌                           |
 | Map publish workflow                    | ❌                           |
-| Atlist replacement on MapSites          | ❌                           |
+| Atlist replacement on Mapsites™          | ❌                           |
 | Editor authentication                   | ❌                           |
-| Automated tests for TalisMaps           | ❌                           |
+| Automated tests for Talismaps™           | ❌                           |
 
 
 ---
@@ -681,7 +681,7 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 - ❌ QR code generation and QR analytics UI
 - ❌ Offline mode
 - ❌ Public published map viewer route (`/talismaps/[slug]`)
-- ❌ MapSite embed cutover from Atlist
+- ❌ Mapsite™ embed cutover from Atlist
 - ❌ Google Maps / Mapbox provider implementations
 - ❌ Geocoding / address search
 - ❌ Media file upload (Storage)
@@ -724,7 +724,7 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 | ID     | Purpose        | Steps                                         | Expected                                          | Priority |
 | ------ | -------------- | --------------------------------------------- | ------------------------------------------------- | -------- |
 | TM-010 | Marketing page | Open `/talismaps`                             | Hero, roadmap grid, CTAs render; ™ symbol present | P1       |
-| TM-011 | Talispros link | From `/talispros`, click TalisMaps™ in header | Navigates to `/talismaps`                         | P1       |
+| TM-011 | Talispros link | From `/talispros`, click Talismaps™ in header | Navigates to `/talismaps`                         | P1       |
 | TM-012 | Root shell     | Visit `/talismaps`                            | Main Talishouse header/footer hidden              | P2       |
 | TM-013 | Dashboard CTA  | Click "Open Dashboard" on marketing page      | Lands on `/talismaps/dashboard`                   | P1       |
 
@@ -754,7 +754,7 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 | ------ | ----------- | ------------------------------------------------------- | ------------------------------- | -------- |
 | TM-030 | Admin auth  | Open `/admin/talismaps` without Talispros admin session | Redirect to login or auth gate  | P1       |
 | TM-031 | Admin stats | Login to Talispros admin, open `/admin/talismaps`       | Stats cards + model list render | P1       |
-| TM-032 | Admin nav   | From legacy `/admin`, click TalisMaps™                  | Reaches `/admin/talismaps`      | P2       |
+| TM-032 | Admin nav   | From legacy `/admin`, click Talismaps™                  | Reaches `/admin/talismaps`      | P2       |
 
 
 
@@ -818,9 +818,9 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 
 | ID     | Purpose              | Steps                                  | Expected                    | Priority |
 | ------ | -------------------- | -------------------------------------- | --------------------------- | -------- |
-| TM-080 | Talispros unaffected | Browse `/talispros`, MapSites          | Existing flows work         | P1       |
+| TM-080 | Talispros unaffected | Browse `/talispros`, Mapsites™          | Existing flows work         | P1       |
 | TM-081 | Legacy MapView       | Load page using `MapShell` / `MapView` | Map renders via MapProvider | P2       |
-| TM-082 | Atlist embeds        | Open MapSite with Atlist URL           | iframe still works          | P1       |
+| TM-082 | Atlist embeds        | Open Mapsite™ with Atlist URL           | iframe still works          | P1       |
 
 
 ---
@@ -861,9 +861,9 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 
 
 
-### Lint (TalisMaps scope)
+### Lint (Talismaps™ scope)
 
-4 warnings, 0 errors in TalisMaps paths:
+4 warnings, 0 errors in Talismaps™ paths:
 
 - `MapEngineCanvas.tsx` — exhaustive-deps (intentional mount behavior)
 - `stub-providers.ts` — unused stub params
@@ -895,7 +895,7 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 
 ### Loading
 
-- Editor shows "Loading TalisMaps™ PIN Engine…" until bootstrap completes.
+- Editor shows "Loading Talismaps™ PIN Engine…" until bootstrap completes.
 - Map tiles depend on OSM CDN latency.
 
 
@@ -1020,9 +1020,9 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 
 | File                                       | Change                                                  |
 | ------------------------------------------ | ------------------------------------------------------- |
-| `app/admin/layout.tsx`                     | TalisMaps™ nav link; passthrough for `/admin/talismaps` |
+| `app/admin/layout.tsx`                     | Talismaps™ nav link; passthrough for `/admin/talismaps` |
 | `components/RootShell.tsx`                 | Embed `/talismaps` routes                               |
-| `components/talispros/TalisprosHeader.tsx` | TalisMaps™ nav item                                     |
+| `components/talispros/TalisprosHeader.tsx` | Talismaps™ nav item                                     |
 | `components/talismaps/MapView.tsx`         | Refactored to `MapEngineProvider` + `MapEngineCanvas`   |
 | `lib/database.types.ts`                    | Added 10 `talismaps_*` table types + PIN engine columns |
 | `lib/routes.ts`                            | Added `TALISMAPS_*` route constants                     |
@@ -1052,7 +1052,7 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 | 2    | **Apply migrations to staging**          | Unblock QA and integration                      |
 | 3    | **API authentication & permissions**     | Blocker for any public deployment               |
 | 4    | **Public map route** `/talismaps/[slug]` | Required for Atlist replacement                 |
-| 5    | **MapSite embed cutover**                | Replace `MapSiteAtlistMap` with TalisMaps embed |
+| 5    | **Mapsite™ embed cutover**                | Replace `MapSiteAtlistMap` with Talismaps™ embed |
 | 6    | **Per-account maps**                     | Remove shared `editor-draft`                    |
 | 7    | **Atlist import wizard**                 | Migration path for existing customers           |
 | 8    | **Media upload (Supabase Storage)**      | Property listings need images                   |
@@ -1094,7 +1094,7 @@ Open: `http://localhost:3000/talismaps`
 | `SUPABASE_SERVICE_ROLE_KEY`          | Yes      | Server writes (PIN CRUD, bootstrap) |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY`      | Yes      | Client auth (Talispros admin)       |
 | `NEXT_PUBLIC_TALISMAPS_MAP_PROVIDER` | No       | Default `leaflet-osm`               |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`    | No       | Not used by TalisMaps™ yet          |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`    | No       | Not used by Talismaps™ yet          |
 
 
 Without `SUPABASE_SERVICE_ROLE_KEY`, APIs return errors and editor cannot save.
@@ -1114,7 +1114,7 @@ WHERE table_name LIKE 'talismaps_%';
 
 
 
-#### 4. Access TalisMaps™
+#### 4. Access Talismaps™
 
 
 | URL                    | What to test                                    |
@@ -1226,10 +1226,10 @@ Audit run: **2026-07-09** (no code modified during audit)
 | ----------------------------- | ----------------------------------------------------------------- |
 | `npm run build`               | ✅ Pass — exit 0                                                   |
 | TypeScript                    | ✅ Pass (via `next build`)                                         |
-| TalisMaps routes compile      | ✅ 15 pages + 4 API handlers in build output                       |
-| Broken imports (TalisMaps)    | ✅ None detected in build                                          |
-| ESLint (TalisMaps paths only) | ⚠️ 4 warnings, 0 errors                                           |
-| ESLint (full repo)            | ⚠️ 200 pre-existing issues (unrelated to TalisMaps)               |
+| Talismaps™ routes compile      | ✅ 15 pages + 4 API handlers in build output                       |
+| Broken imports (Talismaps™)    | ✅ None detected in build                                          |
+| ESLint (Talismaps™ paths only) | ⚠️ 4 warnings, 0 errors                                           |
+| ESLint (full repo)            | ⚠️ 200 pre-existing issues (unrelated to Talismaps™)               |
 | Database models vs code       | ✅ `database.types.ts` includes all 10 tables + PIN engine columns |
 | Migrations present            | ✅ 069, 070 on disk                                                |
 | Migrations applied remotely   | ❓ QA must verify via `db push`                                    |
@@ -1239,4 +1239,4 @@ Audit run: **2026-07-09** (no code modified during audit)
 
 ---
 
-*End of TalisMaps™ Phase 2 Implementation Report*
+*End of Talismaps™ Phase 2 Implementation Report*

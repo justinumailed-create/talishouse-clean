@@ -4,7 +4,7 @@ import {
   stripLogoBackground,
 } from "@/lib/media/strip-logo-background";
 
-export async function uploadBuildMapsiteAsset(
+export async function uploadBuildMapSiteAsset(
   requestId: string,
   fieldName: string,
   file: File

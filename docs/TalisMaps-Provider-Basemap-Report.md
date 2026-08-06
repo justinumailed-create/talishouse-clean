@@ -1,4 +1,4 @@
-# TalisMaps™ Provider & Satellite Imagery Report
+# Talismaps™ Provider & Satellite Imagery Report
 
 **Date:** 2026-07-15  
 **Scope:** MapProvider abstraction, basemap views, production recommendation
@@ -22,7 +22,7 @@ Satellite is exposed as a selectable basemap view through the Leaflet adapter (E
 
 ## 1. Which providers support Satellite?
 
-| Provider | Street | Satellite | Hybrid | Terrain | Status in TalisMaps™ |
+| Provider | Street | Satellite | Hybrid | Terrain | Status in Talismaps™ |
 |----------|--------|-----------|--------|---------|----------------------|
 | **OpenStreetMap (Leaflet)** | Yes (OSM tiles) | Via optional Esri World Imagery layer in Leaflet adapter | Future | Future | **Implemented (default)** |
 | **Mapbox** | Yes | Yes (`mapbox/satellite-*`) | Yes | Yes | Stub — needs `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` |
@@ -39,7 +39,7 @@ Satellite is exposed as a selectable basemap view through the Leaflet adapter (E
 | Mapbox Satellite | Yes | Free tier then paid | API token required |
 | Google Maps Satellite | Yes | Billing account required | Maps JavaScript API |
 
-**Conclusion:** Free, unrestricted satellite for a commercial Mapsite product is **not** available. Therefore default view remains **Street**.
+**Conclusion:** Free, unrestricted satellite for a commercial Mapsite™ product is **not** available. Therefore default view remains **Street**.
 
 ---
 
@@ -48,7 +48,7 @@ Satellite is exposed as a selectable basemap view through the Leaflet adapter (E
 ### OpenStreetMap (street)
 - Data: ODbL — attribution required (“© OpenStreetMap contributors”).
 - Tile usage: osm.org public tiles are for light use; production at scale should use a commercial tile host or self-hosted tiles.
-- Suitable as TalisMaps™ default engine with no API key.
+- Suitable as Talismaps™ default engine with no API key.
 
 ### Esri World Imagery
 - **OSM editor exception:** free for tracing/editing OSM; not a general commercial tile grant.

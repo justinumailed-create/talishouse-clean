@@ -401,9 +401,9 @@ export default function TalisBooksViewerShell({
           <p className="talisbooks-viewer__eyebrow">
             {isMagazine
               ? book.listingProfile === "fsbo"
-                ? "TalisBooks™ FSBO Demo"
-                : "TalisBooks™ Magazine"
-              : "TalisBooks™ Viewer"}
+                ? "Talisbooks™ FSBO Demo"
+                : "Talisbooks™ Magazine"
+              : "Talisbooks™ Viewer"}
           </p>
           <h1 className="talisbooks-viewer__title">{book.title}</h1>
           {book.subtitle ? (

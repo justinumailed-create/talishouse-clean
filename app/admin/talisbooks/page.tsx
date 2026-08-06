@@ -25,7 +25,7 @@ export default async function TalisBooksAdminPage() {
           {TALISBOOKS_PRODUCT_NAME} Admin
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500">
-          Manage the TalisBooks™ digital publication engine. Books link to MapSites™, accounts,
+          Manage the Talisbooks™ digital publication engine. Books link to Mapsites™, accounts,
           and FAST Codes across the Talispros™ ecosystem.
         </p>
 

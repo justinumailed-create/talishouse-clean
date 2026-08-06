@@ -17,6 +17,17 @@ import {
   ONBOARDING_JOB_TIMEOUT_MS,
   formatOnboardingDuration,
 } from "@/lib/onboarding-timing";
+type EbookOptimizedUploadResponse = {
+  ok: true;
+  url: string;
+  width: number;
+  height: number;
+  bytes: number;
+  originalBytes: number;
+  mimeType: string;
+  kind: "property" | "agent" | "logo";
+  compressionRatio: number;
+};
 
 interface EbookGenerateClientProps {
   /** Server-resolved FAST Code (display / titles only — never trusted on submit). */
@@ -43,6 +54,22 @@ type SelectedUpload = {
   label: string;
 };
 
+type OptimizedAsset = {
+  url: string;
+  width: number;
+  height: number;
+  bytes: number;
+  originalBytes: number;
+};
+
+type UploadFailure = {
+  id: string;
+  label: string;
+  kind: "property" | "agent" | "logo";
+  file: File;
+  error: string;
+};
+
 /** Format digits into North American (XXX) XXX-XXXX as the user types. */
 function formatNorthAmericanPhone(value: string): string {
   const digits = value.replace(/\D/g, "").slice(0, 10);
@@ -55,14 +82,82 @@ function formatNorthAmericanPhone(value: string): string {
 }
 
 const STAGE_ORDER = EBOOK_GENERATION_STAGES;
+const UPLOAD_CONCURRENCY = 3;
 
 function stageIndex(stage: EbookGenerationStage | null): number {
   if (!stage || stage === "failed") return -1;
   return STAGE_ORDER.indexOf(stage);
 }
 
+async function uploadOptimizedImage(options: {
+  requestId: string;
+  kind: "property" | "agent" | "logo";
+  file: File;
+  label: string;
+  signal?: AbortSignal;
+}): Promise<EbookOptimizedUploadResponse> {
+  const fd = new FormData();
+  fd.set("requestId", options.requestId);
+  fd.set("kind", options.kind);
+  fd.set("label", options.label);
+  fd.set("file", options.file);
+
+  const response = await fetch("/api/talispros/ebook-generate/upload-image", {
+    method: "POST",
+    body: fd,
+    signal: options.signal,
+  });
+
+  let payload: { ok?: boolean; error?: string } & Partial<EbookOptimizedUploadResponse>;
+  try {
+    payload = (await response.json()) as typeof payload;
+  } catch {
+    throw new Error(
+      response.status === 413
+        ? `“${options.label}” is too large for a single upload. Try again — optimization should shrink it.`
+        : `Failed to upload “${options.label}” (${response.status}).`,
+    );
+  }
+
+  if (!response.ok || !payload.ok || !payload.url) {
+    if (response.status === 413) {
+      throw new Error(
+        `“${options.label}” triggered HTTP 413. Retry this image only.`,
+      );
+    }
+    throw new Error(
+      payload.error || `Failed to optimize and upload “${options.label}”.`,
+    );
+  }
+
+  return payload as EbookOptimizedUploadResponse;
+}
+
+async function mapPool<T, R>(
+  items: T[],
+  concurrency: number,
+  mapper: (item: T, index: number) => Promise<R>,
+): Promise<R[]> {
+  if (items.length === 0) return [];
+  const results = new Array<R>(items.length);
+  let next = 0;
+
+  async function worker() {
+    while (next < items.length) {
+      const index = next;
+      next += 1;
+      results[index] = await mapper(items[index]!, index);
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, items.length) }, () => worker()),
+  );
+  return results;
+}
+
 /**
- * Self-service first TalisBook™ generator — images / PDF pages, title, description, location.
+ * Self-service first Talisbook™ generator — images / PDF pages, title, description, location.
  * Business identity comes from requestId (Build Request) resolved on the server.
  */
 export default function EbookGenerateClient({
@@ -96,6 +191,8 @@ export default function EbookGenerateClient({
   const [activeStage, setActiveStage] = useState<EbookGenerationStage | null>(
     null
   );
+  const [stageDetail, setStageDetail] = useState("");
+  const [uploadFailures, setUploadFailures] = useState<UploadFailure[]>([]);
   const [error, setError] = useState(bootstrapError || "");
   const [errorMeta, setErrorMeta] = useState(bootstrapMeta);
 
@@ -116,6 +213,7 @@ export default function EbookGenerateClient({
   async function handleFilesSelected(fileList: FileList | null) {
     setError("");
     setErrorMeta(null);
+    setUploadFailures([]);
     if (!fileList || fileList.length === 0) return;
 
     const remaining = Math.max(0, MAX_EBOOK_UPLOAD_PAGES - uploads.length);
@@ -190,10 +288,245 @@ export default function EbookGenerateClient({
     }
   }
 
+  type UploadStash = {
+    byId: Record<string, OptimizedAsset>;
+    agentPhotoUrl: string | null;
+    brokerageLogoUrl: string | null;
+  };
+
+  function stashKeyFor(id: string) {
+    return `ebook-opt-${id}`;
+  }
+
+  function readStash(id: string): UploadStash {
+    try {
+      const raw = sessionStorage.getItem(stashKeyFor(id));
+      if (!raw) return { byId: {}, agentPhotoUrl: null, brokerageLogoUrl: null };
+      const parsed = JSON.parse(raw) as UploadStash & {
+        images?: OptimizedAsset[];
+      };
+      // Migrate older stash shape if present.
+      if (parsed.byId) return parsed;
+      const byId: Record<string, OptimizedAsset> = {};
+      for (const [index, image] of (parsed.images || []).entries()) {
+        byId[`legacy-${index}`] = image;
+      }
+      return {
+        byId,
+        agentPhotoUrl: parsed.agentPhotoUrl || null,
+        brokerageLogoUrl: parsed.brokerageLogoUrl || null,
+      };
+    } catch {
+      return { byId: {}, agentPhotoUrl: null, brokerageLogoUrl: null };
+    }
+  }
+
+  function writeStash(id: string, stash: UploadStash) {
+    sessionStorage.setItem(stashKeyFor(id), JSON.stringify(stash));
+  }
+
+  async function optimizeAndStoreUploads(options: {
+    requestId: string;
+    propertyItems: SelectedUpload[];
+    logo: File | null;
+    agentPhoto: File | null;
+    signal: AbortSignal;
+    prior: UploadStash;
+  }): Promise<{
+    optimizedImages: OptimizedAsset[];
+    agentPhotoUrl: string | null;
+    brokerageLogoUrl: string | null;
+    failures: UploadFailure[];
+    originalBytes: number;
+    optimizedBytes: number;
+    stash: UploadStash;
+  }> {
+    const failures: UploadFailure[] = [];
+    const stash: UploadStash = {
+      byId: { ...options.prior.byId },
+      agentPhotoUrl: options.prior.agentPhotoUrl,
+      brokerageLogoUrl: options.prior.brokerageLogoUrl,
+    };
+    let originalBytes = 0;
+    let optimizedBytes = 0;
+
+    const pendingProperty = options.propertyItems.filter(
+      (item) => !stash.byId[item.id],
+    );
+    const needLogo = Boolean(options.logo) && !stash.brokerageLogoUrl;
+    const needAgent = Boolean(options.agentPhoto) && !stash.agentPhotoUrl;
+    const total =
+      pendingProperty.length + (needLogo ? 1 : 0) + (needAgent ? 1 : 0);
+    let completed = 0;
+
+    const bump = () => {
+      completed += 1;
+      setActiveStage(
+        completed < total ? "optimizing_images" : "uploading_images",
+      );
+      setStageDetail(total > 0 ? `${completed}/${total}` : "");
+    };
+
+    setActiveStage("optimizing_images");
+    setStageDetail(total > 0 ? `0/${total}` : "cached");
+
+    await mapPool(pendingProperty, UPLOAD_CONCURRENCY, async (item) => {
+      setActiveStage("optimizing_images");
+      try {
+        const result = await uploadOptimizedImage({
+          requestId: options.requestId,
+          kind: "property",
+          file: item.file,
+          label: item.label,
+          signal: options.signal,
+        });
+        stash.byId[item.id] = {
+          url: result.url,
+          width: result.width,
+          height: result.height,
+          bytes: result.bytes,
+          originalBytes: result.originalBytes,
+        };
+        originalBytes += result.originalBytes;
+        optimizedBytes += result.bytes;
+      } catch (err) {
+        failures.push({
+          id: item.id,
+          label: item.label,
+          kind: "property",
+          file: item.file,
+          error: err instanceof Error ? err.message : "Upload failed.",
+        });
+      } finally {
+        bump();
+      }
+    });
+
+    setActiveStage("uploading_images");
+
+    if (needLogo && options.logo) {
+      try {
+        const result = await uploadOptimizedImage({
+          requestId: options.requestId,
+          kind: "logo",
+          file: options.logo,
+          label: options.logo.name || "Brokerage logo",
+          signal: options.signal,
+        });
+        stash.brokerageLogoUrl = result.url;
+        originalBytes += result.originalBytes;
+        optimizedBytes += result.bytes;
+      } catch (err) {
+        failures.push({
+          id: "logo",
+          label: options.logo.name || "Brokerage logo",
+          kind: "logo",
+          file: options.logo,
+          error: err instanceof Error ? err.message : "Logo upload failed.",
+        });
+      } finally {
+        bump();
+      }
+    }
+
+    if (needAgent && options.agentPhoto) {
+      try {
+        const result = await uploadOptimizedImage({
+          requestId: options.requestId,
+          kind: "agent",
+          file: options.agentPhoto,
+          label: options.agentPhoto.name || "Agent photo",
+          signal: options.signal,
+        });
+        stash.agentPhotoUrl = result.url;
+        originalBytes += result.originalBytes;
+        optimizedBytes += result.bytes;
+      } catch (err) {
+        failures.push({
+          id: "agent-photo",
+          label: options.agentPhoto.name || "Agent photo",
+          kind: "agent",
+          file: options.agentPhoto,
+          error:
+            err instanceof Error ? err.message : "Agent photo upload failed.",
+        });
+      } finally {
+        bump();
+      }
+    }
+
+    const optimizedImages = options.propertyItems
+      .map((item) => stash.byId[item.id])
+      .filter((item): item is OptimizedAsset => Boolean(item));
+
+    // Account for previously cached assets in the compression report.
+    const pendingIds = new Set(pendingProperty.map((item) => item.id));
+    for (const item of options.propertyItems) {
+      if (pendingIds.has(item.id)) continue;
+      const asset = stash.byId[item.id];
+      if (!asset) continue;
+      originalBytes += asset.originalBytes;
+      optimizedBytes += asset.bytes;
+    }
+
+    return {
+      optimizedImages,
+      agentPhotoUrl: stash.agentPhotoUrl,
+      brokerageLogoUrl: stash.brokerageLogoUrl,
+      failures,
+      originalBytes,
+      optimizedBytes,
+      stash,
+    };
+  }
+
+  async function retryFailedUpload(failure: UploadFailure) {
+    if (!requestId || saving) return;
+    setError("");
+    setSaving(true);
+    setActiveStage("optimizing_images");
+    setStageDetail(`Retrying ${failure.label}`);
+
+    try {
+      const result = await uploadOptimizedImage({
+        requestId,
+        kind: failure.kind,
+        file: failure.file,
+        label: failure.label,
+      });
+      const stash = readStash(requestId);
+      if (failure.kind === "property") {
+        stash.byId[failure.id] = {
+          url: result.url,
+          width: result.width,
+          height: result.height,
+          bytes: result.bytes,
+          originalBytes: result.originalBytes,
+        };
+      } else if (failure.kind === "agent") {
+        stash.agentPhotoUrl = result.url;
+      } else {
+        stash.brokerageLogoUrl = result.url;
+      }
+      writeStash(requestId, stash);
+      setUploadFailures((current) =>
+        current.filter((item) => item.id !== failure.id),
+      );
+      setActiveStage(null);
+      setStageDetail("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Retry failed.");
+      setActiveStage("failed");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setError("");
     setErrorMeta(null);
+    setUploadFailures([]);
 
     if (!requestId) {
       setError(
@@ -219,30 +552,9 @@ export default function EbookGenerateClient({
     }
 
     setSaving(true);
-    setActiveStage("upload_complete");
+    setActiveStage("optimizing_images");
     const generateStarted =
       typeof performance !== "undefined" ? performance.now() : Date.now();
-
-    const fd = new FormData();
-    // Canonical key only — server resolves FAST Code / MapSite from the Build Request.
-    fd.set("requestId", requestId);
-    fd.set(
-      "title",
-      fromPdf
-        ? title.trim() || `${fastCode.toUpperCase()} TalisBook™`
-        : title.trim()
-    );
-    fd.set("description", fromPdf ? description.trim() : description.trim());
-    fd.set("location", fromPdf ? location.trim() : location.trim());
-    fd.set("agentName", agentName.trim());
-    fd.set("agentEmail", agentEmail.trim());
-    fd.set("agentPhone", agentPhone.trim());
-    for (const item of uploads) {
-      fd.append("images", item.file);
-    }
-    if (logoFile) fd.set("brokerageLogo", logoFile);
-    if (agentPhotoFile) fd.set("agentPhoto", agentPhotoFile);
-    fd.set("uploadMode", fromPdf ? "pdf" : "images");
 
     const controller = new AbortController();
     const timeoutId = window.setTimeout(() => {
@@ -250,6 +562,72 @@ export default function EbookGenerateClient({
     }, ONBOARDING_JOB_TIMEOUT_MS);
 
     try {
+      const prior = readStash(requestId);
+      const stored = await optimizeAndStoreUploads({
+        requestId,
+        propertyItems: uploads,
+        logo: logoFile,
+        agentPhoto: agentPhotoFile,
+        signal: controller.signal,
+        prior,
+      });
+      writeStash(requestId, stored.stash);
+
+      if (stored.failures.length > 0) {
+        setUploadFailures(stored.failures);
+        setActiveStage("failed");
+        setError(
+          `${stored.failures.length} image${stored.failures.length === 1 ? "" : "s"} failed. Retry the failed image(s) below — you do not need to restart the whole upload.`,
+        );
+        return;
+      }
+
+      if (stored.optimizedImages.length === 0) {
+        setError("Upload at least one property image or PDF.");
+        setActiveStage("failed");
+        return;
+      }
+
+      const { optimizedImages, agentPhotoUrl, brokerageLogoUrl } = stored;
+
+      console.info(
+        `[onboarding] Image optimize+upload ...... original=${stored.originalBytes} optimized=${stored.optimizedBytes} ratio=${
+          stored.originalBytes
+            ? (stored.optimizedBytes / stored.originalBytes).toFixed(3)
+            : "n/a"
+        }`,
+      );
+
+      setActiveStage("generating_pages");
+      setStageDetail("");
+
+      const fd = new FormData();
+      fd.set("requestId", requestId);
+      fd.set(
+        "title",
+        fromPdf
+          ? title.trim() || `${fastCode.toUpperCase()} Talisbook™`
+          : title.trim()
+      );
+      fd.set("description", fromPdf ? description.trim() : description.trim());
+      fd.set("location", fromPdf ? location.trim() : location.trim());
+      fd.set("agentName", agentName.trim());
+      fd.set("agentEmail", agentEmail.trim());
+      fd.set("agentPhone", agentPhone.trim());
+      fd.set(
+        "optimizedImages",
+        JSON.stringify(
+          optimizedImages.map(({ url, width, height }) => ({
+            url,
+            width,
+            height,
+          })),
+        ),
+      );
+      if (agentPhotoUrl) fd.set("agentPhotoUrl", agentPhotoUrl);
+      if (brokerageLogoUrl) fd.set("brokerageLogoUrl", brokerageLogoUrl);
+      fd.set("uploadMode", fromPdf ? "pdf" : "images");
+
       const response = await fetch("/api/talispros/ebook-generate", {
         method: "POST",
         body: fd,
@@ -258,7 +636,9 @@ export default function EbookGenerateClient({
 
       if (!response.ok || !response.body) {
         throw new Error(
-          `Generation request failed (${response.status}). Please try again.`
+          response.status === 413
+            ? "Generate request was rejected as too large (HTTP 413). Images should already be stored as URLs — please retry."
+            : `Generation request failed (${response.status}). Please try again.`,
         );
       }
 
@@ -284,6 +664,9 @@ export default function EbookGenerateClient({
             continue;
           }
           setActiveStage(event.stage);
+          if ("detail" in event && event.detail) {
+            setStageDetail(event.detail);
+          }
           finalEvent = event;
           if (event.stage === "failed") {
             setError(event.error);
@@ -317,6 +700,11 @@ export default function EbookGenerateClient({
 
       if (finalEvent.stage === "completed") {
         setActiveStage("completed");
+        try {
+          sessionStorage.removeItem(stashKeyFor(requestId));
+        } catch {
+          /* ignore */
+        }
         if (finalEvent.mapsiteHref) {
           window.location.assign(finalEvent.mapsiteHref);
           return;
@@ -333,7 +721,7 @@ export default function EbookGenerateClient({
         generateError instanceof DOMException &&
         generateError.name === "AbortError";
       const message = aborted
-        ? `Ebook generation timed out after ${formatOnboardingDuration(ONBOARDING_JOB_TIMEOUT_MS)}. Please try again with fewer or smaller images.`
+        ? `Ebook generation timed out after ${formatOnboardingDuration(ONBOARDING_JOB_TIMEOUT_MS)}. Please try again with fewer images.`
         : generateError instanceof Error
           ? generateError.message
           : "Could not generate your E-Book. Please try again.";
@@ -352,6 +740,7 @@ export default function EbookGenerateClient({
     } finally {
       window.clearTimeout(timeoutId);
       setSaving(false);
+      setStageDetail("");
     }
   }
 
@@ -362,13 +751,14 @@ export default function EbookGenerateClient({
       <div className="w-full max-w-lg">
         <div className="text-center">
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-400">
-            TalisBooks™
+            Talisbooks™
           </p>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
             Generate My Own E-Book
           </h1>
           <p className="mt-2 text-sm text-neutral-500">
-            Add property images or a PDF. Each PDF page becomes a viewer page.
+            Add high-resolution photos or a PDF. Images are optimized
+            automatically — no resizing needed.
           </p>
           {fastCode ? (
             <p className="mt-2 text-xs text-neutral-400">
@@ -408,7 +798,8 @@ export default function EbookGenerateClient({
                   className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
                 />
                 <p className="mt-1.5 text-xs text-neutral-400">
-                  JPG, PNG, or PDF. Up to {MAX_EBOOK_UPLOAD_PAGES} pages.
+                  JPG, PNG, or PDF. Up to {MAX_EBOOK_UPLOAD_PAGES} pages. Phone
+                  camera photos are fine.
                 </p>
 
                 {converting ? (
@@ -550,7 +941,7 @@ export default function EbookGenerateClient({
                     className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
                   />
                   <p className="mt-1.5 truncate text-xs text-neutral-400">
-                    {logoFile ? logoFile.name : "Optional"}
+                    {logoFile ? logoFile.name : "Optional · kept lossless"}
                   </p>
                 </div>
                 <div className="block text-sm">
@@ -571,7 +962,9 @@ export default function EbookGenerateClient({
                     className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
                   />
                   <p className="mt-1.5 truncate text-xs text-neutral-400">
-                    {agentPhotoFile ? agentPhotoFile.name : "Optional"}
+                    {agentPhotoFile
+                      ? agentPhotoFile.name
+                      : "Optional · auto-cropped"}
                   </p>
                 </div>
               </div>
@@ -586,12 +979,36 @@ export default function EbookGenerateClient({
                         ? ` · FAST ${errorMeta.fastCode.toUpperCase()}`
                         : ""}
                       {errorMeta.mapsiteId
-                        ? ` · MapSite ${errorMeta.mapsiteId.slice(0, 8)}`
+                        ? ` · Mapsite™ ${errorMeta.mapsiteId.slice(0, 8)}`
                         : ""}
                       {errorMeta.stage ? ` · Stage ${errorMeta.stage}` : ""}
                     </p>
                   ) : null}
                 </div>
+              ) : null}
+
+              {uploadFailures.length > 0 ? (
+                <ul className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                  {uploadFailures.map((failure) => (
+                    <li
+                      key={failure.id}
+                      className="flex items-start justify-between gap-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{failure.label}</p>
+                        <p className="text-xs text-amber-700">{failure.error}</p>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => void retryFailedUpload(failure)}
+                        className="shrink-0 rounded-lg bg-amber-900 px-2.5 py-1 text-xs font-medium text-white hover:bg-amber-800 disabled:opacity-60"
+                      >
+                        Retry
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               ) : null}
 
               {(saving || activeStage) && (
@@ -612,7 +1029,14 @@ export default function EbookGenerateClient({
                               : "text-neutral-400"
                         }`}
                       >
-                        <span>{EBOOK_GENERATION_STAGE_LABELS[stage]}</span>
+                        <span>
+                          {EBOOK_GENERATION_STAGE_LABELS[stage]}
+                          {current && stageDetail ? (
+                            <span className="ml-2 text-xs font-normal text-neutral-500">
+                              {stageDetail}
+                            </span>
+                          ) : null}
+                        </span>
                         <span className="text-xs">
                           {done ? "✓" : current ? "…" : ""}
                         </span>
@@ -633,11 +1057,13 @@ export default function EbookGenerateClient({
                         activeStage === "completed"
                           ? "completed"
                           : activeStage
-                      ]}…`
-                    : "Generating…"
+                      ]}${stageDetail ? ` (${stageDetail})` : ""}…`
+                    : "Working…"
                   : converting
                     ? "Converting PDF…"
-                    : "Generate Talisbook™"}
+                    : uploadFailures.length > 0
+                      ? "Continue after retries"
+                      : "Generate Talisbook™"}
               </button>
             </>
           )}

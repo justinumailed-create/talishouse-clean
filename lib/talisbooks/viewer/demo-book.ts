@@ -53,13 +53,13 @@ function propertyPage(
 }
 
 /**
- * FSBO demonstration TalisBook™ — optimized for owner-seller onboarding.
+ * FSBO demonstration Talisbook™ — optimized for owner-seller onboarding.
  *
  * Intentionally omits broker branding, corporate pages, and pages 2–3 brokerage
  * layouts. Those remain scaffolded in `brokerage-scaffold.ts` for a future
  * brokerage demonstration mode.
  *
- * Shape: cover → MapSite location → property story → Glasshouse brochure (permanent)
+ * Shape: cover → Mapsite™ location → property story → Glasshouse brochure (permanent)
  * → soft back cover. ensurePermanentClosingPages() injects brochure before back cover.
  */
 export function createDemoViewerBook(): TalisBooksViewerBook {
@@ -85,7 +85,7 @@ export function createDemoViewerBook(): TalisBooksViewerBook {
       latitude: MAPSITE_DEMO_LOCATION.latitude,
       longitude: MAPSITE_DEMO_LOCATION.longitude,
       mapZoom: MAPSITE_DEMO_LOCATION.mapZoom,
-      body: "Your MapSite™ PIN marks the property. Tap through for the full interactive story — no brokerage page required.",
+      body: "Your Mapsite™ PIN marks the property. Tap through for the full interactive story — no brokerage page required.",
     },
     ...centerfoldPair(3, "03", {
       title: "Cabins on the Ridge",
@@ -144,7 +144,7 @@ export function createDemoViewerBook(): TalisBooksViewerBook {
       address: ADDRESS,
       coverTemplateId: "horizon-caption",
       heroImageUrl: `${ASSET}/back-cover.jpg`,
-      body: "Listed by the owner · Open the MapSite™ PIN for details.",
+      body: "Listed by the owner · Open the Mapsite™ PIN for details.",
     },
   ];
 

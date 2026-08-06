@@ -12,7 +12,7 @@ export default async function TalisMapsMapsPage() {
     <div className="mx-auto max-w-6xl">
       <TalisMapsPageHeader
         title="Maps"
-        description="Create and manage TalisMaps™ instances for root accounts, derivative networks, and Adpro PINs."
+        description="Create and manage Talismaps™ instances for root accounts, derivative networks, and Adpro PINs."
       />
 
       {maps.length === 0 ? (

@@ -24,7 +24,7 @@ export function getGoogleMapsApiKey(): string {
   );
 }
 
-/** Hide third-party business / POI branding — TalisMaps™ pins are the only markers. */
+/** Hide third-party business / POI branding — Talismaps™ pins are the only markers. */
 const NO_THIRD_PARTY_POI_STYLES: google.maps.MapTypeStyle[] = [
   { featureType: "poi", stylers: [{ visibility: "off" }] },
   { featureType: "poi.business", stylers: [{ visibility: "off" }] },
@@ -87,7 +87,7 @@ type PinOverlay = {
 
 /**
  * Create an HTML overlay marker after the Maps JS API is loaded.
- * Preserves TalisMaps™ pin styling without requiring a Cloud Map ID.
+ * Preserves Talismaps™ pin styling without requiring a Cloud Map ID.
  */
 function createHtmlPinOverlayClass() {
   return class HtmlPinOverlay extends google.maps.OverlayView {
@@ -294,7 +294,7 @@ function createHtmlPinOverlayClass() {
 }
 
 /**
- * Google Maps JavaScript API adapter for TalisMaps™ / MapSite™.
+ * Google Maps JavaScript API adapter for Talismaps™ / Mapsite™.
  * Requires NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.
  */
 export class GoogleMapsProvider implements MapProvider {

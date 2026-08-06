@@ -115,7 +115,7 @@ export default function AdminMarketingPage() {
                       <Link className="px-2 py-1 rounded bg-neutral-100" href={`/admin/marketing/${row.id}`}>View</Link>
                       <Link className="px-2 py-1 rounded bg-neutral-100" href={`/admin/marketing/${row.id}`}>Edit</Link>
                       <button className="px-2 py-1 rounded bg-indigo-100 text-indigo-800" onClick={() => runAction(() => assignFastCode(row.id))} disabled={pending}>Assign FAST Code</button>
-                      <button className="px-2 py-1 rounded bg-green-100 text-green-800" onClick={() => runAction(() => generateDraftMapSite(row.id))} disabled={pending}>Generate MapSite</button>
+                      <button className="px-2 py-1 rounded bg-green-100 text-green-800" onClick={() => runAction(() => generateDraftMapSite(row.id))} disabled={pending}>Generate Mapsite™</button>
                       <button className="px-2 py-1 rounded bg-blue-100 text-blue-800" onClick={() => runAction(() => sendRegistration(row.id))} disabled={pending}>Send Registration</button>
                       <button
                         className="px-2 py-1 rounded bg-red-100 text-red-700"

@@ -6,14 +6,14 @@ import {
 
 /**
  * MapTiler Cloud → MapLibre style URL templates.
- * TalisMaps™ uses MapTiler exclusively for basemap styles.
+ * Talismaps™ uses MapTiler exclusively for basemap styles.
  */
 type StyleUrlMap = Record<MapStyleId, string>;
 
 function mapTilerStyleUrls(apiKey: string): StyleUrlMap {
   const key = encodeURIComponent(apiKey);
   return {
-    // Pure satellite imagery — no place / business labels (TalisMaps™ pins only).
+    // Pure satellite imagery — no place / business labels (Talismaps™ pins only).
     // Hybrid includes third-party POI branding we must not show.
     satellite: `https://api.maptiler.com/maps/satellite/style.json?key=${key}`,
     street: `https://api.maptiler.com/maps/streets-v2/style.json?key=${key}`,

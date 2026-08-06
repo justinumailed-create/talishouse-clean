@@ -66,7 +66,7 @@ export default function RahulBuildAssistClient({
         return;
       }
 
-      // Create MapSite + owner session, then show waiting screen.
+      // Create Mapsite™ + owner session, then show waiting screen.
       // Client never enters Rahul’s upload workspace.
       const opened = await openMapSiteAfterBuildRequest({
         requestId: result.requestId,
@@ -95,7 +95,7 @@ export default function RahulBuildAssistClient({
       <div className="flex min-h-dvh items-center justify-center bg-white px-4 py-8">
         <div className="w-full max-w-2xl rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 sm:text-3xl">
-            Your MapSite™ has been created
+            Your Mapsite™ has been created
           </h1>
           {code ? (
             <p className="mt-3 text-sm font-medium uppercase tracking-[0.08em] text-neutral-500">
@@ -103,18 +103,18 @@ export default function RahulBuildAssistClient({
             </p>
           ) : null}
           <p className="mt-4 text-sm leading-relaxed text-neutral-600 sm:text-base">
-            Rahul is now preparing your first TalisBook™. You&apos;ll receive a
+            Rahul is now preparing your first Talisbook™. You&apos;ll receive a
             notification as soon as it is ready.
           </p>
           <p className="mt-3 text-sm leading-relaxed text-neutral-600 sm:text-base">
-            You can open your pending MapSite™ anytime. When your book is ready,
+            You can open your pending Mapsite™ anytime. When your book is ready,
             it will appear on your property popup.
           </p>
           <a
             href={waiting.href}
             className="mt-8 inline-flex min-h-11 items-center justify-center rounded-xl bg-neutral-900 px-6 text-sm font-medium text-white transition hover:bg-neutral-800"
           >
-            Open My MapSite™
+            Open My Mapsite™
           </a>
         </div>
       </div>
@@ -132,7 +132,7 @@ export default function RahulBuildAssistClient({
         </h1>
         <p className="mt-2 text-sm text-neutral-600 sm:text-base">
           Submit the request and we will generate your FAST Code and create your
-          pending MapSite™. Rahul prepares your first TalisBook™.
+          pending Mapsite™. Rahul prepares your first Talisbook™.
         </p>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2">

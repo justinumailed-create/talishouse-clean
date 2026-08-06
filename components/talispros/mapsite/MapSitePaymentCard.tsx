@@ -163,7 +163,7 @@ export default function MapSitePaymentCard({
                     intent: "CAPTURE",
                     purchase_units: [
                       {
-                        description: `Talispros™ ${summary.planLabel} — MapSite ${fastCode || mapsiteId}`,
+                        description: `Talispros™ ${summary.planLabel} — Mapsite™ ${fastCode || mapsiteId}`,
                         amount: {
                           currency_code: "CAD",
                           value: summary.total.toFixed(2),
@@ -205,7 +205,7 @@ export default function MapSitePaymentCard({
         {!compact ? (
           <p className="mt-2 text-[11px] leading-snug text-neutral-500">
             PayPal charges {summary.totalLabel}. After payment, Express an Interest
-            unlocks and this MapSite™ becomes active for admin management on{" "}
+            unlocks and this Mapsite™ becomes active for admin management on{" "}
             {MAPSITE_APP_PATH}.
           </p>
         ) : null}

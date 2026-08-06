@@ -2,7 +2,7 @@
 
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { Database } from "@/lib/database.types";
-import { uploadBuildMapsiteAsset } from "@/lib/build-mapsite-upload";
+import { uploadBuildMapSiteAsset } from "@/lib/build-mapsite-upload";
 import { encodePinStyleInNotes } from "@/lib/build-request-pin-style-notes";
 import { lookupFastCodeRegistrationTier, type RegistrationFastCodeTier } from "@/lib/registration-fast-code-routing";
 import { sendBuildRequestReceived } from "@/lib/email";
@@ -87,7 +87,7 @@ function expectedTierForAccountType(
   return null;
 }
 
-export async function validateBuildMapsiteFastCode(
+export async function validateBuildMapSiteFastCode(
   code: string,
   accountType: string
 ): Promise<{ ok: true; code: string } | { ok: false; error: string }> {
@@ -182,7 +182,7 @@ async function uploadFile(
   fieldName: string,
   file: File
 ): Promise<string | null> {
-  return uploadBuildMapsiteAsset(requestId, fieldName, file);
+  return uploadBuildMapSiteAsset(requestId, fieldName, file);
 }
 
 function readUploadedUrl(formData: FormData, fieldName: string): string | null {
@@ -324,7 +324,7 @@ export async function submitBuildRequest(
     requiresFastCodeValidation(fields.accountType) &&
     !skipFastCodeValidation
   ) {
-    const fastCodeValidation = await validateBuildMapsiteFastCode(
+    const fastCodeValidation = await validateBuildMapSiteFastCode(
       fields.fastCode,
       fields.accountType
     );
@@ -544,7 +544,7 @@ export async function submitBuildRequest(
       .insert(mapsiteRequest);
 
     if (msError) {
-      console.error("[build-mapsite] Mapsite request insert error:", msError);
+      console.error("[build-mapsite] Mapsite™ request insert error:", msError);
     }
 
     const queueItem: Database["public"]["Tables"]["production_queue"]["Insert"] = {
@@ -687,13 +687,13 @@ export async function submitBuildRequest(
       return {
         success: false,
         requestId,
-        error: "FAST Code is required before continuing to MapSite™ or E-Book.",
+        error: "FAST Code is required before continuing to Mapsite™ or E-Book.",
       };
     }
 
     let resolvedMapSiteId = mapsiteId;
     if (mapsiteId) {
-      const claimed = await timedOnboardingStep("MapSite claim", () =>
+      const claimed = await timedOnboardingStep("Mapsite™ claim", () =>
         markMapSiteClaimedByBuildRequest({
           mapsiteId,
           buildRequestId: requestId,
@@ -712,7 +712,7 @@ export async function submitBuildRequest(
       );
       resolvedMapSiteId = claimed?.id ?? mapsiteId;
     } else if (formData.get("claimDemonstration") === "true") {
-      const claimed = await timedOnboardingStep("MapSite claim demo", () =>
+      const claimed = await timedOnboardingStep("Mapsite™ claim demo", () =>
         markMapSiteClaimedByBuildRequest({
           mapsiteId: DEMO_MAPSITE_ID,
           buildRequestId: requestId,

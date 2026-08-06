@@ -1,7 +1,7 @@
 /**
- * TalisBooks™ ecosystem relationships — reusable across Talispros™ products.
+ * Talisbooks™ ecosystem relationships — reusable across Talispros™ products.
  *
- * Book → MapSite™ → Account → FAST Code
+ * Book → Mapsite™ → Account → FAST Code
  */
 
 export type TalisBooksAccountType = "root" | "derivative" | "adpro";
@@ -32,7 +32,7 @@ export type TalisBooksDomainModel = keyof typeof TALISBOOKS_TABLE_MAP;
 
 export const TALISBOOKS_ECOSYSTEM_CHAIN = [
   { layer: "Book", description: "Digital publication (lookbook, property story)" },
-  { layer: "MapSite™", description: "Property marketing site the book belongs to" },
+  { layer: "Mapsite™", description: "Property marketing site the book belongs to" },
   { layer: "Account", description: "Talispros™ account hierarchy" },
   { layer: "FAST Code", description: "Referral network identifier" },
 ] as const;

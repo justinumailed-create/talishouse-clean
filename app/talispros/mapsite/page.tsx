@@ -31,9 +31,9 @@ import MapSiteOnboardingEntry from "@/components/talispros/mapsite/MapSiteOnboar
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = createMetadata({
-  title: "Talispros™ MapSite™",
+  title: "Talispros™ Mapsite™",
   description:
-    "Claim your market on the Talispros™ MapSite™ — the fullscreen map application for FSBO, builders, and real estate professionals.",
+    "Claim your market on the Talispros™ Mapsite™ — the fullscreen map application for FSBO, builders, and real estate professionals.",
   path: "/talispros/mapsite",
 });
 
@@ -92,7 +92,7 @@ export default async function TalisprosMapSitePage({
   }
 
   // PMC multi-pin is brokers browse only. Any claim / FAST-code / pin view
-  // must use the single-pin MapSite (user pin + MLS/URL/TEB/TTV card).
+  // must use the single-pin Mapsite™ (user pin + MLS/URL/TEB/TTV card).
   const showSinglePinMap =
     claimed ||
     view === "pin" ||
@@ -114,7 +114,7 @@ export default async function TalisprosMapSitePage({
   }
 
   // Backward-compatible setup URLs now enter dedicated onboarding flows first.
-  // Existing MapSite visual/state route remains the post-build success state.
+  // Existing Mapsite™ visual/state route remains the post-build success state.
   if (isAudienceEntryPage && setup === "self") {
     const params = new URLSearchParams({
       audience,

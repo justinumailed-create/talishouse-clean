@@ -14,19 +14,19 @@ export async function establishMapSiteOwnerSession(
   const entered = enteredCode.trim().toLowerCase();
 
   if (!target) {
-    return { success: false, error: "MapSite FAST code is required." };
+    return { success: false, error: "Mapsite™ FAST code is required." };
   }
 
   if (!entered || entered !== target) {
     return {
       success: false,
-      error: "Enter the FAST code for this MapSite to continue.",
+      error: "Enter the FAST code for this Mapsite™ to continue.",
     };
   }
 
   const mapsite = await getMapSiteByFastCode(target);
   if (!mapsite) {
-    return { success: false, error: "MapSite not found." };
+    return { success: false, error: "Mapsite™ not found." };
   }
 
   await setMapSiteOwnerSession(target);

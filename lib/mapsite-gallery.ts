@@ -76,7 +76,7 @@ export function mergeGalleryItemsWithLegacy(
   ]);
 }
 
-export function resolveMapsiteGalleryItems(
+export function resolveMapSiteGalleryItems(
   galleryItems: unknown,
   legacyUrls: string[]
 ): MapSiteGalleryItem[] {

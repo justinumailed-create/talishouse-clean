@@ -1,7 +1,7 @@
 "use server";
 
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { uploadBuildMapsiteAsset } from "@/lib/build-mapsite-upload";
+import { uploadBuildMapSiteAsset } from "@/lib/build-mapsite-upload";
 import type { Database } from "@/lib/database.types";
 import { generateFastCode } from "@/lib/fast-code-generator";
 import {
@@ -75,7 +75,7 @@ async function uploadFile(
   fieldName: string,
   file: File
 ): Promise<string | null> {
-  return uploadBuildMapsiteAsset(requestId, fieldName, file);
+  return uploadBuildMapSiteAsset(requestId, fieldName, file);
 }
 
 export async function submitBuildRequest(
@@ -301,7 +301,7 @@ export async function submitBuildRequest(
       .insert(mapsiteRequest);
 
     if (msError) {
-      console.error("[build-mapsite] Mapsite request insert error:", msError);
+      console.error("[build-mapsite] Mapsite™ request insert error:", msError);
     }
 
     const queueItem: Database["public"]["Tables"]["production_queue"]["Insert"] = {

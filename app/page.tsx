@@ -115,7 +115,7 @@ export default function Home() {
 
           {/* EXPLORE MAPSITE */}
           <div className="mobile-cta">
-            <a href="/mapsite">Explore Mapsite</a>
+            <a href="/mapsite">Explore Mapsite™</a>
           </div>
         </div>
       </div>

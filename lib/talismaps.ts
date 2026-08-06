@@ -79,7 +79,7 @@ export async function getTalisMapsData(
     .maybeSingle();
 
   if (!mapsite) {
-    return { mapsite: null, pins: [], categories: [], notFound: true, message: `MapSite with code "${code}" not found` };
+    return { mapsite: null, pins: [], categories: [], notFound: true, message: `Mapsite™ with code "${code}" not found` };
   }
 
   const [categoriesResult, pinsResult] = await Promise.all([

@@ -7,7 +7,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: `Library | ${TALISBOOKS_PRODUCT_NAME}`,
   description:
-    "Personal TalisBooks™ bookshelf for Root and Derivative accounts — search, sort, and filter published lookbooks.",
+    "Personal Talisbooks™ bookshelf for Root and Derivative accounts — search, sort, and filter published lookbooks.",
   path: "/talisbooks/library",
   private: true,
 });

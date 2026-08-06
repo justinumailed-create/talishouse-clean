@@ -13,7 +13,7 @@
 The Talishouse/TalisPros platform is a full-stack web application that serves two main audiences:
 
 1. **Consumers** — Browse products (Glasshouse, Talishouse, TalisTowns), configure builds, get pricing, and apply for lease-to-own financing through the TalisBOT assistant or web forms.
-2. **Wholesale Partners & Associates** — Generate FAST Codes, access MapSites (geospatial landing pages), submit build requests, and manage the production pipeline through admin, CRM, and associate dashboards.
+2. **Wholesale Partners & Associates** — Generate FAST Codes, access Mapsites™ (geospatial landing pages), submit build requests, and manage the production pipeline through admin, CRM, and associate dashboards.
 
 The platform is built with **Next.js 16** (the latest version), React 19, Supabase (PostgreSQL database + file storage), PayPal for payments, and Resend for transactional emails. It is deployed on Vercel.
 
@@ -26,8 +26,8 @@ The platform is built with **Next.js 16** (the latest version), React 19, Supaba
 | TalisBOT lead capture chatbot | Production Ready |
 | FAST Code generator (/fast-code) | Production Ready |
 | Partner Access portal (/partner-access) | Production Ready — iframe embeddable |
-| MapSite public pages (/ma/[fastcode]) | Functional — shows all assets and data |
-| Build a MapSite form (/build-mapsite) | Built — needs database deployment |
+| Mapsite™ public pages (/ma/[fastcode]) | Functional — shows all assets and data |
+| Build a Mapsite™ form (/build-mapsite) | Built — needs database deployment |
 | Admin console (20 pages) | Built — needs database deployment |
 | CRM (9 pages with roles) | Built — needs database deployment |
 | Associate dashboard | Built — needs database deployment |
@@ -48,7 +48,7 @@ The **Partner Access** and **FAST Code Generator** pages have undergone extensiv
 
 ### What Remains Under Development
 
-The **TalisPros Build System** — a new suite of features including the Build MapSite form, admin build-request management, CRM, associate portal, production queue kanban, email notifications, and the MapSite public renderer — is **fully coded but the database migrations have not yet been applied to the live Supabase project**. Once the migrations are deployed and environment variables validated, these features will become operational.
+The **TalisPros Build System** — a new suite of features including the Build Mapsite™ form, admin build-request management, CRM, associate portal, production queue kanban, email notifications, and the Mapsite™ public renderer — is **fully coded but the database migrations have not yet been applied to the live Supabase project**. Once the migrations are deployed and environment variables validated, these features will become operational.
 
 **Eight database migration files** (numbered 027 through 034) need to be applied. They create six new tables (`build_requests`, `fast_codes`, `mapsite_requests`, `mapsite_assets`, `production_queue`, `activity_logs`) and one storage bucket (`mapsite-assets`).
 
@@ -88,18 +88,18 @@ The platform has **67 active routes**. This section lists every route with its s
 | Page | URL | Purpose | Status |
 |---|---|---|---|
 | FAST Code Generator | `/fast-code` | Generate a FAST Code for partner access | Production Ready — iframe embeddable |
-| Partner Access | `/partner-access` | Access MapSites using FAST Codes | Production Ready — iframe embeddable |
+| Partner Access | `/partner-access` | Access Mapsites™ using FAST Codes | Production Ready — iframe embeddable |
 | TTV Access (redirect) | `/ttvaccess/[fastCode]` | Redirect route for FAST Code access | Production Ready (legacy) |
-| MapSite Viewer | `/ma/[fastcode]` | Public MapSite page showing all assets | Functional — needs live data |
+| Mapsite™ Viewer | `/ma/[fastcode]` | Public Mapsite™ page showing all assets | Functional — needs live data |
 | Partner View | `/partner-view` | Partner dashboard view | Stub / Incomplete |
 
 ### Build System
 
 | Page | URL | Purpose | Status |
 |---|---|---|---|
-| Build a MapSite | `/build-mapsite` | 8-section form to request a MapSite build | Built — needs migration deploy |
-| MapSite Page | `/mapsite` | General MapSite listing | Stub / Incomplete |
-| MapSite by Slug | `/mapsite/[slug]` | MapSite by custom slug | Stub / Incomplete |
+| Build a Mapsite™ | `/build-mapsite` | 8-section form to request a Mapsite™ build | Built — needs migration deploy |
+| Mapsite™ Page | `/mapsite` | General Mapsite™ listing | Stub / Incomplete |
+| Mapsite™ by Slug | `/mapsite/[slug]` | Mapsite™ by custom slug | Stub / Incomplete |
 
 ### Associate Portal
 
@@ -153,7 +153,7 @@ The platform has **67 active routes**. This section lists every route with its s
 | CRM Dashboard | `/crm` | Metric cards and quick links | Needs migration deploy |
 | CRM Leads | `/crm/leads` | Read-only lead viewer | Needs migration deploy |
 | CRM Build Requests | `/crm/build-requests` | Read-only build request list | Needs migration deploy |
-| CRM MapSites | `/crm/mapsites` | Read-only MapSite list | Needs migration deploy |
+| CRM Mapsites™ | `/crm/mapsites` | Read-only Mapsite™ list | Needs migration deploy |
 | CRM Associates | `/crm/associates` | Read-only associate list | Needs migration deploy |
 | CRM Production Queue | `/crm/production-queue` | Read-only queue viewer with status filter | Needs migration deploy |
 | CRM Activity Logs | `/crm/activity-logs` | Audit trail viewer with table filter | Needs migration deploy |
@@ -164,9 +164,9 @@ The platform has **67 active routes**. This section lists every route with its s
 
 ### What Are FAST Codes?
 
-FAST Codes are **4-character alphanumeric codes** (e.g., `LRG1`, `TTV7`, `ABC2`) that serve as unique identifiers for partners, associates, and MapSites. They are the central key linking:
+FAST Codes are **4-character alphanumeric codes** (e.g., `LRG1`, `TTV7`, `ABC2`) that serve as unique identifiers for partners, associates, and Mapsites™. They are the central key linking:
 
-- A **client or partner** to their MapSite
+- A **client or partner** to their Mapsite™
 - A **build request** to its production status
 - An **associate** to their dashboard and commission records
 
@@ -182,12 +182,12 @@ The `generateFastCode()` function works as follows:
 4. If it collides with an existing code, it retries with a new random code.
 5. It can retry up to **200 times** before failing (at which point all 1,679,616 possible codes would be nearly exhausted — extremely unlikely).
 
-### How Users Access MapSites
+### How Users Access Mapsites™
 
-1. A partner receives their FAST Code (either generated via the FAST Code Generator form or as a result of submitting a MapSite build request).
+1. A partner receives their FAST Code (either generated via the FAST Code Generator form or as a result of submitting a Mapsite™ build request).
 2. The partner visits **`https://talispros.com/partner-access`** and enters their FAST Code.
-3. The system opens the corresponding MapSite at **`https://talispros.com/ma/{fastCode}`**.
-4. The MapSite page displays the client's profile image, logo, pin image, description, media type, PDF links, and contact information.
+3. The system opens the corresponding Mapsite™ at **`https://talispros.com/ma/{fastCode}`**.
+4. The Mapsite™ page displays the client's profile image, logo, pin image, description, media type, PDF links, and contact information.
 
 ### Current Workflow
 
@@ -199,7 +199,7 @@ The `generateFastCode()` function works as follows:
    - The partner is redirected to the Business Office for registration/subscription.
 
 2. **Build System Flow** (`/build-mapsite` + `fast_codes` table):
-   - A client submits a full MapSite build request (8 sections of data, file uploads).
+   - A client submits a full Mapsite™ build request (8 sections of data, file uploads).
    - A FAST Code is generated and linked to their `build_requests` record.
    - The code is stored in the `fast_codes` table with `type: "mapsite"`.
 
@@ -207,7 +207,7 @@ The `generateFastCode()` function works as follows:
 
 - **Two independent tables** — FAST Codes in `fast_code_registrations` are **not cross-checked** against `fast_codes`. The same code could theoretically exist in both tables (though extremely unlikely with 4-character randomness).
 - **No transaction rollback** — The build submission action writes to 6 tables sequentially. If one fails, earlier writes are not rolled back, which could create orphan records.
-- **No RLS between systems** — The MapSite engine uses the service-role key and bypasses row-level security. This is fine for public pages but means audit logging is the only protection.
+- **No RLS between systems** — The Mapsite™ engine uses the service-role key and bypasses row-level security. This is fine for public pages but means audit logging is the only protection.
 
 ---
 
@@ -216,7 +216,7 @@ The `generateFastCode()` function works as follows:
 | Field | Details |
 |---|---|
 | **URL** | `https://talispros.com/partner-access` |
-| **Purpose** | Allow wholesale partners to access their dedicated MapSites using FAST Codes |
+| **Purpose** | Allow wholesale partners to access their dedicated Mapsites™ using FAST Codes |
 | **Layout** | Embeddable — no site chrome (header, footer, chat), white background, flat styling |
 | **SEO** | Dedicated metadata with OG image (`/seo/partner-access-og.png`), canonical URL, Twitter card |
 
@@ -228,7 +228,7 @@ The `generateFastCode()` function works as follows:
 
 1. Partner enters their FAST Code (or pastes a full URL — trailing slashes and domain prefixes are stripped).
 2. Validation checks for non-empty and alphanumeric format.
-3. On submit, the MapSite opens in a **new browser tab** at `https://talispros.com/ma/{fastCode}`.
+3. On submit, the Mapsite™ opens in a **new browser tab** at `https://talispros.com/ma/{fastCode}`.
 4. The input field resets and refocuses for the next user.
 5. The loading state resets correctly after submission.
 
@@ -245,7 +245,7 @@ The page is designed to be embedded in partner websites via iframe. To support t
 ### Recent Fixes Applied
 
 - Loading state reset after submission (was stuck in "loading" state)
-- Changed "Access MapSite" button behavior to open in new tab
+- Changed "Access Mapsite™" button behavior to open in new tab
 - Windswept logo replaced old branding
 - Mobile responsiveness improved (padding, font sizes, image sizing)
 - Grey background below embedded forms fixed (body min-height override)
@@ -286,7 +286,7 @@ The user sees their FAST Code displayed in large text with a **copy-to-clipboard
 
 ## Registration Flow
 
-The complete user journey from FAST Code generation to MapSite production:
+The complete user journey from FAST Code generation to Mapsite™ production:
 
 ```
 Step 1: Generate FAST Code
@@ -313,13 +313,13 @@ Step 4: Subscription Selection
         PayPal checkout integration
             ↓
 
-Step 5: MapSite Production
+Step 5: Mapsite™ Production
         URL: https://talispros.com/build-mapsite
         Partner submits full build request with:
           - Personal information
           - Account type selection
           - Media focus areas (up to 6 checkboxes)
-          - MapSite asset uploads (profile image, logo, pin image, PDFs)
+          - Mapsite™ asset uploads (profile image, logo, pin image, PDFs)
           - Design preferences
           - Additional comments
         → System creates: build_request, fast_code, mapsite_request,
@@ -340,7 +340,7 @@ Step 5: MapSite Production
 | Jun 11 | `ff452fa` | Set white background on fast-code and partner-access pages for clean iframe embedding | `/partner-access`, `/fast-code` |
 | Jun 11 | `a2062c6` | Strip card styling from form inputs, selects, and wrapper containers | `/partner-access`, `/fast-code` |
 | Jun 11 | `5d23f9a` | Phase 1 UI simplification — compact iframe-friendly forms | `/partner-access`, `/fast-code` |
-| ~Jun 1 | `ea1b609` | Remove "Already have a Fast Code?" and "Access MapSite" links from fast-code page | `/fast-code` |
+| ~Jun 1 | `ea1b609` | Remove "Already have a Fast Code?" and "Access Mapsite™" links from fast-code page | `/fast-code` |
 | ~Jun 1 | `a62b36f` | Fix: use `window.top.location.href` for reliable iframe breakout on fast-code redirect | `/fast-code` |
 | ~Jun 1 | `14511ae` | Fix: break out of iframe on fast-code redirect to register page | `/fast-code` |
 | ~Jun 1 | `bd67d74` | Phase 1 stabilization — onboarding flow and iframe navigation fixes | `/fast-code`, `/partner-access` |
@@ -348,7 +348,7 @@ Step 5: MapSite Production
 | ~May 28 | `cb59a78` | Fix: reset loading state after Fast Code submission | `/fast-code` |
 | ~May 25 | `a88ec64` | Fix: guard `window.top` null check for TypeScript build | `/fast-code` |
 | ~May 25 | `a1a0515` | Add partner-access CTA and replace spark icon with Windswept logo | `/fast-code` |
-| ~May 22 | `1b819a1` | Fast Code generator, domain update, TalisBot suppression, MapSite™ text | `/fast-code` |
+| ~May 22 | `1b819a1` | Fast Code generator, domain update, TalisBot suppression, Mapsite™ text | `/fast-code` |
 | ~May 20 | `06208b8` | Simplify partner-access page for Phase ONE operational rollout | `/partner-access` |
 | ~May 18 | `a11702f` | Add (TM) to partner-access metadata title/description | `/partner-access` |
 | ~May 18 | `76648b2` | Update partner-access metadata for brand consistency | `/partner-access` |
@@ -475,12 +475,12 @@ No automated deployment log exists. Deployments are managed through Vercel's aut
 
 ### PDF Generation
 
-The Build System supports **PDF upload** as part of the MapSite build request:
+The Build System supports **PDF upload** as part of the Mapsite™ build request:
 
 - **Monologue PDF** — uploaded as part of the build form at `/build-mapsite`
 - **eBook PDF** — uploaded as part of the build form at `/build-mapsite`
 - PDFs are stored in Supabase Storage bucket `mapsite-assets` (max 20 MB, `application/pdf` MIME type)
-- PDFs are displayed as download links on the public MapSite page at `/ma/[fastcode]`
+- PDFs are displayed as download links on the public Mapsite™ page at `/ma/[fastcode]`
 
 There is **no server-side PDF generation** — PDFs are user-uploaded only.
 
@@ -490,7 +490,7 @@ Three dashboards exist:
 
 1. **Admin Dashboard** (`/admin/dashboard`) — 4 stat cards: Total Deals, Active Deals, Closed Deals, Earnings (CAD formatted). Fetches from `deals` table.
 
-2. **Associate Dashboard** (`/associate/dashboard`) — 3-tab view (Pending / In Progress / Completed) showing the associate's assigned MapSite requests with client details and status badges. Includes a commission tracking placeholder.
+2. **Associate Dashboard** (`/associate/dashboard`) — 3-tab view (Pending / In Progress / Completed) showing the associate's assigned Mapsite™ requests with client details and status badges. Includes a commission tracking placeholder.
 
 3. **CRM Dashboard** (`/crm`) — 5 metric cards: New Requests, Assigned, Completed, Pipeline (Leads), Pending Queue. Includes a quick links grid to all CRM modules.
 
@@ -507,7 +507,7 @@ Three dashboards exist:
 | Jun 11 | `ff452fa` | White background for clean iframe embedding | `/partner-access`, `/fast-code` |
 | Jun 11 | `a2062c6` | Strip card styling from forms | `/partner-access`, `/fast-code` |
 | Jun 11 | `5d23f9a` | Phase 1 UI simplification | `/partner-access`, `/fast-code` |
-| Jun 1 | `ea1b609` | Remove "Already have a Fast Code?" and "Access MapSite" links | `/fast-code` |
+| Jun 1 | `ea1b609` | Remove "Already have a Fast Code?" and "Access Mapsite™" links | `/fast-code` |
 | Jun 1 | `a62b36f` | Use `window.top.location.href` for iframe breakout | `/fast-code` |
 | Jun 1 | `14511ae` | Break out of iframe on redirect | `/fast-code` |
 | Jun 1 | `bd67d74` | Phase 1 stabilization | `/fast-code`, `/partner-access` |
@@ -548,14 +548,14 @@ The site is deployed to **Vercel** via git push (Vercel automatically detects Ne
 4. A unique 4-character code will be displayed (e.g., `LRG1`, `TTV7`).
 5. You can **copy the code** to your clipboard or click **"Continue to Registration"** to proceed.
 
-### How to Access MapSites
+### How to Access Mapsites™
 
 1. Go to **https://talishouse.com/partner-access**
 2. Enter the FAST Code. The code is not case-sensitive — `lrg1` works the same as `LRG1`.
-3. Click **"Access MapSite"**.
-4. The MapSite will open in a new browser tab.
+3. Click **"Access Mapsite™"**.
+4. The Mapsite™ will open in a new browser tab.
 
-The MapSite page shows:
+The Mapsite™ page shows:
 - The client's profile image
 - Their company logo
 - A location pin image on a map
@@ -586,17 +586,17 @@ For per-partner details, navigate to:
 - **"Applications"** — see associate sign-up applications (approve or reject)
 - **"Project Applications"** — see project proposals (approve or reject)
 
-### How to Share MapSites
+### How to Share Mapsites™
 
-1. Once a MapSite is built, it has a public URL: **https://talishouse.com/ma/{FAST_CODE}**
+1. Once a Mapsite™ is built, it has a public URL: **https://talishouse.com/ma/{FAST_CODE}**
 2. Share this URL with the partner. For example, if the FAST Code is `LRG1`, share: **https://talishouse.com/ma/lrg1**
 3. Partners can also access it via **https://talishouse.com/partner-access** by entering their code.
-4. The MapSite can be embedded in partner websites using an iframe.
+4. The Mapsite™ can be embedded in partner websites using an iframe.
 
 ### How to Verify New Submissions
 
 1. Check the **"Leads"** page in the Admin console to see new form submissions (name, phone, source, date).
-2. Check **"Build Requests"** to see MapSite build submissions (once the Build System is deployed).
+2. Check **"Build Requests"** to see Mapsite™ build submissions (once the Build System is deployed).
 3. Check **"Project Applications"** for project proposals submitted via the Business Office.
 4. Check **"Applications"** for new associate sign-ups.
 5. The **TalisBOT Analytics** page shows chatbot lead capture statistics including conversion rate and budget distribution.
@@ -660,7 +660,7 @@ For per-partner details, navigate to:
 | Component | Technology |
 |---|---|
 | Hosting Platform | **Vercel** |
-| Domain | `talishouse.com` (primary), `talispros.com` (secondary for MapSites) |
+| Domain | `talishouse.com` (primary), `talispros.com` (secondary for Mapsites™) |
 | Environment | Node.js (version managed by Vercel) |
 | Deployment | Automatic — git push triggers build + deploy |
 
@@ -689,25 +689,25 @@ For per-partner details, navigate to:
 - Security vulnerabilities closed (env in git, hardcoded admin code)
 - Test scripts for common workflows
 
-### Phase 2: Automated MapSite Generation
+### Phase 2: Automated Mapsite™ Generation
 
 **Duration:** 2-3 weeks
 
 **Tasks:**
 
-1. **Build the MapSite Atlas renderer** — Replace the placeholder `/ma/[fastcode]` page with a full interactive geospatial map that renders profile images, logos, pin markers, descriptions, and media content on an embedded map canvas.
-2. **Implement media processing** — Auto-resize uploaded images to standard dimensions for consistent MapSite display. Generate thumbnails for faster loading.
-3. **Add MapSite customization options** — Allow associates to customize colors, layout, and branding on their MapSite page.
+1. **Build the Mapsite™ Atlas renderer** — Replace the placeholder `/ma/[fastcode]` page with a full interactive geospatial map that renders profile images, logos, pin markers, descriptions, and media content on an embedded map canvas.
+2. **Implement media processing** — Auto-resize uploaded images to standard dimensions for consistent Mapsite™ display. Generate thumbnails for faster loading.
+3. **Add Mapsite™ customization options** — Allow associates to customize colors, layout, and branding on their Mapsite™ page.
 4. **Implement PDF preview** — Render uploaded PDFs as embedded previews rather than just download links.
-5. **Add QR code generation** — Generate a QR code for each MapSite URL that partners can print on business cards/flyers.
-6. **Build MapSite analytics** — Track page views, link clicks, and contact form submissions per MapSite.
+5. **Add QR code generation** — Generate a QR code for each Mapsite™ URL that partners can print on business cards/flyers.
+6. **Build Mapsite™ analytics** — Track page views, link clicks, and contact form submissions per Mapsite™.
 
 **Deliverables:**
-- Fully rendered interactive MapSite Atlas
+- Fully rendered interactive Mapsite™ Atlas
 - Image/media pipeline with automatic optimization
 - Customization controls in admin/associate settings
-- QR code for every MapSite
-- Basic analytics dashboard per MapSite
+- QR code for every Mapsite™
+- Basic analytics dashboard per Mapsite™
 
 ### Phase 3: Atlist Map Provider Replacement
 
@@ -715,11 +715,11 @@ For per-partner details, navigate to:
 
 **Tasks:**
 
-1. **Audit current Atlist integration** — Identify all locations where Atlist map embeds are used (associate pages, MapSite pages).
+1. **Audit current Atlist integration** — Identify all locations where Atlist map embeds are used (associate pages, Mapsite™ pages).
 2. **Evaluate alternatives** — Research and select a replacement map provider (Google Maps, Mapbox, Leaflet with OpenStreetMap, or another provider) based on feature needs, pricing, and licensing.
 3. **Implement new map provider** — Replace Atlist embeds with the new provider's maps, maintaining or improving visual design.
 4. **Migrate existing map data** — Port any custom map styling, markers, pins, and overlays from Atlist to the new provider.
-5. **Test all map locations** — Verify that maps render correctly on associate pages, MapSite pages, and any other embedded locations.
+5. **Test all map locations** — Verify that maps render correctly on associate pages, Mapsite™ pages, and any other embedded locations.
 6. **Update documentation** — Document the new map provider API key requirements and usage for future development.
 
 **Deliverables:**

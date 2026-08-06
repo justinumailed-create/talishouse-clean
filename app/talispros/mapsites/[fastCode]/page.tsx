@@ -18,17 +18,17 @@ export async function generateMetadata({
   const mapsite = await getPublicMapSiteByFastCode(fastCode);
 
   if (!mapsite) {
-    return { title: "MapSite Not Found | Talispros™" };
+    return { title: "Mapsite™ Not Found | Talispros™" };
   }
 
   const layoutData = buildMapSiteLayoutData(mapsite);
 
   return {
-    title: layoutData.metaTitle || `${layoutData.propertyTitle} | MapSite™`,
+    title: layoutData.metaTitle || `${layoutData.propertyTitle} | Mapsite™`,
     description:
       layoutData.metaDescription ||
       layoutData.summary.description ||
-      `MapSite™ ${layoutData.fastCode}`,
+      `Mapsite™ ${layoutData.fastCode}`,
     openGraph: layoutData.ogImageUrl
       ? {
           images: [{ url: layoutData.ogImageUrl }],

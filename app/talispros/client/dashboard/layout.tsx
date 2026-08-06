@@ -4,7 +4,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "Marketing Dashboard | Talispros™",
   description:
-    "Track Facebook and Instagram impressions, reach, leads, and weekly marketing summaries for your MapSite™.",
+    "Track Facebook and Instagram impressions, reach, leads, and weekly marketing summaries for your Mapsite™.",
   path: "/talispros/client/dashboard",
   private: true,
 });

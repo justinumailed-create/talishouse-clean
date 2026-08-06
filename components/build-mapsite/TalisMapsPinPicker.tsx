@@ -13,8 +13,8 @@ import {
   clampMapZoom,
   formatCoordinate,
   hasValidCoordinates,
-  HOME_PIN_DEFAULT_MAP_ZOOM,
 } from "@/lib/home-pin-coordinates";
+import { BUILD_MAPSITE_PREVIEW_LOCATION } from "@/components/build-mapsite/home-pin-types";
 
 export interface TalisMapsPinPickerPinStyle {
   color?: string | null;
@@ -53,8 +53,11 @@ export interface TalisMapsPinPickerProps {
 
 const HOME_PIN_ID = "home-pin";
 const DEFAULT_VIEWPORT: MapViewport = {
-  center: { latitude: 43.6532, longitude: -79.3832 },
-  zoom: HOME_PIN_DEFAULT_MAP_ZOOM,
+  center: {
+    latitude: BUILD_MAPSITE_PREVIEW_LOCATION.latitude,
+    longitude: BUILD_MAPSITE_PREVIEW_LOCATION.longitude,
+  },
+  zoom: BUILD_MAPSITE_PREVIEW_LOCATION.mapZoom,
 };
 
 function buildHomePin(
@@ -161,7 +164,7 @@ function TalisMapsPinPickerMap({
   streetAddress,
   manualPlacement = false,
   addressLookupNonce = 0,
-  mapZoom = HOME_PIN_DEFAULT_MAP_ZOOM,
+  mapZoom = BUILD_MAPSITE_PREVIEW_LOCATION.mapZoom,
   pinStyle,
   onLocationChange,
   onMapZoomChange,
@@ -175,7 +178,7 @@ function TalisMapsPinPickerMap({
   const isPinDraggingRef = useRef(false);
   const mapZoomRef = useRef(mapZoom);
   const defaults = useTalisMapsMapDefaults({
-    // Match MapSite: Google satellite for claim / Home PIN placement.
+    // Match Mapsite™: Google satellite for claim / Home PIN placement.
     providerId: "google-maps",
     basemapView: "satellite",
   });

@@ -10,10 +10,10 @@ export type EbookChoiceOption = "self" | "rahul";
 
 export type PostBuildSuccessPath = "self-ebook" | "rahul-waiting" | "mapsite";
 
-/** Query flag: pending MapSite waiting for Rahul’s first TalisBook™. */
+/** Query flag: pending Mapsite™ waiting for Rahul’s first Talisbook™. */
 export const BOOK_PENDING_QUERY = "bookPending";
 
-/** Query flag: show existing PayPal activation card on the MapSite. */
+/** Query flag: show existing PayPal activation card on the Mapsite™. */
 export const ACTIVATE_QUERY = "activate";
 
 export function buildEbookChoiceHref(options: {
@@ -43,7 +43,7 @@ export function buildEbookChoiceHref(options: {
 }
 
 /** Continue after “Generate My Own E-Book”.
- * Canonical handoff: requestId only. Server resolves FAST Code / MapSite from DB.
+ * Canonical handoff: requestId only. Server resolves FAST Code / Mapsite™ from DB.
  * Legacy fastCode/mapsiteId/accountType query params are ignored by the page
  * when requestId is present (kept optional only for older bookmarks).
  */
@@ -119,7 +119,7 @@ function appendCommonMapSiteParams(
   }
 }
 
-/** Rahul path: open pending MapSite while Marketing Admin prepares the book. */
+/** Rahul path: open pending Mapsite™ while Marketing Admin prepares the book. */
 export function buildRahulWaitingMapSiteHref(options: {
   fastCode?: string | null;
   mapsiteId?: string | null;
@@ -148,7 +148,7 @@ export function buildRahulWaitingMapSiteHref(options: {
   return `${MAPSITE_APP_PATH}?${params.toString()}`;
 }
 
-/** After self-service TalisBook™ create — open claimed MapSite with popup. */
+/** After self-service Talisbook™ create — open claimed Mapsite™ with popup. */
 export function buildMapSiteAfterBookHref(options: {
   fastCode?: string | null;
   mapsiteId?: string | null;
@@ -175,7 +175,7 @@ export function buildMapSiteAfterBookHref(options: {
   return `${MAPSITE_APP_PATH}?${params.toString()}`;
 }
 
-/** Activate Your MapSite™ — same MapSite with existing PayPal card visible. */
+/** Activate Your Mapsite™ — same Mapsite™ with existing PayPal card visible. */
 export function buildActivateMapSiteHref(options: {
   fastCode?: string | null;
   mapsiteId?: string | null;

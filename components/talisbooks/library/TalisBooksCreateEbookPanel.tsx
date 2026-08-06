@@ -78,7 +78,7 @@ export default function TalisBooksCreateEbookPanel({
         ? "Ebook updated."
         : activated
           ? "Ebook created on your shelf."
-          : "First draft TalisBook™ created. Activate your account to publish and unlock more books.",
+          : "First draft Talisbook™ created. Activate your account to publish and unlock more books.",
     );
     setOpen(false);
     router.refresh();
@@ -87,7 +87,7 @@ export default function TalisBooksCreateEbookPanel({
   if (!hasExistingBook && !canCreate) {
     return (
       <div className="mx-auto mb-6 max-w-3xl rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-950">
-        <p className="font-semibold">Activate to create more TalisBooks™</p>
+        <p className="font-semibold">Activate to create more Talisbooks™</p>
         <p className="mt-1 text-amber-900/80">
           Your first draft is already used. Activate your {accountKind} account to unlock
           up to {bookQuota} books, publishing, and bookshelf features.
@@ -110,7 +110,7 @@ export default function TalisBooksCreateEbookPanel({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-neutral-900">
-            {hasExistingBook ? "Update TEB™ ebook" : "Create your first TalisBook™"}
+            {hasExistingBook ? "Update TEB™ ebook" : "Create your first Talisbook™"}
           </p>
           <p className="mt-0.5 text-xs text-neutral-500">
             {hasExistingBook

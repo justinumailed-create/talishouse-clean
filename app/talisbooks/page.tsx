@@ -64,8 +64,8 @@ export default function TalisBooksMarketingPage() {
             Built for the Talispros™ ecosystem
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-neutral-500">
-            TalisBooks™ is a standalone digital publication engine for the Talispros™ ecosystem —
-            books, pages, templates, and publish workflows linked to MapSites™, accounts, and FAST Codes.
+            Talisbooks™ is a standalone digital publication engine for the Talispros™ ecosystem —
+            books, pages, templates, and publish workflows linked to Mapsites™, accounts, and FAST Codes.
           </p>
           <Link
             href="/talispros"

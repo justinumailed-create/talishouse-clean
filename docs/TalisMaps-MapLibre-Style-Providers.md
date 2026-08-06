@@ -1,11 +1,11 @@
-# TalisMaps™ MapLibre Engine & Style Providers
+# Talismaps™ MapLibre Engine & Style Providers
 
-TalisMaps™ renders all maps with **MapLibre GL JS**. Business logic never imports Google Maps or other proprietary map SDKs.
+Talismaps™ renders all maps with **MapLibre GL JS**. Business logic never imports Google Maps or other proprietary map SDKs.
 
 ## Architecture
 
 ```
-Surfaces (editor, embeds, registration, MapSites)
+Surfaces (editor, embeds, registration, Mapsites™)
         ↓
 MapEngineProvider / MapEngineCanvas
         ↓

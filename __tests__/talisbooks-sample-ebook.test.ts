@@ -53,7 +53,7 @@ describe("Sample E-Book demo book (FSBO)", () => {
     expect(last.heroImageUrl).toContain("back-cover.jpg");
   });
 
-  it("places the demo Mapsite PIN on page 2", () => {
+  it("places the demo Mapsite™ PIN on page 2", () => {
     const mapPage = book.pages[1]!;
     expect(mapPage.address).toBe(MAPSITE_DEMO_LOCATION.streetAddress);
     expect(mapPage.latitude).toBe(MAPSITE_DEMO_LOCATION.latitude);

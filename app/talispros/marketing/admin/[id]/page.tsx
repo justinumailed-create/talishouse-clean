@@ -14,7 +14,7 @@ export async function generateMetadata({
   const { id } = await params;
   return createMetadata({
     title: "Registration Review | Marketing Manager | Talispros™",
-    description: "Review a market registration and prepare MapSite onboarding.",
+    description: "Review a market registration and prepare Mapsite™ onboarding.",
     path: `${MARKETING_ADMIN_PATH}/${id}`,
     private: true,
   });

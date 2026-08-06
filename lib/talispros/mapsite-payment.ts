@@ -2,7 +2,7 @@ import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin
 
 /**
  * True when talispros_payments has a completed PayPal capture for this claim.
- * Looks up emails from the FAST Code build request and/or MapSite owner.
+ * Looks up emails from the FAST Code build request and/or Mapsite™ owner.
  */
 export async function hasCompletedMapSitePaypalPayment(options: {
   email?: string | null;

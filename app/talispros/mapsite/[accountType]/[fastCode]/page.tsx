@@ -58,14 +58,14 @@ export async function generateMetadata({
   const { accountType, fastCode } = await params;
   const code = fastCode.trim().toUpperCase();
   return createMetadata({
-    title: `MapSite™ ${code}`,
-    description: `Talispros™ MapSite™ for FAST Code ${code}.`,
+    title: `Mapsite™ ${code}`,
+    description: `Talispros™ Mapsite™ for FAST Code ${code}.`,
     path: `${MAPSITE_APP_PATH}/${mapsiteAccountTypeSegment(accountType)}/${fastCode.trim().toLowerCase()}`,
   });
 }
 
 /**
- * Short claimed MapSite URL:
+ * Short claimed Mapsite™ URL:
  * /talispros/mapsite/{accountType}/{fastCode}
  * e.g. /talispros/mapsite/listings/lg01
  */

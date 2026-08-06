@@ -356,7 +356,7 @@ export async function upsertMapSiteEbook(input: {
   }
 
   const context = await getMapSiteEbookContext(fastCode);
-  if (!context) return { success: false, error: "MapSite FAST Code not found." };
+  if (!context) return { success: false, error: "Mapsite™ FAST Code not found." };
 
   const entitlements = await getTalisBooksEntitlementSnapshot(fastCode);
   const existing = context.primaryEbook;
@@ -390,7 +390,7 @@ export async function upsertMapSiteEbook(input: {
     ) {
       return {
         success: false,
-        error: "Activate your account to manage additional TalisBooks™ features.",
+        error: "Activate your account to manage additional Talisbooks™ features.",
         registrationHref: context.registrationHref,
       };
     }
@@ -406,7 +406,7 @@ export async function upsertMapSiteEbook(input: {
   const description =
     input.description?.trim() ||
     existing?.description ||
-    `TalisBooks™ ebook for MapSite™ FAST Code ${fastCode.toUpperCase()}.`;
+    `Talisbooks™ ebook for Mapsite™ FAST Code ${fastCode.toUpperCase()}.`;
   const coverImageUrl =
     input.coverImageUrl !== undefined
       ? input.coverImageUrl?.trim() || null

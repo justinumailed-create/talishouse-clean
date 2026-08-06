@@ -82,7 +82,7 @@ function sharpenRasterImagery(map: MapLibreMap): void {
   }
 }
 
-/** Hide place / business / transit layers so only TalisMaps™ pins brand the map. */
+/** Hide place / business / transit layers so only Talismaps™ pins brand the map. */
 function hideThirdPartyPoiLayers(map: MapLibreMap): void {
   try {
     const style = map.getStyle();
@@ -163,7 +163,7 @@ function waitForStyleIdle(
 }
 
 /**
- * MapLibre GL JS adapter for TalisMaps™.
+ * MapLibre GL JS adapter for Talismaps™.
  * Styles come from MapStyleManager — never hard-coded vendor URLs here.
  */
 export class MapLibreProvider implements MapProvider {
@@ -251,7 +251,7 @@ export class MapLibreProvider implements MapProvider {
     activeStyleUrl = initial.styleUrl;
     if (initial.usingPlaceholderKey && process.env.NODE_ENV !== "production") {
       console.warn(
-        "[TalisMaps] Using placeholder MapTiler API key. Set NEXT_PUBLIC_MAPTILER_API_KEY."
+        "[Talismaps™] Using placeholder MapTiler API key. Set NEXT_PUBLIC_MAPTILER_API_KEY."
       );
     }
 
@@ -427,7 +427,7 @@ export class MapLibreProvider implements MapProvider {
       try {
         map.setStyle(url, { diff: false });
       } catch (error) {
-        console.error("[TalisMaps] setStyle failed", error);
+        console.error("[Talismaps™] setStyle failed", error);
       }
     };
 
@@ -443,7 +443,7 @@ export class MapLibreProvider implements MapProvider {
         | undefined;
       const message = error?.message ?? String(event.error ?? "");
       if (process.env.NODE_ENV !== "production") {
-        console.warn("[TalisMaps] MapLibre / MapTiler error", message);
+        console.warn("[Talismaps™] MapLibre / MapTiler error", message);
       }
     });
 

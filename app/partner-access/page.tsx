@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from "react";
 import Image from "next/image";
-import { buildMapsiteRedirectUrl } from "@/lib/registration-fast-code-routing";
+import { buildMapSiteRedirectUrl } from "@/lib/registration-fast-code-routing";
 
 export default function PartnerAccessPage() {
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function PartnerAccessPage() {
     }
 
     setIsSubmitting(true);
-    const targetUrl = buildMapsiteRedirectUrl(normalized);
+    const targetUrl = buildMapSiteRedirectUrl(normalized);
     if (window.self !== window.top) {
       window.top!.location.assign(targetUrl);
     } else {
@@ -63,7 +63,7 @@ export default function PartnerAccessPage() {
           />
           <h1 className="text-xl font-light tracking-tight">Partner Access</h1>
           <p className="text-sm text-neutral-500 font-light mt-0.5">
-            Access MapSites&trade; using Fast Codes
+            Access Mapsites™ using Fast Codes
           </p>
         </div>
 
@@ -90,7 +90,7 @@ export default function PartnerAccessPage() {
             {isSubmitting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              "Access MapSite"
+              "Access Mapsite™"
             )}
           </button>
 

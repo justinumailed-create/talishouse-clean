@@ -1,4 +1,4 @@
-/** Demo / test property location for Mapsite and TalisBooks sample content. */
+/** Demo / test property location for Mapsite™ and Talisbooks™ sample content. */
 export const MAPSITE_DEMO_LOCATION = {
   streetAddress: "2447 Meat Cove Rd, Pleasant Bay, NS B0E 2P0",
   latitude: 47.026177,

@@ -6,7 +6,7 @@ import FastCodeSidebarCard from "@/components/talispros/FastCodeSidebarCard";
 const BENEFITS = [
   {
     title: "Market Visibility",
-    description: "Establish a prominent presence inside a TalisMaps™ marketplace where buyers and sellers actively search.",
+    description: "Establish a prominent presence inside a Talismaps™ marketplace where buyers and sellers actively search.",
   },
   {
     title: "Referral Networks",
@@ -21,12 +21,12 @@ const BENEFITS = [
     description: "Receive a unique FAST Code that serves as your universal gateway for account access and market routing.",
   },
   {
-    title: "MapSite™ Presence",
-    description: "Own a dedicated MapSite™ — a property discovery page that showcases your listings and services.",
+    title: "Mapsite™ Presence",
+    description: "Own a dedicated Mapsite™ — a property discovery page that showcases your listings and services.",
   },
   {
     title: "Lead Generation",
-    description: "Capture qualified leads through your MapSite™ with built-in contact forms and discovery tools.",
+    description: "Capture qualified leads through your Mapsite™ with built-in contact forms and discovery tools.",
   },
 ];
 
@@ -50,7 +50,7 @@ export default function ClaimAMarketPage() {
               Claim A Market™
             </h1>
             <p className="text-base sm:text-lg text-neutral-500 mb-3">
-              Establish your presence inside a TalisMaps™ marketplace.
+              Establish your presence inside a Talismaps™ marketplace.
             </p>
             <p className="text-sm text-neutral-400 max-w-xl mx-auto leading-relaxed mb-8">
               Root Accounts™, Derivative Accounts™, and AdPro™ placements

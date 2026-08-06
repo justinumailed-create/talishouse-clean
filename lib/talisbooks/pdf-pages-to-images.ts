@@ -1,5 +1,5 @@
 /**
- * Client-side PDF → JPEG page rasters for the Self-Service TalisBook™ creator.
+ * Client-side PDF → JPEG page rasters for the Self-Service Talisbook™ creator.
  * Each PDF page becomes one image File so the existing viewer pipeline stays unchanged.
  */
 

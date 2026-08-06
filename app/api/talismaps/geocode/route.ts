@@ -20,7 +20,7 @@ async function forwardGeocode(query: string) {
     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
     {
       headers: {
-        "User-Agent": "TalisMaps/Talispros (talishouse-clean)",
+        "User-Agent": "Talismaps™/Talispros (talishouse-clean)",
         Accept: "application/json",
       },
       next: { revalidate: 3600 },
@@ -50,7 +50,7 @@ async function reverseGeocode(lat: string, lon: string) {
     `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&zoom=18&addressdetails=0`,
     {
       headers: {
-        "User-Agent": "TalisMaps/Talispros (talishouse-clean)",
+        "User-Agent": "Talismaps™/Talispros (talishouse-clean)",
         Accept: "application/json",
       },
       next: { revalidate: 3600 },

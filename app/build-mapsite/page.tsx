@@ -393,7 +393,7 @@ function RegisterCta() {
       className="block text-center px-6 py-6 mb-8 rounded-xl border-2 border-[#c92026] bg-white cursor-pointer hover:translate-y-[-2px] hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)] transition-all duration-200 ease-in-out no-underline"
     >
       <p className="text-[18px] leading-relaxed text-neutral-800 mb-4">
-        Build a &apos;done-for-you&apos; MapSite™
+        Build a &apos;done-for-you&apos; Mapsite™
         without obligation. We will follow
         up within two business days to
         optimize and publish.
@@ -461,7 +461,7 @@ function FastCodeSidebar() {
         <div className="text-center">
         <Image
           src="/logo.png"
-          alt="TalisPros"
+          alt="Talispros™"
           width={120}
           height={32}
           className="h-7 w-auto object-contain mx-auto mb-6"
@@ -489,7 +489,7 @@ function FastCodeSidebar() {
           </button>
         </div>
         <p className="text-xs text-neutral-500">
-          Use this code to access your MapSite™.
+          Use this code to access your Mapsite™.
         </p>
       </div>
       </div>
@@ -501,7 +501,7 @@ function FastCodeSidebar() {
       <RegisterCta />
       <Image
         src="/logo.png"
-        alt="TalisPros"
+        alt="Talispros™"
         width={120}
         height={32}
         className="h-7 w-auto object-contain mb-6"
@@ -734,7 +734,7 @@ function AccountTypeSelector({
   );
 }
 
-export default function BuildMapsitePage() {
+export default function BuildMapSitePage() {
   useEffect(() => {
     document.documentElement.style.height = "auto";
     document.body.style.minHeight = "auto";
@@ -939,7 +939,7 @@ export default function BuildMapsitePage() {
             <Check className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight mb-3">
-            Your Build A MapSite™ Request Has Been Received
+            Your Build A Mapsite™ Request Has Been Received
           </h1>
           <p className="text-neutral-500 text-sm sm:text-base leading-relaxed mb-8 max-w-sm mx-auto">
             We will review your request and contact you within two business days.
@@ -1002,7 +1002,7 @@ export default function BuildMapsitePage() {
             {[
               { label: "Welcome", href: "/" },
               { label: "Claim a Market", href: "#" },
-              { label: "Build a MapSite™", href: "/build-mapsite", active: true },
+              { label: "Build a Mapsite™", href: "/build-mapsite", active: true },
               { label: "Register Account", href: "/business-office/register" },
             ].map((item) => (
               <li key={item.label}>
@@ -1029,10 +1029,10 @@ export default function BuildMapsitePage() {
           <div className="max-w-2xl mx-auto px-5 py-8 sm:py-12 lg:py-16">
             <div className="text-center mb-8 sm:mb-10">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-neutral-900">
-                Build A MapSite™
+                Build A Mapsite™
               </h1>
               <p className="text-sm sm:text-base text-neutral-500 mt-2 max-w-md mx-auto leading-relaxed">
-                Set up your MapSite™ account. Enter the required information below
+                Set up your Mapsite™ account. Enter the required information below
                 and we will process your request within two business days.
               </p>
             </div>
@@ -1084,7 +1084,7 @@ export default function BuildMapsitePage() {
 
               <SectionCard
                 number={2}
-                title="MapSite Personalization"
+                title="Mapsite™ Personalization"
                 description="Your branding assets."
                 isOpen={openSections.has(2)}
                 onToggle={() => toggleSection(2)}

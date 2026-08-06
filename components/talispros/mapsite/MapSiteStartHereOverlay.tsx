@@ -43,12 +43,12 @@ interface MapSiteStartHereOverlayProps {
   tipTop: number;
   /** Horizontal center of the flag (px from left of map root). */
   centerX: number | null;
-  /** Owner MapSite™ only — visitors never enable this. */
+  /** Owner Mapsite™ only — visitors never enable this. */
   enabled: boolean;
 }
 
 /**
- * Guided onboarding prompt for a new MapSite™ owner.
+ * Guided onboarding prompt for a new Mapsite™ owner.
  * Points at the open property flag; continues to the E-Book decision step.
  */
 export default function MapSiteStartHereOverlay({
@@ -112,7 +112,7 @@ export default function MapSiteStartHereOverlay({
             Start Here
           </span>
           <span className="text-[11px] font-normal leading-snug text-white/80">
-            Open your first TalisBook™
+            Open your first Talisbook™
           </span>
         </button>
       </div>

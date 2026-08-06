@@ -1,4 +1,4 @@
-/** Fixed positions in the official TalisBooks™ page sequence. */
+/** Fixed positions in the official Talisbooks™ page sequence. */
 export const TALISBOOKS_COVER_PAGE_NUMBER = 1;
 export const TALISBOOKS_AGENT_BROKERAGE_PAGE_2 = 2;
 export const TALISBOOKS_AGENT_BROKERAGE_PAGE_3 = 3;

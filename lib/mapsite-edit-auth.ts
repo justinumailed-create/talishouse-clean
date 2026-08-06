@@ -76,7 +76,7 @@ export async function getMapSiteEditToolbarState(
   };
 }
 
-/** True when the current browser session belongs to this MapSite™ owner. */
+/** True when the current browser session belongs to this Mapsite™ owner. */
 export async function isOwnMapSite(fastCode: string | null | undefined): Promise<boolean> {
   const code = fastCode?.trim();
   if (!code) return false;

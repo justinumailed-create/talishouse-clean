@@ -53,7 +53,7 @@ export async function createOrUpdateMapSiteEbookAction(input: {
   asAdmin?: boolean;
   /** When true, email the client that their E-Book is ready. */
   notifyClient?: boolean;
-  /** Attach viewer URL to MapSite teb_url after save. */
+  /** Attach viewer URL to Mapsite™ teb_url after save. */
   attachToMapSite?: boolean;
 }): Promise<{
   success: boolean;
@@ -113,17 +113,17 @@ export async function createOrUpdateMapSiteEbookAction(input: {
       let recipientName = "there";
 
       if (context?.mapsiteId) {
-        const { data: byMapsite } = await supabase
+        const { data: byMapSite } = await supabase
           .from("build_requests")
           .select("first_name, last_name, email")
           .eq("linked_mapsite_id", context.mapsiteId)
           .order("submitted_at", { ascending: false })
           .limit(1)
           .maybeSingle();
-        if (byMapsite?.email) {
-          email = byMapsite.email.trim();
+        if (byMapSite?.email) {
+          email = byMapSite.email.trim();
           recipientName =
-            `${byMapsite.first_name || ""} ${byMapsite.last_name || ""}`.trim() ||
+            `${byMapSite.first_name || ""} ${byMapSite.last_name || ""}`.trim() ||
             recipientName;
         }
       }

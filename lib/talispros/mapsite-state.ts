@@ -1,5 +1,5 @@
 /**
- * MapSite™ platform lifecycle.
+ * Mapsite™ platform lifecycle.
  *
  * UNCLAIMED → BUILD_REQUEST_SUBMITTED → MARKETING_REVIEW → ACTIVE → ARCHIVED
  */
@@ -100,7 +100,7 @@ export function assertTransition(
   to: MapSitePlatformStatus
 ): void {
   if (!canTransition(from, to)) {
-    throw new Error(`Invalid MapSite™ transition: ${from} → ${to}`);
+    throw new Error(`Invalid Mapsite™ transition: ${from} → ${to}`);
   }
 }
 
@@ -110,7 +110,7 @@ export const DEMO_MAPSITE_FAST_CODE = "DEMO";
 export const MAPSITE_APP_PATH = "/talispros/mapsite";
 
 /**
- * Claimed MapSite path segment for account / market type.
+ * Claimed Mapsite™ path segment for account / market type.
  * Accepts claim account types (root, derivative, adpro) and audiences (listings, …).
  */
 export function mapsiteAccountTypeSegment(
@@ -139,7 +139,7 @@ export function mapsiteAccountTypeSegment(
   return "listings";
 }
 
-/** Short claimed MapSite URL: /talispros/mapsite/{accountType}/{fastCode} */
+/** Short claimed Mapsite™ URL: /talispros/mapsite/{accountType}/{fastCode} */
 export function buildClaimedMapSitePath(options: {
   fastCode: string;
   accountType?: string | null;
@@ -154,7 +154,7 @@ export function buildClaimedMapSitePath(options: {
 
 /**
  * Claim a Market™ registration invite (pre-claim / share for registration).
- * Recipient submits the form, then lands on the post-claim MapSite (PayPal).
+ * Recipient submits the form, then lands on the post-claim Mapsite™ (PayPal).
  */
 export function buildClaimRegistrationHref(options: {
   mapsiteId: string;

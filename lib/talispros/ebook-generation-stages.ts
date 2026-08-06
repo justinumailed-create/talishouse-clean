@@ -1,8 +1,8 @@
 /** Client-safe ebook generation stage constants (no server imports). */
 
 export const EBOOK_GENERATION_STAGES = [
-  "upload_complete",
-  "preparing_images",
+  "optimizing_images",
+  "uploading_images",
   "generating_pages",
   "publishing",
   "completed",
@@ -18,6 +18,8 @@ export type EbookGenerationProgressEvent =
       requestId: string;
       fastCode: string | null;
       mapsiteId: string | null;
+      /** Optional per-stage detail (e.g. "3/22"). */
+      detail?: string;
     }
   | {
       stage: "completed";
@@ -43,9 +45,9 @@ export const EBOOK_GENERATION_STAGE_LABELS: Record<
   Exclude<EbookGenerationStage, "failed">,
   string
 > = {
-  upload_complete: "Upload complete",
-  preparing_images: "Preparing images",
-  generating_pages: "Generating pages",
-  publishing: "Publishing",
+  optimizing_images: "Optimizing images",
+  uploading_images: "Uploading images",
+  generating_pages: "Building ebook",
+  publishing: "Publishing ebook",
   completed: "Completed",
 };

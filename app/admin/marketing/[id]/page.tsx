@@ -112,7 +112,7 @@ export default function MarketingBuildRequestDetailsPage() {
     await updateBuildRequestDetails(request.id, { [field]: url });
   }
 
-  async function replaceMapsiteAsset(
+  async function replaceMapSiteAsset(
     field: keyof MapSiteAsset,
     file: File
   ) {
@@ -202,13 +202,13 @@ export default function MarketingBuildRequestDetailsPage() {
         <AssetRow label="Header / Video" url={request.video} />
         <input type="file" onChange={(e) => e.target.files?.[0] && void replaceBuildRequestAsset("video", e.target.files[0])} />
         <AssetRow label="Profile Image" url={assets?.profile_image || null} />
-        <input type="file" onChange={(e) => e.target.files?.[0] && void replaceMapsiteAsset("profile_image", e.target.files[0])} />
+        <input type="file" onChange={(e) => e.target.files?.[0] && void replaceMapSiteAsset("profile_image", e.target.files[0])} />
         <AssetRow label="PIN Image" url={assets?.pin_image || null} />
-        <input type="file" onChange={(e) => e.target.files?.[0] && void replaceMapsiteAsset("pin_image", e.target.files[0])} />
+        <input type="file" onChange={(e) => e.target.files?.[0] && void replaceMapSiteAsset("pin_image", e.target.files[0])} />
         <AssetRow label="Monologue PDF" url={assets?.monologue_pdf || null} />
-        <input type="file" onChange={(e) => e.target.files?.[0] && void replaceMapsiteAsset("monologue_pdf", e.target.files[0])} />
+        <input type="file" onChange={(e) => e.target.files?.[0] && void replaceMapSiteAsset("monologue_pdf", e.target.files[0])} />
         <AssetRow label="EBook PDF" url={assets?.ebook_pdf || null} />
-        <input type="file" onChange={(e) => e.target.files?.[0] && void replaceMapsiteAsset("ebook_pdf", e.target.files[0])} />
+        <input type="file" onChange={(e) => e.target.files?.[0] && void replaceMapSiteAsset("ebook_pdf", e.target.files[0])} />
         <label className="block text-sm">Gallery Images (one URL per line)
           <textarea
             className="mt-1 w-full border rounded px-3 py-2 min-h-24"

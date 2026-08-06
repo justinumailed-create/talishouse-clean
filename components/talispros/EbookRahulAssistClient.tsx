@@ -91,7 +91,7 @@ export default function EbookRahulAssistClient({
       <div className="flex min-h-dvh flex-col items-center justify-center bg-white px-5 py-12 text-center text-neutral-900">
         <h1 className="text-2xl font-semibold tracking-tight">Draft E-Book generated</h1>
         <p className="mt-3 max-w-md text-sm text-neutral-500">
-          Your images were sent to Rahul and a Draft TalisBook™ preview was created
+          Your images were sent to Rahul and a Draft Talisbook™ preview was created
           automatically. Opening your preview…
         </p>
       </div>
@@ -103,7 +103,7 @@ export default function EbookRahulAssistClient({
       <div className="w-full max-w-lg">
         <div className="text-center">
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-400">
-            TalisBooks™
+            Talisbooks™
           </p>
           <h1 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
             Have Rahul Build It For Me

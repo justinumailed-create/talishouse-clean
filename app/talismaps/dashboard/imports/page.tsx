@@ -7,7 +7,7 @@ export default function TalisMapsImportsPage() {
     <div className="mx-auto max-w-6xl">
       <TalisMapsPageHeader
         title="Imports"
-        description="Import pins and categories from Atlist, spreadsheets, or existing MapSite data."
+        description="Import pins and categories from Atlist, spreadsheets, or existing Mapsite™ data."
       />
       <TalisMapsEmptyState
         icon={Download}

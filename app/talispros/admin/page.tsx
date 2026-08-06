@@ -17,7 +17,7 @@ export default async function TalisprosAdminOverviewPage() {
         <TalisprosAdminLogoutButton />
       </div>
       <p className="text-sm text-neutral-600 mb-8">
-        Configure MapSite templates, subscription tiers shown to visitors, and
+        Configure Mapsite™ templates, subscription tiers shown to visitors, and
         when the Express an Interest form is enabled.
       </p>
 
@@ -26,9 +26,9 @@ export default async function TalisprosAdminOverviewPage() {
           href="/talispros/admin/pmc"
           className="rounded-xl border border-neutral-200 bg-white px-4 py-3 hover:bg-neutral-50"
         >
-          <p className="text-sm font-semibold text-neutral-900">PMC MapSite™ admin</p>
+          <p className="text-sm font-semibold text-neutral-900">PMC Mapsite™ admin</p>
           <p className="text-xs text-neutral-500 mt-1">
-            Edit claimed MapSite pins on a map, plus Canada/USA regional Root pins.
+            Edit claimed Mapsite™ pins on a map, plus Canada/USA regional Root pins.
           </p>
         </Link>
         <Link
@@ -37,7 +37,7 @@ export default async function TalisprosAdminOverviewPage() {
         >
           <p className="text-sm font-semibold text-neutral-900">Forms Manager</p>
           <p className="text-xs text-neutral-500 mt-1">
-            View Build a MapSite™ submissions and registration checkouts.
+            View Build a Mapsite™ submissions and registration checkouts.
           </p>
         </Link>
         <Link
@@ -52,17 +52,17 @@ export default async function TalisprosAdminOverviewPage() {
       </section>
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6">
-        <h2 className="text-lg font-semibold text-neutral-900 mb-4">MapSites</h2>
+        <h2 className="text-lg font-semibold text-neutral-900 mb-4">Mapsites™</h2>
 
         {mapsites.length === 0 ? (
           <div className="text-sm text-neutral-600 space-y-3">
-            <p>No MapSites found in the database.</p>
+            <p>No Mapsites™ found in the database.</p>
             <p>
               Apply pending migrations with{" "}
               <code className="text-xs bg-neutral-100 px-1.5 py-0.5 rounded">
                 npx supabase db push --include-all
               </code>{" "}
-              to seed MapSite records.
+              to seed Mapsite™ records.
             </p>
           </div>
         ) : (
@@ -78,7 +78,7 @@ export default async function TalisprosAdminOverviewPage() {
                       {mapsite.fastCode}
                     </p>
                     <p className="text-sm text-neutral-500">
-                      {mapsite.propertyTitle || "Untitled MapSite"}
+                      {mapsite.propertyTitle || "Untitled Mapsite™"}
                     </p>
                   </div>
                   <span className="text-xs uppercase tracking-wide text-neutral-400">

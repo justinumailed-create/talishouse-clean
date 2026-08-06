@@ -13,7 +13,7 @@ const poppins = Poppins({
 export const metadata: Metadata = createMetadata({
   title: `${TALISBOOKS_PRODUCT_NAME} | Digital Book Platform`,
   description:
-    "TalisBooks™ is the native digital book and lookbook engine for the Talispros™ ecosystem — books, pages, templates, layouts, and publish workflows.",
+    "Talisbooks™ is the native digital book and lookbook engine for the Talispros™ ecosystem — books, pages, templates, layouts, and publish workflows.",
   path: "/talisbooks",
 });
 

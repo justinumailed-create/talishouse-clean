@@ -46,13 +46,13 @@ async function resolveFastCodeTier(
   if (directTier) return directTier;
 
   if (mapsiteId) {
-    const { data: linkedMapsite } = await supabase
+    const { data: linkedMapSite } = await supabase
       .from("mapsites")
       .select("account_type")
       .eq("id", mapsiteId)
       .maybeSingle();
 
-    const linkedTier = tierFromAccountType(linkedMapsite?.account_type);
+    const linkedTier = tierFromAccountType(linkedMapSite?.account_type);
     if (linkedTier) return linkedTier;
   }
 
@@ -141,7 +141,7 @@ export async function lookupFastCodeRegistrationTier(
   return { found: false, tier: null, code };
 }
 
-export function buildMapsiteRedirectUrl(fastCode: string): string {
+export function buildMapSiteRedirectUrl(fastCode: string): string {
   return `/talispros/mapsites/${encodeURIComponent(
     fastCode.trim().toLowerCase()
   )}`;

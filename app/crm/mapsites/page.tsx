@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
 
-interface MapSite {
+interface CrmMapSite {
   id: string;
   fastCode: string | null;
   name: string;
@@ -13,8 +13,8 @@ interface MapSite {
   createdAt: string;
 }
 
-export default function CrmMapsitesPage() {
-  const [mapsites, setMapsites] = useState<MapSite[]>([]);
+export default function CrmMapSitesPage() {
+  const [mapsites, setMapSites] = useState<CrmMapSite[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function CrmMapsitesPage() {
       const fcMap: Record<string, string> = {};
       if (fcData) fcData.forEach((f) => { fcMap[f.request_id] = f.code; });
 
-      setMapsites(
+      setMapSites(
         msData.map((m) => ({
           id: m.id,
           fastCode: fcMap[m.request_id] || null,
@@ -76,14 +76,14 @@ export default function CrmMapsitesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">MapSites</h1>
-      <p className="text-sm text-gray-500 mb-6">All MapSite build records</p>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">Mapsites™</h1>
+      <p className="text-sm text-gray-500 mb-6">All Mapsite™ build records</p>
 
       <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-sm text-neutral-400">Loading...</div>
         ) : mapsites.length === 0 ? (
-          <div className="p-8 text-center text-sm text-neutral-400">No MapSites yet</div>
+          <div className="p-8 text-center text-sm text-neutral-400">No Mapsites™ yet</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

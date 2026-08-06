@@ -7,13 +7,13 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = createMetadata({
-  title: "Build A MapSite™ | Talispros™",
+  title: "Build A Mapsite™ | Talispros™",
   description:
-    "Create a done-for-you MapSite™ designed to connect referral partners, local businesses, and real estate professionals.",
+    "Create a done-for-you Mapsite™ designed to connect referral partners, local businesses, and real estate professionals.",
   path: "/talispros/build-mapsite",
 });
 
-export default function BuildMapsiteLayout({
+export default function BuildMapSiteLayout({
   children,
 }: {
   children: React.ReactNode;

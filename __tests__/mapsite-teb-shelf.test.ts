@@ -18,7 +18,7 @@ function resolveTebHref(site: {
   return ROUTES.TALISBOOKS_LIBRARY;
 }
 
-describe("MapSite TEB™ shelf href", () => {
+describe("Mapsite™ TEB™ shelf href", () => {
   it("scopes library to FAST code by default", () => {
     expect(resolveTebHref({ fast_code: "lg01" })).toBe(
       "/talisbooks/library?fastCode=lg01"

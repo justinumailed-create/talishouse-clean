@@ -14,7 +14,7 @@ import {
 
 const mockAccountsLike = vi.fn();
 const mockRegistrationsLike = vi.fn();
-const mockMapsitesLike = vi.fn();
+const mockMapSitesLike = vi.fn();
 const mockFastCodesLike = vi.fn();
 
 vi.mock("@/lib/supabaseAdmin", () => ({
@@ -39,7 +39,7 @@ vi.mock("@/lib/supabaseAdmin", () => ({
       if (table === "mapsites") {
         return {
           select: () => ({
-            like: mockMapsitesLike,
+            like: mockMapSitesLike,
           }),
         };
       }
@@ -119,7 +119,7 @@ describe("generateFastCode", () => {
     vi.clearAllMocks();
     mockAccountsLike.mockResolvedValue({ data: [], error: null });
     mockRegistrationsLike.mockResolvedValue({ data: [], error: null });
-    mockMapsitesLike.mockResolvedValue({ data: [], error: null });
+    mockMapSitesLike.mockResolvedValue({ data: [], error: null });
     mockFastCodesLike.mockResolvedValue({ data: [], error: null });
   });
 

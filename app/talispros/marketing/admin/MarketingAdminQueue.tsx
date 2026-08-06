@@ -72,7 +72,7 @@ export default function MarketingAdminQueue() {
             Pending Build Requests
           </h2>
           <p className="text-xs text-neutral-500">
-            MapSite™ claims from Start → fullscreen map onboarding
+            Mapsite™ claims from Start → fullscreen map onboarding
           </p>
         </div>
         <button
@@ -190,7 +190,7 @@ export default function MarketingAdminQueue() {
                         }
                         disabled={pending}
                       >
-                        Convert to Active MapSite
+                        Convert to Active Mapsite™
                       </button>
                       <button
                         type="button"
@@ -200,7 +200,7 @@ export default function MarketingAdminQueue() {
                         }
                         disabled={pending}
                       >
-                        Activate MapSite
+                        Activate Mapsite™
                       </button>
                       <button
                         type="button"

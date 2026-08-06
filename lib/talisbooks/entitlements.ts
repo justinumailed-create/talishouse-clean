@@ -1,5 +1,5 @@
 /**
- * TalisBooks™ activation entitlements.
+ * Talisbooks™ activation entitlements.
  *
  * Clients may create one draft without payment. Publishing, global marketing,
  * multiple books, additional uploads, bookshelves, derivative books, and Adpro
@@ -30,13 +30,13 @@ export type TalisBooksEntitlementFeature =
   | "derivative_book"
   | "adpro_book";
 
-/** Unactivated accounts may hold exactly one draft TalisBook™. */
+/** Unactivated accounts may hold exactly one draft Talisbook™. */
 export const TALISBOOKS_UNACTIVATED_BOOK_QUOTA = 1;
 
 /**
  * Permitted book counts after activation, by account type.
  * Root / Derivative use the standard TEB™ shelf capacity.
- * Adpro PIN unlocks one book per PIN / MapSite shelf.
+ * Adpro PIN unlocks one book per PIN / Mapsite™ shelf.
  */
 export const TALISBOOKS_ACTIVATED_BOOK_QUOTAS: Record<TalisBooksAccountKind, number> =
   {
@@ -91,7 +91,7 @@ export function resolveTalisBooksAccountKind(input: {
 }
 
 /**
- * Activation for TalisBooks entitlements — MapSite ACTIVE and/or
+ * Activation for Talisbooks™ entitlements — Mapsite™ ACTIVE and/or
  * build_requests.activated_at. Does not call or modify payment helpers.
  */
 export function isTalisBooksAccountActivated(input: {
@@ -189,7 +189,7 @@ export function assertTalisBooksFeature(
         ok: false,
         error: entitlements.activated
           ? `Book quota reached (${entitlements.bookQuota} for ${entitlements.accountKind} accounts).`
-          : "Activate your account to create additional TalisBooks™.",
+          : "Activate your account to create additional Talisbooks™.",
         registrationHref: href,
       };
     case "create_additional_book":
@@ -200,7 +200,7 @@ export function assertTalisBooksFeature(
         ok: false,
         error: entitlements.activated
           ? `Book quota reached (${entitlements.bookQuota} for ${entitlements.accountKind} accounts).`
-          : "Activate your account to create additional TalisBooks™.",
+          : "Activate your account to create additional Talisbooks™.",
         registrationHref: href,
       };
     case "publish":

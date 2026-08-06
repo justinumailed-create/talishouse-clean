@@ -3,11 +3,11 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockUsersInsert = vi.fn();
 const mockUsersUpdate = vi.fn();
 const mockAccountsInsert = vi.fn();
-const mockMapsitesInsert = vi.fn();
-const mockMapsitesInsertPayload = vi.fn();
-const mockMapsitesSelect = vi.fn();
+const mockMapSitesInsert = vi.fn();
+const mockMapSitesInsertPayload = vi.fn();
+const mockMapSitesSelect = vi.fn();
 const mockAccountsLike = vi.fn();
-const mockMapsitesLike = vi.fn();
+const mockMapSitesLike = vi.fn();
 const mockFastCodesLike = vi.fn();
 
 vi.mock("../lib/slug-generator", () => ({
@@ -63,18 +63,18 @@ vi.mock("../lib/supabaseAdmin", () => ({
           select: (...args: unknown[]) => {
             // createMapSiteForAccount awaits .select("slug") directly
             if (args[0] === "slug") {
-              return mockMapsitesSelect();
+              return mockMapSitesSelect();
             }
             // generateFastCode uses .select("fast_code").like(...)
             return {
-              like: mockMapsitesLike,
+              like: mockMapSitesLike,
             };
           },
           insert: (record: unknown) => {
-            mockMapsitesInsertPayload(record);
+            mockMapSitesInsertPayload(record);
             return {
               select: () => ({
-                single: mockMapsitesInsert,
+                single: mockMapSitesInsert,
               }),
             };
           },
@@ -105,16 +105,16 @@ import { completeRootAccountRegistration } from "../lib/root-account-registratio
 describe("createMapSiteForAccount", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockMapsitesLike.mockResolvedValue({ data: [], error: null });
+    mockMapSitesLike.mockResolvedValue({ data: [], error: null });
     mockFastCodesLike.mockResolvedValue({ data: [], error: null });
-    mockMapsitesSelect.mockReturnValue({
+    mockMapSitesSelect.mockReturnValue({
       data: [],
       error: null,
     });
   });
 
-  it("creates a draft MapSite linked to the account FAST Code", async () => {
-    mockMapsitesInsert.mockResolvedValue({
+  it("creates a draft Mapsite™ linked to the account FAST Code", async () => {
+    mockMapSitesInsert.mockResolvedValue({
       data: {
         id: "mapsite-1",
         fast_code: "ar01",
@@ -144,8 +144,8 @@ describe("createMapSiteForAccount", () => {
       updatedAt: "2026-01-01T00:00:00.000Z",
     });
 
-    expect(mockMapsitesInsertPayload).toHaveBeenCalledOnce();
-    const insertArg = mockMapsitesInsertPayload.mock.calls[0][0] as {
+    expect(mockMapSitesInsertPayload).toHaveBeenCalledOnce();
+    const insertArg = mockMapSitesInsertPayload.mock.calls[0][0] as {
       fast_code: string;
       account_id: string;
       status: string;
@@ -176,7 +176,7 @@ describe("completeRootAccountRegistration", () => {
     mockUsersUpdate.mockResolvedValue({ error: null });
 
     mockAccountsLike.mockResolvedValue({ data: [], error: null });
-    mockMapsitesLike.mockResolvedValue({ data: [], error: null });
+    mockMapSitesLike.mockResolvedValue({ data: [], error: null });
     mockFastCodesLike.mockResolvedValue({ data: [], error: null });
 
     mockAccountsInsert.mockResolvedValue({
@@ -194,12 +194,12 @@ describe("completeRootAccountRegistration", () => {
       error: null,
     });
 
-    mockMapsitesSelect.mockReturnValue({
+    mockMapSitesSelect.mockReturnValue({
       data: [],
       error: null,
     });
 
-    mockMapsitesInsert.mockResolvedValue({
+    mockMapSitesInsert.mockResolvedValue({
       data: {
         id: "mapsite-1",
         fast_code: "ar01",
@@ -212,7 +212,7 @@ describe("completeRootAccountRegistration", () => {
     });
   });
 
-  it("creates user, root account, FAST Code, and MapSite in order", async () => {
+  it("creates user, root account, FAST Code, and Mapsite™ in order", async () => {
     const result = await completeRootAccountRegistration({
       firstName: "Arun",
       lastName: "Rachuri",
@@ -229,7 +229,7 @@ describe("completeRootAccountRegistration", () => {
 
     expect(mockUsersInsert).toHaveBeenCalled();
     expect(mockAccountsInsert).toHaveBeenCalled();
-    expect(mockMapsitesInsert).toHaveBeenCalled();
+    expect(mockMapSitesInsert).toHaveBeenCalled();
     expect(mockUsersUpdate).toHaveBeenCalledWith("id", "user-1");
   });
 });

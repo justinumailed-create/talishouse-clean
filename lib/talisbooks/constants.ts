@@ -15,7 +15,7 @@ import { TALISBOOKS_ECOSYSTEM_CHAIN, TALISBOOKS_TABLE_MAP } from "./ecosystem";
 export { TALISBOOKS_ECOSYSTEM_CHAIN, TALISBOOKS_TABLE_MAP };
 export type { TalisBooksDomainModel, TalisBooksEcosystemLinks } from "./ecosystem";
 
-export const TALISBOOKS_PRODUCT_NAME = "TalisBooks™";
+export const TALISBOOKS_PRODUCT_NAME = "Talisbooks™";
 
 export const TALISBOOKS_SIDEBAR_ITEMS = [
   { href: TALISBOOKS_ROUTES.DASHBOARD, label: "Dashboard", icon: LayoutDashboard },
@@ -43,7 +43,7 @@ export const TALISBOOKS_DATABASE_MODELS = [
 
 export const TALISBOOKS_FUTURE_FEATURES = [
   "Book Editor",
-  "MapSites™ Integration",
+  "Mapsites™ Integration",
   "TalisTV™ Video Shelf (TTV)",
   "FAST Code Libraries",
   "Template Marketplace",
@@ -85,7 +85,7 @@ export const TALISBOOKS_PAGE_STRUCTURE = [
  */
 export const TALISBOOKS_FSBO_DEMO_PAGE_STRUCTURE = [
   { page: 1, role: "cover", label: "Cover" },
-  { page: 2, role: "property_content", label: "MapSite™ location" },
+  { page: 2, role: "property_content", label: "Mapsite™ location" },
   { page: "3–(n-3)", role: "property_content", label: "Property story" },
   {
     page: "(n-2)–(n-1)",

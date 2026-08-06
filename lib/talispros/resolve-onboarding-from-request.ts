@@ -40,7 +40,7 @@ export type ResolveOnboardingResult =
 /**
  * Canonical onboarding resolver.
  * Build Request (`requestId`) is the sole source of truth — no cookies,
- * localStorage, or client-supplied FAST Code / MapSite IDs are trusted.
+ * localStorage, or client-supplied FAST Code / Mapsite™ IDs are trusted.
  */
 export async function resolveOnboardingFromRequest(
   requestIdRaw: string | null | undefined
@@ -208,7 +208,7 @@ export async function resolveOnboardingFromRequest(
         (url): url is string => typeof url === "string" && url.trim().length > 0
       )
     : [];
-  const galleryFromMapsite = Array.isArray(mapsite?.gallery_images)
+  const galleryFromMapSite = Array.isArray(mapsite?.gallery_images)
     ? mapsite.gallery_images.filter(
         (url): url is string => typeof url === "string" && url.trim().length > 0
       )
@@ -236,7 +236,7 @@ export async function resolveOnboardingFromRequest(
         galleryFromRequest[0] ||
         null,
       galleryImages:
-        galleryFromMapsite.length > 0 ? galleryFromMapsite : galleryFromRequest,
+        galleryFromMapSite.length > 0 ? galleryFromMapSite : galleryFromRequest,
       logo:
         mapsite?.logo_url?.trim() ||
         (typeof request.logo === "string" ? request.logo.trim() : null) ||

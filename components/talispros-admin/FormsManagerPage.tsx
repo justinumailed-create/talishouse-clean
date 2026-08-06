@@ -5,8 +5,8 @@ import { assignBuildRequest, completeBuildRequest } from "@/lib/build-request-ac
 import {
   listFormsManagerSubmissions,
   updateBuildRequestStatusAdmin,
-  updateMapsiteRequestStatusAdmin,
-  type FormsManagerBuildMapsiteRow,
+  updateMapSiteRequestStatusAdmin,
+  type FormsManagerBuildMapSiteRow,
   type FormsManagerRow,
   type FormsManagerSource,
 } from "@/lib/forms-manager-admin-actions";
@@ -30,12 +30,12 @@ const STATUS_FILTERS = [
 
 const FORM_FILTERS: { value: FormFilter; label: string }[] = [
   { value: "all", label: "All Forms" },
-  { value: "build_mapsite", label: "Build a MapSite™" },
+  { value: "build_mapsite", label: "Build a Mapsite™" },
   { value: "registration", label: "Registrations" },
 ];
 
 function formLabel(row: FormsManagerRow): string {
-  return row.source === "build_mapsite" ? "Build a MapSite™" : "Registration";
+  return row.source === "build_mapsite" ? "Build a Mapsite™" : "Registration";
 }
 
 function displayStatus(row: FormsManagerRow): string {
@@ -85,7 +85,7 @@ export default function FormsManagerPage() {
     }
 
     const combined: FormsManagerRow[] = [
-      ...result.buildMapsite,
+      ...result.buildMapSite,
       ...result.registrations,
     ].sort(
       (a, b) =>
@@ -102,7 +102,7 @@ export default function FormsManagerPage() {
 
   async function handleResetStatus(requestId: string) {
     const buildResult = await updateBuildRequestStatusAdmin(requestId, "pending");
-    const mapsiteResult = await updateMapsiteRequestStatusAdmin(
+    const mapsiteResult = await updateMapSiteRequestStatusAdmin(
       requestId,
       "pending"
     );
@@ -259,7 +259,7 @@ export default function FormsManagerPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Forms Manager</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Build a MapSite™ submissions and registration checkouts
+            Build a Mapsite™ submissions and registration checkouts
           </p>
         </div>
         <button
@@ -422,7 +422,7 @@ export default function FormsManagerPage() {
                     </td>
                     <td className="py-3 px-4">
                       {row.source === "build_mapsite" ? (
-                        <BuildMapsiteActions
+                        <BuildMapSiteActions
                           row={row}
                           onAssign={handleAssign}
                           onComplete={handleMarkComplete}
@@ -444,7 +444,7 @@ export default function FormsManagerPage() {
             <p className="text-sm text-gray-500 text-center mt-1">
               {search || statusFilter !== "all" || formFilter !== "all"
                 ? "No submissions match your filters."
-                : "Build a MapSite™ and registration submissions will appear here."}
+                : "Build a Mapsite™ and registration submissions will appear here."}
             </p>
           </div>
         )}
@@ -474,14 +474,14 @@ export default function FormsManagerPage() {
   );
 }
 
-function BuildMapsiteActions({
+function BuildMapSiteActions({
   row,
   displayStatus,
   onAssign,
   onComplete,
   onReopen,
 }: {
-  row: FormsManagerBuildMapsiteRow;
+  row: FormsManagerBuildMapSiteRow;
   displayStatus: string;
   onAssign: (id: string) => void;
   onComplete: (id: string) => void;

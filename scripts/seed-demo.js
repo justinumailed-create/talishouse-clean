@@ -19,7 +19,7 @@ async function seedDemo() {
     mapsite_slug: "demo",
     hero_type: "image",
     hero_content: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2070&auto=format&fit=crop",
-    page_headline: "Welcome to our Demo Mapsite",
+    page_headline: "Welcome to our Demo Mapsite™",
     page_subtext: "Explore our premium modular home solutions and property discovery tools.",
     page_contact_cta: "Refer a Project",
     show_video: true,

@@ -39,7 +39,7 @@ function RegistrationSuccessContent() {
           Registration Successful
         </h1>
         <p className="text-neutral-500 text-sm sm:text-base mb-8 max-w-sm mx-auto">
-          Your MapSite™ has been created.
+          Your Mapsite™ has been created.
         </p>
 
         <div className="border border-neutral-200 rounded-2xl bg-white p-6 sm:p-8 text-left space-y-4">
@@ -51,7 +51,7 @@ function RegistrationSuccessContent() {
           </div>
           <div>
             <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-1">
-              MapSite URL
+              Mapsite™ URL
             </p>
             <a
               href={url}

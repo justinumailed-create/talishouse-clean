@@ -19,7 +19,7 @@ export async function openMapSiteAfterBuildRequest(input: {
 }): Promise<{ href: string; mapsiteId?: string; fastCode?: string | null }> {
   const started = onboardingNow();
   const result = await timedOnboardingStep(
-    "MapSite creation",
+    "Mapsite™ creation",
     () =>
       ensureClientMapSiteFromBuildRequest({
         requestId: input.requestId,
@@ -46,7 +46,7 @@ export async function openMapSiteAfterBuildRequest(input: {
     );
   }
 
-  // Mark this browser as the MapSite™ owner so auto-open pin/flag applies.
+  // Mark this browser as the Mapsite™ owner so auto-open pin/flag applies.
   if (isIssuedFastCode(fastCode)) {
     const cookieStarted = onboardingNow();
     await setMapSiteOwnerSession(fastCode);
@@ -66,7 +66,7 @@ export async function openMapSiteAfterBuildRequest(input: {
   };
 }
 
-/** Establish owner session after Build My MapSite™ (or other success handoff). */
+/** Establish owner session after Build My Mapsite™ (or other success handoff). */
 export async function establishOwnerMapSiteSession(
   fastCode: string | null | undefined
 ): Promise<void> {

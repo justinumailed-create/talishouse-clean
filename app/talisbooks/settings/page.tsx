@@ -7,7 +7,7 @@ export default function TalisBooksSettingsPage() {
     <div className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
       <TalisBooksPageHeader
         title="Settings"
-        description="Marketing-surface settings for the TalisBooks™ platform."
+        description="Marketing-surface settings for the Talisbooks™ platform."
       />
       <TalisBooksEmptyState
         icon={Settings}

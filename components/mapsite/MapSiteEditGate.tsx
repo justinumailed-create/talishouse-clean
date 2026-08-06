@@ -34,7 +34,7 @@ export default function MapSiteEditGate({ fastCode }: { fastCode: string }) {
     <div className="min-h-[60vh] flex items-center justify-center px-5 py-16">
       <div className="w-full max-w-sm">
         <h1 className="text-2xl font-semibold text-neutral-900 text-center mb-2">
-          Edit MapSite
+          Edit Mapsite™
         </h1>
         <p className="text-sm text-neutral-500 text-center mb-8">
           Enter FAST code{" "}

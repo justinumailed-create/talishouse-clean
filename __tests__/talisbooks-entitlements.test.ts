@@ -9,8 +9,8 @@ import {
   resolveTalisBooksAccountKind,
 } from "../lib/talisbooks/entitlements";
 
-describe("TalisBooks activation entitlements", () => {
-  it("treats MapSite ACTIVE or activated_at as activated", () => {
+describe("Talisbooks™ activation entitlements", () => {
+  it("treats Mapsite™ ACTIVE or activated_at as activated", () => {
     expect(isTalisBooksAccountActivated({ mapsiteStatus: "ACTIVE" })).toBe(true);
     expect(
       isTalisBooksAccountActivated({ activatedAt: "2026-07-01T00:00:00.000Z" }),

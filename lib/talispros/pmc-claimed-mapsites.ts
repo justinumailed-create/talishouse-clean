@@ -9,7 +9,7 @@ export type PmcClaimedMapSiteListItem = {
 };
 
 /**
- * All generated MapSite FAST Codes for PMC admin — sourced from `fast_codes`,
+ * All generated Mapsite™ FAST Codes for PMC admin — sourced from `fast_codes`,
  * not only the current `mapsites.fast_code` value (claims can overwrite that).
  */
 export async function listPmcClaimedMapSites(): Promise<PmcClaimedMapSiteListItem[]> {
@@ -65,7 +65,7 @@ export async function listPmcClaimedMapSites(): Promise<PmcClaimedMapSiteListIte
         const title =
           build.property_title?.trim() ||
           build.future_pin_label?.trim() ||
-          (name ? `${name} MapSite™` : null) ||
+          (name ? `${name} Mapsite™` : null) ||
           build.street_address?.trim() ||
           null;
         buildById.set(build.id, {

@@ -19,13 +19,13 @@ function RegisterSidebar() {
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-sm p-6 border-2 border-[#c92026] text-center">
         <p className="text-sm text-neutral-900 leading-relaxed mb-4">
-          After registration, you&apos;ll continue building your MapSite™.
+          After registration, you&apos;ll continue building your Mapsite™.
         </p>
         <Link
           href="/talispros/build-mapsite"
           className="inline-flex h-10 px-6 bg-neutral-900 text-white rounded-lg text-sm font-medium tracking-wide items-center justify-center hover:bg-neutral-800 active:scale-[0.98] transition-all"
         >
-          Continue to My MapSite™
+          Continue to My Mapsite™
         </Link>
       </div>
 

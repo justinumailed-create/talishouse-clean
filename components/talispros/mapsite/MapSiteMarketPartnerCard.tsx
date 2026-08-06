@@ -39,7 +39,7 @@ interface MapSiteMarketPartnerCardProps {
 }
 
 /**
- * Claimed MapSite left card:
+ * Claimed Mapsite™ left card:
  * FAST CODE → address → partner photo → partner copy → register blurb.
  * Uses a div (not a tall <button>) so the parent sidebar can scroll.
  */

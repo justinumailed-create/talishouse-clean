@@ -10,7 +10,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Registration Successful | TalisPros™",
-  description: "Your MapSite has been created successfully.",
+  description: "Your Mapsite™ has been created successfully.",
 };
 
 export default function RegistrationSuccessLayout({

@@ -13,7 +13,7 @@ export default function FsboPage() {
           </h1>
           <p className="text-sm sm:text-base text-neutral-500 max-w-xl mx-auto leading-relaxed mb-8">
             Get market-ready with an AdPro™ placement. Reach motivated buyers
-            directly through TalisMaps™ — no agent required.
+            directly through Talismaps™ — no agent required.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link

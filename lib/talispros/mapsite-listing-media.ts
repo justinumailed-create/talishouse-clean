@@ -14,7 +14,7 @@ export const MAPSITE_LISTING_HERO_HEIGHT_CLASS = "h-44";
 export const MAPSITE_LISTING_TILE_TOP_FALLBACK_PX = 64;
 
 /**
- * Demo / unclaimed MapSite gallery — Talishouse™ product lineup
+ * Demo / unclaimed Mapsite™ gallery — Talishouse™ product lineup
  * (400, 800, residential 1600+, residential hero).
  */
 export const MAPSITE_DEMO_GALLERY = [

@@ -1,5 +1,5 @@
 /**
- * Marketing / MapSite admin helpers for form-driven TalisBooks™ page management.
+ * Marketing / Mapsite™ admin helpers for form-driven Talisbooks™ page management.
  * No HTML editing — title, body, image URL/file, and reorder only.
  */
 

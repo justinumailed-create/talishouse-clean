@@ -13,7 +13,7 @@ export default async function TalisMapsDashboardSettingsPage() {
     <div className="mx-auto max-w-3xl">
       <TalisMapsPageHeader
         title="Settings"
-        description="Choose the default MapProvider and map view for TalisMaps™."
+        description="Choose the default MapProvider and map view for Talismaps™."
       />
 
       <div className="space-y-8">

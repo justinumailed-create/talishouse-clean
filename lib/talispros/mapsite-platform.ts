@@ -29,7 +29,7 @@ export type MapSitePlatformRecord = {
   is_demonstration: boolean;
   created_at: string | null;
   updated_at: string | null;
-  /** From the linked Build Request when MapSite row is still on demo coordinates. */
+  /** From the linked Build Request when Mapsite™ row is still on demo coordinates. */
   pin_icon?: string | null;
   pin_color?: string | null;
   pin_white_center?: boolean;
@@ -415,7 +415,7 @@ export async function getDemonstrationMapSite(): Promise<MapSitePlatformRecord> 
 
     return createFallbackDemoMapSite();
   } catch (error) {
-    console.warn("[mapsite-platform] Falling back to demo MapSite:", error);
+    console.warn("[mapsite-platform] Falling back to demo Mapsite™:", error);
     return createFallbackDemoMapSite();
   }
 }
@@ -448,7 +448,7 @@ export async function transitionMapSiteStatus(
   }
 
   const current = await getMapSitePlatformById(mapsiteId);
-  if (!current) return { ok: false, error: "MapSite not found." };
+  if (!current) return { ok: false, error: "Mapsite™ not found." };
 
   try {
     assertTransition(current.status, next);
@@ -471,7 +471,7 @@ export async function transitionMapSiteStatus(
     .single();
 
   if (error || !data) {
-    return { ok: false, error: error?.message || "Failed to update MapSite status." };
+    return { ok: false, error: error?.message || "Failed to update Mapsite™ status." };
   }
 
   return { ok: true, mapsite: mapRow(data as MapSiteRow) };
@@ -532,14 +532,14 @@ export async function updateMapSiteResources(
     .single();
 
   if (error || !data) {
-    return { ok: false, error: error?.message || "Failed to update MapSite." };
+    return { ok: false, error: error?.message || "Failed to update Mapsite™." };
   }
 
   return { ok: true, mapsite: mapRow(data as MapSiteRow) };
 }
 
 /**
- * After a Build Request is submitted against a MapSite, move it into the
+ * After a Build Request is submitted against a Mapsite™, move it into the
  * pending pipeline and associate the request.
  */
 export async function markMapSiteClaimedByBuildRequest(params: {
@@ -605,7 +605,7 @@ export async function markMapSiteClaimedByBuildRequest(params: {
       { onConflict: "id" }
     );
     if (seedError) {
-      console.warn("[mapsite-platform] Unable to seed demo MapSite:", seedError.message);
+      console.warn("[mapsite-platform] Unable to seed demo Mapsite™:", seedError.message);
     } else {
       current = await getMapSitePlatformById(params.mapsiteId);
     }

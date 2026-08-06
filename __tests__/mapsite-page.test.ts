@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { buildClaimedMapSiteHref, getMapSiteByFastCode } from "../lib/mapsite-service";
 
-const mockMapsitesMaybeSingle = vi.fn();
-const mockMapsitesByIdMaybeSingle = vi.fn();
+const mockMapSitesMaybeSingle = vi.fn();
+const mockMapSitesByIdMaybeSingle = vi.fn();
 const mockPinsOrder = vi.fn();
 const mockPinsEq = vi.fn();
 const mockFastCodesIlikeMaybeSingle = vi.fn();
-const mockFastCodesByMapsiteMaybeSingle = vi.fn();
+const mockFastCodesByMapSiteMaybeSingle = vi.fn();
 const mockBuildRequestsMaybeSingle = vi.fn();
 const mockAssetsMaybeSingle = vi.fn();
 
@@ -14,10 +14,10 @@ function mapsitesQuery() {
   return {
     select: () => ({
       ilike: () => ({
-        maybeSingle: mockMapsitesMaybeSingle,
+        maybeSingle: mockMapSitesMaybeSingle,
       }),
       eq: () => ({
-        maybeSingle: mockMapsitesByIdMaybeSingle,
+        maybeSingle: mockMapSitesByIdMaybeSingle,
       }),
     }),
   };
@@ -43,10 +43,10 @@ function fastCodesQuery() {
       eq: () => ({
         order: () => ({
           limit: () => ({
-            maybeSingle: mockFastCodesByMapsiteMaybeSingle,
+            maybeSingle: mockFastCodesByMapSiteMaybeSingle,
           }),
         }),
-        maybeSingle: mockFastCodesByMapsiteMaybeSingle,
+        maybeSingle: mockFastCodesByMapSiteMaybeSingle,
       }),
     }),
   };
@@ -121,22 +121,22 @@ describe("getMapSiteByFastCode", () => {
     vi.clearAllMocks();
     mockPinsOrder.mockResolvedValue({ data: [], error: null });
     mockFastCodesIlikeMaybeSingle.mockResolvedValue({ data: null, error: null });
-    mockFastCodesByMapsiteMaybeSingle.mockResolvedValue({ data: null, error: null });
-    mockMapsitesByIdMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockFastCodesByMapSiteMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockMapSitesByIdMaybeSingle.mockResolvedValue({ data: null, error: null });
     mockBuildRequestsMaybeSingle.mockResolvedValue({ data: null, error: null });
     mockAssetsMaybeSingle.mockResolvedValue({ data: null, error: null });
   });
 
   it("returns null when the FAST Code does not exist", async () => {
-    mockMapsitesMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockMapSitesMaybeSingle.mockResolvedValue({ data: null, error: null });
 
     const result = await getMapSiteByFastCode("missing01");
 
     expect(result).toBeNull();
   });
 
-  it("returns the MapSite and its pins from the database", async () => {
-    mockMapsitesMaybeSingle.mockResolvedValue({
+  it("returns the Mapsite™ and its pins from the database", async () => {
+    mockMapSitesMaybeSingle.mockResolvedValue({
       data: {
         id: "mapsite-1",
         fast_code: "ar01",
@@ -211,7 +211,7 @@ describe("getMapSiteByFastCode", () => {
   });
 
   it("keeps the looked-up FAST Code when mapsite row was overwritten to DEMO", async () => {
-    mockMapsitesMaybeSingle.mockResolvedValue({ data: null, error: null });
+    mockMapSitesMaybeSingle.mockResolvedValue({ data: null, error: null });
     mockFastCodesIlikeMaybeSingle.mockResolvedValue({
       data: {
         code: "lg01",
@@ -220,7 +220,7 @@ describe("getMapSiteByFastCode", () => {
       },
       error: null,
     });
-    mockMapsitesByIdMaybeSingle.mockResolvedValue({
+    mockMapSitesByIdMaybeSingle.mockResolvedValue({
       data: {
         id: "00000000-0000-4000-8000-000000000001",
         fast_code: "DEMO",

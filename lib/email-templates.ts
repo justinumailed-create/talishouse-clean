@@ -57,7 +57,7 @@ function wrap(content: string) {
                 <tr>
                   <td style="padding-top:24px;border-top:1px solid #e5e5e5;text-align:center">
                     <p style="margin:0;font-size:12px;color:#8e8e93">
-                      Talishouse Inc. &middot; Building better MapSites
+                      Talishouse Inc. &middot; Building better Mapsites™
                     </p>
                   </td>
                 </tr>
@@ -83,10 +83,10 @@ export function buildRequestReceivedHtml({ recipientName, requestId }: BuildRequ
           Hi ${recipientName},
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
-          Thank you for submitting your MapSite build request. Our team has received it and will review it within two business days.
+          Thank you for submitting your Mapsite™ build request. Our team has received it and will review it within two business days.
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
-          Once reviewed, you will receive a FAST code that grants you access to your MapSite.
+          Once reviewed, you will receive a FAST code that grants you access to your Mapsite™.
         </p>
         <table cellpadding="0" cellspacing="0" style="background-color:#f5f5f7;border-radius:10px;padding:16px;margin-bottom:16px">
           <tr>
@@ -119,7 +119,7 @@ export function fastCodeGeneratedHtml({ recipientName, fastCode, mapsiteUrl }: F
           Hi ${recipientName},
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
-          Great news! Your MapSite FAST code has been generated. This code is your key to accessing and sharing your MapSite.
+          Great news! Your Mapsite™ FAST code has been generated. This code is your key to accessing and sharing your Mapsite™.
         </p>
         <table cellpadding="0" cellspacing="0" style="background-color:#f0f4ff;border-radius:12px;padding:20px;margin-bottom:16px">
           <tr>
@@ -134,13 +134,13 @@ export function fastCodeGeneratedHtml({ recipientName, fastCode, mapsiteUrl }: F
           </tr>
         </table>
         <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
-          Access your MapSite anytime at the link below:
+          Access your Mapsite™ anytime at the link below:
         </p>
         <table cellpadding="0" cellspacing="0">
           <tr>
             <td style="background-color:#111;border-radius:10px;padding:12px 24px">
               <a href="${mapsiteUrl}" style="color:#fff;text-decoration:none;font-size:14px;font-weight:500;display:inline-block">
-                View My MapSite
+                View My Mapsite™
               </a>
             </td>
           </tr>
@@ -159,13 +159,13 @@ export function mapSiteAssignedHtml({ recipientName, clientName, fastCode }: Map
     <tr>
       <td style="padding-top:24px">
         <h2 style="margin:0 0 8px;font-size:22px;font-weight:600;color:#111;letter-spacing:-0.3px">
-          New MapSite Assigned
+          New Mapsite™ Assigned
         </h2>
         <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
           Hi ${recipientName},
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
-          A new MapSite build request has been assigned to you.
+          A new Mapsite™ build request has been assigned to you.
         </p>
         <table cellpadding="0" cellspacing="0" style="background-color:#f5f5f7;border-radius:10px;padding:16px;margin-bottom:16px">
           <tr>
@@ -200,13 +200,13 @@ export function mapSiteCompletedHtml({ recipientName, fastCode, mapsiteUrl }: Ma
     <tr>
       <td style="padding-top:24px">
         <h2 style="margin:0 0 8px;font-size:22px;font-weight:600;color:#111;letter-spacing:-0.3px">
-          Your MapSite is Complete
+          Your Mapsite™ is Complete
         </h2>
         <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
           Hi ${recipientName},
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
-          Your MapSite is ready! You can now view and share it using your FAST code.
+          Your Mapsite™ is ready! You can now view and share it using your FAST code.
         </p>
         <table cellpadding="0" cellspacing="0" style="background-color:#f0fdf4;border-radius:12px;padding:20px;margin-bottom:16px">
           <tr>
@@ -224,7 +224,7 @@ export function mapSiteCompletedHtml({ recipientName, fastCode, mapsiteUrl }: Ma
           <tr>
             <td style="background-color:#111;border-radius:10px;padding:12px 24px">
               <a href="${mapsiteUrl}" style="color:#fff;text-decoration:none;font-size:14px;font-weight:500;display:inline-block">
-                View My MapSite
+                View My Mapsite™
               </a>
             </td>
           </tr>
@@ -243,7 +243,7 @@ export function ebookCompletedHtml({ recipientName, fastCode, ebookUrl }: EbookC
     <tr>
       <td style="padding-top:24px">
         <h2 style="margin:0 0 8px;font-size:22px;font-weight:600;color:#111;letter-spacing:-0.3px">
-          Your TalisBook™ is Ready
+          Your Talisbook™ is Ready
         </h2>
         <p style="margin:0 0 16px;font-size:15px;color:#555;line-height:1.5">
           Hi ${recipientName},

@@ -73,7 +73,7 @@ export default function CrmBuildRequestsPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Build Requests</h1>
-      <p className="text-sm text-gray-500 mb-6">MapSite build requests from the public form</p>
+      <p className="text-sm text-gray-500 mb-6">Mapsite™ build requests from the public form</p>
 
       <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
         {loading ? (

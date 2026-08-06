@@ -13,7 +13,7 @@ const poppins = Poppins({
 export const metadata: Metadata = createMetadata({
   title: `${TALISMAPS_PRODUCT_NAME} | Interactive Map Platform`,
   description:
-    "TalisMaps™ is the native interactive map platform for the Talispros™ ecosystem — replacing Atlist with root accounts, derivative maps, Adpro PINs, and property listings.",
+    "Talismaps™ is the native interactive map platform for the Talispros™ ecosystem — replacing Atlist with root accounts, derivative maps, Adpro PINs, and property listings.",
   path: "/talismaps",
 });
 

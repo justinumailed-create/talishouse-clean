@@ -16,7 +16,7 @@ export const maxDuration = 60;
 export const metadata: Metadata = createMetadata({
   title: "Generate E-Book | Talispros™",
   description:
-    "Generate your own TalisBooks™ E-Book from property images, title, description, and location — no payment required.",
+    "Generate your own Talisbooks™ E-Book from property images, title, description, and location — no payment required.",
   path: "/talispros/ebook-generate",
   private: true,
 });

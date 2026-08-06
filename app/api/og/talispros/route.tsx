@@ -64,13 +64,13 @@ export async function GET() {
             letterSpacing: "0.02em",
           }}
         >
-          <span>MapSites™</span>
+          <span>Mapsites™</span>
           <span>•</span>
           <span>FAST Codes™</span>
           <span>•</span>
           <span>TalisForms™</span>
           <span>•</span>
-          <span>TalisMaps™</span>
+          <span>Talismaps™</span>
         </div>
       </div>
     ),

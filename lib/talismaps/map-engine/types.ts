@@ -51,7 +51,7 @@ export interface MapMountOptions {
   basemapView?: MapBasemapView;
   /**
    * Keep the map center fixed on `center` (zoom allowed, pan disabled).
-   * Used by MapSite™ so the pin stays under the floating card pointer.
+   * Used by Mapsite™ so the pin stays under the floating card pointer.
    */
   lockCenter?: boolean;
   /**
@@ -116,7 +116,7 @@ export interface MapInstance {
   setDraggablePinIds(pinIds: string[]): void;
   setBasemapView?(view: MapBasemapView): void;
   getBasemapView?(): MapBasemapView;
-  /** Update locked-pin screen offset without remounting (MapSite responsive layout). */
+  /** Update locked-pin screen offset without remounting (Mapsite™ responsive layout). */
   setLockCenterOffset?(offset: { x: number; y: number }): void;
   fitToPins(padding?: number): void;
   fitToCoordinates(coordinates: MapCoordinates[], padding?: number): void;
@@ -126,7 +126,7 @@ export interface MapInstance {
 
 /**
  * Provider-agnostic map engine contract.
- * All TalisMaps™ surfaces mount maps through this interface.
+ * All Talismaps™ surfaces mount maps through this interface.
  * Implementations may use Google Maps, MapLibre, Mapbox GL, etc.
  */
 export interface MapProvider {

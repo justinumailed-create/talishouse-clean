@@ -48,7 +48,7 @@ function cardWidthFor(rootWidth: number): number {
 }
 
 /**
- * Computes MapSite overlay positions so the FAST card and pin popup
+ * Computes Mapsite™ overlay positions so the FAST card and pin popup
  * do not overlap, and the map pin sits under the popup tip.
  */
 export function computeMapSiteOverlayLayout(

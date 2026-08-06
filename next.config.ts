@@ -20,9 +20,10 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      // Self-service ebook uploads (images + PDF page rasters) can exceed 4mb.
+      // Per-image optimize uploads (one phone photo at a time) — not a giant multi-file POST.
       bodySizeLimit: "25mb",
     },
+    // Allows a single high-res camera JPEG into /upload-image before server-side optimize.
     proxyClientMaxBodySize: "25mb",
   },
 };

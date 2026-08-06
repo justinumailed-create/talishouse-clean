@@ -5,7 +5,7 @@ import {
   normalizeGalleryItemsForSave,
   orderGalleryItemsBySortOrder,
   parseGalleryItems,
-  resolveMapsiteGalleryItems,
+  resolveMapSiteGalleryItems,
   visibleGalleryDisplayItems,
 } from "../lib/mapsite-gallery";
 
@@ -125,7 +125,7 @@ describe("mapsite-gallery", () => {
   });
 
   it("resolves gallery items from structured storage with legacy fallback", () => {
-    const resolved = resolveMapsiteGalleryItems(
+    const resolved = resolveMapSiteGalleryItems(
       [
         { url: "/a.png", description: "Front", sortOrder: 0, visible: true },
         { url: "/b.png", description: "", sortOrder: 1, visible: true },

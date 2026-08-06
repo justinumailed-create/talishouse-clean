@@ -11,7 +11,7 @@ export type PinProps = TalisMapsPinVisualProps & {
 };
 
 /**
- * Reusable TalisMaps™ PIN.
+ * Reusable Talismaps™ PIN.
  * Rendering-only — no editing / inspector wiring yet.
  */
 export default function Pin({

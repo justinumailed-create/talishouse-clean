@@ -20,8 +20,8 @@ export default async function TalisMapsAdminPage() {
           {TALISMAPS_PRODUCT_NAME} Admin
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500">
-          Manage the TalisMaps™ platform architecture, monitor adoption, and configure
-          ecosystem integrations. This console is separate from Talispros™ MapSite admin.
+          Manage the Talismaps™ platform architecture, monitor adoption, and configure
+          ecosystem integrations. This console is separate from Talispros™ Mapsite™ admin.
         </p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

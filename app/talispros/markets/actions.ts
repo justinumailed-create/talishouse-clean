@@ -23,7 +23,7 @@ export async function submitMarketRegistration(formData: FormData) {
     typeof existingComments === "string" && existingComments.trim()
       ? existingComments
       : fromMapSite
-        ? `Submitted from MapSite™ application: ${market}`
+        ? `Submitted from Mapsite™ application: ${market}`
         : `Submitted from market page: ${market}`
   );
 

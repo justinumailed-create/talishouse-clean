@@ -10,7 +10,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: `My Books | ${TALISBOOKS_PRODUCT_NAME}`,
   description:
-    "Client portal for TalisBooks™ digital publications linked to your MapSite™, account, and FAST Code.",
+    "Client portal for Talisbooks™ digital publications linked to your Mapsite™, account, and FAST Code.",
   path: "/client/books",
   private: true,
 });
@@ -41,7 +41,7 @@ export default async function ClientBooksPage() {
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-neutral-900">My Books</h2>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-500">
-            Digital publications linked to your MapSite™ through your account and FAST Code.
+            Digital publications linked to your Mapsite™ through your account and FAST Code.
             Editing is not enabled yet — this is the client portal scaffold.
           </p>
         </div>
@@ -66,7 +66,7 @@ export default async function ClientBooksPage() {
             <h3 className="text-lg font-semibold text-neutral-900">No books yet</h3>
             <p className="mt-2 max-w-md text-sm text-neutral-500">
               Books for FAST Code {session.fastCode.toUpperCase()} will appear here once linked
-              to your MapSite™.
+              to your Mapsite™.
             </p>
             <Link
               href={TALISBOOKS_ROUTES.VIEWER}

@@ -15,7 +15,7 @@ interface PageConfig {
   phone?: string;
 }
 
-export default async function MapsitePage({ params }: { params: Promise<{ slug?: string }> }) {
+export default async function MapSitePage({ params }: { params: Promise<{ slug?: string }> }) {
   const resolvedParams = await params;
   const slug = resolvedParams?.slug?.toLowerCase().trim();
 
@@ -23,7 +23,7 @@ export default async function MapsitePage({ params }: { params: Promise<{ slug?:
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold mb-2">Invalid Mapsite Slug</h1>
+          <h1 className="text-2xl font-semibold mb-2">Invalid Mapsite™ Slug</h1>
           <p className="text-gray-600">Please check the URL and try again.</p>
         </div>
       </div>
@@ -46,7 +46,7 @@ export default async function MapsitePage({ params }: { params: Promise<{ slug?:
         pageConfig = {
           contentType: data.hero_type || "map",
           contentUrl: data.hero_content || "",
-          headline: data.page_headline || data.name || "Mapsite",
+          headline: data.page_headline || data.name || "Mapsite™",
           subtext: data.page_subtext || "Property Discovery Map",
           ctaText: data.page_contact_cta || "Refer a Project",
           showForm: data.show_form || false,
@@ -66,7 +66,7 @@ export default async function MapsitePage({ params }: { params: Promise<{ slug?:
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold mb-2">Mapsite Not Found</h1>
+            <h1 className="text-2xl font-semibold mb-2">Mapsite™ Not Found</h1>
             <p className="text-gray-600">The requested mapsite could not be located.</p>
           </div>
         </div>

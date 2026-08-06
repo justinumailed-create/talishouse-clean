@@ -9,11 +9,11 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Register Your MapSite | TalisPros™",
-  description: "Register your MapSite and activate your TalisPros™ presence with payment.",
+  title: "Register Your Mapsite™ | TalisPros™",
+  description: "Register your Mapsite™ and activate your TalisPros™ presence with payment.",
 };
 
-export default function RegisterMapsiteLayout({
+export default function RegisterMapSiteLayout({
   children,
 }: {
   children: React.ReactNode;

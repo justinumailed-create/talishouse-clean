@@ -8,7 +8,7 @@ import {
 } from "../lib/talispros/mapsite-listing-media";
 import { createFallbackDemoMapSite } from "../lib/talispros/mapsite-platform";
 
-describe("MapSite listing media", () => {
+describe("Mapsite™ listing media", () => {
   it("uses Talishouse product images for demo listings", () => {
     const demo = createFallbackDemoMapSite();
     expect(MAPSITE_DEMO_LISTING_IMAGE).toBe(

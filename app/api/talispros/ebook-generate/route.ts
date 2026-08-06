@@ -6,13 +6,37 @@ import {
   logOnboardingStep,
   onboardingNow,
 } from "@/lib/onboarding-timing";
+import type { OptimizedEbookImageAsset } from "@/lib/talisbooks/auto-draft-ebook";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+function parseOptimizedImages(raw: FormDataEntryValue | null): OptimizedEbookImageAsset[] {
+  if (typeof raw !== "string" || !raw.trim()) return [];
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => {
+        if (!item || typeof item !== "object") return null;
+        const record = item as Record<string, unknown>;
+        const url = String(record.url || "").trim();
+        const width = Number(record.width);
+        const height = Number(record.height);
+        if (!url || !Number.isFinite(width) || !Number.isFinite(height)) return null;
+        if (width <= 0 || height <= 0) return null;
+        return { url, width: Math.round(width), height: Math.round(height) };
+      })
+      .filter((item): item is OptimizedEbookImageAsset => Boolean(item));
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Streaming ebook generation job (NDJSON).
- * Client receives stage events so the UI never sits on an opaque "Generating…".
+ * Prefer `optimizedImages` JSON (storage URLs) — avoids HTTP 413 from giant multipart bodies.
+ * Legacy File `images` still accepted for compatibility.
  */
 export async function POST(request: Request) {
   const started = onboardingNow();
@@ -28,6 +52,11 @@ export async function POST(request: Request) {
     .trim()
     .toLowerCase();
   const uploadMode = uploadModeRaw === "pdf" ? "pdf" : "images";
+  const optimizedImages = parseOptimizedImages(formData.get("optimizedImages"));
+  const agentPhotoUrl = String(formData.get("agentPhotoUrl") || "").trim() || null;
+  const brokerageLogoUrl =
+    String(formData.get("brokerageLogoUrl") || "").trim() || null;
+
   const brokerageLogoRaw = formData.get("brokerageLogo");
   const brokerageLogo =
     brokerageLogoRaw instanceof File && brokerageLogoRaw.size > 0
@@ -45,6 +74,7 @@ export async function POST(request: Request) {
   logOnboardingStep("Ebook API accept", started, {
     requestId: requestId || null,
     imageCount: images.length,
+    optimizedCount: optimizedImages.length,
     uploadMode,
   });
 
@@ -66,7 +96,10 @@ export async function POST(request: Request) {
           agentPhone,
           brokerageLogo,
           agentPhoto,
+          agentPhotoUrl,
+          brokerageLogoUrl,
           images,
+          optimizedImages,
           uploadMode,
           onProgress: async (event) => {
             send(event);

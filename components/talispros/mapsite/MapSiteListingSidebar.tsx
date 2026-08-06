@@ -69,7 +69,7 @@ export default function MapSiteListingSidebar({
             type="search"
             placeholder="Search..."
             className="w-full bg-transparent text-base text-neutral-700 outline-none placeholder:text-neutral-400 sm:text-sm"
-            aria-label="Search MapSite"
+            aria-label="Search Mapsite™"
           />
         </div>
 

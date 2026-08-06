@@ -180,10 +180,10 @@ export default function MapSiteAdminEbookPanel({
     });
     setSaving(false);
     if (!result.success) {
-      setError(result.error || "Could not attach ebook to MapSite.");
+      setError(result.error || "Could not attach ebook to Mapsite™.");
       return;
     }
-    setMessage("Book URL attached to MapSite™ (teb_url).");
+    setMessage("Book URL attached to Mapsite™ (teb_url).");
     await refreshWorkbench();
     router.refresh();
   }
@@ -286,10 +286,10 @@ export default function MapSiteAdminEbookPanel({
     <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-neutral-900">TalisBooks™</h2>
+          <h2 className="text-lg font-semibold text-neutral-900">Talisbooks™</h2>
           <p className="mt-1 text-sm text-neutral-500">
             Form-driven ebook tools for {fastCode.toUpperCase()} — create, replace
-            images, reorder, preview, publish, and attach to MapSite™. No HTML editing.
+            images, reorder, preview, publish, and attach to Mapsite™. No HTML editing.
           </p>
         </div>
         <div className="flex flex-wrap gap-2 text-sm">
@@ -373,7 +373,7 @@ export default function MapSiteAdminEbookPanel({
             disabled={saving || !adminWritesEnabled}
             className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
           >
-            {saving ? "Saving…" : ebook ? "Save ebook" : "Create TalisBook™"}
+            {saving ? "Saving…" : ebook ? "Save ebook" : "Create Talisbook™"}
           </button>
           <button
             type="button"
@@ -426,7 +426,7 @@ export default function MapSiteAdminEbookPanel({
                 {" · "}
                 {ebook.pageCount} pages
                 {ebook.attachedTebUrl
-                  ? " · Attached to MapSite™"
+                  ? " · Attached to Mapsite™"
                   : " · Not attached yet"}
               </p>
             </div>
@@ -446,7 +446,7 @@ export default function MapSiteAdminEbookPanel({
                 className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800 hover:bg-neutral-50 disabled:opacity-60"
               >
                 <Link2 className="h-3.5 w-3.5" />
-                Attach to MapSite™
+                Attach to Mapsite™
               </button>
               {ebook.publishStatus === "published" ? (
                 <button

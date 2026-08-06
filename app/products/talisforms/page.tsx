@@ -5,7 +5,7 @@ import { createMetadata } from "@/lib/seo";
 export const metadata: Metadata = createMetadata({
   title: "TalisForms™ | Forms Infrastructure For Talispros™",
   description:
-    "The forms engine powering Talispros™, MapSites™, FAST Codes™, registrations, onboarding workflows, and partner applications.",
+    "The forms engine powering Talispros™, Mapsites™, FAST Codes™, registrations, onboarding workflows, and partner applications.",
   path: "/products/talisforms",
 });
 

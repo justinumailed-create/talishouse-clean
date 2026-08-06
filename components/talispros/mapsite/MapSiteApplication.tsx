@@ -43,7 +43,7 @@ import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
 import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
 
-/** Auto-reveal PayPal registration under the sidebar after MapSite load. */
+/** Auto-reveal PayPal registration under the sidebar after Mapsite™ load. */
 const PAYPAL_REGISTER_REVEAL_DELAY_MS = 10_000;
 
 const PIN_COLORS: Record<string, string> = {
@@ -62,19 +62,19 @@ interface MapSiteApplicationProps {
   initialMapSite: MapSitePlatformRecord;
   audience: RegistrationMarket;
   requestId?: string | null;
-  /** Owner MapSite™ only: select primary PIN and open the property flag on load. */
+  /** Owner Mapsite™ only: select primary PIN and open the property flag on load. */
   openPinOnLoad?: boolean;
-  /** Owner MapSite™ only: one-time guided prompt above the open property flag. */
+  /** Owner Mapsite™ only: one-time guided prompt above the open property flag. */
   showStartHere?: boolean;
   /** Claim-form plan for PayPal (e.g. ROOT_ACCOUNT_1). */
   paymentPlanType?: PlanType;
   /** Completed PayPal payment on file — unlocks Express Interest. */
   paymentReceived?: boolean;
-  /** Whether a TalisBook™ exists for this MapSite / FAST Code. */
+  /** Whether a Talisbook™ exists for this Mapsite™ / FAST Code. */
   hasTalisBook?: boolean;
-  /** Viewer path for View Your TalisBook™. */
+  /** Viewer path for View Your Talisbook™. */
   talisBookHref?: string | null;
-  /** Show PayPal immediately (Activate Your MapSite™); otherwise reveals after 10s. */
+  /** Show PayPal immediately (Activate Your Mapsite™); otherwise reveals after 10s. */
   showActivatePayment?: boolean;
   /** Entry-point choice: user setup vs done-for-you request. */
   onboardingMode?: "self" | "assisted";
@@ -400,7 +400,7 @@ function MapSiteChrome({
     hasTalisBook: hasTalisBook || Boolean(talisBookHref || mapsite.teb_url),
   });
 
-  // Unpaid claimed MapSites: reveal PayPal after load delay (or immediately via Activate).
+  // Unpaid claimed Mapsites™: reveal PayPal after load delay (or immediately via Activate).
   useEffect(() => {
     if (!claimed || paid || showActivatePayment) return;
     const timer = window.setTimeout(() => {

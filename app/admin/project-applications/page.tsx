@@ -11,7 +11,7 @@ function generateFastCode(name: string): string {
   return `${prefix}${random}`;
 }
 
-function generateMapsiteSlug(name: string): string {
+function generateMapSiteSlug(name: string): string {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, "")
@@ -48,10 +48,10 @@ async function findUniqueFastCode(name: string): Promise<string> {
 }
 
 async function findUniqueSlug(name: string): Promise<string> {
-  let slug = generateMapsiteSlug(name);
+  let slug = generateMapSiteSlug(name);
   let attempts = 0;
   while (!(await checkSlugUnique(slug)) && attempts < 10) {
-    slug = `${generateMapsiteSlug(name)}-${Math.floor(1000 + Math.random() * 9000)}`;
+    slug = `${generateMapSiteSlug(name)}-${Math.floor(1000 + Math.random() * 9000)}`;
     attempts++;
   }
   return slug;
@@ -221,7 +221,7 @@ export default function ProjectApplicationsPage() {
             FAST Code: <span className="font-mono font-bold">{showSuccess.fastCode}</span>
           </p>
           <p className="text-sm text-green-700">
-            Mapsite: <Link href={`/mapsite/${showSuccess.mapsiteSlug}`} className="underline hover:text-green-900">
+            Mapsite™: <Link href={`/mapsite/${showSuccess.mapsiteSlug}`} className="underline hover:text-green-900">
               talishouse.com/mapsite/{showSuccess.mapsiteSlug}
             </Link>
           </p>
@@ -299,7 +299,7 @@ export default function ProjectApplicationsPage() {
         </p>
         <ul className="text-sm text-[#6e6e73] leading-relaxed list-disc list-inside mb-4">
           <li>Generates a unique FAST Code (first 3 letters of name + 4 random digits)</li>
-          <li>Generates a unique Mapsite slug (URL-friendly name)</li>
+          <li>Generates a unique Mapsite™ slug (URL-friendly name)</li>
           <li>Creates an associate record in the associates table</li>
           <li>Updates the application status to "approved"</li>
         </ul>

@@ -21,8 +21,8 @@ function toEcosystemBook(row: BookRow): TalisBooksEcosystemBook {
   };
 }
 
-/** List books linked to a MapSite™ (ecosystem reuse). */
-export async function listTalisBooksByMapsiteId(
+/** List books linked to a Mapsite™ (ecosystem reuse). */
+export async function listTalisBooksByMapSiteId(
   mapsiteId: string,
 ): Promise<TalisBooksEcosystemBook[]> {
   const supabase = getSupabaseAdmin();
@@ -33,7 +33,7 @@ export async function listTalisBooksByMapsiteId(
     .order("updated_at", { ascending: false });
 
   if (error) {
-    console.error("[talisbooks] listTalisBooksByMapsiteId error:", error.message);
+    console.error("[talisbooks] listTalisBooksByMapSiteId error:", error.message);
     return [];
   }
 

@@ -7,7 +7,7 @@ import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { finalizeRegistrationClientAccess } from "@/lib/client-analytics-auth";
 import { createMapSite } from "@/lib/mapsite";
 
-export interface RegisterMapsiteInput {
+export interface RegisterMapSiteInput {
   fastCode: string;
   accountType: string;
   firstName: string;
@@ -18,7 +18,7 @@ export interface RegisterMapsiteInput {
   province: string;
 }
 
-export interface RegisterMapsiteResult {
+export interface RegisterMapSiteResult {
   success: boolean;
   mapsite?: {
     id: string;
@@ -30,7 +30,7 @@ export interface RegisterMapsiteResult {
   error?: string;
 }
 
-function validate(input: RegisterMapsiteInput): string | null {
+function validate(input: RegisterMapSiteInput): string | null {
   if (!input.fastCode.trim()) return "FAST Code is required";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.email.trim()))
     return "Invalid email format";
@@ -39,9 +39,9 @@ function validate(input: RegisterMapsiteInput): string | null {
   return null;
 }
 
-export async function registerMapsite(
-  input: RegisterMapsiteInput
-): Promise<RegisterMapsiteResult> {
+export async function registerMapSite(
+  input: RegisterMapSiteInput
+): Promise<RegisterMapSiteResult> {
   const validationError = validate(input);
   if (validationError) {
     return { success: false, error: validationError };
@@ -53,7 +53,7 @@ export async function registerMapsite(
     const { error: paymentError } = await supabaseAdmin
       .from("payments")
       .insert({
-        product_name: "MapSite Registration",
+        product_name: "Mapsite™ Registration",
         amount: 49.99,
         user_name: `${input.firstName.trim()} ${input.lastName.trim()}`,
         status: "completed",

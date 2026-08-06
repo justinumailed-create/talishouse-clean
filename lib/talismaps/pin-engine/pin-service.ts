@@ -151,7 +151,7 @@ async function ensureEditorDraftMap(): Promise<MapRow> {
     .insert({
       slug: DEFAULT_EDITOR_MAP_SLUG,
       name: "Editor Draft Map",
-      description: "Default TalisMaps™ editor workspace",
+      description: "Default Talismaps™ editor workspace",
       status: "draft",
       account_type: "root",
       default_latitude: 43.6532,

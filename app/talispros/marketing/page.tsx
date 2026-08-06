@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = createMetadata({
   title: "Client Dashboards | Marketing Manager | Talispros™",
   description:
-    "Select a MapSite™ client to post daily marketing metrics and checklist updates.",
+    "Select a Mapsite™ client to post daily marketing metrics and checklist updates.",
   path: "/talispros/marketing",
   private: true,
 });
@@ -29,7 +29,7 @@ export default async function MarketingHomePage() {
 
       {clients.length === 0 ? (
         <div className="rounded-xl border border-dashed border-neutral-300 bg-neutral-50 p-8 text-center">
-          <p className="text-sm text-neutral-500">No active MapSites found.</p>
+          <p className="text-sm text-neutral-500">No active Mapsites™ found.</p>
         </div>
       ) : (
         <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">

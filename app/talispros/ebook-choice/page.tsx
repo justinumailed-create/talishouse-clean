@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = createMetadata({
   title: "E-Book Choice | Talispros™",
   description:
-    "After confirming with Rahul, choose whether to generate your own TalisBooks™ E-Book or have Rahul build it for you.",
+    "After confirming with Rahul, choose whether to generate your own Talisbooks™ E-Book or have Rahul build it for you.",
   path: EBOOK_CHOICE_PATH,
   private: true,
 });
@@ -49,7 +49,7 @@ export default async function EbookChoicePage({
   const requestId = firstParam(params.requestId)?.trim() || null;
   const fromYes = isTruthyParam(firstParam(params.yes));
 
-  // YES handoff: mark this browser as the MapSite™ owner when a code is present.
+  // YES handoff: mark this browser as the Mapsite™ owner when a code is present.
   if (fromYes && fastCode) {
     await establishOwnerMapSiteSession(fastCode);
   }

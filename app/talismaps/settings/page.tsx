@@ -14,7 +14,7 @@ export default async function TalisMapsSettingsPage() {
     <div className="mx-auto max-w-3xl px-6 py-16 sm:py-24 lg:px-8">
       <TalisMapsPageHeader
         title={`${TALISMAPS_PRODUCT_NAME} Settings`}
-        description="Configure the global MapProvider and default map view for TalisMaps™."
+        description="Configure the global MapProvider and default map view for Talismaps™."
       />
 
       <div className="space-y-8">

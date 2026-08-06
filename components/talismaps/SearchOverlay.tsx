@@ -78,7 +78,7 @@ export default function SearchOverlay({ onSearch, onClear }: SearchOverlayProps)
               </button>
             </form>
             <div className="px-4 py-3 text-xs text-neutral-400">
-              Search across all pins on this MapSite by name or location.
+              Search across all pins on this Mapsite™ by name or location.
             </div>
           </div>
         </div>

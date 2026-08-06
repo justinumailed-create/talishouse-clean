@@ -37,7 +37,7 @@ export const PMC_ACCOUNT_BULLETS = [
   "Adpro Accounts formalize referral and co-promotion networks.",
 ] as const;
 
-/** Default regional Root Account pins for Talispros™ PMC (brokers MapSite). */
+/** Default regional Root Account pins for Talispros™ PMC (brokers Mapsite™). */
 export const PMC_DEFAULT_REGIONAL_PINS: readonly PmcRegionalPin[] = [
   {
     id: "nl",

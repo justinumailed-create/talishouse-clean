@@ -1,6 +1,6 @@
 /**
  * Bookshelf-only chrome for /talisbooks/library.
- * Intentionally excludes the TalisBooks™ dashboard sidebar —
+ * Intentionally excludes the Talisbooks™ dashboard sidebar —
  * dashboard opens only after successful registration.
  */
 export default function TalisBooksLibraryLayout({

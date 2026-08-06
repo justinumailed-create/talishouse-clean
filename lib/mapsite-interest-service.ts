@@ -80,7 +80,7 @@ export async function submitMapSiteInterest(
       email,
       phone,
       message: composedMessage,
-      location: `MapSite ${fastCode}`,
+      location: `Mapsite™ ${fastCode}`,
       fast_code: fastCode,
       source: "mapsite_interest_form",
       status: "new",

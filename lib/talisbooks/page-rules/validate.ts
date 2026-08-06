@@ -78,7 +78,7 @@ export function assertValidForPublishing(
 
   if (!result.valid) {
     const summary = result.violations.map((violation) => violation.message).join(" ");
-    throw new Error(`TalisBooks publish validation failed: ${summary}`);
+    throw new Error(`Talisbooks™ publish validation failed: ${summary}`);
   }
 
   return result;

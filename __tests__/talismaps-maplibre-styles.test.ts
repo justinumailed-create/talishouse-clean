@@ -14,7 +14,7 @@ import {
   parseMapBasemapView,
 } from "../lib/talismaps/map-engine";
 
-describe("TalisMaps MapLibre style manager", () => {
+describe("Talismaps™ MapLibre style manager", () => {
   const originalEnv = { ...process.env };
 
   beforeEach(() => {

@@ -35,7 +35,7 @@ export default function TalisprosAdminLoginForm() {
       <div className="rounded-2xl border border-neutral-200 bg-white/95 shadow-sm backdrop-blur px-6 py-8">
         <h1 className="text-2xl font-semibold text-center mb-2">Talispros Admin</h1>
         <p className="text-sm text-neutral-500 text-center mb-8">
-          Sign in to manage MapSite pages and visitor subscriptions
+          Sign in to manage Mapsite™ pages and visitor subscriptions
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input

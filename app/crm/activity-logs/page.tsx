@@ -81,7 +81,7 @@ export default function CrmActivityLogsPage() {
           <option value="all">All Tables</option>
           <option value="build_requests">Build Requests</option>
           <option value="fast_codes">Fast Codes</option>
-          <option value="mapsite_requests">MapSites</option>
+          <option value="mapsite_requests">Mapsites™</option>
           <option value="production_queue">Production Queue</option>
           <option value="mapsite_assets">Assets</option>
         </select>

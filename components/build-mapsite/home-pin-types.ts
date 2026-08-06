@@ -1,5 +1,3 @@
-import { MAPSITE_DEMO_LOCATION } from "@/lib/mapsite/demo-location";
-
 export interface HomePinLocationValues {
   streetAddress: string;
   latitude: string;
@@ -8,7 +6,7 @@ export interface HomePinLocationValues {
   manualPlacement: boolean;
   /** Address resolved from coordinates; never overwrites streetAddress. */
   reverseGeocodedAddress: string;
-  /** User-controlled preview zoom — carried onto the created MapSite. */
+  /** User-controlled preview zoom — carried onto the created Mapsite™. */
   mapZoom: number;
   pinWriteup: string;
   futurePinColor: string | null;
@@ -20,13 +18,21 @@ export interface HomePinLocationValues {
   futurePinCategoryBadge: string | null;
 }
 
+/** Default Build A Mapsite™ PIN preview — Niagara Falls / Canada border. */
+export const BUILD_MAPSITE_PREVIEW_LOCATION = {
+  latitude: 43.105808,
+  longitude: -79.058733,
+  /** Regional framing: Niagara Falls, Canada, and the border. */
+  mapZoom: 12,
+} as const;
+
 export const defaultHomePinLocationValues: HomePinLocationValues = {
-  streetAddress: MAPSITE_DEMO_LOCATION.streetAddress,
-  latitude: String(MAPSITE_DEMO_LOCATION.latitude),
-  longitude: String(MAPSITE_DEMO_LOCATION.longitude),
+  streetAddress: "",
+  latitude: String(BUILD_MAPSITE_PREVIEW_LOCATION.latitude),
+  longitude: String(BUILD_MAPSITE_PREVIEW_LOCATION.longitude),
   manualPlacement: true,
-  reverseGeocodedAddress: MAPSITE_DEMO_LOCATION.streetAddress,
-  mapZoom: MAPSITE_DEMO_LOCATION.mapZoom,
+  reverseGeocodedAddress: "",
+  mapZoom: BUILD_MAPSITE_PREVIEW_LOCATION.mapZoom,
   pinWriteup: "",
   futurePinColor: "#1A73E8",
   futurePinIcon: "none",

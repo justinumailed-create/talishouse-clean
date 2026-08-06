@@ -10,7 +10,7 @@ import {
   rootAccountPlanSummary,
 } from "../lib/talispros/mapsite-audience";
 
-describe("MapSite audience payment helpers", () => {
+describe("Mapsite™ audience payment helpers", () => {
   it("maps audiences to account categories", () => {
     expect(accountCategoryForAudience("brokers")).toBe("root");
     expect(accountCategoryForAudience("listings")).toBe("derivative");

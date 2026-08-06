@@ -9,7 +9,7 @@ import {
   planTypeForClaimAccountType,
 } from "@/lib/registration-plans";
 
-/** Map Start / MapSite audience → registration account category. */
+/** Map Start / Mapsite™ audience → registration account category. */
 export function accountCategoryForAudience(
   audience: RegistrationMarket
 ): RegistrationAccountCategory {
@@ -42,7 +42,7 @@ export function audiencePlanSummary(audience: RegistrationMarket): {
   };
 }
 
-/** Default MapSite claim payment (full Root) when no claim selection is known. */
+/** Default Mapsite™ claim payment (full Root) when no claim selection is known. */
 export function rootAccountPlanSummary(): {
   planLabel: string;
   priceLabel: string;
@@ -78,7 +78,7 @@ export function mapsiteClaimPlanSummary(planType: PlanType = "ROOT_ACCOUNT"): {
 export { planTypeForClaimAccountType };
 
 /**
- * PayPal Root Account™ checkout for MapSite™ claims.
+ * PayPal Root Account™ checkout for Mapsite™ claims.
  * Audience is preserved for copy/routing context; payment plan is always root.
  */
 export function buildMapSitePaymentHref(options: {

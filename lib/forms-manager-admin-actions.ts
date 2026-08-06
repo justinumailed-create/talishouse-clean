@@ -6,7 +6,7 @@ import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
 
 export type FormsManagerSource = "build_mapsite" | "registration";
 
-export interface FormsManagerBuildMapsiteRow {
+export interface FormsManagerBuildMapSiteRow {
   id: string;
   source: "build_mapsite";
   email: string;
@@ -35,13 +35,13 @@ export interface FormsManagerRegistrationRow {
 }
 
 export type FormsManagerRow =
-  | FormsManagerBuildMapsiteRow
+  | FormsManagerBuildMapSiteRow
   | FormsManagerRegistrationRow;
 
 export interface ListFormsManagerResult {
   success: boolean;
   error?: string;
-  buildMapsite: FormsManagerBuildMapsiteRow[];
+  buildMapSite: FormsManagerBuildMapSiteRow[];
   registrations: FormsManagerRegistrationRow[];
 }
 
@@ -63,7 +63,7 @@ export async function listFormsManagerSubmissions(): Promise<ListFormsManagerRes
     return {
       success: false,
       error: "Unauthorized",
-      buildMapsite: [],
+      buildMapSite: [],
       registrations: [],
     };
   }
@@ -73,7 +73,7 @@ export async function listFormsManagerSubmissions(): Promise<ListFormsManagerRes
       success: false,
       error:
         "SUPABASE_SERVICE_ROLE_KEY is not configured. Add it to .env.local and restart the dev server.",
-      buildMapsite: [],
+      buildMapSite: [],
       registrations: [],
     };
   }
@@ -91,7 +91,7 @@ export async function listFormsManagerSubmissions(): Promise<ListFormsManagerRes
     return {
       success: false,
       error: buildError.message,
-      buildMapsite: [],
+      buildMapSite: [],
       registrations: [],
     };
   }
@@ -130,7 +130,7 @@ export async function listFormsManagerSubmissions(): Promise<ListFormsManagerRes
     }
   }
 
-  const buildMapsite: FormsManagerBuildMapsiteRow[] = buildRows.map((row) => {
+  const buildMapSite: FormsManagerBuildMapSiteRow[] = buildRows.map((row) => {
     const mapsite = msMap[row.id];
     return {
       id: row.id,
@@ -160,7 +160,7 @@ export async function listFormsManagerSubmissions(): Promise<ListFormsManagerRes
     return {
       success: false,
       error: registrationError.message,
-      buildMapsite,
+      buildMapSite,
       registrations: [],
     };
   }
@@ -179,7 +179,7 @@ export async function listFormsManagerSubmissions(): Promise<ListFormsManagerRes
     })
   );
 
-  return { success: true, buildMapsite, registrations };
+  return { success: true, buildMapSite, registrations };
 }
 
 export async function updateBuildRequestStatusAdmin(
@@ -202,7 +202,7 @@ export async function updateBuildRequestStatusAdmin(
   return { success: true };
 }
 
-export async function updateMapsiteRequestStatusAdmin(
+export async function updateMapSiteRequestStatusAdmin(
   requestId: string,
   status: string
 ): Promise<{ success: boolean; error?: string }> {

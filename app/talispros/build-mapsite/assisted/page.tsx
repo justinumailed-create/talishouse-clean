@@ -8,7 +8,7 @@ function firstParam(
   return Array.isArray(value) ? value[0] : value;
 }
 
-export default async function AssistedBuildMapsitePage({
+export default async function AssistedBuildMapSitePage({
   searchParams,
 }: {
   searchParams: SearchParams;

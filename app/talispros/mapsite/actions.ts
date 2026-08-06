@@ -184,7 +184,7 @@ export async function refreshMapSiteApplicationState(
 }
 
 /**
- * Capture Root Account™ PayPal payment from the MapSite™ sidebar.
+ * Capture Root Account™ PayPal payment from the Mapsite™ sidebar.
  * Uses claim Build Request contact details when available.
  */
 export async function processMapSiteRootPaypalPayment(input: {
@@ -204,7 +204,7 @@ export async function processMapSiteRootPaypalPayment(input: {
   const requestId = input.requestId?.trim() || null;
 
   if (!mapsiteId) {
-    return { success: false, error: "Missing MapSite id." };
+    return { success: false, error: "Missing Mapsite™ id." };
   }
   if (!input.paypalOrderId?.trim()) {
     return { success: false, error: "Missing PayPal order id." };
@@ -213,7 +213,7 @@ export async function processMapSiteRootPaypalPayment(input: {
   try {
     const supabase = getSupabaseAdmin();
 
-    let firstName = "MapSite";
+    let firstName = "Mapsite™";
     let lastName = "Owner";
     let email = "";
     let resolvedRequestId = requestId;
@@ -327,7 +327,7 @@ export async function processMapSiteRootPaypalPayment(input: {
     await supabase
       .from("build_requests")
       .update({
-        status: "MapSite Active",
+        status: "Mapsite™ Active",
         approval_status: "Approved",
         activated_at: new Date().toISOString(),
         linked_mapsite_id: result.mapsiteId || mapsiteId,

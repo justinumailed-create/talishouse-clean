@@ -95,7 +95,7 @@ export default function PmcPinsAdminEditor({
               href="/talispros/mapsite?audience=brokers"
               className="rounded-xl border border-neutral-200 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
             >
-              Open MapSite
+              Open Mapsite™
             </Link>
             <button
               type="button"
@@ -189,7 +189,7 @@ export default function PmcPinsAdminEditor({
                   updateActive({ visible: event.target.checked })
                 }
               />
-              Show on MapSite
+              Show on Mapsite™
             </label>
           </Field>
           <div className="sm:col-span-2">

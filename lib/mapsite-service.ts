@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
 import {
   galleryItemsToLegacyUrls,
-  resolveMapsiteGalleryItems,
+  resolveMapSiteGalleryItems,
   type MapSiteGalleryItem,
 } from "./mapsite-gallery";
 import type { CreateAccountResult } from "./account-service";
@@ -92,7 +92,7 @@ export interface MapSiteView {
   brokerUrl: string | null;
   tebUrl: string | null;
   ttvUrl: string | null;
-  /** Build request linked to this FAST Code (for claimed MapSite URLs). */
+  /** Build request linked to this FAST Code (for claimed Mapsite™ URLs). */
   requestId?: string | null;
   /** Market audience from the claim form (listings, brokers, …). */
   claimAudience?: string | null;
@@ -207,7 +207,7 @@ async function fetchMapSiteByFastCode(
   let mapsiteRow = mapsiteByCode;
 
   if (!mapsiteRow && linkedId) {
-    const { data: linkedMapsite, error: linkedError } = await client
+    const { data: linkedMapSite, error: linkedError } = await client
       .from("mapsites")
       .select("*")
       .eq("id", linkedId)
@@ -216,7 +216,7 @@ async function fetchMapSiteByFastCode(
     if (linkedError) {
       return { mapsite: null, error: linkedError.message };
     }
-    mapsiteRow = linkedMapsite;
+    mapsiteRow = linkedMapSite;
   }
 
   if (!mapsiteRow) {
@@ -260,14 +260,14 @@ async function buildMapSiteView(
   }
 
   if (!requestId) {
-    const { data: fastCodeByMapsite } = await client
+    const { data: fastCodeByMapSite } = await client
       .from("fast_codes")
       .select("request_id")
       .eq("mapsite_id", mapsite.id)
       .order("assigned_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    requestId = fastCodeByMapsite?.request_id ?? null;
+    requestId = fastCodeByMapSite?.request_id ?? null;
   }
 
   let assets: {
@@ -312,7 +312,7 @@ async function buildMapSiteView(
     sortOrder: pin.sort_order || 0,
   }));
 
-  const galleryItems = resolveMapsiteGalleryItems(
+  const galleryItems = resolveMapSiteGalleryItems(
     mapsite.gallery_items,
     mapsite.gallery_images || []
   );
@@ -364,7 +364,7 @@ async function buildMapSiteView(
 
 import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 
-/** Public claimed MapSite URL used after Claim a Market / from admin. */
+/** Public claimed Mapsite™ URL used after Claim a Market / from admin. */
 export function buildClaimedMapSiteHref(options: {
   mapsiteId: string;
   fastCode: string;
@@ -394,10 +394,10 @@ export async function createMapSiteForAccount(
   const fastCode = input.fastCode.trim().toLowerCase();
 
   if (!fastCode) {
-    throw new Error("FAST Code is required to create a MapSite");
+    throw new Error("FAST Code is required to create a Mapsite™");
   }
   if (!input.accountId) {
-    throw new Error("Account ID is required to create a MapSite");
+    throw new Error("Account ID is required to create a Mapsite™");
   }
 
   const supabase = getSupabaseAdmin();
@@ -407,7 +407,7 @@ export async function createMapSiteForAccount(
     .select("slug");
 
   if (slugError) {
-    throw new Error(`Failed to fetch existing MapSite slugs: ${slugError.message}`);
+    throw new Error(`Failed to fetch existing Mapsite™ slugs: ${slugError.message}`);
   }
 
   const slug = await generateMapSiteSlug(
@@ -434,7 +434,7 @@ export async function createMapSiteForAccount(
 
   if (error || !data) {
     throw new Error(
-      `Failed to create MapSite: ${error?.message || "Unknown error"}`
+      `Failed to create Mapsite™: ${error?.message || "Unknown error"}`
     );
   }
 

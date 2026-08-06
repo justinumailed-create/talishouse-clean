@@ -2,7 +2,7 @@ import { supabase } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import AssociateHero from "@/components/associate/AssociateHero";
 
-export default async function MapsiteRouterPage() {
+export default async function MapSiteRouterPage() {
   // Try to find the first enabled associate with a slug
   const { data: associate } = await supabase
     .from("associates")

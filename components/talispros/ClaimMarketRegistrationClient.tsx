@@ -44,7 +44,7 @@ export default function ClaimMarketRegistrationClient({
             return;
           }
 
-          // Owner cookie is a convenience for MapSite toolbar — not required for ebook.
+          // Owner cookie is a convenience for Mapsite™ toolbar — not required for ebook.
           await establishOwnerMapSiteSession(fastCode);
 
           // Canonical handoff: requestId only.

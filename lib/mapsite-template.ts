@@ -13,14 +13,14 @@ export function getDefaultSections(data: {
   province?: string;
   fastCode: string;
 }): MapSiteSection[] {
-  const displayName = `${data.firstName} ${data.lastName}`.trim() || "MapSite Owner";
+  const displayName = `${data.firstName} ${data.lastName}`.trim() || "Mapsite™ Owner";
 
   return [
     {
       type: "hero",
       title: `${displayName}`,
       content: {
-        headline: `Welcome to ${displayName}'s MapSite™`,
+        headline: `Welcome to ${displayName}'s Mapsite™`,
         subtext: "Property discovery and modular home solutions powered by TalisPros™.",
         fastCode: data.fastCode,
       },

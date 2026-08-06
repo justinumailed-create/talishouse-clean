@@ -66,15 +66,15 @@ export default function MapSiteContextPanel({
     };
   }, [refreshAccountStatus]);
 
-  const ownsThisMapsite =
+  const ownsThisMapSite =
     hasSubscribed &&
     visitorFastCode !== null &&
     visitorFastCode.trim().toLowerCase() === fastCode.trim().toLowerCase();
 
-  const showInterestForm = ownsThisMapsite && interestFormEnabled;
+  const showInterestForm = ownsThisMapSite && interestFormEnabled;
   const title = showInterestForm
     ? "Express an Interest"
-    : "Register Your MapSite™";
+    : "Register Your Mapsite™";
 
   return (
     <div className="flex flex-col min-h-0 rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white h-full">
@@ -97,10 +97,10 @@ export default function MapSiteContextPanel({
             embedded
             fillHeight
           />
-        ) : ownsThisMapsite && !interestFormEnabled ? (
+        ) : ownsThisMapSite && !interestFormEnabled ? (
           <div className="p-6 text-sm text-neutral-600 text-center">
             Your subscription is active. The interest form is not enabled for
-            this MapSite.
+            this Mapsite™.
           </div>
         ) : (
           <RootAccountRegistrationPanel

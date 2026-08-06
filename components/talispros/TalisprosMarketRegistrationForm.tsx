@@ -13,9 +13,9 @@ import { hasValidCoordinates } from "@/lib/home-pin-coordinates";
 
 interface TalisprosMarketRegistrationFormProps {
   market: RegistrationMarket;
-  /** When set, associates the Build Request with this MapSite™ record. */
+  /** When set, associates the Build Request with this Mapsite™ record. */
   mapsiteId?: string;
-  /** `panel` keeps the user on MapSite™ and invokes onSuccess instead of a full success page. */
+  /** `panel` keeps the user on Mapsite™ and invokes onSuccess instead of a full success page. */
   variant?: "page" | "panel";
   onSuccess?: (result: {
     requestId?: string;
@@ -250,8 +250,8 @@ export default function TalisprosMarketRegistrationForm({
         </div>
         <h2 className="text-2xl text-neutral-900">Registration received</h2>
         <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-          Thank you. Your {marketCopy.label} MapSite™ setup has started from your
-          essentials. We have emailed your MapSite™ details to {email}.
+          Thank you. Your {marketCopy.label} Mapsite™ setup has started from your
+          essentials. We have emailed your Mapsite™ details to {email}.
         </p>
       </div>
     );

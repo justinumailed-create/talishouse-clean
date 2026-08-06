@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import BuildMapsiteClient from "./BuildMapsiteClient";
+import BuildMapSiteClient from "./BuildMapSiteClient";
 
-export default async function BuildMapsitePage({
+export default async function BuildMapSitePage({
   searchParams,
 }: {
   searchParams: Promise<{
@@ -22,7 +22,7 @@ export default async function BuildMapsitePage({
   }
 
   return (
-    <BuildMapsiteClient
+    <BuildMapSiteClient
       initialAudienceType={audience}
       onboardingMode={onboardingMode ? "self" : "standard"}
     />

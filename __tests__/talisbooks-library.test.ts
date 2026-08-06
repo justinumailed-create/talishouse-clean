@@ -14,7 +14,7 @@ import {
   sortLibraryBooks,
 } from "../lib/talisbooks/library";
 
-describe("TalisBooks library shelves", () => {
+describe("Talisbooks™ library shelves", () => {
   it("stocks a Root Account shelf to the 25-book monetization capacity", () => {
     const shelf = createDemoRootBookshelf();
     expect(shelf.accountType).toBe("root");
@@ -46,7 +46,7 @@ describe("TalisBooks library shelves", () => {
   });
 });
 
-describe("TalisBooks split bookshelf layout", () => {
+describe("Talisbooks™ split bookshelf layout", () => {
   const books = createDemoRootBookshelf().books;
 
   it("partitions into featured (5 hero) and general library (≥20)", () => {
@@ -84,7 +84,7 @@ describe("TalisBooks split bookshelf layout", () => {
   });
 });
 
-describe("TalisBooks library search / sort / filter", () => {
+describe("Talisbooks™ library search / sort / filter", () => {
   const books = createDemoRootBookshelf().books;
 
   it("searches by title", () => {

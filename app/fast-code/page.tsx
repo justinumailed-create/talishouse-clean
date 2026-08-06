@@ -278,7 +278,7 @@ export default function FastCodeGeneratorPage() {
             </div>
 
             <p className="text-sm text-neutral-500 font-light">
-              Your MapSite is ready. Redirecting to registration...
+              Your Mapsite™ is ready. Redirecting to registration...
             </p>
 
             <button

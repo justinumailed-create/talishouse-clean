@@ -38,11 +38,11 @@ export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
     monthly: 0,
     taxLabel: "GST",
     description:
-      "CAD $1 Root Account™ activation — unlock Express Interest and admin MapSite™ management.",
+      "CAD $1 Root Account™ activation — unlock Express Interest and admin Mapsite™ management.",
     bullets: [
       "CAD $1.00 + GST one-time activation",
       "Enables Express an Interest form",
-      "Activates MapSite™ for admin management",
+      "Activates Mapsite™ for admin management",
       "Root-equivalent FAST Code generation",
     ],
   },

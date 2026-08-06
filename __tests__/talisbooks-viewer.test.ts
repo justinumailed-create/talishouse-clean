@@ -15,7 +15,7 @@ import {
   TALISBOOKS_VIEWER_SPEED_MIN_MS,
 } from "../lib/talisbooks/viewer";
 
-describe("TalisBooks viewer auto page-turn helpers", () => {
+describe("Talisbooks™ viewer auto page-turn helpers", () => {
   it("clamps interval within supported speed bounds", () => {
     expect(clampViewerIntervalMs(100)).toBe(TALISBOOKS_VIEWER_SPEED_MIN_MS);
     expect(clampViewerIntervalMs(99999)).toBe(TALISBOOKS_VIEWER_SPEED_MAX_MS);
@@ -59,7 +59,7 @@ describe("TalisBooks viewer auto page-turn helpers", () => {
   });
 });
 
-describe("TalisBooks viewer view-mode navigation", () => {
+describe("Talisbooks™ viewer view-mode navigation", () => {
   it("converts spread indexes to primary page indexes", () => {
     expect(convertViewerNavIndex("spread", "single", 0, 10)).toBe(0);
     expect(convertViewerNavIndex("spread", "single", 1, 10)).toBe(1);
@@ -78,7 +78,7 @@ describe("TalisBooks viewer view-mode navigation", () => {
   });
 });
 
-describe("TalisBooks viewer narration stubs", () => {
+describe("Talisbooks™ viewer narration stubs", () => {
   it("starts with narration disabled and no track", () => {
     const controller = createEmptyNarrationController();
     expect(controller.enabled).toBe(false);

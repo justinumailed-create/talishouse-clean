@@ -32,5 +32,5 @@ export async function generateMapSiteSlug(
     }
   }
 
-  throw new Error("Failed to generate a unique MapSite slug after exhausting attempts");
+  throw new Error("Failed to generate a unique Mapsite™ slug after exhausting attempts");
 }

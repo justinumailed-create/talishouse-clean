@@ -58,8 +58,8 @@ export const CLAIM_A_MARKET_PAGE: TalisprosMarketPageContent = {
   marketPartner: "Market Partner: Rahul C.",
   partnerImage: "/images/mapsites/lrg1-rahul.jpeg",
   partnerImageAlt: "Market partner portrait",
-  whyHeading: "Why build your MapSite™.",
+  whyHeading: "Why build your Mapsite™.",
   whyBody:
-    "MapSite™ is the centre of Talispros™. Submit your Build Request here to receive a FAST Code™, create your first TalisBook™, and unlock MLS®, URL, TEB™, and TTV™ actions on your pin after activation — without leaving the map-first workflow.",
+    "Mapsite™ is the centre of Talispros™. Submit your Build Request here to receive a FAST Code™, create your first Talisbook™, and unlock MLS®, URL, TEB™, and TTV™ actions on your pin after activation — without leaving the map-first workflow.",
   metadataTitle: "Talispros™ | Build My Mapsite™",
 };

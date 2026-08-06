@@ -10,7 +10,7 @@ export default function TalisprosStartPage() {
           <header className="border-b border-neutral-200 px-6 pt-4 text-center sm:pt-5">
             <Image
               src="/logo.png"
-              alt="TalisPros PMC"
+              alt="Talispros™ PMC"
               width={40}
               height={40}
               className="mx-auto mb-2 h-9 w-9 object-contain sm:mb-3 sm:h-10 sm:w-10"

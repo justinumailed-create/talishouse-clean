@@ -871,7 +871,7 @@ export default function RootAccountRegistrationForm({
           <div className="text-center">
             <div className="w-10 h-10 border-4 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-3" />
             <p className="text-sm text-neutral-600 font-medium">
-              Creating your MapSite™...
+              Creating your Mapsite™...
             </p>
           </div>
         </div>

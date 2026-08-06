@@ -7,7 +7,7 @@
 import { useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
-import { registerMapsite, type RegisterMapsiteInput } from "./actions";
+import { registerMapSite, type RegisterMapSiteInput } from "./actions";
 
 const ADPRE_TYPES = [
   { value: "single", label: "Single AdPro™ PIN", description: "Individual business placement." },
@@ -16,7 +16,7 @@ const ADPRE_TYPES = [
   { value: "unlimited", label: "Unlimited AdPro™ PINs", description: "Enterprise-scale deployment." },
 ];
 
-function RegisterMapsiteForm() {
+function RegisterMapSiteForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [fastCode, setFastCode] = useState(searchParams.get("fastCode") || "");
@@ -29,7 +29,7 @@ function RegisterMapsiteForm() {
   const [accountType, setAccountType] = useState("single");
   const [error, setError] = useState("");
   const [step, setStep] = useState<"form" | "payment" | "processing">("form");
-  const [mapsiteResult, setMapsiteResult] = useState<{
+  const [mapsiteResult, setMapSiteResult] = useState<{
     fastCode: string;
     slug: string;
     url: string;
@@ -52,7 +52,7 @@ function RegisterMapsiteForm() {
   async function handlePaymentSuccess() {
     setStep("processing");
 
-    const input: RegisterMapsiteInput = {
+    const input: RegisterMapSiteInput = {
       fastCode: fastCode.trim(),
       accountType,
       firstName: firstName.trim(),
@@ -63,10 +63,10 @@ function RegisterMapsiteForm() {
       province: province.trim(),
     };
 
-    const result = await registerMapsite(input);
+    const result = await registerMapSite(input);
 
     if (result.success && result.mapsite) {
-      setMapsiteResult(result.mapsite);
+      setMapSiteResult(result.mapsite);
       router.push(result.redirectUrl || "/talispros/client/dashboard");
     } else {
       setError(result.error || "Registration failed. Please contact support.");
@@ -83,10 +83,10 @@ function RegisterMapsiteForm() {
       <div className="max-w-2xl mx-auto px-5 py-12">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">
-            Register Your MapSite™
+            Register Your Mapsite™
           </h1>
           <p className="text-neutral-500 mt-2">
-            Complete registration and payment to activate your MapSite.
+            Complete registration and payment to activate your Mapsite™.
           </p>
         </div>
 
@@ -244,7 +244,7 @@ function RegisterMapsiteForm() {
           <div>
             <div className="bg-neutral-50 rounded-2xl p-6 mb-6">
               <h2 className="text-lg font-semibold text-neutral-900 mb-2">
-                MapSite Registration
+                Mapsite™ Registration
               </h2>
               <div className="space-y-1 text-sm text-neutral-600">
                 <p>FAST Code: <span className="font-medium text-neutral-900">{fastCode}</span></p>
@@ -271,7 +271,7 @@ function RegisterMapsiteForm() {
                   return actions.order.create({
                     intent: "CAPTURE",
                     purchase_units: [{
-                      description: "MapSite Registration",
+                      description: "Mapsite™ Registration",
                       amount: {
                         currency_code: "CAD",
                         value: "49.99",
@@ -304,7 +304,7 @@ function RegisterMapsiteForm() {
         {step === "processing" && (
           <div className="text-center py-12">
             <div className="w-12 h-12 border-4 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-neutral-600">Creating your MapSite...</p>
+            <p className="text-neutral-600">Creating your Mapsite™...</p>
           </div>
         )}
       </div>
@@ -312,10 +312,10 @@ function RegisterMapsiteForm() {
   );
 }
 
-export default function RegisterMapsitePage() {
+export default function RegisterMapSitePage() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center"><div className="w-8 h-8 border-4 border-neutral-200 border-t-neutral-900 rounded-full animate-spin" /></div>}>
-      <RegisterMapsiteForm />
+      <RegisterMapSiteForm />
     </Suspense>
   );
 }

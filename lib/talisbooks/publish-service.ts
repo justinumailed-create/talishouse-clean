@@ -105,7 +105,7 @@ export async function publishTalisBooksBook(
   // Official page rules are enforced automatically — no manual overrides.
   if (requiresPageRulesValidation(input.toStatus) && !validation.valid) {
     const summary = validation.violations.map((violation) => violation.message).join(" ");
-    throw new Error(`TalisBooks publish validation failed: ${summary}`);
+    throw new Error(`Talisbooks™ publish validation failed: ${summary}`);
   }
 
   // Centerfolds require admin preview approval before publishing.
@@ -113,7 +113,7 @@ export async function publishTalisBooksBook(
     const centerfoldGate = await bookCenterfoldsApprovedForPublishing(input.bookId);
     if (!centerfoldGate.approved) {
       throw new Error(
-        `TalisBooks publish blocked: ${centerfoldGate.pending} centerfold(s) pending admin preview` +
+        `Talisbooks™ publish blocked: ${centerfoldGate.pending} centerfold(s) pending admin preview` +
           (centerfoldGate.rejected > 0
             ? ` and ${centerfoldGate.rejected} rejected.`
             : ". Approve centerfolds before publishing."),

@@ -118,7 +118,7 @@ function RegisterForm() {
       <div className="max-w-6xl mx-auto px-4 py-8 sm:py-12">
         <div className="text-center mb-8 sm:mb-10">
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900">
-            Register Your MapSite™
+            Register Your Mapsite™
           </h1>
           <p className="text-sm sm:text-base text-neutral-500 mt-2">
             Choose your AdPro™ package and complete payment to activate.

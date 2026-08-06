@@ -4,7 +4,7 @@ import {
   createFallbackDemoMapSite,
 } from "@/lib/talispros/mapsite-platform";
 
-describe("MapSite submitted location merge", () => {
+describe("Mapsite™ submitted location merge", () => {
   it("replaces demo coordinates and address with Build Request values", () => {
     const demo = createFallbackDemoMapSite({
       status: "BUILD_REQUEST_SUBMITTED",

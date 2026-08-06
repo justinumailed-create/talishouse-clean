@@ -10,7 +10,7 @@ import {
   selectRandomCoverTemplate,
 } from "../lib/talisbooks/covers";
 
-describe("TalisBooks premium cover templates", () => {
+describe("Talisbooks™ premium cover templates", () => {
   it("exposes exactly five distinct cover templates", () => {
     const templates = listCoverTemplates();
     expect(templates).toHaveLength(5);

@@ -13,7 +13,7 @@ export default function InvestorPage() {
           </h1>
           <p className="text-sm sm:text-base text-neutral-500 max-w-xl mx-auto leading-relaxed mb-8">
             Manage multiple properties under a single Derivative Account™.
-            Generate FAST Codes for each asset and track them all on TalisMaps™.
+            Generate FAST Codes for each asset and track them all on Talismaps™.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link

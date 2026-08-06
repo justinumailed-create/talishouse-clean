@@ -28,7 +28,7 @@ function createShelfProfile(input: {
 
 export const TALISBOOKS_SHELF_PROFILE = createShelfProfile({
   productCode: "TEB",
-  productName: "TalisBooks™",
+  productName: "Talisbooks™",
   shelfLabel: "Bookshelf",
   unitLabel: "books",
   capacity: 25,

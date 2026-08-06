@@ -65,7 +65,7 @@ function buildSuccessHref(options: {
     });
   }
 
-  // Legacy / default: open MapSite with pin (no registration / PayPal redirect).
+  // Legacy / default: open Mapsite™ with pin (no registration / PayPal redirect).
   if (fastCode && fastCode.toLowerCase() !== "demo") {
     const path = buildClaimedMapSitePath({
       fastCode,
@@ -91,14 +91,14 @@ function buildSuccessHref(options: {
 }
 
 /**
- * After a Build Request succeeds, ensure the client has a MapSite™ to open
+ * After a Build Request succeeds, ensure the client has a Mapsite™ to open
  * immediately (PIN + location + image). Does not change submitBuildRequest.
  */
 export async function ensureClientMapSiteFromBuildRequest(options: {
   requestId: string;
   fastCode?: string | null;
   accountType?: string | null;
-  /** Where to send the client after MapSite + owner association. */
+  /** Where to send the client after Mapsite™ + owner association. */
   successPath?: PostBuildSuccessPath;
 }): Promise<EnsureClientMapSiteResult> {
   const ensureStarted = onboardingNow();
@@ -161,7 +161,7 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
       : null;
 
     if (successPath === "self-ebook" && !fastCode) {
-      logOnboardingStep("MapSite creation", ensureStarted, {
+      logOnboardingStep("Mapsite™ creation", ensureStarted, {
         failed: true,
         reason: "missing_issued_fast_code",
         requestId,
@@ -222,7 +222,7 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
         resolvedCode = claimed.fast_code.trim().toLowerCase();
       }
     } else {
-      // Create the client's MapSite™ for immediate open without linking yet,
+      // Create the client's Mapsite™ for immediate open without linking yet,
       // so Marketing Admin can still Generate / review the official draft.
       const { data: existingSlugs } = await supabase
         .from("mapsites")
@@ -231,13 +231,13 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
         (existingSlugs || []).map((row) => row.slug)
       );
 
-      // MapSite row may carry a provisional placeholder only when no issued
+      // Mapsite™ row may carry a provisional placeholder only when no issued
       // FAST Code exists yet (non self-ebook paths). Self-ebook already gated above.
       const provisionalCode =
         resolvedCode?.toLowerCase() || `ms${slug.toLowerCase()}`;
 
       const ownerFirst = request.first_name?.trim() || "Client";
-      const ownerLast = request.last_name?.trim() || "MapSite";
+      const ownerLast = request.last_name?.trim() || "Mapsite™";
       const agentName = `${ownerFirst} ${ownerLast}`.trim();
       const gallery =
         location?.galleryImages?.length
@@ -295,7 +295,7 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
       }
     }
 
-    logOnboardingStep("MapSite ensure", ensureStarted, {
+    logOnboardingStep("Mapsite™ ensure", ensureStarted, {
       mapsiteId,
       fastCode: resolvedCode,
       successPath,
@@ -316,13 +316,13 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
     };
   } catch (error) {
     console.error("[ensure-client-mapsite] Failed:", error);
-    logOnboardingStep("MapSite ensure", ensureStarted, {
+    logOnboardingStep("Mapsite™ ensure", ensureStarted, {
       failed: true,
       error: error instanceof Error ? error.message : String(error),
     });
     return {
       ok: false,
-      error: error instanceof Error ? error.message : "Unable to open MapSite.",
+      error: error instanceof Error ? error.message : "Unable to open Mapsite™.",
       href: fallbackHref,
     };
   }

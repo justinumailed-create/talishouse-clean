@@ -109,7 +109,7 @@ export function getNavItems(): { href: string; label: string; module: Module }[]
     { href: "/crm", label: "Dashboard", module: "dashboard" as Module },
     { href: "/crm/leads", label: "Leads", module: "leads" as Module },
     { href: "/crm/build-requests", label: "Build Requests", module: "buildRequests" as Module },
-    { href: "/crm/mapsites", label: "MapSites", module: "mapsites" as Module },
+    { href: "/crm/mapsites", label: "Mapsites™", module: "mapsites" as Module },
     { href: "/crm/associates", label: "Associates", module: "associates" as Module },
     { href: "/crm/production-queue", label: "Production Queue", module: "productionQueue" as Module },
     { href: "/crm/activity-logs", label: "Activity Logs", module: "activityLogs" as Module },

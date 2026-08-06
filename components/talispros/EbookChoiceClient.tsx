@@ -71,7 +71,7 @@ export default function EbookChoiceClient({
     <div className="flex min-h-dvh flex-col items-center justify-center bg-white px-5 py-12 text-neutral-900">
       <div className="w-full max-w-md text-center">
         <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-400">
-          TalisBooks™
+          Talisbooks™
         </p>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight text-neutral-900 sm:text-3xl">
           Choose how to create your E-Book

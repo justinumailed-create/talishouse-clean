@@ -116,7 +116,7 @@ async function loadAnalyticsCounts(
 
 /**
  * Personal bookshelf for a Root or Derivative account.
- * When `fastCode` is set (MapSite TEB™), returns only that code's ebooks — not the demo library.
+ * When `fastCode` is set (Mapsite™ TEB™), returns only that code's ebooks — not the demo library.
  */
 export async function getTalisBooksBookshelf(options?: {
   accountId?: string | null;

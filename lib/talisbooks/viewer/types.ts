@@ -64,7 +64,7 @@ export interface TalisBooksViewerPage {
 export interface TalisBooksViewerBook {
   id: string;
   slug: string;
-  /** Source MapSite FAST Code when this book is tied to an account. */
+  /** Source Mapsite™ FAST Code when this book is tied to an account. */
   fastCode?: string;
   /** Account type that owns this book (root / derivative / adpro / fsbo, etc.). */
   accountType?: string;

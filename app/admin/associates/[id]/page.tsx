@@ -145,7 +145,7 @@ export default function AssociateSettingsPage({ params }: { params: Promise<{ id
               </label>
               <input
                 type="text"
-                placeholder={settings.hero_type === 'map' ? 'Map uses TalisMaps™ by default' : 'https://...'}
+                placeholder={settings.hero_type === 'map' ? 'Map uses Talismaps™ by default' : 'https://...'}
                 disabled={settings.hero_type === 'map'}
                 value={settings.hero_content}
                 onChange={(e) => setSettings({ ...settings, hero_content: e.target.value })}

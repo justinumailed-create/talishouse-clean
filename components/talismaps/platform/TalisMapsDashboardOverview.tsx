@@ -55,7 +55,7 @@ export default function TalisMapsDashboardOverview({
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500">
             The command center for every map — monitor publishing, pins, visitors,
-            account networks, and recent platform activity across TalisMaps™.
+            account networks, and recent platform activity across Talismaps™.
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -208,7 +208,7 @@ export default function TalisMapsDashboardOverview({
               icon={Map}
               items={latestMaps}
               emptyTitle="No maps yet"
-              emptyDescription="Maps will appear here as soon as TalisMaps™ instances are created."
+              emptyDescription="Maps will appear here as soon as Talismaps™ instances are created."
             />
           </motion.div>
           <motion.div variants={itemVariants} className="min-h-[320px]">

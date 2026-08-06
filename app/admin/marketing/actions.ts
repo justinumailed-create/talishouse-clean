@@ -106,7 +106,7 @@ export async function generateDraftMapSite(requestId: string): Promise<ActionRes
       return { ok: false, error: "Build request not found" };
     }
     if (buildRequest.linked_mapsite_id) {
-      return { ok: false, error: "Draft MapSite already generated for this request." };
+      return { ok: false, error: "Draft Mapsite™ already generated for this request." };
     }
 
     const fastCodeReservation = await reserveFastCodeForRequest(requestId);
@@ -370,7 +370,7 @@ export async function activateMapSiteForRequest(
   if (!mapsiteId) {
     return {
       ok: false,
-      error: "No linked MapSite™. Create a MapSite or claim from the map first.",
+      error: "No linked Mapsite™. Create a Mapsite™ or claim from the map first.",
     };
   }
 
@@ -378,7 +378,7 @@ export async function activateMapSiteForRequest(
   const { toDbStatus } = await import("@/lib/talispros/mapsite-state");
   const current = await getMapSitePlatformById(mapsiteId);
   if (!current) {
-    return { ok: false, error: "Linked MapSite™ was not found." };
+    return { ok: false, error: "Linked Mapsite™ was not found." };
   }
 
   if (current.status !== "ACTIVE") {
@@ -396,7 +396,7 @@ export async function activateMapSiteForRequest(
   const { error } = await supabaseAdmin
     .from("build_requests")
     .update({
-      status: "MapSite Active",
+      status: "Mapsite™ Active",
       approval_status: "Approved",
       activated_at: new Date().toISOString(),
     })
@@ -415,7 +415,7 @@ export async function updateLinkedMapSiteResources(
 ): Promise<ActionResult> {
   const mapsiteId = await resolveLinkedMapSiteId(requestId);
   if (!mapsiteId) {
-    return { ok: false, error: "No linked MapSite™ for this Build Request." };
+    return { ok: false, error: "No linked Mapsite™ for this Build Request." };
   }
 
   const result = await updateMapSiteResources(mapsiteId, updates);

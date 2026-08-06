@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { buildPinBodySvg, pinVisualCacheKey } from "@/lib/talismaps/pin";
 
-describe("TalisMaps flag pin style", () => {
+describe("Talismaps™ flag pin style", () => {
   it("renders a large white icon on a solid color body when whiteCenter is false", () => {
     const svg = buildPinBodySvg({
       pinColor: "#1A73E8",

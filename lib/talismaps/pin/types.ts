@@ -1,5 +1,5 @@
 /**
- * TalisMaps™ PIN visual model — future-ready rendering props.
+ * Talismaps™ PIN visual model — future-ready rendering props.
  * Editing UI is intentionally out of scope; this is the rendering contract only.
  */
 

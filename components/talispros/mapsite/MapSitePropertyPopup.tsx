@@ -119,7 +119,7 @@ interface MapSitePropertyPopupProps {
   accountType?: MapSiteCapabilityAccountType;
   /** UI onboarding phase (derived; not a DB status). */
   onboardingPhase: MapSiteOnboardingPhase;
-  /** Viewer href for View Your TalisBook™ (pending / book-ready). */
+  /** Viewer href for View Your Talisbook™ (pending / book-ready). */
   talisBookHref?: string | null;
   /** Top of the FAST Code card — shared with pin popup. */
   alignTop?: number;
@@ -139,7 +139,7 @@ interface MapSitePropertyPopupProps {
 export default function MapSitePropertyPopup({
   mapsite,
   claimHref,
-  claimLabel = "Build My MapSite™",
+  claimLabel = "Build My Mapsite™",
   genericOnboardingCard = false,
   accountType = "derivative",
   onboardingPhase,
@@ -321,8 +321,8 @@ export default function MapSitePropertyPopup({
               <div className="mt-auto flex shrink-0 flex-col gap-2 pt-2.5">
                 {onboardingPhase === "BUILD_SUBMITTED" && !showBookButton ? (
                   <p className="text-[12px] leading-snug text-neutral-600">
-                    Your first TalisBook™ is being prepared. You&apos;ll see View
-                    Your TalisBook™ here when it&apos;s ready.
+                    Your first Talisbook™ is being prepared. You&apos;ll see View
+                    Your Talisbook™ here when it&apos;s ready.
                   </p>
                 ) : null}
                 {showBookButton && talisBookHref ? (
@@ -330,7 +330,7 @@ export default function MapSitePropertyPopup({
                     href={talisBookHref}
                     className="flex min-h-11 w-full items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
                   >
-                    View Your TalisBook™
+                    View Your Talisbook™
                   </Link>
                 ) : null}
               </div>
@@ -347,7 +347,7 @@ export default function MapSitePropertyPopup({
                     href={talisBookHref}
                     className="flex min-h-11 w-full items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
                   >
-                    View Your TalisBook™
+                    View Your Talisbook™
                   </Link>
                 ) : null}
                 {visibleResources.length > 0 ? (

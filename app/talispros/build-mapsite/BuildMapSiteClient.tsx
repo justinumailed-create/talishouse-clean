@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { submitBuildRequest, validateBuildMapsiteFastCode, type ActionResult as BuildResult } from "./actions";
+import { submitBuildRequest, validateBuildMapSiteFastCode, type ActionResult as BuildResult } from "./actions";
 import { openMapSiteAfterBuildRequest } from "./success-actions";
 import HomePinLocationSection, {
   validateHomePinLocation,
@@ -271,7 +271,7 @@ function isAdproAccountType(accountType: string): boolean {
   return accountType.startsWith("adpro-");
 }
 
-async function uploadBuildMapsiteFile(
+async function uploadBuildMapSiteFile(
   requestId: string,
   fieldName: string,
   file: File
@@ -374,15 +374,15 @@ function AccountTypeSelector({ value, onChange, error }: { value: string; onChan
   );
 }
 
-interface BuildMapsiteClientProps {
+interface BuildMapSiteClientProps {
   initialAudienceType?: string;
   onboardingMode?: "standard" | "self";
 }
 
-export default function BuildMapsiteClient({
+export default function BuildMapSiteClient({
   initialAudienceType = "",
   onboardingMode = "standard",
-}: BuildMapsiteClientProps) {
+}: BuildMapSiteClientProps) {
   useEffect(() => {
     document.documentElement.style.height = "auto";
     document.body.style.minHeight = "auto";
@@ -470,7 +470,7 @@ export default function BuildMapsiteClient({
       delete next.fastCode;
       return next;
     });
-    const result = await validateBuildMapsiteFastCode(code, form.accountType);
+    const result = await validateBuildMapSiteFastCode(code, form.accountType);
     setValidatingFastCode(false);
     if (!result.ok) {
       setFastCodeValidated(false);
@@ -549,7 +549,7 @@ export default function BuildMapsiteClient({
         file: File | null
       ): Promise<string | null> => {
         if (!file || file.size === 0) return null;
-        return uploadBuildMapsiteFile(requestId, fieldName, file);
+        return uploadBuildMapSiteFile(requestId, fieldName, file);
       };
 
       const [
@@ -570,7 +570,7 @@ export default function BuildMapsiteClient({
 
       const tebPictureUrls: string[] = [];
       for (let i = 0; i < files.tebPictures.length; i++) {
-        const url = await uploadBuildMapsiteFile(
+        const url = await uploadBuildMapSiteFile(
           requestId,
           `tebPicture_${i}`,
           files.tebPictures[i]
@@ -634,7 +634,7 @@ export default function BuildMapsiteClient({
           );
           return;
         }
-        // Open the client's MapSite™ immediately — first visible success.
+        // Open the client's Mapsite™ immediately — first visible success.
         try {
           const opened = await openMapSiteAfterBuildRequest({
             requestId: result.requestId,
@@ -645,7 +645,7 @@ export default function BuildMapsiteClient({
           window.location.assign(opened.href);
           return;
         } catch (openError) {
-          console.error("[build-mapsite] MapSite open failed:", openError);
+          console.error("[build-mapsite] Mapsite™ open failed:", openError);
           setSubmitError(
             openError instanceof Error
               ? openError.message
@@ -695,10 +695,10 @@ export default function BuildMapsiteClient({
             <Check className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-semibold text-neutral-900 tracking-tight mb-3">
-            Your Build A MapSite™ Request Has Been Received
+            Your Build A Mapsite™ Request Has Been Received
           </h1>
           <p className="text-neutral-500 text-sm sm:text-base leading-relaxed mb-8 max-w-sm mx-auto">
-            Thank you! Your request has been received. A Marketing Manager will review your submission and contact you before your MapSite™ is published.
+            Thank you! Your request has been received. A Marketing Manager will review your submission and contact you before your Mapsite™ is published.
           </p>
           <div className="border border-neutral-200 rounded-2xl bg-white p-6 sm:p-8 text-left mb-8">
             <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-3">Build Request ID</p>
@@ -722,7 +722,7 @@ export default function BuildMapsiteClient({
               }
               className="w-full h-12 bg-[#2563eb] text-white rounded-xl text-sm font-medium tracking-wide flex items-center justify-center gap-2 hover:bg-[#1d4ed8] active:scale-[0.98] transition-all"
             >
-              View Your MapSite™
+              View Your Mapsite™
             </Link>
             <button type="button" onClick={handleReset} className="text-sm text-neutral-400 hover:text-neutral-900 transition-colors underline underline-offset-2">
               Submit Another Request
@@ -741,7 +741,7 @@ export default function BuildMapsiteClient({
           <div className="max-w-2xl mx-auto px-5 py-8 sm:py-12 lg:py-16">
             <div className="text-center mb-8 sm:mb-10">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-neutral-900">
-                Build A MapSite™
+                Build A Mapsite™
               </h1>
               <p className="text-sm sm:text-base text-neutral-500 mt-2 max-w-md mx-auto leading-relaxed">
                 Submit your onboarding request for Marketing Manager review before publication.
@@ -834,7 +834,7 @@ export default function BuildMapsiteClient({
                   </div>
                 </SectionCard>
 
-                <SectionCard number={2} title="MapSite Personalization" description="Your branding assets." isOpen={openSections.has(2)} onToggle={() => toggleSection(2)}>
+                <SectionCard number={2} title="Mapsite™ Personalization" description="Your branding assets." isOpen={openSections.has(2)} onToggle={() => toggleSection(2)}>
                   <div className="space-y-4">
                     <FileUpload label="Your Picture" file={files.picture} onChange={(f) => updateFile("picture", f)} accept="image/*" />
                     <FileUpload label="Your Logo" file={files.logo} onChange={(f) => updateFile("logo", f)} accept="image/*" />
@@ -981,7 +981,7 @@ export default function BuildMapsiteClient({
             {/* CTA Card */}
             <div className="bg-white rounded-xl shadow-sm p-6 border-2 border-red-400 text-center">
               <p className="text-sm text-neutral-900 leading-relaxed mb-4">
-                Build a &apos;done-for-you&apos; MapSite™ without obligation.
+                Build a &apos;done-for-you&apos; Mapsite™ without obligation.
               </p>
               <p className="text-xs text-neutral-500 leading-relaxed mb-4">
                 We will follow up within two business days to optimize and publish.

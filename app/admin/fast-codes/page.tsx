@@ -381,7 +381,7 @@ export default function FastCodesPage() {
             </div>
             <div className="md:col-span-2">
               <p className="text-sm text-gray-500 mb-3">
-                If a MapSite already uses this FAST code (for example{" "}
+                If a Mapsite™ already uses this FAST code (for example{" "}
                 <span className="font-mono">LRG1</span>), it will be linked
                 automatically.
               </p>

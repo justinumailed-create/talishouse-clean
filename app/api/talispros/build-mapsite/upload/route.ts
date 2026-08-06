@@ -1,4 +1,4 @@
-import { uploadBuildMapsiteAsset } from "@/lib/build-mapsite-upload";
+import { uploadBuildMapSiteAsset } from "@/lib/build-mapsite-upload";
 
 export const runtime = "nodejs";
 
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Invalid upload request" }, { status: 400 });
     }
 
-    const url = await uploadBuildMapsiteAsset(
+    const url = await uploadBuildMapSiteAsset(
       requestId.trim(),
       fieldName.trim(),
       file

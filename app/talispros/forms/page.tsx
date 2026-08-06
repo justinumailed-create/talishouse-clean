@@ -62,7 +62,7 @@ export default function TalisFormsPage() {
             Enterprise Form Infrastructure
           </p>
           <p className="text-sm text-neutral-400 max-w-2xl mx-auto leading-relaxed mb-8">
-            TalisForms™ powers the entire Talispros™ ecosystem including MapSites™, FAST Codes™, registrations, partner onboarding, CRM intake workflows, lead generation, and white-label form deployments.
+            TalisForms™ powers the entire Talispros™ ecosystem including Mapsites™, FAST Codes™, registrations, partner onboarding, CRM intake workflows, lead generation, and white-label form deployments.
           </p>
           <a
             href="#demo"
@@ -104,7 +104,7 @@ export default function TalisFormsPage() {
             White Label Forms
           </h2>
           <p className="text-sm text-neutral-500 text-center max-w-2xl mx-auto leading-relaxed mb-8">
-            Deploy fully white-labeled forms under your own brand across the Talispros™ platform. Every form — from MapSite™ registrations to partner onboarding — can be customized with your logo, colors, and domain.
+            Deploy fully white-labeled forms under your own brand across the Talispros™ platform. Every form — from Mapsite™ registrations to partner onboarding — can be customized with your logo, colors, and domain.
           </p>
           <div className="bg-neutral-50 rounded-2xl p-8 border border-neutral-200">
             <ul className="space-y-3">
@@ -267,12 +267,12 @@ export default function TalisFormsPage() {
             Marketplace Forms
           </h2>
           <p className="text-sm text-neutral-500 text-center max-w-2xl mx-auto leading-relaxed mb-8">
-            Deploy forms across the Talispros™ marketplace ecosystem. From MapSite™ builder requests to partner registration, every marketplace touchpoint is powered by TalisForms™.
+            Deploy forms across the Talispros™ marketplace ecosystem. From Mapsite™ builder requests to partner registration, every marketplace touchpoint is powered by TalisForms™.
           </p>
           <div className="bg-neutral-50 rounded-2xl p-8 border border-neutral-200">
             <ul className="space-y-3">
               {[
-                "MapSite™ build request forms with media uploads",
+                "Mapsite™ build request forms with media uploads",
                 "Partner and associate registration portals",
                 "FAST Code generation and account creation forms",
                 "White-label form deployments for enterprise partners",

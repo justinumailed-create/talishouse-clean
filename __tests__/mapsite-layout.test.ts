@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { buildMapSiteLayoutData } from "../lib/mapsite-layout";
 import type { MapSiteView } from "../lib/mapsite-service";
 
-const baseMapsite: MapSiteView = {
+const baseMapSite: MapSiteView = {
   id: "mapsite-1",
   fastCode: "ar01",
   accountId: "account-1",
@@ -63,7 +63,7 @@ const baseMapsite: MapSiteView = {
 
 describe("buildMapSiteLayoutData", () => {
   it("uses pin data for property title and summary when no explicit title exists", () => {
-    const layout = buildMapSiteLayoutData(baseMapsite);
+    const layout = buildMapSiteLayoutData(baseMapSite);
 
     expect(layout.propertyTitle).toBe("King Street Residence");
     expect(layout.summary.description).toBe(
@@ -76,7 +76,7 @@ describe("buildMapSiteLayoutData", () => {
 
   it("resolves video and gallery content from database fields", () => {
     const layout = buildMapSiteLayoutData({
-      ...baseMapsite,
+      ...baseMapSite,
       videoUrl: null,
       galleryImages: ["https://cdn.example.com/photo-1.jpg"],
       galleryItems: [
@@ -90,7 +90,7 @@ describe("buildMapSiteLayoutData", () => {
       profileImageUrl: "https://cdn.example.com/agent.jpg",
       pins: [
         {
-          ...baseMapsite.pins[0],
+          ...baseMapSite.pins[0],
           website: "",
         },
       ],
@@ -105,17 +105,17 @@ describe("buildMapSiteLayoutData", () => {
   });
 
   it("embeds youtube links from pin website values", () => {
-    const layout = buildMapSiteLayoutData(baseMapsite);
+    const layout = buildMapSiteLayoutData(baseMapSite);
 
     expect(layout.videoUrl).toBe("https://www.youtube.com/embed/dQw4w9WgXcQ");
   });
 
   it("exposes map center and overlay card fields", () => {
     const layout = buildMapSiteLayoutData({
-      ...baseMapsite,
+      ...baseMapSite,
       headerImageUrl: "https://cdn.example.com/hero.jpg",
       price: "$129,000",
-      pins: [{ ...baseMapsite.pins[0], name: "LRG1-TTV" }],
+      pins: [{ ...baseMapSite.pins[0], name: "LRG1-TTV" }],
     });
 
     expect(layout.mapCenter).toEqual([43.65, -79.38]);

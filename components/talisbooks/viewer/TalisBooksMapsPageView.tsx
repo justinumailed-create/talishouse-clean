@@ -27,12 +27,12 @@ export default function TalisBooksMapsPageView({ page }: { page: TalisBooksViewe
           pinLabel={page.title || page.address || "Property location"}
           className="h-full w-full"
           minHeightClassName="min-h-0"
-          emptyMessage="Add coordinates to display this property on TalisMaps™."
+          emptyMessage="Add coordinates to display this property on Talismaps™."
         />
       </div>
 
       <div className="talisbooks-viewer-page__maps-caption">
-        <p className="talisbooks-viewer-page__eyebrow">Mapsite · TalisMaps™</p>
+        <p className="talisbooks-viewer-page__eyebrow">Mapsite™ · Talismaps™</p>
         {page.title ? (
           <h2 className="talisbooks-viewer-page__title">{page.title}</h2>
         ) : null}

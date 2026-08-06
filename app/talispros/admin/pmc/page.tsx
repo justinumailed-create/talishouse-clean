@@ -27,11 +27,11 @@ export default async function TalisprosPmcAdminPage() {
             Talispros™ Admin
           </p>
           <h1 className="mt-1 text-2xl font-semibold text-neutral-900">
-            PMC MapSite™ admin
+            PMC Mapsite™ admin
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-neutral-600">
             Manage regional Root Account™ pins and every generated FAST Code /
-            claimed MapSite (pin map, listing copy, MLS® / URL / TEB™ / TTV™).
+            claimed Mapsite™ (pin map, listing copy, MLS® / URL / TEB™ / TTV™).
           </p>
         </div>
         <Link
@@ -46,7 +46,7 @@ export default async function TalisprosPmcAdminPage() {
         <div className="flex flex-wrap items-end justify-between gap-2">
           <div>
             <h2 className="text-lg font-semibold text-neutral-900">
-              Claimed MapSites
+              Claimed Mapsites™
             </h2>
             <p className="mt-1 text-sm text-neutral-600">
               All codes from{" "}
@@ -79,7 +79,7 @@ export default async function TalisprosPmcAdminPage() {
                       {site.fastCode}
                     </p>
                     <p className="truncate text-sm text-neutral-500">
-                      {site.propertyTitle || "Untitled MapSite"}
+                      {site.propertyTitle || "Untitled Mapsite™"}
                     </p>
                   </div>
                   <span className="shrink-0 text-xs uppercase tracking-wide text-neutral-400">

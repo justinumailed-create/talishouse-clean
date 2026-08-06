@@ -78,7 +78,7 @@ export default function TalisMapsPlatformSettingsForm({
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
         <h2 className="text-base font-semibold text-neutral-900">Default Provider</h2>
         <p className="mt-1 text-sm text-neutral-500">
-          TalisMaps™ renders with MapLibre GL JS. Tile styles come from interchangeable
+          Talismaps™ renders with MapLibre GL JS. Tile styles come from interchangeable
           vendors (MapTiler by default). Google Maps is not supported.
         </p>
 

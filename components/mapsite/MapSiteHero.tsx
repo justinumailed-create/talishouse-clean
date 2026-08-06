@@ -51,7 +51,7 @@ export default function MapSiteHero({
             )}
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-white/70 mb-2">
-                MapSite™
+                Mapsite™
               </p>
               <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight">
                 {propertyTitle}

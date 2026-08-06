@@ -152,7 +152,7 @@ export default function MarketingAdminRequestDetail({
     await marketingUpdateBuildRequestDetails(request.id, { [field]: url });
   }
 
-  async function replaceMapsiteAsset(field: keyof MapSiteAsset, file: File) {
+  async function replaceMapSiteAsset(field: keyof MapSiteAsset, file: File) {
     const url = await uploadAndAttach(String(field), file);
     if (!url) return;
     const next = { ...(assets || {}), [field]: url } as MapSiteAsset;
@@ -241,7 +241,7 @@ export default function MarketingAdminRequestDetail({
             }
             className="rounded bg-green-100 px-3 py-2 text-sm text-green-800 disabled:opacity-50"
           >
-            Convert to Active MapSite
+            Convert to Active Mapsite™
           </button>
           <button
             type="button"
@@ -251,7 +251,7 @@ export default function MarketingAdminRequestDetail({
             }
             className="rounded bg-teal-100 px-3 py-2 text-sm text-teal-900 disabled:opacity-50"
           >
-            Activate MapSite
+            Activate Mapsite™
           </button>
           <button
             type="button"
@@ -307,19 +307,19 @@ export default function MarketingAdminRequestDetail({
             </div>
             {fastCode ? (
               <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-sm">
-                <p className="font-medium text-neutral-900">MapSite tools</p>
+                <p className="font-medium text-neutral-900">Mapsite™ tools</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <Link
                     href={`/talispros/mapsites/${fastCode}`}
                     className="rounded bg-white px-2 py-1 text-blue-700 underline"
                   >
-                    Preview MapSite
+                    Preview Mapsite™
                   </Link>
                   <Link
                     href={`/talispros/mapsites/${fastCode}/edit`}
                     className="rounded bg-white px-2 py-1 text-blue-700 underline"
                   >
-                    Edit MapSite
+                    Edit Mapsite™
                   </Link>
                 </div>
               </div>
@@ -497,7 +497,7 @@ export default function MarketingAdminRequestDetail({
           type="file"
           onChange={(event) =>
             event.target.files?.[0] &&
-            void replaceMapsiteAsset("profile_image", event.target.files[0])
+            void replaceMapSiteAsset("profile_image", event.target.files[0])
           }
         />
         <label className="block text-sm">
@@ -521,7 +521,7 @@ export default function MarketingAdminRequestDetail({
       {mapsite ? (
         <section className="space-y-4 rounded-xl border border-neutral-200 bg-white p-4">
           <div>
-            <h2 className="font-semibold text-neutral-900">MapSite™ Configuration</h2>
+            <h2 className="font-semibold text-neutral-900">Mapsite™ Configuration</h2>
             <p className="mt-1 text-xs text-neutral-500">
               Status: {mapsite.status} · FAST Code: {mapsite.fast_code || "—"}
             </p>
@@ -610,7 +610,7 @@ export default function MarketingAdminRequestDetail({
                 href={`/talispros/admin/mapsites/${encodeURIComponent(mapsite.fast_code)}`}
                 className="inline-flex text-sm font-medium text-neutral-900 underline underline-offset-2"
               >
-                Open TalisBooks™ manager (create, images, reorder, publish, attach)
+                Open Talisbooks™ manager (create, images, reorder, publish, attach)
               </a>
             ) : null}
             <label className="text-sm">
@@ -642,13 +642,13 @@ export default function MarketingAdminRequestDetail({
             }
             className="rounded bg-neutral-800 px-4 py-2 text-sm text-white disabled:opacity-50"
           >
-            Save MapSite Configuration
+            Save Mapsite™ Configuration
           </button>
         </section>
       ) : (
         <p className="rounded-xl border border-dashed border-neutral-300 bg-neutral-50 px-4 py-3 text-sm text-neutral-600">
-          No linked MapSite™ yet. Claims from the fullscreen map associate
-          automatically; otherwise use Convert to Active MapSite.
+          No linked Mapsite™ yet. Claims from the fullscreen map associate
+          automatically; otherwise use Convert to Active Mapsite™.
         </p>
       )}
 

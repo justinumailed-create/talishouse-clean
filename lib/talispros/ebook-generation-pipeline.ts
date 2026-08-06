@@ -9,6 +9,7 @@ import {
   withOnboardingTimeout,
   type OnboardingFailureReport,
 } from "@/lib/onboarding-timing";
+import type { OptimizedEbookImageAsset } from "@/lib/talisbooks/auto-draft-ebook";
 import type { EbookGenerationProgressEvent } from "@/lib/talispros/ebook-generation-stages";
 
 export type {
@@ -30,7 +31,12 @@ export type RunEbookGenerationInput = {
   agentPhone?: string;
   brokerageLogo?: File | null;
   agentPhoto?: File | null;
-  images: File[];
+  agentPhotoUrl?: string | null;
+  brokerageLogoUrl?: string | null;
+  /** Legacy giant FormData path — prefer optimizedImages. */
+  images?: File[];
+  /** Pre-optimized property (or PDF page) assets already in storage. */
+  optimizedImages?: OptimizedEbookImageAsset[];
   uploadMode: "images" | "pdf";
   onProgress?: (event: EbookGenerationProgressEvent) => void | Promise<void>;
   /** Override job timeout (ms). Defaults to ONBOARDING_JOB_TIMEOUT_MS. */
@@ -46,7 +52,8 @@ function emit(
 
 /**
  * Tracked ebook generation job keyed by Build Request ID.
- * Resolves FAST Code / MapSite / account type from the database only.
+ * Resolves FAST Code / Mapsite™ / account type from the database only.
+ * Expects images already optimized + stored when `optimizedImages` is provided.
  */
 export async function runEbookGenerationPipeline(
   input: RunEbookGenerationInput
@@ -94,15 +101,6 @@ export async function runEbookGenerationPipeline(
           return fail("resolve_request", "Build Request ID is required.");
         }
 
-        currentStage = "upload_complete";
-        await emit(input.onProgress, {
-          stage: "upload_complete",
-          requestId,
-          fastCode,
-          mapsiteId,
-        });
-        logOnboardingStep("Upload complete", pipelineStarted, { requestId });
-
         currentStage = "resolve_request";
         const resolved = await resolveOnboardingFromRequest(requestId);
         if (!resolved.ok) {
@@ -114,17 +112,14 @@ export async function runEbookGenerationPipeline(
         fastCode = ctx.fastCode;
         mapsiteId = ctx.mapsiteId;
 
-        currentStage = "preparing_images";
-        await emit(input.onProgress, {
-          stage: "preparing_images",
-          requestId,
-          fastCode,
-          mapsiteId,
-        });
+        const optimizedImages = (input.optimizedImages || []).filter(
+          (item) => item.url && item.width > 0 && item.height > 0,
+        );
+        const rawImages = input.images || [];
 
-        if (!input.images.length) {
+        if (!optimizedImages.length && !rawImages.length) {
           return fail(
-            "preparing_images",
+            "uploading_images",
             "Upload at least one property image or PDF page."
           );
         }
@@ -143,7 +138,7 @@ export async function runEbookGenerationPipeline(
           mapsiteId: ctx.mapsiteId,
           accountType: ctx.accountType,
           requestId: ctx.requestId,
-          title: input.title.trim() || `${ctx.fastCode.toUpperCase()} TalisBook™`,
+          title: input.title.trim() || `${ctx.fastCode.toUpperCase()} Talisbook™`,
           description: input.description.trim(),
           location:
             input.location.trim() ||
@@ -154,13 +149,17 @@ export async function runEbookGenerationPipeline(
           agentPhone: input.agentPhone?.trim() || ctx.owner.phone,
           brokerageLogo: input.brokerageLogo,
           agentPhoto: input.agentPhoto,
-          images: input.images,
+          agentPhotoUrl: input.agentPhotoUrl,
+          brokerageLogoUrl: input.brokerageLogoUrl,
+          images: rawImages,
+          optimizedImages,
           uploadMode: input.uploadMode,
         });
         logOnboardingStep("Book generation", generateStarted, {
           requestId,
           fastCode,
           success: result.success,
+          preoptimized: optimizedImages.length > 0,
         });
 
         if (!result.success) {

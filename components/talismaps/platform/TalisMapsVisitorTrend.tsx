@@ -24,7 +24,7 @@ export default function TalisMapsVisitorTrend({
           </p>
           <h2 className="mt-1 text-lg font-semibold text-neutral-900">Visitor Trend</h2>
           <p className="mt-1 text-sm text-neutral-500">
-            Map views across your published TalisMaps™ network.
+            Map views across your published Talismaps™ network.
           </p>
         </div>
         <div className="text-left sm:text-right">

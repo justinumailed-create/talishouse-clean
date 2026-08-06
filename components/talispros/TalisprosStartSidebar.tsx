@@ -12,7 +12,7 @@ export default function TalisprosStartSidebar() {
           </span>
           <span className="mt-5 block text-[26px] leading-[1.1] tracking-[-0.008em] sm:mt-6 sm:text-[30px] lg:text-[34px]">
             <span className="block whitespace-nowrap">Get Your Own</span>
-            <span className="block whitespace-nowrap">Mapsite Market™</span>
+            <span className="block whitespace-nowrap">Mapsite™ Market™</span>
           </span>
           <span className="mt-5 block text-[22px] leading-[1.1] tracking-[-0.008em] sm:mt-6 sm:text-[26px] lg:text-[30px]">
             What Best

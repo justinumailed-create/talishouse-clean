@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   ...createMetadata({
     title: "Talispros™ | Industry Adjacent Market Places for Real Estate Professionals",
     description:
-      "Build referral networks, co-promotion ecosystems, and industry-adjacent marketplaces using MapSites™, FAST Codes™, TalisForms™, and TalisMaps™.",
+      "Build referral networks, co-promotion ecosystems, and industry-adjacent marketplaces using Mapsites™, FAST Codes™, TalisForms™, and Talismaps™.",
     path: "/talispros",
   }),
   icons: {
