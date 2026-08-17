@@ -130,10 +130,11 @@ export function mapsiteAccountTypeSegment(
     normalized === "listings" ||
     normalized === "homes" ||
     normalized === "fsbos" ||
+    normalized === "fsbo" ||
     normalized === "brokers" ||
     normalized === "adpro"
   ) {
-    return normalized;
+    return normalized === "fsbo" ? "fsbos" : normalized;
   }
 
   return "listings";

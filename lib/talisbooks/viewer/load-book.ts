@@ -1,6 +1,7 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
   ensurePermanentClosingPages,
+  getGlasshouseBrochureSource,
   hydratePermanentViewerPages,
 } from "@/lib/talisbooks/permanent-pages";
 import { createDemoViewerBook } from "./demo-book";
@@ -23,7 +24,11 @@ function asLayout(value: unknown): TalisBooksViewerPageLayout | undefined {
     value === "centerfold_left" ||
     value === "centerfold_right" ||
     value === "parting" ||
-    value === "maps"
+    value === "maps" ||
+    value === "quote" ||
+    value === "facing" ||
+    value === "custom_content" ||
+    value === "global_content"
   ) {
     return value;
   }
@@ -122,6 +127,17 @@ export async function getViewerBookBySlug(
   const metadata = (book.metadata as Record<string, unknown>) ?? {};
   const coverImageUrl =
     typeof metadata.coverImageUrl === "string" ? metadata.coverImageUrl : null;
+  const galleryImageUrls = Array.isArray(metadata.galleryImageUrls)
+    ? metadata.galleryImageUrls.filter(
+        (url): url is string => typeof url === "string" && url.trim().length > 0,
+      )
+    : [];
+  const backCoverImageUrl =
+    (typeof metadata.backCoverImageUrl === "string"
+      ? metadata.backCoverImageUrl
+      : null) ||
+    galleryImageUrls[1] ||
+    null;
 
   const { data: pages } = await supabase
     .from("talisbooks_book_pages")
@@ -130,10 +146,30 @@ export async function getViewerBookBySlug(
     .eq("is_visible", true)
     .order("page_number", { ascending: true });
 
+  const glasshouse = getGlasshouseBrochureSource();
   const viewerPages: TalisBooksViewerPage[] =
     (pages ?? []).length > 0
       ? (pages ?? []).map((page) => {
           const content = (page.content as Record<string, unknown>) ?? {};
+          const layout = asLayout(content.layout) ?? "caption";
+          const storedHero =
+            typeof content.heroImageUrl === "string"
+              ? content.heroImageUrl
+              : undefined;
+          const isGlasshouse =
+            content.systemKey === "glasshouse_brochure" ||
+            layout === "global_content";
+          const skipCoverFallback =
+            layout === "facing" ||
+            layout === "centerfold_left" ||
+            layout === "centerfold_right" ||
+            layout === "global_content";
+          const heroFallback =
+            layout === "agent_summary"
+              ? backCoverImageUrl || coverImageUrl || undefined
+              : skipCoverFallback
+                ? undefined
+                : coverImageUrl || undefined;
           return {
             id: page.id,
             pageNumber: page.page_number,
@@ -145,15 +181,15 @@ export async function getViewerBookBySlug(
             subtitle:
               typeof content.subtitle === "string" ? content.subtitle : undefined,
             body: typeof content.body === "string" ? content.body : undefined,
-            heroImageUrl:
-              typeof content.heroImageUrl === "string"
-                ? content.heroImageUrl
-                : coverImageUrl || undefined,
-            spreadImageUrl:
-              typeof content.spreadImageUrl === "string"
+            heroImageUrl: isGlasshouse
+              ? glasshouse.spreadImageUrl
+              : storedHero || heroFallback,
+            spreadImageUrl: isGlasshouse
+              ? glasshouse.spreadImageUrl
+              : typeof content.spreadImageUrl === "string"
                 ? content.spreadImageUrl
                 : undefined,
-            layout: asLayout(content.layout) ?? "caption",
+            layout,
             coverTemplateId: asCoverTemplateId(content.coverTemplateId),
             latitude:
               typeof content.latitude === "number" ? content.latitude : undefined,
@@ -204,6 +240,26 @@ export async function getViewerBookBySlug(
               content.brochureLeaf === "left" || content.brochureLeaf === "right"
                 ? content.brochureLeaf
                 : undefined,
+            advertisement: content.advertisement === true,
+            advertisementLabel:
+              typeof content.advertisementLabel === "string"
+                ? content.advertisementLabel
+                : undefined,
+            captionsEnabled: content.captionsEnabled === true,
+            captionSkipped: content.captionSkipped === true,
+            captionAlign:
+              content.captionAlign === "left" || content.captionAlign === "right"
+                ? content.captionAlign
+                : undefined,
+            spreadMat: content.spreadMat === true,
+            pricingLine:
+              typeof content.pricingLine === "string"
+                ? content.pricingLine
+                : undefined,
+            disclaimer:
+              typeof content.disclaimer === "string"
+                ? content.disclaimer
+                : undefined,
           };
         })
       : buildFallbackPages({
@@ -225,7 +281,7 @@ export async function getViewerBookBySlug(
     title: book.title,
     subtitle: book.subtitle,
     frontCoverImageUrl: coverImageUrl || undefined,
-    backCoverImageUrl: coverImageUrl || undefined,
+    backCoverImageUrl: backCoverImageUrl || coverImageUrl || undefined,
     pages: enrichCoverPagesWithAgentBranding(
       skipPermanentPages
         ? viewerPages

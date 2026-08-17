@@ -34,6 +34,11 @@ export {
 } from "./brokerage-scaffold";
 export { getViewerBookBySlug, resolveViewerBookBySlug } from "./load-book";
 export {
+  isLandscapeSpreadCandidate,
+  isMattedSpreadPage,
+  SPREAD_SOURCE_WIDTH_PERCENT,
+} from "./spread-layout";
+export {
   convertViewerNavIndex,
   describeViewerPage,
   describeViewerSpread,

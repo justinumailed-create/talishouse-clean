@@ -10,7 +10,15 @@ export type TalisBooksViewerPageLayout =
   | "centerfold_left"
   | "centerfold_right"
   | "parting"
-  | "maps";
+  | "maps"
+  /** Framed intro write-up — white page, large dark-gray centered text. */
+  | "quote"
+  /** Level 1 facing page — image centered on white mat, no bleed. */
+  | "facing"
+  /** Level 3 custom / root-account content. */
+  | "custom_content"
+  /** Level 3 Glasshouse™ + pricing global content. */
+  | "global_content";
 
 export interface TalisBooksViewerPage {
   id: string;
@@ -59,6 +67,19 @@ export interface TalisBooksViewerPage {
   systemKey?: string;
   /** Leaf within a permanent spread (Glasshouse brochure). */
   brochureLeaf?: "left" | "right";
+  /** Level 3 advertising kicker — "Advertisement" at top-left of the spread. */
+  advertisement?: boolean;
+  advertisementLabel?: string;
+  captionsEnabled?: boolean;
+  captionSkipped?: boolean;
+  captionAlign?: "left" | "right";
+  /**
+   * Matted landscape spread: left/right pages share one source image split at the fold.
+   * Distinct from legacy full-bleed centerfolds (demo / Glasshouse).
+   */
+  spreadMat?: boolean;
+  pricingLine?: string;
+  disclaimer?: string;
 }
 
 export interface TalisBooksViewerBook {

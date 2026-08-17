@@ -150,6 +150,7 @@ export function planTypeForClaimAccountType(accountType: string): PlanType {
     return normalized === "test" ? "TEST_ACCOUNT" : "ROOT_ACCOUNT";
   }
   if (normalized.startsWith("adpro")) return "ADPRO_SINGLE";
+  if (normalized === "fsbo" || normalized === "fsbos") return "ROOT_ACCOUNT_1";
   if (normalized === "derivative") return "DERIVATIVE_ACCOUNT";
   return "ROOT_ACCOUNT";
 }

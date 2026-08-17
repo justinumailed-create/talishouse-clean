@@ -10,6 +10,10 @@ import {
   type OnboardingFailureReport,
 } from "@/lib/onboarding-timing";
 import type { OptimizedEbookImageAsset } from "@/lib/talisbooks/auto-draft-ebook";
+import type {
+  SelfServiceBookOptions,
+  SelfServicePageCaption,
+} from "@/lib/talisbooks/self-service-page-plan";
 import type { EbookGenerationProgressEvent } from "@/lib/talispros/ebook-generation-stages";
 
 export type {
@@ -38,6 +42,8 @@ export type RunEbookGenerationInput = {
   /** Pre-optimized property (or PDF page) assets already in storage. */
   optimizedImages?: OptimizedEbookImageAsset[];
   uploadMode: "images" | "pdf";
+  bookOptions?: Partial<SelfServiceBookOptions>;
+  captions?: SelfServicePageCaption[];
   onProgress?: (event: EbookGenerationProgressEvent) => void | Promise<void>;
   /** Override job timeout (ms). Defaults to ONBOARDING_JOB_TIMEOUT_MS. */
   timeoutMs?: number;
@@ -154,6 +160,8 @@ export async function runEbookGenerationPipeline(
           images: rawImages,
           optimizedImages,
           uploadMode: input.uploadMode,
+          bookOptions: input.bookOptions,
+          captions: input.captions,
         });
         logOnboardingStep("Book generation", generateStarted, {
           requestId,

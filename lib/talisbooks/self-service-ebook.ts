@@ -4,6 +4,10 @@ import {
   type AutoDraftUploadMode,
   type OptimizedEbookImageAsset,
 } from "@/lib/talisbooks/auto-draft-ebook";
+import type {
+  SelfServiceBookOptions,
+  SelfServicePageCaption,
+} from "@/lib/talisbooks/self-service-page-plan";
 
 export type GenerateSelfServiceEbookInput = {
   fastCode: string;
@@ -26,6 +30,8 @@ export type GenerateSelfServiceEbookInput = {
   optimizedImages?: OptimizedEbookImageAsset[];
   /** `pdf` skips ebook layout rules and renders exact page rasters. */
   uploadMode?: AutoDraftUploadMode;
+  bookOptions?: Partial<SelfServiceBookOptions>;
+  captions?: SelfServicePageCaption[];
 };
 
 export type GenerateSelfServiceEbookResult =
@@ -40,8 +46,8 @@ export type GenerateSelfServiceEbookResult =
 
 /**
  * Client self-service path — delegates to automatic draft generation.
- * Images: fixed 22-page plan — landscapes as continuous facing spreads.
- * PDF: exact page rasters, no Glasshouse / cover scaffolding.
+ * Images: one page plan configured by facingPages / captions / advertising /
+ * globalContent / customContent. PDF: exact page rasters.
  */
 export async function generateSelfServiceEbook(
   input: GenerateSelfServiceEbookInput
@@ -66,6 +72,8 @@ export async function generateSelfServiceEbook(
     optimizedImages: input.optimizedImages,
     source: uploadMode === "pdf" ? "self-service-pdf" : "self-service-teb",
     uploadMode,
+    bookOptions: input.bookOptions,
+    captions: input.captions,
   });
 
   if (!result.success) {

@@ -24,7 +24,14 @@ export interface TalisBooksGlasshouseBrochureSource {
   label: string;
   left: TalisBooksGlasshouseBrochureLeafSource;
   right: TalisBooksGlasshouseBrochureLeafSource;
+  /** One landscape photograph split across the two-page advertisement. */
+  spreadImageUrl: string;
+  /** Reusable global pricing line — not hardcoded in the page renderer. */
+  pricingLine: string;
+  disclaimer: string;
 }
+
+const GLASSHOUSE_SPREAD_IMAGE_URL = "/images/glasshouse/hero-hd.webp";
 
 const DEFAULT_GLASSHOUSE_BROCHURE: TalisBooksGlasshouseBrochureSource = {
   key: TALISBOOKS_GLASSHOUSE_BROCHURE_SYSTEM_KEY,
@@ -32,13 +39,16 @@ const DEFAULT_GLASSHOUSE_BROCHURE: TalisBooksGlasshouseBrochureSource = {
   left: {
     title: "Glasshouse™",
     body: "160 and 200 sq. ft. Modular glass-enclosed spaces. Permanent installation. Up in a day, finished in a week. Lease-To-Own available, OAC.",
-    heroImageUrl: "/images/glasshouse/hero.png",
+    heroImageUrl: GLASSHOUSE_SPREAD_IMAGE_URL,
   },
   right: {
     title: "Glasshouse™ 200",
     body: "Open concept. One, two, or three sides of glass. Built for views, short-term stays, and home offices — finished open space you complete to taste.",
-    heroImageUrl: "/images/glasshouse/models/200.png",
+    heroImageUrl: GLASSHOUSE_SPREAD_IMAGE_URL,
   },
+  spreadImageUrl: GLASSHOUSE_SPREAD_IMAGE_URL,
+  pricingLine: "Available from $58.00 per sq.ft.",
+  disclaimer: "Some Limitations Apply",
 };
 
 /** Runtime admin override — replace globally without republishing every book. */
@@ -46,6 +56,9 @@ let glasshouseBrochureOverride: Partial<{
   left: Partial<TalisBooksGlasshouseBrochureLeafSource>;
   right: Partial<TalisBooksGlasshouseBrochureLeafSource>;
   label: string;
+  spreadImageUrl: string;
+  pricingLine: string;
+  disclaimer: string;
 }> | null = null;
 
 /**
@@ -59,19 +72,33 @@ export function setGlasshouseBrochureSourceOverride(
 }
 
 export function getGlasshouseBrochureSource(): TalisBooksGlasshouseBrochureSource {
+  const spreadImageUrl =
+    glasshouseBrochureOverride?.spreadImageUrl?.trim() ||
+    glasshouseBrochureOverride?.left?.heroImageUrl?.trim() ||
+    DEFAULT_GLASSHOUSE_BROCHURE.spreadImageUrl;
   const left = {
     ...DEFAULT_GLASSHOUSE_BROCHURE.left,
     ...glasshouseBrochureOverride?.left,
+    heroImageUrl:
+      glasshouseBrochureOverride?.left?.heroImageUrl?.trim() || spreadImageUrl,
   };
   const right = {
     ...DEFAULT_GLASSHOUSE_BROCHURE.right,
     ...glasshouseBrochureOverride?.right,
+    heroImageUrl: spreadImageUrl,
   };
   return {
     key: TALISBOOKS_GLASSHOUSE_BROCHURE_SYSTEM_KEY,
     label: glasshouseBrochureOverride?.label ?? DEFAULT_GLASSHOUSE_BROCHURE.label,
     left,
     right,
+    spreadImageUrl,
+    pricingLine:
+      glasshouseBrochureOverride?.pricingLine ??
+      DEFAULT_GLASSHOUSE_BROCHURE.pricingLine,
+    disclaimer:
+      glasshouseBrochureOverride?.disclaimer ??
+      DEFAULT_GLASSHOUSE_BROCHURE.disclaimer,
   };
 }
 
@@ -101,10 +128,13 @@ function leafFromSource(
     id: `system-${TALISBOOKS_GLASSHOUSE_BROCHURE_SYSTEM_KEY}-${leaf}`,
     pageNumber,
     pageRole: "property_content",
-    layout: "full_bleed",
+    layout: "global_content",
     title: content.title,
     body: content.body,
-    heroImageUrl: content.heroImageUrl,
+    heroImageUrl: source.spreadImageUrl,
+    spreadImageUrl: source.spreadImageUrl,
+    pricingLine: source.pricingLine,
+    disclaimer: source.disclaimer,
     isPermanent: true,
     clientEditable: false,
     systemKey: TALISBOOKS_GLASSHOUSE_BROCHURE_SYSTEM_KEY,
@@ -133,10 +163,13 @@ export function glasshouseBrochureContentPayload(
   const content = leaf === "left" ? source.left : source.right;
   return {
     pageRole: "property_content",
-    layout: "full_bleed",
+    layout: "global_content",
     title: content.title,
     body: content.body,
-    heroImageUrl: content.heroImageUrl,
+    heroImageUrl: source.spreadImageUrl,
+    spreadImageUrl: source.spreadImageUrl,
+    pricingLine: source.pricingLine,
+    disclaimer: source.disclaimer,
     isPermanent: true,
     clientEditable: false,
     systemKey: TALISBOOKS_GLASSHOUSE_BROCHURE_SYSTEM_KEY,
@@ -204,8 +237,11 @@ export function hydratePermanentViewerPages(
       ...page,
       title: content.title,
       body: content.body,
-      heroImageUrl: content.heroImageUrl,
-      layout: "full_bleed",
+      heroImageUrl: source.spreadImageUrl,
+      spreadImageUrl: source.spreadImageUrl,
+      pricingLine: source.pricingLine,
+      disclaimer: source.disclaimer,
+      layout: "global_content",
       pageRole: "property_content",
       isPermanent: true,
       clientEditable: false,
