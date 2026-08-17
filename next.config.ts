@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: "/talispros/start",
+        destination: "/",
+        permanent: false,
+      },
+      {
         source: "/client/:path*",
         destination: "/talispros/client/:path*",
         permanent: true,

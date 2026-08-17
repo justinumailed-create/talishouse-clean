@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { isTalisprosStartPath } from "@/lib/talispros/start-content";
 import TalisprosFooter from "./TalisprosFooter";
 import TalisprosHeader from "./TalisprosHeader";
 
@@ -19,7 +20,7 @@ export default function TalisprosLayoutClient({
   }
 
   const isFullBleedPage =
-    pathname === "/talispros/start" || pathname.startsWith("/talispros/markets/");
+    isTalisprosStartPath(pathname) || pathname.startsWith("/talispros/markets/");
 
   return (
     <>

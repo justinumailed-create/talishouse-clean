@@ -15,7 +15,7 @@ export default function Footer() {
     <footer className="w-full border-t border-gray-100 bg-white text-gray-700 mt-12">
       <div className="w-full px-5 py-14 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
         <div className="flex flex-col gap-6">
-          <Link href={ROUTES.HOME} className="flex-shrink-0">
+          <Link href={ROUTES.TALISHOUSE} className="flex-shrink-0">
             <Image
               src="/logo.png"
               alt="Windswept Logo"
@@ -43,7 +43,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href={ROUTES.HOME} className="text-[15px] text-neutral-600 hover:text-gray-900 transition-colors">
+              <Link href={ROUTES.TALISHOUSE} className="text-[15px] text-neutral-600 hover:text-gray-900 transition-colors">
                 Home
               </Link>
             </li>

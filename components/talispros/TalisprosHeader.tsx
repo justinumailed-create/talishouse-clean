@@ -3,13 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { isTalisprosStartPath } from "@/lib/talispros/start-content";
 
 export default function TalisprosHeader() {
   const pathname = usePathname();
 
   if (
     pathname.startsWith("/talispros/mapsites/") ||
-    pathname === "/talispros/start" ||
+    isTalisprosStartPath(pathname) ||
     pathname.startsWith("/talispros/markets/")
   ) {
     return null;

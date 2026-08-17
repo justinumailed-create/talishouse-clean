@@ -1,5 +1,9 @@
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
+export function isTalisprosStartPath(pathname: string | null | undefined) {
+  return pathname === "/" || pathname === "/talispros/start";
+}
+
 export const TALISPROS_START_INTRO =
   "Seen here, a Glasshouse™ optimized for short-term rental purposes. A Mapsite™ of 50 miles around a centre point, or up to 100,000 people population base, is automatically included with every Account.*";
 

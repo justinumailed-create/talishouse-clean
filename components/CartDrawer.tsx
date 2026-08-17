@@ -162,7 +162,7 @@ export default function CartDrawer() {
               </svg>
             </div>
             <h2 className="text-2xl font-semibold mb-2">Payment Successful!</h2>
-            <Link href="/" onClick={closeCart} className="btn-primary mt-6">Continue Shopping</Link>
+            <Link href="/talishouse" onClick={closeCart} className="btn-primary mt-6">Continue Shopping</Link>
           </div>
         </div>
       </div>
