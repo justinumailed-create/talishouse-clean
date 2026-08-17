@@ -9,6 +9,10 @@ import {
   onboardingNow,
 } from "@/lib/onboarding-timing";
 import type { GenerateSelfServiceEbookActionResult } from "@/lib/talispros/ebook-generate-action-types";
+import {
+  parseSelfServiceBookOptions,
+  parseSelfServiceCaptions,
+} from "@/lib/talisbooks/self-service-page-plan";
 
 /**
  * Self-service ebook generation.
@@ -55,6 +59,10 @@ export async function generateSelfServiceEbookAction(
     agentPhoto,
     images,
     uploadMode,
+    bookOptions: parseSelfServiceBookOptions(
+      String(formData.get("bookOptions") || ""),
+    ),
+    captions: parseSelfServiceCaptions(String(formData.get("captions") || "")),
   });
 
   if (result.stage !== "completed") {

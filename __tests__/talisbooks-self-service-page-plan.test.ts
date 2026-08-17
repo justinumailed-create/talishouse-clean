@@ -1,129 +1,303 @@
 import { describe, expect, it } from "vitest";
+import { getGlasshouseBrochureSource } from "@/lib/talisbooks/permanent-pages/glasshouse-brochure";
 import {
+  assignFacingUploadRoles,
   buildSelfServiceEbookPageRows,
   isSelfServiceSpreadCandidate,
-  SELF_SERVICE_AGENT_PAGE,
-  SELF_SERVICE_CLOSING_LANDSCAPE_START,
-  SELF_SERVICE_GLASSHOUSE_START,
-  SELF_SERVICE_INTERIOR_SPREAD_STARTS,
+  parseSelfServiceBookOptions,
+  parseSelfServiceCaptions,
+  selfServicePageCount,
+  SELF_SERVICE_BOTH_CONTENT_TOTAL_PAGES,
+  SELF_SERVICE_DEFAULT_TOTAL_PAGES,
   SELF_SERVICE_LOT_PAGE,
-  SELF_SERVICE_MAX_LANDSCAPE_SPREADS,
-  SELF_SERVICE_TOTAL_PAGES,
+  SELF_SERVICE_MAX_UPLOAD_IMAGES,
+  type SelfServiceBookOptions,
 } from "@/lib/talisbooks/self-service-page-plan";
+import { isMattedSpreadPage } from "@/lib/talisbooks/viewer/spread-layout";
 
-describe("self-service ebook page plan", () => {
-  const landscapes = Array.from({ length: 12 }, (_, i) => ({
-    url: `https://cdn.example/landscape-${i + 1}.jpg`,
-    width: 2400,
-    height: 1200,
-  }));
+const portrait = (n: number) => ({
+  url: `https://cdn.example/portrait-${n}.jpg`,
+  width: 1200,
+  height: 1800,
+});
 
-  it("classifies landscape vs portrait for spread candidates", () => {
-    expect(isSelfServiceSpreadCandidate(2400, 1200)).toBe(true);
-    expect(isSelfServiceSpreadCandidate(1200, 1800)).toBe(false);
-    expect(isSelfServiceSpreadCandidate(1000, 1000)).toBe(false);
+const landscape = (n: number) => ({
+  url: `https://cdn.example/landscape-${n}.jpg`,
+  width: 2400,
+  height: 1200,
+});
+
+const baseInput = {
+  title: "Cliff Lot",
+  description: "Oceanfront acreage.",
+  location: "Meat Cove, NS",
+  coverImageUrl: "https://cdn.example/cover.jpg",
+  backCoverImageUrl: "https://cdn.example/back.jpg",
+  agent: {
+    name: "Alex Owner",
+    phone: "902-555-0100",
+    email: "alex@example.com",
+    brokerageName: "Owner Listing",
+    brokerageLogoUrl: "https://cdn.example/logo.png",
+  },
+};
+
+function options(
+  partial: Partial<SelfServiceBookOptions> = {},
+): SelfServiceBookOptions {
+  return {
+    facingPages: true,
+    captions: false,
+    advertising: false,
+    globalContent: false,
+    customContent: false,
+    ...partial,
+  };
+}
+
+describe("self-service ebook page plan (facing spreads)", () => {
+  it("caps uploads at 20 and assigns image 1 cover / image 2 back / 3–20 interiors", () => {
+    expect(SELF_SERVICE_MAX_UPLOAD_IMAGES).toBe(20);
+    const uploads = Array.from({ length: 22 }, (_, i) => ({
+      url: `https://cdn.example/img-${i + 1}.jpg`,
+      width: 1600,
+      height: i % 3 === 0 ? 2000 : 1200,
+    }));
+    const roles = assignFacingUploadRoles(uploads);
+    expect(roles.coverImageUrl).toBe("https://cdn.example/img-1.jpg");
+    expect(roles.backCoverImageUrl).toBe("https://cdn.example/img-2.jpg");
+    expect(roles.landscapes).toHaveLength(18);
+    expect(roles.landscapes[0]?.url).toBe("https://cdn.example/img-3.jpg");
   });
 
-  it("builds exactly 22 pages with fixed lot / glasshouse / agent slots", () => {
+  it("TEST 1: landscape image becomes one two-page spread without duplicating the photo", () => {
+    expect(isSelfServiceSpreadCandidate(2400, 1200)).toBe(true);
     const rows = buildSelfServiceEbookPageRows({
-      title: "Cliff Lot",
-      description: "Oceanfront acreage.",
-      location: "Meat Cove, NS",
-      landscapes,
-      coverImageUrl: landscapes[0]!.url,
-      agent: {
-        name: "Alex Owner",
-        phone: "902-555-0100",
-        email: "alex@example.com",
-      },
+      ...baseInput,
+      landscapes: [landscape(1)],
+      options: options(),
     });
+    expect(rows).toHaveLength(SELF_SERVICE_DEFAULT_TOTAL_PAGES);
+    const left = rows.find((r) => r.page_number === 2);
+    const right = rows.find((r) => r.page_number === 3);
+    expect(left?.content.layout).toBe("centerfold_left");
+    expect(right?.content.layout).toBe("centerfold_right");
+    expect(left?.content.spreadImageUrl).toBe(landscape(1).url);
+    expect(right?.content.spreadImageUrl).toBe(landscape(1).url);
+    expect(left?.content.heroImageUrl).toBeUndefined();
+    expect(right?.content.heroImageUrl).toBeUndefined();
+    expect(left?.content.spreadMat).toBe(true);
+    expect(isMattedSpreadPage(left!.content as never)).toBe(true);
+    expect(isMattedSpreadPage(right!.content as never)).toBe(true);
+  });
 
-    expect(rows).toHaveLength(SELF_SERVICE_TOTAL_PAGES);
-    expect(rows.map((r) => r.page_number)).toEqual(
-      Array.from({ length: SELF_SERVICE_TOTAL_PAGES }, (_, i) => i + 1),
-    );
+  it("TEST 2: portrait image occupies one single page", () => {
+    expect(isSelfServiceSpreadCandidate(1200, 1800)).toBe(false);
+    const rows = buildSelfServiceEbookPageRows({
+      ...baseInput,
+      landscapes: [portrait(1)],
+      options: options(),
+    });
+    const page = rows.find((r) => r.page_number === 2);
+    expect(page?.content.layout).toBe("facing");
+    expect(page?.content.layoutType).toBe("single");
+    expect(page?.content.heroImageUrl).toBe(portrait(1).url);
+    expect(page?.content.spreadImageUrl).toBeUndefined();
+    expect(rows.find((r) => r.page_number === 3)?.content.heroImageUrl).toBeUndefined();
+  });
 
-    const lot = rows.find((r) => r.page_number === SELF_SERVICE_LOT_PAGE);
-    expect(lot?.content.pageRole).toBe("cover");
-    expect(lot?.content.title).toBe("Cliff Lot");
+  it("TEST 3: landscape + caption is one spread with one caption string (left-leaf template)", () => {
+    const rows = buildSelfServiceEbookPageRows({
+      ...baseInput,
+      landscapes: [landscape(1)],
+      options: options({ captions: true }),
+      captions: [{ text: "West ridge at dusk", skipped: false }],
+    });
+    const left = rows.find((r) => r.page_number === 2);
+    const right = rows.find((r) => r.page_number === 3);
+    expect(left?.content.captionsEnabled).toBe(true);
+    expect(right?.content.captionsEnabled).toBe(true);
+    expect(left?.content.title).toBe("West ridge at dusk");
+    expect(right?.content.title).toBe("West ridge at dusk");
+    expect(left?.content.spreadImageUrl).toBe(right?.content.spreadImageUrl);
+  });
 
-    for (const start of SELF_SERVICE_INTERIOR_SPREAD_STARTS) {
-      const left = rows.find((r) => r.page_number === start);
-      const right = rows.find((r) => r.page_number === start + 1);
+  it("TEST 4: portrait + caption sits on that single page", () => {
+    const rows = buildSelfServiceEbookPageRows({
+      ...baseInput,
+      landscapes: [portrait(1)],
+      options: options({ captions: true }),
+      captions: [{ text: "Entry hall", skipped: false }],
+    });
+    const page = rows.find((r) => r.page_number === 2);
+    expect(page?.content.layout).toBe("facing");
+    expect(page?.content.title).toBe("Entry hall");
+    expect(page?.content.captionsEnabled).toBe(true);
+    expect(page?.content.captionSkipped).toBe(false);
+  });
+
+  it("TEST 5: skipped landscape caption keeps the reserved band", () => {
+    const rows = buildSelfServiceEbookPageRows({
+      ...baseInput,
+      landscapes: [landscape(1)],
+      options: options({ captions: true }),
+      captions: [{ text: "", skipped: true }],
+    });
+    const left = rows.find((r) => r.page_number === 2);
+    const right = rows.find((r) => r.page_number === 3);
+    expect(left?.content.captionSkipped).toBe(true);
+    expect(right?.content.captionSkipped).toBe(true);
+    expect(left?.content.captionsEnabled).toBe(true);
+    expect(right?.content.title).toBe("");
+    expect(left?.content.spreadImageUrl).toBe(landscape(1).url);
+  });
+
+  it("TEST 6: each landscape becomes its own independent spread", () => {
+    const rows = buildSelfServiceEbookPageRows({
+      ...baseInput,
+      landscapes: [landscape(1), landscape(2), landscape(3)],
+      options: options(),
+    });
+    const spreads = [
+      [2, 3, landscape(1).url],
+      [4, 5, landscape(2).url],
+      [6, 7, landscape(3).url],
+    ] as const;
+    for (const [leftPage, rightPage, url] of spreads) {
+      const left = rows.find((r) => r.page_number === leftPage);
+      const right = rows.find((r) => r.page_number === rightPage);
+      expect(left?.content.spreadImageUrl).toBe(url);
+      expect(right?.content.spreadImageUrl).toBe(url);
       expect(left?.content.layout).toBe("centerfold_left");
       expect(right?.content.layout).toBe("centerfold_right");
-      expect(left?.content.spreadImageUrl).toBe(right?.content.spreadImageUrl);
-      expect(left?.content.spreadImageUrl).toBeTruthy();
     }
-
-    const ghLeft = rows.find((r) => r.page_number === SELF_SERVICE_GLASSHOUSE_START);
-    const ghRight = rows.find(
-      (r) => r.page_number === SELF_SERVICE_GLASSHOUSE_START + 1,
+    expect(rows.find((r) => r.page_number === 2)?.content.spreadImageUrl).not.toBe(
+      rows.find((r) => r.page_number === 4)?.content.spreadImageUrl,
     );
-    expect(ghLeft?.content.layout).toBe("centerfold_left");
-    expect(ghRight?.content.layout).toBe("centerfold_right");
-    expect(ghLeft?.content.spreadImageUrl).toBe(ghRight?.content.spreadImageUrl);
-    expect(ghRight?.content.body).toBeTruthy();
-    expect(ghLeft?.content.systemKey).toBe("glasshouse_brochure");
-
-    const closeLeft = rows.find(
-      (r) => r.page_number === SELF_SERVICE_CLOSING_LANDSCAPE_START,
-    );
-    const closeRight = rows.find(
-      (r) => r.page_number === SELF_SERVICE_CLOSING_LANDSCAPE_START + 1,
-    );
-    expect(closeLeft?.content.spreadImageUrl).toBe(landscapes[8]!.url);
-    expect(closeRight?.content.spreadImageUrl).toBe(landscapes[8]!.url);
-
-    const agent = rows.find((r) => r.page_number === SELF_SERVICE_AGENT_PAGE);
-    expect(agent?.content.pageRole).toBe("agent_brokerage");
-    expect(agent?.content.agentName).toBe("Alex Owner");
   });
 
-  it("ignores landscapes beyond the 9-spread budget and leaves empty slots blank", () => {
-    const few = landscapes.slice(0, 2);
+  it("TEST 7: mixed portrait and landscape pack as page / spread / page / spread", () => {
     const rows = buildSelfServiceEbookPageRows({
-      title: "Small Gallery",
-      description: "Two views.",
-      location: "Cape Breton",
-      landscapes: few,
-      coverImageUrl: few[0]!.url,
-      agent: { name: "Owner" },
+      ...baseInput,
+      landscapes: [portrait(1), landscape(2), portrait(3), landscape(4)],
+      options: options({ captions: true }),
+      captions: [
+        { text: "A", skipped: false },
+        { text: "B", skipped: false },
+        { text: "C", skipped: false },
+        { text: "D", skipped: false },
+      ],
     });
+    const p2 = rows.find((r) => r.page_number === 2);
+    expect(p2?.content.layout).toBe("facing");
+    expect(p2?.content.heroImageUrl).toBe(portrait(1).url);
+    expect(p2?.content.title).toBe("A");
 
-    expect(rows).toHaveLength(SELF_SERVICE_TOTAL_PAGES);
+    // Portrait on left leaf (page 2); next landscape must start on the next left leaf (page 4)
+    // after padding the odd right leaf (page 3).
+    const p3 = rows.find((r) => r.page_number === 3);
+    expect(p3?.content.layout).toBe("facing");
+    expect(p3?.content.heroImageUrl).toBeUndefined();
 
-    const firstSpreadLeft = rows.find((r) => r.page_number === 2);
-    const secondSpreadLeft = rows.find((r) => r.page_number === 4);
-    const thirdSpreadLeft = rows.find((r) => r.page_number === 6);
-    expect(firstSpreadLeft?.content.spreadImageUrl).toBe(few[0]!.url);
-    expect(secondSpreadLeft?.content.spreadImageUrl).toBe(few[1]!.url);
-    expect(thirdSpreadLeft?.content.spreadImageUrl).toBeUndefined();
+    const p4 = rows.find((r) => r.page_number === 4);
+    const p5 = rows.find((r) => r.page_number === 5);
+    expect(p4?.content.layout).toBe("centerfold_left");
+    expect(p5?.content.layout).toBe("centerfold_right");
+    expect(p4?.content.spreadImageUrl).toBe(landscape(2).url);
+    expect(p5?.content.spreadImageUrl).toBe(landscape(2).url);
+    expect(p5?.content.title).toBe("B");
 
-    const closing = rows.find(
-      (r) => r.page_number === SELF_SERVICE_CLOSING_LANDSCAPE_START,
-    );
-    expect(closing?.content.spreadImageUrl).toBeUndefined();
+    const p6 = rows.find((r) => r.page_number === 6);
+    expect(p6?.content.layout).toBe("facing");
+    expect(p6?.content.heroImageUrl).toBe(portrait(3).url);
+    expect(p6?.content.title).toBe("C");
+
+    const p7 = rows.find((r) => r.page_number === 7);
+    expect(p7?.content.layout).toBe("facing");
+    expect(p7?.content.heroImageUrl).toBeUndefined();
+
+    const p8 = rows.find((r) => r.page_number === 8);
+    const p9 = rows.find((r) => r.page_number === 9);
+    expect(p8?.content.layout).toBe("centerfold_left");
+    expect(p9?.content.layout).toBe("centerfold_right");
+    expect(p8?.content.spreadImageUrl).toBe(landscape(4).url);
+    expect(p9?.content.spreadImageUrl).toBe(landscape(4).url);
+    expect(p9?.content.title).toBe("D");
   });
 
-  it("caps usable landscapes at SELF_SERVICE_MAX_LANDSCAPE_SPREADS", () => {
-    expect(SELF_SERVICE_MAX_LANDSCAPE_SPREADS).toBe(9);
+  it("TEST 8: generated spread metadata matches the viewer matted-spread contract", () => {
     const rows = buildSelfServiceEbookPageRows({
-      title: "Full",
-      description: "Many shots.",
-      location: "NS",
-      landscapes,
-      coverImageUrl: landscapes[0]!.url,
-      agent: { name: "Owner" },
+      ...baseInput,
+      landscapes: [landscape(1)],
+      options: options(),
     });
+    const left = rows.find((r) => r.page_number === 2)!.content;
+    const right = rows.find((r) => r.page_number === 3)!.content;
+    expect(isMattedSpreadPage(left as never)).toBe(true);
+    expect(isMattedSpreadPage(right as never)).toBe(true);
+    expect(left.spreadImageUrl).toBe(right.spreadImageUrl);
+    expect(left.layout).toBe("centerfold_left");
+    expect(right.layout).toBe("centerfold_right");
+  });
 
-    const usedUrls = new Set(
-      rows
-        .filter((r) => typeof r.content.spreadImageUrl === "string")
-        .map((r) => r.content.spreadImageUrl as string)
-        .filter((url) => url.includes("landscape-")),
+  it("keeps 22 pages and cover/back out of the spread rule", () => {
+    const rows = buildSelfServiceEbookPageRows({
+      ...baseInput,
+      landscapes: [landscape(1), portrait(2)],
+      options: options(),
+    });
+    expect(selfServicePageCount(options())).toBe(22);
+    expect(rows).toHaveLength(22);
+    expect(rows.find((r) => r.page_number === SELF_SERVICE_LOT_PAGE)?.content.layout).toBe(
+      "cover",
     );
-    expect(usedUrls.size).toBe(9);
-    expect(usedUrls.has(landscapes[9]!.url)).toBe(false);
+    expect(rows.find((r) => r.page_number === 22)?.content.layout).toBe("agent_summary");
+  });
+
+  it("places custom content on pages 2–3 and global Glasshouse on the inside back", () => {
+    const glasshouse = getGlasshouseBrochureSource();
+    const rows = buildSelfServiceEbookPageRows({
+      ...baseInput,
+      landscapes: [landscape(1)],
+      options: options({
+        customContent: true,
+        globalContent: true,
+        advertising: true,
+      }),
+    });
+    expect(selfServicePageCount(options({ customContent: true, globalContent: true }))).toBe(
+      SELF_SERVICE_BOTH_CONTENT_TOTAL_PAGES,
+    );
+    expect(rows).toHaveLength(24);
+    expect(rows.find((r) => r.page_number === 2)?.content.layout).toBe("custom_content");
+    expect(rows.find((r) => r.page_number === 4)?.content.layout).toBe("centerfold_left");
+    expect(rows.find((r) => r.page_number === 22)?.content.layout).toBe("global_content");
+    expect(rows.find((r) => r.page_number === 22)?.content.spreadImageUrl).toBe(
+      glasshouse.spreadImageUrl,
+    );
+    expect(rows.find((r) => r.page_number === 23)?.content.spreadImageUrl).toBe(
+      glasshouse.spreadImageUrl,
+    );
+    expect(rows.find((r) => r.page_number === 22)?.content.heroImageUrl).toBe(
+      rows.find((r) => r.page_number === 23)?.content.heroImageUrl,
+    );
+    expect(rows.find((r) => r.page_number === 22)?.content.pricingLine).toBe(
+      glasshouse.pricingLine,
+    );
+  });
+
+  it("parses book options and captions from JSON", () => {
+    expect(parseSelfServiceBookOptions("")).toMatchObject({
+      facingPages: true,
+      captions: false,
+    });
+    expect(
+      parseSelfServiceCaptions(
+        JSON.stringify([{ text: "Hi", skipped: false }, { skipped: true }]),
+      ),
+    ).toEqual([
+      { text: "Hi", skipped: false },
+      { text: "", skipped: true },
+    ]);
   });
 });

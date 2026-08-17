@@ -7,6 +7,10 @@ import {
   onboardingNow,
 } from "@/lib/onboarding-timing";
 import type { OptimizedEbookImageAsset } from "@/lib/talisbooks/auto-draft-ebook";
+import {
+  parseSelfServiceBookOptions,
+  parseSelfServiceCaptions,
+} from "@/lib/talisbooks/self-service-page-plan";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -101,6 +105,10 @@ export async function POST(request: Request) {
           images,
           optimizedImages,
           uploadMode,
+          bookOptions: parseSelfServiceBookOptions(
+            String(formData.get("bookOptions") || ""),
+          ),
+          captions: parseSelfServiceCaptions(String(formData.get("captions") || "")),
           onProgress: async (event) => {
             send(event);
           },

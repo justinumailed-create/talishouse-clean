@@ -127,7 +127,9 @@ describe("Permanent Glasshouse brochure pages", () => {
 
     const source = getGlasshouseBrochureSource();
     expect(source.left.title).toBe("Admin Glasshouse Left");
-    expect(source.right.heroImageUrl).toBe("/admin/right.jpg");
+    expect(source.spreadImageUrl).toBe("/admin/left.jpg");
+    expect(source.right.heroImageUrl).toBe("/admin/left.jpg");
+    expect(source.left.heroImageUrl).toBe(source.right.heroImageUrl);
 
     const pages = ensurePermanentClosingPages([
       {
@@ -148,6 +150,9 @@ describe("Permanent Glasshouse brochure pages", () => {
 
     expect(pages[1]?.title).toBe("Admin Glasshouse Left");
     expect(pages[2]?.title).toBe("Admin Glasshouse Right");
+    expect(pages[1]?.layout).toBe("global_content");
+    expect(pages[1]?.spreadImageUrl).toBe("/admin/left.jpg");
+    expect(pages[2]?.spreadImageUrl).toBe(pages[1]?.spreadImageUrl);
   });
 
   it("keeps brokerage scaffolds available for future mode", () => {

@@ -692,7 +692,9 @@ export async function submitBuildRequest(
     }
 
     let resolvedMapSiteId = mapsiteId;
-    if (mapsiteId) {
+    const canClaimExisting =
+      Boolean(mapsiteId) && mapsiteId !== DEMO_MAPSITE_ID;
+    if (canClaimExisting && mapsiteId) {
       const claimed = await timedOnboardingStep("Mapsite™ claim", () =>
         markMapSiteClaimedByBuildRequest({
           mapsiteId,
