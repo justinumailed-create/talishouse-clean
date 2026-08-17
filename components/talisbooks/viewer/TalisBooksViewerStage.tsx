@@ -10,6 +10,7 @@ import {
   type MotionValue,
 } from "framer-motion";
 import TalisBooksPageRenderer from "@/components/talisbooks/viewer/TalisBooksPageRenderer";
+import { isMattedSpreadPage } from "@/lib/talisbooks/viewer/spread-layout";
 import {
   TALISBOOKS_VIEWER_DRAG_THRESHOLD_PX,
   TALISBOOKS_VIEWER_FLIP_COMMIT_PROGRESS,
@@ -96,8 +97,9 @@ function BookPageFace({
   const darkFolio =
     page.pageRole === "cover" ||
     page.layout === "full_bleed" ||
-    page.layout === "centerfold_left" ||
-    page.layout === "centerfold_right" ||
+    page.layout === "global_content" ||
+    ((page.layout === "centerfold_left" || page.layout === "centerfold_right") &&
+      !isMattedSpreadPage(page)) ||
     page.layout === "parting" ||
     page.layout === "cover" ||
     page.layout === "maps";

@@ -10,6 +10,7 @@ import { submitMarketRegistration } from "@/app/talispros/markets/actions";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import { REGISTRATION_MARKET_COPY } from "@/lib/registration-market";
 import { hasValidCoordinates } from "@/lib/home-pin-coordinates";
+import { DEMO_MAPSITE_ID } from "@/lib/talispros/mapsite-state";
 
 interface TalisprosMarketRegistrationFormProps {
   market: RegistrationMarket;
@@ -99,7 +100,7 @@ export default function TalisprosMarketRegistrationForm({
   const marketCopy = REGISTRATION_MARKET_COPY[market];
   const requestId = useMemo(() => crypto.randomUUID(), []);
   const isPanel = variant === "panel";
-  const accountType = "root-1";
+  const accountType = market === "fsbos" ? "fsbo" : "root-1";
 
   const [date, setDate] = useState("");
   useEffect(() => {
@@ -212,7 +213,10 @@ export default function TalisprosMarketRegistrationForm({
       );
       formData.set("consentData", "true");
       formData.set("consentCommunications", "false");
-      if (mapsiteId) {
+      if (pinImage && pinImage.size > 0) {
+        formData.set("pinImage", pinImage);
+      }
+      if (mapsiteId && mapsiteId !== DEMO_MAPSITE_ID) {
         formData.set("mapsiteId", mapsiteId);
       }
 

@@ -2918,11 +2918,48 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talisbooks-viewer-page--agent-summary {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: #f5f5f7;
   font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "SF Pro Text",
     "Segoe UI", sans-serif;
+  overflow: hidden;
+}
+
+.talisbooks-viewer-page__summary-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.talisbooks-viewer-page__summary-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(245, 245, 247, 0.55) 0%,
+    rgba(245, 245, 247, 0.72) 42%,
+    rgba(245, 245, 247, 0.82) 100%
+  );
+}
+
+.talisbooks-viewer-page__summary-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.talisbooks-viewer-page--agent-summary-has-bg .talisbooks-viewer-page__summary-header {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px);
 }
 
 .talisbooks-viewer-page__summary-header {
@@ -3255,6 +3292,328 @@ body.mapsite-gallery-open [data-paypal-button] {
 .talisbooks-viewer-page--fold-continuous.talisbooks-viewer-page--fold-right
   .talisbooks-viewer-page__bleed-hero {
   background-position: right center;
+}
+
+/* Optional intro write-up — framed quote page */
+.talisbooks-viewer-page--quote {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: clamp(1.25rem, 4.5vw, 2.25rem);
+}
+
+.talisbooks-viewer-page__quote-frame {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(1.5rem, 5vw, 2.75rem);
+  border: 1.5px solid #d6d3d1;
+  box-shadow: inset 0 0 0 6px #ffffff, inset 0 0 0 7.5px #e7e5e4;
+}
+
+.talisbooks-viewer-page__quote-eyebrow {
+  margin: 0 0 clamp(0.85rem, 2.5vw, 1.25rem);
+  font-size: clamp(0.65rem, 1.6vw, 0.75rem);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #a8a29e;
+}
+
+.talisbooks-viewer-page__quote-body {
+  margin: 0;
+  max-width: 28ch;
+  font-size: clamp(1.15rem, 3.4vw, 1.65rem);
+  line-height: 1.45;
+  font-weight: 500;
+  color: #44403c;
+  text-wrap: pretty;
+}
+
+.talisbooks-viewer-page__quote-body--empty {
+  color: #a8a29e;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.talisbooks-viewer-page__ad-kicker {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.85rem;
+  z-index: 2;
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #57534e;
+}
+
+.talisbooks-viewer-page--facing {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  padding: clamp(0.85rem, 3.2vw, 1.35rem);
+}
+
+.talisbooks-viewer-page--facing-captions {
+  padding-bottom: 0;
+}
+
+.talisbooks-viewer-page__facing-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.talisbooks-viewer-page--facing-captions .talisbooks-viewer-page__facing-stage {
+  flex: 1.15;
+}
+
+.talisbooks-viewer-page__facing-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+.talisbooks-viewer-page__facing-empty {
+  width: 70%;
+  height: 70%;
+  background: #f5f5f4;
+}
+
+.talisbooks-viewer-page__facing-caption {
+  flex: 0 0 auto;
+  min-height: 3.25rem;
+  display: flex;
+  align-items: flex-end;
+  padding: 0.65rem 0.15rem 0.85rem;
+}
+
+.talisbooks-viewer-page__facing-caption--right {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.talisbooks-viewer-page__facing-caption--left {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.talisbooks-viewer-page__facing-caption p {
+  margin: 0;
+  max-width: 28ch;
+  font-size: clamp(0.72rem, 1.8vw, 0.88rem);
+  line-height: 1.4;
+  color: #44403c;
+}
+
+/* Landscape spread: ONE source image, left/right halves, optional shared caption. */
+.talisbooks-viewer-page--spread-mat {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  padding: clamp(0.85rem, 3.2vw, 1.35rem);
+  overflow: hidden;
+}
+
+/* Keep outer mat; meet at the fold so the photograph stays continuous. */
+.talisbooks-viewer-page--spread-mat.talisbooks-viewer-page--spread-left {
+  padding-right: 0;
+}
+
+.talisbooks-viewer-page--spread-mat.talisbooks-viewer-page--spread-right {
+  padding-left: 0;
+}
+
+.talisbooks-viewer-page--spread-captions {
+  padding-bottom: 1.85rem;
+}
+
+.talisbooks-viewer-page__spread-stage {
+  flex: 1 1 0;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.talisbooks-viewer-page--spread-captions .talisbooks-viewer-page__spread-stage {
+  flex: 1 1 0;
+}
+
+.talisbooks-viewer-page__spread-image {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 200%;
+  max-width: none;
+  object-fit: contain;
+  object-position: center center;
+}
+
+.talisbooks-viewer-page--spread-left .talisbooks-viewer-page__spread-image {
+  left: 0;
+}
+
+.talisbooks-viewer-page--spread-right .talisbooks-viewer-page__spread-image {
+  left: -100%;
+}
+
+.talisbooks-viewer-page__spread-caption {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  align-self: stretch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-height: 2.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0;
+  padding: 0.4rem 1.7rem 0.4rem 0.85rem;
+  background: rgba(28, 25, 23, 0.08);
+}
+
+.talisbooks-viewer-page--spread-right .talisbooks-viewer-page__spread-caption,
+.talisbooks-viewer-page__spread-caption--empty {
+  background: transparent;
+}
+
+.talisbooks-viewer-page__spread-caption p {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  color: #1c1917;
+  font-size: clamp(0.72rem, 1.7vw, 0.86rem);
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.talisbooks-viewer-page--global-content {
+  position: relative;
+  background: #0c0a09;
+  overflow: hidden;
+}
+
+.talisbooks-viewer-page__global-hero {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.talisbooks-viewer-page__global-spread-image {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 200%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.talisbooks-viewer-page--spread-left .talisbooks-viewer-page__global-spread-image {
+  left: 0;
+}
+
+.talisbooks-viewer-page--spread-right .talisbooks-viewer-page__global-spread-image {
+  left: -100%;
+}
+
+.talisbooks-viewer-page__global-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: clamp(1.1rem, 4vw, 1.8rem);
+  background: linear-gradient(180deg, rgba(12, 10, 9, 0.15) 0%, rgba(12, 10, 9, 0.82) 78%);
+  color: #fafaf9;
+}
+
+.talisbooks-viewer-page--global-content .talisbooks-viewer-page__ad-kicker {
+  color: #e7e5e4;
+}
+
+.talisbooks-viewer-page__global-title {
+  margin: 0;
+  font-size: clamp(1.05rem, 3vw, 1.4rem);
+  font-weight: 600;
+}
+
+.talisbooks-viewer-page__global-caption,
+.talisbooks-viewer-page__global-price,
+.talisbooks-viewer-page__global-disclaimer {
+  margin: 0.35rem 0 0;
+  font-size: clamp(0.72rem, 1.8vw, 0.88rem);
+  line-height: 1.4;
+  color: rgba(250, 250, 249, 0.88);
+}
+
+.talisbooks-viewer-page__global-price {
+  font-weight: 600;
+}
+
+.talisbooks-viewer-page__global-disclaimer {
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(250, 250, 249, 0.62);
+}
+
+.talisbooks-viewer-page--custom-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  padding: clamp(1rem, 4vw, 1.75rem);
+  text-align: center;
+}
+
+.talisbooks-viewer-page__custom-logo {
+  width: min(88%, 18rem);
+  aspect-ratio: 3 / 2;
+  margin-bottom: 0.85rem;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.talisbooks-viewer-page__custom-name {
+  margin: 0;
+  font-size: clamp(1.35rem, 4.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #171717;
+}
+
+.talisbooks-viewer-page__custom-agent,
+.talisbooks-viewer-page__custom-role,
+.talisbooks-viewer-page__custom-body {
+  margin: 0.35rem 0 0;
+  font-size: clamp(0.78rem, 2vw, 0.95rem);
+  color: #525252;
 }
 
 .talisbooks-viewer-page__body-text {
@@ -4067,9 +4426,9 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 /* ─── Mapsite™ phone overlays ─────────────────────────────────────────────── */
-/* The map pin sits at the vertical centre, so the bottom stack (registration
-   card + manager strip) must never grow tall enough to reach it. Short phones
-   drop the secondary copy first. */
+/* The map pin sits at the vertical centre, so the left stack (registration
+   card above the manager strip) must never grow tall enough to reach it. Short
+   phones drop the secondary copy first. */
 
 /* The base `p` rule adds a 0.5rem bottom margin that bloats these dense cards. */
 .mapsite-manager-strip p {

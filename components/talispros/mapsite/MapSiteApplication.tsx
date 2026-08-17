@@ -43,7 +43,7 @@ import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
 import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
 
-/** Auto-reveal PayPal registration under the sidebar after Mapsite™ load. */
+/** Auto-reveal PayPal registration above the marketing sidebar after Mapsite™ load. */
 const PAYPAL_REGISTER_REVEAL_DELAY_MS = 10_000;
 
 const PIN_COLORS: Record<string, string> = {
@@ -447,7 +447,7 @@ function MapSiteChrome({
       : "Register Account now";
 
   // Express Interest only after payment. PayPal uses claim-form planType;
-  // auto-reveals under the sidebar 10s after load (or immediately via Activate).
+  // auto-reveals above the marketing sidebar 10s after load (or immediately via Activate).
   const registrationCard =
     claimed && paid && mapsite.fast_code ? (
       <MapSiteExpressInterestCard
@@ -508,7 +508,7 @@ function MapSiteChrome({
             mapsite={mapsite}
             claimHref={claimHref}
             claimLabel={claimLabel}
-            genericOnboardingCard={!paid}
+            genericOnboardingCard={!claimed}
             accountType={accountType}
             onboardingPhase={onboardingPhase}
             talisBookHref={bookHref}

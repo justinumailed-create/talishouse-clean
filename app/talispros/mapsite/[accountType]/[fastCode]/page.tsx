@@ -47,6 +47,7 @@ function audienceForAccountTypeSegment(segment: string): RegistrationMarket {
   if (segment === "root") return "brokers";
   if (segment === "derivative") return "listings";
   if (segment === "adpro") return "adpro";
+  if (segment === "fsbo" || segment === "fsbos") return "fsbos";
   return "listings";
 }
 

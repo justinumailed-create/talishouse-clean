@@ -7,7 +7,7 @@ import type { RegistrationMarket } from "@/lib/registration-market";
 import type { PlanType } from "@/lib/registration-plans";
 import { mapsiteClaimPlanSummary } from "@/lib/talispros/mapsite-audience";
 import { MAPSITE_LISTING_CARD_WIDTH_CLASS } from "@/lib/talispros/mapsite-listing-media";
-import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
+import { shouldRegisterAgentsAfterPayment } from "@/lib/talispros/register-agents";
 import { processMapSiteRootPaypalPayment } from "@/app/talispros/mapsite/actions";
 
 interface MapSitePaymentCardProps {
@@ -204,9 +204,10 @@ export default function MapSitePaymentCard({
 
         {!compact ? (
           <p className="mt-2 text-[11px] leading-snug text-neutral-500">
-            PayPal charges {summary.totalLabel}. After payment, Express an Interest
-            unlocks and this Mapsite™ becomes active for admin management on{" "}
-            {MAPSITE_APP_PATH}.
+            PayPal charges {summary.totalLabel}. After payment{" "}
+            {shouldRegisterAgentsAfterPayment({ audience })
+              ? "you'll continue to Register Your Agents."
+              : "this Mapsite™ becomes active."}
           </p>
         ) : null}
       </div>

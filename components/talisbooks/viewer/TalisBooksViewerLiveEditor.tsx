@@ -8,7 +8,8 @@ import type { TalisBooksViewerPage, TalisBooksViewerPageLayout } from "@/lib/tal
 
 const LAYOUT_OPTIONS: Array<{ value: TalisBooksViewerPageLayout; label: string }> = [
   { value: "caption", label: "Caption" },
-  { value: "full_bleed", label: "Full bleed" },
+  { value: "full_bleed", label: "Full bleed / advertising" },
+  { value: "quote", label: "Quote / intro write-up" },
   { value: "centerfold_left", label: "Centerfold left" },
   { value: "centerfold_right", label: "Centerfold right" },
   { value: "parting", label: "Parting" },
@@ -16,6 +17,9 @@ const LAYOUT_OPTIONS: Array<{ value: TalisBooksViewerPageLayout; label: string }
   { value: "cover", label: "Cover" },
   { value: "agent_intro", label: "Agent intro (brokerage scaffold)" },
   { value: "agent_summary", label: "Agent summary (brokerage scaffold)" },
+  { value: "facing", label: "Facing page (matted image)" },
+  { value: "custom_content", label: "Custom / root content" },
+  { value: "global_content", label: "Global / Glasshouse content" },
 ];
 
 interface TalisBooksViewerLiveEditorProps {
@@ -82,6 +86,7 @@ function PageEditorCard({
     page.pageRole === "cover" ||
     layout === "cover" ||
     layout === "full_bleed" ||
+    layout === "quote" ||
     layout === "caption" ||
     layout === "centerfold_left" ||
     layout === "centerfold_right" ||
@@ -153,7 +158,7 @@ function PageEditorCard({
             </select>
           </Field>
 
-          {layout !== "maps" ? (
+          {layout !== "maps" && layout !== "quote" ? (
             <TalisBooksImageField
               id={`${page.id}-hero`}
               label="Page image"
@@ -237,6 +242,14 @@ function PageEditorCard({
 
       {isAgent ? (
         <>
+          {layout === "agent_summary" ? (
+            <TalisBooksImageField
+              id={`${page.id}-back-cover-bg`}
+              label="Back cover background"
+              value={page.heroImageUrl ?? ""}
+              onChange={(url) => onUpdatePage(page.id, { heroImageUrl: url })}
+            />
+          ) : null}
           <TalisBooksImageField
             id={`${page.id}-agent-photo`}
             label="Agent photo"

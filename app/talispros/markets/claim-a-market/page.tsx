@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
 import { parseRegistrationMarket } from "@/lib/registration-market";
 import { CLAIM_A_MARKET_PAGE } from "@/lib/talispros/market-pages";
-import { DEMO_MAPSITE_ID, MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
+import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 import TalisprosMarketPageLayout from "@/components/talispros/TalisprosMarketPageLayout";
 import ClaimMarketRegistrationClient from "@/components/talispros/ClaimMarketRegistrationClient";
 
@@ -29,7 +29,7 @@ export default async function ClaimAMarketPage({
   const audience =
     parseRegistrationMarket(firstParam(params.audience)) ??
     CLAIM_A_MARKET_PAGE.registrationMarket;
-  const mapsiteId = firstParam(params.mapsiteId) || DEMO_MAPSITE_ID;
+  const mapsiteId = firstParam(params.mapsiteId)?.trim() || undefined;
   const returnTo = firstParam(params.returnTo) || MAPSITE_APP_PATH;
 
   const content = {

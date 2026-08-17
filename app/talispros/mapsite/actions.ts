@@ -15,10 +15,7 @@ import {
   mergeMapSiteWithSubmittedLocation,
   type MapSitePlatformRecord,
 } from "@/lib/talispros/mapsite-platform";
-import {
-  buildClaimedMapSitePath,
-  MAPSITE_APP_PATH,
-} from "@/lib/talispros/mapsite-state";
+import { postMapSitePaymentRedirectHref } from "@/lib/talispros/register-agents";
 
 export async function loadMapSiteApplicationState(options?: {
   mapsiteId?: string | null;
@@ -335,12 +332,14 @@ export async function processMapSiteRootPaypalPayment(input: {
       .eq("id", resolvedRequestId);
 
     const fastCode = result.fastCode || null;
-    const redirectUrl = fastCode
-      ? buildClaimedMapSitePath({
-          fastCode,
-          audience: input.audience,
-        })
-      : `${MAPSITE_APP_PATH}?claimed=1&view=pin&mapsiteId=${encodeURIComponent(result.mapsiteId || mapsiteId)}&audience=${encodeURIComponent(input.audience)}`;
+    const mapsiteIdForRedirect = result.mapsiteId || mapsiteId;
+    const redirectUrl = postMapSitePaymentRedirectHref({
+      fastCode,
+      mapsiteId: mapsiteIdForRedirect,
+      audience: input.audience,
+      accountType: accountTypeFromRequest,
+      requestId: resolvedRequestId,
+    });
 
     return {
       success: true,

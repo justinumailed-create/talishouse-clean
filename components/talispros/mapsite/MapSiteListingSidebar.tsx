@@ -13,9 +13,9 @@ interface MapSiteListingSidebarProps {
   /** Phone layout: search at top and manager summary strip at bottom. */
   mobileOverlay?: boolean;
   onSelectListing: () => void;
-  /** Partner / FAST card content (claimed). */
+  /** Partner / FAST marketing sidebar (claimed). */
   aboveCard?: ReactNode;
-  /** Payment CTA or Express Interest. */
+  /** Payment CTA or Express Interest — rendered above the marketing sidebar. */
   belowCard?: ReactNode;
 }
 
@@ -73,8 +73,14 @@ export default function MapSiteListingSidebar({
           />
         </div>
 
-        {mobileOverlay && belowCard ? (
-          <div className="pointer-events-auto mt-auto shrink-0 translate-x-1 pb-1">
+        {belowCard ? (
+          <div
+            className={
+              mobileOverlay
+                ? "pointer-events-auto shrink-0 translate-x-1"
+                : "shrink-0"
+            }
+          >
             {belowCard}
           </div>
         ) : null}
@@ -105,14 +111,6 @@ export default function MapSiteListingSidebar({
             </button>
           </div>
         )}
-
-        {!mobileOverlay && belowCard ? (
-          <div
-            className="shrink-0 pb-1"
-          >
-            {belowCard}
-          </div>
-        ) : null}
       </div>
     </aside>
   );

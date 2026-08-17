@@ -5,8 +5,12 @@ import { FormEvent, useId, useRef, useState } from "react";
 import {
   classifyUploadFile,
   convertPdfFileToImageFiles,
-  MAX_EBOOK_UPLOAD_PAGES,
 } from "@/lib/talisbooks/pdf-pages-to-images";
+import {
+  SELF_SERVICE_MAX_UPLOAD_IMAGES,
+  type SelfServiceBookOptions,
+  type SelfServicePageCaption,
+} from "@/lib/talisbooks/self-service-page-plan";
 import {
   EBOOK_GENERATION_STAGES,
   EBOOK_GENERATION_STAGE_LABELS,
@@ -195,6 +199,22 @@ export default function EbookGenerateClient({
   const [uploadFailures, setUploadFailures] = useState<UploadFailure[]>([]);
   const [error, setError] = useState(bootstrapError || "");
   const [errorMeta, setErrorMeta] = useState(bootstrapMeta);
+  const [facingPages, setFacingPages] = useState(true);
+  const [captionsEnabled, setCaptionsEnabled] = useState(false);
+  const [advertising, setAdvertising] = useState(false);
+  const [globalContent, setGlobalContent] = useState(false);
+  const [customContent, setCustomContent] = useState(false);
+  const [captionStep, setCaptionStep] = useState(false);
+  const [captionIndex, setCaptionIndex] = useState(0);
+  const [captionDraft, setCaptionDraft] = useState("");
+  const [pageCaptions, setPageCaptions] = useState<SelfServicePageCaption[]>([]);
+  const pendingGenerateRef = useRef<{
+    optimizedImages: OptimizedAsset[];
+    agentPhotoUrl: string | null;
+    brokerageLogoUrl: string | null;
+    fromPdf: boolean;
+  } | null>(null);
+  const skipOptimizeRef = useRef(false);
 
   const isPdfUpload =
     uploads.length > 0 && uploads.every((item) => item.source === "pdf-page");
@@ -216,9 +236,9 @@ export default function EbookGenerateClient({
     setUploadFailures([]);
     if (!fileList || fileList.length === 0) return;
 
-    const remaining = Math.max(0, MAX_EBOOK_UPLOAD_PAGES - uploads.length);
+    const remaining = Math.max(0, SELF_SERVICE_MAX_UPLOAD_IMAGES - uploads.length);
     if (remaining === 0) {
-      setError(`You can add up to ${MAX_EBOOK_UPLOAD_PAGES} pages.`);
+      setError(`You can add up to ${SELF_SERVICE_MAX_UPLOAD_IMAGES} images.`);
       return;
     }
 
@@ -272,7 +292,7 @@ export default function EbookGenerateClient({
 
       if (next.length > 0) {
         setUploads((current) =>
-          [...current, ...next].slice(0, MAX_EBOOK_UPLOAD_PAGES)
+          [...current, ...next].slice(0, SELF_SERVICE_MAX_UPLOAD_IMAGES)
         );
       }
     } catch (convertError) {
@@ -522,7 +542,36 @@ export default function EbookGenerateClient({
     }
   }
 
-  async function handleSubmit(event: FormEvent) {
+  function commitCaption(skipped: boolean) {
+    const interiors = Math.max(
+      0,
+      (pendingGenerateRef.current?.optimizedImages.length ?? 0) - 2,
+    );
+    const next = [...pageCaptions];
+    next[captionIndex] = {
+      text: skipped ? "" : captionDraft.trim(),
+      skipped,
+    };
+    setPageCaptions(next);
+    if (captionIndex + 1 >= interiors) {
+      skipOptimizeRef.current = true;
+      setCaptionStep(false);
+      void handleSubmit(
+        {
+          preventDefault() {},
+        } as FormEvent,
+        next,
+      );
+      return;
+    }
+    setCaptionIndex(captionIndex + 1);
+    setCaptionDraft(next[captionIndex + 1]?.text ?? "");
+  }
+
+  async function handleSubmit(
+    event: FormEvent,
+    captionsOverride?: SelfServicePageCaption[],
+  ) {
     event.preventDefault();
     setError("");
     setErrorMeta(null);
@@ -562,6 +611,17 @@ export default function EbookGenerateClient({
     }, ONBOARDING_JOB_TIMEOUT_MS);
 
     try {
+      let optimizedImages: OptimizedAsset[] = [];
+      let agentPhotoUrl: string | null = null;
+      let brokerageLogoUrl: string | null = null;
+
+      if (skipOptimizeRef.current && pendingGenerateRef.current) {
+        skipOptimizeRef.current = false;
+        optimizedImages = pendingGenerateRef.current.optimizedImages;
+        agentPhotoUrl = pendingGenerateRef.current.agentPhotoUrl;
+        brokerageLogoUrl = pendingGenerateRef.current.brokerageLogoUrl;
+        setActiveStage("generating_pages");
+      } else {
       const prior = readStash(requestId);
       const stored = await optimizeAndStoreUploads({
         requestId,
@@ -588,7 +648,9 @@ export default function EbookGenerateClient({
         return;
       }
 
-      const { optimizedImages, agentPhotoUrl, brokerageLogoUrl } = stored;
+      optimizedImages = stored.optimizedImages;
+      agentPhotoUrl = stored.agentPhotoUrl;
+      brokerageLogoUrl = stored.brokerageLogoUrl;
 
       console.info(
         `[onboarding] Image optimize+upload ...... original=${stored.originalBytes} optimized=${stored.optimizedBytes} ratio=${
@@ -597,6 +659,29 @@ export default function EbookGenerateClient({
             : "n/a"
         }`,
       );
+
+      const interiorCount = Math.max(0, optimizedImages.length - 2);
+      if (captionsEnabled && !fromPdf && interiorCount > 0 && !captionStep) {
+        pendingGenerateRef.current = {
+          optimizedImages,
+          agentPhotoUrl,
+          brokerageLogoUrl,
+          fromPdf,
+        };
+        setPageCaptions(
+          Array.from({ length: interiorCount }, () => ({
+            text: "",
+            skipped: false,
+          })),
+        );
+        setCaptionIndex(0);
+        setCaptionDraft("");
+        setCaptionStep(true);
+        setActiveStage(null);
+        setSaving(false);
+        return;
+      }
+      }
 
       setActiveStage("generating_pages");
       setStageDetail("");
@@ -627,6 +712,20 @@ export default function EbookGenerateClient({
       if (agentPhotoUrl) fd.set("agentPhotoUrl", agentPhotoUrl);
       if (brokerageLogoUrl) fd.set("brokerageLogoUrl", brokerageLogoUrl);
       fd.set("uploadMode", fromPdf ? "pdf" : "images");
+      fd.set(
+        "bookOptions",
+        JSON.stringify({
+          facingPages,
+          captions: captionsEnabled,
+          advertising,
+          globalContent,
+          customContent,
+        } satisfies SelfServiceBookOptions),
+      );
+      const captionsToSend = captionsOverride ?? pageCaptions;
+      if (captionsEnabled && captionsToSend.length > 0) {
+        fd.set("captions", JSON.stringify(captionsToSend));
+      }
 
       const response = await fetch("/api/talispros/ebook-generate", {
         method: "POST",
@@ -758,7 +857,8 @@ export default function EbookGenerateClient({
           </h1>
           <p className="mt-2 text-sm text-neutral-500">
             Add high-resolution photos or a PDF. Images are optimized
-            automatically — no resizing needed.
+            automatically — no resizing needed. Image 1 is the front cover,
+            image 2 is the back cover.
           </p>
           {fastCode ? (
             <p className="mt-2 text-xs text-neutral-400">
@@ -777,6 +877,38 @@ export default function EbookGenerateClient({
           )}
         </div>
 
+        {captionStep ? (
+          <div className="mt-8 space-y-4">
+            <p className="text-sm text-neutral-600">
+              Captions · image {captionIndex + 1} of{" "}
+              {Math.max(0, (pendingGenerateRef.current?.optimizedImages.length ?? 2) - 2)}
+              {" "}(cover and back cover are skipped; landscape photos share one caption per spread)
+            </p>
+            <textarea
+              value={captionDraft}
+              onChange={(event) => setCaptionDraft(event.target.value)}
+              rows={4}
+              className="w-full rounded-xl border border-neutral-200 px-3 py-2.5 text-sm outline-none focus:border-neutral-400"
+              placeholder="Write a caption, or skip this page."
+            />
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => commitCaption(true)}
+                className="flex-1 rounded-2xl border border-neutral-300 px-5 py-3 text-sm font-medium text-neutral-800"
+              >
+                Skip caption
+              </button>
+              <button
+                type="button"
+                onClick={() => commitCaption(false)}
+                className="flex-1 rounded-2xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white"
+              >
+                Save caption
+              </button>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           {!canGenerate ? null : (
             <>
@@ -798,8 +930,8 @@ export default function EbookGenerateClient({
                   className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
                 />
                 <p className="mt-1.5 text-xs text-neutral-400">
-                  JPG, PNG, or PDF. Up to {MAX_EBOOK_UPLOAD_PAGES} pages. Phone
-                  camera photos are fine.
+                  JPG, PNG, or PDF. Up to {SELF_SERVICE_MAX_UPLOAD_IMAGES} images.
+                  Phone camera photos are fine.
                 </p>
 
                 {converting ? (
@@ -928,7 +1060,8 @@ export default function EbookGenerateClient({
                     htmlFor={logoInputId}
                     className="mb-1.5 block text-xs font-medium text-neutral-500"
                   >
-                    Brokerage logo
+                    Logo{" "}
+                    <span className="font-normal text-neutral-400">(optional)</span>
                   </label>
                   <input
                     id={logoInputId}
@@ -941,7 +1074,7 @@ export default function EbookGenerateClient({
                     className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
                   />
                   <p className="mt-1.5 truncate text-xs text-neutral-400">
-                    {logoFile ? logoFile.name : "Optional · kept lossless"}
+                    {logoFile ? logoFile.name : "Kept lossless"}
                   </p>
                 </div>
                 <div className="block text-sm">
@@ -949,7 +1082,8 @@ export default function EbookGenerateClient({
                     htmlFor={agentPhotoInputId}
                     className="mb-1.5 block text-xs font-medium text-neutral-500"
                   >
-                    Agent photo
+                    Photo{" "}
+                    <span className="font-normal text-neutral-400">(optional)</span>
                   </label>
                   <input
                     id={agentPhotoInputId}
@@ -962,12 +1096,63 @@ export default function EbookGenerateClient({
                     className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
                   />
                   <p className="mt-1.5 truncate text-xs text-neutral-400">
-                    {agentPhotoFile
-                      ? agentPhotoFile.name
-                      : "Optional · auto-cropped"}
+                    {agentPhotoFile ? agentPhotoFile.name : "Auto-cropped"}
                   </p>
                 </div>
               </div>
+
+              {!isPdfUpload ? (
+                <fieldset className="space-y-2 rounded-xl border border-neutral-200 px-3 py-3">
+                  <legend className="px-1 text-xs font-medium text-neutral-500">
+                    Talisbook™ options
+                  </legend>
+                  <label className="flex items-center gap-2 text-sm text-neutral-800">
+                    <input
+                      type="checkbox"
+                      checked={facingPages}
+                      onChange={(event) => setFacingPages(event.target.checked)}
+                      disabled={saving || converting}
+                    />
+                    Facing pages (landscapes span the fold; portraits stay single)
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-neutral-800">
+                    <input
+                      type="checkbox"
+                      checked={captionsEnabled}
+                      onChange={(event) => setCaptionsEnabled(event.target.checked)}
+                      disabled={saving || converting}
+                    />
+                    Captions (write or skip after image processing)
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-neutral-800">
+                    <input
+                      type="checkbox"
+                      checked={advertising}
+                      onChange={(event) => setAdvertising(event.target.checked)}
+                      disabled={saving || converting}
+                    />
+                    Advertising (“Advertisement” on custom/global spreads)
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-neutral-800">
+                    <input
+                      type="checkbox"
+                      checked={customContent}
+                      onChange={(event) => setCustomContent(event.target.checked)}
+                      disabled={saving || converting}
+                    />
+                    Custom content (root account / logo)
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-neutral-800">
+                    <input
+                      type="checkbox"
+                      checked={globalContent}
+                      onChange={(event) => setGlobalContent(event.target.checked)}
+                      disabled={saving || converting}
+                    />
+                    Global content (Glasshouse™ + pricing)
+                  </label>
+                </fieldset>
+              ) : null}
 
               {error ? (
                 <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -1068,6 +1253,7 @@ export default function EbookGenerateClient({
             </>
           )}
         </form>
+        )}
       </div>
     </div>
   );

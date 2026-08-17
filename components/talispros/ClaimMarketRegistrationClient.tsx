@@ -3,12 +3,12 @@
 import TalisprosMarketRegistrationForm from "@/components/talispros/TalisprosMarketRegistrationForm";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import { buildSelfEbookContinueHref } from "@/lib/talispros/ebook-choice";
-import { establishOwnerMapSiteSession } from "@/app/talispros/build-mapsite/success-actions";
+import { openMapSiteAfterBuildRequest } from "@/app/talispros/build-mapsite/success-actions";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 
 interface ClaimMarketRegistrationClientProps {
   market: RegistrationMarket;
-  mapsiteId: string;
+  mapsiteId?: string;
   returnTo: string;
 }
 
@@ -44,15 +44,22 @@ export default function ClaimMarketRegistrationClient({
             return;
           }
 
-          // Owner cookie is a convenience for Mapsite™ toolbar — not required for ebook.
-          await establishOwnerMapSiteSession(fastCode);
-
-          // Canonical handoff: requestId only.
-          window.location.assign(
-            buildSelfEbookContinueHref({
+          try {
+            const opened = await openMapSiteAfterBuildRequest({
               requestId,
-            })
-          );
+              fastCode,
+              accountType: result.accountType || null,
+              successPath: "self-ebook",
+            });
+            window.location.assign(opened.href);
+          } catch (openError) {
+            console.error("[claim-market] Mapsite™ create failed:", openError);
+            window.location.assign(
+              buildSelfEbookContinueHref({
+                requestId,
+              })
+            );
+          }
         })();
       }}
     />
