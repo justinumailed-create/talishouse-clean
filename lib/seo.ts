@@ -22,13 +22,44 @@ export const siteConfig = {
   ],
 };
 
+export type CreateMetadataImage = {
+  url: string;
+  width?: number;
+  height?: number;
+  alt?: string;
+};
+
 export function createMetadata(overrides: {
   title: string;
   description: string;
   path: string;
   private?: boolean;
+  /** Absolute or site-relative Open Graph / WhatsApp preview image. */
+  image?: string | CreateMetadataImage;
 }): Metadata {
   const url = `${SITE_URL}${overrides.path}`;
+  const image =
+    typeof overrides.image === "string"
+      ? {
+          url: overrides.image,
+          width: 1200,
+          height: 630,
+          alt: overrides.title,
+        }
+      : overrides.image
+        ? {
+            url: overrides.image.url,
+            width: overrides.image.width ?? 1200,
+            height: overrides.image.height ?? 630,
+            alt: overrides.image.alt ?? overrides.title,
+          }
+        : {
+            url: OG_IMAGE,
+            width: 1200,
+            height: 630,
+            alt: overrides.title,
+          };
+
   const robots = overrides.private
     ? { index: false as const, follow: false as const }
     : {
@@ -56,13 +87,13 @@ export function createMetadata(overrides: {
       siteName: SITE_NAME,
       type: "website",
       locale: "en_US",
-      images: [{ url: OG_IMAGE, width: 1200, height: 630 }],
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
       title: overrides.title,
       description: overrides.description,
-      images: [OG_IMAGE],
+      images: [image.url],
     },
     robots,
   };
