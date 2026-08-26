@@ -56,8 +56,8 @@ export function createMetadata(overrides: {
           }
         : {
             url: OG_IMAGE,
-            width: 1200,
-            height: 630,
+            width: 579,
+            height: 1024,
             alt: overrides.title,
           };
 

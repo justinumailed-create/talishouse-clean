@@ -24,9 +24,9 @@ export const metadata: Metadata = {
     path: "/talispros",
     image: {
       url: "/seo/talispros-og.jpg",
-      width: 1200,
-      height: 630,
-      alt: "Talispros™ — Claim your market with Mapsite™",
+      width: 579,
+      height: 1024,
+      alt: "Talispros™ Mapsite™",
     },
   }),
   icons: {
