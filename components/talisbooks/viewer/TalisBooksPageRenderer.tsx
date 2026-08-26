@@ -446,6 +446,18 @@ function PropertyContentPageView({ page }: { page: TalisBooksViewerPage }) {
 }
 
 function TebCoverPageView({ page }: { page: TalisBooksViewerPage }) {
+  // Supplied cover art (exact PDF / separate cover assets) — show image only.
+  if (page.exactPdfPage === true && page.heroImageUrl?.trim()) {
+    return (
+      <div className="talisbooks-viewer-page talisbooks-viewer-page--bleed talisbooks-viewer-page--exact-pdf">
+        <div
+          className="talisbooks-viewer-page__bleed-hero"
+          style={{ backgroundImage: `url(${page.heroImageUrl})` }}
+        />
+      </div>
+    );
+  }
+
   const agencyName = page.brokerageName?.trim() || page.brokerageLine?.trim();
   const agentName = page.agentName?.trim();
   const hasAgency = Boolean(page.brokerageLogoUrl?.trim() || agencyName);

@@ -1,4 +1,4 @@
-import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import type { Database } from "@/lib/database.types";
 import { TALISBOOKS_COVER_TEMPLATES } from "../covers/catalog";
 import type { TalisBooksCoverTemplateId } from "../covers/constants";
@@ -37,6 +37,13 @@ function coverGradientFor(templateId: TalisBooksCoverTemplateId | null, index: n
   return TALISBOOKS_LIBRARY_SPINE_PALETTES[index % TALISBOOKS_LIBRARY_SPINE_PALETTES.length]!;
 }
 
+function metadataCoverUrl(row: BookRow): string | null {
+  const metadata = (row.metadata as Record<string, unknown>) ?? {};
+  return typeof metadata.coverImageUrl === "string" && metadata.coverImageUrl.trim()
+    ? metadata.coverImageUrl.trim()
+    : null;
+}
+
 function toLibraryBook(
   row: BookRow,
   index: number,
@@ -46,13 +53,14 @@ function toLibraryBook(
 ): TalisBooksLibraryBook {
   const metadata = (row.metadata as Record<string, unknown>) ?? {};
   const coverTemplateId = asTemplateId(metadata.coverTemplateId);
+  const isPinned = Boolean(row.is_pinned);
 
   return {
     id: row.id,
     slug: row.slug,
     title: row.title,
     subtitle: row.subtitle,
-    coverImageUrl: coverUrl,
+    coverImageUrl: coverUrl || metadataCoverUrl(row),
     coverTemplateId,
     coverGradient: coverGradientFor(coverTemplateId, index),
     publishStatus: row.publish_status as TalisBooksPublishStatus,
@@ -65,6 +73,7 @@ function toLibraryBook(
     mapsiteId: row.mapsite_id ?? null,
     fastCode: row.fast_code ?? null,
     parentBookId: row.parent_book_id ?? null,
+    isPinned,
   };
 }
 
@@ -254,5 +263,97 @@ export async function getTalisBooksLibrary(
     pageSize: paged.pageSize,
     pageCount: paged.pageCount,
     stats: buildStats(bookshelf.books),
+  };
+}
+
+/**
+ * Public product bookshelf at /talisbooks.
+ * Shows published + public books with the pinned book first.
+ * Always includes the built-in pinned sample when no DB pin is present.
+ */
+export async function getPublicTalisBooksBookshelf(): Promise<TalisBooksBookshelf> {
+  const { pinnedTalisBookLibraryEntry } = await import("./pinned-catalog");
+  const pinnedFallback = pinnedTalisBookLibraryEntry();
+
+  if (!isSupabaseAdminConfigured()) {
+    return {
+      accountId: null,
+      accountType: "root",
+      accountName: "TalisBooks™",
+      fastCode: null,
+      publicCatalog: true,
+      books: [pinnedFallback],
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("talisbooks_books")
+    .select("*")
+    .eq("is_public", true)
+    .eq("publish_status", "published")
+    .order("published_at", { ascending: false });
+
+  if (error) {
+    console.error("[talisbooks] getPublicTalisBooksBookshelf error:", error.message);
+    return {
+      accountId: null,
+      accountType: "root",
+      accountName: "TalisBooks™",
+      fastCode: null,
+      publicCatalog: true,
+      books: [pinnedFallback],
+    };
+  }
+
+  const rows = (data ?? []) as BookRow[];
+  const coverIds = rows
+    .map((row) => row.cover_image_id)
+    .filter((id): id is string => typeof id === "string" && id.length > 0);
+
+  const coverMap = new Map<string, string>();
+  if (coverIds.length > 0) {
+    const { data: images } = await supabase
+      .from("talisbooks_images")
+      .select("id, url")
+      .in("id", coverIds);
+    for (const image of (images ?? []) as Pick<ImageRow, "id" | "url">[]) {
+      coverMap.set(image.id, image.url);
+    }
+  }
+
+  const analytics = await loadAnalyticsCounts(rows.map((row) => row.id));
+  const books = rows.map((row, index) => {
+    const metrics = analytics.get(row.id) ?? { views: 0, clicks: 0 };
+    return toLibraryBook(
+      row,
+      index,
+      row.cover_image_id ? coverMap.get(row.cover_image_id) ?? null : null,
+      metrics.views,
+      metrics.clicks,
+    );
+  });
+
+  books.sort((a, b) => {
+    if (Boolean(a.isPinned) !== Boolean(b.isPinned)) {
+      return a.isPinned ? -1 : 1;
+    }
+    const aTime = a.publishedAt ? Date.parse(a.publishedAt) : 0;
+    const bTime = b.publishedAt ? Date.parse(b.publishedAt) : 0;
+    return bTime - aTime;
+  });
+
+  const hasPinned = books.some((book) => book.isPinned);
+  if (!hasPinned) {
+    books.unshift(pinnedFallback);
+  }
+
+  return {
+    accountId: null,
+    accountType: "root",
+    accountName: "TalisBooks™",
+    fastCode: null,
+    publicCatalog: true,
+    books,
   };
 }

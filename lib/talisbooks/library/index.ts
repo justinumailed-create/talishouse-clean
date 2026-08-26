@@ -24,7 +24,16 @@ export {
   queryLibraryBooks,
   sortLibraryBooks,
 } from "./query";
-export { getTalisBooksBookshelf, getTalisBooksLibrary } from "./bookshelf-service";
+export {
+  getPublicTalisBooksBookshelf,
+  getTalisBooksBookshelf,
+  getTalisBooksLibrary,
+} from "./bookshelf-service";
+export {
+  PINNED_TALISBOOK_SLUG,
+  createPinnedTalisBookViewer,
+  pinnedTalisBookLibraryEntry,
+} from "./pinned-catalog";
 export type {
   TalisBooksBookshelf,
   TalisBooksLibraryBook,

@@ -31,6 +31,19 @@ describe("Talisbooks™ open-book spreads", () => {
     expect(first.right?.pageNumber).toBe(1);
   });
 
+  it("opens a cover spread with back left and front right", () => {
+    const pages = makePages(16);
+    const first = getViewerSpread(pages, 0, {
+      coverSpreadOpening: true,
+      backCoverImageUrl: "https://cdn.example/back.jpg",
+      backCoverTitle: "Demo",
+    });
+    expect(first.left?.id).toBe("opening-back-cover");
+    expect(first.left?.heroImageUrl).toBe("https://cdn.example/back.jpg");
+    expect(first.right?.pageNumber).toBe(1);
+    expect(describeViewerSpread(first)).toBe("Cover spread");
+  });
+
   it("pairs interior pages as left/right leaves", () => {
     const pages = makePages(16);
     const second = getViewerSpread(pages, 1);

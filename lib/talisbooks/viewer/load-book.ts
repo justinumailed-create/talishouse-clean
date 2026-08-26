@@ -138,6 +138,7 @@ export async function getViewerBookBySlug(
       : null) ||
     galleryImageUrls[1] ||
     null;
+  const coverSpreadOpening = metadata.coverSpreadOpening === true;
 
   const { data: pages } = await supabase
     .from("talisbooks_book_pages")
@@ -282,6 +283,7 @@ export async function getViewerBookBySlug(
     subtitle: book.subtitle,
     frontCoverImageUrl: coverImageUrl || undefined,
     backCoverImageUrl: backCoverImageUrl || coverImageUrl || undefined,
+    coverSpreadOpening,
     pages: enrichCoverPagesWithAgentBranding(
       skipPermanentPages
         ? viewerPages
@@ -295,6 +297,13 @@ export async function resolveViewerBookBySlug(
 ): Promise<TalisBooksViewerBook | null> {
   const fromDb = await getViewerBookBySlug(slug);
   if (fromDb) return fromDb;
+
+  const { PINNED_TALISBOOK_SLUG, createPinnedTalisBookViewer } = await import(
+    "@/lib/talisbooks/library/pinned-catalog"
+  );
+  if (slug.trim() === PINNED_TALISBOOK_SLUG) {
+    return createPinnedTalisBookViewer();
+  }
 
   const demoSlugs = new Set(["sample-ebook", "demo", "preview"]);
   if (demoSlugs.has(slug)) {

@@ -31,6 +31,8 @@ export interface TalisBooksLibraryBook {
   mapsiteId: string | null;
   fastCode: string | null;
   parentBookId: string | null;
+  /** Featured first on the public /talisbooks bookshelf. */
+  isPinned?: boolean;
 }
 
 export interface TalisBooksBookshelf {
@@ -41,6 +43,8 @@ export interface TalisBooksBookshelf {
   mapsiteId?: string | null;
   /** When set, this shelf is scoped to a Mapsite™ TEB™ FAST Code. */
   scopedToFastCode?: boolean;
+  /** Public product shelf at /talisbooks (not account/FAST scoped). */
+  publicCatalog?: boolean;
   paymentReceived?: boolean;
   registrationHref?: string | null;
   /** Activation + account-type book entitlements (independent of PayPal helpers). */

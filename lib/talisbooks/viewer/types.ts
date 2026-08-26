@@ -107,6 +107,11 @@ export interface TalisBooksViewerBook {
   frontCoverImageUrl?: string;
   /** Closed hard-cover art (back). Falls back to last property hero or front. */
   backCoverImageUrl?: string;
+  /**
+   * When true, spread 0 opens as a wrap: back cover (left) | front cover (right).
+   * Set for self-service PDFs where page 1 is a cover spread.
+   */
+  coverSpreadOpening?: boolean;
   pages: TalisBooksViewerPage[];
 }
 

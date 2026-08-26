@@ -80,6 +80,7 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
   const [, startTransition] = useTransition();
   const deferredSearch = useDeferredValue(search);
   const scoped = Boolean(bookshelf.scopedToFastCode && bookshelf.fastCode);
+  const publicCatalog = Boolean(bookshelf.publicCatalog);
 
   const { featured, general, featuredLayout } = useMemo(
     () => partitionBookshelf(bookshelf.books, { featuredCapacity }),
@@ -115,18 +116,29 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
       <header className="talisbooks-library__topbar">
         <div className="talisbooks-library__brand">
           <p className="talisbooks-library__eyebrow">
-            {scoped
-              ? `TEB™ · ${bookshelf.fastCode!.toUpperCase()}`
-              : bookshelf.accountType === "root"
-                ? "Root Account"
-                : "Derivative Account"}
-            {!scoped && bookshelf.fastCode
+            {publicCatalog
+              ? "Talispros™ Ecosystem"
+              : scoped
+                ? `TEB™ · ${bookshelf.fastCode!.toUpperCase()}`
+                : bookshelf.accountType === "root"
+                  ? "Root Account"
+                  : "Derivative Account"}
+            {!publicCatalog && !scoped && bookshelf.fastCode
               ? ` · ${bookshelf.fastCode.toUpperCase()}`
               : ""}
           </p>
           <h1 className="talisbooks-library__title">
-            {scoped ? bookshelf.accountName : "Bookshelf"}
+            {publicCatalog
+              ? "TalisBooks™"
+              : scoped
+                ? bookshelf.accountName
+                : "Bookshelf"}
           </h1>
+          {publicCatalog ? (
+            <p className="talisbooks-library__subtitle">
+              Open a cover to read. The featured book is pinned at the front of the shelf.
+            </p>
+          ) : null}
         </div>
 
         <label className="talisbooks-library__search">
@@ -138,24 +150,32 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
               setSearch(event.target.value);
               startTransition(() => setPage(1));
             }}
-            placeholder={scoped ? "Search this shelf…" : "Search library…"}
+            placeholder={
+              publicCatalog
+                ? "Search TalisBooks™…"
+                : scoped
+                  ? "Search this shelf…"
+                  : "Search library…"
+            }
             className="talisbooks-library__search-input"
           />
         </label>
 
-        <div
-          className="talisbooks-library__capacity"
-          title="Fully stocked shelf monetization capacity"
-        >
-          <span className="talisbooks-library__capacity-label">Shelf capacity</span>
-          <strong>
-            {stocked}/{TALISBOOKS_LIBRARY_SHELF_CAPACITY}
-          </strong>
-          <span className="talisbooks-library__capacity-value">
-            ${monthlyEstimate.toFixed(2)} / ${TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD.toFixed(2)}{" "}
-            mo
-          </span>
-        </div>
+        {!publicCatalog ? (
+          <div
+            className="talisbooks-library__capacity"
+            title="Fully stocked shelf monetization capacity"
+          >
+            <span className="talisbooks-library__capacity-label">Shelf capacity</span>
+            <strong>
+              {stocked}/{TALISBOOKS_LIBRARY_SHELF_CAPACITY}
+            </strong>
+            <span className="talisbooks-library__capacity-value">
+              ${monthlyEstimate.toFixed(2)} / ${TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD.toFixed(2)}{" "}
+              mo
+            </span>
+          </div>
+        ) : null}
       </header>
 
       {scoped && bookshelf.fastCode && bookshelf.registrationHref ? (
@@ -232,9 +252,11 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
                 {featured.length === 0 ? (
                   <div className="talisbooks-library__niche-empty">
                     <p>
-                      {scoped
-                        ? "No ebook on this FAST Code shelf yet"
-                        : "No highlighted books yet"}
+                      {publicCatalog
+                        ? "No published TalisBooks™ yet"
+                        : scoped
+                          ? "No ebook on this FAST Code shelf yet"
+                          : "No highlighted books yet"}
                     </p>
                   </div>
                 ) : featuredLayout === "hero-plus-4" && heroBook ? (

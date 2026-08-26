@@ -672,8 +672,18 @@ function OpenBookSpread({
     }
   };
 
-  const current = getViewerSpread(book.pages, displayedIndex);
-  const incoming = flip ? getViewerSpread(book.pages, flip.to) : null;
+  const current = getViewerSpread(book.pages, displayedIndex, {
+    coverSpreadOpening: Boolean(book.coverSpreadOpening),
+    backCoverImageUrl: book.backCoverImageUrl,
+    backCoverTitle: book.title,
+  });
+  const incoming = flip
+    ? getViewerSpread(book.pages, flip.to, {
+        coverSpreadOpening: Boolean(book.coverSpreadOpening),
+        backCoverImageUrl: book.backCoverImageUrl,
+        backCoverTitle: book.title,
+      })
+    : null;
   const flipping = Boolean(flip && incoming);
   const forward = (flip?.direction ?? direction) > 0;
 

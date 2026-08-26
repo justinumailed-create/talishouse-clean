@@ -1596,6 +1596,7 @@ export interface Database {
           locale: string
           page_count: number
           is_public: boolean
+          is_pinned: boolean
           published_at: string | null
           scheduled_at: string | null
           settings: Record<string, unknown>
@@ -1621,6 +1622,7 @@ export interface Database {
           locale?: string
           page_count?: number
           is_public?: boolean
+          is_pinned?: boolean
           published_at?: string | null
           scheduled_at?: string | null
           settings?: Record<string, unknown>
@@ -1646,6 +1648,7 @@ export interface Database {
           locale?: string
           page_count?: number
           is_public?: boolean
+          is_pinned?: boolean
           published_at?: string | null
           scheduled_at?: string | null
           settings?: Record<string, unknown>

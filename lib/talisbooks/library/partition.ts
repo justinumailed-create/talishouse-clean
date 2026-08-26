@@ -21,6 +21,8 @@ function isHighlightCandidate(book: TalisBooksLibraryBook): boolean {
  * Left capacity:
  * - 6 → 3×2 grid
  * - 5 (default) → 1 larger hero + 4 on lower shelves
+ *
+ * Pinned books always sort first (public /talisbooks featured slot).
  */
 export function partitionBookshelf(
   books: TalisBooksLibraryBook[],
@@ -33,6 +35,11 @@ export function partitionBookshelf(
   const capacity = options?.featuredCapacity ?? 5;
 
   const prioritized = [...books].sort((a, b) => {
+    const aPinned = a.isPinned ? 0 : 1;
+    const bPinned = b.isPinned ? 0 : 1;
+    if (aPinned !== bPinned) {
+      return aPinned - bPinned;
+    }
     const aBoost = isHighlightCandidate(a) ? 0 : 1;
     const bBoost = isHighlightCandidate(b) ? 0 : 1;
     if (aBoost !== bBoost) {

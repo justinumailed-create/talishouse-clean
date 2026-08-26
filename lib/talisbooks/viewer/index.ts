@@ -47,7 +47,10 @@ export {
   primaryPageIndexFromSpread,
   spreadIndexFromPageIndex,
 } from "./spreads";
-export type { TalisBooksViewerSpread } from "./spreads";
+export type {
+  TalisBooksViewerSpread,
+  TalisBooksViewerSpreadOptions,
+} from "./spreads";
 export {
   createEmptyNarrationController,
   getNarrationCueForPage,

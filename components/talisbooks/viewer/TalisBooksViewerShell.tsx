@@ -73,6 +73,15 @@ export default function TalisBooksViewerShell({
     viewModeRef.current = viewMode;
   }, [viewMode]);
 
+  const spreadOptions = useMemo(
+    () => ({
+      coverSpreadOpening: Boolean(book.coverSpreadOpening),
+      backCoverImageUrl: book.backCoverImageUrl,
+      backCoverTitle: book.title,
+    }),
+    [book.coverSpreadOpening, book.backCoverImageUrl, book.title],
+  );
+
   const spreadCount = useMemo(
     () => getViewerSpreadCount(book.pages.length),
     [book.pages.length],
@@ -124,8 +133,12 @@ export default function TalisBooksViewerShell({
     onPageChange: (nextNavIndex) => {
       const mode = viewModeRef.current;
       if (mode === "spread") {
-        const previous = getViewerSpread(book.pages, previousNavRef.current);
-        const next = getViewerSpread(book.pages, nextNavIndex);
+        const previous = getViewerSpread(
+          book.pages,
+          previousNavRef.current,
+          spreadOptions,
+        );
+        const next = getViewerSpread(book.pages, nextNavIndex, spreadOptions);
         const leavePage = previous.right ?? previous.left;
         const enterPage = next.left ?? next.right;
         if (leavePage) {
@@ -160,7 +173,7 @@ export default function TalisBooksViewerShell({
   const lastNavIndex = Math.max(navCount - 1, 0);
   const spread =
     book.pages.length > 0
-      ? getViewerSpread(book.pages, effectiveNavIndex)
+      ? getViewerSpread(book.pages, effectiveNavIndex, spreadOptions)
       : { index: 0, left: null, right: null };
   const singlePage = book.pages[effectiveNavIndex] ?? null;
 

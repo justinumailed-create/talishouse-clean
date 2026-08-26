@@ -66,6 +66,19 @@ export default async function TalisBooksAdminPage() {
         </section>
 
         <section className="mt-6 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-neutral-900">Public bookshelf</h2>
+          <p className="mt-2 text-sm text-neutral-600">
+            The product shelf lives at{" "}
+            <Link href={TALISBOOKS_ROUTES.HOME} className="font-medium text-neutral-900 underline-offset-4 hover:underline">
+              /talisbooks
+            </Link>
+            . Set <code className="rounded bg-neutral-100 px-1">is_pinned</code> on one published
+            public book (via <code className="rounded bg-neutral-100 px-1">pinTalisBookAction</code>)
+            to feature it first. Until a DB pin exists, the built-in TalisPros™ sample is shown.
+          </p>
+        </section>
+
+        <section className="mt-6 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold text-neutral-900">Roadmap</h2>
           <ul className="mt-4 grid gap-2 sm:grid-cols-2 text-sm text-neutral-600">
             {TALISBOOKS_FUTURE_FEATURES.map((feature) => (

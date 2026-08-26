@@ -857,8 +857,10 @@ export default function EbookGenerateClient({
           </h1>
           <p className="mt-2 text-sm text-neutral-500">
             Add high-resolution photos or a PDF. Images are optimized
-            automatically — no resizing needed. Image 1 is the front cover,
-            image 2 is the back cover.
+            automatically — no resizing needed. For a PDF, page 1 is always
+            the cover spread (back cover on the left half, front cover on the
+            right half). Remaining PDF pages become the interior. For photos,
+            image 1 is the front cover and image 2 is the back cover.
           </p>
           {fastCode ? (
             <p className="mt-2 text-xs text-neutral-400">

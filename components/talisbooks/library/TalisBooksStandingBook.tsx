@@ -55,6 +55,9 @@ export default function TalisBooksStandingBook({
               )}
               <div className="talisbooks-standing-book__cover-scrim" />
               <div className="talisbooks-standing-book__cover-copy">
+                {book.isPinned ? (
+                  <p className="talisbooks-standing-book__cover-kicker">Pinned</p>
+                ) : null}
                 <p className="talisbooks-standing-book__cover-title">{book.title}</p>
                 {book.subtitle && size !== "compact" ? (
                   <p className="talisbooks-standing-book__cover-subtitle">{book.subtitle}</p>
