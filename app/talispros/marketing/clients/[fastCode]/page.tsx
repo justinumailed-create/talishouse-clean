@@ -104,16 +104,16 @@ export default async function MarketingClientPage({
                 >
                   <div className="flex items-center justify-between gap-3 mb-2">
                     <p className="text-sm font-medium text-neutral-900">
-                      {new Date(`${entry.reportDate}T12:00:00`).toLocaleDateString()}
+                      {new Date(`${entry.reportDate}T12:00:00`).toLocaleDateString("en-US")}
                     </p>
                     <span className="text-xs text-neutral-500 capitalize">
                       {entry.pipelineStatus.replace(/_/g, " ")}
                     </span>
                   </div>
                   <p className="text-xs text-neutral-500">
-                    FB {entry.facebookImpressions.toLocaleString()} · IG{" "}
-                    {entry.instagramImpressions.toLocaleString()} · Reach{" "}
-                    {entry.totalReach.toLocaleString()} · {entry.emailsReceived} emails ·{" "}
+                    FB {entry.facebookImpressions.toLocaleString("en-US")} · IG{" "}
+                    {entry.instagramImpressions.toLocaleString("en-US")} · Reach{" "}
+                    {entry.totalReach.toLocaleString("en-US")} · {entry.emailsReceived} emails ·{" "}
                     {entry.textsReceived} texts
                   </p>
                   {entry.checklistNotes ? (

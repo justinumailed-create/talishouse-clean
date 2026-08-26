@@ -199,7 +199,7 @@ export default function AssociatesPage() {
                     <td className="py-2 px-3 text-gray-500 text-xs">{a.mapsite_slug || "—"}</td>
                     <td className="py-2 px-3 text-gray-600">{a.email || "—"}</td>
                     <td className="py-2 px-3 text-gray-500 text-xs">
-                      {new Date(a.created_at).toLocaleDateString()}
+                      {new Date(a.created_at).toLocaleDateString("en-US")}
                     </td>
                     <td className="py-2 px-3">
                       <div className="flex items-center gap-3">

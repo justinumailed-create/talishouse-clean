@@ -61,7 +61,7 @@ export default function CrmAssociatesPage() {
                     </td>
                     <td className="py-3 px-4 text-neutral-500 hidden sm:table-cell">{a.email || "—"}</td>
                     <td className="py-3 px-4 text-neutral-500 hidden md:table-cell">{a.phone || "—"}</td>
-                    <td className="py-3 px-4 text-neutral-500 text-xs">{new Date(a.created_at).toLocaleDateString()}</td>
+                    <td className="py-3 px-4 text-neutral-500 text-xs">{new Date(a.created_at).toLocaleDateString("en-US")}</td>
                   </tr>
                 ))}
               </tbody>

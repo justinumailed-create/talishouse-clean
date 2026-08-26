@@ -189,7 +189,8 @@ export default function TalisMapsPlatformSettingsForm({
         </button>
         {initialSettings.updatedAt ? (
           <p className="text-xs text-neutral-400">
-            Last updated {new Date(initialSettings.updatedAt).toLocaleString()}
+            Last updated{" "}
+            {new Date(initialSettings.updatedAt).toLocaleString("en-US")}
           </p>
         ) : null}
       </div>

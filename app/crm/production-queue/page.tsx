@@ -129,7 +129,7 @@ export default function CrmProductionQueuePage() {
                     <td className="py-3 px-4">{statusBadge(q.status)}</td>
                     <td className="py-3 px-4 text-neutral-500 text-xs hidden sm:table-cell">{q.assignedTo ? "Yes" : "—"}</td>
                     <td className="py-3 px-4 text-neutral-500 text-xs">{q.priority}</td>
-                    <td className="py-3 px-4 text-neutral-500 text-xs">{new Date(q.createdAt).toLocaleDateString()}</td>
+                    <td className="py-3 px-4 text-neutral-500 text-xs">{new Date(q.createdAt).toLocaleDateString("en-US")}</td>
                   </tr>
                 ))}
               </tbody>

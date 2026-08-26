@@ -6,8 +6,17 @@
 export const ONBOARDING_SLOW_MS = 5_000;
 export const ONBOARDING_CRITICAL_MS = 30_000;
 
-/** Default ceiling for a single long ebook-generation job. */
-export const ONBOARDING_JOB_TIMEOUT_MS = 55_000;
+/**
+ * Ceiling for the ebook generate API job (cover-spread split + DB write).
+ * Kept under Fluid Compute limits; route maxDuration must stay ≥ this.
+ */
+export const ONBOARDING_JOB_TIMEOUT_MS = 180_000;
+
+/**
+ * Client-side budget for optimize + per-image uploads before generate starts.
+ * Separate from the generate job so a slow upload does not starve page creation.
+ */
+export const ONBOARDING_OPTIMIZE_TIMEOUT_MS = 180_000;
 
 export type OnboardingFailureReport = {
   requestId: string | null;

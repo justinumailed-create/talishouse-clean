@@ -118,7 +118,7 @@ export default function CrmActivityLogsPage() {
                       {log.performed_by || "system"}
                     </td>
                     <td className="py-3 px-4 text-neutral-500 text-xs">
-                      {new Date(log.created_at).toLocaleString()}
+                      {new Date(log.created_at).toLocaleString("en-US")}
                     </td>
                   </tr>
                 ))}

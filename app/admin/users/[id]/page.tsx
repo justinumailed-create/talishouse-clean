@@ -129,7 +129,7 @@ export default function UserProfilePage() {
           </div>
           <div>
             <p className="text-sm text-gray-500">Member Since</p>
-            <p className="font-medium">{new Date(user.created_at).toLocaleDateString()}</p>
+            <p className="font-medium">{new Date(user.created_at).toLocaleDateString("en-US")}</p>
           </div>
         </div>
       </div>

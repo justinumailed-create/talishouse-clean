@@ -13,7 +13,7 @@ import {
 } from "@/lib/talisbooks/self-service-page-plan";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 function parseOptimizedImages(raw: FormDataEntryValue | null): OptimizedEbookImageAsset[] {
   if (typeof raw !== "string" || !raw.trim()) return [];

@@ -113,7 +113,7 @@ export default function CrmMapSitesPage() {
                     <td className="py-3 px-4 text-neutral-500 hidden sm:table-cell">{m.type}</td>
                     <td className="py-3 px-4">{statusBadge(m.status)}</td>
                     <td className="py-3 px-4 text-neutral-500 text-xs hidden md:table-cell">{m.assignedTo ? "Yes" : "—"}</td>
-                    <td className="py-3 px-4 text-neutral-500 text-xs">{new Date(m.createdAt).toLocaleDateString()}</td>
+                    <td className="py-3 px-4 text-neutral-500 text-xs">{new Date(m.createdAt).toLocaleDateString("en-US")}</td>
                   </tr>
                 ))}
               </tbody>

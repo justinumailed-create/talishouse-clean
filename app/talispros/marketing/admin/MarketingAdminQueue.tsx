@@ -153,7 +153,7 @@ export default function MarketingAdminQueue() {
                   <td className="px-4 py-3">
                     {new Date(
                       row.submitted_at || row.created_at || new Date().toISOString()
-                    ).toLocaleDateString()}
+                    ).toLocaleDateString("en-US")}
                   </td>
                   <td className="px-4 py-3">{row.status}</td>
                   <td className="px-4 py-3">

@@ -107,7 +107,7 @@ export default function AdminMarketingPage() {
                   <td className="py-3 px-4">{row.email}</td>
                   <td className="py-3 px-4">{row.requested_account_type || "—"}</td>
                   <td className="py-3 px-4">
-                    {new Date(row.submitted_at || row.created_at || new Date().toISOString()).toLocaleDateString()}
+                    {new Date(row.submitted_at || row.created_at || new Date().toISOString()).toLocaleDateString("en-US")}
                   </td>
                   <td className="py-3 px-4">{row.status}</td>
                   <td className="py-3 px-4">

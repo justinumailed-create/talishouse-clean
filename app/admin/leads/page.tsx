@@ -341,7 +341,7 @@ export default function LeadsPage() {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-gray-500 text-sm hidden sm:table-cell">
-                      {new Date(lead.created_at).toLocaleDateString()}
+                      {new Date(lead.created_at).toLocaleDateString("en-US")}
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex gap-1.5 whitespace-nowrap">
@@ -423,7 +423,7 @@ export default function LeadsPage() {
                       <td className="py-3 px-4 text-gray-500 hidden lg:table-cell">{msg.phone}</td>
                       <td className="py-3 px-4 text-gray-500 hidden lg:table-cell">{msg.email}</td>
                       <td className="py-3 px-4 text-gray-500 text-sm hidden sm:table-cell">
-                        {new Date(msg.created_at).toLocaleDateString()}
+                        {new Date(msg.created_at).toLocaleDateString("en-US")}
                       </td>
                     </tr>
                   ))}

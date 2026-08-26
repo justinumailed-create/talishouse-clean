@@ -56,18 +56,38 @@ function options(
 }
 
 describe("self-service ebook page plan (facing spreads)", () => {
-  it("caps uploads at 20 and assigns image 1 cover / image 2 back / 3–20 interiors", () => {
+  it("uses the first landscape as cover spread; remaining images are interiors", () => {
     expect(SELF_SERVICE_MAX_UPLOAD_IMAGES).toBe(20);
-    const uploads = Array.from({ length: 22 }, (_, i) => ({
-      url: `https://cdn.example/img-${i + 1}.jpg`,
-      width: 1600,
-      height: i % 3 === 0 ? 2000 : 1200,
-    }));
+    const uploads = [
+      { url: "https://cdn.example/portrait-early.jpg", width: 1200, height: 1800 },
+      { url: "https://cdn.example/cover-spread.jpg", width: 2400, height: 1200 },
+      { url: "https://cdn.example/interior-1.jpg", width: 1600, height: 1200 },
+      { url: "https://cdn.example/interior-2.jpg", width: 1200, height: 1800 },
+      ...Array.from({ length: 18 }, (_, i) => ({
+        url: `https://cdn.example/extra-${i + 1}.jpg`,
+        width: 1600,
+        height: 1200,
+      })),
+    ];
     const roles = assignFacingUploadRoles(uploads);
-    expect(roles.coverImageUrl).toBe("https://cdn.example/img-1.jpg");
-    expect(roles.backCoverImageUrl).toBe("https://cdn.example/img-2.jpg");
+    expect(roles.coverSpreadImageUrl).toBe("https://cdn.example/cover-spread.jpg");
+    expect(roles.coverImageUrl).toBe("https://cdn.example/cover-spread.jpg");
+    expect(roles.backCoverImageUrl).toBe("https://cdn.example/cover-spread.jpg");
+    expect(roles.landscapes[0]?.url).toBe("https://cdn.example/portrait-early.jpg");
+    expect(roles.landscapes[1]?.url).toBe("https://cdn.example/interior-1.jpg");
     expect(roles.landscapes).toHaveLength(18);
-    expect(roles.landscapes[0]?.url).toBe("https://cdn.example/img-3.jpg");
+  });
+
+  it("falls back to the first image as cover when no landscape exists", () => {
+    const roles = assignFacingUploadRoles([
+      { url: "https://cdn.example/p1.jpg", width: 1000, height: 1400 },
+      { url: "https://cdn.example/p2.jpg", width: 1000, height: 1400 },
+    ]);
+    expect(roles.coverSpreadImageUrl).toBeNull();
+    expect(roles.coverImageUrl).toBe("https://cdn.example/p1.jpg");
+    expect(roles.backCoverImageUrl).toBe("https://cdn.example/p1.jpg");
+    expect(roles.landscapes).toHaveLength(1);
+    expect(roles.landscapes[0]?.url).toBe("https://cdn.example/p2.jpg");
   });
 
   it("TEST 1: landscape image becomes one two-page spread without duplicating the photo", () => {

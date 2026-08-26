@@ -4,10 +4,9 @@
  * One generator, configuration-driven:
  *   facingPages / captions / advertising / globalContent / customContent
  *
- * Upload roles (Level 1):
- *   Image 1  — front cover
- *   Image 2  — back cover
- *   Images 3–20 — interiors (landscape = one two-page spread; portrait = one page)
+ * Upload roles (Level 1) — matches pinned TalisBook cover-spread logic:
+ *   First landscape — cover spread (left half = back, right half = front)
+ *   Remaining images — interiors (landscape = one two-page spread; portrait = one page)
  *
  * Page count (Level 3):
  *   No Custom + No Global → 22
@@ -552,7 +551,7 @@ export function isSelfServiceSpreadCandidate(width: number, height: number): boo
   return isLandscapeSpreadCandidate(width, height);
 }
 
-/** Interior facing pages that accept captions (uploads 3–20). */
+/** Interior facing pages that accept captions (after the cover-spread landscape). */
 export function captionableInteriorCount(
   options?: SelfServiceBookOptions,
 ): number {
@@ -561,43 +560,59 @@ export function captionableInteriorCount(
 }
 
 /**
- * Upload order (Level 1):
- *   1 → front cover
- *   2 → back cover
- *   3–20 → interiors (landscape spreads / portrait singles)
+ * Upload roles (Level 1) — pinned TalisBook cover-spread logic:
+ *   first landscape → cover spread source (split later into back | front)
+ *   remaining images → interiors (landscape spreads / portrait singles)
+ *
+ * If no landscape exists, the first image is used as a single cover fallback.
  */
 export function assignFacingUploadRoles(
   items: Array<{ url: string; width: number; height: number }>,
 ): {
   landscapes: SelfServiceLandscapeAsset[];
+  /** Landscape wrap to split into back (left) + front (right). */
+  coverSpreadImageUrl: string | null;
   coverImageUrl: string | null;
   backCoverImageUrl: string | null;
   galleryUrls: string[];
 } {
   const landscapes: SelfServiceLandscapeAsset[] = [];
   const galleryUrls: string[] = [];
-  let coverImageUrl: string | null = null;
-  let backCoverImageUrl: string | null = null;
+  let coverSpreadImageUrl: string | null = null;
 
   for (const item of items) {
     if (!item.url || item.width <= 0 || item.height <= 0) continue;
     galleryUrls.push(item.url);
-    if (!coverImageUrl) {
-      coverImageUrl = item.url;
+
+    const isLandscape = isSelfServiceSpreadCandidate(item.width, item.height);
+    if (!coverSpreadImageUrl && isLandscape) {
+      coverSpreadImageUrl = item.url;
       continue;
     }
-    if (!backCoverImageUrl) {
-      backCoverImageUrl = item.url;
-      continue;
-    }
+
     if (landscapes.length < SELF_SERVICE_MAX_INTERIOR_IMAGES) {
       landscapes.push(item);
     }
   }
 
-  if (!coverImageUrl) {
-    coverImageUrl = landscapes[0]?.url ?? null;
+  if (coverSpreadImageUrl) {
+    return {
+      landscapes,
+      coverSpreadImageUrl,
+      // Halves are produced at generation time; until then both point at the wrap.
+      coverImageUrl: coverSpreadImageUrl,
+      backCoverImageUrl: coverSpreadImageUrl,
+      galleryUrls,
+    };
   }
 
-  return { landscapes, coverImageUrl, backCoverImageUrl, galleryUrls };
+  // No landscape: first image becomes a single-page cover fallback.
+  const fallbackCover = landscapes.shift()?.url ?? galleryUrls[0] ?? null;
+  return {
+    landscapes,
+    coverSpreadImageUrl: null,
+    coverImageUrl: fallbackCover,
+    backCoverImageUrl: fallbackCover,
+    galleryUrls,
+  };
 }

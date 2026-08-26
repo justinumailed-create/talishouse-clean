@@ -214,7 +214,7 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-gray-500 text-sm">
-                      {new Date(project.created_at).toLocaleDateString()}
+                      {new Date(project.created_at).toLocaleDateString("en-US")}
                     </td>
                   </tr>
                 ))}

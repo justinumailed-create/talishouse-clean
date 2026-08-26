@@ -19,8 +19,14 @@ import {
 } from "@/lib/talispros/ebook-generation-stages";
 import {
   ONBOARDING_JOB_TIMEOUT_MS,
+  ONBOARDING_OPTIMIZE_TIMEOUT_MS,
   formatOnboardingDuration,
 } from "@/lib/onboarding-timing";
+import {
+  EBOOK_GENERATE_HELP_TEXT,
+  EBOOK_GENERATE_UPLOAD_HINT,
+} from "@/lib/talispros/ebook-generate-copy";
+
 type EbookOptimizedUploadResponse = {
   ok: true;
   url: string;
@@ -595,20 +601,19 @@ export default function EbookGenerateClient({
     }
 
     const fromPdf = uploads.every((item) => item.source === "pdf-page");
-    if (!fromPdf && (!title.trim() || !description.trim() || !location.trim())) {
-      setError("Title, description, and headline are required.");
-      return;
-    }
-
     setSaving(true);
     setActiveStage("optimizing_images");
     const generateStarted =
       typeof performance !== "undefined" ? performance.now() : Date.now();
 
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => {
-      controller.abort();
-    }, ONBOARDING_JOB_TIMEOUT_MS);
+    // Separate budgets: optimize/upload must not starve the generate job.
+    const optimizeController = new AbortController();
+    const optimizeTimeoutId = window.setTimeout(() => {
+      optimizeController.abort();
+    }, ONBOARDING_OPTIMIZE_TIMEOUT_MS);
+
+    let generateController: AbortController | null = null;
+    let generateTimeoutId: number | undefined;
 
     try {
       let optimizedImages: OptimizedAsset[] = [];
@@ -621,6 +626,7 @@ export default function EbookGenerateClient({
         agentPhotoUrl = pendingGenerateRef.current.agentPhotoUrl;
         brokerageLogoUrl = pendingGenerateRef.current.brokerageLogoUrl;
         setActiveStage("generating_pages");
+        window.clearTimeout(optimizeTimeoutId);
       } else {
       const prior = readStash(requestId);
       const stored = await optimizeAndStoreUploads({
@@ -628,10 +634,11 @@ export default function EbookGenerateClient({
         propertyItems: uploads,
         logo: logoFile,
         agentPhoto: agentPhotoFile,
-        signal: controller.signal,
+        signal: optimizeController.signal,
         prior,
       });
       writeStash(requestId, stored.stash);
+      window.clearTimeout(optimizeTimeoutId);
 
       if (stored.failures.length > 0) {
         setUploadFailures(stored.failures);
@@ -660,7 +667,8 @@ export default function EbookGenerateClient({
         }`,
       );
 
-      const interiorCount = Math.max(0, optimizedImages.length - 2);
+      // First landscape (or first image fallback) is the cover spread — not captioned.
+      const interiorCount = Math.max(0, optimizedImages.length - 1);
       if (captionsEnabled && !fromPdf && interiorCount > 0 && !captionStep) {
         pendingGenerateRef.current = {
           optimizedImages,
@@ -685,6 +693,11 @@ export default function EbookGenerateClient({
 
       setActiveStage("generating_pages");
       setStageDetail("");
+
+      generateController = new AbortController();
+      generateTimeoutId = window.setTimeout(() => {
+        generateController?.abort();
+      }, ONBOARDING_JOB_TIMEOUT_MS);
 
       const fd = new FormData();
       fd.set("requestId", requestId);
@@ -730,7 +743,7 @@ export default function EbookGenerateClient({
       const response = await fetch("/api/talispros/ebook-generate", {
         method: "POST",
         body: fd,
-        signal: controller.signal,
+        signal: generateController.signal,
       });
 
       if (!response.ok || !response.body) {
@@ -819,8 +832,11 @@ export default function EbookGenerateClient({
       const aborted =
         generateError instanceof DOMException &&
         generateError.name === "AbortError";
+      const optimizeAborted = aborted && !generateController;
       const message = aborted
-        ? `Ebook generation timed out after ${formatOnboardingDuration(ONBOARDING_JOB_TIMEOUT_MS)}. Please try again with fewer images.`
+        ? optimizeAborted
+          ? `Image upload timed out after ${formatOnboardingDuration(ONBOARDING_OPTIMIZE_TIMEOUT_MS)}. Please try again with fewer or smaller images.`
+          : `Ebook generation timed out after ${formatOnboardingDuration(ONBOARDING_JOB_TIMEOUT_MS)}. Please try again.`
         : generateError instanceof Error
           ? generateError.message
           : "Could not generate your E-Book. Please try again.";
@@ -837,7 +853,10 @@ export default function EbookGenerateClient({
         stage: aborted ? "timeout" : "ebook_client",
       });
     } finally {
-      window.clearTimeout(timeoutId);
+      window.clearTimeout(optimizeTimeoutId);
+      if (generateTimeoutId !== undefined) {
+        window.clearTimeout(generateTimeoutId);
+      }
       setSaving(false);
       setStageDetail("");
     }
@@ -856,11 +875,7 @@ export default function EbookGenerateClient({
             Generate My Own E-Book
           </h1>
           <p className="mt-2 text-sm text-neutral-500">
-            Add high-resolution photos or a PDF. Images are optimized
-            automatically — no resizing needed. For a PDF, page 1 is always
-            the cover spread (back cover on the left half, front cover on the
-            right half). Remaining PDF pages become the interior. For photos,
-            image 1 is the front cover and image 2 is the back cover.
+            {EBOOK_GENERATE_HELP_TEXT}
           </p>
           {fastCode ? (
             <p className="mt-2 text-xs text-neutral-400">
@@ -883,8 +898,8 @@ export default function EbookGenerateClient({
           <div className="mt-8 space-y-4">
             <p className="text-sm text-neutral-600">
               Captions · image {captionIndex + 1} of{" "}
-              {Math.max(0, (pendingGenerateRef.current?.optimizedImages.length ?? 2) - 2)}
-              {" "}(cover and back cover are skipped; landscape photos share one caption per spread)
+              {Math.max(0, (pendingGenerateRef.current?.optimizedImages.length ?? 1) - 1)}
+              {" "}(cover spread is skipped; landscape photos share one caption per spread)
             </p>
             <textarea
               value={captionDraft}
@@ -932,8 +947,7 @@ export default function EbookGenerateClient({
                   className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-xl file:border-0 file:bg-neutral-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-neutral-800 disabled:opacity-60"
                 />
                 <p className="mt-1.5 text-xs text-neutral-400">
-                  JPG, PNG, or PDF. Up to {SELF_SERVICE_MAX_UPLOAD_IMAGES} images.
-                  Phone camera photos are fine.
+                  {EBOOK_GENERATE_UPLOAD_HINT}
                 </p>
 
                 {converting ? (
@@ -978,7 +992,7 @@ export default function EbookGenerateClient({
                 <>
                   <label className="block text-sm">
                     <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-                      Title
+                      Title <span className="font-normal text-neutral-400">(optional)</span>
                     </span>
                     <input
                       value={title}
@@ -989,7 +1003,7 @@ export default function EbookGenerateClient({
                   </label>
                   <label className="block text-sm">
                     <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-                      Description
+                      Description <span className="font-normal text-neutral-400">(optional)</span>
                     </span>
                     <textarea
                       value={description}
@@ -1001,7 +1015,7 @@ export default function EbookGenerateClient({
                   </label>
                   <label className="block text-sm">
                     <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-                      Headline
+                      Headline <span className="font-normal text-neutral-400">(optional)</span>
                     </span>
                     <input
                       value={location}

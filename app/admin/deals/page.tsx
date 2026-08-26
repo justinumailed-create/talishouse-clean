@@ -174,7 +174,7 @@ export default function DealsPage() {
                     </span>
                   </td>
                   <td className="py-3 px-4 text-[#6e6e73] text-sm">
-                    {new Date(deal.created_at).toLocaleDateString()}
+                    {new Date(deal.created_at).toLocaleDateString("en-US")}
                   </td>
                   <td className="py-3 px-4">
                     <button

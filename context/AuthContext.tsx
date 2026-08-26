@@ -14,38 +14,29 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-function getInitialAuthState() {
-  if (typeof window === "undefined") {
-    return {
-      authorized: null,
-      role: null,
-      fastCode: null,
-      loading: true,
-    };
-  }
-
-  return {
-    authorized: isAuthorized(),
-    role: getRole(),
-    fastCode: getFastCode(),
-    loading: false,
-  };
-}
+/** SSR-safe defaults — never read localStorage during the initial render. */
+const SSR_AUTH_STATE = {
+  authorized: null as boolean | null,
+  role: null as "admin" | "associate" | null,
+  fastCode: null as string | null,
+  loading: true,
+};
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const initialState = getInitialAuthState();
-  const [authorized, setAuthorized] = useState<boolean | null>(initialState.authorized);
-  const [role, setRole] = useState<"admin" | "associate" | null>(initialState.role);
-  const [fastCode, setFastCode] = useState<string | null>(initialState.fastCode);
-  const [loading] = useState(initialState.loading);
+  const [authorized, setAuthorized] = useState<boolean | null>(SSR_AUTH_STATE.authorized);
+  const [role, setRole] = useState<"admin" | "associate" | null>(SSR_AUTH_STATE.role);
+  const [fastCode, setFastCode] = useState<string | null>(SSR_AUTH_STATE.fastCode);
+  const [loading, setLoading] = useState(SSR_AUTH_STATE.loading);
 
   useEffect(() => {
     const syncAuth = () => {
       setAuthorized(isAuthorized());
       setRole(getRole());
       setFastCode(getFastCode());
+      setLoading(false);
     };
 
+    syncAuth();
     window.addEventListener("storage", syncAuth);
     return () => {
       window.removeEventListener("storage", syncAuth);
@@ -69,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthorized(true);
     setRole(r as "admin" | "associate");
     setFastCode(normalizedCode);
+    setLoading(false);
   };
 
   const logout = () => {
@@ -86,6 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthorized(false);
     setRole(null);
     setFastCode(null);
+    setLoading(false);
 
     window.location.href = "/";
   };

@@ -29,8 +29,10 @@ export default function TalisBooksStandingBook({
     >
       <Link
         href={href}
+        target="_blank"
+        rel="noopener noreferrer"
         className="talisbooks-standing-book__link"
-        aria-label={`${book.title}${book.subtitle ? ` — ${book.subtitle}` : ""}`}
+        aria-label={`Open ${book.title}${book.subtitle ? ` — ${book.subtitle}` : ""} in a new tab`}
         title={`${book.title} · ${book.publishStatus} · ${book.views} views`}
       >
         <div className="talisbooks-standing-book__scene">

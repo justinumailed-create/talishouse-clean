@@ -484,7 +484,7 @@ export default function FastCodesPage() {
                     <td className="py-3 px-4 text-gray-600">{fc.email || "-"}</td>
                     <td className="py-3 px-4 text-gray-600 font-mono text-xs">{fc.request_id || "-"}</td>
                     <td className="py-3 px-4 text-gray-500 text-sm">
-                      {new Date(fc.timestamp).toLocaleDateString()}
+                      {new Date(fc.timestamp).toLocaleDateString("en-US")}
                     </td>
                     <td className="py-3 px-4">
                       {fc.source === "build-system" ? (

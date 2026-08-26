@@ -1,5 +1,13 @@
 import Image from "next/image";
+import Link from "next/link";
 import TalisprosStartSidebar from "@/components/talispros/TalisprosStartSidebar";
+import {
+  PINNED_TALISBOOK_ASSET_ROOT,
+  PINNED_TALISBOOK_SLUG,
+} from "@/lib/talisbooks/library/pinned-catalog";
+import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
+
+const PINNED_VIEWER_HREF = `${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`;
 
 export default function TalisprosStartPage() {
   return (
@@ -33,13 +41,45 @@ export default function TalisprosStartPage() {
                   className="mx-auto block h-auto w-full max-w-full"
                   sizes="(min-width: 1200px) 1200px, calc(100vw - 350px)"
                 />
-                <div className="flex items-center gap-3 bg-white px-3 py-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:gap-4 sm:bg-black/50 sm:px-5 sm:py-3">
-                  <div className="min-w-0 flex-1 text-center text-sm font-bold leading-snug tracking-[0.03em] text-neutral-900 sm:text-base sm:text-white">
+                <div className="relative flex items-center bg-white px-3 py-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:bg-black/50 sm:px-5 sm:py-3">
+                  <Link
+                    href={PINNED_VIEWER_HREF}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute left-3 top-1/2 z-10 flex -translate-y-1/2 items-center gap-2 sm:left-5"
+                    aria-label="Open pinned Talisbook™ sample in a new tab"
+                    title="Open sample Talisbook™"
+                  >
+                    <span className="relative block h-14 w-[2.65rem] shrink-0 overflow-hidden rounded-[2px] shadow-[2px_3px_10px_rgba(0,0,0,0.35)] ring-1 ring-black/25 sm:h-16 sm:w-12">
+                      <Image
+                        src={`${PINNED_TALISBOOK_ASSET_ROOT}/front-cover.jpg`}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-y-0 left-0 w-[3px] bg-gradient-to-r from-black/35 to-transparent"
+                      />
+                    </span>
+                    <span className="hidden flex-col items-start gap-1 sm:inline-flex">
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/90">
+                        View
+                        <br />
+                        E-Book
+                      </span>
+                      <span className="rounded-sm bg-[#f5c518] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.06em] text-neutral-900 shadow-sm">
+                        Open
+                      </span>
+                    </span>
+                  </Link>
+                  <div className="w-full px-16 text-center text-[11px] font-bold leading-snug tracking-[0.03em] text-neutral-900 sm:px-28 sm:text-xs sm:text-white">
                     Seen here, a Glasshouse™ optimized for short-term rental purposes. A
                     Mapsite™ of 50 miles around a centre point, or up to 100,000 people
                     population base, is automatically included with every Account.*
                   </div>
-                  <div className="hidden h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-black ring-2 ring-neutral-900 sm:flex sm:h-14 sm:w-14 sm:ring-white">
+                  <div className="absolute right-3 top-1/2 hidden h-12 w-12 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-black ring-2 ring-neutral-900 sm:right-5 sm:flex sm:h-14 sm:w-14 sm:ring-white">
                     <Image
                       src="/logo.png"
                       alt="Talishouse™"

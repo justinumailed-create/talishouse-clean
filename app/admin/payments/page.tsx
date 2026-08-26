@@ -103,7 +103,7 @@ export default function PaymentsPage() {
                       </span>
                     </td>
                     <td className="py-3 px-4 text-gray-500 text-sm">
-                      {new Date(payment.created_at).toLocaleDateString()}
+                      {new Date(payment.created_at).toLocaleDateString("en-US")}
                     </td>
                   </tr>
                 ))}

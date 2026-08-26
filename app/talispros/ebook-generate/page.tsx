@@ -11,7 +11,7 @@ import {
 export const dynamic = "force-dynamic";
 
 /** Image encode + storage uploads need more than the default serverless window. */
-export const maxDuration = 60;
+export const maxDuration = 300;
 
 export const metadata: Metadata = createMetadata({
   title: "Generate E-Book | Talispros™",

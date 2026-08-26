@@ -105,7 +105,7 @@ export default function CrmBuildRequestsPage() {
                     <td className="py-3 px-4 font-medium text-neutral-900">{r.first_name} {r.last_name}</td>
                     <td className="py-3 px-4 text-neutral-500 hidden sm:table-cell">{r.email}</td>
                     <td className="py-3 px-4">{statusBadge(r.status)}</td>
-                    <td className="py-3 px-4 text-neutral-500 text-xs">{new Date(r.created_at).toLocaleDateString()}</td>
+                    <td className="py-3 px-4 text-neutral-500 text-xs">{new Date(r.created_at).toLocaleDateString("en-US")}</td>
                   </tr>
                 ))}
               </tbody>

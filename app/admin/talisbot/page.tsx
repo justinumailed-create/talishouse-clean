@@ -320,7 +320,7 @@ export default function TalisBotAnalytics() {
                     </td>
                     <td className="py-2 text-gray-500">{lead.location || '-'}</td>
                     <td className="text-right py-2 text-gray-500">
-                      {lead.created_at ? new Date(lead.created_at).toLocaleDateString() : '-'}
+                      {lead.created_at ? new Date(lead.created_at).toLocaleDateString("en-US") : '-'}
                     </td>
                   </tr>
                 ))

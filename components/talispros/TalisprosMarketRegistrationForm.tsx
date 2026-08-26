@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { Check } from "lucide-react";
 import HomePinLocationSection, {
   validateHomePinLocation,
@@ -98,12 +98,13 @@ export default function TalisprosMarketRegistrationForm({
   onSuccess,
 }: TalisprosMarketRegistrationFormProps) {
   const marketCopy = REGISTRATION_MARKET_COPY[market];
-  const requestId = useMemo(() => crypto.randomUUID(), []);
+  const [requestId, setRequestId] = useState("");
   const isPanel = variant === "panel";
   const accountType = market === "fsbos" ? "fsbo" : "root-1";
 
   const [date, setDate] = useState("");
   useEffect(() => {
+    setRequestId(crypto.randomUUID());
     setDate(todayString());
   }, []);
   const [firstName, setFirstName] = useState("");
@@ -172,7 +173,9 @@ export default function TalisprosMarketRegistrationForm({
       }
 
       const formData = new FormData();
-      formData.set("requestId", requestId);
+      const resolvedRequestId = requestId || crypto.randomUUID();
+      if (!requestId) setRequestId(resolvedRequestId);
+      formData.set("requestId", resolvedRequestId);
       formData.set("date", date);
       formData.set("firstName", firstName);
       formData.set("lastName", lastName);

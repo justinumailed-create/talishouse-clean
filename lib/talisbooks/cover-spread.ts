@@ -1,7 +1,7 @@
 /**
  * Cover-spread helpers for self-service TalisBooks™.
  *
- * Rule: the first uploaded/processed PDF page is always a wrap cover:
+ * Rule: the first landscape upload (or PDF page 1) is always a wrap cover:
  *   LEFT half  = back cover
  *   RIGHT half = front cover
  *

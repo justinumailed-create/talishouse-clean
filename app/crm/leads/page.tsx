@@ -58,7 +58,7 @@ export default function CrmLeadsPage() {
                       }`}>{lead.status}</span>
                     </td>
                     <td className="py-3 px-4 text-neutral-500 text-xs">
-                      {new Date(lead.created_at).toLocaleDateString()}
+                      {new Date(lead.created_at).toLocaleDateString("en-US")}
                     </td>
                   </tr>
                 ))}
