@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 const SITE_URL = "https://www.talishouse.com";
 const SITE_NAME = "Talispros™";
-const OG_IMAGE = new URL("/api/og/talispros", SITE_URL).toString();
+/** Static WhatsApp / Open Graph preview (1200×630). */
+const OG_IMAGE = "/seo/talispros-og.jpg";
 
 export const siteConfig = {
   url: SITE_URL,

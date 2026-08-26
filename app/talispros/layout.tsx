@@ -18,10 +18,16 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   ...createMetadata({
-    title: "Talispros™ | Industry Adjacent Market Places for Real Estate Professionals",
+    title: "Talispros™ | Claim your market",
     description:
-      "Build referral networks, co-promotion ecosystems, and industry-adjacent marketplaces using Mapsites™, FAST Codes™, TalisForms™, and Talismaps™.",
+      "Claim your market on Talispros™. Mapsite™ pins your place on the map so buyers and partners can find you — Explore Talisbooks™ and grow your exposure worldwide.",
     path: "/talispros",
+    image: {
+      url: "/seo/talispros-og.jpg",
+      width: 1200,
+      height: 630,
+      alt: "Talispros™ — Claim your market with Mapsite™",
+    },
   }),
   icons: {
     icon: "/favicon-v2.ico",

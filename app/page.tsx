@@ -9,10 +9,16 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = createMetadata({
-  title: "Talispros™ | Choose your Mapsite™...",
+  title: "Talispros™ | Claim your market",
   description:
-    "Talispros™ provides Mapsites™ as alternative Market Places around Talishouse™ Homes and Cottages.",
+    "Claim your market on Talispros™. Mapsite™ pins your place on the map so buyers and partners can find you — Explore Talisbooks™ and grow your exposure worldwide.",
   path: "/",
+  image: {
+    url: "/seo/talispros-og.jpg",
+    width: 1200,
+    height: 630,
+    alt: "Talispros™ — Claim your market with Mapsite™",
+  },
 });
 
 export default function Home() {
