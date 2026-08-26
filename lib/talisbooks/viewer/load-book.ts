@@ -5,7 +5,7 @@ import {
   hydratePermanentViewerPages,
 } from "@/lib/talisbooks/permanent-pages";
 import { createDemoViewerBook } from "./demo-book";
-import { enrichCoverPagesWithAgentBranding } from "./cover-branding";
+import { enrichCoverPagesWithAgentBranding, normalizeMapSiteBackCoverToArt, stripTrailingBlankFacingPages } from "./cover-branding";
 import type {
   TalisBooksViewerBook,
   TalisBooksViewerPage,
@@ -272,6 +272,19 @@ export async function getViewerBookBySlug(
 
   const skipPermanentPages =
     metadata.exactPdfPages === true || metadata.skipPermanentPages === true;
+  const isMapSiteBook =
+    typeof book.fast_code === "string" && book.fast_code.trim().length > 0;
+  const artBackCoverUrl = backCoverImageUrl || coverImageUrl || null;
+
+  const withPermanentPages = skipPermanentPages
+    ? viewerPages
+    : ensurePermanentClosingPages(hydratePermanentViewerPages(viewerPages));
+
+  const withMapSiteBack = isMapSiteBook
+    ? stripTrailingBlankFacingPages(
+        normalizeMapSiteBackCoverToArt(withPermanentPages, artBackCoverUrl),
+      )
+    : withPermanentPages;
 
   return {
     id: book.id,
@@ -282,13 +295,9 @@ export async function getViewerBookBySlug(
     title: book.title,
     subtitle: book.subtitle,
     frontCoverImageUrl: coverImageUrl || undefined,
-    backCoverImageUrl: backCoverImageUrl || coverImageUrl || undefined,
+    backCoverImageUrl: artBackCoverUrl || undefined,
     coverSpreadOpening,
-    pages: enrichCoverPagesWithAgentBranding(
-      skipPermanentPages
-        ? viewerPages
-        : ensurePermanentClosingPages(hydratePermanentViewerPages(viewerPages)),
-    ),
+    pages: enrichCoverPagesWithAgentBranding(withMapSiteBack),
   };
 }
 

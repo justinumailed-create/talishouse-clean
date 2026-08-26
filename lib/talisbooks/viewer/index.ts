@@ -25,7 +25,7 @@ export {
   speedPercentToIntervalMs,
 } from "./auto-page-turn";
 export { createDemoViewerBook } from "./demo-book";
-export { enrichCoverPagesWithAgentBranding } from "./cover-branding";
+export { enrichCoverPagesWithAgentBranding, normalizeMapSiteBackCoverToArt, stripTrailingBlankFacingPages } from "./cover-branding";
 export {
   TALISBOOKS_BROKERAGE_DEMO_AGENT,
   createBrokerageClosingScaffold,
@@ -34,8 +34,12 @@ export {
 } from "./brokerage-scaffold";
 export { getViewerBookBySlug, resolveViewerBookBySlug } from "./load-book";
 export {
+  clampSpreadAspectRatio,
+  continuousSpreadImageUrl,
   isLandscapeSpreadCandidate,
   isMattedSpreadPage,
+  SPREAD_ASPECT_MAX,
+  SPREAD_ASPECT_MIN,
   SPREAD_SOURCE_WIDTH_PERCENT,
 } from "./spread-layout";
 export {

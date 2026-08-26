@@ -14,21 +14,30 @@ export const MAPSITE_LISTING_HERO_HEIGHT_CLASS = "h-44";
 export const MAPSITE_LISTING_TILE_TOP_FALLBACK_PX = 64;
 
 /**
- * Demo / unclaimed Mapsite™ gallery — Talishouse™ product lineup
- * (400, 800, residential 1600+, residential hero).
+ * Demo / unclaimed Mapsite™ gallery — Glasshouse™ product imagery.
  */
 export const MAPSITE_DEMO_GALLERY = [
-  "/images/talishouse/recreational/400.png",
-  "/images/talishouse/recreational/800.png",
-  "/images/talishouse/residential/models/1600.png",
-  "/images/talishouse/residential/hero.jpg",
+  "/images/glasshouse/hero.png",
+  "/images/glasshouse/models/200.png",
+  "/images/glasshouse/models/160.png",
+  "/images/glasshouse/glasshouse.png",
 ] as const;
 
 export const MAPSITE_DEMO_LISTING_IMAGE = MAPSITE_DEMO_GALLERY[0];
 
+/** Prior demo stock — still replace these with the current Glasshouse™ set. */
+const SUPERSEDED_DEMO_LISTING_IMAGES = new Set([
+  "/images/talishouse/recreational/400.png",
+  "/images/talishouse/recreational/800.png",
+  "/images/talishouse/residential/models/1600.png",
+  "/images/talishouse/residential/hero.jpg",
+]);
+
 function isLegacyScenicDemoPath(path: string | null | undefined): boolean {
   if (!path?.trim()) return true;
-  return path.includes("/images/mapsites/lrg1-gallery/");
+  const trimmed = path.trim();
+  if (trimmed.includes("/images/mapsites/lrg1-gallery/")) return true;
+  return SUPERSEDED_DEMO_LISTING_IMAGES.has(trimmed);
 }
 
 /**
@@ -54,10 +63,7 @@ export function getMapSiteListingHeroImage(
     "cover_image" | "gallery_images" | "is_demonstration"
   >
 ): string {
-  if (
-    mapsite.is_demonstration &&
-    shouldReplaceDemoListingMedia(mapsite.cover_image, mapsite.gallery_images)
-  ) {
+  if (shouldReplaceDemoListingMedia(mapsite.cover_image, mapsite.gallery_images)) {
     return MAPSITE_DEMO_LISTING_IMAGE;
   }
 
@@ -80,10 +86,7 @@ export function getMapSiteListingGalleryImages(
     "gallery_images" | "cover_image" | "is_demonstration"
   >
 ): string[] {
-  if (
-    mapsite.is_demonstration &&
-    shouldReplaceDemoListingMedia(mapsite.cover_image, mapsite.gallery_images)
-  ) {
+  if (shouldReplaceDemoListingMedia(mapsite.cover_image, mapsite.gallery_images)) {
     return [...MAPSITE_DEMO_GALLERY];
   }
 

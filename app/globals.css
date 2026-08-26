@@ -1678,9 +1678,10 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-viewer-book {
   --book-page-radius: 0.12rem;
+  --book-spread-aspect: 3 / 2.05;
   position: relative;
   width: min(100%, 68rem);
-  aspect-ratio: 3 / 2.05;
+  aspect-ratio: var(--book-spread-aspect);
   transform: rotateX(8deg) scale(0.98);
   transform-style: preserve-3d;
   filter: drop-shadow(0 32px 48px rgba(28, 25, 23, 0.32));
@@ -3243,11 +3244,23 @@ body.mapsite-gallery-open [data-paypal-button] {
   background: #f5f5f4;
 }
 
-/* Letterbox single exact pages; continuous centerfolds use 200% width instead. */
+/* Letterbox single exact interior pages; continuous centerfolds use 200% width instead. */
 .talisbooks-viewer-page--exact-pdf:not(.talisbooks-viewer-page--fold-continuous)
   .talisbooks-viewer-page__bleed-hero {
   background-size: contain;
   background-color: #f5f5f4;
+}
+
+/* Front / back cover art fills the page face — no letterbox bars. */
+.talisbooks-viewer-page--exact-pdf.talisbooks-viewer-page--cover-art {
+  background: #1c1917;
+}
+
+.talisbooks-viewer-page--exact-pdf.talisbooks-viewer-page--cover-art
+  .talisbooks-viewer-page__bleed-hero {
+  background-size: cover;
+  background-position: center;
+  background-color: transparent;
 }
 
 .talisbooks-viewer-page__bleed-caption {
@@ -3281,8 +3294,15 @@ body.mapsite-gallery-open [data-paypal-button] {
   background-position: left center;
 }
 
-/* Full original shared across both pages — guaranteed join at the gutter. */
+/* Full original shared across both pages — fit entire art, never crop/stretch. */
 .talisbooks-viewer-page--fold-continuous .talisbooks-viewer-page__bleed-hero {
+  background-size: 200% auto;
+  background-repeat: no-repeat;
+}
+
+.talisbooks-viewer-book[data-spread-fit="image"]
+  .talisbooks-viewer-page--fold-continuous
+  .talisbooks-viewer-page__bleed-hero {
   background-size: 200% 100%;
 }
 
@@ -3421,17 +3441,23 @@ body.mapsite-gallery-open [data-paypal-button] {
   color: #44403c;
 }
 
-/* Landscape spread: ONE source image, left/right halves, optional shared caption. */
+/* Landscape spread: ONE source image spanning both leaves at the gutter.
+   When the open book aspect matches the upload (--book-spread-aspect),
+   cover fills both leaves with no letterbox — including at the fold. */
 .talisbooks-viewer-page--spread-mat {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
-  padding: clamp(0.85rem, 3.2vw, 1.35rem);
+  background: #f5f5f4;
+  padding: 0;
   overflow: hidden;
 }
 
-/* Keep outer mat; meet at the fold so the photograph stays continuous. */
+.talisbooks-viewer-book[data-spread-fit="image"] .talisbooks-viewer-page--spread-mat {
+  background: #1c1917;
+}
+
+/* Meet at the fold so the photograph stays continuous. */
 .talisbooks-viewer-page--spread-mat.talisbooks-viewer-page--spread-left {
   padding-right: 0;
 }
@@ -3441,7 +3467,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talisbooks-viewer-page--spread-captions {
-  padding-bottom: 1.85rem;
+  padding-bottom: 0;
 }
 
 .talisbooks-viewer-page__spread-stage {
@@ -3462,6 +3488,11 @@ body.mapsite-gallery-open [data-paypal-button] {
   width: 200%;
   max-width: none;
   object-fit: contain;
+  object-position: center center;
+}
+
+.talisbooks-viewer-book[data-spread-fit="image"] .talisbooks-viewer-page__spread-image {
+  object-fit: cover;
   object-position: center center;
 }
 
@@ -3758,12 +3789,14 @@ body.mapsite-gallery-open [data-paypal-button] {
 
   .talisbooks-viewer-book {
     transform: rotateX(3deg);
-    aspect-ratio: 3 / 2.2;
+    --book-spread-aspect: 3 / 2.2;
+    aspect-ratio: var(--book-spread-aspect);
   }
 
   .talisbooks-viewer--magazine .talisbooks-viewer-book--magazine {
     transform: rotateX(1.5deg);
-    aspect-ratio: 3 / 2.25;
+    --book-spread-aspect: 3 / 2.25;
+    aspect-ratio: var(--book-spread-aspect);
     width: min(100%, 100%);
   }
 

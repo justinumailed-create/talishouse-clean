@@ -9,16 +9,14 @@ import {
 import { createFallbackDemoMapSite } from "../lib/talispros/mapsite-platform";
 
 describe("Mapsite™ listing media", () => {
-  it("uses Talishouse product images for demo listings", () => {
+  it("uses Glasshouse product images for demo listings", () => {
     const demo = createFallbackDemoMapSite();
-    expect(MAPSITE_DEMO_LISTING_IMAGE).toBe(
-      "/images/talishouse/recreational/400.png"
-    );
+    expect(MAPSITE_DEMO_LISTING_IMAGE).toBe("/images/glasshouse/hero.png");
     expect(MAPSITE_DEMO_GALLERY).toEqual([
-      "/images/talishouse/recreational/400.png",
-      "/images/talishouse/recreational/800.png",
-      "/images/talishouse/residential/models/1600.png",
-      "/images/talishouse/residential/hero.jpg",
+      "/images/glasshouse/hero.png",
+      "/images/glasshouse/models/200.png",
+      "/images/glasshouse/models/160.png",
+      "/images/glasshouse/glasshouse.png",
     ]);
     expect(getMapSiteListingHeroImage(demo)).toBe(MAPSITE_DEMO_LISTING_IMAGE);
     expect(demo.gallery_images).toEqual([...MAPSITE_DEMO_GALLERY]);
@@ -43,6 +41,21 @@ describe("Mapsite™ listing media", () => {
       ],
     });
     expect(hero).toBe(MAPSITE_DEMO_LISTING_IMAGE);
+  });
+
+  it("replaces superseded Talishouse stock media on claimed listings", () => {
+    expect(
+      shouldReplaceDemoListingMedia("/images/talishouse/recreational/400.png", [
+        "/images/talishouse/recreational/400.png",
+      ])
+    ).toBe(true);
+
+    const hero = getMapSiteListingHeroImage({
+      is_demonstration: false,
+      cover_image: "/images/talishouse/recreational/400.png",
+      gallery_images: ["/images/talishouse/recreational/400.png"],
+    });
+    expect(hero).toBe("/images/glasshouse/hero.png");
   });
 
   it("prefers gallery[0] for claimed listings", () => {

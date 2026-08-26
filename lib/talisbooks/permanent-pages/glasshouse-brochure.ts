@@ -216,7 +216,13 @@ export function createGlasshouseBrochureDbRows(options: {
 function isBackCoverPage(page: TalisBooksViewerPage, index: number, total: number): boolean {
   if (total <= 0) return false;
   if (index !== total - 1) return false;
-  return page.pageRole === "cover" || page.layout === "cover" || page.layout === "parting";
+  return (
+    page.pageRole === "cover" ||
+    page.layout === "cover" ||
+    page.layout === "parting" ||
+    // Legacy self-service closing leaf before art-only back covers.
+    page.layout === "agent_summary"
+  );
 }
 
 /**

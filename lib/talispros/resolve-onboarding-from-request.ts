@@ -42,6 +42,50 @@ export type ResolveOnboardingResult =
  * Build Request (`requestId`) is the sole source of truth — no cookies,
  * localStorage, or client-supplied FAST Code / Mapsite™ IDs are trusted.
  */
+
+/**
+ * Lightweight scope check for per-image optimize uploads.
+ * Avoids the full onboarding resolve (owner, mapsite, assets) on every photo.
+ */
+export async function resolveOnboardingUploadScope(
+  requestIdRaw: string | null | undefined
+): Promise<
+  | { ok: true; requestId: string; fastCode: string }
+  | { ok: false; error: string }
+> {
+  const requestId = requestIdRaw?.trim() || "";
+  if (!requestId) {
+    return { ok: false, error: "Build Request ID is required." };
+  }
+  if (!isSupabaseAdminConfigured()) {
+    return { ok: false, error: "Database is not configured." };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data: request, error } = await supabase
+    .from("build_requests")
+    .select("id, requested_fast_code")
+    .eq("id", requestId)
+    .maybeSingle();
+
+  if (error || !request) {
+    return {
+      ok: false,
+      error: error?.message || "Build Request not found. Restart onboarding from the Build Form.",
+    };
+  }
+
+  const fastCode = request.requested_fast_code?.trim().toLowerCase() || "";
+  if (!isIssuedFastCode(fastCode)) {
+    return {
+      ok: false,
+      error: "A FAST Code was not issued for this Build Request.",
+    };
+  }
+
+  return { ok: true, requestId, fastCode };
+}
+
 export async function resolveOnboardingFromRequest(
   requestIdRaw: string | null | undefined
 ): Promise<ResolveOnboardingResult> {

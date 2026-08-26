@@ -1,10 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BookOpen } from "lucide-react";
 import TalisprosStartSidebar from "@/components/talispros/TalisprosStartSidebar";
-import {
-  PINNED_TALISBOOK_ASSET_ROOT,
-  PINNED_TALISBOOK_SLUG,
-} from "@/lib/talisbooks/library/pinned-catalog";
+import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 
 const PINNED_VIEWER_HREF = `${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`;
@@ -46,45 +44,27 @@ export default function TalisprosStartPage() {
                     href={PINNED_VIEWER_HREF}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute left-3 top-1/2 z-10 flex -translate-y-1/2 items-center gap-2 sm:left-5"
+                    className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white shadow-md ring-1 ring-white/35 transition hover:bg-black hover:ring-white/70 sm:left-5 sm:h-12 sm:w-12"
                     aria-label="Open pinned Talisbook™ sample in a new tab"
                     title="Open sample Talisbook™"
                   >
-                    <span className="relative block h-14 w-[2.65rem] shrink-0 overflow-hidden rounded-[2px] shadow-[2px_3px_10px_rgba(0,0,0,0.35)] ring-1 ring-black/25 sm:h-16 sm:w-12">
-                      <Image
-                        src={`${PINNED_TALISBOOK_ASSET_ROOT}/front-cover.jpg`}
-                        alt=""
-                        fill
-                        className="object-cover"
-                        sizes="48px"
-                      />
-                      <span
-                        aria-hidden="true"
-                        className="pointer-events-none absolute inset-y-0 left-0 w-[3px] bg-gradient-to-r from-black/35 to-transparent"
-                      />
-                    </span>
-                    <span className="hidden flex-col items-start gap-1 sm:inline-flex">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-white/90">
-                        View
-                        <br />
-                        E-Book
-                      </span>
-                      <span className="rounded-sm bg-[#f5c518] px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.06em] text-neutral-900 shadow-sm">
-                        Open
-                      </span>
-                    </span>
+                    <BookOpen
+                      className="h-5 w-5 sm:h-6 sm:w-6"
+                      strokeWidth={1.75}
+                      aria-hidden="true"
+                    />
                   </Link>
-                  <div className="w-full px-16 text-center text-[11px] font-bold leading-snug tracking-[0.03em] text-neutral-900 sm:px-28 sm:text-xs sm:text-white">
+                  <div className="w-full px-14 text-center text-xs font-bold leading-snug tracking-[0.03em] text-neutral-900 sm:px-20 sm:text-sm sm:text-white">
                     Seen here, a Glasshouse™ optimized for short-term rental purposes. A
                     Mapsite™ of 50 miles around a centre point, or up to 100,000 people
                     population base, is automatically included with every Account.*
                   </div>
-                  <div className="absolute right-3 top-1/2 hidden h-12 w-12 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-black ring-2 ring-neutral-900 sm:right-5 sm:flex sm:h-14 sm:w-14 sm:ring-white">
+                  <div className="absolute right-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-black ring-1 ring-white/35 sm:right-5 sm:flex sm:h-12 sm:w-12 sm:ring-white/70">
                     <Image
                       src="/logo.png"
                       alt="Talishouse™"
-                      width={56}
-                      height={56}
+                      width={48}
+                      height={48}
                       className="h-full w-full object-contain invert"
                     />
                   </div>

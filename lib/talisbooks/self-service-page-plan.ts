@@ -4,15 +4,15 @@
  * One generator, configuration-driven:
  *   facingPages / captions / advertising / globalContent / customContent
  *
- * Upload roles (Level 1) — matches pinned TalisBook cover-spread logic:
- *   First landscape — cover spread (left half = back, right half = front)
+ * Upload roles (Level 1) — pinned TalisBook cover-spread logic:
+ *   Image #1 — ALWAYS the cover spread (left half = back, right half = front)
  *   Remaining images — interiors (landscape = one two-page spread; portrait = one page)
  *
- * Page count (Level 3):
- *   No Custom + No Global → 22
- *   Only Custom           → 22
- *   Only Global           → 22
- *   Custom + Global       → 24
+ * Page count (Level 3) — maximums; books size to content (no blank endpapers):
+ *   No Custom + No Global → ≤ 20
+ *   Only Custom           → ≤ 22
+ *   Only Global           → ≤ 22
+ *   Custom + Global       → ≤ 24
  */
 
 import { getGlasshouseBrochureSource } from "@/lib/talisbooks/permanent-pages/glasshouse-brochure";
@@ -20,7 +20,10 @@ import { isLandscapeSpreadCandidate } from "@/lib/talisbooks/viewer/spread-layou
 
 export const SELF_SERVICE_MAX_UPLOAD_IMAGES = 20;
 export const SELF_SERVICE_MAX_INTERIOR_IMAGES = 18;
-export const SELF_SERVICE_DEFAULT_TOTAL_PAGES = 22;
+/** Cover + up to 18 interior leaves + back (no blank endpaper spread). */
+export const SELF_SERVICE_DEFAULT_TOTAL_PAGES = 20;
+/** Only Custom or only Global adds a 2-page section before the back cover. */
+export const SELF_SERVICE_SINGLE_CONTENT_TOTAL_PAGES = 22;
 export const SELF_SERVICE_BOTH_CONTENT_TOTAL_PAGES = 24;
 /** @deprecated Use selfServicePageCount() — kept for existing imports. */
 export const SELF_SERVICE_TOTAL_PAGES = SELF_SERVICE_DEFAULT_TOTAL_PAGES;
@@ -113,9 +116,13 @@ export function resolveSelfServiceBookOptions(
 }
 
 export function selfServicePageCount(options: SelfServiceBookOptions): number {
-  return options.customContent && options.globalContent
-    ? SELF_SERVICE_BOTH_CONTENT_TOTAL_PAGES
-    : SELF_SERVICE_DEFAULT_TOTAL_PAGES;
+  if (options.customContent && options.globalContent) {
+    return SELF_SERVICE_BOTH_CONTENT_TOTAL_PAGES;
+  }
+  if (options.customContent || options.globalContent) {
+    return SELF_SERVICE_SINGLE_CONTENT_TOTAL_PAGES;
+  }
+  return SELF_SERVICE_DEFAULT_TOTAL_PAGES;
 }
 
 export function parseSelfServiceBookOptions(
@@ -227,25 +234,6 @@ function landscapeSpreadPair(options: {
         brochureLeaf: "right",
       },
     },
-  ];
-}
-
-function blankFacingPair(startPage: number, slugPrefix: string): SelfServicePageRowContent[] {
-  return [
-    facingPageRow({
-      pageNumber: startPage,
-      slug: `${slugPrefix}-left`,
-      imageUrl: null,
-      captionsEnabled: false,
-      leaf: "left",
-    }),
-    facingPageRow({
-      pageNumber: startPage + 1,
-      slug: `${slugPrefix}-right`,
-      imageUrl: null,
-      captionsEnabled: false,
-      leaf: "right",
-    }),
   ];
 }
 
@@ -365,29 +353,19 @@ function globalContentRows(options: {
 }
 
 function coverRow(input: SelfServicePagePlanInput): SelfServicePageRowContent {
-  const agent = input.agent;
   return {
-    title: input.title,
-    slug: "lot-info",
+    title: "Front cover",
+    slug: "front-cover",
     page_number: SELF_SERVICE_LOT_PAGE,
     sort_order: SELF_SERVICE_LOT_PAGE,
     content: {
       pageRole: "cover",
       layout: "cover",
-      title: input.title,
-      subtitle: input.location || "Lot information",
-      body: input.description,
-      address: input.location || undefined,
+      title: "",
+      body: "",
       heroImageUrl: input.coverImageUrl || undefined,
-      coverTemplateId: "horizon-caption",
-      agentName: agent.name,
-      agentTitle: agent.title,
-      agentPhone: agent.phone,
-      agentEmail: agent.email,
-      agentPhotoUrl: agent.photoUrl,
-      brokerageLogoUrl: agent.brokerageLogoUrl,
-      brokerageName: agent.brokerageName || "Talispros™",
-      brokerageLine: agent.brokerageLine || input.location || undefined,
+      exactPdfPage: true,
+      coverSpreadHalf: "front",
     },
   };
 }
@@ -396,29 +374,21 @@ function backCoverRow(
   input: SelfServicePagePlanInput,
   pageNumber: number,
 ): SelfServicePageRowContent {
-  const agent = input.agent;
   const backCoverImageUrl =
     input.backCoverImageUrl?.trim() || input.coverImageUrl || null;
   return {
-    title: agent.name || "Agent details",
-    slug: "agent-details",
+    title: "Back cover",
+    slug: "back-cover",
     page_number: pageNumber,
     sort_order: pageNumber,
     content: {
-      pageRole: "agent_brokerage",
-      layout: "agent_summary",
-      title: "Agent details",
-      agentName: agent.name,
-      agentTitle: agent.title,
-      agentPhone: agent.phone,
-      agentEmail: agent.email,
-      agentPhotoUrl: agent.photoUrl,
-      brokerageLogoUrl: agent.brokerageLogoUrl,
-      brokerageName: agent.brokerageName || "Talispros™",
-      brokerageLine: agent.brokerageLine || input.location || undefined,
-      address: input.location || undefined,
-      body: input.description || undefined,
+      pageRole: "cover",
+      layout: "cover",
+      title: "",
+      body: "",
       heroImageUrl: backCoverImageUrl || undefined,
+      exactPdfPage: true,
+      coverSpreadHalf: "back",
     },
   };
 }
@@ -454,9 +424,9 @@ export function buildSelfServiceEbookPageRows(
   }
 
   const backCoverPage = totalPages;
-  // Reserve the inside-back spread for Global content, or blank endpapers
-  // when neither Custom nor Global is on (keeps the 22-page base).
-  const reserveInsideBack = options.globalContent || !options.customContent;
+  // Reserve the inside-back spread only for Global (Glasshouse) content.
+  // Blank endpapers are no longer used — match the pinned sample.
+  const reserveInsideBack = options.globalContent;
   const interiorEnd = backCoverPage - 1 - (reserveInsideBack ? 2 : 0);
   let pageCursor = cursor;
   let imageIndex = 0;
@@ -537,8 +507,6 @@ export function buildSelfServiceEbookPageRows(
         advertising: options.advertising,
       }),
     );
-  } else if (reserveInsideBack) {
-    rows.push(...blankFacingPair(backCoverPage - 2, "endpaper"));
   }
 
   rows.push(backCoverRow(input, backCoverPage));
@@ -561,16 +529,14 @@ export function captionableInteriorCount(
 
 /**
  * Upload roles (Level 1) — pinned TalisBook cover-spread logic:
- *   first landscape → cover spread source (split later into back | front)
- *   remaining images → interiors (landscape spreads / portrait singles)
- *
- * If no landscape exists, the first image is used as a single cover fallback.
+ *   Image #1 ALWAYS → cover spread source (split later into back | front)
+ *   Remaining images → interiors (landscape spreads / portrait singles)
  */
 export function assignFacingUploadRoles(
   items: Array<{ url: string; width: number; height: number }>,
 ): {
   landscapes: SelfServiceLandscapeAsset[];
-  /** Landscape wrap to split into back (left) + front (right). */
+  /** Wrap to split into back (left) + front (right). */
   coverSpreadImageUrl: string | null;
   coverImageUrl: string | null;
   backCoverImageUrl: string | null;
@@ -584,8 +550,8 @@ export function assignFacingUploadRoles(
     if (!item.url || item.width <= 0 || item.height <= 0) continue;
     galleryUrls.push(item.url);
 
-    const isLandscape = isSelfServiceSpreadCandidate(item.width, item.height);
-    if (!coverSpreadImageUrl && isLandscape) {
+    // First valid image is always the wrap cover — never an interior page.
+    if (!coverSpreadImageUrl) {
       coverSpreadImageUrl = item.url;
       continue;
     }
@@ -606,13 +572,11 @@ export function assignFacingUploadRoles(
     };
   }
 
-  // No landscape: first image becomes a single-page cover fallback.
-  const fallbackCover = landscapes.shift()?.url ?? galleryUrls[0] ?? null;
   return {
     landscapes,
     coverSpreadImageUrl: null,
-    coverImageUrl: fallbackCover,
-    backCoverImageUrl: fallbackCover,
+    coverImageUrl: null,
+    backCoverImageUrl: null,
     galleryUrls,
   };
 }

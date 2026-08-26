@@ -136,7 +136,7 @@ function mapRow(row: MapSiteRow): MapSitePlatformRecord {
     gallery[0] ||
     MAPSITE_DEMO_LISTING_IMAGE;
 
-  // Unclaimed demo still on legacy coastal photos → Talishouse™ product gallery.
+  // Unclaimed demo (or stock demo media) → current Glasshouse™ product gallery.
   if (
     Boolean(row.is_demonstration) &&
     shouldReplaceDemoListingMedia(cover, gallery)

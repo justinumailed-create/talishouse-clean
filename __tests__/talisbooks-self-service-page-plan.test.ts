@@ -56,11 +56,11 @@ function options(
 }
 
 describe("self-service ebook page plan (facing spreads)", () => {
-  it("uses the first landscape as cover spread; remaining images are interiors", () => {
+  it("uses image #1 as cover spread; remaining images are interiors", () => {
     expect(SELF_SERVICE_MAX_UPLOAD_IMAGES).toBe(20);
     const uploads = [
-      { url: "https://cdn.example/portrait-early.jpg", width: 1200, height: 1800 },
       { url: "https://cdn.example/cover-spread.jpg", width: 2400, height: 1200 },
+      { url: "https://cdn.example/portrait-early.jpg", width: 1200, height: 1800 },
       { url: "https://cdn.example/interior-1.jpg", width: 1600, height: 1200 },
       { url: "https://cdn.example/interior-2.jpg", width: 1200, height: 1800 },
       ...Array.from({ length: 18 }, (_, i) => ({
@@ -78,12 +78,12 @@ describe("self-service ebook page plan (facing spreads)", () => {
     expect(roles.landscapes).toHaveLength(18);
   });
 
-  it("falls back to the first image as cover when no landscape exists", () => {
+  it("still treats a portrait first image as the cover wrap (split later)", () => {
     const roles = assignFacingUploadRoles([
       { url: "https://cdn.example/p1.jpg", width: 1000, height: 1400 },
       { url: "https://cdn.example/p2.jpg", width: 1000, height: 1400 },
     ]);
-    expect(roles.coverSpreadImageUrl).toBeNull();
+    expect(roles.coverSpreadImageUrl).toBe("https://cdn.example/p1.jpg");
     expect(roles.coverImageUrl).toBe("https://cdn.example/p1.jpg");
     expect(roles.backCoverImageUrl).toBe("https://cdn.example/p1.jpg");
     expect(roles.landscapes).toHaveLength(1);
@@ -260,18 +260,26 @@ describe("self-service ebook page plan (facing spreads)", () => {
     expect(right.layout).toBe("centerfold_right");
   });
 
-  it("keeps 22 pages and cover/back out of the spread rule", () => {
+  it("keeps 20 pages without blank endpapers; cover/back stay art-only", () => {
     const rows = buildSelfServiceEbookPageRows({
       ...baseInput,
       landscapes: [landscape(1), portrait(2)],
       options: options(),
     });
-    expect(selfServicePageCount(options())).toBe(22);
-    expect(rows).toHaveLength(22);
+    expect(selfServicePageCount(options())).toBe(SELF_SERVICE_DEFAULT_TOTAL_PAGES);
+    expect(rows).toHaveLength(SELF_SERVICE_DEFAULT_TOTAL_PAGES);
     expect(rows.find((r) => r.page_number === SELF_SERVICE_LOT_PAGE)?.content.layout).toBe(
       "cover",
     );
-    expect(rows.find((r) => r.page_number === 22)?.content.layout).toBe("agent_summary");
+    expect(rows.find((r) => r.page_number === SELF_SERVICE_LOT_PAGE)?.content.exactPdfPage).toBe(
+      true,
+    );
+    const back = rows.find((r) => r.page_number === SELF_SERVICE_DEFAULT_TOTAL_PAGES)?.content;
+    expect(back?.layout).toBe("cover");
+    expect(back?.pageRole).toBe("cover");
+    expect(back?.exactPdfPage).toBe(true);
+    expect(back?.heroImageUrl).toBe(baseInput.backCoverImageUrl);
+    expect(rows.some((r) => String(r.slug).startsWith("endpaper"))).toBe(false);
   });
 
   it("places custom content on pages 2–3 and global Glasshouse on the inside back", () => {

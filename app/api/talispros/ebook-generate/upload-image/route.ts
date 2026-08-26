@@ -9,14 +9,15 @@ import {
   TALISBOOKS_ASSET_CACHE_CONTROL,
   TALISBOOKS_IMAGE_STORAGE_BUCKET,
 } from "@/lib/talisbooks/image-engine";
-import { resolveOnboardingFromRequest } from "@/lib/talispros/resolve-onboarding-from-request";
+import { resolveOnboardingUploadScope } from "@/lib/talispros/resolve-onboarding-from-request";
 import {
   logOnboardingStep,
   onboardingNow,
 } from "@/lib/onboarding-timing";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+/** Sharp + storage for a large phone photo routinely exceeds 30s. */
+export const maxDuration = 120;
 
 export type EbookOptimizedUploadResponse = {
   ok: true;
@@ -29,6 +30,10 @@ export type EbookOptimizedUploadResponse = {
   kind: OptimizeImageKind;
   compressionRatio: number;
 };
+
+function isUploadBlob(value: FormDataEntryValue | null): value is Blob {
+  return typeof Blob !== "undefined" && value instanceof Blob && value.size > 0;
+}
 
 /**
  * Optimize one image and store it. Client uploads files individually to avoid 413.
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
     const requestId = String(formData.get("requestId") || "").trim();
     const kind = parseOptimizeImageKind(String(formData.get("kind") || "property"));
     const label = String(formData.get("label") || "").trim();
-    const file = formData.get("file");
+    const fileEntry = formData.get("file");
 
     if (!requestId) {
       return Response.json(
@@ -58,23 +63,20 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-    if (!(file instanceof File) || file.size === 0) {
+    if (!isUploadBlob(fileEntry)) {
       return Response.json(
         { ok: false, error: label ? `Missing file: ${label}` : "Missing image file." },
         { status: 400 },
       );
     }
 
-    const resolved = await resolveOnboardingFromRequest(requestId);
-    if (!resolved.ok) {
-      return Response.json(
-        { ok: false, error: resolved.report.error },
-        { status: 400 },
-      );
+    const scoped = await resolveOnboardingUploadScope(requestId);
+    if (!scoped.ok) {
+      return Response.json({ ok: false, error: scoped.error }, { status: 400 });
     }
 
-    const scope = resolved.context.fastCode || requestId;
-    const source = Buffer.from(await file.arrayBuffer());
+    const scope = scoped.fastCode || requestId;
+    const source = Buffer.from(await fileEntry.arrayBuffer());
     const optimized = await optimizeUploadImage(source, kind);
     const ext = extensionForOptimizedMime(optimized.mimeType);
     const id = crypto.randomUUID();
@@ -140,10 +142,13 @@ export async function POST(request: Request) {
     logOnboardingStep("Ebook image optimize+upload", started, {
       requestId,
       kind,
+      label: label || null,
       originalBytes: optimized.originalBytes,
       bytes: optimized.bytes,
+      width: optimized.width,
+      height: optimized.height,
       compressionRatio,
-      label: label || null,
+      mimeType: optimized.mimeType,
     });
 
     const body: EbookOptimizedUploadResponse = {

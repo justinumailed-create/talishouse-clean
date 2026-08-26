@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import {
   AnimatePresence,
   animate,
@@ -10,7 +10,11 @@ import {
   type MotionValue,
 } from "framer-motion";
 import TalisBooksPageRenderer from "@/components/talisbooks/viewer/TalisBooksPageRenderer";
-import { isMattedSpreadPage } from "@/lib/talisbooks/viewer/spread-layout";
+import {
+  clampSpreadAspectRatio,
+  continuousSpreadImageUrl,
+  isMattedSpreadPage,
+} from "@/lib/talisbooks/viewer/spread-layout";
 import {
   TALISBOOKS_VIEWER_DRAG_THRESHOLD_PX,
   TALISBOOKS_VIEWER_FLIP_COMMIT_PROGRESS,
@@ -376,6 +380,39 @@ function ClosedHardCover({
 
 type GestureSide = "left" | "right";
 
+/** Measure a landscape spread image so the open book can match its aspect. */
+function useContinuousSpreadAspectRatio(imageUrl: string | null): number | null {
+  const [aspect, setAspect] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!imageUrl) {
+      setAspect(null);
+      return;
+    }
+
+    let cancelled = false;
+    const image = new window.Image();
+    image.decoding = "async";
+    image.onload = () => {
+      if (cancelled) return;
+      const { naturalWidth: width, naturalHeight: height } = image;
+      if (width > 0 && height > 0) {
+        setAspect(clampSpreadAspectRatio(width / height));
+      }
+    };
+    image.onerror = () => {
+      if (!cancelled) setAspect(null);
+    };
+    image.src = imageUrl;
+
+    return () => {
+      cancelled = true;
+    };
+  }, [imageUrl]);
+
+  return aspect;
+}
+
 function OpenBookSpread({
   book,
   navIndex,
@@ -705,6 +742,14 @@ function OpenBookSpread({
 
   const soloRight = !labelSpread.left && Boolean(labelSpread.right);
   const soloLeft = Boolean(labelSpread.left) && !labelSpread.right;
+  const continuousUrl = useMemo(
+    () => continuousSpreadImageUrl(labelSpread.left, labelSpread.right),
+    [labelSpread.left, labelSpread.right],
+  );
+  const spreadAspect = useContinuousSpreadAspectRatio(
+    soloRight || soloLeft ? null : continuousUrl,
+  );
+  const fitToLandscape = Boolean(spreadAspect);
 
   return (
     <>
@@ -718,6 +763,14 @@ function OpenBookSpread({
         ]
           .filter(Boolean)
           .join(" ")}
+        data-spread-fit={fitToLandscape ? "image" : undefined}
+        style={
+          fitToLandscape
+            ? ({
+                ["--book-spread-aspect"]: String(spreadAspect),
+              } as CSSProperties)
+            : undefined
+        }
         aria-label={magazine ? "Open magazine" : "Open book"}
         initial={{ opacity: 0.7, rotateY: -8, scale: 0.96 }}
         animate={{ opacity: 1, rotateY: 0, scale: 1 }}

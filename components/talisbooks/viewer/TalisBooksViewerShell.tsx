@@ -12,6 +12,7 @@ import TalisBooksViewerStage, {
   type TalisBooksViewerBinding,
 } from "@/components/talisbooks/viewer/TalisBooksViewerStage";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
+import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
 import { MAPSITE_APP_PATH, buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 import {
@@ -401,6 +402,10 @@ export default function TalisBooksViewerShell({
           accountType: book.accountType,
         })
       : MAPSITE_APP_PATH;
+  const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
+  const backLinkLabel = isPinnedShowcase
+    ? "Build Demo-eBook and Mapsite™"
+    : "Back to Mapsite™";
 
   return (
     <div
@@ -425,7 +430,7 @@ export default function TalisBooksViewerShell({
         </div>
         <div className="talisbooks-viewer__header-actions">
           <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
-            Back to Mapsite™
+            {backLinkLabel}
           </Link>
           {showDashboard ? (
             <Link href={TALISBOOKS_ROUTES.DASHBOARD} className="talisbooks-viewer__back">

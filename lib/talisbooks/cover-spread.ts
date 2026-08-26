@@ -1,15 +1,19 @@
 /**
  * Cover-spread helpers for self-service TalisBooks™.
  *
- * Rule: the first landscape upload (or PDF page 1) is always a wrap cover:
+ * Rule: image #1 (or PDF page 1) is ALWAYS the wrap cover:
  *   LEFT half  = back cover
  *   RIGHT half = front cover
+ *
+ * Split is exactly 50% of width (vertical center line), regardless of
+ * whether the source is landscape or portrait.
  *
  * Separate front/back cover assets (admin / pinned books) remain supported
  * via metadata.coverImageUrl + metadata.backCoverImageUrl without splitting.
  */
 
-import { splitLandscapeImage } from "@/lib/talisbooks/image-engine/split-landscape";
+import sharp from "sharp";
+import { computeLandscapeSplitWidths } from "@/lib/talisbooks/image-engine/split-landscape";
 
 export const COVER_SPREAD_META_KEY = "coverSpreadOpening" as const;
 
@@ -25,7 +29,7 @@ export type CoverSpreadHalves = {
 };
 
 /**
- * Split a landscape cover-spread raster into back (left) and front (right).
+ * Split any cover-spread raster into back (left) and front (right) at 50% width.
  */
 export async function splitCoverSpreadBuffer(
   input: Buffer,
@@ -35,19 +39,45 @@ export async function splitCoverSpreadBuffer(
   width: number;
   height: number;
 }> {
-  const split = await splitLandscapeImage(input);
+  const metadata = await sharp(input, { failOn: "none" }).rotate().metadata();
+  const width = metadata.width;
+  const height = metadata.height;
+
+  if (!width || !height) {
+    throw new Error("Unable to read cover spread image dimensions.");
+  }
+  if (width < 2) {
+    throw new Error("Cover spread image is too narrow to split.");
+  }
+
+  const { leftWidth, rightWidth } = computeLandscapeSplitWidths(width);
+  const rotated = sharp(input, { failOn: "none" }).rotate();
+
+  const [back, front] = await Promise.all([
+    rotated
+      .clone()
+      .extract({ left: 0, top: 0, width: leftWidth, height })
+      .jpeg({ quality: 90, mozjpeg: false })
+      .toBuffer(),
+    rotated
+      .clone()
+      .extract({ left: leftWidth, top: 0, width: rightWidth, height })
+      .jpeg({ quality: 90, mozjpeg: false })
+      .toBuffer(),
+  ]);
+
   return {
-    back: split.left,
-    front: split.right,
-    width: split.original.width,
-    height: split.original.height,
+    back,
+    front,
+    width,
+    height,
   };
 }
 
 /**
  * Fetch a remote image and split it as a cover spread.
  * Falls back to treating the whole image as front (and back = front) when
- * the asset is not landscape — generation should still succeed.
+ * the asset cannot be split — generation should still succeed.
  */
 export async function splitCoverSpreadFromUrl(
   url: string,

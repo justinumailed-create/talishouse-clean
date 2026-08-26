@@ -446,10 +446,10 @@ function PropertyContentPageView({ page }: { page: TalisBooksViewerPage }) {
 }
 
 function TebCoverPageView({ page }: { page: TalisBooksViewerPage }) {
-  // Supplied cover art (exact PDF / separate cover assets) — show image only.
-  if (page.exactPdfPage === true && page.heroImageUrl?.trim()) {
+  // Self-service / pinned / PDF covers: full-bleed art only (no agent chrome).
+  if (page.heroImageUrl?.trim()) {
     return (
-      <div className="talisbooks-viewer-page talisbooks-viewer-page--bleed talisbooks-viewer-page--exact-pdf">
+      <div className="talisbooks-viewer-page talisbooks-viewer-page--bleed talisbooks-viewer-page--exact-pdf talisbooks-viewer-page--cover-art">
         <div
           className="talisbooks-viewer-page__bleed-hero"
           style={{ backgroundImage: `url(${page.heroImageUrl})` }}
@@ -512,19 +512,10 @@ function TebCoverPageView({ page }: { page: TalisBooksViewerPage }) {
       </div>
 
       <div className="talisbooks-viewer-page__teb-hero">
-        {page.heroImageUrl ? (
-          <img
-            className="talisbooks-viewer-page__teb-hero-image"
-            src={page.heroImageUrl}
-            alt={page.title}
-            draggable={false}
-          />
-        ) : (
-          <div
-            className="talisbooks-viewer-page__teb-hero-fallback"
-            aria-hidden="true"
-          />
-        )}
+        <div
+          className="talisbooks-viewer-page__teb-hero-fallback"
+          aria-hidden="true"
+        />
       </div>
       <div className="talisbooks-viewer-page__teb-band talisbooks-viewer-page__teb-band--bottom">
         <p className="talisbooks-viewer-page__teb-caption">

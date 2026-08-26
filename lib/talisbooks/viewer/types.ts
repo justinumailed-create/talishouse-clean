@@ -56,6 +56,8 @@ export interface TalisBooksViewerPage {
    * Exact PDF raster page — show image only (no captions / ebook chrome).
    */
   exactPdfPage?: boolean;
+  /** Which half of a wrap cover this leaf is (self-service / PDF split). */
+  coverSpreadHalf?: "front" | "back";
   /**
    * Permanent / system pages (e.g. Glasshouse brochure).
    * Clients cannot edit these; admins replace the global source.

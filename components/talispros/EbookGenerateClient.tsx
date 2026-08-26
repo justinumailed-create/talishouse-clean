@@ -92,11 +92,35 @@ function formatNorthAmericanPhone(value: string): string {
 }
 
 const STAGE_ORDER = EBOOK_GENERATION_STAGES;
-const UPLOAD_CONCURRENCY = 3;
 
 function stageIndex(stage: EbookGenerationStage | null): number {
   if (!stage || stage === "failed") return -1;
   return STAGE_ORDER.indexOf(stage);
+}
+
+const UPLOAD_CONCURRENCY = 2;
+const UPLOAD_MAX_ATTEMPTS = 3;
+
+function isAbortError(error: unknown): boolean {
+  return (
+    (error instanceof DOMException && error.name === "AbortError") ||
+    (error instanceof Error &&
+      (error.name === "AbortError" || /aborted/i.test(error.message)))
+  );
+}
+
+function isTransientUploadError(error: unknown): boolean {
+  if (isAbortError(error)) return false;
+  if (!(error instanceof Error)) return false;
+  const message = error.message.toLowerCase();
+  return (
+    message.includes("failed to fetch") ||
+    message.includes("networkerror") ||
+    message.includes("network request failed") ||
+    message.includes("load failed") ||
+    message.includes("fetch failed") ||
+    /\b5\d\d\b/.test(message)
+  );
 }
 
 async function uploadOptimizedImage(options: {
@@ -106,41 +130,70 @@ async function uploadOptimizedImage(options: {
   label: string;
   signal?: AbortSignal;
 }): Promise<EbookOptimizedUploadResponse> {
-  const fd = new FormData();
-  fd.set("requestId", options.requestId);
-  fd.set("kind", options.kind);
-  fd.set("label", options.label);
-  fd.set("file", options.file);
+  let lastError: Error | null = null;
 
-  const response = await fetch("/api/talispros/ebook-generate/upload-image", {
-    method: "POST",
-    body: fd,
-    signal: options.signal,
-  });
-
-  let payload: { ok?: boolean; error?: string } & Partial<EbookOptimizedUploadResponse>;
-  try {
-    payload = (await response.json()) as typeof payload;
-  } catch {
-    throw new Error(
-      response.status === 413
-        ? `“${options.label}” is too large for a single upload. Try again — optimization should shrink it.`
-        : `Failed to upload “${options.label}” (${response.status}).`,
-    );
-  }
-
-  if (!response.ok || !payload.ok || !payload.url) {
-    if (response.status === 413) {
-      throw new Error(
-        `“${options.label}” triggered HTTP 413. Retry this image only.`,
-      );
+  for (let attempt = 1; attempt <= UPLOAD_MAX_ATTEMPTS; attempt += 1) {
+    if (options.signal?.aborted) {
+      throw new DOMException("Upload aborted.", "AbortError");
     }
-    throw new Error(
-      payload.error || `Failed to optimize and upload “${options.label}”.`,
-    );
+
+    try {
+      const fd = new FormData();
+      fd.set("requestId", options.requestId);
+      fd.set("kind", options.kind);
+      fd.set("label", options.label);
+      // Always send the live File/Blob — never a revoked object URL.
+      fd.set("file", options.file, options.file.name || options.label || "image.jpg");
+
+      const response = await fetch("/api/talispros/ebook-generate/upload-image", {
+        method: "POST",
+        body: fd,
+        signal: options.signal,
+      });
+
+      let payload: { ok?: boolean; error?: string } & Partial<EbookOptimizedUploadResponse>;
+      try {
+        payload = (await response.json()) as typeof payload;
+      } catch {
+        throw new Error(
+          response.status === 413
+            ? `“${options.label}” is too large for a single upload. Try again — optimization should shrink it.`
+            : `Failed to upload “${options.label}” (${response.status || "network"}).`,
+        );
+      }
+
+      if (!response.ok || !payload.ok || !payload.url) {
+        if (response.status === 413) {
+          throw new Error(
+            `“${options.label}” triggered HTTP 413. Retry this image only.`,
+          );
+        }
+        throw new Error(
+          payload.error || `Failed to optimize and upload “${options.label}”.`,
+        );
+      }
+
+      return payload as EbookOptimizedUploadResponse;
+    } catch (error) {
+      if (isAbortError(error)) throw error;
+      lastError =
+        error instanceof Error
+          ? error
+          : new Error(`Failed to upload “${options.label}”.`);
+
+      const canRetry =
+        attempt < UPLOAD_MAX_ATTEMPTS && isTransientUploadError(lastError);
+      if (!canRetry) break;
+
+      console.warn(
+        `[onboarding] Upload retry ${attempt}/${UPLOAD_MAX_ATTEMPTS} for “${options.label}”:`,
+        lastError.message,
+      );
+      await new Promise((resolve) => setTimeout(resolve, 400 * attempt));
+    }
   }
 
-  return payload as EbookOptimizedUploadResponse;
+  throw lastError || new Error(`Failed to upload “${options.label}”.`);
 }
 
 async function mapPool<T, R>(
@@ -416,12 +469,17 @@ export default function EbookGenerateClient({
         originalBytes += result.originalBytes;
         optimizedBytes += result.bytes;
       } catch (err) {
+        const aborted = isAbortError(err);
         failures.push({
           id: item.id,
           label: item.label,
           kind: "property",
           file: item.file,
-          error: err instanceof Error ? err.message : "Upload failed.",
+          error: aborted
+            ? "Upload timed out — tap Retry on this image."
+            : err instanceof Error
+              ? err.message
+              : "Upload failed.",
         });
       } finally {
         bump();
@@ -667,7 +725,7 @@ export default function EbookGenerateClient({
         }`,
       );
 
-      // First landscape (or first image fallback) is the cover spread — not captioned.
+      // Image #1 is always the cover spread — not captioned.
       const interiorCount = Math.max(0, optimizedImages.length - 1);
       if (captionsEnabled && !fromPdf && interiorCount > 0 && !captionStep) {
         pendingGenerateRef.current = {
@@ -899,7 +957,7 @@ export default function EbookGenerateClient({
             <p className="text-sm text-neutral-600">
               Captions · image {captionIndex + 1} of{" "}
               {Math.max(0, (pendingGenerateRef.current?.optimizedImages.length ?? 1) - 1)}
-              {" "}(cover spread is skipped; landscape photos share one caption per spread)
+              {" "}(image #1 cover spread is skipped; landscape photos share one caption per spread)
             </p>
             <textarea
               value={captionDraft}
