@@ -31,8 +31,14 @@ export type EbookOptimizedUploadResponse = {
   compressionRatio: number;
 };
 
-function isUploadBlob(value: FormDataEntryValue | null): value is Blob {
-  return typeof Blob !== "undefined" && value instanceof Blob && value.size > 0;
+function isUploadBlob(value: FormDataEntryValue | null): value is File {
+  return (
+    value != null &&
+    typeof value !== "string" &&
+    typeof Blob !== "undefined" &&
+    value instanceof Blob &&
+    value.size > 0
+  );
 }
 
 /**
