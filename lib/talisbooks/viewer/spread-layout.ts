@@ -48,6 +48,22 @@ export function continuousSpreadImageUrl(
   return null;
 }
 
+/**
+ * Finds the landscape spread image URL that defines the spread geometry for the book.
+ * Ensures consistent geometry across all pages (cover, interior spreads, and back cover).
+ */
+export function getBookContinuousSpreadImageUrl(
+  pages: TalisBooksViewerPage[],
+): string | null {
+  for (const page of pages) {
+    if (page && isMattedSpreadPage(page)) {
+      const url = page.spreadImageUrl?.trim();
+      if (url) return url;
+    }
+  }
+  return null;
+}
+
 export function clampSpreadAspectRatio(ratio: number): number {
   if (!Number.isFinite(ratio) || ratio <= 0) {
     return SPREAD_ASPECT_MIN;

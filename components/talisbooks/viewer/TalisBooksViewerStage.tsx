@@ -13,6 +13,7 @@ import TalisBooksPageRenderer from "@/components/talisbooks/viewer/TalisBooksPag
 import {
   clampSpreadAspectRatio,
   continuousSpreadImageUrl,
+  getBookContinuousSpreadImageUrl,
   isMattedSpreadPage,
 } from "@/lib/talisbooks/viewer/spread-layout";
 import {
@@ -746,9 +747,11 @@ function OpenBookSpread({
     () => continuousSpreadImageUrl(labelSpread.left, labelSpread.right),
     [labelSpread.left, labelSpread.right],
   );
-  const spreadAspect = useContinuousSpreadAspectRatio(
-    soloRight || soloLeft ? null : continuousUrl,
+  const bookSpreadUrl = useMemo(
+    () => getBookContinuousSpreadImageUrl(book.pages) || continuousUrl,
+    [book.pages, continuousUrl],
   );
+  const spreadAspect = useContinuousSpreadAspectRatio(bookSpreadUrl);
   const fitToLandscape = Boolean(spreadAspect);
 
   return (
@@ -1153,6 +1156,13 @@ function OpenBookSingle({
       ? incomingPage
       : currentPage;
 
+  const bookSpreadUrl = useMemo(
+    () => getBookContinuousSpreadImageUrl(book.pages),
+    [book.pages],
+  );
+  const spreadAspect = useContinuousSpreadAspectRatio(bookSpreadUrl);
+  const fitToLandscape = Boolean(spreadAspect);
+
   return (
     <>
       <motion.div
@@ -1164,6 +1174,14 @@ function OpenBookSingle({
         ]
           .filter(Boolean)
           .join(" ")}
+        data-spread-fit={fitToLandscape ? "image" : undefined}
+        style={
+          fitToLandscape
+            ? ({
+                ["--book-spread-aspect"]: String(spreadAspect),
+              } as CSSProperties)
+            : undefined
+        }
         aria-label={magazine ? "Open magazine · single page" : "Open book · single page"}
         initial={{ opacity: 0.7, rotateY: -6, scale: 0.96 }}
         animate={{ opacity: 1, rotateY: 0, scale: 1 }}

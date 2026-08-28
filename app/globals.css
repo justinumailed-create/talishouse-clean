@@ -1689,7 +1689,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-viewer-book--single {
   width: min(100%, 34rem);
-  aspect-ratio: 3 / 4.05;
+  aspect-ratio: calc(var(--book-spread-aspect, 3 / 2.05) / 2);
   transform: rotateX(5deg) scale(1);
   /* filter flattens preserve-3d — keep shadow off the 3D leaf */
   filter: none;
@@ -2092,7 +2092,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-right,
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-left {
   width: min(50%, 34rem);
-  aspect-ratio: 3 / 4.05;
+  aspect-ratio: calc(var(--book-spread-aspect, 3 / 2.05) / 2);
 }
 
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-right .talisbooks-viewer-book__spread,
@@ -3251,15 +3251,16 @@ body.mapsite-gallery-open [data-paypal-button] {
   background-color: #f5f5f4;
 }
 
-/* Front / back cover art fills the page face — no letterbox bars. */
+/* Front / back cover art fills the page face — no letterbox bars and no cropping. */
 .talisbooks-viewer-page--exact-pdf.talisbooks-viewer-page--cover-art {
   background: #1c1917;
 }
 
 .talisbooks-viewer-page--exact-pdf.talisbooks-viewer-page--cover-art
   .talisbooks-viewer-page__bleed-hero {
-  background-size: cover;
+  background-size: 100% 100%;
   background-position: center;
+  background-repeat: no-repeat;
   background-color: transparent;
 }
 
@@ -3926,10 +3927,10 @@ body.mapsite-gallery-open [data-paypal-button] {
   .talisbooks-viewer--magazine .talisbooks-viewer-book--magazine.talisbooks-viewer-book--solo-left,
   .talisbooks-viewer--magazine .talisbooks-viewer-book--magazine.talisbooks-viewer-book--single {
     width: auto;
-    max-width: min(46vw, calc((100dvh - 3.65rem) * 0.74));
+    max-width: min(50vw, calc((100dvh - 3.65rem) * var(--book-spread-aspect, 3 / 2.05) / 2));
     max-height: calc(100dvh - 3.65rem);
     height: min(calc(100dvh - 3.65rem), 100%);
-    aspect-ratio: 3 / 4.05;
+    aspect-ratio: calc(var(--book-spread-aspect, 3 / 2.05) / 2);
     transform: none;
   }
 

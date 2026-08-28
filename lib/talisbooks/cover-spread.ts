@@ -17,6 +17,13 @@ import { computeLandscapeSplitWidths } from "@/lib/talisbooks/image-engine/split
 
 export const COVER_SPREAD_META_KEY = "coverSpreadOpening" as const;
 
+export interface CoverSpreadSplitOptions {
+  /** Target single-page width (matches interior page leaf width). */
+  targetWidth?: number;
+  /** Target single-page height (matches interior page leaf height). */
+  targetHeight?: number;
+}
+
 export type CoverSpreadHalves = {
   /** Full wrap source (optional, for shelf / admin). */
   coverSpreadImageUrl?: string | null;
@@ -29,10 +36,12 @@ export type CoverSpreadHalves = {
 };
 
 /**
- * Split any cover-spread raster into back (left) and front (right) at 50% width.
+ * Split any cover-spread raster into back (left) and front (right) at 50% width,
+ * and force-resize both halves to the exact interior-page dimensions (without cropping).
  */
 export async function splitCoverSpreadBuffer(
   input: Buffer,
+  options?: CoverSpreadSplitOptions,
 ): Promise<{
   front: Buffer;
   back: Buffer;
@@ -53,24 +62,43 @@ export async function splitCoverSpreadBuffer(
   const { leftWidth, rightWidth } = computeLandscapeSplitWidths(width);
   const rotated = sharp(input, { failOn: "none" }).rotate();
 
+  const targetWidth =
+    options?.targetWidth && options.targetWidth > 0
+      ? options.targetWidth
+      : leftWidth;
+  const targetHeight =
+    options?.targetHeight && options.targetHeight > 0
+      ? options.targetHeight
+      : height;
+
   const [back, front] = await Promise.all([
     rotated
       .clone()
       .extract({ left: 0, top: 0, width: leftWidth, height })
-      .jpeg({ quality: 90, mozjpeg: false })
+      .resize({
+        width: targetWidth,
+        height: targetHeight,
+        fit: "fill",
+      })
+      .jpeg({ quality: 92, mozjpeg: false })
       .toBuffer(),
     rotated
       .clone()
       .extract({ left: leftWidth, top: 0, width: rightWidth, height })
-      .jpeg({ quality: 90, mozjpeg: false })
+      .resize({
+        width: targetWidth,
+        height: targetHeight,
+        fit: "fill",
+      })
+      .jpeg({ quality: 92, mozjpeg: false })
       .toBuffer(),
   ]);
 
   return {
     back,
     front,
-    width,
-    height,
+    width: targetWidth,
+    height: targetHeight,
   };
 }
 
@@ -81,6 +109,7 @@ export async function splitCoverSpreadBuffer(
  */
 export async function splitCoverSpreadFromUrl(
   url: string,
+  options?: CoverSpreadSplitOptions,
 ): Promise<{
   front: Buffer;
   back: Buffer;
@@ -94,7 +123,7 @@ export async function splitCoverSpreadFromUrl(
   }
   const buffer = Buffer.from(await response.arrayBuffer());
   try {
-    const halves = await splitCoverSpreadBuffer(buffer);
+    const halves = await splitCoverSpreadBuffer(buffer, options);
     return { ...halves, splitApplied: true };
   } catch {
     return {
