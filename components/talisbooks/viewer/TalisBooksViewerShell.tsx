@@ -404,7 +404,7 @@ export default function TalisBooksViewerShell({
       : MAPSITE_APP_PATH;
   const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
   const backLinkLabel = isPinnedShowcase
-    ? "Build Demo-eBook and Mapsite™"
+    ? "Build Demo eBook and Mapsite™"
     : "Back to Mapsite™";
 
   return (
@@ -429,6 +429,15 @@ export default function TalisBooksViewerShell({
           ) : null}
         </div>
         <div className="talisbooks-viewer__header-actions">
+          {book.pdfDownloadUrl ? (
+            <a
+              href={book.pdfDownloadUrl}
+              download={book.pdfDownloadFileName || true}
+              className="talisbooks-viewer__back"
+            >
+              Download PDF
+            </a>
+          ) : null}
           <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
             {backLinkLabel}
           </Link>
@@ -441,26 +450,39 @@ export default function TalisBooksViewerShell({
       </header>
 
       <div className="talisbooks-viewer__layout">
-        <TalisBooksViewerStage
-          book={book}
-          binding={isMagazine ? "open" : binding}
-          viewMode={viewMode}
-          navIndex={effectiveNavIndex}
-          navCount={navCount}
-          direction={direction}
-          magazine={isMagazine}
-          onHoverChange={(hovered) => {
-            stageHoverRef.current = hovered;
-            syncStagePause();
-          }}
-          onFlippingChange={(flipping) => {
-            flippingRef.current = flipping;
-            syncStagePause();
-          }}
-          onRequestNext={handleNext}
-          onRequestPrevious={handlePrevious}
-          onOpenBook={handleOpenBook}
-        />
+        <div className="talisbooks-viewer__stage-column">
+          <TalisBooksViewerStage
+            book={book}
+            binding={isMagazine ? "open" : binding}
+            viewMode={viewMode}
+            navIndex={effectiveNavIndex}
+            navCount={navCount}
+            direction={direction}
+            magazine={isMagazine}
+            onHoverChange={(hovered) => {
+              stageHoverRef.current = hovered;
+              syncStagePause();
+            }}
+            onFlippingChange={(flipping) => {
+              flippingRef.current = flipping;
+              syncStagePause();
+            }}
+            onRequestNext={handleNext}
+            onRequestPrevious={handlePrevious}
+            onOpenBook={handleOpenBook}
+          />
+          {book.pdfDownloadUrl ? (
+            <div className="talisbooks-viewer__pdf-row">
+              <a
+                href={book.pdfDownloadUrl}
+                download={book.pdfDownloadFileName || true}
+                className="talisbooks-viewer__pdf-download"
+              >
+                Download PDF
+              </a>
+            </div>
+          ) : null}
+        </div>
         {canEditTools ? (
           <aside className="talisbooks-viewer__sidebar">
             <TalisBooksViewerControls

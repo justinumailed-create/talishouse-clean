@@ -1189,6 +1189,30 @@ body.mapsite-gallery-open [data-paypal-button] {
   align-items: stretch;
 }
 
+.talisbooks-viewer__stage-column {
+  min-width: 0;
+}
+
+.talisbooks-viewer__pdf-row {
+  margin-top: 0.15rem;
+  text-align: center;
+}
+
+.talisbooks-viewer__pdf-download {
+  display: inline-flex;
+  min-height: 2.25rem;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #44403c;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.talisbooks-viewer__pdf-download:hover {
+  color: #171717;
+}
+
 @media (min-width: 1100px) {
   .talisbooks-viewer__layout {
     grid-template-columns: minmax(0, 1fr) 14.5rem;

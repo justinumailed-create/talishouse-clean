@@ -114,6 +114,10 @@ export interface TalisBooksViewerBook {
    * Set for self-service PDFs where page 1 is a cover spread.
    */
   coverSpreadOpening?: boolean;
+  /** Public URL for a downloadable PDF of this book, when one exists. */
+  pdfDownloadUrl?: string;
+  /** Suggested filename for the PDF download. */
+  pdfDownloadFileName?: string;
   pages: TalisBooksViewerPage[];
 }
 

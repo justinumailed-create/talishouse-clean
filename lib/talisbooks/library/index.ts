@@ -31,6 +31,7 @@ export {
 } from "./bookshelf-service";
 export {
   PINNED_TALISBOOK_SLUG,
+  PINNED_TALISBOOK_PDF_PATH,
   createPinnedTalisBookViewer,
   pinnedTalisBookLibraryEntry,
 } from "./pinned-catalog";

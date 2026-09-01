@@ -31,11 +31,14 @@ import {
   isClaimable,
   MAPSITE_APP_PATH,
   pinPhaseLabel,
+  publishedMapSitePath,
 } from "@/lib/talispros/mapsite-state";
 import {
   getMapSiteOnboardingPhase,
 } from "@/lib/talispros/mapsite-onboarding-phase";
 import { ROUTES } from "@/lib/routes";
+import Link from "next/link";
+import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import MapSiteExpressInterestCard from "./MapSiteExpressInterestCard";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
 import MapSiteMarketPartnerCard from "./MapSiteMarketPartnerCard";
@@ -445,6 +448,9 @@ function MapSiteChrome({
     onboardingMode === "assisted"
       ? "Register Account now"
       : "Register Account now";
+  const publishedHref = isIssuedFastCode(mapsite.fast_code)
+    ? publishedMapSitePath(mapsite.fast_code)
+    : null;
 
   // Express Interest only after payment. PayPal uses claim-form planType;
   // auto-reveals above the marketing sidebar 10s after load (or immediately via Activate).
@@ -466,69 +472,81 @@ function MapSiteChrome({
     ) : null;
 
   return (
-    <div
-      ref={rootRef}
-      className="relative h-dvh w-screen overflow-hidden bg-neutral-900"
-    >
-      <MapEngineCanvas className="h-full w-full" />
-
-      <div
-        ref={sidebarStackRef}
-        className={
-          mobileOverlay
-            ? "pointer-events-none absolute inset-0 z-20 p-3"
-            : compact
-              ? "pointer-events-none absolute inset-x-0 top-0 z-20 h-[min(52%,30rem)] p-3 sm:h-[min(48%,28rem)]"
-            : "pointer-events-none absolute inset-0 z-20"
-        }
-      >
-        <MapSiteListingSidebar
-          mapsite={mapsite}
-          listingCardRef={listingCardRef}
-          compact={compact}
-          mobileOverlay={mobileOverlay}
-          onSelectListing={focusPinAndOpen}
-          aboveCard={
-            claimed ? (
-              <MapSiteMarketPartnerCard
-                audience={audience}
-                mapsite={mapsite}
-                cardRef={listingCardRef}
-                onSelect={focusPinAndOpen}
-              />
-            ) : null
-          }
-          belowCard={registrationCard}
-        />
-      </div>
-
-      {selectedPinId === mapsite.id ? (
-        <>
-          <MapSitePropertyPopup
-            mapsite={mapsite}
-            claimHref={claimHref}
-            claimLabel={claimLabel}
-            genericOnboardingCard={!claimed}
-            accountType={accountType}
-            onboardingPhase={onboardingPhase}
-            talisBookHref={bookHref}
-            alignTop={alignTop}
-            centerX={popupCenterX}
-            cardHeight={expandedCardHeight}
-            compact={compact}
-            onClose={() => setSelectedPinId(null)}
-          />
-          <MapSiteStartHereOverlay
-            mapsiteId={mapsite.id}
-            fastCode={mapsite.fast_code}
-            accountType={audience}
-            requestId={requestId}
-            tipTop={alignTop}
-            centerX={popupCenterX}
-            enabled={showStartHere && onboardingPhase === "ACTIVE"}
-          />
-        </>
+    <div className="relative flex h-dvh w-screen flex-col overflow-hidden bg-neutral-900">
+      {publishedHref ? (
+        <div className="z-30 flex shrink-0 items-center justify-center border-b border-white/10 bg-neutral-950 px-4 py-2">
+          <Link
+            href={publishedHref}
+            className="text-sm font-medium text-white underline decoration-white/40 underline-offset-4 transition hover:decoration-white"
+          >
+            View published site
+          </Link>
+        </div>
       ) : null}
+      <div
+        ref={rootRef}
+        className="relative min-h-0 flex-1 overflow-hidden bg-neutral-900"
+      >
+        <MapEngineCanvas className="h-full w-full" />
+
+        <div
+          ref={sidebarStackRef}
+          className={
+            mobileOverlay
+              ? "pointer-events-none absolute inset-0 z-20 p-3"
+              : compact
+                ? "pointer-events-none absolute inset-x-0 top-0 z-20 h-[min(52%,30rem)] p-3 sm:h-[min(48%,28rem)]"
+              : "pointer-events-none absolute inset-0 z-20"
+          }
+        >
+          <MapSiteListingSidebar
+            mapsite={mapsite}
+            listingCardRef={listingCardRef}
+            compact={compact}
+            mobileOverlay={mobileOverlay}
+            onSelectListing={focusPinAndOpen}
+            aboveCard={
+              claimed ? (
+                <MapSiteMarketPartnerCard
+                  audience={audience}
+                  mapsite={mapsite}
+                  cardRef={listingCardRef}
+                  onSelect={focusPinAndOpen}
+                />
+              ) : null
+            }
+            belowCard={registrationCard}
+          />
+        </div>
+
+        {selectedPinId === mapsite.id ? (
+          <>
+            <MapSitePropertyPopup
+              mapsite={mapsite}
+              claimHref={claimHref}
+              claimLabel={claimLabel}
+              genericOnboardingCard={!claimed}
+              accountType={accountType}
+              onboardingPhase={onboardingPhase}
+              talisBookHref={bookHref}
+              alignTop={alignTop}
+              centerX={popupCenterX}
+              cardHeight={expandedCardHeight}
+              compact={compact}
+              onClose={() => setSelectedPinId(null)}
+            />
+            <MapSiteStartHereOverlay
+              mapsiteId={mapsite.id}
+              fastCode={mapsite.fast_code}
+              accountType={audience}
+              requestId={requestId}
+              tipTop={alignTop}
+              centerX={popupCenterX}
+              enabled={showStartHere && onboardingPhase === "ACTIVE"}
+            />
+          </>
+        ) : null}
+      </div>
     </div>
   );
 }

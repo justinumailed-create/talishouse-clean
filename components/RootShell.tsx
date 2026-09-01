@@ -19,6 +19,7 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/associate/dashboard") ||
     pathname.startsWith("/associate/login") ||
     pathname.startsWith("/ma/") ||
+    pathname.startsWith("/mapsite") ||
     pathname.startsWith("/crm/");
   const hideTalisBot = pathname === "/partner-access" || pathname.startsWith("/talistv");
 

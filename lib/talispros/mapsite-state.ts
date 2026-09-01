@@ -140,6 +140,12 @@ export function mapsiteAccountTypeSegment(
   return "listings";
 }
 
+/** Public published Mapsite™ page: /mapsite/{fastCode} */
+export function publishedMapSitePath(fastCode: string): string {
+  const code = fastCode.trim().toLowerCase();
+  return `/mapsite/${encodeURIComponent(code)}`;
+}
+
 /** Short claimed Mapsite™ URL: /talispros/mapsite/{accountType}/{fastCode} */
 export function buildClaimedMapSitePath(options: {
   fastCode: string;

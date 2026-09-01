@@ -1,5 +1,10 @@
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import AssociateHero from "@/components/associate/AssociateHero";
+import PublishedMapSiteView, {
+  loadPublishedMapSiteView,
+  publishedMapSiteMetadata,
+} from "@/components/mapsite/PublishedMapSiteView";
+import type { Metadata } from "next";
 
 interface PageConfig {
   contentType: "map" | "pdf" | "image";
@@ -15,6 +20,25 @@ interface PageConfig {
   phone?: string;
 }
 
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug?: string }>;
+}): Promise<Metadata> {
+  const resolvedParams = await params;
+  const slug = resolvedParams?.slug?.toLowerCase().trim();
+  if (!slug) {
+    return { title: "Mapsite™" };
+  }
+  const published = await loadPublishedMapSiteView(slug);
+  if (published) {
+    return publishedMapSiteMetadata(published);
+  }
+  return { title: "Mapsite™" };
+}
+
 export default async function MapSitePage({ params }: { params: Promise<{ slug?: string }> }) {
   const resolvedParams = await params;
   const slug = resolvedParams?.slug?.toLowerCase().trim();
@@ -28,6 +52,11 @@ export default async function MapSitePage({ params }: { params: Promise<{ slug?:
         </div>
       </div>
     );
+  }
+
+  const published = await loadPublishedMapSiteView(slug);
+  if (published) {
+    return <PublishedMapSiteView mapsite={published} />;
   }
 
   let pageConfig: PageConfig | undefined;

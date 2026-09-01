@@ -18,6 +18,8 @@ import type { TalisBooksViewerBook, TalisBooksViewerPage } from "../viewer/types
 
 export const PINNED_TALISBOOK_SLUG = "talispros-ebook-sample";
 export const PINNED_TALISBOOK_ASSET_ROOT = "/talisbooks/pinned";
+export const PINNED_TALISBOOK_PDF_PATH = `${PINNED_TALISBOOK_ASSET_ROOT}/talispros-ebook-sample.pdf`;
+export const PINNED_TALISBOOK_PDF_FILE_NAME = "TalisPros-Ebook-Sample.pdf";
 export const PINNED_TALISBOOK_INTERIOR_PAGE_COUNT = 11;
 
 /** Front + back covers + 2 leaves per interior landscape slide. */
@@ -124,6 +126,8 @@ export function createPinnedTalisBookViewer(): TalisBooksViewerBook {
     coverSpreadOpening: false,
     frontCoverImageUrl: front,
     backCoverImageUrl: back,
+    pdfDownloadUrl: PINNED_TALISBOOK_PDF_PATH,
+    pdfDownloadFileName: PINNED_TALISBOOK_PDF_FILE_NAME,
     pages,
   };
 }

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { buildClaimedMapSiteHref, getMapSiteByFastCode } from "../lib/mapsite-service";
+import { publishedMapSitePath } from "../lib/talispros/mapsite-state";
 
 const mockMapSitesMaybeSingle = vi.fn();
 const mockMapSitesByIdMaybeSingle = vi.fn();
@@ -305,5 +306,11 @@ describe("buildClaimedMapSiteHref", () => {
         accountType: "root-1",
       })
     ).toBe("/talispros/mapsite/root/rc08");
+  });
+});
+
+describe("publishedMapSitePath", () => {
+  it("builds /mapsite/{fastCode}", () => {
+    expect(publishedMapSitePath("LG01")).toBe("/mapsite/lg01");
   });
 });
