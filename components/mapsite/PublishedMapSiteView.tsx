@@ -3,7 +3,7 @@ import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
 import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
 import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import { getMapSiteByFastCode, type MapSiteView } from "@/lib/mapsite-service";
-import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { getMapSitePlatformByFastCode, type MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 
 function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
@@ -30,7 +30,7 @@ function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
     latitude: record.lat,
     longitude: record.lng,
     price: null,
-    profileImageUrl: record.cover_image,
+    profileImageUrl: null,
     logoUrl: null,
     headerImageUrl: record.cover_image,
     videoUrl: record.ttv_url,
@@ -76,17 +76,82 @@ function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
   };
 }
 
-export async function loadPublishedMapSiteView(fastCode: string) {
-  try {
-    const existing = await getMapSiteByFastCode(fastCode);
-    if (existing) return existing;
-  } catch {
-    // Platform mapsites may not satisfy the account-backed Mapsite™ view.
+async function enrichPublishedBranding(
+  fastCode: string,
+  view: MapSiteView,
+): Promise<MapSiteView> {
+  if (!isSupabaseAdminConfigured()) return view;
+
+  const supabase = getSupabaseAdmin();
+  const [{ data: row }, { data: fastCodeRow }] = await Promise.all([
+    supabase
+      .from("mapsites")
+      .select(
+        "logo_url, profile_image_url, agent_name, email, phone, owner_first_name, owner_last_name",
+      )
+      .ilike("fast_code", fastCode)
+      .maybeSingle(),
+    supabase
+      .from("fast_codes")
+      .select("request_id")
+      .ilike("code", fastCode)
+      .maybeSingle(),
+  ]);
+
+  let assets: { profile_image: string | null; logo_image: string | null } | null =
+    null;
+  const requestId = fastCodeRow?.request_id || view.requestId;
+  if (requestId) {
+    const { data } = await supabase
+      .from("mapsite_assets")
+      .select("profile_image, logo_image")
+      .eq("request_id", requestId)
+      .maybeSingle();
+    assets = data;
   }
 
-  const platform = await getMapSitePlatformByFastCode(fastCode);
-  if (!platform) return null;
-  return mapSiteViewFromPlatform(platform);
+  const logoUrl = row?.logo_url || assets?.logo_image || view.logoUrl;
+  const profileImageUrl =
+    row?.profile_image_url || assets?.profile_image || view.profileImageUrl;
+  const agentName = row?.agent_name?.trim() || view.agentName;
+  const email = row?.email?.trim() || view.email;
+  const phone = row?.phone?.trim() || view.phone;
+
+  return {
+    ...view,
+    logoUrl,
+    profileImageUrl,
+    agentName,
+    email,
+    phone,
+    ownerFirstName: row?.owner_first_name || view.ownerFirstName,
+    ownerLastName: row?.owner_last_name || view.ownerLastName,
+  };
+}
+
+export async function loadPublishedMapSiteView(fastCode: string) {
+  let view: MapSiteView | null = null;
+  try {
+    view = await getMapSiteByFastCode(fastCode);
+  } catch {
+    view = null;
+  }
+
+  if (!view) {
+    const platform = await getMapSitePlatformByFastCode(fastCode);
+    if (!platform) return null;
+    view = mapSiteViewFromPlatform(platform);
+  }
+
+  try {
+    return await enrichPublishedBranding(fastCode, view);
+  } catch (error) {
+    console.warn(
+      "[published-mapsite] Could not load logo/photo branding:",
+      error instanceof Error ? error.message : error,
+    );
+    return view;
+  }
 }
 
 export function publishedMapSiteMetadata(mapsite: MapSiteView) {

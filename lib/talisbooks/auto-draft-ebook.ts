@@ -393,11 +393,19 @@ async function loadSelfServiceAgentDetails(input: {
       ? supabase
           .from("mapsites")
           .select(
-            "owner_first_name, owner_last_name, email, phone, agent_name, profile_image_url, logo_url, property_address",
+            "id, owner_first_name, owner_last_name, email, phone, agent_name, profile_image_url, logo_url, property_address",
           )
           .eq("id", resolvedMapSiteId)
           .maybeSingle()
-      : Promise.resolve({ data: null }),
+      : input.fastCode
+        ? supabase
+            .from("mapsites")
+            .select(
+              "id, owner_first_name, owner_last_name, email, phone, agent_name, profile_image_url, logo_url, property_address",
+            )
+            .ilike("fast_code", input.fastCode)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
     request?.id
       ? supabase
           .from("mapsite_assets")
@@ -419,7 +427,7 @@ async function loadSelfServiceAgentDetails(input: {
     .join(" ")
     .trim();
 
-  return {
+  const agent: SelfServiceAgentDetails = {
     name:
       overrides.name ||
       mapsite?.agent_name?.trim() ||
@@ -439,6 +447,109 @@ async function loadSelfServiceAgentDetails(input: {
     brokerageLogoUrl:
       uploadedLogoUrl || request?.logo || assets?.logo_image || mapsite?.logo_url || undefined,
   };
+
+  await persistSelfServiceMapSiteBranding({
+    mapsiteId: mapsiteResult.data?.id || resolvedMapSiteId,
+    fastCode: input.fastCode,
+    requestId: request?.id || input.requestId,
+    agent,
+    uploadedPhoto: Boolean(uploadedPhotoUrl),
+    uploadedLogo: Boolean(uploadedLogoUrl),
+  });
+
+  return agent;
+}
+
+async function persistSelfServiceMapSiteBranding(input: {
+  mapsiteId: string | null;
+  fastCode: string;
+  requestId: string | null | undefined;
+  agent: SelfServiceAgentDetails;
+  uploadedPhoto: boolean;
+  uploadedLogo: boolean;
+}): Promise<void> {
+  if (!isSupabaseAdminConfigured()) return;
+
+  const photo = input.agent.photoUrl?.trim() || null;
+  const logo = input.agent.brokerageLogoUrl?.trim() || null;
+  const name = input.agent.name?.trim() || "";
+  const email = input.agent.email?.trim() || "";
+  const phone = input.agent.phone?.trim() || "";
+  const requestId = input.requestId?.trim() || null;
+  const fastCode = input.fastCode.trim();
+  const shouldWriteMapSite =
+    Boolean(input.mapsiteId || fastCode) &&
+    (Boolean(photo) ||
+      Boolean(logo) ||
+      input.uploadedPhoto ||
+      input.uploadedLogo ||
+      name ||
+      email ||
+      phone);
+  const shouldWriteAssets =
+    Boolean(requestId) &&
+    (Boolean(photo) || Boolean(logo) || input.uploadedPhoto || input.uploadedLogo);
+
+  if (!shouldWriteMapSite && !shouldWriteAssets) return;
+
+  const supabase = getSupabaseAdmin();
+  const now = new Date().toISOString();
+
+  if (shouldWriteMapSite) {
+    const nameParts = name.split(/\s+/).filter(Boolean);
+    const patch: Record<string, unknown> = { updated_at: now };
+    if (photo) patch.profile_image_url = photo;
+    if (logo) patch.logo_url = logo;
+    if (name) {
+      patch.agent_name = name;
+      if (nameParts.length > 0) patch.owner_first_name = nameParts[0];
+      if (nameParts.length > 1) patch.owner_last_name = nameParts.slice(1).join(" ");
+    }
+    if (email) patch.email = email;
+    if (phone) patch.phone = phone;
+
+    const write = input.mapsiteId
+      ? supabase.from("mapsites").update(patch).eq("id", input.mapsiteId)
+      : supabase.from("mapsites").update(patch).ilike("fast_code", fastCode);
+    const { error } = await write;
+    if (error) {
+      console.warn("[auto-draft-ebook] Could not save Mapsite™ branding:", error.message);
+    } else if (input.mapsiteId && fastCode) {
+      const { error: byCodeError } = await supabase
+        .from("mapsites")
+        .update(patch)
+        .ilike("fast_code", fastCode);
+      if (byCodeError) {
+        console.warn(
+          "[auto-draft-ebook] Could not save Mapsite™ branding by FAST Code:",
+          byCodeError.message,
+        );
+      }
+    }
+  }
+
+  if (shouldWriteAssets && requestId) {
+    const { data: existing } = await supabase
+      .from("mapsite_assets")
+      .select("profile_image, logo_image, pin_image, monologue_pdf, ebook_pdf")
+      .eq("request_id", requestId)
+      .maybeSingle();
+
+    const { error } = await supabase.from("mapsite_assets").upsert(
+      {
+        request_id: requestId,
+        profile_image: photo || existing?.profile_image || null,
+        logo_image: logo || existing?.logo_image || null,
+        pin_image: existing?.pin_image || null,
+        monologue_pdf: existing?.monologue_pdf || null,
+        ebook_pdf: existing?.ebook_pdf || null,
+      },
+      { onConflict: "request_id" },
+    );
+    if (error) {
+      console.warn("[auto-draft-ebook] Could not save Mapsite™ assets:", error.message);
+    }
+  }
 }
 
 export type AutoDraftUploadMode = "images" | "pdf";
@@ -563,6 +674,18 @@ export async function autoGenerateDraftTalisBook(
   const exactPdf = input.uploadMode === "pdf";
 
   if (exactPdf) {
+    const brandingPromise = loadSelfServiceAgentDetails({
+      fastCode,
+      requestId: input.requestId?.trim() || null,
+      mapsiteId,
+      agentName: input.agentName,
+      agentEmail: input.agentEmail,
+      agentPhone: input.agentPhone,
+      agentPhoto: input.agentPhoto,
+      brokerageLogo: input.brokerageLogo,
+      agentPhotoUrl: input.agentPhotoUrl,
+      brokerageLogoUrl: input.brokerageLogoUrl,
+    });
     const uploadStarted = onboardingNow();
     let coverImageUrl: string | null = null;
     let galleryUrls: string[] = [];
@@ -852,6 +975,13 @@ export async function autoGenerateDraftTalisBook(
       mode: "pdf",
       fastCode,
       pageCount,
+    });
+
+    await brandingPromise.catch((error) => {
+      console.warn(
+        "[auto-draft-ebook] PDF branding persist failed:",
+        error instanceof Error ? error.message : error,
+      );
     });
 
     return {

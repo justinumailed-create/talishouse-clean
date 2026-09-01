@@ -119,6 +119,10 @@ export async function POST(request: Request) {
           revalidatePath(`${ROUTES.TALISBOOKS_VIEWER}/${result.slug}`);
           revalidatePath(MAPSITE_APP_PATH);
           revalidatePath(`/talispros/admin/mapsites/${result.fastCode}`);
+          if (result.fastCode) {
+            revalidatePath(`/mapsite/${result.fastCode.toLowerCase()}`);
+            revalidatePath(`/talispros/mapsites/${result.fastCode.toLowerCase()}`);
+          }
         }
 
         logOnboardingStep("Ebook API done", started, {
