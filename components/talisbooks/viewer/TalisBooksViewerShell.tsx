@@ -471,17 +471,6 @@ export default function TalisBooksViewerShell({
             onRequestPrevious={handlePrevious}
             onOpenBook={handleOpenBook}
           />
-          {book.pdfDownloadUrl ? (
-            <div className="talisbooks-viewer__pdf-row">
-              <a
-                href={book.pdfDownloadUrl}
-                download={book.pdfDownloadFileName || true}
-                className="talisbooks-viewer__pdf-download"
-              >
-                Download PDF
-              </a>
-            </div>
-          ) : null}
         </div>
         {canEditTools ? (
           <aside className="talisbooks-viewer__sidebar">
