@@ -14,6 +14,7 @@ import TalisBooksViewerStage, {
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
+import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { MAPSITE_APP_PATH, buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 import {
   convertViewerNavIndex,
@@ -395,14 +396,15 @@ export default function TalisBooksViewerShell({
       : null;
   const editorRight =
     binding === "open" && viewMode === "spread" ? spread.right : null;
-  const backToMapSiteHref =
-    book.fastCode && book.fastCode.trim().toLowerCase() !== "demo"
+  const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
+  const backToMapSiteHref = isPinnedShowcase
+    ? DEMO_MAPSITE_BUILD_PATH
+    : book.fastCode && book.fastCode.trim().toLowerCase() !== "demo"
       ? buildClaimedMapSitePath({
           fastCode: book.fastCode,
           accountType: book.accountType,
         })
       : MAPSITE_APP_PATH;
-  const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
   const backLinkLabel = isPinnedShowcase
     ? "Build Demo eBook and Mapsite™"
     : "Back to Mapsite™";

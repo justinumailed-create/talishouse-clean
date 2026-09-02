@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { signOutMarketingManager } from "@/app/talispros/marketing/actions";
 import {
+  MARKETING_ADMIN_DEMOS_PATH,
   MARKETING_ADMIN_PATH,
   MARKETING_HOME_PATH,
   MARKETING_LOGIN_PATH,
@@ -40,12 +41,24 @@ export default function MarketingShell({
             href={MARKETING_ADMIN_PATH}
             className={`block rounded-lg px-3 py-2 text-sm ${
               pathname === MARKETING_ADMIN_PATH ||
-              pathname.startsWith(`${MARKETING_ADMIN_PATH}/`)
+              (pathname.startsWith(`${MARKETING_ADMIN_PATH}/`) &&
+                !pathname.startsWith(MARKETING_ADMIN_DEMOS_PATH))
                 ? "bg-neutral-100 font-medium text-neutral-900"
                 : "text-neutral-600 hover:bg-neutral-50"
             }`}
           >
             Registrations
+          </Link>
+          <Link
+            href={MARKETING_ADMIN_DEMOS_PATH}
+            className={`block rounded-lg px-3 py-2 text-sm ${
+              pathname === MARKETING_ADMIN_DEMOS_PATH ||
+              pathname.startsWith(`${MARKETING_ADMIN_DEMOS_PATH}/`)
+                ? "bg-neutral-100 font-medium text-neutral-900"
+                : "text-neutral-600 hover:bg-neutral-50"
+            }`}
+          >
+            Demo Mapsites™
           </Link>
           <Link
             href={MARKETING_HOME_PATH}

@@ -4,6 +4,7 @@ import {
   buildClaimedMapSitePath,
   mapsiteAccountTypeSegment,
 } from "@/lib/talispros/mapsite-state";
+import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import type { TalisBooksLibraryBook } from "./library/types";
 import { TALISBOOKS_COVER_TEMPLATES } from "./covers/catalog";
 import type { TalisBooksCoverTemplateId } from "./covers/constants";
@@ -131,7 +132,7 @@ export async function getMapSiteEbookContext(
   fastCodeRaw: string
 ): Promise<MapSiteEbookContext | null> {
   const fastCode = fastCodeRaw.trim().toLowerCase();
-  if (!fastCode || fastCode === "demo") return null;
+  if (!fastCode || fastCode === "demo" || isDemoMapSiteCode(fastCode)) return null;
   if (!isSupabaseAdminConfigured()) {
     return {
       fastCode,

@@ -38,6 +38,7 @@ import {
 } from "@/lib/talispros/mapsite-onboarding-phase";
 import { ROUTES } from "@/lib/routes";
 import Link from "next/link";
+import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import MapSiteExpressInterestCard from "./MapSiteExpressInterestCard";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
@@ -395,8 +396,9 @@ function MapSiteChrome({
   ]);
 
   const claimed = !isClaimable(mapsite.status);
+  const isDemoListing = mapsite.is_demonstration || isDemoMapSiteCode(mapsite.fast_code);
   // PayPal stays until a completed payment note exists (not merely ACTIVE status).
-  const paid = paymentReceived;
+  const paid = isDemoListing || paymentReceived;
   const onboardingPhase = getMapSiteOnboardingPhase({
     status: mapsite.status,
     paymentReceived: paid,
@@ -448,14 +450,15 @@ function MapSiteChrome({
     onboardingMode === "assisted"
       ? "Register Account now"
       : "Register Account now";
-  const publishedHref = isIssuedFastCode(mapsite.fast_code)
-    ? publishedMapSitePath(mapsite.fast_code)
-    : null;
+  const publishedHref =
+    isIssuedFastCode(mapsite.fast_code) || isDemoMapSiteCode(mapsite.fast_code)
+      ? publishedMapSitePath(mapsite.fast_code)
+      : null;
 
   // Express Interest only after payment. PayPal uses claim-form planType;
   // auto-reveals above the marketing sidebar 10s after load (or immediately via Activate).
   const registrationCard =
-    claimed && paid && mapsite.fast_code ? (
+    isDemoListing ? null : claimed && paid && mapsite.fast_code ? (
       <MapSiteExpressInterestCard
         fastCode={mapsite.fast_code}
         propertyTitle={mapsite.property_title}

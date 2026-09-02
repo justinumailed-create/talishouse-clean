@@ -395,15 +395,13 @@ export async function getDemonstrationMapSite(): Promise<MapSitePlatformRecord> 
 
   try {
     const supabase = getSupabaseAdmin();
-    const { data: demo } = await supabase
+    const { data: byId } = await supabase
       .from("mapsites")
       .select(SELECT_COLUMNS)
-      .eq("is_demonstration", true)
-      .order("created_at", { ascending: true })
-      .limit(1)
+      .eq("id", DEMO_MAPSITE_ID)
       .maybeSingle();
 
-    if (demo) return mapRow(demo as MapSiteRow);
+    if (byId) return mapRow(byId as MapSiteRow);
 
     const { data: byCode } = await supabase
       .from("mapsites")

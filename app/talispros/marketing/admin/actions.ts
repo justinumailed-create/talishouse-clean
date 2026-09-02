@@ -18,14 +18,21 @@ import {
 import { requireMarketingManagerSession } from "@/lib/marketing-manager-auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import {
+  MARKETING_ADMIN_DEMOS_PATH,
   MARKETING_ADMIN_PATH,
   MARKETING_HOME_PATH,
 } from "@/lib/mapsite-account-session";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 import type { MapSiteResourceUpdates } from "@/lib/talispros/mapsite-platform";
+import {
+  deleteDemoMapSite,
+  listDemoMapSites,
+  updateDemoMapSite,
+} from "@/lib/talispros/demo-mapsite-service";
 
 function revalidateMarketingAdmin(requestId?: string) {
   revalidatePath(MARKETING_ADMIN_PATH);
+  revalidatePath(MARKETING_ADMIN_DEMOS_PATH);
   revalidatePath(MARKETING_HOME_PATH);
   revalidatePath(MAPSITE_APP_PATH);
   if (requestId) {
@@ -169,5 +176,37 @@ export async function marketingUpdateLinkedMapSite(
   await requireMarketingManagerSession();
   const result = await updateLinkedMapSiteResources(requestId, updates);
   if (result.ok) revalidateMarketingAdmin(requestId);
+  return result;
+}
+
+export async function listMarketingDemoMapSites() {
+  await requireMarketingManagerSession();
+  return { ok: true as const, data: await listDemoMapSites() };
+}
+
+export async function marketingUpdateDemoMapSite(input: {
+  mapsiteId: string;
+  propertyTitle?: string;
+  propertyAddress?: string;
+  latitude?: number;
+  longitude?: number;
+  mapZoom?: number;
+}) {
+  await requireMarketingManagerSession();
+  const result = await updateDemoMapSite(input);
+  if (result.ok) {
+    revalidateMarketingAdmin();
+    revalidatePath(`/mapsite/${input.mapsiteId}`);
+  }
+  return result;
+}
+
+export async function marketingDeleteDemoMapSite(mapsiteId: string) {
+  await requireMarketingManagerSession();
+  const result = await deleteDemoMapSite(mapsiteId);
+  if (result.ok) {
+    revalidateMarketingAdmin();
+    revalidatePath(MAPSITE_APP_PATH);
+  }
   return result;
 }

@@ -23,6 +23,7 @@ import {
 import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
 import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
+import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { ACTIVATE_QUERY, BOOK_PENDING_QUERY } from "@/lib/talispros/ebook-choice";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 import MapSitePmcApplication from "@/components/talispros/mapsite/MapSitePmcApplication";
@@ -173,22 +174,24 @@ export default async function TalisprosMapSitePage({
     mapsiteId: mapsite.id,
   });
 
-  const paymentReceived = await hasCompletedMapSitePaypalPayment({
-    mapsiteId: mapsite.id,
-    fastCode,
-    requestId,
-  });
+  const paymentReceived =
+    mapsite.is_demonstration ||
+    isDemoMapSiteCode(mapsite.fast_code) ||
+    (await hasCompletedMapSitePaypalPayment({
+      mapsiteId: mapsite.id,
+      fastCode,
+      requestId,
+    }));
 
   const ebookContext = ownerCode
     ? await getMapSiteEbookContext(ownerCode)
     : null;
   const primarySlug = ebookContext?.primaryEbook?.slug || bookSlug;
-  const hasTalisBook = Boolean(
-    primarySlug || mapsite.teb_url?.trim() || ebookContext?.books?.length
-  );
-  const talisBookHref = primarySlug
-    ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}`
-    : mapsite.teb_url?.trim() || null;
+  const talisBookHref =
+    (primarySlug ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}` : null) ||
+    mapsite.teb_url?.trim() ||
+    (mapsite.is_demonstration ? DEMO_PINNED_EBOOK_HREF : null);
+  const hasTalisBook = Boolean(talisBookHref || ebookContext?.books?.length);
 
   return (
     <MapSiteApplication
