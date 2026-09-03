@@ -450,9 +450,11 @@ function MapSiteChrome({
     onboardingMode === "assisted"
       ? "Register Account now"
       : "Register Account now";
+  const publishedCode = mapsite.fast_code?.trim() || "";
   const publishedHref =
-    isIssuedFastCode(mapsite.fast_code) || isDemoMapSiteCode(mapsite.fast_code)
-      ? publishedMapSitePath(mapsite.fast_code)
+    publishedCode &&
+    (isIssuedFastCode(publishedCode) || isDemoMapSiteCode(publishedCode))
+      ? publishedMapSitePath(publishedCode)
       : null;
 
   // Express Interest only after payment. PayPal uses claim-form planType;
