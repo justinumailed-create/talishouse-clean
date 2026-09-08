@@ -11,6 +11,7 @@ export default function TalisprosLayoutClient({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const isEbookGenerate = pathname?.startsWith("/talispros/ebook-generate");
   const isAdminRoute = pathname?.startsWith("/talispros/admin");
   const isMapSiteApp =
     pathname === "/talispros/mapsite" || pathname?.startsWith("/talispros/mapsite/");
@@ -26,7 +27,9 @@ export default function TalisprosLayoutClient({
     <>
       <TalisprosHeader />
       <main
-        className={`bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white [&:has(.mapsite-layout)]:p-0 ${
+        className={`font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white [&:has(.mapsite-layout)]:p-0 ${
+          isEbookGenerate ? "bg-[#f5f5f7]" : "bg-white"
+        } ${
           isFullBleedPage
             ? "min-h-dvh lg:h-dvh lg:overflow-hidden"
             : "min-h-screen"
@@ -34,7 +37,7 @@ export default function TalisprosLayoutClient({
       >
         {children}
       </main>
-      <TalisprosFooter />
+      {isEbookGenerate ? null : <TalisprosFooter />}
     </>
   );
 }

@@ -96,6 +96,8 @@ export interface MapSiteView {
   requestId?: string | null;
   /** Market audience from the claim form (listings, brokers, …). */
   claimAudience?: string | null;
+  /** Owner brokerage / company from the Build Request (Claim a Market). */
+  brokerageName?: string | null;
 }
 
 function isServiceRolePermissionError(message: string): boolean {
@@ -276,6 +278,7 @@ async function buildMapSiteView(
     pin_image: string | null;
   } | null = null;
   let claimAudience: string | null = null;
+  let brokerageName: string | null = null;
 
   if (requestId) {
     const [{ data: assetRow }, { data: buildRequest }] = await Promise.all([
@@ -286,12 +289,13 @@ async function buildMapSiteView(
         .maybeSingle(),
       client
         .from("build_requests")
-        .select("market_type, status")
+        .select("market_type, status, company")
         .eq("id", requestId)
         .maybeSingle(),
     ]);
     assets = assetRow;
     claimAudience = buildRequest?.market_type?.trim() || null;
+    brokerageName = buildRequest?.company?.trim() || null;
   }
 
   const pins: MapSitePinView[] = (pinRows || []).map((pin) => ({
@@ -359,6 +363,7 @@ async function buildMapSiteView(
     ttvUrl: mapsite.ttv_url ?? null,
     requestId,
     claimAudience,
+    brokerageName,
   };
 }
 

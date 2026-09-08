@@ -4,9 +4,10 @@
  * One generator, configuration-driven:
  *   facingPages / captions / advertising / globalContent / customContent
  *
- * Upload roles (Level 1) — pinned TalisBook cover-spread logic:
- *   Image #1 — ALWAYS the cover spread (left half = back, right half = front)
- *   Remaining images — interiors (landscape = one two-page spread; portrait = one page)
+ * Upload roles (Level 1):
+ *   Front/back covers are explicit portrait assets (not inferred from page 1)
+ *   Uploaded images / PDF pages are interiors
+ *   Landscape interiors = one complete two-page spread; portraits = one page
  *
  * Page count (Level 3) — maximums; books size to content (no blank endpapers):
  *   No Custom + No Global → ≤ 20
@@ -374,8 +375,7 @@ function backCoverRow(
   input: SelfServicePagePlanInput,
   pageNumber: number,
 ): SelfServicePageRowContent {
-  const backCoverImageUrl =
-    input.backCoverImageUrl?.trim() || input.coverImageUrl || null;
+  const backCoverImageUrl = input.backCoverImageUrl?.trim() || null;
   return {
     title: "Back cover",
     slug: "back-cover",
@@ -407,10 +407,14 @@ export function buildSelfServiceEbookPageRows(
   const totalPages = selfServicePageCount(options);
   const interiors = input.landscapes.slice(0, SELF_SERVICE_MAX_INTERIOR_IMAGES);
   const rows: SelfServicePageRowContent[] = [];
+  const hasFrontCover = Boolean(input.coverImageUrl?.trim());
+  const hasBackCover = Boolean(input.backCoverImageUrl?.trim());
 
-  rows.push(coverRow(input));
+  if (hasFrontCover) {
+    rows.push(coverRow(input));
+  }
 
-  let cursor = 2;
+  let cursor = hasFrontCover ? 2 : 1;
   if (options.customContent) {
     rows.push(
       ...customContentRows({
@@ -427,7 +431,8 @@ export function buildSelfServiceEbookPageRows(
   // Reserve the inside-back spread only for Global (Glasshouse) content.
   // Blank endpapers are no longer used — match the pinned sample.
   const reserveInsideBack = options.globalContent;
-  const interiorEnd = backCoverPage - 1 - (reserveInsideBack ? 2 : 0);
+  const interiorEnd =
+    backCoverPage - (hasBackCover ? 1 : 0) - (reserveInsideBack ? 2 : 0);
   let pageCursor = cursor;
   let imageIndex = 0;
   let spreadIndex = 0;
@@ -509,7 +514,9 @@ export function buildSelfServiceEbookPageRows(
     );
   }
 
-  rows.push(backCoverRow(input, backCoverPage));
+  if (hasBackCover) {
+    rows.push(backCoverRow(input, backCoverPage));
+  }
 
   return rows.sort((a, b) => a.page_number - b.page_number);
 }
@@ -519,7 +526,7 @@ export function isSelfServiceSpreadCandidate(width: number, height: number): boo
   return isLandscapeSpreadCandidate(width, height);
 }
 
-/** Interior facing pages that accept captions (after the cover-spread landscape). */
+/** Interior facing pages that accept captions. Covers are never captioned. */
 export function captionableInteriorCount(
   options?: SelfServiceBookOptions,
 ): number {
@@ -527,16 +534,77 @@ export function captionableInteriorCount(
   return SELF_SERVICE_MAX_INTERIOR_IMAGES;
 }
 
+/** Portrait covers are taller than they are wide. Square/landscape is invalid. */
+export function isPortraitCoverImage(width: number, height: number): boolean {
+  return (
+    Number.isFinite(width) &&
+    Number.isFinite(height) &&
+    width > 0 &&
+    height > width
+  );
+}
+
+export const FRONT_COVER_REQUIRED_MESSAGE =
+  "Please add a front cover before publishing your TalisBook™.";
+export const BACK_COVER_REQUIRED_MESSAGE =
+  "Please add a back cover before publishing your TalisBook™.";
+export const FRONT_COVER_PORTRAIT_MESSAGE =
+  "Please choose a portrait image for your front cover.";
+export const BACK_COVER_PORTRAIT_MESSAGE =
+  "Please choose a portrait image for your back cover.";
+
+export type ExplicitCoverAsset = {
+  url: string;
+  width: number;
+  height: number;
+};
+
+export function parseCoverImageJson(
+  raw: string | null | undefined,
+): ExplicitCoverAsset | null {
+  if (!raw?.trim()) return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    const record =
+      parsed && typeof parsed === "object" && !Array.isArray(parsed)
+        ? (parsed as Record<string, unknown>)
+        : null;
+    if (!record) return null;
+    const url = String(record.url || "").trim();
+    const width = Number(record.width);
+    const height = Number(record.height);
+    if (!url || !Number.isFinite(width) || !Number.isFinite(height)) return null;
+    if (width <= 0 || height <= 0) return null;
+    return { url, width: Math.round(width), height: Math.round(height) };
+  } catch {
+    return null;
+  }
+}
+
+export function validateExplicitCoverAssets(
+  front: ExplicitCoverAsset | null | undefined,
+  back: ExplicitCoverAsset | null | undefined,
+): string | null {
+  if (!front?.url.trim()) return FRONT_COVER_REQUIRED_MESSAGE;
+  if (!back?.url.trim()) return BACK_COVER_REQUIRED_MESSAGE;
+  if (!isPortraitCoverImage(front.width, front.height)) {
+    return FRONT_COVER_PORTRAIT_MESSAGE;
+  }
+  if (!isPortraitCoverImage(back.width, back.height)) {
+    return BACK_COVER_PORTRAIT_MESSAGE;
+  }
+  return null;
+}
+
 /**
- * Upload roles (Level 1) — pinned TalisBook cover-spread logic:
- *   Image #1 ALWAYS → cover spread source (split later into back | front)
- *   Remaining images → interiors (landscape spreads / portrait singles)
+ * Upload roles (Level 1): every valid upload is interior content.
+ * Covers are supplied separately as portrait assets.
  */
 export function assignFacingUploadRoles(
   items: Array<{ url: string; width: number; height: number }>,
 ): {
   landscapes: SelfServiceLandscapeAsset[];
-  /** Wrap to split into back (left) + front (right). */
+  /** Always null — covers are no longer inferred from image/PDF page 1. */
   coverSpreadImageUrl: string | null;
   coverImageUrl: string | null;
   backCoverImageUrl: string | null;
@@ -544,32 +612,13 @@ export function assignFacingUploadRoles(
 } {
   const landscapes: SelfServiceLandscapeAsset[] = [];
   const galleryUrls: string[] = [];
-  let coverSpreadImageUrl: string | null = null;
 
   for (const item of items) {
     if (!item.url || item.width <= 0 || item.height <= 0) continue;
     galleryUrls.push(item.url);
-
-    // First valid image is always the wrap cover — never an interior page.
-    if (!coverSpreadImageUrl) {
-      coverSpreadImageUrl = item.url;
-      continue;
-    }
-
     if (landscapes.length < SELF_SERVICE_MAX_INTERIOR_IMAGES) {
       landscapes.push(item);
     }
-  }
-
-  if (coverSpreadImageUrl) {
-    return {
-      landscapes,
-      coverSpreadImageUrl,
-      // Halves are produced at generation time; until then both point at the wrap.
-      coverImageUrl: coverSpreadImageUrl,
-      backCoverImageUrl: coverSpreadImageUrl,
-      galleryUrls,
-    };
   }
 
   return {

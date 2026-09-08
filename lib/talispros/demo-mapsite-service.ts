@@ -7,10 +7,12 @@ import {
   createDemoMapSiteCode,
   DEMO_PINNED_COVER_IMAGE,
   DEMO_PINNED_EBOOK_HREF,
+  demoMapSiteApplicationHref,
+  demoMapSiteEbookHref,
   isDemoMapSiteCode,
   isProtectedPlatformDemoMapSite,
 } from "@/lib/talispros/demo-mapsite";
-import { MAPSITE_APP_PATH, publishedMapSitePath } from "@/lib/talispros/mapsite-state";
+import { publishedMapSitePath } from "@/lib/talispros/mapsite-state";
 
 export type DemoMapSiteRecord = {
   id: string;
@@ -43,16 +45,9 @@ export type CreateDemoMapSiteResult =
       mapsiteHref: string;
       publishedHref: string;
       ebookHref: string;
+      generateHref: string;
     }
   | { ok: false; error: string };
-
-function demoApplicationHref(mapsiteId: string): string {
-  const params = new URLSearchParams({
-    view: "pin",
-    mapsiteId,
-  });
-  return `${MAPSITE_APP_PATH}?${params.toString()}`;
-}
 
 export async function createDemoMapSiteWithPinnedEbook(
   input: CreateDemoMapSiteInput,
@@ -135,9 +130,13 @@ export async function createDemoMapSiteWithPinnedEbook(
     ok: true,
     mapsiteId: created.id,
     code: savedCode,
-    mapsiteHref: demoApplicationHref(created.id),
+    mapsiteHref: demoMapSiteApplicationHref(created.id),
     publishedHref: publishedMapSitePath(savedCode),
     ebookHref: DEMO_PINNED_EBOOK_HREF,
+    generateHref: demoMapSiteEbookHref({
+      mapsiteId: created.id,
+      code: savedCode,
+    }),
   };
 }
 
@@ -187,7 +186,6 @@ export async function updateDemoMapSite(input: {
 
   const patch: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
-    teb_url: DEMO_PINNED_EBOOK_HREF,
   };
   if (input.propertyTitle !== undefined) {
     patch.property_title = input.propertyTitle.trim() || "Demo Mapsite™";
@@ -256,4 +254,74 @@ export async function deleteDemoMapSite(
   const { error } = await supabase.from("mapsites").delete().eq("id", id);
   if (error) return { ok: false, error: error.message };
   return { ok: true };
+}
+
+export type DemoMapSiteEbookContext = {
+  mapsiteId: string;
+  code: string;
+  title: string;
+  location: string;
+  description: string;
+  mapsiteHref: string;
+};
+
+export async function loadDemoMapSiteForEbook(
+  mapsiteId: string,
+): Promise<DemoMapSiteEbookContext | null> {
+  if (!isSupabaseAdminConfigured()) return null;
+  const id = mapsiteId.trim();
+  if (!id) return null;
+
+  const supabase = getSupabaseAdmin();
+  const { data } = await supabase
+    .from("mapsites")
+    .select(
+      "id, fast_code, property_title, property_address, property_description, is_demonstration",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (!data?.is_demonstration || !isDemoMapSiteCode(data.fast_code)) return null;
+
+  const code = data.fast_code.trim().toLowerCase();
+  return {
+    mapsiteId: data.id,
+    code,
+    title: data.property_title?.trim() || "Demo Mapsite™",
+    location: data.property_address?.trim() || "",
+    description: data.property_description?.trim() || "",
+    mapsiteHref: demoMapSiteApplicationHref(data.id),
+  };
+}
+
+export async function resolveDemoMapSiteUploadScope(
+  mapsiteIdRaw: string | null | undefined,
+): Promise<{ ok: true; mapsiteId: string; fastCode: string } | { ok: false; error: string }> {
+  const mapsiteId = mapsiteIdRaw?.trim() || "";
+  if (!mapsiteId) {
+    return { ok: false, error: "Demo Mapsite™ ID is required." };
+  }
+  if (!isSupabaseAdminConfigured()) {
+    return { ok: false, error: "Database is not configured." };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("mapsites")
+    .select("id, fast_code, is_demonstration")
+    .eq("id", mapsiteId)
+    .maybeSingle();
+
+  if (error || !data?.is_demonstration) {
+    return { ok: false, error: "Demo Mapsite™ not found." };
+  }
+  if (!isDemoMapSiteCode(data.fast_code)) {
+    return { ok: false, error: "That listing is not a demonstration Mapsite™." };
+  }
+
+  return {
+    ok: true,
+    mapsiteId: data.id,
+    fastCode: data.fast_code.trim().toLowerCase(),
+  };
 }

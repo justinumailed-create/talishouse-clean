@@ -48,7 +48,7 @@ export default function DemoMapSiteBuilderClient() {
         setError(result.error);
         return;
       }
-      router.push(result.mapsiteHref);
+      router.push(result.generateHref);
     });
   }
 
@@ -80,11 +80,11 @@ export default function DemoMapSiteBuilderClient() {
         disabled={pending}
         className="w-full rounded-2xl bg-neutral-900 px-5 py-3.5 text-base font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
       >
-        {pending ? "Creating demo…" : "Create demo Mapsite™ and eBook"}
+        {pending ? "Continue to demo eBook…" : "Continue to demo eBook"}
       </button>
       <p className="text-center text-xs text-neutral-500">
-        This demonstration does not issue a FAST Code. The pinned Talispros eBook
-        is attached automatically.
+        Next you will extract the pinned Talispros eBook PDF, optimize its pages,
+        and generate the demonstration Talisbook™. No FAST Code is issued.
       </p>
     </form>
   );

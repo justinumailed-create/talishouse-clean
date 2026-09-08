@@ -111,7 +111,8 @@ export interface TalisBooksViewerBook {
   backCoverImageUrl?: string;
   /**
    * When true, spread 0 opens as a wrap: back cover (left) | front cover (right).
-   * Set for self-service PDFs where page 1 is a cover spread.
+   * Legacy wrap opening for older books that stored a split cover spread.
+   * New books use explicit portrait frontCoverImageUrl / backCoverImageUrl.
    */
   coverSpreadOpening?: boolean;
   /** Public URL for a downloadable PDF of this book, when one exists. */

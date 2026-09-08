@@ -58,7 +58,7 @@ const PIN_COLORS: Record<string, string> = {
 };
 
 /** Minimum popup body height so hero + title + action row stay visible. */
-const MAPSITE_POPUP_MIN_HEIGHT_PX = 304;
+const MAPSITE_POPUP_MIN_HEIGHT_PX = 384;
 /** Ignore residual camera events right after programmatic pin focus. */
 const FOCUS_GESTURE_GUARD_MS = 900;
 
@@ -354,10 +354,9 @@ function MapSiteChrome({
           rootRect.height / 2 - MAPSITE_PIN_TIP_CLEARANCE_PX
         );
         const cardBottom = tipPointY - MAPSITE_POPUP_TIP_HEIGHT_PX;
-        const height = MAPSITE_POPUP_MIN_HEIGHT_PX;
-        const top = Math.max(8, cardBottom - height);
+        const top = Math.max(8, cardBottom - MAPSITE_POPUP_MIN_HEIGHT_PX);
         setAlignTop((prev) => (prev === top ? prev : top));
-        setExpandedCardHeight((prev) => (prev === height ? prev : height));
+        setExpandedCardHeight((prev) => (prev === null ? prev : null));
         setPopupCenterX((prev) => {
           const next = Math.round(rootRect.width / 2);
           return prev === next ? prev : next;
@@ -421,8 +420,8 @@ function MapSiteChrome({
     (typeof mapsite.teb_url === "string" && mapsite.teb_url.trim()
       ? mapsite.teb_url.trim()
       : hasTalisBook && mapsite.fast_code
-        ? `${ROUTES.TALISBOOKS_LIBRARY}?fastCode=${encodeURIComponent(
-            mapsite.fast_code.trim()
+        ? `${ROUTES.TALISBOOKS}/fast/${encodeURIComponent(
+            mapsite.fast_code.trim().toLowerCase()
           )}`
         : null);
 

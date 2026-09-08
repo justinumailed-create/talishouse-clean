@@ -41,3 +41,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .env*.local
+
+# local PDF original (39MB) — extracted template assets are used in-app
+/public/talisbooks/templates/jarlberg/Jarlberg-Project.pdf
+/tmp/

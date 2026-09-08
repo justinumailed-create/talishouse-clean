@@ -10,9 +10,10 @@ import {
   type OnboardingFailureReport,
 } from "@/lib/onboarding-timing";
 import type { OptimizedEbookImageAsset } from "@/lib/talisbooks/auto-draft-ebook";
-import type {
-  SelfServiceBookOptions,
-  SelfServicePageCaption,
+import {
+  validateExplicitCoverAssets,
+  type SelfServiceBookOptions,
+  type SelfServicePageCaption,
 } from "@/lib/talisbooks/self-service-page-plan";
 import type { EbookGenerationProgressEvent } from "@/lib/talispros/ebook-generation-stages";
 
@@ -44,6 +45,8 @@ export type RunEbookGenerationInput = {
   uploadMode: "images" | "pdf";
   bookOptions?: Partial<SelfServiceBookOptions>;
   captions?: SelfServicePageCaption[];
+  frontCover?: OptimizedEbookImageAsset | null;
+  backCover?: OptimizedEbookImageAsset | null;
   onProgress?: (event: EbookGenerationProgressEvent) => void | Promise<void>;
   /** Override job timeout (ms). Defaults to ONBOARDING_JOB_TIMEOUT_MS. */
   timeoutMs?: number;
@@ -130,6 +133,14 @@ export async function runEbookGenerationPipeline(
           );
         }
 
+        const coverError = validateExplicitCoverAssets(
+          input.frontCover,
+          input.backCover,
+        );
+        if (coverError) {
+          return fail("generating_pages", coverError);
+        }
+
         currentStage = "generating_pages";
         await emit(input.onProgress, {
           stage: "generating_pages",
@@ -162,6 +173,8 @@ export async function runEbookGenerationPipeline(
           uploadMode: input.uploadMode,
           bookOptions: input.bookOptions,
           captions: input.captions,
+          frontCover: input.frontCover,
+          backCover: input.backCover,
         });
         logOnboardingStep("Book generation", generateStarted, {
           requestId,

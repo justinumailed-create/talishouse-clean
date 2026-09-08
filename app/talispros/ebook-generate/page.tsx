@@ -19,6 +19,7 @@ export const metadata: Metadata = createMetadata({
     "Generate your own Talisbooks™ E-Book from property images, title, description, and location — no payment required.",
   path: "/talispros/ebook-generate",
   private: true,
+  image: false,
 });
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -57,7 +58,6 @@ export default async function EbookGeneratePage({
         accountType={null}
         initialAgentName=""
         initialAgentEmail=""
-        initialAgentPhone=""
         bootstrapError={resolved.report.error}
         bootstrapMeta={{
           requestId: resolved.report.requestId,
@@ -85,6 +85,8 @@ export default async function EbookGeneratePage({
       initialAgentName={context.owner.agentName}
       initialAgentEmail={context.owner.email}
       initialAgentPhone={context.owner.phone}
+      pinLatitude={context.pin.latitude}
+      pinLongitude={context.pin.longitude}
     />
   );
 }

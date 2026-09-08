@@ -32,9 +32,11 @@ export function useMapVisitorLocation({
 }: UseMapVisitorLocationOptions): UseMapVisitorLocationResult {
   const [status, setStatus] = useState<VisitorLocationStatus>("idle");
   const [coordinates, setCoordinates] = useState<MapCoordinates | null>(null);
-  const [noticeDismissed, setNoticeDismissed] = useState(
-    () => hasDismissedVisitorLocationNotice()
-  );
+  const [noticeDismissed, setNoticeDismissed] = useState(false);
+
+  useEffect(() => {
+    setNoticeDismissed(hasDismissedVisitorLocationNotice());
+  }, []);
 
   const dismissNotice = useCallback(() => {
     setNoticeDismissed(true);

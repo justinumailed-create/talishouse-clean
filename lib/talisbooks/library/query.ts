@@ -45,6 +45,26 @@ export function filterLibraryBooks(
   );
 }
 
+/** Public Mapsite™ shelf: keep books for this FAST Code (or uncoded books on the same mapsite). */
+export function filterBooksForFastCodeShelf(
+  books: TalisBooksLibraryBook[],
+  fastCode: string,
+  mapsiteId?: string | null,
+): TalisBooksLibraryBook[] {
+  const code = normalize(fastCode);
+  if (!code) {
+    return [];
+  }
+
+  return books.filter((book) => {
+    const bookCode = normalize(book.fastCode ?? "");
+    if (bookCode) {
+      return bookCode === code;
+    }
+    return Boolean(mapsiteId && book.mapsiteId === mapsiteId);
+  });
+}
+
 function publishedTimestamp(book: TalisBooksLibraryBook): number {
   if (!book.publishedAt) {
     return 0;

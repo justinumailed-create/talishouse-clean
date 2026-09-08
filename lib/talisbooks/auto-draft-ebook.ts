@@ -14,12 +14,17 @@ import {
   assignFacingUploadRoles,
   buildSelfServiceEbookPageRows,
   resolveSelfServiceBookOptions,
+  isPortraitCoverImage,
+  FRONT_COVER_PORTRAIT_MESSAGE,
+  BACK_COVER_PORTRAIT_MESSAGE,
+  FRONT_COVER_REQUIRED_MESSAGE,
+  BACK_COVER_REQUIRED_MESSAGE,
+  type ExplicitCoverAsset,
   type SelfServiceAgentDetails,
   type SelfServiceBookOptions,
   type SelfServiceLandscapeAsset,
   type SelfServicePageCaption,
 } from "@/lib/talisbooks/self-service-page-plan";
-import { splitCoverSpreadFromUrl } from "@/lib/talisbooks/cover-spread";
 import {
   logOnboardingStep,
   onboardingNow,
@@ -33,6 +38,31 @@ function slugify(input: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 64);
+}
+
+async function persistMapsiteEbookListing(input: {
+  mapsiteId: string | null;
+  previewUrl: string;
+  listingImageUrls: string[];
+  now: string;
+}): Promise<void> {
+  if (!input.mapsiteId || !isSupabaseAdminConfigured()) return;
+  const urls = input.listingImageUrls.map((url) => url.trim()).filter(Boolean);
+  const supabase = getSupabaseAdmin();
+  await supabase
+    .from("mapsites")
+    .update({
+      teb_url: input.previewUrl,
+      ...(urls[0]
+        ? {
+            cover_image: urls[0],
+            header_image_url: urls[0],
+            gallery_images: urls,
+          }
+        : {}),
+      updated_at: input.now,
+    })
+    .eq("id", input.mapsiteId);
 }
 
 function uniqueSlug(scope: string, title: string): string {
@@ -156,7 +186,7 @@ async function prepareViewerPageImage(
 
 /**
  * Upload originals for self-service books.
- * Image #1 = cover spread (back | front); remaining = interiors.
+ * Every image is interior content; covers are explicit portrait assets.
  */
 async function processUploadsForSelfServiceSpreads(options: {
   scope: string;
@@ -242,16 +272,14 @@ async function processUploadsAsExactPages(options: {
 
   const refs: TalisBooksLayoutImageRef[] = [];
   const galleryUrls: string[] = [];
-  let coverImageUrl: string | null = null;
 
   for (const ref of processed) {
     if (!ref) continue;
     refs.push(ref);
     galleryUrls.push(ref.url);
-    if (!coverImageUrl) coverImageUrl = ref.url;
   }
 
-  return { refs, coverImageUrl, galleryUrls };
+  return { refs, coverImageUrl: null, galleryUrls };
 }
 
 export type OptimizedEbookImageAsset = {
@@ -262,7 +290,7 @@ export type OptimizedEbookImageAsset = {
 
 /**
  * Use already-optimized storage URLs (no second encode pass).
- * First image = cover spread; remaining = interiors.
+ * Every image is interior content.
  */
 function processOptimizedImageAssets(
   assets: OptimizedEbookImageAsset[],
@@ -274,6 +302,80 @@ function processOptimizedImageAssets(
   galleryUrls: string[];
 } {
   return assignFacingUploadRoles(assets);
+}
+
+function pdfInteriorSpreadRows(options: {
+  urls: string[];
+  startPage: number;
+  now: string;
+}): Array<{
+  title: string;
+  slug: string;
+  page_number: number;
+  sort_order: number;
+  content: Record<string, unknown>;
+  is_visible: boolean;
+  created_at: string;
+  updated_at: string;
+}> {
+  const rows: Array<{
+    title: string;
+    slug: string;
+    page_number: number;
+    sort_order: number;
+    content: Record<string, unknown>;
+    is_visible: boolean;
+    created_at: string;
+    updated_at: string;
+  }> = [];
+  options.urls.forEach((url, index) => {
+    const leftPage = options.startPage + index * 2;
+    const rightPage = leftPage + 1;
+    const sourcePageIndex = index + 1;
+    rows.push(
+      {
+        title: `Spread ${index + 1} · left`,
+        slug: `pdf-spread-${String(index + 1).padStart(2, "0")}-left`,
+        page_number: leftPage,
+        sort_order: leftPage,
+        content: {
+          pageRole: "property_content",
+          layout: "centerfold_left",
+          layoutType: "spread",
+          title: "",
+          body: "",
+          spreadImageUrl: url,
+          spreadMat: true,
+          brochureLeaf: "left",
+          sourcePageIndex,
+        },
+        is_visible: true,
+        created_at: options.now,
+        updated_at: options.now,
+      },
+      {
+        title: `Spread ${index + 1} · right`,
+        slug: `pdf-spread-${String(index + 1).padStart(2, "0")}-right`,
+        page_number: rightPage,
+        sort_order: rightPage,
+        content: {
+          pageRole: "property_content",
+          layout: "centerfold_right",
+          layoutType: "spread",
+          title: "",
+          body: "",
+          spreadImageUrl: url,
+          spreadMat: true,
+          brochureLeaf: "right",
+          sourcePageIndex,
+        },
+        is_visible: true,
+        created_at: options.now,
+        updated_at: options.now,
+      },
+    );
+  });
+  return rows;
 }
 
 async function uploadOptionalAgentImage(options: {
@@ -584,14 +686,17 @@ export type AutoDraftEbookInput = {
   /** Provenance tag stored in metadata.source */
   source?: string;
   /**
-   * `pdf` = exact page rasters in the viewer.
-   * Page 1 is always treated as a cover spread (back left | front right);
-   * remaining pages are interiors. No Glasshouse / layout engine.
+   * `pdf` = exact page rasters in the viewer as interior content.
+   * Page 1 is not a cover. Front/back covers are explicit portrait assets.
    * `images` = Level 1/2/3 self-service page plan.
    */
   uploadMode?: AutoDraftUploadMode;
   bookOptions?: Partial<SelfServiceBookOptions>;
   captions?: SelfServicePageCaption[];
+  /** Explicit portrait front cover (not inferred from page 1). */
+  frontCover?: ExplicitCoverAsset | null;
+  /** Explicit portrait back cover (not inferred from page 1). */
+  backCover?: ExplicitCoverAsset | null;
 };
 
 export type AutoDraftEbookResult =
@@ -629,6 +734,24 @@ export async function autoGenerateDraftTalisBook(
   if (!optimizedImages.length && !rawImages.length) {
     return { success: false, error: "Upload at least one property image." };
   }
+  const frontProvided = Boolean(input.frontCover?.url.trim());
+  const backProvided = Boolean(input.backCover?.url.trim());
+  if (frontProvided && input.frontCover && !isPortraitCoverImage(input.frontCover.width, input.frontCover.height)) {
+    return { success: false, error: FRONT_COVER_PORTRAIT_MESSAGE };
+  }
+  if (backProvided && input.backCover && !isPortraitCoverImage(input.backCover.width, input.backCover.height)) {
+    return { success: false, error: BACK_COVER_PORTRAIT_MESSAGE };
+  }
+  if (frontProvided !== backProvided) {
+    return {
+      success: false,
+      error: frontProvided
+        ? BACK_COVER_REQUIRED_MESSAGE
+        : FRONT_COVER_REQUIRED_MESSAGE,
+    };
+  }
+  const frontCoverUrl = frontProvided ? input.frontCover!.url.trim() : null;
+  const backCoverUrl = backProvided ? input.backCover!.url.trim() : null;
   if (!isSupabaseAdminConfigured()) {
     return { success: false, error: "Database is not configured." };
   }
@@ -687,15 +810,11 @@ export async function autoGenerateDraftTalisBook(
       brokerageLogoUrl: input.brokerageLogoUrl,
     });
     const uploadStarted = onboardingNow();
-    let coverImageUrl: string | null = null;
     let galleryUrls: string[] = [];
     let pageImageUrls: string[] = [];
 
-    let pdfRefs: TalisBooksLayoutImageRef[] = [];
-
     if (optimizedImages.length > 0) {
       const processed = processOptimizedImageAssets(optimizedImages);
-      coverImageUrl = processed.coverImageUrl;
       galleryUrls = processed.galleryUrls;
       pageImageUrls = processed.galleryUrls;
       logOnboardingStep("Storage upload", uploadStarted, {
@@ -704,14 +823,11 @@ export async function autoGenerateDraftTalisBook(
         preoptimized: true,
       });
     } else {
-      const { refs, coverImageUrl: cover, galleryUrls: gallery } =
-        await processUploadsAsExactPages({
-          scope: fastCode,
-          files: rawImages,
-          altPrefix: title,
-        });
-      pdfRefs = refs;
-      coverImageUrl = cover;
+      const { refs, galleryUrls: gallery } = await processUploadsAsExactPages({
+        scope: fastCode,
+        files: rawImages,
+        altPrefix: title,
+      });
       galleryUrls = gallery;
       pageImageUrls = refs.map((ref) => ref.url);
       logOnboardingStep("Storage upload", uploadStarted, {
@@ -720,69 +836,12 @@ export async function autoGenerateDraftTalisBook(
       });
     }
 
-    if (pageImageUrls.length === 0 || !coverImageUrl) {
+    if (pageImageUrls.length === 0) {
       return {
         success: false,
         error: "Could not process PDF pages. Try exporting as images.",
       };
     }
-
-    // Self-service rule: PDF page 1 = cover spread (back left | front right).
-    const coverSpreadSourceUrl = pageImageUrls[0]!;
-    const interiorUrls = pageImageUrls.slice(1);
-    let frontCoverUrl = coverSpreadSourceUrl;
-    let backCoverUrl = coverSpreadSourceUrl;
-    let coverSpreadSplit = false;
-
-    // Determine target single interior page dimensions (half-width if landscape spread).
-    const firstInteriorMeta =
-      optimizedImages.length > 1
-        ? optimizedImages[1]
-        : pdfRefs.length > 1
-          ? { width: pdfRefs[1]!.width, height: pdfRefs[1]!.height }
-          : null;
-    const targetInteriorWidth = firstInteriorMeta
-      ? firstInteriorMeta.width > firstInteriorMeta.height
-        ? Math.round(firstInteriorMeta.width / 2)
-        : firstInteriorMeta.width
-      : undefined;
-    const targetInteriorHeight = firstInteriorMeta
-      ? firstInteriorMeta.height
-      : undefined;
-
-    try {
-      const halves = await splitCoverSpreadFromUrl(coverSpreadSourceUrl, {
-        targetWidth: targetInteriorWidth,
-        targetHeight: targetInteriorHeight,
-      });
-      const coverId = crypto.randomUUID();
-      const [frontUploaded, backUploaded] = await Promise.all([
-        uploadBuffer({
-          scope: fastCode,
-          id: coverId,
-          suffix: "cover-front",
-          buffer: halves.front,
-          mimeType: "image/jpeg",
-        }),
-        uploadBuffer({
-          scope: fastCode,
-          id: coverId,
-          suffix: "cover-back",
-          buffer: halves.back,
-          mimeType: "image/jpeg",
-        }),
-      ]);
-      if (frontUploaded) frontCoverUrl = frontUploaded;
-      if (backUploaded) backCoverUrl = backUploaded;
-      coverSpreadSplit = halves.splitApplied || Boolean(frontUploaded && backUploaded);
-    } catch (error) {
-      console.warn(
-        "[auto-draft-ebook] Cover spread split failed; using page 1 as front cover.",
-        error instanceof Error ? error.message : error,
-      );
-    }
-
-    coverImageUrl = frontCoverUrl;
 
     const supabase = getSupabaseAdmin();
     const slug = uniqueSlug(fastCode, title);
@@ -797,8 +856,10 @@ export async function autoGenerateDraftTalisBook(
       is_visible: boolean;
       created_at: string;
       updated_at: string;
-    }> = [
-      {
+    }> = [];
+
+    if (frontCoverUrl) {
+      pageRows.push({
         title: "Front cover",
         slug: "pdf-front-cover",
         page_number: 1,
@@ -811,83 +872,42 @@ export async function autoGenerateDraftTalisBook(
           heroImageUrl: frontCoverUrl,
           exactPdfPage: true,
           coverSpreadHalf: "front",
-          sourcePageIndex: 1,
         },
         is_visible: true,
         created_at: now,
         updated_at: now,
-      },
-    ];
+      });
+    }
 
-    // Each remaining PDF page is a landscape slide → one continuous centerfold.
-    interiorUrls.forEach((url, index) => {
-      const leftPage = 2 + index * 2;
-      const rightPage = leftPage + 1;
-      const sourcePageIndex = index + 2;
-      pageRows.push(
-        {
-          title: `Spread ${index + 1} · left`,
-          slug: `pdf-spread-${String(index + 1).padStart(2, "0")}-left`,
-          page_number: leftPage,
-          sort_order: leftPage,
-          content: {
-            pageRole: "property_content",
-            layout: "centerfold_left",
-            layoutType: "spread",
-            title: "",
-            body: "",
-            spreadImageUrl: url,
-            spreadMat: true,
-            brochureLeaf: "left",
-            sourcePageIndex,
-          },
-          is_visible: true,
-          created_at: now,
-          updated_at: now,
-        },
-        {
-          title: `Spread ${index + 1} · right`,
-          slug: `pdf-spread-${String(index + 1).padStart(2, "0")}-right`,
-          page_number: rightPage,
-          sort_order: rightPage,
-          content: {
-            pageRole: "property_content",
-            layout: "centerfold_right",
-            layoutType: "spread",
-            title: "",
-            body: "",
-            spreadImageUrl: url,
-            spreadMat: true,
-            brochureLeaf: "right",
-            sourcePageIndex,
-          },
-          is_visible: true,
-          created_at: now,
-          updated_at: now,
-        },
-      );
-    });
+    pageRows.push(
+      ...pdfInteriorSpreadRows({
+        urls: pageImageUrls,
+        startPage: frontCoverUrl ? 2 : 1,
+        now,
+      }),
+    );
 
-    const backPageNumber = pageRows.length + 1;
-    pageRows.push({
-      title: "Back cover",
-      slug: "pdf-back-cover",
-      page_number: backPageNumber,
-      sort_order: backPageNumber,
-      content: {
-        pageRole: "cover",
-        layout: "cover",
-        title: "",
-        body: "",
-        heroImageUrl: backCoverUrl,
-        exactPdfPage: true,
-        coverSpreadHalf: "back",
-        sourcePageIndex: 1,
-      },
-      is_visible: true,
-      created_at: now,
-      updated_at: now,
-    });
+    if (backCoverUrl) {
+      const backPageNumber = pageRows.length + 1;
+      pageRows.push({
+        title: "Back cover",
+        slug: "pdf-back-cover",
+        page_number: backPageNumber,
+        sort_order: backPageNumber,
+        content: {
+          pageRole: "cover",
+          layout: "cover",
+          title: "",
+          body: "",
+          heroImageUrl: backCoverUrl,
+          exactPdfPage: true,
+          coverSpreadHalf: "back",
+        },
+        is_visible: true,
+        created_at: now,
+        updated_at: now,
+      });
+    }
 
     const pageCount = pageRows.length;
     const previewUrl = `${ROUTES.TALISBOOKS_VIEWER}/${slug}`;
@@ -910,11 +930,10 @@ export async function autoGenerateDraftTalisBook(
         metadata: {
           coverImageUrl: frontCoverUrl,
           backCoverImageUrl: backCoverUrl,
-          coverSpreadImageUrl: coverSpreadSourceUrl,
-          // Issuu opening: front cover alone on the right. Back cover is the last leaf.
-          // Page 1 of the PDF is still interpreted as a cover spread (split into halves).
+          coverSpreadImageUrl: null,
           coverSpreadOpening: false,
-          coverSpreadSplit,
+          coverSpreadSplit: false,
+          explicitCovers: true,
           galleryImageUrls: galleryUrls,
           location: location || null,
           source: input.source || "self-service-pdf",
@@ -956,20 +975,16 @@ export async function autoGenerateDraftTalisBook(
       );
     }
 
-    if (mapsiteId) {
-      await supabase
-        .from("mapsites")
-        .update({
-          teb_url: previewUrl,
-          updated_at: now,
-        })
-        .eq("id", mapsiteId);
-    }
+    await persistMapsiteEbookListing({
+      mapsiteId,
+      previewUrl,
+      listingImageUrls: galleryUrls,
+      now,
+    });
 
     logOnboardingStep("PDF generation", dbStarted, {
       bookId: book.id,
       pageCount,
-      coverSpreadSplit,
     });
     logOnboardingStep("Ebook pipeline", pipelineStarted, {
       mode: "pdf",
@@ -1005,13 +1020,7 @@ export async function autoGenerateDraftTalisBook(
         });
 
   const [
-    {
-      landscapes,
-      coverSpreadImageUrl,
-      coverImageUrl: initialCoverUrl,
-      backCoverImageUrl: initialBackUrl,
-      galleryUrls,
-    },
+    { landscapes, galleryUrls },
     agent,
   ] =
     await Promise.all([
@@ -1036,57 +1045,10 @@ export async function autoGenerateDraftTalisBook(
     preoptimized: optimizedImages.length > 0,
   });
 
-  let coverImageUrl = initialCoverUrl;
-  let backCoverImageUrl = initialBackUrl;
-  let coverSpreadSplit = false;
-  const coverSpreadSource = coverSpreadImageUrl || initialCoverUrl;
+  const coverImageUrl = frontCoverUrl;
+  const backCoverImageUrl = backCoverUrl;
 
-  if (coverSpreadImageUrl) {
-    const firstInterior = landscapes[0];
-    const targetInteriorWidth = firstInterior
-      ? firstInterior.width > firstInterior.height
-        ? Math.round(firstInterior.width / 2)
-        : firstInterior.width
-      : undefined;
-    const targetInteriorHeight = firstInterior
-      ? firstInterior.height
-      : undefined;
-
-    try {
-      const halves = await splitCoverSpreadFromUrl(coverSpreadImageUrl, {
-        targetWidth: targetInteriorWidth,
-        targetHeight: targetInteriorHeight,
-      });
-      const coverId = crypto.randomUUID();
-      const [frontUploaded, backUploaded] = await Promise.all([
-        uploadBuffer({
-          scope: fastCode,
-          id: coverId,
-          suffix: "cover-front",
-          buffer: halves.front,
-          mimeType: "image/jpeg",
-        }),
-        uploadBuffer({
-          scope: fastCode,
-          id: coverId,
-          suffix: "cover-back",
-          buffer: halves.back,
-          mimeType: "image/jpeg",
-        }),
-      ]);
-      if (frontUploaded) coverImageUrl = frontUploaded;
-      if (backUploaded) backCoverImageUrl = backUploaded;
-      coverSpreadSplit =
-        halves.splitApplied || Boolean(frontUploaded && backUploaded);
-    } catch (error) {
-      console.warn(
-        "[auto-draft-ebook] Image cover-spread split failed; using full landscape as cover.",
-        error instanceof Error ? error.message : error,
-      );
-    }
-  }
-
-  if (!coverImageUrl && landscapes.length === 0) {
+  if (landscapes.length === 0) {
     return {
       success: false,
       error: "Could not process property images. Try JPG or PNG files.",
@@ -1135,9 +1097,10 @@ export async function autoGenerateDraftTalisBook(
       metadata: {
         coverImageUrl,
         backCoverImageUrl,
-        coverSpreadImageUrl: coverSpreadSource,
+        coverSpreadImageUrl: null,
         coverSpreadOpening: false,
-        coverSpreadSplit,
+        coverSpreadSplit: false,
+        explicitCovers: true,
         galleryImageUrls: galleryUrls,
         location: location || null,
         source: input.source || "auto-draft-teb",
@@ -1182,15 +1145,12 @@ export async function autoGenerateDraftTalisBook(
     console.error("[auto-draft-ebook] Pages insert failed:", pagesError.message);
   }
 
-  if (mapsiteId) {
-    await supabase
-      .from("mapsites")
-      .update({
-        teb_url: previewUrl,
-        updated_at: now,
-      })
-      .eq("id", mapsiteId);
-  }
+  await persistMapsiteEbookListing({
+    mapsiteId,
+    previewUrl,
+    listingImageUrls: galleryUrls,
+    now,
+  });
 
   logOnboardingStep("Ebook pipeline", pipelineStarted, {
     mode: "images",

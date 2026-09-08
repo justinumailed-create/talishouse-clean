@@ -21,6 +21,7 @@ import {
   ADPRO_CATEGORY_OPTIONS,
   normalizeAdproCategoryCode,
 } from "@/lib/talispros/adpro-categories";
+import { formatNorthAmericanPhone } from "@/lib/format-north-american-phone";
 
 const ADPRE_PACKAGES = [
   { value: "adpro-single", label: "Single AdPro™ PIN", description: "Individual business placement." },
@@ -163,6 +164,7 @@ function InputField({ label, required, type = "text", value, onChange, placehold
       <input
         type={type} value={value} onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder} autoComplete={autoComplete}
+        inputMode={type === "tel" ? "tel" : undefined}
         className={`w-full h-11 px-4 bg-white border text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-xl ${error ? "border-red-300" : "border-neutral-200"}`}
       />
       {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
@@ -756,7 +758,7 @@ export default function BuildMapSiteClient({
                       <InputField label="Last Name" required value={form.lastName} onChange={(v) => updateField("lastName", v)} placeholder="Smith" autoComplete="family-name" error={errors.lastName} />
                     </div>
                     <InputField label="Email Address" required type="email" value={form.email} onChange={(v) => updateField("email", v)} placeholder="john@example.com" autoComplete="email" error={errors.email} />
-                    <InputField label="Phone Number" required value={form.phone} onChange={(v) => updateField("phone", v)} placeholder="+1 555 123 4567" autoComplete="tel" error={errors.phone} />
+                    <InputField label="Phone" required type="tel" value={form.phone} onChange={(v) => updateField("phone", formatNorthAmericanPhone(v))} placeholder="(555) 555-5555" autoComplete="tel" error={errors.phone} />
                     <InputField label="Company" required value={form.company} onChange={(v) => updateField("company", v)} placeholder="Acme Realty" autoComplete="organization" error={errors.company} />
                     <InputField label="Requested Market" value={form.marketType} onChange={(v) => updateField("marketType", v)} placeholder="Downtown Vancouver" error={errors.marketType} />
                     <AccountTypeSelector value={form.accountType} onChange={(v) => updateField("accountType", v)} error={errors.accountType} />

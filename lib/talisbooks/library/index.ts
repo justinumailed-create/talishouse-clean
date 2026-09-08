@@ -17,6 +17,7 @@ export {
 export { createDemoBookshelf, createDemoDerivativeBookshelf, createDemoRootBookshelf } from "./demo-shelf";
 export { monthlyCapacityUsd, partitionBookshelf } from "./partition";
 export {
+  filterBooksForFastCodeShelf,
   filterLibraryBooks,
   matchesLibrarySearch,
   matchesLibraryStatus,

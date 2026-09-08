@@ -26,8 +26,9 @@ export default function DemoMapSiteBuilderPage() {
           Build Demo eBook and Mapsite™
         </h1>
         <p className="mt-2 text-sm leading-6 text-neutral-600">
-          Place a pin the same way as a live Mapsite™. We attach the sample
-          Talispros eBook and skip FAST Code issuance.
+          Place a pin the same way as a live Mapsite™. Next we walk through
+          creating the Talisbook™ from the pinned sample PDF — without issuing a
+          FAST Code.
         </p>
         <p className="mt-3 text-sm">
           <Link

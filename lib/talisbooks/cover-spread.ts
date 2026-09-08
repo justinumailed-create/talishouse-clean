@@ -1,15 +1,13 @@
 /**
- * Cover-spread helpers for self-service TalisBooks™.
+ * Cover-spread split helper (legacy books / tests).
  *
- * Rule: image #1 (or PDF page 1) is ALWAYS the wrap cover:
+ * New self-service generation does not split image #1 or PDF page 1.
+ * Front and back covers are explicit portrait assets stored as
+ * metadata.coverImageUrl + metadata.backCoverImageUrl.
+ *
+ * This helper remains for older wrap-cover rasters and unit tests:
  *   LEFT half  = back cover
  *   RIGHT half = front cover
- *
- * Split is exactly 50% of width (vertical center line), regardless of
- * whether the source is landscape or portrait.
- *
- * Separate front/back cover assets (admin / pinned books) remain supported
- * via metadata.coverImageUrl + metadata.backCoverImageUrl without splitting.
  */
 
 import sharp from "sharp";

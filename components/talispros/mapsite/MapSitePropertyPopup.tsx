@@ -2,17 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import {
-  getMapSiteListingGalleryImages,
   getMapSiteListingHeroImage,
-  getMapSiteListingPhotoCount,
   MAPSITE_LISTING_CARD_WIDTH_CLASS,
   MAPSITE_LISTING_IMAGE_CLASS,
   MAPSITE_LISTING_TILE_TOP_FALLBACK_PX,
-  shouldReplaceDemoListingMedia,
 } from "@/lib/talispros/mapsite-listing-media";
+import {
+  MAPSITE_PIN_TIP_CLEARANCE_PX,
+} from "@/lib/talispros/mapsite-overlay-layout";
 import { ROUTES } from "@/lib/routes";
 import { isClaimable } from "@/lib/talispros/mapsite-state";
 import {
@@ -21,10 +20,9 @@ import {
   type MapSiteResourceKey,
 } from "@/lib/talispros/account-capabilities";
 import {
-  showsActiveResourceButtons,
+  showsPinResourceButtons,
   type MapSiteOnboardingPhase,
 } from "@/lib/talispros/mapsite-onboarding-phase";
-import MapSitePhotoGallery from "./MapSitePhotoGallery";
 
 type ResourceKey = MapSiteResourceKey;
 
@@ -34,14 +32,14 @@ const RESOURCES: {
   resolveHref: (site: MapSitePlatformRecord) => string | null;
 }[] = [
   {
-    key: "mls",
-    label: "MLS®",
-    resolveHref: (site) => site.mls_url?.trim() || null,
-  },
-  {
     key: "url",
     label: "URL",
     resolveHref: (site) => site.broker_url?.trim() || null,
+  },
+  {
+    key: "mls",
+    label: "MLS®",
+    resolveHref: (site) => site.mls_url?.trim() || null,
   },
   {
     key: "teb",
@@ -52,10 +50,10 @@ const RESOURCES: {
       // Prefer FAST-code shelf unless admin set a fully custom absolute TEB URL.
       if (custom && /^https?:\/\//i.test(custom)) return custom;
       if (code) {
-        return `${ROUTES.TALISBOOKS_LIBRARY}?fastCode=${encodeURIComponent(code)}`;
+        return `${ROUTES.TALISBOOKS}/fast/${encodeURIComponent(code.toLowerCase())}`;
       }
       if (custom.startsWith("/")) return custom;
-      return ROUTES.TALISBOOKS_LIBRARY;
+      return ROUTES.TALISBOOKS;
     },
   },
   {
@@ -150,23 +148,12 @@ export default function MapSitePropertyPopup({
   compact = false,
   onClose,
 }: MapSitePropertyPopupProps) {
-  const [galleryOpen, setGalleryOpen] = useState(false);
   const claimable = isClaimable(mapsite.status);
-  const showActiveResources = showsActiveResourceButtons(onboardingPhase);
+  const showResourceButtons = showsPinResourceButtons(onboardingPhase);
   const capabilities = capabilitiesForAccountType(accountType);
-  const visibleResources = RESOURCES.filter((resource) =>
-    capabilities.resourceButtons.includes(resource.key)
-  );
   const heroImage = getMapSiteListingHeroImage(mapsite);
-  const galleryImages = getMapSiteListingGalleryImages(mapsite);
-  const photoCount = getMapSiteListingPhotoCount(mapsite);
   const genericHeroImage = "/talisbooks/sample/img-11-1280x720.jpeg";
   const useGenericCard = genericOnboardingCard || claimable;
-  const hasUploadedPropertyMedia = !shouldReplaceDemoListingMedia(
-    mapsite.cover_image,
-    mapsite.gallery_images
-  );
-  const showPhotoBadge = !useGenericCard && hasUploadedPropertyMedia;
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
   const address =
     mapsite.property_address?.trim() ||
@@ -174,12 +161,7 @@ export default function MapSitePropertyPopup({
     null;
   const showPendingActions =
     onboardingPhase === "BUILD_SUBMITTED" || onboardingPhase === "BOOK_READY";
-  const showBookButton = Boolean(talisBookHref);
-  const pendingHasActions =
-    showPendingActions &&
-    (showBookButton || onboardingPhase === "BUILD_SUBMITTED");
-  const showActiveBookButton =
-    showActiveResources && showBookButton && Boolean(talisBookHref);
+  const tebHref = talisBookHref?.trim() || null;
   const popupHeroImage = useGenericCard ? genericHeroImage : heroImage;
   const popupTitle = useGenericCard
     ? "The first of many E-Books"
@@ -198,8 +180,13 @@ export default function MapSitePropertyPopup({
         aria-label={mapsite.property_title}
         className={`pointer-events-none absolute z-30 ${MAPSITE_LISTING_CARD_WIDTH_CLASS} -translate-x-1/2`}
         style={{
-          top: alignTop,
           left: centerX == null ? "50%" : centerX,
+          ...(cardHeight
+            ? { top: alignTop }
+            : {
+                top: "auto",
+                bottom: `calc(50% + ${MAPSITE_PIN_TIP_CLEARANCE_PX}px)`,
+              }),
         }}
       >
         <div
@@ -210,38 +197,30 @@ export default function MapSitePropertyPopup({
             className={`mapsite-popup-hero relative w-full shrink-0 bg-neutral-200/80 ${
               useGenericCard
                 ? "aspect-video"
-                : showActiveResources || pendingHasActions || showActiveBookButton
-                ? "h-[120px]"
+                : showResourceButtons
+                ? "aspect-[16/9]"
                 : compact
                   ? "h-28"
                   : "h-36"
             }`}
           >
-            <button
-              type="button"
-              onClick={() => {
-                if (!showPhotoBadge) return;
-                setGalleryOpen(true);
-              }}
-              className="absolute inset-0 z-0"
-              aria-label={
-                showPhotoBadge
-                  ? `View ${photoCount} photo${photoCount === 1 ? "" : "s"}`
-                  : "Property image"
-              }
-            >
+            <div className="absolute inset-0 z-0">
               <span className="relative block h-full w-full">
                 <Image
                   src={popupHeroImage}
                   alt={popupTitle}
                   fill
-                  className={MAPSITE_LISTING_IMAGE_CLASS}
+                  className={
+                    showResourceButtons
+                      ? "object-contain object-center"
+                      : MAPSITE_LISTING_IMAGE_CLASS
+                  }
                   sizes="352px"
                   unoptimized
                   priority
                 />
               </span>
-            </button>
+            </div>
 
             <button
               type="button"
@@ -251,51 +230,28 @@ export default function MapSitePropertyPopup({
             >
               ×
             </button>
-
-            {showPhotoBadge ? (
-              <button
-                type="button"
-                onClick={() => setGalleryOpen(true)}
-                className="absolute bottom-2.5 right-2.5 z-10 inline-flex min-h-8 items-center gap-1 rounded-full bg-black/75 px-2.5 py-1 text-[11px] font-medium text-white transition hover:bg-black/90"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  className="h-3 w-3"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden
-                >
-                  <path d="M4 7h3l1.5-2h7L17 7h3v12H4V7Z" />
-                  <circle cx="12" cy="13" r="3.25" />
-                </svg>
-                {photoCount} Photo{photoCount === 1 ? "" : "s"}
-              </button>
-            ) : null}
           </div>
 
-          <div className="flex min-h-0 flex-1 flex-col bg-gradient-to-b from-white/65 to-white/75 px-4 pb-3 pt-2.5">
-            <h2 className="shrink-0 text-[15px] font-semibold leading-snug tracking-tight text-black">
-              {popupTitle}
-            </h2>
-            {useGenericCard ? null : fastCode ? (
-              <p className="mt-1 shrink-0 text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-500">
-                FAST Code: {fastCode}
-              </p>
-            ) : (
-              <p className="mt-1 shrink-0 text-[11px] font-medium uppercase tracking-[0.08em] text-neutral-500">
-                {capabilities.displayName}
-              </p>
-            )}
-            {useGenericCard ? null : (
-              <p
-                className={`mt-1 min-h-0 shrink text-[12px] leading-[1.35] text-black ${
-                  useGenericCard ? "line-clamp-4" : "line-clamp-3"
-                }`}
-              >
-                {popupWriteup}
-              </p>
-            )}
+          <div className="flex flex-col bg-gradient-to-b from-white/65 to-white/75 px-4 pb-3 pt-1.5">
+            <div className="shrink-0">
+              <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">
+                {popupTitle}
+              </h2>
+              {useGenericCard ? null : fastCode ? (
+                <p className="m-0 text-[11px] font-medium uppercase leading-tight tracking-[0.08em] text-neutral-500">
+                  FAST Code: {fastCode}
+                </p>
+              ) : (
+                <p className="m-0 text-[11px] font-medium uppercase leading-tight tracking-[0.08em] text-neutral-500">
+                  {capabilities.displayName}
+                </p>
+              )}
+              {useGenericCard ? null : (
+                <p className="m-0 text-[12px] leading-tight text-black line-clamp-2">
+                  {popupWriteup}
+                </p>
+              )}
+            </div>
 
             {useGenericCard ? (
               <div className="mt-auto flex justify-center pt-2">
@@ -317,54 +273,23 @@ export default function MapSitePropertyPopup({
               </Link>
             ) : null}
 
-            {!useGenericCard && showPendingActions ? (
-              <div className="mt-auto flex shrink-0 flex-col gap-2 pt-2.5">
-                {onboardingPhase === "BUILD_SUBMITTED" && !showBookButton ? (
+            {!useGenericCard && showResourceButtons ? (
+              <div className="mt-2 flex shrink-0 flex-col gap-2">
+                {showPendingActions && !tebHref ? (
                   <p className="text-[12px] leading-snug text-neutral-600">
-                    Your first Talisbook™ is being prepared. You&apos;ll see View
-                    Your Talisbook™ here when it&apos;s ready.
+                    Your first Talisbook™ is being prepared. TEB™ unlocks here
+                    when it&apos;s ready.
                   </p>
                 ) : null}
-                {showBookButton && talisBookHref ? (
-                  <Link
-                    href={talisBookHref}
-                    className="flex min-h-11 w-full items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
-                  >
-                    View Your Talisbook™
-                  </Link>
-                ) : null}
-              </div>
-            ) : null}
-
-            {!useGenericCard && showActiveResources ? (
-              <div
-                className={`mt-auto flex shrink-0 flex-col gap-2 ${
-                  showPendingActions ? "pt-0" : "pt-2.5"
-                }`}
-              >
-                {showActiveBookButton && talisBookHref ? (
-                  <Link
-                    href={talisBookHref}
-                    className="flex min-h-11 w-full items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
-                  >
-                    View Your Talisbook™
-                  </Link>
-                ) : null}
-                {visibleResources.length > 0 ? (
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {visibleResources.map((resource) => (
-                      <ResourceButton
-                        key={resource.key}
-                        href={
-                          resource.key === "teb" && talisBookHref
-                            ? talisBookHref
-                            : resource.resolveHref(mapsite)
-                        }
-                        label={resource.label}
-                      />
-                    ))}
-                  </div>
-                ) : null}
+                <div className="grid grid-cols-4 gap-1.5">
+                  {RESOURCES.map((resource) => (
+                    <ResourceButton
+                      key={resource.key}
+                      href={resource.key === "teb" ? tebHref : null}
+                      label={resource.label}
+                    />
+                  ))}
+                </div>
               </div>
             ) : null}
           </div>
@@ -376,14 +301,6 @@ export default function MapSitePropertyPopup({
           aria-hidden
         />
       </div>
-
-      {galleryOpen ? (
-        <MapSitePhotoGallery
-          title={mapsite.property_title}
-          images={galleryImages}
-          onClose={() => setGalleryOpen(false)}
-        />
-      ) : null}
     </>
   );
 }

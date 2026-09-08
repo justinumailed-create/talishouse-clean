@@ -13,10 +13,6 @@ interface TalisBooksViewerSlugPageProps {
   params: Promise<{ slug: string }>;
 }
 
-const SAMPLE_OG_IMAGE = "/talisbooks/pinned/og-explore-talisbooks.jpg";
-const SAMPLE_OG_DESCRIPTION =
-  "Explore Talisbooks™ — open the sample lookbook. Mapsite™ pins your place on the map so buyers and partners can find your story.";
-
 export async function generateMetadata({
   params,
 }: TalisBooksViewerSlugPageProps): Promise<Metadata> {
@@ -26,14 +22,10 @@ export async function generateMetadata({
   if (normalized === PINNED_TALISBOOK_SLUG) {
     return createMetadata({
       title: "Explore Talisbooks™",
-      description: SAMPLE_OG_DESCRIPTION,
+      description:
+        "Explore Talisbooks™ — open the sample lookbook. Mapsite™ pins your place on the map so buyers and partners can find your story.",
       path: `${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`,
-      image: {
-        url: SAMPLE_OG_IMAGE,
-        width: 1200,
-        height: 630,
-        alt: "Explore Talisbooks™ — sample lookbook with Mapsite™",
-      },
+      image: false,
     });
   }
 
@@ -44,6 +36,7 @@ export async function generateMetadata({
       description: "Read a Talisbook™ digital lookbook.",
       path: `${TALISBOOKS_ROUTES.VIEWER}/${normalized}`,
       private: true,
+      image: false,
     });
   }
 
@@ -53,6 +46,7 @@ export async function generateMetadata({
       book.subtitle?.trim() ||
       "Read this Talisbook™ digital lookbook in the Talisbooks™ viewer.",
     path: `${TALISBOOKS_ROUTES.VIEWER}/${book.slug}`,
+    image: false,
   });
 }
 

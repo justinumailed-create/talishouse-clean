@@ -10,6 +10,7 @@ import {
 } from "@/lib/onboarding-timing";
 import type { GenerateSelfServiceEbookActionResult } from "@/lib/talispros/ebook-generate-action-types";
 import {
+  parseCoverImageJson,
   parseSelfServiceBookOptions,
   parseSelfServiceCaptions,
 } from "@/lib/talisbooks/self-service-page-plan";
@@ -59,6 +60,8 @@ export async function generateSelfServiceEbookAction(
     agentPhoto,
     images,
     uploadMode,
+    frontCover: parseCoverImageJson(String(formData.get("frontCover") || "")),
+    backCover: parseCoverImageJson(String(formData.get("backCover") || "")),
     bookOptions: parseSelfServiceBookOptions(
       String(formData.get("bookOptions") || ""),
     ),

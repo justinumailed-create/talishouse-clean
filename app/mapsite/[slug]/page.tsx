@@ -5,6 +5,7 @@ import PublishedMapSiteView, {
   publishedMapSiteMetadata,
 } from "@/components/mapsite/PublishedMapSiteView";
 import type { Metadata } from "next";
+import { connection } from "next/server";
 
 interface PageConfig {
   contentType: "map" | "pdf" | "image";
@@ -21,6 +22,7 @@ interface PageConfig {
 }
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateMetadata({
   params,
@@ -40,6 +42,8 @@ export async function generateMetadata({
 }
 
 export default async function MapSitePage({ params }: { params: Promise<{ slug?: string }> }) {
+  await connection();
+
   const resolvedParams = await params;
   const slug = resolvedParams?.slug?.toLowerCase().trim();
 

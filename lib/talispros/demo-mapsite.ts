@@ -4,7 +4,7 @@ import {
 } from "@/lib/talisbooks/library/pinned-catalog";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
-import { DEMO_MAPSITE_ID } from "@/lib/talispros/mapsite-state";
+import { DEMO_MAPSITE_ID, MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
 /** Public demo Mapsite™ builder (no FAST Code issuance). */
 export const DEMO_MAPSITE_BUILD_PATH = "/talispros/demo-mapsite";
@@ -31,4 +31,23 @@ export function isProtectedPlatformDemoMapSite(id: string | null | undefined): b
 export function createDemoMapSiteCode(): string {
   const token = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
   return `${DEMO_MAPSITE_CODE_PREFIX}${token}`;
+}
+
+export function demoMapSiteApplicationHref(mapsiteId: string): string {
+  const params = new URLSearchParams({
+    view: "pin",
+    mapsiteId,
+  });
+  return `${MAPSITE_APP_PATH}?${params.toString()}`;
+}
+
+export function demoMapSiteEbookHref(options: {
+  mapsiteId: string;
+  code: string;
+}): string {
+  const params = new URLSearchParams({
+    mapsiteId: options.mapsiteId,
+    code: options.code,
+  });
+  return `${DEMO_MAPSITE_BUILD_PATH}/ebook?${params.toString()}`;
 }

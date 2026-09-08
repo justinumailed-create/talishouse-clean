@@ -32,6 +32,8 @@ export type GenerateSelfServiceEbookInput = {
   uploadMode?: AutoDraftUploadMode;
   bookOptions?: Partial<SelfServiceBookOptions>;
   captions?: SelfServicePageCaption[];
+  frontCover?: OptimizedEbookImageAsset | null;
+  backCover?: OptimizedEbookImageAsset | null;
 };
 
 export type GenerateSelfServiceEbookResult =
@@ -74,6 +76,8 @@ export async function generateSelfServiceEbook(
     uploadMode,
     bookOptions: input.bookOptions,
     captions: input.captions,
+    frontCover: input.frontCover,
+    backCover: input.backCover,
   });
 
   if (!result.success) {

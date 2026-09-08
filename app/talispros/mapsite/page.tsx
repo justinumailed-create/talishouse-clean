@@ -21,10 +21,11 @@ import {
   resolveMapSitePaymentPlanType,
 } from "./actions";
 import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
-import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
+import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { ACTIVATE_QUERY, BOOK_PENDING_QUERY } from "@/lib/talispros/ebook-choice";
+import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 import MapSitePmcApplication from "@/components/talispros/mapsite/MapSitePmcApplication";
 import MapSiteOnboardingEntry from "@/components/talispros/mapsite/MapSiteOnboardingEntry";
@@ -36,6 +37,7 @@ export const metadata: Metadata = createMetadata({
   description:
     "Claim your market on the Talispros™ Mapsite™ — the fullscreen map application for FSBO, builders, and real estate professionals.",
   path: "/talispros/mapsite",
+  image: false,
 });
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -184,7 +186,7 @@ export default async function TalisprosMapSitePage({
     }));
 
   const ebookContext = ownerCode
-    ? await getMapSiteEbookContext(ownerCode)
+    ? await getMapSiteEbookContext(ownerCode, { bookSlug })
     : null;
   const primarySlug = ebookContext?.primaryEbook?.slug || bookSlug;
   const talisBookHref =
@@ -192,10 +194,19 @@ export default async function TalisprosMapSitePage({
     mapsite.teb_url?.trim() ||
     (mapsite.is_demonstration ? DEMO_PINNED_EBOOK_HREF : null);
   const hasTalisBook = Boolean(talisBookHref || ebookContext?.books?.length);
+  const listingImageUrls = await resolveEbookListingImageUrls({
+    listingImageUrls: ebookContext?.primaryEbook?.listingImageUrls,
+    bookSlug: primarySlug,
+    tebUrl: mapsite.teb_url,
+  });
+  const listingMapSite = withEbookListingMedia(
+    mapsite,
+    listingImageUrls,
+  );
 
   return (
     <MapSiteApplication
-      initialMapSite={mapsite}
+      initialMapSite={listingMapSite}
       audience={flowAudience}
       accountType={accountType}
       onboardingMode={onboardingMode}

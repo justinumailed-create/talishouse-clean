@@ -11,6 +11,10 @@ import type { RegistrationMarket } from "@/lib/registration-market";
 import { REGISTRATION_MARKET_COPY } from "@/lib/registration-market";
 import { hasValidCoordinates } from "@/lib/home-pin-coordinates";
 import { DEMO_MAPSITE_ID } from "@/lib/talispros/mapsite-state";
+import {
+  formatNorthAmericanPhone,
+  northAmericanPhoneDigits,
+} from "@/lib/format-north-american-phone";
 
 interface TalisprosMarketRegistrationFormProps {
   market: RegistrationMarket;
@@ -110,6 +114,7 @@ export default function TalisprosMarketRegistrationForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [pinImage, setPinImage] = useState<File | null>(null);
   const [pinLocation, setPinLocation] =
     useState<HomePinLocationValues>(EMPTY_PIN_LOCATION);
@@ -158,6 +163,11 @@ export default function TalisprosMarketRegistrationForm({
       return;
     }
 
+    if (northAmericanPhoneDigits(phone).length !== 10) {
+      setError("Enter a 10-digit phone number.");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const resolvedLocation = await ensurePinLocation();
@@ -180,7 +190,7 @@ export default function TalisprosMarketRegistrationForm({
       formData.set("firstName", firstName);
       formData.set("lastName", lastName);
       formData.set("email", email);
-      formData.set("phone", "");
+      formData.set("phone", phone.trim());
       formData.set("company", marketCopy.label);
       formData.set("marketType", market);
       formData.set("accountType", accountType);
@@ -329,6 +339,25 @@ export default function TalisprosMarketRegistrationForm({
               type="text"
               value={lastName}
               onChange={(event) => setLastName(event.target.value)}
+              required
+              className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <FieldLabel
+              label="Phone"
+              hint="Used on your Talisbook™ and Mapsite™ contact details."
+              required
+            />
+            <input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(event) =>
+                setPhone(formatNorthAmericanPhone(event.target.value))
+              }
+              placeholder="(555) 555-5555"
               required
               className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
             />

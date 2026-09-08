@@ -12,16 +12,16 @@ function resolveTebHref(site: {
   const code = site.fast_code?.trim();
   if (custom && /^https?:\/\//i.test(custom)) return custom;
   if (code) {
-    return `${ROUTES.TALISBOOKS_LIBRARY}?fastCode=${encodeURIComponent(code)}`;
+    return `${ROUTES.TALISBOOKS}/fast/${encodeURIComponent(code.toLowerCase())}`;
   }
   if (custom.startsWith("/")) return custom;
-  return ROUTES.TALISBOOKS_LIBRARY;
+  return ROUTES.TALISBOOKS;
 }
 
 describe("Mapsite™ TEB™ shelf href", () => {
   it("scopes library to FAST code by default", () => {
     expect(resolveTebHref({ fast_code: "lg01" })).toBe(
-      "/talisbooks/library?fastCode=lg01"
+      "/talisbooks/fast/lg01"
     );
   });
 
@@ -34,7 +34,7 @@ describe("Mapsite™ TEB™ shelf href", () => {
     ).toBe("https://example.com/custom-teb");
   });
 
-  it("falls back to full library without FAST code", () => {
-    expect(resolveTebHref({})).toBe("/talisbooks/library");
+  it("falls back to the public bookshelf without FAST code", () => {
+    expect(resolveTebHref({})).toBe("/talisbooks");
   });
 });

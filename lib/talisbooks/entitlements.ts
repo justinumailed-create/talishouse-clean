@@ -13,6 +13,7 @@ import {
   buildClaimedMapSitePath,
   mapsiteAccountTypeSegment,
 } from "@/lib/talispros/mapsite-state";
+import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 
 export type TalisBooksAccountKind = Extract<
@@ -258,7 +259,7 @@ export async function getTalisBooksEntitlementSnapshot(
   fastCodeRaw: string,
 ): Promise<TalisBooksEntitlements | null> {
   const fastCode = fastCodeRaw.trim().toLowerCase();
-  if (!fastCode || fastCode === "demo") return null;
+  if (!fastCode || fastCode === "demo" || isDemoMapSiteCode(fastCode)) return null;
 
   const registrationHref = buildClaimedMapSitePath({
     fastCode,

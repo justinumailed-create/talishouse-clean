@@ -1,7 +1,9 @@
 import MapSiteGalleryLightbox from "./MapSiteGalleryLightbox";
 import MapSiteContextPanel from "./MapSiteContextPanel";
+import MapSiteCreateNewPanel from "./MapSiteCreateNewPanel";
 import MapSitePanelHeader from "./MapSitePanelHeader";
 import MapSiteVideoSection from "./MapSiteVideoSection";
+import MapSiteCreativeLinks from "./MapSiteCreativeLinks";
 import type { MapSiteGalleryDisplayItem } from "@/lib/mapsite-gallery";
 import type { OfferedSubscriptionTier } from "@/lib/mapsite-subscription";
 
@@ -17,6 +19,13 @@ interface MapSiteBottomPanelsProps {
   offeredSubscriptionTier: OfferedSubscriptionTier;
   interestFormEnabled: boolean;
   buildRequestId?: string;
+  paymentReceived?: boolean;
+  tebHref?: string;
+  ttvHref?: string;
+  scheduleHref?: string;
+  brokerageName?: string;
+  brokerageLogoUrl?: string | null;
+  brokerageWebsite?: string | null;
 }
 
 export default function MapSiteBottomPanels({
@@ -31,11 +40,33 @@ export default function MapSiteBottomPanels({
   offeredSubscriptionTier,
   interestFormEnabled,
   buildRequestId,
+  paymentReceived = false,
+  tebHref,
+  ttvHref,
+  scheduleHref,
+  brokerageName,
+  brokerageLogoUrl,
+  brokerageWebsite,
 }: MapSiteBottomPanelsProps) {
+  const paidChrome = paymentReceived
+    ? "bg-[#f8f8f7] px-6 py-14 sm:px-10 sm:py-16 lg:min-h-[calc(100dvh-3rem)] lg:px-12 lg:py-20"
+    : "bg-[#f8f8f7] px-4 py-6 sm:px-8 sm:py-8 lg:h-[calc(100dvh-3rem)]";
+
   return (
-    <section className="border-t border-neutral-200">
-      <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-start">
-        <div className="bg-[#f8f8f7] px-4 py-6 sm:px-8 sm:py-8 lg:h-[calc(100dvh-3rem)]">
+    <section className="border-t border-neutral-200/80">
+      <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-stretch">
+        <div className={paidChrome}>
+          {paymentReceived ? (
+            <MapSiteCreativeLinks
+              fastCode={fastCode}
+              tebHref={tebHref}
+              ttvHref={ttvHref}
+              scheduleHref={scheduleHref}
+              brokerageName={brokerageName?.trim() || agentName}
+              brokerageLogoUrl={brokerageLogoUrl}
+              brokerageWebsite={brokerageWebsite}
+            />
+          ) : (
           <div className="flex flex-col gap-6 min-h-0 lg:h-full">
             <div className="flex flex-col min-h-[240px] lg:flex-1 rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white">
               <MapSitePanelHeader
@@ -70,19 +101,33 @@ export default function MapSiteBottomPanels({
               </div>
             </div>
           </div>
+          )}
         </div>
 
-        <div className="bg-[#e2e5ea] px-4 py-6 sm:px-8 sm:py-8 lg:flex lg:h-[calc(100dvh-3rem)] lg:flex-col lg:overflow-hidden lg:border-l lg:border-neutral-200 lg:sticky lg:top-6">
-          <MapSiteContextPanel
-            fastCode={fastCode}
-            agentName={agentName}
-            agentEmail={agentEmail}
-            offeredSubscriptionTier={offeredSubscriptionTier}
-            interestFormEnabled={interestFormEnabled}
-            initialHasSubscribed={visitorHasSubscribed}
-            initialVisitorFastCode={visitorFastCode}
-            buildRequestId={buildRequestId}
-          />
+        <div
+          className={
+            paymentReceived
+              ? `${paidChrome} lg:border-l lg:border-neutral-200/70`
+              : "bg-[#e2e5ea] px-4 py-6 sm:px-8 sm:py-8 lg:flex lg:h-[calc(100dvh-3rem)] lg:flex-col lg:overflow-hidden lg:border-l lg:border-neutral-200 lg:sticky lg:top-6"
+          }
+        >
+          {paymentReceived ? (
+            <MapSiteCreateNewPanel
+              fastCode={fastCode}
+              buildRequestId={buildRequestId}
+            />
+          ) : (
+            <MapSiteContextPanel
+              fastCode={fastCode}
+              agentName={agentName}
+              agentEmail={agentEmail}
+              offeredSubscriptionTier={offeredSubscriptionTier}
+              interestFormEnabled={interestFormEnabled}
+              initialHasSubscribed={visitorHasSubscribed}
+              initialVisitorFastCode={visitorFastCode}
+              buildRequestId={buildRequestId}
+            />
+          )}
         </div>
       </div>
     </section>

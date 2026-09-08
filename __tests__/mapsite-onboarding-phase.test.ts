@@ -3,6 +3,7 @@ import {
   getMapSiteOnboardingPhase,
   isPendingActivationPhase,
   showsActiveResourceButtons,
+  showsPinResourceButtons,
 } from "../lib/talispros/mapsite-onboarding-phase";
 
 describe("getMapSiteOnboardingPhase", () => {
@@ -84,10 +85,14 @@ describe("getMapSiteOnboardingPhase", () => {
     ).toBe("BOOK_READY");
   });
 
-  it("gates resource buttons to ACTIVE phase only", () => {
+  it("gates paid resource unlocks to ACTIVE, but shows pin slots after claim", () => {
     expect(showsActiveResourceButtons("ACTIVE")).toBe(true);
     expect(showsActiveResourceButtons("BOOK_READY")).toBe(false);
     expect(showsActiveResourceButtons("BUILD_SUBMITTED")).toBe(false);
+    expect(showsPinResourceButtons("ACTIVE")).toBe(true);
+    expect(showsPinResourceButtons("BOOK_READY")).toBe(true);
+    expect(showsPinResourceButtons("BUILD_SUBMITTED")).toBe(true);
+    expect(showsPinResourceButtons("UNCLAIMED")).toBe(false);
     expect(isPendingActivationPhase("BOOK_READY")).toBe(true);
     expect(isPendingActivationPhase("ACTIVE")).toBe(false);
   });

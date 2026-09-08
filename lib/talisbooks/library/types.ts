@@ -43,7 +43,7 @@ export interface TalisBooksBookshelf {
   mapsiteId?: string | null;
   /** When set, this shelf is scoped to a Mapsite™ TEB™ FAST Code. */
   scopedToFastCode?: boolean;
-  /** Public product shelf at /talisbooks (not account/FAST scoped). */
+  /** Public product shelf at /talisbooks. May also be FAST-code scoped via `scopedToFastCode`. */
   publicCatalog?: boolean;
   paymentReceived?: boolean;
   registrationHref?: string | null;

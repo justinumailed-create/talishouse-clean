@@ -15,6 +15,7 @@ export const metadata: Metadata = createMetadata({
   description:
     "Talisbooks™ is the native digital book and lookbook engine for the Talispros™ ecosystem — books, pages, templates, layouts, and publish workflows.",
   path: "/talisbooks",
+  image: false,
 });
 
 export default function TalisBooksLayout({

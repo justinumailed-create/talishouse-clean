@@ -6,6 +6,7 @@ import {
   TALISBOOKS_LIBRARY_SHELF_CAPACITY,
   createDemoDerivativeBookshelf,
   createDemoRootBookshelf,
+  filterBooksForFastCodeShelf,
   filterLibraryBooks,
   monthlyCapacityUsd,
   paginateLibraryBooks,
@@ -147,5 +148,15 @@ describe("Talisbooks™ library search / sort / filter", () => {
           /residences/i.test(book.slug),
       ),
     ).toBe(true);
+  });
+
+  it("keeps only books for one FAST Code on a Mapsite™ public shelf", () => {
+    const mixed = [
+      { ...books[0]!, id: "al02-a", fastCode: "al02", mapsiteId: "ms-al02" },
+      { ...books[1]!, id: "lg01-a", fastCode: "lg01", mapsiteId: "ms-lg01" },
+      { ...books[2]!, id: "al02-uncoded", fastCode: null, mapsiteId: "ms-al02" },
+    ];
+    const shelf = filterBooksForFastCodeShelf(mixed, "AL02", "ms-al02");
+    expect(shelf.map((book) => book.id).sort()).toEqual(["al02-a", "al02-uncoded"]);
   });
 });

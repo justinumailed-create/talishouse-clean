@@ -1,10 +1,13 @@
 import MapSiteLayout from "@/components/mapsite/MapSiteLayout";
 import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
+import { createMetadata } from "@/lib/seo";
 import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
 import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import { getMapSiteByFastCode, type MapSiteView } from "@/lib/mapsite-service";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { getMapSitePlatformByFastCode, type MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
+import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 
 function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
   const code = (record.fast_code || "").trim();
@@ -44,7 +47,7 @@ function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
     mapZoom: record.map_zoom,
     metaTitle: record.property_title,
     metaDescription: record.property_description,
-    ogImageUrl: record.cover_image,
+    ogImageUrl: null,
     atlistMapUrl: null,
     offeredSubscriptionTier: "root",
     interestFormEnabled: true,
@@ -98,16 +101,28 @@ async function enrichPublishedBranding(
       .maybeSingle(),
   ]);
 
+  const requestId = fastCodeRow?.request_id || view.requestId;
   let assets: { profile_image: string | null; logo_image: string | null } | null =
     null;
-  const requestId = fastCodeRow?.request_id || view.requestId;
+  let brokerageName = view.brokerageName?.trim() || null;
+
   if (requestId) {
-    const { data } = await supabase
-      .from("mapsite_assets")
-      .select("profile_image, logo_image")
-      .eq("request_id", requestId)
-      .maybeSingle();
-    assets = data;
+    const [{ data: assetRow }, { data: request }] = await Promise.all([
+      supabase
+        .from("mapsite_assets")
+        .select("profile_image, logo_image")
+        .eq("request_id", requestId)
+        .maybeSingle(),
+      brokerageName
+        ? Promise.resolve({ data: null })
+        : supabase
+            .from("build_requests")
+            .select("company")
+            .eq("id", requestId)
+            .maybeSingle(),
+    ]);
+    assets = assetRow;
+    brokerageName = brokerageName || request?.company?.trim() || null;
   }
 
   const logoUrl = row?.logo_url || assets?.logo_image || view.logoUrl;
@@ -126,6 +141,7 @@ async function enrichPublishedBranding(
     phone,
     ownerFirstName: row?.owner_first_name || view.ownerFirstName,
     ownerLastName: row?.owner_last_name || view.ownerLastName,
+    brokerageName,
   };
 }
 
@@ -156,27 +172,27 @@ export async function loadPublishedMapSiteView(fastCode: string) {
 
 export function publishedMapSiteMetadata(mapsite: MapSiteView) {
   const layoutData = buildMapSiteLayoutData(mapsite);
-  return {
+  const slug = (layoutData.slug || mapsite.fastCode).trim().toLowerCase();
+  return createMetadata({
     title: layoutData.metaTitle || `${layoutData.propertyTitle} | Mapsite™`,
     description:
       layoutData.metaDescription ||
       layoutData.summary.description ||
-      `Mapsite™ ${layoutData.fastCode}`,
-    openGraph: layoutData.ogImageUrl
-      ? {
-          images: [{ url: layoutData.ogImageUrl }],
-        }
-      : undefined,
-  };
+      `Mapsite™ ${layoutData.fastCode.toUpperCase()}`,
+    path: `/mapsite/${slug}`,
+    image: false,
+  });
 }
 
+/** Published /mapsite/[slug] — TEB™, TTV™, Create New, and full-screen map window. */
 export default async function PublishedMapSiteView({
   mapsite,
 }: {
   mapsite: MapSiteView;
 }) {
   const layoutData = buildMapSiteLayoutData(mapsite);
-  const [visitorStatus, editAccess, buildRequestLink] = await Promise.all([
+  const [visitorStatus, editAccess, buildRequestLink, paymentReceived] =
+    await Promise.all([
     getMapSiteVisitorAccountStatus(),
     getMapSiteEditToolbarState(mapsite.fastCode),
     getSupabaseAdmin()
@@ -188,6 +204,14 @@ export default async function PublishedMapSiteView({
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    isDemoMapSiteCode(mapsite.fastCode)
+      ? Promise.resolve(true)
+      : hasCompletedMapSitePaypalPayment({
+          mapsiteId: mapsite.id,
+          fastCode: mapsite.fastCode,
+          requestId: mapsite.requestId,
+          email: mapsite.email,
+        }),
   ]);
 
   return (
@@ -197,6 +221,9 @@ export default async function PublishedMapSiteView({
       visitorFastCode={visitorStatus.fastCode}
       editAccess={editAccess}
       buildRequestId={buildRequestLink.data?.id}
+      paymentReceived={
+        paymentReceived || Boolean(mapsite.tebUrl?.trim())
+      }
     />
   );
 }

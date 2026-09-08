@@ -20,10 +20,11 @@ import {
   resolveMapSiteRequestId,
 } from "../../actions";
 import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
-import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
+import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { ACTIVATE_QUERY, BOOK_PENDING_QUERY } from "@/lib/talispros/ebook-choice";
+import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 
 export const dynamic = "force-dynamic";
@@ -63,6 +64,7 @@ export async function generateMetadata({
     title: `Mapsite™ ${code}`,
     description: `Talispros™ Mapsite™ for FAST Code ${code}.`,
     path: `${MAPSITE_APP_PATH}/${mapsiteAccountTypeSegment(accountType)}/${fastCode.trim().toLowerCase()}`,
+    image: false,
   });
 }
 
@@ -131,20 +133,31 @@ export default async function ClaimedMapSiteByAccountTypePage({
       requestId,
     }));
 
-  const ebookContext = await getMapSiteEbookContext(fastCode);
+  const ebookContext = await getMapSiteEbookContext(fastCode, {
+    bookSlug,
+  });
   const primarySlug = ebookContext?.primaryEbook?.slug || bookSlug;
   const talisBookHref =
     (primarySlug ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}` : null) ||
     mapsite.teb_url?.trim() ||
     (mapsite.is_demonstration ? DEMO_PINNED_EBOOK_HREF : null);
   const hasTalisBook = Boolean(talisBookHref || ebookContext?.books?.length);
+  const listingImageUrls = await resolveEbookListingImageUrls({
+    listingImageUrls: ebookContext?.primaryEbook?.listingImageUrls,
+    bookSlug: primarySlug,
+    tebUrl: mapsite.teb_url,
+  });
+  const listingMapSite = withEbookListingMedia(
+    {
+      ...mapsite,
+      fast_code: mapsite.fast_code || fastCode.toUpperCase(),
+    },
+    listingImageUrls,
+  );
 
   return (
     <MapSiteApplication
-      initialMapSite={{
-        ...mapsite,
-        fast_code: mapsite.fast_code || fastCode.toUpperCase(),
-      }}
+      initialMapSite={listingMapSite}
       audience={audience}
       accountType={capabilityAccountType}
       onboardingMode={onboardingMode}

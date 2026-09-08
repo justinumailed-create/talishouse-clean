@@ -9,6 +9,7 @@ import {
   TALISBOOKS_ASSET_CACHE_CONTROL,
   TALISBOOKS_IMAGE_STORAGE_BUCKET,
 } from "@/lib/talisbooks/image-engine";
+import { resolveDemoMapSiteUploadScope } from "@/lib/talispros/demo-mapsite-service";
 import { resolveOnboardingUploadScope } from "@/lib/talispros/resolve-onboarding-from-request";
 import {
   logOnboardingStep,
@@ -59,16 +60,11 @@ export async function POST(request: Request) {
 
     const formData = await request.formData();
     const requestId = String(formData.get("requestId") || "").trim();
+    const mapsiteId = String(formData.get("mapsiteId") || "").trim();
     const kind = parseOptimizeImageKind(String(formData.get("kind") || "property"));
     const label = String(formData.get("label") || "").trim();
     const fileEntry = formData.get("file");
 
-    if (!requestId) {
-      return Response.json(
-        { ok: false, error: "Build Request ID is required." },
-        { status: 400 },
-      );
-    }
     if (!isUploadBlob(fileEntry)) {
       return Response.json(
         { ok: false, error: label ? `Missing file: ${label}` : "Missing image file." },
@@ -76,12 +72,26 @@ export async function POST(request: Request) {
       );
     }
 
-    const scoped = await resolveOnboardingUploadScope(requestId);
-    if (!scoped.ok) {
-      return Response.json({ ok: false, error: scoped.error }, { status: 400 });
+    let scope: string;
+    if (mapsiteId) {
+      const scoped = await resolveDemoMapSiteUploadScope(mapsiteId);
+      if (!scoped.ok) {
+        return Response.json({ ok: false, error: scoped.error }, { status: 400 });
+      }
+      scope = scoped.fastCode;
+    } else {
+      if (!requestId) {
+        return Response.json(
+          { ok: false, error: "Build Request ID is required." },
+          { status: 400 },
+        );
+      }
+      const scoped = await resolveOnboardingUploadScope(requestId);
+      if (!scoped.ok) {
+        return Response.json({ ok: false, error: scoped.error }, { status: 400 });
+      }
+      scope = scoped.fastCode || requestId;
     }
-
-    const scope = scoped.fastCode || requestId;
     const source = Buffer.from(await fileEntry.arrayBuffer());
     const optimized = await optimizeUploadImage(source, kind);
     const ext = extensionForOptimizedMime(optimized.mimeType);
@@ -146,7 +156,7 @@ export async function POST(request: Request) {
         : 1;
 
     logOnboardingStep("Ebook image optimize+upload", started, {
-      requestId,
+      requestId: requestId || mapsiteId || null,
       kind,
       label: label || null,
       originalBytes: optimized.originalBytes,

@@ -7,6 +7,7 @@ import {
   visibleGalleryDisplayItems,
   type MapSiteGalleryDisplayItem,
 } from "./mapsite-gallery";
+import { ROUTES } from "@/lib/routes";
 
 export const MAPSITE_HEADER_FALLBACK_LOGO =
   "/images/mapsites/header-fallback-logo.jpeg";
@@ -59,10 +60,76 @@ export interface MapSiteLayoutData {
   overlayImageUrl: string | null;
   offeredSubscriptionTier: OfferedSubscriptionTier;
   interestFormEnabled: boolean;
+  tebHref: string;
+  ttvHref: string;
+  scheduleHref: string;
+  brokerageName: string;
+  brokerageLogoUrl: string | null;
+  brokerageWebsite: string | null;
 }
 
-const DEFAULT_PIN_COLOR = "#6B7280";
 const DEFAULT_MAP_ZOOM = 15;
+/** Same marker as the claimed Mapsite™ application PIN. */
+export const MAPSITE_MAP_PIN_COLOR = "#1A73E8";
+export const MAPSITE_MAP_PIN_ICON = "home";
+
+function customOrFallbackHref(
+  custom: string | null | undefined,
+  fallback: string,
+): string {
+  const value = custom?.trim() || "";
+  if (/^https?:\/\//i.test(value) || value.startsWith("/")) return value;
+  return fallback;
+}
+
+export function mapsiteTebHref(
+  fastCode: string,
+  _tebUrl?: string | null,
+): string {
+  const code = fastCode.trim().toLowerCase();
+  return code ? `${ROUTES.TALISBOOKS}/fast/${encodeURIComponent(code)}` : ROUTES.TALISBOOKS;
+}
+
+export function mapsiteTtvHref(ttvUrl?: string | null): string {
+  return customOrFallbackHref(ttvUrl, ROUTES.TALISTV);
+}
+
+export function mapsiteScheduleHref(fastCode: string): string {
+  const code = fastCode.trim();
+  return code
+    ? `${ROUTES.TALISTV}?fastCode=${encodeURIComponent(code)}`
+    : ROUTES.TALISTV;
+}
+
+export function mapsiteCreateEbookHref(
+  fastCode: string,
+  requestId?: string | null,
+): string {
+  const id = requestId?.trim() || "";
+  if (id) {
+    return `${ROUTES.TALISPROS_EBOOK_GENERATE}?requestId=${encodeURIComponent(id)}`;
+  }
+  const code = fastCode.trim().toLowerCase();
+  return code
+    ? `${ROUTES.TALISPROS_EBOOK_GENERATE}?fastCode=${encodeURIComponent(code)}`
+    : ROUTES.TALISPROS_EBOOK_GENERATE;
+}
+
+export function mapsiteCreateContentHref(fastCode: string): string {
+  const code = fastCode.trim().toLowerCase();
+  return code
+    ? `/talispros/mapsites/${encodeURIComponent(code)}/edit`
+    : "/talispros/mapsites";
+}
+
+export function mapsiteCreateVideoHref(fastCode: string): string {
+  return mapsiteScheduleHref(fastCode);
+}
+
+export function mapsiteFullscreenMapHref(slug: string): string {
+  const code = slug.trim().toLowerCase();
+  return code ? `/mapsite/${encodeURIComponent(code)}/map` : "/mapsite";
+}
 
 function isVideoUrl(url: string): boolean {
   const value = url.trim().toLowerCase();
@@ -94,6 +161,24 @@ function toEmbedVideoUrl(url: string): string {
   return value;
 }
 
+function customBrokerageLogoUrl(mapsite: MapSiteView): string | null {
+  const logo = mapsite.logoUrl?.trim() || "";
+  if (!logo || logo === "/logo.png" || logo === MAPSITE_HEADER_FALLBACK_LOGO) {
+    return null;
+  }
+  return logo;
+}
+
+export function resolveMapSiteBrokerageName(mapsite: MapSiteView): string {
+  const company = mapsite.brokerageName?.trim();
+  if (company) return company;
+  const agent = mapsite.agentName?.trim();
+  if (agent) return agent;
+  return `${mapsite.ownerFirstName} ${mapsite.ownerLastName}`.trim();
+}
+
+/** Paid TTV™ card: name the owner's brokerage (company, else listing host). */
+
 function resolveLogoUrl(mapsite: MapSiteView): string {
   const logo = mapsite.logoUrl?.trim();
   if (!logo || logo === "/logo.png") {
@@ -107,7 +192,10 @@ export function getPrimaryPin(pins: MapSitePinView[]): MapSitePinView | null {
   return pins.find((pin) => pin.featured) || pins[0];
 }
 
-function toTalisMapsPin(pin: MapSitePinView): TalisMapsPin {
+function toTalisMapsPin(
+  pin: MapSitePinView,
+  tebHref: string,
+): TalisMapsPin {
   return {
     id: pin.id,
     name: pin.name,
@@ -115,7 +203,7 @@ function toTalisMapsPin(pin: MapSitePinView): TalisMapsPin {
     categoryId: null,
     categorySlug: null,
     categoryName: null,
-    categoryColor: DEFAULT_PIN_COLOR,
+    categoryColor: MAPSITE_MAP_PIN_COLOR,
     latitude: pin.latitude,
     longitude: pin.longitude,
     address: pin.address,
@@ -128,6 +216,11 @@ function toTalisMapsPin(pin: MapSitePinView): TalisMapsPin {
     email: pin.email,
     featured: pin.featured,
     sortOrder: pin.sortOrder,
+    pinIcon: MAPSITE_MAP_PIN_ICON,
+    pinColor: MAPSITE_MAP_PIN_COLOR,
+    whiteCenter: false,
+    href: tebHref,
+    categoryBadge: tebHref ? "TEB™" : null,
   };
 }
 
@@ -200,10 +293,11 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
     mapsite.propertyTitle?.trim() ||
     primaryPin?.name?.trim() ||
     agentName;
+  const tebHref = mapsiteTebHref(mapsite.fastCode, mapsite.tebUrl);
 
   const talisPins =
     mapsite.pins.length > 0
-      ? mapsite.pins.map(toTalisMapsPin)
+      ? mapsite.pins.map((pin) => toTalisMapsPin(pin, tebHref))
       : resolveMapCenter(mapsite, primaryPin)
         ? [
             {
@@ -213,7 +307,7 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
               categoryId: null,
               categorySlug: null,
               categoryName: null,
-              categoryColor: DEFAULT_PIN_COLOR,
+              categoryColor: MAPSITE_MAP_PIN_COLOR,
               latitude: resolveMapCenter(mapsite, primaryPin)![0],
               longitude: resolveMapCenter(mapsite, primaryPin)![1],
               address: mapsite.propertyAddress || "",
@@ -226,6 +320,11 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
               email: mapsite.email || primaryPin?.email || "",
               featured: true,
               sortOrder: 0,
+              pinIcon: MAPSITE_MAP_PIN_ICON,
+              pinColor: MAPSITE_MAP_PIN_COLOR,
+              whiteCenter: false,
+              href: tebHref,
+              categoryBadge: tebHref ? "TEB™" : null,
             },
           ]
         : [];
@@ -281,5 +380,12 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
       mapsite.offeredSubscriptionTier
     ),
     interestFormEnabled: mapsite.interestFormEnabled,
+    tebHref,
+    ttvHref: mapsiteTtvHref(mapsite.ttvUrl),
+    scheduleHref: mapsiteScheduleHref(mapsite.fastCode),
+    brokerageName: resolveMapSiteBrokerageName(mapsite),
+    brokerageLogoUrl: customBrokerageLogoUrl(mapsite),
+    brokerageWebsite:
+      mapsite.brokerUrl?.trim() || mapsite.website?.trim() || null,
   };
 }

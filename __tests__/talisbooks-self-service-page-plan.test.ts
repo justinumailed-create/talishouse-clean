@@ -3,6 +3,9 @@ import { getGlasshouseBrochureSource } from "@/lib/talisbooks/permanent-pages/gl
 import {
   assignFacingUploadRoles,
   buildSelfServiceEbookPageRows,
+  FRONT_COVER_PORTRAIT_MESSAGE,
+  FRONT_COVER_REQUIRED_MESSAGE,
+  isPortraitCoverImage,
   isSelfServiceSpreadCandidate,
   parseSelfServiceBookOptions,
   parseSelfServiceCaptions,
@@ -11,6 +14,7 @@ import {
   SELF_SERVICE_DEFAULT_TOTAL_PAGES,
   SELF_SERVICE_LOT_PAGE,
   SELF_SERVICE_MAX_UPLOAD_IMAGES,
+  validateExplicitCoverAssets,
   type SelfServiceBookOptions,
 } from "@/lib/talisbooks/self-service-page-plan";
 import { isMattedSpreadPage } from "@/lib/talisbooks/viewer/spread-layout";
@@ -56,7 +60,7 @@ function options(
 }
 
 describe("self-service ebook page plan (facing spreads)", () => {
-  it("uses image #1 as cover spread; remaining images are interiors", () => {
+  it("treats every upload as interior content; first landscape stays an interior spread", () => {
     expect(SELF_SERVICE_MAX_UPLOAD_IMAGES).toBe(20);
     const uploads = [
       { url: "https://cdn.example/cover-spread.jpg", width: 2400, height: 1200 },
@@ -70,24 +74,35 @@ describe("self-service ebook page plan (facing spreads)", () => {
       })),
     ];
     const roles = assignFacingUploadRoles(uploads);
-    expect(roles.coverSpreadImageUrl).toBe("https://cdn.example/cover-spread.jpg");
-    expect(roles.coverImageUrl).toBe("https://cdn.example/cover-spread.jpg");
-    expect(roles.backCoverImageUrl).toBe("https://cdn.example/cover-spread.jpg");
-    expect(roles.landscapes[0]?.url).toBe("https://cdn.example/portrait-early.jpg");
-    expect(roles.landscapes[1]?.url).toBe("https://cdn.example/interior-1.jpg");
+    expect(roles.coverSpreadImageUrl).toBeNull();
+    expect(roles.coverImageUrl).toBeNull();
+    expect(roles.backCoverImageUrl).toBeNull();
+    expect(roles.landscapes[0]?.url).toBe("https://cdn.example/cover-spread.jpg");
+    expect(roles.landscapes[1]?.url).toBe("https://cdn.example/portrait-early.jpg");
     expect(roles.landscapes).toHaveLength(18);
   });
 
-  it("still treats a portrait first image as the cover wrap (split later)", () => {
+  it("does not treat a portrait first image as a cover", () => {
     const roles = assignFacingUploadRoles([
       { url: "https://cdn.example/p1.jpg", width: 1000, height: 1400 },
       { url: "https://cdn.example/p2.jpg", width: 1000, height: 1400 },
     ]);
-    expect(roles.coverSpreadImageUrl).toBe("https://cdn.example/p1.jpg");
-    expect(roles.coverImageUrl).toBe("https://cdn.example/p1.jpg");
-    expect(roles.backCoverImageUrl).toBe("https://cdn.example/p1.jpg");
-    expect(roles.landscapes).toHaveLength(1);
-    expect(roles.landscapes[0]?.url).toBe("https://cdn.example/p2.jpg");
+    expect(roles.coverSpreadImageUrl).toBeNull();
+    expect(roles.landscapes).toHaveLength(2);
+    expect(roles.landscapes[0]?.url).toBe("https://cdn.example/p1.jpg");
+  });
+
+  it("rejects landscape images as covers and accepts portrait covers", () => {
+    expect(isPortraitCoverImage(1200, 1800)).toBe(true);
+    expect(isPortraitCoverImage(1800, 1200)).toBe(false);
+    expect(isPortraitCoverImage(1000, 1000)).toBe(false);
+    expect(validateExplicitCoverAssets(null, null)).toBe(FRONT_COVER_REQUIRED_MESSAGE);
+    expect(
+      validateExplicitCoverAssets(
+        { url: "https://cdn.example/front.jpg", width: 1800, height: 1200 },
+        { url: "https://cdn.example/back.jpg", width: 1200, height: 1800 },
+      ),
+    ).toBe(FRONT_COVER_PORTRAIT_MESSAGE);
   });
 
   it("TEST 1: landscape image becomes one two-page spread without duplicating the photo", () => {

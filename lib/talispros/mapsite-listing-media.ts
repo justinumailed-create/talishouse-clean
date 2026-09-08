@@ -33,24 +33,96 @@ const SUPERSEDED_DEMO_LISTING_IMAGES = new Set([
   "/images/talishouse/residential/hero.jpg",
 ]);
 
-function isLegacyScenicDemoPath(path: string | null | undefined): boolean {
+export function isStockDemoListingPath(path: string | null | undefined): boolean {
   if (!path?.trim()) return true;
   const trimmed = path.trim();
+  if (trimmed.includes("/images/glasshouse/")) return true;
   if (trimmed.includes("/images/mapsites/lrg1-gallery/")) return true;
   return SUPERSEDED_DEMO_LISTING_IMAGES.has(trimmed);
 }
 
+function uniqueNonStockUrls(urls: string[]): string[] {
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (const value of urls) {
+    const url = value.trim();
+    if (!url || isStockDemoListingPath(url) || seen.has(url)) continue;
+    seen.add(url);
+    unique.push(url);
+  }
+  return unique;
+}
+
 /**
- * True when demo media is still the old coastal scenic set (or empty).
- * Claimed uploads and custom covers are left alone.
+ * Pin popup / listing card hero: 2nd upload, or PDF page 2.
+ * Falls back to the first interior when only one image exists.
+ */
+export function listingHeroImageUrl(urls: string[]): string | null {
+  const unique = uniqueNonStockUrls(urls);
+  return unique[1] ?? unique[0] ?? null;
+}
+
+/**
+ * Interior Talisbook™ page photographs for the Mapsite™ listing card.
+ * Covers, Glasshouse™ brochure pages, and demo stock are skipped.
+ */
+export function listingImageUrlsFromEbookPages(
+  pages: Array<{
+    pageRole?: string | null;
+    layout?: string | null;
+    systemKey?: string | null;
+    spreadImageUrl?: string | null;
+    heroImageUrl?: string | null;
+  }>,
+): string[] {
+  const urls: string[] = [];
+  for (const page of pages) {
+    const role = page.pageRole?.trim() || "";
+    const layout = page.layout?.trim() || "";
+    if (role === "cover" || layout === "cover") continue;
+    if (layout === "global_content" || page.systemKey === "glasshouse_brochure") {
+      continue;
+    }
+    const spread = page.spreadImageUrl?.trim() || "";
+    const hero = page.heroImageUrl?.trim() || "";
+    urls.push(spread || hero);
+  }
+  return uniqueNonStockUrls(urls);
+}
+
+/**
+ * True when demo media is still the old coastal scenic set, Glasshouse™
+ * stock, or empty. Claimed uploads and custom covers are left alone.
  */
 export function shouldReplaceDemoListingMedia(
   coverImage: string | null | undefined,
   galleryImages: string[] | null | undefined
 ): boolean {
   const gallery = (galleryImages ?? []).filter(Boolean);
-  if (gallery.length === 0) return isLegacyScenicDemoPath(coverImage);
-  return gallery.every((url) => isLegacyScenicDemoPath(url));
+  if (gallery.length === 0) return isStockDemoListingPath(coverImage);
+  return gallery.every((url) => isStockDemoListingPath(url));
+}
+
+/**
+ * When the Mapsite™ still shows stock demo photos, use interior Talisbook™
+ * pages as the listing hero / gallery.
+ */
+export function withEbookListingMedia<
+  T extends {
+    cover_image: string | null;
+    gallery_images: string[];
+  },
+>(mapsite: T, ebookListingUrls: string[]): T {
+  const hero = listingHeroImageUrl(ebookListingUrls);
+  if (!hero) return mapsite;
+  if (!shouldReplaceDemoListingMedia(mapsite.cover_image, mapsite.gallery_images)) {
+    return mapsite;
+  }
+  return {
+    ...mapsite,
+    cover_image: hero,
+    gallery_images: [hero],
+  };
 }
 
 /**
@@ -67,7 +139,7 @@ export function getMapSiteListingHeroImage(
     return MAPSITE_DEMO_LISTING_IMAGE;
   }
 
-  const fromGallery = mapsite.gallery_images?.[0]?.trim();
+  const fromGallery = listingHeroImageUrl(mapsite.gallery_images ?? []);
   if (fromGallery) return fromGallery;
 
   const fromCover = mapsite.cover_image?.trim();

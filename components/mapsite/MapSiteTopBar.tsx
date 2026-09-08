@@ -3,6 +3,7 @@ import {
   MAPSITE_HEADER_FALLBACK_LOGO,
   type MapSiteAgentData,
 } from "@/lib/mapsite-layout";
+import MapSiteAgentPhoto from "./MapSiteAgentPhoto";
 
 interface MapSiteTopBarProps {
   propertyTitle: string;
@@ -12,33 +13,6 @@ interface MapSiteTopBarProps {
 
 const AVATAR_SIZE =
   "h-28 w-28 sm:h-36 sm:w-36 md:h-40 md:w-40 lg:h-44 lg:w-44";
-
-function AgentPhoto({
-  agent,
-  className,
-}: {
-  agent: MapSiteAgentData;
-  className: string;
-}) {
-  return (
-    <div className={`relative overflow-hidden rounded-xl bg-neutral-100 ${className}`}>
-      {agent.profileImageUrl ? (
-        <Image
-          src={agent.profileImageUrl}
-          alt={agent.name}
-          fill
-          className="object-cover object-top"
-          sizes="(max-width: 768px) 112px, 176px"
-          priority
-        />
-      ) : (
-        <div className="flex h-full w-full items-center justify-center text-neutral-400 text-xs">
-          Agent
-        </div>
-      )}
-    </div>
-  );
-}
 
 function shouldBlendLogoBackground(logoUrl: string): boolean {
   return /\.jpe?g$/i.test(logoUrl);
@@ -68,7 +42,7 @@ function ContactRow({ agent }: { agent: MapSiteAgentData }) {
   if (!phone && !email) return null;
 
   return (
-    <div className="mt-3 flex flex-col gap-2 text-sm text-neutral-600 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-6">
+    <div className="mt-3 flex flex-col gap-2 text-sm text-neutral-600 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-6 md:mt-4">
       {phone ? (
         <a
           href={`tel:${phone.replace(/[^\d+]/g, "")}`}
@@ -91,22 +65,6 @@ function ContactRow({ agent }: { agent: MapSiteAgentData }) {
   );
 }
 
-function RepresentationDetails({ agent }: { agent: MapSiteAgentData }) {
-  return (
-    <div className="mt-4 md:mt-5">
-      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500">
-        Market Representation Managed By
-      </p>
-      {agent.name ? (
-        <p className="mt-2 text-lg sm:text-xl font-semibold text-neutral-900 tracking-tight">
-          {agent.name}
-        </p>
-      ) : null}
-      <ContactRow agent={agent} />
-    </div>
-  );
-}
-
 export default function MapSiteTopBar({
   propertyTitle,
   logoUrl,
@@ -122,8 +80,8 @@ export default function MapSiteTopBar({
           <h1 className="text-xl sm:text-2xl font-semibold text-neutral-900 leading-snug tracking-tight px-1">
             {propertyTitle}
           </h1>
-          <RepresentationDetails agent={agent} />
-          <AgentPhoto agent={agent} className={AVATAR_SIZE} />
+          <ContactRow agent={agent} />
+          <MapSiteAgentPhoto agent={agent} className={AVATAR_SIZE} />
         </div>
 
         <div className="hidden md:grid md:grid-cols-[auto_1fr_auto] md:items-center md:gap-8 lg:gap-10">
@@ -133,10 +91,10 @@ export default function MapSiteTopBar({
             <h1 className="text-2xl lg:text-3xl xl:text-4xl font-semibold text-neutral-900 leading-tight tracking-tight">
               {propertyTitle}
             </h1>
-            <RepresentationDetails agent={agent} />
+            <ContactRow agent={agent} />
           </div>
 
-          <AgentPhoto agent={agent} className={`shrink-0 ${AVATAR_SIZE}`} />
+          <MapSiteAgentPhoto agent={agent} className={`shrink-0 ${AVATAR_SIZE}`} />
         </div>
       </div>
     </header>

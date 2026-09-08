@@ -4,7 +4,7 @@ import { TALISBOOKS_COVER_TEMPLATES } from "../covers/catalog";
 import type { TalisBooksCoverTemplateId } from "../covers/constants";
 import { TALISBOOKS_LIBRARY_PAGE_SIZE, TALISBOOKS_LIBRARY_SPINE_PALETTES } from "./constants";
 import { createDemoBookshelf } from "./demo-shelf";
-import { queryLibraryBooks } from "./query";
+import { filterBooksForFastCodeShelf, queryLibraryBooks } from "./query";
 import type {
   TalisBooksBookshelf,
   TalisBooksLibraryBook,
@@ -270,8 +270,35 @@ export async function getTalisBooksLibrary(
  * Public product bookshelf at /talisbooks.
  * Shows published + public books with the pinned book first.
  * Always includes the built-in pinned sample when no DB pin is present.
+ * When `fastCode` is set (Mapsite™ Open bookshelf), only that code's books appear —
+ * the global sample pin is omitted.
  */
-export async function getPublicTalisBooksBookshelf(): Promise<TalisBooksBookshelf> {
+export async function getPublicTalisBooksBookshelf(options?: {
+  fastCode?: string | null;
+}): Promise<TalisBooksBookshelf> {
+  const fastCode = options?.fastCode?.trim().toLowerCase() || null;
+
+  if (fastCode) {
+    const { getMapSiteEbookContext } = await import("../mapsite-ebook-service");
+    const context = await getMapSiteEbookContext(fastCode);
+    const books = filterBooksForFastCodeShelf(
+      context?.books ?? [],
+      fastCode,
+      context?.mapsiteId ?? null,
+    );
+
+    return {
+      accountId: null,
+      accountType: context?.accountType ?? "root",
+      accountName: "TalisBooks™",
+      fastCode: context?.fastCode ?? fastCode,
+      mapsiteId: context?.mapsiteId ?? null,
+      publicCatalog: true,
+      scopedToFastCode: true,
+      books,
+    };
+  }
+
   const { pinnedTalisBookLibraryEntry } = await import("./pinned-catalog");
   const pinnedFallback = pinnedTalisBookLibraryEntry();
 

@@ -117,7 +117,9 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
         <div className="talisbooks-library__brand">
           <p className="talisbooks-library__eyebrow">
             {publicCatalog
-              ? "Talispros™ Ecosystem"
+              ? scoped
+                ? `Talispros™ Ecosystem · ${bookshelf.fastCode!.toUpperCase()}`
+                : "Talispros™ Ecosystem"
               : scoped
                 ? `TEB™ · ${bookshelf.fastCode!.toUpperCase()}`
                 : bookshelf.accountType === "root"
@@ -136,7 +138,9 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
           </h1>
           {publicCatalog ? (
             <p className="talisbooks-library__subtitle">
-              Open a cover to read. The featured book is pinned at the front of the shelf.
+              {scoped && bookshelf.fastCode
+                ? `Open a cover to read. This shelf shows Talisbooks™ connected to FAST Code ${bookshelf.fastCode.toUpperCase()} only.`
+                : "Open a cover to read. The featured book is pinned at the front of the shelf."}
             </p>
           ) : null}
         </div>
@@ -152,7 +156,9 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
             }}
             placeholder={
               publicCatalog
-                ? "Search TalisBooks™…"
+                ? scoped
+                  ? "Search this shelf…"
+                  : "Search TalisBooks™…"
                 : scoped
                   ? "Search this shelf…"
                   : "Search library…"

@@ -1,6 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { buildMapSiteLayoutData } from "../lib/mapsite-layout";
+import {
+  buildMapSiteLayoutData,
+  mapsiteCreateContentHref,
+  mapsiteCreateEbookHref,
+  mapsiteCreateVideoHref,
+  mapsiteFullscreenMapHref,
+} from "../lib/mapsite-layout";
 import type { MapSiteView } from "../lib/mapsite-service";
+import { toMapEnginePin } from "../lib/talismaps/map-engine";
 
 const baseMapSite: MapSiteView = {
   id: "mapsite-1",
@@ -72,6 +79,22 @@ describe("buildMapSiteLayoutData", () => {
     expect(layout.summary.city).toBe("Toronto");
     expect(layout.agent.name).toBe("Arun Rachuri");
     expect(layout.pins).toHaveLength(1);
+    expect(layout.pins[0]).toMatchObject({
+      pinIcon: "home",
+      pinColor: "#1A73E8",
+      whiteCenter: false,
+      href: "/talisbooks/fast/ar01",
+      categoryBadge: "TEB™",
+    });
+    expect(toMapEnginePin(layout.pins[0])).toMatchObject({
+      color: "#1A73E8",
+      metadata: {
+        icon: "home",
+        whiteCenter: false,
+        href: "/talisbooks/fast/ar01",
+        categoryBadge: "TEB™",
+      },
+    });
   });
 
   it("resolves video and gallery content from database fields", () => {
@@ -122,5 +145,46 @@ describe("buildMapSiteLayoutData", () => {
     expect(layout.pinLabel).toBe("LRG1-TTV");
     expect(layout.overlayImageUrl).toBe("https://cdn.example.com/hero.jpg");
     expect(layout.summary.price).toBe("$129,000");
+  });
+
+  it("builds TEB™, TTV™, and TV Schedule hrefs for the paid creative column", () => {
+    const layout = buildMapSiteLayoutData(baseMapSite);
+
+    expect(layout.tebHref).toBe("/talisbooks/fast/ar01");
+    expect(layout.ttvHref).toBe("/talistv");
+    expect(layout.scheduleHref).toBe("/talistv?fastCode=ar01");
+    expect(layout.brokerageName).toBe("Arun Rachuri");
+    expect(layout.brokerageLogoUrl).toBeNull();
+    expect(layout.brokerageWebsite).toBeNull();
+
+    const branded = buildMapSiteLayoutData({
+      ...baseMapSite,
+      brokerageName: "Coastal Partner Realty",
+      logoUrl: "https://cdn.example.com/brokerage.png",
+      brokerUrl: "https://coastal.example.com",
+    });
+    expect(branded.brokerageName).toBe("Coastal Partner Realty");
+    expect(branded.brokerageLogoUrl).toBe("https://cdn.example.com/brokerage.png");
+    expect(branded.brokerageWebsite).toBe("https://coastal.example.com");
+
+    const custom = buildMapSiteLayoutData({
+      ...baseMapSite,
+      tebUrl: "/talisbooks/viewer/custom-book",
+      ttvUrl: "https://tv.example.com/studio",
+    });
+    expect(custom.tebHref).toBe("/talisbooks/fast/ar01");
+    expect(custom.ttvHref).toBe("https://tv.example.com/studio");
+  });
+
+  it("builds Create New destinations for e-books, content, and video", () => {
+    expect(mapsiteCreateEbookHref("AL02")).toBe(
+      "/talispros/ebook-generate?fastCode=al02",
+    );
+    expect(mapsiteCreateEbookHref("AL02", "req-1")).toBe(
+      "/talispros/ebook-generate?requestId=req-1",
+    );
+    expect(mapsiteCreateContentHref("AL02")).toBe("/talispros/mapsites/al02/edit");
+    expect(mapsiteCreateVideoHref("AL02")).toBe("/talistv?fastCode=AL02");
+    expect(mapsiteFullscreenMapHref("AL02")).toBe("/mapsite/al02/map");
   });
 });

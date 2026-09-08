@@ -12,7 +12,6 @@ import {
 import TalisBooksPageRenderer from "@/components/talisbooks/viewer/TalisBooksPageRenderer";
 import {
   clampSpreadAspectRatio,
-  continuousSpreadImageUrl,
   getBookContinuousSpreadImageUrl,
   isMattedSpreadPage,
 } from "@/lib/talisbooks/viewer/spread-layout";
@@ -387,7 +386,6 @@ function useContinuousSpreadAspectRatio(imageUrl: string | null): number | null 
 
   useEffect(() => {
     if (!imageUrl) {
-      setAspect(null);
       return;
     }
 
@@ -402,7 +400,7 @@ function useContinuousSpreadAspectRatio(imageUrl: string | null): number | null 
       }
     };
     image.onerror = () => {
-      if (!cancelled) setAspect(null);
+      // Keep the last good ratio so cover → interior does not collapse.
     };
     image.src = imageUrl;
 
@@ -741,15 +739,13 @@ function OpenBookSpread({
   const labelSpread: TalisBooksViewerSpread =
     flipping && incoming && flip && flip.to !== flip.from ? incoming : current;
 
-  const soloRight = !labelSpread.left && Boolean(labelSpread.right);
-  const soloLeft = Boolean(labelSpread.left) && !labelSpread.right;
-  const continuousUrl = useMemo(
-    () => continuousSpreadImageUrl(labelSpread.left, labelSpread.right),
-    [labelSpread.left, labelSpread.right],
-  );
+  // Keep cover/back layout classes on the current spread until the flip
+  // finishes so the open-book box does not resize mid-turn.
+  const soloRight = !current.left && Boolean(current.right);
+  const soloLeft = Boolean(current.left) && !current.right;
   const bookSpreadUrl = useMemo(
-    () => getBookContinuousSpreadImageUrl(book.pages) || continuousUrl,
-    [book.pages, continuousUrl],
+    () => getBookContinuousSpreadImageUrl(book.pages),
+    [book.pages],
   );
   const spreadAspect = useContinuousSpreadAspectRatio(bookSpreadUrl);
   const fitToLandscape = Boolean(spreadAspect);

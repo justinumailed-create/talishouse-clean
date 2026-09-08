@@ -1,10 +1,13 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
+import { getViewerBookBySlug } from "@/lib/talisbooks/viewer/load-book";
 import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
 import {
   buildClaimedMapSitePath,
   mapsiteAccountTypeSegment,
 } from "@/lib/talispros/mapsite-state";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
+import { listingImageUrlsFromEbookPages } from "@/lib/talispros/mapsite-listing-media";
 import type { TalisBooksLibraryBook } from "./library/types";
 import { TALISBOOKS_COVER_TEMPLATES } from "./covers/catalog";
 import type { TalisBooksCoverTemplateId } from "./covers/constants";
@@ -92,6 +95,7 @@ export type MapSiteEbookDraft = {
   subtitle: string;
   description: string;
   coverImageUrl: string | null;
+  listingImageUrls?: string[];
 };
 
 export type MapSiteEbookContext = {
@@ -105,6 +109,101 @@ export type MapSiteEbookContext = {
   primaryEbook: MapSiteEbookDraft | null;
 };
 
+function listingImageUrlsFromMetadata(
+  metadata: Record<string, unknown> | null,
+): string[] {
+  const raw = metadata?.galleryImageUrls;
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  const urls: string[] = [];
+  for (const value of raw) {
+    if (typeof value !== "string") continue;
+    const url = value.trim();
+    if (!url || seen.has(url)) continue;
+    seen.add(url);
+    urls.push(url);
+  }
+  return urls;
+}
+
+export function ebookSlugFromTebUrl(tebUrl: string | null | undefined): string | null {
+  const value = tebUrl?.trim() || "";
+  if (!value) return null;
+  try {
+    const path = value.startsWith("http://") || value.startsWith("https://")
+      ? new URL(value).pathname
+      : value.split("?")[0] || "";
+    const prefix = `${TALISBOOKS_ROUTES.VIEWER}/`;
+    const index = path.toLowerCase().indexOf(prefix);
+    if (index < 0) return null;
+    const slug = decodeURIComponent(path.slice(index + prefix.length).split("/")[0] || "").trim();
+    return slug || null;
+  } catch {
+    return null;
+  }
+}
+
+function pageRecordFromContent(content: unknown): Record<string, unknown> | null {
+  if (typeof content === "string") {
+    try {
+      const parsed = JSON.parse(content) as unknown;
+      if (parsed && typeof parsed === "object") {
+        return parsed as Record<string, unknown>;
+      }
+    } catch {
+      return null;
+    }
+  }
+  if (content && typeof content === "object") {
+    return content as Record<string, unknown>;
+  }
+  return null;
+}
+
+async function loadListingImagesFromBookPages(
+  bookId: string,
+): Promise<string[]> {
+  const supabase = getSupabaseAdmin();
+  const { data: pages } = await supabase
+    .from("talisbooks_book_pages")
+    .select("*")
+    .eq("book_id", bookId)
+    .order("page_number", { ascending: true });
+
+  return listingImageUrlsFromEbookPages(
+    (pages ?? []).map((page) => {
+      const record = pageRecordFromContent(page.content) ?? {};
+      return {
+        pageRole: typeof record.pageRole === "string" ? record.pageRole : null,
+        layout: typeof record.layout === "string" ? record.layout : null,
+        systemKey: typeof record.systemKey === "string" ? record.systemKey : null,
+        spreadImageUrl:
+          typeof record.spreadImageUrl === "string" ? record.spreadImageUrl : null,
+        heroImageUrl:
+          typeof record.heroImageUrl === "string" ? record.heroImageUrl : null,
+      };
+    }),
+  );
+}
+
+export async function resolveEbookListingImageUrls(options: {
+  listingImageUrls?: string[] | null;
+  bookSlug?: string | null;
+  tebUrl?: string | null;
+}): Promise<string[]> {
+  const fromContext = listingImageUrlsFromEbookPages(
+    (options.listingImageUrls ?? []).map((url) => ({ spreadImageUrl: url })),
+  );
+  if (fromContext.length > 0) return fromContext;
+
+  const slug =
+    options.bookSlug?.trim() || ebookSlugFromTebUrl(options.tebUrl) || "";
+  if (!slug || !isSupabaseAdminConfigured()) return [];
+
+  const viewer = await getViewerBookBySlug(slug);
+  return listingImageUrlsFromEbookPages(viewer?.pages ?? []);
+}
+
 function toDraft(
   row: {
     id: string;
@@ -113,7 +212,8 @@ function toDraft(
     subtitle: string;
     description: string;
     metadata: Record<string, unknown> | null;
-  } | null
+  } | null,
+  listingImageUrls: string[] = [],
 ): MapSiteEbookDraft | null {
   if (!row) return null;
   const metadata = row.metadata ?? {};
@@ -125,11 +225,13 @@ function toDraft(
     description: row.description,
     coverImageUrl:
       typeof metadata.coverImageUrl === "string" ? metadata.coverImageUrl : null,
+    listingImageUrls,
   };
 }
 
 export async function getMapSiteEbookContext(
-  fastCodeRaw: string
+  fastCodeRaw: string,
+  options?: { bookSlug?: string | null },
 ): Promise<MapSiteEbookContext | null> {
   const fastCode = fastCodeRaw.trim().toLowerCase();
   if (!fastCode || fastCode === "demo" || isDemoMapSiteCode(fastCode)) return null;
@@ -194,6 +296,34 @@ export async function getMapSiteEbookContext(
 
   if (!mapsiteId && mapsiteByCode?.id) mapsiteId = mapsiteByCode.id;
 
+  let bookRows = books ?? [];
+  if (bookRows.length === 0 && mapsiteId) {
+    const { data: byMapsite } = await supabase
+      .from("talisbooks_books")
+      .select("*")
+      .eq("mapsite_id", mapsiteId)
+      .order("updated_at", { ascending: false });
+    bookRows = byMapsite ?? [];
+  }
+
+  const wantedSlug = options?.bookSlug?.trim() || "";
+  if (wantedSlug) {
+    const already = bookRows.some((row) => row.slug === wantedSlug);
+    if (!already) {
+      const { data: bySlug } = await supabase
+        .from("talisbooks_books")
+        .select("*")
+        .eq("slug", wantedSlug)
+        .maybeSingle();
+      if (bySlug) bookRows = [bySlug, ...bookRows];
+    } else {
+      bookRows = [
+        ...bookRows.filter((row) => row.slug === wantedSlug),
+        ...bookRows.filter((row) => row.slug !== wantedSlug),
+      ];
+    }
+  }
+
   const paymentReceived = await hasCompletedMapSitePaypalPayment({
     email: mapsiteByCode?.email,
     mapsiteId,
@@ -201,13 +331,26 @@ export async function getMapSiteEbookContext(
     requestId,
   });
 
-  const bookRows = books ?? [];
   const primaryRow = bookRows[0]
     ? {
         ...bookRows[0],
         metadata: (bookRows[0].metadata as Record<string, unknown>) ?? {},
       }
     : null;
+
+  let listingImageUrls = listingImageUrlsFromEbookPages(
+    listingImageUrlsFromMetadata(primaryRow?.metadata ?? null).map((url) => ({
+      spreadImageUrl: url,
+    })),
+  );
+  if (listingImageUrls.length === 0 && primaryRow?.slug) {
+    listingImageUrls = await resolveEbookListingImageUrls({
+      bookSlug: primaryRow.slug,
+    });
+  }
+  if (listingImageUrls.length === 0 && primaryRow?.id) {
+    listingImageUrls = await loadListingImagesFromBookPages(primaryRow.id);
+  }
 
   return {
     fastCode,
@@ -229,7 +372,7 @@ export async function getMapSiteEbookContext(
         index
       )
     ),
-    primaryEbook: toDraft(primaryRow),
+    primaryEbook: toDraft(primaryRow, listingImageUrls),
   };
 }
 

@@ -35,12 +35,17 @@ export function createMetadata(overrides: {
   description: string;
   path: string;
   private?: boolean;
-  /** Absolute or site-relative Open Graph / WhatsApp preview image. */
-  image?: string | CreateMetadataImage;
+  /**
+   * Open Graph / Twitter preview image.
+   * Pass `false` to omit images (title + description only).
+   */
+  image?: string | CreateMetadataImage | false;
 }): Metadata {
   const url = `${SITE_URL}${overrides.path}`;
-  const image =
-    typeof overrides.image === "string"
+  const omitImage = overrides.image === false;
+  const image = omitImage
+    ? null
+    : typeof overrides.image === "string"
       ? {
           url: overrides.image,
           width: 1200,
@@ -88,14 +93,20 @@ export function createMetadata(overrides: {
       siteName: SITE_NAME,
       type: "website",
       locale: "en_US",
-      images: [image],
+      ...(omitImage ? { images: [] } : { images: [image!] }),
     },
-    twitter: {
-      card: "summary_large_image",
-      title: overrides.title,
-      description: overrides.description,
-      images: [image.url],
-    },
+    twitter: omitImage
+      ? {
+          card: "summary",
+          title: overrides.title,
+          description: overrides.description,
+        }
+      : {
+          card: "summary_large_image",
+          title: overrides.title,
+          description: overrides.description,
+          images: [image!.url],
+        },
     robots,
   };
 }

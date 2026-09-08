@@ -26,7 +26,7 @@ export type GetMapSiteOnboardingPhaseInput = {
 /**
  * Derive popup / onboarding UI phase from existing status + payment + book.
  *
- * MLS® / URL / TEB™ / TTV™ only unlock after PayPal (`paymentReceived`).
+ * URL / MLS® / TEB™ / TTV™ only unlock after PayPal (`paymentReceived`).
  * Platform status ACTIVE alone is not enough — unpaid Mapsites™ stay in the
  * pending popup (View Your Talisbook™ + Activate) until payment clears.
  */
@@ -53,9 +53,20 @@ export function isPendingActivationPhase(
   return phase === "BUILD_SUBMITTED" || phase === "BOOK_READY";
 }
 
-/** Show MLS® / URL / TEB™ / TTV™ — only after payment (ACTIVE phase). */
+/** Show URL / MLS® / TEB™ / TTV™ — only after payment (ACTIVE phase). */
 export function showsActiveResourceButtons(
   phase: MapSiteOnboardingPhase
 ): boolean {
   return phase === "ACTIVE";
+}
+
+/** Pin card always shows the four resource slots after claim (TEB may be the only live one). */
+export function showsPinResourceButtons(
+  phase: MapSiteOnboardingPhase
+): boolean {
+  return (
+    phase === "BUILD_SUBMITTED" ||
+    phase === "BOOK_READY" ||
+    phase === "ACTIVE"
+  );
 }

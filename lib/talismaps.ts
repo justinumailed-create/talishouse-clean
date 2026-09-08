@@ -21,6 +21,11 @@ export interface TalisMapsPin {
   email: string;
   featured: boolean;
   sortOrder: number;
+  pinIcon?: string | null;
+  pinColor?: string | null;
+  whiteCenter?: boolean | null;
+  href?: string | null;
+  categoryBadge?: string | null;
 }
 
 export interface TalisMapsCategory {
