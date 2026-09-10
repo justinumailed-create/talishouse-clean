@@ -10,11 +10,17 @@ export {
   TALISBOOKS_VIEWER_SPEED_MAX_MS,
   TALISBOOKS_VIEWER_SPEED_MIN_MS,
   TALISBOOKS_VIEWER_SPEED_PRESETS,
+  TALISBOOKS_VIEWER_COVER_RESET_MS,
   TALISBOOKS_VIEWER_TURN_DURATION_MS,
   type TalisBooksViewerSpeedPresetId,
   type TalisBooksViewerViewMode,
 } from "./constants";
 export { playViewerFlipSound } from "./flip-sound";
+export {
+  magazineSoloShiftPercent,
+  singleFlipRotateY,
+  spreadFlipRotateY,
+} from "./flip-geometry";
 export {
   clampViewerIntervalMs,
   intervalMsToSpeedPercent,

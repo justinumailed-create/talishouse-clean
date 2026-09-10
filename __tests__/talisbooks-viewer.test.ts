@@ -5,11 +5,14 @@ import {
   createEmptyNarrationController,
   getNarrationCueForPage,
   intervalMsToSpeedPercent,
+  magazineSoloShiftPercent,
   nextPageIndex,
   previousPageIndex,
   resolveViewerIntervalMs,
   shouldAutoAdvance,
+  singleFlipRotateY,
   speedPercentToIntervalMs,
+  spreadFlipRotateY,
   TALISBOOKS_VIEWER_SPEED_DEFAULT_MS,
   TALISBOOKS_VIEWER_SPEED_MAX_MS,
   TALISBOOKS_VIEWER_SPEED_MIN_MS,
@@ -98,5 +101,32 @@ describe("Talisbooks™ viewer narration stubs", () => {
     );
     expect(cue?.text).toBe("Meet your agent");
     expect(getNarrationCueForPage(null, 1)).toBeNull();
+  });
+});
+
+describe("Talisbooks™ viewer flip geometry", () => {
+  it("centers a solo cover/back leaf and restores the spread while flipping", () => {
+    expect(
+      magazineSoloShiftPercent({ soloRight: true, soloLeft: false, flipping: false }),
+    ).toBe(-25);
+    expect(
+      magazineSoloShiftPercent({ soloRight: false, soloLeft: true, flipping: false }),
+    ).toBe(25);
+    expect(
+      magazineSoloShiftPercent({ soloRight: true, soloLeft: false, flipping: true }),
+    ).toBe(0);
+    expect(
+      magazineSoloShiftPercent({ soloRight: false, soloLeft: false, flipping: false }),
+    ).toBe(0);
+  });
+
+  it("rotates a double-sided spread leaf a full 180° so the back face never unmounts at 90°", () => {
+    expect(spreadFlipRotateY(1)).toEqual([0, -180]);
+    expect(spreadFlipRotateY(-1)).toEqual([0, 180]);
+  });
+
+  it("peels a single page past 90° with a paper back still in the scene", () => {
+    expect(singleFlipRotateY(1)[1]).toBeLessThan(-90);
+    expect(singleFlipRotateY(-1)[1]).toBeGreaterThan(90);
   });
 });
