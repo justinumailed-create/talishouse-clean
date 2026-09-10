@@ -3,6 +3,8 @@ import {
   PINNED_TALISBOOK_INTERIOR_PAGE_COUNT,
   PINNED_TALISBOOK_PAGE_COUNT,
   createPinnedTalisBookViewer,
+  pinnedTalisBookCoverAsset,
+  pinnedTalisBookInteriorAssets,
 } from "../lib/talisbooks/library/pinned-catalog";
 import { getViewerSpread } from "../lib/talisbooks/viewer/spreads";
 
@@ -52,5 +54,22 @@ describe("pinned TalisBook sample centerfolds", () => {
     const book = createPinnedTalisBookViewer();
     expect(book.pdfDownloadUrl).toBe("/talisbooks/pinned/talispros-ebook-sample.pdf");
     expect(book.pdfDownloadFileName).toBe("TalisPros-Ebook-Sample.pdf");
+  });
+});
+
+describe("pinned demonstration page assets", () => {
+  it("lists eleven interior rasters with known portrait covers", () => {
+    const interiors = pinnedTalisBookInteriorAssets();
+    expect(interiors).toHaveLength(PINNED_TALISBOOK_INTERIOR_PAGE_COUNT);
+    expect(interiors[0]?.url).toBe("/talisbooks/pinned/pages/page-01.jpg");
+    expect(interiors[10]?.url).toBe("/talisbooks/pinned/pages/page-11.jpg");
+    expect(interiors[0]?.width).toBeGreaterThan(interiors[0]?.height ?? 0);
+
+    const front = pinnedTalisBookCoverAsset("front");
+    const back = pinnedTalisBookCoverAsset("back");
+    expect(front.height).toBeGreaterThan(front.width);
+    expect(back.height).toBeGreaterThan(back.width);
+    expect(front.url).toBe("/talisbooks/pinned/front-cover.jpg");
+    expect(back.url).toBe("/talisbooks/pinned/back-cover.jpg");
   });
 });

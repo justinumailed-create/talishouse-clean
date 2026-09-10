@@ -44,4 +44,6 @@ next-env.d.ts
 
 # local PDF original (39MB) — extracted template assets are used in-app
 /public/talisbooks/templates/jarlberg/Jarlberg-Project.pdf
+# Copied from pdfjs-dist on npm install — keep in sync with the package version.
+/public/pdf.worker.min.mjs
 /tmp/

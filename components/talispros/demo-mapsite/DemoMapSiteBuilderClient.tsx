@@ -83,8 +83,8 @@ export default function DemoMapSiteBuilderClient() {
         {pending ? "Continue to demo eBook…" : "Continue to demo eBook"}
       </button>
       <p className="text-center text-xs text-neutral-500">
-        Next you will extract the pinned Talispros eBook PDF, optimize its pages,
-        and generate the demonstration Talisbook™. No FAST Code is issued.
+        Next you will extract the pinned Talispros eBook pages, optimize them,
+        and Build the demonstration Talisbook™. No FAST Code is issued.
       </p>
     </form>
   );
