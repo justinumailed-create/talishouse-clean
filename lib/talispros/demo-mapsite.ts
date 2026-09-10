@@ -33,12 +33,42 @@ export function createDemoMapSiteCode(): string {
   return `${DEMO_MAPSITE_CODE_PREFIX}${token}`;
 }
 
-export function demoMapSiteApplicationHref(mapsiteId: string): string {
+export function demoMapSiteApplicationHref(
+  mapsiteId: string,
+  code?: string | null,
+): string {
   const params = new URLSearchParams({
     view: "pin",
     mapsiteId,
   });
+  const trimmedCode = code?.trim();
+  if (trimmedCode) params.set("code", trimmedCode);
   return `${MAPSITE_APP_PATH}?${params.toString()}`;
+}
+
+/** Next.js revalidatePath matches route files — query strings are not valid paths. */
+export function pathnameForRevalidate(href: string): string {
+  const trimmed = href.trim();
+  if (!trimmed) return MAPSITE_APP_PATH;
+  try {
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      return new URL(trimmed).pathname || MAPSITE_APP_PATH;
+    }
+  } catch {
+    /* use the raw path below */
+  }
+  return trimmed.split("?")[0]?.split("#")[0] || MAPSITE_APP_PATH;
+}
+
+export function publicDemoGenerateError(
+  error: unknown,
+  fallback = "Could not generate the demonstration Talisbook™.",
+): string {
+  if (!(error instanceof Error) || !error.message.trim()) return fallback;
+  if (/server components render|omitted in production|digest/i.test(error.message)) {
+    return fallback;
+  }
+  return error.message;
 }
 
 export function demoMapSiteEbookHref(options: {
