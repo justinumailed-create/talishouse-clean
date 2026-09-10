@@ -156,16 +156,19 @@ export default function DemoEbookGenerateClient({
   title: string;
 }) {
   const router = useRouter();
-  const [busy, setBusy] = useState(false);
+  const [phase, setPhase] = useState<
+    "idle" | "extracting" | "optimizing" | "building"
+  >("idle");
   const [stage, setStage] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pages, setPages] = useState<File[]>([]);
   const [optimized, setOptimized] = useState<OptimizedAsset[]>([]);
+  const busy = phase !== "idle";
 
   async function extractPinnedPdf() {
     setError(null);
     setOptimized([]);
-    setBusy(true);
+    setPhase("extracting");
     setStage("Loading pinned Talispros eBook pages…");
     try {
       const pageFiles = await loadPinnedTalisBookPageFiles({
@@ -186,7 +189,7 @@ export default function DemoEbookGenerateClient({
       );
       setStage("");
     } finally {
-      setBusy(false);
+      setPhase("idle");
     }
   }
 
@@ -196,7 +199,7 @@ export default function DemoEbookGenerateClient({
       return;
     }
     setError(null);
-    setBusy(true);
+    setPhase("optimizing");
     try {
       let usedPinnedFallback = false;
       let uploadError: string | null = null;
@@ -234,7 +237,7 @@ export default function DemoEbookGenerateClient({
       );
       setStage("");
     } finally {
-      setBusy(false);
+      setPhase("idle");
     }
   }
 
@@ -244,7 +247,7 @@ export default function DemoEbookGenerateClient({
       return;
     }
     setError(null);
-    setBusy(true);
+    setPhase("building");
     setStage("Building demonstration Talisbook™…");
     try {
       const result = await withTimeout(
@@ -268,7 +271,7 @@ export default function DemoEbookGenerateClient({
       );
       setStage("");
     } finally {
-      setBusy(false);
+      setPhase("idle");
     }
   }
 
@@ -284,7 +287,7 @@ export default function DemoEbookGenerateClient({
         onClick={() => void extractPinnedPdf()}
         className="w-full rounded-2xl bg-neutral-900 px-5 py-3.5 text-base font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
       >
-        {busy && pages.length === 0 && optimized.length === 0
+        {phase === "extracting"
           ? "Extracting PDF…"
           : "Extract PDF from pinned Talispros eBook"}
       </button>
@@ -303,9 +306,7 @@ export default function DemoEbookGenerateClient({
           onClick={() => void optimizePages()}
           className="w-full rounded-2xl border border-neutral-900 px-5 py-3.5 text-base font-medium text-neutral-900 transition hover:bg-neutral-50 disabled:opacity-60"
         >
-          {busy && pages.length > 0 && optimized.length === 0
-            ? "Optimizing pages…"
-            : "Optimize pages"}
+          {phase === "optimizing" ? "Optimizing pages…" : "Optimize pages"}
         </button>
       ) : null}
 
@@ -316,9 +317,7 @@ export default function DemoEbookGenerateClient({
           onClick={() => void buildEbook()}
           className="w-full rounded-2xl bg-neutral-900 px-5 py-3.5 text-base font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
         >
-          {busy && optimized.length > 0
-            ? "Building Talisbook™…"
-            : "Build Talisbook™"}
+          {phase === "building" ? "Building Talisbook™…" : "Build Talisbook™"}
         </button>
       ) : null}
 
