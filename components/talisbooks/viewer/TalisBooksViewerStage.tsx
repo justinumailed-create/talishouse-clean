@@ -822,14 +822,15 @@ function OpenBookSpread({
           magazine && soloRight ? "talisbooks-viewer-book--solo-right" : "",
           magazine && soloLeft ? "talisbooks-viewer-book--solo-left" : "",
           flipping ? "talisbooks-viewer-book--flipping" : "",
-          closingToFront ? "talisbooks-viewer-book--closing-to-front" : "",
-          closingToBack ? "talisbooks-viewer-book--closing-to-back" : "",
-          wrapPhase !== "idle" ? "talisbooks-viewer-book--closing" : "",
           grabbing ? "talisbooks-viewer-book--grabbing" : "",
         ]
           .filter(Boolean)
           .join(" ")}
         data-spread-fit={fitToLandscape ? "image" : undefined}
+        data-close-pose={
+          closingToFront ? "front" : closingToBack ? "back" : undefined
+        }
+        data-wrap-phase={wrapPhase === "idle" ? undefined : wrapPhase}
         style={
           fitToLandscape
             ? ({
@@ -1285,12 +1286,12 @@ function OpenBookSingle({
           "talisbooks-viewer-book--single",
           magazine ? "talisbooks-viewer-book--magazine" : "",
           flipping ? "talisbooks-viewer-book--flipping" : "",
-          wrapPhase !== "idle" ? "talisbooks-viewer-book--closing" : "",
           grabbing ? "talisbooks-viewer-book--grabbing" : "",
         ]
           .filter(Boolean)
           .join(" ")}
         data-spread-fit={fitToLandscape ? "image" : undefined}
+        data-wrap-phase={wrapPhase === "idle" ? undefined : wrapPhase}
         style={
           fitToLandscape
             ? ({

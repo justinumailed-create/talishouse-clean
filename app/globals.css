@@ -2180,26 +2180,25 @@ body.mapsite-gallery-open [data-paypal-button] {
 /* Cover / back keep the two-page grid so the flip hinge stays on the spine.
    At rest the unused leaf is hidden and the book is shifted so the remaining
    page sits in the center. During a turn, the full spread is restored.
-   Close-to-cover keeps the unused leaf hidden so empty paper does not slide. */
+   Close-to-cover uses data-close-pose so empty paper stays hidden while the
+   reverse curl still paints (class-only selectors were dropped by CSS minify). */
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-right:not(.talisbooks-viewer-book--flipping) .talisbooks-viewer-book__spread,
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-left:not(.talisbooks-viewer-book--flipping) .talisbooks-viewer-book__spread,
-.talisbooks-viewer--magazine .talisbooks-viewer-book--closing-to-front .talisbooks-viewer-book__spread,
-.talisbooks-viewer--magazine .talisbooks-viewer-book--closing-to-back .talisbooks-viewer-book__spread {
+.talisbooks-viewer--magazine .talisbooks-viewer-book[data-close-pose] .talisbooks-viewer-book__spread {
   background: transparent;
   box-shadow: none;
 }
 
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-right:not(.talisbooks-viewer-book--flipping) .talisbooks-viewer-book__gutter,
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-left:not(.talisbooks-viewer-book--flipping) .talisbooks-viewer-book__gutter,
-.talisbooks-viewer--magazine .talisbooks-viewer-book--closing-to-front .talisbooks-viewer-book__gutter,
-.talisbooks-viewer--magazine .talisbooks-viewer-book--closing-to-back .talisbooks-viewer-book__gutter {
+.talisbooks-viewer--magazine .talisbooks-viewer-book[data-close-pose] .talisbooks-viewer-book__gutter {
   opacity: 0;
 }
 
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-right:not(.talisbooks-viewer-book--flipping) .talisbooks-viewer-book__page--left,
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-left:not(.talisbooks-viewer-book--flipping) .talisbooks-viewer-book__page--right,
-.talisbooks-viewer--magazine .talisbooks-viewer-book--closing-to-front .talisbooks-viewer-book__page--left,
-.talisbooks-viewer--magazine .talisbooks-viewer-book--closing-to-back .talisbooks-viewer-book__page--right {
+.talisbooks-viewer--magazine .talisbooks-viewer-book[data-close-pose="front"] .talisbooks-viewer-book__page--left,
+.talisbooks-viewer--magazine .talisbooks-viewer-book[data-close-pose="back"] .talisbooks-viewer-book__page--right {
   visibility: hidden;
   background: transparent;
   box-shadow: none;
@@ -2207,15 +2206,15 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-right:not(.talisbooks-viewer-book--flipping) .talisbooks-viewer-book__page--right,
 .talisbooks-viewer--magazine .talisbooks-viewer-book--solo-left:not(.talisbooks-viewer-book--flipping) .talisbooks-viewer-book__page--left,
-.talisbooks-viewer--magazine .talisbooks-viewer-book--closing-to-front .talisbooks-viewer-book__page--right,
-.talisbooks-viewer--magazine .talisbooks-viewer-book--closing-to-back .talisbooks-viewer-book__page--left {
+.talisbooks-viewer--magazine .talisbooks-viewer-book[data-close-pose="front"] .talisbooks-viewer-book__page--right,
+.talisbooks-viewer--magazine .talisbooks-viewer-book[data-close-pose="back"] .talisbooks-viewer-book__page--left {
   border-radius: var(--book-page-radius);
   box-shadow:
     0 16px 34px rgba(28, 25, 23, 0.2),
     0 0 0 1px rgba(28, 25, 23, 0.08);
 }
 
-.talisbooks-viewer-book--closing {
+.talisbooks-viewer-book[data-wrap-phase] {
   pointer-events: none;
 }
 
