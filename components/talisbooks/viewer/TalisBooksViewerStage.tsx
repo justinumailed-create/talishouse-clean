@@ -745,13 +745,13 @@ function OpenBookSpread({
 
   const leftPage = flipping
     ? forward
-      ? current.left
+      ? current.left ?? incoming!.left
       : incoming!.left
     : current.left;
   const rightPage = flipping
     ? forward
       ? incoming!.right
-      : current.right
+      : current.right ?? incoming!.right
     : current.right;
 
   const flipFront = forward ? current.right : current.left;
