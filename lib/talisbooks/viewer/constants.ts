@@ -12,8 +12,19 @@ export const TALISBOOKS_VIEWER_SPEED_PRESETS = [
 export type TalisBooksViewerSpeedPresetId =
   (typeof TALISBOOKS_VIEWER_SPEED_PRESETS)[number]["id"];
 
-/** Page-turn animation duration in ms (Apple Books–like leaf flip). */
-export const TALISBOOKS_VIEWER_TURN_DURATION_MS = 1100;
+/** Page-turn animation duration in ms (double-sided 180° leaf curl). */
+export const TALISBOOKS_VIEWER_TURN_DURATION_MS = 1150;
+
+/** Magazine last-spread wrap: fade out in place, hold, fade the front in. */
+export const TALISBOOKS_VIEWER_WRAP_OUT_MS = 360;
+/** Keep opacity at 0 while x snaps from back-cover pose to front-cover pose. */
+export const TALISBOOKS_VIEWER_WRAP_SWAP_MS = 64;
+export const TALISBOOKS_VIEWER_WRAP_IN_MS = 420;
+/** @deprecated Use WRAP_OUT + WRAP_SWAP + WRAP_IN. Total wrap close duration. */
+export const TALISBOOKS_VIEWER_COVER_RESET_MS =
+  TALISBOOKS_VIEWER_WRAP_OUT_MS +
+  TALISBOOKS_VIEWER_WRAP_SWAP_MS +
+  TALISBOOKS_VIEWER_WRAP_IN_MS;
 
 /** Hold before a press becomes a grab for manual page turn. */
 export const TALISBOOKS_VIEWER_LONG_PRESS_MS = 220;

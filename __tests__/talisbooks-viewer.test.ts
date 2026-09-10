@@ -5,11 +5,14 @@ import {
   createEmptyNarrationController,
   getNarrationCueForPage,
   intervalMsToSpeedPercent,
+  magazineSoloShiftPercent,
   nextPageIndex,
   previousPageIndex,
   resolveViewerIntervalMs,
   shouldAutoAdvance,
+  singleFlipRotateY,
   speedPercentToIntervalMs,
+  spreadFlipRotateY,
   TALISBOOKS_VIEWER_SPEED_DEFAULT_MS,
   TALISBOOKS_VIEWER_SPEED_MAX_MS,
   TALISBOOKS_VIEWER_SPEED_MIN_MS,
@@ -98,5 +101,75 @@ describe("Talisbooks™ viewer narration stubs", () => {
     );
     expect(cue?.text).toBe("Meet your agent");
     expect(getNarrationCueForPage(null, 1)).toBeNull();
+  });
+});
+
+describe("Talisbooks™ viewer flip geometry", () => {
+  it("centers a solo cover/back leaf and restores the spread while flipping", () => {
+    expect(
+      magazineSoloShiftPercent({ soloRight: true, soloLeft: false, flipping: false }),
+    ).toBe(-25);
+    expect(
+      magazineSoloShiftPercent({ soloRight: false, soloLeft: true, flipping: false }),
+    ).toBe(25);
+    expect(
+      magazineSoloShiftPercent({ soloRight: true, soloLeft: false, flipping: true }),
+    ).toBe(0);
+    expect(
+      magazineSoloShiftPercent({ soloRight: false, soloLeft: false, flipping: false }),
+    ).toBe(0);
+  });
+
+  it("closes to the front cover by shifting with the reverse curl, not after it", () => {
+    expect(
+      magazineSoloShiftPercent({
+        soloRight: false,
+        soloLeft: false,
+        flipping: true,
+        incomingSoloRight: true,
+        direction: -1,
+      }),
+    ).toBe(-25);
+  });
+
+  it("closes to the back cover by shifting with the forward curl", () => {
+    expect(
+      magazineSoloShiftPercent({
+        soloRight: false,
+        soloLeft: false,
+        flipping: true,
+        incomingSoloLeft: true,
+        direction: 1,
+      }),
+    ).toBe(25);
+  });
+
+  it("keeps the current solo pose while wrapping last-spread → front cover", () => {
+    expect(
+      magazineSoloShiftPercent({
+        soloRight: false,
+        soloLeft: true,
+        flipping: false,
+        wrappingToCover: true,
+      }),
+    ).toBe(25);
+    expect(
+      magazineSoloShiftPercent({
+        soloRight: true,
+        soloLeft: false,
+        flipping: false,
+        wrappingToCover: true,
+      }),
+    ).toBe(-25);
+  });
+
+  it("rotates a double-sided spread leaf a full 180° so the back face never unmounts at 90°", () => {
+    expect(spreadFlipRotateY(1)).toEqual([0, -180]);
+    expect(spreadFlipRotateY(-1)).toEqual([0, 180]);
+  });
+
+  it("peels a single page past 90° with a paper back still in the scene", () => {
+    expect(singleFlipRotateY(1)[1]).toBeLessThan(-90);
+    expect(singleFlipRotateY(-1)[1]).toBeGreaterThan(90);
   });
 });
