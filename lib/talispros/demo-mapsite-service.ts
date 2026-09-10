@@ -130,7 +130,7 @@ export async function createDemoMapSiteWithPinnedEbook(
     ok: true,
     mapsiteId: created.id,
     code: savedCode,
-    mapsiteHref: demoMapSiteApplicationHref(created.id),
+    mapsiteHref: demoMapSiteApplicationHref(created.id, savedCode),
     publishedHref: publishedMapSitePath(savedCode),
     ebookHref: DEMO_PINNED_EBOOK_HREF,
     generateHref: demoMapSiteEbookHref({
@@ -290,7 +290,7 @@ export async function loadDemoMapSiteForEbook(
     title: data.property_title?.trim() || "Demo Mapsite™",
     location: data.property_address?.trim() || "",
     description: data.property_description?.trim() || "",
-    mapsiteHref: demoMapSiteApplicationHref(data.id),
+    mapsiteHref: demoMapSiteApplicationHref(data.id, code),
   };
 }
 

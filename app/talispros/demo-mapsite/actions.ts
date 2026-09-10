@@ -8,6 +8,10 @@ import {
   createDemoMapSiteWithPinnedEbook,
   loadDemoMapSiteForEbook,
 } from "@/lib/talispros/demo-mapsite-service";
+import {
+  pathnameForRevalidate,
+  publicDemoGenerateError,
+} from "@/lib/talispros/demo-mapsite";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
 export type CreateDemoMapSiteActionResult =
@@ -42,8 +46,8 @@ export async function createDemoMapSiteAction(formData: FormData): Promise<Creat
   if (!result.ok) return result;
 
   revalidatePath(MAPSITE_APP_PATH);
-  revalidatePath(result.publishedHref);
-  revalidatePath(result.ebookHref);
+  revalidatePath(pathnameForRevalidate(result.publishedHref));
+  revalidatePath(pathnameForRevalidate(result.ebookHref));
 
   return result;
 }
@@ -61,42 +65,51 @@ export async function generateDemoEbookAction(input: {
   mapsiteId: string;
   optimizedImages: { url: string; width: number; height: number }[];
 }): Promise<GenerateDemoEbookActionResult> {
-  const mapsite = await loadDemoMapSiteForEbook(input.mapsiteId);
-  if (!mapsite) {
-    return { ok: false, error: "Demo Mapsite™ not found." };
+  try {
+    const mapsite = await loadDemoMapSiteForEbook(input.mapsiteId);
+    if (!mapsite) {
+      return { ok: false, error: "Demo Mapsite™ not found." };
+    }
+    if (!input.optimizedImages.length) {
+      return { ok: false, error: "Extract and optimize the pinned PDF first." };
+    }
+
+    const frontCover = pinnedTalisBookCoverAsset("front");
+    const backCover = pinnedTalisBookCoverAsset("back");
+
+    const result = await generateSelfServiceEbook({
+      fastCode: mapsite.code,
+      mapsiteId: mapsite.mapsiteId,
+      accountType: "root",
+      title: mapsite.title,
+      description: mapsite.description,
+      location: mapsite.location,
+      optimizedImages: input.optimizedImages,
+      uploadMode: "pdf",
+      frontCover,
+      backCover,
+    });
+
+    if (!result.success) {
+      return { ok: false, error: result.error };
+    }
+
+    revalidatePath(MAPSITE_APP_PATH);
+    revalidatePath(
+      pathnameForRevalidate(`${ROUTES.TALISBOOKS_VIEWER}/${result.slug}`),
+    );
+
+    return {
+      ok: true,
+      slug: result.slug,
+      viewerUrl: result.viewerUrl,
+      mapsiteHref: mapsite.mapsiteHref,
+    };
+  } catch (error) {
+    console.error("[generateDemoEbookAction]", error);
+    return {
+      ok: false,
+      error: publicDemoGenerateError(error),
+    };
   }
-  if (!input.optimizedImages.length) {
-    return { ok: false, error: "Extract and optimize the pinned PDF first." };
-  }
-
-  const frontCover = pinnedTalisBookCoverAsset("front");
-  const backCover = pinnedTalisBookCoverAsset("back");
-
-  const result = await generateSelfServiceEbook({
-    fastCode: mapsite.code,
-    mapsiteId: mapsite.mapsiteId,
-    accountType: "root",
-    title: mapsite.title,
-    description: mapsite.description,
-    location: mapsite.location,
-    optimizedImages: input.optimizedImages,
-    uploadMode: "pdf",
-    frontCover,
-    backCover,
-  });
-
-  if (!result.success) {
-    return { ok: false, error: result.error };
-  }
-
-  revalidatePath(MAPSITE_APP_PATH);
-  revalidatePath(`${ROUTES.TALISBOOKS_VIEWER}/${result.slug}`);
-  revalidatePath(mapsite.mapsiteHref);
-
-  return {
-    ok: true,
-    slug: result.slug,
-    viewerUrl: result.viewerUrl,
-    mapsiteHref: mapsite.mapsiteHref,
-  };
 }

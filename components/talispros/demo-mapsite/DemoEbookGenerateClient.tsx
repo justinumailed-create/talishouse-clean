@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { generateDemoEbookAction } from "@/app/talispros/demo-mapsite/actions";
 import {
   PINNED_TALISBOOK_SLUG,
@@ -11,6 +10,7 @@ import {
   fetchWithTimeout,
   loadPinnedTalisBookPageFiles,
 } from "@/lib/talisbooks/load-pinned-demo-pages";
+import { publicDemoGenerateError } from "@/lib/talispros/demo-mapsite";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { ONBOARDING_JOB_TIMEOUT_MS } from "@/lib/onboarding-timing";
 
@@ -155,7 +155,6 @@ export default function DemoEbookGenerateClient({
   mapsiteId: string;
   title: string;
 }) {
-  const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [stage, setStage] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -259,13 +258,11 @@ export default function DemoEbookGenerateClient({
         throw new Error(result.error);
       }
       setStage("Opening your demo Mapsite™…");
-      router.push(result.mapsiteHref);
+      // Full navigation avoids a failed App Router RSC render leaving this
+      // page stuck on "Building demonstration Talisbook™…".
+      window.location.assign(result.mapsiteHref || result.viewerUrl);
     } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Could not generate the demonstration Talisbook™.",
-      );
+      setError(publicDemoGenerateError(caught));
       setStage("");
     } finally {
       setBusy(false);

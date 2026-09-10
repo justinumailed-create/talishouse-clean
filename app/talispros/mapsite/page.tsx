@@ -65,7 +65,10 @@ export default async function TalisprosMapSitePage({
   const claimed = isTruthyParam(firstParam(params.claimed));
   const view = firstParam(params.view)?.trim().toLowerCase() ?? null;
   const mapsiteId = firstParam(params.mapsiteId)?.trim() || null;
-  const fastCode = firstParam(params.fastCode)?.trim() || null;
+  const fastCode =
+    firstParam(params.fastCode)?.trim() ||
+    firstParam(params.code)?.trim() ||
+    null;
   const requestId = firstParam(params.requestId)?.trim() || null;
   const showStartHere = isTruthyParam(firstParam(params.startHere));
   const showActivatePayment = isTruthyParam(firstParam(params[ACTIVATE_QUERY]));
@@ -169,8 +172,16 @@ export default async function TalisprosMapSitePage({
   });
 
   const ownerCode = mapsite.fast_code || fastCode;
-  const isOwner =
-    showStartHere || (await isOwnMapSite(ownerCode));
+  const isDemoListing =
+    mapsite.is_demonstration || isDemoMapSiteCode(mapsite.fast_code);
+  let isOwner = isDemoListing || showStartHere;
+  if (!isOwner) {
+    try {
+      isOwner = await isOwnMapSite(ownerCode);
+    } catch (error) {
+      console.warn("[mapsite] Could not resolve owner session:", error);
+    }
+  }
 
   const paymentPlanType = await resolveMapSitePaymentPlanType({
     requestId,
@@ -179,8 +190,7 @@ export default async function TalisprosMapSitePage({
   });
 
   const paymentReceived =
-    mapsite.is_demonstration ||
-    isDemoMapSiteCode(mapsite.fast_code) ||
+    isDemoListing ||
     (await hasCompletedMapSitePaypalPayment({
       mapsiteId: mapsite.id,
       fastCode,
@@ -194,13 +204,18 @@ export default async function TalisprosMapSitePage({
   const talisBookHref =
     (primarySlug ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}` : null) ||
     mapsite.teb_url?.trim() ||
-    (mapsite.is_demonstration ? DEMO_PINNED_EBOOK_HREF : null);
+    (isDemoListing ? DEMO_PINNED_EBOOK_HREF : null);
   const hasTalisBook = Boolean(talisBookHref || ebookContext?.books?.length);
-  const listingImageUrls = await resolveEbookListingImageUrls({
-    listingImageUrls: ebookContext?.primaryEbook?.listingImageUrls,
-    bookSlug: primarySlug,
-    tebUrl: mapsite.teb_url,
-  });
+  let listingImageUrls: string[] = [];
+  try {
+    listingImageUrls = await resolveEbookListingImageUrls({
+      listingImageUrls: ebookContext?.primaryEbook?.listingImageUrls,
+      bookSlug: primarySlug,
+      tebUrl: mapsite.teb_url,
+    });
+  } catch (error) {
+    console.warn("[mapsite] Could not resolve ebook listing images:", error);
+  }
   const listingMapSite = withEbookListingMedia(
     mapsite,
     listingImageUrls,

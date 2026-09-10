@@ -426,15 +426,20 @@ export async function getMapSitePlatformById(
     return null;
   }
 
-  const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from("mapsites")
-    .select(SELECT_COLUMNS)
-    .eq("id", mapsiteId)
-    .maybeSingle();
+  try {
+    const supabase = getSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("mapsites")
+      .select(SELECT_COLUMNS)
+      .eq("id", mapsiteId)
+      .maybeSingle();
 
-  if (error || !data) return null;
-  return mapRow(data as MapSiteRow);
+    if (error || !data) return null;
+    return mapRow(data as MapSiteRow);
+  } catch (error) {
+    console.warn("[mapsite-platform] Could not load Mapsite™ by id:", error);
+    return null;
+  }
 }
 
 export async function transitionMapSiteStatus(
