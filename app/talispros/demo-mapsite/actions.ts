@@ -2,12 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { ROUTES } from "@/lib/routes";
-import sharp from "sharp";
-import path from "node:path";
 import { generateSelfServiceEbook } from "@/lib/talisbooks/self-service-ebook";
-import {
-  PINNED_TALISBOOK_ASSET_ROOT,
-} from "@/lib/talisbooks/library/pinned-catalog";
+import { pinnedTalisBookCoverAsset } from "@/lib/talisbooks/library/pinned-catalog";
 import {
   createDemoMapSiteWithPinnedEbook,
   loadDemoMapSiteForEbook,
@@ -61,20 +57,6 @@ export type GenerateDemoEbookActionResult =
     }
   | { ok: false; error: string };
 
-async function pinnedCoverAsset(
-  fileName: "front-cover.jpg" | "back-cover.jpg",
-): Promise<{ url: string; width: number; height: number }> {
-  const abs = path.join(process.cwd(), "public/talisbooks/pinned", fileName);
-  const meta = await sharp(abs).metadata();
-  const width = meta.width || 0;
-  const height = meta.height || 0;
-  return {
-    url: `${PINNED_TALISBOOK_ASSET_ROOT}/${fileName}`,
-    width,
-    height,
-  };
-}
-
 export async function generateDemoEbookAction(input: {
   mapsiteId: string;
   optimizedImages: { url: string; width: number; height: number }[];
@@ -87,10 +69,8 @@ export async function generateDemoEbookAction(input: {
     return { ok: false, error: "Extract and optimize the pinned PDF first." };
   }
 
-  const [frontCover, backCover] = await Promise.all([
-    pinnedCoverAsset("front-cover.jpg"),
-    pinnedCoverAsset("back-cover.jpg"),
-  ]);
+  const frontCover = pinnedTalisBookCoverAsset("front");
+  const backCover = pinnedTalisBookCoverAsset("back");
 
   const result = await generateSelfServiceEbook({
     fastCode: mapsite.code,

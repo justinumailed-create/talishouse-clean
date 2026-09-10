@@ -26,6 +26,40 @@ export const PINNED_TALISBOOK_INTERIOR_PAGE_COUNT = 11;
 export const PINNED_TALISBOOK_PAGE_COUNT =
   2 + PINNED_TALISBOOK_INTERIOR_PAGE_COUNT * 2;
 
+export const PINNED_TALISBOOK_COVER_WIDTH = 800;
+export const PINNED_TALISBOOK_COVER_HEIGHT = 893;
+export const PINNED_TALISBOOK_INTERIOR_WIDTH = 1600;
+export const PINNED_TALISBOOK_INTERIOR_HEIGHT = 893;
+
+export function pinnedTalisBookInteriorPageHref(pageIndex: number): string {
+  const n = String(pageIndex).padStart(2, "0");
+  return `${PINNED_TALISBOOK_ASSET_ROOT}/pages/page-${n}.jpg`;
+}
+
+export function pinnedTalisBookCoverAsset(
+  which: "front" | "back",
+): { url: string; width: number; height: number } {
+  return {
+    url: `${PINNED_TALISBOOK_ASSET_ROOT}/${
+      which === "front" ? "front-cover.jpg" : "back-cover.jpg"
+    }`,
+    width: PINNED_TALISBOOK_COVER_WIDTH,
+    height: PINNED_TALISBOOK_COVER_HEIGHT,
+  };
+}
+
+export function pinnedTalisBookInteriorAssets(): {
+  url: string;
+  width: number;
+  height: number;
+}[] {
+  return Array.from({ length: PINNED_TALISBOOK_INTERIOR_PAGE_COUNT }, (_, index) => ({
+    url: pinnedTalisBookInteriorPageHref(index + 1),
+    width: PINNED_TALISBOOK_INTERIOR_WIDTH,
+    height: PINNED_TALISBOOK_INTERIOR_HEIGHT,
+  }));
+}
+
 function interiorCenterfoldPair(
   startPage: number,
   slideIndex: number,

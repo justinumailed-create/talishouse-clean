@@ -45,9 +45,9 @@ export default async function DemoMapSiteEbookPage({
           Create the demo Talisbook™
         </h1>
         <p className="mt-2 text-sm leading-6 text-neutral-600">
-          Extract the pinned Talispros eBook PDF, then rasterize and optimize
-          each page the same way live generation does. When that finishes, we
-          open your demo Mapsite™.
+          Extract the pinned Talispros eBook pages, optimize them, then Build
+          the demonstration Talisbook™. When that finishes, we open your demo
+          Mapsite™.
         </p>
         <p className="mt-3 text-sm">
           <Link

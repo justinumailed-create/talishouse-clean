@@ -4,6 +4,29 @@
  */
 
 const MAX_PAGES = 22;
+const PDF_LOAD_TIMEOUT_MS = 20_000;
+const PDF_PAGE_RENDER_TIMEOUT_MS = 20_000;
+const SAME_ORIGIN_PDF_WORKER_SRC = "/pdf.worker.min.mjs";
+
+function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  message: string,
+): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), timeoutMs);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
 
 function isPdfFile(file: File): boolean {
   const name = file.name.toLowerCase();
@@ -52,10 +75,22 @@ export async function convertPdfFileToImageFiles(
   const maxPages = options?.maxPages ?? MAX_PAGES;
   try {
     const pdfjs = await import("pdfjs-dist");
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+    // Same-origin worker. A CDN workerSrc can hang forever if the script never
+    // loads (blocked / CORS / offline), which looks like an endless extract loop.
+    pdfjs.GlobalWorkerOptions.workerSrc = SAME_ORIGIN_PDF_WORKER_SRC;
 
     const data = new Uint8Array(await file.arrayBuffer());
-    const document = await pdfjs.getDocument({ data }).promise;
+    const document = await withTimeout(
+      pdfjs.getDocument({
+        data,
+        useWorkerFetch: false,
+        isEvalSupported: false,
+        disableRange: true,
+        disableStream: true,
+      }).promise,
+      PDF_LOAD_TIMEOUT_MS,
+      "Timed out reading the PDF. Check that the PDF.js worker is reachable.",
+    );
     const pageCount = Math.min(document.numPages, maxPages);
     const baseName = file.name.replace(/\.pdf$/i, "") || "pdf";
     const pages: File[] = [];
@@ -71,10 +106,14 @@ export async function convertPdfFileToImageFiles(
         throw new Error("Canvas is not available to convert PDF pages.");
       }
 
-      await page.render({
-        canvasContext: context,
-        viewport,
-      }).promise;
+      await withTimeout(
+        page.render({
+          canvasContext: context,
+          viewport,
+        }).promise,
+        PDF_PAGE_RENDER_TIMEOUT_MS,
+        `Timed out rendering PDF page ${pageNumber}.`,
+      );
 
       pages.push(
         await canvasToJpegFile(
