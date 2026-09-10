@@ -33,7 +33,7 @@ function WordmarkBlock({
       <h2 className="m-0">
         <Link
           href={href}
-          className="block text-[clamp(3.75rem,8vw,7.5rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-[#1d1d1f] no-underline transition-opacity hover:opacity-70"
+          className="inline-flex items-center justify-center rounded-2xl border border-neutral-200 bg-white px-5 py-2.5 text-[clamp(3.75rem,8vw,7.5rem)] font-semibold leading-[0.92] tracking-[-0.05em] text-[#1d1d1f] no-underline shadow-sm transition hover:border-neutral-300 hover:bg-neutral-50 sm:px-7 sm:py-3.5"
         >
           {wordmark}
         </Link>
@@ -79,7 +79,7 @@ export default function MapSiteCreativeLinks({
     <div className="flex min-h-0 flex-col gap-16 lg:h-full lg:justify-center lg:gap-20">
       <WordmarkBlock
         href={tebLink}
-        wordmark="TEB™"
+        wordmark="TEB"
         actions={<TextAction href={tebLink}>Open bookshelf</TextAction>}
       >
         <p className="m-0">
@@ -90,7 +90,7 @@ export default function MapSiteCreativeLinks({
 
       <WordmarkBlock
         href={ttvLink}
-        wordmark="TTV™"
+        wordmark="TTV"
         actions={
           <>
             <TextAction href={ttvLink}>Open TalisTV™</TextAction>
