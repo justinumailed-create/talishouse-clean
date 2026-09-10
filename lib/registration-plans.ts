@@ -10,6 +10,21 @@ export type PlanType =
   | "ADPRO_100"
   | "ADPRO_UNLIMITED";
 
+const PLAN_TYPE_VALUES: readonly PlanType[] = [
+  "TEST_ACCOUNT",
+  "ROOT_ACCOUNT",
+  "ROOT_ACCOUNT_1",
+  "DERIVATIVE_ACCOUNT",
+  "ADPRO_SINGLE",
+  "ADPRO_10",
+  "ADPRO_100",
+  "ADPRO_UNLIMITED",
+];
+
+export function isPlanType(value: string | null | undefined): value is PlanType {
+  return Boolean(value && PLAN_TYPE_VALUES.includes(value as PlanType));
+}
+
 export interface PlanDetail {
   label: string;
   price: number;

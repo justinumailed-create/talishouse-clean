@@ -1,13 +1,25 @@
 "use server";
 
-import { processPayment } from "@/app/talispros/register/payment-actions";
+import { headers } from "next/headers";
 import type { RegistrationMarket } from "@/lib/registration-market";
+import { parseRegistrationMarket } from "@/lib/registration-market";
 import {
-  isRootPlanType,
+  planSummaryFor,
   planTypeForClaimAccountType,
   type PlanType,
 } from "@/lib/registration-plans";
+import { getStripeClient, getStripeSecretKey } from "@/lib/stripe";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import {
+  MAPSITE_ACTIVATION_CURRENCY,
+  mapsiteActivationUnitAmountCents,
+} from "@/lib/talispros/mapsite-activation-amount";
+import { activateMapSiteAfterPayment } from "@/lib/talispros/mapsite-activation";
+import {
+  ACTIVATE_QUERY,
+  CHECKOUT_QUERY,
+  buildActivateMapSiteHref,
+} from "@/lib/talispros/ebook-choice";
 import {
   getDemonstrationMapSite,
   getMapSitePlatformByFastCode,
@@ -15,7 +27,8 @@ import {
   mergeMapSiteWithSubmittedLocation,
   type MapSitePlatformRecord,
 } from "@/lib/talispros/mapsite-platform";
-import { postMapSitePaymentRedirectHref } from "@/lib/talispros/register-agents";
+import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { toShareableAbsoluteUrl } from "@/lib/talispros/mapsite-state";
 
 export async function loadMapSiteApplicationState(options?: {
   mapsiteId?: string | null;
@@ -180,10 +193,176 @@ export async function refreshMapSiteApplicationState(
   return mergeMapSiteWithSubmittedLocation(mapsite);
 }
 
+export async function getMapSiteActivationPaymentStatus(options: {
+  mapsiteId?: string | null;
+  fastCode?: string | null;
+  requestId?: string | null;
+}): Promise<{ paid: boolean }> {
+  const paid = await hasCompletedMapSitePaypalPayment(options);
+  return { paid };
+}
+
+async function resolveAppOrigin(): Promise<string> {
+  const headerList = await headers();
+  const host = headerList.get("x-forwarded-host") ?? headerList.get("host");
+  const protocol = headerList.get("x-forwarded-proto") ?? "http";
+  if (host) return `${protocol}://${host}`;
+  return (
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "") ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
+    "http://localhost:3000"
+  );
+}
+
 /**
- * Capture Root Account™ PayPal payment from the Mapsite™ sidebar.
- * Uses claim Build Request contact details when available.
+ * Create a Stripe Checkout Session for Mapsite™ activation.
+ * Amount and plan are resolved server-side — never from the browser.
  */
+export async function createMapSiteStripeCheckoutSession(input: {
+  mapsiteId: string;
+  requestId?: string | null;
+  audience?: string | null;
+  fastCode?: string | null;
+}): Promise<{ url?: string; error?: string }> {
+  const mapsiteId = input.mapsiteId.trim();
+  if (!mapsiteId) {
+    return { error: "Missing Mapsite™ id." };
+  }
+  if (!getStripeSecretKey()) {
+    return { error: "Stripe is not configured." };
+  }
+  if (!isSupabaseAdminConfigured()) {
+    return { error: "Payment services are not configured." };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data: mapsite } = await supabase
+    .from("mapsites")
+    .select("id, fast_code, email, account_id")
+    .eq("id", mapsiteId)
+    .maybeSingle();
+
+  if (!mapsite?.id) {
+    return { error: "Mapsite™ was not found." };
+  }
+
+  let requestId = input.requestId?.trim() || null;
+  if (!requestId) {
+    const { data: linked } = await supabase
+      .from("build_requests")
+      .select("id")
+      .eq("linked_mapsite_id", mapsiteId)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    requestId = linked?.id || null;
+  }
+
+  if (requestId) {
+    const { data: request } = await supabase
+      .from("build_requests")
+      .select("id, email, linked_mapsite_id")
+      .eq("id", requestId)
+      .maybeSingle();
+    if (!request) {
+      return { error: "Claim request not found." };
+    }
+    if (request.linked_mapsite_id && request.linked_mapsite_id !== mapsiteId) {
+      return { error: "Claim request does not match this Mapsite™." };
+    }
+  }
+
+  let email = "";
+  if (requestId) {
+    const { data } = await supabase
+      .from("build_requests")
+      .select("email")
+      .eq("id", requestId)
+      .maybeSingle();
+    email = data?.email?.trim() || "";
+  }
+  if (!email) {
+    email = mapsite.email?.trim() || "";
+  }
+
+  if (!email || !requestId) {
+    return {
+      error:
+        "Complete Claim a Market first, then return here to activate your Mapsite™.",
+    };
+  }
+
+  const planType: PlanType = await resolveMapSitePaymentPlanType({
+    requestId,
+    mapsiteId,
+    fastCode: input.fastCode || mapsite.fast_code,
+  });
+  const summary = planSummaryFor(planType);
+  const unitAmount = mapsiteActivationUnitAmountCents(planType);
+  const fastCode = (input.fastCode || mapsite.fast_code || "").trim();
+  const audience = parseRegistrationMarket(input.audience) || input.audience || "";
+
+  const origin = await resolveAppOrigin();
+  const returnPath = buildActivateMapSiteHref({
+    fastCode,
+    mapsiteId,
+    accountType: audience,
+    requestId,
+  });
+  const successUrl = new URL(toShareableAbsoluteUrl(returnPath, origin));
+  successUrl.searchParams.set(CHECKOUT_QUERY, "success");
+  successUrl.searchParams.set(ACTIVATE_QUERY, "1");
+  const cancelUrl = new URL(toShareableAbsoluteUrl(returnPath, origin));
+  cancelUrl.searchParams.set(CHECKOUT_QUERY, "cancelled");
+  cancelUrl.searchParams.set(ACTIVATE_QUERY, "1");
+
+  const successUrlTemplate = `${successUrl.toString()}&session_id={CHECKOUT_SESSION_ID}`;
+
+  try {
+    const stripe = getStripeClient();
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      customer_email: email,
+      client_reference_id: mapsiteId,
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: MAPSITE_ACTIVATION_CURRENCY,
+            unit_amount: unitAmount,
+            product_data: {
+              name: `Talispros™ ${summary.planLabel} — Mapsite™ activation`,
+              description: `${summary.priceLabel} + ${summary.taxLabel}`,
+            },
+          },
+        },
+      ],
+      metadata: {
+        mapSiteId: mapsiteId,
+        requestId,
+        fastCode,
+        audience: String(audience || ""),
+        planType,
+        ...(mapsite.account_id ? { accountId: mapsite.account_id } : {}),
+      },
+      success_url: successUrlTemplate,
+      cancel_url: cancelUrl.toString(),
+    });
+
+    if (!session.url) {
+      return { error: "Stripe Checkout did not return a URL." };
+    }
+    return { url: session.url };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unable to start Stripe Checkout.";
+    console.error("[mapsite-stripe] checkout session failed:", message);
+    return { error: message };
+  }
+}
+
+/** Historical PayPal capture path — delegates to the shared activation service. */
 export async function processMapSiteRootPaypalPayment(input: {
   mapsiteId: string;
   requestId?: string | null;
@@ -197,159 +376,12 @@ export async function processMapSiteRootPaypalPayment(input: {
   fastCode?: string;
   error?: string;
 }> {
-  const mapsiteId = input.mapsiteId.trim();
-  const requestId = input.requestId?.trim() || null;
-
-  if (!mapsiteId) {
-    return { success: false, error: "Missing Mapsite™ id." };
-  }
-  if (!input.paypalOrderId?.trim()) {
-    return { success: false, error: "Missing PayPal order id." };
-  }
-
-  try {
-    const supabase = getSupabaseAdmin();
-
-    let firstName = "Mapsite™";
-    let lastName = "Owner";
-    let email = "";
-    let resolvedRequestId = requestId;
-    let accountTypeFromRequest = "";
-
-    if (!resolvedRequestId) {
-      const { data: linkedRequest } = await supabase
-        .from("build_requests")
-        .select(
-          "id, first_name, last_name, email, linked_mapsite_id, requested_account_type, account_type"
-        )
-        .eq("linked_mapsite_id", mapsiteId)
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (linkedRequest?.id) {
-        resolvedRequestId = linkedRequest.id;
-        firstName = linkedRequest.first_name?.trim() || firstName;
-        lastName = linkedRequest.last_name?.trim() || lastName;
-        email = linkedRequest.email?.trim() || email;
-        accountTypeFromRequest =
-          linkedRequest.requested_account_type ||
-          linkedRequest.account_type ||
-          "";
-      }
-    }
-
-    if (resolvedRequestId) {
-      const { data: request } = await supabase
-        .from("build_requests")
-        .select(
-          "id, first_name, last_name, email, linked_mapsite_id, requested_account_type, account_type"
-        )
-        .eq("id", resolvedRequestId)
-        .maybeSingle();
-
-      if (!request) {
-        return { success: false, error: "Claim request not found." };
-      }
-
-      firstName = request.first_name?.trim() || firstName;
-      lastName = request.last_name?.trim() || lastName;
-      email = request.email?.trim() || email;
-      accountTypeFromRequest =
-        request.requested_account_type || request.account_type || "";
-
-      if (!request.linked_mapsite_id) {
-        await supabase
-          .from("build_requests")
-          .update({
-            linked_mapsite_id: mapsiteId,
-            requested_account_type:
-              request.requested_account_type ||
-              accountTypeFromRequest ||
-              "root",
-          })
-          .eq("id", resolvedRequestId);
-      }
-    }
-
-    if (!email) {
-      const { data: mapsite } = await supabase
-        .from("mapsites")
-        .select("email, owner_first_name, owner_last_name")
-        .eq("id", mapsiteId)
-        .maybeSingle();
-
-      email = mapsite?.email?.trim() || "";
-      firstName = mapsite?.owner_first_name?.trim() || firstName;
-      lastName = mapsite?.owner_last_name?.trim() || lastName;
-    }
-
-    if (!email || !resolvedRequestId) {
-      return {
-        success: false,
-        error:
-          "Complete Claim a Market first, then return here to pay with PayPal.",
-      };
-    }
-
-    const planType: PlanType =
-      input.planType && isRootPlanType(input.planType)
-        ? input.planType
-        : accountTypeFromRequest
-          ? planTypeForClaimAccountType(accountTypeFromRequest)
-          : "ROOT_ACCOUNT";
-
-    const result = await processPayment({
-      email,
-      firstName,
-      lastName,
-      planType,
-      paypalOrderId: input.paypalOrderId,
-      paypalCaptureId: input.paypalCaptureId,
-      buildRequestId: resolvedRequestId,
-    });
-
-    if (!result.success) {
-      return { success: false, error: result.error || "Payment failed." };
-    }
-
-    await supabase
-      .from("mapsites")
-      .update({
-        status: "active",
-        interest_form_enabled: true,
-        ...(result.fastCode ? { fast_code: result.fastCode } : {}),
-      })
-      .eq("id", result.mapsiteId || mapsiteId);
-
-    await supabase
-      .from("build_requests")
-      .update({
-        status: "Mapsite™ Active",
-        approval_status: "Approved",
-        activated_at: new Date().toISOString(),
-        linked_mapsite_id: result.mapsiteId || mapsiteId,
-      })
-      .eq("id", resolvedRequestId);
-
-    const fastCode = result.fastCode || null;
-    const mapsiteIdForRedirect = result.mapsiteId || mapsiteId;
-    const redirectUrl = postMapSitePaymentRedirectHref({
-      fastCode,
-      mapsiteId: mapsiteIdForRedirect,
-      audience: input.audience,
-      accountType: accountTypeFromRequest,
-      requestId: resolvedRequestId,
-    });
-
-    return {
-      success: true,
-      fastCode: result.fastCode,
-      redirectUrl,
-    };
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown payment error";
-    console.error("[mapsite-paypal] Error:", error);
-    return { success: false, error: message };
-  }
+  return activateMapSiteAfterPayment({
+    mapsiteId: input.mapsiteId,
+    requestId: input.requestId,
+    audience: input.audience,
+    planType: input.planType,
+    paypalOrderId: input.paypalOrderId,
+    paypalCaptureId: input.paypalCaptureId,
+  });
 }

@@ -19,11 +19,15 @@ export interface ProcessPaymentInput {
   planType: string;
   paypalOrderId?: string;
   paypalCaptureId?: string;
+  stripeCheckoutSessionId?: string;
+  stripePaymentIntentId?: string;
+  paymentProvider?: "paypal" | "stripe";
   buildRequestId?: string;
 }
 
 export interface ProcessPaymentResult {
   success: boolean;
+  alreadyProcessed?: boolean;
   transactionId?: string;
   redirectUrl?: string;
   mapsiteId?: string;
@@ -49,6 +53,40 @@ export async function processPayment(
 
   try {
     const supabaseAdmin = getSupabaseAdmin();
+    const stripeCheckoutSessionId = input.stripeCheckoutSessionId?.trim() || null;
+    const stripePaymentIntentId = input.stripePaymentIntentId?.trim() || null;
+    const paymentProvider =
+      input.paymentProvider ||
+      (stripeCheckoutSessionId ? "stripe" : "paypal");
+
+    if (stripeCheckoutSessionId) {
+      const { data: existingStripe } = await supabaseAdmin
+        .from("talispros_payments")
+        .select("id, payment_status")
+        .eq("stripe_checkout_session_id", stripeCheckoutSessionId)
+        .ilike("payment_status", "completed")
+        .maybeSingle();
+      if (existingStripe?.id) {
+        let mapsiteId: string | undefined;
+        let fastCode: string | undefined;
+        if (input.buildRequestId) {
+          const { data: buildRequest } = await supabaseAdmin
+            .from("build_requests")
+            .select("linked_mapsite_id, requested_fast_code")
+            .eq("id", input.buildRequestId)
+            .maybeSingle();
+          mapsiteId = buildRequest?.linked_mapsite_id || undefined;
+          fastCode = buildRequest?.requested_fast_code || undefined;
+        }
+        return {
+          success: true,
+          alreadyProcessed: true,
+          transactionId: stripePaymentIntentId || stripeCheckoutSessionId,
+          mapsiteId,
+          fastCode,
+        };
+      }
+    }
 
     const { error: paymentError } = await supabaseAdmin
       .from("talispros_payments")
@@ -57,10 +95,23 @@ export async function processPayment(
         plan_type: input.planType,
         paypal_order_id: input.paypalOrderId || null,
         paypal_capture_id: input.paypalCaptureId || null,
+        payment_provider: paymentProvider,
+        stripe_checkout_session_id: stripeCheckoutSessionId,
+        stripe_payment_intent_id: stripePaymentIntentId,
         payment_status: "completed",
       });
 
     if (paymentError) {
+      if (
+        stripeCheckoutSessionId &&
+        /duplicate|unique/i.test(paymentError.message)
+      ) {
+        return {
+          success: true,
+          alreadyProcessed: true,
+          transactionId: stripePaymentIntentId || stripeCheckoutSessionId,
+        };
+      }
       throw new Error(`Payment record failed: ${paymentError.message}`);
     }
 
@@ -78,7 +129,11 @@ export async function processPayment(
 
       return {
         success: true,
-        transactionId: input.paypalCaptureId || input.paypalOrderId,
+        transactionId:
+          stripePaymentIntentId ||
+          stripeCheckoutSessionId ||
+          input.paypalCaptureId ||
+          input.paypalOrderId,
         redirectUrl,
         mapsiteId: registration.mapsiteId,
         fastCode: registration.fastCode,
@@ -202,7 +257,11 @@ export async function processPayment(
 
     return {
       success: true,
-      transactionId: input.paypalCaptureId || input.paypalOrderId,
+      transactionId:
+        stripePaymentIntentId ||
+        stripeCheckoutSessionId ||
+        input.paypalCaptureId ||
+        input.paypalOrderId,
       redirectUrl,
       mapsiteId: mapsite.id,
       fastCode: account.fastCode,

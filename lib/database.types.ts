@@ -431,6 +431,9 @@ export interface Database {
           plan_type: string
           paypal_order_id: string | null
           paypal_capture_id: string | null
+          payment_provider: string | null
+          stripe_checkout_session_id: string | null
+          stripe_payment_intent_id: string | null
           payment_status: string
           created_at: string
         }
@@ -440,6 +443,9 @@ export interface Database {
           plan_type: string
           paypal_order_id?: string | null
           paypal_capture_id?: string | null
+          payment_provider?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
           payment_status?: string
           created_at?: string
         }
@@ -449,6 +455,9 @@ export interface Database {
           plan_type?: string
           paypal_order_id?: string | null
           paypal_capture_id?: string | null
+          payment_provider?: string | null
+          stripe_checkout_session_id?: string | null
+          stripe_payment_intent_id?: string | null
           payment_status?: string
           created_at?: string
         }

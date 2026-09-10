@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import MapEngineCanvas from "@/components/talismaps/map-engine/MapEngineCanvas";
 import {
   MapEngineProvider,
@@ -46,9 +41,14 @@ import MapSiteMarketPartnerCard from "./MapSiteMarketPartnerCard";
 import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
 import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
+import { getMapSiteActivationPaymentStatus } from "@/app/talispros/mapsite/actions";
+import {
+  postMapSitePaymentRedirectHref,
+  shouldRegisterAgentsAfterPayment,
+} from "@/lib/talispros/register-agents";
 
-/** Auto-reveal PayPal registration above the marketing sidebar after Mapsite™ load. */
-const PAYPAL_REGISTER_REVEAL_DELAY_MS = 10_000;
+/** Auto-reveal activation checkout above the marketing sidebar after Mapsite™ load. */
+const ACTIVATION_REVEAL_DELAY_MS = 10_000;
 
 const PIN_COLORS: Record<string, string> = {
   UNCLAIMED: "#1A73E8",
@@ -70,16 +70,18 @@ interface MapSiteApplicationProps {
   openPinOnLoad?: boolean;
   /** Owner Mapsite™ only: one-time guided prompt above the open property flag. */
   showStartHere?: boolean;
-  /** Claim-form plan for PayPal (e.g. ROOT_ACCOUNT_1). */
+  /** Claim-form plan for activation checkout display (e.g. ROOT_ACCOUNT_1). */
   paymentPlanType?: PlanType;
-  /** Completed PayPal payment on file — unlocks Express Interest. */
+  /** Completed activation payment on file — unlocks Express Interest. */
   paymentReceived?: boolean;
   /** Whether a Talisbook™ exists for this Mapsite™ / FAST Code. */
   hasTalisBook?: boolean;
   /** Viewer path for View Your Talisbook™. */
   talisBookHref?: string | null;
-  /** Show PayPal immediately (Activate Your Mapsite™); otherwise reveals after 10s. */
+  /** Show activation checkout immediately (Activate Your Mapsite™); otherwise reveals after 10s. */
   showActivatePayment?: boolean;
+  /** Stripe Checkout return. Never treated as proof of payment. */
+  checkoutStatus?: "success" | "cancelled" | null;
   /** Entry-point choice: user setup vs done-for-you request. */
   onboardingMode?: "self" | "assisted";
   /** Original audience page where prospect entered (for context). */
@@ -99,6 +101,7 @@ export default function MapSiteApplication({
   hasTalisBook = false,
   talisBookHref = null,
   showActivatePayment = false,
+  checkoutStatus = null,
   onboardingMode = "self",
   sourceAudience = null,
   accountType,
@@ -192,6 +195,7 @@ export default function MapSiteApplication({
         hasTalisBook={hasTalisBook}
         talisBookHref={talisBookHref}
         showActivatePayment={showActivatePayment}
+        checkoutStatus={checkoutStatus}
         selectedPinId={selectedPinId}
         setSelectedPinId={setSelectedPinId}
         beginFocusGuard={beginFocusGuard}
@@ -214,6 +218,7 @@ function MapSiteChrome({
   hasTalisBook,
   talisBookHref,
   showActivatePayment,
+  checkoutStatus,
   selectedPinId,
   setSelectedPinId,
   beginFocusGuard,
@@ -231,11 +236,13 @@ function MapSiteChrome({
   hasTalisBook: boolean;
   talisBookHref: string | null;
   showActivatePayment: boolean;
+  checkoutStatus: "success" | "cancelled" | null;
   selectedPinId: string | null;
   setSelectedPinId: (id: string | null) => void;
   beginFocusGuard: () => void;
 }) {
   const { setViewport, isReady } = useMapEngine();
+  const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const sidebarStackRef = useRef<HTMLDivElement>(null);
   const listingCardRef = useRef<HTMLDivElement>(null);
@@ -245,6 +252,7 @@ function MapSiteChrome({
   const [compact, setCompact] = useState(false);
   const [mobileOverlay, setMobileOverlay] = useState(false);
   const [paymentDelayElapsed, setPaymentDelayElapsed] = useState(false);
+  const [activationPaid, setActivationPaid] = useState(paymentReceived);
   const [alignTop, setAlignTop] = useState(MAPSITE_LISTING_TILE_TOP_FALLBACK_PX);
   const [popupCenterX, setPopupCenterX] = useState<number | null>(null);
   const [expandedCardHeight, setExpandedCardHeight] = useState<number | null>(
@@ -396,24 +404,77 @@ function MapSiteChrome({
 
   const claimed = !isClaimable(mapsite.status);
   const isDemoListing = mapsite.is_demonstration || isDemoMapSiteCode(mapsite.fast_code);
-  // PayPal stays until a completed payment note exists (not merely ACTIVE status).
-  const paid = isDemoListing || paymentReceived;
+  // Checkout stays until a completed payment note exists (not merely ACTIVE status).
+  const paid = isDemoListing || activationPaid;
   const onboardingPhase = getMapSiteOnboardingPhase({
     status: mapsite.status,
     paymentReceived: paid,
     hasTalisBook: hasTalisBook || Boolean(talisBookHref || mapsite.teb_url),
   });
 
-  // Unpaid claimed Mapsites™: reveal PayPal after load delay (or immediately via Activate).
   useEffect(() => {
-    if (!claimed || paid || showActivatePayment) return;
+    setActivationPaid(paymentReceived);
+  }, [paymentReceived]);
+
+  useEffect(() => {
+    if (paid || checkoutStatus !== "success") return;
+    let cancelledPoll = false;
+    const poll = async () => {
+      const { paid: nextPaid } = await getMapSiteActivationPaymentStatus({
+        mapsiteId: mapsite.id,
+        fastCode: mapsite.fast_code,
+        requestId,
+      });
+      if (cancelledPoll || !nextPaid) return;
+      setActivationPaid(true);
+      router.refresh();
+      if (
+        shouldRegisterAgentsAfterPayment({
+          audience,
+          accountType,
+        })
+      ) {
+        router.replace(
+          postMapSitePaymentRedirectHref({
+            audience,
+            accountType,
+            fastCode: mapsite.fast_code,
+            mapsiteId: mapsite.id,
+            requestId,
+          }),
+        );
+      }
+    };
+    void poll();
+    const timer = window.setInterval(() => {
+      void poll();
+    }, 2500);
+    return () => {
+      cancelledPoll = true;
+      window.clearInterval(timer);
+    };
+  }, [
+    paid,
+    checkoutStatus,
+    mapsite.id,
+    mapsite.fast_code,
+    requestId,
+    audience,
+    accountType,
+    router,
+  ]);
+
+  // Unpaid claimed Mapsites™: reveal checkout after load delay (or immediately via Activate).
+  useEffect(() => {
+    if (!claimed || paid || showActivatePayment || checkoutStatus) return;
     const timer = window.setTimeout(() => {
       setPaymentDelayElapsed(true);
-    }, PAYPAL_REGISTER_REVEAL_DELAY_MS);
+    }, ACTIVATION_REVEAL_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [claimed, paid, showActivatePayment, mapsite.id]);
+  }, [claimed, paid, showActivatePayment, checkoutStatus, mapsite.id]);
 
-  const showDelayedPayment = showActivatePayment || paymentDelayElapsed;
+  const showDelayedPayment =
+    showActivatePayment || paymentDelayElapsed || Boolean(checkoutStatus);
 
   const bookHref =
     talisBookHref ||
@@ -456,7 +517,7 @@ function MapSiteChrome({
       ? publishedMapSitePath(publishedCode)
       : null;
 
-  // Express Interest only after payment. PayPal uses claim-form planType;
+  // Express Interest only after payment. Checkout uses claim-form planType;
   // auto-reveals above the marketing sidebar 10s after load (or immediately via Activate).
   const registrationCard =
     isDemoListing ? null : claimed && paid && mapsite.fast_code ? (
@@ -472,6 +533,7 @@ function MapSiteChrome({
         requestId={requestId}
         planType={paymentPlanType}
         compact={mobileOverlay}
+        checkoutStatus={checkoutStatus}
       />
     ) : null;
 

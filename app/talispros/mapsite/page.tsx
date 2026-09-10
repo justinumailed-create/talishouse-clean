@@ -24,7 +24,7 @@ import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-paymen
 import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
-import { ACTIVATE_QUERY, BOOK_PENDING_QUERY } from "@/lib/talispros/ebook-choice";
+import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 import MapSitePmcApplication from "@/components/talispros/mapsite/MapSitePmcApplication";
@@ -69,6 +69,7 @@ export default async function TalisprosMapSitePage({
   const requestId = firstParam(params.requestId)?.trim() || null;
   const showStartHere = isTruthyParam(firstParam(params.startHere));
   const showActivatePayment = isTruthyParam(firstParam(params[ACTIVATE_QUERY]));
+  const checkoutStatus = parseCheckoutStatus(firstParam(params[CHECKOUT_QUERY]));
   const bookSlug = firstParam(params.book)?.trim() || null;
   const setup = firstParam(params.setup)?.trim().toLowerCase() ?? null;
   const sourceAudience =
@@ -79,6 +80,7 @@ export default async function TalisprosMapSitePage({
     const redirectParams = new URLSearchParams();
     if (showStartHere) redirectParams.set("startHere", "1");
     if (showActivatePayment) redirectParams.set(ACTIVATE_QUERY, "1");
+    if (checkoutStatus) redirectParams.set(CHECKOUT_QUERY, checkoutStatus);
     if (isTruthyParam(firstParam(params[BOOK_PENDING_QUERY]))) {
       redirectParams.set(BOOK_PENDING_QUERY, "1");
     }
@@ -217,6 +219,7 @@ export default async function TalisprosMapSitePage({
       hasTalisBook={hasTalisBook}
       talisBookHref={talisBookHref}
       showActivatePayment={showActivatePayment}
+      checkoutStatus={checkoutStatus}
       openPinOnLoad={isOwner || claimed || view === "pin"}
       showStartHere={false}
     />

@@ -13,8 +13,21 @@ export type PostBuildSuccessPath = "self-ebook" | "rahul-waiting" | "mapsite";
 /** Query flag: pending Mapsite™ waiting for Rahul’s first Talisbook™. */
 export const BOOK_PENDING_QUERY = "bookPending";
 
-/** Query flag: show existing PayPal activation card on the Mapsite™. */
+/** Query flag: show activation payment card on the Mapsite™. */
 export const ACTIVATE_QUERY = "activate";
+
+/** Stripe Checkout return state (`success` | `cancelled`). Not proof of payment. */
+export const CHECKOUT_QUERY = "checkout";
+
+export type MapSiteCheckoutStatus = "success" | "cancelled";
+
+export function parseCheckoutStatus(
+  value: string | null | undefined
+): MapSiteCheckoutStatus | null {
+  const normalized = value?.trim().toLowerCase();
+  if (normalized === "success" || normalized === "cancelled") return normalized;
+  return null;
+}
 
 export function buildEbookChoiceHref(options: {
   fastCode?: string | null;
@@ -175,7 +188,7 @@ export function buildMapSiteAfterBookHref(options: {
   return `${MAPSITE_APP_PATH}?${params.toString()}`;
 }
 
-/** Activate Your Mapsite™ — same Mapsite™ with existing PayPal card visible. */
+/** Activate Your Mapsite™ — same Mapsite™ with activation payment card visible. */
 export function buildActivateMapSiteHref(options: {
   fastCode?: string | null;
   mapsiteId?: string | null;

@@ -1,8 +1,8 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 
 /**
- * True when talispros_payments has a completed PayPal capture for this claim.
- * Looks up emails from the FAST Code build request and/or Mapsite™ owner.
+ * True when talispros_payments has a completed activation payment for this claim.
+ * Historical PayPal rows and new Stripe rows both use payment_status completed.
  */
 export async function hasCompletedMapSitePaypalPayment(options: {
   email?: string | null;
