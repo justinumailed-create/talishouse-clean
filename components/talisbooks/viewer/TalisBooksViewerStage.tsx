@@ -17,7 +17,6 @@ import {
   isMattedSpreadPage,
 } from "@/lib/talisbooks/viewer/spread-layout";
 import {
-  TALISBOOKS_VIEWER_COVER_RESET_MS,
   TALISBOOKS_VIEWER_DRAG_THRESHOLD_PX,
   TALISBOOKS_VIEWER_FLIP_COMMIT_PROGRESS,
   TALISBOOKS_VIEWER_LONG_PRESS_MS,
@@ -26,6 +25,9 @@ import {
   TALISBOOKS_VIEWER_SINGLE_FLIP_COMMIT_VELOCITY,
   TALISBOOKS_VIEWER_SINGLE_TURN_DURATION_MS,
   TALISBOOKS_VIEWER_TURN_DURATION_MS,
+  TALISBOOKS_VIEWER_WRAP_IN_MS,
+  TALISBOOKS_VIEWER_WRAP_OUT_MS,
+  TALISBOOKS_VIEWER_WRAP_SWAP_MS,
   describeViewerPage,
   describeViewerSpread,
   getViewerSpread,
@@ -59,6 +61,21 @@ interface TalisBooksViewerStageProps {
 
 const FLIP_EASE: [number, number, number, number] = [0.4, 0.0, 0.2, 1];
 const OPEN_EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+type WrapPhase = "idle" | "out" | "swap" | "in";
+
+function wrapOpacityDuration(wrapPhase: WrapPhase): number {
+  if (wrapPhase === "out") {
+    return TALISBOOKS_VIEWER_WRAP_OUT_MS / 1000;
+  }
+  if (wrapPhase === "swap") {
+    return 0;
+  }
+  if (wrapPhase === "in") {
+    return TALISBOOKS_VIEWER_WRAP_IN_MS / 1000;
+  }
+  return 0.4;
+}
 
 function SoftBlank({ side }: { side: "left" | "right" }) {
   /* Placeholder only for flip geometry; solo cover/back CSS collapses the empty leaf. */
@@ -442,7 +459,7 @@ function OpenBookSpread({
     mode: "program" | "gesture";
   } | null>(null);
   const [grabbing, setGrabbing] = useState(false);
-  const [closingToCover, setClosingToCover] = useState(false);
+  const [wrapPhase, setWrapPhase] = useState<WrapPhase>("idle");
   const prefersReducedMotion = useReducedMotion();
 
   const flipProgress = useMotionValue(0);
@@ -489,23 +506,35 @@ function OpenBookSpread({
       return;
     }
 
-    // Last → first wrap closes the back cover, then settles on the front.
+    // Last → first wrap: fade the back cover out in place, hold while x
+    // snaps to the front-cover pose, then fade the front in. Never tween x
+    // from +25% (back) to -25% (front) — that 50% slide is the sloggy close.
     if (magazine && displayedIndex === navCount - 1 && navIndex === 0) {
       if (prefersReducedMotion) {
         setDisplayedIndex(0);
-        setClosingToCover(false);
+        setWrapPhase("idle");
         notifyFlipping(false);
         return;
       }
-      setClosingToCover(true);
+      setWrapPhase("out");
       notifyFlipping(true);
       playViewerFlipSound();
-      const timer = window.setTimeout(() => {
+      const showFront = window.setTimeout(() => {
         setDisplayedIndex(0);
-        setClosingToCover(false);
+        setWrapPhase("swap");
+      }, TALISBOOKS_VIEWER_WRAP_OUT_MS);
+      const fadeIn = window.setTimeout(() => {
+        setWrapPhase("in");
+      }, TALISBOOKS_VIEWER_WRAP_OUT_MS + TALISBOOKS_VIEWER_WRAP_SWAP_MS);
+      const settle = window.setTimeout(() => {
+        setWrapPhase("idle");
         notifyFlipping(false);
-      }, TALISBOOKS_VIEWER_COVER_RESET_MS);
-      return () => window.clearTimeout(timer);
+      }, TALISBOOKS_VIEWER_WRAP_OUT_MS + TALISBOOKS_VIEWER_WRAP_SWAP_MS + TALISBOOKS_VIEWER_WRAP_IN_MS);
+      return () => {
+        window.clearTimeout(showFront);
+        window.clearTimeout(fadeIn);
+        window.clearTimeout(settle);
+      };
     }
 
     if (prefersReducedMotion) {
@@ -763,10 +792,19 @@ function OpenBookSpread({
   // finishes so the open-book box does not resize mid-turn.
   const soloRight = !current.left && Boolean(current.right);
   const soloLeft = Boolean(current.left) && !current.right;
+  const incomingSoloRight = Boolean(incoming && !incoming.left && incoming.right);
+  const incomingSoloLeft = Boolean(incoming && incoming.left && !incoming.right);
+  const closingToFront = Boolean(magazine && flipping && !forward && incomingSoloRight);
+  const closingToBack = Boolean(magazine && flipping && forward && incomingSoloLeft);
+  const wrappingToCover = wrapPhase !== "idle";
   const soloShift = magazineSoloShiftPercent({
     soloRight: Boolean(magazine && soloRight),
     soloLeft: Boolean(magazine && soloLeft),
-    flipping: flipping || closingToCover,
+    flipping,
+    incomingSoloRight: Boolean(magazine && incomingSoloRight),
+    incomingSoloLeft: Boolean(magazine && incomingSoloLeft),
+    direction: flip?.direction ?? direction,
+    wrappingToCover,
   });
   const bookSpreadUrl = useMemo(
     () => getBookContinuousSpreadImageUrl(book.pages),
@@ -784,7 +822,9 @@ function OpenBookSpread({
           magazine && soloRight ? "talisbooks-viewer-book--solo-right" : "",
           magazine && soloLeft ? "talisbooks-viewer-book--solo-left" : "",
           flipping ? "talisbooks-viewer-book--flipping" : "",
-          closingToCover ? "talisbooks-viewer-book--closing" : "",
+          closingToFront ? "talisbooks-viewer-book--closing-to-front" : "",
+          closingToBack ? "talisbooks-viewer-book--closing-to-back" : "",
+          wrapPhase !== "idle" ? "talisbooks-viewer-book--closing" : "",
           grabbing ? "talisbooks-viewer-book--grabbing" : "",
         ]
           .filter(Boolean)
@@ -804,18 +844,25 @@ function OpenBookSpread({
             : { opacity: 0.7, rotateY: -8, scale: 0.96, x: 0 }
         }
         animate={{
-          opacity: closingToCover ? 0.15 : 1,
-          rotateY: closingToCover ? 26 : 0,
-          scale: closingToCover ? 0.9 : 1,
+          opacity: wrapPhase === "out" || wrapPhase === "swap" ? 0 : 1,
+          rotateY: 0,
+          scale: 1,
           x: `${soloShift}%`,
         }}
         transition={{
-          duration: flipping
-            ? TALISBOOKS_VIEWER_TURN_DURATION_MS / 1000
-            : closingToCover
-              ? TALISBOOKS_VIEWER_COVER_RESET_MS / 1000
-              : 0.62,
-          ease: flipping ? FLIP_EASE : OPEN_EASE,
+          x: {
+            duration: wrappingToCover ? 0 : flipping ? TALISBOOKS_VIEWER_TURN_DURATION_MS / 1000 : 0,
+            ease: FLIP_EASE,
+          },
+          opacity: {
+            duration: wrapOpacityDuration(wrapPhase),
+            ease: FLIP_EASE,
+          },
+          scale: {
+            duration: wrapOpacityDuration(wrapPhase),
+            ease: FLIP_EASE,
+          },
+          rotateY: { duration: 0.55, ease: OPEN_EASE },
         }}
       >
         <div className="talisbooks-viewer-book__shadow" aria-hidden="true" />
@@ -906,7 +953,7 @@ function OpenBookSingle({
     mode: "program" | "gesture";
   } | null>(null);
   const [grabbing, setGrabbing] = useState(false);
-  const [closingToCover, setClosingToCover] = useState(false);
+  const [wrapPhase, setWrapPhase] = useState<WrapPhase>("idle");
   const prefersReducedMotion = useReducedMotion();
 
   const flipProgress = useMotionValue(0);
@@ -949,25 +996,35 @@ function OpenBookSingle({
       return;
     }
 
-    // Last → first wrap closes the last page, then settles on the front cover.
+    // Last → first wrap: fade out in place, hold, then fade the front cover in.
     if (magazine && displayedIndex === navCount - 1 && navIndex === 0) {
       if (prefersReducedMotion) {
         setDisplayedIndex(0);
         flipRef.current = null;
         setFlip(null);
-        setClosingToCover(false);
+        setWrapPhase("idle");
         notifyFlipping(false);
         return;
       }
-      setClosingToCover(true);
+      setWrapPhase("out");
       notifyFlipping(true);
       playViewerFlipSound();
-      const timer = window.setTimeout(() => {
+      const showFront = window.setTimeout(() => {
         setDisplayedIndex(0);
-        setClosingToCover(false);
+        setWrapPhase("swap");
+      }, TALISBOOKS_VIEWER_WRAP_OUT_MS);
+      const fadeIn = window.setTimeout(() => {
+        setWrapPhase("in");
+      }, TALISBOOKS_VIEWER_WRAP_OUT_MS + TALISBOOKS_VIEWER_WRAP_SWAP_MS);
+      const settle = window.setTimeout(() => {
+        setWrapPhase("idle");
         notifyFlipping(false);
-      }, TALISBOOKS_VIEWER_COVER_RESET_MS);
-      return () => window.clearTimeout(timer);
+      }, TALISBOOKS_VIEWER_WRAP_OUT_MS + TALISBOOKS_VIEWER_WRAP_SWAP_MS + TALISBOOKS_VIEWER_WRAP_IN_MS);
+      return () => {
+        window.clearTimeout(showFront);
+        window.clearTimeout(fadeIn);
+        window.clearTimeout(settle);
+      };
     }
 
     if (prefersReducedMotion) {
@@ -1228,7 +1285,7 @@ function OpenBookSingle({
           "talisbooks-viewer-book--single",
           magazine ? "talisbooks-viewer-book--magazine" : "",
           flipping ? "talisbooks-viewer-book--flipping" : "",
-          closingToCover ? "talisbooks-viewer-book--closing" : "",
+          wrapPhase !== "idle" ? "talisbooks-viewer-book--closing" : "",
           grabbing ? "talisbooks-viewer-book--grabbing" : "",
         ]
           .filter(Boolean)
@@ -1244,13 +1301,20 @@ function OpenBookSingle({
         aria-label={magazine ? "Open magazine · single page" : "Open book · single page"}
         initial={magazine ? { opacity: 0.4, rotateY: -14, scale: 0.92 } : { opacity: 0.7, rotateY: -6, scale: 0.96 }}
         animate={{
-          opacity: closingToCover ? 0.15 : 1,
-          rotateY: closingToCover ? 22 : 0,
-          scale: closingToCover ? 0.9 : 1,
+          opacity: wrapPhase === "out" || wrapPhase === "swap" ? 0 : 1,
+          rotateY: 0,
+          scale: 1,
         }}
         transition={{
-          duration: closingToCover ? TALISBOOKS_VIEWER_COVER_RESET_MS / 1000 : 0.5,
-          ease: OPEN_EASE,
+          opacity: {
+            duration: wrapOpacityDuration(wrapPhase),
+            ease: FLIP_EASE,
+          },
+          scale: {
+            duration: wrapOpacityDuration(wrapPhase),
+            ease: FLIP_EASE,
+          },
+          rotateY: { duration: 0.5, ease: OPEN_EASE },
         }}
       >
         <div className="talisbooks-viewer-book__shadow" aria-hidden="true" />

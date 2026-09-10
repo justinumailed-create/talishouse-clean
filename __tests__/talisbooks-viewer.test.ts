@@ -120,6 +120,49 @@ describe("Talisbooks™ viewer flip geometry", () => {
     ).toBe(0);
   });
 
+  it("closes to the front cover by shifting with the reverse curl, not after it", () => {
+    expect(
+      magazineSoloShiftPercent({
+        soloRight: false,
+        soloLeft: false,
+        flipping: true,
+        incomingSoloRight: true,
+        direction: -1,
+      }),
+    ).toBe(-25);
+  });
+
+  it("closes to the back cover by shifting with the forward curl", () => {
+    expect(
+      magazineSoloShiftPercent({
+        soloRight: false,
+        soloLeft: false,
+        flipping: true,
+        incomingSoloLeft: true,
+        direction: 1,
+      }),
+    ).toBe(25);
+  });
+
+  it("keeps the current solo pose while wrapping last-spread → front cover", () => {
+    expect(
+      magazineSoloShiftPercent({
+        soloRight: false,
+        soloLeft: true,
+        flipping: false,
+        wrappingToCover: true,
+      }),
+    ).toBe(25);
+    expect(
+      magazineSoloShiftPercent({
+        soloRight: true,
+        soloLeft: false,
+        flipping: false,
+        wrappingToCover: true,
+      }),
+    ).toBe(-25);
+  });
+
   it("rotates a double-sided spread leaf a full 180° so the back face never unmounts at 90°", () => {
     expect(spreadFlipRotateY(1)).toEqual([0, -180]);
     expect(spreadFlipRotateY(-1)).toEqual([0, 180]);

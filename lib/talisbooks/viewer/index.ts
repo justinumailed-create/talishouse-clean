@@ -11,6 +11,9 @@ export {
   TALISBOOKS_VIEWER_SPEED_MIN_MS,
   TALISBOOKS_VIEWER_SPEED_PRESETS,
   TALISBOOKS_VIEWER_COVER_RESET_MS,
+  TALISBOOKS_VIEWER_WRAP_IN_MS,
+  TALISBOOKS_VIEWER_WRAP_OUT_MS,
+  TALISBOOKS_VIEWER_WRAP_SWAP_MS,
   TALISBOOKS_VIEWER_TURN_DURATION_MS,
   type TalisBooksViewerSpeedPresetId,
   type TalisBooksViewerViewMode,
@@ -21,6 +24,7 @@ export {
   singleFlipRotateY,
   spreadFlipRotateY,
 } from "./flip-geometry";
+export type { MagazineSoloShiftInput } from "./flip-geometry";
 export {
   clampViewerIntervalMs,
   intervalMsToSpeedPercent,
