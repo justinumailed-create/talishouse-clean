@@ -94,7 +94,10 @@ export default function ContentPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold">Global Content</h1>
-        <p className="text-sm text-[#6e6e73] mt-1">Edit and save shared content from the GlobalContent table.</p>
+        <p className="text-sm text-[#6e6e73] mt-1">
+          Edit talispros.com / Talishouse shared text and content blocks. Mapsite™ photos,
+          logos, and eBook images are edited under Mapsites and Talisbooks™.
+        </p>
       </div>
 
       {contentBlocks.length === 0 ? (

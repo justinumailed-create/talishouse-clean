@@ -17,7 +17,8 @@
  * demo Mapsite™ id. Ralf Meyer’s checkout email is rememcom@mac.com (not ralf@).
  */
 import Stripe from "stripe";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "../lib/database.types";
 import { DEMO_MAPSITE_ID } from "../lib/talispros/mapsite-state";
 import {
   RALF_ROOT_PAYMENT_EMAIL,
@@ -63,7 +64,7 @@ function optionalSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
   if (!url || !key) return null;
-  return createClient(url, key, {
+  return createClient<Database>(url, key, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
@@ -91,7 +92,7 @@ function sessionSummary(session: Stripe.Checkout.Session) {
 }
 
 async function lookupDb(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient<Database>,
   session: Stripe.Checkout.Session,
 ) {
   const summary = sessionSummary(session);
@@ -159,7 +160,7 @@ async function lookupDb(
 
 async function activateSession(
   stripe: Stripe,
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient<Database>,
   sessionId: string,
 ) {
   const session = await stripe.checkout.sessions.retrieve(sessionId);
@@ -193,6 +194,7 @@ async function activateSession(
     .select("id")
     .eq("stripe_checkout_session_id", session.id)
     .maybeSingle();
+  const existingId = (existing as { id?: string } | null)?.id;
 
   const paymentPatch = {
     email: email.toLowerCase(),
@@ -206,11 +208,11 @@ async function activateSession(
     fast_code: fastCode,
   };
 
-  if (existing?.id) {
+  if (existingId) {
     const { error } = await supabase
       .from("talispros_payments")
       .update(paymentPatch)
-      .eq("id", existing.id);
+      .eq("id", existingId);
     if (error) throw new Error(error.message);
   } else {
     const { error } = await supabase.from("talispros_payments").insert(paymentPatch);

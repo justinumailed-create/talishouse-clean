@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@supabase/supabase-js";
+import { isAdminAuthenticated } from "./admin-auth";
 
 const TALISPROS_ADMIN_ACCESS_COOKIE = "talispros_admin_access_token";
 const TALISPROS_ADMIN_REFRESH_COOKIE = "talispros_admin_refresh_token";
@@ -154,6 +155,9 @@ export async function requireTalisprosAdminSession(): Promise<TalisprosAdminSess
 }
 
 export async function requireTalisprosAdminPage(): Promise<void> {
+  if (await isAdminAuthenticated()) {
+    return;
+  }
   if (!(await isTalisprosAdminAuthenticated())) {
     redirect("/talispros/admin/login");
   }

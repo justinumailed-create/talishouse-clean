@@ -416,6 +416,28 @@ async function emailForMapSiteId(mapsiteId: string): Promise<string | null> {
   return normalizePaymentEmail(data?.email);
 }
 
+/**
+ * Stripe Node v22 types dropped Checkout.Sessions.search while the runtime
+ * Search API still exists. Call it through a narrow helper so typecheck passes
+ * and the existing list() fallback still runs if search is missing.
+ */
+async function searchCheckoutSessions(
+  stripe: Stripe,
+  query: string,
+): Promise<Stripe.Checkout.Session[]> {
+  const search = (
+    stripe.checkout.sessions as {
+      search?: (params: {
+        query: string;
+        limit?: number;
+      }) => Promise<{ data: Stripe.Checkout.Session[] }>;
+    }
+  ).search;
+  if (typeof search !== "function") return [];
+  const searched = await search({ query, limit: 20 });
+  return searched.data;
+}
+
 async function listPaidStripeCheckoutSessionsForMapSite(
   mapsiteId: string,
 ): Promise<Stripe.Checkout.Session[]> {
@@ -428,11 +450,7 @@ async function listPaidStripeCheckoutSessionsForMapSite(
   };
 
   try {
-    const searched = await stripe.checkout.sessions.search({
-      query: `metadata["mapSiteId"]:"${mapsiteId}"`,
-      limit: 20,
-    });
-    add(searched.data);
+    add(await searchCheckoutSessions(stripe, `metadata["mapSiteId"]:"${mapsiteId}"`));
   } catch (error) {
     console.warn(
       "[mapsite-payment] Checkout session search unavailable:",
@@ -442,11 +460,7 @@ async function listPaidStripeCheckoutSessionsForMapSite(
 
   if (collected.size === 0) {
     try {
-      const searched = await stripe.checkout.sessions.search({
-        query: `metadata["mapsiteId"]:"${mapsiteId}"`,
-        limit: 20,
-      });
-      add(searched.data);
+      add(await searchCheckoutSessions(stripe, `metadata["mapsiteId"]:"${mapsiteId}"`));
     } catch {
       /* metadata key variant not searchable */
     }
@@ -486,11 +500,7 @@ async function listPaidRootOneDollarCheckoutSessionsForEmail(
 
   const escaped = email.replace(/"/g, "");
   try {
-    const searched = await stripe.checkout.sessions.search({
-      query: `customer_details.email:"${escaped}"`,
-      limit: 20,
-    });
-    add(searched.data);
+    add(await searchCheckoutSessions(stripe, `customer_details.email:"${escaped}"`));
   } catch (error) {
     console.warn(
       "[mapsite-payment] Checkout email search unavailable:",

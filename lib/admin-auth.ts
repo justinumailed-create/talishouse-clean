@@ -1,6 +1,11 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ADMIN_FAST_CODE, ADMIN_SESSION_COOKIE } from "./admin-constants";
+import {
+  ADMIN_SESSION_COOKIE,
+  getAdminAccountByFastCode,
+  isAuthorizedAdminFastCode,
+  type AdminAccount,
+} from "./admin-constants";
 
 export async function getAdminSessionValue(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -9,7 +14,11 @@ export async function getAdminSessionValue(): Promise<string | null> {
 
 export async function isAdminAuthenticated(): Promise<boolean> {
   const session = await getAdminSessionValue();
-  return session === ADMIN_FAST_CODE;
+  return isAuthorizedAdminFastCode(session);
+}
+
+export async function getAdminSessionAccount(): Promise<AdminAccount | null> {
+  return getAdminAccountByFastCode(await getAdminSessionValue());
 }
 
 export async function requireAdminSession(): Promise<void> {

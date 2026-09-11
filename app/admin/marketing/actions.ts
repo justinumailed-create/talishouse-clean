@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { publishBuildMapSite } from "@/lib/build-mapsite-publish";
 import { resolvePinStyleExtras } from "@/lib/build-request-pin-style-notes";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
@@ -13,6 +14,11 @@ import {
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
 type ActionResult = { ok: boolean; error?: string };
+
+async function unauthorizedIfNotAdmin(): Promise<ActionResult | null> {
+  if (await isAdminAuthenticated()) return null;
+  return { ok: false, error: "Unauthorized" };
+}
 
 export type BuildRequestListRow = {
   id: string;
@@ -30,6 +36,8 @@ export type BuildRequestListRow = {
 };
 
 export async function listBuildRequests(): Promise<{ ok: boolean; data: BuildRequestListRow[]; error?: string }> {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return { ok: false, data: [], error: denied.error };
   const supabaseAdmin = getSupabaseAdmin();
   const { data, error } = await supabaseAdmin
     .from("build_requests")
@@ -86,6 +94,8 @@ async function reserveFastCodeForRequest(requestId: string): Promise<{ ok: boole
 }
 
 export async function assignFastCode(requestId: string): Promise<ActionResult> {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return denied;
   const result = await reserveFastCodeForRequest(requestId);
   if (!result.ok) return result;
   revalidatePath("/admin/marketing");
@@ -93,6 +103,8 @@ export async function assignFastCode(requestId: string): Promise<ActionResult> {
 }
 
 export async function generateDraftMapSite(requestId: string): Promise<ActionResult> {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return denied;
   try {
     const supabaseAdmin = getSupabaseAdmin();
     const { data: buildRequest, error: requestError } = await supabaseAdmin
@@ -200,6 +212,8 @@ export async function generateDraftMapSite(requestId: string): Promise<ActionRes
 }
 
 export async function sendRegistration(requestId: string): Promise<ActionResult> {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return denied;
   const supabaseAdmin = getSupabaseAdmin();
   const reservation = await reserveFastCodeForRequest(requestId);
   if (!reservation.ok) return reservation;
@@ -230,6 +244,8 @@ export async function setBuildRequestStatus(
     | "Awaiting Registration"
     | "Published"
 ): Promise<{ ok: boolean; error?: string }> {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return denied;
   const supabaseAdmin = getSupabaseAdmin();
   const payload: Record<string, string | null> = { status };
   if (status === "Published") {
@@ -266,6 +282,8 @@ export async function setBuildRequestStatus(
 }
 
 export async function getBuildRequestDetails(requestId: string) {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return { request: null, assets: null, mapsite: null };
   const supabaseAdmin = getSupabaseAdmin();
   const { data: request } = await supabaseAdmin
     .from("build_requests")
@@ -297,6 +315,8 @@ export async function updateBuildRequestDetails(
   requestId: string,
   updates: Record<string, unknown>
 ): Promise<ActionResult> {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return denied;
   const supabaseAdmin = getSupabaseAdmin();
   const { error } = await supabaseAdmin.from("build_requests").update(updates).eq("id", requestId);
   if (error) return { ok: false, error: error.message };
@@ -309,6 +329,8 @@ export async function updateBuildRequestAssets(
   requestId: string,
   updates: Record<string, string | null>
 ): Promise<ActionResult> {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return denied;
   const supabaseAdmin = getSupabaseAdmin();
   const { error } = await supabaseAdmin
     .from("mapsite_assets")
@@ -341,6 +363,8 @@ async function resolveLinkedMapSiteId(requestId: string): Promise<string | null>
 export async function approveBuildRequestForMarketing(
   requestId: string
 ): Promise<ActionResult> {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return denied;
   const supabaseAdmin = getSupabaseAdmin();
   const { error } = await supabaseAdmin
     .from("build_requests")
@@ -365,6 +389,8 @@ export async function approveBuildRequestForMarketing(
 export async function activateMapSiteForRequest(
   requestId: string
 ): Promise<ActionResult> {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return denied;
   const supabaseAdmin = getSupabaseAdmin();
   const mapsiteId = await resolveLinkedMapSiteId(requestId);
   if (!mapsiteId) {
@@ -413,6 +439,8 @@ export async function updateLinkedMapSiteResources(
   requestId: string,
   updates: MapSiteResourceUpdates
 ): Promise<ActionResult> {
+  const denied = await unauthorizedIfNotAdmin();
+  if (denied) return denied;
   const mapsiteId = await resolveLinkedMapSiteId(requestId);
   if (!mapsiteId) {
     return { ok: false, error: "No linked Mapsite™ for this Build Request." };

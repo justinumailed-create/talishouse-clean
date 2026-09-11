@@ -3,25 +3,9 @@
 import Link from "next/link";
 import { redirect, usePathname, useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore, useState } from "react";
-import { clearAdminSession, hasAdminSession } from "@/lib/fast-code";
-
-const adminNavItems = [
-  { href: "/admin/dashboard", label: "Dashboard" },
-  { href: "/admin/associates", label: "Associates" },
-  { href: "/admin/talisbot", label: "TalisBOT" },
-  { href: "/admin/products", label: "Products" },
-  { href: "/admin/content", label: "Content" },
-  { href: "/admin/leads", label: "Leads" },
-  { href: "/admin/leads-simulation", label: "Leads Simulation" },
-  { href: "/admin/deals", label: "Deals" },
-  { href: "/admin/users", label: "Users" },
-  { href: "/admin/applications", label: "Associate Apps" },
-  { href: "/admin/project-applications", label: "Project Apps" },
-  { href: "/admin/registrations", label: "Registrations" },
-  { href: "/admin/marketing", label: "Marketing" },
-  { href: "/admin/talismaps", label: "Talismaps™" },
-  { href: "/admin/talisbooks", label: "Talisbooks™" },
-];
+import { clearAdminSession, getFastCode, hasAdminSession } from "@/lib/fast-code";
+import { getAdminAccountByFastCode } from "@/lib/admin-constants";
+import { getAdminNavItems, isAdminNavItemActive, type AdminNavItem } from "@/lib/admin-nav";
 
 function subscribeToAdminSession(onStoreChange: () => void) {
   window.addEventListener("storage", onStoreChange);
@@ -38,7 +22,19 @@ function getAdminSessionServerSnapshot() {
   return false;
 }
 
-function AdminSidebar({ isOpen, onClose, hidden }: { isOpen: boolean; onClose: () => void; hidden: boolean }) {
+function AdminSidebar({
+  isOpen,
+  onClose,
+  hidden,
+  navItems,
+  signedInAs,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  hidden: boolean;
+  navItems: AdminNavItem[];
+  signedInAs: string | null;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -70,6 +66,9 @@ function AdminSidebar({ isOpen, onClose, hidden }: { isOpen: boolean; onClose: (
             <p className="text-[10px] text-[#1E4ED8] font-bold uppercase tracking-widest mt-1">
               Admin Console
             </p>
+            {signedInAs ? (
+              <p className="text-[11px] text-[#6e6e73] mt-1">Signed in as {signedInAs}</p>
+            ) : null}
           </div>
           <button
             onClick={onClose}
@@ -84,13 +83,13 @@ function AdminSidebar({ isOpen, onClose, hidden }: { isOpen: boolean; onClose: (
 
         <nav className="flex-1 p-3 overflow-y-auto">
           <ul className="space-y-0.5">
-            {adminNavItems.map((item) => (
+            {navItems.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   onClick={onClose}
                   className={`block px-3 py-2 rounded-lg text-sm transition-all ${
-                    pathname === item.href
+                    isAdminNavItemActive(item.href, pathname)
                       ? "bg-[#f5f5f7] text-[#111] font-semibold"
                       : "text-[#6e6e73] hover:text-[#111] hover:bg-[#f5f5f7]"
                   }`}
@@ -154,10 +153,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const currentPath = pathname.split("?")[0].trim();
   const isLoginPage = currentPath === "/admin/login";
   const isTalisMapsAdmin = currentPath.startsWith("/admin/talismaps");
-  const isTalisBooksAdmin = currentPath.startsWith("/admin/talisbooks");
-  const isStandaloneProductAdmin = isTalisMapsAdmin || isTalisBooksAdmin;
+  const isStandaloneProductAdmin = isTalisMapsAdmin;
   const isProtectedAdminRoute =
     currentPath.startsWith("/admin") && !isLoginPage && !isStandaloneProductAdmin;
+
+  const sessionAccount = hydrated && hasSession ? getAdminAccountByFastCode(getFastCode()) : null;
+  const navItems = getAdminNavItems(sessionAccount?.access ?? "site-ops");
 
   if (hydrated && isLoginPage && hasSession) {
     redirect("/admin/dashboard");
@@ -174,7 +175,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
       <div className="flex min-h-screen bg-white overflow-x-hidden">
-        <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} hidden={isLoginPage} />
+        <AdminSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          hidden={isLoginPage}
+          navItems={navItems}
+          signedInAs={sessionAccount?.name ?? null}
+        />
 
         <div className="flex-1 flex flex-col min-w-0">
           <header
