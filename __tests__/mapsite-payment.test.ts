@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type Stripe from "stripe";
 
 vi.mock("@/lib/supabaseClient", () => ({
   supabase: {},
@@ -25,7 +26,7 @@ import {
   parseCheckoutSessionId,
   parseCheckoutStatus,
 } from "../lib/talispros/ebook-choice";
-import { stripeMapSiteIdFromCheckoutSession } from "../lib/talispros/stripe-mapsite-webhook";
+import { stripeMapSiteIdFromCheckoutSession } from "../lib/talispros/stripe-mapsite-session";
 
 describe("Mapsite™ payment status helpers", () => {
   it("treats completed, paid, complete, and succeeded as paid", () => {
@@ -312,5 +313,192 @@ describe("hasCompletedMapSitePaypalPayment lookup", () => {
     await expect(
       hasCompletedMapSitePaypalPayment({ mapsiteId: "map-pending" }),
     ).resolves.toBe(false);
+  });
+});
+
+describe("Stripe $1 Root checkout matching", () => {
+  it("matches CAD $1 / $1.14 Root and rememcom@mac.com, not full Root", async () => {
+    const {
+      RALF_ROOT_PAYMENT_EMAIL,
+      isPaidRootOneDollarCheckoutSession,
+      checkoutSessionMatchesEmail,
+      selectCheckoutSessionsForMapSite,
+      shouldReconcileClaimedMapSiteFromStripe,
+    } = await import("@/lib/talispros/stripe-root-checkout-match");
+
+    expect(RALF_ROOT_PAYMENT_EMAIL).toBe("remecom@mac.com");
+    expect(
+      isPaidRootOneDollarCheckoutSession({
+        payment_status: "paid",
+        status: "complete",
+        amount_total: 114,
+        currency: "cad",
+        metadata: { planType: "ROOT_ACCOUNT_1", mapSiteId: "map-1" },
+        customer_email: "remecom@mac.com",
+        customer_details: { email: "remecom@mac.com" },
+      }),
+    ).toBe(true);
+    expect(
+      isPaidRootOneDollarCheckoutSession({
+        payment_status: "paid",
+        status: "complete",
+        amount_total: 113829,
+        currency: "cad",
+        metadata: { planType: "ROOT_ACCOUNT" },
+        customer_email: "remecom@mac.com",
+        customer_details: { email: "remecom@mac.com" },
+      }),
+    ).toBe(false);
+    expect(
+      checkoutSessionMatchesEmail(
+        {
+          customer_email: "remecom@mac.com",
+          customer_details: { email: "remecom@mac.com" },
+        },
+        "remecom@mac.com",
+      ),
+    ).toBe(true);
+    expect(
+      selectCheckoutSessionsForMapSite(
+        [
+          {
+            id: "cs_1",
+            payment_status: "paid",
+            status: "complete",
+            metadata: { mapSiteId: "map-1" },
+            client_reference_id: "map-1",
+          } as Stripe.Checkout.Session,
+        ],
+        "map-1",
+      ),
+    ).toHaveLength(1);
+    expect(
+      shouldReconcileClaimedMapSiteFromStripe({
+        mapsiteStatus: "BUILD_REQUEST_SUBMITTED",
+      }),
+    ).toBe(true);
+    expect(
+      shouldReconcileClaimedMapSiteFromStripe({
+        mapsiteStatus: "UNCLAIMED",
+      }),
+    ).toBe(false);
+    expect(
+      shouldReconcileClaimedMapSiteFromStripe({
+        isDemo: true,
+        checkoutStatus: "success",
+      }),
+    ).toBe(false);
+  });
+});
+
+describe("Stripe list fallback reconciliation", () => {
+  it("activates from a recent listed $1 session when Search is unavailable", async () => {
+    vi.resetModules();
+    const activate = vi.fn(async () => ({ success: true }));
+    vi.doMock("@/lib/talispros/stripe-mapsite-webhook", async (importOriginal) => {
+      const actual = await importOriginal<
+        typeof import("@/lib/talispros/stripe-mapsite-webhook")
+      >();
+      return {
+        ...actual,
+        activateMapSiteFromStripeCheckoutSession: activate,
+      };
+    });
+    vi.doMock("@/lib/supabaseAdmin", () => ({
+      isSupabaseAdminConfigured: () => true,
+      getSupabaseAdmin: () => ({
+        from: (table: string) => {
+          if (table === "talispros_payments") {
+            return {
+              select: () => ({
+                eq: () => ({
+                  maybeSingle: async () => ({ data: null, error: null }),
+                  limit: async () => ({ data: [], error: null }),
+                  not: () => ({
+                    limit: async () => ({ data: [], error: null }),
+                  }),
+                }),
+                ilike: () => ({
+                  limit: async () => ({ data: [], error: null }),
+                }),
+                in: () => ({
+                  limit: async () => ({ data: [], error: null }),
+                }),
+              }),
+            };
+          }
+          if (table === "mapsites") {
+            return {
+              select: () => ({
+                eq: () => ({
+                  maybeSingle: async () => ({
+                    data: { email: "remecom@mac.com", account_id: null, fast_code: "rm01" },
+                    error: null,
+                  }),
+                }),
+              }),
+            };
+          }
+          return {
+            select: () => ({
+              eq: () => ({
+                maybeSingle: async () => ({ data: null, error: null }),
+                order: () => ({
+                  limit: async () => ({ data: [], error: null }),
+                }),
+              }),
+              ilike: () => ({
+                maybeSingle: async () => ({ data: null, error: null }),
+              }),
+            }),
+          };
+        },
+      }),
+    }));
+    vi.doMock("@/lib/stripe", () => ({
+      getStripeSecretKey: () => "sk_test_trace",
+      getStripeClient: () => ({
+        checkout: {
+          sessions: {
+            search: async () => {
+              throw new Error("Search is not enabled");
+            },
+            list: async () => ({
+              data: [
+                {
+                  id: "cs_ralf_root",
+                  payment_status: "paid",
+                  status: "complete",
+                  amount_total: 114,
+                  currency: "cad",
+                  customer_email: "remecom@mac.com",
+                  customer_details: { email: "remecom@mac.com" },
+                  client_reference_id: "map-ralf",
+                  metadata: {
+                    mapSiteId: "map-ralf",
+                    planType: "ROOT_ACCOUNT_1",
+                    fastCode: "rm01",
+                  },
+                },
+              ],
+            }),
+          },
+        },
+      }),
+    }));
+
+    const { hasCompletedMapSitePaypalPayment } = await import(
+      "@/lib/talispros/mapsite-payment"
+    );
+    await expect(
+      hasCompletedMapSitePaypalPayment({
+        mapsiteId: "map-ralf",
+        email: "remecom@mac.com",
+        reconcileFromStripe: true,
+      }),
+    ).resolves.toBe(true);
+    expect(activate).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "cs_ralf_root" }),
+    );
   });
 });

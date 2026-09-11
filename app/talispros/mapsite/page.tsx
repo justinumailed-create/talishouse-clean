@@ -20,7 +20,10 @@ import {
   loadMapSiteApplicationState,
   resolveMapSitePaymentPlanType,
 } from "./actions";
-import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import {
+  hasCompletedMapSitePaypalPayment,
+  shouldReconcileClaimedMapSiteFromStripe,
+} from "@/lib/talispros/mapsite-payment";
 import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
@@ -205,8 +208,12 @@ export default async function TalisprosMapSitePage({
       fastCode,
       requestId,
       stripeCheckoutSessionId: checkoutSessionId,
-      reconcileFromStripe:
-        Boolean(checkoutSessionId) || checkoutStatus === "success",
+      reconcileFromStripe: shouldReconcileClaimedMapSiteFromStripe({
+        isDemo: isDemoListing,
+        mapsiteStatus: mapsite.status,
+        checkoutSessionId,
+        checkoutStatus,
+      }),
     }));
 
   const ebookContext = ownerCode

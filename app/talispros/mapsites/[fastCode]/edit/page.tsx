@@ -35,6 +35,7 @@ export default async function MapSiteOwnerEditPage({
       mapsiteId: mapsite.id,
       fastCode: mapsite.fastCode,
       requestId: mapsite.requestId,
+      reconcileFromStripe: true,
     }),
     getMapSiteEbookContext(mapsite.fastCode),
   ]);

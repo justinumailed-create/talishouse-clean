@@ -5,12 +5,23 @@ import {
   isCompletedTalisprosPaymentStatus,
   normalizePaymentEmail,
 } from "@/lib/talispros/mapsite-payment-status";
+import { stripeMapSiteIdFromCheckoutSession } from "@/lib/talispros/stripe-mapsite-session";
+import {
+  checkoutSessionMatchesEmail,
+  checkoutSessionMatchesMapSite,
+  isPaidRootOneDollarCheckoutSession,
+  selectCheckoutSessionsForMapSite,
+  selectPaidRootOneDollarCheckoutSessionsForEmail,
+  shouldReconcileClaimedMapSiteFromStripe,
+} from "@/lib/talispros/stripe-root-checkout-match";
 import type Stripe from "stripe";
 
 export {
   isCompletedTalisprosPaymentStatus,
   normalizePaymentEmail,
 } from "@/lib/talispros/mapsite-payment-status";
+
+export { shouldReconcileClaimedMapSiteFromStripe };
 
 type PaymentLookupRow = {
   id?: string | null;
@@ -273,32 +284,35 @@ export async function reconcileMapSitePaymentFromStripe(
 ): Promise<boolean> {
   if (!getStripeSecretKey()) return false;
 
-  const mapsiteId = options.mapsiteId?.trim() || "";
   const sessionId = options.stripeCheckoutSessionId?.trim() || "";
+  const mapsiteId = (await resolveMapSiteIdForStripeReconcile(options)) || "";
+  const email = normalizePaymentEmail(options.email);
 
-  if (!sessionId && !mapsiteId) return false;
+  if (!sessionId && !mapsiteId && !email) return false;
   if (mapsiteId && isProtectedPlatformDemoMapSite(mapsiteId)) return false;
 
   try {
     const stripe = getStripeClient();
-
-    if (sessionId) {
-      const { activateMapSiteFromStripeCheckoutSession } = await import(
-        "@/lib/talispros/stripe-mapsite-webhook"
-      );
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
-      const result = await activateMapSiteFromStripeCheckoutSession(session);
-      if (result.success && !result.ignored && !result.error) return true;
-      if (result.alreadyProcessed) return true;
-    }
-
-    if (!mapsiteId) return false;
-
     const { activateMapSiteFromStripeCheckoutSession } = await import(
       "@/lib/talispros/stripe-mapsite-webhook"
     );
 
-    if (isSupabaseAdminConfigured()) {
+    const tryActivate = async (session: Stripe.Checkout.Session) => {
+      if (mapsiteId && !checkoutSessionMatchesMapSite(session, mapsiteId)) {
+        const linkedId = stripeMapSiteIdFromCheckoutSession(session);
+        if (linkedId && linkedId !== mapsiteId) return false;
+      }
+      const result = await activateMapSiteFromStripeCheckoutSession(session);
+      if (result.success && !result.ignored && !result.error) return true;
+      return Boolean(result.alreadyProcessed);
+    };
+
+    if (sessionId) {
+      const session = await stripe.checkout.sessions.retrieve(sessionId);
+      if (await tryActivate(session)) return true;
+    }
+
+    if (mapsiteId && isSupabaseAdminConfigured()) {
       const supabase = getSupabaseAdmin();
       const { data: pendingRows } = await supabase
         .from("talispros_payments")
@@ -310,17 +324,29 @@ export async function reconcileMapSitePaymentFromStripe(
         const pendingSessionId = row.stripe_checkout_session_id?.trim();
         if (!pendingSessionId || pendingSessionId === sessionId) continue;
         const session = await stripe.checkout.sessions.retrieve(pendingSessionId);
-        const result = await activateMapSiteFromStripeCheckoutSession(session);
-        if (result.success && !result.ignored && !result.error) return true;
-        if (result.alreadyProcessed) return true;
+        if (await tryActivate(session)) return true;
       }
     }
 
-    const sessions = await listPaidStripeCheckoutSessionsForMapSite(mapsiteId);
-    for (const session of sessions) {
-      const result = await activateMapSiteFromStripeCheckoutSession(session);
-      if (result.success && !result.ignored && !result.error) return true;
-      if (result.alreadyProcessed) return true;
+    if (mapsiteId) {
+      const sessions = await listPaidStripeCheckoutSessionsForMapSite(mapsiteId);
+      for (const session of sessions) {
+        if (await tryActivate(session)) return true;
+      }
+    }
+
+    const reconcileEmail =
+      email || (mapsiteId ? await emailForMapSiteId(mapsiteId) : null);
+    if (reconcileEmail) {
+      const byEmail = await listPaidRootOneDollarCheckoutSessionsForEmail(
+        reconcileEmail,
+      );
+      for (const session of byEmail) {
+        if (mapsiteId && !sessionBelongsToMapSiteOrEmail(session, mapsiteId, reconcileEmail)) {
+          continue;
+        }
+        if (await tryActivate(session)) return true;
+      }
     }
   } catch (error) {
     console.warn("[mapsite-payment] Stripe reconciliation failed:", error);
@@ -329,20 +355,80 @@ export async function reconcileMapSitePaymentFromStripe(
   return findCompletedMapSitePayment(options);
 }
 
+function sessionBelongsToMapSiteOrEmail(
+  session: Stripe.Checkout.Session,
+  mapsiteId: string,
+  email: string,
+): boolean {
+  if (checkoutSessionMatchesMapSite(session, mapsiteId)) return true;
+  const linkedId =
+    session.metadata?.mapSiteId?.trim() ||
+    session.metadata?.mapsiteId?.trim() ||
+    session.client_reference_id?.trim() ||
+    "";
+  if (linkedId && linkedId !== mapsiteId) return false;
+  return checkoutSessionMatchesEmail(session, email);
+}
+
+async function resolveMapSiteIdForStripeReconcile(
+  options: MapSitePaymentLookupOptions,
+): Promise<string | null> {
+  const direct = options.mapsiteId?.trim() || "";
+  if (direct) return direct;
+  if (!isSupabaseAdminConfigured()) return null;
+
+  const supabase = getSupabaseAdmin();
+  const fastCode = options.fastCode?.trim();
+  if (fastCode) {
+    const { data: byCode } = await supabase
+      .from("mapsites")
+      .select("id")
+      .ilike("fast_code", fastCode)
+      .maybeSingle();
+    if (byCode?.id) return byCode.id;
+  }
+
+  const requestId = options.requestId?.trim();
+  if (requestId) {
+    const { data: request } = await supabase
+      .from("build_requests")
+      .select("linked_mapsite_id")
+      .eq("id", requestId)
+      .maybeSingle();
+    if (request?.linked_mapsite_id) return request.linked_mapsite_id;
+  }
+
+  return null;
+}
+
+async function emailForMapSiteId(mapsiteId: string): Promise<string | null> {
+  if (!isSupabaseAdminConfigured()) return null;
+  const supabase = getSupabaseAdmin();
+  const { data } = await supabase
+    .from("mapsites")
+    .select("email")
+    .eq("id", mapsiteId)
+    .maybeSingle();
+  return normalizePaymentEmail(data?.email);
+}
+
 async function listPaidStripeCheckoutSessionsForMapSite(
   mapsiteId: string,
 ): Promise<Stripe.Checkout.Session[]> {
   const stripe = getStripeClient();
-  const paid: Stripe.Checkout.Session[] = [];
+  const collected = new Map<string, Stripe.Checkout.Session>();
+  const add = (sessions: Stripe.Checkout.Session[]) => {
+    for (const session of selectCheckoutSessionsForMapSite(sessions, mapsiteId)) {
+      collected.set(session.id, session);
+    }
+  };
 
   try {
     const searched = await stripe.checkout.sessions.search({
       query: `metadata["mapSiteId"]:"${mapsiteId}"`,
       limit: 20,
     });
-    for (const session of searched.data) {
-      paid.push(session);
-    }
+    add(searched.data);
   } catch (error) {
     console.warn(
       "[mapsite-payment] Checkout session search unavailable:",
@@ -350,19 +436,80 @@ async function listPaidStripeCheckoutSessionsForMapSite(
     );
   }
 
-  if (paid.length === 0) {
+  if (collected.size === 0) {
     try {
       const searched = await stripe.checkout.sessions.search({
         query: `metadata["mapsiteId"]:"${mapsiteId}"`,
         limit: 20,
       });
-      for (const session of searched.data) {
-        paid.push(session);
-      }
+      add(searched.data);
     } catch {
       /* metadata key variant not searchable */
     }
   }
 
-  return paid;
+  if (collected.size === 0) {
+    try {
+      const listed = await stripe.checkout.sessions.list({
+        limit: 100,
+        status: "complete",
+      });
+      add(listed.data);
+    } catch (error) {
+      console.warn(
+        "[mapsite-payment] Checkout session list unavailable:",
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  return [...collected.values()];
+}
+
+async function listPaidRootOneDollarCheckoutSessionsForEmail(
+  email: string,
+): Promise<Stripe.Checkout.Session[]> {
+  const stripe = getStripeClient();
+  const collected = new Map<string, Stripe.Checkout.Session>();
+  const add = (sessions: Stripe.Checkout.Session[]) => {
+    for (const session of selectPaidRootOneDollarCheckoutSessionsForEmail(
+      sessions,
+      email,
+    )) {
+      collected.set(session.id, session);
+    }
+  };
+
+  const escaped = email.replace(/"/g, "");
+  try {
+    const searched = await stripe.checkout.sessions.search({
+      query: `customer_details.email:"${escaped}"`,
+      limit: 20,
+    });
+    add(searched.data);
+  } catch (error) {
+    console.warn(
+      "[mapsite-payment] Checkout email search unavailable:",
+      error instanceof Error ? error.message : error,
+    );
+  }
+
+  if (collected.size === 0) {
+    try {
+      const listed = await stripe.checkout.sessions.list({
+        limit: 100,
+        status: "complete",
+      });
+      add(listed.data);
+    } catch (error) {
+      console.warn(
+        "[mapsite-payment] Checkout session list unavailable:",
+        error instanceof Error ? error.message : error,
+      );
+    }
+  }
+
+  return [...collected.values()].filter((session) =>
+    isPaidRootOneDollarCheckoutSession(session),
+  );
 }

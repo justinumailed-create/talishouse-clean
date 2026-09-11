@@ -39,7 +39,10 @@ export async function canEditMapSite(fastCode: string): Promise<boolean> {
   if (await isMapSiteAdmin()) return true;
   const state = await getMapSiteEditToolbarState(fastCode);
   if (!state.isOwner) return false;
-  return hasCompletedMapSitePaypalPayment({ fastCode });
+  return hasCompletedMapSitePaypalPayment({
+    fastCode,
+    reconcileFromStripe: true,
+  });
 }
 
 export async function requireMapSiteEditAccess(fastCode: string): Promise<void> {

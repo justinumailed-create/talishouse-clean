@@ -9,7 +9,7 @@ import { parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import {
   stripeCheckoutSessionIsPaid,
   stripePaymentIntentIdFromSession,
-} from "@/lib/talispros/stripe-mapsite-webhook";
+} from "@/lib/talispros/stripe-mapsite-session";
 import { registrationTotalFor } from "@/lib/registration-plans";
 
 vi.mock("@/lib/talispros/mapsite-activation", () => ({

@@ -1,7 +1,8 @@
 -- Link Mapsite™ activation payments to the Mapsite™ / claim they belong to.
 -- Paid unlock previously keyed only on email, so a completed $1 Root payment
 -- could miss the UI if mapsite.email, the claim email, and the payment email
--- did not match. Backfill heals existing completed rows (including Ralf).
+-- did not match. Backfill heals existing completed rows (including Ralf Meyer
+-- at rememcom@mac.com — do not look up email LIKE 'ralf%').
 
 ALTER TABLE talispros_payments
   ADD COLUMN IF NOT EXISTS mapsite_id UUID,

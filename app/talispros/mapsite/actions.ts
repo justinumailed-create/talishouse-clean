@@ -235,7 +235,9 @@ export async function getMapSiteActivationPaymentStatus(options: {
 }): Promise<{ paid: boolean }> {
   const paid = await hasCompletedMapSitePaypalPayment({
     ...options,
-    reconcileFromStripe: Boolean(options.stripeCheckoutSessionId),
+    reconcileFromStripe: Boolean(
+      options.stripeCheckoutSessionId || options.mapsiteId || options.fastCode,
+    ),
   });
 
   if (paid && options.fastCode) {
