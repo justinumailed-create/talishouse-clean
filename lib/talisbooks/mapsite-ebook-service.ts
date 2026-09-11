@@ -1,7 +1,7 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { getViewerBookBySlug } from "@/lib/talisbooks/viewer/load-book";
-import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import {
   buildClaimedMapSitePath,
   mapsiteAccountTypeSegment,
@@ -324,7 +324,7 @@ export async function getMapSiteEbookContext(
     }
   }
 
-  const paymentReceived = await hasCompletedMapSitePaypalPayment({
+  const paymentReceived = await hasCompletedMapSiteActivationPayment({
     email: mapsiteByCode?.email,
     mapsiteId,
     fastCode,

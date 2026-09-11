@@ -4,7 +4,7 @@ import TalisBooksViewerShell from "@/components/talisbooks/viewer/TalisBooksView
 import { resolveViewerBookBySlug } from "@/lib/talisbooks/viewer/load-book";
 import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import { isMarketingManagerAuthenticated } from "@/lib/marketing-manager-auth";
-import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { createMetadata } from "@/lib/seo";
@@ -71,7 +71,7 @@ export default async function TalisBooksViewerSlugPage({
   const canEditTools = isAdmin || editState.showToolbar;
 
   const paymentReceived = book.fastCode
-    ? await hasCompletedMapSitePaypalPayment({ fastCode: book.fastCode })
+    ? await hasCompletedMapSiteActivationPayment({ fastCode: book.fastCode })
     : false;
 
   // Dashboard + Live Edit only after payment (Marketing Admin bypass).

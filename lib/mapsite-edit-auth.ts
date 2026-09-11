@@ -8,7 +8,7 @@ import {
 } from "./mapsite-account-session";
 import { isMarketingManagerAuthenticated } from "./marketing-manager-auth";
 import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
-import { hasCompletedMapSitePaypalPayment } from "./talispros/mapsite-payment";
+import { hasCompletedMapSiteActivationPayment } from "./talispros/mapsite-payment";
 
 export async function getMapSiteOwnerSession(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -39,7 +39,7 @@ export async function canEditMapSite(fastCode: string): Promise<boolean> {
   if (await isMapSiteAdmin()) return true;
   const state = await getMapSiteEditToolbarState(fastCode);
   if (!state.isOwner) return false;
-  return hasCompletedMapSitePaypalPayment({
+  return hasCompletedMapSiteActivationPayment({
     fastCode,
     reconcileFromStripe: true,
   });

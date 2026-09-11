@@ -10,7 +10,7 @@ import {
   mergeMapSiteWithSubmittedLocation,
   type MapSitePlatformRecord,
 } from "@/lib/talispros/mapsite-platform";
-import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 
 function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
@@ -219,7 +219,7 @@ export default async function PublishedMapSiteView({
       .maybeSingle(),
     isDemoMapSiteCode(mapsite.fastCode)
       ? Promise.resolve(true)
-      : hasCompletedMapSitePaypalPayment({
+      : hasCompletedMapSiteActivationPayment({
           mapsiteId: mapsite.id,
           fastCode: mapsite.fastCode,
           requestId: mapsite.requestId,

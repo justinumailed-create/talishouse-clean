@@ -69,7 +69,7 @@ describe("Mapsite™ payment status helpers", () => {
   });
 });
 
-describe("hasCompletedMapSitePaypalPayment lookup", () => {
+describe("hasCompletedMapSiteActivationPayment lookup", () => {
   const paymentsEq = vi.fn();
   const paymentsIn = vi.fn();
   const paymentsIlike = vi.fn();
@@ -237,11 +237,11 @@ describe("hasCompletedMapSitePaypalPayment lookup", () => {
       },
     }));
 
-    const { hasCompletedMapSitePaypalPayment } = await import(
+    const { hasCompletedMapSiteActivationPayment } = await import(
       "@/lib/talispros/mapsite-payment"
     );
     await expect(
-      hasCompletedMapSitePaypalPayment({ mapsiteId: "map-paid" }),
+      hasCompletedMapSiteActivationPayment({ mapsiteId: "map-paid" }),
     ).resolves.toBe(true);
   });
 
@@ -257,11 +257,11 @@ describe("hasCompletedMapSitePaypalPayment lookup", () => {
       },
     }));
 
-    const { hasCompletedMapSitePaypalPayment } = await import(
+    const { hasCompletedMapSiteActivationPayment } = await import(
       "@/lib/talispros/mapsite-payment"
     );
     await expect(
-      hasCompletedMapSitePaypalPayment({ mapsiteId: "map-email" }),
+      hasCompletedMapSiteActivationPayment({ mapsiteId: "map-email" }),
     ).resolves.toBe(true);
     expect(paymentsIn).toHaveBeenCalledWith(
       "email",
@@ -307,11 +307,11 @@ describe("hasCompletedMapSitePaypalPayment lookup", () => {
       },
     }));
 
-    const { hasCompletedMapSitePaypalPayment } = await import(
+    const { hasCompletedMapSiteActivationPayment } = await import(
       "@/lib/talispros/mapsite-payment"
     );
     await expect(
-      hasCompletedMapSitePaypalPayment({ mapsiteId: "map-pending" }),
+      hasCompletedMapSiteActivationPayment({ mapsiteId: "map-pending" }),
     ).resolves.toBe(false);
   });
 });
@@ -388,6 +388,13 @@ describe("Stripe $1 Root checkout matching", () => {
         checkoutStatus: "success",
       }),
     ).toBe(false);
+  });
+
+  it("keeps the historical PayPal helper name as an alias", async () => {
+    const mod = await import("@/lib/talispros/mapsite-payment");
+    expect(mod.hasCompletedMapSitePaypalPayment).toBe(
+      mod.hasCompletedMapSiteActivationPayment,
+    );
   });
 });
 
@@ -487,11 +494,11 @@ describe("Stripe list fallback reconciliation", () => {
       }),
     }));
 
-    const { hasCompletedMapSitePaypalPayment } = await import(
+    const { hasCompletedMapSiteActivationPayment } = await import(
       "@/lib/talispros/mapsite-payment"
     );
     await expect(
-      hasCompletedMapSitePaypalPayment({
+      hasCompletedMapSiteActivationPayment({
         mapsiteId: "map-ralf",
         email: "remecom@mac.com",
         reconcileFromStripe: true,

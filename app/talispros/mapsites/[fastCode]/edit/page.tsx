@@ -7,7 +7,7 @@ import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
 import { listAdminEbookPages } from "@/lib/talisbooks/admin-ebook-pages";
-import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,7 @@ export default async function MapSiteOwnerEditPage({
 
   const writesState = getMapSiteAdminWritesState();
   const [paymentReceived, ebookContext] = await Promise.all([
-    hasCompletedMapSitePaypalPayment({
+    hasCompletedMapSiteActivationPayment({
       email: mapsite.email,
       mapsiteId: mapsite.id,
       fastCode: mapsite.fastCode,

@@ -49,3 +49,21 @@ export async function activateMapSiteFromStripeCheckoutSession(
     fastCode: metadata.fastCode?.trim() || null,
   });
 }
+
+/** Checkout success_url / status poll: retrieve session, then same activation as webhook. */
+export async function activateMapSiteFromStripeCheckoutSessionId(
+  sessionId: string,
+): Promise<{
+  success: boolean;
+  alreadyProcessed?: boolean;
+  ignored?: boolean;
+  error?: string;
+}> {
+  const { getStripeClient, getStripeSecretKey } = await import("@/lib/stripe");
+  if (!getStripeSecretKey()) {
+    return { success: false, error: "Stripe is not configured." };
+  }
+  const stripe = getStripeClient();
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  return activateMapSiteFromStripeCheckoutSession(session);
+}

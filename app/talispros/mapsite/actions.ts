@@ -18,6 +18,7 @@ import { activateMapSiteAfterPayment } from "@/lib/talispros/mapsite-activation"
 import {
   ACTIVATE_QUERY,
   CHECKOUT_QUERY,
+  parseCheckoutSessionId,
   buildActivateMapSiteHref,
 } from "@/lib/talispros/ebook-choice";
 import {
@@ -27,9 +28,7 @@ import {
   mergeMapSiteWithSubmittedLocation,
   type MapSitePlatformRecord,
 } from "@/lib/talispros/mapsite-platform";
-import {
-  hasCompletedMapSitePaypalPayment,
-} from "@/lib/talispros/mapsite-payment";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { establishPaidMapSiteBrowserSession } from "@/lib/mapsite-edit-auth";
 import {
   DEMO_MAPSITE_ID,
@@ -227,17 +226,36 @@ export async function refreshMapSiteApplicationState(
   return mergeMapSiteWithSubmittedLocation(mapsite);
 }
 
+/**
+ * Paid flag for Mapsite™ chrome after Checkout.
+ *
+ * Stripe success return must activate here (same path as the webhook), not
+ * only via the historical PayPal payment-row lookup. The client polls this
+ * with `session_id` after Checkout; webhook lag must not leave UI unpaid.
+ */
 export async function getMapSiteActivationPaymentStatus(options: {
   mapsiteId?: string | null;
   fastCode?: string | null;
   requestId?: string | null;
   stripeCheckoutSessionId?: string | null;
+  reconcileFromStripe?: boolean;
 }): Promise<{ paid: boolean }> {
-  const paid = await hasCompletedMapSitePaypalPayment({
-    ...options,
-    reconcileFromStripe: Boolean(
-      options.stripeCheckoutSessionId || options.mapsiteId || options.fastCode,
-    ),
+  const stripeCheckoutSessionId = parseCheckoutSessionId(
+    options.stripeCheckoutSessionId,
+  );
+
+  if (stripeCheckoutSessionId) {
+    await confirmMapSiteStripeCheckoutSession(stripeCheckoutSessionId);
+  }
+
+  const paid = await hasCompletedMapSiteActivationPayment({
+    mapsiteId: options.mapsiteId,
+    fastCode: options.fastCode,
+    requestId: options.requestId,
+    stripeCheckoutSessionId,
+    reconcileFromStripe:
+      options.reconcileFromStripe ??
+      Boolean(stripeCheckoutSessionId || options.mapsiteId || options.fastCode),
   });
 
   if (paid && options.fastCode) {
@@ -245,6 +263,40 @@ export async function getMapSiteActivationPaymentStatus(options: {
   }
 
   return { paid };
+}
+
+/** Retrieve a paid Checkout Session and run webhook-equivalent activation. */
+export async function confirmMapSiteStripeCheckoutSession(
+  sessionId: string,
+): Promise<{ paid: boolean; error?: string }> {
+  const stripeCheckoutSessionId = parseCheckoutSessionId(sessionId);
+  if (!stripeCheckoutSessionId) {
+    return { paid: false, error: "Missing Stripe Checkout session id." };
+  }
+  if (!getStripeSecretKey()) {
+    return { paid: false, error: "Stripe is not configured." };
+  }
+
+  try {
+    const { activateMapSiteFromStripeCheckoutSessionId } = await import(
+      "@/lib/talispros/stripe-mapsite-webhook"
+    );
+    const result = await activateMapSiteFromStripeCheckoutSessionId(
+      stripeCheckoutSessionId,
+    );
+    if (result.error) {
+      return { paid: false, error: result.error };
+    }
+    if (result.ignored) {
+      return { paid: false };
+    }
+    return { paid: Boolean(result.success || result.alreadyProcessed) };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Stripe Checkout lookup failed.";
+    console.warn("[mapsite-stripe] checkout return activation failed:", message);
+    return { paid: false, error: message };
+  }
 }
 
 async function resolveAppOrigin(): Promise<string> {

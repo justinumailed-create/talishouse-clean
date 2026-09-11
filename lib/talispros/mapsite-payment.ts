@@ -52,14 +52,14 @@ export interface MapSitePaymentLookupOptions {
 
 /**
  * True when talispros_payments has a completed activation payment for this claim.
- * Historical PayPal rows and new Stripe rows both use payment_status completed.
+ * Stripe Checkout rows and historical PayPal rows both use payment_status completed.
  *
  * Lookup order (any completed match unlocks):
  * 1. stripe_checkout_session_id
  * 2. mapsite_id / request_id / fast_code on the payment row
  * 3. emails from the mapsite, linked build request, and account
  */
-export async function hasCompletedMapSitePaypalPayment(
+export async function hasCompletedMapSiteActivationPayment(
   options: MapSitePaymentLookupOptions,
 ): Promise<boolean> {
   if (!isSupabaseAdminConfigured()) return false;
@@ -75,10 +75,14 @@ export async function hasCompletedMapSitePaypalPayment(
 
     return false;
   } catch (error) {
-    console.warn("[mapsite-payment] hasCompletedMapSitePaypalPayment failed:", error);
+    console.warn("[mapsite-payment] hasCompletedMapSiteActivationPayment failed:", error);
     return false;
   }
 }
+
+/** @deprecated Use hasCompletedMapSiteActivationPayment (Stripe + PayPal). */
+export const hasCompletedMapSitePaypalPayment =
+  hasCompletedMapSiteActivationPayment;
 
 async function findCompletedMapSitePayment(
   options: MapSitePaymentLookupOptions,

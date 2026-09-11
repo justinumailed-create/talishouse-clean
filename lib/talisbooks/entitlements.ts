@@ -4,7 +4,7 @@
  * Clients may create one draft without payment. Publishing, global marketing,
  * multiple books, additional uploads, bookshelves, derivative books, and Adpro
  * books stay locked until the account is activated. Quotas then unlock by
- * account type. This module does not change PayPal payment capture logic.
+ * account type. Activation follows Stripe Checkout (and historical PayPal).
  */
 
 import { TALISBOOKS_LIBRARY_SHELF_CAPACITY } from "@/lib/talisbooks/library/constants";
@@ -15,7 +15,7 @@ import {
 } from "@/lib/talispros/mapsite-state";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
-import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 
 export type TalisBooksAccountKind = Extract<
   TalisBooksAccountType,
@@ -326,7 +326,7 @@ export async function getTalisBooksEntitlementSnapshot(
     mapsiteStatus: mapsite?.status,
     activatedAt,
   });
-  const paymentReceived = await hasCompletedMapSitePaypalPayment({
+  const paymentReceived = await hasCompletedMapSiteActivationPayment({
     mapsiteId: mapsite?.id,
     fastCode,
     requestId: codeRow?.request_id,

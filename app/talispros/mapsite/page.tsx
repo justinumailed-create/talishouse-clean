@@ -19,11 +19,9 @@ import { isOwnMapSite } from "@/lib/mapsite-edit-auth";
 import {
   loadMapSiteApplicationState,
   resolveMapSitePaymentPlanType,
+  getMapSiteActivationPaymentStatus,
 } from "./actions";
-import {
-  hasCompletedMapSitePaypalPayment,
-  shouldReconcileClaimedMapSiteFromStripe,
-} from "@/lib/talispros/mapsite-payment";
+import { shouldReconcileClaimedMapSiteFromStripe } from "@/lib/talispros/mapsite-payment";
 import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
@@ -203,18 +201,20 @@ export default async function TalisprosMapSitePage({
 
   const paymentReceived =
     isDemoListing ||
-    (await hasCompletedMapSitePaypalPayment({
-      mapsiteId: mapsite.id,
-      fastCode,
-      requestId,
-      stripeCheckoutSessionId: checkoutSessionId,
-      reconcileFromStripe: shouldReconcileClaimedMapSiteFromStripe({
-        isDemo: isDemoListing,
-        mapsiteStatus: mapsite.status,
-        checkoutSessionId,
-        checkoutStatus,
-      }),
-    }));
+    (
+      await getMapSiteActivationPaymentStatus({
+        mapsiteId: mapsite.id,
+        fastCode,
+        requestId,
+        stripeCheckoutSessionId: checkoutSessionId,
+        reconcileFromStripe: shouldReconcileClaimedMapSiteFromStripe({
+          isDemo: isDemoListing,
+          mapsiteStatus: mapsite.status,
+          checkoutSessionId,
+          checkoutStatus,
+        }),
+      })
+    ).paid;
 
   const ebookContext = ownerCode
     ? await getMapSiteEbookContext(ownerCode, { bookSlug })
