@@ -301,10 +301,12 @@ Also usable via redirected path `/marketing/login` → `/talispros/marketing/log
 |-------|--------|
 | Role | Platform admin |
 | Login URL | `/admin/login` |
-| Email / Username | N/A |
+| Email / Username | N/A (FAST code only) |
 | Password | N/A |
-| FAST Code | `ADMIN123` (hardcoded in `lib/admin-constants.ts`) |
+| FAST codes | `ADMIN123` (full), `rm22` (Ralph / site-ops), `ARUN` (Arun / full) |
 | Expected result | Session cookie; redirect to `/admin/dashboard` |
+
+See `docs/ADMIN_ACCESS.md` for Ralph and Arun verify steps.
 
 ---
 

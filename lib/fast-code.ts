@@ -1,6 +1,10 @@
 "use client";
 
-import { ADMIN_FAST_CODE, ADMIN_SESSION_COOKIE } from "./admin-constants";
+import {
+  ADMIN_FAST_CODE,
+  ADMIN_SESSION_COOKIE,
+  isAuthorizedAdminFastCode,
+} from "./admin-constants";
 
 export { ADMIN_FAST_CODE, ADMIN_SESSION_COOKIE };
 
@@ -48,13 +52,16 @@ export const clearFastCode = () => {
   localStorage.removeItem("associateId");
 };
 
-export const setAdminSession = () => {
+export const setAdminSession = (code: string = ADMIN_FAST_CODE) => {
   if (!isBrowser()) return;
 
-  localStorage.setItem("fast_code", ADMIN_FAST_CODE);
+  const sessionCode = normalizeFastCode(code);
+  if (!isAuthorizedAdminFastCode(sessionCode)) return;
+
+  localStorage.setItem("fast_code", sessionCode);
   localStorage.setItem("role", "admin");
   localStorage.removeItem("associateId");
-  setCookie(ADMIN_SESSION_COOKIE, ADMIN_FAST_CODE, 60 * 60 * 24);
+  setCookie(ADMIN_SESSION_COOKIE, sessionCode, 60 * 60 * 24);
 };
 
 export const clearAdminSession = () => {
@@ -66,11 +73,15 @@ export const hasAdminSession = (): boolean => {
   const cookieValue = getCookie(ADMIN_SESSION_COOKIE);
   const localFastCode = getFastCode();
 
-  return cookieValue === ADMIN_FAST_CODE && localFastCode === ADMIN_FAST_CODE;
+  if (!isAuthorizedAdminFastCode(cookieValue) || !isAuthorizedAdminFastCode(localFastCode)) {
+    return false;
+  }
+
+  return normalizeFastCode(cookieValue || "") === normalizeFastCode(localFastCode || "");
 };
 
 export const isValidAdminFastCode = (code: string): boolean => {
-  return normalizeFastCode(code) === ADMIN_FAST_CODE;
+  return isAuthorizedAdminFastCode(code);
 };
 
 export const isAuthorized = (): boolean => {
@@ -79,10 +90,10 @@ export const isAuthorized = (): boolean => {
 };
 
 export const isSuperAdmin = (): boolean => {
-  return getFastCode() === ADMIN_FAST_CODE;
+  return normalizeFastCode(getFastCode() || "") === ADMIN_FAST_CODE;
 };
 
 export const getRole = (): "admin" | "associate" | null => {
   if (!isAuthorized()) return null;
-  return isSuperAdmin() ? "admin" : "associate";
+  return isValidAdminFastCode(getFastCode() || "") ? "admin" : "associate";
 };

@@ -14,6 +14,7 @@ export const TALISBOOKS_ROUTES = {
   SETTINGS: "/talisbooks/settings",
   ADMIN: "/admin/talisbooks",
   ADMIN_CENTERFOLDS: "/admin/talisbooks/centerfolds",
+  ADMIN_BOOKSHELVES: "/admin/talisbooks/bookshelves",
   CLIENT_BOOKS: "/client/books",
 } as const;
 

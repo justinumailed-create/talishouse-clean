@@ -16,8 +16,7 @@ export default async function TalisBooksAdminPage() {
   const stats = await getTalisBooksDashboardStats();
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] p-6 sm:p-8">
-      <div className="mx-auto max-w-4xl">
+    <div>
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-neutral-400">
           Platform Administration
         </p>
@@ -89,8 +88,14 @@ export default async function TalisBooksAdminPage() {
 
         <div className="mt-8 flex flex-wrap gap-4">
           <Link
-            href={TALISBOOKS_ROUTES.ADMIN_CENTERFOLDS}
+            href={TALISBOOKS_ROUTES.ADMIN_BOOKSHELVES}
             className="inline-flex rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-neutral-800"
+          >
+            Bookshelves
+          </Link>
+          <Link
+            href={TALISBOOKS_ROUTES.ADMIN_CENTERFOLDS}
+            className="inline-flex rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-50"
           >
             Centerfold preview
           </Link>
@@ -106,14 +111,7 @@ export default async function TalisBooksAdminPage() {
           >
             Client Books
           </Link>
-          <Link
-            href="/talispros/admin"
-            className="inline-flex rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-50"
-          >
-            Talispros™ Admin
-          </Link>
         </div>
-      </div>
     </div>
   );
 }

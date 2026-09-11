@@ -28,7 +28,7 @@ export default function LoginPage() {
         return;
       }
 
-      setAdminSession();
+      setAdminSession(normalizedCode);
       router.push("/admin/dashboard");
       router.refresh();
     } finally {
@@ -38,7 +38,10 @@ export default function LoginPage() {
 
   return (
     <div className="w-full max-w-sm px-6">
-      <h1 className="text-2xl font-semibold text-center mb-8">Admin Login</h1>
+      <h1 className="text-2xl font-semibold text-center mb-2">Admin Login</h1>
+      <p className="text-sm text-[#6e6e73] text-center mb-8">
+        Enter your authorized admin FAST code
+      </p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
