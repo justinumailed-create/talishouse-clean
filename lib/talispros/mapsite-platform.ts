@@ -32,7 +32,10 @@ export type MapSitePlatformRecord = {
   /** From the linked Build Request when Mapsite™ row is still on demo coordinates. */
   pin_icon?: string | null;
   pin_color?: string | null;
+  pin_border?: string | null;
   pin_white_center?: boolean;
+  pin_animated?: boolean;
+  pin_category_badge?: string | null;
 };
 
 export type MapSiteBuildRequestLocation = {
@@ -46,6 +49,9 @@ export type MapSiteBuildRequestLocation = {
   pinIcon: string | null;
   pinColor: string | null;
   pinWhiteCenter: boolean;
+  pinBorder?: string | null;
+  pinAnimated?: boolean;
+  pinCategoryBadge?: string | null;
 };
 
 export const DEMO_MAPSITE_COORDINATES = {
@@ -88,6 +94,7 @@ import {
   MAPSITE_LISTING_IMAGE_CLASS,
   shouldReplaceDemoListingMedia,
 } from "@/lib/talispros/mapsite-listing-media";
+import { resolvePinStyleExtras } from "@/lib/build-request-pin-style-notes";
 
 const DEMO_DESCRIPTION =
   "It's a million dollar neighbourhood. A driveway and building site were prepared some years ago. May come with a Tiny Home guest house to stay in, while you build your dream home.";
@@ -177,7 +184,7 @@ function mapRow(row: MapSiteRow): MapSitePlatformRecord {
 }
 
 const BUILD_REQUEST_SUBMISSION_COLUMNS =
-  "id, latitude, longitude, street_address, reverse_geocoded_address, address, property_title, future_pin_label, future_pin_icon, future_pin_color, future_pin_white_center, pin_writeup, description, gallery_images";
+  "id, latitude, longitude, street_address, reverse_geocoded_address, address, property_title, future_pin_label, future_pin_icon, future_pin_color, future_pin_border, future_pin_white_center, future_pin_animated, future_pin_category_badge, notes, pin_writeup, description, gallery_images";
 
 type BuildRequestSubmissionRow = {
   id: string;
@@ -190,7 +197,11 @@ type BuildRequestSubmissionRow = {
   future_pin_label: string | null;
   future_pin_icon: string | null;
   future_pin_color: string | null;
+  future_pin_border: string | null;
   future_pin_white_center: boolean | null;
+  future_pin_animated: boolean | null;
+  future_pin_category_badge: string | null;
+  notes: string | null;
   pin_writeup: string | null;
   description: string | null;
   gallery_images: string[] | null;
@@ -249,6 +260,8 @@ function mapBuildRequestSubmissionRow(
     row.address?.trim() ||
     null;
 
+  const extras = resolvePinStyleExtras(row);
+
   return {
     latitude: hasLocation ? row.latitude! : undefined,
     longitude: hasLocation ? row.longitude! : undefined,
@@ -260,7 +273,10 @@ function mapBuildRequestSubmissionRow(
     galleryImages: gallery.length > 0 ? gallery : coverImage ? [coverImage] : [],
     pinIcon: row.future_pin_icon?.trim() || null,
     pinColor: row.future_pin_color?.trim() || null,
-    pinWhiteCenter: row.future_pin_white_center !== false,
+    pinBorder: row.future_pin_border?.trim() || null,
+    pinWhiteCenter: extras.whiteCenter,
+    pinAnimated: extras.animated,
+    pinCategoryBadge: extras.categoryBadge,
   };
 }
 
@@ -301,7 +317,10 @@ export function applyBuildRequestLocationToMapSite(
     gallery_images: gallery,
     pin_icon: submission.pinIcon,
     pin_color: submission.pinColor,
+    pin_border: submission.pinBorder ?? null,
     pin_white_center: submission.pinWhiteCenter,
+    pin_animated: Boolean(submission.pinAnimated),
+    pin_category_badge: submission.pinCategoryBadge ?? null,
   };
 }
 
@@ -697,7 +716,7 @@ export async function markMapSiteClaimedByBuildRequest(params: {
           : current.gallery_images,
       pinIcon: null,
       pinColor: null,
-      pinWhiteCenter: true,
+      pinWhiteCenter: false,
     }
   );
 }

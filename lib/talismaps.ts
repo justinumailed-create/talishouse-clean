@@ -23,9 +23,12 @@ export interface TalisMapsPin {
   sortOrder: number;
   pinIcon?: string | null;
   pinColor?: string | null;
+  pinBorder?: string | null;
   whiteCenter?: boolean | null;
+  pinAnimated?: boolean | null;
   href?: string | null;
   categoryBadge?: string | null;
+  customLogoUrl?: string | null;
 }
 
 export interface TalisMapsCategory {

@@ -8,6 +8,12 @@ import {
   type MapSiteGalleryDisplayItem,
 } from "./mapsite-gallery";
 import { ROUTES } from "@/lib/routes";
+import {
+  MAPSITE_PIN_DEFAULT_COLOR,
+  MAPSITE_PIN_DEFAULT_ICON,
+  mapSitePinVisualFields,
+  type MapSiteSavedPinStyle,
+} from "@/lib/mapsite-pin-style";
 
 export const MAPSITE_HEADER_FALLBACK_LOGO =
   "/images/mapsites/header-fallback-logo.jpeg";
@@ -69,9 +75,9 @@ export interface MapSiteLayoutData {
 }
 
 const DEFAULT_MAP_ZOOM = 15;
-/** Same marker as the claimed Mapsite™ application PIN. */
-export const MAPSITE_MAP_PIN_COLOR = "#1A73E8";
-export const MAPSITE_MAP_PIN_ICON = "home";
+/** Same marker as the Build / Claim form PIN selector. */
+export const MAPSITE_MAP_PIN_COLOR = MAPSITE_PIN_DEFAULT_COLOR;
+export const MAPSITE_MAP_PIN_ICON = MAPSITE_PIN_DEFAULT_ICON;
 
 function customOrFallbackHref(
   custom: string | null | undefined,
@@ -192,10 +198,23 @@ export function getPrimaryPin(pins: MapSitePinView[]): MapSitePinView | null {
   return pins.find((pin) => pin.featured) || pins[0];
 }
 
+function mapsiteSavedPinStyle(mapsite: MapSiteView): MapSiteSavedPinStyle {
+  return {
+    pinIcon: mapsite.pinIcon,
+    pinColor: mapsite.pinColor,
+    pinBorder: mapsite.pinBorder,
+    pinWhiteCenter: mapsite.pinWhiteCenter,
+    pinAnimated: mapsite.pinAnimated,
+    pinCategoryBadge: mapsite.pinCategoryBadge,
+  };
+}
+
 function toTalisMapsPin(
   pin: MapSitePinView,
   tebHref: string,
+  style: MapSiteSavedPinStyle,
 ): TalisMapsPin {
+  const visual = mapSitePinVisualFields(style);
   return {
     id: pin.id,
     name: pin.name,
@@ -203,7 +222,7 @@ function toTalisMapsPin(
     categoryId: null,
     categorySlug: null,
     categoryName: null,
-    categoryColor: MAPSITE_MAP_PIN_COLOR,
+    categoryColor: visual.categoryColor,
     latitude: pin.latitude,
     longitude: pin.longitude,
     address: pin.address,
@@ -216,11 +235,14 @@ function toTalisMapsPin(
     email: pin.email,
     featured: pin.featured,
     sortOrder: pin.sortOrder,
-    pinIcon: MAPSITE_MAP_PIN_ICON,
-    pinColor: MAPSITE_MAP_PIN_COLOR,
-    whiteCenter: false,
+    pinIcon: visual.pinIcon,
+    pinColor: visual.pinColor,
+    pinBorder: visual.pinBorder,
+    whiteCenter: visual.whiteCenter,
+    pinAnimated: visual.pinAnimated,
+    customLogoUrl: visual.customLogoUrl,
     href: tebHref,
-    categoryBadge: tebHref ? "TEB™" : null,
+    categoryBadge: visual.categoryBadge || (tebHref ? "TEB™" : null),
   };
 }
 
@@ -294,38 +316,34 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
     primaryPin?.name?.trim() ||
     agentName;
   const tebHref = mapsiteTebHref(mapsite.fastCode, mapsite.tebUrl);
+  const pinStyle = mapsiteSavedPinStyle(mapsite);
 
   const talisPins =
     mapsite.pins.length > 0
-      ? mapsite.pins.map((pin) => toTalisMapsPin(pin, tebHref))
+      ? mapsite.pins.map((pin) => toTalisMapsPin(pin, tebHref, pinStyle))
       : resolveMapCenter(mapsite, primaryPin)
         ? [
-            {
-              id: "mapsite-center",
-              name: propertyTitle,
-              description: mapsite.propertyDescription || "",
-              categoryId: null,
-              categorySlug: null,
-              categoryName: null,
-              categoryColor: MAPSITE_MAP_PIN_COLOR,
-              latitude: resolveMapCenter(mapsite, primaryPin)![0],
-              longitude: resolveMapCenter(mapsite, primaryPin)![1],
-              address: mapsite.propertyAddress || "",
-              city: primaryPin?.city || "",
-              province: primaryPin?.province || "",
-              postalCode: primaryPin?.postalCode || "",
-              country: primaryPin?.country || "",
-              website: mapsite.website || primaryPin?.website || "",
-              phone: mapsite.phone || primaryPin?.phone || "",
-              email: mapsite.email || primaryPin?.email || "",
-              featured: true,
-              sortOrder: 0,
-              pinIcon: MAPSITE_MAP_PIN_ICON,
-              pinColor: MAPSITE_MAP_PIN_COLOR,
-              whiteCenter: false,
-              href: tebHref,
-              categoryBadge: tebHref ? "TEB™" : null,
-            },
+            toTalisMapsPin(
+              {
+                id: "mapsite-center",
+                name: propertyTitle,
+                description: mapsite.propertyDescription || "",
+                latitude: resolveMapCenter(mapsite, primaryPin)![0],
+                longitude: resolveMapCenter(mapsite, primaryPin)![1],
+                address: mapsite.propertyAddress || "",
+                city: primaryPin?.city || "",
+                province: primaryPin?.province || "",
+                postalCode: primaryPin?.postalCode || "",
+                country: primaryPin?.country || "",
+                website: mapsite.website || primaryPin?.website || "",
+                phone: mapsite.phone || primaryPin?.phone || "",
+                email: mapsite.email || primaryPin?.email || "",
+                featured: true,
+                sortOrder: 0,
+              },
+              tebHref,
+              pinStyle,
+            ),
           ]
         : [];
 

@@ -9,6 +9,7 @@ import type { CreateAccountResult } from "./account-service";
 import { generateMapSiteSlug } from "./slug-generator";
 import { disableSupabaseAdminClient, getSupabaseAdmin, tryGetSupabaseAdmin } from "./supabaseAdmin";
 import { supabase } from "./supabaseClient";
+import { resolvePinStyleExtras } from "./build-request-pin-style-notes";
 
 export interface CreateMapSiteForAccountInput {
   accountId: string;
@@ -98,6 +99,13 @@ export interface MapSiteView {
   claimAudience?: string | null;
   /** Owner brokerage / company from the Build Request (Claim a Market). */
   brokerageName?: string | null;
+  /** Saved Talismaps™ PIN style from the Build / Claim form. */
+  pinIcon?: string | null;
+  pinColor?: string | null;
+  pinBorder?: string | null;
+  pinWhiteCenter?: boolean | null;
+  pinAnimated?: boolean | null;
+  pinCategoryBadge?: string | null;
 }
 
 function isServiceRolePermissionError(message: string): boolean {
@@ -251,6 +259,14 @@ async function buildMapSiteView(
     .order("sort_order");
 
   let requestId = options?.requestId?.trim() || null;
+  let pinStyle = {
+    pinIcon: null as string | null,
+    pinColor: null as string | null,
+    pinBorder: null as string | null,
+    pinWhiteCenter: null as boolean | null,
+    pinAnimated: null as boolean | null,
+    pinCategoryBadge: null as string | null,
+  };
 
   if (!requestId) {
     const { data: fastCodeRow } = await client
@@ -289,13 +305,26 @@ async function buildMapSiteView(
         .maybeSingle(),
       client
         .from("build_requests")
-        .select("market_type, status, company")
+        .select(
+          "market_type, status, company, notes, future_pin_icon, future_pin_color, future_pin_border, future_pin_white_center, future_pin_animated, future_pin_category_badge"
+        )
         .eq("id", requestId)
         .maybeSingle(),
     ]);
     assets = assetRow;
     claimAudience = buildRequest?.market_type?.trim() || null;
     brokerageName = buildRequest?.company?.trim() || null;
+    if (buildRequest) {
+      const extras = resolvePinStyleExtras(buildRequest);
+      pinStyle = {
+        pinIcon: buildRequest.future_pin_icon?.trim() || null,
+        pinColor: buildRequest.future_pin_color?.trim() || null,
+        pinBorder: buildRequest.future_pin_border?.trim() || null,
+        pinWhiteCenter: extras.whiteCenter,
+        pinAnimated: extras.animated,
+        pinCategoryBadge: extras.categoryBadge,
+      };
+    }
   }
 
   const pins: MapSitePinView[] = (pinRows || []).map((pin) => ({
@@ -364,6 +393,12 @@ async function buildMapSiteView(
     requestId,
     claimAudience,
     brokerageName,
+    pinIcon: pinStyle.pinIcon,
+    pinColor: pinStyle.pinColor,
+    pinBorder: pinStyle.pinBorder,
+    pinWhiteCenter: pinStyle.pinWhiteCenter,
+    pinAnimated: pinStyle.pinAnimated,
+    pinCategoryBadge: pinStyle.pinCategoryBadge,
   };
 }
 

@@ -5,7 +5,11 @@ import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
 import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import { getMapSiteByFastCode, type MapSiteView } from "@/lib/mapsite-service";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
-import { getMapSitePlatformByFastCode, type MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
+import {
+  getMapSitePlatformByFastCode,
+  mergeMapSiteWithSubmittedLocation,
+  type MapSitePlatformRecord,
+} from "@/lib/talispros/mapsite-platform";
 import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 
@@ -76,6 +80,12 @@ function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
     brokerUrl: record.broker_url,
     tebUrl: record.teb_url,
     ttvUrl: record.ttv_url,
+    pinIcon: record.pin_icon ?? null,
+    pinColor: record.pin_color ?? null,
+    pinBorder: record.pin_border ?? null,
+    pinWhiteCenter: record.pin_white_center ?? null,
+    pinAnimated: record.pin_animated ?? null,
+    pinCategoryBadge: record.pin_category_badge ?? null,
   };
 }
 
@@ -156,7 +166,10 @@ export async function loadPublishedMapSiteView(fastCode: string) {
   if (!view) {
     const platform = await getMapSitePlatformByFastCode(fastCode);
     if (!platform) return null;
-    view = mapSiteViewFromPlatform(platform);
+    const merged = await mergeMapSiteWithSubmittedLocation(platform, {
+      fastCode,
+    });
+    view = mapSiteViewFromPlatform(merged);
   }
 
   try {
