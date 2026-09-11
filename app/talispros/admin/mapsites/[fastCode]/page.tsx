@@ -4,7 +4,7 @@ import { requireTalisprosAdminPage } from "@/lib/talispros-admin-auth";
 import { isMarketingManagerAuthenticated } from "@/lib/marketing-manager-auth";
 import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
-import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
 import { listAdminEbookPages } from "@/lib/talisbooks/admin-ebook-pages";
 
@@ -31,7 +31,7 @@ export default async function TalisprosAdminMapSitePage({
 
   const writesState = getMapSiteAdminWritesState();
   const [paymentReceived, ebookContext] = await Promise.all([
-    hasCompletedMapSitePaypalPayment({
+    hasCompletedMapSiteActivationPayment({
       email: mapsite.email,
       mapsiteId: mapsite.id,
       fastCode: mapsite.fastCode,

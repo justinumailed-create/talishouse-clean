@@ -9,7 +9,7 @@ import { parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import {
   stripeCheckoutSessionIsPaid,
   stripePaymentIntentIdFromSession,
-} from "@/lib/talispros/stripe-mapsite-webhook";
+} from "@/lib/talispros/stripe-mapsite-session";
 import { registrationTotalFor } from "@/lib/registration-plans";
 
 vi.mock("@/lib/talispros/mapsite-activation", () => ({
@@ -58,6 +58,31 @@ describe("Stripe Checkout session payment checks", () => {
         status: "open",
       }),
     ).toBe(false);
+  });
+
+  it("activates using client_reference_id when metadata mapsite id is missing", async () => {
+    const { activateMapSiteAfterPayment } = await import(
+      "@/lib/talispros/mapsite-activation"
+    );
+    vi.mocked(activateMapSiteAfterPayment).mockClear();
+    const { activateMapSiteFromStripeCheckoutSession } = await import(
+      "@/lib/talispros/stripe-mapsite-webhook"
+    );
+    const result = await activateMapSiteFromStripeCheckoutSession({
+      id: "cs_ref",
+      payment_status: "paid",
+      status: "complete",
+      client_reference_id: "map-from-ref",
+      metadata: { requestId: "req-9", planType: "ROOT_ACCOUNT_1" },
+    } as Stripe.Checkout.Session);
+    expect(result.success).toBe(true);
+    expect(activateMapSiteAfterPayment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mapsiteId: "map-from-ref",
+        requestId: "req-9",
+        stripeCheckoutSessionId: "cs_ref",
+      }),
+    );
   });
 
   it("does not activate from an unpaid Checkout session", async () => {
@@ -176,5 +201,52 @@ describe("Stripe webhook signature", () => {
     );
     expect(duplicate.status).toBe(200);
     expect(activateMapSiteAfterPayment).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("Stripe Checkout success return", () => {
+  it("retrieves the Checkout session and runs the webhook activation path", async () => {
+    vi.resetModules();
+    const retrieve = vi.fn(async (id: string) => ({
+      id,
+      payment_status: "paid",
+      status: "complete",
+      payment_intent: "pi_return",
+      metadata: {
+        mapSiteId: "map-return",
+        requestId: "req-return",
+        planType: "ROOT_ACCOUNT_1",
+        fastCode: "rm01",
+      },
+    }));
+    vi.doMock("@/lib/stripe", () => ({
+      getStripeSecretKey: () => "sk_test_return",
+      getStripeWebhookSecret: () => "whsec_test",
+      getStripeClient: () => ({
+        checkout: { sessions: { retrieve } },
+      }),
+    }));
+    vi.doMock("@/lib/talispros/mapsite-activation", () => ({
+      activateMapSiteAfterPayment: vi.fn(async () => ({ success: true })),
+    }));
+
+    const { activateMapSiteFromStripeCheckoutSessionId } = await import(
+      "@/lib/talispros/stripe-mapsite-webhook"
+    );
+    const { activateMapSiteAfterPayment } = await import(
+      "@/lib/talispros/mapsite-activation"
+    );
+    const result = await activateMapSiteFromStripeCheckoutSessionId("cs_return");
+    expect(retrieve).toHaveBeenCalledWith("cs_return");
+    expect(result.success).toBe(true);
+    expect(activateMapSiteAfterPayment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mapsiteId: "map-return",
+        requestId: "req-return",
+        stripeCheckoutSessionId: "cs_return",
+        stripePaymentIntentId: "pi_return",
+        fastCode: "rm01",
+      }),
+    );
   });
 });

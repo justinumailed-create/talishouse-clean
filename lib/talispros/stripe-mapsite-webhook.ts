@@ -2,21 +2,17 @@ import type Stripe from "stripe";
 import { parseRegistrationMarket } from "@/lib/registration-market";
 import { isPlanType } from "@/lib/registration-plans";
 import { activateMapSiteAfterPayment } from "@/lib/talispros/mapsite-activation";
+import {
+  stripeCheckoutSessionIsPaid,
+  stripeMapSiteIdFromCheckoutSession,
+  stripePaymentIntentIdFromSession,
+} from "@/lib/talispros/stripe-mapsite-session";
 
-export function stripeCheckoutSessionIsPaid(
-  session: Pick<Stripe.Checkout.Session, "payment_status" | "status">
-): boolean {
-  return session.payment_status === "paid" && session.status === "complete";
-}
-
-export function stripePaymentIntentIdFromSession(
-  session: Pick<Stripe.Checkout.Session, "payment_intent">
-): string | null {
-  const intent = session.payment_intent;
-  if (!intent) return null;
-  if (typeof intent === "string") return intent;
-  return intent.id || null;
-}
+export {
+  stripeCheckoutSessionIsPaid,
+  stripeMapSiteIdFromCheckoutSession,
+  stripePaymentIntentIdFromSession,
+} from "@/lib/talispros/stripe-mapsite-session";
 
 /**
  * checkout.session.completed → existing Mapsite™ activation service.
@@ -34,7 +30,7 @@ export async function activateMapSiteFromStripeCheckoutSession(
   }
 
   const metadata = session.metadata || {};
-  const mapsiteId = metadata.mapSiteId?.trim() || metadata.mapsiteId?.trim() || "";
+  const mapsiteId = stripeMapSiteIdFromCheckoutSession(session) || "";
   const requestId = metadata.requestId?.trim() || null;
   const planType = isPlanType(metadata.planType) ? metadata.planType : null;
   const audience = parseRegistrationMarket(metadata.audience) || metadata.audience || null;
@@ -50,5 +46,24 @@ export async function activateMapSiteFromStripeCheckoutSession(
     planType,
     stripeCheckoutSessionId: session.id,
     stripePaymentIntentId: stripePaymentIntentIdFromSession(session),
+    fastCode: metadata.fastCode?.trim() || null,
   });
+}
+
+/** Checkout success_url / status poll: retrieve session, then same activation as webhook. */
+export async function activateMapSiteFromStripeCheckoutSessionId(
+  sessionId: string,
+): Promise<{
+  success: boolean;
+  alreadyProcessed?: boolean;
+  ignored?: boolean;
+  error?: string;
+}> {
+  const { getStripeClient, getStripeSecretKey } = await import("@/lib/stripe");
+  if (!getStripeSecretKey()) {
+    return { success: false, error: "Stripe is not configured." };
+  }
+  const stripe = getStripeClient();
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  return activateMapSiteFromStripeCheckoutSession(session);
 }

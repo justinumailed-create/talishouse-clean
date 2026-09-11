@@ -86,6 +86,8 @@ interface MapSiteApplicationProps {
   showActivatePayment?: boolean;
   /** Stripe Checkout return. Never treated as proof of payment. */
   checkoutStatus?: "success" | "cancelled" | null;
+  /** Checkout session id from success_url — used to activate if the webhook lagged. */
+  checkoutSessionId?: string | null;
   /** Entry-point choice: user setup vs done-for-you request. */
   onboardingMode?: "self" | "assisted";
   /** Original audience page where prospect entered (for context). */
@@ -106,6 +108,7 @@ export default function MapSiteApplication({
   talisBookHref = null,
   showActivatePayment = false,
   checkoutStatus = null,
+  checkoutSessionId = null,
   onboardingMode = "self",
   sourceAudience = null,
   accountType,
@@ -204,6 +207,7 @@ export default function MapSiteApplication({
         talisBookHref={talisBookHref}
         showActivatePayment={showActivatePayment}
         checkoutStatus={checkoutStatus}
+        checkoutSessionId={checkoutSessionId}
         selectedPinId={selectedPinId}
         setSelectedPinId={setSelectedPinId}
         beginFocusGuard={beginFocusGuard}
@@ -227,6 +231,7 @@ function MapSiteChrome({
   talisBookHref,
   showActivatePayment,
   checkoutStatus,
+  checkoutSessionId,
   selectedPinId,
   setSelectedPinId,
   beginFocusGuard,
@@ -245,6 +250,7 @@ function MapSiteChrome({
   talisBookHref: string | null;
   showActivatePayment: boolean;
   checkoutStatus: "success" | "cancelled" | null;
+  checkoutSessionId: string | null;
   selectedPinId: string | null;
   setSelectedPinId: (id: string | null) => void;
   beginFocusGuard: () => void;
@@ -427,11 +433,17 @@ function MapSiteChrome({
   useEffect(() => {
     if (paid || checkoutStatus !== "success") return;
     let cancelledPoll = false;
+    const sessionId =
+      checkoutSessionId ||
+      (typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("session_id")
+        : null);
     const poll = async () => {
       const { paid: nextPaid } = await getMapSiteActivationPaymentStatus({
         mapsiteId: mapsite.id,
         fastCode: mapsite.fast_code,
         requestId,
+        stripeCheckoutSessionId: sessionId,
       });
       if (cancelledPoll || !nextPaid) return;
       setActivationPaid(true);
@@ -467,6 +479,7 @@ function MapSiteChrome({
     mapsite.id,
     mapsite.fast_code,
     requestId,
+    checkoutSessionId,
     audience,
     accountType,
     router,

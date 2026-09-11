@@ -10,7 +10,7 @@ import {
   mergeMapSiteWithSubmittedLocation,
   type MapSitePlatformRecord,
 } from "@/lib/talispros/mapsite-platform";
-import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 
 function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
@@ -219,11 +219,14 @@ export default async function PublishedMapSiteView({
       .maybeSingle(),
     isDemoMapSiteCode(mapsite.fastCode)
       ? Promise.resolve(true)
-      : hasCompletedMapSitePaypalPayment({
+      : hasCompletedMapSiteActivationPayment({
           mapsiteId: mapsite.id,
           fastCode: mapsite.fastCode,
           requestId: mapsite.requestId,
           email: mapsite.email,
+          reconcileFromStripe:
+            (mapsite.status || "").toLowerCase() !== "unclaimed" &&
+            (mapsite.status || "").toLowerCase() !== "draft",
         }),
   ]);
 
@@ -234,9 +237,7 @@ export default async function PublishedMapSiteView({
       visitorFastCode={visitorStatus.fastCode}
       editAccess={editAccess}
       buildRequestId={buildRequestLink.data?.id}
-      paymentReceived={
-        paymentReceived || Boolean(mapsite.tebUrl?.trim())
-      }
+      paymentReceived={paymentReceived}
     />
   );
 }

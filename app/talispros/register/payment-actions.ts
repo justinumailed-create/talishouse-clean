@@ -23,6 +23,8 @@ export interface ProcessPaymentInput {
   stripePaymentIntentId?: string;
   paymentProvider?: "paypal" | "stripe";
   buildRequestId?: string;
+  mapsiteId?: string | null;
+  fastCode?: string | null;
 }
 
 export interface ProcessPaymentResult {
@@ -58,25 +60,33 @@ export async function processPayment(
     const paymentProvider =
       input.paymentProvider ||
       (stripeCheckoutSessionId ? "stripe" : "paypal");
+    const linkedMapsiteId = input.mapsiteId?.trim() || null;
+    const linkedFastCode = input.fastCode?.trim() || null;
 
     if (stripeCheckoutSessionId) {
       const { data: existingStripe } = await supabaseAdmin
         .from("talispros_payments")
-        .select("id, payment_status")
+        .select("id, payment_status, mapsite_id, fast_code")
         .eq("stripe_checkout_session_id", stripeCheckoutSessionId)
-        .ilike("payment_status", "completed")
         .maybeSingle();
-      if (existingStripe?.id) {
-        let mapsiteId: string | undefined;
-        let fastCode: string | undefined;
-        if (input.buildRequestId) {
+      const existingStatus = existingStripe?.payment_status?.trim().toLowerCase();
+      if (
+        existingStripe?.id &&
+        (existingStatus === "completed" ||
+          existingStatus === "paid" ||
+          existingStatus === "complete" ||
+          existingStatus === "succeeded")
+      ) {
+        let mapsiteId: string | undefined = existingStripe.mapsite_id || linkedMapsiteId || undefined;
+        let fastCode: string | undefined = existingStripe.fast_code || linkedFastCode || undefined;
+        if (input.buildRequestId && (!mapsiteId || !fastCode)) {
           const { data: buildRequest } = await supabaseAdmin
             .from("build_requests")
             .select("linked_mapsite_id, requested_fast_code")
             .eq("id", input.buildRequestId)
             .maybeSingle();
-          mapsiteId = buildRequest?.linked_mapsite_id || undefined;
-          fastCode = buildRequest?.requested_fast_code || undefined;
+          mapsiteId = mapsiteId || buildRequest?.linked_mapsite_id || undefined;
+          fastCode = fastCode || buildRequest?.requested_fast_code || undefined;
         }
         return {
           success: true,
@@ -86,33 +96,69 @@ export async function processPayment(
           fastCode,
         };
       }
-    }
 
-    const { error: paymentError } = await supabaseAdmin
-      .from("talispros_payments")
-      .insert({
-        email: input.email.trim().toLowerCase(),
-        plan_type: input.planType,
-        paypal_order_id: input.paypalOrderId || null,
-        paypal_capture_id: input.paypalCaptureId || null,
-        payment_provider: paymentProvider,
-        stripe_checkout_session_id: stripeCheckoutSessionId,
-        stripe_payment_intent_id: stripePaymentIntentId,
-        payment_status: "completed",
-      });
+      if (existingStripe?.id) {
+        await supabaseAdmin
+          .from("talispros_payments")
+          .update({
+            email: input.email.trim().toLowerCase(),
+            plan_type: input.planType,
+            payment_provider: paymentProvider,
+            stripe_payment_intent_id: stripePaymentIntentId,
+            payment_status: "completed",
+            ...(linkedMapsiteId ? { mapsite_id: linkedMapsiteId } : {}),
+            ...(input.buildRequestId ? { request_id: input.buildRequestId } : {}),
+            ...(linkedFastCode ? { fast_code: linkedFastCode } : {}),
+          })
+          .eq("id", existingStripe.id);
+      } else {
+        const { error: paymentError } = await supabaseAdmin
+          .from("talispros_payments")
+          .insert(paymentRow({
+            email: input.email,
+            planType: input.planType,
+            paypalOrderId: input.paypalOrderId,
+            paypalCaptureId: input.paypalCaptureId,
+            paymentProvider,
+            stripeCheckoutSessionId,
+            stripePaymentIntentId,
+            mapsiteId: linkedMapsiteId,
+            requestId: input.buildRequestId,
+            fastCode: linkedFastCode,
+          }));
 
-    if (paymentError) {
-      if (
-        stripeCheckoutSessionId &&
-        /duplicate|unique/i.test(paymentError.message)
-      ) {
-        return {
-          success: true,
-          alreadyProcessed: true,
-          transactionId: stripePaymentIntentId || stripeCheckoutSessionId,
-        };
+        if (paymentError) {
+          if (/duplicate|unique/i.test(paymentError.message)) {
+            return {
+              success: true,
+              alreadyProcessed: true,
+              transactionId: stripePaymentIntentId || stripeCheckoutSessionId,
+              mapsiteId: linkedMapsiteId || undefined,
+              fastCode: linkedFastCode || undefined,
+            };
+          }
+          throw new Error(`Payment record failed: ${paymentError.message}`);
+        }
       }
-      throw new Error(`Payment record failed: ${paymentError.message}`);
+    } else {
+      const { error: paymentError } = await supabaseAdmin
+        .from("talispros_payments")
+        .insert(paymentRow({
+          email: input.email,
+          planType: input.planType,
+          paypalOrderId: input.paypalOrderId,
+          paypalCaptureId: input.paypalCaptureId,
+          paymentProvider,
+          stripeCheckoutSessionId,
+          stripePaymentIntentId,
+          mapsiteId: linkedMapsiteId,
+          requestId: input.buildRequestId,
+          fastCode: linkedFastCode,
+        }));
+
+      if (paymentError) {
+        throw new Error(`Payment record failed: ${paymentError.message}`);
+      }
     }
 
     if (isRootPlanType(input.planType) && !input.buildRequestId) {
@@ -122,10 +168,18 @@ export async function processPayment(
         email: input.email,
       });
 
-      const { redirectUrl } = await finalizeRegistrationClientAccess(
+      const { redirectUrl } = await establishClientSessionAfterPayment(
         input.email,
-        registration.fastCode
+        registration.fastCode,
       );
+
+      await linkPaymentRecordToMapSite({
+        stripeCheckoutSessionId,
+        paypalOrderId: input.paypalOrderId,
+        mapsiteId: registration.mapsiteId,
+        requestId: input.buildRequestId,
+        fastCode: registration.fastCode,
+      });
 
       return {
         success: true,
@@ -250,9 +304,17 @@ export async function processPayment(
         .eq("id", input.buildRequestId);
     }
 
-    const { redirectUrl } = await finalizeRegistrationClientAccess(
+    await linkPaymentRecordToMapSite({
+      stripeCheckoutSessionId,
+      paypalOrderId: input.paypalOrderId,
+      mapsiteId: mapsite.id,
+      requestId: input.buildRequestId,
+      fastCode: account.fastCode,
+    });
+
+    const { redirectUrl } = await establishClientSessionAfterPayment(
       input.email,
-      account.fastCode
+      account.fastCode,
     );
 
     return {
@@ -270,5 +332,79 @@ export async function processPayment(
     const msg = err instanceof Error ? err.message : "Unknown server error";
     console.error("[talispros-payment] Error:", err);
     return { success: false, error: msg };
+  }
+}
+
+function paymentRow(input: {
+  email: string;
+  planType: string;
+  paypalOrderId?: string;
+  paypalCaptureId?: string;
+  paymentProvider: "paypal" | "stripe";
+  stripeCheckoutSessionId: string | null;
+  stripePaymentIntentId: string | null;
+  mapsiteId?: string | null;
+  requestId?: string | null;
+  fastCode?: string | null;
+}) {
+  return {
+    email: input.email.trim().toLowerCase(),
+    plan_type: input.planType,
+    paypal_order_id: input.paypalOrderId || null,
+    paypal_capture_id: input.paypalCaptureId || null,
+    payment_provider: input.paymentProvider,
+    stripe_checkout_session_id: input.stripeCheckoutSessionId,
+    stripe_payment_intent_id: input.stripePaymentIntentId,
+    payment_status: "completed",
+    ...(input.mapsiteId ? { mapsite_id: input.mapsiteId } : {}),
+    ...(input.requestId ? { request_id: input.requestId } : {}),
+    ...(input.fastCode ? { fast_code: input.fastCode } : {}),
+  };
+}
+
+async function linkPaymentRecordToMapSite(options: {
+  stripeCheckoutSessionId: string | null;
+  paypalOrderId?: string;
+  mapsiteId: string;
+  requestId?: string | null;
+  fastCode?: string | null;
+}): Promise<void> {
+  try {
+    const supabase = getSupabaseAdmin();
+    const patch = {
+      mapsite_id: options.mapsiteId,
+      ...(options.requestId ? { request_id: options.requestId } : {}),
+      ...(options.fastCode ? { fast_code: options.fastCode } : {}),
+    };
+    if (options.stripeCheckoutSessionId) {
+      await supabase
+        .from("talispros_payments")
+        .update(patch)
+        .eq("stripe_checkout_session_id", options.stripeCheckoutSessionId);
+      return;
+    }
+    if (options.paypalOrderId) {
+      await supabase
+        .from("talispros_payments")
+        .update(patch)
+        .eq("paypal_order_id", options.paypalOrderId);
+    }
+  } catch (error) {
+    console.warn("[talispros-payment] Could not link payment to Mapsite™:", error);
+  }
+}
+
+async function establishClientSessionAfterPayment(
+  email: string,
+  fastCode: string,
+): Promise<{ redirectUrl: string; sessionEstablished: boolean }> {
+  try {
+    return await finalizeRegistrationClientAccess(email, fastCode);
+  } catch (error) {
+    console.warn(
+      "[talispros-payment] Client session cookie could not be set (expected on Stripe webhooks):",
+      error,
+    );
+    return { redirectUrl: "/talispros/client/dashboard", sessionEstablished: false };
   }
 }

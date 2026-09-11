@@ -18,6 +18,7 @@ import { activateMapSiteAfterPayment } from "@/lib/talispros/mapsite-activation"
 import {
   ACTIVATE_QUERY,
   CHECKOUT_QUERY,
+  parseCheckoutSessionId,
   buildActivateMapSiteHref,
 } from "@/lib/talispros/ebook-choice";
 import {
@@ -27,8 +28,12 @@ import {
   mergeMapSiteWithSubmittedLocation,
   type MapSitePlatformRecord,
 } from "@/lib/talispros/mapsite-platform";
-import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
-import { toShareableAbsoluteUrl } from "@/lib/talispros/mapsite-state";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
+import { establishPaidMapSiteBrowserSession } from "@/lib/mapsite-edit-auth";
+import {
+  DEMO_MAPSITE_ID,
+  toShareableAbsoluteUrl,
+} from "@/lib/talispros/mapsite-state";
 
 export async function loadMapSiteApplicationState(options?: {
   mapsiteId?: string | null;
@@ -51,8 +56,36 @@ export async function loadMapSiteApplicationState(options?: {
     mapsite = await getMapSitePlatformByFastCode(fastCode);
   }
 
+  if (!mapsite && requestId && isSupabaseAdminConfigured()) {
+    try {
+      const supabase = getSupabaseAdmin();
+      const { data: request } = await supabase
+        .from("build_requests")
+        .select("linked_mapsite_id")
+        .eq("id", requestId)
+        .maybeSingle();
+      if (request?.linked_mapsite_id) {
+        mapsite = await getMapSitePlatformById(request.linked_mapsite_id);
+      }
+    } catch (error) {
+      console.warn("[mapsite] Could not load Mapsite™ from build request:", error);
+    }
+  }
+
   if (!mapsite) {
     mapsite = await getDemonstrationMapSite();
+  }
+
+  if (
+    claimed &&
+    mapsite.id === DEMO_MAPSITE_ID &&
+    (mapsiteId || fastCode) &&
+    mapsiteId !== DEMO_MAPSITE_ID
+  ) {
+    console.warn(
+      "[mapsite] Claimed Mapsite™ fell back to the demonstration listing",
+      { mapsiteId, fastCode, requestId },
+    );
   }
 
   if (claimed) {
@@ -193,13 +226,77 @@ export async function refreshMapSiteApplicationState(
   return mergeMapSiteWithSubmittedLocation(mapsite);
 }
 
+/**
+ * Paid flag for Mapsite™ chrome after Checkout.
+ *
+ * Stripe success return must activate here (same path as the webhook), not
+ * only via the historical PayPal payment-row lookup. The client polls this
+ * with `session_id` after Checkout; webhook lag must not leave UI unpaid.
+ */
 export async function getMapSiteActivationPaymentStatus(options: {
   mapsiteId?: string | null;
   fastCode?: string | null;
   requestId?: string | null;
+  stripeCheckoutSessionId?: string | null;
+  reconcileFromStripe?: boolean;
 }): Promise<{ paid: boolean }> {
-  const paid = await hasCompletedMapSitePaypalPayment(options);
+  const stripeCheckoutSessionId = parseCheckoutSessionId(
+    options.stripeCheckoutSessionId,
+  );
+
+  if (stripeCheckoutSessionId) {
+    await confirmMapSiteStripeCheckoutSession(stripeCheckoutSessionId);
+  }
+
+  const paid = await hasCompletedMapSiteActivationPayment({
+    mapsiteId: options.mapsiteId,
+    fastCode: options.fastCode,
+    requestId: options.requestId,
+    stripeCheckoutSessionId,
+    reconcileFromStripe:
+      options.reconcileFromStripe ??
+      Boolean(stripeCheckoutSessionId || options.mapsiteId || options.fastCode),
+  });
+
+  if (paid && options.fastCode) {
+    await establishPaidMapSiteBrowserSession(options.fastCode);
+  }
+
   return { paid };
+}
+
+/** Retrieve a paid Checkout Session and run webhook-equivalent activation. */
+export async function confirmMapSiteStripeCheckoutSession(
+  sessionId: string,
+): Promise<{ paid: boolean; error?: string }> {
+  const stripeCheckoutSessionId = parseCheckoutSessionId(sessionId);
+  if (!stripeCheckoutSessionId) {
+    return { paid: false, error: "Missing Stripe Checkout session id." };
+  }
+  if (!getStripeSecretKey()) {
+    return { paid: false, error: "Stripe is not configured." };
+  }
+
+  try {
+    const { activateMapSiteFromStripeCheckoutSessionId } = await import(
+      "@/lib/talispros/stripe-mapsite-webhook"
+    );
+    const result = await activateMapSiteFromStripeCheckoutSessionId(
+      stripeCheckoutSessionId,
+    );
+    if (result.error) {
+      return { paid: false, error: result.error };
+    }
+    if (result.ignored) {
+      return { paid: false };
+    }
+    return { paid: Boolean(result.success || result.alreadyProcessed) };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Stripe Checkout lookup failed.";
+    console.warn("[mapsite-stripe] checkout return activation failed:", message);
+    return { paid: false, error: message };
+  }
 }
 
 async function resolveAppOrigin(): Promise<string> {
@@ -353,6 +450,24 @@ export async function createMapSiteStripeCheckoutSession(input: {
     if (!session.url) {
       return { error: "Stripe Checkout did not return a URL." };
     }
+
+    const { error: pendingError } = await supabase.from("talispros_payments").insert({
+      email: email.toLowerCase(),
+      plan_type: planType,
+      payment_provider: "stripe",
+      stripe_checkout_session_id: session.id,
+      payment_status: "pending",
+      mapsite_id: mapsiteId,
+      request_id: requestId,
+      fast_code: fastCode || null,
+    });
+    if (pendingError && !/duplicate|unique/i.test(pendingError.message)) {
+      console.warn(
+        "[mapsite-stripe] Could not record pending checkout:",
+        pendingError.message,
+      );
+    }
+
     return { url: session.url };
   } catch (error) {
     const message =
