@@ -19,6 +19,7 @@ export interface ActivateMapSiteAfterPaymentInput {
   paypalCaptureId?: string | null;
   stripeCheckoutSessionId?: string | null;
   stripePaymentIntentId?: string | null;
+  fastCode?: string | null;
 }
 
 export interface ActivateMapSiteAfterPaymentResult {
@@ -182,6 +183,8 @@ export async function activateMapSiteAfterPayment(
       stripePaymentIntentId: stripePaymentIntentId || undefined,
       paymentProvider,
       buildRequestId: resolvedRequestId,
+      mapsiteId,
+      fastCode: input.fastCode,
     });
 
     if (!result.success) {

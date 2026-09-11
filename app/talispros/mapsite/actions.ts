@@ -27,8 +27,14 @@ import {
   mergeMapSiteWithSubmittedLocation,
   type MapSitePlatformRecord,
 } from "@/lib/talispros/mapsite-platform";
-import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
-import { toShareableAbsoluteUrl } from "@/lib/talispros/mapsite-state";
+import {
+  hasCompletedMapSitePaypalPayment,
+} from "@/lib/talispros/mapsite-payment";
+import { establishPaidMapSiteBrowserSession } from "@/lib/mapsite-edit-auth";
+import {
+  DEMO_MAPSITE_ID,
+  toShareableAbsoluteUrl,
+} from "@/lib/talispros/mapsite-state";
 
 export async function loadMapSiteApplicationState(options?: {
   mapsiteId?: string | null;
@@ -51,8 +57,36 @@ export async function loadMapSiteApplicationState(options?: {
     mapsite = await getMapSitePlatformByFastCode(fastCode);
   }
 
+  if (!mapsite && requestId && isSupabaseAdminConfigured()) {
+    try {
+      const supabase = getSupabaseAdmin();
+      const { data: request } = await supabase
+        .from("build_requests")
+        .select("linked_mapsite_id")
+        .eq("id", requestId)
+        .maybeSingle();
+      if (request?.linked_mapsite_id) {
+        mapsite = await getMapSitePlatformById(request.linked_mapsite_id);
+      }
+    } catch (error) {
+      console.warn("[mapsite] Could not load Mapsite™ from build request:", error);
+    }
+  }
+
   if (!mapsite) {
     mapsite = await getDemonstrationMapSite();
+  }
+
+  if (
+    claimed &&
+    mapsite.id === DEMO_MAPSITE_ID &&
+    (mapsiteId || fastCode) &&
+    mapsiteId !== DEMO_MAPSITE_ID
+  ) {
+    console.warn(
+      "[mapsite] Claimed Mapsite™ fell back to the demonstration listing",
+      { mapsiteId, fastCode, requestId },
+    );
   }
 
   if (claimed) {
@@ -197,8 +231,17 @@ export async function getMapSiteActivationPaymentStatus(options: {
   mapsiteId?: string | null;
   fastCode?: string | null;
   requestId?: string | null;
+  stripeCheckoutSessionId?: string | null;
 }): Promise<{ paid: boolean }> {
-  const paid = await hasCompletedMapSitePaypalPayment(options);
+  const paid = await hasCompletedMapSitePaypalPayment({
+    ...options,
+    reconcileFromStripe: Boolean(options.stripeCheckoutSessionId),
+  });
+
+  if (paid && options.fastCode) {
+    await establishPaidMapSiteBrowserSession(options.fastCode);
+  }
+
   return { paid };
 }
 
@@ -353,6 +396,24 @@ export async function createMapSiteStripeCheckoutSession(input: {
     if (!session.url) {
       return { error: "Stripe Checkout did not return a URL." };
     }
+
+    const { error: pendingError } = await supabase.from("talispros_payments").insert({
+      email: email.toLowerCase(),
+      plan_type: planType,
+      payment_provider: "stripe",
+      stripe_checkout_session_id: session.id,
+      payment_status: "pending",
+      mapsite_id: mapsiteId,
+      request_id: requestId,
+      fast_code: fastCode || null,
+    });
+    if (pendingError && !/duplicate|unique/i.test(pendingError.message)) {
+      console.warn(
+        "[mapsite-stripe] Could not record pending checkout:",
+        pendingError.message,
+      );
+    }
+
     return { url: session.url };
   } catch (error) {
     const message =

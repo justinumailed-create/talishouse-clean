@@ -19,6 +19,9 @@ export const ACTIVATE_QUERY = "activate";
 /** Stripe Checkout return state (`success` | `cancelled`). Not proof of payment. */
 export const CHECKOUT_QUERY = "checkout";
 
+/** Stripe Checkout Session id returned on success_url. Used to activate if the webhook lagged. */
+export const CHECKOUT_SESSION_QUERY = "session_id";
+
 export type MapSiteCheckoutStatus = "success" | "cancelled";
 
 export function parseCheckoutStatus(
@@ -27,6 +30,15 @@ export function parseCheckoutStatus(
   const normalized = value?.trim().toLowerCase();
   if (normalized === "success" || normalized === "cancelled") return normalized;
   return null;
+}
+
+export function parseCheckoutSessionId(
+  value: string | null | undefined,
+): string | null {
+  const normalized = value?.trim() || "";
+  if (!normalized || normalized === "{CHECKOUT_SESSION_ID}") return null;
+  if (!normalized.startsWith("cs_")) return null;
+  return normalized;
 }
 
 export function buildEbookChoiceHref(options: {

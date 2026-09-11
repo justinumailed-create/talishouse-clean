@@ -24,7 +24,8 @@ import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-paymen
 import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
-import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
+import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
+import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, CHECKOUT_SESSION_QUERY, parseCheckoutSessionId, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 import MapSitePmcApplication from "@/components/talispros/mapsite/MapSitePmcApplication";
@@ -73,6 +74,9 @@ export default async function TalisprosMapSitePage({
   const showStartHere = isTruthyParam(firstParam(params.startHere));
   const showActivatePayment = isTruthyParam(firstParam(params[ACTIVATE_QUERY]));
   const checkoutStatus = parseCheckoutStatus(firstParam(params[CHECKOUT_QUERY]));
+  const checkoutSessionId = parseCheckoutSessionId(
+    firstParam(params[CHECKOUT_SESSION_QUERY]),
+  );
   const bookSlug = firstParam(params.book)?.trim() || null;
   const setup = firstParam(params.setup)?.trim().toLowerCase() ?? null;
   const sourceAudience =
@@ -84,6 +88,9 @@ export default async function TalisprosMapSitePage({
     if (showStartHere) redirectParams.set("startHere", "1");
     if (showActivatePayment) redirectParams.set(ACTIVATE_QUERY, "1");
     if (checkoutStatus) redirectParams.set(CHECKOUT_QUERY, checkoutStatus);
+    if (checkoutSessionId) {
+      redirectParams.set(CHECKOUT_SESSION_QUERY, checkoutSessionId);
+    }
     if (isTruthyParam(firstParam(params[BOOK_PENDING_QUERY]))) {
       redirectParams.set(BOOK_PENDING_QUERY, "1");
     }
@@ -173,7 +180,9 @@ export default async function TalisprosMapSitePage({
 
   const ownerCode = mapsite.fast_code || fastCode;
   const isDemoListing =
-    mapsite.is_demonstration || isDemoMapSiteCode(mapsite.fast_code);
+    (mapsite.is_demonstration || isDemoMapSiteCode(mapsite.fast_code)) &&
+    !isIssuedFastCode(fastCode) &&
+    !isIssuedFastCode(ownerCode);
   let isOwner = isDemoListing || showStartHere;
   if (!isOwner) {
     try {
@@ -195,6 +204,9 @@ export default async function TalisprosMapSitePage({
       mapsiteId: mapsite.id,
       fastCode,
       requestId,
+      stripeCheckoutSessionId: checkoutSessionId,
+      reconcileFromStripe:
+        Boolean(checkoutSessionId) || checkoutStatus === "success",
     }));
 
   const ebookContext = ownerCode
@@ -235,6 +247,7 @@ export default async function TalisprosMapSitePage({
       talisBookHref={talisBookHref}
       showActivatePayment={showActivatePayment}
       checkoutStatus={checkoutStatus}
+      checkoutSessionId={checkoutSessionId}
       openPinOnLoad={isOwner || claimed || view === "pin"}
       showStartHere={false}
     />

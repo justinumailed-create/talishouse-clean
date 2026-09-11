@@ -6,7 +6,21 @@ import { activateMapSiteAfterPayment } from "@/lib/talispros/mapsite-activation"
 export function stripeCheckoutSessionIsPaid(
   session: Pick<Stripe.Checkout.Session, "payment_status" | "status">
 ): boolean {
-  return session.payment_status === "paid" && session.status === "complete";
+  if (session.payment_status !== "paid") return false;
+  return session.status === "complete" || session.status == null;
+}
+
+export function stripeMapSiteIdFromCheckoutSession(session: {
+  client_reference_id?: string | null;
+  metadata?: Record<string, string> | null;
+}): string | null {
+  const metadata = session.metadata || {};
+  return (
+    metadata.mapSiteId?.trim() ||
+    metadata.mapsiteId?.trim() ||
+    session.client_reference_id?.trim() ||
+    null
+  );
 }
 
 export function stripePaymentIntentIdFromSession(
@@ -34,7 +48,7 @@ export async function activateMapSiteFromStripeCheckoutSession(
   }
 
   const metadata = session.metadata || {};
-  const mapsiteId = metadata.mapSiteId?.trim() || metadata.mapsiteId?.trim() || "";
+  const mapsiteId = stripeMapSiteIdFromCheckoutSession(session) || "";
   const requestId = metadata.requestId?.trim() || null;
   const planType = isPlanType(metadata.planType) ? metadata.planType : null;
   const audience = parseRegistrationMarket(metadata.audience) || metadata.audience || null;
@@ -50,5 +64,6 @@ export async function activateMapSiteFromStripeCheckoutSession(
     planType,
     stripeCheckoutSessionId: session.id,
     stripePaymentIntentId: stripePaymentIntentIdFromSession(session),
+    fastCode: metadata.fastCode?.trim() || null,
   });
 }

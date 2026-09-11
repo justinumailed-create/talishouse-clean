@@ -435,6 +435,9 @@ export interface Database {
           stripe_checkout_session_id: string | null
           stripe_payment_intent_id: string | null
           payment_status: string
+          mapsite_id: string | null
+          request_id: string | null
+          fast_code: string | null
           created_at: string
         }
         Insert: {
@@ -447,6 +450,9 @@ export interface Database {
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
           payment_status?: string
+          mapsite_id?: string | null
+          request_id?: string | null
+          fast_code?: string | null
           created_at?: string
         }
         Update: {
@@ -459,6 +465,9 @@ export interface Database {
           stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
           payment_status?: string
+          mapsite_id?: string | null
+          request_id?: string | null
+          fast_code?: string | null
           created_at?: string
         }
         Relationships: []

@@ -60,6 +60,31 @@ describe("Stripe Checkout session payment checks", () => {
     ).toBe(false);
   });
 
+  it("activates using client_reference_id when metadata mapsite id is missing", async () => {
+    const { activateMapSiteAfterPayment } = await import(
+      "@/lib/talispros/mapsite-activation"
+    );
+    vi.mocked(activateMapSiteAfterPayment).mockClear();
+    const { activateMapSiteFromStripeCheckoutSession } = await import(
+      "@/lib/talispros/stripe-mapsite-webhook"
+    );
+    const result = await activateMapSiteFromStripeCheckoutSession({
+      id: "cs_ref",
+      payment_status: "paid",
+      status: "complete",
+      client_reference_id: "map-from-ref",
+      metadata: { requestId: "req-9", planType: "ROOT_ACCOUNT_1" },
+    } as Stripe.Checkout.Session);
+    expect(result.success).toBe(true);
+    expect(activateMapSiteAfterPayment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mapsiteId: "map-from-ref",
+        requestId: "req-9",
+        stripeCheckoutSessionId: "cs_ref",
+      }),
+    );
+  });
+
   it("does not activate from an unpaid Checkout session", async () => {
     const { activateMapSiteAfterPayment } = await import(
       "@/lib/talispros/mapsite-activation"

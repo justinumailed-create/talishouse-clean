@@ -23,7 +23,8 @@ import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-paymen
 import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
-import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
+import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
+import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, CHECKOUT_SESSION_QUERY, parseCheckoutSessionId, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 
@@ -91,6 +92,9 @@ export default async function ClaimedMapSiteByAccountTypePage({
 
   const showActivatePayment = isTruthyParam(firstParam(query[ACTIVATE_QUERY]));
   const checkoutStatus = parseCheckoutStatus(firstParam(query[CHECKOUT_QUERY]));
+  const checkoutSessionId = parseCheckoutSessionId(
+    firstParam(query[CHECKOUT_SESSION_QUERY]),
+  );
   const bookPending = isTruthyParam(firstParam(query[BOOK_PENDING_QUERY]));
   const bookSlug = firstParam(query.book)?.trim() || null;
   const onboardingMode: "self" | "assisted" = bookPending ? "assisted" : "self";
@@ -99,13 +103,16 @@ export default async function ClaimedMapSiteByAccountTypePage({
   const capabilityAccountType: MapSiteCapabilityAccountType =
     accountTypeForAudience(audience);
   const requestIdParam = firstParam(query.requestId);
+  const mapsiteIdParam = firstParam(query.mapsiteId);
   const requestId =
     (await resolveMapSiteRequestId({
       requestId: requestIdParam,
       fastCode,
+      mapsiteId: mapsiteIdParam,
     })) || null;
 
   const mapsite = await loadMapSiteApplicationState({
+    mapsiteId: mapsiteIdParam,
     fastCode,
     requestId,
     claimed: true,
@@ -125,14 +132,20 @@ export default async function ClaimedMapSiteByAccountTypePage({
     mapsiteId: mapsite.id,
   });
 
+  const demoFastCode =
+    isDemoMapSiteCode(mapsite.fast_code) || isDemoMapSiteCode(fastCode);
+  const treatAsDemoUnlock =
+    (mapsite.is_demonstration || demoFastCode) && !isIssuedFastCode(fastCode);
+
   const paymentReceived =
-    mapsite.is_demonstration ||
-    isDemoMapSiteCode(mapsite.fast_code) ||
-    isDemoMapSiteCode(fastCode) ||
+    treatAsDemoUnlock ||
     (await hasCompletedMapSitePaypalPayment({
       mapsiteId: mapsite.id,
       fastCode,
       requestId,
+      stripeCheckoutSessionId: checkoutSessionId,
+      reconcileFromStripe:
+        Boolean(checkoutSessionId) || checkoutStatus === "success",
     }));
 
   const ebookContext = await getMapSiteEbookContext(fastCode, {
@@ -170,6 +183,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       talisBookHref={talisBookHref}
       showActivatePayment={showActivatePayment}
       checkoutStatus={checkoutStatus}
+      checkoutSessionId={checkoutSessionId}
       openPinOnLoad={isOwner}
       showStartHere={false}
     />

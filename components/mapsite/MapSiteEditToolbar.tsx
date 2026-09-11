@@ -79,10 +79,17 @@ export default function MapSiteEditToolbar({
   }
 
   return (
-    <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-40 max-w-[calc(100vw-2rem)]">
+    <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-40 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2">
+      <Link
+        href={`/talispros/mapsites/${encodeURIComponent(fastCode)}/edit`}
+        className="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium text-white shadow-lg hover:bg-neutral-800"
+      >
+        <Pencil className="h-4 w-4" />
+        Edit Mapsite™
+      </Link>
       <Link
         href="/talispros/client/login"
-        className="inline-flex items-center gap-2 rounded-full bg-neutral-900 px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium text-white shadow-lg hover:bg-neutral-800"
+        className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 sm:px-4 sm:py-2.5 text-xs sm:text-sm font-medium text-neutral-900 shadow-lg ring-1 ring-black/10 hover:bg-neutral-50"
       >
         <BarChart3 className="h-4 w-4" />
         View Analytics

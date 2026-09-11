@@ -15,6 +15,7 @@ import {
 } from "@/lib/talispros/mapsite-state";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { hasCompletedMapSitePaypalPayment } from "@/lib/talispros/mapsite-payment";
 
 export type TalisBooksAccountKind = Extract<
   TalisBooksAccountType,
@@ -321,10 +322,16 @@ export async function getTalisBooksEntitlementSnapshot(
     marketType,
   });
 
-  const activated = isTalisBooksAccountActivated({
+  const activatedFromStatus = isTalisBooksAccountActivated({
     mapsiteStatus: mapsite?.status,
     activatedAt,
   });
+  const paymentReceived = await hasCompletedMapSitePaypalPayment({
+    mapsiteId: mapsite?.id,
+    fastCode,
+    requestId: codeRow?.request_id,
+  });
+  const activated = activatedFromStatus || paymentReceived;
 
   return evaluateTalisBooksEntitlements({
     activated,

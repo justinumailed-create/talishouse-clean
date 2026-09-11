@@ -224,6 +224,9 @@ export default async function PublishedMapSiteView({
           fastCode: mapsite.fastCode,
           requestId: mapsite.requestId,
           email: mapsite.email,
+          reconcileFromStripe:
+            (mapsite.status || "").toLowerCase() !== "unclaimed" &&
+            (mapsite.status || "").toLowerCase() !== "draft",
         }),
   ]);
 
@@ -234,9 +237,7 @@ export default async function PublishedMapSiteView({
       visitorFastCode={visitorStatus.fastCode}
       editAccess={editAccess}
       buildRequestId={buildRequestLink.data?.id}
-      paymentReceived={
-        paymentReceived || Boolean(mapsite.tebUrl?.trim())
-      }
+      paymentReceived={paymentReceived}
     />
   );
 }

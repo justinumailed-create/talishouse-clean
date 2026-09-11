@@ -52,5 +52,20 @@ export async function POST(request: Request) {
     }
   }
 
+  if (event.type === "checkout.session.async_payment_succeeded") {
+    const session = event.data.object as Stripe.Checkout.Session;
+    const result = await activateMapSiteFromStripeCheckoutSession(session);
+    if (!result.success) {
+      console.error(
+        "[stripe-webhook] Mapsite™ async payment activation failed:",
+        result.error,
+      );
+      return NextResponse.json(
+        { error: "Activation failed." },
+        { status: 500 }
+      );
+    }
+  }
+
   return NextResponse.json({ received: true });
 }
