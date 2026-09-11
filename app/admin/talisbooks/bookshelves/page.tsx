@@ -45,7 +45,7 @@ export default async function AdminBookshelvesPage() {
       <section className="rounded-xl border border-neutral-200 bg-white p-5 space-y-3">
         <h2 className="text-sm font-semibold text-neutral-900">Public library</h2>
         <p className="text-sm text-neutral-500">
-          The product bookshelf at `/talisbooks`. Pin a published book from Talisbooks™ admin
+          The product bookshelf at /talisbooks. Pin a published book from Talisbooks™ admin
           to feature it first.
         </p>
         <div className="flex flex-wrap gap-2">
