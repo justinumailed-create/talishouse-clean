@@ -390,6 +390,24 @@ describe("Stripe $1 Root checkout matching", () => {
     ).toBe(false);
   });
 
+  it("documents Ralf rm22 live Checkout ids for the heal migration", async () => {
+    const { RALF_RM22_ROOT_CHECKOUT } = await import(
+      "@/lib/talispros/ralf-rm22-root-checkout"
+    );
+    expect(RALF_RM22_ROOT_CHECKOUT.email).toBe("remecom@mac.com");
+    expect(RALF_RM22_ROOT_CHECKOUT.fastCode).toBe("rm22");
+    expect(RALF_RM22_ROOT_CHECKOUT.mapsiteId).toBe(
+      "10d37811-43f6-4598-9ceb-d102ba6088d8",
+    );
+    expect(RALF_RM22_ROOT_CHECKOUT.checkoutSessionId.startsWith("cs_live_")).toBe(
+      true,
+    );
+    expect(RALF_RM22_ROOT_CHECKOUT.amountTotalCents).toBe(114);
+    expect(RALF_RM22_ROOT_CHECKOUT.claimedPath).toBe(
+      "/talispros/mapsite/brokers/rm22",
+    );
+  });
+
   it("keeps the historical PayPal helper name as an alias", async () => {
     const mod = await import("@/lib/talispros/mapsite-payment");
     expect(mod.hasCompletedMapSitePaypalPayment).toBe(
