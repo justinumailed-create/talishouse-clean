@@ -8,6 +8,7 @@ import {
   type MapSiteGalleryDisplayItem,
 } from "./mapsite-gallery";
 import { ROUTES } from "@/lib/routes";
+import { clampMapZoom } from "@/lib/home-pin-coordinates";
 import {
   MAPSITE_PIN_DEFAULT_COLOR,
   MAPSITE_PIN_DEFAULT_ICON,
@@ -379,7 +380,7 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
     },
     pins: talisPins,
     mapCenter: resolveMapCenter(mapsite, primaryPin),
-    mapZoom: mapsite.mapZoom ?? DEFAULT_MAP_ZOOM,
+    mapZoom: clampMapZoom(mapsite.mapZoom ?? DEFAULT_MAP_ZOOM),
     videoUrl: resolveVideoUrl(mapsite, primaryPin),
     galleryItems: visibleGalleryDisplayItems(mapsite.galleryItems),
     galleryImages: resolveGalleryImages(mapsite),

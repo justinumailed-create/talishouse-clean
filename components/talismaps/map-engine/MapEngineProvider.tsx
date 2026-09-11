@@ -39,6 +39,8 @@ interface MapEngineContextValue {
   isReady: boolean;
   lockCenter: boolean;
   lockCenterOffset: { x: number; y: number };
+  interactive: boolean;
+  preserveViewport: boolean;
   setProviderId: (providerId: MapProviderId) => void;
   setBasemapView: (view: MapBasemapView) => void;
   setPins: (pins: MapEnginePin[]) => void;
@@ -69,6 +71,10 @@ interface MapEngineProviderProps {
   lockCenter?: boolean;
   /** Screen-pixel offset from viewport center for the locked pin. */
   lockCenterOffset?: { x: number; y: number };
+  /** When false, pan/zoom gestures are disabled. Pins stay clickable. */
+  interactive?: boolean;
+  /** Skip auto fit-to-pins so the initial center/zoom stay as mounted. */
+  preserveViewport?: boolean;
   onViewportChange?: (viewport: MapViewport) => void;
   onPinSelect?: (pinId: string | null) => void;
   onPinDrag?: (pinId: string, coordinates: MapViewport["center"]) => void;
@@ -90,6 +96,8 @@ export function MapEngineProvider({
   draggablePinIds: controlledDraggablePinIds = [],
   lockCenter = false,
   lockCenterOffset = { x: 0, y: 0 },
+  interactive = true,
+  preserveViewport = false,
   onViewportChange,
   onPinSelect,
   onPinDrag,
@@ -178,12 +186,14 @@ export function MapEngineProvider({
 
   const setViewport = useCallback(
     (nextViewport: MapViewport) => {
-      const resolved = lockCenter
-        ? {
-            ...nextViewport,
-            center: viewportRef.current.center,
-          }
-        : nextViewport;
+      const resolved = !interactive
+        ? viewportRef.current
+        : lockCenter
+          ? {
+              ...nextViewport,
+              center: viewportRef.current.center,
+            }
+          : nextViewport;
       setViewportState((current) => {
         if (
           current.center.latitude === resolved.center.latitude &&
@@ -196,7 +206,7 @@ export function MapEngineProvider({
       });
       onViewportChange?.(resolved);
     },
-    [onViewportChange, lockCenter]
+    [onViewportChange, lockCenter, interactive]
   );
 
   const handlePinDrag = useCallback(
@@ -239,6 +249,8 @@ export function MapEngineProvider({
       isReady,
       lockCenter,
       lockCenterOffset,
+      interactive,
+      preserveViewport,
       setProviderId: setActiveProviderId,
       setBasemapView: setActiveBasemapView,
       setPins,
@@ -264,6 +276,8 @@ export function MapEngineProvider({
       isReady,
       lockCenter,
       lockCenterOffset,
+      interactive,
+      preserveViewport,
       setSelectedPinId,
       setViewport,
       setReadyState,

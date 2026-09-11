@@ -1,5 +1,6 @@
 import { importLibrary, setOptions } from "@googlemaps/js-api-loader";
 import { buildPinMarkerHtml, pinStyleCacheKey } from "../pin-marker-icon";
+import { allowMapGestures } from "../mount-flags";
 import type {
   MapBasemapView,
   MapCoordinates,
@@ -365,6 +366,8 @@ export class GoogleMapsProvider implements MapProvider {
     container.replaceChildren();
     container.style.position = container.style.position || "relative";
 
+    const allowGestures = allowMapGestures(options.interactive);
+
     const map = new google.maps.Map(container, {
       center: {
         lat: options.center.latitude,
@@ -375,18 +378,19 @@ export class GoogleMapsProvider implements MapProvider {
       styles: stylesForBasemap(basemapView),
       // Platform chrome only — hide Google default UI / attribution chrome.
       disableDefaultUI: true,
-      zoomControl: true,
+      zoomControl: allowGestures,
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
       scaleControl: false,
       rotateControl: false,
       // Pan disabled when center is locked so the pin stays under the card pointer.
-      draggable: !options.lockCenter,
-      gestureHandling: "greedy",
+      draggable: allowGestures && !options.lockCenter,
+      gestureHandling: allowGestures ? "greedy" : "none",
       clickableIcons: false,
       keyboardShortcuts: false,
-      scrollwheel: true,
+      scrollwheel: allowGestures,
+      disableDoubleClickZoom: !allowGestures,
     });
 
     // Soft-hide residual Google logo / terms chrome if the API still injects it.

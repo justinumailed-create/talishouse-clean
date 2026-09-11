@@ -61,6 +61,16 @@ export interface MapMountOptions {
    */
   lockCenterOffset?: { x: number; y: number };
   /**
+   * When false, pan / zoom / drag / scroll-wheel are disabled. Pin markers
+   * stay clickable. Defaults to true.
+   */
+  interactive?: boolean;
+  /**
+   * Keep the mounted center/zoom. Skip auto fit-to-pins on mount so a
+   * caller-supplied zoom (e.g. Mapsite™ build-time `mapZoom`) is honored.
+   */
+  preserveViewport?: boolean;
+  /**
    * Abort in-flight mounts (React Strict Mode remounts).
    * When aborted, the provider must not clear a container owned by a newer mount.
    */
