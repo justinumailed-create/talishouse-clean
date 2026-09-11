@@ -15,6 +15,15 @@ export async function submitMarketRegistration(formData: FormData) {
 
   formData.set("marketType", market);
 
+  const dateValue = formData.get("date");
+  if (typeof dateValue !== "string" || !dateValue.trim()) {
+    const now = new Date();
+    formData.set(
+      "date",
+      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+    );
+  }
+
   const existingComments = formData.get("additionalComments");
   const fromMapSite = Boolean(formData.get("mapsiteId"));
   formData.set("helpPreference", "marketing_manager_review");

@@ -186,7 +186,7 @@ export default function TalisprosMarketRegistrationForm({
       const resolvedRequestId = requestId || crypto.randomUUID();
       if (!requestId) setRequestId(resolvedRequestId);
       formData.set("requestId", resolvedRequestId);
-      formData.set("date", date);
+      formData.set("date", date || todayString());
       formData.set("firstName", firstName);
       formData.set("lastName", lastName);
       formData.set("email", email);
@@ -297,32 +297,8 @@ export default function TalisprosMarketRegistrationForm({
           Complete these essentials to create your Mapsite™ — personalization can
           wait until after your first success.
         </p>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <FieldLabel label="Date" hint="First come, first serve." required />
-            <input
-              type="date"
-              value={date}
-              onChange={(event) => setDate(event.target.value)}
-              suppressHydrationWarning
-              required
-              className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
-            />
-          </div>
-          <div>
-            <FieldLabel
-              label="Email Address"
-              hint="Establishes an Account."
-              required
-            />
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              required
-              className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
-            />
-          </div>
+        <input type="hidden" name="date" value={date} />
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <div>
             <FieldLabel label="First Name" required />
             <input
@@ -343,9 +319,24 @@ export default function TalisprosMarketRegistrationForm({
               className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
             />
           </div>
-          <div className="sm:col-span-2">
+          <div>
             <FieldLabel
-              label="Phone"
+              label="Email Address"
+              hint="Establishes an Account."
+              required
+            />
+            <input
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              required
+              className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <FieldLabel
+              label="Mobile"
               hint="Used on your Talisbook™ and Mapsite™ contact details."
               required
             />
