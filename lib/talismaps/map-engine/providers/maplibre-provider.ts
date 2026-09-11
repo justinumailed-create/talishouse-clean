@@ -15,6 +15,10 @@ import type {
   MapViewport,
 } from "../types";
 import { buildPinMarkerHtml, pinStyleCacheKey } from "../pin-marker-icon";
+import {
+  allowMapGestures,
+  shouldAutoFitPinsOnMount,
+} from "../mount-flags";
 
 type ListenerMap = Map<MapEngineEvent, Set<MapEngineEventHandler>>;
 type MapLibreMap = import("maplibre-gl").Map;
@@ -215,7 +219,6 @@ export class MapLibreProvider implements MapProvider {
     let mapInteracting = false;
     let disposed = false;
     let styleReady = false;
-    let map!: MapLibreMap;
 
     const isCancelled = () => disposed || Boolean(signal?.aborted);
 
@@ -260,7 +263,9 @@ export class MapLibreProvider implements MapProvider {
         ? Math.min(Math.max(window.devicePixelRatio || 1, 1), 2)
         : 1;
 
-    map = new maplibregl.Map({
+    const allowGestures = allowMapGestures(options.interactive);
+
+    const map = new maplibregl.Map({
       container: host,
       style: activeStyleUrl,
       center: [options.center.longitude, options.center.latitude],
@@ -273,6 +278,15 @@ export class MapLibreProvider implements MapProvider {
       fadeDuration: 0,
       // Avoid rendering half-initialized paint/layout props (constantOr crashes).
       failIfMajorPerformanceCaveat: false,
+      interactive: allowGestures,
+      dragPan: allowGestures && !options.lockCenter,
+      scrollZoom: allowGestures,
+      boxZoom: allowGestures,
+      dragRotate: allowGestures,
+      keyboard: allowGestures,
+      doubleClickZoom: allowGestures,
+      touchZoomRotate: allowGestures,
+      touchPitch: allowGestures,
     });
     claimContainer();
 
@@ -282,10 +296,12 @@ export class MapLibreProvider implements MapProvider {
     };
     signal?.addEventListener("abort", onAbort, { once: true });
 
-    map.addControl(
-      new maplibregl.NavigationControl({ showCompass: false }),
-      "top-right"
-    );
+    if (allowGestures) {
+      map.addControl(
+        new maplibregl.NavigationControl({ showCompass: false }),
+        "top-right"
+      );
+    }
 
     const emit = (
       event: MapEngineEvent,
@@ -355,7 +371,9 @@ export class MapLibreProvider implements MapProvider {
         pin.latitude = position.lat;
         pin.longitude = position.lng;
         draggingPinId = null;
-        map.dragPan.enable();
+        if (allowGestures && !options.lockCenter) {
+          map.dragPan.enable();
+        }
         emit("pindrag", {
           pinId: pin.id,
           coordinates: { latitude: position.lat, longitude: position.lng },
@@ -662,7 +680,7 @@ export class MapLibreProvider implements MapProvider {
 
     styleReady = true;
     syncMarkers();
-    if (pins.length > 0 && !selectedPinId) {
+    if (pins.length > 0 && !selectedPinId && shouldAutoFitPinsOnMount(options)) {
       instance.fitToPins();
     }
 

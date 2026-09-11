@@ -40,6 +40,8 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     registerMapInstance,
     lockCenter,
     lockCenterOffset,
+    interactive,
+    preserveViewport,
   } = useMapEngine();
 
   const setViewportRef = useRef(setViewport);
@@ -58,6 +60,8 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
   const basemapViewRef = useRef(basemapView);
   const lockCenterRef = useRef(lockCenter);
   const lockCenterOffsetRef = useRef(lockCenterOffset);
+  const interactiveRef = useRef(interactive);
+  const preserveViewportRef = useRef(preserveViewport);
 
   useEffect(() => {
     setViewportRef.current = setViewport;
@@ -76,6 +80,8 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     basemapViewRef.current = basemapView;
     lockCenterRef.current = lockCenter;
     lockCenterOffsetRef.current = lockCenterOffset;
+    interactiveRef.current = interactive;
+    preserveViewportRef.current = preserveViewport;
   });
 
   useEffect(() => {
@@ -140,6 +146,8 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
         basemapView: basemapViewRef.current,
         lockCenter: lockCenterRef.current,
         lockCenterOffset: lockCenterOffsetRef.current,
+        interactive: interactiveRef.current,
+        preserveViewport: preserveViewportRef.current,
         signal: abortController.signal,
       })
       .then((instance) => {
@@ -196,7 +204,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
         setReadyRef.current(false);
       }
     };
-  }, [providerId, lockCenter]);
+  }, [providerId, lockCenter, interactive, preserveViewport]);
 
   useEffect(() => {
     const instance = instanceRef.current;
@@ -207,9 +215,10 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
 
   // Apply programmatic viewport changes (e.g. claim-form address geocode → pan map).
   // Skip when center is locked (Mapsite™ pin under tip) — that path owns the camera.
+  // Skip when gestures are disabled so the published map stays at build zoom.
   // Skip when the instance already matches to avoid fighting user pan/zoom echoes.
   useEffect(() => {
-    if (lockCenter) return;
+    if (lockCenter || !interactive) return;
     const instance = instanceRef.current;
     if (!instance) return;
     const current = instance.getViewport();
@@ -218,7 +227,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
       Math.abs(current.center.longitude - viewport.center.longitude) < 1e-7;
     if (sameCenter && current.zoom === viewport.zoom) return;
     instance.setViewport(viewport);
-  }, [viewport, lockCenter]);
+  }, [viewport, lockCenter, interactive]);
 
   useEffect(() => {
     instanceRef.current?.setSelectedPinId(selectedPinId);

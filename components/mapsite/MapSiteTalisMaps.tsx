@@ -4,9 +4,8 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useCallback, type ReactNode } from "react";
 import type { MapSiteLayoutData } from "@/lib/mapsite-layout";
-import { useMapVisitorLocation } from "@/lib/mapsite/use-map-visitor-location";
 import type { TalisMapsPin } from "@/lib/talismaps";
-import MapSiteVisitorLocationOverlay from "./MapSiteVisitorLocationOverlay";
+import MapSitePublishedMapFrame from "./MapSitePublishedMapOverlay";
 
 const TalisMapsEmbed = dynamic(() => import("@/components/talismaps/TalisMapsEmbed"), {
   ssr: false,
@@ -22,6 +21,7 @@ interface MapSiteTalisMapsProps {
   mapCenter: MapSiteLayoutData["mapCenter"];
   mapZoom: MapSiteLayoutData["mapZoom"];
   propertyTitle: string;
+  fastCode: string;
   variant?: "embedded" | "window";
   backHref?: string | null;
   children?: ReactNode;
@@ -32,6 +32,7 @@ export default function MapSiteTalisMaps({
   mapCenter,
   mapZoom,
   propertyTitle,
+  fastCode,
   variant = "embedded",
   backHref = null,
   children = null,
@@ -49,13 +50,6 @@ export default function MapSiteTalisMaps({
     },
     [router],
   );
-  const {
-    coordinates: visitorLocation,
-    nearbyListings,
-    showLocationNotice,
-    dismissNotice,
-    status,
-  } = useMapVisitorLocation({ pins });
 
   const isWindow = variant === "window";
   const frameClassName = isWindow
@@ -65,36 +59,48 @@ export default function MapSiteTalisMaps({
     ? "min-h-dvh"
     : "min-h-[300px] sm:min-h-[440px] md:min-h-[520px]";
 
-  const map = (
+  const mapEmbed = (
+    <TalisMapsEmbed
+      pins={pins}
+      center={mapCenter}
+      zoom={mapZoom}
+      pinLabel={propertyTitle}
+      marketing={pins.length === 0 && !mapCenter}
+      className="absolute inset-0 h-full w-full"
+      minHeightClassName={minHeightClassName}
+      emptyMessage="Add coordinates or Home PINs to display this property on the map."
+      onSelectPin={openGeneratedEbook}
+      preserveViewport
+      interactive={isWindow}
+      lockCenter={!isWindow}
+    />
+  );
+
+  const backLink =
+    isWindow && backHref ? (
+      <a
+        href={backHref}
+        className="absolute right-3 top-3 z-[2147483647] inline-flex min-h-10 items-center rounded-xl border border-neutral-200 bg-white/95 px-3 py-2 text-sm font-medium text-neutral-900 shadow-md backdrop-blur transition hover:bg-white sm:right-4 sm:top-4"
+      >
+        Back to Mapsite™
+      </a>
+    ) : null;
+
+  const map = isWindow ? (
     <div className={frameClassName}>
-      <TalisMapsEmbed
-        pins={pins}
-        center={mapCenter}
-        zoom={mapZoom}
-        pinLabel={propertyTitle}
-        marketing={pins.length === 0 && !mapCenter}
-        visitorLocation={visitorLocation}
-        className="absolute inset-0 h-full w-full"
-        minHeightClassName={minHeightClassName}
-        emptyMessage="Add coordinates or Home PINs to display this property on the map."
-        onSelectPin={openGeneratedEbook}
-      />
-      <MapSiteVisitorLocationOverlay
-        hasVisitorLocation={status === "granted" && visitorLocation != null}
-        nearbyListings={nearbyListings}
-        showLocationNotice={showLocationNotice}
-        onDismissNotice={dismissNotice}
-      />
-      {isWindow && backHref ? (
-        <a
-          href={backHref}
-          className="absolute right-3 top-3 z-[2147483647] inline-flex min-h-10 items-center rounded-xl border border-neutral-200 bg-white/95 px-3 py-2 text-sm font-medium text-neutral-900 shadow-md backdrop-blur transition hover:bg-white sm:right-4 sm:top-4"
-        >
-          Back to Mapsite™
-        </a>
-      ) : null}
+      {mapEmbed}
+      {backLink}
       {children}
     </div>
+  ) : (
+    <MapSitePublishedMapFrame
+      fastCode={fastCode}
+      className={frameClassName}
+      mapZoom={mapZoom}
+    >
+      {mapEmbed}
+      {children}
+    </MapSitePublishedMapFrame>
   );
 
   if (isWindow) {

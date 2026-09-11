@@ -28,6 +28,12 @@ export interface TalisMapsEmbedProps {
   onSelectPin?: (pin: TalisMapsPin | null) => void;
   pinLabel?: string;
   visitorLocation?: MapCoordinates | null;
+  /** When false, pan/zoom/drag/scroll-wheel are disabled. Pins stay clickable. */
+  interactive?: boolean;
+  /** Skip auto fit-to-pins / visitor fit-bounds so the given zoom stays framed. */
+  preserveViewport?: boolean;
+  /** Keep the map center fixed on the pin. */
+  lockCenter?: boolean;
 }
 
 const DEFAULT_PIN_COLOR = "#6B7280";
@@ -154,6 +160,9 @@ function TalisMapsEmbedMap({
   onSelectPin,
   pinLabel,
   visitorLocation = null,
+  interactive = true,
+  preserveViewport = false,
+  lockCenter = false,
 }: TalisMapsEmbedProps) {
   const pins = useMemo(
     () =>
@@ -202,6 +211,9 @@ function TalisMapsEmbedMap({
       initialPins={enginePins}
       initialViewport={initialViewport}
       selectedPinId={selectedPinId}
+      lockCenter={lockCenter}
+      interactive={interactive}
+      preserveViewport={preserveViewport}
       onPinSelect={(pinId) => {
         if (!onSelectPin) return;
         if (!pinId) {
@@ -211,7 +223,7 @@ function TalisMapsEmbedMap({
         onSelectPin(pins.find((pin) => pin.id === pinId) ?? null);
       }}
     >
-      {visitorLocation && fitCoordinates.length > 0 ? (
+      {visitorLocation && !preserveViewport && interactive && fitCoordinates.length > 0 ? (
         <MapEngineFitBounds coordinates={fitCoordinates} />
       ) : null}
       <MapEngineCanvas className="h-full w-full" />

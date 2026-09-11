@@ -222,4 +222,16 @@ describe("buildMapSiteLayoutData", () => {
       },
     });
   });
+
+  it("preserves the saved build-time map zoom on the published layout", () => {
+    expect(buildMapSiteLayoutData({ ...baseMapSite, mapZoom: 12 }).mapZoom).toBe(
+      12,
+    );
+    expect(buildMapSiteLayoutData({ ...baseMapSite, mapZoom: 18 }).mapZoom).toBe(
+      18,
+    );
+    expect(buildMapSiteLayoutData({ ...baseMapSite, mapZoom: null }).mapZoom).toBe(
+      15,
+    );
+  });
 });

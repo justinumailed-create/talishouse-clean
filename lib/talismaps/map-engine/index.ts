@@ -51,6 +51,10 @@ export {
 
 export { toMapEnginePin, toMapEnginePins } from "./pin-adapters";
 export {
+  allowMapGestures,
+  shouldAutoFitPinsOnMount,
+} from "./mount-flags";
+export {
   createMapProvider,
   DEFAULT_MAP_PROVIDER_ID,
   getDefaultMapProvider,
