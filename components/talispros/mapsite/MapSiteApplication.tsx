@@ -7,6 +7,10 @@ import {
   MapEngineProvider,
   useMapEngine,
 } from "@/components/talismaps/map-engine/MapEngineProvider";
+import {
+  MAPSITE_PIN_DEFAULT_BORDER,
+  MAPSITE_PIN_DEFAULT_ICON,
+} from "@/lib/mapsite-pin-style";
 import type { MapEnginePin } from "@/lib/talismaps/map-engine";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import type { PlanType } from "@/lib/registration-plans";
@@ -121,12 +125,16 @@ export default function MapSiteApplication({
         latitude: mapsite.lat,
         longitude: mapsite.lng,
         color: mapsite.pin_color || pinColor,
+        label: mapsite.property_title || undefined,
         featured: true,
         metadata: {
           status: mapsite.status,
           phase,
-          icon: mapsite.pin_icon || "home",
+          icon: mapsite.pin_icon || MAPSITE_PIN_DEFAULT_ICON,
+          border: mapsite.pin_border || MAPSITE_PIN_DEFAULT_BORDER,
           whiteCenter: mapsite.pin_white_center ?? false,
+          animated: Boolean(mapsite.pin_animated),
+          categoryBadge: mapsite.pin_category_badge || null,
         },
       },
     ],

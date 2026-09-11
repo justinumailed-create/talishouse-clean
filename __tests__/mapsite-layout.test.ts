@@ -80,17 +80,21 @@ describe("buildMapSiteLayoutData", () => {
     expect(layout.agent.name).toBe("Arun Rachuri");
     expect(layout.pins).toHaveLength(1);
     expect(layout.pins[0]).toMatchObject({
-      pinIcon: "home",
+      pinIcon: "none",
       pinColor: "#1A73E8",
+      pinBorder: "none",
       whiteCenter: false,
+      pinAnimated: false,
       href: "/talisbooks/fast/ar01",
       categoryBadge: "TEB™",
     });
     expect(toMapEnginePin(layout.pins[0])).toMatchObject({
       color: "#1A73E8",
       metadata: {
-        icon: "home",
+        icon: "none",
+        border: "none",
         whiteCenter: false,
+        animated: false,
         href: "/talisbooks/fast/ar01",
         categoryBadge: "TEB™",
       },
@@ -186,5 +190,36 @@ describe("buildMapSiteLayoutData", () => {
     expect(mapsiteCreateContentHref("AL02")).toBe("/talispros/mapsites/al02/edit");
     expect(mapsiteCreateVideoHref("AL02")).toBe("/talistv?fastCode=AL02");
     expect(mapsiteFullscreenMapHref("AL02")).toBe("/mapsite/al02/map");
+  });
+
+  it("uses saved Build / Claim form pin style on published markers when present", () => {
+    const layout = buildMapSiteLayoutData({
+      ...baseMapSite,
+      pinIcon: "flag",
+      pinColor: "#EC28CD",
+      pinBorder: "solid",
+      pinWhiteCenter: true,
+      pinAnimated: true,
+      pinCategoryBadge: "for-sale",
+    });
+
+    expect(layout.pins[0]).toMatchObject({
+      pinIcon: "flag",
+      pinColor: "#EC28CD",
+      pinBorder: "solid",
+      whiteCenter: true,
+      pinAnimated: true,
+      categoryBadge: "for-sale",
+    });
+    expect(toMapEnginePin(layout.pins[0])).toMatchObject({
+      color: "#EC28CD",
+      metadata: {
+        icon: "flag",
+        border: "solid",
+        whiteCenter: true,
+        animated: true,
+        categoryBadge: "for-sale",
+      },
+    });
   });
 });

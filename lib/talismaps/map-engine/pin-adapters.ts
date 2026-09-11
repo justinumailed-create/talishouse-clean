@@ -15,12 +15,15 @@ export function toMapEnginePin(pin: TalisMapsPin): MapEnginePin {
     featured: pin.featured,
     metadata: {
       icon,
+      border: pin.pinBorder?.trim() || undefined,
       whiteCenter: pin.whiteCenter ?? true,
+      animated: Boolean(pin.pinAnimated),
       categorySlug: pin.categorySlug,
       address: pin.address,
       city: pin.city,
       href: pin.href?.trim() || null,
       categoryBadge: pin.categoryBadge?.trim() || null,
+      customLogoUrl: pin.customLogoUrl?.trim() || null,
     },
   };
 }

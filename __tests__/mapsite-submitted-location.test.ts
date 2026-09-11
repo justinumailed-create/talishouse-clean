@@ -33,5 +33,8 @@ describe("Mapsite™ submitted location merge", () => {
     );
     expect(merged.cover_image).toBe("https://cdn.example/user-photo.jpg");
     expect(merged.pin_icon).toBe("flag");
+    expect(merged.pin_color).toBe("#1A73E8");
+    expect(merged.pin_white_center).toBe(false);
+    expect(merged.pin_animated).toBe(false);
   });
 });

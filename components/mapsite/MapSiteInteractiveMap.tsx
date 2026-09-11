@@ -1,6 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { useMemo } from "react";
+import { mapSitePinVisualFields } from "@/lib/mapsite-pin-style";
+import type { TalisMapsPin } from "@/lib/talismaps";
 
 const TalisMapsEmbed = dynamic(() => import("@/components/talismaps/TalisMapsEmbed"), {
   ssr: false,
@@ -30,8 +33,43 @@ export default function MapSiteInteractiveMap({
     Number.isFinite(latitude) &&
     Number.isFinite(longitude);
 
+  const pins = useMemo<TalisMapsPin[]>(() => {
+    if (!hasCoords || latitude == null || longitude == null) return [];
+    const visual = mapSitePinVisualFields();
+    return [
+      {
+        id: "embed-pin",
+        name: propertyTitle || "Location",
+        description: "",
+        categoryId: null,
+        categorySlug: null,
+        categoryName: null,
+        categoryColor: visual.categoryColor,
+        latitude,
+        longitude,
+        address: "",
+        city: "",
+        province: "",
+        postalCode: "",
+        country: "",
+        website: "",
+        phone: "",
+        email: "",
+        featured: true,
+        sortOrder: 0,
+        pinIcon: visual.pinIcon,
+        pinColor: visual.pinColor,
+        pinBorder: visual.pinBorder,
+        whiteCenter: visual.whiteCenter,
+        pinAnimated: visual.pinAnimated,
+        customLogoUrl: visual.customLogoUrl,
+      },
+    ];
+  }, [hasCoords, latitude, longitude, propertyTitle]);
+
   const mapContent = (
     <TalisMapsEmbed
+      pins={pins}
       latitude={hasCoords ? latitude : undefined}
       longitude={hasCoords ? longitude : undefined}
       zoom={zoom}

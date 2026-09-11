@@ -15,6 +15,7 @@ import {
 } from "@/lib/mapsite-admin-service";
 import MapSiteGalleryEditor from "@/components/admin/MapSiteGalleryEditor";
 import TalisMapsPinPicker from "@/components/build-mapsite/TalisMapsPinPicker";
+import { MAPSITE_PIN_DEFAULT_BORDER, MAPSITE_PIN_DEFAULT_COLOR, MAPSITE_PIN_DEFAULT_ICON } from "@/lib/mapsite-pin-style";
 import MapSiteAdminShareLinks from "@/components/talispros-admin/MapSiteAdminShareLinks";
 import MapSiteAdminEbookPanel from "@/components/talispros-admin/MapSiteAdminEbookPanel";
 import {
@@ -370,8 +371,10 @@ export default function MapSiteAdminEditor({
               mapZoom={Number.parseInt(form.mapZoom, 10) || 15}
               pinStyle={{
                 label: form.propertyTitle || mapsite.fastCode,
-                icon: "home",
-                whiteCenter: true,
+                color: MAPSITE_PIN_DEFAULT_COLOR,
+                icon: MAPSITE_PIN_DEFAULT_ICON,
+                border: MAPSITE_PIN_DEFAULT_BORDER,
+                whiteCenter: false,
               }}
               onLocationChange={(update) => {
                 setForm((prev) => ({
