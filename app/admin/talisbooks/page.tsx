@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireTalisprosAdminPage } from "@/lib/talispros-admin-auth";
+import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { getTalisBooksDashboardStats, listTalisBooks } from "@/lib/talisbooks/book-service";
 import type { TalisBooksDashboardStats } from "@/lib/talisbooks/types";
 import { listMapSitesForAdmin } from "@/lib/mapsite-service";
@@ -11,6 +12,11 @@ import {
   TALISBOOKS_PRODUCT_NAME,
 } from "@/lib/talisbooks/constants";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
+import {
+  filterBooksForAdminLibrary,
+  filterMapSitesForAdminLibrary,
+  talisbooksScopeFromAdminAccount,
+} from "@/lib/talisbooks/library";
 
 export const dynamic = "force-dynamic";
 
@@ -45,14 +51,26 @@ async function safeTalisBooksStats(): Promise<TalisBooksDashboardStats> {
 
 export default async function TalisBooksAdminPage() {
   await requireTalisprosAdminPage();
+  const scope = talisbooksScopeFromAdminAccount(await getAdminSessionAccount());
   const [stats, mapsites, books] = await Promise.all([
     safeTalisBooksStats(),
     listMapSitesForAdmin(),
     safeListTalisBooks(),
   ]);
+  const scopedMapsites = filterMapSitesForAdminLibrary(mapsites, scope);
+  const scopedBooks = filterBooksForAdminLibrary(books, scope);
+  const scopedStats: TalisBooksDashboardStats = scope.excludeDemonstrationCatalog
+    ? {
+        ...stats,
+        totalBooks: scopedBooks.length,
+        publishedBooks: scopedBooks.filter((book) => book.publishStatus === "published").length,
+        draftBooks: scopedBooks.filter((book) => book.publishStatus === "draft").length,
+        inReviewBooks: scopedBooks.filter((book) => book.publishStatus === "in_review").length,
+      }
+    : stats;
 
   const booksByFastCode = new Map<string, { slug: string; title: string }[]>();
-  for (const book of books) {
+  for (const book of scopedBooks) {
     const code = book.fastCode?.trim();
     if (!code) continue;
     const key = code.toLowerCase();
@@ -77,11 +95,11 @@ export default async function TalisBooksAdminPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
             <p className="text-sm text-neutral-500">Total Books</p>
-            <p className="mt-1 text-3xl font-semibold text-neutral-900">{stats.totalBooks}</p>
+            <p className="mt-1 text-3xl font-semibold text-neutral-900">{scopedStats.totalBooks}</p>
           </div>
           <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
             <p className="text-sm text-neutral-500">Published Books</p>
-            <p className="mt-1 text-3xl font-semibold text-neutral-900">{stats.publishedBooks}</p>
+            <p className="mt-1 text-3xl font-semibold text-neutral-900">{scopedStats.publishedBooks}</p>
           </div>
           <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
             <p className="text-sm text-neutral-500">Pages</p>
@@ -140,13 +158,13 @@ export default async function TalisBooksAdminPage() {
             Landscape pages stay one complete two-page spread. After opening a
             book in the viewer, Live Edit is available for SUPERADMIN.
           </p>
-          {mapsites.length === 0 ? (
+          {scopedMapsites.length === 0 ? (
             <p className="mt-4 text-sm text-neutral-500">
               No Mapsites™ found. Create one from Build requests, then return here.
             </p>
           ) : (
             <ul className="mt-4 divide-y divide-neutral-100">
-              {mapsites.slice(0, 12).map((mapsite) => {
+              {scopedMapsites.slice(0, 12).map((mapsite) => {
                 const linked = booksByFastCode.get(mapsite.fastCode.toLowerCase()) ?? [];
                 const firstBook = linked[0];
                 return (

@@ -1,9 +1,11 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import type { Database } from "@/lib/database.types";
+import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { TALISBOOKS_COVER_TEMPLATES } from "../covers/catalog";
 import type { TalisBooksCoverTemplateId } from "../covers/constants";
 import { TALISBOOKS_LIBRARY_PAGE_SIZE, TALISBOOKS_LIBRARY_SPINE_PALETTES } from "./constants";
 import { createDemoBookshelf } from "./demo-shelf";
+import { filterDemonstrationCatalogBooks } from "./demonstration-catalog";
 import { filterBooksForFastCodeShelf, queryLibraryBooks } from "./query";
 import type {
   TalisBooksBookshelf,
@@ -12,6 +14,18 @@ import type {
   TalisBooksLibraryResult,
 } from "./types";
 import type { TalisBooksAccountType, TalisBooksPublishStatus } from "../types";
+
+export type TalisBooksBookshelfOptions = {
+  accountId?: string | null;
+  accountType?: "root" | "derivative";
+  accountName?: string;
+  fastCode?: string | null;
+  /**
+   * When set, never inject the hardcoded preview shelf or pinned sample.
+   * Used by the admin / signed-in library so real Mapsites™ see created books.
+   */
+  excludeDemonstrationCatalog?: boolean;
+};
 
 type BookRow = Database["public"]["Tables"]["talisbooks_books"]["Row"];
 type ImageRow = Database["public"]["Tables"]["talisbooks_images"]["Row"];
@@ -77,6 +91,43 @@ function toLibraryBook(
   };
 }
 
+function shouldExcludeDemonstrationCatalog(
+  options?: Pick<TalisBooksBookshelfOptions, "fastCode" | "excludeDemonstrationCatalog">,
+): boolean {
+  if (options?.excludeDemonstrationCatalog) return true;
+  const code = options?.fastCode?.trim().toLowerCase() || "";
+  return Boolean(code && isIssuedFastCode(code));
+}
+
+function applyBookshelfCatalogPolicy(
+  books: TalisBooksLibraryBook[],
+  options?: Pick<TalisBooksBookshelfOptions, "fastCode" | "excludeDemonstrationCatalog">,
+  mapsiteId?: string | null,
+): TalisBooksLibraryBook[] {
+  let next = books;
+  const fastCode = options?.fastCode?.trim() || "";
+  if (fastCode) {
+    next = filterBooksForFastCodeShelf(next, fastCode, mapsiteId);
+  }
+  if (shouldExcludeDemonstrationCatalog(options)) {
+    next = filterDemonstrationCatalogBooks(next);
+  }
+  return next;
+}
+
+function emptyPersonalBookshelf(
+  options: TalisBooksBookshelfOptions,
+  accountType: "root" | "derivative",
+): TalisBooksBookshelf {
+  return {
+    accountId: options.accountId ?? null,
+    accountType,
+    accountName: options.accountName ?? "Bookshelf",
+    fastCode: options.fastCode?.trim().toLowerCase() || null,
+    books: [],
+  };
+}
+
 function buildStats(books: TalisBooksLibraryBook[]) {
   return {
     total: books.length,
@@ -123,19 +174,71 @@ async function loadAnalyticsCounts(
   return counts;
 }
 
+async function rowsToLibraryBooks(rows: BookRow[]): Promise<TalisBooksLibraryBook[]> {
+  if (rows.length === 0) return [];
+
+  const supabase = getSupabaseAdmin();
+  const coverIds = rows
+    .map((row) => row.cover_image_id)
+    .filter((id): id is string => typeof id === "string" && id.length > 0);
+
+  const coverMap = new Map<string, string>();
+  if (coverIds.length > 0) {
+    const { data: images } = await supabase
+      .from("talisbooks_images")
+      .select("id, url")
+      .in("id", coverIds);
+    for (const image of (images ?? []) as Pick<ImageRow, "id" | "url">[]) {
+      coverMap.set(image.id, image.url);
+    }
+  }
+
+  const analytics = await loadAnalyticsCounts(rows.map((row) => row.id));
+  return rows.map((row, index) => {
+    const metrics = analytics.get(row.id) ?? { views: 0, clicks: 0 };
+    return toLibraryBook(
+      row,
+      index,
+      row.cover_image_id ? coverMap.get(row.cover_image_id) ?? null : null,
+      metrics.views,
+      metrics.clicks,
+    );
+  });
+}
+
+async function loadCreatedLibraryBooks(): Promise<TalisBooksLibraryBook[]> {
+  if (!isSupabaseAdminConfigured()) return [];
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("talisbooks_books")
+    .select("*")
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    console.error("[talisbooks] loadCreatedLibraryBooks error:", error.message);
+    return [];
+  }
+
+  return rowsToLibraryBooks((data ?? []) as BookRow[]);
+}
+
 /**
  * Personal bookshelf for a Root or Derivative account.
  * When `fastCode` is set (Mapsite™ TEB™), returns only that code's ebooks — not the demo library.
+ * When `excludeDemonstrationCatalog` is set without a FAST code, returns created books only
+ * (no pinned sample, demo-* rows, or hardcoded preview fillers).
  */
-export async function getTalisBooksBookshelf(options?: {
-  accountId?: string | null;
-  accountType?: "root" | "derivative";
-  accountName?: string;
-  fastCode?: string | null;
-}): Promise<TalisBooksBookshelf> {
+export async function getTalisBooksBookshelf(
+  options?: TalisBooksBookshelfOptions,
+): Promise<TalisBooksBookshelf> {
   const accountType = options?.accountType ?? "root";
   const accountId = options?.accountId ?? null;
   const fastCode = options?.fastCode?.trim().toLowerCase() || null;
+  const catalogOptions = {
+    fastCode,
+    excludeDemonstrationCatalog: options?.excludeDemonstrationCatalog,
+  };
 
   if (fastCode) {
     const { getMapSiteEbookContext } = await import("../mapsite-ebook-service");
@@ -174,12 +277,31 @@ export async function getTalisBooksBookshelf(options?: {
       registrationHref: context.registrationHref,
       entitlements,
       primaryEbook: context.primaryEbook,
-      books: context.books,
+      books: applyBookshelfCatalogPolicy(context.books, catalogOptions, context.mapsiteId),
     };
   }
 
   if (!accountId) {
+    if (shouldExcludeDemonstrationCatalog(catalogOptions)) {
+      const books = applyBookshelfCatalogPolicy(
+        await loadCreatedLibraryBooks(),
+        catalogOptions,
+      );
+      return {
+        accountId: null,
+        accountType,
+        accountName: options?.accountName ?? "Bookshelf",
+        fastCode: null,
+        books,
+      };
+    }
     return createDemoBookshelf(accountType);
+  }
+
+  if (!isSupabaseAdminConfigured()) {
+    return shouldExcludeDemonstrationCatalog(catalogOptions)
+      ? emptyPersonalBookshelf({ ...options, accountId, fastCode }, accountType)
+      : createDemoBookshelf(accountType);
   }
 
   const supabase = getSupabaseAdmin();
@@ -191,11 +313,16 @@ export async function getTalisBooksBookshelf(options?: {
 
   if (error) {
     console.error("[talisbooks] getTalisBooksBookshelf error:", error.message);
-    return createDemoBookshelf(accountType);
+    return shouldExcludeDemonstrationCatalog(catalogOptions)
+      ? emptyPersonalBookshelf({ ...options, accountId, fastCode }, accountType)
+      : createDemoBookshelf(accountType);
   }
 
   const rows = (data ?? []) as BookRow[];
   if (rows.length === 0) {
+    if (shouldExcludeDemonstrationCatalog(catalogOptions)) {
+      return emptyPersonalBookshelf({ ...options, accountId, fastCode }, accountType);
+    }
     const demo = createDemoBookshelf(accountType);
     return {
       ...demo,
@@ -205,48 +332,19 @@ export async function getTalisBooksBookshelf(options?: {
     };
   }
 
-  const coverIds = rows
-    .map((row) => row.cover_image_id)
-    .filter((id): id is string => typeof id === "string" && id.length > 0);
-
-  const coverMap = new Map<string, string>();
-  if (coverIds.length > 0) {
-    const { data: images } = await supabase
-      .from("talisbooks_images")
-      .select("id, url")
-      .in("id", coverIds);
-    for (const image of (images ?? []) as Pick<ImageRow, "id" | "url">[]) {
-      coverMap.set(image.id, image.url);
-    }
-  }
-
-  const analytics = await loadAnalyticsCounts(rows.map((row) => row.id));
+  const books = applyBookshelfCatalogPolicy(await rowsToLibraryBooks(rows), catalogOptions);
 
   return {
     accountId,
     accountType,
     accountName: options?.accountName ?? "Bookshelf",
     fastCode: options?.fastCode ?? rows[0]?.fast_code ?? null,
-    books: rows.map((row, index) => {
-      const metrics = analytics.get(row.id) ?? { views: 0, clicks: 0 };
-      return toLibraryBook(
-        row,
-        index,
-        row.cover_image_id ? coverMap.get(row.cover_image_id) ?? null : null,
-        metrics.views,
-        metrics.clicks,
-      );
-    }),
+    books,
   };
 }
 
 export async function getTalisBooksLibrary(
-  options?: {
-    accountId?: string | null;
-    accountType?: "root" | "derivative";
-    accountName?: string;
-    fastCode?: string | null;
-  },
+  options?: TalisBooksBookshelfOptions,
   query: TalisBooksLibraryQuery = {},
 ): Promise<TalisBooksLibraryResult> {
   const bookshelf = await getTalisBooksBookshelf(options);
@@ -281,9 +379,9 @@ export async function getPublicTalisBooksBookshelf(options?: {
   if (fastCode) {
     const { getMapSiteEbookContext } = await import("../mapsite-ebook-service");
     const context = await getMapSiteEbookContext(fastCode);
-    const books = filterBooksForFastCodeShelf(
+    const books = applyBookshelfCatalogPolicy(
       context?.books ?? [],
-      fastCode,
+      { fastCode, excludeDemonstrationCatalog: isIssuedFastCode(fastCode) },
       context?.mapsiteId ?? null,
     );
 
