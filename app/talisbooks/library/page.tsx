@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
-import { getTalisBooksBookshelf } from "@/lib/talisbooks/library";
+import { getAdminSessionAccount } from "@/lib/admin-auth";
+import {
+  getTalisBooksBookshelf,
+  talisbooksScopeFromAdminAccount,
+} from "@/lib/talisbooks/library";
 import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
 import { createMetadata } from "@/lib/seo";
 import { ROUTES } from "@/lib/routes";
@@ -35,9 +39,11 @@ export default async function TalisBooksLibraryPage({
     );
   }
   const accountType = params.accountType === "derivative" ? "derivative" : "root";
+  const scope = talisbooksScopeFromAdminAccount(await getAdminSessionAccount());
   const bookshelf = await getTalisBooksBookshelf({
     accountType,
-    fastCode,
+    fastCode: scope.fastCode,
+    excludeDemonstrationCatalog: scope.excludeDemonstrationCatalog,
   });
 
   return <TalisBooksLibraryShell bookshelf={bookshelf} />;

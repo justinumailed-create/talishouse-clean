@@ -6,13 +6,18 @@ import {
   TALISBOOKS_LIBRARY_SHELF_CAPACITY,
   createDemoDerivativeBookshelf,
   createDemoRootBookshelf,
+  filterBooksForAdminLibrary,
   filterBooksForFastCodeShelf,
   filterLibraryBooks,
+  filterMapSitesForAdminLibrary,
+  isDemonstrationCatalogBook,
+  isDemonstrationFastCode,
   monthlyCapacityUsd,
   paginateLibraryBooks,
   partitionBookshelf,
   queryLibraryBooks,
   sortLibraryBooks,
+  talisbooksScopeFromAdminAccount,
 } from "../lib/talisbooks/library";
 
 describe("Talisbooks™ library shelves", () => {
@@ -158,5 +163,79 @@ describe("Talisbooks™ library search / sort / filter", () => {
     ];
     const shelf = filterBooksForFastCodeShelf(mixed, "AL02", "ms-al02");
     expect(shelf.map((book) => book.id).sort()).toEqual(["al02-a", "al02-uncoded"]);
+  });
+});
+
+describe("Talisbooks™ admin library catalog policy", () => {
+  const rm22Book = {
+    id: "real-rm22",
+    slug: "rm22-rm22-talisbook-b1mz",
+    title: "RM22 Talisbook™",
+    subtitle: "Draft",
+    fastCode: "rm22",
+  };
+  const otherRealBook = {
+    id: "real-lg01",
+    slug: "lg01-lookbook",
+    title: "LG01 Lookbook",
+    subtitle: "",
+    fastCode: "lg01",
+  };
+  const pinnedSample = {
+    id: "pinned-talispros-ebook-sample",
+    slug: "talispros-ebook-sample",
+    title: "Talispros eBook",
+    subtitle: "Pinned demonstration",
+    fastCode: null as string | null,
+  };
+  const demoMapsiteBook = {
+    id: "demo-row",
+    slug: "demo-ab12cd34-lookbook",
+    title: "Demo Mapsite™",
+    subtitle: "",
+    fastCode: "demo-ab12cd34",
+  };
+  const previewFiller = createDemoRootBookshelf().books[0]!;
+
+  const catalog = [rm22Book, otherRealBook, pinnedSample, demoMapsiteBook, previewFiller];
+
+  it("treats pinned sample, demo-* FAST codes, and preview fillers as demonstration catalog", () => {
+    expect(isDemonstrationCatalogBook(pinnedSample)).toBe(true);
+    expect(isDemonstrationCatalogBook(demoMapsiteBook)).toBe(true);
+    expect(isDemonstrationCatalogBook(previewFiller)).toBe(true);
+    expect(isDemonstrationFastCode("demo-ab12cd34")).toBe(true);
+    expect(isDemonstrationCatalogBook(rm22Book)).toBe(false);
+  });
+
+  it("scopes Mapsite-linked admin rm22 to created rm22 books only", () => {
+    const scope = talisbooksScopeFromAdminAccount({ fastCode: "RM22" });
+    expect(scope).toEqual({ fastCode: "rm22", excludeDemonstrationCatalog: true });
+
+    const books = filterBooksForAdminLibrary(catalog, scope);
+    expect(books.map((book) => book.id)).toEqual(["real-rm22"]);
+
+    const mapsites = filterMapSitesForAdminLibrary(
+      [
+        { fastCode: "rm22", propertyTitle: "RM22" },
+        { fastCode: "lg01", propertyTitle: "LG01" },
+        { fastCode: "demo-ab12cd34", propertyTitle: "Demo Mapsite™" },
+      ],
+      scope,
+    );
+    expect(mapsites.map((site) => site.fastCode)).toEqual(["rm22"]);
+  });
+
+  it("lets platform admins see every real Mapsite™ book without demo fillers", () => {
+    const scope = talisbooksScopeFromAdminAccount({ fastCode: "ARUN" });
+    expect(scope).toEqual({ fastCode: null, excludeDemonstrationCatalog: true });
+
+    const books = filterBooksForAdminLibrary(catalog, scope);
+    expect(books.map((book) => book.id).sort()).toEqual(["real-lg01", "real-rm22"]);
+  });
+
+  it("keeps the in-memory preview shelf for anonymous library visits", () => {
+    const scope = talisbooksScopeFromAdminAccount(null);
+    expect(scope.excludeDemonstrationCatalog).toBe(false);
+    expect(filterBooksForAdminLibrary(catalog, scope)).toHaveLength(catalog.length);
   });
 });

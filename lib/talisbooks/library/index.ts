@@ -30,6 +30,19 @@ export {
   getTalisBooksBookshelf,
   getTalisBooksLibrary,
 } from "./bookshelf-service";
+export type { TalisBooksBookshelfOptions } from "./bookshelf-service";
+export {
+  PINNED_TALISBOOK_LIBRARY_ID,
+  filterDemonstrationCatalogBooks,
+  isDemonstrationCatalogBook,
+  isDemonstrationFastCode,
+} from "./demonstration-catalog";
+export {
+  filterBooksForAdminLibrary,
+  filterMapSitesForAdminLibrary,
+  talisbooksScopeFromAdminAccount,
+} from "./admin-scope";
+export type { TalisBooksAdminLibraryScope } from "./admin-scope";
 export {
   PINNED_TALISBOOK_SLUG,
   PINNED_TALISBOOK_PDF_PATH,
