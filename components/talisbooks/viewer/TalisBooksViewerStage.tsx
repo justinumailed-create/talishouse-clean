@@ -10,6 +10,7 @@ import {
   useTransform,
   type MotionValue,
 } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import TalisBooksPageRenderer from "@/components/talisbooks/viewer/TalisBooksPageRenderer";
 import {
   clampSpreadAspectRatio,
@@ -28,6 +29,7 @@ import {
   TALISBOOKS_VIEWER_WRAP_IN_MS,
   TALISBOOKS_VIEWER_WRAP_OUT_MS,
   TALISBOOKS_VIEWER_WRAP_SWAP_MS,
+  adjacentNavIndex,
   describeViewerPage,
   describeViewerSpread,
   getViewerSpread,
@@ -75,6 +77,81 @@ function wrapOpacityDuration(wrapPhase: WrapPhase): number {
     return TALISBOOKS_VIEWER_WRAP_IN_MS / 1000;
   }
   return 0.4;
+}
+
+type FlipMode = "program" | "gesture" | "local";
+
+type ActiveFlip = {
+  from: number;
+  to: number;
+  direction: 1 | -1;
+  mode: FlipMode;
+};
+
+function ViewerTurnButtons({
+  disablePrev,
+  disableNext,
+  busy,
+  onPrevious,
+  onNext,
+}: {
+  disablePrev: boolean;
+  disableNext: boolean;
+  busy: boolean;
+  onPrevious: () => void;
+  onNext: () => void;
+}) {
+  const startTurn = (event: ReactPointerEvent<HTMLButtonElement>, turn: () => void) => {
+    if (event.button !== 0) {
+      return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    if (!busy) {
+      turn();
+    }
+  };
+
+  return (
+    <div className="talisbooks-viewer-stage__nav">
+      <button
+        type="button"
+        className="talisbooks-viewer-stage__nav-btn talisbooks-viewer-stage__nav-btn--prev"
+        aria-label="Previous page"
+        disabled={disablePrev || busy}
+        onPointerDown={(event) => startTurn(event, onPrevious)}
+        onClick={(event) => {
+          if (event.detail !== 0) {
+            event.preventDefault();
+            return;
+          }
+          if (!disablePrev && !busy) {
+            onPrevious();
+          }
+        }}
+      >
+        <ChevronLeft className="h-6 w-6" aria-hidden="true" />
+      </button>
+      <button
+        type="button"
+        className="talisbooks-viewer-stage__nav-btn talisbooks-viewer-stage__nav-btn--next"
+        aria-label="Next page"
+        disabled={disableNext || busy}
+        onPointerDown={(event) => startTurn(event, onNext)}
+        onClick={(event) => {
+          if (event.detail !== 0) {
+            event.preventDefault();
+            return;
+          }
+          if (!disableNext && !busy) {
+            onNext();
+          }
+        }}
+      >
+        <ChevronRight className="h-6 w-6" aria-hidden="true" />
+      </button>
+    </div>
+  );
 }
 
 function SoftBlank({ side }: { side: "left" | "right" }) {
@@ -452,12 +529,7 @@ function OpenBookSpread({
   onFlippingChange?: (flipping: boolean) => void;
 }) {
   const [displayedIndex, setDisplayedIndex] = useState(navIndex);
-  const [flip, setFlip] = useState<{
-    from: number;
-    to: number;
-    direction: 1 | -1;
-    mode: "program" | "gesture";
-  } | null>(null);
+  const [flip, setFlip] = useState<ActiveFlip | null>(null);
   const [grabbing, setGrabbing] = useState(false);
   const [wrapPhase, setWrapPhase] = useState<WrapPhase>("idle");
   const prefersReducedMotion = useReducedMotion();
@@ -465,6 +537,14 @@ function OpenBookSpread({
   const flipProgress = useMotionValue(0);
   const targetNavRef = useRef(navIndex);
   const busyRef = useRef(false);
+  const flipRef = useRef<ActiveFlip | null>(flip);
+  flipRef.current = flip;
+  const directionRef = useRef(direction);
+  directionRef.current = direction;
+  const onRequestNextRef = useRef(onRequestNext);
+  const onRequestPreviousRef = useRef(onRequestPrevious);
+  onRequestNextRef.current = onRequestNext;
+  onRequestPreviousRef.current = onRequestPrevious;
   const gestureRef = useRef<{
     side: GestureSide;
     direction: 1 | -1;
@@ -491,10 +571,57 @@ function OpenBookSpread({
     }
   };
 
-  const finishProgramFlip = () => {
-    setDisplayedIndex(targetNavRef.current);
+  const finishActiveFlip = (active: ActiveFlip) => {
+    setDisplayedIndex(active.to);
+    flipRef.current = null;
     setFlip(null);
     notifyFlipping(false);
+    if (active.mode === "local") {
+      if (active.direction > 0) {
+        onRequestNextRef.current();
+      } else {
+        onRequestPreviousRef.current();
+      }
+    }
+  };
+
+  const beginAnimatedFlip = (nextFlip: ActiveFlip) => {
+    flipRef.current = nextFlip;
+    setFlip(nextFlip);
+    notifyFlipping(true);
+  };
+
+  const turnBy = (flipDirection: 1 | -1) => {
+    if (busyRef.current || wrapPhase !== "idle") {
+      return;
+    }
+
+    const to = adjacentNavIndex(displayedIndex, navCount, flipDirection);
+    if (to == null) {
+      if (flipDirection > 0) {
+        onRequestNextRef.current();
+      } else {
+        onRequestPreviousRef.current();
+      }
+      return;
+    }
+
+    if (prefersReducedMotion) {
+      setDisplayedIndex(to);
+      if (flipDirection > 0) {
+        onRequestNextRef.current();
+      } else {
+        onRequestPreviousRef.current();
+      }
+      return;
+    }
+
+    beginAnimatedFlip({
+      from: displayedIndex,
+      to,
+      direction: flipDirection,
+      mode: "local",
+    });
   };
 
   useEffect(() => {
@@ -503,6 +630,10 @@ function OpenBookSpread({
     }
 
     if (gestureRef.current?.dragging) {
+      return;
+    }
+
+    if (flipRef.current && flipRef.current.to === navIndex) {
       return;
     }
 
@@ -539,38 +670,45 @@ function OpenBookSpread({
 
     if (prefersReducedMotion) {
       setDisplayedIndex(navIndex);
+      flipRef.current = null;
       setFlip(null);
       notifyFlipping(false);
       return;
     }
 
-    const flipDirection = direction;
-    setFlip({
+    beginAnimatedFlip({
       from: displayedIndex,
       to: navIndex,
-      direction: flipDirection,
+      direction: directionRef.current,
       mode: "program",
     });
-    flipProgress.set(0);
-    notifyFlipping(true);
-    playViewerFlipSound();
+    // Parent/autoplay turns only. Button/click use turnBy so direction-only
+    // updates cannot cancel an in-flight curl.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navIndex]);
 
+  // Start the curl after FlipLeaf has committed so the 180° leaf is on screen.
+  useEffect(() => {
+    if (!flip || flip.mode === "gesture") {
+      return;
+    }
+
+    flipProgress.set(0);
+    playViewerFlipSound();
     const controls = animate(flipProgress, 1, {
       duration: TALISBOOKS_VIEWER_TURN_DURATION_MS / 1000,
       ease: FLIP_EASE,
     });
-
     const timer = window.setTimeout(() => {
-      finishProgramFlip();
+      finishActiveFlip(flip);
     }, TALISBOOKS_VIEWER_TURN_DURATION_MS);
 
     return () => {
       controls.stop();
       window.clearTimeout(timer);
     };
-    // Intentionally depend on navIndex changes for programmatic turns.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navIndex, direction]);
+  }, [flip]);
 
   const beginGestureFlip = (side: GestureSide, flipDirection: 1 | -1) => {
     if (busyRef.current) {
@@ -582,12 +720,14 @@ function OpenBookSpread({
         ? Math.min(displayedIndex + 1, navCount - 1)
         : Math.max(displayedIndex - 1, 0);
 
-    setFlip({
+    const nextFlip: ActiveFlip = {
       from: displayedIndex,
       to,
       direction: flipDirection,
       mode: "gesture",
-    });
+    };
+    flipRef.current = nextFlip;
+    setFlip(nextFlip);
 
     flipProgress.set(0);
     notifyFlipping(true);
@@ -728,15 +868,11 @@ function OpenBookSpread({
     }
 
     if (!gesture.dragging) {
-      // Short click / tap: right advances (wraps to cover on last spread), left goes back.
+      // Short click / tap: same animated curl path as the nav buttons.
       const clickedSide = gesture.side;
       clearGestureTimers();
       gestureRef.current = null;
-      if (clickedSide === "right") {
-        onRequestNext();
-      } else {
-        onRequestPrevious();
-      }
+      turnBy(clickedSide === "right" ? 1 : -1);
       return;
     }
 
@@ -815,6 +951,7 @@ function OpenBookSpread({
 
   return (
     <>
+      <div className="talisbooks-viewer-stage__open-book">
       <motion.div
         className={[
           "talisbooks-viewer-book",
@@ -918,9 +1055,17 @@ function OpenBookSpread({
           </div>
         </div>
       </motion.div>
+      <ViewerTurnButtons
+        disablePrev={magazine && displayedIndex <= 0}
+        disableNext={false}
+        busy={Boolean(flip) || wrapPhase !== "idle"}
+        onPrevious={() => turnBy(-1)}
+        onNext={() => turnBy(1)}
+      />
+      </div>
 
       <p className="talisbooks-viewer-stage__hint" aria-live="polite">
-        Click right to advance · click left to go back · {describeViewerSpread(labelSpread)} · Spread{" "}
+        Use arrows, click, or swipe · {describeViewerSpread(labelSpread)} · Spread{" "}
         {Math.min(displayedIndex, navCount - 1) + 1} of {navCount}
       </p>
     </>
@@ -947,12 +1092,7 @@ function OpenBookSingle({
   onFlippingChange?: (flipping: boolean) => void;
 }) {
   const [displayedIndex, setDisplayedIndex] = useState(navIndex);
-  const [flip, setFlip] = useState<{
-    from: number;
-    to: number;
-    direction: 1 | -1;
-    mode: "program" | "gesture";
-  } | null>(null);
+  const [flip, setFlip] = useState<ActiveFlip | null>(null);
   const [grabbing, setGrabbing] = useState(false);
   const [wrapPhase, setWrapPhase] = useState<WrapPhase>("idle");
   const prefersReducedMotion = useReducedMotion();
@@ -960,8 +1100,14 @@ function OpenBookSingle({
   const flipProgress = useMotionValue(0);
   const targetNavRef = useRef(navIndex);
   const busyRef = useRef(false);
-  const flipRef = useRef(flip);
+  const flipRef = useRef<ActiveFlip | null>(flip);
   flipRef.current = flip;
+  const directionRef = useRef(direction);
+  directionRef.current = direction;
+  const onRequestNextRef = useRef(onRequestNext);
+  const onRequestPreviousRef = useRef(onRequestPrevious);
+  onRequestNextRef.current = onRequestNext;
+  onRequestPreviousRef.current = onRequestPrevious;
   const pageWidthRef = useRef(320);
   const pageNodeRef = useRef<HTMLDivElement | null>(null);
   const gestureRef = useRef<{
@@ -982,11 +1128,57 @@ function OpenBookSingle({
     onFlippingChange?.(active);
   };
 
-  const finishProgramFlip = () => {
-    setDisplayedIndex(targetNavRef.current);
+  const finishActiveFlip = (active: ActiveFlip) => {
+    setDisplayedIndex(active.to);
     flipRef.current = null;
     setFlip(null);
     notifyFlipping(false);
+    if (active.mode === "local") {
+      if (active.direction > 0) {
+        onRequestNextRef.current();
+      } else {
+        onRequestPreviousRef.current();
+      }
+    }
+  };
+
+  const beginAnimatedFlip = (nextFlip: ActiveFlip) => {
+    flipRef.current = nextFlip;
+    setFlip(nextFlip);
+    notifyFlipping(true);
+  };
+
+  const turnBy = (flipDirection: 1 | -1) => {
+    if (busyRef.current || wrapPhase !== "idle") {
+      return;
+    }
+
+    const to = adjacentNavIndex(displayedIndex, navCount, flipDirection);
+    if (to == null) {
+      if (flipDirection > 0) {
+        onRequestNextRef.current();
+      } else {
+        onRequestPreviousRef.current();
+      }
+      return;
+    }
+
+    if (prefersReducedMotion) {
+      setDisplayedIndex(to);
+      if (flipDirection > 0) {
+        onRequestNextRef.current();
+      } else {
+        onRequestPreviousRef.current();
+      }
+      return;
+    }
+
+    beginAnimatedFlip({
+      from: displayedIndex,
+      to,
+      direction: flipDirection,
+      mode: "local",
+    });
   };
 
   useEffect(() => {
@@ -994,6 +1186,9 @@ function OpenBookSingle({
       return;
     }
     if (gestureRef.current?.dragging) {
+      return;
+    }
+    if (flipRef.current && flipRef.current.to === navIndex) {
       return;
     }
 
@@ -1036,25 +1231,29 @@ function OpenBookSingle({
       return;
     }
 
-    const nextFlip = {
+    beginAnimatedFlip({
       from: displayedIndex,
       to: navIndex,
-      direction,
-      mode: "program" as const,
-    };
-    flipRef.current = nextFlip;
-    setFlip(nextFlip);
-    flipProgress.set(0);
-    notifyFlipping(true);
-    playViewerFlipSound();
+      direction: directionRef.current,
+      mode: "program",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navIndex]);
 
+  useEffect(() => {
+    if (!flip || flip.mode === "gesture") {
+      return;
+    }
+
+    flipProgress.set(0);
+    playViewerFlipSound();
     const controls = animate(flipProgress, 1, {
       duration: TALISBOOKS_VIEWER_SINGLE_TURN_DURATION_MS / 1000,
       ease: FLIP_EASE,
     });
 
     const timer = window.setTimeout(() => {
-      finishProgramFlip();
+      finishActiveFlip(flip);
     }, TALISBOOKS_VIEWER_SINGLE_TURN_DURATION_MS);
 
     return () => {
@@ -1062,7 +1261,7 @@ function OpenBookSingle({
       window.clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navIndex, direction]);
+  }, [flip]);
 
   const beginGestureFlip = (flipDirection: 1 | -1) => {
     if (busyRef.current) {
@@ -1280,6 +1479,7 @@ function OpenBookSingle({
 
   return (
     <>
+      <div className="talisbooks-viewer-stage__open-book">
       <motion.div
         className={[
           "talisbooks-viewer-book",
@@ -1358,9 +1558,17 @@ function OpenBookSingle({
           </div>
         </div>
       </motion.div>
+      <ViewerTurnButtons
+        disablePrev={magazine && displayedIndex <= 0}
+        disableNext={false}
+        busy={Boolean(flip) || wrapPhase !== "idle"}
+        onPrevious={() => turnBy(-1)}
+        onNext={() => turnBy(1)}
+      />
+      </div>
 
       <p className="talisbooks-viewer-stage__hint" aria-live="polite">
-        Swipe to turn · {describeViewerPage(labelPage)} ·{" "}
+        Use arrows or swipe · {describeViewerPage(labelPage)} ·{" "}
         {Math.min(displayedIndex, navCount - 1) + 1} of {navCount}
       </p>
     </>

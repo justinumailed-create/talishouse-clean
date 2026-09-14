@@ -26,6 +26,7 @@ export {
 } from "./flip-geometry";
 export type { MagazineSoloShiftInput } from "./flip-geometry";
 export {
+  adjacentNavIndex,
   clampViewerIntervalMs,
   intervalMsToSpeedPercent,
   nextPageIndex,
