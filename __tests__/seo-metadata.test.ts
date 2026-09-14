@@ -1,5 +1,24 @@
 import { describe, expect, it } from "vitest";
+import { ADMIN_CONSOLE_METADATA, ADMIN_LOGIN_METADATA } from "../lib/admin-seo";
 import { createMetadata } from "../lib/seo";
+
+describe("admin SEO metadata", () => {
+  it("overrides root homes marketing copy on the admin console", () => {
+    expect(ADMIN_CONSOLE_METADATA.title).toBe("Admin Console | Talispros");
+    expect(ADMIN_CONSOLE_METADATA.description).toBe(
+      "Talispros admin console. Authorized operators sign in with a FAST code to manage site content, Mapsites, and operations.",
+    );
+    expect(ADMIN_CONSOLE_METADATA.robots).toMatchObject({ index: false, follow: false });
+  });
+
+  it("uses FAST-code login copy on /admin/login", () => {
+    expect(ADMIN_LOGIN_METADATA.title).toBe("Admin Login | Talispros");
+    expect(ADMIN_LOGIN_METADATA.description).toBe(
+      "Sign in to the Talispros admin console with your authorized FAST code.",
+    );
+    expect(ADMIN_LOGIN_METADATA.robots).toMatchObject({ index: false, follow: false });
+  });
+});
 
 describe("createMetadata", () => {
   it("omits Open Graph and Twitter images when image is false", () => {
