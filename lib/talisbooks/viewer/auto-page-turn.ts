@@ -54,6 +54,24 @@ export function previousPageIndex(currentIndex: number, pageCount: number): numb
   return (currentIndex - 1 + pageCount) % pageCount;
 }
 
+/**
+ * Adjacent nav index without wrapping.
+ * `null` means a boundary turn the shell should handle (cover wrap / close).
+ */
+export function adjacentNavIndex(
+  currentIndex: number,
+  pageCount: number,
+  direction: 1 | -1,
+): number | null {
+  if (pageCount <= 0) {
+    return null;
+  }
+  if (direction > 0) {
+    return currentIndex >= pageCount - 1 ? null : currentIndex + 1;
+  }
+  return currentIndex <= 0 ? null : currentIndex - 1;
+}
+
 /** Maps interval to a 0–100 speed slider value (faster = higher). */
 export function intervalMsToSpeedPercent(intervalMs: number): number {
   const clamped = clampViewerIntervalMs(intervalMs);

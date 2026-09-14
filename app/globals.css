@@ -1262,6 +1262,54 @@ body.mapsite-gallery-open [data-paypal-button] {
   justify-content: center;
 }
 
+.talisbooks-viewer-stage__open-book {
+  position: relative;
+  width: auto;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.talisbooks-viewer-stage__nav {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+  padding: 0 0.45rem;
+}
+
+.talisbooks-viewer-stage__nav-btn {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(28, 25, 23, 0.72);
+  color: #fffefb;
+  box-shadow: 0 10px 22px rgba(28, 25, 23, 0.28);
+  cursor: pointer;
+}
+
+.talisbooks-viewer-stage__nav-btn:hover:not(:disabled) {
+  background: rgba(28, 25, 23, 0.9);
+}
+
+.talisbooks-viewer-stage__nav-btn:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+
+.talisbooks-viewer-stage__nav-btn:focus-visible {
+  outline: 2px solid #fffefb;
+  outline-offset: 2px;
+}
+
 /* Closed hard cover — physical hardcover magazine */
 .talisbooks-viewer-hardcover {
   --hardcover-radius: 0.22rem;
@@ -3929,6 +3977,15 @@ body.mapsite-gallery-open [data-paypal-button] {
   .talisbooks-viewer-controls__row {
     gap: 0.35rem;
   }
+
+  .talisbooks-viewer-stage__nav {
+    padding: 0 0.2rem;
+  }
+
+  .talisbooks-viewer-stage__nav-btn {
+    width: 2.35rem;
+    height: 2.35rem;
+  }
 }
 
 /*
@@ -4004,7 +4061,7 @@ body.mapsite-gallery-open [data-paypal-button] {
     height: auto;
     aspect-ratio: var(--book-spread-aspect, 3 / 2.05);
     transform: none;
-    filter: drop-shadow(0 8px 16px rgba(28, 25, 23, 0.2));
+    /* No CSS filter: filter flattens preserve-3d and kills the page-turn curl. */
   }
 
   .talisbooks-viewer--magazine .talisbooks-viewer-book--magazine.talisbooks-viewer-book--single {
@@ -4023,6 +4080,15 @@ body.mapsite-gallery-open [data-paypal-button] {
     height: min(calc(100dvh - 3.65rem), 100%);
     margin: 0.15rem;
     transform: none;
+  }
+
+  .talisbooks-viewer-stage__nav {
+    padding: 0 0.15rem;
+  }
+
+  .talisbooks-viewer-stage__nav-btn {
+    width: 2.15rem;
+    height: 2.15rem;
   }
 
   .talisbooks-viewer-stage__hint {

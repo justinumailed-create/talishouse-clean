@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  adjacentNavIndex,
   clampViewerIntervalMs,
   convertViewerNavIndex,
   createEmptyNarrationController,
@@ -51,6 +52,13 @@ describe("Talisbooks™ viewer auto page-turn helpers", () => {
     expect(nextPageIndex(2, 3)).toBe(0);
     expect(previousPageIndex(0, 3)).toBe(2);
     expect(previousPageIndex(1, 3)).toBe(0);
+  });
+
+  it("keeps button/click turns on the adjacent animated step, not a wrap", () => {
+    expect(adjacentNavIndex(0, 15, 1)).toBe(1);
+    expect(adjacentNavIndex(1, 15, -1)).toBe(0);
+    expect(adjacentNavIndex(14, 15, 1)).toBeNull();
+    expect(adjacentNavIndex(0, 15, -1)).toBeNull();
   });
 
   it("maps speed percent inversely to interval", () => {

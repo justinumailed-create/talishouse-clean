@@ -223,6 +223,9 @@ export default function TalisBooksViewerShell({
   };
 
   const handleNext = () => {
+    if (flippingRef.current) {
+      return;
+    }
     if (!isMagazine && binding === "closed-front") {
       openBook(0);
       return;
@@ -249,6 +252,9 @@ export default function TalisBooksViewerShell({
   };
 
   const handlePrevious = () => {
+    if (flippingRef.current) {
+      return;
+    }
     if (!isMagazine && binding === "closed-back") {
       openBook(lastNavIndex);
       return;
