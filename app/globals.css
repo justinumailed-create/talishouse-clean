@@ -1264,10 +1264,13 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-viewer-stage__open-book {
   position: relative;
-  width: auto;
-  max-width: 100%;
+  width: min(100%, 68rem);
   display: flex;
   justify-content: center;
+}
+
+.talisbooks-viewer-stage--single .talisbooks-viewer-stage__open-book {
+  width: min(100%, 34rem);
 }
 
 .talisbooks-viewer-stage__nav {
