@@ -286,10 +286,12 @@ export default function MapSiteAdminEbookPanel({
     <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-neutral-900">Talisbooks™</h2>
+          <h2 className="text-lg font-semibold text-neutral-900">Custom ebook editor</h2>
           <p className="mt-1 text-sm text-neutral-500">
-            Form-driven ebook tools for {fastCode.toUpperCase()} — create, replace
-            images, reorder, preview, publish, and attach to Mapsite™. No HTML editing.
+            Form-driven ebook tools for {fastCode.toUpperCase()} — metadata, Front
+            Cover / Back Cover assignment, interiors, captions, reorder, preview,
+            publish, and attach to Mapsite™. Landscape stays one complete two-page
+            spread. No HTML editing.
           </p>
         </div>
         <div className="flex flex-wrap gap-2 text-sm">

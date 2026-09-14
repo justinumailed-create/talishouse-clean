@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { requireTalisprosAdminPage } from "@/lib/talispros-admin-auth";
-import { getTalisBooksDashboardStats } from "@/lib/talisbooks/book-service";
+import { getTalisBooksDashboardStats, listTalisBooks } from "@/lib/talisbooks/book-service";
+import type { TalisBooksDashboardStats } from "@/lib/talisbooks/types";
+import { listMapSitesForAdmin } from "@/lib/mapsite-service";
+import { isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
   TALISBOOKS_DATABASE_MODELS,
   TALISBOOKS_ECOSYSTEM_CHAIN,
@@ -11,9 +14,52 @@ import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 
 export const dynamic = "force-dynamic";
 
+const EMPTY_STATS: TalisBooksDashboardStats = {
+  totalBooks: 0,
+  publishedBooks: 0,
+  draftBooks: 0,
+  inReviewBooks: 0,
+  totalPages: 0,
+  totalTemplates: 0,
+  totalImages: 0,
+  totalAuthors: 0,
+};
+
+async function safeListTalisBooks() {
+  if (!isSupabaseAdminConfigured()) return [];
+  try {
+    return await listTalisBooks();
+  } catch {
+    return [];
+  }
+}
+
+async function safeTalisBooksStats(): Promise<TalisBooksDashboardStats> {
+  if (!isSupabaseAdminConfigured()) return EMPTY_STATS;
+  try {
+    return await getTalisBooksDashboardStats();
+  } catch {
+    return EMPTY_STATS;
+  }
+}
+
 export default async function TalisBooksAdminPage() {
   await requireTalisprosAdminPage();
-  const stats = await getTalisBooksDashboardStats();
+  const [stats, mapsites, books] = await Promise.all([
+    safeTalisBooksStats(),
+    listMapSitesForAdmin(),
+    safeListTalisBooks(),
+  ]);
+
+  const booksByFastCode = new Map<string, { slug: string; title: string }[]>();
+  for (const book of books) {
+    const code = book.fastCode?.trim();
+    if (!code) continue;
+    const key = code.toLowerCase();
+    const current = booksByFastCode.get(key) ?? [];
+    current.push({ slug: book.slug, title: book.title });
+    booksByFastCode.set(key, current);
+  }
 
   return (
     <div>
@@ -84,6 +130,60 @@ export default async function TalisBooksAdminPage() {
               <li key={feature}>{feature}</li>
             ))}
           </ul>
+        </section>
+
+        <section className="mt-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+          <h2 className="text-lg font-semibold text-neutral-900">Custom ebook editor</h2>
+          <p className="mt-2 text-sm text-neutral-600">
+            Open a Mapsite™ to use the existing form-driven ebook editor (metadata,
+            Front Cover / Back Cover assignment, interiors, captions, publish).
+            Landscape pages stay one complete two-page spread. After opening a
+            book in the viewer, Live Edit is available for SUPERADMIN.
+          </p>
+          {mapsites.length === 0 ? (
+            <p className="mt-4 text-sm text-neutral-500">
+              No Mapsites™ found. Create one from Build requests, then return here.
+            </p>
+          ) : (
+            <ul className="mt-4 divide-y divide-neutral-100">
+              {mapsites.slice(0, 12).map((mapsite) => {
+                const linked = booksByFastCode.get(mapsite.fastCode.toLowerCase()) ?? [];
+                const firstBook = linked[0];
+                return (
+                  <li
+                    key={mapsite.fastCode}
+                    className="flex flex-wrap items-center justify-between gap-3 py-3"
+                  >
+                    <div>
+                      <p className="font-mono text-sm font-medium text-neutral-900">
+                        {mapsite.fastCode}
+                      </p>
+                      <p className="text-sm text-neutral-500">
+                        {mapsite.propertyTitle || "Untitled Mapsite™"}
+                        {firstBook ? ` · ${firstBook.title}` : ""}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/admin/mapsites/${mapsite.fastCode}#ebook-editor`}
+                        className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800"
+                      >
+                        Open ebook editor
+                      </Link>
+                      {firstBook ? (
+                        <Link
+                          href={`${TALISBOOKS_ROUTES.VIEWER}/${firstBook.slug}`}
+                          className="rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-800 hover:bg-neutral-50"
+                        >
+                          Viewer Live Edit
+                        </Link>
+                      ) : null}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </section>
 
         <div className="mt-8 flex flex-wrap gap-4">

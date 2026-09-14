@@ -5,7 +5,7 @@ export type AdminNavItem = {
   label: string;
 };
 
-/** Capabilities Ralph needs today: site CMS, build requests, Mapsites, Talisbooks / shelves. */
+/** Site-ops tools: GlobalContent titles, build requests, Mapsites, Talisbooks / shelves. */
 export const ADMIN_SITE_OPS_NAV: readonly AdminNavItem[] = [
   { href: "/admin/dashboard", label: "Dashboard" },
   { href: "/admin/content", label: "Content" },
@@ -13,6 +13,12 @@ export const ADMIN_SITE_OPS_NAV: readonly AdminNavItem[] = [
   { href: "/admin/mapsites", label: "Mapsites" },
   { href: "/admin/talisbooks", label: "Talisbooks™" },
   { href: "/admin/talisbooks/bookshelves", label: "Bookshelves" },
+];
+
+/** SUPERADMIN product tools: real platform CMS/marketing, FAST Codes. */
+export const ADMIN_SUPERADMIN_NAV: readonly AdminNavItem[] = [
+  { href: "/admin/platform-content", label: "Platform Content" },
+  { href: "/admin/fast-codes", label: "FAST Codes" },
 ];
 
 const ADMIN_FULL_EXTRA_NAV: readonly AdminNavItem[] = [
@@ -32,7 +38,10 @@ const ADMIN_FULL_EXTRA_NAV: readonly AdminNavItem[] = [
 
 export function getAdminNavItems(access: AdminAccessLevel | null | undefined): AdminNavItem[] {
   if (access === "full") {
-    return [...ADMIN_SITE_OPS_NAV, ...ADMIN_FULL_EXTRA_NAV];
+    return [...ADMIN_SITE_OPS_NAV, ...ADMIN_SUPERADMIN_NAV, ...ADMIN_FULL_EXTRA_NAV];
+  }
+  if (access === "superadmin") {
+    return [...ADMIN_SITE_OPS_NAV, ...ADMIN_SUPERADMIN_NAV];
   }
   return [...ADMIN_SITE_OPS_NAV];
 }
@@ -45,6 +54,17 @@ export function isAdminNavItemActive(href: string, pathname: string): boolean {
   }
 
   if (href === "/admin/build-requests" && pathname.startsWith("/admin/marketing")) {
+    return true;
+  }
+
+  if (href === "/admin/platform-content") {
+    return (
+      pathname.startsWith("/admin/platform-content") ||
+      pathname.startsWith("/talispros/marketing")
+    );
+  }
+
+  if (href === "/admin/fast-codes" && pathname.startsWith("/admin/fast-codes")) {
     return true;
   }
 

@@ -5,6 +5,7 @@ import { redirect, usePathname, useRouter } from "next/navigation";
 import { useEffect, useSyncExternalStore, useState } from "react";
 import { clearAdminSession, getFastCode, hasAdminSession } from "@/lib/fast-code";
 import { getAdminAccountByFastCode } from "@/lib/admin-constants";
+import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
 import { getAdminNavItems, isAdminNavItemActive, type AdminNavItem } from "@/lib/admin-nav";
 
 function subscribeToAdminSession(onStoreChange: () => void) {
@@ -166,6 +167,15 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
   if (hydrated && isProtectedAdminRoute && !hasSession) {
     redirect("/admin/login");
+  }
+
+  if (
+    hydrated &&
+    isProtectedAdminRoute &&
+    sessionAccount &&
+    !accountCanAccessAdminPath(sessionAccount, currentPath)
+  ) {
+    redirect("/admin/dashboard");
   }
 
   if (isStandaloneProductAdmin) {

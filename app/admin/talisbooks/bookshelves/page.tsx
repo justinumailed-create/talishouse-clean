@@ -110,6 +110,12 @@ export default async function AdminBookshelvesPage() {
                     >
                       Edit Mapsite™
                     </Link>
+                    <Link
+                      href={`/admin/mapsites/${mapsite.fastCode}#ebook-editor`}
+                      className="rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-800 hover:bg-neutral-50"
+                    >
+                      Ebook editor
+                    </Link>
                   </div>
                 </li>
               );

@@ -3,7 +3,11 @@ import {
   MARKETING_LOGIN_PATH,
   MARKETING_UNAUTHORIZED_PATH,
 } from "./mapsite-account-session";
-import { BUILTIN_ADMIN_EMAILS } from "./admin-constants";
+import {
+  BUILTIN_ADMIN_EMAILS,
+  accountHasAdminScope,
+} from "./admin-constants";
+import { getAdminSessionAccount } from "./admin-auth";
 import {
   getTalisprosAdminSession,
 } from "./talispros-admin-auth";
@@ -20,7 +24,7 @@ function getAllowedMarketingManagerEmails(): string[] {
     .map((email) => email.trim().toLowerCase())
     .filter(Boolean);
 
-  // When an allowlist is configured, always include Ralph + Arun.
+  // When an allowlist is configured, always include Ralf + Arun.
   // Do not create an allowlist from builtins alone — an empty env still
   // means “any authenticated marketing session” (existing behavior).
   if (fromEnv.length === 0) {
@@ -30,7 +34,24 @@ function getAllowedMarketingManagerEmails(): string[] {
   return [...new Set([...fromEnv, ...BUILTIN_ADMIN_EMAILS.map((email) => email.toLowerCase())])];
 }
 
+async function getFastCodePlatformContentSession(): Promise<MarketingManagerSession | null> {
+  const account = await getAdminSessionAccount();
+  if (!account || !accountHasAdminScope(account, "platform-content")) {
+    return null;
+  }
+
+  return {
+    userId: `admin:${account.fastCode}`,
+    email: account.email,
+  };
+}
+
 export async function requireMarketingManagerSession(): Promise<MarketingManagerSession> {
+  const fastCodeSession = await getFastCodePlatformContentSession();
+  if (fastCodeSession) {
+    return fastCodeSession;
+  }
+
   const session = await getTalisprosAdminSession();
   if (!session) {
     throw new Error("Unauthorized");
@@ -56,6 +77,11 @@ export async function isMarketingManagerAuthenticated(): Promise<boolean> {
 }
 
 export async function requireMarketingManagerPage(): Promise<MarketingManagerSession> {
+  const fastCodeSession = await getFastCodePlatformContentSession();
+  if (fastCodeSession) {
+    return fastCodeSession;
+  }
+
   const session = await getTalisprosAdminSession();
   if (!session) {
     redirect(MARKETING_LOGIN_PATH);

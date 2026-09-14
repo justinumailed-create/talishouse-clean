@@ -3,7 +3,9 @@
 import {
   ADMIN_FAST_CODE,
   ADMIN_SESSION_COOKIE,
+  getAdminAccountByFastCode,
   isAuthorizedAdminFastCode,
+  isElevatedAdminAccess,
 } from "./admin-constants";
 
 export { ADMIN_FAST_CODE, ADMIN_SESSION_COOKIE };
@@ -90,7 +92,8 @@ export const isAuthorized = (): boolean => {
 };
 
 export const isSuperAdmin = (): boolean => {
-  return normalizeFastCode(getFastCode() || "") === ADMIN_FAST_CODE;
+  const account = getAdminAccountByFastCode(getFastCode());
+  return isElevatedAdminAccess(account?.access);
 };
 
 export const getRole = (): "admin" | "associate" | null => {
