@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireTalisprosAdminPage } from "@/lib/talispros-admin-auth";
 import { getTalisBooksDashboardStats, listTalisBooks } from "@/lib/talisbooks/book-service";
+import type { TalisBooksDashboardStats } from "@/lib/talisbooks/types";
 import { listMapSitesForAdmin } from "@/lib/mapsite-service";
 import { isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
@@ -13,6 +14,17 @@ import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 
 export const dynamic = "force-dynamic";
 
+const EMPTY_STATS: TalisBooksDashboardStats = {
+  totalBooks: 0,
+  publishedBooks: 0,
+  draftBooks: 0,
+  inReviewBooks: 0,
+  totalPages: 0,
+  totalTemplates: 0,
+  totalImages: 0,
+  totalAuthors: 0,
+};
+
 async function safeListTalisBooks() {
   if (!isSupabaseAdminConfigured()) return [];
   try {
@@ -22,10 +34,19 @@ async function safeListTalisBooks() {
   }
 }
 
+async function safeTalisBooksStats(): Promise<TalisBooksDashboardStats> {
+  if (!isSupabaseAdminConfigured()) return EMPTY_STATS;
+  try {
+    return await getTalisBooksDashboardStats();
+  } catch {
+    return EMPTY_STATS;
+  }
+}
+
 export default async function TalisBooksAdminPage() {
   await requireTalisprosAdminPage();
   const [stats, mapsites, books] = await Promise.all([
-    getTalisBooksDashboardStats(),
+    safeTalisBooksStats(),
     listMapSitesForAdmin(),
     safeListTalisBooks(),
   ]);
