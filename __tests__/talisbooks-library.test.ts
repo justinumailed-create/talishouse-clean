@@ -6,10 +6,14 @@ import {
   TALISBOOKS_LIBRARY_SHELF_CAPACITY,
   createDemoDerivativeBookshelf,
   createDemoRootBookshelf,
+  PUBLIC_LIBRARY_PINNED_BOOKS,
+  applyPublicLibraryPins,
   filterBooksForAdminLibrary,
   filterBooksForFastCodeShelf,
+  filterCreatedFastLinkedBooks,
   filterLibraryBooks,
   filterMapSitesForAdminLibrary,
+  isCreatedFastLinkedBook,
   isDemonstrationCatalogBook,
   isDemonstrationFastCode,
   monthlyCapacityUsd,
@@ -233,9 +237,122 @@ describe("Talisbooks™ admin library catalog policy", () => {
     expect(books.map((book) => book.id).sort()).toEqual(["real-lg01", "real-rm22"]);
   });
 
-  it("keeps the in-memory preview shelf for anonymous library visits", () => {
+  it("loads the created FAST catalog for anonymous library visits", () => {
     const scope = talisbooksScopeFromAdminAccount(null);
-    expect(scope.excludeDemonstrationCatalog).toBe(false);
-    expect(filterBooksForAdminLibrary(catalog, scope)).toHaveLength(catalog.length);
+    expect(scope).toEqual({ fastCode: null, excludeDemonstrationCatalog: true });
+    expect(filterBooksForAdminLibrary(catalog, scope).map((book) => book.id).sort()).toEqual([
+      "real-lg01",
+      "real-rm22",
+    ]);
+  });
+});
+
+describe("Talisbooks™ public / root created FAST catalog", () => {
+  const lg02 = {
+    id: "real-lg02",
+    slug: "lg02-lg02-talisbook-4jmz",
+    title: "LG02 Talisbook™",
+    subtitle: "Draft",
+    fastCode: "lg02",
+    publishStatus: "draft" as const,
+    views: 1,
+    isPinned: false,
+  };
+  const rm22 = {
+    id: "real-rm22",
+    slug: "rm22-rm22-talisbook-b1mz",
+    title: "RM22 Talisbook™",
+    subtitle: "Draft",
+    fastCode: "rm22",
+    publishStatus: "draft" as const,
+    views: 4,
+    isPinned: false,
+  };
+  const as01 = {
+    id: "real-as01",
+    slug: "as01-lookbook",
+    title: "AS01 Talisbook™",
+    subtitle: "Published",
+    fastCode: "as01",
+    publishStatus: "published" as const,
+    views: 20,
+    isPinned: false,
+  };
+  const uncoded = {
+    id: "no-fast",
+    slug: "orphan-lookbook",
+    title: "No FAST",
+    subtitle: "",
+    fastCode: null as string | null,
+    publishStatus: "draft" as const,
+    views: 0,
+  };
+  const demoMapsiteBook = {
+    id: "demo-row",
+    slug: "demo-ab12cd34-lookbook",
+    title: "Demo Mapsite™",
+    subtitle: "",
+    fastCode: "demo-ab12cd34",
+    publishStatus: "draft" as const,
+    views: 0,
+  };
+
+  it("keeps only issued FAST-linked created books", () => {
+    expect(isCreatedFastLinkedBook(lg02)).toBe(true);
+    expect(isCreatedFastLinkedBook(uncoded)).toBe(false);
+    expect(isCreatedFastLinkedBook(demoMapsiteBook)).toBe(false);
+
+    const kept = filterCreatedFastLinkedBooks([
+      lg02,
+      rm22,
+      as01,
+      uncoded,
+      demoMapsiteBook,
+      createDemoRootBookshelf().books[0]!,
+    ]);
+    expect(kept.map((book) => book.id).sort()).toEqual(["real-as01", "real-lg02", "real-rm22"]);
+  });
+
+  it("pins LG02 then RM22 from PUBLIC_LIBRARY_PINNED_BOOKS", () => {
+    expect(PUBLIC_LIBRARY_PINNED_BOOKS.map((pin) => pin.fastCode)).toEqual(["lg02", "rm22"]);
+    expect(PUBLIC_LIBRARY_PINNED_BOOKS.map((pin) => pin.slug)).toEqual([
+      "lg02-lg02-talisbook-4jmz",
+      "rm22-rm22-talisbook-b1mz",
+    ]);
+
+    const pinned = applyPublicLibraryPins([as01, rm22, lg02]);
+    expect(pinned.find((book) => book.id === "real-lg02")).toMatchObject({
+      isPinned: true,
+      pinRank: 0,
+    });
+    expect(pinned.find((book) => book.id === "real-rm22")).toMatchObject({
+      isPinned: true,
+      pinRank: 1,
+    });
+    expect(pinned.find((book) => book.id === "real-as01")?.isPinned).toBeFalsy();
+  });
+
+  it("places LG02 then RM22 in the left featured niche before other real books", () => {
+    const books = applyPublicLibraryPins([
+      { ...as01, coverGradient: "g", coverImageUrl: null, coverTemplateId: null, publishedAt: null, clicks: 0, pageCount: 8, accountId: null, accountType: "root" as const, mapsiteId: null, parentBookId: null },
+      { ...rm22, coverGradient: "g", coverImageUrl: null, coverTemplateId: null, publishedAt: null, clicks: 0, pageCount: 8, accountId: null, accountType: "root" as const, mapsiteId: null, parentBookId: null },
+      { ...lg02, coverGradient: "g", coverImageUrl: null, coverTemplateId: null, publishedAt: null, clicks: 0, pageCount: 8, accountId: null, accountType: "root" as const, mapsiteId: null, parentBookId: null },
+    ]);
+    const { featured, general } = partitionBookshelf(books, { featuredCapacity: 5 });
+    expect(featured.map((book) => book.slug)).toEqual([
+      "lg02-lg02-talisbook-4jmz",
+      "rm22-rm22-talisbook-b1mz",
+      "as01-lookbook",
+    ]);
+    expect(general).toHaveLength(0);
+  });
+
+  it("falls back to FAST code when a pin slug is missing", () => {
+    const renamed = { ...lg02, slug: "lg02-renamed-later" };
+    const pinned = applyPublicLibraryPins([renamed, rm22]);
+    expect(pinned.find((book) => book.id === "real-lg02")).toMatchObject({
+      isPinned: true,
+      pinRank: 0,
+    });
   });
 });

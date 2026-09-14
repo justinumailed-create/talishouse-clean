@@ -15,6 +15,13 @@ function isHighlightCandidate(book: TalisBooksLibraryBook): boolean {
   return book.publishStatus === "scheduled" || book.publishStatus === "in_review";
 }
 
+function pinSortKey(book: TalisBooksLibraryBook): number {
+  if (typeof book.pinRank === "number" && Number.isFinite(book.pinRank)) {
+    return book.pinRank;
+  }
+  return book.isPinned ? 100 : Number.POSITIVE_INFINITY;
+}
+
 /**
  * Splits the shelf into left (highlighted/scheduled) and right (general library).
  *
@@ -35,10 +42,10 @@ export function partitionBookshelf(
   const capacity = options?.featuredCapacity ?? 5;
 
   const prioritized = [...books].sort((a, b) => {
-    const aPinned = a.isPinned ? 0 : 1;
-    const bPinned = b.isPinned ? 0 : 1;
-    if (aPinned !== bPinned) {
-      return aPinned - bPinned;
+    const aRank = pinSortKey(a);
+    const bRank = pinSortKey(b);
+    if (aRank !== bRank) {
+      return aRank - bRank;
     }
     const aBoost = isHighlightCandidate(a) ? 0 : 1;
     const bBoost = isHighlightCandidate(b) ? 0 : 1;
