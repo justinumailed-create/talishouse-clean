@@ -267,12 +267,14 @@ export default function MapSiteAdminEditor({
         paymentReceived={paymentReceived}
       />
 
-      <MapSiteAdminEbookPanel
-        fastCode={mapsite.fastCode}
-        initialEbook={ebook}
-        initialPages={ebookPages}
-        adminWritesEnabled={adminWritesEnabled}
-      />
+      <div id="ebook-editor">
+        <MapSiteAdminEbookPanel
+          fastCode={mapsite.fastCode}
+          initialEbook={ebook}
+          initialPages={ebookPages}
+          adminWritesEnabled={adminWritesEnabled}
+        />
+      </div>
 
       {showVisitorSubscriptionPanel ? (
         <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">

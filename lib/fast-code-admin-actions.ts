@@ -1,7 +1,7 @@
 "use server";
 
 import type { Database } from "./database.types";
-import { isAdminAuthenticated } from "./admin-auth";
+import { getAdminSessionAccount, requireAdminScope } from "./admin-auth";
 import { getMapSiteByFastCode } from "./mapsite-service";
 import { tierFromAccountType } from "./registration-fast-code-routing";
 import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
@@ -32,14 +32,17 @@ export interface ListBuildSystemFastCodesResult {
 }
 
 async function requireFastCodeAdminAccess(): Promise<void> {
-  const [legacyAdmin, talisprosAdmin] = await Promise.all([
-    isAdminAuthenticated(),
-    isTalisprosAdminAuthenticated(),
-  ]);
-
-  if (!legacyAdmin && !talisprosAdmin) {
-    throw new Error("Unauthorized");
+  const account = await getAdminSessionAccount();
+  if (account) {
+    await requireAdminScope("fast-codes");
+    return;
   }
+
+  if (await isTalisprosAdminAuthenticated()) {
+    return;
+  }
+
+  throw new Error("Unauthorized");
 }
 
 export async function listBuildSystemFastCodes(): Promise<ListBuildSystemFastCodesResult> {

@@ -303,10 +303,10 @@ Also usable via redirected path `/marketing/login` → `/talispros/marketing/log
 | Login URL | `/admin/login` |
 | Email / Username | N/A (FAST code only) |
 | Password | N/A |
-| FAST codes | `ADMIN123` (full), `rm22` (Ralph / site-ops), `ARUN` (Arun / full) |
+| FAST codes | `ADMIN123` (full), `rm22` (Ralf / SUPERADMIN), `ARUN` (Arun / full) |
 | Expected result | Session cookie; redirect to `/admin/dashboard` |
 
-See `docs/ADMIN_ACCESS.md` for Ralph and Arun verify steps.
+See `docs/ADMIN_ACCESS.md` for Ralf SUPERADMIN and Arun verify steps.
 
 ---
 

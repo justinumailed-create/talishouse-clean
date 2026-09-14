@@ -95,8 +95,13 @@ export default function ContentPage() {
       <div>
         <h1 className="text-2xl font-semibold">Global Content</h1>
         <p className="text-sm text-[#6e6e73] mt-1">
-          Edit talispros.com / Talishouse shared text and content blocks. Mapsite™ photos,
-          logos, and eBook images are edited under Mapsites and Talisbooks™.
+          Homepage hero titles only. For marketing sections, images, demo listings,
+          and promotional content use{" "}
+          <a href="/admin/platform-content" className="font-medium text-[#111] underline underline-offset-2">
+            Platform Content
+          </a>
+          . Mapsite™ photos, logos, and eBook images are edited under Mapsites and
+          Talisbooks™.
         </p>
       </div>
 

@@ -13,7 +13,8 @@ export default async function AdminMapSitesPage() {
       <div>
         <h1 className="text-2xl font-semibold text-neutral-900">Mapsites™</h1>
         <p className="text-sm text-neutral-500 mt-1">
-          Open a Mapsite™ to edit listing text, media, pin placement, and linked Talisbooks™.
+          Open a Mapsite™ to edit listing text, media, pin placement, lifecycle,
+          and the custom ebook editor (Front Cover / Back Cover, interiors, publish).
         </p>
       </div>
 
