@@ -1,9 +1,14 @@
 import Link from "next/link";
-import { requireAdminPage } from "@/lib/admin-auth";
+import { getAdminSessionAccount, requireAdminPage } from "@/lib/admin-auth";
 import { listMapSitesForAdmin } from "@/lib/mapsite-service";
 import { listTalisBooks } from "@/lib/talisbooks/book-service";
 import { isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
+import {
+  filterBooksForAdminLibrary,
+  filterMapSitesForAdminLibrary,
+  talisbooksScopeFromAdminAccount,
+} from "@/lib/talisbooks/library";
 
 export const dynamic = "force-dynamic";
 
@@ -18,14 +23,17 @@ async function safeListTalisBooks() {
 
 export default async function AdminBookshelvesPage() {
   await requireAdminPage();
+  const scope = talisbooksScopeFromAdminAccount(await getAdminSessionAccount());
 
   const [mapsites, books] = await Promise.all([
     listMapSitesForAdmin(),
     safeListTalisBooks(),
   ]);
+  const scopedMapsites = filterMapSitesForAdminLibrary(mapsites, scope);
+  const scopedBooks = filterBooksForAdminLibrary(books, scope);
 
   const booksByFastCode = new Map<string, number>();
-  for (const book of books) {
+  for (const book of scopedBooks) {
     const code = book.fastCode?.trim();
     if (!code) continue;
     const key = code.toLowerCase();
@@ -37,8 +45,9 @@ export default async function AdminBookshelvesPage() {
       <div>
         <h1 className="text-2xl font-semibold text-neutral-900">Bookshelves</h1>
         <p className="text-sm text-neutral-500 mt-1">
-          Open a Mapsite™ TEB™ shelf or the public Talisbooks™ library. Edit books from
-          Talisbooks™ admin or the Mapsite™ eBook panel.
+          Open a Mapsite™ TEB™ shelf or the signed-in library of created books. Demo
+          Mapsites™ and the pinned sample stay on the public /talisbooks catalog, not
+          this admin library.
         </p>
       </div>
 
@@ -59,7 +68,7 @@ export default async function AdminBookshelvesPage() {
             href={TALISBOOKS_ROUTES.LIBRARY}
             className="inline-flex rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
           >
-            Open library
+            Open created-book library
           </Link>
           <Link
             href={TALISBOOKS_ROUTES.ADMIN}
@@ -74,14 +83,15 @@ export default async function AdminBookshelvesPage() {
         <div className="px-5 py-3 border-b border-neutral-200 bg-neutral-50">
           <h2 className="text-sm font-semibold text-neutral-900">Mapsite™ shelves</h2>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Each FAST Code has a TEB™ bookshelf. Open the shelf or jump to Mapsite™ / book tools.
+            Each real FAST Code has a TEB™ bookshelf of created books. Demo Mapsite™
+            codes are omitted here.
           </p>
         </div>
-        {mapsites.length === 0 ? (
+        {scopedMapsites.length === 0 ? (
           <p className="px-5 py-6 text-sm text-neutral-500">No Mapsites™ found.</p>
         ) : (
           <ul className="divide-y divide-neutral-100">
-            {mapsites.map((mapsite) => {
+            {scopedMapsites.map((mapsite) => {
               const bookCount = booksByFastCode.get(mapsite.fastCode.toLowerCase()) ?? 0;
               return (
                 <li

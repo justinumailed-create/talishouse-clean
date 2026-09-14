@@ -2,13 +2,19 @@ import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import TalisBooksEmptyState from "@/components/talisbooks/platform/TalisBooksEmptyState";
 import TalisBooksPageHeader from "@/components/talisbooks/platform/TalisBooksPageHeader";
+import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { listTalisBooks } from "@/lib/talisbooks/book-service";
+import {
+  filterBooksForAdminLibrary,
+  talisbooksScopeFromAdminAccount,
+} from "@/lib/talisbooks/library";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 
 export const dynamic = "force-dynamic";
 
 export default async function TalisBooksBooksPage() {
-  const books = await listTalisBooks();
+  const scope = talisbooksScopeFromAdminAccount(await getAdminSessionAccount());
+  const books = filterBooksForAdminLibrary(await listTalisBooks(), scope);
 
   return (
     <div className="mx-auto max-w-6xl">
