@@ -7,6 +7,10 @@ import {
 } from "@/components/mapsite/PublishedMapSiteView";
 import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
 import { createMetadata } from "@/lib/seo";
+import {
+  mapsiteOgMetadataImage,
+  resolveMapSiteOgImage,
+} from "@/lib/talispros/mapsite-og-image";
 
 export const dynamic = "force-dynamic";
 
@@ -25,11 +29,20 @@ export async function generateMetadata({
   }
   const published = await loadPublishedMapSiteView(code);
   const title = published?.propertyTitle?.trim() || code.toUpperCase();
+  const ogImage = await resolveMapSiteOgImage(code, {
+    fallbackImageUrls: published
+      ? [
+          published.ogImageUrl,
+          published.headerImageUrl,
+          ...(published.galleryImages ?? []),
+        ]
+      : [],
+  });
   return createMetadata({
     title: `${title} map | Mapsite™`,
     description: `Full-screen Mapsite™ map and PIN for ${title}.`,
     path: `/mapsite/${code}/map`,
-    image: false,
+    image: mapsiteOgMetadataImage(ogImage, `Mapsite™ ${title}`),
   });
 }
 

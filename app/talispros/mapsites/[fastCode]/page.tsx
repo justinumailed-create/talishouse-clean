@@ -19,7 +19,7 @@ export async function generateMetadata({
     return { title: "Mapsite™ Not Found | Talispros™" };
   }
 
-  return publishedMapSiteMetadata(mapsite);
+  return await publishedMapSiteMetadata(mapsite);
 }
 
 export default async function TalisprosMapSitePage({

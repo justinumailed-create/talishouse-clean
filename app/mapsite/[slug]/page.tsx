@@ -36,7 +36,7 @@ export async function generateMetadata({
   }
   const published = await loadPublishedMapSiteView(slug);
   if (published) {
-    return publishedMapSiteMetadata(published);
+    return await publishedMapSiteMetadata(published);
   }
   return { title: "Mapsite™" };
 }
