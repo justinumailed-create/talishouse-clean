@@ -39,7 +39,7 @@ function isPdfFile(file: File): boolean {
 
 function isImageFile(file: File): boolean {
   if (file.type.startsWith("image/")) return true;
-  return /\.(jpe?g|png|webp)$/i.test(file.name);
+  return /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name);
 }
 
 export function classifyUploadFile(file: File): "image" | "pdf" | "other" {
@@ -272,7 +272,7 @@ export async function assignBookAssetsFromUploads(
 
   const kinds = incoming.map((file) => ({ file, kind: classifyUploadFile(file) }));
   if (kinds.some((item) => item.kind === "other")) {
-    throw new Error("Unsupported file. Use JPG, PNG, WEBP, or PDF.");
+    throw new Error("Unsupported file. Use JPG, PNG, WEBP, HEIC, or PDF.");
   }
 
   const pdfs = kinds.filter((item) => item.kind === "pdf").map((item) => item.file);

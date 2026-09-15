@@ -5,6 +5,7 @@ import {
   parseOptimizeImageKind,
   type OptimizeImageKind,
 } from "@/lib/media/optimize-upload-image";
+import { VERCEL_FUNCTION_BODY_LIMIT_BYTES } from "@/lib/media/upload-size-limits";
 import {
   TALISBOOKS_ASSET_CACHE_CONTROL,
   TALISBOOKS_IMAGE_STORAGE_BUCKET,
@@ -43,7 +44,9 @@ function isUploadBlob(value: FormDataEntryValue | null): value is File {
 }
 
 /**
- * Optimize one image and store it. Client uploads files individually to avoid 413.
+ * Optimize one image and store it. The browser shrinks each file first so the
+ * POST stays under Vercel's 4.5 MB Function body limit; Sharp then re-encodes
+ * for storage.
  *
  * FormData: requestId, kind (property|agent|logo), file, optional index/label
  */
@@ -69,6 +72,18 @@ export async function POST(request: Request) {
       return Response.json(
         { ok: false, error: label ? `Missing file: ${label}` : "Missing image file." },
         { status: 400 },
+      );
+    }
+
+    if (fileEntry.size > VERCEL_FUNCTION_BODY_LIMIT_BYTES) {
+      return Response.json(
+        {
+          ok: false,
+          error: label
+            ? `“${label}” is too large for a single upload (${(fileEntry.size / (1024 * 1024)).toFixed(1)} MB). Compress it before retrying.`
+            : "Image is too large for a single upload.",
+        },
+        { status: 413 },
       );
     }
 

@@ -15,7 +15,7 @@ describe("self-service ebook generate copy", () => {
   it("describes PDF or image uploads with wrap-cover page 1", () => {
     expect(EBOOK_GENERATE_HELP_TEXT).toContain("PDF or images");
     expect(EBOOK_GENERATE_HELP_TEXT).toContain("wrap cover");
-    expect(EBOOK_GENERATE_UPLOAD_HINT).toContain("PDF, JPG, PNG, or WEBP");
+    expect(EBOOK_GENERATE_UPLOAD_HINT).toContain("PDF, JPG, PNG, WEBP, or HEIC");
     expect(EBOOK_GENERATE_COVER_HELP).toContain("Front and back covers");
     expect(EBOOK_GENERATE_COVER_PDF_HELP).toContain("left = back cover");
     expect(PDF_NEEDS_INTERIOR_PAGES_MESSAGE).toContain("at least two");
