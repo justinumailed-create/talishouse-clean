@@ -12,7 +12,6 @@ interface MapSiteLayoutProps {
   visitorFastCode: string | null;
   editAccess: MapSiteEditToolbarState;
   buildRequestId?: string;
-  paymentReceived?: boolean;
 }
 
 export default function MapSiteLayout({
@@ -21,7 +20,6 @@ export default function MapSiteLayout({
   visitorFastCode,
   editAccess,
   buildRequestId,
-  paymentReceived = false,
 }: MapSiteLayoutProps) {
   return (
     <div className="min-h-screen bg-neutral-200">
@@ -41,22 +39,12 @@ export default function MapSiteLayout({
             fastCode={data.fastCode}
           />
           <MapSiteBottomPanels
-            videoUrl={data.videoUrl}
-            galleryItems={data.galleryItems}
-            propertyTitle={data.propertyTitle}
             fastCode={data.fastCode}
-            agentName={data.agent.name}
-            agentEmail={data.agent.email}
-            visitorHasSubscribed={visitorHasSubscribed}
-            visitorFastCode={visitorFastCode}
-            offeredSubscriptionTier={data.offeredSubscriptionTier}
-            interestFormEnabled={data.interestFormEnabled}
             buildRequestId={buildRequestId}
-            paymentReceived={paymentReceived}
             tebHref={data.tebHref}
             ttvHref={data.ttvHref}
             scheduleHref={data.scheduleHref}
-            brokerageName={data.brokerageName}
+            brokerageName={data.brokerageName || data.agent.name}
             brokerageLogoUrl={data.brokerageLogoUrl}
             brokerageWebsite={data.brokerageWebsite}
           />

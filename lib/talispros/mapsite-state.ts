@@ -140,7 +140,10 @@ export function mapsiteAccountTypeSegment(
   return "listings";
 }
 
-/** Public published Mapsite™ page: /mapsite/{fastCode} */
+/**
+ * Public published Mapsite™ page: /mapsite/{fastCode}.
+ * All FAST Codes share the RM22 creative shell (see PUBLISHED_MAPSITE_SHELL).
+ */
 export function publishedMapSitePath(fastCode: string): string {
   const code = fastCode.trim().toLowerCase();
   return `/mapsite/${encodeURIComponent(code)}`;
