@@ -33,8 +33,9 @@ export function checkoutSessionPlanType(
 }
 
 /**
- * Paid $1 Root (or FSBO, which shares ROOT_ACCOUNT_1). Does not match the
- * $998.50 full Root plan.
+ * Historical paid $1 Root (or FSBO, which shared ROOT_ACCOUNT_1).
+ * Does not match the $998.50 full Root plan. New checkout never creates
+ * these sessions; matching remains so already-paid $1 activations still unlock.
  */
 export function isPaidRootOneDollarCheckoutSession(
   session: Pick<

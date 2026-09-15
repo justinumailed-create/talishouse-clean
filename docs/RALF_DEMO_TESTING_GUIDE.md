@@ -41,7 +41,7 @@ A FAST Code is a short access code that identifies an account or Mapsite™ (exa
 
 ## What Root Accounts are
 
-A Root Account™ is the primary market-owner account type. Registration plans describe Root as market ownership with Derivative capacity, SPLITS eligibility, Claim a Market eligibility, and FAST Code generation. Pricing plans include a full Root Account and a low-cost Root Account™ ($1) activation option used in demos.
+A Root Account™ is the primary market-owner account type. Registration plans describe Root as market ownership with Derivative capacity, SPLITS eligibility, Claim a Market eligibility, and FAST Code generation. Pricing is the full Root Account™ (CAD $998.50 setup). The former $1 demo activation plan is retired and is not offered at checkout.
 
 ## What Derivative Accounts are
 
@@ -353,8 +353,8 @@ These appear as **registration plan types**, not pre-seeded login users:
 | Plan | Label (UI) | Price (CAD) | Notes |
 |------|------------|-------------|-------|
 | `TEST_ACCOUNT` | TEST Account | $10 | Demo / QA Root-equivalent |
-| `ROOT_ACCOUNT_1` | Root Account™ ($1) | $1 + GST | Demo activation |
-| `ROOT_ACCOUNT` | Root Account™ | $998.50 (+ monthly listed in plans) | Full Root |
+| `ROOT_ACCOUNT` | Root Account™ | $998.50 (+ monthly listed in plans) | Full Root — used for registration / Mapsite™ activation |
+| `ROOT_ACCOUNT_1` | Root Account™ ($1) | $1 + GST | **Retired.** Historical demo activations only; not offered at checkout |
 | `DERIVATIVE_ACCOUNT` | Derivative Account™ | $198.50 | Under a Root |
 | `ADPRO_SINGLE` / `ADPRO_10` / `ADPRO_100` / `ADPRO_UNLIMITED` | Adpro PIN packs | Per plan | Adpro placements |
 
