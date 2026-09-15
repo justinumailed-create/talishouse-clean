@@ -1117,6 +1117,10 @@ function OpenBookSpread({
 
             <div className="talisbooks-viewer-book__page talisbooks-viewer-book__page--right">
               <BookPageFace
+                // Cover open: keep the cover as the stationary right face until
+                // past 90°. The incoming interior is a 200% fold-continuous
+                // bleed; sitting it under the cover lets the left half of that
+                // landscape paint beside the still-face-on cover.
                 page={
                   hideCoverLeafBack && current.right ? current.right : rightPage
                 }
