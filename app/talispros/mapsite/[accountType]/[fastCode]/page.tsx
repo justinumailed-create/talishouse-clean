@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createMetadata } from "@/lib/seo";
 import {
+  mapsiteOgMetadataImage,
+  resolveMapSiteOgImage,
+} from "@/lib/talispros/mapsite-og-image";
+import {
   parseRegistrationMarket,
   type RegistrationMarket,
 } from "@/lib/registration-market";
@@ -62,11 +66,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { accountType, fastCode } = await params;
   const code = fastCode.trim().toUpperCase();
+  const ogImage = await resolveMapSiteOgImage(fastCode);
   return createMetadata({
     title: `Mapsite™ ${code}`,
     description: `Talispros™ Mapsite™ for FAST Code ${code}.`,
     path: `${MAPSITE_APP_PATH}/${mapsiteAccountTypeSegment(accountType)}/${fastCode.trim().toLowerCase()}`,
-    image: false,
+    image: mapsiteOgMetadataImage(ogImage, `Mapsite™ ${code}`),
   });
 }
 

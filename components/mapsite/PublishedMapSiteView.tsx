@@ -1,6 +1,10 @@
 import MapSiteLayout from "@/components/mapsite/MapSiteLayout";
 import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
 import { createMetadata } from "@/lib/seo";
+import {
+  mapsiteOgMetadataImage,
+  resolveMapSiteOgImage,
+} from "@/lib/talispros/mapsite-og-image";
 import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
 import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import { getMapSiteByFastCode, type MapSiteView } from "@/lib/mapsite-service";
@@ -183,17 +187,26 @@ export async function loadPublishedMapSiteView(fastCode: string) {
   }
 }
 
-export function publishedMapSiteMetadata(mapsite: MapSiteView) {
+export async function publishedMapSiteMetadata(mapsite: MapSiteView) {
   const layoutData = buildMapSiteLayoutData(mapsite);
   const slug = (layoutData.slug || mapsite.fastCode).trim().toLowerCase();
+  const code = layoutData.fastCode.toUpperCase();
+  const ogImage = await resolveMapSiteOgImage(mapsite.fastCode, {
+    fallbackImageUrls: [
+      mapsite.ogImageUrl,
+      mapsite.headerImageUrl,
+      ...(mapsite.galleryImages ?? []),
+      layoutData.overlayImageUrl,
+    ],
+  });
   return createMetadata({
     title: layoutData.metaTitle || `${layoutData.propertyTitle} | Mapsite™`,
     description:
       layoutData.metaDescription ||
       layoutData.summary.description ||
-      `Mapsite™ ${layoutData.fastCode.toUpperCase()}`,
+      `Mapsite™ ${code}`,
     path: `/mapsite/${slug}`,
-    image: false,
+    image: mapsiteOgMetadataImage(ogImage, `Mapsite™ ${code}`),
   });
 }
 

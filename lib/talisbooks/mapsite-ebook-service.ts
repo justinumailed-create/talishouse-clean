@@ -160,30 +160,62 @@ function pageRecordFromContent(content: unknown): Record<string, unknown> | null
   return null;
 }
 
-async function loadListingImagesFromBookPages(
-  bookId: string,
-): Promise<string[]> {
+function asOptionalString(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+export type EbookPageMedia = {
+  pageNumber: number;
+  slug: string | null;
+  title: string | null;
+  subtitle: string | null;
+  body: string | null;
+  pageRole: string | null;
+  layout: string | null;
+  systemKey: string | null;
+  spreadImageUrl: string | null;
+  heroImageUrl: string | null;
+};
+
+export function ebookPageMediaFromRow(page: {
+  page_number?: number | null;
+  slug?: string | null;
+  title?: string | null;
+  content?: unknown;
+}): EbookPageMedia {
+  const record = pageRecordFromContent(page.content) ?? {};
+  return {
+    pageNumber: typeof page.page_number === "number" ? page.page_number : 0,
+    slug: asOptionalString(page.slug),
+    title: asOptionalString(record.title) || asOptionalString(page.title),
+    subtitle: asOptionalString(record.subtitle),
+    body: asOptionalString(record.body),
+    pageRole: asOptionalString(record.pageRole),
+    layout: asOptionalString(record.layout),
+    systemKey: asOptionalString(record.systemKey),
+    spreadImageUrl: asOptionalString(record.spreadImageUrl),
+    heroImageUrl: asOptionalString(record.heroImageUrl),
+  };
+}
+
+export async function loadEbookPageMedia(bookId: string): Promise<EbookPageMedia[]> {
+  if (!bookId || !isSupabaseAdminConfigured()) return [];
   const supabase = getSupabaseAdmin();
   const { data: pages } = await supabase
     .from("talisbooks_book_pages")
-    .select("*")
+    .select("page_number, slug, title, content, is_visible")
     .eq("book_id", bookId)
     .order("page_number", { ascending: true });
 
-  return listingImageUrlsFromEbookPages(
-    (pages ?? []).map((page) => {
-      const record = pageRecordFromContent(page.content) ?? {};
-      return {
-        pageRole: typeof record.pageRole === "string" ? record.pageRole : null,
-        layout: typeof record.layout === "string" ? record.layout : null,
-        systemKey: typeof record.systemKey === "string" ? record.systemKey : null,
-        spreadImageUrl:
-          typeof record.spreadImageUrl === "string" ? record.spreadImageUrl : null,
-        heroImageUrl:
-          typeof record.heroImageUrl === "string" ? record.heroImageUrl : null,
-      };
-    }),
-  );
+  return (pages ?? [])
+    .filter((page) => page.is_visible !== false)
+    .map(ebookPageMediaFromRow);
+}
+
+async function loadListingImagesFromBookPages(
+  bookId: string,
+): Promise<string[]> {
+  return listingImageUrlsFromEbookPages(await loadEbookPageMedia(bookId));
 }
 
 export async function resolveEbookListingImageUrls(options: {

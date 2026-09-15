@@ -13,6 +13,7 @@ export const metadata: Metadata = createMetadata({
   description:
     "Fullscreen Mapsite™ application for claiming markets and onboarding on Talispros™.",
   path: "/talispros/mapsite",
+  image: false,
 });
 
 export default function MapSiteAppLayout({
