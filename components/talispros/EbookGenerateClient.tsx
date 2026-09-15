@@ -27,6 +27,11 @@ import {
   formatOnboardingDuration,
 } from "@/lib/onboarding-timing";
 import {
+  isAbortError,
+  postEbookGenerateOptimizedImage,
+} from "@/lib/media/client-upload-ebook-image";
+import type { ClientOptimizePass } from "@/lib/media/client-optimize-plan";
+import {
   captionsFromTemplatePages,
   EBOOK_GENERATE_COVER_PDF_HELP,
   EBOOK_GENERATE_HELP_TEXT,
@@ -64,9 +69,9 @@ type CoverPick = {
 };
 
 const BOOK_UPLOAD_ACCEPT =
-  "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,application/pdf,.pdf";
+  "image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,.pdf";
 const INTERIOR_REPLACE_ACCEPT =
-  "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp,application/pdf,.pdf";
+  "image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,.pdf";
 
 function revokePreviewUrl(url: string | null | undefined) {
   if (url) URL.revokeObjectURL(url);
@@ -124,29 +129,6 @@ function stageIndex(stage: EbookGenerationStage | null): number {
 }
 
 const UPLOAD_CONCURRENCY = 2;
-const UPLOAD_MAX_ATTEMPTS = 3;
-
-function isAbortError(error: unknown): boolean {
-  return (
-    (error instanceof DOMException && error.name === "AbortError") ||
-    (error instanceof Error &&
-      (error.name === "AbortError" || /aborted/i.test(error.message)))
-  );
-}
-
-function isTransientUploadError(error: unknown): boolean {
-  if (isAbortError(error)) return false;
-  if (!(error instanceof Error)) return false;
-  const message = error.message.toLowerCase();
-  return (
-    message.includes("failed to fetch") ||
-    message.includes("networkerror") ||
-    message.includes("network request failed") ||
-    message.includes("load failed") ||
-    message.includes("fetch failed") ||
-    /\b5\d\d\b/.test(message)
-  );
-}
 
 async function uploadOptimizedImage(options: {
   requestId: string;
@@ -154,71 +136,9 @@ async function uploadOptimizedImage(options: {
   file: File;
   label: string;
   signal?: AbortSignal;
+  minPass?: ClientOptimizePass;
 }): Promise<EbookOptimizedUploadResponse> {
-  let lastError: Error | null = null;
-
-  for (let attempt = 1; attempt <= UPLOAD_MAX_ATTEMPTS; attempt += 1) {
-    if (options.signal?.aborted) {
-      throw new DOMException("Upload aborted.", "AbortError");
-    }
-
-    try {
-      const fd = new FormData();
-      fd.set("requestId", options.requestId);
-      fd.set("kind", options.kind);
-      fd.set("label", options.label);
-      // Always send the live File/Blob — never a revoked object URL.
-      fd.set("file", options.file, options.file.name || options.label || "image.jpg");
-
-      const response = await fetch("/api/talispros/ebook-generate/upload-image", {
-        method: "POST",
-        body: fd,
-        signal: options.signal,
-      });
-
-      let payload: { ok?: boolean; error?: string } & Partial<EbookOptimizedUploadResponse>;
-      try {
-        payload = (await response.json()) as typeof payload;
-      } catch {
-        throw new Error(
-          response.status === 413
-            ? `“${options.label}” is too large for a single upload. Try again — optimization should shrink it.`
-            : `Failed to upload “${options.label}” (${response.status || "network"}).`,
-        );
-      }
-
-      if (!response.ok || !payload.ok || !payload.url) {
-        if (response.status === 413) {
-          throw new Error(
-            `“${options.label}” triggered HTTP 413. Retry this image only.`,
-          );
-        }
-        throw new Error(
-          payload.error || `Failed to optimize and upload “${options.label}”.`,
-        );
-      }
-
-      return payload as EbookOptimizedUploadResponse;
-    } catch (error) {
-      if (isAbortError(error)) throw error;
-      lastError =
-        error instanceof Error
-          ? error
-          : new Error(`Failed to upload “${options.label}”.`);
-
-      const canRetry =
-        attempt < UPLOAD_MAX_ATTEMPTS && isTransientUploadError(lastError);
-      if (!canRetry) break;
-
-      console.warn(
-        `[onboarding] Upload retry ${attempt}/${UPLOAD_MAX_ATTEMPTS} for “${options.label}”:`,
-        lastError.message,
-      );
-      await new Promise((resolve) => setTimeout(resolve, 400 * attempt));
-    }
-  }
-
-  throw lastError || new Error(`Failed to upload “${options.label}”.`);
+  return postEbookGenerateOptimizedImage(options);
 }
 
 async function mapPool<T, R>(
@@ -430,7 +350,7 @@ export default function EbookGenerateClient({
     setError("");
     const kind = classifyUploadFile(file);
     if (kind === "other") {
-      setError("Use JPG, PNG, WEBP, or PDF to replace a page.");
+      setError("Use JPG, PNG, WEBP, HEIC, or PDF to replace a page.");
       return;
     }
 
@@ -822,6 +742,7 @@ export default function EbookGenerateClient({
         kind: failure.kind,
         file: failure.file,
         label: failure.label,
+        minPass: "retry",
       });
       const stash = readStash(requestId);
       if (failure.kind === "property") {
@@ -1556,7 +1477,7 @@ export default function EbookGenerateClient({
                   <input
                     id={logoInputId}
                     type="file"
-                    accept="image/jpeg,image/png,image/webp"
+                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                     disabled={converting || saving}
                     onChange={(event) =>
                       setLogoFile(event.target.files?.[0] || null)
@@ -1588,7 +1509,7 @@ export default function EbookGenerateClient({
                   <input
                     id={agentPhotoInputId}
                     type="file"
-                    accept="image/jpeg,image/png,image/webp"
+                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                     disabled={converting || saving}
                     onChange={(event) =>
                       setAgentPhotoFile(event.target.files?.[0] || null)

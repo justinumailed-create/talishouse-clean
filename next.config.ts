@@ -25,10 +25,12 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     serverActions: {
-      // Per-image optimize uploads (one phone photo at a time) — not a giant multi-file POST.
+      // Server Actions only — does not apply to /api route handlers, and does
+      // not raise Vercel's 4.5 MB Function payload cap (HTTP 413).
       bodySizeLimit: "25mb",
     },
-    // Allows a single high-res camera JPEG into /upload-image before server-side optimize.
+    // Next.js proxy buffer for self-hosted / large Server Actions. Phone photos
+    // still must be client-shrunk before POST /upload-image on Vercel.
     proxyClientMaxBodySize: "25mb",
   },
 };

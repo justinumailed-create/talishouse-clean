@@ -7,9 +7,9 @@ import {
 } from "@/lib/talisbooks/library/pinned-catalog";
 import {
   fallbackOptimizedDemoPages,
-  fetchWithTimeout,
   loadPinnedTalisBookPageFiles,
 } from "@/lib/talisbooks/load-pinned-demo-pages";
+import { postEbookGenerateOptimizedImage } from "@/lib/media/client-upload-ebook-image";
 import { publicDemoGenerateError } from "@/lib/talispros/demo-mapsite";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { ONBOARDING_JOB_TIMEOUT_MS } from "@/lib/onboarding-timing";
@@ -22,7 +22,6 @@ type OptimizedAsset = {
 
 const UPLOAD_CONCURRENCY = 2;
 const UPLOAD_TIMEOUT_MS = 60_000;
-const UPLOAD_MAX_ATTEMPTS = 2;
 
 async function mapPool<T, R>(
   items: T[],
@@ -47,87 +46,40 @@ async function mapPool<T, R>(
   return results;
 }
 
-function isAbortError(error: unknown): boolean {
-  return (
-    (error instanceof DOMException && error.name === "AbortError") ||
-    (error instanceof Error &&
-      (error.name === "AbortError" || /aborted|timed out/i.test(error.message)))
-  );
-}
-
-function isTransientUploadError(error: unknown): boolean {
-  if (isAbortError(error)) return true;
-  if (!(error instanceof Error)) return false;
-  const message = error.message.toLowerCase();
-  return (
-    message.includes("failed to fetch") ||
-    message.includes("networkerror") ||
-    message.includes("network request failed") ||
-    message.includes("load failed") ||
-    message.includes("fetch failed") ||
-    /\b5\d\d\b/.test(message)
-  );
-}
-
 async function uploadOptimizedPage(options: {
   mapsiteId: string;
   file: File;
   index: number;
 }): Promise<OptimizedAsset> {
   const label = options.file.name || `page-${options.index + 1}.jpg`;
-  let lastError: Error | null = null;
-
-  for (let attempt = 1; attempt <= UPLOAD_MAX_ATTEMPTS; attempt += 1) {
-    try {
-      const fd = new FormData();
-      fd.set("mapsiteId", options.mapsiteId);
-      fd.set("kind", "property");
-      fd.set("label", label);
-      fd.set("file", options.file, label);
-      const response = await fetchWithTimeout(
-        "/api/talispros/ebook-generate/upload-image",
-        { method: "POST", body: fd },
-        UPLOAD_TIMEOUT_MS,
-      );
-      let payload: {
-        ok?: boolean;
-        error?: string;
-        url?: string;
-        width?: number;
-        height?: number;
-      };
-      try {
-        payload = (await response.json()) as typeof payload;
-      } catch {
-        throw new Error(
-          response.status === 413
-            ? `“${label}” is too large for a single upload.`
-            : `Failed to optimize page ${options.index + 1} (${response.status || "network"}).`,
-        );
-      }
-      if (!response.ok || !payload.ok || !payload.url) {
-        throw new Error(
-          payload.error || `Failed to optimize page ${options.index + 1}.`,
-        );
-      }
-      return {
-        url: payload.url,
-        width: Number(payload.width) || 1,
-        height: Number(payload.height) || 1,
-      };
-    } catch (error) {
-      lastError =
-        error instanceof Error
-          ? error
-          : new Error(`Failed to optimize page ${options.index + 1}.`);
-      const canRetry =
-        attempt < UPLOAD_MAX_ATTEMPTS && isTransientUploadError(lastError);
-      if (!canRetry) break;
-      await new Promise((resolve) => setTimeout(resolve, 400 * attempt));
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), UPLOAD_TIMEOUT_MS);
+  try {
+    const payload = await postEbookGenerateOptimizedImage({
+      mapsiteId: options.mapsiteId,
+      kind: "property",
+      file: options.file,
+      label,
+      signal: controller.signal,
+    });
+    return {
+      url: payload.url,
+      width: Number(payload.width) || 1,
+      height: Number(payload.height) || 1,
+    };
+  } catch (error) {
+    if (
+      (error instanceof DOMException && error.name === "AbortError") ||
+      (error instanceof Error && /aborted|timed out/i.test(error.message))
+    ) {
+      throw new Error(`Timed out optimizing page ${options.index + 1}.`);
     }
+    throw error instanceof Error
+      ? error
+      : new Error(`Failed to optimize page ${options.index + 1}.`);
+  } finally {
+    window.clearTimeout(timer);
   }
-
-  throw lastError || new Error(`Failed to optimize page ${options.index + 1}.`);
 }
 
 async function withTimeout<T>(

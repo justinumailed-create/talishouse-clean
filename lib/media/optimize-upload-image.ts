@@ -1,7 +1,19 @@
 import sharp, { type Sharp } from "sharp";
 import { stripLogoBackground } from "@/lib/media/strip-logo-background";
+import {
+  AGENT_PHOTO_MAX_EDGE_PX,
+  LOGO_MAX_EDGE_PX,
+  PROPERTY_IMAGE_MAX_EDGE_PX,
+  PROPERTY_TARGET_MAX_BYTES,
+  type OptimizeImageKind,
+} from "@/lib/media/upload-size-limits";
 
-export type OptimizeImageKind = "property" | "agent" | "logo";
+export type { OptimizeImageKind };
+export {
+  AGENT_PHOTO_MAX_EDGE_PX,
+  LOGO_MAX_EDGE_PX,
+  PROPERTY_IMAGE_MAX_EDGE_PX,
+};
 
 export type OptimizedImageResult = {
   buffer: Buffer;
@@ -13,17 +25,10 @@ export type OptimizedImageResult = {
   kind: OptimizeImageKind;
 };
 
-/** Property / PDF page art — fullscreen + ebook quality. */
-export const PROPERTY_IMAGE_MAX_EDGE_PX = 2048;
-/** Agent headshot — cropped square, then capped. */
-export const AGENT_PHOTO_MAX_EDGE_PX = 1200;
-/** Logo long edge after background strip. */
-export const LOGO_MAX_EDGE_PX = 1200;
-
 const PROPERTY_QUALITY_START = 88;
-const PROPERTY_QUALITY_FLOOR = 78;
-const PROPERTY_TARGET_MAX_BYTES = 1_500_000;
+const PROPERTY_QUALITY_FLOOR = 62;
 const PROPERTY_TARGET_MIN_BYTES = 300_000;
+const PROPERTY_EDGE_STEPS_PX = [2048, 1600, 1280, 1024] as const;
 
 function extForMime(mime: OptimizedImageResult["mimeType"]): string {
   if (mime === "image/png") return "png";
@@ -54,9 +59,19 @@ async function encodeJpeg(pipeline: Sharp, quality: number): Promise<Buffer> {
     .toBuffer();
 }
 
+function sourceMime(
+  format: string | undefined,
+): OptimizedImageResult["mimeType"] | null {
+  if (format === "png") return "image/png";
+  if (format === "webp") return "image/webp";
+  if (format === "jpeg" || format === "jpg") return "image/jpeg";
+  return null;
+}
+
 /**
  * Adaptive property encode: prefer WebP ~85–90 visual quality, stay under ~1.5 MB.
- * Falls back to JPEG when WebP is larger or unavailable.
+ * Falls back to JPEG when WebP is larger. Steps down long-edge if quality alone
+ * cannot hit the byte target (high-entropy phone photos).
  */
 async function optimizePropertyImage(
   input: Buffer,
@@ -71,82 +86,117 @@ async function optimizePropertyImage(
   }
 
   const longEdge = Math.max(srcW, srcH);
-  const scale = Math.min(1, PROPERTY_IMAGE_MAX_EDGE_PX / longEdge);
-  const width = Math.round(srcW * scale);
-  const height = Math.round(srcH * scale);
+  const uniqueEdges = [
+    ...new Set(
+      [Math.min(longEdge, PROPERTY_IMAGE_MAX_EDGE_PX), ...PROPERTY_EDGE_STEPS_PX].filter(
+        (edge) => edge > 0 && edge <= longEdge,
+      ),
+    ),
+  ].sort((a, b) => b - a);
 
-  const base = () => {
-    const pipeline = sharp(input, { failOn: "none", sequentialRead: true }).rotate();
-    if (scale < 1) {
-      return pipeline.resize({
-        width,
-        height,
-        fit: "inside",
-        withoutEnlargement: true,
-      });
+  let best: {
+    buffer: Buffer;
+    mimeType: OptimizedImageResult["mimeType"];
+    width: number;
+    height: number;
+    quality: number;
+  } | null = null;
+
+  for (const maxEdge of uniqueEdges) {
+    const scale = Math.min(1, maxEdge / longEdge);
+    const width = Math.max(1, Math.round(srcW * scale));
+    const height = Math.max(1, Math.round(srcH * scale));
+    const base = () => {
+      const pipeline = sharp(input, { failOn: "none", sequentialRead: true }).rotate();
+      if (scale < 1) {
+        return pipeline.resize({
+          width,
+          height,
+          fit: "inside",
+          withoutEnlargement: true,
+        });
+      }
+      return pipeline;
+    };
+
+    for (
+      let quality = PROPERTY_QUALITY_START;
+      quality >= PROPERTY_QUALITY_FLOOR;
+      quality -= 4
+    ) {
+      const webp = await encodeWebp(base(), quality);
+      const jpeg = await encodeJpeg(base(), quality);
+      const useWebp = webp.byteLength <= jpeg.byteLength * 1.05;
+      const buffer = useWebp ? webp : jpeg;
+      const mimeType = useWebp ? ("image/webp" as const) : ("image/jpeg" as const);
+      if (!best || buffer.byteLength < best.buffer.byteLength) {
+        best = { buffer, mimeType, width, height, quality };
+      }
+      if (buffer.byteLength <= PROPERTY_TARGET_MAX_BYTES) {
+        // Soft floor: if extremely small after aggressive compress, bump quality once.
+        if (
+          buffer.byteLength < PROPERTY_TARGET_MIN_BYTES &&
+          quality < PROPERTY_QUALITY_START &&
+          mimeType === "image/webp"
+        ) {
+          const bumped = await encodeWebp(
+            base(),
+            Math.min(PROPERTY_QUALITY_START, quality + 4),
+          );
+          if (bumped.byteLength <= PROPERTY_TARGET_MAX_BYTES) {
+            best = {
+              buffer: bumped,
+              mimeType,
+              width,
+              height,
+              quality,
+            };
+          }
+        }
+        const chosen = best;
+        const outMeta = await sharp(chosen.buffer).metadata();
+        return {
+          buffer: chosen.buffer,
+          mimeType: chosen.mimeType,
+          width: outMeta.width ?? width,
+          height: outMeta.height ?? height,
+          bytes: chosen.buffer.byteLength,
+          originalBytes,
+          kind: "property",
+        };
+      }
     }
-    return pipeline;
-  };
-
-  let quality = PROPERTY_QUALITY_START;
-  let bestWebp: Buffer | null = null;
-
-  while (quality >= PROPERTY_QUALITY_FLOOR) {
-    const webp = await encodeWebp(base(), quality);
-    bestWebp = webp;
-    if (webp.byteLength <= PROPERTY_TARGET_MAX_BYTES) {
-      break;
-    }
-    quality -= 4;
   }
 
-  const jpeg = await encodeJpeg(base(), Math.max(quality, 85));
-  let chosen: Buffer;
-  let mimeType: OptimizedImageResult["mimeType"];
-
-  if (bestWebp && bestWebp.byteLength <= jpeg.byteLength * 1.05) {
-    chosen = bestWebp;
-    mimeType = "image/webp";
-  } else {
-    chosen = jpeg;
-    mimeType = "image/jpeg";
-  }
-
-  // Prefer the smaller encoding when the source was already compact.
-  if (chosen.byteLength >= originalBytes && scale === 1 && originalBytes > 0) {
-    const srcMime = meta.format === "png" ? "image/png" : meta.format === "webp" ? "image/webp" : "image/jpeg";
-    if (srcMime === "image/jpeg" || srcMime === "image/webp" || srcMime === "image/png") {
-      return {
-        buffer: input,
-        mimeType: srcMime,
-        width: srcW,
-        height: srcH,
-        bytes: originalBytes,
-        originalBytes,
-        kind: "property",
-      };
-    }
-  }
-
-  // Soft floor: if extremely small after aggressive compress, bump quality once.
+  // Prefer the original only when it is already compact enough to store/serve.
+  const compactMime = sourceMime(meta.format);
   if (
-    chosen.byteLength < PROPERTY_TARGET_MIN_BYTES &&
-    quality < PROPERTY_QUALITY_START &&
-    mimeType === "image/webp"
+    compactMime &&
+    originalBytes <= PROPERTY_TARGET_MAX_BYTES &&
+    (!best || best.buffer.byteLength >= originalBytes)
   ) {
-    const bumped = await encodeWebp(base(), Math.min(PROPERTY_QUALITY_START, quality + 4));
-    if (bumped.byteLength <= PROPERTY_TARGET_MAX_BYTES) {
-      chosen = bumped;
-    }
+    return {
+      buffer: input,
+      mimeType: compactMime,
+      width: srcW,
+      height: srcH,
+      bytes: originalBytes,
+      originalBytes,
+      kind: "property",
+    };
   }
 
-  const outMeta = await sharp(chosen).metadata();
+  if (!best) {
+    throw new Error("Unable to encode property image.");
+  }
+
+  const outMeta = await sharp(best.buffer).metadata();
   return {
-    buffer: chosen,
-    mimeType,
-    width: outMeta.width ?? width,
-    height: outMeta.height ?? height,
-    bytes: chosen.byteLength,
+    buffer: best.buffer,
+    mimeType: best.mimeType,
+    width: outMeta.width ?? best.width,
+    height: outMeta.height ?? best.height,
+    bytes: best.buffer.byteLength,
     originalBytes,
     kind: "property",
   };

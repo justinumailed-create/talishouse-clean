@@ -8,7 +8,7 @@ import {
 export const EBOOK_GENERATE_HELP_TEXT =
   "Add a PDF or images. The first page is the wrap cover — left back, right front. The rest become the book.";
 
-export const EBOOK_GENERATE_UPLOAD_HINT = `PDF, JPG, PNG, or WEBP. Up to ${SELF_SERVICE_MAX_UPLOAD_IMAGES} interior pages.`;
+export const EBOOK_GENERATE_UPLOAD_HINT = `PDF, JPG, PNG, WEBP, or HEIC. Up to ${SELF_SERVICE_MAX_UPLOAD_IMAGES} interior pages.`;
 
 export const EBOOK_GENERATE_COVER_HELP =
   "Front and back covers appear here after upload.";
