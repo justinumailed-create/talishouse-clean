@@ -114,7 +114,7 @@ describe("Talisbooks™ viewer narration stubs", () => {
 });
 
 describe("Talisbooks™ viewer flip geometry", () => {
-  it("centers a solo cover/back leaf and restores the spread while flipping", () => {
+  it("centers a solo cover/back leaf and holds that pose while the cover is still curling", () => {
     expect(
       magazineSoloShiftPercent({ soloRight: true, soloLeft: false, flipping: false }),
     ).toBe(-25);
@@ -123,7 +123,7 @@ describe("Talisbooks™ viewer flip geometry", () => {
     ).toBe(25);
     expect(
       magazineSoloShiftPercent({ soloRight: true, soloLeft: false, flipping: true }),
-    ).toBe(0);
+    ).toBe(-25);
     expect(
       magazineSoloShiftPercent({ soloRight: false, soloLeft: false, flipping: false }),
     ).toBe(0);

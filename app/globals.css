@@ -2262,6 +2262,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 .talisbooks-viewer--magazine .talisbooks-viewer-book[data-open-pose="front"] .talisbooks-viewer-book__page--left,
 .talisbooks-viewer--magazine .talisbooks-viewer-book[data-open-pose="back"] .talisbooks-viewer-book__page--right {
   visibility: hidden;
+  opacity: 0;
   background: transparent;
   box-shadow: none;
 }

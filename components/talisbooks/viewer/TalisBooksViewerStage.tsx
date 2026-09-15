@@ -967,6 +967,8 @@ function OpenBookSpread({
   const incomingSoloLeft = Boolean(incoming && incoming.left && !incoming.right);
   const closingToFront = Boolean(magazine && flipping && !forward && incomingSoloRight);
   const closingToBack = Boolean(magazine && flipping && forward && incomingSoloLeft);
+  const openingFromFront = Boolean(magazine && faces.openPose === "front");
+  const openingFromBack = Boolean(magazine && faces.openPose === "back");
   const wrappingToCover = wrapPhase !== "idle";
   const soloShift = magazineSoloShiftPercent({
     soloRight: Boolean(magazine && soloRight),
@@ -977,6 +979,16 @@ function OpenBookSpread({
     direction: flip?.direction ?? direction,
     wrappingToCover,
   });
+  const expandFromFrontX = useTransform(
+    flipProgress,
+    [0, 0.52, 1],
+    ["-25%", "-25%", "0%"],
+  );
+  const expandFromBackX = useTransform(
+    flipProgress,
+    [0, 0.52, 1],
+    ["25%", "25%", "0%"],
+  );
   const bookSpreadUrl = useMemo(
     () => getBookContinuousSpreadImageUrl(book.pages),
     [book.pages],
@@ -1008,6 +1020,11 @@ function OpenBookSpread({
         style={
           {
             ["--book-spread-aspect"]: String(spreadAspect),
+            ...(openingFromFront
+              ? { x: expandFromFrontX }
+              : openingFromBack
+                ? { x: expandFromBackX }
+                : {}),
           } as CSSProperties
         }
         aria-label={magazine ? "Open magazine" : "Open book"}
@@ -1021,11 +1038,16 @@ function OpenBookSpread({
             !geometryReady || wrapPhase === "out" || wrapPhase === "swap" ? 0 : 1,
           rotateY: 0,
           scale: 1,
-          x: `${soloShift}%`,
+          ...(openingFromFront || openingFromBack ? {} : { x: `${soloShift}%` }),
         }}
         transition={{
           x: {
-            duration: wrappingToCover ? 0 : flipping ? TALISBOOKS_VIEWER_TURN_DURATION_MS / 1000 : 0,
+            duration:
+              wrappingToCover || openingFromFront || openingFromBack
+                ? 0
+                : flipping
+                  ? TALISBOOKS_VIEWER_TURN_DURATION_MS / 1000
+                  : 0,
             ease: FLIP_EASE,
           },
           opacity: {

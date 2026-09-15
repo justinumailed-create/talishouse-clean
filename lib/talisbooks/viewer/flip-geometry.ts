@@ -26,7 +26,9 @@ export type MagazineSoloShiftInput = {
  * Horizontal shift so a solo cover/back leaf sits in the stage center.
  *
  * Rest: center the remaining leaf.
- * Open (flip away from solo): expand to 0 with the curl.
+ * Open (flip away from solo): hold the solo pose until the leaf is past 90°,
+ * then expand — implemented with flipProgress in the stage so the next
+ * spread cannot peek beside the cover.
  * Close (flip toward solo): slide to the solo rest pose with the curl —
  * never as a second motion after the leaf has already landed.
  * Wrap: keep the current solo pose (no expand-to-0, no back→front slide).
@@ -55,6 +57,15 @@ export function magazineSoloShiftPercent({
       return -25;
     }
     if (direction > 0 && incomingSoloLeft) {
+      return 25;
+    }
+    // Hold the solo pose while the cover is still curling. Expanding to 0
+    // immediately lets the next spread peek beside the cover (the open-turn
+    // counterpart to close-pose). The stage interpolates 0 after 90°.
+    if (soloRight) {
+      return -25;
+    }
+    if (soloLeft) {
       return 25;
     }
     return 0;
