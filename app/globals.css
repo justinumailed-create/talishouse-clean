@@ -1851,9 +1851,6 @@ body.mapsite-gallery-open [data-paypal-button] {
   position: relative;
   overflow: hidden;
   clip-path: inset(0);
-  isolation: isolate;
-  /* Flatten this leaf so 200% centerfold images clip; the curl leaf is a sibling. */
-  transform: translateZ(0);
   min-width: 0;
   min-height: 0;
   background: #fffefb;
