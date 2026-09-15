@@ -240,12 +240,15 @@ function FlipLeaf({
   back,
   progress,
   magazine = false,
+  hideBackUntilMid = false,
 }: {
   direction: 1 | -1;
   front: TalisBooksViewerPage | null;
   back: TalisBooksViewerPage | null;
   progress: MotionValue<number>;
   magazine?: boolean;
+  /** Cover open: keep next-spread art off the leaf back until past 90°. */
+  hideBackUntilMid?: boolean;
 }) {
   const forward = direction > 0;
   const [fromY, toY] = spreadFlipRotateY(direction);
@@ -270,6 +273,7 @@ function FlipLeaf({
         rotateX: liftX,
         translateZ: liftZ,
       }}
+      data-hide-back={hideBackUntilMid ? "until-mid" : undefined}
     >
       <div className="talisbooks-viewer-book__leaf-face talisbooks-viewer-book__leaf-face--front">
         <BookPageFace page={front} side={forward ? "right" : "left"} magazine={magazine} />
@@ -989,20 +993,20 @@ function OpenBookSpread({
     [0, 0.52, 1],
     ["25%", "25%", "0%"],
   );
-  const [clipOpeningCover, setClipOpeningCover] = useState(false);
+  const [coverOpenFirstHalf, setCoverOpenFirstHalf] = useState(false);
   useEffect(() => {
     if (!openingFromFront) {
-      setClipOpeningCover(false);
+      setCoverOpenFirstHalf(false);
       return;
     }
-    setClipOpeningCover(flipProgress.get() < 0.52);
+    setCoverOpenFirstHalf(flipProgress.get() < 0.52);
     const unsubscribe = flipProgress.on("change", (value) => {
-      setClipOpeningCover(value < 0.52);
+      setCoverOpenFirstHalf(value < 0.52);
     });
     return unsubscribe;
   }, [openingFromFront, flipProgress]);
-  const clipRightHalf = Boolean(
-    openingFromFront && (clipOpeningCover || flipProgress.get() < 0.52),
+  const hideCoverLeafBack = Boolean(
+    openingFromFront && (coverOpenFirstHalf || flipProgress.get() < 0.52),
   );
   const bookSpreadUrl = useMemo(
     () => getBookContinuousSpreadImageUrl(book.pages),
@@ -1031,7 +1035,6 @@ function OpenBookSpread({
           closingToFront ? "front" : closingToBack ? "back" : undefined
         }
         data-open-pose={magazine ? faces.openPose ?? undefined : undefined}
-        data-open-clip={clipRightHalf ? "right-half" : undefined}
         data-wrap-phase={wrapPhase === "idle" ? undefined : wrapPhase}
         style={
           {
@@ -1106,14 +1109,7 @@ function OpenBookSpread({
               onPointerCancel={onHitPointerCancel}
             />
 
-            <div
-              className="talisbooks-viewer-book__page talisbooks-viewer-book__page--left"
-              style={
-                openingFromFront
-                  ? { visibility: "hidden", opacity: 0 }
-                  : undefined
-              }
-            >
+            <div className="talisbooks-viewer-book__page talisbooks-viewer-book__page--left">
               <BookPageFace page={leftPage} side="left" magazine={magazine} />
             </div>
 
@@ -1128,13 +1124,11 @@ function OpenBookSpread({
                 key={`${flip!.from}-${flip!.to}-${flip!.direction}-${flip!.mode}`}
                 direction={flip!.direction}
                 front={flipFront}
-                back={clipRightHalf ? null : flipBack}
+                back={flipBack}
                 progress={flipProgress}
                 magazine={magazine}
+                hideBackUntilMid={hideCoverLeafBack}
               />
-            ) : null}
-            {clipRightHalf ? (
-              <span className="talisbooks-viewer-book__open-mask" aria-hidden="true" />
             ) : null}
           </div>
         </div>

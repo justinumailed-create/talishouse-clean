@@ -211,7 +211,7 @@ async function composeFront(slots: Rm22SlotState): Promise<HTMLCanvasElement> {
   const tagline = slots.frontTagline.trim();
   if (tagline) {
     ctx.fillStyle = LIME;
-    ctx.font = `italic 22px ${SANS}`;
+    ctx.font = `22px ${SANS}`;
     const tagLines = wrapLines(ctx, tagline, maxTextWidth);
     tagLines.forEach((line, index) => {
       ctx.fillText(line, canvas.width / 2, cursorY + index * 28);
