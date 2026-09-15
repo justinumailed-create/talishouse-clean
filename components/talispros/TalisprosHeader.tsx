@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { isDemoMapSitePath } from "@/lib/talispros/demo-mapsite";
 import { isTalisprosStartPath } from "@/lib/talispros/start-content";
 
 export default function TalisprosHeader() {
@@ -11,7 +12,8 @@ export default function TalisprosHeader() {
   if (
     pathname.startsWith("/talispros/mapsites/") ||
     isTalisprosStartPath(pathname) ||
-    pathname.startsWith("/talispros/markets/")
+    pathname.startsWith("/talispros/markets/") ||
+    isDemoMapSitePath(pathname)
   ) {
     return null;
   }

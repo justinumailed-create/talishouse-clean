@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createDemoMapSiteCode,
   isDemoMapSiteCode,
+  isDemoMapSitePath,
   isProtectedPlatformDemoMapSite,
   demoMapSiteApplicationHref,
   demoMapSiteEbookHref,
@@ -19,6 +20,16 @@ describe("demo mapsite codes", () => {
     expect(isDemoMapSiteCode("demo")).toBe(false);
     expect(isDemoMapSiteCode("ar01")).toBe(false);
     expect(isIssuedFastCode(createDemoMapSiteCode())).toBe(false);
+  });
+
+  it("identifies the public demo Mapsite™ builder routes", () => {
+    expect(isDemoMapSitePath("/talispros/demo-mapsite")).toBe(true);
+    expect(isDemoMapSitePath("/talispros/demo-mapsite/ebook")).toBe(true);
+    expect(isDemoMapSitePath("/talispros/demo-mapsite/ebook?mapsiteId=1")).toBe(
+      true,
+    );
+    expect(isDemoMapSitePath("/talispros")).toBe(false);
+    expect(isDemoMapSitePath("/talispros/mapsite")).toBe(false);
   });
 
   it("protects the platform demonstration Mapsite™ id", () => {

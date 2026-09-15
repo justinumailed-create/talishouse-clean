@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { isDemoMapSitePath } from "@/lib/talispros/demo-mapsite";
 import { isTalisprosStartPath } from "@/lib/talispros/start-content";
 import TalisprosFooter from "./TalisprosFooter";
 import TalisprosHeader from "./TalisprosHeader";
@@ -15,8 +16,9 @@ export default function TalisprosLayoutClient({
   const isAdminRoute = pathname?.startsWith("/talispros/admin");
   const isMapSiteApp =
     pathname === "/talispros/mapsite" || pathname?.startsWith("/talispros/mapsite/");
+  const isDemoMapSite = isDemoMapSitePath(pathname);
 
-  if (isAdminRoute || isMapSiteApp) {
+  if (isAdminRoute || isMapSiteApp || isDemoMapSite) {
     return <>{children}</>;
   }
 

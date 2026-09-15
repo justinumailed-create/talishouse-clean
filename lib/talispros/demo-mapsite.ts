@@ -9,6 +9,15 @@ import { DEMO_MAPSITE_ID, MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state
 /** Public demo Mapsite™ builder (no FAST Code issuance). */
 export const DEMO_MAPSITE_BUILD_PATH = "/talispros/demo-mapsite";
 
+/** True for the demo builder and its follow-on pages (e.g. /ebook). */
+export function isDemoMapSitePath(pathname: string | null | undefined): boolean {
+  const path = pathname?.split("?")[0]?.split("#")[0]?.trim() || "";
+  return (
+    path === DEMO_MAPSITE_BUILD_PATH ||
+    path.startsWith(`${DEMO_MAPSITE_BUILD_PATH}/`)
+  );
+}
+
 export const DEMO_MAPSITE_CODE_PREFIX = "demo-";
 
 export const DEMO_PINNED_EBOOK_HREF = `${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`;
