@@ -2283,6 +2283,13 @@ body.mapsite-gallery-open [data-paypal-button] {
   pointer-events: none;
 }
 
+/* Until the cover leaf is past 90°, only the right half of the spread may
+   paint. Otherwise the next interior peeks at the gutter while the cover
+   is still turning (incoming art lives on the leaf back after midpoint). */
+.talisbooks-viewer--magazine .talisbooks-viewer-book[data-open-clip="right-half"] .talisbooks-viewer-book__spread {
+  clip-path: inset(0 0 0 50%);
+}
+
 .talisbooks-viewer--magazine .talisbooks-viewer-book__leaf-face {
   box-shadow:
     0 14px 32px rgba(28, 25, 23, 0.2),

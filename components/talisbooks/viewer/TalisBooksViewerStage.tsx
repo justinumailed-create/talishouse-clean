@@ -989,6 +989,21 @@ function OpenBookSpread({
     [0, 0.52, 1],
     ["25%", "25%", "0%"],
   );
+  const [clipOpeningCover, setClipOpeningCover] = useState(false);
+  useEffect(() => {
+    if (!openingFromFront) {
+      setClipOpeningCover(false);
+      return;
+    }
+    setClipOpeningCover(flipProgress.get() < 0.52);
+    const unsubscribe = flipProgress.on("change", (value) => {
+      setClipOpeningCover(value < 0.52);
+    });
+    return unsubscribe;
+  }, [openingFromFront, flipProgress]);
+  const clipRightHalf = Boolean(
+    openingFromFront && (clipOpeningCover || flipProgress.get() < 0.52),
+  );
   const bookSpreadUrl = useMemo(
     () => getBookContinuousSpreadImageUrl(book.pages),
     [book.pages],
@@ -1016,6 +1031,7 @@ function OpenBookSpread({
           closingToFront ? "front" : closingToBack ? "back" : undefined
         }
         data-open-pose={magazine ? faces.openPose ?? undefined : undefined}
+        data-open-clip={clipRightHalf ? "right-half" : undefined}
         data-wrap-phase={wrapPhase === "idle" ? undefined : wrapPhase}
         style={
           {
@@ -1090,7 +1106,14 @@ function OpenBookSpread({
               onPointerCancel={onHitPointerCancel}
             />
 
-            <div className="talisbooks-viewer-book__page talisbooks-viewer-book__page--left">
+            <div
+              className="talisbooks-viewer-book__page talisbooks-viewer-book__page--left"
+              style={
+                openingFromFront
+                  ? { visibility: "hidden", opacity: 0 }
+                  : undefined
+              }
+            >
               <BookPageFace page={leftPage} side="left" magazine={magazine} />
             </div>
 
