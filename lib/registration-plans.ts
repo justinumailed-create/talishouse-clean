@@ -47,18 +47,20 @@ export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
       "For demonstrations and QA",
     ],
   },
+  /**
+   * Retired demo activation price. Kept only so historical $1 Stripe
+   * Checkout sessions can still be matched; new checkout never uses this.
+   */
   ROOT_ACCOUNT_1: {
     label: "Root Account™ ($1)",
     price: 1,
     monthly: 0,
     taxLabel: "GST",
     description:
-      "CAD $1 Root Account™ activation — unlock Express Interest and admin Mapsite™ management.",
+      "Retired CAD $1 demo activation. New registration uses Root Account™.",
     bullets: [
-      "CAD $1.00 + GST one-time activation",
-      "Enables Express an Interest form",
-      "Activates Mapsite™ for admin management",
-      "Root-equivalent FAST Code generation",
+      "Retired — do not offer for new checkout",
+      "Historical $1 + GST Stripe sessions only",
     ],
   },
   ROOT_ACCOUNT: {
@@ -155,17 +157,26 @@ export function planSummaryFor(planType: PlanType): {
   };
 }
 
-/** Claim-form accountType → PayPal plan. */
+/**
+ * New registration / Mapsite™ activation checkout never charges the retired
+ * $1 ROOT_ACCOUNT_1 demo price. Historical paid $1 sessions stay matchable
+ * via PLAN_DETAILS.ROOT_ACCOUNT_1.
+ */
+export function checkoutPlanTypeForActivation(planType: PlanType): PlanType {
+  return planType === "ROOT_ACCOUNT_1" ? "ROOT_ACCOUNT" : planType;
+}
+
+/** Claim-form accountType → checkout plan (full Root, not $1). */
 export function planTypeForClaimAccountType(accountType: string): PlanType {
   const normalized = accountType.trim().toLowerCase();
   if (normalized === "root-1" || normalized === "root_1") {
-    return "ROOT_ACCOUNT_1";
+    return "ROOT_ACCOUNT";
   }
   if (normalized === "root" || normalized === "test") {
     return normalized === "test" ? "TEST_ACCOUNT" : "ROOT_ACCOUNT";
   }
   if (normalized.startsWith("adpro")) return "ADPRO_SINGLE";
-  if (normalized === "fsbo" || normalized === "fsbos") return "ROOT_ACCOUNT_1";
+  if (normalized === "fsbo" || normalized === "fsbos") return "ROOT_ACCOUNT";
   if (normalized === "derivative") return "DERIVATIVE_ACCOUNT";
   return "ROOT_ACCOUNT";
 }

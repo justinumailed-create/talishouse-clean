@@ -10,6 +10,7 @@ import {
   rootAccountPlanSummary,
 } from "../lib/talispros/mapsite-audience";
 import { mapsiteAccountTypeSegment } from "../lib/talispros/mapsite-state";
+import { accountTypeLabelFromBuildAccountType } from "../lib/build-mapsite-publish";
 
 describe("Mapsite™ audience payment helpers", () => {
   it("maps audiences to account categories", () => {
@@ -54,19 +55,26 @@ describe("Mapsite™ audience payment helpers", () => {
     expect(rootAccountPlanSummary().priceLabel).toContain("998.50");
   });
 
-  it("maps claim root-1 and FSBO to the $1 + GST plan", () => {
-    expect(planTypeForClaimAccountType("root-1")).toBe("ROOT_ACCOUNT_1");
-    expect(planTypeForClaimAccountType("fsbo")).toBe("ROOT_ACCOUNT_1");
-    expect(planTypeForClaimAccountType("fsbos")).toBe("ROOT_ACCOUNT_1");
-    const summary = mapsiteClaimPlanSummary("ROOT_ACCOUNT_1");
-    expect(summary.price).toBe(1);
-    expect(summary.total).toBe(1.14);
-    expect(summary.totalLabel).toContain("GST");
-    expect(summary.planLabel).toContain("$1");
+  it("maps claim root-1 and FSBO to the full Root Account™ plan", () => {
+    expect(planTypeForClaimAccountType("root-1")).toBe("ROOT_ACCOUNT");
+    expect(planTypeForClaimAccountType("root_1")).toBe("ROOT_ACCOUNT");
+    expect(planTypeForClaimAccountType("fsbo")).toBe("ROOT_ACCOUNT");
+    expect(planTypeForClaimAccountType("fsbos")).toBe("ROOT_ACCOUNT");
+    const summary = mapsiteClaimPlanSummary("ROOT_ACCOUNT");
+    expect(summary.price).toBe(998.5);
+    expect(summary.priceLabel).toContain("998.50");
+    expect(summary.planLabel).toBe("Root Account™");
+    expect(summary.planLabel).not.toContain("$1");
   });
 
   it("routes FSBO claimed Mapsites™ to the fsbos segment", () => {
     expect(mapsiteAccountTypeSegment("fsbo")).toBe("fsbos");
     expect(mapsiteAccountTypeSegment("fsbos")).toBe("fsbos");
+  });
+
+  it("does not label root-1 claims as a $1 product", () => {
+    expect(accountTypeLabelFromBuildAccountType("root-1")).toBe("Root Account™");
+    expect(accountTypeLabelFromBuildAccountType("root")).toBe("Root Account™");
+    expect(accountTypeLabelFromBuildAccountType("root-1")).not.toContain("$1");
   });
 });

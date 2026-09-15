@@ -104,7 +104,7 @@ export default function TalisprosMarketRegistrationForm({
   const marketCopy = REGISTRATION_MARKET_COPY[market];
   const [requestId, setRequestId] = useState("");
   const isPanel = variant === "panel";
-  const accountType = market === "fsbos" ? "fsbo" : "root-1";
+  const accountType = market === "fsbos" ? "fsbo" : "root";
 
   const [date, setDate] = useState("");
   useEffect(() => {

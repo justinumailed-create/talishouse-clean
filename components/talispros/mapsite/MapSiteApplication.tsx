@@ -74,7 +74,7 @@ interface MapSiteApplicationProps {
   openPinOnLoad?: boolean;
   /** Owner Mapsite™ only: one-time guided prompt above the open property flag. */
   showStartHere?: boolean;
-  /** Claim-form plan for activation checkout display (e.g. ROOT_ACCOUNT_1). */
+  /** Claim-form plan for activation checkout display (full Root Account™). */
   paymentPlanType?: PlanType;
   /** Completed activation payment on file — unlocks Express Interest. */
   paymentReceived?: boolean;

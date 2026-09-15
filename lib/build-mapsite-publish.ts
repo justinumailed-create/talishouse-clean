@@ -42,7 +42,7 @@ export function offeredTierFromBuildAccountType(
 }
 
 export function accountTypeLabelFromBuildAccountType(accountType: string): string {
-  if (accountType === "root-1") return "Root Account™ ($1)";
+  if (accountType === "root-1") return "Root Account™";
   if (accountType === "root") return "Root Account™";
   if (accountType === "derivative") return "Derivative Account™";
   if (accountType === "fsbo" || accountType === "fsbos") return "FSBO";

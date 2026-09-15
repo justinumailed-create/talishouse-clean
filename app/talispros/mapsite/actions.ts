@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import { parseRegistrationMarket } from "@/lib/registration-market";
 import {
+  checkoutPlanTypeForActivation,
   planSummaryFor,
   planTypeForClaimAccountType,
   type PlanType,
@@ -112,8 +113,8 @@ export async function loadMapSiteApplicationState(options?: {
 }
 
 /**
- * Resolve PayPal plan from the Claim a Market build request
- * (e.g. root-1 → ROOT_ACCOUNT_1).
+ * Resolve checkout plan from the Claim a Market build request.
+ * Legacy root-1 / FSBO claims map to full Root Account™, not the retired $1 plan.
  */
 export async function resolveMapSitePaymentPlanType(options?: {
   requestId?: string | null;
@@ -136,7 +137,11 @@ export async function resolveMapSitePaymentPlanType(options?: {
         .maybeSingle();
       const accountType =
         data?.requested_account_type || data?.account_type || "";
-      if (accountType) return planTypeForClaimAccountType(accountType);
+      if (accountType) {
+        return checkoutPlanTypeForActivation(
+          planTypeForClaimAccountType(accountType),
+        );
+      }
     }
 
     if (fastCode) {
@@ -146,7 +151,9 @@ export async function resolveMapSitePaymentPlanType(options?: {
         .ilike("code", fastCode)
         .maybeSingle();
       if (codeRow?.account_type) {
-        return planTypeForClaimAccountType(codeRow.account_type);
+        return checkoutPlanTypeForActivation(
+          planTypeForClaimAccountType(codeRow.account_type),
+        );
       }
       if (codeRow?.request_id) {
         const { data } = await supabase
@@ -156,7 +163,11 @@ export async function resolveMapSitePaymentPlanType(options?: {
           .maybeSingle();
         const accountType =
           data?.requested_account_type || data?.account_type || "";
-        if (accountType) return planTypeForClaimAccountType(accountType);
+        if (accountType) {
+          return checkoutPlanTypeForActivation(
+            planTypeForClaimAccountType(accountType),
+          );
+        }
       }
     }
 
@@ -170,7 +181,11 @@ export async function resolveMapSitePaymentPlanType(options?: {
         .maybeSingle();
       const accountType =
         data?.requested_account_type || data?.account_type || "";
-      if (accountType) return planTypeForClaimAccountType(accountType);
+      if (accountType) {
+        return checkoutPlanTypeForActivation(
+          planTypeForClaimAccountType(accountType),
+        );
+      }
     }
   } catch (error) {
     console.warn("[mapsite] resolveMapSitePaymentPlanType failed:", error);
@@ -390,11 +405,13 @@ export async function createMapSiteStripeCheckoutSession(input: {
     };
   }
 
-  const planType: PlanType = await resolveMapSitePaymentPlanType({
-    requestId,
-    mapsiteId,
-    fastCode: input.fastCode || mapsite.fast_code,
-  });
+  const planType: PlanType = checkoutPlanTypeForActivation(
+    await resolveMapSitePaymentPlanType({
+      requestId,
+      mapsiteId,
+      fastCode: input.fastCode || mapsite.fast_code,
+    }),
+  );
   const summary = planSummaryFor(planType);
   const unitAmount = mapsiteActivationUnitAmountCents(planType);
   const fastCode = (input.fastCode || mapsite.fast_code || "").trim();
