@@ -6,6 +6,7 @@ import {
 import { HOME_PIN_DEFAULT_MAP_ZOOM } from "@/lib/home-pin-coordinates";
 import { generateMapSiteSlug } from "@/lib/slug-generator";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { firstNonPersonalMapsiteLabel } from "@/lib/mapsite-pin-label";
 import { MAPSITE_DEMO_LISTING_IMAGE } from "@/lib/talispros/mapsite-listing-media";
 import {
   getMapSiteLocationFromBuildRequest,
@@ -176,16 +177,21 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
 
     const location = await getMapSiteLocationFromBuildRequest({ requestId });
     const coverImage = location?.coverImage || MAPSITE_DEMO_LISTING_IMAGE;
-    const propertyTitle =
-      location?.propertyTitle ||
-      request.future_pin_label?.trim() ||
-      `${request.first_name} ${request.last_name}`.trim() ||
-      "Your Property";
+    const ownerName = `${request.first_name} ${request.last_name}`.trim();
     const propertyAddress =
       location?.propertyAddress ||
       request.street_address?.trim() ||
       request.reverse_geocoded_address?.trim() ||
       null;
+    const propertyTitle =
+      firstNonPersonalMapsiteLabel(
+        [
+          location?.propertyTitle,
+          request.future_pin_label?.trim(),
+          propertyAddress,
+        ],
+        [ownerName],
+      ) || "Your Property";
     const propertyDescription =
       location?.propertyDescription || request.pin_writeup?.trim() || null;
     const latitude =

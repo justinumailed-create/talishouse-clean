@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { mapSitePinVisualFields } from "@/lib/mapsite-pin-style";
+import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
 import type { TalisMapsPin } from "@/lib/talismaps";
 
 const TalisMapsEmbed = dynamic(() => import("@/components/talismaps/TalisMapsEmbed"), {
@@ -17,6 +18,7 @@ interface MapSiteInteractiveMapProps {
   longitude?: number;
   zoom?: number;
   propertyTitle?: string;
+  propertyAddress?: string;
   embedded?: boolean;
 }
 
@@ -25,6 +27,7 @@ export default function MapSiteInteractiveMap({
   longitude,
   zoom = 15,
   propertyTitle,
+  propertyAddress,
   embedded = false,
 }: MapSiteInteractiveMapProps) {
   const hasCoords =
@@ -33,13 +36,18 @@ export default function MapSiteInteractiveMap({
     Number.isFinite(latitude) &&
     Number.isFinite(longitude);
 
+  const pinLabel = mapsitePublicPinLabel({
+    propertyTitle,
+    address: propertyAddress,
+  });
+
   const pins = useMemo<TalisMapsPin[]>(() => {
     if (!hasCoords || latitude == null || longitude == null) return [];
     const visual = mapSitePinVisualFields();
     return [
       {
         id: "embed-pin",
-        name: propertyTitle || "Location",
+        name: pinLabel,
         description: "",
         categoryId: null,
         categorySlug: null,
@@ -65,7 +73,7 @@ export default function MapSiteInteractiveMap({
         customLogoUrl: visual.customLogoUrl,
       },
     ];
-  }, [hasCoords, latitude, longitude, propertyTitle]);
+  }, [hasCoords, latitude, longitude, pinLabel]);
 
   const mapContent = (
     <TalisMapsEmbed
@@ -73,7 +81,7 @@ export default function MapSiteInteractiveMap({
       latitude={hasCoords ? latitude : undefined}
       longitude={hasCoords ? longitude : undefined}
       zoom={zoom}
-      pinLabel={propertyTitle}
+      pinLabel={pinLabel}
       className="h-full w-full"
       minHeightClassName="min-h-[320px]"
       emptyMessage={

@@ -78,7 +78,8 @@ describe("buildMapSiteLayoutData", () => {
     );
     expect(layout.summary.city).toBe("Toronto");
     expect(layout.agent.name).toBe("Arun Rachuri");
-    expect(layout.pins).toHaveLength(1);
+    expect(layout.pins[0].name).toBe("123 King St, Toronto, ON, Canada");
+    expect(layout.pinLabel).toBe("123 King St, Toronto, ON, Canada");
     expect(layout.pins[0]).toMatchObject({
       pinIcon: "none",
       pinColor: "#1A73E8",
@@ -146,7 +147,8 @@ describe("buildMapSiteLayoutData", () => {
     });
 
     expect(layout.mapCenter).toEqual([43.65, -79.38]);
-    expect(layout.pinLabel).toBe("LRG1-TTV");
+    expect(layout.pinLabel).toBe("123 King St, Toronto, ON, Canada");
+    expect(layout.pins[0].name).not.toBe("LRG1-TTV");
     expect(layout.overlayImageUrl).toBe("https://cdn.example.com/hero.jpg");
     expect(layout.summary.price).toBe("$129,000");
   });
@@ -221,6 +223,56 @@ describe("buildMapSiteLayoutData", () => {
         categoryBadge: "for-sale",
       },
     });
+  });
+
+  it("labels the public pin with the lot address instead of the owner name", () => {
+    const layout = buildMapSiteLayoutData({
+      ...baseMapSite,
+      ownerFirstName: "Lydia",
+      ownerLastName: "Gaertner",
+      agentName: "Lydia Gaertner",
+      propertyTitle: "Lydia Gaertner",
+      propertyAddress: "5 HEAD RD, HOMEVILLE, NS, CANADA",
+      pins: [
+        {
+          ...baseMapSite.pins[0],
+          name: "Lydia Gaertner",
+          address: "5 HEAD RD, HOMEVILLE, NS, CANADA",
+          city: "Homeville",
+          province: "NS",
+          postalCode: "",
+          country: "Canada",
+        },
+      ],
+    });
+
+    expect(layout.pinLabel).toBe("5 Head Rd, Homeville, NS, Canada");
+    expect(layout.pins[0].name).toBe("5 Head Rd, Homeville, NS, Canada");
+    expect(layout.pinLabel).not.toMatch(/Lydia/i);
+    expect(toMapEnginePin(layout.pins[0]).label).toBe(
+      "5 Head Rd, Homeville, NS, Canada",
+    );
+  });
+
+  it("prefers a formal lot label on the pin flag", () => {
+    const layout = buildMapSiteLayoutData({
+      ...baseMapSite,
+      ownerFirstName: "Lydia",
+      ownerLastName: "Gaertner",
+      propertyTitle: "Lydia Gaertner",
+      propertyAddress: "5 HEAD RD, HOMEVILLE, NS, CANADA",
+      pins: [
+        {
+          ...baseMapSite.pins[0],
+          name: "Lot 8, South Head Road, Homeville, Nova Scotia",
+          address: "5 HEAD RD, HOMEVILLE, NS, CANADA",
+        },
+      ],
+    });
+
+    expect(layout.pinLabel).toBe(
+      "Lot 8, South Head Road, Homeville, Nova Scotia",
+    );
   });
 
   it("preserves the saved build-time map zoom on the published layout", () => {

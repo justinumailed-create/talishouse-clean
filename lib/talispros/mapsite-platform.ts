@@ -95,6 +95,7 @@ import {
   shouldReplaceDemoListingMedia,
 } from "@/lib/talispros/mapsite-listing-media";
 import { resolvePinStyleExtras } from "@/lib/build-request-pin-style-notes";
+import { firstNonPersonalMapsiteLabel } from "@/lib/mapsite-pin-label";
 
 const DEMO_DESCRIPTION =
   "It's a million dollar neighbourhood. A driveway and building site were prepared some years ago. May come with a Tiny Home guest house to stay in, while you build your dream home.";
@@ -266,8 +267,11 @@ function mapBuildRequestSubmissionRow(
     latitude: hasLocation ? row.latitude! : undefined,
     longitude: hasLocation ? row.longitude! : undefined,
     propertyAddress,
-    propertyTitle:
-      row.property_title?.trim() || row.future_pin_label?.trim() || null,
+    propertyTitle: firstNonPersonalMapsiteLabel([
+      row.property_title,
+      row.future_pin_label,
+      propertyAddress,
+    ]),
     propertyDescription,
     coverImage,
     galleryImages: gallery.length > 0 ? gallery : coverImage ? [coverImage] : [],
@@ -310,7 +314,13 @@ export function applyBuildRequestLocationToMapSite(
     lat: hasLocation ? submission.latitude! : mapsite.lat,
     lng: hasLocation ? submission.longitude! : mapsite.lng,
     property_address: submission.propertyAddress || mapsite.property_address,
-    property_title: submission.propertyTitle || mapsite.property_title,
+    property_title:
+      firstNonPersonalMapsiteLabel([
+        submission.propertyTitle,
+        mapsite.property_title,
+        submission.propertyAddress,
+        mapsite.property_address,
+      ]) || mapsite.property_title,
     property_description:
       submission.propertyDescription || mapsite.property_description,
     cover_image: submission.coverImage || mapsite.cover_image,

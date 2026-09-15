@@ -20,7 +20,7 @@ interface MapSiteTalisMapsProps {
   pins: MapSiteLayoutData["pins"];
   mapCenter: MapSiteLayoutData["mapCenter"];
   mapZoom: MapSiteLayoutData["mapZoom"];
-  propertyTitle: string;
+  pinLabel: string;
   fastCode: string;
   variant?: "embedded" | "window";
   backHref?: string | null;
@@ -31,7 +31,7 @@ export default function MapSiteTalisMaps({
   pins,
   mapCenter,
   mapZoom,
-  propertyTitle,
+  pinLabel,
   fastCode,
   variant = "embedded",
   backHref = null,
@@ -64,7 +64,7 @@ export default function MapSiteTalisMaps({
       pins={pins}
       center={mapCenter}
       zoom={mapZoom}
-      pinLabel={propertyTitle}
+      pinLabel={pinLabel}
       marketing={pins.length === 0 && !mapCenter}
       className="absolute inset-0 h-full w-full"
       minHeightClassName={minHeightClassName}

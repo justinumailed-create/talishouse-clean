@@ -60,7 +60,7 @@ function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
     pins: [
       {
         id: record.id,
-        name: record.property_title || code,
+        name: record.property_address || record.property_title || code,
         description: record.property_description || "",
         latitude: record.lat,
         longitude: record.lng,

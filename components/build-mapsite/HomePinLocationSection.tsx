@@ -14,6 +14,7 @@ import {
   PIN_WRITEUP_MAX_LENGTH,
   type HomePinLocationValues,
 } from "./home-pin-types";
+import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
 import GoogleAddressInput from "./GoogleAddressInput";
 import TalisMapsPinStyleSection from "./TalisMapsPinStyleSection";
 import type { TalisMapsPinLocationUpdate } from "./TalisMapsPinPicker";
@@ -224,33 +225,34 @@ export default function HomePinLocationSection({
     return () => URL.revokeObjectURL(objectUrl);
   }, [customLogo]);
 
-  const pinPickerStyle = useMemo(
-    () => ({
+  const pinPickerStyle = useMemo(() => {
+    const locationLabel = mapsitePublicPinLabel({
+      lotLabel: values.futurePinLabel,
+      address: values.streetAddress,
+      fallback: values.reverseGeocodedAddress,
+    });
+    return {
       color: values.futurePinColor,
-      // Prefer the PIN write-up so map text matches what the user entered.
-      label:
-        values.pinWriteup.trim() ||
-        values.futurePinLabel?.trim() ||
-        null,
+      label: locationLabel === "Location" ? null : locationLabel,
       icon: values.futurePinIcon,
       border: values.futurePinBorder,
       whiteCenter: values.futurePinWhiteCenter,
       animated: values.futurePinAnimated,
       categoryBadge: values.futurePinCategoryBadge,
       customLogoUrl: customLogoPreview,
-    }),
-    [
-      values.futurePinColor,
-      values.pinWriteup,
-      values.futurePinLabel,
-      values.futurePinIcon,
-      values.futurePinBorder,
-      values.futurePinWhiteCenter,
-      values.futurePinAnimated,
-      values.futurePinCategoryBadge,
-      customLogoPreview,
-    ]
-  );
+    };
+  }, [
+    values.futurePinColor,
+    values.futurePinLabel,
+    values.streetAddress,
+    values.reverseGeocodedAddress,
+    values.futurePinIcon,
+    values.futurePinBorder,
+    values.futurePinWhiteCenter,
+    values.futurePinAnimated,
+    values.futurePinCategoryBadge,
+    customLogoPreview,
+  ]);
 
   const hasCoords = hasValidCoordinates(values.latitude, values.longitude);
   const hasGeoInput = Boolean(values.latitude.trim() || values.longitude.trim());

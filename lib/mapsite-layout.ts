@@ -15,6 +15,7 @@ import {
   mapSitePinVisualFields,
   type MapSiteSavedPinStyle,
 } from "@/lib/mapsite-pin-style";
+import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
 
 export const MAPSITE_HEADER_FALLBACK_LOGO =
   "/images/mapsites/header-fallback-logo.jpeg";
@@ -214,11 +215,12 @@ function toTalisMapsPin(
   pin: MapSitePinView,
   tebHref: string,
   style: MapSiteSavedPinStyle,
+  publicLabel: string,
 ): TalisMapsPin {
   const visual = mapSitePinVisualFields(style);
   return {
     id: pin.id,
-    name: pin.name,
+    name: publicLabel,
     description: pin.description,
     categoryId: null,
     categorySlug: null,
@@ -308,6 +310,25 @@ function resolveMapCenter(
   return undefined;
 }
 
+function pinLocationLabel(
+  mapsite: MapSiteView,
+  pin: MapSitePinView | null,
+): string {
+  const ownerName = `${mapsite.ownerFirstName} ${mapsite.ownerLastName}`.trim();
+  return mapsitePublicPinLabel({
+    lotLabel: pin?.name,
+    propertyTitle: mapsite.propertyTitle,
+    address: pin?.address || mapsite.propertyAddress,
+    city: pin?.city,
+    province: pin?.province,
+    postalCode: pin?.postalCode,
+    country: pin?.country,
+    ownerName,
+    agentName: mapsite.agentName,
+    fallback: mapsite.fastCode.trim().toUpperCase() || "Location",
+  });
+}
+
 export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData {
   const primaryPin = getPrimaryPin(mapsite.pins);
   const ownerName = `${mapsite.ownerFirstName} ${mapsite.ownerLastName}`.trim();
@@ -318,16 +339,19 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
     agentName;
   const tebHref = mapsiteTebHref(mapsite.fastCode, mapsite.tebUrl);
   const pinStyle = mapsiteSavedPinStyle(mapsite);
+  const pinLabel = pinLocationLabel(mapsite, primaryPin);
 
   const talisPins =
     mapsite.pins.length > 0
-      ? mapsite.pins.map((pin) => toTalisMapsPin(pin, tebHref, pinStyle))
+      ? mapsite.pins.map((pin) =>
+          toTalisMapsPin(pin, tebHref, pinStyle, pinLocationLabel(mapsite, pin)),
+        )
       : resolveMapCenter(mapsite, primaryPin)
         ? [
             toTalisMapsPin(
               {
                 id: "mapsite-center",
-                name: propertyTitle,
+                name: pinLabel,
                 description: mapsite.propertyDescription || "",
                 latitude: resolveMapCenter(mapsite, primaryPin)![0],
                 longitude: resolveMapCenter(mapsite, primaryPin)![1],
@@ -344,6 +368,7 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
               },
               tebHref,
               pinStyle,
+              pinLabel,
             ),
           ]
         : [];
@@ -389,8 +414,7 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
     metaTitle: mapsite.metaTitle,
     metaDescription: mapsite.metaDescription,
     ogImageUrl: mapsite.ogImageUrl,
-    pinLabel:
-      primaryPin?.name?.trim() || mapsite.fastCode.toUpperCase(),
+    pinLabel,
     overlayImageUrl:
       mapsite.headerImageUrl ||
       visibleGalleryDisplayItems(mapsite.galleryItems)[0]?.url ||

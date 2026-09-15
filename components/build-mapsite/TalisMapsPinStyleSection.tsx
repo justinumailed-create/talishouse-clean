@@ -173,7 +173,7 @@ export default function TalisMapsPinStyleSection({
             type="text"
             value={values.futurePinLabel || ""}
             onChange={(event) => onChange({ futurePinLabel: event.target.value })}
-            placeholder="Home PIN"
+            placeholder="Lot 8, South Head Road"
             className="h-11 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 placeholder:text-neutral-400"
           />
         </div>

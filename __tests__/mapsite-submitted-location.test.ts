@@ -37,4 +37,28 @@ describe("Mapsite™ submitted location merge", () => {
     expect(merged.pin_white_center).toBe(false);
     expect(merged.pin_animated).toBe(false);
   });
+
+  it("does not copy a personal name onto the Mapsite™ title", () => {
+    const demo = createFallbackDemoMapSite({
+      status: "BUILD_REQUEST_SUBMITTED",
+      fast_code: "LG02",
+      property_title: "Lydia Gaertner",
+    });
+
+    const merged = applyBuildRequestLocationToMapSite(demo, {
+      latitude: 46.088,
+      longitude: -59.882,
+      propertyAddress: "5 HEAD RD, HOMEVILLE, NS, CANADA",
+      propertyTitle: "Lydia Gaertner",
+      propertyDescription: null,
+      coverImage: null,
+      galleryImages: [],
+      pinIcon: "flag",
+      pinColor: "#1A73E8",
+      pinWhiteCenter: false,
+    });
+
+    expect(merged.property_title).toBe("5 HEAD RD, HOMEVILLE, NS, CANADA");
+    expect(merged.property_title).not.toMatch(/Lydia/i);
+  });
 });

@@ -1,6 +1,7 @@
 import type { Database } from "@/lib/database.types";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { OfferedSubscriptionTier } from "@/lib/mapsite-subscription";
+import { firstNonPersonalMapsiteLabel } from "@/lib/mapsite-pin-label";
 import { generateMapSiteSlug } from "@/lib/slug-generator";
 
 export interface PublishBuildMapSiteInput {
@@ -82,7 +83,11 @@ export async function publishBuildMapSite(
     email: input.email.trim().toLowerCase(),
     phone: "",
     status: "active",
-    property_title: agentName ? `${agentName} Mapsite™` : "Mapsite™",
+    property_title:
+      firstNonPersonalMapsiteLabel(
+        [input.futurePinLabel, input.streetAddress],
+        [agentName],
+      ) || "Mapsite™",
     property_address: input.streetAddress.trim() || null,
     property_description: input.pinWriteup.trim() || null,
     latitude: input.latitude,
