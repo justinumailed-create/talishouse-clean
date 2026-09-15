@@ -42,10 +42,8 @@ export default function TalisprosStartPage() {
                 <div className="relative flex items-center bg-white px-3 py-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:bg-black/50 sm:px-5 sm:py-3">
                   <Link
                     href={PINNED_VIEWER_HREF}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white shadow-md ring-1 ring-white/35 transition hover:bg-black hover:ring-white/70 sm:left-5 sm:h-12 sm:w-12"
-                    aria-label="Open pinned Talisbook™ sample in a new tab"
+                    aria-label="Open pinned Talisbook™ sample"
                     title="Open sample Talisbook™"
                   >
                     <BookOpen
