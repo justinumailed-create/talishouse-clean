@@ -10,6 +10,7 @@ import {
   parseSelfServiceBookOptions,
   parseSelfServiceCaptions,
   selfServicePageCount,
+  SELF_SERVICE_ABSOLUTE_MAX_PAGES,
   SELF_SERVICE_BOTH_CONTENT_TOTAL_PAGES,
   SELF_SERVICE_DEFAULT_TOTAL_PAGES,
   SELF_SERVICE_LOT_PAGE,
@@ -327,6 +328,31 @@ describe("self-service ebook page plan (facing spreads)", () => {
     expect(rows.find((r) => r.page_number === 22)?.content.pricingLine).toBe(
       glasshouse.pricingLine,
     );
+  });
+
+  it("keeps an RM22-length landscape plan including the first product sheet and last outro", () => {
+    const interiors = Array.from({ length: 10 }, (_, i) => landscape(i + 1));
+    const rows = buildSelfServiceEbookPageRows({
+      ...baseInput,
+      landscapes: interiors,
+      options: options(),
+    });
+    expect(rows.length).toBeGreaterThan(SELF_SERVICE_DEFAULT_TOTAL_PAGES);
+    expect(rows.length).toBeLessThanOrEqual(SELF_SERVICE_ABSOLUTE_MAX_PAGES);
+    expect(rows).toHaveLength(22);
+    expect(rows.find((r) => r.page_number === 2)?.content.spreadImageUrl).toBe(
+      interiors[0]?.url,
+    );
+    expect(rows.find((r) => r.page_number === 3)?.content.spreadImageUrl).toBe(
+      interiors[0]?.url,
+    );
+    expect(rows.find((r) => r.page_number === 20)?.content.spreadImageUrl).toBe(
+      interiors[9]?.url,
+    );
+    expect(rows.find((r) => r.page_number === 21)?.content.spreadImageUrl).toBe(
+      interiors[9]?.url,
+    );
+    expect(rows.find((r) => r.page_number === 22)?.content.layout).toBe("cover");
   });
 
   it("parses book options and captions from JSON", () => {

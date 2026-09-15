@@ -1,4 +1,4 @@
-import { JARLBERG_TEMPLATE_ROOT } from "@/lib/talisbooks/jarlberg-template";
+import { RM22_TEMPLATE_ROOT } from "@/lib/talisbooks/rm22-template";
 import {
   SELF_SERVICE_MAX_UPLOAD_IMAGES,
   type SelfServicePageCaption,
@@ -16,12 +16,12 @@ export const EBOOK_GENERATE_COVER_HELP =
 export const EBOOK_GENERATE_COVER_PDF_HELP =
   "Page 1 wrap: left = back cover, right = front cover.";
 
-export const EBOOK_GENERATE_TEMPLATE_PDF_HREF = `${JARLBERG_TEMPLATE_ROOT}/Jarlberg-Project.pdf`;
-export const EBOOK_GENERATE_TEMPLATE_PDF_FILE_NAME = "Jarlberg-Project.pdf";
+export const EBOOK_GENERATE_TEMPLATE_PDF_HREF = `${RM22_TEMPLATE_ROOT}/RM22-Project.pdf`;
+export const EBOOK_GENERATE_TEMPLATE_PDF_FILE_NAME = "RM22-Project.pdf";
 export const EBOOK_GENERATE_TEMPLATE_ACTION = "Use Talisbook™ template";
 export const EBOOK_GENERATE_TEMPLATE_ACTION_ON = "Using Talisbook™ template";
 export const EBOOK_GENERATE_TEMPLATE_HELP =
-  "Jarlberg layout: replace covers, photos, and copy. Page 1 keeps the dome and uses your Mapsite™ pin as the map.";
+  "RM22 layout: pick one product sheet (T-Dome, G-House, or T-House) for the spread after the cover. Replace lime placeholder photos and captions — including Intrinsic Value and the outro.";
 export const EBOOK_GENERATE_TEMPLATE_DOWNLOAD = "Download PDF template";
 export const EBOOK_GENERATE_TEMPLATE_PAGE_PLACEHOLDER =
   "Caption or copy for this page";

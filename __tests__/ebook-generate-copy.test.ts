@@ -23,9 +23,11 @@ describe("self-service ebook generate copy", () => {
 
   it("describes the per-page template flow", () => {
     expect(EBOOK_GENERATE_TEMPLATE_ACTION).toContain("template");
-    expect(EBOOK_GENERATE_TEMPLATE_HELP).toContain("dome");
+    expect(EBOOK_GENERATE_TEMPLATE_HELP).toContain("T-Dome");
+    expect(EBOOK_GENERATE_TEMPLATE_HELP).toContain("G-House");
+    expect(EBOOK_GENERATE_TEMPLATE_HELP).toContain("T-House");
     expect(EBOOK_GENERATE_TEMPLATE_PDF_HREF).toBe(
-      "/talisbooks/templates/jarlberg/Jarlberg-Project.pdf",
+      "/talisbooks/templates/rm22/RM22-Project.pdf",
     );
     expect(captionsFromTemplatePages([" Lake ", "", null])).toEqual([
       { text: "Lake", skipped: false },

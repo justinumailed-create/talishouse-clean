@@ -1,4 +1,4 @@
-/** Jarlberg Nature Centre Talisbook™ template — wrap cover + 11 landscape interiors. */
+/** @deprecated Unused self-serve path; RM22 is the Talisbook™ template. Kept for PDF-era assets. */
 
 export const JARLBERG_TEMPLATE_ROOT = "/talisbooks/templates/jarlberg";
 export const JARLBERG_WRAP_HREF = `${JARLBERG_TEMPLATE_ROOT}/wrap.jpg`;
