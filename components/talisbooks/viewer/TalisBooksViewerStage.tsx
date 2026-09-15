@@ -1130,9 +1130,6 @@ function OpenBookSpread({
                 hideBackUntilMid={hideCoverLeafBack}
               />
             ) : null}
-            {hideCoverLeafBack ? (
-              <span className="talisbooks-viewer-book__open-occluder" aria-hidden="true" />
-            ) : null}
           </div>
         </div>
       </motion.div>

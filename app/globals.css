@@ -2284,25 +2284,14 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 /* Cover open: hide only the leaf BACK (next-spread left art) until past 90°.
-   Do not clip the spread or mask above the leaf — that chops the rotating cover. */
+   Do not clip the spread or mask above the leaf — that chops the rotating cover.
+   Stationary page boxes use clip-path so the incoming right leaf’s 200%
+   centerfold image cannot paint into the empty left slot. */
 .talisbooks-viewer-book__leaf[data-hide-back="until-mid"] .talisbooks-viewer-book__leaf-face--back {
   /* display:none is required: visibility/opacity still leak through preserve-3d. */
   display: none;
   visibility: hidden;
   opacity: 0;
-}
-
-/* Stationary 200% centerfold art on the right leaf overflows left (preserve-3d
-   used to skip overflow:hidden). Sit under the curl leaf (z-index 8). */
-.talisbooks-viewer-book__open-occluder {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 50%;
-  z-index: 5;
-  pointer-events: none;
-  background: #e4ddd3;
 }
 
 .talisbooks-viewer--magazine .talisbooks-viewer-book__leaf-face {
