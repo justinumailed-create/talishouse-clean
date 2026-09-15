@@ -12,10 +12,12 @@ import {
 } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import TalisBooksPageRenderer from "@/components/talisbooks/viewer/TalisBooksPageRenderer";
+import { peekWarmedViewerImage } from "@/lib/talisbooks/viewer/image-preloader";
 import {
   clampSpreadAspectRatio,
   getBookContinuousSpreadImageUrl,
   isMattedSpreadPage,
+  RESERVED_BOOK_SPREAD_ASPECT,
 } from "@/lib/talisbooks/viewer/spread-layout";
 import {
   TALISBOOKS_VIEWER_DRAG_THRESHOLD_PX,
@@ -35,6 +37,7 @@ import {
   getViewerSpread,
   magazineSoloShiftPercent,
   playViewerFlipSound,
+  resolveFlippingSpreadFaces,
   singleFlipRotateY,
   spreadFlipRotateY,
   type TalisBooksViewerBook,
@@ -237,12 +240,15 @@ function FlipLeaf({
   back,
   progress,
   magazine = false,
+  hideBackUntilMid = false,
 }: {
   direction: 1 | -1;
   front: TalisBooksViewerPage | null;
   back: TalisBooksViewerPage | null;
   progress: MotionValue<number>;
   magazine?: boolean;
+  /** Cover open: keep next-spread art off the leaf back until past 90°. */
+  hideBackUntilMid?: boolean;
 }) {
   const forward = direction > 0;
   const [fromY, toY] = spreadFlipRotateY(direction);
@@ -267,6 +273,7 @@ function FlipLeaf({
         rotateX: liftX,
         translateZ: liftZ,
       }}
+      data-hide-back={hideBackUntilMid ? "until-mid" : undefined}
     >
       <div className="talisbooks-viewer-book__leaf-face talisbooks-viewer-book__leaf-face--front">
         <BookPageFace page={front} side={forward ? "right" : "left"} magazine={magazine} />
@@ -477,36 +484,72 @@ function ClosedHardCover({
 
 type GestureSide = "left" | "right";
 
-/** Measure a landscape spread image so the open book can match its aspect. */
-function useContinuousSpreadAspectRatio(imageUrl: string | null): number | null {
-  const [aspect, setAspect] = useState<number | null>(null);
+function applySpreadNaturalSize(
+  width: number,
+  height: number,
+  setAspect: (ratio: number) => void,
+  setMeasured: (ready: boolean) => void,
+) {
+  if (width > 0 && height > 0) {
+    setAspect(clampSpreadAspectRatio(width / height));
+    setMeasured(true);
+  }
+}
+
+/**
+ * Measure a landscape spread so the open book can match its aspect.
+ * Starts at the reserved 16:9 box so the stage never flashes a taller
+ * default and then shrinks when the interior bitmap decodes.
+ */
+function useContinuousSpreadAspectRatio(imageUrl: string | null): {
+  aspect: number;
+  measured: boolean;
+} {
+  const [aspect, setAspect] = useState(RESERVED_BOOK_SPREAD_ASPECT);
+  const [measured, setMeasured] = useState(!imageUrl);
 
   useEffect(() => {
     if (!imageUrl) {
+      setAspect(RESERVED_BOOK_SPREAD_ASPECT);
+      setMeasured(true);
       return;
     }
 
     let cancelled = false;
-    const image = new window.Image();
-    image.decoding = "async";
-    image.onload = () => {
+    const finish = (width: number, height: number) => {
       if (cancelled) return;
-      const { naturalWidth: width, naturalHeight: height } = image;
-      if (width > 0 && height > 0) {
-        setAspect(clampSpreadAspectRatio(width / height));
-      }
+      applySpreadNaturalSize(width, height, setAspect, setMeasured);
     };
-    image.onerror = () => {
-      // Keep the last good ratio so cover → interior does not collapse.
+    const markReady = () => {
+      if (!cancelled) setMeasured(true);
     };
-    image.src = imageUrl;
+
+    const warmed = peekWarmedViewerImage(imageUrl);
+    if (warmed && warmed.complete && warmed.naturalWidth > 0) {
+      finish(warmed.naturalWidth, warmed.naturalHeight);
+      return;
+    }
+
+    const image = warmed ?? new window.Image();
+    image.decoding = "async";
+    const onLoad = () => finish(image.naturalWidth, image.naturalHeight);
+    image.addEventListener("load", onLoad);
+    image.addEventListener("error", markReady);
+    if (!warmed) {
+      image.src = imageUrl;
+    }
+    if (image.complete && image.naturalWidth > 0) {
+      finish(image.naturalWidth, image.naturalHeight);
+    }
 
     return () => {
       cancelled = true;
+      image.removeEventListener("load", onLoad);
+      image.removeEventListener("error", markReady);
     };
   }, [imageUrl]);
 
-  return aspect;
+  return { aspect, measured };
 }
 
 function OpenBookSpread({
@@ -907,20 +950,16 @@ function OpenBookSpread({
     : null;
   const flipping = Boolean(flip && incoming);
   const forward = (flip?.direction ?? direction) > 0;
-
-  const leftPage = flipping
-    ? forward
-      ? current.left ?? incoming!.left
-      : incoming!.left
-    : current.left;
-  const rightPage = flipping
-    ? forward
-      ? incoming!.right
-      : current.right ?? incoming!.right
-    : current.right;
-
-  const flipFront = forward ? current.right : current.left;
-  const flipBack = forward ? incoming?.left ?? null : incoming?.right ?? null;
+  const faces = resolveFlippingSpreadFaces({
+    current,
+    incoming,
+    flipping,
+    forward,
+  });
+  const leftPage = faces.leftPage;
+  const rightPage = faces.rightPage;
+  const flipFront = faces.flipFront;
+  const flipBack = faces.flipBack;
   const labelSpread: TalisBooksViewerSpread =
     flipping && incoming && flip && flip.to !== flip.from ? incoming : current;
 
@@ -932,6 +971,8 @@ function OpenBookSpread({
   const incomingSoloLeft = Boolean(incoming && incoming.left && !incoming.right);
   const closingToFront = Boolean(magazine && flipping && !forward && incomingSoloRight);
   const closingToBack = Boolean(magazine && flipping && forward && incomingSoloLeft);
+  const openingFromFront = Boolean(magazine && faces.openPose === "front");
+  const openingFromBack = Boolean(magazine && faces.openPose === "back");
   const wrappingToCover = wrapPhase !== "idle";
   const soloShift = magazineSoloShiftPercent({
     soloRight: Boolean(magazine && soloRight),
@@ -942,12 +983,37 @@ function OpenBookSpread({
     direction: flip?.direction ?? direction,
     wrappingToCover,
   });
+  const expandFromFrontX = useTransform(
+    flipProgress,
+    [0, 0.52, 1],
+    ["-25%", "-25%", "0%"],
+  );
+  const expandFromBackX = useTransform(
+    flipProgress,
+    [0, 0.52, 1],
+    ["25%", "25%", "0%"],
+  );
+  const [coverOpenFirstHalf, setCoverOpenFirstHalf] = useState(false);
+  useEffect(() => {
+    if (!openingFromFront) {
+      setCoverOpenFirstHalf(false);
+      return;
+    }
+    setCoverOpenFirstHalf(flipProgress.get() < 0.52);
+    const unsubscribe = flipProgress.on("change", (value) => {
+      setCoverOpenFirstHalf(value < 0.52);
+    });
+    return unsubscribe;
+  }, [openingFromFront, flipProgress]);
+  const hideCoverLeafBack = Boolean(
+    openingFromFront && (coverOpenFirstHalf || flipProgress.get() < 0.52),
+  );
   const bookSpreadUrl = useMemo(
     () => getBookContinuousSpreadImageUrl(book.pages),
     [book.pages],
   );
-  const spreadAspect = useContinuousSpreadAspectRatio(bookSpreadUrl);
-  const fitToLandscape = Boolean(spreadAspect);
+  const { aspect: spreadAspect, measured: geometryReady } =
+    useContinuousSpreadAspectRatio(bookSpreadUrl);
 
   return (
     <>
@@ -963,33 +1029,44 @@ function OpenBookSpread({
         ]
           .filter(Boolean)
           .join(" ")}
-        data-spread-fit={fitToLandscape ? "image" : undefined}
+        data-spread-fit="image"
+        data-geometry={geometryReady ? "ready" : "pending"}
         data-close-pose={
           closingToFront ? "front" : closingToBack ? "back" : undefined
         }
+        data-open-pose={magazine ? faces.openPose ?? undefined : undefined}
         data-wrap-phase={wrapPhase === "idle" ? undefined : wrapPhase}
         style={
-          fitToLandscape
-            ? ({
-                ["--book-spread-aspect"]: String(spreadAspect),
-              } as CSSProperties)
-            : undefined
+          {
+            ["--book-spread-aspect"]: String(spreadAspect),
+            ...(openingFromFront
+              ? { x: expandFromFrontX }
+              : openingFromBack
+                ? { x: expandFromBackX }
+                : {}),
+          } as CSSProperties
         }
         aria-label={magazine ? "Open magazine" : "Open book"}
         initial={
           magazine
-            ? { opacity: 0.35, rotateY: -20, scale: 0.9, x: `${soloShift}%` }
+            ? { opacity: 0, rotateY: 0, scale: 1, x: `${soloShift}%` }
             : { opacity: 0.7, rotateY: -8, scale: 0.96, x: 0 }
         }
         animate={{
-          opacity: wrapPhase === "out" || wrapPhase === "swap" ? 0 : 1,
+          opacity:
+            !geometryReady || wrapPhase === "out" || wrapPhase === "swap" ? 0 : 1,
           rotateY: 0,
           scale: 1,
-          x: `${soloShift}%`,
+          ...(openingFromFront || openingFromBack ? {} : { x: `${soloShift}%` }),
         }}
         transition={{
           x: {
-            duration: wrappingToCover ? 0 : flipping ? TALISBOOKS_VIEWER_TURN_DURATION_MS / 1000 : 0,
+            duration:
+              wrappingToCover || openingFromFront || openingFromBack
+                ? 0
+                : flipping
+                  ? TALISBOOKS_VIEWER_TURN_DURATION_MS / 1000
+                  : 0,
             ease: FLIP_EASE,
           },
           opacity: {
@@ -1039,7 +1116,17 @@ function OpenBookSpread({
             <div className="talisbooks-viewer-book__gutter" aria-hidden="true" />
 
             <div className="talisbooks-viewer-book__page talisbooks-viewer-book__page--right">
-              <BookPageFace page={rightPage} side="right" magazine={magazine} />
+              <BookPageFace
+                // Cover open: keep the cover as the stationary right face until
+                // past 90°. The incoming interior is a 200% fold-continuous
+                // bleed; sitting it under the cover lets the left half of that
+                // landscape paint beside the still-face-on cover.
+                page={
+                  hideCoverLeafBack && current.right ? current.right : rightPage
+                }
+                side="right"
+                magazine={magazine}
+              />
             </div>
 
             {flipping ? (
@@ -1050,7 +1137,11 @@ function OpenBookSpread({
                 back={flipBack}
                 progress={flipProgress}
                 magazine={magazine}
+                hideBackUntilMid={hideCoverLeafBack}
               />
+            ) : null}
+            {hideCoverLeafBack ? (
+              <span className="talisbooks-viewer-book__open-occluder" aria-hidden="true" />
             ) : null}
           </div>
         </div>
@@ -1474,8 +1565,8 @@ function OpenBookSingle({
     () => getBookContinuousSpreadImageUrl(book.pages),
     [book.pages],
   );
-  const spreadAspect = useContinuousSpreadAspectRatio(bookSpreadUrl);
-  const fitToLandscape = Boolean(spreadAspect);
+  const { aspect: spreadAspect, measured: geometryReady } =
+    useContinuousSpreadAspectRatio(bookSpreadUrl);
 
   return (
     <>
@@ -1490,19 +1581,19 @@ function OpenBookSingle({
         ]
           .filter(Boolean)
           .join(" ")}
-        data-spread-fit={fitToLandscape ? "image" : undefined}
+        data-spread-fit="image"
+        data-geometry={geometryReady ? "ready" : "pending"}
         data-wrap-phase={wrapPhase === "idle" ? undefined : wrapPhase}
         style={
-          fitToLandscape
-            ? ({
-                ["--book-spread-aspect"]: String(spreadAspect),
-              } as CSSProperties)
-            : undefined
+          {
+            ["--book-spread-aspect"]: String(spreadAspect),
+          } as CSSProperties
         }
         aria-label={magazine ? "Open magazine · single page" : "Open book · single page"}
-        initial={magazine ? { opacity: 0.4, rotateY: -14, scale: 0.92 } : { opacity: 0.7, rotateY: -6, scale: 0.96 }}
+        initial={magazine ? { opacity: 0, rotateY: 0, scale: 1 } : { opacity: 0.7, rotateY: -6, scale: 0.96 }}
         animate={{
-          opacity: wrapPhase === "out" || wrapPhase === "swap" ? 0 : 1,
+          opacity:
+            !geometryReady || wrapPhase === "out" || wrapPhase === "swap" ? 0 : 1,
           rotateY: 0,
           scale: 1,
         }}
@@ -1664,10 +1755,10 @@ export default function TalisBooksViewerStage({
               <motion.div
                 key={`open-book-${viewMode}`}
                 className="talisbooks-viewer-stage__open"
-                initial={{ opacity: 0, scale: 0.94 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.96 }}
-                transition={{ duration: 0.5, ease: OPEN_EASE }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: magazine ? 0.2 : 0.5, ease: OPEN_EASE }}
               >
                 {viewMode === "single" ? (
                   <OpenBookSingle

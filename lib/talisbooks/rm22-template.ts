@@ -53,10 +53,10 @@ export function rm22ProductById(id: Rm22ProductId | string | null | undefined) {
 }
 
 export const RM22_DEFAULT_COPY = {
-  frontTitle: "Property",
-  frontSubtitle: "Primary Attribute",
-  frontPriceLine: "From [ Price ] per acre.",
-  frontTagline: "Available with or without Tiny Home, turn key optional.",
+  frontTitle: "",
+  frontSubtitle: "A prime location",
+  frontPriceLine: "Inquire for price per acre.",
+  frontTagline: "Available with or without Tiny Home, turn key optional",
   backKicker: "Your Marketing Partner...",
   agentName: "Your Name",
   agentPhone: "",
@@ -70,6 +70,66 @@ export const RM22_DEFAULT_COPY = {
   outroTitle: "The Parting Shot…!",
   outroCaption: "Outro Page",
 } as const;
+
+const GENERIC_LOT_BLURB =
+  /^(property|primary attribute|a prime location|mapsite™?|lot \+ optional tiny home|your (listing|property))$/i;
+
+/** Street + community headline. Never the word "Property". */
+export function formatRm22CoverAddressHeadline(
+  address?: string | null,
+): string {
+  const raw = address?.trim() || "";
+  if (!raw || GENERIC_LOT_BLURB.test(raw)) return "";
+  const parts = raw.split(",").map((part) => part.trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0]}, ${parts[1]}`;
+  }
+  return raw;
+}
+
+export function styleRm22CoverLotBlurb(text: string): string {
+  const inner = text.trim().replace(/^\*+\s*|\s*\*+$/g, "").trim();
+  if (!inner) return `*${RM22_DEFAULT_COPY.frontSubtitle}*`;
+  return `*${inner}*`;
+}
+
+/** Lot-dependent italic lime line (title, then a short pin writeup). */
+export function formatRm22CoverLotBlurb(input?: {
+  title?: string | null;
+  writeup?: string | null;
+}): string {
+  const title = input?.title?.trim() || "";
+  if (title && !GENERIC_LOT_BLURB.test(title) && title.length <= 72) {
+    return styleRm22CoverLotBlurb(title);
+  }
+  const writeup = input?.writeup?.trim() || "";
+  if (writeup) {
+    const first = writeup.split(/[.!?\n]/)[0]?.trim() || "";
+    if (first && first.length <= 72 && !GENERIC_LOT_BLURB.test(first)) {
+      return styleRm22CoverLotBlurb(first);
+    }
+  }
+  return styleRm22CoverLotBlurb(RM22_DEFAULT_COPY.frontSubtitle);
+}
+
+/** Price per acre when known; otherwise a clean inquire line. */
+export function formatRm22CoverPriceLine(price?: string | null): string {
+  const raw = price?.trim() || "";
+  if (!raw) return RM22_DEFAULT_COPY.frontPriceLine;
+  if (/inquire/i.test(raw)) {
+    return /per\s+acre/i.test(raw)
+      ? raw.replace(/\.?$/, ".")
+      : "Inquire for price per acre.";
+  }
+  const stripped = raw.replace(/\.?$/, "");
+  if (/per\s+acre/i.test(stripped)) {
+    return /^from\s+/i.test(stripped) ? `${stripped}.` : `From ${stripped}.`;
+  }
+  const amount = /^from\s+/i.test(stripped)
+    ? stripped
+    : `From ${stripped}`;
+  return `${amount} per acre.`;
+}
 
 export type Rm22InteriorRole =
   | "product-sheet"
@@ -117,13 +177,17 @@ export type Rm22SlotState = {
 };
 
 export type Rm22CoverBandInput = {
-  title?: string | null;
   address?: string | null;
+  lotTitle?: string | null;
+  lotWriteup?: string | null;
   priceLine?: string | null;
   tagline?: string | null;
 };
 
-/** Property band on the front cover — fill address/price from onboarding when known. */
+/**
+ * Self-serve front-cover caption lines from mapsite/onboarding.
+ * Title = address headline (street + community). Subtitle = lot blurb.
+ */
 export function rm22CoverBandFromOnboarding(input?: Rm22CoverBandInput): {
   frontTitle: string;
   frontSubtitle: string;
@@ -131,9 +195,12 @@ export function rm22CoverBandFromOnboarding(input?: Rm22CoverBandInput): {
   frontTagline: string;
 } {
   return {
-    frontTitle: input?.title?.trim() || RM22_DEFAULT_COPY.frontTitle,
-    frontSubtitle: input?.address?.trim() || RM22_DEFAULT_COPY.frontSubtitle,
-    frontPriceLine: input?.priceLine?.trim() || RM22_DEFAULT_COPY.frontPriceLine,
+    frontTitle: formatRm22CoverAddressHeadline(input?.address),
+    frontSubtitle: formatRm22CoverLotBlurb({
+      title: input?.lotTitle,
+      writeup: input?.lotWriteup,
+    }),
+    frontPriceLine: formatRm22CoverPriceLine(input?.priceLine),
     frontTagline: input?.tagline?.trim() || RM22_DEFAULT_COPY.frontTagline,
   };
 }
@@ -145,12 +212,14 @@ export function defaultRm22IntrinsicBody(input: {
   address?: string | null;
 }): string {
   const product = input.productLabel.trim() || "T-Dome";
-  const lot = input.lotTitle?.trim() && input.lotTitle.trim() !== RM22_DEFAULT_COPY.frontTitle
-    ? input.lotTitle.trim()
-    : "this lot";
-  const where = input.address?.trim() && input.address.trim() !== RM22_DEFAULT_COPY.frontSubtitle
-    ? input.address.trim()
+  const lotBlurb = input.lotTitle?.trim()
+    ? input.lotTitle.trim().replace(/^\*+\s*|\s*\*+$/g, "")
     : "";
+  const lot =
+    lotBlurb && !GENERIC_LOT_BLURB.test(lotBlurb) ? lotBlurb : "this lot";
+  const whereRaw = input.address?.trim() || "";
+  const where =
+    whereRaw && whereRaw !== RM22_DEFAULT_COPY.frontTitle ? whereRaw : "";
   const place = where ? ` at ${where}` : "";
   return [
     `The lasting value of ${lot}${place} is the land itself — and the choice of what you place on it.`,
@@ -163,16 +232,18 @@ export function createRm22SlotState(input?: {
   agentName?: string;
   agentPhone?: string;
   productId?: Rm22ProductId;
-  frontTitle?: string;
   address?: string;
+  lotTitle?: string;
+  lotWriteup?: string;
   priceLine?: string;
   tagline?: string;
 }): Rm22SlotState {
   const agentName = input?.agentName?.trim() || RM22_DEFAULT_COPY.agentName;
   const agentPhone = input?.agentPhone?.trim() || RM22_DEFAULT_COPY.agentPhone;
   const cover = rm22CoverBandFromOnboarding({
-    title: input?.frontTitle,
     address: input?.address,
+    lotTitle: input?.lotTitle,
+    lotWriteup: input?.lotWriteup,
     priceLine: input?.priceLine,
     tagline: input?.tagline,
   });
@@ -262,8 +333,8 @@ export function planRm22TemplateInteriors(
     slots.intrinsicBody.trim() ||
     defaultRm22IntrinsicBody({
       productLabel: product.label,
-      lotTitle: slots.frontTitle,
-      address: slots.frontSubtitle,
+      lotTitle: slots.frontSubtitle,
+      address: slots.frontTitle,
     });
 
   items.push(

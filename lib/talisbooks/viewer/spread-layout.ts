@@ -13,6 +13,12 @@ export const SPREAD_SOURCE_WIDTH_PERCENT = 200;
 /** Clamp open-book aspect so extreme panoramas still fit the stage. */
 export const SPREAD_ASPECT_MIN = 1.15;
 export const SPREAD_ASPECT_MAX = 3.2;
+/**
+ * Placeholder spread ratio used before the interior landscape is measured.
+ * Matches RM22 interiors (1920×1080) so the book does not start taller and
+ * then shrink when the real ratio lands.
+ */
+export const RESERVED_BOOK_SPREAD_ASPECT = 16 / 9;
 
 export function isLandscapeSpreadCandidate(width: number, height: number): boolean {
   return width > 0 && height > 0 && width > height;

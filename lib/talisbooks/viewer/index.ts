@@ -21,10 +21,15 @@ export {
 export { playViewerFlipSound } from "./flip-sound";
 export {
   magazineSoloShiftPercent,
+  resolveFlippingSpreadFaces,
   singleFlipRotateY,
   spreadFlipRotateY,
 } from "./flip-geometry";
-export type { MagazineSoloShiftInput } from "./flip-geometry";
+export type {
+  FlippingSpreadFaces,
+  MagazineSoloShiftInput,
+  SpreadFacePair,
+} from "./flip-geometry";
 export {
   adjacentNavIndex,
   clampViewerIntervalMs,
@@ -49,6 +54,7 @@ export {
   continuousSpreadImageUrl,
   isLandscapeSpreadCandidate,
   isMattedSpreadPage,
+  RESERVED_BOOK_SPREAD_ASPECT,
   SPREAD_ASPECT_MAX,
   SPREAD_ASPECT_MIN,
   SPREAD_SOURCE_WIDTH_PERCENT,

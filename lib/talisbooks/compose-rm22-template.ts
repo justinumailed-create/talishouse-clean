@@ -154,35 +154,70 @@ function drawCaptionBar(
   ctx.textAlign = "left";
 }
 
+/**
+ * Self-serve front cover caption (raster baked at generate time).
+ *
+ * Existing live books keep their previous cover art until regenerated:
+ *   LG02  /talisbooks/viewer/lg02-lg02-talisbook-4jmz
+ *   RM22  /talisbooks/viewer/rm22-rm22-talisbook-b1mz
+ */
 async function composeFront(slots: Rm22SlotState): Promise<HTMLCanvasElement> {
   const { canvas, ctx } = makePage(RM22_COVER_WIDTH, RM22_COVER_HEIGHT);
   const image = await sourceOrDefault(slots.frontImage, RM22_ASSETS.front);
   coverDraw(ctx, image, 0, 0, canvas.width, canvas.height);
 
-  const bandTop = Math.round(canvas.height * 0.62);
-  ctx.fillStyle = BAND;
-  ctx.fillRect(0, bandTop, canvas.width, canvas.height - bandTop);
+  const fadeTop = Math.round(canvas.height * 0.58);
+  const gradient = ctx.createLinearGradient(0, fadeTop, 0, canvas.height);
+  gradient.addColorStop(0, "rgba(0,0,0,0)");
+  gradient.addColorStop(0.28, "rgba(0,0,0,0.52)");
+  gradient.addColorStop(0.62, "rgba(0,0,0,0.78)");
+  gradient.addColorStop(1, "rgba(0,0,0,0.88)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, fadeTop, canvas.width, canvas.height - fadeTop);
 
+  const maxTextWidth = canvas.width - 96;
   ctx.textAlign = "center";
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `700 72px ${SANS}`;
   ctx.textBaseline = "top";
-  ctx.fillText(slots.frontTitle.trim() || "Property", canvas.width / 2, bandTop + 48);
 
-  ctx.fillStyle = LIME;
-  ctx.font = `italic 42px ${SANS}`;
-  ctx.fillText(slots.frontSubtitle.trim(), canvas.width / 2, bandTop + 140);
+  let cursorY = Math.round(canvas.height * 0.68);
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `32px ${SANS}`;
-  ctx.fillText(slots.frontPriceLine.trim(), canvas.width / 2, bandTop + 210);
+  const title = slots.frontTitle.trim();
+  if (title) {
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `700 64px ${SANS}`;
+    const titleLines = wrapLines(ctx, title, maxTextWidth);
+    titleLines.forEach((line, index) => {
+      ctx.fillText(line, canvas.width / 2, cursorY + index * 70);
+    });
+    cursorY += titleLines.length * 70 + 10;
+  }
 
-  ctx.fillStyle = LIME;
-  ctx.font = `italic 22px ${SANS}`;
-  const tagLines = wrapLines(ctx, slots.frontTagline.trim(), canvas.width - 80);
-  tagLines.forEach((line, index) => {
-    ctx.fillText(line, canvas.width / 2, bandTop + 270 + index * 28);
-  });
+  const subtitle = slots.frontSubtitle.trim();
+  if (subtitle) {
+    ctx.fillStyle = LIME;
+    ctx.font = `italic 40px ${SANS}`;
+    ctx.fillText(subtitle, canvas.width / 2, cursorY);
+    cursorY += 56;
+  }
+
+  const price = slots.frontPriceLine.trim();
+  if (price) {
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `32px ${SANS}`;
+    ctx.fillText(price, canvas.width / 2, cursorY);
+    cursorY += 48;
+  }
+
+  const tagline = slots.frontTagline.trim();
+  if (tagline) {
+    ctx.fillStyle = LIME;
+    ctx.font = `22px ${SANS}`;
+    const tagLines = wrapLines(ctx, tagline, maxTextWidth);
+    tagLines.forEach((line, index) => {
+      ctx.fillText(line, canvas.width / 2, cursorY + index * 28);
+    });
+  }
+
   ctx.textAlign = "left";
   return canvas;
 }

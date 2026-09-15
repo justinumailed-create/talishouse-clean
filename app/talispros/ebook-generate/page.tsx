@@ -88,6 +88,8 @@ export default async function EbookGeneratePage({
       pinLatitude={context.pin.latitude}
       pinLongitude={context.pin.longitude}
       initialPropertyAddress={context.listing.address}
+      initialListingTitle={context.listing.title}
+      initialPinWriteup={context.pin.writeup}
       initialPriceLine={context.listing.price}
     />
   );

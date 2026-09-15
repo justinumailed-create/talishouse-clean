@@ -90,6 +90,8 @@ interface EbookGenerateClientProps {
   pinLatitude?: number | null;
   pinLongitude?: number | null;
   initialPropertyAddress?: string | null;
+  initialListingTitle?: string | null;
+  initialPinWriteup?: string | null;
   initialPriceLine?: string | null;
   bootstrapError?: string | null;
   bootstrapMeta?: {
@@ -178,6 +180,8 @@ export default function EbookGenerateClient({
   initialAgentEmail,
   initialAgentPhone = "",
   initialPropertyAddress = null,
+  initialListingTitle = null,
+  initialPinWriteup = null,
   initialPriceLine = null,
   bootstrapError = null,
   bootstrapMeta = null,
@@ -219,6 +223,8 @@ export default function EbookGenerateClient({
       agentName: initialAgentName,
       agentPhone: initialAgentPhone,
       address: initialPropertyAddress || undefined,
+      lotTitle: initialListingTitle || undefined,
+      lotWriteup: initialPinWriteup || undefined,
       priceLine: initialPriceLine || undefined,
     }),
   );
@@ -432,6 +438,8 @@ export default function EbookGenerateClient({
       agentName: agentName || initialAgentName,
       agentPhone: initialAgentPhone,
       address: initialPropertyAddress || undefined,
+      lotTitle: initialListingTitle || undefined,
+      lotWriteup: initialPinWriteup || undefined,
       priceLine: initialPriceLine || undefined,
     });
     setRm22Slots(slots);

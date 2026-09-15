@@ -59,6 +59,11 @@ export function isViewerImageWarm(url: string | undefined): boolean {
   return warmed.get(url)?.complete ?? false;
 }
 
+/** Decoded (or in-flight) warmup image, if the preloader already created it. */
+export function peekWarmedViewerImage(url: string): HTMLImageElement | null {
+  return warmed.get(url) ?? null;
+}
+
 function pageImageUrls(page: TalisBooksViewerPage | null | undefined): string[] {
   if (!page) return [];
   return [
