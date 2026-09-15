@@ -33,6 +33,8 @@ export interface TalisBooksLibraryBook {
   parentBookId: string | null;
   /** Featured first on the public /talisbooks bookshelf. */
   isPinned?: boolean;
+  /** Lower numbers appear first among pinned books (see PUBLIC_LIBRARY_PINNED_BOOKS). */
+  pinRank?: number;
 }
 
 export interface TalisBooksBookshelf {
@@ -45,6 +47,8 @@ export interface TalisBooksBookshelf {
   scopedToFastCode?: boolean;
   /** Public product shelf at /talisbooks. May also be FAST-code scoped via `scopedToFastCode`. */
   publicCatalog?: boolean;
+  /** Unscoped created FAST-linked catalog (public / root `/talisbooks/library`). */
+  createdCatalog?: boolean;
   paymentReceived?: boolean;
   registrationHref?: string | null;
   /** Activation + account-type book entitlements (independent of PayPal helpers). */

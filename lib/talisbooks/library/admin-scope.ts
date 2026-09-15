@@ -16,14 +16,15 @@ export type TalisBooksAdminLibraryScope = {
 /**
  * Mapsite-linked admins (rm22) see only that FAST Code's created books.
  * Platform-only admins (ARUN, ADMIN123) see every real (non-demo) book.
- * Anonymous / no admin session keeps the in-memory preview shelf.
+ * Anonymous / no admin session loads the created FAST-linked catalog
+ * (no in-memory Meat Cove / preview shelf).
  */
 export function talisbooksScopeFromAdminAccount(
   account: { fastCode: string } | null | undefined,
 ): TalisBooksAdminLibraryScope {
   const raw = account?.fastCode?.trim() || "";
   if (!raw) {
-    return { fastCode: null, excludeDemonstrationCatalog: false };
+    return { fastCode: null, excludeDemonstrationCatalog: true };
   }
 
   const code = raw.toLowerCase();

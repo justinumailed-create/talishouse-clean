@@ -13,7 +13,7 @@ import { ROUTES } from "@/lib/routes";
 export const metadata: Metadata = createMetadata({
   title: `Library | ${TALISBOOKS_PRODUCT_NAME}`,
   description:
-    "Personal Talisbooks™ bookshelf for Root and Derivative accounts — search, sort, and filter published lookbooks.",
+    "Public Talisbooks™ bookshelf of created FAST-linked lookbooks — search, sort, and open covers in the viewer.",
   path: "/talisbooks/library",
   private: true,
   image: false,

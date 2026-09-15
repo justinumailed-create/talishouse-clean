@@ -6,6 +6,7 @@
  */
 
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
+import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { PINNED_TALISBOOK_SLUG } from "./pinned-catalog";
 
 export const PINNED_TALISBOOK_LIBRARY_ID = "pinned-talispros-ebook-sample";
@@ -58,4 +59,18 @@ export function filterDemonstrationCatalogBooks<T extends DemonstrationCatalogBo
   books: T[],
 ): T[] {
   return books.filter((book) => !isDemonstrationCatalogBook(book));
+}
+
+/** Created books linked to a real issued FAST Code (not demo-* / preview fillers). */
+export function isCreatedFastLinkedBook(
+  book: Pick<DemonstrationCatalogBookLike, "fastCode">,
+): boolean {
+  const code = book.fastCode?.trim().toLowerCase() || "";
+  return isIssuedFastCode(code) && !isDemonstrationFastCode(code);
+}
+
+export function filterCreatedFastLinkedBooks<T extends DemonstrationCatalogBookLike>(
+  books: T[],
+): T[] {
+  return books.filter((book) => isCreatedFastLinkedBook(book) && !isDemonstrationCatalogBook(book));
 }

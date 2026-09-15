@@ -5,7 +5,11 @@ import { TALISBOOKS_COVER_TEMPLATES } from "../covers/catalog";
 import type { TalisBooksCoverTemplateId } from "../covers/constants";
 import { TALISBOOKS_LIBRARY_PAGE_SIZE, TALISBOOKS_LIBRARY_SPINE_PALETTES } from "./constants";
 import { createDemoBookshelf } from "./demo-shelf";
-import { filterDemonstrationCatalogBooks } from "./demonstration-catalog";
+import {
+  filterCreatedFastLinkedBooks,
+  filterDemonstrationCatalogBooks,
+} from "./demonstration-catalog";
+import { applyPublicLibraryPins } from "./public-library-pins";
 import { filterBooksForFastCodeShelf, queryLibraryBooks } from "./query";
 import type {
   TalisBooksBookshelf,
@@ -110,7 +114,9 @@ function applyBookshelfCatalogPolicy(
     next = filterBooksForFastCodeShelf(next, fastCode, mapsiteId);
   }
   if (shouldExcludeDemonstrationCatalog(options)) {
-    next = filterDemonstrationCatalogBooks(next);
+    next = fastCode
+      ? filterDemonstrationCatalogBooks(next)
+      : applyPublicLibraryPins(filterCreatedFastLinkedBooks(next));
   }
   return next;
 }
@@ -226,8 +232,9 @@ async function loadCreatedLibraryBooks(): Promise<TalisBooksLibraryBook[]> {
 /**
  * Personal bookshelf for a Root or Derivative account.
  * When `fastCode` is set (Mapsite™ TEB™), returns only that code's ebooks — not the demo library.
- * When `excludeDemonstrationCatalog` is set without a FAST code, returns created books only
- * (no pinned sample, demo-* rows, or hardcoded preview fillers).
+ * When `excludeDemonstrationCatalog` is set without a FAST code, returns every
+ * created FAST-linked book (drafts included; no pinned sample, demo-* rows, or
+ * hardcoded preview fillers). Left featured pins come from PUBLIC_LIBRARY_PINNED_BOOKS.
  */
 export async function getTalisBooksBookshelf(
   options?: TalisBooksBookshelfOptions,
@@ -292,6 +299,7 @@ export async function getTalisBooksBookshelf(
         accountType,
         accountName: options?.accountName ?? "Bookshelf",
         fastCode: null,
+        createdCatalog: true,
         books,
       };
     }

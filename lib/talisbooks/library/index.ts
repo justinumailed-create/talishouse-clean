@@ -33,10 +33,18 @@ export {
 export type { TalisBooksBookshelfOptions } from "./bookshelf-service";
 export {
   PINNED_TALISBOOK_LIBRARY_ID,
+  filterCreatedFastLinkedBooks,
   filterDemonstrationCatalogBooks,
+  isCreatedFastLinkedBook,
   isDemonstrationCatalogBook,
   isDemonstrationFastCode,
 } from "./demonstration-catalog";
+export {
+  PUBLIC_LIBRARY_PINNED_BOOKS,
+  applyPublicLibraryPins,
+  publicLibraryPinRank,
+} from "./public-library-pins";
+export type { PublicLibraryPin } from "./public-library-pins";
 export {
   filterBooksForAdminLibrary,
   filterMapSitesForAdminLibrary,

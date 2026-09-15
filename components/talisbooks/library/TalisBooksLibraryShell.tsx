@@ -81,6 +81,7 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
   const deferredSearch = useDeferredValue(search);
   const scoped = Boolean(bookshelf.scopedToFastCode && bookshelf.fastCode);
   const publicCatalog = Boolean(bookshelf.publicCatalog);
+  const createdCatalog = Boolean(bookshelf.createdCatalog);
 
   const { featured, general, featuredLayout } = useMemo(
     () => partitionBookshelf(bookshelf.books, { featuredCapacity }),
@@ -120,12 +121,14 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
               ? scoped
                 ? `Talispros™ Ecosystem · ${bookshelf.fastCode!.toUpperCase()}`
                 : "Talispros™ Ecosystem"
+              : createdCatalog
+                ? "Talispros™ Ecosystem"
               : scoped
                 ? `TEB™ · ${bookshelf.fastCode!.toUpperCase()}`
                 : bookshelf.accountType === "root"
                   ? "Root Account"
                   : "Derivative Account"}
-            {!publicCatalog && !scoped && bookshelf.fastCode
+            {!publicCatalog && !createdCatalog && !scoped && bookshelf.fastCode
               ? ` · ${bookshelf.fastCode.toUpperCase()}`
               : ""}
           </p>
@@ -136,11 +139,13 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
                 ? bookshelf.accountName
                 : "Bookshelf"}
           </h1>
-          {publicCatalog ? (
+          {publicCatalog || createdCatalog ? (
             <p className="talisbooks-library__subtitle">
               {scoped && bookshelf.fastCode
                 ? `Open a cover to read. This shelf shows Talisbooks™ connected to FAST Code ${bookshelf.fastCode.toUpperCase()} only.`
-                : "Open a cover to read. The featured book is pinned at the front of the shelf."}
+                : createdCatalog
+                  ? "Open a cover to read. Created Talisbooks™ with FAST codes stand on this shelf. Featured books are pinned on the left."
+                  : "Open a cover to read. The featured book is pinned at the front of the shelf."}
             </p>
           ) : null}
         </div>
@@ -159,6 +164,8 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
                 ? scoped
                   ? "Search this shelf…"
                   : "Search TalisBooks™…"
+                : createdCatalog
+                  ? "Search FAST books…"
                 : scoped
                   ? "Search this shelf…"
                   : "Search library…"
@@ -167,7 +174,7 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
           />
         </label>
 
-        {!publicCatalog ? (
+        {!publicCatalog && !createdCatalog ? (
           <div
             className="talisbooks-library__capacity"
             title="Fully stocked shelf monetization capacity"
@@ -260,9 +267,11 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
                     <p>
                       {publicCatalog
                         ? "No published TalisBooks™ yet"
-                        : scoped
-                          ? "No ebook on this FAST Code shelf yet"
-                          : "No highlighted books yet"}
+                        : createdCatalog
+                          ? "No created FAST Talisbooks™ yet"
+                          : scoped
+                            ? "No ebook on this FAST Code shelf yet"
+                            : "No highlighted books yet"}
                     </p>
                   </div>
                 ) : featuredLayout === "hero-plus-4" && heroBook ? (
@@ -380,7 +389,7 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
         </div>
       </div>
 
-      {!scoped ? (
+      {!scoped && !bookshelf.createdCatalog ? (
         <div className="talisbooks-library__account-switch">
           <a
             href="/talisbooks/library?accountType=root"
