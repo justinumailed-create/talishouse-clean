@@ -9,6 +9,7 @@ import {
   magazineSoloShiftPercent,
   nextPageIndex,
   previousPageIndex,
+  resolveFlippingSpreadFaces,
   resolveViewerIntervalMs,
   shouldAutoAdvance,
   singleFlipRotateY,
@@ -179,5 +180,33 @@ describe("Talisbooks™ viewer flip geometry", () => {
   it("peels a single page past 90° with a paper back still in the scene", () => {
     expect(singleFlipRotateY(1)[1]).toBeLessThan(-90);
     expect(singleFlipRotateY(-1)[1]).toBeGreaterThan(90);
+  });
+
+  it("keeps the next spread off the empty cover slot until the leaf back reveals it", () => {
+    const cover = { id: "front" };
+    const tDomeLeft = { id: "tdome-left" };
+    const tDomeRight = { id: "tdome-right" };
+    const opening = resolveFlippingSpreadFaces({
+      current: { left: null, right: cover },
+      incoming: { left: tDomeLeft, right: tDomeRight },
+      flipping: true,
+      forward: true,
+    });
+    expect(opening.leftPage).toBeNull();
+    expect(opening.rightPage).toBe(tDomeRight);
+    expect(opening.flipFront).toBe(cover);
+    expect(opening.flipBack).toBe(tDomeLeft);
+    expect(opening.openPose).toBe("front");
+
+    const closing = resolveFlippingSpreadFaces({
+      current: { left: tDomeLeft, right: tDomeRight },
+      incoming: { left: cover, right: null },
+      flipping: true,
+      forward: true,
+    });
+    expect(closing.rightPage).toBeNull();
+    expect(closing.flipFront).toBe(tDomeRight);
+    expect(closing.flipBack).toBe(cover);
+    expect(closing.openPose).toBeNull();
   });
 });

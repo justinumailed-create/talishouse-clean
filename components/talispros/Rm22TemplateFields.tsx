@@ -100,7 +100,7 @@ export default function Rm22TemplateFields({
         </div>
       </FieldBox>
 
-      <FieldBox label="Front cover — image, title, and price line">
+      <FieldBox label="Front cover — photo and caption (address, lot line, price)">
         <AddButton
           disabled={disabled}
           hasFile={Boolean(slots.frontImage)}
@@ -110,26 +110,28 @@ export default function Rm22TemplateFields({
           disabled={disabled}
           value={slots.frontTitle}
           onChange={(event) => patch({ frontTitle: event.target.value })}
+          placeholder="Street, community"
           className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.frontSubtitle}
           onChange={(event) => patch({ frontSubtitle: event.target.value })}
-          placeholder="Address or primary attribute"
+          placeholder="*A prime Estuary Location*"
           className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.frontPriceLine}
           onChange={(event) => patch({ frontPriceLine: event.target.value })}
-          placeholder="Price line"
+          placeholder="From $20,000 per acre"
           className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.frontTagline}
           onChange={(event) => patch({ frontTagline: event.target.value })}
+          placeholder="Available with or without Tiny Home, turn key optional"
           className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
         />
       </FieldBox>

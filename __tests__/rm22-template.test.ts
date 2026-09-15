@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   createRm22SlotState,
   defaultRm22IntrinsicBody,
+  formatRm22CoverAddressHeadline,
+  formatRm22CoverLotBlurb,
+  formatRm22CoverPriceLine,
   planRm22TemplateInteriors,
   productIdsInPlan,
   rm22CoverBandFromOnboarding,
@@ -14,6 +17,7 @@ import {
   RM22_PHOTO_CAPTION_COUNT,
   RM22_PRODUCTS,
   RM22_PROTECTED_ENDING_SPREADS,
+  styleRm22CoverLotBlurb,
 } from "../lib/talisbooks/rm22-template";
 
 describe("RM22 Talisbook™ template", () => {
@@ -39,35 +43,59 @@ describe("RM22 Talisbook™ template", () => {
     expect(slots.photoImages).toHaveLength(RM22_PHOTO_CAPTION_COUNT);
   });
 
-  it("fills the front-cover Property band from onboarding address and price", () => {
+  it("fills the front-cover caption from address headline, lot blurb, and price", () => {
     const cover = rm22CoverBandFromOnboarding({
       address: "160 Macs Rd, Richmond County, NS B0E 3B0, Canada",
+      lotTitle: "A prime Estuary Location",
       priceLine: "Inquire for price per acre.",
     });
-    expect(cover.frontTitle).toBe("Property");
-    expect(cover.frontSubtitle).toBe(
-      "160 Macs Rd, Richmond County, NS B0E 3B0, Canada",
-    );
+    expect(cover.frontTitle).toBe("160 Macs Rd, Richmond County");
+    expect(cover.frontSubtitle).toBe("*A prime Estuary Location*");
     expect(cover.frontPriceLine).toBe("Inquire for price per acre.");
     expect(cover.frontTagline).toBe(RM22_DEFAULT_COPY.frontTagline);
+    expect(cover.frontTitle).not.toMatch(/property/i);
 
     const slots = createRm22SlotState({
       address: "S Head Rd, Homeville, NS, Canada",
-      priceLine: "From $49,000 per acre.",
+      lotWriteup: "A prime Estuary Location. Long extra copy ignored.",
+      priceLine: "$20,000",
     });
-    expect(slots.frontSubtitle).toBe("S Head Rd, Homeville, NS, Canada");
-    expect(slots.frontPriceLine).toBe("From $49,000 per acre.");
-    expect(slots.frontTagline).toBe(RM22_DEFAULT_COPY.frontTagline);
+    expect(slots.frontTitle).toBe("S Head Rd, Homeville");
+    expect(slots.frontSubtitle).toBe("*A prime Estuary Location*");
+    expect(slots.frontPriceLine).toBe("From $20,000 per acre.");
+    expect(slots.frontTagline).toBe(
+      "Available with or without Tiny Home, turn key optional",
+    );
     expect(slots.introTitle).toBe("Welcome…!");
   });
 
-  it("keeps placeholder cover-band copy when onboarding address/price are absent", () => {
+  it("keeps placeholder cover caption copy when onboarding address/price are absent", () => {
     expect(rm22CoverBandFromOnboarding()).toEqual({
-      frontTitle: RM22_DEFAULT_COPY.frontTitle,
-      frontSubtitle: RM22_DEFAULT_COPY.frontSubtitle,
+      frontTitle: "",
+      frontSubtitle: "*A prime location*",
       frontPriceLine: RM22_DEFAULT_COPY.frontPriceLine,
       frontTagline: RM22_DEFAULT_COPY.frontTagline,
     });
+  });
+
+  it("formats address headlines, lot blurbs, and price lines for the translucent caption", () => {
+    expect(formatRm22CoverAddressHeadline("S Head Rd, Homeville, NS, Canada")).toBe(
+      "S Head Rd, Homeville",
+    );
+    expect(formatRm22CoverAddressHeadline("Property")).toBe("");
+    expect(formatRm22CoverLotBlurb({ title: "Lot + optional Tiny Home" })).toBe(
+      "*A prime location*",
+    );
+    expect(formatRm22CoverLotBlurb({ writeup: "Wooded ridge above the cove." })).toBe(
+      "*Wooded ridge above the cove*",
+    );
+    expect(styleRm22CoverLotBlurb("A prime Estuary Location")).toBe(
+      "*A prime Estuary Location*",
+    );
+    expect(formatRm22CoverPriceLine(null)).toBe("Inquire for price per acre.");
+    expect(formatRm22CoverPriceLine("From $49,000 per acre.")).toBe(
+      "From $49,000 per acre.",
+    );
   });
 
   it("inserts only the chosen product sheet as the first interior", () => {
@@ -135,11 +163,12 @@ describe("RM22 Talisbook™ template", () => {
   it("writes lot + chosen product copy when Intrinsic Value body is empty", () => {
     const body = defaultRm22IntrinsicBody({
       productLabel: "T-Dome",
-      lotTitle: "Property",
-      address: "160 Macs Rd, Richmond County, NS B0E 3B0, Canada",
+      lotTitle: "*A prime Estuary Location*",
+      address: "160 Macs Rd, Richmond County",
     });
     expect(body).toContain("T-Dome");
     expect(body).toContain("160 Macs Rd");
+    expect(body).toContain("A prime Estuary Location");
   });
 
   it("replaces caption and image slots on stub pages without including extra products", () => {

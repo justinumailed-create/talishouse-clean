@@ -69,6 +69,60 @@ export function magazineSoloShiftPercent({
   return 0;
 }
 
+export type SpreadFacePair<T> = {
+  left: T | null;
+  right: T | null;
+};
+
+export type FlippingSpreadFaces<T> = {
+  leftPage: T | null;
+  rightPage: T | null;
+  flipFront: T | null;
+  flipBack: T | null;
+  /** Opening away from a solo cover — hide the empty leaf so the next spread cannot peek. */
+  openPose: "front" | "back" | null;
+};
+
+/**
+ * Stationary faces + flipping leaf contents for a spread turn.
+ *
+ * Incoming art belongs on the *back* of the 180° leaf. Putting it in the
+ * empty cover slot (current.left ?? incoming.left) lets the T-Dome left page
+ * paint beside the cover before the curl finishes.
+ */
+export function resolveFlippingSpreadFaces<T>({
+  current,
+  incoming,
+  flipping,
+  forward,
+}: {
+  current: SpreadFacePair<T>;
+  incoming: SpreadFacePair<T> | null;
+  flipping: boolean;
+  forward: boolean;
+}): FlippingSpreadFaces<T> {
+  if (!flipping || !incoming) {
+    return {
+      leftPage: current.left,
+      rightPage: current.right,
+      flipFront: null,
+      flipBack: null,
+      openPose: null,
+    };
+  }
+
+  const openingFromFront = forward && !current.left && Boolean(current.right);
+  const openingFromBack = !forward && Boolean(current.left) && !current.right;
+
+  return {
+    leftPage: forward ? current.left : incoming.left,
+    rightPage: forward ? incoming.right : current.right,
+    flipFront: forward ? current.right : current.left,
+    flipBack: forward ? incoming.left : incoming.right,
+    openPose: openingFromFront ? "front" : openingFromBack ? "back" : null,
+  };
+}
+
 /** Start/end rotateY for a double-sided spread leaf (degrees). */
 export function spreadFlipRotateY(direction: 1 | -1): [number, number] {
   return direction > 0 ? [0, -180] : [0, 180];

@@ -8,6 +8,7 @@ import {
   continuousSpreadImageUrl,
   clampSpreadAspectRatio,
   isMattedSpreadPage,
+  RESERVED_BOOK_SPREAD_ASPECT,
 } from "@/lib/talisbooks/viewer/spread-layout";
 import { getViewerSpread, getViewerSpreadCount } from "@/lib/talisbooks/viewer/spreads";
 import { createPinnedTalisBookViewer } from "@/lib/talisbooks/library/pinned-catalog";
@@ -175,6 +176,8 @@ describe("TalisBook Cover Dimension + Viewer Focus Fix", () => {
     // Continuous spread aspect ratio helper produces identical clamped ratios
     const ratio = clampSpreadAspectRatio(1600 / 893);
     expect(ratio).toBeCloseTo(1.7917, 3);
+    expect(RESERVED_BOOK_SPREAD_ASPECT).toBeCloseTo(16 / 9, 5);
+    expect(Math.abs(RESERVED_BOOK_SPREAD_ASPECT - ratio)).toBeLessThan(0.05);
 
     // The book's spread geometry URL does NOT depend on the active page,
     // guaranteeing consistent geometry across cover -> interior -> back cover navigation.
