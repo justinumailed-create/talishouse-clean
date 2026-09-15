@@ -31,6 +31,11 @@ export type OnboardingContext = {
     longitude: number | null;
     writeup: string | null;
   };
+  listing: {
+    title: string | null;
+    address: string | null;
+    price: string | null;
+  };
 };
 
 export type ResolveOnboardingResult =
@@ -220,13 +225,16 @@ export async function resolveOnboardingFromRequest(
     cover_image: string | null;
     gallery_images: string[] | null;
     logo_url: string | null;
+    property_title: string | null;
+    property_address: string | null;
+    price: string | null;
   } | null = null;
 
   if (mapsiteId) {
     const byId = await supabase
       .from("mapsites")
       .select(
-        "id, fast_code, owner_first_name, owner_last_name, agent_name, email, phone, cover_image, gallery_images, logo_url"
+        "id, fast_code, owner_first_name, owner_last_name, agent_name, email, phone, cover_image, gallery_images, logo_url, property_title, property_address, price"
       )
       .eq("id", mapsiteId)
       .maybeSingle();
@@ -237,7 +245,7 @@ export async function resolveOnboardingFromRequest(
     const byFast = await supabase
       .from("mapsites")
       .select(
-        "id, fast_code, owner_first_name, owner_last_name, agent_name, email, phone, cover_image, gallery_images, logo_url"
+        "id, fast_code, owner_first_name, owner_last_name, agent_name, email, phone, cover_image, gallery_images, logo_url, property_title, property_address, price"
       )
       .ilike("fast_code", requestedFastCode)
       .order("created_at", { ascending: false })
@@ -261,6 +269,13 @@ export async function resolveOnboardingFromRequest(
   const agentName =
     mapsite?.agent_name?.trim() ||
     `${firstName} ${lastName}`.trim();
+
+  const pinAddress =
+    request.street_address?.trim() ||
+    request.reverse_geocoded_address?.trim() ||
+    null;
+  const listingAddress =
+    mapsite?.property_address?.trim() || pinAddress;
 
   const context: OnboardingContext = {
     requestId,
@@ -287,10 +302,7 @@ export async function resolveOnboardingFromRequest(
         null,
     },
     pin: {
-      streetAddress:
-        request.street_address?.trim() ||
-        request.reverse_geocoded_address?.trim() ||
-        null,
+      streetAddress: pinAddress,
       latitude:
         request.latitude != null && Number.isFinite(request.latitude)
           ? request.latitude
@@ -300,6 +312,11 @@ export async function resolveOnboardingFromRequest(
           ? request.longitude
           : null,
       writeup: request.pin_writeup?.trim() || null,
+    },
+    listing: {
+      title: mapsite?.property_title?.trim() || null,
+      address: listingAddress,
+      price: mapsite?.price?.trim() || null,
     },
   };
 

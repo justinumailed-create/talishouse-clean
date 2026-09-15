@@ -16,6 +16,9 @@
  *   Custom + Global       → ≤ 24
  * Landscape interiors that would overflow the default 20-page book extend
  * the total instead of dropping late pages (e.g. an RM22 product sheet).
+ * When `protectEndingSpreads` is set (RM22: Intrinsic + Parting Shot), those
+ * last interiors are always kept immediately before the back cover — never
+ * dropped to satisfy a page cap.
  */
 
 import { getGlasshouseBrochureSource } from "@/lib/talisbooks/permanent-pages/glasshouse-brochure";
@@ -34,6 +37,8 @@ export const SELF_SERVICE_BOTH_CONTENT_TOTAL_PAGES = 24;
  * first interior (product sheet).
  */
 export const SELF_SERVICE_ABSOLUTE_MAX_PAGES = 28;
+/** RM22 Intrinsic + Parting Shot — last two interior landscapes before the back cover. */
+export const SELF_SERVICE_PROTECTED_ENDING_SPREADS = 2;
 /** @deprecated Use selfServicePageCount() — kept for existing imports. */
 export const SELF_SERVICE_TOTAL_PAGES = SELF_SERVICE_DEFAULT_TOTAL_PAGES;
 export const SELF_SERVICE_LOT_PAGE = 1;
@@ -68,6 +73,12 @@ export type SelfServiceBookOptions = {
   advertising: boolean;
   globalContent: boolean;
   customContent: boolean;
+  /**
+   * Keep the last N interior uploads even when the page budget is tight.
+   * RM22 template path: 2 = Intrinsic Value, then The Parting Shot…!
+   * Positions are relative to the back cover, not hardcoded page numbers.
+   */
+  protectEndingSpreads?: number;
 };
 
 export const DEFAULT_SELF_SERVICE_BOOK_OPTIONS: SelfServiceBookOptions = {
@@ -76,6 +87,7 @@ export const DEFAULT_SELF_SERVICE_BOOK_OPTIONS: SelfServiceBookOptions = {
   advertising: false,
   globalContent: false,
   customContent: false,
+  protectEndingSpreads: 0,
 };
 
 export type SelfServicePageCaption = {
@@ -114,6 +126,10 @@ export function resolveSelfServiceBookOptions(
   input?: Partial<SelfServiceBookOptions> | null,
   legacyIncludeAdIntro?: boolean,
 ): SelfServiceBookOptions {
+  const protectRaw = Number(input?.protectEndingSpreads);
+  const protectEndingSpreads = Number.isFinite(protectRaw)
+    ? Math.max(0, Math.floor(protectRaw))
+    : 0;
   return {
     facingPages: input?.facingPages ?? true,
     captions: input?.captions ?? false,
@@ -121,6 +137,7 @@ export function resolveSelfServiceBookOptions(
     globalContent: input?.globalContent ?? false,
     customContent:
       input?.customContent ?? (legacyIncludeAdIntro !== undefined ? legacyIncludeAdIntro : false),
+    protectEndingSpreads,
   };
 }
 
@@ -134,6 +151,15 @@ export function selfServicePageCount(options: SelfServiceBookOptions): number {
   return SELF_SERVICE_DEFAULT_TOTAL_PAGES;
 }
 
+function leafCountForAsset(
+  asset: SelfServiceLandscapeAsset,
+  facingPages = true,
+): number {
+  return facingPages && isLandscapeSpreadCandidate(asset.width, asset.height)
+    ? 2
+    : 1;
+}
+
 /** Leaf count consumed by interior uploads (landscape = 2 pages). */
 export function selfServiceInteriorLeafCount(
   landscapes: SelfServiceLandscapeAsset[],
@@ -141,19 +167,77 @@ export function selfServiceInteriorLeafCount(
 ): number {
   let pages = 0;
   for (const asset of landscapes) {
-    if (facingPages && isLandscapeSpreadCandidate(asset.width, asset.height)) {
-      pages += 2;
-    } else {
-      pages += 1;
-    }
+    pages += leafCountForAsset(asset, facingPages);
   }
   return pages;
+}
+
+/**
+ * Choose interiors that fit a leaf budget without dropping protected endings.
+ * Head interiors (product sheet, intro) stay first; photo-captions in the
+ * middle are dropped first when the cap is tight.
+ */
+export function selectLandscapesFittingLeaves(
+  interiors: SelfServiceLandscapeAsset[],
+  maxLeaves: number,
+  facingPages = true,
+  protectEndingSpreads = 0,
+): SelfServiceLandscapeAsset[] {
+  const protect = Math.min(
+    Math.max(0, Math.floor(protectEndingSpreads)),
+    interiors.length,
+  );
+  if (protect <= 0) {
+    const kept: SelfServiceLandscapeAsset[] = [];
+    let used = 0;
+    for (const asset of interiors) {
+      const need = leafCountForAsset(asset, facingPages);
+      if (used + need > maxLeaves) break;
+      kept.push(asset);
+      used += need;
+    }
+    return kept;
+  }
+
+  const ending = interiors.slice(-protect);
+  const flexible = interiors.slice(0, -protect);
+  const endingLeaves = selfServiceInteriorLeafCount(ending, facingPages);
+  let remaining = Math.max(0, maxLeaves - endingLeaves);
+  const keptFlexible: SelfServiceLandscapeAsset[] = [];
+  for (const asset of flexible) {
+    const need = leafCountForAsset(asset, facingPages);
+    if (need > remaining) break;
+    keptFlexible.push(asset);
+    remaining -= need;
+  }
+  return [...keptFlexible, ...ending];
+}
+
+/**
+ * When more interiors are uploaded than the image cap, keep the protected
+ * ending pair instead of slicing them off the tail.
+ */
+export function selectLandscapesForImageCap(
+  interiors: SelfServiceLandscapeAsset[],
+  maxImages: number,
+  protectEndingSpreads = 0,
+): SelfServiceLandscapeAsset[] {
+  if (interiors.length <= maxImages) return interiors;
+  const protect = Math.min(
+    Math.max(0, Math.floor(protectEndingSpreads)),
+    maxImages,
+    interiors.length,
+  );
+  if (protect <= 0) return interiors.slice(0, maxImages);
+  const ending = interiors.slice(-protect);
+  const head = interiors.slice(0, maxImages - protect);
+  return [...head, ...ending];
 }
 
 export function parseSelfServiceBookOptions(
   raw: string | null | undefined,
 ): SelfServiceBookOptions {
-  if (!raw?.trim()) return { ...DEFAULT_SELF_SERVICE_BOOK_OPTIONS };
+  if (!raw?.trim()) return resolveSelfServiceBookOptions();
   try {
     const parsed = JSON.parse(raw) as Partial<SelfServiceBookOptions>;
     return resolveSelfServiceBookOptions(parsed);
@@ -428,7 +512,13 @@ export function buildSelfServiceEbookPageRows(
     input.options,
     input.includeAdIntroSection,
   );
-  const interiors = input.landscapes.slice(0, SELF_SERVICE_MAX_INTERIOR_IMAGES);
+  const protectEndingSpreads = options.protectEndingSpreads ?? 0;
+  const facingPages = options.facingPages !== false;
+  const interiors = selectLandscapesForImageCap(
+    input.landscapes,
+    SELF_SERVICE_MAX_INTERIOR_IMAGES,
+    protectEndingSpreads,
+  );
   const rows: SelfServicePageRowContent[] = [];
   const hasFrontCover = Boolean(input.coverImageUrl?.trim());
   const hasBackCover = Boolean(input.backCoverImageUrl?.trim());
@@ -451,15 +541,29 @@ export function buildSelfServiceEbookPageRows(
   }
 
   const reserveInsideBack = options.globalContent;
+  const ending =
+    protectEndingSpreads > 0 ? interiors.slice(-protectEndingSpreads) : [];
+  const endingLeaves = selfServiceInteriorLeafCount(ending, facingPages);
+  const protectedFloor =
+    cursor -
+    1 +
+    endingLeaves +
+    (reserveInsideBack ? 2 : 0) +
+    (hasBackCover ? 1 : 0);
   const neededTotal =
     cursor -
     1 +
-    selfServiceInteriorLeafCount(interiors, options.facingPages !== false) +
+    selfServiceInteriorLeafCount(interiors, facingPages) +
     (reserveInsideBack ? 2 : 0) +
     (hasBackCover ? 1 : 0);
-  const totalPages = Math.min(
-    SELF_SERVICE_ABSOLUTE_MAX_PAGES,
-    Math.max(selfServicePageCount(options), neededTotal),
+  // Raise the book to fit protected endings (Intrinsic + Parting Shot) even
+  // if that exceeds the usual absolute cap. Never drop those two spreads.
+  const totalPages = Math.max(
+    protectedFloor,
+    Math.min(
+      SELF_SERVICE_ABSOLUTE_MAX_PAGES,
+      Math.max(selfServicePageCount(options), neededTotal),
+    ),
   );
 
   const backCoverPage = totalPages;
@@ -467,13 +571,20 @@ export function buildSelfServiceEbookPageRows(
   // Blank endpapers are no longer used — match the pinned sample.
   const interiorEnd =
     backCoverPage - (hasBackCover ? 1 : 0) - (reserveInsideBack ? 2 : 0);
+  const maxInteriorLeaves = Math.max(0, interiorEnd - cursor + 1);
+  const placedInteriors = selectLandscapesFittingLeaves(
+    interiors,
+    maxInteriorLeaves,
+    facingPages,
+    protectEndingSpreads,
+  );
   let pageCursor = cursor;
   let imageIndex = 0;
   let spreadIndex = 0;
 
   while (pageCursor <= interiorEnd) {
     const remaining = interiorEnd - pageCursor + 1;
-    const asset = interiors[imageIndex] ?? null;
+    const asset = placedInteriors[imageIndex] ?? null;
     const leaf: "left" | "right" = pageCursor % 2 === 0 ? "left" : "right";
     const caption = options.captions ? input.captions?.[imageIndex] ?? null : null;
     const asSpread =

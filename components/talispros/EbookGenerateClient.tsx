@@ -41,6 +41,7 @@ import {
   createRm22SlotState,
   planRm22TemplateInteriors,
   RM22_ASSETS,
+  RM22_PROTECTED_ENDING_SPREADS,
   rm22ProductById,
   type Rm22SlotState,
 } from "@/lib/talisbooks/rm22-template";
@@ -83,6 +84,8 @@ interface EbookGenerateClientProps {
   initialAgentPhone?: string;
   pinLatitude?: number | null;
   pinLongitude?: number | null;
+  initialPropertyAddress?: string | null;
+  initialPriceLine?: string | null;
   bootstrapError?: string | null;
   bootstrapMeta?: {
     requestId: string | null;
@@ -254,6 +257,8 @@ export default function EbookGenerateClient({
   initialAgentName,
   initialAgentEmail,
   initialAgentPhone = "",
+  initialPropertyAddress = null,
+  initialPriceLine = null,
   bootstrapError = null,
   bootstrapMeta = null,
 }: EbookGenerateClientProps) {
@@ -293,6 +298,8 @@ export default function EbookGenerateClient({
     createRm22SlotState({
       agentName: initialAgentName,
       agentPhone: initialAgentPhone,
+      address: initialPropertyAddress || undefined,
+      priceLine: initialPriceLine || undefined,
     }),
   );
   const [advertising, setAdvertising] = useState(false);
@@ -504,6 +511,8 @@ export default function EbookGenerateClient({
     const slots = createRm22SlotState({
       agentName: agentName || initialAgentName,
       agentPhone: initialAgentPhone,
+      address: initialPropertyAddress || undefined,
+      priceLine: initialPriceLine || undefined,
     });
     setRm22Slots(slots);
     setConverting(true);
@@ -535,7 +544,7 @@ export default function EbookGenerateClient({
   async function refreshProductPreview(next: Rm22SlotState) {
     const product = rm22ProductById(next.productId);
     try {
-      const file = await fileFromHref(product.href, "interior-01-product.jpg");
+      const file = await fileFromHref(product.href, "interior-product.jpg");
       const previewUrl = URL.createObjectURL(file);
       setUploads((current) => {
         if (current.length === 0) return current;
@@ -1126,6 +1135,7 @@ export default function EbookGenerateClient({
           advertising,
           globalContent,
           customContent,
+          protectEndingSpreads: templateMode ? RM22_PROTECTED_ENDING_SPREADS : 0,
         } satisfies SelfServiceBookOptions),
       );
       const captionsToSend = captionsFromTemplatePages(

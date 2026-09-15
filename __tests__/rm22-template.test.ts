@@ -1,18 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
   createRm22SlotState,
+  defaultRm22IntrinsicBody,
   planRm22TemplateInteriors,
   productIdsInPlan,
+  rm22CoverBandFromOnboarding,
+  rm22EndingRoles,
   rm22InteriorRole,
   rm22ProductById,
   RM22_ASSETS,
+  RM22_DEFAULT_COPY,
   RM22_DEFAULT_PRODUCT_ID,
   RM22_PHOTO_CAPTION_COUNT,
   RM22_PRODUCTS,
+  RM22_PROTECTED_ENDING_SPREADS,
 } from "../lib/talisbooks/rm22-template";
 
 describe("RM22 Talisbook™ template", () => {
-  it("maps interior pages to RM22 roles, not Jarlberg roles", () => {
+  it("maps interior leaves to RM22 roles relative to the plan, not book page numbers", () => {
     expect(rm22InteriorRole(1)).toBe("product-sheet");
     expect(rm22InteriorRole(2)).toBe("intro");
     expect(rm22InteriorRole(4)).toBe("photo-caption");
@@ -20,6 +25,10 @@ describe("RM22 Talisbook™ template", () => {
     expect(rm22InteriorRole(9)).toBe("intrinsic");
     expect(rm22InteriorRole(10)).toBe("outro");
     expect(rm22InteriorRole(11)).toBeNull();
+    // Extra photo-captions shift leaf indexes; intrinsic/outro stay last.
+    expect(rm22InteriorRole(11, 8)).toBe("intrinsic");
+    expect(rm22InteriorRole(12, 8)).toBe("outro");
+    expect(rm22InteriorRole(9, 8)).toBe("photo-caption");
   });
 
   it("defaults the required product picker to T-Dome", () => {
@@ -28,6 +37,37 @@ describe("RM22 Talisbook™ template", () => {
     expect(slots.productId).toBe("t-dome");
     expect(slots.photoCaptions).toHaveLength(RM22_PHOTO_CAPTION_COUNT);
     expect(slots.photoImages).toHaveLength(RM22_PHOTO_CAPTION_COUNT);
+  });
+
+  it("fills the front-cover Property band from onboarding address and price", () => {
+    const cover = rm22CoverBandFromOnboarding({
+      address: "160 Macs Rd, Richmond County, NS B0E 3B0, Canada",
+      priceLine: "Inquire for price per acre.",
+    });
+    expect(cover.frontTitle).toBe("Property");
+    expect(cover.frontSubtitle).toBe(
+      "160 Macs Rd, Richmond County, NS B0E 3B0, Canada",
+    );
+    expect(cover.frontPriceLine).toBe("Inquire for price per acre.");
+    expect(cover.frontTagline).toBe(RM22_DEFAULT_COPY.frontTagline);
+
+    const slots = createRm22SlotState({
+      address: "S Head Rd, Homeville, NS, Canada",
+      priceLine: "From $49,000 per acre.",
+    });
+    expect(slots.frontSubtitle).toBe("S Head Rd, Homeville, NS, Canada");
+    expect(slots.frontPriceLine).toBe("From $49,000 per acre.");
+    expect(slots.frontTagline).toBe(RM22_DEFAULT_COPY.frontTagline);
+    expect(slots.introTitle).toBe("Welcome…!");
+  });
+
+  it("keeps placeholder cover-band copy when onboarding address/price are absent", () => {
+    expect(rm22CoverBandFromOnboarding()).toEqual({
+      frontTitle: RM22_DEFAULT_COPY.frontTitle,
+      frontSubtitle: RM22_DEFAULT_COPY.frontSubtitle,
+      frontPriceLine: RM22_DEFAULT_COPY.frontPriceLine,
+      frontTagline: RM22_DEFAULT_COPY.frontTagline,
+    });
   });
 
   it("inserts only the chosen product sheet as the first interior", () => {
@@ -60,6 +100,48 @@ describe("RM22 Talisbook™ template", () => {
     expect(hrefs(dome)).not.toContain(rm22ProductById("t-house").href);
   });
 
+  it("always ends interiors with Intrinsic Value then The Parting Shot, relative to the back cover", () => {
+    const slots = createRm22SlotState({ productId: "t-dome" });
+    const plan = planRm22TemplateInteriors(slots);
+    expect(rm22EndingRoles(plan)).toEqual(["intrinsic", "outro"]);
+    expect(plan.at(-2)).toMatchObject({
+      role: "intrinsic",
+      title: "Intrinsic Value",
+      signoff: "The Professional Team",
+      fileName: "interior-intrinsic.jpg",
+    });
+    expect(plan.at(-1)).toMatchObject({
+      role: "outro",
+      title: "The Parting Shot…!",
+      fileName: "interior-outro.jpg",
+    });
+    expect(plan.at(-2)?.body).toContain("T-Dome");
+    expect(plan.map((item) => item.role).indexOf("intrinsic")).toBeGreaterThan(
+      plan.map((item) => item.role).lastIndexOf("photo-caption"),
+    );
+  });
+
+  it("still ends intrinsic→outro when photo-caption count grows", () => {
+    const slots = createRm22SlotState({ productId: "g-house" });
+    slots.photoImages = Array.from({ length: 10 }, () => null);
+    slots.photoCaptions = Array.from({ length: 10 }, () => "");
+    const plan = planRm22TemplateInteriors(slots);
+    expect(plan.filter((item) => item.role === "photo-caption")).toHaveLength(10);
+    expect(rm22EndingRoles(plan)).toEqual(["intrinsic", "outro"]);
+    expect(plan).toHaveLength(14);
+    expect(RM22_PROTECTED_ENDING_SPREADS).toBe(2);
+  });
+
+  it("writes lot + chosen product copy when Intrinsic Value body is empty", () => {
+    const body = defaultRm22IntrinsicBody({
+      productLabel: "T-Dome",
+      lotTitle: "Property",
+      address: "160 Macs Rd, Richmond County, NS B0E 3B0, Canada",
+    });
+    expect(body).toContain("T-Dome");
+    expect(body).toContain("160 Macs Rd");
+  });
+
   it("replaces caption and image slots on stub pages without including extra products", () => {
     const photo = new File(["photo"], "lake.jpg", { type: "image/jpeg" });
     const intro = new File(["intro"], "intro.jpg", { type: "image/jpeg" });
@@ -81,10 +163,12 @@ describe("RM22 Talisbook™ template", () => {
     expect(plan[0]?.role).toBe("product-sheet");
     expect(plan[0]?.productId).toBe("g-house");
     expect(plan.filter((item) => item.role === "product-sheet")).toHaveLength(1);
+    expect(rm22EndingRoles(plan)).toEqual(["intrinsic", "outro"]);
 
     const introPage = plan.find((item) => item.role === "intro");
     expect(introPage?.image).toBe(intro);
     expect(introPage?.caption).toBe("Trail head at dusk");
+    expect(introPage?.title).toBe("Welcome…!");
 
     const captionPages = plan.filter((item) => item.role === "photo-caption");
     expect(captionPages).toHaveLength(6);

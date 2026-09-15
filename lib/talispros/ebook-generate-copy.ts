@@ -21,7 +21,7 @@ export const EBOOK_GENERATE_TEMPLATE_PDF_FILE_NAME = "RM22-Project.pdf";
 export const EBOOK_GENERATE_TEMPLATE_ACTION = "Use Talisbook™ template";
 export const EBOOK_GENERATE_TEMPLATE_ACTION_ON = "Using Talisbook™ template";
 export const EBOOK_GENERATE_TEMPLATE_HELP =
-  "RM22 layout: pick one product sheet (T-Dome, G-House, or T-House) for the spread after the cover. Replace lime placeholder photos and captions — including Intrinsic Value and the outro.";
+  "RM22 layout: pick one product sheet (T-Dome, G-House, or T-House) for the spread after the cover. Replace lime placeholder photos and captions. Books always end Intrinsic Value, then The Parting Shot…!, then the back cover.";
 export const EBOOK_GENERATE_TEMPLATE_DOWNLOAD = "Download PDF template";
 export const EBOOK_GENERATE_TEMPLATE_PAGE_PLACEHOLDER =
   "Caption or copy for this page";

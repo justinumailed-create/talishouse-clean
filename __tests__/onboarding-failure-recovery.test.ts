@@ -174,6 +174,11 @@ describe("failure recovery — structured errors", () => {
           longitude: 2,
           writeup: null,
         },
+        listing: {
+          title: null,
+          address: "1 Main",
+          price: null,
+        },
       },
     });
     generateMock.mockResolvedValue({
@@ -223,6 +228,11 @@ describe("failure recovery — structured errors", () => {
           latitude: null,
           longitude: null,
           writeup: null,
+        },
+        listing: {
+          title: null,
+          address: null,
+          price: null,
         },
       },
     });
@@ -274,6 +284,11 @@ describe("failure recovery — structured errors", () => {
           longitude: null,
           writeup: null,
         },
+        listing: {
+          title: null,
+          address: null,
+          price: null,
+        },
       },
     });
 
@@ -313,6 +328,11 @@ describe("failure recovery — structured errors", () => {
           latitude: 1,
           longitude: 2,
           writeup: null,
+        },
+        listing: {
+          title: null,
+          address: "1 Main",
+          price: null,
         },
       },
     });
