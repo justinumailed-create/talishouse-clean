@@ -10,10 +10,12 @@
  *   Landscape interiors = one complete two-page spread; portraits = one page
  *
  * Page count (Level 3) — maximums; books size to content (no blank endpapers):
- *   No Custom + No Global → ≤ 20
+ *   No Custom + No Global → ≤ 20, expanding up to 28 when interiors need it
  *   Only Custom           → ≤ 22
  *   Only Global           → ≤ 22
  *   Custom + Global       → ≤ 24
+ * Landscape interiors that would overflow the default 20-page book extend
+ * the total instead of dropping late pages (e.g. an RM22 product sheet).
  */
 
 import { getGlasshouseBrochureSource } from "@/lib/talisbooks/permanent-pages/glasshouse-brochure";
@@ -26,6 +28,12 @@ export const SELF_SERVICE_DEFAULT_TOTAL_PAGES = 20;
 /** Only Custom or only Global adds a 2-page section before the back cover. */
 export const SELF_SERVICE_SINGLE_CONTENT_TOTAL_PAGES = 22;
 export const SELF_SERVICE_BOTH_CONTENT_TOTAL_PAGES = 24;
+/**
+ * Hard ceiling when landscape interiors need more than the default 20-page
+ * book (RM22 template: 10 landscapes → 22 pages). Never silently drop the
+ * first interior (product sheet).
+ */
+export const SELF_SERVICE_ABSOLUTE_MAX_PAGES = 28;
 /** @deprecated Use selfServicePageCount() — kept for existing imports. */
 export const SELF_SERVICE_TOTAL_PAGES = SELF_SERVICE_DEFAULT_TOTAL_PAGES;
 export const SELF_SERVICE_LOT_PAGE = 1;
@@ -124,6 +132,22 @@ export function selfServicePageCount(options: SelfServiceBookOptions): number {
     return SELF_SERVICE_SINGLE_CONTENT_TOTAL_PAGES;
   }
   return SELF_SERVICE_DEFAULT_TOTAL_PAGES;
+}
+
+/** Leaf count consumed by interior uploads (landscape = 2 pages). */
+export function selfServiceInteriorLeafCount(
+  landscapes: SelfServiceLandscapeAsset[],
+  facingPages = true,
+): number {
+  let pages = 0;
+  for (const asset of landscapes) {
+    if (facingPages && isLandscapeSpreadCandidate(asset.width, asset.height)) {
+      pages += 2;
+    } else {
+      pages += 1;
+    }
+  }
+  return pages;
 }
 
 export function parseSelfServiceBookOptions(
@@ -404,7 +428,6 @@ export function buildSelfServiceEbookPageRows(
     input.options,
     input.includeAdIntroSection,
   );
-  const totalPages = selfServicePageCount(options);
   const interiors = input.landscapes.slice(0, SELF_SERVICE_MAX_INTERIOR_IMAGES);
   const rows: SelfServicePageRowContent[] = [];
   const hasFrontCover = Boolean(input.coverImageUrl?.trim());
@@ -427,10 +450,21 @@ export function buildSelfServiceEbookPageRows(
     cursor += 2;
   }
 
+  const reserveInsideBack = options.globalContent;
+  const neededTotal =
+    cursor -
+    1 +
+    selfServiceInteriorLeafCount(interiors, options.facingPages !== false) +
+    (reserveInsideBack ? 2 : 0) +
+    (hasBackCover ? 1 : 0);
+  const totalPages = Math.min(
+    SELF_SERVICE_ABSOLUTE_MAX_PAGES,
+    Math.max(selfServicePageCount(options), neededTotal),
+  );
+
   const backCoverPage = totalPages;
   // Reserve the inside-back spread only for Global (Glasshouse) content.
   // Blank endpapers are no longer used — match the pinned sample.
-  const reserveInsideBack = options.globalContent;
   const interiorEnd =
     backCoverPage - (hasBackCover ? 1 : 0) - (reserveInsideBack ? 2 : 0);
   let pageCursor = cursor;

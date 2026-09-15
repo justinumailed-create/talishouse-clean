@@ -32,6 +32,12 @@ function tinyPngFile(name = "test.png"): File {
   return new File([bytes], name, { type: "image/png" });
 }
 
+const portraitCover = {
+  url: "https://cdn.example/cover.jpg",
+  width: 1080,
+  height: 1920,
+};
+
 describe("failure recovery — structured errors", () => {
   beforeEach(() => {
     resolveMock.mockReset();
@@ -181,6 +187,8 @@ describe("failure recovery — structured errors", () => {
       description: "D",
       location: "L",
       images: [tinyPngFile()],
+      frontCover: portraitCover,
+      backCover: portraitCover,
       uploadMode: "images",
       timeoutMs: 5_000,
     });
@@ -231,6 +239,8 @@ describe("failure recovery — structured errors", () => {
       description: "D",
       location: "L",
       images: [tinyPngFile()],
+      frontCover: portraitCover,
+      backCover: portraitCover,
       uploadMode: "images",
       timeoutMs: 80,
     });
@@ -280,6 +290,57 @@ describe("failure recovery — structured errors", () => {
     expect(result.stage).toBe("failed");
     if (result.stage !== "failed") return;
     expect(result.failedStage).toBe("uploading_images");
+  });
+
+  it("forwards pdf uploadMode to generate without rewriting it to images", async () => {
+    resolveMock.mockResolvedValue({
+      ok: true,
+      context: {
+        requestId: "req-pdf",
+        fastCode: "ar01",
+        mapsiteId: "ms-pdf",
+        accountType: "root-1",
+        owner: {
+          firstName: "Ada",
+          lastName: "Lovelace",
+          agentName: "Ada Lovelace",
+          email: "ada@example.com",
+          phone: "",
+        },
+        assets: { coverImage: null, galleryImages: [], logo: null },
+        pin: {
+          streetAddress: "1 Main",
+          latitude: 1,
+          longitude: 2,
+          writeup: null,
+        },
+      },
+    });
+    generateMock.mockResolvedValue({
+      success: true,
+      bookId: "b1",
+      slug: "ar01-pdf",
+      viewerUrl: "/talisbooks/viewer/ar01-pdf",
+      mapsiteId: "ms-pdf",
+    });
+    const cover = { url: "https://cdn.example/c.jpg", width: 1080, height: 1920 };
+    const result = await runEbookGenerationPipeline({
+      requestId: "req-pdf",
+      title: "PDF",
+      description: "D",
+      location: "L",
+      optimizedImages: [
+        { url: "https://cdn.example/p.jpg", width: 1920, height: 1080 },
+      ],
+      frontCover: cover,
+      backCover: cover,
+      uploadMode: "pdf",
+      timeoutMs: 5_000,
+    });
+    expect(result.stage).toBe("completed");
+    expect(generateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ uploadMode: "pdf" }),
+    );
   });
 });
 

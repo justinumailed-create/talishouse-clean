@@ -6,7 +6,6 @@ import {
   assignBookAssetsFromUploads,
   classifyUploadFile,
   convertPdfFileToImageFiles,
-  splitWrapCoverImageFile,
   COVER_WRAP_PDF_NOT_LANDSCAPE_MESSAGE,
 } from "@/lib/talisbooks/pdf-pages-to-images";
 import {
@@ -33,21 +32,18 @@ import {
   EBOOK_GENERATE_HELP_TEXT,
   EBOOK_GENERATE_TEMPLATE_ACTION,
   EBOOK_GENERATE_TEMPLATE_ACTION_ON,
-  EBOOK_GENERATE_TEMPLATE_DOWNLOAD,
   EBOOK_GENERATE_TEMPLATE_HELP,
-  EBOOK_GENERATE_TEMPLATE_PDF_FILE_NAME,
-  EBOOK_GENERATE_TEMPLATE_PDF_HREF,
   EBOOK_GENERATE_UPLOAD_HINT,
 } from "@/lib/talispros/ebook-generate-copy";
-import JarlbergTemplateFields from "@/components/talispros/JarlbergTemplateFields";
-import { composeJarlbergTemplateBook } from "@/lib/talisbooks/compose-jarlberg-template";
+import Rm22TemplateFields from "@/components/talispros/Rm22TemplateFields";
+import { composeRm22TemplateBook } from "@/lib/talisbooks/compose-rm22-template";
 import {
-  createJarlbergSlotState,
-  JARLBERG_INTERIOR_COUNT,
-  JARLBERG_WRAP_HREF,
-  jarlbergInteriorHref,
-  type JarlbergSlotState,
-} from "@/lib/talisbooks/jarlberg-template";
+  createRm22SlotState,
+  planRm22TemplateInteriors,
+  RM22_ASSETS,
+  rm22ProductById,
+  type Rm22SlotState,
+} from "@/lib/talisbooks/rm22-template";
 
 type EbookOptimizedUploadResponse = {
   ok: true;
@@ -258,8 +254,6 @@ export default function EbookGenerateClient({
   initialAgentName,
   initialAgentEmail,
   initialAgentPhone = "",
-  pinLatitude = null,
-  pinLongitude = null,
   bootstrapError = null,
   bootstrapMeta = null,
 }: EbookGenerateClientProps) {
@@ -295,8 +289,8 @@ export default function EbookGenerateClient({
   const [facingPages, setFacingPages] = useState(true);
   const [captionsEnabled, setCaptionsEnabled] = useState(false);
   const [templateMode, setTemplateMode] = useState(false);
-  const [jarlbergSlots, setJarlbergSlots] = useState<JarlbergSlotState>(() =>
-    createJarlbergSlotState({
+  const [rm22Slots, setRm22Slots] = useState<Rm22SlotState>(() =>
+    createRm22SlotState({
       agentName: initialAgentName,
       agentPhone: initialAgentPhone,
     }),
@@ -485,47 +479,46 @@ export default function EbookGenerateClient({
     return new File([blob], fileName, { type: blob.type || "image/jpeg" });
   }
 
-  async function loadJarlbergTemplate() {
+  async function applyInteriorFiles(interiors: File[]) {
+    setUploads((current) => {
+      for (const item of current) revokePreviewUrl(item.previewUrl);
+      return interiors.map((pageFile, index) => ({
+        id: crypto.randomUUID(),
+        file: pageFile,
+        source: "image" as const,
+        label: `Page ${index + 1}`,
+        previewUrl: URL.createObjectURL(pageFile),
+      }));
+    });
+    setPageCaptions(
+      interiors.map(() => ({
+        text: "",
+        skipped: true,
+      })),
+    );
+  }
+
+  async function loadRm22Template() {
     setError("");
     setTemplateMode(true);
-    setJarlbergSlots(
-      createJarlbergSlotState({
-        agentName: agentName || initialAgentName,
-        agentPhone: initialAgentPhone,
-      }),
-    );
+    const slots = createRm22SlotState({
+      agentName: agentName || initialAgentName,
+      agentPhone: initialAgentPhone,
+    });
+    setRm22Slots(slots);
     setConverting(true);
-    setConvertProgress("Loading Jarlberg template…");
+    setConvertProgress("Loading RM22 template…");
     try {
-      const wrap = await fileFromHref(JARLBERG_WRAP_HREF, "jarlberg-wrap.jpg");
-      const { front, back } = await splitWrapCoverImageFile(wrap);
+      const front = await fileFromHref(RM22_ASSETS.front, "rm22-front.jpg");
+      const back = await fileFromHref(RM22_ASSETS.agent, "rm22-back.jpg");
       await applyCoverPicks(front, back);
+      const plan = planRm22TemplateInteriors(slots);
       const interiors: File[] = [];
-      for (let page = 1; page <= JARLBERG_INTERIOR_COUNT; page += 1) {
-        setConvertProgress(`Loading Jarlberg template… ${page}/${JARLBERG_INTERIOR_COUNT}`);
-        interiors.push(
-          await fileFromHref(
-            jarlbergInteriorHref(page),
-            `interior-${String(page).padStart(2, "0")}.jpg`,
-          ),
-        );
+      for (const [index, item] of plan.entries()) {
+        setConvertProgress(`Loading RM22 template… ${index + 1}/${plan.length}`);
+        interiors.push(await fileFromHref(item.assetHref, item.fileName));
       }
-      setUploads((current) => {
-        for (const item of current) revokePreviewUrl(item.previewUrl);
-        return interiors.map((pageFile, index) => ({
-          id: crypto.randomUUID(),
-          file: pageFile,
-          source: "image" as const,
-          label: `Page ${index + 1}`,
-          previewUrl: URL.createObjectURL(pageFile),
-        }));
-      });
-      setPageCaptions(
-        interiors.map(() => ({
-          text: "",
-          skipped: true,
-        })),
-      );
+      await applyInteriorFiles(interiors);
     } catch (caught) {
       setTemplateMode(false);
       setError(
@@ -536,6 +529,31 @@ export default function EbookGenerateClient({
     } finally {
       setConverting(false);
       setConvertProgress("");
+    }
+  }
+
+  async function refreshProductPreview(next: Rm22SlotState) {
+    const product = rm22ProductById(next.productId);
+    try {
+      const file = await fileFromHref(product.href, "interior-01-product.jpg");
+      const previewUrl = URL.createObjectURL(file);
+      setUploads((current) => {
+        if (current.length === 0) return current;
+        const [first, ...rest] = current;
+        if (first) revokePreviewUrl(first.previewUrl);
+        return [
+          {
+            id: first?.id ?? crypto.randomUUID(),
+            file,
+            source: "image" as const,
+            label: product.label,
+            previewUrl,
+          },
+          ...rest,
+        ];
+      });
+    } catch {
+      /* preview refresh is best-effort; compose on submit uses the picker. */
     }
   }
 
@@ -925,32 +943,24 @@ export default function EbookGenerateClient({
       let frontPick = frontCover;
       let backPick = backCover;
       if (templateMode) {
-        const pin =
-          pinLatitude != null &&
-          pinLongitude != null &&
-          Number.isFinite(pinLatitude) &&
-          Number.isFinite(pinLongitude)
-            ? { latitude: pinLatitude, longitude: pinLongitude }
-            : null;
-        const composed = await composeJarlbergTemplateBook(
-          jarlbergSlots,
-          pin,
+        const composed = await composeRm22TemplateBook(
+          rm22Slots,
           (detail) => setStageDetail(detail),
         );
         const frontPreview = URL.createObjectURL(composed.front);
         const backPreview = URL.createObjectURL(composed.back);
         frontPick = {
-          id: `front-jarlberg-${Date.now()}`,
+          id: `front-rm22-${Date.now()}`,
           file: composed.front,
           previewUrl: frontPreview,
         };
         backPick = {
-          id: `back-jarlberg-${Date.now()}`,
+          id: `back-rm22-${Date.now()}`,
           file: composed.back,
           previewUrl: backPreview,
         };
         propertyItems = composed.interiors.map((pageFile, index) => ({
-          id: `jarlberg-${index}`,
+          id: `rm22-${index}`,
           file: pageFile,
           source: "image" as const,
           label: `Page ${index + 1}`,
@@ -971,7 +981,7 @@ export default function EbookGenerateClient({
         frontCover: frontPick,
         backCover: backPick,
         logo: logoFile,
-        agentPhoto: jarlbergSlots.backAgentImage || agentPhotoFile,
+        agentPhoto: rm22Slots.backAgentImage || agentPhotoFile,
         signal: optimizeController.signal,
         prior,
       });
@@ -1073,11 +1083,11 @@ export default function EbookGenerateClient({
       fd.set("location", fromPdf ? location.trim() : location.trim());
       fd.set(
         "agentName",
-        (templateMode ? jarlbergSlots.agentName : agentName).trim(),
+        (templateMode ? rm22Slots.agentName : agentName).trim(),
       );
       fd.set("agentEmail", agentEmail.trim());
-      if (templateMode && jarlbergSlots.agentPhone.trim()) {
-        fd.set("agentPhone", jarlbergSlots.agentPhone.trim());
+      if (templateMode && rm22Slots.agentPhone.trim()) {
+        fd.set("agentPhone", rm22Slots.agentPhone.trim());
       }
       fd.set(
         "optimizedImages",
@@ -1443,7 +1453,7 @@ export default function EbookGenerateClient({
                         setTemplateMode(false);
                         return;
                       }
-                      void loadJarlbergTemplate();
+                      void loadRm22Template();
                     }}
                     className={`flex h-12 w-full items-center justify-center rounded-full text-[15px] font-medium transition disabled:opacity-40 ${
                       templateMode
@@ -1458,19 +1468,16 @@ export default function EbookGenerateClient({
                   <p className="mt-3 text-center text-[12px] leading-relaxed text-neutral-400">
                     {EBOOK_GENERATE_TEMPLATE_HELP}
                   </p>
-                  <a
-                    href={EBOOK_GENERATE_TEMPLATE_PDF_HREF}
-                    download={EBOOK_GENERATE_TEMPLATE_PDF_FILE_NAME}
-                    className="mt-2 block text-center text-[12px] font-medium text-sky-600"
-                  >
-                    {EBOOK_GENERATE_TEMPLATE_DOWNLOAD}
-                  </a>
                   {templateMode ? (
                     <>
-                      <JarlbergTemplateFields
-                        slots={jarlbergSlots}
+                      <Rm22TemplateFields
+                        slots={rm22Slots}
                         disabled={converting || saving}
-                        onChange={setJarlbergSlots}
+                        onChange={(next) => {
+                          const productChanged = next.productId !== rm22Slots.productId;
+                          setRm22Slots(next);
+                          if (productChanged) void refreshProductPreview(next);
+                        }}
                         onPickFile={(onFile) => {
                           slotFileHandlerRef.current = onFile;
                           slotFileInputRef.current?.click();
