@@ -1116,7 +1116,13 @@ function OpenBookSpread({
             <div className="talisbooks-viewer-book__gutter" aria-hidden="true" />
 
             <div className="talisbooks-viewer-book__page talisbooks-viewer-book__page--right">
-              <BookPageFace page={rightPage} side="right" magazine={magazine} />
+              <BookPageFace
+                page={
+                  hideCoverLeafBack && current.right ? current.right : rightPage
+                }
+                side="right"
+                magazine={magazine}
+              />
             </div>
 
             {flipping ? (

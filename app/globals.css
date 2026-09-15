@@ -3477,11 +3477,13 @@ body.mapsite-gallery-open [data-paypal-button] {
 .talisbooks-viewer-page--fold-continuous.talisbooks-viewer-page--fold-left
   .talisbooks-viewer-page__bleed-hero {
   background-position: left center;
+  clip-path: inset(0);
 }
 
 .talisbooks-viewer-page--fold-continuous.talisbooks-viewer-page--fold-right
   .talisbooks-viewer-page__bleed-hero {
   background-position: right center;
+  clip-path: inset(0);
 }
 
 /* Optional intro write-up — framed quote page */
