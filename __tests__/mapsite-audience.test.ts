@@ -65,6 +65,11 @@ describe("Mapsite™ audience payment helpers", () => {
     expect(summary.priceLabel).toContain("998.50");
     expect(summary.planLabel).toBe("Root Account™");
     expect(summary.planLabel).not.toContain("$1");
+    const retired = mapsiteClaimPlanSummary("ROOT_ACCOUNT_1");
+    expect(retired.planType).toBe("ROOT_ACCOUNT");
+    expect(retired.price).toBe(998.5);
+    expect(retired.planLabel).toBe("Root Account™");
+    expect(retired.planLabel).not.toContain("$1");
   });
 
   it("routes FSBO claimed Mapsites™ to the fsbos segment", () => {

@@ -5,6 +5,7 @@ import type {
 import { REGISTRATION_MARKET_COPY } from "@/lib/registration-market";
 import {
   type PlanType,
+  checkoutPlanTypeForActivation,
   planSummaryFor,
   planTypeForClaimAccountType,
 } from "@/lib/registration-plans";
@@ -58,6 +59,7 @@ export function rootAccountPlanSummary(): {
   };
 }
 
+/** Activate-card pricing. Retired $1 ROOT_ACCOUNT_1 displays as full Root. */
 export function mapsiteClaimPlanSummary(planType: PlanType = "ROOT_ACCOUNT"): {
   planLabel: string;
   priceLabel: string;
@@ -68,10 +70,11 @@ export function mapsiteClaimPlanSummary(planType: PlanType = "ROOT_ACCOUNT"): {
   tax: number;
   total: number;
 } {
-  const summary = planSummaryFor(planType);
+  const checkoutPlan = checkoutPlanTypeForActivation(planType);
+  const summary = planSummaryFor(checkoutPlan);
   return {
     ...summary,
-    planType,
+    planType: checkoutPlan,
   };
 }
 

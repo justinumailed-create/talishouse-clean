@@ -26,6 +26,7 @@ import {
   accountTypeForAudience,
   type MapSiteCapabilityAccountType,
 } from "@/lib/talispros/account-capabilities";
+import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
 import {
   isClaimable,
   MAPSITE_APP_PATH,
@@ -118,6 +119,11 @@ export default function MapSiteApplication({
   const focusingRef = useRef(false);
   const focusTimerRef = useRef<number | null>(null);
 
+  const pinLabel = mapsitePublicPinLabel({
+    propertyTitle: mapsite.property_title,
+    address: mapsite.property_address,
+    fallback: mapsite.fast_code?.trim().toUpperCase() || "Location",
+  });
   const phase = pinPhaseLabel(mapsite.status);
   const pinColor = PIN_COLORS[phase] ?? PIN_COLORS.UNCLAIMED;
 
@@ -128,7 +134,7 @@ export default function MapSiteApplication({
         latitude: mapsite.lat,
         longitude: mapsite.lng,
         color: mapsite.pin_color || pinColor,
-        label: mapsite.property_title || undefined,
+        label: pinLabel,
         featured: true,
         metadata: {
           status: mapsite.status,
@@ -141,7 +147,7 @@ export default function MapSiteApplication({
         },
       },
     ],
-    [mapsite, pinColor, phase]
+    [mapsite, pinColor, phase, pinLabel]
   );
 
   const viewport = useMemo(

@@ -64,7 +64,7 @@ export default async function MapSiteFullscreenMapPage({
       pins={layout.pins}
       mapCenter={layout.mapCenter}
       mapZoom={layout.mapZoom}
-      propertyTitle={layout.propertyTitle}
+      pinLabel={layout.pinLabel}
       fastCode={code}
       variant="window"
       backHref={`/mapsite/${encodeURIComponent(code)}`}

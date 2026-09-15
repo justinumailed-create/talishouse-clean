@@ -35,7 +35,7 @@ export default function MapSiteLayout({
             pins={data.pins}
             mapCenter={data.mapCenter}
             mapZoom={data.mapZoom}
-            propertyTitle={data.propertyTitle}
+            pinLabel={data.pinLabel}
             fastCode={data.fastCode}
           />
           <MapSiteBottomPanels
