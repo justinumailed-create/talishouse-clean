@@ -19,6 +19,14 @@ import {
 export const MAPSITE_HEADER_FALLBACK_LOGO =
   "/images/mapsites/header-fallback-logo.jpeg";
 
+/**
+ * Shared published Mapsite™ chrome at `/mapsite/{fastCode}`.
+ * Every FAST Code uses the RM22 creative shell (TEB/TTV + Create New).
+ * Activation, Express Interest, and payment cards stay on the claimed
+ * `/talispros/mapsite/{accountType}/{fastCode}` route — not here.
+ */
+export const PUBLISHED_MAPSITE_SHELL = "rm22-creative" as const;
+
 export interface MapSiteAgentData {
   name: string;
   firstName: string;

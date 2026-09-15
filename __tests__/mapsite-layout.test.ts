@@ -5,6 +5,7 @@ import {
   mapsiteCreateEbookHref,
   mapsiteCreateVideoHref,
   mapsiteFullscreenMapHref,
+  PUBLISHED_MAPSITE_SHELL,
 } from "../lib/mapsite-layout";
 import type { MapSiteView } from "../lib/mapsite-service";
 import { toMapEnginePin } from "../lib/talismaps/map-engine";
@@ -151,7 +152,7 @@ describe("buildMapSiteLayoutData", () => {
     expect(layout.summary.price).toBe("$129,000");
   });
 
-  it("builds TEB™, TTV™, and TV Schedule hrefs for the paid creative column", () => {
+  it("builds TEB™, TTV™, and TV Schedule hrefs for the published creative column", () => {
     const layout = buildMapSiteLayoutData(baseMapSite);
 
     expect(layout.tebHref).toBe("/talisbooks/fast/ar01");
@@ -178,6 +179,10 @@ describe("buildMapSiteLayoutData", () => {
     });
     expect(custom.tebHref).toBe("/talisbooks/fast/ar01");
     expect(custom.ttvHref).toBe("https://tv.example.com/studio");
+  });
+
+  it("uses one shared RM22 creative shell for every published FAST Code", () => {
+    expect(PUBLISHED_MAPSITE_SHELL).toBe("rm22-creative");
   });
 
   it("builds Create New destinations for e-books, content, and video", () => {

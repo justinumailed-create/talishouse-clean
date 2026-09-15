@@ -14,8 +14,6 @@ import {
   mergeMapSiteWithSubmittedLocation,
   type MapSitePlatformRecord,
 } from "@/lib/talispros/mapsite-platform";
-import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
-import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 
 function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
   const code = (record.fast_code || "").trim();
@@ -210,15 +208,14 @@ export async function publishedMapSiteMetadata(mapsite: MapSiteView) {
   });
 }
 
-/** Published /mapsite/[slug] — TEB™, TTV™, Create New, and full-screen map window. */
+/** Published /mapsite/[slug] — shared RM22 shell: TEB™, TTV™, Create New, map window. */
 export default async function PublishedMapSiteView({
   mapsite,
 }: {
   mapsite: MapSiteView;
 }) {
   const layoutData = buildMapSiteLayoutData(mapsite);
-  const [visitorStatus, editAccess, buildRequestLink, paymentReceived] =
-    await Promise.all([
+  const [visitorStatus, editAccess, buildRequestLink] = await Promise.all([
     getMapSiteVisitorAccountStatus(),
     getMapSiteEditToolbarState(mapsite.fastCode),
     getSupabaseAdmin()
@@ -230,17 +227,6 @@ export default async function PublishedMapSiteView({
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
-    isDemoMapSiteCode(mapsite.fastCode)
-      ? Promise.resolve(true)
-      : hasCompletedMapSiteActivationPayment({
-          mapsiteId: mapsite.id,
-          fastCode: mapsite.fastCode,
-          requestId: mapsite.requestId,
-          email: mapsite.email,
-          reconcileFromStripe:
-            (mapsite.status || "").toLowerCase() !== "unclaimed" &&
-            (mapsite.status || "").toLowerCase() !== "draft",
-        }),
   ]);
 
   return (
@@ -250,7 +236,6 @@ export default async function PublishedMapSiteView({
       visitorFastCode={visitorStatus.fastCode}
       editAccess={editAccess}
       buildRequestId={buildRequestLink.data?.id}
-      paymentReceived={paymentReceived}
     />
   );
 }
