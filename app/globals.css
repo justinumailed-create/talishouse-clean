@@ -1189,6 +1189,22 @@ body.mapsite-gallery-open [data-paypal-button] {
   flex-wrap: wrap;
 }
 
+.talisbooks-viewer__header-actions--matched {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(8.75rem, 1fr));
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+.talisbooks-viewer__header-actions--matched .talisbooks-viewer__back {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: 2.5rem;
+  height: 100%;
+  white-space: nowrap;
+}
+
 .talisbooks-viewer__layout {
   display: grid;
   gap: 0.85rem;
@@ -3951,6 +3967,15 @@ body.mapsite-gallery-open [data-paypal-button] {
     width: 100%;
   }
 
+  .talisbooks-viewer__header-actions--matched {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .talisbooks-viewer__header-actions--matched .talisbooks-viewer__back {
+    white-space: nowrap;
+  }
+
   .talisbooks-viewer__title {
     font-size: 1.05rem;
     line-height: 1.2;
@@ -4069,6 +4094,14 @@ body.mapsite-gallery-open [data-paypal-button] {
     padding: 0.2rem 0.7rem;
     border-radius: 0.65rem;
     font-size: 0.68rem;
+  }
+
+  .talisbooks-viewer__header-actions--matched {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .talisbooks-viewer__header-actions--matched .talisbooks-viewer__back {
+    min-height: 1.85rem;
   }
 
   .talisbooks-viewer__layout {

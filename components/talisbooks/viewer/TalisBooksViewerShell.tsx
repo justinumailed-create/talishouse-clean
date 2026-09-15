@@ -11,6 +11,7 @@ import TalisBooksViewerLiveEditor from "@/components/talisbooks/viewer/TalisBook
 import TalisBooksViewerStage, {
   type TalisBooksViewerBinding,
 } from "@/components/talisbooks/viewer/TalisBooksViewerStage";
+import { ROUTES } from "@/lib/routes";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
@@ -412,7 +413,7 @@ export default function TalisBooksViewerShell({
         })
       : MAPSITE_APP_PATH;
   const backLinkLabel = isPinnedShowcase
-    ? "Build Demo eBook and Mapsite™"
+    ? "Demo Mapsite™"
     : "Back to Mapsite™";
 
   return (
@@ -436,7 +437,12 @@ export default function TalisBooksViewerShell({
             <p className="talisbooks-viewer__subtitle">{book.subtitle}</p>
           ) : null}
         </div>
-        <div className="talisbooks-viewer__header-actions">
+        <div
+          className={[
+            "talisbooks-viewer__header-actions",
+            isPinnedShowcase ? "talisbooks-viewer__header-actions--matched" : "",
+          ].join(" ")}
+        >
           {book.pdfDownloadUrl ? (
             <a
               href={book.pdfDownloadUrl}
@@ -449,7 +455,12 @@ export default function TalisBooksViewerShell({
           <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
             {backLinkLabel}
           </Link>
-          {showDashboard ? (
+          {isPinnedShowcase ? (
+            <Link href={ROUTES.ADMIN_DASHBOARD} className="talisbooks-viewer__back">
+              Global Admin
+            </Link>
+          ) : null}
+          {!isPinnedShowcase && showDashboard ? (
             <Link href={TALISBOOKS_ROUTES.DASHBOARD} className="talisbooks-viewer__back">
               Dashboard
             </Link>
