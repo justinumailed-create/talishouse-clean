@@ -218,15 +218,17 @@ export default async function PublishedMapSiteView({
   const [visitorStatus, editAccess, buildRequestLink] = await Promise.all([
     getMapSiteVisitorAccountStatus(),
     getMapSiteEditToolbarState(mapsite.fastCode),
-    getSupabaseAdmin()
-      .from("build_requests")
-      .select("id")
-      .or(
-        `linked_mapsite_id.eq.${mapsite.id},requested_fast_code.eq.${mapsite.fastCode}`
-      )
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+    isSupabaseAdminConfigured()
+      ? getSupabaseAdmin()
+          .from("build_requests")
+          .select("id")
+          .or(
+            `linked_mapsite_id.eq.${mapsite.id},requested_fast_code.eq.${mapsite.fastCode}`
+          )
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
 
   return (
