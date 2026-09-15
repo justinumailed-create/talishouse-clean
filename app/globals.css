@@ -2302,7 +2302,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   bottom: 0;
   left: 0;
   width: 50%;
-  z-index: 5;
+  z-index: 7;
   pointer-events: none;
   background: #efeae2;
 }
@@ -3668,10 +3668,14 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-viewer-page--spread-left .talisbooks-viewer-page__spread-image {
   left: 0;
+  /* Clip this element (not a 3D parent) so the unused half cannot paint
+     into the facing leaf — overflow:hidden is skipped inside preserve-3d. */
+  clip-path: inset(0 50% 0 0);
 }
 
 .talisbooks-viewer-page--spread-right .talisbooks-viewer-page__spread-image {
   left: -100%;
+  clip-path: inset(0 0 0 50%);
 }
 
 .talisbooks-viewer-page__spread-caption {
