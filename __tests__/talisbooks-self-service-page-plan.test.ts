@@ -9,12 +9,16 @@ import {
   isSelfServiceSpreadCandidate,
   parseSelfServiceBookOptions,
   parseSelfServiceCaptions,
+  selectLandscapesFittingLeaves,
+  selectLandscapesForImageCap,
   selfServicePageCount,
   SELF_SERVICE_ABSOLUTE_MAX_PAGES,
   SELF_SERVICE_BOTH_CONTENT_TOTAL_PAGES,
   SELF_SERVICE_DEFAULT_TOTAL_PAGES,
   SELF_SERVICE_LOT_PAGE,
+  SELF_SERVICE_MAX_INTERIOR_IMAGES,
   SELF_SERVICE_MAX_UPLOAD_IMAGES,
+  SELF_SERVICE_PROTECTED_ENDING_SPREADS,
   validateExplicitCoverAssets,
   type SelfServiceBookOptions,
 } from "@/lib/talisbooks/self-service-page-plan";
@@ -56,6 +60,7 @@ function options(
     advertising: false,
     globalContent: false,
     customContent: false,
+    protectEndingSpreads: 0,
     ...partial,
   };
 }
@@ -335,7 +340,7 @@ describe("self-service ebook page plan (facing spreads)", () => {
     const rows = buildSelfServiceEbookPageRows({
       ...baseInput,
       landscapes: interiors,
-      options: options(),
+      options: options({ protectEndingSpreads: 2 }),
     });
     expect(rows.length).toBeGreaterThan(SELF_SERVICE_DEFAULT_TOTAL_PAGES);
     expect(rows.length).toBeLessThanOrEqual(SELF_SERVICE_ABSOLUTE_MAX_PAGES);
@@ -355,11 +360,64 @@ describe("self-service ebook page plan (facing spreads)", () => {
     expect(rows.find((r) => r.page_number === 22)?.content.layout).toBe("cover");
   });
 
+  it("never drops Intrinsic + Parting Shot when the page budget would overflow", () => {
+    const interiors = Array.from({ length: 16 }, (_, i) => landscape(i + 1));
+    const intrinsic = interiors[14]!;
+    const outro = interiors[15]!;
+    expect(SELF_SERVICE_PROTECTED_ENDING_SPREADS).toBe(2);
+
+    const uncappedLeaves = 16 * 2 + 2;
+    expect(uncappedLeaves).toBeGreaterThan(SELF_SERVICE_ABSOLUTE_MAX_PAGES);
+
+    const selected = selectLandscapesFittingLeaves(
+      interiors,
+      SELF_SERVICE_ABSOLUTE_MAX_PAGES - 2,
+      true,
+      2,
+    );
+    expect(selected.at(-2)?.url).toBe(intrinsic.url);
+    expect(selected.at(-1)?.url).toBe(outro.url);
+    expect(selected[0]?.url).toBe(interiors[0]?.url);
+
+    const overCap = Array.from({ length: 20 }, (_, i) => landscape(i + 1));
+    const capped = selectLandscapesForImageCap(
+      overCap,
+      SELF_SERVICE_MAX_INTERIOR_IMAGES,
+      2,
+    );
+    expect(capped).toHaveLength(SELF_SERVICE_MAX_INTERIOR_IMAGES);
+    expect(capped.at(-2)?.url).toBe(overCap[18]?.url);
+    expect(capped.at(-1)?.url).toBe(overCap[19]?.url);
+
+    const rows = buildSelfServiceEbookPageRows({
+      ...baseInput,
+      landscapes: interiors,
+      options: options({ protectEndingSpreads: 2 }),
+    });
+    const back = rows[rows.length - 1];
+    expect(back?.content.layout).toBe("cover");
+    const lastSpreadRight = rows[rows.length - 2];
+    const lastSpreadLeft = rows[rows.length - 3];
+    const intrinsicRight = rows[rows.length - 4];
+    const intrinsicLeft = rows[rows.length - 5];
+    expect(lastSpreadLeft?.content.spreadImageUrl).toBe(outro.url);
+    expect(lastSpreadRight?.content.spreadImageUrl).toBe(outro.url);
+    expect(intrinsicLeft?.content.spreadImageUrl).toBe(intrinsic.url);
+    expect(intrinsicRight?.content.spreadImageUrl).toBe(intrinsic.url);
+    expect(rows.find((r) => r.page_number === 2)?.content.spreadImageUrl).toBe(
+      interiors[0]?.url,
+    );
+  });
+
   it("parses book options and captions from JSON", () => {
     expect(parseSelfServiceBookOptions("")).toMatchObject({
       facingPages: true,
       captions: false,
+      protectEndingSpreads: 0,
     });
+    expect(
+      parseSelfServiceBookOptions(JSON.stringify({ protectEndingSpreads: 2 })),
+    ).toMatchObject({ protectEndingSpreads: 2 });
     expect(
       parseSelfServiceCaptions(
         JSON.stringify([{ text: "Hi", skipped: false }, { skipped: true }]),

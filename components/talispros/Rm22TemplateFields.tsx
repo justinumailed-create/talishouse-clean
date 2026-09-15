@@ -59,7 +59,7 @@ export default function Rm22TemplateFields({
 
   return (
     <div className="mt-5 space-y-3">
-      <FieldBox label="Page 2 product sheet — pick exactly one">
+      <FieldBox label="First interior — pick exactly one product sheet">
         <div
           role="radiogroup"
           aria-label="Product sheet"
@@ -116,12 +116,14 @@ export default function Rm22TemplateFields({
           disabled={disabled}
           value={slots.frontSubtitle}
           onChange={(event) => patch({ frontSubtitle: event.target.value })}
+          placeholder="Address or primary attribute"
           className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.frontPriceLine}
           onChange={(event) => patch({ frontPriceLine: event.target.value })}
+          placeholder="Price line"
           className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
         />
         <input
@@ -209,7 +211,7 @@ export default function Rm22TemplateFields({
         </FieldBox>
       ))}
 
-      <FieldBox label="Intrinsic Value — left image, right copy">
+      <FieldBox label="Intrinsic Value — second-to-last interior (portrait left, copy right)">
         <AddButton
           disabled={disabled}
           hasFile={Boolean(slots.intrinsicImage)}
@@ -244,7 +246,7 @@ export default function Rm22TemplateFields({
         />
       </FieldBox>
 
-      <FieldBox label="Outro — image, title, and caption">
+      <FieldBox label="The Parting Shot…! — last interior before the back cover">
         <AddButton
           disabled={disabled}
           hasFile={Boolean(slots.outroImage)}

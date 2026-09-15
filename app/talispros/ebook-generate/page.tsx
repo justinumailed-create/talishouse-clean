@@ -87,6 +87,8 @@ export default async function EbookGeneratePage({
       initialAgentPhone={context.owner.phone}
       pinLatitude={context.pin.latitude}
       pinLongitude={context.pin.longitude}
+      initialPropertyAddress={context.listing.address}
+      initialPriceLine={context.listing.price}
     />
   );
 }

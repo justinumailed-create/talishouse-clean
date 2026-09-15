@@ -26,6 +26,7 @@ describe("self-service ebook generate copy", () => {
     expect(EBOOK_GENERATE_TEMPLATE_HELP).toContain("T-Dome");
     expect(EBOOK_GENERATE_TEMPLATE_HELP).toContain("G-House");
     expect(EBOOK_GENERATE_TEMPLATE_HELP).toContain("T-House");
+    expect(EBOOK_GENERATE_TEMPLATE_HELP).toContain("Parting Shot");
     expect(EBOOK_GENERATE_TEMPLATE_PDF_HREF).toBe(
       "/talisbooks/templates/rm22/RM22-Project.pdf",
     );
