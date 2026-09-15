@@ -2290,6 +2290,17 @@ body.mapsite-gallery-open [data-paypal-button] {
   clip-path: inset(0 0 0 50%);
 }
 
+.talisbooks-viewer-book__open-mask {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  z-index: 12;
+  pointer-events: none;
+  background: #e4ddd3;
+}
+
 .talisbooks-viewer--magazine .talisbooks-viewer-book__leaf-face {
   box-shadow:
     0 14px 32px rgba(28, 25, 23, 0.2),

@@ -1128,10 +1128,13 @@ function OpenBookSpread({
                 key={`${flip!.from}-${flip!.to}-${flip!.direction}-${flip!.mode}`}
                 direction={flip!.direction}
                 front={flipFront}
-                back={flipBack}
+                back={clipRightHalf ? null : flipBack}
                 progress={flipProgress}
                 magazine={magazine}
               />
+            ) : null}
+            {clipRightHalf ? (
+              <span className="talisbooks-viewer-book__open-mask" aria-hidden="true" />
             ) : null}
           </div>
         </div>
