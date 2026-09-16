@@ -2483,6 +2483,19 @@ body.mapsite-gallery-open [data-paypal-button] {
   background: #f5f5f4;
 }
 
+.talisbooks-viewer-live-edit__add-page:disabled,
+.talisbooks-viewer-live-edit--page-insert-locked .talisbooks-viewer-live-edit__add-page {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(1);
+  pointer-events: none;
+}
+
+.talisbooks-viewer-live-edit__add-page:disabled:hover,
+.talisbooks-viewer-live-edit--page-insert-locked .talisbooks-viewer-live-edit__add-page:hover {
+  background: #fafaf9;
+}
+
 .talisbooks-viewer-live-edit__empty-wrap {
   display: flex;
   flex-direction: column;

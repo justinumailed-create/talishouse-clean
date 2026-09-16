@@ -6,6 +6,7 @@ import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import { isMarketingManagerAuthenticated } from "@/lib/marketing-manager-auth";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
+import { isDemonstrationCatalogBook } from "@/lib/talisbooks/library/demonstration-catalog";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { createMetadata } from "@/lib/seo";
 
@@ -68,21 +69,24 @@ export default async function TalisBooksViewerSlugPage({
     : { isAdmin: false, isOwner: false, showToolbar: false };
 
   const isAdmin = isMarketingAdmin || editState.isAdmin;
-  const canEditTools = isAdmin || editState.showToolbar;
+  const isDemoBook = isDemonstrationCatalogBook(book);
+  const canEditTools = isAdmin || (!isDemoBook && editState.showToolbar);
 
   const paymentReceived = book.fastCode
     ? await hasCompletedMapSiteActivationPayment({ fastCode: book.fastCode })
     : false;
 
   // Dashboard + Live Edit only after payment (Marketing Admin bypass).
-  const showDashboard = isAdmin || paymentReceived;
-  const canLiveEdit = isAdmin || (paymentReceived && canEditTools);
+  // Demonstration books never unlock insert-pages for visitors.
+  const showDashboard = isAdmin || (!isDemoBook && paymentReceived);
+  const canLiveEdit = isAdmin || (!isDemoBook && paymentReceived && canEditTools);
 
   return (
     <TalisBooksViewerShell
       book={book}
       canEditTools={canEditTools}
       canLiveEdit={canLiveEdit}
+      pageInsertLocked={isDemoBook}
       showDashboard={showDashboard}
     />
   );

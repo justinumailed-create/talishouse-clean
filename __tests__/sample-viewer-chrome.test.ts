@@ -23,8 +23,16 @@ describe("sample Talisbooks™ viewer chrome", () => {
     expect(shell).toContain("ROUTES.ADMIN_DASHBOARD");
   });
 
-  it("sizes the sample toolbar as a matched three-button set", () => {
-    expect(shell).toContain("talisbooks-viewer__header-actions--matched");
+  it("greys out insert-page Live Edit on demonstration books", () => {
+    expect(shell).toContain("pageInsertLocked");
+    const liveEditor = readSource(
+      "components/talisbooks/viewer/TalisBooksViewerLiveEditor.tsx",
+    );
+    expect(liveEditor).toContain("pageInsertLocked");
+    expect(liveEditor).toContain("talisbooks-viewer-live-edit--page-insert-locked");
+    const viewerPage = readSource("app/talisbooks/viewer/[slug]/page.tsx");
+    expect(viewerPage).toContain("isDemonstrationCatalogBook");
+    expect(viewerPage).toContain("pageInsertLocked={isDemoBook}");
   });
 
   it("opens ebook icons in the same tab", () => {

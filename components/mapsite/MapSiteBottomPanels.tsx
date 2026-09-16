@@ -1,6 +1,7 @@
 import MapSiteCreateNewPanel from "./MapSiteCreateNewPanel";
 import MapSiteCreativeLinks from "./MapSiteCreativeLinks";
 import { PUBLISHED_MAPSITE_SHELL } from "@/lib/mapsite-layout";
+import { shouldLockDemoPageInsert } from "@/lib/talispros/demo-mapsite";
 
 interface MapSiteBottomPanelsProps {
   fastCode: string;
@@ -26,6 +27,8 @@ export default function MapSiteBottomPanels({
   brokerageLogoUrl,
   brokerageWebsite,
 }: MapSiteBottomPanelsProps) {
+  const pageInsertLocked = shouldLockDemoPageInsert(fastCode);
+
   return (
     <section
       className="border-t border-neutral-200/80"
@@ -48,6 +51,7 @@ export default function MapSiteBottomPanels({
           <MapSiteCreateNewPanel
             fastCode={fastCode}
             buildRequestId={buildRequestId}
+            pageInsertLocked={pageInsertLocked}
           />
         </div>
       </div>

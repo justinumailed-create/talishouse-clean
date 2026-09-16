@@ -1,5 +1,6 @@
 import type { MapSiteLayoutData } from "@/lib/mapsite-layout";
 import type { MapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
+import { shouldLockDemoPageInsert } from "@/lib/talispros/demo-mapsite";
 import MapSiteTopBar from "./MapSiteTopBar";
 import MapSiteTalisMaps from "./MapSiteTalisMaps";
 import MapSiteBottomPanels from "./MapSiteBottomPanels";
@@ -21,6 +22,8 @@ export default function MapSiteLayout({
   editAccess,
   buildRequestId,
 }: MapSiteLayoutProps) {
+  const pageInsertLocked = shouldLockDemoPageInsert(data.fastCode);
+
   return (
     <div className="min-h-screen bg-neutral-200">
       <div className="mapsite-layout mx-auto flex min-h-screen w-full max-w-7xl flex-col border-x-0 border-neutral-300 bg-[#f8f8f7] pb-20 md:border-x-[50px] md:pb-0">
@@ -57,12 +60,14 @@ export default function MapSiteLayout({
           updatedAt={data.updatedAt}
         />
       </div>
-      <MapSiteEditToolbar
-        fastCode={data.fastCode}
-        editAccess={editAccess}
-        initialHasSubscribed={visitorHasSubscribed}
-        initialVisitorFastCode={visitorFastCode}
-      />
+      {pageInsertLocked ? null : (
+        <MapSiteEditToolbar
+          fastCode={data.fastCode}
+          editAccess={editAccess}
+          initialHasSubscribed={visitorHasSubscribed}
+          initialVisitorFastCode={visitorFastCode}
+        />
+      )}
     </div>
   );
 }

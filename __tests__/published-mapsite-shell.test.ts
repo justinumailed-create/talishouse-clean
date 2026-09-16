@@ -29,5 +29,18 @@ describe("published Mapsite™ shell", () => {
     const layout = repoSource("components/mapsite/MapSiteLayout.tsx");
     expect(layout).not.toMatch(/paymentReceived/);
     expect(layout).toContain("MapSiteBottomPanels");
+    expect(layout).toContain("shouldLockDemoPageInsert");
+  });
+
+  it("greys out the Create New insert-pages block on demonstration Mapsites™", () => {
+    const createNew = repoSource("components/mapsite/MapSiteCreateNewPanel.tsx");
+    expect(createNew).toContain("pageInsertLocked");
+    expect(createNew).toContain("data-demo-page-insert-locked");
+    expect(createNew).toContain("inert");
+
+    const bottomPanels = repoSource("components/mapsite/MapSiteBottomPanels.tsx");
+    expect(bottomPanels).toContain("shouldLockDemoPageInsert");
+    expect(bottomPanels).toContain("pageInsertLocked");
+    expect(bottomPanels).toContain("MapSiteCreativeLinks");
   });
 });

@@ -33,6 +33,19 @@ export function isDemoMapSiteCode(
   return !isIssuedFastCode(code);
 }
 
+/**
+ * Demonstration Mapsites™ keep TEB/TTV viewing, but Create New / insert-pages
+ * must stay greyed and non-interactive so visitors cannot add ebook pages.
+ */
+export function shouldLockDemoPageInsert(
+  fastCode: string | null | undefined,
+): boolean {
+  const code = fastCode?.trim().toLowerCase() || "";
+  if (!code) return false;
+  if (code === "demo") return true;
+  return isDemoMapSiteCode(code);
+}
+
 export function isProtectedPlatformDemoMapSite(id: string | null | undefined): boolean {
   return (id || "").trim() === DEMO_MAPSITE_ID;
 }

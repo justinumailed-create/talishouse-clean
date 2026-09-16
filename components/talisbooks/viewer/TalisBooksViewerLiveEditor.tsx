@@ -29,6 +29,8 @@ interface TalisBooksViewerLiveEditorProps {
   viewMode?: "spread" | "single";
   onUpdatePage: (pageId: string, patch: Partial<TalisBooksViewerPage>) => void;
   onAddPage?: (afterPageId: string | null) => void;
+  /** Demo / sample books: show Add page greyed out and non-interactive. */
+  pageInsertLocked?: boolean;
 }
 
 function Field({
@@ -316,22 +318,40 @@ export default function TalisBooksViewerLiveEditor({
   viewMode = "spread",
   onUpdatePage,
   onAddPage,
+  pageInsertLocked = false,
 }: TalisBooksViewerLiveEditorProps) {
   const hasPages = Boolean(leftPage || rightPage);
   const singleMode = viewMode === "single";
   const anchorPageId = (rightPage ?? leftPage)?.id ?? null;
+  const showAddPage = Boolean(onAddPage) || pageInsertLocked;
 
   return (
-    <aside className="talisbooks-viewer-live-edit" aria-label="Live page editing">
+    <aside
+      className={[
+        "talisbooks-viewer-live-edit",
+        pageInsertLocked ? "talisbooks-viewer-live-edit--page-insert-locked" : "",
+      ].join(" ")}
+      aria-label="Live page editing"
+    >
       <div className="talisbooks-viewer-live-edit__header">
         <p className="talisbooks-viewer-live-edit__eyebrow">Live edit</p>
         <h2 className="talisbooks-viewer-live-edit__title">Page editor</h2>
         <p className="talisbooks-viewer-live-edit__context">{bindingLabel}</p>
-        {onAddPage ? (
+        {pageInsertLocked ? (
+          <p className="talisbooks-viewer-live-edit__locked-note">
+            Demonstration only — inserting pages is locked.
+          </p>
+        ) : null}
+        {showAddPage ? (
           <button
             type="button"
             className="talisbooks-viewer-live-edit__add-page"
-            onClick={() => onAddPage(anchorPageId)}
+            disabled={pageInsertLocked}
+            aria-disabled={pageInsertLocked || undefined}
+            onClick={() => {
+              if (pageInsertLocked) return;
+              onAddPage?.(anchorPageId);
+            }}
           >
             <Plus className="h-3.5 w-3.5" aria-hidden="true" />
             Add page
@@ -345,11 +365,21 @@ export default function TalisBooksViewerLiveEditor({
             <p className="talisbooks-viewer-live-edit__empty">
               Open the book to edit the current {singleMode ? "page" : "spread"} live.
             </p>
-            {onAddPage ? (
+            {onAddPage && !pageInsertLocked ? (
               <button
                 type="button"
                 className="talisbooks-viewer-live-edit__add-page"
                 onClick={() => onAddPage(null)}
+              >
+                <Plus className="h-3.5 w-3.5" aria-hidden="true" />
+                Add first page
+              </button>
+            ) : pageInsertLocked ? (
+              <button
+                type="button"
+                className="talisbooks-viewer-live-edit__add-page"
+                disabled
+                aria-disabled="true"
               >
                 <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 Add first page
