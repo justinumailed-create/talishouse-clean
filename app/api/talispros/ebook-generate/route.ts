@@ -13,6 +13,11 @@ import {
   parseSelfServiceCaptions,
 } from "@/lib/talisbooks/self-service-page-plan";
 import { parseRm22TemplatePayload } from "@/lib/talisbooks/rm22-template";
+import { parseMapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
+import {
+  assertAllowedEbookUploadFile,
+  rejectDisallowedEbookFiles,
+} from "@/lib/talisbooks/ebook-upload-formats-server";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -76,6 +81,9 @@ export async function POST(request: Request) {
   const images = formData
     .getAll("images")
     .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+  const flagIdentity = parseMapsiteFlagIdentity(
+    String(formData.get("flagIdentity") || ""),
+  );
 
   logOnboardingStep("Ebook API accept", started, {
     requestId: requestId || null,
@@ -92,6 +100,29 @@ export async function POST(request: Request) {
       };
 
       try {
+        const disallowed = rejectDisallowedEbookFiles([
+          ...images,
+          ...(agentPhoto ? [agentPhoto] : []),
+          ...(brokerageLogo ? [brokerageLogo] : []),
+        ]);
+        if (disallowed) {
+          send({
+            stage: "failed",
+            requestId: requestId || null,
+            fastCode: null,
+            mapsiteId: null,
+            error: disallowed,
+            durationMs: onboardingNow() - started,
+            failedStage: "uploading_images",
+          });
+          return;
+        }
+        for (const file of images) {
+          await assertAllowedEbookUploadFile(file);
+        }
+        if (agentPhoto) await assertAllowedEbookUploadFile(agentPhoto);
+        if (brokerageLogo) await assertAllowedEbookUploadFile(brokerageLogo);
+
         const result = await runEbookGenerationPipeline({
           requestId,
           title,
@@ -107,6 +138,7 @@ export async function POST(request: Request) {
           images,
           optimizedImages,
           uploadMode,
+          flagIdentity,
           frontCover: parseCoverImageJson(String(formData.get("frontCover") || "")),
           backCover: parseCoverImageJson(String(formData.get("backCover") || "")),
           bookOptions: parseSelfServiceBookOptions(

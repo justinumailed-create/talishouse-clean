@@ -17,6 +17,8 @@ import {
 } from "@/lib/talisbooks/self-service-page-plan";
 import type { Rm22TemplatePayload } from "@/lib/talisbooks/rm22-template";
 import type { EbookGenerationProgressEvent } from "@/lib/talispros/ebook-generation-stages";
+import type { MapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
+import { rejectDisallowedEbookFiles } from "@/lib/talisbooks/ebook-upload-formats-server";
 
 export type {
   EbookGenerationProgressEvent,
@@ -49,6 +51,7 @@ export type RunEbookGenerationInput = {
   frontCover?: OptimizedEbookImageAsset | null;
   backCover?: OptimizedEbookImageAsset | null;
   rm22Template?: Rm22TemplatePayload | null;
+  flagIdentity?: MapsiteFlagIdentity;
   onProgress?: (event: EbookGenerationProgressEvent) => void | Promise<void>;
   /** Override job timeout (ms). Defaults to ONBOARDING_JOB_TIMEOUT_MS. */
   timeoutMs?: number;
@@ -127,6 +130,14 @@ export async function runEbookGenerationPipeline(
           (item) => item.url && item.width > 0 && item.height > 0,
         );
         const rawImages = input.images || [];
+        const disallowed = rejectDisallowedEbookFiles([
+          ...rawImages,
+          ...(input.agentPhoto ? [input.agentPhoto] : []),
+          ...(input.brokerageLogo ? [input.brokerageLogo] : []),
+        ]);
+        if (disallowed) {
+          return fail("uploading_images", disallowed);
+        }
 
         if (!optimizedImages.length && !rawImages.length && !input.rm22Template) {
           return fail(
@@ -178,6 +189,7 @@ export async function runEbookGenerationPipeline(
           frontCover: input.frontCover,
           backCover: input.backCover,
           rm22Template: input.rm22Template,
+          flagIdentity: input.flagIdentity,
         });
         logOnboardingStep("Book generation", generateStarted, {
           requestId,

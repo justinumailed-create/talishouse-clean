@@ -14,6 +14,8 @@ import {
   parseSelfServiceBookOptions,
   parseSelfServiceCaptions,
 } from "@/lib/talisbooks/self-service-page-plan";
+import { parseMapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
+import { rejectDisallowedEbookFiles } from "@/lib/talisbooks/ebook-upload-formats-server";
 
 /**
  * Self-service ebook generation.
@@ -47,6 +49,22 @@ export async function generateSelfServiceEbookAction(
   const images = formData
     .getAll("images")
     .filter((entry): entry is File => entry instanceof File && entry.size > 0);
+  const disallowed = rejectDisallowedEbookFiles([
+    ...images,
+    ...(agentPhoto ? [agentPhoto] : []),
+    ...(brokerageLogo ? [brokerageLogo] : []),
+  ]);
+  if (disallowed) {
+    return {
+      success: false,
+      error: disallowed,
+      requestId,
+      fastCode: null,
+      mapsiteId: null,
+      stage: "uploading_images",
+      durationMs: onboardingNow() - actionStarted,
+    };
+  }
 
   const result = await runEbookGenerationPipeline({
     requestId,
@@ -60,6 +78,9 @@ export async function generateSelfServiceEbookAction(
     agentPhoto,
     images,
     uploadMode,
+    flagIdentity: parseMapsiteFlagIdentity(
+      String(formData.get("flagIdentity") || ""),
+    ),
     frontCover: parseCoverImageJson(String(formData.get("frontCover") || "")),
     backCover: parseCoverImageJson(String(formData.get("backCover") || "")),
     bookOptions: parseSelfServiceBookOptions(

@@ -3,6 +3,12 @@
  * Each PDF page becomes one image File so the existing viewer pipeline stays unchanged.
  */
 
+import {
+  EBOOK_UPLOAD_UNSUPPORTED_MESSAGE,
+  isAllowedEbookImageUpload,
+  isAllowedEbookPdfUpload,
+} from "@/lib/talisbooks/ebook-upload-formats";
+
 const MAX_PAGES = 22;
 const PDF_LOAD_TIMEOUT_MS = 20_000;
 const PDF_PAGE_RENDER_TIMEOUT_MS = 20_000;
@@ -29,17 +35,11 @@ function withTimeout<T>(
 }
 
 function isPdfFile(file: File): boolean {
-  const name = file.name.toLowerCase();
-  return (
-    file.type === "application/pdf" ||
-    file.type === "application/x-pdf" ||
-    name.endsWith(".pdf")
-  );
+  return isAllowedEbookPdfUpload(file);
 }
 
 function isImageFile(file: File): boolean {
-  if (file.type.startsWith("image/")) return true;
-  return /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name);
+  return isAllowedEbookImageUpload(file);
 }
 
 export function classifyUploadFile(file: File): "image" | "pdf" | "other" {
@@ -272,7 +272,7 @@ export async function assignBookAssetsFromUploads(
 
   const kinds = incoming.map((file) => ({ file, kind: classifyUploadFile(file) }));
   if (kinds.some((item) => item.kind === "other")) {
-    throw new Error("Unsupported file. Use JPG, PNG, WEBP, HEIC, or PDF.");
+    throw new Error(EBOOK_UPLOAD_UNSUPPORTED_MESSAGE);
   }
 
   const pdfs = kinds.filter((item) => item.kind === "pdf").map((item) => item.file);

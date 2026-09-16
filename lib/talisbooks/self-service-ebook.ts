@@ -9,6 +9,7 @@ import type {
   SelfServicePageCaption,
 } from "@/lib/talisbooks/self-service-page-plan";
 import type { Rm22TemplatePayload } from "@/lib/talisbooks/rm22-template";
+import type { MapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
 
 export type GenerateSelfServiceEbookInput = {
   fastCode: string;
@@ -36,6 +37,7 @@ export type GenerateSelfServiceEbookInput = {
   frontCover?: OptimizedEbookImageAsset | null;
   backCover?: OptimizedEbookImageAsset | null;
   rm22Template?: Rm22TemplatePayload | null;
+  flagIdentity?: MapsiteFlagIdentity;
 };
 
 export type GenerateSelfServiceEbookResult =
@@ -82,6 +84,7 @@ export async function generateSelfServiceEbook(
       frontCover: input.frontCover,
       backCover: input.backCover,
       rm22Template: input.rm22Template,
+      flagIdentity: input.flagIdentity,
     });
 
     if (!result.success) {

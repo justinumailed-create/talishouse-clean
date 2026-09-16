@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
+import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
+import TalisprosProductRotator from "@/components/talispros/TalisprosProductRotator";
 import TalisprosStartSidebar from "@/components/talispros/TalisprosStartSidebar";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
@@ -30,15 +32,7 @@ export default function TalisprosStartPage() {
           <section className="px-4 pb-8 pt-3 sm:px-6">
             <div className="mx-auto w-full max-w-[1200px]">
               <div className="relative">
-                <Image
-                  src="/images/glasshouse/glasshouse.png"
-                  alt="Glasshouse™ cabin in the forest"
-                  width={1200}
-                  height={668}
-                  priority
-                  className="mx-auto block h-auto w-full max-w-full"
-                  sizes="(min-width: 1200px) 1200px, calc(100vw - 350px)"
-                />
+                <TalisprosProductRotator />
                 <div className="relative flex items-center bg-white px-3 py-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:bg-black/50 sm:px-5 sm:py-3">
                   <Link
                     href={PINNED_VIEWER_HREF}
@@ -52,11 +46,7 @@ export default function TalisprosStartPage() {
                       aria-hidden="true"
                     />
                   </Link>
-                  <div className="w-full px-14 text-center text-xs font-bold leading-snug tracking-[0.03em] text-neutral-900 sm:px-20 sm:text-sm sm:text-white">
-                    Seen here, a Glasshouse™ optimized for short-term rental purposes. A
-                    Mapsite™ of 50 miles around a centre point, or up to 100,000 people
-                    population base, is automatically included with every Account.*
-                  </div>
+                  <div className="w-full px-14" aria-hidden="true" />
                   <div className="absolute right-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-black ring-1 ring-white/35 sm:right-5 sm:flex sm:h-12 sm:w-12 sm:ring-white/70">
                     <Image
                       src="/logo.png"
@@ -68,9 +58,11 @@ export default function TalisprosStartPage() {
                   </div>
                 </div>
               </div>
-              <p className="pt-4 text-center text-sm font-medium text-neutral-900 sm:text-base">
-                * Some limitations apply. Please follow what best describes you to learn more.
-              </p>
+              <TalisprosLegalCopy
+                className="mx-auto max-w-[42rem] pt-4 text-center"
+                primaryClassName="text-sm font-medium leading-snug text-neutral-900 sm:text-base"
+                secondaryClassName="mt-2 text-sm font-medium text-neutral-900 sm:text-base"
+              />
             </div>
           </section>
         </div>

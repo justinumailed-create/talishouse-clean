@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
 import type { RegistrationMarket } from "@/lib/registration-market";
 
 interface MapSiteOnboardingEntryProps {
@@ -44,12 +45,11 @@ export default function MapSiteOnboardingEntry({
           </Link>
         </div>
 
-        <p className="mx-auto mt-5 max-w-xl text-center text-[0.8125rem] leading-relaxed text-neutral-700 sm:text-[0.9rem]">
-          Differentiate locally and develop a real estate adjacent marketing platform by using Mapsites™ to promote inventory in up to 10 categories with 100 pins and 1,000 views monthly, combined.*
-        </p>
-        <p className="mt-2 text-center text-xs leading-relaxed text-neutral-500 sm:text-sm">
-          * Some limitations apply.
-        </p>
+        <TalisprosLegalCopy
+          className="mx-auto mt-5 max-w-xl text-center"
+          primaryClassName="text-[0.8125rem] leading-relaxed text-neutral-700 sm:text-[0.9rem]"
+          secondaryClassName="mt-2 text-xs leading-relaxed text-neutral-500 sm:text-sm"
+        />
       </div>
     </div>
   );

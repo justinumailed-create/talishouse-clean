@@ -27,6 +27,7 @@ import {
   type MapSiteCapabilityAccountType,
 } from "@/lib/talispros/account-capabilities";
 import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
+import type { MapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
 import {
   isClaimable,
   MAPSITE_APP_PATH,
@@ -95,6 +96,10 @@ interface MapSiteApplicationProps {
   sourceAudience?: RegistrationMarket | null;
   /** Capability account type that drives permissions and UI visibility. */
   accountType?: MapSiteCapabilityAccountType;
+  /** Choose for Flag preference from the Talisbook™ (default Address). */
+  flagIdentity?: MapsiteFlagIdentity | null;
+  /** Agent/owner name used when Choose for Flag is Name. */
+  flagName?: string | null;
 }
 
 export default function MapSiteApplication({
@@ -113,6 +118,8 @@ export default function MapSiteApplication({
   onboardingMode = "self",
   sourceAudience = null,
   accountType,
+  flagIdentity = null,
+  flagName = null,
 }: MapSiteApplicationProps) {
   const [mapsite] = useState(initialMapSite);
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
@@ -123,6 +130,9 @@ export default function MapSiteApplication({
     propertyTitle: mapsite.property_title,
     address: mapsite.property_address,
     fallback: mapsite.fast_code?.trim().toUpperCase() || "Location",
+    agentName: flagName,
+    flagIdentity,
+    accountType,
   });
   const phase = pinPhaseLabel(mapsite.status);
   const pinColor = PIN_COLORS[phase] ?? PIN_COLORS.UNCLAIMED;
