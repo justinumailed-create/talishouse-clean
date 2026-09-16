@@ -8,6 +8,7 @@ import {
   demoMapSiteEbookHref,
   pathnameForRevalidate,
   publicDemoGenerateError,
+  shouldLockDemoPageInsert,
 } from "../lib/talispros/demo-mapsite";
 import { DEMO_MAPSITE_ID } from "../lib/talispros/mapsite-state";
 import { isIssuedFastCode } from "../lib/talispros/fast-code-shape";
@@ -20,6 +21,14 @@ describe("demo mapsite codes", () => {
     expect(isDemoMapSiteCode("demo")).toBe(false);
     expect(isDemoMapSiteCode("ar01")).toBe(false);
     expect(isIssuedFastCode(createDemoMapSiteCode())).toBe(false);
+  });
+
+  it("locks Create New / insert-pages on demonstration Mapsites™ only", () => {
+    expect(shouldLockDemoPageInsert("demo-ab12cd34")).toBe(true);
+    expect(shouldLockDemoPageInsert("DEMO")).toBe(true);
+    expect(shouldLockDemoPageInsert("rm22")).toBe(false);
+    expect(shouldLockDemoPageInsert("ar01")).toBe(false);
+    expect(shouldLockDemoPageInsert("")).toBe(false);
   });
 
   it("identifies the public demo Mapsite™ builder routes", () => {

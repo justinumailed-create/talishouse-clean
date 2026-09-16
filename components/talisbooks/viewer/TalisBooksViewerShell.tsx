@@ -40,6 +40,8 @@ interface TalisBooksViewerShellProps {
   canEditTools?: boolean;
   /** After payment (or admin): show Live Edit panel. */
   canLiveEdit?: boolean;
+  /** Demo / sample books: grey out insert-page controls. */
+  pageInsertLocked?: boolean;
   /** After payment (or admin): show Dashboard link. */
   showDashboard?: boolean;
   /** Reserved for future audio narration — unused in playback today. */
@@ -57,6 +59,7 @@ export default function TalisBooksViewerShell({
   book: initialBook,
   canEditTools = false,
   canLiveEdit = false,
+  pageInsertLocked = false,
   showDashboard = false,
   narration = null,
 }: TalisBooksViewerShellProps) {
@@ -313,6 +316,7 @@ export default function TalisBooksViewerShell({
   };
 
   const handleAddPage = (afterPageId: string | null) => {
+    if (pageInsertLocked) return;
     let insertAt = book.pages.length;
     if (afterPageId) {
       const found = book.pages.findIndex((page) => page.id === afterPageId);
@@ -512,7 +516,8 @@ export default function TalisBooksViewerShell({
                 bindingLabel={pageLabel}
                 viewMode={viewMode}
                 onUpdatePage={handleUpdatePage}
-                onAddPage={handleAddPage}
+                onAddPage={pageInsertLocked ? undefined : handleAddPage}
+                pageInsertLocked={pageInsertLocked}
               />
             ) : null}
           </aside>
