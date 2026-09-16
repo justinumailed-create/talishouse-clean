@@ -8,6 +8,7 @@ import { useCart } from "@/context/CartContext";
 import GatedLink from "./GatedLink";
 import { ROUTES } from "@/lib/routes";
 import { ShoppingCart } from "lucide-react";
+import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 
 export default function Header() {
   const pathname = usePathname();
@@ -19,7 +20,7 @@ export default function Header() {
     closeCart();
   };
 
-  if (pathname === "/partner-access") return null;
+  if (pathname === "/partner-access" || shouldHidePublicStorefrontChrome(pathname)) return null;
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-100">

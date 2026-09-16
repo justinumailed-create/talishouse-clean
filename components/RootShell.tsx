@@ -5,10 +5,13 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import TalisBotChat from "@/components/TalisBotChat";
+import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 
 export default function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const hideStorefrontChrome = shouldHidePublicStorefrontChrome(pathname);
   const isEmbed =
+    hideStorefrontChrome ||
     pathname === "/" ||
     pathname.startsWith("/fast-code") ||
     pathname.startsWith("/partner-access") ||
@@ -22,6 +25,7 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/mapsite") ||
     pathname.startsWith("/crm/");
   const hideTalisBot =
+    hideStorefrontChrome ||
     pathname === "/partner-access" ||
     pathname.startsWith("/talistv") ||
     /\/mapsite\/[^/]+\/map\/?$/.test(pathname);

@@ -5,11 +5,12 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import GatedLink from "./GatedLink";
 import { ROUTES } from "@/lib/routes";
+import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 
 export default function Footer() {
   const pathname = usePathname();
   
-  if (pathname === "/partner-access") return null;
+  if (pathname === "/partner-access" || shouldHidePublicStorefrontChrome(pathname)) return null;
 
   return (
     <footer className="w-full border-t border-gray-100 bg-white text-gray-700 mt-12">

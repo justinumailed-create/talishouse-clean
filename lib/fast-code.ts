@@ -14,27 +14,9 @@ const isBrowser = () => typeof window !== "undefined";
 
 export const normalizeFastCode = (code: string) => (code || "").trim().toUpperCase();
 
-const setCookie = (name: string, value: string, maxAgeSeconds: number) => {
-  if (!isBrowser()) return;
-
-  const secure = window.location.protocol === "https:" ? " Secure;" : "";
-  document.cookie = `${name}=${value}; path=/; max-age=${maxAgeSeconds}; SameSite=Lax;${secure}`;
-};
-
 const clearCookie = (name: string) => {
   if (!isBrowser()) return;
   document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax`;
-};
-
-const getCookie = (name: string): string | null => {
-  if (!isBrowser()) return null;
-
-  const cookie = document.cookie
-    .split(";")
-    .map((value) => value.trim())
-    .find((value) => value.startsWith(`${name}=`));
-
-  return cookie ? cookie.slice(name.length + 1) : null;
 };
 
 export const setFastCode = (code: string) => {
@@ -54,6 +36,11 @@ export const clearFastCode = () => {
   localStorage.removeItem("associateId");
 };
 
+/**
+ * Client companion to the httpOnly `admin_session` cookie (set only by
+ * `loginAdminWithFastCodeAction`). localStorage is used by Live Edit / gates
+ * and is never treated as Global Admin authentication on its own.
+ */
 export const setAdminSession = (code: string = ADMIN_FAST_CODE) => {
   if (!isBrowser()) return;
 
@@ -63,7 +50,6 @@ export const setAdminSession = (code: string = ADMIN_FAST_CODE) => {
   localStorage.setItem("fast_code", sessionCode);
   localStorage.setItem("role", "admin");
   localStorage.removeItem("associateId");
-  setCookie(ADMIN_SESSION_COOKIE, sessionCode, 60 * 60 * 24);
 };
 
 export const clearAdminSession = () => {
@@ -71,15 +57,14 @@ export const clearAdminSession = () => {
   clearCookie(ADMIN_SESSION_COOKIE);
 };
 
+/**
+ * Client-visible admin hint only. The httpOnly admin cookie cannot be read
+ * here — Global Admin rendering must use the server-confirmed session.
+ */
 export const hasAdminSession = (): boolean => {
-  const cookieValue = getCookie(ADMIN_SESSION_COOKIE);
-  const localFastCode = getFastCode();
-
-  if (!isAuthorizedAdminFastCode(cookieValue) || !isAuthorizedAdminFastCode(localFastCode)) {
-    return false;
-  }
-
-  return normalizeFastCode(cookieValue || "") === normalizeFastCode(localFastCode || "");
+  // httpOnly `admin_session` is not readable in the browser. Mapsite FAST
+  // codes in localStorage (including RM22) must never look like Global Admin.
+  return false;
 };
 
 export const isValidAdminFastCode = (code: string): boolean => {
