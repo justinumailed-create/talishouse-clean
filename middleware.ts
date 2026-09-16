@@ -1,33 +1,34 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { ADMIN_SESSION_COOKIE, getAdminAccountByFastCode } from "@/lib/admin-constants";
-import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
+import { ADMIN_SESSION_COOKIE } from "@/lib/admin-constants";
+import {
+  ADMIN_PATHNAME_HEADER,
+  TALISPROS_ADMIN_MARKER_COOKIE,
+  resolveAdminRequestGate,
+} from "@/lib/admin-request-gate";
+import { isAdminAppPath } from "@/lib/admin-paths";
 
 const PUBLIC_ROUTES = ["/business-office/apply"];
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
-  if (path.startsWith("/admin")) {
-    if (path === "/admin/login" || path.startsWith("/admin/login/")) {
-      return NextResponse.next();
+  if (isAdminAppPath(path)) {
+    const gate = resolveAdminRequestGate({
+      pathname: path,
+      adminSessionCookie: request.cookies.get(ADMIN_SESSION_COOKIE)?.value,
+      talisprosAdminMarker: request.cookies.get(TALISPROS_ADMIN_MARKER_COOKIE)?.value,
+    });
+
+    if (gate.action === "redirect") {
+      return NextResponse.redirect(new URL(gate.to, request.url));
     }
 
-    if (path.startsWith("/admin/talismaps")) {
-      return NextResponse.next();
-    }
-
-    const session = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
-    const account = getAdminAccountByFastCode(session);
-    if (!account) {
-      return NextResponse.redirect(new URL("/admin/login", request.url));
-    }
-
-    if (!accountCanAccessAdminPath(account, path)) {
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-    }
-
-    return NextResponse.next();
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set(ADMIN_PATHNAME_HEADER, path);
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
   }
 
   // Bypass auth completely for public routes

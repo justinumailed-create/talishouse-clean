@@ -1,27 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { redirect, usePathname, useRouter } from "next/navigation";
-import { useEffect, useSyncExternalStore, useState } from "react";
-import { clearAdminSession, getFastCode, hasAdminSession } from "@/lib/fast-code";
-import { getAdminAccountByFastCode } from "@/lib/admin-constants";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
+import { logoutAdminAction } from "@/app/admin/actions";
+import type { AdminAccount } from "@/lib/admin-constants";
+import { clearAdminSession } from "@/lib/fast-code";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
 import { getAdminNavItems, isAdminNavItemActive, type AdminNavItem } from "@/lib/admin-nav";
-
-function subscribeToAdminSession(onStoreChange: () => void) {
-  window.addEventListener("storage", onStoreChange);
-  return () => {
-    window.removeEventListener("storage", onStoreChange);
-  };
-}
-
-function getAdminSessionSnapshot() {
-  return hasAdminSession();
-}
-
-function getAdminSessionServerSnapshot() {
-  return false;
-}
+import {
+  isProtectedAdminPath,
+  isPublicAdminPath,
+  isStandaloneAdminPath,
+} from "@/lib/admin-paths";
 
 function AdminSidebar({
   isOpen,
@@ -38,10 +29,15 @@ function AdminSidebar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [, startTransition] = useTransition();
 
   const handleLogout = () => {
-    clearAdminSession();
-    router.replace("/admin/login");
+    startTransition(async () => {
+      await logoutAdminAction();
+      clearAdminSession();
+      router.replace("/admin/login");
+      router.refresh();
+    });
   };
 
   return (
@@ -63,7 +59,7 @@ function AdminSidebar({
       >
         <div className="p-6 border-b border-[#e5e5e5] flex items-center justify-between">
           <div>
-            <h1 className="text-base font-semibold tracking-tight">Talishouse</h1>
+            <h1 className="text-base font-semibold tracking-tight">Talispros™</h1>
             <p className="text-[10px] text-[#1E4ED8] font-bold uppercase tracking-widest mt-1">
               Admin Console
             </p>
@@ -115,7 +111,7 @@ function AdminSidebar({
                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
               />
             </svg>
-            Back to Site
+            Talispros™ home
           </Link>
           <button
             onClick={handleLogout}
@@ -137,50 +133,67 @@ function AdminSidebar({
   );
 }
 
-export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
-  const hasSession = useSyncExternalStore(
-    subscribeToAdminSession,
-    getAdminSessionSnapshot,
-    getAdminSessionServerSnapshot,
-  );
+function AdminGatePlaceholder() {
+  return <div className="min-h-screen bg-white" aria-hidden />;
+}
 
-  useEffect(() => {
-    setHydrated(true);
-  }, []);
+export default function AdminLayoutClient({
+  serverAccount,
+  children,
+}: {
+  serverAccount: AdminAccount | null;
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const currentPath = pathname.split("?")[0].trim();
-  const isLoginPage = currentPath === "/admin/login";
-  const isTalisMapsAdmin = currentPath.startsWith("/admin/talismaps");
-  const isStandaloneProductAdmin = isTalisMapsAdmin;
-  const isProtectedAdminRoute =
-    currentPath.startsWith("/admin") && !isLoginPage && !isStandaloneProductAdmin;
+  const isLoginPage = isPublicAdminPath(currentPath);
+  const isTalisMapsAdmin = isStandaloneAdminPath(currentPath);
+  const isProtectedAdminRoute = isProtectedAdminPath(currentPath) && !isTalisMapsAdmin;
+  const canAccessCurrentPath =
+    !!serverAccount && accountCanAccessAdminPath(serverAccount, currentPath);
 
-  const sessionAccount = hydrated && hasSession ? getAdminAccountByFastCode(getFastCode()) : null;
-  const navItems = getAdminNavItems(sessionAccount?.access ?? "site-ops");
+  useEffect(() => {
+    if (isLoginPage && serverAccount) {
+      router.replace("/admin/dashboard");
+      return;
+    }
+    if (isProtectedAdminRoute && !serverAccount) {
+      router.replace("/admin/login");
+      return;
+    }
+    if (isProtectedAdminRoute && serverAccount && !canAccessCurrentPath) {
+      router.replace("/admin/dashboard");
+    }
+  }, [
+    canAccessCurrentPath,
+    isLoginPage,
+    isProtectedAdminRoute,
+    router,
+    serverAccount,
+  ]);
 
-  if (hydrated && isLoginPage && hasSession) {
-    redirect("/admin/dashboard");
+  // Fail closed: never paint Global Admin chrome or page data without a
+  // server-confirmed FAST-code session. Unknown auth === no access.
+  if (isProtectedAdminRoute && !serverAccount) {
+    return <AdminGatePlaceholder />;
   }
 
-  if (hydrated && isProtectedAdminRoute && !hasSession) {
-    redirect("/admin/login");
+  if (isProtectedAdminRoute && serverAccount && !canAccessCurrentPath) {
+    return <AdminGatePlaceholder />;
   }
 
-  if (
-    hydrated &&
-    isProtectedAdminRoute &&
-    sessionAccount &&
-    !accountCanAccessAdminPath(sessionAccount, currentPath)
-  ) {
-    redirect("/admin/dashboard");
+  if (isLoginPage && serverAccount) {
+    return <AdminGatePlaceholder />;
   }
 
-  if (isStandaloneProductAdmin) {
+  if (isTalisMapsAdmin || isLoginPage) {
     return <>{children}</>;
   }
+
+  const navItems = serverAccount ? getAdminNavItems(serverAccount.access) : [];
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
@@ -188,16 +201,18 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
         <AdminSidebar
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
-          hidden={isLoginPage}
+          hidden={isLoginPage || !serverAccount}
           navItems={navItems}
-          signedInAs={sessionAccount?.name ?? null}
+          signedInAs={serverAccount?.name ?? null}
         />
 
         <div className="flex-1 flex flex-col min-w-0">
           <header
             className={[
               "border-b border-[#e5e5e5] bg-white sticky top-0 z-30",
-              isLoginPage ? "hidden" : "lg:hidden flex items-center gap-4 p-4",
+              isLoginPage || !serverAccount
+                ? "hidden"
+                : "lg:hidden flex items-center gap-4 p-4",
             ].join(" ")}
           >
             <button
