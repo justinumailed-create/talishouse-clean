@@ -1,6 +1,8 @@
+import { resolveMapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
+
 /**
- * Public Mapsite™ pin / flag labels must show a lot or street location,
- * never the registrant or agent personal name.
+ * Public Mapsite™ pin / flag labels default to lot or street location.
+ * Choose for Flag can display Name, except FSBO which always uses Address.
  */
 
 export type MapsitePinLabelFields = {
@@ -16,6 +18,9 @@ export type MapsitePinLabelFields = {
   agentName?: string | null;
   /** Last resort when no location string exists (FAST Code, "Location"). */
   fallback?: string | null;
+  /** Saved Choose for Flag preference from the Talisbook™. */
+  flagIdentity?: string | null;
+  accountType?: string | null;
 };
 
 const STREET_OR_LOT_TOKEN =
@@ -172,9 +177,19 @@ export function firstNonPersonalMapsiteLabel(
 }
 
 /**
- * Auto-fetched public pin / flag text: lot or street location, never a person.
+ * Auto-fetched public pin / flag text.
+ * Default (and FSBO): lot or street location. Name only when explicitly chosen.
  */
 export function mapsitePublicPinLabel(fields: MapsitePinLabelFields): string {
+  const identity = resolveMapsiteFlagIdentity({
+    preference: fields.flagIdentity,
+    accountType: fields.accountType,
+  });
+  if (identity === "name") {
+    const name = collapseWhitespace(fields.agentName || fields.ownerName || "");
+    if (name) return name;
+  }
+
   const knownNames = knownPersonNames(fields);
 
   const formal = firstFormalLabel(

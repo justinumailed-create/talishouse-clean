@@ -6,10 +6,8 @@ import {
   type OptimizeImageKind,
 } from "@/lib/media/optimize-upload-image";
 import { VERCEL_FUNCTION_BODY_LIMIT_BYTES } from "@/lib/media/upload-size-limits";
-import {
-  TALISBOOKS_ASSET_CACHE_CONTROL,
-  TALISBOOKS_IMAGE_STORAGE_BUCKET,
-} from "@/lib/talisbooks/image-engine";
+import { TALISBOOKS_ASSET_CACHE_CONTROL, TALISBOOKS_IMAGE_STORAGE_BUCKET } from "@/lib/talisbooks/image-engine";
+import { assertAllowedEbookImageBuffer } from "@/lib/talisbooks/ebook-upload-formats-server";
 import { resolveDemoMapSiteUploadScope } from "@/lib/talispros/demo-mapsite-service";
 import { resolveOnboardingUploadScope } from "@/lib/talispros/resolve-onboarding-from-request";
 import {
@@ -108,6 +106,24 @@ export async function POST(request: Request) {
       scope = scoped.fastCode || requestId;
     }
     const source = Buffer.from(await fileEntry.arrayBuffer());
+    const fileName =
+      "name" in fileEntry && typeof fileEntry.name === "string"
+        ? fileEntry.name
+        : "";
+    const fileType =
+      "type" in fileEntry && typeof fileEntry.type === "string"
+        ? fileEntry.type
+        : "";
+    try {
+      await assertAllowedEbookImageBuffer(source, {
+        name: fileName,
+        type: fileType,
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unsupported image format.";
+      return Response.json({ ok: false, error: message }, { status: 400 });
+    }
     const optimized = await optimizeUploadImage(source, kind);
     const ext = extensionForOptimizedMime(optimized.mimeType);
     const id = crypto.randomUUID();

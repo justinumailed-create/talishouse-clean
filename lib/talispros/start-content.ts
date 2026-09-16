@@ -4,8 +4,28 @@ export function isTalisprosStartPath(pathname: string | null | undefined) {
   return pathname === "/" || pathname === "/talispros/start";
 }
 
-export const TALISPROS_START_INTRO =
-  "Seen here, a Glasshouse™ optimized for short-term rental purposes. A Mapsite™ of 50 miles around a centre point, or up to 100,000 people population base, is automatically included with every Account.*";
+export const TALISPROS_LEGAL_PRIMARY_COPY =
+  "Differentiate locally and develop a real estate adjacent marketing platform by using Mapsites™️ that promote qualifying inventory.*";
+
+export const TALISPROS_LEGAL_SECONDARY_COPY = "Some Limitations apply";
+
+export const TALISPROS_HOME_PRODUCTS = [
+  {
+    id: "g-house",
+    label: "G-House",
+    imageSrc: "/talisbooks/templates/rm22/products/g-house.jpg",
+  },
+  {
+    id: "t-house",
+    label: "T-House",
+    imageSrc: "/talisbooks/templates/rm22/products/t-house.jpg",
+  },
+  {
+    id: "t-dome",
+    label: "T-Dome",
+    imageSrc: "/talisbooks/templates/rm22/products/t-dome.jpg",
+  },
+] as const;
 
 export const TALISPROS_START_SEGMENTS = [
   {

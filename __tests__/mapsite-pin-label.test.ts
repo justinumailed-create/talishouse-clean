@@ -58,6 +58,31 @@ describe("mapsitePublicPinLabel", () => {
     ).toBe("Location");
   });
 
+  it("uses Name when Choose for Flag is Name and the account is not FSBO", () => {
+    expect(
+      mapsitePublicPinLabel({
+        propertyTitle: "5 HEAD RD, HOMEVILLE, NS, CANADA",
+        address: "5 HEAD RD, HOMEVILLE, NS, CANADA",
+        agentName: "Lydia Gaertner",
+        flagIdentity: "name",
+        accountType: "derivative",
+      }),
+    ).toBe("Lydia Gaertner");
+  });
+
+  it("keeps Address for FSBO even if Name is requested", () => {
+    expect(
+      mapsitePublicPinLabel({
+        propertyTitle: "Lydia Gaertner",
+        address: "5 HEAD RD, HOMEVILLE, NS, CANADA",
+        ownerName: "Lydia Gaertner",
+        agentName: "Lydia Gaertner",
+        flagIdentity: "name",
+        accountType: "fsbo",
+      }),
+    ).toBe("5 Head Rd, Homeville, NS, Canada");
+  });
+
   it("keeps demo lot copy when that is the stored address", () => {
     expect(
       mapsitePublicPinLabel({

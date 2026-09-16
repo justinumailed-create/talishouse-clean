@@ -198,6 +198,8 @@ export default async function ClaimedMapSiteByAccountTypePage({
       checkoutSessionId={checkoutSessionId}
       openPinOnLoad={isOwner}
       showStartHere={false}
+      flagIdentity={ebookContext?.primaryEbook?.flagIdentity}
+      flagName={ebookContext?.primaryEbook?.flagName}
     />
   );
 }

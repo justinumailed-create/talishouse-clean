@@ -8,6 +8,7 @@ import {
 } from "@/lib/talispros/mapsite-state";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { listingImageUrlsFromEbookPages } from "@/lib/talispros/mapsite-listing-media";
+import { parseMapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
 import type { TalisBooksLibraryBook } from "./library/types";
 import { TALISBOOKS_COVER_TEMPLATES } from "./covers/catalog";
 import type { TalisBooksCoverTemplateId } from "./covers/constants";
@@ -96,6 +97,8 @@ export type MapSiteEbookDraft = {
   description: string;
   coverImageUrl: string | null;
   listingImageUrls?: string[];
+  flagIdentity?: "address" | "name";
+  flagName?: string | null;
 };
 
 export type MapSiteEbookContext = {
@@ -258,6 +261,13 @@ function toDraft(
     coverImageUrl:
       typeof metadata.coverImageUrl === "string" ? metadata.coverImageUrl : null,
     listingImageUrls,
+    flagIdentity: parseMapsiteFlagIdentity(
+      typeof metadata.flagIdentity === "string" ? metadata.flagIdentity : null,
+    ),
+    flagName:
+      typeof metadata.flagName === "string" && metadata.flagName.trim()
+        ? metadata.flagName.trim()
+        : null,
   };
 }
 

@@ -34,12 +34,24 @@ import type { ClientOptimizePass } from "@/lib/media/client-optimize-plan";
 import {
   captionsFromTemplatePages,
   EBOOK_GENERATE_COVER_PDF_HELP,
-  EBOOK_GENERATE_HELP_TEXT,
+  EBOOK_GENERATE_HELP_EXPLANATION,
+  EBOOK_GENERATE_HELP_INSTRUCTION,
   EBOOK_GENERATE_TEMPLATE_ACTION,
   EBOOK_GENERATE_TEMPLATE_ACTION_ON,
   EBOOK_GENERATE_TEMPLATE_HELP,
   EBOOK_GENERATE_UPLOAD_HINT,
 } from "@/lib/talispros/ebook-generate-copy";
+import {
+  EBOOK_IMAGE_ACCEPT,
+  EBOOK_UPLOAD_ACCEPT,
+  EBOOK_UPLOAD_UNSUPPORTED_MESSAGE,
+  isAllowedEbookImageUpload,
+} from "@/lib/talisbooks/ebook-upload-formats";
+import {
+  MAPSITE_FLAG_IDENTITY_DEFAULT,
+  resolveMapsiteFlagIdentity,
+  type MapsiteFlagIdentity,
+} from "@/lib/talispros/flag-identity";
 import Rm22TemplateFields from "@/components/talispros/Rm22TemplateFields";
 import { composeRm22TemplateCovers } from "@/lib/talisbooks/compose-rm22-template";
 import {
@@ -70,10 +82,8 @@ type CoverPick = {
   previewUrl: string;
 };
 
-const BOOK_UPLOAD_ACCEPT =
-  "image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,.pdf";
-const INTERIOR_REPLACE_ACCEPT =
-  "image/jpeg,image/png,image/webp,image/heic,image/heif,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,.pdf";
+const BOOK_UPLOAD_ACCEPT = EBOOK_UPLOAD_ACCEPT;
+const INTERIOR_REPLACE_ACCEPT = EBOOK_UPLOAD_ACCEPT;
 
 function revokePreviewUrl(url: string | null | undefined) {
   if (url) URL.revokeObjectURL(url);
@@ -198,6 +208,7 @@ async function mapPool<T, R>(
 export default function EbookGenerateClient({
   fastCode,
   requestId,
+  accountType,
   initialAgentName,
   initialAgentEmail,
   initialAgentPhone = "",
@@ -224,6 +235,9 @@ export default function EbookGenerateClient({
   const [agentEmail, setAgentEmail] = useState(initialAgentEmail);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [agentPhotoFile, setAgentPhotoFile] = useState<File | null>(null);
+  const [flagIdentity, setFlagIdentity] = useState<MapsiteFlagIdentity>(
+    MAPSITE_FLAG_IDENTITY_DEFAULT,
+  );
   const [uploads, setUploads] = useState<SelectedUpload[]>([]);
   const [frontCover, setFrontCover] = useState<CoverPick | null>(null);
   const [backCover, setBackCover] = useState<CoverPick | null>(null);
@@ -272,6 +286,12 @@ export default function EbookGenerateClient({
     backCover?.previewUrl,
     ...uploads.map((item) => item.previewUrl),
   ].filter((url): url is string => Boolean(url));
+
+  const isFsboAccount = (accountType || "").trim().toLowerCase() === "fsbo";
+  const resolvedFlagIdentity = resolveMapsiteFlagIdentity({
+    preference: flagIdentity,
+    accountType,
+  });
 
   useEffect(() => {
     return () => {
@@ -385,7 +405,7 @@ export default function EbookGenerateClient({
     setError("");
     const kind = classifyUploadFile(file);
     if (kind === "other") {
-      setError("Use JPG, PNG, WEBP, HEIC, or PDF to replace a page.");
+      setError(EBOOK_UPLOAD_UNSUPPORTED_MESSAGE);
       return;
     }
 
@@ -1085,6 +1105,7 @@ export default function EbookGenerateClient({
         fd.set("rm22Template", JSON.stringify(rm22TemplatePayload));
       }
       fd.set("uploadMode", fromPdf ? "pdf" : "images");
+      fd.set("flagIdentity", resolvedFlagIdentity);
       fd.set(
         "bookOptions",
         JSON.stringify({
@@ -1249,8 +1270,11 @@ export default function EbookGenerateClient({
           <h1 className="mt-5 text-[34px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[40px]">
             Generate My Own E-Book
           </h1>
-          <p className="mx-auto mt-4 max-w-[26rem] text-[15px] leading-relaxed text-neutral-500">
-            {EBOOK_GENERATE_HELP_TEXT}
+          <p className="mx-auto mt-4 max-w-[26rem] text-[22px] font-semibold leading-snug tracking-[-0.03em] text-neutral-950">
+            {EBOOK_GENERATE_HELP_INSTRUCTION}
+          </p>
+          <p className="mx-auto mt-2 max-w-[26rem] text-[13px] leading-relaxed text-neutral-500">
+            {EBOOK_GENERATE_HELP_EXPLANATION}
           </p>
           {fastCode ? (
             <p className="mt-3 text-[12px] tracking-tight text-neutral-400">
@@ -1462,7 +1486,12 @@ export default function EbookGenerateClient({
                           event.target.value = "";
                           const handler = slotFileHandlerRef.current;
                           slotFileHandlerRef.current = null;
-                          if (file && handler) handler(file);
+                          if (!file || !handler) return;
+                          if (!isAllowedEbookImageUpload(file)) {
+                            setError(EBOOK_UPLOAD_UNSUPPORTED_MESSAGE);
+                            return;
+                          }
+                          handler(file);
                         }}
                       />
                     </>
@@ -1524,11 +1553,17 @@ export default function EbookGenerateClient({
                   <input
                     id={logoInputId}
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                    accept={EBOOK_IMAGE_ACCEPT}
                     disabled={converting || saving}
-                    onChange={(event) =>
-                      setLogoFile(event.target.files?.[0] || null)
-                    }
+                    onChange={(event) => {
+                      const file = event.target.files?.[0] || null;
+                      if (file && !isAllowedEbookImageUpload(file)) {
+                        setError(EBOOK_UPLOAD_UNSUPPORTED_MESSAGE);
+                        event.target.value = "";
+                        return;
+                      }
+                      setLogoFile(file);
+                    }}
                     className="sr-only"
                   />
                 </label>
@@ -1541,14 +1576,14 @@ export default function EbookGenerateClient({
                   {photoPreviewUrl ? (
                     <img
                       src={photoPreviewUrl}
-                      alt="Agent photo preview"
+                      alt="Agent portrait preview"
                       className="h-11 w-full rounded-[12px] object-cover"
                     />
                   ) : (
                     <IdentityClipart kind="photo" />
                   )}
                   <span className="mt-1.5 text-center text-[11px] font-medium text-neutral-500">
-                    Photo
+                    Portrait
                   </span>
                   <span className="mt-0.5 truncate text-center text-[12px] tracking-tight text-neutral-950">
                     {agentPhotoFile ? agentPhotoFile.name : "Add"}
@@ -1556,14 +1591,61 @@ export default function EbookGenerateClient({
                   <input
                     id={agentPhotoInputId}
                     type="file"
-                    accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                    accept={EBOOK_IMAGE_ACCEPT}
                     disabled={converting || saving}
-                    onChange={(event) =>
-                      setAgentPhotoFile(event.target.files?.[0] || null)
-                    }
+                    onChange={(event) => {
+                      const file = event.target.files?.[0] || null;
+                      if (file && !isAllowedEbookImageUpload(file)) {
+                        setError(EBOOK_UPLOAD_UNSUPPORTED_MESSAGE);
+                        event.target.value = "";
+                        return;
+                      }
+                      setAgentPhotoFile(file);
+                    }}
                     className="sr-only"
                   />
                 </label>
+              </div>
+
+              <div className={`${cardClass} px-5 py-4`}>
+                <p className="text-[13px] font-medium text-neutral-950">
+                  Choose for Flag
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Choose for Flag">
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={resolvedFlagIdentity === "address"}
+                    disabled={saving || converting}
+                    onClick={() => setFlagIdentity("address")}
+                    className={`h-11 rounded-full text-[14px] font-medium transition disabled:opacity-40 ${
+                      resolvedFlagIdentity === "address"
+                        ? "bg-neutral-950 text-white"
+                        : "bg-[#e8e8ed] text-neutral-950 hover:bg-[#dcdce2]"
+                    }`}
+                  >
+                    Address
+                  </button>
+                  <button
+                    type="button"
+                    role="radio"
+                    aria-checked={resolvedFlagIdentity === "name"}
+                    disabled={saving || converting || isFsboAccount}
+                    onClick={() => setFlagIdentity("name")}
+                    className={`h-11 rounded-full text-[14px] font-medium transition disabled:opacity-40 ${
+                      resolvedFlagIdentity === "name"
+                        ? "bg-neutral-950 text-white"
+                        : "bg-[#e8e8ed] text-neutral-950 hover:bg-[#dcdce2]"
+                    }`}
+                  >
+                    Name
+                  </button>
+                </div>
+                {isFsboAccount ? (
+                  <p className="mt-2 text-[12px] leading-relaxed text-neutral-400">
+                    FSBO flags use Address.
+                  </p>
+                ) : null}
               </div>
 
               {error ? (
