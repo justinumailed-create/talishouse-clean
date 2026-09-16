@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
+import { loginAdminWithFastCodeAction } from "@/app/admin/actions";
 import { ADMIN_FAST_CODE, normalizeFastCode, setAdminSession } from "@/lib/fast-code";
 
 export default function FastCodeGate() {
@@ -28,7 +29,12 @@ export default function FastCodeGate() {
 
     try {
       if (code === ADMIN_FAST_CODE) {
-        setAdminSession(ADMIN_FAST_CODE);
+        const adminLogin = await loginAdminWithFastCodeAction(ADMIN_FAST_CODE);
+        if (!adminLogin.ok) {
+          setError(adminLogin.error);
+          return;
+        }
+        setAdminSession(adminLogin.fastCode);
         login(code, "admin");
         localStorage.setItem("auth", "true");
         document.cookie = "auth=true; path=/; max-age=86400; SameSite=Lax";

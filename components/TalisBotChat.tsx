@@ -2,7 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { supabase } from "@/lib/supabase";
+import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 
 interface LeadData {
   purpose: string;
@@ -35,6 +37,7 @@ const STEP_OPTIONS = {
 const OPTION_CLASS = "w-full text-left px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-sm hover:border-black hover:bg-black hover:text-white transition-all duration-200 font-medium";
 
 export default function TalisBotChat() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<'greeting' | 'purpose' | 'size' | 'productType' | 'location' | 'contact' | 'complete'>('greeting');
   const [loading, setLoading] = useState(false);
@@ -277,6 +280,10 @@ export default function TalisBotChat() {
         );
     }
   };
+
+  if (shouldHidePublicStorefrontChrome(pathname)) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-6 right-6 z-[1000] font-sans">
