@@ -41,9 +41,10 @@ import {
   EBOOK_GENERATE_UPLOAD_HINT,
 } from "@/lib/talispros/ebook-generate-copy";
 import Rm22TemplateFields from "@/components/talispros/Rm22TemplateFields";
-import { composeRm22TemplateBook } from "@/lib/talisbooks/compose-rm22-template";
+import { composeRm22TemplateCovers } from "@/lib/talisbooks/compose-rm22-template";
 import {
   createRm22SlotState,
+  createRm22TemplatePayload,
   planRm22TemplateInteriors,
   RM22_ASSETS,
   RM22_PROTECTED_ENDING_SPREADS,
@@ -76,6 +77,27 @@ const INTERIOR_REPLACE_ACCEPT =
 
 function revokePreviewUrl(url: string | null | undefined) {
   if (url) URL.revokeObjectURL(url);
+}
+
+function rm22SlotUploadItems(slots: Rm22SlotState): SelectedUpload[] {
+  const items: SelectedUpload[] = [];
+  const add = (id: string, file: File | null, label: string) => {
+    if (!file) return;
+    items.push({
+      id,
+      file,
+      source: "image",
+      label,
+      previewUrl: "",
+    });
+  };
+  add("rm22-intro", slots.introImage, "Intro image");
+  slots.photoImages.forEach((file, index) => {
+    add(`rm22-photo-${index}`, file, `Photo ${index + 1}`);
+  });
+  add("rm22-intrinsic", slots.intrinsicImage, "Intrinsic Value image");
+  add("rm22-outro", slots.outroImage, "Parting Shot image");
+  return items;
 }
 
 interface EbookGenerateClientProps {
@@ -866,6 +888,8 @@ export default function EbookGenerateClient({
       let backCoverAsset: OptimizedAsset | null = null;
       let agentPhotoUrl: string | null = null;
       let brokerageLogoUrl: string | null = null;
+      let rm22TemplatePayload: ReturnType<typeof createRm22TemplatePayload> | null =
+        null;
 
       if (skipOptimizeRef.current && pendingGenerateRef.current) {
         skipOptimizeRef.current = false;
@@ -881,10 +905,8 @@ export default function EbookGenerateClient({
       let frontPick = frontCover;
       let backPick = backCover;
       if (templateMode) {
-        const composed = await composeRm22TemplateBook(
-          rm22Slots,
-          (detail) => setStageDetail(detail),
-        );
+        setStageDetail("Composing covers…");
+        const composed = await composeRm22TemplateCovers(rm22Slots);
         const frontPreview = URL.createObjectURL(composed.front);
         const backPreview = URL.createObjectURL(composed.back);
         frontPick = {
@@ -897,15 +919,9 @@ export default function EbookGenerateClient({
           file: composed.back,
           previewUrl: backPreview,
         };
-        propertyItems = composed.interiors.map((pageFile, index) => ({
-          id: `rm22-${index}`,
-          file: pageFile,
-          source: "image" as const,
-          label: `Page ${index + 1}`,
-          previewUrl: URL.createObjectURL(pageFile),
-        }));
+        propertyItems = rm22SlotUploadItems(rm22Slots);
       }
-      if (!frontPick || !backPick || propertyItems.length === 0) {
+      if (!frontPick || !backPick || (!templateMode && propertyItems.length === 0)) {
         setError(
           "Upload a PDF or images, or use the Talisbook™ template.",
         );
@@ -935,7 +951,7 @@ export default function EbookGenerateClient({
         return;
       }
 
-      if (stored.optimizedImages.length === 0) {
+      if (!templateMode && stored.optimizedImages.length === 0) {
         setError("Upload at least one property image or PDF.");
         setActiveStage("failed");
         return;
@@ -956,6 +972,16 @@ export default function EbookGenerateClient({
       backCoverAsset = stored.backCover;
       agentPhotoUrl = stored.agentPhotoUrl;
       brokerageLogoUrl = stored.brokerageLogoUrl;
+      rm22TemplatePayload = templateMode
+        ? createRm22TemplatePayload(rm22Slots, {
+            intro: stored.stash.byId["rm22-intro"]?.url ?? null,
+            photos: rm22Slots.photoImages.map(
+              (_, index) => stored.stash.byId[`rm22-photo-${index}`]?.url ?? null,
+            ),
+            intrinsic: stored.stash.byId["rm22-intrinsic"]?.url ?? null,
+            outro: stored.stash.byId["rm22-outro"]?.url ?? null,
+          })
+        : null;
 
       console.info(
         `[onboarding] Image optimize+upload ...... original=${stored.originalBytes} optimized=${stored.optimizedBytes} ratio=${
@@ -1055,6 +1081,9 @@ export default function EbookGenerateClient({
       );
       if (agentPhotoUrl) fd.set("agentPhotoUrl", agentPhotoUrl);
       if (brokerageLogoUrl) fd.set("brokerageLogoUrl", brokerageLogoUrl);
+      if (rm22TemplatePayload) {
+        fd.set("rm22Template", JSON.stringify(rm22TemplatePayload));
+      }
       fd.set("uploadMode", fromPdf ? "pdf" : "images");
       fd.set(
         "bookOptions",

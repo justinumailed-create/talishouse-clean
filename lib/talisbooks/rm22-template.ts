@@ -1,5 +1,8 @@
 /** RM22 Talisbook™ self-serve template — one product sheet + editable stub slots. */
 
+import type { SelfServicePageRowContent } from "@/lib/talisbooks/self-service-page-plan";
+import { RM22_TEMPLATE_ID } from "@/lib/talisbooks/rm22-layout";
+
 export const RM22_TEMPLATE_ROOT = "/talisbooks/templates/rm22";
 export const RM22_PAGE_WIDTH = 1920;
 export const RM22_PAGE_HEIGHT = 1080;
@@ -391,4 +394,293 @@ export function productIdsInPlan(plan: Rm22InteriorPlanItem[]): Rm22ProductId[] 
     .filter((item) => item.role === "product-sheet")
     .map((item) => item.productId)
     .filter((id): id is Rm22ProductId => Boolean(id));
+}
+
+export type Rm22SerializedInterior = {
+  role: Rm22InteriorRole;
+  imageUrl: string;
+  title?: string;
+  caption?: string;
+  body?: string;
+  signoff?: string;
+  productId?: Rm22ProductId;
+};
+
+export type Rm22TemplatePayload = {
+  version: 1;
+  templateId: typeof RM22_TEMPLATE_ID;
+  productId: Rm22ProductId;
+  interiors: Rm22SerializedInterior[];
+};
+
+export type Rm22SlotImageUrls = {
+  intro?: string | null;
+  photos: Array<string | null>;
+  intrinsic?: string | null;
+  outro?: string | null;
+};
+
+export function serializeRm22TemplateInteriors(
+  slots: Rm22SlotState,
+  urls: Rm22SlotImageUrls,
+): Rm22SerializedInterior[] {
+  const plan = planRm22TemplateInteriors(slots);
+  let photoIndex = 0;
+  return plan.map((item) => {
+    let imageUrl = item.assetHref;
+    if (item.role === "intro") {
+      imageUrl = urls.intro?.trim() || item.assetHref;
+    } else if (item.role === "intrinsic") {
+      imageUrl = urls.intrinsic?.trim() || item.assetHref;
+    } else if (item.role === "outro") {
+      imageUrl = urls.outro?.trim() || item.assetHref;
+    } else if (item.role === "photo-caption") {
+      imageUrl = urls.photos[photoIndex]?.trim() || item.assetHref;
+      photoIndex += 1;
+    }
+    return {
+      role: item.role,
+      imageUrl,
+      title: item.title,
+      caption: item.caption,
+      body: item.body,
+      signoff: item.signoff,
+      productId: item.productId,
+    };
+  });
+}
+
+export function createRm22TemplatePayload(
+  slots: Rm22SlotState,
+  urls: Rm22SlotImageUrls,
+): Rm22TemplatePayload {
+  return {
+    version: 1,
+    templateId: RM22_TEMPLATE_ID,
+    productId: slots.productId,
+    interiors: serializeRm22TemplateInteriors(slots, urls),
+  };
+}
+
+export function parseRm22TemplatePayload(
+  raw: string | null | undefined,
+): Rm22TemplatePayload | null {
+  if (!raw?.trim()) return null;
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return null;
+    }
+    const record = parsed as Record<string, unknown>;
+    if (record.templateId !== RM22_TEMPLATE_ID || record.version !== 1) {
+      return null;
+    }
+    const productId = isRm22ProductId(String(record.productId || ""))
+      ? (record.productId as Rm22ProductId)
+      : RM22_DEFAULT_PRODUCT_ID;
+    const interiorsRaw = Array.isArray(record.interiors) ? record.interiors : [];
+    const interiors: Rm22SerializedInterior[] = [];
+    for (const item of interiorsRaw) {
+      if (!item || typeof item !== "object") continue;
+      const row = item as Record<string, unknown>;
+      const role = row.role;
+      if (
+        role !== "product-sheet" &&
+        role !== "intro" &&
+        role !== "photo-caption" &&
+        role !== "intrinsic" &&
+        role !== "outro"
+      ) {
+        continue;
+      }
+      const imageUrl = String(row.imageUrl || "").trim();
+      if (!imageUrl) continue;
+      interiors.push({
+        role,
+        imageUrl,
+        title: typeof row.title === "string" ? row.title : undefined,
+        caption: typeof row.caption === "string" ? row.caption : undefined,
+        body: typeof row.body === "string" ? row.body : undefined,
+        signoff: typeof row.signoff === "string" ? row.signoff : undefined,
+        productId: isRm22ProductId(String(row.productId || ""))
+          ? (row.productId as Rm22ProductId)
+          : undefined,
+      });
+    }
+    if (interiors.length === 0) return null;
+    return { version: 1, templateId: RM22_TEMPLATE_ID, productId, interiors };
+  } catch {
+    return null;
+  }
+}
+
+function templateCoverRow(
+  imageUrl: string | null,
+  half: "front" | "back",
+  pageNumber: number,
+): SelfServicePageRowContent {
+  const isFront = half === "front";
+  return {
+    title: isFront ? "Front cover" : "Back cover",
+    slug: isFront ? "front-cover" : "back-cover",
+    page_number: pageNumber,
+    sort_order: pageNumber,
+    content: {
+      pageRole: "cover",
+      layout: "cover",
+      title: "",
+      body: "",
+      heroImageUrl: imageUrl || undefined,
+      exactPdfPage: true,
+      coverSpreadHalf: half,
+    },
+  };
+}
+
+function templateSpreadPair(options: {
+  startPage: number;
+  slugPrefix: string;
+  item: Rm22SerializedInterior;
+}): SelfServicePageRowContent[] {
+  const heading =
+    options.item.role === "photo-caption"
+      ? options.item.caption?.trim() || ""
+      : options.item.title?.trim() || "";
+  const caption =
+    options.item.role === "photo-caption"
+      ? options.item.caption?.trim() || ""
+      : options.item.caption?.trim() || "";
+  const shared = {
+    pageRole: "property_content",
+    layoutType: "spread",
+    templateId: RM22_TEMPLATE_ID,
+    templateRole: options.item.role,
+    title: heading,
+    body: caption && heading !== caption ? caption : "",
+    spreadImageUrl: options.item.imageUrl,
+    spreadMat: true,
+    captionsEnabled: false,
+    captionSkipped: true,
+    productId: options.item.productId,
+  };
+  return [
+    {
+      title: heading || `Spread ${options.startPage}`,
+      slug: `${options.slugPrefix}-left`,
+      page_number: options.startPage,
+      sort_order: options.startPage,
+      content: {
+        ...shared,
+        layout: "centerfold_left",
+        brochureLeaf: "left",
+      },
+    },
+    {
+      title: heading || `Spread ${options.startPage + 1}`,
+      slug: `${options.slugPrefix}-right`,
+      page_number: options.startPage + 1,
+      sort_order: options.startPage + 1,
+      content: {
+        ...shared,
+        layout: "centerfold_right",
+        brochureLeaf: "right",
+      },
+    },
+  ];
+}
+
+function templateIntrinsicPair(
+  item: Rm22SerializedInterior,
+  startPage: number,
+): SelfServicePageRowContent[] {
+  const title = item.title?.trim() || RM22_DEFAULT_COPY.intrinsicTitle;
+  const body = item.body?.trim() || "";
+  const caption = item.caption?.trim() || "";
+  const signoff = item.signoff?.trim() || RM22_DEFAULT_COPY.intrinsicSignoff;
+  return [
+    {
+      title,
+      slug: "intrinsic-left",
+      page_number: startPage,
+      sort_order: startPage,
+      content: {
+        pageRole: "property_content",
+        layout: "split_copy_left",
+        layoutType: "spread",
+        templateId: RM22_TEMPLATE_ID,
+        templateRole: "intrinsic",
+        title: caption,
+        body: "",
+        heroImageUrl: item.imageUrl,
+        captionsEnabled: false,
+        brochureLeaf: "left",
+      },
+    },
+    {
+      title,
+      slug: "intrinsic-right",
+      page_number: startPage + 1,
+      sort_order: startPage + 1,
+      content: {
+        pageRole: "property_content",
+        layout: "split_copy_right",
+        layoutType: "spread",
+        templateId: RM22_TEMPLATE_ID,
+        templateRole: "intrinsic",
+        title,
+        body,
+        signoff,
+        captionsEnabled: false,
+        brochureLeaf: "right",
+      },
+    },
+  ];
+}
+
+/**
+ * Viewer/PDF page rows for an RM22 template book.
+ * Image slots and text slots stay separate — interiors are not flattened.
+ */
+export function buildRm22TemplatePageRows(input: {
+  coverImageUrl: string | null;
+  backCoverImageUrl: string | null;
+  interiors: Rm22SerializedInterior[];
+}): SelfServicePageRowContent[] {
+  const rows: SelfServicePageRowContent[] = [];
+  const hasFront = Boolean(input.coverImageUrl?.trim());
+  const hasBack = Boolean(input.backCoverImageUrl?.trim());
+  if (hasFront) {
+    rows.push(templateCoverRow(input.coverImageUrl, "front", 1));
+  }
+
+  let cursor = hasFront ? 2 : 1;
+  let photoIndex = 0;
+  for (const item of input.interiors) {
+    if (item.role === "intrinsic") {
+      rows.push(...templateIntrinsicPair(item, cursor));
+      cursor += 2;
+      continue;
+    }
+    const slugPrefix =
+      item.role === "product-sheet"
+        ? "product"
+        : item.role === "intro"
+          ? "intro"
+          : item.role === "outro"
+            ? "outro"
+            : `caption-${String((photoIndex += 1)).padStart(2, "0")}`;
+    rows.push(
+      ...templateSpreadPair({
+        startPage: cursor,
+        slugPrefix,
+        item,
+      }),
+    );
+    cursor += 2;
+  }
+
+  if (hasBack) {
+    rows.push(templateCoverRow(input.backCoverImageUrl, "back", cursor));
+  }
+  return rows;
 }

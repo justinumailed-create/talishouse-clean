@@ -610,9 +610,19 @@ function PageAdminRow({
             </p>
           ) : (
             <>
+              {page.templateId ? (
+                <p className="text-xs text-neutral-500">
+                  Template design is locked. Change only the words and designated
+                  images.
+                </p>
+              ) : null}
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-neutral-500">
-                  Title
+                  {page.layout === "split_copy_left"
+                    ? "Edit text — image caption"
+                    : page.templateId
+                      ? "Edit text — title"
+                      : "Title"}
                 </span>
                 <input
                   className={inputClass}
@@ -621,9 +631,10 @@ function PageAdminRow({
                   disabled={disabled}
                 />
               </label>
+              {page.layout !== "split_copy_left" ? (
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-neutral-500">
-                  Body
+                  {page.templateId ? "Edit text — body" : "Body"}
                 </span>
                 <textarea
                   className={textareaClass}
@@ -633,9 +644,12 @@ function PageAdminRow({
                   disabled={disabled}
                 />
               </label>
+              ) : null}
+              {page.layout !== "split_copy_right" ? (
+                <>
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-neutral-500">
-                  Image URL
+                  {page.templateId ? "Replace image — URL" : "Image URL"}
                 </span>
                 <input
                   className={inputClass}
@@ -647,7 +661,7 @@ function PageAdminRow({
               </label>
               <label className="block">
                 <span className="mb-1 block text-xs font-medium text-neutral-500">
-                  Or upload image
+                  {page.templateId ? "Or replace image from file" : "Or upload image"}
                 </span>
                 <input
                   type="file"
@@ -659,6 +673,8 @@ function PageAdminRow({
                   className="block w-full text-sm text-neutral-600 file:mr-3 file:rounded-lg file:border-0 file:bg-neutral-900 file:px-3 file:py-2 file:text-sm file:font-medium file:text-white"
                 />
               </label>
+                </>
+              ) : null}
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"

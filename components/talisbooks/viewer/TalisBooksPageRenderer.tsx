@@ -6,6 +6,16 @@ import {
 } from "@/lib/talisbooks/covers";
 import TalisBooksCoverPreview from "@/components/talisbooks/covers/TalisBooksCoverPreview";
 import type { TalisBooksViewerPage } from "@/lib/talisbooks/viewer";
+import {
+  RM22_INTRINSIC_BODY,
+  RM22_INTRINSIC_CAPTION,
+  RM22_INTRINSIC_SIGNOFF,
+  RM22_INTRINSIC_TITLE,
+  RM22_LEFT_LEAF_PAGE,
+  RM22_RIGHT_LEAF_PAGE,
+  boxToPagePercent,
+  fontSizeCqh,
+} from "@/lib/talisbooks/rm22-layout";
 
 interface TalisBooksPageRendererProps {
   page: TalisBooksViewerPage;
@@ -154,6 +164,134 @@ function AgentSummaryPageView({ page }: { page: TalisBooksViewerPage }) {
   );
 }
 
+function TemplateCaptionBar({
+  text,
+  style,
+}: {
+  text: string;
+  style: { left: string; top: string; width: string; height: string };
+}) {
+  const trimmed = text.trim();
+  return (
+    <div className="talisbooks-viewer-page__template-caption" style={style}>
+      {trimmed ? <p>{trimmed}</p> : null}
+    </div>
+  );
+}
+
+function SplitCopyLeftView({ page }: { page: TalisBooksViewerPage }) {
+  const imageUrl = page.heroImageUrl?.trim() || "";
+  const caption = page.title?.trim() || "";
+  const captionPos = boxToPagePercent(RM22_INTRINSIC_CAPTION.box, RM22_LEFT_LEAF_PAGE);
+  return (
+    <div className="talisbooks-viewer-page talisbooks-viewer-page--split-copy talisbooks-viewer-page--split-copy-left">
+      {imageUrl ? (
+        <img
+          className="talisbooks-viewer-page__split-image"
+          src={imageUrl}
+          alt=""
+          draggable={false}
+        />
+      ) : (
+        <div className="talisbooks-viewer-page__split-image-empty" aria-hidden="true" />
+      )}
+      <TemplateCaptionBar
+        text={caption}
+        style={captionPos}
+      />
+    </div>
+  );
+}
+
+function SplitCopyRightView({ page }: { page: TalisBooksViewerPage }) {
+  const titlePos = boxToPagePercent(RM22_INTRINSIC_TITLE.box, RM22_RIGHT_LEAF_PAGE);
+  const bodyPos = boxToPagePercent(RM22_INTRINSIC_BODY.box, RM22_RIGHT_LEAF_PAGE);
+  const signoffPos = boxToPagePercent(RM22_INTRINSIC_SIGNOFF.box, RM22_RIGHT_LEAF_PAGE);
+  const title = page.title?.trim() || "Intrinsic Value";
+  const body = page.body?.trim() || "";
+  const signoff = page.signoff?.trim() || "";
+  return (
+    <div className="talisbooks-viewer-page talisbooks-viewer-page--split-copy talisbooks-viewer-page--split-copy-right">
+      <h2
+        className="talisbooks-viewer-page__split-title"
+        style={{
+          ...titlePos,
+          fontSize: fontSizeCqh(RM22_INTRINSIC_TITLE.style.fontSize),
+          lineHeight: fontSizeCqh(RM22_INTRINSIC_TITLE.style.lineHeight),
+        }}
+      >
+        {title}
+      </h2>
+      <p
+        className="talisbooks-viewer-page__split-body"
+        style={{
+          ...bodyPos,
+          fontSize: fontSizeCqh(RM22_INTRINSIC_BODY.style.fontSize),
+          lineHeight: fontSizeCqh(RM22_INTRINSIC_BODY.style.lineHeight),
+        }}
+      >
+        {body}
+      </p>
+      {signoff ? (
+        <p
+          className="talisbooks-viewer-page__split-signoff"
+          style={{
+            ...signoffPos,
+            fontSize: fontSizeCqh(RM22_INTRINSIC_SIGNOFF.style.fontSize),
+            lineHeight: fontSizeCqh(RM22_INTRINSIC_SIGNOFF.style.lineHeight),
+          }}
+        >
+          {signoff}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function TemplateSpreadOverlays({
+  page,
+  leaf,
+}: {
+  page: TalisBooksViewerPage;
+  leaf: "left" | "right";
+}) {
+  const role = page.templateRole;
+  if (!role || role === "product-sheet" || role === "intrinsic") return null;
+  const heading = role === "photo-caption" ? "" : page.title?.trim() || "";
+  const caption =
+    role === "photo-caption"
+      ? page.title?.trim() || ""
+      : page.body?.trim() || "";
+  const shiftClass =
+    leaf === "right"
+      ? "talisbooks-viewer-page__template-spread-layer--right"
+      : "talisbooks-viewer-page__template-spread-layer--left";
+  return (
+    <>
+      {heading ? (
+        <p
+          className={[
+            "talisbooks-viewer-page__template-bleed-title",
+            shiftClass,
+          ].join(" ")}
+        >
+          {heading}
+        </p>
+      ) : null}
+      {caption ? (
+        <div
+          className={[
+            "talisbooks-viewer-page__template-spread-caption",
+            shiftClass,
+          ].join(" ")}
+        >
+          <p>{caption}</p>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 function AdvertisementKicker({ page }: { page: TalisBooksViewerPage }) {
   if (!page.advertisement) return null;
   return (
@@ -221,6 +359,7 @@ function ContinuousSpreadPageView({ page }: { page: TalisBooksViewerPage }) {
   const leaf = page.layout === "centerfold_right" ? "right" : "left";
   const imageUrl = page.spreadImageUrl?.trim() || page.heroImageUrl?.trim() || "";
   const showCaptionText = Boolean(captionText) && leaf === "left";
+  const templateOverlay = Boolean(page.templateId && page.templateRole);
 
   return (
     <div
@@ -229,6 +368,7 @@ function ContinuousSpreadPageView({ page }: { page: TalisBooksViewerPage }) {
         "talisbooks-viewer-page--spread-mat",
         `talisbooks-viewer-page--spread-${leaf}`,
         captionsEnabled ? "talisbooks-viewer-page--spread-captions" : "",
+        templateOverlay ? "talisbooks-viewer-page--template-spread" : "",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -244,8 +384,11 @@ function ContinuousSpreadPageView({ page }: { page: TalisBooksViewerPage }) {
         ) : (
           <div className="talisbooks-viewer-page__facing-empty" aria-hidden="true" />
         )}
+        {templateOverlay ? (
+          <TemplateSpreadOverlays page={page} leaf={leaf} />
+        ) : null}
       </div>
-      {captionsEnabled ? (
+      {captionsEnabled && !templateOverlay ? (
         <div
           className={[
             "talisbooks-viewer-page__spread-caption",
@@ -335,6 +478,12 @@ function CustomContentPageView({ page }: { page: TalisBooksViewerPage }) {
 }
 
 function PropertyContentPageView({ page }: { page: TalisBooksViewerPage }) {
+  if (page.layout === "split_copy_left") {
+    return <SplitCopyLeftView page={page} />;
+  }
+  if (page.layout === "split_copy_right") {
+    return <SplitCopyRightView page={page} />;
+  }
   if (page.layout === "facing") {
     return <FacingPageView page={page} />;
   }
@@ -527,6 +676,12 @@ function TebCoverPageView({ page }: { page: TalisBooksViewerPage }) {
 }
 
 export default function TalisBooksPageRenderer({ page }: TalisBooksPageRendererProps) {
+  if (page.layout === "split_copy_left") {
+    return <SplitCopyLeftView page={page} />;
+  }
+  if (page.layout === "split_copy_right") {
+    return <SplitCopyRightView page={page} />;
+  }
   if (page.layout === "maps") {
     return <TalisBooksMapsPageView page={page} />;
   }

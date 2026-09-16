@@ -8,14 +8,25 @@ import {
   type Rm22InteriorPlanItem,
   type Rm22SlotState,
 } from "@/lib/talisbooks/rm22-template";
+import {
+  RM22_BLEED_CAPTION,
+  RM22_BLEED_TITLE,
+  RM22_COLOR,
+  RM22_INTRINSIC_BODY,
+  RM22_INTRINSIC_CAPTION,
+  RM22_INTRINSIC_IMAGE,
+  RM22_INTRINSIC_SIGNOFF,
+  RM22_INTRINSIC_TITLE,
+  RM22_TYPE,
+} from "@/lib/talisbooks/rm22-layout";
 
-const SANS = 'HelveticaNeue, "Helvetica Neue", Helvetica, Arial, sans-serif';
-const SCRIPT = 'Zapfino, "Snell Roundhand", "Apple Chancery", "Segoe Script", cursive';
-const HAND = 'Noteworthy, "Bradley Hand", "Segoe Print", cursive';
-const ROUNDED = '"Arial Rounded MT Bold", "Varela Round", Arial, sans-serif';
+const SANS = RM22_TYPE.sans;
+const SCRIPT = RM22_TYPE.script;
+const HAND = RM22_TYPE.hand;
+const ROUNDED = RM22_TYPE.rounded;
 
-const BAND = "#062806";
-const LIME = "#c6de00";
+const BAND = RM22_COLOR.band;
+const LIME = RM22_COLOR.lime;
 
 async function loadImage(src: string | File): Promise<HTMLImageElement> {
   const url = typeof src === "string" ? src : URL.createObjectURL(src);
@@ -266,20 +277,19 @@ async function composeTitleCaption(
 
   const title = item.title?.trim() || "";
   if (title) {
-    ctx.fillStyle = "#ffffff";
-    ctx.font = `700 92px ${ROUNDED}`;
+    ctx.fillStyle = RM22_BLEED_TITLE.style.color;
+    ctx.font = `700 ${RM22_BLEED_TITLE.style.fontSize}px ${ROUNDED}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
-    ctx.fillText(title, canvas.width / 2, 36);
+    ctx.fillText(
+      title,
+      RM22_BLEED_TITLE.box.x + RM22_BLEED_TITLE.box.width / 2,
+      RM22_BLEED_TITLE.box.y,
+    );
     ctx.textAlign = "left";
   }
 
-  drawCaptionBar(ctx, item.caption || "", {
-    x: 0,
-    y: canvas.height - 120,
-    width: canvas.width,
-    height: 120,
-  });
+  drawCaptionBar(ctx, item.caption || "", RM22_BLEED_CAPTION.box);
   return canvas;
 }
 
@@ -289,12 +299,7 @@ async function composePhotoCaption(
   const { canvas, ctx } = makePage();
   const image = await sourceOrDefault(item.image, item.assetHref);
   coverDraw(ctx, image, 0, 0, canvas.width, canvas.height);
-  drawCaptionBar(ctx, item.caption || "", {
-    x: 0,
-    y: canvas.height - 120,
-    width: canvas.width,
-    height: 120,
-  });
+  drawCaptionBar(ctx, item.caption || "", RM22_BLEED_CAPTION.box);
   return canvas;
 }
 
@@ -302,38 +307,49 @@ async function composeIntrinsic(
   item: Rm22InteriorPlanItem,
 ): Promise<HTMLCanvasElement> {
   const { canvas, ctx } = makePage();
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = RM22_COLOR.paper;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const leftWidth = Math.round(canvas.width * 0.38);
+  const imageBox = RM22_INTRINSIC_IMAGE.box;
   const image = await sourceOrDefault(item.image, item.assetHref);
-  coverDraw(ctx, image, 0, 0, leftWidth, canvas.height);
-  drawCaptionBar(ctx, item.caption || "", {
-    x: 0,
-    y: canvas.height - 110,
-    width: leftWidth,
-    height: 110,
-  });
+  coverDraw(ctx, image, imageBox.x, imageBox.y, imageBox.width, imageBox.height);
 
-  const textLeft = leftWidth + 56;
-  const textWidth = canvas.width - textLeft - 56;
-  ctx.fillStyle = "#111111";
+  const captionBox = RM22_INTRINSIC_CAPTION.box;
+  drawCaptionBar(ctx, item.caption || "", captionBox);
+
+  const titleBox = RM22_INTRINSIC_TITLE.box;
+  ctx.fillStyle = RM22_INTRINSIC_TITLE.style.color;
   ctx.textAlign = "center";
-  ctx.font = `700 42px ${SANS}`;
+  ctx.font = `700 ${RM22_INTRINSIC_TITLE.style.fontSize}px ${SANS}`;
   ctx.textBaseline = "top";
-  ctx.fillText(item.title?.trim() || "Intrinsic Value", leftWidth + (canvas.width - leftWidth) / 2, 72);
+  ctx.fillText(
+    item.title?.trim() || "Intrinsic Value",
+    titleBox.x + titleBox.width / 2,
+    titleBox.y,
+  );
 
+  const bodyBox = RM22_INTRINSIC_BODY.box;
   ctx.textAlign = "left";
-  ctx.font = `22px ${SANS}`;
+  ctx.font = `${RM22_INTRINSIC_BODY.style.fontSize}px ${SANS}`;
   const body = item.body?.trim() || "";
-  const lines = wrapLines(ctx, body, textWidth);
+  const maxLines = Math.floor(bodyBox.height / RM22_INTRINSIC_BODY.style.lineHeight);
+  const lines = wrapLines(ctx, body, bodyBox.width).slice(0, maxLines);
   lines.forEach((line, index) => {
-    ctx.fillText(line, textLeft, 150 + index * 28);
+    ctx.fillText(
+      line,
+      bodyBox.x,
+      bodyBox.y + index * RM22_INTRINSIC_BODY.style.lineHeight,
+    );
   });
 
+  const signoffBox = RM22_INTRINSIC_SIGNOFF.box;
   ctx.textAlign = "right";
-  ctx.font = `32px ${SANS}`;
-  ctx.fillText(item.signoff?.trim() || "", canvas.width - 56, canvas.height - 90);
+  ctx.font = `${RM22_INTRINSIC_SIGNOFF.style.fontSize}px ${SANS}`;
+  ctx.fillText(
+    item.signoff?.trim() || "",
+    signoffBox.x + signoffBox.width,
+    signoffBox.y,
+  );
   ctx.textAlign = "left";
   return canvas;
 }
@@ -354,13 +370,20 @@ async function composeInterior(item: Rm22InteriorPlanItem): Promise<File> {
   return canvasToJpegFile(await composePhotoCaption(item), item.fileName);
 }
 
+export async function composeRm22TemplateCovers(
+  slots: Rm22SlotState,
+): Promise<{ front: File; back: File }> {
+  const front = await canvasToJpegFile(await composeFront(slots), "rm22-front.jpg");
+  const back = await canvasToJpegFile(await composeBack(slots), "rm22-back.jpg");
+  return { front, back };
+}
+
 export async function composeRm22TemplateBook(
   slots: Rm22SlotState,
   onProgress?: (detail: string) => void,
 ): Promise<{ front: File; back: File; interiors: File[] }> {
   onProgress?.("Composing covers…");
-  const front = await canvasToJpegFile(await composeFront(slots), "rm22-front.jpg");
-  const back = await canvasToJpegFile(await composeBack(slots), "rm22-back.jpg");
+  const { front, back } = await composeRm22TemplateCovers(slots);
 
   const plan = planRm22TemplateInteriors(slots);
   const interiors: File[] = [];

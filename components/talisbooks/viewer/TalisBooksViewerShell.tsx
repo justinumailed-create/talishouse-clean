@@ -298,11 +298,35 @@ export default function TalisBooksViewerShell({
       if (target && isPermanentViewerPage(target)) {
         return current;
       }
+      const targetIndex = current.pages.findIndex((page) => page.id === pageId);
+      const pairMate =
+        target &&
+        (target.layout === "centerfold_left" || target.layout === "centerfold_right") &&
+        target.templateId
+          ? current.pages[targetIndex + (target.layout === "centerfold_left" ? 1 : -1)]
+          : null;
+      const pairPatch: Partial<TalisBooksViewerPage> = {};
+      if (pairMate?.templateId === target?.templateId) {
+        if (patch.spreadImageUrl !== undefined) {
+          pairPatch.spreadImageUrl = patch.spreadImageUrl;
+        }
+        if (patch.heroImageUrl !== undefined) {
+          pairPatch.heroImageUrl = patch.heroImageUrl;
+        }
+        if (patch.title !== undefined) {
+          pairPatch.title = patch.title;
+        }
+        if (patch.body !== undefined) {
+          pairPatch.body = patch.body;
+        }
+      }
       return {
         ...current,
-        pages: current.pages.map((page) =>
-          page.id === pageId ? { ...page, ...patch } : page,
-        ),
+        pages: current.pages.map((page) => {
+          if (page.id === pageId) return { ...page, ...patch };
+          if (pairMate && page.id === pairMate.id) return { ...page, ...pairPatch };
+          return page;
+        }),
         title:
           pageId === current.pages[0]?.id && patch.title != null
             ? patch.title

@@ -15,6 +15,7 @@ import {
   type SelfServiceBookOptions,
   type SelfServicePageCaption,
 } from "@/lib/talisbooks/self-service-page-plan";
+import type { Rm22TemplatePayload } from "@/lib/talisbooks/rm22-template";
 import type { EbookGenerationProgressEvent } from "@/lib/talispros/ebook-generation-stages";
 
 export type {
@@ -47,6 +48,7 @@ export type RunEbookGenerationInput = {
   captions?: SelfServicePageCaption[];
   frontCover?: OptimizedEbookImageAsset | null;
   backCover?: OptimizedEbookImageAsset | null;
+  rm22Template?: Rm22TemplatePayload | null;
   onProgress?: (event: EbookGenerationProgressEvent) => void | Promise<void>;
   /** Override job timeout (ms). Defaults to ONBOARDING_JOB_TIMEOUT_MS. */
   timeoutMs?: number;
@@ -126,7 +128,7 @@ export async function runEbookGenerationPipeline(
         );
         const rawImages = input.images || [];
 
-        if (!optimizedImages.length && !rawImages.length) {
+        if (!optimizedImages.length && !rawImages.length && !input.rm22Template) {
           return fail(
             "uploading_images",
             "Upload at least one property image or PDF page."
@@ -175,6 +177,7 @@ export async function runEbookGenerationPipeline(
           captions: input.captions,
           frontCover: input.frontCover,
           backCover: input.backCover,
+          rm22Template: input.rm22Template,
         });
         logOnboardingStep("Book generation", generateStarted, {
           requestId,

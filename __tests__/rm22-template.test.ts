@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildRm22TemplatePageRows,
   createRm22SlotState,
+  createRm22TemplatePayload,
   defaultRm22IntrinsicBody,
   formatRm22CoverAddressHeadline,
   formatRm22CoverLotBlurb,
   formatRm22CoverPriceLine,
+  parseRm22TemplatePayload,
   planRm22TemplateInteriors,
   productIdsInPlan,
   rm22CoverBandFromOnboarding,
@@ -213,5 +216,55 @@ describe("RM22 Talisbook™ template", () => {
     const outroPage = plan.find((item) => item.role === "outro");
     expect(outroPage?.image).toBe(outro);
     expect(outroPage?.caption).toBe("See you on the mountain");
+  });
+
+  it("serializes Intrinsic Value as a split-copy pair with separate image and text slots", () => {
+    const slots = createRm22SlotState({ productId: "t-dome" });
+    slots.intrinsicBody = "Land plus the option of a T-Dome.";
+    slots.intrinsicCaption = "Founder";
+    const payload = createRm22TemplatePayload(slots, {
+      intro: "https://cdn.example/intro.jpg",
+      photos: [],
+      intrinsic: "https://cdn.example/intrinsic.jpg",
+      outro: "https://cdn.example/outro.jpg",
+    });
+    expect(payload.templateId).toBe("rm22");
+    const intrinsic = payload.interiors.find((item) => item.role === "intrinsic");
+    expect(intrinsic?.imageUrl).toBe("https://cdn.example/intrinsic.jpg");
+    expect(intrinsic?.title).toBe("Intrinsic Value");
+    expect(intrinsic?.body).toContain("T-Dome");
+    expect(intrinsic?.caption).toBe("Founder");
+
+    const rows = buildRm22TemplatePageRows({
+      coverImageUrl: "https://cdn.example/front.jpg",
+      backCoverImageUrl: "https://cdn.example/back.jpg",
+      interiors: payload.interiors,
+    });
+    const left = rows.find((row) => row.slug === "intrinsic-left");
+    const right = rows.find((row) => row.slug === "intrinsic-right");
+    expect(left?.content.layout).toBe("split_copy_left");
+    expect(left?.content.heroImageUrl).toBe("https://cdn.example/intrinsic.jpg");
+    expect(left?.content.templateRole).toBe("intrinsic");
+    expect(left?.content.title).toBe("Founder");
+    expect(right?.content.layout).toBe("split_copy_right");
+    expect(right?.content.heroImageUrl).toBeUndefined();
+    expect(right?.content.title).toBe("Intrinsic Value");
+    expect(right?.content.body).toContain("T-Dome");
+    expect(right?.content.signoff).toBe("The Professional Team");
+    expect(rows[0]?.content.layout).toBe("cover");
+    expect(rows[rows.length - 1]?.content.layout).toBe("cover");
+    const product = rows.find((row) => row.slug === "product-left");
+    expect(product?.content.spreadImageUrl).toBe(rm22ProductById("t-dome").href);
+    expect(product?.content.templateRole).toBe("product-sheet");
+  });
+
+  it("round-trips a template payload without flattening image and text", () => {
+    const slots = createRm22SlotState();
+    const original = createRm22TemplatePayload(slots, { photos: [] });
+    const parsed = parseRm22TemplatePayload(JSON.stringify(original));
+    expect(parsed?.interiors).toHaveLength(original.interiors.length);
+    expect(parsed?.interiors.find((item) => item.role === "intrinsic")?.title).toBe(
+      "Intrinsic Value",
+    );
   });
 });

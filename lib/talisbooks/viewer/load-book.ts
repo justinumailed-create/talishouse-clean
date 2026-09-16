@@ -28,7 +28,9 @@ function asLayout(value: unknown): TalisBooksViewerPageLayout | undefined {
     value === "quote" ||
     value === "facing" ||
     value === "custom_content" ||
-    value === "global_content"
+    value === "global_content" ||
+    value === "split_copy_left" ||
+    value === "split_copy_right"
   ) {
     return value;
   }
@@ -164,6 +166,8 @@ export async function getViewerBookBySlug(
             layout === "facing" ||
             layout === "centerfold_left" ||
             layout === "centerfold_right" ||
+            layout === "split_copy_left" ||
+            layout === "split_copy_right" ||
             layout === "global_content";
           const heroFallback =
             layout === "agent_summary"
@@ -261,6 +265,17 @@ export async function getViewerBookBySlug(
               typeof content.disclaimer === "string"
                 ? content.disclaimer
                 : undefined,
+            templateId: content.templateId === "rm22" ? "rm22" : undefined,
+            templateRole:
+              content.templateRole === "product-sheet" ||
+              content.templateRole === "intro" ||
+              content.templateRole === "photo-caption" ||
+              content.templateRole === "intrinsic" ||
+              content.templateRole === "outro"
+                ? content.templateRole
+                : undefined,
+            signoff:
+              typeof content.signoff === "string" ? content.signoff : undefined,
           };
         })
       : buildFallbackPages({

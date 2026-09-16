@@ -8,6 +8,7 @@ import type {
   SelfServiceBookOptions,
   SelfServicePageCaption,
 } from "@/lib/talisbooks/self-service-page-plan";
+import type { Rm22TemplatePayload } from "@/lib/talisbooks/rm22-template";
 
 export type GenerateSelfServiceEbookInput = {
   fastCode: string;
@@ -34,6 +35,7 @@ export type GenerateSelfServiceEbookInput = {
   captions?: SelfServicePageCaption[];
   frontCover?: OptimizedEbookImageAsset | null;
   backCover?: OptimizedEbookImageAsset | null;
+  rm22Template?: Rm22TemplatePayload | null;
 };
 
 export type GenerateSelfServiceEbookResult =
@@ -79,6 +81,7 @@ export async function generateSelfServiceEbook(
       captions: input.captions,
       frontCover: input.frontCover,
       backCover: input.backCover,
+      rm22Template: input.rm22Template,
     });
 
     if (!result.success) {

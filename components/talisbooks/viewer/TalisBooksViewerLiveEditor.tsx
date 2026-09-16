@@ -4,6 +4,11 @@ import type { ReactNode } from "react";
 import { Plus } from "lucide-react";
 import TalisBooksImageField from "@/components/talisbooks/viewer/TalisBooksImageField";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
+import {
+  rm22BleedCaptionFits,
+  rm22IntrinsicBodyFits,
+  rm22IntrinsicCaptionFits,
+} from "@/lib/talisbooks/rm22-layout";
 import type { TalisBooksViewerPage, TalisBooksViewerPageLayout } from "@/lib/talisbooks/viewer";
 
 const LAYOUT_OPTIONS: Array<{ value: TalisBooksViewerPageLayout; label: string }> = [
@@ -31,6 +36,201 @@ interface TalisBooksViewerLiveEditorProps {
   onAddPage?: (afterPageId: string | null) => void;
   /** Demo / sample books: show Add page greyed out and non-interactive. */
   pageInsertLocked?: boolean;
+}
+
+function isTemplatePage(page: TalisBooksViewerPage | null | undefined): boolean {
+  return Boolean(page?.templateId);
+}
+
+function OverflowNote({ fits, label }: { fits: boolean; label: string }) {
+  if (fits) return null;
+  return (
+    <p className="talisbooks-viewer-live-edit__overflow" role="status">
+      {label} is longer than the template text region. Extra words will be clipped
+      so the page design stays intact.
+    </p>
+  );
+}
+
+function TemplatePageEditorCard({
+  page,
+  sideLabel,
+  onUpdatePage,
+}: {
+  page: TalisBooksViewerPage;
+  sideLabel: string;
+  onUpdatePage: (pageId: string, patch: Partial<TalisBooksViewerPage>) => void;
+}) {
+  const role = page.templateRole;
+  const isSpreadRight =
+    page.layout === "centerfold_right" && role !== "intrinsic";
+  const isImageLeaf =
+    page.layout === "split_copy_left" ||
+    (page.layout === "centerfold_left" && role !== "intrinsic");
+  const isIntrinsicImage = page.layout === "split_copy_left";
+  const isIntrinsicCopy = page.layout === "split_copy_right";
+  const isProduct = role === "product-sheet";
+  const captionValue = page.title ?? "";
+  const bodyFit = rm22IntrinsicBodyFits(page.body ?? "");
+  const captionFit = rm22BleedCaptionFits(captionValue);
+
+  return (
+    <section className="talisbooks-viewer-live-edit__card">
+      <header className="talisbooks-viewer-live-edit__card-head">
+        <p className="talisbooks-viewer-live-edit__side">{sideLabel}</p>
+        <p className="talisbooks-viewer-live-edit__page-meta">
+          Page {page.pageNumber}
+          {role ? ` · ${role.replaceAll("-", " ")}` : ""}
+        </p>
+      </header>
+      <p className="talisbooks-viewer-live-edit__locked-note">
+        Design is fixed. Replace the image or edit the text — typography and
+        placement stay with the template.
+      </p>
+
+      {isSpreadRight ? (
+        <p className="talisbooks-viewer-live-edit__locked-note">
+          This is the right half of the same designed spread. Replace the image
+          and edit the text on the left page.
+        </p>
+      ) : null}
+
+      {isProduct && !isSpreadRight ? (
+        <TalisBooksImageField
+          id={`${page.id}-hero`}
+          label="Replace image"
+          replaceOnly
+          value={page.spreadImageUrl ?? page.heroImageUrl ?? ""}
+          onChange={(url) =>
+            onUpdatePage(page.id, {
+              spreadImageUrl: url,
+              heroImageUrl: url,
+            })
+          }
+        />
+      ) : null}
+
+      {isIntrinsicImage ? (
+        <>
+          <TalisBooksImageField
+            id={`${page.id}-hero`}
+            label="Replace image"
+            replaceOnly
+            value={page.heroImageUrl ?? ""}
+            onChange={(url) => onUpdatePage(page.id, { heroImageUrl: url })}
+          />
+          <Field id={`${page.id}-caption`} label="Edit text — image caption">
+            <input
+              id={`${page.id}-caption`}
+              className="talisbooks-viewer-live-edit__input"
+              value={captionValue}
+              onChange={(event) =>
+                onUpdatePage(page.id, { title: event.target.value })
+              }
+            />
+          </Field>
+          <OverflowNote
+            fits={rm22IntrinsicCaptionFits(captionValue).fits}
+            label="Caption"
+          />
+        </>
+      ) : null}
+
+      {isIntrinsicCopy ? (
+        <>
+          <Field id={`${page.id}-title`} label="Edit text — title">
+            <input
+              id={`${page.id}-title`}
+              className="talisbooks-viewer-live-edit__input"
+              value={page.title ?? ""}
+              onChange={(event) =>
+                onUpdatePage(page.id, { title: event.target.value })
+              }
+            />
+          </Field>
+          <Field id={`${page.id}-body`} label="Edit text — body">
+            <textarea
+              id={`${page.id}-body`}
+              className="talisbooks-viewer-live-edit__textarea"
+              rows={8}
+              value={page.body ?? ""}
+              onChange={(event) =>
+                onUpdatePage(page.id, { body: event.target.value })
+              }
+            />
+          </Field>
+          <OverflowNote fits={bodyFit.fits} label="Body" />
+          <Field id={`${page.id}-signoff`} label="Edit text — sign-off">
+            <input
+              id={`${page.id}-signoff`}
+              className="talisbooks-viewer-live-edit__input"
+              value={page.signoff ?? ""}
+              onChange={(event) =>
+                onUpdatePage(page.id, { signoff: event.target.value })
+              }
+            />
+          </Field>
+        </>
+      ) : null}
+
+      {isImageLeaf && !isIntrinsicImage && !isProduct ? (
+        <>
+          <TalisBooksImageField
+            id={`${page.id}-hero`}
+            label="Replace image"
+            replaceOnly
+            value={page.spreadImageUrl ?? page.heroImageUrl ?? ""}
+            onChange={(url) =>
+              onUpdatePage(page.id, {
+                spreadImageUrl: url,
+                heroImageUrl: url,
+              })
+            }
+          />
+          {role === "intro" || role === "outro" ? (
+            <>
+              <Field id={`${page.id}-title`} label="Edit text — title">
+                <input
+                  id={`${page.id}-title`}
+                  className="talisbooks-viewer-live-edit__input"
+                  value={page.title ?? ""}
+                  onChange={(event) =>
+                    onUpdatePage(page.id, { title: event.target.value })
+                  }
+                />
+              </Field>
+              <Field id={`${page.id}-caption`} label="Edit text — caption">
+                <textarea
+                  id={`${page.id}-caption`}
+                  className="talisbooks-viewer-live-edit__textarea"
+                  rows={3}
+                  value={page.body ?? ""}
+                  onChange={(event) =>
+                    onUpdatePage(page.id, { body: event.target.value })
+                  }
+                />
+              </Field>
+            </>
+          ) : (
+            <>
+              <Field id={`${page.id}-caption`} label="Edit text — caption">
+                <textarea
+                  id={`${page.id}-caption`}
+                  className="talisbooks-viewer-live-edit__textarea"
+                  rows={3}
+                  value={page.title ?? ""}
+                  onChange={(event) =>
+                    onUpdatePage(page.id, { title: event.target.value })
+                  }
+                />
+              </Field>
+              <OverflowNote fits={captionFit.fits} label="Caption" />
+            </>
+          )}
+        </>
+      ) : null}
+    </section>
+  );
 }
 
 function Field({
@@ -80,6 +280,16 @@ function PageEditorCard({
           Administrators can replace it globally later.
         </p>
       </section>
+    );
+  }
+
+  if (isTemplatePage(page)) {
+    return (
+      <TemplatePageEditorCard
+        page={page}
+        sideLabel={sideLabel}
+        onUpdatePage={onUpdatePage}
+      />
     );
   }
 
@@ -163,7 +373,7 @@ function PageEditorCard({
           {layout !== "maps" && layout !== "quote" ? (
             <TalisBooksImageField
               id={`${page.id}-hero`}
-              label="Page image"
+              label="Replace image"
               value={page.heroImageUrl ?? ""}
               onChange={(url) => onUpdatePage(page.id, { heroImageUrl: url })}
             />
@@ -322,8 +532,11 @@ export default function TalisBooksViewerLiveEditor({
 }: TalisBooksViewerLiveEditorProps) {
   const hasPages = Boolean(leftPage || rightPage);
   const singleMode = viewMode === "single";
+  const templateBook = isTemplatePage(leftPage) || isTemplatePage(rightPage);
+  const allowAddPage = Boolean(onAddPage) && !templateBook && !pageInsertLocked;
   const anchorPageId = (rightPage ?? leftPage)?.id ?? null;
-  const showAddPage = Boolean(onAddPage) || pageInsertLocked;
+  const showAddPage =
+    !templateBook && (Boolean(onAddPage) || pageInsertLocked);
 
   return (
     <aside
@@ -335,9 +548,11 @@ export default function TalisBooksViewerLiveEditor({
     >
       <div className="talisbooks-viewer-live-edit__header">
         <p className="talisbooks-viewer-live-edit__eyebrow">Live edit</p>
-        <h2 className="talisbooks-viewer-live-edit__title">Page editor</h2>
+        <h2 className="talisbooks-viewer-live-edit__title">
+          {templateBook ? "Edit text & replace image" : "Page editor"}
+        </h2>
         <p className="talisbooks-viewer-live-edit__context">{bindingLabel}</p>
-        {pageInsertLocked ? (
+        {pageInsertLocked && !templateBook ? (
           <p className="talisbooks-viewer-live-edit__locked-note">
             Demonstration only — inserting pages is locked.
           </p>
@@ -365,16 +580,16 @@ export default function TalisBooksViewerLiveEditor({
             <p className="talisbooks-viewer-live-edit__empty">
               Open the book to edit the current {singleMode ? "page" : "spread"} live.
             </p>
-            {onAddPage && !pageInsertLocked ? (
+            {allowAddPage ? (
               <button
                 type="button"
                 className="talisbooks-viewer-live-edit__add-page"
-                onClick={() => onAddPage(null)}
+                onClick={() => onAddPage?.(null)}
               >
                 <Plus className="h-3.5 w-3.5" aria-hidden="true" />
                 Add first page
               </button>
-            ) : pageInsertLocked ? (
+            ) : pageInsertLocked && !templateBook ? (
               <button
                 type="button"
                 className="talisbooks-viewer-live-edit__add-page"

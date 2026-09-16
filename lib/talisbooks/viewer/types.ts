@@ -18,7 +18,13 @@ export type TalisBooksViewerPageLayout =
   /** Level 3 custom / root-account content. */
   | "custom_content"
   /** Level 3 Glasshouse™ + pricing global content. */
-  | "global_content";
+  | "global_content"
+  /**
+   * RM22 / Jarlberg split-copy spread: left leaf is the image slot,
+   * right leaf is the designed text region (Intrinsic Value).
+   */
+  | "split_copy_left"
+  | "split_copy_right";
 
 export interface TalisBooksViewerPage {
   id: string;
@@ -82,6 +88,17 @@ export interface TalisBooksViewerPage {
   spreadMat?: boolean;
   pricingLine?: string;
   disclaimer?: string;
+  /** RM22 template id when this page is a locked magazine layout. */
+  templateId?: "rm22";
+  /** RM22 interior role — drives which content slots the editor exposes. */
+  templateRole?:
+    | "product-sheet"
+    | "intro"
+    | "photo-caption"
+    | "intrinsic"
+    | "outro";
+  /** Template sign-off (Intrinsic Value right leaf). */
+  signoff?: string;
 }
 
 export interface TalisBooksViewerBook {

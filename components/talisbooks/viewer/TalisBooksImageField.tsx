@@ -24,6 +24,7 @@ interface TalisBooksImageFieldProps {
   label: string;
   value?: string;
   onChange: (url: string) => void;
+  replaceOnly?: boolean;
 }
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -305,6 +306,7 @@ export default function TalisBooksImageField({
   label,
   value = "",
   onChange,
+  replaceOnly = false,
 }: TalisBooksImageFieldProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
@@ -327,6 +329,10 @@ export default function TalisBooksImageField({
     }
     try {
       const dataUrl = await readFileAsDataUrl(file);
+      if (replaceOnly) {
+        onChange(dataUrl);
+        return;
+      }
       setCropSrc(dataUrl);
     } catch {
       setError("Could not open that file.");
@@ -355,8 +361,9 @@ export default function TalisBooksImageField({
           onClick={pickFile}
         >
           {value ? <Replace className="h-3.5 w-3.5" /> : <ImagePlus className="h-3.5 w-3.5" />}
-          {value ? "Replace" : "Upload"}
+          {value ? "Replace image" : "Add image"}
         </button>
+        {replaceOnly ? null : (
         <button
           type="button"
           className="talisbooks-viewer-image-field__btn"
@@ -372,6 +379,8 @@ export default function TalisBooksImageField({
           <Crop className="h-3.5 w-3.5" />
           Crop
         </button>
+        )}
+        {replaceOnly ? null : (
         <button
           type="button"
           className="talisbooks-viewer-image-field__btn"
@@ -382,6 +391,7 @@ export default function TalisBooksImageField({
           <Trash2 className="h-3.5 w-3.5" />
           Remove
         </button>
+        )}
       </div>
 
       <input

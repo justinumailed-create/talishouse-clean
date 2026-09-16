@@ -23,6 +23,8 @@ export type AdminEbookPageRow = {
   body: string;
   isPermanent: boolean;
   systemKey: string | null;
+  templateId: string | null;
+  templateRole: string | null;
 };
 
 function contentRecord(value: unknown): Record<string, unknown> {
@@ -64,6 +66,9 @@ function rowToAdminPage(row: {
     body: typeof content.body === "string" ? content.body : "",
     isPermanent,
     systemKey,
+    templateId: typeof content.templateId === "string" ? content.templateId : null,
+    templateRole:
+      typeof content.templateRole === "string" ? content.templateRole : null,
   };
 }
 
@@ -272,13 +277,21 @@ export async function replaceAdminEbookPageImage(input: {
     return { success: false, error: "Provide an image URL or upload a file." };
   }
 
+  const layout = typeof content.layout === "string" ? content.layout : "";
+  const isCenterfold =
+    layout === "centerfold_left" || layout === "centerfold_right";
+  const nextContent = {
+    ...content,
+    heroImageUrl: imageUrl,
+    ...(isCenterfold || typeof content.spreadImageUrl === "string"
+      ? { spreadImageUrl: imageUrl }
+      : {}),
+  };
+
   const { error: updateError } = await supabase
     .from("talisbooks_book_pages")
     .update({
-      content: {
-        ...content,
-        heroImageUrl: imageUrl,
-      },
+      content: nextContent,
       updated_at: new Date().toISOString(),
     })
     .eq("id", input.pageId)
@@ -287,6 +300,41 @@ export async function replaceAdminEbookPageImage(input: {
   if (updateError) {
     return { success: false, error: updateError.message };
   }
+
+  if (isCenterfold && content.templateId === "rm22") {
+    const { data: siblings } = await supabase
+      .from("talisbooks_book_pages")
+      .select("id, page_number, content")
+      .eq("book_id", input.bookId)
+      .order("page_number", { ascending: true });
+    const index = (siblings ?? []).findIndex((row) => row.id === input.pageId);
+    const mateIndex = layout === "centerfold_left" ? index + 1 : index - 1;
+    const mate = index >= 0 ? siblings?.[mateIndex] : undefined;
+    const mateContent = contentRecord(mate?.content);
+    const mateLayout =
+      typeof mateContent.layout === "string" ? mateContent.layout : "";
+    const expectedMate =
+      layout === "centerfold_left" ? "centerfold_right" : "centerfold_left";
+    if (
+      mate &&
+      mateLayout === expectedMate &&
+      mateContent.templateId === "rm22"
+    ) {
+      await supabase
+        .from("talisbooks_book_pages")
+        .update({
+          content: {
+            ...mateContent,
+            heroImageUrl: imageUrl,
+            spreadImageUrl: imageUrl,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", mate.id)
+        .eq("book_id", input.bookId);
+    }
+  }
+
   return { success: true, imageUrl };
 }
 

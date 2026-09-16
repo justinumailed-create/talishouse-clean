@@ -12,6 +12,7 @@ import {
   parseSelfServiceBookOptions,
   parseSelfServiceCaptions,
 } from "@/lib/talisbooks/self-service-page-plan";
+import { parseRm22TemplatePayload } from "@/lib/talisbooks/rm22-template";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -112,6 +113,9 @@ export async function POST(request: Request) {
             String(formData.get("bookOptions") || ""),
           ),
           captions: parseSelfServiceCaptions(String(formData.get("captions") || "")),
+          rm22Template: parseRm22TemplatePayload(
+            String(formData.get("rm22Template") || ""),
+          ),
           onProgress: async (event) => {
             send(event);
           },
