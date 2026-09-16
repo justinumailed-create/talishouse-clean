@@ -39,8 +39,11 @@ export default function AdminLoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="w-full max-w-sm px-6">
+    <main className="min-h-screen bg-white flex items-center justify-center px-6">
+      <div
+        className="w-full rounded-2xl border border-neutral-200 bg-white px-6 py-8 shadow-sm"
+        style={{ maxWidth: 384 }}
+      >
         <h1 className="text-2xl font-semibold text-center mb-2">Admin Login</h1>
         <p className="text-sm text-[#6e6e73] text-center mb-8">
           Enter your authorized admin FAST code
@@ -55,7 +58,9 @@ export default function AdminLoginForm() {
                 setFastCode(e.target.value);
                 setError("");
               }}
-              className={`input text-center font-mono uppercase tracking-[0.3em] ${error ? "border-red-500" : ""}`}
+              className={`w-full h-12 px-4 text-center font-mono uppercase tracking-[0.3em] border rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20 ${
+                error ? "border-red-500" : "border-neutral-200"
+              }`}
               placeholder="FAST CODE"
               autoCorrect="off"
               autoCapitalize="characters"
@@ -71,6 +76,7 @@ export default function AdminLoginForm() {
 
         <div className="mt-8 text-center">
           <button
+            type="button"
             onClick={() => {
               router.push("/");
               router.refresh();
@@ -81,6 +87,6 @@ export default function AdminLoginForm() {
           </button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
