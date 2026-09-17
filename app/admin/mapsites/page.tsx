@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { requireAdminPage } from "@/lib/admin-auth";
 import { listMapSitesForAdmin } from "@/lib/mapsite-service";
+import AdminMapSiteThumbnailCard from "@/components/admin/AdminMapSiteThumbnailCard";
 
 export const dynamic = "force-dynamic";
 
@@ -23,26 +23,9 @@ export default async function AdminMapSitesPage() {
           No Mapsites™ found. New submissions appear here after a build request is generated.
         </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {mapsites.map((mapsite) => (
-            <li key={mapsite.fastCode}>
-              <Link
-                href={`/admin/mapsites/${mapsite.fastCode}`}
-                className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white px-4 py-3 hover:bg-neutral-50"
-              >
-                <div>
-                  <p className="font-mono text-sm font-medium text-neutral-900">
-                    {mapsite.fastCode}
-                  </p>
-                  <p className="text-sm text-neutral-500">
-                    {mapsite.propertyTitle || "Untitled Mapsite™"}
-                  </p>
-                </div>
-                <span className="text-xs uppercase tracking-wide text-neutral-400">
-                  {mapsite.status}
-                </span>
-              </Link>
-            </li>
+            <AdminMapSiteThumbnailCard key={mapsite.fastCode} mapsite={mapsite} />
           ))}
         </ul>
       )}

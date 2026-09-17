@@ -10,6 +10,7 @@ import {
 } from "@/lib/talisbooks/rm22-template";
 import {
   RM22_BLEED_CAPTION,
+  RM22_BLEED_IMAGE,
   RM22_BLEED_TITLE,
   RM22_COLOR,
   RM22_INTRINSIC_BODY,
@@ -18,14 +19,14 @@ import {
   RM22_INTRINSIC_SIGNOFF,
   RM22_INTRINSIC_TITLE,
   RM22_TYPE,
+  type Rm22Box,
 } from "@/lib/talisbooks/rm22-layout";
 
 const SANS = RM22_TYPE.sans;
-const SCRIPT = RM22_TYPE.script;
 const HAND = RM22_TYPE.hand;
 const ROUNDED = RM22_TYPE.rounded;
 
-const BAND = RM22_COLOR.band;
+const CAPTION_OVERLAY = RM22_COLOR.captionOverlay;
 const LIME = RM22_COLOR.lime;
 
 async function loadImage(src: string | File): Promise<HTMLImageElement> {
@@ -69,6 +70,18 @@ async function fileFromHref(href: string, fileName: string): Promise<File> {
   return new File([blob], fileName, { type: blob.type || "image/jpeg" });
 }
 
+function imageSize(image: CanvasImageSource): { iw: number; ih: number } {
+  const iw =
+    "naturalWidth" in image
+      ? (image as HTMLImageElement).naturalWidth || (image as HTMLImageElement).width
+      : (image as CanvasImageSource as HTMLCanvasElement).width;
+  const ih =
+    "naturalHeight" in image
+      ? (image as HTMLImageElement).naturalHeight || (image as HTMLImageElement).height
+      : (image as CanvasImageSource as HTMLCanvasElement).height;
+  return { iw, ih };
+}
+
 function coverDraw(
   ctx: CanvasRenderingContext2D,
   image: CanvasImageSource,
@@ -77,14 +90,7 @@ function coverDraw(
   dw: number,
   dh: number,
 ) {
-  const iw =
-    "naturalWidth" in image
-      ? (image as HTMLImageElement).naturalWidth || (image as HTMLImageElement).width
-      : (image as HTMLCanvasElement).width;
-  const ih =
-    "naturalHeight" in image
-      ? (image as HTMLImageElement).naturalHeight || (image as HTMLImageElement).height
-      : (image as HTMLCanvasElement).height;
+  const { iw, ih } = imageSize(image);
   if (!iw || !ih) return;
   const scale = Math.max(dw / iw, dh / ih);
   const sw = dw / scale;
@@ -92,6 +98,22 @@ function coverDraw(
   const sx = (iw - sw) / 2;
   const sy = (ih - sh) / 2;
   ctx.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
+}
+
+function containDraw(
+  ctx: CanvasRenderingContext2D,
+  image: CanvasImageSource,
+  dx: number,
+  dy: number,
+  dw: number,
+  dh: number,
+) {
+  const { iw, ih } = imageSize(image);
+  if (!iw || !ih) return;
+  const scale = Math.min(dw / iw, dh / ih);
+  const tw = iw * scale;
+  const th = ih * scale;
+  ctx.drawImage(image, dx + (dw - tw) / 2, dy + (dh - th) / 2, tw, th);
 }
 
 function wrapLines(
@@ -136,11 +158,26 @@ function makePage(
   return { canvas, ctx };
 }
 
-async function sourceOrDefault(
-  file: File | null,
-  href: string,
-): Promise<HTMLImageElement> {
-  return loadImage(file ?? href);
+async function loadPhoto(file: File | null): Promise<HTMLImageElement | null> {
+  if (!file) return null;
+  return loadImage(file);
+}
+
+function fillImageSlot(
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement | null,
+  box: Rm22Box,
+  fit: "cover" | "contain" = "cover",
+  emptyColor: string = RM22_COLOR.lime,
+) {
+  ctx.fillStyle = emptyColor;
+  ctx.fillRect(box.x, box.y, box.width, box.height);
+  if (!image) return;
+  if (fit === "contain") {
+    containDraw(ctx, image, box.x, box.y, box.width, box.height);
+    return;
+  }
+  coverDraw(ctx, image, box.x, box.y, box.width, box.height);
 }
 
 function drawCaptionBar(
@@ -148,19 +185,20 @@ function drawCaptionBar(
   caption: string,
   options: { x: number; y: number; width: number; height: number },
 ) {
-  ctx.fillStyle = BAND;
+  ctx.fillStyle = CAPTION_OVERLAY;
   ctx.fillRect(options.x, options.y, options.width, options.height);
   const text = caption.trim();
   if (!text) return;
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = RM22_COLOR.caption;
   ctx.font = `36px ${HAND}`;
   ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
+  ctx.textBaseline = "alphabetic";
   const lines = wrapLines(ctx, text, options.width - 80);
-  const lineHeight = 40;
-  const startY = options.y + options.height / 2 - ((lines.length - 1) * lineHeight) / 2;
+  const lineHeight = 48;
+  const baseline =
+    options.y + options.height / 2 + 10 - ((lines.length - 1) * lineHeight) / 2;
   lines.forEach((line, index) => {
-    ctx.fillText(line, options.x + options.width / 2, startY + index * lineHeight);
+    ctx.fillText(line, options.x + options.width / 2, baseline + index * lineHeight);
   });
   ctx.textAlign = "left";
 }
@@ -174,8 +212,13 @@ function drawCaptionBar(
  */
 async function composeFront(slots: Rm22SlotState): Promise<HTMLCanvasElement> {
   const { canvas, ctx } = makePage(RM22_COVER_WIDTH, RM22_COVER_HEIGHT);
-  const image = await sourceOrDefault(slots.frontImage, RM22_ASSETS.front);
-  coverDraw(ctx, image, 0, 0, canvas.width, canvas.height);
+  fillImageSlot(
+    ctx,
+    await loadPhoto(slots.frontImage),
+    { x: 0, y: 0, width: canvas.width, height: canvas.height },
+    "contain",
+    "#000000",
+  );
 
   const fadeTop = Math.round(canvas.height * 0.58);
   const gradient = ctx.createLinearGradient(0, fadeTop, 0, canvas.height);
@@ -235,33 +278,46 @@ async function composeFront(slots: Rm22SlotState): Promise<HTMLCanvasElement> {
 
 async function composeBack(slots: Rm22SlotState): Promise<HTMLCanvasElement> {
   const { canvas, ctx } = makePage(RM22_COVER_WIDTH, RM22_COVER_HEIGHT);
-  const image = await sourceOrDefault(slots.backAgentImage, RM22_ASSETS.agent);
-  coverDraw(ctx, image, 0, 0, canvas.width, canvas.height);
+  const image = slots.backAgentImage
+    ? await loadPhoto(slots.backAgentImage)
+    : await loadImage(RM22_ASSETS.agent);
+  fillImageSlot(
+    ctx,
+    image,
+    {
+      x: 0,
+      y: 0,
+      width: canvas.width,
+      height: canvas.height,
+    },
+    "cover",
+    "#000000",
+  );
 
   const bandTop = Math.round(canvas.height * 0.68);
-  const gradient = ctx.createLinearGradient(0, bandTop - 80, 0, canvas.height);
-  gradient.addColorStop(0, "rgba(0,0,0,0)");
-  gradient.addColorStop(0.35, "rgba(0,0,0,0.55)");
-  gradient.addColorStop(1, "rgba(0,0,0,0.82)");
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, bandTop - 80, canvas.width, canvas.height - bandTop + 80);
+  ctx.fillStyle = CAPTION_OVERLAY;
+  ctx.fillRect(0, bandTop, canvas.width, canvas.height - bandTop);
 
   ctx.textAlign = "center";
-  ctx.fillStyle = LIME;
-  ctx.font = `italic 36px ${SANS}`;
-  ctx.textBaseline = "top";
-  ctx.fillText(slots.backKicker.trim(), canvas.width / 2, bandTop + 24);
-
   ctx.fillStyle = "#ffffff";
-  ctx.font = `64px ${SCRIPT}`;
-  ctx.fillText(slots.agentName.trim() || "Your Name", canvas.width / 2, bandTop + 90);
+  ctx.textBaseline = "bottom";
+
+  const phoneY = canvas.height - 48;
+  const nameY = slots.agentPhone.trim() ? phoneY - 52 : phoneY;
+  const kickerY = nameY - 70;
+
+  ctx.font = `700 48px ${SANS}`;
+  ctx.fillText(slots.backKicker.trim(), canvas.width / 2, kickerY);
+
+  ctx.font = `500 32px ${SANS}`;
+  ctx.fillText(slots.agentName.trim() || "Your Name", canvas.width / 2, nameY);
 
   if (slots.agentPhone.trim()) {
-    ctx.font = `italic 28px ${SANS}`;
+    ctx.font = `italic 26px ${SANS}`;
     ctx.fillText(
       `Please message me @ ${slots.agentPhone.trim()}`,
       canvas.width / 2,
-      bandTop + 190,
+      phoneY,
     );
   }
   ctx.textAlign = "left";
@@ -272,8 +328,7 @@ async function composeTitleCaption(
   item: Rm22InteriorPlanItem,
 ): Promise<HTMLCanvasElement> {
   const { canvas, ctx } = makePage();
-  const image = await sourceOrDefault(item.image, item.assetHref);
-  coverDraw(ctx, image, 0, 0, canvas.width, canvas.height);
+  fillImageSlot(ctx, await loadPhoto(item.image), RM22_BLEED_IMAGE.box);
 
   const title = item.title?.trim() || "";
   if (title) {
@@ -281,11 +336,17 @@ async function composeTitleCaption(
     ctx.font = `700 ${RM22_BLEED_TITLE.style.fontSize}px ${ROUNDED}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
+    ctx.shadowColor = "rgba(0,0,0,0.6)";
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 2;
     ctx.fillText(
       title,
       RM22_BLEED_TITLE.box.x + RM22_BLEED_TITLE.box.width / 2,
       RM22_BLEED_TITLE.box.y,
     );
+    ctx.shadowColor = "transparent";
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
     ctx.textAlign = "left";
   }
 
@@ -297,8 +358,7 @@ async function composePhotoCaption(
   item: Rm22InteriorPlanItem,
 ): Promise<HTMLCanvasElement> {
   const { canvas, ctx } = makePage();
-  const image = await sourceOrDefault(item.image, item.assetHref);
-  coverDraw(ctx, image, 0, 0, canvas.width, canvas.height);
+  fillImageSlot(ctx, await loadPhoto(item.image), RM22_BLEED_IMAGE.box);
   drawCaptionBar(ctx, item.caption || "", RM22_BLEED_CAPTION.box);
   return canvas;
 }
@@ -310,12 +370,8 @@ async function composeIntrinsic(
   ctx.fillStyle = RM22_COLOR.paper;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  const imageBox = RM22_INTRINSIC_IMAGE.box;
-  const image = await sourceOrDefault(item.image, item.assetHref);
-  coverDraw(ctx, image, imageBox.x, imageBox.y, imageBox.width, imageBox.height);
-
-  const captionBox = RM22_INTRINSIC_CAPTION.box;
-  drawCaptionBar(ctx, item.caption || "", captionBox);
+  fillImageSlot(ctx, await loadPhoto(item.image), RM22_INTRINSIC_IMAGE.box);
+  drawCaptionBar(ctx, item.caption || "", RM22_INTRINSIC_CAPTION.box);
 
   const titleBox = RM22_INTRINSIC_TITLE.box;
   ctx.fillStyle = RM22_INTRINSIC_TITLE.style.color;

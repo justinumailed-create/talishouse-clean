@@ -7,6 +7,9 @@ import {
 import TalisBooksCoverPreview from "@/components/talisbooks/covers/TalisBooksCoverPreview";
 import type { TalisBooksViewerPage } from "@/lib/talisbooks/viewer";
 import {
+  RM22_BLEED_CAPTION,
+  RM22_BLEED_TITLE,
+  RM22_BLEED_TITLE_SHADOW,
   RM22_INTRINSIC_BODY,
   RM22_INTRINSIC_CAPTION,
   RM22_INTRINSIC_SIGNOFF,
@@ -16,6 +19,7 @@ import {
   boxToPagePercent,
   fontSizeCqh,
 } from "@/lib/talisbooks/rm22-layout";
+import { isRm22PhotoPlaceholderUrl } from "@/lib/talisbooks/rm22-template";
 
 interface TalisBooksPageRendererProps {
   page: TalisBooksViewerPage;
@@ -167,20 +171,32 @@ function AgentSummaryPageView({ page }: { page: TalisBooksViewerPage }) {
 function TemplateCaptionBar({
   text,
   style,
+  spreadLeaf,
 }: {
   text: string;
   style: { left: string; top: string; width: string; height: string };
+  spreadLeaf?: "left" | "right";
 }) {
   const trimmed = text.trim();
   return (
-    <div className="talisbooks-viewer-page__template-caption" style={style}>
+    <div
+      className={[
+        "talisbooks-viewer-page__template-caption",
+        spreadLeaf ? "talisbooks-viewer-page__template-caption--spread" : "",
+        spreadLeaf ? `talisbooks-viewer-page__template-caption--${spreadLeaf}` : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={spreadLeaf ? undefined : style}
+    >
       {trimmed ? <p>{trimmed}</p> : null}
     </div>
   );
 }
 
 function SplitCopyLeftView({ page }: { page: TalisBooksViewerPage }) {
-  const imageUrl = page.heroImageUrl?.trim() || "";
+  const rawUrl = page.heroImageUrl?.trim() || "";
+  const imageUrl = isRm22PhotoPlaceholderUrl(rawUrl) ? "" : rawUrl;
   const caption = page.title?.trim() || "";
   const captionPos = boxToPagePercent(RM22_INTRINSIC_CAPTION.box, RM22_LEFT_LEAF_PAGE);
   return (
@@ -262,32 +278,30 @@ function TemplateSpreadOverlays({
     role === "photo-caption"
       ? page.title?.trim() || ""
       : page.body?.trim() || "";
-  const shiftClass =
-    leaf === "right"
-      ? "talisbooks-viewer-page__template-spread-layer--right"
-      : "talisbooks-viewer-page__template-spread-layer--left";
+  const pageBox = leaf === "right" ? RM22_RIGHT_LEAF_PAGE : RM22_LEFT_LEAF_PAGE;
+  const titlePos = boxToPagePercent(RM22_BLEED_TITLE.box, pageBox);
+  const captionPos = boxToPagePercent(RM22_BLEED_CAPTION.box, pageBox);
   return (
     <>
       {heading ? (
         <p
-          className={[
-            "talisbooks-viewer-page__template-bleed-title",
-            shiftClass,
-          ].join(" ")}
+          className="talisbooks-viewer-page__template-bleed-title"
+          style={{
+            ...titlePos,
+            fontSize: fontSizeCqh(RM22_BLEED_TITLE.style.fontSize),
+            lineHeight: fontSizeCqh(RM22_BLEED_TITLE.style.lineHeight),
+            color: RM22_BLEED_TITLE.style.color,
+            textShadow: RM22_BLEED_TITLE_SHADOW,
+          }}
         >
           {heading}
         </p>
       ) : null}
-      {caption ? (
-        <div
-          className={[
-            "talisbooks-viewer-page__template-spread-caption",
-            shiftClass,
-          ].join(" ")}
-        >
-          <p>{caption}</p>
-        </div>
-      ) : null}
+      <TemplateCaptionBar
+        text={caption}
+        style={captionPos}
+        spreadLeaf={leaf}
+      />
     </>
   );
 }
@@ -357,7 +371,8 @@ function ContinuousSpreadPageView({ page }: { page: TalisBooksViewerPage }) {
   const skipped = page.captionSkipped === true;
   const captionText = skipped ? "" : page.title?.trim() || "";
   const leaf = page.layout === "centerfold_right" ? "right" : "left";
-  const imageUrl = page.spreadImageUrl?.trim() || page.heroImageUrl?.trim() || "";
+  const rawUrl = page.spreadImageUrl?.trim() || page.heroImageUrl?.trim() || "";
+  const imageUrl = isRm22PhotoPlaceholderUrl(rawUrl) ? "" : rawUrl;
   const showCaptionText = Boolean(captionText) && leaf === "left";
   const templateOverlay = Boolean(page.templateId && page.templateRole);
 
@@ -382,7 +397,10 @@ function ContinuousSpreadPageView({ page }: { page: TalisBooksViewerPage }) {
             draggable={false}
           />
         ) : (
-          <div className="talisbooks-viewer-page__facing-empty" aria-hidden="true" />
+          <div
+            className="talisbooks-viewer-page__split-image-empty"
+            aria-hidden="true"
+          />
         )}
         {templateOverlay ? (
           <TemplateSpreadOverlays page={page} leaf={leaf} />

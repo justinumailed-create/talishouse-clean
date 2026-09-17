@@ -8,29 +8,18 @@ export type AdminNavItem = {
 /** Site-ops tools: GlobalContent titles, build requests, Mapsites, Talisbooks / shelves. */
 export const ADMIN_SITE_OPS_NAV: readonly AdminNavItem[] = [
   { href: "/admin/dashboard", label: "Dashboard" },
-  { href: "/admin/content", label: "Content" },
   { href: "/admin/build-requests", label: "Build requests" },
   { href: "/admin/mapsites", label: "Mapsites" },
   { href: "/admin/talisbooks", label: "Talisbooks™" },
   { href: "/admin/talisbooks/bookshelves", label: "Bookshelves" },
 ];
 
-/** SUPERADMIN product tools: real platform CMS/marketing, FAST Codes. */
+/** SUPERADMIN product tools: FAST Codes. */
 export const ADMIN_SUPERADMIN_NAV: readonly AdminNavItem[] = [
-  { href: "/admin/platform-content", label: "Platform Content" },
   { href: "/admin/fast-codes", label: "FAST Codes" },
 ];
 
 const ADMIN_FULL_EXTRA_NAV: readonly AdminNavItem[] = [
-  { href: "/admin/associates", label: "Associates" },
-  { href: "/admin/talisbot", label: "TalisBOT" },
-  { href: "/admin/products", label: "Products" },
-  { href: "/admin/leads", label: "Leads" },
-  { href: "/admin/leads-simulation", label: "Leads Simulation" },
-  { href: "/admin/deals", label: "Deals" },
-  { href: "/admin/users", label: "Users" },
-  { href: "/admin/applications", label: "Associate Apps" },
-  { href: "/admin/project-applications", label: "Project Apps" },
   { href: "/admin/registrations", label: "Registrations" },
   { href: "/admin/marketing", label: "Marketing" },
   { href: "/admin/talismaps", label: "Talismaps™" },

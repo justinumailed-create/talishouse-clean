@@ -32,15 +32,12 @@ import {
   isClaimable,
   MAPSITE_APP_PATH,
   pinPhaseLabel,
-  publishedMapSitePath,
 } from "@/lib/talispros/mapsite-state";
 import {
   getMapSiteOnboardingPhase,
 } from "@/lib/talispros/mapsite-onboarding-phase";
 import { ROUTES } from "@/lib/routes";
-import Link from "next/link";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
-import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import MapSiteExpressInterestCard from "./MapSiteExpressInterestCard";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
 import MapSiteMarketPartnerCard from "./MapSiteMarketPartnerCard";
@@ -547,13 +544,6 @@ function MapSiteChrome({
     onboardingMode === "assisted"
       ? "Register Account now"
       : "Register Account now";
-  const publishedCode = mapsite.fast_code?.trim() || "";
-  const publishedHref =
-    publishedCode &&
-    (isIssuedFastCode(publishedCode) || isDemoMapSiteCode(publishedCode))
-      ? publishedMapSitePath(publishedCode)
-      : null;
-
   // Express Interest only after payment. Checkout uses claim-form planType;
   // auto-reveals above the marketing sidebar 10s after load (or immediately via Activate).
   const registrationCard =
@@ -576,16 +566,6 @@ function MapSiteChrome({
 
   return (
     <div className="relative flex h-dvh w-screen flex-col overflow-hidden bg-neutral-900">
-      {publishedHref ? (
-        <div className="z-30 flex shrink-0 items-center justify-center border-b border-white/10 bg-neutral-950 px-4 py-2">
-          <Link
-            href={publishedHref}
-            className="text-sm font-medium text-white underline decoration-white/40 underline-offset-4 transition hover:decoration-white"
-          >
-            View published site
-          </Link>
-        </div>
-      ) : null}
       <div
         ref={rootRef}
         className="relative min-h-0 flex-1 overflow-hidden bg-neutral-900"

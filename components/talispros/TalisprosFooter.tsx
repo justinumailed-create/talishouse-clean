@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { isDemoMapSitePath } from "@/lib/talispros/demo-mapsite";
+import { isTalisprosMarketLayoutPath } from "@/lib/talispros/market-pages";
 import { isTalisprosStartPath } from "@/lib/talispros/start-content";
 
 export default function TalisprosFooter() {
@@ -10,7 +11,7 @@ export default function TalisprosFooter() {
   if (
     pathname.startsWith("/talispros/mapsites/") ||
     isTalisprosStartPath(pathname) ||
-    pathname.startsWith("/talispros/markets/") ||
+    isTalisprosMarketLayoutPath(pathname) ||
     isDemoMapSitePath(pathname)
   ) {
     return null;

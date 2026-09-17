@@ -1,4 +1,4 @@
-import { RM22_ASSETS, RM22_PRODUCTS } from "@/lib/talisbooks/rm22-template";
+import { RM22_ASSETS, RM22_DESIGN_COMPS, RM22_PRODUCTS } from "@/lib/talisbooks/rm22-template";
 import {
   getMapSiteEbookContext,
   loadEbookPageMedia,
@@ -12,15 +12,17 @@ export const MAPSITE_OG_BRAND_MARK = "/logo-mark.png";
 
 const PUBLIC_OG_ORIGIN = "https://www.talispros.com";
 
-const TEMPLATE_ASSET_PATHS = new Set<string>([
-  RM22_ASSETS.front,
-  RM22_ASSETS.agent,
-  RM22_ASSETS.intro,
-  RM22_ASSETS.caption,
-  RM22_ASSETS.intrinsic,
-  RM22_ASSETS.outro,
-  ...RM22_PRODUCTS.map((product) => product.href),
-]);
+const TEMPLATE_ASSET_PATHS = new Set<string>(
+  [
+    RM22_ASSETS.agent,
+    RM22_DESIGN_COMPS.front,
+    RM22_DESIGN_COMPS.intro,
+    RM22_DESIGN_COMPS.caption,
+    RM22_DESIGN_COMPS.intrinsic,
+    RM22_DESIGN_COMPS.outro,
+    ...RM22_PRODUCTS.map((product) => product.href),
+  ].filter(Boolean),
+);
 
 export function publicOgOrigin(): string {
   return (

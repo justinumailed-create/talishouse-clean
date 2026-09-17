@@ -1,4 +1,7 @@
 import RahulBuildAssistClient from "@/components/talispros/RahulBuildAssistClient";
+import TalisprosMarketPageLayout from "@/components/talispros/TalisprosMarketPageLayout";
+import { parseRegistrationMarket } from "@/lib/registration-market";
+import { CLAIM_A_MARKET_PAGE } from "@/lib/talispros/market-pages";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -14,7 +17,19 @@ export default async function AssistedBuildMapSitePage({
   searchParams: SearchParams;
 }) {
   const params = await searchParams;
-  const audience = firstParam(params.audience)?.trim().toLowerCase() || "listings";
+  const audienceParam =
+    firstParam(params.audience)?.trim().toLowerCase() || "listings";
+  const audience = parseRegistrationMarket(audienceParam) ?? "listings";
 
-  return <RahulBuildAssistClient initialAudienceType={audience} />;
+  const content = {
+    ...CLAIM_A_MARKET_PAGE,
+    title: "Have Me Build It",
+    registrationMarket: audience,
+  };
+
+  return (
+    <TalisprosMarketPageLayout content={content}>
+      <RahulBuildAssistClient initialAudienceType={audienceParam} />
+    </TalisprosMarketPageLayout>
+  );
 }

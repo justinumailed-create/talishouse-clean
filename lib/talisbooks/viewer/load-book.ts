@@ -13,6 +13,7 @@ import type {
 } from "./types";
 import type { TalisBooksPageRole } from "../types";
 import type { TalisBooksCoverTemplateId } from "../covers";
+import { isRm22PhotoPlaceholderUrl } from "@/lib/talisbooks/rm22-template";
 
 function asLayout(value: unknown): TalisBooksViewerPageLayout | undefined {
   if (
@@ -175,6 +176,27 @@ export async function getViewerBookBySlug(
               : skipCoverFallback
                 ? undefined
                 : coverImageUrl || undefined;
+          const templateId = content.templateId === "rm22" ? "rm22" as const : undefined;
+          const templateRole =
+            content.templateRole === "product-sheet" ||
+            content.templateRole === "intro" ||
+            content.templateRole === "photo-caption" ||
+            content.templateRole === "intrinsic" ||
+            content.templateRole === "outro"
+              ? content.templateRole
+              : undefined;
+          const storedSpread =
+            typeof content.spreadImageUrl === "string"
+              ? content.spreadImageUrl
+              : undefined;
+          const photoSlot =
+            templateId === "rm22" && templateRole !== "product-sheet";
+          const heroImageUrl = isGlasshouse
+            ? glasshouse.spreadImageUrl
+            : storedHero || heroFallback;
+          const spreadImageUrl = isGlasshouse
+            ? glasshouse.spreadImageUrl
+            : storedSpread;
           return {
             id: page.id,
             pageNumber: page.page_number,
@@ -186,14 +208,14 @@ export async function getViewerBookBySlug(
             subtitle:
               typeof content.subtitle === "string" ? content.subtitle : undefined,
             body: typeof content.body === "string" ? content.body : undefined,
-            heroImageUrl: isGlasshouse
-              ? glasshouse.spreadImageUrl
-              : storedHero || heroFallback,
-            spreadImageUrl: isGlasshouse
-              ? glasshouse.spreadImageUrl
-              : typeof content.spreadImageUrl === "string"
-                ? content.spreadImageUrl
-                : undefined,
+            heroImageUrl:
+              photoSlot && isRm22PhotoPlaceholderUrl(heroImageUrl)
+                ? undefined
+                : heroImageUrl,
+            spreadImageUrl:
+              photoSlot && isRm22PhotoPlaceholderUrl(spreadImageUrl)
+                ? undefined
+                : spreadImageUrl,
             layout,
             coverTemplateId: asCoverTemplateId(content.coverTemplateId),
             latitude:
@@ -265,15 +287,8 @@ export async function getViewerBookBySlug(
               typeof content.disclaimer === "string"
                 ? content.disclaimer
                 : undefined,
-            templateId: content.templateId === "rm22" ? "rm22" : undefined,
-            templateRole:
-              content.templateRole === "product-sheet" ||
-              content.templateRole === "intro" ||
-              content.templateRole === "photo-caption" ||
-              content.templateRole === "intrinsic" ||
-              content.templateRole === "outro"
-                ? content.templateRole
-                : undefined,
+            templateId,
+            templateRole,
             signoff:
               typeof content.signoff === "string" ? content.signoff : undefined,
           };

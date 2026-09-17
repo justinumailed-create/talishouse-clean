@@ -14,6 +14,7 @@ import {
 } from "@/lib/talispros/mapsite-overlay-layout";
 import { ROUTES } from "@/lib/routes";
 import { isClaimable } from "@/lib/talispros/mapsite-state";
+import { mapsiteScheduleHref } from "@/lib/mapsite-layout";
 import {
   capabilitiesForAccountType,
   type MapSiteCapabilityAccountType,
@@ -59,7 +60,7 @@ const RESOURCES: {
   {
     key: "ttv",
     label: "TTV™",
-    resolveHref: (site) => site.ttv_url?.trim() || ROUTES.TALISTV,
+    resolveHref: (site) => mapsiteScheduleHref(site.fast_code || ""),
   },
 ];
 
@@ -161,7 +162,14 @@ export default function MapSitePropertyPopup({
     null;
   const showPendingActions =
     onboardingPhase === "BUILD_SUBMITTED" || onboardingPhase === "BOOK_READY";
-  const tebHref = talisBookHref?.trim() || null;
+  const tebHref =
+    RESOURCES.find((resource) => resource.key === "teb")?.resolveHref(
+      mapsite,
+    ) ?? null;
+  const ttvHref =
+    RESOURCES.find((resource) => resource.key === "ttv")?.resolveHref(
+      mapsite,
+    ) ?? null;
   const popupHeroImage = useGenericCard ? genericHeroImage : heroImage;
   const popupTitle = useGenericCard
     ? "The first of many E-Books"
@@ -285,7 +293,13 @@ export default function MapSitePropertyPopup({
                   {RESOURCES.map((resource) => (
                     <ResourceButton
                       key={resource.key}
-                      href={resource.key === "teb" ? tebHref : null}
+                      href={
+                        resource.key === "teb"
+                          ? tebHref
+                          : resource.key === "ttv"
+                            ? ttvHref
+                            : null
+                      }
                       label={resource.label}
                     />
                   ))}

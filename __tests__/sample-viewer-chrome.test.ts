@@ -13,9 +13,14 @@ describe("sample Talisbooks™ viewer chrome", () => {
     "components/talisbooks/library/TalisBooksStandingBook.tsx",
   );
 
-  it("labels the sample mapsite CTA without Build", () => {
-    expect(shell).toContain('"Demo Mapsite™"');
-    expect(shell).not.toMatch(/Build Demo/i);
+  it("labels the sample mapsite CTA Build Demo", () => {
+    expect(shell).toContain('"Build Demo"');
+    expect(shell).not.toContain('"Demo Mapsite™"');
+  });
+
+  it("places Home after the sample mapsite CTA", () => {
+    expect(shell).toContain("ROUTES.HOME");
+    expect(shell).toContain("Home");
   });
 
   it("places Global Admin beside the sample mapsite CTA", () => {

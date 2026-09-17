@@ -441,7 +441,7 @@ export default function TalisBooksViewerShell({
         })
       : MAPSITE_APP_PATH;
   const backLinkLabel = isPinnedShowcase
-    ? "Demo Mapsite™"
+    ? "Build Demo"
     : "Back to Mapsite™";
 
   return (
@@ -483,6 +483,11 @@ export default function TalisBooksViewerShell({
           <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
             {backLinkLabel}
           </Link>
+          {isPinnedShowcase ? (
+            <Link href={ROUTES.HOME} className="talisbooks-viewer__back">
+              Home
+            </Link>
+          ) : null}
           {isPinnedShowcase ? (
             <Link href={ROUTES.ADMIN_DASHBOARD} className="talisbooks-viewer__back">
               Global Admin

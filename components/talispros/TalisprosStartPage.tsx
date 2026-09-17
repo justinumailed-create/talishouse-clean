@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
-import TalisprosProductRotator from "@/components/talispros/TalisprosProductRotator";
+import TalisprosHomeMapPreview from "@/components/talispros/TalisprosHomeMapPreview";
 import TalisprosStartSidebar from "@/components/talispros/TalisprosStartSidebar";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
@@ -32,7 +32,7 @@ export default function TalisprosStartPage() {
           <section className="px-4 pb-8 pt-3 sm:px-6">
             <div className="mx-auto w-full max-w-[1200px]">
               <div className="relative">
-                <TalisprosProductRotator />
+                <TalisprosHomeMapPreview />
                 <div className="relative flex items-center bg-white px-3 py-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:bg-black/50 sm:px-5 sm:py-3">
                   <Link
                     href={PINNED_VIEWER_HREF}

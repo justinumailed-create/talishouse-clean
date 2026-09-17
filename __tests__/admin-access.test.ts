@@ -56,34 +56,34 @@ describe("admin access accounts", () => {
 });
 
 describe("admin nav", () => {
-  it("gives site-ops links for content, build requests, mapsites, and books", () => {
+  it("gives site-ops links for build requests, mapsites, and books", () => {
     const hrefs = getAdminNavItems("site-ops").map((item) => item.href);
     expect(hrefs).toEqual([
       "/admin/dashboard",
-      "/admin/content",
       "/admin/build-requests",
       "/admin/mapsites",
       "/admin/talisbooks",
       "/admin/talisbooks/bookshelves",
     ]);
+    expect(hrefs).not.toContain("/admin/content");
     expect(hrefs).not.toContain("/admin/platform-content");
     expect(hrefs).not.toContain("/admin/fast-codes");
     expect(hrefs).not.toContain("/admin/pricing");
     expect(hrefs).not.toContain("/admin/payments");
   });
 
-  it("gives Ralf SUPERADMIN links for platform content, FAST codes, mapsites, and books", () => {
+  it("gives Ralf SUPERADMIN links for FAST codes, mapsites, and books", () => {
     const hrefs = getAdminNavItems("superadmin").map((item) => item.href);
     expect(hrefs).toEqual([
       "/admin/dashboard",
-      "/admin/content",
       "/admin/build-requests",
       "/admin/mapsites",
       "/admin/talisbooks",
       "/admin/talisbooks/bookshelves",
-      "/admin/platform-content",
       "/admin/fast-codes",
     ]);
+    expect(hrefs).not.toContain("/admin/platform-content");
+    expect(hrefs).not.toContain("/admin/content");
     expect(hrefs).not.toContain("/admin/pricing");
     expect(hrefs).not.toContain("/admin/payments");
     expect(hrefs).not.toContain("/admin/users");
@@ -91,8 +91,17 @@ describe("admin nav", () => {
 
   it("gives Arun the SUPERADMIN links plus the rest of the existing console", () => {
     const hrefs = getAdminNavItems("full").map((item) => item.href);
-    expect(hrefs).toContain("/admin/content");
-    expect(hrefs).toContain("/admin/platform-content");
+    expect(hrefs).not.toContain("/admin/content");
+    expect(hrefs).not.toContain("/admin/associates");
+    expect(hrefs).not.toContain("/admin/talisbot");
+    expect(hrefs).not.toContain("/admin/products");
+    expect(hrefs).not.toContain("/admin/leads");
+    expect(hrefs).not.toContain("/admin/leads-simulation");
+    expect(hrefs).not.toContain("/admin/deals");
+    expect(hrefs).not.toContain("/admin/users");
+    expect(hrefs).not.toContain("/admin/applications");
+    expect(hrefs).not.toContain("/admin/project-applications");
+    expect(hrefs).not.toContain("/admin/platform-content");
     expect(hrefs).toContain("/admin/fast-codes");
     expect(hrefs).toContain("/admin/build-requests");
     expect(hrefs).toContain("/admin/mapsites");
