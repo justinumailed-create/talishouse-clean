@@ -63,3 +63,14 @@ export const CLAIM_A_MARKET_PAGE: TalisprosMarketPageContent = {
     "Mapsite™ is the centre of Talispros™. Submit your Build Request here to receive a FAST Code™, create your first Talisbook™, and unlock MLS®, URL, TEB™, and TTV™ actions on your pin after activation — without leaving the map-first workflow.",
   metadataTitle: "Talispros™ | Build My Mapsite™",
 };
+
+/** Same two-column Mapsite™ chrome as Build My Mapsite™ / market pages. */
+export function isTalisprosMarketLayoutPath(
+  pathname: string | null | undefined,
+): boolean {
+  if (!pathname) return false;
+  return (
+    pathname.startsWith("/talispros/markets/") ||
+    pathname.startsWith("/talispros/build-mapsite/assisted")
+  );
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import HomePinLocationSection, {
   validateHomePinLocation,
@@ -10,6 +11,8 @@ import {
   type HomePinLocationValues,
 } from "@/components/build-mapsite/home-pin-types";
 import { createDemoMapSiteAction } from "@/app/talispros/demo-mapsite/actions";
+import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
+import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 
 export default function DemoMapSiteBuilderClient() {
   const router = useRouter();
@@ -52,40 +55,80 @@ export default function DemoMapSiteBuilderClient() {
     });
   }
 
+  const cardClass =
+    "overflow-hidden rounded-[28px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]";
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <label className="block text-sm">
-        <span className="font-medium text-neutral-800">Listing title</span>
-        <input
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          className="mt-1.5 w-full rounded-xl border border-neutral-300 px-3 py-2.5 text-sm text-neutral-900"
-          maxLength={120}
-        />
-      </label>
-
-      <HomePinLocationSection
-        values={pin}
-        pinImage={null}
-        onChange={(values) => setPin((current) => ({ ...current, ...values }))}
-        onPinImageChange={() => undefined}
-        mode="essentials"
-        errors={pinErrors}
-      />
-
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="w-full rounded-2xl bg-neutral-900 px-5 py-3.5 text-base font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
+    <div className="relative flex min-h-dvh flex-col items-center bg-[#f5f5f7] px-6 py-16 text-neutral-950 antialiased sm:py-24">
+      <Link
+        href={`${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`}
+        className="absolute right-4 top-4 z-10 inline-flex min-h-10 items-center justify-center rounded-full bg-neutral-950 px-4 text-[13px] font-medium text-white transition hover:bg-neutral-800 sm:right-6 sm:top-5 sm:text-[14px]"
       >
-        {pending ? "Continue to demo eBook…" : "Continue to demo eBook"}
-      </button>
-      <p className="text-center text-xs text-neutral-500">
-        Next you will extract the pinned Talispros eBook pages, optimize them,
-        and Build the demonstration Talisbook™. No FAST Code is issued.
-      </p>
-    </form>
+        Back to Talispros eBook
+      </Link>
+      <div className="w-full max-w-[480px]">
+        <div className="text-center">
+          <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">
+            DEMONSTRATION
+          </p>
+          <h1 className="mt-5 text-[34px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[40px]">
+            Build Demo eBook and Mapsite™
+          </h1>
+          <p className="mx-auto mt-4 max-w-[26rem] text-[22px] font-semibold leading-snug tracking-[-0.03em] text-neutral-950">
+            Place a pin.
+          </p>
+          <p className="mx-auto mt-2 max-w-[26rem] text-[13px] leading-relaxed text-neutral-500">
+            Next we walk through creating the Talisbook™ from the pinned sample
+            — without issuing a FAST Code.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-12 space-y-5">
+          <div className={`${cardClass} px-6 py-7`}>
+            <label className="block">
+              <span className="block text-center text-[13px] text-neutral-500">
+                Listing title
+              </span>
+              <input
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                disabled={pending}
+                maxLength={120}
+                className="mt-2 w-full bg-transparent py-1 text-center text-[17px] leading-snug tracking-tight text-neutral-950 outline-none placeholder:text-neutral-400 disabled:opacity-40"
+              />
+            </label>
+          </div>
+
+          <div className={`${cardClass} px-5 py-6`}>
+            <HomePinLocationSection
+              values={pin}
+              pinImage={null}
+              onChange={(values) => setPin((current) => ({ ...current, ...values }))}
+              onPinImageChange={() => undefined}
+              mode="essentials"
+              errors={pinErrors}
+            />
+          </div>
+
+          {error ? (
+            <p className="px-1 text-center text-[13px] leading-relaxed text-red-600">
+              {error}
+            </p>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={pending}
+            className="flex h-12 w-full items-center justify-center rounded-full bg-neutral-950 text-[15px] font-medium text-white transition disabled:opacity-40"
+          >
+            {pending ? "Continue to demo eBook…" : "Continue to demo eBook"}
+          </button>
+          <p className="text-center text-[12px] leading-relaxed text-neutral-400">
+            Next you will extract the pinned Talispros eBook pages, optimize
+            them, and Build the demonstration Talisbook™. No FAST Code is issued.
+          </p>
+        </form>
+      </div>
+    </div>
   );
 }

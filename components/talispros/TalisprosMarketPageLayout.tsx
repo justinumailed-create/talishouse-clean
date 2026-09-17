@@ -13,7 +13,7 @@ export default function TalisprosMarketPageLayout({
   children,
 }: TalisprosMarketPageLayoutProps) {
   return (
-    <div className="flex min-h-dvh flex-col bg-white text-neutral-900 lg:h-dvh lg:min-h-0 lg:grid lg:grid-cols-[minmax(0,1fr)_350px] lg:overflow-hidden">
+    <div className="flex min-h-dvh flex-col bg-white text-neutral-900 lg:h-full lg:min-h-0 lg:grid lg:grid-cols-[minmax(0,1fr)_350px] lg:overflow-hidden">
       <div className="flex flex-none flex-col lg:min-h-0 lg:flex-1 lg:overflow-hidden">
         <TalisprosMarketNav />
 

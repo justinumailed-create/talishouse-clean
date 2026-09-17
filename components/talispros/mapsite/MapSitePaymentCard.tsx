@@ -5,7 +5,6 @@ import type { RegistrationMarket } from "@/lib/registration-market";
 import type { PlanType } from "@/lib/registration-plans";
 import { mapsiteClaimPlanSummary } from "@/lib/talispros/mapsite-audience";
 import { MAPSITE_LISTING_CARD_WIDTH_CLASS } from "@/lib/talispros/mapsite-listing-media";
-import { shouldRegisterAgentsAfterPayment } from "@/lib/talispros/register-agents";
 import { createMapSiteStripeCheckoutSession } from "@/app/talispros/mapsite/actions";
 
 interface MapSitePaymentCardProps {
@@ -73,74 +72,66 @@ export default function MapSitePaymentCard({
 
   const pendingConfirmation = checkoutStatus === "success";
   const cancelled = checkoutStatus === "cancelled";
+  const totalDue = summary.totalLabel.replace(/\s*\(incl\. tax\)/i, "");
 
   return (
     <div
-      className={`mapsite-pay-card pointer-events-auto ${MAPSITE_LISTING_CARD_WIDTH_CLASS} rounded-2xl bg-white/75 shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-sm ${
-        compact ? "px-3 py-2" : "p-4"
+      className={`mapsite-pay-card pointer-events-auto ${MAPSITE_LISTING_CARD_WIDTH_CLASS} rounded-[22px] bg-white/80 shadow-[0_8px_28px_rgba(0,0,0,0.12)] ring-1 ring-black/[0.04] backdrop-blur-xl ${
+        compact ? "px-3.5 py-3" : "px-5 py-4"
       }`}
     >
-      <div className="flex justify-center">
-        <button
-          type="button"
-          onClick={handleActivate}
-          disabled={processing || pendingConfirmation}
-          className="inline-flex min-h-8 items-center justify-center rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-neutral-800 disabled:cursor-wait disabled:opacity-70"
-        >
-          {pendingConfirmation
-            ? "Confirming payment…"
-            : processing
-              ? "Redirecting to checkout…"
-              : "Activate Your MapSite™"}
-        </button>
-      </div>
+      <p className="text-[11px] font-medium tracking-[0.01em] text-neutral-400">
+        {compact ? summary.planLabel : "Complete registration"}
+      </p>
 
-      <div className={compact ? "mt-2" : "mt-3"}>
-        <div className={compact ? "flex items-baseline justify-between gap-3" : ""}>
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-            {compact ? summary.planLabel : "Complete registration"}
-          </p>
-          {compact ? (
-            <span className="shrink-0 text-sm font-semibold text-black">
-              {summary.totalLabel}
-            </span>
-          ) : null}
-        </div>
-        <h3
-          className={`items-baseline justify-between gap-3 text-base font-semibold text-black ${
-            compact ? "hidden" : "mt-1 flex"
-          }`}
-        >
-          <span>{summary.planLabel}</span>
-          <span className="shrink-0 text-sm font-semibold">{summary.priceLabel}</span>
-        </h3>
-        <p className={compact ? "hidden" : "mt-1 text-xs text-neutral-600"}>
-          {summary.priceLabel} + {summary.taxLabel} = {summary.totalLabel}
+      {compact ? (
+        <p className="mt-0.5 text-[15px] font-semibold tracking-tight text-neutral-900">
+          {totalDue}
         </p>
-      </div>
+      ) : (
+        <>
+          <div className="mt-1 flex items-baseline justify-between gap-3">
+            <h3 className="m-0 truncate text-[15px] font-semibold tracking-tight text-neutral-900">
+              {summary.planLabel}
+            </h3>
+            <p className="m-0 shrink-0 text-[15px] font-semibold tracking-tight text-neutral-900">
+              {totalDue}
+            </p>
+          </div>
+          <p className="mt-1 text-[12px] leading-snug text-neutral-500">
+            {summary.priceLabel} + {summary.taxLabel}
+          </p>
+        </>
+      )}
 
       {pendingConfirmation ? (
-        <p className="mt-2 text-center text-xs text-neutral-600">
+        <p className="mt-3 text-[13px] leading-snug text-neutral-500">
           Payment submitted. Activating your Mapsite™…
         </p>
       ) : null}
       {cancelled && !processing ? (
-        <p className="mt-2 text-center text-xs text-neutral-600">
+        <p className="mt-3 text-[13px] leading-snug text-neutral-500">
           Checkout was cancelled. You can activate when you are ready.
         </p>
       ) : null}
       {error ? (
-        <p className="mt-2 text-center text-xs text-red-600">{error}</p>
+        <p className="mt-3 text-[13px] leading-snug text-red-600">{error}</p>
       ) : null}
 
-      {!compact && !pendingConfirmation ? (
-        <p className="mt-2 text-[11px] leading-snug text-neutral-500">
-          Checkout charges {summary.totalLabel}. After payment{" "}
-          {shouldRegisterAgentsAfterPayment({ audience })
-            ? "you'll continue to Register Your Agents."
-            : "this Mapsite™ becomes active."}
-        </p>
-      ) : null}
+      <button
+        type="button"
+        onClick={handleActivate}
+        disabled={processing || pendingConfirmation}
+        className={`flex w-full items-center justify-center rounded-full bg-neutral-900 text-[15px] font-medium text-white transition hover:bg-neutral-800 disabled:cursor-wait disabled:opacity-50 ${
+          compact ? "mt-3 min-h-9 px-4 text-[13px]" : "mt-4 min-h-11 px-5"
+        }`}
+      >
+        {pendingConfirmation
+          ? "Confirming payment…"
+          : processing
+            ? "Redirecting…"
+            : "Activate"}
+      </button>
     </div>
   );
 }

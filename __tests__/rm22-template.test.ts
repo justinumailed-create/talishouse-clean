@@ -10,11 +10,11 @@ import {
   parseRm22TemplatePayload,
   planRm22TemplateInteriors,
   productIdsInPlan,
+  isRm22PhotoPlaceholderUrl,
   rm22CoverBandFromOnboarding,
   rm22EndingRoles,
   rm22InteriorRole,
   rm22ProductById,
-  RM22_ASSETS,
   RM22_DEFAULT_COPY,
   RM22_DEFAULT_PRODUCT_ID,
   RM22_PHOTO_CAPTION_COUNT,
@@ -24,6 +24,71 @@ import {
 } from "../lib/talisbooks/rm22-template";
 
 describe("RM22 Talisbook™ template", () => {
+  it("keeps empty photo slots instead of flattened design-comp JPEGs", () => {
+    expect(
+      isRm22PhotoPlaceholderUrl("/talisbooks/templates/rm22/interiors/caption.jpg"),
+    ).toBe(true);
+    expect(isRm22PhotoPlaceholderUrl("")).toBe(true);
+    expect(isRm22PhotoPlaceholderUrl(rm22ProductById("t-dome").href)).toBe(false);
+  });
+
+  it("preserves template text when historical payloads stored flattened design comps", () => {
+    const parsed = parseRm22TemplatePayload(
+      JSON.stringify({
+        version: 1,
+        templateId: "rm22",
+        productId: "t-dome",
+        interiors: [
+          {
+            role: "product-sheet",
+            imageUrl: rm22ProductById("t-dome").href,
+          },
+          {
+            role: "intro",
+            imageUrl: "/talisbooks/templates/rm22/interiors/intro.jpg",
+            title: "Welcome…!",
+            caption: "Intro Page",
+          },
+          {
+            role: "photo-caption",
+            imageUrl: "/talisbooks/templates/rm22/interiors/caption.jpg",
+            caption: "The lake from the ridge",
+          },
+          {
+            role: "intrinsic",
+            imageUrl: "/talisbooks/templates/rm22/interiors/intrinsic.jpg",
+            title: "Intrinsic Value",
+            body: "Land plus the option of a T-Dome.",
+          },
+          {
+            role: "outro",
+            imageUrl: "/talisbooks/templates/rm22/interiors/outro.jpg",
+            title: "The Parting Shot…!",
+            caption: "Outro Page",
+          },
+        ],
+      }),
+    );
+    expect(parsed?.interiors.find((item) => item.role === "intro")?.imageUrl).toBe(
+      "",
+    );
+    expect(parsed?.interiors.find((item) => item.role === "intro")?.title).toBe(
+      "Welcome…!",
+    );
+    expect(
+      parsed?.interiors.find((item) => item.role === "photo-caption")?.imageUrl,
+    ).toBe("");
+    expect(
+      parsed?.interiors.find((item) => item.role === "photo-caption")?.caption,
+    ).toBe("The lake from the ridge");
+    expect(
+      parsed?.interiors.find((item) => item.role === "intrinsic")?.body,
+    ).toContain("T-Dome");
+    expect(
+      parsed?.interiors.find((item) => item.role === "product-sheet")?.imageUrl,
+    ).toContain("/products/");
+  });
+
   it("maps interior leaves to RM22 roles relative to the plan, not book page numbers", () => {
     expect(rm22InteriorRole(1)).toBe("product-sheet");
     expect(rm22InteriorRole(2)).toBe("intro");
@@ -44,6 +109,8 @@ describe("RM22 Talisbook™ template", () => {
     expect(slots.productId).toBe("t-dome");
     expect(slots.photoCaptions).toHaveLength(RM22_PHOTO_CAPTION_COUNT);
     expect(slots.photoImages).toHaveLength(RM22_PHOTO_CAPTION_COUNT);
+    expect(slots.intrinsicBody).toContain("T-Dome");
+    expect(slots.introTitle).toBe("Welcome…!");
   });
 
   it("fills the front-cover caption from address headline, lot blurb, and price", () => {
@@ -206,7 +273,7 @@ describe("RM22 Talisbook™ template", () => {
     expect(captionPages).toHaveLength(6);
     expect(captionPages[2]?.image).toBe(photo);
     expect(captionPages[2]?.caption).toBe("The lake from the ridge");
-    expect(captionPages[0]?.assetHref).toBe(RM22_ASSETS.caption);
+    expect(captionPages[0]?.assetHref).toBe("");
 
     const valuePage = plan.find((item) => item.role === "intrinsic");
     expect(valuePage?.image).toBe(intrinsic);
@@ -266,5 +333,18 @@ describe("RM22 Talisbook™ template", () => {
     expect(parsed?.interiors.find((item) => item.role === "intrinsic")?.title).toBe(
       "Intrinsic Value",
     );
+    const photos = parsed?.interiors.filter((item) => item.role === "photo-caption") ?? [];
+    expect(photos.length).toBeGreaterThan(0);
+    expect(photos.every((item) => item.imageUrl === "")).toBe(true);
+    expect(photos[0]?.caption).toBe("");
+    expect(
+      parsed?.interiors.find((item) => item.role === "intro")?.title,
+    ).toBe("Welcome…!");
+    expect(
+      parsed?.interiors.find((item) => item.role === "product-sheet")?.imageUrl,
+    ).toContain("/products/");
+    expect(JSON.stringify(original)).not.toMatch(/interiors\/caption\.jpg/);
+    expect(JSON.stringify(original)).not.toMatch(/interiors\/intro\.jpg/);
+    expect(JSON.stringify(original)).not.toMatch(/interiors\/intrinsic\.jpg/);
   });
 });

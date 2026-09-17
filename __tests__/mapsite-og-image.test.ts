@@ -4,7 +4,7 @@ import {
   pickPartingShotImageUrl,
   type PartingShotPage,
 } from "../lib/talisbooks/parting-shot";
-import { RM22_ASSETS } from "../lib/talisbooks/rm22-template";
+import { RM22_DESIGN_COMPS } from "../lib/talisbooks/rm22-template";
 import { ebookPageMediaFromRow } from "../lib/talisbooks/mapsite-ebook-service";
 import {
   isLargeBrandLogoUrl,
@@ -216,7 +216,7 @@ describe("Mapsite™ OG image selection", () => {
             pageNumber: 20,
             title: "The Parting Shot…!",
             layout: "centerfold_left",
-            spreadImageUrl: RM22_ASSETS.outro,
+            spreadImageUrl: RM22_DESIGN_COMPS.outro,
           }),
         ],
         fallbackImageUrls: ["/seo/talispros-og.jpg", PIN_PHOTO],

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  RM22_BLEED_CAPTION,
+  RM22_BLEED_IMAGE,
+  RM22_BLEED_TITLE,
+  RM22_COLOR,
   RM22_DOCUMENT_LEAF_WIDTH,
   RM22_DOCUMENT_PAGE_HEIGHT,
   RM22_DOCUMENT_PAGE_WIDTH,
@@ -37,6 +41,37 @@ describe("RM22 document coordinates", () => {
     );
     expect(long.fits).toBe(false);
     expect(long.lineCount).toBeGreaterThan(long.maxLines);
+  });
+
+  it("keeps the bleed photo slot independent of the caption overlay", () => {
+    expect(RM22_BLEED_IMAGE.box.height).toBe(RM22_DOCUMENT_PAGE_HEIGHT);
+    expect(RM22_BLEED_CAPTION.box.y + RM22_BLEED_CAPTION.box.height).toBe(
+      RM22_DOCUMENT_PAGE_HEIGHT,
+    );
+    expect(RM22_BLEED_CAPTION.box.y).toBeGreaterThan(RM22_BLEED_TITLE.box.y);
+    expect(RM22_BLEED_TITLE.style.color).toBe("#ffffff");
+    expect(RM22_COLOR.captionOverlay).toBe("rgba(0, 0, 0, 0.3)");
+    expect(RM22_BLEED_CAPTION.style.color).toBe("#ffffff");
+  });
+
+  it("maps the bleed caption across both leaves so viewer text stays spread-centered", () => {
+    const left = boxToPagePercent(RM22_BLEED_CAPTION.box, {
+      x: 0,
+      y: 0,
+      width: RM22_DOCUMENT_LEAF_WIDTH,
+      height: RM22_DOCUMENT_PAGE_HEIGHT,
+    });
+    const right = boxToPagePercent(RM22_BLEED_CAPTION.box, {
+      x: RM22_DOCUMENT_LEAF_WIDTH,
+      y: 0,
+      width: RM22_DOCUMENT_LEAF_WIDTH,
+      height: RM22_DOCUMENT_PAGE_HEIGHT,
+    });
+    expect(left.left).toBe("0%");
+    expect(left.width).toBe("200%");
+    expect(right.left).toBe("-100%");
+    expect(right.width).toBe("200%");
+    expect(Number.parseFloat(left.height)).toBeGreaterThan(13);
   });
 
   it("converts document boxes to page-relative percents, not viewport units", () => {

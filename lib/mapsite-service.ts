@@ -10,6 +10,10 @@ import { generateMapSiteSlug } from "./slug-generator";
 import { disableSupabaseAdminClient, getSupabaseAdmin, tryGetSupabaseAdmin } from "./supabaseAdmin";
 import { supabase } from "./supabaseClient";
 import { resolvePinStyleExtras } from "./build-request-pin-style-notes";
+import {
+  toAdminMapSiteThumbnail,
+  type AdminMapSiteThumbnail,
+} from "@/lib/talispros/mapsite-admin-thumbnail";
 
 export interface CreateMapSiteForAccountInput {
   accountId: string;
@@ -48,11 +52,7 @@ export interface MapSitePinView {
   sortOrder: number;
 }
 
-export interface MapSiteListItem {
-  fastCode: string;
-  status: string;
-  propertyTitle: string | null;
-}
+export interface MapSiteListItem extends AdminMapSiteThumbnail {}
 
 export interface MapSiteView {
   id: string;
@@ -139,7 +139,9 @@ export async function listMapSitesForAdmin(): Promise<MapSiteListItem[]> {
   const { data, error } = await queryWithAdminFallback((client) =>
     client
       .from("mapsites")
-      .select("fast_code, status, property_title")
+      .select(
+        "fast_code, status, property_title, property_address, cover_image, header_image_url, gallery_images, is_demonstration, latitude, longitude, map_zoom",
+      )
       .order("created_at", { ascending: false })
   );
 
@@ -147,11 +149,7 @@ export async function listMapSitesForAdmin(): Promise<MapSiteListItem[]> {
     return [];
   }
 
-  return data.map((row) => ({
-    fastCode: row.fast_code,
-    status: row.status,
-    propertyTitle: row.property_title,
-  }));
+  return data.map((row) => toAdminMapSiteThumbnail(row));
 }
 
 export async function getMapSiteByFastCode(

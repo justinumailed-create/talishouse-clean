@@ -86,6 +86,40 @@ describe("mapsite pin style", () => {
       pinStyleCacheKey(formPin, false)
     );
   });
+
+  it("uses the Claim / Build hollow-drop PIN on the homepage preview", () => {
+    const visual = mapSitePinVisualFields();
+    const homepagePin = {
+      id: "visitor",
+      latitude: 43.105808,
+      longitude: -79.058733,
+      color: visual.pinColor,
+      featured: true,
+      metadata: {
+        icon: visual.pinIcon,
+        border: visual.pinBorder,
+        whiteCenter: visual.whiteCenter,
+        animated: visual.pinAnimated,
+      },
+    };
+    const formPin = {
+      id: "home-pin",
+      latitude: 43.105808,
+      longitude: -79.058733,
+      color: "#1A73E8",
+      featured: true,
+      metadata: {
+        icon: "none",
+        border: "none",
+        whiteCenter: false,
+        animated: false,
+      },
+    };
+
+    expect(pinStyleCacheKey(homepagePin, true)).toBe(
+      pinStyleCacheKey(formPin, true)
+    );
+  });
 });
 
 describe("published Mapsite™ hollow drop", () => {

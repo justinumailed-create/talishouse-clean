@@ -40,7 +40,7 @@ interface MapSiteMarketPartnerCardProps {
 
 /**
  * Claimed Mapsite™ left card:
- * FAST CODE → address → partner photo → partner copy → register blurb.
+ * FAST CODE → address → partner photo → Market Partner → writeup → register blurb.
  * Uses a div (not a tall <button>) so the parent sidebar can scroll.
  */
 export default function MapSiteMarketPartnerCard({
@@ -93,11 +93,11 @@ export default function MapSiteMarketPartnerCard({
               {address}
             </p>
           ) : null}
-          <p className="mapsite-manager-strip__why mt-1 line-clamp-2 text-[11px] leading-snug text-neutral-700">
-            {genericWriteup}
-          </p>
           <p className="mt-1 text-[13px] font-semibold leading-snug text-black">
             {content.marketPartner}
+          </p>
+          <p className="mapsite-manager-strip__why mt-1 line-clamp-2 text-[11px] leading-snug text-neutral-700">
+            {genericWriteup}
           </p>
           <p className="mapsite-manager-strip__blurb mt-0.5 line-clamp-2 text-[11px] leading-snug text-neutral-600">
             {MAPSITE_DEMO_SIDEBAR_BLURB}
@@ -139,12 +139,12 @@ export default function MapSiteMarketPartnerCard({
           />
         </div>
 
-        <p className="mx-auto mt-4 max-w-[17rem] text-left text-[14px] leading-[1.45] text-neutral-800 sm:text-center">
-          {genericWriteup}
-        </p>
-
         <p className="mt-4 text-[14px] font-semibold leading-snug text-black">
           {content.marketPartner}
+        </p>
+
+        <p className="mx-auto mt-2 max-w-[17rem] text-left text-[14px] leading-[1.45] text-neutral-800 sm:text-center">
+          {genericWriteup}
         </p>
 
         <p className="mx-auto mt-2 max-w-[17rem] text-left text-[12px] font-medium leading-[1.4] text-black sm:text-center">

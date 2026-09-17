@@ -10,9 +10,13 @@ import {
   loadPinnedTalisBookPageFiles,
 } from "@/lib/talisbooks/load-pinned-demo-pages";
 import { postEbookGenerateOptimizedImage } from "@/lib/media/client-upload-ebook-image";
-import { publicDemoGenerateError } from "@/lib/talispros/demo-mapsite";
+import {
+  DEMO_MAPSITE_BUILD_PATH,
+  publicDemoGenerateError,
+} from "@/lib/talispros/demo-mapsite";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { ONBOARDING_JOB_TIMEOUT_MS } from "@/lib/onboarding-timing";
+import Link from "next/link";
 
 type OptimizedAsset = {
   url: string;
@@ -224,66 +228,105 @@ export default function DemoEbookGenerateClient({
     }
   }
 
+  const cardClass =
+    "overflow-hidden rounded-[28px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]";
+
   return (
-    <div className="space-y-5">
-      <p className="text-sm text-neutral-600">
-        Listing: <span className="font-medium text-neutral-900">{title}</span>
-      </p>
-
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => void extractPinnedPdf()}
-        className="w-full rounded-2xl bg-neutral-900 px-5 py-3.5 text-base font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
-      >
-        {phase === "extracting"
-          ? "Extracting PDF…"
-          : "Extract PDF from pinned Talispros eBook"}
-      </button>
-
-      {pages.length > 0 ? (
-        <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
-          {pages.length} page{pages.length === 1 ? "" : "s"} extracted and ready
-          to optimize.
+    <div className="flex min-h-dvh flex-col items-center bg-[#f5f5f7] px-6 py-16 text-neutral-950 antialiased sm:py-24">
+      <div className="w-full max-w-[480px]">
+        <div className="text-center">
+          <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">
+            DEMONSTRATION
+          </p>
+          <h1 className="mt-5 text-[34px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[40px]">
+            Create the demo Talisbook™
+          </h1>
+          <p className="mx-auto mt-4 max-w-[26rem] text-[22px] font-semibold leading-snug tracking-[-0.03em] text-neutral-950">
+            Extract the pinned pages.
+          </p>
+          <p className="mx-auto mt-2 max-w-[26rem] text-[13px] leading-relaxed text-neutral-500">
+            Optimize them, then Build the demonstration Talisbook™. When that
+            finishes, we open your demo Mapsite™.
+          </p>
+          <p className="mt-3 text-[12px] tracking-tight text-neutral-400">
+            {title}
+          </p>
         </div>
-      ) : null}
 
-      {pages.length > 0 ? (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void optimizePages()}
-          className="w-full rounded-2xl border border-neutral-900 px-5 py-3.5 text-base font-medium text-neutral-900 transition hover:bg-neutral-50 disabled:opacity-60"
-        >
-          {phase === "optimizing" ? "Optimizing pages…" : "Optimize pages"}
-        </button>
-      ) : null}
+        <div className="mt-12 space-y-5">
+          <div className={`${cardClass} space-y-3 px-6 py-7`}>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void extractPinnedPdf()}
+              className="flex h-12 w-full items-center justify-center rounded-full bg-neutral-950 text-[15px] font-medium text-white transition disabled:opacity-40"
+            >
+              {phase === "extracting"
+                ? "Extracting PDF…"
+                : "Extract PDF from pinned Talispros eBook"}
+            </button>
 
-      {optimized.length > 0 ? (
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => void buildEbook()}
-          className="w-full rounded-2xl bg-neutral-900 px-5 py-3.5 text-base font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60"
-        >
-          {phase === "building" ? "Building Talisbook™…" : "Build Talisbook™"}
-        </button>
-      ) : null}
+            {pages.length > 0 ? (
+              <p className="text-center text-[13px] text-neutral-500">
+                {pages.length} page{pages.length === 1 ? "" : "s"} extracted and
+                ready to optimize.
+              </p>
+            ) : null}
 
-      {stage ? <p className="text-sm text-neutral-500">{stage}</p> : null}
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+            {pages.length > 0 ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void optimizePages()}
+                className="flex h-12 w-full items-center justify-center rounded-full bg-[#e8e8ed] text-[15px] font-medium text-neutral-950 transition hover:bg-[#dcdce2] disabled:opacity-40"
+              >
+                {phase === "optimizing" ? "Optimizing pages…" : "Optimize pages"}
+              </button>
+            ) : null}
 
-      <p className="text-center text-xs text-neutral-500">
-        Extract the pinned sample pages, optimize them, then build. Storage is
-        used when available; pinned page assets are used if upload-image is not
-        configured.{" "}
-        <a
-          href={`${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`}
-          className="underline underline-offset-2"
-        >
-          View pinned eBook
-        </a>
-      </p>
+            {optimized.length > 0 ? (
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void buildEbook()}
+                className="flex h-12 w-full items-center justify-center rounded-full bg-neutral-950 text-[15px] font-medium text-white transition disabled:opacity-40"
+              >
+                {phase === "building" ? "Building Talisbook™…" : "Build Talisbook™"}
+              </button>
+            ) : null}
+
+            {stage ? (
+              <p className="text-center text-[13px] text-neutral-400">{stage}</p>
+            ) : null}
+            {error ? (
+              <p className="text-center text-[13px] leading-relaxed text-red-600">
+                {error}
+              </p>
+            ) : null}
+          </div>
+
+          <p className="text-center text-[12px] leading-relaxed text-neutral-400">
+            Extract the pinned sample pages, optimize them, then build. Storage
+            is used when available; pinned page assets are used if upload-image
+            is not configured.
+          </p>
+          <p className="text-center text-[12px] tracking-tight text-neutral-400">
+            <Link
+              href={DEMO_MAPSITE_BUILD_PATH}
+              className="transition hover:text-neutral-600"
+            >
+              Back to pin placement
+            </Link>
+            {" · "}
+            <a
+              href={`${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`}
+              className="transition hover:text-neutral-600"
+            >
+              View pinned eBook
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

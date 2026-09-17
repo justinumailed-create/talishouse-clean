@@ -119,3 +119,6 @@ export const TALISTV_GUIDE_CHANNEL = {
   name: "TalisTV™",
   tagline: "Video shelf for the Talispros™ ecosystem",
 } as const;
+
+export const TALISTV_LAUNCH_NOTICE =
+  "First 20 registrants will be upgraded free of charge when launched..!";

@@ -1,7 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useId, useRef, useState } from "react";
+import {
+  FormEvent,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   assignBookAssetsFromUploads,
   classifyUploadFile,
@@ -49,6 +56,7 @@ import {
 } from "@/lib/talisbooks/ebook-upload-formats";
 import {
   MAPSITE_FLAG_IDENTITY_DEFAULT,
+  allowsMapsiteFlagIdentityChoice,
   resolveMapsiteFlagIdentity,
   type MapsiteFlagIdentity,
 } from "@/lib/talispros/flag-identity";
@@ -57,8 +65,6 @@ import { composeRm22TemplateCovers } from "@/lib/talisbooks/compose-rm22-templat
 import {
   createRm22SlotState,
   createRm22TemplatePayload,
-  planRm22TemplateInteriors,
-  RM22_ASSETS,
   RM22_PROTECTED_ENDING_SPREADS,
   rm22ProductById,
   type Rm22SlotState,
@@ -287,7 +293,7 @@ export default function EbookGenerateClient({
     ...uploads.map((item) => item.previewUrl),
   ].filter((url): url is string => Boolean(url));
 
-  const isFsboAccount = (accountType || "").trim().toLowerCase() === "fsbo";
+  const showFlagIdentityChoice = allowsMapsiteFlagIdentityChoice(accountType);
   const resolvedFlagIdentity = resolveMapsiteFlagIdentity({
     preference: flagIdentity,
     accountType,
@@ -323,6 +329,13 @@ export default function EbookGenerateClient({
   }, [agentPhotoFile]);
 
   const canGenerate = Boolean(requestId && fastCode && !bootstrapError);
+
+  /** Keep template UI off until after hydration so SSR markup matches the client. */
+  const showTemplateUi = useSyncExternalStore(
+    () => () => {},
+    () => templateMode,
+    () => false,
+  );
 
   async function applyCoverPicks(frontFile: File, backFile: File) {
     const frontPreview = URL.createObjectURL(frontFile);
@@ -366,6 +379,7 @@ export default function EbookGenerateClient({
           },
         },
       );
+      setTemplateMode(false);
       await applyCoverPicks(front, back);
       setUploads((current) => {
         for (const item of current) revokePreviewUrl(item.previewUrl);
@@ -476,39 +490,28 @@ export default function EbookGenerateClient({
   async function loadRm22Template() {
     setError("");
     setTemplateMode(true);
-    const slots = createRm22SlotState({
-      agentName: agentName || initialAgentName,
-      agentPhone: initialAgentPhone,
-      address: initialPropertyAddress || undefined,
-      lotTitle: initialListingTitle || undefined,
-      lotWriteup: initialPinWriteup || undefined,
-      priceLine: initialPriceLine || undefined,
+    setRm22Slots(
+      createRm22SlotState({
+        agentName: agentName || initialAgentName,
+        agentPhone: initialAgentPhone,
+        address: initialPropertyAddress || undefined,
+        lotTitle: initialListingTitle || undefined,
+        lotWriteup: initialPinWriteup || undefined,
+        priceLine: initialPriceLine || undefined,
+      }),
+    );
+    setFrontCover((current) => {
+      if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl);
+      return null;
     });
-    setRm22Slots(slots);
-    setConverting(true);
-    setConvertProgress("Loading RM22 template…");
-    try {
-      const front = await fileFromHref(RM22_ASSETS.front, "rm22-front.jpg");
-      const back = await fileFromHref(RM22_ASSETS.agent, "rm22-back.jpg");
-      await applyCoverPicks(front, back);
-      const plan = planRm22TemplateInteriors(slots);
-      const interiors: File[] = [];
-      for (const [index, item] of plan.entries()) {
-        setConvertProgress(`Loading RM22 template… ${index + 1}/${plan.length}`);
-        interiors.push(await fileFromHref(item.assetHref, item.fileName));
-      }
-      await applyInteriorFiles(interiors);
-    } catch (caught) {
-      setTemplateMode(false);
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Could not load the Talisbook™ template.",
-      );
-    } finally {
-      setConverting(false);
-      setConvertProgress("");
-    }
+    setBackCover((current) => {
+      if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl);
+      return null;
+    });
+    setUploads((current) => {
+      for (const item of current) revokePreviewUrl(item.previewUrl);
+      return [];
+    });
   }
 
   async function refreshProductPreview(next: Rm22SlotState) {
@@ -1339,7 +1342,9 @@ export default function EbookGenerateClient({
                   className="mt-6 flex h-[168px] w-full flex-col items-center justify-center rounded-[22px] bg-[#f5f5f7] text-[15px] font-medium text-neutral-950 transition hover:bg-[#ececef] disabled:opacity-40"
                 >
                   <span>
-                    {frontCover && backCover ? "Replace files" : "Upload PDF or images"}
+                    {!showTemplateUi && frontCover && backCover
+                      ? "Replace files"
+                      : "Upload PDF or images"}
                   </span>
                   <span className="mt-2 max-w-[16rem] text-center text-[12px] font-normal leading-relaxed text-neutral-400">
                     {EBOOK_GENERATE_UPLOAD_HINT}
@@ -1365,7 +1370,7 @@ export default function EbookGenerateClient({
                     void handleBookFilesSelected(files);
                   }}
                 />
-                {frontCover && backCover ? (
+                {!showTemplateUi && frontCover && backCover ? (
                   <div className="mt-6 grid grid-cols-2 gap-3">
                     {(
                       [
@@ -1388,7 +1393,7 @@ export default function EbookGenerateClient({
                     ))}
                   </div>
                 ) : null}
-                {uploads.length > 0 ? (
+                {!showTemplateUi && uploads.length > 0 ? (
                   <div className="mt-6">
                     <p className="text-center text-[12px] text-neutral-400">
                       Interior
@@ -1438,29 +1443,26 @@ export default function EbookGenerateClient({
                 <div className="mt-6 border-t border-black/[0.06] pt-6">
                   <button
                     type="button"
-                    aria-pressed={templateMode}
+                    aria-pressed={showTemplateUi}
                     disabled={converting || saving}
                     onClick={() => {
-                      if (templateMode) {
-                        setTemplateMode(false);
-                        return;
-                      }
+                      if (templateMode) return;
                       void loadRm22Template();
                     }}
                     className={`flex h-12 w-full items-center justify-center rounded-full text-[15px] font-medium transition disabled:opacity-40 ${
-                      templateMode
-                        ? "bg-neutral-950 text-white"
-                        : "bg-[#e8e8ed] text-neutral-950 hover:bg-[#dcdce2]"
+                      showTemplateUi
+                        ? "bg-[#e8e8ed] text-neutral-500"
+                        : "bg-white text-black ring-1 ring-black/[0.08] hover:bg-[#fafafa]"
                     }`}
                   >
-                    {templateMode
+                    {showTemplateUi
                       ? EBOOK_GENERATE_TEMPLATE_ACTION_ON
                       : EBOOK_GENERATE_TEMPLATE_ACTION}
                   </button>
                   <p className="mt-3 text-center text-[12px] leading-relaxed text-neutral-400">
                     {EBOOK_GENERATE_TEMPLATE_HELP}
                   </p>
-                  {templateMode ? (
+                  {showTemplateUi ? (
                     <>
                       <Rm22TemplateFields
                         slots={rm22Slots}
@@ -1607,46 +1609,47 @@ export default function EbookGenerateClient({
                 </label>
               </div>
 
-              <div className={`${cardClass} px-5 py-4`}>
-                <p className="text-[13px] font-medium text-neutral-950">
-                  Choose for Flag
-                </p>
-                <div className="mt-3 grid grid-cols-2 gap-2" role="radiogroup" aria-label="Choose for Flag">
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={resolvedFlagIdentity === "address"}
-                    disabled={saving || converting}
-                    onClick={() => setFlagIdentity("address")}
-                    className={`h-11 rounded-full text-[14px] font-medium transition disabled:opacity-40 ${
-                      resolvedFlagIdentity === "address"
-                        ? "bg-neutral-950 text-white"
-                        : "bg-[#e8e8ed] text-neutral-950 hover:bg-[#dcdce2]"
-                    }`}
-                  >
-                    Address
-                  </button>
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={resolvedFlagIdentity === "name"}
-                    disabled={saving || converting || isFsboAccount}
-                    onClick={() => setFlagIdentity("name")}
-                    className={`h-11 rounded-full text-[14px] font-medium transition disabled:opacity-40 ${
-                      resolvedFlagIdentity === "name"
-                        ? "bg-neutral-950 text-white"
-                        : "bg-[#e8e8ed] text-neutral-950 hover:bg-[#dcdce2]"
-                    }`}
-                  >
-                    Name
-                  </button>
-                </div>
-                {isFsboAccount ? (
-                  <p className="mt-2 text-[12px] leading-relaxed text-neutral-400">
-                    FSBO flags use Address.
+              {showFlagIdentityChoice ? (
+                <div className={`${cardClass} px-5 py-4`}>
+                  <p className="text-[13px] font-medium text-neutral-950">
+                    Choose for Flag
                   </p>
-                ) : null}
-              </div>
+                  <div
+                    className="mt-3 grid grid-cols-2 gap-2"
+                    role="radiogroup"
+                    aria-label="Choose for Flag"
+                  >
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={resolvedFlagIdentity === "address"}
+                      disabled={saving || converting}
+                      onClick={() => setFlagIdentity("address")}
+                      className={`h-11 rounded-full text-[14px] font-medium transition disabled:opacity-40 ${
+                        resolvedFlagIdentity === "address"
+                          ? "bg-neutral-950 text-white"
+                          : "bg-[#e8e8ed] text-neutral-950 hover:bg-[#dcdce2]"
+                      }`}
+                    >
+                      Address
+                    </button>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={resolvedFlagIdentity === "name"}
+                      disabled={saving || converting}
+                      onClick={() => setFlagIdentity("name")}
+                      className={`h-11 rounded-full text-[14px] font-medium transition disabled:opacity-40 ${
+                        resolvedFlagIdentity === "name"
+                          ? "bg-neutral-950 text-white"
+                          : "bg-[#e8e8ed] text-neutral-950 hover:bg-[#dcdce2]"
+                      }`}
+                    >
+                      Name
+                    </button>
+                  </div>
+                </div>
+              ) : null}
 
               {error ? (
                 <p className="px-1 text-center text-[13px] leading-relaxed text-red-600">

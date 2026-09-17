@@ -30,12 +30,16 @@ export const RM22_TYPE = {
 } as const;
 
 export const RM22_COLOR = {
-  band: "#062806",
+  /** Caption strip over bleed photos — not a solid template color. */
+  captionOverlay: "rgba(0, 0, 0, 0.3)",
   lime: "#c6de00",
   ink: "#111111",
   paper: "#ffffff",
   caption: "#ffffff",
 } as const;
+
+export const RM22_BLEED_TITLE_SHADOW =
+  "0 1px 2px rgba(0,0,0,0.55), 0 4px 18px rgba(0,0,0,0.6)";
 
 export type Rm22Box = {
   x: number;
@@ -157,13 +161,13 @@ export const RM22_BLEED_TITLE: Rm22TextSlotDef = {
 
 export const RM22_BLEED_CAPTION: Rm22TextSlotDef = {
   key: "caption",
-  box: { x: 0, y: RM22_DOCUMENT_PAGE_HEIGHT - 120, width: RM22_DOCUMENT_PAGE_WIDTH, height: 120 },
+  box: { x: 0, y: RM22_DOCUMENT_PAGE_HEIGHT - 150, width: RM22_DOCUMENT_PAGE_WIDTH, height: 150 },
   style: {
     fontFamily: RM22_TYPE.hand,
     fontSize: 36,
     fontWeight: 400,
     fontStyle: "normal",
-    lineHeight: 40,
+    lineHeight: 48,
     align: "center",
     color: RM22_COLOR.caption,
   },

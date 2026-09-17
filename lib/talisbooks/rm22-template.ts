@@ -37,14 +37,54 @@ export const RM22_PRODUCTS = [
   },
 ] as const;
 
-export const RM22_ASSETS = {
+/**
+ * Flattened design comps (green + baked titles/captions). Never use these as
+ * image-slot sources — they mix template overlay with the photo region.
+ * Image slots are user photos or an empty placeholder; text is overlay.
+ */
+export const RM22_DESIGN_COMPS = {
   front: `${RM22_TEMPLATE_ROOT}/overlays/front.jpg`,
-  agent: `${RM22_TEMPLATE_ROOT}/overlays/agent.jpg`,
   intro: `${RM22_TEMPLATE_ROOT}/interiors/intro.jpg`,
   caption: `${RM22_TEMPLATE_ROOT}/interiors/caption.jpg`,
   intrinsic: `${RM22_TEMPLATE_ROOT}/interiors/intrinsic.jpg`,
   outro: `${RM22_TEMPLATE_ROOT}/interiors/outro.jpg`,
 } as const;
+
+export const RM22_ASSETS = {
+  /** Photo-only default portrait. Cover copy is drawn from text slots. */
+  agent: `${RM22_TEMPLATE_ROOT}/overlays/agent.jpg`,
+  intro: "",
+  caption: "",
+  intrinsic: "",
+  outro: "",
+  front: "",
+} as const;
+
+export function isRm22PhotoPlaceholderUrl(
+  url: string | null | undefined,
+): boolean {
+  const value = url?.trim() || "";
+  if (!value) return true;
+  const path = value.startsWith("http")
+    ? (() => {
+        try {
+          return new URL(value).pathname;
+        } catch {
+          return value;
+        }
+      })()
+    : value;
+  return (
+    path.includes("/talisbooks/templates/rm22/interiors/") ||
+    path.endsWith("/overlays/front.jpg")
+  );
+}
+
+/** Photo slots store user images only — never flattened design-comp JPEGs. */
+export function rm22PhotoSlotUrl(url: string | null | undefined): string {
+  const value = url?.trim() || "";
+  return isRm22PhotoPlaceholderUrl(value) ? "" : value;
+}
 
 export function isRm22ProductId(value: string): value is Rm22ProductId {
   return RM22_PRODUCTS.some((product) => product.id === value);
@@ -60,7 +100,7 @@ export const RM22_DEFAULT_COPY = {
   frontSubtitle: "A prime location",
   frontPriceLine: "Inquire for price per acre.",
   frontTagline: "Available with or without Tiny Home, turn key optional",
-  backKicker: "Your Marketing Partner...",
+  backKicker: "Your Marketing Manager",
   agentName: "Your Name",
   agentPhone: "",
   introTitle: "Welcome…!",
@@ -243,6 +283,8 @@ export function createRm22SlotState(input?: {
 }): Rm22SlotState {
   const agentName = input?.agentName?.trim() || RM22_DEFAULT_COPY.agentName;
   const agentPhone = input?.agentPhone?.trim() || RM22_DEFAULT_COPY.agentPhone;
+  const productId = input?.productId ?? RM22_DEFAULT_PRODUCT_ID;
+  const product = rm22ProductById(productId);
   const cover = rm22CoverBandFromOnboarding({
     address: input?.address,
     lotTitle: input?.lotTitle,
@@ -251,7 +293,7 @@ export function createRm22SlotState(input?: {
     tagline: input?.tagline,
   });
   return {
-    productId: input?.productId ?? RM22_DEFAULT_PRODUCT_ID,
+    productId,
     frontImage: null,
     frontTitle: cover.frontTitle,
     frontSubtitle: cover.frontSubtitle,
@@ -269,7 +311,11 @@ export function createRm22SlotState(input?: {
     intrinsicImage: null,
     intrinsicTitle: RM22_DEFAULT_COPY.intrinsicTitle,
     intrinsicCaption: RM22_DEFAULT_COPY.intrinsicCaption,
-    intrinsicBody: RM22_DEFAULT_COPY.intrinsicBody,
+    intrinsicBody: defaultRm22IntrinsicBody({
+      productLabel: product.label,
+      lotTitle: cover.frontSubtitle,
+      address: cover.frontTitle,
+    }),
     intrinsicSignoff: RM22_DEFAULT_COPY.intrinsicSignoff,
     outroImage: null,
     outroTitle: RM22_DEFAULT_COPY.outroTitle,
@@ -427,15 +473,17 @@ export function serializeRm22TemplateInteriors(
   const plan = planRm22TemplateInteriors(slots);
   let photoIndex = 0;
   return plan.map((item) => {
-    let imageUrl = item.assetHref;
-    if (item.role === "intro") {
-      imageUrl = urls.intro?.trim() || item.assetHref;
+    let imageUrl = "";
+    if (item.role === "product-sheet") {
+      imageUrl = item.assetHref;
+    } else if (item.role === "intro") {
+      imageUrl = rm22PhotoSlotUrl(urls.intro);
     } else if (item.role === "intrinsic") {
-      imageUrl = urls.intrinsic?.trim() || item.assetHref;
+      imageUrl = rm22PhotoSlotUrl(urls.intrinsic);
     } else if (item.role === "outro") {
-      imageUrl = urls.outro?.trim() || item.assetHref;
+      imageUrl = rm22PhotoSlotUrl(urls.outro);
     } else if (item.role === "photo-caption") {
-      imageUrl = urls.photos[photoIndex]?.trim() || item.assetHref;
+      imageUrl = rm22PhotoSlotUrl(urls.photos[photoIndex]);
       photoIndex += 1;
     }
     return {
@@ -493,8 +541,10 @@ export function parseRm22TemplatePayload(
       ) {
         continue;
       }
-      const imageUrl = String(row.imageUrl || "").trim();
-      if (!imageUrl) continue;
+      const rawImageUrl = String(row.imageUrl || "").trim();
+      const imageUrl =
+        role === "product-sheet" ? rawImageUrl : rm22PhotoSlotUrl(rawImageUrl);
+      if (role === "product-sheet" && !imageUrl) continue;
       interiors.push({
         role,
         imageUrl,
