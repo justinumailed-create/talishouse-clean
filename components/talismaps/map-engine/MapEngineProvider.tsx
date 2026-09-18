@@ -40,6 +40,7 @@ interface MapEngineContextValue {
   lockCenter: boolean;
   lockCenterOffset: { x: number; y: number };
   interactive: boolean;
+  scrollZoom: boolean;
   preserveViewport: boolean;
   setProviderId: (providerId: MapProviderId) => void;
   setBasemapView: (view: MapBasemapView) => void;
@@ -73,6 +74,8 @@ interface MapEngineProviderProps {
   lockCenterOffset?: { x: number; y: number };
   /** When false, pan/zoom gestures are disabled. Pins stay clickable. */
   interactive?: boolean;
+  /** When false, wheel/trackpad zoom is off so overlay maps don't steal page scroll. */
+  scrollZoom?: boolean;
   /** Skip auto fit-to-pins so the initial center/zoom stay as mounted. */
   preserveViewport?: boolean;
   onViewportChange?: (viewport: MapViewport) => void;
@@ -97,6 +100,7 @@ export function MapEngineProvider({
   lockCenter = false,
   lockCenterOffset = { x: 0, y: 0 },
   interactive = true,
+  scrollZoom = true,
   preserveViewport = false,
   onViewportChange,
   onPinSelect,
@@ -250,6 +254,7 @@ export function MapEngineProvider({
       lockCenter,
       lockCenterOffset,
       interactive,
+      scrollZoom,
       preserveViewport,
       setProviderId: setActiveProviderId,
       setBasemapView: setActiveBasemapView,
@@ -277,6 +282,7 @@ export function MapEngineProvider({
       lockCenter,
       lockCenterOffset,
       interactive,
+      scrollZoom,
       preserveViewport,
       setSelectedPinId,
       setViewport,

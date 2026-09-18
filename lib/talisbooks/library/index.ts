@@ -5,6 +5,9 @@ export {
   TALISBOOKS_LIBRARY_GENERAL_COLUMNS,
   TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
   TALISBOOKS_LIBRARY_GENERAL_ROWS,
+  generalShelfBookScale,
+  generalShelfColumns,
+  packShelfRowsNewestAtRight,
   TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD,
   TALISBOOKS_LIBRARY_PAGE_SIZE,
   TALISBOOKS_LIBRARY_SHELF_CAPACITY,
@@ -32,6 +35,11 @@ export {
 } from "./bookshelf-service";
 export type { TalisBooksBookshelfOptions } from "./bookshelf-service";
 export {
+  deleteTalisBooksLibraryBook,
+  libraryEbookViewerPath,
+} from "./delete-book";
+export type { DeleteTalisBooksLibraryBookResult } from "./delete-book";
+export {
   PINNED_TALISBOOK_LIBRARY_ID,
   filterCreatedFastLinkedBooks,
   filterDemonstrationCatalogBooks,
@@ -46,6 +54,7 @@ export {
 } from "./public-library-pins";
 export type { PublicLibraryPin } from "./public-library-pins";
 export {
+  canAdminDeleteLibraryBook,
   filterBooksForAdminLibrary,
   filterMapSitesForAdminLibrary,
   talisbooksScopeFromAdminAccount,

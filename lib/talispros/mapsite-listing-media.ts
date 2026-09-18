@@ -1,4 +1,5 @@
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
+import { MAPSITE_HEADER_FALLBACK_LOGO } from "@/lib/mapsite-layout";
 
 /** Listing card + pin popup share one hero image and crop focal point. */
 export const MAPSITE_LISTING_IMAGE_CLASS =
@@ -6,6 +7,41 @@ export const MAPSITE_LISTING_IMAGE_CLASS =
 
 /** Shared card width for the left tile and pin popup. */
 export const MAPSITE_LISTING_CARD_WIDTH_CLASS = "w-[min(92vw,22rem)]";
+
+export const MAPSITE_FALLBACK_AGENCY_NAME = "TSplits";
+
+export function mapsiteAgencyLogoUrl(
+  logoUrl: string | null | undefined,
+): string {
+  const logo = logoUrl?.trim() || "";
+  if (!logo || logo === "/logo.png") return MAPSITE_HEADER_FALLBACK_LOGO;
+  return logo;
+}
+
+export function mapsiteAgencyDisplayName(
+  logoUrl: string | null | undefined,
+  agencyName?: string | null,
+): string {
+  const named = agencyName?.trim() || "";
+  if (named && !looksLikeMarketLabel(named)) return named;
+  return MAPSITE_FALLBACK_AGENCY_NAME;
+}
+
+function looksLikeMarketLabel(value: string): boolean {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/[™®]/g, "")
+    .replace(/-/g, " ");
+  return (
+    normalized.includes("for sale by owner") ||
+    normalized === "fsbo" ||
+    normalized === "listings" ||
+    normalized === "brokers" ||
+    normalized === "broker" ||
+    normalized === "pmc"
+  );
+}
 
 /** Shared hero image height so sidebar and pin popup align visually. */
 export const MAPSITE_LISTING_HERO_HEIGHT_CLASS = "h-44";

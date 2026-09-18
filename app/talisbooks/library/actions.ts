@@ -17,8 +17,15 @@ import {
   type AdminEbookPageRow,
 } from "@/lib/talisbooks/admin-ebook-pages";
 import { sendEbookCompleted } from "@/lib/email";
+import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { isTalisprosAdminAuthenticated } from "@/lib/talispros-admin-auth";
+import { talisbooksScopeFromAdminAccount } from "@/lib/talisbooks/library";
+import {
+  deleteTalisBooksLibraryBook,
+  libraryEbookViewerPath,
+} from "@/lib/talisbooks/library/delete-book";
 import { ROUTES } from "@/lib/routes";
 
 function absoluteEbookUrl(viewerPath: string): string {
@@ -41,6 +48,38 @@ function revalidateEbookPaths(fastCode: string, slug?: string) {
   if (slug) {
     revalidatePath(`${ROUTES.TALISBOOKS_VIEWER}/${slug}`);
   }
+}
+
+export async function deleteLibraryEbookAction(bookId: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const [account, talisprosAdmin] = await Promise.all([
+    getAdminSessionAccount(),
+    isTalisprosAdminAuthenticated(),
+  ]);
+  if (!account && !talisprosAdmin) {
+    return { success: false, error: "Unauthorized." };
+  }
+
+  const result = await deleteTalisBooksLibraryBook({
+    bookId,
+    scope: talisbooksScopeFromAdminAccount(account),
+  });
+  if (!result.success) return result;
+
+  revalidatePath(ROUTES.TALISBOOKS);
+  revalidatePath(ROUTES.TALISBOOKS_LIBRARY);
+  if (result.slug) {
+    revalidatePath(libraryEbookViewerPath(result.slug));
+  }
+  if (result.fastCode) {
+    const code = result.fastCode.trim().toLowerCase();
+    revalidatePath(`/talisbooks/fast/${code}`);
+    revalidateEbookPaths(code, result.slug);
+  }
+
+  return { success: true };
 }
 
 export async function createOrUpdateMapSiteEbookAction(input: {

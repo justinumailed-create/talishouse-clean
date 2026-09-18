@@ -9,7 +9,10 @@ import { VERCEL_FUNCTION_BODY_LIMIT_BYTES } from "@/lib/media/upload-size-limits
 import { TALISBOOKS_ASSET_CACHE_CONTROL, TALISBOOKS_IMAGE_STORAGE_BUCKET } from "@/lib/talisbooks/image-engine";
 import { assertAllowedEbookImageBuffer } from "@/lib/talisbooks/ebook-upload-formats-server";
 import { resolveDemoMapSiteUploadScope } from "@/lib/talispros/demo-mapsite-service";
-import { resolveOnboardingUploadScope } from "@/lib/talispros/resolve-onboarding-from-request";
+import {
+  resolveMapSiteUploadScope,
+  resolveOnboardingUploadScope,
+} from "@/lib/talispros/resolve-onboarding-from-request";
 import {
   logOnboardingStep,
   onboardingNow,
@@ -86,24 +89,28 @@ export async function POST(request: Request) {
     }
 
     let scope: string;
-    if (mapsiteId) {
-      const scoped = await resolveDemoMapSiteUploadScope(mapsiteId);
-      if (!scoped.ok) {
-        return Response.json({ ok: false, error: scoped.error }, { status: 400 });
-      }
-      scope = scoped.fastCode;
-    } else {
-      if (!requestId) {
-        return Response.json(
-          { ok: false, error: "Build Request ID is required." },
-          { status: 400 },
-        );
-      }
+    if (requestId) {
       const scoped = await resolveOnboardingUploadScope(requestId);
       if (!scoped.ok) {
         return Response.json({ ok: false, error: scoped.error }, { status: 400 });
       }
       scope = scoped.fastCode || requestId;
+    } else if (mapsiteId) {
+      const demoScoped = await resolveDemoMapSiteUploadScope(mapsiteId);
+      if (demoScoped.ok) {
+        scope = demoScoped.fastCode;
+      } else {
+        const scoped = await resolveMapSiteUploadScope(mapsiteId);
+        if (!scoped.ok) {
+          return Response.json({ ok: false, error: scoped.error }, { status: 400 });
+        }
+        scope = scoped.fastCode;
+      }
+    } else {
+      return Response.json(
+        { ok: false, error: "Build Request ID is required." },
+        { status: 400 },
+      );
     }
     const source = Buffer.from(await fileEntry.arrayBuffer());
     const fileName =

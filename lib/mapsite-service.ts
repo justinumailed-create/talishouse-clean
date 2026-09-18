@@ -10,10 +10,16 @@ import { generateMapSiteSlug } from "./slug-generator";
 import { disableSupabaseAdminClient, getSupabaseAdmin, tryGetSupabaseAdmin } from "./supabaseAdmin";
 import { supabase } from "./supabaseClient";
 import { resolvePinStyleExtras } from "./build-request-pin-style-notes";
+import { paymentProtectsMapSiteFromDelete } from "@/lib/fast-code-admin-payment";
+import { adminMapSiteDeleteControl } from "@/lib/talispros/admin-mapsite-delete";
 import {
   toAdminMapSiteThumbnail,
   type AdminMapSiteThumbnail,
 } from "@/lib/talispros/mapsite-admin-thumbnail";
+import {
+  mapsiteRealtimeSeoCopy,
+  resolveMapSiteOgImage,
+} from "@/lib/talispros/mapsite-og-image";
 
 export interface CreateMapSiteForAccountInput {
   accountId: string;
@@ -53,6 +59,22 @@ export interface MapSitePinView {
 }
 
 export interface MapSiteListItem extends AdminMapSiteThumbnail {}
+
+export type MapSiteSeoListItem = {
+  id: string;
+  fastCode: string;
+  status: string;
+  propertyTitle: string | null;
+  metaTitle: string | null;
+  metaDescription: string | null;
+  ogImageUrl: string | null;
+  /** Live share title when no SEO override is saved. */
+  liveTitle: string;
+  /** Live share description when no SEO override is saved. */
+  liveDescription: string;
+  /** Live Open Graph image (ebook / listing photo), not a manual override. */
+  liveOgImageUrl: string;
+};
 
 export interface MapSiteView {
   id: string;
@@ -135,12 +157,44 @@ async function queryWithAdminFallback<T>(
   };
 }
 
+async function listCompletedPaymentsForAdminThumbnails(
+  client: SupabaseClient<Database>,
+) {
+  const pageSize = 1000;
+  const payments: Array<{
+    payment_status?: string | null;
+    fast_code?: string | null;
+    mapsite_id?: string | null;
+    email?: string | null;
+  }> = [];
+
+  for (let from = 0; from < 20_000; from += pageSize) {
+    const { data: page, error } = await client
+      .from("talispros_payments")
+      .select("payment_status, fast_code, mapsite_id, email")
+      .or(
+        "payment_status.ilike.completed,payment_status.ilike.paid,payment_status.ilike.complete,payment_status.ilike.succeeded",
+      )
+      .range(from, from + pageSize - 1);
+
+    if (error) {
+      console.warn("[mapsites] talispros_payments lookup failed:", error.message);
+      break;
+    }
+
+    payments.push(...(page ?? []));
+    if (!page || page.length < pageSize) break;
+  }
+
+  return payments;
+}
+
 export async function listMapSitesForAdmin(): Promise<MapSiteListItem[]> {
   const { data, error } = await queryWithAdminFallback((client) =>
     client
       .from("mapsites")
       .select(
-        "fast_code, status, property_title, property_address, cover_image, header_image_url, gallery_images, is_demonstration, latitude, longitude, map_zoom",
+        "id, fast_code, status, property_title, property_address, cover_image, header_image_url, gallery_images, is_demonstration, latitude, longitude, map_zoom",
       )
       .order("created_at", { ascending: false })
   );
@@ -149,7 +203,104 @@ export async function listMapSitesForAdmin(): Promise<MapSiteListItem[]> {
     return [];
   }
 
-  return data.map((row) => toAdminMapSiteThumbnail(row));
+  const admin = tryGetSupabaseAdmin();
+  const payments = admin
+    ? await listCompletedPaymentsForAdminThumbnails(admin)
+    : [];
+
+  return data.map((row) => {
+    const thumb = toAdminMapSiteThumbnail(row);
+    const paymentReceived = paymentProtectsMapSiteFromDelete(
+      { id: row.id, fastCode: row.fast_code },
+      payments,
+    );
+    return {
+      ...thumb,
+      id: row.id,
+      paymentReceived,
+      deleteControl: adminMapSiteDeleteControl({
+        status: row.status,
+        paymentReceived,
+      }),
+    };
+  });
+}
+
+export async function listMapSitesForSeoAdmin(): Promise<MapSiteSeoListItem[]> {
+  const { data, error } = await queryWithAdminFallback((client) =>
+    client
+      .from("mapsites")
+      .select(
+        "id, fast_code, status, property_title, property_description, meta_title, meta_description, og_image_url, header_image_url, cover_image, gallery_images, agent_name, owner_first_name, owner_last_name",
+      )
+      .order("fast_code", { ascending: true })
+  );
+
+  if (error || !data) {
+    return [];
+  }
+
+  const rows = data
+    .map((row) => {
+      const fastCode = (row.fast_code ?? "").trim();
+      const ownerName = [row.owner_first_name, row.owner_last_name]
+        .map((part) => part?.trim() || "")
+        .filter(Boolean)
+        .join(" ");
+      const propertyTitle =
+        row.property_title?.trim() ||
+        row.agent_name?.trim() ||
+        ownerName ||
+        null;
+      return {
+        id: row.id as string,
+        fastCode,
+        status: row.status as string,
+        propertyTitle,
+        propertyDescription: row.property_description as string | null,
+        metaTitle: (row.meta_title as string | null) ?? null,
+        metaDescription: (row.meta_description as string | null) ?? null,
+        ogImageUrl: (row.og_image_url as string | null) ?? null,
+        headerImageUrl: (row.header_image_url as string | null) ?? null,
+        coverImage: (row.cover_image as string | null) ?? null,
+        galleryImages: Array.isArray(row.gallery_images)
+          ? (row.gallery_images as string[])
+          : [],
+      };
+    })
+    .filter((row) => row.fastCode.length > 0)
+    .sort((a, b) =>
+      a.fastCode.localeCompare(b.fastCode, undefined, { sensitivity: "base" }),
+    );
+
+  return Promise.all(
+    rows.map(async (row) => {
+      const live = mapsiteRealtimeSeoCopy({
+        fastCode: row.fastCode,
+        propertyTitle: row.propertyTitle,
+        propertyDescription: row.propertyDescription,
+      });
+      const liveOgImageUrl = await resolveMapSiteOgImage(row.fastCode, {
+        fallbackImageUrls: [
+          row.headerImageUrl,
+          row.coverImage,
+          ...row.galleryImages,
+        ],
+      });
+      return {
+        id: row.id,
+        fastCode: row.fastCode,
+        status: row.status,
+        propertyTitle: row.propertyTitle,
+        metaTitle: row.metaTitle,
+        metaDescription: row.metaDescription,
+        ogImageUrl: row.ogImageUrl,
+        liveTitle: live.title,
+        liveDescription: live.description,
+        liveOgImageUrl,
+      };
+    }),
+  );
 }
 
 export async function getMapSiteByFastCode(
@@ -284,6 +435,28 @@ async function buildMapSiteView(
       .limit(1)
       .maybeSingle();
     requestId = fastCodeByMapSite?.request_id ?? null;
+  }
+
+  if (!requestId) {
+    const { data: byLinkedMapSite } = await client
+      .from("build_requests")
+      .select("id")
+      .eq("linked_mapsite_id", mapsite.id)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    requestId = byLinkedMapSite?.id ?? null;
+  }
+
+  if (!requestId && displayFastCode) {
+    const { data: byFastCode } = await client
+      .from("build_requests")
+      .select("id")
+      .ilike("requested_fast_code", displayFastCode)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    requestId = byFastCode?.id ?? null;
   }
 
   let assets: {

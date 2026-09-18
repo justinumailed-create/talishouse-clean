@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { partitionBookshelf } from "../lib/talisbooks/library/partition";
+import { packShelfRowsNewestAtRight, partitionBookshelf } from "../lib/talisbooks/library";
 import type { TalisBooksLibraryBook } from "../lib/talisbooks/library/types";
 
 function book(
@@ -34,5 +34,38 @@ describe("partitionBookshelf pinned ordering", () => {
       book({ id: "c", title: "Charlie", views: 500 }),
     ]);
     expect(featured[0]?.id).toBe("b");
+  });
+
+  it("puts FAST-code published books on the right shelf newest first", () => {
+    const { featured, general } = partitionBookshelf(
+      [
+        book({
+          id: "older",
+          title: "Older",
+          fastCode: "demo-ab12cd34",
+          publishedAt: "2026-01-01T00:00:00.000Z",
+        }),
+        book({
+          id: "newest",
+          title: "Newest",
+          fastCode: "demo-ab12cd34",
+          publishedAt: "2026-09-18T00:00:00.000Z",
+        }),
+        book({
+          id: "scheduled",
+          title: "Coming soon",
+          fastCode: "demo-ab12cd34",
+          publishStatus: "scheduled",
+          publishedAt: "2026-10-01T00:00:00.000Z",
+        }),
+      ],
+      { featuredMode: "highlights" },
+    );
+
+    expect(featured.map((item) => item.id)).toEqual(["scheduled"]);
+    expect(general.map((item) => item.id)).toEqual(["newest", "older"]);
+    expect(packShelfRowsNewestAtRight(general.map((item) => item.id), 4)).toEqual([
+      ["older", "newest"],
+    ]);
   });
 });

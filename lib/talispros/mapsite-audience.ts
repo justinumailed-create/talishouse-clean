@@ -103,7 +103,7 @@ export function buildMapSitePaymentHref(options: {
   return `/talispros/register?${params.toString()}`;
 }
 
-/** Paid / activated markets unlock Express Interest instead of the payment CTA. */
+/** Paid / activated markets hide checkout; the agency logo sits above the manager card. */
 export function isMapSitePaid(status: string): boolean {
   return status === "ACTIVE";
 }

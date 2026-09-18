@@ -10,6 +10,7 @@ const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | nu
   { prefix: "/admin/build-requests", scope: "build-requests" },
   { prefix: "/admin/marketing", scope: "build-requests" },
   { prefix: "/admin/mapsites", scope: "mapsites" },
+  { prefix: "/admin/seo", scope: "mapsites" },
   { prefix: "/admin/talisbooks", scope: "talisbooks" },
   { prefix: "/admin/bookshelves", scope: "talisbooks" },
   { prefix: "/admin/products", scope: "platform-content" },

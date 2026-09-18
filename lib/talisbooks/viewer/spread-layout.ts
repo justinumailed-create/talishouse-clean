@@ -19,6 +19,12 @@ export const SPREAD_ASPECT_MAX = 3.2;
  * then shrink when the real ratio lands.
  */
 export const RESERVED_BOOK_SPREAD_ASPECT = 16 / 9;
+/** Displayed open-book matches the source spread (16:9). */
+export const VIEWER_BOOK_HEIGHT_SCALE = 1;
+
+export function displayBookSpreadAspect(ratio: number): number {
+  return clampSpreadAspectRatio(ratio) / VIEWER_BOOK_HEIGHT_SCALE;
+}
 
 export function isLandscapeSpreadCandidate(width: number, height: number): boolean {
   return width > 0 && height > 0 && width > height;

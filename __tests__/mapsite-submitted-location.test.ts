@@ -19,6 +19,9 @@ describe("Mapsite™ submitted location merge", () => {
       propertyDescription: "User PIN write-up from the claim form.",
       coverImage: "https://cdn.example/user-photo.jpg",
       galleryImages: ["https://cdn.example/user-photo.jpg"],
+      company: "Cape Realty",
+      agentImage: "https://cdn.example/agent.jpg",
+      agentName: "Ralf Meyer",
       pinIcon: "flag",
       pinColor: "#1A73E8",
       pinWhiteCenter: false,
@@ -36,6 +39,9 @@ describe("Mapsite™ submitted location merge", () => {
     expect(merged.pin_color).toBe("#1A73E8");
     expect(merged.pin_white_center).toBe(false);
     expect(merged.pin_animated).toBe(false);
+    expect(merged.agency_name).toBe("Cape Realty");
+    expect(merged.profile_image_url).toBe("https://cdn.example/agent.jpg");
+    expect(merged.agent_name).toBe("Ralf Meyer");
   });
 
   it("does not copy a personal name onto the Mapsite™ title", () => {
@@ -53,6 +59,9 @@ describe("Mapsite™ submitted location merge", () => {
       propertyDescription: null,
       coverImage: null,
       galleryImages: [],
+      company: null,
+      agentImage: null,
+      agentName: null,
       pinIcon: "flag",
       pinColor: "#1A73E8",
       pinWhiteCenter: false,

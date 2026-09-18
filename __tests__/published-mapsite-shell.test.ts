@@ -43,4 +43,39 @@ describe("published Mapsite™ shell", () => {
     expect(bottomPanels).toContain("pageInsertLocked");
     expect(bottomPanels).toContain("MapSiteCreativeLinks");
   });
+
+  it("shows the agency logo above the marketing manager on paid claimed Mapsites™", () => {
+    const application = repoSource(
+      "components/talispros/mapsite/MapSiteApplication.tsx",
+    );
+    expect(application).toContain("MapSiteMarketPartnerCard");
+    expect(application).toContain("paid={paid}");
+    expect(application).not.toContain("MapSiteExpressInterestCard");
+    expect(application).toContain("overscroll-none");
+
+    const partnerCard = repoSource(
+      "components/talispros/mapsite/MapSiteMarketPartnerCard.tsx",
+    );
+    expect(partnerCard).toContain("MapSiteAgencyLogo");
+    expect(partnerCard).toContain("paid ?");
+    expect(partnerCard).toContain("mapsite-cloud-vignette");
+  });
+
+  it("scroll-locks the claimed Mapsite™ viewport", () => {
+    const layout = repoSource("app/talispros/mapsite/layout.tsx");
+    expect(layout).toContain("MapSiteViewportLock");
+    expect(layout).toContain("mapsite-app-shell");
+    expect(layout).toContain("overflow-hidden");
+
+    const sidebar = repoSource(
+      "components/talispros/mapsite/MapSiteListingSidebar.tsx",
+    );
+    expect(sidebar).toContain("overflow-y-auto");
+    expect(sidebar).toContain("stopMapScrollSteal");
+
+    const application = repoSource(
+      "components/talispros/mapsite/MapSiteApplication.tsx",
+    );
+    expect(application).toContain("scrollZoom={false}");
+  });
 });

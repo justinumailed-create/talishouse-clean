@@ -11,10 +11,17 @@ import {
   saveMapSiteDraft,
   unpublishMapSite,
   uploadMapSiteAsset,
+  type MapSiteAdminActionResult,
   type MapSiteAdminInput,
 } from "@/lib/mapsite-admin-service";
 import MapSiteGalleryEditor from "@/components/admin/MapSiteGalleryEditor";
-import TalisMapsPinPicker from "@/components/build-mapsite/TalisMapsPinPicker";
+import HomePinLocationSection, {
+  validateHomePinLocation,
+} from "@/components/build-mapsite/HomePinLocationSection";
+import {
+  defaultHomePinLocationValues,
+  type HomePinLocationValues,
+} from "@/components/build-mapsite/home-pin-types";
 import { MAPSITE_PIN_DEFAULT_BORDER, MAPSITE_PIN_DEFAULT_COLOR, MAPSITE_PIN_DEFAULT_ICON } from "@/lib/mapsite-pin-style";
 import MapSiteAdminShareLinks from "@/components/talispros-admin/MapSiteAdminShareLinks";
 import MapSiteAdminEbookPanel from "@/components/talispros-admin/MapSiteAdminEbookPanel";
@@ -23,7 +30,6 @@ import {
   type OfferedSubscriptionTier,
 } from "@/lib/mapsite-subscription";
 import type { MapSiteEbookDraft } from "@/lib/talisbooks/mapsite-ebook-service";
-import type { AdminEbookPageRow } from "@/lib/talisbooks/admin-ebook-pages";
 
 interface MapSiteAdminEditorProps {
   mapsite: MapSiteView;
@@ -34,7 +40,6 @@ interface MapSiteAdminEditorProps {
   /** Completed PayPal payment on file for this claim. */
   paymentReceived?: boolean;
   ebook?: MapSiteEbookDraft | null;
-  ebookPages?: AdminEbookPageRow[];
 }
 
 function Field({
@@ -56,9 +61,6 @@ function Field({
 
 const inputClass =
   "w-full h-11 px-4 bg-white border border-neutral-200 text-sm text-neutral-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20";
-
-const textareaClass =
-  "w-full px-4 py-3 bg-white border border-neutral-200 text-sm text-neutral-900 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20 resize-y";
 
 const BRANDING_IMAGE_FIELDS = [
   {
@@ -91,7 +93,6 @@ export default function MapSiteAdminEditor({
   showVisitorSubscriptionPanel = false,
   paymentReceived = false,
   ebook = null,
-  ebookPages = [],
 }: MapSiteAdminEditorProps) {
   const [form, setForm] = useState({
     propertyTitle: mapsite.propertyTitle || "",
@@ -119,11 +120,19 @@ export default function MapSiteAdminEditor({
     brokerUrl: mapsite.brokerUrl || "",
     tebUrl: mapsite.tebUrl || "",
     ttvUrl: mapsite.ttvUrl || "",
+    pinIcon: mapsite.pinIcon || defaultHomePinLocationValues.futurePinIcon || MAPSITE_PIN_DEFAULT_ICON,
+    pinColor: mapsite.pinColor || defaultHomePinLocationValues.futurePinColor || MAPSITE_PIN_DEFAULT_COLOR,
+    pinBorder: mapsite.pinBorder || defaultHomePinLocationValues.futurePinBorder || MAPSITE_PIN_DEFAULT_BORDER,
+    pinWhiteCenter: mapsite.pinWhiteCenter ?? defaultHomePinLocationValues.futurePinWhiteCenter,
+    pinAnimated: mapsite.pinAnimated ?? defaultHomePinLocationValues.futurePinAnimated,
+    pinCategoryBadge: mapsite.pinCategoryBadge || "",
+    pinLabel: mapsite.propertyTitle || mapsite.fastCode,
   });
+  const [pinImage, setPinImage] = useState<File | null>(null);
+  const [mapHref, setMapHref] = useState(mapsite.atlistMapUrl || "");
   const [galleryItems, setGalleryItems] = useState(mapsite.galleryItems);
   const [uploadingBrandingField, setUploadingBrandingField] =
     useState<BrandingImageKey | null>(null);
-  const [uploadingOgImage, setUploadingOgImage] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -154,15 +163,6 @@ export default function MapSiteAdminEditor({
     }
   }
 
-  async function handleOgImageUpload(file: File) {
-    setUploadingOgImage(true);
-    try {
-      await handleUpload("ogImageUrl", file, "ogImageUrl");
-    } finally {
-      setUploadingOgImage(false);
-    }
-  }
-
   async function handleUpload(fieldName: string, file: File, formKey: keyof typeof form) {
     const formData = new FormData();
     formData.append("fastCode", mapsite.fastCode);
@@ -179,7 +179,7 @@ export default function MapSiteAdminEditor({
   }
 
   async function runAction(
-    action: (input: MapSiteAdminInput) => Promise<{ success: boolean; error?: string }>
+    action: (input: MapSiteAdminInput) => Promise<MapSiteAdminActionResult>
   ) {
     setSaving(true);
     setMessage("");
@@ -187,10 +187,37 @@ export default function MapSiteAdminEditor({
     const result = await action(toInput());
     if (result.success) {
       setMessage("Saved successfully");
+      if (result.mapHref) setMapHref(result.mapHref);
     } else {
       setError(result.error || "Save failed");
     }
     setSaving(false);
+  }
+
+  const pinValues: HomePinLocationValues = {
+    streetAddress: form.propertyAddress,
+    latitude: form.latitude,
+    longitude: form.longitude,
+    manualPlacement: true,
+    reverseGeocodedAddress: "",
+    mapZoom: Number.parseInt(form.mapZoom, 10) || 15,
+    pinWriteup: form.propertyDescription,
+    futurePinColor: form.pinColor,
+    futurePinIcon: form.pinIcon,
+    futurePinBorder: form.pinBorder,
+    futurePinLabel: form.pinLabel,
+    futurePinWhiteCenter: form.pinWhiteCenter,
+    futurePinAnimated: form.pinAnimated,
+    futurePinCategoryBadge: form.pinCategoryBadge || null,
+  };
+
+  async function handleCreateMap() {
+    const pinErrors = validateHomePinLocation(pinValues);
+    if (Object.keys(pinErrors).length > 0) {
+      setError("Place a pin or enter an address to create the Talismaps™.");
+      return;
+    }
+    await runAction(saveMapSiteDraft);
   }
 
   return (
@@ -200,8 +227,8 @@ export default function MapSiteAdminEditor({
           {adminWritesMessage}
         </div>
       ) : null}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
           {backHref ? (
             <Link
               href={backHref}
@@ -215,27 +242,31 @@ export default function MapSiteAdminEditor({
           </h1>
           <p className="text-sm text-neutral-500 mt-1 font-mono">{mapsite.fastCode}</p>
         </div>
-        <Link
-          href={buildClaimedMapSiteHref({
-            mapsiteId: mapsite.id,
-            fastCode: mapsite.fastCode,
-            requestId: mapsite.requestId,
-            audience: mapsite.claimAudience || "listings",
-          })}
-          target="_blank"
-          className="inline-flex items-center gap-2 text-sm text-neutral-700 hover:text-neutral-900"
-        >
-          Open claimed Mapsite™
-          <ExternalLink className="w-4 h-4" />
-        </Link>
-        <Link
-          href={`/talispros/mapsites/${mapsite.fastCode}`}
-          target="_blank"
-          className="inline-flex items-center gap-2 text-sm text-neutral-700 hover:text-neutral-900"
-        >
-          View published page
-          <ExternalLink className="w-4 h-4" />
-        </Link>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <Link
+            href={buildClaimedMapSiteHref({
+              mapsiteId: mapsite.id,
+              fastCode: mapsite.fastCode,
+              requestId: mapsite.requestId,
+              audience: mapsite.claimAudience || "listings",
+            })}
+            target="_blank"
+            className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1.5 text-[13px] font-medium text-orange-600 ring-1 ring-orange-200/80 transition hover:bg-orange-100"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-orange-500" aria-hidden="true" />
+            Open claimed Mapsite™
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+          <Link
+            href={`/talispros/mapsites/${mapsite.fastCode}`}
+            target="_blank"
+            className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-[13px] font-medium text-blue-600 ring-1 ring-blue-200/80 transition hover:bg-blue-100"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-blue-500" aria-hidden="true" />
+            View published page
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       </div>
 
       {message && (
@@ -270,9 +301,24 @@ export default function MapSiteAdminEditor({
       <div id="ebook-editor">
         <MapSiteAdminEbookPanel
           fastCode={mapsite.fastCode}
+          mapsiteId={mapsite.id}
+          requestId={mapsite.requestId}
+          accountType={mapsite.accountType}
           initialEbook={ebook}
-          initialPages={ebookPages}
           adminWritesEnabled={adminWritesEnabled}
+          initialAgentName={
+            mapsite.agentName ||
+            `${mapsite.ownerFirstName} ${mapsite.ownerLastName}`.trim()
+          }
+          initialAgentEmail={mapsite.email}
+          initialAgentPhone={mapsite.phone}
+          pinLatitude={mapsite.latitude}
+          pinLongitude={mapsite.longitude}
+          initialPropertyAddress={mapsite.propertyAddress}
+          initialListingTitle={mapsite.propertyTitle}
+          initialPinWriteup={mapsite.propertyDescription}
+          initialPriceLine={mapsite.price}
+          initialAgencyLogoUrl={mapsite.logoUrl}
         />
       </div>
 
@@ -328,80 +374,6 @@ export default function MapSiteAdminEditor({
             onChange={(e) => setForm((p) => ({ ...p, propertyTitle: e.target.value }))}
           />
         </Field>
-        <Field label="Address">
-          <input
-            className={inputClass}
-            value={form.propertyAddress}
-            onChange={(e) => setForm((p) => ({ ...p, propertyAddress: e.target.value }))}
-          />
-        </Field>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Latitude">
-            <input
-              className={inputClass}
-              value={form.latitude}
-              onChange={(e) => setForm((p) => ({ ...p, latitude: e.target.value }))}
-            />
-          </Field>
-          <Field label="Longitude">
-            <input
-              className={inputClass}
-              value={form.longitude}
-              onChange={(e) => setForm((p) => ({ ...p, longitude: e.target.value }))}
-            />
-          </Field>
-        </div>
-        <Field label="Map zoom">
-          <input
-            className={inputClass}
-            type="number"
-            min={1}
-            max={21}
-            value={form.mapZoom}
-            onChange={(e) => setForm((p) => ({ ...p, mapZoom: e.target.value }))}
-          />
-        </Field>
-        <div className="overflow-hidden rounded-xl border border-neutral-200">
-          <div className="border-b border-neutral-200 bg-neutral-50 px-4 py-2 text-sm font-medium text-neutral-800">
-            Editable map pin
-          </div>
-          <div className="h-[360px] w-full bg-neutral-100">
-            <TalisMapsPinPicker
-              latitude={form.latitude}
-              longitude={form.longitude}
-              streetAddress={form.propertyAddress}
-              mapZoom={Number.parseInt(form.mapZoom, 10) || 15}
-              pinStyle={{
-                label: form.propertyTitle || mapsite.fastCode,
-                color: MAPSITE_PIN_DEFAULT_COLOR,
-                icon: MAPSITE_PIN_DEFAULT_ICON,
-                border: MAPSITE_PIN_DEFAULT_BORDER,
-                whiteCenter: false,
-              }}
-              onLocationChange={(update) => {
-                setForm((prev) => ({
-                  ...prev,
-                  latitude: update.latitude,
-                  longitude: update.longitude,
-                  propertyAddress:
-                    update.reverseGeocodedAddress?.trim() ||
-                    prev.propertyAddress,
-                  mapZoom:
-                    update.mapZoom != null
-                      ? String(update.mapZoom)
-                      : prev.mapZoom,
-                }));
-              }}
-              onMapZoomChange={(mapZoom) =>
-                setForm((prev) => ({ ...prev, mapZoom: String(mapZoom) }))
-              }
-            />
-          </div>
-        </div>
-        <p className="text-xs text-neutral-500">
-          Drag the pin or search an address. Saved coordinates and zoom drive the
-          claimed Mapsite™ pin card.
-        </p>
         <Field label="Price">
           <input
             className={inputClass}
@@ -575,97 +547,90 @@ export default function MapSiteAdminEditor({
       </section>
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-neutral-900">Map</h2>
-        <div>
-          <p className="text-xs font-medium text-neutral-500 mb-1.5">Talismaps™</p>
-          <p className="text-sm text-neutral-600">
-            Your map link will be generated by Talispros backend team.
-          </p>
-        </div>
-      </section>
-
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-neutral-900">SEO</h2>
-        <Field label="Meta Title">
-          <input
-            className={inputClass}
-            value={form.metaTitle}
-            onChange={(e) => setForm((p) => ({ ...p, metaTitle: e.target.value }))}
-          />
-        </Field>
-        <Field label="Meta Description">
-          <textarea
-            className={textareaClass}
-            rows={3}
-            value={form.metaDescription}
-            onChange={(e) => setForm((p) => ({ ...p, metaDescription: e.target.value }))}
-          />
-        </Field>
-        <div className="rounded-xl border border-neutral-200 p-4 space-y-3">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm font-medium text-neutral-900">OpenGraph image</p>
-            <p className="text-xs text-neutral-500 mt-0.5">
-              Shown when this Mapsite™ is shared on social media. Recommended 1200×630.
+            <h2 className="text-lg font-semibold text-neutral-900">Map</h2>
+            <p className="mt-1 text-sm text-neutral-500">
+              Same Home PIN flow as Build My Mapsite™ — search an address or drop
+              a pin, then create the Talismaps™ for {mapsite.fastCode.toUpperCase()}.
             </p>
           </div>
-
-          <div className="flex flex-wrap items-center gap-4">
-            {form.ogImageUrl ? (
-              <div className="relative h-20 w-36 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
-                <Image
-                  src={form.ogImageUrl}
-                  alt="OpenGraph preview"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-              </div>
-            ) : (
-              <div className="flex h-20 w-36 shrink-0 items-center justify-center rounded-lg border border-dashed border-neutral-300 bg-neutral-50 text-xs text-neutral-400">
-                No image
-              </div>
-            )}
-
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-neutral-300 px-4 py-2 text-sm text-neutral-600 hover:bg-neutral-50">
-              <Upload className="h-4 w-4" />
-              {uploadingOgImage
-                ? "Uploading..."
-                : form.ogImageUrl
-                  ? "Replace image"
-                  : "Upload image"}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                disabled={uploadingOgImage || uploadingBrandingField !== null}
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) void handleOgImageUpload(file);
-                  e.target.value = "";
-                }}
-              />
-            </label>
-
-            {form.ogImageUrl ? (
-              <button
-                type="button"
-                onClick={() => setForm((prev) => ({ ...prev, ogImageUrl: "" }))}
-                className="text-sm text-red-600 hover:text-red-700"
-              >
-                Remove
-              </button>
-            ) : null}
-          </div>
-
-          <Field label="Or paste image URL">
-            <input
-              className={inputClass}
-              value={form.ogImageUrl}
-              onChange={(e) => setForm((p) => ({ ...p, ogImageUrl: e.target.value }))}
-              placeholder="https://..."
-            />
-          </Field>
+          {mapHref ? (
+            <Link
+              href={mapHref}
+              target="_blank"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200 px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-50"
+            >
+              Open map <ExternalLink className="h-3.5 w-3.5" />
+            </Link>
+          ) : null}
         </div>
+        <HomePinLocationSection
+          values={pinValues}
+          pinImage={pinImage}
+          onChange={(values) => {
+            setForm((prev) => ({
+              ...prev,
+              propertyAddress:
+                values.streetAddress !== undefined
+                  ? values.streetAddress
+                  : prev.propertyAddress,
+              latitude:
+                values.latitude !== undefined ? values.latitude : prev.latitude,
+              longitude:
+                values.longitude !== undefined ? values.longitude : prev.longitude,
+              mapZoom:
+                values.mapZoom !== undefined
+                  ? String(values.mapZoom)
+                  : prev.mapZoom,
+              propertyDescription:
+                values.pinWriteup !== undefined
+                  ? values.pinWriteup
+                  : prev.propertyDescription,
+              pinColor:
+                values.futurePinColor !== undefined
+                  ? values.futurePinColor || prev.pinColor
+                  : prev.pinColor,
+              pinIcon:
+                values.futurePinIcon !== undefined
+                  ? values.futurePinIcon || prev.pinIcon
+                  : prev.pinIcon,
+              pinBorder:
+                values.futurePinBorder !== undefined
+                  ? values.futurePinBorder || prev.pinBorder
+                  : prev.pinBorder,
+              pinLabel:
+                values.futurePinLabel !== undefined
+                  ? values.futurePinLabel || prev.pinLabel
+                  : prev.pinLabel,
+              pinWhiteCenter:
+                values.futurePinWhiteCenter !== undefined
+                  ? values.futurePinWhiteCenter
+                  : prev.pinWhiteCenter,
+              pinAnimated:
+                values.futurePinAnimated !== undefined
+                  ? values.futurePinAnimated
+                  : prev.pinAnimated,
+              pinCategoryBadge:
+                values.futurePinCategoryBadge !== undefined
+                  ? values.futurePinCategoryBadge || ""
+                  : prev.pinCategoryBadge,
+            }));
+          }}
+          onPinImageChange={setPinImage}
+        />
+        <button
+          type="button"
+          disabled={!adminWritesEnabled || saving}
+          onClick={() => void handleCreateMap()}
+          className="inline-flex h-11 items-center justify-center rounded-xl bg-neutral-900 px-5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
+        >
+          {saving
+            ? "Creating…"
+            : mapHref
+              ? "Update Talismaps™"
+              : "Create Talismaps™"}
+        </button>
       </section>
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6">

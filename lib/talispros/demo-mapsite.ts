@@ -50,6 +50,17 @@ export function isProtectedPlatformDemoMapSite(id: string | null | undefined): b
   return (id || "").trim() === DEMO_MAPSITE_ID;
 }
 
+/** Keep the seed row only when it still is the demonstration listing. */
+export function shouldKeepPlatformDemoMapSite(input: {
+  mapsiteId: string | null | undefined;
+  fastCode?: string | null;
+}): boolean {
+  if (!isProtectedPlatformDemoMapSite(input.mapsiteId)) return false;
+  const code = input.fastCode?.trim().toLowerCase() || "";
+  if (!code || code === "demo") return true;
+  return isDemoMapSiteCode(code);
+}
+
 export function createDemoMapSiteCode(): string {
   const token = crypto.randomUUID().replace(/-/g, "").slice(0, 8);
   return `${DEMO_MAPSITE_CODE_PREFIX}${token}`;

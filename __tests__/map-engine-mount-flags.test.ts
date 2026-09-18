@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   allowMapGestures,
+  allowMapScrollZoom,
   shouldAutoFitPinsOnMount,
 } from "../lib/talismaps/map-engine/mount-flags";
 
@@ -9,6 +10,14 @@ describe("map engine mount flags", () => {
     expect(allowMapGestures(undefined)).toBe(true);
     expect(allowMapGestures(true)).toBe(true);
     expect(allowMapGestures(false)).toBe(false);
+  });
+
+  it("can disable wheel zoom without turning off other map gestures", () => {
+    expect(allowMapScrollZoom({})).toBe(true);
+    expect(allowMapScrollZoom({ scrollZoom: false })).toBe(false);
+    expect(allowMapScrollZoom({ interactive: false, scrollZoom: true })).toBe(
+      false,
+    );
   });
 
   it("skips auto fit-to-pins when the published viewport must stay at build zoom", () => {

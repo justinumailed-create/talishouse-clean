@@ -12,7 +12,7 @@ import {
   parseSelfServiceBookOptions,
   parseSelfServiceCaptions,
 } from "@/lib/talisbooks/self-service-page-plan";
-import { parseRm22TemplatePayload } from "@/lib/talisbooks/rm22-template";
+import { parseRm22TemplatePayload, parseRm22SlotHydration } from "@/lib/talisbooks/rm22-template";
 import { parseMapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
 import {
   assertAllowedEbookUploadFile,
@@ -53,6 +53,7 @@ export async function POST(request: Request) {
   const started = onboardingNow();
   const formData = await request.formData();
   const requestId = String(formData.get("requestId") || "").trim();
+  const fastCode = String(formData.get("fastCode") || "").trim();
   const title = String(formData.get("title") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const location = String(formData.get("location") || "").trim();
@@ -125,6 +126,7 @@ export async function POST(request: Request) {
 
         const result = await runEbookGenerationPipeline({
           requestId,
+          fastCode: requestId ? undefined : fastCode,
           title,
           description,
           location,
@@ -148,6 +150,18 @@ export async function POST(request: Request) {
           rm22Template: parseRm22TemplatePayload(
             String(formData.get("rm22Template") || ""),
           ),
+          rm22SlotHydration: parseRm22SlotHydration(
+            (() => {
+              const raw = String(formData.get("rm22SlotHydration") || "").trim();
+              if (!raw) return null;
+              try {
+                return JSON.parse(raw) as unknown;
+              } catch {
+                return null;
+              }
+            })(),
+          ),
+          replaceBookId: String(formData.get("replaceBookId") || "").trim() || null,
           onProgress: async (event) => {
             send(event);
           },

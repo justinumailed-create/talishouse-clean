@@ -57,6 +57,8 @@ describe("admin Mapsite™ thumbnails", () => {
     expect(item.listingHeroUrl).toBe("/gallery-second.png");
     expect(item.mapPreviewUrl).toContain("api.maptiler.com/tiles/satellite-v2/");
     expect(item.fastCode).toBe("tr01");
+    expect(item.deleteControl).toBe("none");
+    expect(item.paymentReceived).toBe(false);
   });
 
   it("falls back to the Glasshouse listing image for stock demo media", () => {
@@ -70,5 +72,15 @@ describe("admin Mapsite™ thumbnails", () => {
     });
     expect(item.listingHeroUrl).toBe(MAPSITE_DEMO_LISTING_IMAGE);
     expect(item.mapPreviewUrl).toBeNull();
+    expect(item.deleteControl).toBe("none");
+  });
+
+  it("marks unpaid ACTIVE Mapsites™ as deletable", () => {
+    const item = toAdminMapSiteThumbnail({
+      fast_code: "ar01",
+      status: "ACTIVE",
+      property_title: "202, HW Riva",
+    });
+    expect(item.deleteControl).toBe("delete");
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { Check, Plus, Search } from "lucide-react";
 import {
   createAdminFastCode,
   deleteAdminFastCode,
@@ -9,10 +9,24 @@ import {
   updateAdminFastCode,
 } from "@/lib/fast-code-admin-actions";
 
+function displayFastCode(code: string | null | undefined): string {
+  return (code ?? "").trim().toUpperCase();
+}
+
+function formatStripeDate(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
 interface FastCodeRow {
   id: string;
   code: string;
-  source: "build-system" | "registration";
+  source: "build-system";
   type: string;
   request_id: string | null;
   account_type: string | null;
@@ -21,6 +35,8 @@ interface FastCodeRow {
   email: string | null;
   phone: string | null;
   timestamp: string;
+  paymentSuccessful: boolean;
+  stripeTransactionId: string | null;
 }
 
 function toErrorLogObject(err: unknown): Record<string, unknown> {
@@ -100,81 +116,33 @@ export default function FastCodesPage() {
   async function fetchFastCodes() {
     setFetchWarnings([]);
     try {
-      const [fastCodesResult, registrationsResult] = await Promise.allSettled([
-        listBuildSystemFastCodes(),
-        supabase
-          .from("fast_code_registrations")
-          .select("id, fast_code, first_name, last_name, email, cell_phone, created_at")
-          .order("created_at", { ascending: false }),
-      ]);
-
+      const result = await listBuildSystemFastCodes();
       const warnings: string[] = [];
-      const fastCodesData =
-        fastCodesResult.status === "fulfilled" && fastCodesResult.value.success
-          ? fastCodesResult.value.data
-          : [];
-      const fastCodesError =
-        fastCodesResult.status === "fulfilled" && !fastCodesResult.value.success
-          ? fastCodesResult.value.error
-          : fastCodesResult.status === "rejected"
-            ? fastCodesResult.reason
-            : null;
 
-      if (fastCodesError) {
+      if (!result.success) {
         warnings.push("Build-system FAST codes could not be loaded.");
-        console.warn("FAST codes source warning (fast_codes):", toErrorLogObject(fastCodesError));
-      }
-
-      const registrationsData =
-        registrationsResult.status === "fulfilled" ? registrationsResult.value.data ?? [] : [];
-      const registrationsError =
-        registrationsResult.status === "fulfilled"
-          ? registrationsResult.value.error
-          : registrationsResult.reason;
-
-      if (registrationsError) {
-        warnings.push("Registration FAST codes could not be loaded.");
-        console.warn(
-          "FAST codes source error (fast_code_registrations):",
-          toErrorLogObject(registrationsError)
-        );
+        console.warn("FAST codes source warning (fast_codes):", toErrorLogObject(result.error));
       }
 
       setFetchWarnings(warnings);
 
-      const normalizedFastCodes: FastCodeRow[] = fastCodesData.map((row) => ({
+      const normalizedFastCodes: FastCodeRow[] = (result.data ?? []).map((row) => ({
         id: row.id,
-        code: row.code,
+        code: displayFastCode(row.code),
         source: "build-system",
         type: row.type ?? "legacy-fast-code",
         request_id: row.request_id ?? null,
         account_type: row.account_type ?? null,
         mapsite_id: row.mapsite_id ?? null,
         name: null,
-        email: null,
+        email: row.email ?? null,
         phone: null,
         timestamp: row.assigned_at,
+        paymentSuccessful: Boolean(row.paymentSuccessful),
+        stripeTransactionId: row.stripeTransactionId ?? null,
       }));
 
-      const normalizedRegistrations: FastCodeRow[] = registrationsData.map((row) => ({
-        id: row.id,
-        code: row.fast_code,
-        source: "registration",
-        type: "legacy-registration",
-        request_id: null,
-        account_type: null,
-        mapsite_id: null,
-        name: `${row.first_name ?? ""} ${row.last_name ?? ""}`.trim() || null,
-        email: row.email ?? null,
-        phone: row.cell_phone ?? null,
-        timestamp: row.created_at,
-      }));
-
-      const combined = [...normalizedFastCodes, ...normalizedRegistrations].sort(
-        (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
-
-      setFastCodes(combined);
+      setFastCodes(normalizedFastCodes);
     } catch (error) {
       console.warn("FAST codes fetch warning:", toErrorLogObject(error));
     } finally {
@@ -203,7 +171,7 @@ export default function FastCodesPage() {
       setFastCodes([
         {
           id: row.id,
-          code: row.code,
+          code: displayFastCode(row.code),
           source: "build-system",
           type: row.type ?? "mapsite",
           request_id: row.request_id ?? null,
@@ -213,6 +181,8 @@ export default function FastCodesPage() {
           email: null,
           phone: null,
           timestamp: row.assigned_at,
+          paymentSuccessful: false,
+          stripeTransactionId: null,
         },
         ...fastCodes,
       ]);
@@ -226,7 +196,7 @@ export default function FastCodesPage() {
   }
 
   async function deleteFastCode(id: string) {
-    if (!confirm("Are you sure you want to delete this FAST Code?")) return;
+    if (!confirm("Are you sure you want to delete this FAST Code? The connected Mapsite™ and Talisbooks™ bookshelf will also be removed.")) return;
 
     try {
       const target = fastCodes.find((fc) => fc.id === id);
@@ -303,91 +273,123 @@ export default function FastCodesPage() {
     ? fastCodes.find((fc) => fc.id === editingId) ?? null
     : null;
 
-  const filteredFastCodes = fastCodes.filter(fc =>
-    fc.code.toLowerCase().includes(search.toLowerCase()) ||
-    fc.source.toLowerCase().includes(search.toLowerCase()) ||
-    (fc.type ?? "").toLowerCase().includes(search.toLowerCase()) ||
-    (fc.account_type ?? "").toLowerCase().includes(search.toLowerCase()) ||
-    (fc.name ?? "").toLowerCase().includes(search.toLowerCase()) ||
-    (fc.email ?? "").toLowerCase().includes(search.toLowerCase()) ||
-    (fc.phone ?? "").toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredFastCodes = fastCodes.filter((fc) => {
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    const statusLabel = fc.paymentSuccessful ? "succeeded successful" : "incomplete unpaid";
+    return (
+      displayFastCode(fc.code).toLowerCase().includes(q) ||
+      fc.source.toLowerCase().includes(q) ||
+      (fc.type ?? "").toLowerCase().includes(q) ||
+      (fc.account_type ?? "").toLowerCase().includes(q) ||
+      (fc.name ?? "").toLowerCase().includes(q) ||
+      (fc.email ?? "").toLowerCase().includes(q) ||
+      (fc.phone ?? "").toLowerCase().includes(q) ||
+      (fc.stripeTransactionId ?? "").toLowerCase().includes(q) ||
+      (fc.request_id ?? "").toLowerCase().includes(q) ||
+      statusLabel.includes(q)
+    );
+  });
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">FAST Codes</h1>
-        <div className="flex gap-4">
+    <div className="text-[#0a2540]">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-[28px] font-semibold leading-tight tracking-tight">
+            FAST Codes
+          </h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {loading
+              ? "Loading…"
+              : `${filteredFastCodes.length} result${filteredFastCodes.length === 1 ? "" : "s"}`}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setEditingId(null);
+            setShowForm(!showForm);
+          }}
+          className="inline-flex h-9 items-center gap-1.5 rounded-md bg-[#635bff] px-3.5 text-sm font-medium text-white shadow-sm hover:bg-[#5851ea]"
+        >
+          {showForm ? (
+            "Cancel"
+          ) : (
+            <>
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Add FAST Code
+            </>
+          )}
+        </button>
+      </div>
+
+      <div className="mb-4">
+        <label className="relative block">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            aria-hidden="true"
+          />
           <input
-            type="text"
-            placeholder="Search..."
+            type="search"
+            placeholder="Search FAST codes, email, or payment ID"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+            className="h-9 w-full rounded-md border border-slate-200 bg-white py-0 pl-9 pr-3 text-sm text-[#0a2540] shadow-sm outline-none placeholder:text-slate-400 focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/20"
           />
-          <button
-            onClick={() => {
-              setEditingId(null);
-              setShowForm(!showForm);
-            }}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-          >
-            {showForm ? "Cancel" : "Add FAST Code"}
-          </button>
-        </div>
+        </label>
       </div>
 
       {fetchWarnings.length > 0 && (
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           {fetchWarnings.join(" ")}
         </div>
       )}
 
       {showForm && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-          <h2 className="text-lg font-bold mb-4">Create New FAST Code</h2>
-          <form onSubmit={createFastCode} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mb-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-base font-semibold">Create FAST Code</h2>
+          <form onSubmit={createFastCode} className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Code *</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Code</label>
               <input
                 type="text"
                 required
                 value={formData.code}
                 onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black uppercase"
-                placeholder="FAST001"
+                className="h-9 w-full rounded-md border border-slate-200 px-3 font-mono text-sm uppercase outline-none focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/20"
+                placeholder="RM22"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Type</label>
               <input
                 type="text"
                 required
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/20"
                 placeholder="mapsite"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Account type</label>
               <input
                 type="text"
                 value={formData.accountType}
                 onChange={(e) => setFormData({ ...formData, accountType: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/20"
                 placeholder="root"
               />
             </div>
             <div className="md:col-span-2">
-              <p className="text-sm text-gray-500 mb-3">
+              <p className="mb-3 text-sm text-slate-500">
                 If a Mapsite™ already uses this FAST code (for example{" "}
                 <span className="font-mono">LRG1</span>), it will be linked
                 automatically.
               </p>
               <button
                 type="submit"
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex h-9 items-center rounded-md bg-[#635bff] px-4 text-sm font-medium text-white hover:bg-[#5851ea]"
               >
                 Create FAST Code
               </button>
@@ -397,14 +399,14 @@ export default function FastCodesPage() {
       )}
 
       {editingFastCode && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
-          <h2 className="text-lg font-bold mb-4">
-            Edit FAST Code{" "}
-            <span className="font-mono">{editingFastCode.code}</span>
+        <div className="mb-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="mb-4 text-base font-semibold">
+            Edit{" "}
+            <span className="font-mono">{displayFastCode(editingFastCode.code)}</span>
           </h2>
-          <form onSubmit={saveEdit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={saveEdit} className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Type</label>
               <input
                 type="text"
                 required
@@ -412,13 +414,13 @@ export default function FastCodesPage() {
                 onChange={(e) =>
                   setEditFormData({ ...editFormData, type: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/20"
                 placeholder="mapsite"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Account Type
+              <label className="mb-1 block text-sm font-medium text-slate-700">
+                Account type
               </label>
               <input
                 type="text"
@@ -426,22 +428,22 @@ export default function FastCodesPage() {
                 onChange={(e) =>
                   setEditFormData({ ...editFormData, accountType: e.target.value })
                 }
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-black"
+                className="h-9 w-full rounded-md border border-slate-200 px-3 text-sm outline-none focus:border-[#635bff] focus:ring-2 focus:ring-[#635bff]/20"
                 placeholder="root"
               />
             </div>
-            <div className="md:col-span-2 flex gap-3">
+            <div className="flex gap-2 md:col-span-2">
               <button
                 type="submit"
                 disabled={savingEdit}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60"
+                className="inline-flex h-9 items-center rounded-md bg-[#635bff] px-4 text-sm font-medium text-white hover:bg-[#5851ea] disabled:opacity-60"
               >
-                {savingEdit ? "Saving..." : "Save Changes"}
+                {savingEdit ? "Saving..." : "Save"}
               </button>
               <button
                 type="button"
                 onClick={cancelEditing}
-                className="px-6 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                className="inline-flex h-9 items-center rounded-md border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 Cancel
               </button>
@@ -450,71 +452,99 @@ export default function FastCodesPage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,34,67,0.04)]">
         {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading...</div>
+          <div className="p-10 text-center text-sm text-slate-500">Loading FAST codes…</div>
         ) : filteredFastCodes.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full min-w-[920px] border-collapse text-sm">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Code</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Source</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Type</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Account Type</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Name</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Email</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Request ID</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-500">Actions</th>
+                <tr className="border-b border-slate-200">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">FAST code</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Description</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Customer</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Payment ID</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500">Date</th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-500"> </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredFastCodes.map((fc) => (
-                  <tr key={fc.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="py-3 px-4 font-mono font-bold">{fc.code}</td>
-                    <td className="py-3 px-4">
-                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-700">
-                        {fc.source === "build-system" ? "Build System" : "Registration"}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">{fc.type}</td>
-                    <td className="py-3 px-4 text-gray-600">{fc.account_type || "-"}</td>
-                    <td className="py-3 px-4 text-gray-600">{fc.name || "-"}</td>
-                    <td className="py-3 px-4 text-gray-600">{fc.email || "-"}</td>
-                    <td className="py-3 px-4 text-gray-600 font-mono text-xs">{fc.request_id || "-"}</td>
-                    <td className="py-3 px-4 text-gray-500 text-sm">
-                      {new Date(fc.timestamp).toLocaleDateString("en-US")}
-                    </td>
-                    <td className="py-3 px-4">
-                      {fc.source === "build-system" ? (
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={() => startEditing(fc)}
-                            className="text-blue-600 hover:text-blue-800 text-sm"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => deleteFastCode(fc.id)}
-                            className="text-red-600 hover:text-red-800 text-sm"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-400">-</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {filteredFastCodes.map((fc) => {
+                  const code = displayFastCode(fc.code);
+                  const description = [fc.type, fc.account_type]
+                    .filter((value) => value && value.trim())
+                    .join(" · ");
+                  return (
+                    <tr
+                      key={fc.id}
+                      className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50/80"
+                    >
+                      <td className="px-4 py-3 align-top">
+                        <p className="font-mono text-[15px] font-semibold tracking-wide">
+                          {code}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          {fc.source === "build-system" ? "Build System" : "Registration"}
+                        </p>
+                      </td>
+                      <td className="px-4 py-3 align-top text-slate-600">
+                        {description || "—"}
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <p className="text-slate-700">{fc.email || fc.name || "—"}</p>
+                        {fc.request_id ? (
+                          <p className="mt-0.5 max-w-[12rem] truncate font-mono text-[11px] text-slate-400" title={fc.request_id}>
+                            {fc.request_id}
+                          </p>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        {fc.paymentSuccessful ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#d6f6e3] px-2 py-[3px] text-xs font-medium text-[#0e6245]">
+                            <Check className="h-3 w-3" strokeWidth={3} aria-hidden="true" />
+                            Succeeded
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-[3px] text-xs font-medium text-slate-500">
+                            Incomplete
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 align-top font-mono text-xs text-slate-600">
+                        {fc.stripeTransactionId || "—"}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 align-top text-slate-500">
+                        {formatStripeDate(fc.timestamp)}
+                      </td>
+                      <td className="px-4 py-3 align-top text-right">
+                        {fc.source === "build-system" ? (
+                          <div className="flex items-center justify-end gap-3">
+                            <button
+                              type="button"
+                              onClick={() => startEditing(fc)}
+                              className="text-sm font-medium text-[#635bff] hover:text-[#4b45c6]"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => deleteFastCode(fc.id)}
+                              className="text-sm font-medium text-slate-400 hover:text-red-600"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        ) : null}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
         ) : (
-          <div className="p-8 text-center text-gray-500">
+          <div className="p-10 text-center text-sm text-slate-500">
             {search ? "No FAST codes match your search." : "No FAST codes yet. Create one to get started."}
           </div>
         )}

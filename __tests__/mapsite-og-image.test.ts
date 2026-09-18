@@ -11,6 +11,7 @@ import {
   isUsableMapSiteOgImage,
   MAPSITE_OG_BRAND_MARK,
   mapsiteOgMetadataImage,
+  mapsiteRealtimeSeoCopy,
   selectMapSiteOgImageUrl,
   toAbsoluteHttpsOgUrl,
 } from "../lib/talispros/mapsite-og-image";
@@ -232,6 +233,29 @@ describe("Mapsite™ OG image selection", () => {
       }),
     ).toBe(LG02_COVER);
     expect(selectMapSiteOgImageUrl({})).toBe(MAPSITE_OG_BRAND_MARK);
+  });
+
+  it("builds the live WhatsApp title and description Mapsite™ metadata uses", () => {
+    expect(
+      mapsiteRealtimeSeoCopy({
+        fastCode: "rm22",
+        propertyTitle: "Ralf Meyer",
+        propertyDescription: "160 Macs Rd, Richmond County.",
+      }),
+    ).toEqual({
+      title: "Ralf Meyer | Mapsite™",
+      description: "160 Macs Rd, Richmond County.",
+    });
+    expect(
+      mapsiteRealtimeSeoCopy({
+        fastCode: "rm22",
+        propertyTitle: null,
+        propertyDescription: null,
+      }),
+    ).toEqual({
+      title: "RM22 | Mapsite™",
+      description: "Mapsite™ RM22",
+    });
   });
 
   it("emits absolute HTTPS Open Graph URLs for WhatsApp", () => {

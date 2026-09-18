@@ -17,6 +17,7 @@ import type {
 import { buildPinMarkerHtml, pinStyleCacheKey } from "../pin-marker-icon";
 import {
   allowMapGestures,
+  allowMapScrollZoom,
   shouldAutoFitPinsOnMount,
 } from "../mount-flags";
 
@@ -264,6 +265,7 @@ export class MapLibreProvider implements MapProvider {
         : 1;
 
     const allowGestures = allowMapGestures(options.interactive);
+    const allowScrollZoom = allowMapScrollZoom(options);
 
     const map = new maplibregl.Map({
       container: host,
@@ -280,7 +282,7 @@ export class MapLibreProvider implements MapProvider {
       failIfMajorPerformanceCaveat: false,
       interactive: allowGestures,
       dragPan: allowGestures && !options.lockCenter,
-      scrollZoom: allowGestures,
+      scrollZoom: allowScrollZoom,
       boxZoom: allowGestures,
       dragRotate: allowGestures,
       keyboard: allowGestures,

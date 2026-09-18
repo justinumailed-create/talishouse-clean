@@ -1,8 +1,13 @@
 import { clampMapZoom, HOME_PIN_DEFAULT_MAP_ZOOM } from "@/lib/home-pin-coordinates";
+import {
+  adminMapSiteDeleteControl,
+  type AdminMapSiteDeleteControl,
+} from "@/lib/talispros/admin-mapsite-delete";
 import { getMapSiteListingHeroImage } from "@/lib/talispros/mapsite-listing-media";
 import { getMapTilerApiKey } from "@/lib/talismaps/map-engine/styles/types";
 
 export type AdminMapSiteThumbnailRow = {
+  id?: string;
   fast_code: string;
   status: string;
   property_title: string | null;
@@ -17,12 +22,15 @@ export type AdminMapSiteThumbnailRow = {
 };
 
 export type AdminMapSiteThumbnail = {
+  id: string | null;
   fastCode: string;
   status: string;
   propertyTitle: string | null;
   propertyAddress: string | null;
   listingHeroUrl: string;
   mapPreviewUrl: string | null;
+  paymentReceived: boolean;
+  deleteControl: AdminMapSiteDeleteControl;
 };
 
 function isUsableMapTilerKey(apiKey: string): boolean {
@@ -79,7 +87,9 @@ export function toAdminMapSiteThumbnail(
   const gallery = asGallery(row.gallery_images);
   const cover = row.cover_image?.trim() || row.header_image_url?.trim() || null;
 
+  const paymentReceived = false;
   return {
+    id: row.id?.trim() || null,
     fastCode: row.fast_code,
     status: row.status,
     propertyTitle: row.property_title,
@@ -93,6 +103,11 @@ export function toAdminMapSiteThumbnail(
       latitude: row.latitude,
       longitude: row.longitude,
       zoom: row.map_zoom,
+    }),
+    paymentReceived,
+    deleteControl: adminMapSiteDeleteControl({
+      status: row.status,
+      paymentReceived,
     }),
   };
 }

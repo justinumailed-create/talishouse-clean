@@ -6,9 +6,12 @@ import {
   listingImageUrlsFromEbookPages,
   MAPSITE_DEMO_GALLERY,
   MAPSITE_DEMO_LISTING_IMAGE,
+  mapsiteAgencyDisplayName,
+  mapsiteAgencyLogoUrl,
   shouldReplaceDemoListingMedia,
   withEbookListingMedia,
 } from "../lib/talispros/mapsite-listing-media";
+import { MAPSITE_HEADER_FALLBACK_LOGO } from "../lib/mapsite-layout";
 import { createFallbackDemoMapSite } from "../lib/talispros/mapsite-platform";
 
 describe("Mapsite™ listing media", () => {
@@ -172,5 +175,19 @@ describe("Mapsite™ listing media", () => {
       ["/images/glasshouse/hero-hd.webp"],
     );
     expect(kept.cover_image).toBe("/images/glasshouse/hero.png");
+  });
+
+  it("uses the Mapsite™ agency logo and falls back to the header mark", () => {
+    expect(mapsiteAgencyLogoUrl("/uploads/agency.png")).toBe("/uploads/agency.png");
+    expect(mapsiteAgencyLogoUrl(null)).toBe(MAPSITE_HEADER_FALLBACK_LOGO);
+    expect(mapsiteAgencyLogoUrl("/logo.png")).toBe(MAPSITE_HEADER_FALLBACK_LOGO);
+    expect(mapsiteAgencyDisplayName(null)).toBe("TSplits");
+    expect(mapsiteAgencyDisplayName("/uploads/agency.png", "Cape Realty")).toBe(
+      "Cape Realty",
+    );
+    expect(mapsiteAgencyDisplayName("/uploads/agency.png", "For-Sale-By-Owner")).toBe(
+      "TSplits",
+    );
+    expect(createFallbackDemoMapSite().logo_url).toBeNull();
   });
 });

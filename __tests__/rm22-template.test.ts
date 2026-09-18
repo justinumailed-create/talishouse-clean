@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyRm22SlotHydration,
   buildRm22TemplatePageRows,
   createRm22SlotState,
   createRm22TemplatePayload,
@@ -8,11 +9,13 @@ import {
   formatRm22CoverLotBlurb,
   formatRm22CoverPriceLine,
   parseRm22TemplatePayload,
+  parseRm22SlotHydration,
   planRm22TemplateInteriors,
   productIdsInPlan,
   isRm22PhotoPlaceholderUrl,
   rm22CoverBandFromOnboarding,
   rm22EndingRoles,
+  rm22HydrationFromPageContents,
   rm22InteriorRole,
   rm22ProductById,
   RM22_DEFAULT_COPY,
@@ -346,5 +349,114 @@ describe("RM22 Talisbook™ template", () => {
     expect(JSON.stringify(original)).not.toMatch(/interiors\/caption\.jpg/);
     expect(JSON.stringify(original)).not.toMatch(/interiors\/intro\.jpg/);
     expect(JSON.stringify(original)).not.toMatch(/interiors\/intrinsic\.jpg/);
+  });
+
+  it("hydrates template slots from saved page contents for in-place editing", () => {
+    const slots = createRm22SlotState({ productId: "g-house" });
+    slots.introTitle = "Saved welcome";
+    slots.introCaption = "Saved intro caption";
+    slots.photoCaptions[1] = "Dock at dusk";
+    slots.intrinsicBody = "Saved intrinsic copy.";
+    slots.outroCaption = "Saved outro";
+    const payload = createRm22TemplatePayload(slots, {
+      intro: "https://cdn.example/intro.jpg",
+      photos: [null, "https://cdn.example/dock.jpg"],
+      intrinsic: "https://cdn.example/intrinsic.jpg",
+      outro: "https://cdn.example/outro.jpg",
+    });
+    const rows = buildRm22TemplatePageRows({
+      coverImageUrl: "https://cdn.example/front.jpg",
+      backCoverImageUrl: "https://cdn.example/back.jpg",
+      interiors: payload.interiors,
+    });
+    const hydration = rm22HydrationFromPageContents(rows.map((row) => ({
+      content: row.content,
+      page_number: row.page_number,
+    })));
+    expect(hydration?.productId).toBe("g-house");
+    expect(hydration?.introTitle).toBe("Saved welcome");
+    expect(hydration?.introImageUrl).toBe("https://cdn.example/intro.jpg");
+    expect(hydration?.photoCaptions[1]).toBe("Dock at dusk");
+    expect(hydration?.photoImageUrls[1]).toBe("https://cdn.example/dock.jpg");
+    expect(hydration?.intrinsicBody).toBe("Saved intrinsic copy.");
+    expect(hydration?.outroImageUrl).toBe("https://cdn.example/outro.jpg");
+
+    const applied = applyRm22SlotHydration(createRm22SlotState(), hydration!);
+    expect(applied.introTitle).toBe("Saved welcome");
+    expect(applied.introImageUrl).toBe("https://cdn.example/intro.jpg");
+    const reused = createRm22TemplatePayload(applied, { photos: [] });
+    expect(reused.interiors.find((item) => item.role === "intro")?.imageUrl).toBe(
+      "https://cdn.example/intro.jpg",
+    );
+    expect(
+      reused.interiors.filter((item) => item.role === "photo-caption")[1]?.imageUrl,
+    ).toBe("https://cdn.example/dock.jpg");
+  });
+
+  it("hydrates covers and interiors from a saved book that has no template roles", () => {
+    const hydration = rm22HydrationFromPageContents([
+      {
+        page_number: 1,
+        content: {
+          pageRole: "cover",
+          layout: "cover",
+          coverSpreadHalf: "front",
+          heroImageUrl: "https://cdn.example/front.jpg",
+        },
+      },
+      {
+        page_number: 2,
+        content: {
+          pageRole: "property_content",
+          brochureLeaf: "left",
+          spreadImageUrl: "https://cdn.example/spread-a.jpg",
+          title: "Dock",
+        },
+      },
+      {
+        page_number: 3,
+        content: {
+          pageRole: "property_content",
+          brochureLeaf: "right",
+          spreadImageUrl: "https://cdn.example/spread-a.jpg",
+        },
+      },
+      {
+        page_number: 4,
+        content: {
+          pageRole: "property_content",
+          brochureLeaf: "left",
+          spreadImageUrl: "https://cdn.example/spread-b.jpg",
+        },
+      },
+      {
+        page_number: 5,
+        content: {
+          pageRole: "cover",
+          layout: "cover",
+          coverSpreadHalf: "back",
+          heroImageUrl: "https://cdn.example/back.jpg",
+        },
+      },
+    ]);
+    expect(hydration?.frontImageUrl).toBe("https://cdn.example/front.jpg");
+    expect(hydration?.backAgentImageUrl).toBe("https://cdn.example/back.jpg");
+    expect(hydration?.introImageUrl).toBe("https://cdn.example/spread-a.jpg");
+    expect(hydration?.introTitle).toBe("Dock");
+    expect(hydration?.outroImageUrl).toBe("https://cdn.example/spread-b.jpg");
+    expect(hydration?.introTitle).not.toBe("Welcome…!");
+  });
+
+  it("stores the agency logo on back-cover hydration", () => {
+    const parsed = parseRm22SlotHydration({
+      productId: "t-dome",
+      agencyLogoUrl: "https://cdn.example/agency.png",
+      backKicker: "Your Marketing Manager",
+    });
+    expect(parsed?.agencyLogoUrl).toBe("https://cdn.example/agency.png");
+    const slots = createRm22SlotState({
+      agencyLogoUrl: "https://cdn.example/agency.png",
+    });
+    expect(slots.agencyLogoUrl).toBe("https://cdn.example/agency.png");
   });
 });

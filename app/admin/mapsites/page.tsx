@@ -1,11 +1,16 @@
 import { requireAdminPage } from "@/lib/admin-auth";
 import { listMapSitesForAdmin } from "@/lib/mapsite-service";
 import AdminMapSiteThumbnailCard from "@/components/admin/AdminMapSiteThumbnailCard";
+import { isSupabaseAdminConfigured, getSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { purgeMapSitesAndBookshelvesWithoutFastCodes } from "@/lib/talispros/fast-code-cascade-delete";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminMapSitesPage() {
   await requireAdminPage();
+  if (isSupabaseAdminConfigured()) {
+    await purgeMapSitesAndBookshelvesWithoutFastCodes(getSupabaseAdmin());
+  }
   const mapsites = await listMapSitesForAdmin();
 
   return (
@@ -25,7 +30,10 @@ export default async function AdminMapSitesPage() {
       ) : (
         <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {mapsites.map((mapsite) => (
-            <AdminMapSiteThumbnailCard key={mapsite.fastCode} mapsite={mapsite} />
+            <AdminMapSiteThumbnailCard
+              key={mapsite.id || mapsite.fastCode}
+              mapsite={mapsite}
+            />
           ))}
         </ul>
       )}

@@ -63,10 +63,17 @@ import {
 import Rm22TemplateFields from "@/components/talispros/Rm22TemplateFields";
 import { composeRm22TemplateCovers } from "@/lib/talisbooks/compose-rm22-template";
 import {
+  applyRm22SlotHydration,
   createRm22SlotState,
   createRm22TemplatePayload,
+  RM22_COVER_HEIGHT,
+  RM22_COVER_WIDTH,
   RM22_PROTECTED_ENDING_SPREADS,
+  rm22CoverCopyChanged,
+  rm22HydrationFromExistingMedia,
+  rm22HydrationFromSlots,
   rm22ProductById,
+  type Rm22SlotHydration,
   type Rm22SlotState,
 } from "@/lib/talisbooks/rm22-template";
 
@@ -131,6 +138,7 @@ interface EbookGenerateClientProps {
   initialListingTitle?: string | null;
   initialPinWriteup?: string | null;
   initialPriceLine?: string | null;
+  initialAgencyLogoUrl?: string | null;
   bootstrapError?: string | null;
   bootstrapMeta?: {
     requestId: string | null;
@@ -138,6 +146,15 @@ interface EbookGenerateClientProps {
     mapsiteId: string | null;
     stage: string;
   } | null;
+  /** Mapsite™ admin embed: same builder, without the standalone generate-page chrome. */
+  embedded?: boolean;
+  /** Replace this book in place instead of creating another Talisbook™. */
+  replaceBookId?: string | null;
+  initialRm22Hydration?: Rm22SlotHydration | null;
+  existingFrontCoverUrl?: string | null;
+  existingBackCoverUrl?: string | null;
+  existingInteriorUrls?: string[];
+  onCompleted?: () => void;
 }
 
 type SelectedUpload = {
@@ -174,14 +191,19 @@ function stageIndex(stage: EbookGenerationStage | null): number {
 const UPLOAD_CONCURRENCY = 2;
 
 async function uploadOptimizedImage(options: {
-  requestId: string;
+  requestId?: string | null;
+  mapsiteId?: string | null;
   kind: "property" | "agent" | "logo";
   file: File;
   label: string;
   signal?: AbortSignal;
   minPass?: ClientOptimizePass;
 }): Promise<EbookOptimizedUploadResponse> {
-  return postEbookGenerateOptimizedImage(options);
+  return postEbookGenerateOptimizedImage({
+    ...options,
+    requestId: options.requestId || undefined,
+    mapsiteId: options.mapsiteId || undefined,
+  });
 }
 
 async function mapPool<T, R>(
@@ -213,6 +235,7 @@ async function mapPool<T, R>(
  */
 export default function EbookGenerateClient({
   fastCode,
+  mapsiteId,
   requestId,
   accountType,
   initialAgentName,
@@ -222,8 +245,16 @@ export default function EbookGenerateClient({
   initialListingTitle = null,
   initialPinWriteup = null,
   initialPriceLine = null,
+  initialAgencyLogoUrl = null,
   bootstrapError = null,
   bootstrapMeta = null,
+  embedded = false,
+  replaceBookId = null,
+  initialRm22Hydration = null,
+  existingFrontCoverUrl = null,
+  existingBackCoverUrl = null,
+  existingInteriorUrls = [],
+  onCompleted,
 }: EbookGenerateClientProps) {
   const router = useRouter();
   const inputId = useId();
@@ -234,9 +265,13 @@ export default function EbookGenerateClient({
   const slotFileInputRef = useRef<HTMLInputElement>(null);
   const slotFileHandlerRef = useRef<((file: File) => void) | null>(null);
   const replaceInteriorIdRef = useRef<string | null>(null);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
+  const [title, setTitle] = useState(embedded ? initialListingTitle?.trim() || "" : "");
+  const [description, setDescription] = useState(
+    embedded ? initialPinWriteup?.trim() || "" : "",
+  );
+  const [location, setLocation] = useState(
+    embedded ? initialPropertyAddress?.trim() || "" : "",
+  );
   const [agentName, setAgentName] = useState(initialAgentName);
   const [agentEmail, setAgentEmail] = useState(initialAgentEmail);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -268,6 +303,7 @@ export default function EbookGenerateClient({
       lotTitle: initialListingTitle || undefined,
       lotWriteup: initialPinWriteup || undefined,
       priceLine: initialPriceLine || undefined,
+      agencyLogoUrl: initialAgencyLogoUrl || undefined,
     }),
   );
   const [advertising, setAdvertising] = useState(false);
@@ -319,6 +355,14 @@ export default function EbookGenerateClient({
   }, [logoFile]);
 
   useEffect(() => {
+    setRm22Slots((current) => ({
+      ...current,
+      agencyLogo: logoFile,
+      agencyLogoUrl: logoFile ? current.agencyLogoUrl : initialAgencyLogoUrl,
+    }));
+  }, [logoFile, initialAgencyLogoUrl]);
+
+  useEffect(() => {
     if (!agentPhotoFile) {
       setPhotoPreviewUrl(null);
       return;
@@ -328,7 +372,19 @@ export default function EbookGenerateClient({
     return () => URL.revokeObjectURL(url);
   }, [agentPhotoFile]);
 
-  const canGenerate = Boolean(requestId && fastCode && !bootstrapError);
+  const sessionKey = (requestId || (embedded ? mapsiteId : null) || "").trim();
+  const canGenerate = Boolean(sessionKey && fastCode && !bootstrapError);
+  const uploadScope = {
+    requestId: requestId || undefined,
+    mapsiteId: requestId ? undefined : mapsiteId || undefined,
+  };
+
+  /** Keep template UI off until after hydration so SSR markup matches the client. */
+  const showTemplateUi = useSyncExternalStore(
+    () => () => {},
+    () => templateMode,
+    () => false,
+  );
 
   /** Keep template UI off until after hydration so SSR markup matches the client. */
   const showTemplateUi = useSyncExternalStore(
@@ -487,19 +543,24 @@ export default function EbookGenerateClient({
     );
   }
 
-  async function loadRm22Template() {
+  async function loadRm22Template(hydration?: Rm22SlotHydration | null) {
     setError("");
     setTemplateMode(true);
-    setRm22Slots(
-      createRm22SlotState({
-        agentName: agentName || initialAgentName,
-        agentPhone: initialAgentPhone,
-        address: initialPropertyAddress || undefined,
-        lotTitle: initialListingTitle || undefined,
-        lotWriteup: initialPinWriteup || undefined,
-        priceLine: initialPriceLine || undefined,
-      }),
-    );
+    const base = createRm22SlotState({
+      agentName: agentName || initialAgentName,
+      agentPhone: initialAgentPhone,
+      address: initialPropertyAddress || undefined,
+      lotTitle: initialListingTitle || undefined,
+      lotWriteup: initialPinWriteup || undefined,
+      priceLine: initialPriceLine || undefined,
+      agencyLogoUrl: initialAgencyLogoUrl || undefined,
+    });
+    const next = hydration ? applyRm22SlotHydration(base, hydration) : base;
+    setRm22Slots({
+      ...next,
+      agencyLogo: logoFile,
+      agencyLogoUrl: next.agencyLogoUrl || initialAgencyLogoUrl || null,
+    });
     setFrontCover((current) => {
       if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl);
       return null;
@@ -513,6 +574,22 @@ export default function EbookGenerateClient({
       return [];
     });
   }
+
+  useEffect(() => {
+    if (!embedded) return;
+    if (replaceBookId) {
+      const hydration = rm22HydrationFromExistingMedia({
+        frontImageUrl: existingFrontCoverUrl,
+        backImageUrl: existingBackCoverUrl,
+        interiors: existingInteriorUrls,
+        base: initialRm22Hydration,
+      });
+      void loadRm22Template(hydration);
+      return;
+    }
+    void loadRm22Template();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [embedded, replaceBookId]);
 
   async function refreshProductPreview(next: Rm22SlotState) {
     const product = rm22ProductById(next.productId);
@@ -577,7 +654,8 @@ export default function EbookGenerateClient({
   }
 
   async function optimizeAndStoreUploads(options: {
-    requestId: string;
+    requestId?: string | null;
+    mapsiteId?: string | null;
     propertyItems: SelectedUpload[];
     frontCover: CoverPick | null;
     backCover: CoverPick | null;
@@ -642,6 +720,7 @@ export default function EbookGenerateClient({
       try {
         const result = await uploadOptimizedImage({
           requestId: options.requestId,
+          mapsiteId: options.mapsiteId,
           kind: "property",
           file: item.file,
           label: item.label,
@@ -679,6 +758,7 @@ export default function EbookGenerateClient({
       try {
         const result = await uploadOptimizedImage({
           requestId: options.requestId,
+          mapsiteId: options.mapsiteId,
           kind: "property",
           file: item.file,
           label: item.label,
@@ -717,6 +797,7 @@ export default function EbookGenerateClient({
       try {
         const result = await uploadOptimizedImage({
           requestId: options.requestId,
+          mapsiteId: options.mapsiteId,
           kind: "logo",
           file: options.logo,
           label: options.logo.name || "Brokerage logo",
@@ -742,6 +823,7 @@ export default function EbookGenerateClient({
       try {
         const result = await uploadOptimizedImage({
           requestId: options.requestId,
+          mapsiteId: options.mapsiteId,
           kind: "agent",
           file: options.agentPhoto,
           label: options.agentPhoto.name || "Agent photo",
@@ -792,7 +874,7 @@ export default function EbookGenerateClient({
   }
 
   async function retryFailedUpload(failure: UploadFailure) {
-    if (!requestId || saving) return;
+    if (!sessionKey || saving) return;
     setError("");
     setSaving(true);
     setActiveStage("optimizing_images");
@@ -800,13 +882,13 @@ export default function EbookGenerateClient({
 
     try {
       const result = await uploadOptimizedImage({
-        requestId,
+        ...uploadScope,
         kind: failure.kind,
         file: failure.file,
         label: failure.label,
         minPass: "retry",
       });
-      const stash = readStash(requestId);
+      const stash = readStash(sessionKey);
       if (failure.kind === "property") {
         stash.byId[failure.id] = {
           url: result.url,
@@ -820,7 +902,7 @@ export default function EbookGenerateClient({
       } else {
         stash.brokerageLogoUrl = result.url;
       }
-      writeStash(requestId, stash);
+      writeStash(sessionKey, stash);
       setUploadFailures((current) =>
         current.filter((item) => item.id !== failure.id),
       );
@@ -869,9 +951,11 @@ export default function EbookGenerateClient({
     setErrorMeta(null);
     setUploadFailures([]);
 
-    if (!requestId) {
+    if (!sessionKey) {
       setError(
-        "Build Request ID is required. Return to the Build Form and complete onboarding again."
+        embedded
+          ? "This Mapsite™ cannot generate a Talisbook™ until it has a FAST Code."
+          : "Build Request ID is required. Return to the Build Form and complete onboarding again.",
       );
       return;
     }
@@ -927,33 +1011,48 @@ export default function EbookGenerateClient({
       let propertyItems = uploads;
       let frontPick = frontCover;
       let backPick = backCover;
+      const reuseExistingCovers =
+        templateMode &&
+        !rm22Slots.frontImage &&
+        !rm22Slots.backAgentImage &&
+        Boolean(existingFrontCoverUrl) &&
+        Boolean(existingBackCoverUrl) &&
+        !rm22CoverCopyChanged(rm22Slots, initialRm22Hydration);
       if (templateMode) {
-        setStageDetail("Composing covers…");
-        const composed = await composeRm22TemplateCovers(rm22Slots);
-        const frontPreview = URL.createObjectURL(composed.front);
-        const backPreview = URL.createObjectURL(composed.back);
-        frontPick = {
-          id: `front-rm22-${Date.now()}`,
-          file: composed.front,
-          previewUrl: frontPreview,
-        };
-        backPick = {
-          id: `back-rm22-${Date.now()}`,
-          file: composed.back,
-          previewUrl: backPreview,
-        };
         propertyItems = rm22SlotUploadItems(rm22Slots);
+        if (!reuseExistingCovers) {
+          setStageDetail("Composing covers…");
+          const composed = await composeRm22TemplateCovers(rm22Slots);
+          const frontPreview = URL.createObjectURL(composed.front);
+          const backPreview = URL.createObjectURL(composed.back);
+          frontPick = {
+            id: `front-rm22-${Date.now()}`,
+            file: composed.front,
+            previewUrl: frontPreview,
+          };
+          backPick = {
+            id: `back-rm22-${Date.now()}`,
+            file: composed.back,
+            previewUrl: backPreview,
+          };
+        } else {
+          frontPick = null;
+          backPick = null;
+        }
       }
-      if (!frontPick || !backPick || (!templateMode && propertyItems.length === 0)) {
+      if (
+        (!templateMode && (!frontPick || !backPick || propertyItems.length === 0)) ||
+        (templateMode && !reuseExistingCovers && (!frontPick || !backPick))
+      ) {
         setError(
           "Upload a PDF or images, or use the Talisbook™ template.",
         );
         setActiveStage("failed");
         return;
       }
-      const prior = readStash(requestId);
+      const prior = readStash(sessionKey);
       const stored = await optimizeAndStoreUploads({
-        requestId,
+        ...uploadScope,
         propertyItems,
         frontCover: frontPick,
         backCover: backPick,
@@ -962,7 +1061,7 @@ export default function EbookGenerateClient({
         signal: optimizeController.signal,
         prior,
       });
-      writeStash(requestId, stored.stash);
+      writeStash(sessionKey, stored.stash);
       window.clearTimeout(optimizeTimeoutId);
 
       if (stored.failures.length > 0) {
@@ -979,32 +1078,61 @@ export default function EbookGenerateClient({
         setActiveStage("failed");
         return;
       }
-      if (!stored.frontCover) {
+      const reusedFront = reuseExistingCovers
+        ? {
+            url: existingFrontCoverUrl!,
+            width: RM22_COVER_WIDTH,
+            height: RM22_COVER_HEIGHT,
+            bytes: 0,
+            originalBytes: 0,
+          }
+        : stored.frontCover;
+      const reusedBack = reuseExistingCovers
+        ? {
+            url: existingBackCoverUrl!,
+            width: RM22_COVER_WIDTH,
+            height: RM22_COVER_HEIGHT,
+            bytes: 0,
+            originalBytes: 0,
+          }
+        : stored.backCover;
+      if (!reusedFront) {
         setError(FRONT_COVER_REQUIRED_MESSAGE);
         setActiveStage("failed");
         return;
       }
-      if (!stored.backCover) {
+      if (!reusedBack) {
         setError(BACK_COVER_REQUIRED_MESSAGE);
         setActiveStage("failed");
         return;
       }
 
       optimizedImages = stored.optimizedImages;
-      frontCoverAsset = stored.frontCover;
-      backCoverAsset = stored.backCover;
+      frontCoverAsset = reusedFront;
+      backCoverAsset = reusedBack;
       agentPhotoUrl = stored.agentPhotoUrl;
       brokerageLogoUrl = stored.brokerageLogoUrl;
-      rm22TemplatePayload = templateMode
-        ? createRm22TemplatePayload(rm22Slots, {
-            intro: stored.stash.byId["rm22-intro"]?.url ?? null,
-            photos: rm22Slots.photoImages.map(
-              (_, index) => stored.stash.byId[`rm22-photo-${index}`]?.url ?? null,
-            ),
-            intrinsic: stored.stash.byId["rm22-intrinsic"]?.url ?? null,
-            outro: stored.stash.byId["rm22-outro"]?.url ?? null,
-          })
-        : null;
+      if (templateMode) {
+        const photoCount = Math.max(
+          rm22Slots.photoImages.length,
+          rm22Slots.photoImageUrls.length,
+          rm22Slots.photoCaptions.length,
+        );
+        const uploadedUrls = {
+          intro: stored.stash.byId["rm22-intro"]?.url ?? rm22Slots.introImageUrl,
+          photos: Array.from(
+            { length: photoCount },
+            (_, index) =>
+              stored.stash.byId[`rm22-photo-${index}`]?.url ??
+              rm22Slots.photoImageUrls[index] ??
+              null,
+          ),
+          intrinsic:
+            stored.stash.byId["rm22-intrinsic"]?.url ?? rm22Slots.intrinsicImageUrl,
+          outro: stored.stash.byId["rm22-outro"]?.url ?? rm22Slots.outroImageUrl,
+        };
+        rm22TemplatePayload = createRm22TemplatePayload(rm22Slots, uploadedUrls);
+      }
 
       console.info(
         `[onboarding] Image optimize+upload ...... original=${stored.originalBytes} optimized=${stored.optimizedBytes} ratio=${
@@ -1059,7 +1187,8 @@ export default function EbookGenerateClient({
       }, ONBOARDING_JOB_TIMEOUT_MS);
 
       const fd = new FormData();
-      fd.set("requestId", requestId);
+      if (requestId) fd.set("requestId", requestId);
+      if (!requestId && embedded && fastCode) fd.set("fastCode", fastCode);
       fd.set(
         "title",
         fromPdf
@@ -1106,7 +1235,24 @@ export default function EbookGenerateClient({
       if (brokerageLogoUrl) fd.set("brokerageLogoUrl", brokerageLogoUrl);
       if (rm22TemplatePayload) {
         fd.set("rm22Template", JSON.stringify(rm22TemplatePayload));
+        const uploadedHydration = rm22HydrationFromSlots({
+          ...rm22Slots,
+          introImageUrl:
+            rm22TemplatePayload.interiors.find((item) => item.role === "intro")
+              ?.imageUrl || rm22Slots.introImageUrl,
+          photoImageUrls: rm22TemplatePayload.interiors
+            .filter((item) => item.role === "photo-caption")
+            .map((item) => item.imageUrl || null),
+          intrinsicImageUrl:
+            rm22TemplatePayload.interiors.find((item) => item.role === "intrinsic")
+              ?.imageUrl || rm22Slots.intrinsicImageUrl,
+          outroImageUrl:
+            rm22TemplatePayload.interiors.find((item) => item.role === "outro")
+              ?.imageUrl || rm22Slots.outroImageUrl,
+        });
+        fd.set("rm22SlotHydration", JSON.stringify(uploadedHydration));
       }
+      if (replaceBookId) fd.set("replaceBookId", replaceBookId);
       fd.set("uploadMode", fromPdf ? "pdf" : "images");
       fd.set("flagIdentity", resolvedFlagIdentity);
       fd.set(
@@ -1203,9 +1349,13 @@ export default function EbookGenerateClient({
       if (finalEvent.stage === "completed") {
         setActiveStage("completed");
         try {
-          sessionStorage.removeItem(stashKeyFor(requestId));
+          sessionStorage.removeItem(stashKeyFor(sessionKey));
         } catch {
           /* ignore */
+        }
+        if (embedded) {
+          onCompleted?.();
+          return;
         }
         if (finalEvent.mapsiteHref) {
           window.location.assign(finalEvent.mapsiteHref);
@@ -1264,15 +1414,34 @@ export default function EbookGenerateClient({
     "flex min-h-[52px] items-center justify-between gap-4 px-5";
 
   return (
-    <div className="flex min-h-dvh flex-col items-center bg-[#f5f5f7] px-6 py-16 text-neutral-950 antialiased sm:py-24">
-      <div className="w-full max-w-[480px]">
+    <div
+      className={
+        embedded
+          ? "flex flex-col items-center bg-transparent px-0 py-0 text-neutral-950 antialiased"
+          : "flex min-h-dvh flex-col items-center bg-[#f5f5f7] px-6 py-16 text-neutral-950 antialiased sm:py-24"
+      }
+    >
+      <div className={embedded ? "w-full" : "w-full max-w-[480px]"}>
         <div className="text-center">
-          <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">
-            TALISBOOKS
-          </p>
-          <h1 className="mt-5 text-[34px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[40px]">
-            Generate My Own E-Book
-          </h1>
+          {embedded ? (
+            <>
+              <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">
+                TALISBOOKS
+              </p>
+              <h2 className="mt-3 text-[22px] font-semibold leading-[1.08] tracking-[-0.035em]">
+                Talisbook™ template
+              </h2>
+            </>
+          ) : (
+            <>
+              <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">
+                TALISBOOKS
+              </p>
+              <h1 className="mt-5 text-[34px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[40px]">
+                Generate My Own E-Book
+              </h1>
+            </>
+          )}
           <p className="mx-auto mt-4 max-w-[26rem] text-[22px] font-semibold leading-snug tracking-[-0.03em] text-neutral-950">
             {EBOOK_GENERATE_HELP_INSTRUCTION}
           </p>
@@ -1730,7 +1899,9 @@ export default function EbookGenerateClient({
                     ? "Reading upload…"
                     : uploadFailures.length > 0
                       ? "Continue after retries"
-                      : "Generate Talisbook™"}
+                      : replaceBookId
+                        ? "Update Talisbook™"
+                        : "Generate Talisbook™"}
               </button>
             </>
           )}

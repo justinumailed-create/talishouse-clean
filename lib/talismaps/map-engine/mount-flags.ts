@@ -7,6 +7,13 @@ export function allowMapGestures(
   return interactive !== false;
 }
 
+/** Wheel zoom is on unless the map is non-interactive or the caller locked it. */
+export function allowMapScrollZoom(
+  options: Pick<MapMountOptions, "interactive" | "scrollZoom">,
+): boolean {
+  return allowMapGestures(options.interactive) && options.scrollZoom !== false;
+}
+
 /**
  * Auto fit-to-pins on mount would override a caller-supplied zoom
  * (Mapsite™ build-time `mapZoom`). Skip it when the viewport is preserved

@@ -1,3 +1,4 @@
+import { mapsiteAgencyLogoUrl } from "@/lib/talispros/mapsite-listing-media";
 import {
   RM22_ASSETS,
   RM22_COVER_HEIGHT,
@@ -89,6 +90,7 @@ function coverDraw(
   dy: number,
   dw: number,
   dh: number,
+  alignY: "center" | "top" = "center",
 ) {
   const { iw, ih } = imageSize(image);
   if (!iw || !ih) return;
@@ -96,7 +98,7 @@ function coverDraw(
   const sw = dw / scale;
   const sh = dh / scale;
   const sx = (iw - sw) / 2;
-  const sy = (ih - sh) / 2;
+  const sy = alignY === "top" ? 0 : (ih - sh) / 2;
   ctx.drawImage(image, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
@@ -158,9 +160,37 @@ function makePage(
   return { canvas, ctx };
 }
 
-async function loadPhoto(file: File | null): Promise<HTMLImageElement | null> {
-  if (!file) return null;
-  return loadImage(file);
+async function loadPhoto(
+  file: File | null,
+  url?: string | null,
+): Promise<HTMLImageElement | null> {
+  if (file) return loadImage(file);
+  const href = url?.trim() || "";
+  if (href) return loadImage(href);
+  return null;
+}
+
+function fitSingleLine(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  maxWidth: number,
+  style: {
+    italic?: boolean;
+    weight?: string;
+    start: number;
+    min: number;
+    family: string;
+  },
+): number {
+  let size = style.start;
+  const prefix = `${style.italic ? "italic " : ""}${style.weight ? `${style.weight} ` : ""}`;
+  while (size > style.min) {
+    ctx.font = `${prefix}${size}px ${style.family}`;
+    if (ctx.measureText(text).width <= maxWidth) return size;
+    size -= 1;
+  }
+  ctx.font = `${prefix}${style.min}px ${style.family}`;
+  return style.min;
 }
 
 function fillImageSlot(
@@ -212,64 +242,77 @@ function drawCaptionBar(
  */
 async function composeFront(slots: Rm22SlotState): Promise<HTMLCanvasElement> {
   const { canvas, ctx } = makePage(RM22_COVER_WIDTH, RM22_COVER_HEIGHT);
-  fillImageSlot(
-    ctx,
-    await loadPhoto(slots.frontImage),
-    { x: 0, y: 0, width: canvas.width, height: canvas.height },
-    "contain",
-    "#000000",
-  );
+  const image = await loadPhoto(slots.frontImage, slots.frontImageUrl);
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (image) {
+    coverDraw(ctx, image, 0, 0, canvas.width, canvas.height, "top");
+  }
 
-  const fadeTop = Math.round(canvas.height * 0.58);
+  const fadeTop = Math.round(canvas.height * 0.5);
   const gradient = ctx.createLinearGradient(0, fadeTop, 0, canvas.height);
   gradient.addColorStop(0, "rgba(0,0,0,0)");
-  gradient.addColorStop(0.28, "rgba(0,0,0,0.52)");
-  gradient.addColorStop(0.62, "rgba(0,0,0,0.78)");
-  gradient.addColorStop(1, "rgba(0,0,0,0.88)");
+  gradient.addColorStop(0.38, "rgba(0,0,0,0.42)");
+  gradient.addColorStop(0.72, "rgba(0,0,0,0.82)");
+  gradient.addColorStop(1, "rgba(0,0,0,0.94)");
   ctx.fillStyle = gradient;
   ctx.fillRect(0, fadeTop, canvas.width, canvas.height - fadeTop);
 
-  const maxTextWidth = canvas.width - 96;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "top";
-
-  let cursorY = Math.round(canvas.height * 0.68);
-
   const title = slots.frontTitle.trim();
-  if (title) {
-    ctx.fillStyle = "#ffffff";
-    ctx.font = `700 64px ${SANS}`;
-    const titleLines = wrapLines(ctx, title, maxTextWidth);
-    titleLines.forEach((line, index) => {
-      ctx.fillText(line, canvas.width / 2, cursorY + index * 70);
-    });
-    cursorY += titleLines.length * 70 + 10;
-  }
-
   const subtitle = slots.frontSubtitle.trim();
-  if (subtitle) {
-    ctx.fillStyle = LIME;
-    ctx.font = `italic 40px ${SANS}`;
-    ctx.fillText(subtitle, canvas.width / 2, cursorY);
-    cursorY += 56;
-  }
-
   const price = slots.frontPriceLine.trim();
-  if (price) {
-    ctx.fillStyle = "#ffffff";
-    ctx.font = `32px ${SANS}`;
-    ctx.fillText(price, canvas.width / 2, cursorY);
-    cursorY += 48;
-  }
-
   const tagline = slots.frontTagline.trim();
+  const maxTextWidth = canvas.width - 88;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+
+  let cursorY = canvas.height - 36;
+
   if (tagline) {
     ctx.fillStyle = LIME;
-    ctx.font = `22px ${SANS}`;
-    const tagLines = wrapLines(ctx, tagline, maxTextWidth);
-    tagLines.forEach((line, index) => {
-      ctx.fillText(line, canvas.width / 2, cursorY + index * 28);
+    fitSingleLine(ctx, tagline, maxTextWidth, {
+      italic: true,
+      start: 34,
+      min: 20,
+      family: SANS,
     });
+    ctx.fillText(tagline, canvas.width / 2, cursorY);
+    cursorY -= 42;
+  }
+
+  if (price) {
+    ctx.fillStyle = "#ffffff";
+    fitSingleLine(ctx, price, maxTextWidth, {
+      weight: "500",
+      start: 42,
+      min: 24,
+      family: SANS,
+    });
+    ctx.fillText(price, canvas.width / 2, cursorY);
+    cursorY -= 48;
+  }
+
+  if (subtitle) {
+    ctx.fillStyle = LIME;
+    fitSingleLine(ctx, subtitle, maxTextWidth, {
+      italic: true,
+      start: 42,
+      min: 24,
+      family: SANS,
+    });
+    ctx.fillText(subtitle, canvas.width / 2, cursorY);
+    cursorY -= 48;
+  }
+
+  if (title) {
+    ctx.fillStyle = "#ffffff";
+    fitSingleLine(ctx, title, maxTextWidth, {
+      weight: "700",
+      start: 48,
+      min: 24,
+      family: SANS,
+    });
+    ctx.fillText(title, canvas.width / 2, cursorY);
   }
 
   ctx.textAlign = "left";
@@ -280,46 +323,81 @@ async function composeBack(slots: Rm22SlotState): Promise<HTMLCanvasElement> {
   const { canvas, ctx } = makePage(RM22_COVER_WIDTH, RM22_COVER_HEIGHT);
   const image = slots.backAgentImage
     ? await loadPhoto(slots.backAgentImage)
-    : await loadImage(RM22_ASSETS.agent);
-  fillImageSlot(
-    ctx,
-    image,
-    {
-      x: 0,
-      y: 0,
-      width: canvas.width,
-      height: canvas.height,
-    },
-    "cover",
-    "#000000",
+    : slots.backAgentImageUrl
+      ? await loadPhoto(null, slots.backAgentImageUrl)
+      : await loadImage(RM22_ASSETS.agent);
+  ctx.fillStyle = "#000000";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (image) {
+    coverDraw(ctx, image, 0, 0, canvas.width, canvas.height, "top");
+  }
+
+  const logo = await loadPhoto(
+    slots.agencyLogo,
+    slots.agencyLogoUrl || mapsiteAgencyLogoUrl(null),
   );
+  if (logo) {
+    const logoBox = Math.round(canvas.width * 0.22);
+    const logoX = Math.round(canvas.width * 0.055);
+    const logoY = Math.round(canvas.height * 0.035);
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.38)";
+    ctx.shadowBlur = 28;
+    ctx.shadowOffsetY = 6;
+    containDraw(ctx, logo, logoX, logoY, logoBox, logoBox);
+    ctx.restore();
+  }
 
-  const bandTop = Math.round(canvas.height * 0.68);
-  ctx.fillStyle = CAPTION_OVERLAY;
-  ctx.fillRect(0, bandTop, canvas.width, canvas.height - bandTop);
+  const fadeTop = Math.round(canvas.height * 0.5);
+  const gradient = ctx.createLinearGradient(0, fadeTop, 0, canvas.height);
+  gradient.addColorStop(0, "rgba(0,0,0,0)");
+  gradient.addColorStop(0.38, "rgba(0,0,0,0.42)");
+  gradient.addColorStop(0.72, "rgba(0,0,0,0.82)");
+  gradient.addColorStop(1, "rgba(0,0,0,0.94)");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, fadeTop, canvas.width, canvas.height - fadeTop);
 
+  const kicker = slots.backKicker.trim();
+  const name = slots.agentName.trim() || "Your Name";
+  const phone = slots.agentPhone.trim()
+    ? `Please message me @ ${slots.agentPhone.trim()}`
+    : "";
+  const maxTextWidth = canvas.width - 88;
   ctx.textAlign = "center";
   ctx.fillStyle = "#ffffff";
   ctx.textBaseline = "bottom";
 
-  const phoneY = canvas.height - 48;
-  const nameY = slots.agentPhone.trim() ? phoneY - 52 : phoneY;
-  const kickerY = nameY - 70;
-
-  ctx.font = `700 48px ${SANS}`;
-  ctx.fillText(slots.backKicker.trim(), canvas.width / 2, kickerY);
-
-  ctx.font = `500 32px ${SANS}`;
-  ctx.fillText(slots.agentName.trim() || "Your Name", canvas.width / 2, nameY);
-
-  if (slots.agentPhone.trim()) {
-    ctx.font = `italic 26px ${SANS}`;
-    ctx.fillText(
-      `Please message me @ ${slots.agentPhone.trim()}`,
-      canvas.width / 2,
-      phoneY,
-    );
+  let cursorY = canvas.height - 36;
+  if (phone) {
+    fitSingleLine(ctx, phone, maxTextWidth, {
+      italic: true,
+      start: 34,
+      min: 20,
+      family: SANS,
+    });
+    ctx.fillText(phone, canvas.width / 2, cursorY);
+    cursorY -= 42;
   }
+
+  fitSingleLine(ctx, name, maxTextWidth, {
+    weight: "500",
+    start: 42,
+    min: 24,
+    family: SANS,
+  });
+  ctx.fillText(name, canvas.width / 2, cursorY);
+  cursorY -= 48;
+
+  if (kicker) {
+    fitSingleLine(ctx, kicker, maxTextWidth, {
+      weight: "700",
+      start: 48,
+      min: 24,
+      family: SANS,
+    });
+    ctx.fillText(kicker, canvas.width / 2, cursorY);
+  }
+
   ctx.textAlign = "left";
   return canvas;
 }

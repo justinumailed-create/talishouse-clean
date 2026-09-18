@@ -2,12 +2,14 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
+import { isTalisprosAdminAuthenticated } from "@/lib/talispros-admin-auth";
 import {
   getTalisBooksBookshelf,
   talisbooksScopeFromAdminAccount,
 } from "@/lib/talisbooks/library";
 import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
 import { createMetadata } from "@/lib/seo";
+import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
 import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = createMetadata({
@@ -25,6 +27,7 @@ interface TalisBooksLibraryPageProps {
   searchParams: Promise<{
     accountType?: string;
     fastCode?: string;
+    from?: string;
   }>;
 }
 
@@ -39,12 +42,22 @@ export default async function TalisBooksLibraryPage({
     );
   }
   const accountType = params.accountType === "derivative" ? "derivative" : "root";
-  const scope = talisbooksScopeFromAdminAccount(await getAdminSessionAccount());
+  const [account, talisprosAdmin] = await Promise.all([
+    getAdminSessionAccount(),
+    isTalisprosAdminAuthenticated(),
+  ]);
+  const scope = talisbooksScopeFromAdminAccount(account);
   const bookshelf = await getTalisBooksBookshelf({
     accountType,
     fastCode: scope.fastCode,
     excludeDemonstrationCatalog: scope.excludeDemonstrationCatalog,
   });
 
-  return <TalisBooksLibraryShell bookshelf={bookshelf} />;
+  return (
+    <TalisBooksLibraryShell
+      bookshelf={bookshelf}
+      canDelete={Boolean(account) || talisprosAdmin}
+      backHref={mapsiteBackFromScheduleHref(params.from)}
+    />
+  );
 }

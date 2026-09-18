@@ -196,25 +196,33 @@ export type Rm22InteriorPlanItem = {
 export type Rm22SlotState = {
   productId: Rm22ProductId;
   frontImage: File | null;
+  frontImageUrl: string | null;
   frontTitle: string;
   frontSubtitle: string;
   frontPriceLine: string;
   frontTagline: string;
   backAgentImage: File | null;
+  backAgentImageUrl: string | null;
+  agencyLogo: File | null;
+  agencyLogoUrl: string | null;
   backKicker: string;
   agentName: string;
   agentPhone: string;
   introImage: File | null;
+  introImageUrl: string | null;
   introTitle: string;
   introCaption: string;
   photoImages: Array<File | null>;
+  photoImageUrls: Array<string | null>;
   photoCaptions: string[];
   intrinsicImage: File | null;
+  intrinsicImageUrl: string | null;
   intrinsicTitle: string;
   intrinsicCaption: string;
   intrinsicBody: string;
   intrinsicSignoff: string;
   outroImage: File | null;
+  outroImageUrl: string | null;
   outroTitle: string;
   outroCaption: string;
 };
@@ -280,6 +288,7 @@ export function createRm22SlotState(input?: {
   lotWriteup?: string;
   priceLine?: string;
   tagline?: string;
+  agencyLogoUrl?: string;
 }): Rm22SlotState {
   const agentName = input?.agentName?.trim() || RM22_DEFAULT_COPY.agentName;
   const agentPhone = input?.agentPhone?.trim() || RM22_DEFAULT_COPY.agentPhone;
@@ -295,20 +304,27 @@ export function createRm22SlotState(input?: {
   return {
     productId,
     frontImage: null,
+    frontImageUrl: null,
     frontTitle: cover.frontTitle,
     frontSubtitle: cover.frontSubtitle,
     frontPriceLine: cover.frontPriceLine,
     frontTagline: cover.frontTagline,
     backAgentImage: null,
+    backAgentImageUrl: null,
+    agencyLogo: null,
+    agencyLogoUrl: input?.agencyLogoUrl?.trim() || null,
     backKicker: RM22_DEFAULT_COPY.backKicker,
     agentName,
     agentPhone,
     introImage: null,
+    introImageUrl: null,
     introTitle: RM22_DEFAULT_COPY.introTitle,
     introCaption: RM22_DEFAULT_COPY.introCaption,
     photoImages: Array.from({ length: RM22_PHOTO_CAPTION_COUNT }, () => null),
+    photoImageUrls: Array.from({ length: RM22_PHOTO_CAPTION_COUNT }, () => null),
     photoCaptions: [...RM22_DEFAULT_COPY.photoCaptions],
     intrinsicImage: null,
+    intrinsicImageUrl: null,
     intrinsicTitle: RM22_DEFAULT_COPY.intrinsicTitle,
     intrinsicCaption: RM22_DEFAULT_COPY.intrinsicCaption,
     intrinsicBody: defaultRm22IntrinsicBody({
@@ -318,6 +334,7 @@ export function createRm22SlotState(input?: {
     }),
     intrinsicSignoff: RM22_DEFAULT_COPY.intrinsicSignoff,
     outroImage: null,
+    outroImageUrl: null,
     outroTitle: RM22_DEFAULT_COPY.outroTitle,
     outroCaption: RM22_DEFAULT_COPY.outroCaption,
   };
@@ -477,13 +494,15 @@ export function serializeRm22TemplateInteriors(
     if (item.role === "product-sheet") {
       imageUrl = item.assetHref;
     } else if (item.role === "intro") {
-      imageUrl = rm22PhotoSlotUrl(urls.intro);
+      imageUrl = rm22PhotoSlotUrl(urls.intro ?? slots.introImageUrl);
     } else if (item.role === "intrinsic") {
-      imageUrl = rm22PhotoSlotUrl(urls.intrinsic);
+      imageUrl = rm22PhotoSlotUrl(urls.intrinsic ?? slots.intrinsicImageUrl);
     } else if (item.role === "outro") {
-      imageUrl = rm22PhotoSlotUrl(urls.outro);
+      imageUrl = rm22PhotoSlotUrl(urls.outro ?? slots.outroImageUrl);
     } else if (item.role === "photo-caption") {
-      imageUrl = rm22PhotoSlotUrl(urls.photos[photoIndex]);
+      imageUrl = rm22PhotoSlotUrl(
+        urls.photos[photoIndex] ?? slots.photoImageUrls[photoIndex],
+      );
       photoIndex += 1;
     }
     return {
@@ -733,4 +752,512 @@ export function buildRm22TemplatePageRows(input: {
     rows.push(templateCoverRow(input.backCoverImageUrl, "back", cursor));
   }
   return rows;
+}
+
+export type Rm22SlotHydration = {
+  productId: Rm22ProductId;
+  frontImageUrl: string | null;
+  frontTitle: string;
+  frontSubtitle: string;
+  frontPriceLine: string;
+  frontTagline: string;
+  backAgentImageUrl: string | null;
+  agencyLogoUrl: string | null;
+  backKicker: string;
+  agentName: string;
+  agentPhone: string;
+  introTitle: string;
+  introCaption: string;
+  introImageUrl: string | null;
+  photoCaptions: string[];
+  photoImageUrls: Array<string | null>;
+  intrinsicTitle: string;
+  intrinsicCaption: string;
+  intrinsicBody: string;
+  intrinsicSignoff: string;
+  intrinsicImageUrl: string | null;
+  outroTitle: string;
+  outroCaption: string;
+  outroImageUrl: string | null;
+};
+
+function emptyRm22Hydration(
+  extras?: {
+    productId?: Rm22ProductId;
+    agentName?: string | null;
+    agentPhone?: string | null;
+    agencyLogoUrl?: string | null;
+  },
+): Rm22SlotHydration {
+  return {
+    productId: extras?.productId ?? RM22_DEFAULT_PRODUCT_ID,
+    frontImageUrl: null,
+    frontTitle: "",
+    frontSubtitle: "",
+    frontPriceLine: "",
+    frontTagline: "",
+    backAgentImageUrl: null,
+    agencyLogoUrl: extras?.agencyLogoUrl?.trim() || null,
+    backKicker: "",
+    agentName: extras?.agentName?.trim() || "",
+    agentPhone: extras?.agentPhone?.trim() || "",
+    introTitle: "",
+    introCaption: "",
+    introImageUrl: null,
+    photoCaptions: Array.from({ length: RM22_PHOTO_CAPTION_COUNT }, () => ""),
+    photoImageUrls: Array.from({ length: RM22_PHOTO_CAPTION_COUNT }, () => null),
+    intrinsicTitle: "",
+    intrinsicCaption: "",
+    intrinsicBody: "",
+    intrinsicSignoff: "",
+    intrinsicImageUrl: null,
+    outroTitle: "",
+    outroCaption: "",
+    outroImageUrl: null,
+  };
+}
+
+/** Fill template slots from a saved Talisbook™'s covers and interior photos. */
+export function rm22HydrationFromExistingMedia(input: {
+  frontImageUrl?: string | null;
+  backImageUrl?: string | null;
+  interiors?: Array<string | null | undefined>;
+  base?: Rm22SlotHydration | null;
+}): Rm22SlotHydration {
+  const hydration = input.base ? { ...input.base } : emptyRm22Hydration();
+  hydration.frontImageUrl =
+    rm22PhotoSlotUrl(input.frontImageUrl) || hydration.frontImageUrl;
+  hydration.backAgentImageUrl =
+    rm22PhotoSlotUrl(input.backImageUrl) || hydration.backAgentImageUrl;
+  const interiors = (input.interiors ?? [])
+    .map((url) => rm22PhotoSlotUrl(url) || null)
+    .filter((url): url is string => Boolean(url));
+  if (interiors.length === 0) return hydration;
+  const hasSlotImages = Boolean(
+    hydration.introImageUrl ||
+      hydration.intrinsicImageUrl ||
+      hydration.outroImageUrl ||
+      hydration.photoImageUrls.some(Boolean),
+  );
+  if (hasSlotImages) return hydration;
+  if (interiors.length === 1) {
+    hydration.introImageUrl = interiors[0]!;
+    return hydration;
+  }
+  if (interiors.length === 2) {
+    hydration.introImageUrl = interiors[0]!;
+    hydration.outroImageUrl = interiors[1]!;
+    return hydration;
+  }
+  hydration.introImageUrl = interiors[0]!;
+  const middle = interiors.slice(1, -2);
+  hydration.photoImageUrls = [
+    ...middle,
+    ...Array.from(
+      { length: Math.max(0, RM22_PHOTO_CAPTION_COUNT - middle.length) },
+      () => null,
+    ),
+  ];
+  hydration.photoCaptions = Array.from(
+    { length: hydration.photoImageUrls.length },
+    (_, index) => hydration.photoCaptions[index] ?? "",
+  );
+  hydration.intrinsicImageUrl = interiors[interiors.length - 2]!;
+  hydration.outroImageUrl = interiors[interiors.length - 1]!;
+  return hydration;
+}
+
+export function rm22HydrationFromSlots(slots: Rm22SlotState): Rm22SlotHydration {
+  const photoCount = Math.max(
+    RM22_PHOTO_CAPTION_COUNT,
+    slots.photoImages.length,
+    slots.photoImageUrls.length,
+    slots.photoCaptions.length,
+  );
+  return {
+    productId: slots.productId,
+    frontImageUrl: slots.frontImageUrl,
+    frontTitle: slots.frontTitle,
+    frontSubtitle: slots.frontSubtitle,
+    frontPriceLine: slots.frontPriceLine,
+    frontTagline: slots.frontTagline,
+    backAgentImageUrl: slots.backAgentImageUrl,
+    agencyLogoUrl: slots.agencyLogoUrl,
+    backKicker: slots.backKicker,
+    agentName: slots.agentName,
+    agentPhone: slots.agentPhone,
+    introTitle: slots.introTitle,
+    introCaption: slots.introCaption,
+    introImageUrl: slots.introImageUrl,
+    photoCaptions: Array.from(
+      { length: photoCount },
+      (_, index) => slots.photoCaptions[index] ?? "",
+    ),
+    photoImageUrls: Array.from(
+      { length: photoCount },
+      (_, index) => slots.photoImageUrls[index] ?? null,
+    ),
+    intrinsicTitle: slots.intrinsicTitle,
+    intrinsicCaption: slots.intrinsicCaption,
+    intrinsicBody: slots.intrinsicBody,
+    intrinsicSignoff: slots.intrinsicSignoff,
+    intrinsicImageUrl: slots.intrinsicImageUrl,
+    outroTitle: slots.outroTitle,
+    outroCaption: slots.outroCaption,
+    outroImageUrl: slots.outroImageUrl,
+  };
+}
+
+export function parseRm22SlotHydration(raw: unknown): Rm22SlotHydration | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const record = raw as Record<string, unknown>;
+  const productId = isRm22ProductId(String(record.productId || ""))
+    ? (record.productId as Rm22ProductId)
+    : RM22_DEFAULT_PRODUCT_ID;
+  const photoCaptions = Array.isArray(record.photoCaptions)
+    ? record.photoCaptions.map((item) =>
+        typeof item === "string" ? item : "",
+      )
+    : [];
+  const photoImageUrls = Array.isArray(record.photoImageUrls)
+    ? record.photoImageUrls.map((item) =>
+        typeof item === "string" && item.trim() ? rm22PhotoSlotUrl(item) || null : null,
+      )
+    : [];
+  const photoCount = Math.max(
+    RM22_PHOTO_CAPTION_COUNT,
+    photoCaptions.length,
+    photoImageUrls.length,
+  );
+  return {
+    productId,
+    frontImageUrl:
+      rm22PhotoSlotUrl(asTrimmedString(record.frontImageUrl)) || null,
+    frontTitle: asTrimmedString(record.frontTitle),
+    frontSubtitle: asTrimmedString(record.frontSubtitle),
+    frontPriceLine: asTrimmedString(record.frontPriceLine),
+    frontTagline: asTrimmedString(record.frontTagline),
+    backAgentImageUrl:
+      rm22PhotoSlotUrl(asTrimmedString(record.backAgentImageUrl)) || null,
+    agencyLogoUrl:
+      rm22PhotoSlotUrl(asTrimmedString(record.agencyLogoUrl)) || null,
+    backKicker: asTrimmedString(record.backKicker),
+    agentName: asTrimmedString(record.agentName),
+    agentPhone: asTrimmedString(record.agentPhone),
+    introTitle: asTrimmedString(record.introTitle),
+    introCaption: asTrimmedString(record.introCaption),
+    introImageUrl: rm22PhotoSlotUrl(asTrimmedString(record.introImageUrl)) || null,
+    photoCaptions: Array.from(
+      { length: photoCount },
+      (_, index) => photoCaptions[index] ?? "",
+    ),
+    photoImageUrls: Array.from(
+      { length: photoCount },
+      (_, index) => photoImageUrls[index] ?? null,
+    ),
+    intrinsicTitle: asTrimmedString(record.intrinsicTitle),
+    intrinsicCaption: asTrimmedString(record.intrinsicCaption),
+    intrinsicBody: asTrimmedString(record.intrinsicBody),
+    intrinsicSignoff: asTrimmedString(record.intrinsicSignoff),
+    intrinsicImageUrl:
+      rm22PhotoSlotUrl(asTrimmedString(record.intrinsicImageUrl)) || null,
+    outroTitle: asTrimmedString(record.outroTitle),
+    outroCaption: asTrimmedString(record.outroCaption),
+    outroImageUrl: rm22PhotoSlotUrl(asTrimmedString(record.outroImageUrl)) || null,
+  };
+}
+
+export function mergeRm22Hydration(
+  stored: Rm22SlotHydration | null,
+  fromPages: Rm22SlotHydration | null,
+): Rm22SlotHydration | null {
+  if (!stored) return fromPages;
+  if (!fromPages) return stored;
+  const photoCount = Math.max(
+    stored.photoCaptions.length,
+    stored.photoImageUrls.length,
+    fromPages.photoCaptions.length,
+    fromPages.photoImageUrls.length,
+  );
+  return {
+    ...fromPages,
+    ...stored,
+    productId: stored.productId || fromPages.productId,
+    frontImageUrl: stored.frontImageUrl || fromPages.frontImageUrl,
+    backAgentImageUrl: stored.backAgentImageUrl || fromPages.backAgentImageUrl,
+    agencyLogoUrl: stored.agencyLogoUrl || fromPages.agencyLogoUrl,
+    introImageUrl: stored.introImageUrl || fromPages.introImageUrl,
+    photoCaptions: Array.from(
+      { length: photoCount },
+      (_, index) => stored.photoCaptions[index] || fromPages.photoCaptions[index] || "",
+    ),
+    photoImageUrls: Array.from(
+      { length: photoCount },
+      (_, index) =>
+        stored.photoImageUrls[index] || fromPages.photoImageUrls[index] || null,
+    ),
+    intrinsicImageUrl: stored.intrinsicImageUrl || fromPages.intrinsicImageUrl,
+    outroImageUrl: stored.outroImageUrl || fromPages.outroImageUrl,
+    intrinsicBody: stored.intrinsicBody || fromPages.intrinsicBody,
+  };
+}
+
+export function rm22CoverCopyChanged(
+  current: Rm22SlotState,
+  initial: Rm22SlotHydration | null,
+): boolean {
+  if (!initial) return true;
+  return (
+    current.frontTitle.trim() !== initial.frontTitle.trim() ||
+    current.frontSubtitle.trim() !== initial.frontSubtitle.trim() ||
+    current.frontPriceLine.trim() !== initial.frontPriceLine.trim() ||
+    current.frontTagline.trim() !== initial.frontTagline.trim() ||
+    current.backKicker.trim() !== initial.backKicker.trim() ||
+    current.agentName.trim() !== initial.agentName.trim() ||
+    current.agentPhone.trim() !== initial.agentPhone.trim() ||
+    Boolean(current.agencyLogo) ||
+    (current.agencyLogoUrl || "") !== (initial.agencyLogoUrl || "")
+  );
+}
+
+function contentRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function asTrimmedString(value: unknown): string {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function pageImageUrl(content: Record<string, unknown>): string | null {
+  const spread = rm22PhotoSlotUrl(asTrimmedString(content.spreadImageUrl));
+  if (spread) return spread;
+  const hero = rm22PhotoSlotUrl(asTrimmedString(content.heroImageUrl));
+  return hero || null;
+}
+
+function pageTemplateRole(
+  content: Record<string, unknown>,
+): Rm22InteriorRole | null {
+  const role = content.templateRole;
+  if (
+    role === "product-sheet" ||
+    role === "intro" ||
+    role === "photo-caption" ||
+    role === "intrinsic" ||
+    role === "outro"
+  ) {
+    return role;
+  }
+  return null;
+}
+
+/** Rebuild template slots from a saved Talisbook™ so admin can edit in-place. */
+export function rm22HydrationFromPageContents(
+  pages: Array<{ content?: unknown; page_number?: number }>,
+  extras?: {
+    agentName?: string | null;
+    agentPhone?: string | null;
+    address?: string | null;
+    lotTitle?: string | null;
+    lotWriteup?: string | null;
+    priceLine?: string | null;
+  },
+): Rm22SlotHydration | null {
+  const sorted = [...pages].sort(
+    (a, b) => (a.page_number ?? 0) - (b.page_number ?? 0),
+  );
+  const hydration = emptyRm22Hydration({
+    agentName: extras?.agentName,
+    agentPhone: extras?.agentPhone,
+  });
+  const cover = rm22CoverBandFromOnboarding({
+    address: extras?.address,
+    lotTitle: extras?.lotTitle,
+    lotWriteup: extras?.lotWriteup,
+    priceLine: extras?.priceLine,
+  });
+  hydration.frontTitle = cover.frontTitle;
+  hydration.frontSubtitle = cover.frontSubtitle;
+  hydration.frontPriceLine = cover.frontPriceLine;
+  hydration.frontTagline = cover.frontTagline;
+
+  let sawTemplate = false;
+  let photoIndex = 0;
+  const untemplated: Array<{ url: string | null; title: string; caption: string }> = [];
+  for (const page of sorted) {
+    const content = contentRecord(page.content);
+    const leaf = asTrimmedString(content.brochureLeaf);
+    const pageRole = asTrimmedString(content.pageRole);
+    const coverHalf = asTrimmedString(content.coverSpreadHalf);
+    if (pageRole === "cover" || asTrimmedString(content.layout) === "cover") {
+      const url =
+        rm22PhotoSlotUrl(asTrimmedString(content.heroImageUrl)) ||
+        pageImageUrl(content);
+      if (coverHalf === "back" || (!hydration.backAgentImageUrl && hydration.frontImageUrl)) {
+        hydration.backAgentImageUrl = hydration.backAgentImageUrl || url;
+      } else {
+        hydration.frontImageUrl = hydration.frontImageUrl || url;
+      }
+      continue;
+    }
+    const role = pageTemplateRole(content);
+    if (!role) {
+      if (leaf !== "right") {
+        untemplated.push({
+          url: pageImageUrl(content),
+          title: asTrimmedString(content.title),
+          caption:
+            asTrimmedString(content.body) || asTrimmedString(content.caption),
+        });
+      }
+      continue;
+    }
+    sawTemplate = true;
+    if (role === "product-sheet") {
+      if (isRm22ProductId(String(content.productId || ""))) {
+        hydration.productId = content.productId as Rm22ProductId;
+      }
+      continue;
+    }
+    if (role === "intro" && leaf !== "right") {
+      hydration.introTitle =
+        asTrimmedString(content.title) || hydration.introTitle;
+      hydration.introCaption =
+        asTrimmedString(content.body) ||
+        asTrimmedString(content.caption) ||
+        hydration.introCaption;
+      hydration.introImageUrl = pageImageUrl(content);
+      continue;
+    }
+    if (role === "photo-caption" && leaf !== "right") {
+      while (hydration.photoCaptions.length <= photoIndex) {
+        hydration.photoCaptions.push("");
+        hydration.photoImageUrls.push(null);
+      }
+      hydration.photoCaptions[photoIndex] =
+        asTrimmedString(content.title) ||
+        asTrimmedString(content.body) ||
+        "";
+      hydration.photoImageUrls[photoIndex] = pageImageUrl(content);
+      photoIndex += 1;
+      continue;
+    }
+    if (role === "intrinsic") {
+      if (leaf !== "right") {
+        hydration.intrinsicCaption =
+          asTrimmedString(content.title) || hydration.intrinsicCaption;
+        hydration.intrinsicImageUrl = pageImageUrl(content);
+      } else {
+        hydration.intrinsicTitle =
+          asTrimmedString(content.title) || hydration.intrinsicTitle;
+        hydration.intrinsicBody =
+          asTrimmedString(content.body) || hydration.intrinsicBody;
+        hydration.intrinsicSignoff =
+          asTrimmedString(content.signoff) || hydration.intrinsicSignoff;
+      }
+      continue;
+    }
+    if (role === "outro" && leaf !== "right") {
+      hydration.outroTitle =
+        asTrimmedString(content.title) || hydration.outroTitle;
+      hydration.outroCaption =
+        asTrimmedString(content.body) || hydration.outroCaption;
+      hydration.outroImageUrl = pageImageUrl(content);
+    }
+  }
+
+  if (!sawTemplate) {
+    if (
+      !hydration.frontImageUrl &&
+      !hydration.backAgentImageUrl &&
+      untemplated.every((item) => !item.url)
+    ) {
+      return null;
+    }
+    const spreads = untemplated.filter((item) => item.url);
+    if (spreads.length === 1) {
+      hydration.introImageUrl = spreads[0]!.url;
+      hydration.introTitle = spreads[0]!.title;
+      hydration.introCaption = spreads[0]!.caption;
+    } else if (spreads.length === 2) {
+      hydration.introImageUrl = spreads[0]!.url;
+      hydration.introTitle = spreads[0]!.title;
+      hydration.introCaption = spreads[0]!.caption;
+      hydration.outroImageUrl = spreads[1]!.url;
+      hydration.outroTitle = spreads[1]!.title;
+      hydration.outroCaption = spreads[1]!.caption;
+    } else if (spreads.length >= 3) {
+      hydration.introImageUrl = spreads[0]!.url;
+      hydration.introTitle = spreads[0]!.title;
+      hydration.introCaption = spreads[0]!.caption;
+      const middle = spreads.slice(1, -2);
+      hydration.photoCaptions = middle.map((item) => item.caption || item.title);
+      hydration.photoImageUrls = middle.map((item) => item.url);
+      while (hydration.photoCaptions.length < RM22_PHOTO_CAPTION_COUNT) {
+        hydration.photoCaptions.push("");
+        hydration.photoImageUrls.push(null);
+      }
+      hydration.intrinsicImageUrl = spreads[spreads.length - 2]!.url;
+      hydration.intrinsicCaption = spreads[spreads.length - 2]!.caption;
+      hydration.intrinsicTitle = spreads[spreads.length - 2]!.title;
+      hydration.outroImageUrl = spreads[spreads.length - 1]!.url;
+      hydration.outroTitle = spreads[spreads.length - 1]!.title;
+      hydration.outroCaption = spreads[spreads.length - 1]!.caption;
+    }
+    return hydration;
+  }
+  return hydration;
+}
+
+export function applyRm22SlotHydration(
+  base: Rm22SlotState,
+  hydration: Rm22SlotHydration,
+): Rm22SlotState {
+  const photoCount = Math.max(
+    RM22_PHOTO_CAPTION_COUNT,
+    hydration.photoCaptions.length,
+    hydration.photoImageUrls.length,
+  );
+  return {
+    ...base,
+    productId: hydration.productId,
+    frontImage: null,
+    frontImageUrl: hydration.frontImageUrl,
+    frontTitle: hydration.frontTitle,
+    frontSubtitle: hydration.frontSubtitle,
+    frontPriceLine: hydration.frontPriceLine,
+    frontTagline: hydration.frontTagline,
+    backAgentImage: null,
+    backAgentImageUrl: hydration.backAgentImageUrl,
+    agencyLogo: base.agencyLogo,
+    agencyLogoUrl: hydration.agencyLogoUrl || base.agencyLogoUrl,
+    backKicker: hydration.backKicker,
+    agentName: hydration.agentName || base.agentName,
+    agentPhone: hydration.agentPhone || base.agentPhone,
+    introTitle: hydration.introTitle,
+    introCaption: hydration.introCaption,
+    introImage: null,
+    introImageUrl: hydration.introImageUrl,
+    photoImages: Array.from({ length: photoCount }, () => null),
+    photoImageUrls: Array.from(
+      { length: photoCount },
+      (_, index) => hydration.photoImageUrls[index] ?? null,
+    ),
+    photoCaptions: Array.from(
+      { length: photoCount },
+      (_, index) => hydration.photoCaptions[index] ?? "",
+    ),
+    intrinsicTitle: hydration.intrinsicTitle,
+    intrinsicCaption: hydration.intrinsicCaption,
+    intrinsicBody: hydration.intrinsicBody,
+    intrinsicSignoff: hydration.intrinsicSignoff,
+    intrinsicImage: null,
+    intrinsicImageUrl: hydration.intrinsicImageUrl,
+    outroTitle: hydration.outroTitle,
+    outroCaption: hydration.outroCaption,
+    outroImage: null,
+    outroImageUrl: hydration.outroImageUrl,
+  };
 }

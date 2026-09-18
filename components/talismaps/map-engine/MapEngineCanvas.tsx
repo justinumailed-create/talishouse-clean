@@ -41,6 +41,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     lockCenter,
     lockCenterOffset,
     interactive,
+    scrollZoom,
     preserveViewport,
   } = useMapEngine();
 
@@ -61,6 +62,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
   const lockCenterRef = useRef(lockCenter);
   const lockCenterOffsetRef = useRef(lockCenterOffset);
   const interactiveRef = useRef(interactive);
+  const scrollZoomRef = useRef(scrollZoom);
   const preserveViewportRef = useRef(preserveViewport);
 
   useEffect(() => {
@@ -81,6 +83,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
     lockCenterRef.current = lockCenter;
     lockCenterOffsetRef.current = lockCenterOffset;
     interactiveRef.current = interactive;
+    scrollZoomRef.current = scrollZoom;
     preserveViewportRef.current = preserveViewport;
   });
 
@@ -147,6 +150,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
         lockCenter: lockCenterRef.current,
         lockCenterOffset: lockCenterOffsetRef.current,
         interactive: interactiveRef.current,
+        scrollZoom: scrollZoomRef.current,
         preserveViewport: preserveViewportRef.current,
         signal: abortController.signal,
       })
@@ -204,7 +208,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
         setReadyRef.current(false);
       }
     };
-  }, [providerId, lockCenter, interactive, preserveViewport]);
+  }, [providerId, lockCenter, interactive, scrollZoom, preserveViewport]);
 
   useEffect(() => {
     const instance = instanceRef.current;

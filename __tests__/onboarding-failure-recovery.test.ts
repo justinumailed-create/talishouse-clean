@@ -9,17 +9,25 @@ import { runEbookGenerationPipeline } from "@/lib/talispros/ebook-generation-pip
 
 vi.mock("@/lib/talispros/resolve-onboarding-from-request", () => ({
   resolveOnboardingFromRequest: vi.fn(),
+  resolveOnboardingFromMapSite: vi.fn(),
 }));
 
 vi.mock("@/lib/talisbooks/self-service-ebook", () => ({
   generateSelfServiceEbook: vi.fn(),
 }));
 
-import { resolveOnboardingFromRequest } from "@/lib/talispros/resolve-onboarding-from-request";
+vi.mock("@/lib/mapsite-edit-auth", () => ({
+  canEditMapSite: vi.fn(),
+}));
+
+import { resolveOnboardingFromRequest, resolveOnboardingFromMapSite } from "@/lib/talispros/resolve-onboarding-from-request";
 import { generateSelfServiceEbook } from "@/lib/talisbooks/self-service-ebook";
+import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 
 const resolveMock = vi.mocked(resolveOnboardingFromRequest);
+const resolveMapSiteMock = vi.mocked(resolveOnboardingFromMapSite);
 const generateMock = vi.mocked(generateSelfServiceEbook);
+const canEditMock = vi.mocked(canEditMapSite);
 
 function tinyPngFile(name = "test.png"): File {
   // 1x1 transparent PNG
@@ -41,7 +49,10 @@ const portraitCover = {
 describe("failure recovery — structured errors", () => {
   beforeEach(() => {
     resolveMock.mockReset();
+    resolveMapSiteMock.mockReset();
     generateMock.mockReset();
+    canEditMock.mockReset();
+    canEditMock.mockResolvedValue(false);
   });
 
   it("missing requestId returns structured failure (no hang)", async () => {
@@ -60,6 +71,89 @@ describe("failure recovery — structured errors", () => {
     expect(result.failedStage).toBe("resolve_request");
     expect(result.error).toMatch(/Build Request ID/i);
     expect(result.durationMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it("client FAST Code without edit access still requires a Build Request", async () => {
+    const result = await runEbookGenerationPipeline({
+      requestId: "",
+      fastCode: "lrg1",
+      title: "T",
+      description: "D",
+      location: "L",
+      images: [tinyPngFile()],
+      uploadMode: "images",
+      timeoutMs: 5_000,
+    });
+    expect(result.stage).toBe("failed");
+    if (result.stage !== "failed") return;
+    expect(result.failedStage).toBe("resolve_request");
+    expect(result.error).toMatch(/Build Request ID/i);
+    expect(resolveMapSiteMock).not.toHaveBeenCalled();
+    expect(generateMock).not.toHaveBeenCalled();
+  });
+
+  it("editable Mapsite™ generates without a Build Request", async () => {
+    canEditMock.mockResolvedValue(true);
+    resolveMapSiteMock.mockResolvedValue({
+      ok: true,
+      context: {
+        requestId: null,
+        fastCode: "lrg1",
+        mapsiteId: "ms-lrg1",
+        accountType: "root",
+        owner: {
+          firstName: "Rahul",
+          lastName: "Chakraborty",
+          agentName: "Rahul Chakraborty",
+          email: "rahulc@talispros.com",
+          phone: "",
+        },
+        assets: { coverImage: null, galleryImages: [], logo: null },
+        pin: {
+          streetAddress: "Lot 8",
+          latitude: 1,
+          longitude: 2,
+          writeup: null,
+        },
+        listing: {
+          title: "Lot 8",
+          address: "Lot 8",
+          price: null,
+        },
+      },
+    });
+    generateMock.mockResolvedValue({
+      success: true,
+      bookId: "b-lrg1",
+      slug: "lrg1-book",
+      viewerUrl: "/talisbooks/viewer/lrg1-book",
+      mapsiteId: "ms-lrg1",
+    });
+    const cover = { url: "https://cdn.example/c.jpg", width: 1080, height: 1920 };
+    const result = await runEbookGenerationPipeline({
+      requestId: "",
+      fastCode: "lrg1",
+      title: "Lot 8",
+      description: "D",
+      location: "L",
+      optimizedImages: [
+        { url: "https://cdn.example/p.jpg", width: 1920, height: 1080 },
+      ],
+      frontCover: cover,
+      backCover: cover,
+      uploadMode: "images",
+      timeoutMs: 5_000,
+    });
+    expect(result.stage).toBe("completed");
+    expect(resolveMock).not.toHaveBeenCalled();
+    expect(resolveMapSiteMock).toHaveBeenCalledWith("lrg1");
+    expect(generateMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fastCode: "lrg1",
+        mapsiteId: "ms-lrg1",
+        requestId: null,
+      }),
+    );
   });
 
   it("invalid requestId / missing build request returns stage + message", async () => {

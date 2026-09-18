@@ -6,6 +6,7 @@ import {
   TALISBOOKS_IMAGE_STORAGE_BUCKET,
 } from "@/lib/talisbooks/image-engine";
 import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
+import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import {
   assertTalisBooksFeature,
   getTalisBooksEntitlementSnapshot,
@@ -27,6 +28,7 @@ import {
 } from "@/lib/talisbooks/self-service-page-plan";
 import {
   buildRm22TemplatePageRows,
+  type Rm22SlotHydration,
   type Rm22TemplatePayload,
 } from "@/lib/talisbooks/rm22-template";
 import {
@@ -41,6 +43,31 @@ import {
   type MapsiteFlagIdentity,
 } from "@/lib/talispros/flag-identity";
 
+function demoEbookPublishFields(fastCode: string, now: string): {
+  publish_status: "published" | "draft";
+  published_at: string | null;
+} {
+  if (isDemoMapSiteCode(fastCode)) {
+    return { publish_status: "published", published_at: now };
+  }
+  return { publish_status: "draft", published_at: null };
+}
+
+function ebookInsertPublishFields(input: {
+  fastCode: string;
+  now: string;
+  asAdmin?: boolean;
+  replacing?: boolean;
+}): {
+  publish_status: "published" | "draft";
+  published_at: string | null;
+} {
+  if (input.asAdmin && !input.replacing) {
+    return { publish_status: "published", published_at: input.now };
+  }
+  return demoEbookPublishFields(input.fastCode, input.now);
+}
+
 function slugify(input: string): string {
   return input
     .trim()
@@ -50,15 +77,38 @@ function slugify(input: string): string {
     .slice(0, 64);
 }
 
+/** First book binds Mapsite™ TEB. Additional books stay on the shelf without replacing it. */
+export function shouldBindMapsiteTebListing(input: {
+  replacing: boolean;
+  existingTebUrl?: string | null;
+}): boolean {
+  if (input.replacing) return true;
+  return !(input.existingTebUrl || "").trim();
+}
+
 async function persistMapsiteEbookListing(input: {
   mapsiteId: string | null;
   previewUrl: string;
   listingImageUrls: string[];
   now: string;
+  replacing?: boolean;
 }): Promise<void> {
   if (!input.mapsiteId || !isSupabaseAdminConfigured()) return;
-  const urls = input.listingImageUrls.map((url) => url.trim()).filter(Boolean);
   const supabase = getSupabaseAdmin();
+  const { data: mapsite } = await supabase
+    .from("mapsites")
+    .select("teb_url")
+    .eq("id", input.mapsiteId)
+    .maybeSingle();
+  if (
+    !shouldBindMapsiteTebListing({
+      replacing: Boolean(input.replacing),
+      existingTebUrl: mapsite?.teb_url,
+    })
+  ) {
+    return;
+  }
+  const urls = input.listingImageUrls.map((url) => url.trim()).filter(Boolean);
   await supabase
     .from("mapsites")
     .update({
@@ -79,6 +129,120 @@ function uniqueSlug(scope: string, title: string): string {
   const base = slugify(`${scope}-${title}`) || `${scope}-teb`;
   const suffix = Date.now().toString(36).slice(-4);
   return `${base}-${suffix}`;
+}
+
+type GeneratedBookPageRow = {
+  title: string;
+  slug: string;
+  page_number: number;
+  sort_order: number;
+  content: Record<string, unknown>;
+  is_visible: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+async function persistGeneratedEbook(input: {
+  replaceBookId?: string | null;
+  fastCode: string;
+  mapsiteId: string | null;
+  accountType: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  pageRows: GeneratedBookPageRow[];
+  metadata: Record<string, unknown>;
+  publishFields: { publish_status: "published" | "draft"; published_at: string | null };
+  now: string;
+}): Promise<{ id: string; slug: string } | { error: string }> {
+  const supabase = getSupabaseAdmin();
+  const replaceId = input.replaceBookId?.trim() || "";
+  const pageCount = input.pageRows.length;
+
+  if (replaceId) {
+    const { data: existing, error } = await supabase
+      .from("talisbooks_books")
+      .select("id, slug, fast_code, mapsite_id")
+      .eq("id", replaceId)
+      .maybeSingle();
+    if (error || !existing) {
+      return { error: "That Talisbook™ could not be found." };
+    }
+    if (String(existing.fast_code || "").toLowerCase() !== input.fastCode.toLowerCase()) {
+      return { error: "That Talisbook™ does not belong to this FAST Code." };
+    }
+    if (
+      input.mapsiteId &&
+      existing.mapsite_id &&
+      existing.mapsite_id !== input.mapsiteId
+    ) {
+      return { error: "That Talisbook™ does not belong to this Mapsite™." };
+    }
+    const previewUrl = `${ROUTES.TALISBOOKS_VIEWER}/${existing.slug}`;
+    const { error: updateError } = await supabase
+      .from("talisbooks_books")
+      .update({
+        title: input.title,
+        subtitle: input.subtitle,
+        description: input.description,
+        page_count: pageCount,
+        mapsite_id: input.mapsiteId,
+        metadata: { ...input.metadata, previewUrl },
+        updated_at: input.now,
+      })
+      .eq("id", existing.id);
+    if (updateError) {
+      return { error: updateError.message || "Failed to update Talisbook™." };
+    }
+    const { error: deleteError } = await supabase
+      .from("talisbooks_book_pages")
+      .delete()
+      .eq("book_id", existing.id);
+    if (deleteError) {
+      return { error: deleteError.message || "Failed to replace Talisbook™ pages." };
+    }
+    const { error: pagesError } = await supabase
+      .from("talisbooks_book_pages")
+      .insert(input.pageRows.map((row) => ({ ...row, book_id: existing.id })));
+    if (pagesError) {
+      console.error("[auto-draft-ebook] Pages replace failed:", pagesError.message);
+    }
+    return { id: existing.id, slug: existing.slug };
+  }
+
+  const slug = uniqueSlug(input.fastCode, input.title);
+  const previewUrl = `${ROUTES.TALISBOOKS_VIEWER}/${slug}`;
+  const { data: book, error: bookError } = await supabase
+    .from("talisbooks_books")
+    .insert({
+      slug,
+      title: input.title,
+      subtitle: input.subtitle,
+      description: input.description,
+      ...input.publishFields,
+      page_count: pageCount,
+      is_public: input.publishFields.publish_status === "published",
+      mapsite_id: input.mapsiteId,
+      fast_code: input.fastCode,
+      account_type: input.accountType,
+      metadata: { ...input.metadata, previewUrl },
+      created_at: input.now,
+      updated_at: input.now,
+    })
+    .select("id, slug")
+    .maybeSingle();
+
+  if (bookError || !book) {
+    return { error: bookError?.message || "Failed to create draft Talisbook™." };
+  }
+
+  const { error: pagesError } = await supabase
+    .from("talisbooks_book_pages")
+    .insert(input.pageRows.map((row) => ({ ...row, book_id: book.id })));
+  if (pagesError) {
+    console.error("[auto-draft-ebook] Pages insert failed:", pagesError.message);
+  }
+  return { id: book.id, slug: book.slug };
 }
 
 /** Keep serverless CPU under control while still overlapping I/O. */
@@ -671,6 +835,10 @@ export type AutoDraftEbookInput = {
   mapsiteId?: string | null;
   accountType?: string | null;
   requestId?: string | null;
+  /** Replace this book's pages in place instead of inserting a new Talisbook™. */
+  replaceBookId?: string | null;
+  /** Mapsite™ / platform editor: additional books are allowed even if client quota is locked. */
+  asAdmin?: boolean;
   title: string;
   description?: string | null;
   location?: string | null;
@@ -709,6 +877,8 @@ export type AutoDraftEbookInput = {
   backCover?: ExplicitCoverAsset | null;
   /** RM22 magazine template — interiors keep image/text slots unflattened. */
   rm22Template?: Rm22TemplatePayload | null;
+  /** Template slot copy/urls persisted so admin can edit the same book later. */
+  rm22SlotHydration?: Rm22SlotHydration | null;
   /** Choose for Flag: Name or Address. FSBO is forced to Address. */
   flagIdentity?: MapsiteFlagIdentity;
 };
@@ -794,7 +964,7 @@ export async function autoGenerateDraftTalisBook(
     fastCode,
     bookCount: entitlements?.bookCount ?? null,
   });
-  if (entitlements) {
+  if (entitlements && !input.replaceBookId?.trim() && !input.asAdmin) {
     const createGate = assertTalisBooksFeature(
       entitlements,
       entitlements.bookCount === 0 ? "create_first_draft" : "create_additional_book",
@@ -869,20 +1039,9 @@ export async function autoGenerateDraftTalisBook(
       };
     }
 
-    const supabase = getSupabaseAdmin();
-    const slug = uniqueSlug(fastCode, title);
     const now = new Date().toISOString();
 
-    const pageRows: Array<{
-      title: string;
-      slug: string;
-      page_number: number;
-      sort_order: number;
-      content: Record<string, unknown>;
-      is_visible: boolean;
-      created_at: string;
-      updated_at: string;
-    }> = [];
+    const pageRows: GeneratedBookPageRow[] = [];
 
     if (frontCoverUrl) {
       pageRows.push({
@@ -936,82 +1095,71 @@ export async function autoGenerateDraftTalisBook(
     }
 
     const pageCount = pageRows.length;
-    const previewUrl = `${ROUTES.TALISBOOKS_VIEWER}/${slug}`;
-
     const dbStarted = onboardingNow();
-    const { data: book, error: bookError } = await supabase
-      .from("talisbooks_books")
-      .insert({
-        slug,
-        title,
-        subtitle: location || "PDF",
-        description,
-        publish_status: "draft",
-        published_at: null,
-        page_count: pageCount,
-        is_public: false,
-        mapsite_id: mapsiteId,
-        fast_code: fastCode,
-        account_type: accountType,
-        metadata: {
-          coverImageUrl: frontCoverUrl,
-          backCoverImageUrl: backCoverUrl,
-          coverSpreadImageUrl: null,
-          coverSpreadOpening: false,
-          coverSpreadSplit: false,
-          explicitCovers: true,
-          galleryImageUrls: galleryUrls,
-          location: location || null,
-          source: input.source || "self-service-pdf",
-          requestId: input.requestId ?? null,
-          globallyPublished: false,
-          paymentRequired: false,
-          previewUrl,
-          autoGenerated: true,
-          exactPdfPages: true,
-          skipPermanentPages: true,
-          landscapeAsSpreads: true,
-          portraitPreserved: true,
-          flagIdentity,
-          flagName: input.agentName?.trim() || null,
-        },
-        created_at: now,
-        updated_at: now,
-      })
-      .select("id, slug")
-      .maybeSingle();
+    const persisted = await persistGeneratedEbook({
+      replaceBookId: input.replaceBookId,
+      fastCode,
+      mapsiteId,
+      accountType,
+      title,
+      subtitle: location || "PDF",
+      description,
+      pageRows,
+      publishFields: ebookInsertPublishFields({
+        fastCode,
+        now,
+        asAdmin: input.asAdmin,
+        replacing: Boolean(input.replaceBookId?.trim()),
+      }),
+      now,
+      metadata: {
+        coverImageUrl: frontCoverUrl,
+        backCoverImageUrl: backCoverUrl,
+        coverSpreadImageUrl: null,
+        coverSpreadOpening: false,
+        coverSpreadSplit: false,
+        explicitCovers: true,
+        galleryImageUrls: galleryUrls,
+        location: location || null,
+        source: input.source || "self-service-pdf",
+        requestId: input.requestId ?? null,
+        globallyPublished: false,
+        paymentRequired: false,
+        autoGenerated: true,
+        exactPdfPages: true,
+        skipPermanentPages: true,
+        landscapeAsSpreads: true,
+        portraitPreserved: true,
+        rm22Template: false,
+        rm22SlotHydration: null,
+        flagIdentity,
+        flagName: input.agentName?.trim() || null,
+      },
+    });
 
-    if (bookError || !book) {
+    if ("error" in persisted) {
       logOnboardingStep("PDF generation", pipelineStarted, {
         failed: true,
-        error: bookError?.message,
+        error: persisted.error,
       });
       return {
         success: false,
-        error: bookError?.message || "Failed to create PDF Talisbook™.",
+        error: persisted.error,
       };
     }
 
-    const { error: pagesError } = await supabase
-      .from("talisbooks_book_pages")
-      .insert(pageRows.map((row) => ({ ...row, book_id: book.id })));
-
-    if (pagesError) {
-      console.error(
-        "[auto-draft-ebook] PDF pages insert failed:",
-        pagesError.message
-      );
-    }
+    const previewUrl = `${ROUTES.TALISBOOKS_VIEWER}/${persisted.slug}`;
 
     await persistMapsiteEbookListing({
       mapsiteId,
       previewUrl,
       listingImageUrls: galleryUrls,
       now,
+      replacing: Boolean(input.replaceBookId?.trim()),
     });
 
     logOnboardingStep("PDF generation", dbStarted, {
-      bookId: book.id,
+      bookId: persisted.id,
       pageCount,
     });
     logOnboardingStep("Ebook pipeline", pipelineStarted, {
@@ -1029,8 +1177,8 @@ export async function autoGenerateDraftTalisBook(
 
     return {
       success: true,
-      bookId: book.id,
-      slug: book.slug,
+      bookId: persisted.id,
+      slug: persisted.slug,
       previewUrl,
       pageCount,
       mapsiteId,
@@ -1114,8 +1262,6 @@ export async function autoGenerateDraftTalisBook(
         captions: input.captions,
       });
 
-  const supabase = getSupabaseAdmin();
-  const slug = uniqueSlug(fastCode, title);
   const now = new Date().toISOString();
   const pageRows = planned.map((row) => ({
     ...row,
@@ -1125,97 +1271,87 @@ export async function autoGenerateDraftTalisBook(
   }));
 
   const pageCount = planned.length;
-  const previewUrl = `${ROUTES.TALISBOOKS_VIEWER}/${slug}`;
+  const persisted = await persistGeneratedEbook({
+    replaceBookId: input.replaceBookId,
+    fastCode,
+    mapsiteId,
+    accountType,
+    title,
+    subtitle: location || "Draft",
+    description,
+    pageRows,
+    publishFields: ebookInsertPublishFields({
+      fastCode,
+      now,
+      asAdmin: input.asAdmin,
+      replacing: Boolean(input.replaceBookId?.trim()),
+    }),
+    now,
+    metadata: {
+      coverImageUrl,
+      backCoverImageUrl,
+      coverSpreadImageUrl: null,
+      coverSpreadOpening: false,
+      coverSpreadSplit: false,
+      explicitCovers: true,
+      galleryImageUrls: listingUrls,
+      location: location || null,
+      source: input.source || "auto-draft-teb",
+      requestId: input.requestId ?? null,
+      globallyPublished: false,
+      paymentRequired: false,
+      autoGenerated: true,
+      skipPermanentPages: true,
+      selfServicePagePlan: true,
+      facingPages: true,
+      bookOptions: resolveSelfServiceBookOptions(input.bookOptions),
+      landscapeAsSpreads: true,
+      continuousCenterfolds: true,
+      portraitPreserved: true,
+      interiorImageCount: rm22Template
+        ? rm22Template.interiors.length
+        : landscapes.length,
+      rm22Template: Boolean(rm22Template),
+      templateId: rm22Template ? "rm22" : undefined,
+      rm22SlotHydration: rm22Template ? input.rm22SlotHydration ?? null : null,
+      flagIdentity,
+      flagName: input.agentName?.trim() || null,
+    },
+  });
 
-  const { data: book, error: bookError } = await supabase
-    .from("talisbooks_books")
-    .insert({
-      slug,
-      title,
-      subtitle: location || "Draft",
-      description,
-      publish_status: "draft",
-      published_at: null,
-      page_count: pageCount,
-      is_public: false,
-      mapsite_id: mapsiteId,
-      fast_code: fastCode,
-      account_type: accountType,
-      metadata: {
-        coverImageUrl,
-        backCoverImageUrl,
-        coverSpreadImageUrl: null,
-        coverSpreadOpening: false,
-        coverSpreadSplit: false,
-        explicitCovers: true,
-        galleryImageUrls: listingUrls,
-        location: location || null,
-        source: input.source || "auto-draft-teb",
-        requestId: input.requestId ?? null,
-        globallyPublished: false,
-        paymentRequired: false,
-        previewUrl,
-        autoGenerated: true,
-        // Fixed page plan already embeds Glasshouse — do not re-inject.
-        skipPermanentPages: true,
-        selfServicePagePlan: true,
-        facingPages: true,
-        bookOptions: resolveSelfServiceBookOptions(input.bookOptions),
-        landscapeAsSpreads: true,
-        continuousCenterfolds: true,
-        portraitPreserved: true,
-        interiorImageCount: rm22Template
-          ? rm22Template.interiors.length
-          : landscapes.length,
-        rm22Template: Boolean(rm22Template),
-        templateId: rm22Template ? "rm22" : undefined,
-        flagIdentity,
-        flagName: input.agentName?.trim() || null,
-      },
-      created_at: now,
-      updated_at: now,
-    })
-    .select("id, slug")
-    .maybeSingle();
-
-  if (bookError || !book) {
+  if ("error" in persisted) {
     logOnboardingStep("Ebook pipeline", pipelineStarted, {
       failed: true,
       mode: "images",
-      error: bookError?.message,
+      error: persisted.error,
     });
     return {
       success: false,
-      error: bookError?.message || "Failed to create draft Talisbook™.",
+      error: persisted.error,
     };
   }
 
-  const { error: pagesError } = await supabase
-    .from("talisbooks_book_pages")
-    .insert(pageRows.map((row) => ({ ...row, book_id: book.id })));
-
-  if (pagesError) {
-    console.error("[auto-draft-ebook] Pages insert failed:", pagesError.message);
-  }
+  const previewUrl = `${ROUTES.TALISBOOKS_VIEWER}/${persisted.slug}`;
 
   await persistMapsiteEbookListing({
     mapsiteId,
     previewUrl,
     listingImageUrls: listingUrls,
     now,
+    replacing: Boolean(input.replaceBookId?.trim()),
   });
 
   logOnboardingStep("Ebook pipeline", pipelineStarted, {
     mode: "images",
     fastCode,
     pageCount,
-    bookId: book.id,
+    bookId: persisted.id,
   });
 
   return {
     success: true,
-    bookId: book.id,
-    slug: book.slug,
+    bookId: persisted.id,
+    slug: persisted.slug,
     previewUrl,
     pageCount,
     mapsiteId,
