@@ -386,13 +386,6 @@ export default function EbookGenerateClient({
     () => false,
   );
 
-  /** Keep template UI off until after hydration so SSR markup matches the client. */
-  const showTemplateUi = useSyncExternalStore(
-    () => () => {},
-    () => templateMode,
-    () => false,
-  );
-
   async function applyCoverPicks(frontFile: File, backFile: File) {
     const frontPreview = URL.createObjectURL(frontFile);
     const backPreview = URL.createObjectURL(backFile);
