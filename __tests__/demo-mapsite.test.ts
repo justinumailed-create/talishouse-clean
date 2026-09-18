@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createDemoMapSiteCode,
   isDemoMapSiteCode,
+  isDemonstrationListing,
   isDemoMapSitePath,
   isProtectedPlatformDemoMapSite,
   shouldKeepPlatformDemoMapSite,
@@ -27,6 +28,21 @@ import {
 import { canLoadMapSiteEbookContext } from "../lib/talisbooks/mapsite-ebook-service";
 
 describe("demo mapsite codes", () => {
+  it("does not treat issued FAST Codes like LRG1 as demonstration listings", () => {
+    expect(isDemonstrationListing({ isDemonstration: true, fastCode: "lrg1" })).toBe(
+      false,
+    );
+    expect(isDemonstrationListing({ isDemonstration: true, fastCode: "RM22" })).toBe(
+      false,
+    );
+    expect(
+      isDemonstrationListing({ isDemonstration: true, fastCode: "demo-ab12cd34" }),
+    ).toBe(true);
+    expect(isDemonstrationListing({ isDemonstration: true, fastCode: null })).toBe(
+      true,
+    );
+  });
+
   it("accepts demo- prefixed public codes and rejects issued FAST Codes", () => {
     expect(isDemoMapSiteCode("demo-ab12cd34")).toBe(true);
     expect(isDemoMapSiteCode("DEMO-ab12cd34")).toBe(true);

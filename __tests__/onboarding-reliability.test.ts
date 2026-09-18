@@ -33,6 +33,7 @@ describe("onboarding reliability — browser-state independence", () => {
   it("isIssuedFastCode accepts only initials+sequence shapes", () => {
     expect(isIssuedFastCode("ar01")).toBe(true);
     expect(isIssuedFastCode("JMD03")).toBe(true);
+    expect(isIssuedFastCode("lrg1")).toBe(true);
     expect(isIssuedFastCode("msabc123")).toBe(false);
     expect(isIssuedFastCode("demo")).toBe(false);
     expect(isIssuedFastCode("")).toBe(false);

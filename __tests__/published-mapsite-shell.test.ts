@@ -78,4 +78,12 @@ describe("published Mapsite™ shell", () => {
     );
     expect(application).toContain("scrollZoom={false}");
   });
+
+  it("crops the pin popup listing photo the same way as other FAST Codes", () => {
+    const popup = repoSource(
+      "components/talispros/mapsite/MapSitePropertyPopup.tsx",
+    );
+    expect(popup).toContain("MAPSITE_LISTING_IMAGE_CLASS");
+    expect(popup).not.toContain("object-contain object-center");
+  });
 });

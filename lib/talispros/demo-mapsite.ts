@@ -33,6 +33,15 @@ export function isDemoMapSiteCode(
   return !isIssuedFastCode(code);
 }
 
+/** Issued FAST Codes (LRG1, RM22, …) are live listings, even if the seed row was marked demonstration. */
+export function isDemonstrationListing(options: {
+  isDemonstration?: boolean | null;
+  fastCode?: string | null;
+}): boolean {
+  if (isIssuedFastCode(options.fastCode)) return false;
+  return Boolean(options.isDemonstration) || isDemoMapSiteCode(options.fastCode);
+}
+
 /**
  * Demonstration Mapsites™ keep TEB/TTV viewing, but Create New / insert-pages
  * must stay greyed and non-interactive so visitors cannot add ebook pages.

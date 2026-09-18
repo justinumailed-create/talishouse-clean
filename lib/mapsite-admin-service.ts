@@ -284,7 +284,7 @@ export async function updateMapSiteAdmin(
     return pinResult;
   }
 
-  await persistBuildRequestPin(supabase, mapsite.requestId, input);
+  await persistBuildRequestPin(supabase, mapsite, input);
 
   const latitude = parseCoordinate(input.latitude);
   const longitude = parseCoordinate(input.longitude);
@@ -326,10 +326,33 @@ export async function updateMapSiteAdmin(
 
 async function persistBuildRequestPin(
   supabase: ReturnType<typeof getSupabaseAdmin>,
-  requestId: string | null | undefined,
+  mapsite: { id: string; fastCode: string; requestId?: string | null },
   input: MapSiteAdminInput,
 ): Promise<void> {
-  const id = requestId?.trim();
+  let id = mapsite.requestId?.trim() || "";
+
+  if (!id) {
+    const { data: byMap } = await supabase
+      .from("build_requests")
+      .select("id")
+      .eq("linked_mapsite_id", mapsite.id)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    id = byMap?.id?.trim() || "";
+  }
+
+  if (!id && mapsite.fastCode.trim()) {
+    const { data: byCode } = await supabase
+      .from("build_requests")
+      .select("id")
+      .ilike("requested_fast_code", mapsite.fastCode.trim())
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    id = byCode?.id?.trim() || "";
+  }
+
   if (!id) return;
 
   await supabase

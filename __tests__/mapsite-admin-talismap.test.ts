@@ -21,4 +21,13 @@ describe("Mapsite™ admin Talismaps™ create", () => {
     );
     expect(editor).not.toContain("OpenGraph image");
   });
+
+  it("writes PIN colour onto existing Talismaps™ pins, not only new ones", () => {
+    const service = readFileSync(
+      resolve("lib/talismaps/map-service.ts"),
+      "utf8",
+    );
+    expect(service).toContain("metadata: input.pinStyle ?? {}");
+    expect(service).toContain("getMapSiteTalisMapPinStyle");
+  });
 });

@@ -1,4 +1,6 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import type { MapSiteSavedPinStyle } from "@/lib/mapsite-pin-style";
+import { getMapSiteTalisMapPinStyle } from "@/lib/talismaps/map-service";
 import { HOME_PIN_DEFAULT_MAP_ZOOM, clampMapZoom } from "@/lib/home-pin-coordinates";
 import {
   DEMO_MAPSITE_FAST_CODE,
@@ -380,12 +382,47 @@ export function applyBuildRequestLocationToMapSite(
     agency_name: submission.company || mapsite.agency_name,
     profile_image_url: submission.agentImage || mapsite.profile_image_url,
     agent_name: submission.agentName || mapsite.agent_name,
-    pin_icon: submission.pinIcon,
-    pin_color: submission.pinColor,
-    pin_border: submission.pinBorder ?? null,
-    pin_white_center: submission.pinWhiteCenter,
-    pin_animated: Boolean(submission.pinAnimated),
-    pin_category_badge: submission.pinCategoryBadge ?? null,
+    pin_icon: submission.pinIcon ?? mapsite.pin_icon,
+    pin_color: submission.pinColor ?? mapsite.pin_color,
+    pin_border: submission.pinBorder ?? mapsite.pin_border ?? null,
+    pin_white_center: submission.pinWhiteCenter ?? mapsite.pin_white_center,
+    pin_animated:
+      submission.pinAnimated ?? Boolean(mapsite.pin_animated),
+    pin_category_badge:
+      submission.pinCategoryBadge ?? mapsite.pin_category_badge ?? null,
+  };
+}
+
+export function applySavedPinStyleToMapSite(
+  mapsite: MapSitePlatformRecord,
+  style: MapSiteSavedPinStyle | null | undefined,
+): MapSitePlatformRecord {
+  if (!style) return mapsite;
+  const pinColor = style.pinColor?.trim() || null;
+  const pinIcon = style.pinIcon?.trim() || null;
+  const pinBorder = style.pinBorder?.trim() || null;
+  const pinCategoryBadge = style.pinCategoryBadge?.trim() || null;
+  if (
+    !pinColor &&
+    !pinIcon &&
+    !pinBorder &&
+    style.pinWhiteCenter == null &&
+    style.pinAnimated == null &&
+    !pinCategoryBadge
+  ) {
+    return mapsite;
+  }
+  return {
+    ...mapsite,
+    pin_icon: pinIcon || mapsite.pin_icon,
+    pin_color: pinColor || mapsite.pin_color,
+    pin_border: pinBorder || mapsite.pin_border,
+    pin_white_center: style.pinWhiteCenter ?? mapsite.pin_white_center,
+    pin_animated:
+      style.pinAnimated == null
+        ? Boolean(mapsite.pin_animated)
+        : Boolean(style.pinAnimated),
+    pin_category_badge: pinCategoryBadge || mapsite.pin_category_badge,
   };
 }
 
@@ -465,8 +502,17 @@ export async function mergeMapSiteWithSubmittedLocation(
     fastCode: options.fastCode || mapsite.fast_code,
   });
 
-  if (!location) return mapsite;
-  return applyBuildRequestLocationToMapSite(mapsite, location);
+  let merged = location
+    ? applyBuildRequestLocationToMapSite(mapsite, location)
+    : mapsite;
+
+  if (!isSupabaseAdminConfigured()) return merged;
+
+  const talisStyle = await getMapSiteTalisMapPinStyle({
+    mapsiteId: mapsite.id,
+    fastCode: options.fastCode || mapsite.fast_code,
+  });
+  return applySavedPinStyleToMapSite(merged, talisStyle);
 }
 
 const SELECT_COLUMNS =

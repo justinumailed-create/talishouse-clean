@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import type { Database } from "@/lib/database.types";
+import type { MapSiteSavedPinStyle } from "@/lib/mapsite-pin-style";
 import type {
   TalisMapsAccountType,
   TalisMapsActivityItem,
@@ -248,6 +249,7 @@ export async function ensureMapSiteTalisMap(
       status: "published",
       visibility: "public",
       updated_at: now,
+      metadata: input.pinStyle ?? {},
     };
 
     if (existingPin?.id) {
@@ -258,12 +260,97 @@ export async function ensureMapSiteTalisMap(
         pin_type: "property",
         ...pinPatch,
         sort_order: 0,
-        metadata: input.pinStyle ?? {},
       });
     }
   }
 
   return { ok: true, mapId, slug };
+}
+
+function asPinStyleRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
+}
+
+function readPinStyleString(
+  style: Record<string, unknown>,
+  ...keys: string[]
+): string | null {
+  for (const key of keys) {
+    const raw = style[key];
+    if (typeof raw === "string" && raw.trim()) return raw.trim();
+  }
+  return null;
+}
+
+function readPinStyleBoolean(
+  style: Record<string, unknown>,
+  ...keys: string[]
+): boolean | null {
+  for (const key of keys) {
+    if (typeof style[key] === "boolean") return style[key] as boolean;
+  }
+  return null;
+}
+
+/** Latest admin-saved Home PIN style from the Mapsite™ Talismaps™ row. */
+export async function getMapSiteTalisMapPinStyle(options: {
+  mapsiteId?: string | null;
+  fastCode?: string | null;
+}): Promise<MapSiteSavedPinStyle | null> {
+  const mapsiteId = options.mapsiteId?.trim() || "";
+  const fastCode = options.fastCode?.trim().toLowerCase() || "";
+  if (!mapsiteId && !fastCode) return null;
+
+  const supabase = getSupabaseAdmin();
+  let map: { id: string; settings: unknown } | null = null;
+
+  if (mapsiteId) {
+    const { data } = await supabase
+      .from("talismaps_maps")
+      .select("id, settings")
+      .eq("mapsite_id", mapsiteId)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    map = data;
+  }
+
+  if (!map && fastCode) {
+    const { data } = await supabase
+      .from("talismaps_maps")
+      .select("id, settings")
+      .eq("slug", mapsiteTalisMapSlug(fastCode))
+      .maybeSingle();
+    map = data;
+  }
+
+  if (!map) return null;
+
+  const settings = asPinStyleRecord(map.settings);
+  const fromSettings = asPinStyleRecord(settings?.pinStyle);
+
+  const { data: pin } = await supabase
+    .from("talismaps_map_pins")
+    .select("metadata")
+    .eq("map_id", map.id)
+    .eq("pin_type", "property")
+    .order("sort_order", { ascending: true })
+    .limit(1)
+    .maybeSingle();
+
+  const fromPin = asPinStyleRecord(pin?.metadata);
+  const style = { ...(fromSettings ?? {}), ...(fromPin ?? {}) };
+  if (Object.keys(style).length === 0) return null;
+
+  return {
+    pinIcon: readPinStyleString(style, "pinIcon"),
+    pinColor: readPinStyleString(style, "pinColor"),
+    pinBorder: readPinStyleString(style, "pinBorder"),
+    pinWhiteCenter: readPinStyleBoolean(style, "pinWhiteCenter"),
+    pinAnimated: readPinStyleBoolean(style, "pinAnimated"),
+    pinCategoryBadge: readPinStyleString(style, "pinCategoryBadge"),
+  };
 }
 
 export async function listTalisMaps(): Promise<TalisMapsMap[]> {

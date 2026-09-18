@@ -10,6 +10,7 @@ import {
 import {
   MAPSITE_PIN_DEFAULT_BORDER,
   MAPSITE_PIN_DEFAULT_ICON,
+  resolveMapSitePinStyle,
 } from "@/lib/mapsite-pin-style";
 import type { MapEnginePin } from "@/lib/talismaps/map-engine";
 import type { RegistrationMarket } from "@/lib/registration-market";
@@ -37,7 +38,7 @@ import {
   getMapSiteOnboardingPhase,
 } from "@/lib/talispros/mapsite-onboarding-phase";
 import { ROUTES } from "@/lib/routes";
-import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
+import { isDemonstrationListing, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
 import MapSiteMarketPartnerCard from "./MapSiteMarketPartnerCard";
 import MapSitePaymentCard from "./MapSitePaymentCard";
@@ -51,14 +52,6 @@ import {
 
 /** Auto-reveal activation checkout above the marketing sidebar after Mapsite™ load. */
 const ACTIVATION_REVEAL_DELAY_MS = 10_000;
-
-const PIN_COLORS: Record<string, string> = {
-  UNCLAIMED: "#1A73E8",
-  PENDING: "#1A73E8",
-  ACTIVE: "#1A73E8",
-  ARCHIVED: "#9CA3AF",
-};
-
 /** Minimum popup body height so hero + title + action row stay visible. */
 const MAPSITE_POPUP_MIN_HEIGHT_PX = 384;
 /** Ignore residual camera events right after programmatic pin focus. */
@@ -131,30 +124,35 @@ export default function MapSiteApplication({
     accountType,
   });
   const phase = pinPhaseLabel(mapsite.status);
-  const pinColor = PIN_COLORS[phase] ?? PIN_COLORS.UNCLAIMED;
-
-  const pins: MapEnginePin[] = useMemo(
-    () => [
+  const pins: MapEnginePin[] = useMemo(() => {
+    const savedPin = resolveMapSitePinStyle({
+      pinIcon: mapsite.pin_icon,
+      pinColor: mapsite.pin_color,
+      pinBorder: mapsite.pin_border,
+      pinWhiteCenter: mapsite.pin_white_center,
+      pinAnimated: mapsite.pin_animated,
+      pinCategoryBadge: mapsite.pin_category_badge,
+    });
+    return [
       {
         id: mapsite.id,
         latitude: mapsite.lat,
         longitude: mapsite.lng,
-        color: mapsite.pin_color || pinColor,
+        color: savedPin.pinColor,
         label: pinLabel,
         featured: true,
         metadata: {
           status: mapsite.status,
           phase,
-          icon: mapsite.pin_icon || MAPSITE_PIN_DEFAULT_ICON,
-          border: mapsite.pin_border || MAPSITE_PIN_DEFAULT_BORDER,
-          whiteCenter: mapsite.pin_white_center ?? false,
-          animated: Boolean(mapsite.pin_animated),
-          categoryBadge: mapsite.pin_category_badge || null,
+          icon: savedPin.pinIcon || MAPSITE_PIN_DEFAULT_ICON,
+          border: savedPin.pinBorder || MAPSITE_PIN_DEFAULT_BORDER,
+          whiteCenter: savedPin.whiteCenter,
+          animated: savedPin.pinAnimated,
+          categoryBadge: savedPin.pinCategoryBadge,
         },
       },
-    ],
-    [mapsite, pinColor, phase, pinLabel]
-  );
+    ];
+  }, [mapsite, phase, pinLabel]);
 
   const viewport = useMemo(
     () => ({
@@ -430,7 +428,10 @@ function MapSiteChrome({
   ]);
 
   const claimed = !isClaimable(mapsite.status);
-  const isDemoListing = mapsite.is_demonstration || isDemoMapSiteCode(mapsite.fast_code);
+  const isDemoListing = isDemonstrationListing({
+    isDemonstration: mapsite.is_demonstration,
+    fastCode: mapsite.fast_code,
+  });
   // Checkout stays until a completed payment note exists (not merely ACTIVE status).
   const paid = isDemoListing || activationPaid;
   const onboardingPhase = getMapSiteOnboardingPhase({

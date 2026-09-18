@@ -218,11 +218,7 @@ export default function MapSitePropertyPopup({
                   src={popupHeroImage}
                   alt={popupTitle}
                   fill
-                  className={
-                    showResourceButtons
-                      ? "object-contain object-center"
-                      : MAPSITE_LISTING_IMAGE_CLASS
-                  }
+                  className={MAPSITE_LISTING_IMAGE_CLASS}
                   sizes="352px"
                   unoptimized
                   priority

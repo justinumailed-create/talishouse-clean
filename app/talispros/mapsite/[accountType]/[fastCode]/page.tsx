@@ -167,7 +167,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
   const talisBookHref =
     (primarySlug ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}` : null) ||
     mapsite.teb_url?.trim() ||
-    (mapsite.is_demonstration ? DEMO_PINNED_EBOOK_HREF : null);
+    (treatAsDemoUnlock ? DEMO_PINNED_EBOOK_HREF : null);
   const hasTalisBook = Boolean(talisBookHref || ebookContext?.books?.length);
   const listingImageUrls = await resolveEbookListingImageUrls({
     listingImageUrls: ebookContext?.primaryEbook?.listingImageUrls,
