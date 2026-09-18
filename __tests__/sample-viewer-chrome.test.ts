@@ -18,20 +18,31 @@ describe("sample Talisbooks™ viewer chrome", () => {
     "components/talisbooks/library/TalisBooksStandingBook.tsx",
   );
 
-  it("does not show magazine title chrome or Mapsite™ / sample CTAs above the book", () => {
-    expect(shell).not.toContain("talisbooks-viewer__header");
-    expect(shell).not.toContain("Talisbooks™ Magazine");
-    expect(shell).not.toContain("Back to Mapsite™");
-    expect(shell).not.toContain('"Build Demo"');
-    expect(shell).not.toContain("Global Admin");
-    expect(shell).not.toContain("TALISBOOKS_ROUTES.DASHBOARD");
-    expect(shell).not.toContain(">Dashboard<");
+  it("labels the sample mapsite CTA without Build", () => {
+    expect(shell).toContain('"Demo Mapsite™"');
+    expect(shell).toContain("DEMO_MAPSITE_BUILD_PATH");
+    expect(shell).not.toMatch(/Build Demo/i);
   });
 
-  it("hides playback and Live Edit so the stage can use the full 16:9 width", () => {
+  it("places Home after the sample mapsite CTA", () => {
+    expect(shell).toContain("ROUTES.HOME");
+    expect(shell).toContain("Home");
+  });
+
+  it("places Global Admin beside the sample mapsite CTA", () => {
+    expect(shell).toContain("Global Admin");
+    expect(shell).toContain("ROUTES.ADMIN_DASHBOARD");
+  });
+
+  it("sizes the sample toolbar as a matched button set", () => {
+    expect(shell).toContain("talisbooks-viewer__header-actions--matched");
+  });
+
+  it("keeps BrandRail and PlaybackRail beside the restored header", () => {
     expect(shell).toContain("const showViewerSidebar = false");
     expect(shell).toContain("TalisBooksViewerBrandRail");
     expect(shell).toContain("TalisBooksViewerPlaybackRail");
+    expect(shell).toContain("talisbooks-viewer__header");
   });
 
   it("shows Live Edit only after payment, never on demonstration books", () => {
@@ -47,7 +58,9 @@ describe("sample Talisbooks™ viewer chrome", () => {
     expect(viewerPage).toContain(
       "const canLiveEdit = !isDemoBook && paymentReceived && canEditTools;",
     );
-    expect(viewerPage).not.toContain("isAdmin || (!isDemoBook && paymentReceived");
+    expect(viewerPage).not.toContain(
+      "const canLiveEdit = isAdmin || (!isDemoBook && paymentReceived",
+    );
   });
 
   it("opens ebook icons in the same tab", () => {

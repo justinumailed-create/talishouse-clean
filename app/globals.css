@@ -1136,7 +1136,8 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-viewer {
   --viewer-inset: 0.2rem;
-  --viewer-book-height: calc(100dvh - (2 * var(--viewer-inset)));
+  --viewer-header-height: 3.85rem;
+  --viewer-book-height: calc(100dvh - (2 * var(--viewer-inset)) - var(--viewer-header-height));
   position: relative;
   box-sizing: border-box;
   display: flex;
@@ -1157,8 +1158,12 @@ body.mapsite-gallery-open [data-paypal-button] {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem 1rem;
-  max-width: 96rem;
-  margin: 0 auto 0.55rem;
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto 0.35rem;
 }
 
 .talisbooks-viewer__eyebrow {
@@ -1252,7 +1257,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-viewer__rail {
   position: absolute;
-  top: 1rem;
+  top: calc(var(--viewer-inset) + var(--viewer-header-height) + 0.25rem);
   z-index: 8;
   display: flex;
   flex-direction: column;
@@ -4366,6 +4371,7 @@ body.mapsite-gallery-open [data-paypal-button] {
  */
 @media (max-width: 1024px) and (orientation: landscape) and (max-height: 560px) {
   .talisbooks-viewer {
+    --viewer-header-height: 2.4rem;
     min-height: 100dvh;
     padding: 0.2rem 0.35rem 0.25rem;
   }
