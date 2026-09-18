@@ -73,7 +73,6 @@ export function isStockDemoListingPath(path: string | null | undefined): boolean
   if (!path?.trim()) return true;
   const trimmed = path.trim();
   if (trimmed.includes("/images/glasshouse/")) return true;
-  if (trimmed.includes("/images/mapsites/lrg1-gallery/")) return true;
   return SUPERSEDED_DEMO_LISTING_IMAGES.has(trimmed);
 }
 
@@ -127,8 +126,9 @@ export function listingImageUrlsFromEbookPages(
 }
 
 /**
- * True when demo media is still the old coastal scenic set, Glasshouse™
- * stock, or empty. Claimed uploads and custom covers are left alone.
+ * True when demo media is still Glasshouse™ stock, superseded Talishouse
+ * recreational/residential stock, or empty. Claimed uploads, custom covers,
+ * and LRG1 gallery frames are left alone.
  */
 export function shouldReplaceDemoListingMedia(
   coverImage: string | null | undefined,

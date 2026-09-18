@@ -199,6 +199,18 @@ describe("Mapsite™ OG image selection", () => {
     ).toBe(MAPSITE_OG_BRAND_MARK);
   });
 
+  it("allows LRG1 gallery frames as real listing images", () => {
+    expect(isUsableMapSiteOgImage("/images/mapsites/lrg1-gallery/02.png")).toBe(
+      true,
+    );
+    expect(isUsableMapSiteOgImage("/images/glasshouse/hero.png")).toBe(false);
+    expect(
+      selectMapSiteOgImageUrl({
+        fallbackImageUrls: ["/images/mapsites/lrg1-gallery/02.png"],
+      }),
+    ).toBe("/images/mapsites/lrg1-gallery/02.png");
+  });
+
   it("prefers the linked ebook parting shot over a mapsite pin photo", () => {
     expect(
       selectMapSiteOgImageUrl({
