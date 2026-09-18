@@ -30,13 +30,18 @@ describe("Mapsite™ listing media", () => {
     expect(getMapSiteListingPhotoCount(demo)).toBe(4);
   });
 
-  it("replaces legacy scenic demo media", () => {
+  it("keeps LRG1 gallery media and prefers the second frame as hero", () => {
     expect(
       shouldReplaceDemoListingMedia("/images/mapsites/lrg1-gallery/09.png", [
         "/images/mapsites/lrg1-gallery/09.png",
         "/images/mapsites/lrg1-gallery/02.png",
       ])
-    ).toBe(true);
+    ).toBe(false);
+    expect(
+      shouldReplaceDemoListingMedia(null, [
+        "/images/mapsites/lrg1-gallery/09.png",
+      ])
+    ).toBe(false);
 
     const hero = getMapSiteListingHeroImage({
       is_demonstration: true,
@@ -46,7 +51,13 @@ describe("Mapsite™ listing media", () => {
         "/images/mapsites/lrg1-gallery/02.png",
       ],
     });
-    expect(hero).toBe(MAPSITE_DEMO_LISTING_IMAGE);
+    expect(hero).toBe("/images/mapsites/lrg1-gallery/02.png");
+    expect(
+      listingHeroImageUrl([
+        "/images/mapsites/lrg1-gallery/09.png",
+        "/images/mapsites/lrg1-gallery/02.png",
+      ]),
+    ).toBe("/images/mapsites/lrg1-gallery/02.png");
   });
 
   it("replaces superseded Talishouse stock media on claimed listings", () => {
