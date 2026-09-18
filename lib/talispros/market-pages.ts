@@ -12,12 +12,37 @@ export interface TalisprosMarketPageContent {
   metadataTitle: string;
 }
 
+export const MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE =
+  "/images/mapsites/lrg1-rahul.jpeg";
+
+export function mapsiteMarketPartnerImageUrl(
+  agentImageUrl?: string | null,
+  fallback: string = MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE,
+): string {
+  return agentImageUrl?.trim() || fallback;
+}
+
+export const MAPSITE_MARKET_PARTNER_FALLBACK_NAME = "Rahul C.";
+
+export function mapsiteMarketPartnerLabel(
+  agentImageUrl?: string | null,
+  agentName?: string | null,
+  fallback: string = `Market Partner: ${MAPSITE_MARKET_PARTNER_FALLBACK_NAME}`,
+): string {
+  const image = agentImageUrl?.trim() || "";
+  const name = agentName?.trim() || "";
+  if (image && name) {
+    return `Market Partner: ${name}`;
+  }
+  return fallback;
+}
+
 export const REAL_ESTATE_PROFESSIONALS_MARKET: TalisprosMarketPageContent = {
   slug: "real-estate-professionals",
   title: "Real Estate Professionals",
   registrationMarket: "listings",
   marketPartner: "Market Partner: Rahul C.",
-  partnerImage: "/images/mapsites/lrg1-rahul.jpeg",
+  partnerImage: MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE,
   partnerImageAlt: "Market partner portrait",
   whyHeading: "Why Real Estate Professionals might use Mapsites™.",
   whyBody:
@@ -30,7 +55,7 @@ export const TALISHHOUSE_BUILDERS_MARKET: TalisprosMarketPageContent = {
   title: "Talishouse™ Builders",
   registrationMarket: "homes",
   marketPartner: "Market Partner: Rahul C.",
-  partnerImage: "/images/mapsites/lrg1-rahul.jpeg",
+  partnerImage: MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE,
   partnerImageAlt: "Market partner portrait",
   whyHeading: "Why Talishouse™ Builders might use Mapsites™.",
   whyBody:
@@ -43,7 +68,7 @@ export const FOR_SALE_BY_OWNERS_MARKET: TalisprosMarketPageContent = {
   title: "For Sale By Owners",
   registrationMarket: "fsbos",
   marketPartner: "Market Partner: Rahul C.",
-  partnerImage: "/images/mapsites/lrg1-rahul.jpeg",
+  partnerImage: MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE,
   partnerImageAlt: "Market partner portrait",
   whyHeading: "Why For-Sale-By-Owners might use Mapsites™.",
   whyBody:
@@ -56,7 +81,7 @@ export const CLAIM_A_MARKET_PAGE: TalisprosMarketPageContent = {
   title: "Build My Mapsite™",
   registrationMarket: "listings",
   marketPartner: "Market Partner: Rahul C.",
-  partnerImage: "/images/mapsites/lrg1-rahul.jpeg",
+  partnerImage: MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE,
   partnerImageAlt: "Market partner portrait",
   whyHeading: "Why build your Mapsite™.",
   whyBody:

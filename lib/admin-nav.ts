@@ -5,12 +5,12 @@ export type AdminNavItem = {
   label: string;
 };
 
-/** Site-ops tools: GlobalContent titles, build requests, Mapsites, Talisbooks / shelves. */
+/** Site-ops tools: Dashboard, build requests, Mapsites, SEO, bookshelves. */
 export const ADMIN_SITE_OPS_NAV: readonly AdminNavItem[] = [
   { href: "/admin/dashboard", label: "Dashboard" },
   { href: "/admin/build-requests", label: "Build requests" },
   { href: "/admin/mapsites", label: "Mapsites" },
-  { href: "/admin/talisbooks", label: "Talisbooks™" },
+  { href: "/admin/seo", label: "SEO" },
   { href: "/admin/talisbooks/bookshelves", label: "Bookshelves" },
 ];
 
@@ -22,7 +22,6 @@ export const ADMIN_SUPERADMIN_NAV: readonly AdminNavItem[] = [
 const ADMIN_FULL_EXTRA_NAV: readonly AdminNavItem[] = [
   { href: "/admin/registrations", label: "Registrations" },
   { href: "/admin/marketing", label: "Marketing" },
-  { href: "/admin/talismaps", label: "Talismaps™" },
 ];
 
 export function getAdminNavItems(access: AdminAccessLevel | null | undefined): AdminNavItem[] {
@@ -38,7 +37,21 @@ export function getAdminNavItems(access: AdminAccessLevel | null | undefined): A
 export function isAdminNavItemActive(href: string, pathname: string): boolean {
   if (pathname === href) return true;
 
+  if (href === "/admin/dashboard") {
+    if (pathname.startsWith("/admin/talismaps")) return true;
+    if (
+      pathname.startsWith("/admin/talisbooks") &&
+      !pathname.startsWith("/admin/talisbooks/bookshelves")
+    ) {
+      return true;
+    }
+  }
+
   if (href === "/admin/mapsites" && pathname.startsWith("/admin/mapsites/")) {
+    return true;
+  }
+
+  if (href === "/admin/seo" && pathname.startsWith("/admin/seo")) {
     return true;
   }
 

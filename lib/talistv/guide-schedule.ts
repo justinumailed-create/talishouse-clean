@@ -120,5 +120,7 @@ export const TALISTV_GUIDE_CHANNEL = {
   tagline: "Video shelf for the Talispros™ ecosystem",
 } as const;
 
+export const TALISTV_LAUNCH_HEADLINE = "EARLY BIRD SPECIAL!";
+
 export const TALISTV_LAUNCH_NOTICE =
-  "First 20 registrants will be upgraded free of charge when launched..!";
+  "The first 20 Talispros™ will receive our TTV ‘Text to Video’ functionality FREE OF CHARGE when we launch it in late 2026 or early 2027.";

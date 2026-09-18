@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   TALISBOOKS_LIBRARY_BOOK_PRICE_USD,
@@ -8,11 +10,15 @@ import {
   createDemoRootBookshelf,
   PUBLIC_LIBRARY_PINNED_BOOKS,
   applyPublicLibraryPins,
+  canAdminDeleteLibraryBook,
   filterBooksForAdminLibrary,
   filterBooksForFastCodeShelf,
   filterCreatedFastLinkedBooks,
   filterLibraryBooks,
   filterMapSitesForAdminLibrary,
+  generalShelfBookScale,
+  generalShelfColumns,
+  packShelfRowsNewestAtRight,
   isCreatedFastLinkedBook,
   isDemonstrationCatalogBook,
   isDemonstrationFastCode,
@@ -92,6 +98,28 @@ describe("Talisbooks™ split bookshelf layout", () => {
     expect(page.books.length).toBeLessThanOrEqual(20);
     expect(page.books.length).toBe(Math.min(20, general.length));
   });
+
+  it("shrinks right-shelf books 25% for every 5 until 20", () => {
+    expect(generalShelfBookScale(1)).toBe(1);
+    expect(generalShelfBookScale(5)).toBe(1);
+    expect(generalShelfBookScale(6)).toBe(0.75);
+    expect(generalShelfBookScale(10)).toBe(0.75);
+    expect(generalShelfBookScale(11)).toBe(0.5);
+    expect(generalShelfBookScale(16)).toBe(0.25);
+    expect(generalShelfBookScale(20)).toBe(0.25);
+    expect(generalShelfColumns(1)).toBe(5);
+    expect(generalShelfColumns(5)).toBe(5);
+    expect(generalShelfColumns(12)).toBe(5);
+    expect(generalShelfColumns(20)).toBe(4);
+  });
+
+  it("packs each right-shelf row from the right, newest last in the row", () => {
+    expect(packShelfRowsNewestAtRight(["n1", "n2", "n3", "n4", "n5"], 4)).toEqual([
+      ["n4", "n3", "n2", "n1"],
+      ["n5"],
+    ]);
+    expect(packShelfRowsNewestAtRight(["newest"], 1)).toEqual([["newest"]]);
+  });
 });
 
 describe("Talisbooks™ library search / sort / filter", () => {
@@ -115,6 +143,18 @@ describe("Talisbooks™ library search / sort / filter", () => {
     for (let index = 1; index < sorted.length; index += 1) {
       expect(sorted[index - 1]!.views).toBeGreaterThanOrEqual(sorted[index]!.views);
     }
+  });
+
+  it("sorts by published date descending", () => {
+    const sorted = sortLibraryBooks(
+      [
+        { ...books[0]!, id: "a", publishedAt: "2026-01-01T00:00:00.000Z" },
+        { ...books[0]!, id: "b", publishedAt: "2026-09-18T00:00:00.000Z" },
+        { ...books[0]!, id: "c", publishedAt: null },
+      ],
+      "published_desc",
+    );
+    expect(sorted.map((book) => book.id)).toEqual(["b", "a", "c"]);
   });
 
   it("sorts by title ascending", () => {
@@ -245,6 +285,49 @@ describe("Talisbooks™ admin library catalog policy", () => {
       "real-rm22",
     ]);
   });
+
+  it("lets Mapsite-linked admins delete only their FAST Code books", () => {
+    const rm22Scope = talisbooksScopeFromAdminAccount({ fastCode: "RM22" });
+    expect(canAdminDeleteLibraryBook(rm22Book, rm22Scope)).toBe(true);
+    expect(canAdminDeleteLibraryBook(otherRealBook, rm22Scope)).toBe(false);
+    expect(canAdminDeleteLibraryBook(demoMapsiteBook, rm22Scope)).toBe(false);
+  });
+
+  it("lets platform admins delete real books but not demonstration catalog", () => {
+    const platformScope = talisbooksScopeFromAdminAccount({ fastCode: "ARUN" });
+    expect(canAdminDeleteLibraryBook(rm22Book, platformScope)).toBe(true);
+    expect(canAdminDeleteLibraryBook(otherRealBook, platformScope)).toBe(true);
+    expect(canAdminDeleteLibraryBook(pinnedSample, platformScope)).toBe(false);
+    expect(canAdminDeleteLibraryBook(demoMapsiteBook, platformScope)).toBe(false);
+  });
+});
+
+describe("Talisbooks™ library admin delete wiring", () => {
+  it("shows delete only when the library page passes canDelete", () => {
+    const page = readFileSync(resolve("app/talisbooks/library/page.tsx"), "utf8");
+    const shell = readFileSync(
+      resolve("components/talisbooks/library/TalisBooksLibraryShell.tsx"),
+      "utf8",
+    );
+    const standing = readFileSync(
+      resolve("components/talisbooks/library/TalisBooksStandingBook.tsx"),
+      "utf8",
+    );
+    const actions = readFileSync(resolve("app/talisbooks/library/actions.ts"), "utf8");
+
+    expect(page).toContain("canDelete={Boolean(account) || talisprosAdmin}");
+    expect(page).toContain("getAdminSessionAccount");
+    expect(page).toContain("isTalisprosAdminAuthenticated");
+    expect(page).toContain("backHref={mapsiteBackFromScheduleHref(params.from)}");
+    expect(shell).toContain("deleteLibraryEbookAction");
+    expect(shell).toContain("canDelete");
+    expect(shell).toContain("Back to Mapsite™");
+    expect(shell).toContain("mapsiteBackFromScheduleHref");
+    expect(standing).toContain("talisbooks-standing-book__delete");
+    expect(standing).toContain("Delete ${book.title}");
+    expect(actions).toContain("deleteLibraryEbookAction");
+    expect(actions).toContain('return { success: false, error: "Unauthorized." }');
+  });
 });
 
 describe("Talisbooks™ public / root created FAST catalog", () => {
@@ -345,6 +428,66 @@ describe("Talisbooks™ public / root created FAST catalog", () => {
       "as01-lookbook",
     ]);
     expect(general).toHaveLength(0);
+  });
+
+  it("puts created-catalog published books on the right shelf newest first", () => {
+    const older = {
+      ...as01,
+      id: "real-as01",
+      publishedAt: "2026-01-01T00:00:00.000Z",
+      coverGradient: "g",
+      coverImageUrl: null,
+      coverTemplateId: null,
+      clicks: 0,
+      pageCount: 8,
+      accountId: null,
+      accountType: "root" as const,
+      mapsiteId: null,
+      parentBookId: null,
+    };
+    const newest = {
+      ...as01,
+      id: "real-ay04",
+      slug: "ay04-lookbook",
+      title: "AY04 Talisbook™",
+      fastCode: "ay04",
+      publishedAt: "2026-09-18T00:00:00.000Z",
+      coverGradient: "g",
+      coverImageUrl: null,
+      coverTemplateId: null,
+      clicks: 0,
+      pageCount: 8,
+      accountId: null,
+      accountType: "root" as const,
+      mapsiteId: null,
+      parentBookId: null,
+    };
+    const books = applyPublicLibraryPins([
+      older,
+      newest,
+      {
+        ...rm22,
+        coverGradient: "g",
+        coverImageUrl: null,
+        coverTemplateId: null,
+        publishedAt: null,
+        clicks: 0,
+        pageCount: 8,
+        accountId: null,
+        accountType: "root" as const,
+        mapsiteId: null,
+        parentBookId: null,
+      },
+    ]);
+    const { featured, general } = partitionBookshelf(books, {
+      featuredCapacity: 5,
+      featuredMode: "highlights",
+    });
+    expect(featured.map((book) => book.id)).toEqual(["real-rm22"]);
+    expect(general.map((book) => book.id)).toEqual(["real-ay04", "real-as01"]);
+    expect(packShelfRowsNewestAtRight(general.map((book) => book.id), 5)).toEqual([
+      ["real-as01", "real-ay04"],
+    ]);
   });
 
   it("falls back to FAST code when a pin slug is missing", () => {

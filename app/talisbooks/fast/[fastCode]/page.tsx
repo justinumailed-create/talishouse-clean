@@ -3,6 +3,7 @@ import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLi
 import { getPublicTalisBooksBookshelf } from "@/lib/talisbooks/library";
 import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
 import { createMetadata } from "@/lib/seo";
+import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
 
 export const dynamic = "force-dynamic";
 
@@ -32,5 +33,10 @@ export default async function FastCodeBookshelfPage({
   const bookshelf = await getPublicTalisBooksBookshelf({
     fastCode: fastCode.trim() || null,
   });
-  return <TalisBooksLibraryShell bookshelf={bookshelf} />;
+  return (
+    <TalisBooksLibraryShell
+      bookshelf={bookshelf}
+      backHref={mapsiteBackFromScheduleHref(fastCode)}
+    />
+  );
 }

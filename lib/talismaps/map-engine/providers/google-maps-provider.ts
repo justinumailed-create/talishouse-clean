@@ -1,6 +1,6 @@
 import { importLibrary, setOptions } from "@googlemaps/js-api-loader";
 import { buildPinMarkerHtml, pinStyleCacheKey } from "../pin-marker-icon";
-import { allowMapGestures } from "../mount-flags";
+import { allowMapGestures, allowMapScrollZoom } from "../mount-flags";
 import type {
   MapBasemapView,
   MapCoordinates,
@@ -367,6 +367,7 @@ export class GoogleMapsProvider implements MapProvider {
     container.style.position = container.style.position || "relative";
 
     const allowGestures = allowMapGestures(options.interactive);
+    const allowScrollZoom = allowMapScrollZoom(options);
 
     const map = new google.maps.Map(container, {
       center: {
@@ -386,10 +387,14 @@ export class GoogleMapsProvider implements MapProvider {
       rotateControl: false,
       // Pan disabled when center is locked so the pin stays under the card pointer.
       draggable: allowGestures && !options.lockCenter,
-      gestureHandling: allowGestures ? "greedy" : "none",
+      gestureHandling: allowGestures
+        ? allowScrollZoom
+          ? "greedy"
+          : "cooperative"
+        : "none",
       clickableIcons: false,
       keyboardShortcuts: false,
-      scrollwheel: allowGestures,
+      scrollwheel: allowScrollZoom,
       disableDoubleClickZoom: !allowGestures,
     });
 

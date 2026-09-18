@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { X } from "lucide-react";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import type { TalisBooksLibraryBook } from "@/lib/talisbooks/library/types";
 
@@ -12,6 +13,9 @@ interface TalisBooksStandingBookProps {
   size?: TalisBooksShelfBookSize;
   /** Meta under covers is off inside physical niches; available for list views. */
   showMeta?: boolean;
+  canDelete?: boolean;
+  deleting?: boolean;
+  onDelete?: (book: TalisBooksLibraryBook) => void;
 }
 
 export default function TalisBooksStandingBook({
@@ -19,6 +23,9 @@ export default function TalisBooksStandingBook({
   index = 0,
   size = "featured",
   showMeta = false,
+  canDelete = false,
+  deleting = false,
+  onDelete,
 }: TalisBooksStandingBookProps) {
   const href = `${TALISBOOKS_ROUTES.VIEWER}/${book.slug}`;
 
@@ -27,12 +34,29 @@ export default function TalisBooksStandingBook({
       className={`talisbooks-standing-book talisbooks-standing-book--${size}`}
       style={{ animationDelay: `${Math.min(index, 24) * 18}ms` }}
     >
-      <Link
-        href={href}
-        className="talisbooks-standing-book__link"
-        aria-label={`Open ${book.title}${book.subtitle ? ` — ${book.subtitle}` : ""}`}
-        title={`${book.title} · ${book.publishStatus} · ${book.views} views`}
-      >
+      <div className="talisbooks-standing-book__frame">
+        {canDelete ? (
+          <button
+            type="button"
+            className="talisbooks-standing-book__delete"
+            aria-label={`Delete ${book.title}`}
+            title="Delete ebook"
+            disabled={deleting}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onDelete?.(book);
+            }}
+          >
+            <X aria-hidden="true" />
+          </button>
+        ) : null}
+        <Link
+          href={href}
+          className="talisbooks-standing-book__link"
+          aria-label={`Open ${book.title}${book.subtitle ? ` — ${book.subtitle}` : ""}`}
+          title={`${book.title} · ${book.publishStatus} · ${book.views} views`}
+        >
         <div className="talisbooks-standing-book__scene">
           <div
             className="talisbooks-standing-book__volume"
@@ -75,6 +99,7 @@ export default function TalisBooksStandingBook({
           </div>
         ) : null}
       </Link>
+      </div>
     </article>
   );
 }

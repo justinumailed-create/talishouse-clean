@@ -5,7 +5,7 @@
  * Coordinates are in the designed page space — never the browser viewport.
  *
  * Interior spread: 1920×1080 (two 960×1080 leaves).
- * Covers: 1080×1920 portrait assets (explicit front/back, not inferred).
+ * Cover rasters: 1080×1920. The viewer shows each cover as one 960×1080 leaf.
  *
  * Intrinsic Value is a split-copy spread, matching the Jarlberg investor page:
  *   LEFT leaf  = image slot only
@@ -18,6 +18,8 @@ export const RM22_DOCUMENT_COVER_WIDTH = 1080;
 export const RM22_DOCUMENT_COVER_HEIGHT = 1920;
 export const RM22_DOCUMENT_LEAF_WIDTH = 960;
 export const RM22_DOCUMENT_LEAF_HEIGHT = 1080;
+/** Open-book cover leaf — same height as interiors in the Talisbooks™ viewer. */
+export const RM22_VIEWER_COVER_ASPECT = `${RM22_DOCUMENT_LEAF_WIDTH} / ${RM22_DOCUMENT_LEAF_HEIGHT}`;
 
 export const RM22_TEMPLATE_ID = "rm22" as const;
 

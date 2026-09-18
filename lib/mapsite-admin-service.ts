@@ -7,9 +7,17 @@ import {
   normalizeGalleryItemsForSave,
 } from "./mapsite-gallery";
 import { requireMapSiteEditAccess } from "./mapsite-edit-auth";
+import { isAdminAuthenticated } from "./admin-auth";
 import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
 import { getMapSiteByFastCode } from "./mapsite-service";
+import { ensureMapSiteTalisMap } from "@/lib/talismaps/map-service";
+import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
+import { shouldKeepPlatformDemoMapSite } from "@/lib/talispros/demo-mapsite";
+import { adminMapSiteDeleteControl } from "@/lib/talispros/admin-mapsite-delete";
+import { paymentProtectsMapSiteFromDelete } from "@/lib/fast-code-admin-payment";
+import { unlinkAndDeleteMapSite, deleteBookshelfForFastCode } from "@/lib/talispros/fast-code-cascade-delete";
+import { revalidatePath } from "next/cache";
 import {
   isLogoUploadField,
   stripLogoBackground,
@@ -39,6 +47,13 @@ export interface MapSiteAdminInput {
   metaDescription?: string;
   ogImageUrl?: string;
   atlistMapUrl?: string;
+  pinIcon?: string | null;
+  pinColor?: string | null;
+  pinBorder?: string | null;
+  pinWhiteCenter?: boolean | null;
+  pinAnimated?: boolean | null;
+  pinCategoryBadge?: string | null;
+  pinLabel?: string | null;
   offeredSubscriptionTier?: string;
   interestFormEnabled?: boolean;
   mlsUrl?: string;
@@ -50,6 +65,14 @@ export interface MapSiteAdminInput {
 export interface MapSiteAdminActionResult {
   success: boolean;
   error?: string;
+  mapHref?: string;
+}
+
+export interface MapSiteSeoInput {
+  fastCode: string;
+  metaTitle: string;
+  metaDescription: string;
+  ogImageUrl: string;
 }
 
 const SERVICE_ROLE_ERROR =
@@ -261,7 +284,70 @@ export async function updateMapSiteAdmin(
     return pinResult;
   }
 
-  return { success: true };
+  await persistBuildRequestPin(supabase, mapsite.requestId, input);
+
+  const latitude = parseCoordinate(input.latitude);
+  const longitude = parseCoordinate(input.longitude);
+  const zoom = parseZoom(input.mapZoom);
+  const mapResult = await ensureMapSiteTalisMap({
+    mapsiteId: mapsite.id,
+    fastCode: mapsite.fastCode,
+    name: input.propertyTitle?.trim() || mapsite.propertyTitle || mapsite.fastCode,
+    description: input.propertyDescription?.trim() || mapsite.propertyDescription,
+    accountType: mapsite.accountType,
+    latitude,
+    longitude,
+    zoom,
+    pinStyle: {
+      pinIcon: input.pinIcon ?? null,
+      pinColor: input.pinColor ?? null,
+      pinBorder: input.pinBorder ?? null,
+      pinWhiteCenter: input.pinWhiteCenter ?? null,
+      pinAnimated: input.pinAnimated ?? null,
+      pinCategoryBadge: input.pinCategoryBadge ?? null,
+      pinLabel: input.pinLabel ?? null,
+    },
+  });
+  if (!mapResult.ok) {
+    return { success: false, error: mapResult.error };
+  }
+
+  const mapHref = buildClaimedMapSitePath({
+    fastCode: mapsite.fastCode,
+    accountType: mapsite.claimAudience || mapsite.accountType,
+  });
+  await supabase
+    .from("mapsites")
+    .update({ atlist_map_url: mapHref })
+    .eq("id", mapsite.id);
+
+  return { success: true, mapHref };
+}
+
+async function persistBuildRequestPin(
+  supabase: ReturnType<typeof getSupabaseAdmin>,
+  requestId: string | null | undefined,
+  input: MapSiteAdminInput,
+): Promise<void> {
+  const id = requestId?.trim();
+  if (!id) return;
+
+  await supabase
+    .from("build_requests")
+    .update({
+      street_address: input.propertyAddress?.trim() || null,
+      pin_writeup: input.propertyDescription?.trim() || null,
+      latitude: parseCoordinate(input.latitude),
+      longitude: parseCoordinate(input.longitude),
+      future_pin_icon: input.pinIcon?.trim() || null,
+      future_pin_color: input.pinColor?.trim() || null,
+      future_pin_border: input.pinBorder?.trim() || null,
+      future_pin_white_center: input.pinWhiteCenter ?? false,
+      future_pin_animated: input.pinAnimated ?? false,
+      future_pin_category_badge: input.pinCategoryBadge?.trim() || null,
+      future_pin_label: input.pinLabel?.trim() || input.propertyTitle?.trim() || null,
+    })
+    .eq("id", id);
 }
 
 export async function saveMapSiteDraft(
@@ -304,6 +390,43 @@ export async function unpublishMapSite(
     return { success: false, error: error.message };
   }
 
+  return { success: true };
+}
+
+export async function saveMapSiteSeo(
+  input: MapSiteSeoInput,
+): Promise<MapSiteAdminActionResult> {
+  try {
+    await requireMapSiteEditAccess(input.fastCode);
+  } catch {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const mapsite = await getMapSiteByFastCode(input.fastCode);
+  if (!mapsite) {
+    return { success: false, error: "Mapsite™ not found" };
+  }
+
+  const client = requireServiceRoleClient();
+  if ("success" in client) {
+    return client;
+  }
+
+  const { error } = await client
+    .from("mapsites")
+    .update({
+      meta_title: input.metaTitle.trim() || null,
+      meta_description: input.metaDescription.trim() || null,
+      og_image_url: input.ogImageUrl.trim() || null,
+    })
+    .eq("id", mapsite.id);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/admin/seo");
+  revalidatePath(`/admin/mapsites/${mapsite.fastCode}`);
   return { success: true };
 }
 
@@ -371,5 +494,104 @@ export async function updateMapSiteGallery(
     return { success: false, error: error.message };
   }
 
+  return { success: true };
+}
+
+export async function deleteAdminActiveMapSite(
+  fastCode: string,
+  mapsiteId?: string | null,
+): Promise<MapSiteAdminActionResult> {
+  if (!(await isAdminAuthenticated())) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const code = fastCode.trim();
+  if (!code) {
+    return { success: false, error: "FAST code is required." };
+  }
+
+  const client = requireServiceRoleClient();
+  if ("success" in client) {
+    return client;
+  }
+
+  let query = client.from("mapsites").select("id, fast_code, status");
+  const id = mapsiteId?.trim() || "";
+  if (id) {
+    query = query.eq("id", id);
+  } else {
+    query = query.ilike("fast_code", code);
+  }
+  const { data: rows, error: loadError } = await query;
+  if (loadError) {
+    return { success: false, error: loadError.message };
+  }
+  const mapsites = rows ?? [];
+  if (mapsites.length === 0) {
+    return { success: false, error: "Mapsite™ not found" };
+  }
+
+  for (const mapsite of mapsites) {
+    if (
+      shouldKeepPlatformDemoMapSite({
+        mapsiteId: mapsite.id,
+        fastCode: mapsite.fast_code || code,
+      })
+    ) {
+      return {
+        success: false,
+        error: "The platform demonstration Mapsite™ cannot be deleted.",
+      };
+    }
+
+    const [{ data: byId }, { data: byCode }] = await Promise.all([
+      client
+        .from("talispros_payments")
+        .select("payment_status, fast_code, mapsite_id")
+        .eq("mapsite_id", mapsite.id)
+        .limit(50),
+      client
+        .from("talispros_payments")
+        .select("payment_status, fast_code, mapsite_id")
+        .ilike("fast_code", mapsite.fast_code || code)
+        .limit(50),
+    ]);
+
+    const paymentReceived = paymentProtectsMapSiteFromDelete(
+      { id: mapsite.id, fastCode: mapsite.fast_code || code },
+      [...(byId ?? []), ...(byCode ?? [])],
+    );
+    const control = adminMapSiteDeleteControl({
+      status: mapsite.status,
+      paymentReceived,
+    });
+
+    if (control === "lock") {
+      return {
+        success: false,
+        error: "Paid Mapsites™ are delete-protected.",
+      };
+    }
+    if (control !== "delete") {
+      return {
+        success: false,
+        error: "Only active unpaid Mapsites™ can be deleted from this list.",
+      };
+    }
+
+    await deleteBookshelfForFastCode(client, mapsite.fast_code || code, mapsite.id);
+    const deleted = await unlinkAndDeleteMapSite(
+      client,
+      mapsite.id,
+      mapsite.fast_code || code,
+    );
+    if (!deleted.ok) {
+      return { success: false, error: deleted.error };
+    }
+  }
+
+  revalidatePath("/admin/mapsites");
+  revalidatePath("/admin/talisbooks");
+  revalidatePath("/admin/talisbooks/bookshelves");
   return { success: true };
 }

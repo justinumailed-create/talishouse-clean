@@ -91,6 +91,7 @@ export default async function EbookGeneratePage({
       initialListingTitle={context.listing.title}
       initialPinWriteup={context.pin.writeup}
       initialPriceLine={context.listing.price}
+      initialAgencyLogoUrl={context.assets.logo}
     />
   );
 }

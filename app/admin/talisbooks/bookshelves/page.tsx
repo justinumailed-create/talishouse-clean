@@ -62,13 +62,13 @@ export default async function AdminBookshelvesPage() {
             href={TALISBOOKS_ROUTES.HOME}
             className="inline-flex rounded-lg bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800"
           >
-            Open public bookshelf
+            Pinned shelf
           </Link>
           <Link
             href={TALISBOOKS_ROUTES.LIBRARY}
             className="inline-flex rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
           >
-            Open created-book library
+            Public shelf
           </Link>
           <Link
             href={TALISBOOKS_ROUTES.ADMIN}

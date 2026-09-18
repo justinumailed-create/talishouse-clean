@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
+import { mapsiteAgencyLogoUrl } from "@/lib/talispros/mapsite-listing-media";
 import {
   RM22_ASSETS,
   RM22_PRODUCTS,
@@ -19,6 +26,7 @@ import {
   RM22_INTRINSIC_SIGNOFF,
   RM22_INTRINSIC_TITLE,
   RM22_SPREAD_PAGE,
+  RM22_VIEWER_COVER_ASPECT,
   boxToPagePercent,
   fontSizeCqh,
 } from "@/lib/talisbooks/rm22-layout";
@@ -38,9 +46,11 @@ function FieldBox({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-[18px] bg-[#f5f5f7] p-3">
-      <p className="text-[12px] font-medium text-neutral-500">{label}</p>
-      <div className="mt-2 space-y-2">{children}</div>
+    <div className="min-w-0 rounded-[14px] bg-[#f5f5f7] p-2.5">
+      <p className="text-[11px] font-medium leading-snug text-neutral-500">
+        {label}
+      </p>
+      <div className="mt-1.5 space-y-1.5">{children}</div>
     </div>
   );
 }
@@ -59,7 +69,7 @@ function AddButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="inline-flex rounded-full bg-white px-3 py-1.5 text-[12px] font-medium text-neutral-950 ring-1 ring-black/[0.06] disabled:opacity-40"
+      className="inline-flex rounded-full bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-950 ring-1 ring-black/[0.06] disabled:opacity-40"
     >
       {hasFile ? "Replace image" : "Add image"}
     </button>
@@ -95,8 +105,8 @@ function DocumentPreview({
 }) {
   const frame =
     variant === "cover"
-      ? "relative mx-auto block max-w-full overflow-hidden rounded-xl bg-black disabled:opacity-40"
-      : "relative block w-full overflow-hidden rounded-xl bg-white disabled:opacity-40";
+      ? "relative mx-auto block w-full overflow-hidden rounded-lg bg-black disabled:opacity-40"
+      : "relative block w-full overflow-hidden rounded-lg bg-white disabled:opacity-40";
   return (
     <button
       type="button"
@@ -106,9 +116,6 @@ function DocumentPreview({
       style={{
         aspectRatio: aspect,
         containerType: "size",
-        ...(variant === "cover"
-          ? { height: "min(28rem, 70vw)", width: "auto" }
-          : {}),
       }}
     >
       {children}
@@ -120,10 +127,12 @@ function PhotoSlot({
   src,
   fit = "cover",
   emptyColor = RM22_COLOR.lime,
+  objectTop = false,
 }: {
   src: string | null;
   fit?: "cover" | "contain";
   emptyColor?: string;
+  objectTop?: boolean;
 }) {
   return (
     <>
@@ -140,7 +149,7 @@ function PhotoSlot({
           className={
             fit === "contain"
               ? "absolute inset-0 h-full w-full object-contain"
-              : "absolute inset-0 h-full w-full object-cover"
+              : `absolute inset-0 h-full w-full object-cover${objectTop ? " object-top" : ""}`
           }
         />
       ) : null}
@@ -150,18 +159,21 @@ function PhotoSlot({
 
 function BleedPreview({
   file,
+  srcUrl,
   title,
   caption,
   disabled,
   onPick,
 }: {
   file: File | null;
+  srcUrl?: string | null;
   title?: string;
   caption: string;
   disabled?: boolean;
   onPick: () => void;
 }) {
-  const src = useObjectUrl(file);
+  const uploadUrl = useObjectUrl(file);
+  const src = uploadUrl || srcUrl || null;
   const heading = title?.trim() || "";
   const titlePos = boxToPagePercent(RM22_BLEED_TITLE.box, RM22_SPREAD_PAGE);
   const captionPos = boxToPagePercent(RM22_BLEED_CAPTION.box, RM22_SPREAD_PAGE);
@@ -192,13 +204,18 @@ function BleedPreview({
           {caption.trim() ? <p>{caption.trim()}</p> : null}
         </div>
       </DocumentPreview>
-      <AddButton disabled={disabled} hasFile={Boolean(file)} onClick={onPick} />
+      <AddButton
+        disabled={disabled}
+        hasFile={Boolean(file || srcUrl)}
+        onClick={onPick}
+      />
     </div>
   );
 }
 
 function IntrinsicPreview({
   file,
+  srcUrl,
   title,
   caption,
   body,
@@ -207,6 +224,7 @@ function IntrinsicPreview({
   onPick,
 }: {
   file: File | null;
+  srcUrl?: string | null;
   title: string;
   caption: string;
   body: string;
@@ -214,7 +232,8 @@ function IntrinsicPreview({
   disabled?: boolean;
   onPick: () => void;
 }) {
-  const src = useObjectUrl(file);
+  const uploadUrl = useObjectUrl(file);
+  const src = uploadUrl || srcUrl || null;
   const imagePos = boxToPagePercent(RM22_INTRINSIC_IMAGE.box, RM22_SPREAD_PAGE);
   const captionPos = boxToPagePercent(RM22_INTRINSIC_CAPTION.box, RM22_SPREAD_PAGE);
   const titlePos = boxToPagePercent(RM22_INTRINSIC_TITLE.box, RM22_SPREAD_PAGE);
@@ -266,72 +285,200 @@ function IntrinsicPreview({
           </p>
         ) : null}
       </DocumentPreview>
-      <AddButton disabled={disabled} hasFile={Boolean(file)} onClick={onPick} />
+      <AddButton
+        disabled={disabled}
+        hasFile={Boolean(file || srcUrl)}
+        onClick={onPick}
+      />
+    </div>
+  );
+}
+
+const COVER_MERGE_FADE: CSSProperties = {
+  height: "50%",
+  background:
+    "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.42) 38%, rgba(0,0,0,0.82) 72%, rgba(0,0,0,0.94) 100%)",
+};
+
+const COVER_COPY_STACK: CSSProperties = {
+  bottom: "2.6%",
+  left: "6%",
+  right: "6%",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "flex-end",
+  alignItems: "center",
+  gap: "0.28em",
+  fontSize: "4.2cqh",
+};
+
+const COVER_LINE: CSSProperties = {
+  margin: 0,
+  width: "100%",
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+  lineHeight: 1.05,
+  color: "#ffffff",
+};
+
+function FitCoverLine({
+  text,
+  style,
+}: {
+  text: string;
+  style?: CSSProperties;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const fit = () => {
+      el.style.fontSize = "";
+      const computed = Number.parseFloat(getComputedStyle(el).fontSize);
+      let size = Number.isFinite(computed) ? computed : 10;
+      const min = 4;
+      while (el.scrollWidth > el.clientWidth + 0.5 && size > min) {
+        size -= 0.2;
+        el.style.fontSize = `${size}px`;
+      }
+    };
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(el);
+    if (el.parentElement) observer.observe(el.parentElement);
+    return () => observer.disconnect();
+  }, [text, style]);
+  return (
+    <div ref={ref} style={{ ...COVER_LINE, ...style }}>
+      {text}
     </div>
   );
 }
 
 function CoverPreview({
   file,
+  srcUrl,
   placeholderSrc,
   disabled,
   onPick,
   children,
   fit = "cover",
-  overlay = "fade",
 }: {
   file: File | null;
+  srcUrl?: string | null;
   placeholderSrc?: string;
   disabled?: boolean;
   onPick: () => void;
   children: React.ReactNode;
   fit?: "cover" | "contain";
-  overlay?: "fade" | "band";
 }) {
   const uploadUrl = useObjectUrl(file);
-  const src = uploadUrl || placeholderSrc || null;
-  const band = overlay === "band";
+  const src = uploadUrl || srcUrl || placeholderSrc || null;
+  const showCopy = Boolean(file) || !srcUrl;
   return (
     <div className="space-y-2">
       <DocumentPreview
-        aspect="1080 / 1920"
+        aspect={RM22_VIEWER_COVER_ASPECT}
         variant="cover"
         disabled={disabled}
         onPick={onPick}
       >
-        <PhotoSlot src={src} fit={fit} emptyColor="#000000" />
+        <PhotoSlot
+          src={src}
+          fit={fit}
+          emptyColor="#000000"
+          objectTop={fit === "cover"}
+        />
+        {showCopy ? (
+          <>
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0"
-          style={
-            band
-              ? { height: "32%", background: RM22_COLOR.captionOverlay }
-              : {
-                  height: "42%",
-                  background:
-                    "linear-gradient(to bottom, rgba(0,0,0,0), #000000 55%)",
-                }
-          }
+          style={COVER_MERGE_FADE}
         />
         <div
-          className="pointer-events-none absolute inset-x-[8%] text-center"
-          style={
-            band
-              ? {
-                  bottom: "4%",
-                  left: "8%",
-                  right: "8%",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "flex-end",
-                  gap: "0.35em",
-                }
-              : { bottom: "6%" }
-          }
+          className="pointer-events-none absolute inset-x-[6%] text-center"
+          style={COVER_COPY_STACK}
         >
           {children}
         </div>
+          </>
+        ) : null}
       </DocumentPreview>
-      <AddButton disabled={disabled} hasFile={Boolean(file)} onClick={onPick} />
+      <AddButton
+        disabled={disabled}
+        hasFile={Boolean(file || srcUrl)}
+        onClick={onPick}
+      />
+    </div>
+  );
+}
+
+function BackCoverPreview({
+  file,
+  srcUrl,
+  logoFile,
+  logoUrl,
+  placeholderSrc,
+  disabled,
+  onPick,
+  children,
+}: {
+  file: File | null;
+  srcUrl?: string | null;
+  logoFile: File | null;
+  logoUrl?: string | null;
+  placeholderSrc?: string;
+  disabled?: boolean;
+  onPick: () => void;
+  children: React.ReactNode;
+}) {
+  const uploadUrl = useObjectUrl(file);
+  const logoUploadUrl = useObjectUrl(logoFile);
+  const src = uploadUrl || srcUrl || placeholderSrc || null;
+  const logoSrc = logoUploadUrl || mapsiteAgencyLogoUrl(logoUrl);
+  const showCopy = Boolean(file) || !srcUrl;
+  return (
+    <div className="space-y-2">
+      <DocumentPreview
+        aspect={RM22_VIEWER_COVER_ASPECT}
+        variant="cover"
+        disabled={disabled}
+        onPick={onPick}
+      >
+          <PhotoSlot src={src} fit="cover" emptyColor="#000000" objectTop />
+          {showCopy ? (
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={logoSrc}
+                alt=""
+                className="pointer-events-none absolute object-contain"
+                style={{
+                  top: "3.6%",
+                  left: "5.5%",
+                  width: "22%",
+                  height: "12%",
+                  filter: "drop-shadow(0 4px 10px rgba(0,0,0,0.4))",
+                }}
+              />
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-0"
+                style={COVER_MERGE_FADE}
+              />
+              <div
+                className="pointer-events-none absolute inset-x-[6%] text-center"
+                style={COVER_COPY_STACK}
+              >
+                {children}
+              </div>
+            </>
+          ) : null}
+        </DocumentPreview>
+      <AddButton
+        disabled={disabled}
+        hasFile={Boolean(file || srcUrl)}
+        onClick={onPick}
+      />
     </div>
   );
 }
@@ -407,38 +554,46 @@ export default function Rm22TemplateFields({
         </div>
       </FieldBox>
 
-      <FieldBox label="Front cover — photo and caption (address, lot line, price)">
+      <div className="grid grid-cols-2 gap-2">
+      <FieldBox label="Front cover — photo and caption">
         <CoverPreview
           file={slots.frontImage}
-          fit="contain"
+          srcUrl={slots.frontImageUrl}
+          fit="cover"
           disabled={disabled}
           onPick={() => onPickFile((file) => patch({ frontImage: file }))}
         >
           {slots.frontTitle.trim() ? (
-            <p className="text-[13px] font-bold leading-tight text-white">
-              {slots.frontTitle.trim()}
-            </p>
+            <FitCoverLine
+              text={slots.frontTitle.trim()}
+              style={{ fontWeight: 700, fontSize: "1.05em" }}
+            />
           ) : null}
           {slots.frontSubtitle.trim() ? (
-            <p
-              className="mt-1 text-[12px] italic"
-              style={{ color: RM22_COLOR.lime }}
-            >
-              {slots.frontSubtitle.trim()}
-            </p>
+            <FitCoverLine
+              text={slots.frontSubtitle.trim()}
+              style={{
+                fontStyle: "italic",
+                fontSize: "0.95em",
+                color: RM22_COLOR.lime,
+              }}
+            />
           ) : null}
           {slots.frontPriceLine.trim() ? (
-            <p className="mt-1 text-[11px] text-white">
-              {slots.frontPriceLine.trim()}
-            </p>
+            <FitCoverLine
+              text={slots.frontPriceLine.trim()}
+              style={{ fontWeight: 500, fontSize: "0.95em" }}
+            />
           ) : null}
           {slots.frontTagline.trim() ? (
-            <p
-              className="mt-1 text-[10px]"
-              style={{ color: RM22_COLOR.lime }}
-            >
-              {slots.frontTagline.trim()}
-            </p>
+            <FitCoverLine
+              text={slots.frontTagline.trim()}
+              style={{
+                fontStyle: "italic",
+                fontSize: "0.78em",
+                color: RM22_COLOR.lime,
+              }}
+            />
           ) : null}
         </CoverPreview>
         <input
@@ -446,86 +601,84 @@ export default function Rm22TemplateFields({
           value={slots.frontTitle}
           onChange={(event) => patch({ frontTitle: event.target.value })}
           placeholder="Street, community"
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.frontSubtitle}
           onChange={(event) => patch({ frontSubtitle: event.target.value })}
           placeholder="*A prime Estuary Location*"
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.frontPriceLine}
           onChange={(event) => patch({ frontPriceLine: event.target.value })}
           placeholder="From $20,000 per acre"
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.frontTagline}
           onChange={(event) => patch({ frontTagline: event.target.value })}
           placeholder="Available with or without Tiny Home, turn key optional"
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
       </FieldBox>
 
       <FieldBox label="Back cover — agent photo and contact">
-        <CoverPreview
+        <BackCoverPreview
           file={slots.backAgentImage}
+          srcUrl={slots.backAgentImageUrl}
+          logoFile={slots.agencyLogo}
+          logoUrl={slots.agencyLogoUrl}
           placeholderSrc={RM22_ASSETS.agent}
-          fit="cover"
-          overlay="band"
           disabled={disabled}
           onPick={() => onPickFile((file) => patch({ backAgentImage: file }))}
         >
           {slots.backKicker.trim() ? (
-            <p
-              className="m-0 text-[15px] font-semibold leading-tight"
-              style={{ color: "#ffffff" }}
-            >
-              {slots.backKicker.trim()}
-            </p>
+            <FitCoverLine
+              text={slots.backKicker.trim()}
+              style={{ fontWeight: 700, fontSize: "1.05em" }}
+            />
           ) : null}
-          <p
-            className="m-0 text-[11px] font-medium leading-tight"
-            style={{ color: "#ffffff" }}
-          >
-            {slots.agentName.trim() || "Your Name"}
-          </p>
+          <FitCoverLine
+            text={slots.agentName.trim() || "Your Name"}
+            style={{ fontWeight: 500, fontSize: "0.95em" }}
+          />
           {slots.agentPhone.trim() ? (
-            <p
-              className="m-0 text-[10px] italic leading-tight"
-              style={{ color: "#ffffff" }}
-            >
-              Please message me @ {slots.agentPhone.trim()}
-            </p>
+            <FitCoverLine
+              text={`Please message me @ ${slots.agentPhone.trim()}`}
+              style={{ fontStyle: "italic", fontSize: "0.78em" }}
+            />
           ) : null}
-        </CoverPreview>
+        </BackCoverPreview>
         <input
           disabled={disabled}
           value={slots.backKicker}
           onChange={(event) => patch({ backKicker: event.target.value })}
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.agentName}
           onChange={(event) => patch({ agentName: event.target.value })}
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.agentPhone}
           onChange={(event) => patch({ agentPhone: event.target.value })}
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
       </FieldBox>
+      </div>
 
+      <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
       <FieldBox label="Intro spread — replaceable photo, title, and caption">
         <BleedPreview
           file={slots.introImage}
+          srcUrl={slots.introImageUrl}
           title={slots.introTitle}
           caption={slots.introCaption}
           disabled={disabled}
@@ -535,13 +688,13 @@ export default function Rm22TemplateFields({
           disabled={disabled}
           value={slots.introTitle}
           onChange={(event) => patch({ introTitle: event.target.value })}
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.introCaption}
           onChange={(event) => patch({ introCaption: event.target.value })}
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
       </FieldBox>
 
@@ -552,6 +705,7 @@ export default function Rm22TemplateFields({
         >
           <BleedPreview
             file={slots.photoImages[index] ?? null}
+            srcUrl={slots.photoImageUrls[index] ?? null}
             caption={caption}
             disabled={disabled}
             onPick={() =>
@@ -572,7 +726,7 @@ export default function Rm22TemplateFields({
               patch({ photoCaptions });
             }}
             placeholder="Caption"
-            className="w-full resize-none rounded-xl bg-white px-3 py-2 text-[15px] tracking-tight outline-none disabled:opacity-40"
+            className="w-full resize-none rounded-lg bg-white px-2 py-1.5 text-[12px] leading-snug tracking-tight outline-none disabled:opacity-40"
           />
         </FieldBox>
       ))}
@@ -580,6 +734,7 @@ export default function Rm22TemplateFields({
       <FieldBox label="Intrinsic Value — second-to-last interior (portrait left, copy right)">
         <IntrinsicPreview
           file={slots.intrinsicImage}
+          srcUrl={slots.intrinsicImageUrl}
           title={slots.intrinsicTitle}
           caption={slots.intrinsicCaption}
           body={slots.intrinsicBody}
@@ -591,34 +746,35 @@ export default function Rm22TemplateFields({
           disabled={disabled}
           value={slots.intrinsicTitle}
           onChange={(event) => patch({ intrinsicTitle: event.target.value })}
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.intrinsicCaption}
           onChange={(event) => patch({ intrinsicCaption: event.target.value })}
           placeholder="Image caption"
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
         <textarea
-          rows={8}
+          rows={4}
           disabled={disabled}
           value={slots.intrinsicBody}
           onChange={(event) => patch({ intrinsicBody: event.target.value })}
           placeholder="Replace the placeholder copy with the real story."
-          className="w-full resize-none rounded-xl bg-white px-3 py-2 text-[14px] leading-relaxed outline-none disabled:opacity-40"
+          className="w-full resize-none rounded-lg bg-white px-2 py-1.5 text-[12px] leading-snug outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.intrinsicSignoff}
           onChange={(event) => patch({ intrinsicSignoff: event.target.value })}
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
       </FieldBox>
 
       <FieldBox label="The Parting Shot…! — last interior before the back cover">
         <BleedPreview
           file={slots.outroImage}
+          srcUrl={slots.outroImageUrl}
           title={slots.outroTitle}
           caption={slots.outroCaption}
           disabled={disabled}
@@ -628,15 +784,16 @@ export default function Rm22TemplateFields({
           disabled={disabled}
           value={slots.outroTitle}
           onChange={(event) => patch({ outroTitle: event.target.value })}
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
         <input
           disabled={disabled}
           value={slots.outroCaption}
           onChange={(event) => patch({ outroCaption: event.target.value })}
-          className="w-full rounded-xl bg-white px-3 py-2 text-[15px] outline-none disabled:opacity-40"
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[13px] outline-none disabled:opacity-40"
         />
       </FieldBox>
+      </div>
     </div>
   );
 }

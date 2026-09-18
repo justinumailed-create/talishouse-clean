@@ -4,6 +4,7 @@ import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLi
 import { getPublicTalisBooksBookshelf } from "@/lib/talisbooks/library";
 import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
 import { createMetadata } from "@/lib/seo";
+import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
 import { ROUTES } from "@/lib/routes";
 
 export const metadata: Metadata = createMetadata({
@@ -19,6 +20,7 @@ export const dynamic = "force-dynamic";
 interface TalisBooksPublicBookshelfPageProps {
   searchParams: Promise<{
     fastCode?: string;
+    from?: string;
   }>;
 }
 
@@ -31,5 +33,10 @@ export default async function TalisBooksPublicBookshelfPage({
     redirect(`${ROUTES.TALISBOOKS}/fast/${encodeURIComponent(fastCode)}`);
   }
   const bookshelf = await getPublicTalisBooksBookshelf();
-  return <TalisBooksLibraryShell bookshelf={bookshelf} />;
+  return (
+    <TalisBooksLibraryShell
+      bookshelf={bookshelf}
+      backHref={mapsiteBackFromScheduleHref(params.from)}
+    />
+  );
 }

@@ -20,6 +20,14 @@ export type MapSitePlatformRecord = {
   property_address: string | null;
   property_description: string | null;
   cover_image: string | null;
+  /** Brokerage / agency mark for paid Mapsite™ chrome. */
+  logo_url: string | null;
+  /** Brokerage / agency name from the Build Request company. */
+  agency_name: string | null;
+  /** Agent / owner portrait from Mapsite™ or Build Request assets. */
+  profile_image_url: string | null;
+  /** Agent / owner name from Mapsite™ or Build Request. */
+  agent_name: string | null;
   gallery_images: string[];
   mls_url: string | null;
   broker_url: string | null;
@@ -46,6 +54,9 @@ export type MapSiteBuildRequestLocation = {
   propertyDescription: string | null;
   coverImage: string | null;
   galleryImages: string[];
+  company: string | null;
+  agentImage: string | null;
+  agentName: string | null;
   pinIcon: string | null;
   pinColor: string | null;
   pinWhiteCenter: boolean;
@@ -74,6 +85,11 @@ type MapSiteRow = {
   property_description?: string | null;
   cover_image?: string | null;
   header_image_url?: string | null;
+  logo_url?: string | null;
+  profile_image_url?: string | null;
+  agent_name?: string | null;
+  owner_first_name?: string | null;
+  owner_last_name?: string | null;
   gallery_images?: string[] | null;
   mls_url?: string | null;
   broker_url?: string | null;
@@ -103,6 +119,18 @@ const DEMO_DESCRIPTION =
 const DEMO_SIDEBAR_BLURB =
   "Register with Talispros to have Rahul manage your exposure globally...!";
 
+export const MAPSITE_GENERIC_PARTNER_WRITEUP =
+  "Upon registration your Mapsite™ will be able to promote up to 10 categories containing 100 PINs generating 1,000 views, monthly. No referral fees - ever";
+
+export const MAPSITE_DEMO_EBOOK_PARTNER_WRITEUP =
+  "Upon registration your Mapsite™ will be able to promote up to 100 PINs generating up to 1,000 views, combined. A small insertion fee applies while the PIN is being promoted, but NO REFERRAL FEES, EVER…!";
+
+export function mapsiteMarketPartnerWriteup(isDemoEbook: boolean): string {
+  return isDemoEbook
+    ? MAPSITE_DEMO_EBOOK_PARTNER_WRITEUP
+    : MAPSITE_GENERIC_PARTNER_WRITEUP;
+}
+
 export function createFallbackDemoMapSite(
   overrides: Partial<MapSitePlatformRecord> = {}
 ): MapSitePlatformRecord {
@@ -117,6 +145,10 @@ export function createFallbackDemoMapSite(
     property_address: DEMO_MAPSITE_ADDRESS,
     property_description: DEMO_DESCRIPTION,
     cover_image: MAPSITE_DEMO_LISTING_IMAGE,
+    logo_url: null,
+    agency_name: null,
+    profile_image_url: null,
+    agent_name: null,
     gallery_images: [...MAPSITE_DEMO_GALLERY],
     mls_url: null,
     broker_url: null,
@@ -172,6 +204,16 @@ function mapRow(row: MapSiteRow): MapSitePlatformRecord {
       row.property_address || DEMO_MAPSITE_ADDRESS,
     property_description: row.property_description || DEMO_DESCRIPTION,
     cover_image: cover,
+    logo_url: row.logo_url?.trim() || null,
+    agency_name: null,
+    profile_image_url: row.profile_image_url?.trim() || null,
+    agent_name:
+      row.agent_name?.trim() ||
+      [row.owner_first_name, row.owner_last_name]
+        .map((part) => part?.trim() || "")
+        .filter(Boolean)
+        .join(" ") ||
+      null,
     gallery_images: gallery,
     mls_url: row.mls_url ?? null,
     broker_url: row.broker_url ?? row.website ?? null,
@@ -185,7 +227,7 @@ function mapRow(row: MapSiteRow): MapSitePlatformRecord {
 }
 
 const BUILD_REQUEST_SUBMISSION_COLUMNS =
-  "id, latitude, longitude, street_address, reverse_geocoded_address, address, property_title, future_pin_label, future_pin_icon, future_pin_color, future_pin_border, future_pin_white_center, future_pin_animated, future_pin_category_badge, notes, pin_writeup, description, gallery_images";
+  "id, latitude, longitude, street_address, reverse_geocoded_address, address, property_title, company, first_name, last_name, future_pin_label, future_pin_icon, future_pin_color, future_pin_border, future_pin_white_center, future_pin_animated, future_pin_category_badge, notes, pin_writeup, description, gallery_images";
 
 type BuildRequestSubmissionRow = {
   id: string;
@@ -195,6 +237,9 @@ type BuildRequestSubmissionRow = {
   reverse_geocoded_address: string | null;
   address: string | null;
   property_title: string | null;
+  company: string | null;
+  first_name: string | null;
+  last_name: string | null;
   future_pin_label: string | null;
   future_pin_icon: string | null;
   future_pin_color: string | null;
@@ -275,6 +320,13 @@ function mapBuildRequestSubmissionRow(
     propertyDescription,
     coverImage,
     galleryImages: gallery.length > 0 ? gallery : coverImage ? [coverImage] : [],
+    company: row.company?.trim() || null,
+    agentImage: assets?.profile_image?.trim() || null,
+    agentName:
+      [row.first_name, row.last_name]
+        .map((part) => part?.trim() || "")
+        .filter(Boolean)
+        .join(" ") || null,
     pinIcon: row.future_pin_icon?.trim() || null,
     pinColor: row.future_pin_color?.trim() || null,
     pinBorder: row.future_pin_border?.trim() || null,
@@ -325,6 +377,9 @@ export function applyBuildRequestLocationToMapSite(
       submission.propertyDescription || mapsite.property_description,
     cover_image: submission.coverImage || mapsite.cover_image,
     gallery_images: gallery,
+    agency_name: submission.company || mapsite.agency_name,
+    profile_image_url: submission.agentImage || mapsite.profile_image_url,
+    agent_name: submission.agentName || mapsite.agent_name,
     pin_icon: submission.pinIcon,
     pin_color: submission.pinColor,
     pin_border: submission.pinBorder ?? null,
@@ -415,7 +470,7 @@ export async function mergeMapSiteWithSubmittedLocation(
 }
 
 const SELECT_COLUMNS =
-  "id, fast_code, status, latitude, longitude, map_zoom, property_title, property_address, property_description, cover_image, header_image_url, gallery_images, mls_url, broker_url, website, teb_url, ttv_url, assigned_marketing_manager, is_demonstration, created_at, updated_at";
+  "id, fast_code, status, latitude, longitude, map_zoom, property_title, property_address, property_description, cover_image, header_image_url, logo_url, profile_image_url, agent_name, owner_first_name, owner_last_name, gallery_images, mls_url, broker_url, website, teb_url, ttv_url, assigned_marketing_manager, is_demonstration, created_at, updated_at";
 
 export async function getDemonstrationMapSite(): Promise<MapSitePlatformRecord> {
   if (!isSupabaseAdminConfigured()) {
@@ -724,6 +779,9 @@ export async function markMapSiteClaimedByBuildRequest(params: {
         params.coverImage != null
           ? [params.coverImage]
           : current.gallery_images,
+      company: current.agency_name,
+      agentImage: current.profile_image_url,
+      agentName: current.agent_name,
       pinIcon: null,
       pinColor: null,
       pinWhiteCenter: false,

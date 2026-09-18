@@ -75,6 +75,7 @@ export default function MapSitePmcApplication({
       onMapDragStart={dismissIfUserGesture}
       onMapZoom={dismissIfUserGesture}
       basemapView="satellite"
+      scrollZoom={false}
     >
       <MapSitePmcChrome
         pins={pins}
@@ -196,7 +197,7 @@ function MapSitePmcChrome({
   return (
     <div
       ref={rootRef}
-      className="relative h-dvh w-screen overflow-hidden bg-neutral-900"
+      className="relative h-dvh max-h-dvh w-screen overflow-hidden overscroll-none bg-neutral-900"
     >
       <MapEngineCanvas className="h-full w-full" />
 

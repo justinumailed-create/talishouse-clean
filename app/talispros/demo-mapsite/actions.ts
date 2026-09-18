@@ -98,6 +98,9 @@ export async function generateDemoEbookAction(input: {
     revalidatePath(
       pathnameForRevalidate(`${ROUTES.TALISBOOKS_VIEWER}/${result.slug}`),
     );
+    revalidatePath(
+      pathnameForRevalidate(`${ROUTES.TALISBOOKS}/fast/${mapsite.code}`),
+    );
 
     return {
       ok: true,

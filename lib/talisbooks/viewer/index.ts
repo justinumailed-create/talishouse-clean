@@ -49,6 +49,7 @@ export {
   createBrokeragePage3Scaffold,
 } from "./brokerage-scaffold";
 export { getViewerBookBySlug, resolveViewerBookBySlug } from "./load-book";
+export { viewerFastCodeLabel, viewerGoogleMapsHref, viewerMapsiteHref } from "./location";
 export {
   clampSpreadAspectRatio,
   continuousSpreadImageUrl,
@@ -58,6 +59,8 @@ export {
   SPREAD_ASPECT_MAX,
   SPREAD_ASPECT_MIN,
   SPREAD_SOURCE_WIDTH_PERCENT,
+  VIEWER_BOOK_HEIGHT_SCALE,
+  displayBookSpreadAspect,
 } from "./spread-layout";
 export {
   convertViewerNavIndex,

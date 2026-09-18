@@ -15,6 +15,7 @@ import TalisBooksPageRenderer from "@/components/talisbooks/viewer/TalisBooksPag
 import { peekWarmedViewerImage } from "@/lib/talisbooks/viewer/image-preloader";
 import {
   clampSpreadAspectRatio,
+  displayBookSpreadAspect,
   getBookContinuousSpreadImageUrl,
   isMattedSpreadPage,
   RESERVED_BOOK_SPREAD_ASPECT,
@@ -1038,7 +1039,7 @@ function OpenBookSpread({
         data-wrap-phase={wrapPhase === "idle" ? undefined : wrapPhase}
         style={
           {
-            ["--book-spread-aspect"]: String(spreadAspect),
+            ["--book-spread-aspect"]: String(displayBookSpreadAspect(spreadAspect)),
             ...(openingFromFront
               ? { x: expandFromFrontX }
               : openingFromBack
@@ -1586,7 +1587,7 @@ function OpenBookSingle({
         data-wrap-phase={wrapPhase === "idle" ? undefined : wrapPhase}
         style={
           {
-            ["--book-spread-aspect"]: String(spreadAspect),
+            ["--book-spread-aspect"]: String(displayBookSpreadAspect(spreadAspect)),
           } as CSSProperties
         }
         aria-label={magazine ? "Open magazine · single page" : "Open book · single page"}

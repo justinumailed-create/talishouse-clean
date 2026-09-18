@@ -1,3 +1,4 @@
+import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
   logOnboardingStep,
@@ -9,7 +10,7 @@ import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 export { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 
 export type OnboardingContext = {
-  requestId: string;
+  requestId: string | null;
   fastCode: string;
   mapsiteId: string | null;
   accountType: string | null;
@@ -328,4 +329,226 @@ export async function resolveOnboardingFromRequest(
   });
 
   return { ok: true, context };
+}
+
+/**
+ * Admin / paid-owner ebook identity from an existing Mapsite™ FAST Code.
+ * Used when there is no Build Request (seeded listings like LRG1).
+ * Callers must already have verified `canEditMapSite(fastCode)`.
+ */
+export async function resolveOnboardingFromMapSite(
+  fastCodeRaw: string | null | undefined,
+): Promise<ResolveOnboardingResult> {
+  const started = onboardingNow();
+  const fastCode = fastCodeRaw?.trim().toLowerCase() || "";
+
+  if (!fastCode) {
+    return {
+      ok: false,
+      report: {
+        requestId: null,
+        fastCode: null,
+        mapsiteId: null,
+        stage: "resolve_request",
+        error: "FAST Code is required.",
+        durationMs: onboardingNow() - started,
+      },
+    };
+  }
+
+  if (!isSupabaseAdminConfigured()) {
+    return {
+      ok: false,
+      report: {
+        requestId: null,
+        fastCode,
+        mapsiteId: null,
+        stage: "resolve_request",
+        error: "Database is not configured.",
+        durationMs: onboardingNow() - started,
+      },
+    };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data: fastRow } = await supabase
+    .from("fast_codes")
+    .select("code, mapsite_id, request_id")
+    .ilike("code", fastCode)
+    .maybeSingle();
+
+  let mapsite: {
+    id: string;
+    fast_code: string | null;
+    account_type: string | null;
+    owner_first_name: string | null;
+    owner_last_name: string | null;
+    agent_name: string | null;
+    email: string | null;
+    phone: string | null;
+    cover_image: string | null;
+    gallery_images: string[] | null;
+    logo_url: string | null;
+    property_title: string | null;
+    property_address: string | null;
+    property_description: string | null;
+    price: string | null;
+    latitude: number | null;
+    longitude: number | null;
+  } | null = null;
+
+  const mapsiteSelect =
+    "id, fast_code, account_type, owner_first_name, owner_last_name, agent_name, email, phone, cover_image, gallery_images, logo_url, property_title, property_address, property_description, price, latitude, longitude";
+
+  if (fastRow?.mapsite_id) {
+    const byId = await supabase
+      .from("mapsites")
+      .select(mapsiteSelect)
+      .eq("id", fastRow.mapsite_id)
+      .maybeSingle();
+    mapsite = byId.data;
+  }
+
+  if (!mapsite) {
+    const byFast = await supabase
+      .from("mapsites")
+      .select(mapsiteSelect)
+      .ilike("fast_code", fastCode)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    mapsite = byFast.data;
+  }
+
+  if (!mapsite) {
+    return {
+      ok: false,
+      report: {
+        requestId: fastRow?.request_id?.trim() || null,
+        fastCode,
+        mapsiteId: null,
+        stage: "resolve_fast_code",
+        error: "Mapsite™ not found for this FAST Code.",
+        durationMs: onboardingNow() - started,
+      },
+    };
+  }
+
+  let requestId = fastRow?.request_id?.trim() || null;
+  if (!requestId) {
+    const { data: byLinked } = await supabase
+      .from("build_requests")
+      .select("id")
+      .eq("linked_mapsite_id", mapsite.id)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    requestId = byLinked?.id ?? null;
+  }
+  if (!requestId) {
+    const { data: byFastRequest } = await supabase
+      .from("build_requests")
+      .select("id")
+      .ilike("requested_fast_code", fastCode)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    requestId = byFastRequest?.id ?? null;
+  }
+
+  const firstName = mapsite.owner_first_name?.trim() || "";
+  const lastName = mapsite.owner_last_name?.trim() || "";
+  const galleryImages = Array.isArray(mapsite.gallery_images)
+    ? mapsite.gallery_images.filter(
+        (url): url is string => typeof url === "string" && url.trim().length > 0,
+      )
+    : [];
+  const agentName =
+    mapsite.agent_name?.trim() ||
+    `${firstName} ${lastName}`.trim() ||
+    fastCode.toUpperCase();
+
+  const context: OnboardingContext = {
+    requestId,
+    fastCode,
+    mapsiteId: mapsite.id,
+    accountType: mapsite.account_type?.trim() || null,
+    owner: {
+      firstName,
+      lastName,
+      agentName,
+      email: mapsite.email?.trim() || "",
+      phone: mapsite.phone?.trim() || "",
+    },
+    assets: {
+      coverImage: mapsite.cover_image?.trim() || galleryImages[0] || null,
+      galleryImages,
+      logo: mapsite.logo_url?.trim() || null,
+    },
+    pin: {
+      streetAddress: mapsite.property_address?.trim() || null,
+      latitude:
+        mapsite.latitude != null && Number.isFinite(mapsite.latitude)
+          ? mapsite.latitude
+          : null,
+      longitude:
+        mapsite.longitude != null && Number.isFinite(mapsite.longitude)
+          ? mapsite.longitude
+          : null,
+      writeup: mapsite.property_description?.trim() || null,
+    },
+    listing: {
+      title: mapsite.property_title?.trim() || null,
+      address: mapsite.property_address?.trim() || null,
+      price: mapsite.price?.trim() || null,
+    },
+  };
+
+  logOnboardingStep("Resolve mapsite onboarding", started, {
+    requestId,
+    fastCode,
+    mapsiteId: context.mapsiteId,
+    accountType: context.accountType,
+  });
+
+  return { ok: true, context };
+}
+
+/**
+ * Per-image upload scope for an existing Mapsite™ the caller is allowed to edit.
+ */
+export async function resolveMapSiteUploadScope(
+  mapsiteIdRaw: string | null | undefined,
+): Promise<
+  | { ok: true; mapsiteId: string; fastCode: string }
+  | { ok: false; error: string }
+> {
+  const mapsiteId = mapsiteIdRaw?.trim() || "";
+  if (!mapsiteId) {
+    return { ok: false, error: "Mapsite™ ID is required." };
+  }
+  if (!isSupabaseAdminConfigured()) {
+    return { ok: false, error: "Database is not configured." };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("mapsites")
+    .select("id, fast_code")
+    .eq("id", mapsiteId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return { ok: false, error: error?.message || "Mapsite™ not found." };
+  }
+
+  const fastCode = data.fast_code?.trim().toLowerCase() || "";
+  if (!fastCode) {
+    return { ok: false, error: "This Mapsite™ has no FAST Code." };
+  }
+  if (!(await canEditMapSite(fastCode))) {
+    return { ok: false, error: "Unauthorized." };
+  }
+
+  return { ok: true, mapsiteId: data.id, fastCode };
 }

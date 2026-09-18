@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { createMetadata } from "@/lib/seo";
+import MapSiteViewportLock from "@/components/talispros/mapsite/MapSiteViewportLock";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -22,7 +23,8 @@ export default function MapSiteAppLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="h-dvh w-screen overflow-hidden bg-neutral-900 text-neutral-900">
+    <div className="mapsite-app-shell h-dvh max-h-dvh w-screen overflow-hidden overscroll-none bg-neutral-900 text-neutral-900">
+      <MapSiteViewportLock />
       {children}
     </div>
   );

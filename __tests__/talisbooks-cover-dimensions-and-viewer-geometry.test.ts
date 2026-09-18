@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import sharp from "sharp";
 import {
   splitCoverSpreadBuffer,
@@ -7,8 +9,10 @@ import {
   getBookContinuousSpreadImageUrl,
   continuousSpreadImageUrl,
   clampSpreadAspectRatio,
+  displayBookSpreadAspect,
   isMattedSpreadPage,
   RESERVED_BOOK_SPREAD_ASPECT,
+  VIEWER_BOOK_HEIGHT_SCALE,
 } from "@/lib/talisbooks/viewer/spread-layout";
 import { getViewerSpread, getViewerSpreadCount } from "@/lib/talisbooks/viewer/spreads";
 import { createPinnedTalisBookViewer } from "@/lib/talisbooks/library/pinned-catalog";
@@ -183,5 +187,23 @@ describe("TalisBook Cover Dimension + Viewer Focus Fix", () => {
     // guaranteeing consistent geometry across cover -> interior -> back cover navigation.
     const urlFromPages = getBookContinuousSpreadImageUrl(book.pages);
     expect(urlFromPages).toBe(book.pages[1]?.spreadImageUrl);
+  });
+
+  it("displays the open book at the source 16:9 spread", () => {
+    expect(VIEWER_BOOK_HEIGHT_SCALE).toBe(1);
+    expect(displayBookSpreadAspect(16 / 9)).toBeCloseTo(16 / 9, 5);
+  });
+
+  it("sizes the stage to a 16:9 spread at the current display height", () => {
+    const css = readFileSync(resolve("app/globals.css"), "utf8");
+    expect(css).toContain(
+      "width: min(100%, calc(16 / 9 * var(--viewer-book-height)))",
+    );
+    expect(css).toContain(
+      "--viewer-book-height: calc(100dvh - (2 * var(--viewer-inset)));",
+    );
+    expect(css).toContain(
+      ".talisbooks-viewer-book[data-spread-fit=\"image\"] .talisbooks-viewer-page__spread-image {\n  object-fit: cover;",
+    );
   });
 });

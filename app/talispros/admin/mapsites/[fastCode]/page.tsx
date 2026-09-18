@@ -6,7 +6,6 @@ import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
-import { listAdminEbookPages } from "@/lib/talisbooks/admin-ebook-pages";
 
 export const dynamic = "force-dynamic";
 
@@ -37,12 +36,8 @@ export default async function TalisprosAdminMapSitePage({
       fastCode: mapsite.fastCode,
       requestId: mapsite.requestId,
     }),
-    getMapSiteEbookContext(mapsite.fastCode),
+    getMapSiteEbookContext(mapsite.fastCode, { includeRm22Editor: true }),
   ]);
-
-  const ebookPages = ebookContext?.primaryEbook?.id
-    ? await listAdminEbookPages(ebookContext.primaryEbook.id)
-    : [];
 
   return (
     <MapSiteAdminEditor
@@ -53,7 +48,6 @@ export default async function TalisprosAdminMapSitePage({
       showVisitorSubscriptionPanel
       paymentReceived={paymentReceived}
       ebook={ebookContext?.primaryEbook ?? null}
-      ebookPages={ebookPages}
     />
   );
 }

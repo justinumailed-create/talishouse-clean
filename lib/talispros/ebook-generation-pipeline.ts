@@ -1,6 +1,12 @@
 import { generateSelfServiceEbook } from "@/lib/talisbooks/self-service-ebook";
+import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { buildMapSiteAfterBookHref } from "@/lib/talispros/ebook-choice";
-import { resolveOnboardingFromRequest } from "@/lib/talispros/resolve-onboarding-from-request";
+import {
+  resolveOnboardingFromMapSite,
+  resolveOnboardingFromRequest,
+  type OnboardingContext,
+  type ResolveOnboardingResult,
+} from "@/lib/talispros/resolve-onboarding-from-request";
 import {
   ONBOARDING_JOB_TIMEOUT_MS,
   logOnboardingFailure,
@@ -31,6 +37,8 @@ export {
 
 export type RunEbookGenerationInput = {
   requestId: string;
+  /** Admin / owner Mapsite™ path when no Build Request exists. Never trusted without canEditMapSite. */
+  fastCode?: string | null;
   title: string;
   description: string;
   location: string;
@@ -51,6 +59,8 @@ export type RunEbookGenerationInput = {
   frontCover?: OptimizedEbookImageAsset | null;
   backCover?: OptimizedEbookImageAsset | null;
   rm22Template?: Rm22TemplatePayload | null;
+  rm22SlotHydration?: import("@/lib/talisbooks/rm22-template").Rm22SlotHydration | null;
+  replaceBookId?: string | null;
   flagIdentity?: MapsiteFlagIdentity;
   onProgress?: (event: EbookGenerationProgressEvent) => void | Promise<void>;
   /** Override job timeout (ms). Defaults to ONBOARDING_JOB_TIMEOUT_MS. */
@@ -65,8 +75,10 @@ function emit(
 }
 
 /**
- * Tracked ebook generation job keyed by Build Request ID.
- * Resolves FAST Code / Mapsite™ / account type from the database only.
+ * Tracked ebook generation job keyed by Build Request ID, or by an editable
+ * Mapsite™ FAST Code when a Build Request was never created.
+ * Public generate still requires requestId. Client FAST codes are ignored
+ * unless `canEditMapSite` succeeds.
  * Expects images already optimized + stored when `optimizedImages` is provided.
  */
 export async function runEbookGenerationPipeline(
@@ -111,20 +123,29 @@ export async function runEbookGenerationPipeline(
       "Ebook generation job",
       timeoutMs,
       async () => {
-        if (!requestId) {
-          return fail("resolve_request", "Build Request ID is required.");
-        }
-
         currentStage = "resolve_request";
-        const resolved = await resolveOnboardingFromRequest(requestId);
+        let resolved: ResolveOnboardingResult;
+        if (requestId) {
+          resolved = await resolveOnboardingFromRequest(requestId);
+        } else {
+          const editorFastCode = input.fastCode?.trim().toLowerCase() || "";
+          if (!editorFastCode) {
+            return fail("resolve_request", "Build Request ID is required.");
+          }
+          if (!(await canEditMapSite(editorFastCode))) {
+            return fail("resolve_request", "Build Request ID is required.");
+          }
+          resolved = await resolveOnboardingFromMapSite(editorFastCode);
+        }
         if (!resolved.ok) {
           return fail(resolved.report.stage, resolved.report.error, resolved.report);
         }
 
-        const ctx = resolved.context;
+        const ctx: OnboardingContext = resolved.context;
         requestId = ctx.requestId;
         fastCode = ctx.fastCode;
         mapsiteId = ctx.mapsiteId;
+        const progressRequestId = ctx.requestId || ctx.mapsiteId || ctx.fastCode;
 
         const optimizedImages = (input.optimizedImages || []).filter(
           (item) => item.url && item.width > 0 && item.height > 0,
@@ -157,7 +178,7 @@ export async function runEbookGenerationPipeline(
         currentStage = "generating_pages";
         await emit(input.onProgress, {
           stage: "generating_pages",
-          requestId,
+          requestId: progressRequestId,
           fastCode,
           mapsiteId,
         });
@@ -189,6 +210,9 @@ export async function runEbookGenerationPipeline(
           frontCover: input.frontCover,
           backCover: input.backCover,
           rm22Template: input.rm22Template,
+          rm22SlotHydration: input.rm22SlotHydration,
+          replaceBookId: input.replaceBookId,
+          asAdmin: await canEditMapSite(ctx.fastCode),
           flagIdentity: input.flagIdentity,
         });
         logOnboardingStep("Book generation", generateStarted, {
@@ -205,7 +229,7 @@ export async function runEbookGenerationPipeline(
         currentStage = "publishing";
         await emit(input.onProgress, {
           stage: "publishing",
-          requestId,
+          requestId: progressRequestId,
           fastCode,
           mapsiteId: result.mapsiteId || mapsiteId,
         });
@@ -231,7 +255,7 @@ export async function runEbookGenerationPipeline(
 
         const completed: EbookGenerationProgressEvent = {
           stage: "completed",
-          requestId: ctx.requestId,
+          requestId: progressRequestId,
           fastCode: ctx.fastCode,
           mapsiteId: result.mapsiteId || ctx.mapsiteId,
           viewerUrl: result.viewerUrl,

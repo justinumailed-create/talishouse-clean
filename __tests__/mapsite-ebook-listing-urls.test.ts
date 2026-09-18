@@ -1,5 +1,36 @@
 import { describe, expect, it } from "vitest";
 import { ebookSlugFromTebUrl } from "../lib/talisbooks/mapsite-ebook-service";
+import { shouldBindMapsiteTebListing } from "../lib/talisbooks/auto-draft-ebook";
+
+describe("shouldBindMapsiteTebListing", () => {
+  it("binds TEB™ on the first created book", () => {
+    expect(
+      shouldBindMapsiteTebListing({ replacing: false, existingTebUrl: null }),
+    ).toBe(true);
+    expect(
+      shouldBindMapsiteTebListing({ replacing: false, existingTebUrl: "  " }),
+    ).toBe(true);
+  });
+
+  it("keeps the existing Mapsite™ TEB™ when another book is created", () => {
+    expect(
+      shouldBindMapsiteTebListing({
+        replacing: false,
+        existingTebUrl: "/talisbooks/viewer/rm22-rm22-talisbook-b1mz",
+      }),
+    ).toBe(false);
+  });
+
+  it("updates TEB™ when editing the existing book in place", () => {
+    expect(
+      shouldBindMapsiteTebListing({
+        replacing: true,
+        existingTebUrl: "/talisbooks/viewer/rm22-rm22-talisbook-b1mz",
+      }),
+    ).toBe(true);
+  });
+});
+
 
 describe("ebookSlugFromTebUrl", () => {
   it("reads the viewer slug from a relative TEB™ url", () => {

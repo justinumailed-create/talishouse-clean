@@ -1,20 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/lib/supabase";
-
-type RegistrationRow = {
-  id: string;
-  email: string;
-  account_type: string;
-  fast_code: string;
-  amount_paid: number;
-  registration_number: string;
-  status: string;
-  paypal_order_id: string | null;
-  paypal_capture_id: string | null;
-  created_at: string;
-};
+import {
+  listAdminRegistrations,
+  markAdminRegistrationCompleted,
+  markAllAdminRegistrationsCompleted,
+} from "@/lib/admin-registrations-actions";
+import type { AdminRegistrationRow } from "@/lib/admin-registrations";
 
 function toErrorLogObject(err: unknown): Record<string, unknown> {
   if (err instanceof Error) {
@@ -58,7 +50,7 @@ function toErrorLogObject(err: unknown): Record<string, unknown> {
 }
 
 export default function RegistrationsPage() {
-  const [rows, setRows] = useState<RegistrationRow[]>([]);
+  const [rows, setRows] = useState<AdminRegistrationRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchWarning, setFetchWarning] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -73,15 +65,12 @@ export default function RegistrationsPage() {
     setLoading(true);
     setFetchWarning(null);
     try {
-      const { data, error } = await supabase
-        .from("registrations")
-        .select(
-          "id, email, account_type, fast_code, amount_paid, registration_number, status, paypal_order_id, paypal_capture_id, created_at"
-        )
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setRows((data || []) as RegistrationRow[]);
+      const result = await listAdminRegistrations();
+      if (!result.success) {
+        setFetchWarning("Registrations could not be loaded right now.");
+        console.warn("Registrations fetch warning:", toErrorLogObject(result.error));
+      }
+      setRows(result.data ?? []);
     } catch (err) {
       console.warn("Registrations fetch warning:", toErrorLogObject(err));
       setFetchWarning("Registrations could not be loaded right now.");
@@ -100,21 +89,26 @@ export default function RegistrationsPage() {
       return (
         row.email.toLowerCase().includes(q) ||
         row.fast_code.toLowerCase().includes(q) ||
-        row.registration_number.toLowerCase().includes(q)
+        row.registration_number.toLowerCase().includes(q) ||
+        row.account_type.toLowerCase().includes(q)
       );
     });
   }, [rows, search, statusFilter]);
 
-  const markableRows = filteredRows.filter((row) => row.status !== "completed");
+  const markableRows = filteredRows.filter((row) => row.markable);
 
   async function markPurchaseCompleted(id: string) {
-    const { error } = await supabase.from("registrations").update({ status: "completed" }).eq("id", id);
-    if (error) {
-      console.error("Error updating registration:", error);
+    const result = await markAdminRegistrationCompleted(id);
+    if (!result.success) {
+      console.error("Error updating registration:", result.error);
       return;
     }
 
-    setRows((prev) => prev.map((row) => (row.id === id ? { ...row, status: "completed" } : row)));
+    setRows((prev) =>
+      prev.map((row) =>
+        row.id === id ? { ...row, status: "completed", markable: false } : row,
+      ),
+    );
   }
 
   async function markAllPurchasesCompleted() {
@@ -123,11 +117,15 @@ export default function RegistrationsPage() {
 
     try {
       const ids = markableRows.map((row) => row.id);
-      const { error } = await supabase.from("registrations").update({ status: "completed" }).in("id", ids);
-      if (error) throw error;
+      const result = await markAllAdminRegistrationsCompleted(ids);
+      if (!result.success) throw new Error(result.error);
 
       setRows((prev) =>
-        prev.map((row) => (ids.includes(row.id) ? { ...row, status: "completed" } : row))
+        prev.map((row) =>
+          ids.includes(row.id)
+            ? { ...row, status: "completed", markable: false }
+            : row,
+        ),
       );
     } catch (err) {
       console.error("Error marking all purchases as completed:", err);
@@ -143,7 +141,9 @@ export default function RegistrationsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Registrations</h1>
-          <p className="text-sm text-gray-500 mt-1">Review registrations and mark purchases as completed.</p>
+          <p className="text-sm text-gray-500 mt-1">
+            Review Mapsite™ Root Account™ payments and mark legacy purchases as completed.
+          </p>
         </div>
         <button
           onClick={markAllPurchasesCompleted}
@@ -212,7 +212,9 @@ export default function RegistrationsPage() {
                   <tr key={row.id} className="border-b border-gray-50 hover:bg-gray-50">
                     <td className="py-3 px-4 text-sm text-gray-700">{row.registration_number}</td>
                     <td className="py-3 px-4 text-sm text-gray-700">{row.email}</td>
-                    <td className="py-3 px-4 text-sm font-mono text-blue-600">{row.fast_code}</td>
+                    <td className="py-3 px-4 text-sm font-mono text-blue-600">
+                      {row.fast_code || "—"}
+                    </td>
                     <td className="py-3 px-4 text-sm text-gray-700">{row.account_type}</td>
                     <td className="py-3 px-4 text-sm text-gray-700">${row.amount_paid.toFixed(2)}</td>
                     <td className="py-3 px-4 text-sm">
@@ -225,15 +227,17 @@ export default function RegistrationsPage() {
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      {row.status === "completed" ? (
-                        <span className="text-xs text-gray-400">Completed</span>
-                      ) : (
+                      {row.markable ? (
                         <button
                           onClick={() => markPurchaseCompleted(row.id)}
                           className="text-xs px-2.5 py-1 rounded-md bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
                         >
                           Mark Completed
                         </button>
+                      ) : (
+                        <span className="text-xs text-gray-400">
+                          {row.status === "completed" ? "Completed" : "—"}
+                        </span>
                       )}
                     </td>
                   </tr>

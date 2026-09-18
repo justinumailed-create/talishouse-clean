@@ -62,7 +62,7 @@ describe("admin nav", () => {
       "/admin/dashboard",
       "/admin/build-requests",
       "/admin/mapsites",
-      "/admin/talisbooks",
+      "/admin/seo",
       "/admin/talisbooks/bookshelves",
     ]);
     expect(hrefs).not.toContain("/admin/content");
@@ -78,7 +78,7 @@ describe("admin nav", () => {
       "/admin/dashboard",
       "/admin/build-requests",
       "/admin/mapsites",
-      "/admin/talisbooks",
+      "/admin/seo",
       "/admin/talisbooks/bookshelves",
       "/admin/fast-codes",
     ]);
@@ -105,7 +105,9 @@ describe("admin nav", () => {
     expect(hrefs).toContain("/admin/fast-codes");
     expect(hrefs).toContain("/admin/build-requests");
     expect(hrefs).toContain("/admin/mapsites");
-    expect(hrefs).toContain("/admin/talisbooks");
+    expect(hrefs).toContain("/admin/seo");
+    expect(hrefs).not.toContain("/admin/talisbooks");
+    expect(hrefs).not.toContain("/admin/talismaps");
     expect(hrefs).toContain("/admin/talisbooks/bookshelves");
     expect(hrefs).toContain("/admin/registrations");
     expect(hrefs).toContain("/admin/marketing");
@@ -113,10 +115,17 @@ describe("admin nav", () => {
 
   it("highlights nested Mapsite, platform content, and Talisbooks routes", () => {
     expect(isAdminNavItemActive("/admin/mapsites", "/admin/mapsites/rm22")).toBe(true);
+    expect(isAdminNavItemActive("/admin/seo", "/admin/seo")).toBe(true);
+    expect(isAdminNavItemActive("/admin/seo", "/admin/mapsites/rm22")).toBe(false);
+    expect(isAdminNavItemActive("/admin/mapsites", "/admin/seo")).toBe(false);
     expect(isAdminNavItemActive("/admin/build-requests", "/admin/marketing/abc")).toBe(true);
     expect(isAdminNavItemActive("/admin/platform-content", "/admin/platform-content")).toBe(true);
     expect(isAdminNavItemActive("/admin/platform-content", "/talispros/marketing/admin")).toBe(true);
-    expect(isAdminNavItemActive("/admin/talisbooks", "/admin/talisbooks/centerfolds")).toBe(true);
+    expect(isAdminNavItemActive("/admin/dashboard", "/admin/talisbooks")).toBe(true);
+    expect(isAdminNavItemActive("/admin/dashboard", "/admin/talismaps")).toBe(true);
+    expect(isAdminNavItemActive("/admin/dashboard", "/admin/talisbooks/bookshelves")).toBe(
+      false,
+    );
     expect(isAdminNavItemActive("/admin/talisbooks", "/admin/talisbooks/bookshelves")).toBe(false);
     expect(isAdminNavItemActive("/admin/talisbooks/bookshelves", "/admin/talisbooks/bookshelves")).toBe(
       true,
@@ -132,6 +141,7 @@ describe("admin route scopes", () => {
     expect(getRequiredAdminScopeForPath("/admin/platform-content")).toBe("platform-content");
     expect(getRequiredAdminScopeForPath("/admin/fast-codes")).toBe("fast-codes");
     expect(getRequiredAdminScopeForPath("/admin/mapsites/rm22")).toBe("mapsites");
+    expect(getRequiredAdminScopeForPath("/admin/seo")).toBe("mapsites");
     expect(getRequiredAdminScopeForPath("/admin/talisbooks")).toBe("talisbooks");
     expect(getRequiredAdminScopeForPath("/admin/products")).toBe("platform-content");
     expect(getRequiredAdminScopeForPath("/admin/pricing")).toBe("full-console");

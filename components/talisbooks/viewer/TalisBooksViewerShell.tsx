@@ -1,22 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import {
   orderedViewerImageUrls,
   warmViewerImages,
 } from "@/lib/talisbooks/viewer/image-preloader";
 import TalisBooksViewerControls from "@/components/talisbooks/viewer/TalisBooksViewerControls";
 import TalisBooksViewerLiveEditor from "@/components/talisbooks/viewer/TalisBooksViewerLiveEditor";
+import {
+  TalisBooksViewerBrandRail,
+  TalisBooksViewerPlaybackRail,
+} from "@/components/talisbooks/viewer/TalisBooksViewerRails";
 import TalisBooksViewerStage, {
   type TalisBooksViewerBinding,
 } from "@/components/talisbooks/viewer/TalisBooksViewerStage";
-import { ROUTES } from "@/lib/routes";
-import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
-import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
-import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
-import { MAPSITE_APP_PATH, buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 import {
   convertViewerNavIndex,
   createEmptyNarrationController,
@@ -38,12 +36,10 @@ interface TalisBooksViewerShellProps {
   book: TalisBooksViewerBook;
   /** Owner / admin: show playback sidebar controls. */
   canEditTools?: boolean;
-  /** After payment (or admin): show Live Edit panel. */
+  /** After activation payment: show Live Edit panel. */
   canLiveEdit?: boolean;
   /** Demo / sample books: grey out insert-page controls. */
   pageInsertLocked?: boolean;
-  /** After payment (or admin): show Dashboard link. */
-  showDashboard?: boolean;
   /** Reserved for future audio narration — unused in playback today. */
   narration?: TalisBooksNarrationController | null;
 }
@@ -60,7 +56,6 @@ export default function TalisBooksViewerShell({
   canEditTools = false,
   canLiveEdit = false,
   pageInsertLocked = false,
-  showDashboard = false,
   narration = null,
 }: TalisBooksViewerShellProps) {
   const narrationController = narration ?? createEmptyNarrationController();
@@ -431,18 +426,7 @@ export default function TalisBooksViewerShell({
       : null;
   const editorRight =
     binding === "open" && viewMode === "spread" ? spread.right : null;
-  const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
-  const backToMapSiteHref = isPinnedShowcase
-    ? DEMO_MAPSITE_BUILD_PATH
-    : book.fastCode && book.fastCode.trim().toLowerCase() !== "demo"
-      ? buildClaimedMapSitePath({
-          fastCode: book.fastCode,
-          accountType: book.accountType,
-        })
-      : MAPSITE_APP_PATH;
-  const backLinkLabel = isPinnedShowcase
-    ? "Build Demo"
-    : "Back to Mapsite™";
+  const showViewerSidebar = false;
 
   return (
     <div
@@ -451,56 +435,15 @@ export default function TalisBooksViewerShell({
         isMagazine ? "talisbooks-viewer--magazine" : "talisbooks-viewer--hardcover",
       ].join(" ")}
     >
-      <header className="talisbooks-viewer__header">
-        <div>
-          <p className="talisbooks-viewer__eyebrow">
-            {isMagazine
-              ? book.listingProfile === "fsbo"
-                ? "Talisbooks™ FSBO Demo"
-                : "Talisbooks™ Magazine"
-              : "Talisbooks™ Viewer"}
-          </p>
-          <h1 className="talisbooks-viewer__title">{book.title}</h1>
-          {book.subtitle ? (
-            <p className="talisbooks-viewer__subtitle">{book.subtitle}</p>
-          ) : null}
-        </div>
-        <div
-          className={[
-            "talisbooks-viewer__header-actions",
-            isPinnedShowcase ? "talisbooks-viewer__header-actions--matched" : "",
-          ].join(" ")}
-        >
-          {book.pdfDownloadUrl ? (
-            <a
-              href={book.pdfDownloadUrl}
-              download={book.pdfDownloadFileName || true}
-              className="talisbooks-viewer__back"
-            >
-              Download PDF
-            </a>
-          ) : null}
-          <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
-            {backLinkLabel}
-          </Link>
-          {isPinnedShowcase ? (
-            <Link href={ROUTES.HOME} className="talisbooks-viewer__back">
-              Home
-            </Link>
-          ) : null}
-          {isPinnedShowcase ? (
-            <Link href={ROUTES.ADMIN_DASHBOARD} className="talisbooks-viewer__back">
-              Global Admin
-            </Link>
-          ) : null}
-          {!isPinnedShowcase && showDashboard ? (
-            <Link href={TALISBOOKS_ROUTES.DASHBOARD} className="talisbooks-viewer__back">
-              Dashboard
-            </Link>
-          ) : null}
-        </div>
-      </header>
-
+      <TalisBooksViewerBrandRail book={book} />
+      <TalisBooksViewerPlaybackRail
+        viewMode={viewMode}
+        autoPlaying={autoPlaying}
+        intervalMs={intervalMs}
+        onViewModeChange={handleViewModeChange}
+        onToggleAutoplay={handleToggleAutoplay}
+        onIntervalChange={setIntervalMs}
+      />
       <div className="talisbooks-viewer__layout">
         <div className="talisbooks-viewer__stage-column">
           <TalisBooksViewerStage
@@ -524,7 +467,7 @@ export default function TalisBooksViewerShell({
             onOpenBook={handleOpenBook}
           />
         </div>
-        {canEditTools ? (
+        {showViewerSidebar && canEditTools ? (
           <aside className="talisbooks-viewer__sidebar">
             <TalisBooksViewerControls
               pageLabel={pageLabel}

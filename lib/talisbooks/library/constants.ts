@@ -27,11 +27,49 @@ export const TALISBOOKS_ECOSYSTEM_SHELF_PROFILES = [
 export const TALISBOOKS_LIBRARY_FEATURED_CAPACITY_GRID = 6; // 3×2
 export const TALISBOOKS_LIBRARY_FEATURED_CAPACITY_HERO = 5; // 1 large + 4 small
 
-/** Right niche: general library — 4 columns × 5 rows. */
+/** Right niche: general library — up to 20 books, shrinking every 5. */
 export const TALISBOOKS_LIBRARY_GENERAL_COLUMNS = 4;
 export const TALISBOOKS_LIBRARY_GENERAL_ROWS = 5;
 export const TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE =
   TALISBOOKS_LIBRARY_GENERAL_COLUMNS * TALISBOOKS_LIBRARY_GENERAL_ROWS; // 20
+export const TALISBOOKS_LIBRARY_GENERAL_SCALE_STEP = 5;
+export const TALISBOOKS_LIBRARY_GENERAL_SCALE_REDUCTION = 0.25;
+
+/** Right-shelf book scale: full size for the first 5, then −25% for every
+ * additional 5 until 20 books (1 → 0.75 → 0.5 → 0.25).
+ */
+export function generalShelfBookScale(bookCount: number): number {
+  const count = Math.min(
+    Math.max(bookCount, 0),
+    TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
+  );
+  if (count <= 0) return 1;
+  const steps = Math.floor((count - 1) / TALISBOOKS_LIBRARY_GENERAL_SCALE_STEP);
+  return Math.max(0.25, 1 - steps * TALISBOOKS_LIBRARY_GENERAL_SCALE_REDUCTION);
+}
+
+/** Plank column count — leftover slots stay empty on the left so books start at the right. */
+export function generalShelfColumns(bookCount: number): number {
+  const count = Math.min(
+    Math.max(bookCount, 1),
+    TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
+  );
+  if (count <= 15) return 5;
+  return TALISBOOKS_LIBRARY_GENERAL_COLUMNS;
+}
+
+/**
+ * Lay a newest-first list onto shelf rows packed from the right.
+ * Rightmost book in each row is the newest in that row.
+ */
+export function packShelfRowsNewestAtRight<T>(items: T[], columns: number): T[][] {
+  const width = Math.max(1, columns);
+  const rows: T[][] = [];
+  for (let index = 0; index < items.length; index += width) {
+    rows.push(items.slice(index, index + width).reverse());
+  }
+  return rows;
+}
 
 /** @deprecated Prefer GENERAL_PAGE_SIZE for the split shelf. */
 export const TALISBOOKS_LIBRARY_PAGE_SIZE = TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE;
@@ -42,8 +80,8 @@ export const TALISBOOKS_LIBRARY_SORT_OPTIONS: Array<{
   value: TalisBooksLibrarySort;
   label: string;
 }> = [
-  { value: "title_asc", label: "Name" },
   { value: "published_desc", label: "Date" },
+  { value: "title_asc", label: "Name" },
   { value: "views_desc", label: "Most viewed" },
   { value: "clicks_desc", label: "Most clicked" },
   { value: "status", label: "Status" },

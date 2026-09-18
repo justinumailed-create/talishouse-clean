@@ -38,7 +38,6 @@ import {
 } from "@/lib/talispros/mapsite-onboarding-phase";
 import { ROUTES } from "@/lib/routes";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
-import MapSiteExpressInterestCard from "./MapSiteExpressInterestCard";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
 import MapSiteMarketPartnerCard from "./MapSiteMarketPartnerCard";
 import MapSitePaymentCard from "./MapSitePaymentCard";
@@ -75,7 +74,7 @@ interface MapSiteApplicationProps {
   showStartHere?: boolean;
   /** Claim-form plan for activation checkout display (full Root Account™). */
   paymentPlanType?: PlanType;
-  /** Completed activation payment on file — unlocks Express Interest. */
+  /** Completed activation payment on file — unlocks listing resources. */
   paymentReceived?: boolean;
   /** Whether a Talisbook™ exists for this Mapsite™ / FAST Code. */
   hasTalisBook?: boolean;
@@ -204,6 +203,7 @@ export default function MapSiteApplication({
       onMapDragStart={dismissIfUserGesture}
       onMapZoom={dismissIfUserGesture}
       basemapView="satellite"
+      scrollZoom={false}
     >
       <MapSiteChrome
         mapsite={mapsite}
@@ -544,15 +544,10 @@ function MapSiteChrome({
     onboardingMode === "assisted"
       ? "Register Account now"
       : "Register Account now";
-  // Express Interest only after payment. Checkout uses claim-form planType;
-  // auto-reveals above the marketing sidebar 10s after load (or immediately via Activate).
+  // Paid Mapsites™: agency logo merges into the manager cloud. Unpaid: checkout
+  // uses claim-form planType and auto-reveals 10s after load (or via Activate).
   const registrationCard =
-    isDemoListing ? null : claimed && paid && mapsite.fast_code ? (
-      <MapSiteExpressInterestCard
-        fastCode={mapsite.fast_code}
-        propertyTitle={mapsite.property_title}
-      />
-    ) : claimed && !paid && showDelayedPayment ? (
+    !isDemoListing && claimed && !paid && showDelayedPayment ? (
       <MapSitePaymentCard
         audience={audience}
         mapsiteId={mapsite.id}
@@ -565,7 +560,7 @@ function MapSiteChrome({
     ) : null;
 
   return (
-    <div className="relative flex h-dvh w-screen flex-col overflow-hidden bg-neutral-900">
+    <div className="relative flex h-dvh max-h-dvh w-screen flex-col overflow-hidden overscroll-none bg-neutral-900">
       <div
         ref={rootRef}
         className="relative min-h-0 flex-1 overflow-hidden bg-neutral-900"
@@ -595,6 +590,8 @@ function MapSiteChrome({
                   mapsite={mapsite}
                   cardRef={listingCardRef}
                   onSelect={focusPinAndOpen}
+                  isDemoEbook={isDemoMapSiteCode(mapsite.fast_code)}
+                  paid={paid}
                 />
               ) : null
             }

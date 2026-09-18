@@ -52,6 +52,7 @@ export {
 export { toMapEnginePin, toMapEnginePins } from "./pin-adapters";
 export {
   allowMapGestures,
+  allowMapScrollZoom,
   shouldAutoFitPinsOnMount,
 } from "./mount-flags";
 export {

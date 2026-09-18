@@ -1,16 +1,22 @@
 "use client";
 
 import { useDeferredValue, useMemo, useState, useTransition } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowDownUp, Search } from "lucide-react";
+import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
 import TalisBooksCreateEbookPanel from "@/components/talisbooks/library/TalisBooksCreateEbookPanel";
 import TalisBooksStandingBook from "@/components/talisbooks/library/TalisBooksStandingBook";
+import { deleteLibraryEbookAction } from "@/app/talisbooks/library/actions";
 import {
   TALISBOOKS_LIBRARY_BOOK_PRICE_USD,
-  TALISBOOKS_LIBRARY_GENERAL_COLUMNS,
   TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
   TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD,
   TALISBOOKS_LIBRARY_SHELF_CAPACITY,
   TALISBOOKS_LIBRARY_SORT_OPTIONS,
+  generalShelfBookScale,
+  generalShelfColumns,
+  packShelfRowsNewestAtRight,
 } from "@/lib/talisbooks/library/constants";
 import { partitionBookshelf } from "@/lib/talisbooks/library/partition";
 import { queryLibraryBooks } from "@/lib/talisbooks/library/query";
@@ -22,6 +28,8 @@ import type {
 
 interface TalisBooksLibraryShellProps {
   bookshelf: TalisBooksBookshelf;
+  canDelete?: boolean;
+  backHref?: string;
 }
 
 function chunkRows<T>(items: T[], columns: number): T[][] {
@@ -36,10 +44,16 @@ function ShelfRow({
   books,
   size,
   startIndex = 0,
+  canDelete = false,
+  deletingId = null,
+  onDelete,
 }: {
   books: TalisBooksLibraryBook[];
   size: "hero" | "featured" | "compact";
   startIndex?: number;
+  canDelete?: boolean;
+  deletingId?: string | null;
+  onDelete?: (book: TalisBooksLibraryBook) => void;
 }) {
   return (
     <div className="talisbooks-library__shelf-bay">
@@ -60,6 +74,9 @@ function ShelfRow({
               index={startIndex + index}
               size={size}
               showMeta={false}
+              canDelete={canDelete}
+              deleting={deletingId === book.id}
+              onDelete={onDelete}
             />
           </div>
         ))}
@@ -72,20 +89,39 @@ function ShelfRow({
   );
 }
 
-export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryShellProps) {
+export default function TalisBooksLibraryShell({
+  bookshelf,
+  canDelete = false,
+  backHref,
+}: TalisBooksLibraryShellProps) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<TalisBooksLibrarySort>("title_asc");
+  const [sort, setSort] = useState<TalisBooksLibrarySort>("published_desc");
   const [page, setPage] = useState(1);
   const [featuredCapacity, setFeaturedCapacity] = useState<5 | 6>(5);
+  const [deletedIds, setDeletedIds] = useState<string[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const deferredSearch = useDeferredValue(search);
   const scoped = Boolean(bookshelf.scopedToFastCode && bookshelf.fastCode);
   const publicCatalog = Boolean(bookshelf.publicCatalog);
   const createdCatalog = Boolean(bookshelf.createdCatalog);
 
+  const mapsiteHref =
+    backHref?.trim() || mapsiteBackFromScheduleHref(bookshelf.fastCode);
+
+  const visibleBooks = useMemo(
+    () => bookshelf.books.filter((book) => !deletedIds.includes(book.id)),
+    [bookshelf.books, deletedIds],
+  );
+
   const { featured, general, featuredLayout } = useMemo(
-    () => partitionBookshelf(bookshelf.books, { featuredCapacity }),
-    [bookshelf.books, featuredCapacity],
+    () =>
+      partitionBookshelf(visibleBooks, {
+        featuredCapacity,
+        featuredMode: scoped || createdCatalog ? "highlights" : "fill",
+      }),
+    [visibleBooks, featuredCapacity, scoped, createdCatalog],
   );
 
   const generalResult = useMemo(
@@ -99,21 +135,58 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
     [general, deferredSearch, sort, page],
   );
 
+  const generalCount = generalResult.books.length;
+  const generalColumns = generalShelfColumns(generalCount);
+  const generalScale = generalShelfBookScale(generalCount);
+
   const generalRows = useMemo(
-    () => chunkRows(generalResult.books, TALISBOOKS_LIBRARY_GENERAL_COLUMNS),
-    [generalResult.books],
+    () => packShelfRowsNewestAtRight(generalResult.books, generalColumns),
+    [generalResult.books, generalColumns],
   );
 
-  const stocked = Math.min(bookshelf.books.length, TALISBOOKS_LIBRARY_SHELF_CAPACITY);
+  const stocked = Math.min(visibleBooks.length, TALISBOOKS_LIBRARY_SHELF_CAPACITY);
   const monthlyEstimate = Math.round(stocked * TALISBOOKS_LIBRARY_BOOK_PRICE_USD * 100) / 100;
 
   const heroBook = featuredLayout === "hero-plus-4" ? featured[0] : null;
   const featuredRest =
     featuredLayout === "hero-plus-4" ? featured.slice(1) : featured;
   const primary = bookshelf.primaryEbook;
+  const shelfControls = {
+    canDelete,
+    deletingId,
+    onDelete: async (book: TalisBooksLibraryBook) => {
+      const title = book.title.trim() || "this ebook";
+      if (
+        !window.confirm(
+          `Delete “${title}”? This removes it from the shelf and cannot be undone.`,
+        )
+      ) {
+        return;
+      }
+
+      setDeletingId(book.id);
+      const result = await deleteLibraryEbookAction(book.id);
+      setDeletingId(null);
+      if (!result.success) {
+        window.alert(result.error || "Could not delete this ebook.");
+        return;
+      }
+      setDeletedIds((current) =>
+        current.includes(book.id) ? current : [...current, book.id],
+      );
+      startTransition(() => {
+        router.refresh();
+      });
+    },
+  };
 
   return (
     <div className="talisbooks-library">
+      <div className="talisbooks-library__nav">
+        <Link href={mapsiteHref} className="talisbooks-library__back">
+          Back to Mapsite™
+        </Link>
+      </div>
       <header className="talisbooks-library__topbar">
         <div className="talisbooks-library__brand">
           <p className="talisbooks-library__eyebrow">
@@ -166,9 +239,9 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
                   : "Search TalisBooks™…"
                 : createdCatalog
                   ? "Search FAST books…"
-                : scoped
-                  ? "Search this shelf…"
-                  : "Search library…"
+                  : scoped
+                    ? "Search this shelf…"
+                    : "Search library…"
             }
             className="talisbooks-library__search-input"
           />
@@ -265,33 +338,47 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
                 {featured.length === 0 ? (
                   <div className="talisbooks-library__niche-empty">
                     <p>
-                      {publicCatalog
-                        ? "No published TalisBooks™ yet"
-                        : createdCatalog
-                          ? "No created FAST Talisbooks™ yet"
-                          : scoped
-                            ? "No ebook on this FAST Code shelf yet"
-                            : "No highlighted books yet"}
+                      {visibleBooks.length > 0
+                        ? "No featured TalisBooks™ yet"
+                        : publicCatalog
+                          ? "No published TalisBooks™ yet"
+                          : createdCatalog
+                            ? "No created FAST Talisbooks™ yet"
+                            : scoped
+                              ? "No ebook on this FAST Code shelf yet"
+                              : "No highlighted books yet"}
                     </p>
                   </div>
                 ) : featuredLayout === "hero-plus-4" && heroBook ? (
                   <div className="talisbooks-library__featured talisbooks-library__featured--hero">
-                    <ShelfRow books={[heroBook]} size="hero" startIndex={0} />
+                    <ShelfRow books={[heroBook]} size="hero" startIndex={0} {...shelfControls} />
                     <ShelfRow
                       books={featuredRest.slice(0, 2)}
                       size="featured"
                       startIndex={1}
+                      {...shelfControls}
                     />
                     <ShelfRow
                       books={featuredRest.slice(2, 4)}
                       size="featured"
                       startIndex={3}
+                      {...shelfControls}
                     />
                   </div>
                 ) : (
                   <div className="talisbooks-library__featured talisbooks-library__featured--grid">
-                    <ShelfRow books={featured.slice(0, 3)} size="featured" startIndex={0} />
-                    <ShelfRow books={featured.slice(3, 6)} size="featured" startIndex={3} />
+                    <ShelfRow
+                      books={featured.slice(0, 3)}
+                      size="featured"
+                      startIndex={0}
+                      {...shelfControls}
+                    />
+                    <ShelfRow
+                      books={featured.slice(3, 6)}
+                      size="featured"
+                      startIndex={3}
+                      {...shelfControls}
+                    />
                   </div>
                 )}
               </div>
@@ -303,6 +390,7 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
           <section
             className="talisbooks-library__niche talisbooks-library__niche--general"
             aria-label="General library"
+            style={{ ["--general-book-scale" as string]: String(generalScale) }}
           >
             <div className="talisbooks-library__niche-inner">
               <div className="talisbooks-library__niche-header talisbooks-library__niche-header--end">
@@ -353,7 +441,8 @@ export default function TalisBooksLibraryShell({ bookshelf }: TalisBooksLibraryS
                       key={`general-row-${rowIndex}`}
                       books={row}
                       size="compact"
-                      startIndex={rowIndex * TALISBOOKS_LIBRARY_GENERAL_COLUMNS}
+                      startIndex={rowIndex * generalColumns}
+                      {...shelfControls}
                     />
                   ))
                 )}

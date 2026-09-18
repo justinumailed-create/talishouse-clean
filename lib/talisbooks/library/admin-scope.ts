@@ -65,3 +65,19 @@ export function filterMapSitesForAdminLibrary<T extends { fastCode: string }>(
     return true;
   });
 }
+
+/**
+ * FAST-scope check for library deletes. Authentication is enforced separately
+ * so anonymous visitors cannot use the same unscoped catalog view to delete.
+ */
+export function canAdminDeleteLibraryBook(
+  book: DemonstrationCatalogBookLike,
+  scope: TalisBooksAdminLibraryScope,
+): boolean {
+  if (scope.excludeDemonstrationCatalog && isDemonstrationCatalogBook(book)) {
+    return false;
+  }
+  if (!scope.fastCode) return true;
+  const bookCode = book.fastCode?.trim().toLowerCase() || "";
+  return bookCode === scope.fastCode;
+}

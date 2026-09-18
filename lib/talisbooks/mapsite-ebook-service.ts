@@ -9,6 +9,12 @@ import {
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { listingImageUrlsFromEbookPages } from "@/lib/talispros/mapsite-listing-media";
 import { parseMapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
+import {
+  mergeRm22Hydration,
+  parseRm22SlotHydration,
+  rm22HydrationFromPageContents,
+  type Rm22SlotHydration,
+} from "@/lib/talisbooks/rm22-template";
 import type { TalisBooksLibraryBook } from "./library/types";
 import { TALISBOOKS_COVER_TEMPLATES } from "./covers/catalog";
 import type { TalisBooksCoverTemplateId } from "./covers/constants";
@@ -96,9 +102,12 @@ export type MapSiteEbookDraft = {
   subtitle: string;
   description: string;
   coverImageUrl: string | null;
+  backCoverImageUrl?: string | null;
   listingImageUrls?: string[];
   flagIdentity?: "address" | "name";
   flagName?: string | null;
+  isRm22Template?: boolean;
+  rm22Hydration?: Rm22SlotHydration | null;
 };
 
 export type MapSiteEbookContext = {
@@ -260,6 +269,10 @@ function toDraft(
     description: row.description,
     coverImageUrl:
       typeof metadata.coverImageUrl === "string" ? metadata.coverImageUrl : null,
+    backCoverImageUrl:
+      typeof metadata.backCoverImageUrl === "string"
+        ? metadata.backCoverImageUrl
+        : null,
     listingImageUrls,
     flagIdentity: parseMapsiteFlagIdentity(
       typeof metadata.flagIdentity === "string" ? metadata.flagIdentity : null,
@@ -271,12 +284,21 @@ function toDraft(
   };
 }
 
+/** Load TEB™ books for issued FAST Codes and demo-* Mapsites™. Bare `demo` is not a shelf. */
+export function canLoadMapSiteEbookContext(
+  fastCode: string | null | undefined,
+): boolean {
+  const code = fastCode?.trim().toLowerCase() || "";
+  return Boolean(code && code !== "demo");
+}
+
 export async function getMapSiteEbookContext(
   fastCodeRaw: string,
-  options?: { bookSlug?: string | null },
+  options?: { bookSlug?: string | null; includeRm22Editor?: boolean },
 ): Promise<MapSiteEbookContext | null> {
   const fastCode = fastCodeRaw.trim().toLowerCase();
-  if (!fastCode || fastCode === "demo" || isDemoMapSiteCode(fastCode)) return null;
+  if (!canLoadMapSiteEbookContext(fastCode)) return null;
+  const isDemoCode = isDemoMapSiteCode(fastCode);
   if (!isSupabaseAdminConfigured()) {
     return {
       fastCode,
@@ -366,12 +388,14 @@ export async function getMapSiteEbookContext(
     }
   }
 
-  const paymentReceived = await hasCompletedMapSiteActivationPayment({
-    email: mapsiteByCode?.email,
-    mapsiteId,
-    fastCode,
-    requestId,
-  });
+  const paymentReceived = isDemoCode
+    ? true
+    : await hasCompletedMapSiteActivationPayment({
+        email: mapsiteByCode?.email,
+        mapsiteId,
+        fastCode,
+        requestId,
+      });
 
   const primaryRow = bookRows[0]
     ? {
@@ -394,6 +418,28 @@ export async function getMapSiteEbookContext(
     listingImageUrls = await loadListingImagesFromBookPages(primaryRow.id);
   }
 
+  const primaryEbook = toDraft(primaryRow, listingImageUrls);
+  if (options?.includeRm22Editor && primaryEbook && primaryRow) {
+    const metadata = primaryRow.metadata ?? {};
+    const stored = parseRm22SlotHydration(metadata.rm22SlotHydration);
+    const { data: templatePages } = await supabase
+      .from("talisbooks_book_pages")
+      .select("page_number, content")
+      .eq("book_id", primaryEbook.id)
+      .order("page_number", { ascending: true });
+    const fromPages = rm22HydrationFromPageContents(templatePages ?? []);
+    const merged = mergeRm22Hydration(stored, fromPages);
+    if (merged) {
+      merged.frontImageUrl =
+        merged.frontImageUrl || primaryEbook.coverImageUrl;
+      merged.backAgentImageUrl =
+        merged.backAgentImageUrl || primaryEbook.backCoverImageUrl || null;
+    }
+    primaryEbook.rm22Hydration = merged;
+    primaryEbook.isRm22Template =
+      Boolean(metadata.rm22Template) || Boolean(fromPages);
+  }
+
   return {
     fastCode,
     mapsiteId,
@@ -414,7 +460,7 @@ export async function getMapSiteEbookContext(
         index
       )
     ),
-    primaryEbook: toDraft(primaryRow, listingImageUrls),
+    primaryEbook,
   };
 }
 
@@ -536,6 +582,12 @@ export async function upsertMapSiteEbook(input: {
   const fastCode = input.fastCode.trim().toLowerCase();
   const title = input.title.trim();
   if (!fastCode) return { success: false, error: "FAST Code is required." };
+  if (fastCode === "demo" || isDemoMapSiteCode(fastCode)) {
+    return {
+      success: false,
+      error: "Demonstration Mapsites™ cannot add more Talisbooks™ from this shelf.",
+    };
+  }
   if (!title) return { success: false, error: "Ebook title is required." };
   if (!isSupabaseAdminConfigured()) {
     return { success: false, error: "Database is not configured." };

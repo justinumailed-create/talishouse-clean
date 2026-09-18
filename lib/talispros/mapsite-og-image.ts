@@ -121,6 +121,21 @@ export function mapsiteOgMetadataImage(
   };
 }
 
+/** Title and description WhatsApp / Open Graph use when SEO fields are empty. */
+export function mapsiteRealtimeSeoCopy(input: {
+  fastCode: string;
+  propertyTitle?: string | null;
+  propertyDescription?: string | null;
+}): { title: string; description: string } {
+  const code = input.fastCode.trim().toUpperCase();
+  const property = input.propertyTitle?.trim() || "";
+  const description = input.propertyDescription?.trim() || "";
+  return {
+    title: property ? `${property} | Mapsite™` : `${code || "Mapsite™"} | Mapsite™`,
+    description: description || (code ? `Mapsite™ ${code}` : "Mapsite™"),
+  };
+}
+
 export async function resolveMapSiteOgImage(
   fastCodeRaw: string,
   options?: {

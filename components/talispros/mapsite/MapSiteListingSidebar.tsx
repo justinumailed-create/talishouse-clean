@@ -10,12 +10,12 @@ interface MapSiteListingSidebarProps {
   listingCardRef?: RefObject<HTMLDivElement | null>;
   /** Narrow viewports: full-width stacked overlay instead of left float. */
   compact?: boolean;
-  /** Phone layout: search at top and manager summary strip at bottom. */
+  /** Phone layout: stacked overlay instead of a left float. */
   mobileOverlay?: boolean;
   onSelectListing: () => void;
   /** Partner / FAST marketing sidebar (claimed). */
   aboveCard?: ReactNode;
-  /** Payment CTA or Express Interest — rendered above the marketing sidebar. */
+  /** Payment CTA — rendered above the marketing sidebar on unpaid claimed Mapsites™. */
   belowCard?: ReactNode;
 }
 
@@ -49,30 +49,17 @@ export default function MapSiteListingSidebar({
         className={
           mobileOverlay
             ? "pointer-events-none flex h-full min-h-0 flex-1 flex-col gap-3"
-            : "pointer-events-auto flex h-full min-h-0 max-h-full flex-1 flex-col gap-3 overflow-y-auto overscroll-y-contain touch-pan-y pr-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            : "pointer-events-auto flex h-full min-h-0 max-h-full flex-1 flex-col gap-3 overflow-hidden pr-0.5"
         }
-        onWheel={stopMapScrollSteal}
       >
-        <div className="pointer-events-auto flex min-h-11 shrink-0 items-center gap-2 rounded-full bg-white/50 px-3 py-2 shadow-md ring-1 ring-black/5 backdrop-blur-sm">
-          <svg
-            viewBox="0 0 24 24"
-            className="h-4 w-4 shrink-0 text-neutral-500"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            aria-hidden
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="m20 20-3.5-3.5" />
-          </svg>
-          <input
-            type="search"
-            placeholder="Search..."
-            className="w-full bg-transparent text-base text-neutral-700 outline-none placeholder:text-neutral-400 sm:text-sm"
-            aria-label="Search Mapsite™"
-          />
-        </div>
-
+        <div
+          className={
+            mobileOverlay
+              ? "pointer-events-none flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain"
+              : "flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain"
+          }
+          onWheel={stopMapScrollSteal}
+        >
         {belowCard ? (
           <div
             className={
@@ -111,6 +98,7 @@ export default function MapSiteListingSidebar({
             </button>
           </div>
         )}
+        </div>
       </div>
     </aside>
   );

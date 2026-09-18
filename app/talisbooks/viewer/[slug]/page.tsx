@@ -76,10 +76,9 @@ export default async function TalisBooksViewerSlugPage({
     ? await hasCompletedMapSiteActivationPayment({ fastCode: book.fastCode })
     : false;
 
-  // Dashboard + Live Edit only after payment (Marketing Admin bypass).
-  // Demonstration books never unlock insert-pages for visitors.
-  const showDashboard = isAdmin || (!isDemoBook && paymentReceived);
-  const canLiveEdit = isAdmin || (!isDemoBook && paymentReceived && canEditTools);
+  // Live Edit only after activation payment — never on demonstration books,
+  // and never via admin bypass.
+  const canLiveEdit = !isDemoBook && paymentReceived && canEditTools;
 
   return (
     <TalisBooksViewerShell
@@ -87,7 +86,6 @@ export default async function TalisBooksViewerSlugPage({
       canEditTools={canEditTools}
       canLiveEdit={canLiveEdit}
       pageInsertLocked={isDemoBook}
-      showDashboard={showDashboard}
     />
   );
 }

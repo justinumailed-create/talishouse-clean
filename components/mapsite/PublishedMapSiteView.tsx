@@ -3,6 +3,7 @@ import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
 import { createMetadata } from "@/lib/seo";
 import {
   mapsiteOgMetadataImage,
+  mapsiteRealtimeSeoCopy,
   resolveMapSiteOgImage,
 } from "@/lib/talispros/mapsite-og-image";
 import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
@@ -197,12 +198,14 @@ export async function publishedMapSiteMetadata(mapsite: MapSiteView) {
       layoutData.overlayImageUrl,
     ],
   });
+  const copy = mapsiteRealtimeSeoCopy({
+    fastCode: mapsite.fastCode,
+    propertyTitle: layoutData.propertyTitle,
+    propertyDescription: layoutData.summary.description,
+  });
   return createMetadata({
-    title: layoutData.metaTitle || `${layoutData.propertyTitle} | Mapsite™`,
-    description:
-      layoutData.metaDescription ||
-      layoutData.summary.description ||
-      `Mapsite™ ${code}`,
+    title: layoutData.metaTitle?.trim() || copy.title,
+    description: layoutData.metaDescription?.trim() || copy.description,
     path: `/mapsite/${slug}`,
     image: mapsiteOgMetadataImage(ogImage, `Mapsite™ ${code}`),
   });
