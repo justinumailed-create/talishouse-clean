@@ -11,6 +11,7 @@ import {
   saveMapSiteDraft,
   unpublishMapSite,
   uploadMapSiteAsset,
+  type MapSiteAdminActionResult,
   type MapSiteAdminInput,
 } from "@/lib/mapsite-admin-service";
 import MapSiteGalleryEditor from "@/components/admin/MapSiteGalleryEditor";
@@ -178,7 +179,7 @@ export default function MapSiteAdminEditor({
   }
 
   async function runAction(
-    action: (input: MapSiteAdminInput) => Promise<{ success: boolean; error?: string }>
+    action: (input: MapSiteAdminInput) => Promise<MapSiteAdminActionResult>
   ) {
     setSaving(true);
     setMessage("");
