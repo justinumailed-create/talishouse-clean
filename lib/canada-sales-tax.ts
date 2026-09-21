@@ -330,8 +330,8 @@ export function canadaTaxWord(rate: CanadaTaxRate): string {
 }
 
 export function formatCanadaTaxPercent(rate: number): string {
-  const percent = rate * 100;
-  return Number.isInteger(percent) ? `${percent}%` : `${percent.toFixed(3)}%`;
+  const percent = Number((rate * 100).toFixed(3));
+  return Number.isInteger(percent) ? `${percent}%` : `${percent}%`;
 }
 
 export function roundCadCents(amount: number): number {

@@ -5,6 +5,7 @@ import {
   CANADA_TAX_RATES_AS_OF,
   canadaTaxWord,
   computeCanadaSalesTax,
+  formatCanadaTaxPercent,
   parseCanadaProvince,
   resolvePlaceOfSupplyProvince,
 } from "@/lib/canada-sales-tax";
@@ -51,6 +52,12 @@ describe("Canada GST/HST/PST table", () => {
     expect(qc.taxAmount).toBe(14.98);
     expect(qc.total).toBe(114.98);
     expect(qc.taxWord).toBe("GST + QST");
+  });
+
+  it("formats whole percents without trailing zeros", () => {
+    expect(formatCanadaTaxPercent(0.14)).toBe("14%");
+    expect(formatCanadaTaxPercent(0.05)).toBe("5%");
+    expect(formatCanadaTaxPercent(0.14975)).toBe("14.975%");
   });
 
   it("labels HST, GST, and GST + provincial taxes correctly", () => {
