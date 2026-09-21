@@ -9,8 +9,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { saveRegistration, type RegistrationInput } from "./actions";
 import { formatCAD } from "@/utils/currency";
-
-const TAX_RATE = 0.14;
+import {
+  canadaTaxWord,
+  computeCanadaSalesTax,
+  type CanadaProvinceCode,
+} from "@/lib/canada-sales-tax";
+import CanadaProvinceSelect from "@/components/CanadaProvinceSelect";
 
 const ADPRE_PACKAGES = [
   {
@@ -53,11 +57,14 @@ function RegisterForm() {
   );
   const [error, setError] = useState("");
   const [step, setStep] = useState<"form" | "processing">("form");
+  const [province, setProvince] = useState<CanadaProvinceCode | "">("");
 
   const pkg = ADPRE_PACKAGES.find((p) => p.value === selectedPackage)!;
   const subtotal = pkg.price;
-  const taxes = subtotal * TAX_RATE;
-  const totalDue = subtotal + taxes;
+  const taxBreakdown = province ? computeCanadaSalesTax(subtotal, province) : null;
+  const taxes = taxBreakdown?.taxAmount ?? 0;
+  const totalDue = taxBreakdown?.total ?? subtotal;
+  const taxWord = taxBreakdown ? canadaTaxWord(taxBreakdown.rate) : "tax";
 
   const fastCode = useDefaultFastCode
     ? "DEFAULT"
@@ -70,6 +77,7 @@ function RegisterForm() {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       return "Valid email is required";
     if (!selectedPackage) return "Select a package";
+    if (!province) return "Province / territory is required for tax";
     if (!useDefaultFastCode && overrideFastCode.trim()) {
       if (overrideFastCode.trim().length < 3)
         return "FAST Code must be at least 3 characters";
@@ -195,7 +203,9 @@ function RegisterForm() {
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-neutral-500">Taxes (14%)</span>
+                  <span className="text-neutral-500">
+                    {province ? taxWord : "Tax (select province)"}
+                  </span>
                   <span className="text-neutral-900 font-medium">
                     {formatCAD(taxes)}
                   </span>
@@ -220,6 +230,9 @@ function RegisterForm() {
                     <PayPalButtons
                       style={{ layout: "vertical", color: "blue", shape: "rect" }}
                       createOrder={(data, actions) => {
+                        if (!province) {
+                          throw new Error("Province is required");
+                        }
                         return actions.order.create({
                           intent: "CAPTURE",
                           purchase_units: [{
@@ -326,6 +339,17 @@ function RegisterForm() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="(555) 123-4567"
+                    className="w-full h-11 px-4 bg-white border border-neutral-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-medium text-neutral-500 mb-1.5 block">
+                    Province / territory <span className="text-red-400">*</span>
+                  </label>
+                  <CanadaProvinceSelect
+                    value={province}
+                    onChange={setProvince}
                     className="w-full h-11 px-4 bg-white border border-neutral-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
                   />
                 </div>

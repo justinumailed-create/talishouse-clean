@@ -7,9 +7,14 @@ import {
   type PricingConfig,
 } from "@/lib/config/pricing";
 import { ToastContainer, useToast, Modal, LoadingButton } from "@/components/Toast";
+import {
+  CANADA_TAX_RATE_LIST,
+  CANADA_TAX_RATES_AS_OF,
+  canadaTaxWord,
+  formatCanadaTaxPercent,
+} from "@/lib/canada-sales-tax";
 
 const FALLBACK_CONFIG: PricingConfig = {
-  taxRate: 0.14,
   paymentOptions: {
     full: { enabled: true },
     partial: { enabled: true, percentage: 0.05 },
@@ -47,7 +52,7 @@ export default function PricingAdminPage() {
     try {
       const { data, error } = await supabase
         .from("pricing_config")
-        .select("tax_rate, full_payment_enabled, partial_payment_enabled")
+        .select("full_payment_enabled, partial_payment_enabled")
         .single();
 
       if (error) {
@@ -60,7 +65,6 @@ export default function PricingAdminPage() {
       if (data) {
         setConfig((prev) => ({
           ...prev,
-          taxRate: data.tax_rate ?? prev.taxRate,
           paymentOptions: {
             ...prev.paymentOptions,
             full: { ...prev.paymentOptions.full, enabled: data.full_payment_enabled ?? true },
@@ -89,7 +93,6 @@ export default function PricingAdminPage() {
         .single();
 
       const updatePayload = {
-        tax_rate: config.taxRate,
         full_payment_enabled: config.paymentOptions.full.enabled,
         partial_payment_enabled: config.paymentOptions.partial.enabled,
         updated_at: new Date().toISOString(),
@@ -132,13 +135,6 @@ export default function PricingAdminPage() {
       error("Failed to save configuration.");
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const updateTaxRate = (value: string) => {
-    const num = parseFloat(value) / 100;
-    if (!isNaN(num) && num >= 0 && num <= 1) {
-      setConfig((prev) => ({ ...prev, taxRate: num }));
     }
   };
 
@@ -298,25 +294,42 @@ export default function PricingAdminPage() {
       </div>
 
       <div className="space-y-6">
-        {/* Tax Rate */}
+        {/* Canada sales tax (CRA) */}
         <section className="card">
-          <h2 className="text-lg font-semibold mb-4">Tax Rate</h2>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <label className="text-sm text-gray-600 min-w-[140px]">Tax Percentage</label>
-            <div className="flex items-center">
-              <input
-                type="number"
-                value={(config.taxRate * 100).toFixed(2)}
-                onChange={(e) => updateTaxRate(e.target.value)}
-                className="input w-28"
-                min="0"
-                max="100"
-                step="0.01"
-              />
-              <span className="ml-2 text-gray-600">%</span>
-            </div>
+          <h2 className="text-lg font-semibold mb-2">Canada sales tax</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Checkout uses CRA GST / HST / PST (RST/QST) rates by province and
+            territory (as of {CANADA_TAX_RATES_AS_OF}). These rates are code
+            constants — they are not a single editable Canada-wide percentage.
+          </p>
+          <div className="border rounded-lg overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-3 py-2 text-left font-medium text-gray-600">Place</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-600">Regime</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-600">Label</th>
+                  <th className="px-3 py-2 text-right font-medium text-gray-600">Combined</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {CANADA_TAX_RATE_LIST.map((rate) => (
+                  <tr key={rate.code}>
+                    <td className="px-3 py-2">
+                      {rate.name} ({rate.code})
+                    </td>
+                    <td className="px-3 py-2 text-gray-600">
+                      {canadaTaxWord(rate)}
+                    </td>
+                    <td className="px-3 py-2 text-gray-600">{rate.displayLabel}</td>
+                    <td className="px-3 py-2 text-right font-mono">
+                      {formatCanadaTaxPercent(rate.combinedRate)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <p className="text-xs text-gray-500 mt-3">Current: {(config.taxRate * 100).toFixed(2)}% ({(config.taxRate).toFixed(4)} as decimal)</p>
         </section>
 
         {/* Payment Options */}

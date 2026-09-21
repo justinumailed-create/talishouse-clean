@@ -22,6 +22,8 @@ import {
   registrationTotalFor,
   type PlanType,
 } from "@/lib/registration-plans";
+import type { CanadaProvinceCode } from "@/lib/canada-sales-tax";
+import CanadaProvinceSelect from "@/components/CanadaProvinceSelect";
 
 interface RootAccountRegistrationFormProps {
   variant?: "page" | "panel";
@@ -71,6 +73,7 @@ export default function RootAccountRegistrationForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
+  const [province, setProvince] = useState<CanadaProvinceCode | "">("");
   const [error, setError] = useState("");
   const [processing, setProcessing] = useState(false);
   const [paypalKey, setPaypalKey] = useState(0);
@@ -190,6 +193,7 @@ export default function RootAccountRegistrationForm({
     if (!email.trim()) return "Email is required";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()))
       return "Valid email is required";
+    if (!province) return "Province / territory is required for tax";
     return null;
   }
 
@@ -377,6 +381,9 @@ export default function RootAccountRegistrationForm({
           if (!ok) {
             throw new Error("Validation failed");
           }
+          if (!province) {
+            throw new Error("Province is required");
+          }
           return actions.order.create({
             intent: "CAPTURE",
             purchase_units: [
@@ -384,7 +391,7 @@ export default function RootAccountRegistrationForm({
                 description,
                 amount: {
                   currency_code: "CAD",
-                  value: registrationTotalFor(price).toFixed(2),
+                  value: registrationTotalFor(price, province).toFixed(2),
                 },
               },
             ],
@@ -661,6 +668,22 @@ export default function RootAccountRegistrationForm({
                   className={inputClass}
                 />
               </div>
+            </div>
+            <div>
+              <label className="text-xs font-medium text-neutral-500 mb-1 block">
+                Province / territory <span className="text-red-400">*</span>
+              </label>
+              <CanadaProvinceSelect
+                value={province}
+                onChange={(code) => {
+                  setProvince(code);
+                  setPaypalKey((k) => k + 1);
+                }}
+                className={inputClass}
+              />
+              <p className="mt-1 text-[11px] text-neutral-400">
+                Tax is GST, HST, or GST + PST/RST/QST based on this location.
+              </p>
             </div>
           </div>
         </div>

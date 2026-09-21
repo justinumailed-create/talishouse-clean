@@ -3,6 +3,12 @@ import {
   DEFAULT_PRICING_CONFIG,
   type PricingConfig,
 } from "@/lib/config/pricing";
+import {
+  canadaTaxWord,
+  computeCanadaSalesTax,
+  parseCanadaProvince,
+  resolveCanadaTaxRate,
+} from "@/lib/canada-sales-tax";
 import { formatCAD } from "@/utils/currency";
 
 const PRICING_CONFIG_KEY = "pricing_config";
@@ -21,6 +27,7 @@ export interface PriceCalculationResult {
   discountCode?: string;
   taxRate: number;
   taxAmount: number;
+  taxLabel: string;
   total: number;
 }
 
@@ -83,11 +90,13 @@ export function calculateTotal({
   addons = [],
   discountCode,
   config = PRICING_CONFIG,
+  province,
 }: {
   basePrice: number;
   addons?: Addon[];
   discountCode?: string;
   config?: PricingConfig;
+  province?: string | null;
 }): PriceCalculationResult {
   const addonsTotal = addons.reduce((sum, addon) => sum + addon.price, 0);
   let subtotal = basePrice + addonsTotal;
@@ -104,9 +113,21 @@ export function calculateTotal({
     }
   }
 
-  const taxRate = config.taxRate;
-  const taxAmount = subtotal * taxRate;
-  const total = subtotal + taxAmount;
+  const code = parseCanadaProvince(province);
+  if (code) {
+    const tax = computeCanadaSalesTax(subtotal, code);
+    return {
+      basePrice,
+      addonsTotal,
+      subtotal,
+      discountAmount,
+      discountCode,
+      taxRate: tax.rate.combinedRate,
+      taxAmount: tax.taxAmount,
+      taxLabel: canadaTaxWord(tax.rate),
+      total: tax.total,
+    };
+  }
 
   return {
     basePrice,
@@ -114,9 +135,10 @@ export function calculateTotal({
     subtotal,
     discountAmount,
     discountCode,
-    taxRate,
-    taxAmount,
-    total,
+    taxRate: 0,
+    taxAmount: 0,
+    taxLabel: "tax",
+    total: subtotal,
   };
 }
 
@@ -221,8 +243,8 @@ export function formatPercent(rate: number): string {
   return `${(rate * 100).toFixed(2)}%`;
 }
 
-export function getTaxRate(config = PRICING_CONFIG): number {
-  return config.taxRate;
+export function getTaxRate(province?: string | null): number {
+  return resolveCanadaTaxRate(province)?.combinedRate ?? 0;
 }
 
 export function getInitialPaymentPercent(config = PRICING_CONFIG): number {

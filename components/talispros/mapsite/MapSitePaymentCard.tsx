@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import type { PlanType } from "@/lib/registration-plans";
+import { parseCanadaProvince, type CanadaProvinceCode } from "@/lib/canada-sales-tax";
 import { mapsiteClaimPlanSummary } from "@/lib/talispros/mapsite-audience";
 import { MAPSITE_LISTING_CARD_WIDTH_CLASS } from "@/lib/talispros/mapsite-listing-media";
 import { createMapSiteStripeCheckoutSession } from "@/app/talispros/mapsite/actions";
+import CanadaProvinceSelect from "@/components/CanadaProvinceSelect";
 
 interface MapSitePaymentCardProps {
   audience: RegistrationMarket;
@@ -14,6 +16,8 @@ interface MapSitePaymentCardProps {
   requestId?: string | null;
   /** Plan chosen on Claim a Market (defaults to full Root). Display only. */
   planType?: PlanType;
+  /** Claimed market / property address used to resolve place of supply. */
+  propertyAddress?: string | null;
   /** Phone-only compact card so the map pin remains visible. */
   compact?: boolean;
   checkoutStatus?: "success" | "cancelled" | null;
@@ -44,16 +48,29 @@ export default function MapSitePaymentCard({
   fastCode,
   requestId,
   planType = "ROOT_ACCOUNT",
+  propertyAddress = null,
   compact: compactProp = false,
   checkoutStatus = null,
 }: MapSitePaymentCardProps) {
-  const summary = mapsiteClaimPlanSummary(planType);
+  const resolvedFromAddress = parseCanadaProvince(propertyAddress);
+  const [selectedProvince, setSelectedProvince] = useState<CanadaProvinceCode | "">(
+    resolvedFromAddress ?? "",
+  );
+  const province = selectedProvince || resolvedFromAddress || "";
+  const summary = useMemo(
+    () => mapsiteClaimPlanSummary(planType, province || null),
+    [planType, province],
+  );
   const compact = useMediaQuery(PHONE_QUERY) || compactProp;
 
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleActivate() {
+    if (!province) {
+      setError("Select the province or territory of this Mapsite™.");
+      return;
+    }
     setProcessing(true);
     setError(null);
     const result = await createMapSiteStripeCheckoutSession({
@@ -61,6 +78,7 @@ export default function MapSitePaymentCard({
       requestId,
       audience,
       fastCode,
+      province,
     });
     if (result.url) {
       window.location.assign(result.url);
@@ -72,7 +90,9 @@ export default function MapSitePaymentCard({
 
   const pendingConfirmation = checkoutStatus === "success";
   const cancelled = checkoutStatus === "cancelled";
-  const totalDue = summary.totalLabel.replace(/\s*\(incl\. tax\)/i, "");
+  const totalDue = summary.totalLabel.replace(/\s*\(incl\. [^)]+\)/i, "");
+  const selectClass =
+    "mt-2 w-full rounded-xl border border-neutral-200 bg-white px-3 py-2 text-[13px] text-neutral-900";
 
   return (
     <div
@@ -104,6 +124,15 @@ export default function MapSitePaymentCard({
         </>
       )}
 
+      <label className="mt-3 block text-[11px] font-medium text-neutral-500">
+        Province / territory <span className="text-red-500">*</span>
+      </label>
+      <CanadaProvinceSelect
+        value={province}
+        onChange={setSelectedProvince}
+        className={selectClass}
+      />
+
       {pendingConfirmation ? (
         <p className="mt-3 text-[13px] leading-snug text-neutral-500">
           Payment submitted. Activating your Mapsite™…
@@ -121,7 +150,7 @@ export default function MapSitePaymentCard({
       <button
         type="button"
         onClick={handleActivate}
-        disabled={processing || pendingConfirmation}
+        disabled={processing || pendingConfirmation || summary.needsProvince}
         className={`flex w-full items-center justify-center rounded-full bg-neutral-900 text-[15px] font-medium text-white transition hover:bg-neutral-800 disabled:cursor-wait disabled:opacity-50 ${
           compact ? "mt-3 min-h-9 px-4 text-[13px]" : "mt-4 min-h-11 px-5"
         }`}

@@ -16,6 +16,7 @@ import {
   mapsiteActivationUnitAmountCents,
 } from "@/lib/talispros/mapsite-activation-amount";
 import { activateMapSiteAfterPayment } from "@/lib/talispros/mapsite-activation";
+import { resolveMapSitePlaceOfSupply } from "@/lib/talispros/mapsite-place-of-supply";
 import {
   ACTIVATE_QUERY,
   CHECKOUT_QUERY,
@@ -336,6 +337,7 @@ export async function createMapSiteStripeCheckoutSession(input: {
   requestId?: string | null;
   audience?: string | null;
   fastCode?: string | null;
+  province?: string | null;
 }): Promise<{ url?: string; error?: string }> {
   const mapsiteId = input.mapsiteId.trim();
   if (!mapsiteId) {
@@ -412,8 +414,19 @@ export async function createMapSiteStripeCheckoutSession(input: {
       fastCode: input.fastCode || mapsite.fast_code,
     }),
   );
-  const summary = planSummaryFor(planType);
-  const unitAmount = mapsiteActivationUnitAmountCents(planType);
+  const province = await resolveMapSitePlaceOfSupply({
+    mapsiteId,
+    requestId,
+    selectedProvince: input.province,
+  });
+  if (!province) {
+    return {
+      error:
+        "Select the Mapsite™ province or territory so we can apply the correct GST, HST, or PST.",
+    };
+  }
+  const summary = planSummaryFor(planType, province);
+  const unitAmount = mapsiteActivationUnitAmountCents(planType, province);
   const fastCode = (input.fastCode || mapsite.fast_code || "").trim();
   const audience = parseRegistrationMarket(input.audience) || input.audience || "";
 
@@ -458,6 +471,7 @@ export async function createMapSiteStripeCheckoutSession(input: {
         fastCode,
         audience: String(audience || ""),
         planType,
+        province,
         ...(mapsite.account_id ? { accountId: mapsite.account_id } : {}),
       },
       success_url: successUrlTemplate,

@@ -12,7 +12,7 @@ export const RALF_ROOT_PAYMENT_EMAIL = "remecom@mac.com";
 
 export const ROOT_ONE_DOLLAR_PLAN_TYPE = "ROOT_ACCOUNT_1";
 
-/** CAD $1.00 or $1.00 + 14% GST, in cents. */
+/** CAD $1.00 or $1.00 + 14% GST, in cents — historical paid sessions only. */
 export const ROOT_ONE_DOLLAR_AMOUNT_CENTS = new Set<number>([
   100,
   mapsiteActivationUnitAmountCents("ROOT_ACCOUNT_1"),

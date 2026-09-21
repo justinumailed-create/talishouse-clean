@@ -23,6 +23,12 @@ import {
   type DiscountStackConfig,
   DEFAULT_STACK_CONFIG,
 } from "@/lib/utils/discounts";
+import {
+  canadaTaxWord,
+  computeCanadaSalesTax,
+  parseCanadaProvince,
+  type CanadaProvinceCode,
+} from "@/lib/canada-sales-tax";
 
 export interface CartItem {
   id: string;
@@ -57,7 +63,6 @@ export type PaymentStrategy = "full" | "deposit" | "lto";
 
 export const SHIPPING_CLEARANCE = 10000;
 export const BUILD_AND_PRICE = 1950;
-export const TAX_RATE = 0.14;
 
 export interface PromoCodeInfo {
   code: PromoCode;
@@ -79,6 +84,9 @@ interface CartContextType {
   discountedSubtotal: number;
   subtotalWithCharge: number;
   tax: number;
+  taxLabel: string;
+  taxProvince: CanadaProvinceCode | "";
+  setTaxProvince: (province: CanadaProvinceCode | "") => void;
   grandTotal: number;
   itemCount: number;
   promoCode: PromoCode;
@@ -126,6 +134,7 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   const [ltoTermMonths, setLtoTermMonths] = useState(config.leaseToOwn.maxMonths);
   const [stackConfig] = useState<DiscountStackConfig>(DEFAULT_STACK_CONFIG);
   const [splitsJobs, setSplitsJobs] = useState<SplitsJob[]>([]);
+  const [taxProvince, setTaxProvince] = useState<CanadaProvinceCode | "">("");
 
   const splitsAmount = useMemo(() => {
     return splitsJobs.reduce((sum, job) => sum + job.amount, 0);
@@ -141,11 +150,13 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
         const itemsToSet = parsed.items || [];
         const promoToSet = parsed.appliedDiscountCode || null;
         const splitsJobsToSet = parsed.splitsJobs || [];
+        const provinceToSet = parseCanadaProvince(parsed.taxProvince) ?? "";
         
         setTimeout(() => {
           if (itemsToSet.length > 0) setItems(itemsToSet);
           if (promoToSet) setAppliedDiscountCode(promoToSet);
           if (splitsJobsToSet.length > 0) setSplitsJobs(splitsJobsToSet);
+          if (provinceToSet) setTaxProvince(provinceToSet);
           hydrate();
         }, 0);
       } catch (e) {
@@ -159,9 +170,12 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
 
   useEffect(() => {
     if (isHydrated) {
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items, appliedDiscountCode, splitsJobs }));
+      localStorage.setItem(
+        CART_STORAGE_KEY,
+        JSON.stringify({ items, appliedDiscountCode, splitsJobs, taxProvince }),
+      );
     }
-  }, [items, appliedDiscountCode, isHydrated, splitsJobs]);
+  }, [items, appliedDiscountCode, isHydrated, splitsJobs, taxProvince]);
 
   const rawSubtotal = useMemo(() => {
     return items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -208,8 +222,14 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
   }, [rawSubtotal, totalDiscount, shippingSelected]);
 
   const tax = useMemo(() => {
-    return subtotalWithCharge * TAX_RATE;
-  }, [subtotalWithCharge]);
+    if (!taxProvince) return 0;
+    return computeCanadaSalesTax(subtotalWithCharge, taxProvince).taxAmount;
+  }, [subtotalWithCharge, taxProvince]);
+
+  const taxLabel = useMemo(() => {
+    if (!taxProvince) return "tax";
+    return canadaTaxWord(computeCanadaSalesTax(subtotalWithCharge, taxProvince).rate);
+  }, [subtotalWithCharge, taxProvince]);
 
   const grandTotal = useMemo(() => {
     return subtotalWithCharge + tax;
@@ -334,11 +354,12 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
         associateName: associate?.name || null,
         splitsAmount: splitsAmount,
         splitsJobs: splitsJobs,
+        taxProvince: taxProvince || null,
       };
     } catch {
       return {};
     }
-  }, [splitsAmount, splitsJobs]);
+  }, [splitsAmount, splitsJobs, taxProvince]);
 
   const addSplitsJob = useCallback(() => {
     setSplitsJobs((prev) => {
@@ -370,6 +391,9 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     discountedSubtotal,
     subtotalWithCharge,
     tax,
+    taxLabel,
+    taxProvince,
+    setTaxProvince,
     grandTotal,
     itemCount,
     promoCode,
@@ -407,6 +431,8 @@ export function CartProvider({ children, pricingConfig }: { children: ReactNode;
     discountedSubtotal,
     subtotalWithCharge,
     tax,
+    taxLabel,
+    taxProvince,
     grandTotal,
     itemCount,
     promoCode,

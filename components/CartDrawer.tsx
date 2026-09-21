@@ -12,6 +12,7 @@ import { DISCOUNT_CODES, formatDiscount } from "@/lib/utils/discounts";
 import { formatCAD } from "@/utils/currency";
 import { UI } from "@/styles/design-system";
 import { addonsRecord } from "@/lib/config/addons";
+import CanadaProvinceSelect from "@/components/CanadaProvinceSelect";
 
 const DEFAULT_PRODUCT_IMAGE = "/images/placeholder.png";
 
@@ -28,6 +29,9 @@ export default function CartDrawer() {
     discountedSubtotal,
     subtotalWithCharge,
     tax,
+    taxLabel,
+    taxProvince,
+    setTaxProvince,
     grandTotal,
     promoCode,
     promoInfo,
@@ -339,8 +343,20 @@ export default function CartDrawer() {
                       </div>
                     )}
 
+                    <div className="space-y-2">
+                      <label className="block text-xs font-medium text-gray-500">
+                        Province / territory <span className="text-red-500">*</span>
+                      </label>
+                      <CanadaProvinceSelect
+                        value={taxProvince}
+                        onChange={setTaxProvince}
+                        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900"
+                      />
+                    </div>
                     <div className="flex justify-between items-center text-gray-500 text-sm">
-                      <span>Tax (14%)</span>
+                      <span>
+                        {taxProvince ? taxLabel : "Tax (select province)"}
+                      </span>
                       <span className="text-gray-900 font-medium">{formatCAD(tax)}</span>
                     </div>
                   </div>
@@ -435,10 +451,20 @@ export default function CartDrawer() {
           <div className="p-6 border-t bg-white flex-shrink-0">
             {!isCheckingOut ? (
               <button 
-                onClick={() => setIsCheckingOut(true)} 
-                className="w-full bg-black text-white py-4.5 rounded-2xl font-black text-[13px] uppercase tracking-[0.15em] hover:bg-gray-900 transition-all shadow-xl active:scale-[0.98]"
+                onClick={() => {
+                  if (!taxProvince) return;
+                  setIsCheckingOut(true);
+                }}
+                disabled={!taxProvince}
+                className="w-full bg-black text-white py-4.5 rounded-2xl font-black text-[13px] uppercase tracking-[0.15em] hover:bg-gray-900 transition-all shadow-xl active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                {paymentStrategy === "deposit" ? "Pay Deposit" : paymentStrategy === "lto" ? "Start Lease" : "Proceed to Checkout"} — {formatCAD(getPaymentAmount())}
+                {!taxProvince
+                  ? "Select province for tax"
+                  : paymentStrategy === "deposit"
+                    ? "Pay Deposit"
+                    : paymentStrategy === "lto"
+                      ? "Start Lease"
+                      : "Proceed to Checkout"} — {formatCAD(getPaymentAmount())}
               </button>
             ) : (
               <PayPalScriptProvider
@@ -450,10 +476,15 @@ export default function CartDrawer() {
             >
                 <PayPalButtons
                   style={{ layout: "horizontal", color: "black", shape: "pill", label: "checkout" }}
-                  createOrder={(data, actions) => actions.order.create({
+                  createOrder={(data, actions) => {
+                    if (!taxProvince) {
+                      throw new Error("Province is required");
+                    }
+                    return actions.order.create({
                     intent: "CAPTURE",
                     purchase_units: [{ amount: { currency_code: "CAD", value: paymentAmount.toFixed(2) } }]
-                  })}
+                  });
+                  }}
                   onApprove={async (data, actions) => {
                     const details = await actions?.order?.capture();
                     await savePayment(details?.id || "");

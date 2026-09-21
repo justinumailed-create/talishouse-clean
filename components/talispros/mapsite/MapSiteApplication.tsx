@@ -554,6 +554,7 @@ function MapSiteChrome({
         fastCode={mapsite.fast_code}
         requestId={requestId}
         planType={paymentPlanType}
+        propertyAddress={mapsite.property_address}
         compact={mobileOverlay}
         checkoutStatus={checkoutStatus}
       />
