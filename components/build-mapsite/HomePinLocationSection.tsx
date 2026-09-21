@@ -58,6 +58,7 @@ function InputField({
   onBlur,
   onKeyDown,
   hint,
+  inputMode,
 }: {
   label: string;
   required?: boolean;
@@ -68,12 +69,15 @@ function InputField({
   onBlur?: () => void;
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
   hint?: string;
+  inputMode?: "text" | "url";
 }) {
   return (
     <div>
       <FieldLabel label={label} required={required} hint={hint} />
       <input
         type="text"
+        inputMode={inputMode}
+        autoComplete={inputMode === "url" ? "url" : undefined}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
@@ -290,6 +294,27 @@ export default function HomePinLocationSection({
         error={errors.streetAddress}
         required
       />
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <InputField
+          label="MLS®"
+          value={values.mlsUrl}
+          onChange={(mlsUrl) => onChange({ mlsUrl })}
+          placeholder="https://www.realtor.ca/..."
+          hint="Optional. Opens from the pin MLS® button."
+          inputMode="url"
+          error={errors.mlsUrl}
+        />
+        <InputField
+          label="URL"
+          value={values.brokerUrl}
+          onChange={(brokerUrl) => onChange({ brokerUrl })}
+          placeholder="https://"
+          hint="Optional. Opens from the pin URL button."
+          inputMode="url"
+          error={errors.brokerUrl}
+        />
+      </div>
 
       <div>
         <FieldLabel

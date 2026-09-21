@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { MapEngineProvider } from "@/components/talismaps/map-engine/MapEngineProvider";
 import type { MapEnginePin } from "@/lib/talismaps/map-engine/types";
-import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
+import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { mapSitePinVisualFields } from "@/lib/mapsite-pin-style";
 import {
   TALISPROS_HOME_MAP_FALLBACK,
@@ -106,17 +106,14 @@ export default function TalisprosHomeMapPreview() {
             >
               <X className="h-3 w-3" strokeWidth={1.75} aria-hidden="true" />
             </button>
-            <p className="m-0 pr-5 text-[10px] font-medium uppercase tracking-[0.08em] text-neutral-500 sm:text-[11px]">
-              {TALISPROS_HOME_MAPSITE_CARD.eyebrow}
-            </p>
-            <h2 className="m-0 mt-0.5 text-[15px] font-semibold leading-tight tracking-tight text-black sm:text-[17px]">
+            <h2 className="m-0 mt-0 pr-6 text-[22px] font-semibold leading-tight tracking-tight text-black sm:text-[26px]">
               {TALISPROS_HOME_MAPSITE_CARD.title}
             </h2>
             <p className="m-0 mt-1 line-clamp-2 text-[12px] leading-snug text-neutral-800 sm:mt-1.5 sm:line-clamp-none sm:text-[13px]">
               {TALISPROS_HOME_MAPSITE_CARD.body}
             </p>
             <Link
-              href={MAPSITE_APP_PATH}
+              href={DEMO_MAPSITE_BUILD_PATH}
               className="mt-2 flex min-h-9 w-full items-center justify-center rounded-xl border border-neutral-200/80 bg-white/80 px-4 py-1.5 text-sm font-medium text-neutral-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition hover:border-neutral-300 hover:bg-white sm:mt-3 sm:min-h-10 sm:py-2"
             >
               {TALISPROS_HOME_MAPSITE_CARD.cta}

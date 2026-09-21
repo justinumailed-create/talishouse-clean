@@ -26,6 +26,8 @@ describe("Mapsite™ submitted location merge", () => {
       pinIcon: "flag",
       pinColor: "#1A73E8",
       pinWhiteCenter: false,
+      mlsUrl: "https://www.realtor.ca/listing/1",
+      brokerUrl: "https://example.com/listing",
     });
 
     expect(merged.lat).toBe(22.5882834);
@@ -43,6 +45,8 @@ describe("Mapsite™ submitted location merge", () => {
     expect(merged.agency_name).toBe("Cape Realty");
     expect(merged.profile_image_url).toBe("https://cdn.example/agent.jpg");
     expect(merged.agent_name).toBe("Ralf Meyer");
+    expect(merged.mls_url).toBe("https://www.realtor.ca/listing/1");
+    expect(merged.broker_url).toBe("https://example.com/listing");
   });
 
   it("does not copy a personal name onto the Mapsite™ title", () => {

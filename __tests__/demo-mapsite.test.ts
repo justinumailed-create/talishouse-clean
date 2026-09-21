@@ -115,7 +115,11 @@ describe("demo mapsite codes", () => {
     expect(mapsiteMarketPartnerWriteup(true)).toBe(
       MAPSITE_DEMO_EBOOK_PARTNER_WRITEUP,
     );
-    expect(MAPSITE_GENERIC_PARTNER_WRITEUP).toContain("10 categories");
+    expect(MAPSITE_GENERIC_PARTNER_WRITEUP).toContain(
+      "100 PINs generating 1,000 views, monthly",
+    );
+    expect(MAPSITE_GENERIC_PARTNER_WRITEUP).toContain("No referral fees - ever");
+    expect(MAPSITE_GENERIC_PARTNER_WRITEUP).not.toContain("10 categories");
     expect(MAPSITE_DEMO_EBOOK_PARTNER_WRITEUP).toContain(
       "up to 100 PINs generating up to 1,000 views, combined",
     );
@@ -133,7 +137,8 @@ describe("demo mapsite codes", () => {
     );
     expect(cardSource).toContain("mapsiteMarketPartnerWriteup(isDemoEbook)");
     expect(cardSource).toContain("mapsiteMarketPartnerImageUrl");
-    expect(cardSource).toContain("mapsite.profile_image_url");
+    expect(cardSource).toContain("content.partnerImage");
+    expect(cardSource).not.toContain("mapsite.profile_image_url");
     expect(appSource).toContain(
       "isDemoEbook={isDemoMapSiteCode(mapsite.fast_code)}",
     );
@@ -141,10 +146,10 @@ describe("demo mapsite codes", () => {
       "https://cdn.example/agent.jpg",
     );
     expect(mapsiteMarketPartnerImageUrl(null)).toBe(
-      "/images/mapsites/lrg1-rahul.jpeg",
+      "/images/mapsites/aisha-c.webp",
     );
     expect(mapsiteMarketPartnerImageUrl("  ")).toBe(
-      "/images/mapsites/lrg1-rahul.jpeg",
+      "/images/mapsites/aisha-c.webp",
     );
     expect(
       mapsiteMarketPartnerLabel(
@@ -153,10 +158,11 @@ describe("demo mapsite codes", () => {
       ),
     ).toBe("Market Partner: Ralf Meyer");
     expect(mapsiteMarketPartnerLabel(null, "Ralf Meyer")).toBe(
-      "Market Partner: Rahul C.",
+      "Market Partner: Aisha C.",
     );
     expect(cardSource).toContain("mapsiteMarketPartnerLabel");
-    expect(cardSource).toContain("mapsite.agent_name");
+    expect(cardSource).toContain("mapsite.assigned_marketing_manager");
+    expect(cardSource).not.toContain("mapsite.agent_name");
   });
 
   it("does not surface Next.js production digest text to the user", () => {

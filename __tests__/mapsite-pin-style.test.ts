@@ -12,6 +12,11 @@ import { pinStyleCacheKey } from "@/lib/talismaps/map-engine/pin-marker-icon";
 import { toMapEnginePin } from "@/lib/talismaps/map-engine";
 import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
 import type { MapSiteView } from "@/lib/mapsite-service";
+import {
+  decodeListingLinksFromNotes,
+  encodePinStyleInNotes,
+  normalizeListingHref,
+} from "@/lib/build-request-pin-style-notes";
 
 describe("mapsite pin style", () => {
   it("matches the Build / Claim form PIN defaults", () => {
@@ -27,6 +32,19 @@ describe("mapsite pin style", () => {
     expect(MAPSITE_PIN_DEFAULT_WHITE_CENTER).toBe(
       defaultHomePinLocationValues.futurePinWhiteCenter
     );
+    expect(defaultHomePinLocationValues.mlsUrl).toBe("");
+    expect(defaultHomePinLocationValues.brokerUrl).toBe("");
+    expect(normalizeListingHref("realtor.ca/x")).toBe("https://realtor.ca/x");
+    const notes = encodePinStyleInNotes(
+      "",
+      { whiteCenter: false, animated: false, categoryBadge: null },
+      undefined,
+      { mlsUrl: "realtor.ca/listing", brokerUrl: "https://example.com" },
+    );
+    expect(decodeListingLinksFromNotes(notes)).toEqual({
+      mlsUrl: "https://realtor.ca/listing",
+      brokerUrl: "https://example.com",
+    });
     expect(resolveMapSitePinStyle()).toMatchObject({
       pinIcon: "none",
       pinColor: "#1A73E8",

@@ -6,6 +6,7 @@ import {
 import { HOME_PIN_DEFAULT_MAP_ZOOM } from "@/lib/home-pin-coordinates";
 import { generateMapSiteSlug } from "@/lib/slug-generator";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { decodeListingLinksFromNotes } from "@/lib/build-request-pin-style-notes";
 import { firstNonPersonalMapsiteLabel } from "@/lib/mapsite-pin-label";
 import { MAPSITE_DEMO_LISTING_IMAGE } from "@/lib/talispros/mapsite-listing-media";
 import {
@@ -136,7 +137,7 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
     const { data: request, error: requestError } = await supabase
       .from("build_requests")
       .select(
-        "id, first_name, last_name, email, phone, street_address, reverse_geocoded_address, latitude, longitude, pin_writeup, future_pin_label, requested_account_type, account_type, requested_fast_code, linked_mapsite_id, gallery_images"
+        "id, first_name, last_name, email, phone, street_address, reverse_geocoded_address, latitude, longitude, pin_writeup, future_pin_label, requested_account_type, account_type, requested_fast_code, linked_mapsite_id, gallery_images, notes"
       )
       .eq("id", requestId)
       .maybeSingle();
@@ -204,6 +205,11 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
       (request.longitude != null && Number.isFinite(request.longitude)
         ? request.longitude
         : null);
+    const listing = decodeListingLinksFromNotes(
+      (request as { notes?: string | null }).notes,
+    );
+    const mlsUrl = listing.mlsUrl || location?.mlsUrl || null;
+    const brokerUrl = listing.brokerUrl || location?.brokerUrl || null;
     const mapZoom = HOME_PIN_DEFAULT_MAP_ZOOM;
 
     let mapsiteId = request.linked_mapsite_id?.trim() || null;
@@ -222,6 +228,8 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
         propertyAddress,
         propertyDescription,
         coverImage,
+        mlsUrl,
+        brokerUrl,
       });
       mapsiteId = claimed?.id ?? mapsiteId;
       if (!resolvedCode && isIssuedFastCode(claimed?.fast_code)) {
@@ -273,6 +281,9 @@ export async function ensureClientMapSiteFromBuildRequest(options: {
         header_image_url: coverImage,
         gallery_images: gallery,
         profile_image_url: coverImage,
+        mls_url: mlsUrl,
+        broker_url: brokerUrl,
+        website: brokerUrl,
         is_demonstration: false,
         interest_form_enabled: true,
         offered_subscription_tier: offeredTierFromBuildAccountType(

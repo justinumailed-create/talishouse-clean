@@ -37,6 +37,8 @@ const EMPTY_PIN_LOCATION: HomePinLocationValues = {
   manualPlacement: false,
   reverseGeocodedAddress: "",
   mapZoom: 16,
+  mlsUrl: "",
+  brokerUrl: "",
   pinWriteup: "",
   futurePinColor: "#1A73E8",
   futurePinIcon: "none",
@@ -203,10 +205,9 @@ export default function TalisprosMarketRegistrationForm({
         "manualPlacement",
         resolvedLocation.manualPlacement ? "true" : "false"
       );
-      formData.set(
-        "reverseGeocodedAddress",
-        resolvedLocation.reverseGeocodedAddress
-      );
+      formData.set("reverseGeocodedAddress", resolvedLocation.reverseGeocodedAddress);
+      formData.set("mlsUrl", resolvedLocation.mlsUrl);
+      formData.set("brokerUrl", resolvedLocation.brokerUrl);
       formData.set("pinWriteup", resolvedLocation.pinWriteup);
       formData.set("futurePinColor", resolvedLocation.futurePinColor ?? "");
       formData.set("futurePinIcon", resolvedLocation.futurePinIcon ?? "");

@@ -42,10 +42,9 @@ export function zoomForMapRadiusKm(
 }
 
 export const TALISPROS_HOME_MAPSITE_CARD = {
-  eyebrow: "Your market",
-  title: "Mapsite™",
-  body: "A dedicated marketing platform covering about 50 km around all PINs you generate. Free Trial: Build Talisbooks™ and have us promote attached inventory.",
-  cta: "Free Trial",
+  title: "Build Mapsite™",
+  body: "A dedicated marketing platform covering about 50 km around all PINs you generate. Free Demo: Build Talisbooks™ and have us promote attached inventory.",
+  cta: "Free Demo",
 } as const;
 
 export const TALISPROS_START_SEGMENTS = [

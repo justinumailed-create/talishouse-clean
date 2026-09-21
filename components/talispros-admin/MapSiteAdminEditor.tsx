@@ -201,6 +201,8 @@ export default function MapSiteAdminEditor({
     manualPlacement: true,
     reverseGeocodedAddress: "",
     mapZoom: Number.parseInt(form.mapZoom, 10) || 15,
+    mlsUrl: form.mlsUrl,
+    brokerUrl: form.brokerUrl,
     pinWriteup: form.propertyDescription,
     futurePinColor: form.pinColor,
     futurePinIcon: form.pinIcon,

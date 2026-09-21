@@ -1,4 +1,7 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { DEMO_MAPSITE_BUILD_PATH } from "../lib/talispros/demo-mapsite";
 import {
   TALISPROS_HOME_MAP_FALLBACK,
   TALISPROS_HOME_MAP_RADIUS_KM,
@@ -24,11 +27,18 @@ describe("Talispros legal copy and homepage products", () => {
   });
 
   it("explains Mapsite™ on the homepage map card", () => {
-    expect(TALISPROS_HOME_MAPSITE_CARD.title).toBe("Mapsite™");
-    expect(TALISPROS_HOME_MAPSITE_CARD.cta).toBe("Free Trial");
+    expect("eyebrow" in TALISPROS_HOME_MAPSITE_CARD).toBe(false);
+    expect(TALISPROS_HOME_MAPSITE_CARD.title).toBe("Build Mapsite™");
+    expect(TALISPROS_HOME_MAPSITE_CARD.cta).toBe("Free Demo");
     expect(TALISPROS_HOME_MAPSITE_CARD.body).toBe(
-      "A dedicated marketing platform covering about 50 km around all PINs you generate. Free Trial: Build Talisbooks™ and have us promote attached inventory.",
+      "A dedicated marketing platform covering about 50 km around all PINs you generate. Free Demo: Build Talisbooks™ and have us promote attached inventory.",
     );
+    const preview = readFileSync(
+      resolve("components/talispros/TalisprosHomeMapPreview.tsx"),
+      "utf8",
+    );
+    expect(preview).toContain("href={DEMO_MAPSITE_BUILD_PATH}");
+    expect(DEMO_MAPSITE_BUILD_PATH).toBe("/talispros/demo-mapsite");
   });
 
   it("frames the homepage map to a 50 km radius around the Claim-form Home PIN", () => {

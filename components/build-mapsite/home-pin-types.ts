@@ -8,6 +8,10 @@ export interface HomePinLocationValues {
   reverseGeocodedAddress: string;
   /** User-controlled preview zoom — carried onto the created Mapsite™. */
   mapZoom: number;
+  /** Optional MLS® listing URL for pin resource buttons. */
+  mlsUrl: string;
+  /** Optional listing / broker website URL for pin resource buttons. */
+  brokerUrl: string;
   pinWriteup: string;
   futurePinColor: string | null;
   futurePinIcon: string | null;
@@ -33,6 +37,8 @@ export const defaultHomePinLocationValues: HomePinLocationValues = {
   manualPlacement: true,
   reverseGeocodedAddress: "",
   mapZoom: BUILD_MAPSITE_PREVIEW_LOCATION.mapZoom,
+  mlsUrl: "",
+  brokerUrl: "",
   pinWriteup: "",
   futurePinColor: "#1A73E8",
   futurePinIcon: "none",

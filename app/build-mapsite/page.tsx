@@ -67,6 +67,8 @@ interface FormData {
   mapZoom: number;
   manualPlacement: boolean;
   reverseGeocodedAddress: string;
+  mlsUrl: string;
+  brokerUrl: string;
   pinWriteup: string;
   futurePinColor: string | null;
   futurePinIcon: string | null;
@@ -820,6 +822,8 @@ export default function BuildMapSitePage() {
         manualPlacement: form.manualPlacement,
         reverseGeocodedAddress: form.reverseGeocodedAddress,
         mapZoom: form.mapZoom,
+        mlsUrl: form.mlsUrl,
+        brokerUrl: form.brokerUrl,
         pinWriteup: form.pinWriteup,
         futurePinColor: form.futurePinColor,
         futurePinIcon: form.futurePinIcon,
@@ -865,6 +869,8 @@ export default function BuildMapSitePage() {
       fd.append("mapZoom", String(form.mapZoom));
       fd.append("manualPlacement", String(form.manualPlacement));
       fd.append("reverseGeocodedAddress", form.reverseGeocodedAddress);
+      fd.append("mlsUrl", form.mlsUrl);
+      fd.append("brokerUrl", form.brokerUrl);
       fd.append("pinWriteup", form.pinWriteup);
       fd.append("futurePinColor", form.futurePinColor ?? "");
       fd.append("futurePinIcon", form.futurePinIcon ?? "");
@@ -1120,6 +1126,8 @@ export default function BuildMapSitePage() {
                     manualPlacement: form.manualPlacement,
                     reverseGeocodedAddress: form.reverseGeocodedAddress,
                     mapZoom: form.mapZoom,
+                    mlsUrl: form.mlsUrl,
+                    brokerUrl: form.brokerUrl,
                     pinWriteup: form.pinWriteup,
                     futurePinColor: form.futurePinColor,
                     futurePinIcon: form.futurePinIcon,

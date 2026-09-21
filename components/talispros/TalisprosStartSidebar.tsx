@@ -7,11 +7,7 @@ export default function TalisprosStartSidebar() {
     <aside className="flex-none bg-[#f2f2f0] text-black lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:border-l lg:border-[#dedede] lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
       <div className="flex justify-center px-4 pb-5 pt-6 lg:px-5 lg:pb-4 lg:pt-8">
         <h2 className="max-w-[19rem] text-center text-black sm:max-w-[20.5rem]">
-          <span className="block text-[26px] leading-[1.1] tracking-[-0.008em] sm:text-[30px] lg:text-[34px]">
-            <span className="block whitespace-nowrap">Get Your Own</span>
-            <span className="block whitespace-nowrap">Mapsite™ Market</span>
-          </span>
-          <span className="mt-5 block text-[16px] leading-[1.1] tracking-[-0.008em] sm:mt-6 sm:text-[18px] lg:text-[20px]">
+          <span className="block text-[16px] leading-[1.1] tracking-[-0.008em] sm:text-[18px] lg:text-[20px]">
             What Best
             <br />
             Describes You?

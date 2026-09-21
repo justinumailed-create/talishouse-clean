@@ -1,5 +1,6 @@
 const PIN_STYLE_MARKER = "__PIN_STYLE__";
 const PIN_PLACEMENT_MARKER = "__PIN_PLACEMENT__";
+const LISTING_LINKS_MARKER = "__LISTING_LINKS__";
 
 export interface PinStyleExtras {
   whiteCenter: boolean;
@@ -12,10 +13,34 @@ export interface PinPlacementExtras {
   reverseGeocodedAddress: string | null;
 }
 
+export interface ListingLinkExtras {
+  mlsUrl: string | null;
+  brokerUrl: string | null;
+}
+
+export function normalizeListingHref(
+  value: string | null | undefined,
+): string | null {
+  const href = value?.trim() || "";
+  if (!href) return null;
+  if (/^https?:\/\//i.test(href) || href.startsWith("/")) return href;
+  return `https://${href}`;
+}
+
+function nextMarkerIndex(notes: string, start: number): number {
+  const candidates = [
+    notes.indexOf(PIN_STYLE_MARKER, start),
+    notes.indexOf(PIN_PLACEMENT_MARKER, start),
+    notes.indexOf(LISTING_LINKS_MARKER, start),
+  ].filter((i) => i >= 0);
+  return candidates.length > 0 ? Math.min(...candidates) : notes.length;
+}
+
 export function encodePinStyleInNotes(
   additionalComments: string,
   extras: PinStyleExtras,
-  placement?: PinPlacementExtras
+  placement?: PinPlacementExtras,
+  listing?: ListingLinkExtras,
 ): string | null {
   const parts: string[] = [];
   const comments = additionalComments.trim();
@@ -37,6 +62,17 @@ export function encodePinStyleInNotes(
     );
   }
 
+  const mlsUrl = normalizeListingHref(listing?.mlsUrl);
+  const brokerUrl = normalizeListingHref(listing?.brokerUrl);
+  if (mlsUrl || brokerUrl) {
+    parts.push(
+      `${LISTING_LINKS_MARKER}${JSON.stringify({
+        mlsUrl,
+        brokerUrl,
+      } satisfies ListingLinkExtras)}`,
+    );
+  }
+
   return parts.length > 0 ? parts.join("\n\n") : null;
 }
 
@@ -45,10 +81,7 @@ function parseJsonAfterMarker<T>(notes: string, marker: string): T | null {
   if (markerIndex === -1) return null;
 
   const start = markerIndex + marker.length;
-  const nextStyle = notes.indexOf(PIN_STYLE_MARKER, start);
-  const nextPlacement = notes.indexOf(PIN_PLACEMENT_MARKER, start);
-  const candidates = [nextStyle, nextPlacement].filter((i) => i >= 0);
-  const end = candidates.length > 0 ? Math.min(...candidates) : notes.length;
+  const end = nextMarkerIndex(notes, start);
 
   try {
     return JSON.parse(notes.slice(start, end).trim()) as T;
@@ -77,7 +110,8 @@ export function decodePinStyleFromNotes(notes: string | null | undefined): {
 
   const styleMarkerIndex = notes.indexOf(PIN_STYLE_MARKER);
   const placementMarkerIndex = notes.indexOf(PIN_PLACEMENT_MARKER);
-  const firstMarkerIndex = [styleMarkerIndex, placementMarkerIndex]
+  const listingMarkerIndex = notes.indexOf(LISTING_LINKS_MARKER);
+  const firstMarkerIndex = [styleMarkerIndex, placementMarkerIndex, listingMarkerIndex]
     .filter((i) => i >= 0)
     .sort((a, b) => a - b)[0];
 
@@ -129,5 +163,17 @@ export function resolvePinStyleExtras(buildRequest: {
     animated: buildRequest.future_pin_animated ?? fromNotes.animated,
     categoryBadge:
       buildRequest.future_pin_category_badge ?? fromNotes.categoryBadge,
+  };
+}
+
+export function decodeListingLinksFromNotes(
+  notes: string | null | undefined,
+): ListingLinkExtras {
+  const parsed = notes
+    ? parseJsonAfterMarker<Partial<ListingLinkExtras>>(notes, LISTING_LINKS_MARKER)
+    : null;
+  return {
+    mlsUrl: normalizeListingHref(parsed?.mlsUrl),
+    brokerUrl: normalizeListingHref(parsed?.brokerUrl),
   };
 }

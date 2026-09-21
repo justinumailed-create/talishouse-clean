@@ -26,6 +26,8 @@ export interface BuildFields {
   longitude: string;
   manualPlacement: boolean;
   reverseGeocodedAddress: string;
+  mlsUrl: string;
+  brokerUrl: string;
   pinWriteup: string;
   futurePinColor: string;
   futurePinIcon: string;
@@ -92,6 +94,8 @@ export async function submitBuildRequest(
     manualPlacement: formData.get("manualPlacement") === "true",
     reverseGeocodedAddress:
       (formData.get("reverseGeocodedAddress") as string) || "",
+    mlsUrl: (formData.get("mlsUrl") as string) || "",
+    brokerUrl: (formData.get("brokerUrl") as string) || "",
     pinWriteup: (formData.get("pinWriteup") as string) || "",
     futurePinColor: (formData.get("futurePinColor") as string) || "",
     futurePinIcon: (formData.get("futurePinIcon") as string) || "",
@@ -180,6 +184,10 @@ export async function submitBuildRequest(
           manualPlacement: fields.manualPlacement,
           reverseGeocodedAddress:
             fields.reverseGeocodedAddress.trim() || null,
+        },
+        {
+          mlsUrl: fields.mlsUrl,
+          brokerUrl: fields.brokerUrl,
         }
       ),
       status: "pending",

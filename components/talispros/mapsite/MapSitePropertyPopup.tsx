@@ -30,21 +30,25 @@ type ResourceKey = MapSiteResourceKey;
 const RESOURCES: {
   key: ResourceKey;
   label: string;
+  variant: "blue" | "gold";
   resolveHref: (site: MapSitePlatformRecord) => string | null;
 }[] = [
   {
     key: "url",
     label: "URL",
-    resolveHref: (site) => site.broker_url?.trim() || null,
+    variant: "blue",
+    resolveHref: (site) => listingResourceHref(site.broker_url),
   },
   {
     key: "mls",
     label: "MLS®",
-    resolveHref: (site) => site.mls_url?.trim() || null,
+    variant: "blue",
+    resolveHref: (site) => listingResourceHref(site.mls_url),
   },
   {
     key: "teb",
     label: "TEB™",
+    variant: "blue",
     resolveHref: (site) => {
       const custom = site.teb_url?.trim() || "";
       const code = site.fast_code?.trim();
@@ -60,21 +64,35 @@ const RESOURCES: {
   {
     key: "ttv",
     label: "TTV™",
+    variant: "gold",
     resolveHref: (site) => mapsiteScheduleHref(site.fast_code || ""),
   },
 ];
 
+function listingResourceHref(value: string | null | undefined): string | null {
+  const href = value?.trim() || "";
+  if (!href) return null;
+  if (/^https?:\/\//i.test(href) || href.startsWith("/")) return href;
+  return `https://${href}`;
+}
+
 function ResourceButton({
   href,
   label,
+  variant,
 }: {
   href: string | null;
   label: string;
+  variant: "blue" | "gold";
 }) {
   const disabled = !href;
-  const className = disabled
-    ? "mapsite-paypal-btn mapsite-paypal-btn--disabled"
-    : "mapsite-paypal-btn";
+  const className = [
+    "mapsite-paypal-btn",
+    variant === "gold" ? "mapsite-paypal-btn--gold" : "",
+    disabled ? "mapsite-paypal-btn--disabled" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   if (disabled) {
     return (
@@ -164,10 +182,6 @@ export default function MapSitePropertyPopup({
     onboardingPhase === "BUILD_SUBMITTED" || onboardingPhase === "BOOK_READY";
   const tebHref =
     RESOURCES.find((resource) => resource.key === "teb")?.resolveHref(
-      mapsite,
-    ) ?? null;
-  const ttvHref =
-    RESOURCES.find((resource) => resource.key === "ttv")?.resolveHref(
       mapsite,
     ) ?? null;
   const popupHeroImage = useGenericCard ? genericHeroImage : heroImage;
@@ -289,14 +303,9 @@ export default function MapSitePropertyPopup({
                   {RESOURCES.map((resource) => (
                     <ResourceButton
                       key={resource.key}
-                      href={
-                        resource.key === "teb"
-                          ? tebHref
-                          : resource.key === "ttv"
-                            ? ttvHref
-                            : null
-                      }
+                      href={resource.resolveHref(mapsite)}
                       label={resource.label}
+                      variant={resource.variant}
                     />
                   ))}
                 </div>

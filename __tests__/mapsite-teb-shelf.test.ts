@@ -59,6 +59,28 @@ describe("Mapsite™ TTV™ schedule href", () => {
   });
 });
 
+describe("Mapsite™ pin resource buttons", () => {
+  it("enables URL and MLS® only when Build form or Admin saved a link; gold only on TTV™", () => {
+    const popup = readFileSync(
+      join(process.cwd(), "components/talispros/mapsite/MapSitePropertyPopup.tsx"),
+      "utf8",
+    );
+    expect(popup).toContain("listingResourceHref(site.broker_url)");
+    expect(popup).toContain("listingResourceHref(site.mls_url)");
+    expect(popup).not.toContain("listingSearchHref");
+    expect(popup).not.toContain("google.com/search");
+    expect(popup).not.toContain("realtor.ca/map");
+    expect(popup).toContain('variant: "blue"');
+    expect(popup).toContain('variant: "gold"');
+    expect(popup).not.toContain("resource.key === \"ttv\"");
+    expect(popup).toContain("href={resource.resolveHref(mapsite)}");
+
+    const css = readFileSync(join(process.cwd(), "app/globals.css"), "utf8");
+    expect(css).toContain(".mapsite-paypal-btn--gold");
+    expect(css).not.toContain(".mapsite-paypal-btn:nth-child(even)");
+  });
+});
+
 describe("TalisTV™ library return", () => {
   it("passes the FAST code so the bookshelf can return to Mapsite™", () => {
     const source = readFileSync(join(process.cwd(), "app/talistv/page.tsx"), "utf8");

@@ -63,12 +63,12 @@ export default function MapSiteMarketPartnerCard({
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
   const address = mapsite.property_address?.trim().toUpperCase() || null;
   const partnerImage = mapsiteMarketPartnerImageUrl(
-    mapsite.profile_image_url,
+    null,
     content.partnerImage,
   );
   const partnerLabel = mapsiteMarketPartnerLabel(
-    mapsite.profile_image_url,
-    mapsite.agent_name,
+    null,
+    mapsite.assigned_marketing_manager,
     content.marketPartner,
   );
 

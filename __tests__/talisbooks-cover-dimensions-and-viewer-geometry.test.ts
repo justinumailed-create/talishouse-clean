@@ -200,7 +200,7 @@ describe("TalisBook Cover Dimension + Viewer Focus Fix", () => {
       "width: min(100%, calc(16 / 9 * var(--viewer-book-height)))",
     );
     expect(css).toContain(
-      "--viewer-book-height: calc(100dvh - (2 * var(--viewer-inset)));",
+      "--viewer-book-height: calc((100dvh - (2 * var(--viewer-inset))) * 0.85);",
     );
     expect(css).toContain(
       ".talisbooks-viewer-book[data-spread-fit=\"image\"] .talisbooks-viewer-page__spread-image {\n  object-fit: cover;",

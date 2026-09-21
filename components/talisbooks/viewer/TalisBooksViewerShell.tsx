@@ -19,7 +19,6 @@ import { ROUTES } from "@/lib/routes";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
-import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { MAPSITE_APP_PATH, buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 import {
   convertViewerNavIndex,
@@ -437,17 +436,13 @@ export default function TalisBooksViewerShell({
     binding === "open" && viewMode === "spread" ? spread.right : null;
   const showViewerSidebar = false;
   const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
-  const backToMapSiteHref = isPinnedShowcase
-    ? DEMO_MAPSITE_BUILD_PATH
-    : book.fastCode && book.fastCode.trim().toLowerCase() !== "demo"
+  const backToMapSiteHref =
+    book.fastCode && book.fastCode.trim().toLowerCase() !== "demo"
       ? buildClaimedMapSitePath({
           fastCode: book.fastCode,
           accountType: book.accountType,
         })
       : MAPSITE_APP_PATH;
-  const backLinkLabel = isPinnedShowcase
-    ? "Demo Mapsite™"
-    : "Back to Mapsite™";
 
   return (
     <div
@@ -476,6 +471,20 @@ export default function TalisBooksViewerShell({
             isPinnedShowcase ? "talisbooks-viewer__header-actions--matched" : "",
           ].join(" ")}
         >
+          {isPinnedShowcase ? (
+            <Link href={ROUTES.HOME} className="talisbooks-viewer__back">
+              Home
+            </Link>
+          ) : (
+            <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
+              Back to Mapsite™
+            </Link>
+          )}
+          {isPinnedShowcase ? (
+            <Link href={ROUTES.CATALOG} className="talisbooks-viewer__back">
+              Product
+            </Link>
+          ) : null}
           {book.pdfDownloadUrl ? (
             <a
               href={book.pdfDownloadUrl}
@@ -485,12 +494,9 @@ export default function TalisBooksViewerShell({
               Download PDF
             </a>
           ) : null}
-          <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
-            {backLinkLabel}
-          </Link>
           {isPinnedShowcase ? (
-            <Link href={ROUTES.HOME} className="talisbooks-viewer__back">
-              Home
+            <Link href={MAPSITE_APP_PATH} className="talisbooks-viewer__back">
+              Markets
             </Link>
           ) : null}
           {isPinnedShowcase ? (

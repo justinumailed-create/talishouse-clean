@@ -45,6 +45,8 @@ export interface BuildFields {
   mapZoom: number;
   manualPlacement: boolean;
   reverseGeocodedAddress: string;
+  mlsUrl: string;
+  brokerUrl: string;
   pinWriteup: string;
   futurePinColor: string;
   futurePinIcon: string;
@@ -299,6 +301,8 @@ export async function submitBuildRequest(
     manualPlacement: formData.get("manualPlacement") === "true",
     reverseGeocodedAddress:
       (formData.get("reverseGeocodedAddress") as string) || "",
+    mlsUrl: (formData.get("mlsUrl") as string) || "",
+    brokerUrl: (formData.get("brokerUrl") as string) || "",
     pinWriteup: (formData.get("pinWriteup") as string) || "",
     futurePinColor: (formData.get("futurePinColor") as string) || "",
     futurePinIcon: (formData.get("futurePinIcon") as string) || "",
@@ -436,6 +440,10 @@ export async function submitBuildRequest(
           manualPlacement: fields.manualPlacement,
           reverseGeocodedAddress:
             fields.reverseGeocodedAddress.trim() || null,
+        },
+        {
+          mlsUrl: fields.mlsUrl,
+          brokerUrl: fields.brokerUrl,
         }
       ),
       description: fields.pinWriteup.trim() || null,
@@ -710,6 +718,8 @@ export async function submitBuildRequest(
             null,
           propertyDescription: fields.pinWriteup.trim() || null,
           coverImage: fileUrls.picture ?? fileUrls.pinImage ?? null,
+          mlsUrl: fields.mlsUrl,
+          brokerUrl: fields.brokerUrl,
         })
       );
       resolvedMapSiteId = claimed?.id ?? mapsiteId;
@@ -729,6 +739,8 @@ export async function submitBuildRequest(
             null,
           propertyDescription: fields.pinWriteup.trim() || null,
           coverImage: fileUrls.picture ?? fileUrls.pinImage ?? null,
+          mlsUrl: fields.mlsUrl,
+          brokerUrl: fields.brokerUrl,
         })
       );
       resolvedMapSiteId = claimed?.id ?? DEMO_MAPSITE_ID;

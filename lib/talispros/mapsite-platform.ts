@@ -65,6 +65,8 @@ export type MapSiteBuildRequestLocation = {
   pinBorder?: string | null;
   pinAnimated?: boolean;
   pinCategoryBadge?: string | null;
+  mlsUrl?: string | null;
+  brokerUrl?: string | null;
 };
 
 export const DEMO_MAPSITE_COORDINATES = {
@@ -112,17 +114,17 @@ import {
   MAPSITE_LISTING_IMAGE_CLASS,
   shouldReplaceDemoListingMedia,
 } from "@/lib/talispros/mapsite-listing-media";
-import { resolvePinStyleExtras } from "@/lib/build-request-pin-style-notes";
+import { resolvePinStyleExtras, decodeListingLinksFromNotes, normalizeListingHref } from "@/lib/build-request-pin-style-notes";
 import { firstNonPersonalMapsiteLabel } from "@/lib/mapsite-pin-label";
 
 const DEMO_DESCRIPTION =
   "It's a million dollar neighbourhood. A driveway and building site were prepared some years ago. May come with a Tiny Home guest house to stay in, while you build your dream home.";
 
 const DEMO_SIDEBAR_BLURB =
-  "Register with Talispros to have Rahul manage your exposure globally...!";
+  "Register with Talispros to have Aisha manage your exposure globally...!";
 
 export const MAPSITE_GENERIC_PARTNER_WRITEUP =
-  "Upon registration your Mapsite™ will be able to promote up to 10 categories containing 100 PINs generating 1,000 views, monthly. No referral fees - ever";
+  "Upon registration your Mapsite™ will be able to promote 100 PINs generating 1,000 views, monthly. No referral fees - ever";
 
 export const MAPSITE_DEMO_EBOOK_PARTNER_WRITEUP =
   "Upon registration your Mapsite™ will be able to promote up to 100 PINs generating up to 1,000 views, combined. A small insertion fee applies while the PIN is being promoted, but NO REFERRAL FEES, EVER…!";
@@ -309,6 +311,7 @@ function mapBuildRequestSubmissionRow(
     null;
 
   const extras = resolvePinStyleExtras(row);
+  const listing = decodeListingLinksFromNotes(row.notes);
 
   return {
     latitude: hasLocation ? row.latitude! : undefined,
@@ -335,6 +338,8 @@ function mapBuildRequestSubmissionRow(
     pinWhiteCenter: extras.whiteCenter,
     pinAnimated: extras.animated,
     pinCategoryBadge: extras.categoryBadge,
+    mlsUrl: listing.mlsUrl,
+    brokerUrl: listing.brokerUrl,
   };
 }
 
@@ -390,6 +395,8 @@ export function applyBuildRequestLocationToMapSite(
       submission.pinAnimated ?? Boolean(mapsite.pin_animated),
     pin_category_badge:
       submission.pinCategoryBadge ?? mapsite.pin_category_badge ?? null,
+    mls_url: submission.mlsUrl ?? mapsite.mls_url,
+    broker_url: submission.brokerUrl ?? mapsite.broker_url,
   };
 }
 
@@ -686,6 +693,8 @@ export async function markMapSiteClaimedByBuildRequest(params: {
   propertyAddress?: string | null;
   propertyDescription?: string | null;
   coverImage?: string | null;
+  mlsUrl?: string | null;
+  brokerUrl?: string | null;
 }): Promise<MapSitePlatformRecord | null> {
   if (!isSupabaseAdminConfigured()) {
     return createFallbackDemoMapSite({
@@ -782,6 +791,13 @@ export async function markMapSiteClaimedByBuildRequest(params: {
     patch.cover_image = params.coverImage;
     patch.header_image_url = params.coverImage;
   }
+  const mlsUrl = normalizeListingHref(params.mlsUrl);
+  const brokerUrl = normalizeListingHref(params.brokerUrl);
+  if (mlsUrl) patch.mls_url = mlsUrl;
+  if (brokerUrl) {
+    patch.broker_url = brokerUrl;
+    patch.website = brokerUrl;
+  }
 
   const { data, error } = await supabase
     .from("mapsites")
@@ -831,6 +847,8 @@ export async function markMapSiteClaimedByBuildRequest(params: {
       pinIcon: null,
       pinColor: null,
       pinWhiteCenter: false,
+      mlsUrl: normalizeListingHref(params.mlsUrl),
+      brokerUrl: normalizeListingHref(params.brokerUrl),
     }
   );
 }

@@ -18,20 +18,19 @@ describe("sample Talisbooks™ viewer chrome", () => {
     "components/talisbooks/library/TalisBooksStandingBook.tsx",
   );
 
-  it("labels the sample mapsite CTA without Build", () => {
-    expect(shell).toContain('"Demo Mapsite™"');
-    expect(shell).toContain("DEMO_MAPSITE_BUILD_PATH");
+  it("omits the Demo Mapsite™ header button on the sample viewer", () => {
+    expect(shell).not.toContain('"Demo Mapsite™"');
+    expect(shell).not.toContain("DEMO_MAPSITE_BUILD_PATH");
     expect(shell).not.toMatch(/Build Demo/i);
   });
 
-  it("places Home after the sample mapsite CTA", () => {
-    expect(shell).toContain("ROUTES.HOME");
-    expect(shell).toContain("Home");
-  });
-
-  it("places Global Admin beside the sample mapsite CTA", () => {
-    expect(shell).toContain("Global Admin");
-    expect(shell).toContain("ROUTES.ADMIN_DASHBOARD");
+  it("places Home, Product, Download PDF, Markets, then Global Admin on the sample toolbar", () => {
+    expect(shell).toMatch(
+      /href=\{ROUTES\.HOME\}[\s\S]*href=\{ROUTES\.CATALOG\}[\s\S]*Download PDF[\s\S]*href=\{MAPSITE_APP_PATH\}[\s\S]*ROUTES\.ADMIN_DASHBOARD/,
+    );
+    expect(shell).toContain("ROUTES.CATALOG");
+    expect(shell).toMatch(/\n\s*Product\n/);
+    expect(shell).toMatch(/\n\s*Markets\n/);
   });
 
   it("sizes the sample toolbar as a matched button set", () => {
