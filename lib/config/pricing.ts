@@ -22,7 +22,12 @@ export interface LeaseToOwn {
 }
 
 export interface PricingConfig {
-  taxRate: number;
+  /**
+   * Unused leftover from the old single Canada rate. Live checkout uses
+   * `lib/canada-sales-tax.ts` (GST/HST/PST by province). Kept optional so
+   * stored admin / localStorage payloads still parse.
+   */
+  taxRate?: number;
   paymentOptions: PaymentOptions;
   leaseToOwn: LeaseToOwn;
   discounts: {
@@ -32,7 +37,6 @@ export interface PricingConfig {
 }
 
 export const DEFAULT_PRICING_CONFIG: PricingConfig = {
-  taxRate: 0.14,
   paymentOptions: {
     full: {
       enabled: true,

@@ -3,8 +3,12 @@ import type {
   RegistrationMarket,
 } from "@/lib/registration-market";
 import { REGISTRATION_MARKET_COPY } from "@/lib/registration-market";
+import type { CanadaProvinceCode } from "@/lib/canada-sales-tax";
+import { parseCanadaProvince } from "@/lib/canada-sales-tax";
 import {
+  type PlanSummary,
   type PlanType,
+  PLAN_DETAILS,
   checkoutPlanTypeForActivation,
   planSummaryFor,
   planTypeForClaimAccountType,
@@ -30,12 +34,43 @@ export function audiencePaymentLabel(audience: RegistrationMarket): string {
   return REGISTRATION_MARKET_COPY[audience].label;
 }
 
-export function audiencePlanSummary(audience: RegistrationMarket): {
+function pendingTaxSummary(planType: PlanType): PlanSummary & {
+  needsProvince: true;
+} {
+  const plan = PLAN_DETAILS[planType];
+  return {
+    planLabel: plan.label,
+    priceLabel: `CAD $${plan.price.toFixed(2)}`,
+    taxLabel: "Select province / territory for tax",
+    totalLabel: `CAD $${plan.price.toFixed(2)} + tax`,
+    price: plan.price,
+    tax: 0,
+    total: plan.price,
+    taxWord: "tax",
+    province: null,
+    needsProvince: true,
+  };
+}
+
+export function audiencePlanSummary(
+  audience: RegistrationMarket,
+  province?: string | null,
+): {
   planLabel: string;
   priceLabel: string;
   totalLabel: string;
 } {
-  const summary = planSummaryFor(planTypeForAudience(audience));
+  const planType = planTypeForAudience(audience);
+  const code = parseCanadaProvince(province);
+  if (!code) {
+    const pending = pendingTaxSummary(planType);
+    return {
+      planLabel: pending.planLabel,
+      priceLabel: pending.priceLabel,
+      totalLabel: pending.totalLabel,
+    };
+  }
+  const summary = planSummaryFor(planType, code);
   return {
     planLabel: summary.planLabel,
     priceLabel: summary.priceLabel,
@@ -44,13 +79,13 @@ export function audiencePlanSummary(audience: RegistrationMarket): {
 }
 
 /** Default Mapsite™ claim payment (full Root) when no claim selection is known. */
-export function rootAccountPlanSummary(): {
+export function rootAccountPlanSummary(province?: string | null): {
   planLabel: string;
   priceLabel: string;
   totalLabel: string;
   taxLabel: string;
 } {
-  const summary = planSummaryFor("ROOT_ACCOUNT");
+  const summary = mapsiteClaimPlanSummary("ROOT_ACCOUNT", province);
   return {
     planLabel: summary.planLabel,
     priceLabel: summary.priceLabel,
@@ -60,21 +95,25 @@ export function rootAccountPlanSummary(): {
 }
 
 /** Activate-card pricing. Retired $1 ROOT_ACCOUNT_1 displays as full Root. */
-export function mapsiteClaimPlanSummary(planType: PlanType = "ROOT_ACCOUNT"): {
-  planLabel: string;
-  priceLabel: string;
-  totalLabel: string;
-  taxLabel: string;
+export function mapsiteClaimPlanSummary(
+  planType: PlanType = "ROOT_ACCOUNT",
+  province?: CanadaProvinceCode | string | null,
+): PlanSummary & {
   planType: PlanType;
-  price: number;
-  tax: number;
-  total: number;
+  needsProvince: boolean;
 } {
   const checkoutPlan = checkoutPlanTypeForActivation(planType);
-  const summary = planSummaryFor(checkoutPlan);
+  const code = parseCanadaProvince(province);
+  if (!code) {
+    return {
+      ...pendingTaxSummary(checkoutPlan),
+      planType: checkoutPlan,
+    };
+  }
   return {
-    ...summary,
+    ...planSummaryFor(checkoutPlan, code),
     planType: checkoutPlan,
+    needsProvince: false,
   };
 }
 

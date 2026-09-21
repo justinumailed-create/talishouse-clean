@@ -8,6 +8,13 @@ import { useState, FormEvent, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { registerMapSite, type RegisterMapSiteInput } from "./actions";
+import {
+  canadaTaxWord,
+  computeCanadaSalesTax,
+  type CanadaProvinceCode,
+} from "@/lib/canada-sales-tax";
+import CanadaProvinceSelect from "@/components/CanadaProvinceSelect";
+import { formatCAD } from "@/utils/currency";
 
 const ADPRE_TYPES = [
   { value: "single", label: "Single AdPro™ PIN", description: "Individual business placement." },
@@ -25,7 +32,7 @@ function RegisterMapSiteForm() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
-  const [province, setProvince] = useState("");
+  const [province, setProvince] = useState<CanadaProvinceCode | "">("");
   const [accountType, setAccountType] = useState("single");
   const [error, setError] = useState("");
   const [step, setStep] = useState<"form" | "payment" | "processing">("form");
@@ -35,6 +42,11 @@ function RegisterMapSiteForm() {
     url: string;
   } | null>(null);
   const [paypalKey, setPaypalKey] = useState(0);
+  const MAPSITE_REGISTRATION_FEE = 49.99;
+  const taxBreakdown = province
+    ? computeCanadaSalesTax(MAPSITE_REGISTRATION_FEE, province)
+    : null;
+  const totalDue = taxBreakdown?.total ?? MAPSITE_REGISTRATION_FEE;
 
   function handleProceedToPayment(e: FormEvent) {
     e.preventDefault();
@@ -44,6 +56,7 @@ function RegisterMapSiteForm() {
     if (!firstName.trim()) { setError("First name is required"); return; }
     if (!lastName.trim()) { setError("Last name is required"); return; }
     if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError("Valid email is required"); return; }
+    if (!province) { setError("Province / territory is required for tax"); return; }
 
     setStep("payment");
     setPaypalKey((k) => k + 1);
@@ -179,13 +192,14 @@ function RegisterMapSiteForm() {
               </div>
               <div>
                 <label className="text-xs font-medium text-neutral-500 mb-1.5 block">
-                  Province / State
+                  Province / territory <span className="text-red-400">*</span>
                 </label>
-                <input
-                  type="text"
+                <CanadaProvinceSelect
                   value={province}
-                  onChange={(e) => setProvince(e.target.value)}
-                  placeholder="Ontario"
+                  onChange={(code) => {
+                    setProvince(code);
+                    setPaypalKey((k) => k + 1);
+                  }}
                   className="w-full h-11 px-4 bg-white border border-neutral-200 text-sm rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
                 />
               </div>
@@ -252,7 +266,15 @@ function RegisterMapSiteForm() {
                 <p>Email: <span className="font-medium text-neutral-900">{email}</span></p>
               </div>
               <div className="mt-4 pt-4 border-t border-neutral-200">
-                <p className="text-2xl font-bold text-neutral-900">$49.99 CAD</p>
+                <p className="text-sm text-neutral-600">
+                  {formatCAD(MAPSITE_REGISTRATION_FEE)}
+                  {taxBreakdown
+                    ? ` + ${formatCAD(taxBreakdown.taxAmount)} ${canadaTaxWord(taxBreakdown.rate)}`
+                    : " + tax"}
+                </p>
+                <p className="text-2xl font-bold text-neutral-900 mt-1">
+                  {formatCAD(totalDue)} CAD
+                </p>
                 <p className="text-xs text-neutral-500 mt-1">One-time registration fee</p>
               </div>
             </div>
@@ -268,13 +290,16 @@ function RegisterMapSiteForm() {
               <PayPalButtons
                 style={{ layout: "vertical", color: "blue", shape: "rect" }}
                 createOrder={(data, actions) => {
+                  if (!province || !taxBreakdown) {
+                    throw new Error("Province is required");
+                  }
                   return actions.order.create({
                     intent: "CAPTURE",
                     purchase_units: [{
-                      description: "Mapsite™ Registration",
+                      description: `Mapsite™ Registration (${canadaTaxWord(taxBreakdown.rate)})`,
                       amount: {
                         currency_code: "CAD",
-                        value: "49.99",
+                        value: totalDue.toFixed(2),
                       },
                     }],
                   });

@@ -10,19 +10,26 @@ import {
   stripeCheckoutSessionIsPaid,
   stripePaymentIntentIdFromSession,
 } from "@/lib/talispros/stripe-mapsite-session";
-import { checkoutPlanTypeForActivation, registrationTotalFor } from "@/lib/registration-plans";
+import { checkoutPlanTypeForActivation, historicalRootOneDollarTotal, registrationTotalFor } from "@/lib/registration-plans";
 
 vi.mock("@/lib/talispros/mapsite-activation", () => ({
   activateMapSiteAfterPayment: vi.fn(async () => ({ success: true })),
 }));
 
 describe("MapSite™ Stripe activation amounts", () => {
-  it("uses CAD cents from the existing registration total (including tax)", () => {
+  it("uses CAD cents from the province GST/HST/PST total", () => {
     expect(MAPSITE_ACTIVATION_CURRENCY).toBe("cad");
-    expect(mapsiteActivationUnitAmountCents("ROOT_ACCOUNT")).toBe(
-      Math.round(registrationTotalFor(998.5) * 100),
+    expect(mapsiteActivationUnitAmountCents("ROOT_ACCOUNT", "ON")).toBe(
+      Math.round(registrationTotalFor(998.5, "ON") * 100),
     );
-    expect(mapsiteActivationUnitAmountCents("ROOT_ACCOUNT")).toBe(113829);
+    expect(mapsiteActivationUnitAmountCents("ROOT_ACCOUNT", "ON")).toBe(112831);
+    expect(mapsiteActivationUnitAmountCents("ROOT_ACCOUNT", "AB")).toBe(
+      Math.round(registrationTotalFor(998.5, "AB") * 100),
+    );
+    expect(mapsiteActivationUnitAmountCents("ROOT_ACCOUNT", "QC")).toBe(
+      Math.round(registrationTotalFor(998.5, "QC") * 100),
+    );
+    expect(mapsiteActivationUnitAmountCents("ROOT_ACCOUNT", "NS")).toBe(113829);
   });
 
   it("does not use the retired $1 plan for new checkout", () => {
@@ -35,13 +42,14 @@ describe("MapSite™ Stripe activation amounts", () => {
     expect(
       mapsiteActivationUnitAmountCents(
         checkoutPlanTypeForActivation("ROOT_ACCOUNT_1"),
+        "ON",
       ),
-    ).toBe(113829);
+    ).toBe(112831);
   });
 
   it("keeps the historical $1 amount for matching already-paid sessions", () => {
     expect(mapsiteActivationUnitAmountCents("ROOT_ACCOUNT_1")).toBe(
-      Math.round(registrationTotalFor(1) * 100),
+      Math.round(historicalRootOneDollarTotal() * 100),
     );
     expect(mapsiteActivationUnitAmountCents("ROOT_ACCOUNT_1")).toBe(114);
   });

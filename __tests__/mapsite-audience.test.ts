@@ -51,8 +51,10 @@ describe("Mapsite™ audience payment helpers", () => {
     expect(isMapSitePaid("BUILD_REQUEST_SUBMITTED")).toBe(false);
     expect(planTypeForAudience("brokers")).toBe("ROOT_ACCOUNT");
     expect(audiencePlanSummary("listings").planLabel).toContain("Derivative");
-    expect(rootAccountPlanSummary().planLabel).toBe("Root Account™");
-    expect(rootAccountPlanSummary().priceLabel).toContain("998.50");
+    expect(rootAccountPlanSummary("ON").planLabel).toBe("Root Account™");
+    expect(rootAccountPlanSummary("ON").priceLabel).toContain("998.50");
+    expect(rootAccountPlanSummary("ON").taxLabel).toContain("HST");
+    expect(rootAccountPlanSummary().taxLabel).toMatch(/province/i);
   });
 
   it("maps claim root-1 and FSBO to the full Root Account™ plan", () => {
@@ -60,12 +62,14 @@ describe("Mapsite™ audience payment helpers", () => {
     expect(planTypeForClaimAccountType("root_1")).toBe("ROOT_ACCOUNT");
     expect(planTypeForClaimAccountType("fsbo")).toBe("ROOT_ACCOUNT");
     expect(planTypeForClaimAccountType("fsbos")).toBe("ROOT_ACCOUNT");
-    const summary = mapsiteClaimPlanSummary("ROOT_ACCOUNT");
+    const summary = mapsiteClaimPlanSummary("ROOT_ACCOUNT", "ON");
     expect(summary.price).toBe(998.5);
     expect(summary.priceLabel).toContain("998.50");
+    expect(summary.taxWord).toBe("HST");
+    expect(summary.needsProvince).toBe(false);
     expect(summary.planLabel).toBe("Root Account™");
     expect(summary.planLabel).not.toContain("$1");
-    const retired = mapsiteClaimPlanSummary("ROOT_ACCOUNT_1");
+    const retired = mapsiteClaimPlanSummary("ROOT_ACCOUNT_1", "AB");
     expect(retired.planType).toBe("ROOT_ACCOUNT");
     expect(retired.price).toBe(998.5);
     expect(retired.planLabel).toBe("Root Account™");

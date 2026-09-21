@@ -9,9 +9,9 @@ import { getModelsByCategory } from "@/lib/products";
 import { getAddonsForProduct, addonsRecord } from "@/lib/config/addons";
 import SuccessToast from "@/components/SuccessToast";
 import { formatCAD } from "@/utils/currency";
+import { computeCanadaSalesTax } from "@/lib/canada-sales-tax";
 
 const BUILD_AND_PRICE = 1950;
-const TAX_RATE = 0.14;
 
 export default function TalishouseRecreationalPage() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function TalishouseRecreationalPage() {
   const [wholesaleRequested, setWholesaleRequested] = useState(false);
   const [leaseToOwnRequested, setLeaseToOwnRequested] = useState(false);
   const [success, setSuccess] = useState(false);
-  const { addToCart, openCart } = useCart();
+  const { addToCart, openCart, taxProvince } = useCart();
 
   const toggleOption = (category: string, option: string) => {
     setSelectedOptions((prev) => ({
@@ -74,7 +74,8 @@ export default function TalishouseRecreationalPage() {
   };
 
   const calculateTax = (): number => {
-    return calculateSubtotalWithUpsell() * TAX_RATE;
+    if (!taxProvince) return 0;
+    return computeCanadaSalesTax(calculateSubtotalWithUpsell(), taxProvince).taxAmount;
   };
 
   const calculateTotalWithUpsell = (): number => {

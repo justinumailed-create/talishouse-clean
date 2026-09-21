@@ -1,4 +1,18 @@
-export const REGISTRATION_TAX_RATE = 0.14;
+import {
+  canadaTaxAmountFor,
+  canadaTaxWord,
+  canadaTotalFor,
+  computeCanadaSalesTax,
+  parseCanadaProvince,
+  roundCadCents,
+  type CanadaProvinceCode,
+} from "@/lib/canada-sales-tax";
+
+/**
+ * Retired $1 Root Stripe sessions charged CAD $1.00 + 14% GST.
+ * New checkout never uses this rate — province GST/HST/PST applies instead.
+ */
+export const HISTORICAL_ROOT_ONE_DOLLAR_TAX_RATE = 0.14;
 
 export type PlanType =
   | "TEST_ACCOUNT"
@@ -31,8 +45,6 @@ export interface PlanDetail {
   monthly?: number;
   bullets?: string[];
   description?: string;
-  /** Prefer "GST" vs generic "tax" in checkout copy. */
-  taxLabel?: "tax" | "GST";
 }
 
 export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
@@ -55,7 +67,6 @@ export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
     label: "Root Account™ ($1)",
     price: 1,
     monthly: 0,
-    taxLabel: "GST",
     description:
       "Retired CAD $1 demo activation. New registration uses Root Account™.",
     bullets: [
@@ -117,12 +128,28 @@ export const ADPRO_PLANS: PlanType[] = [
   "ADPRO_UNLIMITED",
 ];
 
-export function registrationTotalFor(price: number): number {
-  return Math.round((price + price * REGISTRATION_TAX_RATE) * 100) / 100;
+export function historicalRootOneDollarTaxAmount(): number {
+  return roundCadCents(PLAN_DETAILS.ROOT_ACCOUNT_1.price * HISTORICAL_ROOT_ONE_DOLLAR_TAX_RATE);
 }
 
-export function registrationTaxAmountFor(price: number): number {
-  return Math.round(price * REGISTRATION_TAX_RATE * 100) / 100;
+export function historicalRootOneDollarTotal(): number {
+  return roundCadCents(
+    PLAN_DETAILS.ROOT_ACCOUNT_1.price + historicalRootOneDollarTaxAmount(),
+  );
+}
+
+export function registrationTotalFor(
+  price: number,
+  province: CanadaProvinceCode | string,
+): number {
+  return canadaTotalFor(price, province);
+}
+
+export function registrationTaxAmountFor(
+  price: number,
+  province: CanadaProvinceCode | string,
+): number {
+  return canadaTaxAmountFor(price, province);
 }
 
 export function isRootPlanType(planType: string): boolean {
@@ -133,7 +160,7 @@ export function isRootPlanType(planType: string): boolean {
   );
 }
 
-export function planSummaryFor(planType: PlanType): {
+export interface PlanSummary {
   planLabel: string;
   priceLabel: string;
   taxLabel: string;
@@ -141,19 +168,54 @@ export function planSummaryFor(planType: PlanType): {
   price: number;
   tax: number;
   total: number;
-} {
+  taxWord: string;
+  province: CanadaProvinceCode | null;
+}
+
+/**
+ * Checkout / display totals. ROOT_ACCOUNT_1 always uses the historical
+ * $1 + 14% GST matchers. Every other plan requires a Canadian province.
+ */
+export function planSummaryFor(
+  planType: PlanType,
+  province?: CanadaProvinceCode | string | null,
+): PlanSummary {
   const plan = PLAN_DETAILS[planType];
-  const tax = registrationTaxAmountFor(plan.price);
-  const total = registrationTotalFor(plan.price);
-  const taxWord = plan.taxLabel === "GST" ? "GST" : "tax";
+  if (planType === "ROOT_ACCOUNT_1") {
+    const tax = historicalRootOneDollarTaxAmount();
+    const total = historicalRootOneDollarTotal();
+    return {
+      planLabel: plan.label,
+      priceLabel: `CAD $${plan.price.toFixed(2)}`,
+      taxLabel: `CAD $${tax.toFixed(2)} GST`,
+      totalLabel: `CAD $${total.toFixed(2)} (incl. GST)`,
+      price: plan.price,
+      tax,
+      total,
+      taxWord: "GST",
+      province: null,
+    };
+  }
+
+  const code = parseCanadaProvince(province);
+  if (!code) {
+    throw new Error(
+      "A Canadian province or territory is required to calculate sales tax.",
+    );
+  }
+
+  const breakdown = computeCanadaSalesTax(plan.price, code);
+  const taxWord = canadaTaxWord(breakdown.rate);
   return {
     planLabel: plan.label,
     priceLabel: `CAD $${plan.price.toFixed(2)}`,
-    taxLabel: `CAD $${tax.toFixed(2)} ${taxWord}`,
-    totalLabel: `CAD $${total.toFixed(2)} (incl. ${taxWord})`,
+    taxLabel: `CAD $${breakdown.taxAmount.toFixed(2)} ${taxWord}`,
+    totalLabel: `CAD $${breakdown.total.toFixed(2)} (incl. ${taxWord})`,
     price: plan.price,
-    tax,
-    total,
+    tax: breakdown.taxAmount,
+    total: breakdown.total,
+    taxWord,
+    province: code,
   };
 }
 
