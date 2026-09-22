@@ -6,8 +6,6 @@ import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 import {
-  PRODUCT_FLIPBOOK_ASSET_TODO,
-  PRODUCT_FLIPBOOK_PLACEHOLDER_PAGES,
   PRODUCT_FLIPBOOK_SAMPLE_HREF,
   type ProductFlipbookPage,
 } from "@/lib/product-flipbook/manifest";
@@ -23,37 +21,16 @@ type Flip = {
 };
 
 function CatalogueFace({ page }: { page: ProductFlipbookPage }) {
-  if (page.src) {
-    return (
-      <Image
-        src={page.src}
-        alt={page.alt}
-        fill
-        sizes="(max-width: 960px) 100vw, 960px"
-        className="product-flipbook__image"
-        draggable={false}
-      />
-    );
-  }
-
-  if (page.number === 1) {
-    return (
-      <div className="product-flipbook__cover">
-        <p className="product-flipbook__kicker">Talispros</p>
-        <h2 className="product-flipbook__cover-title">T-All</h2>
-        <p className="product-flipbook__cover-rule" aria-hidden="true" />
-        <p className="product-flipbook__cover-subtitle">Product catalogue</p>
-        <p className="product-flipbook__cover-note">Single pages, bound at the top</p>
-      </div>
-    );
-  }
-
+  if (!page.src) return null;
   return (
-    <div className="product-flipbook__leaf">
-      <p className="product-flipbook__leaf-kicker">T-All</p>
-      <p className="product-flipbook__leaf-number">{String(page.number).padStart(2, "0")}</p>
-      <p className="product-flipbook__leaf-caption">Catalogue page</p>
-    </div>
+    <Image
+      src={page.src}
+      alt={page.alt}
+      fill
+      sizes="(max-width: 960px) 100vw, 960px"
+      className="product-flipbook__image"
+      draggable={false}
+    />
   );
 }
 
@@ -62,8 +39,7 @@ export default function TopBoundFlipbook({
 }: {
   pages: ProductFlipbookPage[];
 }) {
-  const usingPlaceholders = pages.length === 0;
-  const leaves = usingPlaceholders ? PRODUCT_FLIPBOOK_PLACEHOLDER_PAGES : pages;
+  const leaves = pages;
   const [index, setIndex] = useState(0);
   const [flip, setFlip] = useState<Flip | null>(null);
   const indexRef = useRef(0);
@@ -231,7 +207,7 @@ export default function TopBoundFlipbook({
           >
             <div className="product-flipbook__slot">
               <div className="product-flipbook__settled" data-testid="product-flipbook-page">
-                <CatalogueFace page={underPage} />
+                {underPage ? <CatalogueFace page={underPage} /> : null}
               </div>
               {flip && sheetPage ? (
                 <div
@@ -256,11 +232,6 @@ export default function TopBoundFlipbook({
       </div>
 
       <div className="product-flipbook__toolbar">
-        {usingPlaceholders ? (
-          <p className="product-flipbook__todo" role="status">
-            {PRODUCT_FLIPBOOK_ASSET_TODO}
-          </p>
-        ) : null}
         <div className="product-flipbook__controls">
           <button
             type="button"

@@ -13,8 +13,7 @@ import {
 import { loadProductFlipbookPages } from "../lib/product-flipbook/load-pages";
 import {
   pagesFromFlipbookFiles,
-  PRODUCT_FLIPBOOK_ASSET_TODO,
-  PRODUCT_FLIPBOOK_PLACEHOLDER_PAGES,
+  PRODUCT_FLIPBOOK_PAGE_COUNT,
   selectProductFlipbookFiles,
 } from "../lib/product-flipbook/manifest";
 import { isProductCataloguePath } from "../lib/product-flipbook/paths";
@@ -82,12 +81,22 @@ describe("T-All page manifest", () => {
     ]);
   });
 
-  it("ships placeholders and a TODO until T-All rasters are added", () => {
-    expect(loadProductFlipbookPages()).toEqual([]);
-    expect(PRODUCT_FLIPBOOK_PLACEHOLDER_PAGES.length).toBeGreaterThan(1);
-    expect(PRODUCT_FLIPBOOK_PLACEHOLDER_PAGES.every((page) => page.src === null)).toBe(true);
-    expect(PRODUCT_FLIPBOOK_ASSET_TODO).toContain("public/product-flipbook/page-01.webp");
-    expect(PRODUCT_FLIPBOOK_ASSET_TODO).toContain("uploads/T-All-Final.pdf");
+  it("loads every T-All Final page raster in order", () => {
+    const pages = loadProductFlipbookPages();
+    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT);
+    expect(pages[0]).toMatchObject({
+      id: "page-01.webp",
+      number: 1,
+      src: "/product-flipbook/page-01.webp",
+      alt: "T-All catalogue page 1",
+    });
+    expect(pages.map((page) => page.src)).toEqual(
+      Array.from({ length: PRODUCT_FLIPBOOK_PAGE_COUNT }, (_, index) => {
+        const number = String(index + 1).padStart(2, "0");
+        return `/product-flipbook/page-${number}.webp`;
+      }),
+    );
+    expect(pages.every((page) => page.src)).toBe(true);
   });
 });
 
@@ -114,7 +123,9 @@ describe("product catalogue route", () => {
     expect(catalog).toContain('redirect("/catalogue")');
     expect(catalog).not.toContain("catalog-grid");
     expect(viewer).toContain('data-binding="top"');
-    expect(viewer).toContain("PRODUCT_FLIPBOOK_ASSET_TODO");
+    expect(viewer).not.toContain("PRODUCT_FLIPBOOK_ASSET_TODO");
+    expect(viewer).not.toContain("product-flipbook__todo");
+    expect(viewer).not.toContain("PRODUCT_FLIPBOOK_PLACEHOLDER_PAGES");
     expect(viewer).not.toContain("rotateY");
     expect(viewer).not.toContain("Glasshouse");
     expect(viewer).not.toContain("$58.50");

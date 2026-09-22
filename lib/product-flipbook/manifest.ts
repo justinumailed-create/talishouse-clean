@@ -7,23 +7,18 @@ export const PRODUCT_FLIPBOOK_PUBLIC_PREFIX = "/product-flipbook";
 /** Directory Next serves. Drop optimized page rasters here. */
 export const PRODUCT_FLIPBOOK_ASSET_DIR = "public/product-flipbook";
 
-/** Source catalogue Arun named for this Product destination. */
+/** Source catalogue. Each PDF page is one image in this folder. */
 export const PRODUCT_FLIPBOOK_SOURCE_PDF = "T-All Final.pdf";
 
-/** Workspace path the PDF may arrive as. */
-export const PRODUCT_FLIPBOOK_UPLOAD_CANDIDATE = "uploads/T-All-Final.pdf";
-
 /**
- * TODO: T-All Final.pdf was not in the workspace when this viewer shipped.
- * Rasterize that PDF (or uploads/T-All-Final.pdf) to optimized images:
+ * Page rasters from T-All Final.pdf, one image per PDF page:
  *   public/product-flipbook/page-01.webp
  *   public/product-flipbook/page-02.webp
  *   …
  * webp, jpg, and png are picked up in natural filename order.
  * One image is one top-bound page — do not split them into centerfold leaves.
  */
-export const PRODUCT_FLIPBOOK_ASSET_TODO =
-  "TODO: rasterize T-All Final.pdf (uploads/T-All-Final.pdf) into public/product-flipbook/page-01.webp, page-02.webp, and so on (webp, jpg, or png). Each file is one page and turns from the top edge.";
+export const PRODUCT_FLIPBOOK_PAGE_COUNT = 38;
 
 export const PRODUCT_FLIPBOOK_SAMPLE_HREF = `${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`;
 
@@ -64,16 +59,3 @@ export function pagesFromFlipbookFiles(fileNames: string[]): ProductFlipbookPage
     };
   });
 }
-
-/** Shown until real page rasters are added. Still a top-bound, single-page deck. */
-export const PRODUCT_FLIPBOOK_PLACEHOLDER_PAGES: ProductFlipbookPage[] = [
-  1, 2, 3, 4,
-].map((number) => ({
-  id: `placeholder-${number}`,
-  number,
-  src: null,
-  alt:
-    number === 1
-      ? "T-All catalogue cover, awaiting page images"
-      : `T-All catalogue placeholder page ${number}`,
-}));
