@@ -4,16 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
+import { shouldShowTalisbooksMarketingHeader } from "@/lib/talisbooks/marketing-chrome";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 
 export default function TalisBooksMarketingHeader() {
   const pathname = usePathname();
-  const hideChrome =
-    pathname.startsWith("/talisbooks/dashboard") ||
-    pathname.startsWith("/talisbooks/editor") ||
-    pathname.startsWith("/talisbooks/viewer");
 
-  if (hideChrome) {
+  if (!shouldShowTalisbooksMarketingHeader(pathname)) {
     return null;
   }
 
