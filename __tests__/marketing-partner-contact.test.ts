@@ -19,7 +19,7 @@ describe("marketing partner contact", () => {
     expect(MARKETING_PARTNER_TELEGRAM_HREF).toBe("https://t.me/+19023172223");
   });
 
-  it("labels Aisha as Marketing Partner and offers Express an Interest", () => {
+  it("keeps Marketing Partner Express an Interest on Mapsite cards only", () => {
     const card = readFileSync(
       join(
         process.cwd(),
@@ -41,8 +41,10 @@ describe("marketing partner contact", () => {
 
     expect(card).toContain("MarketingPartnerInterestLinks");
     expect(card).not.toContain("What we do for you");
-    expect(sidebar).toContain("MARKETING_PARTNER_ROLE_LABEL");
-    expect(sidebar).not.toContain("What we do for you");
+    expect(sidebar).toContain("Your Mapsite™ Manager:");
+    expect(sidebar).toContain("What we do for you");
+    expect(sidebar).not.toContain("MarketingPartnerInterestLinks");
+    expect(sidebar).not.toContain("MARKETING_PARTNER_ROLE_LABEL");
     expect(links).toContain("Express an Interest");
     expect(links).toContain("MARKETING_PARTNER_WHATSAPP_HREF");
     expect(links).toContain("MARKETING_PARTNER_TELEGRAM_HREF");
