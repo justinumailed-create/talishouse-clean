@@ -78,7 +78,6 @@ export default async function TalisBooksViewerSlugPage({
 
   // Live Edit only after activation payment — never on demonstration books,
   // and never via admin bypass.
-  const showDashboard = isAdmin || (!isDemoBook && paymentReceived);
   const canLiveEdit = !isDemoBook && paymentReceived && canEditTools;
 
   return (
@@ -87,7 +86,6 @@ export default async function TalisBooksViewerSlugPage({
       canEditTools={canEditTools}
       canLiveEdit={canLiveEdit}
       pageInsertLocked={isDemoBook}
-      showDashboard={showDashboard}
     />
   );
 }

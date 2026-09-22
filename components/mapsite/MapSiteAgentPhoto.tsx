@@ -32,11 +32,12 @@ export default function MapSiteAgentPhoto({
     <div className={`relative overflow-visible ${className}`}>
       {cutoutUrl ? (
         // Blob URL from the on-device cutout; not a remote Next Image source.
+        // The cutout keeps the person intact and clears the photo background.
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={cutoutUrl}
           alt={agent.name}
-          className="absolute inset-0 h-full w-full object-contain object-bottom drop-shadow-[0_12px_18px_rgba(0,0,0,0.18)]"
+          className="absolute inset-0 h-full w-full object-contain object-center drop-shadow-[0_12px_18px_rgba(0,0,0,0.18)]"
         />
       ) : sourceUrl ? (
         <Image
@@ -44,7 +45,7 @@ export default function MapSiteAgentPhoto({
           alt={agent.name}
           fill
           unoptimized
-          className="origin-top scale-[1.38] object-cover object-[center_18%]"
+          className="object-contain object-center"
           sizes="(max-width: 768px) 112px, 176px"
           priority
         />
