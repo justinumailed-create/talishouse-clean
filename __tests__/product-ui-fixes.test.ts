@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
 import { TALISPROS_START_SEGMENTS } from "@/lib/talispros/start-content";
 
 function repoSource(relativePath: string) {
@@ -32,6 +33,17 @@ describe("home right rail audience labels", () => {
       expect(segment.title.startsWith("I am a")).toBe(false);
       expect(segment.title.startsWith("I am an")).toBe(false);
     }
+  });
+});
+
+describe("Back to Mapsite from a FAST-scoped page", () => {
+  it("opens the published Mapsite for that FAST code", () => {
+    expect(mapsiteBackFromScheduleHref("lg01")).toBe("/mapsite/lg01");
+    expect(mapsiteBackFromScheduleHref("rm22")).toBe("/mapsite/rm22");
+
+    const talistv = repoSource("app/talistv/page.tsx");
+    expect(talistv).toContain("mapsiteBackFromScheduleHref(fastCode)");
+    expect(talistv).not.toContain("/talispros/mapsite/listings/");
   });
 });
 

@@ -10,16 +10,14 @@ import {
 import { ROUTES } from "@/lib/routes";
 import { clampMapZoom } from "@/lib/home-pin-coordinates";
 import {
-  buildClaimedMapSitePath,
-  MAPSITE_APP_PATH,
-} from "@/lib/talispros/mapsite-state";
-import {
   MAPSITE_PIN_DEFAULT_COLOR,
   MAPSITE_PIN_DEFAULT_ICON,
   mapSitePinVisualFields,
   type MapSiteSavedPinStyle,
 } from "@/lib/mapsite-pin-style";
 import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
+
+export { mapsiteBackFromScheduleHref } from "@/lib/talispros/mapsite-state";
 
 export const MAPSITE_HEADER_FALLBACK_LOGO =
   "/images/mapsites/header-fallback-logo.jpeg";
@@ -119,18 +117,6 @@ export function mapsiteScheduleHref(fastCode: string): string {
   return code
     ? `${ROUTES.TALISTV}?fastCode=${encodeURIComponent(code)}`
     : ROUTES.TALISTV;
-}
-
-/** Reverse of `mapsiteScheduleHref` — return to the FAST-code Mapsite™ overlay. */
-export function mapsiteBackFromScheduleHref(
-  fastCode: string | null | undefined,
-): string {
-  const code = fastCode?.trim().toLowerCase() || "";
-  if (!code) return MAPSITE_APP_PATH;
-  return buildClaimedMapSitePath({
-    fastCode: code,
-    audience: "listings",
-  });
 }
 
 export function mapsiteCreateEbookHref(

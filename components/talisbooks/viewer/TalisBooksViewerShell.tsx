@@ -18,7 +18,10 @@ import TalisBooksViewerStage, {
 import { ROUTES } from "@/lib/routes";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
-import { MAPSITE_APP_PATH, buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
+import {
+  MAPSITE_APP_PATH,
+  mapsiteBackFromScheduleHref,
+} from "@/lib/talispros/mapsite-state";
 import {
   convertViewerNavIndex,
   createEmptyNarrationController,
@@ -432,13 +435,7 @@ export default function TalisBooksViewerShell({
     binding === "open" && viewMode === "spread" ? spread.right : null;
   const showViewerSidebar = false;
   const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
-  const backToMapSiteHref =
-    book.fastCode && book.fastCode.trim().toLowerCase() !== "demo"
-      ? buildClaimedMapSitePath({
-          fastCode: book.fastCode,
-          accountType: book.accountType,
-        })
-      : MAPSITE_APP_PATH;
+  const backToMapSiteHref = mapsiteBackFromScheduleHref(book.fastCode);
 
   return (
     <div
