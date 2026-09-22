@@ -24,15 +24,17 @@ export function mapsiteMarketPartnerImageUrl(
 
 export const MAPSITE_MARKET_PARTNER_FALLBACK_NAME = "Aisha C.";
 
+export const MARKETING_PARTNER_ROLE_LABEL = "Marketing Partner";
+
 export function mapsiteMarketPartnerLabel(
   agentImageUrl?: string | null,
   agentName?: string | null,
-  fallback: string = `Market Partner: ${MAPSITE_MARKET_PARTNER_FALLBACK_NAME}`,
+  fallback: string = MARKETING_PARTNER_ROLE_LABEL,
 ): string {
   const image = agentImageUrl?.trim() || "";
   const name = agentName?.trim() || "";
   if (image && name) {
-    return `Market Partner: ${name}`;
+    return `${MARKETING_PARTNER_ROLE_LABEL}: ${name}`;
   }
   return fallback;
 }
@@ -41,7 +43,7 @@ export const REAL_ESTATE_PROFESSIONALS_MARKET: TalisprosMarketPageContent = {
   slug: "real-estate-professionals",
   title: "Real Estate Professionals",
   registrationMarket: "listings",
-  marketPartner: "Market Partner: Aisha C.",
+  marketPartner: "Marketing Partner",
   partnerImage: MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE,
   partnerImageAlt: "Aisha C.",
   whyHeading: "Why Real Estate Professionals might use Mapsites™.",
@@ -54,7 +56,7 @@ export const TALISHHOUSE_BUILDERS_MARKET: TalisprosMarketPageContent = {
   slug: "talishouse-builders",
   title: "Talishouse™ Builders",
   registrationMarket: "homes",
-  marketPartner: "Market Partner: Aisha C.",
+  marketPartner: "Marketing Partner",
   partnerImage: MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE,
   partnerImageAlt: "Aisha C.",
   whyHeading: "Why Talishouse™ Builders might use Mapsites™.",
@@ -67,7 +69,7 @@ export const FOR_SALE_BY_OWNERS_MARKET: TalisprosMarketPageContent = {
   slug: "for-sale-by-owners",
   title: "For Sale By Owners",
   registrationMarket: "fsbos",
-  marketPartner: "Market Partner: Aisha C.",
+  marketPartner: "Marketing Partner",
   partnerImage: MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE,
   partnerImageAlt: "Aisha C.",
   whyHeading: "Why For-Sale-By-Owners might use Mapsites™.",
@@ -80,7 +82,7 @@ export const CLAIM_A_MARKET_PAGE: TalisprosMarketPageContent = {
   slug: "claim-a-market",
   title: "Build Mapsite™",
   registrationMarket: "listings",
-  marketPartner: "Market Partner: Aisha C.",
+  marketPartner: "Marketing Partner",
   partnerImage: MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE,
   partnerImageAlt: "Aisha C.",
   whyHeading: "Why build your Mapsite™.",

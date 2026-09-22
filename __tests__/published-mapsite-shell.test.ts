@@ -50,6 +50,8 @@ describe("published Mapsite™ shell", () => {
     );
     expect(application).toContain("MapSiteMarketPartnerCard");
     expect(application).toContain("paid={paid}");
+    expect(application).not.toContain("ACTIVATION_REVEAL_DELAY_MS");
+    expect(application).not.toContain("paymentDelayElapsed");
     expect(application).not.toContain("MapSiteExpressInterestCard");
     expect(application).toContain("overscroll-none");
 

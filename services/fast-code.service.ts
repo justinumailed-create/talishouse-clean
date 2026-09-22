@@ -17,13 +17,20 @@ export interface GenerateFastCodeResult {
 const MAX_SEQUENCE = 99;
 
 export function formatFastCode(prefix: string, sequence: number): string {
+  const letters = prefix.trim().toLowerCase();
+  if (!/^[a-z]{2,3}$/.test(letters)) {
+    throw new Error(
+      `FAST Code prefix must be 2–3 letters, got "${prefix}"`
+    );
+  }
+
   if (sequence < 1 || sequence > MAX_SEQUENCE) {
     throw new Error(
       `FAST Code sequence must be between 1 and ${MAX_SEQUENCE}, got ${sequence}`
     );
   }
 
-  return `${prefix}${String(sequence).padStart(2, "0")}`;
+  return `${letters}${String(sequence).padStart(2, "0")}`;
 }
 
 export function getNextFastCodeSequence(
@@ -60,9 +67,9 @@ export async function generateFastCode(
   input: GenerateFastCodeInput
 ): Promise<string> {
   const normalized = validateAndNormalizeFastCodeInput(input);
-  const prefix = extractInitials(normalized);
+  const prefix = extractInitials(normalized).replace(/[^a-z]/g, "");
 
-  if (!prefix) {
+  if (!/^[a-z]{2,3}$/.test(prefix)) {
     throw new Error("Unable to derive FAST Code initials from name");
   }
 

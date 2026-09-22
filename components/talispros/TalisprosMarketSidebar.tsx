@@ -1,6 +1,8 @@
 import Image from "next/image";
+import MarketingPartnerInterestLinks from "@/components/talispros/mapsite/MarketingPartnerInterestLinks";
 import {
   MAPSITE_MARKET_PARTNER_FALLBACK_NAME,
+  MARKETING_PARTNER_ROLE_LABEL,
   type TalisprosMarketPageContent,
 } from "@/lib/talispros/market-pages";
 
@@ -13,7 +15,7 @@ export default function TalisprosMarketSidebar({ content }: TalisprosMarketSideb
     <aside className="flex-none bg-[#f2f2f0] text-black lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:border-l lg:border-[#dedede] lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
       <div className="px-5 pb-10 pt-8 text-center sm:px-6 sm:pt-10">
         <h2 className="text-[21px] leading-snug text-black">
-          Your Mapsite™ Manager:
+          {MARKETING_PARTNER_ROLE_LABEL}
           <br />
           {MAPSITE_MARKET_PARTNER_FALLBACK_NAME}
         </h2>
@@ -21,7 +23,7 @@ export default function TalisprosMarketSidebar({ content }: TalisprosMarketSideb
         <div className="mx-auto mt-6 max-w-[280px]">
           <Image
             src={content.partnerImage}
-            alt={content.partnerImageAlt}
+            alt={MAPSITE_MARKET_PARTNER_FALLBACK_NAME}
             width={896}
             height={1200}
             className="mx-auto h-auto w-full"
@@ -30,37 +32,7 @@ export default function TalisprosMarketSidebar({ content }: TalisprosMarketSideb
           />
         </div>
 
-        <h3 className="mt-8 text-[26px] leading-snug text-black">
-          What we do for you
-        </h3>
-
-        <p className="mx-auto mt-5 max-w-[18rem] text-left text-[14px] leading-[26px] text-black sm:text-center">
-          We help grow your real estate adjacent marketing along the following
-          broad development curves:
-          <br />
-          <br />
-          TEB: We manage your bookshelf to highlight qualifying listings by
-          promoting digital publications. Qualifying listings are those that pay
-          enough and have enough term to improve performance metrics on both
-          levels over time. This pays for us many times over.
-          <br />
-          <br />
-          TVA: We analyze listings that may be suitable for an investor class that
-          seeks collective purchases, or even tokenization. Such purchase options
-          are often incompatible with exposure on industry platforms. Hence, we
-          manage your Mapsite™ initiatives.
-          <br />
-          <br />
-          TTV: We coordinate video production and in-house online TV programming
-          at a fraction of the cost of conventional channels, including
-          green-screen production of features that influence word-of-mouth and
-          highlight core competencies.
-          <br />
-          <br />
-          Please add us to your team...!
-          <br />
-          Aisha
-        </p>
+        <MarketingPartnerInterestLinks className="mx-auto mt-6 max-w-[18rem]" />
       </div>
     </aside>
   );
