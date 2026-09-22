@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import TalisBooksMarketingHeader from "@/components/talisbooks/platform/TalisBooksMarketingHeader";
+import { shouldShowTalisbooksMarketingHeader } from "@/lib/talisbooks/marketing-chrome";
 
 export default function TalisBooksLayoutClient({
   children,
@@ -20,7 +21,9 @@ export default function TalisBooksLayoutClient({
 
   return (
     <>
-      <TalisBooksMarketingHeader />
+      {shouldShowTalisbooksMarketingHeader(pathname) ? (
+        <TalisBooksMarketingHeader />
+      ) : null}
       <main className="min-h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
         {children}
       </main>
