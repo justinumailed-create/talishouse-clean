@@ -4,6 +4,7 @@ import {
   validateAndNormalizeFastCodeInput,
   FastCodeValidationError,
   normalizeNamePart,
+  splitPersonName,
   validateNamePart,
 } from "@/validators/fast-code.validator";
 import {
@@ -77,6 +78,18 @@ describe("validateNamePart", () => {
       /invalid characters/
     );
   });
+
+  it("allows & and + between given names", () => {
+    expect(validateNamePart("Lydia & Richard", "firstName")).toBe(
+      "lydia & richard"
+    );
+    expect(validateNamePart("Lydia + Richard", "firstName")).toBe(
+      "lydia + richard"
+    );
+    expect(validateNamePart("Lydia and Richard", "firstName")).toBe(
+      "lydia and richard"
+    );
+  });
 });
 
 describe("extractInitials", () => {
@@ -104,6 +117,87 @@ describe("extractInitials", () => {
       lastName: "O'Connor",
     });
     expect(extractInitials(input)).toBe("jjo");
+  });
+
+  it("uses the first letter of each given name when & , + , or and separates them", () => {
+    expect(
+      extractInitials(
+        validateAndNormalizeFastCodeInput({
+          firstName: "Lydia & Richard",
+          lastName: "Gaertner",
+        })
+      )
+    ).toBe("lrg");
+    expect(
+      extractInitials(
+        validateAndNormalizeFastCodeInput({
+          firstName: "Lydia + Richard",
+          lastName: "Gaertner",
+        })
+      )
+    ).toBe("lrg");
+    expect(
+      extractInitials(
+        validateAndNormalizeFastCodeInput({
+          firstName: "Lydia and Richard",
+          lastName: "Gaertner",
+        })
+      )
+    ).toBe("lrg");
+    expect(
+      extractInitials(
+        validateAndNormalizeFastCodeInput({
+          firstName: "Lydia&Richard",
+          lastName: "Gaertner",
+        })
+      )
+    ).toBe("lrg");
+  });
+
+  it("keeps the issued 2–3 letter shape when there are more than two given names", () => {
+    expect(
+      extractInitials(
+        validateAndNormalizeFastCodeInput({
+          firstName: "Lydia & Richard & Tom",
+          lastName: "Gaertner",
+        })
+      )
+    ).toBe("lrg");
+  });
+
+  it("does not treat and inside a given name as a separator", () => {
+    expect(
+      extractInitials(
+        validateAndNormalizeFastCodeInput({
+          firstName: "Andrew",
+          lastName: "Smith",
+        })
+      )
+    ).toBe("as");
+  });
+});
+
+describe("splitPersonName", () => {
+  it("keeps a shared surname after & , + , or and", () => {
+    expect(splitPersonName("Lydia & Richard Gaertner")).toEqual({
+      firstName: "Lydia & Richard",
+      lastName: "Gaertner",
+    });
+    expect(splitPersonName("Lydia + Richard Gaertner")).toEqual({
+      firstName: "Lydia + Richard",
+      lastName: "Gaertner",
+    });
+    expect(splitPersonName("Lydia and Richard Gaertner")).toEqual({
+      firstName: "Lydia and Richard",
+      lastName: "Gaertner",
+    });
+  });
+
+  it("still splits a single-person name on the first space", () => {
+    expect(splitPersonName("Rahul Das")).toEqual({
+      firstName: "Rahul",
+      lastName: "Das",
+    });
   });
 });
 
@@ -158,7 +252,25 @@ describe("generateFastCode", () => {
     });
 
     expect(code).toBe("lrg01");
-    expect(code).toMatch(/^[a-z]+\d{2}$/);
+    expect(code).toMatch(/^[a-z]{2,3}\d{2}$/);
+  });
+
+  it("turns multi-person names into letters and digits only", async () => {
+    const cases = [
+      { firstName: "Lydia & Richard", lastName: "Gaertner" },
+      { firstName: "Lydia + Richard", lastName: "Gaertner" },
+      { firstName: "Lydia and Richard", lastName: "Gaertner" },
+    ];
+
+    for (const input of cases) {
+      const code = await generateFastCode(input);
+      expect(code).toBe("lrg01");
+      expect(code).toMatch(/^[a-z]{2,3}\d{2}$/);
+      expect(code).not.toMatch(/[&+\s']/);
+    }
+
+    const display = splitPersonName("Lydia & Richard Gaertner");
+    await expect(generateFastCode(display)).resolves.toBe("lrg01");
   });
 
   it("rejects invalid input", async () => {
@@ -171,5 +283,10 @@ describe("generateFastCode", () => {
 describe("formatFastCode", () => {
   it("formats two-digit sequences", () => {
     expect(formatFastCode("rd", 4)).toBe("rd04");
+  });
+
+  it("rejects prefixes that are not 2–3 letters", () => {
+    expect(() => formatFastCode("lr&", 1)).toThrow(/2–3 letters/);
+    expect(() => formatFastCode("lrgx", 1)).toThrow(/2–3 letters/);
   });
 });

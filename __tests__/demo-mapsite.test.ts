@@ -135,13 +135,14 @@ describe("demo mapsite codes", () => {
       join(process.cwd(), "components/talispros/mapsite/MapSiteApplication.tsx"),
       "utf8",
     );
-    expect(cardSource).toContain("mapsiteMarketPartnerWriteup(isDemoEbook)");
+    expect(cardSource).not.toContain("mapsiteMarketPartnerWriteup");
+    expect(cardSource).not.toContain("MAPSITE_DEMO_SIDEBAR_BLURB");
+    expect(cardSource).toContain("MarketingPartnerInterestLinks");
     expect(cardSource).toContain("mapsiteMarketPartnerImageUrl");
     expect(cardSource).toContain("content.partnerImage");
     expect(cardSource).not.toContain("mapsite.profile_image_url");
-    expect(appSource).toContain(
-      "isDemoEbook={isDemoMapSiteCode(mapsite.fast_code)}",
-    );
+    expect(appSource).toContain("MapSiteMarketPartnerCard");
+    expect(appSource).not.toContain("ACTIVATION_REVEAL_DELAY_MS");
     expect(mapsiteMarketPartnerImageUrl("https://cdn.example/agent.jpg")).toBe(
       "https://cdn.example/agent.jpg",
     );
@@ -156,9 +157,9 @@ describe("demo mapsite codes", () => {
         "https://cdn.example/agent.jpg",
         "Ralf Meyer",
       ),
-    ).toBe("Market Partner: Ralf Meyer");
+    ).toBe("Marketing Partner: Ralf Meyer");
     expect(mapsiteMarketPartnerLabel(null, "Ralf Meyer")).toBe(
-      "Market Partner: Aisha C.",
+      "Marketing Partner",
     );
     expect(cardSource).toContain("mapsiteMarketPartnerLabel");
     expect(cardSource).toContain("mapsite.assigned_marketing_manager");

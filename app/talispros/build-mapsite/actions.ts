@@ -7,6 +7,7 @@ import { encodePinStyleInNotes } from "@/lib/build-request-pin-style-notes";
 import { lookupFastCodeRegistrationTier, type RegistrationFastCodeTier } from "@/lib/registration-fast-code-routing";
 import { sendBuildRequestReceived } from "@/lib/email";
 import { generateFastCode } from "@/services/fast-code.service";
+import { splitPersonName } from "@/validators/fast-code.validator";
 import { markMapSiteClaimedByBuildRequest } from "@/lib/talispros/mapsite-platform";
 import { DEMO_MAPSITE_ID } from "@/lib/talispros/mapsite-state";
 import { clampMapZoom, HOME_PIN_DEFAULT_MAP_ZOOM } from "@/lib/home-pin-coordinates";
@@ -206,18 +207,7 @@ function readTebPictureUrls(formData: FormData): string[] {
 }
 
 function splitName(fullName: string): { firstName: string; lastName: string } {
-  const normalized = fullName.trim().replace(/\s+/g, " ");
-  if (!normalized) {
-    return { firstName: "", lastName: "" };
-  }
-  const parts = normalized.split(" ");
-  if (parts.length === 1) {
-    return { firstName: parts[0], lastName: parts[0] };
-  }
-  return {
-    firstName: parts[0],
-    lastName: parts.slice(1).join(" "),
-  };
+  return splitPersonName(fullName);
 }
 
 export async function submitAssistedBuildRequest(

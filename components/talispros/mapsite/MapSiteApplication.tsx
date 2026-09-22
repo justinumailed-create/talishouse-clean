@@ -38,7 +38,7 @@ import {
   getMapSiteOnboardingPhase,
 } from "@/lib/talispros/mapsite-onboarding-phase";
 import { ROUTES } from "@/lib/routes";
-import { isDemonstrationListing, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
+import { isDemonstrationListing } from "@/lib/talispros/demo-mapsite";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
 import MapSiteMarketPartnerCard from "./MapSiteMarketPartnerCard";
 import MapSitePaymentCard from "./MapSitePaymentCard";
@@ -50,8 +50,6 @@ import {
   shouldRegisterAgentsAfterPayment,
 } from "@/lib/talispros/register-agents";
 
-/** Auto-reveal activation checkout above the marketing sidebar after Mapsite™ load. */
-const ACTIVATION_REVEAL_DELAY_MS = 10_000;
 /** Minimum popup body height so hero + title + action row stay visible. */
 const MAPSITE_POPUP_MIN_HEIGHT_PX = 384;
 /** Ignore residual camera events right after programmatic pin focus. */
@@ -73,7 +71,7 @@ interface MapSiteApplicationProps {
   hasTalisBook?: boolean;
   /** Viewer path for View Your Talisbook™. */
   talisBookHref?: string | null;
-  /** Show activation checkout immediately (Activate Your Mapsite™); otherwise reveals after 10s. */
+  /** Show activation checkout only for an explicit Activate link or a checkout return. */
   showActivatePayment?: boolean;
   /** Stripe Checkout return. Never treated as proof of payment. */
   checkoutStatus?: "success" | "cancelled" | null;
@@ -276,7 +274,6 @@ function MapSiteChrome({
 
   const [compact, setCompact] = useState(false);
   const [mobileOverlay, setMobileOverlay] = useState(false);
-  const [paymentDelayElapsed, setPaymentDelayElapsed] = useState(false);
   const [activationPaid, setActivationPaid] = useState(paymentReceived);
   const [alignTop, setAlignTop] = useState(MAPSITE_LISTING_TILE_TOP_FALLBACK_PX);
   const [popupCenterX, setPopupCenterX] = useState<number | null>(null);
@@ -499,17 +496,8 @@ function MapSiteChrome({
     router,
   ]);
 
-  // Unpaid claimed Mapsites™: reveal checkout after load delay (or immediately via Activate).
-  useEffect(() => {
-    if (!claimed || paid || showActivatePayment || checkoutStatus) return;
-    const timer = window.setTimeout(() => {
-      setPaymentDelayElapsed(true);
-    }, ACTIVATION_REVEAL_DELAY_MS);
-    return () => window.clearTimeout(timer);
-  }, [claimed, paid, showActivatePayment, checkoutStatus, mapsite.id]);
-
-  const showDelayedPayment =
-    showActivatePayment || paymentDelayElapsed || Boolean(checkoutStatus);
+  const showExplicitPayment =
+    showActivatePayment || Boolean(checkoutStatus);
 
   const bookHref =
     talisBookHref ||
@@ -545,10 +533,10 @@ function MapSiteChrome({
     onboardingMode === "assisted"
       ? "Register Account now"
       : "Register Account now";
-  // Paid Mapsites™: agency logo merges into the manager cloud. Unpaid: checkout
-  // uses claim-form planType and auto-reveals 10s after load (or via Activate).
+  // Paid Mapsites™: agency logo merges into the manager cloud. Checkout stays
+  // off the first-look map unless the visitor opens Activate or returns from checkout.
   const registrationCard =
-    !isDemoListing && claimed && !paid && showDelayedPayment ? (
+    !isDemoListing && claimed && !paid && showExplicitPayment ? (
       <MapSitePaymentCard
         audience={audience}
         mapsiteId={mapsite.id}
@@ -592,7 +580,6 @@ function MapSiteChrome({
                   mapsite={mapsite}
                   cardRef={listingCardRef}
                   onSelect={focusPinAndOpen}
-                  isDemoEbook={isDemoMapSiteCode(mapsite.fast_code)}
                   paid={paid}
                 />
               ) : null

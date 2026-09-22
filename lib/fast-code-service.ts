@@ -9,7 +9,9 @@ export {
 
 export {
   extractInitials,
+  givenNameInitials,
   normalizeNamePart,
+  splitPersonName,
   validateAndNormalizeFastCodeInput,
   validateNamePart,
   FastCodeValidationError,
