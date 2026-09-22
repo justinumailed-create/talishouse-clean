@@ -2,7 +2,6 @@ import { agentPhotoProxyHref } from "@/lib/mapsite/agent-photo-url";
 import {
   normalizePersonMask,
   personBoundingBox,
-  zoomedCropRect,
 } from "@/lib/media/agent-photo-cutout";
 
 const MEDIAPIPE_VERSION = "1.0.1";
@@ -94,52 +93,32 @@ async function renderCutout(image: HTMLImageElement): Promise<string | null> {
 
   const sourceWidth = image.naturalWidth || image.width;
   const sourceHeight = image.naturalHeight || image.height;
-  const scaleX = sourceWidth / maskWidth;
-  const scaleY = sourceHeight / maskHeight;
-  const crop = zoomedCropRect(
-    {
-      x: Math.round(box.x * scaleX),
-      y: Math.round(box.y * scaleY),
-      width: Math.round(box.width * scaleX),
-      height: Math.round(box.height * scaleY),
-    },
-    sourceWidth,
-    sourceHeight,
-    { padding: 0.08, zoom: 1.32 },
-  );
+  if (!sourceWidth || !sourceHeight) return null;
 
+  // Keep the full frame so the person is not zoom-cropped. Only the
+  // background (mask == 0) is cleared; the subject stays intact.
   const canvas = document.createElement("canvas");
-  canvas.width = crop.width;
-  canvas.height = crop.height;
+  canvas.width = sourceWidth;
+  canvas.height = sourceHeight;
   const ctx = canvas.getContext("2d");
   if (!ctx) return null;
 
-  ctx.drawImage(
-    image,
-    crop.x,
-    crop.y,
-    crop.width,
-    crop.height,
-    0,
-    0,
-    crop.width,
-    crop.height,
-  );
+  ctx.drawImage(image, 0, 0, sourceWidth, sourceHeight);
 
-  const pixels = ctx.getImageData(0, 0, crop.width, crop.height);
+  const pixels = ctx.getImageData(0, 0, sourceWidth, sourceHeight);
   const data = pixels.data;
-  for (let y = 0; y < crop.height; y += 1) {
+  for (let y = 0; y < sourceHeight; y += 1) {
     const maskY = Math.min(
       maskHeight - 1,
-      Math.max(0, Math.round((crop.y + y) / scaleY)),
+      Math.max(0, Math.round((y * maskHeight) / sourceHeight)),
     );
-    for (let x = 0; x < crop.width; x += 1) {
+    for (let x = 0; x < sourceWidth; x += 1) {
       const maskX = Math.min(
         maskWidth - 1,
-        Math.max(0, Math.round((crop.x + x) / scaleX)),
+        Math.max(0, Math.round((x * maskWidth) / sourceWidth)),
       );
       if ((mask[maskY * maskWidth + maskX] ?? 0) === 0) {
-        data[(y * crop.width + x) * 4 + 3] = 0;
+        data[(y * sourceWidth + x) * 4 + 3] = 0;
       }
     }
   }

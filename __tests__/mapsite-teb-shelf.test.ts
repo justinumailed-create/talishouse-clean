@@ -51,11 +51,14 @@ describe("Mapsite™ TTV™ schedule href", () => {
     expect(mapsiteScheduleHref("rd02")).toBe("/talistv?fastCode=rd02");
   });
 
-  it("returns to the demo Mapsite™ overlay from the schedule", () => {
+  it("returns to that FAST code’s published Mapsite™ from the schedule", () => {
+    expect(mapsiteBackFromScheduleHref("lg01")).toBe("/mapsite/lg01");
+    expect(mapsiteBackFromScheduleHref("RM22")).toBe("/mapsite/rm22");
     expect(mapsiteBackFromScheduleHref("demo-d697325b")).toBe(
-      "/talispros/mapsite/listings/demo-d697325b",
+      "/mapsite/demo-d697325b",
     );
     expect(mapsiteBackFromScheduleHref("")).toBe("/talispros/mapsite");
+    expect(mapsiteBackFromScheduleHref("demo")).toBe("/talispros/mapsite");
   });
 });
 

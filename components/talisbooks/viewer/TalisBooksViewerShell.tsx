@@ -16,10 +16,12 @@ import TalisBooksViewerStage, {
   type TalisBooksViewerBinding,
 } from "@/components/talisbooks/viewer/TalisBooksViewerStage";
 import { ROUTES } from "@/lib/routes";
-import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
-import { MAPSITE_APP_PATH, buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
+import {
+  MAPSITE_APP_PATH,
+  mapsiteBackFromScheduleHref,
+} from "@/lib/talispros/mapsite-state";
 import {
   convertViewerNavIndex,
   createEmptyNarrationController,
@@ -45,8 +47,6 @@ interface TalisBooksViewerShellProps {
   canLiveEdit?: boolean;
   /** Demo / sample books: grey out insert-page controls. */
   pageInsertLocked?: boolean;
-  /** After payment (or admin): show Dashboard link. */
-  showDashboard?: boolean;
   /** Reserved for future audio narration — unused in playback today. */
   narration?: TalisBooksNarrationController | null;
 }
@@ -63,7 +63,6 @@ export default function TalisBooksViewerShell({
   canEditTools = false,
   canLiveEdit = false,
   pageInsertLocked = false,
-  showDashboard = false,
   narration = null,
 }: TalisBooksViewerShellProps) {
   const narrationController = narration ?? createEmptyNarrationController();
@@ -436,13 +435,7 @@ export default function TalisBooksViewerShell({
     binding === "open" && viewMode === "spread" ? spread.right : null;
   const showViewerSidebar = false;
   const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
-  const backToMapSiteHref =
-    book.fastCode && book.fastCode.trim().toLowerCase() !== "demo"
-      ? buildClaimedMapSitePath({
-          fastCode: book.fastCode,
-          accountType: book.accountType,
-        })
-      : MAPSITE_APP_PATH;
+  const backToMapSiteHref = mapsiteBackFromScheduleHref(book.fastCode);
 
   return (
     <div
@@ -502,11 +495,6 @@ export default function TalisBooksViewerShell({
           {isPinnedShowcase ? (
             <Link href={ROUTES.ADMIN_DASHBOARD} className="talisbooks-viewer__back">
               Global Admin
-            </Link>
-          ) : null}
-          {!isPinnedShowcase && showDashboard ? (
-            <Link href={TALISBOOKS_ROUTES.DASHBOARD} className="talisbooks-viewer__back">
-              Dashboard
             </Link>
           ) : null}
         </div>

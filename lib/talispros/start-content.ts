@@ -50,22 +50,22 @@ export const TALISPROS_HOME_MAPSITE_CARD = {
 export const TALISPROS_START_SEGMENTS = [
   {
     label: "Broker",
-    title: "I am a Broker or Team Leader",
+    title: "Broker or Team Leader",
     href: `${MAPSITE_APP_PATH}?audience=brokers&accountType=root`,
   },
   {
     label: "Professional",
-    title: "I am a Real Estate Professional",
+    title: "Real Estate Professional",
     href: `${MAPSITE_APP_PATH}?audience=listings`,
   },
   {
     label: "FSBO",
-    title: "I am a For-Sale-By-Owner Seller",
+    title: "For-Sale-By-Owner Seller",
     href: `${MAPSITE_APP_PATH}?audience=fsbos`,
   },
   {
     label: "Adpros",
-    title: "I am an Adpros Service Provider",
+    title: "Adpros Service Provider",
     href: `${MAPSITE_APP_PATH}?audience=adpro`,
   },
 ] as const;
