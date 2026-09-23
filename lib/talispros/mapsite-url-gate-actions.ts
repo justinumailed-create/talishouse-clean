@@ -5,13 +5,15 @@ import { requireMapSiteEditAccess } from "@/lib/mapsite-edit-auth";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
-  generateUrlGatePin,
-  hashUrlGatePin,
   isUrlGatePinFormat,
   listingResourceHref,
   normalizeUrlGatePin,
-  urlGatePinsMatch,
 } from "@/lib/talispros/mapsite-url-gate";
+import {
+  generateUrlGatePin,
+  hashUrlGatePin,
+  urlGatePinsMatch,
+} from "@/lib/talispros/mapsite-url-gate-crypto";
 
 const STORAGE_ERROR =
   "URL PIN storage is not available. Apply the mapsite_url_gate_pins migration.";
