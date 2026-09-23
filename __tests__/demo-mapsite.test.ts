@@ -201,9 +201,9 @@ describe("demo mapsite codes", () => {
     );
     expect(shellSource).toContain('useState<TalisBooksLibrarySort>("published_desc")');
     expect(shellSource).toContain(
-      'featuredMode: scoped || createdCatalog ? "highlights" : "fill"',
+      'featuredMode: scoped || createdCatalog ? "newest" : "fill"',
     );
-    expect(shellSource).toContain("packShelfRowsNewestAtRight");
+    expect(shellSource).toContain("packShelfRowsNewestAtLeft");
 
     const generateSource = readFileSync(
       join(process.cwd(), "app/talispros/demo-mapsite/actions.ts"),

@@ -354,8 +354,16 @@ export async function getMapSiteEbookContext(
     const requested = (request?.requested_account_type || request?.account_type || "")
       .toLowerCase();
     if (requested === "derivative") accountType = "derivative";
-  } else if (codeRow?.account_type?.toLowerCase() === "derivative") {
-    accountType = "derivative";
+  } else {
+    audience = mapsiteAccountTypeSegment(
+      mapsiteByCode?.account_type || codeRow?.account_type,
+    );
+    if (
+      (mapsiteByCode?.account_type || codeRow?.account_type || "")
+        .toLowerCase() === "derivative"
+    ) {
+      accountType = "derivative";
+    }
   }
 
   if (!mapsiteId && mapsiteByCode?.id) mapsiteId = mapsiteByCode.id;

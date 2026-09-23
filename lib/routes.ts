@@ -57,6 +57,7 @@ export const ROUTES = {
   TALISPROS_EBOOK_GENERATE: "/talispros/ebook-generate",
   TALISPROS_EBOOK_RAHUL: "/talispros/ebook-rahul",
   TALISPROS_REGISTER_AGENTS: "/talispros/register-agents",
+  TALISPROS_REGISTER_YOUR_MAPSITE: "/talispros/register-your-mapsite",
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;

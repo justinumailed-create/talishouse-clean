@@ -21,7 +21,7 @@ import {
 describe("Talispros legal copy and homepage products", () => {
   it("keeps the exact shared legal strings", () => {
     expect(TALISPROS_LEGAL_PRIMARY_COPY).toBe(
-      "Differentiate locally and develop a real estate adjacent marketing platform by using Mapsites™️ that promote qualifying inventory.*",
+      "More traffic in higher gross markets for better averages over time.",
     );
     expect(TALISPROS_LEGAL_SECONDARY_COPY).toBe("*Some Limitations apply");
   });
@@ -38,6 +38,7 @@ describe("Talispros legal copy and homepage products", () => {
       "utf8",
     );
     expect(preview).toContain("href={DEMO_MAPSITE_BUILD_PATH}");
+    expect(preview).toContain('if (pinId === "home-pin") setCardOpen(true)');
     expect(DEMO_MAPSITE_BUILD_PATH).toBe("/talispros/demo-mapsite");
   });
 

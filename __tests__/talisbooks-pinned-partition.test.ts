@@ -65,7 +65,40 @@ describe("partitionBookshelf pinned ordering", () => {
     expect(featured.map((item) => item.id)).toEqual(["scheduled"]);
     expect(general.map((item) => item.id)).toEqual(["newest", "older"]);
     expect(packShelfRowsNewestAtRight(general.map((item) => item.id), 4)).toEqual([
-      ["older", "newest"],
+      ["newest", "older"],
+    ]);
+  });
+
+  it("pins the latest created ebook on the left and shifts older books right", () => {
+    const { featured, general } = partitionBookshelf(
+      [
+        book({
+          id: "older",
+          title: "Older",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          publishedAt: "2026-01-01T00:00:00.000Z",
+        }),
+        book({
+          id: "latest",
+          title: "Latest",
+          createdAt: "2026-09-23T00:00:00.000Z",
+          publishedAt: "2026-09-23T00:00:00.000Z",
+        }),
+        book({
+          id: "middle",
+          title: "Middle",
+          createdAt: "2026-06-01T00:00:00.000Z",
+          publishedAt: "2026-06-01T00:00:00.000Z",
+        }),
+      ],
+      { featuredMode: "newest" },
+    );
+
+    expect(featured.map((item) => item.id)).toEqual(["latest"]);
+    expect(featured[0]?.isPinned).toBe(true);
+    expect(general.map((item) => item.id)).toEqual(["middle", "older"]);
+    expect(packShelfRowsNewestAtRight(general.map((item) => item.id), 5)).toEqual([
+      ["middle", "older"],
     ]);
   });
 });

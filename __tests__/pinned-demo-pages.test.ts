@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  fallbackOptimizedDemoInteriorPagesAfterWrap,
   fallbackOptimizedDemoPages,
   fetchWithTimeout,
   loadPinnedTalisBookPageFiles,
@@ -52,5 +53,11 @@ describe("pinned demo page extract", () => {
       width: 1600,
       height: 893,
     });
+  });
+
+  it("skips page 1 when interiors follow wrap-cover logic", () => {
+    const pages = fallbackOptimizedDemoInteriorPagesAfterWrap();
+    expect(pages).toHaveLength(PINNED_TALISBOOK_INTERIOR_PAGE_COUNT - 1);
+    expect(pages[0]?.url).toBe("/talisbooks/pinned/pages/page-02.jpg");
   });
 });

@@ -25,6 +25,7 @@ interface GoogleAddressInputProps {
   error?: string;
   placeholder?: string;
   hint?: string;
+  helper?: string;
   label?: string;
   onBlur?: () => void;
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
@@ -42,6 +43,7 @@ export default function GoogleAddressInput({
   error,
   placeholder = "Start typing a street address…",
   hint,
+  helper,
   label = "Street Address",
   onBlur,
   onKeyDown,
@@ -136,6 +138,9 @@ export default function GoogleAddressInput({
         }`}
       />
       {error ? <p className="mt-1 text-xs text-red-500">{error}</p> : null}
+      {helper ? (
+        <p className="mt-1.5 text-xs leading-relaxed text-neutral-500">{helper}</p>
+      ) : null}
       {fallbackHint ? (
         <p className="mt-1 text-xs text-neutral-500">{fallbackHint}</p>
       ) : null}

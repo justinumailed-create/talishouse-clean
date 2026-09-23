@@ -14,6 +14,7 @@ function readSource(relativePath: string) {
 describe("sample Talisbooks™ viewer chrome", () => {
   const shell = readSource("components/talisbooks/viewer/TalisBooksViewerShell.tsx");
   const startPage = readSource("components/talispros/TalisprosStartPage.tsx");
+  const homeMap = readSource("components/talispros/TalisprosHomeMapPreview.tsx");
   const standingBook = readSource(
     "components/talisbooks/library/TalisBooksStandingBook.tsx",
   );
@@ -37,11 +38,14 @@ describe("sample Talisbooks™ viewer chrome", () => {
     expect(shell).toContain("talisbooks-viewer__header-actions--matched");
   });
 
-  it("keeps BrandRail and PlaybackRail beside the restored header", () => {
+  it("keeps PlaybackRail beside the restored header and omits the left brand rail", () => {
     expect(shell).toContain("const showViewerSidebar = false");
-    expect(shell).toContain("TalisBooksViewerBrandRail");
+    expect(shell).not.toContain("TalisBooksViewerBrandRail");
     expect(shell).toContain("TalisBooksViewerPlaybackRail");
     expect(shell).toContain("talisbooks-viewer__header");
+    const rails = readSource("components/talisbooks/viewer/TalisBooksViewerRails.tsx");
+    expect(rails).not.toContain("talisbooks-viewer__map-pin");
+    expect(rails).not.toContain("talisbooks-viewer__rail--left");
   });
 
   it("shows Live Edit only after payment, never on demonstration books", () => {
@@ -63,6 +67,10 @@ describe("sample Talisbooks™ viewer chrome", () => {
   });
 
   it("opens ebook icons in the same tab", () => {
+    expect(homeMap).toContain("href={ROUTES.CATALOG}");
+    expect(homeMap).toContain('aria-label="View catalogue"');
+    expect(homeMap).not.toContain('target="_blank"');
+    expect(homeMap).not.toContain("noopener");
     expect(startPage).not.toContain('target="_blank"');
     expect(startPage).not.toContain("noopener");
     expect(startPage).not.toMatch(/new tab/i);

@@ -83,6 +83,7 @@ function toLibraryBook(
     coverGradient: coverGradientFor(coverTemplateId, index),
     publishStatus: row.publish_status as TalisBooksPublishStatus,
     publishedAt: row.published_at,
+    createdAt: row.created_at,
     views,
     clicks,
     pageCount: row.page_count,
@@ -401,6 +402,7 @@ export async function getPublicTalisBooksBookshelf(options?: {
       mapsiteId: context?.mapsiteId ?? null,
       publicCatalog: true,
       scopedToFastCode: true,
+      registrationHref: context?.registrationHref ?? null,
       books,
     };
   }

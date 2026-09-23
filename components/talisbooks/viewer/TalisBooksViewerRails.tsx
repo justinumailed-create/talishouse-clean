@@ -1,61 +1,16 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import {
   BookOpen,
-  MapPin,
   Pause,
   Play,
   RectangleVertical,
 } from "lucide-react";
 import {
   TALISBOOKS_VIEWER_SPEED_PRESETS,
-  viewerFastCodeLabel,
-  viewerGoogleMapsHref,
-  viewerMapsiteHref,
-  type TalisBooksViewerBook,
   type TalisBooksViewerSpeedPresetId,
   type TalisBooksViewerViewMode,
 } from "@/lib/talisbooks/viewer";
-
-export function TalisBooksViewerBrandRail({
-  book,
-}: {
-  book: TalisBooksViewerBook;
-}) {
-  const fastCode = viewerFastCodeLabel(book.fastCode);
-  const mapsHref = viewerGoogleMapsHref(book);
-  const mapsiteHref = viewerMapsiteHref(book);
-  return (
-    <aside className="talisbooks-viewer__rail talisbooks-viewer__rail--left" aria-label="Talispros™">
-      <Link href={mapsiteHref} className="talisbooks-viewer__brand" title="Open Mapsite™">
-        <Image
-          src="/logo.png"
-          alt="Talispros™ Mapsite™"
-          width={36}
-          height={36}
-          className="talisbooks-viewer__brand-logo"
-        />
-      </Link>
-      {fastCode ? (
-        <p className="talisbooks-viewer__fast-code">{fastCode}</p>
-      ) : null}
-      {mapsHref ? (
-        <a
-          href={mapsHref}
-          target="_blank"
-          rel="noreferrer"
-          className="talisbooks-viewer__map-pin"
-          aria-label="View location on Google Maps"
-          title="View location on Google Maps"
-        >
-          <MapPin className="h-4 w-4" aria-hidden="true" />
-        </a>
-      ) : null}
-    </aside>
-  );
-}
 
 export function TalisBooksViewerPlaybackRail({
   viewMode,

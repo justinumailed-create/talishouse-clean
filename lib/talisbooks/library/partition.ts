@@ -28,7 +28,15 @@ function publishedTimestamp(book: TalisBooksLibraryBook): number {
   return Number.isFinite(value) ? value : 0;
 }
 
-export type TalisBooksFeaturedMode = "fill" | "highlights";
+function createdTimestamp(book: TalisBooksLibraryBook): number {
+  if (book.createdAt) {
+    const created = Date.parse(book.createdAt);
+    if (Number.isFinite(created)) return created;
+  }
+  return publishedTimestamp(book);
+}
+
+export type TalisBooksFeaturedMode = "fill" | "highlights" | "newest";
 
 /**
  * Splits the shelf into left (highlighted/scheduled) and right (general library).
@@ -40,6 +48,8 @@ export type TalisBooksFeaturedMode = "fill" | "highlights";
  * `fill` (default): take up to capacity from the prioritized list.
  * `highlights`: left niche is pins / scheduled / in_review only; published
  * catalog books stay on the right, newest first.
+ * `newest`: the latest created ebook is always the left pin; older books
+ * stand on the right from the left and shift right as newer pins arrive.
  *
  * Pinned books always sort first (public /talisbooks featured slot).
  */
@@ -53,6 +63,22 @@ export function partitionBookshelf(
 } {
   const capacity = options?.featuredCapacity ?? 5;
   const featuredMode = options?.featuredMode ?? "fill";
+
+  if (featuredMode === "newest") {
+    const byCreated = [...books].sort((a, b) => {
+      const createdDelta = createdTimestamp(b) - createdTimestamp(a);
+      if (createdDelta !== 0) return createdDelta;
+      return a.title.localeCompare(b.title);
+    });
+    const newest = byCreated[0];
+    const featured = newest ? [{ ...newest, isPinned: true }] : [];
+    const general = byCreated.slice(1);
+    const featuredLayout: TalisBooksFeaturedLayout =
+      featured.length >= TALISBOOKS_LIBRARY_FEATURED_CAPACITY_GRID
+        ? "grid-3x2"
+        : "hero-plus-4";
+    return { featured, general, featuredLayout };
+  }
 
   const prioritized = [...books].sort((a, b) => {
     const aRank = pinSortKey(a);

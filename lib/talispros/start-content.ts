@@ -6,7 +6,7 @@ export function isTalisprosStartPath(pathname: string | null | undefined) {
 }
 
 export const TALISPROS_LEGAL_PRIMARY_COPY =
-  "Differentiate locally and develop a real estate adjacent marketing platform by using Mapsites™️ that promote qualifying inventory.*";
+  "More traffic in higher gross markets for better averages over time.";
 
 export const TALISPROS_LEGAL_SECONDARY_COPY = "*Some Limitations apply";
 
@@ -49,23 +49,23 @@ export const TALISPROS_HOME_MAPSITE_CARD = {
 
 export const TALISPROS_START_SEGMENTS = [
   {
-    label: "Broker",
+    label: "Owners / Managers",
     title: "Broker or Team Leader",
     href: `${MAPSITE_APP_PATH}?audience=brokers&accountType=root`,
   },
   {
-    label: "Professional",
+    label: "Licensed",
     title: "Real Estate Professional",
     href: `${MAPSITE_APP_PATH}?audience=listings`,
   },
   {
-    label: "FSBO",
-    title: "For-Sale-By-Owner Seller",
+    label: "Unlicensed",
+    title: "For-Sale-By-Owner",
     href: `${MAPSITE_APP_PATH}?audience=fsbos`,
   },
   {
-    label: "Adpros",
-    title: "Adpros Service Provider",
+    label: "Adpro™",
+    title: "Product & Service Providers",
     href: `${MAPSITE_APP_PATH}?audience=adpro`,
   },
 ] as const;

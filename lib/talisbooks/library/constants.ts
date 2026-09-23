@@ -48,7 +48,7 @@ export function generalShelfBookScale(bookCount: number): number {
   return Math.max(0.25, 1 - steps * TALISBOOKS_LIBRARY_GENERAL_SCALE_REDUCTION);
 }
 
-/** Plank column count — leftover slots stay empty on the left so books start at the right. */
+/** Plank column count — leftover slots stay empty on the right so books start at the left. */
 export function generalShelfColumns(bookCount: number): number {
   const count = Math.min(
     Math.max(bookCount, 1),
@@ -59,16 +59,21 @@ export function generalShelfColumns(bookCount: number): number {
 }
 
 /**
- * Lay a newest-first list onto shelf rows packed from the right.
- * Rightmost book in each row is the newest in that row.
+ * Lay a newest-first list onto shelf rows packed from the left.
+ * Leftmost book in each row is the newest in that row; older books shift right.
  */
-export function packShelfRowsNewestAtRight<T>(items: T[], columns: number): T[][] {
+export function packShelfRowsNewestAtLeft<T>(items: T[], columns: number): T[][] {
   const width = Math.max(1, columns);
   const rows: T[][] = [];
   for (let index = 0; index < items.length; index += width) {
-    rows.push(items.slice(index, index + width).reverse());
+    rows.push(items.slice(index, index + width));
   }
   return rows;
+}
+
+/** @deprecated Use packShelfRowsNewestAtLeft — right-shelf books now enter from the left. */
+export function packShelfRowsNewestAtRight<T>(items: T[], columns: number): T[][] {
+  return packShelfRowsNewestAtLeft(items, columns);
 }
 
 /** @deprecated Prefer GENERAL_PAGE_SIZE for the split shelf. */

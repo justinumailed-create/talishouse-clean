@@ -110,6 +110,7 @@ export default function HomePinLocationSection({
   errors = {},
 }: HomePinLocationSectionProps) {
   const pinImageInputRef = useRef<HTMLInputElement>(null);
+  const coordsEditedRef = useRef(false);
   const [pinImagePreview, setPinImagePreview] = useState<string | null>(null);
   const [addressLookupNonce, setAddressLookupNonce] = useState(0);
 
@@ -127,19 +128,26 @@ export default function HomePinLocationSection({
 
   const handleLocationChange = useCallback(
     (update: TalisMapsPinLocationUpdate) => {
+      const resolved =
+        update.reverseGeocodedAddress !== undefined
+          ? update.reverseGeocodedAddress?.trim() || ""
+          : undefined;
       onChange({
         latitude: update.latitude,
         longitude: update.longitude,
         manualPlacement: update.manualPlacement,
         ...(update.mapZoom != null ? { mapZoom: update.mapZoom } : {}),
-        ...(update.reverseGeocodedAddress !== undefined
+        ...(resolved !== undefined
           ? {
-              reverseGeocodedAddress: update.reverseGeocodedAddress ?? "",
+              reverseGeocodedAddress: resolved,
+              ...(!values.streetAddress.trim() && resolved
+                ? { streetAddress: resolved }
+                : {}),
             }
           : {}),
       });
     },
-    [onChange]
+    [onChange, values.streetAddress]
   );
 
   const handleGooglePlaceSelected = useCallback(
@@ -159,6 +167,7 @@ export default function HomePinLocationSection({
     field: "latitude" | "longitude",
     rawValue: string
   ) {
+    coordsEditedRef.current = true;
     const parsed = parseCoordinatePaste(rawValue);
     if (parsed) {
       onChange({
@@ -175,11 +184,11 @@ export default function HomePinLocationSection({
     });
   }
 
-  // When coordinates are entered (option 2), reverse-geocode for metadata only.
-  // Never overwrite the optional street address field.
+  // When geo-coordinates are typed or pasted, reverse-geocode into Street Address.
   useEffect(() => {
     if (!hasValidCoordinates(values.latitude, values.longitude)) return;
     if (values.manualPlacement) return;
+    if (!coordsEditedRef.current && values.streetAddress.trim()) return;
 
     const timeout = window.setTimeout(async () => {
       try {
@@ -196,16 +205,17 @@ export default function HomePinLocationSection({
           return;
         }
         const resolved = payload.address?.trim() || "";
-        if (resolved !== values.reverseGeocodedAddress) {
-          onChange({ reverseGeocodedAddress: resolved });
-        }
+        coordsEditedRef.current = false;
+        onChange({
+          reverseGeocodedAddress: resolved,
+          ...(resolved ? { streetAddress: resolved } : {}),
+        });
       } catch {
         // Best-effort reverse geocode.
       }
     }, 700);
 
     return () => window.clearTimeout(timeout);
-    // Intentionally omit reverseGeocodedAddress / onChange to avoid loops.
     // eslint-disable-next-line react-hooks/exhaustive-deps -- coord-driven reverse geocode
   }, [values.latitude, values.longitude, values.manualPlacement]);
 
@@ -293,6 +303,7 @@ export default function HomePinLocationSection({
         placeholder="123 Main Street"
         error={errors.streetAddress}
         required
+        helper="If no street address is available, please enter one close to where you would like the PIN to appear, then manipulate the map to reflect the desired location. The geo-coordinates will adjust automatically."
       />
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -374,10 +385,6 @@ export default function HomePinLocationSection({
               placeholder="-59.882749"
               error={errors.longitude}
             />
-            <p className="text-xs text-neutral-500 sm:col-span-2">
-              Use only when you need vacant-land placement or want to override
-              the Google address pin.
-            </p>
             <p className="text-xs text-neutral-400 sm:col-span-2">
               Paste coordinates like{" "}
               <span className="font-mono text-neutral-500">

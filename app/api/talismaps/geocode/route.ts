@@ -15,15 +15,54 @@ type NominatimReverseResult = {
   error?: string;
 };
 
+function googleMapsApiKey(): string {
+  return (
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_TALISMAPS_GOOGLE_MAPS_API_KEY?.trim() ||
+    process.env.GOOGLE_MAPS_API_KEY?.trim() ||
+    ""
+  );
+}
+
+const nominatimHeaders = {
+  "User-Agent": "Talismaps-Talispros/1.0 (https://www.talispros.com)",
+  Accept: "application/json",
+} as const;
+
+async function reverseGeocodeGoogle(lat: string, lon: string) {
+  const key = googleMapsApiKey();
+  if (!key) return null;
+  const response = await fetch(
+    `https://maps.googleapis.com/maps/api/geocode/json?latlng=${encodeURIComponent(lat)},${encodeURIComponent(lon)}&key=${encodeURIComponent(key)}`,
+    { cache: "no-store" },
+  );
+  if (!response.ok) return null;
+  const payload = (await response.json()) as {
+    status?: string;
+    results?: Array<{ formatted_address?: string }>;
+  };
+  if (payload.status !== "OK") return null;
+  const address =
+    payload.results?.find(
+      (item) =>
+        item.formatted_address?.trim() &&
+        !item.formatted_address.includes("+"),
+    )?.formatted_address?.trim() || "";
+  if (!address) return null;
+  return {
+    found: true as const,
+    latitude: lat,
+    longitude: lon,
+    address,
+  };
+}
+
 async function forwardGeocode(query: string) {
   const response = await fetch(
     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
     {
-      headers: {
-        "User-Agent": "Talismaps™/Talispros (talishouse-clean)",
-        Accept: "application/json",
-      },
-      next: { revalidate: 3600 },
+      headers: nominatimHeaders,
+      cache: "no-store",
     }
   );
 
@@ -46,14 +85,14 @@ async function forwardGeocode(query: string) {
 }
 
 async function reverseGeocode(lat: string, lon: string) {
+  const google = await reverseGeocodeGoogle(lat, lon);
+  if (google) return NextResponse.json(google);
+
   const response = await fetch(
     `https://nominatim.openstreetmap.org/reverse?format=json&lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}&zoom=18&addressdetails=0`,
     {
-      headers: {
-        "User-Agent": "Talismaps™/Talispros (talishouse-clean)",
-        Accept: "application/json",
-      },
-      next: { revalidate: 3600 },
+      headers: nominatimHeaders,
+      cache: "no-store",
     }
   );
 

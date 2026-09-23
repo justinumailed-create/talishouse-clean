@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import HomePinLocationSection, {
   validateHomePinLocation,
@@ -11,8 +10,10 @@ import {
   type HomePinLocationValues,
 } from "@/components/build-mapsite/home-pin-types";
 import { createDemoMapSiteAction } from "@/app/talispros/demo-mapsite/actions";
-import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
-import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
+import {
+  DEMO_MAPSITE_PDF_FILE_NAME,
+  DEMO_MAPSITE_PDF_HREF,
+} from "@/lib/talispros/demo-mapsite";
 
 export default function DemoMapSiteBuilderClient() {
   const router = useRouter();
@@ -60,26 +61,28 @@ export default function DemoMapSiteBuilderClient() {
 
   return (
     <div className="relative flex min-h-dvh flex-col items-center bg-[#f5f5f7] px-6 py-16 text-neutral-950 antialiased sm:py-24">
-      <Link
-        href={`${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`}
+      <a
+        href={DEMO_MAPSITE_PDF_HREF}
+        download={DEMO_MAPSITE_PDF_FILE_NAME}
         className="absolute right-4 top-4 z-10 inline-flex min-h-10 items-center justify-center rounded-full bg-neutral-950 px-4 text-[13px] font-medium text-white transition hover:bg-neutral-800 sm:right-6 sm:top-5 sm:text-[14px]"
       >
-        Back to Talispros eBook
-      </Link>
+        Download Demo PDF
+      </a>
       <div className="w-full max-w-[480px]">
         <div className="text-center">
           <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">
             DEMONSTRATION
           </p>
           <h1 className="mt-5 text-[34px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[40px]">
-            Build Demo eBook and Mapsite™
+            Demo eBook and Mapsite™
           </h1>
           <p className="mx-auto mt-4 max-w-[26rem] text-[22px] font-semibold leading-snug tracking-[-0.03em] text-neutral-950">
             Place a pin.
           </p>
           <p className="mx-auto mt-2 max-w-[26rem] text-[13px] leading-relaxed text-neutral-500">
-            Next we walk through creating the Talisbook™ from the pinned sample
-            — without issuing a FAST Code.
+            Create Talisbook™ from pinned sample
+            <br />
+            FAST Code issued upon registration
           </p>
         </div>
 

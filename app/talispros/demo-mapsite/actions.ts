@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { ROUTES } from "@/lib/routes";
+import type { OptimizedEbookImageAsset } from "@/lib/talisbooks/auto-draft-ebook";
 import { generateSelfServiceEbook } from "@/lib/talisbooks/self-service-ebook";
-import { pinnedTalisBookCoverAsset } from "@/lib/talisbooks/library/pinned-catalog";
 import {
   createDemoMapSiteWithPinnedEbook,
   loadDemoMapSiteForEbook,
@@ -63,7 +63,9 @@ export type GenerateDemoEbookActionResult =
 
 export async function generateDemoEbookAction(input: {
   mapsiteId: string;
-  optimizedImages: { url: string; width: number; height: number }[];
+  optimizedImages: OptimizedEbookImageAsset[];
+  frontCover: OptimizedEbookImageAsset;
+  backCover: OptimizedEbookImageAsset;
 }): Promise<GenerateDemoEbookActionResult> {
   try {
     const mapsite = await loadDemoMapSiteForEbook(input.mapsiteId);
@@ -73,9 +75,13 @@ export async function generateDemoEbookAction(input: {
     if (!input.optimizedImages.length) {
       return { ok: false, error: "Extract and optimize the pinned PDF first." };
     }
-
-    const frontCover = pinnedTalisBookCoverAsset("front");
-    const backCover = pinnedTalisBookCoverAsset("back");
+    if (!input.frontCover?.url.trim() || !input.backCover?.url.trim()) {
+      return {
+        ok: false,
+        error:
+          "Page 1 of the PDF must become the wrap cover (left = back, right = front).",
+      };
+    }
 
     const result = await generateSelfServiceEbook({
       fastCode: mapsite.code,
@@ -86,8 +92,8 @@ export async function generateDemoEbookAction(input: {
       location: mapsite.location,
       optimizedImages: input.optimizedImages,
       uploadMode: "pdf",
-      frontCover,
-      backCover,
+      frontCover: input.frontCover,
+      backCover: input.backCover,
     });
 
     if (!result.success) {

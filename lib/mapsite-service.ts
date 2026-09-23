@@ -115,6 +115,8 @@ export interface MapSiteView {
   brokerUrl: string | null;
   tebUrl: string | null;
   ttvUrl: string | null;
+  /** When Global Admin last issued a 6-digit URL gate PIN. */
+  urlGatePinIssuedAt?: string | null;
   /** Build request linked to this FAST Code (for claimed Mapsite™ URLs). */
   requestId?: string | null;
   /** Market audience from the claim form (listings, brokers, …). */
@@ -407,6 +409,13 @@ async function buildMapSiteView(
     .eq("mapsite_id", mapsite.id)
     .order("sort_order");
 
+  const { data: urlGate } = await client
+    .from("mapsite_url_gate_pins")
+    .select("issued_at")
+    .eq("mapsite_id", mapsite.id)
+    .maybeSingle();
+  const urlGatePinIssuedAt = urlGate?.issued_at ?? null;
+
   let requestId = options?.requestId?.trim() || null;
   let pinStyle = {
     pinIcon: null as string | null,
@@ -561,6 +570,7 @@ async function buildMapSiteView(
     brokerUrl: mapsite.broker_url ?? null,
     tebUrl: mapsite.teb_url ?? null,
     ttvUrl: mapsite.ttv_url ?? null,
+    urlGatePinIssuedAt,
     requestId,
     claimAudience,
     brokerageName,

@@ -16,6 +16,10 @@ import { ROUTES } from "@/lib/routes";
 import { isClaimable } from "@/lib/talispros/mapsite-state";
 import { mapsiteScheduleHref } from "@/lib/mapsite-layout";
 import {
+  listingResourceHref,
+  mapsiteUrlGateHref,
+} from "@/lib/talispros/mapsite-url-gate";
+import {
   capabilitiesForAccountType,
   type MapSiteCapabilityAccountType,
   type MapSiteResourceKey,
@@ -37,7 +41,7 @@ const RESOURCES: {
     key: "url",
     label: "URL",
     variant: "blue",
-    resolveHref: (site) => listingResourceHref(site.broker_url),
+    resolveHref: (site) => mapsiteUrlGateHref(site.fast_code, site.broker_url),
   },
   {
     key: "mls",
@@ -68,13 +72,6 @@ const RESOURCES: {
     resolveHref: (site) => mapsiteScheduleHref(site.fast_code || ""),
   },
 ];
-
-function listingResourceHref(value: string | null | undefined): string | null {
-  const href = value?.trim() || "";
-  if (!href) return null;
-  if (/^https?:\/\//i.test(href) || href.startsWith("/")) return href;
-  return `https://${href}`;
-}
 
 function ResourceButton({
   href,

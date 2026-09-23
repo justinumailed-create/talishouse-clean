@@ -68,7 +68,9 @@ describe("Mapsite™ pin resource buttons", () => {
       join(process.cwd(), "components/talispros/mapsite/MapSitePropertyPopup.tsx"),
       "utf8",
     );
-    expect(popup).toContain("listingResourceHref(site.broker_url)");
+    expect(popup).toContain("listingResourceHref(site.mls_url)");
+    expect(popup).toContain("mapsiteUrlGateHref(site.fast_code, site.broker_url)");
+    expect(popup).not.toContain("listingResourceHref(site.broker_url)");
     expect(popup).toContain("listingResourceHref(site.mls_url)");
     expect(popup).not.toContain("listingSearchHref");
     expect(popup).not.toContain("google.com/search");

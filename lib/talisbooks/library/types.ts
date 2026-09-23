@@ -23,6 +23,8 @@ export interface TalisBooksLibraryBook {
   coverGradient: string;
   publishStatus: TalisBooksPublishStatus;
   publishedAt: string | null;
+  /** When set, newest-created shelf order prefers this over publishedAt. */
+  createdAt?: string | null;
   views: number;
   clicks: number;
   pageCount: number;

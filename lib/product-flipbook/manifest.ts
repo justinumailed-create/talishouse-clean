@@ -1,6 +1,3 @@
-import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
-import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
-
 /** Public URL prefix. Files live in `public/product-flipbook/`. */
 export const PRODUCT_FLIPBOOK_PUBLIC_PREFIX = "/product-flipbook";
 
@@ -19,8 +16,6 @@ export const PRODUCT_FLIPBOOK_SOURCE_PDF = "T-All Final.pdf";
  * One image is one top-bound page — do not split them into centerfold leaves.
  */
 export const PRODUCT_FLIPBOOK_PAGE_COUNT = 38;
-
-export const PRODUCT_FLIPBOOK_SAMPLE_HREF = `${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`;
 
 export interface ProductFlipbookPage {
   id: string;

@@ -4,11 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
-import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
+import TalisprosMarketsDropdown from "@/components/talispros/TalisprosMarketsDropdown";
 import {
-  PRODUCT_FLIPBOOK_SAMPLE_HREF,
   type ProductFlipbookPage,
 } from "@/lib/product-flipbook/manifest";
+import "./top-bound-flipbook.css";
 
 const FLIP_MS = 720;
 
@@ -23,13 +23,14 @@ type Flip = {
 function CatalogueFace({ page }: { page: ProductFlipbookPage }) {
   if (!page.src) return null;
   return (
-    <Image
+    // Native img: next/image `fill` was painting the page against the viewport
+    // whenever the slot had no used height.
+    <img
       src={page.src}
       alt={page.alt}
-      fill
-      sizes="(max-width: 960px) 100vw, 960px"
       className="product-flipbook__image"
       draggable={false}
+      decoding="async"
     />
   );
 }
@@ -158,7 +159,7 @@ export default function TopBoundFlipbook({
   }
 
   return (
-    <div className="product-flipbook" data-testid="product-flipbook" data-binding="top">
+    <div className="product-flipbook relative flex h-dvh min-h-dvh flex-col" data-testid="product-flipbook" data-binding="top">
       <header className="product-flipbook__header">
         <div className="product-flipbook__brand">
           <Image
@@ -175,20 +176,20 @@ export default function TopBoundFlipbook({
             <p className="product-flipbook__subtitle">Top-bound · one page at a time</p>
           </div>
         </div>
-        <nav className="product-flipbook__actions" aria-label="Talispros">
-          <Link href={ROUTES.HOME} className="product-flipbook__link">
-            Home
-          </Link>
-          <Link href={PRODUCT_FLIPBOOK_SAMPLE_HREF} className="product-flipbook__link">
-            Sample
-          </Link>
-          <Link href={MAPSITE_APP_PATH} className="product-flipbook__link">
-            Markets
-          </Link>
-          <Link href={ROUTES.ADMIN_DASHBOARD} className="product-flipbook__link">
+        <div className="product-flipbook__header-tools">
+          <Link href={ROUTES.ADMIN_DASHBOARD} className="product-flipbook__admin-link">
             Global Admin
           </Link>
-        </nav>
+          <nav className="product-flipbook__actions" aria-label="Talispros">
+            <Link href={ROUTES.HOME} className="product-flipbook__link">
+              Home
+            </Link>
+            <TalisprosMarketsDropdown
+              triggerClassName="product-flipbook__link"
+              menuAlign="end"
+            />
+          </nav>
+        </div>
       </header>
 
       <div className="product-flipbook__stage">
@@ -205,8 +206,8 @@ export default function TopBoundFlipbook({
               dragRef.current = null;
             }}
           >
-            <div className="product-flipbook__slot">
-              <div className="product-flipbook__settled" data-testid="product-flipbook-page">
+            <div className="product-flipbook__slot relative aspect-video">
+              <div className="product-flipbook__settled absolute inset-0 overflow-hidden" data-testid="product-flipbook-page">
                 {underPage ? <CatalogueFace page={underPage} /> : null}
               </div>
               {flip && sheetPage ? (

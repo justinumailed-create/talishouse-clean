@@ -1,13 +1,15 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { BookOpen, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { MapEngineProvider } from "@/components/talismaps/map-engine/MapEngineProvider";
 import type { MapEnginePin } from "@/lib/talismaps/map-engine/types";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { mapSitePinVisualFields } from "@/lib/mapsite-pin-style";
+import { ROUTES } from "@/lib/routes";
 import {
   TALISPROS_HOME_MAP_FALLBACK,
   TALISPROS_HOME_MAP_RADIUS_KM,
@@ -87,6 +89,9 @@ export default function TalisprosHomeMapPreview() {
         preserveViewport
         interactive
         lockCenterOffset={{ x: 0, y: 0 }}
+        onPinSelect={(pinId) => {
+          if (pinId === "home-pin") setCardOpen(true);
+        }}
       >
         <MapEngineCanvas className="absolute inset-0 h-full w-full" />
       </MapEngineProvider>
@@ -126,6 +131,29 @@ export default function TalisprosHomeMapPreview() {
         </article>
       </div>
       ) : null}
+
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[500] flex items-center bg-black/50 px-3 py-3 sm:px-5">
+        <Link
+          href={ROUTES.CATALOG}
+          aria-label="View catalogue"
+          className="pointer-events-auto flex h-11 w-11 items-center justify-center rounded-full bg-black/70 text-white shadow-md ring-1 ring-white/35 transition hover:bg-black/85 sm:h-12 sm:w-12"
+        >
+          <BookOpen
+            className="h-5 w-5 sm:h-6 sm:w-6"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+        </Link>
+        <div className="ml-auto hidden h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-black p-2 ring-1 ring-white/70 sm:flex sm:h-12 sm:w-12 sm:p-2.5">
+          <Image
+            src="/logo.png"
+            alt="Talishouse™"
+            width={48}
+            height={48}
+            className="h-full w-full object-contain invert"
+          />
+        </div>
+      </div>
     </div>
   );
 }

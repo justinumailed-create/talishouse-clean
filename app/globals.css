@@ -1267,40 +1267,10 @@ body.mapsite-gallery-open [data-paypal-button] {
   pointer-events: auto;
 }
 
-.talisbooks-viewer__rail--left {
-  left: 0.45rem;
-}
-
 .talisbooks-viewer__rail--right {
   right: 0.45rem;
 }
 
-.talisbooks-viewer__brand {
-  display: flex;
-  width: 2.5rem;
-  height: 2.5rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.7rem;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 4px 14px rgba(28, 25, 23, 0.08);
-}
-
-.talisbooks-viewer__brand-logo {
-  width: 1.55rem;
-  height: 1.55rem;
-  object-fit: contain;
-}
-
-.talisbooks-viewer__fast-code {
-  margin: 0;
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #44403c;
-}
-
-.talisbooks-viewer__map-pin,
 .talisbooks-viewer__rail-btn,
 .talisbooks-viewer__seconds-btn {
   display: inline-flex;
@@ -1317,7 +1287,6 @@ body.mapsite-gallery-open [data-paypal-button] {
   text-decoration: none;
 }
 
-.talisbooks-viewer__map-pin:hover,
 .talisbooks-viewer__rail-btn:hover,
 .talisbooks-viewer__seconds-btn:hover {
   background: #ffffff;
@@ -4508,25 +4477,29 @@ body.mapsite-gallery-open [data-paypal-button] {
   --library-niche-pad: 1.1rem;
   min-height: 100%;
   color: var(--library-ink);
-  padding: 1.15rem var(--library-page-pad) 2.25rem;
+  padding: 0.55rem var(--library-page-pad) 1.5rem;
 }
 
 .talisbooks-library__topbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem 1.25rem;
-  margin-bottom: 1rem;
+  gap: 0.65rem 1rem;
+  margin-bottom: 0.45rem;
   /* Match the recessed shelf: case padding + niche gutter. */
   padding-inline: calc(var(--library-case-pad) + var(--library-niche-pad));
 }
 
-.talisbooks-library__nav {
+.talisbooks-library__brand {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.talisbooks-library__header-actions {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 0.35rem;
-  padding-inline: calc(var(--library-case-pad) + var(--library-niche-pad));
+  flex-shrink: 0;
+  align-items: flex-start;
+  gap: 0.5rem;
 }
 
 .talisbooks-library__back {
@@ -4537,8 +4510,8 @@ body.mapsite-gallery-open [data-paypal-button] {
   border-radius: 0.75rem;
   border: 1px solid #e5e5e5;
   background: #fff;
-  padding: 0.625rem 1rem;
-  font-size: 0.875rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.75rem;
   font-weight: 500;
   color: #171717;
   text-decoration: none;
@@ -4551,59 +4524,27 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-library__eyebrow {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.52rem;
   font-weight: 600;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #a8a29e;
 }
 
 .talisbooks-library__title {
-  margin: 0.15rem 0 0;
-  font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+  margin: 0.05rem 0 0;
+  font-size: 1.05rem;
   font-weight: 600;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
 }
 
 .talisbooks-library__subtitle {
-  margin: 0.35rem 0 0;
-  max-width: 36rem;
-  font-size: 0.875rem;
-  line-height: 1.45;
+  margin: 0.12rem 0 0;
+  max-width: 38rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
   color: var(--library-muted);
-}
-
-.talisbooks-library__search {
-  position: relative;
-  flex: 1 1 14rem;
-  max-width: 18rem;
-}
-
-.talisbooks-library__search-icon {
-  position: absolute;
-  left: 0.85rem;
-  top: 50%;
-  width: 0.9rem;
-  height: 0.9rem;
-  transform: translateY(-50%);
-  color: #a8a29e;
-  pointer-events: none;
-}
-
-.talisbooks-library__search-input {
-  width: 100%;
-  border: 1px solid rgba(28, 25, 23, 0.08);
-  border-radius: 999px;
-  background: #f5f5f4;
-  padding: 0.6rem 1rem 0.6rem 2.3rem;
-  font-size: 0.85rem;
-  outline: none;
-  transition: background 160ms ease, box-shadow 160ms ease;
-}
-
-.talisbooks-library__search-input:focus {
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(28, 25, 23, 0.06);
 }
 
 .talisbooks-library__capacity {
@@ -4851,7 +4792,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-library__shelf-row--compact {
   min-height: 5.1rem;
-  justify-content: flex-end;
+  justify-content: flex-start;
   gap: clamp(0.4rem, 1.1vw, 0.85rem);
 }
 
@@ -5040,7 +4981,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-library__niche--general .talisbooks-library__shelf-row--compact {
   min-height: calc(clamp(5.75rem, 9.5vw, 8.25rem) * var(--general-book-scale) * 1.4);
-  justify-content: flex-end;
+  justify-content: flex-start;
 }
 
 .talisbooks-library__niche--general .talisbooks-standing-book--compact .talisbooks-standing-book__cover-title {
@@ -5335,394 +5276,5 @@ body.mapsite-gallery-open [data-paypal-button] {
     width: 100%;
     max-width: 100%;
     height: auto;
-  }
-}
-
-/* product-flipbook — top-bound T-All catalogue (single page, rotateX) */
-
-.product-flipbook {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  min-height: 100dvh;
-  /* visible so the top-edge rotateX is not flattened by an overflow clip */
-  overflow: visible;
-  background:
-    radial-gradient(ellipse 90% 70% at 50% 12%, #f7f5f1 0%, transparent 55%),
-    linear-gradient(180deg, #ebe7e0 0%, #d9d3c9 48%, #cfc8bc 100%);
-  color: #171717;
-  padding: 0.65rem clamp(0.75rem, 2vw, 1.35rem) 0.75rem;
-}
-
-.product-flipbook__header {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.25rem;
-  position: relative;
-  z-index: 20;
-  flex: 0 0 auto;
-}
-
-.product-flipbook__brand {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-width: 0;
-}
-
-.product-flipbook__logo {
-  width: 2.25rem;
-  height: 2.25rem;
-  object-fit: contain;
-}
-
-.product-flipbook__eyebrow {
-  margin: 0;
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: #78716c;
-}
-
-.product-flipbook__title {
-  margin: 0.05rem 0 0;
-  font-size: clamp(1.15rem, 2vw, 1.45rem);
-  font-weight: 600;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-}
-
-.product-flipbook__subtitle {
-  margin: 0.12rem 0 0;
-  font-size: 0.78rem;
-  color: #57534e;
-}
-
-.product-flipbook__actions {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(6.25rem, 1fr));
-  gap: 0.45rem;
-}
-
-.product-flipbook__link,
-.product-flipbook__turn {
-  display: inline-flex;
-  min-height: 2.5rem;
-  align-items: center;
-  justify-content: center;
-  padding: 0.45rem 0.9rem;
-  border: 0;
-  border-radius: 0.85rem;
-  background: #171717;
-  color: #ffffff;
-  font: inherit;
-  font-size: 0.8rem;
-  font-weight: 500;
-  line-height: 1.2;
-  text-align: center;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.product-flipbook__link:hover,
-.product-flipbook__turn:hover:not(:disabled) {
-  background: #2a2a2a;
-  color: #ffffff;
-}
-
-.product-flipbook__turn:disabled {
-  opacity: 0.38;
-  cursor: default;
-}
-
-.product-flipbook__stage {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.35rem 0 0.25rem;
-}
-
-.product-flipbook__book {
-  width: min(100%, calc((100dvh - 13.5rem) * 16 / 9));
-}
-
-.product-flipbook__hinge {
-  position: relative;
-  z-index: 5;
-  height: 1.15rem;
-  margin: 0 7% -0.55rem;
-  border-radius: 0.55rem 0.55rem 0.15rem 0.15rem;
-  background: linear-gradient(180deg, #3a3a3a 0%, #111111 100%);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
-}
-
-.product-flipbook__hinge-wire {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: radial-gradient(circle at 0.7rem 50%, transparent 0.28rem, rgba(255, 255, 255, 0.14) 0.32rem) 0 0 / 1.7rem 100% repeat-x;
-}
-
-.product-flipbook__perspective {
-  perspective: 1600px;
-  perspective-origin: 50% 0%;
-  touch-action: none;
-  cursor: pointer;
-}
-
-.product-flipbook__slot {
-  position: relative;
-  aspect-ratio: 16 / 9;
-  background: #f7f4ee;
-  border-radius: 0 0 2px 2px;
-  box-shadow:
-    0 22px 44px rgba(40, 32, 20, 0.18),
-    0 1px 0 rgba(255, 255, 255, 0.65) inset;
-  transform-style: preserve-3d;
-}
-
-.product-flipbook__slot::before,
-.product-flipbook__slot::after {
-  content: "";
-  position: absolute;
-  height: 7px;
-  border-radius: 0 0 2px 2px;
-  pointer-events: none;
-}
-
-.product-flipbook__slot::before {
-  left: 5px;
-  right: 5px;
-  bottom: -6px;
-  background: #e4ddd2;
-}
-
-.product-flipbook__slot::after {
-  left: 10px;
-  right: 10px;
-  bottom: -11px;
-  background: #d5cec2;
-}
-
-.product-flipbook__settled,
-.product-flipbook__sheet,
-.product-flipbook__face {
-  position: absolute;
-  inset: 0;
-}
-
-.product-flipbook__settled {
-  overflow: hidden;
-  border-radius: inherit;
-  background: #f7f4ee;
-}
-
-.product-flipbook__sheet {
-  z-index: 2;
-  transform-origin: top center;
-  transform-style: preserve-3d;
-  pointer-events: none;
-}
-
-.product-flipbook__sheet--next {
-  animation: product-flipbook-turn-next 720ms cubic-bezier(0.45, 0.02, 0.25, 1) forwards;
-}
-
-.product-flipbook__sheet--prev {
-  animation: product-flipbook-turn-prev 720ms cubic-bezier(0.45, 0.02, 0.25, 1) forwards;
-}
-
-.product-flipbook__face {
-  overflow: hidden;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  background: #f7f4ee;
-}
-
-.product-flipbook__face--back {
-  transform: rotateX(180deg);
-  background: linear-gradient(180deg, #d9d3c8 0%, #efeae2 22%, #e7e1d6 100%);
-}
-
-.product-flipbook__curl {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.28), transparent 46%);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.product-flipbook__sheet--next .product-flipbook__curl,
-.product-flipbook__sheet--prev .product-flipbook__curl {
-  animation: product-flipbook-curl 720ms linear;
-}
-
-.product-flipbook__image {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  background: #f7f4ee;
-  user-select: none;
-}
-
-.product-flipbook__cover,
-.product-flipbook__leaf {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-  padding: 8% 9%;
-  background:
-    linear-gradient(180deg, rgba(0, 0, 0, 0.14), transparent 2.1rem),
-    #fbf8f3;
-  user-select: none;
-}
-
-.product-flipbook__kicker,
-.product-flipbook__leaf-kicker {
-  margin: 0;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: #78716c;
-}
-
-.product-flipbook__cover-title {
-  margin: 0.35rem 0 0;
-  font-size: clamp(3rem, 8vw, 6.5rem);
-  font-weight: 500;
-  letter-spacing: -0.045em;
-  line-height: 0.9;
-}
-
-.product-flipbook__cover-rule {
-  width: 4.5rem;
-  height: 1px;
-  margin: 1.1rem 0 0.9rem;
-  background: #171717;
-}
-
-.product-flipbook__cover-subtitle {
-  margin: 0;
-  font-size: clamp(1.05rem, 2vw, 1.45rem);
-  font-weight: 500;
-}
-
-.product-flipbook__cover-note,
-.product-flipbook__leaf-caption {
-  margin: 0.4rem 0 0;
-  color: #57534e;
-  font-size: 0.95rem;
-}
-
-.product-flipbook__leaf-number {
-  margin: 0.2rem 0 0;
-  font-size: clamp(3.5rem, 9vw, 7rem);
-  font-weight: 500;
-  letter-spacing: -0.05em;
-  line-height: 0.9;
-}
-
-.product-flipbook__toolbar {
-  flex: 0 0 auto;
-  position: relative;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.45rem;
-  padding-top: 0.85rem;
-}
-
-.product-flipbook__todo {
-  max-width: 52rem;
-  margin: 0;
-  padding: 0.45rem 0.75rem;
-  border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.72);
-  color: #44403c;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  text-align: center;
-}
-
-.product-flipbook__controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-}
-
-.product-flipbook__count {
-  min-width: 8.5rem;
-  margin: 0;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.product-flipbook__hint {
-  margin: 0;
-  color: #57534e;
-  font-size: 0.75rem;
-}
-
-@keyframes product-flipbook-turn-next {
-  from {
-    transform: rotateX(0deg);
-  }
-  to {
-    transform: rotateX(-180deg);
-  }
-}
-
-@keyframes product-flipbook-turn-prev {
-  from {
-    transform: rotateX(-180deg);
-  }
-  to {
-    transform: rotateX(0deg);
-  }
-}
-
-@keyframes product-flipbook-curl {
-  0% {
-    opacity: 0;
-  }
-  35% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0.15;
-  }
-}
-
-@media (max-width: 720px) {
-  .product-flipbook__actions {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: 100%;
-  }
-
-  .product-flipbook__book {
-    width: min(100%, calc((100dvh - 18rem) * 16 / 9));
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .product-flipbook__sheet--next,
-  .product-flipbook__sheet--prev,
-  .product-flipbook__sheet--next .product-flipbook__curl,
-  .product-flipbook__sheet--prev .product-flipbook__curl {
-    animation-duration: 1ms;
   }
 }

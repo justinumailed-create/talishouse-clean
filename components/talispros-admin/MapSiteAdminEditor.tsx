@@ -25,6 +25,7 @@ import {
 import { MAPSITE_PIN_DEFAULT_BORDER, MAPSITE_PIN_DEFAULT_COLOR, MAPSITE_PIN_DEFAULT_ICON } from "@/lib/mapsite-pin-style";
 import MapSiteAdminShareLinks from "@/components/talispros-admin/MapSiteAdminShareLinks";
 import MapSiteAdminEbookPanel from "@/components/talispros-admin/MapSiteAdminEbookPanel";
+import MapSiteUrlGatePinControls from "@/components/talispros-admin/MapSiteUrlGatePinControls";
 import {
   OFFERED_SUBSCRIPTION_TIER_LABELS,
   type OfferedSubscriptionTier,
@@ -409,6 +410,11 @@ export default function MapSiteAdminEditor({
             placeholder="https://"
           />
         </Field>
+        <MapSiteUrlGatePinControls
+          fastCode={mapsite.fastCode}
+          issuedAt={mapsite.urlGatePinIssuedAt}
+          disabled={!adminWritesEnabled}
+        />
         <Field label="TEB™ URL (optional override)">
           <input
             className={inputClass}

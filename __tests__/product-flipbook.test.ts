@@ -129,17 +129,25 @@ describe("product catalogue route", () => {
     expect(viewer).not.toContain("rotateY");
     expect(viewer).not.toContain("Glasshouse");
     expect(viewer).not.toContain("$58.50");
+    expect(viewer).not.toContain("showSample");
+    expect(viewer).not.toContain("Sample");
+    expect(viewer).toContain("product-flipbook__header-tools");
+    expect(viewer).toContain("product-flipbook__admin-link");
+    expect(viewer).toContain("TalisprosMarketsDropdown");
+    expect(viewer).not.toContain("MAPSITE_APP_PATH");
+    expect(catalogue).not.toContain("isAdminAuthenticated");
+    expect(catalogue).not.toContain("showSample");
   });
 
   it("animates a top-edge rotateX and not a center fold", () => {
-    const css = readSource("app/globals.css");
-    const block = css.split("/* product-flipbook")[1] ?? "";
-    expect(block.length).toBeGreaterThan(0);
-    expect(block).toContain("transform-origin: top center");
-    expect(block).toContain("rotateX(-180deg)");
-    expect(block).toContain("product-flipbook-turn-next");
-    expect(block).toContain("perspective-origin: 50% 0%");
-    expect(block).not.toContain("rotateY");
+    const css = readSource("components/product-flipbook/top-bound-flipbook.css");
+    expect(css).toContain("transform-origin: top center");
+    expect(css).toContain("rotateX(-180deg)");
+    expect(css).toContain("product-flipbook-turn-next");
+    expect(css).toContain("perspective-origin: 50% 0%");
+    expect(css).not.toContain("rotateY");
+    const viewer = readSource("components/product-flipbook/TopBoundFlipbook.tsx");
+    expect(viewer).toContain("top-bound-flipbook.css");
   });
 
   it("drops Talishouse header, cart, and Talisbot on the product routes", () => {

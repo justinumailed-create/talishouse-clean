@@ -603,6 +603,26 @@ export interface Database {
           { foreignKeyName: "mapsites_account_id_fkey"; columns: ["account_id"]; referencedRelation: "accounts"; referencedColumns: ["id"] }
         ]
       }
+      mapsite_url_gate_pins: {
+        Row: {
+          mapsite_id: string
+          pin_hash: string
+          issued_at: string
+        }
+        Insert: {
+          mapsite_id: string
+          pin_hash: string
+          issued_at?: string
+        }
+        Update: {
+          mapsite_id?: string
+          pin_hash?: string
+          issued_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "mapsite_url_gate_pins_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] }
+        ]
+      }
       categories: {
         Row: {
           id: string

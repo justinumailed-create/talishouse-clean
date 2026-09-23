@@ -1,13 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
-import { BookOpen } from "lucide-react";
 import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
 import TalisprosHomeMapPreview from "@/components/talispros/TalisprosHomeMapPreview";
 import TalisprosStartSidebar from "@/components/talispros/TalisprosStartSidebar";
-import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
-import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
-
-const PINNED_VIEWER_HREF = `${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`;
 
 export default function TalisprosStartPage() {
   return (
@@ -33,30 +27,6 @@ export default function TalisprosStartPage() {
             <div className="mx-auto w-full max-w-[1200px]">
               <div className="relative">
                 <TalisprosHomeMapPreview />
-                <div className="relative flex items-center bg-white px-3 py-4 sm:absolute sm:inset-x-0 sm:bottom-0 sm:bg-black/50 sm:px-5 sm:py-3">
-                  <Link
-                    href={PINNED_VIEWER_HREF}
-                    className="absolute left-3 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/70 text-white shadow-md ring-1 ring-white/35 transition hover:bg-black hover:ring-white/70 sm:left-5 sm:h-12 sm:w-12"
-                    aria-label="Open pinned Talisbook™ sample"
-                    title="Open sample Talisbook™"
-                  >
-                    <BookOpen
-                      className="h-5 w-5 sm:h-6 sm:w-6"
-                      strokeWidth={1.75}
-                      aria-hidden="true"
-                    />
-                  </Link>
-                  <div className="w-full px-14" aria-hidden="true" />
-                  <div className="absolute right-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full bg-black ring-1 ring-white/35 sm:right-5 sm:flex sm:h-12 sm:w-12 sm:ring-white/70">
-                    <Image
-                      src="/logo.png"
-                      alt="Talishouse™"
-                      width={48}
-                      height={48}
-                      className="h-full w-full object-contain invert"
-                    />
-                  </div>
-                </div>
               </div>
               <TalisprosLegalCopy
                 className="mx-auto max-w-[42rem] pt-4 text-center"

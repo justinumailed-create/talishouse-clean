@@ -8,10 +8,7 @@ import {
 } from "@/lib/talisbooks/viewer/image-preloader";
 import TalisBooksViewerControls from "@/components/talisbooks/viewer/TalisBooksViewerControls";
 import TalisBooksViewerLiveEditor from "@/components/talisbooks/viewer/TalisBooksViewerLiveEditor";
-import {
-  TalisBooksViewerBrandRail,
-  TalisBooksViewerPlaybackRail,
-} from "@/components/talisbooks/viewer/TalisBooksViewerRails";
+import { TalisBooksViewerPlaybackRail } from "@/components/talisbooks/viewer/TalisBooksViewerRails";
 import TalisBooksViewerStage, {
   type TalisBooksViewerBinding,
 } from "@/components/talisbooks/viewer/TalisBooksViewerStage";
@@ -499,7 +496,6 @@ export default function TalisBooksViewerShell({
           ) : null}
         </div>
       </header>
-      <TalisBooksViewerBrandRail book={book} />
       <TalisBooksViewerPlaybackRail
         viewMode={viewMode}
         autoPlaying={autoPlaying}

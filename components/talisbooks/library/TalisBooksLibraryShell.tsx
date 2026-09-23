@@ -1,13 +1,15 @@
 "use client";
 
-import { useDeferredValue, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowDownUp, Search } from "lucide-react";
-import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
-import TalisBooksCreateEbookPanel from "@/components/talisbooks/library/TalisBooksCreateEbookPanel";
+import { ArrowDownUp } from "lucide-react";
 import TalisBooksStandingBook from "@/components/talisbooks/library/TalisBooksStandingBook";
 import { deleteLibraryEbookAction } from "@/app/talisbooks/library/actions";
+import {
+  buildClaimedMapSitePath,
+  MAPSITE_APP_PATH,
+} from "@/lib/talispros/mapsite-state";
 import {
   TALISBOOKS_LIBRARY_BOOK_PRICE_USD,
   TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
@@ -16,7 +18,7 @@ import {
   TALISBOOKS_LIBRARY_SORT_OPTIONS,
   generalShelfBookScale,
   generalShelfColumns,
-  packShelfRowsNewestAtRight,
+  packShelfRowsNewestAtLeft,
 } from "@/lib/talisbooks/library/constants";
 import { partitionBookshelf } from "@/lib/talisbooks/library/partition";
 import { queryLibraryBooks } from "@/lib/talisbooks/library/query";
@@ -95,20 +97,28 @@ export default function TalisBooksLibraryShell({
   backHref,
 }: TalisBooksLibraryShellProps) {
   const router = useRouter();
-  const [search, setSearch] = useState("");
   const [sort, setSort] = useState<TalisBooksLibrarySort>("published_desc");
   const [page, setPage] = useState(1);
   const [featuredCapacity, setFeaturedCapacity] = useState<5 | 6>(5);
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
-  const deferredSearch = useDeferredValue(search);
   const scoped = Boolean(bookshelf.scopedToFastCode && bookshelf.fastCode);
   const publicCatalog = Boolean(bookshelf.publicCatalog);
   const createdCatalog = Boolean(bookshelf.createdCatalog);
 
-  const mapsiteHref =
-    backHref?.trim() || mapsiteBackFromScheduleHref(bookshelf.fastCode);
+  const claimedHref =
+    bookshelf.registrationHref?.trim() ||
+    (bookshelf.fastCode
+      ? buildClaimedMapSitePath({
+          fastCode: bookshelf.fastCode,
+          accountType: bookshelf.accountType,
+        })
+      : "");
+  const requestedHref = backHref?.trim() || "";
+  const mapsiteHref = requestedHref.startsWith("/talispros/mapsite")
+    ? requestedHref
+    : claimedHref || requestedHref || MAPSITE_APP_PATH;
 
   const visibleBooks = useMemo(
     () => bookshelf.books.filter((book) => !deletedIds.includes(book.id)),
@@ -119,7 +129,7 @@ export default function TalisBooksLibraryShell({
     () =>
       partitionBookshelf(visibleBooks, {
         featuredCapacity,
-        featuredMode: scoped || createdCatalog ? "highlights" : "fill",
+        featuredMode: scoped || createdCatalog ? "newest" : "fill",
       }),
     [visibleBooks, featuredCapacity, scoped, createdCatalog],
   );
@@ -127,12 +137,12 @@ export default function TalisBooksLibraryShell({
   const generalResult = useMemo(
     () =>
       queryLibraryBooks(general, {
-        search: deferredSearch,
+        search: "",
         sort,
         page,
         pageSize: TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
       }),
-    [general, deferredSearch, sort, page],
+      [general, sort, page],
   );
 
   const generalCount = generalResult.books.length;
@@ -140,7 +150,7 @@ export default function TalisBooksLibraryShell({
   const generalScale = generalShelfBookScale(generalCount);
 
   const generalRows = useMemo(
-    () => packShelfRowsNewestAtRight(generalResult.books, generalColumns),
+    () => packShelfRowsNewestAtLeft(generalResult.books, generalColumns),
     [generalResult.books, generalColumns],
   );
 
@@ -150,7 +160,6 @@ export default function TalisBooksLibraryShell({
   const heroBook = featuredLayout === "hero-plus-4" ? featured[0] : null;
   const featuredRest =
     featuredLayout === "hero-plus-4" ? featured.slice(1) : featured;
-  const primary = bookshelf.primaryEbook;
   const shelfControls = {
     canDelete,
     deletingId,
@@ -182,11 +191,6 @@ export default function TalisBooksLibraryShell({
 
   return (
     <div className="talisbooks-library">
-      <div className="talisbooks-library__nav">
-        <Link href={mapsiteHref} className="talisbooks-library__back">
-          Back to Mapsite™
-        </Link>
-      </div>
       <header className="talisbooks-library__topbar">
         <div className="talisbooks-library__brand">
           <p className="talisbooks-library__eyebrow">
@@ -217,65 +221,33 @@ export default function TalisBooksLibraryShell({
               {scoped && bookshelf.fastCode
                 ? `Open a cover to read. This shelf shows Talisbooks™ connected to FAST Code ${bookshelf.fastCode.toUpperCase()} only.`
                 : createdCatalog
-                  ? "Open a cover to read. Created Talisbooks™ with FAST codes stand on this shelf. Featured books are pinned on the left."
+                  ? "Open a cover to read. Created Talisbooks™ with FAST codes stand on this shelf. The latest book is pinned on the left; older books stand on the right, newest first from the left."
                   : "Open a cover to read. The featured book is pinned at the front of the shelf."}
             </p>
           ) : null}
         </div>
 
-        <label className="talisbooks-library__search">
-          <Search className="talisbooks-library__search-icon" aria-hidden="true" />
-          <span className="sr-only">Search books</span>
-          <input
-            value={search}
-            onChange={(event) => {
-              setSearch(event.target.value);
-              startTransition(() => setPage(1));
-            }}
-            placeholder={
-              publicCatalog
-                ? scoped
-                  ? "Search this shelf…"
-                  : "Search TalisBooks™…"
-                : createdCatalog
-                  ? "Search FAST books…"
-                  : scoped
-                    ? "Search this shelf…"
-                    : "Search library…"
-            }
-            className="talisbooks-library__search-input"
-          />
-        </label>
-
-        {!publicCatalog && !createdCatalog ? (
-          <div
-            className="talisbooks-library__capacity"
-            title="Fully stocked shelf monetization capacity"
-          >
-            <span className="talisbooks-library__capacity-label">Shelf capacity</span>
-            <strong>
-              {stocked}/{TALISBOOKS_LIBRARY_SHELF_CAPACITY}
-            </strong>
-            <span className="talisbooks-library__capacity-value">
-              ${monthlyEstimate.toFixed(2)} / ${TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD.toFixed(2)}{" "}
-              mo
-            </span>
-          </div>
-        ) : null}
+        <div className="talisbooks-library__header-actions">
+          {!publicCatalog && !createdCatalog ? (
+            <div
+              className="talisbooks-library__capacity"
+              title="Fully stocked shelf monetization capacity"
+            >
+              <span className="talisbooks-library__capacity-label">Shelf capacity</span>
+              <strong>
+                {stocked}/{TALISBOOKS_LIBRARY_SHELF_CAPACITY}
+              </strong>
+              <span className="talisbooks-library__capacity-value">
+                ${monthlyEstimate.toFixed(2)} / ${TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD.toFixed(2)}{" "}
+                mo
+              </span>
+            </div>
+          ) : null}
+          <Link href={mapsiteHref} className="talisbooks-library__back">
+            Back to Mapsite™
+          </Link>
+        </div>
       </header>
-
-      {scoped && bookshelf.fastCode && bookshelf.registrationHref ? (
-        <TalisBooksCreateEbookPanel
-          fastCode={bookshelf.fastCode}
-          paymentReceived={Boolean(bookshelf.paymentReceived)}
-          registrationHref={bookshelf.registrationHref}
-          entitlements={bookshelf.entitlements}
-          initialTitle={primary?.title || ""}
-          initialSubtitle={primary?.subtitle || ""}
-          initialDescription={primary?.description || ""}
-          hasExistingBook={Boolean(primary)}
-        />
-      ) : null}
 
       {scoped && bookshelf.entitlements && !bookshelf.entitlements.activated ? (
         <div className="mx-auto mb-6 max-w-3xl rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
@@ -424,7 +396,7 @@ export default function TalisBooksLibraryShell({
               <div className="talisbooks-library__alcove">
                 {generalResult.books.length === 0 ? (
                   <div className="talisbooks-library__niche-empty">
-                    <p>No books match{deferredSearch ? ` “${deferredSearch}”` : ""}</p>
+                    <p>No books on this shelf</p>
                     {Array.from({ length: 3 }).map((_, index) => (
                       <div key={index} className="talisbooks-library__shelf-bay">
                         <div className="talisbooks-library__shelf-row talisbooks-library__shelf-row--compact" />

@@ -113,9 +113,9 @@ describe("Talisbooks™ split bookshelf layout", () => {
     expect(generalShelfColumns(20)).toBe(4);
   });
 
-  it("packs each right-shelf row from the right, newest last in the row", () => {
+  it("packs each right-shelf row from the left, newest first in the row", () => {
     expect(packShelfRowsNewestAtRight(["n1", "n2", "n3", "n4", "n5"], 4)).toEqual([
-      ["n4", "n3", "n2", "n1"],
+      ["n1", "n2", "n3", "n4"],
       ["n5"],
     ]);
     expect(packShelfRowsNewestAtRight(["newest"], 1)).toEqual([["newest"]]);
@@ -322,7 +322,16 @@ describe("Talisbooks™ library admin delete wiring", () => {
     expect(shell).toContain("deleteLibraryEbookAction");
     expect(shell).toContain("canDelete");
     expect(shell).toContain("Back to Mapsite™");
-    expect(shell).toContain("mapsiteBackFromScheduleHref");
+    expect(shell).toContain("buildClaimedMapSitePath");
+    expect(shell).toContain("talisbooks-library__header-actions");
+    expect(shell).not.toContain("talisbooks-library__search");
+    expect(shell).not.toContain("Search this shelf");
+    const fastPage = readFileSync(
+      resolve("app/talisbooks/fast/[fastCode]/page.tsx"),
+      "utf8",
+    );
+    expect(fastPage).toContain("buildClaimedMapSitePath");
+    expect(fastPage).not.toContain("mapsiteBackFromScheduleHref");
     expect(standing).toContain("talisbooks-standing-book__delete");
     expect(standing).toContain("Delete ${book.title}");
     expect(actions).toContain("deleteLibraryEbookAction");
@@ -486,7 +495,7 @@ describe("Talisbooks™ public / root created FAST catalog", () => {
     expect(featured.map((book) => book.id)).toEqual(["real-rm22"]);
     expect(general.map((book) => book.id)).toEqual(["real-ay04", "real-as01"]);
     expect(packShelfRowsNewestAtRight(general.map((book) => book.id), 5)).toEqual([
-      ["real-as01", "real-ay04"],
+      ["real-ay04", "real-as01"],
     ]);
   });
 

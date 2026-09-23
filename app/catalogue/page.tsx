@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     "Top-bound T-All product catalogue. Pages turn one at a time from the top edge.",
 };
 
-export default function CataloguePage() {
+export default async function CataloguePage() {
   const pages = loadProductFlipbookPages();
   return <TopBoundFlipbook pages={pages} />;
 }

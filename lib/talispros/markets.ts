@@ -1,14 +1,4 @@
-export const TALISPROS_MARKET_OPTIONS = [
-  {
-    label: "Real Estate Professionals",
-    href: "/talispros/mapsite?audience=listings",
-  },
-  {
-    label: "Talishouse™ Builders",
-    href: "/talispros/mapsite?audience=homes",
-  },
-  {
-    label: "For Sale By Owners",
-    href: "/talispros/mapsite?audience=fsbos",
-  },
-] as const;
+import { TALISPROS_START_SEGMENTS } from "@/lib/talispros/start-content";
+
+/** Markets nav uses the same audience options as the homepage right rail. */
+export const TALISPROS_MARKET_OPTIONS = TALISPROS_START_SEGMENTS;

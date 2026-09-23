@@ -7,6 +7,7 @@ export {
   TALISBOOKS_LIBRARY_GENERAL_ROWS,
   generalShelfBookScale,
   generalShelfColumns,
+  packShelfRowsNewestAtLeft,
   packShelfRowsNewestAtRight,
   TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD,
   TALISBOOKS_LIBRARY_PAGE_SIZE,

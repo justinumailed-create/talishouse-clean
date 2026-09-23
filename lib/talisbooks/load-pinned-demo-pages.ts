@@ -117,3 +117,8 @@ export function fallbackOptimizedDemoPages(
 ) {
   return pinnedTalisBookInteriorAssets().slice(0, Math.max(0, count));
 }
+
+/** Interior fallbacks after page 1 is consumed as the wrap cover. */
+export function fallbackOptimizedDemoInteriorPagesAfterWrap() {
+  return pinnedTalisBookInteriorAssets().slice(1);
+}

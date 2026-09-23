@@ -4,7 +4,7 @@ export interface HomePinLocationValues {
   longitude: string;
   /** True when the PIN was placed or moved on the map (click or drag). */
   manualPlacement: boolean;
-  /** Address resolved from coordinates; never overwrites streetAddress. */
+  /** Address resolved from coordinates; also fills streetAddress. */
   reverseGeocodedAddress: string;
   /** User-controlled preview zoom — carried onto the created Mapsite™. */
   mapZoom: number;
