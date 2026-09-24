@@ -131,13 +131,18 @@ describe("admin chrome must not inherit Talishouse storefront", () => {
     expect(readSource("components/TalisBotChat.tsx")).toContain("shouldHidePublicStorefrontChrome");
   });
 
-  it("does not deep-link admin chrome to Talishouse Home or Catalogue", () => {
+  it("exposes Talishouse site only as an admin-only external link (not Home/Catalogue)", () => {
     const layout = readSource("components/admin/AdminLayoutClient.tsx");
     expect(layout).toContain('href="/"');
     expect(layout).toContain("Talispros™ home");
+    expect(layout).toContain('href="/talishouse"');
+    expect(layout).toContain("Talishouse™ site");
+    expect(layout).toContain('target="_blank"');
     expect(layout).not.toContain("ROUTES.TALISHOUSE");
     expect(layout).not.toContain("/catalogue");
-    expect(layout).not.toContain("/talishouse");
+    // Must not use public storefront Home/Catalogue labels in admin chrome
+    expect(layout).not.toMatch(/>\s*Home\s*</);
+    expect(layout).not.toMatch(/>\s*Catalogue\s*</);
   });
 
   it("fails closed until the server confirms a FAST-code session", () => {

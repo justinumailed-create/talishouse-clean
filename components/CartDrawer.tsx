@@ -166,7 +166,7 @@ export default function CartDrawer() {
               </svg>
             </div>
             <h2 className="text-2xl font-semibold mb-2">Payment Successful!</h2>
-            <Link href="/talishouse" onClick={closeCart} className="btn-primary mt-6">Continue Shopping</Link>
+            <Link href="/catalogue" onClick={closeCart} className="btn-primary mt-6">Continue Shopping</Link>
           </div>
         </div>
       </div>
@@ -190,7 +190,7 @@ export default function CartDrawer() {
           {items.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-gray-500 mb-4">Your cart is empty</p>
-              <Link href="/catalog" onClick={closeCart} className="text-gray-900 hover:underline font-medium">Browse Products</Link>
+              <Link href="/catalogue" onClick={closeCart} className="text-gray-900 hover:underline font-medium">Browse Products</Link>
             </div>
           ) : (
             <div className="space-y-6">

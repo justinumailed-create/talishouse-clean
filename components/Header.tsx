@@ -28,7 +28,7 @@ export default function Header() {
         <div className="flex justify-between items-center h-24">
           {/* LEFT: Logo + Navigation */}
           <div className="flex items-center gap-8">
-            <Link href={ROUTES.TALISHOUSE} onClick={handleLinkClick} className="flex items-center flex-shrink-0">
+            <Link href={ROUTES.HOME} onClick={handleLinkClick} className="flex items-center flex-shrink-0">
               <Image
                 src="/logo.png"
                 alt="Windswept Logo"
@@ -41,16 +41,16 @@ export default function Header() {
 
             <nav className="hidden md:flex items-center gap-10">
               <Link
-                href={ROUTES.TALISHOUSE}
+                href={ROUTES.HOME}
                 onClick={handleLinkClick}
                 className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
-                  pathname === ROUTES.TALISHOUSE ? "text-black" : "text-gray-500"
+                  pathname === ROUTES.HOME ? "text-black" : "text-gray-500"
                 }`}
               >
                 Home
               </Link>
               <Link
-                href="/catalogue"
+                href={ROUTES.CATALOG}
                 onClick={handleLinkClick}
                 className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
                   pathname.startsWith("/catalogue") || pathname.startsWith("/catalog")
@@ -58,7 +58,7 @@ export default function Header() {
                     : "text-gray-500"
                 }`}
               >
-                Catalogue
+                Product
               </Link>
               <div onClick={handleLinkClick}>
                 <GatedLink
@@ -124,10 +124,10 @@ export default function Header() {
         {isMenuOpen && (
           <nav className="md:hidden py-4 border-t border-gray-100 flex flex-col gap-3">
             <Link
-              href={ROUTES.TALISHOUSE}
+              href={ROUTES.HOME}
               onClick={handleLinkClick}
               className={`text-gray-700 uppercase tracking-wide text-sm font-medium px-2 transition-colors hover:text-black ${
-                pathname === ROUTES.TALISHOUSE ? "text-black" : ""
+                pathname === ROUTES.HOME ? "text-black" : ""
               }`}
             >
               Home
@@ -141,7 +141,7 @@ export default function Header() {
                   : ""
               }`}
             >
-              Catalogue
+              Product
             </Link>
             <div onClick={handleLinkClick}>
               <GatedLink

@@ -9,7 +9,7 @@ const PRODUCT_RECOMMENDATIONS: Record<string, { product: string; path: string; c
   },
   talishouse_residential: {
     product: "Talishouse Residential",
-    path: "/talishouse",
+    path: "/talishouse-residential",
     config: "Full residential home, 800-3,200 sq.ft."
   },
   talistowns: {
@@ -19,7 +19,7 @@ const PRODUCT_RECOMMENDATIONS: Record<string, { product: string; path: string; c
   },
   not_sure: {
     product: "Talishouse Residential",
-    path: "/talishouse",
+    path: "/catalogue",
     config: "Based on your goals, we'll recommend the best fit during consultation"
   }
 };
@@ -32,7 +32,7 @@ function getRecommendation(homeType: string, goal: string, budget?: number): { p
   if (goal === "invest") {
     return {
       product: "Talishouse Residential",
-      path: "/talishouse",
+      path: "/talishouse-residential",
       config: "Investment property, rental-ready configuration"
     };
   }
@@ -40,7 +40,7 @@ function getRecommendation(homeType: string, goal: string, budget?: number): { p
   if (goal === "build") {
     return {
       product: "Talishouse Residential",
-      path: "/talishouse",
+      path: "/talishouse-residential",
       config: "Custom build, full residential specs"
     };
   }

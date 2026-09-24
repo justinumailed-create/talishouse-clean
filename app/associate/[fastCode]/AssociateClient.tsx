@@ -284,8 +284,8 @@ export default function AssociateClient({
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {[
                     { name: "Glasshouse", desc: "Modern glass enclosed spaces", href: "/glasshouse" },
-                    { name: "Talishouse 400", desc: "Premium residential units", href: "/talishouse" },
-                    { name: "Talishouse Residential", desc: "Full-size family homes", href: "/talishouse" },
+                    { name: "Talishouse 400", desc: "Premium residential units", href: "/talishouse-recreational" },
+                    { name: "Talishouse Residential", desc: "Full-size family homes", href: "/talishouse-residential" },
                     { name: "Talistowns", desc: "Community living solutions", href: "/talistowns" },
                   ].map((product) => (
                     <Link
@@ -416,8 +416,8 @@ export default function AssociateClient({
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { name: "Glasshouse", href: "/glasshouse" },
-                  { name: "Talishouse 400", href: "/talishouse" },
-                  { name: "Talishouse Residential", href: "/talishouse" },
+                  { name: "Talishouse 400", href: "/talishouse-recreational" },
+                  { name: "Talishouse Residential", href: "/talishouse-residential" },
                   { name: "Talistowns", href: "/talistowns" },
                 ].map((product) => (
                   <Link
