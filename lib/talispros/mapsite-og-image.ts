@@ -1,9 +1,9 @@
 import { RM22_ASSETS, RM22_DESIGN_COMPS, RM22_PRODUCTS } from "@/lib/talisbooks/rm22-template";
 import {
-  getMapSiteEbookContext,
-  loadEbookPageMedia,
-} from "@/lib/talisbooks/mapsite-ebook-service";
-import { pickPartingShotImageUrl } from "@/lib/talisbooks/parting-shot";
+  pickPartingShotImageUrl,
+  type PartingShotPage,
+} from "@/lib/talisbooks/parting-shot";
+import { mapsiteShareOgPath } from "@/lib/share/og-card";
 import { isStockDemoListingPath } from "@/lib/talispros/mapsite-listing-media";
 import type { CreateMetadataImage } from "@/lib/seo";
 
@@ -92,21 +92,26 @@ function firstUsable(urls: Array<string | null | undefined>): string | null {
   return null;
 }
 
-export function selectMapSiteOgImageUrl(input: {
-  pages?: Parameters<typeof pickPartingShotImageUrl>[0];
-  coverImageUrl?: string | null;
+/**
+ * Scenic layer behind a Mapsite™ share card when satellite imagery is unavailable.
+ * Parting shot first, then a listing photo. Front covers and brand posters are skipped.
+ */
+export function selectMapsiteScenicBackgroundUrl(input: {
+  pages?: PartingShotPage[];
   fallbackImageUrls?: Array<string | null | undefined>;
-}): string {
+}): string | null {
   const parting = pickPartingShotImageUrl(input.pages ?? []);
   if (isUsableMapSiteOgImage(parting)) return parting!;
+  return firstUsable(input.fallbackImageUrls ?? []);
+}
 
-  const pinPhoto = firstUsable(input.fallbackImageUrls ?? []);
-  if (pinPhoto) return pinPhoto;
-
-  const cover = input.coverImageUrl?.trim() || "";
-  if (isUsableMapSiteOgImage(cover)) return cover;
-
-  return MAPSITE_OG_BRAND_MARK;
+/** Talisbooks™ viewer cards use the parting shot only — not the front cover. */
+export function selectViewerPartingShotUrl(
+  pages: PartingShotPage[],
+): string | null {
+  const parting = pickPartingShotImageUrl(pages);
+  if (isUsableMapSiteOgImage(parting)) return parting;
+  return null;
 }
 
 export function mapsiteOgMetadataImage(
@@ -136,36 +141,7 @@ export function mapsiteRealtimeSeoCopy(input: {
   };
 }
 
-export async function resolveMapSiteOgImage(
-  fastCodeRaw: string,
-  options?: {
-    bookSlug?: string | null;
-    fallbackImageUrls?: Array<string | null | undefined>;
-  },
-): Promise<string> {
-  let pages: Parameters<typeof pickPartingShotImageUrl>[0] = [];
-  let coverImageUrl: string | null = null;
-
-  try {
-    const context = await getMapSiteEbookContext(fastCodeRaw, {
-      bookSlug: options?.bookSlug,
-    });
-    coverImageUrl = context?.primaryEbook?.coverImageUrl ?? null;
-    if (context?.primaryEbook?.id) {
-      pages = await loadEbookPageMedia(context.primaryEbook.id);
-    }
-  } catch (error) {
-    console.warn(
-      "[mapsite-og] Could not load linked Talisbook™ pages:",
-      error instanceof Error ? error.message : error,
-    );
-  }
-
-  return toAbsoluteHttpsOgUrl(
-    selectMapSiteOgImageUrl({
-      pages,
-      coverImageUrl,
-      fallbackImageUrls: options?.fallbackImageUrls,
-    }),
-  );
+/** Absolute URL of the composed landscape Mapsite™ share card. */
+export function resolveMapSiteOgImage(fastCodeRaw: string): string {
+  return toAbsoluteHttpsOgUrl(mapsiteShareOgPath(fastCodeRaw));
 }

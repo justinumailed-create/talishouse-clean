@@ -66,7 +66,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { accountType, fastCode } = await params;
   const code = fastCode.trim().toUpperCase();
-  const ogImage = await resolveMapSiteOgImage(fastCode);
+  const ogImage = resolveMapSiteOgImage(fastCode);
   return createMetadata({
     title: `Mapsite™ ${code}`,
     description: `Talispros™ Mapsite™ for FAST Code ${code}.`,

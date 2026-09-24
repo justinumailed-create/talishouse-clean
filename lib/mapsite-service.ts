@@ -72,7 +72,7 @@ export type MapSiteSeoListItem = {
   liveTitle: string;
   /** Live share description when no SEO override is saved. */
   liveDescription: string;
-  /** Live Open Graph image (ebook / listing photo), not a manual override. */
+  /** Live Open Graph image — composed landscape share card. */
   liveOgImageUrl: string;
 };
 
@@ -233,7 +233,7 @@ export async function listMapSitesForSeoAdmin(): Promise<MapSiteSeoListItem[]> {
     client
       .from("mapsites")
       .select(
-        "id, fast_code, status, property_title, property_description, meta_title, meta_description, og_image_url, header_image_url, cover_image, gallery_images, agent_name, owner_first_name, owner_last_name",
+        "id, fast_code, status, property_title, property_description, meta_title, meta_description, og_image_url, agent_name, owner_first_name, owner_last_name",
       )
       .order("fast_code", { ascending: true })
   );
@@ -263,11 +263,6 @@ export async function listMapSitesForSeoAdmin(): Promise<MapSiteSeoListItem[]> {
         metaTitle: (row.meta_title as string | null) ?? null,
         metaDescription: (row.meta_description as string | null) ?? null,
         ogImageUrl: (row.og_image_url as string | null) ?? null,
-        headerImageUrl: (row.header_image_url as string | null) ?? null,
-        coverImage: (row.cover_image as string | null) ?? null,
-        galleryImages: Array.isArray(row.gallery_images)
-          ? (row.gallery_images as string[])
-          : [],
       };
     })
     .filter((row) => row.fastCode.length > 0)
@@ -282,13 +277,7 @@ export async function listMapSitesForSeoAdmin(): Promise<MapSiteSeoListItem[]> {
         propertyTitle: row.propertyTitle,
         propertyDescription: row.propertyDescription,
       });
-      const liveOgImageUrl = await resolveMapSiteOgImage(row.fastCode, {
-        fallbackImageUrls: [
-          row.headerImageUrl,
-          row.coverImage,
-          ...row.galleryImages,
-        ],
-      });
+      const liveOgImageUrl = resolveMapSiteOgImage(row.fastCode);
       return {
         id: row.id,
         fastCode: row.fastCode,

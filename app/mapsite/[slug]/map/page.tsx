@@ -29,15 +29,7 @@ export async function generateMetadata({
   }
   const published = await loadPublishedMapSiteView(code);
   const title = published?.propertyTitle?.trim() || code.toUpperCase();
-  const ogImage = await resolveMapSiteOgImage(code, {
-    fallbackImageUrls: published
-      ? [
-          published.ogImageUrl,
-          published.headerImageUrl,
-          ...(published.galleryImages ?? []),
-        ]
-      : [],
-  });
+  const ogImage = resolveMapSiteOgImage(code);
   return createMetadata({
     title: `${title} map | Mapsite™`,
     description: `Full-screen Mapsite™ map and PIN for ${title}.`,
