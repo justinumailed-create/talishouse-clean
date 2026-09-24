@@ -53,7 +53,7 @@ export default function Header() {
                 href={ROUTES.CATALOG}
                 onClick={handleLinkClick}
                 className={`text-[15px] uppercase tracking-wider font-medium transition-colors hover:text-black ${
-                  pathname.startsWith("/catalogue") || pathname.startsWith("/catalog")
+                  pathname.startsWith("/catalogue")
                     ? "text-black"
                     : "text-gray-500"
                 }`}
@@ -136,7 +136,7 @@ export default function Header() {
               href={ROUTES.CATALOG}
               onClick={handleLinkClick}
               className={`text-gray-700 uppercase tracking-wide text-sm font-medium px-2 transition-colors hover:text-black ${
-                pathname.startsWith("/catalog") || pathname.startsWith("/catalogue")
+                pathname.startsWith("/catalogue")
                   ? "text-black"
                   : ""
               }`}

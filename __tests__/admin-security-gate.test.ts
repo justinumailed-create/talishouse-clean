@@ -135,8 +135,9 @@ describe("admin chrome must not inherit Talishouse storefront", () => {
     const layout = readSource("components/admin/AdminLayoutClient.tsx");
     expect(layout).toContain('href="/"');
     expect(layout).toContain("Talispros™ home");
-    expect(layout).toContain('href="/talishouse"');
+    expect(layout).toContain('href="/catalog"');
     expect(layout).toContain("Talishouse™ site");
+    expect(layout).not.toContain('href="/talishouse"');
     expect(layout).toContain('target="_blank"');
     expect(layout).not.toContain("ROUTES.TALISHOUSE");
     expect(layout).not.toContain("/catalogue");

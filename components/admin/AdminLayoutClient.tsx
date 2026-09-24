@@ -100,7 +100,7 @@ function AdminSidebar({
 
         <div className="p-3 border-t border-[#e5e5e5] space-y-1">
           <Link
-            href="/talishouse"
+            href="/catalog"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 px-3 py-2 text-[#6e6e73] hover:text-[#111] text-xs font-medium transition-colors"

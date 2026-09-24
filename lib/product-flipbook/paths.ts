@@ -1,10 +1,10 @@
 import { normalizeAppPath } from "@/lib/admin-paths";
 
 /**
- * Product destination. `/catalog` is the old alias and redirects here.
- * These routes must not inherit Talishouse storefront chrome.
+ * Public Product destination: Keynote / top-bound T-All flipbook.
+ * `/catalog` is the Talishouse e-commerce product line (storefront) and keeps chrome.
  */
 export function isProductCataloguePath(pathname: string | null | undefined): boolean {
   const path = normalizeAppPath(pathname);
-  return path === "/catalogue" || path === "/catalog";
+  return path === "/catalogue";
 }

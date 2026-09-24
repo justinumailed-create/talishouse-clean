@@ -101,16 +101,16 @@ describe("T-All page manifest", () => {
 });
 
 describe("product catalogue route", () => {
-  it("treats /catalogue and /catalog as the product flipbook", () => {
+  it("treats /catalogue as the product flipbook; /catalog is the e-commerce storefront", () => {
     expect(isProductCataloguePath("/catalogue")).toBe(true);
     expect(isProductCataloguePath("/catalogue/")).toBe(true);
-    expect(isProductCataloguePath("/catalog")).toBe(true);
-    expect(isProductCataloguePath("/catalog?product=glasshouse")).toBe(true);
+    expect(isProductCataloguePath("/catalog")).toBe(false);
+    expect(isProductCataloguePath("/catalog?product=glasshouse")).toBe(false);
     expect(isProductCataloguePath("/talishouse")).toBe(false);
     expect(isProductCataloguePath("/catalogue/extra")).toBe(false);
   });
 
-  it("replaces the Talishouse product grid with the top-bound flipbook", () => {
+  it("keeps the flipbook on /catalogue and the e-commerce product line on /catalog", () => {
     const catalogue = readSource("app/catalogue/page.tsx");
     const catalog = readSource("app/catalog/page.tsx");
     const viewer = readSource("components/product-flipbook/TopBoundFlipbook.tsx");
@@ -120,8 +120,10 @@ describe("product catalogue route", () => {
     expect(catalogue).not.toContain("Glasshouse");
     expect(catalogue).not.toContain("$58.50");
     expect(catalogue).not.toContain("talishouse-400");
-    expect(catalog).toContain('redirect("/catalogue")');
-    expect(catalog).not.toContain("catalog-grid");
+    expect(catalog).not.toContain('redirect("/catalogue")');
+    expect(catalog).toContain("catalog-grid");
+    expect(catalog).toContain("Glasshouse");
+    expect(catalog).not.toContain("TopBoundFlipbook");
     expect(viewer).toContain('data-binding="top"');
     expect(viewer).not.toContain("PRODUCT_FLIPBOOK_ASSET_TODO");
     expect(viewer).not.toContain("product-flipbook__todo");
