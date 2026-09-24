@@ -190,14 +190,7 @@ export async function publishedMapSiteMetadata(mapsite: MapSiteView) {
   const layoutData = buildMapSiteLayoutData(mapsite);
   const slug = (layoutData.slug || mapsite.fastCode).trim().toLowerCase();
   const code = layoutData.fastCode.toUpperCase();
-  const ogImage = await resolveMapSiteOgImage(mapsite.fastCode, {
-    fallbackImageUrls: [
-      mapsite.ogImageUrl,
-      mapsite.headerImageUrl,
-      ...(mapsite.galleryImages ?? []),
-      layoutData.overlayImageUrl,
-    ],
-  });
+  const ogImage = resolveMapSiteOgImage(mapsite.fastCode);
   const copy = mapsiteRealtimeSeoCopy({
     fastCode: mapsite.fastCode,
     propertyTitle: layoutData.propertyTitle,

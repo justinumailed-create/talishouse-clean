@@ -8,6 +8,11 @@ import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-pa
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { isDemonstrationCatalogBook } from "@/lib/talisbooks/library/demonstration-catalog";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
+import { talisbooksViewerShareOgPath } from "@/lib/share/og-card";
+import {
+  mapsiteOgMetadataImage,
+  toAbsoluteHttpsOgUrl,
+} from "@/lib/talispros/mapsite-og-image";
 import { createMetadata } from "@/lib/seo";
 
 interface TalisBooksViewerSlugPageProps {
@@ -26,7 +31,10 @@ export async function generateMetadata({
       description:
         "Explore Talisbooks™ — open the sample lookbook. Mapsite™ pins your place on the map so buyers and partners can find your story.",
       path: `${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`,
-      image: false,
+      image: mapsiteOgMetadataImage(
+        toAbsoluteHttpsOgUrl(talisbooksViewerShareOgPath(PINNED_TALISBOOK_SLUG)),
+        "Explore Talisbooks™",
+      ),
     });
   }
 
@@ -47,7 +55,10 @@ export async function generateMetadata({
       book.subtitle?.trim() ||
       "Read this Talisbook™ digital lookbook in the Talisbooks™ viewer.",
     path: `${TALISBOOKS_ROUTES.VIEWER}/${book.slug}`,
-    image: false,
+    image: mapsiteOgMetadataImage(
+      toAbsoluteHttpsOgUrl(talisbooksViewerShareOgPath(book.slug)),
+      book.title,
+    ),
   });
 }
 

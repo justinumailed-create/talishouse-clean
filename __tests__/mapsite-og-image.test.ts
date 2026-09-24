@@ -6,13 +6,15 @@ import {
 } from "../lib/talisbooks/parting-shot";
 import { RM22_DESIGN_COMPS } from "../lib/talisbooks/rm22-template";
 import { ebookPageMediaFromRow } from "../lib/talisbooks/mapsite-ebook-service";
+import { talisbooksViewerShareOgPath } from "../lib/share/og-card";
 import {
   isLargeBrandLogoUrl,
   isUsableMapSiteOgImage,
-  MAPSITE_OG_BRAND_MARK,
   mapsiteOgMetadataImage,
   mapsiteRealtimeSeoCopy,
-  selectMapSiteOgImageUrl,
+  resolveMapSiteOgImage,
+  selectMapsiteScenicBackgroundUrl,
+  selectViewerPartingShotUrl,
   toAbsoluteHttpsOgUrl,
 } from "../lib/talispros/mapsite-og-image";
 import { createMetadata } from "../lib/seo";
@@ -186,17 +188,17 @@ describe("ebookPageMediaFromRow", () => {
   });
 });
 
-describe("Mapsite™ OG image selection", () => {
-  it("never uses the large Talispros™ poster or /logo.png", () => {
+describe("Mapsite™ and viewer share image selection", () => {
+  it("never uses the large Talispros™ poster or /logo.png as the scenic layer", () => {
     expect(isLargeBrandLogoUrl("/seo/talispros-og.jpg")).toBe(true);
     expect(isLargeBrandLogoUrl("/logo.png")).toBe(true);
     expect(isLargeBrandLogoUrl("/api/og/talispros")).toBe(true);
     expect(isUsableMapSiteOgImage("/seo/talispros-og.jpg")).toBe(false);
     expect(
-      selectMapSiteOgImageUrl({
+      selectMapsiteScenicBackgroundUrl({
         fallbackImageUrls: ["/seo/talispros-og.jpg", "/logo.png"],
       }),
-    ).toBe(MAPSITE_OG_BRAND_MARK);
+    ).toBeNull();
   });
 
   it("allows LRG1 gallery frames as real listing images", () => {
@@ -205,7 +207,7 @@ describe("Mapsite™ OG image selection", () => {
     );
     expect(isUsableMapSiteOgImage("/images/glasshouse/hero.png")).toBe(false);
     expect(
-      selectMapSiteOgImageUrl({
+      selectMapsiteScenicBackgroundUrl({
         fallbackImageUrls: ["/images/mapsites/lrg1-gallery/02.png"],
       }),
     ).toBe("/images/mapsites/lrg1-gallery/02.png");
@@ -213,17 +215,16 @@ describe("Mapsite™ OG image selection", () => {
 
   it("prefers the linked ebook parting shot over a mapsite pin photo", () => {
     expect(
-      selectMapSiteOgImageUrl({
+      selectMapsiteScenicBackgroundUrl({
         pages: lg02Pages,
-        coverImageUrl: LG02_COVER,
-        fallbackImageUrls: [PIN_PHOTO, "/seo/talispros-og.jpg"],
+        fallbackImageUrls: [PIN_PHOTO, "/seo/talispros-og.jpg", LG02_COVER],
       }),
     ).toBe(LG02_TREE);
   });
 
   it("falls back to a mapsite pin photo when the outro is still the lime template", () => {
     expect(
-      selectMapSiteOgImageUrl({
+      selectMapsiteScenicBackgroundUrl({
         pages: [
           page({
             pageNumber: 20,
@@ -237,14 +238,31 @@ describe("Mapsite™ OG image selection", () => {
     ).toBe(PIN_PHOTO);
   });
 
-  it("falls back to the ebook cover, then a small brand mark", () => {
+  it("does not use the ebook cover when no parting shot or listing photo exists", () => {
     expect(
-      selectMapSiteOgImageUrl({
-        coverImageUrl: LG02_COVER,
-        fallbackImageUrls: ["/logo.png"],
+      selectMapsiteScenicBackgroundUrl({
+        pages: [
+          page({
+            pageNumber: 1,
+            pageRole: "cover",
+            layout: "cover",
+            heroImageUrl: LG02_COVER,
+          }),
+        ],
       }),
-    ).toBe(LG02_COVER);
-    expect(selectMapSiteOgImageUrl({})).toBe(MAPSITE_OG_BRAND_MARK);
+    ).toBeNull();
+    expect(selectMapsiteScenicBackgroundUrl({})).toBeNull();
+    expect(selectViewerPartingShotUrl(lg02Pages)).toBe(LG02_TREE);
+    expect(
+      selectViewerPartingShotUrl([
+        page({
+          pageNumber: 1,
+          pageRole: "cover",
+          layout: "cover",
+          heroImageUrl: LG02_COVER,
+        }),
+      ]),
+    ).toBeNull();
   });
 
   it("builds the live WhatsApp title and description Mapsite™ metadata uses", () => {
@@ -270,30 +288,47 @@ describe("Mapsite™ OG image selection", () => {
     });
   });
 
-  it("emits absolute HTTPS Open Graph URLs for WhatsApp", () => {
+  it("emits the composed landscape share-card URL for Mapsite™ and viewer links", () => {
     expect(toAbsoluteHttpsOgUrl(LG02_TREE)).toBe(LG02_TREE);
     expect(toAbsoluteHttpsOgUrl("http://cdn.example/tree.webp")).toBe(
       "https://cdn.example/tree.webp",
     );
-    const image = mapsiteOgMetadataImage(LG02_TREE, "Mapsite™ LG02");
-    expect(image.url).toBe(LG02_TREE);
-    const meta = createMetadata({
-      title: "Mapsite™ LG02",
-      description: "Talispros™ Mapsite™ for FAST Code LG02.",
-      path: "/talispros/mapsite/root/lg02",
-      image,
+
+    const mapsiteImage = mapsiteOgMetadataImage(
+      resolveMapSiteOgImage("dc02"),
+      "Mapsite™ DC02",
+    );
+    expect(mapsiteImage).toEqual({
+      url: "https://www.talispros.com/api/og/mapsite/dc02",
+      width: 1200,
+      height: 630,
+      alt: "Mapsite™ DC02",
     });
-    expect(meta.openGraph?.images).toEqual([
-      {
-        url: LG02_TREE,
-        width: 1200,
-        height: 630,
-        alt: "Mapsite™ LG02",
-      },
-    ]);
+    expect(mapsiteImage.url).not.toContain(LG02_TREE);
+    expect(mapsiteImage.url).not.toContain("/logo.png");
+    expect(mapsiteImage.url).not.toContain("talispros-og");
+
+    const viewerUrl = toAbsoluteHttpsOgUrl(
+      talisbooksViewerShareOgPath("dc02-dc02-talisbook-kc9h"),
+    );
+    const viewerImage = mapsiteOgMetadataImage(viewerUrl, "Chaga Town");
+    expect(viewerImage).toEqual({
+      url: "https://www.talispros.com/api/og/talisbooks/dc02-dc02-talisbook-kc9h",
+      width: 1200,
+      height: 630,
+      alt: "Chaga Town",
+    });
+
+    const meta = createMetadata({
+      title: "Mapsite™ DC02",
+      description: "Talispros™ Mapsite™ for FAST Code DC02.",
+      path: "/talispros/mapsite/fsbos/dc02",
+      image: mapsiteImage,
+    });
+    expect(meta.openGraph?.images).toEqual([mapsiteImage]);
     expect(meta.twitter).toMatchObject({
       card: "summary_large_image",
-      images: [LG02_TREE],
+      images: [mapsiteImage.url],
     });
   });
 });
