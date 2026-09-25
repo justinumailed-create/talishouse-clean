@@ -9,10 +9,11 @@ import {
 
 export { ISOLATED_BOOKSHELF_PATH, ALLPINS_FAST_CODE };
 
+/** Claimed ALLPINS Mapsite™ — listings segment (same as viewer Back to Mapsite™). */
 export function allPinsClaimedHref(): string {
   return buildClaimedMapSitePath({
     fastCode: ALLPINS_FAST_CODE,
-    accountType: "brokers",
+    accountType: "listings",
   });
 }
 

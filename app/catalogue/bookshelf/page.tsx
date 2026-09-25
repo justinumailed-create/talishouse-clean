@@ -15,9 +15,9 @@ import { listIsolatedBookshelfBooks } from "@/lib/talisbooks/isolated-bookshelf-
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Isolated Bookshelf | T-All Catalogue",
+  title: "ALLPINS Talisbooks™ | Bookshelf",
   description:
-    "Admin-only isolated T-All bookshelf. Books are created through the self-serve ebook process.",
+    "Mapsite™-connected Talisbooks™ bookshelf for FAST Code ALLPINS. Admin create uses the self-serve ebook process.",
   robots: { index: false, follow: false },
 };
 

@@ -13,6 +13,12 @@ import {
   allPinsPublishedHref,
   ISOLATED_BOOKSHELF_PATH,
 } from "@/lib/talispros/allpins-mapsite-ui";
+import {
+  MAPSITE_PIN_DEFAULT_BORDER,
+  MAPSITE_PIN_DEFAULT_ICON,
+  resolveMapSitePinStyle,
+} from "@/lib/mapsite-pin-style";
+import MapSiteAllPinsPinCard from "./MapSiteAllPinsPinCard";
 import MapSiteAllPinsShowcase from "./MapSiteAllPinsShowcase";
 
 const FOCUS_GESTURE_GUARD_MS = 900;
@@ -28,21 +34,33 @@ export default function MapSiteAllPinsApplication({ aggregation }: Props) {
 
   const enginePins: MapEnginePin[] = useMemo(
     () =>
-      aggregation.pins.map((pin) => ({
-        id: pin.id,
-        latitude: pin.latitude,
-        longitude: pin.longitude,
-        color: "#0ea5e9",
-        featured: true,
-        metadata: {
-          icon: "dot",
-          whiteCenter: true,
-          pinSize: 52,
-          animated: false,
+      aggregation.pins.map((pin) => {
+        const savedPin = resolveMapSitePinStyle({
+          pinIcon: pin.pinIcon,
+          pinColor: pin.pinColor,
+          pinBorder: pin.pinBorder,
+          pinWhiteCenter: pin.whiteCenter,
+          pinAnimated: pin.pinAnimated,
+          pinCategoryBadge: pin.pinCategoryBadge,
+        });
+        return {
+          id: pin.id,
+          latitude: pin.latitude,
+          longitude: pin.longitude,
+          color: savedPin.pinColor,
           label: pin.fastCode.toUpperCase(),
-          fastCode: pin.fastCode,
-        },
-      })),
+          featured: true,
+          metadata: {
+            icon: savedPin.pinIcon || MAPSITE_PIN_DEFAULT_ICON,
+            border: savedPin.pinBorder || MAPSITE_PIN_DEFAULT_BORDER,
+            whiteCenter: savedPin.whiteCenter,
+            animated: savedPin.pinAnimated,
+            categoryBadge: savedPin.pinCategoryBadge,
+            label: pin.fastCode.toUpperCase(),
+            fastCode: pin.fastCode,
+          },
+        };
+      }),
     [aggregation.pins],
   );
 
@@ -160,11 +178,11 @@ function AllPinsChrome({
             FAST Code · ALLPINS
           </p>
           <h1 className="mt-1 text-[15px] font-semibold tracking-tight text-neutral-950">
-            Every Mapsite™ pin
+            Canadian Mapsite™ pins
           </h1>
           <p className="mt-1 text-[12px] leading-snug text-neutral-600">
             {aggregation.pins.length} live pin
-            {aggregation.pins.length === 1 ? "" : "s"} from existing Mapsites™.
+            {aggregation.pins.length === 1 ? "" : "s"} in Canada from existing Mapsites™.
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             <Link
@@ -191,6 +209,18 @@ function AllPinsChrome({
           setSelectedPinId(pinId);
         }}
       />
+
+      {selectedPinId
+        ? (() => {
+            const pin = aggregation.pins.find((p) => p.id === selectedPinId);
+            return pin ? (
+              <MapSiteAllPinsPinCard
+                pin={pin}
+                onClose={() => setSelectedPinId(null)}
+              />
+            ) : null;
+          })()
+        : null}
     </>
   );
 }

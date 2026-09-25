@@ -136,12 +136,47 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(location).toContain("viewerBackToMapsiteHref");
     expect(loadBook).toContain("isolatedBookshelf: isIsolatedBookshelfBook");
     expect(shell).toContain("viewerBackToMapsiteHref(book)");
-    // Isolated shelf library already links ALLPINS Mapsite™ (not admin123).
+    // Isolated shelf uses the normal Mapsite™-connected Talisbooks™ shell,
+    // linked to ALLPINS (not admin123 / product-catalogue chrome).
     const shelf = readFileSync(
       resolve("components/catalogue/IsolatedBookshelfView.tsx"),
       "utf8",
     );
     expect(shelf).toContain("allPinsClaimedHref");
+    expect(shelf).toContain("TalisBooksLibraryShell");
+    expect(shelf).toContain("ALLPINS_FAST_CODE");
+    expect(shelf).toContain("scopedToFastCode: true");
+    expect(shelf).not.toContain("Isolated Bookshelf");
+    expect(shelf).not.toContain("Admin-only shelf");
     expect(shelf).not.toContain("mapsiteBackFromScheduleHref");
+  });
+
+  it("ALLPINS aggregation is Canada-scoped with per-site pin style fields", () => {
+    const constants = readFileSync(
+      resolve("lib/talispros/allpins-mapsite-constants.ts"),
+      "utf8",
+    );
+    const mod = readFileSync(
+      resolve("lib/talispros/allpins-mapsite.ts"),
+      "utf8",
+    );
+    const app = readFileSync(
+      resolve("components/talispros/mapsite/MapSiteAllPinsApplication.tsx"),
+      "utf8",
+    );
+    const card = readFileSync(
+      resolve("components/talispros/mapsite/MapSiteAllPinsPinCard.tsx"),
+      "utf8",
+    );
+    expect(constants).toContain("CANADA_BOUNDS");
+    expect(constants).toContain("isAllPinsInCanadaScope");
+    expect(mod).toContain("isAllPinsInCanadaScope");
+    expect(mod).toContain("getMapSiteTalisMapPinStyle");
+    expect(mod).toContain("pinColor");
+    expect(app).toContain("resolveMapSitePinStyle");
+    expect(app).not.toContain('icon: "dot"');
+    expect(app).toContain("MapSiteAllPinsPinCard");
+    expect(card).toContain("allpins-pin-card");
+    expect(card).toContain("Open Mapsite™");
   });
 });

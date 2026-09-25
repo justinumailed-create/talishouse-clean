@@ -10,13 +10,21 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { ROUTES } from "@/lib/routes";
 import {
+  ALLPINS_CANADA_DEFAULT_VIEWPORT,
   ALLPINS_FAST_CODE,
   isAllPinsFastCode,
+  isAllPinsInCanadaScope,
 } from "@/lib/talispros/allpins-mapsite-constants";
 import {
   buildClaimedMapSitePath,
   publishedMapSitePath,
 } from "@/lib/talispros/mapsite-state";
+import type { MapSiteSavedPinStyle } from "@/lib/mapsite-pin-style";
+import {
+  MAPSITE_PIN_DEFAULT_COLOR,
+  resolveMapSitePinStyle,
+} from "@/lib/mapsite-pin-style";
+import { getMapSiteTalisMapPinStyle } from "@/lib/talismaps/map-service";
 
 export { ALLPINS_FAST_CODE, isAllPinsFastCode };
 
@@ -34,6 +42,13 @@ export type AllPinsShowcasePin = {
   bookHref: string | null;
   bookTitle: string | null;
   bookSlug: string | null;
+  /** Source Mapsite™ pin colour (talismaps / build request); defaults to Mapsite blue. */
+  pinColor: string;
+  pinIcon: string;
+  pinBorder: string;
+  whiteCenter: boolean;
+  pinAnimated: boolean;
+  pinCategoryBadge: string | null;
 };
 
 export type AllPinsAggregation = {
@@ -99,9 +114,23 @@ export async function listAllPinsAggregatedPins(): Promise<
     const code = row.fast_code!.trim().toLowerCase();
     if (!byCode.has(code)) byCode.set(code, row);
   }
-  const unique = [...byCode.values()];
+  const uniqueAll = [...byCode.values()];
+  /** Canada-only for now — see isAllPinsInCanadaScope / CANADA_BOUNDS. */
+  const unique = uniqueAll.filter((row) =>
+    isAllPinsInCanadaScope({
+      latitude: row.latitude as number,
+      longitude: row.longitude as number,
+      address: row.property_address,
+      label: row.property_title,
+    }),
+  );
   const codes = unique.map((row) => row.fast_code!.trim().toLowerCase());
   const mapsiteIds = unique.map((row) => row.id);
+
+  const pinStylesByMapsiteId = await loadAllPinsSourcePinStyles(
+    mapsiteIds,
+    codes,
+  );
 
   type BookRow = {
     id: string;
@@ -170,6 +199,7 @@ export async function listAllPinsAggregatedPins(): Promise<
       ? `${ROUTES.TALISBOOKS_VIEWER}/${book.slug}`
       : tebFromMapsite;
     const segment = accountTypeSegment(row.account_type);
+    const resolved = resolveMapSitePinStyle(pinStylesByMapsiteId.get(row.id));
     return {
       id: row.id,
       sourceMapsiteId: row.id,
@@ -190,8 +220,95 @@ export async function listAllPinsAggregatedPins(): Promise<
       bookHref,
       bookTitle: book?.title?.trim() || null,
       bookSlug: book?.slug || null,
+      pinColor: resolved.pinColor,
+      pinIcon: resolved.pinIcon,
+      pinBorder: resolved.pinBorder,
+      whiteCenter: resolved.whiteCenter,
+      pinAnimated: resolved.pinAnimated,
+      pinCategoryBadge: resolved.pinCategoryBadge,
     } satisfies AllPinsShowcasePin;
   });
+}
+
+
+/**
+ * Batch-load each source Mapsite™ pin style (talismaps settings / pin metadata,
+ * then build_requests future_pin_*). Same fields claimed Mapsites™ use.
+ */
+async function loadAllPinsSourcePinStyles(
+  mapsiteIds: string[],
+  codes: string[],
+): Promise<Map<string, MapSiteSavedPinStyle>> {
+  const byId = new Map<string, MapSiteSavedPinStyle>();
+  if (mapsiteIds.length === 0) return byId;
+
+  // Prefer parallel getMapSiteTalisMapPinStyle (same path as claimed Mapsite™).
+  const talisResults = await Promise.all(
+    mapsiteIds.map(async (id, index) => {
+      const style = await getMapSiteTalisMapPinStyle({
+        mapsiteId: id,
+        fastCode: codes[index] || null,
+      });
+      return [id, style] as const;
+    }),
+  );
+  for (const [id, style] of talisResults) {
+    if (style) byId.set(id, style);
+  }
+
+  // Fill gaps from build_requests (future_pin_color etc.).
+  const missingIds = mapsiteIds.filter((id) => !byId.has(id));
+  const missingCodes = codes.filter((_, i) => !byId.has(mapsiteIds[i]!));
+  if (!isSupabaseAdminConfigured()) return byId;
+  const supabase = getSupabaseAdmin();
+
+  if (missingIds.length > 0 || missingCodes.length > 0) {
+    const filters: string[] = [];
+    if (missingIds.length) {
+      filters.push(`linked_mapsite_id.in.(${missingIds.join(",")})`);
+    }
+    if (missingCodes.length) {
+      filters.push(
+        `requested_fast_code.in.(${missingCodes.map((c) => JSON.stringify(c)).join(",")})`,
+      );
+    }
+    const { data: builds } = await supabase
+      .from("build_requests")
+      .select(
+        "linked_mapsite_id, requested_fast_code, future_pin_color, future_pin_icon, future_pin_border, future_pin_white_center, future_pin_animated, future_pin_category_badge, updated_at",
+      )
+      .or(filters.join(","))
+      .order("updated_at", { ascending: false })
+      .limit(400);
+
+    const codeToId = new Map(
+      mapsiteIds.map((id, i) => [codes[i]!, id] as const),
+    );
+    for (const row of builds || []) {
+      const id =
+        (row.linked_mapsite_id as string | null) ||
+        codeToId.get(
+          (row.requested_fast_code || "").trim().toLowerCase(),
+        ) ||
+        null;
+      if (!id || byId.has(id)) continue;
+      const color = (row.future_pin_color as string | null)?.trim() || null;
+      const icon = (row.future_pin_icon as string | null)?.trim() || null;
+      if (!color && !icon) continue;
+      byId.set(id, {
+        pinColor: color,
+        pinIcon: icon === "none" || icon === "dot" ? "none" : icon,
+        pinBorder: (row.future_pin_border as string | null)?.trim() || null,
+        pinWhiteCenter: Boolean(row.future_pin_white_center),
+        pinAnimated: Boolean(row.future_pin_animated),
+        pinCategoryBadge:
+          (row.future_pin_category_badge as string | null)?.trim() || null,
+      });
+    }
+  }
+
+  void MAPSITE_PIN_DEFAULT_COLOR; // documented default via resolveMapSitePinStyle
+  return byId;
 }
 
 function computeViewport(pins: AllPinsShowcasePin[]): {
@@ -199,7 +316,10 @@ function computeViewport(pins: AllPinsShowcasePin[]): {
   zoom: number;
 } {
   if (pins.length === 0) {
-    return { center: { latitude: 45.0, longitude: -63.0 }, zoom: 4 };
+    return {
+      center: { ...ALLPINS_CANADA_DEFAULT_VIEWPORT.center },
+      zoom: ALLPINS_CANADA_DEFAULT_VIEWPORT.zoom,
+    };
   }
   if (pins.length === 1) {
     return {
@@ -266,7 +386,7 @@ export async function ensureAllPinsMapSite(): Promise<AllPinsAggregation | null>
       property_title: "ALLPINS — Every Mapsite™",
       property_address: "Aggregated live Mapsite™ pins",
       property_description:
-        "Showcase map of every Mapsite™ pin. Open a pin for the book and Mapsite™ demo.",
+        "Canada showcase of Mapsite™ pins. Open a pin for the book and Mapsite™ demo.",
       latitude: viewport.center.latitude,
       longitude: viewport.center.longitude,
       map_zoom: viewport.zoom,
@@ -302,7 +422,7 @@ export async function ensureAllPinsMapSite(): Promise<AllPinsAggregation | null>
         property_title: "ALLPINS — Every Mapsite™",
         property_address: "Aggregated live Mapsite™ pins",
         property_description:
-          "Showcase map of every Mapsite™ pin. Open a pin for the book and Mapsite™ demo.",
+          "Canada showcase of Mapsite™ pins. Open a pin for the book and Mapsite™ demo.",
         latitude: viewport.center.latitude,
         longitude: viewport.center.longitude,
         map_zoom: viewport.zoom,
@@ -391,7 +511,7 @@ export async function ensureAllPinsMapSite(): Promise<AllPinsAggregation | null>
 export function allPinsClaimedHref(): string {
   return buildClaimedMapSitePath({
     fastCode: ALLPINS_FAST_CODE,
-    accountType: "brokers",
+    accountType: "listings",
   });
 }
 
