@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import MapEngineCanvas from "@/components/talismaps/map-engine/MapEngineCanvas";
 import {
   MapEngineProvider,
@@ -9,10 +8,6 @@ import {
 } from "@/components/talismaps/map-engine/MapEngineProvider";
 import type { MapEnginePin } from "@/lib/talismaps/map-engine";
 import type { AllPinsAggregation } from "@/lib/talispros/allpins-mapsite";
-import {
-  allPinsPublishedHref,
-  ISOLATED_BOOKSHELF_PATH,
-} from "@/lib/talispros/allpins-mapsite-ui";
 import {
   MAPSITE_PIN_DEFAULT_BORDER,
   MAPSITE_PIN_DEFAULT_ICON,
@@ -171,35 +166,6 @@ function AllPinsChrome({
       <div className="absolute inset-0">
         <MapEngineCanvas className="h-full w-full" />
       </div>
-
-      <header className="pointer-events-none absolute right-3 top-3 z-30 flex max-w-[min(92vw,20rem)] flex-col items-end gap-2 sm:right-4 sm:top-4">
-        <div className="pointer-events-auto rounded-2xl bg-white/90 px-4 py-3 shadow-lg ring-1 ring-black/5 backdrop-blur-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
-            FAST Code · ALLPINS
-          </p>
-          <h1 className="mt-1 text-[15px] font-semibold tracking-tight text-neutral-950">
-            Canadian Mapsite™ pins
-          </h1>
-          <p className="mt-1 text-[12px] leading-snug text-neutral-600">
-            {aggregation.pins.length} live pin
-            {aggregation.pins.length === 1 ? "" : "s"} in Canada from existing Mapsites™.
-          </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            <Link
-              href={allPinsPublishedHref()}
-              className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-[11px] font-medium text-neutral-800 hover:bg-neutral-50"
-            >
-              Published URL
-            </Link>
-            <Link
-              href={ISOLATED_BOOKSHELF_PATH}
-              className="rounded-lg bg-neutral-950 px-2.5 py-1.5 text-[11px] font-medium text-white hover:bg-neutral-800"
-            >
-              Isolated shelf
-            </Link>
-          </div>
-        </div>
-      </header>
 
       <MapSiteAllPinsShowcase
         aggregation={aggregation}

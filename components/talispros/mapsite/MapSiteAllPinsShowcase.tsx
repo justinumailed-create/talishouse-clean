@@ -1,10 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type {
   AllPinsAggregation,
   AllPinsShowcasePin,
 } from "@/lib/talispros/allpins-mapsite";
+import {
+  allPinsPublishedHref,
+  ISOLATED_BOOKSHELF_PATH,
+} from "@/lib/talispros/allpins-mapsite-ui";
 
 type Props = {
   aggregation: AllPinsAggregation;
@@ -19,21 +24,94 @@ export default function MapSiteAllPinsShowcase({
 }: Props) {
   const selected =
     aggregation.pins.find((pin) => pin.id === selectedPinId) ?? null;
+  const [mobileOpen, setMobileOpen] = useState(true);
+  const pinCount = aggregation.pins.length;
+  const pinCountLabel = `${pinCount} live pin${pinCount === 1 ? "" : "s"} in Canada from existing Mapsites™.`;
 
   return (
-    <aside className="pointer-events-none absolute bottom-3 left-3 top-3 z-20 flex w-[min(92vw,22rem)] flex-col gap-3 sm:left-4 sm:top-4 sm:bottom-4">
-      <div className="pointer-events-auto flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white/90 shadow-[0_12px_40px_rgba(0,0,0,0.22)] ring-1 ring-black/5 backdrop-blur-sm">
+    <aside
+      className="pointer-events-none absolute bottom-3 left-3 top-3 z-20 flex w-[min(92vw,22rem)] flex-col gap-2 sm:left-4 sm:top-4 sm:bottom-4"
+      data-testid="allpins-left-rail"
+    >
+      {!mobileOpen ? (
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          className="pointer-events-auto flex items-center gap-2 rounded-2xl bg-white/90 px-3.5 py-2.5 text-left shadow-[0_12px_40px_rgba(0,0,0,0.22)] ring-1 ring-black/5 backdrop-blur-sm md:hidden"
+          data-testid="allpins-rail-expand"
+          aria-expanded={false}
+          aria-controls="allpins-rail-panel"
+        >
+          <span className="min-w-0 flex-1">
+            <span className="block text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
+              FAST Code · ALLPINS
+            </span>
+            <span className="mt-0.5 block truncate text-[14px] font-semibold tracking-tight text-neutral-950">
+              Talispros™ ALL-PINs
+            </span>
+          </span>
+          <span className="shrink-0 rounded-lg bg-neutral-950 px-2.5 py-1.5 text-[11px] font-medium text-white">
+            Show list
+          </span>
+        </button>
+      ) : null}
+
+      <div
+        id="allpins-rail-panel"
+        className={`pointer-events-auto min-h-0 flex-1 flex-col overflow-hidden rounded-2xl bg-white/90 shadow-[0_12px_40px_rgba(0,0,0,0.22)] ring-1 ring-black/5 backdrop-blur-sm ${
+          mobileOpen ? "flex" : "hidden md:flex"
+        }`}
+        data-testid="allpins-rail-panel"
+      >
         <div className="shrink-0 border-b border-neutral-200/80 px-4 py-3">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
-            ALLPINS · Showcase
-          </p>
-          <h2 className="mt-1 text-[15px] font-semibold tracking-tight text-neutral-950">
-            Books & Mapsites™
-          </h2>
-          <p className="mt-1 text-[12px] leading-snug text-neutral-600">
-            Pins use each Mapsite™&apos;s live coordinates. Open a card for the
-            book viewer or Mapsite™ demo.
-          </p>
+          <div className="flex items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">
+                FAST Code · ALLPINS
+              </p>
+              <h1 className="mt-1 text-[15px] font-semibold tracking-tight text-neutral-950">
+                Talispros™ ALL-PINs
+              </h1>
+              <p className="mt-1 text-[12px] leading-snug text-neutral-600">
+                {pinCountLabel}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileOpen(false)}
+              className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 ring-1 ring-neutral-200/80 transition hover:bg-neutral-200 md:hidden"
+              data-testid="allpins-rail-collapse"
+              aria-expanded={true}
+              aria-controls="allpins-rail-panel"
+              aria-label="Hide pin list and view map"
+              title="View map"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                aria-hidden
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link
+              href={allPinsPublishedHref()}
+              className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-[11px] font-medium text-neutral-800 hover:bg-neutral-50"
+            >
+              Published URL
+            </Link>
+            <Link
+              href={ISOLATED_BOOKSHELF_PATH}
+              className="rounded-lg bg-neutral-950 px-2.5 py-1.5 text-[11px] font-medium text-white hover:bg-neutral-800"
+            >
+              Isolated shelf
+            </Link>
+          </div>
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3">

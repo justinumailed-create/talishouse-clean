@@ -208,6 +208,29 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(card).toContain("allpins-pin-card");
     expect(card).toContain("Open Mapsite™");
   });
+
+  it("ALLPINS left rail uses Talispros™ ALL-PINs title with mobile collapse", () => {
+    const app = readFileSync(
+      resolve("components/talispros/mapsite/MapSiteAllPinsApplication.tsx"),
+      "utf8",
+    );
+    const showcase = readFileSync(
+      resolve("components/talispros/mapsite/MapSiteAllPinsShowcase.tsx"),
+      "utf8",
+    );
+    expect(app).not.toContain("Canadian Mapsite™ pins");
+    expect(app).not.toContain("absolute right-3 top-3");
+    expect(showcase).toContain("Talispros™ ALL-PINs");
+    expect(showcase).toContain("allpins-left-rail");
+    expect(showcase).toContain("allpins-rail-collapse");
+    expect(showcase).toContain("allpins-rail-expand");
+    expect(showcase).toContain("Published URL");
+    expect(showcase).toContain("Isolated shelf");
+    expect(showcase).toContain("allPinsPublishedHref");
+    expect(showcase).toContain("ISOLATED_BOOKSHELF_PATH");
+    expect(showcase).toContain("md:hidden");
+    expect(showcase).toContain("hidden md:flex");
+  });
 });
 
 describe("synthetic FAST-code Talisbook titles", () => {
