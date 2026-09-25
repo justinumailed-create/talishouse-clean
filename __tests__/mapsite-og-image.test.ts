@@ -16,6 +16,7 @@ import {
   resolveMapSiteOgImage,
   selectMapsiteScenicBackgroundUrl,
   selectViewerPartingShotUrl,
+  resolveViewerShareCoverUrl,
   toAbsoluteHttpsOgUrl,
   viewerRealtimeSeoCopy,
   bookshelfOgMetadataImage,
@@ -393,4 +394,43 @@ describe("Mapsite™ and viewer share image selection", () => {
       images: [mapsiteImage.url],
     });
   });
+
+  it("prefers the viewer front cover over parting-shot art for share images", () => {
+    expect(
+      resolveViewerShareCoverUrl({
+        frontCoverImageUrl: LG02_COVER,
+        coverPageHeroImageUrl: LG02_TREE,
+      }),
+    ).toBe(toAbsoluteHttpsOgUrl(LG02_COVER));
+    expect(
+      resolveViewerShareCoverUrl({
+        frontCoverImageUrl: null,
+        coverPageHeroImageUrl: LG02_COVER,
+      }),
+    ).toBe(toAbsoluteHttpsOgUrl(LG02_COVER));
+    expect(
+      resolveViewerShareCoverUrl({
+        frontCoverImageUrl: "/relative/cover.jpg",
+      }),
+    ).toMatch(/^https:\/\//);
+    expect(
+      resolveViewerShareCoverUrl({
+        frontCoverImageUrl: null,
+        coverPageHeroImageUrl: null,
+      }),
+    ).toBeNull();
+  });
+
+  it("uses the book meta description when present instead of marketing filler", () => {
+    expect(
+      viewerRealtimeSeoCopy({
+        title: "Macs Road Lookbook",
+        subtitle: "160 Macs Rd",
+        description: "Oceanfront acreage with a quiet cove and morning light.",
+        address: "160 Macs Rd",
+        fastCode: "rm22",
+      }).description,
+    ).toBe("Oceanfront acreage with a quiet cove and morning light.");
+  });
+
 });

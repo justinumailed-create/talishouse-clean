@@ -120,6 +120,22 @@ export function selectViewerPartingShotUrl(
   return null;
 }
 
+/**
+ * Viewer share image: prefer the book front cover (absolute URL for crawlers).
+ * Parting-shot OG cards remain available via talisbooksViewerShareOgPath for
+ * other surfaces; viewer page metadata must not use them when a cover exists.
+ */
+export function resolveViewerShareCoverUrl(input: {
+  frontCoverImageUrl?: string | null;
+  coverPageHeroImageUrl?: string | null;
+}): string | null {
+  const cover = input.frontCoverImageUrl?.trim() || "";
+  if (isUsableMapSiteOgImage(cover)) return toAbsoluteHttpsOgUrl(cover);
+  const hero = input.coverPageHeroImageUrl?.trim() || "";
+  if (isUsableMapSiteOgImage(hero)) return toAbsoluteHttpsOgUrl(hero);
+  return null;
+}
+
 export function mapsiteOgMetadataImage(
   url: string,
   alt: string,

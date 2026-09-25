@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ADMIN_CONSOLE_METADATA, ADMIN_LOGIN_METADATA } from "../lib/admin-seo";
 import { createMetadata } from "../lib/seo";
@@ -37,5 +39,20 @@ describe("createMetadata", () => {
     });
     expect(meta.twitter && "images" in meta.twitter ? meta.twitter.images : undefined).toBeUndefined();
     expect(meta.alternates?.canonical).toBe("https://www.talishouse.com/mapsite/al02");
+  });
+});
+
+describe("Talisbooks™ viewer share metadata", () => {
+  it("points og:image at the front cover and description at the book meta description", () => {
+    const page = readFileSync(
+      resolve("app/talisbooks/viewer/[slug]/page.tsx"),
+      "utf8",
+    );
+    expect(page).toContain("resolveViewerShareCoverUrl");
+    expect(page).toContain("description: book.description");
+    expect(page).toContain("frontCoverImageUrl: book.frontCoverImageUrl");
+    // Parting-shot OG path stays as fallback only.
+    expect(page).toContain("talisbooksViewerShareOgPath");
+    expect(page).toMatch(/coverUrl\s*\?[\s\S]*mapsiteOgMetadataImage\(coverUrl/);
   });
 });

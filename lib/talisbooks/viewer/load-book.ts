@@ -326,6 +326,15 @@ export async function getViewerBookBySlug(
     isolatedBookshelf: isIsolatedBookshelfBook({ metadata }),
     title: book.title,
     subtitle: book.subtitle,
+    description:
+      (typeof metadata.metaDescription === "string" && metadata.metaDescription.trim()
+        ? metadata.metaDescription.trim()
+        : null) ||
+      (typeof metadata.seoDescription === "string" && metadata.seoDescription.trim()
+        ? metadata.seoDescription.trim()
+        : null) ||
+      book.description?.trim() ||
+      undefined,
     frontCoverImageUrl: coverImageUrl || undefined,
     backCoverImageUrl: artBackCoverUrl || undefined,
     coverSpreadOpening,

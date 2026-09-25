@@ -32,6 +32,8 @@ export interface TalisBooksViewerPage {
   pageRole: TalisBooksPageRole;
   title: string;
   subtitle?: string;
+  /** Book meta / SEO description for share cards and <meta name="description">. */
+  description?: string;
   body?: string;
   heroImageUrl?: string;
   /**
