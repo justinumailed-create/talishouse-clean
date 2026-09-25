@@ -18,6 +18,9 @@ import {
   selectViewerPartingShotUrl,
   toAbsoluteHttpsOgUrl,
   viewerRealtimeSeoCopy,
+  bookshelfOgMetadataImage,
+  bookshelfSeoCopy,
+  resolveBookshelfOgImage,
 } from "../lib/talispros/mapsite-og-image";
 import { createMetadata } from "../lib/seo";
 
@@ -332,6 +335,19 @@ describe("Mapsite™ and viewer share image selection", () => {
       title: "Chaga Town",
       description: "Ottawa, ON · Talisbook™ for FAST Code DC02",
     });
+  });
+
+
+  it("uses a dedicated portrait bookshelf OG URL, not ALLPINS Mapsite landscape", () => {
+    expect(bookshelfSeoCopy({ isolatedAllPins: true }).title).toContain("Bookshelf");
+    expect(resolveBookshelfOgImage()).toBe(
+      "https://www.talispros.com/api/og/bookshelf",
+    );
+    expect(resolveBookshelfOgImage()).not.toBe(resolveMapSiteOgImage("allpins"));
+    const image = bookshelfOgMetadataImage("Bookshelf");
+    expect(image.width).toBe(1080);
+    expect(image.height).toBe(1350);
+    expect(image.url).toContain("/api/og/bookshelf");
   });
 
   it("emits the composed landscape share-card URL for Mapsite™ and viewer links", () => {

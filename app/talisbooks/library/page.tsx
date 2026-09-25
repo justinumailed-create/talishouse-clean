@@ -9,6 +9,9 @@ import {
 } from "@/lib/talisbooks/library";
 import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
 import { createMetadata } from "@/lib/seo";
+import {
+  bookshelfOgMetadataImage,
+} from "@/lib/talispros/mapsite-og-image";
 import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
 import { ROUTES } from "@/lib/routes";
 
@@ -18,7 +21,7 @@ export const metadata: Metadata = createMetadata({
     "Public Talisbooks™ bookshelf of created FAST-linked lookbooks — search, sort, and open covers in the viewer.",
   path: "/talisbooks/library",
   private: true,
-  image: false,
+  image: bookshelfOgMetadataImage(`Library | ${TALISBOOKS_PRODUCT_NAME}`),
 });
 
 export const dynamic = "force-dynamic";

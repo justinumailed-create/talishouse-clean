@@ -4,6 +4,12 @@ import {
   type PartingShotPage,
 } from "@/lib/talisbooks/parting-shot";
 import { mapsiteShareOgPath } from "@/lib/share/og-card";
+import {
+  BOOKSHELF_OG_HEIGHT,
+  BOOKSHELF_OG_WIDTH,
+  bookshelfShareOgPath,
+} from "@/lib/share/bookshelf-og-card";
+import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
 import { isStockDemoListingPath } from "@/lib/talispros/mapsite-listing-media";
 import type { CreateMetadataImage } from "@/lib/seo";
 
@@ -190,6 +196,59 @@ export function viewerRealtimeSeoCopy(input: {
     desc = "Read this Talisbook™ digital lookbook in the Talisbooks™ viewer.";
   }
   return { title, description: desc };
+}
+
+
+/** Portrait bookshelf share-card metadata (not landscape Mapsite™ / viewer). */
+export function bookshelfOgMetadataImage(alt: string): CreateMetadataImage {
+  return {
+    url: toAbsoluteHttpsOgUrl(bookshelfShareOgPath()),
+    width: BOOKSHELF_OG_WIDTH,
+    height: BOOKSHELF_OG_HEIGHT,
+    alt,
+  };
+}
+
+/** Absolute URL of the composed portrait bookshelf share card. */
+export function resolveBookshelfOgImage(): string {
+  return toAbsoluteHttpsOgUrl(bookshelfShareOgPath());
+}
+
+/**
+ * SEO copy for Mapsite™-connected Talisbooks™ shelves (FAST TEB™ + isolated
+ * ALLPINS catalogue shelf). Distinct from ALLPINS Mapsite™ multi-pin listing copy.
+ */
+export function bookshelfSeoCopy(input: {
+  fastCode?: string | null;
+  place?: string | null;
+  isolatedAllPins?: boolean;
+}): { title: string; description: string } {
+  if (input.isolatedAllPins) {
+    return {
+      title: `ALLPINS ${TALISBOOKS_PRODUCT_NAME} · Bookshelf`,
+      description:
+        "Mapsite™-connected Talisbooks™ bookshelf for FAST Code ALLPINS. Open a cover to read books on the isolated shelf.",
+    };
+  }
+  const code = (input.fastCode || "").trim().toUpperCase();
+  const place = input.place?.trim() || "";
+  if (place) {
+    return {
+      title: `${TALISBOOKS_PRODUCT_NAME} · ${place}`,
+      description: `Talisbooks™ bookshelf for ${place} (FAST Code ${code}). Open a cover to read books connected to this Mapsite™ only.`,
+    };
+  }
+  if (code) {
+    return {
+      title: `${TALISBOOKS_PRODUCT_NAME} · ${code}`,
+      description: `Talisbooks™ bookshelf for FAST Code ${code}. Open a cover to read books connected to this Mapsite™ only.`,
+    };
+  }
+  return {
+    title: TALISBOOKS_PRODUCT_NAME,
+    description:
+      "Explore Talisbooks™ — browse digital lookbooks on the standing-book bookshelf.",
+  };
 }
 
 /** Absolute URL of the composed landscape Mapsite™ share card. */

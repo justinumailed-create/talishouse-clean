@@ -81,15 +81,17 @@ function buildIsolatedAllPinsBookshelf(
 /**
  * Isolated catalogue shelf — same Mapsite™-connected Talisbooks™ shelf UX
  * as `/talisbooks/fast/{code}`, scoped to ALLPINS. Admin-only create stays
- * available; the chrome matches a normal connected shelf (not product-catalogue
- * admin marketing copy).
+ * available when `canCreate`; the chrome matches a normal connected shelf.
  */
 export default function IsolatedBookshelfView({
   books,
+  canCreate = false,
 }: {
   books: IsolatedBookshelfBook[];
   /** Retained for callers; no longer shown in shelf chrome. */
   adminFastCode?: string;
+  /** Show the Create ebook control (Global Admin session only). */
+  canCreate?: boolean;
 }) {
   const bookshelf = buildIsolatedAllPinsBookshelf(books);
   const backHref = allPinsClaimedHref();
@@ -100,13 +102,15 @@ export default function IsolatedBookshelfView({
         bookshelf={bookshelf}
         backHref={backHref}
         headerExtra={
-          <Link
-            href={ISOLATED_BOOKSHELF_CREATE_PATH}
-            className="inline-flex flex-shrink-0 items-center justify-center rounded-xl bg-neutral-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-neutral-800"
-            data-testid="isolated-bookshelf-create"
-          >
-            Create ebook
-          </Link>
+          canCreate ? (
+            <Link
+              href={ISOLATED_BOOKSHELF_CREATE_PATH}
+              className="inline-flex flex-shrink-0 items-center justify-center rounded-xl bg-neutral-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-neutral-800"
+              data-testid="isolated-bookshelf-create"
+            >
+              Create ebook
+            </Link>
+          ) : null
         }
       />
     </div>

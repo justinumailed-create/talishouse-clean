@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import { getPublicTalisBooksBookshelf } from "@/lib/talisbooks/library";
-import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
 import { createMetadata } from "@/lib/seo";
 import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { loadMapsiteSeoFields } from "@/lib/talispros/load-mapsite-seo-fields";
+import {
+  bookshelfOgMetadataImage,
+  bookshelfSeoCopy,
+} from "@/lib/talispros/mapsite-og-image";
 
 export const dynamic = "force-dynamic";
 
@@ -23,28 +26,24 @@ export async function generateMetadata({
   const path = `/talisbooks/fast/${fastCode.trim().toLowerCase()}`;
 
   if (isAllPinsFastCode(fastCode)) {
+    const copy = bookshelfSeoCopy({ isolatedAllPins: true });
     return createMetadata({
-      title: `ALLPINS ${TALISBOOKS_PRODUCT_NAME} · Bookshelf`,
-      description:
-        "Mapsite™-connected Talisbooks™ bookshelf for FAST Code ALLPINS. Open a cover to read books on the isolated shelf.",
+      title: copy.title,
+      description: copy.description,
       path,
-      image: false,
+      image: bookshelfOgMetadataImage(copy.title),
     });
   }
 
   const fields = await loadMapsiteSeoFields(fastCode);
-  const place = fields?.propertyTitle?.trim() || fields?.propertyAddress?.trim();
-  const title = place
-    ? `${TALISBOOKS_PRODUCT_NAME} · ${place}`
-    : `${TALISBOOKS_PRODUCT_NAME} · ${code}`;
-  const description = place
-    ? `Talisbooks™ bookshelf for ${place} (FAST Code ${code}). Open a cover to read books connected to this Mapsite™ only.`
-    : `Talisbooks™ bookshelf for FAST Code ${code}. Open a cover to read books connected to this Mapsite™ only.`;
+  const place =
+    fields?.propertyTitle?.trim() || fields?.propertyAddress?.trim() || null;
+  const copy = bookshelfSeoCopy({ fastCode: code, place });
   return createMetadata({
-    title,
-    description,
+    title: copy.title,
+    description: copy.description,
     path,
-    image: false,
+    image: bookshelfOgMetadataImage(copy.title),
   });
 }
 

@@ -123,6 +123,25 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(page).toContain("MapSiteAllPinsApplication");
   });
 
+
+  it("catalogue bookshelf view is publicly shareable with portrait bookshelf OG", () => {
+    const page = readFileSync(
+      resolve("app/catalogue/bookshelf/page.tsx"),
+      "utf8",
+    );
+    expect(page).toContain("bookshelfOgMetadataImage");
+    expect(page).toContain("bookshelfSeoCopy");
+    expect(page).toContain("canCreate={Boolean(account)}");
+    expect(page).not.toContain("requireAdminPage");
+    expect(page).toContain("getAdminSessionAccount");
+    // Create path stays admin-gated.
+    const create = readFileSync(
+      resolve("app/catalogue/bookshelf/create/page.tsx"),
+      "utf8",
+    );
+    expect(create).toContain("requireAdminPage");
+  });
+
   it("viewer Back to Mapsite™ for isolated books uses ALLPINS, not admin FAST Code", () => {
     const location = readFileSync(
       resolve("lib/talisbooks/viewer/location.ts"),
@@ -153,6 +172,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(shelf).toContain("scopedToFastCode: true");
     expect(shelf).toContain("headerExtra");
     expect(shelf).toContain("isolated-bookshelf-create");
+    expect(shelf).toContain("canCreate");
     expect(shelf).toContain("displayShelfBookTitle");
     expect(shelf).not.toContain("absolute right-4 top-4");
     expect(shelf).not.toContain("Isolated Bookshelf");
