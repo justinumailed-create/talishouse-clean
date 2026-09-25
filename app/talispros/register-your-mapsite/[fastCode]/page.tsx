@@ -16,7 +16,7 @@ export async function generateMetadata({
   return createMetadata({
     title: `${MAPSITE_URL_GATE_HEADLINE} | Talispros™`,
     description:
-      "Enter the Global Admin PIN to open the listing URL submitted for this Mapsite™.",
+      "Generate a secure code for Admin Notifications, then enter it to open the listing/payment URL.",
     path: `/talispros/register-your-mapsite/${encodeURIComponent(fastCode)}`,
   });
 }

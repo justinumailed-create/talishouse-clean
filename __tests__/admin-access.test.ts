@@ -60,6 +60,7 @@ describe("admin nav", () => {
     const hrefs = getAdminNavItems("site-ops").map((item) => item.href);
     expect(hrefs).toEqual([
       "/admin/dashboard",
+      "/admin/notifications",
       "/admin/build-requests",
       "/admin/mapsites",
       "/admin/seo",
@@ -76,6 +77,7 @@ describe("admin nav", () => {
     const hrefs = getAdminNavItems("superadmin").map((item) => item.href);
     expect(hrefs).toEqual([
       "/admin/dashboard",
+      "/admin/notifications",
       "/admin/build-requests",
       "/admin/mapsites",
       "/admin/seo",
@@ -102,6 +104,7 @@ describe("admin nav", () => {
     expect(hrefs).not.toContain("/admin/applications");
     expect(hrefs).not.toContain("/admin/project-applications");
     expect(hrefs).not.toContain("/admin/platform-content");
+    expect(hrefs).toContain("/admin/notifications");
     expect(hrefs).toContain("/admin/fast-codes");
     expect(hrefs).toContain("/admin/build-requests");
     expect(hrefs).toContain("/admin/mapsites");

@@ -14,6 +14,7 @@ const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | nu
   { prefix: "/admin/talisbooks", scope: "talisbooks" },
   { prefix: "/admin/bookshelves", scope: "talisbooks" },
   { prefix: "/admin/products", scope: "platform-content" },
+  { prefix: "/admin/notifications", scope: "dashboard" },
   { prefix: "/admin/dashboard", scope: "dashboard" },
   { prefix: "/admin/associates", scope: "full-console" },
   { prefix: "/admin/talisbot", scope: "full-console" },

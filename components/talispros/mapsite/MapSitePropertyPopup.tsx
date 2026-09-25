@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
@@ -17,8 +18,9 @@ import { isClaimable } from "@/lib/talispros/mapsite-state";
 import { mapsiteScheduleHref } from "@/lib/mapsite-layout";
 import {
   listingResourceHref,
-  mapsiteUrlGateHref,
+  mapsiteHasGatedUrl,
 } from "@/lib/talispros/mapsite-url-gate";
+import MapSiteUrlGateDialog from "@/components/talispros/mapsite/MapSiteUrlGateDialog";
 import {
   capabilitiesForAccountType,
   type MapSiteCapabilityAccountType,
@@ -41,7 +43,9 @@ const RESOURCES: {
     key: "url",
     label: "URL",
     variant: "blue",
-    resolveHref: (site) => mapsiteUrlGateHref(site.fast_code, site.broker_url),
+    // Gated: presence of broker_url enables the button; click opens secure-code popup.
+    resolveHref: (site) =>
+      mapsiteHasGatedUrl(site.broker_url) ? "__url_gate__" : null,
   },
   {
     key: "mls",
@@ -77,10 +81,12 @@ function ResourceButton({
   href,
   label,
   variant,
+  onGateClick,
 }: {
   href: string | null;
   label: string;
   variant: "blue" | "gold";
+  onGateClick?: () => void;
 }) {
   const disabled = !href;
   const className = [
@@ -101,6 +107,19 @@ function ResourceButton({
       >
         {label}
       </span>
+    );
+  }
+
+  if (href === "__url_gate__" && onGateClick) {
+    return (
+      <button
+        type="button"
+        className={className}
+        aria-label={label}
+        onClick={onGateClick}
+      >
+        {label}
+      </button>
     );
   }
 
@@ -164,6 +183,7 @@ export default function MapSitePropertyPopup({
   compact = false,
   onClose,
 }: MapSitePropertyPopupProps) {
+  const [urlGateOpen, setUrlGateOpen] = useState(false);
   const claimable = isClaimable(mapsite.status);
   const showResourceButtons = showsPinResourceButtons(onboardingPhase);
   const capabilities = capabilitiesForAccountType(accountType);
@@ -303,6 +323,11 @@ export default function MapSitePropertyPopup({
                       href={resource.resolveHref(mapsite)}
                       label={resource.label}
                       variant={resource.variant}
+                      onGateClick={
+                        resource.key === "url"
+                          ? () => setUrlGateOpen(true)
+                          : undefined
+                      }
                     />
                   ))}
                 </div>
@@ -317,6 +342,14 @@ export default function MapSitePropertyPopup({
           aria-hidden
         />
       </div>
+
+      {fastCode ? (
+        <MapSiteUrlGateDialog
+          open={urlGateOpen}
+          fastCode={fastCode}
+          onClose={() => setUrlGateOpen(false)}
+        />
+      ) : null}
     </>
   );
 }

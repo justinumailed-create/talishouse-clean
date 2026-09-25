@@ -8,6 +8,7 @@ export type AdminNavItem = {
 /** Site-ops tools: Dashboard, build requests, Mapsites, SEO, bookshelves. */
 export const ADMIN_SITE_OPS_NAV: readonly AdminNavItem[] = [
   { href: "/admin/dashboard", label: "Dashboard" },
+  { href: "/admin/notifications", label: "Notifications" },
   { href: "/admin/build-requests", label: "Build requests" },
   { href: "/admin/mapsites", label: "Mapsites" },
   { href: "/admin/seo", label: "SEO" },
@@ -45,6 +46,10 @@ export function isAdminNavItemActive(href: string, pathname: string): boolean {
     ) {
       return true;
     }
+  }
+
+  if (href === "/admin/notifications" && pathname.startsWith("/admin/notifications")) {
+    return true;
   }
 
   if (href === "/admin/mapsites" && pathname.startsWith("/admin/mapsites/")) {
