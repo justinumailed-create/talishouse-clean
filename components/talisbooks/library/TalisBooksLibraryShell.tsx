@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowDownUp } from "lucide-react";
@@ -22,6 +22,7 @@ import {
 } from "@/lib/talisbooks/library/constants";
 import { partitionBookshelf } from "@/lib/talisbooks/library/partition";
 import { queryLibraryBooks } from "@/lib/talisbooks/library/query";
+import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import type {
   TalisBooksBookshelf,
   TalisBooksLibraryBook,
@@ -32,6 +33,8 @@ interface TalisBooksLibraryShellProps {
   bookshelf: TalisBooksBookshelf;
   canDelete?: boolean;
   backHref?: string;
+  /** Extra controls in the topbar actions row (e.g. admin Create ebook). */
+  headerExtra?: ReactNode;
 }
 
 function chunkRows<T>(items: T[], columns: number): T[][] {
@@ -95,6 +98,7 @@ export default function TalisBooksLibraryShell({
   bookshelf,
   canDelete = false,
   backHref,
+  headerExtra,
 }: TalisBooksLibraryShellProps) {
   const router = useRouter();
   const [sort, setSort] = useState<TalisBooksLibrarySort>("published_desc");
@@ -164,7 +168,7 @@ export default function TalisBooksLibraryShell({
     canDelete,
     deletingId,
     onDelete: async (book: TalisBooksLibraryBook) => {
-      const title = book.title.trim() || "this ebook";
+      const title = displayShelfBookTitle(book.title) || "this ebook";
       if (
         !window.confirm(
           `Delete “${title}”? This removes it from the shelf and cannot be undone.`,
@@ -243,6 +247,7 @@ export default function TalisBooksLibraryShell({
               </span>
             </div>
           ) : null}
+          {headerExtra}
           <Link href={mapsiteHref} className="talisbooks-library__back">
             Back to Mapsite™
           </Link>

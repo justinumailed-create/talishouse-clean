@@ -14,6 +14,11 @@ import {
   withIsolatedBookshelfMetadata,
 } from "../lib/talisbooks/isolated-bookshelf";
 import { buildIsolatedBookshelfOnboardingContext } from "../lib/talispros/resolve-onboarding-from-request";
+import {
+  displayShelfBookTitle,
+  isSyntheticFastCodeTalisbookTitle,
+  resolvePersistedBookTitle,
+} from "../lib/talisbooks/book-title";
 
 describe("isolated catalogue bookshelf", () => {
   it("tags and detects isolated bookshelf books", () => {
@@ -146,6 +151,10 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(shelf).toContain("TalisBooksLibraryShell");
     expect(shelf).toContain("ALLPINS_FAST_CODE");
     expect(shelf).toContain("scopedToFastCode: true");
+    expect(shelf).toContain("headerExtra");
+    expect(shelf).toContain("isolated-bookshelf-create");
+    expect(shelf).toContain("displayShelfBookTitle");
+    expect(shelf).not.toContain("absolute right-4 top-4");
     expect(shelf).not.toContain("Isolated Bookshelf");
     expect(shelf).not.toContain("Admin-only shelf");
     expect(shelf).not.toContain("mapsiteBackFromScheduleHref");
@@ -178,5 +187,49 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(app).toContain("MapSiteAllPinsPinCard");
     expect(card).toContain("allpins-pin-card");
     expect(card).toContain("Open Mapsite™");
+  });
+});
+
+describe("synthetic FAST-code Talisbook titles", () => {
+  it("detects auto-generated (CODE) Talisbook titles", () => {
+    expect(isSyntheticFastCodeTalisbookTitle("ALLPINS Talisbook™")).toBe(true);
+    expect(isSyntheticFastCodeTalisbookTitle("allpins Talisbook")).toBe(true);
+    expect(isSyntheticFastCodeTalisbookTitle("(allpins) Talisbook")).toBe(true);
+    expect(isSyntheticFastCodeTalisbookTitle("RM22 Talisbook™")).toBe(true);
+    expect(isSyntheticFastCodeTalisbookTitle("Waterfront Estate")).toBe(false);
+    expect(isSyntheticFastCodeTalisbookTitle("")).toBe(false);
+  });
+
+  it("hides synthetic titles on the shelf and never invents them on persist", () => {
+    expect(displayShelfBookTitle("ALLPINS Talisbook™")).toBe("");
+    expect(displayShelfBookTitle("Lake House Lookbook")).toBe("Lake House Lookbook");
+    expect(resolvePersistedBookTitle("")).toBe("");
+    expect(resolvePersistedBookTitle("  My Title  ")).toBe("My Title");
+  });
+
+  it("create/generate paths no longer default to CODE Talisbook™", () => {
+    const pipeline = readFileSync(
+      resolve("lib/talispros/ebook-generation-pipeline.ts"),
+      "utf8",
+    );
+    const autoDraft = readFileSync(
+      resolve("lib/talisbooks/auto-draft-ebook.ts"),
+      "utf8",
+    );
+    const client = readFileSync(
+      resolve("components/talispros/EbookGenerateClient.tsx"),
+      "utf8",
+    );
+    const shell = readFileSync(
+      resolve("components/talisbooks/library/TalisBooksLibraryShell.tsx"),
+      "utf8",
+    );
+    expect(pipeline).toContain("resolvePersistedBookTitle");
+    expect(autoDraft).toContain("resolvePersistedBookTitle");
+    expect(client).toContain("resolvePersistedBookTitle");
+    expect(pipeline).not.toContain("Talisbook™`");
+    expect(autoDraft).not.toContain("Talisbook™`");
+    expect(client).not.toContain("Talisbook™`");
+    expect(shell).toContain("headerExtra");
   });
 });

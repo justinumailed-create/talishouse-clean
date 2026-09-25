@@ -4498,8 +4498,11 @@ body.mapsite-gallery-open [data-paypal-button] {
 .talisbooks-library__header-actions {
   display: flex;
   flex-shrink: 0;
+  flex-wrap: wrap;
   align-items: flex-start;
+  justify-content: flex-end;
   gap: 0.5rem;
+  max-width: min(100%, 28rem);
 }
 
 .talisbooks-library__back {

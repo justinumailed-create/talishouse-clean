@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { X } from "lucide-react";
+import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import type { TalisBooksLibraryBook } from "@/lib/talisbooks/library/types";
 
@@ -28,6 +29,13 @@ export default function TalisBooksStandingBook({
   onDelete,
 }: TalisBooksStandingBookProps) {
   const href = `${TALISBOOKS_ROUTES.VIEWER}/${book.slug}`;
+  const displayTitle = displayShelfBookTitle(book.title);
+  const openLabel = displayTitle
+    ? `Open ${displayTitle}${book.subtitle ? ` — ${book.subtitle}` : ""}`
+    : "Open ebook";
+  const tipTitle = displayTitle
+    ? `${displayTitle} · ${book.publishStatus} · ${book.views} views`
+    : `${book.publishStatus} · ${book.views} views`;
 
   return (
     <article
@@ -39,7 +47,7 @@ export default function TalisBooksStandingBook({
           <button
             type="button"
             className="talisbooks-standing-book__delete"
-            aria-label={`Delete ${book.title}`}
+            aria-label={displayTitle ? `Delete ${displayTitle}` : "Delete ebook"}
             title="Delete ebook"
             disabled={deleting}
             onClick={(event) => {
@@ -54,8 +62,8 @@ export default function TalisBooksStandingBook({
         <Link
           href={href}
           className="talisbooks-standing-book__link"
-          aria-label={`Open ${book.title}${book.subtitle ? ` — ${book.subtitle}` : ""}`}
-          title={`${book.title} · ${book.publishStatus} · ${book.views} views`}
+          aria-label={openLabel}
+          title={tipTitle}
         >
         <div className="talisbooks-standing-book__scene">
           <div
@@ -82,7 +90,9 @@ export default function TalisBooksStandingBook({
                 {book.isPinned ? (
                   <p className="talisbooks-standing-book__cover-kicker">Pinned</p>
                 ) : null}
-                <p className="talisbooks-standing-book__cover-title">{book.title}</p>
+                {displayTitle ? (
+                  <p className="talisbooks-standing-book__cover-title">{displayTitle}</p>
+                ) : null}
                 {book.subtitle && size !== "compact" ? (
                   <p className="talisbooks-standing-book__cover-subtitle">{book.subtitle}</p>
                 ) : null}
@@ -95,7 +105,9 @@ export default function TalisBooksStandingBook({
 
         {showMeta ? (
           <div className="talisbooks-standing-book__meta">
-            <h3 className="talisbooks-standing-book__title">{book.title}</h3>
+            {displayTitle ? (
+              <h3 className="talisbooks-standing-book__title">{displayTitle}</h3>
+            ) : null}
           </div>
         ) : null}
       </Link>

@@ -1,4 +1,5 @@
 import { ISOLATED_BOOKSHELF_PATH } from "@/lib/talisbooks/isolated-bookshelf";
+import { resolvePersistedBookTitle } from "@/lib/talisbooks/book-title";
 import { generateSelfServiceEbook } from "@/lib/talisbooks/self-service-ebook";
 import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { buildMapSiteAfterBookHref } from "@/lib/talispros/ebook-choice";
@@ -195,7 +196,7 @@ export async function runEbookGenerationPipeline(
           mapsiteId: ctx.mapsiteId,
           accountType: ctx.accountType,
           requestId: ctx.requestId,
-          title: input.title.trim() || `${ctx.fastCode.toUpperCase()} Talisbook™`,
+          title: resolvePersistedBookTitle(input.title),
           description: input.description.trim(),
           location:
             input.location.trim() ||

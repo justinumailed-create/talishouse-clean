@@ -76,6 +76,7 @@ import {
   type Rm22SlotHydration,
   type Rm22SlotState,
 } from "@/lib/talisbooks/rm22-template";
+import { resolvePersistedBookTitle } from "@/lib/talisbooks/book-title";
 
 type EbookOptimizedUploadResponse = {
   ok: true;
@@ -1222,9 +1223,7 @@ export default function EbookGenerateClient({
       }
       fd.set(
         "title",
-        fromPdf
-          ? title.trim() || `${fastCode.toUpperCase()} Talisbook™`
-          : title.trim()
+        resolvePersistedBookTitle(title),
       );
       fd.set("description", fromPdf ? description.trim() : description.trim());
       fd.set("location", fromPdf ? location.trim() : location.trim());

@@ -4,6 +4,7 @@ import {
   ISOLATED_BOOKSHELF_METADATA_KEY,
   isIsolatedBookshelfBook,
 } from "@/lib/talisbooks/isolated-bookshelf";
+import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import { ROUTES } from "@/lib/routes";
 
 type BookRow = Database["public"]["Tables"]["talisbooks_books"]["Row"];
@@ -66,7 +67,7 @@ export async function listIsolatedBookshelfBooks(): Promise<IsolatedBookshelfBoo
   return rows.map((row) => ({
     id: row.id,
     slug: row.slug,
-    title: row.title,
+    title: displayShelfBookTitle(row.title),
     subtitle: row.subtitle,
     coverImageUrl: coverFromMetadata(row),
     publishStatus: rowPublishStatus(row),

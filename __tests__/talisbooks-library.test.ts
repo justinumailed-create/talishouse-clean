@@ -333,7 +333,8 @@ describe("Talisbooks™ library admin delete wiring", () => {
     expect(fastPage).toContain("buildClaimedMapSitePath");
     expect(fastPage).not.toContain("mapsiteBackFromScheduleHref");
     expect(standing).toContain("talisbooks-standing-book__delete");
-    expect(standing).toContain("Delete ${book.title}");
+    expect(standing).toContain("displayShelfBookTitle");
+    expect(standing).toContain("Delete ${displayTitle}");
     expect(actions).toContain("deleteLibraryEbookAction");
     expect(actions).toContain('return { success: false, error: "Unauthorized." }');
   });

@@ -4,6 +4,7 @@ import Link from "next/link";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import type { IsolatedBookshelfBook } from "@/lib/talisbooks/isolated-bookshelf-service";
 import { ISOLATED_BOOKSHELF_CREATE_PATH } from "@/lib/talisbooks/isolated-bookshelf";
+import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import { ALLPINS_FAST_CODE } from "@/lib/talispros/allpins-mapsite-constants";
 import { allPinsClaimedHref } from "@/lib/talispros/allpins-mapsite-ui";
 import { TALISBOOKS_LIBRARY_SPINE_PALETTES } from "@/lib/talisbooks/library/constants";
@@ -34,7 +35,7 @@ function toLibraryBook(
   return {
     id: book.id,
     slug: book.slug,
-    title: book.title,
+    title: displayShelfBookTitle(book.title),
     subtitle: book.subtitle || "",
     coverImageUrl: book.coverImageUrl,
     coverTemplateId: null,
@@ -95,16 +96,19 @@ export default function IsolatedBookshelfView({
 
   return (
     <div data-testid="isolated-bookshelf" className="relative min-h-dvh">
-      <div className="pointer-events-none absolute right-4 top-4 z-20 flex flex-wrap justify-end gap-2 sm:right-6 sm:top-5">
-        <Link
-          href={ISOLATED_BOOKSHELF_CREATE_PATH}
-          className="pointer-events-auto rounded-xl bg-neutral-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-neutral-800"
-          data-testid="isolated-bookshelf-create"
-        >
-          Create ebook
-        </Link>
-      </div>
-      <TalisBooksLibraryShell bookshelf={bookshelf} backHref={backHref} />
+      <TalisBooksLibraryShell
+        bookshelf={bookshelf}
+        backHref={backHref}
+        headerExtra={
+          <Link
+            href={ISOLATED_BOOKSHELF_CREATE_PATH}
+            className="inline-flex flex-shrink-0 items-center justify-center rounded-xl bg-neutral-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-neutral-800"
+            data-testid="isolated-bookshelf-create"
+          >
+            Create ebook
+          </Link>
+        }
+      />
     </div>
   );
 }

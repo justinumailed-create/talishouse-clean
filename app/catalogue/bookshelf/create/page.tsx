@@ -43,9 +43,8 @@ export default async function CatalogueIsolatedBookshelfCreatePage() {
   // so isolated create is linked to the multi-pin showcase shelf.
   const allPins = mapsite ? null : await ensureAllPinsMapSite();
   const mapsiteId = mapsite?.id ?? allPins?.mapsiteId ?? null;
-  const listingTitle =
-    mapsite?.propertyTitle ??
-    (allPins ? "ALLPINS — Isolated shelf" : "");
+  // Prefer a real property title; never seed a synthetic shelf label as the book title.
+  const listingTitle = mapsite?.propertyTitle?.trim() || "";
   const propertyAddress =
     mapsite?.propertyAddress ??
     (allPins ? "Aggregated live Mapsite™ pins" : "");
