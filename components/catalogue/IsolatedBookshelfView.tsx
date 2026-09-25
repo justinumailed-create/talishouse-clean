@@ -5,6 +5,10 @@ import {
   ISOLATED_BOOKSHELF_PATH,
 } from "@/lib/talisbooks/isolated-bookshelf";
 import { ROUTES } from "@/lib/routes";
+import {
+  allPinsClaimedHref,
+  allPinsPublishedHref,
+} from "@/lib/talispros/allpins-mapsite-ui";
 
 export default function IsolatedBookshelfView({
   books,
@@ -40,6 +44,13 @@ export default function IsolatedBookshelfView({
               T-All catalogue
             </Link>
             <Link
+              href={allPinsClaimedHref()}
+              className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-sm font-medium text-sky-900 hover:bg-sky-100"
+              data-testid="isolated-bookshelf-allpins"
+            >
+              ALLPINS Mapsite™
+            </Link>
+            <Link
               href={ISOLATED_BOOKSHELF_CREATE_PATH}
               className="rounded-xl bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800"
               data-testid="isolated-bookshelf-create"
@@ -56,7 +67,7 @@ export default function IsolatedBookshelfView({
           <span className="font-mono font-medium text-neutral-800">
             {adminFastCode.toUpperCase()}
           </span>
-          . Public visitors cannot create or edit this shelf.
+          . Linked showcase map: ALLPINS. Public visitors cannot create or edit this shelf.
         </p>
 
         {books.length === 0 ? (

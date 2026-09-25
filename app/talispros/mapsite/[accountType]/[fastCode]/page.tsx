@@ -32,6 +32,11 @@ import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, CHECKOUT_SESSION_QUERY, parseCheckoutSessionId, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
+import MapSiteAllPinsApplication from "@/components/talispros/mapsite/MapSiteAllPinsApplication";
+import {
+  ensureAllPinsMapSite,
+  isAllPinsFastCode,
+} from "@/lib/talispros/allpins-mapsite";
 
 export const dynamic = "force-dynamic";
 
@@ -116,6 +121,14 @@ export default async function ClaimedMapSiteByAccountTypePage({
       fastCode,
       mapsiteId: mapsiteIdParam,
     })) || null;
+
+  if (isAllPinsFastCode(fastCode)) {
+    const aggregation = await ensureAllPinsMapSite();
+    if (!aggregation) {
+      notFound();
+    }
+    return <MapSiteAllPinsApplication aggregation={aggregation} />;
+  }
 
   const mapsite = await loadMapSiteApplicationState({
     mapsiteId: mapsiteIdParam,

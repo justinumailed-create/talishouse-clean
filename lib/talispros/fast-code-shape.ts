@@ -4,5 +4,7 @@
 export function isIssuedFastCode(value: string | null | undefined): value is string {
   const code = value?.trim().toLowerCase() || "";
   if (code === "lrg1") return true;
+  // Platform showcase aggregate map (multi-pin). Letters+digits only.
+  if (code === "allpins") return true;
   return /^[a-z]{2,3}\d{2}$/.test(code);
 }

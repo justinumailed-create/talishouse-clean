@@ -7,6 +7,7 @@ import {
   requireAdminPage,
 } from "@/lib/admin-auth";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
+import { ensureAllPinsMapSite } from "@/lib/talispros/allpins-mapsite";
 import {
   ISOLATED_BOOKSHELF_DESTINATION,
   ISOLATED_BOOKSHELF_PATH,
@@ -38,6 +39,16 @@ export default async function CatalogueIsolatedBookshelfCreatePage() {
   }
 
   const mapsite = await getMapSiteByFastCode(account.fastCode);
+  // When the admin FAST Code has no Mapsite™, attach the ALLPINS aggregate
+  // so isolated create is linked to the multi-pin showcase shelf.
+  const allPins = mapsite ? null : await ensureAllPinsMapSite();
+  const mapsiteId = mapsite?.id ?? allPins?.mapsiteId ?? null;
+  const listingTitle =
+    mapsite?.propertyTitle ??
+    (allPins ? "ALLPINS — Isolated shelf" : "");
+  const propertyAddress =
+    mapsite?.propertyAddress ??
+    (allPins ? "Aggregated live Mapsite™ pins" : "");
 
   return (
     <div
@@ -71,13 +82,13 @@ export default async function CatalogueIsolatedBookshelfCreatePage() {
       <main className="mx-auto max-w-3xl px-5 py-8">
         <IsolatedBookshelfCreateClient
           fastCode={mapsite?.fastCode ?? account.fastCode}
-          mapsiteId={mapsite?.id ?? null}
+          mapsiteId={mapsiteId}
           accountType={mapsite?.accountType ?? "root"}
           agentName={mapsite?.agentName ?? account.name}
           agentEmail={mapsite?.email || account.email || ""}
           agentPhone={mapsite?.phone || ""}
-          propertyAddress={mapsite?.propertyAddress ?? ""}
-          listingTitle={mapsite?.propertyTitle ?? ""}
+          propertyAddress={propertyAddress}
+          listingTitle={listingTitle}
           destination={ISOLATED_BOOKSHELF_DESTINATION}
         />
       </main>
