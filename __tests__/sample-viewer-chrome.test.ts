@@ -62,6 +62,10 @@ describe("sample Talisbooks™ viewer chrome", () => {
     const css = readSource("app/globals.css");
     expect(css).toContain("talisbooks-viewer--stage-landscape");
     expect(css).toContain("rotate(90deg)");
+    // Title/Back header must collapse in forced landscape so the stage is unobstructed.
+    expect(css).toMatch(
+      /\.talisbooks-viewer--stage-landscape \.talisbooks-viewer__header\s*\{[\s\S]*?display:\s*none/,
+    );
   });
 
   it("shows Live Edit only after payment, never on demonstration books", () => {

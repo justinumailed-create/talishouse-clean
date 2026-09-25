@@ -1369,9 +1369,20 @@ body.mapsite-gallery-open [data-paypal-button] {
 
   /*
    * Forced landscape stage on a portrait phone: rotate the flipbook stage
-   * so landscape spreads read larger without turning the device. Header and
-   * the orient FAB stay in portrait so Portrait is always one tap away.
+   * so landscape spreads read larger without turning the device. Collapse the
+   * magazine/title/Back header so the stage can use that vertical space; the
+   * orient FAB stays so Portrait is always one tap away.
    */
+  .talisbooks-viewer--stage-landscape {
+    --viewer-header-height: 0rem;
+    padding-top: 0.15rem;
+    padding-bottom: 0.15rem;
+  }
+
+  .talisbooks-viewer--stage-landscape .talisbooks-viewer__header {
+    display: none;
+  }
+
   .talisbooks-viewer--stage-landscape .talisbooks-viewer__layout {
     overflow: hidden;
     min-height: 0;
