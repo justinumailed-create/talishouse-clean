@@ -64,7 +64,8 @@ describe("isolated catalogue bookshelf", () => {
       "utf8",
     );
     expect(page).toContain("IsolatedBookshelfCreateClient");
-    expect(page).toMatch(/mapsiteId=\{mapsite\?\.id \?\? null\}/);
+    expect(page).toMatch(/mapsiteId=\{mapsiteId\}/);
+    expect(page).toContain("ensureAllPinsMapSite");
     expect(page).not.toMatch(/No Mapsite™ linked/i);
     expect(page).not.toMatch(/self-serve ebook process needs a Mapsite/i);
     expect(page).toMatch(/Mapsite™ is optional/i);
@@ -88,3 +89,31 @@ describe("isolated catalogue bookshelf", () => {
     expect(pipeline).toContain("input.isolatedBookshelf");
   });
 });
+
+
+  it("ebook generate client forwards isolated upload scope (fastCode + flag)", () => {
+    const client = readFileSync(
+      resolve("components/talispros/EbookGenerateClient.tsx"),
+      "utf8",
+    );
+    expect(client).toContain("fastCode: options.fastCode");
+    expect(client).toContain("isolatedBookshelf: options.isolatedBookshelf");
+    expect(client).toMatch(
+      /isolatedBookshelf && !requestId && fastCode/,
+    );
+  });
+
+  it("ALLPINS mapsite module and claimed page branch exist", () => {
+    const mod = readFileSync(
+      resolve("lib/talispros/allpins-mapsite.ts"),
+      "utf8",
+    );
+    expect(mod).toContain("ensureAllPinsMapSite");
+    expect(mod).toContain("listAllPinsAggregatedPins");
+    const page = readFileSync(
+      resolve("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx"),
+      "utf8",
+    );
+    expect(page).toContain("isAllPinsFastCode");
+    expect(page).toContain("MapSiteAllPinsApplication");
+  });

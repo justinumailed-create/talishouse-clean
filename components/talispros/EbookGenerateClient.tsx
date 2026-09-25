@@ -392,8 +392,10 @@ export default function EbookGenerateClient({
   const uploadScope = {
     requestId: requestId || undefined,
     mapsiteId: requestId ? undefined : mapsiteId || undefined,
+    // Isolated create may have no Mapsite™ — always send FAST Code + flag so
+    // /upload-image can scope storage without a Build Request ID.
     fastCode:
-      isolatedBookshelf && !requestId && !mapsiteId && fastCode
+      isolatedBookshelf && !requestId && fastCode
         ? fastCode
         : undefined,
     isolatedBookshelf: isolatedBookshelf || undefined,
@@ -669,6 +671,8 @@ export default function EbookGenerateClient({
   async function optimizeAndStoreUploads(options: {
     requestId?: string | null;
     mapsiteId?: string | null;
+    fastCode?: string | null;
+    isolatedBookshelf?: boolean;
     propertyItems: SelectedUpload[];
     frontCover: CoverPick | null;
     backCover: CoverPick | null;
@@ -734,6 +738,8 @@ export default function EbookGenerateClient({
         const result = await uploadOptimizedImage({
           requestId: options.requestId,
           mapsiteId: options.mapsiteId,
+          fastCode: options.fastCode,
+          isolatedBookshelf: options.isolatedBookshelf,
           kind: "property",
           file: item.file,
           label: item.label,
@@ -772,6 +778,8 @@ export default function EbookGenerateClient({
         const result = await uploadOptimizedImage({
           requestId: options.requestId,
           mapsiteId: options.mapsiteId,
+          fastCode: options.fastCode,
+          isolatedBookshelf: options.isolatedBookshelf,
           kind: "property",
           file: item.file,
           label: item.label,
@@ -811,6 +819,8 @@ export default function EbookGenerateClient({
         const result = await uploadOptimizedImage({
           requestId: options.requestId,
           mapsiteId: options.mapsiteId,
+          fastCode: options.fastCode,
+          isolatedBookshelf: options.isolatedBookshelf,
           kind: "logo",
           file: options.logo,
           label: options.logo.name || "Brokerage logo",
@@ -837,6 +847,8 @@ export default function EbookGenerateClient({
         const result = await uploadOptimizedImage({
           requestId: options.requestId,
           mapsiteId: options.mapsiteId,
+          fastCode: options.fastCode,
+          isolatedBookshelf: options.isolatedBookshelf,
           kind: "agent",
           file: options.agentPhoto,
           label: options.agentPhoto.name || "Agent photo",
