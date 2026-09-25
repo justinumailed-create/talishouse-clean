@@ -1,3 +1,5 @@
+import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
   extensionForOptimizedMime,
@@ -65,6 +67,11 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const requestId = String(formData.get("requestId") || "").trim();
     const mapsiteId = String(formData.get("mapsiteId") || "").trim();
+    const fastCode = String(formData.get("fastCode") || "").trim().toLowerCase();
+    const isolatedBookshelf =
+      String(formData.get("isolatedBookshelf") || "").trim() === "1" ||
+      String(formData.get("destination") || "").trim().toLowerCase() ===
+        "isolated-bookshelf";
     const kind = parseOptimizeImageKind(String(formData.get("kind") || "property"));
     const label = String(formData.get("label") || "").trim();
     const fileEntry = formData.get("file");
@@ -106,6 +113,15 @@ export async function POST(request: Request) {
         }
         scope = scoped.fastCode;
       }
+    } else if (isolatedBookshelf && fastCode) {
+      // Isolated bookshelf create — Global Admin FAST Code, Mapsite™ optional.
+      if (!(await isAdminAuthenticated())) {
+        return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
+      }
+      if (!(await canEditMapSite(fastCode))) {
+        return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
+      }
+      scope = fastCode;
     } else {
       return Response.json(
         { ok: false, error: "Build Request ID is required." },

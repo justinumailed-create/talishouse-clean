@@ -11,7 +11,8 @@ import {
 
 type Props = {
   fastCode: string;
-  mapsiteId: string;
+  /** Optional — isolated create works without a linked Mapsite™. */
+  mapsiteId: string | null;
   accountType: string;
   agentName: string;
   agentEmail: string;
@@ -24,6 +25,7 @@ type Props = {
 /**
  * Wraps the standard self-serve ebook generator for the isolated catalogue shelf.
  * On success: unlock cookie + redirect to /catalogue/bookshelf.
+ * Does not require a Mapsite™ — admin FAST Code alone is enough.
  */
 export default function IsolatedBookshelfCreateClient({
   fastCode,

@@ -3,6 +3,7 @@ import { generateSelfServiceEbook } from "@/lib/talisbooks/self-service-ebook";
 import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { buildMapSiteAfterBookHref } from "@/lib/talispros/ebook-choice";
 import {
+  resolveOnboardingForIsolatedBookshelf,
   resolveOnboardingFromMapSite,
   resolveOnboardingFromRequest,
   type OnboardingContext,
@@ -138,7 +139,9 @@ export async function runEbookGenerationPipeline(
           if (!(await canEditMapSite(editorFastCode))) {
             return fail("resolve_request", "Build Request ID is required.");
           }
-          resolved = await resolveOnboardingFromMapSite(editorFastCode);
+          resolved = input.isolatedBookshelf
+            ? await resolveOnboardingForIsolatedBookshelf(editorFastCode)
+            : await resolveOnboardingFromMapSite(editorFastCode);
         }
         if (!resolved.ok) {
           return fail(resolved.report.stage, resolved.report.error, resolved.report);

@@ -197,6 +197,8 @@ const UPLOAD_CONCURRENCY = 2;
 async function uploadOptimizedImage(options: {
   requestId?: string | null;
   mapsiteId?: string | null;
+  fastCode?: string | null;
+  isolatedBookshelf?: boolean;
   kind: "property" | "agent" | "logo";
   file: File;
   label: string;
@@ -207,6 +209,8 @@ async function uploadOptimizedImage(options: {
     ...options,
     requestId: options.requestId || undefined,
     mapsiteId: options.mapsiteId || undefined,
+    fastCode: options.fastCode || undefined,
+    isolatedBookshelf: options.isolatedBookshelf || undefined,
   });
 }
 
@@ -378,11 +382,21 @@ export default function EbookGenerateClient({
     return () => URL.revokeObjectURL(url);
   }, [agentPhotoFile]);
 
-  const sessionKey = (requestId || (embedded ? mapsiteId : null) || "").trim();
+  const sessionKey = (
+    requestId ||
+    (embedded ? mapsiteId : null) ||
+    (isolatedBookshelf && fastCode ? `isolated:${fastCode}` : null) ||
+    ""
+  ).trim();
   const canGenerate = Boolean(sessionKey && fastCode && !bootstrapError);
   const uploadScope = {
     requestId: requestId || undefined,
     mapsiteId: requestId ? undefined : mapsiteId || undefined,
+    fastCode:
+      isolatedBookshelf && !requestId && !mapsiteId && fastCode
+        ? fastCode
+        : undefined,
+    isolatedBookshelf: isolatedBookshelf || undefined,
   };
 
   /** Keep template UI off until after hydration so SSR markup matches the client. */
@@ -952,9 +966,11 @@ export default function EbookGenerateClient({
 
     if (!sessionKey) {
       setError(
-        embedded
-          ? "This Mapsite™ cannot generate a Talisbook™ until it has a FAST Code."
-          : "Build Request ID is required. Return to the Build Form and complete onboarding again.",
+        isolatedBookshelf
+          ? "Admin FAST Code is required to generate for the isolated bookshelf."
+          : embedded
+            ? "This Mapsite™ cannot generate a Talisbook™ until it has a FAST Code."
+            : "Build Request ID is required. Return to the Build Form and complete onboarding again.",
       );
       return;
     }

@@ -1,3 +1,4 @@
+import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
@@ -508,6 +509,105 @@ export async function resolveOnboardingFromMapSite(
     requestId,
     fastCode,
     mapsiteId: context.mapsiteId,
+    accountType: context.accountType,
+  });
+
+  return { ok: true, context };
+}
+
+
+/**
+ * Minimal onboarding context for the catalogue isolated bookshelf when no
+ * Mapsite™ is linked to the admin FAST Code. Callers must already have
+ * verified edit/admin access for `fastCode`.
+ */
+export function buildIsolatedBookshelfOnboardingContext(options: {
+  fastCode: string;
+  agentName?: string | null;
+  agentEmail?: string | null;
+  agentPhone?: string | null;
+}): OnboardingContext {
+  const fastCode = options.fastCode.trim().toLowerCase();
+  const agentName =
+    options.agentName?.trim() || fastCode.toUpperCase();
+  return {
+    requestId: null,
+    fastCode,
+    mapsiteId: null,
+    accountType: "root",
+    owner: {
+      firstName: "",
+      lastName: "",
+      agentName,
+      email: options.agentEmail?.trim() || "",
+      phone: options.agentPhone?.trim() || "",
+    },
+    assets: {
+      coverImage: null,
+      galleryImages: [],
+      logo: null,
+    },
+    pin: {
+      streetAddress: null,
+      latitude: null,
+      longitude: null,
+      writeup: null,
+    },
+    listing: {
+      title: null,
+      address: null,
+      price: null,
+    },
+  };
+}
+
+/**
+ * Isolated catalogue bookshelf onboarding.
+ * Prefers a linked Mapsite™ when one exists; otherwise proceeds with the
+ * admin FAST Code alone (no Mapsite™ required).
+ * Callers must already have verified `canEditMapSite(fastCode)`.
+ */
+export async function resolveOnboardingForIsolatedBookshelf(
+  fastCodeRaw: string | null | undefined,
+): Promise<ResolveOnboardingResult> {
+  const started = onboardingNow();
+  const fastCode = fastCodeRaw?.trim().toLowerCase() || "";
+
+  if (!fastCode) {
+    return {
+      ok: false,
+      report: {
+        requestId: null,
+        fastCode: null,
+        mapsiteId: null,
+        stage: "resolve_request",
+        error: "FAST Code is required.",
+        durationMs: onboardingNow() - started,
+      },
+    };
+  }
+
+  const withMapsite = await resolveOnboardingFromMapSite(fastCode);
+  if (withMapsite.ok) {
+    return withMapsite;
+  }
+
+  // Only bypass when the sole problem is a missing Mapsite™.
+  if (withMapsite.report.error !== "Mapsite™ not found for this FAST Code.") {
+    return withMapsite;
+  }
+
+  const account = await getAdminSessionAccount();
+  const context = buildIsolatedBookshelfOnboardingContext({
+    fastCode,
+    agentName: account?.name,
+    agentEmail: account?.email,
+  });
+
+  logOnboardingStep("Resolve isolated bookshelf onboarding", started, {
+    requestId: null,
+    fastCode,
+    mapsiteId: null,
     accountType: context.accountType,
   });
 

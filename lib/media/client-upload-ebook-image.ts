@@ -60,6 +60,9 @@ function isPayloadTooLargeError(error: unknown, status?: number): boolean {
 export async function postEbookGenerateOptimizedImage(options: {
   requestId?: string;
   mapsiteId?: string;
+  /** Isolated bookshelf without Mapsite™ — admin FAST Code scope. */
+  fastCode?: string;
+  isolatedBookshelf?: boolean;
   kind: OptimizeImageKind;
   file: File;
   label: string;
@@ -84,6 +87,11 @@ export async function postEbookGenerateOptimizedImage(options: {
       const fd = new FormData();
       if (options.requestId) fd.set("requestId", options.requestId);
       if (options.mapsiteId) fd.set("mapsiteId", options.mapsiteId);
+      if (options.fastCode) fd.set("fastCode", options.fastCode);
+      if (options.isolatedBookshelf) {
+        fd.set("isolatedBookshelf", "1");
+        fd.set("destination", "isolated-bookshelf");
+      }
       fd.set("kind", options.kind);
       fd.set("label", options.label);
       fd.set("file", fileToSend, fileToSend.name || options.label || "image.jpg");

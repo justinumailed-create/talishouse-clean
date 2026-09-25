@@ -11,7 +11,6 @@ import {
   ISOLATED_BOOKSHELF_DESTINATION,
   ISOLATED_BOOKSHELF_PATH,
 } from "@/lib/talisbooks/isolated-bookshelf";
-import { ROUTES } from "@/lib/routes";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -26,7 +25,10 @@ export const metadata: Metadata = {
 /**
  * Self-serve ebook entry for the isolated catalogue bookshelf.
  * Catalogue chrome "Bookshelf" lands here so reaching the shelf follows
- * the same generate process as Mapsite™ self-serve — admin only.
+ * the self-serve generate process — admin only.
+ *
+ * A linked Mapsite™ is optional: isolated create works with any admin FAST
+ * Code (e.g. ADMIN123) even when no Mapsite™ exists for that code.
  */
 export default async function CatalogueIsolatedBookshelfCreatePage() {
   await requireAdminPage();
@@ -52,9 +54,9 @@ export default async function CatalogueIsolatedBookshelfCreatePage() {
               Create for isolated bookshelf
             </h1>
             <p className="mt-1 text-sm text-neutral-500">
-              Same generate flow as Talispros™ self-serve. The finished book is
-              tagged for the isolated T-All shelf only — not the public
-              /talisbooks catalogue.
+              Admin self-serve ebook for the isolated T-All shelf. A linked
+              Mapsite™ is optional — finished books are tagged for this shelf
+              only, not the public /talisbooks catalogue.
             </p>
           </div>
           <Link
@@ -67,37 +69,17 @@ export default async function CatalogueIsolatedBookshelfCreatePage() {
       </header>
 
       <main className="mx-auto max-w-3xl px-5 py-8">
-        {!mapsite ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-6 text-sm text-amber-950">
-            <p className="font-semibold">
-              No Mapsite™ linked to admin FAST Code{" "}
-              {account.fastCode.toUpperCase()}
-            </p>
-            <p className="mt-2 text-amber-900/80">
-              The self-serve ebook process needs a Mapsite™ for{" "}
-              <span className="font-mono">{account.fastCode.toUpperCase()}</span>.
-              Open Mapsites™ in Global Admin, then return here.
-            </p>
-            <Link
-              href={ROUTES.ADMIN_MAPSITES}
-              className="mt-4 inline-flex rounded-xl bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-800"
-            >
-              Open Mapsites™ admin
-            </Link>
-          </div>
-        ) : (
-          <IsolatedBookshelfCreateClient
-            fastCode={mapsite.fastCode}
-            mapsiteId={mapsite.id}
-            accountType={mapsite.accountType ?? "root"}
-            agentName={mapsite.agentName ?? account.name}
-            agentEmail={mapsite.email || account.email || ""}
-            agentPhone={mapsite.phone || ""}
-            propertyAddress={mapsite.propertyAddress ?? ""}
-            listingTitle={mapsite.propertyTitle ?? ""}
-            destination={ISOLATED_BOOKSHELF_DESTINATION}
-          />
-        )}
+        <IsolatedBookshelfCreateClient
+          fastCode={mapsite?.fastCode ?? account.fastCode}
+          mapsiteId={mapsite?.id ?? null}
+          accountType={mapsite?.accountType ?? "root"}
+          agentName={mapsite?.agentName ?? account.name}
+          agentEmail={mapsite?.email || account.email || ""}
+          agentPhone={mapsite?.phone || ""}
+          propertyAddress={mapsite?.propertyAddress ?? ""}
+          listingTitle={mapsite?.propertyTitle ?? ""}
+          destination={ISOLATED_BOOKSHELF_DESTINATION}
+        />
       </main>
     </div>
   );

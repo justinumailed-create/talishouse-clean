@@ -2,8 +2,9 @@
  * Catalogue T-All isolated bookshelf.
  *
  * Separate from the public /talisbooks product shelf and from Mapsite™ TEB™
- * shelves. Only Global Admin creates books for it, and only through the same
- * self-serve ebook generate flow used after ebook-choice.
+ * shelves. Only Global Admin creates books for it, through the self-serve
+ * ebook generate flow. A linked Mapsite™ is optional — admin FAST Codes
+ * such as ADMIN123 can create for this shelf without one.
  */
 
 export const ISOLATED_BOOKSHELF_PATH = "/catalogue/bookshelf";
