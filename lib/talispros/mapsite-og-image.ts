@@ -131,14 +131,65 @@ export function mapsiteRealtimeSeoCopy(input: {
   fastCode: string;
   propertyTitle?: string | null;
   propertyDescription?: string | null;
+  propertyAddress?: string | null;
 }): { title: string; description: string } {
   const code = input.fastCode.trim().toUpperCase();
   const property = input.propertyTitle?.trim() || "";
   const description = input.propertyDescription?.trim() || "";
+  const address = input.propertyAddress?.trim() || "";
+  const title = property
+    ? `${property} | Mapsite™`
+    : `${code || "Mapsite™"} | Mapsite™`;
+  let desc = description;
+  if (!desc && address && code) {
+    desc = `${address} · FAST Code ${code}`;
+  } else if (!desc && address) {
+    desc = address;
+  } else if (!desc && code) {
+    desc = `Mapsite™ for FAST Code ${code}.`;
+  } else if (!desc) {
+    desc = "Mapsite™";
+  }
+  return { title, description: desc };
+}
+
+/**
+ * ALLPINS listing share copy — mirrors the ALLPINS Mapsite™ property fields
+ * (Canada multi-pin showcase), not synthetic marketing fluff.
+ */
+export function allpinsSeoCopy(): { title: string; description: string } {
   return {
-    title: property ? `${property} | Mapsite™` : `${code || "Mapsite™"} | Mapsite™`,
-    description: description || (code ? `Mapsite™ ${code}` : "Mapsite™"),
+    title: "ALLPINS — Every Mapsite™ | Mapsite™",
+    description:
+      "Canada showcase of Mapsite™ pins. Open a pin for the book and Mapsite™ demo.",
   };
+}
+
+/** Talisbooks™ viewer title / description from real book fields. */
+export function viewerRealtimeSeoCopy(input: {
+  title: string;
+  subtitle?: string | null;
+  description?: string | null;
+  address?: string | null;
+  fastCode?: string | null;
+}): { title: string; description: string } {
+  const title = input.title.trim() || "Talisbooks™";
+  const subtitle = input.subtitle?.trim() || "";
+  const description = input.description?.trim() || "";
+  const address = input.address?.trim() || "";
+  const code = input.fastCode?.trim().toUpperCase() || "";
+
+  let desc = description || subtitle;
+  if (!desc && address && code) {
+    desc = `${address} · Talisbook™ for FAST Code ${code}`;
+  } else if (!desc && address) {
+    desc = address;
+  } else if (!desc && code) {
+    desc = `Talisbook™ digital lookbook for FAST Code ${code}.`;
+  } else if (!desc) {
+    desc = "Read this Talisbook™ digital lookbook in the Talisbooks™ viewer.";
+  }
+  return { title, description: desc };
 }
 
 /** Absolute URL of the composed landscape Mapsite™ share card. */

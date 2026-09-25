@@ -4,10 +4,12 @@ import sharp, { type OverlayOptions } from "sharp";
 import {
   SHARE_OG_HEIGHT,
   SHARE_OG_LOGO_PATH,
+  SHARE_OG_PIN_COLOR,
   SHARE_OG_WIDTH,
   shareOgLogoPlacement,
   shareOgPinPlacement,
   shareOgPinSvg,
+  type ShareOgProjectedPin,
 } from "@/lib/share/og-card";
 
 const FALLBACK_BG = "#1a3348";
@@ -16,9 +18,20 @@ export async function readShareOgLogo(): Promise<Buffer> {
   return readFile(path.join(process.cwd(), "public", SHARE_OG_LOGO_PATH.replace(/^\//, "")));
 }
 
+async function pinPng(color: string, scale = 1): Promise<Buffer> {
+  return sharp(Buffer.from(shareOgPinSvg(color, scale))).png().toBuffer();
+}
+
 export async function renderShareOgCard(input: {
   background?: Buffer | null;
   showPin: boolean;
+  /** Single-pin colour (Mapsite™ listing cards). Defaults to brand red. */
+  pinColor?: string;
+  /**
+   * Multi-pin overlays (ALLPINS). When non-empty, these replace the single
+   * centered pin — each tip is already projected into the OG frame.
+   */
+  pinOverlays?: ShareOgProjectedPin[];
   logo?: Buffer | null;
 }): Promise<Buffer> {
   const background = input.background
@@ -41,11 +54,20 @@ export async function renderShareOgCard(input: {
         .toBuffer();
 
   const composites: OverlayOptions[] = [];
+  const overlays = input.pinOverlays ?? [];
 
-  if (input.showPin) {
+  if (overlays.length > 0) {
+    for (const overlay of overlays) {
+      composites.push({
+        input: await pinPng(overlay.color, overlay.scale),
+        left: overlay.left,
+        top: overlay.top,
+      });
+    }
+  } else if (input.showPin) {
     const pin = shareOgPinPlacement();
     composites.push({
-      input: await sharp(Buffer.from(shareOgPinSvg())).png().toBuffer(),
+      input: await pinPng(input.pinColor?.trim() || SHARE_OG_PIN_COLOR),
       left: pin.left,
       top: pin.top,
     });

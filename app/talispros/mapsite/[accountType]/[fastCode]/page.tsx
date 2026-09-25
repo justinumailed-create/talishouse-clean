@@ -2,9 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createMetadata } from "@/lib/seo";
 import {
+  allpinsSeoCopy,
   mapsiteOgMetadataImage,
+  mapsiteRealtimeSeoCopy,
   resolveMapSiteOgImage,
 } from "@/lib/talispros/mapsite-og-image";
+import { loadMapsiteSeoFields } from "@/lib/talispros/load-mapsite-seo-fields";
 import {
   parseRegistrationMarket,
   type RegistrationMarket,
@@ -71,12 +74,33 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { accountType, fastCode } = await params;
   const code = fastCode.trim().toUpperCase();
+  const path = `${MAPSITE_APP_PATH}/${mapsiteAccountTypeSegment(accountType)}/${fastCode.trim().toLowerCase()}`;
   const ogImage = resolveMapSiteOgImage(fastCode);
+
+  if (isAllPinsFastCode(fastCode)) {
+    const copy = allpinsSeoCopy();
+    return createMetadata({
+      title: copy.title,
+      description: copy.description,
+      path,
+      image: mapsiteOgMetadataImage(ogImage, copy.title),
+    });
+  }
+
+  const fields = await loadMapsiteSeoFields(fastCode);
+  const live = mapsiteRealtimeSeoCopy({
+    fastCode: code,
+    propertyTitle: fields?.propertyTitle,
+    propertyDescription: fields?.propertyDescription,
+    propertyAddress: fields?.propertyAddress,
+  });
+  const title = fields?.metaTitle?.trim() || live.title;
+  const description = fields?.metaDescription?.trim() || live.description;
   return createMetadata({
-    title: `Mapsite™ ${code}`,
-    description: `Talispros™ Mapsite™ for FAST Code ${code}.`,
-    path: `${MAPSITE_APP_PATH}/${mapsiteAccountTypeSegment(accountType)}/${fastCode.trim().toLowerCase()}`,
-    image: mapsiteOgMetadataImage(ogImage, `Mapsite™ ${code}`),
+    title,
+    description,
+    path,
+    image: mapsiteOgMetadataImage(ogImage, title),
   });
 }
 

@@ -12,6 +12,7 @@ import { talisbooksViewerShareOgPath } from "@/lib/share/og-card";
 import {
   mapsiteOgMetadataImage,
   toAbsoluteHttpsOgUrl,
+  viewerRealtimeSeoCopy,
 } from "@/lib/talispros/mapsite-og-image";
 import { createMetadata } from "@/lib/seo";
 
@@ -49,15 +50,21 @@ export async function generateMetadata({
     });
   }
 
-  return createMetadata({
+  const address =
+    book.pages.find((page) => page.address?.trim())?.address?.trim() || null;
+  const copy = viewerRealtimeSeoCopy({
     title: book.title,
-    description:
-      book.subtitle?.trim() ||
-      "Read this Talisbook™ digital lookbook in the Talisbooks™ viewer.",
+    subtitle: book.subtitle,
+    address,
+    fastCode: book.fastCode,
+  });
+  return createMetadata({
+    title: copy.title,
+    description: copy.description,
     path: `${TALISBOOKS_ROUTES.VIEWER}/${book.slug}`,
     image: mapsiteOgMetadataImage(
       toAbsoluteHttpsOgUrl(talisbooksViewerShareOgPath(book.slug)),
-      book.title,
+      copy.title,
     ),
   });
 }

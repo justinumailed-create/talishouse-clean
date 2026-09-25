@@ -2,10 +2,12 @@ import MapSiteLayout from "@/components/mapsite/MapSiteLayout";
 import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
 import { createMetadata } from "@/lib/seo";
 import {
+  allpinsSeoCopy,
   mapsiteOgMetadataImage,
   mapsiteRealtimeSeoCopy,
   resolveMapSiteOgImage,
 } from "@/lib/talispros/mapsite-og-image";
+import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
 import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import { getMapSiteByFastCode, type MapSiteView } from "@/lib/mapsite-service";
@@ -191,16 +193,30 @@ export async function publishedMapSiteMetadata(mapsite: MapSiteView) {
   const slug = (layoutData.slug || mapsite.fastCode).trim().toLowerCase();
   const code = layoutData.fastCode.toUpperCase();
   const ogImage = resolveMapSiteOgImage(mapsite.fastCode);
+
+  if (isAllPinsFastCode(mapsite.fastCode)) {
+    const copy = allpinsSeoCopy();
+    return createMetadata({
+      title: copy.title,
+      description: copy.description,
+      path: `/mapsite/${slug}`,
+      image: mapsiteOgMetadataImage(ogImage, copy.title),
+    });
+  }
+
   const copy = mapsiteRealtimeSeoCopy({
     fastCode: mapsite.fastCode,
     propertyTitle: layoutData.propertyTitle,
     propertyDescription: layoutData.summary.description,
+    propertyAddress: layoutData.summary.address || mapsite.propertyAddress,
   });
+  const title = layoutData.metaTitle?.trim() || copy.title;
+  const description = layoutData.metaDescription?.trim() || copy.description;
   return createMetadata({
-    title: layoutData.metaTitle?.trim() || copy.title,
-    description: layoutData.metaDescription?.trim() || copy.description,
+    title,
+    description,
     path: `/mapsite/${slug}`,
-    image: mapsiteOgMetadataImage(ogImage, `Mapsite™ ${code}`),
+    image: mapsiteOgMetadataImage(ogImage, title),
   });
 }
 

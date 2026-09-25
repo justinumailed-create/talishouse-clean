@@ -5,14 +5,19 @@ import { describe, expect, it } from "vitest";
 import {
   SHARE_OG_HEIGHT,
   SHARE_OG_LOGO_MARGIN_RIGHT,
+  SHARE_OG_PIN_COLOR,
   SHARE_OG_WIDTH,
   esriWorldImageryUrl,
+  esriWorldImageryUrlWide,
   lngLatToWebMercator,
   planMapsiteShareOg,
   planViewerShareOg,
+  projectPinsOntoShareOg,
   shareOgImageryBbox,
   shareOgLogoPlacement,
   shareOgPinPlacement,
+  shareOgPinSvg,
+  shareOgWideImageryBbox,
 } from "../lib/share/og-card";
 import { fetchOgImageBuffer } from "../lib/share/fetch-og-image";
 import { renderShareOgCard } from "../lib/share/render-share-og";
@@ -160,3 +165,83 @@ describe("share OG composition", () => {
     expect(center[1]).toBeGreaterThan(center[0]);
   });
 });
+
+describe("ALLPINS multi-pin OG", () => {
+  it("builds a wide Canada bbox without clamping to listing zoom", () => {
+    const box = shareOgWideImageryBbox({
+      latitude: 56.1,
+      longitude: -96.0,
+      zoom: 4,
+    });
+    expect(box.zoom).toBe(4);
+    expect(box.east - box.west).toBeGreaterThan(box.north - box.south);
+    const url = esriWorldImageryUrlWide({
+      latitude: 56.1,
+      longitude: -96.0,
+      zoom: 4,
+    });
+    expect(url).toContain("World_Imagery/MapServer/export");
+    expect(url).toContain(`size=${SHARE_OG_WIDTH}%2C${SHARE_OG_HEIGHT}`);
+  });
+
+  it("projects coloured pins into the OG frame and keeps the logo on the right", () => {
+    const { overlays } = projectPinsOntoShareOg({
+      latitude: 45.5,
+      longitude: -75.7,
+      zoom: 6,
+      scale: 0.4,
+      pins: [
+        { latitude: 45.42, longitude: -75.7, color: "#1A73E8" },
+        { latitude: 45.6, longitude: -75.5, color: "#E10600" },
+        { latitude: 45.3, longitude: -75.9, color: "#34A853" },
+      ],
+    });
+    expect(overlays.length).toBe(3);
+    expect(overlays[0]!.color).toBe("#1A73E8");
+    expect(overlays[0]!.scale).toBe(0.4);
+    for (const overlay of overlays) {
+      expect(overlay.left).toBeGreaterThan(-80);
+      expect(overlay.top).toBeGreaterThan(-120);
+      expect(overlay.left + overlay.width).toBeLessThan(SHARE_OG_WIDTH + 80);
+    }
+    const logo = shareOgLogoPlacement();
+    expect(logo.left).toBeGreaterThan(SHARE_OG_WIDTH / 2);
+  });
+
+  it("renders a multi-pin landscape card with distinct pin colours", async () => {
+    const background = await sharp({
+      create: {
+        width: 80,
+        height: 40,
+        channels: 3,
+        background: "#1f8a3b",
+      },
+    })
+      .jpeg()
+      .toBuffer();
+    const logo = await readFile(path.join(process.cwd(), "public/logo.png"));
+    const { overlays } = projectPinsOntoShareOg({
+      latitude: 45.5,
+      longitude: -75.7,
+      zoom: 6,
+      scale: 0.5,
+      pins: [
+        { latitude: 45.5, longitude: -75.7, color: "#1A73E8" },
+        { latitude: 45.55, longitude: -75.55, color: "#E10600" },
+      ],
+    });
+    expect(overlays.length).toBeGreaterThanOrEqual(1);
+    const jpeg = await renderShareOgCard({
+      background,
+      showPin: false,
+      pinOverlays: overlays,
+      logo,
+    });
+    const meta = await sharp(jpeg).metadata();
+    expect(meta.width).toBe(SHARE_OG_WIDTH);
+    expect(meta.height).toBe(SHARE_OG_HEIGHT);
+    expect(shareOgPinSvg("#1A73E8")).toContain("#1A73E8");
+    expect(shareOgPinSvg("not-a-color")).toContain(SHARE_OG_PIN_COLOR);
+  });
+});
+

@@ -8,6 +8,7 @@ import { RM22_DESIGN_COMPS } from "../lib/talisbooks/rm22-template";
 import { ebookPageMediaFromRow } from "../lib/talisbooks/mapsite-ebook-service";
 import { talisbooksViewerShareOgPath } from "../lib/share/og-card";
 import {
+  allpinsSeoCopy,
   isLargeBrandLogoUrl,
   isUsableMapSiteOgImage,
   mapsiteOgMetadataImage,
@@ -16,6 +17,7 @@ import {
   selectMapsiteScenicBackgroundUrl,
   selectViewerPartingShotUrl,
   toAbsoluteHttpsOgUrl,
+  viewerRealtimeSeoCopy,
 } from "../lib/talispros/mapsite-og-image";
 import { createMetadata } from "../lib/seo";
 
@@ -281,10 +283,54 @@ describe("Mapsite™ and viewer share image selection", () => {
         fastCode: "rm22",
         propertyTitle: null,
         propertyDescription: null,
+        propertyAddress: "160 Macs Rd, Richmond County",
       }),
     ).toEqual({
       title: "RM22 | Mapsite™",
-      description: "Mapsite™ RM22",
+      description: "160 Macs Rd, Richmond County · FAST Code RM22",
+    });
+    expect(
+      mapsiteRealtimeSeoCopy({
+        fastCode: "rm22",
+        propertyTitle: null,
+        propertyDescription: null,
+      }),
+    ).toEqual({
+      title: "RM22 | Mapsite™",
+      description: "Mapsite™ for FAST Code RM22.",
+    });
+  });
+
+  it("uses ALLPINS property copy for the multi-pin listings share card", () => {
+    expect(allpinsSeoCopy()).toEqual({
+      title: "ALLPINS — Every Mapsite™ | Mapsite™",
+      description:
+        "Canada showcase of Mapsite™ pins. Open a pin for the book and Mapsite™ demo.",
+    });
+    expect(resolveMapSiteOgImage("allpins")).toBe(
+      "https://www.talispros.com/api/og/mapsite/allpins",
+    );
+  });
+
+  it("composes viewer SEO from title, address, and FAST Code", () => {
+    expect(
+      viewerRealtimeSeoCopy({
+        title: "Chaga Town",
+        subtitle: "A lookbook for DC02",
+      }),
+    ).toEqual({
+      title: "Chaga Town",
+      description: "A lookbook for DC02",
+    });
+    expect(
+      viewerRealtimeSeoCopy({
+        title: "Chaga Town",
+        address: "Ottawa, ON",
+        fastCode: "dc02",
+      }),
+    ).toEqual({
+      title: "Chaga Town",
+      description: "Ottawa, ON · Talisbook™ for FAST Code DC02",
     });
   });
 

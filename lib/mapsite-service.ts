@@ -17,9 +17,11 @@ import {
   type AdminMapSiteThumbnail,
 } from "@/lib/talispros/mapsite-admin-thumbnail";
 import {
+  allpinsSeoCopy,
   mapsiteRealtimeSeoCopy,
   resolveMapSiteOgImage,
 } from "@/lib/talispros/mapsite-og-image";
+import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 
 export interface CreateMapSiteForAccountInput {
   accountId: string;
@@ -233,7 +235,7 @@ export async function listMapSitesForSeoAdmin(): Promise<MapSiteSeoListItem[]> {
     client
       .from("mapsites")
       .select(
-        "id, fast_code, status, property_title, property_description, meta_title, meta_description, og_image_url, agent_name, owner_first_name, owner_last_name",
+        "id, fast_code, status, property_title, property_description, property_address, meta_title, meta_description, og_image_url, agent_name, owner_first_name, owner_last_name",
       )
       .order("fast_code", { ascending: true })
   );
@@ -260,6 +262,7 @@ export async function listMapSitesForSeoAdmin(): Promise<MapSiteSeoListItem[]> {
         status: row.status as string,
         propertyTitle,
         propertyDescription: row.property_description as string | null,
+        propertyAddress: (row.property_address as string | null) ?? null,
         metaTitle: (row.meta_title as string | null) ?? null,
         metaDescription: (row.meta_description as string | null) ?? null,
         ogImageUrl: (row.og_image_url as string | null) ?? null,
@@ -272,11 +275,14 @@ export async function listMapSitesForSeoAdmin(): Promise<MapSiteSeoListItem[]> {
 
   return Promise.all(
     rows.map(async (row) => {
-      const live = mapsiteRealtimeSeoCopy({
-        fastCode: row.fastCode,
-        propertyTitle: row.propertyTitle,
-        propertyDescription: row.propertyDescription,
-      });
+      const live = isAllPinsFastCode(row.fastCode)
+        ? allpinsSeoCopy()
+        : mapsiteRealtimeSeoCopy({
+            fastCode: row.fastCode,
+            propertyTitle: row.propertyTitle,
+            propertyDescription: row.propertyDescription,
+            propertyAddress: row.propertyAddress,
+          });
       const liveOgImageUrl = resolveMapSiteOgImage(row.fastCode);
       return {
         id: row.id,
