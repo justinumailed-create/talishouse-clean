@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   ISOLATED_BOOKSHELF_CREATE_PATH,
+  ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
   ISOLATED_BOOKSHELF_DESTINATION,
   ISOLATED_BOOKSHELF_PATH,
   buildIsolatedBookshelfEbookChoiceHref,
@@ -10,8 +11,10 @@ import {
   isIsolatedBookshelfFromAllPins,
   buildIsolatedBookshelfSelfServeHref,
   excludeIsolatedBookshelfBooks,
+  isolatedBookshelfSeoMetadata,
   isIsolatedBookshelfBook,
   isIsolatedBookshelfDestination,
+  resolveIsolatedBookshelfBookDescription,
   withIsolatedBookshelfMetadata,
 } from "../lib/talisbooks/isolated-bookshelf";
 import { buildIsolatedBookshelfOnboardingContext } from "../lib/talispros/resolve-onboarding-from-request";
@@ -28,6 +31,47 @@ describe("isolated catalogue bookshelf", () => {
     expect(metadata.globallyPublished).toBe(false);
     expect(isIsolatedBookshelfBook({ metadata })).toBe(true);
     expect(isIsolatedBookshelfBook({ metadata: {} })).toBe(false);
+  });
+
+
+  it("defaults blank isolated-shelf descriptions to Talispros™ RWA copy (not ADMIN123)", () => {
+    expect(ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION).toBe(
+      "Talispros™ Real-World Asset Tokenization",
+    );
+    expect(resolveIsolatedBookshelfBookDescription("")).toBe(
+      ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
+    );
+    expect(resolveIsolatedBookshelfBookDescription("   ")).toBe(
+      ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
+    );
+    expect(resolveIsolatedBookshelfBookDescription(null)).toBe(
+      ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
+    );
+    expect(resolveIsolatedBookshelfBookDescription("Custom listing copy")).toBe(
+      "Custom listing copy",
+    );
+    expect(isolatedBookshelfSeoMetadata("")).toEqual({
+      metaDescription: ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
+      seoDescription: ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
+    });
+    expect(isolatedBookshelfSeoMetadata("Custom listing copy")).toEqual({
+      metaDescription: "Custom listing copy",
+      seoDescription: "Custom listing copy",
+    });
+
+    const autoDraft = readFileSync(
+      resolve("lib/talisbooks/auto-draft-ebook.ts"),
+      "utf8",
+    );
+    expect(autoDraft).toContain("resolveIsolatedBookshelfBookDescription");
+    expect(autoDraft).toContain("isolatedBookshelfSeoMetadata(description)");
+    expect(autoDraft).toMatch(
+      /input\.isolatedBookshelf\s*\?\s*resolveIsolatedBookshelfBookDescription/,
+    );
+    // Normal Mapsite self-serve still uses the FAST-code draft placeholder.
+    expect(autoDraft).toContain(
+      "Draft Talisbook™ for FAST Code ${fastCode.toUpperCase()}.",
+    );
   });
 
   it("excludes isolated books from public/general lists", () => {

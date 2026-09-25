@@ -16,6 +16,28 @@ export const ISOLATED_BOOKSHELF_UNLOCK_COOKIE = "catalogue_isolated_bookshelf";
 export const ISOLATED_BOOKSHELF_FROM_PARAM = "from";
 export const ISOLATED_BOOKSHELF_FROM_ALLPINS = "allpins";
 
+/**
+ * Default book / OG description for isolated-shelf drafts when the creator
+ * leaves description blank. Avoids persisting the ADMIN123 FAST-code placeholder.
+ */
+export const ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION =
+  "Talispros™ Real-World Asset Tokenization";
+
+export function resolveIsolatedBookshelfBookDescription(
+  description?: string | null,
+): string {
+  const trimmed = (description || "").trim();
+  return trimmed || ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION;
+}
+
+/** SEO fields `load-book.ts` prefers before `books.description` for viewer OG. */
+export function isolatedBookshelfSeoMetadata(
+  description: string,
+): { metaDescription: string; seoDescription: string } {
+  const value = description.trim() || ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION;
+  return { metaDescription: value, seoDescription: value };
+}
+
 export type IsolatedBookshelfDestination = typeof ISOLATED_BOOKSHELF_DESTINATION;
 
 export function isIsolatedBookshelfDestination(
