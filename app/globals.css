@@ -1330,7 +1330,109 @@ body.mapsite-gallery-open [data-paypal-button] {
   .talisbooks-viewer__rail {
     display: none;
   }
+
+  /* Mobile-only: Landscape / Portrait stage toggle (rail is hidden). */
+  .talisbooks-viewer__orient-fab {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.55rem;
+    z-index: 24;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 2.35rem;
+    padding: 0.4rem 0.75rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.92);
+    color: #1c1917;
+    box-shadow: 0 4px 14px rgba(28, 25, 23, 0.12);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .talisbooks-viewer__orient-fab:hover {
+    background: #ffffff;
+  }
+
+  .talisbooks-viewer__orient-fab--active {
+    background: #171717;
+    color: #ffffff;
+  }
+
+  .talisbooks-viewer__stage-column {
+    position: relative;
+  }
+
+  /*
+   * Forced landscape stage on a portrait phone: rotate the flipbook stage
+   * so landscape spreads read larger without turning the device. Header and
+   * the orient FAB stay in portrait so Portrait is always one tap away.
+   */
+  .talisbooks-viewer--stage-landscape .talisbooks-viewer__layout {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .talisbooks-viewer--stage-landscape .talisbooks-viewer__stage-column {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100dvh;
+    height: 100dvw;
+    max-width: 100dvh;
+    max-height: calc(100dvw - 0.5rem);
+    margin: 0;
+    transform: translate(-50%, -50%) rotate(90deg);
+    transform-origin: center center;
+  }
+
+  .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage__desk {
+    min-height: 0;
+    height: 100%;
+    width: 100%;
+    border-radius: 0.55rem;
+    padding: 0.25rem 0.3rem 0.15rem;
+  }
+
+  .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage__perspective,
+  .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage--closed .talisbooks-viewer-stage__perspective,
+  .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage--magazine .talisbooks-viewer-stage__perspective {
+    min-height: 0;
+    width: min(100%, calc(16 / 9 * var(--viewer-book-height, 70dvh)));
+    height: auto;
+    max-height: min(100%, var(--viewer-book-height, 70dvh));
+    aspect-ratio: 16 / 9;
+  }
+
+  .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage__hint {
+    font-size: 0.62rem;
+  }
 }
+
+/* Hide the mobile orient FAB on desktop — rail (when shown) can carry the control. */
+@media (min-width: 861px) {
+  .talisbooks-viewer__orient-fab {
+    display: none;
+  }
+
+  .talisbooks-viewer__rail-btn--orient {
+    display: none;
+  }
+}
+
 
 .talisbooks-viewer__empty {
   max-width: 40rem;

@@ -50,6 +50,20 @@ describe("sample Talisbooks™ viewer chrome", () => {
     expect(rails).not.toContain("talisbooks-viewer__rail--left");
   });
 
+
+  it("offers a mobile Landscape stage toggle with an easy return to Portrait", () => {
+    expect(shell).toContain("stageLandscape");
+    expect(shell).toContain("talisbooks-viewer--stage-landscape");
+    expect(shell).toContain("talisbooks-viewer__orient-fab");
+    expect(shell).toMatch(/Landscape|Portrait/);
+    const rails = readSource("components/talisbooks/viewer/TalisBooksViewerRails.tsx");
+    expect(rails).toContain("onToggleStageLandscape");
+    expect(rails).toContain("talisbooks-viewer__rail-btn--orient");
+    const css = readSource("app/globals.css");
+    expect(css).toContain("talisbooks-viewer--stage-landscape");
+    expect(css).toContain("rotate(90deg)");
+  });
+
   it("shows Live Edit only after payment, never on demonstration books", () => {
     expect(shell).toContain("pageInsertLocked");
     const liveEditor = readSource(

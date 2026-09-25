@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { RotateCw } from "lucide-react";
 import {
   orderedViewerImageUrls,
   warmViewerImages,
@@ -75,6 +76,9 @@ export default function TalisBooksViewerShell({
   useEffect(() => {
     viewModeRef.current = viewMode;
   }, [viewMode]);
+
+  /** Mobile portrait: CSS-rotate the flipbook stage to landscape for spreads. */
+  const [stageLandscape, setStageLandscape] = useState(false);
 
   const spreadOptions = useMemo(
     () => ({
@@ -437,7 +441,10 @@ export default function TalisBooksViewerShell({
       className={[
         "talisbooks-viewer",
         isMagazine ? "talisbooks-viewer--magazine" : "talisbooks-viewer--hardcover",
-      ].join(" ")}
+        stageLandscape ? "talisbooks-viewer--stage-landscape" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <header className="talisbooks-viewer__header">
         <div>
@@ -498,12 +505,34 @@ export default function TalisBooksViewerShell({
         viewMode={viewMode}
         autoPlaying={autoPlaying}
         intervalMs={intervalMs}
+        stageLandscape={stageLandscape}
         onViewModeChange={handleViewModeChange}
         onToggleAutoplay={handleToggleAutoplay}
         onIntervalChange={setIntervalMs}
+        onToggleStageLandscape={() => setStageLandscape((current) => !current)}
       />
       <div className="talisbooks-viewer__layout">
         <div className="talisbooks-viewer__stage-column">
+          <button
+            type="button"
+            className={[
+              "talisbooks-viewer__orient-fab",
+              stageLandscape ? "talisbooks-viewer__orient-fab--active" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            aria-pressed={stageLandscape}
+            onClick={() => setStageLandscape((current) => !current)}
+            title={stageLandscape ? "Portrait stage" : "Landscape stage"}
+            aria-label={
+              stageLandscape
+                ? "Return viewer stage to portrait"
+                : "Turn viewer stage to landscape"
+            }
+          >
+            <RotateCw className="h-4 w-4" aria-hidden="true" />
+            <span>{stageLandscape ? "Portrait" : "Landscape"}</span>
+          </button>
           <TalisBooksViewerStage
             book={book}
             binding={isMagazine ? "open" : binding}

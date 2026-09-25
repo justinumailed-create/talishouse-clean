@@ -5,6 +5,7 @@ import {
   Pause,
   Play,
   RectangleVertical,
+  RotateCw,
 } from "lucide-react";
 import {
   TALISBOOKS_VIEWER_SPEED_PRESETS,
@@ -16,16 +17,21 @@ export function TalisBooksViewerPlaybackRail({
   viewMode,
   autoPlaying,
   intervalMs,
+  stageLandscape = false,
   onViewModeChange,
   onToggleAutoplay,
   onIntervalChange,
+  onToggleStageLandscape,
 }: {
   viewMode: TalisBooksViewerViewMode;
   autoPlaying: boolean;
   intervalMs: number;
+  /** Mobile: CSS-rotate the stage to landscape without turning the phone. */
+  stageLandscape?: boolean;
   onViewModeChange: (mode: TalisBooksViewerViewMode) => void;
   onToggleAutoplay: () => void;
   onIntervalChange: (intervalMs: number) => void;
+  onToggleStageLandscape?: () => void;
 }) {
   const applyPreset = (id: TalisBooksViewerSpeedPresetId) => {
     const preset = TALISBOOKS_VIEWER_SPEED_PRESETS.find((entry) => entry.id === id);
@@ -103,6 +109,37 @@ export function TalisBooksViewerPlaybackRail({
           <RectangleVertical className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
       </div>
+
+      {onToggleStageLandscape ? (
+        <button
+          type="button"
+          className={[
+            "talisbooks-viewer__rail-btn",
+            "talisbooks-viewer__rail-btn--orient",
+            stageLandscape ? "talisbooks-viewer__rail-btn--active" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          aria-pressed={stageLandscape}
+          onClick={onToggleStageLandscape}
+          title={stageLandscape ? "Portrait stage" : "Landscape stage"}
+          aria-label={
+            stageLandscape
+              ? "Return viewer stage to portrait"
+              : "Turn viewer stage to landscape"
+          }
+        >
+          <RotateCw
+            className={[
+              "h-3.5 w-3.5",
+              stageLandscape ? "talisbooks-viewer__orient-icon--on" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            aria-hidden="true"
+          />
+        </button>
+      ) : null}
     </aside>
   );
 }
