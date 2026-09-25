@@ -8,8 +8,8 @@ import type {
 } from "@/lib/talispros/allpins-mapsite";
 import {
   allPinsPublishedHref,
-  ISOLATED_BOOKSHELF_PATH,
 } from "@/lib/talispros/allpins-mapsite-ui";
+import { buildIsolatedBookshelfHref } from "@/lib/talisbooks/isolated-bookshelf";
 
 type Props = {
   aggregation: AllPinsAggregation;
@@ -106,7 +106,7 @@ export default function MapSiteAllPinsShowcase({
               Published URL
             </Link>
             <Link
-              href={ISOLATED_BOOKSHELF_PATH}
+              href={buildIsolatedBookshelfHref({ fromAllPins: true })}
               className="rounded-lg bg-neutral-950 px-2.5 py-1.5 text-[11px] font-medium text-white hover:bg-neutral-800"
             >
               Isolated shelf

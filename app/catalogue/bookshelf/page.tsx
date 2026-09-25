@@ -7,6 +7,7 @@ import {
   ISOLATED_BOOKSHELF_CREATE_PATH,
   ISOLATED_BOOKSHELF_PATH,
   ISOLATED_BOOKSHELF_UNLOCK_COOKIE,
+  isIsolatedBookshelfFromAllPins,
 } from "@/lib/talisbooks/isolated-bookshelf";
 import { listIsolatedBookshelfBooks } from "@/lib/talisbooks/isolated-bookshelf-service";
 import { createMetadata } from "@/lib/seo";
@@ -38,7 +39,7 @@ export const metadata: Metadata = createMetadata({
 export default async function CatalogueIsolatedBookshelfPage({
   searchParams,
 }: {
-  searchParams: Promise<{ created?: string }>;
+  searchParams: Promise<{ created?: string; from?: string }>;
 }) {
   const account = await getAdminSessionAccount();
   const params = await searchParams;
@@ -58,6 +59,7 @@ export default async function CatalogueIsolatedBookshelfPage({
       books={books}
       adminFastCode={account?.fastCode}
       canCreate={Boolean(account)}
+      fromAllPins={isIsolatedBookshelfFromAllPins(params.from)}
     />
   );
 }

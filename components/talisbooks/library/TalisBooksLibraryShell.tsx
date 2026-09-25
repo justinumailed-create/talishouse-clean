@@ -35,6 +35,11 @@ interface TalisBooksLibraryShellProps {
   backHref?: string;
   /** Extra controls in the topbar actions row (e.g. admin Create ebook). */
   headerExtra?: ReactNode;
+  /** Strip capacity / marketing chrome (Isolated Bookshelf). */
+  compactHeader?: boolean;
+  /** Optional second back control (e.g. Back to ALL-PINs). */
+  secondaryBackHref?: string;
+  secondaryBackLabel?: string;
 }
 
 function chunkRows<T>(items: T[], columns: number): T[][] {
@@ -99,6 +104,9 @@ export default function TalisBooksLibraryShell({
   canDelete = false,
   backHref,
   headerExtra,
+  compactHeader = false,
+  secondaryBackHref,
+  secondaryBackLabel = "Back to ALL-PINs",
 }: TalisBooksLibraryShellProps) {
   const router = useRouter();
   const [sort, setSort] = useState<TalisBooksLibrarySort>("published_desc");
@@ -197,42 +205,48 @@ export default function TalisBooksLibraryShell({
     <div className="talisbooks-library">
       <header className="talisbooks-library__topbar">
         <div className="talisbooks-library__brand">
-          <p className="talisbooks-library__eyebrow">
-            {publicCatalog
-              ? scoped
-                ? `Talispros™ Ecosystem · ${bookshelf.fastCode!.toUpperCase()}`
-                : "Talispros™ Ecosystem"
-              : createdCatalog
-                ? "Talispros™ Ecosystem"
-              : scoped
-                ? `TEB™ · ${bookshelf.fastCode!.toUpperCase()}`
-                : bookshelf.accountType === "root"
-                  ? "Root Account"
-                  : "Derivative Account"}
-            {!publicCatalog && !createdCatalog && !scoped && bookshelf.fastCode
-              ? ` · ${bookshelf.fastCode.toUpperCase()}`
-              : ""}
-          </p>
-          <h1 className="talisbooks-library__title">
-            {publicCatalog
-              ? "TalisBooks™"
-              : scoped
-                ? bookshelf.accountName
-                : "Bookshelf"}
-          </h1>
-          {publicCatalog || createdCatalog ? (
-            <p className="talisbooks-library__subtitle">
-              {scoped && bookshelf.fastCode
-                ? `Open a cover to read. This shelf shows Talisbooks™ connected to FAST Code ${bookshelf.fastCode.toUpperCase()} only.`
-                : createdCatalog
-                  ? "Open a cover to read. Created Talisbooks™ with FAST codes stand on this shelf. The latest book is pinned on the left; older books stand on the right, newest first from the left."
-                  : "Open a cover to read. The featured book is pinned at the front of the shelf."}
-            </p>
-          ) : null}
+          {compactHeader ? (
+            <h1 className="talisbooks-library__title">Bookshelf</h1>
+          ) : (
+            <>
+              <p className="talisbooks-library__eyebrow">
+                {publicCatalog
+                  ? scoped
+                    ? `Talispros™ Ecosystem · ${bookshelf.fastCode!.toUpperCase()}`
+                    : "Talispros™ Ecosystem"
+                  : createdCatalog
+                    ? "Talispros™ Ecosystem"
+                  : scoped
+                    ? `TEB™ · ${bookshelf.fastCode!.toUpperCase()}`
+                    : bookshelf.accountType === "root"
+                      ? "Root Account"
+                      : "Derivative Account"}
+                {!publicCatalog && !createdCatalog && !scoped && bookshelf.fastCode
+                  ? ` · ${bookshelf.fastCode.toUpperCase()}`
+                  : ""}
+              </p>
+              <h1 className="talisbooks-library__title">
+                {publicCatalog
+                  ? "TalisBooks™"
+                  : scoped
+                    ? bookshelf.accountName
+                    : "Bookshelf"}
+              </h1>
+              {publicCatalog || createdCatalog ? (
+                <p className="talisbooks-library__subtitle">
+                  {scoped && bookshelf.fastCode
+                    ? `Open a cover to read. This shelf shows Talisbooks™ connected to FAST Code ${bookshelf.fastCode.toUpperCase()} only.`
+                    : createdCatalog
+                      ? "Open a cover to read. Created Talisbooks™ with FAST codes stand on this shelf. The latest book is pinned on the left; older books stand on the right, newest first from the left."
+                      : "Open a cover to read. The featured book is pinned at the front of the shelf."}
+                </p>
+              ) : null}
+            </>
+          )}
         </div>
 
         <div className="talisbooks-library__header-actions">
-          {!publicCatalog && !createdCatalog ? (
+          {!compactHeader && !publicCatalog && !createdCatalog ? (
             <div
               className="talisbooks-library__capacity"
               title="Fully stocked shelf monetization capacity"
@@ -248,13 +262,18 @@ export default function TalisBooksLibraryShell({
             </div>
           ) : null}
           {headerExtra}
+          {secondaryBackHref ? (
+            <Link href={secondaryBackHref} className="talisbooks-library__back">
+              {secondaryBackLabel}
+            </Link>
+          ) : null}
           <Link href={mapsiteHref} className="talisbooks-library__back">
             Back to Mapsite™
           </Link>
         </div>
       </header>
 
-      {scoped && bookshelf.entitlements && !bookshelf.entitlements.activated ? (
+      {!compactHeader && scoped && bookshelf.entitlements && !bookshelf.entitlements.activated ? (
         <div className="mx-auto mb-6 max-w-3xl rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
           <p className="font-medium text-neutral-900">Bookshelf locked</p>
           <p className="mt-1 text-neutral-600">
@@ -265,7 +284,7 @@ export default function TalisBooksLibraryShell({
         </div>
       ) : null}
 
-      {scoped && bookshelf.entitlements?.activated ? (
+      {!compactHeader && scoped && bookshelf.entitlements?.activated ? (
         <div className="mx-auto mb-4 max-w-3xl text-xs text-neutral-500">
           Activated {bookshelf.entitlements.accountKind} · quota{" "}
           {bookshelf.entitlements.bookCount}/{bookshelf.entitlements.bookQuota} books

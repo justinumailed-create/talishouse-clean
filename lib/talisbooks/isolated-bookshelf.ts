@@ -12,6 +12,9 @@ export const ISOLATED_BOOKSHELF_CREATE_PATH = "/catalogue/bookshelf/create";
 export const ISOLATED_BOOKSHELF_DESTINATION = "isolated-bookshelf";
 export const ISOLATED_BOOKSHELF_METADATA_KEY = "isolatedBookshelf";
 export const ISOLATED_BOOKSHELF_UNLOCK_COOKIE = "catalogue_isolated_bookshelf";
+/** Query flag set when the shelf is opened from the ALLPINS Mapsite™ chrome. */
+export const ISOLATED_BOOKSHELF_FROM_PARAM = "from";
+export const ISOLATED_BOOKSHELF_FROM_ALLPINS = "allpins";
 
 export type IsolatedBookshelfDestination = typeof ISOLATED_BOOKSHELF_DESTINATION;
 
@@ -45,8 +48,19 @@ export function excludeIsolatedBookshelfBooks<
   return books.filter((book) => !isIsolatedBookshelfBook(book));
 }
 
-export function buildIsolatedBookshelfHref(): string {
+export function buildIsolatedBookshelfHref(options?: {
+  fromAllPins?: boolean;
+}): string {
+  if (options?.fromAllPins) {
+    return `${ISOLATED_BOOKSHELF_PATH}?${ISOLATED_BOOKSHELF_FROM_PARAM}=${ISOLATED_BOOKSHELF_FROM_ALLPINS}`;
+  }
   return ISOLATED_BOOKSHELF_PATH;
+}
+
+export function isIsolatedBookshelfFromAllPins(
+  value: string | null | undefined,
+): boolean {
+  return (value || "").trim().toLowerCase() === ISOLATED_BOOKSHELF_FROM_ALLPINS;
 }
 
 /**

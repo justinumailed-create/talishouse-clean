@@ -7,6 +7,7 @@ import {
   ISOLATED_BOOKSHELF_PATH,
   buildIsolatedBookshelfEbookChoiceHref,
   buildIsolatedBookshelfHref,
+  isIsolatedBookshelfFromAllPins,
   buildIsolatedBookshelfSelfServeHref,
   excludeIsolatedBookshelfBooks,
   isIsolatedBookshelfBook,
@@ -142,6 +143,43 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(create).toContain("requireAdminPage");
   });
 
+
+  it("strips capacity chrome on Isolated Bookshelf and gates Back to ALL-PINs on from=allpins", () => {
+    const shell = readFileSync(
+      resolve("components/talisbooks/library/TalisBooksLibraryShell.tsx"),
+      "utf8",
+    );
+    expect(shell).toContain("compactHeader");
+    expect(shell).toMatch(/!compactHeader && !publicCatalog && !createdCatalog/);
+    expect(shell).toContain("talisbooks-library__capacity");
+    expect(shell).toContain("secondaryBackHref");
+    expect(shell).toContain("Back to ALL-PINs");
+
+    const view = readFileSync(
+      resolve("components/catalogue/IsolatedBookshelfView.tsx"),
+      "utf8",
+    );
+    expect(view).toContain("compactHeader");
+    expect(view).toContain("fromAllPins");
+    expect(view).toContain("secondaryBackHref={fromAllPins ? backHref : undefined}");
+    expect(view).not.toMatch(/Shelf capacity/);
+
+    const page = readFileSync(resolve("app/catalogue/bookshelf/page.tsx"), "utf8");
+    expect(page).toContain("isIsolatedBookshelfFromAllPins(params.from)");
+
+    const showcase = readFileSync(
+      resolve("components/talispros/mapsite/MapSiteAllPinsShowcase.tsx"),
+      "utf8",
+    );
+    expect(showcase).toContain("buildIsolatedBookshelfHref({ fromAllPins: true })");
+
+    expect(buildIsolatedBookshelfHref({ fromAllPins: true })).toBe(
+      "/catalogue/bookshelf?from=allpins",
+    );
+    expect(isIsolatedBookshelfFromAllPins("allpins")).toBe(true);
+    expect(isIsolatedBookshelfFromAllPins(undefined)).toBe(false);
+  });
+
   it("viewer Back to Mapsite™ for isolated books uses ALLPINS, not admin FAST Code", () => {
     const location = readFileSync(
       resolve("lib/talisbooks/viewer/location.ts"),
@@ -247,7 +285,8 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(showcase).toContain("Published URL");
     expect(showcase).toContain("Isolated shelf");
     expect(showcase).toContain("allPinsPublishedHref");
-    expect(showcase).toContain("ISOLATED_BOOKSHELF_PATH");
+    expect(showcase).toContain("buildIsolatedBookshelfHref");
+    expect(showcase).toContain("fromAllPins: true");
     expect(showcase).toContain("md:hidden");
     expect(showcase).toContain("hidden md:flex");
   });

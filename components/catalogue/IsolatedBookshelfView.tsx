@@ -4,9 +4,9 @@ import Link from "next/link";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import type { IsolatedBookshelfBook } from "@/lib/talisbooks/isolated-bookshelf-service";
 import { ISOLATED_BOOKSHELF_CREATE_PATH } from "@/lib/talisbooks/isolated-bookshelf";
+import { allPinsClaimedHref } from "@/lib/talispros/allpins-mapsite-ui";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import { ALLPINS_FAST_CODE } from "@/lib/talispros/allpins-mapsite-constants";
-import { allPinsClaimedHref } from "@/lib/talispros/allpins-mapsite-ui";
 import { TALISBOOKS_LIBRARY_SPINE_PALETTES } from "@/lib/talisbooks/library/constants";
 import type {
   TalisBooksBookshelf,
@@ -86,12 +86,15 @@ function buildIsolatedAllPinsBookshelf(
 export default function IsolatedBookshelfView({
   books,
   canCreate = false,
+  fromAllPins = false,
 }: {
   books: IsolatedBookshelfBook[];
   /** Retained for callers; no longer shown in shelf chrome. */
   adminFastCode?: string;
   /** Show the Create ebook control (Global Admin session only). */
   canCreate?: boolean;
+  /** True when the reader opened this shelf from the ALLPINS Mapsite™ chrome. */
+  fromAllPins?: boolean;
 }) {
   const bookshelf = buildIsolatedAllPinsBookshelf(books);
   const backHref = allPinsClaimedHref();
@@ -101,6 +104,9 @@ export default function IsolatedBookshelfView({
       <TalisBooksLibraryShell
         bookshelf={bookshelf}
         backHref={backHref}
+        compactHeader
+        secondaryBackHref={fromAllPins ? backHref : undefined}
+        secondaryBackLabel="Back to ALL-PINs"
         headerExtra={
           canCreate ? (
             <Link
