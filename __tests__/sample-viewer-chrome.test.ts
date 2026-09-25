@@ -2,8 +2,10 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  viewerBackToMapsiteHref,
   viewerFastCodeLabel,
   viewerGoogleMapsHref,
+  viewerMapsiteFastCode,
   viewerMapsiteHref,
 } from "../lib/talisbooks/viewer/location";
 
@@ -108,6 +110,44 @@ describe("viewer edge chrome", () => {
   it("sends the Talispros™ logo to the claimed Mapsite™", () => {
     expect(viewerMapsiteHref({ fastCode: "rm22", accountType: "root" })).toBe(
       "/talispros/mapsite/root/rm22",
+    );
+  });
+
+  it("routes isolated / ALLPINS shelf Back to listings/allpins, not admin123", () => {
+    expect(
+      viewerMapsiteFastCode({
+        fastCode: "admin123",
+        isolatedBookshelf: true,
+      }),
+    ).toBe("allpins");
+    expect(
+      viewerBackToMapsiteHref({
+        fastCode: "admin123",
+        isolatedBookshelf: true,
+      }),
+    ).toBe("/talispros/mapsite/listings/allpins");
+    expect(
+      viewerMapsiteHref({
+        fastCode: "ADMIN123",
+        accountType: "root",
+        isolatedBookshelf: true,
+      }),
+    ).toBe("/talispros/mapsite/listings/allpins");
+
+    // Normal FAST books keep their own listings code.
+    expect(
+      viewerBackToMapsiteHref({ fastCode: "rm22", isolatedBookshelf: false }),
+    ).toBe("/talispros/mapsite/listings/rm22");
+    expect(
+      viewerBackToMapsiteHref({ fastCode: "lg01" }),
+    ).toBe("/talispros/mapsite/listings/lg01");
+
+    const shellSrc = readSource(
+      "components/talisbooks/viewer/TalisBooksViewerShell.tsx",
+    );
+    expect(shellSrc).toContain("viewerBackToMapsiteHref(book)");
+    expect(shellSrc).not.toContain(
+      "mapsiteBackFromScheduleHref(book.fastCode)",
     );
   });
 });

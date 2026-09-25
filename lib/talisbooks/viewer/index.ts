@@ -49,7 +49,7 @@ export {
   createBrokeragePage3Scaffold,
 } from "./brokerage-scaffold";
 export { getViewerBookBySlug, resolveViewerBookBySlug } from "./load-book";
-export { viewerFastCodeLabel, viewerGoogleMapsHref, viewerMapsiteHref } from "./location";
+export { viewerBackToMapsiteHref, viewerFastCodeLabel, viewerGoogleMapsHref, viewerMapsiteFastCode, viewerMapsiteHref } from "./location";
 export {
   clampSpreadAspectRatio,
   continuousSpreadImageUrl,

@@ -90,7 +90,7 @@ describe("isolated catalogue bookshelf", () => {
   });
 });
 
-
+describe("isolated bookshelf ALLPINS / viewer back link", () => {
   it("ebook generate client forwards isolated upload scope (fastCode + flag)", () => {
     const client = readFileSync(
       resolve("components/talispros/EbookGenerateClient.tsx"),
@@ -117,3 +117,31 @@ describe("isolated catalogue bookshelf", () => {
     expect(page).toContain("isAllPinsFastCode");
     expect(page).toContain("MapSiteAllPinsApplication");
   });
+
+  it("viewer Back to Mapsite™ for isolated books uses ALLPINS, not admin FAST Code", () => {
+    const location = readFileSync(
+      resolve("lib/talisbooks/viewer/location.ts"),
+      "utf8",
+    );
+    const shell = readFileSync(
+      resolve("components/talisbooks/viewer/TalisBooksViewerShell.tsx"),
+      "utf8",
+    );
+    const loadBook = readFileSync(
+      resolve("lib/talisbooks/viewer/load-book.ts"),
+      "utf8",
+    );
+    expect(location).toContain("ALLPINS_FAST_CODE");
+    expect(location).toContain("isolatedBookshelf");
+    expect(location).toContain("viewerBackToMapsiteHref");
+    expect(loadBook).toContain("isolatedBookshelf: isIsolatedBookshelfBook");
+    expect(shell).toContain("viewerBackToMapsiteHref(book)");
+    // Isolated shelf library already links ALLPINS Mapsite™ (not admin123).
+    const shelf = readFileSync(
+      resolve("components/catalogue/IsolatedBookshelfView.tsx"),
+      "utf8",
+    );
+    expect(shelf).toContain("allPinsClaimedHref");
+    expect(shelf).not.toContain("mapsiteBackFromScheduleHref");
+  });
+});

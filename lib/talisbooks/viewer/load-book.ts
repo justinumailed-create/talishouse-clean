@@ -14,6 +14,7 @@ import type {
 import type { TalisBooksPageRole } from "../types";
 import type { TalisBooksCoverTemplateId } from "../covers";
 import { isRm22PhotoPlaceholderUrl } from "@/lib/talisbooks/rm22-template";
+import { isIsolatedBookshelfBook } from "@/lib/talisbooks/isolated-bookshelf";
 
 function asLayout(value: unknown): TalisBooksViewerPageLayout | undefined {
   if (
@@ -322,6 +323,7 @@ export async function getViewerBookBySlug(
     fastCode: typeof book.fast_code === "string" ? book.fast_code : undefined,
     accountType:
       typeof book.account_type === "string" ? book.account_type : undefined,
+    isolatedBookshelf: isIsolatedBookshelfBook({ metadata }),
     title: book.title,
     subtitle: book.subtitle,
     frontCoverImageUrl: coverImageUrl || undefined,

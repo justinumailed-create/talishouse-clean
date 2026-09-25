@@ -108,6 +108,11 @@ export interface TalisBooksViewerBook {
   fastCode?: string;
   /** Account type that owns this book (root / derivative / adpro / fsbo, etc.). */
   accountType?: string;
+  /**
+   * Catalogue isolated shelf book (metadata.isolatedBookshelf).
+   * Back to Mapsite™ must use ALLPINS, not the creator admin FAST Code.
+   */
+  isolatedBookshelf?: boolean;
   title: string;
   subtitle?: string;
   /**
