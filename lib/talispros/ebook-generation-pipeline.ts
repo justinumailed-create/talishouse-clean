@@ -1,3 +1,4 @@
+import { ISOLATED_BOOKSHELF_PATH } from "@/lib/talisbooks/isolated-bookshelf";
 import { generateSelfServiceEbook } from "@/lib/talisbooks/self-service-ebook";
 import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { buildMapSiteAfterBookHref } from "@/lib/talispros/ebook-choice";
@@ -62,6 +63,8 @@ export type RunEbookGenerationInput = {
   rm22SlotHydration?: import("@/lib/talisbooks/rm22-template").Rm22SlotHydration | null;
   replaceBookId?: string | null;
   flagIdentity?: MapsiteFlagIdentity;
+  /** Catalogue isolated bookshelf — admin self-serve destination. */
+  isolatedBookshelf?: boolean;
   onProgress?: (event: EbookGenerationProgressEvent) => void | Promise<void>;
   /** Override job timeout (ms). Defaults to ONBOARDING_JOB_TIMEOUT_MS. */
   timeoutMs?: number;
@@ -213,6 +216,7 @@ export async function runEbookGenerationPipeline(
           rm22SlotHydration: input.rm22SlotHydration,
           replaceBookId: input.replaceBookId,
           asAdmin: await canEditMapSite(ctx.fastCode),
+          isolatedBookshelf: Boolean(input.isolatedBookshelf),
           flagIdentity: input.flagIdentity,
         });
         logOnboardingStep("Book generation", generateStarted, {
@@ -258,7 +262,9 @@ export async function runEbookGenerationPipeline(
           requestId: progressRequestId,
           fastCode: ctx.fastCode,
           mapsiteId: result.mapsiteId || ctx.mapsiteId,
-          viewerUrl: result.viewerUrl,
+          viewerUrl: input.isolatedBookshelf
+            ? ISOLATED_BOOKSHELF_PATH
+            : result.viewerUrl,
           mapsiteHref,
           slug: result.slug,
           durationMs,

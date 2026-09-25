@@ -108,6 +108,8 @@ describe("product catalogue route", () => {
     expect(isProductCataloguePath("/catalog?product=glasshouse")).toBe(false);
     expect(isProductCataloguePath("/talishouse")).toBe(false);
     expect(isProductCataloguePath("/catalogue/extra")).toBe(false);
+    expect(isProductCataloguePath("/catalogue/bookshelf")).toBe(true);
+    expect(isProductCataloguePath("/catalogue/bookshelf/create")).toBe(true);
   });
 
   it("keeps the flipbook on /catalogue and the e-commerce product line on /catalog", () => {
@@ -136,6 +138,11 @@ describe("product catalogue route", () => {
     expect(viewer).toContain("product-flipbook__header-tools");
     expect(viewer).toContain("product-flipbook__admin-link");
     expect(viewer).toContain("TalisprosMarketsDropdown");
+    expect(viewer).toContain("Bookshelf");
+    expect(viewer).toContain("CATALOGUE_BOOKSHELF");
+    expect(viewer).not.toContain('href={ROUTES.TALISBOOKS}');
+    expect(viewer).not.toContain('"/talisbooks"');
+    expect(viewer).toContain('data-testid="catalogue-bookshelf-button"');
     expect(viewer).not.toContain("MAPSITE_APP_PATH");
     expect(catalogue).not.toContain("isAdminAuthenticated");
     expect(catalogue).not.toContain("showSample");

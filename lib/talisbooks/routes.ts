@@ -9,6 +9,8 @@ export const TALISBOOKS_ROUTES = {
   DASHBOARD_AUTHORS: "/talisbooks/dashboard/authors",
   DASHBOARD_SETTINGS: "/talisbooks/dashboard/settings",
   LIBRARY: "/talisbooks/library",
+  ISOLATED_BOOKSHELF: "/catalogue/bookshelf",
+  ISOLATED_BOOKSHELF_CREATE: "/catalogue/bookshelf/create",
   EDITOR: "/talisbooks/editor",
   VIEWER: "/talisbooks/viewer",
   SETTINGS: "/talisbooks/settings",

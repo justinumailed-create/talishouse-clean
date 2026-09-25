@@ -155,6 +155,10 @@ interface EbookGenerateClientProps {
   existingBackCoverUrl?: string | null;
   existingInteriorUrls?: string[];
   onCompleted?: () => void;
+  /** Tag the created book for the catalogue isolated bookshelf (admin-only). */
+  isolatedBookshelf?: boolean;
+  /** Destination token — when isolated-bookshelf, post-generate returns to that shelf. */
+  destination?: string | null;
 }
 
 type SelectedUpload = {
@@ -255,6 +259,8 @@ export default function EbookGenerateClient({
   existingBackCoverUrl = null,
   existingInteriorUrls = [],
   onCompleted,
+  isolatedBookshelf = false,
+  destination = null,
 }: EbookGenerateClientProps) {
   const router = useRouter();
   const inputId = useId();
@@ -1182,6 +1188,10 @@ export default function EbookGenerateClient({
       const fd = new FormData();
       if (requestId) fd.set("requestId", requestId);
       if (!requestId && embedded && fastCode) fd.set("fastCode", fastCode);
+      if (isolatedBookshelf || destination === "isolated-bookshelf") {
+        fd.set("isolatedBookshelf", "1");
+        fd.set("destination", "isolated-bookshelf");
+      }
       fd.set(
         "title",
         fromPdf

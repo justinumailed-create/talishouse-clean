@@ -35,6 +35,8 @@ export interface TalisBooksLibraryBook {
   parentBookId: string | null;
   /** Featured first on the public /talisbooks bookshelf. */
   isPinned?: boolean;
+  /** Raw book metadata (e.g. isolatedBookshelf). */
+  metadata?: Record<string, unknown> | null;
   /** Lower numbers appear first among pinned books (see PUBLIC_LIBRARY_PINNED_BOOKS). */
   pinRank?: number;
 }

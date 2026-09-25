@@ -40,6 +40,8 @@ export type GenerateSelfServiceEbookInput = {
   rm22SlotHydration?: import("@/lib/talisbooks/rm22-template").Rm22SlotHydration | null;
   replaceBookId?: string | null;
   asAdmin?: boolean;
+  /** Tag book for catalogue isolated bookshelf (admin-only, not public). */
+  isolatedBookshelf?: boolean;
   flagIdentity?: MapsiteFlagIdentity;
 };
 
@@ -90,6 +92,7 @@ export async function generateSelfServiceEbook(
       rm22SlotHydration: input.rm22SlotHydration,
       replaceBookId: input.replaceBookId,
       asAdmin: input.asAdmin,
+      isolatedBookshelf: input.isolatedBookshelf,
       flagIdentity: input.flagIdentity,
     });
 

@@ -54,6 +54,10 @@ export async function POST(request: Request) {
   const formData = await request.formData();
   const requestId = String(formData.get("requestId") || "").trim();
   const fastCode = String(formData.get("fastCode") || "").trim();
+  const isolatedBookshelf =
+    String(formData.get("isolatedBookshelf") || "").trim() === "1" ||
+    String(formData.get("destination") || "").trim().toLowerCase() ===
+      "isolated-bookshelf";
   const title = String(formData.get("title") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const location = String(formData.get("location") || "").trim();
@@ -162,6 +166,7 @@ export async function POST(request: Request) {
             })(),
           ),
           replaceBookId: String(formData.get("replaceBookId") || "").trim() || null,
+          isolatedBookshelf,
           onProgress: async (event) => {
             send(event);
           },

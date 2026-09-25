@@ -1,3 +1,4 @@
+import { excludeIsolatedBookshelfBooks } from "@/lib/talisbooks/isolated-bookshelf";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import type { Database } from "@/lib/database.types";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
@@ -93,6 +94,7 @@ function toLibraryBook(
     fastCode: row.fast_code ?? null,
     parentBookId: row.parent_book_id ?? null,
     isPinned,
+    metadata: (row.metadata as Record<string, unknown>) ?? {},
   };
 }
 
@@ -489,6 +491,6 @@ export async function getPublicTalisBooksBookshelf(options?: {
     accountName: "TalisBooks™",
     fastCode: null,
     publicCatalog: true,
-    books,
+    books: excludeIsolatedBookshelfBooks(books),
   };
 }

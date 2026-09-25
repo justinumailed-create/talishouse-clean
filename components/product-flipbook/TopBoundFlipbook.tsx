@@ -188,6 +188,13 @@ export default function TopBoundFlipbook({
               triggerClassName="product-flipbook__link"
               menuAlign="end"
             />
+            <Link
+              href={ROUTES.CATALOGUE_BOOKSHELF}
+              className="product-flipbook__link"
+              data-testid="catalogue-bookshelf-button"
+            >
+              Bookshelf
+            </Link>
           </nav>
         </div>
       </header>
