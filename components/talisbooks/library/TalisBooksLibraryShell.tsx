@@ -391,6 +391,7 @@ export default function TalisBooksLibraryShell({
                       {option.label}
                       <ArrowDownUp
                         className="talisbooks-library__sort-icon"
+                        size={11}
                         aria-hidden="true"
                       />
                     </button>

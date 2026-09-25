@@ -160,6 +160,26 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(shelf).not.toContain("mapsiteBackFromScheduleHref");
   });
 
+
+  it("keeps Date and Name sort pills in a non-overlapping flex row", () => {
+    const libraryShell = readFileSync(
+      resolve("components/talisbooks/library/TalisBooksLibraryShell.tsx"),
+      "utf8",
+    );
+    const globals = readFileSync(resolve("app/globals.css"), "utf8");
+    expect(libraryShell).toContain("talisbooks-library__sort-pills");
+    expect(libraryShell).toContain("published_desc");
+    expect(libraryShell).toContain("title_asc");
+    expect(libraryShell).toContain("size={11}");
+    expect(globals).toContain(".talisbooks-library__sort-pills");
+    expect(globals).toContain("flex-direction: row");
+    expect(globals).toContain("gap: 0.5rem");
+    expect(globals).toContain("flex: 0 0 auto");
+    expect(globals).toMatch(
+      /\.talisbooks-library__sort-pill:not\(\.is-active\)\s*\{[^}]*opacity:\s*1/s,
+    );
+  });
+
   it("ALLPINS aggregation is Canada-scoped with per-site pin style fields", () => {
     const constants = readFileSync(
       resolve("lib/talispros/allpins-mapsite-constants.ts"),

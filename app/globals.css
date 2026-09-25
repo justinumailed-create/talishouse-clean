@@ -4697,13 +4697,23 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-library__layout-toggle,
 .talisbooks-library__sort-pills {
+  /* Keep niche chrome controls in a single non-collapsing row. */
   display: inline-flex;
-  gap: 0.35rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  max-width: 100%;
+}
+
+.talisbooks-library__sort-pills {
+  justify-content: flex-end;
 }
 
 .talisbooks-library__layout-toggle button,
 .talisbooks-library__sort-pill {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 0.28rem;
   border: none;
@@ -4713,14 +4723,16 @@ body.mapsite-gallery-open [data-paypal-button] {
   font-size: 0.7rem;
   font-weight: 500;
   color: #fafaf9;
+  white-space: nowrap;
   backdrop-filter: blur(8px);
   transition: background 140ms ease, opacity 140ms ease;
 }
 
 .talisbooks-library__layout-toggle button:not(.is-active),
 .talisbooks-library__sort-pill:not(.is-active) {
-  background: rgba(68, 64, 60, 0.45);
-  opacity: 0.85;
+  /* Solid enough that inactive pills don't look like a ghost stacked on the active one. */
+  background: rgba(68, 64, 60, 0.72);
+  opacity: 1;
 }
 
 .talisbooks-library__layout-toggle button.is-active,
@@ -4732,6 +4744,10 @@ body.mapsite-gallery-open [data-paypal-button] {
 .talisbooks-library__sort-icon {
   width: 0.7rem;
   height: 0.7rem;
+  max-width: 0.7rem;
+  max-height: 0.7rem;
+  flex-shrink: 0;
+  display: block;
   opacity: 0.75;
 }
 

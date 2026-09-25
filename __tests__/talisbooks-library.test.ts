@@ -6,6 +6,7 @@ import {
   TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
   TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD,
   TALISBOOKS_LIBRARY_SHELF_CAPACITY,
+  TALISBOOKS_LIBRARY_SORT_OPTIONS,
   createDemoDerivativeBookshelf,
   createDemoRootBookshelf,
   PUBLIC_LIBRARY_PINNED_BOOKS,
@@ -155,6 +156,13 @@ describe("Talisbooks™ library search / sort / filter", () => {
       "published_desc",
     );
     expect(sorted.map((book) => book.id)).toEqual(["b", "a", "c"]);
+  });
+
+  it("lists Date and Name as the connected-shelf niche sort controls", () => {
+    const nicheSorts = TALISBOOKS_LIBRARY_SORT_OPTIONS.filter(
+      (option) => option.value === "title_asc" || option.value === "published_desc",
+    );
+    expect(nicheSorts.map((option) => option.label)).toEqual(["Date", "Name"]);
   });
 
   it("sorts by title ascending", () => {
