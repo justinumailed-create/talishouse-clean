@@ -85,18 +85,6 @@ export default function TalisBooksStandingBook({
                   style={{ backgroundImage: book.coverGradient }}
                 />
               )}
-              <div className="talisbooks-standing-book__cover-scrim" />
-              <div className="talisbooks-standing-book__cover-copy">
-                {book.isPinned ? (
-                  <p className="talisbooks-standing-book__cover-kicker">Pinned</p>
-                ) : null}
-                {displayTitle ? (
-                  <p className="talisbooks-standing-book__cover-title">{displayTitle}</p>
-                ) : null}
-                {book.subtitle && size !== "compact" ? (
-                  <p className="talisbooks-standing-book__cover-subtitle">{book.subtitle}</p>
-                ) : null}
-              </div>
             </div>
             <div className="talisbooks-standing-book__pages" aria-hidden="true" />
           </div>

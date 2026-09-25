@@ -5003,10 +5003,6 @@ body.mapsite-gallery-open [data-paypal-button] {
   justify-content: flex-start;
 }
 
-.talisbooks-library__niche--general .talisbooks-standing-book--compact .talisbooks-standing-book__cover-title {
-  font-size: calc(0.42rem + 0.7rem * var(--general-book-scale));
-  -webkit-line-clamp: 3;
-}
 
 @keyframes talisbooks-library-rise {
   from {
@@ -5083,61 +5079,6 @@ body.mapsite-gallery-open [data-paypal-button] {
   background-position: center;
 }
 
-.talisbooks-standing-book__cover-scrim {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.04) 30%, rgba(0, 0, 0, 0.55) 100%);
-}
-
-.talisbooks-standing-book__cover-copy {
-  position: absolute;
-  left: 9%;
-  right: 9%;
-  bottom: 9%;
-  z-index: 1;
-}
-
-.talisbooks-standing-book__cover-title {
-  margin: 0;
-  font-size: clamp(0.48rem, 1.1vw, 0.72rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.18;
-  color: #fff;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.talisbooks-standing-book__cover-kicker {
-  margin: 0 0 0.2rem;
-  font-size: 0.42rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.talisbooks-standing-book--hero .talisbooks-standing-book__cover-title {
-  font-size: clamp(0.85rem, 1.7vw, 1.15rem);
-}
-
-.talisbooks-standing-book--compact .talisbooks-standing-book__cover-title {
-  font-size: 0.46rem;
-  -webkit-line-clamp: 2;
-}
-
-.talisbooks-standing-book__cover-subtitle {
-  margin: 0.25rem 0 0;
-  font-size: 0.48rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.72);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 
 /* Page block on the right edge */
 .talisbooks-standing-book__pages {

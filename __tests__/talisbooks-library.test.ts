@@ -343,6 +343,9 @@ describe("Talisbooks™ library admin delete wiring", () => {
     expect(standing).toContain("talisbooks-standing-book__delete");
     expect(standing).toContain("displayShelfBookTitle");
     expect(standing).toContain("Delete ${displayTitle}");
+    expect(standing).not.toContain("talisbooks-standing-book__cover-scrim");
+    expect(standing).not.toContain("talisbooks-standing-book__cover-kicker");
+    expect(standing).not.toContain(">Pinned<");
     expect(actions).toContain("deleteLibraryEbookAction");
     expect(actions).toContain('return { success: false, error: "Unauthorized." }');
   });

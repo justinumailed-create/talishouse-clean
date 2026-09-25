@@ -80,6 +80,17 @@ describe("sample Talisbooks™ viewer chrome", () => {
     expect(standingBook).not.toContain("noopener");
     expect(standingBook).not.toMatch(/new tab/i);
   });
+
+  it("shows the real cover image only — no PINNED / title overlay on shelf books", () => {
+    expect(standingBook).toContain("talisbooks-standing-book__cover-image");
+    expect(standingBook).toContain("talisbooks-standing-book__delete");
+    expect(standingBook).not.toContain("talisbooks-standing-book__cover-scrim");
+    expect(standingBook).not.toContain("talisbooks-standing-book__cover-copy");
+    expect(standingBook).not.toContain("talisbooks-standing-book__cover-kicker");
+    expect(standingBook).not.toContain(">Pinned<");
+    expect(standingBook).not.toContain("cover-title");
+    expect(standingBook).not.toContain("cover-subtitle");
+  });
 });
 
 describe("viewer edge chrome", () => {
