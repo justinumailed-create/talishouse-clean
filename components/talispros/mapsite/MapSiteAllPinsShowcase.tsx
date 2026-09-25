@@ -6,9 +6,6 @@ import type {
   AllPinsAggregation,
   AllPinsShowcasePin,
 } from "@/lib/talispros/allpins-mapsite";
-import {
-  allPinsPublishedHref,
-} from "@/lib/talispros/allpins-mapsite-ui";
 import { buildIsolatedBookshelfHref } from "@/lib/talisbooks/isolated-bookshelf";
 
 type Props = {
@@ -99,12 +96,6 @@ export default function MapSiteAllPinsShowcase({
             </button>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            <Link
-              href={allPinsPublishedHref()}
-              className="rounded-lg border border-neutral-300 bg-white px-2.5 py-1.5 text-[11px] font-medium text-neutral-800 hover:bg-neutral-50"
-            >
-              Published URL
-            </Link>
             <Link
               href={buildIsolatedBookshelfHref({ fromAllPins: true })}
               className="rounded-lg bg-neutral-950 px-2.5 py-1.5 text-[11px] font-medium text-white hover:bg-neutral-800"

@@ -282,9 +282,9 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(showcase).toContain("allpins-left-rail");
     expect(showcase).toContain("allpins-rail-collapse");
     expect(showcase).toContain("allpins-rail-expand");
-    expect(showcase).toContain("Published URL");
+    expect(showcase).not.toContain("Published URL");
     expect(showcase).toContain("Isolated shelf");
-    expect(showcase).toContain("allPinsPublishedHref");
+    expect(showcase).not.toContain("allPinsPublishedHref");
     expect(showcase).toContain("buildIsolatedBookshelfHref");
     expect(showcase).toContain("fromAllPins: true");
     expect(showcase).toContain("md:hidden");
