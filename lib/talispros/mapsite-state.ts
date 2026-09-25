@@ -151,14 +151,19 @@ export function publishedMapSitePath(fastCode: string): string {
 
 /**
  * Back to Mapsite™ from a FAST-scoped page (TalisTV, bookshelf, viewer).
- * Uses that code’s published Mapsite™, not the generic claim app or another code.
+ * Lands on the listings / claimed Mapsite™ for that FAST Code
+ * (`/talispros/mapsite/listings/{code}`), not the published creative shell
+ * (`/mapsite/{code}`). Empty / invalid / demo codes fall back to MAPSITE_APP_PATH.
  */
 export function mapsiteBackFromScheduleHref(
   fastCode: string | null | undefined,
 ): string {
   const code = fastCode?.trim().toLowerCase() || "";
   if (!code || code === "demo") return MAPSITE_APP_PATH;
-  return publishedMapSitePath(code);
+  return buildClaimedMapSitePath({
+    fastCode: code,
+    accountType: "listings",
+  });
 }
 
 /** Short claimed Mapsite™ URL: /talispros/mapsite/{accountType}/{fastCode} */

@@ -51,11 +51,15 @@ describe("Mapsite™ TTV™ schedule href", () => {
     expect(mapsiteScheduleHref("rd02")).toBe("/talistv?fastCode=rd02");
   });
 
-  it("returns to that FAST code’s published Mapsite™ from the schedule", () => {
-    expect(mapsiteBackFromScheduleHref("lg01")).toBe("/mapsite/lg01");
-    expect(mapsiteBackFromScheduleHref("RM22")).toBe("/mapsite/rm22");
+  it("returns to that FAST code’s listings Mapsite™ from the schedule", () => {
+    expect(mapsiteBackFromScheduleHref("lg01")).toBe(
+      "/talispros/mapsite/listings/lg01",
+    );
+    expect(mapsiteBackFromScheduleHref("RM22")).toBe(
+      "/talispros/mapsite/listings/rm22",
+    );
     expect(mapsiteBackFromScheduleHref("demo-d697325b")).toBe(
-      "/mapsite/demo-d697325b",
+      "/talispros/mapsite/listings/demo-d697325b",
     );
     expect(mapsiteBackFromScheduleHref("")).toBe("/talispros/mapsite");
     expect(mapsiteBackFromScheduleHref("demo")).toBe("/talispros/mapsite");

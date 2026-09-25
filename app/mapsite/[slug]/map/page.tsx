@@ -11,6 +11,7 @@ import {
   mapsiteOgMetadataImage,
   resolveMapSiteOgImage,
 } from "@/lib/talispros/mapsite-og-image";
+import { mapsiteBackFromScheduleHref } from "@/lib/talispros/mapsite-state";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +60,7 @@ export default async function MapSiteFullscreenMapPage({
       pinLabel={layout.pinLabel}
       fastCode={code}
       variant="window"
-      backHref={`/mapsite/${encodeURIComponent(code)}`}
+      backHref={mapsiteBackFromScheduleHref(code)}
     />
   );
 }

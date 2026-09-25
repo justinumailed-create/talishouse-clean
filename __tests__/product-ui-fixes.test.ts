@@ -60,13 +60,18 @@ describe("home right rail audience labels", () => {
 });
 
 describe("Back to Mapsite from a FAST-scoped page", () => {
-  it("opens the published Mapsite for that FAST code", () => {
-    expect(mapsiteBackFromScheduleHref("lg01")).toBe("/mapsite/lg01");
-    expect(mapsiteBackFromScheduleHref("rm22")).toBe("/mapsite/rm22");
+  it("opens the listings Mapsite for that FAST code", () => {
+    expect(mapsiteBackFromScheduleHref("lg01")).toBe(
+      "/talispros/mapsite/listings/lg01",
+    );
+    expect(mapsiteBackFromScheduleHref("rm22")).toBe(
+      "/talispros/mapsite/listings/rm22",
+    );
+    expect(mapsiteBackFromScheduleHref("")).toBe("/talispros/mapsite");
+    expect(mapsiteBackFromScheduleHref("demo")).toBe("/talispros/mapsite");
 
     const talistv = repoSource("app/talistv/page.tsx");
     expect(talistv).toContain("mapsiteBackFromScheduleHref(fastCode)");
-    expect(talistv).not.toContain("/talispros/mapsite/listings/");
   });
 });
 
