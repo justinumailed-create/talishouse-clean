@@ -17,6 +17,7 @@ import { ROUTES } from "@/lib/routes";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
+import { SHOW_BACK_TO_MAPSITE } from "@/lib/talisbooks/ui-flags";
 import {
   convertViewerNavIndex,
   createEmptyNarrationController,
@@ -470,11 +471,11 @@ export default function TalisBooksViewerShell({
             <Link href={ROUTES.HOME} className="talisbooks-viewer__back">
               Home
             </Link>
-          ) : (
+          ) : SHOW_BACK_TO_MAPSITE ? (
             <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
               Back to Mapsite™
             </Link>
-          )}
+          ) : null}
           {isPinnedShowcase ? (
             <Link href={ROUTES.CATALOG} className="talisbooks-viewer__back">
               Product

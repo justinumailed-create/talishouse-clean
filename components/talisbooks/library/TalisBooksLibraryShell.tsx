@@ -23,6 +23,7 @@ import {
 import { partitionBookshelf } from "@/lib/talisbooks/library/partition";
 import { queryLibraryBooks } from "@/lib/talisbooks/library/query";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
+import { SHOW_BACK_TO_MAPSITE } from "@/lib/talisbooks/ui-flags";
 import type {
   TalisBooksBookshelf,
   TalisBooksLibraryBook,
@@ -267,9 +268,11 @@ export default function TalisBooksLibraryShell({
               {secondaryBackLabel}
             </Link>
           ) : null}
-          <Link href={mapsiteHref} className="talisbooks-library__back">
-            Back to Mapsite™
-          </Link>
+          {SHOW_BACK_TO_MAPSITE ? (
+            <Link href={mapsiteHref} className="talisbooks-library__back">
+              Back to Mapsite™
+            </Link>
+          ) : null}
         </div>
       </header>
 
