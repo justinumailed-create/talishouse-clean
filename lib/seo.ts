@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 
 const SITE_URL = "https://www.talishouse.com";
 const SITE_NAME = "Talispros™";
-/** Static WhatsApp / Open Graph preview (1200×630). */
-const OG_IMAGE = "/seo/talispros-og.jpg";
+/** Brand WhatsApp / Open Graph preview — logo + Aisha (1200×630). */
+const OG_IMAGE = "https://www.talispros.com/api/og/talispros";
 
 export const siteConfig = {
   url: SITE_URL,
@@ -61,8 +61,8 @@ export function createMetadata(overrides: {
           }
         : {
             url: OG_IMAGE,
-            width: 579,
-            height: 1024,
+            width: 1200,
+            height: 630,
             alt: overrides.title,
           };
 

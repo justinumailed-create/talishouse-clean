@@ -2,7 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "../globals.css";
 import TalisprosLayoutClient from "@/components/talispros/TalisprosLayoutClient";
-import { siteConfig, createMetadata } from "@/lib/seo";
+import { createMetadata } from "@/lib/seo";
+import { talisprosBrandOgMetadataImage } from "@/lib/talispros/mapsite-og-image";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -22,12 +23,7 @@ export const metadata: Metadata = {
     description:
       "Claim your market on Talispros™. Mapsite™ pins your place on the map so buyers and partners can find you — Explore Talisbooks™ and grow your exposure worldwide.",
     path: "/talispros",
-    image: {
-      url: "/seo/talispros-og.jpg",
-      width: 579,
-      height: 1024,
-      alt: "Talispros™ Mapsite™",
-    },
+    image: talisprosBrandOgMetadataImage("Talispros™ | Claim your market"),
   }),
   icons: {
     icon: "/favicon-v2.ico",

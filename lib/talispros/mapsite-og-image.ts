@@ -9,6 +9,11 @@ import {
   BOOKSHELF_OG_WIDTH,
   bookshelfShareOgPath,
 } from "@/lib/share/bookshelf-og-card";
+import {
+  TALISPROS_OG_HEIGHT,
+  TALISPROS_OG_WIDTH,
+  talisprosBrandShareOgPath,
+} from "@/lib/share/talispros-og-card";
 import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
 import { isStockDemoListingPath } from "@/lib/talispros/mapsite-listing-media";
 import type { CreateMetadataImage } from "@/lib/seo";
@@ -223,6 +228,22 @@ export function bookshelfOgMetadataImage(alt: string): CreateMetadataImage {
     height: BOOKSHELF_OG_HEIGHT,
     alt,
   };
+}
+
+
+/** Homepage + T-All catalogue brand share-card metadata (logo + Aisha left). */
+export function talisprosBrandOgMetadataImage(alt: string): CreateMetadataImage {
+  return {
+    url: toAbsoluteHttpsOgUrl(talisprosBrandShareOgPath()),
+    width: TALISPROS_OG_WIDTH,
+    height: TALISPROS_OG_HEIGHT,
+    alt,
+  };
+}
+
+/** Absolute URL of the composed brand share card (homepage / catalogue). */
+export function resolveTalisprosBrandOgImage(): string {
+  return toAbsoluteHttpsOgUrl(talisprosBrandShareOgPath());
 }
 
 /** Absolute URL of the composed portrait bookshelf share card. */

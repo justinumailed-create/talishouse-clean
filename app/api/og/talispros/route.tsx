@@ -1,16 +1,27 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { renderTalisprosOgCard } from "@/lib/share/render-talispros-og";
 
-/** Node runtime — serve the static WhatsApp / Open Graph JPEG. */
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
+const HEADERS = {
+  "Content-Type": "image/jpeg",
+  "Cache-Control":
+    "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800",
+};
+
+/**
+ * Landscape brand Open Graph card shared by homepage + T-All Product catalogue.
+ * Logo + Aisha portrait on the left — not the tall Mapsite™ marketing poster.
+ */
 export async function GET() {
-  const filePath = path.join(process.cwd(), "public/seo/talispros-og.jpg");
-  const file = await readFile(filePath);
-  return new Response(file, {
-    headers: {
-      "Content-Type": "image/jpeg",
-      "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
-    },
-  });
+  try {
+    const jpeg = await renderTalisprosOgCard();
+    return new Response(new Uint8Array(jpeg), { headers: HEADERS });
+  } catch (error) {
+    console.error(
+      "[og] Talispros brand card failed:",
+      error instanceof Error ? error.message : error,
+    );
+    return new Response("Open Graph image is unavailable.", { status: 500 });
+  }
 }
