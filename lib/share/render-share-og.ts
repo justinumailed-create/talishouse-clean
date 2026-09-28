@@ -33,19 +33,26 @@ export async function renderShareOgCard(input: {
    */
   pinOverlays?: ShareOgProjectedPin[];
   logo?: Buffer | null;
+  /** When false, skip the brand mark (brand OG already places logo on the left). */
+  includeLogo?: boolean;
+  /** Output frame size (defaults to full landscape OG). */
+  width?: number;
+  height?: number;
 }): Promise<Buffer> {
+  const width = input.width ?? SHARE_OG_WIDTH;
+  const height = input.height ?? SHARE_OG_HEIGHT;
   const background = input.background
     ? await sharp(input.background)
         .rotate()
-        .resize(SHARE_OG_WIDTH, SHARE_OG_HEIGHT, {
+        .resize(width, height, {
           fit: "cover",
           position: "centre",
         })
         .toBuffer()
     : await sharp({
         create: {
-          width: SHARE_OG_WIDTH,
-          height: SHARE_OG_HEIGHT,
+          width,
+          height,
           channels: 3,
           background: FALLBACK_BG,
         },
@@ -73,22 +80,26 @@ export async function renderShareOgCard(input: {
     });
   }
 
-  const slot = shareOgLogoPlacement();
-  const logoPng = await sharp(input.logo ?? (await readShareOgLogo()))
-    .resize(slot.width, slot.height, {
-      fit: "inside",
-      background: { r: 0, g: 0, b: 0, alpha: 0 },
-    })
-    .png()
-    .toBuffer();
-  const meta = await sharp(logoPng).metadata();
-  const logoW = meta.width ?? slot.width;
-  const logoH = meta.height ?? slot.height;
-  composites.push({
-    input: logoPng,
-    left: slot.left + Math.round((slot.width - logoW) / 2),
-    top: slot.top + Math.round((slot.height - logoH) / 2),
-  });
+  if (input.includeLogo !== false) {
+    const slot = shareOgLogoPlacement();
+    // Keep logo inside the frame when rendering a narrower panel.
+    const logoLeft = Math.min(slot.left, Math.max(0, width - slot.width - 12));
+    const logoPng = await sharp(input.logo ?? (await readShareOgLogo()))
+      .resize(slot.width, slot.height, {
+        fit: "inside",
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
+      })
+      .png()
+      .toBuffer();
+    const meta = await sharp(logoPng).metadata();
+    const logoW = meta.width ?? slot.width;
+    const logoH = meta.height ?? slot.height;
+    composites.push({
+      input: logoPng,
+      left: logoLeft + Math.round((slot.width - logoW) / 2),
+      top: Math.round((height - logoH) / 2),
+    });
+  }
 
   return sharp(background).composite(composites).jpeg({ quality: 86 }).toBuffer();
 }

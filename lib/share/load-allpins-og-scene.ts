@@ -4,6 +4,8 @@ import {
 import { listAllPinsAggregatedPins } from "@/lib/talispros/allpins-mapsite";
 import { MAPSITE_PIN_DEFAULT_COLOR } from "@/lib/mapsite-pin-style";
 import {
+  SHARE_OG_HEIGHT,
+  SHARE_OG_WIDTH,
   esriWorldImageryUrlWide,
   projectPinsOntoShareOg,
   type ShareOgProjectedPin,
@@ -16,6 +18,8 @@ export type AllPinsOgScene = {
   imageryUrl: string;
   pinOverlays: ShareOgProjectedPin[];
   pinCount: number;
+  width: number;
+  height: number;
 };
 
 function viewportForPins(
@@ -62,8 +66,14 @@ function viewportForPins(
 /**
  * Build the ALLPINS landscape share scene: Canada satellite frame + one
  * coloured pin per live Mapsite™ (same colours as the ALLPINS map).
+ * Optional width/height size the frame (brand OG right panel uses half-card).
  */
-export async function loadAllPinsOgScene(): Promise<AllPinsOgScene> {
+export async function loadAllPinsOgScene(size?: {
+  width?: number;
+  height?: number;
+}): Promise<AllPinsOgScene> {
+  const width = size?.width ?? SHARE_OG_WIDTH;
+  const height = size?.height ?? SHARE_OG_HEIGHT;
   let pins: Awaited<ReturnType<typeof listAllPinsAggregatedPins>> = [];
   try {
     pins = await listAllPinsAggregatedPins();
@@ -85,14 +95,18 @@ export async function loadAllPinsOgScene(): Promise<AllPinsOgScene> {
     longitude: viewport.longitude,
     zoom: viewport.zoom,
     scale: 0.4,
+    width,
+    height,
   });
 
   return {
     latitude: viewport.latitude,
     longitude: viewport.longitude,
     zoom: viewport.zoom,
-    imageryUrl: esriWorldImageryUrlWide(viewport),
+    imageryUrl: esriWorldImageryUrlWide({ ...viewport, width, height }),
     pinOverlays: projected.overlays,
     pinCount: pins.length,
+    width,
+    height,
   };
 }

@@ -191,6 +191,10 @@ export function shareOgWideImageryBbox(input: {
   latitude: number;
   longitude: number;
   zoom: number;
+  /** Frame width in px (defaults to full landscape OG). */
+  width?: number;
+  /** Frame height in px (defaults to full landscape OG). */
+  height?: number;
 }): {
   zoom: number;
   west: number;
@@ -199,10 +203,12 @@ export function shareOgWideImageryBbox(input: {
   north: number;
 } {
   const zoom = Math.min(12, Math.max(2, Math.round(input.zoom)));
+  const frameW = input.width ?? SHARE_OG_WIDTH;
+  const frameH = input.height ?? SHARE_OG_HEIGHT;
   const center = lngLatToWebMercator(input.longitude, input.latitude);
   const metersPerPixel = EQUATOR_MPP_Z0 / 2 ** zoom;
-  const halfW = (SHARE_OG_WIDTH / 2) * metersPerPixel;
-  const halfH = (SHARE_OG_HEIGHT / 2) * metersPerPixel;
+  const halfW = (frameW / 2) * metersPerPixel;
+  const halfH = (frameH / 2) * metersPerPixel;
   return {
     zoom,
     west: center.x - halfW,
@@ -216,14 +222,18 @@ export function esriWorldImageryUrlWide(input: {
   latitude: number;
   longitude: number;
   zoom: number;
+  width?: number;
+  height?: number;
 }): string {
+  const frameW = input.width ?? SHARE_OG_WIDTH;
+  const frameH = input.height ?? SHARE_OG_HEIGHT;
   const box = shareOgWideImageryBbox(input);
   const bbox = [box.west, box.south, box.east, box.north].join(",");
   const params = new URLSearchParams({
     bbox,
     bboxSR: "3857",
     imageSR: "3857",
-    size: `${SHARE_OG_WIDTH},${SHARE_OG_HEIGHT}`,
+    size: `${frameW},${frameH}`,
     format: "jpg",
     f: "image",
   });
@@ -250,6 +260,8 @@ export function projectPinsOntoShareOg(input: {
   zoom: number;
   /** Relative pin size vs single-listing pin (ALLPINS uses ~0.4). */
   scale?: number;
+  width?: number;
+  height?: number;
 }): {
   bbox: ReturnType<typeof shareOgWideImageryBbox>;
   overlays: ShareOgProjectedPin[];
@@ -258,6 +270,8 @@ export function projectPinsOntoShareOg(input: {
     input.scale != null && Number.isFinite(input.scale) && input.scale > 0
       ? input.scale
       : 0.4;
+  const frameW = input.width ?? SHARE_OG_WIDTH;
+  const frameH = input.height ?? SHARE_OG_HEIGHT;
   const bbox = shareOgWideImageryBbox(input);
   const spanX = bbox.east - bbox.west;
   const spanY = bbox.north - bbox.south;
@@ -270,13 +284,13 @@ export function projectPinsOntoShareOg(input: {
       continue;
     }
     const merc = lngLatToWebMercator(pin.longitude, pin.latitude);
-    const tipX = ((merc.x - bbox.west) / spanX) * SHARE_OG_WIDTH;
-    const tipY = ((bbox.north - merc.y) / spanY) * SHARE_OG_HEIGHT;
+    const tipX = ((merc.x - bbox.west) / spanX) * frameW;
+    const tipY = ((bbox.north - merc.y) / spanY) * frameH;
     if (
       tipX < -40 ||
-      tipX > SHARE_OG_WIDTH + 40 ||
+      tipX > frameW + 40 ||
       tipY < -40 ||
-      tipY > SHARE_OG_HEIGHT + 40
+      tipY > frameH + 40
     ) {
       continue;
     }

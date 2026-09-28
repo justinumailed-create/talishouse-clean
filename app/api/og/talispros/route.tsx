@@ -11,7 +11,7 @@ const HEADERS = {
 
 /**
  * Landscape brand Open Graph card shared by homepage + T-All Product catalogue.
- * Logo + Aisha portrait on the left — not the tall Mapsite™ marketing poster.
+ * Logo + Aisha on the left, ALLPINS multi-pin Mapsite™ map on the right.
  */
 export async function GET() {
   try {

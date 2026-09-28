@@ -231,7 +231,7 @@ export function bookshelfOgMetadataImage(alt: string): CreateMetadataImage {
 }
 
 
-/** Homepage + T-All catalogue brand share-card metadata (logo + Aisha left). */
+/** Homepage + T-All catalogue brand share-card metadata (logo + Aisha left, ALLPINS map right). */
 export function talisprosBrandOgMetadataImage(alt: string): CreateMetadataImage {
   return {
     url: toAbsoluteHttpsOgUrl(talisprosBrandShareOgPath()),

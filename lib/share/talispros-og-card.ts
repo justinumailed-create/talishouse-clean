@@ -1,7 +1,7 @@
 /**
  * Landscape Open Graph card for Talispros™ homepage + T-All Product catalogue.
  * 1200×630. Soft market-chrome background, Talispros™ logo and Aisha portrait
- * stacked on the left (same brand partner photo used on Claim a Market / Mapsite™).
+ * stacked on the left; ALLPINS Mapsite™ multi-pin Canada map on the right.
  */
 
 import { SHARE_OG_HEIGHT, SHARE_OG_LOGO_PATH, SHARE_OG_WIDTH } from "@/lib/share/og-card";
@@ -61,3 +61,20 @@ export function talisprosOgPartnerPlacement(): {
     height: TALISPROS_OG_PARTNER_HEIGHT,
   };
 }
+
+/** Right half — ALLPINS multi-pin Mapsite™ map fills this panel. */
+export function talisprosOgMapPlacement(): {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+} {
+  const width = Math.floor(TALISPROS_OG_WIDTH / 2);
+  return {
+    left: TALISPROS_OG_WIDTH - width,
+    top: 0,
+    width,
+    height: TALISPROS_OG_HEIGHT,
+  };
+}
+

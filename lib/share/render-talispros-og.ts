@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import sharp, { type OverlayOptions } from "sharp";
+import { renderAllPinsOgCard } from "@/lib/share/render-allpins-og";
 import {
   TALISPROS_OG_BG,
   TALISPROS_OG_HEIGHT,
@@ -8,6 +9,7 @@ import {
   TALISPROS_OG_PARTNER_PATH,
   TALISPROS_OG_WIDTH,
   talisprosOgLogoPlacement,
+  talisprosOgMapPlacement,
   talisprosOgPartnerPlacement,
 } from "@/lib/share/talispros-og-card";
 
@@ -24,11 +26,14 @@ export async function readTalisprosOgPartner(): Promise<Buffer> {
 }
 
 /**
- * Compose the brand share card: soft chrome background, logo + Aisha on the left.
+ * Compose the brand share card: soft chrome background, logo + Aisha on the
+ * left, ALLPINS multi-pin Mapsite™ map on the right.
  */
 export async function renderTalisprosOgCard(input?: {
   logo?: Buffer | null;
   partner?: Buffer | null;
+  /** Pre-rendered ALLPINS map panel (tests). Live path loads pins + imagery. */
+  mapPanel?: Buffer | null;
 }): Promise<Buffer> {
   const background = await sharp({
     create: {
@@ -97,6 +102,34 @@ export async function renderTalisprosOgCard(input?: {
       top: partnerSlot.top,
     },
   ];
+
+  const mapSlot = talisprosOgMapPlacement();
+  try {
+    const mapSource =
+      input?.mapPanel ??
+      (await renderAllPinsOgCard({
+        includeLogo: false,
+        width: mapSlot.width,
+        height: mapSlot.height,
+      }));
+    const mapPanel = await sharp(mapSource)
+      .resize(mapSlot.width, mapSlot.height, {
+        fit: "cover",
+        position: "centre",
+      })
+      .jpeg({ quality: 86 })
+      .toBuffer();
+    composites.push({
+      input: mapPanel,
+      left: mapSlot.left,
+      top: mapSlot.top,
+    });
+  } catch (error) {
+    console.warn(
+      "[og] ALLPINS map panel failed; leaving chrome on the right:",
+      error instanceof Error ? error.message : error,
+    );
+  }
 
   return sharp(background)
     .composite(composites)

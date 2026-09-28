@@ -8,6 +8,7 @@ import {
   TALISPROS_OG_WIDTH,
   talisprosBrandShareOgPath,
   talisprosOgLogoPlacement,
+  talisprosOgMapPlacement,
   talisprosOgPartnerPlacement,
 } from "../lib/share/talispros-og-card";
 import { renderTalisprosOgCard } from "../lib/share/render-talispros-og";
@@ -30,7 +31,7 @@ function pixel(
 }
 
 describe("Talispros brand OG (homepage + T-All catalogue)", () => {
-  it("uses the landscape Mapsite™ frame with logo + partner on the left", () => {
+  it("uses the landscape Mapsite™ frame with logo + partner left and map right", () => {
     expect(TALISPROS_OG_WIDTH).toBe(SHARE_OG_WIDTH);
     expect(TALISPROS_OG_HEIGHT).toBe(SHARE_OG_HEIGHT);
     expect(talisprosBrandShareOgPath()).toBe("/api/og/talispros");
@@ -44,14 +45,48 @@ describe("Talispros brand OG (homepage + T-All catalogue)", () => {
     expect(partner.top).toBeGreaterThan(logo.top + logo.height / 2);
     expect(partner.left + partner.width).toBeLessThan(TALISPROS_OG_WIDTH / 2 + 40);
     expect(TALISPROS_OG_PARTNER_PATH).toBe("/images/mapsites/aisha-c.webp");
+
+    const map = talisprosOgMapPlacement();
+    expect(map.left).toBe(TALISPROS_OG_WIDTH / 2);
+    expect(map.width).toBe(TALISPROS_OG_WIDTH / 2);
+    expect(map.height).toBe(TALISPROS_OG_HEIGHT);
+    expect(map.top).toBe(0);
   });
 
-  it("renders a landscape JPEG with partner photo on the left", async () => {
+  it("renders a landscape JPEG with partner on the left and map on the right", async () => {
     const logo = await readFile(path.join(process.cwd(), "public/logo.png"));
     const partner = await readFile(
       path.join(process.cwd(), "public/images/mapsites/aisha-c.webp"),
     );
-    const jpeg = await renderTalisprosOgCard({ logo, partner });
+    // Stub ALLPINS map panel: teal satellite stand-in with a red pin blot.
+    const mapPanel = await sharp({
+      create: {
+        width: 600,
+        height: 630,
+        channels: 3,
+        background: { r: 28, g: 90, b: 72 },
+      },
+    })
+      .composite([
+        {
+          input: await sharp({
+            create: {
+              width: 36,
+              height: 48,
+              channels: 3,
+              background: { r: 225, g: 20, b: 10 },
+            },
+          })
+            .png()
+            .toBuffer(),
+          left: 280,
+          top: 280,
+        },
+      ])
+      .jpeg()
+      .toBuffer();
+
+    const jpeg = await renderTalisprosOgCard({ logo, partner, mapPanel });
     const { data, info } = await sharp(jpeg)
       .removeAlpha()
       .raw()
@@ -60,11 +95,11 @@ describe("Talispros brand OG (homepage + T-All catalogue)", () => {
     expect(info.width).toBe(TALISPROS_OG_WIDTH);
     expect(info.height).toBe(TALISPROS_OG_HEIGHT);
 
-    // Soft chrome background on the right half.
-    const bg = pixel(data, info.width, info.channels, 1000, 315);
-    expect(bg[0]).toBeGreaterThan(220);
-    expect(bg[1]).toBeGreaterThan(220);
-    expect(bg[2]).toBeGreaterThan(210);
+    // Right half is the ALLPINS map panel (teal), not empty chrome.
+    const mapPx = pixel(data, info.width, info.channels, 1000, 315);
+    expect(mapPx[1]).toBeGreaterThan(mapPx[0]);
+    expect(mapPx[1]).toBeGreaterThan(60);
+    expect(mapPx[0]).toBeLessThan(80);
 
     // Partner portrait occupies left column (skin/hair tones, not flat chrome).
     const face = pixel(data, info.width, info.channels, 180, 320);
