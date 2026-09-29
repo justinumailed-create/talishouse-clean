@@ -53,7 +53,7 @@ describe("SamCart → /start return", () => {
     );
     expect(startPage).toContain("TalisprosGatePage");
     expect(gate).toContain("TalisprosHomeGate");
-    expect(gate).toContain("TalisprosHomeShowcase");
+    expect(gate).not.toContain("TalisprosHomeShowcase");
     expect(gate).toContain("TalisprosSamCartReturnBanner");
     expect(home).toContain("TalisprosHomeMapPreview");
     expect(home).toContain("TalisprosStartSidebar");

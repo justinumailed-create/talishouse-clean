@@ -62,7 +62,7 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(homePage).not.toContain("TalisprosHomeGate");
     expect(startRoute).toContain("TalisprosGatePage");
     expect(gatePage).toContain("TalisprosHomeGate");
-    expect(gatePage).toContain("TalisprosHomeShowcase");
+    expect(gatePage).not.toContain("TalisprosHomeShowcase");
     expect(gate).toContain("TalisprosHomeFastCodeEntry");
     expect(gate).toContain("Login To Your Account");
     expect(gate).toContain("System Demo");
@@ -88,30 +88,16 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/talisu/mkts");
   });
 
-  it("wires /start compact trio of mini demo screens (not tall carousel)", () => {
-    const showcase = readFileSync(
-      join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
+  it("keeps /start as a clean centered gate without the showcase rail", () => {
+    const gatePage = readFileSync(
+      join(root, "components/talispros/TalisprosGatePage.tsx"),
       "utf8",
     );
-    const content = readFileSync(
-      join(root, "lib/talispros/start-content.ts"),
-      "utf8",
-    );
-    expect(showcase).toContain("TALISPROS_HOME_DEMO_FLOW");
-    expect(showcase).toContain("compact");
-    expect(showcase).toContain("max-h-[");
-    expect(showcase).toContain("privacyMask");
-    expect(showcase).not.toContain("talistowns.jpg");
-    expect(content).toContain("/assets/home-demo/01-talismaps-mkts.jpg");
-    expect(content).toContain("/assets/home-demo/02-talisbooks-bookshelf.jpg");
-    expect(content).toContain("/assets/home-demo/03-claimed-mapsite-rm22.jpg");
-    expect(content).toContain("Demo Bookshelf");
-    expect(content).toContain("Talismaps™");
-    expect(content).toContain("Talisbooks™");
-    expect(content).toContain("Mapsites™");
-    expect(content).toContain("privacyMask");
-    expect(content).not.toContain("/images/talistowns.jpg");
-    expect(content).not.toContain("T-Dome-elevateNF");
+    expect(gatePage).toContain("TalisprosHomeGate");
+    expect(gatePage).toContain("TalisprosSamCartReturnBanner");
+    expect(gatePage).not.toContain("TalisprosHomeShowcase");
+    expect(gatePage).toContain("<main");
+    expect(gatePage).toContain("min-h-dvh");
   });
 
   it("shows Logout on paid owner claimed Mapsite™ chrome", () => {
