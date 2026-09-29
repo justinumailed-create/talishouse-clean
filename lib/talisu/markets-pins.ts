@@ -4,6 +4,8 @@
  * Rendered with first-party Talismaps™ (Google satellite), not an Atlist iframe.
  */
 
+import type { MapEnginePin } from "@/lib/talismaps/map-engine";
+
 export const TALISU_MKTS_ATLIST_MAP_ID =
   "dd00462f-d929-4aac-a777-32017c2523b1" as const;
 
@@ -45,6 +47,22 @@ export const TALISU_MKTS_FIT_PADDING = {
   bottom: 64,
   left: 360,
 } as const;
+
+/**
+ * fitBounds padding for chrome-free /start preview (no Markets sidebar).
+ */
+export const TALISU_MKTS_START_FIT_PADDING = {
+  top: 48,
+  right: 48,
+  bottom: 48,
+  left: 48,
+} as const;
+
+/** Canada market flag pin diameter (px) on the mkts map engine. */
+export const TALISU_MKTS_MARKET_PIN_SIZE = 32;
+
+/** Do More (Modular Spaces) pin diameter — 1.5× the prior 30px size. */
+export const TALISU_MKTS_DO_MORE_PIN_SIZE = 45;
 
 export const TALISU_MKTS_FOOTER =
   "Select the PIN nearest you to claim a market of 50 miles (80 kilometres) around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.";
@@ -351,4 +369,51 @@ export function talisuMktsDoMorePins(): TalisUMktsPin[] {
 
 export function talisuMktsPinById(id: string): TalisUMktsPin | undefined {
   return TALISU_MKTS_PINS.find((pin) => pin.id === id);
+}
+
+/**
+ * Shared MapEngine pin list for /talisu/mkts and the /start static preview.
+ * Filters to showOnMap; market pins use CA flag, Do More uses tree logo @ 45px.
+ */
+export function talisuMktsToEnginePins(
+  pins: readonly TalisUMktsPin[] = TALISU_MKTS_PINS,
+): MapEnginePin[] {
+  return pins
+    .filter((pin) => pin.showOnMap)
+    .map((pin) => {
+      if (pin.kind === "market") {
+        return {
+          id: pin.id,
+          latitude: pin.latitude,
+          longitude: pin.longitude,
+          color: "#FFFFFF",
+          featured: false,
+          metadata: {
+            icon: "dot",
+            whiteCenter: true,
+            customLogoUrl: TALISU_MKTS_FLAG_CA,
+            pinBorderColor: "#CC8800",
+            pinSize: TALISU_MKTS_MARKET_PIN_SIZE,
+            animated: false,
+            label: pin.label,
+          },
+        } satisfies MapEnginePin;
+      }
+      return {
+        id: pin.id,
+        latitude: pin.latitude,
+        longitude: pin.longitude,
+        color: "#FFFFFF",
+        featured: false,
+        metadata: {
+          icon: "dot",
+          whiteCenter: true,
+          customLogoUrl: TALISU_MKTS_TREE_LOGO,
+          pinBorderColor: "#000000",
+          pinSize: TALISU_MKTS_DO_MORE_PIN_SIZE,
+          animated: false,
+          label: pin.label,
+        },
+      } satisfies MapEnginePin;
+    });
 }

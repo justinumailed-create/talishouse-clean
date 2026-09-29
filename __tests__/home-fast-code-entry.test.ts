@@ -97,21 +97,35 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
       join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
       "utf8",
     );
+    const startMap = readFileSync(
+      join(root, "components/talispros/TalisprosStartMktsMap.tsx"),
+      "utf8",
+    );
+    const mktsApp = readFileSync(
+      join(root, "components/talisu/TalisUMarketsMapApp.tsx"),
+      "utf8",
+    );
 
     expect(gatePage).toContain("TalisprosHomeGate");
     expect(gatePage).toContain("TalisprosSamCartReturnBanner");
     expect(gatePage).toContain("TalisprosHomeShowcase");
     expect(gatePage).toContain("lg:grid-cols-");
     expect(gatePage).toContain("min-h-dvh");
-    expect(showcase).toContain("/assets/home-demo/01-talismaps-mkts.jpg");
-    expect(showcase).toContain("object-cover");
+    expect(showcase).toContain("TalisprosStartMktsMap");
     expect(showcase).toContain("lg:h-full");
-    expect(showcase).toContain("pointer-events-none");
-    expect(showcase).toContain("draggable={false}");
+    expect(showcase).not.toContain("/assets/home-demo/01-talismaps-mkts.jpg");
     expect(showcase).not.toContain("System demo");
     expect(showcase).not.toContain("figcaption");
     expect(showcase).not.toContain("<Link");
     expect(showcase).not.toContain("onClick");
+    // Same pin source as live mkts; chrome-free; non-interactive.
+    expect(startMap).toContain("talisuMktsToEnginePins");
+    expect(startMap).toContain("TALISU_MKTS_PINS");
+    expect(startMap).toContain("interactive={false}");
+    expect(startMap).toContain("TALISU_MKTS_START_FIT_PADDING");
+    expect(startMap).not.toContain("TalisUMarketsSidebar");
+    expect(startMap).not.toContain("TalisUMarketsPinCard");
+    expect(mktsApp).toContain("talisuMktsToEnginePins");
   });
 
   it("shows Logout on paid owner claimed Mapsite™ chrome", () => {

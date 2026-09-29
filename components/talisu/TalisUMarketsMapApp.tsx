@@ -7,70 +7,24 @@ import {
   MapEngineProvider,
   useMapEngine,
 } from "@/components/talismaps/map-engine/MapEngineProvider";
-import type { MapEnginePin } from "@/lib/talismaps/map-engine";
 import {
   TALISU_MKTS_FIT_PADDING,
-  TALISU_MKTS_FLAG_CA,
   TALISU_MKTS_FOOTER,
   TALISU_MKTS_PINS,
-  TALISU_MKTS_TREE_LOGO,
   TALISU_MKTS_VIEWPORT,
   talisuMktsMapCoordinates,
-  type TalisUMktsPin,
+  talisuMktsToEnginePins,
 } from "@/lib/talisu/markets-pins";
 import TalisUMarketsPinCard from "./TalisUMarketsPinCard";
 import TalisUMarketsSidebar from "./TalisUMarketsSidebar";
 
 const FOCUS_GESTURE_GUARD_MS = 900;
 
-function toEnginePins(pins: readonly TalisUMktsPin[]): MapEnginePin[] {
-  return pins
-    .filter((pin) => pin.showOnMap)
-    .map((pin) => {
-      if (pin.kind === "market") {
-        return {
-          id: pin.id,
-          latitude: pin.latitude,
-          longitude: pin.longitude,
-          // White circular pin hosting the authentic Atlist Canada-flag icon.
-          color: "#FFFFFF",
-          featured: false,
-          metadata: {
-            icon: "dot",
-            whiteCenter: true,
-            customLogoUrl: TALISU_MKTS_FLAG_CA,
-            pinBorderColor: "#CC8800",
-            pinSize: 32,
-            animated: false,
-            label: pin.label,
-          },
-        } satisfies MapEnginePin;
-      }
-      // Do More… — white circle + authentic Atlist TalisU tree logo (not solid blue).
-      return {
-        id: pin.id,
-        latitude: pin.latitude,
-        longitude: pin.longitude,
-        color: "#FFFFFF",
-        featured: false,
-        metadata: {
-          icon: "dot",
-          whiteCenter: true,
-          customLogoUrl: TALISU_MKTS_TREE_LOGO,
-          pinBorderColor: "#000000",
-          pinSize: 45,
-          animated: false,
-          label: pin.label,
-        },
-      } satisfies MapEnginePin;
-    });
-}
-
 export default function TalisUMarketsMapApp() {
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const focusingRef = useRef(false);
   const focusTimerRef = useRef<number | null>(null);
-  const enginePins = useMemo(() => toEnginePins(TALISU_MKTS_PINS), []);
+  const enginePins = useMemo(() => talisuMktsToEnginePins(TALISU_MKTS_PINS), []);
   const fitCoordinates = useMemo(() => talisuMktsMapCoordinates(), []);
   const fitPadding = useMemo(
     () => ({
