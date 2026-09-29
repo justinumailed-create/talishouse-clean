@@ -57,7 +57,7 @@ export default function TalisUHomePage() {
           Markets
         </Link>
         <Link href="/talisu/au" className={TALISU_BTN_SECONDARY}>
-          Audio Deep Dive
+          Audio
         </Link>
         <Link href="/talisu/reg" className={TALISU_BTN_SECONDARY}>
           Register

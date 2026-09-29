@@ -61,11 +61,7 @@ export const TALISU_MARKETS_COPY = {
 } as const;
 
 export const TALISU_AUDIO = {
-  title: "Audio Deep Dive",
-  subtitle: "A Deep Dive on Asset Fractionalization and Tokenization…",
-  /** Hosted on live talisu.com until the ~40MB file is placed on CDN/deploy. */
-  deepDiveRemoteSrc: "https://talisu.com/resources/Deep-Dive.mp3",
-  deepDiveLocalSrc: "/talisu/Deep-Dive.mp3",
+  title: "Audio",
   /** Local NotebookLM-style dialogue (Aisha + Webster) on digital property fractionalization. */
   aishaWebsterSrc: "/talisu/Aisha-Webster.mp3",
   aishaWebsterSubtitle:

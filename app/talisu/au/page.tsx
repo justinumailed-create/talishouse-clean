@@ -2,15 +2,12 @@ import { TALISU_AUDIO } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
 import SectionShell from "@/components/talisu/SectionShell";
-import {
-  TALISU_AISHA_WEBSTER_TRANSCRIPT,
-  TALISU_DEEP_DIVE_TRANSCRIPT,
-} from "@/lib/talisu/transcript";
+import { TALISU_AISHA_WEBSTER_TRANSCRIPT } from "@/lib/talisu/transcript";
 
 export const metadata = createTalisUMetadata({
-  title: "TalisU™ | Audio Deep Dive",
+  title: "TalisU™ | Audio",
   description:
-    "A deep dive on asset fractionalization and tokenization — listen or read the transcript.",
+    "Digital property fractionalization with Aisha & Webster — listen or read the transcript.",
   path: "/talisu/au",
 });
 
@@ -37,41 +34,12 @@ export default function TalisUAudioPage() {
         </audio>
       </div>
 
-      <article className={`mb-10 ${TALISU_CARD} px-5 py-8 sm:px-8`}>
+      <article className={`${TALISU_CARD} px-5 py-8 sm:px-8`}>
         <h2 className="mb-6 text-center text-xl font-semibold text-neutral-950">
           Transcript — Aisha &amp; Webster
         </h2>
         <div className="mx-auto max-w-3xl space-y-4 text-sm leading-relaxed text-neutral-700 sm:text-base">
           {TALISU_AISHA_WEBSTER_TRANSCRIPT.map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </div>
-      </article>
-
-      <div className={`mb-10 ${TALISU_CARD}`}>
-        <h2 className="text-center text-lg font-semibold text-neutral-950 sm:text-xl">
-          {TALISU_AUDIO.subtitle}
-        </h2>
-        <audio
-          className="mt-6 w-full"
-          controls
-          preload="none"
-          src={TALISU_AUDIO.deepDiveRemoteSrc}
-        >
-          Your browser does not support the audio element.
-        </audio>
-        <p className="mt-3 text-center text-xs text-neutral-500">
-          Audio streams from the legacy host until Deep-Dive.mp3 (~40MB) is
-          mirrored under public/talisu for production.
-        </p>
-      </div>
-
-      <article className={`${TALISU_CARD} px-5 py-8 sm:px-8`}>
-        <h2 className="mb-6 text-center text-xl font-semibold text-neutral-950">
-          Transcript — Deep Dive summary
-        </h2>
-        <div className="mx-auto max-w-3xl space-y-4 text-sm leading-relaxed text-neutral-700 sm:text-base">
-          {TALISU_DEEP_DIVE_TRANSCRIPT.map((para, i) => (
             <p key={i}>{para}</p>
           ))}
         </div>
