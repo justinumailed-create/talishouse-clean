@@ -13,7 +13,7 @@ export function isTalisprosStartPath(pathname: string | null | undefined) {
 export const TALISPROS_LEGAL_PRIMARY_COPY =
   "More traffic in higher gross markets for better averages over time.";
 
-export const TALISPROS_LEGAL_SECONDARY_COPY = "*Some Limitations apply";
+export const TALISPROS_LEGAL_SECONDARY_COPY = "Some limitations apply*.";
 
 /** Same default Home PIN as Claim a Market / Build A Mapsite™. */
 export const TALISPROS_HOME_MAP_FALLBACK = {
