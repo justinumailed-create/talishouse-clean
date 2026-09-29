@@ -17,7 +17,7 @@ type TalisULeadFormProps = {
 };
 
 const fieldClass =
-  "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-neutral-900";
+  "w-full rounded-xl border border-neutral-300 bg-white px-4 py-3 text-sm text-neutral-900 outline-none focus:border-[#0069CF] focus:ring-2 focus:ring-[#0069CF]/20";
 
 export default function TalisULeadForm({
   source,
@@ -42,7 +42,7 @@ export default function TalisULeadForm({
   return (
     <form
       action={action}
-      className="space-y-4 rounded-2xl border border-neutral-200 bg-white p-6 text-neutral-900 shadow-sm"
+      className="space-y-4 rounded-2xl bg-white p-6 text-neutral-900 shadow-[0_8px_24px_rgba(0,0,0,0.08)] ring-1 ring-black/5"
     >
       <div className="mb-2">
         <h2 className="text-xl font-semibold tracking-tight">{heading}</h2>
@@ -124,7 +124,7 @@ export default function TalisULeadForm({
       <button
         type="submit"
         disabled={pending}
-        className="w-full rounded-xl bg-neutral-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:opacity-60"
+        className="w-full rounded-xl bg-[#0069CF] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#145de3] disabled:opacity-60"
       >
         {pending ? "Sending…" : submitLabel}
       </button>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSeaCanSku, SEA_CAN_TAGLINE } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
+import { TALISU_LINK } from "@/lib/talisu/ui";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
 
@@ -28,10 +29,7 @@ export default function TalisUSkuCheckoutPage() {
       subtitle={`${product.dimensions} · ${product.blurb}`}
     >
       <div className="mb-4 text-center">
-        <Link
-          href="/talisu/bo"
-          className="text-sm text-amber-200/80 hover:text-amber-100"
-        >
+        <Link href="/talisu/bo" className={TALISU_LINK}>
           ← Back to Business Office
         </Link>
       </div>

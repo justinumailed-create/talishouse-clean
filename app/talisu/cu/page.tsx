@@ -2,6 +2,7 @@ import { SEA_CAN_CONTACT, SEA_CAN_SKUS, SEA_CAN_TAGLINE } from "@/lib/talisu/con
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import SectionShell from "@/components/talisu/SectionShell";
 import SeaCanProductGrid from "@/components/talisu/SeaCanProductGrid";
+import SeaCansLocalNav from "@/components/talisu/SeaCansLocalNav";
 import TalisULeadForm from "@/components/talisu/TalisULeadForm";
 
 export const metadata = createTalisUMetadata({
@@ -16,8 +17,9 @@ export default function TalisUContactPage() {
       title={`TalisU Sea-Cans · ${SEA_CAN_CONTACT.title}`}
       subtitle={SEA_CAN_TAGLINE}
     >
+      <SeaCansLocalNav />
       <div className="mb-10">
-        <p className="mb-4 text-sm font-medium text-white/70">Product</p>
+        <p className="mb-4 text-sm font-medium text-neutral-600">Product</p>
         <SeaCanProductGrid linkToCheckout={false} />
       </div>
 

@@ -11,7 +11,7 @@ export default function SamCartEmbed({
   height = 1400,
 }: SamCartEmbedProps) {
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-white/10 bg-white">
+    <div className="w-full overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)] ring-1 ring-black/5">
       <iframe
         title={title}
         src={src}

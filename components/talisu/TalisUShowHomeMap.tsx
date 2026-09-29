@@ -17,7 +17,7 @@ const TalisMapsEmbed = dynamic(
 
 export default function TalisUShowHomeMap() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-neutral-900">
+    <div className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)] ring-1 ring-black/5">
       <TalisMapsEmbed
         latitude={SEA_CAN_SHOW_HOME.latitude}
         longitude={SEA_CAN_SHOW_HOME.longitude}

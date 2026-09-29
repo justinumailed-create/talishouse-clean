@@ -14,7 +14,7 @@ export default function TalisUMktsHeader() {
 
   return (
     <header
-      className="shrink-0 text-white shadow-sm"
+      className="sticky top-0 z-40 shrink-0 text-white shadow-sm"
       style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
     >
       <div className="mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-3 px-3 py-2.5 sm:px-5">

@@ -1,12 +1,14 @@
-import { SEA_CAN_SHOW_HOME, SEA_CAN_TAGLINE } from "@/lib/talisu/content";
+import { SEA_CAN_SHOW_HOME } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
+import { TALISU_BTN_PRIMARY } from "@/lib/talisu/ui";
 import SectionShell from "@/components/talisu/SectionShell";
 import SeaCanProductGrid from "@/components/talisu/SeaCanProductGrid";
+import SeaCansLocalNav from "@/components/talisu/SeaCansLocalNav";
 import TalisUShowHomeMap from "@/components/talisu/TalisUShowHomeMap";
 
 export const metadata = createTalisUMetadata({
   title: "TalisU Sea-Cans | Show Home",
-  description: SEA_CAN_TAGLINE,
+  description: SEA_CAN_SHOW_HOME.heading,
   path: "/talisu/sh",
 });
 
@@ -16,11 +18,9 @@ export default function TalisUShowHomePage() {
       title={`TalisU Sea-Cans · ${SEA_CAN_SHOW_HOME.title}`}
       subtitle={SEA_CAN_SHOW_HOME.heading}
     >
+      <SeaCansLocalNav />
       <div className="mb-8 text-center">
-        <a
-          href={SEA_CAN_SHOW_HOME.phoneHref}
-          className="inline-flex rounded-full border border-amber-400/40 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-amber-100 hover:bg-amber-500/20"
-        >
+        <a href={SEA_CAN_SHOW_HOME.phoneHref} className={TALISU_BTN_PRIMARY}>
           Call {SEA_CAN_SHOW_HOME.contactName}: {SEA_CAN_SHOW_HOME.phoneDisplay}
         </a>
       </div>
@@ -28,7 +28,7 @@ export default function TalisUShowHomePage() {
       <TalisUShowHomeMap />
 
       <div className="mt-10">
-        <p className="mb-4 text-sm font-medium text-white/70">Product</p>
+        <p className="mb-4 text-sm font-medium text-neutral-600">Product</p>
         <SeaCanProductGrid />
       </div>
     </SectionShell>

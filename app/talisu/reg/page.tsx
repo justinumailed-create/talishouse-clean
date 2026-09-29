@@ -1,5 +1,6 @@
 import { TALISU_REGISTER } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
+import { TALISU_CARD } from "@/lib/talisu/ui";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
 
@@ -14,25 +15,25 @@ export default function TalisURegisterPage() {
   return (
     <SectionShell title={TALISU_REGISTER.title}>
       <div className="mb-10 grid gap-8 lg:grid-cols-2">
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h2 className="text-xl font-semibold text-amber-200">
+        <div className={TALISU_CARD}>
+          <h2 className="text-xl font-semibold text-[#0069CF]">
             {TALISU_REGISTER.partnerHeading}
           </h2>
-          <p className="mt-3 text-sm font-medium text-white">
+          <p className="mt-3 text-sm font-medium text-neutral-950">
             {TALISU_REGISTER.partnerName}
           </p>
-          <p className="mt-3 text-sm text-white/70">
+          <p className="mt-3 text-sm text-neutral-700">
             {TALISU_REGISTER.partnerIntro}
           </p>
-          <ul className="mt-4 space-y-3 text-sm text-white/65">
+          <ul className="mt-4 space-y-3 text-sm text-neutral-600">
             {TALISU_REGISTER.bullets.map((b) => (
               <li key={b.label}>
-                <span className="font-semibold text-white">{b.label}:</span>{" "}
+                <span className="font-semibold text-neutral-900">{b.label}:</span>{" "}
                 {b.text}
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-sm font-medium text-amber-100">
+          <p className="mt-4 text-sm font-medium text-[#0069CF]">
             {TALISU_REGISTER.closing}
           </p>
         </div>

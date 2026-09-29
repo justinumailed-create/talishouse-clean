@@ -2,6 +2,7 @@ import { SEA_CAN_BO, SEA_CAN_SKUS, SEA_CAN_TAGLINE } from "@/lib/talisu/content"
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import SectionShell from "@/components/talisu/SectionShell";
 import SeaCanProductGrid from "@/components/talisu/SeaCanProductGrid";
+import SeaCansLocalNav from "@/components/talisu/SeaCansLocalNav";
 import TalisULeadForm from "@/components/talisu/TalisULeadForm";
 
 export const metadata = createTalisUMetadata({
@@ -12,8 +13,12 @@ export const metadata = createTalisUMetadata({
 
 export default function TalisUBusinessOfficePage() {
   return (
-    <SectionShell title={`TalisU Sea-Cans · ${SEA_CAN_BO.title}`} subtitle={SEA_CAN_TAGLINE}>
-      <p className="mb-4 text-sm font-medium text-white/70">
+    <SectionShell
+      title={`TalisU Sea-Cans · ${SEA_CAN_BO.title}`}
+      subtitle={SEA_CAN_TAGLINE}
+    >
+      <SeaCansLocalNav />
+      <p className="mb-4 text-sm font-medium text-neutral-600">
         {SEA_CAN_BO.productLabel}
       </p>
       <SeaCanProductGrid />
