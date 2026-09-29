@@ -595,6 +595,7 @@ function MapSiteChrome({
                   paid={paid}
                   isOwner={isOwner}
                   accountTypeSegment={accountTypeSegment}
+                  isDemo={isDemoListing}
                 />
               ) : null
             }

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import type { KeyboardEvent, RefObject } from "react";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import {
@@ -15,6 +16,7 @@ import {
 } from "@/lib/talispros/market-pages";
 import { MAPSITE_LISTING_CARD_WIDTH_CLASS } from "@/lib/talispros/mapsite-listing-media";
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
+import { ROUTES } from "@/lib/routes";
 import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
@@ -45,6 +47,8 @@ interface MapSiteMarketPartnerCardProps {
   isOwner?: boolean;
   /** Claimed path segment for Logout return (e.g. brokers, listings). */
   accountTypeSegment?: string | null;
+  /** Demo claimed Mapsites™ only — CTA back to Talispros™ home. */
+  isDemo?: boolean;
 }
 
 /**
@@ -61,6 +65,7 @@ export default function MapSiteMarketPartnerCard({
   paid = false,
   isOwner = false,
   accountTypeSegment = null,
+  isDemo = false,
 }: MapSiteMarketPartnerCardProps) {
   const content = contentForAudience(audience);
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
@@ -149,6 +154,16 @@ export default function MapSiteMarketPartnerCard({
           </div>
         </div>
         <MarketingPartnerInterestLinks align="start" className="mt-3" />
+        {isDemo ? (
+          <div className="mt-3 flex justify-start">
+            <Link
+              href={ROUTES.HOME}
+              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
+            >
+              Claim Your Market
+            </Link>
+          </div>
+        ) : null}
         {isOwner ? (
           <div className="mt-3 flex justify-start">
             <MapSiteOwnerLogoutButton
@@ -213,6 +228,16 @@ export default function MapSiteMarketPartnerCard({
           </p>
         </div>
         <MarketingPartnerInterestLinks className="mt-4" />
+        {isDemo ? (
+          <div className="mt-4 flex justify-center">
+            <Link
+              href={ROUTES.HOME}
+              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
+            >
+              Claim Your Market
+            </Link>
+          </div>
+        ) : null}
         {isOwner ? (
           <div className="mt-4 flex justify-center">
             <MapSiteOwnerLogoutButton

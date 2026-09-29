@@ -26,18 +26,19 @@ describe("Talispros legal copy and homepage products", () => {
     expect(TALISPROS_LEGAL_SECONDARY_COPY).toBe("*Some limitations apply.");
   });
 
-  it("explains Mapsite™ on the homepage map card", () => {
+  it("explains Mapsite™ on the homepage map card without a demo link", () => {
     expect("eyebrow" in TALISPROS_HOME_MAPSITE_CARD).toBe(false);
     expect(TALISPROS_HOME_MAPSITE_CARD.title).toBe("Build Mapsite™");
-    expect(TALISPROS_HOME_MAPSITE_CARD.cta).toBe("Free Demo");
+    expect("cta" in TALISPROS_HOME_MAPSITE_CARD).toBe(false);
     expect(TALISPROS_HOME_MAPSITE_CARD.body).toBe(
-      "A dedicated marketing platform covering about 50 km around all PINs you generate. Free Demo: Build Talisbooks™ and have us promote attached inventory.",
+      "A dedicated marketing platform covering about 50 km around all PINs you generate. Build Talisbooks™ and have us promote attached inventory.",
     );
     const preview = readFileSync(
       resolve("components/talispros/TalisprosHomeMapPreview.tsx"),
       "utf8",
     );
-    expect(preview).toContain("href={DEMO_MAPSITE_BUILD_PATH}");
+    expect(preview).not.toContain("DEMO_MAPSITE_BUILD_PATH");
+    expect(preview).not.toContain("Free Demo");
     expect(preview).toContain('if (pinId === "home-pin") setCardOpen(true)');
     expect(DEMO_MAPSITE_BUILD_PATH).toBe("/talispros/demo-mapsite");
   });

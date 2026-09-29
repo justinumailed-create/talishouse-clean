@@ -25,6 +25,7 @@ import {
   publicDemoGenerateError,
 } from "@/lib/talispros/demo-mapsite";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
+import { ROUTES } from "@/lib/routes";
 import { ONBOARDING_JOB_TIMEOUT_MS } from "@/lib/onboarding-timing";
 import Link from "next/link";
 
@@ -345,6 +346,14 @@ export default function DemoEbookGenerateClient({
           <h1 className="mt-5 text-[34px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[40px]">
             Create the demo Talisbook™
           </h1>
+          <div className="mt-5 flex justify-center">
+            <Link
+              href={ROUTES.HOME}
+              className="inline-flex min-h-10 items-center justify-center rounded-full border-2 border-neutral-900 bg-white px-5 text-[13px] font-medium text-neutral-900 transition hover:bg-neutral-900 hover:text-white sm:text-[14px]"
+            >
+              Claim Your Market
+            </Link>
+          </div>
           <p className="mx-auto mt-4 max-w-[26rem] text-[22px] font-semibold leading-snug tracking-[-0.03em] text-neutral-950">
             Extract the pinned pages, or upload a PDF.
           </p>
