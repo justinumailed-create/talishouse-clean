@@ -23,7 +23,7 @@ describe("Talispros legal copy and homepage products", () => {
     expect(TALISPROS_LEGAL_PRIMARY_COPY).toBe(
       "More traffic in higher gross markets for better averages over time.",
     );
-    expect(TALISPROS_LEGAL_SECONDARY_COPY).toBe("Some limitations apply*.");
+    expect(TALISPROS_LEGAL_SECONDARY_COPY).toBe("*Some limitations apply.");
   });
 
   it("explains Mapsite™ on the homepage map card", () => {
