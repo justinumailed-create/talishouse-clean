@@ -22,7 +22,6 @@ import {
   normalizeAdproCategoryCode,
 } from "@/lib/talispros/adpro-categories";
 import { formatNorthAmericanPhone } from "@/lib/format-north-american-phone";
-import { TALISTV_TAGLINE, TALISTV_TITLE } from "@/lib/talistv/copy";
 
 const ADPRE_PACKAGES = [
   { value: "adpro-single", label: "Single AdPro™ PIN", description: "Individual business placement." },
@@ -921,16 +920,16 @@ export default function BuildMapSiteClient({
               </SectionCard>
 
               {showMediaFocus && (
-                <SectionCard number={5} title="Media Focus" description="In-House Online TV Station and Talis E-Books." isOpen={openSections.has(5)} onToggle={() => toggleSection(5)}>
+                <SectionCard number={5} title="Media Focus" description="Talis TV and Talis E-Books." isOpen={openSections.has(5)} onToggle={() => toggleSection(5)}>
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight mb-5">{TALISTV_TITLE} (TTV)</h3>
+                      <h3 className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight mb-5">Talis TV (TTV)</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <FileUpload label="A Monologue in PDF" file={files.ttvMonologuePdf} onChange={(f) => updateFile("ttvMonologuePdf", f)} accept=".pdf" />
                         <FileUpload label="A JPG or PNG background for your Monologue." file={files.ttvBackgroundImage} onChange={(f) => updateFile("ttvBackgroundImage", f)} accept=".jpg,.jpeg,.png" />
                       </div>
                       <p className="text-xs text-neutral-500 leading-relaxed mt-4">
-                        {TALISTV_TAGLINE}. TTV segments should be at least 90 seconds and no more than three minutes in length. As a rough estimate figure about 1,200 characters per minute. Segments over three minutes in length will be edited down.
+                        TTV Segments should be at least 90 seconds and no more than three minutes in length. As a rough estimate figure about 1,200 characters per minute. Segments over three minutes in length will be edited down.
                       </p>
                     </div>
                     <div>

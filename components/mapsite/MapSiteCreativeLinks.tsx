@@ -6,7 +6,6 @@ import {
   mapsiteTebHref,
   mapsiteTtvHref,
 } from "@/lib/mapsite-layout";
-import { TALISTV_TAGLINE, TALISTV_TITLE } from "@/lib/talistv/copy";
 
 interface MapSiteCreativeLinksProps {
   fastCode: string;
@@ -94,7 +93,7 @@ export default function MapSiteCreativeLinks({
         wordmark="TTV"
         actions={
           <>
-            <TextAction href={ttvLink}>Open In-House Online TV Station</TextAction>
+            <TextAction href={ttvLink}>Open TalisTV™</TextAction>
             <TextAction href={scheduleLink}>TV Schedule</TextAction>
           </>
         }
@@ -129,8 +128,8 @@ export default function MapSiteCreativeLinks({
           ) : null}
           <p className="m-0">
             {brokerage
-              ? `Home of ${brokerage}'s ${TALISTV_TITLE}. ${TALISTV_TAGLINE}`
-              : `Home of FAST Code ${code}'s ${TALISTV_TITLE}. ${TALISTV_TAGLINE}`}
+              ? `Home of ${brokerage}'s In-House Online TV Channel.`
+              : `Home of FAST Code ${code}'s In-House Online TV Channel.`}
           </p>
         </div>
       </WordmarkBlock>

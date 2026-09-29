@@ -41,13 +41,8 @@ export default async function TalisTvPage({ searchParams }: TalisTvPageProps) {
               className="h-7 w-7 object-contain"
               priority
             />
-            <span className="flex flex-col items-start gap-1">
-              <span className="m-0 text-[15px] font-semibold leading-none tracking-tight text-neutral-900 transition-colors group-hover:text-neutral-600">
-                {TALISTV_GUIDE_CHANNEL.name}
-              </span>
-              <span className="text-[10px] leading-none text-neutral-500">
-                {TALISTV_GUIDE_CHANNEL.tagline}
-              </span>
+            <span className="m-0 text-[15px] font-semibold leading-none tracking-tight text-neutral-900 transition-colors group-hover:text-neutral-600">
+              {TALISTV_GUIDE_CHANNEL.name}
             </span>
           </Link>
           <Link
@@ -61,7 +56,7 @@ export default async function TalisTvPage({ searchParams }: TalisTvPageProps) {
 
       <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
         <section
-          aria-label="In-House Online TV Station program guide"
+          aria-label="TalisTV program guide"
           className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm"
         >
           <div

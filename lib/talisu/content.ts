@@ -1,7 +1,5 @@
 /** TalisU™ marketing + Sea-Cans content under /talisu */
 
-import { TALISTV_TAGLINE, TALISTV_TITLE } from "@/lib/talistv/copy";
-
 export const TALISU_BASE_PATH = "/talisu";
 
 export const TALISU_SITE_URL = "https://www.talispros.com";
@@ -97,7 +95,7 @@ export const TALISU_REGISTER = {
     },
     {
       label: "TTV",
-      text: `${TALISTV_TITLE}. ${TALISTV_TAGLINE}. We provide AI video production and assist in weekly channel programming to include virtual walk throughs, digital open houses and, of course, value added proposals.`,
+      text: "we provide an in-house online TV Station by giving it its digital home. Additionally, we provide AI video production and assist in weekly channel programming to include virtual walk throughs, digital open houses and, of course, value added proposals.",
     },
   ],
   closing: "Please add us as a resource…!",

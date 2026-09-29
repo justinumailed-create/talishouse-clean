@@ -101,9 +101,9 @@ describe("TalisTV™ library return", () => {
 
 describe("TalisTV™ launch notice", () => {
   it("tells the first 20 registrants they will be upgraded when launched", () => {
-    expect(TALISTV_LAUNCH_HEADLINE).toBe("EARLY BIRD SPECIAL!");
+    expect(TALISTV_LAUNCH_HEADLINE).toBe("In-House Online TV Station");
     expect(TALISTV_LAUNCH_NOTICE).toBe(
-      "The first 20 Talispros™ will receive our TTV ‘Text to Video’ functionality FREE OF CHARGE when we launch it in late 2026 or early 2027.",
+      "Requires a minimum of four hours of contents to be publicly available",
     );
   });
 });

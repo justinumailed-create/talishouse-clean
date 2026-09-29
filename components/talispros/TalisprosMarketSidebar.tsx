@@ -3,7 +3,6 @@ import {
   MAPSITE_MARKET_PARTNER_FALLBACK_NAME,
   type TalisprosMarketPageContent,
 } from "@/lib/talispros/market-pages";
-import { TALISTV_TAGLINE, TALISTV_TITLE } from "@/lib/talistv/copy";
 
 interface TalisprosMarketSidebarProps {
   content: TalisprosMarketPageContent;
@@ -52,10 +51,10 @@ export default function TalisprosMarketSidebar({ content }: TalisprosMarketSideb
           manage your Mapsite™ initiatives.
           <br />
           <br />
-          TTV: {TALISTV_TITLE}. {TALISTV_TAGLINE}. We coordinate video
-          production at a fraction of the cost of conventional channels,
-          including green-screen production of features that influence
-          word-of-mouth and highlight core competencies.
+          TTV: We coordinate video production and in-house online TV programming
+          at a fraction of the cost of conventional channels, including
+          green-screen production of features that influence word-of-mouth and
+          highlight core competencies.
           <br />
           <br />
           Please add us to your team...!
