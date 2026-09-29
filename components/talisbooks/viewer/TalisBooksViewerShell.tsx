@@ -433,7 +433,9 @@ export default function TalisBooksViewerShell({
       : null;
   const editorRight =
     binding === "open" && viewMode === "spread" ? spread.right : null;
-  const showViewerSidebar = false;
+  // Paid Mapsite™ owners / admins: unlock Live Edit + playback tools.
+  // Public visitors keep a chrome-free stage (sidebar stays off).
+  const showViewerSidebar = Boolean(canEditTools);
   const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
   const backToMapSiteHref = viewerBackToMapsiteHref(book);
 

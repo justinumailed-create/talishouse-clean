@@ -73,7 +73,7 @@ describe("Mapsite™ pin resource buttons", () => {
       "utf8",
     );
     expect(popup).toContain("listingResourceHref(site.mls_url)");
-    expect(popup).toContain("mapsiteUrlGateHref(site.fast_code, site.broker_url)");
+    expect(popup).toContain("mapsiteHasGatedUrl(site.broker_url)");
     expect(popup).not.toContain("listingResourceHref(site.broker_url)");
     expect(popup).toContain("listingResourceHref(site.mls_url)");
     expect(popup).not.toContain("listingSearchHref");
@@ -105,5 +105,56 @@ describe("TalisTV™ launch notice", () => {
     expect(TALISTV_LAUNCH_NOTICE).toBe(
       "The first 20 Talispros™ will receive our TTV ‘Text to Video’ functionality FREE OF CHARGE when we launch it in late 2026 or early 2027.",
     );
+  });
+});
+
+
+describe("Paid Mapsite™ TEB™ unlocks ebook admin", () => {
+  it("FAST TEB shelf reuses canEditMapSite for owner/admin Manage + Edit book chrome", () => {
+    const page = readFileSync(
+      join(process.cwd(), "app/talisbooks/fast/[fastCode]/page.tsx"),
+      "utf8",
+    );
+    expect(page).toContain("canEditMapSite");
+    expect(page).toContain("getTalisBooksBookshelf");
+    expect(page).toContain("getPublicTalisBooksBookshelf");
+    expect(page).toContain("canManageEbook");
+    expect(page).toContain("Manage ebook");
+    expect(page).toContain("Edit book");
+    expect(page).toContain("/edit#ebook-editor");
+    // Public visitors keep the read-only public shelf.
+    expect(page).toMatch(/canManageEbook[\s\S]*getTalisBooksBookshelf[\s\S]*getPublicTalisBooksBookshelf/);
+  });
+
+  it("viewer Live Edit sidebar unlocks for paid owner/admin canEditTools", () => {
+    const shell = readFileSync(
+      join(process.cwd(), "components/talisbooks/viewer/TalisBooksViewerShell.tsx"),
+      "utf8",
+    );
+    const viewerPage = readFileSync(
+      join(process.cwd(), "app/talisbooks/viewer/[slug]/page.tsx"),
+      "utf8",
+    );
+    expect(shell).toContain("const showViewerSidebar = Boolean(canEditTools)");
+    expect(shell).not.toContain("const showViewerSidebar = false");
+    expect(viewerPage).toContain("canEditMapSite");
+    expect(viewerPage).toContain("canLiveEdit");
+    expect(viewerPage).toContain("canEditTools={canEditTools}");
+    expect(viewerPage).toContain("canLiveEdit={canLiveEdit}");
+  });
+
+  it("pin TEB™ still resolves to the FAST-code shelf for every Mapsite™ class", () => {
+    expect(
+      resolveTebHref({
+        fast_code: "rm22",
+        teb_url: "/talisbooks/viewer/rm22-some-book",
+      }),
+    ).toBe("/talisbooks/fast/rm22");
+    expect(
+      resolveTebHref({
+        fast_code: "lg01",
+        teb_url: null,
+      }),
+    ).toBe("/talisbooks/fast/lg01");
   });
 });

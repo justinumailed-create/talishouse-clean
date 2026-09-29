@@ -41,7 +41,7 @@ describe("sample Talisbooks™ viewer chrome", () => {
   });
 
   it("keeps PlaybackRail beside the restored header and omits the left brand rail", () => {
-    expect(shell).toContain("const showViewerSidebar = false");
+    expect(shell).toContain("const showViewerSidebar = Boolean(canEditTools)");
     expect(shell).not.toContain("TalisBooksViewerBrandRail");
     expect(shell).toContain("TalisBooksViewerPlaybackRail");
     expect(shell).toContain("talisbooks-viewer__header");
@@ -78,9 +78,9 @@ describe("sample Talisbooks™ viewer chrome", () => {
     const viewerPage = readSource("app/talisbooks/viewer/[slug]/page.tsx");
     expect(viewerPage).toContain("isDemonstrationCatalogBook");
     expect(viewerPage).toContain("pageInsertLocked={isDemoBook}");
-    expect(viewerPage).toContain(
-      "const canLiveEdit = !isDemoBook && paymentReceived && canEditTools;",
-    );
+    expect(viewerPage).toContain("canEditMapSite");
+    expect(viewerPage).toContain("canManageEbook");
+    expect(viewerPage).toContain("const canLiveEdit =");
     expect(viewerPage).not.toContain(
       "const canLiveEdit = isAdmin || (!isDemoBook && paymentReceived",
     );
