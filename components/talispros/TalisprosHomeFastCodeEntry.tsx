@@ -1,18 +1,34 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { setFastCode } from "@/lib/fast-code";
 import { openClaimedMapSiteFromHomeFastCode } from "@/app/talispros/mapsites/actions";
+
+type TalisprosHomeFastCodeEntryProps = {
+  /** When true, focus the input as soon as the field is shown (gate reveal). */
+  autoFocus?: boolean;
+  /** Compact embedded styling for the homepage gate drop-down. */
+  embedded?: boolean;
+};
 
 /**
  * Homepage control: enter a FAST Code → open that code’s claimed Mapsite™
  * with owner/paid session privileges (not the public published shell).
  */
-export default function TalisprosHomeFastCodeEntry() {
+export default function TalisprosHomeFastCodeEntry({
+  autoFocus = false,
+  embedded = false,
+}: TalisprosHomeFastCodeEntryProps = {}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!autoFocus) return;
+    const id = window.setTimeout(() => inputRef.current?.focus(), 40);
+    return () => window.clearTimeout(id);
+  }, [autoFocus]);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -45,16 +61,28 @@ export default function TalisprosHomeFastCodeEntry() {
     }
   }
 
+  const shellClass = embedded
+    ? "bg-white px-0 py-0"
+    : "border-b border-neutral-200 bg-white px-4 py-3 sm:px-6 sm:py-3.5";
+
+  const formClass = embedded
+    ? "flex w-full flex-col items-stretch gap-2"
+    : "mx-auto flex w-full max-w-[1200px] flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3";
+
   return (
-    <div className="border-b border-neutral-200 bg-white px-4 py-3 sm:px-6 sm:py-3.5">
+    <div className={shellClass}>
       <form
         onSubmit={handleSubmit}
-        className="mx-auto flex w-full max-w-[1200px] flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-3"
+        className={formClass}
         aria-label="Open Mapsite™ with FAST Code"
       >
         <label
           htmlFor="home-fast-code"
-          className="shrink-0 text-center text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500 sm:text-left"
+          className={
+            embedded
+              ? "shrink-0 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500"
+              : "shrink-0 text-center text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500 sm:text-left"
+          }
         >
           FAST Code™
         </label>
@@ -73,7 +101,11 @@ export default function TalisprosHomeFastCodeEntry() {
             spellCheck={false}
             autoComplete="off"
             autoCapitalize="characters"
-            className="min-w-0 flex-1 border border-neutral-300 bg-white px-3 py-2.5 text-center font-mono text-sm uppercase tracking-[0.18em] text-neutral-900 placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 disabled:opacity-50 sm:text-left"
+            className={
+              embedded
+                ? "min-w-0 flex-1 border border-neutral-300 bg-white px-3 py-2.5 text-left font-mono text-sm uppercase tracking-[0.18em] text-neutral-900 placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 disabled:opacity-50"
+                : "min-w-0 flex-1 border border-neutral-300 bg-white px-3 py-2.5 text-center font-mono text-sm uppercase tracking-[0.18em] text-neutral-900 placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 disabled:opacity-50 sm:text-left"
+            }
             aria-invalid={Boolean(error)}
             aria-describedby={error ? "home-fast-code-error" : undefined}
           />
@@ -90,7 +122,11 @@ export default function TalisprosHomeFastCodeEntry() {
         <p
           id="home-fast-code-error"
           role="alert"
-          className="mx-auto mt-2 max-w-[1200px] text-center text-xs font-medium text-red-600 sm:text-left"
+          className={
+            embedded
+              ? "mt-2 text-left text-xs font-medium text-red-600"
+              : "mx-auto mt-2 max-w-[1200px] text-center text-xs font-medium text-red-600 sm:text-left"
+          }
         >
           {error}
         </p>

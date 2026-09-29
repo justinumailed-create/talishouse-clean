@@ -47,3 +47,6 @@ next-env.d.ts
 # Copied from pdfjs-dist on npm install — keep in sync with the package version.
 /public/pdf.worker.min.mjs
 /tmp/
+
+# Local scratch PDF — do not commit
+/public/tmp-T-All-Final.pdf

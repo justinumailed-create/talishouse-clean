@@ -69,3 +69,45 @@ export const TALISPROS_START_SEGMENTS = [
     href: `${MAPSITE_APP_PATH}?audience=adpro`,
   },
 ] as const;
+
+/** System Demo destination from the homepage gate. */
+export const TALISPROS_HOME_SYSTEM_DEMO_HREF = "/talisu/mkts";
+
+/**
+ * Right-hand homepage showcase: product roadmap screens (not funnel marketing).
+ * Visuals are first-party assets already used across Mapsites / Markets / ebooks.
+ */
+export const TALISPROS_HOME_SHOWCASE_PANELS = [
+  {
+    id: "mapsites",
+    eyebrow: "Mapsites™",
+    title: "Pin your place on the map",
+    body: "A dedicated marketing surface covering about 50 km around every PIN you generate — findable by buyers and partners.",
+    imageSrc: "/images/talistowns.jpg",
+    imageAlt: "Mapsites™ digital community overview",
+  },
+  {
+    id: "markets",
+    eyebrow: "Markets",
+    title: "Claim semi-exclusive territory",
+    body: "Select the PIN nearest you and lock a market circle on Talismaps™ — neighbouring markets stay discoverable, yours stays primary.",
+    imageSrc: "/talisu/mkts/PIN-Map-1920L.jpeg",
+    imageAlt: "Markets pin map",
+  },
+  {
+    id: "ebooks",
+    eyebrow: "Talisbooks™",
+    title: "Ebooks that travel with you",
+    body: "Build and share Talisbooks™ from your Mapsite™ so inventory, stories, and offers move with every visit.",
+    imageSrc: "/talisbooks/sample/img-04-1280x720.jpeg",
+    imageAlt: "Talisbooks™ sample landscape",
+  },
+  {
+    id: "system",
+    eyebrow: "System",
+    title: "Catalogue, Sea-cans & beyond",
+    body: "Explore the product catalogue, Business Office structures, and the rest of the Talispros™ roadmap from one system.",
+    imageSrc: "/talisu/mkts/T-Dome-elevateNF.jpg",
+    imageAlt: "Talispros™ product system visual",
+  },
+] as const;

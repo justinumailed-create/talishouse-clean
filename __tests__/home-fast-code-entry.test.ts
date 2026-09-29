@@ -6,6 +6,7 @@ import {
   claimedMapSiteSegmentForAccountOrPlan,
   mapsiteBackFromScheduleHref,
 } from "@/lib/talispros/mapsite-state";
+import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
 
 const root = process.cwd();
 
@@ -38,6 +39,10 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
       join(root, "components/talispros/TalisprosStartPage.tsx"),
       "utf8",
     );
+    const gate = readFileSync(
+      join(root, "components/talispros/TalisprosHomeGate.tsx"),
+      "utf8",
+    );
     const entry = readFileSync(
       join(root, "components/talispros/TalisprosHomeFastCodeEntry.tsx"),
       "utf8",
@@ -47,7 +52,15 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
       "utf8",
     );
 
-    expect(startPage).toContain("TalisprosHomeFastCodeEntry");
+    expect(startPage).toContain("TalisprosHomeGate");
+    expect(startPage).toContain("TalisprosHomeShowcase");
+    expect(gate).toContain("TalisprosHomeFastCodeEntry");
+    expect(gate).toContain("Login To Your Account");
+    expect(gate).toContain("System Demo");
+    expect(gate).toContain("TALISPROS_HOME_SYSTEM_DEMO_HREF");
+    expect(gate).toContain("aria-expanded={loginOpen}");
+    expect(gate).toContain("setLoginOpen");
+    expect(gate).toContain("<TalisprosHomeFastCodeEntry autoFocus embedded />");
     expect(entry).toContain("openClaimedMapSiteFromHomeFastCode");
     expect(entry).toContain("setFastCode");
     expect(entry).toContain("window.location.assign");
@@ -60,6 +73,10 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(actions).toContain("logoutMapSiteOwnerSession");
     expect(actions).toContain("clearMapSiteBrowserSession");
     expect(actions).toContain('return { success: true, href: "/" }');
+  });
+
+  it("points System Demo at /talisu/mkts", () => {
+    expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/talisu/mkts");
   });
 
   it("shows Logout on paid owner claimed Mapsite™ chrome", () => {
