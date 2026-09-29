@@ -83,6 +83,10 @@ interface MapSiteApplicationProps {
   sourceAudience?: RegistrationMarket | null;
   /** Capability account type that drives permissions and UI visibility. */
   accountType?: MapSiteCapabilityAccountType;
+  /** True when this browser has the owner / paid Mapsite™ session. */
+  isOwner?: boolean;
+  /** Claimed URL account-type segment (brokers, listings, …) for Logout return. */
+  accountTypeSegment?: string | null;
   /** Choose for Flag preference from the Talisbook™ (default Address). */
   flagIdentity?: MapsiteFlagIdentity | null;
   /** Agent/owner name used when Choose for Flag is Name. */
@@ -105,6 +109,8 @@ export default function MapSiteApplication({
   onboardingMode = "self",
   sourceAudience = null,
   accountType,
+  isOwner = false,
+  accountTypeSegment = null,
   flagIdentity = null,
   flagName = null,
 }: MapSiteApplicationProps) {
@@ -217,6 +223,8 @@ export default function MapSiteApplication({
         showActivatePayment={showActivatePayment}
         checkoutStatus={checkoutStatus}
         checkoutSessionId={checkoutSessionId}
+        isOwner={isOwner}
+        accountTypeSegment={accountTypeSegment}
         selectedPinId={selectedPinId}
         setSelectedPinId={setSelectedPinId}
         beginFocusGuard={beginFocusGuard}
@@ -241,6 +249,8 @@ function MapSiteChrome({
   showActivatePayment,
   checkoutStatus,
   checkoutSessionId,
+  isOwner,
+  accountTypeSegment,
   selectedPinId,
   setSelectedPinId,
   beginFocusGuard,
@@ -260,6 +270,8 @@ function MapSiteChrome({
   showActivatePayment: boolean;
   checkoutStatus: "success" | "cancelled" | null;
   checkoutSessionId: string | null;
+  isOwner: boolean;
+  accountTypeSegment: string | null;
   selectedPinId: string | null;
   setSelectedPinId: (id: string | null) => void;
   beginFocusGuard: () => void;
@@ -581,6 +593,8 @@ function MapSiteChrome({
                   cardRef={listingCardRef}
                   onSelect={focusPinAndOpen}
                   paid={paid}
+                  isOwner={isOwner}
+                  accountTypeSegment={accountTypeSegment}
                 />
               ) : null
             }

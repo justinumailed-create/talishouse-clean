@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { setFastCode } from "@/lib/fast-code";
 import { openClaimedMapSiteFromHomeFastCode } from "@/app/talispros/mapsites/actions";
 
@@ -10,7 +9,6 @@ import { openClaimedMapSiteFromHomeFastCode } from "@/app/talispros/mapsites/act
  * with owner/paid session privileges (not the public published shell).
  */
 export default function TalisprosHomeFastCodeEntry() {
-  const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
@@ -37,11 +35,12 @@ export default function TalisprosHomeFastCodeEntry() {
       }
 
       setFastCode(trimmed);
-      router.push(result.href);
+      // Full document navigation so owner/paid Set-Cookie from the action
+      // is applied before the claimed Mapsite™ RSC reads the session.
+      window.location.assign(result.href);
     } catch {
       setError("Something went wrong. Please try again.");
       inputRef.current?.focus();
-    } finally {
       setLoading(false);
     }
   }

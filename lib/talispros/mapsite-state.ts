@@ -140,6 +140,38 @@ export function mapsiteAccountTypeSegment(
   return "listings";
 }
 
+
+/**
+ * Path segment for a claimed Mapsite™ from claim account type or payment plan.
+ * Root / $1 root activations land on brokers (Root Account™ chrome), not listings.
+ */
+export function claimedMapSiteSegmentForAccountOrPlan(
+  value: string | null | undefined,
+): string {
+  const normalized = value?.trim().toLowerCase() || "";
+  if (!normalized) return "listings";
+
+  if (
+    normalized === "root" ||
+    normalized === "root-1" ||
+    normalized === "root_1" ||
+    normalized === "test" ||
+    normalized === "brokers" ||
+    normalized === "root_account" ||
+    normalized === "root_account_1" ||
+    normalized.startsWith("root_account")
+  ) {
+    return "brokers";
+  }
+
+  if (normalized === "fsbo" || normalized === "fsbos") return "fsbos";
+  if (normalized.startsWith("adpro")) return "adpro";
+  if (normalized === "homes" || normalized === "home") return "homes";
+  if (normalized === "derivative" || normalized === "listings") return "listings";
+
+  return mapsiteAccountTypeSegment(normalized);
+}
+
 /**
  * Public published Mapsite™ page: /mapsite/{fastCode}.
  * All FAST Codes share the RM22 creative shell (see PUBLISHED_MAPSITE_SHELL).

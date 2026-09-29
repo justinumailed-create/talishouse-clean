@@ -92,6 +92,14 @@ export async function establishPaidMapSiteBrowserSession(
   }
 }
 
+
+/** Clear owner + paid root-account cookies (Logout → public/visitor view). */
+export async function clearMapSiteBrowserSession(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.delete(MAPSITE_OWNER_COOKIE);
+  cookieStore.delete(MAPSITE_ROOT_ACCOUNT_COOKIE);
+}
+
 export interface MapSiteEditToolbarState {
   isAdmin: boolean;
   isOwner: boolean;

@@ -3,12 +3,18 @@
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import {
   canEditMapSite,
+  clearMapSiteBrowserSession,
   establishPaidMapSiteBrowserSession,
   setMapSiteOwnerSession,
 } from "@/lib/mapsite-edit-auth";
+import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
-import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
+import {
+  buildClaimedMapSitePath,
+  claimedMapSiteSegmentForAccountOrPlan,
+  MAPSITE_APP_PATH,
+} from "@/lib/talispros/mapsite-state";
 
 export async function establishMapSiteOwnerSession(
   mapsiteFastCode: string,
@@ -41,6 +47,109 @@ export async function checkMapSiteEditAccess(
   fastCode: string
 ): Promise<boolean> {
   return canEditMapSite(fastCode);
+}
+
+/**
+ * Prefer payment plan, then build-request / FAST Code account type, so Root
+ * activations (e.g. rm22) open /brokers/… instead of a generic listings path.
+ */
+export async function resolveClaimedMapSiteAccountTypeSegment(options: {
+  fastCode: string;
+  mapsiteId?: string | null;
+}): Promise<string> {
+  const fastCode = options.fastCode.trim();
+  const mapsiteId = options.mapsiteId?.trim() || null;
+  if (!fastCode && !mapsiteId) return "listings";
+  if (!isSupabaseAdminConfigured()) return "listings";
+
+  try {
+    const supabase = getSupabaseAdmin();
+
+    if (mapsiteId) {
+      const { data: payment } = await supabase
+        .from("talispros_payments")
+        .select("plan_type, payment_status")
+        .eq("mapsite_id", mapsiteId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      for (const row of payment || []) {
+        const status = row.payment_status?.trim().toLowerCase() || "";
+        if (
+          row.plan_type &&
+          (status === "completed" ||
+            status === "paid" ||
+            status === "complete" ||
+            status === "succeeded")
+        ) {
+          return claimedMapSiteSegmentForAccountOrPlan(row.plan_type);
+        }
+      }
+    }
+
+    if (fastCode) {
+      const { data: paymentByCode } = await supabase
+        .from("talispros_payments")
+        .select("plan_type, payment_status")
+        .ilike("fast_code", fastCode)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      for (const row of paymentByCode || []) {
+        const status = row.payment_status?.trim().toLowerCase() || "";
+        if (
+          row.plan_type &&
+          (status === "completed" ||
+            status === "paid" ||
+            status === "complete" ||
+            status === "succeeded")
+        ) {
+          return claimedMapSiteSegmentForAccountOrPlan(row.plan_type);
+        }
+      }
+
+      const { data: codeRow } = await supabase
+        .from("fast_codes")
+        .select("account_type, request_id")
+        .ilike("code", fastCode)
+        .maybeSingle();
+      if (codeRow?.account_type) {
+        return claimedMapSiteSegmentForAccountOrPlan(codeRow.account_type);
+      }
+      if (codeRow?.request_id) {
+        const { data: request } = await supabase
+          .from("build_requests")
+          .select("requested_account_type, account_type")
+          .eq("id", codeRow.request_id)
+          .maybeSingle();
+        const accountType =
+          request?.requested_account_type || request?.account_type || "";
+        if (accountType) {
+          return claimedMapSiteSegmentForAccountOrPlan(accountType);
+        }
+      }
+    }
+
+    if (mapsiteId) {
+      const { data: request } = await supabase
+        .from("build_requests")
+        .select("requested_account_type, account_type")
+        .eq("linked_mapsite_id", mapsiteId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      const accountType =
+        request?.requested_account_type || request?.account_type || "";
+      if (accountType) {
+        return claimedMapSiteSegmentForAccountOrPlan(accountType);
+      }
+    }
+  } catch (error) {
+    console.warn(
+      "[mapsite] resolveClaimedMapSiteAccountTypeSegment failed:",
+      error,
+    );
+  }
+
+  return "listings";
 }
 
 /**
@@ -83,25 +192,53 @@ export async function openClaimedMapSiteFromHomeFastCode(
 
   const resolvedCode = (mapsite.fastCode || code).trim().toLowerCase();
 
-  // Same owner cookie the edit gate / post-claim flows set — unlocks owner chrome.
-  await setMapSiteOwnerSession(resolvedCode);
-
   const paid = await hasCompletedMapSiteActivationPayment({
     fastCode: resolvedCode,
     mapsiteId: mapsite.id,
     reconcileFromStripe: true,
   });
 
-  // Paid users also get the root-account cookie used on the normal paid path.
+  // Paid users get owner + root-account cookies; unpaid still get owner chrome.
   if (paid) {
     await establishPaidMapSiteBrowserSession(resolvedCode);
+  } else {
+    await setMapSiteOwnerSession(resolvedCode);
   }
 
-  // Same destination as Back to Mapsite™ / mapsiteBackFromScheduleHref.
+  const accountType = await resolveClaimedMapSiteAccountTypeSegment({
+    fastCode: resolvedCode,
+    mapsiteId: mapsite.id,
+  });
+
   const href = buildClaimedMapSitePath({
     fastCode: resolvedCode,
-    accountType: "listings",
+    accountType,
   });
 
   return { success: true, href };
+}
+
+/**
+ * Logout from claimed/paid Mapsite™ owner view: clear owner + paid cookies and
+ * return to the same claimed URL as a public visitor (or the Mapsite™ app hub).
+ */
+export async function logoutMapSiteOwnerSession(options?: {
+  fastCode?: string | null;
+  accountType?: string | null;
+}): Promise<{ success: boolean; href: string }> {
+  await clearMapSiteBrowserSession();
+
+  const code = options?.fastCode?.trim().toLowerCase() || "";
+  if (!code) {
+    return { success: true, href: MAPSITE_APP_PATH };
+  }
+
+  const accountType =
+    options?.accountType?.trim() ||
+    (await resolveClaimedMapSiteAccountTypeSegment({ fastCode: code }));
+
+  return {
+    success: true,
+    href: buildClaimedMapSitePath({ fastCode: code, accountType }),
+  };
 }

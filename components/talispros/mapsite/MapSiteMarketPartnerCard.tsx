@@ -17,6 +17,7 @@ import { MAPSITE_LISTING_CARD_WIDTH_CLASS } from "@/lib/talispros/mapsite-listin
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
+import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
 
 function contentForAudience(audience: RegistrationMarket): TalisprosMarketPageContent {
   switch (audience) {
@@ -40,6 +41,10 @@ interface MapSiteMarketPartnerCardProps {
   onSelect?: () => void;
   /** Agency logo + cloud vignette only after activation payment. */
   paid?: boolean;
+  /** Browser owns this Mapsite™ (owner / paid session cookies). */
+  isOwner?: boolean;
+  /** Claimed path segment for Logout return (e.g. brokers, listings). */
+  accountTypeSegment?: string | null;
 }
 
 /**
@@ -54,6 +59,8 @@ export default function MapSiteMarketPartnerCard({
   cardRef,
   onSelect,
   paid = false,
+  isOwner = false,
+  accountTypeSegment = null,
 }: MapSiteMarketPartnerCardProps) {
   const content = contentForAudience(audience);
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
@@ -142,6 +149,14 @@ export default function MapSiteMarketPartnerCard({
           </div>
         </div>
         <MarketingPartnerInterestLinks align="start" className="mt-3" />
+        {paid && isOwner ? (
+          <div className="mt-3 flex justify-start">
+            <MapSiteOwnerLogoutButton
+              fastCode={fastCode}
+              accountType={accountTypeSegment}
+            />
+          </div>
+        ) : null}
       </div>
 
       <div className={desktopPanel}>
@@ -198,6 +213,14 @@ export default function MapSiteMarketPartnerCard({
           </p>
         </div>
         <MarketingPartnerInterestLinks className="mt-4" />
+        {paid && isOwner ? (
+          <div className="mt-4 flex justify-center">
+            <MapSiteOwnerLogoutButton
+              fastCode={fastCode}
+              accountType={accountTypeSegment}
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

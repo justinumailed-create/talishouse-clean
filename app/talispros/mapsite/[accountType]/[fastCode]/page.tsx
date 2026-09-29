@@ -167,7 +167,8 @@ export default async function ClaimedMapSiteByAccountTypePage({
     Boolean(bookSlug) ||
     showActivatePayment ||
     Boolean(checkoutStatus);
-  const isOwner = forceOpenPin || (await isOwnMapSite(fastCode));
+  // Real owner/paid browser session (not forceOpenPin query shortcuts).
+  const isOwner = await isOwnMapSite(fastCode);
 
   const paymentPlanType = await resolveMapSitePaymentPlanType({
     requestId,
@@ -196,6 +197,10 @@ export default async function ClaimedMapSiteByAccountTypePage({
         }),
       })
     ).paid;
+
+  // Paid claimed Mapsites™ always surface pin dashboard resources (URL/MLS/TEB/TTV).
+  // Owner session still gates Logout / owner-only chrome.
+  const openPinOnLoad = forceOpenPin || isOwner || paymentReceived;
 
   const ebookContext = await getMapSiteEbookContext(fastCode, {
     bookSlug,
@@ -233,7 +238,9 @@ export default async function ClaimedMapSiteByAccountTypePage({
       showActivatePayment={showActivatePayment}
       checkoutStatus={checkoutStatus}
       checkoutSessionId={checkoutSessionId}
-      openPinOnLoad={isOwner}
+      openPinOnLoad={openPinOnLoad}
+      isOwner={isOwner}
+      accountTypeSegment={accountType}
       showStartHere={false}
       flagIdentity={ebookContext?.primaryEbook?.flagIdentity}
       flagName={ebookContext?.primaryEbook?.flagName}
