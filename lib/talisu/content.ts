@@ -66,6 +66,11 @@ export const TALISU_AUDIO = {
   /** Hosted on live talisu.com until the ~40MB file is placed on CDN/deploy. */
   deepDiveRemoteSrc: "https://talisu.com/resources/Deep-Dive.mp3",
   deepDiveLocalSrc: "/talisu/Deep-Dive.mp3",
+  /** Local NotebookLM-style dialogue (Aisha + Webster) on digital property fractionalization. */
+  aishaWebsterSrc: "/talisu/Aisha-Webster.mp3",
+  aishaWebsterSubtitle:
+    "Digital Property Fractionalization — with Aisha & Webster",
+  aishaWebsterVtt: "/talisu/Aisha-Webster.vtt",
   playHint: "Press PLAY, or scroll to the bottom to print and read.",
 } as const;
 
