@@ -9,6 +9,7 @@ import GatedLink from "./GatedLink";
 import { ROUTES } from "@/lib/routes";
 import { ShoppingCart } from "lucide-react";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
+import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
 
 export default function Header() {
   const pathname = usePathname();
@@ -23,7 +24,7 @@ export default function Header() {
   if (pathname === "/partner-access" || shouldHidePublicStorefrontChrome(pathname)) return null;
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-100">
+    <header className={`sticky top-0 z-50 bg-white border-b border-gray-100 ${STOREFRONT_CHROME_CLASS}`}>
       <div className="w-full px-5">
         <div className="flex justify-between items-center h-24">
           {/* LEFT: Logo + Navigation */}

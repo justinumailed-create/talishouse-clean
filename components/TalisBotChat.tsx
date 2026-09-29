@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { supabase } from "@/lib/supabase";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
+import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
 
 interface LeadData {
   purpose: string;
@@ -286,7 +287,7 @@ export default function TalisBotChat() {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-[1000] font-sans">
+    <div className={`fixed bottom-6 right-6 z-[1000] font-sans ${STOREFRONT_CHROME_CLASS}`}>
       {!open ? (
         <div className="bg-white/80 backdrop-blur-md p-1.5 rounded-[22px] shadow-2xl border border-white/50">
           <button

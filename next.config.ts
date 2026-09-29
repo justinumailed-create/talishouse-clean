@@ -54,6 +54,7 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
+    globalNotFound: true,
     serverActions: {
       // Server Actions only — does not apply to /api route handlers, and does
       // not raise Vercel's 4.5 MB Function payload cap (HTTP 413).

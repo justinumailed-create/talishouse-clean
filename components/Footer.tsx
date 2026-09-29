@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import GatedLink from "./GatedLink";
 import { ROUTES } from "@/lib/routes";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
+import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
 
 export default function Footer() {
   const pathname = usePathname();
@@ -13,7 +14,7 @@ export default function Footer() {
   if (pathname === "/partner-access" || shouldHidePublicStorefrontChrome(pathname)) return null;
 
   return (
-    <footer className="w-full border-t border-gray-100 bg-white text-gray-700 mt-12">
+    <footer className={`w-full border-t border-gray-100 bg-white text-gray-700 mt-12 ${STOREFRONT_CHROME_CLASS}`}>
       <div className="w-full px-5 py-14 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8">
         <div className="flex flex-col gap-6">
           <Link href={ROUTES.HOME} className="flex-shrink-0">

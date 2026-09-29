@@ -13,6 +13,7 @@ import { formatCAD } from "@/utils/currency";
 import { UI } from "@/styles/design-system";
 import { addonsRecord } from "@/lib/config/addons";
 import CanadaProvinceSelect from "@/components/CanadaProvinceSelect";
+import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
 
 const DEFAULT_PRODUCT_IMAGE = "/images/placeholder.png";
 
@@ -151,7 +152,7 @@ export default function CartDrawer() {
 
   if (paymentSuccess) {
     return (
-      <div className="fixed inset-0 z-30 pointer-events-none flex justify-end overflow-y-auto">
+      <div className={`fixed inset-0 z-30 pointer-events-none flex justify-end overflow-y-auto ${STOREFRONT_CHROME_CLASS}`}>
         <div className="absolute inset-0 bg-black/40 pointer-events-auto" onClick={closeCart} />
         <div className="relative top-24 h-fit min-h-[400px] w-full max-w-md bg-white shadow-2xl p-6 flex flex-col pointer-events-auto mb-24">
           <button onClick={closeCart} className="absolute top-4 right-4 text-gray-400 hover:text-gray-900 p-2">
@@ -174,7 +175,7 @@ export default function CartDrawer() {
   }
 
   return (
-    <div className="fixed inset-0 z-30 pointer-events-none flex justify-end overflow-y-auto">
+    <div className={`fixed inset-0 z-30 pointer-events-none flex justify-end overflow-y-auto ${STOREFRONT_CHROME_CLASS}`}>
       <div className="absolute inset-0 bg-black/40 pointer-events-auto" onClick={closeCart} />
       <div className="relative top-24 h-fit w-full max-w-md bg-white shadow-2xl flex flex-col pointer-events-auto mb-24">
         <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
