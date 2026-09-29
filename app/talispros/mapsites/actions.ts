@@ -13,7 +13,6 @@ import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-pa
 import {
   buildClaimedMapSitePath,
   claimedMapSiteSegmentForAccountOrPlan,
-  MAPSITE_APP_PATH,
 } from "@/lib/talispros/mapsite-state";
 
 export async function establishMapSiteOwnerSession(
@@ -220,25 +219,13 @@ export async function openClaimedMapSiteFromHomeFastCode(
 
 /**
  * Logout from claimed/paid Mapsite™ owner view: clear owner + paid cookies and
- * return to the same claimed URL as a public visitor (or the Mapsite™ app hub).
+ * return to the Talispros home page so no claimed/public Mapsite™ shell remains.
  */
-export async function logoutMapSiteOwnerSession(options?: {
+export async function logoutMapSiteOwnerSession(_options?: {
   fastCode?: string | null;
   accountType?: string | null;
 }): Promise<{ success: boolean; href: string }> {
+  void _options; // Keep the action signature compatible with existing Mapsite chrome callers.
   await clearMapSiteBrowserSession();
-
-  const code = options?.fastCode?.trim().toLowerCase() || "";
-  if (!code) {
-    return { success: true, href: MAPSITE_APP_PATH };
-  }
-
-  const accountType =
-    options?.accountType?.trim() ||
-    (await resolveClaimedMapSiteAccountTypeSegment({ fastCode: code }));
-
-  return {
-    success: true,
-    href: buildClaimedMapSitePath({ fastCode: code, accountType }),
-  };
+  return { success: true, href: "/" };
 }

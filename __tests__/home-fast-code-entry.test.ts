@@ -59,6 +59,7 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(actions).toContain("hasCompletedMapSiteActivationPayment");
     expect(actions).toContain("logoutMapSiteOwnerSession");
     expect(actions).toContain("clearMapSiteBrowserSession");
+    expect(actions).toContain('return { success: true, href: "/" }');
   });
 
   it("shows Logout on paid owner claimed Mapsite™ chrome", () => {
