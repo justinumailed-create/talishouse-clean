@@ -149,7 +149,7 @@ export default function MapSiteMarketPartnerCard({
           </div>
         </div>
         <MarketingPartnerInterestLinks align="start" className="mt-3" />
-        {paid && isOwner ? (
+        {isOwner ? (
           <div className="mt-3 flex justify-start">
             <MapSiteOwnerLogoutButton
               fastCode={fastCode}
@@ -213,7 +213,7 @@ export default function MapSiteMarketPartnerCard({
           </p>
         </div>
         <MarketingPartnerInterestLinks className="mt-4" />
-        {paid && isOwner ? (
+        {isOwner ? (
           <div className="mt-4 flex justify-center">
             <MapSiteOwnerLogoutButton
               fastCode={fastCode}

@@ -82,6 +82,8 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
 
     expect(partner).toContain("MapSiteOwnerLogoutButton");
     expect(partner).toContain("isOwner");
+    expect(partner).not.toContain("paid && isOwner");
+    expect(partner.match(/\{isOwner \?/g)).toHaveLength(2);
     expect(logout).toContain("logoutMapSiteOwnerSession");
     expect(logout).toContain("Logout");
     expect(application).toContain("isOwner={isOwner}");
