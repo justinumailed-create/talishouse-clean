@@ -44,7 +44,7 @@ export const TALISBOOKS_DATABASE_MODELS = [
 export const TALISBOOKS_FUTURE_FEATURES = [
   "Book Editor",
   "Mapsites™ Integration",
-  "TalisTV™ Video Shelf (TTV)",
+  "In-House Online TV Station (TTV)",
   "FAST Code Libraries",
   "Template Marketplace",
   "Media Library",

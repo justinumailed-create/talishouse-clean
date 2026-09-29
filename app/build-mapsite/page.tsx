@@ -17,6 +17,7 @@ import HomePinLocationSection, {
   validateHomePinLocation,
 } from "@/components/build-mapsite/HomePinLocationSection";
 import { defaultHomePinLocationValues } from "@/components/build-mapsite/home-pin-types";
+import { TALISTV_TAGLINE, TALISTV_TITLE } from "@/lib/talistv/copy";
 
 const PROVINCES = [
   "Ontario",
@@ -1155,7 +1156,7 @@ export default function BuildMapSitePage() {
 
               <div className="py-6">
                 <h3 className="text-base sm:text-lg font-semibold text-neutral-900 tracking-tight mb-5">
-                  Talis TV (TTV)
+                  {TALISTV_TITLE} (TTV)
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <FileUpload
@@ -1172,7 +1173,7 @@ export default function BuildMapSitePage() {
                   />
                 </div>
                 <p className="text-xs text-neutral-500 leading-relaxed mt-4">
-                  TTV Segments should be at least 90 seconds and no more than three minutes in length. As a rough estimate figure about 1,200 characters per minute. Segments over three minutes in length will be edited down.
+                  {TALISTV_TAGLINE}. TTV segments should be at least 90 seconds and no more than three minutes in length. As a rough estimate figure about 1,200 characters per minute. Segments over three minutes in length will be edited down.
                 </p>
               </div>
 

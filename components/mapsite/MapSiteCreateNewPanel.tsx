@@ -4,6 +4,7 @@ import {
   mapsiteCreateEbookHref,
   mapsiteCreateVideoHref,
 } from "@/lib/mapsite-layout";
+import { TALISTV_TAGLINE, TALISTV_TITLE } from "@/lib/talistv/copy";
 
 interface MapSiteCreateNewPanelProps {
   fastCode: string;
@@ -35,8 +36,8 @@ const ITEMS: {
   {
     title: "Video",
     description: () =>
-      "Add programming to this Mapsite™ In-House Online TV Channel.",
-    cta: "Open TalisTV™",
+      `Add programming to this Mapsite™ ${TALISTV_TITLE}. ${TALISTV_TAGLINE}`,
+    cta: "Open In-House Online TV Station",
     href: (fastCode) => mapsiteCreateVideoHref(fastCode),
   },
 ];

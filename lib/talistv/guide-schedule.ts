@@ -1,3 +1,5 @@
+import { TALISTV_TAGLINE, TALISTV_TITLE } from "./copy";
+
 /**
  * TalisTV™ guide schedule — demo lineup for the TV-guide surface.
  * Times are local wall-clock labels; shows align 1:1 with each slot.
@@ -116,8 +118,8 @@ export const TALISTV_GUIDE_SLOTS: TalisTvGuideSlot[] = [
 
 export const TALISTV_GUIDE_CHANNEL = {
   callSign: "TTV",
-  name: "TalisTV™",
-  tagline: "Video shelf for the Talispros™ ecosystem",
+  name: TALISTV_TITLE,
+  tagline: TALISTV_TAGLINE,
 } as const;
 
 export const TALISTV_LAUNCH_HEADLINE = "EARLY BIRD SPECIAL!";

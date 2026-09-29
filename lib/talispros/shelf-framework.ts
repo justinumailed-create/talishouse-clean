@@ -38,8 +38,8 @@ export const TALISBOOKS_SHELF_PROFILE = createShelfProfile({
 
 export const TALISTV_VIDEO_SHELF_PROFILE = createShelfProfile({
   productCode: "TTV",
-  productName: "TalisTV™",
-  shelfLabel: "Video Shelf",
+  productName: "In-House Online TV Station",
+  shelfLabel: "In-House Online TV Station",
   unitLabel: "videos",
   capacity: 25,
   unitValueUsd: 49.95,
