@@ -26,7 +26,7 @@ describe("Claim Your Market on demo Mapsites™ only", () => {
     ).toBe(false);
   });
 
-  it("wires Claim Your Market → / on demo claimed partner card and demo-mapsite surfaces", () => {
+  it("wires Claim Your Market → / only on demo claimed partner card, not demo-mapsite template", () => {
     expect(ROUTES.HOME).toBe("/");
     const partner = readFileSync(
       resolve("components/talispros/mapsite/MapSiteMarketPartnerCard.tsx"),
@@ -46,15 +46,13 @@ describe("Claim Your Market on demo Mapsites™ only", () => {
       resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),
       "utf8",
     );
-    expect(builder).toContain("Claim Your Market");
-    expect(builder).toContain("href={ROUTES.HOME}");
+    expect(builder).not.toContain("Claim Your Market");
     expect(builder).toContain("DEMO_MAPSITE_PDF_HREF");
 
     const ebook = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoEbookGenerateClient.tsx"),
       "utf8",
     );
-    expect(ebook).toContain("Claim Your Market");
-    expect(ebook).toContain("href={ROUTES.HOME}");
+    expect(ebook).not.toContain("Claim Your Market");
   });
 });
