@@ -19,6 +19,7 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/fast-code") ||
     pathname.startsWith("/partner-access") ||
     pathname.startsWith("/talispros") ||
+    pathname.startsWith("/talisu") ||
     pathname.startsWith("/talismaps") ||
     pathname.startsWith("/talisbooks") ||
     pathname.startsWith("/talistv") ||

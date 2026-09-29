@@ -60,6 +60,14 @@ export const ROUTES = {
   TALISPROS_EBOOK_RAHUL: "/talispros/ebook-rahul",
   TALISPROS_REGISTER_AGENTS: "/talispros/register-agents",
   TALISPROS_REGISTER_YOUR_MAPSITE: "/talispros/register-your-mapsite",
+  TALISU: "/talisu",
+  TALISU_MARKETS: "/talisu/mkts",
+  TALISU_AUDIO: "/talisu/au",
+  TALISU_REGISTER: "/talisu/reg",
+  TALISU_ENGAGE: "/talisu/engage",
+  TALISU_BUSINESS_OFFICE: "/talisu/bo",
+  TALISU_SHOW_HOME: "/talisu/sh",
+  TALISU_CONTACT: "/talisu/cu",
 } as const;
 
 export type RouteKey = keyof typeof ROUTES;
