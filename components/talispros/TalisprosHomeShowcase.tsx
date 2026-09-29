@@ -15,7 +15,7 @@ export default function TalisprosHomeShowcase() {
         src="/assets/home-demo/01-talismaps-mkts.jpg"
         alt="Static Talismaps™ Markets map with Canada pins"
         fill
-        sizes="(max-width: 1023px) 100vw, calc(100vw - 22rem)"
+        sizes="(max-width: 1023px) 100vw, 60vw"
         className="pointer-events-none select-none object-cover object-center"
         draggable={false}
         priority
