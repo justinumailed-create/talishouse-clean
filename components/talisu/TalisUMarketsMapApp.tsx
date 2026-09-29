@@ -58,7 +58,7 @@ function toEnginePins(pins: readonly TalisUMktsPin[]): MapEnginePin[] {
           whiteCenter: true,
           customLogoUrl: TALISU_MKTS_TREE_LOGO,
           pinBorderColor: "#000000",
-          pinSize: 30,
+          pinSize: 45,
           animated: false,
           label: pin.label,
         },

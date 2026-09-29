@@ -33,8 +33,6 @@ describe("TalisU mkts Atlist pin export", () => {
   it("includes Do More sidebar actions with Modular Spaces → catalogue", () => {
     const doMore = talisuMktsDoMorePins();
     expect(doMore.map((p) => p.label)).toEqual([
-      "Add Marketing PINs",
-      "Add Adpro Sites",
       "TalisU™ Modular Spaces",
     ]);
     expect(doMore.find((p) => p.id === "modular-spaces")?.nextHref).toBe(
@@ -42,8 +40,8 @@ describe("TalisU mkts Atlist pin export", () => {
     );
   });
 
-  it("exposes 18 total pins matching the Atlist map marker count", () => {
-    expect(TALISU_MKTS_PINS).toHaveLength(18);
+  it("exposes 16 total pins (15 Canada markets + Modular Spaces)", () => {
+    expect(TALISU_MKTS_PINS).toHaveLength(16);
   });
 
   it("uses authentic Atlist circular Canada-flag and tree pin assets", () => {
@@ -56,7 +54,7 @@ describe("TalisU mkts Atlist pin export", () => {
     expect(TALISU_MKTS_VIEWPORT.zoom).toBeLessThan(4.2);
     expect(TALISU_MKTS_FIT_PADDING.left).toBeGreaterThanOrEqual(300);
     const coords = talisuMktsMapCoordinates();
-    expect(coords.length).toBe(18);
+    expect(coords.length).toBe(16);
     const lngs = coords.map((c) => c.longitude);
     expect(Math.min(...lngs)).toBeLessThan(-130); // Yukon
     expect(Math.max(...lngs)).toBeGreaterThan(-60); // NL
