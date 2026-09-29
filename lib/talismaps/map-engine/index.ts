@@ -3,6 +3,7 @@ export type {
   MapBasemapViewAvailability,
   MapBasemapViewOption,
   MapCoordinates,
+  MapFitPadding,
   MapEngineEvent,
   MapEngineEventHandler,
   MapEngineEventPayload,

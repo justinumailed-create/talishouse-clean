@@ -2,16 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import MapEngineCanvas from "@/components/talismaps/map-engine/MapEngineCanvas";
+import MapEngineFitBounds from "@/components/talismaps/map-engine/MapEngineFitBounds";
 import {
   MapEngineProvider,
   useMapEngine,
 } from "@/components/talismaps/map-engine/MapEngineProvider";
 import type { MapEnginePin } from "@/lib/talismaps/map-engine";
 import {
+  TALISU_MKTS_FIT_PADDING,
   TALISU_MKTS_FLAG_CA,
   TALISU_MKTS_FOOTER,
   TALISU_MKTS_PINS,
+  TALISU_MKTS_TREE_LOGO,
   TALISU_MKTS_VIEWPORT,
+  talisuMktsMapCoordinates,
   type TalisUMktsPin,
 } from "@/lib/talisu/markets-pins";
 import TalisUMarketsPinCard from "./TalisUMarketsPinCard";
@@ -28,29 +32,33 @@ function toEnginePins(pins: readonly TalisUMktsPin[]): MapEnginePin[] {
           id: pin.id,
           latitude: pin.latitude,
           longitude: pin.longitude,
-          color: "#FF0000",
+          // White circular pin hosting the authentic Atlist Canada-flag icon.
+          color: "#FFFFFF",
           featured: false,
           metadata: {
             icon: "dot",
             whiteCenter: true,
             customLogoUrl: TALISU_MKTS_FLAG_CA,
-            pinSize: 58,
+            pinBorderColor: "#CC8800",
+            pinSize: 52,
             animated: false,
             label: pin.label,
           },
         } satisfies MapEnginePin;
       }
-      // Do More… action pins — solid blue dots (not ALLPINS multi-color).
+      // Do More… — white circle + authentic Atlist TalisU tree logo (not solid blue).
       return {
         id: pin.id,
         latitude: pin.latitude,
         longitude: pin.longitude,
-        color: "#0069CF",
+        color: "#FFFFFF",
         featured: false,
         metadata: {
           icon: "dot",
           whiteCenter: true,
-          pinSize: 44,
+          customLogoUrl: TALISU_MKTS_TREE_LOGO,
+          pinBorderColor: "#000000",
+          pinSize: 50,
           animated: false,
           label: pin.label,
         },
@@ -63,6 +71,16 @@ export default function TalisUMarketsMapApp() {
   const focusingRef = useRef(false);
   const focusTimerRef = useRef<number | null>(null);
   const enginePins = useMemo(() => toEnginePins(TALISU_MKTS_PINS), []);
+  const fitCoordinates = useMemo(() => talisuMktsMapCoordinates(), []);
+  const fitPadding = useMemo(
+    () => ({
+      top: TALISU_MKTS_FIT_PADDING.top,
+      right: TALISU_MKTS_FIT_PADDING.right,
+      bottom: TALISU_MKTS_FIT_PADDING.bottom,
+      left: TALISU_MKTS_FIT_PADDING.left,
+    }),
+    []
+  );
 
   const beginFocusGuard = useCallback(() => {
     focusingRef.current = true;
@@ -101,7 +119,9 @@ export default function TalisUMarketsMapApp() {
       onMapZoom={dismissIfUserGesture}
       basemapView="satellite"
       scrollZoom={false}
+      preserveViewport
     >
+      <MapEngineFitBounds coordinates={fitCoordinates} padding={fitPadding} />
       <MarketsChrome
         selectedPinId={selectedPinId}
         setSelectedPinId={setSelectedPinId}

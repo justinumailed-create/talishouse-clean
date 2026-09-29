@@ -4,6 +4,7 @@ import { allowMapGestures, allowMapScrollZoom } from "../mount-flags";
 import type {
   MapBasemapView,
   MapCoordinates,
+  MapFitPadding,
   MapEngineEvent,
   MapEngineEventHandler,
   MapEnginePin,
@@ -682,7 +683,7 @@ export class GoogleMapsProvider implements MapProvider {
       getBasemapView() {
         return basemapView;
       },
-      fitToPins(padding = 60) {
+      fitToPins(padding: MapFitPadding = 60) {
         instance.fitToCoordinates(
           pins.map((pin) => ({
             latitude: pin.latitude,
@@ -691,7 +692,7 @@ export class GoogleMapsProvider implements MapProvider {
           padding
         );
       },
-      fitToCoordinates(coordinates: MapCoordinates[], padding = 60) {
+      fitToCoordinates(coordinates: MapCoordinates[], padding: MapFitPadding = 60) {
         if (coordinates.length === 0) return;
         if (coordinates.length === 1) {
           map.setCenter({

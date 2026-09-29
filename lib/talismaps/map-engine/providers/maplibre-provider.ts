@@ -7,6 +7,7 @@ import {
 import type {
   MapBasemapView,
   MapCoordinates,
+  MapFitPadding,
   MapEngineEvent,
   MapEngineEventHandler,
   MapEnginePin,
@@ -31,6 +32,20 @@ function coordinatesMatch(
 ): boolean {
   return left.latitude === right.latitude && left.longitude === right.longitude;
 }
+
+
+function toMapLibreFitPadding(
+  padding: MapFitPadding
+): number | { top: number; right: number; bottom: number; left: number } {
+  if (typeof padding === "number") return padding;
+  return {
+    top: padding.top ?? 0,
+    right: padding.right ?? 0,
+    bottom: padding.bottom ?? 0,
+    left: padding.left ?? 0,
+  };
+}
+
 
 function resolveStyleId(
   preferred: MapBasemapView | undefined,
@@ -624,7 +639,7 @@ export class MapLibreProvider implements MapProvider {
       getBasemapView() {
         return styleId;
       },
-      fitToPins(padding = 60) {
+      fitToPins(padding: MapFitPadding = 60) {
         instance.fitToCoordinates(
           pins.map((pin) => ({
             latitude: pin.latitude,
@@ -633,7 +648,7 @@ export class MapLibreProvider implements MapProvider {
           padding
         );
       },
-      fitToCoordinates(coordinates: MapCoordinates[], padding = 60) {
+      fitToCoordinates(coordinates: MapCoordinates[], padding: MapFitPadding = 60) {
         if (!styleReady || coordinates.length === 0) return;
         if (coordinates.length === 1) {
           map.easeTo({
@@ -653,7 +668,7 @@ export class MapLibreProvider implements MapProvider {
         );
 
         map.fitBounds(bounds, {
-          padding,
+          padding: toMapLibreFitPadding(padding),
           maxZoom: 18,
         });
       },

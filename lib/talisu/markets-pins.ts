@@ -7,7 +7,17 @@
 export const TALISU_MKTS_ATLIST_MAP_ID =
   "dd00462f-d929-4aac-a777-32017c2523b1" as const;
 
-export const TALISU_MKTS_FLAG_CA = "/flags/ca.svg";
+/** Authentic circular Canada-flag pin from live Atlist category markerCustomIcon. */
+export const TALISU_MKTS_FLAG_CA = "/talisu/mkts/atlist-canada-flag-pin.png";
+
+/** Authentic TalisU tree logo from live Atlist "Do More..." category markerCustomIcon. */
+export const TALISU_MKTS_TREE_LOGO = "/talisu/mkts/atlist-talisu-tree-pin.png";
+
+/**
+ * Source URLs (captured 2026-09-29 from Atlist AppSync categories):
+ * Canada → s3://markerimages143639-prod/.../d43c09d0-5443-43c3-b0ae-a6a6ea813c18.png
+ * Do More → cloudfront .../9cdfadf4-c1de-42c5-9f91-656e8e736bb7.png
+ */
 
 /** Hero image shared by Canada market pin cards (red pin on paper map). */
 export const TALISU_MKTS_MARKET_HERO = "/talisu/mkts/PIN-Map-1920L.jpeg";
@@ -20,9 +30,20 @@ export const TALISU_MKTS_DEMO_HREF = "/talisu/demo";
 export const TALISU_MKTS_HEADER_BLUE = "#0069CF";
 
 export const TALISU_MKTS_VIEWPORT = {
-  /** Eastern / Atlantic Canada framing to match live Atlist screenshots. */
-  center: { latitude: 48.2, longitude: -72.5 },
-  zoom: 4.6,
+  /** Full-Canada fallback before fitBounds settles (NL→YT + Do More cluster). */
+  center: { latitude: 56.2, longitude: -96.0 },
+  zoom: 3.5,
+} as const;
+
+/**
+ * fitBounds padding: left inset clears the floating Markets sidebar
+ * (`w-[min(92vw,20.5rem)]` + left offset) so western pins stay visible.
+ */
+export const TALISU_MKTS_FIT_PADDING = {
+  top: 64,
+  right: 56,
+  bottom: 64,
+  left: 360,
 } as const;
 
 export const TALISU_MKTS_FOOTER =
@@ -340,6 +361,14 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     sortOrder: 220,
   },
 ] as const;
+
+
+export function talisuMktsMapCoordinates(): { latitude: number; longitude: number }[] {
+  return TALISU_MKTS_PINS.filter((pin) => pin.showOnMap).map((pin) => ({
+    latitude: pin.latitude,
+    longitude: pin.longitude,
+  }));
+}
 
 export function talisuMktsMarketPins(): TalisUMktsPin[] {
   return TALISU_MKTS_PINS.filter((pin) => pin.kind === "market");

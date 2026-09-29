@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import type { MapCoordinates } from "@/lib/talismaps/map-engine";
+import type { MapCoordinates, MapFitPadding } from "@/lib/talismaps/map-engine";
 import { useMapEngine } from "./MapEngineProvider";
 
 interface MapEngineFitBoundsProps {
   coordinates: MapCoordinates[];
-  padding?: number;
+  padding?: MapFitPadding;
 }
 
 export default function MapEngineFitBounds({

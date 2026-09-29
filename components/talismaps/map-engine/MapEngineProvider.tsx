@@ -18,6 +18,7 @@ import type {
   MapBasemapView,
   MapCoordinates,
   MapEnginePin,
+  MapFitPadding,
   MapInstance,
   MapProviderId,
   MapViewport,
@@ -50,7 +51,7 @@ interface MapEngineContextValue {
   setViewport: (viewport: MapViewport) => void;
   setReady: (ready: boolean) => void;
   registerMapInstance: (instance: MapInstance | null) => void;
-  fitToCoordinates: (coordinates: MapCoordinates[], padding?: number) => void;
+  fitToCoordinates: (coordinates: MapCoordinates[], padding?: MapFitPadding) => void;
   onPinDrag?: (pinId: string, coordinates: MapViewport["center"]) => void;
   onPinDragStart?: (pinId: string) => void;
   onMapClick?: (coordinates: MapViewport["center"]) => void;
@@ -127,7 +128,7 @@ export function MapEngineProvider({
   }, []);
 
   const fitToCoordinates = useCallback(
-    (coordinates: MapCoordinates[], padding = 60) => {
+    (coordinates: MapCoordinates[], padding: MapFitPadding = 60) => {
       mapInstanceRef.current?.fitToCoordinates(coordinates, padding);
     },
     []

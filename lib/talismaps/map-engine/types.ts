@@ -26,6 +26,11 @@ export interface MapCoordinates {
   longitude: number;
 }
 
+/** Padding for fitBounds — number (uniform) or per-edge inset in CSS pixels. */
+export type MapFitPadding =
+  | number
+  | { top?: number; right?: number; bottom?: number; left?: number };
+
 export interface MapViewport {
   center: MapCoordinates;
   zoom: number;
@@ -133,8 +138,8 @@ export interface MapInstance {
   getBasemapView?(): MapBasemapView;
   /** Update locked-pin screen offset without remounting (Mapsite™ responsive layout). */
   setLockCenterOffset?(offset: { x: number; y: number }): void;
-  fitToPins(padding?: number): void;
-  fitToCoordinates(coordinates: MapCoordinates[], padding?: number): void;
+  fitToPins(padding?: MapFitPadding): void;
+  fitToCoordinates(coordinates: MapCoordinates[], padding?: MapFitPadding): void;
   on(event: MapEngineEvent, handler: MapEngineEventHandler): void;
   off(event: MapEngineEvent, handler: MapEngineEventHandler): void;
 }
