@@ -1,5 +1,6 @@
 import Image from "next/image";
 import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
+import TalisprosHomeFastCodeEntry from "@/components/talispros/TalisprosHomeFastCodeEntry";
 import TalisprosHomeMapPreview from "@/components/talispros/TalisprosHomeMapPreview";
 import TalisprosStartSidebar from "@/components/talispros/TalisprosStartSidebar";
 
@@ -22,6 +23,8 @@ export default function TalisprosStartPage() {
               Talispros
             </h1>
           </header>
+
+          <TalisprosHomeFastCodeEntry />
 
           <section className="px-4 pb-8 pt-3 sm:px-6">
             <div className="mx-auto w-full max-w-[1200px]">
