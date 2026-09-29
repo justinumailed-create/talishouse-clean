@@ -17,21 +17,21 @@ export default function TalisUMktsHeader() {
       className="sticky top-0 z-40 shrink-0 text-white shadow-sm"
       style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
     >
-      <div className="mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-3 px-3 py-2.5 sm:px-5">
+      <div className="mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-3 px-3 py-2.5 pb-3 sm:px-5 sm:pb-3.5">
         <Link href="/talisu" className="flex min-w-0 items-center gap-2.5">
           <Image
             src="/talisu/mkts/talisu-mark.png"
             alt="TalisU™"
-            width={44}
-            height={44}
-            className="h-10 w-10 shrink-0 rounded-sm object-cover sm:h-11 sm:w-11"
+            width={40}
+            height={43}
+            className="h-10 w-auto shrink-0 self-start rounded-sm object-contain object-top sm:h-11"
             priority
           />
           <div className="min-w-0 leading-tight">
             <div className="text-base font-bold tracking-wide sm:text-lg">
               TalisU&trade;
             </div>
-            <div className="truncate text-[12px] text-white/95 sm:text-[13px]">
+            <div className="text-[12px] text-white/95 sm:text-[13px]">
               {TALISU_MKTS_HEADER_TAGLINE}
             </div>
           </div>

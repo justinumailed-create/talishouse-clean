@@ -53,12 +53,12 @@ export const TALISU_MKTS_PMC_TITLE = "Talispros™ PMC";
 
 export const TALISU_MKTS_PMC_BULLETS = [
   "Root Accounts can register unlimited Derivative Accounts.",
-  "Derivative Accounts publish to Root Mapsites™ to promote up to 100 PINs.",
+  "Derivative Accounts publish to Root Mapsites™ to promote up to 100 PINs each.",
   "FSBO and Adpro Accounts promote single PIN Mapsites™.",
 ] as const;
 
 export const TALISU_MKTS_HEADER_TAGLINE =
-  "Semi-Exclusive Proprietary Markets…";
+  "Industry Adjacent Markets…";
 
 export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/mkts", label: "Markets" },
