@@ -79,6 +79,29 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/talisu/mkts");
   });
 
+  it("wires homepage right rail to live demo-flow screenshots", () => {
+    const showcase = readFileSync(
+      join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
+      "utf8",
+    );
+    const content = readFileSync(
+      join(root, "lib/talispros/start-content.ts"),
+      "utf8",
+    );
+    expect(showcase).toContain("TALISPROS_HOME_DEMO_FLOW");
+    expect(showcase).toContain("System demo flow");
+    expect(showcase).not.toContain("talistowns.jpg");
+    expect(content).toContain("/assets/home-demo/01-talismaps-mkts.jpg");
+    expect(content).toContain("/assets/home-demo/02-talisbooks-bookshelf.jpg");
+    expect(content).toContain("/assets/home-demo/03-claimed-mapsite-rm22.jpg");
+    expect(content).toContain("Talismaps™");
+    expect(content).toContain("Talisbooks™");
+    expect(content).toContain("Mapsites™");
+    expect(content).toContain("FAST Code™");
+    expect(content).not.toContain("/images/talistowns.jpg");
+    expect(content).not.toContain("T-Dome-elevateNF");
+  });
+
   it("shows Logout on paid owner claimed Mapsite™ chrome", () => {
     const partner = readFileSync(
       join(root, "components/talispros/mapsite/MapSiteMarketPartnerCard.tsx"),

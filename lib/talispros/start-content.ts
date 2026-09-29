@@ -74,40 +74,44 @@ export const TALISPROS_START_SEGMENTS = [
 export const TALISPROS_HOME_SYSTEM_DEMO_HREF = "/talisu/mkts";
 
 /**
- * Right-hand homepage showcase: product roadmap screens (not funnel marketing).
- * Visuals are first-party assets already used across Mapsites / Markets / ebooks.
+ * Right-hand homepage demo flow: live system screens (not stock / 3D art).
+ * Captured from production talispros.com pages — see scripts/capture-home-demo.mjs.
  */
-export const TALISPROS_HOME_SHOWCASE_PANELS = [
+export const TALISPROS_HOME_DEMO_FLOW = [
   {
-    id: "mapsites",
-    eyebrow: "Mapsites™",
-    title: "Pin your place on the map",
-    body: "A dedicated marketing surface covering about 50 km around every PIN you generate — findable by buyers and partners.",
-    imageSrc: "/images/talistowns.jpg",
-    imageAlt: "Mapsites™ digital community overview",
+    id: "talismaps",
+    step: 1,
+    eyebrow: "Talismaps™",
+    title: "Markets on /talisu/mkts",
+    body: "Claim semi-exclusive territory on Talismaps™ — select the PIN nearest you and lock your market circle.",
+    href: "/talisu/mkts",
+    imageSrc: "/assets/home-demo/01-talismaps-mkts.jpg",
+    imageAlt:
+      "Live Talismaps™ Markets screen at /talisu/mkts showing Canada pins and Talispros™ PMC sidebar",
   },
   {
-    id: "markets",
-    eyebrow: "Markets",
-    title: "Claim semi-exclusive territory",
-    body: "Select the PIN nearest you and lock a market circle on Talismaps™ — neighbouring markets stay discoverable, yours stays primary.",
-    imageSrc: "/talisu/mkts/PIN-Map-1920L.jpeg",
-    imageAlt: "Markets pin map",
-  },
-  {
-    id: "ebooks",
+    id: "talisbooks",
+    step: 2,
     eyebrow: "Talisbooks™",
-    title: "Ebooks that travel with you",
-    body: "Build and share Talisbooks™ from your Mapsite™ so inventory, stories, and offers move with every visit.",
-    imageSrc: "/talisbooks/sample/img-04-1280x720.jpeg",
-    imageAlt: "Talisbooks™ sample landscape",
+    title: "Bookshelf",
+    body: "Open the Bookshelf to publish and promote Talisbooks™ that travel with every Mapsite™ visit.",
+    href: "/catalogue/bookshelf",
+    imageSrc: "/assets/home-demo/02-talisbooks-bookshelf.jpg",
+    imageAlt:
+      "Live Talisbooks™ Bookshelf screen with Real-World Asset Tokenization on the shelf",
   },
   {
-    id: "system",
-    eyebrow: "System",
-    title: "Catalogue, Sea-cans & beyond",
-    body: "Explore the product catalogue, Business Office structures, and the rest of the Talispros™ roadmap from one system.",
-    imageSrc: "/talisu/mkts/T-Dome-elevateNF.jpg",
-    imageAlt: "Talispros™ product system visual",
+    id: "mapsite",
+    step: 3,
+    eyebrow: "Mapsites™",
+    title: "Claimed Mapsite™ · FAST Code™ RM22",
+    body: "A claimed Mapsite™ pinned to market — FAST Codes™ unlock URL, MLS®, TEB™, and TTV™ from the pin.",
+    href: "/talispros/mapsite/brokers/rm22",
+    imageSrc: "/assets/home-demo/03-claimed-mapsite-rm22.jpg",
+    imageAlt:
+      "Live claimed Mapsite™ for FAST Code™ RM22 at 160 Macs Rd with partner card and pin actions",
   },
 ] as const;
+
+/** @deprecated Use TALISPROS_HOME_DEMO_FLOW — kept alias for any older imports. */
+export const TALISPROS_HOME_SHOWCASE_PANELS = TALISPROS_HOME_DEMO_FLOW;

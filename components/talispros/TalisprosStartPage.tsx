@@ -3,7 +3,8 @@ import TalisprosHomeShowcase from "@/components/talispros/TalisprosHomeShowcase"
 
 /**
  * Homepage gate inspired by marketplace-select split layout:
- * left = Talispros logo + Login (FAST) + System Demo; right = product roadmap.
+ * left = Talispros logo + Login (FAST Codes™) + System Demo;
+ * right = live demo flow (Talismaps™ → Talisbooks™ → claimed Mapsite™).
  */
 export default function TalisprosStartPage() {
   return (
