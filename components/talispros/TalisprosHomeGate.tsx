@@ -46,7 +46,7 @@ export default function TalisprosHomeGate() {
                 : "border-neutral-900 bg-white text-neutral-900 hover:bg-neutral-900 hover:text-white"
             }`}
           >
-            Login To Your Account
+            Claim your market. Open your Account*
           </button>
 
           <div
