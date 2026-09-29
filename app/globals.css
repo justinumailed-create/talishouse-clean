@@ -1142,7 +1142,10 @@ body.mapsite-gallery-open [data-paypal-button] {
 .talisbooks-viewer {
   --viewer-inset: 0.2rem;
   --viewer-header-height: 3.85rem;
-  --viewer-book-height: calc((100dvh - (2 * var(--viewer-inset))) * 0.85);
+  /* The reader stage now owns the space formerly used by the bottom controls. */
+  --viewer-book-height: calc(
+    100dvh - (2 * var(--viewer-inset)) - var(--viewer-header-height) - 0.35rem
+  );
   position: relative;
   box-sizing: border-box;
   display: flex;

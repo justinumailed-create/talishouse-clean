@@ -7,7 +7,6 @@ import {
   orderedViewerImageUrls,
   warmViewerImages,
 } from "@/lib/talisbooks/viewer/image-preloader";
-import TalisBooksViewerControls from "@/components/talisbooks/viewer/TalisBooksViewerControls";
 import TalisBooksViewerLiveEditor from "@/components/talisbooks/viewer/TalisBooksViewerLiveEditor";
 import { TalisBooksViewerPlaybackRail } from "@/components/talisbooks/viewer/TalisBooksViewerRails";
 import TalisBooksViewerStage, {
@@ -38,8 +37,6 @@ import {
 
 interface TalisBooksViewerShellProps {
   book: TalisBooksViewerBook;
-  /** Owner / admin: show playback sidebar controls. */
-  canEditTools?: boolean;
   /** After activation payment: show Live Edit panel. */
   canLiveEdit?: boolean;
   /** Demo / sample books: grey out insert-page controls. */
@@ -57,7 +54,6 @@ function withCoverBranding(book: TalisBooksViewerBook): TalisBooksViewerBook {
 
 export default function TalisBooksViewerShell({
   book: initialBook,
-  canEditTools = false,
   canLiveEdit = false,
   pageInsertLocked = false,
   narration = null,
@@ -116,7 +112,6 @@ export default function TalisBooksViewerShell({
   const {
     pageIndex: navIndex,
     autoPlaying,
-    pausedByHover,
     intervalMs,
     goNext,
     goPrevious,
@@ -433,9 +428,9 @@ export default function TalisBooksViewerShell({
       : null;
   const editorRight =
     binding === "open" && viewMode === "spread" ? spread.right : null;
-  // Paid Mapsite™ owners / admins: unlock Live Edit + playback tools.
-  // Public visitors keep a chrome-free stage (sidebar stays off).
-  const showViewerSidebar = Boolean(canEditTools);
+  // Public visitors and readers keep a chrome-free stage.
+  // The owner-only Live Edit panel remains available when explicitly unlocked.
+  const showViewerSidebar = Boolean(canLiveEdit);
   const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
   const backToMapSiteHref = viewerBackToMapsiteHref(book);
 
@@ -557,31 +552,17 @@ export default function TalisBooksViewerShell({
             onOpenBook={handleOpenBook}
           />
         </div>
-        {showViewerSidebar && canEditTools ? (
+        {showViewerSidebar ? (
           <aside className="talisbooks-viewer__sidebar">
-            <TalisBooksViewerControls
-              pageLabel={pageLabel}
+            <TalisBooksViewerLiveEditor
+              leftPage={editorLeft}
+              rightPage={editorRight}
+              bindingLabel={pageLabel}
               viewMode={viewMode}
-              autoPlaying={autoPlaying}
-              pausedByHover={pausedByHover}
-              intervalMs={intervalMs}
-              onViewModeChange={handleViewModeChange}
-              onToggleAutoplay={handleToggleAutoplay}
-              onPrevious={handlePrevious}
-              onNext={handleNext}
-              onIntervalChange={setIntervalMs}
+              onUpdatePage={handleUpdatePage}
+              onAddPage={pageInsertLocked ? undefined : handleAddPage}
+              pageInsertLocked={pageInsertLocked}
             />
-            {canLiveEdit ? (
-              <TalisBooksViewerLiveEditor
-                leftPage={editorLeft}
-                rightPage={editorRight}
-                bindingLabel={pageLabel}
-                viewMode={viewMode}
-                onUpdatePage={handleUpdatePage}
-                onAddPage={pageInsertLocked ? undefined : handleAddPage}
-                pageInsertLocked={pageInsertLocked}
-              />
-            ) : null}
           </aside>
         ) : null}
       </div>

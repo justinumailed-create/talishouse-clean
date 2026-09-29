@@ -138,7 +138,6 @@ export default async function TalisBooksViewerSlugPage({
   return (
     <TalisBooksViewerShell
       book={book}
-      canEditTools={canEditTools}
       canLiveEdit={canLiveEdit}
       pageInsertLocked={isDemoBook}
     />

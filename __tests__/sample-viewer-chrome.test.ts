@@ -41,10 +41,11 @@ describe("sample Talisbooks™ viewer chrome", () => {
   });
 
   it("keeps PlaybackRail beside the restored header and omits the left brand rail", () => {
-    expect(shell).toContain("const showViewerSidebar = Boolean(canEditTools)");
+    expect(shell).toContain("const showViewerSidebar = Boolean(canLiveEdit)");
     expect(shell).not.toContain("TalisBooksViewerBrandRail");
     expect(shell).toContain("TalisBooksViewerPlaybackRail");
     expect(shell).toContain("talisbooks-viewer__header");
+    expect(shell).not.toContain("TalisBooksViewerControls");
     const rails = readSource("components/talisbooks/viewer/TalisBooksViewerRails.tsx");
     expect(rails).not.toContain("talisbooks-viewer__map-pin");
     expect(rails).not.toContain("talisbooks-viewer__rail--left");
@@ -66,6 +67,14 @@ describe("sample Talisbooks™ viewer chrome", () => {
     expect(css).toMatch(
       /\.talisbooks-viewer--stage-landscape \.talisbooks-viewer__header\s*\{[\s\S]*?display:\s*none/,
     );
+  });
+
+  it("removes the bottom playback dock while retaining stage navigation", () => {
+    expect(shell).not.toContain("TalisBooksViewerControls");
+    expect(shell).toContain("TalisBooksViewerStage");
+    const css = readSource("app/globals.css");
+    expect(css).toContain("formerly used by the bottom controls");
+    expect(css).toContain("100dvh - (2 * var(--viewer-inset))");
   });
 
   it("shows Live Edit only after payment, never on demonstration books", () => {
