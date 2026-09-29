@@ -10,6 +10,46 @@ export const MAPSITE_URL_GATE_REGEN_COOLDOWN_MS = 10 * 1000;
 
 export const MAPSITE_URL_GATE_TTL_LABEL = "30 minutes";
 
+/** Sentinel href used by the published Mapsite™ URL button when the gate applies. */
+export const MAPSITE_URL_GATE_SENTINEL = "__url_gate__";
+
+/**
+ * FAST codes that skip the Admin Notifications secure-code URL unlock.
+ * Normalized lower-case; compare with normalizeMapsiteUrlGateFastCode.
+ */
+export const MAPSITE_URL_GATE_EXEMPT_FAST_CODES = ["dc01"] as const;
+
+/**
+ * Listing/payment URL overrides for specific FAST codes (case-insensitive key).
+ * Wins over the stored mapsites.broker_url for the published URL button / unlock.
+ */
+export const MAPSITE_URL_OVERRIDES: Readonly<Record<string, string>> = {
+  dc01: "https://talispros.mysamcart.com/checkout/register",
+};
+
+export function normalizeMapsiteUrlGateFastCode(
+  value: string | null | undefined,
+): string {
+  return (value || "").trim().toLowerCase();
+}
+
+export function isMapsiteUrlGateExempt(
+  fastCode: string | null | undefined,
+): boolean {
+  const code = normalizeMapsiteUrlGateFastCode(fastCode);
+  return (MAPSITE_URL_GATE_EXEMPT_FAST_CODES as readonly string[]).includes(
+    code,
+  );
+}
+
+export function mapsiteListingUrlOverride(
+  fastCode: string | null | undefined,
+): string | null {
+  const code = normalizeMapsiteUrlGateFastCode(fastCode);
+  return MAPSITE_URL_OVERRIDES[code] ?? null;
+}
+
+
 export function listingResourceHref(value: string | null | undefined): string | null {
   const href = value?.trim() || "";
   if (!href) return null;
@@ -17,9 +57,38 @@ export function listingResourceHref(value: string | null | undefined): string | 
   return `https://${href}`;
 }
 
-/** True when the Mapsite™ has a stored payment/listing URL that must be gated. */
-export function mapsiteHasGatedUrl(brokerUrl: string | null | undefined): boolean {
-  return Boolean(listingResourceHref(brokerUrl));
+/**
+ * Effective listing/payment URL: FAST-code override wins over stored broker_url.
+ */
+export function resolveMapsiteListingUrl(
+  fastCode: string | null | undefined,
+  brokerUrl: string | null | undefined,
+): string | null {
+  return listingResourceHref(
+    mapsiteListingUrlOverride(fastCode) ?? brokerUrl,
+  );
+}
+
+/** True when the Mapsite™ has a payment/listing URL (stored or overridden). */
+export function mapsiteHasGatedUrl(
+  brokerUrl: string | null | undefined,
+  fastCode?: string | null,
+): boolean {
+  return Boolean(resolveMapsiteListingUrl(fastCode, brokerUrl));
+}
+
+/**
+ * Published Mapsite™ URL button href: direct link when exempt, gate sentinel
+ * when gated, or null when no listing URL is available.
+ */
+export function resolvePublishedUrlButtonHref(
+  fastCode: string | null | undefined,
+  brokerUrl: string | null | undefined,
+): string | null {
+  const dest = resolveMapsiteListingUrl(fastCode, brokerUrl);
+  if (!dest) return null;
+  if (isMapsiteUrlGateExempt(fastCode)) return dest;
+  return MAPSITE_URL_GATE_SENTINEL;
 }
 
 export function registerYourMapSiteFastCodeFromPath(
@@ -50,8 +119,9 @@ export function mapsiteUrlGateHref(
   fastCode: string | null | undefined,
   brokerUrl: string | null | undefined,
 ): string | null {
-  const dest = listingResourceHref(brokerUrl);
+  const dest = resolveMapsiteListingUrl(fastCode, brokerUrl);
   if (!dest) return null;
+  if (isMapsiteUrlGateExempt(fastCode)) return dest;
   const code = fastCode?.trim();
   if (!code) return dest;
   return mapsiteUrlGatePath(code);

@@ -6,12 +6,13 @@ import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { createAdminNotification } from "@/lib/talispros/admin-notifications";
 import {
+  isMapsiteUrlGateExempt,
   isUrlGateExpired,
   isUrlGatePinFormat,
-  listingResourceHref,
   MAPSITE_URL_GATE_REGEN_COOLDOWN_MS,
   MAPSITE_URL_GATE_TTL_LABEL,
   normalizeUrlGatePin,
+  resolveMapsiteListingUrl,
   urlGateExpiresAt,
 } from "@/lib/talispros/mapsite-url-gate";
 import {
@@ -53,7 +54,15 @@ async function persistUrlGateCode(options: {
     return { success: false, error: "Mapsite™ not found" };
   }
 
-  const dest = listingResourceHref(mapsite.brokerUrl);
+  if (isMapsiteUrlGateExempt(mapsite.fastCode)) {
+    return {
+      success: false,
+      error:
+        "URL gate is disabled for this FAST Code — the listing URL opens without a secure code.",
+    };
+  }
+
+  const dest = resolveMapsiteListingUrl(mapsite.fastCode, mapsite.brokerUrl);
   if (!dest) {
     return {
       success: false,
@@ -194,12 +203,16 @@ async function unlockWithPin(
     return { success: false, error: "Mapsite™ not found" };
   }
 
-  const dest = listingResourceHref(mapsite.brokerUrl);
+  const dest = resolveMapsiteListingUrl(mapsite.fastCode, mapsite.brokerUrl);
   if (!dest) {
     return {
       success: false,
       error: "No listing/payment URL is on file for this Mapsite™.",
     };
+  }
+
+  if (isMapsiteUrlGateExempt(mapsite.fastCode)) {
+    return { success: true, url: dest };
   }
 
   const supabase = getSupabaseAdmin();

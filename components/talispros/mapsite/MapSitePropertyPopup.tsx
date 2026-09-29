@@ -18,7 +18,8 @@ import { isClaimable } from "@/lib/talispros/mapsite-state";
 import { mapsiteScheduleHref } from "@/lib/mapsite-layout";
 import {
   listingResourceHref,
-  mapsiteHasGatedUrl,
+  MAPSITE_URL_GATE_SENTINEL,
+  resolvePublishedUrlButtonHref,
 } from "@/lib/talispros/mapsite-url-gate";
 import MapSiteUrlGateDialog from "@/components/talispros/mapsite/MapSiteUrlGateDialog";
 import {
@@ -43,9 +44,10 @@ const RESOURCES: {
     key: "url",
     label: "URL",
     variant: "blue",
-    // Gated: presence of broker_url enables the button; click opens secure-code popup.
+    // Gated by default (secure-code popup). Exempt FAST codes (e.g. DC01) open
+    // the listing URL directly — override wins over stored broker_url.
     resolveHref: (site) =>
-      mapsiteHasGatedUrl(site.broker_url) ? "__url_gate__" : null,
+      resolvePublishedUrlButtonHref(site.fast_code, site.broker_url),
   },
   {
     key: "mls",
@@ -110,7 +112,7 @@ function ResourceButton({
     );
   }
 
-  if (href === "__url_gate__" && onGateClick) {
+  if (href === MAPSITE_URL_GATE_SENTINEL && onGateClick) {
     return (
       <button
         type="button"

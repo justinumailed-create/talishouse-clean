@@ -1,8 +1,12 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
-import { listingResourceHref, MAPSITE_URL_GATE_HEADLINE } from "@/lib/talispros/mapsite-url-gate";
+import {
+  isMapsiteUrlGateExempt,
+  MAPSITE_URL_GATE_HEADLINE,
+  resolveMapsiteListingUrl,
+} from "@/lib/talispros/mapsite-url-gate";
 import RegisterYourMapSiteClient from "@/components/talispros/RegisterYourMapSiteClient";
 
 export const dynamic = "force-dynamic";
@@ -28,8 +32,16 @@ export default async function RegisterYourMapSitePage({
 }) {
   const { fastCode } = await params;
   const mapsite = await getMapSiteByFastCode(fastCode);
-  if (!mapsite || !listingResourceHref(mapsite.brokerUrl)) {
+  const listingUrl = mapsite
+    ? resolveMapsiteListingUrl(mapsite.fastCode, mapsite.brokerUrl)
+    : null;
+  if (!mapsite || !listingUrl) {
     notFound();
+  }
+
+  // Exempt FAST codes (e.g. DC01) skip the secure-code gate entirely.
+  if (isMapsiteUrlGateExempt(mapsite.fastCode)) {
+    redirect(listingUrl);
   }
 
   return (

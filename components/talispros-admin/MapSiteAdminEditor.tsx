@@ -414,6 +414,7 @@ export default function MapSiteAdminEditor({
           fastCode={mapsite.fastCode}
           issuedAt={mapsite.urlGatePinIssuedAt}
           disabled={!adminWritesEnabled}
+          brokerUrl={form.brokerUrl || mapsite.brokerUrl}
         />
         <Field label="TEB™ URL (optional override)">
           <input
