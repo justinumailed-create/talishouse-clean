@@ -3,8 +3,9 @@ import TalisprosHomeShowcase from "@/components/talispros/TalisprosHomeShowcase"
 import TalisprosSamCartReturnBanner from "@/components/talispros/TalisprosSamCartReturnBanner";
 
 /**
- * /start gate: Login + System Demo on the left; a static Markets map preview
- * on the right. SamCart payment success returns here and keeps the same gate flow.
+ * /start gate: Login + System Demo on the left; map-only Markets preview
+ * (full-height, no chrome) on the right. SamCart payment success returns here
+ * and keeps the same gate flow.
  */
 export default function TalisprosGatePage() {
   return (

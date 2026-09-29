@@ -88,7 +88,7 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/talisu/mkts");
   });
 
-  it("keeps /start as a clean centered gate without the showcase rail", () => {
+  it("keeps /start right column as map-only full-height preview", () => {
     const gatePage = readFileSync(
       join(root, "components/talispros/TalisprosGatePage.tsx"),
       "utf8",
@@ -104,9 +104,12 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(gatePage).toContain("lg:grid-cols-");
     expect(gatePage).toContain("min-h-dvh");
     expect(showcase).toContain("/assets/home-demo/01-talismaps-mkts.jpg");
-    expect(showcase).toContain("/talisu/mkts");
+    expect(showcase).toContain("object-cover");
+    expect(showcase).toContain("lg:h-full");
     expect(showcase).toContain("pointer-events-none");
     expect(showcase).toContain("draggable={false}");
+    expect(showcase).not.toContain("System demo");
+    expect(showcase).not.toContain("figcaption");
     expect(showcase).not.toContain("<Link");
     expect(showcase).not.toContain("onClick");
   });
