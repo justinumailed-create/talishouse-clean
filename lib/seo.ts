@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 
 const SITE_URL = "https://www.talishouse.com";
 const SITE_NAME = "Talispros™";
-/** Brand WhatsApp / Open Graph preview — logo + Aisha (1200×630). */
+/**
+ * Sitewide default Open Graph / Twitter preview when a page omits `image`.
+ * Must be the composed homepage brand card (logo+partner+map) — never the
+ * oversized standalone /logo.png or /seo/talispros-og.jpg poster.
+ */
 const OG_IMAGE = "https://www.talispros.com/api/og/talispros";
 
 export const siteConfig = {
