@@ -38,7 +38,7 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/talispros/start",
-        destination: "/",
+        destination: "/start",
         permanent: false,
       },
       {

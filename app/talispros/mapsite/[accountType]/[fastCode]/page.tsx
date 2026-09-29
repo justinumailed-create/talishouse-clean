@@ -222,6 +222,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       fast_code: mapsite.fast_code || fastCode.toUpperCase(),
     },
     listingImageUrls,
+    { hideSecondInterior: paymentReceived },
   );
 
   return (

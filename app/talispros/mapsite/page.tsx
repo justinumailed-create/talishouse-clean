@@ -238,6 +238,7 @@ export default async function TalisprosMapSitePage({
   const listingMapSite = withEbookListingMedia(
     mapsite,
     listingImageUrls,
+    { hideSecondInterior: paymentReceived },
   );
 
   return (

@@ -16,6 +16,7 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     hideStorefrontChrome ||
     productCatalogue ||
     pathname === "/" ||
+    pathname === "/start" ||
     pathname.startsWith("/fast-code") ||
     pathname.startsWith("/partner-access") ||
     pathname.startsWith("/talispros") ||

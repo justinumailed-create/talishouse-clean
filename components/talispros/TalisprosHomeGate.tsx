@@ -8,7 +8,7 @@ import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
 import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
 
 /**
- * Left homepage gate: Talispros logo + Login (reveals FAST Code) + System Demo.
+ * /start gate left column: Talispros logo + Login (reveals FAST Code) + System Demo.
  * Keeps the existing claimed-Mapsite cookie/session FAST flow.
  */
 export default function TalisprosHomeGate() {
@@ -38,7 +38,7 @@ export default function TalisprosHomeGate() {
           <button
             type="button"
             aria-expanded={loginOpen}
-            aria-controls="home-login-fast-code"
+            aria-controls="start-login-fast-code"
             onClick={() => setLoginOpen((open) => !open)}
             className={`w-full border-2 px-4 py-3.5 text-center text-[15px] font-medium tracking-wide transition active:scale-[0.99] sm:text-base ${
               loginOpen
@@ -50,7 +50,7 @@ export default function TalisprosHomeGate() {
           </button>
 
           <div
-            id="home-login-fast-code"
+            id="start-login-fast-code"
             className={`grid transition-[grid-template-rows] duration-300 ease-out ${
               loginOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
             }`}

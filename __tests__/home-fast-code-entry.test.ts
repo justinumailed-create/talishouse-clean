@@ -34,9 +34,13 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     ).toBe("/talispros/mapsite/brokers/rm22");
   });
 
-  it("wires the homepage entry to openClaimedMapSiteFromHomeFastCode", () => {
-    const startPage = readFileSync(
+  it("wires /start Login gate (not homepage) to openClaimedMapSiteFromHomeFastCode", () => {
+    const homePage = readFileSync(
       join(root, "components/talispros/TalisprosStartPage.tsx"),
+      "utf8",
+    );
+    const gatePage = readFileSync(
+      join(root, "components/talispros/TalisprosGatePage.tsx"),
       "utf8",
     );
     const gate = readFileSync(
@@ -51,9 +55,14 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
       join(root, "app/talispros/mapsites/actions.ts"),
       "utf8",
     );
+    const startRoute = readFileSync(join(root, "app/start/page.tsx"), "utf8");
 
-    expect(startPage).toContain("TalisprosHomeGate");
-    expect(startPage).toContain("TalisprosHomeShowcase");
+    expect(homePage).toContain("TalisprosHomeMapPreview");
+    expect(homePage).toContain("TalisprosStartSidebar");
+    expect(homePage).not.toContain("TalisprosHomeGate");
+    expect(startRoute).toContain("TalisprosGatePage");
+    expect(gatePage).toContain("TalisprosHomeGate");
+    expect(gatePage).toContain("TalisprosHomeShowcase");
     expect(gate).toContain("TalisprosHomeFastCodeEntry");
     expect(gate).toContain("Login To Your Account");
     expect(gate).toContain("System Demo");
@@ -79,7 +88,7 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/talisu/mkts");
   });
 
-  it("wires homepage right rail to live demo-flow screenshots", () => {
+  it("wires /start compact trio of mini demo screens (not tall carousel)", () => {
     const showcase = readFileSync(
       join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
       "utf8",
@@ -89,15 +98,18 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
       "utf8",
     );
     expect(showcase).toContain("TALISPROS_HOME_DEMO_FLOW");
-    expect(showcase).toContain("System demo flow");
+    expect(showcase).toContain("compact");
+    expect(showcase).toContain("max-h-[");
+    expect(showcase).toContain("privacyMask");
     expect(showcase).not.toContain("talistowns.jpg");
     expect(content).toContain("/assets/home-demo/01-talismaps-mkts.jpg");
     expect(content).toContain("/assets/home-demo/02-talisbooks-bookshelf.jpg");
     expect(content).toContain("/assets/home-demo/03-claimed-mapsite-rm22.jpg");
+    expect(content).toContain("Demo Bookshelf");
     expect(content).toContain("Talismaps™");
     expect(content).toContain("Talisbooks™");
     expect(content).toContain("Mapsites™");
-    expect(content).toContain("FAST Code™");
+    expect(content).toContain("privacyMask");
     expect(content).not.toContain("/images/talistowns.jpg");
     expect(content).not.toContain("T-Dome-elevateNF");
   });

@@ -1,8 +1,13 @@
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 import { BUILD_MAPSITE_PREVIEW_LOCATION } from "@/components/build-mapsite/home-pin-types";
 
+/** Full-bleed chrome paths: restored homepage + /start gate. */
 export function isTalisprosStartPath(pathname: string | null | undefined) {
-  return pathname === "/" || pathname === "/talispros/start";
+  return (
+    pathname === "/" ||
+    pathname === "/start" ||
+    pathname === "/talispros/start"
+  );
 }
 
 export const TALISPROS_LEGAL_PRIMARY_COPY =
@@ -70,46 +75,77 @@ export const TALISPROS_START_SEGMENTS = [
   },
 ] as const;
 
-/** System Demo destination from the homepage gate. */
+/** System Demo destination from the /start gate. */
 export const TALISPROS_HOME_SYSTEM_DEMO_HREF = "/talisu/mkts";
 
+export type TalisprosHomeDemoPrivacyMask = {
+  id: string;
+  left: string;
+  top: string;
+  width: string;
+  height: string;
+};
+
+export type TalisprosHomeDemoStep = {
+  id: string;
+  step: number;
+  eyebrow: string;
+  title: string;
+  body: string;
+  href: string;
+  hrefLabel?: string;
+  imageSrc: string;
+  imageAlt: string;
+  imageObjectPosition?: string;
+  privacyMask?: readonly TalisprosHomeDemoPrivacyMask[];
+};
+
 /**
- * Right-hand homepage demo flow: live system screens (not stock / 3D art).
- * Captured from production talispros.com pages — see scripts/capture-home-demo.mjs.
+ * Compact /start demo trio (not a tall carousel).
+ * Mapsite™ asset is privacy-scrubbed; CSS masks hide residual address / FAST Code.
+ * Talisbooks™ slot uses a filled Demo Bookshelf composite (many books).
  */
-export const TALISPROS_HOME_DEMO_FLOW = [
+export const TALISPROS_HOME_DEMO_FLOW: readonly TalisprosHomeDemoStep[] = [
   {
     id: "talismaps",
     step: 1,
     eyebrow: "Talismaps™",
-    title: "Markets on /talisu/mkts",
-    body: "Claim semi-exclusive territory on Talismaps™ — select the PIN nearest you and lock your market circle.",
+    title: "Markets",
+    body: "Claim semi-exclusive territory — pick the PIN nearest you.",
     href: "/talisu/mkts",
+    hrefLabel: "/talisu/mkts",
     imageSrc: "/assets/home-demo/01-talismaps-mkts.jpg",
-    imageAlt:
-      "Live Talismaps™ Markets screen at /talisu/mkts showing Canada pins and Talispros™ PMC sidebar",
+    imageAlt: "Talismaps™ Markets map with Canada pins (demo)",
+    imageObjectPosition: "object-center",
   },
   {
     id: "talisbooks",
     step: 2,
     eyebrow: "Talisbooks™",
-    title: "Bookshelf",
-    body: "Open the Bookshelf to publish and promote Talisbooks™ that travel with every Mapsite™ visit.",
+    title: "Demo Bookshelf",
+    body: "A full Demo Bookshelf of Talisbooks™ — not a single listing hero.",
     href: "/catalogue/bookshelf",
+    hrefLabel: "/catalogue/bookshelf",
     imageSrc: "/assets/home-demo/02-talisbooks-bookshelf.jpg",
-    imageAlt:
-      "Live Talisbooks™ Bookshelf screen with Real-World Asset Tokenization on the shelf",
+    imageAlt: "Demo Bookshelf filled with many Talisbooks™ covers",
+    imageObjectPosition: "object-top",
   },
   {
     id: "mapsite",
     step: 3,
     eyebrow: "Mapsites™",
-    title: "Claimed Mapsite™ · FAST Code™ RM22",
-    body: "A claimed Mapsite™ pinned to market — FAST Codes™ unlock URL, MLS®, TEB™, and TTV™ from the pin.",
-    href: "/talispros/mapsite/brokers/rm22",
+    title: "Claimed Mapsite™",
+    body: "Pin dashboard with URL, MLS®, TEB™, and TTV™ — identity details hidden in demo.",
+    href: "/talisu/mkts",
+    hrefLabel: "System Demo",
     imageSrc: "/assets/home-demo/03-claimed-mapsite-rm22.jpg",
-    imageAlt:
-      "Live claimed Mapsite™ for FAST Code™ RM22 at 160 Macs Rd with partner card and pin actions",
+    imageAlt: "Claimed Mapsite™ pin dashboard with address and FAST Code hidden",
+    imageObjectPosition: "object-[center_35%]",
+    privacyMask: [
+      { id: "rail-id", left: "2%", top: "8%", width: "18%", height: "12%" },
+      { id: "popup-copy", left: "38%", top: "48%", width: "28%", height: "10%" },
+      { id: "pin-label", left: "40%", top: "76%", width: "24%", height: "5%" },
+    ],
   },
 ] as const;
 

@@ -88,12 +88,36 @@ function uniqueNonStockUrls(urls: string[]): string[] {
   return unique;
 }
 
+export type ListingHeroImageOptions = {
+  /**
+   * After activation payment: hide the 2nd interior (former pin hero) so the
+   * former 3rd page becomes the new 2nd interior and thus the pin image.
+   */
+  hideSecondInterior?: boolean;
+};
+
+/**
+ * Drop the 2nd unique interior so former page 3 becomes the new page 2.
+ * Used after payment success for the paid ebook / Mapsite™ pin hero shift.
+ */
+export function hideSecondInteriorListingUrls(urls: string[]): string[] {
+  const unique = uniqueNonStockUrls(urls);
+  if (unique.length < 2) return unique;
+  return [unique[0]!, ...unique.slice(2)];
+}
+
 /**
  * Pin popup / listing card hero: 2nd upload, or PDF page 2.
  * Falls back to the first interior when only one image exists.
+ * When `hideSecondInterior` is set (paid), the former 3rd page is the hero.
  */
-export function listingHeroImageUrl(urls: string[]): string | null {
-  const unique = uniqueNonStockUrls(urls);
+export function listingHeroImageUrl(
+  urls: string[],
+  options?: ListingHeroImageOptions,
+): string | null {
+  const unique = options?.hideSecondInterior
+    ? hideSecondInteriorListingUrls(urls)
+    : uniqueNonStockUrls(urls);
   return unique[1] ?? unique[0] ?? null;
 }
 
@@ -148,11 +172,35 @@ export function withEbookListingMedia<
     cover_image: string | null;
     gallery_images: string[];
   },
->(mapsite: T, ebookListingUrls: string[]): T {
-  const hero = listingHeroImageUrl(ebookListingUrls);
+>(
+  mapsite: T,
+  ebookListingUrls: string[],
+  options?: ListingHeroImageOptions,
+): T {
+  const hero = listingHeroImageUrl(ebookListingUrls, options);
   if (!hero) return mapsite;
   if (!shouldReplaceDemoListingMedia(mapsite.cover_image, mapsite.gallery_images)) {
+    // Still shift pin hero among claimed gallery frames after payment.
+    if (options?.hideSecondInterior) {
+      const shifted = listingHeroImageUrl(mapsite.gallery_images ?? [], options);
+      if (shifted && shifted !== mapsite.cover_image) {
+        const gallery = hideSecondInteriorListingUrls(mapsite.gallery_images ?? []);
+        return {
+          ...mapsite,
+          cover_image: shifted,
+          gallery_images: gallery.length > 0 ? gallery : [shifted],
+        };
+      }
+    }
     return mapsite;
+  }
+  if (options?.hideSecondInterior) {
+    const gallery = hideSecondInteriorListingUrls(ebookListingUrls);
+    return {
+      ...mapsite,
+      cover_image: hero,
+      gallery_images: gallery.length > 0 ? gallery : [hero],
+    };
   }
   return {
     ...mapsite,
@@ -169,13 +217,14 @@ export function getMapSiteListingHeroImage(
   mapsite: Pick<
     MapSitePlatformRecord,
     "cover_image" | "gallery_images" | "is_demonstration"
-  >
+  >,
+  options?: ListingHeroImageOptions,
 ): string {
   if (shouldReplaceDemoListingMedia(mapsite.cover_image, mapsite.gallery_images)) {
     return MAPSITE_DEMO_LISTING_IMAGE;
   }
 
-  const fromGallery = listingHeroImageUrl(mapsite.gallery_images ?? []);
+  const fromGallery = listingHeroImageUrl(mapsite.gallery_images ?? [], options);
   if (fromGallery) return fromGallery;
 
   const fromCover = mapsite.cover_image?.trim();
@@ -192,7 +241,8 @@ export function getMapSiteListingGalleryImages(
   mapsite: Pick<
     MapSitePlatformRecord,
     "gallery_images" | "cover_image" | "is_demonstration"
-  >
+  >,
+  options?: ListingHeroImageOptions,
 ): string[] {
   if (shouldReplaceDemoListingMedia(mapsite.cover_image, mapsite.gallery_images)) {
     return [...MAPSITE_DEMO_GALLERY];
@@ -202,7 +252,11 @@ export function getMapSiteListingGalleryImages(
     .map((url) => url?.trim())
     .filter((url): url is string => Boolean(url));
 
-  if (fromGallery.length > 0) return fromGallery;
+  if (fromGallery.length > 0) {
+    return options?.hideSecondInterior
+      ? hideSecondInteriorListingUrls(fromGallery)
+      : fromGallery;
+  }
 
   const fromCover = mapsite.cover_image?.trim();
   if (fromCover) return [fromCover];

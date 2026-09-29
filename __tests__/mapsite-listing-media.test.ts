@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   getMapSiteListingHeroImage,
   getMapSiteListingPhotoCount,
+  hideSecondInteriorListingUrls,
   listingHeroImageUrl,
   listingImageUrlsFromEbookPages,
   MAPSITE_DEMO_GALLERY,
@@ -200,5 +201,31 @@ describe("Mapsite™ listing media", () => {
       "TSplits",
     );
     expect(createFallbackDemoMapSite().logo_url).toBeNull();
+  });
+
+  it("after payment hides 2nd interior so 3rd page becomes pin hero", () => {
+    const urls = [
+      "https://cdn.example/interior-1.webp",
+      "https://cdn.example/interior-2.webp",
+      "https://cdn.example/interior-3.webp",
+    ];
+    expect(listingHeroImageUrl(urls)).toBe("https://cdn.example/interior-2.webp");
+    expect(listingHeroImageUrl(urls, { hideSecondInterior: true })).toBe(
+      "https://cdn.example/interior-3.webp",
+    );
+    expect(hideSecondInteriorListingUrls(urls)).toEqual([
+      "https://cdn.example/interior-1.webp",
+      "https://cdn.example/interior-3.webp",
+    ]);
+
+    const withEbook = withEbookListingMedia(
+      {
+        cover_image: "/images/glasshouse/hero.png",
+        gallery_images: ["/images/glasshouse/hero.png"],
+      },
+      urls,
+      { hideSecondInterior: true },
+    );
+    expect(withEbook.cover_image).toBe("https://cdn.example/interior-3.webp");
   });
 });
