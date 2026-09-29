@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Libre_Baskerville } from "next/font/google";
 import TalisprosGatePage from "@/components/talispros/TalisprosGatePage";
 import { createMetadata } from "@/lib/seo";
-import { talisprosBrandOgMetadataImage } from "@/lib/talispros/mapsite-og-image";
+import { toAbsoluteHttpsOgUrl } from "@/lib/talispros/mapsite-og-image";
 import { SAMCART_SUCCESS_RETURN_PATH } from "@/lib/talispros/samcart-return";
 
 const libreBaskerville = Libre_Baskerville({
@@ -11,14 +11,19 @@ const libreBaskerville = Libre_Baskerville({
   weight: ["400", "700"],
 });
 
-const startTitle = "Talispros™ | Login & System Demo";
+const startTitle = "Talispros™";
+const startDescription = "Claim your market. Open your Mapsite™.";
 
 export const metadata: Metadata = createMetadata({
   title: startTitle,
-  description:
-    "Login to your Talispros™ account with a FAST Code™, or open the System Demo. SamCart checkout returns here after payment.",
+  description: startDescription,
   path: SAMCART_SUCCESS_RETURN_PATH,
-  image: talisprosBrandOgMetadataImage(startTitle),
+  image: {
+    url: toAbsoluteHttpsOgUrl("/assets/start-og.png"),
+    width: 690,
+    height: 686,
+    alt: startTitle,
+  },
 });
 
 export default function StartGatePage() {
