@@ -1,9 +1,14 @@
 import { fetchOgImageBuffer } from "@/lib/share/fetch-og-image";
 import { loadMapsiteOgLocation } from "@/lib/share/load-mapsite-og-location";
 import { loadMapsiteScenicBackgroundUrl } from "@/lib/share/load-share-og-scene";
-import { esriWorldImageryUrl, planMapsiteShareOg } from "@/lib/share/og-card";
+import {
+  CLAIMED_MAPSITE_OG_LOGO_PATH,
+  CLAIMED_MAPSITE_OG_PIN_COLOR,
+  esriWorldImageryUrl,
+  planMapsiteShareOg,
+} from "@/lib/share/og-card";
 import { renderAllPinsOgCard } from "@/lib/share/render-allpins-og";
-import { renderShareOgCard } from "@/lib/share/render-share-og";
+import { readShareOgLogo, renderShareOgCard } from "@/lib/share/render-share-og";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 
 export const runtime = "nodejs";
@@ -52,6 +57,10 @@ export async function GET(
     const jpeg = await renderShareOgCard({
       background,
       showPin: true,
+      pinColor: CLAIMED_MAPSITE_OG_PIN_COLOR,
+      // Individual Mapsite™ cards use the circular Windswept badge. Keep the
+      // ALLPINS branch above and unrelated Talisbooks™ cards on their existing logo.
+      logo: await readShareOgLogo(CLAIMED_MAPSITE_OG_LOGO_PATH),
     });
     return new Response(new Uint8Array(jpeg), { headers: HEADERS });
   } catch (error) {

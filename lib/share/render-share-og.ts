@@ -14,8 +14,8 @@ import {
 
 const FALLBACK_BG = "#1a3348";
 
-export async function readShareOgLogo(): Promise<Buffer> {
-  return readFile(path.join(process.cwd(), "public", SHARE_OG_LOGO_PATH.replace(/^\//, "")));
+export async function readShareOgLogo(logoPath = SHARE_OG_LOGO_PATH): Promise<Buffer> {
+  return readFile(path.join(process.cwd(), "public", logoPath.replace(/^\//, "")));
 }
 
 async function pinPng(color: string, scale = 1): Promise<Buffer> {
