@@ -173,8 +173,11 @@ export function renderPinMarkerHtml(
   const badgeHtml = badge
     ? `<div class="talismaps-pin-badge">${escapePinHtml(badge)}</div>`
     : "";
+  // Size the logo in px so large PNG assets (e.g. 400×400 Atlist icons) cannot
+  // render at intrinsic size when CSS inset-only rules fail on <img>.
+  const logoPx = Math.max(8, Math.round(size * 0.64));
   const logoHtml = visual.customLogoUrl
-    ? `<img class="talismaps-pin-logo" src="${escapePinHtml(visual.customLogoUrl)}" alt="" />`
+    ? `<img class="talismaps-pin-logo" src="${escapePinHtml(visual.customLogoUrl)}" alt="" width="${logoPx}" height="${logoPx}" style="width:${logoPx}px;height:${logoPx}px;top:18%;left:18%" />`
     : "";
 
   const markerWidth = Math.max(size, PIN_LABEL_MAX_WIDTH);

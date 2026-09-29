@@ -192,6 +192,14 @@ export default function Pin({
             className="talismaps-pin-logo"
             src={visual.customLogoUrl}
             alt=""
+            width={Math.max(8, Math.round(size * 0.64))}
+            height={Math.max(8, Math.round(size * 0.64))}
+            style={{
+              width: Math.max(8, Math.round(size * 0.64)),
+              height: Math.max(8, Math.round(size * 0.64)),
+              top: "18%",
+              left: "18%",
+            }}
           />
         ) : null}
       </div>
