@@ -35,6 +35,19 @@ import {
   type TalisBooksViewerViewMode,
 } from "@/lib/talisbooks/viewer";
 
+const TALISBOOKS_REGISTER_URL = "https://talispros.mysamcart.com/checkout/register";
+
+function TalisBooksViewerRegisterLink() {
+  return (
+    <a
+      href={TALISBOOKS_REGISTER_URL}
+      className="talisbooks-viewer__register"
+    >
+      Continue to register
+    </a>
+  );
+}
+
 interface TalisBooksViewerShellProps {
   book: TalisBooksViewerBook;
   /** After activation payment: show Live Edit panel. */
@@ -197,6 +210,7 @@ export default function TalisBooksViewerShell({
     return (
       <div className="talisbooks-viewer">
         <p className="talisbooks-viewer__empty">This book has no pages yet.</p>
+        <TalisBooksViewerRegisterLink />
       </div>
     );
   }
@@ -566,6 +580,7 @@ export default function TalisBooksViewerShell({
           </aside>
         ) : null}
       </div>
+      <TalisBooksViewerRegisterLink />
     </div>
   );
 }

@@ -1244,6 +1244,43 @@ body.mapsite-gallery-open [data-paypal-button] {
   white-space: nowrap;
 }
 
+.talisbooks-viewer__register {
+  position: absolute;
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: max(0.75rem, env(safe-area-inset-bottom));
+  z-index: 30;
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 1.5rem);
+  box-sizing: border-box;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: #171717;
+  color: #ffffff;
+  box-shadow: 0 8px 22px rgba(28, 25, 23, 0.24);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.talisbooks-viewer__register:hover {
+  background: #2a2a2a;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.talisbooks-viewer__register:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 3px;
+}
+
 .talisbooks-viewer__layout {
   display: grid;
   gap: 0;
