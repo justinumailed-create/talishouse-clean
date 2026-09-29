@@ -56,7 +56,8 @@ export const TALISU_WELCOME = {
 export const TALISU_MARKETS_COPY = {
   title: "Markets served",
   body: "Select the PIN nearest you to claim a market of 50 miles (80 kilometres) around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.",
-  claimHref: "/talispros/markets/claim-a-market",
+  /** Demo path — builds a Demo Mapsite™ (301/redirect via /talisu/demo). */
+  claimHref: "/talisu/demo",
 } as const;
 
 export const TALISU_AUDIO = {

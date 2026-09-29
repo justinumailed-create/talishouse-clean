@@ -7,6 +7,7 @@ import {
   TALISU_PRIMARY_NAV,
   TALISU_SEACANS_NAV,
 } from "@/lib/talisu/content";
+import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 
 function navActive(pathname: string, href: string): boolean {
   if (href === "/talisu") return pathname === "/talisu" || pathname === "/talisu/";
@@ -22,12 +23,24 @@ export default function TalisUChrome({
   children: React.ReactNode;
 }) {
   const pathname = usePathname() || "/talisu";
+  const isMkts =
+    pathname === "/talisu/mkts" || pathname.startsWith("/talisu/mkts/");
+
+  // Markets page uses the live Atlist-style blue header + full-bleed map.
+  if (isMkts) {
+    return (
+      <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-neutral-950 text-white">
+        <TalisUMktsHeader />
+        <main className="flex min-h-0 flex-1 flex-col">{children}</main>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-dvh flex flex-col bg-neutral-950 text-white">
-      <header className="border-b border-white/10 bg-neutral-950/95 backdrop-blur sticky top-0 z-40">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex flex-wrap items-center gap-4 justify-between">
-          <Link href="/talisu" className="flex items-center gap-3 shrink-0">
+    <div className="flex min-h-dvh flex-col bg-neutral-950 text-white">
+      <header className="sticky top-0 z-40 border-b border-white/10 bg-neutral-950/95 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-3">
+          <Link href="/talisu" className="flex shrink-0 items-center gap-3">
             <Image
               src="/talisu/Windswept.jpg"
               alt="TalisU™"
@@ -35,12 +48,12 @@ export default function TalisUChrome({
               height={40}
               className="rounded-md object-cover"
             />
-            <span className="font-semibold tracking-wide text-lg">
+            <span className="text-lg font-semibold tracking-wide">
               TalisU&trade;
             </span>
           </Link>
 
-          <nav className="flex flex-wrap gap-1.5 text-xs sm:text-sm justify-end">
+          <nav className="flex flex-wrap justify-end gap-1.5 text-xs sm:text-sm">
             {TALISU_PRIMARY_NAV.map((item) => {
               const active = navActive(pathname, item.href);
               return (
@@ -49,7 +62,7 @@ export default function TalisUChrome({
                   href={item.href}
                   className={`rounded-full px-3 py-1.5 transition ${
                     active
-                      ? "bg-white text-neutral-950 font-medium"
+                      ? "bg-white font-medium text-neutral-950"
                       : "text-white/80 hover:bg-white/10 hover:text-white"
                   }`}
                 >
@@ -61,8 +74,8 @@ export default function TalisUChrome({
         </div>
 
         <div className="border-t border-white/5 bg-neutral-900/80">
-          <div className="mx-auto max-w-6xl px-4 py-2 flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-white/50 uppercase tracking-wider mr-1">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-2 px-4 py-2 text-xs">
+            <span className="mr-1 uppercase tracking-wider text-white/50">
               Sea-Cans
             </span>
             {TALISU_SEACANS_NAV.map((item) => {
@@ -74,7 +87,7 @@ export default function TalisUChrome({
                   className={`rounded-md px-2.5 py-1 transition ${
                     active
                       ? "bg-amber-500/20 text-amber-200"
-                      : "text-white/70 hover:text-white hover:bg-white/5"
+                      : "text-white/70 hover:bg-white/5 hover:text-white"
                   }`}
                 >
                   {item.label}
