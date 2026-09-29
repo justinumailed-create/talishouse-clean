@@ -213,4 +213,30 @@ describe("demo mapsite codes", () => {
       "pathnameForRevalidate(`${ROUTES.TALISBOOKS}/fast/${mapsite.code}`)",
     );
   });
+
+  it("seeds demo Mapsites™ with stock gallery so pin hero uses shared ebook helper", () => {
+    const serviceSource = readFileSync(
+      join(process.cwd(), "lib/talispros/demo-mapsite-service.ts"),
+      "utf8",
+    );
+    expect(serviceSource).toContain("MAPSITE_DEMO_LISTING_IMAGE");
+    expect(serviceSource).toContain("MAPSITE_DEMO_GALLERY");
+    expect(serviceSource).not.toContain("cover_image: DEMO_PINNED_COVER_IMAGE");
+    expect(serviceSource).not.toContain("gallery_images: [DEMO_PINNED_COVER_IMAGE]");
+
+    const mediaSource = readFileSync(
+      join(process.cwd(), "lib/talispros/mapsite-listing-media.ts"),
+      "utf8",
+    );
+    expect(mediaSource).toContain("front-cover.jpg");
+    expect(mediaSource).toContain("PINNED_TALISBOOK_ASSET_ROOT");
+
+    const ebookSource = readFileSync(
+      join(process.cwd(), "lib/talisbooks/mapsite-ebook-service.ts"),
+      "utf8",
+    );
+    expect(ebookSource).toContain("resolveViewerBookBySlug");
+    expect(ebookSource).not.toContain("await getViewerBookBySlug(slug)");
+  });
 });
+

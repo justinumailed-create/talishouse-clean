@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { ebookSlugFromTebUrl } from "../lib/talisbooks/mapsite-ebook-service";
+import {
+  ebookSlugFromTebUrl,
+  resolveEbookListingImageUrls,
+} from "../lib/talisbooks/mapsite-ebook-service";
+import { DEMO_PINNED_EBOOK_HREF } from "../lib/talispros/demo-mapsite";
+import { listingHeroImageUrl } from "../lib/talispros/mapsite-listing-media";
 import { shouldBindMapsiteTebListing } from "../lib/talisbooks/auto-draft-ebook";
 
 describe("shouldBindMapsiteTebListing", () => {
@@ -45,5 +50,20 @@ describe("ebookSlugFromTebUrl", () => {
         "https://example.com/talisbooks/viewer/al02-al02-talisbook-cs4b?x=1",
       ),
     ).toBe("al02-al02-talisbook-cs4b");
+  });
+});
+
+describe("resolveEbookListingImageUrls pinned demo fallback", () => {
+  it("loads pinned catalog interiors from the demo TEB™ url (not the front cover)", async () => {
+    const urls = await resolveEbookListingImageUrls({
+      tebUrl: DEMO_PINNED_EBOOK_HREF,
+    });
+    expect(urls[0]).toBe("/talisbooks/pinned/pages/page-01.jpg");
+    expect(urls[1]).toBe("/talisbooks/pinned/pages/page-02.jpg");
+    expect(urls).not.toContain("/talisbooks/pinned/front-cover.jpg");
+    expect(listingHeroImageUrl(urls)).toBe("/talisbooks/pinned/pages/page-02.jpg");
+    expect(listingHeroImageUrl(urls, { hideSecondInterior: true })).toBe(
+      "/talisbooks/pinned/pages/page-03.jpg",
+    );
   });
 });

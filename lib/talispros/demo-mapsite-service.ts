@@ -5,13 +5,16 @@ import {
 } from "@/lib/supabaseAdmin";
 import {
   createDemoMapSiteCode,
-  DEMO_PINNED_COVER_IMAGE,
   DEMO_PINNED_EBOOK_HREF,
   demoMapSiteApplicationHref,
   demoMapSiteEbookHref,
   isDemoMapSiteCode,
   isProtectedPlatformDemoMapSite,
 } from "@/lib/talispros/demo-mapsite";
+import {
+  MAPSITE_DEMO_GALLERY,
+  MAPSITE_DEMO_LISTING_IMAGE,
+} from "@/lib/talispros/mapsite-listing-media";
 import { publishedMapSitePath } from "@/lib/talispros/mapsite-state";
 
 export type DemoMapSiteRecord = {
@@ -101,9 +104,11 @@ export async function createDemoMapSiteWithPinnedEbook(
     latitude: input.latitude,
     longitude: input.longitude,
     map_zoom: mapZoom,
-    cover_image: DEMO_PINNED_COVER_IMAGE,
-    header_image_url: DEMO_PINNED_COVER_IMAGE,
-    gallery_images: [DEMO_PINNED_COVER_IMAGE],
+    // Stock Glasshouse™ placeholder — pin/hero comes from ebook interiors via
+    // withEbookListingMedia / listingHeroImageUrl (same as claimed FAST Mapsites™).
+    cover_image: MAPSITE_DEMO_LISTING_IMAGE,
+    header_image_url: MAPSITE_DEMO_LISTING_IMAGE,
+    gallery_images: [...MAPSITE_DEMO_GALLERY],
     teb_url: DEMO_PINNED_EBOOK_HREF,
     is_demonstration: true,
     interest_form_enabled: false,

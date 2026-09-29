@@ -1,5 +1,6 @@
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import { MAPSITE_HEADER_FALLBACK_LOGO } from "@/lib/mapsite-layout";
+import { PINNED_TALISBOOK_ASSET_ROOT } from "@/lib/talisbooks/library/pinned-catalog";
 
 /** Listing card + pin popup share one hero image and crop focal point. */
 export const MAPSITE_LISTING_IMAGE_CLASS =
@@ -71,8 +72,18 @@ const SUPERSEDED_DEMO_LISTING_IMAGES = new Set([
 
 export function isStockDemoListingPath(path: string | null | undefined): boolean {
   if (!path?.trim()) return true;
-  const trimmed = path.trim();
+  const trimmed = path.trim().split("?")[0]?.split("#")[0] || path.trim();
   if (trimmed.includes("/images/glasshouse/")) return true;
+  // Demo Mapsites™ are seeded with the pinned ebook front cover — that is a
+  // placeholder, not a listing hero. Interiors under /pages/ stay usable.
+  if (
+    trimmed === `${PINNED_TALISBOOK_ASSET_ROOT}/front-cover.jpg` ||
+    trimmed === `${PINNED_TALISBOOK_ASSET_ROOT}/back-cover.jpg` ||
+    trimmed.endsWith("/talisbooks/pinned/front-cover.jpg") ||
+    trimmed.endsWith("/talisbooks/pinned/back-cover.jpg")
+  ) {
+    return true;
+  }
   return SUPERSEDED_DEMO_LISTING_IMAGES.has(trimmed);
 }
 

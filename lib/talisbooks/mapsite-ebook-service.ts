@@ -1,6 +1,6 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
-import { getViewerBookBySlug } from "@/lib/talisbooks/viewer/load-book";
+import { resolveViewerBookBySlug } from "@/lib/talisbooks/viewer/load-book";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import {
   buildClaimedMapSitePath,
@@ -242,9 +242,11 @@ export async function resolveEbookListingImageUrls(options: {
 
   const slug =
     options.bookSlug?.trim() || ebookSlugFromTebUrl(options.tebUrl) || "";
-  if (!slug || !isSupabaseAdminConfigured()) return [];
+  if (!slug) return [];
 
-  const viewer = await getViewerBookBySlug(slug);
+  // resolveViewerBookBySlug falls back to the pinned catalog when the slug is
+  // the demonstration ebook (even without a DB row / without admin config).
+  const viewer = await resolveViewerBookBySlug(slug);
   return listingImageUrlsFromEbookPages(viewer?.pages ?? []);
 }
 

@@ -14,6 +14,7 @@ import {
 } from "../lib/talispros/mapsite-listing-media";
 import { MAPSITE_HEADER_FALLBACK_LOGO } from "../lib/mapsite-layout";
 import { createFallbackDemoMapSite } from "../lib/talispros/mapsite-platform";
+import { DEMO_PINNED_COVER_IMAGE } from "../lib/talispros/demo-mapsite";
 
 describe("Mapsite™ listing media", () => {
   it("uses Glasshouse product images for demo listings", () => {
@@ -201,6 +202,42 @@ describe("Mapsite™ listing media", () => {
       "TSplits",
     );
     expect(createFallbackDemoMapSite().logo_url).toBeNull();
+  });
+
+  it("treats pinned ebook covers as stock so demo Mapsites™ use listingHeroImageUrl", () => {
+    expect(shouldReplaceDemoListingMedia(DEMO_PINNED_COVER_IMAGE, [DEMO_PINNED_COVER_IMAGE])).toBe(
+      true,
+    );
+    expect(
+      shouldReplaceDemoListingMedia("/talisbooks/pinned/pages/page-02.jpg", [
+        "/talisbooks/pinned/pages/page-02.jpg",
+      ]),
+    ).toBe(false);
+
+    const pinnedInteriors = [
+      "/talisbooks/pinned/pages/page-01.jpg",
+      "/talisbooks/pinned/pages/page-02.jpg",
+      "/talisbooks/pinned/pages/page-03.jpg",
+    ];
+    const unpaid = withEbookListingMedia(
+      {
+        cover_image: DEMO_PINNED_COVER_IMAGE,
+        gallery_images: [DEMO_PINNED_COVER_IMAGE],
+      },
+      pinnedInteriors,
+    );
+    expect(unpaid.cover_image).toBe("/talisbooks/pinned/pages/page-02.jpg");
+
+    const paid = withEbookListingMedia(
+      {
+        cover_image: DEMO_PINNED_COVER_IMAGE,
+        gallery_images: [DEMO_PINNED_COVER_IMAGE],
+      },
+      pinnedInteriors,
+      { hideSecondInterior: true },
+    );
+    // Demo Mapsites™ unlock like paid FAST listings → former page 3 is pin hero.
+    expect(paid.cover_image).toBe("/talisbooks/pinned/pages/page-03.jpg");
   });
 
   it("after payment hides 2nd interior so 3rd page becomes pin hero", () => {
