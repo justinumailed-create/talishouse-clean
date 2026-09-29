@@ -62,7 +62,7 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(homePage).not.toContain("TalisprosHomeGate");
     expect(startRoute).toContain("TalisprosGatePage");
     expect(gatePage).toContain("TalisprosHomeGate");
-    expect(gatePage).not.toContain("TalisprosHomeShowcase");
+    expect(gatePage).toContain("TalisprosHomeShowcase");
     expect(gate).toContain("TalisprosHomeFastCodeEntry");
     expect(gate).toContain("Login To Your Account");
     expect(gate).toContain("System Demo");
@@ -93,11 +93,22 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
       join(root, "components/talispros/TalisprosGatePage.tsx"),
       "utf8",
     );
+    const showcase = readFileSync(
+      join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
+      "utf8",
+    );
+
     expect(gatePage).toContain("TalisprosHomeGate");
     expect(gatePage).toContain("TalisprosSamCartReturnBanner");
-    expect(gatePage).not.toContain("TalisprosHomeShowcase");
-    expect(gatePage).toContain("<main");
+    expect(gatePage).toContain("TalisprosHomeShowcase");
+    expect(gatePage).toContain("lg:grid-cols-");
     expect(gatePage).toContain("min-h-dvh");
+    expect(showcase).toContain("/assets/home-demo/01-talismaps-mkts.jpg");
+    expect(showcase).toContain("/talisu/mkts");
+    expect(showcase).toContain("pointer-events-none");
+    expect(showcase).toContain("draggable={false}");
+    expect(showcase).not.toContain("<Link");
+    expect(showcase).not.toContain("onClick");
   });
 
   it("shows Logout on paid owner claimed Mapsite™ chrome", () => {
