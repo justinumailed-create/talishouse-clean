@@ -80,8 +80,6 @@ export const TALISU_MKTS_HEADER_TAGLINE =
 
 export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/mkts", label: "Markets" },
-  { href: "/talisu/eb", label: "E-Book" },
-  { href: "/talisu/au", label: "Audio" },
   { href: "/talisu/reg", label: "Register" },
 ] as const;
 

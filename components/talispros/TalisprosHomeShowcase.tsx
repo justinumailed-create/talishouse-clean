@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { HOME_OWNERSHIP_SECTIONS } from "@/lib/talispros/ownership-models";
 import HomeMountainMotion from "@/components/talispros/HomeMountainMotion";
@@ -92,6 +93,17 @@ export default function TalisprosHomeShowcase() {
             <p className="mt-2.5 text-[13.5px] leading-relaxed text-neutral-700 sm:text-[14.5px]">
               {openSection.result}
             </p>
+            {openSection.learnMoreHref ? (
+              <p className="mt-3.5">
+                <Link
+                  href={openSection.learnMoreHref}
+                  className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
+                >
+                  {openSection.learnMoreLabel ?? "Learn More"}
+                  <span aria-hidden>→</span>
+                </Link>
+              </p>
+            ) : null}
           </div>
         ) : null}
 

@@ -18,7 +18,14 @@ describe("TalisU blue header dropdown", () => {
       "/talisu/au",
       "/talisu/video",
     ]);
-    expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Markets")).toBe(true);
+    expect(TALISU_MKTS_HEADER_NAV.map((i) => i.label)).toEqual([
+      "Markets",
+      "Register",
+    ]);
+    expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "E-Book")).toBe(
+      false,
+    );
+    expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Audio")).toBe(false);
   });
 
   it("wires the blue header to render a TalisU dropdown menu", () => {
