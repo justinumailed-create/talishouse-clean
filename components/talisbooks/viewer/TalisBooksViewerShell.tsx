@@ -16,7 +16,12 @@ import { ROUTES } from "@/lib/routes";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
-import { SHOW_BACK_TO_MAPSITE } from "@/lib/talisbooks/ui-flags";
+import {
+  resolveClaimMapsiteId,
+  TALISBOOKS_SAMCART_REGISTER_URL,
+  talisBooksViewerCta,
+  talisBooksViewerShowBack,
+} from "@/lib/talisbooks/cta-mode";
 import {
   convertViewerNavIndex,
   createEmptyNarrationController,
@@ -34,17 +39,24 @@ import {
   type TalisBooksViewerPage,
   type TalisBooksViewerViewMode,
 } from "@/lib/talisbooks/viewer";
-
-const TALISBOOKS_REGISTER_URL = "https://talispros.mysamcart.com/checkout/register";
+import DemoClaimMarketButton from "@/components/talispros/mapsite/DemoClaimMarketButton";
 
 function TalisBooksViewerRegisterLink() {
   return (
     <a
-      href={TALISBOOKS_REGISTER_URL}
+      href={TALISBOOKS_SAMCART_REGISTER_URL}
       className="talisbooks-viewer__register"
     >
       Continue to register
     </a>
+  );
+}
+
+function TalisBooksViewerClaimCta({ mapsiteId }: { mapsiteId: string }) {
+  return (
+    <div className="talisbooks-viewer__claim">
+      <DemoClaimMarketButton mapsiteId={mapsiteId} align="end" />
+    </div>
   );
 }
 
@@ -210,7 +222,13 @@ export default function TalisBooksViewerShell({
     return (
       <div className="talisbooks-viewer">
         <p className="talisbooks-viewer__empty">This book has no pages yet.</p>
-        <TalisBooksViewerRegisterLink />
+        {talisBooksViewerCta(book) === "register" ? (
+          <TalisBooksViewerRegisterLink />
+        ) : (
+          <TalisBooksViewerClaimCta
+            mapsiteId={resolveClaimMapsiteId(book.mapsiteId)}
+          />
+        )}
       </div>
     );
   }
@@ -447,6 +465,9 @@ export default function TalisBooksViewerShell({
   const showViewerSidebar = Boolean(canLiveEdit);
   const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
   const backToMapSiteHref = viewerBackToMapsiteHref(book);
+  const surfaceCta = talisBooksViewerCta(book);
+  const showBackToMapsite = talisBooksViewerShowBack(book);
+  const claimMapsiteId = resolveClaimMapsiteId(book.mapsiteId);
 
   return (
     <div
@@ -482,7 +503,7 @@ export default function TalisBooksViewerShell({
             <Link href={ROUTES.HOME} className="talisbooks-viewer__back">
               Home
             </Link>
-          ) : SHOW_BACK_TO_MAPSITE ? (
+          ) : showBackToMapsite ? (
             <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
               Back to Mapsite™
             </Link>
@@ -580,7 +601,11 @@ export default function TalisBooksViewerShell({
           </aside>
         ) : null}
       </div>
-      <TalisBooksViewerRegisterLink />
+      {surfaceCta === "register" ? (
+        <TalisBooksViewerRegisterLink />
+      ) : (
+        <TalisBooksViewerClaimCta mapsiteId={claimMapsiteId} />
+      )}
     </div>
   );
 }

@@ -4,11 +4,11 @@ export const TALISU_KB_UNLOCK_STORAGE_KEY = "talisu_kb_unlocked_v1";
 /** Exact password for the TalisU™ Knowledge Base gate. */
 export const TALISU_KB_PASSWORD = "Admin123";
 
-/** Query flag that opens the TalisU navbar KB unlock drop-pop. */
-export const TALISU_KB_UNLOCK_QUERY = "kbUnlock";
+/** CustomEvent: open the TalisU navbar KB unlock popover (stay on current page). */
+export const TALISU_KB_OPEN_UNLOCK_EVENT = "talisu:open-kb-unlock";
 
-/** Query key for post-unlock destination (e.g. /talisu/kb or /talisu/kb/manage). */
-export const TALISU_KB_NEXT_QUERY = "kbNext";
+/** CustomEvent: password succeeded — gates re-check session and show children. */
+export const TALISU_KB_UNLOCKED_EVENT = "talisu:kb-unlocked";
 
 export function isTalisUKbPassword(candidate: string): boolean {
   return candidate === TALISU_KB_PASSWORD;
@@ -30,13 +30,12 @@ export function writeTalisUKbUnlocked(): void {
   }
 }
 
-/**
- * Send locked visitors to /talisu with the navbar unlock drop-pop open.
- * `nextPath` is where they land after a successful Unlock.
- */
-export function buildTalisUKbUnlockHref(nextPath: string): string {
-  const params = new URLSearchParams();
-  params.set(TALISU_KB_UNLOCK_QUERY, "1");
-  params.set(TALISU_KB_NEXT_QUERY, nextPath || "/talisu/kb");
-  return `/talisu?${params.toString()}`;
+export function requestTalisUKbNavbarUnlock(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(TALISU_KB_OPEN_UNLOCK_EVENT));
+}
+
+export function notifyTalisUKbUnlocked(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(TALISU_KB_UNLOCKED_EVENT));
 }

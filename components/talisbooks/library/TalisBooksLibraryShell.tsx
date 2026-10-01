@@ -23,7 +23,13 @@ import {
 import { partitionBookshelf } from "@/lib/talisbooks/library/partition";
 import { queryLibraryBooks } from "@/lib/talisbooks/library/query";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
-import { SHOW_BACK_TO_MAPSITE } from "@/lib/talisbooks/ui-flags";
+import {
+  resolveClaimMapsiteId,
+  TALISBOOKS_SAMCART_REGISTER_URL,
+  talisBooksShelfCta,
+  talisBooksShelfShowBack,
+} from "@/lib/talisbooks/cta-mode";
+import DemoClaimMarketButton from "@/components/talispros/mapsite/DemoClaimMarketButton";
 import type {
   TalisBooksBookshelf,
   TalisBooksLibraryBook,
@@ -132,6 +138,11 @@ export default function TalisBooksLibraryShell({
   const mapsiteHref = requestedHref.startsWith("/talispros/mapsite")
     ? requestedHref
     : claimedHref || requestedHref || MAPSITE_APP_PATH;
+  const shelfCta = scoped ? talisBooksShelfCta(bookshelf.fastCode) : null;
+  const showBackToMapsite = scoped
+    ? talisBooksShelfShowBack(bookshelf.fastCode)
+    : Boolean(requestedHref);
+  const claimMapsiteId = resolveClaimMapsiteId(bookshelf.mapsiteId);
 
   const visibleBooks = useMemo(
     () => bookshelf.books.filter((book) => !deletedIds.includes(book.id)),
@@ -263,12 +274,30 @@ export default function TalisBooksLibraryShell({
             </div>
           ) : null}
           {headerExtra}
+          {scoped && shelfCta === "claim" ? (
+            <div className="talisbooks-library__claim">
+              <DemoClaimMarketButton
+                mapsiteId={claimMapsiteId}
+                align="end"
+              />
+            </div>
+          ) : null}
+          {scoped && shelfCta === "register" ? (
+            <a
+              href={TALISBOOKS_SAMCART_REGISTER_URL}
+              className="talisbooks-library__back"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Register
+            </a>
+          ) : null}
           {secondaryBackHref ? (
             <Link href={secondaryBackHref} className="talisbooks-library__back">
               {secondaryBackLabel}
             </Link>
           ) : null}
-          {SHOW_BACK_TO_MAPSITE ? (
+          {showBackToMapsite ? (
             <Link href={mapsiteHref} className="talisbooks-library__back">
               Back to Mapsite™
             </Link>

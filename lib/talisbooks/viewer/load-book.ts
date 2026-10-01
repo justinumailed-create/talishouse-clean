@@ -321,6 +321,10 @@ export async function getViewerBookBySlug(
     id: book.id,
     slug: book.slug,
     fastCode: typeof book.fast_code === "string" ? book.fast_code : undefined,
+    mapsiteId:
+      typeof book.mapsite_id === "string" && book.mapsite_id.trim()
+        ? book.mapsite_id.trim()
+        : null,
     accountType:
       typeof book.account_type === "string" ? book.account_type : undefined,
     isolatedBookshelf: isIsolatedBookshelfBook({ metadata }),

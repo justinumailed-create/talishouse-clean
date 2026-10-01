@@ -77,14 +77,18 @@ describe("sample Talisbooks™ viewer chrome", () => {
     expect(css).toContain("100dvh - (2 * var(--viewer-inset))");
   });
 
-  it("keeps the registration CTA visible on every shared ebook viewer", () => {
-    expect(shell).toContain("https://talispros.mysamcart.com/checkout/register");
+  it("shows Register only on issued FAST ebooks; Claim on demo viewers", () => {
+    expect(shell).toContain("TALISBOOKS_SAMCART_REGISTER_URL");
     expect(shell).toContain("Continue to register");
     expect(shell).toContain("talisbooks-viewer__register");
+    expect(shell).toContain("talisBooksViewerCta");
+    expect(shell).toContain("DemoClaimMarketButton");
+    expect(shell).toContain("talisbooks-viewer__claim");
     const css = readSource("app/globals.css");
     expect(css).toMatch(
       /\.talisbooks-viewer__register[\s\S]*position:\s*absolute[\s\S]*bottom:/,
     );
+    expect(css).toContain("talisbooks-viewer__claim");
   });
 
   it("shows Live Edit only after payment, never on demonstration books", () => {

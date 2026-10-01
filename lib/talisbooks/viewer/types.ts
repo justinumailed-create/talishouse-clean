@@ -106,6 +106,8 @@ export interface TalisBooksViewerBook {
   slug: string;
   /** Source Mapsite™ FAST Code when this book is tied to an account. */
   fastCode?: string;
+  /** Source Mapsite™ id for Claim Your Market™ on demonstration books. */
+  mapsiteId?: string | null;
   /** Account type that owns this book (root / derivative / adpro / fsbo, etc.). */
   accountType?: string;
   /**

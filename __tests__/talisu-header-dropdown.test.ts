@@ -47,6 +47,8 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain("TalisUKbUnlockForm");
     expect(header).toContain("kb-unlock");
     expect(header).toContain("handleKbMenuClick");
-    expect(header).toContain("TALISU_KB_UNLOCK_QUERY");
+    expect(header).toContain("TALISU_KB_OPEN_UNLOCK_EVENT");
+    expect(header).not.toContain("TALISU_KB_UNLOCK_QUERY");
+    expect(header).toContain("bg-white p-5");
   });
 });

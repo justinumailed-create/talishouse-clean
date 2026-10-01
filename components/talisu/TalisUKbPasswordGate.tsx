@@ -1,24 +1,24 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { usePathname, useRouter } from "next/navigation";
 import {
-  buildTalisUKbUnlockHref,
   readTalisUKbUnlocked,
+  requestTalisUKbNavbarUnlock,
+  TALISU_KB_UNLOCKED_EVENT,
 } from "@/lib/talisu/kb-gate";
+import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
 
 /**
  * Protects /talisu/kb and manage routes.
- * Unlocked session → children. Locked → redirect to TalisU navbar unlock drop-pop.
- * Primary UX is the header popover; this gate is for direct URL hits.
+ * Unlocked session → children.
+ * Locked → stay on this URL; open the TalisU navbar unlock popover and show
+ * an inline PayPal-style unlock card (never bounce to /talisu?kbUnlock=…).
  */
 export default function TalisUKbPasswordGate({
   children,
 }: {
   children: ReactNode;
 }) {
-  const router = useRouter();
-  const pathname = usePathname() || "/talisu/kb";
   const [ready, setReady] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
 
@@ -27,14 +27,38 @@ export default function TalisUKbPasswordGate({
     setUnlocked(ok);
     setReady(true);
     if (!ok) {
-      router.replace(buildTalisUKbUnlockHref(pathname));
+      requestTalisUKbNavbarUnlock();
     }
-  }, [pathname, router]);
 
-  if (!ready || !unlocked) {
+    function onUnlocked() {
+      setUnlocked(true);
+    }
+    window.addEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
+    return () => {
+      window.removeEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
+    };
+  }, []);
+
+  if (!ready) {
     return (
       <div className="mx-auto flex min-h-[40vh] max-w-sm items-center justify-center px-4">
-        <p className="text-sm text-neutral-500">Opening unlock…</p>
+        <p className="text-sm text-neutral-500">Checking access…</p>
+      </div>
+    );
+  }
+
+  if (!unlocked) {
+    return (
+      <div className="mx-auto flex min-h-[50vh] max-w-sm flex-col items-center justify-center px-4 py-10">
+        <div className="w-full rounded-2xl border border-neutral-200 bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
+          <TalisUKbUnlockForm
+            variant="inline"
+            onSuccess={() => setUnlocked(true)}
+          />
+        </div>
+        <p className="mt-4 text-center text-[12px] text-neutral-500">
+          You can also unlock from the TalisU menu in the header.
+        </p>
       </div>
     );
   }

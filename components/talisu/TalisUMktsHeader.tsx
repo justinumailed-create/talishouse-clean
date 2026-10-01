@@ -12,9 +12,8 @@ import {
 } from "@/lib/talisu/markets-pins";
 import { TALISU_REGISTER } from "@/lib/talisu/content";
 import {
-  TALISU_KB_NEXT_QUERY,
-  TALISU_KB_UNLOCK_QUERY,
   readTalisUKbUnlocked,
+  TALISU_KB_OPEN_UNLOCK_EVENT,
 } from "@/lib/talisu/kb-gate";
 import { TALISU_KB_PATH } from "@/lib/talisu/kb-content";
 import TalisBrandFlip from "@/components/talisu/TalisBrandFlip";
@@ -96,20 +95,26 @@ export default function TalisUMktsHeader({
     setKbUnlocked(readTalisUKbUnlocked());
   }, []);
 
-  // Direct hits to /talisu/kb (or manage) redirect here with ?kbUnlock=1&kbNext=…
+  // Locked /talisu/kb (or manage) asks the header to open unlock in-place — never /talisu?kbUnlock=
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get(TALISU_KB_UNLOCK_QUERY) !== "1") return;
-    const next = params.get(TALISU_KB_NEXT_QUERY) || TALISU_KB_PATH;
-    setKbNext(next);
-    if (readTalisUKbUnlocked()) {
-      router.replace(next);
-      return;
+    function onOpenUnlock() {
+      if (readTalisUKbUnlocked()) {
+        setKbUnlocked(true);
+        return;
+      }
+      const next =
+        pathname === TALISU_KB_PATH || pathname.startsWith(`${TALISU_KB_PATH}/`)
+          ? pathname
+          : TALISU_KB_PATH;
+      setKbNext(next);
+      setPanel("kb-unlock");
+      setOpen(true);
     }
-    setPanel("kb-unlock");
-    setOpen(true);
-  }, [pathname, router]);
+    window.addEventListener(TALISU_KB_OPEN_UNLOCK_EVENT, onOpenUnlock);
+    return () => {
+      window.removeEventListener(TALISU_KB_OPEN_UNLOCK_EVENT, onOpenUnlock);
+    };
+  }, [pathname]);
 
   useEffect(() => {
     if (!open) return;
@@ -176,8 +181,16 @@ export default function TalisUMktsHeader({
     setOpen(false);
     setPanel("menu");
     const destination = kbNext || TALISU_KB_PATH;
-    // Drop unlock query if present, then open the KB dashboard / manage UI.
-    router.replace(destination);
+    // Already on the KB page (inline gate) — stay put; gate listens for unlock event.
+    if (
+      pathname === destination ||
+      pathname.startsWith(`${destination}/`) ||
+      pathname === TALISU_KB_PATH ||
+      pathname.startsWith(`${TALISU_KB_PATH}/`)
+    ) {
+      return;
+    }
+    router.push(destination);
   }
 
   function handleTalisUToggle() {
@@ -242,17 +255,17 @@ export default function TalisUMktsHeader({
               <div
                 id={menuId}
                 role="menu"
-                className={`absolute right-0 z-50 mt-1.5 overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] shadow-lg ${
+                className={
                   panel === "kb-unlock"
-                    ? "w-[min(92vw,16.5rem)] p-3"
-                    : "min-w-[11.5rem] py-1"
-                }`}
+                    ? "absolute right-0 z-50 mt-1.5 w-[min(92vw,20rem)] overflow-hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]"
+                    : "absolute right-0 z-50 mt-1.5 min-w-[11.5rem] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] py-1 shadow-lg"
+                }
               >
                 {panel === "kb-unlock" ? (
                   <div>
                     <button
                       type="button"
-                      className="mb-2 text-[12px] font-medium text-white/80 transition hover:text-white"
+                      className="mb-3 text-[12px] font-medium text-neutral-500 transition hover:text-neutral-800"
                       onClick={() => setPanel("menu")}
                     >
                       ← Menu
