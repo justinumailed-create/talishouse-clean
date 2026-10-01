@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import IsolatedBookshelfCreateClient from "@/components/catalogue/IsolatedBookshelfCreateClient";
+import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import {
   getAdminSessionAccount,
   requireAdminPage,
@@ -54,6 +55,7 @@ export default async function CatalogueIsolatedBookshelfCreatePage() {
       className="min-h-dvh bg-[#f5f5f7]"
       data-testid="isolated-bookshelf-create"
     >
+      <TalisUMktsHeader />
       <header className="border-b border-neutral-200 bg-white">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-3 px-5 py-4">
           <div>

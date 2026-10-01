@@ -185,6 +185,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
       "utf8",
     );
     expect(create).toContain("requireAdminPage");
+    expect(create).toContain("TalisUMktsHeader");
   });
 
 

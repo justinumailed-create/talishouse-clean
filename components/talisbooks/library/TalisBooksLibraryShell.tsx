@@ -7,10 +7,6 @@ import { ArrowDownUp } from "lucide-react";
 import TalisBooksStandingBook from "@/components/talisbooks/library/TalisBooksStandingBook";
 import { deleteLibraryEbookAction } from "@/app/talisbooks/library/actions";
 import {
-  buildClaimedMapSitePath,
-  MAPSITE_APP_PATH,
-} from "@/lib/talispros/mapsite-state";
-import {
   TALISBOOKS_LIBRARY_BOOK_PRICE_USD,
   TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
   TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD,
@@ -27,9 +23,9 @@ import {
   resolveClaimMapsiteId,
   TALISBOOKS_SAMCART_REGISTER_URL,
   talisBooksShelfCta,
-  talisBooksShelfShowBack,
 } from "@/lib/talisbooks/cta-mode";
 import DemoClaimMarketButton from "@/components/talispros/mapsite/DemoClaimMarketButton";
+import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import type {
   TalisBooksBookshelf,
   TalisBooksLibraryBook,
@@ -39,6 +35,7 @@ import type {
 interface TalisBooksLibraryShellProps {
   bookshelf: TalisBooksBookshelf;
   canDelete?: boolean;
+  /** Retained for callers; shelf UI no longer renders a Mapsite back CTA. */
   backHref?: string;
   /** Extra controls in the topbar actions row (e.g. admin Create ebook). */
   headerExtra?: ReactNode;
@@ -109,7 +106,7 @@ function ShelfRow({
 export default function TalisBooksLibraryShell({
   bookshelf,
   canDelete = false,
-  backHref,
+  backHref: _backHref,
   headerExtra,
   compactHeader = false,
   secondaryBackHref,
@@ -126,22 +123,9 @@ export default function TalisBooksLibraryShell({
   const publicCatalog = Boolean(bookshelf.publicCatalog);
   const createdCatalog = Boolean(bookshelf.createdCatalog);
 
-  const claimedHref =
-    bookshelf.registrationHref?.trim() ||
-    (bookshelf.fastCode
-      ? buildClaimedMapSitePath({
-          fastCode: bookshelf.fastCode,
-          accountType: bookshelf.accountType,
-        })
-      : "");
-  const requestedHref = backHref?.trim() || "";
-  const mapsiteHref = requestedHref.startsWith("/talispros/mapsite")
-    ? requestedHref
-    : claimedHref || requestedHref || MAPSITE_APP_PATH;
+  // _backHref retained for caller compatibility; shelves no longer render a Mapsite back CTA.
+  void _backHref;
   const shelfCta = scoped ? talisBooksShelfCta(bookshelf.fastCode) : null;
-  const showBackToMapsite = scoped
-    ? talisBooksShelfShowBack(bookshelf.fastCode)
-    : Boolean(requestedHref);
   const claimMapsiteId = resolveClaimMapsiteId(bookshelf.mapsiteId);
 
   const visibleBooks = useMemo(
@@ -214,7 +198,9 @@ export default function TalisBooksLibraryShell({
   };
 
   return (
-    <div className="talisbooks-library">
+    <div className="talisbooks-library-shell">
+      <TalisUMktsHeader />
+      <div className="talisbooks-library">
       <header className="talisbooks-library__topbar">
         <div className="talisbooks-library__brand">
           {compactHeader ? (
@@ -295,11 +281,6 @@ export default function TalisBooksLibraryShell({
           {secondaryBackHref ? (
             <Link href={secondaryBackHref} className="talisbooks-library__back">
               {secondaryBackLabel}
-            </Link>
-          ) : null}
-          {showBackToMapsite ? (
-            <Link href={mapsiteHref} className="talisbooks-library__back">
-              Back to Mapsite™
             </Link>
           ) : null}
         </div>
@@ -523,6 +504,7 @@ export default function TalisBooksLibraryShell({
           </a>
         </div>
       ) : null}
+      </div>
     </div>
   );
 }

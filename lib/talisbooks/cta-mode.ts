@@ -67,11 +67,14 @@ export function talisBooksShelfCta(
   return "claim";
 }
 
-/** Shelves always get Back (they are not issued-FAST ebook viewer pages). */
+/**
+ * Shelves never show a Mapsite back CTA — blue TalisU navbar replaces it.
+ * Ebook viewer Back rules stay in talisBooksViewerShowBack.
+ */
 export function talisBooksShelfShowBack(
-  fastCode: string | null | undefined,
+  _fastCode: string | null | undefined,
 ): boolean {
-  return Boolean(fastCode?.trim());
+  return false;
 }
 
 /** mapsiteId for DemoClaimMarketButton — fall back to platform demo seed. */

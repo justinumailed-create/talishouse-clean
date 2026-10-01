@@ -348,8 +348,8 @@ describe("Talisbooks™ library admin delete wiring", () => {
     expect(page).toContain("backHref={mapsiteBackFromScheduleHref(params.from)}");
     expect(shell).toContain("deleteLibraryEbookAction");
     expect(shell).toContain("canDelete");
-    expect(shell).toContain("Back to Mapsite™");
-    expect(shell).toContain("buildClaimedMapSitePath");
+    expect(shell).not.toContain("Back to Mapsite™");
+    expect(shell).toContain("TalisUMktsHeader");
     expect(shell).toContain("talisbooks-library__header-actions");
     expect(shell).not.toContain("talisbooks-library__search");
     expect(shell).not.toContain("Search this shelf");

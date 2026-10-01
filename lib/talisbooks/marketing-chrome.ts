@@ -15,7 +15,10 @@ export function shouldShowTalisbooksMarketingHeader(
   pathname: string | null | undefined,
 ): boolean {
   const path = pathname?.split("?")[0]?.split("#")[0] || "";
+  // Product shelves use the shared blue TalisUMktsHeader instead.
   if (
+    path === "/talisbooks" ||
+    path.startsWith("/talisbooks/library") ||
     path.startsWith("/talisbooks/dashboard") ||
     path.startsWith("/talisbooks/editor") ||
     path.startsWith("/talisbooks/viewer") ||

@@ -12,6 +12,13 @@ import {
 import { PINNED_TALISBOOK_SLUG } from "../lib/talisbooks/library/pinned-catalog";
 
 describe("Talisbooks Claim vs Register vs Back", () => {
+  it("never shows Back to Mapsite™ on shelves (demo or issued)", () => {
+    expect(talisBooksShelfShowBack("demo-abc123")).toBe(false);
+    expect(talisBooksShelfShowBack("rm22")).toBe(false);
+    expect(talisBooksShelfShowBack("")).toBe(false);
+    expect(talisBooksShelfShowBack(null)).toBe(false);
+  });
+
   it("uses SamCart register destination for issued connected surfaces", () => {
     expect(TALISBOOKS_SAMCART_REGISTER_URL).toContain(
       "talispros.mysamcart.com/checkout/register",
@@ -35,7 +42,7 @@ describe("Talisbooks Claim vs Register vs Back", () => {
     expect(talisBooksViewerShowBack({ slug: PINNED_TALISBOOK_SLUG })).toBe(
       true,
     );
-    expect(talisBooksShelfShowBack("demo-abc123")).toBe(true);
+    expect(talisBooksShelfShowBack("demo-abc123")).toBe(false);
   });
 
   it("shows Register only (no Back) on issued FAST ebook viewers", () => {
@@ -46,7 +53,7 @@ describe("Talisbooks Claim vs Register vs Back", () => {
       talisBooksViewerShowBack({ fastCode: "rm22", slug: "rm22-book" }),
     ).toBe(false);
     expect(talisBooksShelfCta("rm22")).toBe("register");
-    expect(talisBooksShelfShowBack("rm22")).toBe(true);
+    expect(talisBooksShelfShowBack("rm22")).toBe(false);
   });
 
   it("wires viewer + shelf shells to Claim / Register / Back helpers", () => {
@@ -67,9 +74,10 @@ describe("Talisbooks Claim vs Register vs Back", () => {
     expect(viewer).not.toContain("SHOW_BACK_TO_MAPSITE");
 
     expect(library).toContain("talisBooksShelfCta");
-    expect(library).toContain("talisBooksShelfShowBack");
     expect(library).toContain("DemoClaimMarketButton");
-    expect(library).toContain("Back to Mapsite™");
+    expect(library).toContain("TalisUMktsHeader");
+    expect(library).not.toContain("Back to Mapsite™");
+    expect(library).not.toContain("talisBooksShelfShowBack");
     expect(library).not.toContain("SHOW_BACK_TO_MAPSITE");
   });
 });

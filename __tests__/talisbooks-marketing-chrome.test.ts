@@ -18,8 +18,12 @@ describe("Talisbooks™ marketing header on TEB shelves", () => {
     ).toBe(false);
   });
 
-  it("keeps the product label on unrelated Talisbooks pages", () => {
-    expect(shouldShowTalisbooksMarketingHeader("/talisbooks")).toBe(true);
+  it("hides shelf surfaces; keeps chrome helper for other product pages", () => {
+    // Public / library / FAST shelves use blue TalisUMktsHeader instead.
+    expect(shouldShowTalisbooksMarketingHeader("/talisbooks")).toBe(false);
+    expect(shouldShowTalisbooksMarketingHeader("/talisbooks/library")).toBe(
+      false,
+    );
     expect(shouldShowTalisbooksMarketingHeader("/talisbooks/settings")).toBe(
       true,
     );
