@@ -114,7 +114,43 @@ describe("Talisbooks™ split bookshelf layout", () => {
     expect(generalShelfColumns(20)).toBe(4);
   });
 
-  it("packs each right-shelf row from the left, newest first in the row", () => {
+  it("newest mode keeps other pinned books under the hero", () => {
+    const base = createDemoRootBookshelf().books[0]!;
+    const newest = {
+      ...base,
+      id: "newest-hero",
+      title: "Newest Highlight",
+      createdAt: "2026-09-30T12:00:00.000Z",
+      isPinned: false,
+    };
+    const cowboy = {
+      ...base,
+      id: "pinned-talispros-ebook-sample",
+      slug: "talispros-ebook-sample",
+      title: "Cowboy's Guide",
+      createdAt: "2020-01-01T00:00:00.000Z",
+      isPinned: true,
+      pinRank: 1,
+    };
+    const older = {
+      ...base,
+      id: "older-general",
+      title: "Older General",
+      createdAt: "2026-08-01T12:00:00.000Z",
+      isPinned: false,
+    };
+    const { featured, general } = partitionBookshelf([older, cowboy, newest], {
+      featuredCapacity: 5,
+      featuredMode: "newest",
+    });
+    expect(featured.map((book) => book.id)).toEqual([
+      "newest-hero",
+      "pinned-talispros-ebook-sample",
+    ]);
+    expect(general.map((book) => book.id)).toEqual(["older-general"]);
+  });
+
+    it("packs each right-shelf row from the left, newest first in the row", () => {
     expect(packShelfRowsNewestAtRight(["n1", "n2", "n3", "n4", "n5"], 4)).toEqual([
       ["n1", "n2", "n3", "n4"],
       ["n5"],

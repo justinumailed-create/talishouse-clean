@@ -12,6 +12,10 @@ import type {
   TalisBooksBookshelf,
   TalisBooksLibraryBook,
 } from "@/lib/talisbooks/library/types";
+import {
+  PINNED_TALISBOOK_SLUG,
+  pinnedTalisBookLibraryEntry,
+} from "@/lib/talisbooks/library/pinned-catalog";
 import type { TalisBooksPublishStatus } from "@/lib/talisbooks/types";
 
 function toPublishStatus(value: string): TalisBooksPublishStatus {
@@ -59,6 +63,22 @@ function toLibraryBook(
   };
 }
 
+
+/** Built-in Cowboy's Guide (pinned sample) — sits under the left hero on Common Shelf. */
+function cowboyGuideLibraryEntry(): TalisBooksLibraryBook {
+  const pinned = pinnedTalisBookLibraryEntry();
+  return {
+    ...pinned,
+    title: "Cowboy's Guide",
+    subtitle: "The Cowboy's Guide to Outside Capital · Talispros PMC",
+    isPinned: true,
+    pinRank: 1,
+    // Never win the newest hero slot above the highlighted book.
+    createdAt: "2020-01-01T00:00:00.000Z",
+    publishedAt: pinned.publishedAt || "2020-01-01T00:00:00.000Z",
+  };
+}
+
 function buildIsolatedAllPinsBookshelf(
   books: IsolatedBookshelfBook[],
 ): TalisBooksBookshelf {
@@ -74,7 +94,17 @@ function buildIsolatedAllPinsBookshelf(
     registrationHref: allPinsClaimedHref(),
     entitlements: null,
     primaryEbook: null,
-    books: books.map(toLibraryBook),
+    books: (() => {
+      const libraryBooks = books.map(toLibraryBook);
+      const cowboy = cowboyGuideLibraryEntry();
+      const withoutDup = libraryBooks.filter(
+        (book) =>
+          book.id !== cowboy.id &&
+          book.slug !== cowboy.slug &&
+          book.slug !== PINNED_TALISBOOK_SLUG,
+      );
+      return [...withoutDup, cowboy];
+    })(),
   };
 }
 

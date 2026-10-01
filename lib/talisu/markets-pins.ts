@@ -80,17 +80,16 @@ export const TALISU_MKTS_HEADER_TAGLINE =
 
 /**
  * Primary top-bar links (home + claimed Mapsites™ blue header).
- * Shelf / admin places use real working routes that already exist.
+ * Bookshelf is the only book link; Mapsites™ is a header dropdown (not here).
  */
 export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/mkts", label: "Markets" },
-  { href: "/catalogue/bookshelf", label: "Common Shelf" },
-  { href: "/talisbooks", label: "All Books" },
-  { href: "/talisbooks/library", label: "FAST Shelves" },
-  { href: "/catalogue/bookshelf/create", label: "Create Demo" },
-  { href: "/admin/talisbooks/bookshelves", label: "Admin Places" },
+  { href: "/catalogue/bookshelf", label: "Bookshelf" },
   { href: "/talisu/reg", label: "Register" },
 ] as const;
+
+/** Placeholder marker — Mapsites™ dropdown is rendered in TalisUMktsHeader. */
+export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
 
 /** TalisU™ header dropdown (Knowledge Base / Audio / Video). */
 export const TALISU_MKTS_HEADER_DROPDOWN = [

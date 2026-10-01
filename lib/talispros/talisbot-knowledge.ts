@@ -43,7 +43,7 @@ export const TALISBOT_KNOWLEDGE = [
   {
     id: "shelves",
     title: "Shelves",
-    body: "Common Shelf is the catalogue isolated bookshelf. FAST Shelves are per-code TEB™ shelves. Admin Places opens bookshelves management for operators.",
+    body: "Bookshelf (Common Shelf) is the catalogue isolated bookshelf with Cowboy's Guide under the left highlight. Mapsites™ dropdown lists claimed and demo Mapsites™.",
   },
   {
     id: "talisu",

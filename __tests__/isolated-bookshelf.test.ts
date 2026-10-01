@@ -257,6 +257,9 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(shelf).toContain("isolated-bookshelf-create");
     expect(shelf).toContain("canCreate");
     expect(shelf).toContain("displayShelfBookTitle");
+    expect(shelf).toContain("cowboyGuideLibraryEntry");
+    expect(shelf).toContain("Cowboy's Guide");
+    expect(shelf).toContain("pinnedTalisBookLibraryEntry");
     expect(shelf).not.toContain("absolute right-4 top-4");
     expect(shelf).not.toContain("Isolated Bookshelf");
     expect(shelf).not.toContain("Admin-only shelf");

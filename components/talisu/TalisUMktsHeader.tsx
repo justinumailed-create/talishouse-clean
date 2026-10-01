@@ -20,13 +20,14 @@ import {
 import { TALISU_KB_PATH } from "@/lib/talisu/kb-content";
 import TalisBrandMark from "@/components/talisu/TalisBrandMark";
 import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
+import MapsitesNavDropdown from "@/components/talisu/MapsitesNavDropdown";
 
 export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 
 export type TalisUMktsHeaderProps = {
   /**
    * `claimed-mapsite`: replace Register with Dashboard (lock until real payment).
-   * `default`: Markets + Register (homepage /talisu chrome).
+   * `default`: Markets + Bookshelf + Mapsites + Register (homepage /talisu chrome).
    */
   variant?: TalisUMktsHeaderVariant;
   /**
@@ -315,7 +316,13 @@ export default function TalisUMktsHeader({
         </div>
 
         <nav className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
-          {TALISU_MKTS_HEADER_NAV.map((item) => renderNavLink(item))}
+          {TALISU_MKTS_HEADER_NAV.filter(
+            (item) => item.label === "Markets" || item.label === "Bookshelf",
+          ).map((item) => renderNavLink(item))}
+          <MapsitesNavDropdown />
+          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Register").map(
+            (item) => renderNavLink(item),
+          )}
 
           <span
             aria-hidden
