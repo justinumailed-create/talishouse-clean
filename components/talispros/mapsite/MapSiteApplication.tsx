@@ -50,9 +50,22 @@ import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import { TALISU_REGISTER } from "@/lib/talisu/content";
 import { getMapSiteActivationPaymentStatus } from "@/app/talispros/mapsite/actions";
 import {
+  confirmAdditionalPinCheckout,
+  fixMapSiteAdditionalPin,
+  placeMapSiteAdditionalPin,
+} from "@/app/talispros/mapsite/pin-actions";
+import {
+  defaultMapSitePinDashboard,
+  normalizePinCoordinate,
+  type MapSitePinDashboardState,
+} from "@/lib/talispros/mapsite-additional-pins";
+import {
   postMapSitePaymentRedirectHref,
   shouldRegisterAgentsAfterPayment,
 } from "@/lib/talispros/register-agents";
+import MapSitePinDashboard, {
+  type PinEditorState,
+} from "@/components/talispros/mapsite/MapSitePinDashboard";
 
 /** Minimum popup body height so hero + title + action row stay visible. */
 const MAPSITE_POPUP_MIN_HEIGHT_PX = 384;
@@ -95,6 +108,11 @@ interface MapSiteApplicationProps {
   flagIdentity?: MapsiteFlagIdentity | null;
   /** Agent/owner name used when Choose for Flag is Name. */
   flagName?: string | null;
+  /** Included PIN plus purchased capacity and placed additional PINs. */
+  initialPinDashboard?: MapSitePinDashboardState;
+  /** Return from additional-PIN Stripe Checkout. Separate from activation checkout. */
+  pinCheckoutStatus?: "success" | "cancelled" | null;
+  pinCheckoutSessionId?: string | null;
 }
 
 export default function MapSiteApplication({
@@ -117,8 +135,16 @@ export default function MapSiteApplication({
   accountTypeSegment = null,
   flagIdentity = null,
   flagName = null,
+  initialPinDashboard,
+  pinCheckoutStatus = null,
+  pinCheckoutSessionId = null,
 }: MapSiteApplicationProps) {
   const [mapsite] = useState(initialMapSite);
+  const [pinDashboard, setPinDashboard] = useState(
+    () => initialPinDashboard ?? defaultMapSitePinDashboard(),
+  );
+  const [pinEditor, setPinEditor] = useState<PinEditorState>({ kind: "idle" });
+  const placeLockRef = useRef(false);
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const [lockCenterOffset, setLockCenterOffset] = useState({ x: 0, y: 0 });
   const setLockCenterOffsetSafe = useCallback(
@@ -151,6 +177,15 @@ export default function MapSiteApplication({
       pinAnimated: mapsite.pin_animated,
       pinCategoryBadge: mapsite.pin_category_badge,
     });
+    const styleMetadata = {
+      status: mapsite.status,
+      phase,
+      icon: savedPin.pinIcon || MAPSITE_PIN_DEFAULT_ICON,
+      border: savedPin.pinBorder || MAPSITE_PIN_DEFAULT_BORDER,
+      whiteCenter: savedPin.whiteCenter,
+      animated: savedPin.pinAnimated,
+      categoryBadge: savedPin.pinCategoryBadge,
+    };
     return [
       {
         id: mapsite.id,
@@ -159,18 +194,19 @@ export default function MapSiteApplication({
         color: savedPin.pinColor,
         label: pinLabel,
         featured: true,
-        metadata: {
-          status: mapsite.status,
-          phase,
-          icon: savedPin.pinIcon || MAPSITE_PIN_DEFAULT_ICON,
-          border: savedPin.pinBorder || MAPSITE_PIN_DEFAULT_BORDER,
-          whiteCenter: savedPin.whiteCenter,
-          animated: savedPin.pinAnimated,
-          categoryBadge: savedPin.pinCategoryBadge,
-        },
+        metadata: styleMetadata,
       },
+      ...pinDashboard.pins.map((pin, index) => ({
+        id: pin.id,
+        latitude: pin.latitude,
+        longitude: pin.longitude,
+        color: savedPin.pinColor,
+        label: pin.label.trim() || `PIN ${index + 2}`,
+        featured: false,
+        metadata: { ...styleMetadata, additional: true },
+      })),
     ];
-  }, [mapsite, phase, pinLabel]);
+  }, [mapsite, phase, pinLabel, pinDashboard.pins]);
 
   const viewport = useMemo(
     () => ({
@@ -204,6 +240,70 @@ export default function MapSiteApplication({
     setSelectedPinId(null);
   }, []);
 
+  const pinEditorActive = pinEditor.kind !== "idle";
+  const lockMapCenter = pinDashboard.pins.length === 0 && !pinEditorActive;
+
+  useEffect(() => {
+    if (pinCheckoutStatus !== "success" || !pinCheckoutSessionId) return;
+    let cancelled = false;
+    void confirmAdditionalPinCheckout(pinCheckoutSessionId).then((result) => {
+      if (cancelled || !("dashboard" in result) || !result.dashboard) return;
+      setPinDashboard(result.dashboard);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [pinCheckoutStatus, pinCheckoutSessionId]);
+
+  const placeAdditionalAt = useCallback(
+    async (latitude: number, longitude: number) => {
+      const code = mapsite.fast_code?.trim();
+      if (!code || placeLockRef.current || pinEditor.kind !== "place") return;
+      placeLockRef.current = true;
+      try {
+        const result = await placeMapSiteAdditionalPin({
+          mapsiteId: mapsite.id,
+          fastCode: code,
+          latitude,
+          longitude,
+        });
+        if ("dashboard" in result && result.dashboard) {
+          setPinDashboard(result.dashboard);
+          if (result.dashboard.remainingToPlace <= 0) {
+            setPinEditor({ kind: "idle" });
+          }
+        }
+      } finally {
+        placeLockRef.current = false;
+      }
+    },
+    [mapsite.fast_code, mapsite.id, pinEditor.kind],
+  );
+
+  const fixAdditionalAt = useCallback(
+    async (pinId: string, latitude: number, longitude: number) => {
+      const code = mapsite.fast_code?.trim();
+      if (!code || pinEditor.kind !== "fix" || pinEditor.pinId !== pinId) return;
+      setPinDashboard((current) => ({
+        ...current,
+        pins: current.pins.map((pin) =>
+          pin.id === pinId ? { ...pin, latitude, longitude } : pin,
+        ),
+      }));
+      const result = await fixMapSiteAdditionalPin({
+        mapsiteId: mapsite.id,
+        fastCode: code,
+        pinId,
+        latitude,
+        longitude,
+      });
+      if ("dashboard" in result && result.dashboard) {
+        setPinDashboard(result.dashboard);
+      }
+    },
+    [mapsite.fast_code, mapsite.id, pinEditor],
+  );
+
   return (
     <MapEngineProvider
       key={`${mapsite.lat.toFixed(6)}-${mapsite.lng.toFixed(6)}`}
@@ -211,14 +311,31 @@ export default function MapSiteApplication({
       initialPins={pins}
       initialViewport={viewport}
       selectedPinId={selectedPinId}
-      draggablePinIds={[]}
-      lockCenter
+      draggablePinIds={
+        pinEditor.kind === "fix" ? [pinEditor.pinId] : []
+      }
+      lockCenter={lockMapCenter}
       lockCenterOffset={lockCenterOffset}
       preserveViewport
       onPinSelect={(pinId) => {
         setSelectedPinId(pinId);
       }}
-      onMapClick={() => dismissIfUserGesture()}
+      onMapClick={(coordinates) => {
+        if (pinEditor.kind === "place") {
+          const latitude = normalizePinCoordinate(coordinates.latitude, "lat");
+          const longitude = normalizePinCoordinate(coordinates.longitude, "lng");
+          if (latitude == null || longitude == null) return;
+          void placeAdditionalAt(latitude, longitude);
+          return;
+        }
+        dismissIfUserGesture();
+      }}
+      onPinDrag={(pinId, coordinates) => {
+        const latitude = normalizePinCoordinate(coordinates.latitude, "lat");
+        const longitude = normalizePinCoordinate(coordinates.longitude, "lng");
+        if (latitude == null || longitude == null) return;
+        void fixAdditionalAt(pinId, latitude, longitude);
+      }}
       onMapDragStart={dismissIfUserGesture}
       onMapZoom={dismissIfUserGesture}
       basemapView="satellite"
@@ -247,6 +364,11 @@ export default function MapSiteApplication({
         beginFocusGuard={beginFocusGuard}
         showClaimedNav={showClaimedNav}
         onLockCenterOffsetChange={setLockCenterOffsetSafe}
+        pinDashboard={pinDashboard}
+        pinEditor={pinEditor}
+        pinCheckoutStatus={pinCheckoutStatus}
+        onPinDashboardChange={setPinDashboard}
+        onPinEditorChange={setPinEditor}
       />
     </MapEngineProvider>
   );
@@ -275,6 +397,11 @@ function MapSiteChrome({
   beginFocusGuard,
   showClaimedNav,
   onLockCenterOffsetChange,
+  pinDashboard,
+  pinEditor,
+  pinCheckoutStatus,
+  onPinDashboardChange,
+  onPinEditorChange,
 }: {
   mapsite: MapSitePlatformRecord;
   audience: RegistrationMarket;
@@ -298,8 +425,13 @@ function MapSiteChrome({
   beginFocusGuard: () => void;
   showClaimedNav: boolean;
   onLockCenterOffsetChange: (offset: { x: number; y: number }) => void;
+  pinDashboard: MapSitePinDashboardState;
+  pinEditor: PinEditorState;
+  pinCheckoutStatus: "success" | "cancelled" | null;
+  onPinDashboardChange: (dashboard: MapSitePinDashboardState) => void;
+  onPinEditorChange: (editor: PinEditorState) => void;
 }) {
-  const { setViewport, isReady } = useMapEngine();
+  const { setViewport, isReady, fitToCoordinates } = useMapEngine();
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
   const sidebarStackRef = useRef<HTMLDivElement>(null);
@@ -315,6 +447,7 @@ function MapSiteChrome({
   const [expandedCardHeight, setExpandedCardHeight] = useState<number | null>(
     null
   );
+  const [dashboardOpen, setDashboardOpen] = useState(false);
 
   const focusPinAndOpen = useCallback(() => {
     beginFocusGuard();
@@ -550,6 +683,46 @@ function MapSiteChrome({
   const showExplicitPayment =
     showActivatePayment || Boolean(checkoutStatus);
 
+  const openOwnerDashboard = useCallback(() => {
+    focusPinAndOpen();
+    if (dashboardUnlocked && isOwner) {
+      setDashboardOpen(true);
+    }
+  }, [dashboardUnlocked, focusPinAndOpen, isOwner]);
+
+  useEffect(() => {
+    if (!pinCheckoutStatus || !dashboardUnlocked || !isOwner) return;
+    setDashboardOpen(true);
+  }, [pinCheckoutStatus, dashboardUnlocked, isOwner]);
+
+  const pinFitKey = pinDashboard.pins
+    .map((pin) => `${pin.id}:${pin.latitude}:${pin.longitude}`)
+    .join("|");
+
+  useEffect(() => {
+    if (!isReady || pinDashboard.pins.length === 0 || pinEditor.kind !== "idle") {
+      return;
+    }
+    fitToCoordinates(
+      [
+        { latitude: mapsite.lat, longitude: mapsite.lng },
+        ...pinDashboard.pins.map((pin) => ({
+          latitude: pin.latitude,
+          longitude: pin.longitude,
+        })),
+      ],
+      { top: 72, right: 48, bottom: 96, left: 48 },
+    );
+  }, [
+    fitToCoordinates,
+    isReady,
+    mapsite.lat,
+    mapsite.lng,
+    pinDashboard.pins,
+    pinEditor.kind,
+    pinFitKey,
+  ]);
+
   const bookHref =
     talisBookHref ||
     (typeof mapsite.teb_url === "string" && mapsite.teb_url.trim()
@@ -607,7 +780,7 @@ function MapSiteChrome({
           variant="claimed-mapsite"
           dashboardUnlocked={dashboardUnlocked}
           registerHref={TALISU_REGISTER.samcartUrl}
-          onOpenDashboard={focusPinAndOpen}
+          onOpenDashboard={openOwnerDashboard}
         />
       ) : null}
       <div
@@ -662,7 +835,25 @@ function MapSiteChrome({
           </div>
         ) : null}
 
-        {selectedPinId === mapsite.id ? (
+        {dashboardOpen && dashboardUnlocked && isOwner ? (
+          <MapSitePinDashboard
+            open
+            mapsiteId={mapsite.id}
+            fastCode={mapsite.fast_code || ""}
+            accountTypeSegment={accountTypeSegment}
+            dashboard={pinDashboard}
+            editor={pinEditor}
+            checkoutStatus={pinCheckoutStatus}
+            onClose={() => {
+              setDashboardOpen(false);
+              onPinEditorChange({ kind: "idle" });
+            }}
+            onDashboardChange={onPinDashboardChange}
+            onEditorChange={onPinEditorChange}
+          />
+        ) : null}
+
+        {selectedPinId === mapsite.id && !dashboardOpen ? (
           <>
             <MapSitePropertyPopup
               mapsite={mapsite}

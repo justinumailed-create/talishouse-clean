@@ -520,6 +520,33 @@ async function buildMapSiteView(
     sortOrder: pin.sort_order || 0,
   }));
 
+  const { data: additionalPinRows, error: additionalPinError } = await client
+    .from("mapsite_additional_pins")
+    .select("id, latitude, longitude, label, sort_order")
+    .eq("mapsite_id", mapsite.id)
+    .order("sort_order", { ascending: true });
+  if (!additionalPinError) {
+    for (const pin of additionalPinRows ?? []) {
+      pins.push({
+        id: pin.id,
+        name: pin.label?.trim() || "Additional PIN",
+        description: "",
+        latitude: pin.latitude,
+        longitude: pin.longitude,
+        address: "",
+        city: "",
+        province: "",
+        postalCode: "",
+        country: "",
+        website: "",
+        phone: "",
+        email: "",
+        featured: false,
+        sortOrder: 1000 + (pin.sort_order || 0),
+      });
+    }
+  }
+
   const galleryItems = resolveMapSiteGalleryItems(
     mapsite.gallery_items,
     mapsite.gallery_images || []

@@ -27,6 +27,13 @@ import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, CHECKOUT_SESSION_QUERY, parseCheckoutSessionId, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
+import {
+  PIN_CHECKOUT_QUERY,
+  PIN_CHECKOUT_SESSION_QUERY,
+  parsePinCheckoutSessionId,
+  parsePinCheckoutStatus,
+} from "@/lib/talispros/mapsite-additional-pins";
+import { loadMapSitePinDashboard } from "@/lib/talispros/mapsite-additional-pins-service";
 import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 import MapSitePmcApplication from "@/components/talispros/mapsite/MapSitePmcApplication";
@@ -77,6 +84,12 @@ export default async function TalisprosMapSitePage({
   const checkoutStatus = parseCheckoutStatus(firstParam(params[CHECKOUT_QUERY]));
   const checkoutSessionId = parseCheckoutSessionId(
     firstParam(params[CHECKOUT_SESSION_QUERY]),
+  );
+  const pinCheckoutStatus = parsePinCheckoutStatus(
+    firstParam(params[PIN_CHECKOUT_QUERY]),
+  );
+  const pinCheckoutSessionId = parsePinCheckoutSessionId(
+    firstParam(params[PIN_CHECKOUT_SESSION_QUERY]),
   );
   const bookSlug = firstParam(params.book)?.trim() || null;
   const setup = firstParam(params.setup)?.trim().toLowerCase() ?? null;
@@ -216,9 +229,10 @@ export default async function TalisprosMapSitePage({
       })
     ).paid;
 
-  const ebookContext = ownerCode
-    ? await getMapSiteEbookContext(ownerCode, { bookSlug })
-    : null;
+  const [ebookContext, pinDashboard] = await Promise.all([
+    ownerCode ? getMapSiteEbookContext(ownerCode, { bookSlug }) : Promise.resolve(null),
+    loadMapSitePinDashboard(mapsite.id),
+  ]);
   const primarySlug = ebookContext?.primaryEbook?.slug || bookSlug;
   const talisBookHref =
     (primarySlug ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}` : null) ||
@@ -261,6 +275,9 @@ export default async function TalisprosMapSitePage({
       showStartHere={false}
       flagIdentity={ebookContext?.primaryEbook?.flagIdentity}
       flagName={ebookContext?.primaryEbook?.flagName}
+      initialPinDashboard={pinDashboard}
+      pinCheckoutStatus={pinCheckoutStatus}
+      pinCheckoutSessionId={pinCheckoutSessionId}
     />
   );
 }
