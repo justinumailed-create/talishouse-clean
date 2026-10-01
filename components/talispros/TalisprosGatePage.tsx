@@ -5,9 +5,9 @@ import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 
 /**
  * Homepage gate (`/`): TalisU blue navbar; Login + System Demo + FAST on the
- * left (40%); ownership models over mountain background on the right (60%).
- * SamCart payment success returns here and keeps the same gate flow.
- * Former homepage content lives at `/start`.
+ * left (40%); right (60%) is mountain image above + metallic ownership-model
+ * buttons (popover details) below. SamCart payment success returns here and
+ * keeps the same gate flow. Former homepage content lives at `/start`.
  */
 export default function TalisprosGatePage() {
   return (
