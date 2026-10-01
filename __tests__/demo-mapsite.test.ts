@@ -163,7 +163,8 @@ describe("demo mapsite codes", () => {
     );
     expect(cardSource).toContain("mapsiteMarketPartnerLabel");
     expect(cardSource).toContain("mapsite.assigned_marketing_manager");
-    expect(cardSource).not.toContain("mapsite.agent_name");
+    // Claim Your Market™ may prefill from agent_name; partner label still uses assigned manager.
+    expect(cardSource).toContain("suggestedFullName={mapsite.agent_name}");
   });
 
   it("does not surface Next.js production digest text to the user", () => {

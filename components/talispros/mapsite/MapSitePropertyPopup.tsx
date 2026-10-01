@@ -193,10 +193,13 @@ export default function MapSitePropertyPopup({
   const genericHeroImage = "/talisbooks/sample/img-11-1280x720.jpeg";
   const useGenericCard = genericOnboardingCard || claimable;
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
-  const address =
-    mapsite.property_address?.trim() ||
-    mapsite.property_title?.trim() ||
-    null;
+  const propertyAddress = mapsite.property_address?.trim() || null;
+  const propertyTitle = mapsite.property_title?.trim() || null;
+  const demoishTitle =
+    !propertyTitle ||
+    /^demo(\s|$)/i.test(propertyTitle) ||
+    /mapsite/i.test(propertyTitle);
+  const address = propertyAddress || propertyTitle || null;
   const showPendingActions =
     onboardingPhase === "BUILD_SUBMITTED" || onboardingPhase === "BOOK_READY";
   const tebHref =
@@ -204,13 +207,17 @@ export default function MapSitePropertyPopup({
       mapsite,
     ) ?? null;
   const popupHeroImage = useGenericCard ? genericHeroImage : heroImage;
+  // Claimed / live cards prefer the property address — never stay stuck on a demo title.
   const popupTitle = useGenericCard
     ? "The first of many E-Books"
-    : mapsite.property_title;
+    : propertyAddress || (demoishTitle ? address : propertyTitle) || "Your Mapsite™";
   const popupWriteup = useGenericCard
     ? "Upon registration your Mapsite™ will be able to promote up to 10 categories containing 100 PINs generating 1,000 views, monthly. No referral fees - ever"
-    : address ||
+    : (propertyAddress && !demoishTitle && propertyTitle && propertyTitle !== propertyAddress
+        ? propertyTitle
+        : null) ||
       mapsite.property_description ||
+      (propertyAddress ? propertyAddress : null) ||
       "Welcome to Talispros™. Choose your market and begin onboarding.";
   const popupClaimLabel = useGenericCard ? "Register Account now" : claimLabel;
 

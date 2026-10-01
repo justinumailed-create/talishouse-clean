@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  isMapsiteRegisterPathStandIn,
   isMapsiteUrlGateExempt,
   isUrlGateExpired,
   isUrlGatePinFormat,
@@ -224,6 +225,12 @@ describe("Mapsite™ URL gate", () => {
     expect(
       resolvePublishedUrlButtonHref("ar01", "https://example.com/paid"),
     ).toBe(MAPSITE_URL_GATE_SENTINEL);
+    expect(
+      resolvePublishedUrlButtonHref(
+        "ar01",
+        "/talispros/register-your-mapsite/ar01",
+      ),
+    ).toBe("/talispros/register-your-mapsite/ar01");
     expect(mapsiteHasGatedUrl("", "dc01")).toBe(true);
     expect(mapsiteHasGatedUrl("", "dc02")).toBe(true);
 
@@ -242,6 +249,30 @@ describe("Mapsite™ URL gate", () => {
       "utf8",
     );
     expect(controls).toContain("isMapsiteUrlGateExempt");
+  });
+
+
+  it("treats register-your-mapsite paths (and homepage) as payment stand-ins", () => {
+    expect(
+      isMapsiteRegisterPathStandIn("/talispros/register-your-mapsite/ar01"),
+    ).toBe(true);
+    expect(isMapsiteRegisterPathStandIn("/")).toBe(true);
+    expect(isMapsiteRegisterPathStandIn("https://example.com/paid")).toBe(
+      false,
+    );
+    expect(
+      isMapsiteRegisterPathStandIn(
+        "https://talispros.mysamcart.com/checkout/register",
+      ),
+    ).toBe(false);
+
+    const actions = readFileSync(
+      join(process.cwd(), "lib/talispros/mapsite-url-gate-actions.ts"),
+      "utf8",
+    );
+    expect(actions).toContain("isMapsiteRegisterPathStandIn");
+    expect(actions).toContain("buildClaimedMapSitePath");
+    expect(actions).toContain("resolveUrlGateUnlockHref");
   });
 
   it("ships codes to the Admin Notifications tab", () => {

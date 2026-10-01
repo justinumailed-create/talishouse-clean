@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import DemoFastCodePreview from "@/components/talispros/DemoFastCodePreview";
 import { claimDemoMapSiteAction } from "@/app/talispros/demo-mapsite/claim-actions";
 import { splitPersonName } from "@/validators/fast-code.validator";
+import { TALISPROS_START_SEGMENTS } from "@/lib/talispros/start-content";
+import { parseRegistrationMarket } from "@/lib/registration-market";
+import { accountTypeForAudience } from "@/lib/talispros/account-capabilities";
 
 type DemoClaimMarketButtonProps = {
   mapsiteId: string;
@@ -32,9 +35,22 @@ function suggestedNames(fullName: string | null | undefined): {
   }
 }
 
+function audienceFromSegmentHref(href: string): string {
+  try {
+    const url = new URL(href, "https://talispros.local");
+    const audience = parseRegistrationMarket(url.searchParams.get("audience"));
+    if (audience) return audience;
+    const accountType = url.searchParams.get("accountType");
+    if (accountType) return accountType;
+  } catch {
+    /* ignore */
+  }
+  return "brokers";
+}
+
 /**
  * In-place Claim Your Market™ on a demonstration Mapsite™:
- * collect name → issue FAST Code™ → open the live claimed URL.
+ * choose /start audience → collect name → issue FAST Code™ → open live claimed URL.
  */
 export default function DemoClaimMarketButton({
   mapsiteId,
@@ -48,15 +64,24 @@ export default function DemoClaimMarketButton({
   const seed = suggestedNames(suggestedFullName);
   const [firstName, setFirstName] = useState(seed.firstName);
   const [lastName, setLastName] = useState(seed.lastName);
+  const [audienceKey, setAudienceKey] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
 
   function handleClaim() {
     setError(null);
+    if (!audienceKey) {
+      setError("Choose who you are (same options as /start) before claiming.");
+      return;
+    }
+    const market = parseRegistrationMarket(audienceKey) ?? "brokers";
+    const accountType = accountTypeForAudience(market);
     startTransition(async () => {
       const result = await claimDemoMapSiteAction({
         mapsiteId,
         firstName,
         lastName,
+        accountType,
+        audience: market,
       });
       if (!result.ok) {
         setError(result.error);
@@ -83,6 +108,43 @@ export default function DemoClaimMarketButton({
           <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-neutral-500">
             Claim Your Market™
           </p>
+          <fieldset className="space-y-2">
+            <legend className="text-[11px] font-medium text-neutral-500">
+              What best describes you?
+            </legend>
+            {TALISPROS_START_SEGMENTS.map((segment) => {
+              const key = audienceFromSegmentHref(segment.href);
+              const selected = audienceKey === key;
+              return (
+                <label
+                  key={segment.label}
+                  className={`flex cursor-pointer items-start gap-2 rounded-lg border px-2.5 py-2 transition ${
+                    selected
+                      ? "border-[#046BD9] bg-[#046BD9]/5"
+                      : "border-neutral-200 hover:border-neutral-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="claim-audience"
+                    value={key}
+                    checked={selected}
+                    disabled={pending}
+                    onChange={() => setAudienceKey(key)}
+                    className="mt-0.5"
+                  />
+                  <span className="min-w-0">
+                    <span className="block text-[10px] uppercase tracking-[0.1em] text-neutral-500">
+                      {segment.label}
+                    </span>
+                    <span className="block text-[13px] font-medium leading-snug text-neutral-900">
+                      {segment.title}
+                    </span>
+                  </span>
+                </label>
+              );
+            })}
+          </fieldset>
           <label className="block">
             <span className="text-[11px] font-medium text-neutral-500">
               First name
@@ -127,7 +189,12 @@ export default function DemoClaimMarketButton({
             </button>
             <button
               type="button"
-              disabled={pending || !firstName.trim() || !lastName.trim()}
+              disabled={
+                pending ||
+                !firstName.trim() ||
+                !lastName.trim() ||
+                !audienceKey
+              }
               onClick={handleClaim}
               className="inline-flex min-h-9 flex-1 items-center justify-center rounded-xl bg-[#046BD9] px-3 text-sm font-medium text-white transition hover:bg-[#0357b0] disabled:opacity-50"
             >

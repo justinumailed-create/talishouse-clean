@@ -19,6 +19,8 @@ export async function claimDemoMapSiteAction(input: {
   middleName?: string | null;
   email?: string | null;
   accountType?: string | null;
+  /** /start audience (brokers | listings | fsbos | adpro). */
+  audience?: string | null;
 }): Promise<ClaimDemoMapSiteActionResult> {
   const result = await claimDemoMapSite(input);
   if (!result.ok) return result;
@@ -29,6 +31,9 @@ export async function claimDemoMapSiteAction(input: {
 
   revalidatePath(MAPSITE_APP_PATH);
   revalidatePath(pathnameForRevalidate(result.href));
+  if (result.tebHref) {
+    revalidatePath(pathnameForRevalidate(result.tebHref));
+  }
 
   return result;
 }

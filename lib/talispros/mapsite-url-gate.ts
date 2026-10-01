@@ -89,6 +89,12 @@ export function resolvePublishedUrlButtonHref(
   const dest = resolveMapsiteListingUrl(fastCode, brokerUrl);
   if (!dest) return null;
   if (isMapsiteUrlGateExempt(fastCode)) return dest;
+  // Claimed-demo stand-in: URL button shows the register path (FAST Code™ gate).
+  if (isMapsiteRegisterPathStandIn(dest)) {
+    const code = fastCode?.trim();
+    if (!code) return dest;
+    return mapsiteUrlGatePath(code);
+  }
   return MAPSITE_URL_GATE_SENTINEL;
 }
 
@@ -126,6 +132,38 @@ export function mapsiteUrlGateHref(
   const code = fastCode?.trim();
   if (!code) return dest;
   return mapsiteUrlGatePath(code);
+}
+
+
+/**
+ * Stand-in until SamCart payment success: when broker_url is the local
+ * register-your-mapsite path (or a bare homepage), unlock opens the claimed
+ * Mapsite™ instead of looping the gate or dumping to `/`.
+ */
+export function isMapsiteRegisterPathStandIn(
+  href: string | null | undefined,
+): boolean {
+  const raw = (href || "").trim();
+  if (!raw) return false;
+  if (registerYourMapSiteFastCodeFromPath(raw)) return true;
+  try {
+    const url = new URL(raw, "https://talispros.local");
+    if (registerYourMapSiteFastCodeFromPath(url.pathname)) return true;
+    const path = url.pathname.replace(/\/+$/, "") || "/";
+    if (path === "/" || path === "") return true;
+    // Absolute homepage hosts without a deeper path.
+    if (
+      (url.hostname === "talispros.com" ||
+        url.hostname === "www.talispros.com" ||
+        url.hostname === "talispros.local") &&
+      (path === "/" || path === "")
+    ) {
+      return true;
+    }
+  } catch {
+    if (raw === "/" || raw === "") return true;
+  }
+  return false;
 }
 
 export function normalizeUrlGatePin(value: string): string {
