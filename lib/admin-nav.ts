@@ -23,6 +23,7 @@ export const ADMIN_SUPERADMIN_NAV: readonly AdminNavItem[] = [
 const ADMIN_FULL_EXTRA_NAV: readonly AdminNavItem[] = [
   { href: "/admin/registrations", label: "Registrations" },
   { href: "/admin/marketing", label: "Marketing" },
+  { href: "/admin/contact-from-leads", label: "Contact from leads" },
 ];
 
 export function getAdminNavItems(access: AdminAccessLevel | null | undefined): AdminNavItem[] {

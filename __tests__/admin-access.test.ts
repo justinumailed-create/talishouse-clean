@@ -114,6 +114,7 @@ describe("admin nav", () => {
     expect(hrefs).toContain("/admin/talisbooks/bookshelves");
     expect(hrefs).toContain("/admin/registrations");
     expect(hrefs).toContain("/admin/marketing");
+    expect(hrefs).toContain("/admin/contact-from-leads");
   });
 
   it("highlights nested Mapsite, platform content, and Talisbooks routes", () => {

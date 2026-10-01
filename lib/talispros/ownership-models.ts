@@ -2,8 +2,13 @@
  * Homepage (gate) right-rail ownership model copy — exact user wording.
  */
 export const HOME_OWNERSHIP_BG_SRC = "/assets/home-ownership-bg.jpg";
-/** Looping GIF: subtle Ken Burns plus sky cloud drift. Primary motion asset. */
+/** Looping GIF kept as a fallback asset; the banner now plays the MP4. */
 export const HOME_OWNERSHIP_BG_GIF = "/assets/home-ownership-bg.gif";
+/**
+ * Royalty-free landscape loop (Pexels video 1093662, aerial mountain range,
+ * HD 1920×1080). Muted, looping, behind the ownership copy.
+ */
+export const HOME_OWNERSHIP_BG_MP4 = "/assets/home-ownership-bg.mp4";
 
 /** Title overlaid at the top of the homepage mountain ownership banner. */
 export const HOME_OWNERSHIP_BANNER_TITLE =
@@ -17,6 +22,11 @@ export type OwnershipModelSection = {
   /** Optional CTA shown in the popover (e.g. Tokenization → Learn More). */
   learnMoreHref?: string;
   learnMoreLabel?: string;
+  /**
+   * When true, Learn More opens the ownership contact form
+   * (marketing + admin) instead of navigating.
+   */
+  learnMoreContact?: boolean;
 };
 
 export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
@@ -27,6 +37,8 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
       "The way real estate was always acquired: you choose a property, make an offer, have that offer accepted and pay cash, or finance. Either way, title changes hands upon that last penny having been paid.",
     result:
       "The result: you have no ownership rights until you have paid in full, and full ownership rights when the transaction has closed.",
+    learnMoreLabel: "Learn More",
+    learnMoreContact: true,
   },
   {
     id: "splits",
@@ -35,6 +47,8 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
       'Similar to "Conventional", but includes a SPLITS period (Simple Project Lead & Input Tracking System). That avoids the bank, but requires money down and instalments until the transaction has closed.',
     result:
       "The result: you have full usage rights in accordance with a 'Lease-To-Own' Agreement drafted between lawyers.",
+    learnMoreLabel: "Learn More",
+    learnMoreContact: true,
   },
   {
     id: "fractionalization",
@@ -43,6 +57,8 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
       "Fractionalization enables several participants to share one over-arching physical interest, which is divided into clearly defined slices, each with its own claim on rights and proportional upside.",
     result:
       "The result: it fits partners and investor groups, who want shares in the collective without an all-or-nothing purchase.",
+    learnMoreLabel: "Learn More",
+    learnMoreContact: true,
   },
   {
     id: "tokenization",

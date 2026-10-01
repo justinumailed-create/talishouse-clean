@@ -12,6 +12,7 @@ describe("Tokenization Learn More", () => {
     );
     expect(tokenization?.learnMoreHref).toBe("/learn-more");
     expect(tokenization?.learnMoreLabel).toBe("Learn More");
+    expect(tokenization?.learnMoreContact).toBeUndefined();
 
     const showcase = readFileSync(
       join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
@@ -19,6 +20,34 @@ describe("Tokenization Learn More", () => {
     );
     expect(showcase).toContain("learnMoreHref");
     expect(showcase).toContain("Learn More");
+    expect(showcase).toContain("OwnershipLearnMoreForm");
+  });
+
+  it("opens a contact form Learn More for every non-Tokenization ownership button", () => {
+    const others = HOME_OWNERSHIP_SECTIONS.filter((s) => s.id !== "tokenization");
+    expect(others.length).toBeGreaterThan(0);
+    for (const section of others) {
+      expect(section.learnMoreContact).toBe(true);
+      expect(section.learnMoreLabel).toBe("Learn More");
+      expect(section.learnMoreHref).toBeUndefined();
+    }
+
+    const contact = readFileSync(
+      join(root, "lib/talispros/ownership-contact.ts"),
+      "utf8",
+    );
+    expect(contact).toContain("Just.inumailed@gmail.com");
+    expect(contact).toContain("remecom@mac.com");
+    expect(contact).not.toContain("kyptronix");
+
+    const api = readFileSync(
+      join(root, "app/api/ownership-contact/route.ts"),
+      "utf8",
+    );
+    expect(api).toContain("OWNERSHIP_CONTACT_RECIPIENTS");
+    expect(api).toContain("OWNERSHIP_CONTACT_SOURCE");
+    expect(contact).toContain("ownership_learn_more");
+    expect(api).toContain('from("leads")');
   });
 
   it("ships a 50/50 E-Book + Audio learn-more page", () => {

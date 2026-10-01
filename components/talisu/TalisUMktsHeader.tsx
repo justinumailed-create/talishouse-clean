@@ -16,7 +16,7 @@ import {
   TALISU_KB_OPEN_UNLOCK_EVENT,
 } from "@/lib/talisu/kb-gate";
 import { TALISU_KB_PATH } from "@/lib/talisu/kb-content";
-import TalisBrandFlip from "@/components/talisu/TalisBrandFlip";
+import TalisBrandMark from "@/components/talisu/TalisBrandMark";
 import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
 
 export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
@@ -201,6 +201,84 @@ export default function TalisUMktsHeader({
     });
   }
 
+  function renderNavLink(item: (typeof TALISU_MKTS_HEADER_NAV)[number]) {
+    if (claimedMapsite && item.label === "Register") {
+      return (
+        <div key="dashboard" className="relative">
+          <button
+            type="button"
+            onClick={handleDashboardClick}
+            aria-haspopup={dashboardUnlocked ? undefined : "dialog"}
+            aria-expanded={
+              dashboardUnlocked ? undefined : registerPromptOpen
+            }
+            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
+              registerPromptOpen
+                ? "bg-white/20 text-white"
+                : "text-white hover:bg-white/15"
+            }`}
+          >
+            {!dashboardUnlocked ? (
+              <LockIcon className="h-3.5 w-3.5 shrink-0 opacity-95" />
+            ) : null}
+            Dashboard
+          </button>
+          {registerPromptOpen && !dashboardUnlocked ? (
+            <div
+              ref={promptRef}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby={promptTitleId}
+              className="absolute right-0 z-50 mt-1.5 w-[16.5rem]! min-w-[16.5rem] max-w-none! overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] p-3 shadow-lg"
+            >
+              <p
+                id={promptTitleId}
+                className="text-[13px] font-semibold text-white"
+              >
+                Dashboard is locked
+              </p>
+              <p className="mt-1.5 text-[12px] leading-snug text-white/90">
+                Register to unlock your Mapsite™ Dashboard after payment
+                succeeds.
+              </p>
+              <a
+                href={registerHref}
+                target={
+                  registerHref.startsWith("http") ? "_blank" : undefined
+                }
+                rel={
+                  registerHref.startsWith("http")
+                    ? "noopener noreferrer"
+                    : undefined
+                }
+                className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-white px-3 py-2 text-[13px] font-semibold text-[#035bb8] transition hover:bg-white/95"
+                onClick={() => setRegisterPromptOpen(false)}
+              >
+                Register
+              </a>
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+
+    const active =
+      pathname === item.href || pathname.startsWith(`${item.href}/`);
+    return (
+      <Link
+        key={`${item.label}-${item.href}`}
+        href={item.href}
+        className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
+          active
+            ? "bg-white/20 text-white"
+            : "text-white hover:bg-white/15"
+        }`}
+      >
+        {item.label}
+      </Link>
+    );
+  }
+
   return (
     <header
       className="sticky top-0 z-40 shrink-0 text-white shadow-sm"
@@ -218,10 +296,17 @@ export default function TalisUMktsHeader({
               priority
             />
           </Link>
-          <TalisBrandFlip tagline={TALISU_MKTS_HEADER_TAGLINE} />
+          <TalisBrandMark tagline={TALISU_MKTS_HEADER_TAGLINE} />
         </div>
 
         <nav className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
+          {TALISU_MKTS_HEADER_NAV.map((item) => renderNavLink(item))}
+
+          <span
+            aria-hidden
+            className="mx-0.5 hidden h-5 w-px shrink-0 bg-white/45 sm:inline-block"
+          />
+
           <div ref={rootRef} className="relative">
             <button
               type="button"
@@ -318,84 +403,6 @@ export default function TalisUMktsHeader({
               </div>
             ) : null}
           </div>
-
-          {TALISU_MKTS_HEADER_NAV.map((item) => {
-            if (claimedMapsite && item.label === "Register") {
-              return (
-                <div key="dashboard" className="relative">
-                  <button
-                    type="button"
-                    onClick={handleDashboardClick}
-                    aria-haspopup={dashboardUnlocked ? undefined : "dialog"}
-                    aria-expanded={
-                      dashboardUnlocked ? undefined : registerPromptOpen
-                    }
-                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
-                      registerPromptOpen
-                        ? "bg-white/20 text-white"
-                        : "text-white hover:bg-white/15"
-                    }`}
-                  >
-                    {!dashboardUnlocked ? (
-                      <LockIcon className="h-3.5 w-3.5 shrink-0 opacity-95" />
-                    ) : null}
-                    Dashboard
-                  </button>
-                  {registerPromptOpen && !dashboardUnlocked ? (
-                    <div
-                      ref={promptRef}
-                      role="dialog"
-                      aria-modal="true"
-                      aria-labelledby={promptTitleId}
-                      className="absolute right-0 z-50 mt-1.5 w-[16.5rem]! min-w-[16.5rem] max-w-none! overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] p-3 shadow-lg"
-                    >
-                      <p
-                        id={promptTitleId}
-                        className="text-[13px] font-semibold text-white"
-                      >
-                        Dashboard is locked
-                      </p>
-                      <p className="mt-1.5 text-[12px] leading-snug text-white/90">
-                        Register to unlock your Mapsite™ Dashboard after payment
-                        succeeds.
-                      </p>
-                      <a
-                        href={registerHref}
-                        target={
-                          registerHref.startsWith("http") ? "_blank" : undefined
-                        }
-                        rel={
-                          registerHref.startsWith("http")
-                            ? "noopener noreferrer"
-                            : undefined
-                        }
-                        className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-white px-3 py-2 text-[13px] font-semibold text-[#035bb8] transition hover:bg-white/95"
-                        onClick={() => setRegisterPromptOpen(false)}
-                      >
-                        Register
-                      </a>
-                    </div>
-                  ) : null}
-                </div>
-              );
-            }
-
-            const active =
-              pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
-                  active
-                    ? "bg-white/20 text-white"
-                    : "text-white hover:bg-white/15"
-                }`}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
         </nav>
       </div>
     </header>

@@ -1,27 +1,25 @@
 import Image from "next/image";
 import {
-  HOME_OWNERSHIP_BG_GIF,
+  HOME_OWNERSHIP_BG_MP4,
   HOME_OWNERSHIP_BG_SRC,
 } from "@/lib/talispros/ownership-models";
 
 /**
  * Upper homepage mountain panel.
- * The looping GIF is the primary motion asset. prefers-reduced-motion
- * shows the static JPG instead (same pattern as theme-swapped images:
- * two layers, CSS media query, no preload so only the visible file loads).
+ * Royalty-free looping muted video is the primary motion asset.
+ * prefers-reduced-motion shows the static JPG instead.
  */
 export default function HomeMountainMotion() {
   return (
     <>
-      <Image
-        src={HOME_OWNERSHIP_BG_GIF}
-        alt=""
-        fill
-        unoptimized
-        loading="eager"
-        fetchPriority="high"
-        sizes="(min-width: 1024px) 60vw, 100vw"
-        className="object-cover object-center motion-reduce:hidden"
+      <video
+        className="absolute inset-0 h-full w-full object-cover object-center motion-reduce:hidden"
+        src={HOME_OWNERSHIP_BG_MP4}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
         aria-hidden
       />
       <Image

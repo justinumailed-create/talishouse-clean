@@ -7,6 +7,7 @@ import {
   HOME_OWNERSHIP_SECTIONS,
 } from "@/lib/talispros/ownership-models";
 import HomeMountainMotion from "@/components/talispros/HomeMountainMotion";
+import OwnershipLearnMoreForm from "@/components/talispros/OwnershipLearnMoreForm";
 
 /**
  * Homepage gate right column: looping mountain motion on the upper half with a
@@ -16,6 +17,7 @@ import HomeMountainMotion from "@/components/talispros/HomeMountainMotion";
  */
 export default function TalisprosHomeShowcase() {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [contactTopic, setContactTopic] = useState<string | null>(null);
   const rootRef = useRef<HTMLElement>(null);
   const baseId = useId();
 
@@ -102,7 +104,18 @@ export default function TalisprosHomeShowcase() {
             <p className="mt-2.5 text-[13.5px] leading-relaxed text-neutral-700 sm:text-[14.5px]">
               {openSection.result}
             </p>
-            {openSection.learnMoreHref ? (
+            {openSection.learnMoreContact ? (
+              <p className="mt-3.5">
+                <button
+                  type="button"
+                  onClick={() => setContactTopic(openSection.title)}
+                  className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
+                >
+                  {openSection.learnMoreLabel ?? "Learn More"}
+                  <span aria-hidden>→</span>
+                </button>
+              </p>
+            ) : openSection.learnMoreHref ? (
               <p className="mt-3.5">
                 <Link
                   href={openSection.learnMoreHref}
@@ -161,6 +174,12 @@ export default function TalisprosHomeShowcase() {
           })}
         </div>
       </div>
+
+      <OwnershipLearnMoreForm
+        topic={contactTopic || "Conventional"}
+        open={Boolean(contactTopic)}
+        onClose={() => setContactTopic(null)}
+      />
     </aside>
   );
 }

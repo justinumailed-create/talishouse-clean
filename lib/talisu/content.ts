@@ -62,13 +62,48 @@ export const TALISU_MARKETS_COPY = {
 
 export const TALISU_AUDIO = {
   title: "Audio",
+  /** Short ~1 min welcome clip — autoplays when /talisu/au opens. */
+  autoplaySrc: "/talisu/Aisha.mp3",
+  autoplayTitle: "Aisha — Welcome Summary",
+  autoplaySubtitle: "About one minute — plays when you open Audio.",
   /** Local NotebookLM-style dialogue (Aisha + Webster) on digital property fractionalization. */
   aishaWebsterSrc: "/talisu/Aisha-Webster.mp3",
   aishaWebsterSubtitle:
     "Digital Property Fractionalization — with Aisha & Webster",
   aishaWebsterVtt: "/talisu/Aisha-Webster.vtt",
-  playHint: "Press PLAY, or scroll to the bottom to print and read.",
+  playHint: "A short welcome plays first. Other clips list and play like Knowledge Base Audios.",
 } as const;
+
+/** Audio library cards — same presentation pattern as KB Audios. */
+export type TalisUAudioLibraryItem = {
+  id: string;
+  title: string;
+  description: string;
+  src: string;
+  kind: string;
+  captionsSrc?: string;
+  autoplay?: boolean;
+};
+
+export const TALISU_AUDIO_LIBRARY: readonly TalisUAudioLibraryItem[] = [
+  {
+    id: "aisha-summary",
+    title: "Aisha — Welcome Summary",
+    description: "Short (~1 minute) welcome audio from the TalisU™ home experience.",
+    src: "/talisu/Aisha.mp3",
+    kind: "Audio",
+    autoplay: true,
+  },
+  {
+    id: "aisha-webster",
+    title: "Digital Property Fractionalization — Aisha & Webster",
+    description:
+      "NotebookLM-style dialogue on digital property fractionalization. Transcript below.",
+    src: "/talisu/Aisha-Webster.mp3",
+    kind: "Audio",
+    captionsSrc: "/talisu/Aisha-Webster.vtt",
+  },
+] as const;
 
 export const TALISU_REGISTER = {
   title: "Register Account",

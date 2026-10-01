@@ -6,38 +6,25 @@ import { usePathname } from 'next/navigation';
 import { supabase } from "@/lib/supabase";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
+import {
+  TALISBOT_GREETING,
+  TALISBOT_INTEREST_OPTIONS,
+  TALISBOT_KNOWLEDGE,
+  TALISBOT_SYSTEM_ROLE,
+} from "@/lib/talispros/talisbot-knowledge";
 
 interface LeadData {
-  purpose: string;
-  size: string;
-  productType: string;
-  location: string;
+  interest: string;
+  topicId: string;
   name: string;
   phone: string;
   email: string;
 }
 
-const STEP_OPTIONS = {
-  purpose: [
-    { value: 'personal', label: 'Personal Home / Cottage' },
-    { value: 'rental', label: 'Short / Long Term Rental' },
-    { value: 'commercial', label: 'Office Space / Commercial Use' },
-  ],
-  size: [
-    { value: 'under_400', label: '399 sq. ft. or less' },
-    { value: '401_800', label: '400 to 800 sq. ft.' },
-    { value: 'over_800', label: '801+ sq. ft.' },
-  ],
-  productType: [
-    { value: 'glasshouse', label: 'Glasshouse' },
-    { value: 'talishouse_recreational', label: 'Talishouse (Recreational)' },
-    { value: 'talishouse_residential', label: 'Talishouse (Residential)' },
-  ]
-};
-
 const OPTION_CLASS = "w-full text-left px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-sm hover:border-black hover:bg-black hover:text-white transition-all duration-200 font-medium";
 
 type TalisBotPosition = "left" | "right";
+type BotStep = 'greeting' | 'knowledge' | 'topic' | 'interest' | 'contact' | 'complete';
 
 export default function TalisBotChat({
   position = "right",
@@ -46,13 +33,12 @@ export default function TalisBotChat({
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<'greeting' | 'purpose' | 'size' | 'productType' | 'location' | 'contact' | 'complete'>('greeting');
+  const [step, setStep] = useState<BotStep>('greeting');
   const [loading, setLoading] = useState(false);
+  const [activeKnowledgeId, setActiveKnowledgeId] = useState<string | null>(null);
   const [leadData, setLeadData] = useState<LeadData>({
-    purpose: '',
-    size: '',
-    productType: '',
-    location: '',
+    interest: '',
+    topicId: '',
     name: '',
     phone: '',
     email: '',
@@ -64,7 +50,7 @@ export default function TalisBotChat({
     if (contentRef.current) {
       contentRef.current.scrollTop = contentRef.current.scrollHeight;
     }
-  }, [step]);
+  }, [step, activeKnowledgeId]);
 
   const generateFastCode = () => {
     const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -73,7 +59,7 @@ export default function TalisBotChat({
 
   const handleSubmit = async () => {
     if (!leadData.name || !leadData.phone || !leadData.email) return;
-    
+
     setLoading(true);
     const fastCode = generateFastCode();
 
@@ -81,26 +67,21 @@ export default function TalisBotChat({
       name: leadData.name,
       email: leadData.email,
       phone: leadData.phone,
-      location: leadData.location,
+      location: leadData.interest || "Talispros™ inquiry",
       source: "talisbot",
       status: "new",
       deal_status: "pending",
       fast_code: fastCode,
-      notes: `Purpose: ${leadData.purpose}, Size: ${leadData.size}, Product Type: ${leadData.productType}`,
+      notes: `Talispros™ process interest: ${leadData.interest}. Topic: ${leadData.topicId || "n/a"}. Role: ${TALISBOT_SYSTEM_ROLE}`,
       created_at: new Date().toISOString()
     };
 
     try {
       const { error } = await supabase.from('leads').insert([payload]);
       if (error) throw error;
-      
-      // Optional: trigger CRM/SMS via edge function or webhook
-      // await fetch('/api/talisbot/notify', { method: 'POST', body: JSON.stringify(payload) });
-
       setStep('complete');
     } catch (err) {
       console.error("Talisbot submission error:", err);
-      // Fallback: show completion anyway but log error
       setStep('complete');
     } finally {
       setLoading(false);
@@ -109,16 +90,17 @@ export default function TalisBotChat({
 
   const reset = () => {
     setStep('greeting');
+    setActiveKnowledgeId(null);
     setLeadData({
-      purpose: '',
-      size: '',
-      productType: '',
-      location: '',
+      interest: '',
+      topicId: '',
       name: '',
       phone: '',
       email: '',
     });
   };
+
+  const activeKnowledge = TALISBOT_KNOWLEDGE.find((k) => k.id === activeKnowledgeId);
 
   const renderContent = () => {
     switch (step) {
@@ -130,108 +112,117 @@ export default function TalisBotChat({
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">TalisBOT</h3>
             <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-              Configure your project in under 60 seconds
+              {TALISBOT_GREETING}
             </p>
-            <button 
-              onClick={() => setStep('purpose')}
-              className="w-full bg-black text-white py-4 rounded-2xl text-sm font-semibold hover:bg-gray-800 transition shadow-lg shadow-black/5"
-            >
-              Get Started
-            </button>
-          </div>
-        );
-
-      case 'purpose':
-        return (
-          <div className="space-y-4 p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <h4 className="text-[15px] font-semibold text-gray-900 px-1">What is the primary purpose?</h4>
-            <div className="grid gap-2">
-              {STEP_OPTIONS.purpose.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => {
-                    setLeadData({ ...leadData, purpose: opt.label });
-                    setStep('size');
-                  }}
-                  className={OPTION_CLASS}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-
-      case 'size':
-        return (
-          <div className="space-y-4 p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <h4 className="text-[15px] font-semibold text-gray-900 px-1">Choose your preferred size</h4>
-            <div className="grid gap-2">
-              {STEP_OPTIONS.size.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => {
-                    setLeadData({ ...leadData, size: opt.label });
-                    setStep('productType');
-                  }}
-                  className={OPTION_CLASS}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-
-      case 'productType':
-        return (
-          <div className="space-y-4 p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <h4 className="text-[15px] font-semibold text-gray-900 px-1">Select Product Type</h4>
-            <div className="grid gap-2">
-              {STEP_OPTIONS.productType.map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => {
-                    setLeadData({ ...leadData, productType: opt.label });
-                    setStep('location');
-                  }}
-                  className={OPTION_CLASS}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-
-      case 'location':
-        return (
-          <div className="space-y-4 p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <h4 className="text-[15px] font-semibold text-gray-900 px-1">Where is your project located?</h4>
-            <div className="space-y-4">
-              <input
-                type="text"
-                autoFocus
-                placeholder="Enter a full street address..."
-                className="w-full px-4 py-4 rounded-xl border border-gray-100 bg-gray-50 text-sm focus:outline-none focus:border-black focus:ring-0 transition"
-                value={leadData.location}
-                onChange={(e) => setLeadData({ ...leadData, location: e.target.value })}
-              />
+            <div className="flex w-full flex-col gap-2">
               <button
-                disabled={!leadData.location.trim()}
-                onClick={() => setStep('contact')}
-                className="w-full bg-black text-white py-4 rounded-xl text-sm font-semibold hover:bg-gray-800 transition disabled:opacity-50"
+                onClick={() => setStep('knowledge')}
+                className="w-full bg-black text-white py-4 rounded-2xl text-sm font-semibold hover:bg-gray-800 transition shadow-lg shadow-black/5"
               >
-                Continue
+                Browse Talispros™ knowledge
+              </button>
+              <button
+                onClick={() => setStep('interest')}
+                className="w-full border border-gray-200 bg-white text-gray-900 py-3.5 rounded-2xl text-sm font-semibold hover:bg-gray-50 transition"
+              >
+                Get help / leave contact
               </button>
             </div>
           </div>
         );
 
+      case 'knowledge':
+        return (
+          <div className="space-y-4 p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <h4 className="text-[15px] font-semibold text-gray-900 px-1">Talispros™ processes</h4>
+            {activeKnowledge ? (
+              <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 text-left">
+                <h5 className="text-sm font-semibold text-gray-900">{activeKnowledge.title}</h5>
+                <p className="mt-2 text-sm leading-relaxed text-gray-600">{activeKnowledge.body}</p>
+                <button
+                  type="button"
+                  className="mt-3 text-sm font-medium text-[#046BD9]"
+                  onClick={() => setActiveKnowledgeId(null)}
+                >
+                  ← All topics
+                </button>
+                <button
+                  type="button"
+                  className={`${OPTION_CLASS} mt-3`}
+                  onClick={() => {
+                    setLeadData({
+                      ...leadData,
+                      topicId: activeKnowledge.id,
+                      interest: activeKnowledge.title,
+                    });
+                    setStep('contact');
+                  }}
+                >
+                  Contact about this
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                {TALISBOT_KNOWLEDGE.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveKnowledgeId(item.id)}
+                    className={OPTION_CLASS}
+                  >
+                    {item.title}
+                  </button>
+                ))}
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={() => setStep('greeting')}
+              className="text-sm font-medium text-gray-400 hover:text-black transition px-1"
+            >
+              ← Back
+            </button>
+          </div>
+        );
+
+      case 'interest':
+        return (
+          <div className="space-y-4 p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <h4 className="text-[15px] font-semibold text-gray-900 px-1">What do you need help with?</h4>
+            <div className="grid gap-2">
+              {TALISBOT_INTEREST_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    setLeadData({ ...leadData, interest: opt.label, topicId: opt.value });
+                    setStep('contact');
+                  }}
+                  className={OPTION_CLASS}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setStep('greeting')}
+              className="text-sm font-medium text-gray-400 hover:text-black transition px-1"
+            >
+              ← Back
+            </button>
+          </div>
+        );
+
+      case 'topic':
+        return null;
+
       case 'contact':
         return (
           <div className="space-y-4 p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <h4 className="text-[15px] font-semibold text-gray-900 px-1">Your contact details</h4>
+            {leadData.interest ? (
+              <p className="text-xs text-neutral-500 px-1">Re: {leadData.interest}</p>
+            ) : null}
             <div className="space-y-3">
               <input
                 type="text"
@@ -259,7 +250,7 @@ export default function TalisBotChat({
                 onClick={handleSubmit}
                 className="w-full bg-black text-white py-4 rounded-xl text-sm font-semibold hover:bg-gray-800 transition disabled:opacity-50 mt-2"
               >
-                {loading ? 'Submitting...' : 'Complete Configuration'}
+                {loading ? 'Submitting...' : 'Send to Talispros™'}
               </button>
             </div>
           </div>
@@ -273,15 +264,15 @@ export default function TalisBotChat({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Success!</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Got it!</h3>
             <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-              Your configuration is saved. A Talis advisor will contact you shortly with your personalized quote.
+              A Talispros™ advisor will follow up about your Mapsite™ / process question.
             </p>
-            <button 
+            <button
               onClick={reset}
               className="text-sm font-medium text-gray-400 hover:text-black transition"
             >
-              Start New Configuration
+              Ask something else
             </button>
           </div>
         );
@@ -299,6 +290,8 @@ export default function TalisBotChat({
 
   return (
     <div className={`fixed ${cornerClass} z-[1000] font-sans ${STOREFRONT_CHROME_CLASS}`}>
+      {/* System role kept for future LLM wiring / admin analytics */}
+      <span className="sr-only">{TALISBOT_SYSTEM_ROLE}</span>
       {!open ? (
         <div className="bg-white/80 backdrop-blur-md p-1.5 rounded-[22px] shadow-2xl border border-white/50">
           <button
@@ -310,8 +303,7 @@ export default function TalisBotChat({
         </div>
       ) : (
         <div className={`w-[340px] max-h-[580px] bg-white rounded-[32px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-300 ${panelOriginClass}`}>
-          
-          {/* Header */}
+
           <div className="px-6 pt-6 pb-4 flex justify-between items-center bg-white">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-black rounded-xl flex items-center justify-center">
@@ -321,11 +313,11 @@ export default function TalisBotChat({
                 <span className="text-[13px] font-bold text-gray-900 leading-none">TalisBOT</span>
                 <span className="text-[10px] text-green-500 font-medium mt-1 flex items-center gap-1">
                   <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span>
-                  Active Now
+                  Talispros™ processes
                 </span>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setOpen(false)}
               className="p-2 text-gray-400 hover:bg-gray-50 rounded-xl transition"
             >
@@ -335,31 +327,12 @@ export default function TalisBotChat({
             </button>
           </div>
 
-          {/* Body */}
-          <div 
+          <div
             ref={contentRef}
             className="flex-1 overflow-y-auto px-6 pb-8"
           >
             {renderContent()}
           </div>
-
-          {/* Progress Indicator */}
-          {step !== 'greeting' && step !== 'complete' && (
-            <div className="px-6 py-4 bg-gray-50/50 flex gap-1.5">
-              {['purpose', 'size', 'productType', 'location', 'contact'].map((s, i) => {
-                const steps = ['purpose', 'size', 'productType', 'location', 'contact'];
-                const currentIndex = steps.indexOf(step);
-                return (
-                  <div 
-                    key={s} 
-                    className={`h-1 flex-1 rounded-full transition-all duration-500 ${
-                      i <= currentIndex ? 'bg-black' : 'bg-gray-200'
-                    }`}
-                  />
-                );
-              })}
-            </div>
-          )}
         </div>
       )}
     </div>

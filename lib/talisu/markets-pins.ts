@@ -78,15 +78,24 @@ export const TALISU_MKTS_PMC_BULLETS = [
 export const TALISU_MKTS_HEADER_TAGLINE =
   "Industry Adjacent Markets…";
 
+/**
+ * Primary top-bar links (home + claimed Mapsites™ blue header).
+ * Shelf / admin places use real working routes that already exist.
+ */
 export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/mkts", label: "Markets" },
+  { href: "/catalogue/bookshelf", label: "Common Shelf" },
+  { href: "/talisbooks", label: "All Books" },
+  { href: "/talisbooks/library", label: "FAST Shelves" },
+  { href: "/catalogue/bookshelf/create", label: "Create Demo" },
+  { href: "/admin/talisbooks/bookshelves", label: "Admin Places" },
   { href: "/talisu/reg", label: "Register" },
 ] as const;
 
-/** TalisU™ header dropdown (Knowledge Base / Audio Files / Video). */
+/** TalisU™ header dropdown (Knowledge Base / Audio / Video). */
 export const TALISU_MKTS_HEADER_DROPDOWN = [
   { href: "/talisu/kb", label: "Knowledge Base" },
-  { href: "/talisu/au", label: "Audio Files" },
+  { href: "/talisu/au", label: "Audio" },
   { href: "/talisu/video", label: "Video" },
 ] as const;
 

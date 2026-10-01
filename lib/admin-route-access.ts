@@ -20,6 +20,7 @@ const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | nu
   { prefix: "/admin/talisbot", scope: "full-console" },
   { prefix: "/admin/leads-simulation", scope: "full-console" },
   { prefix: "/admin/leads", scope: "full-console" },
+  { prefix: "/admin/contact-from-leads", scope: "full-console" },
   { prefix: "/admin/deals", scope: "full-console" },
   { prefix: "/admin/users", scope: "full-console" },
   { prefix: "/admin/applications", scope: "full-console" },

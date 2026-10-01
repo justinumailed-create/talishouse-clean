@@ -6,10 +6,9 @@ import { TALISU_MKTS_HEADER_NAV } from "../lib/talisu/markets-pins";
 
 describe("Claimed FAST Mapsite™ header Dashboard nav", () => {
   it("keeps Register in the shared nav config for non-claimed chrome", () => {
-    expect(TALISU_MKTS_HEADER_NAV.map((i) => i.label)).toEqual([
-      "Markets",
-      "Register",
-    ]);
+    expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Markets")).toBe(true);
+    expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Register")).toBe(true);
+    expect(TALISU_MKTS_HEADER_NAV.at(-1)?.label).toBe("Register");
     expect(TALISU_REGISTER.samcartUrl).toContain(
       "talispros.mysamcart.com/checkout/register",
     );

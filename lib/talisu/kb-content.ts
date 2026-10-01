@@ -36,8 +36,8 @@ export const TALISU_KB_DEFAULT_AUDIOS: readonly TalisUKbItem[] = [
   {
     id: "aisha-summary",
     title: "Aisha — Welcome Summary",
-    description: "Short welcome audio from the TalisU™ home experience.",
-    href: "/talisu",
+    description: "Short (~1 minute) welcome audio from the TalisU™ home experience.",
+    href: "/talisu/au",
     kind: "Audio",
   },
 ] as const;

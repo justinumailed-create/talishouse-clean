@@ -7,10 +7,10 @@ import {
 } from "../lib/talisu/markets-pins";
 
 describe("TalisU blue header dropdown", () => {
-  it("exposes Knowledge Base, Audio Files, and Video entries", () => {
+  it("exposes Knowledge Base, Audio, and Video entries", () => {
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label)).toEqual([
       "Knowledge Base",
-      "Audio Files",
+      "Audio",
       "Video",
     ]);
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.href)).toEqual([
@@ -20,15 +20,25 @@ describe("TalisU blue header dropdown", () => {
     ]);
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.label)).toEqual([
       "Markets",
+      "Common Shelf",
+      "All Books",
+      "FAST Shelves",
+      "Create Demo",
+      "Admin Places",
       "Register",
     ]);
-    expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "E-Book")).toBe(
-      false,
-    );
-    expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Audio")).toBe(false);
+    expect(TALISU_MKTS_HEADER_NAV.map((i) => i.href)).toEqual([
+      "/talisu/mkts",
+      "/catalogue/bookshelf",
+      "/talisbooks",
+      "/talisbooks/library",
+      "/catalogue/bookshelf/create",
+      "/admin/talisbooks/bookshelves",
+      "/talisu/reg",
+    ]);
   });
 
-  it("wires the blue header to render a TalisU dropdown menu", () => {
+  it("wires the blue header to render a TalisU dropdown as the last nav item", () => {
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
@@ -37,6 +47,15 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain('aria-haspopup="menu"');
     expect(header).toMatch(/\n\s*TalisU\n/);
     expect(header).toContain('role="menu"');
+    // TalisU trigger is rendered after primary nav items + vertical separator
+    expect(header).toContain("TALISU_MKTS_HEADER_NAV.map");
+    expect(header).toContain("bg-white/45");
+    const navRenderIdx = header.indexOf("{TALISU_MKTS_HEADER_NAV.map((item) => renderNavLink(item))}");
+    const separatorIdx = header.indexOf('bg-white/45');
+    const menuButtonIdx = header.indexOf('aria-haspopup="menu"');
+    expect(navRenderIdx).toBeGreaterThan(-1);
+    expect(separatorIdx).toBeGreaterThan(navRenderIdx);
+    expect(menuButtonIdx).toBeGreaterThan(separatorIdx);
   });
 
   it("opens Knowledge Base unlock as a navbar drop-pop (not a full page)", () => {
@@ -50,8 +69,6 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain("TALISU_KB_OPEN_UNLOCK_EVENT");
     expect(header).not.toContain("TALISU_KB_UNLOCK_QUERY");
     expect(header).toContain("bg-white p-5");
-    // Global `* { max-width:100% }` would otherwise squeeze the absolute card
-    // to the TalisU trigger width (~86px) — cancel it and keep a PayPal-wide card.
     expect(header).toContain("max-w-none!");
     expect(header).toContain("min-w-[280px]");
     expect(header).toContain("w-80!");
