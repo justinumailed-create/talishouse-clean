@@ -17,6 +17,8 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     productCatalogue ||
     pathname === "/" ||
     pathname === "/start" ||
+    pathname === "/learn-more" ||
+    pathname.startsWith("/learn-more/") ||
     pathname.startsWith("/fast-code") ||
     pathname.startsWith("/partner-access") ||
     pathname.startsWith("/talispros") ||

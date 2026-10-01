@@ -36,4 +36,16 @@ describe("Tokenization Learn More", () => {
     expect(page).toContain("Talisbooks™");
     expect(page).toContain("Talispros™");
   });
+
+  it("strips Talishouse storefront chrome (navbar/cart/Talisbot) like /talisu embed", () => {
+    const shell = readFileSync(join(root, "components/RootShell.tsx"), "utf8");
+    expect(shell).toContain('pathname === "/learn-more"');
+    expect(shell).toContain('pathname.startsWith("/learn-more/")');
+    const layout = readFileSync(
+      join(root, "app/learn-more/layout.tsx"),
+      "utf8",
+    );
+    expect(layout).toContain("TalisUChrome");
+  });
+
 });
