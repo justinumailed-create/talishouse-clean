@@ -1,7 +1,7 @@
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 import { BUILD_MAPSITE_PREVIEW_LOCATION } from "@/components/build-mapsite/home-pin-types";
 
-/** Full-bleed chrome paths: restored homepage + /start gate. */
+/** Full-bleed chrome paths: homepage gate (`/`) + former homepage (`/start`). */
 export function isTalisprosStartPath(pathname: string | null | undefined) {
   return (
     pathname === "/" ||
@@ -74,7 +74,7 @@ export const TALISPROS_START_SEGMENTS = [
   },
 ] as const;
 
-/** System Demo destination from the /start gate. */
+/** System Demo destination from the homepage gate. */
 export const TALISPROS_HOME_SYSTEM_DEMO_HREF = "/talisu/mkts";
 
 export type TalisprosHomeDemoPrivacyMask = {
@@ -100,7 +100,7 @@ export type TalisprosHomeDemoStep = {
 };
 
 /**
- * Compact /start demo trio (not a tall carousel).
+ * Compact homepage demo trio (not a tall carousel).
  * Mapsite™ asset is privacy-scrubbed; CSS masks hide residual address / FAST Code.
  * Talisbooks™ slot uses a filled Demo Bookshelf composite (many books).
  */

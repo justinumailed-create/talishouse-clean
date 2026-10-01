@@ -1,8 +1,8 @@
 /**
- * SamCart checkout return → /start
+ * SamCart checkout return → / (homepage gate)
  *
  * Configure the SamCart product Order Redirect (Custom URL) to:
- *   https://www.talispros.com/start?orderid=##orderid##&email=##email##
+ *   https://www.talispros.com/?orderid=##orderid##&email=##email##
  *
  * Optional custom fields (if wired in SamCart):
  *   &fastCode=##custom_fast_code##   (or fast_code / code)
@@ -21,11 +21,11 @@
  * Prefer completing the SamCart Notify URL / webhook for authoritative paid state.
  */
 
-export const SAMCART_SUCCESS_RETURN_PATH = "/start";
+export const SAMCART_SUCCESS_RETURN_PATH = "/";
 
 /** Documented Custom URL for SamCart product Order Redirect settings. */
 export const SAMCART_SUCCESS_RETURN_URL =
-  "https://www.talispros.com/start?orderid=##orderid##&email=##email##";
+  "https://www.talispros.com/?orderid=##orderid##&email=##email##";
 
 export const SAMCART_RETURN_COOKIE = "talispros_samcart_return";
 export const SAMCART_RETURN_COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
@@ -45,7 +45,7 @@ function firstString(
 }
 
 /**
- * Detect SamCart (and common aliases) success query params on /start.
+ * Detect SamCart (and common aliases) success query params on the homepage gate (`/`).
  * Presence of orderid (or order_id) is the primary success signal SamCart
  * substitutes via ##orderid## on Custom URL redirects.
  */

@@ -7,22 +7,22 @@ import {
   toAbsoluteHttpsOgUrl,
 } from "../lib/talispros/mapsite-og-image";
 
-describe("/start Open Graph image", () => {
+describe("homepage Open Graph image", () => {
   it("points openGraph + twitter at compressed start-og.png, not the brand logo", () => {
-    const page = readFileSync(resolve("app/start/page.tsx"), "utf8");
+    const page = readFileSync(resolve("app/page.tsx"), "utf8");
     expect(page).toMatch(/toAbsoluteHttpsOgUrl\("\/assets\/start-og\.png(\?v=\d+)?"\)/);
     expect(page).toContain("width: 1200");
     expect(page).toContain("height: 630");
     expect(page).not.toContain("/logo.png");
     expect(page).not.toContain("/seo/talispros-og");
 
-    const imageUrl = toAbsoluteHttpsOgUrl("/assets/start-og.png?v=2");
-    expect(imageUrl).toBe("https://www.talispros.com/assets/start-og.png?v=2");
+    const imageUrl = toAbsoluteHttpsOgUrl("/assets/start-og.png?v=4");
+    expect(imageUrl).toBe("https://www.talispros.com/assets/start-og.png?v=4");
 
     const meta = createMetadata({
       title: "Talispros™",
       description: "Claim your market. Open your Mapsite™.",
-      path: "/start",
+      path: "/",
       image: { url: imageUrl, width: 1200, height: 630, alt: "Talispros™" },
     });
     expect(meta.openGraph?.images).toEqual([

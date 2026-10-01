@@ -131,7 +131,7 @@ async function resolveMapSiteFromReturn(
 }
 
 /**
- * Handle SamCart Custom URL return on /start.
+ * Handle SamCart Custom URL return on the homepage gate (`/`).
  * Sets return cookie + best-effort paid session / payment row.
  * Does NOT cryptographically verify the charge (webhook still required).
  */

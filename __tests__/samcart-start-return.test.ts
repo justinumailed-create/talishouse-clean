@@ -15,11 +15,11 @@ import {
 
 const root = process.cwd();
 
-describe("SamCart → /start return", () => {
+describe("SamCart → homepage gate return", () => {
   it("documents the SamCart Custom URL success redirect", () => {
-    expect(SAMCART_SUCCESS_RETURN_PATH).toBe("/start");
+    expect(SAMCART_SUCCESS_RETURN_PATH).toBe("/");
     expect(SAMCART_SUCCESS_RETURN_URL).toContain(
-      "https://www.talispros.com/start?orderid=##orderid##&email=##email##",
+      "https://www.talispros.com/?orderid=##orderid##&email=##email##",
     );
   });
 
@@ -41,23 +41,26 @@ describe("SamCart → /start return", () => {
     expect(samcartExternalOrderKey("samcart:123")).toBe("samcart:123");
   });
 
-  it("wires /start gate + return banner (not homepage)", () => {
+  it("wires homepage gate + return banner (former homepage at /start)", () => {
+    const homePage = readFileSync(join(root, "app/page.tsx"), "utf8");
     const startPage = readFileSync(join(root, "app/start/page.tsx"), "utf8");
     const gate = readFileSync(
       join(root, "components/talispros/TalisprosGatePage.tsx"),
       "utf8",
     );
-    const home = readFileSync(
+    const formerHome = readFileSync(
       join(root, "components/talispros/TalisprosStartPage.tsx"),
       "utf8",
     );
-    expect(startPage).toContain("TalisprosGatePage");
+    expect(homePage).toContain("TalisprosGatePage");
+    expect(startPage).toContain("TalisprosStartPage");
+    expect(startPage).toContain("TalisprosSamCartPathRedirect");
     expect(gate).toContain("TalisprosHomeGate");
     expect(gate).toContain("TalisprosHomeShowcase");
     expect(gate).toContain("TalisprosSamCartReturnBanner");
-    expect(home).toContain("TalisprosHomeMapPreview");
-    expect(home).toContain("TalisprosStartSidebar");
-    expect(home).not.toContain("TalisprosHomeGate");
+    expect(formerHome).toContain("TalisprosHomeMapPreview");
+    expect(formerHome).toContain("TalisprosStartSidebar");
+    expect(formerHome).not.toContain("TalisprosHomeGate");
   });
 });
 

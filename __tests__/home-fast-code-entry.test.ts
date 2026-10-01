@@ -7,6 +7,11 @@ import {
   mapsiteBackFromScheduleHref,
 } from "@/lib/talispros/mapsite-state";
 import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
+import {
+  HOME_OWNERSHIP_BG_SRC,
+  HOME_OWNERSHIP_SECTIONS,
+} from "@/lib/talispros/ownership-models";
+import { TALISU_MKTS_HEADER_BLUE } from "@/lib/talisu/markets-pins";
 
 const root = process.cwd();
 
@@ -34,8 +39,8 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     ).toBe("/talispros/mapsite/brokers/rm22");
   });
 
-  it("wires /start Login gate (not homepage) to openClaimedMapSiteFromHomeFastCode", () => {
-    const homePage = readFileSync(
+  it("wires homepage Login gate (not /start) to openClaimedMapSiteFromHomeFastCode", () => {
+    const formerHome = readFileSync(
       join(root, "components/talispros/TalisprosStartPage.tsx"),
       "utf8",
     );
@@ -55,14 +60,17 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
       join(root, "app/talispros/mapsites/actions.ts"),
       "utf8",
     );
+    const homeRoute = readFileSync(join(root, "app/page.tsx"), "utf8");
     const startRoute = readFileSync(join(root, "app/start/page.tsx"), "utf8");
 
-    expect(homePage).toContain("TalisprosHomeMapPreview");
-    expect(homePage).toContain("TalisprosStartSidebar");
-    expect(homePage).not.toContain("TalisprosHomeGate");
-    expect(startRoute).toContain("TalisprosGatePage");
+    expect(formerHome).toContain("TalisprosHomeMapPreview");
+    expect(formerHome).toContain("TalisprosStartSidebar");
+    expect(formerHome).not.toContain("TalisprosHomeGate");
+    expect(homeRoute).toContain("TalisprosGatePage");
+    expect(startRoute).toContain("TalisprosStartPage");
     expect(gatePage).toContain("TalisprosHomeGate");
     expect(gatePage).toContain("TalisprosHomeShowcase");
+    expect(gatePage).toContain("TalisUMktsHeader");
     expect(gate).toContain("TalisprosHomeFastCodeEntry");
     expect(gate).toContain("Claim your market. Open your Account*");
     expect(gate).toContain("System Demo");
@@ -88,7 +96,7 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/talisu/mkts");
   });
 
-  it("keeps /start right column as map-only full-height preview", () => {
+  it("uses ownership models over photo on homepage right rail (not Markets map)", () => {
     const gatePage = readFileSync(
       join(root, "components/talispros/TalisprosGatePage.tsx"),
       "utf8",
@@ -97,35 +105,33 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
       join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
       "utf8",
     );
-    const startMap = readFileSync(
-      join(root, "components/talispros/TalisprosStartMktsMap.tsx"),
-      "utf8",
-    );
-    const mktsApp = readFileSync(
-      join(root, "components/talisu/TalisUMarketsMapApp.tsx"),
-      "utf8",
-    );
 
     expect(gatePage).toContain("TalisprosHomeGate");
     expect(gatePage).toContain("TalisprosSamCartReturnBanner");
     expect(gatePage).toContain("TalisprosHomeShowcase");
+    expect(gatePage).toContain("TalisUMktsHeader");
     expect(gatePage).toContain("lg:grid-cols-");
     expect(gatePage).toContain("min-h-dvh");
-    expect(showcase).toContain("TalisprosStartMktsMap");
-    expect(showcase).toContain("lg:h-full");
+    expect(showcase).toContain("HOME_OWNERSHIP_SECTIONS");
+    expect(showcase).toContain("HOME_OWNERSHIP_BG_SRC");
+    expect(showcase).not.toContain("TalisprosStartMktsMap");
     expect(showcase).not.toContain("/assets/home-demo/01-talismaps-mkts.jpg");
-    expect(showcase).not.toContain("System demo");
-    expect(showcase).not.toContain("figcaption");
-    expect(showcase).not.toContain("<Link");
-    expect(showcase).not.toContain("onClick");
-    // Same pin source as live mkts; chrome-free; non-interactive.
-    expect(startMap).toContain("talisuMktsToEnginePins");
-    expect(startMap).toContain("TALISU_MKTS_PINS");
-    expect(startMap).toContain("interactive={false}");
-    expect(startMap).toContain("TALISU_MKTS_START_FIT_PADDING");
-    expect(startMap).not.toContain("TalisUMarketsSidebar");
-    expect(startMap).not.toContain("TalisUMarketsPinCard");
-    expect(mktsApp).toContain("talisuMktsToEnginePins");
+    expect(HOME_OWNERSHIP_BG_SRC).toBe("/assets/home-ownership-bg.jpg");
+    expect(HOME_OWNERSHIP_SECTIONS).toHaveLength(4);
+    expect(HOME_OWNERSHIP_SECTIONS.map((s) => s.title)).toEqual([
+      "Conventional",
+      "SPLITS",
+      "Fractionalization",
+      "Tokenization",
+    ]);
+    expect(HOME_OWNERSHIP_SECTIONS[0].body).toContain(
+      "title changes hands upon that last penny having been paid.",
+    );
+    expect(HOME_OWNERSHIP_SECTIONS[1].body).toContain("instalments");
+    expect(HOME_OWNERSHIP_SECTIONS[1].result).toContain("'Lease-To-Own'");
+    expect(HOME_OWNERSHIP_SECTIONS[2].body).toContain("over-arching");
+    expect(HOME_OWNERSHIP_SECTIONS[3].body).toContain("interest—whole or fractional");
+    expect(TALISU_MKTS_HEADER_BLUE).toBe("#046BD9");
   });
 
   it("shows Logout on paid owner claimed Mapsite™ chrome", () => {

@@ -9,7 +9,7 @@ import {
 import { isSamCartPaymentReturn, parseSamCartReturnParams } from "@/lib/talispros/samcart-return";
 
 /**
- * On /start after SamCart Custom URL redirect: detect orderid/email,
+ * On `/` after SamCart Custom URL redirect: detect orderid/email,
  * set paid/session state (unverified without webhook), and surface status.
  */
 export default function TalisprosSamCartReturnBanner() {
@@ -34,7 +34,7 @@ export default function TalisprosSamCartReturnBanner() {
       .then((next) => {
         setResult(next);
         if (next.href && next.sessionEstablished) {
-          // Stay on /start with success UI; user can Login or follow link.
+          // Stay on `/` with success UI; user can Login or follow link.
         }
       })
       .catch(() => {

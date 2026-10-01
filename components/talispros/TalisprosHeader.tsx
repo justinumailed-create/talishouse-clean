@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { isTalisprosMarketLayoutPath } from "@/lib/talispros/market-pages";
-import { isDemoMapSitePath } from "@/lib/talispros/demo-mapsite";
 import { isTalisprosStartPath } from "@/lib/talispros/start-content";
 import { registerYourMapSiteFastCodeFromPath } from "@/lib/talispros/mapsite-url-gate";
 import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
@@ -13,7 +12,7 @@ import { ROUTES } from "@/lib/routes";
 export default function TalisprosHeader() {
   const pathname = usePathname();
   const gateCode = registerYourMapSiteFastCodeFromPath(pathname);
-  const logoHref = isDemoMapSitePath(pathname) ? "/start" : ROUTES.HOME;
+  const logoHref = ROUTES.HOME;
 
   if (
     pathname.startsWith("/talispros/mapsites/") ||

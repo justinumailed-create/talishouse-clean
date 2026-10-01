@@ -8,7 +8,7 @@ import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
 import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
 
 /**
- * /start gate left column: Talispros logo + Login (reveals FAST Code) + System Demo.
+ * Homepage gate left column: Talispros logo + Login (reveals FAST Code) + System Demo.
  * Keeps the existing claimed-Mapsite cookie/session FAST flow.
  */
 export default function TalisprosHomeGate() {

@@ -29,7 +29,7 @@ export const TALISU_MKTS_MODULAR_HERO = "/talisu/mkts/T-Dome-elevateNF.jpg";
 /** Demo path — app/talisu/demo redirects to /talispros/demo-mapsite. */
 export const TALISU_MKTS_DEMO_HREF = "/talisu/demo";
 
-export const TALISU_MKTS_HEADER_BLUE = "#0069CF";
+export const TALISU_MKTS_HEADER_BLUE = "#046BD9";
 
 export const TALISU_MKTS_VIEWPORT = {
   /** Full-Canada fallback before fitBounds settles (NL→YT + Do More cluster). */
@@ -49,7 +49,7 @@ export const TALISU_MKTS_FIT_PADDING = {
 } as const;
 
 /**
- * fitBounds padding for chrome-free /start preview (no Markets sidebar).
+ * fitBounds padding for chrome-free Markets preview (no Markets sidebar).
  */
 export const TALISU_MKTS_START_FIT_PADDING = {
   top: 48,

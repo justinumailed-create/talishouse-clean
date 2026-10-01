@@ -1,28 +1,37 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Libre_Baskerville } from "next/font/google";
-import TalisprosStartPage from "@/components/talispros/TalisprosStartPage";
+import TalisprosGatePage from "@/components/talispros/TalisprosGatePage";
 import { createMetadata } from "@/lib/seo";
-import { talisprosBrandOgMetadataImage } from "@/lib/talispros/mapsite-og-image";
+import { toAbsoluteHttpsOgUrl } from "@/lib/talispros/mapsite-og-image";
+import { SAMCART_SUCCESS_RETURN_PATH } from "@/lib/talispros/samcart-return";
 
 const libreBaskerville = Libre_Baskerville({
   subsets: ["latin"],
   weight: ["400", "700"],
 });
 
-const homeTitle = "Talispros™ | Claim your market";
+const homeTitle = "Talispros™";
+const homeDescription = "Claim your market. Open your Mapsite™.";
 
 export const metadata: Metadata = createMetadata({
   title: homeTitle,
-  description:
-    "Claim your market on Talispros™. Mapsite™ pins your place on the map so buyers and partners can find you — Explore Talisbooks™ and grow your exposure worldwide.",
-  path: "/",
-  image: talisprosBrandOgMetadataImage(homeTitle),
+  description: homeDescription,
+  path: SAMCART_SUCCESS_RETURN_PATH,
+  image: {
+    url: toAbsoluteHttpsOgUrl("/assets/start-og.png?v=4"),
+    width: 1200,
+    height: 630,
+    alt: homeTitle,
+  },
 });
 
 export default function Home() {
   return (
     <div className={`${libreBaskerville.className} min-h-dvh lg:h-full lg:min-h-0`}>
-      <TalisprosStartPage />
+      <Suspense fallback={null}>
+        <TalisprosGatePage />
+      </Suspense>
     </div>
   );
 }
