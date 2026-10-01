@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { isDemoMapSitePath } from "@/lib/talispros/demo-mapsite";
 import { isTalisprosMarketLayoutPath } from "@/lib/talispros/market-pages";
 import { isTalisprosStartPath } from "@/lib/talispros/start-content";
+import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import TalisprosFooter from "./TalisprosFooter";
 import TalisprosHeader from "./TalisprosHeader";
 
@@ -29,7 +30,8 @@ export default function TalisprosLayoutClient({
 
   return (
     <>
-      <TalisprosHeader />
+      {/* Demo Mapsite™ builder/ebook: shared blue TalisU nav (same as shelves/claimed). */}
+      {isDemoMapSite ? <TalisUMktsHeader /> : <TalisprosHeader />}
       <main
         className={`font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white [&:has(.mapsite-layout)]:p-0 ${
           isEbookLikePage ? "bg-[#f5f5f7]" : "bg-white"

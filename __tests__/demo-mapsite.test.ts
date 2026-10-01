@@ -215,6 +215,26 @@ describe("demo mapsite codes", () => {
     );
   });
 
+  it("mounts shared blue TalisUMktsHeader on demo-mapsite (not white PMC)", () => {
+    const layout = readFileSync(
+      join(process.cwd(), "components/talispros/TalisprosLayoutClient.tsx"),
+      "utf8",
+    );
+    expect(layout).toContain('import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader"');
+    expect(layout).toContain("isDemoMapSite ? <TalisUMktsHeader /> : <TalisprosHeader />");
+    // Builder form stays free of duplicate chrome wiring.
+    const builder = readFileSync(
+      join(
+        process.cwd(),
+        "components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx",
+      ),
+      "utf8",
+    );
+    expect(builder).toContain("DEMO_MAPSITE_PDF_HREF");
+    expect(builder).toContain("handleSubmit");
+    expect(builder).toContain("HomePinLocationSection");
+  });
+
   it("seeds demo Mapsites™ with stock gallery so pin hero uses shared ebook helper", () => {
     const serviceSource = readFileSync(
       join(process.cwd(), "lib/talispros/demo-mapsite-service.ts"),
