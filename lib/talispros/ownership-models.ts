@@ -5,6 +5,10 @@ export const HOME_OWNERSHIP_BG_SRC = "/assets/home-ownership-bg.jpg";
 /** Looping GIF: subtle Ken Burns plus sky cloud drift. Primary motion asset. */
 export const HOME_OWNERSHIP_BG_GIF = "/assets/home-ownership-bg.gif";
 
+/** Title overlaid at the top of the homepage mountain ownership banner. */
+export const HOME_OWNERSHIP_BANNER_TITLE =
+  "Industry Adjacent Fulfilment Options 101";
+
 export type OwnershipModelSection = {
   id: string;
   title: string;

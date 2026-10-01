@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import {
+  HOME_OWNERSHIP_BANNER_TITLE,
   HOME_OWNERSHIP_BG_GIF,
   HOME_OWNERSHIP_BG_SRC,
 } from "../lib/talispros/ownership-models";
@@ -43,5 +44,19 @@ describe("homepage mountain looping motion", () => {
     expect(motion).not.toContain("<video");
     expect(motion).not.toContain("HOME_OWNERSHIP_BG_WEBM");
     expect(motion).not.toContain("HOME_OWNERSHIP_BG_MP4");
+  });
+
+  it("overlays Industry Adjacent Fulfilment Options 101 on the mountain panel", () => {
+    expect(HOME_OWNERSHIP_BANNER_TITLE).toBe(
+      "Industry Adjacent Fulfilment Options 101",
+    );
+    const showcase = readFileSync(
+      resolve("components/talispros/TalisprosHomeShowcase.tsx"),
+      "utf8",
+    );
+    expect(showcase).toContain("HOME_OWNERSHIP_BANNER_TITLE");
+    expect(showcase).toContain("pointer-events-none");
+    // Title stays above the image but below the metallic popover layer
+    expect(showcase).toContain("z-[1]");
   });
 });
