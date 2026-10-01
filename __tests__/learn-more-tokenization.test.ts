@@ -48,4 +48,17 @@ describe("Tokenization Learn More", () => {
     expect(layout).toContain("TalisUChrome");
   });
 
+  it("shows bottom-left Talisbot on homepage embed only", () => {
+    const shell = readFileSync(join(root, "components/RootShell.tsx"), "utf8");
+    expect(shell).toContain('const showHomeTalisBot = pathname === "/"');
+    expect(shell).toContain('<TalisBotChat position="left" />');
+    // /learn-more remains embed without the home-only bot flag
+    expect(shell).toMatch(/isEmbed[\s\S]*pathname === "\/learn-more"/);
+    expect(shell).not.toMatch(/showHomeTalisBot = pathname === "\/learn-more"/);
+
+    const bot = readFileSync(join(root, "components/TalisBotChat.tsx"), "utf8");
+    expect(bot).toContain('position === "left" ? "bottom-6 left-6"');
+    expect(bot).toContain('position = "right"');
+  });
+
 });

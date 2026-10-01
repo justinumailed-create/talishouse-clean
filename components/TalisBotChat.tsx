@@ -37,7 +37,13 @@ const STEP_OPTIONS = {
 
 const OPTION_CLASS = "w-full text-left px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-sm hover:border-black hover:bg-black hover:text-white transition-all duration-200 font-medium";
 
-export default function TalisBotChat() {
+type TalisBotPosition = "left" | "right";
+
+export default function TalisBotChat({
+  position = "right",
+}: {
+  position?: TalisBotPosition;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<'greeting' | 'purpose' | 'size' | 'productType' | 'location' | 'contact' | 'complete'>('greeting');
@@ -286,8 +292,13 @@ export default function TalisBotChat() {
     return null;
   }
 
+  const cornerClass =
+    position === "left" ? "bottom-6 left-6" : "bottom-6 right-6";
+  const panelOriginClass =
+    position === "left" ? "origin-bottom-left" : "origin-bottom-right";
+
   return (
-    <div className={`fixed bottom-6 right-6 z-[1000] font-sans ${STOREFRONT_CHROME_CLASS}`}>
+    <div className={`fixed ${cornerClass} z-[1000] font-sans ${STOREFRONT_CHROME_CLASS}`}>
       {!open ? (
         <div className="bg-white/80 backdrop-blur-md p-1.5 rounded-[22px] shadow-2xl border border-white/50">
           <button
@@ -298,7 +309,7 @@ export default function TalisBotChat() {
           </button>
         </div>
       ) : (
-        <div className="w-[340px] max-h-[580px] bg-white rounded-[32px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-300 origin-bottom-right">
+        <div className={`w-[340px] max-h-[580px] bg-white rounded-[32px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-300 ${panelOriginClass}`}>
           
           {/* Header */}
           <div className="px-6 pt-6 pb-4 flex justify-between items-center bg-white">

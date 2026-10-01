@@ -37,9 +37,16 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     pathname === "/partner-access" ||
     pathname.startsWith("/talistv") ||
     /\/mapsite\/[^/]+\/map\/?$/.test(pathname);
+  // Homepage stays embed (no Talishouse navbar/cart) but still shows Talisbot, bottom-left.
+  const showHomeTalisBot = pathname === "/";
 
   if (isEmbed) {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        {showHomeTalisBot && <TalisBotChat position="left" />}
+      </>
+    );
   }
 
   return (
