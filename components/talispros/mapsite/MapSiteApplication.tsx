@@ -16,6 +16,7 @@ import type { MapEnginePin } from "@/lib/talismaps/map-engine";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import type { PlanType } from "@/lib/registration-plans";
 import {
+  MAPSITE_CLAIMED_NAV_PIN_NUDGE_Y_PX,
   MAPSITE_MIN_CARD_HEIGHT_PX,
   MAPSITE_PIN_TIP_CLEARANCE_PX,
   MAPSITE_POPUP_TIP_HEIGHT_PX,
@@ -117,8 +118,18 @@ export default function MapSiteApplication({
 }: MapSiteApplicationProps) {
   const [mapsite] = useState(initialMapSite);
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
+  const [lockCenterOffset, setLockCenterOffset] = useState({ x: 0, y: 0 });
+  const setLockCenterOffsetSafe = useCallback(
+    (next: { x: number; y: number }) => {
+      setLockCenterOffset((prev) =>
+        prev.x === next.x && prev.y === next.y ? prev : next,
+      );
+    },
+    [],
+  );
   const focusingRef = useRef(false);
   const focusTimerRef = useRef<number | null>(null);
+  const showClaimedNav = !isClaimable(mapsite.status);
 
   const pinLabel = mapsitePublicPinLabel({
     propertyTitle: mapsite.property_title,
@@ -199,6 +210,9 @@ export default function MapSiteApplication({
       initialViewport={viewport}
       selectedPinId={selectedPinId}
       draggablePinIds={[]}
+      lockCenter
+      lockCenterOffset={lockCenterOffset}
+      preserveViewport
       onPinSelect={(pinId) => {
         setSelectedPinId(pinId);
       }}
@@ -229,6 +243,8 @@ export default function MapSiteApplication({
         selectedPinId={selectedPinId}
         setSelectedPinId={setSelectedPinId}
         beginFocusGuard={beginFocusGuard}
+        showClaimedNav={showClaimedNav}
+        onLockCenterOffsetChange={setLockCenterOffsetSafe}
       />
     </MapEngineProvider>
   );
@@ -255,6 +271,8 @@ function MapSiteChrome({
   selectedPinId,
   setSelectedPinId,
   beginFocusGuard,
+  showClaimedNav,
+  onLockCenterOffsetChange,
 }: {
   mapsite: MapSitePlatformRecord;
   audience: RegistrationMarket;
@@ -276,6 +294,8 @@ function MapSiteChrome({
   selectedPinId: string | null;
   setSelectedPinId: (id: string | null) => void;
   beginFocusGuard: () => void;
+  showClaimedNav: boolean;
+  onLockCenterOffsetChange: (offset: { x: number; y: number }) => void;
 }) {
   const { setViewport, isReady } = useMapEngine();
   const router = useRouter();
@@ -370,12 +390,18 @@ function MapSiteChrome({
 
       // Phone-only composition: search at top, manager strip at bottom,
       // and the property card above the centered map pin.
+      const navNudge = showClaimedNav ? MAPSITE_CLAIMED_NAV_PIN_NUDGE_Y_PX : 0;
+
       if (popupOpen && isMobileOverlay) {
         // Anchored under the search bar, but never tall enough to reach the pin.
+        // Nudge pin/card down when the blue TalisU™ navbar is present.
         const tipPointY = Math.round(
-          rootRect.height / 2 - MAPSITE_PIN_TIP_CLEARANCE_PX
+          rootRect.height / 2 - MAPSITE_PIN_TIP_CLEARANCE_PX + navNudge
         );
-        const top = MAPSITE_LISTING_TILE_TOP_FALLBACK_PX;
+        const top = Math.max(
+          MAPSITE_LISTING_TILE_TOP_FALLBACK_PX,
+          8 + navNudge,
+        );
         const height = Math.max(
           MAPSITE_MIN_CARD_HEIGHT_PX,
           Math.min(
@@ -389,21 +415,23 @@ function MapSiteChrome({
           const next = Math.round(rootRect.width / 2);
           return prev === next ? prev : next;
         });
+        onLockCenterOffsetChange({ x: 0, y: navNudge });
         return;
       }
 
       if (popupOpen) {
         const tipPointY = Math.round(
-          rootRect.height / 2 - MAPSITE_PIN_TIP_CLEARANCE_PX
+          rootRect.height / 2 - MAPSITE_PIN_TIP_CLEARANCE_PX + navNudge
         );
         const cardBottom = tipPointY - MAPSITE_POPUP_TIP_HEIGHT_PX;
-        const top = Math.max(8, cardBottom - MAPSITE_POPUP_MIN_HEIGHT_PX);
+        const top = Math.max(8 + navNudge, cardBottom - MAPSITE_POPUP_MIN_HEIGHT_PX);
         setAlignTop((prev) => (prev === top ? prev : top));
         setExpandedCardHeight((prev) => (prev === null ? prev : null));
         setPopupCenterX((prev) => {
           const next = Math.round(rootRect.width / 2);
           return prev === next ? prev : next;
         });
+        onLockCenterOffsetChange({ x: 0, y: navNudge });
         return;
       }
 
@@ -417,6 +445,10 @@ function MapSiteChrome({
       setPopupCenterX((prev) =>
         prev === layout.popupCenterX ? prev : layout.popupCenterX
       );
+      onLockCenterOffsetChange({
+        x: layout.pinOffset.x,
+        y: layout.pinOffset.y + navNudge,
+      });
     };
 
     syncLayout();
@@ -435,6 +467,8 @@ function MapSiteChrome({
     mapsite.property_title,
     mapsite.id,
     selectedPinId,
+    showClaimedNav,
+    onLockCenterOffsetChange,
   ]);
 
   const claimed = !isClaimable(mapsite.status);

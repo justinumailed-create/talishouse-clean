@@ -36,6 +36,15 @@ export function isDemonstrationFastCode(
 export function isDemonstrationCatalogBook(
   book: DemonstrationCatalogBookLike,
 ): boolean {
+  // Claimed / issued FAST inventory stays on that shelf even when the demo
+  // title ("Demo Mapsite™") or pinned sample slug was carried over from claim.
+  if (
+    isIssuedFastCode(book.fastCode) &&
+    !isDemonstrationFastCode(book.fastCode)
+  ) {
+    return false;
+  }
+
   const id = book.id?.trim().toLowerCase() || "";
   const slug = book.slug?.trim().toLowerCase() || "";
   const accountId = book.accountId?.trim().toLowerCase() || "";

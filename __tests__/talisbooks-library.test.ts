@@ -259,6 +259,25 @@ describe("Talisbooks™ admin library catalog policy", () => {
     expect(isDemonstrationCatalogBook(rm22Book)).toBe(false);
   });
 
+  it("keeps claimed demo ebook on an issued FAST shelf even if title still says Demo Mapsite™", () => {
+    const claimedFromDemo = {
+      id: "752f5bfd-92bf-4ef5-9ca9-3917fd172e21",
+      slug: "demo-7a58377e-demo-mapsite-qxfz",
+      title: "Demo Mapsite™",
+      subtitle: "from demonstration ebook",
+      fastCode: "rd01",
+    };
+    expect(isDemonstrationCatalogBook(claimedFromDemo)).toBe(false);
+    expect(
+      isDemonstrationCatalogBook({
+        id: "pinned-talispros-ebook-sample",
+        slug: "talispros-ebook-sample",
+        title: "Talispros eBook",
+        fastCode: "rd01",
+      }),
+    ).toBe(false);
+  });
+
   it("scopes Mapsite-linked admin rm22 to created rm22 books only", () => {
     const scope = talisbooksScopeFromAdminAccount({ fastCode: "RM22" });
     expect(scope).toEqual({ fastCode: "rm22", excludeDemonstrationCatalog: true });

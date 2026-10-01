@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   computeMapSiteOverlayLayout,
+  MAPSITE_CLAIMED_NAV_PIN_NUDGE_Y_PX,
   MAPSITE_COMPACT_BREAKPOINT_PX,
   MAPSITE_LISTING_CARD_MAX_WIDTH_PX,
 } from "@/lib/talispros/mapsite-overlay-layout";
@@ -53,5 +54,9 @@ describe("computeMapSiteOverlayLayout", () => {
 
     expect(layout.compact).toBe(true);
     expect(layout.pinOffset).toEqual({ x: 0, y: 0 });
+  });
+
+  it("exports a downward pin nudge so claimed cards clear the blue TalisU™ navbar", () => {
+    expect(MAPSITE_CLAIMED_NAV_PIN_NUDGE_Y_PX).toBeGreaterThan(0);
   });
 });

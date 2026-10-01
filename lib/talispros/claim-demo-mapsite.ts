@@ -57,6 +57,46 @@ function isDemoPlaceholderTitle(title: string | null | undefined): boolean {
   return /^demo(\s|$)/i.test(raw) || /mapsite/i.test(raw);
 }
 
+/** Demo builder default copy — must not survive on an issued claimed Mapsite™. */
+function isDemoNotIssuedDescription(value: string | null | undefined): boolean {
+  const text = value?.trim() || "";
+  if (!text) return true;
+  return (
+    /no fast code is issued/i.test(text) ||
+    /^demonstration mapsite/i.test(text)
+  );
+}
+
+function resolveClaimedDescription(
+  raw: string | null | undefined,
+  propertyAddress: string | null,
+): string {
+  if (!isDemoNotIssuedDescription(raw)) {
+    return raw!.trim();
+  }
+  if (propertyAddress) {
+    return `Claimed Mapsite™ · FAST Code™ issued for ${propertyAddress}.`;
+  }
+  return "Claimed Mapsite™ · FAST Code™ issued.";
+}
+
+function resolveClaimedBookTitle(
+  currentTitle: string | null | undefined,
+  propertyTitle: string,
+  propertyAddress: string | null,
+  fastCode: string,
+): string {
+  const title = currentTitle?.trim() || "";
+  if (title && !isDemoPlaceholderTitle(title) && !/^demo\b/i.test(title)) {
+    return title;
+  }
+  if (propertyTitle && !isDemoPlaceholderTitle(propertyTitle)) {
+    return propertyTitle;
+  }
+  if (propertyAddress) return propertyAddress;
+  return `Talisbook™ · ${fastCode.trim().toUpperCase()}`;
+}
+
 function resolveClaimAccountType(input: ClaimDemoMapSiteInput): {
   accountTypeRaw: string;
   accountTypeSegment: string;
@@ -83,11 +123,21 @@ async function reassignDemoBooksToClaimed(options: {
   previousMapsiteId: string;
   claimedMapsiteId: string;
   fastCode: string;
-}): Promise<void> {
-  const { supabase, previousFastCode, previousMapsiteId, claimedMapsiteId, fastCode } =
-    options;
+  propertyTitle: string;
+  propertyAddress: string | null;
+}): Promise<{ primaryBookSlug: string | null }> {
+  const {
+    supabase,
+    previousFastCode,
+    previousMapsiteId,
+    claimedMapsiteId,
+    fastCode,
+    propertyTitle,
+    propertyAddress,
+  } = options;
   const code = fastCode.trim().toLowerCase();
   const prev = previousFastCode?.trim().toLowerCase() || "";
+  const now = new Date().toISOString();
 
   // Move any books tied to the demonstration Mapsite™ / demo-* code onto the live code.
   if (prev && prev !== code) {
@@ -96,7 +146,7 @@ async function reassignDemoBooksToClaimed(options: {
       .update({
         fast_code: code,
         mapsite_id: claimedMapsiteId,
-        updated_at: new Date().toISOString(),
+        updated_at: now,
       })
       .ilike("fast_code", prev);
   }
@@ -106,12 +156,47 @@ async function reassignDemoBooksToClaimed(options: {
     .update({
       fast_code: code,
       mapsite_id: claimedMapsiteId,
-      updated_at: new Date().toISOString(),
+      updated_at: now,
     })
     .eq("mapsite_id", previousMapsiteId);
 
-  // Shared pinned-sample stays global — empty claimed shelves pick up the
+  // Rename leftover "Demo Mapsite™" titles so the FAST TEB™ shelf keeps them
+  // (same inventory as self-serve after issue — not filtered as demonstration).
+  const { data: claimedBooks } = await supabase
+    .from("talisbooks_books")
+    .select("id, slug, title, subtitle")
+    .or(`mapsite_id.eq.${claimedMapsiteId},fast_code.ilike.${code}`)
+    .order("updated_at", { ascending: false });
+
+  let primaryBookSlug: string | null = null;
+  for (const book of claimedBooks ?? []) {
+    if (!primaryBookSlug && book.slug) {
+      primaryBookSlug = book.slug;
+    }
+    const nextTitle = resolveClaimedBookTitle(
+      book.title,
+      propertyTitle,
+      propertyAddress,
+      fastCode,
+    );
+    if (nextTitle !== (book.title || "").trim()) {
+      await supabase
+        .from("talisbooks_books")
+        .update({
+          title: nextTitle,
+          subtitle:
+            book.subtitle?.trim() && !/demonstration/i.test(book.subtitle)
+              ? book.subtitle
+              : `${fastCode.trim().toUpperCase()} TEB™`,
+          updated_at: now,
+        })
+        .eq("id", book.id);
+    }
+  }
+
+  // Shared pinned-sample stays global — empty claimed shelves still pick up the
   // demo ebook via teb_url in getMapSiteEbookContext.
+  return { primaryBookSlug };
 }
 
 export async function claimDemoMapSite(
@@ -200,8 +285,15 @@ export async function claimDemoMapSite(
   const propertyTitle = isDemoPlaceholderTitle(row.property_title)
     ? propertyAddress || "Your Mapsite™"
     : row.property_title || propertyAddress || "Your Mapsite™";
-  const tebUrl =
-    row.teb_url?.trim() || DEMO_PINNED_EBOOK_HREF;
+  const propertyDescription = resolveClaimedDescription(
+    row.property_description,
+    propertyAddress,
+  );
+  // Preserve the demo-selected pin exactly — never geolocation / local default.
+  const latitude = row.latitude;
+  const longitude = row.longitude;
+  const mapZoom = row.map_zoom;
+  let tebUrl = row.teb_url?.trim() || DEMO_PINNED_EBOOK_HREF;
   // Stand-in for SamCart payment URL: register path → FAST Code™ gate → Mapsite™.
   const registerPath = mapsiteUrlGatePath(fastCode);
 
@@ -243,10 +335,10 @@ export async function claimDemoMapSite(
       status: "active",
       property_title: propertyTitle,
       property_address: propertyAddress,
-      property_description: row.property_description,
-      latitude: row.latitude,
-      longitude: row.longitude,
-      map_zoom: row.map_zoom,
+      property_description: propertyDescription,
+      latitude,
+      longitude,
+      map_zoom: mapZoom,
       cover_image: row.cover_image,
       header_image_url: row.header_image_url,
       logo_url: row.logo_url,
@@ -297,6 +389,11 @@ export async function claimDemoMapSite(
         status: "active",
         property_title: propertyTitle,
         property_address: propertyAddress,
+        property_description: propertyDescription,
+        // Keep the demo pin placement — do not overwrite with geolocation/default.
+        latitude,
+        longitude,
+        map_zoom: mapZoom,
         broker_url: registerPath,
         website: registerPath,
         teb_url: tebUrl,
@@ -320,13 +417,23 @@ export async function claimDemoMapSite(
   }
 
   try {
-    await reassignDemoBooksToClaimed({
+    const { primaryBookSlug } = await reassignDemoBooksToClaimed({
       supabase,
       previousFastCode,
       previousMapsiteId: row.id,
       claimedMapsiteId,
       fastCode,
+      propertyTitle,
+      propertyAddress,
     });
+    // Prefer the claimed ebook viewer (self-serve style) over the global pinned sample.
+    if (primaryBookSlug) {
+      tebUrl = `${ROUTES.TALISBOOKS}/viewer/${encodeURIComponent(primaryBookSlug)}`;
+      await supabase
+        .from("mapsites")
+        .update({ teb_url: tebUrl, updated_at: now })
+        .eq("id", claimedMapsiteId);
+    }
   } catch (error) {
     console.warn("[claimDemoMapSite] Could not reassign demo ebook shelf:", error);
   }

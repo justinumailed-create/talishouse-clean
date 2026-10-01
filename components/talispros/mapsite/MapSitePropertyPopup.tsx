@@ -211,14 +211,25 @@ export default function MapSitePropertyPopup({
   const popupTitle = useGenericCard
     ? "The first of many E-Books"
     : propertyAddress || (demoishTitle ? address : propertyTitle) || "Your Mapsite™";
+  const rawDescription = mapsite.property_description?.trim() || "";
+  const demoNotIssuedCopy =
+    /no fast code is issued/i.test(rawDescription) ||
+    /^demonstration mapsite/i.test(rawDescription);
+  // After FAST Code™ issue, never keep demonstration “not issued” pin copy.
+  const issuedDescription =
+    fastCode && demoNotIssuedCopy
+      ? null
+      : rawDescription || null;
   const popupWriteup = useGenericCard
     ? "Upon registration your Mapsite™ will be able to promote up to 10 categories containing 100 PINs generating 1,000 views, monthly. No referral fees - ever"
     : (propertyAddress && !demoishTitle && propertyTitle && propertyTitle !== propertyAddress
         ? propertyTitle
         : null) ||
-      mapsite.property_description ||
+      issuedDescription ||
       (propertyAddress ? propertyAddress : null) ||
-      "Welcome to Talispros™. Choose your market and begin onboarding.";
+      (fastCode
+        ? `FAST Code™ ${fastCode} · claimed Mapsite™.`
+        : "Welcome to Talispros™. Choose your market and begin onboarding.");
   const popupClaimLabel = useGenericCard ? "Register Account now" : claimLabel;
 
   return (

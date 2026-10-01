@@ -44,5 +44,9 @@ describe("claim demo Mapsite™ → live claimed URL", () => {
     expect(service).toContain("DEMO_PINNED_EBOOK_HREF");
     expect(service).toContain("property_address");
     expect(service).toContain("audience");
+    expect(service).toContain("resolveClaimedDescription");
+    expect(service).toContain("latitude");
+    expect(service).toContain("longitude");
+    expect(service).toContain("primaryBookSlug");
   });
 });

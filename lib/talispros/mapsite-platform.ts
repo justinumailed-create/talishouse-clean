@@ -116,6 +116,7 @@ import {
 } from "@/lib/talispros/mapsite-listing-media";
 import { resolvePinStyleExtras, decodeListingLinksFromNotes, normalizeListingHref } from "@/lib/build-request-pin-style-notes";
 import { firstNonPersonalMapsiteLabel } from "@/lib/mapsite-pin-label";
+import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 
 const DEMO_DESCRIPTION =
   "It's a million dollar neighbourhood. A driveway and building site were prepared some years ago. May come with a Tiny Home guest house to stay in, while you build your dream home.";
@@ -189,24 +190,33 @@ function mapRow(row: MapSiteRow): MapSitePlatformRecord {
     cover = MAPSITE_DEMO_LISTING_IMAGE;
   }
 
+  const fastCodeRaw =
+    row.fast_code && row.fast_code.toUpperCase() !== "DEMO"
+      ? row.fast_code
+      : toPlatformStatus(row.status) === "UNCLAIMED"
+        ? null
+        : row.fast_code || null;
+  const issued = isIssuedFastCode(fastCodeRaw);
+  // Issued claimed Mapsites™ must keep their own pin/address — never inherit
+  // the platform demo lot fallback (or a local/default location).
   return {
     id: row.id,
-    fast_code: row.fast_code && row.fast_code.toUpperCase() !== "DEMO"
-    ? row.fast_code
-    : toPlatformStatus(row.status) === "UNCLAIMED"
-      ? null
-      : row.fast_code || null,
+    fast_code: fastCodeRaw,
     status: toPlatformStatus(row.status),
+    // Always prefer stored demo/claimed pin coords; fallback is platform seed only.
     lat: row.latitude ?? 46.088287,
     lng: row.longitude ?? -59.882749,
     map_zoom:
       row.map_zoom != null && Number.isFinite(row.map_zoom)
         ? clampMapZoom(row.map_zoom)
         : HOME_PIN_DEFAULT_MAP_ZOOM,
-    property_title: row.property_title || "Lot + optional Tiny Home",
+    property_title:
+      row.property_title ||
+      (issued ? row.property_address || "Your Mapsite™" : "Lot + optional Tiny Home"),
     property_address:
-      row.property_address || DEMO_MAPSITE_ADDRESS,
-    property_description: row.property_description || DEMO_DESCRIPTION,
+      row.property_address || (issued ? null : DEMO_MAPSITE_ADDRESS),
+    property_description:
+      row.property_description || (issued ? null : DEMO_DESCRIPTION),
     cover_image: cover,
     logo_url: row.logo_url?.trim() || null,
     agency_name: null,
