@@ -5440,3 +5440,17 @@ body.mapsite-gallery-open [data-paypal-button] {
     animation: none !important;
   }
 }
+
+/* Demo Talisbook™ create — Visa-style indeterminate progress */
+@keyframes demo-visa-progress-indeterminate {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(380%);
+  }
+}
+
+.demo-visa-progress__indeterminate {
+  animation: demo-visa-progress-indeterminate 1.35s ease-in-out infinite;
+}
