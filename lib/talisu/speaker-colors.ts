@@ -18,7 +18,7 @@ export type ParsedTranscriptLine = {
   raw: string;
 };
 
-const SPEAKER_LINE_RE = /^([A-Za-z][A-Za-z .'-]{0,40}):\s*(.*)$/s;
+const SPEAKER_LINE_RE = /^([A-Za-z][A-Za-z .'-]{0,40}):\s*(.*)$/;
 
 export function parseTranscriptLine(line: string): ParsedTranscriptLine {
   const match = line.match(SPEAKER_LINE_RE);
