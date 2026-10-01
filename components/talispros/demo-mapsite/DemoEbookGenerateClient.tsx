@@ -26,6 +26,7 @@ import {
 } from "@/lib/talispros/demo-mapsite";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { ONBOARDING_JOB_TIMEOUT_MS } from "@/lib/onboarding-timing";
+import { TALISU_MKTS_HEADER_BLUE } from "@/lib/talisu/markets-pins";
 import Link from "next/link";
 import { DemoVisaProgress } from "@/components/talispros/demo-mapsite/DemoVisaProgress";
 
@@ -42,8 +43,19 @@ type ProgressState = {
   total: number;
 };
 
+type BookSourceAssets = {
+  front: File;
+  back: File;
+  interiors: File[];
+  source: "pinned" | "upload";
+  label: string;
+};
+
 const UPLOAD_CONCURRENCY = 2;
 const UPLOAD_TIMEOUT_MS = 60_000;
+
+const primaryButtonClass =
+  "flex h-12 w-full items-center justify-center rounded-full text-[15px] font-medium text-white transition hover:brightness-95 disabled:opacity-40";
 
 async function mapPool<T, R>(
   items: T[],
@@ -122,6 +134,14 @@ async function withTimeout<T>(
   }
 }
 
+function uploadLabelFromFiles(files: File[]): string {
+  if (files.length === 1) return files[0]!.name || "PDF uploaded";
+  if (files.length > 1) {
+    return `${files[0]!.name || "PDF"} + ${files.length - 1} more`;
+  }
+  return "PDF uploaded";
+}
+
 export default function DemoEbookGenerateClient({
   mapsiteId,
   title,
@@ -141,25 +161,41 @@ export default function DemoEbookGenerateClient({
     back: File;
   } | null>(null);
   const [pageSource, setPageSource] = useState<"pinned" | "upload">("pinned");
+  const [sourceLabel, setSourceLabel] = useState("");
   const [optimized, setOptimized] = useState<OptimizedAsset[]>([]);
   const [optimizedCovers, setOptimizedCovers] = useState<{
     front: OptimizedAsset;
     back: OptimizedAsset;
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const runIdRef = useRef(0);
   const busy = phase !== "idle";
+  const sourceReady = pages.length > 0 && Boolean(coverFiles);
+  const optimizedReady = optimized.length > 0 && Boolean(optimizedCovers);
 
   function resetBookAssets() {
     setPages([]);
     setCoverFiles(null);
     setOptimized([]);
     setOptimizedCovers(null);
+    setSourceLabel("");
+  }
+
+  function clearSourceAndReupload() {
+    runIdRef.current += 1;
+    resetBookAssets();
+    setError(null);
+    setStage("");
+    setProgress(null);
+    setPhase("idle");
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   async function applyWrapCoverFromFiles(
     files: File[],
     source: "pinned" | "upload",
-  ) {
+    label: string,
+  ): Promise<BookSourceAssets> {
     const { front, back, interiors } = await assignBookAssetsFromUploads(
       files,
       {
@@ -178,15 +214,146 @@ export default function DemoEbookGenerateClient({
     setPageSource(source);
     setCoverFiles({ front, back });
     setPages(interiors);
+    setSourceLabel(label);
+    setOptimized([]);
+    setOptimizedCovers(null);
     setProgress(null);
     setStage(
       `Wrap cover from page 1 plus ${interiors.length} interior page${
         interiors.length === 1 ? "" : "s"
-      }. Optimize them, then build the Talisbook™.`,
+      }. Preparing Talisbook™…`,
     );
+    return { front, back, interiors, source, label };
+  }
+
+  async function optimizePages(
+    assets: BookSourceAssets,
+    runId: number,
+  ): Promise<{
+    interiors: OptimizedAsset[];
+    covers: { front: OptimizedAsset; back: OptimizedAsset };
+  } | null> {
+    const { front, back, interiors, source } = assets;
+    if (interiors.length === 0) {
+      setError("Extract the pinned PDF or upload a PDF first.");
+      return null;
+    }
+    setError(null);
+    setPhase("optimizing");
+    const coverSteps = 1;
+    const totalSteps = coverSteps + interiors.length;
+    try {
+      setStage("Optimizing wrap cover…");
+      setProgress({
+        label: "Optimizing pages…",
+        detail: "Optimizing wrap cover…",
+        current: 0,
+        total: totalSteps,
+      });
+      const [frontCover, backCover] = await Promise.all([
+        uploadOptimizedPage({
+          mapsiteId,
+          file: front,
+          index: 0,
+        }),
+        uploadOptimizedPage({
+          mapsiteId,
+          file: back,
+          index: 0,
+        }),
+      ]);
+      if (runId !== runIdRef.current) return null;
+      const covers = { front: frontCover, back: backCover };
+      setOptimizedCovers(covers);
+      setProgress({
+        label: "Optimizing pages…",
+        detail: `Cover ready · 0 of ${interiors.length} interiors`,
+        current: coverSteps,
+        total: totalSteps,
+      });
+
+      let usedPinnedFallback = false;
+      let uploadError: string | null = null;
+      let completedInteriors = 0;
+      const pinnedInteriorFallbacks =
+        source === "pinned"
+          ? fallbackOptimizedDemoInteriorPagesAfterWrap()
+          : [];
+      const uploaded = await mapPool(
+        interiors,
+        UPLOAD_CONCURRENCY,
+        async (file, index) => {
+          try {
+            const asset = await uploadOptimizedPage({ mapsiteId, file, index });
+            completedInteriors += 1;
+            const done = completedInteriors;
+            if (runId === runIdRef.current) {
+              setStage(`Optimizing page ${done} of ${interiors.length}…`);
+              setProgress({
+                label: "Optimizing pages…",
+                detail: `Page ${done} of ${interiors.length}`,
+                current: coverSteps + done,
+                total: totalSteps,
+              });
+            }
+            return asset;
+          } catch (caught) {
+            const fallback = pinnedInteriorFallbacks[index];
+            if (!fallback) {
+              throw caught;
+            }
+            usedPinnedFallback = true;
+            uploadError =
+              caught instanceof Error ? caught.message : "Image upload failed.";
+            console.warn(
+              `[demo-ebook] Upload failed for page ${index + 1}; using pinned page asset.`,
+              uploadError,
+            );
+            completedInteriors += 1;
+            const done = completedInteriors;
+            if (runId === runIdRef.current) {
+              setStage(`Optimizing page ${done} of ${interiors.length}…`);
+              setProgress({
+                label: "Optimizing pages…",
+                detail: `Page ${done} of ${interiors.length}`,
+                current: coverSteps + done,
+                total: totalSteps,
+              });
+            }
+            return fallback;
+          }
+        },
+      );
+      if (runId !== runIdRef.current) return null;
+      setOptimized(uploaded);
+      setProgress(null);
+      setStage(
+        usedPinnedFallback
+          ? `${uploaded.length} interiors ready using pinned assets. ${uploadError || "upload-image was unavailable."} Ready to build.`
+          : `Wrap cover and ${uploaded.length} pages ready. Build your Talisbook™.`,
+      );
+      return { interiors: uploaded, covers };
+    } catch (caught) {
+      if (runId !== runIdRef.current) return null;
+      setOptimized([]);
+      setOptimizedCovers(null);
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Could not optimize the demonstration pages.",
+      );
+      setStage("");
+      setProgress(null);
+      return null;
+    } finally {
+      if (runId === runIdRef.current) {
+        setPhase("idle");
+      }
+    }
   }
 
   async function extractPinnedPdf() {
+    const runId = ++runIdRef.current;
     setError(null);
     resetBookAssets();
     setPhase("extracting");
@@ -200,6 +367,7 @@ export default function DemoEbookGenerateClient({
     try {
       const pageFiles = await loadPinnedTalisBookPageFiles({
         onProgress: (done, total) => {
+          if (runId !== runIdRef.current) return;
           setStage(`Extracting pages: ${done} of ${total}…`);
           setProgress({
             label: "Extracting pages…",
@@ -209,8 +377,16 @@ export default function DemoEbookGenerateClient({
           });
         },
       });
-      await applyWrapCoverFromFiles(pageFiles, "pinned");
+      if (runId !== runIdRef.current) return;
+      const assets = await applyWrapCoverFromFiles(
+        pageFiles,
+        "pinned",
+        "Pinned Talispros eBook",
+      );
+      if (runId !== runIdRef.current) return;
+      await optimizePages(assets, runId);
     } catch (caught) {
+      if (runId !== runIdRef.current) return;
       resetBookAssets();
       setError(
         caught instanceof Error
@@ -219,7 +395,6 @@ export default function DemoEbookGenerateClient({
       );
       setStage("");
       setProgress(null);
-    } finally {
       setPhase("idle");
     }
   }
@@ -228,6 +403,7 @@ export default function DemoEbookGenerateClient({
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (files.length === 0) return;
 
+    const runId = ++runIdRef.current;
     setError(null);
     resetBookAssets();
     setPhase("converting");
@@ -239,8 +415,15 @@ export default function DemoEbookGenerateClient({
       total: 1,
     });
     try {
-      await applyWrapCoverFromFiles(files, "upload");
+      const assets = await applyWrapCoverFromFiles(
+        files,
+        "upload",
+        uploadLabelFromFiles(files),
+      );
+      if (runId !== runIdRef.current) return;
+      await optimizePages(assets, runId);
     } catch (caught) {
+      if (runId !== runIdRef.current) return;
       resetBookAssets();
       setError(
         caught instanceof Error
@@ -249,119 +432,16 @@ export default function DemoEbookGenerateClient({
       );
       setStage("");
       setProgress(null);
-    } finally {
-      setPhase("idle");
-    }
-  }
-
-  async function optimizePages() {
-    if (pages.length === 0 || !coverFiles) {
-      setError("Extract the pinned PDF or upload a PDF first.");
-      return;
-    }
-    setError(null);
-    setPhase("optimizing");
-    const coverSteps = 1;
-    const totalSteps = coverSteps + pages.length;
-    try {
-      setStage("Optimizing wrap cover…");
-      setProgress({
-        label: "Optimizing pages…",
-        detail: "Optimizing wrap cover…",
-        current: 0,
-        total: totalSteps,
-      });
-      const [frontCover, backCover] = await Promise.all([
-        uploadOptimizedPage({
-          mapsiteId,
-          file: coverFiles.front,
-          index: 0,
-        }),
-        uploadOptimizedPage({
-          mapsiteId,
-          file: coverFiles.back,
-          index: 0,
-        }),
-      ]);
-      setOptimizedCovers({ front: frontCover, back: backCover });
-      setProgress({
-        label: "Optimizing pages…",
-        detail: `Cover ready · 0 of ${pages.length} interiors`,
-        current: coverSteps,
-        total: totalSteps,
-      });
-
-      let usedPinnedFallback = false;
-      let uploadError: string | null = null;
-      let completedInteriors = 0;
-      const pinnedInteriorFallbacks =
-        pageSource === "pinned"
-          ? fallbackOptimizedDemoInteriorPagesAfterWrap()
-          : [];
-      const uploaded = await mapPool(pages, UPLOAD_CONCURRENCY, async (file, index) => {
-        try {
-          const asset = await uploadOptimizedPage({ mapsiteId, file, index });
-          completedInteriors += 1;
-          const done = completedInteriors;
-          setStage(`Optimizing page ${done} of ${pages.length}…`);
-          setProgress({
-            label: "Optimizing pages…",
-            detail: `Page ${done} of ${pages.length}`,
-            current: coverSteps + done,
-            total: totalSteps,
-          });
-          return asset;
-        } catch (caught) {
-          const fallback = pinnedInteriorFallbacks[index];
-          if (!fallback) {
-            throw caught;
-          }
-          usedPinnedFallback = true;
-          uploadError =
-            caught instanceof Error ? caught.message : "Image upload failed.";
-          console.warn(
-            `[demo-ebook] Upload failed for page ${index + 1}; using pinned page asset.`,
-            uploadError,
-          );
-          completedInteriors += 1;
-          const done = completedInteriors;
-          setStage(`Optimizing page ${done} of ${pages.length}…`);
-          setProgress({
-            label: "Optimizing pages…",
-            detail: `Page ${done} of ${pages.length}`,
-            current: coverSteps + done,
-            total: totalSteps,
-          });
-          return fallback;
-        }
-      });
-      setOptimized(uploaded);
-      setProgress(null);
-      setStage(
-        usedPinnedFallback
-          ? `${uploaded.length} interiors ready using pinned assets. ${uploadError || "upload-image was unavailable."} You can still Build.`
-          : `Wrap cover and ${uploaded.length} pages optimized and ready to build.`,
-      );
-    } catch (caught) {
-      setOptimized([]);
-      setOptimizedCovers(null);
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Could not optimize the demonstration pages.",
-      );
-      setStage("");
-      setProgress(null);
-    } finally {
       setPhase("idle");
     }
   }
 
   async function buildEbook() {
-    if (optimized.length === 0 || !optimizedCovers) {
-      setError("Optimize the extracted pages first.");
+    if (!optimizedReady || !optimizedCovers) {
+      setError("Prepare pages first, then Build.");
       return;
     }
+    const runId = runIdRef.current;
     setError(null);
     setPhase("building");
     setStage("Building demonstration Talisbook™…");
@@ -382,6 +462,7 @@ export default function DemoEbookGenerateClient({
         ONBOARDING_JOB_TIMEOUT_MS,
         "Generation timed out. Please try Build again.",
       );
+      if (runId !== runIdRef.current) return;
       if (!result.ok) {
         throw new Error(result.error);
       }
@@ -396,12 +477,33 @@ export default function DemoEbookGenerateClient({
       // page stuck on "Building demonstration Talisbook™…".
       window.location.assign(result.mapsiteHref || result.viewerUrl);
     } catch (caught) {
+      if (runId !== runIdRef.current) return;
       setError(publicDemoGenerateError(caught));
       setStage("");
       setProgress(null);
     } finally {
-      setPhase("idle");
+      if (runId === runIdRef.current) {
+        setPhase("idle");
+      }
     }
+  }
+
+  async function retryOptimize() {
+    if (!coverFiles || pages.length === 0) {
+      setError("Extract the pinned PDF or upload a PDF first.");
+      return;
+    }
+    const runId = ++runIdRef.current;
+    await optimizePages(
+      {
+        front: coverFiles.front,
+        back: coverFiles.back,
+        interiors: pages,
+        source: pageSource,
+        label: sourceLabel,
+      },
+      runId,
+    );
   }
 
   const cardClass =
@@ -433,8 +535,8 @@ export default function DemoEbookGenerateClient({
             Extract the pinned pages, or upload a PDF.
           </p>
           <p className="mx-auto mt-2 max-w-[26rem] text-[13px] leading-relaxed text-neutral-500">
-            Optimize them, then Build the demonstration Talisbook™. When that
-            finishes, we open your demo Mapsite™.
+            We prepare the pages automatically. Then Build the demonstration
+            Talisbook™ — when that finishes, we open your demo Mapsite™.
           </p>
           <p className="mt-3 text-[12px] tracking-tight text-neutral-400">
             {title}
@@ -443,34 +545,70 @@ export default function DemoEbookGenerateClient({
 
         <div className="mt-12 space-y-5">
           <div className={`${cardClass} space-y-3 px-6 py-7`}>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void extractPinnedPdf()}
-              className="flex h-12 w-full items-center justify-center rounded-full bg-neutral-950 text-[15px] font-medium text-white transition disabled:opacity-40"
-            >
-              Extract PDF from pinned Talispros eBook
-            </button>
+            {!sourceReady ? (
+              <>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => void extractPinnedPdf()}
+                  className={primaryButtonClass}
+                  style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
+                >
+                  Extract PDF from pinned Talispros eBook
+                </button>
 
-            <div className="flex items-center gap-3 px-1">
-              <span className="h-px flex-1 bg-black/[0.08]" />
-              <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-                or
-              </span>
-              <span className="h-px flex-1 bg-black/[0.08]" />
-            </div>
+                <div className="flex items-center gap-3 px-1">
+                  <span className="h-px flex-1 bg-black/[0.08]" />
+                  <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-400">
+                    or
+                  </span>
+                  <span className="h-px flex-1 bg-black/[0.08]" />
+                </div>
 
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => fileInputRef.current?.click()}
-              className="flex h-12 w-full items-center justify-center rounded-full bg-[#e8e8ed] text-[15px] font-medium text-neutral-950 transition hover:bg-[#dcdce2] disabled:opacity-40"
-            >
-              Upload PDF
-            </button>
-            <p className="text-center text-[12px] leading-relaxed text-neutral-400">
-              {EBOOK_GENERATE_COVER_PDF_HELP} {EBOOK_GENERATE_UPLOAD_HINT}
-            </p>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={primaryButtonClass}
+                  style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
+                >
+                  Upload PDF
+                </button>
+                <p className="text-center text-[12px] leading-relaxed text-neutral-400">
+                  {EBOOK_GENERATE_COVER_PDF_HELP} {EBOOK_GENERATE_UPLOAD_HINT}
+                </p>
+              </>
+            ) : (
+              <div
+                className="flex h-12 w-full items-center gap-3 rounded-full px-4 text-[15px] font-medium text-white"
+                style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
+                role="status"
+                aria-live="polite"
+              >
+                <span
+                  className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/20 text-[13px] font-semibold"
+                  aria-hidden
+                >
+                  ✓
+                </span>
+                <span className="min-w-0 flex-1 truncate">
+                  {sourceLabel ||
+                    (pageSource === "pinned"
+                      ? "Pinned Talispros eBook"
+                      : "PDF uploaded")}
+                </span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={clearSourceAndReupload}
+                  aria-label="Clear and re-upload"
+                  className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-[18px] leading-none transition hover:bg-white/25 disabled:opacity-40"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
             <input
               ref={fileInputRef}
               type="file"
@@ -486,30 +624,25 @@ export default function DemoEbookGenerateClient({
               }}
             />
 
-            {pages.length > 0 && coverFiles ? (
-              <p className="text-center text-[13px] text-neutral-500">
-                Wrap cover from page 1 plus {pages.length} interior
-                {pages.length === 1 ? "" : "s"}, ready to optimize.
-              </p>
-            ) : null}
-
-            {pages.length > 0 && coverFiles ? (
+            {sourceReady && !optimizedReady && !busy && error ? (
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => void optimizePages()}
-                className="flex h-12 w-full items-center justify-center rounded-full bg-[#e8e8ed] text-[15px] font-medium text-neutral-950 transition hover:bg-[#dcdce2] disabled:opacity-40"
+                onClick={() => void retryOptimize()}
+                className={primaryButtonClass}
+                style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
               >
-                Optimize pages
+                Try again
               </button>
             ) : null}
 
-            {optimized.length > 0 && optimizedCovers ? (
+            {optimizedReady ? (
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => void buildEbook()}
-                className="flex h-12 w-full items-center justify-center rounded-full bg-neutral-950 text-[15px] font-medium text-white transition disabled:opacity-40"
+                className={primaryButtonClass}
+                style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
               >
                 Build Talisbook™
               </button>

@@ -102,4 +102,19 @@ describe("demo ebook wrap cover", () => {
     expect(client).toContain("frontCover: optimizedCovers.front");
     expect(client).toContain("backCover: optimizedCovers.back");
   });
+
+  it("collapses create flow: blue upload, auto-optimize, single Build", () => {
+    const client = repoSource(
+      "components/talispros/demo-mapsite/DemoEbookGenerateClient.tsx",
+    );
+
+    expect(client).toContain("TALISU_MKTS_HEADER_BLUE");
+    expect(client).toContain("Upload PDF");
+    expect(client).toContain("Clear and re-upload");
+    expect(client).toContain("Build Talisbook™");
+    expect(client).toContain("await optimizePages(assets, runId)");
+    expect(client).toContain("DemoVisaProgress");
+    expect(client).not.toContain("Optimize pages");
+    expect(client).not.toContain("bg-[#e8e8ed]");
+  });
 });
