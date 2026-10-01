@@ -3,6 +3,7 @@ import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
 import SectionShell from "@/components/talisu/SectionShell";
 import TalisUAudioLibrary from "@/components/talisu/TalisUAudioLibrary";
+import TranscriptLines from "@/components/talisu/TranscriptLines";
 import { TALISU_AISHA_WEBSTER_TRANSCRIPT } from "@/lib/talisu/transcript";
 
 export const metadata = createTalisUMetadata({
@@ -21,11 +22,7 @@ export default function TalisUAudioPage() {
         <h2 className="mb-6 text-center text-xl font-semibold text-neutral-950">
           Transcript — Aisha &amp; Webster
         </h2>
-        <div className="mx-auto max-w-3xl space-y-4 text-sm leading-relaxed text-neutral-700 sm:text-base">
-          {TALISU_AISHA_WEBSTER_TRANSCRIPT.map((para, i) => (
-            <p key={i}>{para}</p>
-          ))}
-        </div>
+        <TranscriptLines lines={TALISU_AISHA_WEBSTER_TRANSCRIPT} />
       </article>
     </SectionShell>
   );
