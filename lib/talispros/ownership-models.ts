@@ -5,8 +5,10 @@ export const HOME_OWNERSHIP_BG_SRC = "/assets/home-ownership-bg.jpg";
 /** Looping GIF kept as a fallback asset; the banner now plays the MP4. */
 export const HOME_OWNERSHIP_BG_GIF = "/assets/home-ownership-bg.gif";
 /**
- * Royalty-free landscape loop (Pexels video 1093662, aerial mountain range,
- * HD 1920×1080). Muted, looping, behind the ownership copy.
+ * Cool muted blue-grey ownership mountain loop (1920×1080).
+ * Ken Burns pan/zoom derived from home-ownership-bg.jpg — climb/help
+ * silhouettes over misty layered mountains (same palette as the still).
+ * Muted, looping, behind the ownership title + metallic buttons.
  */
 export const HOME_OWNERSHIP_BG_MP4 = "/assets/home-ownership-bg.mp4";
 
