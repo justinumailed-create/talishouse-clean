@@ -13,7 +13,9 @@ import {
 import { TALISU_REGISTER } from "@/lib/talisu/content";
 import {
   readTalisUKbUnlocked,
+  TALISU_KB_LOCKED_EVENT,
   TALISU_KB_OPEN_UNLOCK_EVENT,
+  TALISU_KB_UNLOCKED_EVENT,
 } from "@/lib/talisu/kb-gate";
 import { TALISU_KB_PATH } from "@/lib/talisu/kb-content";
 import TalisBrandMark from "@/components/talisu/TalisBrandMark";
@@ -93,6 +95,19 @@ export default function TalisUMktsHeader({
 
   useEffect(() => {
     setKbUnlocked(readTalisUKbUnlocked());
+
+    function onUnlocked() {
+      setKbUnlocked(true);
+    }
+    function onLocked() {
+      setKbUnlocked(false);
+    }
+    window.addEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
+    window.addEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
+    return () => {
+      window.removeEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
+      window.removeEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
+    };
   }, []);
 
   // Locked /talisu/kb (or manage) asks the header to open unlock in-place — never /talisu?kbUnlock=

@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   readTalisUKbUnlocked,
   requestTalisUKbNavbarUnlock,
+  TALISU_KB_LOCKED_EVENT,
   TALISU_KB_UNLOCKED_EVENT,
 } from "@/lib/talisu/kb-gate";
 import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
@@ -33,9 +34,15 @@ export default function TalisUKbPasswordGate({
     function onUnlocked() {
       setUnlocked(true);
     }
+    function onLocked() {
+      setUnlocked(false);
+      requestTalisUKbNavbarUnlock();
+    }
     window.addEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
+    window.addEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
     return () => {
       window.removeEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
+      window.removeEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
     };
   }, []);
 

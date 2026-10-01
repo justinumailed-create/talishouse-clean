@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   isTalisUKbPassword,
+  TALISU_KB_LOCKED_EVENT,
   TALISU_KB_OPEN_UNLOCK_EVENT,
   TALISU_KB_PASSWORD,
   TALISU_KB_UNLOCKED_EVENT,
@@ -45,6 +46,8 @@ describe("TalisU Knowledge Base password gate", () => {
 
     expect(kbGate).toContain(TALISU_KB_OPEN_UNLOCK_EVENT);
     expect(kbGate).toContain(TALISU_KB_UNLOCKED_EVENT);
+    expect(kbGate).toContain(TALISU_KB_LOCKED_EVENT);
+    expect(kbGate).toContain("clearTalisUKbUnlocked");
     expect(kbGate).not.toContain("buildTalisUKbUnlockHref");
   });
 
@@ -91,5 +94,41 @@ describe("TalisU Knowledge Base password gate", () => {
     const page = readFileSync(join(root, "app/talisu/kb/page.tsx"), "utf8");
     expect(page).toContain("TalisUKbDashboard");
     expect(page).not.toContain("Articles and playbooks will land here");
+  });
+
+  it("offers Logout that clears session without a full-page redirect", () => {
+    const logout = readFileSync(
+      join(root, "components/talisu/TalisUKbLogoutButton.tsx"),
+      "utf8",
+    );
+    const gate = readFileSync(
+      join(root, "components/talisu/TalisUKbPasswordGate.tsx"),
+      "utf8",
+    );
+    const dash = readFileSync(
+      join(root, "components/talisu/TalisUKbDashboard.tsx"),
+      "utf8",
+    );
+    const manage = readFileSync(
+      join(root, "components/talisu/TalisUKbManagePanel.tsx"),
+      "utf8",
+    );
+    const header = readFileSync(
+      join(root, "components/talisu/TalisUMktsHeader.tsx"),
+      "utf8",
+    );
+
+    expect(logout).toContain("Logout");
+    expect(logout).toContain("clearTalisUKbUnlocked");
+    expect(logout).toContain("notifyTalisUKbLocked");
+    expect(logout).toContain("requestTalisUKbNavbarUnlock");
+    expect(logout).not.toContain("window.location");
+    expect(logout).not.toContain("router.push");
+    expect(logout).not.toContain("router.replace");
+
+    expect(gate).toContain("TALISU_KB_LOCKED_EVENT");
+    expect(header).toContain("TALISU_KB_LOCKED_EVENT");
+    expect(dash).toContain("TalisUKbLogoutButton");
+    expect(manage).toContain("TalisUKbLogoutButton");
   });
 });

@@ -10,6 +10,9 @@ export const TALISU_KB_OPEN_UNLOCK_EVENT = "talisu:open-kb-unlock";
 /** CustomEvent: password succeeded — gates re-check session and show children. */
 export const TALISU_KB_UNLOCKED_EVENT = "talisu:kb-unlocked";
 
+/** CustomEvent: logout cleared session — gates show unlock UI again (no redirect). */
+export const TALISU_KB_LOCKED_EVENT = "talisu:kb-locked";
+
 export function isTalisUKbPassword(candidate: string): boolean {
   return candidate === TALISU_KB_PASSWORD;
 }
@@ -30,6 +33,14 @@ export function writeTalisUKbUnlocked(): void {
   }
 }
 
+export function clearTalisUKbUnlocked(): void {
+  try {
+    sessionStorage.removeItem(TALISU_KB_UNLOCK_STORAGE_KEY);
+  } catch {
+    // Ignore storage failures; notify listeners so UI still locks.
+  }
+}
+
 export function requestTalisUKbNavbarUnlock(): void {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(TALISU_KB_OPEN_UNLOCK_EVENT));
@@ -38,4 +49,9 @@ export function requestTalisUKbNavbarUnlock(): void {
 export function notifyTalisUKbUnlocked(): void {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(TALISU_KB_UNLOCKED_EVENT));
+}
+
+export function notifyTalisUKbLocked(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(TALISU_KB_LOCKED_EVENT));
 }

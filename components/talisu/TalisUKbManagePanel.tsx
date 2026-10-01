@@ -13,6 +13,7 @@ import {
   type TalisUKbItem,
 } from "@/lib/talisu/kb-content";
 import { TALISU_BTN_PRIMARY, TALISU_BTN_SECONDARY, TALISU_CARD } from "@/lib/talisu/ui";
+import TalisUKbLogoutButton from "@/components/talisu/TalisUKbLogoutButton";
 
 const BUCKETS: TalisUKbBucket[] = ["audios", "videos", "learning"];
 
@@ -110,7 +111,7 @@ export default function TalisUKbManagePanel() {
             );
           })}
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link href={TALISU_KB_PATH} className={TALISU_BTN_SECONDARY}>
             View dashboard
           </Link>
@@ -120,6 +121,7 @@ export default function TalisUKbManagePanel() {
           <button type="button" onClick={handleSave} className={TALISU_BTN_PRIMARY}>
             Save changes
           </button>
+          <TalisUKbLogoutButton />
         </div>
       </div>
 
