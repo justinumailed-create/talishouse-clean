@@ -23,19 +23,27 @@ export default function TalisprosHomeShowcase() {
         sizes="(min-width: 1024px) 60vw, 100vw"
         className="object-cover object-center"
       />
+      {/* Base darkening over the photo */}
+      <div className="absolute inset-0 bg-black/55" aria-hidden />
+      {/* Stronger vertical scrim so body copy stays readable */}
       <div
-        className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/55 to-black/75"
+        className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/70 to-black/85"
+        aria-hidden
+      />
+      {/* Extra density behind the centered text column */}
+      <div
+        className="pointer-events-none absolute inset-y-0 left-1/2 w-full max-w-[40rem] -translate-x-1/2 bg-gradient-to-r from-transparent via-black/45 to-transparent"
         aria-hidden
       />
       <div className="relative z-10 flex h-full min-h-0 flex-col overflow-y-auto overscroll-contain px-5 py-6 sm:px-7 sm:py-8 lg:px-8 lg:py-9 lg:[&::-webkit-scrollbar]:thin">
-        <div className="mx-auto flex w-full max-w-[36rem] flex-col gap-0 text-white">
+        <div className="mx-auto flex w-full max-w-[36rem] flex-col gap-0 text-[#f7f7f5]">
           {HOME_OWNERSHIP_SECTIONS.map((section, index) => (
             <section
               key={section.id}
               className={
                 index === 0
                   ? "pb-5 sm:pb-6"
-                  : "border-t border-white/25 py-5 sm:py-6"
+                  : "border-t border-white/35 py-5 sm:py-6"
               }
               aria-labelledby={`ownership-${section.id}-title`}
             >
@@ -45,10 +53,10 @@ export default function TalisprosHomeShowcase() {
               >
                 {section.title}
               </h2>
-              <p className="mt-2.5 text-[13.5px] leading-relaxed text-white/92 sm:text-[14.5px] sm:leading-relaxed">
+              <p className="mt-2.5 text-[13.5px] leading-relaxed text-[#f2f2ef] sm:text-[14.5px] sm:leading-relaxed">
                 {section.body}
               </p>
-              <p className="mt-2.5 text-[13.5px] leading-relaxed text-white/85 sm:text-[14.5px]">
+              <p className="mt-2.5 text-[13.5px] leading-relaxed text-[#ecece8] sm:text-[14.5px]">
                 {section.result}
               </p>
             </section>
