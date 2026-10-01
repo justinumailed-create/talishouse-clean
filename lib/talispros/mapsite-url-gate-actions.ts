@@ -6,6 +6,7 @@ import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { createAdminNotification } from "@/lib/talispros/admin-notifications";
 import {
+  isMapsiteRegisterPathStandIn,
   isMapsiteUrlGateExempt,
   isUrlGateExpired,
   isUrlGatePinFormat,
@@ -15,6 +16,10 @@ import {
   resolveMapsiteListingUrl,
   urlGateExpiresAt,
 } from "@/lib/talispros/mapsite-url-gate";
+import {
+  buildClaimedMapSitePath,
+  claimedMapSiteSegmentForAccountOrPlan,
+} from "@/lib/talispros/mapsite-state";
 import {
   generateUrlGatePin,
   hashUrlGatePin,
@@ -182,6 +187,24 @@ export async function issueMapSiteUrlGatePin(fastCode: string): Promise<{
   });
 }
 
+
+function resolveUrlGateUnlockHref(mapsite: {
+  fastCode: string;
+  brokerUrl?: string | null;
+  accountType?: string | null;
+}): string | null {
+  const dest = resolveMapsiteListingUrl(mapsite.fastCode, mapsite.brokerUrl);
+  if (!dest) return null;
+  if (isMapsiteRegisterPathStandIn(dest)) {
+    const segment = claimedMapSiteSegmentForAccountOrPlan(mapsite.accountType);
+    return buildClaimedMapSitePath({
+      fastCode: mapsite.fastCode,
+      accountType: segment,
+    });
+  }
+  return dest;
+}
+
 async function unlockWithPin(
   fastCode: string,
   rawPin: string,
@@ -203,7 +226,7 @@ async function unlockWithPin(
     return { success: false, error: "Mapsite™ not found" };
   }
 
-  const dest = resolveMapsiteListingUrl(mapsite.fastCode, mapsite.brokerUrl);
+  const dest = resolveUrlGateUnlockHref(mapsite);
   if (!dest) {
     return {
       success: false,

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import {
+  isMapsiteRegisterPathStandIn,
   isMapsiteUrlGateExempt,
   MAPSITE_URL_GATE_HEADLINE,
   resolveMapsiteListingUrl,
@@ -20,7 +21,7 @@ export async function generateMetadata({
   return createMetadata({
     title: `${MAPSITE_URL_GATE_HEADLINE} | Talispros™`,
     description:
-      "Generate a secure code for Admin Notifications, then enter it to open the listing/payment URL.",
+      "Generate a secure code for Admin Notifications, then enter it to open this Mapsite™ (stand-in until SamCart).",
     path: `/talispros/register-your-mapsite/${encodeURIComponent(fastCode)}`,
   });
 }
@@ -39,15 +40,18 @@ export default async function RegisterYourMapSitePage({
     notFound();
   }
 
-  // Exempt FAST codes (e.g. DC02) skip the secure-code gate entirely.
+  // Exempt FAST codes (e.g. DC01, DC02) skip the secure-code gate entirely.
   if (isMapsiteUrlGateExempt(mapsite.fastCode)) {
     redirect(listingUrl);
   }
+
+  const unlockToMapsite = isMapsiteRegisterPathStandIn(listingUrl);
 
   return (
     <RegisterYourMapSiteClient
       fastCode={mapsite.fastCode}
       pinIssued={Boolean(mapsite.urlGatePinIssuedAt)}
+      unlockToMapsite={unlockToMapsite}
     />
   );
 }

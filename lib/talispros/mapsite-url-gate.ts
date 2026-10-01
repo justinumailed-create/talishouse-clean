@@ -17,13 +17,14 @@ export const MAPSITE_URL_GATE_SENTINEL = "__url_gate__";
  * FAST codes that skip the Admin Notifications secure-code URL unlock.
  * Normalized lower-case; compare with normalizeMapsiteUrlGateFastCode.
  */
-export const MAPSITE_URL_GATE_EXEMPT_FAST_CODES = ["dc02"] as const;
+export const MAPSITE_URL_GATE_EXEMPT_FAST_CODES = ["dc01", "dc02"] as const;
 
 /**
  * Listing/payment URL overrides for specific FAST codes (case-insensitive key).
  * Wins over the stored mapsites.broker_url for the published URL button / unlock.
  */
 export const MAPSITE_URL_OVERRIDES: Readonly<Record<string, string>> = {
+  dc01: "https://talispros.mysamcart.com/checkout/register",
   dc02: "https://talispros.mysamcart.com/checkout/register",
 };
 
@@ -88,6 +89,12 @@ export function resolvePublishedUrlButtonHref(
   const dest = resolveMapsiteListingUrl(fastCode, brokerUrl);
   if (!dest) return null;
   if (isMapsiteUrlGateExempt(fastCode)) return dest;
+  // Claimed-demo stand-in: URL button shows the register path (FAST Code™ gate).
+  if (isMapsiteRegisterPathStandIn(dest)) {
+    const code = fastCode?.trim();
+    if (!code) return dest;
+    return mapsiteUrlGatePath(code);
+  }
   return MAPSITE_URL_GATE_SENTINEL;
 }
 
@@ -125,6 +132,38 @@ export function mapsiteUrlGateHref(
   const code = fastCode?.trim();
   if (!code) return dest;
   return mapsiteUrlGatePath(code);
+}
+
+
+/**
+ * Stand-in until SamCart payment success: when broker_url is the local
+ * register-your-mapsite path (or a bare homepage), unlock opens the claimed
+ * Mapsite™ instead of looping the gate or dumping to `/`.
+ */
+export function isMapsiteRegisterPathStandIn(
+  href: string | null | undefined,
+): boolean {
+  const raw = (href || "").trim();
+  if (!raw) return false;
+  if (registerYourMapSiteFastCodeFromPath(raw)) return true;
+  try {
+    const url = new URL(raw, "https://talispros.local");
+    if (registerYourMapSiteFastCodeFromPath(url.pathname)) return true;
+    const path = url.pathname.replace(/\/+$/, "") || "/";
+    if (path === "/" || path === "") return true;
+    // Absolute homepage hosts without a deeper path.
+    if (
+      (url.hostname === "talispros.com" ||
+        url.hostname === "www.talispros.com" ||
+        url.hostname === "talispros.local") &&
+      (path === "/" || path === "")
+    ) {
+      return true;
+    }
+  } catch {
+    if (raw === "/" || raw === "") return true;
+  }
+  return false;
 }
 
 export function normalizeUrlGatePin(value: string): string {

@@ -44,6 +44,9 @@ describe("Claim Your Market on demo Mapsites™ only", () => {
     expect(claimButton).toContain("claimDemoMapSiteAction");
     expect(claimButton).toContain("DemoFastCodePreview");
     expect(claimButton).toContain("Claim Your Market™");
+    expect(claimButton).toContain("TALISPROS_START_SEGMENTS");
+    expect(claimButton).toContain("audience");
+    expect(claimButton).toContain("What best describes you?");
 
     const claimAction = readFileSync(
       resolve("app/talispros/demo-mapsite/claim-actions.ts"),

@@ -40,9 +40,12 @@ export function isDemonstrationCatalogBook(
   const slug = book.slug?.trim().toLowerCase() || "";
   const accountId = book.accountId?.trim().toLowerCase() || "";
 
-  if (id === PINNED_TALISBOOK_LIBRARY_ID) return true;
+  // Former demo/pinned ebook kept on a claimed (issued) FAST Code shelf is live inventory.
+  if (id === PINNED_TALISBOOK_LIBRARY_ID || slug === PINNED_TALISBOOK_SLUG) {
+    if (isIssuedFastCode(book.fastCode)) return false;
+    return true;
+  }
   if (id.startsWith("lib-demo-")) return true;
-  if (slug === PINNED_TALISBOOK_SLUG) return true;
   if (accountId === "demo-root-account" || accountId === "demo-derivative-account") {
     return true;
   }

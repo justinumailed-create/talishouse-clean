@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  isMapsiteRegisterPathStandIn,
   isMapsiteUrlGateExempt,
   isUrlGateExpired,
   isUrlGatePinFormat,
@@ -183,16 +184,31 @@ describe("Mapsite™ URL gate", () => {
     ).toBeNull();
   });
 
-  it("exempts DC02 from the URL gate and forces the SamCart register URL", () => {
+  it("exempts DC01 and DC02 from the URL gate and forces the SamCart register URL", () => {
+    expect(isMapsiteUrlGateExempt("DC01")).toBe(true);
+    expect(isMapsiteUrlGateExempt("dc01")).toBe(true);
+    expect(isMapsiteUrlGateExempt("Dc01")).toBe(true);
     expect(isMapsiteUrlGateExempt("DC02")).toBe(true);
     expect(isMapsiteUrlGateExempt("dc02")).toBe(true);
     expect(isMapsiteUrlGateExempt("Dc02")).toBe(true);
     expect(isMapsiteUrlGateExempt("ar01")).toBe(false);
+    expect(MAPSITE_URL_OVERRIDES.dc01).toBe(
+      "https://talispros.mysamcart.com/checkout/register",
+    );
     expect(MAPSITE_URL_OVERRIDES.dc02).toBe(
       "https://talispros.mysamcart.com/checkout/register",
     );
     expect(
+      resolveMapsiteListingUrl("DC01", "https://www.talispros.com/talisu/reg"),
+    ).toBe("https://talispros.mysamcart.com/checkout/register");
+    expect(
       resolveMapsiteListingUrl("DC02", "https://www.talispros.com/talisu/reg"),
+    ).toBe("https://talispros.mysamcart.com/checkout/register");
+    expect(
+      resolvePublishedUrlButtonHref(
+        "dc01",
+        "https://www.talispros.com/talisu/reg",
+      ),
     ).toBe("https://talispros.mysamcart.com/checkout/register");
     expect(
       resolvePublishedUrlButtonHref(
@@ -201,11 +217,21 @@ describe("Mapsite™ URL gate", () => {
       ),
     ).toBe("https://talispros.mysamcart.com/checkout/register");
     expect(
+      mapsiteUrlGateHref("DC01", "https://example.com/old"),
+    ).toBe("https://talispros.mysamcart.com/checkout/register");
+    expect(
       mapsiteUrlGateHref("DC02", "https://example.com/old"),
     ).toBe("https://talispros.mysamcart.com/checkout/register");
     expect(
       resolvePublishedUrlButtonHref("ar01", "https://example.com/paid"),
     ).toBe(MAPSITE_URL_GATE_SENTINEL);
+    expect(
+      resolvePublishedUrlButtonHref(
+        "ar01",
+        "/talispros/register-your-mapsite/ar01",
+      ),
+    ).toBe("/talispros/register-your-mapsite/ar01");
+    expect(mapsiteHasGatedUrl("", "dc01")).toBe(true);
     expect(mapsiteHasGatedUrl("", "dc02")).toBe(true);
 
     const actions = readFileSync(
@@ -223,6 +249,30 @@ describe("Mapsite™ URL gate", () => {
       "utf8",
     );
     expect(controls).toContain("isMapsiteUrlGateExempt");
+  });
+
+
+  it("treats register-your-mapsite paths (and homepage) as payment stand-ins", () => {
+    expect(
+      isMapsiteRegisterPathStandIn("/talispros/register-your-mapsite/ar01"),
+    ).toBe(true);
+    expect(isMapsiteRegisterPathStandIn("/")).toBe(true);
+    expect(isMapsiteRegisterPathStandIn("https://example.com/paid")).toBe(
+      false,
+    );
+    expect(
+      isMapsiteRegisterPathStandIn(
+        "https://talispros.mysamcart.com/checkout/register",
+      ),
+    ).toBe(false);
+
+    const actions = readFileSync(
+      join(process.cwd(), "lib/talispros/mapsite-url-gate-actions.ts"),
+      "utf8",
+    );
+    expect(actions).toContain("isMapsiteRegisterPathStandIn");
+    expect(actions).toContain("buildClaimedMapSitePath");
+    expect(actions).toContain("resolveUrlGateUnlockHref");
   });
 
   it("ships codes to the Admin Notifications tab", () => {

@@ -6,7 +6,14 @@ import {
   buildClaimedMapSitePath,
   mapsiteAccountTypeSegment,
 } from "@/lib/talispros/mapsite-state";
-import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
+import {
+  DEMO_PINNED_EBOOK_HREF,
+  isDemoMapSiteCode,
+} from "@/lib/talispros/demo-mapsite";
+import {
+  PINNED_TALISBOOK_SLUG,
+  pinnedTalisBookLibraryEntry,
+} from "@/lib/talisbooks/library/pinned-catalog";
 import { listingImageUrlsFromEbookPages } from "@/lib/talispros/mapsite-listing-media";
 import { parseMapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
 import {
@@ -92,6 +99,7 @@ function toLibraryBook(
     mapsiteId: row.mapsite_id,
     fastCode: row.fast_code,
     parentBookId: row.parent_book_id,
+    metadata,
   };
 }
 
@@ -328,7 +336,7 @@ export async function getMapSiteEbookContext(
         .maybeSingle(),
       supabase
         .from("mapsites")
-        .select("id, fast_code, account_type, account_id, email")
+        .select("id, fast_code, account_type, account_id, email, teb_url")
         .ilike("fast_code", fastCode)
         .maybeSingle(),
       supabase
@@ -396,6 +404,41 @@ export async function getMapSiteEbookContext(
         ...bookRows.filter((row) => row.slug !== wantedSlug),
       ];
     }
+  }
+
+  // Claimed demo → live: keep the demo/pinned ebook on the FAST shelf when DB books are empty.
+  const tebUrl = (mapsiteByCode as { teb_url?: string | null } | null)?.teb_url?.trim() || "";
+  const tebIsPinned =
+    tebUrl === DEMO_PINNED_EBOOK_HREF ||
+    tebUrl.endsWith(`/${PINNED_TALISBOOK_SLUG}`) ||
+    ebookSlugFromTebUrl(tebUrl) === PINNED_TALISBOOK_SLUG;
+  if (bookRows.length === 0 && (tebIsPinned || isDemoCode)) {
+    // Synthetic shelf entry — same pinned sample that was the demo ebook.
+    const pinned = pinnedTalisBookLibraryEntry();
+    bookRows = [
+      {
+        id: pinned.id,
+        slug: pinned.slug,
+        title: pinned.title,
+        subtitle: "Your Talisbook™ · from demonstration ebook",
+        publish_status: pinned.publishStatus,
+        published_at: pinned.publishedAt,
+        page_count: pinned.pageCount,
+        account_id: pinned.accountId,
+        account_type: pinned.accountType,
+        mapsite_id: mapsiteId,
+        fast_code: fastCode,
+        parent_book_id: pinned.parentBookId,
+        metadata: {
+          coverImageUrl: pinned.coverImageUrl,
+          coverTemplateId: pinned.coverTemplateId,
+          fromPinnedDemoEbook: true,
+        },
+        views: pinned.views,
+        clicks: pinned.clicks,
+        updated_at: new Date().toISOString(),
+      } as unknown as (typeof bookRows)[number],
+    ];
   }
 
   const paymentReceived = isDemoCode

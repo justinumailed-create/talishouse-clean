@@ -7,26 +7,6 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
-        source: "/talispros/mapsite/:accountType/dc01",
-        destination: "/talispros/mapsite/:accountType/dc02",
-        permanent: true,
-      },
-      {
-        source: "/ma/dc01",
-        destination: "/ma/dc02",
-        permanent: true,
-      },
-      {
-        source: "/talisbooks/viewer/dc01-dc01-talisbook-b9rg",
-        destination: "/talisbooks/viewer/dc02-dc02-talisbook-b9rg",
-        permanent: true,
-      },
-      {
-        source: "/talisbooks/fast/dc01",
-        destination: "/talisbooks/fast/dc02",
-        permanent: true,
-      },
-      {
         source: "/talisu/eb",
         destination: "/catalogue/bookshelf",
         permanent: true,

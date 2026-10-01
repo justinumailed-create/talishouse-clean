@@ -11,6 +11,7 @@ import {
 import { generateFastCode } from "@/services/fast-code.service";
 import { FastCodeValidationError } from "@/validators/fast-code.validator";
 import {
+  DEMO_PINNED_EBOOK_HREF,
   isDemonstrationListing,
   isProtectedPlatformDemoMapSite,
 } from "@/lib/talispros/demo-mapsite";
@@ -19,6 +20,10 @@ import {
   claimedMapSiteSegmentForAccountOrPlan,
   DEMO_MAPSITE_FAST_CODE,
 } from "@/lib/talispros/mapsite-state";
+import { accountTypeForAudience } from "@/lib/talispros/account-capabilities";
+import { parseRegistrationMarket } from "@/lib/registration-market";
+import { mapsiteUrlGatePath } from "@/lib/talispros/mapsite-url-gate";
+import { ROUTES } from "@/lib/routes";
 
 export type ClaimDemoMapSiteInput = {
   mapsiteId: string;
@@ -26,8 +31,10 @@ export type ClaimDemoMapSiteInput = {
   lastName: string;
   middleName?: string | null;
   email?: string | null;
-  /** Audience / account type for the claimed URL segment. Default root → brokers. */
+  /** Capability account type (root / derivative / fsbo / adpro). */
   accountType?: string | null;
+  /** /start audience (brokers | listings | fsbos | adpro). Wins over accountType for path. */
+  audience?: string | null;
 };
 
 export type ClaimDemoMapSiteResult =
@@ -37,11 +44,75 @@ export type ClaimDemoMapSiteResult =
       fastCode: string;
       href: string;
       accountTypeSegment: string;
+      tebHref: string;
     }
   | { ok: false; error: string };
 
 const MAPSITE_SELECT =
   "id, fast_code, status, latitude, longitude, map_zoom, property_title, property_address, property_description, cover_image, header_image_url, logo_url, profile_image_url, agent_name, owner_first_name, owner_last_name, gallery_images, mls_url, broker_url, website, teb_url, ttv_url, account_type, is_demonstration, email, phone";
+
+function isDemoPlaceholderTitle(title: string | null | undefined): boolean {
+  const raw = title?.trim() || "";
+  if (!raw) return true;
+  return /^demo(\s|$)/i.test(raw) || /mapsite/i.test(raw);
+}
+
+function resolveClaimAccountType(input: ClaimDemoMapSiteInput): {
+  accountTypeRaw: string;
+  accountTypeSegment: string;
+} {
+  const audience =
+    parseRegistrationMarket(input.audience) ||
+    parseRegistrationMarket(input.accountType);
+  if (audience) {
+    return {
+      accountTypeRaw: accountTypeForAudience(audience),
+      accountTypeSegment: claimedMapSiteSegmentForAccountOrPlan(audience),
+    };
+  }
+  const accountTypeRaw = input.accountType?.trim() || "root";
+  return {
+    accountTypeRaw,
+    accountTypeSegment: claimedMapSiteSegmentForAccountOrPlan(accountTypeRaw),
+  };
+}
+
+async function reassignDemoBooksToClaimed(options: {
+  supabase: ReturnType<typeof getSupabaseAdmin>;
+  previousFastCode: string | null | undefined;
+  previousMapsiteId: string;
+  claimedMapsiteId: string;
+  fastCode: string;
+}): Promise<void> {
+  const { supabase, previousFastCode, previousMapsiteId, claimedMapsiteId, fastCode } =
+    options;
+  const code = fastCode.trim().toLowerCase();
+  const prev = previousFastCode?.trim().toLowerCase() || "";
+
+  // Move any books tied to the demonstration Mapsite™ / demo-* code onto the live code.
+  if (prev && prev !== code) {
+    await supabase
+      .from("talisbooks_books")
+      .update({
+        fast_code: code,
+        mapsite_id: claimedMapsiteId,
+        updated_at: new Date().toISOString(),
+      })
+      .ilike("fast_code", prev);
+  }
+
+  await supabase
+    .from("talisbooks_books")
+    .update({
+      fast_code: code,
+      mapsite_id: claimedMapsiteId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("mapsite_id", previousMapsiteId);
+
+  // Shared pinned-sample stays global — empty claimed shelves pick up the
+  // demo ebook via teb_url in getMapSiteEbookContext.
+}
 
 export async function claimDemoMapSite(
   input: ClaimDemoMapSiteInput,
@@ -65,6 +136,12 @@ export async function claimDemoMapSite(
   }
   if (!firstName || !lastName) {
     return { ok: false, error: "Enter your first and last name to claim." };
+  }
+  if (!input.audience?.trim() && !input.accountType?.trim()) {
+    return {
+      ok: false,
+      error: "Choose who you are (same options as /start) before claiming.",
+    };
   }
 
   const supabase = getSupabaseAdmin();
@@ -113,14 +190,20 @@ export async function claimDemoMapSite(
     };
   }
 
-  const accountTypeRaw =
-    input.accountType?.trim() ||
-    row.account_type?.trim() ||
-    "root";
-  const accountTypeSegment =
-    claimedMapSiteSegmentForAccountOrPlan(accountTypeRaw);
+  const { accountTypeRaw, accountTypeSegment } = resolveClaimAccountType({
+    ...input,
+    accountType: input.accountType || row.account_type,
+  });
   const agentName = `${firstName} ${lastName}`.trim();
   const now = new Date().toISOString();
+  const propertyAddress = row.property_address?.trim() || null;
+  const propertyTitle = isDemoPlaceholderTitle(row.property_title)
+    ? propertyAddress || "Your Mapsite™"
+    : row.property_title || propertyAddress || "Your Mapsite™";
+  const tebUrl =
+    row.teb_url?.trim() || DEMO_PINNED_EBOOK_HREF;
+  // Stand-in for SamCart payment URL: register path → FAST Code™ gate → Mapsite™.
+  const registerPath = mapsiteUrlGatePath(fastCode);
 
   const { error: fastInsertError } = await supabase.from("fast_codes").upsert(
     {
@@ -144,6 +227,7 @@ export async function claimDemoMapSite(
     row.fast_code?.trim().toUpperCase() === DEMO_MAPSITE_FAST_CODE;
 
   let claimedMapsiteId = row.id;
+  const previousFastCode = row.fast_code;
 
   if (protectSeed) {
     // Keep the platform DEMO seed; copy pin/listing into a new claimed row.
@@ -157,8 +241,8 @@ export async function claimDemoMapSite(
       email,
       phone: row.phone || "",
       status: "active",
-      property_title: row.property_title || "Your Mapsite™",
-      property_address: row.property_address,
+      property_title: propertyTitle,
+      property_address: propertyAddress,
       property_description: row.property_description,
       latitude: row.latitude,
       longitude: row.longitude,
@@ -169,9 +253,9 @@ export async function claimDemoMapSite(
       profile_image_url: row.profile_image_url,
       gallery_images: row.gallery_images || [],
       mls_url: row.mls_url,
-      broker_url: row.broker_url,
-      website: row.website,
-      teb_url: row.teb_url,
+      broker_url: registerPath,
+      website: registerPath,
+      teb_url: tebUrl,
       ttv_url: row.ttv_url,
       is_demonstration: false,
       interest_form_enabled: true,
@@ -211,6 +295,11 @@ export async function claimDemoMapSite(
         agent_name: agentName,
         email,
         status: "active",
+        property_title: propertyTitle,
+        property_address: propertyAddress,
+        broker_url: registerPath,
+        website: registerPath,
+        teb_url: tebUrl,
         is_demonstration: false,
         interest_form_enabled: true,
         updated_at: now,
@@ -230,10 +319,25 @@ export async function claimDemoMapSite(
       .ilike("code", fastCode);
   }
 
+  try {
+    await reassignDemoBooksToClaimed({
+      supabase,
+      previousFastCode,
+      previousMapsiteId: row.id,
+      claimedMapsiteId,
+      fastCode,
+    });
+  } catch (error) {
+    console.warn("[claimDemoMapSite] Could not reassign demo ebook shelf:", error);
+  }
+
   const href = buildClaimedMapSitePath({
     fastCode,
     accountType: accountTypeSegment,
   });
+  const tebHref = `${ROUTES.TALISBOOKS}/fast/${encodeURIComponent(
+    fastCode.trim().toLowerCase(),
+  )}`;
 
   return {
     ok: true,
@@ -241,5 +345,6 @@ export async function claimDemoMapSite(
     fastCode,
     href,
     accountTypeSegment,
+    tebHref,
   };
 }
