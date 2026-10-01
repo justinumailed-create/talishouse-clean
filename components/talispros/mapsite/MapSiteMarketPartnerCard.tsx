@@ -16,7 +16,6 @@ import {
 } from "@/lib/talispros/market-pages";
 import { MAPSITE_LISTING_CARD_WIDTH_CLASS } from "@/lib/talispros/mapsite-listing-media";
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
-import { ROUTES } from "@/lib/routes";
 import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
@@ -157,7 +156,7 @@ export default function MapSiteMarketPartnerCard({
         {isDemo ? (
           <div className="mt-3 flex justify-start">
             <Link
-              href={ROUTES.HOME}
+              href="/start"
               className="inline-flex min-h-10 items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
             >
               Claim Your Market
@@ -231,7 +230,7 @@ export default function MapSiteMarketPartnerCard({
         {isDemo ? (
           <div className="mt-4 flex justify-center">
             <Link
-              href={ROUTES.HOME}
+              href="/start"
               className="inline-flex min-h-10 items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
             >
               Claim Your Market

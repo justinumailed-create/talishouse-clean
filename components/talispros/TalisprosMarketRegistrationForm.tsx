@@ -15,6 +15,7 @@ import {
   formatNorthAmericanPhone,
   northAmericanPhoneDigits,
 } from "@/lib/format-north-american-phone";
+import DemoFastCodePreview from "@/components/talispros/DemoFastCodePreview";
 
 interface TalisprosMarketRegistrationFormProps {
   market: RegistrationMarket;
@@ -319,6 +320,9 @@ export default function TalisprosMarketRegistrationForm({
               required
               className="w-full rounded border border-neutral-300 px-3 py-2 text-sm"
             />
+          </div>
+          <div className="sm:col-span-2">
+            <DemoFastCodePreview firstName={firstName} lastName={lastName} />
           </div>
           <div>
             <FieldLabel
