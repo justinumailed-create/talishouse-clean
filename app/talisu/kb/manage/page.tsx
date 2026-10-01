@@ -12,7 +12,7 @@ export const metadata = createTalisUMetadata({
 });
 
 /**
- * KB content manage UI (same Admin123 gate). Linked from rm22 Mapsite™ dashboard.
+ * KB content manage UI (same session unlock as /talisu/kb). Linked from rm22 Mapsite™ dashboard.
  */
 export default function TalisUKnowledgeBaseManagePage() {
   return (

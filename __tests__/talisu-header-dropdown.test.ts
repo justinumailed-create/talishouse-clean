@@ -38,4 +38,15 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toMatch(/\n\s*TalisU\n/);
     expect(header).toContain('role="menu"');
   });
+
+  it("opens Knowledge Base unlock as a navbar drop-pop (not a full page)", () => {
+    const header = readFileSync(
+      resolve("components/talisu/TalisUMktsHeader.tsx"),
+      "utf8",
+    );
+    expect(header).toContain("TalisUKbUnlockForm");
+    expect(header).toContain("kb-unlock");
+    expect(header).toContain("handleKbMenuClick");
+    expect(header).toContain("TALISU_KB_UNLOCK_QUERY");
+  });
 });

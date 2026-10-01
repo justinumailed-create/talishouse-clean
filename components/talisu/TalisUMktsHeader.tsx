@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   TALISU_MKTS_HEADER_BLUE,
   TALISU_MKTS_HEADER_DROPDOWN,
@@ -11,7 +11,14 @@ import {
   TALISU_MKTS_HEADER_TAGLINE,
 } from "@/lib/talisu/markets-pins";
 import { TALISU_REGISTER } from "@/lib/talisu/content";
+import {
+  TALISU_KB_NEXT_QUERY,
+  TALISU_KB_UNLOCK_QUERY,
+  readTalisUKbUnlocked,
+} from "@/lib/talisu/kb-gate";
+import { TALISU_KB_PATH } from "@/lib/talisu/kb-content";
 import TalisBrandFlip from "@/components/talisu/TalisBrandFlip";
+import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
 
 export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 
@@ -59,6 +66,8 @@ function LockIcon({ className }: { className?: string }) {
   );
 }
 
+type DropdownPanel = "menu" | "kb-unlock";
+
 export default function TalisUMktsHeader({
   variant = "default",
   dashboardUnlocked = false,
@@ -66,7 +75,11 @@ export default function TalisUMktsHeader({
   onOpenDashboard,
 }: TalisUMktsHeaderProps = {}) {
   const pathname = usePathname() || "/talisu/mkts";
+  const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [panel, setPanel] = useState<DropdownPanel>("menu");
+  const [kbUnlocked, setKbUnlocked] = useState(false);
+  const [kbNext, setKbNext] = useState(TALISU_KB_PATH);
   const [registerPromptOpen, setRegisterPromptOpen] = useState(false);
   const menuId = useId();
   const promptTitleId = useId();
@@ -80,14 +93,37 @@ export default function TalisUMktsHeader({
   );
 
   useEffect(() => {
+    setKbUnlocked(readTalisUKbUnlocked());
+  }, []);
+
+  // Direct hits to /talisu/kb (or manage) redirect here with ?kbUnlock=1&kbNext=…
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get(TALISU_KB_UNLOCK_QUERY) !== "1") return;
+    const next = params.get(TALISU_KB_NEXT_QUERY) || TALISU_KB_PATH;
+    setKbNext(next);
+    if (readTalisUKbUnlocked()) {
+      router.replace(next);
+      return;
+    }
+    setPanel("kb-unlock");
+    setOpen(true);
+  }, [pathname, router]);
+
+  useEffect(() => {
     if (!open) return;
     function onPointerDown(event: MouseEvent) {
       if (!rootRef.current?.contains(event.target as Node)) {
         setOpen(false);
+        setPanel("menu");
       }
     }
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        setOpen(false);
+        setPanel("menu");
+      }
     }
     document.addEventListener("mousedown", onPointerDown);
     document.addEventListener("keydown", onKeyDown);
@@ -123,6 +159,35 @@ export default function TalisUMktsHeader({
     setRegisterPromptOpen(true);
   }
 
+  function handleKbMenuClick() {
+    if (kbUnlocked || readTalisUKbUnlocked()) {
+      setKbUnlocked(true);
+      setOpen(false);
+      setPanel("menu");
+      router.push(TALISU_KB_PATH);
+      return;
+    }
+    setKbNext(TALISU_KB_PATH);
+    setPanel("kb-unlock");
+  }
+
+  function handleKbUnlockSuccess() {
+    setKbUnlocked(true);
+    setOpen(false);
+    setPanel("menu");
+    const destination = kbNext || TALISU_KB_PATH;
+    // Drop unlock query if present, then open the KB dashboard / manage UI.
+    router.replace(destination);
+  }
+
+  function handleTalisUToggle() {
+    setOpen((value) => {
+      const next = !value;
+      if (!next) setPanel("menu");
+      return next;
+    });
+  }
+
   return (
     <header
       className="sticky top-0 z-40 shrink-0 text-white shadow-sm"
@@ -150,7 +215,7 @@ export default function TalisUMktsHeader({
               aria-haspopup="menu"
               aria-expanded={open}
               aria-controls={menuId}
-              onClick={() => setOpen((value) => !value)}
+              onClick={handleTalisUToggle}
               className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
                 dropdownActive || open
                   ? "bg-white/20 text-white"
@@ -177,28 +242,66 @@ export default function TalisUMktsHeader({
               <div
                 id={menuId}
                 role="menu"
-                className="absolute right-0 z-50 mt-1.5 min-w-[11.5rem] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] py-1 shadow-lg"
+                className={`absolute right-0 z-50 mt-1.5 overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] shadow-lg ${
+                  panel === "kb-unlock"
+                    ? "w-[min(92vw,16.5rem)] p-3"
+                    : "min-w-[11.5rem] py-1"
+                }`}
               >
-                {TALISU_MKTS_HEADER_DROPDOWN.map((item) => {
-                  const active =
-                    pathname === item.href ||
-                    pathname.startsWith(`${item.href}/`);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      role="menuitem"
-                      onClick={() => setOpen(false)}
-                      className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
-                        active
-                          ? "bg-white/20 text-white"
-                          : "text-white/95 hover:bg-white/15"
-                      }`}
+                {panel === "kb-unlock" ? (
+                  <div>
+                    <button
+                      type="button"
+                      className="mb-2 text-[12px] font-medium text-white/80 transition hover:text-white"
+                      onClick={() => setPanel("menu")}
                     >
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                      ← Menu
+                    </button>
+                    <TalisUKbUnlockForm
+                      variant="navbar"
+                      onSuccess={handleKbUnlockSuccess}
+                    />
+                  </div>
+                ) : (
+                  TALISU_MKTS_HEADER_DROPDOWN.map((item) => {
+                    const active =
+                      pathname === item.href ||
+                      pathname.startsWith(`${item.href}/`);
+                    const isKb = item.href === TALISU_KB_PATH;
+                    if (isKb) {
+                      return (
+                        <button
+                          key={item.href}
+                          type="button"
+                          role="menuitem"
+                          onClick={handleKbMenuClick}
+                          className={`block w-full px-3.5 py-2 text-left text-[13px] font-medium transition sm:text-[14px] ${
+                            active
+                              ? "bg-white/20 text-white"
+                              : "text-white/95 hover:bg-white/15"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      );
+                    }
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        role="menuitem"
+                        onClick={() => setOpen(false)}
+                        className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
+                          active
+                            ? "bg-white/20 text-white"
+                            : "text-white/95 hover:bg-white/15"
+                        }`}
+                      >
+                        {item.label}
+                      </Link>
+                    );
+                  })
+                )}
               </div>
             ) : null}
           </div>

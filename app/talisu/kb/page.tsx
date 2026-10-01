@@ -12,7 +12,7 @@ export const metadata = createTalisUMetadata({
 });
 
 /**
- * Knowledge Base dashboard. Protected by Admin123 password gate.
+ * Knowledge Base dashboard. Protected by session unlock (navbar drop-pop / gate redirect).
  * Sections: Audios / Videos / Learning Material.
  */
 export default function TalisUKnowledgeBasePage() {
