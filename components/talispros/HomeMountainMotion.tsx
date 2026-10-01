@@ -18,6 +18,8 @@ export default function HomeMountainMotion() {
         alt=""
         fill
         unoptimized
+        loading="eager"
+        fetchPriority="high"
         sizes="(min-width: 1024px) 60vw, 100vw"
         className="object-cover object-center motion-reduce:hidden"
         aria-hidden
