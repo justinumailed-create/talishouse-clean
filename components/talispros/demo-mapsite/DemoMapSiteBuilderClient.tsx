@@ -68,12 +68,6 @@ export default function DemoMapSiteBuilderClient() {
       >
         Download Demo PDF
       </a>
-      <a
-        href="/start"
-        className="absolute left-4 top-4 z-10 inline-flex min-h-10 items-center justify-center rounded-full border border-neutral-300 bg-white px-4 text-[13px] font-medium text-neutral-900 transition hover:border-neutral-900 sm:left-6 sm:top-5 sm:text-[14px]"
-      >
-        Realtor / FSBO claim
-      </a>
       <div className="w-full max-w-[480px]">
         <div className="text-center">
           <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">

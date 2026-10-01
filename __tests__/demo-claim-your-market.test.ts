@@ -26,27 +26,55 @@ describe("Claim Your Market on demo Mapsites™ only", () => {
     ).toBe(false);
   });
 
-  it("wires Claim Your Market → /start (audience → FAST) on demo claimed partner card, not demo-mapsite template", () => {
+  it("wires in-place Claim Your Market™ (no /start redirect) on demo partner card", () => {
     expect(ROUTES.HOME).toBe("/");
     const partner = readFileSync(
       resolve("components/talispros/mapsite/MapSiteMarketPartnerCard.tsx"),
       "utf8",
     );
-    expect(partner).toContain("Claim Your Market");
-    expect(partner).toContain('href="/start"');
+    expect(partner).toContain("DemoClaimMarketButton");
+    expect(partner).not.toContain('href="/start"');
+    expect(partner).not.toContain("Claim Your Market");
     expect(partner).toContain("isDemo");
+
+    const claimButton = readFileSync(
+      resolve("components/talispros/mapsite/DemoClaimMarketButton.tsx"),
+      "utf8",
+    );
+    expect(claimButton).toContain("claimDemoMapSiteAction");
+    expect(claimButton).toContain("DemoFastCodePreview");
+    expect(claimButton).toContain("Claim Your Market™");
+
+    const claimAction = readFileSync(
+      resolve("app/talispros/demo-mapsite/claim-actions.ts"),
+      "utf8",
+    );
+    expect(claimAction).toContain("claimDemoMapSite");
+    expect(claimAction).toContain("setMapSiteOwnerSession");
+
+    const claimService = readFileSync(
+      resolve("lib/talispros/claim-demo-mapsite.ts"),
+      "utf8",
+    );
+    expect(claimService).toContain("generateFastCode");
+    expect(claimService).toContain("is_demonstration: false");
+    expect(claimService).toContain("buildClaimedMapSitePath");
 
     const app = readFileSync(
       resolve("components/talispros/mapsite/MapSiteApplication.tsx"),
       "utf8",
     );
     expect(app).toContain("isDemo={isDemoListing}");
+    expect(app).toContain("TalisUMktsHeader");
+    expect(app).toContain("{claimed ? <TalisUMktsHeader /> : null}");
 
     const builder = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),
       "utf8",
     );
     expect(builder).not.toContain("Claim Your Market");
+    expect(builder).not.toContain('href="/start"');
+    expect(builder).not.toContain("Realtor / FSBO claim");
     expect(builder).toContain("DEMO_MAPSITE_PDF_HREF");
 
     const ebook = readFileSync(

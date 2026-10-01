@@ -1,0 +1,245 @@
+/**
+ * Convert a demonstration Mapsite™ into a live claimed Mapsite™ with an
+ * issued FAST Code™ — same initials+digits rules as Claim a Market™ / build.
+ */
+
+import type { Database } from "@/lib/database.types";
+import {
+  getSupabaseAdmin,
+  isSupabaseAdminConfigured,
+} from "@/lib/supabaseAdmin";
+import { generateFastCode } from "@/services/fast-code.service";
+import { FastCodeValidationError } from "@/validators/fast-code.validator";
+import {
+  isDemonstrationListing,
+  isProtectedPlatformDemoMapSite,
+} from "@/lib/talispros/demo-mapsite";
+import {
+  buildClaimedMapSitePath,
+  claimedMapSiteSegmentForAccountOrPlan,
+  DEMO_MAPSITE_FAST_CODE,
+} from "@/lib/talispros/mapsite-state";
+
+export type ClaimDemoMapSiteInput = {
+  mapsiteId: string;
+  firstName: string;
+  lastName: string;
+  middleName?: string | null;
+  email?: string | null;
+  /** Audience / account type for the claimed URL segment. Default root → brokers. */
+  accountType?: string | null;
+};
+
+export type ClaimDemoMapSiteResult =
+  | {
+      ok: true;
+      mapsiteId: string;
+      fastCode: string;
+      href: string;
+      accountTypeSegment: string;
+    }
+  | { ok: false; error: string };
+
+const MAPSITE_SELECT =
+  "id, fast_code, status, latitude, longitude, map_zoom, property_title, property_address, property_description, cover_image, header_image_url, logo_url, profile_image_url, agent_name, owner_first_name, owner_last_name, gallery_images, mls_url, broker_url, website, teb_url, ttv_url, account_type, is_demonstration, email, phone";
+
+export async function claimDemoMapSite(
+  input: ClaimDemoMapSiteInput,
+): Promise<ClaimDemoMapSiteResult> {
+  if (!isSupabaseAdminConfigured()) {
+    return {
+      ok: false,
+      error: "Claim is unavailable until storage is configured.",
+    };
+  }
+
+  const mapsiteId = input.mapsiteId.trim();
+  const firstName = input.firstName.trim();
+  const lastName = input.lastName.trim();
+  const middleName = input.middleName?.trim() || null;
+  const email =
+    input.email?.trim().toLowerCase() || "claim@talispros.com";
+
+  if (!mapsiteId) {
+    return { ok: false, error: "Missing Mapsite™ ID." };
+  }
+  if (!firstName || !lastName) {
+    return { ok: false, error: "Enter your first and last name to claim." };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data: row, error: loadError } = await supabase
+    .from("mapsites")
+    .select(MAPSITE_SELECT)
+    .eq("id", mapsiteId)
+    .maybeSingle();
+
+  if (loadError) {
+    return { ok: false, error: loadError.message };
+  }
+  if (!row) {
+    return { ok: false, error: "Demo Mapsite™ not found." };
+  }
+
+  if (
+    !isDemonstrationListing({
+      isDemonstration: row.is_demonstration,
+      fastCode: row.fast_code,
+    })
+  ) {
+    return {
+      ok: false,
+      error: "That Mapsite™ is already claimed with a live FAST Code™.",
+    };
+  }
+
+  let fastCode: string;
+  try {
+    fastCode = await generateFastCode({
+      firstName,
+      middleName,
+      lastName,
+    });
+  } catch (error) {
+    if (error instanceof FastCodeValidationError) {
+      return { ok: false, error: error.message };
+    }
+    return {
+      ok: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Could not generate a FAST Code™ from that name.",
+    };
+  }
+
+  const accountTypeRaw =
+    input.accountType?.trim() ||
+    row.account_type?.trim() ||
+    "root";
+  const accountTypeSegment =
+    claimedMapSiteSegmentForAccountOrPlan(accountTypeRaw);
+  const agentName = `${firstName} ${lastName}`.trim();
+  const now = new Date().toISOString();
+
+  const { error: fastInsertError } = await supabase.from("fast_codes").upsert(
+    {
+      code: fastCode,
+      type: "mapsite",
+      account_type: accountTypeRaw,
+      mapsite_id: mapsiteId,
+    },
+    { onConflict: "code" },
+  );
+
+  if (fastInsertError) {
+    return {
+      ok: false,
+      error: `FAST Code™ could not be saved: ${fastInsertError.message}`,
+    };
+  }
+
+  const protectSeed =
+    isProtectedPlatformDemoMapSite(row.id) ||
+    row.fast_code?.trim().toUpperCase() === DEMO_MAPSITE_FAST_CODE;
+
+  let claimedMapsiteId = row.id;
+
+  if (protectSeed) {
+    // Keep the platform DEMO seed; copy pin/listing into a new claimed row.
+    const insert: Database["public"]["Tables"]["mapsites"]["Insert"] = {
+      fast_code: fastCode,
+      slug: fastCode,
+      account_type: accountTypeRaw,
+      owner_first_name: firstName,
+      owner_last_name: lastName,
+      agent_name: agentName,
+      email,
+      phone: row.phone || "",
+      status: "active",
+      property_title: row.property_title || "Your Mapsite™",
+      property_address: row.property_address,
+      property_description: row.property_description,
+      latitude: row.latitude,
+      longitude: row.longitude,
+      map_zoom: row.map_zoom,
+      cover_image: row.cover_image,
+      header_image_url: row.header_image_url,
+      logo_url: row.logo_url,
+      profile_image_url: row.profile_image_url,
+      gallery_images: row.gallery_images || [],
+      mls_url: row.mls_url,
+      broker_url: row.broker_url,
+      website: row.website,
+      teb_url: row.teb_url,
+      ttv_url: row.ttv_url,
+      is_demonstration: false,
+      interest_form_enabled: true,
+      offered_subscription_tier: "root",
+      updated_at: now,
+    };
+
+    const { data: created, error: createError } = await supabase
+      .from("mapsites")
+      .insert(insert)
+      .select("id")
+      .single();
+
+    if (createError || !created) {
+      return {
+        ok: false,
+        error:
+          createError?.message ||
+          "Could not create the claimed Mapsite™ from the demonstration.",
+      };
+    }
+    claimedMapsiteId = created.id;
+
+    await supabase
+      .from("fast_codes")
+      .update({ mapsite_id: claimedMapsiteId })
+      .ilike("code", fastCode);
+  } else {
+    const { error: updateError } = await supabase
+      .from("mapsites")
+      .update({
+        fast_code: fastCode,
+        slug: fastCode,
+        account_type: accountTypeRaw,
+        owner_first_name: firstName,
+        owner_last_name: lastName,
+        agent_name: agentName,
+        email,
+        status: "active",
+        is_demonstration: false,
+        interest_form_enabled: true,
+        updated_at: now,
+      })
+      .eq("id", row.id);
+
+    if (updateError) {
+      return {
+        ok: false,
+        error: `Could not convert the demo Mapsite™: ${updateError.message}`,
+      };
+    }
+
+    await supabase
+      .from("fast_codes")
+      .update({ mapsite_id: claimedMapsiteId })
+      .ilike("code", fastCode);
+  }
+
+  const href = buildClaimedMapSitePath({
+    fastCode,
+    accountType: accountTypeSegment,
+  });
+
+  return {
+    ok: true,
+    mapsiteId: claimedMapsiteId,
+    fastCode,
+    href,
+    accountTypeSegment,
+  };
+}

@@ -5396,3 +5396,47 @@ body.mapsite-gallery-open [data-paypal-button] {
     height: auto;
   }
 }
+
+@keyframes talis-brand-flip {
+  0% {
+    opacity: 0;
+    transform: rotateX(-72deg) translateY(0.35em);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateX(0deg) translateY(0);
+  }
+}
+
+.talis-brand-flip-face {
+  animation: talis-brand-flip 0.55s ease;
+  transform-origin: center bottom;
+  backface-visibility: hidden;
+}
+
+@keyframes home-mountain-kenburns {
+  0% {
+    transform: scale(1.02) translate3d(0%, 0%, 0);
+  }
+  40% {
+    transform: scale(1.1) translate3d(-1.5%, -1%, 0);
+  }
+  70% {
+    transform: scale(1.08) translate3d(1.2%, -0.6%, 0);
+  }
+  100% {
+    transform: scale(1.02) translate3d(0%, 0%, 0);
+  }
+}
+
+.home-mountain-kenburns {
+  animation: home-mountain-kenburns 22s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .talis-brand-flip-face,
+  .home-mountain-kenburns {
+    animation: none !important;
+  }
+}

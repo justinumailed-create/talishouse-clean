@@ -44,6 +44,7 @@ import MapSiteMarketPartnerCard from "./MapSiteMarketPartnerCard";
 import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
 import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
+import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import { getMapSiteActivationPaymentStatus } from "@/app/talispros/mapsite/actions";
 import {
   postMapSitePaymentRedirectHref,
@@ -563,6 +564,7 @@ function MapSiteChrome({
 
   return (
     <div className="relative flex h-dvh max-h-dvh w-screen flex-col overflow-hidden overscroll-none bg-neutral-900">
+      {claimed ? <TalisUMktsHeader /> : null}
       <div
         ref={rootRef}
         className="relative min-h-0 flex-1 overflow-hidden bg-neutral-900"

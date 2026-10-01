@@ -10,6 +10,7 @@ import {
   TALISU_MKTS_HEADER_NAV,
   TALISU_MKTS_HEADER_TAGLINE,
 } from "@/lib/talisu/markets-pins";
+import TalisBrandFlip from "@/components/talisu/TalisBrandFlip";
 
 export default function TalisUMktsHeader() {
   const pathname = usePathname() || "/talisu/mkts";
@@ -45,24 +46,19 @@ export default function TalisUMktsHeader() {
       style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
     >
       <div className="mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-3 px-3 py-2.5 pb-3 sm:px-5 sm:pb-3.5">
-        <Link href="/talisu" className="flex min-w-0 items-center gap-2.5">
-          <Image
-            src="/talisu/mkts/talisu-mark.png"
-            alt="TalisU™"
-            width={40}
-            height={43}
-            className="h-10 w-auto shrink-0 self-start rounded-sm object-contain object-top sm:h-11"
-            priority
-          />
-          <div className="min-w-0 leading-tight">
-            <div className="text-base font-bold tracking-wide sm:text-lg">
-              TalisU&trade;
-            </div>
-            <div className="text-[12px] text-white/95 sm:text-[13px]">
-              {TALISU_MKTS_HEADER_TAGLINE}
-            </div>
-          </div>
-        </Link>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <Link href="/talisu" className="shrink-0 self-start">
+            <Image
+              src="/talisu/mkts/talisu-mark.png"
+              alt="TalisU™"
+              width={40}
+              height={43}
+              className="h-10 w-auto rounded-sm object-contain object-top sm:h-11"
+              priority
+            />
+          </Link>
+          <TalisBrandFlip tagline={TALISU_MKTS_HEADER_TAGLINE} />
+        </div>
 
         <nav className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
           <div ref={rootRef} className="relative">

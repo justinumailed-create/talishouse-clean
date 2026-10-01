@@ -20,18 +20,25 @@ describe("demo FAST Code generation preview", () => {
     expect(previewFastCodeFromFullName("Arun Rachuri")).toBe("ar##");
   });
 
-  it("wires claim registration + demo builder to the preview /start claim path", () => {
+  it("wires claim registration + in-place demo claim to FAST Code™ preview", () => {
     const form = readFileSync(
       resolve("components/talispros/TalisprosMarketRegistrationForm.tsx"),
       "utf8",
     );
     expect(form).toContain("DemoFastCodePreview");
+
+    const claimButton = readFileSync(
+      resolve("components/talispros/mapsite/DemoClaimMarketButton.tsx"),
+      "utf8",
+    );
+    expect(claimButton).toContain("DemoFastCodePreview");
+
     const builder = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),
       "utf8",
     );
-    expect(builder).toContain('href="/start"');
-    expect(builder).toContain("Realtor / FSBO claim");
+    expect(builder).not.toContain('href="/start"');
+    expect(builder).not.toContain("Realtor / FSBO claim");
     expect(builder).not.toContain("Claim Your Market");
   });
 });

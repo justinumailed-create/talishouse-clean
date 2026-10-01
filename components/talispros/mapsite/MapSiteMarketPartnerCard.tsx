@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import type { KeyboardEvent, RefObject } from "react";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import {
@@ -19,6 +18,7 @@ import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
+import DemoClaimMarketButton from "./DemoClaimMarketButton";
 
 function contentForAudience(audience: RegistrationMarket): TalisprosMarketPageContent {
   switch (audience) {
@@ -155,12 +155,11 @@ export default function MapSiteMarketPartnerCard({
         <MarketingPartnerInterestLinks align="start" className="mt-3" />
         {isDemo ? (
           <div className="mt-3 flex justify-start">
-            <Link
-              href="/start"
-              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
-            >
-              Claim Your Market
-            </Link>
+            <DemoClaimMarketButton
+              mapsiteId={mapsite.id}
+              suggestedFullName={mapsite.agent_name}
+              align="start"
+            />
           </div>
         ) : null}
         {isOwner ? (
@@ -229,12 +228,11 @@ export default function MapSiteMarketPartnerCard({
         <MarketingPartnerInterestLinks className="mt-4" />
         {isDemo ? (
           <div className="mt-4 flex justify-center">
-            <Link
-              href="/start"
-              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
-            >
-              Claim Your Market
-            </Link>
+            <DemoClaimMarketButton
+              mapsiteId={mapsite.id}
+              suggestedFullName={mapsite.agent_name}
+              align="center"
+            />
           </div>
         ) : null}
         {isOwner ? (

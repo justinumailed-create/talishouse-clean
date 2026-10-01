@@ -1,14 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import {
-  HOME_OWNERSHIP_BG_SRC,
-  HOME_OWNERSHIP_SECTIONS,
-} from "@/lib/talispros/ownership-models";
+import { HOME_OWNERSHIP_SECTIONS } from "@/lib/talispros/ownership-models";
+import HomeMountainMotion from "@/components/talispros/HomeMountainMotion";
 
 /**
- * Homepage gate right column: mountain background on the upper half (no text
+ * Homepage gate right column: looping mountain motion on the upper half (no text
  * overlay); lower half holds four brushed-metal square buttons. Clicking a
  * heading opens a high-contrast popover with that model's body + result copy.
  */
@@ -49,20 +46,13 @@ export default function TalisprosHomeShowcase() {
       className="relative flex min-h-[42vh] w-full flex-1 flex-col overflow-hidden bg-neutral-900 lg:h-full lg:min-h-0 lg:border-l lg:border-[#dedede]"
       aria-label="Ownership models"
     >
-      {/* Upper: mountain image only — no text overlay */}
+      {/* Upper: looping mountain motion — no text overlay */}
       <div
         className="relative min-h-[240px] flex-1 basis-[58%]"
         onClick={openId ? close : undefined}
         role={openId ? "presentation" : undefined}
       >
-        <Image
-          src={HOME_OWNERSHIP_BG_SRC}
-          alt=""
-          fill
-          priority
-          sizes="(min-width: 1024px) 60vw, 100vw"
-          className="object-cover object-center"
-        />
+        <HomeMountainMotion />
       </div>
 
       {/* Lower: metallic square buttons + popover */}
