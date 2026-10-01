@@ -83,6 +83,8 @@ describe("TalisU Knowledge Base password gate", () => {
     expect(form).not.toContain("text-white/90");
     expect(header).toContain("bg-white p-5");
     expect(header).toContain("rounded-2xl");
+    expect(header).toContain("max-w-none!");
+    expect(header).toContain("min-w-[280px]");
   });
 
   it("unlocks into the tabbed Knowledge Base dashboard", () => {

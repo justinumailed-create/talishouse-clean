@@ -50,5 +50,10 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain("TALISU_KB_OPEN_UNLOCK_EVENT");
     expect(header).not.toContain("TALISU_KB_UNLOCK_QUERY");
     expect(header).toContain("bg-white p-5");
+    // Global `* { max-width:100% }` would otherwise squeeze the absolute card
+    // to the TalisU trigger width (~86px) — cancel it and keep a PayPal-wide card.
+    expect(header).toContain("max-w-none!");
+    expect(header).toContain("min-w-[280px]");
+    expect(header).toContain("w-80!");
   });
 });

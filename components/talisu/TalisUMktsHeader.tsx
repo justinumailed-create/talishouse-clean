@@ -257,7 +257,7 @@ export default function TalisUMktsHeader({
                 role="menu"
                 className={
                   panel === "kb-unlock"
-                    ? "absolute right-0 z-50 mt-1.5 w-[min(92vw,20rem)] overflow-hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]"
+                    ? "absolute right-0 z-50 mt-1.5 w-80! min-w-[280px] max-w-none! overflow-hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]"
                     : "absolute right-0 z-50 mt-1.5 min-w-[11.5rem] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] py-1 shadow-lg"
                 }
               >
@@ -347,7 +347,7 @@ export default function TalisUMktsHeader({
                       role="dialog"
                       aria-modal="true"
                       aria-labelledby={promptTitleId}
-                      className="absolute right-0 z-50 mt-1.5 w-[min(92vw,16.5rem)] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] p-3 shadow-lg"
+                      className="absolute right-0 z-50 mt-1.5 w-[16.5rem]! min-w-[16.5rem] max-w-none! overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] p-3 shadow-lg"
                     >
                       <p
                         id={promptTitleId}
