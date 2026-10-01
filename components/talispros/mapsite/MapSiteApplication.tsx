@@ -42,6 +42,7 @@ import { ROUTES } from "@/lib/routes";
 import { isDemonstrationListing } from "@/lib/talispros/demo-mapsite";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
 import MapSiteMarketPartnerCard from "./MapSiteMarketPartnerCard";
+import DemoClaimMarketButton from "./DemoClaimMarketButton";
 import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
 import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
@@ -641,7 +642,6 @@ function MapSiteChrome({
                   paid={paid}
                   isOwner={isOwner}
                   accountTypeSegment={accountTypeSegment}
-                  isDemo={isDemoListing}
                   showKnowledgeBaseManage={dashboardUnlocked}
                 />
               ) : null
@@ -649,6 +649,18 @@ function MapSiteChrome({
             belowCard={registrationCard}
           />
         </div>
+
+        {isDemoListing ? (
+          <div className="pointer-events-none absolute bottom-3 right-3 z-30 flex flex-col items-end justify-end sm:bottom-4 sm:right-4">
+            <div className="pointer-events-auto max-h-[min(70vh,36rem)] overflow-y-auto">
+              <DemoClaimMarketButton
+                mapsiteId={mapsite.id}
+                suggestedFullName={mapsite.agent_name}
+                align="end"
+              />
+            </div>
+          </div>
+        ) : null}
 
         {selectedPinId === mapsite.id ? (
           <>

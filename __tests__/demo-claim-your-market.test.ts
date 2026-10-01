@@ -26,16 +26,15 @@ describe("Claim Your Market on demo Mapsites™ only", () => {
     ).toBe(false);
   });
 
-  it("wires in-place Claim Your Market™ (no /start redirect) on demo partner card", () => {
+  it("wires in-place Claim Your Market™ (no /start redirect) on demo Mapsite right control", () => {
     expect(ROUTES.HOME).toBe("/");
     const partner = readFileSync(
       resolve("components/talispros/mapsite/MapSiteMarketPartnerCard.tsx"),
       "utf8",
     );
-    expect(partner).toContain("DemoClaimMarketButton");
+    expect(partner).not.toContain("DemoClaimMarketButton");
     expect(partner).not.toContain('href="/start"');
     expect(partner).not.toContain("Claim Your Market");
-    expect(partner).toContain("isDemo");
 
     const claimButton = readFileSync(
       resolve("components/talispros/mapsite/DemoClaimMarketButton.tsx"),
@@ -67,7 +66,10 @@ describe("Claim Your Market on demo Mapsites™ only", () => {
       resolve("components/talispros/mapsite/MapSiteApplication.tsx"),
       "utf8",
     );
-    expect(app).toContain("isDemo={isDemoListing}");
+    expect(app).toContain("DemoClaimMarketButton");
+    expect(app).toContain("isDemoListing");
+    expect(app).toContain("right-3");
+    expect(app).toContain("bottom-3");
     expect(app).toContain("TalisUMktsHeader");
     expect(app).toContain('variant="claimed-mapsite"');
     expect(app).toContain("TalisUMktsHeader");

@@ -14,7 +14,7 @@ type DemoClaimMarketButtonProps = {
   /** Prefill from Mapsite™ owner / agent when it looks like a real name. */
   suggestedFullName?: string | null;
   className?: string;
-  align?: "start" | "center";
+  align?: "start" | "center" | "end";
 };
 
 function suggestedNames(fullName: string | null | undefined): {
@@ -91,7 +91,12 @@ export default function DemoClaimMarketButton({
     });
   }
 
-  const justify = align === "center" ? "justify-center" : "justify-start";
+  const justify =
+    align === "center"
+      ? "justify-center"
+      : align === "end"
+        ? "justify-end items-end"
+        : "justify-start";
 
   return (
     <div className={`flex flex-col ${justify} ${className}`}>

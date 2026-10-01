@@ -19,7 +19,6 @@ import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
-import DemoClaimMarketButton from "./DemoClaimMarketButton";
 import {
   TALISU_KB_MANAGE_PATH,
   isTalisUKbMapsiteManagerFastCode,
@@ -51,8 +50,6 @@ interface MapSiteMarketPartnerCardProps {
   isOwner?: boolean;
   /** Claimed path segment for Logout return (e.g. brokers, listings). */
   accountTypeSegment?: string | null;
-  /** Demo claimed Mapsites™ only — CTA back to Talispros™ home. */
-  isDemo?: boolean;
   /**
    * Real activation payment unlocked Dashboard — show Knowledge Base manage
    * entry for rm22 (Ralf) Mapsite™ dashboard.
@@ -74,7 +71,6 @@ export default function MapSiteMarketPartnerCard({
   paid = false,
   isOwner = false,
   accountTypeSegment = null,
-  isDemo = false,
   showKnowledgeBaseManage = false,
 }: MapSiteMarketPartnerCardProps) {
   const content = contentForAudience(audience);
@@ -163,15 +159,6 @@ export default function MapSiteMarketPartnerCard({
           </div>
         </div>
         <MarketingPartnerInterestLinks align="start" className="mt-3" />
-        {isDemo ? (
-          <div className="mt-3 flex justify-start">
-            <DemoClaimMarketButton
-              mapsiteId={mapsite.id}
-              suggestedFullName={mapsite.agent_name}
-              align="start"
-            />
-          </div>
-        ) : null}
         {showKbManage ? (
           <div className="mt-3 flex justify-start">
             <Link
@@ -243,15 +230,6 @@ export default function MapSiteMarketPartnerCard({
           </p>
         </div>
         <MarketingPartnerInterestLinks className="mt-4" />
-        {isDemo ? (
-          <div className="mt-4 flex justify-center">
-            <DemoClaimMarketButton
-              mapsiteId={mapsite.id}
-              suggestedFullName={mapsite.agent_name}
-              align="center"
-            />
-          </div>
-        ) : null}
         {showKbManage ? (
           <div className="mt-4 flex justify-center">
             <Link
