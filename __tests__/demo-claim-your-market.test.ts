@@ -69,7 +69,8 @@ describe("Claim Your Market on demo Mapsites™ only", () => {
     );
     expect(app).toContain("isDemo={isDemoListing}");
     expect(app).toContain("TalisUMktsHeader");
-    expect(app).toContain("{claimed ? <TalisUMktsHeader /> : null}");
+    expect(app).toContain('variant="claimed-mapsite"');
+    expect(app).toContain("TalisUMktsHeader");
     expect(app).toContain("lockCenter");
     expect(app).toContain("MAPSITE_CLAIMED_NAV_PIN_NUDGE_Y_PX");
 

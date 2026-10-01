@@ -10,13 +10,70 @@ import {
   TALISU_MKTS_HEADER_NAV,
   TALISU_MKTS_HEADER_TAGLINE,
 } from "@/lib/talisu/markets-pins";
+import { TALISU_REGISTER } from "@/lib/talisu/content";
 import TalisBrandFlip from "@/components/talisu/TalisBrandFlip";
 
-export default function TalisUMktsHeader() {
+export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
+
+export type TalisUMktsHeaderProps = {
+  /**
+   * `claimed-mapsite`: replace Register with Dashboard (lock until real payment).
+   * `default`: Markets + Register (homepage /talisu chrome).
+   */
+  variant?: TalisUMktsHeaderVariant;
+  /**
+   * Real activation payment success (not demo-only). Unlocks Dashboard.
+   */
+  dashboardUnlocked?: boolean;
+  /** Destination when locked Dashboard → Register (SamCart / register flow). */
+  registerHref?: string;
+  /** When Dashboard is unlocked, open the Mapsite™ pin dashboard. */
+  onOpenDashboard?: () => void;
+};
+
+function LockIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 16 16"
+      className={className}
+      fill="none"
+    >
+      <path
+        d="M4.5 7V5.5a3.5 3.5 0 0 1 7 0V7"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <rect
+        x="3"
+        y="7"
+        width="10"
+        height="7"
+        rx="1.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <circle cx="8" cy="10.25" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+export default function TalisUMktsHeader({
+  variant = "default",
+  dashboardUnlocked = false,
+  registerHref = TALISU_REGISTER.samcartUrl,
+  onOpenDashboard,
+}: TalisUMktsHeaderProps = {}) {
   const pathname = usePathname() || "/talisu/mkts";
   const [open, setOpen] = useState(false);
+  const [registerPromptOpen, setRegisterPromptOpen] = useState(false);
   const menuId = useId();
+  const promptTitleId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  const promptRef = useRef<HTMLDivElement>(null);
+
+  const claimedMapsite = variant === "claimed-mapsite";
 
   const dropdownActive = TALISU_MKTS_HEADER_DROPDOWN.some(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
@@ -39,6 +96,32 @@ export default function TalisUMktsHeader() {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!registerPromptOpen) return;
+    function onPointerDown(event: MouseEvent) {
+      if (!promptRef.current?.contains(event.target as Node)) {
+        setRegisterPromptOpen(false);
+      }
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setRegisterPromptOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [registerPromptOpen]);
+
+  function handleDashboardClick() {
+    if (dashboardUnlocked) {
+      onOpenDashboard?.();
+      return;
+    }
+    setRegisterPromptOpen(true);
+  }
 
   return (
     <header
@@ -121,6 +204,66 @@ export default function TalisUMktsHeader() {
           </div>
 
           {TALISU_MKTS_HEADER_NAV.map((item) => {
+            if (claimedMapsite && item.label === "Register") {
+              return (
+                <div key="dashboard" className="relative">
+                  <button
+                    type="button"
+                    onClick={handleDashboardClick}
+                    aria-haspopup={dashboardUnlocked ? undefined : "dialog"}
+                    aria-expanded={
+                      dashboardUnlocked ? undefined : registerPromptOpen
+                    }
+                    className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
+                      registerPromptOpen
+                        ? "bg-white/20 text-white"
+                        : "text-white hover:bg-white/15"
+                    }`}
+                  >
+                    {!dashboardUnlocked ? (
+                      <LockIcon className="h-3.5 w-3.5 shrink-0 opacity-95" />
+                    ) : null}
+                    Dashboard
+                  </button>
+                  {registerPromptOpen && !dashboardUnlocked ? (
+                    <div
+                      ref={promptRef}
+                      role="dialog"
+                      aria-modal="true"
+                      aria-labelledby={promptTitleId}
+                      className="absolute right-0 z-50 mt-1.5 w-[min(92vw,16.5rem)] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] p-3 shadow-lg"
+                    >
+                      <p
+                        id={promptTitleId}
+                        className="text-[13px] font-semibold text-white"
+                      >
+                        Dashboard is locked
+                      </p>
+                      <p className="mt-1.5 text-[12px] leading-snug text-white/90">
+                        Register to unlock your Mapsite™ Dashboard after payment
+                        succeeds.
+                      </p>
+                      <a
+                        href={registerHref}
+                        target={
+                          registerHref.startsWith("http") ? "_blank" : undefined
+                        }
+                        rel={
+                          registerHref.startsWith("http")
+                            ? "noopener noreferrer"
+                            : undefined
+                        }
+                        className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-white px-3 py-2 text-[13px] font-semibold text-[#035bb8] transition hover:bg-white/95"
+                        onClick={() => setRegisterPromptOpen(false)}
+                      >
+                        Register
+                      </a>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            }
+
             const active =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import type { KeyboardEvent, RefObject } from "react";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import {
@@ -19,6 +20,10 @@ import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
 import DemoClaimMarketButton from "./DemoClaimMarketButton";
+import {
+  TALISU_KB_MANAGE_PATH,
+  isTalisUKbMapsiteManagerFastCode,
+} from "@/lib/talisu/kb-content";
 
 function contentForAudience(audience: RegistrationMarket): TalisprosMarketPageContent {
   switch (audience) {
@@ -48,6 +53,11 @@ interface MapSiteMarketPartnerCardProps {
   accountTypeSegment?: string | null;
   /** Demo claimed Mapsites™ only — CTA back to Talispros™ home. */
   isDemo?: boolean;
+  /**
+   * Real activation payment unlocked Dashboard — show Knowledge Base manage
+   * entry for rm22 (Ralf) Mapsite™ dashboard.
+   */
+  showKnowledgeBaseManage?: boolean;
 }
 
 /**
@@ -65,9 +75,12 @@ export default function MapSiteMarketPartnerCard({
   isOwner = false,
   accountTypeSegment = null,
   isDemo = false,
+  showKnowledgeBaseManage = false,
 }: MapSiteMarketPartnerCardProps) {
   const content = contentForAudience(audience);
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
+  const showKbManage =
+    showKnowledgeBaseManage && isTalisUKbMapsiteManagerFastCode(fastCode);
   const address = mapsite.property_address?.trim().toUpperCase() || null;
   const partnerImage = mapsiteMarketPartnerImageUrl(
     null,
@@ -159,6 +172,16 @@ export default function MapSiteMarketPartnerCard({
             />
           </div>
         ) : null}
+        {showKbManage ? (
+          <div className="mt-3 flex justify-start">
+            <Link
+              href={TALISU_KB_MANAGE_PATH}
+              className="inline-flex min-h-8 items-center justify-center rounded-full bg-[#046BD9] px-3 text-[12px] font-semibold text-white transition hover:bg-[#035bb8]"
+            >
+              Knowledge Base
+            </Link>
+          </div>
+        ) : null}
         {isOwner ? (
           <div className="mt-3 flex justify-start">
             <MapSiteOwnerLogoutButton
@@ -227,6 +250,16 @@ export default function MapSiteMarketPartnerCard({
               suggestedFullName={mapsite.agent_name}
               align="center"
             />
+          </div>
+        ) : null}
+        {showKbManage ? (
+          <div className="mt-4 flex justify-center">
+            <Link
+              href={TALISU_KB_MANAGE_PATH}
+              className="inline-flex min-h-8 items-center justify-center rounded-full bg-[#046BD9] px-3 text-[12px] font-semibold text-white transition hover:bg-[#035bb8]"
+            >
+              Knowledge Base
+            </Link>
           </div>
         ) : null}
         {isOwner ? (

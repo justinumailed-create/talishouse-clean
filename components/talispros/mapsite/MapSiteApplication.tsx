@@ -46,6 +46,7 @@ import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
 import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
+import { TALISU_REGISTER } from "@/lib/talisu/content";
 import { getMapSiteActivationPaymentStatus } from "@/app/talispros/mapsite/actions";
 import {
   postMapSitePaymentRedirectHref,
@@ -478,6 +479,8 @@ function MapSiteChrome({
   });
   // Checkout stays until a completed payment note exists (not merely ACTIVE status).
   const paid = isDemoListing || activationPaid;
+  // Header Dashboard unlocks only on real activation payment — never demo-only.
+  const dashboardUnlocked = activationPaid && !isDemoListing;
   const onboardingPhase = getMapSiteOnboardingPhase({
     status: mapsite.status,
     paymentReceived: paid,
@@ -598,7 +601,14 @@ function MapSiteChrome({
 
   return (
     <div className="relative flex h-dvh max-h-dvh w-screen flex-col overflow-hidden overscroll-none bg-neutral-900">
-      {claimed ? <TalisUMktsHeader /> : null}
+      {claimed ? (
+        <TalisUMktsHeader
+          variant="claimed-mapsite"
+          dashboardUnlocked={dashboardUnlocked}
+          registerHref={TALISU_REGISTER.samcartUrl}
+          onOpenDashboard={focusPinAndOpen}
+        />
+      ) : null}
       <div
         ref={rootRef}
         className="relative min-h-0 flex-1 overflow-hidden bg-neutral-900"
@@ -632,6 +642,7 @@ function MapSiteChrome({
                   isOwner={isOwner}
                   accountTypeSegment={accountTypeSegment}
                   isDemo={isDemoListing}
+                  showKnowledgeBaseManage={dashboardUnlocked}
                 />
               ) : null
             }

@@ -31,4 +31,10 @@ describe("TalisU Knowledge Base password gate", () => {
     expect(gate).toContain("Incorrect password");
     expect(gate).toContain("Unlock");
   });
+
+  it("unlocks into the tabbed Knowledge Base dashboard", () => {
+    const page = readFileSync(join(root, "app/talisu/kb/page.tsx"), "utf8");
+    expect(page).toContain("TalisUKbDashboard");
+    expect(page).not.toContain("Articles and playbooks will land here");
+  });
 });
