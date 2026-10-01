@@ -19,7 +19,7 @@ export const metadata: Metadata = createMetadata({
   description: homeDescription,
   path: SAMCART_SUCCESS_RETURN_PATH,
   image: {
-    url: toAbsoluteHttpsOgUrl("/assets/start-og.png?v=4"),
+    url: toAbsoluteHttpsOgUrl("/assets/start-og.png?v=5"),
     width: 1200,
     height: 630,
     alt: homeTitle,

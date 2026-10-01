@@ -16,8 +16,8 @@ describe("homepage Open Graph image", () => {
     expect(page).not.toContain("/logo.png");
     expect(page).not.toContain("/seo/talispros-og");
 
-    const imageUrl = toAbsoluteHttpsOgUrl("/assets/start-og.png?v=4");
-    expect(imageUrl).toBe("https://www.talispros.com/assets/start-og.png?v=4");
+    const imageUrl = toAbsoluteHttpsOgUrl("/assets/start-og.png?v=5");
+    expect(imageUrl).toBe("https://www.talispros.com/assets/start-og.png?v=5");
 
     const meta = createMetadata({
       title: "Talispros™",
