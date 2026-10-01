@@ -113,7 +113,12 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(gatePage).toContain("lg:grid-cols-");
     expect(gatePage).toContain("min-h-dvh");
     expect(showcase).toContain("HOME_OWNERSHIP_SECTIONS");
-    expect(showcase).toContain("HOME_OWNERSHIP_BG_SRC");
+    expect(showcase).toContain("HomeMountainMotion");
+    const motion = readFileSync(
+      join(root, "components/talispros/HomeMountainMotion.tsx"),
+      "utf8",
+    );
+    expect(motion).toContain("HOME_OWNERSHIP_BG_SRC");
     expect(showcase).not.toContain("TalisprosStartMktsMap");
     expect(showcase).not.toContain("/assets/home-demo/01-talismaps-mkts.jpg");
     expect(HOME_OWNERSHIP_BG_SRC).toBe("/assets/home-ownership-bg.jpg");

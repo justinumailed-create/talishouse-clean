@@ -2,9 +2,8 @@
  * Homepage (gate) right-rail ownership model copy — exact user wording.
  */
 export const HOME_OWNERSHIP_BG_SRC = "/assets/home-ownership-bg.jpg";
-/** Looping Ken Burns mountain — WebM preferred (small); MP4 fallback. */
-export const HOME_OWNERSHIP_BG_WEBM = "/assets/home-ownership-bg.webm";
-export const HOME_OWNERSHIP_BG_MP4 = "/assets/home-ownership-bg.mp4";
+/** Looping GIF: subtle Ken Burns plus sky cloud drift. Primary motion asset. */
+export const HOME_OWNERSHIP_BG_GIF = "/assets/home-ownership-bg.gif";
 
 export type OwnershipModelSection = {
   id: string;
