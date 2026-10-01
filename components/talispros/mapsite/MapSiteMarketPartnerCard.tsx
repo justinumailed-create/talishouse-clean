@@ -40,7 +40,7 @@ interface MapSiteMarketPartnerCardProps {
   mapsite: MapSitePlatformRecord;
   cardRef?: RefObject<HTMLDivElement | null>;
   onSelect?: () => void;
-  /** Agency logo + cloud vignette only after activation payment. */
+  /** Agency logo only after activation payment (solid card for demo + paid). */
   paid?: boolean;
   /** Browser owns this Mapsite™ (owner / paid session cookies). */
   isOwner?: boolean;
@@ -90,12 +90,12 @@ export default function MapSiteMarketPartnerCard({
     }
   }
 
-  const copyClass = paid ? "mapsite-cloud-copy relative" : "";
+  // Solid opaque card for demo and paid claimed Mapsites™ (no frosted glass).
   const mobilePanel = paid
-    ? "mapsite-manager-strip relative isolate w-full p-4 text-left sm:hidden"
+    ? "mapsite-manager-strip w-full overflow-hidden rounded-2xl bg-[#f2f2f0] p-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:hidden"
     : "mapsite-manager-strip w-full overflow-hidden rounded-2xl bg-[#f2f2f0] p-3 text-left shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:hidden";
   const desktopPanel = paid
-    ? "relative isolate hidden w-full px-5 py-6 text-center sm:block"
+    ? "hidden w-full overflow-hidden rounded-2xl bg-[#f2f2f0] px-5 py-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:block"
     : "hidden w-full overflow-hidden rounded-2xl bg-[#f2f2f0] px-4 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:block sm:px-5";
   const selectableClass = onSelect
     ? "w-full cursor-pointer text-inherit transition hover:opacity-90"
@@ -115,9 +115,6 @@ export default function MapSiteMarketPartnerCard({
           className={`${selectableClass} flex gap-3 text-left`}
         >
           {paid ? (
-            <div aria-hidden="true" className="mapsite-cloud-vignette mapsite-cloud-vignette--panel" />
-          ) : null}
-          {paid ? (
             <MapSiteAgencyLogo
               logoUrl={mapsite.logo_url}
               agencyName={mapsite.agency_name}
@@ -135,18 +132,18 @@ export default function MapSiteMarketPartnerCard({
               />
             </div>
             <div className="min-w-0 flex-1">
-              <p className={`${copyClass} text-[13px] font-bold uppercase tracking-wide text-black`}>
+              <p className="text-[13px] font-bold uppercase tracking-wide text-black">
                 {fastCode ? `FAST CODE: ${fastCode}` : "Claim received"}
               </p>
               {address ? (
-                <p className={`${copyClass} mt-0.5 truncate text-[11px] font-bold uppercase tracking-wide text-black`}>
+                <p className="mt-0.5 truncate text-[11px] font-bold uppercase tracking-wide text-black">
                   {address}
                 </p>
               ) : null}
-              <p className={`${copyClass} mt-1 text-[13px] font-semibold leading-snug text-black`}>
+              <p className="mt-1 text-[13px] font-semibold leading-snug text-black">
                 {partnerName}
               </p>
-              <p className={`${copyClass} text-[12px] font-semibold leading-snug text-black`}>
+              <p className="text-[12px] font-semibold leading-snug text-black">
                 {partnerLabel}
               </p>
             </div>
@@ -181,9 +178,6 @@ export default function MapSiteMarketPartnerCard({
           className={selectableClass}
         >
           {paid ? (
-            <div aria-hidden="true" className="mapsite-cloud-vignette mapsite-cloud-vignette--panel" />
-          ) : null}
-          {paid ? (
             <div className="relative mb-4">
               <MapSiteAgencyLogo
                 logoUrl={mapsite.logo_url}
@@ -192,17 +186,17 @@ export default function MapSiteMarketPartnerCard({
             </div>
           ) : null}
           {fastCode ? (
-            <p className={`${copyClass} text-[15px] font-bold uppercase tracking-wide text-black`}>
+            <p className="text-[15px] font-bold uppercase tracking-wide text-black">
               FAST CODE: {fastCode}
             </p>
           ) : (
-            <p className={`${copyClass} text-[15px] font-bold uppercase tracking-wide text-black`}>
+            <p className="text-[15px] font-bold uppercase tracking-wide text-black">
               Claim received
             </p>
           )}
 
           {address ? (
-            <p className={`${copyClass} mt-2 text-[12px] font-bold uppercase leading-snug tracking-wide text-black`}>
+            <p className="mt-2 text-[12px] font-bold uppercase leading-snug tracking-wide text-black">
               {address}
             </p>
           ) : null}
@@ -218,10 +212,10 @@ export default function MapSiteMarketPartnerCard({
             />
           </div>
 
-          <p className={`${copyClass} mt-4 text-[14px] font-semibold leading-snug text-black`}>
+          <p className="mt-4 text-[14px] font-semibold leading-snug text-black">
             {partnerName}
           </p>
-          <p className={`${copyClass} mt-1 text-[13px] font-semibold leading-snug text-black`}>
+          <p className="mt-1 text-[13px] font-semibold leading-snug text-black">
             {partnerLabel}
           </p>
         </div>

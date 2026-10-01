@@ -580,7 +580,7 @@ function MapSiteChrome({
     onboardingMode === "assisted"
       ? "Register Account now"
       : "Register Account now";
-  // Paid Mapsites™: agency logo merges into the manager cloud. Checkout stays
+  // Paid Mapsites™: agency logo on the solid partner card. Checkout stays
   // off the first-look map unless the visitor opens Activate or returns from checkout.
   const registrationCard =
     !isDemoListing && claimed && !paid && showExplicitPayment ? (

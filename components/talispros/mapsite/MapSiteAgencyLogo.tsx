@@ -34,7 +34,7 @@ export default function MapSiteAgencyLogo({
       />
       {name ? (
         <p
-          className={`mapsite-cloud-copy relative text-center font-sans font-bold leading-tight tracking-tight text-black ${
+          className={`relative text-center font-sans font-bold leading-tight tracking-tight text-black ${
             compact
               ? "mt-0.5 text-[13px]"
               : "mt-1.5 text-[17px]"

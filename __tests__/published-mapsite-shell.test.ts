@@ -60,7 +60,9 @@ describe("published Mapsite™ shell", () => {
     );
     expect(partnerCard).toContain("MapSiteAgencyLogo");
     expect(partnerCard).toContain("paid ?");
-    expect(partnerCard).toContain("mapsite-cloud-vignette");
+    expect(partnerCard).toContain("bg-[#f2f2f0]");
+    expect(partnerCard).not.toContain("mapsite-cloud-vignette");
+    expect(partnerCard).not.toContain("backdrop-blur");
   });
 
   it("scroll-locks the claimed Mapsite™ viewport", () => {
