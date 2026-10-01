@@ -1,6 +1,7 @@
 import type Stripe from "stripe";
 import { parseRegistrationMarket } from "@/lib/registration-market";
 import { isPlanType } from "@/lib/registration-plans";
+import { isAdditionalPinsCheckout } from "@/lib/talispros/mapsite-additional-pins";
 import { activateMapSiteAfterPayment } from "@/lib/talispros/mapsite-activation";
 import {
   stripeCheckoutSessionIsPaid,
@@ -25,6 +26,10 @@ export async function activateMapSiteFromStripeCheckoutSession(
   ignored?: boolean;
   error?: string;
 }> {
+  if (isAdditionalPinsCheckout(session.metadata)) {
+    return { success: true, ignored: true };
+  }
+
   if (!stripeCheckoutSessionIsPaid(session)) {
     return { success: true, ignored: true };
   }

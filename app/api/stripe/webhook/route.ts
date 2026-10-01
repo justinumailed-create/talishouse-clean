@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getStripeWebhookSecret } from "@/lib/stripe";
+import { isAdditionalPinsCheckout } from "@/lib/talispros/mapsite-additional-pins";
+import { fulfillAdditionalPinsFromStripeCheckoutSession } from "@/lib/talispros/mapsite-additional-pins-service";
 import { activateMapSiteFromStripeCheckoutSession } from "@/lib/talispros/stripe-mapsite-webhook";
 
 export const runtime = "nodejs";
@@ -40,30 +42,29 @@ export async function POST(request: Request) {
     );
   }
 
-  if (event.type === "checkout.session.completed") {
+  if (
+    event.type === "checkout.session.completed" ||
+    event.type === "checkout.session.async_payment_succeeded"
+  ) {
     const session = event.data.object as Stripe.Checkout.Session;
-    const result = await activateMapSiteFromStripeCheckoutSession(session);
-    if (!result.success) {
-      console.error("[stripe-webhook] Mapsite™ activation failed:", result.error);
-      return NextResponse.json(
-        { error: "Activation failed." },
-        { status: 500 }
-      );
-    }
-  }
-
-  if (event.type === "checkout.session.async_payment_succeeded") {
-    const session = event.data.object as Stripe.Checkout.Session;
-    const result = await activateMapSiteFromStripeCheckoutSession(session);
-    if (!result.success) {
-      console.error(
-        "[stripe-webhook] Mapsite™ async payment activation failed:",
-        result.error,
-      );
-      return NextResponse.json(
-        { error: "Activation failed." },
-        { status: 500 }
-      );
+    if (isAdditionalPinsCheckout(session.metadata)) {
+      const result = await fulfillAdditionalPinsFromStripeCheckoutSession(session);
+      if (!result.success) {
+        console.error("[stripe-webhook] Additional PIN purchase failed:", result.error);
+        return NextResponse.json(
+          { error: "Additional PIN purchase failed." },
+          { status: 500 },
+        );
+      }
+    } else {
+      const result = await activateMapSiteFromStripeCheckoutSession(session);
+      if (!result.success) {
+        console.error("[stripe-webhook] Mapsite™ activation failed:", result.error);
+        return NextResponse.json(
+          { error: "Activation failed." },
+          { status: 500 },
+        );
+      }
     }
   }
 

@@ -512,6 +512,8 @@ export interface Database {
           atlist_map_url: string | null
           offered_subscription_tier: string
           interest_form_enabled: boolean
+          pin_quota: number
+          purchased_pins: number
           created_at: string
           updated_at: string
         }
@@ -554,6 +556,8 @@ export interface Database {
           atlist_map_url?: string | null
           offered_subscription_tier?: string
           interest_form_enabled?: boolean
+          pin_quota?: number
+          purchased_pins?: number
           created_at?: string
           updated_at?: string
         }
@@ -596,6 +600,8 @@ export interface Database {
           atlist_map_url?: string | null
           offered_subscription_tier?: string
           interest_form_enabled?: boolean
+          pin_quota?: number
+          purchased_pins?: number
           created_at?: string
           updated_at?: string
         }
@@ -663,6 +669,91 @@ export interface Database {
         }
         Relationships: [
           { foreignKeyName: "mapsite_url_gate_pins_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] }
+        ]
+      }
+      mapsite_additional_pins: {
+        Row: {
+          id: string
+          mapsite_id: string
+          latitude: number
+          longitude: number
+          label: string
+          sort_order: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          mapsite_id: string
+          latitude: number
+          longitude: number
+          label?: string
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          mapsite_id?: string
+          latitude?: number
+          longitude?: number
+          label?: string
+          sort_order?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "mapsite_additional_pins_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] }
+        ]
+      }
+      mapsite_pin_purchases: {
+        Row: {
+          id: string
+          mapsite_id: string
+          quantity: number
+          granted_quantity: number | null
+          unit_amount_cents: number
+          currency: string
+          stripe_checkout_session_id: string
+          stripe_payment_intent_id: string | null
+          payment_status: string
+          email: string | null
+          fast_code: string | null
+          created_at: string
+          fulfilled_at: string | null
+        }
+        Insert: {
+          id?: string
+          mapsite_id: string
+          quantity: number
+          granted_quantity?: number | null
+          unit_amount_cents: number
+          currency?: string
+          stripe_checkout_session_id: string
+          stripe_payment_intent_id?: string | null
+          payment_status?: string
+          email?: string | null
+          fast_code?: string | null
+          created_at?: string
+          fulfilled_at?: string | null
+        }
+        Update: {
+          id?: string
+          mapsite_id?: string
+          quantity?: number
+          granted_quantity?: number | null
+          unit_amount_cents?: number
+          currency?: string
+          stripe_checkout_session_id?: string
+          stripe_payment_intent_id?: string | null
+          payment_status?: string
+          email?: string | null
+          fast_code?: string | null
+          created_at?: string
+          fulfilled_at?: string | null
+        }
+        Relationships: [
+          { foreignKeyName: "mapsite_pin_purchases_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] }
         ]
       }
       categories: {
@@ -2103,7 +2194,28 @@ export interface Database {
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      grant_mapsite_additional_pins: {
+        Args: {
+          p_mapsite_id: string
+          p_quantity: number
+          p_session_id: string
+          p_payment_intent_id: string | null
+          p_amount_total: number
+          p_currency: string
+          p_email: string | null
+          p_fast_code: string | null
+        }
+        Returns: {
+          ok: boolean
+          error?: string
+          alreadyProcessed?: boolean
+          pinQuota?: number
+          purchasedPins?: number
+          granted?: number
+        }
+      }
+    }
     Enums: Record<string, never>
   }
 }

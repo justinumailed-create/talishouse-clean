@@ -41,7 +41,9 @@ describe("Claimed FAST Mapsite™ header Dashboard nav", () => {
       "const dashboardUnlocked = activationPaid && !isDemoListing",
     );
     expect(app).toContain("TALISU_REGISTER.samcartUrl");
-    expect(app).toContain("onOpenDashboard={focusPinAndOpen}");
+    expect(app).toContain("onOpenDashboard={openOwnerDashboard}");
+    expect(app).toContain("focusPinAndOpen()");
+    expect(app).toContain("MapSitePinDashboard");
     expect(app).toContain("showKnowledgeBaseManage={dashboardUnlocked}");
 
     expect(partner).toContain("isTalisUKbMapsiteManagerFastCode");
