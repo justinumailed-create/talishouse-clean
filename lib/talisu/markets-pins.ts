@@ -85,6 +85,13 @@ export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/reg", label: "Register" },
 ] as const;
 
+/** TalisU™ header dropdown (Knowledge Base / Audio Files / Video). */
+export const TALISU_MKTS_HEADER_DROPDOWN = [
+  { href: "/talisu/kb", label: "Knowledge Base" },
+  { href: "/talisu/au", label: "Audio Files" },
+  { href: "/talisu/video", label: "Video" },
+] as const;
+
 export type TalisUMktsPinKind = "market" | "do-more";
 
 export type TalisUMktsPin = {
