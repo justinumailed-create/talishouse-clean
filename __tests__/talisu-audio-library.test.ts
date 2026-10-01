@@ -2,6 +2,11 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { TALISU_AUDIO, TALISU_AUDIO_LIBRARY } from "../lib/talisu/content";
+import {
+  TALISU_AISHA_SUMMARY_TRANSCRIPT,
+  TALISU_AISHA_WEBSTER_TRANSCRIPT,
+  TALISU_AUDIO_TRANSCRIPTS,
+} from "../lib/talisu/transcript";
 
 describe("TalisU Audio library", () => {
   it("autoplays the ~1 minute Aisha welcome clip and lists the rest like KB", () => {
@@ -22,5 +27,24 @@ describe("TalisU Audio library", () => {
     expect(lib).toContain("autoPlay");
     expect(lib).toContain("TALISU_AUDIO_LIBRARY");
     expect(lib).toContain("Audios");
+  });
+
+  it("maps Aisha-labeled transcripts per library episode and swaps under the player", () => {
+    expect(TALISU_AUDIO_TRANSCRIPTS["aisha-summary"]).toBe(
+      TALISU_AISHA_SUMMARY_TRANSCRIPT,
+    );
+    expect(TALISU_AUDIO_TRANSCRIPTS["aisha-webster"]).toBe(
+      TALISU_AISHA_WEBSTER_TRANSCRIPT,
+    );
+    expect(TALISU_AISHA_SUMMARY_TRANSCRIPT[0]).toMatch(/^Aisha:/);
+
+    const lib = readFileSync(
+      resolve("components/talisu/TalisUAudioLibrary.tsx"),
+      "utf8",
+    );
+    expect(lib).toContain("TranscriptLines");
+    expect(lib).toContain("TALISU_AUDIO_TRANSCRIPTS");
+    expect(lib).toContain("userPickedRef");
+    expect(lib).toContain("handleSelect");
   });
 });

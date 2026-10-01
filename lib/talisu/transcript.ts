@@ -41,3 +41,32 @@ export const TALISU_AISHA_WEBSTER_TRANSCRIPT: string[] = [
   "Aisha: Right, they just need the cash.",
   "Webster: Yeah, but with tokens, executors and heirs can just sell a small portion of their shares on liquid secondary markets to cover that exact tax bill, keeping the primary real estate in the family.",
 ];
+
+/** Speaker-labeled transcript of /talisu/Aisha.mp3 (~1 min welcome / tokenization summary). */
+export const TALISU_AISHA_SUMMARY_TRANSCRIPT: string[] = [
+  "Aisha: Property tokenization is transforming real estate because traditional mortgages bottleneck deals behind massive down payments and slow bank approvals.",
+  "Aisha: Take a standard $500,000 commercial building that needs immediate capital to close.",
+  "Aisha: Normally, a single buyer has to clear a 20% down payment and survive a 90-day manual underwriting process.",
+  "Aisha: Instead of one person carrying that massive debt, the building's legal ownership is fractured into $10-to-$50 digital shares on a blockchain.",
+  "Aisha: But without a bank, who verifies buyers and enforces the rules? That is handled by automated digital code baked directly into the shares, verifying investor identities instantly.",
+  "Aisha: Because compliance is entirely automated, the capital barrier disappears. This unlocks a massive global pool of everyday investors who can instantly fund the building with micro investments, completely bypassing the bank.",
+  "Aisha: And instead of waiting years for the physical property to be sold, these investors can trade their digital shares online 24/7.",
+  "Aisha: So what happens to that $500,000 commercial building from the beginning of the video? Instead of waiting months for a bank, it is fully funded by a global network of micro investors in just minutes.",
+];
+
+/** Map audio library item ids → speaker-labeled transcript lines for /talisu/au. */
+export const TALISU_AUDIO_TRANSCRIPTS: Record<string, readonly string[]> = {
+  "aisha-summary": TALISU_AISHA_SUMMARY_TRANSCRIPT,
+  "aisha-webster": TALISU_AISHA_WEBSTER_TRANSCRIPT,
+};
+
+export function transcriptTitleForAudioId(id: string | null | undefined): string {
+  switch (id) {
+    case "aisha-summary":
+      return "Transcript — Aisha";
+    case "aisha-webster":
+      return "Transcript — Aisha & Webster";
+    default:
+      return "Transcript";
+  }
+}

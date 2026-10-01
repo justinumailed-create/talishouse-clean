@@ -43,10 +43,16 @@ describe("TalisU transcript speaker colours", () => {
     );
   });
 
-  it("wires TranscriptLines into /talisu/au", () => {
+  it("wires TranscriptLines into /talisu/au via the audio library", () => {
     const page = readFileSync(resolve("app/talisu/au/page.tsx"), "utf8");
-    expect(page).toContain("TranscriptLines");
-    expect(page).toContain("TALISU_AISHA_WEBSTER_TRANSCRIPT");
+    expect(page).toContain("TalisUAudioLibrary");
+
+    const library = readFileSync(
+      resolve("components/talisu/TalisUAudioLibrary.tsx"),
+      "utf8",
+    );
+    expect(library).toContain("TranscriptLines");
+    expect(library).toContain("TALISU_AUDIO_TRANSCRIPTS");
 
     const component = readFileSync(
       resolve("components/talisu/TranscriptLines.tsx"),

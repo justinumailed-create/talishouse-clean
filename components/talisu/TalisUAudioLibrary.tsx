@@ -7,6 +7,11 @@ import {
   type TalisUAudioLibraryItem,
 } from "@/lib/talisu/content";
 import { TALISU_CARD } from "@/lib/talisu/ui";
+import TranscriptLines from "@/components/talisu/TranscriptLines";
+import {
+  TALISU_AUDIO_TRANSCRIPTS,
+  transcriptTitleForAudioId,
+} from "@/lib/talisu/transcript";
 
 function AudioCard({
   item,
@@ -40,7 +45,8 @@ function AudioCard({
 
 /**
  * TalisU™ Audio library: autoplays the ~1 min Aisha clip on open,
- * and lists other clips in the same card grid style as KB Audios.
+ * lists other clips like KB Audios, and shows the matching
+ * Aisha-labeled transcript under the player (swaps on card select).
  */
 export default function TalisUAudioLibrary() {
   const autoplayItem =
@@ -49,23 +55,34 @@ export default function TalisUAudioLibrary() {
     autoplayItem?.id ?? null,
   );
   const audioRef = useRef<HTMLAudioElement>(null);
+  /** True after the user picks a card — always attempt play on those selects. */
+  const userPickedRef = useRef(false);
 
   const active =
     TALISU_AUDIO_LIBRARY.find((item) => item.id === activeId) ?? autoplayItem;
+
+  const transcriptLines =
+    (active?.id && TALISU_AUDIO_TRANSCRIPTS[active.id]) || null;
 
   useEffect(() => {
     const el = audioRef.current;
     if (!el || !active) return;
     el.load();
-    if (active.autoplay) {
-      const play = el.play();
-      if (play && typeof play.catch === "function") {
-        play.catch(() => {
-          /* Browsers may block autoplay until a gesture; controls remain. */
-        });
-      }
+    // Autoplay the default clip on open; always play after a card click.
+    const shouldPlay = Boolean(active.autoplay) || userPickedRef.current;
+    if (!shouldPlay) return;
+    const play = el.play();
+    if (play && typeof play.catch === "function") {
+      play.catch(() => {
+        /* Browsers may block autoplay until a gesture; controls remain. */
+      });
     }
   }, [active?.id, active?.autoplay]);
+
+  function handleSelect(id: string) {
+    userPickedRef.current = true;
+    setActiveId(id);
+  }
 
   return (
     <div className="space-y-8">
@@ -108,11 +125,20 @@ export default function TalisUAudioLibrary() {
               key={item.id}
               item={item}
               activeId={activeId}
-              onSelect={setActiveId}
+              onSelect={handleSelect}
             />
           ))}
         </div>
       </div>
+
+      {transcriptLines ? (
+        <article className={`mt-2 ${TALISU_CARD} px-5 py-8 sm:px-8`}>
+          <h2 className="mb-6 text-center text-xl font-semibold text-neutral-950">
+            {transcriptTitleForAudioId(active?.id)}
+          </h2>
+          <TranscriptLines lines={transcriptLines} />
+        </article>
+      ) : null}
     </div>
   );
 }
