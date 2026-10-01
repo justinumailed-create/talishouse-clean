@@ -17,14 +17,14 @@ export const MAPSITE_URL_GATE_SENTINEL = "__url_gate__";
  * FAST codes that skip the Admin Notifications secure-code URL unlock.
  * Normalized lower-case; compare with normalizeMapsiteUrlGateFastCode.
  */
-export const MAPSITE_URL_GATE_EXEMPT_FAST_CODES = ["dc01"] as const;
+export const MAPSITE_URL_GATE_EXEMPT_FAST_CODES = ["dc02"] as const;
 
 /**
  * Listing/payment URL overrides for specific FAST codes (case-insensitive key).
  * Wins over the stored mapsites.broker_url for the published URL button / unlock.
  */
 export const MAPSITE_URL_OVERRIDES: Readonly<Record<string, string>> = {
-  dc01: "https://talispros.mysamcart.com/checkout/register",
+  dc02: "https://talispros.mysamcart.com/checkout/register",
 };
 
 export function normalizeMapsiteUrlGateFastCode(

@@ -21,19 +21,19 @@ describe("Claim Your Market on demo Mapsites™ only", () => {
     expect(
       isDemonstrationListing({
         isDemonstration: false,
-        fastCode: "dc01",
+        fastCode: "dc02",
       }),
     ).toBe(false);
   });
 
-  it("wires Claim Your Market → / only on demo claimed partner card, not demo-mapsite template", () => {
+  it("wires Claim Your Market → /start (audience → FAST) on demo claimed partner card, not demo-mapsite template", () => {
     expect(ROUTES.HOME).toBe("/");
     const partner = readFileSync(
       resolve("components/talispros/mapsite/MapSiteMarketPartnerCard.tsx"),
       "utf8",
     );
     expect(partner).toContain("Claim Your Market");
-    expect(partner).toContain("href={ROUTES.HOME}");
+    expect(partner).toContain('href="/start"');
     expect(partner).toContain("isDemo");
 
     const app = readFileSync(

@@ -44,7 +44,7 @@ const RESOURCES: {
     key: "url",
     label: "URL",
     variant: "blue",
-    // Gated by default (secure-code popup). Exempt FAST codes (e.g. DC01) open
+    // Gated by default (secure-code popup). Exempt FAST codes (e.g. DC02) open
     // the listing URL directly — override wins over stored broker_url.
     resolveHref: (site) =>
       resolvePublishedUrlButtonHref(site.fast_code, site.broker_url),

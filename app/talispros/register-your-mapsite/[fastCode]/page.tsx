@@ -39,7 +39,7 @@ export default async function RegisterYourMapSitePage({
     notFound();
   }
 
-  // Exempt FAST codes (e.g. DC01) skip the secure-code gate entirely.
+  // Exempt FAST codes (e.g. DC02) skip the secure-code gate entirely.
   if (isMapsiteUrlGateExempt(mapsite.fastCode)) {
     redirect(listingUrl);
   }
