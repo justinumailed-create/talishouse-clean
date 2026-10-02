@@ -7,20 +7,20 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/assets/Centrefolds.pdf",
+        source: "/assets/Demo-PDF.pdf",
         headers: [
           {
             key: "Content-Disposition",
-            value: 'attachment; filename="Centrefolds.pdf"',
+            value: 'attachment; filename="Demo-PDF.pdf"',
           },
         ],
       },
       {
-        source: "/talispros/demo-mapsite/Centrefolds.pdf",
+        source: "/talispros/demo-mapsite/Demo-PDF.pdf",
         headers: [
           {
             key: "Content-Disposition",
-            value: 'attachment; filename="Centrefolds.pdf"',
+            value: 'attachment; filename="Demo-PDF.pdf"',
           },
         ],
       },

@@ -91,11 +91,12 @@ export const TALISU_MKTS_HEADER_NAV = [
 /** Placeholder marker — Mapsites™ dropdown is rendered in TalisUMktsHeader. */
 export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
 
-/** TalisU™ header dropdown (Knowledge Base / Audio / Video). */
+/** TalisU™ header dropdown (Knowledge Base / Audio / Video / FAQ). */
 export const TALISU_MKTS_HEADER_DROPDOWN = [
   { href: "/talisu/kb", label: "Knowledge Base" },
   { href: "/talisu/au", label: "Audio" },
   { href: "/talisu/video", label: "Video" },
+  { href: "/talisu#faq", label: "FAQ" },
 ] as const;
 
 export type TalisUMktsPinKind = "market" | "do-more";

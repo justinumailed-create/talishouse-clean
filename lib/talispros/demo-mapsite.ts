@@ -10,8 +10,8 @@ import { DEMO_MAPSITE_ID, MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state
 export const DEMO_MAPSITE_BUILD_PATH = "/talispros/demo-mapsite";
 
 /** Centerfold sample PDF offered from Markets / Demo builder (clean download name). */
-export const DEMO_MAPSITE_PDF_HREF = "/talispros/demo-mapsite/Centrefolds.pdf";
-export const DEMO_MAPSITE_PDF_FILE_NAME = "Centrefolds.pdf";
+export const DEMO_MAPSITE_PDF_HREF = "/talispros/demo-mapsite/Demo-PDF.pdf";
+export const DEMO_MAPSITE_PDF_FILE_NAME = "Demo-PDF.pdf";
 
 /** True for the demo builder and its follow-on pages (e.g. /ebook). */
 export function isDemoMapSitePath(pathname: string | null | undefined): boolean {
