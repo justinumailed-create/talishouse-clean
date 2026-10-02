@@ -53,6 +53,29 @@ export const TALISU_WELCOME = {
   aishaSrc: "/talisu/Aisha.mp3",
 } as const;
 
+/** FAQ on /talisu — first item documents KB / Audio / Video → Mapsites™. */
+export const TALISU_FAQ = {
+  title: "Frequently Asked Questions",
+  items: [
+    {
+      question:
+        "How do Knowledge Base, Audio, and Video support client Mapsites™?",
+      answer:
+        "Knowledge Base, Audio, and Video enhance client Mapsites™ to educate their prospects upon registration.",
+    },
+    {
+      question: "How do I get started with TalisU™?",
+      answer:
+        "Use Register to create your account, or open Markets to claim a territory and begin building your Mapsite™.",
+    },
+    {
+      question: "Where do I find learning material?",
+      answer:
+        "Open the TalisU™ menu for Knowledge Base, Audio, and Video. Bookshelf covers Talisbooks™ and FAST Codes™.",
+    },
+  ],
+} as const;
+
 export const TALISU_MARKETS_COPY = {
   title: "Markets served",
   body: "Select the PIN nearest you to claim a market of 50 miles (80 kilometres) around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.",

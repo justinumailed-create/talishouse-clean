@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { TALISU_WELCOME } from "@/lib/talisu/content";
+import { TALISU_FAQ, TALISU_WELCOME } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import {
   TALISU_BTN_PRIMARY,
@@ -51,6 +51,38 @@ export default function TalisUHomePage() {
           </article>
         ))}
       </div>
+
+      <section id="faq" className="mt-14 scroll-mt-24" aria-labelledby="talisu-faq-heading">
+        <h2
+          id="talisu-faq-heading"
+          className="mb-6 text-center text-xl font-semibold text-neutral-950 sm:text-2xl"
+        >
+          {TALISU_FAQ.title}
+        </h2>
+        <div className="mx-auto flex max-w-3xl flex-col gap-3">
+          {TALISU_FAQ.items.map((item) => (
+            <details
+              key={item.question}
+              className={`group ${TALISU_CARD} open:ring-[#046BD9]/25`}
+            >
+              <summary className="cursor-pointer list-none text-base font-semibold text-[#0069CF] marker:content-none [&::-webkit-details-marker]:hidden">
+                <span className="flex items-start justify-between gap-3">
+                  <span>{item.question}</span>
+                  <span
+                    aria-hidden
+                    className="mt-0.5 shrink-0 text-neutral-400 transition group-open:rotate-180"
+                  >
+                    ▾
+                  </span>
+                </span>
+              </summary>
+              <p className="mt-3 text-sm leading-relaxed text-neutral-700">
+                {item.answer}
+              </p>
+            </details>
+          ))}
+        </div>
+      </section>
 
       <div className="mt-10 flex flex-wrap justify-center gap-3">
         <Link href="/talisu/mkts" className={TALISU_BTN_PRIMARY}>
