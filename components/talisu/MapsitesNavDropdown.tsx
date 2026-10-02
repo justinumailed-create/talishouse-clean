@@ -16,6 +16,8 @@ export default function MapsitesNavDropdown() {
   const [payload, setPayload] = useState<NavMapSitesPayload | null>(null);
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  /** Avoid re-fetch cancelling itself when loadState flips to "loading". */
+  const fetchGenRef = useRef(0);
 
   const mapsiteActive =
     pathname.startsWith("/talispros/mapsite") ||
@@ -41,26 +43,26 @@ export default function MapsitesNavDropdown() {
   }, [open]);
 
   useEffect(() => {
-    if (!open || loadState === "loading" || loadState === "ready") return;
-    let cancelled = false;
+    if (!open) return;
+    if (loadState === "ready" || loadState === "loading") return;
+
+    const gen = ++fetchGenRef.current;
     setLoadState("loading");
+
     void fetch("/api/talisu/nav-mapsites")
       .then(async (res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return (await res.json()) as NavMapSitesPayload;
       })
       .then((data) => {
-        if (cancelled) return;
+        if (fetchGenRef.current !== gen) return;
         setPayload(data);
         setLoadState("ready");
       })
       .catch(() => {
-        if (cancelled) return;
+        if (fetchGenRef.current !== gen) return;
         setLoadState("error");
       });
-    return () => {
-      cancelled = true;
-    };
   }, [open, loadState]);
 
   function toggle() {
@@ -70,6 +72,12 @@ export default function MapsitesNavDropdown() {
   const claimed = payload?.claimed ?? [];
   const demos = payload?.demos ?? [];
   const newDemoHref = payload?.newDemoHref || DEMO_MAPSITE_BUILD_PATH;
+
+  const sectionLabelClass =
+    "px-3.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-white/90";
+  const emptyClass = "px-3.5 py-2 text-[12px] text-white/80";
+  const itemClass =
+    "block px-3.5 py-2 text-[13px] font-medium text-white transition hover:bg-white/15 sm:text-[14px]";
 
   return (
     <div ref={rootRef} className="relative">
@@ -105,21 +113,15 @@ export default function MapsitesNavDropdown() {
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 z-50 mt-1.5 max-h-[min(70vh,28rem)] w-[min(92vw,18rem)] overflow-y-auto rounded-lg border border-white/20 bg-[#035bb8] py-1 shadow-lg"
+          className="absolute right-0 z-50 mt-1.5 max-h-[min(70vh,28rem)] w-[min(92vw,18rem)] overflow-y-auto rounded-lg border border-white/25 bg-[#035bb8] py-1 shadow-lg"
         >
-          <p className="px-3.5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wide text-white/55">
-            Claimed sites
-          </p>
+          <p className={sectionLabelClass}>Claimed Mapsites™</p>
           {loadState === "loading" || loadState === "idle" ? (
-            <p className="px-3.5 py-2 text-[12px] text-white/70">Loading…</p>
+            <p className={emptyClass}>Loading…</p>
           ) : loadState === "error" ? (
-            <p className="px-3.5 py-2 text-[12px] text-white/70">
-              Could not load Mapsites™.
-            </p>
+            <p className={emptyClass}>Could not load Mapsites™.</p>
           ) : claimed.length === 0 ? (
-            <p className="px-3.5 py-2 text-[12px] text-white/70">
-              No claimed Mapsites™ yet.
-            </p>
+            <p className={emptyClass}>No claimed Mapsites™ yet.</p>
           ) : (
             claimed.map((item) => (
               <Link
@@ -127,33 +129,29 @@ export default function MapsitesNavDropdown() {
                 href={item.href}
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="block px-3.5 py-2 text-[13px] font-medium text-white/95 transition hover:bg-white/15 sm:text-[14px]"
+                className={itemClass}
               >
                 <span className="block truncate">{item.label}</span>
-                <span className="mt-0.5 block truncate text-[11px] font-normal text-white/60">
+                <span className="mt-0.5 block truncate text-[11px] font-normal text-white/75">
                   {item.sublabel}
                 </span>
               </Link>
             ))
           )}
 
-          <div className="my-1 border-t border-white/15" />
+          <div className="my-1 border-t border-white/25" />
 
-          <p className="px-3.5 pb-1 pt-1 text-[10px] font-semibold uppercase tracking-wide text-white/55">
-            Demo sites
-          </p>
+          <p className={`${sectionLabelClass} pt-1`}>Demo Mapsites™</p>
           <Link
             href={newDemoHref}
             role="menuitem"
             onClick={() => setOpen(false)}
-            className="block px-3.5 py-2 text-[13px] font-medium text-white/95 transition hover:bg-white/15 sm:text-[14px]"
+            className={itemClass}
           >
             Build Demo Mapsite™
           </Link>
           {loadState === "ready" && demos.length === 0 ? (
-            <p className="px-3.5 py-2 text-[12px] text-white/70">
-              No demo Mapsites™ yet.
-            </p>
+            <p className={emptyClass}>No demo Mapsites™ yet.</p>
           ) : null}
           {demos.map((item) => (
             <Link
@@ -161,10 +159,10 @@ export default function MapsitesNavDropdown() {
               href={item.href}
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="block px-3.5 py-2 text-[13px] font-medium text-white/95 transition hover:bg-white/15 sm:text-[14px]"
+              className={itemClass}
             >
               <span className="block truncate">{item.label}</span>
-              <span className="mt-0.5 block truncate text-[11px] font-normal text-white/60">
+              <span className="mt-0.5 block truncate text-[11px] font-normal text-white/75">
                 {item.sublabel}
               </span>
             </Link>

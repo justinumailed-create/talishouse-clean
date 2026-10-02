@@ -5,6 +5,7 @@ import {
   HOME_OWNERSHIP_BANNER_TITLE,
   HOME_OWNERSHIP_BG_MP4,
   HOME_OWNERSHIP_BG_SRC,
+  HOME_OWNERSHIP_STRUCTURES_TAGLINE,
 } from "../lib/talispros/ownership-models";
 
 describe("homepage mountain looping motion", () => {
@@ -45,16 +46,19 @@ describe("homepage mountain looping motion", () => {
     expect(motion).toContain("motion-reduce:block");
   });
 
-  it("overlays Industry Adjacent Fulfilment Options 101 on the mountain panel", () => {
+  it("keeps Fulfilment Options for the blue nav and structures tagline above squares", () => {
     expect(HOME_OWNERSHIP_BANNER_TITLE).toBe(
-      "Industry Adjacent Fulfilment Options 101",
+      "Industry Adjacent Fulfilment Options",
+    );
+    expect(HOME_OWNERSHIP_STRUCTURES_TAGLINE).toBe(
+      "Transaction Structures we support",
     );
     const showcase = readFileSync(
       resolve("components/talispros/TalisprosHomeShowcase.tsx"),
       "utf8",
     );
-    expect(showcase).toContain("HOME_OWNERSHIP_BANNER_TITLE");
-    expect(showcase).toContain("pointer-events-none");
-    expect(showcase).toContain("z-[1]");
+    expect(showcase).toContain("HOME_OWNERSHIP_STRUCTURES_TAGLINE");
+    expect(showcase).not.toContain("HOME_OWNERSHIP_BANNER_TITLE");
+    expect(showcase).toContain("HomeMountainMotion");
   });
 });

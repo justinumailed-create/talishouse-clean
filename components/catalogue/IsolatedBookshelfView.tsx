@@ -79,6 +79,74 @@ function cowboyGuideLibraryEntry(): TalisBooksLibraryBook {
   };
 }
 
+
+/**
+ * Prefer Pipeline before Tokenization on the Common Shelf.
+ * Newest-first shelf layout uses createdAt, so bump Pipeline ahead of Tokenization.
+ */
+function pipelineBeforeTokenization(
+  books: TalisBooksLibraryBook[],
+): TalisBooksLibraryBook[] {
+  const pipeline = books.filter((b) => b.title.toLowerCase().includes("pipeline"));
+  const tokenization = books.filter((b) =>
+    b.title.toLowerCase().includes("tokenization"),
+  );
+  if (pipeline.length === 0 || tokenization.length === 0) {
+    return books;
+  }
+  const tokenTimes = tokenization.map((b) => Date.parse(b.createdAt || "") || 0);
+  const maxToken = Math.max(...tokenTimes, 0);
+  const pipelineTime = new Date(maxToken + 60_000).toISOString();
+  const adjustedIds = new Set(pipeline.map((b) => b.id));
+  return books.map((book) =>
+    adjustedIds.has(book.id)
+      ? { ...book, createdAt: pipelineTime, publishedAt: pipelineTime }
+      : book,
+  );
+}
+
+/** Decorative filler covers so the Common Shelf looks fuller (non-interactive). */
+function decorativeShelfFillers(count = 10): TalisBooksLibraryBook[] {
+  const titles = [
+    "Harbour Lookbook",
+    "Prairie Estates",
+    "Lakefront Digest",
+    "Summit Residences",
+    "Garden Court",
+    "Northshore Collection",
+    "Cedar Ridge",
+    "Market Square",
+    "Vista Heights",
+    "Riverbend Homes",
+  ];
+  return titles.slice(0, count).map((title, index) => ({
+    id: `decorative-shelf-${index + 1}`,
+    slug: `decorative-shelf-${index + 1}`,
+    title,
+    subtitle: "",
+    coverImageUrl: null,
+    coverTemplateId: null,
+    coverGradient:
+      TALISBOOKS_LIBRARY_SPINE_PALETTES[
+        index % TALISBOOKS_LIBRARY_SPINE_PALETTES.length
+      ]!,
+    publishStatus: "published" as const,
+    publishedAt: "2019-01-01T00:00:00.000Z",
+    createdAt: "2019-01-01T00:00:00.000Z",
+    views: 0,
+    clicks: 0,
+    pageCount: 0,
+    accountId: null,
+    accountType: "root" as const,
+    mapsiteId: null,
+    fastCode: ALLPINS_FAST_CODE,
+    parentBookId: null,
+    isPinned: false,
+    decorative: true,
+    metadata: { decorative: true, isolatedBookshelf: true },
+  }));
+}
+
 function buildIsolatedAllPinsBookshelf(
   books: IsolatedBookshelfBook[],
 ): TalisBooksBookshelf {
@@ -103,7 +171,8 @@ function buildIsolatedAllPinsBookshelf(
           book.slug !== cowboy.slug &&
           book.slug !== PINNED_TALISBOOK_SLUG,
       );
-      return [...withoutDup, cowboy];
+      const ordered = pipelineBeforeTokenization(withoutDup);
+      return [...ordered, ...decorativeShelfFillers(10), cowboy];
     })(),
   };
 }

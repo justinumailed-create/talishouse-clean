@@ -20,9 +20,7 @@ import {
 
 describe("Talispros legal copy and homepage products", () => {
   it("keeps the exact shared legal strings", () => {
-    expect(TALISPROS_LEGAL_PRIMARY_COPY).toBe(
-      "More traffic in higher gross markets for better averages over time.",
-    );
+    expect(TALISPROS_LEGAL_PRIMARY_COPY).toBe("");
     expect(TALISPROS_LEGAL_SECONDARY_COPY).toBe("*Some limitations apply.");
   });
 

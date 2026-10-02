@@ -37,6 +37,50 @@ export default function TalisBooksStandingBook({
     ? `${displayTitle} · ${book.publishStatus} · ${book.views} views`
     : `${book.publishStatus} · ${book.views} views`;
 
+  const coverScene = (
+        <div className="talisbooks-standing-book__scene">
+          <div
+            className="talisbooks-standing-book__volume"
+            style={{ ["--book-cover" as string]: book.coverGradient }}
+          >
+            <div className="talisbooks-standing-book__spine" aria-hidden="true" />
+            <div className="talisbooks-standing-book__cover">
+              {book.coverImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={book.coverImageUrl}
+                  alt=""
+                  className="talisbooks-standing-book__cover-image"
+                />
+              ) : (
+                <div
+                  className="talisbooks-standing-book__cover-fallback"
+                  style={{ backgroundImage: book.coverGradient }}
+                />
+              )}
+            </div>
+            <div className="talisbooks-standing-book__pages" aria-hidden="true" />
+          </div>
+          <div className="talisbooks-standing-book__contact-shadow" aria-hidden="true" />
+        </div>
+  );
+
+  if (book.decorative) {
+    return (
+      <article
+        className={`talisbooks-standing-book talisbooks-standing-book--${size} pointer-events-none`}
+        style={{ animationDelay: `${Math.min(index, 24) * 18}ms` }}
+        aria-hidden="true"
+      >
+        <div className="talisbooks-standing-book__frame">
+          <div className="talisbooks-standing-book__link" tabIndex={-1}>
+            {coverScene}
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   return (
     <article
       className={`talisbooks-standing-book talisbooks-standing-book--${size}`}
@@ -65,31 +109,7 @@ export default function TalisBooksStandingBook({
           aria-label={openLabel}
           title={tipTitle}
         >
-        <div className="talisbooks-standing-book__scene">
-          <div
-            className="talisbooks-standing-book__volume"
-            style={{ ["--book-cover" as string]: book.coverGradient }}
-          >
-            <div className="talisbooks-standing-book__spine" aria-hidden="true" />
-            <div className="talisbooks-standing-book__cover">
-              {book.coverImageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={book.coverImageUrl}
-                  alt=""
-                  className="talisbooks-standing-book__cover-image"
-                />
-              ) : (
-                <div
-                  className="talisbooks-standing-book__cover-fallback"
-                  style={{ backgroundImage: book.coverGradient }}
-                />
-              )}
-            </div>
-            <div className="talisbooks-standing-book__pages" aria-hidden="true" />
-          </div>
-          <div className="talisbooks-standing-book__contact-shadow" aria-hidden="true" />
-        </div>
+        {coverScene}
 
         {showMeta ? (
           <div className="talisbooks-standing-book__meta">

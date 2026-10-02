@@ -10,9 +10,13 @@ export const HOME_OWNERSHIP_BG_GIF = "/assets/home-ownership-bg.gif";
  */
 export const HOME_OWNERSHIP_BG_MP4 = "/assets/home-ownership-bg.mp4";
 
-/** Title overlaid at the top of the homepage mountain ownership banner. */
+/** Title overlaid at the top of the homepage mountain ownership banner (moved to blue nav). */
 export const HOME_OWNERSHIP_BANNER_TITLE =
-  "Industry Adjacent Fulfilment Options 101";
+  "Industry Adjacent Fulfilment Options";
+
+/** Very small tagline directly above the four ownership structure squares. */
+export const HOME_OWNERSHIP_STRUCTURES_TAGLINE =
+  "Transaction Structures we support";
 
 export type OwnershipModelSection = {
   id: string;

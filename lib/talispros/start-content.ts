@@ -10,8 +10,8 @@ export function isTalisprosStartPath(pathname: string | null | undefined) {
   );
 }
 
-export const TALISPROS_LEGAL_PRIMARY_COPY =
-  "More traffic in higher gross markets for better averages over time.";
+/** Removed from homepage gate — kept empty so secondary disclaimer can stand alone. */
+export const TALISPROS_LEGAL_PRIMARY_COPY = "";
 
 export const TALISPROS_LEGAL_SECONDARY_COPY = "*Some limitations apply.";
 

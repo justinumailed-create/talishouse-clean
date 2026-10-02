@@ -39,6 +39,8 @@ export interface TalisBooksLibraryBook {
   metadata?: Record<string, unknown> | null;
   /** Lower numbers appear first among pinned books (see PUBLIC_LIBRARY_PINNED_BOOKS). */
   pinRank?: number;
+  /** Decorative filler cover — rendered non-interactive (no navigation). */
+  decorative?: boolean;
 }
 
 export interface TalisBooksBookshelf {

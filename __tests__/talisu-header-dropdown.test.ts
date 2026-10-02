@@ -47,8 +47,8 @@ describe("TalisU blue header dropdown", () => {
       resolve("components/talisu/MapsitesNavDropdown.tsx"),
       "utf8",
     );
-    expect(dropdown).toContain("Claimed sites");
-    expect(dropdown).toContain("Demo sites");
+    expect(dropdown).toContain("Claimed Mapsites");
+    expect(dropdown).toContain("Demo Mapsites");
     expect(dropdown).toContain("/api/talisu/nav-mapsites");
     expect(dropdown).toContain("Build Demo Mapsite");
     const api = readFileSync(

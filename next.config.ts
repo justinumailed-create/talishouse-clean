@@ -4,6 +4,28 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  async headers() {
+    return [
+      {
+        source: "/assets/Centrefolds.pdf",
+        headers: [
+          {
+            key: "Content-Disposition",
+            value: 'attachment; filename="Centrefolds.pdf"',
+          },
+        ],
+      },
+      {
+        source: "/talispros/demo-mapsite/Centrefolds.pdf",
+        headers: [
+          {
+            key: "Content-Disposition",
+            value: 'attachment; filename="Centrefolds.pdf"',
+          },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       {

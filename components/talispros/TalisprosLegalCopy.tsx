@@ -14,9 +14,10 @@ export default function TalisprosLegalCopy({
   primaryClassName,
   secondaryClassName,
 }: TalisprosLegalCopyProps) {
+  const primary = TALISPROS_LEGAL_PRIMARY_COPY.trim();
   return (
     <div className={className}>
-      <p className={primaryClassName}>{TALISPROS_LEGAL_PRIMARY_COPY}</p>
+      {primary ? <p className={primaryClassName}>{primary}</p> : null}
       <p className={secondaryClassName}>{TALISPROS_LEGAL_SECONDARY_COPY}</p>
     </div>
   );

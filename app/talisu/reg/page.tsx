@@ -1,6 +1,8 @@
+import Image from "next/image";
 import { TALISU_REGISTER } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
+import { MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE } from "@/lib/talispros/market-pages";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
 
@@ -14,8 +16,20 @@ export const metadata = createTalisUMetadata({
 export default function TalisURegisterPage() {
   return (
     <SectionShell title={TALISU_REGISTER.title}>
-      <div className="mb-10 grid gap-8 lg:grid-cols-2">
-        <div className={TALISU_CARD}>
+      {/* ~40% write-up / ~60% SamCart so the embed can show its native 2-column layout */}
+      <div className="mb-10 grid gap-8 lg:grid-cols-5">
+        <div className={`${TALISU_CARD} lg:col-span-2`}>
+          <div className="mb-5 flex justify-center">
+            <Image
+              src={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
+              alt="Aisha C."
+              width={896}
+              height={1200}
+              className="h-auto w-full max-w-[220px] rounded-xl object-cover shadow-sm"
+              sizes="220px"
+              priority
+            />
+          </div>
           <h2 className="text-xl font-semibold text-[#0069CF]">
             {TALISU_REGISTER.partnerHeading}
           </h2>
@@ -38,11 +52,13 @@ export default function TalisURegisterPage() {
           </p>
         </div>
 
-        <SamCartEmbed
-          src={TALISU_REGISTER.samcartUrl}
-          title="TalisU Register — SamCart"
-          height={1500}
-        />
+        <div className="lg:col-span-3">
+          <SamCartEmbed
+            src={TALISU_REGISTER.samcartUrl}
+            title="TalisU Register — SamCart"
+            height={1500}
+          />
+        </div>
       </div>
     </SectionShell>
   );

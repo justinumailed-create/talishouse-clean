@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import {
-  HOME_OWNERSHIP_BANNER_TITLE,
   HOME_OWNERSHIP_SECTIONS,
+  HOME_OWNERSHIP_STRUCTURES_TAGLINE,
 } from "@/lib/talispros/ownership-models";
 import HomeMountainMotion from "@/components/talispros/HomeMountainMotion";
 import OwnershipLearnMoreForm from "@/components/talispros/OwnershipLearnMoreForm";
@@ -53,18 +53,13 @@ export default function TalisprosHomeShowcase() {
       className="relative flex min-h-[42vh] w-full flex-1 flex-col overflow-hidden bg-neutral-900 lg:h-full lg:min-h-0 lg:border-l lg:border-[#dedede]"
       aria-label="Ownership models"
     >
-      {/* Upper: looping mountain motion + title */}
+      {/* Upper: looping mountain motion (Fulfilment Options title lives in blue nav) */}
       <div
         className="relative min-h-[240px] flex-1 basis-[58%]"
         onClick={openId ? close : undefined}
         role={openId ? "presentation" : undefined}
       >
         <HomeMountainMotion />
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-[1] bg-gradient-to-b from-black/60 via-black/30 to-transparent px-4 pb-12 pt-4 sm:px-5 sm:pt-5">
-          <h2 className="text-center text-[15px] font-semibold leading-snug tracking-wide text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] sm:text-[17px] md:text-[18px]">
-            {HOME_OWNERSHIP_BANNER_TITLE}
-          </h2>
-        </div>
       </div>
 
       {/* Lower: metallic square buttons + popover */}
@@ -129,6 +124,9 @@ export default function TalisprosHomeShowcase() {
           </div>
         ) : null}
 
+        <p className="mb-2 text-center text-[9px] font-semibold uppercase tracking-[0.18em] text-neutral-700/90 sm:mb-2.5 sm:text-[10px]">
+          {HOME_OWNERSHIP_STRUCTURES_TAGLINE}
+        </p>
         <div className="mx-auto grid max-w-3xl grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
           {HOME_OWNERSHIP_SECTIONS.map((section) => {
             const isOpen = openId === section.id;
