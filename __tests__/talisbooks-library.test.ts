@@ -92,7 +92,7 @@ describe("Talisbooks™ split bookshelf layout", () => {
     expect(featured.some((book) => highlightStatuses.has(book.publishStatus))).toBe(true);
   });
 
-  it("pages the general library in a 4×5 grid of 20", () => {
+  it("pages the general library in a 10×2 grid of 20", () => {
     expect(TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE).toBe(20);
     const { general } = partitionBookshelf(books, { featuredCapacity: 5 });
     const page = paginateLibraryBooks(general, 1, TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE);
@@ -100,18 +100,16 @@ describe("Talisbooks™ split bookshelf layout", () => {
     expect(page.books.length).toBe(Math.min(20, general.length));
   });
 
-  it("shrinks right-shelf books 25% for every 5 until 20", () => {
-    expect(generalShelfBookScale(1)).toBe(1);
-    expect(generalShelfBookScale(5)).toBe(1);
-    expect(generalShelfBookScale(6)).toBe(0.75);
-    expect(generalShelfBookScale(10)).toBe(0.75);
-    expect(generalShelfBookScale(11)).toBe(0.5);
-    expect(generalShelfBookScale(16)).toBe(0.25);
-    expect(generalShelfBookScale(20)).toBe(0.25);
-    expect(generalShelfColumns(1)).toBe(5);
-    expect(generalShelfColumns(5)).toBe(5);
-    expect(generalShelfColumns(12)).toBe(5);
-    expect(generalShelfColumns(20)).toBe(4);
+  it("packs the right shelf at 10 books per row with denser covers", () => {
+    expect(generalShelfBookScale(1)).toBe(0.55);
+    expect(generalShelfBookScale(5)).toBe(0.55);
+    expect(generalShelfBookScale(10)).toBe(0.55);
+    expect(generalShelfBookScale(11)).toBe(0.4);
+    expect(generalShelfBookScale(20)).toBe(0.4);
+    expect(generalShelfColumns(1)).toBe(10);
+    expect(generalShelfColumns(5)).toBe(10);
+    expect(generalShelfColumns(12)).toBe(10);
+    expect(generalShelfColumns(20)).toBe(10);
   });
 
   it("newest mode keeps other pinned books under the hero", () => {

@@ -27,16 +27,16 @@ export const TALISBOOKS_ECOSYSTEM_SHELF_PROFILES = [
 export const TALISBOOKS_LIBRARY_FEATURED_CAPACITY_GRID = 6; // 3×2
 export const TALISBOOKS_LIBRARY_FEATURED_CAPACITY_HERO = 5; // 1 large + 4 small
 
-/** Right niche: general library — up to 20 books, shrinking every 5. */
-export const TALISBOOKS_LIBRARY_GENERAL_COLUMNS = 4;
-export const TALISBOOKS_LIBRARY_GENERAL_ROWS = 5;
+/** Right niche: general library — 10 books per row, up to 2 rows (20) per page. */
+export const TALISBOOKS_LIBRARY_GENERAL_COLUMNS = 10;
+export const TALISBOOKS_LIBRARY_GENERAL_ROWS = 2;
 export const TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE =
   TALISBOOKS_LIBRARY_GENERAL_COLUMNS * TALISBOOKS_LIBRARY_GENERAL_ROWS; // 20
-export const TALISBOOKS_LIBRARY_GENERAL_SCALE_STEP = 5;
-export const TALISBOOKS_LIBRARY_GENERAL_SCALE_REDUCTION = 0.25;
+export const TALISBOOKS_LIBRARY_GENERAL_SCALE_STEP = 10;
+export const TALISBOOKS_LIBRARY_GENERAL_SCALE_REDUCTION = 0.2;
 
-/** Right-shelf book scale: full size for the first 5, then −25% for every
- * additional 5 until 20 books (1 → 0.75 → 0.5 → 0.25).
+/** Right-shelf book scale for a 10-wide plank: denser rows use a smaller cover.
+ * 1–10 → 0.55 (fits one full row); 11–20 → 0.4.
  */
 export function generalShelfBookScale(bookCount: number): number {
   const count = Math.min(
@@ -44,17 +44,12 @@ export function generalShelfBookScale(bookCount: number): number {
     TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
   );
   if (count <= 0) return 1;
-  const steps = Math.floor((count - 1) / TALISBOOKS_LIBRARY_GENERAL_SCALE_STEP);
-  return Math.max(0.25, 1 - steps * TALISBOOKS_LIBRARY_GENERAL_SCALE_REDUCTION);
+  if (count <= TALISBOOKS_LIBRARY_GENERAL_COLUMNS) return 0.55;
+  return 0.4;
 }
 
-/** Plank column count — leftover slots stay empty on the right so books start at the left. */
-export function generalShelfColumns(bookCount: number): number {
-  const count = Math.min(
-    Math.max(bookCount, 1),
-    TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
-  );
-  if (count <= 15) return 5;
+/** Plank column capacity — always 10 per row; leftover slots stay empty on the right. */
+export function generalShelfColumns(_bookCount: number): number {
   return TALISBOOKS_LIBRARY_GENERAL_COLUMNS;
 }
 

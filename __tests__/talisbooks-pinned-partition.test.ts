@@ -66,6 +66,72 @@ describe("partitionBookshelf pinned ordering", () => {
     expect(general.map((item) => item.id)).toEqual(["decorative"]);
   });
 
+  it("fills the Common Shelf left hero-5: Cowboy, Tokenization, three dummies", () => {
+    const { featured, general, featuredLayout } = partitionBookshelf(
+      [
+        book({
+          id: "cowboy",
+          title: "Cowboy's Guide",
+          createdAt: "2099-12-31T23:59:59.000Z",
+          isPinned: true,
+          pinRank: 0,
+        }),
+        book({
+          id: "tokenization",
+          title: "Real-World Asset Tokenization",
+          createdAt: "2026-09-01T00:00:00.000Z",
+          isPinned: true,
+          pinRank: 1,
+        }),
+        book({
+          id: "left-hero-dummy-1",
+          title: "Harbour Lookbook",
+          createdAt: "2020-01-01T00:00:00.000Z",
+          isPinned: true,
+          pinRank: 2,
+        }),
+        book({
+          id: "left-hero-dummy-2",
+          title: "Prairie Estates",
+          createdAt: "2020-01-01T00:00:00.000Z",
+          isPinned: true,
+          pinRank: 3,
+        }),
+        book({
+          id: "left-hero-dummy-3",
+          title: "Lakefront Digest",
+          createdAt: "2020-01-01T00:00:00.000Z",
+          isPinned: true,
+          pinRank: 4,
+        }),
+        book({
+          id: "right-1",
+          title: "Summit Residences",
+          createdAt: "2019-01-01T00:00:00.000Z",
+        }),
+        book({
+          id: "right-2",
+          title: "Garden Court",
+          createdAt: "2019-06-01T00:00:00.000Z",
+        }),
+      ],
+      { featuredCapacity: 5, featuredMode: "newest" },
+    );
+
+    expect(featuredLayout).toBe("hero-plus-4");
+    expect(featured.map((item) => item.id)).toEqual([
+      "cowboy",
+      "tokenization",
+      "left-hero-dummy-1",
+      "left-hero-dummy-2",
+      "left-hero-dummy-3",
+    ]);
+    expect(general.map((item) => item.id)).toEqual(["right-2", "right-1"]);
+    expect(packShelfRowsNewestAtRight(general.map((item) => item.id), 10)).toEqual([
+      ["right-2", "right-1"],
+    ]);
+  });
+
   it("puts FAST-code published books on the right shelf newest first", () => {
     const { featured, general } = partitionBookshelf(
       [

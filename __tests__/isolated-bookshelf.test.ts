@@ -260,8 +260,11 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(shelf).toContain("displayShelfBookTitle");
     expect(shelf).toContain("cowboyGuideLibraryEntry");
     expect(shelf).toContain("Cowboy's Guide");
-    expect(shelf).toContain("pinTokenizationUnderCowboy");
-    expect(shelf).toContain('pinRank: 0');
+    expect(shelf).toContain("tokenizationLibraryEntry");
+    expect(shelf).toContain("leftHeroDummyBooks");
+    expect(shelf).toContain("Real-World Asset Tokenization");
+    expect(shelf).toContain("pinRank: 0");
+    expect(shelf).toContain("pinRank: 1");
     expect(shelf).toContain("book.subtitle");
     expect(shelf).toContain("book.slug");
     expect(shelf).toContain("pinnedTalisBookLibraryEntry");
