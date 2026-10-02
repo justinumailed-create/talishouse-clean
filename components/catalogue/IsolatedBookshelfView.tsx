@@ -64,18 +64,18 @@ function toLibraryBook(
 }
 
 
-/** Built-in Cowboy's Guide (pinned sample) — sits under the left hero on Common Shelf. */
-function cowboyGuideLibraryEntry(): TalisBooksLibraryBook {
+/** Built-in Cowboy's Guide — left hero on Common Shelf (above Tokenization). */
+function cowboyGuideLibraryEntry(heroCreatedAt: string): TalisBooksLibraryBook {
   const pinned = pinnedTalisBookLibraryEntry();
   return {
     ...pinned,
     title: "Cowboy's Guide",
     subtitle: "The Cowboy's Guide to Outside Capital · Talispros PMC",
     isPinned: true,
-    pinRank: 1,
-    // Never win the newest hero slot above the highlighted book.
-    createdAt: "2020-01-01T00:00:00.000Z",
-    publishedAt: pinned.publishedAt || "2020-01-01T00:00:00.000Z",
+    pinRank: 0,
+    // Win the newest hero slot so Cowboy sits above Tokenization on the left.
+    createdAt: heroCreatedAt,
+    publishedAt: heroCreatedAt,
   };
 }
 
@@ -101,6 +101,20 @@ function pipelineBeforeTokenization(
   return books.map((book) =>
     adjustedIds.has(book.id)
       ? { ...book, createdAt: pipelineTime, publishedAt: pipelineTime }
+      : book,
+  );
+}
+
+/**
+ * Keep Tokenization on the left under Cowboy's Guide (newest-mode remainingPinned).
+ * Right-side books and decorative fillers stay unpinned.
+ */
+function pinTokenizationUnderCowboy(
+  books: TalisBooksLibraryBook[],
+): TalisBooksLibraryBook[] {
+  return books.map((book) =>
+    book.title.toLowerCase().includes("tokenization")
+      ? { ...book, isPinned: true, pinRank: 1 }
       : book,
   );
 }
@@ -164,14 +178,17 @@ function buildIsolatedAllPinsBookshelf(
     primaryEbook: null,
     books: (() => {
       const libraryBooks = books.map(toLibraryBook);
-      const cowboy = cowboyGuideLibraryEntry();
       const withoutDup = libraryBooks.filter(
         (book) =>
-          book.id !== cowboy.id &&
-          book.slug !== cowboy.slug &&
+          book.id !== "pinned-talispros-ebook-sample" &&
           book.slug !== PINNED_TALISBOOK_SLUG,
       );
-      const ordered = pipelineBeforeTokenization(withoutDup);
+      const ordered = pinTokenizationUnderCowboy(
+        pipelineBeforeTokenization(withoutDup),
+      );
+      // Far-future createdAt so Cowboy always wins the left hero over Pipeline /
+      // Tokenization / decorative fillers (newest-mode partition).
+      const cowboy = cowboyGuideLibraryEntry("2099-12-31T23:59:59.000Z");
       return [...ordered, ...decorativeShelfFillers(10), cowboy];
     })(),
   };
