@@ -9,6 +9,7 @@ import RootShell from "@/components/RootShell";
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-poppins",
 });
 
 export const viewport: Viewport = {
@@ -39,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={poppins.className}>
+      <body className={`${poppins.variable} ${poppins.className}`}>
         <AuthProvider>
           <CartProvider>
             <AssociateProvider>

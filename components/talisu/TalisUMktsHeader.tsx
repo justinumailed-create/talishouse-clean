@@ -297,12 +297,12 @@ export default function TalisUMktsHeader({
 
   return (
     <header
-      className="sticky top-0 z-40 shrink-0 text-white shadow-sm"
+      className="sticky top-0 z-40 shrink-0 font-sans text-white shadow-sm"
       style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
     >
       <div className="mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-3 px-3 py-2.5 pb-3 sm:px-5 sm:pb-3.5">
         <div className="flex min-w-0 items-center gap-2.5">
-          <Link href="/talisu" className="shrink-0 self-start">
+          <Link href="/" className="shrink-0 self-start">
             <Image
               src="/talisu/mkts/talisu-mark.png"
               alt="TalisU™"

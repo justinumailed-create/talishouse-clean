@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Libre_Baskerville } from "next/font/google";
 import TalisprosGatePage from "@/components/talispros/TalisprosGatePage";
 import { createMetadata } from "@/lib/seo";
 import { toAbsoluteHttpsOgUrl } from "@/lib/talispros/mapsite-og-image";
 import { SAMCART_SUCCESS_RETURN_PATH } from "@/lib/talispros/samcart-return";
-
-const libreBaskerville = Libre_Baskerville({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
 
 const homeTitle = "Talispros™";
 const homeDescription = "Claim your market. Open your Mapsite™.";
@@ -28,7 +22,7 @@ export const metadata: Metadata = createMetadata({
 
 export default function Home() {
   return (
-    <div className={`${libreBaskerville.className} min-h-dvh lg:h-full lg:min-h-0`}>
+    <div className="min-h-dvh lg:h-full lg:min-h-0">
       <Suspense fallback={null}>
         <TalisprosGatePage />
       </Suspense>
