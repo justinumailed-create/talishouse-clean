@@ -508,11 +508,9 @@ export async function ensureAllPinsMapSite(): Promise<AllPinsAggregation | null>
   };
 }
 
+/** ALLPINS map view is the live /talisu/mkts Markets map. */
 export function allPinsClaimedHref(): string {
-  return buildClaimedMapSitePath({
-    fastCode: ALLPINS_FAST_CODE,
-    accountType: "listings",
-  });
+  return "/talisu/mkts";
 }
 
 export function allPinsPublishedHref(): string {

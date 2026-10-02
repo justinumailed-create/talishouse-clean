@@ -383,13 +383,16 @@ export default function TalisUMktsHeader({
                     />
                   </div>
                 ) : (
-                  TALISU_MKTS_HEADER_DROPDOWN.map((item) => {
-                    const active =
-                      pathname === item.href ||
-                      pathname.startsWith(`${item.href}/`);
-                    const isKb = item.href === TALISU_KB_PATH;
-                    if (isKb) {
-                      return (
+                  <>
+                    {TALISU_MKTS_HEADER_DROPDOWN.map((item, index) => {
+                      const active =
+                        pathname === item.href ||
+                        pathname.startsWith(`${item.href}/`) ||
+                        (item.href.includes("#") &&
+                          pathname === item.href.split("#")[0]);
+                      const isKb = item.href === TALISU_KB_PATH;
+                      const isFaq = item.label === "FAQ";
+                      const row = isKb ? (
                         <button
                           key={item.href}
                           type="button"
@@ -403,24 +406,36 @@ export default function TalisUMktsHeader({
                         >
                           {item.label}
                         </button>
+                      ) : (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          role="menuitem"
+                          onClick={() => setOpen(false)}
+                          className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
+                            active
+                              ? "bg-white/20 text-white"
+                              : "text-white/95 hover:bg-white/15"
+                          }`}
+                        >
+                          {item.label}
+                        </Link>
                       );
-                    }
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        role="menuitem"
-                        onClick={() => setOpen(false)}
-                        className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
-                          active
-                            ? "bg-white/20 text-white"
-                            : "text-white/95 hover:bg-white/15"
-                        }`}
-                      >
-                        {item.label}
-                      </Link>
-                    );
-                  })
+                      // FAQ is first — horizontal split before Knowledge Base / Audio / Video.
+                      if (isFaq && index === 0) {
+                        return (
+                          <div key={`${item.href}-wrap`}>
+                            {row}
+                            <div
+                              role="separator"
+                              className="my-1 border-t border-white/25"
+                            />
+                          </div>
+                        );
+                      }
+                      return row;
+                    })}
+                  </>
                 )}
               </div>
             ) : null}

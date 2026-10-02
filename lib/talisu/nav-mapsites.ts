@@ -1,14 +1,11 @@
 /**
- * Nav Mapsites™ lists for the blue TalisUMktsHeader dropdown.
- * Claimed = non-demo Mapsites™ (admin-style inventory); Demo = is_demonstration.
+ * Nav Mapsites™ payload for the blue header dropdown.
+ * Claimed Mapsites™ are no longer listed publicly — visitors enter a FAST Code™.
+ * Demo builder link (+ optional demo rows) remain available.
  */
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { isDemoMapSiteCode, DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
-import {
-  buildClaimedMapSitePath,
-  MAPSITE_APP_PATH,
-} from "@/lib/talispros/mapsite-state";
-import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
+import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
 export type NavMapSiteLink = {
   id: string;
@@ -19,6 +16,7 @@ export type NavMapSiteLink = {
 };
 
 export type NavMapSitesPayload = {
+  /** Always empty — claimed Mapsites™ require FAST Code™ lookup. */
   claimed: NavMapSiteLink[];
   demos: NavMapSiteLink[];
   /** Builder entry for new demonstration pins. */
@@ -59,7 +57,6 @@ export async function listNavMapSites(): Promise<NavMapSitesPayload> {
     return empty;
   }
 
-  const claimed: NavMapSiteLink[] = [];
   const demos: NavMapSiteLink[] = [];
 
   for (const row of data) {
@@ -69,40 +66,22 @@ export async function listNavMapSites(): Promise<NavMapSitesPayload> {
 
     const isDemo =
       Boolean(row.is_demonstration) || isDemoMapSiteCode(fastCode);
+    if (!isDemo) continue;
+
     const label = displayLabel(
       row.property_title,
       row.property_address,
       fastCode || id.slice(0, 8),
     );
 
-    if (isDemo) {
-      demos.push({
-        id,
-        label,
-        sublabel: [fastCode || "demo", row.status].filter(Boolean).join(" · "),
-        href: `${MAPSITE_APP_PATH}?view=pin&mapsiteId=${encodeURIComponent(id)}`,
-        fastCode: fastCode || "demo",
-      });
-      continue;
-    }
-
-    if (!fastCode || !isIssuedFastCode(fastCode)) continue;
-
-    claimed.push({
+    demos.push({
       id,
       label,
-      sublabel: [fastCode.toUpperCase(), row.status].filter(Boolean).join(" · "),
-      href: buildClaimedMapSitePath({
-        fastCode,
-        accountType: row.account_type || "listings",
-      }),
-      fastCode,
+      sublabel: [fastCode || "demo", row.status].filter(Boolean).join(" · "),
+      href: `${MAPSITE_APP_PATH}?view=pin&mapsiteId=${encodeURIComponent(id)}`,
+      fastCode: fastCode || "demo",
     });
   }
 
-  claimed.sort((a, b) =>
-    a.fastCode.localeCompare(b.fastCode, undefined, { sensitivity: "base" }),
-  );
-
-  return { claimed, demos, newDemoHref: DEMO_MAPSITE_BUILD_PATH };
+  return { claimed: [], demos, newDemoHref: DEMO_MAPSITE_BUILD_PATH };
 }

@@ -2,19 +2,17 @@
 
 import { ALLPINS_FAST_CODE } from "@/lib/talispros/allpins-mapsite-constants";
 import { ISOLATED_BOOKSHELF_PATH } from "@/lib/talisbooks/isolated-bookshelf";
-import {
-  buildClaimedMapSitePath,
-  publishedMapSitePath,
-} from "@/lib/talispros/mapsite-state";
+import { publishedMapSitePath } from "@/lib/talispros/mapsite-state";
+import { ROUTES } from "@/lib/routes";
 
 export { ISOLATED_BOOKSHELF_PATH, ALLPINS_FAST_CODE };
 
-/** Claimed ALLPINS Mapsite™ — listings segment (same as viewer Back to Mapsite™). */
+/**
+ * ALLPINS Mapsite™ map view — the live /talisu/mkts Markets map.
+ * Kept as a named helper so Back / shelf links share one destination.
+ */
 export function allPinsClaimedHref(): string {
-  return buildClaimedMapSitePath({
-    fastCode: ALLPINS_FAST_CODE,
-    accountType: "listings",
-  });
+  return ROUTES.TALISU_MARKETS;
 }
 
 export function allPinsPublishedHref(): string {

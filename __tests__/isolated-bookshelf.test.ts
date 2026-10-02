@@ -165,7 +165,8 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
       "utf8",
     );
     expect(page).toContain("isAllPinsFastCode");
-    expect(page).toContain("MapSiteAllPinsApplication");
+    expect(page).toMatch(/TALISU_MARKETS|\/talisu\/mkts/);
+    expect(page).toContain("redirect");
   });
 
 

@@ -1,23 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useRef, useState } from "react";
+import { FormEvent, useEffect, useId, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { TALISU_MKTS_HEADER_MAPSITES_LABEL } from "@/lib/talisu/markets-pins";
-import type { NavMapSitesPayload } from "@/lib/talisu/nav-mapsites";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
+import { setFastCode } from "@/lib/fast-code";
+import { openClaimedMapSiteFromHomeFastCode } from "@/app/talispros/mapsites/actions";
 
-type LoadState = "idle" | "loading" | "ready" | "error";
-
+/**
+ * Mapsites™ navbar dropdown — FAST Code™ gate (no public claimed list).
+ * PayPal-style light card, matching TalisU KB unlock; Demo Mapsite™ link kept.
+ */
 export default function MapsitesNavDropdown() {
   const pathname = usePathname() || "";
   const [open, setOpen] = useState(false);
-  const [loadState, setLoadState] = useState<LoadState>("idle");
-  const [payload, setPayload] = useState<NavMapSitesPayload | null>(null);
+  const [value, setValue] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const menuId = useId();
+  const fieldId = useId();
+  const titleId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
-  /** Avoid re-fetch cancelling itself when loadState flips to "loading". */
-  const fetchGenRef = useRef(0);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const mapsiteActive =
     pathname.startsWith("/talispros/mapsite") ||
@@ -44,40 +49,59 @@ export default function MapsitesNavDropdown() {
 
   useEffect(() => {
     if (!open) return;
-    if (loadState === "ready" || loadState === "loading") return;
-
-    const gen = ++fetchGenRef.current;
-    setLoadState("loading");
-
-    void fetch("/api/talisu/nav-mapsites")
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return (await res.json()) as NavMapSitesPayload;
-      })
-      .then((data) => {
-        if (fetchGenRef.current !== gen) return;
-        setPayload(data);
-        setLoadState("ready");
-      })
-      .catch(() => {
-        if (fetchGenRef.current !== gen) return;
-        setLoadState("error");
-      });
-  }, [open, loadState]);
+    const id = window.setTimeout(() => inputRef.current?.focus(), 40);
+    return () => window.clearTimeout(id);
+  }, [open]);
 
   function toggle() {
-    setOpen((value) => !value);
+    setOpen((prev) => {
+      const next = !prev;
+      if (!next) {
+        setError("");
+        setLoading(false);
+      }
+      return next;
+    });
   }
 
-  const claimed = payload?.claimed ?? [];
-  const demos = payload?.demos ?? [];
-  const newDemoHref = payload?.newDemoHref || DEMO_MAPSITE_BUILD_PATH;
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault();
+    setError("");
 
-  const sectionLabelClass =
-    "px-3.5 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-white/90";
-  const emptyClass = "px-3.5 py-2 text-[12px] text-white/80";
-  const itemClass =
-    "block px-3.5 py-2 text-[13px] font-medium text-white transition hover:bg-white/15 sm:text-[14px]";
+    const trimmed = value.trim();
+    if (!trimmed) {
+      setError("Please enter a FAST Code™.");
+      inputRef.current?.focus();
+      return;
+    }
+
+    // FAST Codes™ are letters + digits (and hyphens); never & / +.
+    if (/[&+]/.test(trimmed) || !/^[a-zA-Z0-9-]+$/.test(trimmed)) {
+      setError("Use letters and digits only (no & or +).");
+      inputRef.current?.focus();
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await openClaimedMapSiteFromHomeFastCode(trimmed);
+      if (!result.success || !result.href) {
+        setError(result.error || "Unable to open that Mapsite™.");
+        inputRef.current?.focus();
+        setLoading(false);
+        return;
+      }
+
+      setFastCode(trimmed);
+      setOpen(false);
+      // Full navigation so owner/paid Set-Cookie from the action applies.
+      window.location.assign(result.href);
+    } catch {
+      setError("Something went wrong. Please try again.");
+      inputRef.current?.focus();
+      setLoading(false);
+    }
+  }
 
   return (
     <div ref={rootRef} className="relative">
@@ -113,60 +137,76 @@ export default function MapsitesNavDropdown() {
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 z-50 mt-1.5 max-h-[min(70vh,28rem)] w-[min(92vw,18rem)] overflow-y-auto rounded-lg border border-white/25 bg-[#035bb8] py-1 shadow-lg"
+          className="absolute right-0 z-50 mt-1.5 w-80! min-w-[280px] max-w-none! overflow-hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]"
         >
-          <p className={sectionLabelClass}>Claimed Mapsites™</p>
-          {loadState === "loading" || loadState === "idle" ? (
-            <p className={emptyClass}>Loading…</p>
-          ) : loadState === "error" ? (
-            <p className={emptyClass}>Could not load Mapsites™.</p>
-          ) : claimed.length === 0 ? (
-            <p className={emptyClass}>No claimed Mapsites™ yet.</p>
-          ) : (
-            claimed.map((item) => (
-              <Link
-                key={`claimed-${item.id}`}
-                href={item.href}
-                role="menuitem"
-                onClick={() => setOpen(false)}
-                className={itemClass}
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-4"
+            aria-labelledby={titleId}
+          >
+            <div>
+              <p
+                id={titleId}
+                className="text-[15px] font-semibold tracking-tight text-neutral-900"
               >
-                <span className="block truncate">{item.label}</span>
-                <span className="mt-0.5 block truncate text-[11px] font-normal text-white/75">
-                  {item.sublabel}
-                </span>
-              </Link>
-            ))
-          )}
+                Mapsites™
+              </p>
+              <p className="mt-1 text-[13px] leading-snug text-neutral-500">
+                Enter your FAST Code™ to open your personal Mapsite™.
+              </p>
+            </div>
+            <div>
+              <label htmlFor={fieldId} className="sr-only">
+                FAST Code™
+              </label>
+              <input
+                ref={inputRef}
+                id={fieldId}
+                type="text"
+                value={value}
+                onChange={(event) => {
+                  setValue(event.target.value);
+                  if (error) setError("");
+                }}
+                disabled={loading}
+                spellCheck={false}
+                autoComplete="off"
+                autoCapitalize="characters"
+                className="h-11 w-full rounded-lg border border-neutral-300 bg-white px-3.5 font-mono text-[14px] uppercase tracking-[0.18em] text-neutral-900 shadow-sm placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-400 focus:border-[#0070ba] focus:outline-none focus:ring-2 focus:ring-[#0070ba]/25 disabled:opacity-50"
+                placeholder="FAST Code™"
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? "nav-mapsites-fast-error" : undefined}
+                required
+              />
+            </div>
+            {error ? (
+              <p
+                id="nav-mapsites-fast-error"
+                className="text-[13px] text-red-600"
+                role="alert"
+              >
+                {error}
+              </p>
+            ) : null}
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#0070ba] text-[15px] font-semibold text-white shadow-sm transition hover:bg-[#005ea6] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0070ba]/40 focus-visible:ring-offset-2 disabled:opacity-50"
+            >
+              {loading ? "Opening…" : "Open Mapsite™"}
+            </button>
+          </form>
 
-          <div className="my-1 border-t border-white/25" />
+          <div className="my-4 border-t border-neutral-200" />
 
-          <p className={`${sectionLabelClass} pt-1`}>Demo Mapsites™</p>
           <Link
-            href={newDemoHref}
+            href={DEMO_MAPSITE_BUILD_PATH}
             role="menuitem"
             onClick={() => setOpen(false)}
-            className={itemClass}
+            className="block rounded-lg px-1 py-1.5 text-[14px] font-medium text-[#0070ba] transition hover:bg-neutral-50 hover:text-[#005ea6]"
           >
-            Build Demo Mapsite™
+            Demo Mapsite™
           </Link>
-          {loadState === "ready" && demos.length === 0 ? (
-            <p className={emptyClass}>No demo Mapsites™ yet.</p>
-          ) : null}
-          {demos.map((item) => (
-            <Link
-              key={`demo-${item.id}`}
-              href={item.href}
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className={itemClass}
-            >
-              <span className="block truncate">{item.label}</span>
-              <span className="mt-0.5 block truncate text-[11px] font-normal text-white/75">
-                {item.sublabel}
-              </span>
-            </Link>
-          ))}
         </div>
       ) : null}
     </div>

@@ -177,14 +177,14 @@ describe("viewer edge chrome", () => {
         fastCode: "admin123",
         isolatedBookshelf: true,
       }),
-    ).toBe("/talispros/mapsite/listings/allpins");
+    ).toBe("/talisu/mkts");
     expect(
       viewerMapsiteHref({
         fastCode: "ADMIN123",
         accountType: "root",
         isolatedBookshelf: true,
       }),
-    ).toBe("/talispros/mapsite/listings/allpins");
+    ).toBe("/talisu/mkts");
 
     // Normal FAST books keep their own listings code.
     expect(

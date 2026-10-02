@@ -6,6 +6,9 @@ import PublishedMapSiteView, {
 } from "@/components/mapsite/PublishedMapSiteView";
 import type { Metadata } from "next";
 import { connection } from "next/server";
+import { redirect } from "next/navigation";
+import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
+import { ROUTES } from "@/lib/routes";
 
 interface PageConfig {
   contentType: "map" | "pdf" | "image";
@@ -46,6 +49,10 @@ export default async function MapSitePage({ params }: { params: Promise<{ slug?:
 
   const resolvedParams = await params;
   const slug = resolvedParams?.slug?.toLowerCase().trim();
+
+  if (slug && isAllPinsFastCode(slug)) {
+    redirect(ROUTES.TALISU_MARKETS);
+  }
 
   if (!slug) {
     return (

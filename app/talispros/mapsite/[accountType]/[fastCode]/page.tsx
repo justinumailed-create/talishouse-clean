@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createMetadata } from "@/lib/seo";
 import {
   allpinsSeoCopy,
@@ -42,11 +42,7 @@ import {
 import { loadMapSitePinDashboard } from "@/lib/talispros/mapsite-additional-pins-service";
 import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
-import MapSiteAllPinsApplication from "@/components/talispros/mapsite/MapSiteAllPinsApplication";
-import {
-  ensureAllPinsMapSite,
-  isAllPinsFastCode,
-} from "@/lib/talispros/allpins-mapsite";
+import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite";
 
 export const dynamic = "force-dynamic";
 
@@ -160,11 +156,8 @@ export default async function ClaimedMapSiteByAccountTypePage({
     })) || null;
 
   if (isAllPinsFastCode(fastCode)) {
-    const aggregation = await ensureAllPinsMapSite();
-    if (!aggregation) {
-      notFound();
-    }
-    return <MapSiteAllPinsApplication aggregation={aggregation} />;
+    // ALLPINS map view is the live /talisu/mkts Markets map (not an empty aggregate).
+    redirect(ROUTES.TALISU_MARKETS);
   }
 
   const mapsite = await loadMapSiteApplicationState({

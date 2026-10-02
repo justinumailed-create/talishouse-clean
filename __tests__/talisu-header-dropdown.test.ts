@@ -8,17 +8,20 @@ import {
 } from "../lib/talisu/markets-pins";
 
 describe("TalisU blue header dropdown", () => {
-  it("exposes Knowledge Base, Audio, and Video entries", () => {
+  it("exposes FAQ first, then Knowledge Base, Audio, and Video", () => {
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label)).toEqual([
+      "FAQ",
       "Knowledge Base",
       "Audio",
       "Video",
     ]);
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.href)).toEqual([
+      "/talisu#faq",
       "/talisu/kb",
       "/talisu/au",
       "/talisu/video",
     ]);
+    expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.label).toBe("FAQ");
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.label)).toEqual([
       "Markets",
       "Bookshelf",
@@ -36,7 +39,7 @@ describe("TalisU blue header dropdown", () => {
   });
 
 
-  it("renders a Mapsites dropdown (claimed + demo lists) before the TalisU rule", () => {
+  it("renders a Mapsites FAST Code™ gate (no public claimed list) before the TalisU rule", () => {
     expect(TALISU_MKTS_HEADER_MAPSITES_LABEL).toBe("Mapsites");
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
@@ -47,15 +50,33 @@ describe("TalisU blue header dropdown", () => {
       resolve("components/talisu/MapsitesNavDropdown.tsx"),
       "utf8",
     );
-    expect(dropdown).toContain("Claimed Mapsites");
-    expect(dropdown).toContain("Demo Mapsites");
-    expect(dropdown).toContain("/api/talisu/nav-mapsites");
-    expect(dropdown).toContain("Build Demo Mapsite");
+    expect(dropdown).not.toContain("Claimed Mapsites");
+    expect(dropdown).toContain("FAST Code");
+    expect(dropdown).toContain("openClaimedMapSiteFromHomeFastCode");
+    expect(dropdown).toContain("Demo Mapsite");
+    expect(dropdown).toContain("DEMO_MAPSITE_BUILD_PATH");
+    expect(dropdown).toContain("rounded-2xl");
+    expect(dropdown).toContain("bg-white");
     const api = readFileSync(
       resolve("app/api/talisu/nav-mapsites/route.ts"),
       "utf8",
     );
     expect(api).toContain("listNavMapSites");
+    const navLib = readFileSync(
+      resolve("lib/talisu/nav-mapsites.ts"),
+      "utf8",
+    );
+    expect(navLib).toContain("claimed: []");
+  });
+
+  it("puts a horizontal divider after FAQ in the TalisU dropdown", () => {
+    const header = readFileSync(
+      resolve("components/talisu/TalisUMktsHeader.tsx"),
+      "utf8",
+    );
+    expect(header).toContain('item.label === "FAQ"');
+    expect(header).toContain('role="separator"');
+    expect(header).toContain("border-t border-white/25");
   });
 
   it("wires the blue header to render a TalisU dropdown as the last nav item", () => {

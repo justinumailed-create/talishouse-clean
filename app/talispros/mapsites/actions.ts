@@ -9,6 +9,8 @@ import {
 } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
+import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
+import { ROUTES } from "@/lib/routes";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import {
   buildClaimedMapSitePath,
@@ -179,6 +181,11 @@ export async function openClaimedMapSiteFromHomeFastCode(
       success: false,
       error: "Enter your issued FAST Code to open your claimed Mapsite™.",
     };
+  }
+
+  // ALLPINS opens the live /talisu/mkts Markets map.
+  if (isAllPinsFastCode(code)) {
+    return { success: true, href: ROUTES.TALISU_MARKETS };
   }
 
   const mapsite = await getMapSiteByFastCode(code);

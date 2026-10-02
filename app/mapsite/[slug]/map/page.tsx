@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import MapSiteTalisMaps from "@/components/mapsite/MapSiteTalisMaps";
 import {
@@ -14,6 +14,7 @@ import {
   resolveMapSiteOgImage,
 } from "@/lib/talispros/mapsite-og-image";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
+import { ROUTES } from "@/lib/routes";
 import { mapsiteBackFromScheduleHref } from "@/lib/talispros/mapsite-state";
 
 export const dynamic = "force-dynamic";
@@ -73,6 +74,10 @@ export default async function MapSiteFullscreenMapPage({
   const { slug } = await params;
   const code = slug?.toLowerCase().trim() || "";
   if (!code) notFound();
+
+  if (isAllPinsFastCode(code)) {
+    redirect(ROUTES.TALISU_MARKETS);
+  }
 
   const published = await loadPublishedMapSiteView(code);
   if (!published) notFound();

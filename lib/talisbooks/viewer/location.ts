@@ -52,18 +52,27 @@ export function viewerMapsiteHref(
 ): string {
   const code = viewerMapsiteFastCode(book);
   if (!code || code === "demo") return MAPSITE_APP_PATH;
+  // ALLPINS / isolated shelf → live /talisu/mkts Markets map.
+  if (code === ALLPINS_FAST_CODE || book.isolatedBookshelf) {
+    return "/talisu/mkts";
+  }
   return buildClaimedMapSitePath({
     fastCode: code,
-    accountType: book.isolatedBookshelf ? "listings" : book.accountType,
+    accountType: book.accountType,
   });
 }
 
 /**
  * "Back to Mapsite™" from the book viewer.
- * Lands on listings/{code}; isolated shelf books use ALLPINS, not admin123.
+ * Isolated shelf / ALLPINS → /talisu/mkts; otherwise listings/{code}.
  */
 export function viewerBackToMapsiteHref(
   book: Pick<TalisBooksViewerBook, "fastCode" | "isolatedBookshelf">,
 ): string {
-  return mapsiteBackFromScheduleHref(viewerMapsiteFastCode(book));
+  const code = viewerMapsiteFastCode(book);
+  if (!code) return MAPSITE_APP_PATH;
+  if (code === ALLPINS_FAST_CODE || book.isolatedBookshelf) {
+    return "/talisu/mkts";
+  }
+  return mapsiteBackFromScheduleHref(code);
 }
