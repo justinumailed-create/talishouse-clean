@@ -36,6 +36,36 @@ describe("partitionBookshelf pinned ordering", () => {
     expect(featured[0]?.id).toBe("b");
   });
 
+  it("keeps ranked pinned books below the newest hero", () => {
+    const { featured, general } = partitionBookshelf(
+      [
+        book({
+          id: "cowboy",
+          title: "Cowboy's Guide",
+          createdAt: "2099-12-31T23:59:59.000Z",
+          isPinned: true,
+          pinRank: 0,
+        }),
+        book({
+          id: "tokenization",
+          title: "Real-World Asset Tokenization",
+          createdAt: "2026-09-01T00:00:00.000Z",
+          isPinned: true,
+          pinRank: 1,
+        }),
+        book({
+          id: "decorative",
+          title: "Decorative Cover",
+          createdAt: "2019-01-01T00:00:00.000Z",
+        }),
+      ],
+      { featuredMode: "newest" },
+    );
+
+    expect(featured.map((item) => item.id)).toEqual(["cowboy", "tokenization"]);
+    expect(general.map((item) => item.id)).toEqual(["decorative"]);
+  });
+
   it("puts FAST-code published books on the right shelf newest first", () => {
     const { featured, general } = partitionBookshelf(
       [

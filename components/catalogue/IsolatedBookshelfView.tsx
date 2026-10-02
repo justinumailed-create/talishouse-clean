@@ -112,11 +112,18 @@ function pipelineBeforeTokenization(
 function pinTokenizationUnderCowboy(
   books: TalisBooksLibraryBook[],
 ): TalisBooksLibraryBook[] {
-  return books.map((book) =>
-    book.title.toLowerCase().includes("tokenization")
+  return books.map((book) => {
+    // The generated listing can carry the RWA name in its subtitle or slug
+    // while the visible title remains a generic/synthetic ebook title. Match
+    // all shelf identity fields so it cannot fall through to the right shelf.
+    const shelfIdentity = [book.title, book.subtitle, book.slug]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return shelfIdentity.includes("tokenization")
       ? { ...book, isPinned: true, pinRank: 1 }
-      : book,
-  );
+      : book;
+  });
 }
 
 /** Decorative filler covers so the Common Shelf looks fuller (non-interactive). */
