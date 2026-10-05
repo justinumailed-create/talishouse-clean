@@ -37,6 +37,7 @@ describe("Tokenization Learn More", () => {
     );
     expect(contact).toContain("Just.inumailed@gmail.com");
     expect(contact).toContain("remecom@mac.com");
+    expect(contact).toContain("Tokenization");
     expect(contact).not.toContain("kyptronix");
 
     const api = readFileSync(

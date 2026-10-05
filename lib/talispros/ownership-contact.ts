@@ -14,6 +14,7 @@ export const OWNERSHIP_CONTACT_TOPICS = [
   "Conventional",
   "SPLITS",
   "Fractionalization",
+  "Tokenization",
 ] as const;
 
 export type OwnershipContactTopic =
