@@ -5,7 +5,7 @@ import { createTalisUMetadata } from "@/lib/talisu/seo";
 export const metadata = createTalisUMetadata({
   title: "TalisU™",
   description:
-    "Industry adjacent fulfilment options — Conventional, SPLITS, Fractionalization, and Tokenization. Plus TalisU Sea-Cans.",
+    "Industry adjacent fulfilment options — Conventional, SPLITS, Fractionalization, and Tokenization.",
   path: "/talisu",
 });
 

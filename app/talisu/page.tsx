@@ -94,8 +94,8 @@ export default function TalisUHomePage() {
         <Link href="/talisu/reg" className={TALISU_BTN_SECONDARY}>
           Register
         </Link>
-        <Link href="/talisu/bo" className={TALISU_BTN_SECONDARY}>
-          Sea-Cans Business Office
+        <Link href="/talisu/reg#catalogue" className={TALISU_BTN_SECONDARY}>
+          Catalogue
         </Link>
       </div>
     </SectionShell>
