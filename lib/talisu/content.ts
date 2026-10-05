@@ -245,16 +245,6 @@ export const TALISU_REGISTER = {
   ],
   closing: "Please add us as a resource…!",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
-  /** Product checkout that replaces the retired Sea-Can section. */
-  purchaseUrl: "https://talispros.mysamcart.com/checkout/purchasems",
-  catalogue: {
-    heading: "Catalogue",
-    body: "Browse the T-All catalogue, then complete your purchase.",
-    previewCaption: "T-All catalogue — open it to turn each page.",
-    openLabel: "Open the catalogue",
-    href: "/catalogue",
-    purchaseLinkLabel: "Open the purchase checkout",
-  },
 } as const;
 
 export const TALISU_ENGAGE = {

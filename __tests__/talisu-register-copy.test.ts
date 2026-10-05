@@ -24,29 +24,30 @@ describe("TalisU Register copy", () => {
     expect(tva?.text.startsWith("we analyze")).toBe(true);
   });
 
-  it("keeps account registration and adds the SamCart purchase checkout", () => {
+  it("keeps account registration SamCart checkout", () => {
     expect(TALISU_REGISTER.samcartUrl).toBe(
       "https://talispros.mysamcart.com/checkout/register",
     );
-    expect(TALISU_REGISTER.purchaseUrl).toBe(
-      "https://talispros.mysamcart.com/checkout/purchasems",
-    );
-    expect(TALISU_REGISTER.catalogue.href).toBe("/catalogue");
+    expect(TALISU_REGISTER).not.toHaveProperty("purchaseUrl");
+    expect(TALISU_REGISTER).not.toHaveProperty("catalogue");
   });
 });
 
-describe("Register page catalogue section", () => {
+describe("Register page without catalogue purchase section", () => {
   const page = readFileSync(resolve("app/talisu/reg/page.tsx"), "utf8");
   const welcome = readFileSync(resolve("app/talisu/page.tsx"), "utf8");
   const config = readFileSync(resolve("next.config.ts"), "utf8");
 
-  it("embeds the purchase checkout beside the catalogue and does not render Sea-Cans", () => {
-    expect(page).toContain('id="catalogue"');
-    expect(page).toContain("TALISU_REGISTER.purchaseUrl");
+  it("keeps partner + register checkout and does not render Catalogue/Purchase or Sea-Cans", () => {
+    expect(page).not.toContain('id="catalogue"');
+    expect(page).not.toContain("purchaseUrl");
+    expect(page).not.toContain("TalisU Purchase — SamCart");
+    expect(page).not.toContain("loadProductFlipbookPages");
+    expect(page).not.toContain("Open the catalogue");
     expect(page).toContain("SamCartEmbed");
-    expect(page).toContain("TalisU Purchase — SamCart");
+    expect(page).toContain("TalisU Register — SamCart");
+    expect(page).toContain("TALISU_REGISTER.samcartUrl");
     expect(page).not.toContain("opens in a new tab");
-    expect(page).toContain("loadProductFlipbookPages");
     expect(page).not.toMatch(/Sea-Can/i);
     expect(welcome).not.toMatch(/Sea-Can/i);
     expect(welcome).not.toContain('href="/talisu/bo"');
@@ -57,7 +58,7 @@ describe("Register page catalogue section", () => {
     expect(page).toContain("minmax(16rem,20rem)_minmax(0,1fr)");
   });
 
-  it("redirects Sea-Can routes to the Register catalogue section", () => {
+  it("redirects Sea-Can routes to Register without catalogue hash", () => {
     for (const source of [
       '"/talisu/bo"',
       '"/talisu/bo/:path*"',
@@ -67,6 +68,7 @@ describe("Register page catalogue section", () => {
     ]) {
       expect(config).toContain(`source: ${source}`);
     }
-    expect(config).toContain('destination: "/talisu/reg#catalogue"');
+    expect(config).toContain('destination: "/talisu/reg"');
+    expect(config).not.toContain('destination: "/talisu/reg#catalogue"');
   });
 });
