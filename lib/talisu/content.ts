@@ -1,4 +1,4 @@
-/** TalisU™ marketing + Sea-Cans content under /talisu */
+/** TalisU™ marketing content under /talisu. Sea-Can SKUs stay in source but are not routed. */
 
 export const TALISU_BASE_PATH = "/talisu";
 
@@ -140,20 +140,30 @@ export const TALISU_REGISTER = {
       text: "we provide dedicated map-based platforms that can serve as referral and co-promotion network tools when publishing special purpose or user generated contents. Please note: contents must be non-political and in good taste by generally accepted standards at our sole discretion. Contents deemed otherwise will be switched \"blind\" by our AI bots, immediately and without warning. Resubmissions are permissible.",
     },
     {
-      label: "TEB",
-      text: "we manage your online bookshelf to highlight qualifying listings (QL) by actively promoting pinned digital publications globally. Of course, QL are those that pay you enough and have enough term to improve performance metrics over time.",
+      label: "Talisbooks™ (TEB)",
+      text: "we provide and manage your online bookshelf to highlight qualifying listings (QL) by actively promoting pinned digital publications globally. Of course, QL are those that pay you enough and have enough term to improve performance metrics over time.",
     },
     {
-      label: "TVA",
+      label: "Listing analysis (TVA)",
       text: "we analyze qualifying listings to establish suitability for investor classes that seek advanced transaction structures, including SPLITS, Fractionalization and Tokenization. Since all are often incompatible with exposure on traditional industry platforms they require Mapsites™ for promotional purposes.",
     },
     {
-      label: "TTV",
-      text: "we provide an in-house online TV Station by giving it its digital home. Additionally, we provide AI video production and assist in weekly channel programming to include virtual walk throughs, digital open houses and, of course, value added proposals.",
+      label: "TalisTV™ (TTV)",
+      text: "we provide and manage an in-house online TV Station by giving it its digital home. Additionally, we provide and manage AI video production and assist in weekly channel programming to include virtual walk throughs, digital open houses and, of course, value added proposals.",
     },
   ],
   closing: "Please add us as a resource…!",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
+  /** Product checkout that replaces the retired Sea-Can section. */
+  purchaseUrl: "https://talispros.mysamcart.com/checkout/purchase",
+  catalogue: {
+    heading: "Catalogue",
+    body: "Browse the T-All catalogue, then complete your purchase.",
+    previewCaption: "T-All catalogue — open it to turn each page.",
+    openLabel: "Open the catalogue",
+    href: "/catalogue",
+    purchaseLinkLabel: "Open the purchase checkout",
+  },
 } as const;
 
 export const TALISU_ENGAGE = {
