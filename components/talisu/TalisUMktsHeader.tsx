@@ -21,6 +21,7 @@ import { TALISU_KB_PATH } from "@/lib/talisu/kb-content";
 import TalisBrandMark from "@/components/talisu/TalisBrandMark";
 import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
 import MapsitesNavDropdown from "@/components/talisu/MapsitesNavDropdown";
+import RegisterNavDropdown from "@/components/talisu/RegisterNavDropdown";
 
 export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 
@@ -320,9 +321,11 @@ export default function TalisUMktsHeader({
             (item) => item.label === "Markets" || item.label === "Bookshelf",
           ).map((item) => renderNavLink(item))}
           <MapsitesNavDropdown />
-          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Register").map(
-            (item) => renderNavLink(item),
-          )}
+          {claimedMapsite
+            ? TALISU_MKTS_HEADER_NAV.filter(
+                (item) => item.label === "Register",
+              ).map((item) => renderNavLink(item))
+            : <RegisterNavDropdown />}
 
           <span
             aria-hidden

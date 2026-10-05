@@ -1,64 +1,23 @@
-import Link from "next/link";
-import { TALISU_FAQ, TALISU_WELCOME } from "@/lib/talisu/content";
+import { TALISU_FAQ } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
-import {
-  TALISU_BTN_PRIMARY,
-  TALISU_BTN_SECONDARY,
-  TALISU_CARD,
-} from "@/lib/talisu/ui";
-import SectionShell from "@/components/talisu/SectionShell";
+import { TALISU_CARD } from "@/lib/talisu/ui";
 
 export const metadata = createTalisUMetadata({
-  title: "TalisU™ | Welcome",
-  description:
-    "Transaction structures we support: Conventional, SPLITS, Fractionalization, and Tokenization — with an Aisha audio summary.",
+  title: "TalisU™ | FAQ",
+  description: "Frequently asked questions about Talispros™, Mapsites™, and TalisU™.",
   path: "/talisu",
 });
 
 export default function TalisUHomePage() {
   return (
-    <SectionShell title="TalisU™" subtitle={TALISU_WELCOME.eyebrow}>
-      <div className={`mb-10 ${TALISU_CARD}`}>
-        <p className="text-center text-sm font-medium text-neutral-800">
-          {TALISU_WELCOME.aishaTitle}
-        </p>
-        <p className="mt-1 text-center text-xs text-neutral-500">
-          {TALISU_WELCOME.aishaArtist}
-        </p>
-        <audio
-          className="mt-4 w-full"
-          controls
-          preload="metadata"
-          src={TALISU_WELCOME.aishaSrc}
-        >
-          Your browser does not support the audio element.
-        </audio>
-      </div>
-
-      <h2 className="mb-6 text-center text-xl font-semibold text-neutral-950 sm:text-2xl">
-        {TALISU_WELCOME.heading}
-      </h2>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        {TALISU_WELCOME.structures.map((item) => (
-          <article key={item.title} className={TALISU_CARD}>
-            <h3 className="text-lg font-semibold text-[#0069CF]">
-              {item.title}
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-neutral-700">
-              {item.body}
-            </p>
-          </article>
-        ))}
-      </div>
-
-      <section id="faq" className="mt-14 scroll-mt-24" aria-labelledby="talisu-faq-heading">
-        <h2
+    <div className="mx-auto max-w-6xl px-4 py-10 text-neutral-900 sm:px-5 sm:py-14">
+      <section id="faq" className="scroll-mt-24" aria-labelledby="talisu-faq-heading">
+        <h1
           id="talisu-faq-heading"
-          className="mb-6 text-center text-xl font-semibold text-neutral-950 sm:text-2xl"
+          className="mb-6 text-center text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl"
         >
           {TALISU_FAQ.title}
-        </h2>
+        </h1>
         <div className="mx-auto flex max-w-3xl flex-col gap-3">
           {TALISU_FAQ.items.map((item) => {
             const paragraphs = Array.isArray(item.answer)
@@ -97,21 +56,6 @@ export default function TalisUHomePage() {
           })}
         </div>
       </section>
-
-      <div className="mt-10 flex flex-wrap justify-center gap-3">
-        <Link href="/talisu/mkts" className={TALISU_BTN_PRIMARY}>
-          Markets
-        </Link>
-        <Link href="/talisu/au" className={TALISU_BTN_SECONDARY}>
-          Audio
-        </Link>
-        <Link href="/talisu/reg" className={TALISU_BTN_SECONDARY}>
-          Register
-        </Link>
-        <Link href="/talisu/reg#catalogue" className={TALISU_BTN_SECONDARY}>
-          Catalogue
-        </Link>
-      </div>
-    </SectionShell>
+    </div>
   );
 }

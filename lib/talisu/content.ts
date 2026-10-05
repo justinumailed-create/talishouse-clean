@@ -22,7 +22,6 @@ export const TALISU_PRIMARY_NAV: TalisUNavItem[] = [
 ];
 
 export const TALISU_SEACANS_NAV: TalisUNavItem[] = [
-  { href: "/talisu/bo", label: "Business Office", section: "seacans" },
   { href: "/talisu/sh", label: "Show Home", section: "seacans" },
   { href: "/talisu/cu", label: "Contact", section: "seacans" },
 ];
@@ -247,7 +246,7 @@ export const TALISU_REGISTER = {
   closing: "Please add us as a resource…!",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
   /** Product checkout that replaces the retired Sea-Can section. */
-  purchaseUrl: "https://talispros.mysamcart.com/checkout/purchase",
+  purchaseUrl: "https://talispros.mysamcart.com/checkout/purchasems",
   catalogue: {
     heading: "Catalogue",
     body: "Browse the T-All catalogue, then complete your purchase.",

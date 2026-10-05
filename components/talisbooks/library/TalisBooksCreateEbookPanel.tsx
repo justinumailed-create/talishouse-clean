@@ -97,7 +97,7 @@ export default function TalisBooksCreateEbookPanel({
           onClick={() =>
             router.push(entitlements?.registrationHref || registrationHref)
           }
-          className="mt-3 inline-flex rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800"
+          className="mt-3 inline-flex rounded-xl bg-[var(--talis-nav-blue)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--talis-nav-blue-hover)]"
         >
           Continue activation
         </button>
@@ -179,7 +179,7 @@ export default function TalisBooksCreateEbookPanel({
           <button
             type="submit"
             disabled={saving}
-            className="rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
+            className="rounded-xl bg-[var(--talis-nav-blue)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--talis-nav-blue-hover)] disabled:opacity-60"
           >
             {saving
               ? "Saving…"

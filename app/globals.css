@@ -8,6 +8,8 @@
   --border-subtle: rgba(0,0,0,0.08);
   --accent-gradient: linear-gradient(135deg, #0070ba, #1546a0);
   --bg-ad-image: none;
+  --talis-nav-blue: #046bd9;
+  --talis-nav-blue-hover: #0358b3;
 
   /* Apple-style 8pt Spacing System */
   --space-1: 8px;
@@ -1205,7 +1207,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   justify-content: center;
   padding: 0.45rem 1rem;
   border-radius: 0.85rem;
-  background: #171717;
+  background: var(--talis-nav-blue);
   color: #ffffff;
   font-size: 0.8rem;
   font-weight: 500;
@@ -1217,7 +1219,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talisbooks-viewer__back:hover {
-  background: #2a2a2a;
+  background: var(--talis-nav-blue-hover);
   color: #ffffff;
 }
 
@@ -1282,9 +1284,9 @@ body.mapsite-gallery-open [data-paypal-button] {
   padding: 0.55rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 999px;
-  background: #171717;
+  background: var(--talis-nav-blue);
   color: #ffffff;
-  box-shadow: 0 8px 22px rgba(28, 25, 23, 0.24);
+  box-shadow: 0 8px 22px rgba(4, 107, 217, 0.28);
   font-size: 0.8rem;
   font-weight: 600;
   line-height: 1.2;
@@ -1295,7 +1297,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talisbooks-viewer__register:hover {
-  background: #2a2a2a;
+  background: var(--talis-nav-blue-hover);
   color: #ffffff;
   transform: translateY(-1px);
 }
@@ -1362,12 +1364,12 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talisbooks-viewer__rail-btn--play {
-  background: #171717;
+  background: var(--talis-nav-blue);
   color: #ffffff;
 }
 
 .talisbooks-viewer__rail-btn--play:hover {
-  background: #2a2a2a;
+  background: var(--talis-nav-blue-hover);
 }
 
 .talisbooks-viewer__seconds {
@@ -1385,7 +1387,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-viewer__seconds-btn--active,
 .talisbooks-viewer__rail-btn--active {
-  background: #171717;
+  background: var(--talis-nav-blue);
   color: #ffffff;
 }
 
@@ -1428,7 +1430,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 
   .talisbooks-viewer__orient-fab--active {
-    background: #171717;
+    background: var(--talis-nav-blue);
     color: #ffffff;
   }
 
@@ -4343,9 +4345,9 @@ body.mapsite-gallery-open [data-paypal-button] {
   border-radius: 0.7rem;
   font-size: 0.78rem;
   font-weight: 500;
-  background: #171717;
+  background: var(--talis-nav-blue);
   color: #ffffff;
-  border-color: #171717;
+  border-color: var(--talis-nav-blue);
 }
 
 .talisbooks-viewer-controls__icon-btn:hover,
@@ -4354,7 +4356,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talisbooks-viewer-controls__play-btn:hover {
-  background: #2a2a2a;
+  background: var(--talis-nav-blue-hover);
 }
 
 .talisbooks-viewer-controls__meta {
@@ -4384,7 +4386,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-viewer-controls__slider {
   width: 100%;
-  accent-color: #171717;
+  accent-color: var(--talis-nav-blue);
 }
 
 .talisbooks-viewer-controls__presets {
@@ -4402,9 +4404,9 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talisbooks-viewer-controls__preset--active {
-  background: #171717;
+  background: var(--talis-nav-blue);
   color: #ffffff;
-  border-color: #171717;
+  border-color: var(--talis-nav-blue);
 }
 
 @media (max-width: 639px) {

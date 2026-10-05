@@ -42,8 +42,8 @@ export default function TalisprosHomeGate() {
             onClick={() => setLoginOpen((open) => !open)}
             className={`w-full border-2 px-4 py-3.5 text-center text-[15px] font-medium tracking-wide transition active:scale-[0.99] sm:text-base ${
               loginOpen
-                ? "border-neutral-900 bg-neutral-900 text-white"
-                : "border-neutral-900 bg-white text-neutral-900 hover:bg-neutral-900 hover:text-white"
+                ? "border-[var(--talis-nav-blue)] bg-[var(--talis-nav-blue)] text-white"
+                : "border-[var(--talis-nav-blue)] bg-white text-[var(--talis-nav-blue)] hover:bg-[var(--talis-nav-blue)] hover:text-white"
             }`}
           >
             Claim your market. Open your Account*

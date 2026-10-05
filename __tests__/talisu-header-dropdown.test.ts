@@ -5,6 +5,7 @@ import {
   TALISU_MKTS_HEADER_DROPDOWN,
   TALISU_MKTS_HEADER_NAV,
   TALISU_MKTS_HEADER_MAPSITES_LABEL,
+  TALISU_MKTS_HEADER_REGISTER_DROPDOWN,
 } from "../lib/talisu/markets-pins";
 
 describe("TalisU blue header dropdown", () => {
@@ -36,6 +37,14 @@ describe("TalisU blue header dropdown", () => {
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "FAST Shelves")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Create Demo")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Admin Places")).toBe(false);
+    expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.label)).toEqual([
+      "Mapsite",
+      "Product",
+    ]);
+    expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.href)).toEqual([
+      "/talisu/reg",
+      "/catalogue",
+    ]);
   });
 
 
@@ -91,12 +100,11 @@ describe("TalisU blue header dropdown", () => {
     // TalisU trigger is rendered after primary nav + Mapsites + vertical separator
     expect(header).toContain("TALISU_MKTS_HEADER_NAV.filter");
     expect(header).toContain("MapsitesNavDropdown");
+    expect(header).toContain("RegisterNavDropdown");
     expect(header).toContain("bg-white/45");
     const bookshelvesIdx = header.indexOf('item.label === "Bookshelf"');
     const mapsitesIdx = header.indexOf("<MapsitesNavDropdown");
-    const registerFilterIdx = header.indexOf(
-      'TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Register")',
-    );
+    const registerFilterIdx = header.indexOf("<RegisterNavDropdown");
     const separatorIdx = header.indexOf("bg-white/45");
     const talisUIdx = header.indexOf("\n              TalisU\n");
     expect(bookshelvesIdx).toBeGreaterThan(-1);

@@ -89,6 +89,10 @@ describe("sample Talisbooks™ viewer chrome", () => {
       /\.talisbooks-viewer__register[\s\S]*position:\s*absolute[\s\S]*bottom:/,
     );
     expect(css).toContain("talisbooks-viewer__claim");
+    expect(css).toContain("--talis-nav-blue");
+    expect(css).toMatch(
+      /\.talisbooks-viewer__register[\s\S]*background:\s*var\(--talis-nav-blue\)/,
+    );
   });
 
   it("shows Live Edit only after payment, never on demonstration books", () => {

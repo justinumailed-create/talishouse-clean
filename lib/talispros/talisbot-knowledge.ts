@@ -11,9 +11,6 @@ export const TALISBOT_SYSTEM_ROLE =
   "FAST Codes™, claim/register, shelves, TalisU™, Knowledge Base, SamCart register, " +
   "and demo claim. Do not discuss or recommend any other house-product brands outside Talispros™.";
 
-export const TALISBOT_GREETING =
-  "Ask about Mapsites™, Talisbooks™, FAST Codes™, shelves, TalisU™, or claim/register — I help with Talispros™ processes.";
-
 export const TALISBOT_KNOWLEDGE = [
   {
     id: "mapsites",

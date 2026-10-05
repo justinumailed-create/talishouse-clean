@@ -292,7 +292,7 @@ export default function IsolatedBookshelfView({
           canCreate ? (
             <Link
               href={ISOLATED_BOOKSHELF_CREATE_PATH}
-              className="inline-flex flex-shrink-0 items-center justify-center rounded-xl bg-neutral-900 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-neutral-800"
+              className="inline-flex flex-shrink-0 items-center justify-center rounded-xl bg-[var(--talis-nav-blue)] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[var(--talis-nav-blue-hover)]"
               data-testid="isolated-bookshelf-create"
             >
               Create ebook

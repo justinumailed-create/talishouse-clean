@@ -29,7 +29,7 @@ describe("TalisU Register copy", () => {
       "https://talispros.mysamcart.com/checkout/register",
     );
     expect(TALISU_REGISTER.purchaseUrl).toBe(
-      "https://talispros.mysamcart.com/checkout/purchase",
+      "https://talispros.mysamcart.com/checkout/purchasems",
     );
     expect(TALISU_REGISTER.catalogue.href).toBe("/catalogue");
   });
@@ -43,10 +43,18 @@ describe("Register page catalogue section", () => {
   it("embeds the purchase checkout beside the catalogue and does not render Sea-Cans", () => {
     expect(page).toContain('id="catalogue"');
     expect(page).toContain("TALISU_REGISTER.purchaseUrl");
+    expect(page).toContain("SamCartEmbed");
+    expect(page).toContain("TalisU Purchase — SamCart");
+    expect(page).not.toContain("opens in a new tab");
     expect(page).toContain("loadProductFlipbookPages");
     expect(page).not.toMatch(/Sea-Can/i);
     expect(welcome).not.toMatch(/Sea-Can/i);
-    expect(welcome).toContain('href="/talisu/reg#catalogue"');
+    expect(welcome).not.toContain('href="/talisu/bo"');
+    expect(welcome).not.toContain('href="/talisu/au"');
+    expect(welcome).toContain('id="faq"');
+    expect(welcome).toContain("TALISU_FAQ");
+    expect(page).toContain("max-w-[1920px]");
+    expect(page).toContain("minmax(16rem,20rem)_minmax(0,1fr)");
   });
 
   it("redirects Sea-Can routes to the Register catalogue section", () => {

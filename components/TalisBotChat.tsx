@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { supabase } from "@/lib/supabase";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
 import {
-  TALISBOT_GREETING,
   TALISBOT_INTEREST_OPTIONS,
   TALISBOT_KNOWLEDGE,
   TALISBOT_SYSTEM_ROLE,
@@ -110,17 +110,14 @@ export default function TalisBotChat({
             <div className="w-16 h-16 bg-black rounded-3xl flex items-center justify-center mb-6 shadow-lg shadow-black/10">
               <Image src="/logo.png" alt="TalisBOT" width={40} height={40} className="invert" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">TalisBOT</h3>
-            <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-              {TALISBOT_GREETING}
-            </p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-8">TalisBOT</h3>
             <div className="flex w-full flex-col gap-2">
-              <button
-                onClick={() => setStep('knowledge')}
+              <Link
+                href="/talisu#faq"
                 className="w-full bg-black text-white py-4 rounded-2xl text-sm font-semibold hover:bg-gray-800 transition shadow-lg shadow-black/5"
               >
-                Browse Talispros™ knowledge
-              </button>
+                Talispros FAQ
+              </Link>
               <button
                 onClick={() => setStep('interest')}
                 className="w-full border border-gray-200 bg-white text-gray-900 py-3.5 rounded-2xl text-sm font-semibold hover:bg-gray-50 transition"

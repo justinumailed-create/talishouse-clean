@@ -104,7 +104,7 @@ export default function DemoClaimMarketButton({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800"
+          className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--talis-nav-blue)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--talis-nav-blue-hover)]"
         >
           Claim Your Market™
         </button>

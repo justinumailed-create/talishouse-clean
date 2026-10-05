@@ -8,13 +8,18 @@ export default function SectionShell({
   title,
   subtitle,
   children,
+  maxWidthClass = "max-w-6xl",
 }: {
   title: string;
   subtitle?: string;
   children: ReactNode;
+  /** Override the default 6xl cap (Register needs more width for SamCart). */
+  maxWidthClass?: string;
 }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 text-neutral-900 sm:px-5 sm:py-14">
+    <div
+      className={`${maxWidthClass} mx-auto px-4 py-10 text-neutral-900 sm:px-5 sm:py-14`}
+    >
       <header className="mb-8 text-center sm:mb-10">
         <h1 className="text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl">
           {title}

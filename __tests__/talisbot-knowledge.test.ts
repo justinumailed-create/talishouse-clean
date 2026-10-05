@@ -3,7 +3,6 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   assertNoTalishouseInBotCopy,
-  TALISBOT_GREETING,
   TALISBOT_KNOWLEDGE,
   TALISBOT_SYSTEM_ROLE,
 } from "../lib/talispros/talisbot-knowledge";
@@ -11,7 +10,6 @@ import {
 describe("TalisBOT Talispros™ knowledge", () => {
   it("never mentions Talishouse in system role or knowledge", () => {
     expect(assertNoTalishouseInBotCopy(TALISBOT_SYSTEM_ROLE)).toBe(true);
-    expect(assertNoTalishouseInBotCopy(TALISBOT_GREETING)).toBe(true);
     for (const item of TALISBOT_KNOWLEDGE) {
       expect(assertNoTalishouseInBotCopy(item.title + item.body)).toBe(true);
     }
@@ -27,6 +25,9 @@ describe("TalisBOT Talispros™ knowledge", () => {
     expect(bot).toContain("TALISBOT_KNOWLEDGE");
     expect(bot).not.toMatch(/Talishouse \(Recreational\)/);
     expect(bot).not.toMatch(/Talishouse \(Residential\)/);
-    expect(bot).toContain("Talispros™ processes");
+    expect(bot).toContain("Talispros FAQ");
+    expect(bot).toContain('href="/talisu#faq"');
+    expect(bot).not.toContain("Browse Talispros™ knowledge");
+    expect(bot).not.toContain("Ask about Mapsites™");
   });
 });

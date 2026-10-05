@@ -20,10 +20,11 @@ export default function TalisURegisterPage() {
   const catalogue = TALISU_REGISTER.catalogue;
 
   return (
-    <SectionShell title={TALISU_REGISTER.title}>
-      {/* ~40% write-up / ~60% SamCart so the embed can show its native 2-column layout */}
-      <div className="mb-14 grid gap-8 lg:grid-cols-5">
-        <div className={`${TALISU_CARD} lg:col-span-2`}>
+    <SectionShell title={TALISU_REGISTER.title} maxWidthClass="max-w-[1920px]">
+      {/* Partner write-up stays compact; SamCart gets the remaining width so its
+          native two-column checkout (order + form) can sit side by side. */}
+      <div className="mb-14 grid items-start gap-8 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
+        <div className={TALISU_CARD}>
           <div className="mb-5 flex justify-center">
             <Image
               src={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
@@ -57,7 +58,7 @@ export default function TalisURegisterPage() {
           </p>
         </div>
 
-        <div className="lg:col-span-3">
+        <div className="min-w-0">
           <SamCartEmbed
             src={TALISU_REGISTER.samcartUrl}
             title="TalisU Register — SamCart"
@@ -98,25 +99,20 @@ export default function TalisURegisterPage() {
             </Link>
           </div>
 
-          <div className={`${TALISU_CARD} lg:col-span-3`}>
+          <div className="min-w-0 lg:col-span-3">
             <h3 className="text-xl font-semibold text-[#0069CF]">
               Purchase
             </h3>
             <p className="mt-3 text-sm text-neutral-700">
-              Complete your purchase in the SamCart checkout. It opens in a new
-              tab so this Register page stays open.
+              Complete your purchase in the SamCart checkout below.
             </p>
-            <a
-              href={TALISU_REGISTER.purchaseUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`${TALISU_BTN_PRIMARY} mt-5`}
-            >
-              {catalogue.purchaseLinkLabel}
-            </a>
-            <p className="mt-4 break-all text-xs text-neutral-500">
-              {TALISU_REGISTER.purchaseUrl}
-            </p>
+            <div className="mt-5">
+              <SamCartEmbed
+                src={TALISU_REGISTER.purchaseUrl}
+                title="TalisU Purchase — SamCart"
+                height={1100}
+              />
+            </div>
           </div>
         </div>
       </section>
