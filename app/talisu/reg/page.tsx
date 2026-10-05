@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { TALISU_REGISTER } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
-import { TALISU_BTN_PRIMARY, TALISU_CARD, TALISU_LINK } from "@/lib/talisu/ui";
+import { TALISU_BTN_PRIMARY, TALISU_CARD } from "@/lib/talisu/ui";
 import { MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE } from "@/lib/talispros/market-pages";
 import { loadProductFlipbookPages } from "@/lib/product-flipbook/load-pages";
 import SectionShell from "@/components/talisu/SectionShell";
@@ -98,22 +98,25 @@ export default function TalisURegisterPage() {
             </Link>
           </div>
 
-          <div className="lg:col-span-3">
-            <p className="mb-3 text-sm">
-              <a
-                href={TALISU_REGISTER.purchaseUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={TALISU_LINK}
-              >
-                {catalogue.purchaseLinkLabel}
-              </a>
+          <div className={`${TALISU_CARD} lg:col-span-3`}>
+            <h3 className="text-xl font-semibold text-[#0069CF]">
+              Purchase
+            </h3>
+            <p className="mt-3 text-sm text-neutral-700">
+              Complete your purchase in the SamCart checkout. It opens in a new
+              tab so this Register page stays open.
             </p>
-            <SamCartEmbed
-              src={TALISU_REGISTER.purchaseUrl}
-              title="Talispros™ purchase — SamCart"
-              height={1500}
-            />
+            <a
+              href={TALISU_REGISTER.purchaseUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`${TALISU_BTN_PRIMARY} mt-5`}
+            >
+              {catalogue.purchaseLinkLabel}
+            </a>
+            <p className="mt-4 break-all text-xs text-neutral-500">
+              {TALISU_REGISTER.purchaseUrl}
+            </p>
           </div>
         </div>
       </section>
