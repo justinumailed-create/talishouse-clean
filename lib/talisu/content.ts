@@ -252,6 +252,8 @@ export const TALISU_ENGAGE = {
   headline: "Send a Down Payment to engage Webster and his Design Team",
   partnerHeading: "Your Product Partner",
   partnerName: "Webster M. — Team Leader",
+  partnerImage: "/talisu/webster-team-leader.jpg",
+  partnerImageAlt: "Webster M.",
   partnerIntro:
     "My team and I help grow you diversify horizontally by offering space along with property of businesses:",
   bullets: [

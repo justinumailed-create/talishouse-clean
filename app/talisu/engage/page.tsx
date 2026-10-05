@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { TALISU_ENGAGE } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
@@ -16,9 +17,23 @@ export default function TalisUEngagePage() {
     <SectionShell
       title={TALISU_ENGAGE.title}
       subtitle={TALISU_ENGAGE.headline}
+      maxWidthClass="max-w-[1920px]"
     >
-      <div className="mb-10 grid gap-8 lg:grid-cols-2">
+      {/* Partner write-up stays compact; SamCart gets the remaining width so its
+          native two-column checkout (order + form) can sit side by side. */}
+      <div className="mb-14 grid items-start gap-8 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
         <div className={TALISU_CARD}>
+          <div className="mb-5 flex justify-center">
+            <Image
+              src={TALISU_ENGAGE.partnerImage}
+              alt={TALISU_ENGAGE.partnerImageAlt}
+              width={1024}
+              height={1024}
+              className="h-auto w-full max-w-[220px] rounded-xl object-cover shadow-sm"
+              sizes="220px"
+              priority
+            />
+          </div>
           <h2 className="text-xl font-semibold text-[#0069CF]">
             {TALISU_ENGAGE.partnerHeading}
           </h2>
@@ -41,11 +56,13 @@ export default function TalisUEngagePage() {
           </p>
         </div>
 
-        <SamCartEmbed
-          src={TALISU_ENGAGE.samcartUrl}
-          title="TalisU Engage — SamCart"
-          height={1500}
-        />
+        <div className="min-w-0">
+          <SamCartEmbed
+            src={TALISU_ENGAGE.samcartUrl}
+            title="TalisU Engage — SamCart"
+            height={1500}
+          />
+        </div>
       </div>
     </SectionShell>
   );

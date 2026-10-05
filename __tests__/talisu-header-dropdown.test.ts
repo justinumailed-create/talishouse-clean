@@ -43,7 +43,7 @@ describe("TalisU blue header dropdown", () => {
     ]);
     expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.href)).toEqual([
       "/talisu/reg",
-      "/catalogue",
+      "/talisu/engage",
     ]);
   });
 

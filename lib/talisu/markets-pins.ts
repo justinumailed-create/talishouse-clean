@@ -88,10 +88,10 @@ export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/reg", label: "Register" },
 ] as const;
 
-/** Register dropdown — Mapsite account vs Product catalogue. */
+/** Register dropdown — Mapsite account vs Product partner (Webster). */
 export const TALISU_MKTS_HEADER_REGISTER_DROPDOWN = [
   { href: "/talisu/reg", label: "Mapsite" },
-  { href: "/catalogue", label: "Product" },
+  { href: "/talisu/engage", label: "Product" },
 ] as const;
 
 /** Placeholder marker — Mapsites™ dropdown is rendered in TalisUMktsHeader. */
