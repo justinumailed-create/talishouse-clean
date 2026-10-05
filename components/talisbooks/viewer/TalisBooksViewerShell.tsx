@@ -7,14 +7,12 @@ import {
   orderedViewerImageUrls,
   warmViewerImages,
 } from "@/lib/talisbooks/viewer/image-preloader";
-import TalisBooksViewerLiveEditor from "@/components/talisbooks/viewer/TalisBooksViewerLiveEditor";
 import { TalisBooksViewerPlaybackRail } from "@/components/talisbooks/viewer/TalisBooksViewerRails";
 import TalisBooksViewerStage, {
   type TalisBooksViewerBinding,
 } from "@/components/talisbooks/viewer/TalisBooksViewerStage";
 import { ROUTES } from "@/lib/routes";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
-import { isPermanentViewerPage } from "@/lib/talisbooks/permanent-pages";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 import {
   resolveClaimMapsiteId,
@@ -25,8 +23,6 @@ import {
 import {
   convertViewerNavIndex,
   createEmptyNarrationController,
-  describeViewerPage,
-  describeViewerSpread,
   enrichCoverPagesWithAgentBranding,
   getViewerSpread,
   getViewerSpreadCount,
@@ -36,7 +32,6 @@ import {
   viewerBackToMapsiteHref,
   type TalisBooksNarrationController,
   type TalisBooksViewerBook,
-  type TalisBooksViewerPage,
   type TalisBooksViewerViewMode,
 } from "@/lib/talisbooks/viewer";
 import DemoClaimMarketButton from "@/components/talispros/mapsite/DemoClaimMarketButton";
@@ -62,10 +57,6 @@ function TalisBooksViewerClaimCta({ mapsiteId }: { mapsiteId: string }) {
 
 interface TalisBooksViewerShellProps {
   book: TalisBooksViewerBook;
-  /** After activation payment: show Live Edit panel. */
-  canLiveEdit?: boolean;
-  /** Demo / sample books: grey out insert-page controls. */
-  pageInsertLocked?: boolean;
   /** Reserved for future audio narration — unused in playback today. */
   narration?: TalisBooksNarrationController | null;
 }
@@ -79,8 +70,6 @@ function withCoverBranding(book: TalisBooksViewerBook): TalisBooksViewerBook {
 
 export default function TalisBooksViewerShell({
   book: initialBook,
-  canLiveEdit = false,
-  pageInsertLocked = false,
   narration = null,
 }: TalisBooksViewerShellProps) {
   const narrationController = narration ?? createEmptyNarrationController();
@@ -203,7 +192,6 @@ export default function TalisBooksViewerShell({
     book.pages.length > 0
       ? getViewerSpread(book.pages, effectiveNavIndex, spreadOptions)
       : { index: 0, left: null, right: null };
-  const singlePage = book.pages[effectiveNavIndex] ?? null;
 
   // Faces paint from CSS backgrounds, so an unwarmed page turns into a blank
   // leaf mid-flip. Keep downloads running ahead of wherever the reader is.
@@ -321,148 +309,6 @@ export default function TalisBooksViewerShell({
     openBook(binding === "closed-back" ? lastNavIndex : 0);
   };
 
-  const handleUpdatePage = (pageId: string, patch: Partial<TalisBooksViewerPage>) => {
-    setBook((current) => {
-      const target = current.pages.find((page) => page.id === pageId);
-      if (target && isPermanentViewerPage(target)) {
-        return current;
-      }
-      const targetIndex = current.pages.findIndex((page) => page.id === pageId);
-      const pairMate =
-        target &&
-        (target.layout === "centerfold_left" || target.layout === "centerfold_right") &&
-        target.templateId
-          ? current.pages[targetIndex + (target.layout === "centerfold_left" ? 1 : -1)]
-          : null;
-      const pairPatch: Partial<TalisBooksViewerPage> = {};
-      if (pairMate?.templateId === target?.templateId) {
-        if (patch.spreadImageUrl !== undefined) {
-          pairPatch.spreadImageUrl = patch.spreadImageUrl;
-        }
-        if (patch.heroImageUrl !== undefined) {
-          pairPatch.heroImageUrl = patch.heroImageUrl;
-        }
-        if (patch.title !== undefined) {
-          pairPatch.title = patch.title;
-        }
-        if (patch.body !== undefined) {
-          pairPatch.body = patch.body;
-        }
-      }
-      return {
-        ...current,
-        pages: current.pages.map((page) => {
-          if (page.id === pageId) return { ...page, ...patch };
-          if (pairMate && page.id === pairMate.id) return { ...page, ...pairPatch };
-          return page;
-        }),
-        title:
-          pageId === current.pages[0]?.id && patch.title != null
-            ? patch.title
-            : current.title,
-        subtitle:
-          pageId === current.pages[0]?.id && patch.subtitle !== undefined
-            ? patch.subtitle
-            : current.subtitle,
-      };
-    });
-  };
-
-  const handleAddPage = (afterPageId: string | null) => {
-    if (pageInsertLocked) return;
-    let insertAt = book.pages.length;
-    if (afterPageId) {
-      const found = book.pages.findIndex((page) => page.id === afterPageId);
-      if (found >= 0) {
-        insertAt = found + 1;
-      }
-    } else if (binding === "open") {
-      if (viewMode === "single") {
-        insertAt = Math.min(effectiveNavIndex + 1, book.pages.length);
-      } else {
-        const anchor = spread.right ?? spread.left;
-        if (anchor) {
-          const found = book.pages.findIndex((page) => page.id === anchor.id);
-          if (found >= 0) {
-            insertAt = found + 1;
-          }
-        }
-      }
-    }
-
-    // Never insert into/after permanent brochure or back-cover system block.
-    const firstLocked = book.pages.findIndex((page) => isPermanentViewerPage(page));
-    if (firstLocked >= 0 && insertAt > firstLocked) {
-      insertAt = firstLocked;
-    }
-    if (firstLocked >= 0 && insertAt === firstLocked && afterPageId) {
-      const after = book.pages.find((page) => page.id === afterPageId);
-      if (after && isPermanentViewerPage(after)) {
-        insertAt = firstLocked;
-      }
-    }
-
-    const newPage: TalisBooksViewerPage = {
-      id: `page-${Date.now()}`,
-      pageNumber: insertAt + 1,
-      pageRole: "property_content",
-      layout: "caption",
-      title: "New page",
-      body: "",
-      heroImageUrl: "",
-    };
-
-    setBook((current) => {
-      const pages = [...current.pages];
-      pages.splice(insertAt, 0, newPage);
-      return {
-        ...current,
-        pages: pages.map((page, index) => ({
-          ...page,
-          pageNumber: index + 1,
-        })),
-      };
-    });
-
-    setBinding("open");
-    setDirection(1);
-    setAutoPlaying(false);
-
-    if (viewMode === "single") {
-      goToRef.current(insertAt);
-      previousNavRef.current = insertAt;
-    } else {
-      const spreadTarget = convertViewerNavIndex(
-        "single",
-        "spread",
-        insertAt,
-        book.pages.length + 1,
-      );
-      goToRef.current(spreadTarget);
-      previousNavRef.current = spreadTarget;
-    }
-  };
-
-  const pageLabel =
-    !isMagazine && binding === "closed-front"
-      ? "Closed · Front hard cover"
-      : !isMagazine && binding === "closed-back"
-        ? "Closed · Back hard cover"
-        : viewMode === "single"
-          ? `${describeViewerPage(singlePage)} · ${effectiveNavIndex + 1}/${navCount}`
-          : `${describeViewerSpread(spread)} · Spread ${effectiveNavIndex + 1}/${navCount}`;
-
-  const editorLeft =
-    binding === "open"
-      ? viewMode === "single"
-        ? singlePage
-        : spread.left
-      : null;
-  const editorRight =
-    binding === "open" && viewMode === "spread" ? spread.right : null;
-  // Public visitors and readers keep a chrome-free stage.
-  // The owner-only Live Edit panel remains available when explicitly unlocked.
-  const showViewerSidebar = Boolean(canLiveEdit);
   const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
   const backToMapSiteHref = viewerBackToMapsiteHref(book);
   const surfaceCta = talisBooksViewerCta(book);
@@ -587,19 +433,6 @@ export default function TalisBooksViewerShell({
             onOpenBook={handleOpenBook}
           />
         </div>
-        {showViewerSidebar ? (
-          <aside className="talisbooks-viewer__sidebar">
-            <TalisBooksViewerLiveEditor
-              leftPage={editorLeft}
-              rightPage={editorRight}
-              bindingLabel={pageLabel}
-              viewMode={viewMode}
-              onUpdatePage={handleUpdatePage}
-              onAddPage={pageInsertLocked ? undefined : handleAddPage}
-              pageInsertLocked={pageInsertLocked}
-            />
-          </aside>
-        ) : null}
       </div>
       {surfaceCta === "register" ? (
         <TalisBooksViewerRegisterLink />

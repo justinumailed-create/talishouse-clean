@@ -2,14 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import TalisBooksViewerShell from "@/components/talisbooks/viewer/TalisBooksViewerShell";
 import { resolveViewerBookBySlug } from "@/lib/talisbooks/viewer/load-book";
-import {
-  canEditMapSite,
-  getMapSiteEditToolbarState,
-} from "@/lib/mapsite-edit-auth";
-import { isMarketingManagerAuthenticated } from "@/lib/marketing-manager-auth";
-import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
-import { isDemonstrationCatalogBook } from "@/lib/talisbooks/library/demonstration-catalog";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { talisbooksViewerShareOgPath } from "@/lib/share/og-card";
 import {
@@ -95,51 +88,11 @@ export default async function TalisBooksViewerSlugPage({
   params,
 }: TalisBooksViewerSlugPageProps) {
   const { slug } = await params;
-  const [book, isMarketingAdmin] = await Promise.all([
-    resolveViewerBookBySlug(slug),
-    isMarketingManagerAuthenticated(),
-  ]);
+  const book = await resolveViewerBookBySlug(slug);
 
   if (!book) {
     notFound();
   }
 
-  const editState = book.fastCode
-    ? await getMapSiteEditToolbarState(book.fastCode)
-    : { isAdmin: false, isOwner: false, showToolbar: false };
-
-  const isAdmin = isMarketingAdmin || editState.isAdmin;
-  const isDemoBook = isDemonstrationCatalogBook(book);
-
-  // Same gate as /talispros/mapsites/[fastCode]/edit and library ebook actions
-  // (owner session + activation payment, or platform admin).
-  const canManageEbook = book.fastCode
-    ? await canEditMapSite(book.fastCode)
-    : false;
-
-  const canEditTools =
-    isAdmin || canManageEbook || (!isDemoBook && editState.showToolbar);
-
-  const paymentReceived = book.fastCode
-    ? await hasCompletedMapSiteActivationPayment({
-        fastCode: book.fastCode,
-        reconcileFromStripe: true,
-      })
-    : false;
-
-  // Live Edit for paid owners via canEditMapSite. Platform admins still need
-  // activation payment — never on demonstration books, never via admin bypass.
-  const canLiveEdit =
-    !isDemoBook &&
-    (canManageEbook
-      ? editState.isOwner || paymentReceived
-      : paymentReceived && canEditTools);
-
-  return (
-    <TalisBooksViewerShell
-      book={book}
-      canLiveEdit={canLiveEdit}
-      pageInsertLocked={isDemoBook}
-    />
-  );
+  return <TalisBooksViewerShell book={book} />;
 }

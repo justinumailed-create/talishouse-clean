@@ -22,10 +22,7 @@ export default function MarketingPartnerInterestLinks({
 
   return (
     <div className={`${alignment} flex flex-col ${className}`}>
-      <p className="text-[12px] font-semibold leading-snug text-black">
-        Express an Interest
-      </p>
-      <div className="mt-2 flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2">
         <a
           href={MARKETING_PARTNER_WHATSAPP_HREF}
           target="_blank"

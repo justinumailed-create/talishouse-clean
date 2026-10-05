@@ -35,17 +35,12 @@ export const TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE =
 export const TALISBOOKS_LIBRARY_GENERAL_SCALE_STEP = 10;
 export const TALISBOOKS_LIBRARY_GENERAL_SCALE_REDUCTION = 0.2;
 
-/** Right-shelf book scale for a 10-wide plank: denser rows use a smaller cover.
- * 1–10 → 0.55 (fits one full row); 11–20 → 0.4.
+/**
+ * Main-shelf cover scale. Always 1.
+ * Book size is fixed. Count must not shrink covers to force a row.
  */
-export function generalShelfBookScale(bookCount: number): number {
-  const count = Math.min(
-    Math.max(bookCount, 0),
-    TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
-  );
-  if (count <= 0) return 1;
-  if (count <= TALISBOOKS_LIBRARY_GENERAL_COLUMNS) return 0.55;
-  return 0.4;
+export function generalShelfBookScale(_bookCount: number): number {
+  return 1;
 }
 
 /** Plank column capacity — always 10 per row; leftover slots stay empty on the right. */

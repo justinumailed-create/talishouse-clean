@@ -161,7 +161,7 @@ describe("demo mapsite codes", () => {
     expect(mapsiteMarketPartnerLabel(null, "Ralf Meyer")).toBe(
       "Marketing Partner",
     );
-    expect(cardSource).toContain("mapsiteMarketPartnerLabel");
+    expect(cardSource).toContain("MARKETING_PARTNER_CARD_INTRO");
     expect(cardSource).toContain("mapsite.assigned_marketing_manager");
     // Claim Your Market™ may prefill from agent_name; partner label still uses assigned manager.
     expect(cardSource).toContain("suggestedFullName={mapsite.agent_name}");

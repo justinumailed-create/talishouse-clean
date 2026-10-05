@@ -8,16 +8,20 @@ import TalisBooksStandingBook from "@/components/talisbooks/library/TalisBooksSt
 import { deleteLibraryEbookAction } from "@/app/talisbooks/library/actions";
 import {
   TALISBOOKS_LIBRARY_BOOK_PRICE_USD,
-  TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
   TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD,
   TALISBOOKS_LIBRARY_SHELF_CAPACITY,
   TALISBOOKS_LIBRARY_SORT_OPTIONS,
-  generalShelfBookScale,
   generalShelfColumns,
   packShelfRowsNewestAtLeft,
+  TALISBOOKS_LIBRARY_GENERAL_ROWS,
 } from "@/lib/talisbooks/library/constants";
+import {
+  layoutMainShelfRows,
+  layoutNicheRows,
+  readBookshelfPlacement,
+} from "@/lib/talisbooks/library/placement";
 import { partitionBookshelf } from "@/lib/talisbooks/library/partition";
-import { queryLibraryBooks } from "@/lib/talisbooks/library/query";
+import { sortLibraryBooks } from "@/lib/talisbooks/library/query";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import {
   resolveClaimMapsiteId,
@@ -62,7 +66,7 @@ function ShelfRow({
   deletingId = null,
   onDelete,
 }: {
-  books: TalisBooksLibraryBook[];
+  books: Array<TalisBooksLibraryBook | null>;
   size: "hero" | "featured" | "compact";
   startIndex?: number;
   canDelete?: boolean;
@@ -81,19 +85,27 @@ function ShelfRow({
           .join(" ")}
         role="list"
       >
-        {books.map((book, index) => (
-          <div key={book.id} role="listitem" className="talisbooks-library__shelf-slot">
-            <TalisBooksStandingBook
-              book={book}
-              index={startIndex + index}
-              size={size}
-              showMeta={false}
-              canDelete={canDelete}
-              deleting={deletingId === book.id}
-              onDelete={onDelete}
+        {books.map((book, index) =>
+          book ? (
+            <div key={book.id} role="listitem" className="talisbooks-library__shelf-slot">
+              <TalisBooksStandingBook
+                book={book}
+                index={startIndex + index}
+                size={size}
+                showMeta={false}
+                canDelete={canDelete}
+                deleting={deletingId === book.id}
+                onDelete={onDelete}
+              />
+            </div>
+          ) : (
+            <div
+              key={`gap-${startIndex + index}`}
+              className="talisbooks-library__shelf-slot talisbooks-library__shelf-slot--gap"
+              aria-hidden="true"
             />
-          </div>
-        ))}
+          ),
+        )}
       </div>
       <div className="talisbooks-library__plank" aria-hidden="true">
         <span className="talisbooks-library__plank-face" />
@@ -133,41 +145,76 @@ export default function TalisBooksLibraryShell({
     [bookshelf.books, deletedIds],
   );
 
+  const anchoredBooks = useMemo(
+    () => visibleBooks.filter((book) => readBookshelfPlacement(book)),
+    [visibleBooks],
+  );
+  const anchoredIds = useMemo(
+    () => new Set(anchoredBooks.map((book) => book.id)),
+    [anchoredBooks],
+  );
+  const flexibleBooks = useMemo(
+    () => visibleBooks.filter((book) => !anchoredIds.has(book.id)),
+    [visibleBooks, anchoredIds],
+  );
+
   const { featured, general, featuredLayout } = useMemo(
     () =>
-      partitionBookshelf(visibleBooks, {
+      partitionBookshelf(flexibleBooks, {
         featuredCapacity,
         featuredMode: scoped || createdCatalog ? "newest" : "fill",
       }),
-    [visibleBooks, featuredCapacity, scoped, createdCatalog],
+    [flexibleBooks, featuredCapacity, scoped, createdCatalog],
   );
 
-  const generalResult = useMemo(
+  const mainAnchors = useMemo(
+    () => anchoredBooks.filter((book) => readBookshelfPlacement(book)?.shelf === 2),
+    [anchoredBooks],
+  );
+  const leftAnchors = useMemo(
+    () => anchoredBooks.filter((book) => readBookshelfPlacement(book)?.shelf === 1),
+    [anchoredBooks],
+  );
+
+  const featuredLayoutResult = useMemo(
     () =>
-      queryLibraryBooks(general, {
-        search: "",
-        sort,
-        page,
-        pageSize: TALISBOOKS_LIBRARY_GENERAL_PAGE_SIZE,
-      }),
-      [general, sort, page],
+      layoutNicheRows(
+        featured,
+        leftAnchors,
+        1,
+        featuredLayout === "grid-3x2" ? [3, 3] : [1, 2, 2],
+      ),
+    [featured, leftAnchors, featuredLayout],
+  );
+  const featuredRows = featuredLayoutResult.rows;
+
+  const sortedGeneral = useMemo(
+    () => sortLibraryBooks([...general, ...featuredLayoutResult.overflow], sort),
+    [general, featuredLayoutResult.overflow, sort],
   );
 
-  const generalCount = generalResult.books.length;
-  const generalColumns = generalShelfColumns(generalCount);
-  const generalScale = generalShelfBookScale(generalCount);
+  const generalColumns = generalShelfColumns(sortedGeneral.length + mainAnchors.length);
+  const generalRowsAll = useMemo(() => {
+    if (mainAnchors.length === 0) {
+      return packShelfRowsNewestAtLeft(sortedGeneral, generalColumns);
+    }
+    return layoutMainShelfRows(sortedGeneral, mainAnchors, generalColumns);
+  }, [sortedGeneral, mainAnchors, generalColumns]);
 
-  const generalRows = useMemo(
-    () => packShelfRowsNewestAtLeft(generalResult.books, generalColumns),
-    [generalResult.books, generalColumns],
+  const generalPageCount = Math.max(
+    1,
+    Math.ceil(generalRowsAll.length / TALISBOOKS_LIBRARY_GENERAL_ROWS),
   );
+  const generalPage = Math.min(page, generalPageCount);
+  const generalRows = generalRowsAll.slice(
+    (generalPage - 1) * TALISBOOKS_LIBRARY_GENERAL_ROWS,
+    generalPage * TALISBOOKS_LIBRARY_GENERAL_ROWS,
+  );
+  const generalTotal = sortedGeneral.length + mainAnchors.length;
 
   const stocked = Math.min(visibleBooks.length, TALISBOOKS_LIBRARY_SHELF_CAPACITY);
   const monthlyEstimate = Math.round(stocked * TALISBOOKS_LIBRARY_BOOK_PRICE_USD * 100) / 100;
 
-  const heroBook = featuredLayout === "hero-plus-4" ? featured[0] : null;
-  const featuredRest =
-    featuredLayout === "hero-plus-4" ? featured.slice(1) : featured;
   const shelfControls = {
     canDelete,
     deletingId,
@@ -344,7 +391,7 @@ export default function TalisBooksLibraryShell({
               </div>
 
               <div className="talisbooks-library__alcove">
-                {featured.length === 0 ? (
+                {featuredRows.length === 0 ? (
                   <div className="talisbooks-library__niche-empty">
                     <p>
                       {visibleBooks.length > 0
@@ -358,36 +405,29 @@ export default function TalisBooksLibraryShell({
                               : "No highlighted books yet"}
                     </p>
                   </div>
-                ) : featuredLayout === "hero-plus-4" && heroBook ? (
-                  <div className="talisbooks-library__featured talisbooks-library__featured--hero">
-                    <ShelfRow books={[heroBook]} size="hero" startIndex={0} {...shelfControls} />
-                    <ShelfRow
-                      books={featuredRest.slice(0, 2)}
-                      size="featured"
-                      startIndex={1}
-                      {...shelfControls}
-                    />
-                    <ShelfRow
-                      books={featuredRest.slice(2, 4)}
-                      size="featured"
-                      startIndex={3}
-                      {...shelfControls}
-                    />
-                  </div>
                 ) : (
-                  <div className="talisbooks-library__featured talisbooks-library__featured--grid">
-                    <ShelfRow
-                      books={featured.slice(0, 3)}
-                      size="featured"
-                      startIndex={0}
-                      {...shelfControls}
-                    />
-                    <ShelfRow
-                      books={featured.slice(3, 6)}
-                      size="featured"
-                      startIndex={3}
-                      {...shelfControls}
-                    />
+                  <div
+                    className={
+                      featuredLayout === "hero-plus-4"
+                        ? "talisbooks-library__featured talisbooks-library__featured--hero"
+                        : "talisbooks-library__featured talisbooks-library__featured--grid"
+                    }
+                  >
+                    {featuredRows.map((row, rowIndex) => (
+                      <ShelfRow
+                        key={`featured-row-${rowIndex}`}
+                        books={row}
+                        size={
+                          featuredLayout === "hero-plus-4" && rowIndex === 0
+                            ? "hero"
+                            : "featured"
+                        }
+                        startIndex={featuredRows
+                          .slice(0, rowIndex)
+                          .reduce((sum, previous) => sum + previous.length, 0)}
+                        {...shelfControls}
+                      />
+                    ))}
                   </div>
                 )}
               </div>
@@ -399,7 +439,6 @@ export default function TalisBooksLibraryShell({
           <section
             className="talisbooks-library__niche talisbooks-library__niche--general"
             aria-label="General library"
-            style={{ ["--general-book-scale" as string]: String(generalScale) }}
           >
             <div className="talisbooks-library__niche-inner">
               <div className="talisbooks-library__niche-header talisbooks-library__niche-header--end">
@@ -432,7 +471,7 @@ export default function TalisBooksLibraryShell({
               </div>
 
               <div className="talisbooks-library__alcove">
-                {generalResult.books.length === 0 ? (
+                {generalTotal === 0 ? (
                   <div className="talisbooks-library__niche-empty">
                     <p>No books on this shelf</p>
                     {Array.from({ length: 3 }).map((_, index) => (
@@ -460,22 +499,22 @@ export default function TalisBooksLibraryShell({
 
               <div className="talisbooks-library__pager">
                 <span>
-                  {generalResult.page}/{generalResult.pageCount} ({generalResult.total} books)
+                  {generalPage}/{generalPageCount} ({generalTotal} books)
                 </span>
-                {generalResult.pageCount > 1 ? (
+                {generalPageCount > 1 ? (
                   <div className="talisbooks-library__pager-actions">
                     <button
                       type="button"
-                      disabled={generalResult.page <= 1}
+                      disabled={generalPage <= 1}
                       onClick={() => setPage((current) => Math.max(1, current - 1))}
                     >
                       Prev
                     </button>
                     <button
                       type="button"
-                      disabled={generalResult.page >= generalResult.pageCount}
+                      disabled={generalPage >= generalPageCount}
                       onClick={() =>
-                        setPage((current) => Math.min(generalResult.pageCount, current + 1))
+                        setPage((current) => Math.min(generalPageCount, current + 1))
                       }
                     >
                       Next

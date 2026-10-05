@@ -72,7 +72,7 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(gatePage).toContain("TalisprosHomeShowcase");
     expect(gatePage).toContain("TalisUMktsHeader");
     expect(gate).toContain("TalisprosHomeFastCodeEntry");
-    expect(gate).toContain("Claim your market. Open your Account*");
+    expect(gate).toContain("Open your Account*");
     expect(gate).toContain("System Demo");
     expect(gate).toContain("TALISPROS_HOME_SYSTEM_DEMO_HREF");
     expect(gate).toContain("aria-expanded={loginOpen}");
@@ -163,6 +163,9 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(partner.match(/\{isOwner \?/g)).toHaveLength(2);
     expect(logout).toContain("logoutMapSiteOwnerSession");
     expect(logout).toContain("Logout");
+    expect(logout).toContain("LogOut");
+    expect(logout).toContain("bg-red-600");
+    expect(partner).toContain("absolute top-2 right-2");
     expect(application).toContain("isOwner={isOwner}");
     expect(application).toContain("accountTypeSegment={accountTypeSegment}");
     expect(page).toContain("isOwner={isOwner}");

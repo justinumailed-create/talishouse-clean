@@ -19,6 +19,7 @@ export type IsolatedBookshelfBook = {
   fastCode: string | null;
   createdAt: string;
   viewerHref: string;
+  metadata: Record<string, unknown>;
 };
 
 function coverFromMetadata(row: BookRow): string | null {
@@ -74,6 +75,7 @@ export async function listIsolatedBookshelfBooks(): Promise<IsolatedBookshelfBoo
     fastCode: rowFastCode(row),
     createdAt: row.created_at,
     viewerHref: `${ROUTES.TALISBOOKS_VIEWER}/${row.slug}`,
+    metadata: (row.metadata as Record<string, unknown>) ?? {},
   }));
 }
 

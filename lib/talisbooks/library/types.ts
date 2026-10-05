@@ -41,6 +41,15 @@ export interface TalisBooksLibraryBook {
   pinRank?: number;
   /** Decorative filler cover — rendered non-interactive (no navigation). */
   decorative?: boolean;
+  /**
+   * Explicit physical slot. When set, this wins over metadata and over
+   * Date/Name sorting. Prefer `metadata.bookshelfPlacement` for real books.
+   */
+  shelfPlacement?: {
+    shelf: 1 | 2;
+    row: number;
+    position: number;
+  } | null;
 }
 
 export interface TalisBooksBookshelf {

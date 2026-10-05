@@ -25,6 +25,7 @@ export function mapsiteMarketPartnerImageUrl(
 export const MAPSITE_MARKET_PARTNER_FALLBACK_NAME = "Aisha C.";
 
 export const MARKETING_PARTNER_ROLE_LABEL = "Marketing Partner";
+export const MARKETING_PARTNER_CARD_INTRO = "I am your Marketing Partner...";
 
 export function mapsiteMarketPartnerLabel(
   agentImageUrl?: string | null,

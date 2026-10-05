@@ -114,7 +114,7 @@ export default function TalisprosHomeFastCodeEntry({
             disabled={loading}
             className="shrink-0 bg-[var(--talis-nav-blue)] px-4 py-2.5 text-sm font-medium tracking-wide text-white transition hover:bg-[var(--talis-nav-blue-hover)] active:scale-[0.98] disabled:opacity-50 sm:px-5"
           >
-            {loading ? "Opening…" : "Open Mapsite™"}
+            {loading ? "Opening…" : "Mapsite"}
           </button>
         </div>
       </form>

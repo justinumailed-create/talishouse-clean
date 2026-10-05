@@ -8,10 +8,10 @@ import {
   CLAIM_A_MARKET_PAGE,
   FOR_SALE_BY_OWNERS_MARKET,
   MAPSITE_MARKET_PARTNER_FALLBACK_NAME,
+  MARKETING_PARTNER_CARD_INTRO,
   REAL_ESTATE_PROFESSIONALS_MARKET,
   TALISHHOUSE_BUILDERS_MARKET,
   mapsiteMarketPartnerImageUrl,
-  mapsiteMarketPartnerLabel,
   type TalisprosMarketPageContent,
 } from "@/lib/talispros/market-pages";
 import { MAPSITE_LISTING_CARD_WIDTH_CLASS } from "@/lib/talispros/mapsite-listing-media";
@@ -59,7 +59,7 @@ interface MapSiteMarketPartnerCardProps {
 
 /**
  * Claimed Mapsite™ left card:
- * FAST CODE → address → partner photo → name → Marketing Partner → Express an Interest.
+ * FAST CODE → address → partner photo → name → Marketing Partner → WhatsApp / Telegram.
  * The photo block is a div (not a tall <button>) so the parent sidebar can scroll.
  * Interest links sit outside that control so they are not nested buttons.
  */
@@ -85,11 +85,7 @@ export default function MapSiteMarketPartnerCard({
   const partnerName =
     mapsite.assigned_marketing_manager?.trim() ||
     MAPSITE_MARKET_PARTNER_FALLBACK_NAME;
-  const partnerLabel = mapsiteMarketPartnerLabel(
-    null,
-    mapsite.assigned_marketing_manager,
-    content.marketPartner,
-  );
+  const partnerLabel = MARKETING_PARTNER_CARD_INTRO;
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (!onSelect) return;
@@ -101,11 +97,11 @@ export default function MapSiteMarketPartnerCard({
 
   // Solid opaque card for demo and paid claimed Mapsites™ (no frosted glass).
   const mobilePanel = paid
-    ? "mapsite-manager-strip w-full overflow-hidden rounded-2xl bg-[#f2f2f0] p-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:hidden"
-    : "mapsite-manager-strip w-full overflow-hidden rounded-2xl bg-[#f2f2f0] p-3 text-left shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:hidden";
+    ? "mapsite-manager-strip relative w-full overflow-hidden rounded-2xl bg-[#f2f2f0] p-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:hidden"
+    : "mapsite-manager-strip relative w-full overflow-hidden rounded-2xl bg-[#f2f2f0] p-3 text-left shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:hidden";
   const desktopPanel = paid
-    ? "hidden w-full overflow-hidden rounded-2xl bg-[#f2f2f0] px-5 py-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:block"
-    : "hidden w-full overflow-hidden rounded-2xl bg-[#f2f2f0] px-4 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:block sm:px-5";
+    ? "relative hidden w-full overflow-hidden rounded-2xl bg-[#f2f2f0] px-5 py-6 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:block"
+    : "relative hidden w-full overflow-hidden rounded-2xl bg-[#f2f2f0] px-4 py-4 text-center shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:block sm:px-5";
   const selectableClass = onSelect
     ? "w-full cursor-pointer text-inherit transition hover:opacity-90"
     : "w-full text-inherit";
@@ -170,12 +166,11 @@ export default function MapSiteMarketPartnerCard({
           </div>
         ) : null}
         {isOwner ? (
-          <div className="mt-3 flex justify-start">
-            <MapSiteOwnerLogoutButton
-              fastCode={fastCode}
-              accountType={accountTypeSegment}
-            />
-          </div>
+          <MapSiteOwnerLogoutButton
+            fastCode={fastCode}
+            accountType={accountTypeSegment}
+            className="absolute top-2 right-2 z-20 inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+          />
         ) : null}
       </div>
 
@@ -241,12 +236,11 @@ export default function MapSiteMarketPartnerCard({
           </div>
         ) : null}
         {isOwner ? (
-          <div className="mt-4 flex justify-center">
-            <MapSiteOwnerLogoutButton
-              fastCode={fastCode}
-              accountType={accountTypeSegment}
-            />
-          </div>
+          <MapSiteOwnerLogoutButton
+            fastCode={fastCode}
+            accountType={accountTypeSegment}
+            className="absolute top-2 right-2 z-20 inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
+          />
         ) : null}
       </div>
     </div>

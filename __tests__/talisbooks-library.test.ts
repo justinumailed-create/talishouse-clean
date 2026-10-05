@@ -100,12 +100,12 @@ describe("Talisbooks™ split bookshelf layout", () => {
     expect(page.books.length).toBe(Math.min(20, general.length));
   });
 
-  it("packs the right shelf at 10 books per row with denser covers", () => {
-    expect(generalShelfBookScale(1)).toBe(0.55);
-    expect(generalShelfBookScale(5)).toBe(0.55);
-    expect(generalShelfBookScale(10)).toBe(0.55);
-    expect(generalShelfBookScale(11)).toBe(0.4);
-    expect(generalShelfBookScale(20)).toBe(0.4);
+  it("keeps a fixed right-shelf cover size regardless of book count", () => {
+    expect(generalShelfBookScale(1)).toBe(1);
+    expect(generalShelfBookScale(5)).toBe(1);
+    expect(generalShelfBookScale(10)).toBe(1);
+    expect(generalShelfBookScale(11)).toBe(1);
+    expect(generalShelfBookScale(20)).toBe(1);
     expect(generalShelfColumns(1)).toBe(10);
     expect(generalShelfColumns(5)).toBe(10);
     expect(generalShelfColumns(12)).toBe(10);

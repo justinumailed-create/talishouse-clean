@@ -159,7 +159,7 @@ export default function TopBoundFlipbook({
   }
 
   return (
-    <div className="product-flipbook relative flex h-dvh min-h-dvh flex-col" data-testid="product-flipbook" data-binding="top">
+    <div className="product-flipbook relative flex h-full min-h-full flex-col" data-testid="product-flipbook" data-binding="top">
       <header className="product-flipbook__header">
         <div className="product-flipbook__brand">
           <Image

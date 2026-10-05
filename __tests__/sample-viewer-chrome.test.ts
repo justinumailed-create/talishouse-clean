@@ -41,7 +41,8 @@ describe("sample Talisbooks™ viewer chrome", () => {
   });
 
   it("keeps PlaybackRail beside the restored header and omits the left brand rail", () => {
-    expect(shell).toContain("const showViewerSidebar = Boolean(canLiveEdit)");
+    expect(shell).not.toContain("TalisBooksViewerLiveEditor");
+    expect(shell).not.toContain("showViewerSidebar");
     expect(shell).not.toContain("TalisBooksViewerBrandRail");
     expect(shell).toContain("TalisBooksViewerPlaybackRail");
     expect(shell).toContain("talisbooks-viewer__header");
@@ -74,7 +75,7 @@ describe("sample Talisbooks™ viewer chrome", () => {
     expect(shell).toContain("TalisBooksViewerStage");
     const css = readSource("app/globals.css");
     expect(css).toContain("formerly used by the bottom controls");
-    expect(css).toContain("100dvh - (2 * var(--viewer-inset))");
+    expect(css).toContain("100% - (2 * var(--viewer-inset))");
   });
 
   it("shows Register only on issued FAST ebooks; Claim on demo viewers", () => {
@@ -95,22 +96,25 @@ describe("sample Talisbooks™ viewer chrome", () => {
     );
   });
 
-  it("shows Live Edit only after payment, never on demonstration books", () => {
-    expect(shell).toContain("pageInsertLocked");
-    const liveEditor = readSource(
-      "components/talisbooks/viewer/TalisBooksViewerLiveEditor.tsx",
-    );
-    expect(liveEditor).toContain("pageInsertLocked");
-    expect(liveEditor).toContain("talisbooks-viewer-live-edit--page-insert-locked");
+  it("omits Live Edit from every viewer surface", () => {
+    expect(shell).not.toContain("TalisBooksViewerLiveEditor");
+    expect(shell).not.toContain("canLiveEdit");
+    expect(shell).not.toContain("talisbooks-viewer-live-edit");
     const viewerPage = readSource("app/talisbooks/viewer/[slug]/page.tsx");
-    expect(viewerPage).toContain("isDemonstrationCatalogBook");
-    expect(viewerPage).toContain("pageInsertLocked={isDemoBook}");
-    expect(viewerPage).toContain("canEditMapSite");
-    expect(viewerPage).toContain("canManageEbook");
-    expect(viewerPage).toContain("const canLiveEdit =");
-    expect(viewerPage).not.toContain(
-      "const canLiveEdit = isAdmin || (!isDemoBook && paymentReceived",
+    expect(viewerPage).not.toContain("canLiveEdit");
+    expect(viewerPage).not.toContain("TalisBooksViewerLiveEditor");
+    expect(viewerPage).not.toContain("pageInsertLocked");
+    const css = readSource("app/globals.css");
+    expect(css).not.toContain("talisbooks-viewer-live-edit");
+  });
+
+  it("mounts the blue TalisU navbar above the viewer", () => {
+    const layout = readSource(
+      "components/talisbooks/platform/TalisBooksLayoutClient.tsx",
     );
+    expect(layout).toContain("TalisUMktsHeader");
+    expect(layout).toContain('pathname.startsWith("/talisbooks/viewer")');
+    expect(layout).not.toContain("isDashboard || isLibrary || isEditor || isViewer");
   });
 
   it("opens ebook icons in the same tab", () => {

@@ -2,43 +2,49 @@
 
 import { usePathname } from "next/navigation";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
-import { shouldShowTalisbooksMarketingHeader } from "@/lib/talisbooks/marketing-chrome";
+
+function talisbooksPathHasLibraryHeader(pathname: string): boolean {
+  return (
+    pathname === "/talisbooks" ||
+    pathname.startsWith("/talisbooks/library") ||
+    pathname === "/talisbooks/fast" ||
+    pathname.startsWith("/talisbooks/fast/")
+  );
+}
 
 /**
  * Product chrome for /talisbooks.
- * Shelf surfaces (public, FAST, library) render TalisUMktsHeader inside
- * TalisBooksLibraryShell. Remaining pages that still used the white
- * Talisbooks marketing bar now share the same blue TalisU navbar.
- * Dashboard / editor / viewer keep their own chrome (no duplicate blue bar).
+ * Shelf surfaces already mount TalisUMktsHeader inside TalisBooksLibraryShell.
+ * Viewer, editor, dashboard, and remaining product pages share the same blue bar.
  */
 export default function TalisBooksLayoutClient({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const isDashboard = pathname.startsWith("/talisbooks/dashboard");
-  const isLibrary = pathname.startsWith("/talisbooks/library");
-  const isEditor = pathname.startsWith("/talisbooks/editor");
+  const pathname = usePathname() || "";
   const isViewer = pathname.startsWith("/talisbooks/viewer");
-  // FAST + public shelves include the blue bar via LibraryShell.
-  const isShelfSurface =
-    pathname === "/talisbooks" ||
-    pathname.startsWith("/talisbooks/fast/") ||
-    pathname === "/talisbooks/fast";
 
-  if (isDashboard || isLibrary || isEditor || isViewer || isShelfSurface) {
+  if (talisbooksPathHasLibraryHeader(pathname)) {
     return <>{children}</>;
   }
 
   return (
-    <>
-      {shouldShowTalisbooksMarketingHeader(pathname) ? (
-        <TalisUMktsHeader />
-      ) : null}
-      <main className="min-h-screen bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
-        {children}
-      </main>
-    </>
+    <div
+      className={
+        isViewer
+          ? "flex h-dvh min-h-dvh flex-col"
+          : "flex min-h-dvh flex-col"
+      }
+    >
+      <TalisUMktsHeader />
+      {isViewer ? (
+        <div className="min-h-0 flex-1">{children}</div>
+      ) : (
+        <main className="min-h-0 flex-1 bg-white font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white">
+          {children}
+        </main>
+      )}
+    </div>
   );
 }

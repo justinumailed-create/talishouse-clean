@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { LogOut } from "lucide-react";
 import { logoutMapSiteOwnerSession } from "@/app/talispros/mapsites/actions";
 
 interface MapSiteOwnerLogoutButtonProps {
@@ -24,7 +25,8 @@ export default function MapSiteOwnerLogoutButton({
     <button
       type="button"
       disabled={isPending}
-      onClick={() => {
+      onClick={(event) => {
+        event.stopPropagation();
         startTransition(async () => {
           const result = await logoutMapSiteOwnerSession({
             fastCode,
@@ -35,10 +37,11 @@ export default function MapSiteOwnerLogoutButton({
       }}
       className={
         className ||
-        "relative z-10 rounded-full bg-white/80 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-800 shadow-sm ring-1 ring-black/10 backdrop-blur-sm transition hover:bg-white disabled:opacity-50"
+        "relative z-10 inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
       }
       aria-label="Log out of Mapsite™ owner session"
     >
+      <LogOut className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
       {isPending ? "Logging out…" : "Logout"}
     </button>
   );

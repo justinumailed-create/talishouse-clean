@@ -59,7 +59,7 @@ function toLibraryBook(
     fastCode: book.fastCode || ALLPINS_FAST_CODE,
     parentBookId: null,
     isPinned: false,
-    metadata: { isolatedBookshelf: true },
+    metadata: book.metadata ?? { isolatedBookshelf: true },
   };
 }
 

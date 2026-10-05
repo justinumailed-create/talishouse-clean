@@ -165,6 +165,11 @@ describe("product catalogue route", () => {
     expect(shell).toContain("productCatalogue");
     expect(shell).toMatch(/isEmbed[\s\S]*productCatalogue/);
     expect(shell).toMatch(/hideTalisBot[\s\S]*productCatalogue/);
+    const catalogueLayout = readSource(
+      "components/catalogue/CatalogueLayoutClient.tsx",
+    );
+    expect(catalogueLayout).toContain("TalisUMktsHeader");
+    expect(catalogueLayout).toContain("/catalogue/bookshelf");
   });
 
   it("keeps the sample viewer Product button on /catalogue", () => {

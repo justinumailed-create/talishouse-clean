@@ -126,7 +126,7 @@ describe("Paid Mapsite™ TEB™ unlocks ebook admin", () => {
     expect(page).toMatch(/canManageEbook[\s\S]*getTalisBooksBookshelf[\s\S]*getPublicTalisBooksBookshelf/);
   });
 
-  it("viewer Live Edit sidebar unlocks for paid owner/admin", () => {
+  it("keeps ebook editing on the Mapsite™ editor, not the viewer", () => {
     const shell = readFileSync(
       join(process.cwd(), "components/talisbooks/viewer/TalisBooksViewerShell.tsx"),
       "utf8",
@@ -135,12 +135,11 @@ describe("Paid Mapsite™ TEB™ unlocks ebook admin", () => {
       join(process.cwd(), "app/talisbooks/viewer/[slug]/page.tsx"),
       "utf8",
     );
-    expect(shell).toContain("const showViewerSidebar = Boolean(canLiveEdit)");
+    expect(shell).not.toContain("TalisBooksViewerLiveEditor");
+    expect(shell).not.toContain("canLiveEdit");
     expect(shell).not.toContain("TalisBooksViewerControls");
-    expect(shell).not.toContain("const showViewerSidebar = false");
-    expect(viewerPage).toContain("canEditMapSite");
-    expect(viewerPage).toContain("canLiveEdit");
-    expect(viewerPage).toContain("canLiveEdit={canLiveEdit}");
+    expect(viewerPage).not.toContain("canLiveEdit");
+    expect(viewerPage).toContain("TalisBooksViewerShell");
   });
 
   it("pin TEB™ still resolves to the FAST-code shelf for every Mapsite™ class", () => {

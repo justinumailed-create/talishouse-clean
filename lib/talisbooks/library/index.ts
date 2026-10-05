@@ -21,6 +21,15 @@ export {
 export { createDemoBookshelf, createDemoDerivativeBookshelf, createDemoRootBookshelf } from "./demo-shelf";
 export { monthlyCapacityUsd, partitionBookshelf } from "./partition";
 export {
+  BOOKSHELF_PLACEMENT_METADATA_KEY,
+  layoutMainShelfRows,
+  layoutNicheRows,
+  preserveBookshelfPlacement,
+  readBookshelfPlacement,
+  withBookshelfPlacement,
+} from "./placement";
+export type { BookshelfPlacement } from "./placement";
+export {
   filterBooksForFastCodeShelf,
   filterLibraryBooks,
   matchesLibrarySearch,

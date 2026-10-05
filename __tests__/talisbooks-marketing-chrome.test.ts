@@ -30,7 +30,7 @@ describe("Talisbooks™ marketing header on TEB shelves", () => {
     expect(isTalisbooksFastShelfPath("/talisbooks/fastest")).toBe(false);
   });
 
-  it("still hides viewer, editor, and dashboard chrome", () => {
+  it("still hides the white Talisbooks product bar on viewer, editor, and dashboard", () => {
     expect(
       shouldShowTalisbooksMarketingHeader(
         "/talisbooks/viewer/lg01-lg01-talisbook-ts9i",

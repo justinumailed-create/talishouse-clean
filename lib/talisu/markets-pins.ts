@@ -76,7 +76,7 @@ export const TALISU_MKTS_PMC_BULLETS = [
 ] as const;
 
 export const TALISU_MKTS_HEADER_TAGLINE =
-  "Industry Adjacent Fulfilment Options";
+  "Industry Adjacent Mapsite Markets";
 
 /**
  * Primary top-bar links (home + claimed Mapsites™ blue header).

@@ -26,8 +26,11 @@ describe("TalisBOT Talispros™ knowledge", () => {
     expect(bot).not.toMatch(/Talishouse \(Recreational\)/);
     expect(bot).not.toMatch(/Talishouse \(Residential\)/);
     expect(bot).toContain("Talispros FAQ");
-    expect(bot).toContain('href="/talisu#faq"');
-    expect(bot).not.toContain("Browse Talispros™ knowledge");
-    expect(bot).not.toContain("Ask about Mapsites™");
+    expect(bot).toContain("Talispros™ processes");
+    expect(bot).toContain("TALISU_MKTS_HEADER_BLUE");
+    expect(bot).toContain("OwnershipLearnMoreForm");
+    expect(bot).toContain("Get help / leave contact");
+    expect(bot).not.toContain("TALISBOT_INTEREST_OPTIONS");
+    expect(bot).not.toMatch(/text-green-500|bg-green-500|bg-green-50|text-green-600/);
   });
 });

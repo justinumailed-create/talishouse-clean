@@ -82,7 +82,7 @@ export default function OwnershipLearnMoreForm({
 
   return (
     <div
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/45 p-3 sm:items-center sm:p-6"
+      className="fixed inset-0 z-[1100] flex items-end justify-center bg-black/45 p-3 sm:items-center sm:p-6"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();

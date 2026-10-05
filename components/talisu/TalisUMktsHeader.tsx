@@ -28,7 +28,7 @@ export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 export type TalisUMktsHeaderProps = {
   /**
    * `claimed-mapsite`: replace Register with Dashboard (lock until real payment).
-   * `default`: Markets + Bookshelf + Mapsites + Register (homepage /talisu chrome).
+   * `default`: Markets + Mapsites + Bookshelf + Register (homepage /talisu chrome).
    */
   variant?: TalisUMktsHeaderVariant;
   /**
@@ -317,10 +317,13 @@ export default function TalisUMktsHeader({
         </div>
 
         <nav className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
-          {TALISU_MKTS_HEADER_NAV.filter(
-            (item) => item.label === "Markets" || item.label === "Bookshelf",
-          ).map((item) => renderNavLink(item))}
+          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Markets").map(
+            (item) => renderNavLink(item),
+          )}
           <MapsitesNavDropdown />
+          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Bookshelf").map(
+            (item) => renderNavLink(item),
+          )}
           {claimedMapsite
             ? TALISU_MKTS_HEADER_NAV.filter(
                 (item) => item.label === "Register",

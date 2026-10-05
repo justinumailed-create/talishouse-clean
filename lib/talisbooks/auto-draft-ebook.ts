@@ -4,6 +4,7 @@ import {
   withIsolatedBookshelfMetadata,
 } from "@/lib/talisbooks/isolated-bookshelf";
 import { resolvePersistedBookTitle } from "@/lib/talisbooks/book-title";
+import { preserveBookshelfPlacement } from "@/lib/talisbooks/library/placement";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { ROUTES } from "@/lib/routes";
 import type { TalisBooksLayoutImageRef } from "@/lib/talisbooks/layout-engine/types";
@@ -168,7 +169,7 @@ async function persistGeneratedEbook(input: {
   if (replaceId) {
     const { data: existing, error } = await supabase
       .from("talisbooks_books")
-      .select("id, slug, fast_code, mapsite_id")
+      .select("id, slug, fast_code, mapsite_id, metadata")
       .eq("id", replaceId)
       .maybeSingle();
     if (error || !existing) {
@@ -193,7 +194,10 @@ async function persistGeneratedEbook(input: {
         description: input.description,
         page_count: pageCount,
         mapsite_id: input.mapsiteId,
-        metadata: { ...input.metadata, previewUrl },
+        metadata: preserveBookshelfPlacement(
+          (existing.metadata as Record<string, unknown>) ?? {},
+          { ...input.metadata, previewUrl },
+        ),
         updated_at: input.now,
       })
       .eq("id", existing.id);

@@ -308,15 +308,6 @@ export default function HomePinLocationSection({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <InputField
-          label="MLS®"
-          value={values.mlsUrl}
-          onChange={(mlsUrl) => onChange({ mlsUrl })}
-          placeholder="https://www.realtor.ca/..."
-          hint="Optional. Opens from the pin MLS® button."
-          inputMode="url"
-          error={errors.mlsUrl}
-        />
-        <InputField
           label="URL"
           value={values.brokerUrl}
           onChange={(brokerUrl) => onChange({ brokerUrl })}
@@ -324,6 +315,15 @@ export default function HomePinLocationSection({
           hint="Optional. Opens from the pin URL button."
           inputMode="url"
           error={errors.brokerUrl}
+        />
+        <InputField
+          label="MLS®"
+          value={values.mlsUrl}
+          onChange={(mlsUrl) => onChange({ mlsUrl })}
+          placeholder="https://www.realtor.ca/..."
+          hint="Optional. Opens from the pin MLS® button."
+          inputMode="url"
+          error={errors.mlsUrl}
         />
       </div>
 

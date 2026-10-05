@@ -29,8 +29,8 @@ export default function TalisprosHomeGate() {
           <h1 className="text-[28px] leading-[1.1] tracking-[0.14em] text-neutral-900 sm:text-[34px]">
             Talispros
           </h1>
-          <p className="mt-2 text-sm font-medium text-neutral-500 sm:text-[15px]">
-            Claim your market. Open your Mapsite™.
+          <p className="mt-2 text-sm font-medium tracking-[0.14em] text-neutral-500 sm:text-[15px]">
+            PROMOTE - MANAGE - COOPERATE
           </p>
         </div>
 
@@ -46,7 +46,7 @@ export default function TalisprosHomeGate() {
                 : "border-[var(--talis-nav-blue)] bg-white text-[var(--talis-nav-blue)] hover:bg-[var(--talis-nav-blue)] hover:text-white"
             }`}
           >
-            Claim your market. Open your Account*
+            Open your Account*
           </button>
 
           <div

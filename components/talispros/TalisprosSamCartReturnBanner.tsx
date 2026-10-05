@@ -97,7 +97,7 @@ export default function TalisprosSamCartReturnBanner() {
             </a>
           ) : (
             <p className="text-xs text-emerald-800">
-              Use <strong>Claim your market. Open your Account*</strong> with your FAST Code™ to
+              Use <strong>Open your Account*</strong> with your FAST Code™ to
               open your Mapsite™.
             </p>
           )}
