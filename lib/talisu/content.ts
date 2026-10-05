@@ -53,28 +53,120 @@ export const TALISU_WELCOME = {
   aishaSrc: "/talisu/Aisha.mp3",
 } as const;
 
-/** FAQ on /talisu — first item documents KB / Audio / Video → Mapsites™. */
-export const TALISU_FAQ = {
+/** FAQ item on /talisu — answer may be one string or several paragraphs, with optional bullets. */
+export type TalisUFaqItem = {
+  question: string;
+  /** One or more answer paragraphs (string = single paragraph). */
+  answer: string | readonly string[];
+  /** Optional bullet list shown after the answer paragraph(s). */
+  bullets?: readonly string[];
+};
+
+/** FAQ on /talisu — TalisU™ PMC Q&A (navbar FAQ → /talisu#faq). */
+export const TALISU_FAQ: {
+  title: string;
+  items: readonly TalisUFaqItem[];
+} = {
   title: "Frequently Asked Questions",
   items: [
     {
-      question:
-        "How do Knowledge Base, Audio, and Video support client Mapsites™?",
+      question: "What is a Mapsite™?",
       answer:
-        "Knowledge Base, Audio, and Video enhance client Mapsites™ to educate their prospects upon registration.",
+        "It is a map-based online navigation system that can be deployed industry adjacent and adds flexibility to how you promote major purchase products (those that typically exceed $10,000 per unit and are immobile, roll, float or fly).",
     },
     {
-      question: "How do I get started with TalisU™?",
+      question: "What does Talis“U” mean?",
       answer:
-        "Use Register to create your account, or open Markets to claim a territory and begin building your Mapsite™.",
+        "The “U” represents a play on words: “University” — we educate registrants to enlarge their marketing comfort zones and empower them to get their platforms out there, quickly and competently.",
     },
     {
-      question: "Where do I find learning material?",
+      question: "What is the meaning of PMC?",
       answer:
-        "Open the TalisU™ menu for Knowledge Base, Audio, and Video. Bookshelf covers Talisbooks™ and FAST Codes™.",
+        "Promote - Manage - Cooperate. Mapsites™ contain pins whose flags reveal URL, MLS®, TEB and TTV links for every pin:",
+      bullets: [
+        "URL: a means to advance narratives and shape external communication.",
+        "MLS®: a link specifically for real estate professionals to bypass distractions en route to specific listings.",
+        "TEB: Talis eBooks / Talisbooks™ are digital lead magnets and authority-building tools that attract clients and stand out in competitive markets.",
+        "TTV: TalisTV™ serves to gain control over brand narratives, eliminate advertising dependencies and inspire deep audience engagement.",
+      ],
+    },
+    {
+      question: "What are Talispros™?",
+      answer:
+        "TalisU™ “graduates” who use Mapsites™ to visually chart, track, and manage the infrastructure of complex referral and/or co-promotion networks.",
+    },
+    {
+      question: "How can Mapsites™ increase revenues for Talispros™?",
+      answer: [
+        "By setting up virtual monopolies that establish service floors.",
+        "Example: an average service fee may be “X”, and an average term length may be “Y”, locally. How often would those averages be challenged when competing for clients the traditional way?",
+        "Virtual monopolies with clearly defined up-side benefits may well introduce an argument that extra reward and/or extra term are warranted.",
+      ],
+    },
+    {
+      question: "How much to register an account?",
+      answer: [
+        "Registration for Root, FSBO and Adpro Accounts is $998.50 annually to establish the account, and $98.50 monthly to maintain it.",
+        "Registration for Derivative Accounts, which use Root Account Mapsites™, is $198.50 annually to establish the account, and $98.50 monthly to maintain it.",
+        "Additional global marketing pins are $7 per week (a dollar a day, weekly commitment) for Derivative Account Holders.",
+      ],
+    },
+    {
+      question: "When do registration fees become due?",
+      answer: "After approval of your market application.",
+    },
+    {
+      question: "How do I submit a market application?",
+      answer: "Please follow this sequence on Talispros.com:",
+      bullets: [
+        "Select “System Demo”.",
+        "Choose the PIN closest to your home point.",
+        "Select “Next Step” and build a demo eBook.",
+        "Fill out the form: First initials of your first and last name generate half of your FAST Code™ (Free Access, Standard Tracking). The other half is a number between 01 and 99 to make you unique within our system. Your Street Address positions your Home PIN on your sample Mapsite™. The sample Mapsite™ tells us if there are conflicts with other home markets.",
+        "Select “Continue to Demo eBook”.",
+        "Your Mapsite™ builds and a flag opens.",
+        "You can claim your market by registering under URL and open TEB and TTV links.",
+        "MLS® only applies to Licensed Real Estate Professionals registered through Root Account Holders.",
+      ],
+    },
+    {
+      question: "For how long are market approvals valid?",
+      answer: [
+        "Until someone else gets approved and registers. That time period might be hours or days, but it is unlikely to be weeks or months: our automated placement system will prioritize markets where there already has been interest, and your demo obviously triggered that interest condition.",
+      ],
+    },
+    {
+      question: "How much are referral fees for successful sales?",
+      answer:
+        "We are an advertising and marketing business. We do not charge referral fees.",
+    },
+    {
+      question: "How long is the account commitment?",
+      answer:
+        "Simply stop paying service fees to stop services and avoid future obligations.",
+    },
+    {
+      question: "Can I operate out of a home office?",
+      answer:
+        "Yes, provided the car you designate identifies you as Talispro with email address and cell number clearly visible on doors or box and hatch, trunk or tailgate.",
+    },
+    {
+      question: "Do I have to work on the business myself?",
+      answer:
+        "No, providing you work with someone who is legally indistinguishable from you and we have the appropriate paperwork on file (i.e.: a spouse or adult child, etc.).",
+    },
+    {
+      question: "How much money can I expect to make per year?",
+      answer:
+        "We cannot make representations regarding how much business you might do. There are too many factors that differ from person to person and from market to market.",
+    },
+    {
+      question: "Will I receive training before I launch?",
+      answer:
+        "Yes. Our training program is very comprehensive and not limited in time or duration. By the time you are done you will have made your first sale and you are on your way to a better future.",
     },
   ],
-} as const;
+};
 
 export const TALISU_MARKETS_COPY = {
   title: "Markets served",
