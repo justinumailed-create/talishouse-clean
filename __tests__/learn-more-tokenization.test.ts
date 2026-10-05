@@ -6,27 +6,26 @@ import { HOME_OWNERSHIP_SECTIONS } from "../lib/talispros/ownership-models";
 const root = process.cwd();
 
 describe("Tokenization Learn More", () => {
-  it("wires Tokenization popover CTA to /learn-more", () => {
+  it("opens contact-form Learn More for Tokenization like the other three", () => {
     const tokenization = HOME_OWNERSHIP_SECTIONS.find(
       (s) => s.id === "tokenization",
     );
-    expect(tokenization?.learnMoreHref).toBe("/learn-more");
+    expect(tokenization?.learnMoreContact).toBe(true);
     expect(tokenization?.learnMoreLabel).toBe("Learn More");
-    expect(tokenization?.learnMoreContact).toBeUndefined();
+    expect(tokenization?.learnMoreHref).toBeUndefined();
 
     const showcase = readFileSync(
       join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
       "utf8",
     );
-    expect(showcase).toContain("learnMoreHref");
+    expect(showcase).toContain("learnMoreContact");
     expect(showcase).toContain("Learn More");
     expect(showcase).toContain("OwnershipLearnMoreForm");
   });
 
-  it("opens a contact form Learn More for every non-Tokenization ownership button", () => {
-    const others = HOME_OWNERSHIP_SECTIONS.filter((s) => s.id !== "tokenization");
-    expect(others.length).toBeGreaterThan(0);
-    for (const section of others) {
+  it("opens a contact form Learn More for every ownership button", () => {
+    expect(HOME_OWNERSHIP_SECTIONS.length).toBeGreaterThan(0);
+    for (const section of HOME_OWNERSHIP_SECTIONS) {
       expect(section.learnMoreContact).toBe(true);
       expect(section.learnMoreLabel).toBe("Learn More");
       expect(section.learnMoreHref).toBeUndefined();

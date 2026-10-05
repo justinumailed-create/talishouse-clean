@@ -65,8 +65,7 @@ export default function ContactFromLeadsPage() {
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
           Inquiries from homepage ownership Learn More forms (Conventional,
-          SPLITS, Fractionalization). Tokenization keeps the dedicated
-          /learn-more page.
+          SPLITS, Fractionalization, Tokenization).
         </p>
       </div>
 
