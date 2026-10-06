@@ -1,7 +1,5 @@
-import { TALISU_AUDIO } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
-import SectionShell from "@/components/talisu/SectionShell";
-import TalisUAudioLibrary from "@/components/talisu/TalisUAudioLibrary";
+import TalisUTalisTvSoonPlaceholder from "@/components/talisu/TalisUTalisTvSoonPlaceholder";
 
 export const metadata = createTalisUMetadata({
   title: "TalisU™ | Audio",
@@ -10,10 +8,7 @@ export const metadata = createTalisUMetadata({
   path: "/talisu/au",
 });
 
+/** Audio library UI paused — restore by rendering the library component again. */
 export default function TalisUAudioPage() {
-  return (
-    <SectionShell title={TALISU_AUDIO.title} subtitle={TALISU_AUDIO.playHint}>
-      <TalisUAudioLibrary />
-    </SectionShell>
-  );
+  return <TalisUTalisTvSoonPlaceholder />;
 }

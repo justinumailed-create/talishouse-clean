@@ -9,7 +9,7 @@ import {
 } from "../lib/talisu/transcript";
 
 describe("TalisU Audio library", () => {
-  it("autoplays the ~1 minute Aisha welcome clip and lists the rest like KB", () => {
+  it("keeps autoplay / library data and shows the TalisTV soon placeholder on /talisu/au", () => {
     expect(TALISU_AUDIO.autoplaySrc).toBe("/talisu/Aisha.mp3");
     const autoplay = TALISU_AUDIO_LIBRARY.find((i) => i.autoplay);
     expect(autoplay?.src).toBe("/talisu/Aisha.mp3");
@@ -18,7 +18,14 @@ describe("TalisU Audio library", () => {
     );
 
     const page = readFileSync(resolve("app/talisu/au/page.tsx"), "utf8");
-    expect(page).toContain("TalisUAudioLibrary");
+    expect(page).toContain("TalisUTalisTvSoonPlaceholder");
+    expect(page).not.toContain("TalisUAudioLibrary");
+
+    const placeholder = readFileSync(
+      resolve("components/talisu/TalisUTalisTvSoonPlaceholder.tsx"),
+      "utf8",
+    );
+    expect(placeholder).toContain("All Contents will be posted on TalisTV soon!");
 
     const lib = readFileSync(
       resolve("components/talisu/TalisUAudioLibrary.tsx"),

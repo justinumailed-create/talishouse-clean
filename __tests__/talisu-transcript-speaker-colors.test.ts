@@ -43,9 +43,10 @@ describe("TalisU transcript speaker colours", () => {
     );
   });
 
-  it("wires TranscriptLines into /talisu/au via the audio library", () => {
+  it("keeps TranscriptLines wired in the audio library (page shows TalisTV soon placeholder)", () => {
     const page = readFileSync(resolve("app/talisu/au/page.tsx"), "utf8");
-    expect(page).toContain("TalisUAudioLibrary");
+    expect(page).toContain("TalisUTalisTvSoonPlaceholder");
+    expect(page).not.toContain("TalisUAudioLibrary");
 
     const library = readFileSync(
       resolve("components/talisu/TalisUAudioLibrary.tsx"),
