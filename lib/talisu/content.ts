@@ -250,32 +250,25 @@ export const TALISU_REGISTER = {
 export const TALISU_ENGAGE = {
   title: "Engage the Team",
   headline: "Send a Down Payment to engage Webster and his Customization Team",
-  partnerHeading: "Your Product Partner",
+  partnerHeading: "Your Customization Partner",
   partnerName: "Webster M. — Team Leader",
-  partnerImage: "/talisu/webster-team-leader.jpg",
+  partnerImage: "/talisu/webster-team-leader-v2.jpg",
   partnerImageAlt: "Webster M.",
-  partnerIntro:
-    "I am your Product Partner... My team and I help you grow and diversify horizontally by offering space along with your property or business, across four broad product lines:",
-  bullets: [
-    {
-      label: "GH",
-      text: "an abbreviation for Glasshouse, GH are 8x20 or 10x20 spaces with one, two or three sides glass, finished inside but not furnished. Kitchen and Bathroom facilities are options.",
-    },
-    {
-      label: "TH",
-      text: "an abbreviation for Talishouse, TH are 20x20 or 20x40 folding structures with two or three bedrooms and one or two bathrooms. Kitchen, dining and living rooms are open concept, or further divided to facilitate offices or business space. TH are optionally mobile, thus negating the need for Building Permits in many North American jurisdictions.",
-    },
-    {
-      label: "TT",
-      text: "an abbreviation for Talistown, TT are many TH on one property, or serving the same purpose under SPLITS or Fractionalized ownership. TT can be scaled to make a million dollars per year.",
-    },
-    {
-      label: "TD",
-      text: "an abbreviation for Talisdome, TD are the quintessential guest house, in-law suite, home office or even short term rental. Their impermanent nature negates the need for Building Permits in many North American jurisdictions.",
-    },
+  paragraphs: [
+    'Modular container or dome structures unlock "hyper-mobility" with structural reliability, allowing traffic-reliant businesses to deploy physical locations exactly where they find their customers.',
+    "Built from standardized, durable “Corten” steel (corrosion resistant with high tensile strength) or fibreglass, prefabricated modules can be operationalized quickly.",
+    "When installed on mobile platforms, they may negate the need for Building Permits in many North American jurisdictions.",
   ],
-  closing:
-    "Send us any amount up to a maximum of $10,000 as a down payment, and to start the customization process for your object or project.",
+  helpHeading: "How we help:",
+  helpItems: [
+    "Select a design and send a $2,000 Down Payment.",
+    "It is applied in full to your order - and…",
+    "Establishes your spot in the production and shipping queues.",
+    "It also reserves time with our customization department to precisely realize your vision.",
+  ],
+  protectionHeading: "Down Payment Protection:",
+  protectionText:
+    "Your downpayment is protected for up to 12 months (or more by special arrangement on a case by case basis).",
   samcartUrl: "https://talispros.mysamcart.com/checkout/custom",
 } as const;
 

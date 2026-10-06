@@ -23,7 +23,7 @@ export const CATALOGUE_DESIGN_IDEAS_PAGE_TITLE = "Design suggestions";
 
 export const CATALOGUE_PATH = "/catalogue";
 
-/** Product registration page (Webster — Product Partner). */
+/** Product registration page (Webster — Customization Partner). */
 export const CATALOGUE_PRODUCT_REGISTER_PATH = "/talisu/engage";
 
 /** Query param carrying the product code to the Register (Product) page. */

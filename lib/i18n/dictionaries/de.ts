@@ -2,7 +2,7 @@
  * Deutsches UI-Wörterbuch — von Hand übersetzt (Sie-Form).
  * Marken bleiben unverändert: Talispros™, Talishouse™, Mapsites™/Mapsite,
  * Talisbooks™, TalisTV™, TalisU / Talis“U”, TalisBOT, FAST Codes™, TEB™, TTV™,
- * PIN, SamCart. Akronyme (URL, MLS, TEB, TVA, TTV, GH/TH/TT/TD) bleiben,
+ * PIN, SamCart. Akronyme (URL, MLS, TEB, TVA, TTV) bleiben,
  * nur ihre Erklärungen werden übersetzt.
  */
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -291,30 +291,23 @@ export const de: Dictionary = {
       title: "Das Team beauftragen",
       headline:
         "Leisten Sie eine Anzahlung, um Webster und sein Anpassungsteam zu beauftragen",
-      partnerHeading: "Ihr Produktpartner",
+      partnerHeading: "Ihr Anpassungspartner",
       partnerName: "Webster M. – Teamleiter",
-      partnerIntro:
-        "Ich bin Ihr Produktpartner … Mein Team und ich helfen Ihnen, horizontal zu wachsen und sich breiter aufzustellen, indem Sie zusätzlich zu Ihrer Immobilie oder Ihrem Unternehmen Raum anbieten – in vier großen Produktlinien:",
-      bullets: [
-        {
-          label: "GH",
-          text: "Abkürzung für Glasshouse: GH sind Räume im Format 8x20 oder 10x20 mit einer, zwei oder drei Glasseiten, innen ausgebaut, aber nicht möbliert. Küche und Bad sind optional erhältlich.",
-        },
-        {
-          label: "TH",
-          text: "Abkürzung für Talishouse: TH sind faltbare Bauten im Format 20x20 oder 20x40 mit zwei oder drei Schlafzimmern und einem oder zwei Bädern. Küche, Ess- und Wohnbereich sind offen gestaltet oder weiter unterteilt, um Büro- oder Geschäftsräume zu schaffen. TH sind optional mobil, wodurch in vielen nordamerikanischen Rechtsordnungen keine Baugenehmigung erforderlich ist.",
-        },
-        {
-          label: "TT",
-          text: "Abkürzung für Talistown: TT sind viele TH auf einem Grundstück oder TH, die im Rahmen von SPLITS oder fraktionalisiertem Eigentum demselben Zweck dienen. TT lassen sich so skalieren, dass sie eine Million Dollar pro Jahr erwirtschaften.",
-        },
-        {
-          label: "TD",
-          text: "Abkürzung für Talisdome: TD sind der Inbegriff von Gästehaus, Einliegerwohnung, Homeoffice oder sogar Kurzzeitvermietung. Da sie nicht dauerhaft errichtet werden, ist in vielen nordamerikanischen Rechtsordnungen keine Baugenehmigung erforderlich.",
-        },
+      paragraphs: [
+        "Modulare Container- oder Kuppelbauten erschließen „Hypermobilität“ bei struktureller Zuverlässigkeit und ermöglichen Unternehmen, die auf Kundenfrequenz angewiesen sind, physische Standorte genau dort einzusetzen, wo sie ihre Kunden finden.",
+        "Vorgefertigte Module aus standardisiertem, langlebigem „Corten“-Stahl (korrosionsbeständig und mit hoher Zugfestigkeit) oder aus Fiberglas lassen sich schnell in Betrieb nehmen.",
+        "Werden sie auf mobilen Plattformen installiert, kann in vielen nordamerikanischen Rechtsordnungen eine Baugenehmigung entfallen.",
       ],
-      closing:
-        "Senden Sie uns einen beliebigen Betrag bis maximal 10.000 $ als Anzahlung, um den Anpassungsprozess für Ihr Objekt oder Projekt zu starten.",
+      helpHeading: "So helfen wir Ihnen:",
+      helpItems: [
+        "Wählen Sie ein Design und leisten Sie eine Anzahlung von 2.000 $.",
+        "Sie wird vollständig auf Ihre Bestellung angerechnet – und …",
+        "Sie sichert Ihnen Ihren Platz in den Warteschlangen für Produktion und Versand.",
+        "Außerdem reserviert sie Zeit bei unserer Anpassungsabteilung, um Ihre Vision präzise zu verwirklichen.",
+      ],
+      protectionHeading: "Schutz der Anzahlung:",
+      protectionText:
+        "Ihre Anzahlung ist bis zu 12 Monate geschützt (oder länger nach besonderer Vereinbarung von Fall zu Fall).",
     },
     engageCustomizing: "Anpassung:",
     engageCataloguePage: "Talishouse™ Produktkatalog, Seite {page}",
