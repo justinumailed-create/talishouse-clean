@@ -1,32 +1,59 @@
 "use client";
 
 import Link from "next/link";
+import type { Ref } from "react";
 import type { TalisUMktsPin } from "@/lib/talisu/markets-pins";
-import { MAPSITE_PIN_TIP_CLEARANCE_PX } from "@/lib/talispros/mapsite-overlay-layout";
+import type { MktsPinCardPlacementMode } from "@/lib/talisu/mkts-pin-card-layout";
 import { useT } from "@/lib/i18n/client";
 
 type Props = {
   pin: TalisUMktsPin;
   onClose: () => void;
+  /** Horizontal centre of the card relative to the map root (px). */
+  left: number;
+  /** Top of the card wrapper relative to the map root (px). */
+  top: number;
+  /** Tip points down at the pin (`above`) or up at the pin (`below`). */
+  placement: MktsPinCardPlacementMode;
+  /** Optional ref on the card body for height measurement. */
+  cardBodyRef?: Ref<HTMLDivElement>;
 };
 
 /**
  * Atlist-style pin modal: hero image, title, claim copy, Next Step… → Demo.
+ * Positioned by the parent against the selected pin's screen coordinates.
  */
-export default function TalisUMarketsPinCard({ pin, onClose }: Props) {
+export default function TalisUMarketsPinCard({
+  pin,
+  onClose,
+  left,
+  top,
+  placement,
+  cardBodyRef,
+}: Props) {
   const t = useT();
+  const tipDown = placement === "above";
+
   return (
     <div
       role="dialog"
       aria-label={pin.label}
       data-testid="talisu-mkts-pin-card"
-      className="pointer-events-none absolute left-1/2 z-30 w-[min(92vw,20rem)] -translate-x-1/2"
-      style={{
-        top: "auto",
-        bottom: `calc(50% + ${MAPSITE_PIN_TIP_CLEARANCE_PX}px)`,
-      }}
+      data-placement={placement}
+      className="pointer-events-none absolute z-30 w-[min(92vw,20rem)] -translate-x-1/2"
+      style={{ left, top }}
     >
-      <div className="pointer-events-auto flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5">
+      {!tipDown ? (
+        <div
+          className="pointer-events-none mx-auto -mb-px h-0 w-0 border-b-[12px] border-l-[11px] border-r-[11px] border-b-white border-l-transparent border-r-transparent drop-shadow-[0_-1px_1px_rgba(0,0,0,0.08)]"
+          aria-hidden
+        />
+      ) : null}
+
+      <div
+        ref={cardBodyRef}
+        className="pointer-events-auto flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5"
+      >
         {pin.heroImageUrl ? (
           <div className="relative h-36 w-full shrink-0 bg-neutral-200">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -73,10 +100,12 @@ export default function TalisUMarketsPinCard({ pin, onClose }: Props) {
         </div>
       </div>
 
-      <div
-        className="pointer-events-none mx-auto -mt-px h-0 w-0 border-l-[11px] border-r-[11px] border-t-[12px] border-l-transparent border-r-transparent border-t-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.12)]"
-        aria-hidden
-      />
+      {tipDown ? (
+        <div
+          className="pointer-events-none mx-auto -mt-px h-0 w-0 border-l-[11px] border-r-[11px] border-t-[12px] border-l-transparent border-r-transparent border-t-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.12)]"
+          aria-hidden
+        />
+      ) : null}
     </div>
   );
 }
