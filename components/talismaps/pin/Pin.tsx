@@ -204,6 +204,11 @@ export default function Pin({
               height: pinLogoSizePx(size),
               top: `${pinLogoInsetPercent()}%`,
               left: `${pinLogoInsetPercent()}%`,
+              objectFit: "contain",
+              objectPosition: "center",
+              overflow: "visible",
+              borderRadius: 0,
+              padding: 0,
             }}
           />
         ) : null}

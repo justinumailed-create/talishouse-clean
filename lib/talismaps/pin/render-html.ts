@@ -184,7 +184,7 @@ export function renderPinMarkerHtml(
   const logoPx = pinLogoSizePx(size);
   const logoInset = pinLogoInsetPercent();
   const logoHtml = visual.customLogoUrl
-    ? `<img class="talismaps-pin-logo" src="${escapePinHtml(visual.customLogoUrl)}" alt="" width="${logoPx}" height="${logoPx}" style="width:${logoPx}px;height:${logoPx}px;top:${logoInset}%;left:${logoInset}%" />`
+    ? `<img class="talismaps-pin-logo" src="${escapePinHtml(visual.customLogoUrl)}" alt="" width="${logoPx}" height="${logoPx}" style="width:${logoPx}px;height:${logoPx}px;top:${logoInset}%;left:${logoInset}%;object-fit:contain;object-position:center;overflow:visible;border-radius:0;padding:0" />`
     : "";
 
   const markerWidth = Math.max(size, PIN_LABEL_MAX_WIDTH);

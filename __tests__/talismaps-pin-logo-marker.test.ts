@@ -27,7 +27,7 @@ describe("Talismaps™ logo marker padding + border", () => {
     const visual = resolvePinVisual({
       pinSize: 58,
       whiteCenter: true,
-      customLogoUrl: "/talisu/mkts/atlist-talisu-tree-pin.png",
+      customLogoUrl: "/talisu/mkts/talispros-tree-pin-logo.png",
       pinBorderColor: "#000000",
       pinColor: "#FFFFFF",
     });
@@ -41,7 +41,7 @@ describe("Talismaps™ logo marker padding + border", () => {
     const visual = resolvePinVisual({
       pinSize: 58,
       whiteCenter: true,
-      customLogoUrl: "/talisu/mkts/atlist-talisu-tree-pin.png",
+      customLogoUrl: "/talisu/mkts/talispros-tree-pin-logo.png",
       pinBorderColor: "#000000",
       pinColor: "#FFFFFF",
     });
@@ -50,11 +50,13 @@ describe("Talismaps™ logo marker padding + border", () => {
     const { html, iconAnchor, iconSize } = renderPinMarkerHtml({
       pinSize: 58,
       whiteCenter: true,
-      customLogoUrl: "/talisu/mkts/atlist-talisu-tree-pin.png",
+      customLogoUrl: "/talisu/mkts/talispros-tree-pin-logo.png",
       pinBorderColor: "#000000",
       pinColor: "#FFFFFF",
     });
     expect(html).toContain("top:25%");
+    expect(html).toContain("object-fit:contain");
+    expect(html).not.toContain("object-fit:cover");
     expect(html).toContain("left:25%");
     expect(html).toContain("width:29px");
     expect(html).toContain("height:29px");
@@ -75,5 +77,21 @@ describe("Talismaps™ logo marker padding + border", () => {
     expect(pinLogoSizePx(withLogo.bodySize)).toBe(pinLogoSizePx(Math.round(66 * 1.28)));
     // Absolute logo size ≈ legacy 0.64 * 66
     expect(pinLogoSizePx(withLogo.bodySize)).toBe(Math.round(66 * 0.64));
+  });
+});
+
+describe("Talismaps™ logo marker CSS", () => {
+  it("uses object-fit contain with no circular crop on the logo img", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
+    const css = readFileSync(resolve("app/globals.css"), "utf8");
+    const block = css.slice(
+      css.indexOf(".talismaps-pin-logo"),
+      css.indexOf(".talismaps-pin-label"),
+    );
+    expect(block).toContain("object-fit: contain");
+    expect(block).not.toContain("object-fit: cover");
+    expect(block).toContain("overflow: visible");
+    expect(block).toMatch(/border-radius:\s*0/);
   });
 });

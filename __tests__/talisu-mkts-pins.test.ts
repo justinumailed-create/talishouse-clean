@@ -50,7 +50,7 @@ describe("TalisU mkts Atlist pin export", () => {
 
   it("uses authentic Atlist circular Canada-flag and tree pin assets", () => {
     expect(TALISU_MKTS_FLAG_CA).toBe("/talisu/mkts/atlist-canada-flag-pin.png");
-    expect(TALISU_MKTS_TREE_LOGO).toBe("/talisu/mkts/atlist-talisu-tree-pin.png");
+    expect(TALISU_MKTS_TREE_LOGO).toBe("/talisu/mkts/talispros-tree-pin-logo.png");
   });
 
   it("defaults to a full-Canada viewport and fitBounds padding for the sidebar", () => {

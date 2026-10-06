@@ -12,13 +12,14 @@ export const TALISU_MKTS_ATLIST_MAP_ID =
 /** Authentic circular Canada-flag pin from live Atlist category markerCustomIcon. */
 export const TALISU_MKTS_FLAG_CA = "/talisu/mkts/atlist-canada-flag-pin.png";
 
-/** Authentic TalisU tree logo from live Atlist "Do More..." category markerCustomIcon. */
-export const TALISU_MKTS_TREE_LOGO = "/talisu/mkts/atlist-talisu-tree-pin.png";
+/** Full Talispros windswept-tree mark for Do More pins (Atlist tree art, outer ring removed, padded). */
+export const TALISU_MKTS_TREE_LOGO = "/talisu/mkts/talispros-tree-pin-logo.png";
 
 /**
  * Source URLs (captured 2026-09-29 from Atlist AppSync categories):
  * Canada → s3://markerimages143639-prod/.../d43c09d0-5443-43c3-b0ae-a6a6ea813c18.png
- * Do More → cloudfront .../9cdfadf4-c1de-42c5-9f91-656e8e736bb7.png
+ * Do More (legacy Atlist) → cloudfront .../9cdfadf4-c1de-42c5-9f91-656e8e736bb7.png
+ * Do More (map marker) → /talisu/mkts/talispros-tree-pin-logo.png (full tree, padded)
  */
 
 /** Hero image shared by Canada market pin cards (red pin on paper map). */
