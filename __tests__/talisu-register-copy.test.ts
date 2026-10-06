@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { de } from "../lib/i18n/dictionaries/de";
 import { TALISU_ENGAGE, TALISU_REGISTER } from "../lib/talisu/content";
 
 describe("TalisU Register copy", () => {
@@ -40,23 +41,88 @@ describe("TalisU Register → Product (Webster) copy", () => {
     );
   });
 
-  it("opens Webster's intro like the Mapsite partner card", () => {
-    expect(TALISU_ENGAGE.partnerHeading).toBe("Your Product Partner");
+  it("introduces Webster as the customization partner", () => {
+    expect(TALISU_ENGAGE.partnerHeading).toBe("Your Customization Partner");
     expect(TALISU_ENGAGE.partnerName).toBe("Webster M. — Team Leader");
-    expect(TALISU_ENGAGE.partnerIntro.startsWith("I am your Product Partner...")).toBe(
-      true,
-    );
-    expect(TALISU_ENGAGE.partnerIntro).toContain("diversify horizontally");
+    expect(TALISU_ENGAGE.partnerImage).toBe("/talisu/webster-team-leader-v2.jpg");
+    expect(TALISU_ENGAGE.paragraphs).toEqual([
+      'Modular container or dome structures unlock "hyper-mobility" with structural reliability, allowing traffic-reliant businesses to deploy physical locations exactly where they find their customers.',
+      "Built from standardized, durable “Corten” steel (corrosion resistant with high tensile strength) or fibreglass, prefabricated modules can be operationalized quickly.",
+      "When installed on mobile platforms, they may negate the need for Building Permits in many North American jurisdictions.",
+    ]);
   });
 
-  it("keeps GH / TH / TT / TD and the $10,000 down-payment closing", () => {
-    expect(TALISU_ENGAGE.bullets.map((b) => b.label)).toEqual([
-      "GH",
-      "TH",
-      "TT",
-      "TD",
+  it("lists the $2,000 down payment and 12-month protection", () => {
+    expect(TALISU_ENGAGE.helpHeading).toBe("How we help:");
+    expect(TALISU_ENGAGE.helpItems).toEqual([
+      "Select a design and send a $2,000 Down Payment.",
+      "It is applied in full to your order - and…",
+      "Establishes your spot in the production and shipping queues.",
+      "It also reserves time with our customization department to precisely realize your vision.",
     ]);
-    expect(TALISU_ENGAGE.closing).toContain("$10,000");
+    expect(TALISU_ENGAGE.protectionHeading).toBe("Down Payment Protection:");
+    expect(TALISU_ENGAGE.protectionText).toBe(
+      "Your downpayment is protected for up to 12 months (or more by special arrangement on a case by case basis).",
+    );
+  });
+
+  it("drops the product-line definitions and the $10,000 closing from the card", () => {
+    expect(TALISU_ENGAGE).not.toHaveProperty("partnerIntro");
+    expect(TALISU_ENGAGE).not.toHaveProperty("bullets");
+    expect(TALISU_ENGAGE).not.toHaveProperty("closing");
+    const card = [
+      TALISU_ENGAGE.partnerHeading,
+      TALISU_ENGAGE.partnerName,
+      ...TALISU_ENGAGE.paragraphs,
+      TALISU_ENGAGE.helpHeading,
+      ...TALISU_ENGAGE.helpItems,
+      TALISU_ENGAGE.protectionHeading,
+      TALISU_ENGAGE.protectionText,
+    ].join("\n");
+    expect(card).not.toContain("Your Product Partner");
+    expect(card).not.toContain("I am your Product Partner");
+    expect(card).not.toContain("$10,000");
+    expect(card).not.toMatch(/\bGH\b|\bTH\b|\bTT\b|\bTD\b/);
+  });
+
+  it("renders the new card on the engage page and leaves checkout chrome", () => {
+    const page = readFileSync(resolve("app/talisu/engage/page.tsx"), "utf8");
+    expect(page).toContain("TALISU_ENGAGE.paragraphs");
+    expect(page).toContain("TALISU_ENGAGE.helpItems");
+    expect(page).toContain("TALISU_ENGAGE.protectionHeading");
+    expect(page).toContain("TALISU_ENGAGE.protectionText");
+    expect(page).toContain("list-disc");
+    expect(page).toContain("TALISU_ENGAGE.headline");
+    expect(page).toContain("t.engageCustomizing");
+    expect(page).toContain("SamCartEmbed");
+    expect(page).not.toContain("partnerIntro");
+    expect(page).not.toContain("TALISU_ENGAGE.closing");
+    expect(page).not.toContain("b.label");
+    expect(page).toContain("TALISU_ENGAGE.partnerImage");
+  });
+
+  it("translates the customization partner card into German (Sie)", () => {
+    const engage = de.talisu.engage;
+    expect(engage.partnerHeading).toBe("Ihr Anpassungspartner");
+    expect(engage.partnerName).toBe("Webster M. – Teamleiter");
+    expect(engage.partnerImage).toBe(TALISU_ENGAGE.partnerImage);
+    expect(engage.paragraphs).toHaveLength(3);
+    expect(engage.paragraphs[0]).toContain("„Hypermobilität“");
+    expect(engage.paragraphs[1]).toContain("„Corten“-Stahl");
+    expect(engage.helpHeading).toBe("So helfen wir Ihnen:");
+    expect(engage.helpItems).toEqual([
+      "Wählen Sie ein Design und leisten Sie eine Anzahlung von 2.000 $.",
+      "Sie wird vollständig auf Ihre Bestellung angerechnet – und …",
+      "Sie sichert Ihnen Ihren Platz in den Warteschlangen für Produktion und Versand.",
+      "Außerdem reserviert sie Zeit bei unserer Anpassungsabteilung, um Ihre Vision präzise zu verwirklichen.",
+    ]);
+    expect(engage.protectionHeading).toBe("Schutz der Anzahlung:");
+    expect(engage.protectionText).toBe(
+      "Ihre Anzahlung ist bis zu 12 Monate geschützt (oder länger nach besonderer Vereinbarung von Fall zu Fall).",
+    );
+    expect(engage).not.toHaveProperty("partnerIntro");
+    expect(engage).not.toHaveProperty("bullets");
+    expect(engage).not.toHaveProperty("closing");
   });
 });
 

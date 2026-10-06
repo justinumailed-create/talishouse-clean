@@ -55,8 +55,8 @@ export default async function TalisUEngagePage({
             <Image
               src={TALISU_ENGAGE.partnerImage}
               alt={TALISU_ENGAGE.partnerImageAlt}
-              width={1024}
-              height={1024}
+              width={800}
+              height={800}
               className="h-auto w-full max-w-[220px] rounded-xl object-cover shadow-sm"
               sizes="220px"
               priority
@@ -68,19 +68,24 @@ export default async function TalisUEngagePage({
           <p className="mt-3 text-sm font-medium text-neutral-950">
             {TALISU_ENGAGE.partnerName}
           </p>
-          <p className="mt-3 text-sm text-neutral-700">
-            {TALISU_ENGAGE.partnerIntro}
-          </p>
-          <ul className="mt-4 space-y-3 text-sm text-neutral-600">
-            {TALISU_ENGAGE.bullets.map((b) => (
-              <li key={b.label}>
-                <span className="font-semibold text-neutral-900">{b.label}:</span>{" "}
-                {b.text}
-              </li>
+          <div className="mt-3 space-y-3 text-sm text-neutral-700">
+            {TALISU_ENGAGE.paragraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+          <h3 className="mt-4 text-sm font-semibold text-neutral-900">
+            {TALISU_ENGAGE.helpHeading}
+          </h3>
+          <ul className="mt-2 list-disc space-y-2 pl-5 text-sm text-neutral-600">
+            {TALISU_ENGAGE.helpItems.map((item) => (
+              <li key={item}>{item}</li>
             ))}
           </ul>
-          <p className="mt-4 text-sm font-medium text-[#0069CF]">
-            {TALISU_ENGAGE.closing}
+          <h3 className="mt-4 text-sm font-semibold text-neutral-900">
+            {TALISU_ENGAGE.protectionHeading}
+          </h3>
+          <p className="mt-2 text-sm text-neutral-700">
+            {TALISU_ENGAGE.protectionText}
           </p>
         </div>
 
