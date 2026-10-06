@@ -290,9 +290,9 @@
   justify-content: center;
   padding: 4% 4.6% 3.4%;
   border-left: 1px solid rgba(4, 107, 217, 0.16);
-  font-size: 12px;
-  font-size: clamp(8px, 1.72cqh, 13.25px);
-  line-height: 1.26;
+  font-size: 13px;
+  font-size: clamp(9px, 2.12cqh, 15px);
+  line-height: 1.28;
   letter-spacing: -0.012em;
 }
 
