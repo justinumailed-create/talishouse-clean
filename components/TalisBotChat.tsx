@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
@@ -60,13 +61,12 @@ export default function TalisBotChat({
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-8">TalisBOT</h3>
             <div className="flex w-full flex-col gap-2">
-              <button
-                type="button"
-                onClick={() => setStep("knowledge")}
+              <Link
+                href="/talisu#faq"
                 className="w-full bg-black text-white py-4 rounded-2xl text-sm font-semibold hover:bg-gray-800 transition shadow-lg shadow-black/5"
               >
-                Talispros FAQ
-              </button>
+                FAQ
+              </Link>
               <button
                 type="button"
                 onClick={openContactForm}

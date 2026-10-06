@@ -25,7 +25,9 @@ describe("TalisBOT Talispros™ knowledge", () => {
     expect(bot).toContain("TALISBOT_KNOWLEDGE");
     expect(bot).not.toMatch(/Talishouse \(Recreational\)/);
     expect(bot).not.toMatch(/Talishouse \(Residential\)/);
-    expect(bot).toContain("Talispros FAQ");
+    expect(bot).toMatch(/\n\s*FAQ\n/);
+    expect(bot).toContain('href="/talisu#faq"');
+    expect(bot).not.toContain("Talispros FAQ");
     expect(bot).toContain("Talispros™ processes");
     expect(bot).toContain("TALISU_MKTS_HEADER_BLUE");
     expect(bot).toContain("OwnershipLearnMoreForm");
