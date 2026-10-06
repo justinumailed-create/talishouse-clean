@@ -11,6 +11,9 @@ import {
  * Talishouse™ Product Catalogue pages for /catalogue: opens on Design Ideas
  * (source page 20); earlier source pages are trimmed in data, and each
  * design block carries its P-code hotspot → /talisu/engage?product=Pxx.
+ *
+ * The page image list comes from the bundled flipbook manifest, not a
+ * request-time read of `public/product-flipbook`.
  */
 export function loadCataloguePages(directory?: string): ProductFlipbookPage[] {
   return loadProductFlipbookPages(directory, {

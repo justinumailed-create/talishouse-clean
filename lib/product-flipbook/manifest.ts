@@ -12,10 +12,25 @@ export const PRODUCT_FLIPBOOK_SOURCE_PDF = "T-All Final.pdf";
  *   public/product-flipbook/page-01.webp
  *   public/product-flipbook/page-02.webp
  *   …
- * webp, jpg, and png are picked up in natural filename order.
  * One image is one top-bound page — do not split them into centerfold leaves.
  */
 export const PRODUCT_FLIPBOOK_PAGE_COUNT = 38;
+
+/**
+ * Filenames bundled into the server module. `/catalogue` renders on each
+ * request (the root layout reads the locale cookie), and Vercel serves
+ * `public/` from the CDN — that folder is not on the serverless filesystem.
+ * Reading it with `fs.readdir` at request time throws and used to yield an
+ * empty book ("Page 1 of 0").
+ *
+ * These names are the runtime page list. The image bytes stay in
+ * `public/product-flipbook/` and are deployed as static files. A directory
+ * read (tests, or an explicit override) still accepts webp, jpg, and png.
+ */
+export const PRODUCT_FLIPBOOK_PAGE_FILES: readonly string[] = Array.from(
+  { length: PRODUCT_FLIPBOOK_PAGE_COUNT },
+  (_, index) => `page-${String(index + 1).padStart(2, "0")}.webp`,
+);
 
 /** Clickable product block on a page (percent of the page image). */
 export interface ProductFlipbookHotspot {
@@ -52,7 +67,7 @@ export function productFlipbookPublicSrc(fileName: string): string {
 }
 
 /** Keep page images only, in natural order (page-2 before page-10). */
-export function selectProductFlipbookFiles(fileNames: string[]): string[] {
+export function selectProductFlipbookFiles(fileNames: readonly string[]): string[] {
   return fileNames
     .filter((name) => {
       const base = name.split("/").pop() || name;
@@ -64,7 +79,7 @@ export function selectProductFlipbookFiles(fileNames: string[]): string[] {
 }
 
 export function pagesFromFlipbookFiles(
-  fileNames: string[],
+  fileNames: readonly string[],
   options: ProductFlipbookPageOptions = {},
 ): ProductFlipbookPage[] {
   const startPage = Math.max(1, Math.floor(options.startPage ?? 1));

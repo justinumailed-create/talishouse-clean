@@ -1,29 +1,40 @@
 import fs from "node:fs";
-import path from "node:path";
 import {
-  PRODUCT_FLIPBOOK_ASSET_DIR,
+  PRODUCT_FLIPBOOK_PAGE_FILES,
   pagesFromFlipbookFiles,
   type ProductFlipbookPage,
   type ProductFlipbookPageOptions,
 } from "@/lib/product-flipbook/manifest";
 
 /**
- * Reads `public/product-flipbook/` at request/build time.
- * Returns [] when the directory only has the placeholder marker — the viewer
- * then shows top-bound placeholder sheets and the asset TODO.
+ * Page list for the top-bound catalogue.
  *
- * `options.startPage` trims every source page before it (e.g. the Catalogue
- * opens on Design Ideas, source page 20).
+ * With no `directory`, this uses the bundled `PRODUCT_FLIPBOOK_PAGE_FILES`
+ * manifest. Do not discover those files with `fs.readdir` of
+ * `public/product-flipbook` at request time: on Vercel that directory is not
+ * inside the serverless function, the read throws, and the viewer renders
+ * "Page 1 of 0".
+ *
+ * Pass `directory` to read a specific folder (tests). A missing directory
+ * returns [] so a bad override stays an empty book instead of throwing.
+ *
+ * `options.startPage` trims every source page before it (the Catalogue opens
+ * on Design Ideas, source page 20).
  */
 export function loadProductFlipbookPages(
-  directory = path.join(process.cwd(), PRODUCT_FLIPBOOK_ASSET_DIR),
+  directory?: string,
   options: ProductFlipbookPageOptions = {},
 ): ProductFlipbookPage[] {
-  let fileNames: string[] = [];
+  const fileNames = directory
+    ? readFlipbookDirectory(directory)
+    : PRODUCT_FLIPBOOK_PAGE_FILES;
+  return pagesFromFlipbookFiles(fileNames, options);
+}
+
+function readFlipbookDirectory(directory: string): string[] {
   try {
-    fileNames = fs.readdirSync(directory);
+    return fs.readdirSync(directory);
   } catch {
     return [];
   }
-  return pagesFromFlipbookFiles(fileNames, options);
 }

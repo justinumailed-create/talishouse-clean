@@ -14,7 +14,9 @@ import {
 import { loadProductFlipbookPages } from "../lib/product-flipbook/load-pages";
 import {
   pagesFromFlipbookFiles,
+  PRODUCT_FLIPBOOK_ASSET_DIR,
   PRODUCT_FLIPBOOK_PAGE_COUNT,
+  PRODUCT_FLIPBOOK_PAGE_FILES,
   selectProductFlipbookFiles,
 } from "../lib/product-flipbook/manifest";
 import { isProductCataloguePath } from "../lib/product-flipbook/paths";
@@ -100,6 +102,11 @@ describe("T-All page manifest", () => {
       }),
     );
     expect(pages.every((page) => page.src)).toBe(true);
+    const onDisk = selectProductFlipbookFiles(
+      fs.readdirSync(path.join(process.cwd(), PRODUCT_FLIPBOOK_ASSET_DIR)),
+    );
+    expect([...PRODUCT_FLIPBOOK_PAGE_FILES]).toEqual(onDisk);
+    expect(pages.map((page) => page.id)).toEqual(onDisk);
   });
 });
 
