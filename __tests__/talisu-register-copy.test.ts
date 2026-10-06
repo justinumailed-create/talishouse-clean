@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { TALISU_REGISTER } from "../lib/talisu/content";
+import { TALISU_ENGAGE, TALISU_REGISTER } from "../lib/talisu/content";
 
 describe("TalisU Register copy", () => {
   const bullets = TALISU_REGISTER.bullets;
@@ -30,6 +30,27 @@ describe("TalisU Register copy", () => {
     );
     expect(TALISU_REGISTER).not.toHaveProperty("purchaseUrl");
     expect(TALISU_REGISTER).not.toHaveProperty("catalogue");
+  });
+});
+
+describe("TalisU Register → Product (Webster) copy", () => {
+  it("opens Webster's intro like the Mapsite partner card", () => {
+    expect(TALISU_ENGAGE.partnerHeading).toBe("Your Product Partner");
+    expect(TALISU_ENGAGE.partnerName).toBe("Webster M. — Team Leader");
+    expect(TALISU_ENGAGE.partnerIntro.startsWith("I am your Product Partner...")).toBe(
+      true,
+    );
+    expect(TALISU_ENGAGE.partnerIntro).toContain("diversify horizontally");
+  });
+
+  it("keeps GH / TH / TT / TD and the $10,000 down-payment closing", () => {
+    expect(TALISU_ENGAGE.bullets.map((b) => b.label)).toEqual([
+      "GH",
+      "TH",
+      "TT",
+      "TD",
+    ]);
+    expect(TALISU_ENGAGE.closing).toContain("$10,000");
   });
 });
 

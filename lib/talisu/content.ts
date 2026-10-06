@@ -255,7 +255,7 @@ export const TALISU_ENGAGE = {
   partnerImage: "/talisu/webster-team-leader.jpg",
   partnerImageAlt: "Webster M.",
   partnerIntro:
-    "My team and I help grow you diversify horizontally by offering space along with property of businesses:",
+    "I am your Product Partner... My team and I help you grow and diversify horizontally by offering space along with your property or business, across four broad product lines:",
   bullets: [
     {
       label: "GH",
