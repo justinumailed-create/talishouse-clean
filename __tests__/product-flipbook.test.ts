@@ -138,16 +138,33 @@ describe("product catalogue route", () => {
     expect(viewer).not.toContain("showSample");
     expect(viewer).not.toContain("Sample");
     expect(viewer).toContain("product-flipbook__header-tools");
-    expect(viewer).toContain("product-flipbook__admin-link");
-    expect(viewer).toContain("TalisprosMarketsDropdown");
+    expect(viewer).not.toContain("product-flipbook__admin-link");
+    expect(viewer).not.toContain("TalisprosMarketsDropdown");
+    expect(viewer).not.toContain("Global Admin");
     expect(viewer).toContain("Bookshelf");
     expect(viewer).toContain("CATALOGUE_BOOKSHELF");
+    expect(viewer).toContain("ROUTES.HOME");
     expect(viewer).not.toContain('href={ROUTES.TALISBOOKS}');
     expect(viewer).not.toContain('"/talisbooks"');
     expect(viewer).toContain('data-testid="catalogue-bookshelf-button"');
     expect(viewer).not.toContain("MAPSITE_APP_PATH");
     expect(catalogue).not.toContain("isAdminAuthenticated");
     expect(catalogue).not.toContain("showSample");
+
+    const gate = readSource("components/talispros/TalisprosGatePage.tsx");
+    const corner = readSource("components/talispros/TalisprosHomeCornerLinks.tsx");
+    const marketsDropdown = readSource(
+      "components/talispros/TalisprosMarketsDropdown.tsx",
+    );
+    expect(gate).toContain("TalisprosHomeCornerLinks");
+    expect(corner).toContain("Global Admin");
+    expect(corner).toContain("ROUTES.ADMIN_DASHBOARD");
+    expect(corner).toContain("TalisprosMarketsDropdown");
+    expect(corner).toContain('menuDirection="up"');
+    expect(corner).toContain('data-testid="home-corner-links"');
+    // Same always-on visibility as the former flipbook header (no admin gate).
+    expect(corner).not.toContain("isAdminAuthenticated");
+    expect(marketsDropdown).toContain('menuDirection?: "down" | "up"');
   });
 
   it("animates a top-edge rotateX and not a center fold", () => {

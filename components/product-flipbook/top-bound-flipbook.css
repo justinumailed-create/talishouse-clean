@@ -70,37 +70,10 @@
   margin-left: auto;
 }
 
-.product-flipbook__admin-link {
-  color: #78716c;
-  font-size: 0.68rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  padding: 0.05rem 0.1rem;
-  text-decoration: none;
-}
-
-.product-flipbook__admin-link:hover {
-  color: #44403c;
-  text-decoration: underline;
-}
-
 .product-flipbook__actions {
   display: grid;
-  grid-template-columns: repeat(3, minmax(5.5rem, 1fr));
+  grid-template-columns: repeat(2, minmax(5.5rem, 1fr));
   gap: 0.45rem;
-}
-
-.product-flipbook__actions .group {
-  min-width: 0;
-  overflow: visible;
-}
-
-.product-flipbook__actions [data-markets-menu] {
-  left: auto !important;
-  right: 0 !important;
-  width: 18rem !important;
-  max-width: none !important;
 }
 
 .product-flipbook__actions .product-flipbook__link {
@@ -410,7 +383,7 @@
 
 @media (max-width: 720px) {
   .product-flipbook__actions {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
   }
 

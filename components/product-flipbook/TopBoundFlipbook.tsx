@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
-import TalisprosMarketsDropdown from "@/components/talispros/TalisprosMarketsDropdown";
 import {
   type ProductFlipbookHotspot,
   type ProductFlipbookPage,
@@ -221,17 +220,10 @@ export default function TopBoundFlipbook({
           </div>
         </div>
         <div className="product-flipbook__header-tools">
-          <Link href={ROUTES.ADMIN_DASHBOARD} className="product-flipbook__admin-link">
-            Global Admin
-          </Link>
           <nav className="product-flipbook__actions" aria-label="Talispros">
             <Link href={ROUTES.HOME} className="product-flipbook__link">
               Home
             </Link>
-            <TalisprosMarketsDropdown
-              triggerClassName="product-flipbook__link"
-              menuAlign="end"
-            />
             <Link
               href={ROUTES.CATALOGUE_BOOKSHELF}
               className="product-flipbook__link"

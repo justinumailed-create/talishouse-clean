@@ -3,6 +3,7 @@ import TalisprosHomeGate from "@/components/talispros/TalisprosHomeGate";
 import TalisprosHomeShowcase from "@/components/talispros/TalisprosHomeShowcase";
 import TalisprosSamCartReturnBanner from "@/components/talispros/TalisprosSamCartReturnBanner";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
+import TalisprosHomeCornerLinks from "@/components/talispros/TalisprosHomeCornerLinks";
 
 const libreBaskerville = Libre_Baskerville({
   subsets: ["latin"],
@@ -22,6 +23,7 @@ export default function TalisprosGatePage() {
   return (
     <div className="flex min-h-dvh flex-col bg-white text-neutral-900 lg:h-dvh lg:min-h-0 lg:overflow-hidden">
       <TalisUMktsHeader />
+      <TalisprosHomeCornerLinks />
       <div
         className={`${libreBaskerville.className} flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[40%_60%] lg:overflow-hidden`}
       >
