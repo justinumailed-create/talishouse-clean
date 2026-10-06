@@ -34,6 +34,12 @@ describe("TalisU Register copy", () => {
 });
 
 describe("TalisU Register → Product (Webster) copy", () => {
+  it("uses Customization Team in the engage headline", () => {
+    expect(TALISU_ENGAGE.headline).toBe(
+      "Send a Down Payment to engage Webster and his Customization Team",
+    );
+  });
+
   it("opens Webster's intro like the Mapsite partner card", () => {
     expect(TALISU_ENGAGE.partnerHeading).toBe("Your Product Partner");
     expect(TALISU_ENGAGE.partnerName).toBe("Webster M. — Team Leader");

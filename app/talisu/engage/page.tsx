@@ -14,7 +14,7 @@ import {
 export const metadata = createTalisUMetadata({
   title: "TalisU™ | Engage the Team",
   description:
-    "Send a down payment to engage Webster and the design team for Glasshouse, Talishouse, Talistown, or Talisdome projects.",
+    "Send a down payment to engage Webster and the customization team for Glasshouse, Talishouse, Talistown, or Talisdome projects.",
   path: "/talisu/engage",
 });
 

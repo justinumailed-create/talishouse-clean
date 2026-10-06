@@ -249,7 +249,7 @@ export const TALISU_REGISTER = {
 
 export const TALISU_ENGAGE = {
   title: "Engage the Team",
-  headline: "Send a Down Payment to engage Webster and his Design Team",
+  headline: "Send a Down Payment to engage Webster and his Customization Team",
   partnerHeading: "Your Product Partner",
   partnerName: "Webster M. — Team Leader",
   partnerImage: "/talisu/webster-team-leader.jpg",
