@@ -20,9 +20,8 @@ export default async function CataloguePage() {
   return (
     <TopBoundFlipbook
       pages={pages}
-      eyebrow="Talishouse™ Product Catalogue"
       title="Catalogue"
-      subtitle="Design ideas · tap a design to customize it"
+      showHeader={false}
     />
   );
 }

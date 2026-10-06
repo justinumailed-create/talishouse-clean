@@ -124,6 +124,10 @@
   width: min(100%, 64rem, calc((100dvh - 15rem) * 16 / 9));
 }
 
+.product-flipbook[data-header="hidden"] .product-flipbook__book {
+  width: min(100%, 72rem, calc((100dvh - 9rem) * 16 / 9));
+}
+
 .product-flipbook__hinge {
   position: relative;
   z-index: 5;
@@ -389,6 +393,10 @@
 
   .product-flipbook__book {
     width: min(100%, 40rem, calc((100dvh - 18rem) * 16 / 9));
+  }
+
+  .product-flipbook[data-header="hidden"] .product-flipbook__book {
+    width: min(100%, 44rem, calc((100dvh - 11rem) * 16 / 9));
   }
 }
 

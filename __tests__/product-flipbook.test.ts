@@ -138,6 +138,9 @@ describe("product catalogue route", () => {
     expect(viewer).not.toContain("showSample");
     expect(viewer).not.toContain("Sample");
     expect(viewer).toContain("product-flipbook__header-tools");
+    expect(viewer).toContain("showHeader");
+    expect(viewer).toContain('data-header={showHeader ? "visible" : "hidden"}');
+    expect(viewer).toContain('className="sr-only"');
     expect(viewer).not.toContain("product-flipbook__admin-link");
     expect(viewer).not.toContain("TalisprosMarketsDropdown");
     expect(viewer).not.toContain("Global Admin");
@@ -148,6 +151,10 @@ describe("product catalogue route", () => {
     expect(viewer).not.toContain('"/talisbooks"');
     expect(viewer).toContain('data-testid="catalogue-bookshelf-button"');
     expect(viewer).not.toContain("MAPSITE_APP_PATH");
+    expect(catalogue).toContain("showHeader={false}");
+    expect(catalogue).toContain('title="Catalogue"');
+    expect(catalogue).not.toContain("eyebrow=");
+    expect(catalogue).not.toContain("subtitle=");
     expect(catalogue).not.toContain("isAdminAuthenticated");
     expect(catalogue).not.toContain("showSample");
 
@@ -174,6 +181,8 @@ describe("product catalogue route", () => {
     expect(css).toContain("product-flipbook-turn-next");
     expect(css).toContain("perspective-origin: 50% 0%");
     expect(css).not.toContain("rotateY");
+    expect(css).toContain('data-header="hidden"');
+    expect(css).toContain("100dvh - 9rem");
     const viewer = readSource("components/product-flipbook/TopBoundFlipbook.tsx");
     expect(viewer).toContain("top-bound-flipbook.css");
   });

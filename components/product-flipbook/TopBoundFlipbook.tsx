@@ -75,13 +75,16 @@ function CatalogueHotspots({ hotspots }: { hotspots: ProductFlipbookHotspot[] })
 export default function TopBoundFlipbook({
   pages,
   eyebrow = "Product",
-  title = "T-All catalogue",
+  title = "Catalogue",
   subtitle = "Top-bound · one page at a time",
+  showHeader = true,
 }: {
   pages: ProductFlipbookPage[];
   eyebrow?: string;
   title?: string;
   subtitle?: string;
+  /** Visible sub-header strip (logo, eyebrow, title, Home/Bookshelf). Off on /catalogue. */
+  showHeader?: boolean;
 }) {
   const leaves = pages;
   const [index, setIndex] = useState(0);
@@ -202,38 +205,47 @@ export default function TopBoundFlipbook({
   }
 
   return (
-    <div className="product-flipbook relative flex h-full min-h-full flex-col" data-testid="product-flipbook" data-binding="top">
-      <header className="product-flipbook__header">
-        <div className="product-flipbook__brand">
-          <Image
-            src="/logo.png"
-            alt="Talispros"
-            width={36}
-            height={36}
-            className="product-flipbook__logo"
-            priority
-          />
-          <div>
-            <p className="product-flipbook__eyebrow">{eyebrow}</p>
-            <h1 className="product-flipbook__title">{title}</h1>
-            <p className="product-flipbook__subtitle">{subtitle}</p>
+    <div
+      className="product-flipbook relative flex h-full min-h-full flex-col"
+      data-testid="product-flipbook"
+      data-binding="top"
+      data-header={showHeader ? "visible" : "hidden"}
+    >
+      {showHeader ? (
+        <header className="product-flipbook__header">
+          <div className="product-flipbook__brand">
+            <Image
+              src="/logo.png"
+              alt="Talispros"
+              width={36}
+              height={36}
+              className="product-flipbook__logo"
+              priority
+            />
+            <div>
+              <p className="product-flipbook__eyebrow">{eyebrow}</p>
+              <h1 className="product-flipbook__title">{title}</h1>
+              <p className="product-flipbook__subtitle">{subtitle}</p>
+            </div>
           </div>
-        </div>
-        <div className="product-flipbook__header-tools">
-          <nav className="product-flipbook__actions" aria-label="Talispros">
-            <Link href={ROUTES.HOME} className="product-flipbook__link">
-              Home
-            </Link>
-            <Link
-              href={ROUTES.CATALOGUE_BOOKSHELF}
-              className="product-flipbook__link"
-              data-testid="catalogue-bookshelf-button"
-            >
-              Bookshelf
-            </Link>
-          </nav>
-        </div>
-      </header>
+          <div className="product-flipbook__header-tools">
+            <nav className="product-flipbook__actions" aria-label="Talispros">
+              <Link href={ROUTES.HOME} className="product-flipbook__link">
+                Home
+              </Link>
+              <Link
+                href={ROUTES.CATALOGUE_BOOKSHELF}
+                className="product-flipbook__link"
+                data-testid="catalogue-bookshelf-button"
+              >
+                Bookshelf
+              </Link>
+            </nav>
+          </div>
+        </header>
+      ) : (
+        <h1 className="sr-only">{title}</h1>
+      )}
 
       <div className="product-flipbook__stage">
         <div className="product-flipbook__book">
