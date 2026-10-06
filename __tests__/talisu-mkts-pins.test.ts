@@ -64,19 +64,19 @@ describe("TalisU mkts Atlist pin export", () => {
     expect(Math.max(...lngs)).toBeGreaterThan(-60); // NL
   });
 
-  it("maps engine pins without Marketing/Adpro; Do More size is 45", () => {
+  it("maps engine pins without Marketing/Adpro; Do More size is 58", () => {
     const engine = talisuMktsToEnginePins();
     const ids = engine.map((p) => p.id);
     expect(ids).toHaveLength(16);
     expect(ids).toContain("modular-spaces");
     expect(ids).not.toContain("add-marketing-pins");
     expect(ids).not.toContain("add-adpro-sites");
-    expect(TALISU_MKTS_MARKET_PIN_SIZE).toBe(32);
-    expect(TALISU_MKTS_DO_MORE_PIN_SIZE).toBe(45);
+    expect(TALISU_MKTS_MARKET_PIN_SIZE).toBe(41);
+    expect(TALISU_MKTS_DO_MORE_PIN_SIZE).toBe(58);
     const modular = engine.find((p) => p.id === "modular-spaces");
-    expect(modular?.metadata?.pinSize).toBe(45);
+    expect(modular?.metadata?.pinSize).toBe(58);
     const market = engine.find((p) => p.id === "ns");
-    expect(market?.metadata?.pinSize).toBe(32);
+    expect(market?.metadata?.pinSize).toBe(41);
     expect(TALISU_MKTS_START_FIT_PADDING.left).toBeLessThan(100);
   });
 });

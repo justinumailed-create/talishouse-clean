@@ -58,11 +58,13 @@ export const TALISU_MKTS_START_FIT_PADDING = {
   left: 48,
 } as const;
 
-/** Canada market flag pin diameter (px) on the mkts map engine. */
-export const TALISU_MKTS_MARKET_PIN_SIZE = 32;
+/** Canada market flag pin diameter (px) on the mkts map engine.
+ * Grown from 32 so the logo stays ~20px after the 50% fill ratio (was 64%). */
+export const TALISU_MKTS_MARKET_PIN_SIZE = 41;
 
-/** Do More (Modular Spaces) pin diameter — 1.5× the prior 30px size. */
-export const TALISU_MKTS_DO_MORE_PIN_SIZE = 45;
+/** Do More (Modular Spaces / windswept-tree) pin diameter.
+ * Grown from 45 so the logo stays ~29px after the 50% fill ratio (was 64%). */
+export const TALISU_MKTS_DO_MORE_PIN_SIZE = 58;
 
 export const TALISU_MKTS_FOOTER =
   "Select the PIN nearest you to claim a market of 50 miles (80 kilometres) around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.";
@@ -395,7 +397,7 @@ export function talisuMktsPinById(id: string): TalisUMktsPin | undefined {
 
 /**
  * Shared MapEngine pin list for /talisu/mkts and the /start static preview.
- * Filters to showOnMap; market pins use CA flag, Do More uses tree logo @ 45px.
+ * Filters to showOnMap; market pins use CA flag, Do More uses tree logo @ 58px.
  */
 export function talisuMktsToEnginePins(
   pins: readonly TalisUMktsPin[] = TALISU_MKTS_PINS,

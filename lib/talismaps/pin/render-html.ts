@@ -1,4 +1,9 @@
-import { resolvePinVisual } from "./defaults";
+import {
+  pinLogoInsetPercent,
+  pinLogoSizePx,
+  resolvePinVisual,
+  TALISMAPS_PIN_BORDER_WIDTH,
+} from "./defaults";
 import { getPinIconPath } from "./icons";
 import type { ResolvedTalisMapsPinVisual, TalisMapsPinVisualProps } from "./types";
 
@@ -82,7 +87,7 @@ function buildClassicPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
   return `<g filter="url(#pinShadow)">
     <circle cx="${c}" cy="${c}" r="${ringRadius + 2.5}" fill="#ffffff" opacity="0.55"/>
     <circle cx="${c}" cy="${c}" r="${ringRadius}" fill="${escapePinHtml(pinColor)}" opacity="${ringOpacity}"/>
-    <circle cx="${c}" cy="${c}" r="${ringRadius}" fill="none" stroke="${escapePinHtml(pinBorderColor)}" stroke-width="1"/>
+    <circle cx="${c}" cy="${c}" r="${ringRadius}" fill="none" stroke="${escapePinHtml(pinBorderColor)}" stroke-width="${TALISMAPS_PIN_BORDER_WIDTH}"/>
     <circle cx="${c}" cy="${c}" r="${centerRadius}" fill="#ffffff"/>
     ${glyph}
   </g>`;
@@ -175,9 +180,11 @@ export function renderPinMarkerHtml(
     : "";
   // Size the logo in px so large PNG assets (e.g. 400×400 Atlist icons) cannot
   // render at intrinsic size when CSS inset-only rules fail on <img>.
-  const logoPx = Math.max(8, Math.round(size * 0.64));
+  // ~25% of the diameter is kept as white margin around the logo.
+  const logoPx = pinLogoSizePx(size);
+  const logoInset = pinLogoInsetPercent();
   const logoHtml = visual.customLogoUrl
-    ? `<img class="talismaps-pin-logo" src="${escapePinHtml(visual.customLogoUrl)}" alt="" width="${logoPx}" height="${logoPx}" style="width:${logoPx}px;height:${logoPx}px;top:18%;left:18%" />`
+    ? `<img class="talismaps-pin-logo" src="${escapePinHtml(visual.customLogoUrl)}" alt="" width="${logoPx}" height="${logoPx}" style="width:${logoPx}px;height:${logoPx}px;top:${logoInset}%;left:${logoInset}%" />`
     : "";
 
   const markerWidth = Math.max(size, PIN_LABEL_MAX_WIDTH);

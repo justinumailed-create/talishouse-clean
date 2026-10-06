@@ -777,12 +777,13 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talismaps-pin-logo {
   /* Explicit width/height required: absolutely positioned <img> replaced
-     elements ignore inset-only sizing and keep intrinsic pixels (e.g. 400×400). */
+     elements ignore inset-only sizing and keep intrinsic pixels (e.g. 400×400).
+     50% fill (~25% diameter margin) matches TALISMAPS_PIN_LOGO_RATIO. */
   position: absolute;
-  top: 18%;
-  left: 18%;
-  width: 64%;
-  height: 64%;
+  top: 25%;
+  left: 25%;
+  width: 50%;
+  height: 50%;
   display: block;
   border-radius: 9999px;
   object-fit: cover;

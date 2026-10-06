@@ -1,7 +1,12 @@
 "use client";
 
 import { useId, type CSSProperties } from "react";
-import { resolvePinVisual } from "@/lib/talismaps/pin/defaults";
+import {
+  pinLogoInsetPercent,
+  pinLogoSizePx,
+  resolvePinVisual,
+  TALISMAPS_PIN_BORDER_WIDTH,
+} from "@/lib/talismaps/pin/defaults";
 import { getPinIconPath } from "@/lib/talismaps/pin/icons";
 import type { TalisMapsPinVisualProps } from "@/lib/talismaps/pin/types";
 
@@ -161,7 +166,7 @@ export default function Pin({
                   r={visual.ringRadius}
                   fill="none"
                   stroke={visual.pinBorderColor}
-                  strokeWidth={1}
+                  strokeWidth={TALISMAPS_PIN_BORDER_WIDTH}
                 />
                 <circle cx={c} cy={c} r={visual.centerRadius} fill="#ffffff" />
                 {showGlyph ? (
@@ -192,13 +197,13 @@ export default function Pin({
             className="talismaps-pin-logo"
             src={visual.customLogoUrl}
             alt=""
-            width={Math.max(8, Math.round(size * 0.64))}
-            height={Math.max(8, Math.round(size * 0.64))}
+            width={pinLogoSizePx(size)}
+            height={pinLogoSizePx(size)}
             style={{
-              width: Math.max(8, Math.round(size * 0.64)),
-              height: Math.max(8, Math.round(size * 0.64)),
-              top: "18%",
-              left: "18%",
+              width: pinLogoSizePx(size),
+              height: pinLogoSizePx(size),
+              top: `${pinLogoInsetPercent()}%`,
+              left: `${pinLogoInsetPercent()}%`,
             }}
           />
         ) : null}

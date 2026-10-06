@@ -478,7 +478,7 @@ export function pmcPinToMapEnginePin(pin: PmcRegionalPin): MapEnginePin {
       icon: "dot",
       whiteCenter: true,
       customLogoUrl: pin.logoUrl,
-      pinSize: 58,
+      pinSize: 74,
       animated: false,
       pmc: true,
       country: pin.country,
