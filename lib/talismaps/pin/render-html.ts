@@ -178,9 +178,9 @@ export function renderPinMarkerHtml(
   const badgeHtml = badge
     ? `<div class="talismaps-pin-badge">${escapePinHtml(badge)}</div>`
     : "";
-  // Size the logo in px so large PNG assets (e.g. 400×400 Atlist icons) cannot
-  // render at intrinsic size when CSS inset-only rules fail on <img>.
-  // ~25% of the diameter is kept as white margin around the logo.
+  // Size the logo in px so large assets cannot render at intrinsic size when
+  // CSS inset-only rules fail on <img>. The box is the only margin: art must
+  // be cropped tight (no baked padding) so it fills this box via contain.
   const logoPx = pinLogoSizePx(size);
   const logoInset = pinLogoInsetPercent();
   const logoHtml = visual.customLogoUrl
