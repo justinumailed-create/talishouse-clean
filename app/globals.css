@@ -1141,44 +1141,66 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 /* ─── Talisbooks™ Viewer ──────────────────────────────────────────────────── */
 
+/*
+ * Full-bleed reader. TalisBooksLayoutClient makes /talisbooks/viewer a 100dvh
+ * flex column (blue navbar + flex-1 slot), so height: 100% here is exactly the
+ * viewport minus the navbar — no hard-coded navbar height.
+ *
+ * Inside: compact header row, then the stage column takes every remaining
+ * pixel. The stage perspective box is a CSS size container; the open book
+ * contain-fits its content box with cq units (see .talisbooks-viewer-book), so
+ * spreads keep their aspect, are never cropped, and center both ways.
+ * The reader stage owns the space formerly used by the bottom controls.
+ */
 .talisbooks-viewer {
-  --viewer-inset: 0.2rem;
-  --viewer-header-height: 3.85rem;
-  /* The reader stage now owns the space formerly used by the bottom controls. */
-  --viewer-book-height: calc(
-    100% - (2 * var(--viewer-inset)) - var(--viewer-header-height) - 0.35rem
-  );
+  /* Side room for the prev/next arrows and the right playback rail. */
+  --viewer-gutter: 0.35rem;
+  --viewer-stage-pad-top: 0.35rem;
+  /* Strip under the spread for the "Use arrows…" hint (and CTA on desktop). */
+  --viewer-stage-pad-bottom: 1.6rem;
+  --viewer-hint-bottom: 0.35rem;
   position: relative;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  min-height: 100%;
   height: 100%;
+  min-height: 0;
   overflow: hidden;
   background:
     radial-gradient(ellipse 90% 70% at 50% 18%, #f7f5f1 0%, transparent 55%),
     linear-gradient(180deg, #ebe7e0 0%, #d9d3c9 48%, #cfc8bc 100%);
   color: #171717;
-  padding: var(--viewer-inset) clamp(0.75rem, 2vw, 1.35rem);
+  padding: 0;
 }
 
+/* Compact one-row header: eyebrow · title · subtitle inline, actions right. */
 .talisbooks-viewer__header {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem 1rem;
+  gap: 0.35rem 1rem;
   flex: 0 0 auto;
   position: relative;
   z-index: 10;
+  box-sizing: border-box;
   width: 100%;
   max-width: none;
-  margin: 0 auto 0.35rem;
+  margin: 0;
+  padding: 0.3rem clamp(0.75rem, 2vw, 1.35rem) 0.2rem;
+}
+
+.talisbooks-viewer__heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.05rem 0.65rem;
+  min-width: 0;
 }
 
 .talisbooks-viewer__eyebrow {
   margin: 0;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -1186,26 +1208,26 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talisbooks-viewer__title {
-  margin: 0.1rem 0 0;
-  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  margin: 0;
+  font-size: clamp(0.98rem, 1.5vw, 1.15rem);
   font-weight: 600;
   letter-spacing: -0.03em;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 .talisbooks-viewer__subtitle {
-  margin: 0.12rem 0 0;
-  font-size: 0.78rem;
+  margin: 0;
+  font-size: 0.75rem;
   color: #57534e;
   line-height: 1.3;
 }
 
 .talisbooks-viewer__back {
   display: inline-flex;
-  min-height: 2.5rem;
+  min-height: 2.1rem;
   align-items: center;
   justify-content: center;
-  padding: 0.45rem 1rem;
+  padding: 0.3rem 0.95rem;
   border-radius: 0.85rem;
   background: var(--talis-nav-blue);
   color: #ffffff;
@@ -1241,7 +1263,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  min-height: 2.5rem;
+  min-height: 2.1rem;
   height: 100%;
   white-space: nowrap;
 }
@@ -1276,7 +1298,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   bottom: max(0.75rem, env(safe-area-inset-bottom));
   z-index: 30;
   display: inline-flex;
-  min-height: 2.75rem;
+  min-height: 2.5rem;
   align-items: center;
   justify-content: center;
   max-width: calc(100% - 1.5rem);
@@ -1308,27 +1330,31 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talisbooks-viewer__layout {
-  display: grid;
-  gap: 0;
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   min-height: 0;
   width: 100%;
   max-width: none;
   margin: 0;
-  align-items: stretch;
 }
 
+/* Every pixel below the header. Size container so the rotated mobile stage
+   (and anything else) can size itself to this box with cqw/cqh. */
 .talisbooks-viewer__stage-column {
+  position: relative;
+  flex: 1 1 auto;
   min-width: 0;
   min-height: 0;
-  height: 100%;
   display: flex;
   flex-direction: column;
+  container-type: size;
 }
 
+/* Overlays the stage's top-right corner, inside --viewer-gutter on desktop. */
 .talisbooks-viewer__rail {
   position: absolute;
-  top: calc(var(--viewer-inset) + var(--viewer-header-height) + 0.25rem);
+  top: 0.35rem;
   z-index: 8;
   display: flex;
   flex-direction: column;
@@ -1445,9 +1471,9 @@ body.mapsite-gallery-open [data-paypal-button] {
    * orient FAB stays so Portrait is always one tap away.
    */
   .talisbooks-viewer--stage-landscape {
-    --viewer-header-height: 0rem;
-    padding-top: 0.15rem;
-    padding-bottom: 0.15rem;
+    --viewer-stage-pad-top: 0.25rem;
+    --viewer-stage-pad-bottom: 1.3rem;
+    --viewer-hint-bottom: 0.2rem;
   }
 
   .talisbooks-viewer--stage-landscape .talisbooks-viewer__header {
@@ -1468,14 +1494,16 @@ body.mapsite-gallery-open [data-paypal-button] {
     justify-content: center;
   }
 
+  /* Swap the stage column's real box (cq units = stage column, i.e. the area
+     under the navbar) and rotate, so the rotated spread is never clipped. */
   .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 100dvh;
-    height: 100dvw;
-    max-width: 100dvh;
-    max-height: calc(100dvw - 0.5rem);
+    width: 100cqh;
+    height: 100cqw;
+    max-width: none;
+    max-height: none;
     margin: 0;
     transform: translate(-50%, -50%) rotate(90deg);
     transform-origin: center center;
@@ -1485,18 +1513,12 @@ body.mapsite-gallery-open [data-paypal-button] {
     min-height: 0;
     height: 100%;
     width: 100%;
-    border-radius: 0.55rem;
-    padding: 0.25rem 0.3rem 0.15rem;
   }
 
-  .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage__perspective,
-  .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage--closed .talisbooks-viewer-stage__perspective,
-  .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage--magazine .talisbooks-viewer-stage__perspective {
-    min-height: 0;
-    width: min(100%, calc(16 / 9 * var(--viewer-book-height, 70dvh)));
-    height: auto;
-    max-height: min(100%, var(--viewer-book-height, 70dvh));
-    aspect-ratio: 16 / 9;
+  /* The stage's right edge is the screen's bottom once rotated: keep the
+     spread clear of the bottom-right register / claim CTA. */
+  .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage__perspective {
+    padding-right: calc(var(--viewer-gutter) + 3.4rem);
   }
 
   .talisbooks-viewer--stage-landscape .talisbooks-viewer-stage__hint {
@@ -1524,22 +1546,21 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 /* Open book stage */
+/* Full-bleed desk — no padded/rounded card around the reader. */
 .talisbooks-viewer-stage__desk {
   flex: 1;
   min-height: 0;
   height: 100%;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
-  border-radius: 1.15rem;
+  border-radius: 0;
   padding: 0;
-  background:
-    radial-gradient(ellipse at 50% 12%, rgba(255, 252, 245, 0.7) 0%, transparent 52%),
-    linear-gradient(165deg, #efeae2 0%, #e4ddd3 46%, #d8d0c4 100%);
-  border: 1px solid rgba(28, 25, 23, 0.07);
+  background: transparent;
+  border: 0;
   overflow: visible;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  box-shadow: none;
 }
 
 .talisbooks-viewer-stage {
@@ -1557,23 +1578,25 @@ body.mapsite-gallery-open [data-paypal-button] {
   overflow: visible;
 }
 
+/*
+ * The fit box. Its content box (stage minus gutters / hint strip) is a CSS
+ * size container; the book below contain-fits it with cqw/cqh.
+ */
 .talisbooks-viewer-stage__perspective {
   perspective: 2200px;
   perspective-origin: 50% 45%;
   overflow: visible;
-  flex: 0 1 auto;
+  position: relative;
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
   min-height: 0;
-  width: min(100%, calc(16 / 9 * var(--viewer-book-height)));
-  height: auto;
-  max-height: var(--viewer-book-height);
-  aspect-ratio: 16 / 9;
+  padding: var(--viewer-stage-pad-top) var(--viewer-gutter) var(--viewer-stage-pad-bottom);
+  container-type: size;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.talisbooks-viewer-stage--closed .talisbooks-viewer-stage__perspective {
-  min-height: min(80vh, 820px);
 }
 
 .talisbooks-viewer-stage__closed,
@@ -1590,19 +1613,17 @@ body.mapsite-gallery-open [data-paypal-button] {
   position: relative;
   width: 100%;
   height: 100%;
-  max-height: var(--viewer-book-height);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.talisbooks-viewer-stage--single .talisbooks-viewer-stage__open-book {
-  width: min(100%, calc(16 / 9 * var(--viewer-book-height) / 2));
-}
-
+/* Arrows span the gutters too, so on desktop they sit beside the pages. */
 .talisbooks-viewer-stage__nav {
   position: absolute;
-  inset: 0;
+  inset: 0 calc(-1 * var(--viewer-gutter));
+  /* Global "* { max-width: 100% }" would pin it to the fit box width. */
+  max-width: none;
   z-index: 12;
   display: flex;
   align-items: center;
@@ -2066,13 +2087,18 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 }
 
+/*
+ * Contain-fit: width is the smaller of the fit box width and the width the
+ * spread would have at full fit-box height; aspect-ratio derives the height.
+ * Whichever axis is the limit, the whole spread shows and stays centered.
+ */
 .talisbooks-viewer-book {
   --book-page-radius: 0.12rem;
   --book-spread-aspect: 16 / 9;
   position: relative;
-  width: 100%;
+  flex: 0 0 auto;
+  width: min(100cqw, calc(100cqh * var(--book-spread-aspect)));
   max-width: 100%;
-  max-height: 100%;
   aspect-ratio: var(--book-spread-aspect);
   height: auto;
   transform-style: preserve-3d;
@@ -2085,7 +2111,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talisbooks-viewer-book--single {
-  width: min(100%, calc(var(--book-spread-aspect, 16 / 9) * var(--viewer-book-height) / 2));
+  width: min(100cqw, calc(100cqh * var(--book-spread-aspect, 16 / 9) / 2));
   aspect-ratio: calc(var(--book-spread-aspect, 16 / 9) / 2);
 }
 
@@ -2664,11 +2690,12 @@ body.mapsite-gallery-open [data-paypal-button] {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
 }
 
+/* Sits in the perspective box's bottom padding strip, under the spread. */
 .talisbooks-viewer-stage__hint {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0.35rem;
+  bottom: var(--viewer-hint-bottom);
   z-index: 5;
   margin: 0;
   text-align: center;
@@ -3975,13 +4002,9 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 @media (max-width: 639px) {
-  .talisbooks-viewer {
-    padding: 0.65rem;
-  }
-
   .talisbooks-viewer__header {
-    gap: 0.7rem;
-    margin-bottom: 0.75rem;
+    gap: 0.45rem;
+    padding: 0.45rem 0.65rem 0.35rem;
   }
 
   .talisbooks-viewer__back {
@@ -4027,11 +4050,11 @@ body.mapsite-gallery-open [data-paypal-button] {
     transform: rotateX(1.5deg);
     --book-spread-aspect: 16 / 9;
     aspect-ratio: var(--book-spread-aspect);
-    width: min(100%, 100%);
+    width: min(100cqw, calc(100cqh * var(--book-spread-aspect)));
   }
 
   .talisbooks-viewer--magazine .talisbooks-viewer-book--magazine.talisbooks-viewer-book--single {
-    width: min(88%, 26rem);
+    width: min(88cqw, 26rem, calc(100cqh * 3 / 4.1));
     aspect-ratio: 3 / 4.1;
   }
 
@@ -4059,14 +4082,6 @@ body.mapsite-gallery-open [data-paypal-button] {
     -webkit-line-clamp: 4;
   }
 
-  .talisbooks-viewer-stage__desk {
-    min-height: min(64vh, 560px);
-  }
-
-  .talisbooks-viewer-stage__perspective {
-    min-height: min(54vh, 430px);
-  }
-
   .talisbooks-viewer-controls__row {
     gap: 0.35rem;
   }
@@ -4086,16 +4101,25 @@ body.mapsite-gallery-open [data-paypal-button] {
  * Desktop is excluded via max-height (phone landscape ~320–500px tall).
  */
 @media (max-width: 1024px) and (orientation: landscape) and (max-height: 560px) {
+  /* Spreads are height-limited here, so the CTA sits in the side slack and
+     only the hint needs a strip under the spread. */
   .talisbooks-viewer {
-    --viewer-header-height: 2.4rem;
-    min-height: 100%;
-    padding: 0.2rem 0.35rem 0.25rem;
+    --viewer-stage-pad-top: 0.2rem;
+    --viewer-stage-pad-bottom: 1.25rem;
+    --viewer-hint-bottom: 0.15rem;
   }
 
   .talisbooks-viewer__header {
     gap: 0.2rem 0.65rem;
-    margin: 0 auto 0.2rem;
+    margin: 0;
+    padding: 0.2rem 0.5rem 0.15rem;
     max-width: none;
+  }
+
+  /* Phone-landscape widths above 860px (e.g. 932×430): the 230px rail would
+     cover the next arrow on a ~280px stage. Match narrower phones: no rail. */
+  .talisbooks-viewer__rail {
+    display: none;
   }
 
   .talisbooks-viewer__eyebrow,
@@ -4131,18 +4155,12 @@ body.mapsite-gallery-open [data-paypal-button] {
 
   .talisbooks-viewer-stage__desk {
     min-height: 0;
-    padding: 0.25rem 0.3rem 0.15rem;
-    border-radius: 0.55rem;
   }
 
   .talisbooks-viewer-stage__perspective,
   .talisbooks-viewer-stage--closed .talisbooks-viewer-stage__perspective,
   .talisbooks-viewer-stage--magazine .talisbooks-viewer-stage__perspective {
     min-height: 0;
-    width: min(100%, calc(16 / 9 * var(--viewer-book-height)));
-    height: auto;
-    max-height: var(--viewer-book-height);
-    aspect-ratio: 16 / 9;
     perspective: 1400px;
   }
 
@@ -4154,19 +4172,17 @@ body.mapsite-gallery-open [data-paypal-button] {
 
   .talisbooks-viewer-book,
   .talisbooks-viewer--magazine .talisbooks-viewer-book--magazine {
-    width: 100%;
+    width: min(100cqw, calc(100cqh * var(--book-spread-aspect, 16 / 9)));
     max-width: 100%;
-    max-height: 100%;
     height: auto;
     aspect-ratio: var(--book-spread-aspect, 16 / 9);
     /* No CSS filter: filter flattens preserve-3d and kills the page-turn curl. */
   }
 
   .talisbooks-viewer--magazine .talisbooks-viewer-book--magazine.talisbooks-viewer-book--single {
-    width: auto;
-    max-width: min(50vw, calc((100dvh - 3.65rem) * var(--book-spread-aspect, 16 / 9) / 2));
-    max-height: calc(100dvh - 3.65rem);
-    height: min(calc(100dvh - 3.65rem), 100%);
+    width: min(100cqw, calc(100cqh * var(--book-spread-aspect, 16 / 9) / 2));
+    max-width: 100%;
+    height: auto;
     aspect-ratio: calc(var(--book-spread-aspect, 16 / 9) / 2);
     transform: none;
   }
@@ -4198,6 +4214,38 @@ body.mapsite-gallery-open [data-paypal-button] {
     font-size: 0.55rem;
     right: 0.45rem;
     bottom: 0.35rem;
+  }
+}
+
+/*
+ * Desktop: reserve side gutters for the arrows + playback rail, and a bottom
+ * strip that holds the hint (centered) and the CTA (right) so neither covers
+ * the pages. Short landscape phones keep their own strip (above).
+ */
+@media (min-width: 1025px), (min-width: 861px) and (min-height: 561px) {
+  .talisbooks-viewer {
+    --viewer-gutter: 3.75rem;
+  }
+}
+
+@media (min-width: 861px) and (min-height: 561px) {
+  .talisbooks-viewer {
+    --viewer-stage-pad-bottom: 3.35rem;
+    --viewer-hint-bottom: 1.15rem;
+  }
+
+  .talisbooks-viewer__register,
+  .talisbooks-viewer__claim {
+    bottom: max(0.45rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Portrait phones/tablets: spreads are width-limited with vertical slack, so
+   lift the hint above the bottom-right CTA instead of colliding with it. */
+@media (max-width: 860px) and (orientation: portrait) {
+  .talisbooks-viewer:not(.talisbooks-viewer--stage-landscape) {
+    --viewer-stage-pad-bottom: 4.6rem;
+    --viewer-hint-bottom: 3.75rem;
   }
 }
 

@@ -194,14 +194,13 @@ describe("TalisBook Cover Dimension + Viewer Focus Fix", () => {
     expect(displayBookSpreadAspect(16 / 9)).toBeCloseTo(16 / 9, 5);
   });
 
-  it("sizes the stage to a 16:9 spread at the current display height", () => {
+  it("contain-fits the measured spread aspect inside the stage container", () => {
     const css = readFileSync(resolve("app/globals.css"), "utf8");
+    expect(css).toContain("container-type: size;");
     expect(css).toContain(
-      "width: min(100%, calc(16 / 9 * var(--viewer-book-height)))",
+      "width: min(100cqw, calc(100cqh * var(--book-spread-aspect)));",
     );
-    expect(css).toContain(
-      "--viewer-book-height: calc(\n    100dvh - (2 * var(--viewer-inset)) - var(--viewer-header-height) - 0.35rem\n  );",
-    );
+    expect(css).not.toContain("--viewer-book-height");
     expect(css).toContain(
       ".talisbooks-viewer-book[data-spread-fit=\"image\"] .talisbooks-viewer-page__spread-image {\n  object-fit: cover;",
     );

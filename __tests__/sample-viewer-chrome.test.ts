@@ -75,7 +75,65 @@ describe("sample Talisbooks™ viewer chrome", () => {
     expect(shell).toContain("TalisBooksViewerStage");
     const css = readSource("app/globals.css");
     expect(css).toContain("formerly used by the bottom controls");
-    expect(css).toContain("100% - (2 * var(--viewer-inset))");
+    expect(css).not.toContain("--viewer-book-height");
+  });
+
+  it("fills the viewport under the navbar and contain-fits spreads", () => {
+    const layout = readSource(
+      "components/talisbooks/platform/TalisBooksLayoutClient.tsx",
+    );
+    // Navbar + flex-1 slot inside a 100dvh column: no hard-coded navbar height.
+    expect(layout).toContain("flex h-dvh min-h-dvh flex-col");
+    expect(layout).toContain('<div className="min-h-0 flex-1">{children}</div>');
+
+    const css = readSource("app/globals.css");
+    const block = (selector: string) => {
+      const start = css.indexOf(`\n${selector} {`);
+      expect(start).toBeGreaterThan(-1);
+      return css.slice(start, css.indexOf("\n}", start));
+    };
+    const viewer = block(".talisbooks-viewer");
+    expect(viewer).toMatch(/height:\s*100%/);
+    expect(viewer).toMatch(/padding:\s*0;/);
+    // Stage column + perspective box are size containers.
+    expect(block(".talisbooks-viewer__stage-column")).toContain("container-type: size");
+    const perspective = block(".talisbooks-viewer-stage__perspective");
+    expect(perspective).toContain("container-type: size");
+    expect(perspective).not.toContain("aspect-ratio");
+    // Contain-fit: limited by width or height, aspect preserved.
+    const book = block(".talisbooks-viewer-book");
+    expect(book).toContain(
+      "width: min(100cqw, calc(100cqh * var(--book-spread-aspect)));",
+    );
+    expect(book).toContain("aspect-ratio: var(--book-spread-aspect);");
+    expect(book).not.toMatch(/max-height:\s*100%/);
+    expect(block(".talisbooks-viewer-book--single")).toContain(
+      "width: min(100cqw, calc(100cqh * var(--book-spread-aspect, 16 / 9) / 2));",
+    );
+    // No padded, rounded card around the reader.
+    const desk = block(".talisbooks-viewer-stage__desk");
+    expect(desk).toContain("border-radius: 0;");
+    expect(desk).toContain("background: transparent;");
+    // Arrows reach into the desktop gutters (escape the global max-width).
+    const nav = block(".talisbooks-viewer-stage__nav");
+    expect(nav).toContain("inset: 0 calc(-1 * var(--viewer-gutter));");
+    expect(nav).toContain("max-width: none;");
+    // Rotated mobile stage swaps the stage column's real box.
+    expect(css).toMatch(
+      /\.talisbooks-viewer--stage-landscape \.talisbooks-viewer-stage \{[\s\S]*?width:\s*100cqh;[\s\S]*?height:\s*100cqw;/,
+    );
+  });
+
+  it("keeps the playback rail inside the stage column and the header compact", () => {
+    const railIndex = shell.indexOf("<TalisBooksViewerPlaybackRail");
+    expect(shell.indexOf('className="talisbooks-viewer__stage-column"')).toBeLessThan(
+      railIndex,
+    );
+    expect(shell).toContain('className="talisbooks-viewer__heading"');
+    // Title metadata is still rendered.
+    expect(shell).toContain("talisbooks-viewer__eyebrow");
+    expect(shell).toContain("talisbooks-viewer__title");
+    expect(shell).toContain("talisbooks-viewer__subtitle");
   });
 
   it("shows Register only on issued FAST ebooks; Claim on demo viewers", () => {

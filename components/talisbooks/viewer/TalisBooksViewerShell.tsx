@@ -326,7 +326,7 @@ export default function TalisBooksViewerShell({
         .join(" ")}
     >
       <header className="talisbooks-viewer__header">
-        <div>
+        <div className="talisbooks-viewer__heading">
           <p className="talisbooks-viewer__eyebrow">
             {isMagazine
               ? book.listingProfile === "fsbo"
@@ -380,18 +380,23 @@ export default function TalisBooksViewerShell({
           ) : null}
         </div>
       </header>
-      <TalisBooksViewerPlaybackRail
-        viewMode={viewMode}
-        autoPlaying={autoPlaying}
-        intervalMs={intervalMs}
-        stageLandscape={stageLandscape}
-        onViewModeChange={handleViewModeChange}
-        onToggleAutoplay={handleToggleAutoplay}
-        onIntervalChange={setIntervalMs}
-        onToggleStageLandscape={() => setStageLandscape((current) => !current)}
-      />
       <div className="talisbooks-viewer__layout">
+        {/*
+          Stage column = every pixel under the navbar + compact header. It is a
+          CSS size container: the open book contain-fits it (see globals.css),
+          and the rail / orient FAB overlay its corners instead of eating rows.
+        */}
         <div className="talisbooks-viewer__stage-column">
+          <TalisBooksViewerPlaybackRail
+            viewMode={viewMode}
+            autoPlaying={autoPlaying}
+            intervalMs={intervalMs}
+            stageLandscape={stageLandscape}
+            onViewModeChange={handleViewModeChange}
+            onToggleAutoplay={handleToggleAutoplay}
+            onIntervalChange={setIntervalMs}
+            onToggleStageLandscape={() => setStageLandscape((current) => !current)}
+          />
           <button
             type="button"
             className={[
