@@ -5,15 +5,11 @@ import Link from "next/link";
 import { TALISPROS_MARKET_OPTIONS } from "@/lib/talispros/markets";
 import { useT } from "@/lib/i18n/client";
 
+/** Downward Markets menu used by market-page nav. Homepage lists these inline. */
 export default function TalisprosMarketsDropdown({
   triggerClassName = "text-[11px] tracking-[0.08em] text-neutral-500 hover:text-neutral-900 transition-colors",
-  menuAlign = "center",
-  menuDirection = "down",
 }: {
   triggerClassName?: string;
-  menuAlign?: "center" | "end";
-  /** `up` opens above the trigger (homepage corner). */
-  menuDirection?: "down" | "up";
 }) {
   const [open, setOpen] = useState(false);
   const t = useT();
@@ -29,8 +25,6 @@ export default function TalisprosMarketsDropdown({
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, []);
-
-  const opensUp = menuDirection === "up";
 
   return (
     <div
@@ -50,18 +44,10 @@ export default function TalisprosMarketsDropdown({
       </button>
 
       <div
-        className={`absolute z-30 ${
-          opensUp ? "bottom-full pb-2" : "top-full pt-2"
-        } ${open ? "block" : "hidden group-hover:block"} ${
-          menuAlign === "end" ? "" : "left-1/2 -translate-x-1/2"
+        className={`absolute top-full left-1/2 z-30 -translate-x-1/2 pt-2 ${
+          open ? "block" : "hidden group-hover:block"
         }`}
-        style={
-          menuAlign === "end"
-            ? { left: "auto", right: 0, width: "18rem", maxWidth: "none" }
-            : undefined
-        }
         data-markets-menu=""
-        data-markets-menu-direction={menuDirection}
       >
         <div className="min-w-[18rem] bg-[#e2e5ea] px-5 py-4 text-center shadow-sm">
           <div className="space-y-3">
