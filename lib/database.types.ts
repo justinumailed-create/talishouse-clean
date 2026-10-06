@@ -712,6 +712,8 @@ export interface Database {
           fast_code: string
           logo_url: string | null
           partner_image_url: string | null
+          partner_name: string | null
+          partner_tagline: string | null
           bookshelf_order: unknown
           created_at: string
           updated_at: string
@@ -721,6 +723,8 @@ export interface Database {
           fast_code: string
           logo_url?: string | null
           partner_image_url?: string | null
+          partner_name?: string | null
+          partner_tagline?: string | null
           bookshelf_order?: unknown
           created_at?: string
           updated_at?: string
@@ -730,6 +734,8 @@ export interface Database {
           fast_code?: string
           logo_url?: string | null
           partner_image_url?: string | null
+          partner_name?: string | null
+          partner_tagline?: string | null
           bookshelf_order?: unknown
           created_at?: string
           updated_at?: string

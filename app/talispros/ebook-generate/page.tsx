@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
 import EbookGenerateClient from "@/components/talispros/EbookGenerateClient";
 import { resolveOnboardingFromRequest } from "@/lib/talispros/resolve-onboarding-from-request";
+import { resolveMapSiteLogoUrlForServer } from "@/lib/talispros/mapsite-branding-service";
 import {
   logOnboardingFailure,
   logOnboardingStep,
@@ -70,6 +71,12 @@ export default async function EbookGeneratePage({
   }
 
   const { context } = resolved;
+  // New ebooks pick up the owner's Logo & Card Editor logo when one is set.
+  const agencyLogoUrl = await resolveMapSiteLogoUrlForServer({
+    mapsiteId: context.mapsiteId,
+    fastCode: context.fastCode,
+    defaultLogoUrl: context.assets.logo,
+  });
   logOnboardingStep("Ebook page load", pageStarted, {
     requestId: context.requestId,
     fastCode: context.fastCode,
@@ -91,7 +98,7 @@ export default async function EbookGeneratePage({
       initialListingTitle={context.listing.title}
       initialPinWriteup={context.pin.writeup}
       initialPriceLine={context.listing.price}
-      initialAgencyLogoUrl={context.assets.logo}
+      initialAgencyLogoUrl={agencyLogoUrl}
     />
   );
 }

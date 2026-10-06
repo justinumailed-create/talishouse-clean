@@ -1,3 +1,4 @@
+import sharp from "sharp";
 import { fetchOgImageBuffer } from "@/lib/share/fetch-og-image";
 import { loadMapsiteOgLocation } from "@/lib/share/load-mapsite-og-location";
 import { loadMapsiteScenicBackgroundUrl } from "@/lib/share/load-share-og-scene";
@@ -10,6 +11,30 @@ import {
 import { renderAllPinsOgCard } from "@/lib/share/render-allpins-og";
 import { readShareOgLogo, renderShareOgCard } from "@/lib/share/render-share-og";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
+import { isAllowedOwnerImageUrl } from "@/lib/talispros/mapsite-owner-customizations";
+import { resolveMapSiteLogoUrl } from "@/lib/talispros/mapsite-branding";
+import { loadMapSiteBrandingOverrides } from "@/lib/talispros/mapsite-branding-service";
+
+/** Owner Logo & Card Editor logo for the share card, else the Windswept badge. */
+async function mapsiteShareOgLogo(code: string): Promise<Buffer> {
+  if (code) {
+    const overrides = await loadMapSiteBrandingOverrides({ fastCode: code });
+    const ownerLogo = overrides?.logoUrl
+      ? resolveMapSiteLogoUrl(null, overrides)
+      : null;
+    if (
+      ownerLogo &&
+      isAllowedOwnerImageUrl(ownerLogo, process.env.NEXT_PUBLIC_SUPABASE_URL)
+    ) {
+      const buffer = await fetchOgImageBuffer(ownerLogo);
+      // Only use it if sharp can decode it; otherwise keep the default badge.
+      if (buffer && (await sharp(buffer).metadata().then(() => true, () => false))) {
+        return buffer;
+      }
+    }
+  }
+  return readShareOgLogo(CLAIMED_MAPSITE_OG_LOGO_PATH);
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -58,9 +83,9 @@ export async function GET(
       background,
       showPin: true,
       pinColor: CLAIMED_MAPSITE_OG_PIN_COLOR,
-      // Individual Mapsite™ cards use the circular Windswept badge. Keep the
-      // ALLPINS branch above and unrelated Talisbooks™ cards on their existing logo.
-      logo: await readShareOgLogo(CLAIMED_MAPSITE_OG_LOGO_PATH),
+      // Individual Mapsite™ cards use the owner's custom logo when set, else the
+      // circular Windswept badge. ALLPINS and Talisbooks™ cards are unchanged.
+      logo: await mapsiteShareOgLogo(code),
     });
     return new Response(new Uint8Array(jpeg), { headers: HEADERS });
   } catch (error) {

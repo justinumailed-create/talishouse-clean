@@ -43,6 +43,7 @@ import {
   onboardingNow,
 } from "@/lib/onboarding-timing";
 import { optimizeUploadImage } from "@/lib/media/optimize-upload-image";
+import { loadMapSiteBrandingOverrides } from "@/lib/talispros/mapsite-branding-service";
 import { rejectDisallowedEbookFiles } from "@/lib/talisbooks/ebook-upload-formats-server";
 import {
   MAPSITE_FLAG_IDENTITY_DEFAULT,
@@ -706,6 +707,13 @@ async function loadSelfServiceAgentDetails(input: {
 
   const mapsite = mapsiteResult.data;
   const assets = assetsResult.data;
+  // Owner Logo & Card Editor logo (override) — used for new ebooks, never
+  // written back over the Mapsite™ default logo.
+  const ownerBranding = await loadMapSiteBrandingOverrides({
+    mapsiteId: mapsite?.id || resolvedMapSiteId,
+    fastCode: input.fastCode,
+  });
+  const ownerLogoUrl = ownerBranding?.logoUrl?.trim() || null;
 
   const requestName = [request?.first_name, request?.last_name]
     .filter(Boolean)
@@ -734,7 +742,12 @@ async function loadSelfServiceAgentDetails(input: {
     brokerageName: "Talispros™",
     brokerageLine: mapsite?.property_address || undefined,
     brokerageLogoUrl:
-      uploadedLogoUrl || request?.logo || assets?.logo_image || mapsite?.logo_url || undefined,
+      uploadedLogoUrl ||
+      ownerLogoUrl ||
+      request?.logo ||
+      assets?.logo_image ||
+      mapsite?.logo_url ||
+      undefined,
   };
 
   await persistSelfServiceMapSiteBranding({
@@ -743,7 +756,8 @@ async function loadSelfServiceAgentDetails(input: {
     requestId: request?.id || input.requestId,
     agent,
     uploadedPhoto: Boolean(uploadedPhotoUrl),
-    uploadedLogo: Boolean(uploadedLogoUrl),
+    uploadedLogo: Boolean(uploadedLogoUrl) && uploadedLogoUrl !== ownerLogoUrl,
+    ownerLogoUrl,
   });
 
   return agent;
@@ -756,11 +770,17 @@ async function persistSelfServiceMapSiteBranding(input: {
   agent: SelfServiceAgentDetails;
   uploadedPhoto: boolean;
   uploadedLogo: boolean;
+  /** Owner override logo — never persisted as the Mapsite™ default. */
+  ownerLogoUrl?: string | null;
 }): Promise<void> {
   if (!isSupabaseAdminConfigured()) return;
 
   const photo = input.agent.photoUrl?.trim() || null;
-  const logo = input.agent.brokerageLogoUrl?.trim() || null;
+  const rawLogo = input.agent.brokerageLogoUrl?.trim() || null;
+  const logo =
+    rawLogo && input.ownerLogoUrl && rawLogo === input.ownerLogoUrl.trim()
+      ? null
+      : rawLogo;
   const name = input.agent.name?.trim() || "";
   const email = input.agent.email?.trim() || "";
   const phone = input.agent.phone?.trim() || "";

@@ -3,21 +3,53 @@
  *
  * Stored in `mapsite_owner_customizations` (migration 093):
  * - logo / partner photo overrides for the claimed Mapsite™ left card
+ * - partner name + tagline overrides (migration 094)
  * - per-FAST-Code bookshelf order (ordered talisbooks_books ids)
+ *
+ * Read overrides through `resolveMapSiteBranding` (mapsite-branding.ts) so
+ * every surface stays consistent.
  */
 
 export type MapSiteOwnerCustomizations = {
   logoUrl: string | null;
   partnerImageUrl: string | null;
+  partnerName: string | null;
+  partnerTagline: string | null;
   bookshelfOrder: string[];
+  /** Row updated_at (cache-busts Open Graph cards after a change). */
+  updatedAt?: string | null;
 };
 
 export type MapSiteBrandingField = "logo" | "partnerImage";
+export type MapSitePartnerTextField = "partnerName" | "partnerTagline";
+
+/** Length limits (mirrored by DB checks in migration 094). */
+export const MAPSITE_PARTNER_TEXT_LIMITS: Record<MapSitePartnerTextField, number> = {
+  partnerName: 60,
+  partnerTagline: 140,
+};
+
+/**
+ * Normalize an owner-entered partner name / tagline: collapse whitespace,
+ * strip control characters. Returns null for empty input; `tooLong` when
+ * over the limit (never silently truncated).
+ */
+export function normalizePartnerText(
+  value: unknown,
+  field: MapSitePartnerTextField,
+): { value: string | null; tooLong: boolean } {
+  if (typeof value !== "string") return { value: null, tooLong: false };
+  const cleaned = value.replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s+/g, " ").trim();
+  if (!cleaned) return { value: null, tooLong: false };
+  const max = MAPSITE_PARTNER_TEXT_LIMITS[field];
+  if (Array.from(cleaned).length > max) return { value: cleaned, tooLong: true };
+  return { value: cleaned, tooLong: false };
+}
 
 /** Dashboard dropdown items, in navbar order. */
 export const MAPSITE_DASHBOARD_MENU_ITEMS = [
   { id: "ebooks", label: "Ebook Editor" },
-  { id: "branding", label: "Logo & Image Editor" },
+  { id: "branding", label: "Logo & Card Editor" },
   { id: "pins", label: "PIN Dashboard" },
   { id: "bookshelf", label: "Bookshelf Editor" },
 ] as const;
@@ -28,7 +60,14 @@ export type MapSiteDashboardPanelId =
 export const MAPSITE_BOOKSHELF_ORDER_MAX = 500;
 
 export function emptyMapSiteOwnerCustomizations(): MapSiteOwnerCustomizations {
-  return { logoUrl: null, partnerImageUrl: null, bookshelfOrder: [] };
+  return {
+    logoUrl: null,
+    partnerImageUrl: null,
+    partnerName: null,
+    partnerTagline: null,
+    bookshelfOrder: [],
+    updatedAt: null,
+  };
 }
 
 /** Keep unique, non-empty string ids (bounded). */

@@ -11,6 +11,11 @@ import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { getMapSiteVisitorAccountStatus } from "@/lib/mapsite-account-status";
 import { getMapSiteEditToolbarState } from "@/lib/mapsite-edit-auth";
 import { getMapSiteByFastCode, type MapSiteView } from "@/lib/mapsite-service";
+import { withOwnerLogoUrl } from "@/lib/talispros/mapsite-branding";
+import {
+  loadMapSiteBrandingOverrides,
+  resolveBrandedMapSiteOgImage,
+} from "@/lib/talispros/mapsite-branding-service";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
   getMapSitePlatformByFastCode,
@@ -101,7 +106,7 @@ async function enrichPublishedBranding(
   if (!isSupabaseAdminConfigured()) return view;
 
   const supabase = getSupabaseAdmin();
-  const [{ data: row }, { data: fastCodeRow }] = await Promise.all([
+  const [{ data: row }, { data: fastCodeRow }, ownerBranding] = await Promise.all([
     supabase
       .from("mapsites")
       .select(
@@ -114,6 +119,7 @@ async function enrichPublishedBranding(
       .select("request_id")
       .ilike("code", fastCode)
       .maybeSingle(),
+    loadMapSiteBrandingOverrides({ mapsiteId: view.id, fastCode }),
   ]);
 
   const requestId = fastCodeRow?.request_id || view.requestId;
@@ -147,7 +153,8 @@ async function enrichPublishedBranding(
   const email = row?.email?.trim() || view.email;
   const phone = row?.phone?.trim() || view.phone;
 
-  return {
+  return withOwnerLogoUrl(
+    {
     ...view,
     logoUrl,
     profileImageUrl,
@@ -157,7 +164,10 @@ async function enrichPublishedBranding(
     ownerFirstName: row?.owner_first_name || view.ownerFirstName,
     ownerLastName: row?.owner_last_name || view.ownerLastName,
     brokerageName,
-  };
+    },
+    // Owner Logo & Card Editor override wins on the published Mapsite™ too.
+    ownerBranding,
+  );
 }
 
 export async function loadPublishedMapSiteView(fastCode: string) {
@@ -192,7 +202,9 @@ export async function publishedMapSiteMetadata(mapsite: MapSiteView) {
   const layoutData = buildMapSiteLayoutData(mapsite);
   const slug = (layoutData.slug || mapsite.fastCode).trim().toLowerCase();
   const code = layoutData.fastCode.toUpperCase();
-  const ogImage = resolveMapSiteOgImage(mapsite.fastCode);
+  const ogImage = isAllPinsFastCode(mapsite.fastCode)
+    ? resolveMapSiteOgImage(mapsite.fastCode)
+    : await resolveBrandedMapSiteOgImage(mapsite.fastCode);
 
   if (isAllPinsFastCode(mapsite.fastCode)) {
     const copy = allpinsSeoCopy();

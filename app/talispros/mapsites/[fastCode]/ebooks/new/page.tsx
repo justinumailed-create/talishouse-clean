@@ -7,6 +7,7 @@ import { CLIENT_LOGIN_PATH } from "@/lib/mapsite-account-session";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { safeMapSiteBackHref } from "@/lib/talispros/owner-ebook-routes";
+import { resolveMapSiteLogoUrlForServer } from "@/lib/talispros/mapsite-branding-service";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,11 @@ export default async function OwnerEbookCreatePage({
     accountType: mapsite.accountType,
   });
   const writes = getMapSiteAdminWritesState();
+  const agencyLogoUrl = await resolveMapSiteLogoUrlForServer({
+    mapsiteId: mapsite.id,
+    fastCode: mapsite.fastCode,
+    defaultLogoUrl: mapsite.logoUrl,
+  });
 
   return (
     <div className="min-h-dvh bg-[#f5f5f7]">
@@ -66,7 +72,7 @@ export default async function OwnerEbookCreatePage({
           initialListingTitle={mapsite.propertyTitle}
           initialPinWriteup={mapsite.propertyDescription}
           initialPriceLine={mapsite.price}
-          initialAgencyLogoUrl={mapsite.logoUrl}
+          initialAgencyLogoUrl={agencyLogoUrl}
         />
       </div>
     </div>

@@ -4,6 +4,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { renumberBookPagesTwoPass } from "@/lib/talisbooks/renumber-book-pages";
 import {
   isLockedPageContent,
   ownerEbookPageFromRow,
@@ -99,23 +100,8 @@ export async function renumberOwnerEbookPages(
     return { success: false, error: "Page order has duplicates." };
   }
   const now = new Date().toISOString();
-  const offset = 100000;
-  for (let index = 0; index < orderedIds.length; index += 1) {
-    const { error } = await supabase
-      .from("talisbooks_book_pages")
-      .update({ page_number: offset + index + 1 })
-      .eq("id", orderedIds[index]!)
-      .eq("book_id", bookId);
-    if (error) return { success: false, error: error.message };
-  }
-  for (let index = 0; index < orderedIds.length; index += 1) {
-    const { error } = await supabase
-      .from("talisbooks_book_pages")
-      .update({ page_number: index + 1, sort_order: index + 1, updated_at: now })
-      .eq("id", orderedIds[index]!)
-      .eq("book_id", bookId);
-    if (error) return { success: false, error: error.message };
-  }
+  const renumbered = await renumberBookPagesTwoPass(supabase, bookId, orderedIds, now);
+  if (!renumbered.success) return renumbered;
   await supabase
     .from("talisbooks_books")
     .update({ page_count: orderedIds.length, updated_at: now })

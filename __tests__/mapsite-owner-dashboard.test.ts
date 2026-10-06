@@ -40,7 +40,7 @@ describe("Mapsite™ owner Dashboard menu", () => {
   it("lists the four Dashboard items in navbar order", () => {
     expect(MAPSITE_DASHBOARD_MENU_ITEMS.map((item) => item.label)).toEqual([
       "Ebook Editor",
-      "Logo & Image Editor",
+      "Logo & Card Editor",
       "PIN Dashboard",
       "Bookshelf Editor",
     ]);

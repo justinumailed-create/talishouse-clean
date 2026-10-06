@@ -13,7 +13,7 @@ type MapSiteDashboardPanelProps = {
 
 /**
  * Closeable owner Dashboard panel over the Mapsite™ map canvas.
- * Shared shell for PIN Dashboard, Logo & Image Editor, Bookshelf Editor and
+ * Shared shell for PIN Dashboard, Logo & Card Editor, Bookshelf Editor and
  * Ebook Editor so every Dashboard item looks and closes the same way.
  */
 export default function MapSiteDashboardPanel({

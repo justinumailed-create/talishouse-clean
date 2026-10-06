@@ -42,8 +42,11 @@ import { ROUTES } from "@/lib/routes";
 import { isDemonstrationListing } from "@/lib/talispros/demo-mapsite";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
 import MapSiteMarketPartnerCard, {
+  DEFAULT_MAPSITE_PARTNER_TAGLINE,
   defaultMapSitePartnerImage,
+  defaultMapSitePartnerName,
 } from "./MapSiteMarketPartnerCard";
+import { resolveMapSiteBranding, withOwnerLogo } from "@/lib/talispros/mapsite-branding";
 import MapSiteLogoImageEditor from "./MapSiteLogoImageEditor";
 import MapSiteBookshelfEditor from "./MapSiteBookshelfEditor";
 import MapSiteEbookEditorPanel from "./MapSiteEbookEditorPanel";
@@ -79,7 +82,7 @@ import {
 } from "@/lib/talispros/mapsite-owner-customizations";
 import { mapsiteAgencyLogoUrl } from "@/lib/talispros/mapsite-listing-media";
 
-/** Owner Dashboard dropdown: Ebook Editor, Logo & Image Editor, PIN Dashboard, Bookshelf Editor. */
+/** Owner Dashboard dropdown: Ebook Editor, Logo & Card Editor, PIN Dashboard, Bookshelf Editor. */
 const DASHBOARD_MENU = MAPSITE_DASHBOARD_MENU_ITEMS;
 
 /** Minimum popup body height so hero + title + action row stay visible. */
@@ -752,12 +755,25 @@ function MapSiteChrome({
   }, [pinCheckoutStatus, dashboardManageable]);
 
   const defaultPartnerImage = defaultMapSitePartnerImage(audience);
-  const cardMapSite = useMemo(
+  const defaultPartnerName = defaultMapSitePartnerName(mapsite);
+  // One resolver for logo + partner photo/name/tagline (owner overrides win).
+  const branding = useMemo(
     () =>
-      ownerCustomizations.logoUrl
-        ? { ...mapsite, logo_url: ownerCustomizations.logoUrl }
-        : mapsite,
-    [mapsite, ownerCustomizations.logoUrl],
+      resolveMapSiteBranding(
+        {
+          logoUrl: mapsite.logo_url,
+          partnerImageUrl: defaultPartnerImage,
+          partnerName: defaultPartnerName,
+          partnerTagline: DEFAULT_MAPSITE_PARTNER_TAGLINE,
+        },
+        ownerCustomizations,
+      ),
+    [mapsite.logo_url, defaultPartnerImage, defaultPartnerName, ownerCustomizations],
+  );
+  // Branded record (owner logo override) for the left card, sidebar and popup.
+  const cardMapSite = useMemo(
+    () => withOwnerLogo(mapsite, ownerCustomizations),
+    [mapsite, ownerCustomizations],
   );
 
   const pinFitKey = pinDashboard.pins
@@ -867,7 +883,7 @@ function MapSiteChrome({
           }
         >
           <MapSiteListingSidebar
-            mapsite={mapsite}
+            mapsite={cardMapSite}
             listingCardRef={listingCardRef}
             compact={compact}
             mobileOverlay={mobileOverlay}
@@ -877,7 +893,9 @@ function MapSiteChrome({
                 <MapSiteMarketPartnerCard
                   audience={audience}
                   mapsite={cardMapSite}
-                  partnerImageUrl={ownerCustomizations.partnerImageUrl}
+                  partnerImageUrl={branding.partnerImageUrl}
+                  partnerName={branding.partnerName}
+                  partnerTagline={branding.partnerTagline}
                   cardRef={listingCardRef}
                   onSelect={focusPinAndOpen}
                   paid={paid}
@@ -922,12 +940,12 @@ function MapSiteChrome({
           <MapSiteLogoImageEditor
             mapsiteId={mapsite.id}
             fastCode={mapsite.fast_code || ""}
-            currentLogoUrl={mapsiteAgencyLogoUrl(cardMapSite.logo_url)}
-            currentPartnerImageUrl={
-              ownerCustomizations.partnerImageUrl || defaultPartnerImage
-            }
+            currentLogoUrl={mapsiteAgencyLogoUrl(branding.logoUrl)}
+            currentPartnerImageUrl={branding.partnerImageUrl}
             defaultLogoUrl={mapsiteAgencyLogoUrl(mapsite.logo_url)}
             defaultPartnerImageUrl={defaultPartnerImage}
+            defaultPartnerName={defaultPartnerName}
+            defaultPartnerTagline={DEFAULT_MAPSITE_PARTNER_TAGLINE}
             customizations={ownerCustomizations}
             onClose={closeDashboardPanel}
             onSaved={setOwnerCustomizations}
@@ -953,7 +971,7 @@ function MapSiteChrome({
         {selectedPinId === mapsite.id && !dashboardOpen ? (
           <>
             <MapSitePropertyPopup
-              mapsite={mapsite}
+              mapsite={cardMapSite}
               claimHref={claimHref}
               claimLabel={claimLabel}
               genericOnboardingCard={!claimed}

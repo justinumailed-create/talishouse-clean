@@ -15,15 +15,24 @@ type Row = {
   fast_code: string;
   logo_url: string | null;
   partner_image_url: string | null;
+  partner_name?: string | null;
+  partner_tagline?: string | null;
   bookshelf_order: unknown;
+  updated_at?: string | null;
 };
+
+const COLUMNS =
+  "mapsite_id, fast_code, logo_url, partner_image_url, partner_name, partner_tagline, bookshelf_order, updated_at";
 
 function rowToCustomizations(row: Row | null | undefined): MapSiteOwnerCustomizations {
   if (!row) return emptyMapSiteOwnerCustomizations();
   return {
     logoUrl: row.logo_url?.trim() || null,
     partnerImageUrl: row.partner_image_url?.trim() || null,
+    partnerName: row.partner_name?.trim() || null,
+    partnerTagline: row.partner_tagline?.trim() || null,
     bookshelfOrder: normalizeBookshelfOrder(row.bookshelf_order),
+    updatedAt: row.updated_at ?? null,
   };
 }
 
@@ -36,8 +45,29 @@ export async function loadMapSiteOwnerCustomizations(
   try {
     const { data, error } = await getSupabaseAdmin()
       .from(TABLE)
-      .select("mapsite_id, fast_code, logo_url, partner_image_url, bookshelf_order")
+      .select(COLUMNS)
       .eq("mapsite_id", id)
+      .maybeSingle();
+    if (error) return emptyMapSiteOwnerCustomizations();
+    return rowToCustomizations(data as Row | null);
+  } catch {
+    return emptyMapSiteOwnerCustomizations();
+  }
+}
+
+/** Overrides by FAST Code (public surfaces that only know the code). Never throws. */
+export async function loadMapSiteOwnerCustomizationsByFastCode(
+  fastCode: string | null | undefined,
+): Promise<MapSiteOwnerCustomizations> {
+  const code = fastCode?.trim().toLowerCase() || "";
+  if (!code || !isSupabaseAdminConfigured()) return emptyMapSiteOwnerCustomizations();
+  try {
+    const { data, error } = await getSupabaseAdmin()
+      .from(TABLE)
+      .select(COLUMNS)
+      .ilike("fast_code", code)
+      .order("updated_at", { ascending: false })
+      .limit(1)
       .maybeSingle();
     if (error) return emptyMapSiteOwnerCustomizations();
     return rowToCustomizations(data as Row | null);
@@ -73,6 +103,8 @@ export async function saveMapSiteOwnerCustomizations(input: {
   patch: Partial<{
     logo_url: string | null;
     partner_image_url: string | null;
+    partner_name: string | null;
+    partner_tagline: string | null;
     bookshelf_order: string[];
   }>;
 }): Promise<{ customizations?: MapSiteOwnerCustomizations; error?: string }> {
@@ -89,7 +121,7 @@ export async function saveMapSiteOwnerCustomizations(input: {
       },
       { onConflict: "mapsite_id" },
     )
-    .select("mapsite_id, fast_code, logo_url, partner_image_url, bookshelf_order")
+    .select(COLUMNS)
     .maybeSingle();
   if (error) {
     const missing = /relation|does not exist|schema cache/i.test(error.message || "");

@@ -289,6 +289,11 @@ export function bookshelfSeoCopy(input: {
 }
 
 /** Absolute URL of the composed landscape Mapsite™ share card. */
-export function resolveMapSiteOgImage(fastCodeRaw: string): string {
-  return toAbsoluteHttpsOgUrl(mapsiteShareOgPath(fastCodeRaw));
+export function resolveMapSiteOgImage(
+  fastCodeRaw: string,
+  /** Owner branding version (mapsiteBrandingOgVersion) — busts link-preview caches. */
+  brandingVersion?: string | null,
+): string {
+  const url = toAbsoluteHttpsOgUrl(mapsiteShareOgPath(fastCodeRaw));
+  return brandingVersion ? `${url}?v=${encodeURIComponent(brandingVersion)}` : url;
 }

@@ -12,6 +12,7 @@ import {
 } from "./demonstration-catalog";
 import { applyPublicLibraryPins } from "./public-library-pins";
 import { applyBookshelfOrder } from "@/lib/talispros/mapsite-owner-customizations";
+import { withFirstPageCovers } from "./first-page-cover";
 import { filterBooksForFastCodeShelf, queryLibraryBooks } from "./query";
 import type {
   TalisBooksBookshelf,
@@ -125,11 +126,16 @@ function applyBookshelfCatalogPolicy(
   return next;
 }
 
-/** Owner Bookshelf Editor order (mapsite_owner_customizations) for a FAST shelf. */
+/**
+ * FAST-Code shelf finishing: first-page cover thumbnails, then the owner
+ * Bookshelf Editor order (mapsite_owner_customizations).
+ */
 async function applyOwnerShelfOrder(
   fastCode: string,
-  books: TalisBooksLibraryBook[],
+  incoming: TalisBooksLibraryBook[],
 ): Promise<{ books: TalisBooksLibraryBook[]; ownerOrdered: boolean }> {
+  // FAST shelves show each book's first-page image as its cover thumbnail.
+  const books = await withFirstPageCovers(incoming);
   if (books.length < 2) return { books, ownerOrdered: false };
   const { loadBookshelfOrderForFastCode } = await import(
     "@/lib/talispros/mapsite-owner-customizations-service"

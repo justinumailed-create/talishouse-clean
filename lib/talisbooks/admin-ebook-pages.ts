@@ -4,6 +4,7 @@
  */
 
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { renumberBookPagesTwoPass } from "@/lib/talisbooks/renumber-book-pages";
 import { ROUTES } from "@/lib/routes";
 import {
   TALISBOOKS_ASSET_CACHE_CONTROL,
@@ -400,22 +401,14 @@ export async function reorderAdminEbookPages(input: {
   const supabase = getSupabaseAdmin();
   const now = new Date().toISOString();
 
-  for (let index = 0; index < nextOrder.length; index += 1) {
-    const page = nextOrder[index]!;
-    const pageNumber = index + 1;
-    const { error } = await supabase
-      .from("talisbooks_book_pages")
-      .update({
-        page_number: pageNumber,
-        sort_order: pageNumber,
-        updated_at: now,
-      })
-      .eq("id", page.id)
-      .eq("book_id", input.bookId);
-    if (error) {
-      return { success: false, error: error.message };
-    }
-  }
+  // Two-pass renumber: a single pass collides with UNIQUE (book_id, page_number).
+  const renumbered = await renumberBookPagesTwoPass(
+    supabase,
+    input.bookId,
+    nextOrder.map((page) => page.id),
+    now,
+  );
+  if (!renumbered.success) return renumbered;
 
   await supabase
     .from("talisbooks_books")

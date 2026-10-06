@@ -39,10 +39,22 @@ function contentForAudience(audience: RegistrationMarket): TalisprosMarketPageCo
   }
 }
 
-/** Default left-card partner photo for this audience (Logo & Image Editor reset). */
+/** Default left-card partner photo for this audience (Logo & Card Editor reset). */
 export function defaultMapSitePartnerImage(audience: RegistrationMarket): string {
   return mapsiteMarketPartnerImageUrl(null, contentForAudience(audience).partnerImage);
 }
+
+/** Default left-card partner name (assigned marketing manager, else Aisha C.). */
+export function defaultMapSitePartnerName(
+  mapsite: Pick<MapSitePlatformRecord, "assigned_marketing_manager">,
+): string {
+  return (
+    mapsite.assigned_marketing_manager?.trim() || MAPSITE_MARKET_PARTNER_FALLBACK_NAME
+  );
+}
+
+/** Default left-card tagline. */
+export const DEFAULT_MAPSITE_PARTNER_TAGLINE = MARKETING_PARTNER_CARD_INTRO;
 
 interface MapSiteMarketPartnerCardProps {
   audience: RegistrationMarket;
@@ -60,8 +72,11 @@ interface MapSiteMarketPartnerCardProps {
    * entry for rm22 (Ralf) Mapsite™ dashboard.
    */
   showKnowledgeBaseManage?: boolean;
-  /** Owner Logo & Image Editor override for the partner photo slot. */
+  /** Resolved partner photo (owner override via resolveMapSiteBranding). */
   partnerImageUrl?: string | null;
+  /** Resolved partner name / tagline (owner overrides via resolveMapSiteBranding). */
+  partnerName?: string | null;
+  partnerTagline?: string | null;
 }
 
 /**
@@ -80,6 +95,8 @@ export default function MapSiteMarketPartnerCard({
   accountTypeSegment = null,
   showKnowledgeBaseManage = false,
   partnerImageUrl = null,
+  partnerName: partnerNameOverride = null,
+  partnerTagline = null,
 }: MapSiteMarketPartnerCardProps) {
   const content = contentForAudience(audience);
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
@@ -91,9 +108,8 @@ export default function MapSiteMarketPartnerCard({
     content.partnerImage,
   );
   const partnerName =
-    mapsite.assigned_marketing_manager?.trim() ||
-    MAPSITE_MARKET_PARTNER_FALLBACK_NAME;
-  const partnerLabel = MARKETING_PARTNER_CARD_INTRO;
+    partnerNameOverride?.trim() || defaultMapSitePartnerName(mapsite);
+  const partnerLabel = partnerTagline?.trim() || DEFAULT_MAPSITE_PARTNER_TAGLINE;
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (!onSelect) return;

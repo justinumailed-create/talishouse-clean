@@ -8,6 +8,7 @@ import {
   resolveMapSiteOgImage,
 } from "@/lib/talispros/mapsite-og-image";
 import { loadMapsiteSeoFields } from "@/lib/talispros/load-mapsite-seo-fields";
+import { resolveBrandedMapSiteOgImage } from "@/lib/talispros/mapsite-branding-service";
 import {
   parseRegistrationMarket,
   type RegistrationMarket,
@@ -79,7 +80,9 @@ export async function generateMetadata({
   const { accountType, fastCode } = await params;
   const code = fastCode.trim().toUpperCase();
   const path = `${MAPSITE_APP_PATH}/${mapsiteAccountTypeSegment(accountType)}/${fastCode.trim().toLowerCase()}`;
-  const ogImage = resolveMapSiteOgImage(fastCode);
+  const ogImage = isAllPinsFastCode(fastCode)
+    ? resolveMapSiteOgImage(fastCode)
+    : await resolveBrandedMapSiteOgImage(fastCode);
 
   if (isAllPinsFastCode(fastCode)) {
     const copy = allpinsSeoCopy();

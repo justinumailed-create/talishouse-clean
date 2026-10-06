@@ -6,8 +6,11 @@ import { getTalisBooksBookshelf } from "@/lib/talisbooks/library";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import {
   isAllowedOwnerImageUrl,
+  MAPSITE_PARTNER_TEXT_LIMITS,
   normalizeBookshelfOrder,
+  normalizePartnerText,
   type MapSiteBrandingField,
+  type MapSitePartnerTextField,
   type MapSiteOwnerCustomizations,
 } from "@/lib/talispros/mapsite-owner-customizations";
 import {
@@ -31,6 +34,8 @@ function revalidateOwnerSurfaces(fastCode: string) {
   revalidatePath("/talispros/mapsite", "layout");
   if (!code) return;
   revalidatePath(`/mapsite/${code}`);
+  revalidatePath(`/mapsite/${code}/map`);
+  revalidatePath(`/talispros/mapsites/${code}`);
   revalidatePath(`/talisbooks/fast/${code}`);
 }
 
@@ -82,6 +87,39 @@ export async function saveMapSiteBrandingAction(input: {
     mapsiteId: auth.mapsiteId,
     fastCode: auth.fastCode,
     patch: { [column]: url },
+  });
+  if (!saved.customizations) return { error: saved.error || "Could not save." };
+  revalidateOwnerSurfaces(auth.fastCode);
+  return { customizations: saved.customizations };
+}
+
+/** Save or reset (value = null) the left-card partner name or tagline. */
+export async function saveMapSitePartnerTextAction(input: {
+  mapsiteId: string;
+  fastCode: string;
+  field: MapSitePartnerTextField;
+  value: string | null;
+}): Promise<{ customizations: MapSiteOwnerCustomizations } | ActionError> {
+  const auth = await authorizeOwner(input);
+  if ("error" in auth) return auth;
+  if (input.field !== "partnerName" && input.field !== "partnerTagline") {
+    return { error: "Unknown card field." };
+  }
+  const normalized = normalizePartnerText(input.value, input.field);
+  if (normalized.tooLong) {
+    const label = input.field === "partnerName" ? "Name" : "Tagline";
+    return {
+      error: `${label} must be ${MAPSITE_PARTNER_TEXT_LIMITS[input.field]} characters or fewer.`,
+    };
+  }
+  if (input.value !== null && !normalized.value) {
+    return { error: "Enter some text, or use Reset to default." };
+  }
+  const column = input.field === "partnerName" ? "partner_name" : "partner_tagline";
+  const saved = await saveMapSiteOwnerCustomizations({
+    mapsiteId: auth.mapsiteId,
+    fastCode: auth.fastCode,
+    patch: { [column]: normalized.value },
   });
   if (!saved.customizations) return { error: saved.error || "Could not save." };
   revalidateOwnerSurfaces(auth.fastCode);

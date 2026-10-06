@@ -2,10 +2,16 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { postEbookGenerateOptimizedImage } from "@/lib/media/client-upload-ebook-image";
-import { saveMapSiteBrandingAction } from "@/app/talispros/mapsite/dashboard-actions";
-import type {
-  MapSiteBrandingField,
-  MapSiteOwnerCustomizations,
+import {
+  saveMapSiteBrandingAction,
+  saveMapSitePartnerTextAction,
+} from "@/app/talispros/mapsite/dashboard-actions";
+import {
+  MAPSITE_PARTNER_TEXT_LIMITS,
+  normalizePartnerText,
+  type MapSiteBrandingField,
+  type MapSiteOwnerCustomizations,
+  type MapSitePartnerTextField,
 } from "@/lib/talispros/mapsite-owner-customizations";
 import MapSiteDashboardPanel, { DashboardNotice } from "./MapSiteDashboardPanel";
 
@@ -18,6 +24,9 @@ type MapSiteLogoImageEditorProps = {
   /** Build defaults restored by Reset. */
   defaultLogoUrl: string;
   defaultPartnerImageUrl: string;
+  /** Default left-card partner name / tagline (Reset target). */
+  defaultPartnerName: string;
+  defaultPartnerTagline: string;
   customizations: MapSiteOwnerCustomizations;
   onClose: () => void;
   onSaved: (next: MapSiteOwnerCustomizations) => void;
@@ -42,7 +51,7 @@ const SLOTS: Array<{
   {
     field: "logo",
     label: "Logo",
-    help: "Shown at the top of the left write-up card. PNG with a transparent background works best.",
+    help: "Used everywhere this Mapsite™ shows its logo: the left card, the published Mapsite™ header, new ebooks, and link previews. PNG with a transparent background works best.",
     kind: "logo",
   },
   {
@@ -53,7 +62,7 @@ const SLOTS: Array<{
   },
 ];
 
-/** Logo & Image Editor: upload / replace / reset the left-card logo and photo. */
+/** Logo & Card Editor: logo, left-card photo, partner name and tagline (upload / save / reset). */
 export default function MapSiteLogoImageEditor({
   mapsiteId,
   fastCode,
@@ -61,10 +70,16 @@ export default function MapSiteLogoImageEditor({
   currentPartnerImageUrl,
   defaultLogoUrl,
   defaultPartnerImageUrl,
+  defaultPartnerName,
+  defaultPartnerTagline,
   customizations,
   onClose,
   onSaved,
 }: MapSiteLogoImageEditorProps) {
+  const [texts, setTexts] = useState<Record<MapSitePartnerTextField, string>>({
+    partnerName: customizations.partnerName ?? defaultPartnerName,
+    partnerTagline: customizations.partnerTagline ?? defaultPartnerTagline,
+  });
   const [slots, setSlots] = useState<Record<MapSiteBrandingField, SlotState>>({
     logo: EMPTY_SLOT,
     partnerImage: EMPTY_SLOT,
@@ -127,8 +142,50 @@ export default function MapSiteLogoImageEditor({
     });
   }
 
+  function saveText(field: MapSitePartnerTextField, value: string | null, done: string) {
+    setError(null);
+    setMessage(null);
+    startTransition(async () => {
+      const result = await saveMapSitePartnerTextAction({ mapsiteId, fastCode, field, value });
+      if ("error" in result) {
+        setError(result.error);
+        return;
+      }
+      onSaved(result.customizations);
+      setTexts((current) => ({
+        ...current,
+        [field]:
+          (field === "partnerName"
+            ? result.customizations.partnerName
+            : result.customizations.partnerTagline) ??
+          (field === "partnerName" ? defaultPartnerName : defaultPartnerTagline),
+      }));
+      setMessage(done);
+    });
+  }
+
+  const TEXT_SLOTS: Array<{
+    field: MapSitePartnerTextField;
+    label: string;
+    saved: string | null;
+    fallback: string;
+  }> = [
+    {
+      field: "partnerName",
+      label: "Partner name",
+      saved: customizations.partnerName,
+      fallback: defaultPartnerName,
+    },
+    {
+      field: "partnerTagline",
+      label: "Tagline",
+      saved: customizations.partnerTagline,
+      fallback: defaultPartnerTagline,
+    },
+  ];
+
   return (
-    <MapSiteDashboardPanel title="Logo & Image Editor" fastCode={fastCode} onClose={onClose}>
+    <MapSiteDashboardPanel title="Logo & Card Editor" fastCode={fastCode} onClose={onClose}>
       {message ? <DashboardNotice tone="success">{message}</DashboardNotice> : null}
       {error ? <DashboardNotice tone="error">{error}</DashboardNotice> : null}
 
@@ -221,6 +278,73 @@ export default function MapSiteLogoImageEditor({
           </div>
         );
       })}
+
+      <div className="space-y-3 rounded-md border border-neutral-200 p-3">
+        <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+          Left-card text
+        </h3>
+        {TEXT_SLOTS.map((slot) => {
+          const max = MAPSITE_PARTNER_TEXT_LIMITS[slot.field];
+          const value = texts[slot.field];
+          const normalized = normalizePartnerText(value, slot.field);
+          const length = Array.from(value.trim()).length;
+          const current = slot.saved ?? slot.fallback;
+          const dirty = (normalized.value ?? "") !== current;
+          const inputId = `mapsite-card-${slot.field}`;
+          return (
+            <div key={slot.field} className="space-y-1">
+              <div className="flex items-center justify-between gap-2">
+                <label htmlFor={inputId} className="text-[11px] font-semibold text-neutral-700">
+                  {slot.label}
+                </label>
+                <span
+                  className={`text-[10px] ${length > max ? "text-red-600" : "text-neutral-400"}`}
+                >
+                  {length}/{max} · {slot.saved ? "Custom" : "Default"}
+                </span>
+              </div>
+              <input
+                id={inputId}
+                type="text"
+                value={value}
+                maxLength={max + 20}
+                onChange={(event) =>
+                  setTexts((currentTexts) => ({
+                    ...currentTexts,
+                    [slot.field]: event.target.value,
+                  }))
+                }
+                className="w-full rounded-md border border-neutral-300 px-2.5 py-1.5 text-sm"
+              />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={!dirty || !normalized.value || normalized.tooLong || pending}
+                  onClick={() =>
+                    saveText(slot.field, normalized.value, `${slot.label} saved.`)
+                  }
+                  className="rounded-md bg-neutral-900 px-3 py-1 text-xs font-semibold text-white disabled:opacity-50"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  disabled={!slot.saved || pending}
+                  onClick={() => {
+                    if (!window.confirm(`Reset the ${slot.label.toLowerCase()} to “${slot.fallback}”?`)) {
+                      return;
+                    }
+                    saveText(slot.field, null, `${slot.label} reset to default.`);
+                  }}
+                  className="ml-auto rounded-md px-2 py-1 text-xs font-medium text-red-700 hover:bg-red-50 disabled:opacity-40"
+                >
+                  Reset to default
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </MapSiteDashboardPanel>
   );
 }
