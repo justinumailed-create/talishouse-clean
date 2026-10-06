@@ -23,7 +23,27 @@ export type OwnershipContactTopic =
 export type OwnershipContactPayload = {
   name: string;
   email: string;
-  phone?: string;
+  /** Required; must be a North American (NANP) number — see nanp-phone.ts. */
+  phone: string;
   message: string;
   topic: OwnershipContactTopic | string;
 };
+
+/**
+ * Window event the homepage Learn More buttons dispatch so the TalisBOT chat
+ * widget opens with the contact form (instead of a full-page modal).
+ */
+export const OPEN_OWNERSHIP_CONTACT_EVENT = "talisbot:open-ownership-contact" as const;
+
+export type OpenOwnershipContactDetail = {
+  topic: OwnershipContactTopic | string;
+};
+
+export function openOwnershipContactInTalisBot(topic: OwnershipContactTopic | string) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(
+    new CustomEvent<OpenOwnershipContactDetail>(OPEN_OWNERSHIP_CONTACT_EVENT, {
+      detail: { topic },
+    }),
+  );
+}

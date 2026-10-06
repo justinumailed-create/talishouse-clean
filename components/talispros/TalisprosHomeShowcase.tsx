@@ -7,7 +7,7 @@ import {
   HOME_OWNERSHIP_STRUCTURES_TAGLINE,
 } from "@/lib/talispros/ownership-models";
 import HomeMountainMotion from "@/components/talispros/HomeMountainMotion";
-import OwnershipLearnMoreForm from "@/components/talispros/OwnershipLearnMoreForm";
+import { openOwnershipContactInTalisBot } from "@/lib/talispros/ownership-contact";
 
 /**
  * Homepage gate right column: looping mountain motion on the upper half with a
@@ -17,7 +17,6 @@ import OwnershipLearnMoreForm from "@/components/talispros/OwnershipLearnMoreFor
  */
 export default function TalisprosHomeShowcase() {
   const [openId, setOpenId] = useState<string | null>(null);
-  const [contactTopic, setContactTopic] = useState<string | null>(null);
   const rootRef = useRef<HTMLElement>(null);
   const baseId = useId();
 
@@ -103,7 +102,12 @@ export default function TalisprosHomeShowcase() {
               <p className="mt-3.5">
                 <button
                   type="button"
-                  onClick={() => setContactTopic(openSection.title)}
+                  onClick={() => {
+                    // Opens the TalisBOT panel (bottom-left) with the
+                    // OwnershipLearnMoreForm inside; topic is sent silently.
+                    openOwnershipContactInTalisBot(openSection.title);
+                    close();
+                  }}
                   className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
                 >
                   {openSection.learnMoreLabel ?? "Learn More"}
@@ -172,12 +176,6 @@ export default function TalisprosHomeShowcase() {
           })}
         </div>
       </div>
-
-      <OwnershipLearnMoreForm
-        topic={contactTopic || "Conventional"}
-        open={Boolean(contactTopic)}
-        onClose={() => setContactTopic(null)}
-      />
     </aside>
   );
 }

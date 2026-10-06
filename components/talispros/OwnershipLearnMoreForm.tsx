@@ -1,54 +1,57 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
+import type { OwnershipContactTopic } from "@/lib/talispros/ownership-contact";
 import {
-  OWNERSHIP_CONTACT_TOPICS,
-  type OwnershipContactTopic,
-} from "@/lib/talispros/ownership-contact";
+  NANP_PHONE_ERROR,
+  formatNanpPhoneInput,
+  isValidNanpPhone,
+} from "@/lib/talispros/nanp-phone";
 
 type OwnershipLearnMoreFormProps = {
+  /** Recorded silently with the submission (which Learn More was clicked). */
   topic: OwnershipContactTopic | string;
-  open: boolean;
+  /** Called from the Back / Close buttons. */
   onClose: () => void;
 };
 
+const INPUT_CLASS =
+  "w-full rounded-xl border bg-neutral-50 px-3 py-2.5 text-sm outline-none focus:border-[#046BD9]";
+
+/**
+ * Ownership Learn More contact form, rendered inline inside the TalisBOT
+ * chat panel (components/TalisBotChat.tsx). The topic is not shown as a
+ * field; it is sent with the submission so leads route the same way.
+ */
 export default function OwnershipLearnMoreForm({
   topic,
-  open,
   onClose,
 }: OwnershipLearnMoreFormProps) {
   const titleId = useId();
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const phoneErrorId = useId();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [phoneTouched, setPhoneTouched] = useState(false);
   const [message, setMessage] = useState("");
-  const [selectedTopic, setSelectedTopic] = useState(topic);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    if (open) {
-      setSelectedTopic(topic);
-      setError(null);
-      setDone(false);
-    }
-  }, [open, topic]);
+    setError(null);
+    setDone(false);
+  }, [topic]);
 
-  useEffect(() => {
-    if (!open) return;
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
-
-  if (!open) return null;
+  const phoneInvalid = phoneTouched && !isValidNanpPhone(phone);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setPhoneTouched(true);
+    if (!isValidNanpPhone(phone)) {
+      setError(null);
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -60,7 +63,7 @@ export default function OwnershipLearnMoreForm({
           email,
           phone,
           message,
-          topic: selectedTopic,
+          topic,
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
@@ -72,6 +75,7 @@ export default function OwnershipLearnMoreForm({
       setName("");
       setEmail("");
       setPhone("");
+      setPhoneTouched(false);
       setMessage("");
     } catch {
       setError("Network error. Please try again.");
@@ -81,143 +85,131 @@ export default function OwnershipLearnMoreForm({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[1100] flex items-end justify-center bg-black/45 p-3 sm:items-center sm:p-6"
-      role="presentation"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
+    <section
+      aria-labelledby={titleId}
+      className="space-y-3 p-1 text-left animate-in fade-in slide-in-from-bottom-2 duration-300"
+      data-ownership-topic={topic}
     >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_24px_60px_rgba(0,0,0,0.28)]"
-      >
-        <div className="flex items-start justify-between gap-3 border-b border-neutral-100 px-5 py-4">
-          <div>
-            <h2
-              id={titleId}
-              className="text-[16px] font-semibold text-neutral-900"
-            >
-              Learn More
-            </h2>
-            <p className="mt-0.5 text-[13px] text-neutral-500">
-              Tell us about your interest — we&apos;ll follow up.
-            </p>
-          </div>
+      <div>
+        <h4 id={titleId} className="text-[15px] font-semibold text-gray-900">
+          Learn More
+        </h4>
+        <p className="mt-0.5 text-[12.5px] text-neutral-500">
+          Tell us about your interest — we&apos;ll follow up.
+        </p>
+      </div>
+
+      {done ? (
+        <div className="space-y-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-5 text-center">
+          <p className="text-[14px] font-semibold text-neutral-900">
+            Thanks — your message is on its way.
+          </p>
+          <p className="text-[13px] text-neutral-600">
+            A Talispros™ advisor will contact you about {topic}.
+          </p>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full px-2 py-0.5 text-sm font-medium text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800"
-            aria-label="Close contact form"
+            className="inline-flex rounded-lg bg-[#046BD9] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#035bb8]"
           >
-            ✕
+            Done
           </button>
         </div>
-
-        {done ? (
-          <div className="space-y-4 px-5 py-8 text-center">
-            <p className="text-[15px] font-semibold text-neutral-900">
-              Thanks — your message is on its way.
-            </p>
-            <p className="text-sm text-neutral-600">
-              A Talispros™ advisor will contact you about {selectedTopic}.
-            </p>
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex rounded-lg bg-[#046BD9] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#035bb8]"
-            >
-              Close
-            </button>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input type="hidden" name="topic" value={topic} />
+          <div>
+            <label className="mb-1 block text-[12px] font-medium text-neutral-600">
+              Name
+            </label>
+            <input
+              type="text"
+              name="name"
+              required
+              autoComplete="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className={`${INPUT_CLASS} border-neutral-200`}
+              placeholder="Full name"
+            />
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-3.5 px-5 py-5">
-            <div>
-              <label className="mb-1 block text-[12px] font-medium text-neutral-600">
-                Topic
-              </label>
-              <select
-                value={selectedTopic}
-                onChange={(e) => setSelectedTopic(e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm outline-none focus:border-[#046BD9]"
-                required
-              >
-                {OWNERSHIP_CONTACT_TOPICS.map((t) => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="mb-1 block text-[12px] font-medium text-neutral-600">
-                Name
-              </label>
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm outline-none focus:border-[#046BD9]"
-                placeholder="Full name"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-[12px] font-medium text-neutral-600">
-                Email
-              </label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm outline-none focus:border-[#046BD9]"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-[12px] font-medium text-neutral-600">
-                Phone <span className="text-neutral-400">(optional)</span>
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm outline-none focus:border-[#046BD9]"
-                placeholder="+1…"
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-[12px] font-medium text-neutral-600">
-                Message
-              </label>
-              <textarea
-                required
-                rows={4}
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="w-full resize-y rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm outline-none focus:border-[#046BD9]"
-                placeholder="What would you like to know?"
-              />
-            </div>
-            {error ? (
-              <p className="text-sm text-red-600" role="alert">
-                {error}
+          <div>
+            <label className="mb-1 block text-[12px] font-medium text-neutral-600">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={`${INPUT_CLASS} border-neutral-200`}
+              placeholder="you@example.com"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-[12px] font-medium text-neutral-600">
+              Phone
+            </label>
+            <input
+              type="tel"
+              name="phone"
+              required
+              inputMode="tel"
+              autoComplete="tel-national"
+              value={phone}
+              onChange={(e) => setPhone(formatNanpPhoneInput(e.target.value))}
+              onBlur={() => setPhoneTouched(true)}
+              aria-invalid={phoneInvalid}
+              aria-describedby={phoneInvalid ? phoneErrorId : undefined}
+              className={`${INPUT_CLASS} ${
+                phoneInvalid ? "border-red-500" : "border-neutral-200"
+              }`}
+              placeholder="(555) 555-5555"
+            />
+            {phoneInvalid ? (
+              <p id={phoneErrorId} className="mt-1 text-[12px] text-red-600" role="alert">
+                {NANP_PHONE_ERROR}
               </p>
             ) : null}
-            <button
-              type="submit"
-              disabled={submitting}
-              className="inline-flex w-full items-center justify-center rounded-xl bg-[#046BD9] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#035bb8] disabled:opacity-60"
-            >
-              {submitting ? "Sending…" : "Send inquiry"}
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
+          </div>
+          <div>
+            <label className="mb-1 block text-[12px] font-medium text-neutral-600">
+              Propose a Project
+            </label>
+            <textarea
+              name="message"
+              required
+              rows={4}
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              className={`${INPUT_CLASS} resize-y border-neutral-200`}
+              placeholder="Propose a Project"
+            />
+          </div>
+          {error ? (
+            <p className="text-sm text-red-600" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="inline-flex w-full items-center justify-center rounded-xl bg-[#046BD9] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#035bb8] disabled:opacity-60"
+          >
+            {submitting ? "Sending…" : "Send inquiry"}
+          </button>
+        </form>
+      )}
+
+      <button
+        type="button"
+        onClick={onClose}
+        className="text-sm font-medium text-gray-400 hover:text-black transition px-1"
+      >
+        ← Back
+      </button>
+    </section>
   );
 }

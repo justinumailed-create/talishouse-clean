@@ -20,7 +20,34 @@ describe("Tokenization Learn More", () => {
     );
     expect(showcase).toContain("learnMoreContact");
     expect(showcase).toContain("Learn More");
-    expect(showcase).toContain("OwnershipLearnMoreForm");
+    // Learn More opens the form inside TalisBOT, not a page-level modal.
+    expect(showcase).toContain("openOwnershipContactInTalisBot");
+    expect(showcase).not.toContain("<OwnershipLearnMoreForm");
+
+    const bot = readFileSync(join(root, "components/TalisBotChat.tsx"), "utf8");
+    expect(bot).toContain("OPEN_OWNERSHIP_CONTACT_EVENT");
+    expect(bot).toContain("<OwnershipLearnMoreForm topic={contactTopic}");
+  });
+
+  it("Learn More form: no Topic field, required NANP phone, Propose a Project", () => {
+    const form = readFileSync(
+      join(root, "components/talispros/OwnershipLearnMoreForm.tsx"),
+      "utf8",
+    );
+    expect(form).not.toContain("<select");
+    expect(form).not.toContain("(optional)");
+    expect(form).not.toContain("What would you like to know?");
+    expect(form).toContain("Propose a Project");
+    expect(form).toMatch(/type="tel"[\s\S]*?required/);
+    expect(form).toContain("isValidNanpPhone");
+    expect(form).toContain("topic,");
+    expect(form).not.toContain('className="fixed inset-0');
+
+    const api = readFileSync(
+      join(root, "app/api/ownership-contact/route.ts"),
+      "utf8",
+    );
+    expect(api).toContain("formatNanpPhone");
   });
 
   it("opens a contact form Learn More for every ownership button", () => {

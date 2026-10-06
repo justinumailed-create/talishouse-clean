@@ -6,6 +6,7 @@ import {
   OWNERSHIP_CONTACT_SOURCE,
   OWNERSHIP_CONTACT_TOPICS,
 } from "@/lib/talispros/ownership-contact";
+import { NANP_PHONE_ERROR, formatNanpPhone } from "@/lib/talispros/nanp-phone";
 
 export const runtime = "nodejs";
 
@@ -30,13 +31,13 @@ export async function POST(request: Request) {
 
   const name = String(body.name || "").trim();
   const email = String(body.email || "").trim();
-  const phone = String(body.phone || "").trim();
+  const rawPhone = String(body.phone || "").trim();
   const message = String(body.message || "").trim();
   const topic = String(body.topic || "").trim();
 
-  if (!name || !email || !message || !topic) {
+  if (!name || !email || !rawPhone || !message || !topic) {
     return NextResponse.json(
-      { ok: false, error: "Name, email, topic, and message are required." },
+      { ok: false, error: "Name, email, phone, and message are required." },
       { status: 400 },
     );
   }
@@ -50,13 +51,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Enter a valid email." }, { status: 400 });
   }
 
+  // North American (NANP) numbers only; stored as +1 (NPA) NXX-XXXX.
+  const phone = formatNanpPhone(rawPhone);
+  if (!phone) {
+    return NextResponse.json({ ok: false, error: NANP_PHONE_ERROR }, { status: 400 });
+  }
+
   try {
     const supabase = getLeadsClient();
     const { error: insertError } = await supabase.from("leads").insert([
       {
         name,
         email,
-        phone: phone || "—",
+        phone,
         message,
         location: `Ownership Learn More — ${topic}`,
         fast_code: null,
@@ -83,7 +90,7 @@ export async function POST(request: Request) {
     recipients: OWNERSHIP_CONTACT_RECIPIENTS,
     name,
     email,
-    phone: phone || undefined,
+    phone,
     topic,
     message,
   });

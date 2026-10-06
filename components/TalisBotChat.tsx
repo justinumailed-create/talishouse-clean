@@ -12,13 +12,17 @@ import {
   TALISBOT_SYSTEM_ROLE,
 } from "@/lib/talispros/talisbot-knowledge";
 import { TALISU_MKTS_HEADER_BLUE } from "@/lib/talisu/markets-pins";
-import { OWNERSHIP_CONTACT_TOPICS } from "@/lib/talispros/ownership-contact";
+import {
+  OPEN_OWNERSHIP_CONTACT_EVENT,
+  OWNERSHIP_CONTACT_TOPICS,
+  type OpenOwnershipContactDetail,
+} from "@/lib/talispros/ownership-contact";
 
 const OPTION_CLASS =
   "w-full text-left px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 text-sm hover:border-black hover:bg-black hover:text-white transition-all duration-200 font-medium";
 
 type TalisBotPosition = "left" | "right";
-type BotStep = "greeting" | "knowledge";
+type BotStep = "greeting" | "knowledge" | "contact";
 
 const DEFAULT_CONTACT_TOPIC = OWNERSHIP_CONTACT_TOPICS[0];
 
@@ -31,7 +35,7 @@ export default function TalisBotChat({
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<BotStep>("greeting");
   const [activeKnowledgeId, setActiveKnowledgeId] = useState<string | null>(null);
-  const [contactOpen, setContactOpen] = useState(false);
+  const [contactTopic, setContactTopic] = useState<string>(DEFAULT_CONTACT_TOPIC);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,19 +44,42 @@ export default function TalisBotChat({
     }
   }, [step, activeKnowledgeId]);
 
+  // Homepage Learn More buttons open the bot with the contact form inside it.
+  useEffect(() => {
+    function onOpenContact(event: Event) {
+      const detail = (event as CustomEvent<OpenOwnershipContactDetail>).detail;
+      setContactTopic(detail?.topic || DEFAULT_CONTACT_TOPIC);
+      setActiveKnowledgeId(null);
+      setStep("contact");
+      setOpen(true);
+    }
+    window.addEventListener(OPEN_OWNERSHIP_CONTACT_EVENT, onOpenContact);
+    return () => window.removeEventListener(OPEN_OWNERSHIP_CONTACT_EVENT, onOpenContact);
+  }, []);
+
+  useEffect(() => {
+    if (step === "contact" && contentRef.current) {
+      contentRef.current.scrollTop = 0;
+    }
+  }, [step, contactTopic]);
+
   const reset = () => {
     setStep("greeting");
     setActiveKnowledgeId(null);
   };
 
   const openContactForm = () => {
-    setContactOpen(true);
+    setContactTopic(DEFAULT_CONTACT_TOPIC);
+    setStep("contact");
   };
 
   const activeKnowledge = TALISBOT_KNOWLEDGE.find((k) => k.id === activeKnowledgeId);
 
   const renderContent = () => {
     switch (step) {
+      case "contact":
+        return <OwnershipLearnMoreForm topic={contactTopic} onClose={reset} />;
+
       case "greeting":
         return (
           <div className="flex flex-col items-center justify-center h-full text-center p-4 py-8">
@@ -194,12 +221,6 @@ export default function TalisBotChat({
           </div>
         </div>
       )}
-
-      <OwnershipLearnMoreForm
-        topic={DEFAULT_CONTACT_TOPIC}
-        open={contactOpen}
-        onClose={() => setContactOpen(false)}
-      />
     </div>
   );
 }
