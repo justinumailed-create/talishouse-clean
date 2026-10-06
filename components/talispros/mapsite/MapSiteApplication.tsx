@@ -46,6 +46,7 @@ import MapSiteMarketPartnerCard, {
 } from "./MapSiteMarketPartnerCard";
 import MapSiteLogoImageEditor from "./MapSiteLogoImageEditor";
 import MapSiteBookshelfEditor from "./MapSiteBookshelfEditor";
+import MapSiteEbookEditorPanel from "./MapSiteEbookEditorPanel";
 import DemoClaimMarketButton from "./DemoClaimMarketButton";
 import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
@@ -78,10 +79,8 @@ import {
 } from "@/lib/talispros/mapsite-owner-customizations";
 import { mapsiteAgencyLogoUrl } from "@/lib/talispros/mapsite-listing-media";
 
-/** Phase 1 Dashboard dropdown (Ebook Editor ships in phase 2). */
-const DASHBOARD_MENU = MAPSITE_DASHBOARD_MENU_ITEMS.filter(
-  (item) => item.id !== "ebooks",
-);
+/** Owner Dashboard dropdown: Ebook Editor, Logo & Image Editor, PIN Dashboard, Bookshelf Editor. */
+const DASHBOARD_MENU = MAPSITE_DASHBOARD_MENU_ITEMS;
 
 /** Minimum popup body height so hero + title + action row stay visible. */
 const MAPSITE_POPUP_MIN_HEIGHT_PX = 384;
@@ -932,6 +931,14 @@ function MapSiteChrome({
             customizations={ownerCustomizations}
             onClose={closeDashboardPanel}
             onSaved={setOwnerCustomizations}
+          />
+        ) : null}
+
+        {dashboardPanel === "ebooks" && dashboardManageable ? (
+          <MapSiteEbookEditorPanel
+            mapsiteId={mapsite.id}
+            fastCode={mapsite.fast_code || ""}
+            onClose={closeDashboardPanel}
           />
         ) : null}
 
