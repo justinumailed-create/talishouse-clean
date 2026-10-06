@@ -80,7 +80,7 @@ describe("Register page without catalogue purchase section", () => {
     expect(welcome).not.toContain('href="/talisu/bo"');
     expect(welcome).not.toContain('href="/talisu/au"');
     expect(welcome).toContain('id="faq"');
-    expect(welcome).toContain("TALISU_FAQ");
+    expect(welcome).toContain("talisu.faq");
     expect(page).toContain("max-w-[1920px]");
     expect(page).toContain("minmax(16rem,20rem)_minmax(0,1fr)");
   });

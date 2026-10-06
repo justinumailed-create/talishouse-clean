@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import { HOME_OWNERSHIP_SECTIONS } from "../lib/talispros/ownership-models";
 
 const root = process.cwd();
@@ -19,7 +20,8 @@ describe("Tokenization Learn More", () => {
       "utf8",
     );
     expect(showcase).toContain("learnMoreContact");
-    expect(showcase).toContain("Learn More");
+    expect(showcase).toContain("t.home.learnMore");
+    expect(en.home.learnMore).toBe("Learn More");
     // Learn More opens the form inside TalisBOT, not a page-level modal.
     expect(showcase).toContain("openOwnershipContactInTalisBot");
     expect(showcase).not.toContain("<OwnershipLearnMoreForm");
@@ -37,7 +39,8 @@ describe("Tokenization Learn More", () => {
     expect(form).not.toContain("<select");
     expect(form).not.toContain("(optional)");
     expect(form).not.toContain("What would you like to know?");
-    expect(form).toContain("Propose a Project");
+    expect(form).toContain("c.project");
+    expect(en.contactForm.project).toBe("Propose a Project");
     expect(form).toMatch(/type="tel"[\s\S]*?required/);
     expect(form).toContain("isValidNanpPhone");
     expect(form).toContain("topic,");

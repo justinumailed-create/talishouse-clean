@@ -11,6 +11,21 @@ export const TALISBOT_SYSTEM_ROLE =
   "FAST Codes™, claim/register, shelves, TalisU™, Knowledge Base, SamCart register, " +
   "and demo claim. Do not discuss or recommend any other house-product brands outside Talispros™.";
 
+/**
+ * Locale-aware system role. German adds an explicit reply-language rule so any
+ * model wired to TalisBOT answers in German (Sie form) and keeps brand names.
+ */
+export function getTalisBotSystemRole(locale: "en" | "de" = "en"): string {
+  if (locale !== "de") return TALISBOT_SYSTEM_ROLE;
+  return (
+    TALISBOT_SYSTEM_ROLE +
+    " Always reply in natural, professional German using the formal \"Sie\" form." +
+    " Keep brand names and trademarks unchanged (Talispros™, Talishouse™, Mapsites™, Talisbooks™," +
+    " TalisTV™, TalisU™, TalisBOT, FAST Codes™, TEB™, TTV™, PIN, SamCart) and keep acronyms" +
+    " such as URL, MLS®, TEB, TVA and TTV."
+  );
+}
+
 export const TALISBOT_KNOWLEDGE = [
   {
     id: "mapsites",

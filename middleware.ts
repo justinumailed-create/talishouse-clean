@@ -7,11 +7,22 @@ import {
   resolveAdminRequestGate,
 } from "@/lib/admin-request-gate";
 import { isAdminAppPath } from "@/lib/admin-paths";
+import {
+  localeFromRequestUrl,
+  persistLocaleCookie,
+  withLocaleRequestHeader,
+} from "@/lib/i18n/middleware";
 
 const PUBLIC_ROUTES = ["/business-office/apply"];
 
+function isBusinessOfficePath(path: string) {
+  return path === "/business-office" || path.startsWith("/business-office/");
+}
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
+  // `?lang=de|en` — crawlable German alternates without a /[locale] segment.
+  const locale = localeFromRequestUrl(request.nextUrl);
 
   if (isAdminAppPath(path)) {
     const gate = resolveAdminRequestGate({
@@ -21,30 +32,52 @@ export function middleware(request: NextRequest) {
     });
 
     if (gate.action === "redirect") {
-      return NextResponse.redirect(new URL(gate.to, request.url));
+      return persistLocaleCookie(
+        NextResponse.redirect(new URL(gate.to, request.url)),
+        locale,
+      );
     }
 
-    const requestHeaders = new Headers(request.headers);
+    const requestHeaders = withLocaleRequestHeader(new Headers(request.headers), locale);
     requestHeaders.set(ADMIN_PATHNAME_HEADER, path);
-    return NextResponse.next({
-      request: { headers: requestHeaders },
-    });
+    return persistLocaleCookie(
+      NextResponse.next({
+        request: { headers: requestHeaders },
+      }),
+      locale,
+    );
   }
 
-  // Bypass auth completely for public routes
-  if (PUBLIC_ROUTES.includes(path)) {
-    return NextResponse.next();
+  if (isBusinessOfficePath(path) && !PUBLIC_ROUTES.includes(path)) {
+    const authCookie = request.cookies.get("auth");
+
+    if (!authCookie) {
+      return persistLocaleCookie(
+        NextResponse.redirect(new URL("/", request.url)),
+        locale,
+      );
+    }
   }
 
-  const authCookie = request.cookies.get("auth");
+  if (!locale) return NextResponse.next();
 
-  if (!authCookie) {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-
-  return NextResponse.next();
+  return persistLocaleCookie(
+    NextResponse.next({
+      request: { headers: withLocaleRequestHeader(new Headers(request.headers), locale) },
+    }),
+    locale,
+  );
 }
 
 export const config = {
-  matcher: ["/business-office/:path*", "/admin", "/admin/:path*"],
+  matcher: [
+    "/business-office/:path*",
+    "/admin",
+    "/admin/:path*",
+    // Any page URL carrying ?lang= (language alternates / shared German links).
+    {
+      source: "/((?!api|_next/static|_next/image|favicon).*)",
+      has: [{ type: "query", key: "lang" }],
+    },
+  ],
 };

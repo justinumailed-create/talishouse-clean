@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import {
   buildClaimedMapSitePath,
   claimedMapSiteSegmentForAccountOrPlan,
@@ -72,8 +73,11 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(gatePage).toContain("TalisprosHomeShowcase");
     expect(gatePage).toContain("TalisUMktsHeader");
     expect(gate).toContain("TalisprosHomeFastCodeEntry");
-    expect(gate).toContain("Open your Account*");
-    expect(gate).toContain("System Demo");
+    // Copy lives in the i18n dictionary (English default; German in de.ts).
+    expect(gate).toContain("t.home.openAccount");
+    expect(en.home.openAccount).toBe("Open your Account*");
+    expect(gate).toContain("t.home.systemDemo");
+    expect(en.home.systemDemo).toBe("System Demo");
     expect(gate).toContain("TALISPROS_HOME_SYSTEM_DEMO_HREF");
     expect(gate).toContain("aria-expanded={loginOpen}");
     expect(gate).toContain("setLoginOpen");

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
+import { useT } from "@/lib/i18n/client";
 
 export default function TalisUChrome({
   children,
@@ -10,6 +11,7 @@ export default function TalisUChrome({
   children: React.ReactNode;
 }) {
   const pathname = usePathname() || "/talisu";
+  const t = useT();
   const isMkts =
     pathname === "/talisu/mkts" || pathname.startsWith("/talisu/mkts/");
 
@@ -31,7 +33,7 @@ export default function TalisUChrome({
       <main className="flex-1">{children}</main>
       <footer className="shrink-0 border-t border-black/10 bg-white px-4 py-4 text-center text-[12px] leading-snug text-neutral-600 sm:px-6 sm:text-[13px]">
         <p>
-          TalisU&trade; · part of{" "}
+          TalisU&trade; · {t.talisu.footerPartOf}{" "}
           <Link href="/" className="font-medium text-[#0069CF] hover:underline">
             Talispros&trade;
           </Link>

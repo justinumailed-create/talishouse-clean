@@ -7,6 +7,7 @@ import {
   type SamCartStartReturnResult,
 } from "@/app/talispros/start/samcart-return-actions";
 import { isSamCartPaymentReturn, parseSamCartReturnParams } from "@/lib/talispros/samcart-return";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * On `/` after SamCart Custom URL redirect: detect orderid/email,
@@ -16,6 +17,9 @@ export default function TalisprosSamCartReturnBanner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const ran = useRef(false);
+  const t = useT();
+  const r = t.home.samcartReturn;
+  const failedNote = r.failedNote;
   const [result, setResult] = useState<SamCartStartReturnResult | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -41,8 +45,7 @@ export default function TalisprosSamCartReturnBanner() {
         setResult({
           detected: true,
           chargeVerified: false,
-          verificationNote:
-            "Return detected but session setup failed. Use Login with your FAST Code™.",
+          verificationNote: failedNote,
           orderId: parsed.orderId,
           email: parsed.email,
           fastCode: parsed.fastCode,
@@ -54,7 +57,7 @@ export default function TalisprosSamCartReturnBanner() {
         });
       })
       .finally(() => setBusy(false));
-  }, [searchParams, router]);
+  }, [searchParams, router, failedNote]);
 
   if (!busy && !result?.detected) return null;
 
@@ -65,17 +68,17 @@ export default function TalisprosSamCartReturnBanner() {
       aria-live="polite"
     >
       {busy && !result ? (
-        <p className="font-medium">Confirming payment return…</p>
+        <p className="font-medium">{r.confirming}</p>
       ) : result ? (
         <div className="space-y-1.5">
           <p className="font-semibold tracking-wide">
             {result.sessionEstablished || result.paymentRecorded
-              ? "Payment return received — Mapsite™ unlock in progress."
-              : "Payment return detected."}
+              ? r.received
+              : r.detected}
           </p>
           {result.orderId ? (
             <p className="text-xs text-emerald-800">
-              SamCart order <span className="font-mono">{result.orderId}</span>
+              {r.order} <span className="font-mono">{result.orderId}</span>
               {result.fastCode ? (
                 <>
                   {" "}
@@ -93,12 +96,12 @@ export default function TalisprosSamCartReturnBanner() {
               href={result.href}
               className="inline-block pt-1 text-xs font-semibold uppercase tracking-[0.12em] text-emerald-950 underline-offset-2 hover:underline"
             >
-              Open your claimed Mapsite™
+              {r.openClaimed}
             </a>
           ) : (
             <p className="text-xs text-emerald-800">
-              Use <strong>Open your Account*</strong> with your FAST Code™ to
-              open your Mapsite™.
+              {r.useAccountBefore} <strong>{t.home.openAccount}</strong>{" "}
+              {r.useAccountAfter}
             </p>
           )}
         </div>

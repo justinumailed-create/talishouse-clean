@@ -6,6 +6,7 @@ import { useState } from "react";
 import TalisprosHomeFastCodeEntry from "@/components/talispros/TalisprosHomeFastCodeEntry";
 import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
 import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * Homepage gate left column: Talispros logo + Login (reveals FAST Code) + System Demo.
@@ -13,6 +14,7 @@ import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
  */
 export default function TalisprosHomeGate() {
   const [loginOpen, setLoginOpen] = useState(false);
+  const t = useT();
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-white px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
@@ -30,7 +32,7 @@ export default function TalisprosHomeGate() {
             Talispros
           </h1>
           <p className="mt-2 text-sm font-medium tracking-[0.14em] text-neutral-500 sm:text-[15px]">
-            PROMOTE - MANAGE - COOPERATE
+            {t.home.motto}
           </p>
         </div>
 
@@ -46,7 +48,7 @@ export default function TalisprosHomeGate() {
                 : "border-[var(--talis-nav-blue)] bg-white text-[var(--talis-nav-blue)] hover:bg-[var(--talis-nav-blue)] hover:text-white"
             }`}
           >
-            Open your Account*
+            {t.home.openAccount}
           </button>
 
           <div
@@ -72,7 +74,7 @@ export default function TalisprosHomeGate() {
             href={TALISPROS_HOME_SYSTEM_DEMO_HREF}
             className="w-full border-2 border-neutral-300 bg-white px-4 py-3.5 text-center text-[15px] font-medium tracking-wide text-neutral-900 transition hover:border-neutral-900 hover:bg-neutral-50 active:scale-[0.99] sm:text-base"
           >
-            System Demo
+            {t.home.systemDemo}
           </Link>
         </div>
 

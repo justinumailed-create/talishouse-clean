@@ -97,7 +97,7 @@ describe("TalisU blue header dropdown", () => {
     );
     expect(header).toContain("TALISU_MKTS_HEADER_DROPDOWN");
     expect(header).toContain('aria-haspopup="menu"');
-    expect(header).toMatch(/\n\s*TalisU\n/);
+    expect(header).toMatch(/\n\s*\{t\.nav\.talisu\}\n/);
     expect(header).toContain('role="menu"');
     // TalisU trigger is rendered after primary nav + Mapsites + vertical separator
     expect(header).toContain("TALISU_MKTS_HEADER_NAV.filter");
@@ -110,7 +110,7 @@ describe("TalisU blue header dropdown", () => {
     const catalogueIdx = header.indexOf('(item) => item.label === "Catalogue"');
     const registerFilterIdx = header.indexOf("<RegisterNavDropdown");
     const separatorIdx = header.indexOf("bg-white/45");
-    const talisUIdx = header.indexOf("\n              TalisU\n");
+    const talisUIdx = header.indexOf("\n              {t.nav.talisu}\n");
     expect(marketsIdx).toBeGreaterThan(-1);
     expect(mapsitesIdx).toBeGreaterThan(marketsIdx);
     expect(bookshelvesIdx).toBeGreaterThan(mapsitesIdx);

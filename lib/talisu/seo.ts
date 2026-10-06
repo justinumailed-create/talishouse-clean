@@ -1,4 +1,10 @@
 import type { Metadata } from "next";
+import type { Locale } from "@/lib/i18n/config";
+import {
+  localeAlternates,
+  ogAlternateLocales,
+  ogLocale,
+} from "@/lib/i18n/metadata";
 import { TALISU_SITE_URL } from "@/lib/talisu/content";
 
 const OG_IMAGE = "https://www.talispros.com/api/og/talispros";
@@ -8,6 +14,11 @@ export function createTalisUMetadata(overrides: {
   description: string;
   path: string;
   private?: boolean;
+  /**
+   * Translated page: emit canonical for this locale plus en/de/x-default
+   * hreflang alternates (German = `?lang=de`). Omit on English-only pages.
+   */
+  locale?: Locale;
 }): Metadata {
   const path = overrides.path.startsWith("/")
     ? overrides.path
@@ -31,14 +42,19 @@ export function createTalisUMetadata(overrides: {
     metadataBase: new URL(TALISU_SITE_URL),
     title: overrides.title,
     description: overrides.description,
-    alternates: { canonical: url },
+    alternates: overrides.locale
+      ? localeAlternates(url, overrides.locale)
+      : { canonical: url },
     openGraph: {
       title: overrides.title,
       description: overrides.description,
       url,
       siteName: "TalisU™",
       type: "website",
-      locale: "en_US",
+      locale: ogLocale(overrides.locale ?? "en"),
+      ...(overrides.locale
+        ? { alternateLocale: ogAlternateLocales(overrides.locale) }
+        : {}),
       images: [
         {
           url: OG_IMAGE,

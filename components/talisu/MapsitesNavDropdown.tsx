@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useId, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { TALISU_MKTS_HEADER_MAPSITES_LABEL } from "@/lib/talisu/markets-pins";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { setFastCode } from "@/lib/fast-code";
 import { openClaimedMapSiteFromHomeFastCode } from "@/app/talispros/mapsites/actions";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * Mapsites™ navbar dropdown — FAST Code™ gate (no public claimed list).
@@ -14,6 +14,8 @@ import { openClaimedMapSiteFromHomeFastCode } from "@/app/talispros/mapsites/act
  */
 export default function MapsitesNavDropdown() {
   const pathname = usePathname() || "";
+  const t = useT();
+  const m = t.nav.mapsitesMenu;
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
@@ -70,14 +72,14 @@ export default function MapsitesNavDropdown() {
 
     const trimmed = value.trim();
     if (!trimmed) {
-      setError("Please enter a FAST Code™.");
+      setError(m.errEmpty);
       inputRef.current?.focus();
       return;
     }
 
     // FAST Codes™ are letters + digits (and hyphens); never & / +.
     if (/[&+]/.test(trimmed) || !/^[a-zA-Z0-9-]+$/.test(trimmed)) {
-      setError("Use letters and digits only (no & or +).");
+      setError(m.errChars);
       inputRef.current?.focus();
       return;
     }
@@ -86,7 +88,7 @@ export default function MapsitesNavDropdown() {
     try {
       const result = await openClaimedMapSiteFromHomeFastCode(trimmed);
       if (!result.success || !result.href) {
-        setError(result.error || "Unable to open that Mapsite™.");
+        setError(result.error || m.errOpen);
         inputRef.current?.focus();
         setLoading(false);
         return;
@@ -97,7 +99,7 @@ export default function MapsitesNavDropdown() {
       // Full navigation so owner/paid Set-Cookie from the action applies.
       window.location.assign(result.href);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t.common.somethingWrong);
       inputRef.current?.focus();
       setLoading(false);
     }
@@ -117,7 +119,7 @@ export default function MapsitesNavDropdown() {
             : "text-white hover:bg-white/15"
         }`}
       >
-        {TALISU_MKTS_HEADER_MAPSITES_LABEL}
+        {t.nav.mapsites}
         <svg
           aria-hidden
           viewBox="0 0 12 8"
@@ -149,15 +151,15 @@ export default function MapsitesNavDropdown() {
                 id={titleId}
                 className="text-[15px] font-semibold tracking-tight text-neutral-900"
               >
-                Mapsites™
+                {m.title}
               </p>
               <p className="mt-1 text-[13px] leading-snug text-neutral-500">
-                Enter your FAST Code™ to open your personal Mapsite™.
+                {m.prompt}
               </p>
             </div>
             <div>
               <label htmlFor={fieldId} className="sr-only">
-                FAST Code™
+                {m.fieldLabel}
               </label>
               <input
                 ref={inputRef}
@@ -173,7 +175,7 @@ export default function MapsitesNavDropdown() {
                 autoComplete="off"
                 autoCapitalize="characters"
                 className="h-11 w-full rounded-lg border border-neutral-300 bg-white px-3.5 font-mono text-[14px] uppercase tracking-[0.18em] text-neutral-900 shadow-sm placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-400 focus:border-[#0070ba] focus:outline-none focus:ring-2 focus:ring-[#0070ba]/25 disabled:opacity-50"
-                placeholder="FAST Code™"
+                placeholder={m.placeholder}
                 aria-invalid={Boolean(error)}
                 aria-describedby={error ? "nav-mapsites-fast-error" : undefined}
                 required
@@ -193,7 +195,7 @@ export default function MapsitesNavDropdown() {
               disabled={loading}
               className="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#0070ba] text-[15px] font-semibold text-white shadow-sm transition hover:bg-[#005ea6] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0070ba]/40 focus-visible:ring-offset-2 disabled:opacity-50"
             >
-              {loading ? "Opening…" : "Open Mapsite™"}
+              {loading ? m.opening : m.submit}
             </button>
           </form>
 
@@ -205,7 +207,7 @@ export default function MapsitesNavDropdown() {
             onClick={() => setOpen(false)}
             className="block rounded-lg px-1 py-1.5 text-[14px] font-medium text-[#0070ba] transition hover:bg-neutral-50 hover:text-[#005ea6]"
           >
-            Demo Mapsite™
+            {m.demo}
           </Link>
         </div>
       ) : null}

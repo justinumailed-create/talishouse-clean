@@ -8,7 +8,6 @@ import {
   TALISU_MKTS_HEADER_BLUE,
   TALISU_MKTS_HEADER_DROPDOWN,
   TALISU_MKTS_HEADER_NAV,
-  TALISU_MKTS_HEADER_TAGLINE,
 } from "@/lib/talisu/markets-pins";
 import { TALISU_REGISTER } from "@/lib/talisu/content";
 import {
@@ -22,6 +21,41 @@ import TalisBrandMark from "@/components/talisu/TalisBrandMark";
 import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
 import MapsitesNavDropdown from "@/components/talisu/MapsitesNavDropdown";
 import RegisterNavDropdown from "@/components/talisu/RegisterNavDropdown";
+import LanguageSwitch from "@/components/i18n/LanguageSwitch";
+import { useT } from "@/lib/i18n/client";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+
+/** English nav label (stable id in TALISU_MKTS_HEADER_NAV) → localized text. */
+function navLabel(t: Dictionary, label: string): string {
+  switch (label) {
+    case "Markets":
+      return t.nav.markets;
+    case "Bookshelf":
+      return t.nav.bookshelf;
+    case "Catalogue":
+      return t.nav.catalogue;
+    case "Register":
+      return t.nav.register;
+    default:
+      return label;
+  }
+}
+
+/** English TalisU dropdown label → localized text. */
+function talisuMenuLabel(t: Dictionary, label: string): string {
+  switch (label) {
+    case "FAQ":
+      return t.nav.talisuMenu.faq;
+    case "Knowledge Base":
+      return t.nav.talisuMenu.knowledgeBase;
+    case "Audio":
+      return t.nav.talisuMenu.audio;
+    case "Video":
+      return t.nav.talisuMenu.video;
+    default:
+      return label;
+  }
+}
 
 export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 
@@ -88,6 +122,7 @@ export default function TalisUMktsHeader({
 }: TalisUMktsHeaderProps = {}) {
   const pathname = usePathname() || "/talisu/mkts";
   const router = useRouter();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<DropdownPanel>("menu");
   const [kbUnlocked, setKbUnlocked] = useState(false);
@@ -275,7 +310,7 @@ export default function TalisUMktsHeader({
                 : "text-white hover:bg-white/15"
             }`}
           >
-            Dashboard
+            {t.nav.dashboard}
             <svg
               aria-hidden
               viewBox="0 0 12 8"
@@ -295,7 +330,7 @@ export default function TalisUMktsHeader({
             <div
               id={dashboardMenuId}
               role="menu"
-              aria-label="Dashboard"
+              aria-label={t.nav.dashboard}
               className="absolute right-0 z-50 mt-1.5 min-w-[11.5rem] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] py-1 shadow-lg"
             >
               {dashboardMenuItems!.map((menuItem) => (
@@ -337,7 +372,7 @@ export default function TalisUMktsHeader({
             {!dashboardUnlocked ? (
               <LockIcon className="h-3.5 w-3.5 shrink-0 opacity-95" />
             ) : null}
-            Dashboard
+            {t.nav.dashboard}
           </button>
           {registerPromptOpen && !dashboardUnlocked ? (
             <div
@@ -351,11 +386,10 @@ export default function TalisUMktsHeader({
                 id={promptTitleId}
                 className="text-[13px] font-semibold text-white"
               >
-                Dashboard is locked
+                {t.nav.dashboardLocked.title}
               </p>
               <p className="mt-1.5 text-[12px] leading-snug text-white/90">
-                Register to unlock your Mapsite™ Dashboard after payment
-                succeeds.
+                {t.nav.dashboardLocked.body}
               </p>
               <a
                 href={registerHref}
@@ -370,7 +404,7 @@ export default function TalisUMktsHeader({
                 className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-white px-3 py-2 text-[13px] font-semibold text-[#035bb8] transition hover:bg-white/95"
                 onClick={() => setRegisterPromptOpen(false)}
               >
-                Register
+                {t.nav.dashboardLocked.cta}
               </a>
             </div>
           ) : null}
@@ -393,7 +427,7 @@ export default function TalisUMktsHeader({
             : "text-white hover:bg-white/15"
         }`}
       >
-        {item.label}
+        {navLabel(t, item.label)}
       </Link>
     );
   }
@@ -415,7 +449,7 @@ export default function TalisUMktsHeader({
               priority
             />
           </Link>
-          <TalisBrandMark tagline={TALISU_MKTS_HEADER_TAGLINE} />
+          <TalisBrandMark tagline={t.nav.tagline} />
         </div>
 
         <nav className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
@@ -453,7 +487,7 @@ export default function TalisUMktsHeader({
                   : "text-white hover:bg-white/15"
               }`}
             >
-              TalisU
+              {t.nav.talisu}
               <svg
                 aria-hidden
                 viewBox="0 0 12 8"
@@ -486,7 +520,7 @@ export default function TalisUMktsHeader({
                       className="mb-3 text-[12px] font-medium text-neutral-500 transition hover:text-neutral-800"
                       onClick={() => setPanel("menu")}
                     >
-                      ← Menu
+                      {t.nav.menuBack}
                     </button>
                     <TalisUKbUnlockForm
                       variant="navbar"
@@ -515,7 +549,7 @@ export default function TalisUMktsHeader({
                               : "text-white/95 hover:bg-white/15"
                           }`}
                         >
-                          {item.label}
+                          {talisuMenuLabel(t, item.label)}
                         </button>
                       ) : (
                         <Link
@@ -529,7 +563,7 @@ export default function TalisUMktsHeader({
                               : "text-white/95 hover:bg-white/15"
                           }`}
                         >
-                          {item.label}
+                          {talisuMenuLabel(t, item.label)}
                         </Link>
                       );
                       // FAQ is first — horizontal split before Knowledge Base / Audio / Video.
@@ -551,6 +585,8 @@ export default function TalisUMktsHeader({
               </div>
             ) : null}
           </div>
+
+          <LanguageSwitch className="ml-0.5" />
         </nav>
       </div>
     </header>

@@ -7,10 +7,8 @@ import { usePathname } from "next/navigation";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
 import OwnershipLearnMoreForm from "@/components/talispros/OwnershipLearnMoreForm";
-import {
-  TALISBOT_KNOWLEDGE,
-  TALISBOT_SYSTEM_ROLE,
-} from "@/lib/talispros/talisbot-knowledge";
+import { getTalisBotSystemRole } from "@/lib/talispros/talisbot-knowledge";
+import { useLocale, useT } from "@/lib/i18n/client";
 import { TALISU_MKTS_HEADER_BLUE } from "@/lib/talisu/markets-pins";
 import {
   OPEN_OWNERSHIP_CONTACT_EVENT,
@@ -32,6 +30,9 @@ export default function TalisBotChat({
   position?: TalisBotPosition;
 }) {
   const pathname = usePathname();
+  const locale = useLocale();
+  const t = useT();
+  const b = t.bot;
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<BotStep>("greeting");
   const [activeKnowledgeId, setActiveKnowledgeId] = useState<string | null>(null);
@@ -73,7 +74,7 @@ export default function TalisBotChat({
     setStep("contact");
   };
 
-  const activeKnowledge = TALISBOT_KNOWLEDGE.find((k) => k.id === activeKnowledgeId);
+  const activeKnowledge = b.knowledge.find((k) => k.id === activeKnowledgeId);
 
   const renderContent = () => {
     switch (step) {
@@ -92,14 +93,14 @@ export default function TalisBotChat({
                 href="/talisu#faq"
                 className="w-full bg-black text-white py-4 rounded-2xl text-sm font-semibold hover:bg-gray-800 transition shadow-lg shadow-black/5"
               >
-                FAQ
+                {b.faq}
               </Link>
               <button
                 type="button"
                 onClick={openContactForm}
                 className="w-full border border-gray-200 bg-white text-gray-900 py-3.5 rounded-2xl text-sm font-semibold hover:bg-gray-50 transition"
               >
-                Get help / leave contact
+                {b.getHelp}
               </button>
             </div>
           </div>
@@ -108,7 +109,7 @@ export default function TalisBotChat({
       case "knowledge":
         return (
           <div className="space-y-4 p-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <h4 className="text-[15px] font-semibold text-gray-900 px-1">Talispros™ processes</h4>
+            <h4 className="text-[15px] font-semibold text-gray-900 px-1">{b.processesHeading}</h4>
             {activeKnowledge ? (
               <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4 text-left">
                 <h5 className="text-sm font-semibold text-gray-900">{activeKnowledge.title}</h5>
@@ -118,15 +119,15 @@ export default function TalisBotChat({
                   className="mt-3 text-sm font-medium text-[#046BD9]"
                   onClick={() => setActiveKnowledgeId(null)}
                 >
-                  ← All topics
+                  {b.allTopics}
                 </button>
                 <button type="button" className={`${OPTION_CLASS} mt-3`} onClick={openContactForm}>
-                  Contact about this
+                  {b.contactAbout}
                 </button>
               </div>
             ) : (
               <div className="grid gap-2">
-                {TALISBOT_KNOWLEDGE.map((item) => (
+                {b.knowledge.map((item) => (
                   <button
                     key={item.id}
                     type="button"
@@ -143,7 +144,7 @@ export default function TalisBotChat({
               onClick={reset}
               className="text-sm font-medium text-gray-400 hover:text-black transition px-1"
             >
-              ← Back
+              {b.back}
             </button>
           </div>
         );
@@ -160,12 +161,13 @@ export default function TalisBotChat({
 
   return (
     <div className={`fixed ${cornerClass} z-[1000] font-sans ${STOREFRONT_CHROME_CLASS}`}>
-      <span className="sr-only">{TALISBOT_SYSTEM_ROLE}</span>
+      <span className="sr-only">{getTalisBotSystemRole(locale)}</span>
       {!open ? (
         <div className="bg-white/80 backdrop-blur-md p-1.5 rounded-[22px] shadow-2xl border border-white/50">
           <button
             type="button"
             onClick={() => setOpen(true)}
+            aria-label={b.openAria}
             className="bg-black text-white rounded-2xl w-14 h-14 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all duration-300 group"
           >
             <Image
@@ -196,13 +198,14 @@ export default function TalisBotChat({
                     className="w-1 h-1 rounded-full animate-pulse"
                     style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
                   />
-                  Talispros™ processes
+                  {b.subtitle}
                 </span>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setOpen(false)}
+              aria-label={b.closeAria}
               className="p-2 text-gray-400 hover:bg-gray-50 rounded-xl transition"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

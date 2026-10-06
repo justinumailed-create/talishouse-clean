@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
+import { TALISU_MKTS_HEADER_TAGLINE } from "../lib/talisu/markets-pins";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -10,7 +12,8 @@ describe("Talispros™ static brand mark (no flip)", () => {
     );
     expect(header).toContain("TalisBrandMark");
     expect(header).not.toContain("TalisBrandFlip");
-    expect(header).toContain("TALISU_MKTS_HEADER_TAGLINE");
+    expect(header).toContain("t.nav.tagline");
+    expect(en.nav.tagline).toBe(TALISU_MKTS_HEADER_TAGLINE);
 
     const mark = readFileSync(
       resolve("components/talisu/TalisBrandMark.tsx"),

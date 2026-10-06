@@ -1,4 +1,10 @@
 import type { Metadata } from "next";
+import type { Locale } from "@/lib/i18n/config";
+import {
+  localeAlternates,
+  ogAlternateLocales,
+  ogLocale,
+} from "@/lib/i18n/metadata";
 
 const SITE_URL = "https://www.talishouse.com";
 const SITE_NAME = "Talispros™";
@@ -39,6 +45,11 @@ export function createMetadata(overrides: {
   description: string;
   path: string;
   private?: boolean;
+  /**
+   * Translated page: emit canonical for this locale plus en/de/x-default
+   * hreflang alternates (German = `?lang=de`). Omit on English-only pages.
+   */
+  locale?: Locale;
   /**
    * Open Graph / Twitter preview image.
    * Pass `false` to omit images (title + description only).
@@ -89,14 +100,19 @@ export function createMetadata(overrides: {
     title: overrides.title,
     description: overrides.description,
     keywords: siteConfig.keywords,
-    alternates: { canonical: url },
+    alternates: overrides.locale
+      ? localeAlternates(url, overrides.locale)
+      : { canonical: url },
     openGraph: {
       title: overrides.title,
       description: overrides.description,
       url,
       siteName: SITE_NAME,
       type: "website",
-      locale: "en_US",
+      locale: ogLocale(overrides.locale ?? "en"),
+      ...(overrides.locale
+        ? { alternateLocale: ogAlternateLocales(overrides.locale) }
+        : {}),
       ...(omitImage ? { images: [] } : { images: [image!] }),
     },
     twitter: omitImage

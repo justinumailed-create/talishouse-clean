@@ -6,6 +6,7 @@ import {
   notifyTalisUKbUnlocked,
   writeTalisUKbUnlocked,
 } from "@/lib/talisu/kb-gate";
+import { useT } from "@/lib/i18n/client";
 
 export type TalisUKbUnlockFormProps = {
   /** Called after password succeeds and session unlock is stored. */
@@ -27,6 +28,8 @@ export default function TalisUKbUnlockForm({
   variant = "navbar",
   className = "",
 }: TalisUKbUnlockFormProps) {
+  const t = useT();
+  const k = t.kbUnlock;
   const titleId = useId();
   const fieldId = useId();
   const [password, setPassword] = useState("");
@@ -36,7 +39,7 @@ export default function TalisUKbUnlockForm({
     event.preventDefault();
     setError("");
     if (!isTalisUKbPassword(password)) {
-      setError("Incorrect password. Try again.");
+      setError(k.error);
       return;
     }
     writeTalisUKbUnlocked();
@@ -56,15 +59,15 @@ export default function TalisUKbUnlockForm({
           id={titleId}
           className="text-[15px] font-semibold tracking-tight text-neutral-900"
         >
-          Knowledge Base
+          {k.title}
         </p>
         <p className="mt-1 text-[13px] leading-snug text-neutral-500">
-          Enter your password to unlock.
+          {k.prompt}
         </p>
       </div>
       <div>
         <label htmlFor={fieldId} className="sr-only">
-          Password
+          {k.passwordLabel}
         </label>
         <input
           id={fieldId}
@@ -75,7 +78,7 @@ export default function TalisUKbUnlockForm({
             setError("");
           }}
           className="h-11 w-full rounded-lg border border-neutral-300 bg-white px-3.5 text-[14px] text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-[#0070ba] focus:outline-none focus:ring-2 focus:ring-[#0070ba]/25"
-          placeholder="Password"
+          placeholder={k.placeholder}
           autoComplete="current-password"
           autoFocus
           required
@@ -90,7 +93,7 @@ export default function TalisUKbUnlockForm({
         type="submit"
         className="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#0070ba] text-[15px] font-semibold text-white shadow-sm transition hover:bg-[#005ea6] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0070ba]/40 focus-visible:ring-offset-2"
       >
-        Unlock
+        {k.submit}
       </button>
     </form>
   );

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import { readFileSync, existsSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import {
@@ -57,7 +58,8 @@ describe("homepage mountain looping motion", () => {
       resolve("components/talispros/TalisprosHomeShowcase.tsx"),
       "utf8",
     );
-    expect(showcase).toContain("HOME_OWNERSHIP_STRUCTURES_TAGLINE");
+    expect(showcase).toContain("t.home.structuresTagline");
+    expect(en.home.structuresTagline).toBe(HOME_OWNERSHIP_STRUCTURES_TAGLINE);
     expect(showcase).not.toContain("HOME_OWNERSHIP_BANNER_TITLE");
     expect(showcase).toContain("HomeMountainMotion");
   });

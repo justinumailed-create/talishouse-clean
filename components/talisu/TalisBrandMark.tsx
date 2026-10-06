@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useT } from "@/lib/i18n/client";
 
 type TalisBrandMarkProps = {
   tagline: string;
@@ -14,6 +15,7 @@ export default function TalisBrandMark({
   tagline,
   className = "",
 }: TalisBrandMarkProps) {
+  const t = useT();
   return (
     <div className={`min-w-0 leading-tight ${className}`}>
       <div className="relative h-[1.35em] overflow-hidden text-base font-bold tracking-wide sm:text-lg">
@@ -22,7 +24,7 @@ export default function TalisBrandMark({
         </Link>
       </div>
       <div className="text-[12px] text-white/95 sm:text-[13px]">{tagline}</div>
-      <span className="sr-only">Brand: Talispros™</span>
+      <span className="sr-only">{t.nav.brandSr}</span>
     </div>
   );
 }

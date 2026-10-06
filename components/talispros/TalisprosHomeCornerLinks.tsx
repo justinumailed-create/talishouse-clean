@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
 import TalisprosMarketsDropdown from "@/components/talispros/TalisprosMarketsDropdown";
+import { useT } from "@/lib/i18n/client";
 
 /**
  * Homepage bottom-right: small grey Markets (with upward market-options
@@ -13,6 +14,7 @@ const cornerLinkClass =
   "text-[0.68rem] font-medium leading-none tracking-[0.04em] text-[#78716c] no-underline hover:text-[#44403c] hover:underline px-0.5 py-0.5";
 
 export default function TalisprosHomeCornerLinks() {
+  const t = useT();
   return (
     <div
       className="pointer-events-none fixed bottom-6 right-4 z-[900] flex max-w-[min(100vw-5.5rem,18rem)] flex-col items-end gap-1.5 sm:right-6"
@@ -29,7 +31,7 @@ export default function TalisprosHomeCornerLinks() {
           className={cornerLinkClass}
           data-testid="home-global-admin-link"
         >
-          Global Admin
+          {t.home.corner.globalAdmin}
         </Link>
       </div>
     </div>

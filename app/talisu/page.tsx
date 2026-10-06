@@ -1,14 +1,21 @@
-import { TALISU_FAQ } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
-export const metadata = createTalisUMetadata({
-  title: "TalisU™ | FAQ",
-  description: "Frequently asked questions about Talispros™, Mapsites™, and TalisU™.",
-  path: "/talisu",
-});
+export async function generateMetadata() {
+  const locale = await getLocale();
+  const m = getDictionary(locale).meta.talisuFaq;
+  return createTalisUMetadata({
+    title: m.title,
+    description: m.description,
+    path: "/talisu",
+    locale,
+  });
+}
 
-export default function TalisUHomePage() {
+export default async function TalisUHomePage() {
+  const faq = getDictionary(await getLocale()).talisu.faq;
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 text-neutral-900 sm:px-5 sm:py-14">
       <section id="faq" className="scroll-mt-24" aria-labelledby="talisu-faq-heading">
@@ -16,10 +23,10 @@ export default function TalisUHomePage() {
           id="talisu-faq-heading"
           className="mb-6 text-center text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl"
         >
-          {TALISU_FAQ.title}
+          {faq.title}
         </h1>
         <div className="mx-auto flex max-w-3xl flex-col gap-3">
-          {TALISU_FAQ.items.map((item) => {
+          {faq.items.map((item) => {
             const paragraphs = Array.isArray(item.answer)
               ? item.answer
               : [item.answer];

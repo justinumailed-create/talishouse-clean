@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { setFastCode } from "@/lib/fast-code";
 import { openClaimedMapSiteFromHomeFastCode } from "@/app/talispros/mapsites/actions";
+import { useT } from "@/lib/i18n/client";
 
 type TalisprosHomeFastCodeEntryProps = {
   /** When true, focus the input as soon as the field is shown (gate reveal). */
@@ -20,6 +21,8 @@ export default function TalisprosHomeFastCodeEntry({
   embedded = false,
 }: TalisprosHomeFastCodeEntryProps = {}) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const t = useT();
+  const f = t.home.fastCode;
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,7 +39,7 @@ export default function TalisprosHomeFastCodeEntry({
 
     const trimmed = value.trim();
     if (!trimmed) {
-      setError("Please enter a FAST Code.");
+      setError(f.errEmpty);
       inputRef.current?.focus();
       return;
     }
@@ -45,7 +48,7 @@ export default function TalisprosHomeFastCodeEntry({
     try {
       const result = await openClaimedMapSiteFromHomeFastCode(trimmed);
       if (!result.success || !result.href) {
-        setError(result.error || "Unable to open that Mapsite™.");
+        setError(result.error || f.errOpen);
         inputRef.current?.focus();
         return;
       }
@@ -55,7 +58,7 @@ export default function TalisprosHomeFastCodeEntry({
       // is applied before the claimed Mapsite™ RSC reads the session.
       window.location.assign(result.href);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(t.common.somethingWrong);
       inputRef.current?.focus();
       setLoading(false);
     }
@@ -74,7 +77,7 @@ export default function TalisprosHomeFastCodeEntry({
       <form
         onSubmit={handleSubmit}
         className={formClass}
-        aria-label="Open Mapsite™ with FAST Code"
+        aria-label={f.formAria}
       >
         <label
           htmlFor="home-fast-code"
@@ -84,7 +87,7 @@ export default function TalisprosHomeFastCodeEntry({
               : "shrink-0 text-center text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-500 sm:text-left"
           }
         >
-          FAST Code™
+          {f.label}
         </label>
         <div className="flex min-w-0 flex-1 gap-2">
           <input
@@ -96,7 +99,7 @@ export default function TalisprosHomeFastCodeEntry({
               setValue(event.target.value);
               if (error) setError("");
             }}
-            placeholder="Enter your FAST Code"
+            placeholder={f.placeholder}
             disabled={loading}
             spellCheck={false}
             autoComplete="off"
@@ -114,7 +117,7 @@ export default function TalisprosHomeFastCodeEntry({
             disabled={loading}
             className="shrink-0 bg-[var(--talis-nav-blue)] px-4 py-2.5 text-sm font-medium tracking-wide text-white transition hover:bg-[var(--talis-nav-blue-hover)] active:scale-[0.98] disabled:opacity-50 sm:px-5"
           >
-            {loading ? "Opening…" : "Mapsite"}
+            {loading ? f.opening : f.submit}
           </button>
         </div>
       </form>

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
 import { TALISPROS_MARKET_OPTIONS } from "@/lib/talispros/markets";
 import { TALISPROS_START_SEGMENTS } from "@/lib/talispros/start-content";
@@ -52,8 +53,15 @@ describe("home right rail audience labels", () => {
     const dropdown = repoSource(
       "components/talispros/TalisprosMarketsDropdown.tsx",
     );
-    expect(dropdown).toContain("{option.title}");
-    expect(dropdown).toContain("{option.label}");
+    // Localized via the dictionary; English falls back to the option itself.
+    expect(dropdown).toContain("option.title");
+    expect(dropdown).toContain("option.label");
+    expect(en.home.segments.map((s) => s.title)).toEqual(
+      TALISPROS_START_SEGMENTS.map((s) => s.title),
+    );
+    expect(en.home.segments.map((s) => s.label)).toEqual(
+      TALISPROS_START_SEGMENTS.map((s) => s.label),
+    );
     expect(dropdown).toContain("TALISPROS_MARKET_OPTIONS");
     expect(dropdown).not.toContain("Talishouse™ Builders");
   });

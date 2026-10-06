@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import { TALISU_REGISTER } from "../lib/talisu/content";
 import { TALISU_MKTS_HEADER_NAV } from "../lib/talisu/markets-pins";
 
@@ -32,8 +33,10 @@ describe("Claimed FAST Mapsite™ header Dashboard nav", () => {
     expect(header).toContain("dashboardUnlocked");
     expect(header).toContain("Dashboard");
     expect(header).toContain("LockIcon");
-    expect(header).toContain("Dashboard is locked");
-    expect(header).toMatch(/Register\s*<\/a>/);
+    expect(header).toContain("t.nav.dashboardLocked.title");
+    expect(en.nav.dashboardLocked.title).toBe("Dashboard is locked");
+    expect(header).toMatch(/t\.nav\.dashboardLocked\.cta\}\s*<\/a>/);
+    expect(en.nav.dashboardLocked.cta).toBe("Register");
     expect(header).toContain("registerHref");
 
     expect(app).toContain('variant="claimed-mapsite"');

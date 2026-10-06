@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { TALISU_MKTS_HEADER_REGISTER_DROPDOWN } from "@/lib/talisu/markets-pins";
+import { useT } from "@/lib/i18n/client";
 
 function isRegisterHrefActive(pathname: string, href: string) {
   const path = href.split("#")[0] || href;
@@ -13,6 +14,7 @@ function isRegisterHrefActive(pathname: string, href: string) {
 
 export default function RegisterNavDropdown() {
   const pathname = usePathname() || "";
+  const t = useT();
   const [open, setOpen] = useState(false);
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -53,7 +55,7 @@ export default function RegisterNavDropdown() {
             : "text-white hover:bg-white/15"
         }`}
       >
-        Register
+        {t.nav.register}
         <svg
           aria-hidden
           viewBox="0 0 12 8"
@@ -89,7 +91,9 @@ export default function RegisterNavDropdown() {
                     : "text-white/95 hover:bg-white/15"
                 }`}
               >
-                {item.label}
+                {item.label === "Product"
+                  ? t.nav.registerMenu.product
+                  : t.nav.registerMenu.mapsite}
               </Link>
             );
           })}

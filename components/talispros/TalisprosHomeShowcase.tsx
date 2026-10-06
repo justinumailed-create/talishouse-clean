@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import {
-  HOME_OWNERSHIP_SECTIONS,
-  HOME_OWNERSHIP_STRUCTURES_TAGLINE,
-} from "@/lib/talispros/ownership-models";
+import { HOME_OWNERSHIP_SECTIONS } from "@/lib/talispros/ownership-models";
+import { useT } from "@/lib/i18n/client";
+import { fmt } from "@/lib/i18n/format";
 import HomeMountainMotion from "@/components/talispros/HomeMountainMotion";
 import { openOwnershipContactInTalisBot } from "@/lib/talispros/ownership-contact";
 
@@ -19,9 +18,16 @@ export default function TalisprosHomeShowcase() {
   const [openId, setOpenId] = useState<string | null>(null);
   const rootRef = useRef<HTMLElement>(null);
   const baseId = useId();
+  const t = useT();
+  const sections = t.home.ownershipSections;
 
   const openSection =
-    HOME_OWNERSHIP_SECTIONS.find((section) => section.id === openId) ?? null;
+    sections.find((section) => section.id === openId) ?? null;
+  /** English title stays the submitted contact topic (API validates it). */
+  const openSectionTopic =
+    HOME_OWNERSHIP_SECTIONS.find((section) => section.id === openId)?.title ??
+    openSection?.title ??
+    "";
 
   const close = useCallback(() => setOpenId(null), []);
 
@@ -50,7 +56,7 @@ export default function TalisprosHomeShowcase() {
     <aside
       ref={rootRef}
       className="relative flex min-h-[42vh] w-full flex-1 flex-col overflow-hidden bg-neutral-900 lg:h-full lg:min-h-0 lg:border-l lg:border-[#dedede]"
-      aria-label="Ownership models"
+      aria-label={t.home.ownershipAria}
     >
       {/* Upper: looping mountain motion (Fulfilment Options title lives in blue nav) */}
       <div
@@ -87,7 +93,7 @@ export default function TalisprosHomeShowcase() {
                 type="button"
                 onClick={close}
                 className="shrink-0 rounded-full px-2 py-0.5 text-sm font-medium text-neutral-500 transition hover:bg-neutral-200/70 hover:text-neutral-800"
-                aria-label={`Close ${openSection.title} details`}
+                aria-label={fmt(t.home.closeDetails, { title: openSection.title })}
               >
                 ✕
               </button>
@@ -105,12 +111,12 @@ export default function TalisprosHomeShowcase() {
                   onClick={() => {
                     // Opens the TalisBOT panel (bottom-left) with the
                     // OwnershipLearnMoreForm inside; topic is sent silently.
-                    openOwnershipContactInTalisBot(openSection.title);
+                    openOwnershipContactInTalisBot(openSectionTopic);
                     close();
                   }}
                   className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
                 >
-                  {openSection.learnMoreLabel ?? "Learn More"}
+                  {openSection.learnMoreLabel ?? t.home.learnMore}
                   <span aria-hidden>→</span>
                 </button>
               </p>
@@ -120,7 +126,7 @@ export default function TalisprosHomeShowcase() {
                   href={openSection.learnMoreHref}
                   className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
                 >
-                  {openSection.learnMoreLabel ?? "Learn More"}
+                  {openSection.learnMoreLabel ?? t.home.learnMore}
                   <span aria-hidden>→</span>
                 </Link>
               </p>
@@ -129,10 +135,10 @@ export default function TalisprosHomeShowcase() {
         ) : null}
 
         <p className="mb-2 text-center text-[9px] font-semibold uppercase tracking-[0.18em] text-neutral-700/90 sm:mb-2.5 sm:text-[10px]">
-          {HOME_OWNERSHIP_STRUCTURES_TAGLINE}
+          {t.home.structuresTagline}
         </p>
         <div className="mx-auto grid max-w-3xl grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
-          {HOME_OWNERSHIP_SECTIONS.map((section) => {
+          {sections.map((section) => {
             const isOpen = openId === section.id;
             return (
               <button

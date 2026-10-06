@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import {
   isTalisUKbPassword,
   TALISU_KB_LOCKED_EVENT,
@@ -65,7 +66,8 @@ describe("TalisU Knowledge Base password gate", () => {
     expect(page).not.toContain("Password protection coming soon");
     expect(gate).toContain("TalisUKbUnlockForm");
     expect(gate).not.toContain("Incorrect password");
-    expect(form).toContain("Incorrect password");
+    expect(form).toContain("k.error");
+    expect(en.kbUnlock.error).toContain("Incorrect password");
     expect(form).toContain("Unlock");
     expect(form).toContain("writeTalisUKbUnlocked");
   });

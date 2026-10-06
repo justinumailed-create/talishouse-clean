@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { TALISPROS_MARKET_OPTIONS } from "@/lib/talispros/markets";
+import { useT } from "@/lib/i18n/client";
 
 export default function TalisprosMarketsDropdown({
   triggerClassName = "text-[11px] tracking-[0.08em] text-neutral-500 hover:text-neutral-900 transition-colors",
@@ -15,6 +16,7 @@ export default function TalisprosMarketsDropdown({
   menuDirection?: "down" | "up";
 }) {
   const [open, setOpen] = useState(false);
+  const t = useT();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -44,7 +46,7 @@ export default function TalisprosMarketsDropdown({
         aria-expanded={open}
         aria-haspopup="true"
       >
-        Markets
+        {t.home.corner.markets}
       </button>
 
       <div
@@ -63,7 +65,7 @@ export default function TalisprosMarketsDropdown({
       >
         <div className="min-w-[18rem] bg-[#e2e5ea] px-5 py-4 text-center shadow-sm">
           <div className="space-y-3">
-            {TALISPROS_MARKET_OPTIONS.map((option) => (
+            {TALISPROS_MARKET_OPTIONS.map((option, index) => (
               <Link
                 key={option.href}
                 href={option.href}
@@ -71,10 +73,10 @@ export default function TalisprosMarketsDropdown({
                 className="block text-neutral-600 hover:text-neutral-900 transition-colors"
               >
                 <span className="block text-[10px] uppercase tracking-[0.12em] text-neutral-500">
-                  {option.label}
+                  {t.home.segments[index]?.label ?? option.label}
                 </span>
                 <span className="mt-1 block whitespace-nowrap text-xs tracking-[0.04em] leading-snug">
-                  {option.title}
+                  {t.home.segments[index]?.title ?? option.title}
                 </span>
               </Link>
             ))}

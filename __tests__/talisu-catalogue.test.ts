@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import { loadProductFlipbookPages } from "../lib/product-flipbook/load-pages";
 import {
   pagesFromFlipbookFiles,
@@ -156,7 +157,8 @@ describe("Engage page product param", () => {
   it("shows Customizing: on /talisu/engage and embeds the product checkout", () => {
     const page = read("app/talisu/engage/page.tsx");
     expect(page).toContain("findCatalogueProduct(params.product)");
-    expect(page).toContain("Customizing:");
+    expect(page).toContain("t.engageCustomizing");
+    expect(en.talisu.engageCustomizing).toBe("Customizing:");
     expect(page).toContain("catalogueProductCheckoutUrl");
     expect(page).toContain("src={checkoutUrl}");
   });

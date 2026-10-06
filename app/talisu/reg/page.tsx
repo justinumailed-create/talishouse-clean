@@ -1,19 +1,25 @@
 import Image from "next/image";
-import { TALISU_REGISTER } from "@/lib/talisu/content";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE } from "@/lib/talispros/market-pages";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
 
-export const metadata = createTalisUMetadata({
-  title: "TalisU™ | Register Account",
-  description:
-    "Register your TalisU™ marketing partner account via SamCart checkout.",
-  path: "/talisu/reg",
-});
+export async function generateMetadata() {
+  const locale = await getLocale();
+  const m = getDictionary(locale).meta.talisuRegister;
+  return createTalisUMetadata({
+    title: m.title,
+    description: m.description,
+    path: "/talisu/reg",
+    locale,
+  });
+}
 
-export default function TalisURegisterPage() {
+export default async function TalisURegisterPage() {
+  const TALISU_REGISTER = getDictionary(await getLocale()).talisu.register;
   return (
     <SectionShell title={TALISU_REGISTER.title} maxWidthClass="max-w-[1920px]">
       {/* Partner write-up stays compact; SamCart gets the remaining width so its
