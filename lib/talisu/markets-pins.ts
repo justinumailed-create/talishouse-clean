@@ -80,11 +80,13 @@ export const TALISU_MKTS_HEADER_TAGLINE =
 
 /**
  * Primary top-bar links (home + claimed Mapsites™ blue header).
- * Bookshelf is the only book link; Mapsites™ is a header dropdown (not here).
+ * Bookshelf + Catalogue are the book links; Mapsites™ is a header dropdown (not here).
  */
 export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/mkts", label: "Markets" },
   { href: "/catalogue/bookshelf", label: "Bookshelf" },
+  /** Talishouse™ Product Catalogue — opens on Design Ideas. */
+  { href: "/catalogue", label: "Catalogue" },
   { href: "/talisu/reg", label: "Register" },
 ] as const;
 

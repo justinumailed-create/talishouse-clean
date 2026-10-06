@@ -58,45 +58,45 @@ const nextConfig: NextConfig = {
         destination: "/talispros/demo-mapsite",
         permanent: true,
       },
-      // Sea-Can pages are not ready. Send them to Register.
+      // Sea-Can pages are not ready. Send them to the Talishouse™ Product Catalogue.
       {
         source: "/talisu/bo",
-        destination: "/talisu/reg",
+        destination: "/catalogue",
         permanent: false,
       },
       {
         source: "/talisu/bo/:path*",
-        destination: "/talisu/reg",
+        destination: "/catalogue",
         permanent: false,
       },
       {
         source: "/talisu/sh",
-        destination: "/talisu/reg",
+        destination: "/catalogue",
         permanent: false,
       },
       {
         source: "/talisu/sh/:path*",
-        destination: "/talisu/reg",
+        destination: "/catalogue",
         permanent: false,
       },
       {
         source: "/talisu/cu",
-        destination: "/talisu/reg",
+        destination: "/catalogue",
         permanent: false,
       },
       {
         source: "/talisu/cu/:path*",
-        destination: "/talisu/reg",
+        destination: "/catalogue",
         permanent: false,
       },
       {
         source: "/talisu/blog",
-        destination: "/talisu/reg",
+        destination: "/catalogue",
         permanent: false,
       },
       {
         source: "/talisu/blog/:path*",
-        destination: "/talisu/reg",
+        destination: "/catalogue",
         permanent: false,
       },
       {

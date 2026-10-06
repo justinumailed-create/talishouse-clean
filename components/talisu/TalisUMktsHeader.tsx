@@ -28,7 +28,7 @@ export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 export type TalisUMktsHeaderProps = {
   /**
    * `claimed-mapsite`: replace Register with Dashboard (lock until real payment).
-   * `default`: Markets + Mapsites + Bookshelf + Register (homepage /talisu chrome).
+   * `default`: Markets + Mapsites + Bookshelf + Catalogue + Register (homepage /talisu chrome).
    */
   variant?: TalisUMktsHeaderVariant;
   /**
@@ -279,8 +279,11 @@ export default function TalisUMktsHeader({
       );
     }
 
+    // Catalogue (/catalogue) is exact-match so /catalogue/bookshelf only lights Bookshelf.
     const active =
-      pathname === item.href || pathname.startsWith(`${item.href}/`);
+      item.label === "Catalogue"
+        ? pathname === item.href
+        : pathname === item.href || pathname.startsWith(`${item.href}/`);
     return (
       <Link
         key={`${item.label}-${item.href}`}
@@ -322,6 +325,9 @@ export default function TalisUMktsHeader({
           )}
           <MapsitesNavDropdown />
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Bookshelf").map(
+            (item) => renderNavLink(item),
+          )}
+          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Catalogue").map(
             (item) => renderNavLink(item),
           )}
           {claimedMapsite

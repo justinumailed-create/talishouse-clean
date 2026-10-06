@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
 import TalisprosMarketsDropdown from "@/components/talispros/TalisprosMarketsDropdown";
 import {
+  type ProductFlipbookHotspot,
   type ProductFlipbookPage,
 } from "@/lib/product-flipbook/manifest";
 import "./top-bound-flipbook.css";
@@ -35,10 +36,53 @@ function CatalogueFace({ page }: { page: ProductFlipbookPage }) {
   );
 }
 
+/**
+ * Clickable product blocks, percent-positioned inside the page slot so they
+ * scale with the viewer. Pointer events stop here so a tap on a block routes
+ * to registration instead of turning the page.
+ */
+function CatalogueHotspots({ hotspots }: { hotspots: ProductFlipbookHotspot[] }) {
+  return (
+    <div className="absolute inset-0" data-testid="product-flipbook-hotspots">
+      {hotspots.map((spot) => (
+        <Link
+          key={spot.code}
+          href={spot.href}
+          aria-label={`Register for ${spot.label}`}
+          title={`Register for ${spot.label}`}
+          data-product-code={spot.code}
+          onPointerDown={(event) => event.stopPropagation()}
+          onPointerUp={(event) => event.stopPropagation()}
+          className="group absolute block cursor-pointer rounded-[3px] outline-none ring-[#046BD9] transition hover:ring-2 focus-visible:ring-2"
+          style={{
+            left: `${spot.rect.x}%`,
+            top: `${spot.rect.y}%`,
+            width: `${spot.rect.w}%`,
+            height: `${spot.rect.h}%`,
+          }}
+        >
+          <span className="absolute left-[3%] top-[5%] rounded bg-[#046BD9] px-[0.45em] py-[0.15em] text-[clamp(9px,1.1vw,14px)] font-semibold leading-tight text-white shadow-sm">
+            {spot.code}
+          </span>
+          <span className="absolute bottom-[5%] right-[3%] rounded bg-white/90 px-[0.45em] py-[0.15em] text-[clamp(8px,0.9vw,12px)] font-semibold leading-tight text-[#046BD9] opacity-0 shadow-sm transition group-hover:opacity-100 group-focus-visible:opacity-100">
+            Register
+          </span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 export default function TopBoundFlipbook({
   pages,
+  eyebrow = "Product",
+  title = "T-All catalogue",
+  subtitle = "Top-bound · one page at a time",
 }: {
   pages: ProductFlipbookPage[];
+  eyebrow?: string;
+  title?: string;
+  subtitle?: string;
 }) {
   const leaves = pages;
   const [index, setIndex] = useState(0);
@@ -171,9 +215,9 @@ export default function TopBoundFlipbook({
             priority
           />
           <div>
-            <p className="product-flipbook__eyebrow">Product</p>
-            <h1 className="product-flipbook__title">T-All catalogue</h1>
-            <p className="product-flipbook__subtitle">Top-bound · one page at a time</p>
+            <p className="product-flipbook__eyebrow">{eyebrow}</p>
+            <h1 className="product-flipbook__title">{title}</h1>
+            <p className="product-flipbook__subtitle">{subtitle}</p>
           </div>
         </div>
         <div className="product-flipbook__header-tools">
@@ -216,6 +260,9 @@ export default function TopBoundFlipbook({
             <div className="product-flipbook__slot relative aspect-video">
               <div className="product-flipbook__settled absolute inset-0 overflow-hidden" data-testid="product-flipbook-page">
                 {underPage ? <CatalogueFace page={underPage} /> : null}
+                {!flip && underPage?.hotspots?.length ? (
+                  <CatalogueHotspots hotspots={underPage.hotspots} />
+                ) : null}
               </div>
               {flip && sheetPage ? (
                 <div

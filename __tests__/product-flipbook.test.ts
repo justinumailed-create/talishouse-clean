@@ -56,12 +56,14 @@ describe("T-All page manifest", () => {
       {
         id: "page-01.webp",
         number: 1,
+        sourcePage: 1,
         src: "/product-flipbook/page-01.webp",
         alt: "T-All catalogue page 1",
       },
       {
         id: "page-02.webp",
         number: 2,
+        sourcePage: 2,
         src: "/product-flipbook/page-02.webp",
         alt: "T-All catalogue page 2",
       },

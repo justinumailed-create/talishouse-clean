@@ -79,7 +79,7 @@ describe("Register page without catalogue purchase section", () => {
     expect(page).toContain("minmax(16rem,20rem)_minmax(0,1fr)");
   });
 
-  it("redirects Sea-Can routes to Register without catalogue hash", () => {
+  it("redirects Sea-Can routes to the Talishouse™ Product Catalogue", () => {
     for (const source of [
       '"/talisu/bo"',
       '"/talisu/bo/:path*"',
@@ -89,7 +89,12 @@ describe("Register page without catalogue purchase section", () => {
     ]) {
       expect(config).toContain(`source: ${source}`);
     }
-    expect(config).toContain('destination: "/talisu/reg"');
+    expect(config).not.toContain('destination: "/talisu/reg"');
     expect(config).not.toContain('destination: "/talisu/reg#catalogue"');
+    const seaCan = config.slice(
+      config.indexOf("Sea-Can pages are not ready"),
+      config.indexOf('source: "/talispros/start"'),
+    );
+    expect(seaCan.match(/destination: "\/catalogue"/g)).toHaveLength(8);
   });
 });

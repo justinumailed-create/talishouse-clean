@@ -26,11 +26,13 @@ describe("TalisU blue header dropdown", () => {
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.label)).toEqual([
       "Markets",
       "Bookshelf",
+      "Catalogue",
       "Register",
     ]);
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.href)).toEqual([
       "/talisu/mkts",
       "/catalogue/bookshelf",
+      "/catalogue",
       "/talisu/reg",
     ]);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "All Books")).toBe(false);
@@ -105,13 +107,15 @@ describe("TalisU blue header dropdown", () => {
     const marketsIdx = header.indexOf('item.label === "Markets"');
     const mapsitesIdx = header.indexOf("<MapsitesNavDropdown");
     const bookshelvesIdx = header.indexOf('item.label === "Bookshelf"');
+    const catalogueIdx = header.indexOf('(item) => item.label === "Catalogue"');
     const registerFilterIdx = header.indexOf("<RegisterNavDropdown");
     const separatorIdx = header.indexOf("bg-white/45");
     const talisUIdx = header.indexOf("\n              TalisU\n");
     expect(marketsIdx).toBeGreaterThan(-1);
     expect(mapsitesIdx).toBeGreaterThan(marketsIdx);
     expect(bookshelvesIdx).toBeGreaterThan(mapsitesIdx);
-    expect(registerFilterIdx).toBeGreaterThan(bookshelvesIdx);
+    expect(catalogueIdx).toBeGreaterThan(bookshelvesIdx);
+    expect(registerFilterIdx).toBeGreaterThan(catalogueIdx);
     expect(separatorIdx).toBeGreaterThan(registerFilterIdx);
     expect(talisUIdx).toBeGreaterThan(separatorIdx);
   });
