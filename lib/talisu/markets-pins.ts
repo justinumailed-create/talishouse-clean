@@ -12,14 +12,20 @@ export const TALISU_MKTS_ATLIST_MAP_ID =
 /** Authentic circular Canada-flag pin from live Atlist category markerCustomIcon. */
 export const TALISU_MKTS_FLAG_CA = "/talisu/mkts/atlist-canada-flag-pin.png";
 
-/** Full Talispros windswept-tree mark for Do More pins (Atlist tree art, outer ring removed, padded). */
-export const TALISU_MKTS_TREE_LOGO = "/talisu/mkts/talispros-tree-pin-logo.png";
+/**
+ * Full Talispros windswept-tree mark for Do More pins.
+ * Vector of the navbar tree (`/logo-mark.png`), cropped tight to the branch
+ * tips and trunk base. White margin comes only from the logo-box inset —
+ * this file has no baked padding (a padded PNG plus that inset rendered the
+ * tree at about half size).
+ */
+export const TALISU_MKTS_TREE_LOGO = "/talisu/mkts/talispros-tree-logo.svg";
 
 /**
  * Source URLs (captured 2026-09-29 from Atlist AppSync categories):
  * Canada → s3://markerimages143639-prod/.../d43c09d0-5443-43c3-b0ae-a6a6ea813c18.png
  * Do More (legacy Atlist) → cloudfront .../9cdfadf4-c1de-42c5-9f91-656e8e736bb7.png
- * Do More (map marker) → /talisu/mkts/talispros-tree-pin-logo.png (full tree, padded)
+ * Do More (map marker) → /talisu/mkts/talispros-tree-logo.svg (navbar tree, tight)
  */
 
 /** Hero image shared by Canada market pin cards (red pin on paper map). */
@@ -63,8 +69,11 @@ export const TALISU_MKTS_START_FIT_PADDING = {
  * Grown from 32 so the logo stays ~20px after the 50% fill ratio (was 64%). */
 export const TALISU_MKTS_MARKET_PIN_SIZE = 41;
 
-/** Do More (Modular Spaces / windswept-tree) pin diameter.
- * Grown from 45 so the logo stays ~29px after the 50% fill ratio (was 64%). */
+/**
+ * Do More (Modular Spaces / windswept-tree) pin diameter.
+ * Logo box is 50% of this (29px). The tight tree fills that box, which is
+ * about 74% of the thin ring's inner diameter.
+ */
 export const TALISU_MKTS_DO_MORE_PIN_SIZE = 58;
 
 export const TALISU_MKTS_FOOTER =

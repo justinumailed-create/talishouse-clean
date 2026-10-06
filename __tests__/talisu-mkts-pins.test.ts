@@ -48,9 +48,9 @@ describe("TalisU mkts Atlist pin export", () => {
     expect(TALISU_MKTS_PINS).toHaveLength(16);
   });
 
-  it("uses authentic Atlist circular Canada-flag and tree pin assets", () => {
+  it("uses authentic Atlist circular Canada-flag and a tight tree pin asset", () => {
     expect(TALISU_MKTS_FLAG_CA).toBe("/talisu/mkts/atlist-canada-flag-pin.png");
-    expect(TALISU_MKTS_TREE_LOGO).toBe("/talisu/mkts/talispros-tree-pin-logo.png");
+    expect(TALISU_MKTS_TREE_LOGO).toBe("/talisu/mkts/talispros-tree-logo.svg");
   });
 
   it("defaults to a full-Canada viewport and fitBounds padding for the sidebar", () => {

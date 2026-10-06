@@ -1,6 +1,8 @@
 /**
  * Renders the Modular Spaces tree logo marker and screenshots it with Playwright
- * to confirm the trunk base is not clipped (object-fit: contain).
+ * (2x) to confirm the full tree fills about 70–80% of the ring's inner
+ * diameter and the trunk base is not clipped. Same marker is used on
+ * /talisu/mkts and the /start Markets preview.
  * Writes eval under tmp/ (not typechecked by next build).
  */
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
@@ -48,7 +50,8 @@ console.log(JSON.stringify({ html: result.html, pinCss, logoPath: TALISU_MKTS_TR
   const data = JSON.parse(line);
 
   const logoBuf = readFileSync(resolve(root, "public" + data.logoPath));
-  const logoData = `data:image/png;base64,${logoBuf.toString("base64")}`;
+  const mime = data.logoPath.endsWith(".svg") ? "image/svg+xml" : "image/png";
+  const logoData = `data:${mime};base64,${logoBuf.toString("base64")}`;
   const htmlMarker = data.html.replaceAll(data.logoPath, logoData);
 
   const pageHtml = `<!DOCTYPE html>
@@ -56,20 +59,28 @@ console.log(JSON.stringify({ html: result.html, pinCss, logoPath: TALISU_MKTS_TR
 <style>
   html,body{margin:0;background:#5a7d4a;display:flex;align-items:center;justify-content:center;min-height:100vh;}
   ${data.pinCss}
-  .stage{transform:scale(4);transform-origin:center center;}
 </style>
 </head>
-<body><div class="stage" data-testid="logo-marker-stage">${htmlMarker}</div></body></html>`;
+<body><div data-testid="logo-marker-stage">${htmlMarker}</div></body></html>`;
 
   const htmlPath = resolve(outDir, "marker.html");
   writeFileSync(htmlPath, pageHtml);
 
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage({ viewport: { width: 480, height: 480 } });
+  const browser = await chromium.launch({
+    headless: true,
+    executablePath: process.env.CHROME_PATH || undefined,
+    args: ["--no-sandbox", "--disable-dev-shm-usage"],
+  });
+  const page = await browser.newPage({
+    viewport: { width: 480, height: 480 },
+    // Rasterize the vector logo at 4× so the zoomed shot stays crisp (retina is 2×).
+    deviceScaleFactor: 4,
+  });
   await page.goto("file://" + htmlPath, { waitUntil: "load" });
   await page.waitForTimeout(300);
   const shotPath = resolve(outDir, "logo-marker.png");
-  await page.screenshot({ path: shotPath, type: "png" });
+  const marker = page.locator(".talismaps-pin-body");
+  await marker.screenshot({ path: shotPath, type: "png" });
   await browser.close();
 
   const sharp = (await import("sharp")).default;
@@ -80,22 +91,53 @@ console.log(JSON.stringify({ html: result.html, pinCss, logoPath: TALISU_MKTS_TR
   const w = info.width;
   const h = info.height;
   let darkCount = 0;
-  const x0 = Math.floor(w * 0.45);
-  const x1 = Math.floor(w * 0.55);
-  const y0 = Math.floor(h * 0.55);
-  const y1 = Math.floor(h * 0.8);
-  for (let y = y0; y < y1; y++) {
-    for (let x = x0; x < x1; x++) {
+  let minX = w;
+  let minY = h;
+  let maxX = 0;
+  let maxY = 0;
+  const cx = (w - 1) / 2;
+  const cy = (h - 1) / 2;
+  // Tree sits inside the white disk. The thin ring is near 0.34 of the body,
+  // so dark pixels closer than 0.30 of the body are the tree (not the ring).
+  const treeLimit = Math.min(w, h) * 0.3;
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4;
-      if (rgba[i + 3] > 200 && rgba[i] + rgba[i + 1] + rgba[i + 2] < 120) darkCount++;
+      const dark = rgba[i + 3] > 200 && rgba[i] + rgba[i + 1] + rgba[i + 2] < 180;
+      if (!dark) continue;
+      const dist = Math.hypot(x - cx, y - cy);
+      if (dist > treeLimit) continue;
+      if (x < minX) minX = x;
+      if (y < minY) minY = y;
+      if (x > maxX) maxX = x;
+      if (y > maxY) maxY = y;
+      // Trunk base sits in the lower half of the tree, near the vertical center.
+      if (y > cy && Math.abs(x - cx) < w * 0.08) darkCount++;
     }
   }
-  console.log(JSON.stringify({ shotPath, htmlPath, darkTrunkSamples: darkCount, trunkVisible: darkCount > 30 }));
+  // Ring inner diameter is ~68% of the body; the tree's long side should
+  // occupy about 70–80% of that circle.
+  const inner = Math.min(w, h) * (0.34 * 2);
+  const heightFill = maxY > minY ? (maxY - minY + 1) / inner : 0;
+  console.log(
+    JSON.stringify({
+      shotPath,
+      htmlPath,
+      darkTrunkSamples: darkCount,
+      trunkVisible: darkCount > 30,
+      heightFill: Number(heightFill.toFixed(3)),
+      devicePx: { w, h },
+    })
+  );
   if (darkCount <= 30) {
     console.error("FAIL: trunk base not detected");
     process.exit(2);
   }
-  console.error("OK: trunk base visible in screenshot");
+  if (heightFill < 0.7 || heightFill > 0.8) {
+    console.error(`FAIL: tree height fill ${heightFill.toFixed(3)} is outside 0.70–0.80`);
+    process.exit(3);
+  }
+  console.error("OK: full tree visible, about 70–80% of the ring inner diameter");
 }
 
 main().catch((e) => {

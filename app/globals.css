@@ -779,10 +779,12 @@ body.mapsite-gallery-open [data-paypal-button] {
 .talismaps-pin-logo {
   /* Explicit width/height required: absolutely positioned <img> replaced
      elements ignore inset-only sizing and keep intrinsic pixels (e.g. 400×400).
-     50% fill (~25% diameter margin) matches TALISMAPS_PIN_LOGO_RATIO.
-     object-fit:contain (never cover) so non-square / full-tree logos keep the
-     trunk; no border-radius or overflow clipping. White space comes from the
-     logo box inset + padded source asset — not img padding (ignored for paint). */
+     50% fill (~25% of the pin body) matches TALISMAPS_PIN_LOGO_RATIO. On a
+     classic white pin that is about 74% of the thin ring's inner diameter —
+     the only white margin. Source art must be cropped tight; baked padding
+     plus this inset shrinks the mark by half. object-fit:contain (never
+     cover) so non-square / full-tree logos keep the trunk and branch tips.
+     No border-radius or overflow clipping. Img padding is ignored for paint. */
   position: absolute;
   top: 25%;
   left: 25%;
