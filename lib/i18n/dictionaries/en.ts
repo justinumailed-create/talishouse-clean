@@ -437,6 +437,7 @@ export const en = {
     previous: "Previous",
     next: "Next",
     customize: "Customize {label}",
+    customizeDesign: "Customize a design",
     pageOf: "Page {page} of {count}",
   },
 

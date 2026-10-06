@@ -40,6 +40,12 @@ export interface ProductFlipbookHotspot {
   rect: { x: number; y: number; w: number; h: number };
 }
 
+/**
+ * `raster` paints `src`. `webster` is the catalogue closing sheet: an HTML
+ * page (photo + write-up) instead of the source portrait.
+ */
+export type ProductFlipbookFace = "raster" | "webster";
+
 export interface ProductFlipbookPage {
   id: string;
   /** 1-based page number in the (possibly trimmed) book shown to readers. */
@@ -50,6 +56,8 @@ export interface ProductFlipbookPage {
   src: string | null;
   alt: string;
   hotspots?: ProductFlipbookHotspot[];
+  /** Omitted pages are rasters. */
+  face?: ProductFlipbookFace;
 }
 
 export type ProductFlipbookPageOptions = {

@@ -251,6 +251,127 @@
   user-select: none;
 }
 
+/* Closing sheet: Webster photo (left) + engage write-up (right), 16:9 slot. */
+.product-flipbook__partner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  overflow: hidden;
+  container-type: size;
+  background: #fbfaf7;
+  color: #1c1917;
+}
+
+.product-flipbook__partner-photo {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #2a2a2a;
+}
+
+.product-flipbook__partner-photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  user-select: none;
+}
+
+.product-flipbook__partner-copy {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4% 4.6% 3.4%;
+  border-left: 1px solid rgba(4, 107, 217, 0.16);
+  font-size: 13px;
+  font-size: clamp(9px, 2.12cqh, 15px);
+  line-height: 1.28;
+  letter-spacing: -0.012em;
+}
+
+.product-flipbook__partner-copy h2 {
+  margin: 0;
+  color: #046bd9;
+  font-size: 1.18em;
+  font-weight: 650;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.product-flipbook__partner-name {
+  margin: 0.22em 0 0;
+  font-size: 0.96em;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.product-flipbook__partner-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.48em;
+  margin-top: 0.62em;
+}
+
+.product-flipbook__partner-body p,
+.product-flipbook__partner-protection {
+  margin: 0;
+}
+
+.product-flipbook__partner-help {
+  margin-top: 0.58em;
+}
+
+.product-flipbook__partner-help h3 {
+  margin: 0 0 0.18em;
+  color: #046bd9;
+  font-size: 1em;
+  font-weight: 650;
+  line-height: 1.15;
+}
+
+.product-flipbook__partner-help ul {
+  margin: 0;
+  padding-left: 1.15em;
+}
+
+.product-flipbook__partner-help li {
+  margin: 0.08em 0;
+}
+
+.product-flipbook__partner-protection {
+  margin-top: 0.58em;
+}
+
+.product-flipbook__partner-protection strong {
+  color: #046bd9;
+  font-weight: 650;
+}
+
+.product-flipbook__partner-cta {
+  align-self: flex-start;
+  margin-top: 0.7em;
+  padding: 0.42em 0.85em;
+  border-radius: 0.55em;
+  background: #046bd9;
+  color: #ffffff;
+  font-size: 0.92em;
+  font-weight: 600;
+  line-height: 1.15;
+  text-decoration: none;
+}
+
+.product-flipbook__partner-cta:hover {
+  background: #0358b3;
+  color: #ffffff;
+}
+
 .product-flipbook__cover,
 .product-flipbook__leaf {
   position: relative;
