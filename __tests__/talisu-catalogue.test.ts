@@ -7,7 +7,10 @@ import {
   pagesFromFlipbookFiles,
   PRODUCT_FLIPBOOK_PAGE_COUNT,
 } from "../lib/product-flipbook/manifest";
-import { loadCataloguePages } from "../lib/talisu/catalogue-pages";
+import {
+  CATALOGUE_WEBSTER_SOURCE_PAGE,
+  loadCataloguePages,
+} from "../lib/talisu/catalogue-pages";
 import {
   buildCatalogueProducts,
   CATALOGUE_DESIGN_IDEAS_PAGE_TITLE,
@@ -122,13 +125,49 @@ describe("Catalogue product numbering", () => {
     const pages = loadCataloguePages();
     expect(pages[0].hotspots?.map((h) => h.code)).toEqual(["P01", "P02", "P03", "P04", "P05", "P06"]);
     expect(pages[0].hotspots?.[0].href).toBe("/talisu/engage?product=P01");
-    expect(pages.at(-1)?.hotspots).toEqual([]);
+    expect(pages[0].face).toBeUndefined();
+    const closing = pages.at(-1);
+    expect(CATALOGUE_WEBSTER_SOURCE_PAGE).toBe(38);
+    expect(closing).toMatchObject({
+      id: "page-38.webp",
+      number: 19,
+      sourcePage: 38,
+      face: "webster",
+      src: null,
+      hotspots: [],
+    });
+    expect(pages[17].hotspots?.map((h) => h.code)).toEqual([
+      "P103",
+      "P104",
+      "P105",
+      "P106",
+      "P107",
+      "P108",
+    ]);
     const total = pages.reduce((n, p) => n + (p.hotspots?.length ?? 0), 0);
     expect(total).toBe(108);
     const viewer = read("components/product-flipbook/TopBoundFlipbook.tsx");
     expect(viewer).toContain("CatalogueHotspots");
     expect(viewer).toContain("left: `${spot.rect.x}%`");
     expect(viewer).toContain("event.stopPropagation()");
+    expect(viewer).toContain('page.face === "webster"');
+    expect(viewer).toContain("WebsterCataloguePage");
+    const sheet = read("components/product-flipbook/WebsterCataloguePage.tsx");
+    expect(sheet).toContain("useT().talisu.engage");
+    expect(sheet).toContain("engage.partnerImage");
+    expect(sheet).toContain("engage.partnerHeading");
+    expect(sheet).toContain("engage.partnerName");
+    expect(sheet).toContain("engage.paragraphs");
+    expect(sheet).toContain("engage.helpHeading");
+    expect(sheet).toContain("engage.helpItems");
+    expect(sheet).toContain("engage.protectionHeading");
+    expect(sheet).toContain("engage.protectionText");
+    expect(sheet).toContain("ROUTES.TALISU_ENGAGE");
+    expect(sheet).toContain("catalogueUi.customizeDesign");
+    expect(sheet).not.toContain("Your Customization Partner");
+    expect(sheet).not.toContain("page-38.webp");
+    expect(en.catalogueUi.customizeDesign).toBe("Customize a design");
+    expect(en.talisu.engage.partnerImage).toBe("/talisu/webster-team-leader-v2.jpg");
   });
 });
 

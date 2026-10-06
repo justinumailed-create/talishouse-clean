@@ -649,6 +649,7 @@ export const de: Dictionary = {
     previous: "Zurück",
     next: "Weiter",
     customize: "{label} anpassen",
+    customizeDesign: "Ein Design anpassen",
     pageOf: "Seite {page} von {count}",
   },
 

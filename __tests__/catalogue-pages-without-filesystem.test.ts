@@ -43,7 +43,14 @@ describe("Catalogue page list without a readable public directory", () => {
       alt: "Talishouse™ Product Catalogue page 1",
     });
     expect(pages.some((page) => page.sourcePage < 20)).toBe(false);
-    expect(pages.at(-1)?.sourcePage).toBe(PRODUCT_FLIPBOOK_PAGE_COUNT);
+    expect(pages.at(-1)).toMatchObject({
+      id: "page-38.webp",
+      number: PRODUCT_FLIPBOOK_PAGE_COUNT - 19,
+      sourcePage: PRODUCT_FLIPBOOK_PAGE_COUNT,
+      face: "webster",
+      src: null,
+      hotspots: [],
+    });
     expect(pages[0].hotspots?.map((hotspot) => hotspot.code)).toEqual([
       "P01",
       "P02",
