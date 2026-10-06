@@ -11,6 +11,7 @@ import {
   filterDemonstrationCatalogBooks,
 } from "./demonstration-catalog";
 import { applyPublicLibraryPins } from "./public-library-pins";
+import { applyBookshelfOrder } from "@/lib/talispros/mapsite-owner-customizations";
 import { filterBooksForFastCodeShelf, queryLibraryBooks } from "./query";
 import type {
   TalisBooksBookshelf,
@@ -122,6 +123,20 @@ function applyBookshelfCatalogPolicy(
       : applyPublicLibraryPins(filterCreatedFastLinkedBooks(next));
   }
   return next;
+}
+
+/** Owner Bookshelf Editor order (mapsite_owner_customizations) for a FAST shelf. */
+async function applyOwnerShelfOrder(
+  fastCode: string,
+  books: TalisBooksLibraryBook[],
+): Promise<{ books: TalisBooksLibraryBook[]; ownerOrdered: boolean }> {
+  if (books.length < 2) return { books, ownerOrdered: false };
+  const { loadBookshelfOrderForFastCode } = await import(
+    "@/lib/talispros/mapsite-owner-customizations-service"
+  );
+  const order = await loadBookshelfOrderForFastCode(fastCode);
+  if (order.length === 0) return { books, ownerOrdered: false };
+  return { books: applyBookshelfOrder(books, order), ownerOrdered: true };
 }
 
 function emptyPersonalBookshelf(
@@ -276,6 +291,10 @@ export async function getTalisBooksBookshelf(
         books: [],
       };
     }
+    const ordered = await applyOwnerShelfOrder(
+      fastCode,
+      applyBookshelfCatalogPolicy(context.books, catalogOptions, context.mapsiteId),
+    );
     return {
       accountId: null,
       accountType: context.accountType,
@@ -287,7 +306,8 @@ export async function getTalisBooksBookshelf(
       registrationHref: context.registrationHref,
       entitlements,
       primaryEbook: context.primaryEbook,
-      books: applyBookshelfCatalogPolicy(context.books, catalogOptions, context.mapsiteId),
+      ownerOrdered: ordered.ownerOrdered,
+      books: ordered.books,
     };
   }
 
@@ -390,11 +410,15 @@ export async function getPublicTalisBooksBookshelf(options?: {
   if (fastCode) {
     const { getMapSiteEbookContext } = await import("../mapsite-ebook-service");
     const context = await getMapSiteEbookContext(fastCode);
-    const books = applyBookshelfCatalogPolicy(
-      context?.books ?? [],
-      { fastCode, excludeDemonstrationCatalog: isIssuedFastCode(fastCode) },
-      context?.mapsiteId ?? null,
+    const ordered = await applyOwnerShelfOrder(
+      fastCode,
+      applyBookshelfCatalogPolicy(
+        context?.books ?? [],
+        { fastCode, excludeDemonstrationCatalog: isIssuedFastCode(fastCode) },
+        context?.mapsiteId ?? null,
+      ),
     );
+    const books = ordered.books;
 
     return {
       accountId: null,
@@ -405,6 +429,7 @@ export async function getPublicTalisBooksBookshelf(options?: {
       publicCatalog: true,
       scopedToFastCode: true,
       registrationHref: context?.registrationHref ?? null,
+      ownerOrdered: ordered.ownerOrdered,
       books,
     };
   }

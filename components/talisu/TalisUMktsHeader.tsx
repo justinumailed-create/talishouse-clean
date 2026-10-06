@@ -39,6 +39,13 @@ export type TalisUMktsHeaderProps = {
   registerHref?: string;
   /** When Dashboard is unlocked, open the Mapsite™ pin dashboard. */
   onOpenDashboard?: () => void;
+  /**
+   * Paid owner (or admin) Dashboard dropdown. When set with `dashboardUnlocked`,
+   * Dashboard opens a menu (same chrome as TalisU) instead of a single action.
+   */
+  dashboardMenuItems?: ReadonlyArray<{ id: string; label: string }>;
+  /** Called with the chosen dashboard menu item id. */
+  onSelectDashboardItem?: (id: string) => void;
 };
 
 function LockIcon({ className }: { className?: string }) {
@@ -76,6 +83,8 @@ export default function TalisUMktsHeader({
   dashboardUnlocked = false,
   registerHref = TALISU_REGISTER.samcartUrl,
   onOpenDashboard,
+  dashboardMenuItems,
+  onSelectDashboardItem,
 }: TalisUMktsHeaderProps = {}) {
   const pathname = usePathname() || "/talisu/mkts";
   const router = useRouter();
@@ -84,12 +93,20 @@ export default function TalisUMktsHeader({
   const [kbUnlocked, setKbUnlocked] = useState(false);
   const [kbNext, setKbNext] = useState(TALISU_KB_PATH);
   const [registerPromptOpen, setRegisterPromptOpen] = useState(false);
+  const [dashboardMenuOpen, setDashboardMenuOpen] = useState(false);
+  const dashboardMenuId = useId();
+  const dashboardMenuRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const promptTitleId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const promptRef = useRef<HTMLDivElement>(null);
 
   const claimedMapsite = variant === "claimed-mapsite";
+  const dashboardHasMenu =
+    claimedMapsite &&
+    dashboardUnlocked &&
+    Boolean(dashboardMenuItems?.length) &&
+    Boolean(onSelectDashboardItem);
 
   const dropdownActive = TALISU_MKTS_HEADER_DROPDOWN.some(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
@@ -173,7 +190,31 @@ export default function TalisUMktsHeader({
     };
   }, [registerPromptOpen]);
 
+  useEffect(() => {
+    if (!dashboardMenuOpen) return;
+    function onPointerDown(event: MouseEvent | TouchEvent) {
+      if (!dashboardMenuRef.current?.contains(event.target as Node)) {
+        setDashboardMenuOpen(false);
+      }
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setDashboardMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [dashboardMenuOpen]);
+
   function handleDashboardClick() {
+    if (dashboardHasMenu) {
+      setDashboardMenuOpen((value) => !value);
+      return;
+    }
     if (dashboardUnlocked) {
       onOpenDashboard?.();
       return;
@@ -219,6 +260,64 @@ export default function TalisUMktsHeader({
   }
 
   function renderNavLink(item: (typeof TALISU_MKTS_HEADER_NAV)[number]) {
+    if (claimedMapsite && item.label === "Register" && dashboardHasMenu) {
+      return (
+        <div key="dashboard" ref={dashboardMenuRef} className="relative">
+          <button
+            type="button"
+            onClick={handleDashboardClick}
+            aria-haspopup="menu"
+            aria-expanded={dashboardMenuOpen}
+            aria-controls={dashboardMenuId}
+            className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
+              dashboardMenuOpen
+                ? "bg-white/20 text-white"
+                : "text-white hover:bg-white/15"
+            }`}
+          >
+            Dashboard
+            <svg
+              aria-hidden
+              viewBox="0 0 12 8"
+              className={`h-2.5 w-2.5 transition ${dashboardMenuOpen ? "rotate-180" : ""}`}
+              fill="none"
+            >
+              <path
+                d="M1 1.5 6 6.5 11 1.5"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+          {dashboardMenuOpen ? (
+            <div
+              id={dashboardMenuId}
+              role="menu"
+              aria-label="Dashboard"
+              className="absolute right-0 z-50 mt-1.5 min-w-[11.5rem] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] py-1 shadow-lg"
+            >
+              {dashboardMenuItems!.map((menuItem) => (
+                <button
+                  key={menuItem.id}
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setDashboardMenuOpen(false);
+                    onSelectDashboardItem!(menuItem.id);
+                  }}
+                  className="block w-full whitespace-nowrap px-3.5 py-2 text-left text-[13px] font-medium text-white/95 transition hover:bg-white/15 sm:text-[14px]"
+                >
+                  {menuItem.label}
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      );
+    }
+
     if (claimedMapsite && item.label === "Register") {
       return (
         <div key="dashboard" className="relative">

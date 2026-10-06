@@ -125,7 +125,11 @@ export default function TalisBooksLibraryShell({
   secondaryBackLabel = "Back to ALL-PINs",
 }: TalisBooksLibraryShellProps) {
   const router = useRouter();
-  const [sort, setSort] = useState<TalisBooksLibrarySort>("published_desc");
+  const ownerOrdered = Boolean(bookshelf.ownerOrdered);
+  // Owner-ordered FAST shelves keep the saved order until a sort pill is chosen.
+  const [sort, setSort] = useState<TalisBooksLibrarySort | "owner">(
+    ownerOrdered ? "owner" : "published_desc",
+  );
   const [page, setPage] = useState(1);
   const [featuredCapacity, setFeaturedCapacity] = useState<5 | 6>(5);
   const [deletedIds, setDeletedIds] = useState<string[]>([]);
@@ -162,9 +166,14 @@ export default function TalisBooksLibraryShell({
     () =>
       partitionBookshelf(flexibleBooks, {
         featuredCapacity,
-        featuredMode: scoped || createdCatalog ? "newest" : "fill",
+        featuredMode:
+          ownerOrdered && sort === "owner"
+            ? "ordered"
+            : scoped || createdCatalog
+              ? "newest"
+              : "fill",
       }),
-    [flexibleBooks, featuredCapacity, scoped, createdCatalog],
+    [flexibleBooks, featuredCapacity, scoped, createdCatalog, ownerOrdered, sort],
   );
 
   const mainAnchors = useMemo(
@@ -189,7 +198,10 @@ export default function TalisBooksLibraryShell({
   const featuredRows = featuredLayoutResult.rows;
 
   const sortedGeneral = useMemo(
-    () => sortLibraryBooks([...general, ...featuredLayoutResult.overflow], sort),
+    () =>
+      sort === "owner"
+        ? [...general, ...featuredLayoutResult.overflow]
+        : sortLibraryBooks([...general, ...featuredLayoutResult.overflow], sort),
     [general, featuredLayoutResult.overflow, sort],
   );
 
@@ -443,6 +455,21 @@ export default function TalisBooksLibraryShell({
             <div className="talisbooks-library__niche-inner">
               <div className="talisbooks-library__niche-header talisbooks-library__niche-header--end">
                 <div className="talisbooks-library__sort-pills">
+                  {ownerOrdered ? (
+                    <button
+                      type="button"
+                      className={[
+                        "talisbooks-library__sort-pill",
+                        sort === "owner" ? "is-active" : "",
+                      ].join(" ")}
+                      onClick={() => {
+                        setSort("owner");
+                        setPage(1);
+                      }}
+                    >
+                      Saved order
+                    </button>
+                  ) : null}
                   {TALISBOOKS_LIBRARY_SORT_OPTIONS.filter(
                     (option) =>
                       option.value === "title_asc" || option.value === "published_desc",

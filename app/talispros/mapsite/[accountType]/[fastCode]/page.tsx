@@ -20,7 +20,8 @@ import {
   mapsiteAccountTypeSegment,
   MAPSITE_APP_PATH,
 } from "@/lib/talispros/mapsite-state";
-import { isOwnMapSite } from "@/lib/mapsite-edit-auth";
+import { getMapSiteEditToolbarState, isOwnMapSite } from "@/lib/mapsite-edit-auth";
+import { loadMapSiteOwnerCustomizations } from "@/lib/talispros/mapsite-owner-customizations-service";
 import {
   loadMapSiteApplicationState,
   resolveMapSitePaymentPlanType,
@@ -208,12 +209,19 @@ export default async function ClaimedMapSiteByAccountTypePage({
   // Owner session still gates Logout / owner-only chrome.
   const openPinOnLoad = forceOpenPin || isOwner || paymentReceived;
 
-  const [ebookContext, pinDashboard] = await Promise.all([
+  const [ebookContext, pinDashboard, ownerCustomizations, editAccess] = await Promise.all([
     getMapSiteEbookContext(fastCode, {
       bookSlug,
     }),
     loadMapSitePinDashboard(mapsite.id),
+    loadMapSiteOwnerCustomizations(mapsite.id),
+    fastCode
+      ? getMapSiteEditToolbarState(fastCode).catch(() => null)
+      : Promise.resolve(null),
   ]);
+  // Dashboard dropdown: owner session, or a Mapsite™ admin (e.g. FAST Code ARUN).
+  // Paid + non-demo is enforced client-side (dashboardUnlocked) and in every action.
+  const canManageDashboard = isOwner || Boolean(editAccess?.isAdmin);
   const primarySlug = ebookContext?.primaryEbook?.slug || bookSlug;
   const talisBookHref =
     (primarySlug ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}` : null) ||
@@ -257,6 +265,8 @@ export default async function ClaimedMapSiteByAccountTypePage({
       initialPinDashboard={pinDashboard}
       pinCheckoutStatus={pinCheckoutStatus}
       pinCheckoutSessionId={pinCheckoutSessionId}
+      canManageDashboard={canManageDashboard}
+      initialOwnerCustomizations={ownerCustomizations}
     />
   );
 }

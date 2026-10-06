@@ -41,7 +41,11 @@ import {
 import { ROUTES } from "@/lib/routes";
 import { isDemonstrationListing } from "@/lib/talispros/demo-mapsite";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
-import MapSiteMarketPartnerCard from "./MapSiteMarketPartnerCard";
+import MapSiteMarketPartnerCard, {
+  defaultMapSitePartnerImage,
+} from "./MapSiteMarketPartnerCard";
+import MapSiteLogoImageEditor from "./MapSiteLogoImageEditor";
+import MapSiteBookshelfEditor from "./MapSiteBookshelfEditor";
 import DemoClaimMarketButton from "./DemoClaimMarketButton";
 import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
@@ -66,6 +70,18 @@ import {
 import MapSitePinDashboard, {
   type PinEditorState,
 } from "@/components/talispros/mapsite/MapSitePinDashboard";
+import {
+  MAPSITE_DASHBOARD_MENU_ITEMS,
+  emptyMapSiteOwnerCustomizations,
+  type MapSiteDashboardPanelId,
+  type MapSiteOwnerCustomizations,
+} from "@/lib/talispros/mapsite-owner-customizations";
+import { mapsiteAgencyLogoUrl } from "@/lib/talispros/mapsite-listing-media";
+
+/** Phase 1 Dashboard dropdown (Ebook Editor ships in phase 2). */
+const DASHBOARD_MENU = MAPSITE_DASHBOARD_MENU_ITEMS.filter(
+  (item) => item.id !== "ebooks",
+);
 
 /** Minimum popup body height so hero + title + action row stay visible. */
 const MAPSITE_POPUP_MIN_HEIGHT_PX = 384;
@@ -113,6 +129,13 @@ interface MapSiteApplicationProps {
   /** Return from additional-PIN Stripe Checkout. Separate from activation checkout. */
   pinCheckoutStatus?: "success" | "cancelled" | null;
   pinCheckoutSessionId?: string | null;
+  /**
+   * Owner session or Mapsite™ admin may use the Dashboard dropdown. Server
+   * actions still re-check requireMapSiteEditAccess (owner + paid, or admin).
+   */
+  canManageDashboard?: boolean;
+  /** Logo / left-card image overrides and saved bookshelf order. */
+  initialOwnerCustomizations?: MapSiteOwnerCustomizations | null;
 }
 
 export default function MapSiteApplication({
@@ -138,6 +161,8 @@ export default function MapSiteApplication({
   initialPinDashboard,
   pinCheckoutStatus = null,
   pinCheckoutSessionId = null,
+  canManageDashboard,
+  initialOwnerCustomizations = null,
 }: MapSiteApplicationProps) {
   const [mapsite] = useState(initialMapSite);
   const [pinDashboard, setPinDashboard] = useState(
@@ -369,6 +394,8 @@ export default function MapSiteApplication({
         pinCheckoutStatus={pinCheckoutStatus}
         onPinDashboardChange={setPinDashboard}
         onPinEditorChange={setPinEditor}
+        canManageDashboard={canManageDashboard ?? isOwner}
+        initialOwnerCustomizations={initialOwnerCustomizations}
       />
     </MapEngineProvider>
   );
@@ -402,6 +429,8 @@ function MapSiteChrome({
   pinCheckoutStatus,
   onPinDashboardChange,
   onPinEditorChange,
+  canManageDashboard,
+  initialOwnerCustomizations,
 }: {
   mapsite: MapSitePlatformRecord;
   audience: RegistrationMarket;
@@ -430,6 +459,8 @@ function MapSiteChrome({
   pinCheckoutStatus: "success" | "cancelled" | null;
   onPinDashboardChange: (dashboard: MapSitePinDashboardState) => void;
   onPinEditorChange: (editor: PinEditorState) => void;
+  canManageDashboard: boolean;
+  initialOwnerCustomizations: MapSiteOwnerCustomizations | null;
 }) {
   const { setViewport, isReady, fitToCoordinates } = useMapEngine();
   const router = useRouter();
@@ -447,7 +478,13 @@ function MapSiteChrome({
   const [expandedCardHeight, setExpandedCardHeight] = useState<number | null>(
     null
   );
-  const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [dashboardPanel, setDashboardPanel] =
+    useState<MapSiteDashboardPanelId | null>(null);
+  const dashboardOpen = dashboardPanel !== null;
+  const [ownerCustomizations, setOwnerCustomizations] =
+    useState<MapSiteOwnerCustomizations>(
+      () => initialOwnerCustomizations ?? emptyMapSiteOwnerCustomizations(),
+    );
 
   const focusPinAndOpen = useCallback(() => {
     beginFocusGuard();
@@ -683,17 +720,46 @@ function MapSiteChrome({
   const showExplicitPayment =
     showActivatePayment || Boolean(checkoutStatus);
 
+  // Every paid (non-demo) Mapsite™ owner — or a Mapsite™ admin — gets the menu.
+  const dashboardManageable = dashboardUnlocked && canManageDashboard;
+
   const openOwnerDashboard = useCallback(() => {
     focusPinAndOpen();
-    if (dashboardUnlocked && isOwner) {
-      setDashboardOpen(true);
+    if (dashboardManageable) {
+      setDashboardPanel("pins");
     }
-  }, [dashboardUnlocked, focusPinAndOpen, isOwner]);
+  }, [dashboardManageable, focusPinAndOpen]);
+
+  const selectDashboardItem = useCallback(
+    (id: string) => {
+      if (!dashboardManageable) return;
+      const item = MAPSITE_DASHBOARD_MENU_ITEMS.find((entry) => entry.id === id);
+      if (!item) return;
+      if (item.id === "pins") focusPinAndOpen();
+      onPinEditorChange({ kind: "idle" });
+      setDashboardPanel(item.id);
+    },
+    [dashboardManageable, focusPinAndOpen, onPinEditorChange],
+  );
+
+  const closeDashboardPanel = useCallback(() => {
+    setDashboardPanel(null);
+    onPinEditorChange({ kind: "idle" });
+  }, [onPinEditorChange]);
 
   useEffect(() => {
-    if (!pinCheckoutStatus || !dashboardUnlocked || !isOwner) return;
-    setDashboardOpen(true);
-  }, [pinCheckoutStatus, dashboardUnlocked, isOwner]);
+    if (!pinCheckoutStatus || !dashboardManageable) return;
+    setDashboardPanel("pins");
+  }, [pinCheckoutStatus, dashboardManageable]);
+
+  const defaultPartnerImage = defaultMapSitePartnerImage(audience);
+  const cardMapSite = useMemo(
+    () =>
+      ownerCustomizations.logoUrl
+        ? { ...mapsite, logo_url: ownerCustomizations.logoUrl }
+        : mapsite,
+    [mapsite, ownerCustomizations.logoUrl],
+  );
 
   const pinFitKey = pinDashboard.pins
     .map((pin) => `${pin.id}:${pin.latitude}:${pin.longitude}`)
@@ -781,6 +847,8 @@ function MapSiteChrome({
           dashboardUnlocked={dashboardUnlocked}
           registerHref={TALISU_REGISTER.samcartUrl}
           onOpenDashboard={openOwnerDashboard}
+          dashboardMenuItems={dashboardManageable ? DASHBOARD_MENU : undefined}
+          onSelectDashboardItem={selectDashboardItem}
         />
       ) : null}
       <div
@@ -809,7 +877,8 @@ function MapSiteChrome({
               claimed ? (
                 <MapSiteMarketPartnerCard
                   audience={audience}
-                  mapsite={mapsite}
+                  mapsite={cardMapSite}
+                  partnerImageUrl={ownerCustomizations.partnerImageUrl}
                   cardRef={listingCardRef}
                   onSelect={focusPinAndOpen}
                   paid={paid}
@@ -835,7 +904,7 @@ function MapSiteChrome({
           </div>
         ) : null}
 
-        {dashboardOpen && dashboardUnlocked && isOwner ? (
+        {dashboardPanel === "pins" && dashboardManageable ? (
           <MapSitePinDashboard
             open
             mapsiteId={mapsite.id}
@@ -844,12 +913,33 @@ function MapSiteChrome({
             dashboard={pinDashboard}
             editor={pinEditor}
             checkoutStatus={pinCheckoutStatus}
-            onClose={() => {
-              setDashboardOpen(false);
-              onPinEditorChange({ kind: "idle" });
-            }}
+            onClose={closeDashboardPanel}
             onDashboardChange={onPinDashboardChange}
             onEditorChange={onPinEditorChange}
+          />
+        ) : null}
+
+        {dashboardPanel === "branding" && dashboardManageable ? (
+          <MapSiteLogoImageEditor
+            mapsiteId={mapsite.id}
+            fastCode={mapsite.fast_code || ""}
+            currentLogoUrl={mapsiteAgencyLogoUrl(cardMapSite.logo_url)}
+            currentPartnerImageUrl={
+              ownerCustomizations.partnerImageUrl || defaultPartnerImage
+            }
+            defaultLogoUrl={mapsiteAgencyLogoUrl(mapsite.logo_url)}
+            defaultPartnerImageUrl={defaultPartnerImage}
+            customizations={ownerCustomizations}
+            onClose={closeDashboardPanel}
+            onSaved={setOwnerCustomizations}
+          />
+        ) : null}
+
+        {dashboardPanel === "bookshelf" && dashboardManageable ? (
+          <MapSiteBookshelfEditor
+            mapsiteId={mapsite.id}
+            fastCode={mapsite.fast_code || ""}
+            onClose={closeDashboardPanel}
           />
         ) : null}
 

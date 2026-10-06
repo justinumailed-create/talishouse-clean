@@ -200,9 +200,9 @@ describe("demo mapsite codes", () => {
       join(process.cwd(), "components/talisbooks/library/TalisBooksLibraryShell.tsx"),
       "utf8",
     );
-    expect(shellSource).toContain('useState<TalisBooksLibrarySort>("published_desc")');
-    expect(shellSource).toContain(
-      'featuredMode: scoped || createdCatalog ? "newest" : "fill"',
+    expect(shellSource).toContain('ownerOrdered ? "owner" : "published_desc"');
+    expect(shellSource).toMatch(
+      /scoped \|\| createdCatalog\s*\?\s*"newest"\s*:\s*"fill"/,
     );
     expect(shellSource).toContain("packShelfRowsNewestAtLeft");
 

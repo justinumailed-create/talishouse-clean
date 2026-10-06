@@ -39,6 +39,11 @@ function contentForAudience(audience: RegistrationMarket): TalisprosMarketPageCo
   }
 }
 
+/** Default left-card partner photo for this audience (Logo & Image Editor reset). */
+export function defaultMapSitePartnerImage(audience: RegistrationMarket): string {
+  return mapsiteMarketPartnerImageUrl(null, contentForAudience(audience).partnerImage);
+}
+
 interface MapSiteMarketPartnerCardProps {
   audience: RegistrationMarket;
   mapsite: MapSitePlatformRecord;
@@ -55,6 +60,8 @@ interface MapSiteMarketPartnerCardProps {
    * entry for rm22 (Ralf) Mapsite™ dashboard.
    */
   showKnowledgeBaseManage?: boolean;
+  /** Owner Logo & Image Editor override for the partner photo slot. */
+  partnerImageUrl?: string | null;
 }
 
 /**
@@ -72,6 +79,7 @@ export default function MapSiteMarketPartnerCard({
   isOwner = false,
   accountTypeSegment = null,
   showKnowledgeBaseManage = false,
+  partnerImageUrl = null,
 }: MapSiteMarketPartnerCardProps) {
   const content = contentForAudience(audience);
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
@@ -79,7 +87,7 @@ export default function MapSiteMarketPartnerCard({
     showKnowledgeBaseManage && isTalisUKbMapsiteManagerFastCode(fastCode);
   const address = mapsite.property_address?.trim().toUpperCase() || null;
   const partnerImage = mapsiteMarketPartnerImageUrl(
-    null,
+    partnerImageUrl,
     content.partnerImage,
   );
   const partnerName =

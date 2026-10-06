@@ -36,7 +36,7 @@ function createdTimestamp(book: TalisBooksLibraryBook): number {
   return publishedTimestamp(book);
 }
 
-export type TalisBooksFeaturedMode = "fill" | "highlights" | "newest";
+export type TalisBooksFeaturedMode = "fill" | "highlights" | "newest" | "ordered";
 
 /**
  * Splits the shelf into left (highlighted/scheduled) and right (general library).
@@ -48,6 +48,7 @@ export type TalisBooksFeaturedMode = "fill" | "highlights" | "newest";
  * `fill` (default): take up to capacity from the prioritized list.
  * `highlights`: left niche is pins / scheduled / in_review only; published
  * catalog books stay on the right, newest first.
+ * `ordered`: keep the incoming order (owner Bookshelf Editor); first = hero.
  * `newest`: the latest created ebook is always the left hero pin; other
  * `isPinned` books (e.g. Cowboy's Guide) sit below it; remaining books
  * stand on the right from the left and shift right as newer pins arrive.
@@ -64,6 +65,13 @@ export function partitionBookshelf(
 } {
   const capacity = options?.featuredCapacity ?? 5;
   const featuredMode = options?.featuredMode ?? "fill";
+
+  if (featuredMode === "ordered") {
+    // Owner Bookshelf Editor order: first book is the hero, the rest follow as saved.
+    const [first, ...rest] = books;
+    const featured: TalisBooksLibraryBook[] = first ? [{ ...first, isPinned: true }] : [];
+    return { featured, general: rest, featuredLayout: "hero-plus-4" };
+  }
 
   if (featuredMode === "newest") {
     const byCreated = [...books].sort((a, b) => {

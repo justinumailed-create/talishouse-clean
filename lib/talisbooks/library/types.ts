@@ -65,6 +65,11 @@ export interface TalisBooksBookshelf {
   /** Unscoped created FAST-linked catalog (public / root `/talisbooks/library`). */
   createdCatalog?: boolean;
   paymentReceived?: boolean;
+  /**
+   * Owner saved a Bookshelf Editor order for this FAST Code: `books` is already
+   * in that order (first = hero) and the shelf keeps it until a sort pill is used.
+   */
+  ownerOrdered?: boolean;
   registrationHref?: string | null;
   /** Activation + account-type book entitlements (independent of PayPal helpers). */
   entitlements?: TalisBooksEntitlements | null;
