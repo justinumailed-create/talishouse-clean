@@ -118,6 +118,10 @@ describe("Tokenization Learn More", () => {
     const bot = readFileSync(join(root, "components/TalisBotChat.tsx"), "utf8");
     expect(bot).toContain('position === "left" ? "bottom-6 left-6"');
     expect(bot).toContain('position = "right"');
+    // Homepage launcher sits in the left-column slot; the open panel stays fixed above it.
+    expect(bot).toContain("HOME_TALISBOT_SLOT_ID");
+    expect(bot).toContain("createPortal(launcher, homeSlot)");
+    expect(bot).toContain("z-[1000]");
   });
 
 });

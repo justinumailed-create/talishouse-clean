@@ -172,14 +172,26 @@ describe("product catalogue route", () => {
       "components/talispros/TalisprosMarketsDropdown.tsx",
     );
     expect(gate).toContain("TalisprosHomeCornerLinks");
-    expect(corner).toContain("Global Admin");
+    // Left column, after the gate — not a fixed bottom-right corner.
+    expect(gate).toMatch(/TalisprosHomeGate[\s\S]*TalisprosHomeCornerLinks/);
+    expect(corner).toContain("t.home.corner.globalAdmin");
+    expect(corner).toContain("t.home.corner.markets");
+    expect(corner).toContain("t.home.segments");
+    expect(corner).toContain("TALISPROS_MARKET_OPTIONS");
     expect(corner).toContain("ROUTES.ADMIN_DASHBOARD");
-    expect(corner).toContain("TalisprosMarketsDropdown");
-    expect(corner).toContain('menuDirection="up"');
     expect(corner).toContain('data-testid="home-corner-links"');
+    expect(corner).toContain('data-testid="home-markets-block"');
+    expect(corner).toContain('id={HOME_TALISBOT_SLOT_ID}');
+    expect(corner).not.toContain("TalisprosMarketsDropdown");
+    expect(corner).not.toContain("menuDirection");
+    expect(corner).not.toContain("right-4");
+    expect(corner).not.toContain("fixed ");
     // Same always-on visibility as the former flipbook header (no admin gate).
     expect(corner).not.toContain("isAdminAuthenticated");
-    expect(marketsDropdown).toContain('menuDirection?: "down" | "up"');
+    expect(marketsDropdown).not.toContain("menuDirection");
+    expect(marketsDropdown).not.toContain("opensUp");
+    expect(marketsDropdown).toContain("top-full");
+    expect(marketsDropdown).toContain("TALISPROS_MARKET_OPTIONS");
   });
 
   it("animates a top-edge rotateX and not a center fold", () => {
