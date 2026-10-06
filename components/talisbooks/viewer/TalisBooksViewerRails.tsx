@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import {
   BookOpen,
   Pause,
@@ -33,6 +34,7 @@ export function TalisBooksViewerPlaybackRail({
   onIntervalChange: (intervalMs: number) => void;
   onToggleStageLandscape?: () => void;
 }) {
+  const tv = useT().viewer;
   const applyPreset = (id: TalisBooksViewerSpeedPresetId) => {
     const preset = TALISBOOKS_VIEWER_SPEED_PRESETS.find((entry) => entry.id === id);
     if (preset) onIntervalChange(preset.intervalMs);
@@ -41,14 +43,14 @@ export function TalisBooksViewerPlaybackRail({
   return (
     <aside
       className="talisbooks-viewer__rail talisbooks-viewer__rail--right"
-      aria-label="Playback"
+      aria-label={tv.playback}
     >
       <button
         type="button"
         className="talisbooks-viewer__rail-btn talisbooks-viewer__rail-btn--play"
         onClick={onToggleAutoplay}
-        aria-label={autoPlaying ? "Pause" : "Play"}
-        title={autoPlaying ? "Pause" : "Play"}
+        aria-label={autoPlaying ? tv.pause : tv.play}
+        title={autoPlaying ? tv.pause : tv.play}
       >
         {autoPlaying ? (
           <Pause className="h-4 w-4" aria-hidden="true" />
@@ -56,7 +58,7 @@ export function TalisBooksViewerPlaybackRail({
           <Play className="h-4 w-4" aria-hidden="true" />
         )}
       </button>
-      <div className="talisbooks-viewer__seconds" role="group" aria-label="Flip speed">
+      <div className="talisbooks-viewer__seconds" role="group" aria-label={tv.flipSpeed}>
         {TALISBOOKS_VIEWER_SPEED_PRESETS.map((preset) => (
           <button
             key={preset.id}
@@ -71,13 +73,13 @@ export function TalisBooksViewerPlaybackRail({
               .join(" ")}
             onClick={() => applyPreset(preset.id)}
             aria-pressed={intervalMs === preset.intervalMs}
-            title={preset.label}
+            title={tv.speedPresets[preset.id] ?? preset.label}
           >
             {(preset.intervalMs / 1000).toFixed(preset.intervalMs % 1000 === 0 ? 0 : 1)}s
           </button>
         ))}
       </div>
-      <div className="talisbooks-viewer__view-icons" role="group" aria-label="View mode">
+      <div className="talisbooks-viewer__view-icons" role="group" aria-label={tv.viewMode}>
         <button
           type="button"
           className={[
@@ -88,8 +90,8 @@ export function TalisBooksViewerPlaybackRail({
             .join(" ")}
           aria-pressed={viewMode === "spread"}
           onClick={() => onViewModeChange("spread")}
-          title="Spread"
-          aria-label="Spread view"
+          title={tv.spread}
+          aria-label={tv.spreadView}
         >
           <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
@@ -103,8 +105,8 @@ export function TalisBooksViewerPlaybackRail({
             .join(" ")}
           aria-pressed={viewMode === "single"}
           onClick={() => onViewModeChange("single")}
-          title="Single"
-          aria-label="Single page"
+          title={tv.single}
+          aria-label={tv.singlePage}
         >
           <RectangleVertical className="h-3.5 w-3.5" aria-hidden="true" />
         </button>
@@ -122,11 +124,11 @@ export function TalisBooksViewerPlaybackRail({
             .join(" ")}
           aria-pressed={stageLandscape}
           onClick={onToggleStageLandscape}
-          title={stageLandscape ? "Portrait stage" : "Landscape stage"}
+          title={stageLandscape ? tv.portraitStage : tv.landscapeStage}
           aria-label={
             stageLandscape
-              ? "Return viewer stage to portrait"
-              : "Turn viewer stage to landscape"
+              ? tv.toPortraitAria
+              : tv.toLandscapeAria
           }
         >
           <RotateCw

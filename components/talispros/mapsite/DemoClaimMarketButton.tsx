@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import DemoFastCodePreview from "@/components/talispros/DemoFastCodePreview";
@@ -58,6 +59,7 @@ export default function DemoClaimMarketButton({
   className = "",
   align = "start",
 }: DemoClaimMarketButtonProps) {
+  const { demo: d, home: { segments } } = useT();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -70,7 +72,7 @@ export default function DemoClaimMarketButton({
   function handleClaim() {
     setError(null);
     if (!audienceKey) {
-      setError("Choose who you are (same options as /start) before claiming.");
+      setError(d.claimChooseError);
       return;
     }
     const market = parseRegistrationMarket(audienceKey) ?? "brokers";
@@ -115,9 +117,10 @@ export default function DemoClaimMarketButton({
           </p>
           <fieldset className="space-y-2">
             <legend className="text-[11px] font-medium text-neutral-500">
-              What best describes you?
+              {d.claimDescribe}
             </legend>
-            {TALISPROS_START_SEGMENTS.map((segment) => {
+            {TALISPROS_START_SEGMENTS.map((segment, segmentIndex) => {
+              const localized = segments[segmentIndex];
               const key = audienceFromSegmentHref(segment.href);
               const selected = audienceKey === key;
               return (
@@ -140,10 +143,10 @@ export default function DemoClaimMarketButton({
                   />
                   <span className="min-w-0">
                     <span className="block text-[10px] uppercase tracking-[0.1em] text-neutral-500">
-                      {segment.label}
+                      {localized?.label ?? segment.label}
                     </span>
                     <span className="block text-[13px] font-medium leading-snug text-neutral-900">
-                      {segment.title}
+                      {localized?.title ?? segment.title}
                     </span>
                   </span>
                 </label>
@@ -152,7 +155,7 @@ export default function DemoClaimMarketButton({
           </fieldset>
           <label className="block">
             <span className="text-[11px] font-medium text-neutral-500">
-              First name
+              {d.firstName}
             </span>
             <input
               value={firstName}
@@ -160,12 +163,12 @@ export default function DemoClaimMarketButton({
               disabled={pending}
               autoComplete="given-name"
               className="mt-1 w-full rounded-lg border border-neutral-200 bg-white px-2.5 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-400 disabled:opacity-50"
-              placeholder="First name"
+              placeholder={d.firstName}
             />
           </label>
           <label className="block">
             <span className="text-[11px] font-medium text-neutral-500">
-              Last name
+              {d.lastName}
             </span>
             <input
               value={lastName}
@@ -173,7 +176,7 @@ export default function DemoClaimMarketButton({
               disabled={pending}
               autoComplete="family-name"
               className="mt-1 w-full rounded-lg border border-neutral-200 bg-white px-2.5 py-2 text-sm text-neutral-900 outline-none focus:border-neutral-400 disabled:opacity-50"
-              placeholder="Last name"
+              placeholder={d.lastName}
             />
           </label>
           <DemoFastCodePreview firstName={firstName} lastName={lastName} />
@@ -190,7 +193,7 @@ export default function DemoClaimMarketButton({
               }}
               className="inline-flex min-h-9 flex-1 items-center justify-center rounded-xl border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 disabled:opacity-50"
             >
-              Cancel
+              {d.cancel}
             </button>
             <button
               type="button"
@@ -203,7 +206,7 @@ export default function DemoClaimMarketButton({
               onClick={handleClaim}
               className="inline-flex min-h-9 flex-1 items-center justify-center rounded-xl bg-[#046BD9] px-3 text-sm font-medium text-white transition hover:bg-[#0357b0] disabled:opacity-50"
             >
-              {pending ? "Claiming…" : "Claim"}
+              {pending ? d.claiming : d.claim}
             </button>
           </div>
         </div>

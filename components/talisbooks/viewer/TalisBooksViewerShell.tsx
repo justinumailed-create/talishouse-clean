@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { RotateCw } from "lucide-react";
@@ -37,12 +38,13 @@ import {
 import DemoClaimMarketButton from "@/components/talispros/mapsite/DemoClaimMarketButton";
 
 function TalisBooksViewerRegisterLink() {
+  const tv = useT().viewer;
   return (
     <a
       href={TALISBOOKS_SAMCART_REGISTER_URL}
       className="talisbooks-viewer__register"
     >
-      Continue to register
+      {tv.continueToRegister}
     </a>
   );
 }
@@ -72,6 +74,7 @@ export default function TalisBooksViewerShell({
   book: initialBook,
   narration = null,
 }: TalisBooksViewerShellProps) {
+  const tv = useT().viewer;
   const narrationController = narration ?? createEmptyNarrationController();
 
   const [book, setBook] = useState<TalisBooksViewerBook>(() =>
@@ -330,9 +333,9 @@ export default function TalisBooksViewerShell({
           <p className="talisbooks-viewer__eyebrow">
             {isMagazine
               ? book.listingProfile === "fsbo"
-                ? "Talisbooks™ FSBO Demo"
-                : "Talisbooks™ Magazine"
-              : "Talisbooks™ Viewer"}
+                ? tv.eyebrowFsbo
+                : tv.eyebrowMagazine
+              : tv.eyebrowViewer}
           </p>
           <h1 className="talisbooks-viewer__title">{book.title}</h1>
           {book.subtitle ? (
@@ -347,16 +350,16 @@ export default function TalisBooksViewerShell({
         >
           {isPinnedShowcase ? (
             <Link href={ROUTES.HOME} className="talisbooks-viewer__back">
-              Home
+              {tv.home}
             </Link>
           ) : showBackToMapsite ? (
             <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
-              Back to Mapsite™
+              {tv.backToMapsite}
             </Link>
           ) : null}
           {isPinnedShowcase ? (
             <Link href={ROUTES.CATALOG} className="talisbooks-viewer__back">
-              Product
+              {tv.product}
             </Link>
           ) : null}
           {book.pdfDownloadUrl ? (
@@ -365,17 +368,17 @@ export default function TalisBooksViewerShell({
               download={book.pdfDownloadFileName || true}
               className="talisbooks-viewer__back"
             >
-              Download PDF
+              {tv.downloadPdf}
             </a>
           ) : null}
           {isPinnedShowcase ? (
             <Link href={MAPSITE_APP_PATH} className="talisbooks-viewer__back">
-              Markets
+              {tv.markets}
             </Link>
           ) : null}
           {isPinnedShowcase ? (
             <Link href={ROUTES.ADMIN_DASHBOARD} className="talisbooks-viewer__back">
-              Global Admin
+              {tv.globalAdmin}
             </Link>
           ) : null}
         </div>
@@ -407,15 +410,15 @@ export default function TalisBooksViewerShell({
               .join(" ")}
             aria-pressed={stageLandscape}
             onClick={() => setStageLandscape((current) => !current)}
-            title={stageLandscape ? "Portrait stage" : "Landscape stage"}
+            title={stageLandscape ? tv.portraitStage : tv.landscapeStage}
             aria-label={
               stageLandscape
-                ? "Return viewer stage to portrait"
-                : "Turn viewer stage to landscape"
+                ? tv.toPortraitAria
+                : tv.toLandscapeAria
             }
           >
             <RotateCw className="h-4 w-4" aria-hidden="true" />
-            <span>{stageLandscape ? "Portrait" : "Landscape"}</span>
+            <span>{stageLandscape ? tv.portrait : tv.landscape}</span>
           </button>
           <TalisBooksViewerStage
             book={book}

@@ -19,6 +19,7 @@ import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
+import { useT } from "@/lib/i18n/client";
 import {
   TALISU_KB_MANAGE_PATH,
   isTalisUKbMapsiteManagerFastCode,
@@ -98,6 +99,7 @@ export default function MapSiteMarketPartnerCard({
   partnerName: partnerNameOverride = null,
   partnerTagline = null,
 }: MapSiteMarketPartnerCardProps) {
+  const t = useT();
   const content = contentForAudience(audience);
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
   const showKbManage =
@@ -109,7 +111,11 @@ export default function MapSiteMarketPartnerCard({
   );
   const partnerName =
     partnerNameOverride?.trim() || defaultMapSitePartnerName(mapsite);
-  const partnerLabel = partnerTagline?.trim() || DEFAULT_MAPSITE_PARTNER_TAGLINE;
+  const ownerTagline = partnerTagline?.trim();
+  const partnerLabel =
+    ownerTagline && ownerTagline !== DEFAULT_MAPSITE_PARTNER_TAGLINE
+      ? ownerTagline
+      : t.mapsite.partnerIntro;
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (!onSelect) return;
@@ -162,7 +168,7 @@ export default function MapSiteMarketPartnerCard({
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[13px] font-bold uppercase tracking-wide text-black">
-                {fastCode ? `FAST CODE: ${fastCode}` : "Claim received"}
+                {fastCode ? `FAST CODE: ${fastCode}` : t.mapsite.claimReceived}
               </p>
               {address ? (
                 <p className="mt-0.5 truncate text-[11px] font-bold uppercase tracking-wide text-black">
@@ -185,7 +191,7 @@ export default function MapSiteMarketPartnerCard({
               href={TALISU_KB_MANAGE_PATH}
               className="inline-flex min-h-8 items-center justify-center rounded-full bg-[#046BD9] px-3 text-[12px] font-semibold text-white transition hover:bg-[#035bb8]"
             >
-              Knowledge Base
+              {t.mapsite.knowledgeBase}
             </Link>
           </div>
         ) : null}
@@ -220,7 +226,7 @@ export default function MapSiteMarketPartnerCard({
             </p>
           ) : (
             <p className="text-[15px] font-bold uppercase tracking-wide text-black">
-              Claim received
+              {t.mapsite.claimReceived}
             </p>
           )}
 
@@ -255,7 +261,7 @@ export default function MapSiteMarketPartnerCard({
               href={TALISU_KB_MANAGE_PATH}
               className="inline-flex min-h-8 items-center justify-center rounded-full bg-[#046BD9] px-3 text-[12px] font-semibold text-white transition hover:bg-[#035bb8]"
             >
-              Knowledge Base
+              {t.mapsite.knowledgeBase}
             </Link>
           </div>
         ) : null}

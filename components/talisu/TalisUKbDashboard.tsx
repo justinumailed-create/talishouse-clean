@@ -13,6 +13,7 @@ import {
 } from "@/lib/talisu/kb-content";
 import { TALISU_CARD, TALISU_BTN_SECONDARY } from "@/lib/talisu/ui";
 import TalisUKbLogoutButton from "@/components/talisu/TalisUKbLogoutButton";
+import { useT } from "@/lib/i18n/client";
 
 const TABS: TalisUKbBucket[] = ["audios", "videos", "learning"];
 
@@ -61,6 +62,7 @@ export default function TalisUKbDashboard({
   showManageLink?: boolean;
 }) {
   const tabsId = useId();
+  const h = useT().talisuHub;
   const [tab, setTab] = useState<TalisUKbBucket>("audios");
   const [content, setContent] = useState<TalisUKbContentState>(defaultTalisUKbContent);
 
@@ -84,15 +86,15 @@ export default function TalisUKbDashboard({
 
   const emptyHint =
     tab === "learning"
-      ? "Learning Material placeholders will grow here as guides are published."
-      : "No items in this section yet.";
+      ? h.kbEmptyLearning
+      : h.kbEmpty;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div
           role="tablist"
-          aria-label="Knowledge Base sections"
+          aria-label={h.kbTabsAria}
           className="inline-flex flex-wrap gap-1 rounded-xl bg-neutral-200/70 p-1"
         >
           {TABS.map((key) => {
@@ -112,7 +114,7 @@ export default function TalisUKbDashboard({
                     : "text-neutral-600 hover:text-neutral-900"
                 }`}
               >
-                {TALISU_KB_BUCKET_LABELS[key]}
+                {h.buckets[key] ?? TALISU_KB_BUCKET_LABELS[key]}
               </button>
             );
           })}
@@ -120,7 +122,7 @@ export default function TalisUKbDashboard({
         <div className="flex flex-wrap items-center gap-2">
           {showManageLink ? (
             <Link href={TALISU_KB_MANAGE_PATH} className={TALISU_BTN_SECONDARY}>
-              Update content
+              {h.kbUpdateContent}
             </Link>
           ) : null}
           <TalisUKbLogoutButton />

@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
+import { fmt } from "@/lib/i18n/format";
 import { useEffect, useState } from "react";
 import {
   extractInitials,
@@ -25,6 +27,7 @@ export default function DemoFastCodePreview({
   middleName,
   className = "",
 }: DemoFastCodePreviewProps) {
+  const d = useT().demo;
   const [preview, setPreview] = useState<string | null>(null);
   const [hint, setHint] = useState<string | null>(null);
 
@@ -44,22 +47,22 @@ export default function DemoFastCodePreview({
       const initials = extractInitials(normalized).replace(/[^a-z]/g, "");
       if (!/^[a-z]{2,3}$/.test(initials)) {
         setPreview(null);
-        setHint("Enter a first and last name to preview your FAST Code™.");
+        setHint(d.previewNeedName);
         return;
       }
       setPreview(`${initials}##`);
       setHint(
-        `Based on “${full}” — initials ${initials.toUpperCase()}. The final 2 digits are assigned when you claim.`,
+        fmt(d.previewBased, { name: full, initials: initials.toUpperCase() }),
       );
     } catch (error) {
       setPreview(null);
       setHint(
         error instanceof Error
           ? error.message
-          : "Could not preview FAST Code™ from that name.",
+          : d.previewError,
       );
     }
-  }, [firstName, lastName, middleName]);
+  }, [firstName, lastName, middleName, d]);
 
   if (!preview && !hint) return null;
 
@@ -69,7 +72,7 @@ export default function DemoFastCodePreview({
       aria-live="polite"
     >
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
-        FAST Code™ preview
+        {d.previewTitle}
       </p>
       {preview ? (
         <p className="mt-1 font-mono text-lg font-semibold tracking-wide text-neutral-900">

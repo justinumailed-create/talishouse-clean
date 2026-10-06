@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import { useEffect, useState, type ReactNode } from "react";
 import {
   readTalisUKbUnlocked,
@@ -20,6 +21,7 @@ export default function TalisUKbPasswordGate({
 }: {
   children: ReactNode;
 }) {
+  const h = useT().talisuHub;
   const [ready, setReady] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
 
@@ -49,7 +51,7 @@ export default function TalisUKbPasswordGate({
   if (!ready) {
     return (
       <div className="mx-auto flex min-h-[40vh] max-w-sm items-center justify-center px-4">
-        <p className="text-sm text-neutral-500">Checking access…</p>
+        <p className="text-sm text-neutral-500">{h.kbChecking}</p>
       </div>
     );
   }
@@ -64,7 +66,7 @@ export default function TalisUKbPasswordGate({
           />
         </div>
         <p className="mt-4 text-center text-[12px] text-neutral-500">
-          You can also unlock from the TalisU menu in the header.
+          {h.kbUnlockHint}
         </p>
       </div>
     );

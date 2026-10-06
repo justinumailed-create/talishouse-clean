@@ -344,7 +344,9 @@ export default function TalisUMktsHeader({
                   }}
                   className="block w-full whitespace-nowrap px-3.5 py-2 text-left text-[13px] font-medium text-white/95 transition hover:bg-white/15 sm:text-[14px]"
                 >
-                  {menuItem.label}
+                  {(t.mapsite.dashboardMenu as Record<string, string>)[
+                    menuItem.id
+                  ] ?? menuItem.label}
                 </button>
               ))}
             </div>

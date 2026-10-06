@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import HomePinLocationSection, {
@@ -19,7 +20,8 @@ export default function DemoMapSiteBuilderClient() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [pin, setPin] = useState<HomePinLocationValues>(defaultHomePinLocationValues);
-  const [title, setTitle] = useState("Demo Mapsite™");
+  const d = useT().demo;
+  const [title, setTitle] = useState(d.defaultListingTitle);
   const [error, setError] = useState<string | null>(null);
   const [pinErrors, setPinErrors] = useState<
     Partial<Record<keyof HomePinLocationValues, string>>
@@ -30,7 +32,7 @@ export default function DemoMapSiteBuilderClient() {
     const nextPinErrors = validateHomePinLocation(pin);
     setPinErrors(nextPinErrors);
     if (Object.keys(nextPinErrors).length > 0) {
-      setError("Place a pin or enter an address to continue.");
+      setError(d.errPlacePin);
       return;
     }
 
@@ -66,7 +68,7 @@ export default function DemoMapSiteBuilderClient() {
         download={DEMO_MAPSITE_PDF_FILE_NAME}
         className="absolute right-4 top-4 z-10 inline-flex min-h-10 items-center justify-center rounded-full bg-neutral-950 px-4 text-[13px] font-medium text-white transition hover:bg-neutral-800 sm:right-6 sm:top-5 sm:text-[14px]"
       >
-        Download Demo PDF
+        {d.downloadPdf}
       </a>
       <div className="w-full max-w-[480px]">
         <div className="text-center">
@@ -74,15 +76,15 @@ export default function DemoMapSiteBuilderClient() {
             DEMONSTRATION
           </p>
           <h1 className="mt-5 text-[34px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[40px]">
-            Demo eBook and Mapsite™
+            {d.title}
           </h1>
           <p className="mx-auto mt-4 max-w-[26rem] text-[22px] font-semibold leading-snug tracking-[-0.03em] text-neutral-950">
-            Place a pin.
+            {d.placeAPin}
           </p>
           <p className="mx-auto mt-2 max-w-[26rem] text-[13px] leading-relaxed text-neutral-500">
-            Create Talisbook™ from pinned sample
+            {d.createFromSample}
             <br />
-            FAST Code issued upon registration
+            {d.fastCodeOnRegistration}
           </p>
         </div>
 
@@ -90,7 +92,7 @@ export default function DemoMapSiteBuilderClient() {
           <div className={`${cardClass} px-6 py-7`}>
             <label className="block">
               <span className="block text-center text-[13px] text-neutral-500">
-                Listing title
+                {d.listingTitle}
               </span>
               <input
                 value={title}
@@ -124,11 +126,10 @@ export default function DemoMapSiteBuilderClient() {
             disabled={pending}
             className="flex h-12 w-full items-center justify-center rounded-full bg-neutral-950 text-[15px] font-medium text-white transition disabled:opacity-40"
           >
-            {pending ? "Continue to demo eBook…" : "Continue to demo eBook"}
+            {pending ? d.continuing : d.continue}
           </button>
           <p className="text-center text-[12px] leading-relaxed text-neutral-400">
-            Next you will extract the pinned Talispros eBook pages, optimize
-            them, and Build the demonstration Talisbook™. No FAST Code is issued.
+            {d.nextNote}
           </p>
         </form>
       </div>

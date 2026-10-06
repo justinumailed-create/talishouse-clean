@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
@@ -12,6 +13,7 @@ const VALID_ROLES: { code: string; role: Role; label: string }[] = [
 ];
 
 export default function CrmLoginPage() {
+  const l = useT().login;
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,7 @@ export default function CrmLoginPage() {
     try {
       const normalized = code.trim().toUpperCase();
       if (!normalized) {
-        setError("Please enter your access code.");
+        setError(l.crmEmpty);
         return;
       }
 
@@ -52,9 +54,9 @@ export default function CrmLoginPage() {
         return;
       }
 
-      setError("Invalid access code. Please try again.");
+      setError(l.crmInvalid);
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError(l.genericError);
     } finally {
       setLoading(false);
     }
@@ -65,10 +67,10 @@ export default function CrmLoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
-            CRM Login
+            {l.crmTitle}
           </h1>
           <p className="text-sm text-neutral-500 mt-1">
-            Enter your access code to continue
+            {l.crmSubtitle}
           </p>
         </div>
 
@@ -78,7 +80,7 @@ export default function CrmLoginPage() {
               type="text"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="Access code"
+              placeholder={l.crmPlaceholder}
               className="w-full h-11 px-4 bg-white border border-neutral-200 rounded-xl text-sm focus:outline-none focus:border-neutral-900 transition-colors uppercase tracking-wider text-center"
               autoFocus
               disabled={loading}
@@ -102,13 +104,13 @@ export default function CrmLoginPage() {
             {loading ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto" />
             ) : (
-              "Sign In"
+              l.signIn
             )}
           </button>
         </form>
 
         <div className="mt-6 pt-6 border-t border-neutral-200">
-          <p className="text-xs text-neutral-400 text-center mb-3">Demo access codes</p>
+          <p className="text-xs text-neutral-400 text-center mb-3">{l.crmDemoCodes}</p>
           <div className="space-y-1.5">
             {VALID_ROLES.map((r) => (
               <div key={r.role} className="flex items-center justify-between text-xs">

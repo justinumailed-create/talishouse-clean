@@ -1,18 +1,22 @@
 import type { Metadata } from "next";
 import TopBoundFlipbook from "@/components/product-flipbook/TopBoundFlipbook";
 import { createMetadata } from "@/lib/seo";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { talisprosBrandOgMetadataImage } from "@/lib/talispros/mapsite-og-image";
 import { loadCataloguePages } from "@/lib/talisu/catalogue-pages";
 
-const catalogueTitle = "Catalogue | Talishouse™ Product Catalogue";
-
-export const metadata: Metadata = createMetadata({
-  title: catalogueTitle,
-  description:
-    "Talishouse™ Product Catalogue design ideas. Every design is numbered (P01, P02…) — tap one to register for that product.",
-  path: "/catalogue",
-  image: talisprosBrandOgMetadataImage(catalogueTitle),
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const m = getDictionary(locale).meta.catalogue;
+  return createMetadata({
+    title: m.title,
+    description: m.description,
+    path: "/catalogue",
+    image: talisprosBrandOgMetadataImage(m.title),
+    locale,
+  });
+}
 
 /** Opens on Design Ideas; pages before it are trimmed in data (loadProductFlipbookPages startPage). */
 export default async function CataloguePage() {

@@ -1,12 +1,18 @@
 import { createTalisUMetadata } from "@/lib/talisu/seo";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import TalisUTalisTvSoonPlaceholder from "@/components/talisu/TalisUTalisTvSoonPlaceholder";
 
-export const metadata = createTalisUMetadata({
-  title: "TalisU™ | Audio",
-  description:
-    "Listen to TalisU™ audio — a short welcome autoplays, plus Aisha & Webster on digital property fractionalization.",
-  path: "/talisu/au",
-});
+export async function generateMetadata() {
+  const locale = await getLocale();
+  const m = getDictionary(locale).meta.talisuAudio;
+  return createTalisUMetadata({
+    title: m.title,
+    description: m.description,
+    path: "/talisu/au",
+    locale,
+  });
+}
 
 /** Audio library UI paused — restore by rendering the library component again. */
 export default function TalisUAudioPage() {

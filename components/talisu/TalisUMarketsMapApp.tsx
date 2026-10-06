@@ -9,14 +9,16 @@ import {
 } from "@/components/talismaps/map-engine/MapEngineProvider";
 import {
   TALISU_MKTS_FIT_PADDING,
-  TALISU_MKTS_FOOTER,
   TALISU_MKTS_PINS,
+  localizeTalisUMktsPins,
   TALISU_MKTS_VIEWPORT,
   talisuMktsMapCoordinates,
   talisuMktsToEnginePins,
+  type TalisUMktsPin,
 } from "@/lib/talisu/markets-pins";
 import TalisUMarketsPinCard from "./TalisUMarketsPinCard";
 import TalisUMarketsSidebar from "./TalisUMarketsSidebar";
+import { useT } from "@/lib/i18n/client";
 
 const FOCUS_GESTURE_GUARD_MS = 900;
 
@@ -24,7 +26,13 @@ export default function TalisUMarketsMapApp() {
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const focusingRef = useRef(false);
   const focusTimerRef = useRef<number | null>(null);
-  const enginePins = useMemo(() => talisuMktsToEnginePins(TALISU_MKTS_PINS), []);
+  const t = useT();
+  const pins = useMemo(
+    () => localizeTalisUMktsPins(TALISU_MKTS_PINS, t.markets),
+    [t],
+  );
+  // Engine pins keep the first-render labels (map re-init is avoided on switch).
+  const enginePins = useMemo(() => talisuMktsToEnginePins(pins), [pins]);
   const fitCoordinates = useMemo(() => talisuMktsMapCoordinates(), []);
   const fitPadding = useMemo(
     () => ({
@@ -77,6 +85,8 @@ export default function TalisUMarketsMapApp() {
     >
       <MapEngineFitBounds coordinates={fitCoordinates} padding={fitPadding} />
       <MarketsChrome
+        pins={pins}
+        footer={t.markets.footer}
         selectedPinId={selectedPinId}
         setSelectedPinId={setSelectedPinId}
         beginFocusGuard={beginFocusGuard}
@@ -86,10 +96,14 @@ export default function TalisUMarketsMapApp() {
 }
 
 function MarketsChrome({
+  pins,
+  footer,
   selectedPinId,
   setSelectedPinId,
   beginFocusGuard,
 }: {
+  pins: readonly TalisUMktsPin[];
+  footer: string;
   selectedPinId: string | null;
   setSelectedPinId: (id: string | null) => void;
   beginFocusGuard: () => void;
@@ -98,8 +112,8 @@ function MarketsChrome({
   const lastFocusedRef = useRef<string | null>(null);
 
   const selectedPin = useMemo(
-    () => TALISU_MKTS_PINS.find((pin) => pin.id === selectedPinId) ?? null,
-    [selectedPinId]
+    () => pins.find((pin) => pin.id === selectedPinId) ?? null,
+    [pins, selectedPinId]
   );
 
   const focusPin = useCallback(
@@ -139,7 +153,7 @@ function MarketsChrome({
         <MapEngineCanvas className="h-full w-full" />
 
         <TalisUMarketsSidebar
-          pins={TALISU_MKTS_PINS}
+          pins={pins}
           selectedPinId={selectedPinId}
           onSelectPin={focusPin}
         />
@@ -153,7 +167,7 @@ function MarketsChrome({
       </div>
 
       <footer className="shrink-0 border-t border-black/10 bg-white px-4 py-3 text-center text-[12px] leading-snug text-neutral-700 sm:px-6 sm:text-[13px]">
-        {TALISU_MKTS_FOOTER}
+        {footer}
       </footer>
     </div>
   );

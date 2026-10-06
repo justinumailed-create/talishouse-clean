@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import { isDemonstrationListing } from "../lib/talispros/demo-mapsite";
 import { ROUTES } from "../lib/routes";
 
@@ -45,7 +46,8 @@ describe("Claim Your Market on demo Mapsites™ only", () => {
     expect(claimButton).toContain("Claim Your Market™");
     expect(claimButton).toContain("TALISPROS_START_SEGMENTS");
     expect(claimButton).toContain("audience");
-    expect(claimButton).toContain("What best describes you?");
+    expect(claimButton).toContain("d.claimDescribe");
+    expect(en.demo.claimDescribe).toBe("What best describes you?");
 
     const claimAction = readFileSync(
       resolve("app/talispros/demo-mapsite/claim-actions.ts"),

@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useId, useState, useTransition } from "react";
-import {
-  MAPSITE_URL_GATE_HEADLINE,
-  MAPSITE_URL_GATE_TTL_LABEL,
-  normalizeUrlGatePin,
-} from "@/lib/talispros/mapsite-url-gate";
+import { normalizeUrlGatePin } from "@/lib/talispros/mapsite-url-gate";
+import { useT } from "@/lib/i18n/client";
+import { fmt } from "@/lib/i18n/format";
 import {
   requestMapSiteUrlGateCode,
   unlockMapSiteUrlWithGatePin,
@@ -21,6 +19,8 @@ export default function MapSiteUrlGateDialog({
   onClose: () => void;
 }) {
   const titleId = useId();
+  const t = useT();
+  const u = t.mapsite.urlGate;
   const [pin, setPin] = useState("");
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
@@ -53,12 +53,12 @@ export default function MapSiteUrlGateDialog({
     startGenerate(async () => {
       const result = await requestMapSiteUrlGateCode(fastCode);
       if (!result.success) {
-        setError(result.error || "Could not generate a secure code.");
+        setError(result.error || u.errGenerate);
         return;
       }
       setGenerated(true);
       setStatus(
-        `Secure code generated and sent to Admin Notifications. Ask admin for the 6-digit code (valid ${result.ttlLabel || MAPSITE_URL_GATE_TTL_LABEL}, single-use).`,
+        fmt(u.generated, { ttl: u.ttl }),
       );
     });
   }
@@ -68,7 +68,7 @@ export default function MapSiteUrlGateDialog({
     startUnlock(async () => {
       const result = await unlockMapSiteUrlWithGatePin(fastCode, pin);
       if (!result.success || !result.url) {
-        setError(result.error || "Could not unlock the URL.");
+        setError(result.error || u.errUnlock);
         return;
       }
       window.open(result.url, "_blank", "noopener,noreferrer");
@@ -95,18 +95,17 @@ export default function MapSiteUrlGateDialog({
               id={titleId}
               className="m-0 text-lg font-semibold tracking-tight text-neutral-900"
             >
-              {MAPSITE_URL_GATE_HEADLINE}
+              {u.headline}
             </h2>
             <p className="mt-1 text-sm leading-relaxed text-neutral-500">
-              Payment and listing links stay locked until a secure code from
-              Global Admin is entered.
+              {u.intro}
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg leading-none text-neutral-500 hover:bg-neutral-100"
-            aria-label="Close"
+            aria-label={t.mapsite.close}
           >
             ×
           </button>
@@ -120,10 +119,10 @@ export default function MapSiteUrlGateDialog({
             className="flex h-11 w-full items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 text-sm font-medium text-neutral-900 hover:bg-neutral-100 disabled:opacity-50"
           >
             {pendingGenerate
-              ? "Generating…"
+              ? u.generating
               : generated
-                ? "Generate a new secure code"
-                : "Generate secure code"}
+                ? u.generateNew
+                : u.generate}
           </button>
 
           {status ? (
@@ -140,7 +139,7 @@ export default function MapSiteUrlGateDialog({
 
           <label className="block">
             <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-              Enter 6-digit secure code
+              {u.codeLabel}
             </span>
             <input
               inputMode="numeric"
@@ -161,12 +160,11 @@ export default function MapSiteUrlGateDialog({
             onClick={unlock}
             className="flex h-11 w-full items-center justify-center rounded-xl bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
           >
-            {pendingUnlock ? "Checking…" : "Open URL"}
+            {pendingUnlock ? u.checking : u.open}
           </button>
 
           <p className="text-[11px] leading-relaxed text-neutral-400">
-            Codes appear under Admin → Notifications with FAST Code and time.
-            Each code works once and expires after {MAPSITE_URL_GATE_TTL_LABEL}.
+            {fmt(u.footnote, { ttl: u.ttl })}
           </p>
         </div>
       </div>

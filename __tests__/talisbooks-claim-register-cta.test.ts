@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import {
   isIssuedConnectedFastCode,
   TALISBOOKS_SAMCART_REGISTER_URL,
@@ -69,7 +70,8 @@ describe("Talisbooks Claim vs Register vs Back", () => {
     expect(viewer).toContain("talisBooksViewerCta");
     expect(viewer).toContain("talisBooksViewerShowBack");
     expect(viewer).toContain("DemoClaimMarketButton");
-    expect(viewer).toContain("Continue to register");
+    expect(viewer).toContain("tv.continueToRegister");
+    expect(en.viewer.continueToRegister).toBe("Continue to register");
     expect(viewer).toContain("TALISBOOKS_SAMCART_REGISTER_URL");
     expect(viewer).not.toContain("SHOW_BACK_TO_MAPSITE");
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
+import { fmt } from "@/lib/i18n/format";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,13 +43,14 @@ function CatalogueFace({ page }: { page: ProductFlipbookPage }) {
  * to registration instead of turning the page.
  */
 function CatalogueHotspots({ hotspots }: { hotspots: ProductFlipbookHotspot[] }) {
+  const c = useT().catalogueUi;
   return (
     <div className="absolute inset-0" data-testid="product-flipbook-hotspots">
       {hotspots.map((spot) => (
         <Link
           key={spot.code}
           href={spot.href}
-          aria-label={`Customize ${spot.label}`}
+          aria-label={fmt(c.customize, { label: spot.label })}
           title={`Customize ${spot.label}`}
           data-product-code={spot.code}
           onPointerDown={(event) => event.stopPropagation()}
@@ -64,7 +67,7 @@ function CatalogueHotspots({ hotspots }: { hotspots: ProductFlipbookHotspot[] })
             {spot.code}
           </span>
           <span className="absolute bottom-[5%] right-[3%] rounded bg-white/90 px-[0.45em] py-[0.15em] text-[clamp(8px,0.9vw,12px)] font-semibold leading-tight text-[#046BD9] opacity-0 shadow-sm transition group-hover:opacity-100 group-focus-visible:opacity-100">
-            Register
+            {c.register}
           </span>
         </Link>
       ))}
@@ -86,6 +89,7 @@ export default function TopBoundFlipbook({
   /** Visible sub-header strip (logo, eyebrow, title, Home/Bookshelf). Off on /catalogue. */
   showHeader?: boolean;
 }) {
+  const c = useT().catalogueUi;
   const leaves = pages;
   const [index, setIndex] = useState(0);
   const [flip, setFlip] = useState<Flip | null>(null);
@@ -231,14 +235,14 @@ export default function TopBoundFlipbook({
           <div className="product-flipbook__header-tools">
             <nav className="product-flipbook__actions" aria-label="Talispros">
               <Link href={ROUTES.HOME} className="product-flipbook__link">
-                Home
+                {c.home}
               </Link>
               <Link
                 href={ROUTES.CATALOGUE_BOOKSHELF}
                 className="product-flipbook__link"
                 data-testid="catalogue-bookshelf-button"
               >
-                Bookshelf
+                {c.bookshelf}
               </Link>
             </nav>
           </div>
@@ -299,10 +303,10 @@ export default function TopBoundFlipbook({
             onClick={() => go("prev")}
             disabled={atStart || flip !== null}
           >
-            Previous
+            {c.previous}
           </button>
           <p className="product-flipbook__count" aria-live="polite">
-            Page {displayNumber} of {leaves.length}
+            {fmt(c.pageOf, { page: displayNumber, count: leaves.length })}
           </p>
           <button
             type="button"
@@ -311,7 +315,7 @@ export default function TopBoundFlipbook({
             onClick={() => go("next")}
             disabled={atEnd || flip !== null}
           >
-            Next
+            {c.next}
           </button>
         </div>
         <p className="product-flipbook__hint">Flip up from the top edge. Swipe down to turn back.</p>

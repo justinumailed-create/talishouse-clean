@@ -7,11 +7,13 @@ import {
   placeMapSiteAdditionalPin,
 } from "@/app/talispros/mapsite/pin-actions";
 import {
-  formatAdditionalPinCheckoutLabel,
+  additionalPinPriceCents,
   formatUsdFromCents,
   normalizePinCoordinate,
   type MapSitePinDashboardState,
 } from "@/lib/talispros/mapsite-additional-pins";
+import { useT } from "@/lib/i18n/client";
+import { fmt } from "@/lib/i18n/format";
 
 export type PinEditorState =
   | { kind: "idle" }
@@ -44,6 +46,8 @@ export default function MapSitePinDashboard({
   onEditorChange,
 }: MapSitePinDashboardProps) {
   const titleId = useId();
+  const t = useT();
+  const d = t.mapsite.pinDashboard;
   const quantityId = useId();
   const [quantity, setQuantity] = useState(1);
   const [label, setLabel] = useState("");
@@ -88,7 +92,7 @@ export default function MapSitePinDashboard({
         window.location.assign(result.url);
         return;
       }
-      setError("error" in result ? result.error : "Unable to start checkout.");
+      setError("error" in result ? result.error : d.errCheckout);
     });
   }
 
@@ -96,7 +100,7 @@ export default function MapSitePinDashboard({
     const lat = normalizePinCoordinate(Number(latitude), "lat");
     const lng = normalizePinCoordinate(Number(longitude), "lng");
     if (lat == null || lng == null) {
-      setError("Enter a valid latitude and longitude, or click the map.");
+      setError(d.errCoordsOrMap);
       return;
     }
     setError(null);
@@ -115,7 +119,7 @@ export default function MapSitePinDashboard({
       }
       onDashboardChange(result.dashboard);
       setError(null);
-      setMessage("PIN placed.");
+      setMessage(d.placed);
       setLabel("");
       setLatitude("");
       setLongitude("");
@@ -130,7 +134,7 @@ export default function MapSitePinDashboard({
     const lat = normalizePinCoordinate(Number(latitude || fixing.latitude), "lat");
     const lng = normalizePinCoordinate(Number(longitude || fixing.longitude), "lng");
     if (lat == null || lng == null) {
-      setError("Enter a valid latitude and longitude.");
+      setError(d.errCoords);
       return;
     }
     setError(null);
@@ -144,7 +148,7 @@ export default function MapSitePinDashboard({
         label: label || fixing.label,
       });
       if (!report(result)) return;
-      setMessage("PIN updated.");
+      setMessage(d.updated);
       onEditorChange({ kind: "idle" });
     });
   }
@@ -161,9 +165,9 @@ export default function MapSitePinDashboard({
 
   const checkoutNote =
     checkoutStatus === "success"
-      ? "Payment received. PIN capacity updates as soon as Stripe confirms it."
+      ? d.checkoutSuccess
       : checkoutStatus === "cancelled"
-        ? "Checkout cancelled. No PINs were added."
+        ? d.checkoutCancelled
         : null;
 
   return (
@@ -178,7 +182,7 @@ export default function MapSitePinDashboard({
             Mapsites™
           </p>
           <h2 id={titleId} className="text-sm font-semibold">
-            PIN Dashboard
+            {d.title}
           </h2>
           <p className="mt-0.5 font-mono text-[11px] text-neutral-500">
             FAST Code™ {fastCode.trim().toUpperCase()}
@@ -189,7 +193,7 @@ export default function MapSitePinDashboard({
           onClick={onClose}
           className="rounded-md px-2 py-1 text-xs font-medium text-neutral-500 hover:bg-neutral-100"
         >
-          Close
+          {t.mapsite.close}
         </button>
       </header>
 
@@ -212,37 +216,37 @@ export default function MapSitePinDashboard({
 
         <dl className="grid grid-cols-2 gap-2 text-xs">
           <div className="rounded-md bg-neutral-50 px-2 py-1.5">
-            <dt className="text-neutral-500">Included</dt>
-            <dd className="font-semibold">1 PIN</dd>
+            <dt className="text-neutral-500">{d.included}</dt>
+            <dd className="font-semibold">{d.onePin}</dd>
           </div>
           <div className="rounded-md bg-neutral-50 px-2 py-1.5">
-            <dt className="text-neutral-500">Capacity</dt>
+            <dt className="text-neutral-500">{d.capacity}</dt>
             <dd className="font-semibold">
               {dashboard.pinQuota} / {dashboard.maxPins}
             </dd>
           </div>
           <div className="rounded-md bg-neutral-50 px-2 py-1.5">
-            <dt className="text-neutral-500">Purchased</dt>
+            <dt className="text-neutral-500">{d.purchased}</dt>
             <dd className="font-semibold">{dashboard.purchasedPins}</dd>
           </div>
           <div className="rounded-md bg-neutral-50 px-2 py-1.5">
-            <dt className="text-neutral-500">Ready to place</dt>
+            <dt className="text-neutral-500">{d.readyToPlace}</dt>
             <dd className="font-semibold">{dashboard.remainingToPlace}</dd>
           </div>
         </dl>
 
         <div className="space-y-2">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-            Buy PINs · {formatUsdFromCents(dashboard.unitPriceCents)} USD each
+            {fmt(d.buyHeading, { price: formatUsdFromCents(dashboard.unitPriceCents) })}
           </h3>
           {atMax ? (
             <p className="text-xs text-neutral-600">
-              This Mapsite™ is at the 100 PIN limit.
+              {d.atLimit}
             </p>
           ) : (
             <div className="flex flex-wrap items-end gap-2">
               <label htmlFor={quantityId} className="text-xs text-neutral-600">
-                Quantity
+                {d.quantity}
                 <input
                   id={quantityId}
                   type="number"
@@ -262,22 +266,26 @@ export default function MapSitePinDashboard({
                 disabled={pending}
                 className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
               >
-                {pending ? "Starting checkout…" : formatAdditionalPinCheckoutLabel(safeQuantity)}
+                {pending
+                  ? d.startingCheckout
+                  : fmt(safeQuantity === 1 ? d.buyOne : d.buyMany, {
+                      count: safeQuantity,
+                      price: formatUsdFromCents(additionalPinPriceCents(safeQuantity)),
+                    })}
               </button>
             </div>
           )}
           <p className="text-[11px] text-neutral-500">
-            {room} PIN{room === 1 ? "" : "s"} left to purchase.
+            {room === 1 ? d.leftOne : fmt(d.leftMany, { count: room })}
           </p>
         </div>
 
         <div className="space-y-2">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-            Place and fix
+            {d.placeHeading}
           </h3>
           <p className="text-[11px] leading-relaxed text-neutral-500">
-            The included PIN stays on the listing. Place purchased PINs by clicking
-            the map, or enter coordinates. Drag a PIN, or edit it here, to fix the location.
+            {d.placeHelp}
           </p>
           <button
             type="button"
@@ -294,18 +302,18 @@ export default function MapSitePinDashboard({
             }}
             className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs font-semibold disabled:opacity-50"
           >
-            {editor.kind === "place" ? "Cancel placement" : "Place a PIN"}
+            {editor.kind === "place" ? d.cancelPlacement : d.placeAPin}
           </button>
           {editor.kind === "place" ? (
             <p className="text-[11px] font-medium text-sky-800">
-              Click the map to drop the next PIN.
+              {d.clickMap}
             </p>
           ) : null}
 
           {editor.kind === "place" || fixing ? (
             <div className="space-y-2 rounded-md border border-neutral-200 p-2">
               <label className="block text-xs text-neutral-600">
-                Label
+                {d.label}
                 <input
                   value={label}
                   onChange={(event) => setLabel(event.target.value)}
@@ -315,7 +323,7 @@ export default function MapSitePinDashboard({
               </label>
               <div className="grid grid-cols-2 gap-2">
                 <label className="block text-xs text-neutral-600">
-                  Latitude
+                  {d.latitude}
                   <input
                     value={latitude}
                     onChange={(event) => setLatitude(event.target.value)}
@@ -324,7 +332,7 @@ export default function MapSitePinDashboard({
                   />
                 </label>
                 <label className="block text-xs text-neutral-600">
-                  Longitude
+                  {d.longitude}
                   <input
                     value={longitude}
                     onChange={(event) => setLongitude(event.target.value)}
@@ -340,7 +348,7 @@ export default function MapSitePinDashboard({
                   disabled={pending}
                   className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
                 >
-                  Place at coordinates
+                  {d.placeAtCoords}
                 </button>
               ) : (
                 <button
@@ -349,14 +357,14 @@ export default function MapSitePinDashboard({
                   disabled={pending}
                   className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
                 >
-                  Save PIN
+                  {d.savePin}
                 </button>
               )}
             </div>
           ) : null}
 
           {dashboard.pins.length === 0 ? (
-            <p className="text-xs text-neutral-500">No additional PINs placed yet.</p>
+            <p className="text-xs text-neutral-500">{d.noneYet}</p>
           ) : (
             <ul className="space-y-1.5">
               {dashboard.pins.map((pin, index) => (
@@ -378,8 +386,8 @@ export default function MapSitePinDashboard({
                     className="shrink-0 rounded-md border border-neutral-300 px-2 py-1 text-[11px] font-semibold"
                   >
                     {editor.kind === "fix" && editor.pinId === pin.id
-                      ? "Fixing"
-                      : "Fix"}
+                      ? d.fixing
+                      : d.fix}
                   </button>
                 </li>
               ))}

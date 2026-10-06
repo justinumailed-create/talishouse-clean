@@ -14,6 +14,8 @@ import {
   MAPSITE_PIN_TIP_CLEARANCE_PX,
 } from "@/lib/talispros/mapsite-overlay-layout";
 import { ROUTES } from "@/lib/routes";
+import { useT } from "@/lib/i18n/client";
+import { fmt } from "@/lib/i18n/format";
 import { isClaimable } from "@/lib/talispros/mapsite-state";
 import { mapsiteScheduleHref } from "@/lib/mapsite-layout";
 import {
@@ -90,6 +92,7 @@ function ResourceButton({
   variant: "blue" | "gold";
   onGateClick?: () => void;
 }) {
+  const t = useT();
   const disabled = !href;
   const className = [
     "mapsite-paypal-btn",
@@ -103,9 +106,9 @@ function ResourceButton({
     return (
       <span
         className={className}
-        aria-label={`${label} unavailable`}
+        aria-label={fmt(t.mapsite.popup.resourceUnavailable, { label })}
         aria-disabled="true"
-        title={`${label} not configured yet`}
+        title={fmt(t.mapsite.popup.resourceNotConfigured, { label })}
       >
         {label}
       </span>
@@ -186,6 +189,8 @@ export default function MapSitePropertyPopup({
   onClose,
 }: MapSitePropertyPopupProps) {
   const [urlGateOpen, setUrlGateOpen] = useState(false);
+  const t = useT();
+  const p = t.mapsite.popup;
   const claimable = isClaimable(mapsite.status);
   const showResourceButtons = showsPinResourceButtons(onboardingPhase);
   const capabilities = capabilitiesForAccountType(accountType);
@@ -209,8 +214,8 @@ export default function MapSitePropertyPopup({
   const popupHeroImage = useGenericCard ? genericHeroImage : heroImage;
   // Claimed / live cards prefer the property address — never stay stuck on a demo title.
   const popupTitle = useGenericCard
-    ? "The first of many E-Books"
-    : propertyAddress || (demoishTitle ? address : propertyTitle) || "Your Mapsite™";
+    ? p.genericTitle
+    : propertyAddress || (demoishTitle ? address : propertyTitle) || p.yourMapsite;
   const rawDescription = mapsite.property_description?.trim() || "";
   const demoNotIssuedCopy =
     /no fast code is issued/i.test(rawDescription) ||
@@ -221,16 +226,24 @@ export default function MapSitePropertyPopup({
       ? null
       : rawDescription || null;
   const popupWriteup = useGenericCard
-    ? "Upon registration your Mapsite™ will be able to promote up to 10 categories containing 100 PINs generating 1,000 views, monthly. No referral fees - ever"
+    ? p.genericWriteup
     : (propertyAddress && !demoishTitle && propertyTitle && propertyTitle !== propertyAddress
         ? propertyTitle
         : null) ||
       issuedDescription ||
       (propertyAddress ? propertyAddress : null) ||
       (fastCode
-        ? `FAST Code™ ${fastCode} · claimed Mapsite™.`
-        : "Welcome to Talispros™. Choose your market and begin onboarding.");
-  const popupClaimLabel = useGenericCard ? "Register Account now" : claimLabel;
+        ? fmt(p.claimedFallback, { code: fastCode })
+        : p.welcomeFallback);
+  const localizedClaimLabel =
+    claimLabel === "Register Account now"
+      ? t.mapsite.registerAccountNow
+      : claimLabel === "Build My Mapsite™"
+        ? t.mapsite.buildMyMapsite
+        : claimLabel;
+  const popupClaimLabel = useGenericCard
+    ? t.mapsite.registerAccountNow
+    : localizedClaimLabel;
 
   return (
     <>
@@ -281,7 +294,7 @@ export default function MapSitePropertyPopup({
               type="button"
               onClick={onClose}
               className="absolute right-2.5 top-2.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/50 text-[17px] leading-none text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition hover:bg-white/70"
-              aria-label="Close"
+              aria-label={t.mapsite.close}
             >
               ×
             </button>
@@ -332,8 +345,7 @@ export default function MapSitePropertyPopup({
               <div className="mt-2 flex shrink-0 flex-col gap-2">
                 {showPendingActions && !tebHref ? (
                   <p className="text-[12px] leading-snug text-neutral-600">
-                    Your first Talisbook™ is being prepared. TEB™ unlocks here
-                    when it&apos;s ready.
+                    {p.tebPreparing}
                   </p>
                 ) : null}
                 <div className="grid grid-cols-4 gap-1.5">

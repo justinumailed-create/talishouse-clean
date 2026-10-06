@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { TalisUMktsPin } from "@/lib/talisu/markets-pins";
 import { MAPSITE_PIN_TIP_CLEARANCE_PX } from "@/lib/talispros/mapsite-overlay-layout";
+import { useT } from "@/lib/i18n/client";
 
 type Props = {
   pin: TalisUMktsPin;
@@ -13,6 +14,7 @@ type Props = {
  * Atlist-style pin modal: hero image, title, claim copy, Next Step… → Demo.
  */
 export default function TalisUMarketsPinCard({ pin, onClose }: Props) {
+  const t = useT();
   return (
     <div
       role="dialog"
@@ -37,7 +39,7 @@ export default function TalisUMarketsPinCard({ pin, onClose }: Props) {
               type="button"
               onClick={onClose}
               className="absolute right-2.5 top-2.5 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/70 text-[17px] leading-none text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur-sm transition hover:bg-white"
-              aria-label="Close"
+              aria-label={t.markets.close}
             >
               ×
             </button>
@@ -48,7 +50,7 @@ export default function TalisUMarketsPinCard({ pin, onClose }: Props) {
               type="button"
               onClick={onClose}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100 text-[17px] text-neutral-700 hover:bg-neutral-200"
-              aria-label="Close"
+              aria-label={t.markets.close}
             >
               ×
             </button>

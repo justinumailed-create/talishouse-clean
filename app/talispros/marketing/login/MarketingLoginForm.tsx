@@ -1,11 +1,13 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { establishMarketingManagerSession } from "@/app/talispros/marketing/actions";
 import { MARKETING_HOME_PATH } from "@/lib/mapsite-account-session";
 
 export default function MarketingLoginForm() {
+  const l = useT().login;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,7 @@ export default function MarketingLoginForm() {
     try {
       const result = await establishMarketingManagerSession(email, password);
       if (!result.success) {
-        setError(result.error || "Invalid email or password");
+        setError(result.error || l.marketingInvalid);
         return;
       }
 
@@ -34,9 +36,9 @@ export default function MarketingLoginForm() {
   return (
     <div className="w-full max-w-sm px-6">
       <div className="rounded-2xl border border-neutral-200 bg-white/95 shadow-sm backdrop-blur px-6 py-8">
-        <h1 className="text-2xl font-semibold text-center mb-2">Marketing Manager</h1>
+        <h1 className="text-2xl font-semibold text-center mb-2">{l.marketingTitle}</h1>
         <p className="text-sm text-neutral-500 text-center mb-8">
-          Sign in to post daily metrics and checklist updates for clients
+          {l.marketingSubtitle}
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -47,7 +49,7 @@ export default function MarketingLoginForm() {
               setError("");
             }}
             className="w-full h-11 px-4 text-center border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-            placeholder="Email"
+            placeholder={l.email}
             autoComplete="email"
             autoFocus
             required
@@ -60,7 +62,7 @@ export default function MarketingLoginForm() {
               setError("");
             }}
             className="w-full h-11 px-4 text-center border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-            placeholder="Password"
+            placeholder={l.password}
             autoComplete="current-password"
             required
           />
@@ -70,7 +72,7 @@ export default function MarketingLoginForm() {
             disabled={loading}
             className="w-full h-11 rounded-xl bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800 disabled:opacity-50"
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? l.signingIn : l.signInLower}
           </button>
         </form>
       </div>

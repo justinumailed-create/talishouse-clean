@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from "react";
 import {
   AnimatePresence,
@@ -105,6 +106,7 @@ function ViewerTurnButtons({
   onPrevious: () => void;
   onNext: () => void;
 }) {
+  const tv = useT().viewer;
   const startTurn = (event: ReactPointerEvent<HTMLButtonElement>, turn: () => void) => {
     if (event.button !== 0) {
       return;
@@ -121,7 +123,7 @@ function ViewerTurnButtons({
       <button
         type="button"
         className="talisbooks-viewer-stage__nav-btn talisbooks-viewer-stage__nav-btn--prev"
-        aria-label="Previous page"
+        aria-label={tv.previousPage}
         disabled={disablePrev || busy}
         onPointerDown={(event) => startTurn(event, onPrevious)}
         onClick={(event) => {
@@ -139,7 +141,7 @@ function ViewerTurnButtons({
       <button
         type="button"
         className="talisbooks-viewer-stage__nav-btn talisbooks-viewer-stage__nav-btn--next"
-        aria-label="Next page"
+        aria-label={tv.nextPage}
         disabled={disableNext || busy}
         onPointerDown={(event) => startTurn(event, onNext)}
         onClick={(event) => {
@@ -572,6 +574,7 @@ function OpenBookSpread({
   onRequestPrevious: () => void;
   onFlippingChange?: (flipping: boolean) => void;
 }) {
+  const tv = useT().viewer;
   const [displayedIndex, setDisplayedIndex] = useState(navIndex);
   const [flip, setFlip] = useState<ActiveFlip | null>(null);
   const [grabbing, setGrabbing] = useState(false);
@@ -1047,7 +1050,7 @@ function OpenBookSpread({
                 : {}),
           } as CSSProperties
         }
-        aria-label={magazine ? "Open magazine" : "Open book"}
+        aria-label={magazine ? tv.openMagazine : tv.openBook}
         initial={
           magazine
             ? { opacity: 0, rotateY: 0, scale: 1, x: `${soloShift}%` }
@@ -1183,6 +1186,7 @@ function OpenBookSingle({
   onRequestPrevious: () => void;
   onFlippingChange?: (flipping: boolean) => void;
 }) {
+  const tv = useT().viewer;
   const [displayedIndex, setDisplayedIndex] = useState(navIndex);
   const [flip, setFlip] = useState<ActiveFlip | null>(null);
   const [grabbing, setGrabbing] = useState(false);
@@ -1590,7 +1594,7 @@ function OpenBookSingle({
             ["--book-spread-aspect"]: String(displayBookSpreadAspect(spreadAspect)),
           } as CSSProperties
         }
-        aria-label={magazine ? "Open magazine · single page" : "Open book · single page"}
+        aria-label={magazine ? tv.openMagazineSingle : tv.openBookSingle}
         initial={magazine ? { opacity: 0, rotateY: 0, scale: 1 } : { opacity: 0.7, rotateY: -6, scale: 0.96 }}
         animate={{
           opacity:
@@ -1681,6 +1685,7 @@ export default function TalisBooksViewerStage({
   onRequestPrevious,
   onOpenBook,
 }: TalisBooksViewerStageProps) {
+  const tv = useT().viewer;
   const frontUrl = resolveFrontCoverUrl(book);
   const backUrl = resolveBackCoverUrl(book);
 
@@ -1725,7 +1730,7 @@ export default function TalisBooksViewerStage({
                   onOpen={onOpenBook}
                 />
                 <p className="talisbooks-viewer-stage__hint">
-                  Closed hardcover · Click to open
+                  {tv.closedOpen}
                 </p>
               </motion.div>
             ) : null}
@@ -1747,7 +1752,7 @@ export default function TalisBooksViewerStage({
                   onOpen={onOpenBook}
                 />
                 <p className="talisbooks-viewer-stage__hint">
-                  Closed hardcover · Click to reopen
+                  {tv.closedReopen}
                 </p>
               </motion.div>
             ) : null}

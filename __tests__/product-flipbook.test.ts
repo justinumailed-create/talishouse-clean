@@ -4,6 +4,7 @@ import path from "node:path";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import {
   topBoundRotateX,
   topBoundSheetAngle,
@@ -203,6 +204,7 @@ describe("product catalogue route", () => {
   it("keeps the sample viewer Product button on /catalogue", () => {
     const viewer = readSource("components/talisbooks/viewer/TalisBooksViewerShell.tsx");
     expect(viewer).toContain("ROUTES.CATALOG");
-    expect(viewer).toMatch(/\n\s*Product\n/);
+    expect(viewer).toContain("{tv.product}");
+    expect(en.viewer.product).toBe("Product");
   });
 });

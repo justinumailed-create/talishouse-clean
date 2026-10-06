@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useId, type ReactNode } from "react";
+import { useT } from "@/lib/i18n/client";
+import { MAPSITE_DASHBOARD_MENU_ITEMS } from "@/lib/talispros/mapsite-owner-customizations";
 
 type MapSiteDashboardPanelProps = {
   title: string;
@@ -24,6 +26,9 @@ export default function MapSiteDashboardPanel({
   wide = false,
 }: MapSiteDashboardPanelProps) {
   const titleId = useId();
+  const t = useT();
+  const menuId = MAPSITE_DASHBOARD_MENU_ITEMS.find((item) => item.label === title)?.id;
+  const localizedTitle = menuId ? t.mapsite.dashboardMenu[menuId] : title;
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -49,7 +54,7 @@ export default function MapSiteDashboardPanel({
             Mapsites™
           </p>
           <h2 id={titleId} className="text-sm font-semibold">
-            {title}
+            {localizedTitle}
           </h2>
           <p className="mt-0.5 font-mono text-[11px] text-neutral-500">
             FAST Code™ {fastCode.trim().toUpperCase()}
@@ -60,7 +65,7 @@ export default function MapSiteDashboardPanel({
           onClick={onClose}
           className="rounded-md px-2 py-1 text-xs font-medium text-neutral-500 hover:bg-neutral-100"
         >
-          Close
+          {t.mapsite.close}
         </button>
       </header>
       <div className="space-y-4 overflow-y-auto px-4 py-3 text-sm">{children}</div>

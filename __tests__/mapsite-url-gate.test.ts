@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { en } from "../lib/i18n/dictionaries/en";
 import {
   isMapsiteRegisterPathStandIn,
   isMapsiteUrlGateExempt,
@@ -94,7 +95,8 @@ describe("Mapsite™ URL gate", () => {
     );
     expect(dialog).toContain("requestMapSiteUrlGateCode");
     expect(dialog).toContain("unlockMapSiteUrlWithGatePin");
-    expect(dialog).toContain("Generate secure code");
+    expect(dialog).toContain("u.generate");
+    expect(en.mapsite.urlGate.generate).toBe("Generate secure code");
     expect(dialog).toContain("window.open");
 
     const actions = readFileSync(

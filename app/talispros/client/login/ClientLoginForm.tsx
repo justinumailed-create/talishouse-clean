@@ -1,11 +1,13 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { establishClientAnalyticsSession } from "@/app/talispros/client/actions";
 import { CLIENT_DASHBOARD_PATH } from "@/lib/mapsite-account-session";
 
 export default function ClientLoginForm() {
+  const l = useT().login;
   const [email, setEmail] = useState("");
   const [fastCode, setFastCode] = useState("");
   const [error, setError] = useState("");
@@ -20,7 +22,7 @@ export default function ClientLoginForm() {
     try {
       const result = await establishClientAnalyticsSession(email, fastCode);
       if (!result.success) {
-        setError(result.error || "Invalid email or FAST Code.");
+        setError(result.error || l.clientInvalid);
         return;
       }
 
@@ -35,17 +37,17 @@ export default function ClientLoginForm() {
     <div className="w-full max-w-sm">
       <div className="text-center mb-8">
         <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
-          Client Analytics
+          {l.clientTitle}
         </h1>
         <p className="text-sm text-neutral-500 mt-1">
-          Sign in with your email and assigned FAST Code
+          {l.clientSubtitle}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">
-            Email
+            {l.email}
           </label>
           <input
             id="email"
@@ -76,7 +78,7 @@ export default function ClientLoginForm() {
               setFastCode(e.target.value);
               setError("");
             }}
-            placeholder="e.g. LRG1"
+            placeholder={l.clientCodePlaceholder}
             className="w-full h-11 px-4 bg-white border border-neutral-200 rounded-xl text-sm font-mono uppercase tracking-wider focus:outline-none focus:border-neutral-900 transition-colors"
             autoComplete="current-password"
             disabled={loading}
@@ -98,7 +100,7 @@ export default function ClientLoginForm() {
           {loading ? (
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
-            "Sign In"
+            l.signIn
           )}
         </button>
       </form>

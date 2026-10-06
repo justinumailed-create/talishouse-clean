@@ -1,5 +1,6 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import Link from "next/link";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import type { IsolatedBookshelfBook } from "@/lib/talisbooks/isolated-bookshelf-service";
@@ -277,6 +278,7 @@ export default function IsolatedBookshelfView({
   /** True when the reader opened this shelf from the ALLPINS Mapsite™ chrome. */
   fromAllPins?: boolean;
 }) {
+  const bs = useT().bookshelf;
   const bookshelf = buildIsolatedAllPinsBookshelf(books);
   const backHref = allPinsClaimedHref();
 
@@ -295,7 +297,7 @@ export default function IsolatedBookshelfView({
               className="inline-flex flex-shrink-0 items-center justify-center rounded-xl bg-[var(--talis-nav-blue)] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[var(--talis-nav-blue-hover)]"
               data-testid="isolated-bookshelf-create"
             >
-              Create ebook
+              {bs.createEbook}
             </Link>
           ) : null
         }

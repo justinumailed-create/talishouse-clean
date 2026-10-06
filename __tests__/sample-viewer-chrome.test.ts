@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import {
   viewerBackToMapsiteHref,
   viewerFastCodeLabel,
@@ -29,11 +30,14 @@ describe("sample Talisbooks™ viewer chrome", () => {
 
   it("places Home, Product, Download PDF, Markets, then Global Admin on the sample toolbar", () => {
     expect(shell).toMatch(
-      /href=\{ROUTES\.HOME\}[\s\S]*href=\{ROUTES\.CATALOG\}[\s\S]*Download PDF[\s\S]*href=\{MAPSITE_APP_PATH\}[\s\S]*ROUTES\.ADMIN_DASHBOARD/,
+      /href=\{ROUTES\.HOME\}[\s\S]*href=\{ROUTES\.CATALOG\}[\s\S]*tv\.downloadPdf[\s\S]*href=\{MAPSITE_APP_PATH\}[\s\S]*ROUTES\.ADMIN_DASHBOARD/,
     );
     expect(shell).toContain("ROUTES.CATALOG");
-    expect(shell).toMatch(/\n\s*Product\n/);
-    expect(shell).toMatch(/\n\s*Markets\n/);
+    expect(shell).toContain("{tv.product}");
+    expect(shell).toContain("{tv.markets}");
+    expect(en.viewer.product).toBe("Product");
+    expect(en.viewer.markets).toBe("Markets");
+    expect(en.viewer.downloadPdf).toBe("Download PDF");
   });
 
   it("sizes the sample toolbar as a matched button set", () => {
@@ -138,7 +142,8 @@ describe("sample Talisbooks™ viewer chrome", () => {
 
   it("shows Register only on issued FAST ebooks; Claim on demo viewers", () => {
     expect(shell).toContain("TALISBOOKS_SAMCART_REGISTER_URL");
-    expect(shell).toContain("Continue to register");
+    expect(shell).toContain("tv.continueToRegister");
+    expect(en.viewer.continueToRegister).toBe("Continue to register");
     expect(shell).toContain("talisbooks-viewer__register");
     expect(shell).toContain("talisBooksViewerCta");
     expect(shell).toContain("DemoClaimMarketButton");

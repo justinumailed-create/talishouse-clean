@@ -377,6 +377,30 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
 ] as const;
 
 
+/** Localized display copy for a market pin (labels / descriptions / CTA). */
+export type TalisUMktsPinCopy = {
+  pinLabels: Readonly<Record<string, string>>;
+  doMoreDescriptions: Readonly<Record<string, string>>;
+  marketDescription: string;
+  nextLabel: string;
+};
+
+/** Applies localized copy to pins; ids, coordinates and hrefs are untouched. */
+export function localizeTalisUMktsPins(
+  pins: readonly TalisUMktsPin[],
+  copy: TalisUMktsPinCopy,
+): TalisUMktsPin[] {
+  return pins.map((pin) => ({
+    ...pin,
+    label: copy.pinLabels[pin.id] ?? pin.label,
+    description:
+      pin.kind === "market"
+        ? copy.marketDescription
+        : (copy.doMoreDescriptions[pin.id] ?? pin.description),
+    nextLabel: copy.nextLabel,
+  }));
+}
+
 export function talisuMktsMapCoordinates(): { latitude: number; longitude: number }[] {
   return TALISU_MKTS_PINS.filter((pin) => pin.showOnMap).map((pin) => ({
     latitude: pin.latitude,

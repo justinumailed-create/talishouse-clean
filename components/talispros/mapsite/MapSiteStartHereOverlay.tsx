@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildEbookChoiceHref } from "@/lib/talispros/ebook-choice";
+import { useT } from "@/lib/i18n/client";
 
 const STORAGE_PREFIX = "talispros_mapsite_guided_prompt_dismissed:";
 
@@ -61,6 +62,7 @@ export default function MapSiteStartHereOverlay({
   enabled,
 }: MapSiteStartHereOverlayProps) {
   const router = useRouter();
+  const t = useT();
   const account = accountKey(fastCode, mapsiteId);
   const [visible, setVisible] = useState(false);
 
@@ -103,16 +105,16 @@ export default function MapSiteStartHereOverlay({
           type="button"
           onClick={continueToEbookChoice}
           className="pointer-events-auto flex max-w-[min(92vw,16rem)] flex-col items-center gap-0.5 rounded-2xl border border-white/35 bg-neutral-950/72 px-3.5 py-2 text-center shadow-[0_8px_24px_rgba(0,0,0,0.28)] backdrop-blur-sm transition hover:bg-neutral-950/85"
-          aria-label="Start here. Continue to choose your E-Book."
+          aria-label={t.mapsite.startHere.aria}
         >
           <span className="mapsite-guided-prompt__arrow text-[15px] leading-none" aria-hidden="true">
             👇
           </span>
           <span className="text-[13px] font-semibold tracking-wide text-white">
-            Start Here
+            {t.mapsite.startHere.title}
           </span>
           <span className="text-[11px] font-normal leading-snug text-white/80">
-            Open your first Talisbook™
+            {t.mapsite.startHere.subtitle}
           </span>
         </button>
       </div>

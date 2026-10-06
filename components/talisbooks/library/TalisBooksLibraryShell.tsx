@@ -1,5 +1,7 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
+import { fmt } from "@/lib/i18n/format";
 import { useMemo, useState, useTransition, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -124,6 +126,7 @@ export default function TalisBooksLibraryShell({
   secondaryBackHref,
   secondaryBackLabel = "Back to ALL-PINs",
 }: TalisBooksLibraryShellProps) {
+  const bs = useT().bookshelf;
   const router = useRouter();
   const ownerOrdered = Boolean(bookshelf.ownerOrdered);
   // Owner-ordered FAST shelves keep the saved order until a sort pill is chosen.
@@ -263,21 +266,21 @@ export default function TalisBooksLibraryShell({
       <header className="talisbooks-library__topbar">
         <div className="talisbooks-library__brand">
           {compactHeader ? (
-            <h1 className="talisbooks-library__title">Bookshelf</h1>
+            <h1 className="talisbooks-library__title">{bs.title}</h1>
           ) : (
             <>
               <p className="talisbooks-library__eyebrow">
                 {publicCatalog
                   ? scoped
                     ? `Talispros™ Ecosystem · ${bookshelf.fastCode!.toUpperCase()}`
-                    : "Talispros™ Ecosystem"
+                    : bs.ecosystem
                   : createdCatalog
-                    ? "Talispros™ Ecosystem"
+                    ? bs.ecosystem
                   : scoped
                     ? `TEB™ · ${bookshelf.fastCode!.toUpperCase()}`
                     : bookshelf.accountType === "root"
-                      ? "Root Account"
-                      : "Derivative Account"}
+                      ? bs.rootAccount
+                      : bs.derivativeAccount}
                 {!publicCatalog && !createdCatalog && !scoped && bookshelf.fastCode
                   ? ` · ${bookshelf.fastCode.toUpperCase()}`
                   : ""}
@@ -287,15 +290,15 @@ export default function TalisBooksLibraryShell({
                   ? "TalisBooks™"
                   : scoped
                     ? bookshelf.accountName
-                    : "Bookshelf"}
+                    : bs.title}
               </h1>
               {publicCatalog || createdCatalog ? (
                 <p className="talisbooks-library__subtitle">
                   {scoped && bookshelf.fastCode
-                    ? `Open a cover to read. This shelf shows Talisbooks™ connected to FAST Code ${bookshelf.fastCode.toUpperCase()} only.`
+                    ? fmt(bs.subtitleScoped, { code: bookshelf.fastCode.toUpperCase() })
                     : createdCatalog
-                      ? "Open a cover to read. Created Talisbooks™ with FAST codes stand on this shelf. The latest book is pinned on the left; older books stand on the right, newest first from the left."
-                      : "Open a cover to read. The featured book is pinned at the front of the shelf."}
+                      ? bs.subtitleCreated
+                      : bs.subtitlePublic}
                 </p>
               ) : null}
             </>
@@ -306,15 +309,15 @@ export default function TalisBooksLibraryShell({
           {!compactHeader && !publicCatalog && !createdCatalog ? (
             <div
               className="talisbooks-library__capacity"
-              title="Fully stocked shelf monetization capacity"
+              title={bs.capacityTitle}
             >
-              <span className="talisbooks-library__capacity-label">Shelf capacity</span>
+              <span className="talisbooks-library__capacity-label">{bs.capacityLabel}</span>
               <strong>
                 {stocked}/{TALISBOOKS_LIBRARY_SHELF_CAPACITY}
               </strong>
               <span className="talisbooks-library__capacity-value">
                 ${monthlyEstimate.toFixed(2)} / ${TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD.toFixed(2)}{" "}
-                mo
+                {bs.perMonth}
               </span>
             </div>
           ) : null}
@@ -334,12 +337,14 @@ export default function TalisBooksLibraryShell({
               target="_blank"
               rel="noopener noreferrer"
             >
-              Register
+              {bs.register}
             </a>
           ) : null}
           {secondaryBackHref ? (
             <Link href={secondaryBackHref} className="talisbooks-library__back">
-              {secondaryBackLabel}
+              {secondaryBackLabel === "Back to ALL-PINs"
+                ? bs.backToAllPins
+                : secondaryBackLabel}
             </Link>
           ) : null}
         </div>
@@ -347,11 +352,9 @@ export default function TalisBooksLibraryShell({
 
       {!compactHeader && scoped && bookshelf.entitlements && !bookshelf.entitlements.activated ? (
         <div className="mx-auto mb-6 max-w-3xl rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700">
-          <p className="font-medium text-neutral-900">Bookshelf locked</p>
+          <p className="font-medium text-neutral-900">{bs.lockedTitle}</p>
           <p className="mt-1 text-neutral-600">
-            Full bookshelf features, publishing, global marketing, additional uploads,
-            derivative books, and Adpro books unlock after account activation. Your first
-            draft remains available now.
+            {bs.lockedBody}
           </p>
         </div>
       ) : null}
@@ -376,14 +379,14 @@ export default function TalisBooksLibraryShell({
         <div className="talisbooks-library__split">
           <section
             className="talisbooks-library__niche talisbooks-library__niche--featured"
-            aria-label="Highlighted and scheduled books"
+            aria-label={bs.highlightedAria}
           >
             <div className="talisbooks-library__niche-inner">
               <div className="talisbooks-library__niche-header">
                 <div
                   className="talisbooks-library__layout-toggle"
                   role="group"
-                  aria-label="Featured layout"
+                  aria-label={bs.featuredLayoutAria}
                 >
                   <button
                     type="button"
@@ -407,14 +410,14 @@ export default function TalisBooksLibraryShell({
                   <div className="talisbooks-library__niche-empty">
                     <p>
                       {visibleBooks.length > 0
-                        ? "No featured TalisBooks™ yet"
+                        ? bs.emptyFeatured
                         : publicCatalog
-                          ? "No published TalisBooks™ yet"
+                          ? bs.emptyPublished
                           : createdCatalog
-                            ? "No created FAST Talisbooks™ yet"
+                            ? bs.emptyCreated
                             : scoped
-                              ? "No ebook on this FAST Code shelf yet"
-                              : "No highlighted books yet"}
+                              ? bs.emptyScoped
+                              : bs.emptyHighlighted}
                     </p>
                   </div>
                 ) : (
@@ -450,7 +453,7 @@ export default function TalisBooksLibraryShell({
 
           <section
             className="talisbooks-library__niche talisbooks-library__niche--general"
-            aria-label="General library"
+            aria-label={bs.generalAria}
           >
             <div className="talisbooks-library__niche-inner">
               <div className="talisbooks-library__niche-header talisbooks-library__niche-header--end">
@@ -467,7 +470,7 @@ export default function TalisBooksLibraryShell({
                         setPage(1);
                       }}
                     >
-                      Saved order
+                      {bs.savedOrder}
                     </button>
                   ) : null}
                   {TALISBOOKS_LIBRARY_SORT_OPTIONS.filter(
@@ -486,7 +489,7 @@ export default function TalisBooksLibraryShell({
                         setPage(1);
                       }}
                     >
-                      {option.label}
+                      {(bs.sort as Record<string, string>)[option.value] ?? option.label}
                       <ArrowDownUp
                         className="talisbooks-library__sort-icon"
                         size={11}
@@ -500,7 +503,7 @@ export default function TalisBooksLibraryShell({
               <div className="talisbooks-library__alcove">
                 {generalTotal === 0 ? (
                   <div className="talisbooks-library__niche-empty">
-                    <p>No books on this shelf</p>
+                    <p>{bs.noBooks}</p>
                     {Array.from({ length: 3 }).map((_, index) => (
                       <div key={index} className="talisbooks-library__shelf-bay">
                         <div className="talisbooks-library__shelf-row talisbooks-library__shelf-row--compact" />
@@ -526,7 +529,11 @@ export default function TalisBooksLibraryShell({
 
               <div className="talisbooks-library__pager">
                 <span>
-                  {generalPage}/{generalPageCount} ({generalTotal} books)
+                  {fmt(bs.pageCount, {
+                    page: generalPage,
+                    count: generalPageCount,
+                    total: generalTotal,
+                  })}
                 </span>
                 {generalPageCount > 1 ? (
                   <div className="talisbooks-library__pager-actions">
@@ -535,7 +542,7 @@ export default function TalisBooksLibraryShell({
                       disabled={generalPage <= 1}
                       onClick={() => setPage((current) => Math.max(1, current - 1))}
                     >
-                      Prev
+                      {bs.prev}
                     </button>
                     <button
                       type="button"
@@ -544,7 +551,7 @@ export default function TalisBooksLibraryShell({
                         setPage((current) => Math.min(generalPageCount, current + 1))
                       }
                     >
-                      Next
+                      {bs.next}
                     </button>
                   </div>
                 ) : null}
@@ -560,13 +567,13 @@ export default function TalisBooksLibraryShell({
             href="/talisbooks/library?accountType=root"
             className={bookshelf.accountType === "root" ? "is-active" : ""}
           >
-            Root shelf
+            {bs.rootShelf}
           </a>
           <a
             href="/talisbooks/library?accountType=derivative"
             className={bookshelf.accountType === "derivative" ? "is-active" : ""}
           >
-            Derivative shelf
+            {bs.derivativeShelf}
           </a>
         </div>
       ) : null}

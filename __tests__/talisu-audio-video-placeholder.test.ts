@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 
 describe("TalisU Audio / Video TalisTV soon placeholders", () => {
   it("renders the shared placeholder on /talisu/au and /talisu/video", () => {
@@ -13,7 +14,8 @@ describe("TalisU Audio / Video TalisTV soon placeholders", () => {
 
     expect(audio).toContain("TalisUTalisTvSoonPlaceholder");
     expect(video).toContain("TalisUTalisTvSoonPlaceholder");
-    expect(placeholder).toContain("All Contents will be posted on TalisTV soon!");
+    expect(placeholder).toContain("t.talisuHub.talisTvSoon");
+    expect(en.talisuHub.talisTvSoon).toBe("All Contents will be posted on TalisTV soon!");
     expect(placeholder).toContain("#046BD9");
   });
 });

@@ -1,11 +1,13 @@
 "use client";
 
+import { useT } from "@/lib/i18n/client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabase";
 
 export default function AssociateLoginPage() {
+  const l = useT().login;
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,7 @@ export default function AssociateLoginPage() {
     try {
       const normalized = code.trim().toUpperCase();
       if (!normalized) {
-        setError("Please enter your FAST code.");
+        setError(l.associateEmpty);
         return;
       }
 
@@ -34,7 +36,7 @@ export default function AssociateLoginPage() {
       if (lookupError) throw lookupError;
 
       if (!data) {
-        setError("Invalid FAST code. Please check and try again.");
+        setError(l.associateInvalid);
         return;
       }
 
@@ -42,7 +44,7 @@ export default function AssociateLoginPage() {
       router.push("/associate/dashboard");
     } catch (err) {
       console.error("Associate login error:", err);
-      setError("Something went wrong. Please try again.");
+      setError(l.genericError);
     } finally {
       setLoading(false);
     }
@@ -53,10 +55,10 @@ export default function AssociateLoginPage() {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="text-xl font-semibold tracking-tight text-neutral-900">
-            Associate Login
+            {l.associateTitle}
           </h1>
           <p className="text-sm text-neutral-500 mt-1">
-            Enter your FAST code to access your dashboard
+            {l.associateSubtitle}
           </p>
         </div>
 
@@ -70,7 +72,7 @@ export default function AssociateLoginPage() {
               type="text"
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder="e.g. FAST001"
+              placeholder={l.associateCodePlaceholder}
               className="w-full h-11 px-4 bg-white border border-neutral-200 rounded-xl text-sm focus:outline-none focus:border-neutral-900 transition-colors uppercase tracking-wider"
               autoFocus
               disabled={loading}
@@ -94,7 +96,7 @@ export default function AssociateLoginPage() {
             {loading ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              "Sign In"
+              l.signIn
             )}
           </button>
         </form>

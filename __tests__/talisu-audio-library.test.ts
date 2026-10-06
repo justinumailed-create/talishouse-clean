@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import { TALISU_AUDIO, TALISU_AUDIO_LIBRARY } from "../lib/talisu/content";
 import {
   TALISU_AISHA_SUMMARY_TRANSCRIPT,
@@ -25,7 +26,8 @@ describe("TalisU Audio library", () => {
       resolve("components/talisu/TalisUTalisTvSoonPlaceholder.tsx"),
       "utf8",
     );
-    expect(placeholder).toContain("All Contents will be posted on TalisTV soon!");
+    expect(placeholder).toContain("t.talisuHub.talisTvSoon");
+    expect(en.talisuHub.talisTvSoon).toBe("All Contents will be posted on TalisTV soon!");
 
     const lib = readFileSync(
       resolve("components/talisu/TalisUAudioLibrary.tsx"),

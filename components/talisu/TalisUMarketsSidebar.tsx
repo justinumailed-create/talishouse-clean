@@ -1,11 +1,8 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import {
-  TALISU_MKTS_PMC_BULLETS,
-  TALISU_MKTS_PMC_TITLE,
-  type TalisUMktsPin,
-} from "@/lib/talisu/markets-pins";
+import type { TalisUMktsPin } from "@/lib/talisu/markets-pins";
+import { useT } from "@/lib/i18n/client";
 
 type Props = {
   pins: readonly TalisUMktsPin[];
@@ -18,6 +15,8 @@ export default function TalisUMarketsSidebar({
   selectedPinId,
   onSelectPin,
 }: Props) {
+  const t = useT();
+  const m = t.markets;
   const [query, setQuery] = useState("");
   const [canadaOpen, setCanadaOpen] = useState(true);
   const [doMoreOpen, setDoMoreOpen] = useState(true);
@@ -44,19 +43,19 @@ export default function TalisUMarketsSidebar({
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search…"
+          placeholder={m.searchPlaceholder}
           className="w-full rounded-xl border-0 bg-white px-3.5 py-2.5 text-[13px] text-neutral-900 shadow-[0_8px_24px_rgba(0,0,0,0.14)] ring-1 ring-black/5 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-sky-400 sm:text-sm"
-          aria-label="Search markets"
+          aria-label={m.searchAria}
         />
       </div>
 
       <div className="pointer-events-auto max-h-[min(70dvh,42rem)] overflow-y-auto rounded-2xl bg-white px-4 pb-4 pt-3.5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:max-h-[min(78dvh,42rem)]">
         <h1 className="text-[17px] font-semibold tracking-tight text-neutral-950">
-          {TALISU_MKTS_PMC_TITLE}
+          {m.pmcTitle}
         </h1>
 
         <ul className="mt-3 space-y-2.5 border-b border-neutral-200/80 pb-3.5">
-          {TALISU_MKTS_PMC_BULLETS.map((bullet) => (
+          {m.pmcBullets.map((bullet) => (
             <li
               key={bullet}
               className="flex gap-2 text-[12px] leading-[1.35] text-neutral-800"
@@ -69,7 +68,7 @@ export default function TalisUMarketsSidebar({
 
         <div className="mt-3 space-y-1">
           <RegionFolder
-            label="Canada"
+            label={m.canada}
             open={canadaOpen}
             onToggle={() => setCanadaOpen((v) => !v)}
           >
@@ -82,12 +81,12 @@ export default function TalisUMarketsSidebar({
               />
             ))}
             {canadaPins.length === 0 ? (
-              <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
+              <p className="px-2 py-1 text-[12px] text-neutral-500">{m.noMatches}</p>
             ) : null}
           </RegionFolder>
 
           <RegionFolder
-            label="Do More…"
+            label={m.doMore}
             open={doMoreOpen}
             onToggle={() => setDoMoreOpen((v) => !v)}
           >
@@ -100,7 +99,7 @@ export default function TalisUMarketsSidebar({
               />
             ))}
             {doMorePins.length === 0 ? (
-              <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
+              <p className="px-2 py-1 text-[12px] text-neutral-500">{m.noMatches}</p>
             ) : null}
           </RegionFolder>
         </div>

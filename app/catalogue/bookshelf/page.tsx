@@ -11,6 +11,8 @@ import {
 } from "@/lib/talisbooks/isolated-bookshelf";
 import { listIsolatedBookshelfBooks } from "@/lib/talisbooks/isolated-bookshelf-service";
 import { createMetadata } from "@/lib/seo";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import {
   bookshelfOgMetadataImage,
   bookshelfSeoCopy,
@@ -18,14 +20,20 @@ import {
 
 export const dynamic = "force-dynamic";
 
-const copy = bookshelfSeoCopy({ isolatedAllPins: true });
-
-export const metadata: Metadata = createMetadata({
-  title: copy.title,
-  description: copy.description,
-  path: ISOLATED_BOOKSHELF_PATH,
-  image: bookshelfOgMetadataImage(copy.title),
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const copy =
+    locale === "en"
+      ? bookshelfSeoCopy({ isolatedAllPins: true })
+      : getDictionary(locale).meta.bookshelf;
+  return createMetadata({
+    title: copy.title,
+    description: copy.description,
+    path: ISOLATED_BOOKSHELF_PATH,
+    image: bookshelfOgMetadataImage(copy.title),
+    locale,
+  });
+}
 
 /**
  * Isolated catalogue bookshelf — same Mapsite™-connected Talisbooks™ shelf
