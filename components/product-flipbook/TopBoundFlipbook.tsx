@@ -47,8 +47,8 @@ function CatalogueHotspots({ hotspots }: { hotspots: ProductFlipbookHotspot[] })
         <Link
           key={spot.code}
           href={spot.href}
-          aria-label={`Register for ${spot.label}`}
-          title={`Register for ${spot.label}`}
+          aria-label={`Customize ${spot.label}`}
+          title={`Customize ${spot.label}`}
           data-product-code={spot.code}
           onPointerDown={(event) => event.stopPropagation()}
           onPointerUp={(event) => event.stopPropagation()}

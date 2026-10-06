@@ -22,7 +22,7 @@ export default async function CataloguePage() {
       pages={pages}
       eyebrow="Talishouse™ Product Catalogue"
       title="Catalogue"
-      subtitle="Design ideas · tap a design to register for it"
+      subtitle="Design ideas · tap a design to customize it"
     />
   );
 }

@@ -153,10 +153,10 @@ describe("Engage page product param", () => {
     );
   });
 
-  it("shows Registering for: on /talisu/engage and embeds the product checkout", () => {
+  it("shows Customizing: on /talisu/engage and embeds the product checkout", () => {
     const page = read("app/talisu/engage/page.tsx");
     expect(page).toContain("findCatalogueProduct(params.product)");
-    expect(page).toContain("Registering for:");
+    expect(page).toContain("Customizing:");
     expect(page).toContain("catalogueProductCheckoutUrl");
     expect(page).toContain("src={checkoutUrl}");
   });

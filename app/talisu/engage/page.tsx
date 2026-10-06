@@ -83,7 +83,7 @@ export default async function TalisUEngagePage({
               data-testid="engage-product"
               data-product-code={product.code}
             >
-              <span className="font-semibold text-[#046BD9]">Registering for:</span>{" "}
+              <span className="font-semibold text-[#046BD9]">Customizing:</span>{" "}
               <span className="font-semibold text-neutral-950">{product.code}</span>
               {" — "}
               {product.title}
