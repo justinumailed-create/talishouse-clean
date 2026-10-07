@@ -19,8 +19,12 @@ vi.mock("node:fs", async (importOriginal) => {
   return { ...mocked, default: mocked };
 });
 
-const { loadCataloguePages, CATALOGUE_TDOME_PAGE_ID, CATALOGUE_TDOME_SRC } =
-  await import("../lib/talisu/catalogue-pages");
+const {
+  loadCataloguePages,
+  CATALOGUE_TDOME_PAGE_ID,
+  CATALOGUE_TDOME_SRC,
+  CATALOGUE_HIDDEN_CONTENT_PAGES,
+} = await import("../lib/talisu/catalogue-pages");
 const { PRODUCT_FLIPBOOK_PAGE_COUNT } = await import("../lib/product-flipbook/manifest");
 
 describe("Catalogue page list without a readable public directory", () => {
@@ -35,8 +39,10 @@ describe("Catalogue page list without a readable public directory", () => {
     expect(readdirThrew).toBe(true);
     const pages = loadCataloguePages();
     expect(pages.length).toBeGreaterThan(0);
-    // Front + T-Dome + source 2–37 + back
-    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT + 1);
+    // Front + T-Dome + source 20–37 (2–19 hidden) + back
+    const hiddenCount =
+      CATALOGUE_HIDDEN_CONTENT_PAGES.to - CATALOGUE_HIDDEN_CONTENT_PAGES.from + 1;
+    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT + 1 - hiddenCount);
     expect(pages[0]).toMatchObject({
       id: "page-01.webp",
       number: 0,

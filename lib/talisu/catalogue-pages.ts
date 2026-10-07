@@ -22,14 +22,25 @@ export const CATALOGUE_TDOME_SRC =
   "/talisbooks/templates/rm22/products/t-dome.jpg";
 
 /**
+ * Inclusive content-page range omitted from the public flipbook (toolbar +
+ * navigation). T-Dome stays page 1; Design Ideas pages 20–37 keep their numbers.
+ */
+export const CATALOGUE_HIDDEN_CONTENT_PAGES = {
+  from: 2,
+  to: 19,
+} as const;
+
+/**
  * Talishouse™ Product Catalogue for /catalogue:
  *   Front cover (source page 1)
  *   → Page 1 = T-Dome
- *   → source pages 2–37 (Design Ideas / hotspots P01–P108 on 20–37)
+ *   → source pages 20–37 (Design Ideas / hotspots P01–P108); pages 2–19 hidden
  *   → Back cover = uploaded source page 38
  *
  * Opens on the front cover (not mid-book Design Ideas). Page list comes from
  * the bundled flipbook manifest, not a request-time read of public/.
+ * Hidden pages are dropped from the leaf list (not CSS-hidden) so they are
+ * not navigable.
  */
 export function loadCataloguePages(directory?: string): ProductFlipbookPage[] {
   const rasters = loadProductFlipbookPages(directory);
@@ -68,14 +79,20 @@ export function loadCataloguePages(directory?: string): ProductFlipbookPage[] {
     hotspots: [],
   };
 
-  const middle: ProductFlipbookPage[] = middleRasters.map((page) =>
-    withHotspots({
-      ...page,
-      // Source page N is content page N (T-Dome occupies content page 1).
-      number: page.sourcePage,
-      role: "content",
-    }),
-  );
+  const middle: ProductFlipbookPage[] = middleRasters
+    .map((page) =>
+      withHotspots({
+        ...page,
+        // Source page N is content page N (T-Dome occupies content page 1).
+        number: page.sourcePage,
+        role: "content",
+      }),
+    )
+    .filter(
+      (page) =>
+        page.number < CATALOGUE_HIDDEN_CONTENT_PAGES.from ||
+        page.number > CATALOGUE_HIDDEN_CONTENT_PAGES.to,
+    );
 
   const back: ProductFlipbookPage = {
     ...backRaster,

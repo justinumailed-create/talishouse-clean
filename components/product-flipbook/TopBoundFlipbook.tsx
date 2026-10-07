@@ -179,9 +179,16 @@ export default function TopBoundFlipbook({
     : null;
   const displayIndex = flip ? flip.toIndex : index;
   const displayPage = leaves[displayIndex] ?? leaves[0];
-  const contentCount = leaves.filter(
+  const contentPages = leaves.filter(
     (page) => (page.role ?? "content") === "content",
-  ).length;
+  );
+  // Prefer the highest content `number` so gaps (hidden pages 2–19) still
+  // label as "Page 20 of 37" instead of "Page 20 of 19".
+  const contentCount = Math.max(
+    contentPages.length,
+    ...contentPages.map((page) => page.number),
+    0,
+  );
   const pageLabel =
     displayPage?.role === "front"
       ? c.front

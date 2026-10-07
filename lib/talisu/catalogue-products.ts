@@ -2,9 +2,9 @@
  * Talishouse™ Product Catalogue — Design Ideas products + clickable hotspots.
  *
  * The public Catalogue (/catalogue) is a full book: front cover → T-Dome as
- * content page 1 → source pages 2–37 → uploaded back cover (source page 38).
- * Design suggestions (source pages 20–37) keep P01–P108 hotspots; they are no
- * longer the opening spread.
+ * content page 1 → source pages 20–37 (pages 2–19 hidden) → uploaded back
+ * cover (source page 38). Design suggestions (source pages 20–37) keep
+ * P01–P108 hotspots; they are no longer the opening spread.
  *
  * Every design block is a product, numbered in reading order
  * (page by page, left→right, top→bottom): P01 … P99, P100, P101 …

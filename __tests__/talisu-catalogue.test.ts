@@ -13,6 +13,7 @@ import {
   CATALOGUE_TDOME_PAGE_ID,
   CATALOGUE_TDOME_SRC,
   loadCataloguePages,
+  CATALOGUE_HIDDEN_CONTENT_PAGES,
 } from "../lib/talisu/catalogue-pages";
 import {
   buildCatalogueProducts,
@@ -64,8 +65,11 @@ describe("Catalogue start page (front cover → T-Dome page 1)", () => {
     const all = loadProductFlipbookPages();
     const pages = loadCataloguePages();
     expect(all).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT);
-    // Front + T-Dome + source pages 2–37 + back = 39 leaves
-    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT + 1);
+    // Front + T-Dome + source 20–37 (pages 2–19 hidden) + back = 21 leaves
+    const hiddenCount =
+      CATALOGUE_HIDDEN_CONTENT_PAGES.to - CATALOGUE_HIDDEN_CONTENT_PAGES.from + 1;
+    expect(CATALOGUE_HIDDEN_CONTENT_PAGES).toEqual({ from: 2, to: 19 });
+    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT + 1 - hiddenCount);
     expect(pages[0]).toMatchObject({
       id: "page-01.webp",
       number: 0,
@@ -81,12 +85,21 @@ describe("Catalogue start page (front cover → T-Dome page 1)", () => {
       src: CATALOGUE_TDOME_SRC,
       hotspots: [],
     });
+    // Next leaf after T-Dome is Design Ideas (page 20); pages 2–19 are omitted
     expect(pages[2]).toMatchObject({
-      id: "page-02.webp",
-      number: 2,
-      sourcePage: 2,
+      id: "page-20.webp",
+      number: 20,
+      sourcePage: 20,
       role: "content",
     });
+    expect(
+      pages.some(
+        (p) =>
+          p.role === "content" &&
+          p.number >= CATALOGUE_HIDDEN_CONTENT_PAGES.from &&
+          p.number <= CATALOGUE_HIDDEN_CONTENT_PAGES.to,
+      ),
+    ).toBe(false);
     const design = pages.find((p) => p.sourcePage === 20);
     expect(design).toMatchObject({
       id: "page-20.webp",
