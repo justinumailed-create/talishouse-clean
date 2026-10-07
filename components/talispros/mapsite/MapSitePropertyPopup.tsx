@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
@@ -20,10 +19,9 @@ import { isClaimable } from "@/lib/talispros/mapsite-state";
 import { mapsiteScheduleHref } from "@/lib/mapsite-layout";
 import {
   listingResourceHref,
-  MAPSITE_URL_GATE_SENTINEL,
+  MAPSITE_URL_ADDITIONAL_PINS_SENTINEL,
   resolvePublishedUrlButtonHref,
 } from "@/lib/talispros/mapsite-url-gate";
-import MapSiteUrlGateDialog from "@/components/talispros/mapsite/MapSiteUrlGateDialog";
 import {
   capabilitiesForAccountType,
   type MapSiteCapabilityAccountType,
@@ -46,8 +44,7 @@ const RESOURCES: {
     key: "url",
     label: "URL",
     variant: "blue",
-    // Gated by default (secure-code popup). Exempt FAST codes (e.g. DC01, DC02) open
-    // the listing URL directly — override wins over stored broker_url.
+    // Resolved in render: Register for visitors, multipin Dashboard for paid owners.
     resolveHref: (site) =>
       resolvePublishedUrlButtonHref(site.fast_code, site.broker_url),
   },
@@ -85,12 +82,12 @@ function ResourceButton({
   href,
   label,
   variant,
-  onGateClick,
+  onActionClick,
 }: {
   href: string | null;
   label: string;
   variant: "blue" | "gold";
-  onGateClick?: () => void;
+  onActionClick?: () => void;
 }) {
   const t = useT();
   const disabled = !href;
@@ -115,13 +112,13 @@ function ResourceButton({
     );
   }
 
-  if (href === MAPSITE_URL_GATE_SENTINEL && onGateClick) {
+  if (href === MAPSITE_URL_ADDITIONAL_PINS_SENTINEL && onActionClick) {
     return (
       <button
         type="button"
         className={className}
         aria-label={label}
-        onClick={onGateClick}
+        onClick={onActionClick}
       >
         {label}
       </button>
@@ -159,6 +156,13 @@ interface MapSitePropertyPopupProps {
   onboardingPhase: MapSiteOnboardingPhase;
   /** Viewer href for View Your Talisbook™ (pending / book-ready). */
   talisBookHref?: string | null;
+  /**
+   * Paid owner / Mapsite admin: URL opens multipin (additional PIN) purchase
+   * instead of Register.
+   */
+  canBuyAdditionalPins?: boolean;
+  /** Opens Dashboard → PIN Dashboard (buy additional PINs). */
+  onOpenAdditionalPins?: () => void;
   /** Top of the FAST Code card — shared with pin popup. */
   alignTop?: number;
   /** Horizontal center of the popup in root coordinates (px). */
@@ -182,13 +186,14 @@ export default function MapSitePropertyPopup({
   accountType = "derivative",
   onboardingPhase,
   talisBookHref = null,
+  canBuyAdditionalPins = false,
+  onOpenAdditionalPins,
   alignTop = MAPSITE_LISTING_TILE_TOP_FALLBACK_PX,
   centerX = null,
   cardHeight = null,
   compact = false,
   onClose,
 }: MapSitePropertyPopupProps) {
-  const [urlGateOpen, setUrlGateOpen] = useState(false);
   const t = useT();
   const p = t.mapsite.popup;
   const claimable = isClaimable(mapsite.status);
@@ -349,19 +354,29 @@ export default function MapSitePropertyPopup({
                   </p>
                 ) : null}
                 <div className="grid grid-cols-4 gap-1.5">
-                  {RESOURCES.map((resource) => (
-                    <ResourceButton
-                      key={resource.key}
-                      href={resource.resolveHref(mapsite)}
-                      label={resource.label}
-                      variant={resource.variant}
-                      onGateClick={
-                        resource.key === "url"
-                          ? () => setUrlGateOpen(true)
-                          : undefined
-                      }
-                    />
-                  ))}
+                  {RESOURCES.map((resource) => {
+                    const href =
+                      resource.key === "url"
+                        ? resolvePublishedUrlButtonHref(
+                            mapsite.fast_code,
+                            mapsite.broker_url,
+                            { canBuyAdditionalPins },
+                          )
+                        : resource.resolveHref(mapsite);
+                    return (
+                      <ResourceButton
+                        key={resource.key}
+                        href={href}
+                        label={resource.label}
+                        variant={resource.variant}
+                        onActionClick={
+                          resource.key === "url" && canBuyAdditionalPins
+                            ? onOpenAdditionalPins
+                            : undefined
+                        }
+                      />
+                    );
+                  })}
                 </div>
               </div>
             ) : null}
@@ -375,13 +390,6 @@ export default function MapSitePropertyPopup({
         />
       </div>
 
-      {fastCode ? (
-        <MapSiteUrlGateDialog
-          open={urlGateOpen}
-          fastCode={fastCode}
-          onClose={() => setUrlGateOpen(false)}
-        />
-      ) : null}
     </>
   );
 }

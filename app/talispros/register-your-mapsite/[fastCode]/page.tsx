@@ -3,12 +3,10 @@ import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import {
-  isMapsiteRegisterPathStandIn,
-  isMapsiteUrlGateExempt,
+  MAPSITE_DEFAULT_REGISTER_URL,
   MAPSITE_URL_GATE_HEADLINE,
-  resolveMapsiteListingUrl,
+  mapsiteListingUrlOverride,
 } from "@/lib/talispros/mapsite-url-gate";
-import RegisterYourMapSiteClient from "@/components/talispros/RegisterYourMapSiteClient";
 
 export const dynamic = "force-dynamic";
 
@@ -21,11 +19,16 @@ export async function generateMetadata({
   return createMetadata({
     title: `${MAPSITE_URL_GATE_HEADLINE} | Talispros™`,
     description:
-      "Generate a secure code for Admin Notifications, then enter it to open this Mapsite (stand-in until SamCart).",
+      "Register for this Mapsite — visitors go straight to Register (no FAST Code™ dead-end gate).",
     path: `/talispros/register-your-mapsite/${encodeURIComponent(fastCode)}`,
   });
 }
 
+/**
+ * Legacy URL-gate path. Claimed Mapsite URL buttons no longer land here; if
+ * someone still hits this route, send them to Register instead of the broken
+ * FAST Code™ / secure-code gate.
+ */
 export default async function RegisterYourMapSitePage({
   params,
 }: {
@@ -33,25 +36,11 @@ export default async function RegisterYourMapSitePage({
 }) {
   const { fastCode } = await params;
   const mapsite = await getMapSiteByFastCode(fastCode);
-  const listingUrl = mapsite
-    ? resolveMapsiteListingUrl(mapsite.fastCode, mapsite.brokerUrl)
-    : null;
-  if (!mapsite || !listingUrl) {
+  if (!mapsite) {
     notFound();
   }
 
-  // Exempt FAST codes (e.g. DC01, DC02) skip the secure-code gate entirely.
-  if (isMapsiteUrlGateExempt(mapsite.fastCode)) {
-    redirect(listingUrl);
-  }
-
-  const unlockToMapsite = isMapsiteRegisterPathStandIn(listingUrl);
-
-  return (
-    <RegisterYourMapSiteClient
-      fastCode={mapsite.fastCode}
-      pinIssued={Boolean(mapsite.urlGatePinIssuedAt)}
-      unlockToMapsite={unlockToMapsite}
-    />
+  redirect(
+    mapsiteListingUrlOverride(mapsite.fastCode) ?? MAPSITE_DEFAULT_REGISTER_URL,
   );
 }

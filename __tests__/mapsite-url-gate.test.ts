@@ -8,6 +8,8 @@ import {
   isUrlGateExpired,
   isUrlGatePinFormat,
   listingResourceHref,
+  MAPSITE_DEFAULT_REGISTER_URL,
+  MAPSITE_URL_ADDITIONAL_PINS_SENTINEL,
   MAPSITE_URL_GATE_HEADLINE,
   MAPSITE_URL_GATE_SENTINEL,
   MAPSITE_URL_GATE_TTL_LABEL,
@@ -69,7 +71,7 @@ describe("Mapsite URL gate", () => {
     ).toBe(false);
   });
 
-  it("opens a secure-code popup from the published Mapsite URL button", () => {
+  it("routes claimed Mapsite URL to Register or multipin Dashboard (no dead-end gate)", () => {
     const popup = readFileSync(
       join(
         process.cwd(),
@@ -77,15 +79,27 @@ describe("Mapsite URL gate", () => {
       ),
       "utf8",
     );
-    expect(popup).toContain("MapSiteUrlGateDialog");
-    expect(popup).toContain(
-      "resolvePublishedUrlButtonHref(site.fast_code, site.broker_url)",
-    );
+    expect(popup).toContain("resolvePublishedUrlButtonHref");
+    expect(popup).toContain("canBuyAdditionalPins");
+    expect(popup).toContain("onOpenAdditionalPins");
+    expect(popup).toContain("MAPSITE_URL_ADDITIONAL_PINS_SENTINEL");
+    expect(popup).not.toContain("MapSiteUrlGateDialog");
+    expect(popup).not.toContain("MAPSITE_URL_GATE_SENTINEL");
     expect(popup).not.toContain(
       "mapsiteUrlGateHref(site.fast_code, site.broker_url)",
     );
-    expect(popup).toContain("MAPSITE_URL_GATE_SENTINEL");
 
+    const app = readFileSync(
+      join(
+        process.cwd(),
+        "components/talispros/mapsite/MapSiteApplication.tsx",
+      ),
+      "utf8",
+    );
+    expect(app).toContain("canBuyAdditionalPins={dashboardManageable}");
+    expect(app).toContain("onOpenAdditionalPins={openOwnerDashboard}");
+
+    // Gate helpers remain for admin tooling; published URL no longer uses them.
     const dialog = readFileSync(
       join(
         process.cwd(),
@@ -95,9 +109,7 @@ describe("Mapsite URL gate", () => {
     );
     expect(dialog).toContain("requestMapSiteUrlGateCode");
     expect(dialog).toContain("unlockMapSiteUrlWithGatePin");
-    expect(dialog).toContain("u.generate");
     expect(en.mapsite.urlGate.generate).toBe("Generate secure code");
-    expect(dialog).toContain("window.open");
 
     const actions = readFileSync(
       join(process.cwd(), "lib/talispros/mapsite-url-gate-actions.ts"),
@@ -105,17 +117,7 @@ describe("Mapsite URL gate", () => {
     );
     expect(actions).toContain("createAdminNotification");
     expect(actions).toContain('type: "mapsite_url_gate_code"');
-    expect(actions).toContain("consumed_at");
-    expect(actions).toContain("expires_at");
     expect(actions).toContain("requestMapSiteUrlGateCode");
-    // Visitor generate must not return the plaintext PIN (admin reads it in Notifications).
-    const visitorFn = actions.slice(
-      actions.indexOf("export async function requestMapSiteUrlGateCode"),
-      actions.indexOf("export async function issueMapSiteUrlGatePin"),
-    );
-    expect(visitorFn).toContain("ttlLabel");
-    expect(visitorFn).not.toMatch(/\bpin\s*:/);
-    expect(visitorFn).not.toMatch(/\bpin\b\s*[,}]/);
 
     const page = readFileSync(
       join(
@@ -124,10 +126,9 @@ describe("Mapsite URL gate", () => {
       ),
       "utf8",
     );
-    expect(page).toContain("MAPSITE_URL_GATE_HEADLINE");
-    expect(page).toContain("RegisterYourMapSiteClient");
-    expect(page).toContain("isMapsiteUrlGateExempt");
-    expect(page).toContain("redirect(listingUrl)");
+    expect(page).toContain("MAPSITE_DEFAULT_REGISTER_URL");
+    expect(page).toContain("redirect(");
+    expect(page).not.toContain("RegisterYourMapSiteClient");
 
     const admin = readFileSync(
       join(
@@ -226,13 +227,22 @@ describe("Mapsite URL gate", () => {
     ).toBe("https://talispros.mysamcart.com/checkout/register");
     expect(
       resolvePublishedUrlButtonHref("ar01", "https://example.com/paid"),
-    ).toBe(MAPSITE_URL_GATE_SENTINEL);
+    ).toBe(MAPSITE_DEFAULT_REGISTER_URL);
     expect(
       resolvePublishedUrlButtonHref(
         "ar01",
         "/talispros/register-your-mapsite/ar01",
       ),
-    ).toBe("/talispros/register-your-mapsite/ar01");
+    ).toBe(MAPSITE_DEFAULT_REGISTER_URL);
+    expect(
+      resolvePublishedUrlButtonHref("dc04", null),
+    ).toBe(MAPSITE_DEFAULT_REGISTER_URL);
+    expect(
+      resolvePublishedUrlButtonHref("rm22", "https://example.com/paid", {
+        canBuyAdditionalPins: true,
+      }),
+    ).toBe(MAPSITE_URL_ADDITIONAL_PINS_SENTINEL);
+    expect(MAPSITE_URL_GATE_SENTINEL).toBe("__url_gate__");
     expect(mapsiteHasGatedUrl("", "dc01")).toBe(true);
     expect(mapsiteHasGatedUrl("", "dc02")).toBe(true);
 

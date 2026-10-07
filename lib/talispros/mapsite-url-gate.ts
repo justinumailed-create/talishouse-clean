@@ -14,6 +14,16 @@ export const MAPSITE_URL_GATE_TTL_LABEL = "30 minutes";
 export const MAPSITE_URL_GATE_SENTINEL = "__url_gate__";
 
 /**
+ * Sentinel href for paid owner sessions: URL opens the multipin / additional-PIN
+ * Dashboard flow instead of Register.
+ */
+export const MAPSITE_URL_ADDITIONAL_PINS_SENTINEL = "__additional_pins__";
+
+/** Default Register destination for the published Mapsite URL button (visitors). */
+export const MAPSITE_DEFAULT_REGISTER_URL =
+  "https://talispros.mysamcart.com/checkout/register";
+
+/**
  * FAST codes that skip the Admin Notifications secure-code URL unlock.
  * Normalized lower-case; compare with normalizeMapsiteUrlGateFastCode.
  */
@@ -24,8 +34,8 @@ export const MAPSITE_URL_GATE_EXEMPT_FAST_CODES = ["dc01", "dc02"] as const;
  * Wins over the stored mapsites.broker_url for the published URL button / unlock.
  */
 export const MAPSITE_URL_OVERRIDES: Readonly<Record<string, string>> = {
-  dc01: "https://talispros.mysamcart.com/checkout/register",
-  dc02: "https://talispros.mysamcart.com/checkout/register",
+  dc01: MAPSITE_DEFAULT_REGISTER_URL,
+  dc02: MAPSITE_DEFAULT_REGISTER_URL,
 };
 
 export function normalizeMapsiteUrlGateFastCode(
@@ -78,24 +88,30 @@ export function mapsiteHasGatedUrl(
   return Boolean(resolveMapsiteListingUrl(fastCode, brokerUrl));
 }
 
+export type ResolvePublishedUrlButtonOptions = {
+  /**
+   * Paid owner / Mapsite admin session that can buy additional PINs.
+   * When true, the URL button opens the multipin Dashboard instead of Register.
+   */
+  canBuyAdditionalPins?: boolean;
+};
+
 /**
- * Published Mapsite URL button href: direct link when exempt, gate sentinel
- * when gated, or null when no listing URL is available.
+ * Published Mapsite URL button href:
+ * - paid owner session → additional-PIN Dashboard sentinel
+ * - everyone else → Register (SamCart), never the broken FAST Code™ / secure-code gate
  */
 export function resolvePublishedUrlButtonHref(
   fastCode: string | null | undefined,
-  brokerUrl: string | null | undefined,
+  _brokerUrl?: string | null,
+  options?: ResolvePublishedUrlButtonOptions,
 ): string | null {
-  const dest = resolveMapsiteListingUrl(fastCode, brokerUrl);
-  if (!dest) return null;
-  if (isMapsiteUrlGateExempt(fastCode)) return dest;
-  // Claimed-demo stand-in: URL button shows the register path (FAST Code™ gate).
-  if (isMapsiteRegisterPathStandIn(dest)) {
-    const code = fastCode?.trim();
-    if (!code) return dest;
-    return mapsiteUrlGatePath(code);
+  if (options?.canBuyAdditionalPins) {
+    return MAPSITE_URL_ADDITIONAL_PINS_SENTINEL;
   }
-  return MAPSITE_URL_GATE_SENTINEL;
+  // Prefer FAST-code override (e.g. DC01/DC02); otherwise always Register.
+  // broker_url is intentionally ignored — visitors must not hit the broken gate.
+  return mapsiteListingUrlOverride(fastCode) ?? MAPSITE_DEFAULT_REGISTER_URL;
 }
 
 export function registerYourMapSiteFastCodeFromPath(

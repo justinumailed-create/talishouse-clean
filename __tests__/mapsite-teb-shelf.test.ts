@@ -82,7 +82,8 @@ describe("Mapsite pin resource buttons", () => {
     expect(popup).toContain('variant: "blue"');
     expect(popup).toContain('variant: "gold"');
     expect(popup).not.toContain("resource.key === \"ttv\"");
-    expect(popup).toContain("href={resource.resolveHref(mapsite)}");
+    expect(popup).toContain("canBuyAdditionalPins");
+    expect(popup).toContain("onOpenAdditionalPins");
 
     const css = readFileSync(join(process.cwd(), "app/globals.css"), "utf8");
     expect(css).toContain(".mapsite-paypal-btn--gold");

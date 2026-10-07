@@ -978,6 +978,8 @@ function MapSiteChrome({
               accountType={accountType}
               onboardingPhase={onboardingPhase}
               talisBookHref={bookHref}
+              canBuyAdditionalPins={dashboardManageable}
+              onOpenAdditionalPins={openOwnerDashboard}
               alignTop={alignTop}
               centerX={popupCenterX}
               cardHeight={expandedCardHeight}
