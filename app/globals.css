@@ -5109,3 +5109,84 @@ body.mapsite-gallery-open [data-paypal-button] {
 .demo-visa-progress__indeterminate {
   animation: demo-visa-progress-indeterminate 1.35s ease-in-out infinite;
 }
+
+
+/* talisu-faq-print — /talisu FAQ + tokenization essay */
+@media print {
+  .talisu-no-print,
+  .talisu-no-print * {
+    display: none !important;
+  }
+
+  .talisu-faq-page {
+    max-width: none !important;
+    padding: 0 !important;
+    color: #111 !important;
+    background: #fff !important;
+  }
+
+  .talisu-faq-page > .grid {
+    display: block !important;
+  }
+
+  .talisu-faq-column {
+    break-after: page;
+    margin-bottom: 1.5rem;
+  }
+
+  .talisu-essay-column {
+    position: static !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .talisu-tokenization-essay {
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    overflow: visible !important;
+  }
+
+  .talisu-essay-body {
+    font-size: 11pt !important;
+    line-height: 1.45 !important;
+    color: #111 !important;
+  }
+
+  .talisu-essay-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .talisu-essay-section h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .talisu-essay-table-wrap {
+    overflow: visible !important;
+  }
+
+  .talisu-essay-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  .talisu-essay-table th,
+  .talisu-essay-table td {
+    border: 1px solid #ccc !important;
+    padding: 0.35rem 0.5rem !important;
+  }
+
+  .talisu-faq-column details {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+  }
+
+  .talisu-faq-column details[open] summary,
+  .talisu-faq-column details summary {
+    color: #111 !important;
+  }
+}

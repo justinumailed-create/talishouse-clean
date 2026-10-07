@@ -31,7 +31,7 @@ export default function TalisUChrome({
     <div className="flex min-h-dvh flex-col bg-neutral-100 text-neutral-900">
       <TalisUMktsHeader />
       <main className="flex-1">{children}</main>
-      <footer className="shrink-0 border-t border-black/10 bg-white px-4 py-4 text-center text-[12px] leading-snug text-neutral-600 sm:px-6 sm:text-[13px]">
+      <footer className="talisu-no-print shrink-0 border-t border-black/10 bg-white px-4 py-4 text-center text-[12px] leading-snug text-neutral-600 sm:px-6 sm:text-[13px] print:hidden">
         <p>
           TalisU&trade; · {t.talisu.footerPartOf}{" "}
           <Link href="/" className="font-medium text-[#0069CF] hover:underline">
