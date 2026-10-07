@@ -97,15 +97,15 @@ export const TALISU_MKTS_HEADER_TAGLINE =
 export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/mkts", label: "Markets" },
   { href: "/catalogue/bookshelf", label: "Bookshelf" },
-  /** Talishouse™ Product Catalogue — opens on Design Ideas. */
+  /** Talishouse™ Product Catalogue — opens on the front cover. */
   { href: "/catalogue", label: "Catalogue" },
   { href: "/talisu/reg", label: "Register" },
 ] as const;
 
-/** Register dropdown — Mapsite account vs Product partner (Webster). */
+/** Register dropdown — Mapsite account vs Product Options (Webster). */
 export const TALISU_MKTS_HEADER_REGISTER_DROPDOWN = [
   { href: "/talisu/reg", label: "Mapsite" },
-  { href: "/talisu/engage", label: "Product" },
+  { href: "/talisu/engage", label: "Product Options" },
 ] as const;
 
 /** Placeholder marker — Mapsites dropdown is rendered in TalisUMktsHeader. */

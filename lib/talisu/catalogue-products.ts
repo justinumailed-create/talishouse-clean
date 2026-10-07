@@ -1,10 +1,10 @@
 /**
  * Talishouse™ Product Catalogue — Design Ideas products + clickable hotspots.
  *
- * The public Catalogue (/catalogue) opens on the first "Design suggestions"
- * page of T-All Final.pdf (source page 20). Earlier pages (cover, container
- * specs, loading, floor plans, prefabrication) are trimmed in data by
- * `loadProductFlipbookPages({ startPage })`.
+ * The public Catalogue (/catalogue) is a full book: front cover → T-Dome as
+ * content page 1 → source pages 2–37 → uploaded back cover (source page 38).
+ * Design suggestions (source pages 20–37) keep P01–P108 hotspots; they are no
+ * longer the opening spread.
  *
  * Every design block is a product, numbered in reading order
  * (page by page, left→right, top→bottom): P01 … P99, P100, P101 …
@@ -52,7 +52,7 @@ export type CatalogueProduct = {
   code: string;
   /** 1-based page in T-All Final.pdf. */
   sourcePage: number;
-  /** 1-based page in the trimmed Catalogue (Design Ideas = page 1). */
+  /** 1-based content page in the Catalogue (T-Dome = 1; source N → page N). */
   cataloguePage: number;
   /** 1-based block position on its page. */
   slot: number;
@@ -124,7 +124,8 @@ export function normalizeCatalogueProductCode(
 
 export function buildCatalogueProducts(
   pages: CatalogueDesignPage[] = CATALOGUE_DESIGN_PAGES,
-  startPage = CATALOGUE_DESIGN_IDEAS_SOURCE_PAGE,
+  /** Content-page offset: source page N maps to catalogue page N when 1. */
+  startPage = 1,
 ): CatalogueProduct[] {
   const products: CatalogueProduct[] = [];
   const ordered = [...pages].sort((a, b) => a.sourcePage - b.sourcePage);

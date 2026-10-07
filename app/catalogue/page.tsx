@@ -18,7 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-/** Opens on Design Ideas; pages before it are trimmed in data (loadProductFlipbookPages startPage). */
+/** Opens on the front cover; T-Dome is content page 1 (see loadCataloguePages). */
 export default async function CataloguePage() {
   const pages = loadCataloguePages();
   return (

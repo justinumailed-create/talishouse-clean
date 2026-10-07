@@ -91,7 +91,7 @@ export default function RegisterNavDropdown() {
                     : "text-white/95 hover:bg-white/15"
                 }`}
               >
-                {item.label === "Product"
+                {item.href === "/talisu/engage"
                   ? t.nav.registerMenu.product
                   : t.nav.registerMenu.mapsite}
               </Link>

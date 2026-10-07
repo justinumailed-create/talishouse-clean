@@ -1,50 +1,89 @@
 import { loadProductFlipbookPages } from "@/lib/product-flipbook/load-pages";
 import type { ProductFlipbookPage } from "@/lib/product-flipbook/manifest";
 import {
-  CATALOGUE_DESIGN_IDEAS_SOURCE_PAGE,
   catalogueProductLabel,
   catalogueProductRegisterHref,
   catalogueProductsForSourcePage,
 } from "@/lib/talisu/catalogue-products";
 
-/**
- * Source page 38 (`page-38.webp`) is the closing portrait. The catalogue
- * replaces that raster with Webster's HTML sheet. It stays page 19 of 19
- * and carries no product hotspots, so P01–P108 are unchanged.
- */
-export const CATALOGUE_WEBSTER_SOURCE_PAGE = 38;
+/** Source PDF page 1 — Talishouse™ Product Catalogue front cover. */
+export const CATALOGUE_FRONT_SOURCE_PAGE = 1;
 
 /**
- * Talishouse™ Product Catalogue pages for /catalogue: opens on Design Ideas
- * (source page 20); earlier source pages are trimmed in data, and each
- * design block carries its P-code hotspot → /talisu/engage?product=Pxx.
+ * Uploaded closing raster (`page-38.webp`). Kept as the back cover; not
+ * replaced by the Webster HTML sheet.
+ */
+export const CATALOGUE_BACK_SOURCE_PAGE = 38;
+
+/** Synthetic first content leaf — T-Dome product sheet (not in T-All Final.pdf). */
+export const CATALOGUE_TDOME_PAGE_ID = "t-dome";
+
+export const CATALOGUE_TDOME_SRC =
+  "/talisbooks/templates/rm22/products/t-dome.jpg";
+
+/**
+ * Talishouse™ Product Catalogue for /catalogue:
+ *   Front cover (source page 1)
+ *   → Page 1 = T-Dome
+ *   → source pages 2–37 (Design Ideas / hotspots P01–P108 on 20–37)
+ *   → Back cover = uploaded source page 38
  *
- * The page image list comes from the bundled flipbook manifest, not a
- * request-time read of `public/product-flipbook`.
+ * Opens on the front cover (not mid-book Design Ideas). Page list comes from
+ * the bundled flipbook manifest, not a request-time read of public/.
  */
 export function loadCataloguePages(directory?: string): ProductFlipbookPage[] {
-  return loadProductFlipbookPages(directory, {
-    startPage: CATALOGUE_DESIGN_IDEAS_SOURCE_PAGE,
-  }).map((page) => {
-    const alt = `Talishouse™ Product Catalogue page ${page.number}`;
-    if (page.sourcePage === CATALOGUE_WEBSTER_SOURCE_PAGE) {
-      return {
-        ...page,
-        alt,
-        face: "webster",
-        src: null,
-        hotspots: [],
-      };
-    }
-    return {
-      ...page,
-      alt,
-      hotspots: catalogueProductsForSourcePage(page.sourcePage).map((product) => ({
-        code: product.code,
-        href: catalogueProductRegisterHref(product.code),
-        label: catalogueProductLabel(product),
-        rect: product.rect,
-      })),
-    };
+  const rasters = loadProductFlipbookPages(directory);
+  if (rasters.length === 0) return [];
+
+  const frontRaster = rasters[0];
+  const backRaster = rasters[rasters.length - 1];
+  const middleRasters = rasters.slice(1, -1);
+
+  const withHotspots = (page: ProductFlipbookPage): ProductFlipbookPage => ({
+    ...page,
+    alt: `Talishouse™ Product Catalogue page ${page.number}`,
+    hotspots: catalogueProductsForSourcePage(page.sourcePage).map((product) => ({
+      code: product.code,
+      href: catalogueProductRegisterHref(product.code),
+      label: catalogueProductLabel(product),
+      rect: product.rect,
+    })),
   });
+
+  const front: ProductFlipbookPage = {
+    ...frontRaster,
+    number: 0,
+    role: "front",
+    alt: "Talishouse™ Product Catalogue front cover",
+    hotspots: [],
+  };
+
+  const tDome: ProductFlipbookPage = {
+    id: CATALOGUE_TDOME_PAGE_ID,
+    number: 1,
+    sourcePage: 0,
+    src: CATALOGUE_TDOME_SRC,
+    alt: "Talishouse™ T-Dome — Product Catalogue page 1",
+    role: "content",
+    hotspots: [],
+  };
+
+  const middle: ProductFlipbookPage[] = middleRasters.map((page) =>
+    withHotspots({
+      ...page,
+      // Source page N is content page N (T-Dome occupies content page 1).
+      number: page.sourcePage,
+      role: "content",
+    }),
+  );
+
+  const back: ProductFlipbookPage = {
+    ...backRaster,
+    number: 0,
+    role: "back",
+    alt: "Talishouse™ Product Catalogue back cover",
+    hotspots: [],
+  };
+
+  return [front, tDome, ...middle, back];
 }

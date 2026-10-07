@@ -61,7 +61,7 @@ export const en = {
     menuBack: "← Menu",
     registerMenu: {
       mapsite: "Mapsite",
-      product: "Product",
+      product: "Product Options",
     },
     talisuMenu: {
       faq: "FAQ",
@@ -443,6 +443,8 @@ export const en = {
     customize: "Customize {label}",
     customizeDesign: "Customize a design",
     pageOf: "Page {page} of {count}",
+    front: "Front",
+    back: "Back",
   },
 
   demo: {

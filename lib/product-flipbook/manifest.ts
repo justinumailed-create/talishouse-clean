@@ -41,16 +41,24 @@ export interface ProductFlipbookHotspot {
 }
 
 /**
- * `raster` paints `src`. `webster` is the catalogue closing sheet: an HTML
- * page (photo + write-up) instead of the source portrait.
+ * `raster` paints `src`. `webster` is an optional HTML face (unused by the
+ * current catalogue closing page, which uses the uploaded back-cover raster).
  */
 export type ProductFlipbookFace = "raster" | "webster";
 
+/** Cover leaves are unnumbered; content pages use `number` (T-Dome = 1). */
+export type ProductFlipbookLeafRole = "front" | "back" | "content";
+
 export interface ProductFlipbookPage {
   id: string;
-  /** 1-based page number in the (possibly trimmed) book shown to readers. */
+  /**
+   * 1-based content page number for `role: "content"`. Front/back covers use 0.
+   */
   number: number;
-  /** 1-based page number in the source PDF (T-All Final.pdf). */
+  /**
+   * 1-based page number in the source PDF (T-All Final.pdf).
+   * 0 for synthetic leaves (e.g. T-Dome) that are not in the PDF.
+   */
   sourcePage: number;
   /** Public image URL. Null while the T-All rasters are not in public/. */
   src: string | null;
@@ -58,6 +66,8 @@ export interface ProductFlipbookPage {
   hotspots?: ProductFlipbookHotspot[];
   /** Omitted pages are rasters. */
   face?: ProductFlipbookFace;
+  /** Omitted pages are treated as content. */
+  role?: ProductFlipbookLeafRole;
 }
 
 export type ProductFlipbookPageOptions = {

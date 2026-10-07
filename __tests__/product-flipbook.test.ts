@@ -127,7 +127,7 @@ describe("product catalogue route", () => {
     const catalog = readSource("app/catalog/page.tsx");
     const viewer = readSource("components/product-flipbook/TopBoundFlipbook.tsx");
     expect(catalogue).toContain("TopBoundFlipbook");
-    expect(catalogue).toContain("loadProductFlipbookPages");
+    expect(catalogue).toContain("loadCataloguePages");
     expect(catalogue).not.toContain("catalog-grid");
     expect(catalogue).not.toContain("Glasshouse");
     expect(catalogue).not.toContain("$58.50");

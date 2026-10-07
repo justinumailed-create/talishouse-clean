@@ -18,8 +18,8 @@ import {
  * Pass `directory` to read a specific folder (tests). A missing directory
  * returns [] so a bad override stays an empty book instead of throwing.
  *
- * `options.startPage` trims every source page before it (the Catalogue opens
- * on Design Ideas, source page 20).
+ * `options.startPage` trims every source page before it. The public Catalogue
+ * loads the full book (front cover onward) via `loadCataloguePages`.
  */
 export function loadProductFlipbookPages(
   directory?: string,

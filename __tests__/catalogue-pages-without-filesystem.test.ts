@@ -19,7 +19,8 @@ vi.mock("node:fs", async (importOriginal) => {
   return { ...mocked, default: mocked };
 });
 
-const { loadCataloguePages } = await import("../lib/talisu/catalogue-pages");
+const { loadCataloguePages, CATALOGUE_TDOME_PAGE_ID, CATALOGUE_TDOME_SRC } =
+  await import("../lib/talisu/catalogue-pages");
 const { PRODUCT_FLIPBOOK_PAGE_COUNT } = await import("../lib/product-flipbook/manifest");
 
 describe("Catalogue page list without a readable public directory", () => {
@@ -34,24 +35,33 @@ describe("Catalogue page list without a readable public directory", () => {
     expect(readdirThrew).toBe(true);
     const pages = loadCataloguePages();
     expect(pages.length).toBeGreaterThan(0);
-    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT - 19);
+    // Front + T-Dome + source 2–37 + back
+    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT + 1);
     expect(pages[0]).toMatchObject({
-      id: "page-20.webp",
-      number: 1,
-      sourcePage: 20,
-      src: "/product-flipbook/page-20.webp",
-      alt: "Talishouse™ Product Catalogue page 1",
+      id: "page-01.webp",
+      number: 0,
+      sourcePage: 1,
+      role: "front",
+      src: "/product-flipbook/page-01.webp",
+      alt: "Talishouse™ Product Catalogue front cover",
     });
-    expect(pages.some((page) => page.sourcePage < 20)).toBe(false);
+    expect(pages[1]).toMatchObject({
+      id: CATALOGUE_TDOME_PAGE_ID,
+      number: 1,
+      role: "content",
+      src: CATALOGUE_TDOME_SRC,
+    });
+    expect(pages.some((page) => page.face === "webster")).toBe(false);
     expect(pages.at(-1)).toMatchObject({
       id: "page-38.webp",
-      number: PRODUCT_FLIPBOOK_PAGE_COUNT - 19,
+      number: 0,
       sourcePage: PRODUCT_FLIPBOOK_PAGE_COUNT,
-      face: "webster",
-      src: null,
+      role: "back",
+      src: "/product-flipbook/page-38.webp",
       hotspots: [],
     });
-    expect(pages[0].hotspots?.map((hotspot) => hotspot.code)).toEqual([
+    const design = pages.find((page) => page.sourcePage === 20);
+    expect(design?.hotspots?.map((hotspot) => hotspot.code)).toEqual([
       "P01",
       "P02",
       "P03",
@@ -59,6 +69,6 @@ describe("Catalogue page list without a readable public directory", () => {
       "P05",
       "P06",
     ]);
-    expect(pages[0].hotspots?.[0].href).toBe("/talisu/engage?product=P01");
+    expect(design?.hotspots?.[0].href).toBe("/talisu/engage?product=P01");
   });
 });

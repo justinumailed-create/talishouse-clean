@@ -177,7 +177,20 @@ export default function TopBoundFlipbook({
   const sheetPage = flip
     ? leaves[flip.direction === "next" ? flip.fromIndex : flip.toIndex]
     : null;
-  const displayNumber = (flip ? flip.toIndex : index) + 1;
+  const displayIndex = flip ? flip.toIndex : index;
+  const displayPage = leaves[displayIndex] ?? leaves[0];
+  const contentCount = leaves.filter(
+    (page) => (page.role ?? "content") === "content",
+  ).length;
+  const pageLabel =
+    displayPage?.role === "front"
+      ? c.front
+      : displayPage?.role === "back"
+        ? c.back
+        : fmt(c.pageOf, {
+            page: displayPage?.number ?? displayIndex + 1,
+            count: contentCount || leaves.length,
+          });
   const atStart = index === 0 && !flip;
   const atEnd = index >= leaves.length - 1 && !flip;
 
@@ -308,7 +321,7 @@ export default function TopBoundFlipbook({
             {c.previous}
           </button>
           <p className="product-flipbook__count" aria-live="polite">
-            {fmt(c.pageOf, { page: displayNumber, count: leaves.length })}
+            {pageLabel}
           </p>
           <button
             type="button"

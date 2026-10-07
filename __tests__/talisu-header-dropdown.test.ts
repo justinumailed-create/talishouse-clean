@@ -41,7 +41,7 @@ describe("TalisU blue header dropdown", () => {
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Admin Places")).toBe(false);
     expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.label)).toEqual([
       "Mapsite",
-      "Product",
+      "Product Options",
     ]);
     expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.href)).toEqual([
       "/talisu/reg",

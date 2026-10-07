@@ -8,7 +8,10 @@ import {
   PRODUCT_FLIPBOOK_PAGE_COUNT,
 } from "../lib/product-flipbook/manifest";
 import {
-  CATALOGUE_WEBSTER_SOURCE_PAGE,
+  CATALOGUE_BACK_SOURCE_PAGE,
+  CATALOGUE_FRONT_SOURCE_PAGE,
+  CATALOGUE_TDOME_PAGE_ID,
+  CATALOGUE_TDOME_SRC,
   loadCataloguePages,
 } from "../lib/talisu/catalogue-pages";
 import {
@@ -40,13 +43,15 @@ describe("Catalogue nav item", () => {
   });
 });
 
-describe("Catalogue start page (Design Ideas)", () => {
-  it("opens on source page 20 — the first Design suggestions page", () => {
+describe("Catalogue start page (front cover → T-Dome page 1)", () => {
+  it("keeps Design Ideas at source page 20 for hotspot layout", () => {
     expect(CATALOGUE_DESIGN_IDEAS_SOURCE_PAGE).toBe(20);
     expect(CATALOGUE_DESIGN_IDEAS_PAGE_TITLE).toBe("Design suggestions");
+    expect(CATALOGUE_FRONT_SOURCE_PAGE).toBe(1);
+    expect(CATALOGUE_BACK_SOURCE_PAGE).toBe(38);
   });
 
-  it("trims earlier pages in data and renumbers from 1", () => {
+  it("still supports startPage trimming on the raw flipbook loader", () => {
     const files = ["page-01.webp", "page-02.webp", "page-03.webp", "page-04.webp"];
     const pages = pagesFromFlipbookFiles(files, { startPage: 3 });
     expect(pages.map((p) => [p.id, p.number, p.sourcePage])).toEqual([
@@ -55,22 +60,53 @@ describe("Catalogue start page (Design Ideas)", () => {
     ]);
   });
 
-  it("loads the real catalogue starting at page-20 with 19 pages hidden", () => {
+  it("opens on the front cover with T-Dome as content page 1 and uploaded back cover", () => {
     const all = loadProductFlipbookPages();
     const pages = loadCataloguePages();
     expect(all).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT);
-    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT - 19);
+    // Front + T-Dome + source pages 2–37 + back = 39 leaves
+    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT + 1);
     expect(pages[0]).toMatchObject({
-      id: "page-20.webp",
+      id: "page-01.webp",
+      number: 0,
+      sourcePage: 1,
+      role: "front",
+      src: "/product-flipbook/page-01.webp",
+    });
+    expect(pages[1]).toMatchObject({
+      id: CATALOGUE_TDOME_PAGE_ID,
       number: 1,
-      sourcePage: 20,
+      sourcePage: 0,
+      role: "content",
+      src: CATALOGUE_TDOME_SRC,
+      hotspots: [],
+    });
+    expect(pages[2]).toMatchObject({
+      id: "page-02.webp",
+      number: 2,
+      sourcePage: 2,
+      role: "content",
+    });
+    const design = pages.find((p) => p.sourcePage === 20);
+    expect(design).toMatchObject({
+      id: "page-20.webp",
+      number: 20,
+      role: "content",
       src: "/product-flipbook/page-20.webp",
     });
-    expect(pages.some((p) => p.sourcePage < 20)).toBe(false);
-    expect(pages.map((p) => p.number)).toEqual(pages.map((_, i) => i + 1));
+    expect(pages.at(-1)).toMatchObject({
+      id: "page-38.webp",
+      number: 0,
+      sourcePage: 38,
+      role: "back",
+      src: "/product-flipbook/page-38.webp",
+      hotspots: [],
+    });
+    expect(pages.at(-1)?.face).toBeUndefined();
+    expect(pages.some((p) => p.face === "webster")).toBe(false);
   });
 
-  it("renders /catalogue through the flipbook with the trimmed loader and no purchase embed", () => {
+  it("renders /catalogue through the flipbook with the full-book loader and no purchase embed", () => {
     const page = read("app/catalogue/page.tsx");
     expect(page).toContain("loadCataloguePages");
     expect(page).toContain("TopBoundFlipbook");
@@ -92,7 +128,7 @@ describe("Catalogue product numbering", () => {
 
   it("numbers every design block in reading order from Design Ideas", () => {
     expect(CATALOGUE_PRODUCTS).toHaveLength(108);
-    expect(CATALOGUE_PRODUCTS[0]).toMatchObject({ code: "P01", sourcePage: 20, cataloguePage: 1, slot: 1 });
+    expect(CATALOGUE_PRODUCTS[0]).toMatchObject({ code: "P01", sourcePage: 20, cataloguePage: 20, slot: 1 });
     expect(CATALOGUE_PRODUCTS[6]).toMatchObject({ code: "P07", sourcePage: 21, slot: 1 });
     expect(CATALOGUE_PRODUCTS.at(-1)).toMatchObject({ code: "P108", sourcePage: 37, slot: 6 });
     CATALOGUE_PRODUCTS.forEach((p, i) => {
@@ -123,20 +159,30 @@ describe("Catalogue product numbering", () => {
 
   it("attaches clickable hotspots linking to Product registration", () => {
     const pages = loadCataloguePages();
-    expect(pages[0].hotspots?.map((h) => h.code)).toEqual(["P01", "P02", "P03", "P04", "P05", "P06"]);
-    expect(pages[0].hotspots?.[0].href).toBe("/talisu/engage?product=P01");
-    expect(pages[0].face).toBeUndefined();
+    const design = pages.find((p) => p.sourcePage === 20);
+    expect(design?.hotspots?.map((h) => h.code)).toEqual([
+      "P01",
+      "P02",
+      "P03",
+      "P04",
+      "P05",
+      "P06",
+    ]);
+    expect(design?.hotspots?.[0].href).toBe("/talisu/engage?product=P01");
+    expect(design?.face).toBeUndefined();
     const closing = pages.at(-1);
-    expect(CATALOGUE_WEBSTER_SOURCE_PAGE).toBe(38);
+    expect(CATALOGUE_BACK_SOURCE_PAGE).toBe(38);
     expect(closing).toMatchObject({
       id: "page-38.webp",
-      number: 19,
+      number: 0,
       sourcePage: 38,
-      face: "webster",
-      src: null,
+      role: "back",
+      src: "/product-flipbook/page-38.webp",
       hotspots: [],
     });
-    expect(pages[17].hotspots?.map((h) => h.code)).toEqual([
+    expect(closing?.face).toBeUndefined();
+    const lastDesign = pages.find((p) => p.sourcePage === 37);
+    expect(lastDesign?.hotspots?.map((h) => h.code)).toEqual([
       "P103",
       "P104",
       "P105",
@@ -150,24 +196,13 @@ describe("Catalogue product numbering", () => {
     expect(viewer).toContain("CatalogueHotspots");
     expect(viewer).toContain("left: `${spot.rect.x}%`");
     expect(viewer).toContain("event.stopPropagation()");
-    expect(viewer).toContain('page.face === "webster"');
-    expect(viewer).toContain("WebsterCataloguePage");
-    const sheet = read("components/product-flipbook/WebsterCataloguePage.tsx");
-    expect(sheet).toContain("useT().talisu.engage");
-    expect(sheet).toContain("engage.partnerImage");
-    expect(sheet).toContain("engage.partnerHeading");
-    expect(sheet).toContain("engage.partnerName");
-    expect(sheet).toContain("engage.paragraphs");
-    expect(sheet).toContain("engage.helpHeading");
-    expect(sheet).toContain("engage.helpItems");
-    expect(sheet).toContain("engage.protectionHeading");
-    expect(sheet).toContain("engage.protectionText");
-    expect(sheet).toContain("ROUTES.TALISU_ENGAGE");
-    expect(sheet).toContain("catalogueUi.customizeDesign");
-    expect(sheet).not.toContain("Your Customization Partner");
-    expect(sheet).not.toContain("page-38.webp");
+    expect(viewer).toContain("c.front");
+    expect(viewer).toContain("c.back");
+    expect(viewer).toContain('role === "front"');
+    expect(en.catalogueUi.front).toBe("Front");
+    expect(en.catalogueUi.back).toBe("Back");
     expect(en.catalogueUi.customizeDesign).toBe("Customize a design");
-    expect(en.talisu.engage.partnerImage).toBe("/talisu/webster-team-leader-v2.jpg");
+    expect(en.nav.registerMenu.product).toBe("Product Options");
   });
 });
 

@@ -41,7 +41,7 @@ export const de: Dictionary = {
     menuBack: "← Menü",
     registerMenu: {
       mapsite: "Mapsite",
-      product: "Produkt",
+      product: "Produktoptionen",
     },
     talisuMenu: {
       faq: "FAQ",
@@ -655,6 +655,8 @@ export const de: Dictionary = {
     customize: "{label} anpassen",
     customizeDesign: "Ein Design anpassen",
     pageOf: "Seite {page} von {count}",
+    front: "Vorderseite",
+    back: "Rückseite",
   },
 
   demo: {
