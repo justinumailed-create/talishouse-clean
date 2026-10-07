@@ -83,7 +83,7 @@ export function partitionBookshelf(
     const featured: TalisBooksLibraryBook[] = newest
       ? [{ ...newest, isPinned: true }]
       : [];
-    // Keep other pinned books under the hero (e.g. Common Shelf sample covers).
+    // Keep other pinned books under the hero (e.g. isolated ALLPINS sample covers).
     const remainingPinned = byCreated
       .filter((book) => book.id !== newest?.id && Boolean(book.isPinned))
       .sort((a, b) => {

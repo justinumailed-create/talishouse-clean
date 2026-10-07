@@ -4,11 +4,15 @@ import { useT } from "@/lib/i18n/client";
 import Link from "next/link";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import type { IsolatedBookshelfBook } from "@/lib/talisbooks/isolated-bookshelf-service";
-import { ISOLATED_BOOKSHELF_CREATE_PATH } from "@/lib/talisbooks/isolated-bookshelf";
+import {
+  ISOLATED_BOOKSHELF_CREATE_PATH,
+  ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
+} from "@/lib/talisbooks/isolated-bookshelf";
 import { allPinsClaimedHref } from "@/lib/talispros/allpins-mapsite-ui";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import { ALLPINS_FAST_CODE } from "@/lib/talispros/allpins-mapsite-constants";
 import { TALISBOOKS_LIBRARY_SPINE_PALETTES } from "@/lib/talisbooks/library/constants";
+import { BOOKSHELF_PLACEMENT_METADATA_KEY } from "@/lib/talisbooks/library/placement";
 import type {
   TalisBooksBookshelf,
   TalisBooksLibraryBook,
@@ -64,21 +68,56 @@ function toLibraryBook(
 
 const TOKENIZATION_TITLE = "Real-World Asset Tokenization";
 
-/** Match Tokenization across title / subtitle / slug (synthetic titles may be blank). */
-function isTokenizationBook(book: TalisBooksLibraryBook): boolean {
-  const shelfIdentity = [book.title, book.subtitle, book.slug]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-  return (
-    shelfIdentity.includes("tokenization") ||
-    shelfIdentity.includes("real-world asset")
-  );
+function metadataIdentityText(book: TalisBooksLibraryBook): string {
+  const metadata = book.metadata ?? {};
+  return [
+    metadata.seoDescription,
+    metadata.metaDescription,
+    metadata.description,
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
 }
 
 /**
- * Primary left hero on Common Shelf. Prefer a real isolated listing; otherwise
- * inject a sample cover so Tokenization always owns the large hero slot.
+ * Match the ALLPINS Tokenization listing on the isolated shelf. Title may be a
+ * blank/synthetic FAST-code label; RWA copy often lives in metadata SEO fields.
+ */
+function isTokenizationBook(book: TalisBooksLibraryBook): boolean {
+  const shelfIdentity = [
+    book.title,
+    book.subtitle,
+    book.slug,
+    metadataIdentityText(book),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  if (
+    shelfIdentity.includes("tokenization") ||
+    shelfIdentity.includes("real-world asset") ||
+    shelfIdentity.includes(
+      ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION.toLowerCase(),
+    )
+  ) {
+    return true;
+  }
+  const slug = (book.slug || "").toLowerCase();
+  return slug.includes("allpins-isolated") || slug.includes("isolated-shelf");
+}
+
+function withoutBookshelfPlacement(
+  metadata: Record<string, unknown> | null | undefined,
+): Record<string, unknown> {
+  const next = { ...(metadata ?? {}) };
+  delete next[BOOKSHELF_PLACEMENT_METADATA_KEY];
+  return next;
+}
+
+/**
+ * Primary left hero on the isolated ALLPINS shelf. Prefer the real ALLPINS
+ * Tokenization listing (cover + viewer); otherwise inject a sample cover so
+ * Tokenization always owns the large hero slot.
  */
 function tokenizationLibraryEntry(
   source: TalisBooksLibraryBook | null,
@@ -87,22 +126,28 @@ function tokenizationLibraryEntry(
   if (source) {
     return {
       ...source,
-      title: source.title.trim() || TOKENIZATION_TITLE,
+      // Shelf chrome label — the ALLPINS isolated listing is Tokenization.
+      title: TOKENIZATION_TITLE,
       subtitle:
-        source.subtitle.trim() ||
-        "Talispros™ Real-World Asset Tokenization",
+        source.subtitle.trim() || ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
       isPinned: true,
       pinRank: 0,
+      // Clear any prior main-shelf anchor so newest-mode can feature this book.
+      shelfPlacement: null,
+      metadata: {
+        ...withoutBookshelfPlacement(source.metadata),
+        isolatedBookshelf: true,
+      },
       // Win the newest hero slot so Tokenization is the large left feature.
       createdAt: heroCreatedAt,
       publishedAt: heroCreatedAt,
     };
   }
   return {
-    id: "common-shelf-tokenization",
+    id: "allpins-isolated-tokenization",
     slug: "real-world-asset-tokenization",
     title: TOKENIZATION_TITLE,
-    subtitle: "Talispros™ Real-World Asset Tokenization",
+    subtitle: ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
     coverImageUrl: null,
     coverTemplateId: null,
     coverGradient: TALISBOOKS_LIBRARY_SPINE_PALETTES[1]!,
@@ -204,7 +249,7 @@ function decorativeShelfFillers(count = 10): TalisBooksLibraryBook[] {
   }));
 }
 
-function buildIsolatedAllPinsBookshelf(
+export function buildIsolatedAllPinsBookshelf(
   books: IsolatedBookshelfBook[],
 ): TalisBooksBookshelf {
   return {
@@ -226,7 +271,7 @@ function buildIsolatedAllPinsBookshelf(
           book.id !== "pinned-talispros-ebook-sample" &&
           book.slug !== PINNED_TALISBOOK_SLUG,
       );
-      // Left hero-5 (newest-mode): Tokenization as primary hero + 4 sample dummies.
+      // Left hero-5 (newest-mode): ALLPINS Tokenization as primary hero + 4 sample dummies.
       const tokenizationSource =
         withoutDup.find(isTokenizationBook) ?? null;
       const rightCatalog = withoutDup.filter(

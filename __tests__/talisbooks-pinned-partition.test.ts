@@ -69,7 +69,7 @@ describe("partitionBookshelf pinned ordering", () => {
     expect(general.map((item) => item.id)).toEqual(["decorative"]);
   });
 
-  it("fills the Common Shelf left hero-5: Tokenization plus four dummies", () => {
+  it("fills the isolated ALLPINS left hero-5: Tokenization plus four dummies", () => {
     const { featured, general, featuredLayout } = partitionBookshelf(
       [
         book({

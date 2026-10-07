@@ -263,6 +263,11 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(shelf).toContain("tokenizationLibraryEntry");
     expect(shelf).toContain("leftHeroDummyBooks");
     expect(shelf).toContain("Real-World Asset Tokenization");
+    expect(shelf).toContain("allpins-isolated-tokenization");
+    expect(shelf).not.toContain("common-shelf-tokenization");
+    expect(shelf).toContain("BOOKSHELF_PLACEMENT_METADATA_KEY");
+    expect(shelf).toContain("ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION");
+    expect(shelf).toContain("allpins-isolated");
     expect(shelf).toContain("pinRank: 0");
     expect(shelf).toContain("Canyon Collection");
     expect(shelf).toContain("2099-12-31T23:59:59.000Z");
