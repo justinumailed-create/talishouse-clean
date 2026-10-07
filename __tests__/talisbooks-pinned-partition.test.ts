@@ -40,15 +40,15 @@ describe("partitionBookshelf pinned ordering", () => {
     const { featured, general } = partitionBookshelf(
       [
         book({
-          id: "cowboy",
-          title: "Cowboy's Guide",
+          id: "tokenization",
+          title: "Real-World Asset Tokenization",
           createdAt: "2099-12-31T23:59:59.000Z",
           isPinned: true,
           pinRank: 0,
         }),
         book({
-          id: "tokenization",
-          title: "Real-World Asset Tokenization",
+          id: "sample-cover",
+          title: "Harbour Lookbook",
           createdAt: "2026-09-01T00:00:00.000Z",
           isPinned: true,
           pinRank: 1,
@@ -62,44 +62,47 @@ describe("partitionBookshelf pinned ordering", () => {
       { featuredMode: "newest" },
     );
 
-    expect(featured.map((item) => item.id)).toEqual(["cowboy", "tokenization"]);
+    expect(featured.map((item) => item.id)).toEqual([
+      "tokenization",
+      "sample-cover",
+    ]);
     expect(general.map((item) => item.id)).toEqual(["decorative"]);
   });
 
-  it("fills the Common Shelf left hero-5: Cowboy, Tokenization, three dummies", () => {
+  it("fills the Common Shelf left hero-5: Tokenization plus four dummies", () => {
     const { featured, general, featuredLayout } = partitionBookshelf(
       [
         book({
-          id: "cowboy",
-          title: "Cowboy's Guide",
+          id: "tokenization",
+          title: "Real-World Asset Tokenization",
           createdAt: "2099-12-31T23:59:59.000Z",
           isPinned: true,
           pinRank: 0,
-        }),
-        book({
-          id: "tokenization",
-          title: "Real-World Asset Tokenization",
-          createdAt: "2026-09-01T00:00:00.000Z",
-          isPinned: true,
-          pinRank: 1,
         }),
         book({
           id: "left-hero-dummy-1",
           title: "Harbour Lookbook",
           createdAt: "2020-01-01T00:00:00.000Z",
           isPinned: true,
-          pinRank: 2,
+          pinRank: 1,
         }),
         book({
           id: "left-hero-dummy-2",
           title: "Prairie Estates",
           createdAt: "2020-01-01T00:00:00.000Z",
           isPinned: true,
-          pinRank: 3,
+          pinRank: 2,
         }),
         book({
           id: "left-hero-dummy-3",
           title: "Lakefront Digest",
+          createdAt: "2020-01-01T00:00:00.000Z",
+          isPinned: true,
+          pinRank: 3,
+        }),
+        book({
+          id: "left-hero-dummy-4",
+          title: "Canyon Collection",
           createdAt: "2020-01-01T00:00:00.000Z",
           isPinned: true,
           pinRank: 4,
@@ -120,11 +123,11 @@ describe("partitionBookshelf pinned ordering", () => {
 
     expect(featuredLayout).toBe("hero-plus-4");
     expect(featured.map((item) => item.id)).toEqual([
-      "cowboy",
       "tokenization",
       "left-hero-dummy-1",
       "left-hero-dummy-2",
       "left-hero-dummy-3",
+      "left-hero-dummy-4",
     ]);
     expect(general.map((item) => item.id)).toEqual(["right-2", "right-1"]);
     expect(packShelfRowsNewestAtRight(general.map((item) => item.id), 10)).toEqual([

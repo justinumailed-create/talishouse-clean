@@ -13,10 +13,7 @@ import type {
   TalisBooksBookshelf,
   TalisBooksLibraryBook,
 } from "@/lib/talisbooks/library/types";
-import {
-  PINNED_TALISBOOK_SLUG,
-  pinnedTalisBookLibraryEntry,
-} from "@/lib/talisbooks/library/pinned-catalog";
+import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import type { TalisBooksPublishStatus } from "@/lib/talisbooks/types";
 
 function toPublishStatus(value: string): TalisBooksPublishStatus {
@@ -65,21 +62,6 @@ function toLibraryBook(
 }
 
 
-/** Built-in Cowboy's Guide — left hero on Common Shelf (above Tokenization). */
-function cowboyGuideLibraryEntry(heroCreatedAt: string): TalisBooksLibraryBook {
-  const pinned = pinnedTalisBookLibraryEntry();
-  return {
-    ...pinned,
-    title: "Cowboy's Guide",
-    subtitle: "The Cowboy's Guide to Outside Capital · Talispros PMC",
-    isPinned: true,
-    pinRank: 0,
-    // Win the newest hero slot so Cowboy sits above Tokenization on the left.
-    createdAt: heroCreatedAt,
-    publishedAt: heroCreatedAt,
-  };
-}
-
 const TOKENIZATION_TITLE = "Real-World Asset Tokenization";
 
 /** Match Tokenization across title / subtitle / slug (synthetic titles may be blank). */
@@ -95,11 +77,12 @@ function isTokenizationBook(book: TalisBooksLibraryBook): boolean {
 }
 
 /**
- * Left slot 2 under Cowboy. Prefer a real isolated listing; otherwise inject a
- * sample cover so the hero-5 niche never leaves Tokenization on the right.
+ * Primary left hero on Common Shelf. Prefer a real isolated listing; otherwise
+ * inject a sample cover so Tokenization always owns the large hero slot.
  */
 function tokenizationLibraryEntry(
   source: TalisBooksLibraryBook | null,
+  heroCreatedAt: string,
 ): TalisBooksLibraryBook {
   if (source) {
     return {
@@ -109,7 +92,10 @@ function tokenizationLibraryEntry(
         source.subtitle.trim() ||
         "Talispros™ Real-World Asset Tokenization",
       isPinned: true,
-      pinRank: 1,
+      pinRank: 0,
+      // Win the newest hero slot so Tokenization is the large left feature.
+      createdAt: heroCreatedAt,
+      publishedAt: heroCreatedAt,
     };
   }
   return {
@@ -121,8 +107,8 @@ function tokenizationLibraryEntry(
     coverTemplateId: null,
     coverGradient: TALISBOOKS_LIBRARY_SPINE_PALETTES[1]!,
     publishStatus: "published",
-    publishedAt: "2026-09-01T00:00:00.000Z",
-    createdAt: "2026-09-01T00:00:00.000Z",
+    publishedAt: heroCreatedAt,
+    createdAt: heroCreatedAt,
     views: 0,
     clicks: 0,
     pageCount: 0,
@@ -132,17 +118,18 @@ function tokenizationLibraryEntry(
     fastCode: ALLPINS_FAST_CODE,
     parentBookId: null,
     isPinned: true,
-    pinRank: 1,
+    pinRank: 0,
     decorative: true,
     metadata: { decorative: true, isolatedBookshelf: true },
   };
 }
 
-/** Left hero slots 3–5: sample/dummy covers under Cowboy + Tokenization. */
+/** Left hero slots 2–5: sample/dummy covers under Tokenization. */
 const LEFT_HERO_DUMMY_TITLES = [
   "Harbour Lookbook",
   "Prairie Estates",
   "Lakefront Digest",
+  "Canyon Collection",
 ] as const;
 
 function leftHeroDummyBooks(): TalisBooksLibraryBook[] {
@@ -169,7 +156,7 @@ function leftHeroDummyBooks(): TalisBooksLibraryBook[] {
     fastCode: ALLPINS_FAST_CODE,
     parentBookId: null,
     isPinned: true,
-    pinRank: 2 + index,
+    pinRank: 1 + index,
     decorative: true,
     metadata: { decorative: true, isolatedBookshelf: true },
   }));
@@ -239,14 +226,16 @@ function buildIsolatedAllPinsBookshelf(
           book.id !== "pinned-talispros-ebook-sample" &&
           book.slug !== PINNED_TALISBOOK_SLUG,
       );
-      // Left hero-5 (newest-mode): Cowboy, Tokenization, 3 sample dummies.
+      // Left hero-5 (newest-mode): Tokenization as primary hero + 4 sample dummies.
       const tokenizationSource =
         withoutDup.find(isTokenizationBook) ?? null;
       const rightCatalog = withoutDup.filter(
         (book) => !tokenizationSource || book.id !== tokenizationSource.id,
       );
-      const cowboy = cowboyGuideLibraryEntry("2099-12-31T23:59:59.000Z");
-      const tokenization = tokenizationLibraryEntry(tokenizationSource);
+      const tokenization = tokenizationLibraryEntry(
+        tokenizationSource,
+        "2099-12-31T23:59:59.000Z",
+      );
       const leftDummies = leftHeroDummyBooks();
       // Right niche: remaining real books + decorative fillers (10 per row).
       return [
@@ -254,7 +243,6 @@ function buildIsolatedAllPinsBookshelf(
         ...decorativeShelfFillers(10),
         ...leftDummies,
         tokenization,
-        cowboy,
       ];
     })(),
   };

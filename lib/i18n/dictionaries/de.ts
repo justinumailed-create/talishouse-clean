@@ -354,7 +354,7 @@ export const de: Dictionary = {
       {
         id: "shelves",
         title: "Regale",
-        body: "Das Bücherregal (Common Shelf) ist das eigenständige Katalogregal mit dem Cowboy's Guide unter der linken Hervorhebung. Das Mapsites-Menü führt zu beanspruchten und Demo-Mapsites.",
+        body: "Das Bücherregal (Common Shelf) ist das eigenständige Katalogregal mit Real-World Asset Tokenization als linker Hervorhebung. Das Mapsites-Menü führt zu beanspruchten und Demo-Mapsites.",
       },
       {
         id: "talisu",

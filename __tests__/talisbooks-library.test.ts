@@ -121,11 +121,11 @@ describe("Talisbooks™ split bookshelf layout", () => {
       createdAt: "2026-09-30T12:00:00.000Z",
       isPinned: false,
     };
-    const cowboy = {
+    const pinnedSample = {
       ...base,
       id: "pinned-talispros-ebook-sample",
       slug: "talispros-ebook-sample",
-      title: "Cowboy's Guide",
+      title: "Pinned Sample",
       createdAt: "2020-01-01T00:00:00.000Z",
       isPinned: true,
       pinRank: 1,
@@ -137,7 +137,7 @@ describe("Talisbooks™ split bookshelf layout", () => {
       createdAt: "2026-08-01T12:00:00.000Z",
       isPinned: false,
     };
-    const { featured, general } = partitionBookshelf([older, cowboy, newest], {
+    const { featured, general } = partitionBookshelf([older, pinnedSample, newest], {
       featuredCapacity: 5,
       featuredMode: "newest",
     });

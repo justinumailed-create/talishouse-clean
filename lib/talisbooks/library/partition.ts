@@ -50,7 +50,7 @@ export type TalisBooksFeaturedMode = "fill" | "highlights" | "newest" | "ordered
  * catalog books stay on the right, newest first.
  * `ordered`: keep the incoming order (owner Bookshelf Editor); first = hero.
  * `newest`: the latest created ebook is always the left hero pin; other
- * `isPinned` books (e.g. Cowboy's Guide) sit below it; remaining books
+ * `isPinned` books (e.g. Tokenization samples) sit below it; remaining books
  * stand on the right from the left and shift right as newer pins arrive.
  *
  * Pinned books always sort first (public /talisbooks featured slot).
@@ -83,7 +83,7 @@ export function partitionBookshelf(
     const featured: TalisBooksLibraryBook[] = newest
       ? [{ ...newest, isPinned: true }]
       : [];
-    // Keep other pinned books under the hero (e.g. Cowboy's Guide on Common Shelf).
+    // Keep other pinned books under the hero (e.g. Common Shelf sample covers).
     const remainingPinned = byCreated
       .filter((book) => book.id !== newest?.id && Boolean(book.isPinned))
       .sort((a, b) => {
