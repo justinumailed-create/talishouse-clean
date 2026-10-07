@@ -19,9 +19,9 @@ import DemoFastCodePreview from "@/components/talispros/DemoFastCodePreview";
 
 interface TalisprosMarketRegistrationFormProps {
   market: RegistrationMarket;
-  /** When set, associates the Build Request with this Mapsite™ record. */
+  /** When set, associates the Build Request with this Mapsite record. */
   mapsiteId?: string;
-  /** `panel` keeps the user on Mapsite™ and invokes onSuccess instead of a full success page. */
+  /** `panel` keeps the user on Mapsite and invokes onSuccess instead of a full success page. */
   variant?: "page" | "panel";
   onSuccess?: (result: {
     requestId?: string;
@@ -269,8 +269,8 @@ export default function TalisprosMarketRegistrationForm({
         </div>
         <h2 className="text-2xl text-neutral-900">Registration received</h2>
         <p className="mt-3 text-sm leading-relaxed text-neutral-600">
-          Thank you. Your {marketCopy.label} Mapsite™ setup has started from your
-          essentials. We have emailed your Mapsite™ details to {email}.
+          Thank you. Your {marketCopy.label} Mapsite setup has started from your
+          essentials. We have emailed your Mapsite details to {email}.
         </p>
       </div>
     );
@@ -296,7 +296,7 @@ export default function TalisprosMarketRegistrationForm({
           General Information
         </h2>
         <p className="mb-6 text-sm text-neutral-500">
-          Complete these essentials to create your Mapsite™ — personalization can
+          Complete these essentials to create your Mapsite — personalization can
           wait until after your first success.
         </p>
         <input type="hidden" name="date" value={date} />
@@ -342,7 +342,7 @@ export default function TalisprosMarketRegistrationForm({
           <div>
             <FieldLabel
               label="Mobile"
-              hint="Used on your Talisbook™ and Mapsite™ contact details."
+              hint="Used on your Talisbook™ and Mapsite contact details."
               required
             />
             <input
@@ -382,7 +382,7 @@ export default function TalisprosMarketRegistrationForm({
         />
         <span>
           I consent to Talispros™ processing my registration data to prepare my
-          Mapsite™ and coordinate payment and onboarding.
+          Mapsite and coordinate payment and onboarding.
         </span>
       </label>
 
@@ -395,7 +395,7 @@ export default function TalisprosMarketRegistrationForm({
           ? "Submitting..."
           : isPanel
             ? "Submit Build Request"
-            : "Create My Mapsite™"}
+            : "Create My Mapsite"}
       </button>
     </form>
   );

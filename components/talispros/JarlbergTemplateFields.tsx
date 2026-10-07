@@ -103,7 +103,7 @@ export default function JarlbergTemplateFields({
         />
       </FieldBox>
 
-      <FieldBox label="Page 1 — dome stays; map uses your Mapsite™ pin">
+      <FieldBox label="Page 1 — dome stays; map uses your Mapsite pin">
         <input
           disabled={disabled}
           value={slots.welcomeTitle}

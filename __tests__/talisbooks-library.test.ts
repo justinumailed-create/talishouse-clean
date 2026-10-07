@@ -241,7 +241,7 @@ describe("Talisbooks™ library search / sort / filter", () => {
     ).toBe(true);
   });
 
-  it("keeps only books for one FAST Code on a Mapsite™ public shelf", () => {
+  it("keeps only books for one FAST Code on a Mapsite public shelf", () => {
     const mixed = [
       { ...books[0]!, id: "al02-a", fastCode: "al02", mapsiteId: "ms-al02" },
       { ...books[1]!, id: "lg01-a", fastCode: "lg01", mapsiteId: "ms-lg01" },
@@ -277,7 +277,7 @@ describe("Talisbooks™ admin library catalog policy", () => {
   const demoMapsiteBook = {
     id: "demo-row",
     slug: "demo-ab12cd34-lookbook",
-    title: "Demo Mapsite™",
+    title: "Demo Mapsite",
     subtitle: "",
     fastCode: "demo-ab12cd34",
   };
@@ -293,11 +293,11 @@ describe("Talisbooks™ admin library catalog policy", () => {
     expect(isDemonstrationCatalogBook(rm22Book)).toBe(false);
   });
 
-  it("keeps claimed demo ebook on an issued FAST shelf even if title still says Demo Mapsite™", () => {
+  it("keeps claimed demo ebook on an issued FAST shelf even if title still says Demo Mapsite", () => {
     const claimedFromDemo = {
       id: "752f5bfd-92bf-4ef5-9ca9-3917fd172e21",
       slug: "demo-7a58377e-demo-mapsite-qxfz",
-      title: "Demo Mapsite™",
+      title: "Demo Mapsite",
       subtitle: "from demonstration ebook",
       fastCode: "rd01",
     };
@@ -323,14 +323,14 @@ describe("Talisbooks™ admin library catalog policy", () => {
       [
         { fastCode: "rm22", propertyTitle: "RM22" },
         { fastCode: "lg01", propertyTitle: "LG01" },
-        { fastCode: "demo-ab12cd34", propertyTitle: "Demo Mapsite™" },
+        { fastCode: "demo-ab12cd34", propertyTitle: "Demo Mapsite" },
       ],
       scope,
     );
     expect(mapsites.map((site) => site.fastCode)).toEqual(["rm22"]);
   });
 
-  it("lets platform admins see every real Mapsite™ book without demo fillers", () => {
+  it("lets platform admins see every real Mapsite book without demo fillers", () => {
     const scope = talisbooksScopeFromAdminAccount({ fastCode: "ARUN" });
     expect(scope).toEqual({ fastCode: null, excludeDemonstrationCatalog: true });
 
@@ -382,7 +382,7 @@ describe("Talisbooks™ library admin delete wiring", () => {
     expect(page).toContain("backHref={mapsiteBackFromScheduleHref(params.from)}");
     expect(shell).toContain("deleteLibraryEbookAction");
     expect(shell).toContain("canDelete");
-    expect(shell).not.toContain("Back to Mapsite™");
+    expect(shell).not.toContain("Back to Mapsite");
     expect(shell).toContain("TalisUMktsHeader");
     expect(shell).toContain("talisbooks-library__header-actions");
     expect(shell).not.toContain("talisbooks-library__search");
@@ -447,7 +447,7 @@ describe("Talisbooks™ public / root created FAST catalog", () => {
   const demoMapsiteBook = {
     id: "demo-row",
     slug: "demo-ab12cd34-lookbook",
-    title: "Demo Mapsite™",
+    title: "Demo Mapsite",
     subtitle: "",
     fastCode: "demo-ab12cd34",
     publishStatus: "draft" as const,

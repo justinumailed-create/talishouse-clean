@@ -21,7 +21,7 @@ function toEcosystemBook(row: BookRow): TalisBooksEcosystemBook {
   };
 }
 
-/** List books linked to a Mapsite™ (ecosystem reuse). */
+/** List books linked to a Mapsite (ecosystem reuse). */
 export async function listTalisBooksByMapSiteId(
   mapsiteId: string,
 ): Promise<TalisBooksEcosystemBook[]> {

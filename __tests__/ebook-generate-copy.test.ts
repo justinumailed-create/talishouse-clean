@@ -50,7 +50,7 @@ describe("self-service ebook generate copy", () => {
   });
 });
 
-describe("Mapsite™ admin ebook editor", () => {
+describe("Mapsite admin ebook editor", () => {
   it("embeds the Build-page Talisbook™ template generator", () => {
     const panel = readFileSync(
       resolve("components/talispros-admin/MapSiteAdminEbookPanel.tsx"),

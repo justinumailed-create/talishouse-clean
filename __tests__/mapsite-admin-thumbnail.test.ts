@@ -5,12 +5,12 @@ import {
   toAdminMapSiteThumbnail,
 } from "../lib/talispros/mapsite-admin-thumbnail";
 
-describe("admin Mapsite™ thumbnails", () => {
+describe("admin Mapsite thumbnails", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
   });
 
-  it("builds a satellite still of the live Mapsite™ camera", () => {
+  it("builds a satellite still of the live Mapsite camera", () => {
     vi.stubEnv("NEXT_PUBLIC_MAPTILER_API_KEY", "test-maptiler-key");
     const url = mapsiteSatellitePreviewUrl({
       latitude: 43.8509,
@@ -39,7 +39,7 @@ describe("admin Mapsite™ thumbnails", () => {
     ).toBeNull();
   });
 
-  it("uses the same listing hero as the public Mapsite™ page", () => {
+  it("uses the same listing hero as the public Mapsite page", () => {
     vi.stubEnv("NEXT_PUBLIC_MAPTILER_API_KEY", "test-maptiler-key");
     const item = toAdminMapSiteThumbnail({
       fast_code: "tr01",
@@ -75,7 +75,7 @@ describe("admin Mapsite™ thumbnails", () => {
     expect(item.deleteControl).toBe("none");
   });
 
-  it("marks unpaid ACTIVE Mapsites™ as deletable", () => {
+  it("marks unpaid ACTIVE Mapsites as deletable", () => {
     const item = toAdminMapSiteThumbnail({
       fast_code: "ar01",
       status: "ACTIVE",

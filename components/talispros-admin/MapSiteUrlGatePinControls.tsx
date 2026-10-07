@@ -69,7 +69,7 @@ export default function MapSiteUrlGatePinControls({
     <div className="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 space-y-2">
       <p className="text-sm font-medium text-neutral-900">URL secure code</p>
       <p className="text-xs text-neutral-500">
-        Visitors who tap URL on the published Mapsite™ generate a 6-digit code.
+        Visitors who tap URL on the published Mapsite generate a 6-digit code.
         The code ships to{" "}
         <Link href="/admin/notifications" className="underline hover:text-neutral-800">
           Notifications

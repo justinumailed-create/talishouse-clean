@@ -51,7 +51,7 @@ export const MAPSITE_LISTING_HERO_HEIGHT_CLASS = "h-44";
 export const MAPSITE_LISTING_TILE_TOP_FALLBACK_PX = 64;
 
 /**
- * Demo / unclaimed Mapsite™ gallery — Glasshouse™ product imagery.
+ * Demo / unclaimed Mapsite gallery — Glasshouse™ product imagery.
  */
 export const MAPSITE_DEMO_GALLERY = [
   "/images/glasshouse/hero.png",
@@ -74,7 +74,7 @@ export function isStockDemoListingPath(path: string | null | undefined): boolean
   if (!path?.trim()) return true;
   const trimmed = path.trim().split("?")[0]?.split("#")[0] || path.trim();
   if (trimmed.includes("/images/glasshouse/")) return true;
-  // Demo Mapsites™ are seeded with the pinned ebook front cover — that is a
+  // Demo Mapsites are seeded with the pinned ebook front cover — that is a
   // placeholder, not a listing hero. Interiors under /pages/ stay usable.
   if (
     trimmed === `${PINNED_TALISBOOK_ASSET_ROOT}/front-cover.jpg` ||
@@ -109,7 +109,7 @@ export type ListingHeroImageOptions = {
 
 /**
  * Drop the 2nd unique interior so former page 3 becomes the new page 2.
- * Used after payment success for the paid ebook / Mapsite™ pin hero shift.
+ * Used after payment success for the paid ebook / Mapsite pin hero shift.
  */
 export function hideSecondInteriorListingUrls(urls: string[]): string[] {
   const unique = uniqueNonStockUrls(urls);
@@ -133,7 +133,7 @@ export function listingHeroImageUrl(
 }
 
 /**
- * Interior Talisbook™ page photographs for the Mapsite™ listing card.
+ * Interior Talisbook™ page photographs for the Mapsite listing card.
  * Covers, Glasshouse™ brochure pages, and demo stock are skipped.
  */
 export function listingImageUrlsFromEbookPages(
@@ -175,7 +175,7 @@ export function shouldReplaceDemoListingMedia(
 }
 
 /**
- * When the Mapsite™ still shows stock demo photos, use interior Talisbook™
+ * When the Mapsite still shows stock demo photos, use interior Talisbook™
  * pages as the listing hero / gallery.
  */
 export function withEbookListingMedia<

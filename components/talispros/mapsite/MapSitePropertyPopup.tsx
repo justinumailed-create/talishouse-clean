@@ -177,7 +177,7 @@ interface MapSitePropertyPopupProps {
 export default function MapSitePropertyPopup({
   mapsite,
   claimHref,
-  claimLabel = "Build My Mapsite™",
+  claimLabel = "Build My Mapsite",
   genericOnboardingCard = false,
   accountType = "derivative",
   onboardingPhase,
@@ -238,7 +238,7 @@ export default function MapSitePropertyPopup({
   const localizedClaimLabel =
     claimLabel === "Register Account now"
       ? t.mapsite.registerAccountNow
-      : claimLabel === "Build My Mapsite™"
+      : claimLabel === "Build My Mapsite"
         ? t.mapsite.buildMyMapsite
         : claimLabel;
   const popupClaimLabel = useGenericCard

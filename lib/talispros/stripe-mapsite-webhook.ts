@@ -16,7 +16,7 @@ export {
 } from "@/lib/talispros/stripe-mapsite-session";
 
 /**
- * checkout.session.completed → existing Mapsite™ activation service.
+ * checkout.session.completed → existing Mapsite activation service.
  */
 export async function activateMapSiteFromStripeCheckoutSession(
   session: Stripe.Checkout.Session

@@ -1,9 +1,9 @@
 /**
  * Catalogue T-All isolated bookshelf.
  *
- * Separate from the public /talisbooks product shelf and from Mapsite™ TEB™
+ * Separate from the public /talisbooks product shelf and from Mapsite TEB™
  * shelves. Only Global Admin creates books for it, through the self-serve
- * ebook generate flow. A linked Mapsite™ is optional — admin FAST Codes
+ * ebook generate flow. A linked Mapsite is optional — admin FAST Codes
  * such as ADMIN123 can create for this shelf without one.
  */
 
@@ -12,7 +12,7 @@ export const ISOLATED_BOOKSHELF_CREATE_PATH = "/catalogue/bookshelf/create";
 export const ISOLATED_BOOKSHELF_DESTINATION = "isolated-bookshelf";
 export const ISOLATED_BOOKSHELF_METADATA_KEY = "isolatedBookshelf";
 export const ISOLATED_BOOKSHELF_UNLOCK_COOKIE = "catalogue_isolated_bookshelf";
-/** Query flag set when the shelf is opened from the ALLPINS Mapsite™ chrome. */
+/** Query flag set when the shelf is opened from the ALLPINS Mapsite chrome. */
 export const ISOLATED_BOOKSHELF_FROM_PARAM = "from";
 export const ISOLATED_BOOKSHELF_FROM_ALLPINS = "allpins";
 

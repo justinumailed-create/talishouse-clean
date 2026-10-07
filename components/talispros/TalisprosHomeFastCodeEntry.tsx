@@ -13,7 +13,7 @@ type TalisprosHomeFastCodeEntryProps = {
 };
 
 /**
- * Homepage control: enter a FAST Code → open that code’s claimed Mapsite™
+ * Homepage control: enter a FAST Code → open that code’s claimed Mapsite
  * with owner/paid session privileges (not the public published shell).
  */
 export default function TalisprosHomeFastCodeEntry({
@@ -55,7 +55,7 @@ export default function TalisprosHomeFastCodeEntry({
 
       setFastCode(trimmed);
       // Full document navigation so owner/paid Set-Cookie from the action
-      // is applied before the claimed Mapsite™ RSC reads the session.
+      // is applied before the claimed Mapsite RSC reads the session.
       window.location.assign(result.href);
     } catch {
       setError(t.common.somethingWrong);

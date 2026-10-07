@@ -83,14 +83,14 @@ export async function GET(
       background,
       showPin: true,
       pinColor: CLAIMED_MAPSITE_OG_PIN_COLOR,
-      // Individual Mapsite™ cards use the owner's custom logo when set, else the
+      // Individual Mapsite cards use the owner's custom logo when set, else the
       // circular Windswept badge. ALLPINS and Talisbooks™ cards are unchanged.
       logo: await mapsiteShareOgLogo(code),
     });
     return new Response(new Uint8Array(jpeg), { headers: HEADERS });
   } catch (error) {
     console.error(
-      "[og] Mapsite™ card failed:",
+      "[og] Mapsite card failed:",
       error instanceof Error ? error.message : error,
     );
     return new Response("Open Graph image is unavailable.", { status: 500 });

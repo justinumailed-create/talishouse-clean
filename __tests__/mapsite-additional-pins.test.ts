@@ -35,8 +35,8 @@ vi.mock("@/lib/talispros/mapsite-additional-pins-service", () => ({
   })),
 }));
 
-describe("Mapsite™ additional PIN quota", () => {
-  it("starts each Mapsite™ with 1 included PIN", () => {
+describe("Mapsite additional PIN quota", () => {
+  it("starts each Mapsite with 1 included PIN", () => {
     const quota = resolvePinQuota({});
     expect(quota).toEqual({ pinQuota: 1, purchasedPins: 0 });
     expect(MAPSITE_INCLUDED_PIN_COUNT).toBe(1);
@@ -80,7 +80,7 @@ describe("Mapsite™ additional PIN quota", () => {
     expect(nearCap).toEqual({ pinQuota: 100, purchasedPins: 99, granted: 2 });
 
     expect(grantAdditionalPins({ pinQuota: 100, purchasedPins: 99 }, 1)).toEqual({
-      error: "This Mapsite™ already has the maximum of 100 PINs.",
+      error: "This Mapsite already has the maximum of 100 PINs.",
     });
     expect(additionalPinCheckoutQuantityError(100, 1)).toMatch(/100/);
     expect(additionalPinCheckoutQuantityError(99, 3)).toMatch(/1 more PIN/);
@@ -115,7 +115,7 @@ describe("Mapsite™ additional PIN quota", () => {
   });
 });
 
-describe("additional PIN Checkout does not activate a Mapsite™", () => {
+describe("additional PIN Checkout does not activate a Mapsite", () => {
   it("ignores additional-PIN sessions in the activation path", async () => {
     const { activateMapSiteAfterPayment } = await import(
       "@/lib/talispros/mapsite-activation"

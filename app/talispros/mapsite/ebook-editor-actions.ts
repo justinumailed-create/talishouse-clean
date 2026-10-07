@@ -26,7 +26,7 @@ type Fail = { success: false; error: string };
 
 /**
  * Ownership is enforced here on every call: owner session + completed
- * activation payment for this FAST Code (or a Mapsite™ admin), and each lib
+ * activation payment for this FAST Code (or a Mapsite admin), and each lib
  * call re-checks talisbooks_books.fast_code before touching a row.
  */
 async function authorize(fastCodeRaw: string): Promise<{ fastCode: string } | Fail> {
@@ -35,7 +35,7 @@ async function authorize(fastCodeRaw: string): Promise<{ fastCode: string } | Fa
   try {
     await requireMapSiteEditAccess(fastCode);
   } catch {
-    return { success: false, error: "Only the paid Mapsite™ owner can edit these ebooks." };
+    return { success: false, error: "Only the paid Mapsite owner can edit these ebooks." };
   }
   return { fastCode };
 }

@@ -9,7 +9,7 @@ describe("TalisU Register copy", () => {
 
   it("spells out TEB, TVA, and TTV instead of the short codes alone", () => {
     expect(bullets.map((b) => b.label)).toEqual([
-      "Mapsites™",
+      "Mapsites",
       "Talisbooks™ (TEB)",
       "Listing analysis (TVA)",
       "TalisTV™ (TTV)",

@@ -14,8 +14,8 @@ type Props = {
 };
 
 /**
- * Floating pin card for ALLPINS — mirrors claimed Mapsite™ popup chrome
- * (hero + FAST Code + book / Mapsite™ demo actions) without claim/onboarding.
+ * Floating pin card for ALLPINS — mirrors claimed Mapsite popup chrome
+ * (hero + FAST Code + book / Mapsite demo actions) without claim/onboarding.
  */
 export default function MapSiteAllPinsPinCard({ pin, onClose }: Props) {
   const hero =
@@ -80,7 +80,7 @@ export default function MapSiteAllPinsPinCard({ pin, onClose }: Props) {
               href={pin.mapsiteHref}
               className="inline-flex min-h-9 flex-1 items-center justify-center rounded-lg border border-neutral-200/80 bg-white/75 px-3 py-1.5 text-xs font-medium text-neutral-900 shadow-[0_1px_2px_rgba(0,0,0,0.06)] backdrop-blur-sm transition hover:border-neutral-300 hover:bg-white/85"
             >
-              Open Mapsite™
+              Open Mapsite
             </Link>
           </div>
         </div>

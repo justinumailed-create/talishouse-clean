@@ -34,6 +34,10 @@ import {
 import TalisUMarketsPinCard from "./TalisUMarketsPinCard";
 import TalisUMarketsSidebar from "./TalisUMarketsSidebar";
 import { useT } from "@/lib/i18n/client";
+import {
+  TALISU_MKTS_PLACE_SEARCH_ZOOM,
+  type MktsSearchOrigin,
+} from "@/lib/talisu/mkts-place-search";
 
 const FOCUS_GESTURE_GUARD_MS = 900;
 /** Retry window while Google overlays settle after a camera move. */
@@ -41,6 +45,9 @@ const PIN_ANCHOR_POLL_MS = 800;
 
 export default function TalisUMarketsMapApp() {
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
+  const [searchOrigin, setSearchOrigin] = useState<MktsSearchOrigin | null>(
+    null,
+  );
   const focusingRef = useRef(false);
   const focusTimerRef = useRef<number | null>(null);
   /** Sidebar (or other) focus asked for a camera move; map clicks do not. */
@@ -115,6 +122,8 @@ export default function TalisUMarketsMapApp() {
         setSelectedPinId={setSelectedPinId}
         beginFocusGuard={beginFocusGuard}
         recenterOnSelectRef={recenterOnSelectRef}
+        searchOrigin={searchOrigin}
+        setSearchOrigin={setSearchOrigin}
       />
     </MapEngineProvider>
   );
@@ -127,6 +136,8 @@ function MarketsChrome({
   setSelectedPinId,
   beginFocusGuard,
   recenterOnSelectRef,
+  searchOrigin,
+  setSearchOrigin,
 }: {
   pins: readonly TalisUMktsPin[];
   footer: string;
@@ -134,6 +145,8 @@ function MarketsChrome({
   setSelectedPinId: (id: string | null) => void;
   beginFocusGuard: () => void;
   recenterOnSelectRef: MutableRefObject<boolean>;
+  searchOrigin: MktsSearchOrigin | null;
+  setSearchOrigin: (origin: MktsSearchOrigin | null) => void;
 }) {
   const { setViewport } = useMapEngine();
   const lastFocusedRef = useRef<string | null>(null);
@@ -168,6 +181,23 @@ function MarketsChrome({
     },
     [beginFocusGuard, recenterOnSelectRef, setSelectedPinId, setViewport],
   );
+
+  const handlePlaceSearch = useCallback(
+    (origin: MktsSearchOrigin) => {
+      beginFocusGuard();
+      setSearchOrigin(origin);
+      setSelectedPinId(null);
+      setViewport({
+        center: { latitude: origin.latitude, longitude: origin.longitude },
+        zoom: TALISU_MKTS_PLACE_SEARCH_ZOOM,
+      });
+    },
+    [beginFocusGuard, setSearchOrigin, setSelectedPinId, setViewport],
+  );
+
+  const handlePlaceSearchClear = useCallback(() => {
+    setSearchOrigin(null);
+  }, [setSearchOrigin]);
 
   useEffect(() => {
     if (!selectedPinId) {
@@ -301,6 +331,9 @@ function MarketsChrome({
           pins={pins}
           selectedPinId={selectedPinId}
           onSelectPin={focusPin}
+          onPlaceSearch={handlePlaceSearch}
+          onPlaceSearchClear={handlePlaceSearchClear}
+          searchOrigin={searchOrigin}
         />
 
         {selectedPin && placement ? (

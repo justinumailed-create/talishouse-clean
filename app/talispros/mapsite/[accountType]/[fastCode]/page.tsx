@@ -112,7 +112,7 @@ export async function generateMetadata({
 }
 
 /**
- * Short claimed Mapsite™ URL:
+ * Short claimed Mapsite URL:
  * /talispros/mapsite/{accountType}/{fastCode}
  * e.g. /talispros/mapsite/listings/lg01
  */
@@ -208,7 +208,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       })
     ).paid;
 
-  // Paid claimed Mapsites™ always surface pin dashboard resources (URL/MLS/TEB/TTV).
+  // Paid claimed Mapsites always surface pin dashboard resources (URL/MLS/TEB/TTV).
   // Owner session still gates Logout / owner-only chrome.
   const openPinOnLoad = forceOpenPin || isOwner || paymentReceived;
 
@@ -222,7 +222,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       ? getMapSiteEditToolbarState(fastCode).catch(() => null)
       : Promise.resolve(null),
   ]);
-  // Dashboard dropdown: owner session, or a Mapsite™ admin (e.g. FAST Code ARUN).
+  // Dashboard dropdown: owner session, or a Mapsite admin (e.g. FAST Code ARUN).
   // Paid + non-demo is enforced client-side (dashboardUnlocked) and in every action.
   const canManageDashboard = isOwner || Boolean(editAccess?.isAdmin);
   const primarySlug = ebookContext?.primaryEbook?.slug || bookSlug;

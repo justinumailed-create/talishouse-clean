@@ -9,7 +9,7 @@
  * Sources:
  *   1) https://www.talispros.com/talisu/mkts          → Talismaps™ Markets
  *   2) https://www.talispros.com/catalogue/bookshelf → Talisbooks™ Bookshelf
- *   3) https://www.talispros.com/talispros/mapsite/brokers/rm22 → claimed Mapsite™
+ *   3) https://www.talispros.com/talispros/mapsite/brokers/rm22 → claimed Mapsite
  */
 import puppeteer from "puppeteer-core";
 import path from "node:path";

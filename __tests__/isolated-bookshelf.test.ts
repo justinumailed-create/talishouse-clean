@@ -95,7 +95,7 @@ describe("isolated catalogue bookshelf", () => {
     );
   });
 
-  it("builds onboarding context without a Mapsite™ for isolated create", () => {
+  it("builds onboarding context without a Mapsite for isolated create", () => {
     const context = buildIsolatedBookshelfOnboardingContext({
       fastCode: "ADMIN123",
       agentName: "Platform Admin",
@@ -108,7 +108,7 @@ describe("isolated catalogue bookshelf", () => {
     expect(context.accountType).toBe("root");
   });
 
-  it("isolated create page no longer blocks on a missing Mapsite™", () => {
+  it("isolated create page no longer blocks on a missing Mapsite", () => {
     const page = readFileSync(
       resolve("app/catalogue/bookshelf/create/page.tsx"),
       "utf8",
@@ -116,9 +116,9 @@ describe("isolated catalogue bookshelf", () => {
     expect(page).toContain("IsolatedBookshelfCreateClient");
     expect(page).toMatch(/mapsiteId=\{mapsiteId\}/);
     expect(page).toContain("ensureAllPinsMapSite");
-    expect(page).not.toMatch(/No Mapsite™ linked/i);
+    expect(page).not.toMatch(/No Mapsite linked/i);
     expect(page).not.toMatch(/self-serve ebook process needs a Mapsite/i);
-    expect(page).toMatch(/Mapsite™ is optional/i);
+    expect(page).toMatch(/Mapsite is optional/i);
   });
 
   it("generate client allows isolated session without mapsiteId", () => {
@@ -226,7 +226,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(isIsolatedBookshelfFromAllPins(undefined)).toBe(false);
   });
 
-  it("viewer Back to Mapsite™ for isolated books uses ALLPINS, not admin FAST Code", () => {
+  it("viewer Back to Mapsite for isolated books uses ALLPINS, not admin FAST Code", () => {
     const location = readFileSync(
       resolve("lib/talisbooks/viewer/location.ts"),
       "utf8",
@@ -244,7 +244,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(location).toContain("viewerBackToMapsiteHref");
     expect(loadBook).toContain("isolatedBookshelf: isIsolatedBookshelfBook");
     expect(shell).toContain("viewerBackToMapsiteHref(book)");
-    // Isolated shelf uses the normal Mapsite™-connected Talisbooks™ shell,
+    // Isolated shelf uses the normal Mapsite-connected Talisbooks™ shell,
     // linked to ALLPINS (not admin123 / product-catalogue chrome).
     const shelf = readFileSync(
       resolve("components/catalogue/IsolatedBookshelfView.tsx"),
@@ -320,7 +320,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(app).not.toContain('icon: "dot"');
     expect(app).toContain("MapSiteAllPinsPinCard");
     expect(card).toContain("allpins-pin-card");
-    expect(card).toContain("Open Mapsite™");
+    expect(card).toContain("Open Mapsite");
   });
 
   it("ALLPINS left rail uses Talispros™ ALL-PINs title with mobile collapse", () => {
@@ -332,7 +332,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
       resolve("components/talispros/mapsite/MapSiteAllPinsShowcase.tsx"),
       "utf8",
     );
-    expect(app).not.toContain("Canadian Mapsite™ pins");
+    expect(app).not.toContain("Canadian Mapsite pins");
     expect(app).not.toContain("absolute right-3 top-3");
     expect(showcase).toContain("Talispros™ ALL-PINs");
     expect(showcase).toContain("allpins-left-rail");

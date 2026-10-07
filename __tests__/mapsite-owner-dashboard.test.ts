@@ -36,7 +36,7 @@ function book(id: string, createdAt: string): TalisBooksLibraryBook {
   };
 }
 
-describe("Mapsite™ owner Dashboard menu", () => {
+describe("Mapsite owner Dashboard menu", () => {
   it("lists the four Dashboard items in navbar order", () => {
     expect(MAPSITE_DASHBOARD_MENU_ITEMS.map((item) => item.label)).toEqual([
       "Ebook Editor",
@@ -67,7 +67,7 @@ describe("Mapsite™ owner Dashboard menu", () => {
     expect(header).toContain("bg-[#035bb8]");
     expect(page).toContain("const canManageDashboard = isOwner || Boolean(editAccess?.isAdmin)");
     expect(actions).toContain("requireMapSiteEditAccess");
-    expect(actions).toContain("FAST Code™ does not match this Mapsite™.");
+    expect(actions).toContain("FAST Code™ does not match this Mapsite.");
   });
 });
 

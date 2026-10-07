@@ -17,7 +17,7 @@ describe("shouldBindMapsiteTebListing", () => {
     ).toBe(true);
   });
 
-  it("keeps the existing Mapsite™ TEB™ when another book is created", () => {
+  it("keeps the existing Mapsite TEB™ when another book is created", () => {
     expect(
       shouldBindMapsiteTebListing({
         replacing: false,

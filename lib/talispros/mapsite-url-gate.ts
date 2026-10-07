@@ -5,12 +5,12 @@ export const MAPSITE_URL_GATE_HEADLINE = "Secure URL access";
 /** PIN lifetime after generate. Documented default for phone/WhatsApp handoff. */
 export const MAPSITE_URL_GATE_TTL_MS = 30 * 60 * 1000;
 
-/** Cooldown between regenerations for the same Mapsite™ (spam guard). */
+/** Cooldown between regenerations for the same Mapsite (spam guard). */
 export const MAPSITE_URL_GATE_REGEN_COOLDOWN_MS = 10 * 1000;
 
 export const MAPSITE_URL_GATE_TTL_LABEL = "30 minutes";
 
-/** Sentinel href used by the published Mapsite™ URL button when the gate applies. */
+/** Sentinel href used by the published Mapsite URL button when the gate applies. */
 export const MAPSITE_URL_GATE_SENTINEL = "__url_gate__";
 
 /**
@@ -70,7 +70,7 @@ export function resolveMapsiteListingUrl(
   );
 }
 
-/** True when the Mapsite™ has a payment/listing URL (stored or overridden). */
+/** True when the Mapsite has a payment/listing URL (stored or overridden). */
 export function mapsiteHasGatedUrl(
   brokerUrl: string | null | undefined,
   fastCode?: string | null,
@@ -79,7 +79,7 @@ export function mapsiteHasGatedUrl(
 }
 
 /**
- * Published Mapsite™ URL button href: direct link when exempt, gate sentinel
+ * Published Mapsite URL button href: direct link when exempt, gate sentinel
  * when gated, or null when no listing URL is available.
  */
 export function resolvePublishedUrlButtonHref(
@@ -119,7 +119,7 @@ export function mapsiteUrlGatePath(fastCode: string): string {
 }
 
 /**
- * Deep-link to the standalone gate page (fallback). Published Mapsite™ URL
+ * Deep-link to the standalone gate page (fallback). Published Mapsite URL
  * buttons open an on-page popup instead of navigating here immediately.
  */
 export function mapsiteUrlGateHref(
@@ -138,7 +138,7 @@ export function mapsiteUrlGateHref(
 /**
  * Stand-in until SamCart payment success: when broker_url is the local
  * register-your-mapsite path (or a bare homepage), unlock opens the claimed
- * Mapsite™ instead of looping the gate or dumping to `/`.
+ * Mapsite instead of looping the gate or dumping to `/`.
  */
 export function isMapsiteRegisterPathStandIn(
   href: string | null | undefined,

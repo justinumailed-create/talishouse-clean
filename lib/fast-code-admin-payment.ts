@@ -57,7 +57,7 @@ function paymentMatchesCode(
   return false;
 }
 
-/** Paid unlock for delete protection — FAST code or Mapsite™ id only (not email). */
+/** Paid unlock for delete protection — FAST code or Mapsite id only (not email). */
 export function paymentProtectsMapSiteFromDelete(
   mapsite: { id?: string | null; fastCode: string },
   payments: TalisprosPaymentMatchRow[],

@@ -53,7 +53,7 @@ export default function ClaimMarketRegistrationClient({
             });
             window.location.assign(opened.href);
           } catch (openError) {
-            console.error("[claim-market] Mapsite™ create failed:", openError);
+            console.error("[claim-market] Mapsite create failed:", openError);
             window.location.assign(
               buildSelfEbookContinueHref({
                 requestId,

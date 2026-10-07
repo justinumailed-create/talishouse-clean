@@ -154,7 +154,7 @@ export function createGlasshouseBrochurePages(
 }
 
 /**
- * DB / content JSON payload for one brochure leaf (auto-draft + Mapsite™ seeds).
+ * DB / content JSON payload for one brochure leaf (auto-draft + Mapsite seeds).
  */
 export function glasshouseBrochureContentPayload(
   leaf: TalisBooksGlasshouseBrochureLeaf,

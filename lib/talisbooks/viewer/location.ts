@@ -6,7 +6,7 @@ import {
 } from "@/lib/talispros/mapsite-state";
 import type { TalisBooksViewerBook } from "./types";
 
-/** Google Maps pin for the Mapsite™ location, or a search from the book address. */
+/** Google Maps pin for the Mapsite location, or a search from the book address. */
 export function viewerGoogleMapsHref(
   book: Pick<TalisBooksViewerBook, "title" | "subtitle" | "pages">,
 ): string | null {
@@ -31,9 +31,9 @@ export function viewerFastCodeLabel(fastCode?: string | null): string | null {
 }
 
 /**
- * FAST Code used for Mapsite™ navigation from a viewer book.
+ * FAST Code used for Mapsite navigation from a viewer book.
  * Isolated-shelf books are stored under the admin creator code (ADMIN123)
- * but belong to the ALLPINS showcase Mapsite™.
+ * but belong to the ALLPINS showcase Mapsite.
  */
 export function viewerMapsiteFastCode(
   book: Pick<TalisBooksViewerBook, "fastCode" | "isolatedBookshelf">,
@@ -43,7 +43,7 @@ export function viewerMapsiteFastCode(
   return code || null;
 }
 
-/** Logo on the viewer rail opens this Mapsite™. */
+/** Logo on the viewer rail opens this Mapsite. */
 export function viewerMapsiteHref(
   book: Pick<
     TalisBooksViewerBook,
@@ -63,7 +63,7 @@ export function viewerMapsiteHref(
 }
 
 /**
- * "Back to Mapsite™" from the book viewer.
+ * "Back to Mapsite" from the book viewer.
  * Isolated shelf / ALLPINS → /talisu/mkts; otherwise listings/{code}.
  */
 export function viewerBackToMapsiteHref(

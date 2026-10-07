@@ -30,7 +30,7 @@ export default function TalisprosLayoutClient({
 
   return (
     <>
-      {/* Demo Mapsite™ builder/ebook: shared blue TalisU nav (same as shelves/claimed). */}
+      {/* Demo Mapsite builder/ebook: shared blue TalisU nav (same as shelves/claimed). */}
       {isDemoMapSite ? <TalisUMktsHeader /> : <TalisprosHeader />}
       <main
         className={`font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white [&:has(.mapsite-layout)]:p-0 ${

@@ -1,5 +1,5 @@
 /**
- * Mapsite™ / published PIN visuals — same defaults as the Build / Claim form
+ * Mapsite / published PIN visuals — same defaults as the Build / Claim form
  * (`defaultHomePinLocationValues` in `components/build-mapsite/home-pin-types.ts`).
  * Do not invent a separate marker: hollow drop (`none`) + Google-blue fill.
  */

@@ -33,7 +33,7 @@ describe("TalisU Knowledge Base dashboard", () => {
     expect(parsed.audios[0].title).toContain("Fractionalization");
   });
 
-  it("scopes the Mapsite™ manager entry to rm22", () => {
+  it("scopes the Mapsite manager entry to rm22", () => {
     expect(TALISU_KB_MAPSITE_MANAGER_FAST_CODE).toBe("rm22");
     expect(isTalisUKbMapsiteManagerFastCode("rm22")).toBe(true);
     expect(isTalisUKbMapsiteManagerFastCode("RM22")).toBe(true);

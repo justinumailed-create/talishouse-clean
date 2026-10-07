@@ -16,7 +16,7 @@ import { TALISU_MKTS_HEADER_BLUE } from "@/lib/talisu/markets-pins";
 
 const root = process.cwd();
 
-describe("homepage FAST Code → claimed Mapsite™", () => {
+describe("homepage FAST Code → claimed Mapsite", () => {
   it("matches existing claimed listings navigation", () => {
     expect(buildClaimedMapSitePath({ fastCode: "LG01", accountType: "listings" })).toBe(
       "/talispros/mapsite/listings/lg01",
@@ -143,7 +143,7 @@ describe("homepage FAST Code → claimed Mapsite™", () => {
     expect(TALISU_MKTS_HEADER_BLUE).toBe("#046BD9");
   });
 
-  it("shows Logout on paid owner claimed Mapsite™ chrome", () => {
+  it("shows Logout on paid owner claimed Mapsite chrome", () => {
     const partner = readFileSync(
       join(root, "components/talispros/mapsite/MapSiteMarketPartnerCard.tsx"),
       "utf8",

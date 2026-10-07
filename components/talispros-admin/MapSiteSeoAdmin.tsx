@@ -48,8 +48,8 @@ function WhatsAppIphonePreview({
 }) {
   const liveUrl = mapsiteLiveUrl(fastCode);
   const host = previewHost(liveUrl);
-  const previewTitle = title.trim() || `${displayFastCode(fastCode)} | Mapsite™`;
-  const previewDescription = description.trim() || `Mapsite™ ${displayFastCode(fastCode)}`;
+  const previewTitle = title.trim() || `${displayFastCode(fastCode)} | Mapsite`;
+  const previewDescription = description.trim() || `Mapsite ${displayFastCode(fastCode)}`;
   const displayPath = liveUrl.replace(/^https?:\/\//, "");
 
   return (
@@ -77,7 +77,7 @@ function WhatsAppIphonePreview({
               </div>
               <div className="min-w-0">
                 <p className="truncate text-[13px] font-semibold leading-tight">
-                  Mapsite™
+                  Mapsite
                 </p>
                 <p className="text-[10px] leading-tight text-white/75">online</p>
               </div>
@@ -226,14 +226,14 @@ function MapSiteSeoCard({ mapsite }: { mapsite: MapSiteSeoListItem }) {
                 {displayFastCode(mapsite.fastCode)}
               </h2>
               <p className="mt-0.5 text-sm text-neutral-500">
-                {mapsite.propertyTitle?.trim() || "Untitled Mapsite™"}
+                {mapsite.propertyTitle?.trim() || "Untitled Mapsite"}
               </p>
             </div>
             <Link
               href={`/admin/mapsites/${mapsite.fastCode}`}
               className="inline-flex h-9 items-center rounded-full border border-neutral-200 px-3 text-xs font-medium text-neutral-700 hover:bg-neutral-50"
             >
-              Open Mapsite™
+              Open Mapsite
             </Link>
           </div>
 
@@ -249,7 +249,7 @@ function MapSiteSeoCard({ mapsite }: { mapsite: MapSiteSeoListItem }) {
             />
             {usingLiveTitle ? (
               <p className="mt-1 text-[11px] text-neutral-400">
-                Live Mapsite™ title (system assigned)
+                Live Mapsite title (system assigned)
               </p>
             ) : null}
           </label>
@@ -267,7 +267,7 @@ function MapSiteSeoCard({ mapsite }: { mapsite: MapSiteSeoListItem }) {
             />
             {usingLiveDescription ? (
               <p className="mt-1 text-[11px] text-neutral-400">
-                Live Mapsite™ description (system assigned)
+                Live Mapsite description (system assigned)
               </p>
             ) : null}
           </label>
@@ -276,7 +276,7 @@ function MapSiteSeoCard({ mapsite }: { mapsite: MapSiteSeoListItem }) {
             <div>
               <p className="text-sm font-medium text-neutral-900">OpenGraph image</p>
               <p className="mt-0.5 text-xs text-neutral-500">
-                Shown when this Mapsite™ is shared on social media. Recommended
+                Shown when this Mapsite is shared on social media. Recommended
                 1200×630.
                 {usingLiveImage
                   ? " Using the live system-assigned image until you upload a replacement."
@@ -391,7 +391,7 @@ export default function MapSiteSeoAdmin({
   if (mapsites.length === 0) {
     return (
       <div className="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500">
-        No Mapsites™ found. SEO is stored per FAST Code after a Mapsite™ exists.
+        No Mapsites found. SEO is stored per FAST Code after a Mapsite exists.
       </div>
     );
   }
@@ -407,7 +407,7 @@ export default function MapSiteSeoAdmin({
       />
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500">
-          No Mapsite™ matches that FAST Code.
+          No Mapsite matches that FAST Code.
         </div>
       ) : (
         filtered.map((mapsite) => (

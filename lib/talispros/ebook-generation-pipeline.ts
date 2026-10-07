@@ -40,7 +40,7 @@ export {
 
 export type RunEbookGenerationInput = {
   requestId: string;
-  /** Admin / owner Mapsite™ path when no Build Request exists. Never trusted without canEditMapSite. */
+  /** Admin / owner Mapsite path when no Build Request exists. Never trusted without canEditMapSite. */
   fastCode?: string | null;
   title: string;
   description: string;
@@ -81,7 +81,7 @@ function emit(
 
 /**
  * Tracked ebook generation job keyed by Build Request ID, or by an editable
- * Mapsite™ FAST Code when a Build Request was never created.
+ * Mapsite FAST Code when a Build Request was never created.
  * Public generate still requires requestId. Client FAST codes are ignored
  * unless `canEditMapSite` succeeds.
  * Expects images already optimized + stored when `optimizedImages` is provided.

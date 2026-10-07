@@ -1,6 +1,6 @@
 /**
  * Portrait Open Graph card for Talisbooks™ bookshelf shares.
- * 1080×1350 (~4:5) — distinct from landscape Mapsite™ / viewer parting-shot cards.
+ * 1080×1350 (~4:5) — distinct from landscape Mapsite / viewer parting-shot cards.
  * Soft alcove, shelf planks, one standing book, Talispros™ mark.
  */
 

@@ -30,16 +30,16 @@ export default async function AdminPlatformContentPage() {
         >
           <p className="text-sm font-semibold text-neutral-900">Marketing Admin</p>
           <p className="mt-1 text-xs text-neutral-500">
-            Registrations, listing text, images, and Mapsite™ handoff.
+            Registrations, listing text, images, and Mapsite handoff.
           </p>
         </Link>
         <Link
           href={MARKETING_ADMIN_DEMOS_PATH}
           className="rounded-xl border border-neutral-200 bg-white px-4 py-3 hover:bg-neutral-50"
         >
-          <p className="text-sm font-semibold text-neutral-900">Demo Mapsites™</p>
+          <p className="text-sm font-semibold text-neutral-900">Demo Mapsites</p>
           <p className="mt-1 text-xs text-neutral-500">
-            Edit or remove demonstration listings and promotional Mapsites™.
+            Edit or remove demonstration listings and promotional Mapsites.
           </p>
         </Link>
         <Link
@@ -73,7 +73,7 @@ export default async function AdminPlatformContentPage() {
           href="/admin/mapsites"
           className="rounded-xl border border-neutral-200 bg-white px-4 py-3 hover:bg-neutral-50"
         >
-          <p className="text-sm font-semibold text-neutral-900">Mapsite™ listings</p>
+          <p className="text-sm font-semibold text-neutral-900">Mapsite listings</p>
           <p className="mt-1 text-xs text-neutral-500">
             Listing write-ups, gallery images, pins, and linked Talisbooks™.
           </p>

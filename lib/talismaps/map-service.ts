@@ -144,8 +144,8 @@ export type EnsureMapSiteTalisMapResult =
   | { ok: false; error: string };
 
 /**
- * Create or update the Talismaps™ instance for an existing Mapsite™,
- * matching the Build My Mapsite™ home-PIN outcome.
+ * Create or update the Talismaps™ instance for an existing Mapsite,
+ * matching the Build My Mapsite home-PIN outcome.
  */
 export async function ensureMapSiteTalisMap(
   input: EnsureMapSiteTalisMapInput,
@@ -153,7 +153,7 @@ export async function ensureMapSiteTalisMap(
   const mapsiteId = input.mapsiteId.trim();
   const fastCode = input.fastCode.trim().toLowerCase();
   if (!mapsiteId || !fastCode) {
-    return { ok: false, error: "Mapsite™ ID and FAST Code are required." };
+    return { ok: false, error: "Mapsite ID and FAST Code are required." };
   }
 
   const supabase = getSupabaseAdmin();
@@ -163,7 +163,7 @@ export async function ensureMapSiteTalisMap(
     input.zoom != null && Number.isFinite(input.zoom)
       ? Math.min(21, Math.max(1, Math.round(input.zoom)))
       : 15;
-  const name = input.name.trim() || `${fastCode.toUpperCase()} Mapsite™`;
+  const name = input.name.trim() || `${fastCode.toUpperCase()} Mapsite`;
   const description = input.description?.trim() || "";
   const accountType = talismapsAccountType(input.accountType);
   const settings = {
@@ -293,7 +293,7 @@ function readPinStyleBoolean(
   return null;
 }
 
-/** Latest admin-saved Home PIN style from the Mapsite™ Talismaps™ row. */
+/** Latest admin-saved Home PIN style from the Mapsite Talismaps™ row. */
 export async function getMapSiteTalisMapPinStyle(options: {
   mapsiteId?: string | null;
   fastCode?: string | null;

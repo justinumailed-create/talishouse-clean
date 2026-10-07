@@ -39,7 +39,7 @@ Satellite is exposed as a selectable basemap view through the Leaflet adapter (E
 | Mapbox Satellite | Yes | Free tier then paid | API token required |
 | Google Maps Satellite | Yes | Billing account required | Maps JavaScript API |
 
-**Conclusion:** Free, unrestricted satellite for a commercial Mapsite™ product is **not** available. Therefore default view remains **Street**.
+**Conclusion:** Free, unrestricted satellite for a commercial Mapsite product is **not** available. Therefore default view remains **Street**.
 
 ---
 

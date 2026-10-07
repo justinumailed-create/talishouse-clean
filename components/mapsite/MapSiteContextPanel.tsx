@@ -74,7 +74,7 @@ export default function MapSiteContextPanel({
   const showInterestForm = ownsThisMapSite && interestFormEnabled;
   const title = showInterestForm
     ? "Express an Interest"
-    : "Register Your Mapsite™";
+    : "Register Your Mapsite";
 
   return (
     <div className="flex flex-col min-h-0 rounded-2xl border border-neutral-200 overflow-hidden shadow-sm bg-white h-full">
@@ -100,7 +100,7 @@ export default function MapSiteContextPanel({
         ) : ownsThisMapSite && !interestFormEnabled ? (
           <div className="p-6 text-sm text-neutral-600 text-center">
             Your subscription is active. The interest form is not enabled for
-            this Mapsite™.
+            this Mapsite.
           </div>
         ) : (
           <RootAccountRegistrationPanel

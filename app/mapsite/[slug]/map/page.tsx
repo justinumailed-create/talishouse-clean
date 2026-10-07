@@ -31,7 +31,7 @@ export async function generateMetadata({
   const { slug } = await params;
   const code = slug?.toLowerCase().trim() || "";
   if (!code) {
-    return { title: "Mapsite™ map" };
+    return { title: "Mapsite map" };
   }
   const published = await loadPublishedMapSiteView(code);
   const ogImage = isAllPinsFastCode(code)
@@ -41,7 +41,7 @@ export async function generateMetadata({
   if (isAllPinsFastCode(code)) {
     const copy = allpinsSeoCopy();
     return createMetadata({
-      title: copy.title.replace(" | Mapsite™", " map | Mapsite™"),
+      title: copy.title.replace(" | Mapsite", " map | Mapsite"),
       description: copy.description,
       path: `/mapsite/${code}/map`,
       image: mapsiteOgMetadataImage(ogImage, copy.title),
@@ -57,11 +57,11 @@ export async function generateMetadata({
   const baseTitle = published?.metaTitle?.trim() || live.title;
   const title = baseTitle.includes(" map | ")
     ? baseTitle
-    : baseTitle.replace(" | Mapsite™", " map | Mapsite™");
+    : baseTitle.replace(" | Mapsite", " map | Mapsite");
   const description =
     published?.metaDescription?.trim() ||
     live.description ||
-    `Full-screen Mapsite™ map and PIN for ${baseTitle}.`;
+    `Full-screen Mapsite map and PIN for ${baseTitle}.`;
   return createMetadata({
     title,
     description,

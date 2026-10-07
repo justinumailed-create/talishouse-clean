@@ -30,7 +30,7 @@ describe("register-agents routes", () => {
     );
   });
 
-  it("sends Root/Broker to Register Agents and FSBO back to the claimed Mapsite™", () => {
+  it("sends Root/Broker to Register Agents and FSBO back to the claimed Mapsite", () => {
     expect(
       shouldRegisterAgentsAfterPayment({
         audience: "brokers",

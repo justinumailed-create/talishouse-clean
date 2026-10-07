@@ -294,7 +294,7 @@ function toDraft(
   };
 }
 
-/** Load TEB™ books for issued FAST Codes and demo-* Mapsites™. Bare `demo` is not a shelf. */
+/** Load TEB™ books for issued FAST Codes and demo-* Mapsites. Bare `demo` is not a shelf. */
 export function canLoadMapSiteEbookContext(
   fastCode: string | null | undefined,
 ): boolean {
@@ -638,7 +638,7 @@ export async function upsertMapSiteEbook(input: {
   if (fastCode === "demo" || isDemoMapSiteCode(fastCode)) {
     return {
       success: false,
-      error: "Demonstration Mapsites™ cannot add more Talisbooks™ from this shelf.",
+      error: "Demonstration Mapsites cannot add more Talisbooks™ from this shelf.",
     };
   }
   if (!title) return { success: false, error: "Ebook title is required." };
@@ -647,7 +647,7 @@ export async function upsertMapSiteEbook(input: {
   }
 
   const context = await getMapSiteEbookContext(fastCode);
-  if (!context) return { success: false, error: "Mapsite™ FAST Code not found." };
+  if (!context) return { success: false, error: "Mapsite FAST Code not found." };
 
   const entitlements = await getTalisBooksEntitlementSnapshot(fastCode);
   const existing = context.primaryEbook;
@@ -697,7 +697,7 @@ export async function upsertMapSiteEbook(input: {
   const description =
     input.description?.trim() ||
     existing?.description ||
-    `Talisbooks™ ebook for Mapsite™ FAST Code ${fastCode.toUpperCase()}.`;
+    `Talisbooks™ ebook for Mapsite FAST Code ${fastCode.toUpperCase()}.`;
   const coverImageUrl =
     input.coverImageUrl !== undefined
       ? input.coverImageUrl?.trim() || null

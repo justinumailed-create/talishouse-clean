@@ -27,7 +27,7 @@ export const TALISTV_GUIDE_SLOTS: TalisTvGuideSlot[] = [
     show: {
       id: "show-open",
       title: "Market Open",
-      subtitle: "Daily briefing across featured Mapsites™",
+      subtitle: "Daily briefing across featured Mapsites",
       durationMinutes: 30,
       category: "News",
       status: "later",

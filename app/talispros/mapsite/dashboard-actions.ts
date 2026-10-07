@@ -41,7 +41,7 @@ function revalidateOwnerSurfaces(fastCode: string) {
 
 /**
  * Same gate as the PIN Dashboard: owner session + completed activation payment,
- * or a Mapsite™ admin. The mapsiteId ↔ FAST Code pairing is re-read from the DB.
+ * or a Mapsite admin. The mapsiteId ↔ FAST Code pairing is re-read from the DB.
  */
 async function authorizeOwner(input: {
   mapsiteId: string;
@@ -49,17 +49,17 @@ async function authorizeOwner(input: {
 }): Promise<{ mapsiteId: string; fastCode: string } | ActionError> {
   const fastCode = input.fastCode.trim().toLowerCase();
   if (!fastCode || !input.mapsiteId.trim()) {
-    return { error: "Mapsite™ and FAST Code™ are required." };
+    return { error: "Mapsite and FAST Code™ are required." };
   }
   try {
     await requireMapSiteEditAccess(fastCode);
   } catch {
-    return { error: "Only the paid Mapsite™ owner can change this." };
+    return { error: "Only the paid Mapsite owner can change this." };
   }
   const identity = await readMapSiteIdentity(input.mapsiteId);
-  if (!identity) return { error: "Mapsite™ was not found." };
+  if (!identity) return { error: "Mapsite was not found." };
   if (identity.fastCode !== fastCode) {
-    return { error: "FAST Code™ does not match this Mapsite™." };
+    return { error: "FAST Code™ does not match this Mapsite." };
   }
   return { mapsiteId: identity.id, fastCode };
 }

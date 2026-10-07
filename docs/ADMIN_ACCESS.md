@@ -17,7 +17,7 @@ Enter the FAST code and continue. Codes are case-insensitive.
 
 There is no password on this screen. The FAST code *is* the credential, matching the existing admin auth.
 
-Arun was not given a customer FAST code, so `ARUN` is the admin login code. Ralf’s `rm22` is also his live Root Mapsite™ code; using it at `/admin/login` opens admin. Entering `rm22` on a Mapsite™ / business-office gate does **not** grant admin (only `ADMIN123` still does there).
+Arun was not given a customer FAST code, so `ARUN` is the admin login code. Ralf’s `rm22` is also his live Root Mapsite code; using it at `/admin/login` opens admin. Entering `rm22` on a Mapsite / business-office gate does **not** grant admin (only `ADMIN123` still does there).
 
 ## What each person can edit
 
@@ -25,24 +25,24 @@ After login, the sidebar lists the tools below. Ralf sees SUPERADMIN product too
 
 | Nav item | Path | What you can do |
 |----------|------|-----------------|
-| Platform Content | `/admin/platform-content` | Existing Marketing Admin: registrations, listing text/images, demo Mapsites™, client metrics. Also links to product images and Mapsite™ listings. |
+| Platform Content | `/admin/platform-content` | Existing Marketing Admin: registrations, listing text/images, demo Mapsites, client metrics. Also links to product images and Mapsite listings. |
 | Marketing Admin | `/talispros/marketing/admin` | Same Marketing Admin APIs; FAST-code SUPERADMIN/full session is accepted (no second login). |
 | Content | `/admin/content` | Thin GlobalContent homepage hero titles only |
-| Build requests | `/admin/build-requests` | See submissions and act (assign FAST code, generate Mapsite™, send registration, reject). Detail/edit at `/admin/marketing/[id]` |
-| Mapsites | `/admin/mapsites` | List Mapsites™; open one to edit listing text, images/media, pin, lifecycle, and the custom ebook editor (`#ebook-editor`) |
+| Build requests | `/admin/build-requests` | See submissions and act (assign FAST code, generate Mapsite, send registration, reject). Detail/edit at `/admin/marketing/[id]` |
+| Mapsites | `/admin/mapsites` | List Mapsites; open one to edit listing text, images/media, pin, lifecycle, and the custom ebook editor (`#ebook-editor`) |
 | FAST Codes | `/admin/fast-codes` | Search, view, create/assign, and edit existing FAST Codes. Does not change Build My MapSite / ebook-generate generators. |
-| Talisbooks™ | `/admin/talisbooks` | Book metadata plus a path to the **custom ebook editor** (Mapsite™ panel + viewer Live Edit). Front Cover / Back Cover stay explicit assignments; landscape = one two-page spread. |
-| Bookshelves | `/admin/talisbooks/bookshelves` | Public library + per-Mapsite™ TEB™ shelves, with ebook-editor links |
+| Talisbooks™ | `/admin/talisbooks` | Book metadata plus a path to the **custom ebook editor** (Mapsite panel + viewer Live Edit). Front Cover / Back Cover stay explicit assignments; landscape = one two-page spread. |
+| Bookshelves | `/admin/talisbooks/bookshelves` | Public library + per-Mapsite TEB™ shelves, with ebook-editor links |
 
-Payment-driven Mapsite™ activation is unchanged. SUPERADMIN can edit listings; unpaid Mapsites™ still follow the existing activation rules for owners.
+Payment-driven Mapsite activation is unchanged. SUPERADMIN can edit listings; unpaid Mapsites still follow the existing activation rules for owners.
 
 ## Verify steps
 
 1. Open `/admin/login` while logged out. Confirm the FAST code field is shown.
 2. Sign in as Ralf with `rm22`. Confirm the sidebar shows **Platform Content**, **FAST Codes**, **Content**, **Build requests**, **Mapsites**, **Talisbooks™**, **Bookshelves**, and “Signed in as Ralf”. Confirm pricing/payments/users are not in the sidebar.
-3. Open **Platform Content**. Confirm the Marketing Admin queue (registrations / listing content) loads — not only GlobalContent hero titles. Open Marketing Admin / Demo Mapsites™ / clients from the cards. Direct `/talispros/marketing/admin` should stay signed in (FAST session), not bounce to the marketing email/password login.
+3. Open **Platform Content**. Confirm the Marketing Admin queue (registrations / listing content) loads — not only GlobalContent hero titles. Open Marketing Admin / Demo Mapsites / clients from the cards. Direct `/talispros/marketing/admin` should stay signed in (FAST session), not bounce to the marketing email/password login.
 4. Open **FAST Codes**. Confirm search/list (or an empty/error state from missing DB keys, not a login redirect). Create/edit remain the existing admin actions.
-5. Open **Mapsites** → a row (or empty state). Opening a code should show the Mapsite™ editor and **Custom ebook editor** (`#ebook-editor`), not `/talispros/admin/login`.
+5. Open **Mapsites** → a row (or empty state). Opening a code should show the Mapsite editor and **Custom ebook editor** (`#ebook-editor`), not `/talispros/admin/login`.
 6. Open **Talisbooks™**. Confirm the Custom ebook editor list with “Open ebook editor” and “Viewer Live Edit” when a book exists. Front Cover / Back Cover remain explicit; do not split Page 1 as a cover.
 7. Open a viewer book while signed in as Ralf and confirm Live Edit is available (SUPERADMIN bypass). Non-admins still cannot edit.
 8. Try `/admin/pricing` or `/admin/payments` while signed in as Ralf — should redirect to `/admin/dashboard`.

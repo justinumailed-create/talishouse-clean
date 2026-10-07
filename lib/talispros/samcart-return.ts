@@ -10,7 +10,7 @@
  * What return detection CAN do without a webhook secret:
  * - Recognize typical SamCart success query params (orderid / email)
  * - Set a browser session cookie marking this return
- * - When email (or fastCode) matches an existing Mapsite™ claim, establish
+ * - When email (or fastCode) matches an existing Mapsite claim, establish
  *   the same paid owner cookies as Stripe return
  * - Best-effort upsert a talispros_payments row (provider=samcart) keyed by
  *   order id so listing unlocks / pin-shift can use hasCompletedMapSiteActivationPayment
@@ -97,7 +97,7 @@ export function samcartExternalOrderKey(orderId: string): string {
 
 export function describeSamCartReturnVerification(): string {
   return (
-    "Return URL params set browser paid/session state when a matching Mapsite™ " +
+    "Return URL params set browser paid/session state when a matching Mapsite " +
     "claim is found. Order charge is NOT cryptographically verified until the " +
     "SamCart webhook/Notify URL is wired with a secret."
   );

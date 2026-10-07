@@ -22,7 +22,7 @@ function resolveTebHref(site: {
   return ROUTES.TALISBOOKS;
 }
 
-describe("Mapsite™ TEB™ shelf href", () => {
+describe("Mapsite TEB™ shelf href", () => {
   it("ignores a viewer URL in favor of the FAST-code bookshelf", () => {
     expect(
       resolveTebHref({
@@ -46,12 +46,12 @@ describe("Mapsite™ TEB™ shelf href", () => {
   });
 });
 
-describe("Mapsite™ TTV™ schedule href", () => {
+describe("Mapsite TTV™ schedule href", () => {
   it("opens the FAST-code TV schedule, not a custom TTV override", () => {
     expect(mapsiteScheduleHref("rd02")).toBe("/talistv?fastCode=rd02");
   });
 
-  it("returns to that FAST code’s listings Mapsite™ from the schedule", () => {
+  it("returns to that FAST code’s listings Mapsite from the schedule", () => {
     expect(mapsiteBackFromScheduleHref("lg01")).toBe(
       "/talispros/mapsite/listings/lg01",
     );
@@ -66,7 +66,7 @@ describe("Mapsite™ TTV™ schedule href", () => {
   });
 });
 
-describe("Mapsite™ pin resource buttons", () => {
+describe("Mapsite pin resource buttons", () => {
   it("enables URL and MLS® only when Build form or Admin saved a link; gold only on TTV™", () => {
     const popup = readFileSync(
       join(process.cwd(), "components/talispros/mapsite/MapSitePropertyPopup.tsx"),
@@ -91,7 +91,7 @@ describe("Mapsite™ pin resource buttons", () => {
 });
 
 describe("TalisTV™ library return", () => {
-  it("passes the FAST code so the bookshelf can return to Mapsite™", () => {
+  it("passes the FAST code so the bookshelf can return to Mapsite", () => {
     const source = readFileSync(join(process.cwd(), "app/talistv/page.tsx"), "utf8");
     expect(source).toContain(
       "`${ROUTES.TALISBOOKS_LIBRARY}?from=${encodeURIComponent(fastCode.trim())}`",
@@ -109,7 +109,7 @@ describe("TalisTV™ launch notice", () => {
 });
 
 
-describe("Paid Mapsite™ TEB™ unlocks ebook admin", () => {
+describe("Paid Mapsite TEB™ unlocks ebook admin", () => {
   it("FAST TEB shelf reuses canEditMapSite for owner/admin Manage + Edit book chrome", () => {
     const page = readFileSync(
       join(process.cwd(), "app/talisbooks/fast/[fastCode]/page.tsx"),
@@ -126,7 +126,7 @@ describe("Paid Mapsite™ TEB™ unlocks ebook admin", () => {
     expect(page).toMatch(/canManageEbook[\s\S]*getTalisBooksBookshelf[\s\S]*getPublicTalisBooksBookshelf/);
   });
 
-  it("keeps ebook editing on the Mapsite™ editor, not the viewer", () => {
+  it("keeps ebook editing on the Mapsite editor, not the viewer", () => {
     const shell = readFileSync(
       join(process.cwd(), "components/talisbooks/viewer/TalisBooksViewerShell.tsx"),
       "utf8",
@@ -142,7 +142,7 @@ describe("Paid Mapsite™ TEB™ unlocks ebook admin", () => {
     expect(viewerPage).toContain("TalisBooksViewerShell");
   });
 
-  it("pin TEB™ still resolves to the FAST-code shelf for every Mapsite™ class", () => {
+  it("pin TEB™ still resolves to the FAST-code shelf for every Mapsite class", () => {
     expect(
       resolveTebHref({
         fast_code: "rm22",

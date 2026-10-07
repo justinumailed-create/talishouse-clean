@@ -6,7 +6,7 @@ export interface HomePinLocationValues {
   manualPlacement: boolean;
   /** Address resolved from coordinates; also fills streetAddress. */
   reverseGeocodedAddress: string;
-  /** User-controlled preview zoom — carried onto the created Mapsite™. */
+  /** User-controlled preview zoom — carried onto the created Mapsite. */
   mapZoom: number;
   /** Optional MLS® listing URL for pin resource buttons. */
   mlsUrl: string;
@@ -22,7 +22,7 @@ export interface HomePinLocationValues {
   futurePinCategoryBadge: string | null;
 }
 
-/** Default Build A Mapsite™ PIN preview — Niagara Falls / Canada border. */
+/** Default Build A Mapsite PIN preview — Niagara Falls / Canada border. */
 export const BUILD_MAPSITE_PREVIEW_LOCATION = {
   latitude: 43.105808,
   longitude: -79.058733,

@@ -1,7 +1,7 @@
 import { resolveMapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
 
 /**
- * Public Mapsite™ pin / flag labels default to lot or street location.
+ * Public Mapsite pin / flag labels default to lot or street location.
  * Choose for Flag can display Name, except FSBO which always uses Address.
  */
 

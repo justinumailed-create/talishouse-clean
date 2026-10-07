@@ -296,7 +296,7 @@ function createHtmlPinOverlayClass() {
 }
 
 /**
- * Google Maps JavaScript API adapter for Talismaps™ / Mapsite™.
+ * Google Maps JavaScript API adapter for Talismaps™ / Mapsite.
  * Requires NEXT_PUBLIC_GOOGLE_MAPS_API_KEY.
  */
 export class GoogleMapsProvider implements MapProvider {

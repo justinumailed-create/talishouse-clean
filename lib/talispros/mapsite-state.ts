@@ -1,5 +1,5 @@
 /**
- * Mapsite™ platform lifecycle.
+ * Mapsite platform lifecycle.
  *
  * UNCLAIMED → BUILD_REQUEST_SUBMITTED → MARKETING_REVIEW → ACTIVE → ARCHIVED
  */
@@ -100,7 +100,7 @@ export function assertTransition(
   to: MapSitePlatformStatus
 ): void {
   if (!canTransition(from, to)) {
-    throw new Error(`Invalid Mapsite™ transition: ${from} → ${to}`);
+    throw new Error(`Invalid Mapsite transition: ${from} → ${to}`);
   }
 }
 
@@ -110,7 +110,7 @@ export const DEMO_MAPSITE_FAST_CODE = "DEMO";
 export const MAPSITE_APP_PATH = "/talispros/mapsite";
 
 /**
- * Claimed Mapsite™ path segment for account / market type.
+ * Claimed Mapsite path segment for account / market type.
  * Accepts claim account types (root, derivative, adpro) and audiences (listings, …).
  */
 export function mapsiteAccountTypeSegment(
@@ -142,7 +142,7 @@ export function mapsiteAccountTypeSegment(
 
 
 /**
- * Path segment for a claimed Mapsite™ from claim account type or payment plan.
+ * Path segment for a claimed Mapsite from claim account type or payment plan.
  * Root / $1 root activations land on brokers (Root Account™ chrome), not listings.
  */
 export function claimedMapSiteSegmentForAccountOrPlan(
@@ -173,7 +173,7 @@ export function claimedMapSiteSegmentForAccountOrPlan(
 }
 
 /**
- * Public published Mapsite™ page: /mapsite/{fastCode}.
+ * Public published Mapsite page: /mapsite/{fastCode}.
  * All FAST Codes share the RM22 creative shell (see PUBLISHED_MAPSITE_SHELL).
  */
 export function publishedMapSitePath(fastCode: string): string {
@@ -182,8 +182,8 @@ export function publishedMapSitePath(fastCode: string): string {
 }
 
 /**
- * Back to Mapsite™ from a FAST-scoped page (TalisTV, bookshelf, viewer).
- * Lands on the listings / claimed Mapsite™ for that FAST Code
+ * Back to Mapsite from a FAST-scoped page (TalisTV, bookshelf, viewer).
+ * Lands on the listings / claimed Mapsite for that FAST Code
  * (`/talispros/mapsite/listings/{code}`), not the published creative shell
  * (`/mapsite/{code}`). Empty / invalid / demo codes fall back to MAPSITE_APP_PATH.
  */
@@ -198,7 +198,7 @@ export function mapsiteBackFromScheduleHref(
   });
 }
 
-/** Short claimed Mapsite™ URL: /talispros/mapsite/{accountType}/{fastCode} */
+/** Short claimed Mapsite URL: /talispros/mapsite/{accountType}/{fastCode} */
 export function buildClaimedMapSitePath(options: {
   fastCode: string;
   accountType?: string | null;
@@ -213,7 +213,7 @@ export function buildClaimedMapSitePath(options: {
 
 /**
  * Claim a Market™ registration invite (pre-claim / share for registration).
- * Recipient submits the form, then lands on the post-claim Mapsite™ (PayPal).
+ * Recipient submits the form, then lands on the post-claim Mapsite (PayPal).
  */
 export function buildClaimRegistrationHref(options: {
   mapsiteId: string;

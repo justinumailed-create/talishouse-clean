@@ -84,7 +84,7 @@ export default function MapSiteCreativeLinks({
       >
         <p className="m-0">
           The Talisbooks™ bookshelf for FAST Code {code} — every eBook associated
-          with this Mapsite™.
+          with this Mapsite.
         </p>
       </WordmarkBlock>
 

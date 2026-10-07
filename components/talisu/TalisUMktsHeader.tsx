@@ -71,7 +71,7 @@ export type TalisUMktsHeaderProps = {
   dashboardUnlocked?: boolean;
   /** Destination when locked Dashboard → Register (SamCart / register flow). */
   registerHref?: string;
-  /** When Dashboard is unlocked, open the Mapsite™ pin dashboard. */
+  /** When Dashboard is unlocked, open the Mapsite pin dashboard. */
   onOpenDashboard?: () => void;
   /**
    * Paid owner (or admin) Dashboard dropdown. When set with `dashboardUnlocked`,

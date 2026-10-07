@@ -53,7 +53,7 @@ export async function registerMapSite(
     const { error: paymentError } = await supabaseAdmin
       .from("payments")
       .insert({
-        product_name: "Mapsite™ Registration",
+        product_name: "Mapsite Registration",
         amount: 49.99,
         user_name: `${input.firstName.trim()} ${input.lastName.trim()}`,
         status: "completed",

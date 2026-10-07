@@ -37,7 +37,7 @@ describe("TalisU mkts Atlist pin export", () => {
   it("includes Do More sidebar actions with Modular Spaces → catalogue", () => {
     const doMore = talisuMktsDoMorePins();
     expect(doMore.map((p) => p.label)).toEqual([
-      "TalisU™ Modular Spaces",
+      "Talishouse™ Modular Spaces",
     ]);
     expect(doMore.find((p) => p.id === "modular-spaces")?.nextHref).toBe(
       "/catalogue"

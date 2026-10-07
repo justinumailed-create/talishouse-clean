@@ -1,7 +1,7 @@
 /**
  * Demonstration / sample catalog markers for Talisbooks™ shelves.
  *
- * Demo Mapsites™ keep their own books; real FAST shelves (e.g. rm22) must not
+ * Demo Mapsites keep their own books; real FAST shelves (e.g. rm22) must not
  * inherit the pinned sample, demo-* rows, or hardcoded preview fillers.
  */
 
@@ -37,7 +37,7 @@ export function isDemonstrationCatalogBook(
   book: DemonstrationCatalogBookLike,
 ): boolean {
   // Claimed / issued FAST inventory stays on that shelf even when the demo
-  // title ("Demo Mapsite™") or pinned sample slug was carried over from claim.
+  // title ("Demo Mapsite") or pinned sample slug was carried over from claim.
   if (
     isIssuedFastCode(book.fastCode) &&
     !isDemonstrationFastCode(book.fastCode)

@@ -261,7 +261,7 @@ function buildIsolatedAllPinsBookshelf(
 }
 
 /**
- * Isolated catalogue shelf — same Mapsite™-connected Talisbooks™ shelf UX
+ * Isolated catalogue shelf — same Mapsite-connected Talisbooks™ shelf UX
  * as `/talisbooks/fast/{code}`, scoped to ALLPINS. Admin-only create stays
  * available when `canCreate`; the chrome matches a normal connected shelf.
  */
@@ -275,7 +275,7 @@ export default function IsolatedBookshelfView({
   adminFastCode?: string;
   /** Show the Create ebook control (Global Admin session only). */
   canCreate?: boolean;
-  /** True when the reader opened this shelf from the ALLPINS Mapsite™ chrome. */
+  /** True when the reader opened this shelf from the ALLPINS Mapsite chrome. */
   fromAllPins?: boolean;
 }) {
   const bs = useT().bookshelf;

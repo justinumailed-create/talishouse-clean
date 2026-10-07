@@ -12,7 +12,7 @@ import {
 import { mapsiteAccountTypeSegment } from "../lib/talispros/mapsite-state";
 import { accountTypeLabelFromBuildAccountType } from "../lib/build-mapsite-publish";
 
-describe("Mapsite™ audience payment helpers", () => {
+describe("Mapsite audience payment helpers", () => {
   it("maps audiences to account categories", () => {
     expect(accountCategoryForAudience("brokers")).toBe("root");
     expect(accountCategoryForAudience("listings")).toBe("derivative");
@@ -76,7 +76,7 @@ describe("Mapsite™ audience payment helpers", () => {
     expect(retired.planLabel).not.toContain("$1");
   });
 
-  it("routes FSBO claimed Mapsites™ to the fsbos segment", () => {
+  it("routes FSBO claimed Mapsites to the fsbos segment", () => {
     expect(mapsiteAccountTypeSegment("fsbo")).toBe("fsbos");
     expect(mapsiteAccountTypeSegment("fsbos")).toBe("fsbos");
   });

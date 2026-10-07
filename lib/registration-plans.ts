@@ -220,7 +220,7 @@ export function planSummaryFor(
 }
 
 /**
- * New registration / Mapsite™ activation checkout never charges the retired
+ * New registration / Mapsite activation checkout never charges the retired
  * $1 ROOT_ACCOUNT_1 demo price. Historical paid $1 sessions stay matchable
  * via PLAN_DETAILS.ROOT_ACCOUNT_1.
  */

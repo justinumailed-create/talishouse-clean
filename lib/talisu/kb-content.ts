@@ -2,7 +2,7 @@
  * TalisU™ Knowledge Base content buckets (Audios / Videos / Learning Material).
  * Defaults reuse existing /talisu audio + video destinations; Learning Material
  * starts as a growable placeholder grid. Overrides persist in localStorage so
- * Ralf (rm22) can update from his Mapsite™ dashboard manage UI.
+ * Ralf (rm22) can update from his Mapsite dashboard manage UI.
  */
 
 export type TalisUKbBucket = "audios" | "videos" | "learning";
@@ -21,7 +21,7 @@ export const TALISU_KB_STORAGE_KEY = "talisu_kb_content_v1";
 export const TALISU_KB_MANAGE_PATH = "/talisu/kb/manage";
 export const TALISU_KB_PATH = "/talisu/kb";
 
-/** FAST Code whose claimed Mapsite™ dashboard gets a dedicated KB manage entry. */
+/** FAST Code whose claimed Mapsite dashboard gets a dedicated KB manage entry. */
 export const TALISU_KB_MAPSITE_MANAGER_FAST_CODE = "rm22";
 
 export const TALISU_KB_DEFAULT_AUDIOS: readonly TalisUKbItem[] = [
@@ -62,7 +62,7 @@ export const TALISU_KB_DEFAULT_VIDEOS: readonly TalisUKbItem[] = [
 export const TALISU_KB_DEFAULT_LEARNING: readonly TalisUKbItem[] = [
   {
     id: "lm-mapsites",
-    title: "Mapsites™ Playbook",
+    title: "Mapsites Playbook",
     description: "Coming soon — claim, activate, and pin best practices.",
     href: "/talisu/kb",
     kind: "Guide",

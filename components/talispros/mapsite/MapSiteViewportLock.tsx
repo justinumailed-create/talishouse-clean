@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-/** Keep claimed Mapsite™ views viewport-locked — no document or rubber-band scroll. */
+/** Keep claimed Mapsite views viewport-locked — no document or rubber-band scroll. */
 export default function MapSiteViewportLock() {
   useEffect(() => {
     const html = document.documentElement;

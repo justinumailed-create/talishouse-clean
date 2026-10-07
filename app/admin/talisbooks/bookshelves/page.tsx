@@ -45,8 +45,8 @@ export default async function AdminBookshelvesPage() {
       <div>
         <h1 className="text-2xl font-semibold text-neutral-900">Bookshelves</h1>
         <p className="text-sm text-neutral-500 mt-1">
-          Open a Mapsite™ TEB™ shelf or the signed-in library of created books. Demo
-          Mapsites™ and the pinned sample stay on the public /talisbooks catalog, not
+          Open a Mapsite TEB™ shelf or the signed-in library of created books. Demo
+          Mapsites and the pinned sample stay on the public /talisbooks catalog, not
           this admin library.
         </p>
       </div>
@@ -81,14 +81,14 @@ export default async function AdminBookshelvesPage() {
 
       <section className="rounded-xl border border-neutral-200 bg-white overflow-hidden">
         <div className="px-5 py-3 border-b border-neutral-200 bg-neutral-50">
-          <h2 className="text-sm font-semibold text-neutral-900">Mapsite™ shelves</h2>
+          <h2 className="text-sm font-semibold text-neutral-900">Mapsite shelves</h2>
           <p className="text-xs text-neutral-500 mt-0.5">
-            Each real FAST Code has a TEB™ bookshelf of created books. Demo Mapsite™
+            Each real FAST Code has a TEB™ bookshelf of created books. Demo Mapsite
             codes are omitted here.
           </p>
         </div>
         {scopedMapsites.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-neutral-500">No Mapsites™ found.</p>
+          <p className="px-5 py-6 text-sm text-neutral-500">No Mapsites found.</p>
         ) : (
           <ul className="divide-y divide-neutral-100">
             {scopedMapsites.map((mapsite) => {
@@ -103,7 +103,7 @@ export default async function AdminBookshelvesPage() {
                       {mapsite.fastCode}
                     </p>
                     <p className="text-sm text-neutral-500">
-                      {mapsite.propertyTitle || "Untitled Mapsite™"} · {bookCount} book
+                      {mapsite.propertyTitle || "Untitled Mapsite"} · {bookCount} book
                       {bookCount === 1 ? "" : "s"}
                     </p>
                   </div>
@@ -118,7 +118,7 @@ export default async function AdminBookshelvesPage() {
                       href={`/admin/mapsites/${mapsite.fastCode}`}
                       className="rounded-lg border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-800 hover:bg-neutral-50"
                     >
-                      Edit Mapsite™
+                      Edit Mapsite
                     </Link>
                     <Link
                       href={`/admin/mapsites/${mapsite.fastCode}#ebook-editor`}

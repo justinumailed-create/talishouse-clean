@@ -22,8 +22,8 @@ describe("sample Talisbooks™ viewer chrome", () => {
     "components/talisbooks/library/TalisBooksStandingBook.tsx",
   );
 
-  it("omits the Demo Mapsite™ header button on the sample viewer", () => {
-    expect(shell).not.toContain('"Demo Mapsite™"');
+  it("omits the Demo Mapsite header button on the sample viewer", () => {
+    expect(shell).not.toContain('"Demo Mapsite"');
     expect(shell).not.toContain("DEMO_MAPSITE_BUILD_PATH");
     expect(shell).not.toMatch(/Build Demo/i);
   });
@@ -230,7 +230,7 @@ describe("viewer edge chrome", () => {
     );
   });
 
-  it("sends the Talispros™ logo to the claimed Mapsite™", () => {
+  it("sends the Talispros™ logo to the claimed Mapsite", () => {
     expect(viewerMapsiteHref({ fastCode: "rm22", accountType: "root" })).toBe(
       "/talispros/mapsite/root/rm22",
     );

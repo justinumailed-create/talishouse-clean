@@ -19,7 +19,7 @@ function finitePair(
 
 /**
  * Listing location for the share card. Build-request coordinates win, matching
- * the claimed Mapsite™ map, then the Mapsite™ row, then its first pin.
+ * the claimed Mapsite map, then the Mapsite row, then its first pin.
  * Missing coordinates stay null — demo fallback coords are not invented here.
  */
 export async function loadMapsiteOgLocation(
@@ -33,7 +33,7 @@ export async function loadMapsiteOgLocation(
     mapsite = await getMapSiteByFastCode(code);
   } catch (error) {
     console.warn(
-      "[og] Mapsite™ lookup failed:",
+      "[og] Mapsite lookup failed:",
       error instanceof Error ? error.message : error,
     );
   }

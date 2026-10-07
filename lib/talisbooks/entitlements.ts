@@ -38,7 +38,7 @@ export const TALISBOOKS_UNACTIVATED_BOOK_QUOTA = 1;
 /**
  * Permitted book counts after activation, by account type.
  * Root / Derivative use the standard TEB™ shelf capacity.
- * Adpro PIN unlocks one book per PIN / Mapsite™ shelf.
+ * Adpro PIN unlocks one book per PIN / Mapsite shelf.
  */
 export const TALISBOOKS_ACTIVATED_BOOK_QUOTAS: Record<TalisBooksAccountKind, number> =
   {
@@ -93,7 +93,7 @@ export function resolveTalisBooksAccountKind(input: {
 }
 
 /**
- * Activation for Talisbooks™ entitlements — Mapsite™ ACTIVE and/or
+ * Activation for Talisbooks™ entitlements — Mapsite ACTIVE and/or
  * build_requests.activated_at. Does not call or modify payment helpers.
  */
 export function isTalisBooksAccountActivated(input: {

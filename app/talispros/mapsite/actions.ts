@@ -70,7 +70,7 @@ export async function loadMapSiteApplicationState(options?: {
         mapsite = await getMapSitePlatformById(request.linked_mapsite_id);
       }
     } catch (error) {
-      console.warn("[mapsite] Could not load Mapsite™ from build request:", error);
+      console.warn("[mapsite] Could not load Mapsite from build request:", error);
     }
   }
 
@@ -85,7 +85,7 @@ export async function loadMapSiteApplicationState(options?: {
     mapsiteId !== DEMO_MAPSITE_ID
   ) {
     console.warn(
-      "[mapsite] Claimed Mapsite™ fell back to the demonstration listing",
+      "[mapsite] Claimed Mapsite fell back to the demonstration listing",
       { mapsiteId, fastCode, requestId },
     );
   }
@@ -243,7 +243,7 @@ export async function refreshMapSiteApplicationState(
 }
 
 /**
- * Paid flag for Mapsite™ chrome after Checkout.
+ * Paid flag for Mapsite chrome after Checkout.
  *
  * Stripe success return must activate here (same path as the webhook), not
  * only via the historical PayPal payment-row lookup. The client polls this
@@ -329,7 +329,7 @@ async function resolveAppOrigin(): Promise<string> {
 }
 
 /**
- * Create a Stripe Checkout Session for Mapsite™ activation.
+ * Create a Stripe Checkout Session for Mapsite activation.
  * Amount and plan are resolved server-side — never from the browser.
  */
 export async function createMapSiteStripeCheckoutSession(input: {
@@ -341,7 +341,7 @@ export async function createMapSiteStripeCheckoutSession(input: {
 }): Promise<{ url?: string; error?: string }> {
   const mapsiteId = input.mapsiteId.trim();
   if (!mapsiteId) {
-    return { error: "Missing Mapsite™ id." };
+    return { error: "Missing Mapsite id." };
   }
   if (!getStripeSecretKey()) {
     return { error: "Stripe is not configured." };
@@ -358,7 +358,7 @@ export async function createMapSiteStripeCheckoutSession(input: {
     .maybeSingle();
 
   if (!mapsite?.id) {
-    return { error: "Mapsite™ was not found." };
+    return { error: "Mapsite was not found." };
   }
 
   let requestId = input.requestId?.trim() || null;
@@ -383,7 +383,7 @@ export async function createMapSiteStripeCheckoutSession(input: {
       return { error: "Claim request not found." };
     }
     if (request.linked_mapsite_id && request.linked_mapsite_id !== mapsiteId) {
-      return { error: "Claim request does not match this Mapsite™." };
+      return { error: "Claim request does not match this Mapsite." };
     }
   }
 
@@ -403,7 +403,7 @@ export async function createMapSiteStripeCheckoutSession(input: {
   if (!email || !requestId) {
     return {
       error:
-        "Complete Claim a Market first, then return here to activate your Mapsite™.",
+        "Complete Claim a Market first, then return here to activate your Mapsite.",
     };
   }
 
@@ -422,7 +422,7 @@ export async function createMapSiteStripeCheckoutSession(input: {
   if (!province) {
     return {
       error:
-        "Select the Mapsite™ province or territory so we can apply the correct GST, HST, or PST.",
+        "Select the Mapsite province or territory so we can apply the correct GST, HST, or PST.",
     };
   }
   const summary = planSummaryFor(planType, province);
@@ -459,7 +459,7 @@ export async function createMapSiteStripeCheckoutSession(input: {
             currency: MAPSITE_ACTIVATION_CURRENCY,
             unit_amount: unitAmount,
             product_data: {
-              name: `Talispros™ ${summary.planLabel} — Mapsite™ activation`,
+              name: `Talispros™ ${summary.planLabel} — Mapsite activation`,
               description: `${summary.priceLabel} + ${summary.taxLabel}`,
             },
           },

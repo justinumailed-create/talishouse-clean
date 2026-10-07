@@ -21,7 +21,7 @@ describe("homepage Open Graph image", () => {
 
     const meta = createMetadata({
       title: "Talispros™",
-      description: "Claim your market. Open your Mapsite™.",
+      description: "Claim your market. Open your Mapsite.",
       path: "/",
       image: { url: imageUrl, width: 1200, height: 630, alt: "Talispros™" },
     });

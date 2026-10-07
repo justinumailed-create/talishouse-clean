@@ -179,7 +179,7 @@ export default function MapSitePinDashboard({
       <header className="flex items-start justify-between gap-3 border-b border-neutral-200 px-4 py-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
-            Mapsites™
+            Mapsites
           </p>
           <h2 id={titleId} className="text-sm font-semibold">
             {d.title}

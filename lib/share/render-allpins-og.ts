@@ -4,7 +4,7 @@ import { SHARE_OG_HEIGHT, SHARE_OG_WIDTH } from "@/lib/share/og-card";
 import { renderShareOgCard } from "@/lib/share/render-share-og";
 
 /**
- * ALLPINS Mapsite™ landscape share card: Canada satellite + multi-colour pins.
+ * ALLPINS Mapsite landscape share card: Canada satellite + multi-colour pins.
  * Used by `/api/og/mapsite/allpins` and as the right panel of the brand OG.
  */
 export async function renderAllPinsOgCard(input?: {

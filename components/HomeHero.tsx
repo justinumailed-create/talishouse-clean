@@ -158,7 +158,7 @@ export default function HomeHero({ title, subtitle }: HomeHeroProps) {
                 tracking-tight
               "
             >
-              Explore Mapsite™
+              Explore Mapsite
             </Link>
           </div>
         </div>

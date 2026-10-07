@@ -92,7 +92,7 @@ describe("failure recovery — structured errors", () => {
     expect(generateMock).not.toHaveBeenCalled();
   });
 
-  it("editable Mapsite™ generates without a Build Request", async () => {
+  it("editable Mapsite generates without a Build Request", async () => {
     canEditMock.mockResolvedValue(true);
     resolveMapSiteMock.mockResolvedValue({
       ok: true,

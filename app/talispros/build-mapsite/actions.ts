@@ -542,7 +542,7 @@ export async function submitBuildRequest(
       .insert(mapsiteRequest);
 
     if (msError) {
-      console.error("[build-mapsite] Mapsite™ request insert error:", msError);
+      console.error("[build-mapsite] Mapsite request insert error:", msError);
     }
 
     const queueItem: Database["public"]["Tables"]["production_queue"]["Insert"] = {
@@ -685,7 +685,7 @@ export async function submitBuildRequest(
       return {
         success: false,
         requestId,
-        error: "FAST Code is required before continuing to Mapsite™ or E-Book.",
+        error: "FAST Code is required before continuing to Mapsite or E-Book.",
       };
     }
 
@@ -693,7 +693,7 @@ export async function submitBuildRequest(
     const canClaimExisting =
       Boolean(mapsiteId) && mapsiteId !== DEMO_MAPSITE_ID;
     if (canClaimExisting && mapsiteId) {
-      const claimed = await timedOnboardingStep("Mapsite™ claim", () =>
+      const claimed = await timedOnboardingStep("Mapsite claim", () =>
         markMapSiteClaimedByBuildRequest({
           mapsiteId,
           buildRequestId: requestId,
@@ -714,7 +714,7 @@ export async function submitBuildRequest(
       );
       resolvedMapSiteId = claimed?.id ?? mapsiteId;
     } else if (formData.get("claimDemonstration") === "true") {
-      const claimed = await timedOnboardingStep("Mapsite™ claim demo", () =>
+      const claimed = await timedOnboardingStep("Mapsite claim demo", () =>
         markMapSiteClaimedByBuildRequest({
           mapsiteId: DEMO_MAPSITE_ID,
           buildRequestId: requestId,

@@ -39,14 +39,14 @@ export default function AdminMapSiteThumbnailCard({
   const title =
     mapsite.propertyTitle?.trim() ||
     mapsite.propertyAddress?.trim() ||
-    "Untitled Mapsite™";
+    "Untitled Mapsite";
   const caption = mapsite.propertyAddress?.trim() || title;
 
   function handleDelete() {
     const code = mapsite.fastCode;
     if (
       !confirm(
-        `Delete Mapsite™ ${code}? Its Talisbooks™ bookshelf will also be removed. This cannot be undone.`,
+        `Delete Mapsite ${code}? Its Talisbooks™ bookshelf will also be removed. This cannot be undone.`,
       )
     ) {
       return;
@@ -54,7 +54,7 @@ export default function AdminMapSiteThumbnailCard({
     startTransition(async () => {
       const result = await deleteAdminActiveMapSite(code, mapsite.id);
       if (!result.success) {
-        alert(result.error || "Could not delete this Mapsite™.");
+        alert(result.error || "Could not delete this Mapsite.");
         return;
       }
       router.refresh();
@@ -108,7 +108,7 @@ export default function AdminMapSiteThumbnailCard({
               {mapsite.deleteControl === "lock" ? (
                 <span
                   className="inline-flex items-center gap-1 rounded-full bg-red-600 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-white shadow-sm"
-                  title="Paid Mapsite™ — delete protected"
+                  title="Paid Mapsite — delete protected"
                 >
                   <Lock className="h-3 w-3" aria-hidden="true" />
                   Paid
@@ -145,7 +145,7 @@ export default function AdminMapSiteThumbnailCard({
             {mapsite.deleteControl === "lock" ? (
               <span
                 className="inline-flex items-center gap-1 text-[11px] font-medium text-red-600"
-                title="Paid Mapsite™ — delete protected"
+                title="Paid Mapsite — delete protected"
               >
                 <Lock className="h-3.5 w-3.5" aria-hidden="true" />
               </span>

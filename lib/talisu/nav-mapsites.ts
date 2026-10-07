@@ -1,6 +1,6 @@
 /**
- * Nav Mapsites™ payload for the blue header dropdown.
- * Claimed Mapsites™ are no longer listed publicly — visitors enter a FAST Code™.
+ * Nav Mapsites payload for the blue header dropdown.
+ * Claimed Mapsites are no longer listed publicly — visitors enter a FAST Code™.
  * Demo builder link (+ optional demo rows) remain available.
  */
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
@@ -16,7 +16,7 @@ export type NavMapSiteLink = {
 };
 
 export type NavMapSitesPayload = {
-  /** Always empty — claimed Mapsites™ require FAST Code™ lookup. */
+  /** Always empty — claimed Mapsites require FAST Code™ lookup. */
   claimed: NavMapSiteLink[];
   demos: NavMapSiteLink[];
   /** Builder entry for new demonstration pins. */
@@ -32,7 +32,7 @@ function displayLabel(
   if (t) return t;
   const a = address?.trim();
   if (a) return a;
-  return fastCode.toUpperCase() || "Mapsite™";
+  return fastCode.toUpperCase() || "Mapsite";
 }
 
 export async function listNavMapSites(): Promise<NavMapSitesPayload> {

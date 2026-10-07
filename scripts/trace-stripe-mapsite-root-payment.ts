@@ -1,5 +1,5 @@
 /**
- * Trace recent ~$1 Root Mapsite™ Stripe Checkout sessions against
+ * Trace recent ~$1 Root Mapsite Stripe Checkout sessions against
  * talispros_payments / mapsites / build_requests.
  *
  * This environment cannot read live Stripe. Run with production keys:
@@ -9,12 +9,12 @@
  *   SUPABASE_SERVICE_ROLE_KEY=... \
  *   npx tsx scripts/trace-stripe-mapsite-root-payment.ts --email rememcom@mac.com
  *
- * After identifying the session (cs_…), heal that Mapsite™ only:
+ * After identifying the session (cs_…), heal that Mapsite only:
  *
  *   npx tsx scripts/trace-stripe-mapsite-root-payment.ts --activate-session cs_...
  *
  * Dry-run is the default. Does not mark unpaid users paid. Skips the platform
- * demo Mapsite™ id. Ralf Meyer’s checkout email is rememcom@mac.com (not ralf@).
+ * demo Mapsite id. Ralf Meyer’s checkout email is rememcom@mac.com (not ralf@).
  */
 import Stripe from "stripe";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
@@ -174,7 +174,7 @@ async function activateSession(
     throw new Error(`${sessionId} has no mapSiteId / client_reference_id.`);
   }
   if (mapsiteId === DEMO_MAPSITE_ID) {
-    throw new Error("Refusing to activate the platform demo Mapsite™.");
+    throw new Error("Refusing to activate the platform demo Mapsite.");
   }
 
   const email =
@@ -234,7 +234,7 @@ async function activateSession(
     const requestUpdate = await supabase
       .from("build_requests")
       .update({
-        status: "Mapsite™ Active",
+        status: "Mapsite Active",
         approval_status: "Approved",
         activated_at: new Date().toISOString(),
         linked_mapsite_id: mapsiteId,

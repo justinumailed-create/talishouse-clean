@@ -10,7 +10,7 @@ import {
 } from "../lib/talisbooks/entitlements";
 
 describe("Talisbooks™ activation entitlements", () => {
-  it("treats Mapsite™ ACTIVE or activated_at as activated", () => {
+  it("treats Mapsite ACTIVE or activated_at as activated", () => {
     expect(isTalisBooksAccountActivated({ mapsiteStatus: "ACTIVE" })).toBe(true);
     expect(
       isTalisBooksAccountActivated({ activatedAt: "2026-07-01T00:00:00.000Z" }),

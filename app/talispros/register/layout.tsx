@@ -7,9 +7,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = createMetadata({
-  title: "Register Your Mapsite™ | Talispros™",
+  title: "Register Your Mapsite | Talispros™",
   description:
-    "Choose your account level and activate your Mapsite™ through secure online registration.",
+    "Choose your account level and activate your Mapsite through secure online registration.",
   path: "/talispros/register",
 });
 

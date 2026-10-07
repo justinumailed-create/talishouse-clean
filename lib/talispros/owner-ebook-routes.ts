@@ -1,6 +1,6 @@
 import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 
-/** Owner Ebook Editor page for one ebook (separate page, Back → Mapsite™). */
+/** Owner Ebook Editor page for one ebook (separate page, Back → Mapsite). */
 export function ownerEbookEditorPath(fastCode: string, bookId: string, back?: string | null): string {
   const base = `/talispros/mapsites/${encodeURIComponent(fastCode.trim().toLowerCase())}/ebooks/${encodeURIComponent(bookId)}`;
   return back ? `${base}?back=${encodeURIComponent(back)}` : base;
@@ -12,7 +12,7 @@ export function ownerEbookCreatePath(fastCode: string, back?: string | null): st
   return back ? `${base}?back=${encodeURIComponent(back)}` : base;
 }
 
-/** Only same-site Mapsite™ paths are accepted as Back targets (no open redirects). */
+/** Only same-site Mapsite paths are accepted as Back targets (no open redirects). */
 export function safeMapSiteBackHref(
   back: string | null | undefined,
   fallback: { fastCode: string; accountType?: string | null },

@@ -1,6 +1,6 @@
 /**
  * Identify the Talisbook™ Parting Shot / RM22 outro leaf used for
- * viewer Open Graph cards and Mapsite™ scenic fallbacks.
+ * viewer Open Graph cards and Mapsite scenic fallbacks.
  *
  * Recognition (first match wins, scanning from the back of the book):
  *   - layout/role `parting` or `outro`

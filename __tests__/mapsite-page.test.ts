@@ -136,7 +136,7 @@ describe("getMapSiteByFastCode", () => {
     expect(result).toBeNull();
   });
 
-  it("returns the Mapsite™ and its pins from the database", async () => {
+  it("returns the Mapsite and its pins from the database", async () => {
     mockMapSitesMaybeSingle.mockResolvedValue({
       data: {
         id: "mapsite-1",

@@ -62,7 +62,7 @@ export default function RegisterAgentsClient({
             href={mapsiteHref}
             className="inline-flex w-full items-center justify-center rounded-2xl border border-neutral-200 bg-white px-5 py-4 text-base font-medium text-neutral-900 transition hover:bg-neutral-50"
           >
-            Open my Mapsite™
+            Open my Mapsite
           </Link>
         </div>
       </div>

@@ -84,7 +84,7 @@ export default async function TalisBooksAdminHome() {
         {TALISBOOKS_PRODUCT_NAME} Admin
       </h2>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500">
-        Manage the Talisbooks™ digital publication engine. Books link to Mapsites™, accounts,
+        Manage the Talisbooks™ digital publication engine. Books link to Mapsites, accounts,
         and FAST Codes across the Talispros™ ecosystem.
       </p>
 
@@ -149,13 +149,13 @@ export default async function TalisBooksAdminHome() {
       <section className="mt-8 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
         <h3 className="text-lg font-semibold text-neutral-900">Custom ebook editor</h3>
         <p className="mt-2 text-sm text-neutral-600">
-          Open a Mapsite™ to use the same Talisbook™ template builder as the
+          Open a Mapsite to use the same Talisbook™ template builder as the
           Build pages (wrap PDF / images, template slots, generate). After
           opening a book in the viewer, Live Edit is available for SUPERADMIN.
         </p>
         {scopedMapsites.length === 0 ? (
           <p className="mt-4 text-sm text-neutral-500">
-            No Mapsites™ found. Create one from Build requests, then return here.
+            No Mapsites found. Create one from Build requests, then return here.
           </p>
         ) : (
           <ul className="mt-4 divide-y divide-neutral-100">
@@ -172,7 +172,7 @@ export default async function TalisBooksAdminHome() {
                       {mapsite.fastCode}
                     </p>
                     <p className="text-sm text-neutral-500">
-                      {mapsite.propertyTitle || "Untitled Mapsite™"}
+                      {mapsite.propertyTitle || "Untitled Mapsite"}
                       {firstBook ? ` · ${firstBook.title}` : ""}
                     </p>
                   </div>

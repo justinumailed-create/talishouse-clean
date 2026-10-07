@@ -1,6 +1,6 @@
 /**
  * Deutsches UI-Wörterbuch — von Hand übersetzt (Sie-Form).
- * Marken bleiben unverändert: Talispros™, Talishouse™, Mapsites™/Mapsite,
+ * Marken bleiben unverändert: Talispros™, Talishouse™, Mapsites/Mapsite,
  * Talisbooks™, TalisTV™, TalisU / Talis“U”, TalisBOT, FAST Codes™, TEB™, TTV™,
  * PIN, SamCart. Akronyme (URL, MLS, TEB, TVA, TTV) bleiben,
  * nur ihre Erklärungen werden übersetzt.
@@ -51,20 +51,20 @@ export const de: Dictionary = {
     },
     dashboardLocked: {
       title: "Dashboard ist gesperrt",
-      body: "Registrieren Sie sich, um Ihr Mapsite™-Dashboard nach erfolgreicher Zahlung freizuschalten.",
+      body: "Registrieren Sie sich, um Ihr Mapsite-Dashboard nach erfolgreicher Zahlung freizuschalten.",
       cta: "Registrieren",
     },
     mapsitesMenu: {
-      title: "Mapsites™",
-      prompt: "Geben Sie Ihren FAST Code™ ein, um Ihre persönliche Mapsite™ zu öffnen.",
+      title: "Mapsites",
+      prompt: "Geben Sie Ihren FAST Code™ ein, um Ihre persönliche Mapsite zu öffnen.",
       fieldLabel: "FAST Code™",
       placeholder: "FAST Code™",
-      submit: "Mapsite™ öffnen",
+      submit: "Mapsite öffnen",
       opening: "Wird geöffnet …",
-      demo: "Demo-Mapsite™",
+      demo: "Demo-Mapsite",
       errEmpty: "Bitte geben Sie einen FAST Code™ ein.",
       errChars: "Bitte nur Buchstaben und Ziffern verwenden (kein & oder +).",
-      errOpen: "Diese Mapsite™ konnte nicht geöffnet werden.",
+      errOpen: "Diese Mapsite konnte nicht geöffnet werden.",
     },
   },
 
@@ -89,12 +89,12 @@ export const de: Dictionary = {
     learnMore: "Mehr erfahren",
     samcartReturn: {
       confirming: "Zahlungsrückmeldung wird bestätigt …",
-      received: "Zahlungsrückmeldung erhalten – Ihre Mapsite™ wird freigeschaltet.",
+      received: "Zahlungsrückmeldung erhalten – Ihre Mapsite wird freigeschaltet.",
       detected: "Zahlungsrückmeldung erkannt.",
       order: "SamCart-Bestellung",
-      openClaimed: "Ihre beanspruchte Mapsite™ öffnen",
+      openClaimed: "Ihre beanspruchte Mapsite öffnen",
       useAccountBefore: "Nutzen Sie",
-      useAccountAfter: "mit Ihrem FAST Code™, um Ihre Mapsite™ zu öffnen.",
+      useAccountAfter: "mit Ihrem FAST Code™, um Ihre Mapsite zu öffnen.",
       failedNote:
         "Rückmeldung erkannt, aber die Sitzung konnte nicht eingerichtet werden. Bitte melden Sie sich mit Ihrem FAST Code™ an.",
     },
@@ -146,13 +146,13 @@ export const de: Dictionary = {
       { label: "Adpro™", title: "Produkt- und Dienstleistungsanbieter" },
     ],
     fastCode: {
-      formAria: "Mapsite™ mit FAST Code öffnen",
+      formAria: "Mapsite mit FAST Code öffnen",
       label: "FAST Code™",
       placeholder: "FAST Code eingeben",
       submit: "Mapsite",
       opening: "Wird geöffnet …",
       errEmpty: "Bitte geben Sie einen FAST Code ein.",
-      errOpen: "Diese Mapsite™ konnte nicht geöffnet werden.",
+      errOpen: "Diese Mapsite konnte nicht geöffnet werden.",
     },
   },
 
@@ -161,9 +161,9 @@ export const de: Dictionary = {
       title: "Häufig gestellte Fragen",
       items: [
         {
-          question: "Was ist eine Mapsite™?",
+          question: "Was ist eine Mapsite?",
           answer:
-            "Eine Mapsite™ ist ein kartenbasiertes Online-Navigationssystem, das branchennah eingesetzt werden kann und Ihnen mehr Flexibilität bei der Vermarktung hochpreisiger Produkte verschafft (also solcher, die in der Regel mehr als 10.000 $ pro Einheit kosten und ortsfest sind, rollen, schwimmen oder fliegen).",
+            "Eine Mapsite ist ein kartenbasiertes Online-Navigationssystem, das branchennah eingesetzt werden kann und Ihnen mehr Flexibilität bei der Vermarktung hochpreisiger Produkte verschafft (also solcher, die in der Regel mehr als 10.000 $ pro Einheit kosten und ortsfest sind, rollen, schwimmen oder fliegen).",
         },
         {
           question: "Was bedeutet Talis“U”?",
@@ -173,7 +173,7 @@ export const de: Dictionary = {
         {
           question: "Wofür steht PMC?",
           answer:
-            "Promote – Manage – Cooperate (Bewerben – Verwalten – Kooperieren). Mapsites™ enthalten PINs, deren Fähnchen für jeden PIN Links zu URL, MLS®, TEB und TTV anzeigen:",
+            "Promote – Manage – Cooperate (Bewerben – Verwalten – Kooperieren). Mapsites enthalten PINs, deren Fähnchen für jeden PIN Links zu URL, MLS®, TEB und TTV anzeigen:",
           bullets: [
             "URL: ein Mittel, um Ihre Botschaften voranzubringen und die externe Kommunikation zu gestalten.",
             "MLS®: ein Link speziell für Immobilienprofis, der ohne Ablenkungen direkt zu bestimmten Angeboten führt.",
@@ -184,10 +184,10 @@ export const de: Dictionary = {
         {
           question: "Wer sind Talispros™?",
           answer:
-            "„Absolventen“ der TalisU™, die Mapsites™ nutzen, um die Infrastruktur komplexer Empfehlungs- und/oder Co-Promotion-Netzwerke visuell darzustellen, nachzuverfolgen und zu verwalten.",
+            "„Absolventen“ der TalisU™, die Mapsites nutzen, um die Infrastruktur komplexer Empfehlungs- und/oder Co-Promotion-Netzwerke visuell darzustellen, nachzuverfolgen und zu verwalten.",
         },
         {
-          question: "Wie können Mapsites™ den Umsatz von Talispros™ steigern?",
+          question: "Wie können Mapsites den Umsatz von Talispros™ steigern?",
           answer: [
             "Durch den Aufbau virtueller Monopole, die Untergrenzen für Servicegebühren etablieren.",
             "Beispiel: Vor Ort liegt die durchschnittliche Servicegebühr vielleicht bei „X“ und die durchschnittliche Vertragslaufzeit bei „Y“. Wie oft würden diese Durchschnittswerte infrage gestellt, wenn Sie auf herkömmliche Weise um Kunden konkurrieren?",
@@ -198,7 +198,7 @@ export const de: Dictionary = {
           question: "Was kostet die Registrierung eines Kontos?",
           answer: [
             "Die Registrierung von Root-, FSBO- und Adpro-Konten kostet jährlich 998,50 $ für die Einrichtung des Kontos und monatlich 98,50 $ für dessen Fortführung.",
-            "Die Registrierung von Derivative-Konten, die die Mapsites™ von Root-Konten nutzen, kostet jährlich 198,50 $ für die Einrichtung des Kontos und monatlich 98,50 $ für dessen Fortführung.",
+            "Die Registrierung von Derivative-Konten, die die Mapsites von Root-Konten nutzen, kostet jährlich 198,50 $ für die Einrichtung des Kontos und monatlich 98,50 $ für dessen Fortführung.",
             "Zusätzliche globale Marketing-PINs kosten für Inhaber von Derivative-Konten 7 $ pro Woche (ein Dollar pro Tag, wöchentliche Bindung).",
           ],
         },
@@ -213,9 +213,9 @@ export const de: Dictionary = {
             "Wählen Sie „System-Demo“.",
             "Wählen Sie den PIN, der Ihrem Heimatstandort am nächsten liegt.",
             "Wählen Sie „Nächster Schritt“ und erstellen Sie ein Demo-eBook.",
-            "Füllen Sie das Formular aus: Die Initialen Ihres Vor- und Nachnamens bilden die eine Hälfte Ihres FAST Code™ (Free Access, Standard Tracking). Die andere Hälfte ist eine Zahl zwischen 01 und 99, die Sie in unserem System eindeutig macht. Ihre Straßenadresse positioniert Ihren Home-PIN auf Ihrer Beispiel-Mapsite™. Die Beispiel-Mapsite™ zeigt uns, ob es Überschneidungen mit anderen Heimatmärkten gibt.",
+            "Füllen Sie das Formular aus: Die Initialen Ihres Vor- und Nachnamens bilden die eine Hälfte Ihres FAST Code™ (Free Access, Standard Tracking). Die andere Hälfte ist eine Zahl zwischen 01 und 99, die Sie in unserem System eindeutig macht. Ihre Straßenadresse positioniert Ihren Home-PIN auf Ihrer Beispiel-Mapsite. Die Beispiel-Mapsite zeigt uns, ob es Überschneidungen mit anderen Heimatmärkten gibt.",
             "Wählen Sie „Weiter zum Demo-eBook“.",
-            "Ihre Mapsite™ wird erstellt und ein Fähnchen öffnet sich.",
+            "Ihre Mapsite wird erstellt und ein Fähnchen öffnet sich.",
             "Sie können Ihren Markt beanspruchen, indem Sie sich unter URL registrieren und die TEB- und TTV-Links öffnen.",
             "MLS® gilt nur für lizenzierte Immobilienprofis, die über Inhaber von Root-Konten registriert sind.",
           ],
@@ -267,7 +267,7 @@ export const de: Dictionary = {
         "Mein Team und ich helfen Ihnen, Ihre immobiliennahen Marketinginitiativen entlang von vier großen Schwerpunkten auszubauen:",
       bullets: [
         {
-          label: "Mapsites™",
+          label: "Mapsites",
           text: "Wir stellen dedizierte kartenbasierte Plattformen bereit, die Ihnen als Werkzeuge für Empfehlungs- und Co-Promotion-Netzwerke dienen, wenn Sie zweckgebundene oder nutzergenerierte Inhalte veröffentlichen. Bitte beachten Sie: Inhalte müssen unpolitisch sein und nach allgemein anerkannten Maßstäben dem guten Geschmack entsprechen – darüber entscheiden wir nach eigenem Ermessen. Andernfalls werden Inhalte von unseren KI-Bots sofort und ohne Vorwarnung „blind“ geschaltet. Eine erneute Einreichung ist zulässig.",
         },
         {
@@ -276,7 +276,7 @@ export const de: Dictionary = {
         },
         {
           label: "Angebotsanalyse (TVA)",
-          text: "Wir analysieren qualifizierte Angebote, um ihre Eignung für Investorengruppen zu ermitteln, die fortgeschrittene Transaktionsstrukturen suchen – darunter SPLITS, Fraktionalisierung und Tokenisierung. Da diese oft nicht mit einer Präsentation auf herkömmlichen Branchenplattformen vereinbar sind, benötigen sie Mapsites™ für die Vermarktung.",
+          text: "Wir analysieren qualifizierte Angebote, um ihre Eignung für Investorengruppen zu ermitteln, die fortgeschrittene Transaktionsstrukturen suchen – darunter SPLITS, Fraktionalisierung und Tokenisierung. Da diese oft nicht mit einer Präsentation auf herkömmlichen Branchenplattformen vereinbar sind, benötigen sie Mapsites für die Vermarktung.",
         },
         {
           label: "TalisTV™ (TTV)",
@@ -328,8 +328,8 @@ export const de: Dictionary = {
     knowledge: [
       {
         id: "mapsites",
-        title: "Mapsites™",
-        body: "Eine Mapsite™ ist Ihr kartenbasiertes Marktzuhause: PINs, Angebote und Partnerwerbung. Beanspruchen Sie einen Demo-Markt und registrieren Sie sich anschließend über SamCart, um Ihr Dashboard zu aktivieren.",
+        title: "Mapsites",
+        body: "Eine Mapsite ist Ihr kartenbasiertes Marktzuhause: PINs, Angebote und Partnerwerbung. Beanspruchen Sie einen Demo-Markt und registrieren Sie sich anschließend über SamCart, um Ihr Dashboard zu aktivieren.",
       },
       {
         id: "talisbooks",
@@ -339,22 +339,22 @@ export const de: Dictionary = {
       {
         id: "talismaps",
         title: "Talismaps™",
-        body: "Talismaps™ betreibt eigene Karten-Engines (Satellit / PINs) für Märkte und Mapsites™ – keine eingebetteten Karten von Drittanbietern.",
+        body: "Talismaps™ betreibt eigene Karten-Engines (Satellit / PINs) für Märkte und Mapsites – keine eingebetteten Karten von Drittanbietern.",
       },
       {
         id: "fast-codes",
         title: "FAST Codes™",
-        body: "Ein FAST Code™ ist Ihre Marktkennung. Er verbindet Ihre Mapsite™, Ihr Talisbooks™-Regal und Ihre Verwaltungswerkzeuge. Demo-Codes nutzen „Beanspruchen“, ausgegebene Codes nutzen „Registrieren“.",
+        body: "Ein FAST Code™ ist Ihre Marktkennung. Er verbindet Ihre Mapsite, Ihr Talisbooks™-Regal und Ihre Verwaltungswerkzeuge. Demo-Codes nutzen „Beanspruchen“, ausgegebene Codes nutzen „Registrieren“.",
       },
       {
         id: "claim-register",
         title: "Beanspruchen / Registrieren",
-        body: "Beanspruchen Sie einen Demo-Markt, um alles kennenzulernen. Die Registrierung (SamCart-Checkout) schaltet nach erfolgreicher Zahlung ein echtes Mapsite™-Dashboard frei.",
+        body: "Beanspruchen Sie einen Demo-Markt, um alles kennenzulernen. Die Registrierung (SamCart-Checkout) schaltet nach erfolgreicher Zahlung ein echtes Mapsite-Dashboard frei.",
       },
       {
         id: "shelves",
         title: "Regale",
-        body: "Das Bücherregal (Common Shelf) ist das eigenständige Katalogregal mit dem Cowboy's Guide unter der linken Hervorhebung. Das Mapsites™-Menü führt zu beanspruchten und Demo-Mapsites™.",
+        body: "Das Bücherregal (Common Shelf) ist das eigenständige Katalogregal mit dem Cowboy's Guide unter der linken Hervorhebung. Das Mapsites-Menü führt zu beanspruchten und Demo-Mapsites.",
       },
       {
         id: "talisu",
@@ -369,7 +369,7 @@ export const de: Dictionary = {
       {
         id: "demo",
         title: "Demo beanspruchen",
-        body: "Starten Sie über Märkte → Nächster Schritt / Demo, um eine Demo-Mapsite™ zu erstellen und die Abläufe kennenzulernen, bevor Sie sich registrieren.",
+        body: "Starten Sie über Märkte → Nächster Schritt / Demo, um eine Demo-Mapsite zu erstellen und die Abläufe kennenzulernen, bevor Sie sich registrieren.",
       },
     ],
   },
@@ -412,20 +412,25 @@ export const de: Dictionary = {
     pmcTitle: "Talispros™ PMC",
     pmcBullets: [
       "Root-Konten können unbegrenzt viele Derivative-Konten registrieren.",
-      "Derivative-Konten veröffentlichen auf Root-Mapsites™ und bewerben dort jeweils bis zu 100 PINs.",
-      "FSBO- und Adpro-Konten bewerben Mapsites™ mit einem einzelnen PIN.",
+      "Derivative-Konten veröffentlichen auf Root-Mapsites und bewerben dort jeweils bis zu 100 PINs.",
+      "FSBO- und Adpro-Konten bewerben Mapsites mit einem einzelnen PIN.",
     ],
+    pmcTagline: "Bewerben - Verwalten - Kooperieren",
     footer:
       "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 50 Meilen (80 Kilometern) um einen Mittelpunkt als teilexklusives Gebiet zu beanspruchen. Teilexklusiv bedeutet: Innerhalb dieses Kreises werden keine weiteren Märkte vergeben, benachbarte Märkte dürfen jedoch weiterhin Angebote pinnen, für die ihnen schriftliche und geprüfte Angebotsunterlagen vorliegen.",
-    searchPlaceholder: "Suchen …",
-    searchAria: "Märkte durchsuchen",
+    searchPlaceholder: "Ort oder Postleitzahl suchen …",
+    searchAria: "Ort oder Postleitzahl in der Nähe von Märkten suchen",
+    searchClear: "Suche löschen",
+    searchFailed: "Ortsuche fehlgeschlagen. Bitte erneut versuchen.",
+    searchNoResults: "Kein Ort für diese Suche gefunden.",
+    distanceResultsAria: "Nächste PINs nach Entfernung",
     canada: "Kanada",
-    doMore: "Mehr entdecken …",
+    doMore: "Do More...",
     noMatches: "Keine Treffer",
     close: "Schließen",
     nextLabel: "Nächster Schritt …",
     marketDescription:
-      "Beanspruchen Sie einen branchennahen Marktplatz, indem Sie eine Demo-Mapsite™ erstellen.",
+      "Beanspruchen Sie einen branchennahen Marktplatz, indem Sie eine Demo-Mapsite erstellen.",
     pinLabels: {
       "nl": "Neufundland und Labrador",
       "ns": "Nova Scotia (Neuschottland)",
@@ -442,7 +447,7 @@ export const de: Dictionary = {
       "yt": "Yukon",
       "nt": "Nordwest-Territorien",
       "nu": "Nunavut",
-      "modular-spaces": "TalisU™ Modular Spaces",
+      "modular-spaces": "Talishouse™ Modular Spaces",
     },
     doMoreDescriptions: {
       "modular-spaces":
@@ -452,14 +457,14 @@ export const de: Dictionary = {
 
   mapsite: {
     registerAccountNow: "Jetzt Konto registrieren",
-    buildMyMapsite: "Meine Mapsite™ erstellen",
+    buildMyMapsite: "Meine Mapsite erstellen",
     claimReceived: "Anspruch eingegangen",
     fastCodeCaps: "FAST CODE",
     knowledgeBase: "Wissensdatenbank",
     partnerIntro: "Ich bin Ihre Marketingpartnerin …",
     logout: "Abmelden",
     loggingOut: "Abmeldung läuft …",
-    logoutAria: "Von der Mapsite™-Inhabersitzung abmelden",
+    logoutAria: "Von der Mapsite-Inhabersitzung abmelden",
     close: "Schließen",
     dashboardMenu: {
       ebooks: "E-Book-Editor",
@@ -469,10 +474,10 @@ export const de: Dictionary = {
     },
     popup: {
       genericTitle: "Das erste von vielen E-Books",
-      yourMapsite: "Ihre Mapsite™",
+      yourMapsite: "Ihre Mapsite",
       genericWriteup:
-        "Nach der Registrierung kann Ihre Mapsite™ bis zu 10 Kategorien mit 100 PINs bewerben und so monatlich 1.000 Aufrufe erzielen. Niemals Vermittlungsprovisionen.",
-      claimedFallback: "FAST Code™ {code} · beanspruchte Mapsite™.",
+        "Nach der Registrierung kann Ihre Mapsite bis zu 10 Kategorien mit 100 PINs bewerben und so monatlich 1.000 Aufrufe erzielen. Niemals Vermittlungsprovisionen.",
+      claimedFallback: "FAST Code™ {code} · beanspruchte Mapsite.",
       welcomeFallback:
         "Willkommen bei Talispros™. Wählen Sie Ihren Markt und starten Sie das Onboarding.",
       tebPreparing:
@@ -521,7 +526,7 @@ export const de: Dictionary = {
       purchased: "Gekauft",
       readyToPlace: "Bereit zum Setzen",
       buyHeading: "PINs kaufen · {price} USD pro Stück",
-      atLimit: "Diese Mapsite™ hat das Limit von 100 PINs erreicht.",
+      atLimit: "Diese Mapsite hat das Limit von 100 PINs erreicht.",
       quantity: "Anzahl",
       startingCheckout: "Checkout wird gestartet …",
       buyOne: "1 PIN kaufen · {price} USD",
@@ -572,7 +577,7 @@ export const de: Dictionary = {
     eyebrowMagazine: "Talisbooks™ Magazin",
     eyebrowViewer: "Talisbooks™ Viewer",
     home: "Startseite",
-    backToMapsite: "Zurück zur Mapsite™",
+    backToMapsite: "Zurück zur Mapsite",
     product: "Produkt",
     downloadPdf: "PDF herunterladen",
     markets: "Märkte",
@@ -655,12 +660,12 @@ export const de: Dictionary = {
   demo: {
     downloadPdf: "Demo-PDF herunterladen",
     eyebrow: "DEMONSTRATION",
-    title: "Demo-eBook und Mapsite™",
+    title: "Demo-eBook und Mapsite",
     placeAPin: "Setzen Sie einen PIN.",
     createFromSample: "Talisbook™ aus dem angehefteten Muster erstellen",
     fastCodeOnRegistration: "FAST Code wird bei der Registrierung vergeben",
     listingTitle: "Titel des Angebots",
-    defaultListingTitle: "Demo-Mapsite™",
+    defaultListingTitle: "Demo-Mapsite",
     errPlacePin: "Setzen Sie einen PIN oder geben Sie eine Adresse ein, um fortzufahren.",
     continue: "Weiter zum Demo-eBook",
     continuing: "Weiter zum Demo-eBook …",
@@ -714,10 +719,10 @@ export const de: Dictionary = {
     bookshelf: {
       title: "ALLPINS Talisbooks™ · Bücherregal",
       description:
-        "Mit Mapsites™ verbundenes Talisbooks™-Bücherregal für FAST Code ALLPINS. Öffnen Sie einen Einband, um die Bücher im separaten Regal zu lesen.",
+        "Mit Mapsites verbundenes Talisbooks™-Bücherregal für FAST Code ALLPINS. Öffnen Sie einen Einband, um die Bücher im separaten Regal zu lesen.",
     },
     demoMapsite: {
-      title: "Demo-eBook und Mapsite™ erstellen",
+      title: "Demo-eBook und Mapsite erstellen",
       description:
         "Setzen Sie einen Demonstrations-PIN und hängen Sie das angeheftete Talispros-eBook an. Es wird kein FAST Code vergeben.",
     },
@@ -729,7 +734,7 @@ export const de: Dictionary = {
     talisuKb: {
       title: "TalisU™ | Wissensdatenbank",
       description:
-        "TalisU™-Wissensdatenbank – Audios, Videos und Lernmaterial für Mapsites™ und FAST Codes™.",
+        "TalisU™-Wissensdatenbank – Audios, Videos und Lernmaterial für Mapsites und FAST Codes™.",
     },
     talisuVideo: {
       title: "TalisU™ | Video",
@@ -753,7 +758,7 @@ export const de: Dictionary = {
     },
     home: {
       title: "Talispros™",
-      description: "Sichern Sie sich Ihren Markt. Eröffnen Sie Ihre Mapsite™.",
+      description: "Sichern Sie sich Ihren Markt. Eröffnen Sie Ihre Mapsite.",
     },
     talisuLayout: {
       title: "TalisU™",
@@ -763,7 +768,7 @@ export const de: Dictionary = {
     talisuFaq: {
       title: "TalisU™ | FAQ",
       description:
-        "Häufig gestellte Fragen zu Talispros™, Mapsites™ und TalisU™.",
+        "Häufig gestellte Fragen zu Talispros™, Mapsites und TalisU™.",
     },
     talisuRegister: {
       title: "TalisU™ | Konto registrieren",

@@ -104,7 +104,7 @@ export default function TalisprosHomeMapPreview() {
           <div className="relative bg-gradient-to-b from-white/70 to-white/90 px-3 pb-2.5 pt-2.5 sm:px-4 sm:pb-3 sm:pt-3">
             <button
               type="button"
-              aria-label="Dismiss Mapsite™ card"
+              aria-label="Dismiss Mapsite card"
               onClick={() => setCardOpen(false)}
               className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full text-neutral-400/40 transition hover:bg-black/[0.04] hover:text-neutral-500/70 sm:right-2 sm:top-2"
             >

@@ -9,8 +9,8 @@ import { openClaimedMapSiteFromHomeFastCode } from "@/app/talispros/mapsites/act
 import { useT } from "@/lib/i18n/client";
 
 /**
- * Mapsites™ navbar dropdown — FAST Code™ gate (no public claimed list).
- * PayPal-style light card, matching TalisU KB unlock; Demo Mapsite™ link kept.
+ * Mapsites navbar dropdown — FAST Code™ gate (no public claimed list).
+ * PayPal-style light card, matching TalisU KB unlock; Demo Mapsite link kept.
  */
 export default function MapsitesNavDropdown() {
   const pathname = usePathname() || "";

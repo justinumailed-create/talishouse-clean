@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   ...createMetadata({
     title: "Talispros™ | Claim your market",
     description:
-      "Claim your market on Talispros™. Mapsite™ pins your place on the map so buyers and partners can find you — Explore Talisbooks™ and grow your exposure worldwide.",
+      "Claim your market on Talispros™. Mapsite pins your place on the map so buyers and partners can find you — Explore Talisbooks™ and grow your exposure worldwide.",
     path: "/talispros",
     image: talisprosBrandOgMetadataImage("Talispros™ | Claim your market"),
   }),

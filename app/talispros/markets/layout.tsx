@@ -10,7 +10,7 @@ const libreBaskerville = Libre_Baskerville({
 export const metadata: Metadata = createMetadata({
   title: "Talispros™ | Markets",
   description:
-    "Talispros™ provides Mapsites™ as alternative Market Places around Talishouse™ Homes and Cottages.",
+    "Talispros™ provides Mapsites as alternative Market Places around Talishouse™ Homes and Cottages.",
   path: "/talispros/markets",
 });
 

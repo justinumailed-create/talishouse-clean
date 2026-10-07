@@ -8,7 +8,7 @@ import {
 interface MapSiteCreateNewPanelProps {
   fastCode: string;
   buildRequestId?: string;
-  /** Demo Mapsites™: grey out Create New so visitors cannot insert pages. */
+  /** Demo Mapsites: grey out Create New so visitors cannot insert pages. */
   pageInsertLocked?: boolean;
 }
 
@@ -21,21 +21,21 @@ const ITEMS: {
   {
     title: "E-Books",
     description: (code) =>
-      `Generate a Talisbook™ for FAST Code ${code} and add it to this Mapsite™ shelf.`,
+      `Generate a Talisbook™ for FAST Code ${code} and add it to this Mapsite shelf.`,
     cta: "Create e-book",
     href: (fastCode, requestId) => mapsiteCreateEbookHref(fastCode, requestId),
   },
   {
     title: "Content",
     description: () =>
-      "Update listing copy, photos, and pin details for this Mapsite™.",
+      "Update listing copy, photos, and pin details for this Mapsite.",
     cta: "Open editor",
     href: (fastCode) => mapsiteCreateContentHref(fastCode),
   },
   {
     title: "Video",
     description: () =>
-      "Add programming to this Mapsite™ In-House Online TV Channel.",
+      "Add programming to this Mapsite In-House Online TV Channel.",
     cta: "Open TalisTV™",
     href: (fastCode) => mapsiteCreateVideoHref(fastCode),
   },
@@ -69,7 +69,7 @@ export default function MapSiteCreateNewPanel({
       {pageInsertLocked ? (
         <p className="mt-3 max-w-md text-[15px] leading-snug text-neutral-500">
           Demonstration only — inserting pages stays locked so Fractionalization,
-          Tokenization, and SPLITS remain paid Mapsite™ capabilities.
+          Tokenization, and SPLITS remain paid Mapsite capabilities.
         </p>
       ) : null}
       <div

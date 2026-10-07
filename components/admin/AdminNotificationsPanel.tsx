@@ -55,7 +55,7 @@ export default function AdminNotificationsPanel({
             Notifications
           </h1>
           <p className="mt-1 text-sm text-neutral-500">
-            Secure codes generated from Mapsite™ URL clicks land here so you can
+            Secure codes generated from Mapsite URL clicks land here so you can
             dictate them over phone or WhatsApp. Codes are single-use and expire
             after 30 minutes.
           </p>
@@ -73,7 +73,7 @@ export default function AdminNotificationsPanel({
 
       {items.length === 0 ? (
         <div className="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500">
-          No notifications yet. When a visitor taps URL on a published Mapsite™
+          No notifications yet. When a visitor taps URL on a published Mapsite
           and generates a secure code, it will appear here.
         </div>
       ) : (
@@ -142,7 +142,7 @@ export default function AdminNotificationsPanel({
                         href={buildClaimedMapSitePath({ fastCode })}
                         className="inline-flex h-9 items-center justify-center rounded-lg border border-neutral-200 px-3 text-xs font-medium text-neutral-800 hover:bg-neutral-50"
                       >
-                        Open Mapsite™
+                        Open Mapsite
                       </Link>
                     ) : null}
                     {unread ? (

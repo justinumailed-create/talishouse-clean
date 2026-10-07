@@ -32,7 +32,7 @@ export default function TalisBooksMapsPageView({ page }: { page: TalisBooksViewe
       </div>
 
       <div className="talisbooks-viewer-page__maps-caption">
-        <p className="talisbooks-viewer-page__eyebrow">Mapsite™ · Talismaps™</p>
+        <p className="talisbooks-viewer-page__eyebrow">Mapsite · Talismaps™</p>
         {page.title ? (
           <h2 className="talisbooks-viewer-page__title">{page.title}</h2>
         ) : null}

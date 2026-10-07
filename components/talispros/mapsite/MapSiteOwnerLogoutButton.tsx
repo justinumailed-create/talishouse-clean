@@ -12,7 +12,7 @@ interface MapSiteOwnerLogoutButtonProps {
 }
 
 /**
- * Paid / owner claimed Mapsite™ control: clear owner + root-account cookies
+ * Paid / owner claimed Mapsite control: clear owner + root-account cookies
  * and reload the claimed URL as a public visitor.
  */
 export default function MapSiteOwnerLogoutButton({

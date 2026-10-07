@@ -49,7 +49,7 @@ export default async function EbookChoicePage({
   const requestId = firstParam(params.requestId)?.trim() || null;
   const fromYes = isTruthyParam(firstParam(params.yes));
 
-  // YES handoff: mark this browser as the Mapsite™ owner when a code is present.
+  // YES handoff: mark this browser as the Mapsite owner when a code is present.
   if (fromYes && fastCode) {
     await establishOwnerMapSiteSession(fastCode);
   }

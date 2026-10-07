@@ -58,7 +58,7 @@ export default function MarketingShell({
                 : "text-neutral-600 hover:bg-neutral-50"
             }`}
           >
-            Demo Mapsites™
+            Demo Mapsites
           </Link>
           <Link
             href={MARKETING_HOME_PATH}

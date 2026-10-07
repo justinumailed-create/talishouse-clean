@@ -119,7 +119,7 @@ export interface MapSiteView {
   ttvUrl: string | null;
   /** When Global Admin last issued a 6-digit URL gate PIN. */
   urlGatePinIssuedAt?: string | null;
-  /** Build request linked to this FAST Code (for claimed Mapsite™ URLs). */
+  /** Build request linked to this FAST Code (for claimed Mapsite URLs). */
   requestId?: string | null;
   /** Market audience from the claim form (listings, brokers, …). */
   claimAudience?: string | null;
@@ -607,7 +607,7 @@ async function buildMapSiteView(
 
 import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 
-/** Public claimed Mapsite™ URL used after Claim a Market / from admin. */
+/** Public claimed Mapsite URL used after Claim a Market / from admin. */
 export function buildClaimedMapSiteHref(options: {
   mapsiteId: string;
   fastCode: string;
@@ -637,10 +637,10 @@ export async function createMapSiteForAccount(
   const fastCode = input.fastCode.trim().toLowerCase();
 
   if (!fastCode) {
-    throw new Error("FAST Code is required to create a Mapsite™");
+    throw new Error("FAST Code is required to create a Mapsite");
   }
   if (!input.accountId) {
-    throw new Error("Account ID is required to create a Mapsite™");
+    throw new Error("Account ID is required to create a Mapsite");
   }
 
   const supabase = getSupabaseAdmin();
@@ -650,7 +650,7 @@ export async function createMapSiteForAccount(
     .select("slug");
 
   if (slugError) {
-    throw new Error(`Failed to fetch existing Mapsite™ slugs: ${slugError.message}`);
+    throw new Error(`Failed to fetch existing Mapsite slugs: ${slugError.message}`);
   }
 
   const slug = await generateMapSiteSlug(
@@ -677,7 +677,7 @@ export async function createMapSiteForAccount(
 
   if (error || !data) {
     throw new Error(
-      `Failed to create Mapsite™: ${error?.message || "Unknown error"}`
+      `Failed to create Mapsite: ${error?.message || "Unknown error"}`
     );
   }
 

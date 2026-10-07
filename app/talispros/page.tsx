@@ -43,7 +43,7 @@ export default function TalisprosWelcomePage() {
               <ul className="space-y-3">
                 {[
                   "Decades of experience in modular construction and real estate markets.",
-                  "Monthly content support to keep your Mapsite™ fresh and engaging.",
+                  "Monthly content support to keep your Mapsite fresh and engaging.",
                   "Ancillary marketing benefits including co-promotion and referral networks.",
                 ].map((text, i) => (
                   <li key={i} className="flex items-start gap-3 text-sm text-neutral-600 leading-relaxed">
@@ -63,7 +63,7 @@ export default function TalisprosWelcomePage() {
               </h2>
               <div className="text-sm text-neutral-600 leading-relaxed space-y-4">
                 <p>
-                  Mapsite™ puts you at the center of your local market with a dedicated property discovery page that attracts qualified buyers and sellers in your area.
+                  Mapsite puts you at the center of your local market with a dedicated property discovery page that attracts qualified buyers and sellers in your area.
                 </p>
               </div>
             </section>
@@ -91,7 +91,7 @@ export default function TalisprosWelcomePage() {
               </h2>
               <div className="text-sm text-neutral-600 leading-relaxed space-y-4">
                 <p>
-                  In an industry where trust is everything, a professionally designed Mapsite™ positions you as a credible, established professional.
+                  In an industry where trust is everything, a professionally designed Mapsite positions you as a credible, established professional.
                 </p>
               </div>
             </section>
@@ -115,16 +115,16 @@ export default function TalisprosWelcomePage() {
             {/* Ready to build */}
             <section className="text-center mb-12 sm:mb-16">
               <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 mb-3">
-                Ready to build your Mapsite™?
+                Ready to build your Mapsite?
               </h2>
               <p className="text-sm text-neutral-500 mb-6 max-w-md mx-auto leading-relaxed">
-                Click below to start building your Mapsite™ — a done-for-you property discovery page.
+                Click below to start building your Mapsite — a done-for-you property discovery page.
               </p>
               <Link
                 href="/talispros/build-mapsite"
                 className="inline-flex h-12 px-8 bg-neutral-900 text-white rounded-xl text-sm font-medium tracking-wide items-center justify-center gap-2 hover:bg-neutral-800 active:scale-[0.98] transition-all"
               >
-                Build My Mapsite™
+                Build My Mapsite
               </Link>
             </section>
 
@@ -137,7 +137,7 @@ export default function TalisprosWelcomePage() {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[
-                  { title: "Mapsites™", description: "Industry-adjacent marketplaces.", href: "/talispros/build-mapsite" },
+                  { title: "Mapsites", description: "Industry-adjacent marketplaces.", href: "/talispros/build-mapsite" },
                   { title: "FAST Codes™", description: "Universal account access and routing.", href: "/fast-code" },
                   { title: "TalisForms™", description: "Enterprise forms infrastructure.", href: "/talispros/forms" },
                   { title: "Adpros™", description: "Market activation and advertising.", href: "#" },
@@ -161,7 +161,7 @@ export default function TalisprosWelcomePage() {
             {/* CTA Card */}
             <div className="bg-white rounded-xl shadow-sm p-6 border-2 border-red-400 text-center">
               <p className="text-sm text-neutral-900 leading-relaxed mb-4">
-                Our Mapsites™ are industry adjacent market places that can formalize referral and co-promotion networks in real estate.
+                Our Mapsites are industry adjacent market places that can formalize referral and co-promotion networks in real estate.
               </p>
               <Link
                 href="/talispros/claim-a-market"

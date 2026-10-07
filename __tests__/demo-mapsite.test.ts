@@ -52,7 +52,7 @@ describe("demo mapsite codes", () => {
     expect(isIssuedFastCode(createDemoMapSiteCode())).toBe(false);
   });
 
-  it("locks Create New / insert-pages on demonstration Mapsites™ only", () => {
+  it("locks Create New / insert-pages on demonstration Mapsites only", () => {
     expect(shouldLockDemoPageInsert("demo-ab12cd34")).toBe(true);
     expect(shouldLockDemoPageInsert("DEMO")).toBe(true);
     expect(shouldLockDemoPageInsert("rm22")).toBe(false);
@@ -60,7 +60,7 @@ describe("demo mapsite codes", () => {
     expect(shouldLockDemoPageInsert("")).toBe(false);
   });
 
-  it("identifies the public demo Mapsite™ builder routes", () => {
+  it("identifies the public demo Mapsite builder routes", () => {
     expect(isDemoMapSitePath("/talispros/demo-mapsite")).toBe(true);
     expect(isDemoMapSitePath("/talispros/demo-mapsite/ebook")).toBe(true);
     expect(isDemoMapSitePath("/talispros/demo-mapsite/ebook?mapsiteId=1")).toBe(
@@ -70,7 +70,7 @@ describe("demo mapsite codes", () => {
     expect(isDemoMapSitePath("/talispros/mapsite")).toBe(false);
   });
 
-  it("protects the platform demonstration Mapsite™ id", () => {
+  it("protects the platform demonstration Mapsite id", () => {
     expect(isProtectedPlatformDemoMapSite(DEMO_MAPSITE_ID)).toBe(true);
     expect(isProtectedPlatformDemoMapSite("other")).toBe(false);
     expect(
@@ -93,7 +93,7 @@ describe("demo mapsite codes", () => {
     ).toBe("/talispros/demo-mapsite/ebook?mapsiteId=map-1&code=demo-ab12cd34");
   });
 
-  it("includes the demo code on the Mapsite™ success href", () => {
+  it("includes the demo code on the Mapsite success href", () => {
     expect(demoMapSiteApplicationHref("map-1", "demo-ab12cd34")).toBe(
       "/talispros/mapsite?view=pin&mapsiteId=map-1&code=demo-ab12cd34",
     );
@@ -108,7 +108,7 @@ describe("demo mapsite codes", () => {
     ).toBe("/talisbooks/viewer/x");
   });
 
-  it("uses the 100-PIN insertion-fee writeup only on demo ebook Mapsites™", () => {
+  it("uses the 100-PIN insertion-fee writeup only on demo ebook Mapsites", () => {
     expect(mapsiteMarketPartnerWriteup(false)).toBe(
       MAPSITE_GENERIC_PARTNER_WRITEUP,
     );
@@ -175,8 +175,8 @@ describe("demo mapsite codes", () => {
         ),
       ),
     ).toBe("Could not generate the demonstration Talisbook™.");
-    expect(publicDemoGenerateError(new Error("Demo Mapsite™ not found."))).toBe(
-      "Demo Mapsite™ not found.",
+    expect(publicDemoGenerateError(new Error("Demo Mapsite not found."))).toBe(
+      "Demo Mapsite not found.",
     );
   });
 
@@ -235,7 +235,7 @@ describe("demo mapsite codes", () => {
     expect(builder).toContain("HomePinLocationSection");
   });
 
-  it("seeds demo Mapsites™ with stock gallery so pin hero uses shared ebook helper", () => {
+  it("seeds demo Mapsites with stock gallery so pin hero uses shared ebook helper", () => {
     const serviceSource = readFileSync(
       join(process.cwd(), "lib/talispros/demo-mapsite-service.ts"),
       "utf8",

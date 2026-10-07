@@ -5,7 +5,7 @@ import { en } from "../lib/i18n/dictionaries/en";
 import { isDemonstrationListing } from "../lib/talispros/demo-mapsite";
 import { ROUTES } from "../lib/routes";
 
-describe("Claim Your Market on demo Mapsites™ only", () => {
+describe("Claim Your Market on demo Mapsites only", () => {
   it("treats demo-* as demonstration and issued codes as live", () => {
     expect(
       isDemonstrationListing({

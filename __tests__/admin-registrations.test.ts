@@ -4,7 +4,7 @@ import {
   mergeAdminRegistrationRows,
 } from "../lib/admin-registrations";
 
-describe("admin registrations from Mapsite™ payments", () => {
+describe("admin registrations from Mapsite payments", () => {
   it("shows a completed RM22 Stripe payment as a root account registration", () => {
     const row = adminRegistrationFromTalisprosPayment({
       id: "pay-rm22",
@@ -24,7 +24,7 @@ describe("admin registrations from Mapsite™ payments", () => {
     expect(row.markable).toBe(false);
   });
 
-  it("fills FAST code from the linked Mapsite™ when the payment row omitted it", () => {
+  it("fills FAST code from the linked Mapsite when the payment row omitted it", () => {
     const row = adminRegistrationFromTalisprosPayment(
       {
         id: "pay-1",

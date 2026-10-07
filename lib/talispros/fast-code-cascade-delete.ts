@@ -64,7 +64,7 @@ export async function unlinkAndDeleteMapSite(
       fastCode,
     })
   ) {
-    return { ok: false, error: "The platform demonstration Mapsite™ cannot be deleted." };
+    return { ok: false, error: "The platform demonstration Mapsite cannot be deleted." };
   }
 
   const code = issuedFastCodeKey(fastCode);
@@ -108,7 +108,7 @@ export async function unlinkAndDeleteMapSite(
     if (remaining?.id) {
       return {
         ok: false,
-        error: "Mapsite™ could not be deleted. A related record is still linked.",
+        error: "Mapsite could not be deleted. A related record is still linked.",
       };
     }
   }
@@ -191,7 +191,7 @@ export async function purgeMapSitesAndBookshelvesWithoutFastCodes(
     if (deleted.ok) mapsitesDeleted += 1;
     else {
       console.warn(
-        "[fast-code-cleanup] Mapsite™ delete failed:",
+        "[fast-code-cleanup] Mapsite delete failed:",
         mapsite.fast_code,
         deleted.error,
       );

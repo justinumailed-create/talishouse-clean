@@ -56,7 +56,7 @@ async function persistUrlGateCode(options: {
 
   const mapsite = await getMapSiteByFastCode(options.fastCode);
   if (!mapsite) {
-    return { success: false, error: "Mapsite™ not found" };
+    return { success: false, error: "Mapsite not found" };
   }
 
   if (isMapsiteUrlGateExempt(mapsite.fastCode)) {
@@ -71,7 +71,7 @@ async function persistUrlGateCode(options: {
   if (!dest) {
     return {
       success: false,
-      error: "No listing/payment URL is on file for this Mapsite™.",
+      error: "No listing/payment URL is on file for this Mapsite.",
     };
   }
 
@@ -107,7 +107,7 @@ async function persistUrlGateCode(options: {
   const titleLabel =
     mapsite.propertyTitle?.trim() ||
     mapsite.propertyAddress?.trim() ||
-    "Mapsite™";
+    "Mapsite";
 
   const notification = await createAdminNotification({
     type: "mapsite_url_gate_code",
@@ -147,7 +147,7 @@ async function persistUrlGateCode(options: {
   return { success: true, pin, issuedAt, expiresAt };
 }
 
-/** Visitor (published Mapsite™ popup): generate a code and ship it to Admin Notifications. */
+/** Visitor (published Mapsite popup): generate a code and ship it to Admin Notifications. */
 export async function requestMapSiteUrlGateCode(fastCode: string): Promise<{
   success: boolean;
   issuedAt?: string;
@@ -223,14 +223,14 @@ async function unlockWithPin(
 
   const mapsite = await getMapSiteByFastCode(fastCode);
   if (!mapsite) {
-    return { success: false, error: "Mapsite™ not found" };
+    return { success: false, error: "Mapsite not found" };
   }
 
   const dest = resolveUrlGateUnlockHref(mapsite);
   if (!dest) {
     return {
       success: false,
-      error: "No listing/payment URL is on file for this Mapsite™.",
+      error: "No listing/payment URL is on file for this Mapsite.",
     };
   }
 

@@ -55,12 +55,22 @@ export default function TalisUMarketsPinCard({
         className="pointer-events-auto flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5"
       >
         {pin.heroImageUrl ? (
-          <div className="relative h-36 w-full shrink-0 bg-neutral-200">
+          <div
+            className={`relative w-full shrink-0 ${
+              pin.kind === "do-more"
+                ? "h-40 bg-white"
+                : "h-36 bg-neutral-200"
+            }`}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={pin.heroImageUrl}
               alt=""
-              className="h-full w-full object-cover"
+              className={
+                pin.kind === "do-more"
+                  ? "h-full w-full object-contain object-center"
+                  : "h-full w-full object-cover"
+              }
             />
             <button
               type="button"

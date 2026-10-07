@@ -76,14 +76,14 @@ export default function CrmMapSitesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Mapsites™</h1>
-      <p className="text-sm text-gray-500 mb-6">All Mapsite™ build records</p>
+      <h1 className="text-2xl font-bold text-gray-900 mb-1">Mapsites</h1>
+      <p className="text-sm text-gray-500 mb-6">All Mapsite build records</p>
 
       <div className="bg-white border border-neutral-200 rounded-xl overflow-hidden">
         {loading ? (
           <div className="p-8 text-center text-sm text-neutral-400">Loading...</div>
         ) : mapsites.length === 0 ? (
-          <div className="p-8 text-center text-sm text-neutral-400">No Mapsites™ yet</div>
+          <div className="p-8 text-center text-sm text-neutral-400">No Mapsites yet</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

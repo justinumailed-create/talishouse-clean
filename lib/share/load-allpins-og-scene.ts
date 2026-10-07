@@ -65,7 +65,7 @@ function viewportForPins(
 
 /**
  * Build the ALLPINS landscape share scene: Canada satellite frame + one
- * coloured pin per live Mapsite™ (same colours as the ALLPINS map).
+ * coloured pin per live Mapsite (same colours as the ALLPINS map).
  * Optional width/height size the frame (brand OG right panel uses half-card).
  */
 export async function loadAllPinsOgScene(size?: {

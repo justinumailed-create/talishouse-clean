@@ -190,7 +190,7 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
           <div className="flex items-center gap-2.5">
             <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
             <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-neutral-500">
-              Associate Mapsite™ Preview
+              Associate Mapsite Preview
             </span>
           </div>
           <div className="hidden sm:block">
@@ -216,13 +216,13 @@ export default function AssociateHero({ fastCode, pageConfig }: AssociateHeroPro
                 {/* Headline/Subtext Overlay styled like HomeHero */}
                 <div className="bg-white rounded-2xl border border-[#e5e5e5] p-6 shadow-sm">
                   <p className="text-[10px] tracking-[0.2em] text-neutral-400 uppercase mb-2">
-                    Affiliate Mapsite™
+                    Affiliate Mapsite
                   </p>
                   <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-2">
                     Demo Sample
                   </h2>
                   <p className="section-description">
-                    Opt in to qualify for our premium marketing tools, including a Mapsite™. 
+                    Opt in to qualify for our premium marketing tools, including a Mapsite. 
                     "Moonlight" towards a more rewarding lifestyle, or start a sideline to complement your primary business interests.
                   </p>
                 </div>

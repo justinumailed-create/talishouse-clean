@@ -70,7 +70,7 @@ export async function generateDemoEbookAction(input: {
   try {
     const mapsite = await loadDemoMapSiteForEbook(input.mapsiteId);
     if (!mapsite) {
-      return { ok: false, error: "Demo Mapsite™ not found." };
+      return { ok: false, error: "Demo Mapsite not found." };
     }
     if (!input.optimizedImages.length) {
       return { ok: false, error: "Extract and optimize the pinned PDF first." };

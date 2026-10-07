@@ -147,7 +147,7 @@ interface EbookGenerateClientProps {
     mapsiteId: string | null;
     stage: string;
   } | null;
-  /** Mapsite™ admin embed: same builder, without the standalone generate-page chrome. */
+  /** Mapsite admin embed: same builder, without the standalone generate-page chrome. */
   embedded?: boolean;
   /** Replace this book in place instead of creating another Talisbook™. */
   replaceBookId?: string | null;
@@ -393,7 +393,7 @@ export default function EbookGenerateClient({
   const uploadScope = {
     requestId: requestId || undefined,
     mapsiteId: requestId ? undefined : mapsiteId || undefined,
-    // Isolated create may have no Mapsite™ — always send FAST Code + flag so
+    // Isolated create may have no Mapsite — always send FAST Code + flag so
     // /upload-image can scope storage without a Build Request ID.
     fastCode:
       isolatedBookshelf && !requestId && fastCode
@@ -982,7 +982,7 @@ export default function EbookGenerateClient({
         isolatedBookshelf
           ? "Admin FAST Code is required to generate for the isolated bookshelf."
           : embedded
-            ? "This Mapsite™ cannot generate a Talisbook™ until it has a FAST Code."
+            ? "This Mapsite cannot generate a Talisbook™ until it has a FAST Code."
             : "Build Request ID is required. Return to the Build Form and complete onboarding again.",
       );
       return;

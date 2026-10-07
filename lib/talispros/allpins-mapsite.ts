@@ -1,9 +1,9 @@
 /**
- * ALLPINS — aggregate Mapsite™ that shows every existing Mapsite™ pin
+ * ALLPINS — aggregate Mapsite that shows every existing Mapsite pin
  * (exact lat/lng from the mapsites table) with showcase cards for books
- * and the source Mapsite™ demos. Linked to the catalogue isolated shelf.
+ * and the source Mapsite demos. Linked to the catalogue isolated shelf.
  *
- * Single-pin Mapsites™ (rm22, lg01, …) are unchanged — this path only
+ * Single-pin Mapsites (rm22, lg01, …) are unchanged — this path only
  * activates when the FAST Code is ALLPINS.
  */
 
@@ -42,7 +42,7 @@ export type AllPinsShowcasePin = {
   bookHref: string | null;
   bookTitle: string | null;
   bookSlug: string | null;
-  /** Source Mapsite™ pin colour (talismaps / build request); defaults to Mapsite blue. */
+  /** Source Mapsite pin colour (talismaps / build request); defaults to Mapsite blue. */
   pinColor: string;
   pinIcon: string;
   pinBorder: string;
@@ -75,7 +75,7 @@ function accountTypeSegment(accountType: string | null | undefined): string {
 }
 
 /**
- * Every Mapsite™ with real coordinates (excluding ALLPINS itself),
+ * Every Mapsite with real coordinates (excluding ALLPINS itself),
  * plus the newest book for that FAST Code / mapsite when present.
  */
 export async function listAllPinsAggregatedPins(): Promise<
@@ -232,8 +232,8 @@ export async function listAllPinsAggregatedPins(): Promise<
 
 
 /**
- * Batch-load each source Mapsite™ pin style (talismaps settings / pin metadata,
- * then build_requests future_pin_*). Same fields claimed Mapsites™ use.
+ * Batch-load each source Mapsite pin style (talismaps settings / pin metadata,
+ * then build_requests future_pin_*). Same fields claimed Mapsites use.
  */
 async function loadAllPinsSourcePinStyles(
   mapsiteIds: string[],
@@ -242,7 +242,7 @@ async function loadAllPinsSourcePinStyles(
   const byId = new Map<string, MapSiteSavedPinStyle>();
   if (mapsiteIds.length === 0) return byId;
 
-  // Prefer parallel getMapSiteTalisMapPinStyle (same path as claimed Mapsite™).
+  // Prefer parallel getMapSiteTalisMapPinStyle (same path as claimed Mapsite).
   const talisResults = await Promise.all(
     mapsiteIds.map(async (id, index) => {
       const style = await getMapSiteTalisMapPinStyle({
@@ -354,8 +354,8 @@ function computeViewport(pins: AllPinsShowcasePin[]): {
 }
 
 /**
- * Ensure the ALLPINS Mapsite™ + fast_codes row exist, sync `pins` from
- * live Mapsite™ coordinates, and return the aggregation for the UI.
+ * Ensure the ALLPINS Mapsite + fast_codes row exist, sync `pins` from
+ * live Mapsite coordinates, and return the aggregation for the UI.
  */
 export async function ensureAllPinsMapSite(): Promise<AllPinsAggregation | null> {
   if (!isSupabaseAdminConfigured()) return null;
@@ -383,10 +383,10 @@ export async function ensureAllPinsMapSite(): Promise<AllPinsAggregation | null>
       email: "allpins@talispros.com",
       phone: "",
       status: "active",
-      property_title: "ALLPINS — Every Mapsite™",
-      property_address: "Aggregated live Mapsite™ pins",
+      property_title: "ALLPINS — Every Mapsite",
+      property_address: "Aggregated live Mapsite pins",
       property_description:
-        "Canada showcase of Mapsite™ pins. Open a pin for the book and Mapsite™ demo.",
+        "Canada showcase of Mapsite pins. Open a pin for the book and Mapsite demo.",
       latitude: viewport.center.latitude,
       longitude: viewport.center.longitude,
       map_zoom: viewport.zoom,
@@ -419,10 +419,10 @@ export async function ensureAllPinsMapSite(): Promise<AllPinsAggregation | null>
       .from("mapsites")
       .update({
         status: "active",
-        property_title: "ALLPINS — Every Mapsite™",
-        property_address: "Aggregated live Mapsite™ pins",
+        property_title: "ALLPINS — Every Mapsite",
+        property_address: "Aggregated live Mapsite pins",
         property_description:
-          "Canada showcase of Mapsite™ pins. Open a pin for the book and Mapsite™ demo.",
+          "Canada showcase of Mapsite pins. Open a pin for the book and Mapsite demo.",
         latitude: viewport.center.latitude,
         longitude: viewport.center.longitude,
         map_zoom: viewport.zoom,

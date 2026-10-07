@@ -1,5 +1,5 @@
 /**
- * Convert a demonstration Mapsite™ into a live claimed Mapsite™ with an
+ * Convert a demonstration Mapsite into a live claimed Mapsite with an
  * issued FAST Code™ — same initials+digits rules as Claim a Market™ / build.
  */
 
@@ -57,7 +57,7 @@ function isDemoPlaceholderTitle(title: string | null | undefined): boolean {
   return /^demo(\s|$)/i.test(raw) || /mapsite/i.test(raw);
 }
 
-/** Demo builder default copy — must not survive on an issued claimed Mapsite™. */
+/** Demo builder default copy — must not survive on an issued claimed Mapsite. */
 function isDemoNotIssuedDescription(value: string | null | undefined): boolean {
   const text = value?.trim() || "";
   if (!text) return true;
@@ -75,9 +75,9 @@ function resolveClaimedDescription(
     return raw!.trim();
   }
   if (propertyAddress) {
-    return `Claimed Mapsite™ · FAST Code™ issued for ${propertyAddress}.`;
+    return `Claimed Mapsite · FAST Code™ issued for ${propertyAddress}.`;
   }
-  return "Claimed Mapsite™ · FAST Code™ issued.";
+  return "Claimed Mapsite · FAST Code™ issued.";
 }
 
 function resolveClaimedBookTitle(
@@ -139,7 +139,7 @@ async function reassignDemoBooksToClaimed(options: {
   const prev = previousFastCode?.trim().toLowerCase() || "";
   const now = new Date().toISOString();
 
-  // Move any books tied to the demonstration Mapsite™ / demo-* code onto the live code.
+  // Move any books tied to the demonstration Mapsite / demo-* code onto the live code.
   if (prev && prev !== code) {
     await supabase
       .from("talisbooks_books")
@@ -160,7 +160,7 @@ async function reassignDemoBooksToClaimed(options: {
     })
     .eq("mapsite_id", previousMapsiteId);
 
-  // Rename leftover "Demo Mapsite™" titles so the FAST TEB™ shelf keeps them
+  // Rename leftover "Demo Mapsite" titles so the FAST TEB™ shelf keeps them
   // (same inventory as self-serve after issue — not filtered as demonstration).
   const { data: claimedBooks } = await supabase
     .from("talisbooks_books")
@@ -217,7 +217,7 @@ export async function claimDemoMapSite(
     input.email?.trim().toLowerCase() || "claim@talispros.com";
 
   if (!mapsiteId) {
-    return { ok: false, error: "Missing Mapsite™ ID." };
+    return { ok: false, error: "Missing Mapsite ID." };
   }
   if (!firstName || !lastName) {
     return { ok: false, error: "Enter your first and last name to claim." };
@@ -240,7 +240,7 @@ export async function claimDemoMapSite(
     return { ok: false, error: loadError.message };
   }
   if (!row) {
-    return { ok: false, error: "Demo Mapsite™ not found." };
+    return { ok: false, error: "Demo Mapsite not found." };
   }
 
   if (
@@ -251,7 +251,7 @@ export async function claimDemoMapSite(
   ) {
     return {
       ok: false,
-      error: "That Mapsite™ is already claimed with a live FAST Code™.",
+      error: "That Mapsite is already claimed with a live FAST Code™.",
     };
   }
 
@@ -283,8 +283,8 @@ export async function claimDemoMapSite(
   const now = new Date().toISOString();
   const propertyAddress = row.property_address?.trim() || null;
   const propertyTitle = isDemoPlaceholderTitle(row.property_title)
-    ? propertyAddress || "Your Mapsite™"
-    : row.property_title || propertyAddress || "Your Mapsite™";
+    ? propertyAddress || "Your Mapsite"
+    : row.property_title || propertyAddress || "Your Mapsite";
   const propertyDescription = resolveClaimedDescription(
     row.property_description,
     propertyAddress,
@@ -294,7 +294,7 @@ export async function claimDemoMapSite(
   const longitude = row.longitude;
   const mapZoom = row.map_zoom;
   let tebUrl = row.teb_url?.trim() || DEMO_PINNED_EBOOK_HREF;
-  // Stand-in for SamCart payment URL: register path → FAST Code™ gate → Mapsite™.
+  // Stand-in for SamCart payment URL: register path → FAST Code™ gate → Mapsite.
   const registerPath = mapsiteUrlGatePath(fastCode);
 
   const { error: fastInsertError } = await supabase.from("fast_codes").upsert(
@@ -366,7 +366,7 @@ export async function claimDemoMapSite(
         ok: false,
         error:
           createError?.message ||
-          "Could not create the claimed Mapsite™ from the demonstration.",
+          "Could not create the claimed Mapsite from the demonstration.",
       };
     }
     claimedMapsiteId = created.id;
@@ -406,7 +406,7 @@ export async function claimDemoMapSite(
     if (updateError) {
       return {
         ok: false,
-        error: `Could not convert the demo Mapsite™: ${updateError.message}`,
+        error: `Could not convert the demo Mapsite: ${updateError.message}`,
       };
     }
 

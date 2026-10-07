@@ -28,7 +28,7 @@ import {
 } from "../lib/talispros/ebook-choice";
 import { stripeMapSiteIdFromCheckoutSession } from "../lib/talispros/stripe-mapsite-session";
 
-describe("Mapsite™ payment status helpers", () => {
+describe("Mapsite payment status helpers", () => {
   it("treats completed, paid, complete, and succeeded as paid", () => {
     expect(isCompletedTalisprosPaymentStatus("completed")).toBe(true);
     expect(isCompletedTalisprosPaymentStatus("COMPLETED")).toBe(true);

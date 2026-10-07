@@ -10,7 +10,7 @@ export type MapsiteSeoFields = {
 };
 
 /**
- * Thin Mapsite™ row for generateMetadata — real titles/addresses, no full view load.
+ * Thin Mapsite row for generateMetadata — real titles/addresses, no full view load.
  */
 export async function loadMapsiteSeoFields(
   fastCode: string,
@@ -57,7 +57,7 @@ export async function loadMapsiteSeoFields(
     };
   } catch (error) {
     console.warn(
-      "[seo] Mapsite™ fields failed:",
+      "[seo] Mapsite fields failed:",
       error instanceof Error ? error.message : error,
     );
     return null;

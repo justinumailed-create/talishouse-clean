@@ -390,7 +390,7 @@ async function linkPaymentRecordToMapSite(options: {
         .eq("paypal_order_id", options.paypalOrderId);
     }
   } catch (error) {
-    console.warn("[talispros-payment] Could not link payment to Mapsite™:", error);
+    console.warn("[talispros-payment] Could not link payment to Mapsite:", error);
   }
 }
 

@@ -12,7 +12,7 @@ import { accountTypeForAudience } from "@/lib/talispros/account-capabilities";
 
 type DemoClaimMarketButtonProps = {
   mapsiteId: string;
-  /** Prefill from Mapsite™ owner / agent when it looks like a real name. */
+  /** Prefill from Mapsite owner / agent when it looks like a real name. */
   suggestedFullName?: string | null;
   className?: string;
   align?: "start" | "center" | "end";
@@ -50,7 +50,7 @@ function audienceFromSegmentHref(href: string): string {
 }
 
 /**
- * In-place Claim Your Market™ on a demonstration Mapsite™:
+ * In-place Claim Your Market™ on a demonstration Mapsite:
  * choose /start audience → collect name → issue FAST Code™ → open live claimed URL.
  */
 export default function DemoClaimMarketButton({

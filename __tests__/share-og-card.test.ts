@@ -68,7 +68,7 @@ describe("share OG composition", () => {
     expect(shareOgImageryBbox({ ...DC02, zoom: 3 }).zoom).toBe(15);
   });
 
-  it("plans a map pin for Mapsite™ links and a pin-free parting shot for the viewer", () => {
+  it("plans a map pin for Mapsite links and a pin-free parting shot for the viewer", () => {
     expect(
       planMapsiteShareOg({
         hasCoordinates: true,

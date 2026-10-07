@@ -17,27 +17,27 @@ This guide walks through the live product as a user. It does not describe backen
 
 ## What Talispros™ is
 
-Talispros™ is the professional platform for real estate brokers, agents, For-Sale-By-Owner (FSBO) sellers, builders, and Adpro service partners. From Start, a user chooses who they are, opens a Mapsite™ on a map, claims a market, registers, pays when required, and builds marketing assets such as Talisbooks™ E-Books.
+Talispros™ is the professional platform for real estate brokers, agents, For-Sale-By-Owner (FSBO) sellers, builders, and Adpro service partners. From Start, a user chooses who they are, opens a Mapsite on a map, claims a market, registers, pays when required, and builds marketing assets such as Talisbooks™ E-Books.
 
 ## What Talismaps™ is
 
-Talismaps™ is the map experience behind Mapsites™ and related map tools. On the Mapsite™ screen, the map shows market pins and property flags. Separate Talismaps™ dashboard and editor pages exist for map management (some areas still show “coming soon”).
+Talismaps™ is the map experience behind Mapsites and related map tools. On the Mapsite screen, the map shows market pins and property flags. Separate Talismaps™ dashboard and editor pages exist for map management (some areas still show “coming soon”).
 
-## What a Mapsite™ is
+## What a Mapsite is
 
-A Mapsite™ is a fullscreen map landing page for a market or listing. It shows a property pin/flag, listing media, and (when available) resource buttons such as MLS®, Broker URL, TEB™ (E-Book shelf), and TTV™. Unclaimed Mapsites™ invite “Claim a Market.” Claimed Mapsites™ move into registration, payment, and owner tools.
+A Mapsite is a fullscreen map landing page for a market or listing. It shows a property pin/flag, listing media, and (when available) resource buttons such as MLS®, Broker URL, TEB™ (E-Book shelf), and TTV™. Unclaimed Mapsites invite “Claim a Market.” Claimed Mapsites move into registration, payment, and owner tools.
 
 ## What a Published Site is
 
-In practice today, a “published” Mapsite™ is an **active** Mapsite™ with a FAST Code that can be opened at a stable public URL (for example `/talispros/mapsite/{accountType}/{fastCode}` or the legacy `/ma/{fastCode}` path). Marketing Admin can also mark a build request status as **Published**. There is no separate `/admin/published-sites` page in the current app.
+In practice today, a “published” Mapsite is an **active** Mapsite with a FAST Code that can be opened at a stable public URL (for example `/talispros/mapsite/{accountType}/{fastCode}` or the legacy `/ma/{fastCode}` path). Marketing Admin can also mark a build request status as **Published**. There is no separate `/admin/published-sites` page in the current app.
 
 ## What Marketing Admin is
 
-Marketing Admin is the internal console used by the marketing team (for example Rahul) to review build / claim requests, assign FAST Codes, generate draft Mapsites™, configure resource links, manage E-Books, send registration links, and activate Mapsites™. Primary path: `/talispros/marketing/admin` (login at `/talispros/marketing/login`).
+Marketing Admin is the internal console used by the marketing team (for example Rahul) to review build / claim requests, assign FAST Codes, generate draft Mapsites, configure resource links, manage E-Books, send registration links, and activate Mapsites. Primary path: `/talispros/marketing/admin` (login at `/talispros/marketing/login`).
 
 ## What FAST Codes are
 
-A FAST Code is a short access code that identifies an account or Mapsite™ (examples seeded in data: `LRG1` / `lrg1`, `DEMO`). Users and admins use FAST Codes to open Mapsites™, sign into client analytics, manage admin Mapsite™ editors, and share TEB™ library shelves.
+A FAST Code is a short access code that identifies an account or Mapsite (examples seeded in data: `LRG1` / `lrg1`, `DEMO`). Users and admins use FAST Codes to open Mapsites, sign into client analytics, manage admin Mapsite editors, and share TEB™ library shelves.
 
 ## What Root Accounts are
 
@@ -49,7 +49,7 @@ A Derivative Account™ sits under a Root Account™. Plans describe multi-PIN s
 
 ## What AdPro PINs are
 
-An Adpro PIN is a service-provider placement under the Adpro path. Plans include Single Adpro PIN and larger PIN packs. On Start, “I am an Adpro Service Provider” opens Mapsite™ with the Adpro audience. After activation, Adpro book entitlements allow one E-Book per PIN / Mapsite™ shelf.
+An Adpro PIN is a service-provider placement under the Adpro path. Plans include Single Adpro PIN and larger PIN packs. On Start, “I am an Adpro Service Provider” opens Mapsite with the Adpro audience. After activation, Adpro book entitlements allow one E-Book per PIN / Mapsite shelf.
 
 ---
 
@@ -70,17 +70,17 @@ Routes below were read from the App Router (`app/**/page.tsx`) and `next.config.
 
 | Route | Purpose | Who | Expected result |
 |-------|---------|-----|-----------------|
-| `/talispros/start` | Segment chooser (“What best describes you?”) | New prospects | Four audience cards; each opens Mapsite™ with an audience query |
-| `/talispros/mapsite` | Fullscreen Mapsite™ map | Prospects / owners | Demo or loaded Mapsite™ on the map; pin/flag interaction |
-| `/talispros/mapsite/[accountType]/[fastCode]` | Claimed / coded Mapsite™ | Owners / testers | Mapsite™ for that FAST Code and account type segment |
-| `/talispros/markets/claim-a-market` | Claim a Market registration | Prospect claiming DEMO or a pin | Claim form; on success returns to Mapsite™ with `startHere=1` |
+| `/talispros/start` | Segment chooser (“What best describes you?”) | New prospects | Four audience cards; each opens Mapsite with an audience query |
+| `/talispros/mapsite` | Fullscreen Mapsite map | Prospects / owners | Demo or loaded Mapsite on the map; pin/flag interaction |
+| `/talispros/mapsite/[accountType]/[fastCode]` | Claimed / coded Mapsite | Owners / testers | Mapsite for that FAST Code and account type segment |
+| `/talispros/markets/claim-a-market` | Claim a Market registration | Prospect claiming DEMO or a pin | Claim form; on success returns to Mapsite with `startHere=1` |
 | `/talispros/markets/for-sale-by-owners` | FSBO market landing | FSBO audience | Market page content for FSBO |
 | `/talispros/markets/real-estate-professionals` | Pro market landing | Agents / pros | Market page content for professionals |
 | `/talispros/markets/talishouse-builders` | Builders market landing | Builders | Market page content for Talishouse builders |
 | `/talispros/claim-a-market` | Alternate claim entry | Prospects | Claim flow entry (alongside markets path) |
-| `/talispros/build-mapsite` | Build a Mapsite™ form | Applicants | Multi-section build request submission |
+| `/talispros/build-mapsite` | Build a Mapsite form | Applicants | Multi-section build request submission |
 | `/talispros/register` | Account registration | New accounts | Root / Derivative / Adpro registration UI |
-| `/talispros/ebook-choice` | Choose E-Book path | Mapsite™ owners after Start Here | Two options: generate own, or have Rahul build |
+| `/talispros/ebook-choice` | Choose E-Book path | Mapsite owners after Start Here | Two options: generate own, or have Rahul build |
 | `/talispros/ebook-generate` | Self-serve E-Book generation | Owners | Draft generation flow (no payment on this step) |
 | `/talispros/ebook-rahul` | Rahul-assisted upload | Owners | Asset upload for marketing to build the book |
 | `/talisbooks/viewer` | Sample soft-cover E-Book | Anyone | Demo FSBO sample magazine viewer |
@@ -91,11 +91,11 @@ Routes below were read from the App Router (`app/**/page.tsx`) and `next.config.
 | `/talispros/marketing/admin/[id]` | Request detail | Marketing managers | Full request workflow, resources, payment link tools |
 | `/talispros/admin/login` | Talispros admin sign-in | Admins / PMC | Email + password (Supabase) |
 | `/talispros/admin` | Talispros admin home | Admins | Links into PMC / forms / mapsites tools |
-| `/talispros/admin/mapsites/[fastCode]` | Mapsite™ admin editor | Admins | Edit Mapsite™, share links, E-Book panel, resources |
+| `/talispros/admin/mapsites/[fastCode]` | Mapsite admin editor | Admins | Edit Mapsite, share links, E-Book panel, resources |
 | `/talispros/admin/pmc` | PMC browse | Admins | Admin map / PMC tools |
-| `/talispros/client/login` | Client analytics login | Mapsite™ owners | Email + FAST Code (no password) |
+| `/talispros/client/login` | Client analytics login | Mapsite owners | Email + FAST Code (no password) |
 | `/talispros/client/dashboard` | Client marketing dashboard | Authenticated clients | Client metrics / reports view |
-| `/ma/[fastcode]` | Legacy public Mapsite™ | Public / partners | Mapsite™ rendered by FAST Code |
+| `/ma/[fastcode]` | Legacy public Mapsite | Public / partners | Mapsite rendered by FAST Code |
 
 ---
 
@@ -118,8 +118,8 @@ Routes below were read from the App Router (`app/**/page.tsx`) and `next.config.
 | `/register` | Legacy registration + PayPal | Public | Registration with PayPal buttons |
 | `/register/success` | Registration success | Registrants | Success confirmation |
 | `/registration-success` | Alternate success | Registrants | Success confirmation |
-| `/register-mapsite` | Mapsite™ registration + PayPal | Public | PayPal-enabled Mapsite™ registration |
-| `/build-mapsite` | Legacy build form | Applicants | Older build-a-Mapsite™ form |
+| `/register-mapsite` | Mapsite registration + PayPal | Public | PayPal-enabled Mapsite registration |
+| `/build-mapsite` | Legacy build form | Applicants | Older build-a-Mapsite form |
 | `/subscription` | Subscription / PayPal vault UI | Public | PayPal subscription buttons |
 | `/checkout` | Checkout | Public | Checkout page |
 | `/success` | Generic success | Public | Confirmation |
@@ -135,9 +135,9 @@ Routes below were read from the App Router (`app/**/page.tsx`) and `next.config.
 | `/admin` | Admin root | Admins | Admin landing |
 | `/admin/dashboard` | Admin dashboard | Admins | Dashboard after login |
 | `/admin/build-requests` | Build requests | Admins | Request list |
-| `/admin/marketing` | Marketing queue (legacy) | Marketing | Assign FAST Code / generate Mapsite™ actions |
+| `/admin/marketing` | Marketing queue (legacy) | Marketing | Assign FAST Code / generate Mapsite actions |
 | `/admin/marketing/[id]` | Marketing request detail | Marketing | Request detail |
-| `/admin/mapsites/[fastCode]` | Admin Mapsite™ by code | Admins | Mapsite™ admin editor |
+| `/admin/mapsites/[fastCode]` | Admin Mapsite by code | Admins | Mapsite admin editor |
 | `/admin/fast-codes` | FAST Code management | Admins | Codes list / tools |
 | `/admin/registrations` | Registrations & PayPal IDs | Admins | Registration records |
 | `/admin/payments` | Payments | Admins | Payment records |
@@ -165,7 +165,7 @@ Routes below were read from the App Router (`app/**/page.tsx`) and `next.config.
 | `/crm/leads` | CRM leads | CRM staff | Leads |
 | `/crm/associates` | CRM associates | CRM staff | Associates |
 | `/crm/build-requests` | CRM build requests | CRM staff | Build requests |
-| `/crm/mapsites` | CRM Mapsites™ | CRM staff | Mapsites™ |
+| `/crm/mapsites` | CRM Mapsites | CRM staff | Mapsites |
 | `/crm/production-queue` | CRM production | CRM staff | Queue |
 | `/crm/activity-logs` | Activity logs | CRM staff | Logs |
 | `/talispros/admin/build-requests` | Talispros build requests | Admins | Build requests |
@@ -177,8 +177,8 @@ Routes below were read from the App Router (`app/**/page.tsx`) and `next.config.
 | `/talispros/marketing` | Marketing home | Marketing | Marketing landing |
 | `/talispros/marketing/clients/[fastCode]` | Client marketing view | Marketing | Client by FAST Code |
 | `/talispros/marketing/unauthorized` | Unauthorized | Blocked users | Access denied |
-| `/talispros/mapsites/[fastCode]` | Mapsite™ by code | Users | Mapsite™ view |
-| `/talispros/mapsites/[fastCode]/edit` | Edit Mapsite™ | Owners / admins | Edit UI |
+| `/talispros/mapsites/[fastCode]` | Mapsite by code | Users | Mapsite view |
+| `/talispros/mapsites/[fastCode]/edit` | Edit Mapsite | Owners / admins | Edit UI |
 | `/talispros/client/books` | Client books portal | Clients | Scaffold — editing not enabled yet |
 
 ---
@@ -218,7 +218,7 @@ Routes below were read from the App Router (`app/**/page.tsx`) and `next.config.
 | Route | Purpose | Who | Expected result |
 |-------|---------|-----|-----------------|
 | `/fast-code` | FAST Code generator | Partners | Generate a FAST Code (iframe-friendly) |
-| `/partner-access` | Partner access by code | Partners | Access Mapsites™ with a code |
+| `/partner-access` | Partner access by code | Partners | Access Mapsites with a code |
 | `/partner-view` | Partner project view | Partners | Map embed + project interest form |
 | `/ttvaccess/[fastCode]` | TTV access redirect | Public | FAST Code access redirect |
 | `/a/[fastCode]` | Short associate / access path | Public | FAST Code route |
@@ -250,7 +250,7 @@ Routes below were read from the App Router (`app/**/page.tsx`) and `next.config.
 | `/add-project` | Add project | Public | Add project |
 | `/products/talisforms` | TalisForms product | Public | Forms product |
 | `/privacy` / `/terms` | Legal | Public | Policies |
-| `/mapsite` / `/mapsite/[slug]` | Alternate Mapsite™ paths | Public | Mapsite™ by slug |
+| `/mapsite` / `/mapsite/[slug]` | Alternate Mapsite paths | Public | Mapsite by slug |
 | `/business-office` | Business office | Associates | Requires `auth` cookie (middleware) |
 | `/business-office/apply` | Apply (public) | Applicants | Public apply (middleware bypass) |
 | `/business-office/register` | Associate registration | Associates | Shows “Coming soon...” |
@@ -276,7 +276,7 @@ Passwords for Supabase-backed admin accounts are **not stored in this repository
 | Password | **Not in repo** — configured in Supabase Auth |
 | Allowlist | Environment variable `MARKETING_MANAGER_EMAILS` (comma-separated). If set, only listed emails may use Marketing Admin. |
 | FAST Code | N/A (session is email-based) |
-| Associated Mapsite™ | Operates on all queued build requests / Mapsites™ |
+| Associated Mapsite | Operates on all queued build requests / Mapsites |
 | Associated Published Site | N/A |
 
 Also usable via redirected path `/marketing/login` → `/talispros/marketing/login`.
@@ -287,7 +287,7 @@ Also usable via redirected path `/marketing/login` → `/talispros/marketing/log
 
 | Field | Value |
 |-------|--------|
-| Role | Talispros Admin (also used for PMC / Mapsite™ admin tools) |
+| Role | Talispros Admin (also used for PMC / Mapsite admin tools) |
 | Login URL | `/talispros/admin/login` |
 | Email | Supabase Auth email |
 | Password | **Not in repo** — configured in Supabase Auth |
@@ -322,7 +322,7 @@ Codes are displayed on the CRM login page as “Demo access codes.”
 
 ---
 
-## 5. Client Analytics (Demo / seeded Mapsite™ owner)
+## 5. Client Analytics (Demo / seeded Mapsite owner)
 
 | Field | Value |
 |-------|--------|
@@ -332,17 +332,17 @@ Codes are displayed on the CRM login page as “Demo access codes.”
 | Username | Same as email |
 | Password | None — authentication is **email + FAST Code** |
 | FAST Code | `lrg1` / `LRG1` |
-| Associated Mapsite™ | Seeded production template Mapsite™ `LRG1` |
-| Associated Published Site | Active Mapsite™ for `LRG1` (when migrations applied) |
+| Associated Mapsite | Seeded production template Mapsite `LRG1` |
+| Associated Published Site | Active Mapsite for `LRG1` (when migrations applied) |
 
 ---
 
-## 6. Seeded Mapsites™ / demo accounts (no passwords)
+## 6. Seeded Mapsites / demo accounts (no passwords)
 
 | Identifier | Role / type | Email on record | Password | Notes |
 |------------|-------------|-----------------|----------|-------|
-| FAST `DEMO` | Demonstration unclaimed Mapsite™ | `demo@talispros.com` | None | Fixed ID; used by `/talispros/mapsite` claim demos |
-| FAST `LRG1` / `lrg1` | Root Account™ template Mapsite™ | Updated in seeds to `rahulc@talispros.com` (earlier seed used `lydia.gaertner@example.com`) | None | Active template; client analytics seed |
+| FAST `DEMO` | Demonstration unclaimed Mapsite | `demo@talispros.com` | None | Fixed ID; used by `/talispros/mapsite` claim demos |
+| FAST `LRG1` / `lrg1` | Root Account™ template Mapsite | Updated in seeds to `rahulc@talispros.com` (earlier seed used `lydia.gaertner@example.com`) | None | Active template; client analytics seed |
 
 ---
 
@@ -353,7 +353,7 @@ These appear as **registration plan types**, not pre-seeded login users:
 | Plan | Label (UI) | Price (CAD) | Notes |
 |------|------------|-------------|-------|
 | `TEST_ACCOUNT` | TEST Account | $10 | Demo / QA Root-equivalent |
-| `ROOT_ACCOUNT` | Root Account™ | $998.50 (+ monthly listed in plans) | Full Root — used for registration / Mapsite™ activation |
+| `ROOT_ACCOUNT` | Root Account™ | $998.50 (+ monthly listed in plans) | Full Root — used for registration / Mapsite activation |
 | `ROOT_ACCOUNT_1` | Root Account™ ($1) | $1 + GST | **Retired.** Historical demo activations only; not offered at checkout |
 | `DERIVATIVE_ACCOUNT` | Derivative Account™ | $198.50 | Under a Root |
 | `ADPRO_SINGLE` / `ADPRO_10` / `ADPRO_100` / `ADPRO_UNLIMITED` | Adpro PIN packs | Per plan | Adpro placements |
@@ -379,7 +379,7 @@ These appear as **registration plan types**, not pre-seeded login users:
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client / admin auth |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server admin writes |
 | `MARKETING_MANAGER_EMAILS` | Marketing Admin allowlist |
-| `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | Mapsite™ / registration PayPal |
+| `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | Mapsite / registration PayPal |
 | `NEXT_PUBLIC_SITE_URL` or `NEXT_PUBLIC_APP_URL` | Absolute share links |
 | `RESEND_API_KEY` / `EMAIL_FROM` | Transactional email |
 | Map provider keys | Google / MapTiler / Mapbox / Esri as configured |
@@ -415,7 +415,7 @@ Follow this sequence on the **current** implementation. Start audience labels ma
 
 **Expected result:** Browser navigates to `/talispros/mapsite?audience=fsbos`.
 
-**Alternatives (same Mapsite™ shell, different audience):**
+**Alternatives (same Mapsite shell, different audience):**
 
 | Choice | URL |
 |--------|-----|
@@ -423,20 +423,20 @@ Follow this sequence on the **current** implementation. Start audience labels ma
 | Real Estate Professional | `/talispros/mapsite?audience=listings` |
 | Adpro Service Provider | `/talispros/mapsite?audience=adpro` |
 
-**Builders:** not a Start card. Use market page `/talispros/markets/talishouse-builders` or Mapsite™ `?audience=homes`.
+**Builders:** not a Start card. Use market page `/talispros/markets/talishouse-builders` or Mapsite `?audience=homes`.
 
 [Screenshot Here]
 
 ---
 
-### Step 3 — Open Mapsite™ (demo pin)
+### Step 3 — Open Mapsite (demo pin)
 
 **On:** `/talispros/mapsite?audience=fsbos`
 
 **Expected result:**
 
 - Fullscreen map  
-- Demonstration Mapsite™ pin (FAST Code `DEMO` when seeded)  
+- Demonstration Mapsite pin (FAST Code `DEMO` when seeded)  
 - Listing card / property flag available when the pin is selected  
 
 [Screenshot Here]
@@ -476,9 +476,9 @@ Complete the claim / registration form.
 
 ---
 
-### Step 6 — Post-claim Mapsite™ (payment)
+### Step 6 — Post-claim Mapsite (payment)
 
-**On:** Claimed Mapsite™ URL
+**On:** Claimed Mapsite URL
 
 **Expected result:**
 
@@ -494,12 +494,12 @@ If `NEXT_PUBLIC_PAYPAL_CLIENT_ID` is missing, the card shows that PayPal is not 
 
 ### Step 7 — Complete PayPal (when configured)
 
-**Action:** Pay with the PayPal buttons on the Mapsite™ payment card.
+**Action:** Pay with the PayPal buttons on the Mapsite payment card.
 
 **Expected result:**
 
 - Payment processed via `processMapSiteRootPaypalPayment`  
-- Redirect back into the Mapsite™ flow  
+- Redirect back into the Mapsite flow  
 - Payment card replaced by **Express an Interest** when payment is on file  
 
 [Screenshot Here]
@@ -545,7 +545,7 @@ No payment and no registration on this step.
 
 **Rahul path:** Complete `/talispros/ebook-rahul` uploads so Marketing Admin can finish the book.
 
-**Expected result:** Draft book available according to entitlements (first draft allowed before full activation; publish / multi-book features lock until Mapsite™ is activated).
+**Expected result:** Draft book available according to entitlements (first draft allowed before full activation; publish / multi-book features lock until Mapsite is activated).
 
 [Screenshot Here]
 
@@ -555,7 +555,7 @@ No payment and no registration on this step.
 
 **Open:** `/talisbooks/library?fastCode={YOUR_CODE}`
 
-**Expected result:** Shelf scoped to that FAST Code. TEB™ button on Mapsite™ also deep-links here when configured.
+**Expected result:** Shelf scoped to that FAST Code. TEB™ button on Mapsite also deep-links here when configured.
 
 [Screenshot Here]
 
@@ -571,11 +571,11 @@ No payment and no registration on this step.
 
 ---
 
-### Step 14 — Open published / active Mapsite™ by FAST Code
+### Step 14 — Open published / active Mapsite by FAST Code
 
 **Open:** `/talispros/mapsite/{accountType}/{fastCode}` or `/ma/{fastCode}`
 
-**Expected result:** Public Mapsite™ for that code with configured media and resource buttons.
+**Expected result:** Public Mapsite for that code with configured media and resource buttons.
 
 [Screenshot Here]
 
@@ -605,30 +605,30 @@ On the queue / detail page, use available actions such as:
 
 - Set status (e.g. Under Review, Changes Requested, Awaiting Registration, Published, Rejected)  
 - **Approve** build request (`marketingApproveBuildRequest`)  
-- **Activate** Mapsite™ (`marketingActivateMapSite`)
+- **Activate** Mapsite (`marketingActivateMapSite`)
 
 Exact button labels appear on the admin UI for each request state.
 
 ## How FAST Codes are generated
 
-Use **Assign FAST Code** / **Assign FAST Code** workflow actions on the request (`marketingAssignFastCode` / `assignFastCode`). After assignment, the FAST Code appears on the request and linked Mapsite™.
+Use **Assign FAST Code** / **Assign FAST Code** workflow actions on the request (`marketingAssignFastCode` / `assignFastCode`). After assignment, the FAST Code appears on the request and linked Mapsite.
 
-## How Mapsites™ are managed
+## How Mapsites are managed
 
-1. **Generate draft Mapsite™** from the request (`marketingGenerateDraftMapSite`)  
+1. **Generate draft Mapsite** from the request (`marketingGenerateDraftMapSite`)  
 2. Open `/talispros/admin/mapsites/[fastCode]` (or `/admin/mapsites/[fastCode]`) for full editor  
 3. Update listing media, status, and resource URLs  
 
 ## How Published Sites are managed
 
 1. Move build request status to **Published** when appropriate  
-2. Ensure Mapsite™ status is **active**  
-3. Share the public Mapsite™ URL (`/talispros/mapsite/.../{fastCode}` or `/ma/{fastCode}`)  
+2. Ensure Mapsite status is **active**  
+3. Share the public Mapsite URL (`/talispros/mapsite/.../{fastCode}` or `/ma/{fastCode}`)  
 4. There is no dedicated “Published Sites” index page today  
 
 ## How E-Books are managed
 
-On Mapsite™ admin (`MapSiteAdminEbookPanel`):
+On Mapsite admin (`MapSiteAdminEbookPanel`):
 
 - Create / update draft from form fields  
 - Edit pages, reorder non-permanent pages, replace images  
@@ -638,16 +638,16 @@ On Mapsite™ admin (`MapSiteAdminEbookPanel`):
 
 ## How links are copied
 
-In Mapsite™ admin **Share registration links**:
+In Mapsite admin **Share registration links**:
 
 1. Claim invite (pre-claim)  
-2. Post-claim success Mapsite™ (pre-PayPal) — **disabled / greyed out after PayPal success**
+2. Post-claim success Mapsite (pre-PayPal) — **disabled / greyed out after PayPal success**
 
 Use **Copy** / **Open** on each row.
 
 ## How resource buttons are configured
 
-On Marketing Admin request detail / Mapsite™ resources, set:
+On Marketing Admin request detail / Mapsite resources, set:
 
 | Button | Field |
 |--------|--------|
@@ -656,21 +656,21 @@ On Marketing Admin request detail / Mapsite™ resources, set:
 | TEB™ | `teb_url` (or auto shelf via FAST Code) |
 | TTV™ | `ttv_url` (defaults to `/talistv` when empty) |
 
-Unconfigured buttons appear disabled on the Mapsite™ popup.
+Unconfigured buttons appear disabled on the Mapsite popup.
 
 ## How payment status changes
 
 Completed PayPal capture is stored for the claim (`talispros_payments` / payment note). Effects:
 
 - Pre-PayPal share link greys out  
-- Mapsite™ payment card gives way to Express Interest  
+- Mapsite payment card gives way to Express Interest  
 - Admin UI can show payment received  
 
 Also review `/admin/registrations` and `/admin/payments` for captured PayPal order / capture IDs.
 
 ---
 
-# Part 6 — Mapsite™ Test
+# Part 6 — Mapsite Test
 
 Test on `/talispros/mapsite` (DEMO) and on a claimed code URL.
 
@@ -685,14 +685,14 @@ Test on `/talispros/mapsite` (DEMO) and on a claimed code URL.
 | **Registration / Claim** | Unclaimed → Claim a Market | Claim form; returns with `startHere=1` |
 | **Express Interest** | After payment on file | Contact form under listing stack |
 | **Sample E-Book** | Open viewer or TEB sample | Soft-cover sample book |
-| **Published Site** | Open active FAST Code URL | Public Mapsite™ with live data |
+| **Published Site** | Open active FAST Code URL | Public Mapsite with live data |
 
 [Screenshot Here] — PIN selected  
 [Screenshot Here] — Flag / popup with resource buttons  
 [Screenshot Here] — Claim form  
 [Screenshot Here] — PayPal card  
 [Screenshot Here] — Express Interest  
-[Screenshot Here] — Active published Mapsite™  
+[Screenshot Here] — Active published Mapsite  
 
 ---
 
@@ -702,7 +702,7 @@ Test on `/talispros/mapsite` (DEMO) and on a claimed code URL.
 
 - Built-in demo at `/talisbooks/viewer` (`createDemoViewerBook`, slug `sample-ebook`)  
 - Also reachable as `/talisbooks/viewer/sample-ebook`  
-- FSBO sample intentionally omits brokerage pages 2–3; Mapsite™ location is on page 2; permanent Glasshouse brochure sits before the soft back cover  
+- FSBO sample intentionally omits brokerage pages 2–3; Mapsite location is on page 2; permanent Glasshouse brochure sits before the soft back cover  
 
 ## How draft books appear
 
@@ -719,7 +719,7 @@ Test on `/talispros/mapsite` (DEMO) and on a claimed code URL.
 
 - Viewer: `/talisbooks/viewer/[slug]`  
 - Library shelf: `/talisbooks/library?fastCode=...`  
-- TEB™ resource button on Mapsite™  
+- TEB™ resource button on Mapsite  
 
 ## How page flipping works
 
@@ -735,7 +735,7 @@ No hardcover spine in the current sample viewer.
 ## What should happen after registration
 
 - First draft creation remains available  
-- Full publish, multi-book, bookshelf capacity, derivative/adpro extras unlock when the Mapsite™ is **ACTIVE** / activated (`activated_at`)  
+- Full publish, multi-book, bookshelf capacity, derivative/adpro extras unlock when the Mapsite is **ACTIVE** / activated (`activated_at`)  
 - Quotas after activation: Root / Derivative use standard shelf capacity; Adpro = 1 book per PIN shelf  
 
 ---
@@ -744,8 +744,8 @@ No hardcover spine in the current sample viewer.
 
 ## How PayPal is reached
 
-1. Claim a Mapsite™ (or complete registration that leads to a claimed Mapsite™)  
-2. On the Mapsite™, when claimed and unpaid, the **Complete registration** PayPal card appears  
+1. Claim a Mapsite (or complete registration that leads to a claimed Mapsite)  
+2. On the Mapsite, when claimed and unpaid, the **Complete registration** PayPal card appears  
 3. Requires `NEXT_PUBLIC_PAYPAL_CLIENT_ID`  
 4. Currency: CAD; intent: capture  
 
@@ -753,14 +753,14 @@ Alternate PayPal surfaces also exist on `/register`, `/register-mapsite`, and `/
 
 ## What happens after payment
 
-1. Server records PayPal order / capture for the Mapsite™ claim  
-2. User is redirected to the success Mapsite™ URL from the payment action  
+1. Server records PayPal order / capture for the Mapsite claim  
+2. User is redirected to the success Mapsite URL from the payment action  
 3. Express Interest unlocks  
 4. Pre-PayPal share link disables in admin  
 
 ## What changes inside Admin
 
-- Payment received flag on Mapsite™ share links / editor  
+- Payment received flag on Mapsite share links / editor  
 - Registrations / payments admin pages show PayPal IDs when present  
 - Marketing can proceed with activation / Published status as appropriate  
 
@@ -770,13 +770,13 @@ Alternate PayPal surfaces also exist on `/register`, `/register-mapsite`, and `/
 |----------------|---------------|
 | PayPal checkout card | Express Interest form |
 | Pre-PayPal share link active | Pre-PayPal share link disabled |
-| Publish / multi-book may still wait for Mapsite™ activation | Activation + payment path unlocks entitlements when status is ACTIVE |
+| Publish / multi-book may still wait for Mapsite activation | Activation + payment path unlocks entitlements when status is ACTIVE |
 
 Resource buttons (MLS / URL / TEB / TTV) depend on URL configuration, not solely on PayPal.
 
 ## Which links become active
 
-- Post-payment: Express Interest on Mapsite™  
+- Post-payment: Express Interest on Mapsite  
 - Claim invite link remains usable for new claimants as designed  
 - TEB / viewer links activate when books exist and URLs are set  
 
@@ -795,27 +795,27 @@ Only items evidenced in code as incomplete, stubbed, “coming soon,” placehol
 | Client books portal scaffold | `/talispros/client/books` states editing is not enabled yet |
 | Business office associate registration | `/business-office/register` shows “Coming soon...” |
 | Business office auth gate | `/business-office/*` (except apply) requires `auth` cookie via middleware |
-| PayPal depends on env | Missing `NEXT_PUBLIC_PAYPAL_CLIENT_ID` blocks Mapsite™ checkout UI |
+| PayPal depends on env | Missing `NEXT_PUBLIC_PAYPAL_CLIENT_ID` blocks Mapsite checkout UI |
 | Marketing Admin passwords not in repo | Must use Supabase Auth + optional email allowlist |
 | Map provider placeholder keys | Dev warnings when map keys are placeholders / missing |
 | Automatic full publishing workflow | Draft → publish requires admin / entitlement gates; not a fully automatic end-to-end publisher |
-| Glasshouse brochure | Permanent pages exist in the sample structure; treat as fixed brochure pages, not a separate editable Glasshouse product flow inside Mapsite™ |
+| Glasshouse brochure | Permanent pages exist in the sample structure; treat as fixed brochure pages, not a separate editable Glasshouse product flow inside Mapsite |
 | Partner / older build stack | Legacy `/build-mapsite` and older admin paths coexist with Talispros paths — prefer `/talispros/...` for demos |
 
 ---
 
 # Part 10 — Checklist
 
-## Start & Mapsite™
+## Start & Mapsite
 
 - [ ] Open `/talispros/start`  
 - [ ] Select **For-Sale-By-Owner Seller**  
-- [ ] Confirm Mapsite™ opens with `audience=fsbos`  
+- [ ] Confirm Mapsite opens with `audience=fsbos`  
 - [ ] Select demo PIN  
 - [ ] Open property flag / popup  
 - [ ] Confirm Claim a Market (unclaimed)  
 - [ ] Complete claim form  
-- [ ] Confirm return to Mapsite™ with `startHere=1`  
+- [ ] Confirm return to Mapsite with `startHere=1`  
 - [ ] Confirm Start Here overlay (if not previously dismissed)  
 
 ## Resources & media
@@ -837,7 +837,7 @@ Only items evidenced in code as incomplete, stubbed, “coming soon,” placehol
 
 ## Payment & interest
 
-- [ ] Confirm PayPal card on unpaid claimed Mapsite™  
+- [ ] Confirm PayPal card on unpaid claimed Mapsite  
 - [ ] Complete PayPal (sandbox / live as provided)  
 - [ ] Confirm Express Interest appears  
 - [ ] Submit Express Interest form  
@@ -848,16 +848,16 @@ Only items evidenced in code as incomplete, stubbed, “coming soon,” placehol
 - [ ] View pending build requests  
 - [ ] Open request detail  
 - [ ] Assign FAST Code  
-- [ ] Generate draft Mapsite™ (if needed)  
+- [ ] Generate draft Mapsite (if needed)  
 - [ ] Configure MLS / Broker / TEB / TTV URLs  
 - [ ] Copy claim & post-claim share links  
 - [ ] Confirm pre-PayPal link disables after payment  
-- [ ] Manage / publish E-Book from Mapsite™ admin panel  
+- [ ] Manage / publish E-Book from Mapsite admin panel  
 - [ ] Activate / set Published as appropriate  
 
 ## Published / client
 
-- [ ] Open active Mapsite™ by FAST Code  
+- [ ] Open active Mapsite by FAST Code  
 - [ ] Optional: client login `rahulc@talispros.com` + `lrg1`  
 - [ ] Optional: CRM codes ADMIN / MANAGER / ASSOCIATE  
 - [ ] Optional: platform admin FAST Code `ADMIN123`  
@@ -880,21 +880,21 @@ Only items evidenced in code as incomplete, stubbed, “coming soon,” placehol
 
 ```
 app/
-  talispros/          # Start, Mapsite™, claim, register, ebook, marketing, admin, client
+  talispros/          # Start, Mapsite, claim, register, ebook, marketing, admin, client
   talisbooks/         # Library, viewer, dashboard, editor
   talismaps/          # Maps product + dashboard/editor
   admin/              # Legacy platform admin
   crm/                # CRM role-code console
   api/                # REST handlers (fast-code, talismaps, build upload, cron, …)
   build-mapsite/      # Legacy build form
-  ma/[fastcode]/       # Legacy public Mapsite™
+  ma/[fastcode]/       # Legacy public Mapsite
 components/
-  talispros/          # Start, claim, Mapsite™ UI, ebook clients
-  talispros-admin/    # Mapsite™ admin editor, ebook panel, share links
+  talispros/          # Start, claim, Mapsite UI, ebook clients
+  talispros-admin/    # Mapsite admin editor, ebook panel, share links
   talisbooks/         # Viewer shell, library shell
   talismaps/          # Map engine embeds / editor
 lib/
-  talispros/          # Mapsite™ state, audience, platform loaders
+  talispros/          # Mapsite state, audience, platform loaders
   talisbooks/         # Viewer, entitlements, ebook services, permanent pages
   registration-*.ts   # Plans / markets
   marketing-manager-auth.ts
@@ -911,7 +911,7 @@ docs/                 # This guide + prior reports
 | Concern | Primary files |
 |---------|----------------|
 | Start segments | `lib/talispros/start-content.ts`, `components/talispros/TalisprosStartSidebar.tsx` |
-| Mapsite™ app | `components/talispros/mapsite/MapSiteApplication.tsx` |
+| Mapsite app | `components/talispros/mapsite/MapSiteApplication.tsx` |
 | Claim success | `components/talispros/ClaimMarketRegistrationClient.tsx` |
 | Payment card | `components/talispros/mapsite/MapSitePaymentCard.tsx` |
 | Express Interest | `components/talispros/mapsite/MapSiteExpressInterestCard.tsx` |
@@ -953,14 +953,14 @@ From `lib/database.types.ts` / migrations (non-exhaustive but demo-critical):
 
 | Table | Use |
 |-------|-----|
-| `mapsites` | Mapsite™ records, status, resource URLs, FAST Code |
-| `pins` | Map pins under Mapsites™ |
+| `mapsites` | Mapsite records, status, resource URLs, FAST Code |
+| `pins` | Map pins under Mapsites |
 | `accounts` | Account rows (client login match) |
 | `fast_codes` | FAST Code registry |
 | `build_requests` | Claim / build queue |
 | `build_request_registrations` | Registration linkage |
 | `mapsite_requests` / `mapsite_assets` | Legacy / asset pipeline |
-| `talispros_payments` | Mapsite™ PayPal payment notes |
+| `talispros_payments` | Mapsite PayPal payment notes |
 | `registrations` / `payments` | Registration PayPal captures |
 | `categories` | Account categories (root, etc.) |
 | `client_marketing_metrics` / `client_weekly_reports` | Client dashboard |
@@ -978,7 +978,7 @@ From `lib/database.types.ts` / migrations (non-exhaustive but demo-critical):
 | Platform `/admin` | FAST Code `ADMIN123` → `admin_session` cookie |
 | Client analytics | Email + FAST Code match on `accounts` or `mapsites` → `client_analytics_session` cookie |
 | CRM | Local role codes ADMIN / MANAGER / ASSOCIATE |
-| Mapsite™ owner | `mapsite_owner_fast_code` / root account cookies after claim |
+| Mapsite owner | `mapsite_owner_fast_code` / root account cookies after claim |
 | Business office | Middleware requires `auth` cookie except `/business-office/apply` |
 
 ---
@@ -993,7 +993,7 @@ Seeded codes: `DEMO`, `LRG1`/`lrg1`. Admin login code: `ADMIN123`.
 
 ---
 
-## Mapsite™ lifecycle
+## Mapsite lifecycle
 
 Platform statuses (normalized):
 
@@ -1001,17 +1001,17 @@ Platform statuses (normalized):
 
 - Claimable when `UNCLAIMED`  
 - Resource actions when submitted / review / active  
-- Demo Mapsite™: id `00000000-0000-4000-8000-000000000001`, FAST `DEMO`, `is_demonstration = true`
+- Demo Mapsite: id `00000000-0000-4000-8000-000000000001`, FAST `DEMO`, `is_demonstration = true`
 
 ---
 
 ## Published Site lifecycle
 
 1. Build / claim request created  
-2. FAST Code assigned; draft Mapsite™ generated  
+2. FAST Code assigned; draft Mapsite generated  
 3. Assets / resources configured  
-4. Payment may complete on Mapsite™  
-5. Marketing activates Mapsite™ (`activated_at` / status `active`)  
+4. Payment may complete on Mapsite  
+5. Marketing activates Mapsite (`activated_at` / status `active`)  
 6. Build request may be marked **Published**  
 7. Public URL shared: `/talispros/mapsite/{accountType}/{fastCode}` or `/ma/{fastCode}`
 
@@ -1021,8 +1021,8 @@ Platform statuses (normalized):
 
 1. User claims market or submits `/talispros/build-mapsite`  
 2. Row appears in Marketing Admin queue  
-3. Actions: assign FAST Code, generate Mapsite™, send registration, update status, update assets/resources, approve, activate  
-4. Linked Mapsite™ and payments connect through request id / FAST Code  
+3. Actions: assign FAST Code, generate Mapsite, send registration, update status, update assets/resources, approve, activate  
+4. Linked Mapsite and payments connect through request id / FAST Code  
 
 ---
 

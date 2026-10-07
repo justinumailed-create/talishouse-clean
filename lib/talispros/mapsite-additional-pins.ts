@@ -1,6 +1,6 @@
 /**
- * Mapsite™ additional PIN capacity.
- * Every Mapsite™ includes 1 PIN. Owners buy more at $10 USD each, up to 100 total.
+ * Mapsite additional PIN capacity.
+ * Every Mapsite includes 1 PIN. Owners buy more at $10 USD each, up to 100 total.
  */
 
 export const MAPSITE_INCLUDED_PIN_COUNT = 1;
@@ -122,7 +122,7 @@ export function additionalPinCheckoutQuantityError(
 ): string | null {
   const room = remainingPurchasablePins(pinQuota);
   if (room <= 0) {
-    return "This Mapsite™ already has the maximum of 100 PINs.";
+    return "This Mapsite already has the maximum of 100 PINs.";
   }
   if (!Number.isInteger(quantity) || quantity < 1) {
     return "Choose at least 1 PIN.";
@@ -178,7 +178,7 @@ export function grantAdditionalPins(
   const resolved = resolvePinQuota(current);
   const granted = Math.min(quantity, remainingPurchasablePins(resolved.pinQuota));
   if (granted <= 0) {
-    return { error: "This Mapsite™ already has the maximum of 100 PINs." };
+    return { error: "This Mapsite already has the maximum of 100 PINs." };
   }
 
   return {

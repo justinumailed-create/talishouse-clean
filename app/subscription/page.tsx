@@ -187,7 +187,7 @@ export default function SubscriptionPage() {
                 </h3>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>Wholesale pricing</li>
-                  <li>Your own dedicated Mapsite™</li>
+                  <li>Your own dedicated Mapsite</li>
                   <li>Priority production & delivery scheduling</li>
                   <li>Dedicated account manager</li>
                   <li>Early access to new product lines</li>

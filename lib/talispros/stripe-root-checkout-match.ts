@@ -104,7 +104,7 @@ export function selectPaidRootOneDollarCheckoutSessionsForEmail(
 }
 
 /**
- * Reconcile unpaid claimed Mapsites™ (and checkout return) from Stripe.
+ * Reconcile unpaid claimed Mapsites (and checkout return) from Stripe.
  * Skip demo listings and unclaimed/draft public pins.
  */
 export function shouldReconcileClaimedMapSiteFromStripe(options: {

@@ -10,7 +10,7 @@ import { useT } from "@/lib/i18n/client";
 /**
  * Clear the Knowledge Base session unlock and return to the locked unlock UI
  * (inline PayPal-style card + navbar drop) without a full-page redirect.
- * Label/style aligned with claimed Mapsite™ owner Logout.
+ * Label/style aligned with claimed Mapsite owner Logout.
  */
 export default function TalisUKbLogoutButton({
   className = "",

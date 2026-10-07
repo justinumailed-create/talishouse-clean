@@ -96,10 +96,10 @@ function RegisterMapSiteForm() {
       <div className="max-w-2xl mx-auto px-5 py-12">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">
-            Register Your Mapsite™
+            Register Your Mapsite
           </h1>
           <p className="text-neutral-500 mt-2">
-            Complete registration and payment to activate your Mapsite™.
+            Complete registration and payment to activate your Mapsite.
           </p>
         </div>
 
@@ -258,7 +258,7 @@ function RegisterMapSiteForm() {
           <div>
             <div className="bg-neutral-50 rounded-2xl p-6 mb-6">
               <h2 className="text-lg font-semibold text-neutral-900 mb-2">
-                Mapsite™ Registration
+                Mapsite Registration
               </h2>
               <div className="space-y-1 text-sm text-neutral-600">
                 <p>FAST Code: <span className="font-medium text-neutral-900">{fastCode}</span></p>
@@ -296,7 +296,7 @@ function RegisterMapSiteForm() {
                   return actions.order.create({
                     intent: "CAPTURE",
                     purchase_units: [{
-                      description: `Mapsite™ Registration (${canadaTaxWord(taxBreakdown.rate)})`,
+                      description: `Mapsite Registration (${canadaTaxWord(taxBreakdown.rate)})`,
                       amount: {
                         currency_code: "CAD",
                         value: totalDue.toFixed(2),
@@ -329,7 +329,7 @@ function RegisterMapSiteForm() {
         {step === "processing" && (
           <div className="text-center py-12">
             <div className="w-12 h-12 border-4 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-4" />
-            <p className="text-neutral-600">Creating your Mapsite™...</p>
+            <p className="text-neutral-600">Creating your Mapsite...</p>
           </div>
         )}
       </div>

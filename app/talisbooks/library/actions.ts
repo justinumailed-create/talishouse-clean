@@ -92,7 +92,7 @@ export async function createOrUpdateMapSiteEbookAction(input: {
   asAdmin?: boolean;
   /** When true, email the client that their E-Book is ready. */
   notifyClient?: boolean;
-  /** Attach viewer URL to Mapsite™ teb_url after save. */
+  /** Attach viewer URL to Mapsite teb_url after save. */
   attachToMapSite?: boolean;
 }): Promise<{
   success: boolean;

@@ -27,7 +27,7 @@ export default function MarketingAdminDemosClient() {
   const refresh = useCallback(async () => {
     const result = await listMarketingDemoMapSites();
     if (!result.ok) {
-      setError("Unable to load demo Mapsites™");
+      setError("Unable to load demo Mapsites");
       setRows([]);
     } else {
       setError(null);
@@ -67,7 +67,7 @@ export default function MarketingAdminDemosClient() {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-neutral-200 bg-neutral-50 px-4 py-3">
         <div>
           <h2 className="text-sm font-semibold text-neutral-900">
-            Demo Mapsites™
+            Demo Mapsites
           </h2>
           <p className="text-xs text-neutral-500">
             Demonstration pins with the pinned Talispros eBook. No FAST Codes.
@@ -98,10 +98,10 @@ export default function MarketingAdminDemosClient() {
       ) : null}
 
       {loading ? (
-        <div className="p-6 text-sm text-neutral-500">Loading demo Mapsites™…</div>
+        <div className="p-6 text-sm text-neutral-500">Loading demo Mapsites…</div>
       ) : rows.length === 0 ? (
         <div className="p-8 text-center text-sm text-neutral-500">
-          No demonstration Mapsites™ yet.
+          No demonstration Mapsites yet.
         </div>
       ) : (
         <ul className="divide-y divide-neutral-200">
@@ -161,7 +161,7 @@ export default function MarketingAdminDemosClient() {
                         onClick={() => {
                           if (
                             !window.confirm(
-                              "Delete this demo Mapsite™? The pinned eBook is not deleted.",
+                              "Delete this demo Mapsite? The pinned eBook is not deleted.",
                             )
                           ) {
                             return;

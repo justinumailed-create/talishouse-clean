@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 /**
- * Satellite still of a Mapsite™ pin for Jarlberg template page 1.
+ * Satellite still of a Mapsite pin for Jarlberg template page 1.
  * Fetched server-side so the compositor is not blocked by tile CORS.
  */
 export async function GET(request: Request) {

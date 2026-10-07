@@ -7,7 +7,7 @@ function repoSource(relativePath: string) {
   return readFileSync(path.join(__dirname, "..", relativePath), "utf8");
 }
 
-describe("published Mapsite™ shell", () => {
+describe("published Mapsite shell", () => {
   it("always renders the RM22 creative chrome, not the unpaid Play Video / Register panels", () => {
     expect(PUBLISHED_MAPSITE_SHELL).toBe("rm22-creative");
 
@@ -32,7 +32,7 @@ describe("published Mapsite™ shell", () => {
     expect(layout).toContain("shouldLockDemoPageInsert");
   });
 
-  it("greys out the Create New insert-pages block on demonstration Mapsites™", () => {
+  it("greys out the Create New insert-pages block on demonstration Mapsites", () => {
     const createNew = repoSource("components/mapsite/MapSiteCreateNewPanel.tsx");
     expect(createNew).toContain("pageInsertLocked");
     expect(createNew).toContain("data-demo-page-insert-locked");
@@ -44,7 +44,7 @@ describe("published Mapsite™ shell", () => {
     expect(bottomPanels).toContain("MapSiteCreativeLinks");
   });
 
-  it("shows the agency logo above the marketing manager on paid claimed Mapsites™", () => {
+  it("shows the agency logo above the marketing manager on paid claimed Mapsites", () => {
     const application = repoSource(
       "components/talispros/mapsite/MapSiteApplication.tsx",
     );
@@ -65,7 +65,7 @@ describe("published Mapsite™ shell", () => {
     expect(partnerCard).not.toContain("backdrop-blur");
   });
 
-  it("scroll-locks the claimed Mapsite™ viewport", () => {
+  it("scroll-locks the claimed Mapsite viewport", () => {
     const layout = repoSource("app/talispros/mapsite/layout.tsx");
     expect(layout).toContain("MapSiteViewportLock");
     expect(layout).toContain("mapsite-app-shell");

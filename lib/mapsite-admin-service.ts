@@ -214,7 +214,7 @@ export async function updateMapSiteAdmin(
 
   const mapsite = await getMapSiteByFastCode(input.fastCode);
   if (!mapsite) {
-    return { success: false, error: "Mapsite™ not found" };
+    return { success: false, error: "Mapsite not found" };
   }
 
   const client = requireServiceRoleClient();
@@ -396,7 +396,7 @@ export async function unpublishMapSite(
 
   const mapsite = await getMapSiteByFastCode(fastCode);
   if (!mapsite) {
-    return { success: false, error: "Mapsite™ not found" };
+    return { success: false, error: "Mapsite not found" };
   }
 
   const client = requireServiceRoleClient();
@@ -427,7 +427,7 @@ export async function saveMapSiteSeo(
 
   const mapsite = await getMapSiteByFastCode(input.fastCode);
   if (!mapsite) {
-    return { success: false, error: "Mapsite™ not found" };
+    return { success: false, error: "Mapsite not found" };
   }
 
   const client = requireServiceRoleClient();
@@ -495,7 +495,7 @@ export async function updateMapSiteGallery(
 
   const mapsite = await getMapSiteByFastCode(fastCode);
   if (!mapsite) {
-    return { success: false, error: "Mapsite™ not found" };
+    return { success: false, error: "Mapsite not found" };
   }
 
   const client = requireServiceRoleClient();
@@ -551,7 +551,7 @@ export async function deleteAdminActiveMapSite(
   }
   const mapsites = rows ?? [];
   if (mapsites.length === 0) {
-    return { success: false, error: "Mapsite™ not found" };
+    return { success: false, error: "Mapsite not found" };
   }
 
   for (const mapsite of mapsites) {
@@ -563,7 +563,7 @@ export async function deleteAdminActiveMapSite(
     ) {
       return {
         success: false,
-        error: "The platform demonstration Mapsite™ cannot be deleted.",
+        error: "The platform demonstration Mapsite cannot be deleted.",
       };
     }
 
@@ -592,13 +592,13 @@ export async function deleteAdminActiveMapSite(
     if (control === "lock") {
       return {
         success: false,
-        error: "Paid Mapsites™ are delete-protected.",
+        error: "Paid Mapsites are delete-protected.",
       };
     }
     if (control !== "delete") {
       return {
         success: false,
-        error: "Only active unpaid Mapsites™ can be deleted from this list.",
+        error: "Only active unpaid Mapsites can be deleted from this list.",
       };
     }
 

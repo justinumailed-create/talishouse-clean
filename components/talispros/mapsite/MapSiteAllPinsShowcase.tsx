@@ -23,7 +23,7 @@ export default function MapSiteAllPinsShowcase({
     aggregation.pins.find((pin) => pin.id === selectedPinId) ?? null;
   const [mobileOpen, setMobileOpen] = useState(true);
   const pinCount = aggregation.pins.length;
-  const pinCountLabel = `${pinCount} live pin${pinCount === 1 ? "" : "s"} in Canada from existing Mapsites™.`;
+  const pinCountLabel = `${pinCount} live pin${pinCount === 1 ? "" : "s"} in Canada from existing Mapsites.`;
 
   return (
     <aside
@@ -147,7 +147,7 @@ export default function MapSiteAllPinsShowcase({
 
           <section>
             <p className="mb-2 px-1 text-[11px] font-semibold uppercase tracking-wide text-neutral-500">
-              Mapsite™ pins ({aggregation.pins.length})
+              Mapsite pins ({aggregation.pins.length})
             </p>
             <ul className="space-y-2">
               {aggregation.pins.map((pin) => (
@@ -183,7 +183,7 @@ export default function MapSiteAllPinsShowcase({
                 href={selected.mapsiteHref}
                 className="inline-flex flex-1 items-center justify-center rounded-lg border border-neutral-300 bg-white px-3 py-2 text-[12px] font-medium text-neutral-900 hover:bg-neutral-50"
               >
-                Open Mapsite™
+                Open Mapsite
               </Link>
             </div>
           </div>

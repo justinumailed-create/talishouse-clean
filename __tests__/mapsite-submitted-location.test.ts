@@ -5,7 +5,7 @@ import {
   createFallbackDemoMapSite,
 } from "@/lib/talispros/mapsite-platform";
 
-describe("Mapsite™ submitted location merge", () => {
+describe("Mapsite submitted location merge", () => {
   it("replaces demo coordinates and address with Build Request values", () => {
     const demo = createFallbackDemoMapSite({
       status: "BUILD_REQUEST_SUBMITTED",
@@ -49,7 +49,7 @@ describe("Mapsite™ submitted location merge", () => {
     expect(merged.broker_url).toBe("https://example.com/listing");
   });
 
-  it("does not copy a personal name onto the Mapsite™ title", () => {
+  it("does not copy a personal name onto the Mapsite title", () => {
     const demo = createFallbackDemoMapSite({
       status: "BUILD_REQUEST_SUBMITTED",
       fast_code: "LG02",

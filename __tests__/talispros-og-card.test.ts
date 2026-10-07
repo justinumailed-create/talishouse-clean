@@ -31,7 +31,7 @@ function pixel(
 }
 
 describe("Talispros brand OG (homepage + T-All catalogue)", () => {
-  it("uses the landscape Mapsite™ frame with logo + partner left and map right", () => {
+  it("uses the landscape Mapsite frame with logo + partner left and map right", () => {
     expect(TALISPROS_OG_WIDTH).toBe(SHARE_OG_WIDTH);
     expect(TALISPROS_OG_HEIGHT).toBe(SHARE_OG_HEIGHT);
     expect(talisprosBrandShareOgPath()).toBe("/api/og/talispros");

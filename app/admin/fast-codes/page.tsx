@@ -196,7 +196,7 @@ export default function FastCodesPage() {
   }
 
   async function deleteFastCode(id: string) {
-    if (!confirm("Are you sure you want to delete this FAST Code? The connected Mapsite™ and Talisbooks™ bookshelf will also be removed.")) return;
+    if (!confirm("Are you sure you want to delete this FAST Code? The connected Mapsite and Talisbooks™ bookshelf will also be removed.")) return;
 
     try {
       const target = fastCodes.find((fc) => fc.id === id);
@@ -383,7 +383,7 @@ export default function FastCodesPage() {
             </div>
             <div className="md:col-span-2">
               <p className="mb-3 text-sm text-slate-500">
-                If a Mapsite™ already uses this FAST code (for example{" "}
+                If a Mapsite already uses this FAST code (for example{" "}
                 <span className="font-mono">LRG1</span>), it will be linked
                 automatically.
               </p>

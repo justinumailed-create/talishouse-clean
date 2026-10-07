@@ -7,9 +7,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = createMetadata({
-  title: "Build A Mapsite™ | Talispros™",
+  title: "Build A Mapsite | Talispros™",
   description:
-    "Create a done-for-you Mapsite™ designed to connect referral partners, local businesses, and real estate professionals.",
+    "Create a done-for-you Mapsite designed to connect referral partners, local businesses, and real estate professionals.",
   path: "/talispros/build-mapsite",
 });
 

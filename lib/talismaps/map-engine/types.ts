@@ -56,7 +56,7 @@ export interface MapMountOptions {
   basemapView?: MapBasemapView;
   /**
    * Keep the map center fixed on `center` (zoom allowed, pan disabled).
-   * Used by Mapsite™ so the pin stays under the floating card pointer.
+   * Used by Mapsite so the pin stays under the floating card pointer.
    */
   lockCenter?: boolean;
   /**
@@ -72,12 +72,12 @@ export interface MapMountOptions {
   interactive?: boolean;
   /**
    * Wheel / trackpad zoom. Defaults to true. Set false on overlay maps
-   * (Mapsite™) so page/sidebar scroll does not accidentally zoom the map.
+   * (Mapsite) so page/sidebar scroll does not accidentally zoom the map.
    */
   scrollZoom?: boolean;
   /**
    * Keep the mounted center/zoom. Skip auto fit-to-pins on mount so a
-   * caller-supplied zoom (e.g. Mapsite™ build-time `mapZoom`) is honored.
+   * caller-supplied zoom (e.g. Mapsite build-time `mapZoom`) is honored.
    */
   preserveViewport?: boolean;
   /**
@@ -136,7 +136,7 @@ export interface MapInstance {
   setDraggablePinIds(pinIds: string[]): void;
   setBasemapView?(view: MapBasemapView): void;
   getBasemapView?(): MapBasemapView;
-  /** Update locked-pin screen offset without remounting (Mapsite™ responsive layout). */
+  /** Update locked-pin screen offset without remounting (Mapsite responsive layout). */
   setLockCenterOffset?(offset: { x: number; y: number }): void;
   fitToPins(padding?: MapFitPadding): void;
   fitToCoordinates(coordinates: MapCoordinates[], padding?: MapFitPadding): void;

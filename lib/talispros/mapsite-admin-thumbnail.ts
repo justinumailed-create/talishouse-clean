@@ -56,7 +56,7 @@ export function webMercatorTile(
   return { x, y, zoom };
 }
 
-/** Satellite still of the live Mapsite™ camera, for admin thumbnails. */
+/** Satellite still of the live Mapsite camera, for admin thumbnails. */
 export function mapsiteSatellitePreviewUrl(options: {
   latitude: number | null | undefined;
   longitude: number | null | undefined;

@@ -16,7 +16,7 @@ import { MAPSITE_HEADER_FALLBACK_LOGO } from "../lib/mapsite-layout";
 import { createFallbackDemoMapSite } from "../lib/talispros/mapsite-platform";
 import { DEMO_PINNED_COVER_IMAGE } from "../lib/talispros/demo-mapsite";
 
-describe("Mapsite™ listing media", () => {
+describe("Mapsite listing media", () => {
   it("uses Glasshouse product images for demo listings", () => {
     const demo = createFallbackDemoMapSite();
     expect(MAPSITE_DEMO_LISTING_IMAGE).toBe("/images/glasshouse/hero.png");
@@ -190,7 +190,7 @@ describe("Mapsite™ listing media", () => {
     expect(kept.cover_image).toBe("/images/glasshouse/hero.png");
   });
 
-  it("uses the Mapsite™ agency logo and falls back to the header mark", () => {
+  it("uses the Mapsite agency logo and falls back to the header mark", () => {
     expect(mapsiteAgencyLogoUrl("/uploads/agency.png")).toBe("/uploads/agency.png");
     expect(mapsiteAgencyLogoUrl(null)).toBe(MAPSITE_HEADER_FALLBACK_LOGO);
     expect(mapsiteAgencyLogoUrl("/logo.png")).toBe(MAPSITE_HEADER_FALLBACK_LOGO);
@@ -204,7 +204,7 @@ describe("Mapsite™ listing media", () => {
     expect(createFallbackDemoMapSite().logo_url).toBeNull();
   });
 
-  it("treats pinned ebook covers as stock so demo Mapsites™ use listingHeroImageUrl", () => {
+  it("treats pinned ebook covers as stock so demo Mapsites use listingHeroImageUrl", () => {
     expect(shouldReplaceDemoListingMedia(DEMO_PINNED_COVER_IMAGE, [DEMO_PINNED_COVER_IMAGE])).toBe(
       true,
     );
@@ -236,7 +236,7 @@ describe("Mapsite™ listing media", () => {
       pinnedInteriors,
       { hideSecondInterior: true },
     );
-    // Demo Mapsites™ unlock like paid FAST listings → former page 3 is pin hero.
+    // Demo Mapsites unlock like paid FAST listings → former page 3 is pin hero.
     expect(paid.cover_image).toBe("/talisbooks/pinned/pages/page-03.jpg");
   });
 

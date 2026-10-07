@@ -7,7 +7,7 @@ export const TALISBOT_BRAND = "TalisBOT" as const;
 
 export const TALISBOT_SYSTEM_ROLE =
   "You are TalisBOT, the system intelligence for Talispros™ processes. " +
-  "Answer only from Talispros™ product knowledge: Mapsites™, Talisbooks™, Talismaps™, " +
+  "Answer only from Talispros™ product knowledge: Mapsites, Talisbooks™, Talismaps™, " +
   "FAST Codes™, claim/register, shelves, TalisU™, Knowledge Base, SamCart register, " +
   "and demo claim. Do not discuss or recommend any other house-product brands outside Talispros™.";
 
@@ -20,7 +20,7 @@ export function getTalisBotSystemRole(locale: "en" | "de" = "en"): string {
   return (
     TALISBOT_SYSTEM_ROLE +
     " Always reply in natural, professional German using the formal \"Sie\" form." +
-    " Keep brand names and trademarks unchanged (Talispros™, Talishouse™, Mapsites™, Talisbooks™," +
+    " Keep brand names and trademarks unchanged (Talispros™, Talishouse™, Mapsites, Talisbooks™," +
     " TalisTV™, TalisU™, TalisBOT, FAST Codes™, TEB™, TTV™, PIN, SamCart) and keep acronyms" +
     " such as URL, MLS®, TEB, TVA and TTV."
   );
@@ -29,8 +29,8 @@ export function getTalisBotSystemRole(locale: "en" | "de" = "en"): string {
 export const TALISBOT_KNOWLEDGE = [
   {
     id: "mapsites",
-    title: "Mapsites™",
-    body: "A Mapsite™ is your map-based market home: pins, listings, and partner promotion. Claim a demo market, then register via SamCart to activate your Dashboard.",
+    title: "Mapsites",
+    body: "A Mapsite is your map-based market home: pins, listings, and partner promotion. Claim a demo market, then register via SamCart to activate your Dashboard.",
   },
   {
     id: "talisbooks",
@@ -40,22 +40,22 @@ export const TALISBOT_KNOWLEDGE = [
   {
     id: "talismaps",
     title: "Talismaps™",
-    body: "Talismaps™ power first-party map engines (satellite / pins) used by Markets and Mapsites™ — not third-party iframe maps.",
+    body: "Talismaps™ power first-party map engines (satellite / pins) used by Markets and Mapsites — not third-party iframe maps.",
   },
   {
     id: "fast-codes",
     title: "FAST Codes™",
-    body: "A FAST Code™ is your market identity string. It connects your Mapsite™, Talisbooks™ shelf, and admin tools. Demo codes use Claim; issued codes use Register.",
+    body: "A FAST Code™ is your market identity string. It connects your Mapsite, Talisbooks™ shelf, and admin tools. Demo codes use Claim; issued codes use Register.",
   },
   {
     id: "claim-register",
     title: "Claim / Register",
-    body: "Claim a demo market to explore. Register (SamCart checkout) unlocks a real Mapsite™ Dashboard after payment succeeds.",
+    body: "Claim a demo market to explore. Register (SamCart checkout) unlocks a real Mapsite Dashboard after payment succeeds.",
   },
   {
     id: "shelves",
     title: "Shelves",
-    body: "Bookshelf (Common Shelf) is the catalogue isolated bookshelf with Cowboy's Guide under the left highlight. Mapsites™ dropdown lists claimed and demo Mapsites™.",
+    body: "Bookshelf (Common Shelf) is the catalogue isolated bookshelf with Cowboy's Guide under the left highlight. Mapsites dropdown lists claimed and demo Mapsites.",
   },
   {
     id: "talisu",
@@ -70,16 +70,16 @@ export const TALISBOT_KNOWLEDGE = [
   {
     id: "demo",
     title: "Demo claim",
-    body: "Start from Markets → Next Step / Demo to build a Demo Mapsite™ and explore claim flows before registering.",
+    body: "Start from Markets → Next Step / Demo to build a Demo Mapsite and explore claim flows before registering.",
   },
 ] as const;
 
 export const TALISBOT_INTEREST_OPTIONS = [
-  { value: "mapsite", label: "Mapsite™ claim / register" },
+  { value: "mapsite", label: "Mapsite claim / register" },
   { value: "talisbooks", label: "Talisbooks™ / shelves" },
   { value: "fast_code", label: "FAST Codes™" },
   { value: "talisu", label: "TalisU™ / Knowledge Base" },
-  { value: "demo", label: "Demo Mapsite™" },
+  { value: "demo", label: "Demo Mapsite" },
 ] as const;
 
 export function assertNoTalishouseInBotCopy(text: string): boolean {

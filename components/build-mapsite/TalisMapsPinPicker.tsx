@@ -178,7 +178,7 @@ function TalisMapsPinPickerMap({
   const isPinDraggingRef = useRef(false);
   const mapZoomRef = useRef(mapZoom);
   const defaults = useTalisMapsMapDefaults({
-    // Match Mapsite™: Google satellite for claim / Home PIN placement.
+    // Match Mapsite: Google satellite for claim / Home PIN placement.
     providerId: "google-maps",
     basemapView: "satellite",
   });

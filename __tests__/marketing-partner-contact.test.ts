@@ -41,7 +41,7 @@ describe("marketing partner contact", () => {
 
     expect(card).toContain("MarketingPartnerInterestLinks");
     expect(card).not.toContain("What we do for you");
-    expect(sidebar).toContain("Your Mapsite™ Manager:");
+    expect(sidebar).toContain("Your Mapsite Manager:");
     expect(sidebar).toContain("What we do for you");
     expect(sidebar).not.toContain("MarketingPartnerInterestLinks");
     expect(sidebar).not.toContain("MARKETING_PARTNER_ROLE_LABEL");

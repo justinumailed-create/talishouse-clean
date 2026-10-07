@@ -13,7 +13,7 @@ export const MAPSITE_POPUP_TIP_HEIGHT_PX = 12;
 /** Keep the pin body clear of the tip. */
 export const MAPSITE_PIN_TIP_CLEARANCE_PX = 40;
 
-/** Extra downward pin shift when the blue TalisU™ navbar is present (claimed Mapsites™). */
+/** Extra downward pin shift when the blue TalisU™ navbar is present (claimed Mapsites). */
 export const MAPSITE_CLAIMED_NAV_PIN_NUDGE_Y_PX = 72;
 
 export const MAPSITE_MIN_CARD_HEIGHT_PX = 148;
@@ -51,7 +51,7 @@ function cardWidthFor(rootWidth: number): number {
 }
 
 /**
- * Computes Mapsite™ overlay positions so the FAST card and pin popup
+ * Computes Mapsite overlay positions so the FAST card and pin popup
  * do not overlap, and the map pin sits under the popup tip.
  */
 export function computeMapSiteOverlayLayout(

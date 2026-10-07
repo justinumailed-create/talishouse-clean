@@ -1,5 +1,5 @@
 /**
- * Landscape Open Graph card shared by Mapsite™ and Talisbooks™ viewer links.
+ * Landscape Open Graph card shared by Mapsite and Talisbooks™ viewer links.
  * 1200×630 (~1.91:1). Full-bleed photo, red pin at the frame center when the
  * card represents a listing location, Talispros™ mark vertically centered
  * on the right.
@@ -10,9 +10,9 @@ export const SHARE_OG_HEIGHT = 630;
 
 /** Chrome wordmark already used in the product header (`/logo.png`). */
 export const SHARE_OG_LOGO_PATH = "/logo.png";
-/** Circular Windswept mark used only on individual Claimed Mapsite™ OG cards. */
+/** Circular Windswept mark used only on individual Claimed Mapsite OG cards. */
 export const CLAIMED_MAPSITE_OG_LOGO_PATH = "/assets/windswept-tree-logo.png";
-/** Google-blue pin used on individual Claimed Mapsite™ OG cards. */
+/** Google-blue pin used on individual Claimed Mapsite OG cards. */
 export const CLAIMED_MAPSITE_OG_PIN_COLOR = "#1A73E8";
 
 export const SHARE_OG_PIN_COLOR = "#E10600";
@@ -316,7 +316,7 @@ export type ShareOgPlan =
   | { kind: "scenic"; imageUrl: string; showPin: boolean }
   | { kind: "fallback"; showPin: boolean };
 
-/** Mapsite™ cards prefer a map centered on the listing, then a scenic photo. */
+/** Mapsite cards prefer a map centered on the listing, then a scenic photo. */
 export function planMapsiteShareOg(input: {
   hasCoordinates: boolean;
   scenicImageUrl?: string | null;

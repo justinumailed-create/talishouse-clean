@@ -64,13 +64,13 @@ interface MapSiteMarketPartnerCardProps {
   onSelect?: () => void;
   /** Agency logo only after activation payment (solid card for demo + paid). */
   paid?: boolean;
-  /** Browser owns this Mapsite™ (owner / paid session cookies). */
+  /** Browser owns this Mapsite (owner / paid session cookies). */
   isOwner?: boolean;
   /** Claimed path segment for Logout return (e.g. brokers, listings). */
   accountTypeSegment?: string | null;
   /**
    * Real activation payment unlocked Dashboard — show Knowledge Base manage
-   * entry for rm22 (Ralf) Mapsite™ dashboard.
+   * entry for rm22 (Ralf) Mapsite dashboard.
    */
   showKnowledgeBaseManage?: boolean;
   /** Resolved partner photo (owner override via resolveMapSiteBranding). */
@@ -81,7 +81,7 @@ interface MapSiteMarketPartnerCardProps {
 }
 
 /**
- * Claimed Mapsite™ left card:
+ * Claimed Mapsite left card:
  * FAST CODE → address → partner photo → name → Marketing Partner → WhatsApp / Telegram.
  * The photo block is a div (not a tall <button>) so the parent sidebar can scroll.
  * Interest links sit outside that control so they are not nested buttons.
@@ -125,7 +125,7 @@ export default function MapSiteMarketPartnerCard({
     }
   }
 
-  // Solid opaque card for demo and paid claimed Mapsites™ (no frosted glass).
+  // Solid opaque card for demo and paid claimed Mapsites (no frosted glass).
   const mobilePanel = paid
     ? "mapsite-manager-strip relative w-full overflow-hidden rounded-2xl bg-[#f2f2f0] p-4 text-left shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:hidden"
     : "mapsite-manager-strip relative w-full overflow-hidden rounded-2xl bg-[#f2f2f0] p-3 text-left shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:hidden";

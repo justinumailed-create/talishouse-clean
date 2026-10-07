@@ -140,7 +140,7 @@ describe("mapsite pin style", () => {
   });
 });
 
-describe("published Mapsite™ hollow drop", () => {
+describe("published Mapsite hollow drop", () => {
   const baseMapSite: MapSiteView = {
     id: "mapsite-1",
     fastCode: "ar01",

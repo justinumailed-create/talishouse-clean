@@ -309,7 +309,7 @@ export async function submitBuildRequest(
       .insert(mapsiteRequest);
 
     if (msError) {
-      console.error("[build-mapsite] Mapsite™ request insert error:", msError);
+      console.error("[build-mapsite] Mapsite request insert error:", msError);
     }
 
     const queueItem: Database["public"]["Tables"]["production_queue"]["Insert"] = {

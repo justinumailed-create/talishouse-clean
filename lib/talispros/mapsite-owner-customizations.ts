@@ -2,7 +2,7 @@
  * Owner Dashboard customizations (pure helpers — safe for client + server).
  *
  * Stored in `mapsite_owner_customizations` (migration 093):
- * - logo / partner photo overrides for the claimed Mapsite™ left card
+ * - logo / partner photo overrides for the claimed Mapsite left card
  * - partner name + tagline overrides (migration 094)
  * - per-FAST-Code bookshelf order (ordered talisbooks_books ids)
  *

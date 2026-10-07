@@ -1,6 +1,6 @@
 /**
  * Product marketing bar for /talisbooks.
- * FAST-code shelves are the Mapsite™ pin → TEB™ destination and keep the
+ * FAST-code shelves are the Mapsite pin → TEB™ destination and keep the
  * bookshelf chrome only — the "Talisbooks™" product label stays off that bar.
  */
 

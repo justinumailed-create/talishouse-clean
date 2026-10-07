@@ -91,7 +91,7 @@ export async function submitRahulEbookAssistRequest(
   const firstName =
     input.firstName?.trim() || existing?.first_name?.trim() || "Client";
   const lastName =
-    input.lastName?.trim() || existing?.last_name?.trim() || "Mapsite™";
+    input.lastName?.trim() || existing?.last_name?.trim() || "Mapsite";
   const email =
     input.email?.trim().toLowerCase() || existing?.email?.trim().toLowerCase() || "";
   const phone = input.phone?.trim() || existing?.phone?.trim() || "";

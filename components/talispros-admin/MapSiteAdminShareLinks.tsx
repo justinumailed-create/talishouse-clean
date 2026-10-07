@@ -107,7 +107,7 @@ function ShareLinkRow({
 /**
  * Admin share links for registration:
  * 1) Claim invite (pre-claim / start registration)
- * 2) Post-claim success Mapsite™ (pre-SPLITS) — greyed out after payment success
+ * 2) Post-claim success Mapsite (pre-SPLITS) — greyed out after payment success
  */
 export default function MapSiteAdminShareLinks({
   mapsiteId,
@@ -142,20 +142,20 @@ export default function MapSiteAdminShareLinks({
       </h2>
       <p className="mt-1.5 max-w-xl text-[13px] leading-relaxed text-neutral-500">
         Copy links to send for Claim a Market™ registration and for post-claim
-        SPLITS checkout on the Mapsite™.
+        SPLITS checkout on the Mapsite.
       </p>
 
       <div className="mt-6 divide-y divide-black/[0.06] overflow-hidden rounded-[18px] bg-[#f5f5f7] ring-1 ring-black/[0.04]">
         <ShareLinkRow
           label="Claim registration (pre-claim)"
-          description="Share so a prospect can open Claim a Market™ and register against this Mapsite™ pin."
+          description="Share so a prospect can open Claim a Market™ and register against this Mapsite pin."
           path={claimRegistrationPath}
           origin={origin}
         />
 
         <ShareLinkRow
           label="Post-claim success (pre SPLITS)"
-          description="Share after claim succeeds. Opens the short Mapsite™ URL with SPLITS checkout until payment is received."
+          description="Share after claim succeeds. Opens the short Mapsite URL with SPLITS checkout until payment is received."
           path={postClaimPath}
           origin={origin}
           disabled={paymentReceived}

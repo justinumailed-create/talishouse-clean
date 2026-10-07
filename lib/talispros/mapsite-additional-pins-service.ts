@@ -50,7 +50,7 @@ export function mapsiteCannotSellAdditionalPins(input: {
   isDemonstration?: boolean | null;
 }): string | null {
   if (input.mapsiteId === DEMO_MAPSITE_ID || isAllPinsFastCode(input.fastCode)) {
-    return "This Mapsite™ cannot buy additional PINs.";
+    return "This Mapsite cannot buy additional PINs.";
   }
   if (
     isDemonstrationListing({
@@ -58,7 +58,7 @@ export function mapsiteCannotSellAdditionalPins(input: {
       fastCode: input.fastCode,
     })
   ) {
-    return "Demonstration Mapsites™ cannot buy additional PINs.";
+    return "Demonstration Mapsites cannot buy additional PINs.";
   }
   return null;
 }
@@ -149,7 +149,7 @@ export async function fulfillAdditionalPinsFromStripeCheckoutSession(
   if (!mapsiteId || quantity == null) {
     return {
       success: false,
-      error: "Checkout session is missing Mapsite™ PIN details.",
+      error: "Checkout session is missing Mapsite PIN details.",
     };
   }
 
@@ -288,7 +288,7 @@ export async function placeAdditionalPinRecord(input: {
       error:
         dashboard.remainingPurchasable > 0
           ? "Buy another PIN before placing more."
-          : "This Mapsite™ is at its PIN limit.",
+          : "This Mapsite is at its PIN limit.",
     };
   }
 
@@ -369,7 +369,7 @@ export async function fixAdditionalPinRecord(input: {
     if (isMissingPinSchema(error.message)) return { error: MIGRATION_HINT };
     return { error: "Could not update PIN." };
   }
-  if (!data) return { error: "PIN was not found on this Mapsite™." };
+  if (!data) return { error: "PIN was not found on this Mapsite." };
 
   return {
     pin: {

@@ -14,7 +14,7 @@ type MapSiteDashboardPanelProps = {
 };
 
 /**
- * Closeable owner Dashboard panel over the Mapsite™ map canvas.
+ * Closeable owner Dashboard panel over the Mapsite map canvas.
  * Shared shell for PIN Dashboard, Logo & Card Editor, Bookshelf Editor and
  * Ebook Editor so every Dashboard item looks and closes the same way.
  */
@@ -51,7 +51,7 @@ export default function MapSiteDashboardPanel({
       <header className="flex items-start justify-between gap-3 border-b border-neutral-200 px-4 py-3">
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
-            Mapsites™
+            Mapsites
           </p>
           <h2 id={titleId} className="text-sm font-semibold">
             {localizedTitle}

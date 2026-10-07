@@ -60,7 +60,7 @@ function isPayloadTooLargeError(error: unknown, status?: number): boolean {
 export async function postEbookGenerateOptimizedImage(options: {
   requestId?: string;
   mapsiteId?: string;
-  /** Isolated bookshelf without Mapsite™ — admin FAST Code scope. */
+  /** Isolated bookshelf without Mapsite — admin FAST Code scope. */
   fastCode?: string;
   isolatedBookshelf?: boolean;
   kind: OptimizeImageKind;

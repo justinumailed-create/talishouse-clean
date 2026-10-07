@@ -21,11 +21,11 @@ export async function generateMetadata({ params }: { params: Promise<{ fastcode:
   const { fastcode } = await params;
   const data = await getTalisMapsData(fastcode);
   if (data.notFound || !data.mapsite) {
-    return { title: "Mapsite™ Not Found | Talismaps™" };
+    return { title: "Mapsite Not Found | Talismaps™" };
   }
   return {
-    title: `Mapsite™ ${data.mapsite.fastCode} | Talismaps™`,
-    description: `Mapsite™ with FAST Code ${data.mapsite.fastCode}`,
+    title: `Mapsite ${data.mapsite.fastCode} | Talismaps™`,
+    description: `Mapsite with FAST Code ${data.mapsite.fastCode}`,
   };
 }
 
@@ -42,7 +42,7 @@ export default async function TalisMapsPage({ params }: { params: Promise<{ fast
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-neutral-900 mb-2">Mapsite™ Not Found</h1>
+          <h1 className="text-xl font-semibold text-neutral-900 mb-2">Mapsite Not Found</h1>
           <p className="text-sm text-neutral-500">{data.message}</p>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default async function TalisMapsPage({ params }: { params: Promise<{ fast
       <div className="max-w-2xl mx-auto px-5 py-12 sm:py-16">
         <div className="text-center mb-10">
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900">
-            Welcome To Your Mapsite™
+            Welcome To Your Mapsite
           </h1>
           <p className="text-sm text-neutral-500 mt-2">Your TalisPros™ account is active and ready.</p>
         </div>
@@ -83,7 +83,7 @@ export default async function TalisMapsPage({ params }: { params: Promise<{ fast
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-neutral-900">Mapsite™ successfully created.</p>
+            <p className="text-sm font-medium text-neutral-900">Mapsite successfully created.</p>
             <Link
               href="/talispros/client/login"
               className="mt-4 inline-flex items-center justify-center h-10 px-5 rounded-xl bg-neutral-900 text-white text-sm font-medium hover:bg-neutral-800"

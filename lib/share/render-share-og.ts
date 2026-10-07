@@ -25,7 +25,7 @@ async function pinPng(color: string, scale = 1): Promise<Buffer> {
 export async function renderShareOgCard(input: {
   background?: Buffer | null;
   showPin: boolean;
-  /** Single-pin colour (Mapsite™ listing cards). Defaults to brand red. */
+  /** Single-pin colour (Mapsite listing cards). Defaults to brand red. */
   pinColor?: string;
   /**
    * Multi-pin overlays (ALLPINS). When non-empty, these replace the single

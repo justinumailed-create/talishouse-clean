@@ -15,7 +15,7 @@
 
 ## 1. EXECUTIVE SUMMARY
 
-Phase 2 establishes **Talismaps™** as a standalone product within the Talispros™ ecosystem — separate from Mapsite™ admin, with its own routes, database schema, dashboard, map editor, map engine abstraction, and PIN engine.
+Phase 2 establishes **Talismaps™** as a standalone product within the Talispros™ ecosystem — separate from Mapsite admin, with its own routes, database schema, dashboard, map editor, map engine abstraction, and PIN engine.
 
 ### What was completed
 
@@ -33,13 +33,13 @@ Phase 2 establishes **Talismaps™** as a standalone product within the Talispro
 
 ### How Talismaps™ replaces Atlist over time
 
-Today, public Mapsites™ still embed **Atlist** iframes (`MapSiteAtlistMap.tsx`, `atlist_map_url` on `mapsites`). Phase 2 lays the **replacement platform**:
+Today, public Mapsites still embed **Atlist** iframes (`MapSiteAtlistMap.tsx`, `atlist_map_url` on `mapsites`). Phase 2 lays the **replacement platform**:
 
 1. **Now:** Talismaps™ product shell, data model, editor, and PIN CRUD on native tables (`talismaps_`*).
-2. **Next:** Publish maps from Talismaps™ and swap Mapsite™ embeds from Atlist URL → Talismaps™ public map URL.
+2. **Next:** Publish maps from Talismaps™ and swap Mapsite embeds from Atlist URL → Talismaps™ public map URL.
 3. **Later:** Import tooling (Atlist migration), analytics, QR, and marketing integrations complete parity.
 
-Atlist remains in production for existing Mapsites™ until explicit migration and embed cutover in a future phase.
+Atlist remains in production for existing Mapsites until explicit migration and embed cutover in a future phase.
 
 ---
 
@@ -385,7 +385,7 @@ npx supabase db push --include-all
 
 ### Legacy tables (unchanged)
 
-Pre-existing `pins` and `categories` tables (Mapsite™/Leaflet prototype) remain separate from `talismaps_*`.
+Pre-existing `pins` and `categories` tables (Mapsite/Leaflet prototype) remain separate from `talismaps_*`.
 
 ---
 
@@ -655,12 +655,12 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 | Default categories seeding              | ✅                           |
 | Talispros™ nav link                     | ✅                           |
 | RootShell isolation                     | ✅                           |
-| Legacy Atlist embeds on Mapsites™        | ✅ (unchanged — coexistence) |
+| Legacy Atlist embeds on Mapsites        | ✅ (unchanged — coexistence) |
 | Dashboard placeholder sub-pages         | ✅ (shell only)              |
 | Google Maps / Mapbox providers          | ❌ stubs only                |
 | Pin clustering                          | ❌                           |
 | Map publish workflow                    | ❌                           |
-| Atlist replacement on Mapsites™          | ❌                           |
+| Atlist replacement on Mapsites          | ❌                           |
 | Editor authentication                   | ❌                           |
 | Automated tests for Talismaps™           | ❌                           |
 
@@ -681,7 +681,7 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 - ❌ QR code generation and QR analytics UI
 - ❌ Offline mode
 - ❌ Public published map viewer route (`/talismaps/[slug]`)
-- ❌ Mapsite™ embed cutover from Atlist
+- ❌ Mapsite embed cutover from Atlist
 - ❌ Google Maps / Mapbox provider implementations
 - ❌ Geocoding / address search
 - ❌ Media file upload (Storage)
@@ -818,9 +818,9 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 
 | ID     | Purpose              | Steps                                  | Expected                    | Priority |
 | ------ | -------------------- | -------------------------------------- | --------------------------- | -------- |
-| TM-080 | Talispros unaffected | Browse `/talispros`, Mapsites™          | Existing flows work         | P1       |
+| TM-080 | Talispros unaffected | Browse `/talispros`, Mapsites          | Existing flows work         | P1       |
 | TM-081 | Legacy MapView       | Load page using `MapShell` / `MapView` | Map renders via MapProvider | P2       |
-| TM-082 | Atlist embeds        | Open Mapsite™ with Atlist URL           | iframe still works          | P1       |
+| TM-082 | Atlist embeds        | Open Mapsite with Atlist URL           | iframe still works          | P1       |
 
 
 ---
@@ -1052,7 +1052,7 @@ Coordinates, category, description, media, owner (`owner_id`), visibility, theme
 | 2    | **Apply migrations to staging**          | Unblock QA and integration                      |
 | 3    | **API authentication & permissions**     | Blocker for any public deployment               |
 | 4    | **Public map route** `/talismaps/[slug]` | Required for Atlist replacement                 |
-| 5    | **Mapsite™ embed cutover**                | Replace `MapSiteAtlistMap` with Talismaps™ embed |
+| 5    | **Mapsite embed cutover**                | Replace `MapSiteAtlistMap` with Talismaps™ embed |
 | 6    | **Per-account maps**                     | Remove shared `editor-draft`                    |
 | 7    | **Atlist import wizard**                 | Migration path for existing customers           |
 | 8    | **Media upload (Supabase Storage)**      | Property listings need images                   |

@@ -58,7 +58,7 @@ async function authorizePinEdit(fastCode: string): Promise<PinActionError | null
     await requireMapSiteEditAccess(fastCode);
     return null;
   } catch {
-    return { error: "Only the Mapsite™ owner can buy or place PINs." };
+    return { error: "Only the Mapsite owner can buy or place PINs." };
   }
 }
 
@@ -78,9 +78,9 @@ export async function createAdditionalPinCheckout(input: {
   }
 
   const mapsite = await readMapSiteForPinPurchase(mapsiteId);
-  if (!mapsite) return { error: "Mapsite™ was not found." };
+  if (!mapsite) return { error: "Mapsite was not found." };
   if (mapsite.fastCode.trim().toLowerCase() !== fastCode.toLowerCase()) {
-    return { error: "FAST Code™ does not match this Mapsite™." };
+    return { error: "FAST Code™ does not match this Mapsite." };
   }
 
   const blocked = mapsiteCannotSellAdditionalPins({
@@ -120,8 +120,8 @@ export async function createAdditionalPinCheckout(input: {
             currency: MAPSITE_ADDITIONAL_PIN_CURRENCY,
             unit_amount: MAPSITE_ADDITIONAL_PIN_PRICE_CENTS,
             product_data: {
-              name: "Talispros™ Mapsite™ additional PIN",
-              description: "One additional map PIN on your Mapsite™ ($10 USD).",
+              name: "Talispros™ Mapsite additional PIN",
+              description: "One additional map PIN on your Mapsite ($10 USD).",
             },
           },
         },
@@ -196,9 +196,9 @@ export async function placeMapSiteAdditionalPin(input: {
   if (denied) return denied;
 
   const mapsite = await readMapSiteForPinPurchase(input.mapsiteId);
-  if (!mapsite) return { error: "Mapsite™ was not found." };
+  if (!mapsite) return { error: "Mapsite was not found." };
   if (mapsite.fastCode.trim().toLowerCase() !== fastCode.toLowerCase()) {
-    return { error: "FAST Code™ does not match this Mapsite™." };
+    return { error: "FAST Code™ does not match this Mapsite." };
   }
   const blocked = mapsiteCannotSellAdditionalPins({
     mapsiteId: mapsite.id,
@@ -233,9 +233,9 @@ export async function fixMapSiteAdditionalPin(input: {
   if (denied) return denied;
 
   const mapsite = await readMapSiteForPinPurchase(input.mapsiteId);
-  if (!mapsite) return { error: "Mapsite™ was not found." };
+  if (!mapsite) return { error: "Mapsite was not found." };
   if (mapsite.fastCode.trim().toLowerCase() !== fastCode.toLowerCase()) {
-    return { error: "FAST Code™ does not match this Mapsite™." };
+    return { error: "FAST Code™ does not match this Mapsite." };
   }
 
   const fixed = await fixAdditionalPinRecord({

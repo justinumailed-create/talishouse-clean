@@ -66,7 +66,7 @@ export default function RahulBuildAssistClient({
         return;
       }
 
-      // Create Mapsite™ + owner session, then show waiting screen.
+      // Create Mapsite + owner session, then show waiting screen.
       // Client never enters Rahul’s upload workspace.
       const opened = await openMapSiteAfterBuildRequest({
         requestId: result.requestId,
@@ -95,7 +95,7 @@ export default function RahulBuildAssistClient({
       <div className="mx-auto max-w-3xl px-4 pb-12 sm:px-6">
         <div className="w-full">
           <h2 className="text-2xl font-semibold tracking-tight text-neutral-900 sm:text-3xl">
-            Your Mapsite™ has been created
+            Your Mapsite has been created
           </h2>
           {code ? (
             <p className="mt-3 text-sm font-medium uppercase tracking-[0.08em] text-neutral-500">
@@ -107,14 +107,14 @@ export default function RahulBuildAssistClient({
             notification as soon as it is ready.
           </p>
           <p className="mt-3 text-sm leading-relaxed text-neutral-600 sm:text-base">
-            You can open your pending Mapsite™ anytime. When your book is ready,
+            You can open your pending Mapsite anytime. When your book is ready,
             it will appear on your property popup.
           </p>
           <a
             href={waiting.href}
             className="mt-8 inline-flex min-h-11 items-center justify-center rounded-xl bg-neutral-900 px-6 text-sm font-medium text-white transition hover:bg-neutral-800"
           >
-            Open My Mapsite™
+            Open My Mapsite
           </a>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function RahulBuildAssistClient({
     >
       <p className="text-sm text-neutral-600 sm:text-base">
         Submit the request and we will generate your FAST Code and create your
-        pending Mapsite™. Rahul prepares your first Talisbook™.
+        pending Mapsite. Rahul prepares your first Talisbook™.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">

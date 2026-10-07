@@ -23,7 +23,7 @@ export default async function OwnerEbookEditorPage({
 }) {
   const { fastCode, bookId } = await params;
   const query = await searchParams;
-  // Owner (paid) or Mapsite™ admin only — same gate as PIN Dashboard actions.
+  // Owner (paid) or Mapsite admin only — same gate as PIN Dashboard actions.
   if (!(await canEditMapSite(fastCode))) {
     redirect(CLIENT_LOGIN_PATH);
   }

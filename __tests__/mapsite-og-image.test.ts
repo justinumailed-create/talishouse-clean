@@ -194,7 +194,7 @@ describe("ebookPageMediaFromRow", () => {
   });
 });
 
-describe("Mapsite™ and viewer share image selection", () => {
+describe("Mapsite and viewer share image selection", () => {
   it("never uses the large Talispros™ poster or /logo.png as the scenic layer", () => {
     expect(isLargeBrandLogoUrl("/seo/talispros-og.jpg")).toBe(true);
     expect(isLargeBrandLogoUrl("/logo.png")).toBe(true);
@@ -271,7 +271,7 @@ describe("Mapsite™ and viewer share image selection", () => {
     ).toBeNull();
   });
 
-  it("builds the live WhatsApp title and description Mapsite™ metadata uses", () => {
+  it("builds the live WhatsApp title and description Mapsite metadata uses", () => {
     expect(
       mapsiteRealtimeSeoCopy({
         fastCode: "rm22",
@@ -279,7 +279,7 @@ describe("Mapsite™ and viewer share image selection", () => {
         propertyDescription: "160 Macs Rd, Richmond County.",
       }),
     ).toEqual({
-      title: "Ralf Meyer | Mapsite™",
+      title: "Ralf Meyer | Mapsite",
       description: "160 Macs Rd, Richmond County.",
     });
     expect(
@@ -290,7 +290,7 @@ describe("Mapsite™ and viewer share image selection", () => {
         propertyAddress: "160 Macs Rd, Richmond County",
       }),
     ).toEqual({
-      title: "RM22 | Mapsite™",
+      title: "RM22 | Mapsite",
       description: "160 Macs Rd, Richmond County · FAST Code RM22",
     });
     expect(
@@ -300,16 +300,16 @@ describe("Mapsite™ and viewer share image selection", () => {
         propertyDescription: null,
       }),
     ).toEqual({
-      title: "RM22 | Mapsite™",
-      description: "Mapsite™ for FAST Code RM22.",
+      title: "RM22 | Mapsite",
+      description: "Mapsite for FAST Code RM22.",
     });
   });
 
   it("uses ALLPINS property copy for the multi-pin listings share card", () => {
     expect(allpinsSeoCopy()).toEqual({
-      title: "ALLPINS — Every Mapsite™ | Mapsite™",
+      title: "ALLPINS — Every Mapsite | Mapsite",
       description:
-        "Canada showcase of Mapsite™ pins. Open a pin for the book and Mapsite™ demo.",
+        "Canada showcase of Mapsite pins. Open a pin for the book and Mapsite demo.",
     });
     expect(resolveMapSiteOgImage("allpins")).toBe(
       "https://www.talispros.com/api/og/mapsite/allpins",
@@ -351,7 +351,7 @@ describe("Mapsite™ and viewer share image selection", () => {
     expect(image.url).toContain("/api/og/bookshelf");
   });
 
-  it("emits the composed landscape share-card URL for Mapsite™ and viewer links", () => {
+  it("emits the composed landscape share-card URL for Mapsite and viewer links", () => {
     expect(toAbsoluteHttpsOgUrl(LG02_TREE)).toBe(LG02_TREE);
     expect(toAbsoluteHttpsOgUrl("http://cdn.example/tree.webp")).toBe(
       "https://cdn.example/tree.webp",
@@ -359,13 +359,13 @@ describe("Mapsite™ and viewer share image selection", () => {
 
     const mapsiteImage = mapsiteOgMetadataImage(
       resolveMapSiteOgImage("dc02"),
-      "Mapsite™ DC02",
+      "Mapsite DC02",
     );
     expect(mapsiteImage).toEqual({
       url: "https://www.talispros.com/api/og/mapsite/dc02",
       width: 1200,
       height: 630,
-      alt: "Mapsite™ DC02",
+      alt: "Mapsite DC02",
     });
     expect(mapsiteImage.url).not.toContain(LG02_TREE);
     expect(mapsiteImage.url).not.toContain("/logo.png");
@@ -383,8 +383,8 @@ describe("Mapsite™ and viewer share image selection", () => {
     });
 
     const meta = createMetadata({
-      title: "Mapsite™ DC02",
-      description: "Talispros™ Mapsite™ for FAST Code DC02.",
+      title: "Mapsite DC02",
+      description: "Talispros™ Mapsite for FAST Code DC02.",
       path: "/talispros/mapsite/fsbos/dc02",
       image: mapsiteImage,
     });

@@ -94,9 +94,9 @@ describe("mapsitePublicPinLabel", () => {
 });
 
 describe("isPersonalNameLabel", () => {
-  it("detects two-word personal names and Name Mapsite™ titles", () => {
+  it("detects two-word personal names and Name Mapsite titles", () => {
     expect(isPersonalNameLabel("Lydia Gaertner")).toBe(true);
-    expect(isPersonalNameLabel("Lydia Gaertner Mapsite™", ["Lydia Gaertner"])).toBe(
+    expect(isPersonalNameLabel("Lydia Gaertner Mapsite", ["Lydia Gaertner"])).toBe(
       true,
     );
     expect(isPersonalNameLabel("5 Head Rd, Homeville")).toBe(false);
@@ -115,7 +115,7 @@ describe("isFormalLotOrAddressLabel", () => {
 });
 
 describe("firstNonPersonalMapsiteLabel", () => {
-  it("skips the owner name when storing a Mapsite™ title", () => {
+  it("skips the owner name when storing a Mapsite title", () => {
     expect(
       firstNonPersonalMapsiteLabel(
         ["Lydia Gaertner", "5 Head Rd, Homeville, NS"],

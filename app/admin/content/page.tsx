@@ -100,7 +100,7 @@ export default function ContentPage() {
           <a href="/admin/platform-content" className="font-medium text-[#111] underline underline-offset-2">
             Platform Content
           </a>
-          . Mapsite™ photos, logos, and eBook images are edited under Mapsites and
+          . Mapsite photos, logos, and eBook images are edited under Mapsites and
           Talisbooks™.
         </p>
       </div>

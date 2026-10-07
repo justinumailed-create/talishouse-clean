@@ -104,15 +104,15 @@ export interface TalisBooksViewerPage {
 export interface TalisBooksViewerBook {
   id: string;
   slug: string;
-  /** Source Mapsite™ FAST Code when this book is tied to an account. */
+  /** Source Mapsite FAST Code when this book is tied to an account. */
   fastCode?: string;
-  /** Source Mapsite™ id for Claim Your Market™ on demonstration books. */
+  /** Source Mapsite id for Claim Your Market™ on demonstration books. */
   mapsiteId?: string | null;
   /** Account type that owns this book (root / derivative / adpro / fsbo, etc.). */
   accountType?: string;
   /**
    * Catalogue isolated shelf book (metadata.isolatedBookshelf).
-   * Back to Mapsite™ must use ALLPINS, not the creator admin FAST Code.
+   * Back to Mapsite must use ALLPINS, not the creator admin FAST Code.
    */
   isolatedBookshelf?: boolean;
   title: string;

@@ -466,9 +466,9 @@ export default function DemoEbookGenerateClient({
       if (!result.ok) {
         throw new Error(result.error);
       }
-      setStage("Opening your demo Mapsite™…");
+      setStage("Opening your demo Mapsite…");
       setProgress({
-        label: "Opening Mapsite™…",
+        label: "Opening Mapsite…",
         detail: "Demonstration Talisbook™ ready",
         current: 1,
         total: 1,
@@ -536,7 +536,7 @@ export default function DemoEbookGenerateClient({
           </p>
           <p className="mx-auto mt-2 max-w-[26rem] text-[13px] leading-relaxed text-neutral-500">
             We prepare the pages automatically. Then Build the demonstration
-            Talisbook™ — when that finishes, we open your demo Mapsite™.
+            Talisbook™ — when that finishes, we open your demo Mapsite.
           </p>
           <p className="mt-3 text-[12px] tracking-tight text-neutral-400">
             {title}

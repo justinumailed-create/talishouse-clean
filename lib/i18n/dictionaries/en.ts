@@ -71,20 +71,20 @@ export const en = {
     },
     dashboardLocked: {
       title: "Dashboard is locked",
-      body: "Register to unlock your Mapsite™ Dashboard after payment succeeds.",
+      body: "Register to unlock your Mapsite Dashboard after payment succeeds.",
       cta: "Register",
     },
     mapsitesMenu: {
-      title: "Mapsites™",
-      prompt: "Enter your FAST Code™ to open your personal Mapsite™.",
+      title: "Mapsites",
+      prompt: "Enter your FAST Code™ to open your personal Mapsite.",
       fieldLabel: "FAST Code™",
       placeholder: "FAST Code™",
-      submit: "Open Mapsite™",
+      submit: "Open Mapsite",
       opening: "Opening…",
-      demo: "Demo Mapsite™",
+      demo: "Demo Mapsite",
       errEmpty: "Please enter a FAST Code™.",
       errChars: "Use letters and digits only (no & or +).",
-      errOpen: "Unable to open that Mapsite™.",
+      errOpen: "Unable to open that Mapsite.",
     },
   },
 
@@ -109,12 +109,12 @@ export const en = {
     learnMore: "Learn More",
     samcartReturn: {
       confirming: "Confirming payment return…",
-      received: "Payment return received — Mapsite™ unlock in progress.",
+      received: "Payment return received — Mapsite unlock in progress.",
       detected: "Payment return detected.",
       order: "SamCart order",
-      openClaimed: "Open your claimed Mapsite™",
+      openClaimed: "Open your claimed Mapsite",
       useAccountBefore: "Use",
-      useAccountAfter: "with your FAST Code™ to open your Mapsite™.",
+      useAccountAfter: "with your FAST Code™ to open your Mapsite.",
       failedNote:
         "Return detected but session setup failed. Use Login with your FAST Code™.",
     },
@@ -131,13 +131,13 @@ export const en = {
       { label: "Adpro™", title: "Product & Service Providers" },
     ],
     fastCode: {
-      formAria: "Open Mapsite™ with FAST Code",
+      formAria: "Open Mapsite with FAST Code",
       label: "FAST Code™",
       placeholder: "Enter your FAST Code",
       submit: "Mapsite",
       opening: "Opening…",
       errEmpty: "Please enter a FAST Code.",
-      errOpen: "Unable to open that Mapsite™.",
+      errOpen: "Unable to open that Mapsite.",
     },
   },
 
@@ -203,16 +203,21 @@ export const en = {
   markets: {
     pmcTitle: TALISU_MKTS_PMC_TITLE,
     pmcBullets: TALISU_MKTS_PMC_BULLETS,
+    pmcTagline: "Promote - Manage - Cooperate",
     footer: TALISU_MKTS_FOOTER,
-    searchPlaceholder: "Search…",
-    searchAria: "Search markets",
+    searchPlaceholder: "Search a place or postal code…",
+    searchAria: "Search place or postal code near markets",
+    searchClear: "Clear search",
+    searchFailed: "Place lookup failed. Try again.",
+    searchNoResults: "No place found for that search.",
+    distanceResultsAria: "Nearest PINs by distance",
     canada: "Canada",
-    doMore: "Do More…",
+    doMore: "Do More...",
     noMatches: "No matches",
     close: "Close",
     nextLabel: "Next Step...",
     marketDescription:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     /** Pin id → label (TALISU_MKTS_PINS). */
     pinLabels: {
       "nl": "Newfoundland & Labrador",
@@ -230,7 +235,7 @@ export const en = {
       "yt": "Yukon Territory",
       "nt": "Northwest Territories",
       "nu": "Nunavut",
-      "modular-spaces": "TalisU™ Modular Spaces",
+      "modular-spaces": "Talishouse™ Modular Spaces",
     },
     /** Do More pin descriptions by id. */
     doMoreDescriptions: {
@@ -241,7 +246,7 @@ export const en = {
 
   mapsite: {
     registerAccountNow: "Register Account now",
-    buildMyMapsite: "Build My Mapsite™",
+    buildMyMapsite: "Build My Mapsite",
     claimReceived: "Claim received",
     fastCodeCaps: "FAST CODE",
     knowledgeBase: "Knowledge Base",
@@ -249,7 +254,7 @@ export const en = {
     partnerIntro: MARKETING_PARTNER_CARD_INTRO,
     logout: "Logout",
     loggingOut: "Logging out…",
-    logoutAria: "Log out of Mapsite™ owner session",
+    logoutAria: "Log out of Mapsite owner session",
     close: "Close",
     dashboardMenu: {
       ebooks: "Ebook Editor",
@@ -259,10 +264,10 @@ export const en = {
     },
     popup: {
       genericTitle: "The first of many E-Books",
-      yourMapsite: "Your Mapsite™",
+      yourMapsite: "Your Mapsite",
       genericWriteup:
-        "Upon registration your Mapsite™ will be able to promote up to 10 categories containing 100 PINs generating 1,000 views, monthly. No referral fees - ever",
-      claimedFallback: "FAST Code™ {code} · claimed Mapsite™.",
+        "Upon registration your Mapsite will be able to promote up to 10 categories containing 100 PINs generating 1,000 views, monthly. No referral fees - ever",
+      claimedFallback: "FAST Code™ {code} · claimed Mapsite.",
       welcomeFallback:
         "Welcome to Talispros™. Choose your market and begin onboarding.",
       tebPreparing:
@@ -310,7 +315,7 @@ export const en = {
       purchased: "Purchased",
       readyToPlace: "Ready to place",
       buyHeading: "Buy PINs · {price} USD each",
-      atLimit: "This Mapsite™ is at the 100 PIN limit.",
+      atLimit: "This Mapsite is at the 100 PIN limit.",
       quantity: "Quantity",
       startingCheckout: "Starting checkout…",
       buyOne: "Buy 1 PIN · {price} USD",
@@ -360,7 +365,7 @@ export const en = {
     eyebrowMagazine: "Talisbooks™ Magazine",
     eyebrowViewer: "Talisbooks™ Viewer",
     home: "Home",
-    backToMapsite: "Back to Mapsite™",
+    backToMapsite: "Back to Mapsite",
     product: "Product",
     downloadPdf: "Download PDF",
     markets: "Markets",
@@ -443,12 +448,12 @@ export const en = {
   demo: {
     downloadPdf: "Download Demo PDF",
     eyebrow: "DEMONSTRATION",
-    title: "Demo eBook and Mapsite™",
+    title: "Demo eBook and Mapsite",
     placeAPin: "Place a pin.",
     createFromSample: "Create Talisbook™ from pinned sample",
     fastCodeOnRegistration: "FAST Code issued upon registration",
     listingTitle: "Listing title",
-    defaultListingTitle: "Demo Mapsite™",
+    defaultListingTitle: "Demo Mapsite",
     errPlacePin: "Place a pin or enter an address to continue.",
     continue: "Continue to demo eBook",
     continuing: "Continue to demo eBook…",
@@ -499,10 +504,10 @@ export const en = {
     bookshelf: {
       title: "ALLPINS Talisbooks™ · Bookshelf",
       description:
-        "Mapsite™-connected Talisbooks™ bookshelf for FAST Code ALLPINS. Open a cover to read books on the isolated shelf.",
+        "Mapsite-connected Talisbooks™ bookshelf for FAST Code ALLPINS. Open a cover to read books on the isolated shelf.",
     },
     demoMapsite: {
-      title: "Build Demo eBook and Mapsite™",
+      title: "Build Demo eBook and Mapsite",
       description:
         "Place a demonstration pin and attach the pinned Talispros eBook. No FAST Code is issued.",
     },
@@ -514,7 +519,7 @@ export const en = {
     talisuKb: {
       title: "TalisU™ | Knowledge Base",
       description:
-        "TalisU™ Knowledge Base — Audios, Videos, and Learning Material for Mapsites™ and FAST Codes™.",
+        "TalisU™ Knowledge Base — Audios, Videos, and Learning Material for Mapsites and FAST Codes™.",
     },
     talisuVideo: {
       title: "TalisU™ | Video",
@@ -538,7 +543,7 @@ export const en = {
     },
     home: {
       title: "Talispros™",
-      description: "Claim your market. Open your Mapsite™.",
+      description: "Claim your market. Open your Mapsite.",
     },
     talisuLayout: {
       title: "TalisU™",
@@ -548,7 +553,7 @@ export const en = {
     talisuFaq: {
       title: "TalisU™ | FAQ",
       description:
-        "Frequently asked questions about Talispros™, Mapsites™, and TalisU™.",
+        "Frequently asked questions about Talispros™, Mapsites, and TalisU™.",
     },
     talisuRegister: {
       title: "TalisU™ | Register Account",

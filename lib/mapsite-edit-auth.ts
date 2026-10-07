@@ -61,7 +61,7 @@ export async function setMapSiteOwnerSession(fastCode: string): Promise<void> {
 }
 
 /**
- * After a successful activation payment, bind this browser to the Mapsite™
+ * After a successful activation payment, bind this browser to the Mapsite
  * owner session. Stripe webhooks cannot set the customer's cookies; checkout
  * return (server action) can. Safe to call from RSC — failures are ignored.
  */
@@ -125,7 +125,7 @@ export async function getMapSiteEditToolbarState(
   };
 }
 
-/** True when the current browser session belongs to this Mapsite™ owner. */
+/** True when the current browser session belongs to this Mapsite owner. */
 export async function isOwnMapSite(fastCode: string | null | undefined): Promise<boolean> {
   const code = fastCode?.trim();
   if (!code) return false;

@@ -30,12 +30,12 @@ const STATUS_FILTERS = [
 
 const FORM_FILTERS: { value: FormFilter; label: string }[] = [
   { value: "all", label: "All Forms" },
-  { value: "build_mapsite", label: "Build a Mapsite™" },
+  { value: "build_mapsite", label: "Build a Mapsite" },
   { value: "registration", label: "Registrations" },
 ];
 
 function formLabel(row: FormsManagerRow): string {
-  return row.source === "build_mapsite" ? "Build a Mapsite™" : "Registration";
+  return row.source === "build_mapsite" ? "Build a Mapsite" : "Registration";
 }
 
 function displayStatus(row: FormsManagerRow): string {
@@ -259,7 +259,7 @@ export default function FormsManagerPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Forms Manager</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Build a Mapsite™ submissions and registration checkouts
+            Build a Mapsite submissions and registration checkouts
           </p>
         </div>
         <button
@@ -444,7 +444,7 @@ export default function FormsManagerPage() {
             <p className="text-sm text-gray-500 text-center mt-1">
               {search || statusFilter !== "all" || formFilter !== "all"
                 ? "No submissions match your filters."
-                : "Build a Mapsite™ and registration submissions will appear here."}
+                : "Build a Mapsite and registration submissions will appear here."}
             </p>
           </div>
         )}

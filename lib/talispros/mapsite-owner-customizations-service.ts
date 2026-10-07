@@ -36,7 +36,7 @@ function rowToCustomizations(row: Row | null | undefined): MapSiteOwnerCustomiza
   };
 }
 
-/** Read overrides by Mapsite™ id. Never throws — a missing table reads as empty. */
+/** Read overrides by Mapsite id. Never throws — a missing table reads as empty. */
 export async function loadMapSiteOwnerCustomizations(
   mapsiteId: string | null | undefined,
 ): Promise<MapSiteOwnerCustomizations> {
@@ -133,7 +133,7 @@ export async function saveMapSiteOwnerCustomizations(input: {
   return { customizations: rowToCustomizations(data as Row | null) };
 }
 
-/** Mapsite™ id + FAST Code pairing check (never trust the client pairing). */
+/** Mapsite id + FAST Code pairing check (never trust the client pairing). */
 export async function readMapSiteIdentity(
   mapsiteId: string,
 ): Promise<{ id: string; fastCode: string; isDemonstration: boolean } | null> {

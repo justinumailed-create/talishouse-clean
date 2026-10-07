@@ -49,9 +49,9 @@ export const ADMIN_SCOPES_BY_ACCESS: Record<AdminAccessLevel, readonly AdminScop
  * Authorized /admin console operators.
  * Login is the existing FAST-code session (`admin_session` cookie + localStorage).
  *
- * Ralf’s `RM22` is also his live Root Mapsite™ code — that is intentional.
+ * Ralf’s `RM22` is also his live Root Mapsite code — that is intentional.
  * Business-office FastCodeGate still treats only ADMIN123 as a super-admin gate,
- * so entering RM22 on a Mapsite™ / associate gate does not grant admin.
+ * so entering RM22 on a Mapsite / associate gate does not grant admin.
  */
 export const ADMIN_ACCOUNTS: readonly AdminAccount[] = [
   {

@@ -29,8 +29,8 @@ export const metadata: Metadata = {
  * Catalogue chrome "Bookshelf" lands here so reaching the shelf follows
  * the self-serve generate process — admin only.
  *
- * A linked Mapsite™ is optional: isolated create works with any admin FAST
- * Code (e.g. ADMIN123) even when no Mapsite™ exists for that code.
+ * A linked Mapsite is optional: isolated create works with any admin FAST
+ * Code (e.g. ADMIN123) even when no Mapsite exists for that code.
  */
 export default async function CatalogueIsolatedBookshelfCreatePage() {
   await requireAdminPage();
@@ -40,7 +40,7 @@ export default async function CatalogueIsolatedBookshelfCreatePage() {
   }
 
   const mapsite = await getMapSiteByFastCode(account.fastCode);
-  // When the admin FAST Code has no Mapsite™, attach the ALLPINS aggregate
+  // When the admin FAST Code has no Mapsite, attach the ALLPINS aggregate
   // so isolated create is linked to the multi-pin showcase shelf.
   const allPins = mapsite ? null : await ensureAllPinsMapSite();
   const mapsiteId = mapsite?.id ?? allPins?.mapsiteId ?? null;
@@ -48,7 +48,7 @@ export default async function CatalogueIsolatedBookshelfCreatePage() {
   const listingTitle = mapsite?.propertyTitle?.trim() || "";
   const propertyAddress =
     mapsite?.propertyAddress ??
-    (allPins ? "Aggregated live Mapsite™ pins" : "");
+    (allPins ? "Aggregated live Mapsite pins" : "");
 
   return (
     <div
@@ -67,7 +67,7 @@ export default async function CatalogueIsolatedBookshelfCreatePage() {
             </h1>
             <p className="mt-1 text-sm text-neutral-500">
               Admin self-serve ebook for the isolated T-All shelf. A linked
-              Mapsite™ is optional — finished books are tagged for this shelf
+              Mapsite is optional — finished books are tagged for this shelf
               only, not the public /talisbooks catalogue.
             </p>
           </div>

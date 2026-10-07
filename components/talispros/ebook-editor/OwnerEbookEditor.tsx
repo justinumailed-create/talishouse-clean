@@ -303,7 +303,7 @@ export default function OwnerEbookEditor({
           href={backHref}
           className="inline-flex items-center gap-1 text-sm font-medium text-[#046BD9] hover:underline"
         >
-          ← Back to Mapsite™
+          ← Back to Mapsite
         </Link>
         <div className="flex flex-wrap items-center gap-2">
           <a href={viewerHref} target="_blank" rel="noopener noreferrer" className={btnGhost}>

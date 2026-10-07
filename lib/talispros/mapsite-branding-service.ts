@@ -27,7 +27,7 @@ export async function loadMapSiteBrandingOverrides(input: {
   return loadMapSiteOwnerCustomizationsByFastCode(input.fastCode);
 }
 
-/** Effective logo for a Mapsite™ (owner override, else the stored default). */
+/** Effective logo for a Mapsite (owner override, else the stored default). */
 export async function resolveMapSiteLogoUrlForServer(input: {
   mapsiteId?: string | null;
   fastCode?: string | null;
@@ -37,7 +37,7 @@ export async function resolveMapSiteLogoUrlForServer(input: {
   return resolveMapSiteLogoUrl(input.defaultLogoUrl, overrides);
 }
 
-/** og:image URL for a Mapsite™, versioned when the owner has a custom logo. */
+/** og:image URL for a Mapsite, versioned when the owner has a custom logo. */
 export async function resolveBrandedMapSiteOgImage(fastCode: string): Promise<string> {
   const overrides = await loadMapSiteBrandingOverrides({ fastCode });
   return resolveMapSiteOgImage(fastCode, mapsiteBrandingOgVersion(overrides));

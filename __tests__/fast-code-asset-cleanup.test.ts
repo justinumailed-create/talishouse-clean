@@ -5,10 +5,10 @@ import {
   shouldDeleteMapSiteMissingFastCode,
 } from "../lib/talispros/fast-code-asset-cleanup";
 
-describe("FAST code Mapsite™ and bookshelf cleanup", () => {
+describe("FAST code Mapsite and bookshelf cleanup", () => {
   const issued = ["rm22", "LRG1"];
 
-  it("keeps Mapsites™ whose FAST code is still issued", () => {
+  it("keeps Mapsites whose FAST code is still issued", () => {
     expect(
       shouldDeleteMapSiteMissingFastCode({
         mapsiteId: "map-rm22",
@@ -18,7 +18,7 @@ describe("FAST code Mapsite™ and bookshelf cleanup", () => {
     ).toBe(false);
   });
 
-  it("removes Mapsites™ when the FAST code is no longer in the system", () => {
+  it("removes Mapsites when the FAST code is no longer in the system", () => {
     expect(
       shouldDeleteMapSiteMissingFastCode({
         mapsiteId: "map-tt03",
@@ -35,7 +35,7 @@ describe("FAST code Mapsite™ and bookshelf cleanup", () => {
     ).toBe(true);
   });
 
-  it("never removes the platform demonstration Mapsite™", () => {
+  it("never removes the platform demonstration Mapsite", () => {
     expect(
       shouldDeleteMapSiteMissingFastCode({
         mapsiteId: DEMO_MAPSITE_ID,

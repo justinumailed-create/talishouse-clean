@@ -7,7 +7,7 @@ import {
 } from "./demonstration-catalog";
 
 export type TalisBooksAdminLibraryScope = {
-  /** Issued Mapsite™ FAST Code for the signed-in operator, when they have one. */
+  /** Issued Mapsite FAST Code for the signed-in operator, when they have one. */
   fastCode: string | null;
   /** Drop pinned samples, demo-* FAST codes, and hardcoded preview fillers. */
   excludeDemonstrationCatalog: boolean;

@@ -11,7 +11,7 @@ const HEADERS = {
 
 /**
  * Portrait bookshelf Open Graph card shared by catalogue + FAST TEB™ shelves.
- * Distinct from landscape Mapsite™ ALLPINS / viewer parting-shot cards.
+ * Distinct from landscape Mapsite ALLPINS / viewer parting-shot cards.
  */
 export async function GET() {
   try {

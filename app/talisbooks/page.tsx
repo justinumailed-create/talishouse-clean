@@ -15,7 +15,7 @@ const publicShelfCopy = bookshelfSeoCopy({});
 export const metadata: Metadata = createMetadata({
   title: publicShelfCopy.title,
   description:
-    "Explore Talisbooks™ — browse digital lookbooks and branded publications on the standing-book bookshelf. Mapsite™ pins your place on the map so buyers and partners can find your story.",
+    "Explore Talisbooks™ — browse digital lookbooks and branded publications on the standing-book bookshelf. Mapsite pins your place on the map so buyers and partners can find your story.",
   path: "/talisbooks",
   image: bookshelfOgMetadataImage(publicShelfCopy.title),
 });

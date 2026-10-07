@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     } else {
       const result = await activateMapSiteFromStripeCheckoutSession(session);
       if (!result.success) {
-        console.error("[stripe-webhook] Mapsite™ activation failed:", result.error);
+        console.error("[stripe-webhook] Mapsite activation failed:", result.error);
         return NextResponse.json(
           { error: "Activation failed." },
           { status: 500 },

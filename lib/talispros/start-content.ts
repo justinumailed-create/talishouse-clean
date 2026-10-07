@@ -15,13 +15,13 @@ export const TALISPROS_LEGAL_PRIMARY_COPY = "";
 
 export const TALISPROS_LEGAL_SECONDARY_COPY = "*Some limitations apply.";
 
-/** Same default Home PIN as Claim a Market / Build A Mapsite™. */
+/** Same default Home PIN as Claim a Market / Build A Mapsite. */
 export const TALISPROS_HOME_MAP_FALLBACK = {
   latitude: BUILD_MAPSITE_PREVIEW_LOCATION.latitude,
   longitude: BUILD_MAPSITE_PREVIEW_LOCATION.longitude,
 } as const;
 
-/** Market area shown on the homepage Mapsite™ preview. */
+/** Market area shown on the homepage Mapsite preview. */
 export const TALISPROS_HOME_MAP_RADIUS_KM = 50;
 
 /**
@@ -47,7 +47,7 @@ export function zoomForMapRadiusKm(
 }
 
 export const TALISPROS_HOME_MAPSITE_CARD = {
-  title: "Build Mapsite™",
+  title: "Build Mapsite",
   body: "A dedicated marketing platform covering about 50 km around all PINs you generate. Build Talisbooks™ and have us promote attached inventory.",
 } as const;
 
@@ -101,7 +101,7 @@ export type TalisprosHomeDemoStep = {
 
 /**
  * Compact homepage demo trio (not a tall carousel).
- * Mapsite™ asset is privacy-scrubbed; CSS masks hide residual address / FAST Code.
+ * Mapsite asset is privacy-scrubbed; CSS masks hide residual address / FAST Code.
  * Talisbooks™ slot uses a filled Demo Bookshelf composite (many books).
  */
 export const TALISPROS_HOME_DEMO_FLOW: readonly TalisprosHomeDemoStep[] = [
@@ -132,13 +132,13 @@ export const TALISPROS_HOME_DEMO_FLOW: readonly TalisprosHomeDemoStep[] = [
   {
     id: "mapsite",
     step: 3,
-    eyebrow: "Mapsites™",
-    title: "Claimed Mapsite™",
+    eyebrow: "Mapsites",
+    title: "Claimed Mapsite",
     body: "Pin dashboard with URL, MLS®, TEB™, and TTV™ — identity details hidden in demo.",
     href: "/talisu/mkts",
     hrefLabel: "System Demo",
     imageSrc: "/assets/home-demo/03-claimed-mapsite-rm22.jpg",
-    imageAlt: "Claimed Mapsite™ pin dashboard with address and FAST Code hidden",
+    imageAlt: "Claimed Mapsite pin dashboard with address and FAST Code hidden",
     imageObjectPosition: "object-[center_35%]",
     privacyMask: [
       { id: "rail-id", left: "2%", top: "8%", width: "18%", height: "12%" },

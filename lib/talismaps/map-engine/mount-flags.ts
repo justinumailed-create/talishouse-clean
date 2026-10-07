@@ -16,7 +16,7 @@ export function allowMapScrollZoom(
 
 /**
  * Auto fit-to-pins on mount would override a caller-supplied zoom
- * (Mapsite™ build-time `mapZoom`). Skip it when the viewport is preserved
+ * (Mapsite build-time `mapZoom`). Skip it when the viewport is preserved
  * or the map is non-interactive.
  */
 export function shouldAutoFitPinsOnMount(

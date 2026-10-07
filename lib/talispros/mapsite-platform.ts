@@ -22,13 +22,13 @@ export type MapSitePlatformRecord = {
   property_address: string | null;
   property_description: string | null;
   cover_image: string | null;
-  /** Brokerage / agency mark for paid Mapsite™ chrome. */
+  /** Brokerage / agency mark for paid Mapsite chrome. */
   logo_url: string | null;
   /** Brokerage / agency name from the Build Request company. */
   agency_name: string | null;
-  /** Agent / owner portrait from Mapsite™ or Build Request assets. */
+  /** Agent / owner portrait from Mapsite or Build Request assets. */
   profile_image_url: string | null;
-  /** Agent / owner name from Mapsite™ or Build Request. */
+  /** Agent / owner name from Mapsite or Build Request. */
   agent_name: string | null;
   gallery_images: string[];
   mls_url: string | null;
@@ -39,7 +39,7 @@ export type MapSitePlatformRecord = {
   is_demonstration: boolean;
   created_at: string | null;
   updated_at: string | null;
-  /** From the linked Build Request when Mapsite™ row is still on demo coordinates. */
+  /** From the linked Build Request when Mapsite row is still on demo coordinates. */
   pin_icon?: string | null;
   pin_color?: string | null;
   pin_border?: string | null;
@@ -125,10 +125,10 @@ const DEMO_SIDEBAR_BLURB =
   "Register with Talispros to have Aisha manage your exposure globally...!";
 
 export const MAPSITE_GENERIC_PARTNER_WRITEUP =
-  "Upon registration your Mapsite™ will be able to promote 100 PINs generating 1,000 views, monthly. No referral fees - ever";
+  "Upon registration your Mapsite will be able to promote 100 PINs generating 1,000 views, monthly. No referral fees - ever";
 
 export const MAPSITE_DEMO_EBOOK_PARTNER_WRITEUP =
-  "Upon registration your Mapsite™ will be able to promote up to 100 PINs generating up to 1,000 views, combined. A small insertion fee applies while the PIN is being promoted, but NO REFERRAL FEES, EVER…!";
+  "Upon registration your Mapsite will be able to promote up to 100 PINs generating up to 1,000 views, combined. A small insertion fee applies while the PIN is being promoted, but NO REFERRAL FEES, EVER…!";
 
 export function mapsiteMarketPartnerWriteup(isDemoEbook: boolean): string {
   return isDemoEbook
@@ -197,7 +197,7 @@ function mapRow(row: MapSiteRow): MapSitePlatformRecord {
         ? null
         : row.fast_code || null;
   const issued = isIssuedFastCode(fastCodeRaw);
-  // Issued claimed Mapsites™ must keep their own pin/address — never inherit
+  // Issued claimed Mapsites must keep their own pin/address — never inherit
   // the platform demo lot fallback (or a local/default location).
   return {
     id: row.id,
@@ -212,7 +212,7 @@ function mapRow(row: MapSiteRow): MapSitePlatformRecord {
         : HOME_PIN_DEFAULT_MAP_ZOOM,
     property_title:
       row.property_title ||
-      (issued ? row.property_address || "Your Mapsite™" : "Lot + optional Tiny Home"),
+      (issued ? row.property_address || "Your Mapsite" : "Lot + optional Tiny Home"),
     property_address:
       row.property_address || (issued ? null : DEMO_MAPSITE_ADDRESS),
     property_description:
@@ -560,7 +560,7 @@ export async function getDemonstrationMapSite(): Promise<MapSitePlatformRecord> 
 
     return createFallbackDemoMapSite();
   } catch (error) {
-    console.warn("[mapsite-platform] Falling back to demo Mapsite™:", error);
+    console.warn("[mapsite-platform] Falling back to demo Mapsite:", error);
     return createFallbackDemoMapSite();
   }
 }
@@ -584,7 +584,7 @@ export async function getMapSitePlatformById(
     if (error || !data) return null;
     return mapRow(data as MapSiteRow);
   } catch (error) {
-    console.warn("[mapsite-platform] Could not load Mapsite™ by id:", error);
+    console.warn("[mapsite-platform] Could not load Mapsite by id:", error);
     return null;
   }
 }
@@ -598,7 +598,7 @@ export async function transitionMapSiteStatus(
   }
 
   const current = await getMapSitePlatformById(mapsiteId);
-  if (!current) return { ok: false, error: "Mapsite™ not found." };
+  if (!current) return { ok: false, error: "Mapsite not found." };
 
   try {
     assertTransition(current.status, next);
@@ -621,7 +621,7 @@ export async function transitionMapSiteStatus(
     .single();
 
   if (error || !data) {
-    return { ok: false, error: error?.message || "Failed to update Mapsite™ status." };
+    return { ok: false, error: error?.message || "Failed to update Mapsite status." };
   }
 
   return { ok: true, mapsite: mapRow(data as MapSiteRow) };
@@ -682,14 +682,14 @@ export async function updateMapSiteResources(
     .single();
 
   if (error || !data) {
-    return { ok: false, error: error?.message || "Failed to update Mapsite™." };
+    return { ok: false, error: error?.message || "Failed to update Mapsite." };
   }
 
   return { ok: true, mapsite: mapRow(data as MapSiteRow) };
 }
 
 /**
- * After a Build Request is submitted against a Mapsite™, move it into the
+ * After a Build Request is submitted against a Mapsite, move it into the
  * pending pipeline and associate the request.
  */
 export async function markMapSiteClaimedByBuildRequest(params: {
@@ -757,7 +757,7 @@ export async function markMapSiteClaimedByBuildRequest(params: {
       { onConflict: "id" }
     );
     if (seedError) {
-      console.warn("[mapsite-platform] Unable to seed demo Mapsite™:", seedError.message);
+      console.warn("[mapsite-platform] Unable to seed demo Mapsite:", seedError.message);
     } else {
       current = await getMapSitePlatformById(params.mapsiteId);
     }

@@ -63,7 +63,7 @@ export default function PartnerAccessPage() {
           />
           <h1 className="text-xl font-light tracking-tight">Partner Access</h1>
           <p className="text-sm text-neutral-500 font-light mt-0.5">
-            Access Mapsites™ using Fast Codes
+            Access Mapsites using Fast Codes
           </p>
         </div>
 
@@ -90,7 +90,7 @@ export default function PartnerAccessPage() {
             {isSubmitting ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
-              "Access Mapsite™"
+              "Access Mapsite"
             )}
           </button>
 

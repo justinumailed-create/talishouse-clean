@@ -44,7 +44,7 @@ export default function TalisprosHeader() {
               href={buildClaimedMapSitePath({ fastCode: gateCode })}
               className="inline-flex shrink-0 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 no-underline shadow-sm hover:bg-neutral-50"
             >
-              Back to Mapsite™
+              Back to Mapsite
             </Link>
           ) : null}
         </div>

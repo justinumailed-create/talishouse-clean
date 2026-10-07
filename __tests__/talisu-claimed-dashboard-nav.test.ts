@@ -5,7 +5,7 @@ import { en } from "../lib/i18n/dictionaries/en";
 import { TALISU_REGISTER } from "../lib/talisu/content";
 import { TALISU_MKTS_HEADER_NAV } from "../lib/talisu/markets-pins";
 
-describe("Claimed FAST Mapsite™ header Dashboard nav", () => {
+describe("Claimed FAST Mapsite header Dashboard nav", () => {
   it("keeps Register in the shared nav config for non-claimed chrome", () => {
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Markets")).toBe(true);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Register")).toBe(true);
@@ -15,7 +15,7 @@ describe("Claimed FAST Mapsite™ header Dashboard nav", () => {
     );
   });
 
-  it("replaces Register with locked Dashboard on claimed Mapsites™ until payment", () => {
+  it("replaces Register with locked Dashboard on claimed Mapsites until payment", () => {
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",

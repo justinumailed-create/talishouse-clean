@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { isTalisprosMarketLayoutPath } from "../lib/talispros/market-pages";
 
 describe("isTalisprosMarketLayoutPath", () => {
-  it("treats Build My Mapsite™ and Have Rahul Build It as the same chrome", () => {
+  it("treats Build My Mapsite and Have Rahul Build It as the same chrome", () => {
     expect(isTalisprosMarketLayoutPath("/talispros/markets/claim-a-market")).toBe(
       true,
     );

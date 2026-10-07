@@ -32,7 +32,7 @@ export interface ActivateMapSiteAfterPaymentResult {
 }
 
 /**
- * Authoritative Mapsite™ activation after a successful payment.
+ * Authoritative Mapsite activation after a successful payment.
  * PayPal capture and Stripe webhooks both call this — do not duplicate.
  */
 export async function activateMapSiteAfterPayment(
@@ -46,7 +46,7 @@ export async function activateMapSiteAfterPayment(
   const paypalCaptureId = input.paypalCaptureId?.trim() || null;
 
   if (!mapsiteId) {
-    return { success: false, error: "Missing Mapsite™ id." };
+    return { success: false, error: "Missing Mapsite id." };
   }
   if (!paypalOrderId && !stripeCheckoutSessionId) {
     return { success: false, error: "Missing payment identifier." };
@@ -77,7 +77,7 @@ export async function activateMapSiteAfterPayment(
       }
     }
 
-    let firstName = "Mapsite™";
+    let firstName = "Mapsite";
     let lastName = "Owner";
     let email = "";
     let resolvedRequestId = requestId;
@@ -125,7 +125,7 @@ export async function activateMapSiteAfterPayment(
         request.requested_account_type || request.account_type || "";
 
       if (request.linked_mapsite_id && request.linked_mapsite_id !== mapsiteId) {
-        return { success: false, error: "Claim request does not match this Mapsite™." };
+        return { success: false, error: "Claim request does not match this Mapsite." };
       }
 
       if (!request.linked_mapsite_id) {
@@ -252,7 +252,7 @@ async function ensureMapSiteActiveAfterPayment(options: {
     await supabase
       .from("build_requests")
       .update({
-        status: "Mapsite™ Active",
+        status: "Mapsite Active",
         approval_status: "Approved",
         activated_at: new Date().toISOString(),
         linked_mapsite_id: mapsiteId,

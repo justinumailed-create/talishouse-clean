@@ -5,7 +5,7 @@ Talismaps™ renders all maps with **MapLibre GL JS**. Business logic never impo
 ## Architecture
 
 ```
-Surfaces (editor, embeds, registration, Mapsites™)
+Surfaces (editor, embeds, registration, Mapsites)
         ↓
 MapEngineProvider / MapEngineCanvas
         ↓

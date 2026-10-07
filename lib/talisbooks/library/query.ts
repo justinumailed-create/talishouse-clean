@@ -45,7 +45,7 @@ export function filterLibraryBooks(
   );
 }
 
-/** Public Mapsite™ shelf: keep books for this FAST Code (or uncoded books on the same mapsite). */
+/** Public Mapsite shelf: keep books for this FAST Code (or uncoded books on the same mapsite). */
 export function filterBooksForFastCodeShelf(
   books: TalisBooksLibraryBook[],
   fastCode: string,

@@ -47,7 +47,7 @@ export type ResolveOnboardingResult =
 /**
  * Canonical onboarding resolver.
  * Build Request (`requestId`) is the sole source of truth — no cookies,
- * localStorage, or client-supplied FAST Code / Mapsite™ IDs are trusted.
+ * localStorage, or client-supplied FAST Code / Mapsite IDs are trusted.
  */
 
 /**
@@ -333,7 +333,7 @@ export async function resolveOnboardingFromRequest(
 }
 
 /**
- * Admin / paid-owner ebook identity from an existing Mapsite™ FAST Code.
+ * Admin / paid-owner ebook identity from an existing Mapsite FAST Code.
  * Used when there is no Build Request (seeded listings like LRG1).
  * Callers must already have verified `canEditMapSite(fastCode)`.
  */
@@ -429,7 +429,7 @@ export async function resolveOnboardingFromMapSite(
         fastCode,
         mapsiteId: null,
         stage: "resolve_fast_code",
-        error: "Mapsite™ not found for this FAST Code.",
+        error: "Mapsite not found for this FAST Code.",
         durationMs: onboardingNow() - started,
       },
     };
@@ -518,7 +518,7 @@ export async function resolveOnboardingFromMapSite(
 
 /**
  * Minimal onboarding context for the catalogue isolated bookshelf when no
- * Mapsite™ is linked to the admin FAST Code. Callers must already have
+ * Mapsite is linked to the admin FAST Code. Callers must already have
  * verified edit/admin access for `fastCode`.
  */
 export function buildIsolatedBookshelfOnboardingContext(options: {
@@ -563,8 +563,8 @@ export function buildIsolatedBookshelfOnboardingContext(options: {
 
 /**
  * Isolated catalogue bookshelf onboarding.
- * Prefers a linked Mapsite™ when one exists; otherwise proceeds with the
- * admin FAST Code alone (no Mapsite™ required).
+ * Prefers a linked Mapsite when one exists; otherwise proceeds with the
+ * admin FAST Code alone (no Mapsite required).
  * Callers must already have verified `canEditMapSite(fastCode)`.
  */
 export async function resolveOnboardingForIsolatedBookshelf(
@@ -592,8 +592,8 @@ export async function resolveOnboardingForIsolatedBookshelf(
     return withMapsite;
   }
 
-  // Only bypass when the sole problem is a missing Mapsite™.
-  if (withMapsite.report.error !== "Mapsite™ not found for this FAST Code.") {
+  // Only bypass when the sole problem is a missing Mapsite.
+  if (withMapsite.report.error !== "Mapsite not found for this FAST Code.") {
     return withMapsite;
   }
 
@@ -615,7 +615,7 @@ export async function resolveOnboardingForIsolatedBookshelf(
 }
 
 /**
- * Per-image upload scope for an existing Mapsite™ the caller is allowed to edit.
+ * Per-image upload scope for an existing Mapsite the caller is allowed to edit.
  */
 export async function resolveMapSiteUploadScope(
   mapsiteIdRaw: string | null | undefined,
@@ -625,7 +625,7 @@ export async function resolveMapSiteUploadScope(
 > {
   const mapsiteId = mapsiteIdRaw?.trim() || "";
   if (!mapsiteId) {
-    return { ok: false, error: "Mapsite™ ID is required." };
+    return { ok: false, error: "Mapsite ID is required." };
   }
   if (!isSupabaseAdminConfigured()) {
     return { ok: false, error: "Database is not configured." };
@@ -639,12 +639,12 @@ export async function resolveMapSiteUploadScope(
     .maybeSingle();
 
   if (error || !data) {
-    return { ok: false, error: error?.message || "Mapsite™ not found." };
+    return { ok: false, error: error?.message || "Mapsite not found." };
   }
 
   const fastCode = data.fast_code?.trim().toLowerCase() || "";
   if (!fastCode) {
-    return { ok: false, error: "This Mapsite™ has no FAST Code." };
+    return { ok: false, error: "This Mapsite has no FAST Code." };
   }
   if (!(await canEditMapSite(fastCode))) {
     return { ok: false, error: "Unauthorized." };

@@ -13,7 +13,7 @@ export default function TalisprosMarketSidebar({ content }: TalisprosMarketSideb
     <aside className="flex-none bg-[#f2f2f0] text-black lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain lg:border-l lg:border-[#dedede] lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
       <div className="px-5 pb-10 pt-8 text-center sm:px-6 sm:pt-10">
         <h2 className="text-[21px] leading-snug text-black">
-          Your Mapsite™ Manager:
+          Your Mapsite Manager:
           <br />
           {MAPSITE_MARKET_PARTNER_FALLBACK_NAME}
         </h2>
@@ -48,7 +48,7 @@ export default function TalisprosMarketSidebar({ content }: TalisprosMarketSideb
           TVA: We analyze listings that may be suitable for an investor class that
           seeks collective purchases, or even tokenization. Such purchase options
           are often incompatible with exposure on industry platforms. Hence, we
-          manage your Mapsite™ initiatives.
+          manage your Mapsite initiatives.
           <br />
           <br />
           TTV: We coordinate video production and in-house online TV programming

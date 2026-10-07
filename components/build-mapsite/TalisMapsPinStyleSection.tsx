@@ -73,7 +73,7 @@ export default function TalisMapsPinStyleSection({
       </h3>
       <p className="mb-4 mt-1 text-xs text-neutral-500">
         Personalize your Home PIN. Uncheck white center to use flag-style markers
-        where your icon fills the colored circle (like Mapsite™ reference pins).
+        where your icon fills the colored circle (like Mapsite reference pins).
       </p>
 
       <div className="mb-5 flex items-center justify-center rounded-xl border border-neutral-200 bg-white py-6">

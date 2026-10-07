@@ -44,7 +44,7 @@ export interface MapSitePaymentLookupOptions {
   stripeCheckoutSessionId?: string | null;
   /**
    * When the local payment row is missing, ask Stripe for a paid Checkout
-   * session for this Mapsite™ and activate it. Use on owner/checkout paths —
+   * session for this Mapsite and activate it. Use on owner/checkout paths —
    * not on hot anonymous traffic — then persist so later reads are DB-only.
    */
   reconcileFromStripe?: boolean;
@@ -279,7 +279,7 @@ function isMissingPaymentLinkColumnError(message: string | undefined): boolean {
 }
 
 /**
- * If Stripe already captured activation for this Mapsite™ / Checkout session
+ * If Stripe already captured activation for this Mapsite / Checkout session
  * but `talispros_payments` was never marked completed, run the same activation
  * path as the webhook. Safe to call repeatedly (idempotent).
  */

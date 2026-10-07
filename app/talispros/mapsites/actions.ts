@@ -25,19 +25,19 @@ export async function establishMapSiteOwnerSession(
   const entered = enteredCode.trim().toLowerCase();
 
   if (!target) {
-    return { success: false, error: "Mapsite™ FAST code is required." };
+    return { success: false, error: "Mapsite FAST code is required." };
   }
 
   if (!entered || entered !== target) {
     return {
       success: false,
-      error: "Enter the FAST code for this Mapsite™ to continue.",
+      error: "Enter the FAST code for this Mapsite to continue.",
     };
   }
 
   const mapsite = await getMapSiteByFastCode(target);
   if (!mapsite) {
-    return { success: false, error: "Mapsite™ not found." };
+    return { success: false, error: "Mapsite not found." };
   }
 
   await setMapSiteOwnerSession(target);
@@ -154,7 +154,7 @@ export async function resolveClaimedMapSiteAccountTypeSegment(options: {
 }
 
 /**
- * Homepage FAST Code entry: open the connected claimed Mapsite™ with the same
+ * Homepage FAST Code entry: open the connected claimed Mapsite with the same
  * owner / paid browser session as the normal paid return path (not public-only).
  */
 export async function openClaimedMapSiteFromHomeFastCode(
@@ -179,7 +179,7 @@ export async function openClaimedMapSiteFromHomeFastCode(
   if (isDemoMapSiteCode(code)) {
     return {
       success: false,
-      error: "Enter your issued FAST Code to open your claimed Mapsite™.",
+      error: "Enter your issued FAST Code to open your claimed Mapsite.",
     };
   }
 
@@ -192,7 +192,7 @@ export async function openClaimedMapSiteFromHomeFastCode(
   if (!mapsite) {
     return {
       success: false,
-      error: "No Mapsite™ found for that FAST Code.",
+      error: "No Mapsite found for that FAST Code.",
     };
   }
 
@@ -225,8 +225,8 @@ export async function openClaimedMapSiteFromHomeFastCode(
 }
 
 /**
- * Logout from claimed/paid Mapsite™ owner view: clear owner + paid cookies and
- * return to the Talispros home page so no claimed/public Mapsite™ shell remains.
+ * Logout from claimed/paid Mapsite owner view: clear owner + paid cookies and
+ * return to the Talispros home page so no claimed/public Mapsite shell remains.
  */
 export async function logoutMapSiteOwnerSession(_options?: {
   fastCode?: string | null;

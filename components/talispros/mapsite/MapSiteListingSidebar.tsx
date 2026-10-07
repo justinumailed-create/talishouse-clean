@@ -15,7 +15,7 @@ interface MapSiteListingSidebarProps {
   onSelectListing: () => void;
   /** Partner / FAST marketing sidebar (claimed). */
   aboveCard?: ReactNode;
-  /** Payment CTA — rendered above the marketing sidebar on unpaid claimed Mapsites™. */
+  /** Payment CTA — rendered above the marketing sidebar on unpaid claimed Mapsites. */
   belowCard?: ReactNode;
 }
 

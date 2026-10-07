@@ -66,7 +66,7 @@ export async function publishBuildMapSite(
     .select("slug");
 
   if (slugError) {
-    throw new Error(`Failed to fetch existing Mapsite™ slugs: ${slugError.message}`);
+    throw new Error(`Failed to fetch existing Mapsite slugs: ${slugError.message}`);
   }
 
   const slug = await generateMapSiteSlug(
@@ -87,7 +87,7 @@ export async function publishBuildMapSite(
       firstNonPersonalMapsiteLabel(
         [input.futurePinLabel, input.streetAddress],
         [agentName],
-      ) || "Mapsite™",
+      ) || "Mapsite",
     property_address: input.streetAddress.trim() || null,
     property_description: input.pinWriteup.trim() || null,
     latitude: input.latitude,
@@ -110,7 +110,7 @@ export async function publishBuildMapSite(
 
   if (mapsiteError || !mapsite) {
     throw new Error(
-      `Failed to create Mapsite™: ${mapsiteError?.message || "Unknown error"}`
+      `Failed to create Mapsite: ${mapsiteError?.message || "Unknown error"}`
     );
   }
 

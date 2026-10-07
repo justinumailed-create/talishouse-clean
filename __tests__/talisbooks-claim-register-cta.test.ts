@@ -13,7 +13,7 @@ import {
 import { PINNED_TALISBOOK_SLUG } from "../lib/talisbooks/library/pinned-catalog";
 
 describe("Talisbooks Claim vs Register vs Back", () => {
-  it("never shows Back to Mapsite™ on shelves (demo or issued)", () => {
+  it("never shows Back to Mapsite on shelves (demo or issued)", () => {
     expect(talisBooksShelfShowBack("demo-abc123")).toBe(false);
     expect(talisBooksShelfShowBack("rm22")).toBe(false);
     expect(talisBooksShelfShowBack("")).toBe(false);
@@ -36,7 +36,7 @@ describe("Talisbooks Claim vs Register vs Back", () => {
     expect(
       talisBooksViewerCta({
         fastCode: "demo-abc123",
-        title: "Demo Mapsite™",
+        title: "Demo Mapsite",
       }),
     ).toBe("claim");
     expect(talisBooksShelfCta("demo-abc123")).toBe("claim");
@@ -78,7 +78,7 @@ describe("Talisbooks Claim vs Register vs Back", () => {
     expect(library).toContain("talisBooksShelfCta");
     expect(library).toContain("DemoClaimMarketButton");
     expect(library).toContain("TalisUMktsHeader");
-    expect(library).not.toContain("Back to Mapsite™");
+    expect(library).not.toContain("Back to Mapsite");
     expect(library).not.toContain("talisBooksShelfShowBack");
     expect(library).not.toContain("SHOW_BACK_TO_MAPSITE");
   });

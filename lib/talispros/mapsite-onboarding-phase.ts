@@ -1,7 +1,7 @@
 import type { MapSitePlatformStatus } from "@/lib/talispros/mapsite-state";
 
 /**
- * UI-only onboarding phases for Mapsite™ popup / sidebar gating.
+ * UI-only onboarding phases for Mapsite popup / sidebar gating.
  * Does NOT change database `mapsites.status` values.
  */
 export const MAPSITE_ONBOARDING_PHASES = [
@@ -19,7 +19,7 @@ export type GetMapSiteOnboardingPhaseInput = {
   status: MapSitePlatformStatus;
   /** Completed PayPal payment on file (existing payment helper). */
   paymentReceived: boolean;
-  /** Whether a Talisbook™ already exists for this FAST Code / Mapsite™. */
+  /** Whether a Talisbook™ already exists for this FAST Code / Mapsite. */
   hasTalisBook: boolean;
 };
 
@@ -27,7 +27,7 @@ export type GetMapSiteOnboardingPhaseInput = {
  * Derive popup / onboarding UI phase from existing status + payment + book.
  *
  * URL / MLS® / TEB™ / TTV™ only unlock after PayPal (`paymentReceived`).
- * Platform status ACTIVE alone is not enough — unpaid Mapsites™ stay in the
+ * Platform status ACTIVE alone is not enough — unpaid Mapsites stay in the
  * pending popup (View Your Talisbook™ + Activate) until payment clears.
  */
 export function getMapSiteOnboardingPhase(
@@ -46,7 +46,7 @@ export function getMapSiteOnboardingPhase(
   return "BUILD_SUBMITTED";
 }
 
-/** Pending Mapsites™ before payment — hide resource buttons / Express Interest. */
+/** Pending Mapsites before payment — hide resource buttons / Express Interest. */
 export function isPendingActivationPhase(
   phase: MapSiteOnboardingPhase
 ): boolean {

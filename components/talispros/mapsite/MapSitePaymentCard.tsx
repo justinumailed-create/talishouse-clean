@@ -68,7 +68,7 @@ export default function MapSitePaymentCard({
 
   async function handleActivate() {
     if (!province) {
-      setError("Select the province or territory of this Mapsite™.");
+      setError("Select the province or territory of this Mapsite.");
       return;
     }
     setProcessing(true);
@@ -135,7 +135,7 @@ export default function MapSitePaymentCard({
 
       {pendingConfirmation ? (
         <p className="mt-3 text-[13px] leading-snug text-neutral-500">
-          Payment submitted. Activating your Mapsite™…
+          Payment submitted. Activating your Mapsite…
         </p>
       ) : null}
       {cancelled && !processing ? (

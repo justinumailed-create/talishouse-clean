@@ -55,7 +55,7 @@ describe("FAST Code admin payment summary", () => {
     expect(summary.stripeTransactionId).toBe("cs_account_match");
   });
 
-  it("matches a completed payment by Mapsite™ email when the FAST code is not on the payment row", () => {
+  it("matches a completed payment by Mapsite email when the FAST code is not on the payment row", () => {
     const summary = summarizeFastCodePayment(
       { code: "lrg1", email: "rahulc@talispros.com" },
       [

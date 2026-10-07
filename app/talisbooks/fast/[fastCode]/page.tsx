@@ -57,7 +57,7 @@ export default async function FastCodeBookshelfPage({
 }: FastCodeBookshelfPageProps) {
   const { fastCode } = await params;
   const code = fastCode.trim();
-  // Same owner/admin gate as Mapsite™ edit + library ebook actions — no parallel auth.
+  // Same owner/admin gate as Mapsite edit + library ebook actions — no parallel auth.
   const canManageEbook = code ? await canEditMapSite(code) : false;
 
   const bookshelf = canManageEbook

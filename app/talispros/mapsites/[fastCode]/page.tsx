@@ -16,7 +16,7 @@ export async function generateMetadata({
   const mapsite = await loadPublishedMapSiteView(fastCode);
 
   if (!mapsite) {
-    return { title: "Mapsite™ Not Found | Talispros™" };
+    return { title: "Mapsite Not Found | Talispros™" };
   }
 
   return await publishedMapSiteMetadata(mapsite);

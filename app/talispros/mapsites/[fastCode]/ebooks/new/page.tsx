@@ -51,7 +51,7 @@ export default async function OwnerEbookCreatePage({
           href={backHref}
           className="inline-flex items-center gap-1 text-sm font-medium text-[#046BD9] hover:underline"
         >
-          ← Back to Mapsite™
+          ← Back to Mapsite
         </Link>
         <MapSiteAdminEbookPanel
           fastCode={mapsite.fastCode}

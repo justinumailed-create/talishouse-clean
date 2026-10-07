@@ -1,8 +1,8 @@
 /**
- * Single resolver for a Mapsite™'s owner branding (logo, left-card partner
+ * Single resolver for a Mapsite's owner branding (logo, left-card partner
  * photo, partner name, partner tagline).
  *
- * Every surface that shows a Mapsite™ logo or the left-card partner details
+ * Every surface that shows a Mapsite logo or the left-card partner details
  * must go through `resolveMapSiteBranding` / `resolveMapSiteLogoUrl` so the
  * owner overrides in `mapsite_owner_customizations` win everywhere and
  * "Reset to default" (override = null) falls back to the stored defaults.
@@ -38,7 +38,7 @@ function clean(value: string | null | undefined): string | null {
   return trimmed ? trimmed : null;
 }
 
-/** Owner logo override, else the Mapsite™ default logo (may be null). */
+/** Owner logo override, else the Mapsite default logo (may be null). */
 export function resolveMapSiteLogoUrl(
   defaultLogoUrl: string | null | undefined,
   overrides: MapSiteBrandingOverrides | undefined,
@@ -87,7 +87,7 @@ export function withOwnerLogoUrl<T extends { logoUrl: string | null }>(
 }
 
 /**
- * Cache-busting version for the Mapsite™ Open Graph card URL. Only set when an
+ * Cache-busting version for the Mapsite Open Graph card URL. Only set when an
  * owner logo override exists, so default cards keep their stable URL.
  */
 export function mapsiteBrandingOgVersion(

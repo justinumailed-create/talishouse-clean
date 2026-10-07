@@ -6,7 +6,7 @@ import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { DEMO_MAPSITE_ID, MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
-/** Public demo Mapsite™ builder (no FAST Code issuance). */
+/** Public demo Mapsite builder (no FAST Code issuance). */
 export const DEMO_MAPSITE_BUILD_PATH = "/talispros/demo-mapsite";
 
 /** Centerfold sample PDF offered from Markets / Demo builder (clean download name). */
@@ -47,7 +47,7 @@ export function isDemonstrationListing(options: {
 }
 
 /**
- * Demonstration Mapsites™ keep TEB/TTV viewing, but Create New / insert-pages
+ * Demonstration Mapsites keep TEB/TTV viewing, but Create New / insert-pages
  * must stay greyed and non-interactive so visitors cannot add ebook pages.
  */
 export function shouldLockDemoPageInsert(

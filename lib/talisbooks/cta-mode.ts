@@ -1,8 +1,8 @@
 /**
  * Claim vs Register vs Back for Talisbooks™ viewers and FAST shelves.
  *
- * - Register (SamCart): issued / claimed FAST Mapsite™ ebooks only
- * - Claim: demo Mapsite™, demo ebook viewer, demo-* FAST shelves
+ * - Register (SamCart): issued / claimed FAST Mapsite ebooks only
+ * - Claim: demo Mapsite, demo ebook viewer, demo-* FAST shelves
  * - Back: all of the above except issued-FAST ebook viewers (Register only there)
  */
 

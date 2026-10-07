@@ -63,7 +63,7 @@ export async function sendBuildRequestReceived(params: {
 }): Promise<SendResult> {
   return send(
     params.to,
-    "Your Mapsite™ Build Request Has Been Received",
+    "Your Mapsite Build Request Has Been Received",
     buildRequestReceivedHtml({
       recipientName: params.recipientName,
       requestId: params.requestId,
@@ -79,7 +79,7 @@ export async function sendFastCodeGenerated(params: {
 }): Promise<SendResult> {
   return send(
     params.to,
-    "Your Mapsite™ FAST Code is Ready",
+    "Your Mapsite FAST Code is Ready",
     fastCodeGeneratedHtml({
       recipientName: params.recipientName,
       fastCode: params.fastCode,
@@ -96,7 +96,7 @@ export async function sendMapSiteAssigned(params: {
 }): Promise<SendResult> {
   return send(
     params.to,
-    "New Mapsite™ Assigned to You",
+    "New Mapsite Assigned to You",
     mapSiteAssignedHtml({
       recipientName: params.recipientName,
       clientName: params.clientName,
@@ -113,7 +113,7 @@ export async function sendMapSiteCompleted(params: {
 }): Promise<SendResult> {
   return send(
     params.to,
-    "Your Mapsite™ is Complete",
+    "Your Mapsite is Complete",
     mapSiteCompletedHtml({
       recipientName: params.recipientName,
       fastCode: params.fastCode,

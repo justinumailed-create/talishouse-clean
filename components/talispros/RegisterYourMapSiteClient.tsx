@@ -21,8 +21,8 @@ export default function RegisterYourMapSiteClient({
   /** @deprecated PIN is visitor-generated; kept for call-site compatibility. */
   pinIssued?: boolean;
   /**
-   * Stand-in until SamCart: entering this Mapsite™ FAST Code™ opens the claimed
-   * Mapsite™. When false, unlock opens the external listing/payment URL via the
+   * Stand-in until SamCart: entering this Mapsite FAST Code™ opens the claimed
+   * Mapsite. When false, unlock opens the external listing/payment URL via the
    * Admin Notifications secure code.
    */
   unlockToMapsite?: boolean;
@@ -78,7 +78,7 @@ export default function RegisterYourMapSiteClient({
     startFast(async () => {
       const result = await openClaimedMapSiteFromHomeFastCode(entered);
       if (!result.success || !result.href) {
-        setError(result.error || "Could not open that Mapsite™.");
+        setError(result.error || "Could not open that Mapsite.");
         return;
       }
       setFastCode(entered);
@@ -90,12 +90,12 @@ export default function RegisterYourMapSiteClient({
     <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-md px-5 py-16">
         <h1 className="text-center text-3xl font-semibold tracking-tight text-neutral-900">
-          {unlockToMapsite ? "Register your Mapsite™" : MAPSITE_URL_GATE_HEADLINE}
+          {unlockToMapsite ? "Register your Mapsite" : MAPSITE_URL_GATE_HEADLINE}
         </h1>
         <p className="mt-3 text-center text-sm leading-relaxed text-neutral-500">
           {unlockToMapsite
-            ? "Enter your FAST Code™ to open your claimed Mapsite™. This stands in for payment success until SamCart is connected."
-            : "Generate a secure code for Admin Notifications, then enter the code they give you to open the payment/listing URL for this Mapsite™."}
+            ? "Enter your FAST Code™ to open your claimed Mapsite. This stands in for payment success until SamCart is connected."
+            : "Generate a secure code for Admin Notifications, then enter the code they give you to open the payment/listing URL for this Mapsite."}
         </p>
 
         {unlockToMapsite ? (
@@ -127,7 +127,7 @@ export default function RegisterYourMapSiteClient({
               disabled={pendingFast || !fastInput.trim()}
               className="flex h-12 w-full items-center justify-center rounded-xl bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
             >
-              {pendingFast ? "Opening…" : "Open Mapsite™"}
+              {pendingFast ? "Opening…" : "Open Mapsite"}
             </button>
           </form>
         ) : (

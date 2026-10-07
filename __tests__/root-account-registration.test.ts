@@ -113,7 +113,7 @@ describe("createMapSiteForAccount", () => {
     });
   });
 
-  it("creates a draft Mapsite™ linked to the account FAST Code", async () => {
+  it("creates a draft Mapsite linked to the account FAST Code", async () => {
     mockMapSitesInsert.mockResolvedValue({
       data: {
         id: "mapsite-1",
@@ -212,7 +212,7 @@ describe("completeRootAccountRegistration", () => {
     });
   });
 
-  it("creates user, root account, FAST Code, and Mapsite™ in order", async () => {
+  it("creates user, root account, FAST Code, and Mapsite in order", async () => {
     const result = await completeRootAccountRegistration({
       firstName: "Arun",
       lastName: "Rachuri",

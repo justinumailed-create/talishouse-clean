@@ -218,7 +218,7 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
   }, [pins, draggablePinIds]);
 
   // Apply programmatic viewport changes (e.g. claim-form address geocode → pan map).
-  // Skip when center is locked (Mapsite™ pin under tip) — that path owns the camera.
+  // Skip when center is locked (Mapsite pin under tip) — that path owns the camera.
   // Skip when gestures are disabled so the published map stays at build zoom.
   // Skip when the instance already matches to avoid fighting user pan/zoom echoes.
   useEffect(() => {

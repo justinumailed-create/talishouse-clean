@@ -10,9 +10,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = createMetadata({
-  title: "Talispros™ Mapsite™",
+  title: "Talispros™ Mapsite",
   description:
-    "Fullscreen Mapsite™ application for claiming markets and onboarding on Talispros™.",
+    "Fullscreen Mapsite application for claiming markets and onboarding on Talispros™.",
   path: "/talispros/mapsite",
   image: false,
 });

@@ -83,16 +83,16 @@ export const TALISU_MKTS_PMC_TITLE = "Talispros™ PMC";
 
 export const TALISU_MKTS_PMC_BULLETS = [
   "Root Accounts can register unlimited Derivative Accounts.",
-  "Derivative Accounts publish to Root Mapsites™ to promote up to 100 PINs each.",
-  "FSBO and Adpro Accounts promote single PIN Mapsites™.",
+  "Derivative Accounts publish to Root Mapsites to promote up to 100 PINs each.",
+  "FSBO and Adpro Accounts promote single PIN Mapsites.",
 ] as const;
 
 export const TALISU_MKTS_HEADER_TAGLINE =
   "Industry Adjacent Mapsite Markets";
 
 /**
- * Primary top-bar links (home + claimed Mapsites™ blue header).
- * Bookshelf + Catalogue are the book links; Mapsites™ is a header dropdown (not here).
+ * Primary top-bar links (home + claimed Mapsites blue header).
+ * Bookshelf + Catalogue are the book links; Mapsites is a header dropdown (not here).
  */
 export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/mkts", label: "Markets" },
@@ -108,7 +108,7 @@ export const TALISU_MKTS_HEADER_REGISTER_DROPDOWN = [
   { href: "/talisu/engage", label: "Product" },
 ] as const;
 
-/** Placeholder marker — Mapsites™ dropdown is rendered in TalisUMktsHeader. */
+/** Placeholder marker — Mapsites dropdown is rendered in TalisUMktsHeader. */
 export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
 
 /** TalisU™ header dropdown — FAQ first, then KB / Audio / Video. */
@@ -151,7 +151,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -54.6083708,
     mapZoom: 6,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -166,7 +166,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -63.5466822,
     mapZoom: 7,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -181,7 +181,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -66.46191639999999,
     mapZoom: 7,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -196,7 +196,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -71.20745959999999,
     mapZoom: 6,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -211,7 +211,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -76.49302949999999,
     mapZoom: 7,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -226,7 +226,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -81.2452768,
     mapZoom: 7,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -241,7 +241,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -80.99302899999999,
     mapZoom: 6,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -256,7 +256,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -89.2476823,
     mapZoom: 6,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -271,7 +271,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -98.3987593,
     mapZoom: 6,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -286,7 +286,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -106.6701577,
     mapZoom: 6,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -301,7 +301,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -113.4937266,
     mapZoom: 6,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -316,7 +316,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -122.1416885,
     mapZoom: 6,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -331,7 +331,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -136.2919597,
     mapZoom: 5,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -346,7 +346,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -114.3717886,
     mapZoom: 5,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -361,7 +361,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     longitude: -68.5169669,
     mapZoom: 5,
     description:
-      "Claim an industry adjacent market place by building a Demo Mapsite™.",
+      "Claim an industry adjacent market place by building a Demo Mapsite.",
     heroImageUrl: TALISU_MKTS_MARKET_HERO,
     nextHref: TALISU_MKTS_DEMO_HREF,
     nextLabel: "Next Step...",
@@ -371,7 +371,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
   {
     id: "modular-spaces",
     kind: "do-more",
-    label: "TalisU™ Modular Spaces",
+    label: "Talishouse™ Modular Spaces",
     latitude: 58.806958,
     longitude: -95.409728,
     mapZoom: 5,

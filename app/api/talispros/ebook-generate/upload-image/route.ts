@@ -114,7 +114,7 @@ export async function POST(request: Request) {
         scope = scoped.fastCode;
       }
     } else if (isolatedBookshelf && fastCode) {
-      // Isolated bookshelf create — Global Admin FAST Code, Mapsite™ optional.
+      // Isolated bookshelf create — Global Admin FAST Code, Mapsite optional.
       if (!(await isAdminAuthenticated())) {
         return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
       }

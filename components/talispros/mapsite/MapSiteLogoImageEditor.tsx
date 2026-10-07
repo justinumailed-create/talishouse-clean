@@ -51,7 +51,7 @@ const SLOTS: Array<{
   {
     field: "logo",
     label: "Logo",
-    help: "Used everywhere this Mapsite™ shows its logo: the left card, the published Mapsite™ header, new ebooks, and link previews. PNG with a transparent background works best.",
+    help: "Used everywhere this Mapsite shows its logo: the left card, the published Mapsite header, new ebooks, and link previews. PNG with a transparent background works best.",
     kind: "logo",
   },
   {

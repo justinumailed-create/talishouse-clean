@@ -330,7 +330,7 @@ export default function HomePinLocationSection({
       <div>
         <FieldLabel
           label="PIN selector"
-          hint="Zoom to the view you want — placing or moving the PIN keeps that zoom. The created Mapsite™ opens at the same depth."
+          hint="Zoom to the view you want — placing or moving the PIN keeps that zoom. The created Mapsite opens at the same depth."
         />
         <TalisMapsPinPicker
           latitude={values.latitude}

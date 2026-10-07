@@ -1,5 +1,5 @@
 /**
- * One-shot: rasterize Downloads/DC02.pdf and replace the DC02 Mapsite™ ebook.
+ * One-shot: rasterize Downloads/DC02.pdf and replace the DC02 Mapsite ebook.
  * Usage: node scripts/replace-dc02-ebook.mjs
  */
 import { createClient } from "@supabase/supabase-js";

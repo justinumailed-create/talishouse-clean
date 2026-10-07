@@ -57,7 +57,38 @@ async function reverseGeocodeGoogle(lat: string, lon: string) {
   };
 }
 
+async function forwardGeocodeGoogle(query: string) {
+  const key = googleMapsApiKey();
+  if (!key) return null;
+  const response = await fetch(
+    `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${encodeURIComponent(key)}`,
+    { cache: "no-store" },
+  );
+  if (!response.ok) return null;
+  const payload = (await response.json()) as {
+    status?: string;
+    results?: Array<{
+      formatted_address?: string;
+      geometry?: { location?: { lat?: number; lng?: number } };
+    }>;
+  };
+  if (payload.status !== "OK" || !payload.results?.length) return null;
+  const match = payload.results[0];
+  const lat = match.geometry?.location?.lat;
+  const lng = match.geometry?.location?.lng;
+  if (typeof lat !== "number" || typeof lng !== "number") return null;
+  return {
+    found: true as const,
+    latitude: String(lat),
+    longitude: String(lng),
+    address: match.formatted_address?.trim() || null,
+  };
+}
+
 async function forwardGeocode(query: string) {
+  const google = await forwardGeocodeGoogle(query);
+  if (google) return NextResponse.json(google);
+
   const response = await fetch(
     `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`,
     {

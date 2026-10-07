@@ -165,7 +165,7 @@ async function enrichPublishedBranding(
     ownerLastName: row?.owner_last_name || view.ownerLastName,
     brokerageName,
     },
-    // Owner Logo & Card Editor override wins on the published Mapsite™ too.
+    // Owner Logo & Card Editor override wins on the published Mapsite too.
     ownerBranding,
   );
 }

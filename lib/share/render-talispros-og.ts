@@ -27,7 +27,7 @@ export async function readTalisprosOgPartner(): Promise<Buffer> {
 
 /**
  * Compose the brand share card: soft chrome background, logo + Aisha on the
- * left, ALLPINS multi-pin Mapsite™ map on the right.
+ * left, ALLPINS multi-pin Mapsite map on the right.
  */
 export async function renderTalisprosOgCard(input?: {
   logo?: Buffer | null;
@@ -78,7 +78,7 @@ export async function renderTalisprosOgCard(input?: {
     .jpeg({ quality: 90 })
     .toBuffer();
 
-  // Rounded mask so the portrait matches Mapsite™ market-partner chrome.
+  // Rounded mask so the portrait matches Mapsite market-partner chrome.
   const radius = 24;
   const roundedMask = Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${partnerWidth}" height="${partnerHeight}">

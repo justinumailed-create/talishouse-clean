@@ -568,7 +568,7 @@ p {
   animation: slide-in 0.3s ease-out;
 }
 
-/* Hide PayPal iframes while Mapsite™ gallery lightbox is open */
+/* Hide PayPal iframes while Mapsite gallery lightbox is open */
 body.mapsite-gallery-open iframe[src*="paypal.com"],
 body.mapsite-gallery-open [id^="zoid-paypal"],
 body.mapsite-gallery-open [data-paypal-button] {
@@ -577,7 +577,7 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 /*
- * Mapsite™ resource actions — PayPal blue / gold, squared, compact row.
+ * Mapsite resource actions — PayPal blue / gold, squared, compact row.
  */
 .mapsite-paypal-btn {
   display: flex;
@@ -921,7 +921,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 }
 
-/* Mapsite™ owner guided onboarding prompt — gentle float toward the property flag. */
+/* Mapsite owner guided onboarding prompt — gentle float toward the property flag. */
 @keyframes mapsite-guided-prompt-float {
   0%,
   100% {
@@ -4949,7 +4949,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 }
 
-/* Soft white cloud behind Mapsite™ chrome so copy reads on any map tile. */
+/* Soft white cloud behind Mapsite chrome so copy reads on any map tile. */
 .mapsite-cloud-vignette {
   pointer-events: none;
   position: absolute;
@@ -4981,7 +4981,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   color: #000000;
 }
 
-/* ─── Mapsite™ phone overlays ─────────────────────────────────────────────── */
+/* ─── Mapsite phone overlays ─────────────────────────────────────────────── */
 /* The map pin sits at the vertical centre, so the left stack (registration
    card above the manager strip) must never grow tall enough to reach it. Short
    phones drop the secondary copy first. */

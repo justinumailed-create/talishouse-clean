@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * Isolated catalogue bookshelf — same Mapsite™-connected Talisbooks™ shelf
+ * Isolated catalogue bookshelf — same Mapsite-connected Talisbooks™ shelf
  * UX as `/talisbooks/fast/{code}`, scoped to ALLPINS.
  *
  * Publicly viewable so share crawlers receive bookshelf SEO/OG (not Admin

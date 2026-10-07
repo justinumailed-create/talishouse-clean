@@ -9,8 +9,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Register Your Mapsite™ | TalisPros™",
-  description: "Register your Mapsite™ and activate your TalisPros™ presence with payment.",
+  title: "Register Your Mapsite | TalisPros™",
+  description: "Register your Mapsite and activate your TalisPros™ presence with payment.",
 };
 
 export default function RegisterMapSiteLayout({

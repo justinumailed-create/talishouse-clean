@@ -67,7 +67,7 @@ const BRANDING_IMAGE_FIELDS = [
   {
     key: "logoUrl",
     label: "Logo",
-    hint: "Shown in the Mapsite™ header.",
+    hint: "Shown in the Mapsite header.",
     previewClassName: "object-contain p-1",
   },
   {
@@ -241,7 +241,7 @@ export default function MapSiteAdminEditor({
             </Link>
           ) : null}
           <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">
-            Talispros™ Mapsite™ Admin
+            Talispros™ Mapsite Admin
           </h1>
           <p className="text-sm text-neutral-500 mt-1 font-mono">{mapsite.fastCode}</p>
         </div>
@@ -257,7 +257,7 @@ export default function MapSiteAdminEditor({
             className="inline-flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1.5 text-[13px] font-medium text-orange-600 ring-1 ring-orange-200/80 transition hover:bg-orange-100"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-orange-500" aria-hidden="true" />
-            Open claimed Mapsite™
+            Open claimed Mapsite
             <ExternalLink className="h-3.5 w-3.5" />
           </Link>
           <Link
@@ -331,7 +331,7 @@ export default function MapSiteAdminEditor({
             Visitor Subscription Panel
           </h2>
           <p className="text-sm text-neutral-500">
-            Control which subscription visitors see on this Mapsite™ and whether the
+            Control which subscription visitors see on this Mapsite and whether the
             Express an Interest form appears after they subscribe.
           </p>
           <Field label="Offered Subscription">
@@ -391,7 +391,7 @@ export default function MapSiteAdminEditor({
           Pin resource buttons
         </h2>
         <p className="text-sm text-neutral-500">
-          MLS® and URL stay greyed out on the Mapsite™ until these are set. TEB™ and
+          MLS® and URL stay greyed out on the Mapsite until these are set. TEB™ and
           TTV™ use platform defaults when empty.
         </p>
         <Field label="MLS® URL">
@@ -560,7 +560,7 @@ export default function MapSiteAdminEditor({
           <div>
             <h2 className="text-lg font-semibold text-neutral-900">Map</h2>
             <p className="mt-1 text-sm text-neutral-500">
-              Same Home PIN flow as Build My Mapsite™ — search an address or drop
+              Same Home PIN flow as Build My Mapsite — search an address or drop
               a pin, then create the Talismaps™ for {mapsite.fastCode.toUpperCase()}.
             </p>
           </div>
@@ -677,7 +677,7 @@ export default function MapSiteAdminEditor({
               const result = await unpublishMapSite(mapsite.fastCode);
               if (result.success) {
                 setForm((p) => ({ ...p, status: "inactive" }));
-                setMessage("Mapsite™ unpublished");
+                setMessage("Mapsite unpublished");
               } else {
                 setError(result.error || "Unpublish failed");
               }

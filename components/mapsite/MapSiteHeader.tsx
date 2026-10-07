@@ -25,7 +25,7 @@ export default function MapSiteHeader({
               className="w-7 h-7 object-contain"
             />
             <span className="text-sm font-semibold tracking-tight text-neutral-900">
-              Mapsite™
+              Mapsite
             </span>
           </Link>
 

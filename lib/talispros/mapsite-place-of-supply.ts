@@ -14,7 +14,7 @@ async function safeLookup<T>(run: () => Promise<T>, fallback: T): Promise<T> {
 }
 
 /**
- * Place of supply for Mapsite™ activation: claimed market / property
+ * Place of supply for Mapsite activation: claimed market / property
  * province, then any client-selected province. Never invents a default rate.
  */
 export async function resolveMapSitePlaceOfSupply(options: {

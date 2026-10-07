@@ -31,7 +31,7 @@ function newItem(bucket: TalisUKbBucket): TalisUKbItem {
 
 /**
  * Manage Audios / Videos / Learning Material for the Knowledge Base.
- * Used from /talisu/kb/manage and linked from rm22's claimed Mapsite™ dashboard.
+ * Used from /talisu/kb/manage and linked from rm22's claimed Mapsite dashboard.
  */
 export default function TalisUKbManagePanel() {
   const formId = useId();

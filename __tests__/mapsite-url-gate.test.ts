@@ -29,7 +29,7 @@ import {
 } from "@/lib/talispros/mapsite-url-gate-crypto";
 import { urlGateCodeFromNotification } from "@/lib/talispros/admin-notifications";
 
-describe("Mapsite™ URL gate", () => {
+describe("Mapsite URL gate", () => {
   it("keeps gate helpers client-safe and documents TTL", () => {
     expect(MAPSITE_URL_GATE_HEADLINE).toBe("Secure URL access");
     expect(MAPSITE_URL_GATE_TTL_LABEL).toBe("30 minutes");
@@ -69,7 +69,7 @@ describe("Mapsite™ URL gate", () => {
     ).toBe(false);
   });
 
-  it("opens a secure-code popup from the published Mapsite™ URL button", () => {
+  it("opens a secure-code popup from the published Mapsite URL button", () => {
     const popup = readFileSync(
       join(
         process.cwd(),
@@ -147,7 +147,7 @@ describe("Mapsite™ URL gate", () => {
       join(process.cwd(), "components/talispros/TalisprosHeader.tsx"),
       "utf8",
     );
-    expect(header).toContain("Back to Mapsite™");
+    expect(header).toContain("Back to Mapsite");
     expect(header).toContain("registerYourMapSiteFastCodeFromPath");
     expect(header).toContain("buildClaimedMapSitePath");
   });

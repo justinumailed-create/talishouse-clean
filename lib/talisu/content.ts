@@ -69,7 +69,7 @@ export const TALISU_FAQ: {
   title: "Frequently Asked Questions",
   items: [
     {
-      question: "What is a Mapsite™?",
+      question: "What is a Mapsite?",
       answer:
         "It is a map-based online navigation system that can be deployed industry adjacent and adds flexibility to how you promote major purchase products (those that typically exceed $10,000 per unit and are immobile, roll, float or fly).",
     },
@@ -81,7 +81,7 @@ export const TALISU_FAQ: {
     {
       question: "What is the meaning of PMC?",
       answer:
-        "Promote - Manage - Cooperate. Mapsites™ contain pins whose flags reveal URL, MLS®, TEB and TTV links for every pin:",
+        "Promote - Manage - Cooperate. Mapsites contain pins whose flags reveal URL, MLS®, TEB and TTV links for every pin:",
       bullets: [
         "URL: a means to advance narratives and shape external communication.",
         "MLS®: a link specifically for real estate professionals to bypass distractions en route to specific listings.",
@@ -92,10 +92,10 @@ export const TALISU_FAQ: {
     {
       question: "What are Talispros™?",
       answer:
-        "TalisU™ “graduates” who use Mapsites™ to visually chart, track, and manage the infrastructure of complex referral and/or co-promotion networks.",
+        "TalisU™ “graduates” who use Mapsites to visually chart, track, and manage the infrastructure of complex referral and/or co-promotion networks.",
     },
     {
-      question: "How can Mapsites™ increase revenues for Talispros™?",
+      question: "How can Mapsites increase revenues for Talispros™?",
       answer: [
         "By setting up virtual monopolies that establish service floors.",
         "Example: an average service fee may be “X”, and an average term length may be “Y”, locally. How often would those averages be challenged when competing for clients the traditional way?",
@@ -106,7 +106,7 @@ export const TALISU_FAQ: {
       question: "How much to register an account?",
       answer: [
         "Registration for Root, FSBO and Adpro Accounts is $998.50 annually to establish the account, and $98.50 monthly to maintain it.",
-        "Registration for Derivative Accounts, which use Root Account Mapsites™, is $198.50 annually to establish the account, and $98.50 monthly to maintain it.",
+        "Registration for Derivative Accounts, which use Root Account Mapsites, is $198.50 annually to establish the account, and $98.50 monthly to maintain it.",
         "Additional global marketing pins are $7 per week (a dollar a day, weekly commitment) for Derivative Account Holders.",
       ],
     },
@@ -121,9 +121,9 @@ export const TALISU_FAQ: {
         "Select “System Demo”.",
         "Choose the PIN closest to your home point.",
         "Select “Next Step” and build a demo eBook.",
-        "Fill out the form: First initials of your first and last name generate half of your FAST Code™ (Free Access, Standard Tracking). The other half is a number between 01 and 99 to make you unique within our system. Your Street Address positions your Home PIN on your sample Mapsite™. The sample Mapsite™ tells us if there are conflicts with other home markets.",
+        "Fill out the form: First initials of your first and last name generate half of your FAST Code™ (Free Access, Standard Tracking). The other half is a number between 01 and 99 to make you unique within our system. Your Street Address positions your Home PIN on your sample Mapsite. The sample Mapsite tells us if there are conflicts with other home markets.",
         "Select “Continue to Demo eBook”.",
-        "Your Mapsite™ builds and a flag opens.",
+        "Your Mapsite builds and a flag opens.",
         "You can claim your market by registering under URL and open TEB and TTV links.",
         "MLS® only applies to Licensed Real Estate Professionals registered through Root Account Holders.",
       ],
@@ -170,7 +170,7 @@ export const TALISU_FAQ: {
 export const TALISU_MARKETS_COPY = {
   title: "Markets served",
   body: "Select the PIN nearest you to claim a market of 50 miles (80 kilometres) around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.",
-  /** Demo path — builds a Demo Mapsite™ (301/redirect via /talisu/demo). */
+  /** Demo path — builds a Demo Mapsite (301/redirect via /talisu/demo). */
   claimHref: "/talisu/demo",
 } as const;
 
@@ -227,7 +227,7 @@ export const TALISU_REGISTER = {
     "My team and I help grow your real estate adjacent marketing initiatives along four broad parameters:",
   bullets: [
     {
-      label: "Mapsites™",
+      label: "Mapsites",
       text: "we provide dedicated map-based platforms that can serve as referral and co-promotion network tools when publishing special purpose or user generated contents. Please note: contents must be non-political and in good taste by generally accepted standards at our sole discretion. Contents deemed otherwise will be switched \"blind\" by our AI bots, immediately and without warning. Resubmissions are permissible.",
     },
     {
@@ -236,7 +236,7 @@ export const TALISU_REGISTER = {
     },
     {
       label: "Listing analysis (TVA)",
-      text: "we analyze qualifying listings to establish suitability for investor classes that seek advanced transaction structures, including SPLITS, Fractionalization and Tokenization. Since all are often incompatible with exposure on traditional industry platforms they require Mapsites™ for promotional purposes.",
+      text: "we analyze qualifying listings to establish suitability for investor classes that seek advanced transaction structures, including SPLITS, Fractionalization and Tokenization. Since all are often incompatible with exposure on traditional industry platforms they require Mapsites for promotional purposes.",
     },
     {
       label: "TalisTV™ (TTV)",

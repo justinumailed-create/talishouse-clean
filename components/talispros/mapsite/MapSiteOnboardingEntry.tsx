@@ -35,7 +35,7 @@ export default function MapSiteOnboardingEntry({
             href={buildYourOwnHref}
             className="inline-flex min-h-[76px] items-center justify-center rounded-2xl bg-neutral-900 px-5 py-4 text-center text-base font-semibold tracking-[0.02em] text-white transition hover:bg-neutral-800"
           >
-            Build My Mapsite™
+            Build My Mapsite
           </Link>
           <Link
             href={haveItBuiltHref}

@@ -94,15 +94,15 @@ interface MapSiteApplicationProps {
   initialMapSite: MapSitePlatformRecord;
   audience: RegistrationMarket;
   requestId?: string | null;
-  /** Owner Mapsite™ only: select primary PIN and open the property flag on load. */
+  /** Owner Mapsite only: select primary PIN and open the property flag on load. */
   openPinOnLoad?: boolean;
-  /** Owner Mapsite™ only: one-time guided prompt above the open property flag. */
+  /** Owner Mapsite only: one-time guided prompt above the open property flag. */
   showStartHere?: boolean;
   /** Claim-form plan for activation checkout display (full Root Account™). */
   paymentPlanType?: PlanType;
   /** Completed activation payment on file — unlocks listing resources. */
   paymentReceived?: boolean;
-  /** Whether a Talisbook™ exists for this Mapsite™ / FAST Code. */
+  /** Whether a Talisbook™ exists for this Mapsite / FAST Code. */
   hasTalisBook?: boolean;
   /** Viewer path for View Your Talisbook™. */
   talisBookHref?: string | null;
@@ -118,7 +118,7 @@ interface MapSiteApplicationProps {
   sourceAudience?: RegistrationMarket | null;
   /** Capability account type that drives permissions and UI visibility. */
   accountType?: MapSiteCapabilityAccountType;
-  /** True when this browser has the owner / paid Mapsite™ session. */
+  /** True when this browser has the owner / paid Mapsite session. */
   isOwner?: boolean;
   /** Claimed URL account-type segment (brokers, listings, …) for Logout return. */
   accountTypeSegment?: string | null;
@@ -132,7 +132,7 @@ interface MapSiteApplicationProps {
   pinCheckoutStatus?: "success" | "cancelled" | null;
   pinCheckoutSessionId?: string | null;
   /**
-   * Owner session or Mapsite™ admin may use the Dashboard dropdown. Server
+   * Owner session or Mapsite admin may use the Dashboard dropdown. Server
    * actions still re-check requireMapSiteEditAccess (owner + paid, or admin).
    */
   canManageDashboard?: boolean;
@@ -722,7 +722,7 @@ function MapSiteChrome({
   const showExplicitPayment =
     showActivatePayment || Boolean(checkoutStatus);
 
-  // Every paid (non-demo) Mapsite™ owner — or a Mapsite™ admin — gets the menu.
+  // Every paid (non-demo) Mapsite owner — or a Mapsite admin — gets the menu.
   const dashboardManageable = dashboardUnlocked && canManageDashboard;
 
   const openOwnerDashboard = useCallback(() => {
@@ -838,7 +838,7 @@ function MapSiteChrome({
     onboardingMode === "assisted"
       ? "Register Account now"
       : "Register Account now";
-  // Paid Mapsites™: agency logo on the solid partner card. Checkout stays
+  // Paid Mapsites: agency logo on the solid partner card. Checkout stays
   // off the first-look map unless the visitor opens Activate or returns from checkout.
   const registrationCard =
     !isDemoListing && claimed && !paid && showExplicitPayment ? (

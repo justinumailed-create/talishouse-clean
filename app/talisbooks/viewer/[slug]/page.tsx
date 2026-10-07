@@ -29,7 +29,7 @@ export async function generateMetadata({
       return createMetadata({
         title: "Explore Talisbooks™",
         description:
-          "Explore Talisbooks™ — open the sample lookbook. Mapsite™ pins your place on the map so buyers and partners can find your story.",
+          "Explore Talisbooks™ — open the sample lookbook. Mapsite pins your place on the map so buyers and partners can find your story.",
         path: `${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`,
         image: mapsiteOgMetadataImage(
           toAbsoluteHttpsOgUrl(

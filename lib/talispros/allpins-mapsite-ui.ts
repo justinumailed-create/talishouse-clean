@@ -8,7 +8,7 @@ import { ROUTES } from "@/lib/routes";
 export { ISOLATED_BOOKSHELF_PATH, ALLPINS_FAST_CODE };
 
 /**
- * ALLPINS Mapsite™ map view — the live /talisu/mkts Markets map.
+ * ALLPINS Mapsite map view — the live /talisu/mkts Markets map.
  * Kept as a named helper so Back / shelf links share one destination.
  */
 export function allPinsClaimedHref(): string {

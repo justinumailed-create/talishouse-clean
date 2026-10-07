@@ -58,7 +58,7 @@ export async function createDemoMapSiteWithPinnedEbook(
   if (!isSupabaseAdminConfigured()) {
     return {
       ok: false,
-      error: "Demo Mapsite™ creation is unavailable until storage is configured.",
+      error: "Demo Mapsite creation is unavailable until storage is configured.",
     };
   }
 
@@ -67,11 +67,11 @@ export async function createDemoMapSiteWithPinnedEbook(
   }
 
   const title =
-    input.propertyTitle?.trim() || "Demo Mapsite™";
+    input.propertyTitle?.trim() || "Demo Mapsite";
   const address = input.streetAddress?.trim() || null;
   const description =
     input.description?.trim() ||
-    "Demonstration Mapsite™ with the pinned Talispros eBook. No FAST Code is issued.";
+    "Demonstration Mapsite with the pinned Talispros eBook. No FAST Code is issued.";
   const mapZoom = clampMapZoom(input.mapZoom ?? 12);
 
   const supabase = getSupabaseAdmin();
@@ -94,7 +94,7 @@ export async function createDemoMapSiteWithPinnedEbook(
     account_type: "root",
     owner_first_name: "Demo",
     owner_last_name: "Mapsite",
-    agent_name: "Demo Mapsite™",
+    agent_name: "Demo Mapsite",
     email: "demo@talispros.com",
     phone: "",
     status: "active",
@@ -105,7 +105,7 @@ export async function createDemoMapSiteWithPinnedEbook(
     longitude: input.longitude,
     map_zoom: mapZoom,
     // Stock Glasshouse™ placeholder — pin/hero comes from ebook interiors via
-    // withEbookListingMedia / listingHeroImageUrl (same as claimed FAST Mapsites™).
+    // withEbookListingMedia / listingHeroImageUrl (same as claimed FAST Mapsites).
     cover_image: MAPSITE_DEMO_LISTING_IMAGE,
     header_image_url: MAPSITE_DEMO_LISTING_IMAGE,
     gallery_images: [...MAPSITE_DEMO_GALLERY],
@@ -125,7 +125,7 @@ export async function createDemoMapSiteWithPinnedEbook(
   if (error || !created) {
     return {
       ok: false,
-      error: error?.message || "Could not create the demo Mapsite™.",
+      error: error?.message || "Could not create the demo Mapsite.",
     };
   }
 
@@ -162,7 +162,7 @@ export async function listDemoMapSites(): Promise<DemoMapSiteRecord[]> {
   return data.map((row) => ({
     id: row.id,
     fastCode: row.fast_code,
-    propertyTitle: row.property_title || "Demo Mapsite™",
+    propertyTitle: row.property_title || "Demo Mapsite",
     propertyAddress: row.property_address,
     latitude: row.latitude,
     longitude: row.longitude,
@@ -187,13 +187,13 @@ export async function updateDemoMapSite(input: {
   }
 
   const mapsiteId = input.mapsiteId.trim();
-  if (!mapsiteId) return { ok: false, error: "Missing Mapsite™ ID." };
+  if (!mapsiteId) return { ok: false, error: "Missing Mapsite ID." };
 
   const patch: Record<string, unknown> = {
     updated_at: new Date().toISOString(),
   };
   if (input.propertyTitle !== undefined) {
-    patch.property_title = input.propertyTitle.trim() || "Demo Mapsite™";
+    patch.property_title = input.propertyTitle.trim() || "Demo Mapsite";
   }
   if (input.propertyAddress !== undefined) {
     patch.property_address = input.propertyAddress.trim() || null;
@@ -227,7 +227,7 @@ export async function deleteDemoMapSite(
   }
 
   const id = mapsiteId.trim();
-  if (!id) return { ok: false, error: "Missing Mapsite™ ID." };
+  if (!id) return { ok: false, error: "Missing Mapsite ID." };
   if (isProtectedPlatformDemoMapSite(id)) {
     return {
       ok: false,
@@ -244,10 +244,10 @@ export async function deleteDemoMapSite(
 
   if (loadError) return { ok: false, error: loadError.message };
   if (!row?.is_demonstration) {
-    return { ok: false, error: "That Mapsite™ is not a demonstration listing." };
+    return { ok: false, error: "That Mapsite is not a demonstration listing." };
   }
   if (!isDemoMapSiteCode(row.fast_code) && row.fast_code?.toUpperCase() !== "DEMO") {
-    return { ok: false, error: "That listing is not a demo Mapsite™." };
+    return { ok: false, error: "That listing is not a demo Mapsite." };
   }
   if (row.fast_code?.toUpperCase() === "DEMO") {
     return {
@@ -292,7 +292,7 @@ export async function loadDemoMapSiteForEbook(
   return {
     mapsiteId: data.id,
     code,
-    title: data.property_title?.trim() || "Demo Mapsite™",
+    title: data.property_title?.trim() || "Demo Mapsite",
     location: data.property_address?.trim() || "",
     description: data.property_description?.trim() || "",
     mapsiteHref: demoMapSiteApplicationHref(data.id, code),
@@ -304,7 +304,7 @@ export async function resolveDemoMapSiteUploadScope(
 ): Promise<{ ok: true; mapsiteId: string; fastCode: string } | { ok: false; error: string }> {
   const mapsiteId = mapsiteIdRaw?.trim() || "";
   if (!mapsiteId) {
-    return { ok: false, error: "Demo Mapsite™ ID is required." };
+    return { ok: false, error: "Demo Mapsite ID is required." };
   }
   if (!isSupabaseAdminConfigured()) {
     return { ok: false, error: "Database is not configured." };
@@ -318,10 +318,10 @@ export async function resolveDemoMapSiteUploadScope(
     .maybeSingle();
 
   if (error || !data?.is_demonstration) {
-    return { ok: false, error: "Demo Mapsite™ not found." };
+    return { ok: false, error: "Demo Mapsite not found." };
   }
   if (!isDemoMapSiteCode(data.fast_code)) {
-    return { ok: false, error: "That listing is not a demonstration Mapsite™." };
+    return { ok: false, error: "That listing is not a demonstration Mapsite." };
   }
 
   return {

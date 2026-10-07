@@ -15,7 +15,7 @@ describe("TalisBOT Talispros™ knowledge", () => {
     for (const item of TALISBOT_KNOWLEDGE) {
       expect(assertNoTalishouseInBotCopy(item.title + item.body)).toBe(true);
     }
-    expect(TALISBOT_SYSTEM_ROLE).toContain("Mapsites™");
+    expect(TALISBOT_SYSTEM_ROLE).toContain("Mapsites");
     expect(TALISBOT_SYSTEM_ROLE).toContain("Talisbooks™");
     expect(TALISBOT_SYSTEM_ROLE).toMatch(/Do not discuss or recommend/i);
     expect(TALISBOT_SYSTEM_ROLE).toContain("Talispros™");

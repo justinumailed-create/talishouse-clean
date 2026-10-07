@@ -104,7 +104,7 @@ function firstUsable(urls: Array<string | null | undefined>): string | null {
 }
 
 /**
- * Scenic layer behind a Mapsite™ share card when satellite imagery is unavailable.
+ * Scenic layer behind a Mapsite share card when satellite imagery is unavailable.
  * Parting shot first, then a listing photo. Front covers and brand posters are skipped.
  */
 export function selectMapsiteScenicBackgroundUrl(input: {
@@ -165,30 +165,30 @@ export function mapsiteRealtimeSeoCopy(input: {
   const description = input.propertyDescription?.trim() || "";
   const address = input.propertyAddress?.trim() || "";
   const title = property
-    ? `${property} | Mapsite™`
-    : `${code || "Mapsite™"} | Mapsite™`;
+    ? `${property} | Mapsite`
+    : `${code || "Mapsite"} | Mapsite`;
   let desc = description;
   if (!desc && address && code) {
     desc = `${address} · FAST Code ${code}`;
   } else if (!desc && address) {
     desc = address;
   } else if (!desc && code) {
-    desc = `Mapsite™ for FAST Code ${code}.`;
+    desc = `Mapsite for FAST Code ${code}.`;
   } else if (!desc) {
-    desc = "Mapsite™";
+    desc = "Mapsite";
   }
   return { title, description: desc };
 }
 
 /**
- * ALLPINS listing share copy — mirrors the ALLPINS Mapsite™ property fields
+ * ALLPINS listing share copy — mirrors the ALLPINS Mapsite property fields
  * (Canada multi-pin showcase), not synthetic marketing fluff.
  */
 export function allpinsSeoCopy(): { title: string; description: string } {
   return {
-    title: "ALLPINS — Every Mapsite™ | Mapsite™",
+    title: "ALLPINS — Every Mapsite | Mapsite",
     description:
-      "Canada showcase of Mapsite™ pins. Open a pin for the book and Mapsite™ demo.",
+      "Canada showcase of Mapsite pins. Open a pin for the book and Mapsite demo.",
   };
 }
 
@@ -220,7 +220,7 @@ export function viewerRealtimeSeoCopy(input: {
 }
 
 
-/** Portrait bookshelf share-card metadata (not landscape Mapsite™ / viewer). */
+/** Portrait bookshelf share-card metadata (not landscape Mapsite / viewer). */
 export function bookshelfOgMetadataImage(alt: string): CreateMetadataImage {
   return {
     url: toAbsoluteHttpsOgUrl(bookshelfShareOgPath()),
@@ -252,8 +252,8 @@ export function resolveBookshelfOgImage(): string {
 }
 
 /**
- * SEO copy for Mapsite™-connected Talisbooks™ shelves (FAST TEB™ + isolated
- * ALLPINS catalogue shelf). Distinct from ALLPINS Mapsite™ multi-pin listing copy.
+ * SEO copy for Mapsite-connected Talisbooks™ shelves (FAST TEB™ + isolated
+ * ALLPINS catalogue shelf). Distinct from ALLPINS Mapsite multi-pin listing copy.
  */
 export function bookshelfSeoCopy(input: {
   fastCode?: string | null;
@@ -264,7 +264,7 @@ export function bookshelfSeoCopy(input: {
     return {
       title: `ALLPINS ${TALISBOOKS_PRODUCT_NAME} · Bookshelf`,
       description:
-        "Mapsite™-connected Talisbooks™ bookshelf for FAST Code ALLPINS. Open a cover to read books on the isolated shelf.",
+        "Mapsite-connected Talisbooks™ bookshelf for FAST Code ALLPINS. Open a cover to read books on the isolated shelf.",
     };
   }
   const code = (input.fastCode || "").trim().toUpperCase();
@@ -272,13 +272,13 @@ export function bookshelfSeoCopy(input: {
   if (place) {
     return {
       title: `${TALISBOOKS_PRODUCT_NAME} · ${place}`,
-      description: `Talisbooks™ bookshelf for ${place} (FAST Code ${code}). Open a cover to read books connected to this Mapsite™ only.`,
+      description: `Talisbooks™ bookshelf for ${place} (FAST Code ${code}). Open a cover to read books connected to this Mapsite only.`,
     };
   }
   if (code) {
     return {
       title: `${TALISBOOKS_PRODUCT_NAME} · ${code}`,
-      description: `Talisbooks™ bookshelf for FAST Code ${code}. Open a cover to read books connected to this Mapsite™ only.`,
+      description: `Talisbooks™ bookshelf for FAST Code ${code}. Open a cover to read books connected to this Mapsite only.`,
     };
   }
   return {
@@ -288,7 +288,7 @@ export function bookshelfSeoCopy(input: {
   };
 }
 
-/** Absolute URL of the composed landscape Mapsite™ share card. */
+/** Absolute URL of the composed landscape Mapsite share card. */
 export function resolveMapSiteOgImage(
   fastCodeRaw: string,
   /** Owner branding version (mapsiteBrandingOgVersion) — busts link-preview caches. */

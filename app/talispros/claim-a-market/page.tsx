@@ -21,12 +21,12 @@ const BENEFITS = [
     description: "Receive a unique FAST Code that serves as your universal gateway for account access and market routing.",
   },
   {
-    title: "Mapsite™ Presence",
-    description: "Own a dedicated Mapsite™ — a property discovery page that showcases your listings and services.",
+    title: "Mapsite Presence",
+    description: "Own a dedicated Mapsite — a property discovery page that showcases your listings and services.",
   },
   {
     title: "Lead Generation",
-    description: "Capture qualified leads through your Mapsite™ with built-in contact forms and discovery tools.",
+    description: "Capture qualified leads through your Mapsite with built-in contact forms and discovery tools.",
   },
 ];
 

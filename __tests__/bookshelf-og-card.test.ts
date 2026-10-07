@@ -30,7 +30,7 @@ function pixel(
 }
 
 describe("bookshelf portrait OG", () => {
-  it("uses a portrait frame distinct from landscape Mapsite™ / viewer cards", () => {
+  it("uses a portrait frame distinct from landscape Mapsite / viewer cards", () => {
     expect(BOOKSHELF_OG_WIDTH / BOOKSHELF_OG_HEIGHT).toBeCloseTo(0.8, 2);
     expect(BOOKSHELF_OG_HEIGHT).toBeGreaterThan(BOOKSHELF_OG_WIDTH);
     expect(SHARE_OG_WIDTH / SHARE_OG_HEIGHT).toBeCloseTo(1.904, 2);
@@ -79,14 +79,14 @@ describe("bookshelf portrait OG", () => {
     expect(bookshelfSeoCopy({ isolatedAllPins: true })).toEqual({
       title: "ALLPINS Talisbooks™ · Bookshelf",
       description:
-        "Mapsite™-connected Talisbooks™ bookshelf for FAST Code ALLPINS. Open a cover to read books on the isolated shelf.",
+        "Mapsite-connected Talisbooks™ bookshelf for FAST Code ALLPINS. Open a cover to read books on the isolated shelf.",
     });
     expect(
       bookshelfSeoCopy({ fastCode: "dc02", place: "Grand River Falls" }),
     ).toEqual({
       title: "Talisbooks™ · Grand River Falls",
       description:
-        "Talisbooks™ bookshelf for Grand River Falls (FAST Code DC02). Open a cover to read books connected to this Mapsite™ only.",
+        "Talisbooks™ bookshelf for Grand River Falls (FAST Code DC02). Open a cover to read books connected to this Mapsite only.",
     });
 
     expect(resolveBookshelfOgImage()).toBe(

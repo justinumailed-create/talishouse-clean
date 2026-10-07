@@ -66,7 +66,7 @@ export default function TalisMapsMarketingPage() {
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-neutral-500">
             Talismaps™ is a standalone product with its own dashboard, database models,
-            APIs, and management interface. It integrates with Mapsites™, FAST Codes™,
+            APIs, and management interface. It integrates with Mapsites, FAST Codes™,
             and account hierarchies while operating as an independent platform.
           </p>
           <Link

@@ -33,7 +33,7 @@ export function ExplanationSections({
           <p>
             A FAST Code™ is your unique gateway identifier in the TalisPros™ ecosystem.
             It functions as a universal account access key — share it with clients,
-            partners, and referral sources so they can find your Mapsite™ instantly.
+            partners, and referral sources so they can find your Mapsite instantly.
           </p>
           <p>
             Every account type receives a permanent, human-readable FAST Code™
@@ -44,20 +44,20 @@ export function ExplanationSections({
 
       <hr className="border-t border-neutral-200 mb-12" />
 
-      {/* Mapsites™ */}
+      {/* Mapsites */}
       <section className="mb-12">
         <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 mb-3">
-          What is a Mapsite™?
+          What is a Mapsite?
         </h2>
         <div className="text-sm text-neutral-600 space-y-3 leading-relaxed">
           <p>
-            A Mapsite™ is your dedicated property discovery page inside the TalisPros™
+            A Mapsite is your dedicated property discovery page inside the TalisPros™
             marketplace. It serves as your professional storefront where potential
             buyers and sellers can find your listings, learn about your services,
             and connect with you directly.
           </p>
           <p>
-            Each Mapsite™ is linked to your FAST Code™ and is immediately accessible
+            Each Mapsite is linked to your FAST Code™ and is immediately accessible
             at your unique URL upon registration.
           </p>
         </div>

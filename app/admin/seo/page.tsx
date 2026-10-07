@@ -13,7 +13,7 @@ export default async function AdminSeoPage() {
       <div>
         <h1 className="text-2xl font-semibold text-neutral-900">SEO</h1>
         <p className="mt-1 text-sm text-neutral-500">
-          Meta title, description, and OpenGraph image for each Mapsite™, keyed
+          Meta title, description, and OpenGraph image for each Mapsite, keyed
           by FAST Code. Empty fields show the live system-assigned share card.
         </p>
       </div>

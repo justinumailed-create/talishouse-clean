@@ -29,7 +29,7 @@ export type TalisBooksBookshelfOptions = {
   fastCode?: string | null;
   /**
    * When set, never inject the hardcoded preview shelf or pinned sample.
-   * Used by the admin / signed-in library so real Mapsites™ see created books.
+   * Used by the admin / signed-in library so real Mapsites see created books.
    */
   excludeDemonstrationCatalog?: boolean;
 };
@@ -255,7 +255,7 @@ async function loadCreatedLibraryBooks(): Promise<TalisBooksLibraryBook[]> {
 
 /**
  * Personal bookshelf for a Root or Derivative account.
- * When `fastCode` is set (Mapsite™ TEB™), returns only that code's ebooks — not the demo library.
+ * When `fastCode` is set (Mapsite TEB™), returns only that code's ebooks — not the demo library.
  * When `excludeDemonstrationCatalog` is set without a FAST code, returns every
  * created FAST-linked book (drafts included; no pinned sample, demo-* rows, or
  * hardcoded preview fillers). Left featured pins come from PUBLIC_LIBRARY_PINNED_BOOKS.
@@ -405,7 +405,7 @@ export async function getTalisBooksLibrary(
  * Public product bookshelf at /talisbooks.
  * Shows published + public books with the pinned book first.
  * Always includes the built-in pinned sample when no DB pin is present.
- * When `fastCode` is set (Mapsite™ Open bookshelf), only that code's books appear —
+ * When `fastCode` is set (Mapsite Open bookshelf), only that code's books appear —
  * the global sample pin is omitted.
  */
 export async function getPublicTalisBooksBookshelf(options?: {

@@ -6,7 +6,7 @@ import { claimedMapSiteSegmentForAccountOrPlan } from "../lib/talispros/mapsite-
 import { isIssuedFastCode } from "../lib/talispros/fast-code-shape";
 import { accountTypeForAudience } from "../lib/talispros/account-capabilities";
 
-describe("claim demo Mapsite™ → live claimed URL", () => {
+describe("claim demo Mapsite → live claimed URL", () => {
   it("builds brokers claimed path for root-style demo claims", () => {
     const segment = claimedMapSiteSegmentForAccountOrPlan("root");
     expect(segment).toBe("brokers");
