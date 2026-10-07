@@ -44,30 +44,30 @@ describe("Mapsite additional PIN quota", () => {
     expect(canPlaceAnotherPin(quota.pinQuota, 0)).toBe(false);
   });
 
-  it("prices each additional PIN at $10 USD", () => {
-    expect(MAPSITE_ADDITIONAL_PIN_PRICE_CENTS).toBe(1000);
-    expect(additionalPinPriceCents(1)).toBe(1000);
-    expect(additionalPinPriceCents(3)).toBe(3000);
-    expect(formatAdditionalPinCheckoutLabel(2)).toBe("Buy 2 PINs · $20.00 USD");
+  it("prices each additional PIN at $7 CAD", () => {
+    expect(MAPSITE_ADDITIONAL_PIN_PRICE_CENTS).toBe(700);
+    expect(additionalPinPriceCents(1)).toBe(700);
+    expect(additionalPinPriceCents(3)).toBe(2100);
+    expect(formatAdditionalPinCheckoutLabel(2)).toBe("Buy 2 PINs · $14.00 CAD");
     expect(
       additionalPinPaymentMatches({
         quantity: 4,
-        amountTotal: 4000,
-        currency: "usd",
+        amountTotal: 2800,
+        currency: "cad",
       }),
     ).toBe(true);
     expect(
       additionalPinPaymentMatches({
         quantity: 4,
-        amountTotal: 4000,
-        currency: "cad",
+        amountTotal: 2800,
+        currency: "usd",
       }),
     ).toBe(false);
     expect(
       additionalPinPaymentMatches({
         quantity: 4,
-        amountTotal: 1000,
-        currency: "usd",
+        amountTotal: 700,
+        currency: "cad",
       }),
     ).toBe(false);
   });
@@ -158,8 +158,8 @@ describe("additional PIN Checkout does not activate a Mapsite", () => {
           object: "checkout.session",
           payment_status: "paid",
           status: "complete",
-          amount_total: 2000,
-          currency: "usd",
+          amount_total: 1400,
+          currency: "cad",
           metadata: {
             purpose: "additional_pins",
             mapSiteId: "map-1",

@@ -3,6 +3,7 @@ import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { isDemonstrationListing } from "@/lib/talispros/demo-mapsite";
 import {
+  MAPSITE_ADDITIONAL_PIN_CURRENCY,
   MAPSITE_ADDITIONAL_PIN_PRICE_CENTS,
   additionalPinPaymentMatches,
   capacityFromCounts,
@@ -158,7 +159,7 @@ export async function fulfillAdditionalPinsFromStripeCheckoutSession(
   if (!additionalPinPaymentMatches({ quantity, amountTotal, currency })) {
     return {
       success: false,
-      error: "Payment amount does not match $10 USD per PIN.",
+      error: "Payment amount does not match $7 CAD per PIN.",
     };
   }
 
@@ -255,7 +256,7 @@ export async function recordPendingPinPurchase(input: {
     mapsite_id: input.mapsiteId,
     quantity: input.quantity,
     unit_amount_cents: MAPSITE_ADDITIONAL_PIN_PRICE_CENTS,
-    currency: "usd",
+    currency: MAPSITE_ADDITIONAL_PIN_CURRENCY,
     stripe_checkout_session_id: input.stripeCheckoutSessionId,
     payment_status: "pending",
     email: input.email,

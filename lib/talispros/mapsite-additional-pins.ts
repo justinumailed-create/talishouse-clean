@@ -1,12 +1,13 @@
 /**
  * Mapsite additional PIN capacity.
- * Every Mapsite includes 1 PIN. Owners buy more at $10 USD each, up to 100 total.
+ * Every Mapsite includes 1 PIN. Owners buy more at $7 CAD each, up to 100 total.
+ * Canada pricing: CAD unless Arun explicitly asks for USD.
  */
 
 export const MAPSITE_INCLUDED_PIN_COUNT = 1;
 export const MAPSITE_MAX_PIN_COUNT = 100;
-export const MAPSITE_ADDITIONAL_PIN_PRICE_CENTS = 1000;
-export const MAPSITE_ADDITIONAL_PIN_CURRENCY = "usd" as const;
+export const MAPSITE_ADDITIONAL_PIN_PRICE_CENTS = 700;
+export const MAPSITE_ADDITIONAL_PIN_CURRENCY = "cad" as const;
 export const ADDITIONAL_PINS_CHECKOUT_PURPOSE = "additional_pins";
 
 export const PIN_CHECKOUT_QUERY = "pinCheckout";
@@ -140,17 +141,20 @@ export function additionalPinPriceCents(quantity: number): number {
   return quantity * MAPSITE_ADDITIONAL_PIN_PRICE_CENTS;
 }
 
-export function formatUsdFromCents(cents: number): string {
+export function formatAdditionalPinMoneyFromCents(cents: number): string {
   const amount = Number.isFinite(cents) ? cents / 100 : 0;
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat("en-CA", {
     style: "currency",
-    currency: "USD",
+    currency: MAPSITE_ADDITIONAL_PIN_CURRENCY.toUpperCase(),
   }).format(amount);
 }
 
+/** @deprecated Use formatAdditionalPinMoneyFromCents — PIN pricing is CAD. */
+export const formatUsdFromCents = formatAdditionalPinMoneyFromCents;
+
 export function formatAdditionalPinCheckoutLabel(quantity: number): string {
   const countLabel = quantity === 1 ? "1 PIN" : `${quantity} PINs`;
-  return `Buy ${countLabel} · ${formatUsdFromCents(additionalPinPriceCents(quantity))} USD`;
+  return `Buy ${countLabel} · ${formatAdditionalPinMoneyFromCents(additionalPinPriceCents(quantity))} CAD`;
 }
 
 export type PinGrantDecision = {

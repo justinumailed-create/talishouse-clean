@@ -8,7 +8,7 @@ import {
 } from "@/app/talispros/mapsite/pin-actions";
 import {
   additionalPinPriceCents,
-  formatUsdFromCents,
+  formatAdditionalPinMoneyFromCents,
   normalizePinCoordinate,
   type MapSitePinDashboardState,
 } from "@/lib/talispros/mapsite-additional-pins";
@@ -237,7 +237,7 @@ export default function MapSitePinDashboard({
 
         <div className="space-y-2">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-            {fmt(d.buyHeading, { price: formatUsdFromCents(dashboard.unitPriceCents) })}
+            {fmt(d.buyHeading, { price: formatAdditionalPinMoneyFromCents(dashboard.unitPriceCents) })}
           </h3>
           {atMax ? (
             <p className="text-xs text-neutral-600">
@@ -270,7 +270,7 @@ export default function MapSitePinDashboard({
                   ? d.startingCheckout
                   : fmt(safeQuantity === 1 ? d.buyOne : d.buyMany, {
                       count: safeQuantity,
-                      price: formatUsdFromCents(additionalPinPriceCents(safeQuantity)),
+                      price: formatAdditionalPinMoneyFromCents(additionalPinPriceCents(safeQuantity)),
                     })}
               </button>
             </div>

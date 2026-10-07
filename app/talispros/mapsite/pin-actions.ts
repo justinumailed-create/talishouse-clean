@@ -121,7 +121,7 @@ export async function createAdditionalPinCheckout(input: {
             unit_amount: MAPSITE_ADDITIONAL_PIN_PRICE_CENTS,
             product_data: {
               name: "Talispros™ Mapsite additional PIN",
-              description: "One additional map PIN on your Mapsite ($10 USD).",
+              description: "One additional map PIN on your Mapsite ($7 CAD).",
             },
           },
         },
