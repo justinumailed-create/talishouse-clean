@@ -320,7 +320,7 @@ export const de: Dictionary = {
     openAria: "TalisBOT öffnen",
     closeAria: "TalisBOT schließen",
     faq: "FAQ",
-    getHelp: "Hilfe erhalten / Kontakt hinterlassen",
+    getHelp: "Kontakt hinterlassen",
     processesHeading: "Talispros™-Prozesse",
     allTopics: "← Alle Themen",
     contactAbout: "Hierzu Kontakt aufnehmen",

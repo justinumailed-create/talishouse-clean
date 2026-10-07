@@ -157,7 +157,7 @@ export const en = {
     openAria: "Open TalisBOT",
     closeAria: "Close TalisBOT",
     faq: "FAQ",
-    getHelp: "Get help / leave contact",
+    getHelp: "Leave contact",
     processesHeading: "Talispros™ processes",
     allTopics: "← All topics",
     contactAbout: "Contact about this",
