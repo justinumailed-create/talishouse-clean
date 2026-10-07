@@ -5136,6 +5136,8 @@ body.mapsite-gallery-open [data-paypal-button] {
 
   .talisu-essay-column {
     position: static !important;
+    display: block !important;
+    height: auto !important;
     max-height: none !important;
     overflow: visible !important;
   }
@@ -5145,6 +5147,7 @@ body.mapsite-gallery-open [data-paypal-button] {
     border-radius: 0 !important;
     padding: 0 !important;
     background: #fff !important;
+    height: auto !important;
     overflow: visible !important;
   }
 

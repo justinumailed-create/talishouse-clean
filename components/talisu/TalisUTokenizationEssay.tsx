@@ -17,7 +17,7 @@ export default function TalisUTokenizationEssay() {
   return (
     <article
       id="tokenization-essay"
-      className={`talisu-tokenization-essay ${TALISU_CARD} scroll-mt-24 print:shadow-none print:ring-0`}
+      className={`talisu-tokenization-essay ${TALISU_CARD} flex h-full min-h-0 flex-col scroll-mt-24 print:h-auto print:shadow-none print:ring-0`}
       aria-labelledby="talisu-essay-heading"
     >
       <header className="border-b border-neutral-200 pb-4">
@@ -47,7 +47,7 @@ export default function TalisUTokenizationEssay() {
         <p className="mt-3 text-xs italic text-neutral-500">{essay.disclaimer}</p>
       </header>
 
-      <div className="talisu-essay-body mt-5 space-y-7 text-sm leading-relaxed text-neutral-700 sm:text-[15px]">
+      <div className="talisu-essay-body mt-5 min-h-0 flex-1 space-y-7 overflow-y-auto text-sm leading-relaxed text-neutral-700 sm:text-[15px] print:overflow-visible">
         <p className="text-neutral-800">{essay.intro}</p>
 
         {essay.sections.map((section) => (

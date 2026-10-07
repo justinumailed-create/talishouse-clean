@@ -19,7 +19,7 @@ export default async function TalisUHomePage() {
   const faq = getDictionary(await getLocale()).talisu.faq;
   return (
     <div className="talisu-faq-page mx-auto max-w-[1400px] px-4 py-10 text-neutral-900 sm:px-5 sm:py-14">
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10 lg:items-start">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10 lg:items-stretch">
         <section
           id="faq"
           className="talisu-faq-column scroll-mt-24 min-w-0"
@@ -71,7 +71,7 @@ export default async function TalisUHomePage() {
         </section>
 
         <aside
-          className="talisu-essay-column min-w-0 lg:sticky lg:top-20 lg:max-h-[calc(100dvh-5.5rem)] lg:overflow-y-auto print:static print:max-h-none print:overflow-visible"
+          className="talisu-essay-column flex h-full min-w-0 flex-col lg:min-h-0 print:block print:h-auto"
           aria-label="Tokenization essay"
         >
           <TalisUTokenizationEssay />
