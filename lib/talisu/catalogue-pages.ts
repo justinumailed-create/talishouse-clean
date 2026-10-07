@@ -19,7 +19,7 @@ export const CATALOGUE_BACK_SOURCE_PAGE = 38;
 export const CATALOGUE_TDOME_PAGE_ID = "t-dome";
 
 export const CATALOGUE_TDOME_SRC =
-  "/talisbooks/templates/rm22/products/t-dome.jpg";
+  "/talisu/catalogue/t-dome.jpg";
 
 /**
  * Inclusive content-page range omitted from the public flipbook (toolbar +

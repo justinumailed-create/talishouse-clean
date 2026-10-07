@@ -177,27 +177,6 @@ export default function TopBoundFlipbook({
   const sheetPage = flip
     ? leaves[flip.direction === "next" ? flip.fromIndex : flip.toIndex]
     : null;
-  const displayIndex = flip ? flip.toIndex : index;
-  const displayPage = leaves[displayIndex] ?? leaves[0];
-  const contentPages = leaves.filter(
-    (page) => (page.role ?? "content") === "content",
-  );
-  // Prefer the highest content `number` so gaps (hidden pages 2–19) still
-  // label as "Page 20 of 37" instead of "Page 20 of 19".
-  const contentCount = Math.max(
-    contentPages.length,
-    ...contentPages.map((page) => page.number),
-    0,
-  );
-  const pageLabel =
-    displayPage?.role === "front"
-      ? c.front
-      : displayPage?.role === "back"
-        ? c.back
-        : fmt(c.pageOf, {
-            page: displayPage?.number ?? displayIndex + 1,
-            count: contentCount || leaves.length,
-          });
   const atStart = index === 0 && !flip;
   const atEnd = index >= leaves.length - 1 && !flip;
 
@@ -327,9 +306,6 @@ export default function TopBoundFlipbook({
           >
             {c.previous}
           </button>
-          <p className="product-flipbook__count" aria-live="polite">
-            {pageLabel}
-          </p>
           <button
             type="button"
             className="product-flipbook__turn"

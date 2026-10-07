@@ -209,9 +209,9 @@ describe("Catalogue product numbering", () => {
     expect(viewer).toContain("CatalogueHotspots");
     expect(viewer).toContain("left: `${spot.rect.x}%`");
     expect(viewer).toContain("event.stopPropagation()");
-    expect(viewer).toContain("c.front");
-    expect(viewer).toContain("c.back");
-    expect(viewer).toContain('role === "front"');
+    // Page X of N / Front / Back indicator is hidden in the flipbook toolbar.
+    expect(viewer).not.toContain("product-flipbook__count");
+    expect(viewer).not.toContain("pageLabel");
     expect(en.catalogueUi.front).toBe("Front");
     expect(en.catalogueUi.back).toBe("Back");
     expect(en.catalogueUi.customizeDesign).toBe("Customize a design");
