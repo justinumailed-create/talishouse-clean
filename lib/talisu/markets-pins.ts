@@ -379,7 +379,7 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
       "Every registered market includes supply side access to a broad array of structures for DIY construction.",
     heroImageUrl: TALISU_MKTS_MODULAR_HERO,
     nextHref: "/catalogue",
-    nextLabel: "Next Step...",
+    nextLabel: "Catalogue",
     showOnMap: true,
     sortOrder: 220,
   },
@@ -406,7 +406,8 @@ export function localizeTalisUMktsPins(
       pin.kind === "market"
         ? copy.marketDescription
         : (copy.doMoreDescriptions[pin.id] ?? pin.description),
-    nextLabel: copy.nextLabel,
+    // Market pins share localized "Next Step…"; Modular Spaces keeps "Catalogue".
+    nextLabel: pin.kind === "market" ? copy.nextLabel : pin.nextLabel,
   }));
 }
 

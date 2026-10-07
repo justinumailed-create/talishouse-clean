@@ -418,12 +418,6 @@ export const de: Dictionary = {
     pmcTagline: "Bewerben - Verwalten - Kooperieren",
     footer:
       "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 50 Meilen (80 Kilometern) um einen Mittelpunkt als teilexklusives Gebiet zu beanspruchen. Teilexklusiv bedeutet: Innerhalb dieses Kreises werden keine weiteren Märkte vergeben, benachbarte Märkte dürfen jedoch weiterhin Angebote pinnen, für die ihnen schriftliche und geprüfte Angebotsunterlagen vorliegen.",
-    searchPlaceholder: "Ort oder Postleitzahl suchen …",
-    searchAria: "Ort oder Postleitzahl in der Nähe von Märkten suchen",
-    searchClear: "Suche löschen",
-    searchFailed: "Ortsuche fehlgeschlagen. Bitte erneut versuchen.",
-    searchNoResults: "Kein Ort für diese Suche gefunden.",
-    distanceResultsAria: "Nächste PINs nach Entfernung",
     canada: "Kanada",
     doMore: "Do More...",
     noMatches: "Keine Treffer",

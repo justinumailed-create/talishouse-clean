@@ -42,6 +42,9 @@ describe("TalisU mkts Atlist pin export", () => {
     expect(doMore.find((p) => p.id === "modular-spaces")?.nextHref).toBe(
       "/catalogue"
     );
+    expect(doMore.find((p) => p.id === "modular-spaces")?.nextLabel).toBe(
+      "Catalogue"
+    );
   });
 
   it("exposes 16 total pins (15 Canada markets + Modular Spaces)", () => {
