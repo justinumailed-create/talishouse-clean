@@ -172,26 +172,29 @@ describe("product catalogue route", () => {
       "components/talispros/TalisprosMarketsDropdown.tsx",
     );
     expect(gate).toContain("TalisprosHomeCornerLinks");
-    // Left column, after the gate — not a fixed bottom-right corner.
+    // Left column, after the gate — TalisBOT slot only (no Markets/Global Admin under it).
     expect(gate).toMatch(/TalisprosHomeGate[\s\S]*TalisprosHomeCornerLinks/);
-    expect(corner).toContain("t.home.corner.globalAdmin");
-    expect(corner).toContain("t.home.corner.markets");
-    expect(corner).toContain("t.home.segments");
-    expect(corner).toContain("TALISPROS_MARKET_OPTIONS");
-    expect(corner).toContain("ROUTES.ADMIN_DASHBOARD");
     expect(corner).toContain('data-testid="home-corner-links"');
-    expect(corner).toContain('data-testid="home-markets-block"');
     expect(corner).toContain('id={HOME_TALISBOT_SLOT_ID}');
+    expect(corner).toContain('data-testid="home-talisbot-slot"');
+    expect(corner).not.toContain("home-markets-block");
+    expect(corner).not.toContain("home-global-admin-link");
+    expect(corner).not.toContain("t.home.corner.globalAdmin");
+    expect(corner).not.toContain("t.home.corner.markets");
+    expect(corner).not.toContain("t.home.segments");
+    expect(corner).not.toContain("TALISPROS_MARKET_OPTIONS");
+    expect(corner).not.toContain("ROUTES.ADMIN_DASHBOARD");
     expect(corner).not.toContain("TalisprosMarketsDropdown");
     expect(corner).not.toContain("menuDirection");
     expect(corner).not.toContain("right-4");
     expect(corner).not.toContain("fixed ");
-    // Same always-on visibility as the former flipbook header (no admin gate).
     expect(corner).not.toContain("isAdminAuthenticated");
+    // Navbar / market-page Markets dropdown still works as before.
     expect(marketsDropdown).not.toContain("menuDirection");
     expect(marketsDropdown).not.toContain("opensUp");
     expect(marketsDropdown).toContain("top-full");
     expect(marketsDropdown).toContain("TALISPROS_MARKET_OPTIONS");
+    expect(marketsDropdown).toContain("t.home.corner.markets");
   });
 
   it("animates a top-edge rotateX and not a center fold", () => {

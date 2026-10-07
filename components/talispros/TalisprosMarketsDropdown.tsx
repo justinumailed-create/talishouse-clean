@@ -5,7 +5,7 @@ import Link from "next/link";
 import { TALISPROS_MARKET_OPTIONS } from "@/lib/talispros/markets";
 import { useT } from "@/lib/i18n/client";
 
-/** Downward Markets menu used by market-page nav. Homepage lists these inline. */
+/** Downward Markets menu used by the navbar / market-page nav. */
 export default function TalisprosMarketsDropdown({
   triggerClassName = "text-[11px] tracking-[0.08em] text-neutral-500 hover:text-neutral-900 transition-colors",
 }: {

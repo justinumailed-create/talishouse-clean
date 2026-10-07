@@ -95,9 +95,8 @@ export default function TalisBotChat({
     }
   }, [step, contactTopic]);
 
-  // Homepage launcher is portaled into the left-column slot under which
-  // Markets and Global Admin are stacked. The open panel stays fixed so the
-  // scrolling column cannot clip it.
+  // Homepage launcher is portaled into the left-column slot. The open panel
+  // stays fixed so the scrolling column cannot clip it.
   useLayoutEffect(() => {
     if (position !== "left") return;
     const slot = document.getElementById(HOME_TALISBOT_SLOT_ID);

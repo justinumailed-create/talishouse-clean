@@ -138,7 +138,6 @@ export const de: Dictionary = {
     ],
     corner: {
       markets: "Märkte",
-      globalAdmin: "Globaler Admin",
     },
     segments: [
       { label: "Inhaber / Manager", title: "Makler oder Teamleiter" },

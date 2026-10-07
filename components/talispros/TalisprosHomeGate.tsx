@@ -17,7 +17,7 @@ export default function TalisprosHomeGate() {
   const t = useT();
 
   return (
-    <div className="flex flex-1 flex-col bg-white px-6 pt-8 pb-4 sm:px-10 sm:pt-10 sm:pb-6 lg:px-12 lg:pt-4 lg:pb-1">
+    <div className="flex min-h-0 flex-1 flex-col bg-white px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
       <div className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center">
         <div className="mb-8 text-center sm:mb-10">
           <Image

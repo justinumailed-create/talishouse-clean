@@ -122,7 +122,6 @@ export const en = {
     ownershipSections: HOME_OWNERSHIP_SECTIONS,
     corner: {
       markets: "Markets",
-      globalAdmin: "Global Admin",
     },
     /** Markets dropdown audiences, same order as TALISPROS_START_SEGMENTS. */
     segments: [
