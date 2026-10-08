@@ -330,6 +330,17 @@ export const en = {
       noneYet: "No additional PINs placed yet.",
       fixing: "Fixing",
       fix: "Fix",
+      freeCredits: "Free PINs",
+      freeAvailableOne:
+        "You have 1 free PIN from Talispros™ Admin. It is used before any payment.",
+      freeAvailableMany:
+        "You have {count} free PINs from Talispros™ Admin. They are used before any payment.",
+      useFreeOne: "Add 1 free PIN",
+      useFreeMany: "Add {count} free PINs",
+      useFreeAndBuy: "Add {free} free + buy {paid} · {price} CAD",
+      applyingFree: "Adding PINs…",
+      freeAddedOne: "1 free PIN added. No payment needed.",
+      freeAddedMany: "{count} free PINs added. No payment needed.",
     },
   },
 

@@ -7,9 +7,9 @@ import {
   placeMapSiteAdditionalPin,
 } from "@/app/talispros/mapsite/pin-actions";
 import {
-  additionalPinPriceCents,
   formatAdditionalPinMoneyFromCents,
   normalizePinCoordinate,
+  splitFreeAndPaidPins,
   type MapSitePinDashboardState,
 } from "@/lib/talispros/mapsite-additional-pins";
 import { useT } from "@/lib/i18n/client";
@@ -62,6 +62,8 @@ export default function MapSitePinDashboard({
   const room = dashboard.remainingPurchasable;
   const safeQuantity = Math.min(Math.max(quantity, 1), Math.max(room, 1));
   const atMax = room <= 0;
+  const freeCredits = dashboard.freePinCredits ?? 0;
+  const split = splitFreeAndPaidPins(safeQuantity, freeCredits);
   const fixing =
     editor.kind === "fix"
       ? dashboard.pins.find((pin) => pin.id === editor.pinId) ?? null
@@ -88,11 +90,21 @@ export default function MapSitePinDashboard({
         quantity: safeQuantity,
         accountTypeSegment,
       });
-      if ("url" in result && result.url) {
+      if (result.url) {
         window.location.assign(result.url);
         return;
       }
-      setError("error" in result ? result.error : d.errCheckout);
+      if (result.dashboard) {
+        onDashboardChange(result.dashboard);
+        setQuantity(1);
+        setMessage(
+          result.freeRedeemed === 1
+            ? d.freeAddedOne
+            : fmt(d.freeAddedMany, { count: result.freeRedeemed }),
+        );
+        return;
+      }
+      setError(result.error || d.errCheckout);
     });
   }
 
@@ -233,12 +245,25 @@ export default function MapSitePinDashboard({
             <dt className="text-neutral-500">{d.readyToPlace}</dt>
             <dd className="font-semibold">{dashboard.remainingToPlace}</dd>
           </div>
+          {freeCredits > 0 ? (
+            <div className="col-span-2 rounded-md bg-emerald-50 px-2 py-1.5">
+              <dt className="text-emerald-800">{d.freeCredits}</dt>
+              <dd className="font-semibold text-emerald-900">{freeCredits}</dd>
+            </div>
+          ) : null}
         </dl>
 
         <div className="space-y-2">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
             {fmt(d.buyHeading, { price: formatAdditionalPinMoneyFromCents(dashboard.unitPriceCents) })}
           </h3>
+          {freeCredits > 0 && !atMax ? (
+            <p className="text-[11px] text-emerald-800">
+              {freeCredits === 1
+                ? d.freeAvailableOne
+                : fmt(d.freeAvailableMany, { count: freeCredits })}
+            </p>
+          ) : null}
           {atMax ? (
             <p className="text-xs text-neutral-600">
               {d.atLimit}
@@ -267,11 +292,23 @@ export default function MapSitePinDashboard({
                 className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
               >
                 {pending
-                  ? d.startingCheckout
-                  : fmt(safeQuantity === 1 ? d.buyOne : d.buyMany, {
-                      count: safeQuantity,
-                      price: formatAdditionalPinMoneyFromCents(additionalPinPriceCents(safeQuantity)),
-                    })}
+                  ? split.paid === 0
+                    ? d.applyingFree
+                    : d.startingCheckout
+                  : split.free === 0
+                    ? fmt(safeQuantity === 1 ? d.buyOne : d.buyMany, {
+                        count: safeQuantity,
+                        price: formatAdditionalPinMoneyFromCents(split.paidCents),
+                      })
+                    : split.paid === 0
+                      ? split.free === 1
+                        ? d.useFreeOne
+                        : fmt(d.useFreeMany, { count: split.free })
+                      : fmt(d.useFreeAndBuy, {
+                          free: split.free,
+                          paid: split.paid,
+                          price: formatAdditionalPinMoneyFromCents(split.paidCents),
+                        })}
               </button>
             </div>
           )}

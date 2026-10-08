@@ -41,6 +41,8 @@ interface MapSiteAdminEditorProps {
   /** Completed PayPal payment on file for this claim. */
   paymentReceived?: boolean;
   ebook?: MapSiteEbookDraft | null;
+  /** Extra server-rendered admin panels shown after General (e.g. free PIN credits). */
+  extraPanels?: React.ReactNode;
 }
 
 function Field({
@@ -94,6 +96,7 @@ export default function MapSiteAdminEditor({
   showVisitorSubscriptionPanel = false,
   paymentReceived = false,
   ebook = null,
+  extraPanels = null,
 }: MapSiteAdminEditorProps) {
   const [form, setForm] = useState({
     propertyTitle: mapsite.propertyTitle || "",
@@ -292,6 +295,8 @@ export default function MapSiteAdminEditor({
           <input className={inputClass} value={form.status} readOnly />
         </Field>
       </section>
+
+      {extraPanels}
 
       <MapSiteAdminShareLinks
         mapsiteId={mapsite.id}

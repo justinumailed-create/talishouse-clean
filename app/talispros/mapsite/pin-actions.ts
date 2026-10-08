@@ -12,6 +12,7 @@ import {
   PIN_CHECKOUT_SESSION_QUERY,
   additionalPinCheckoutQuantityError,
   parsePinCheckoutSessionId,
+  splitFreeAndPaidPins,
   type MapSitePinDashboardState,
 } from "@/lib/talispros/mapsite-additional-pins";
 import {
@@ -22,6 +23,7 @@ import {
   placeAdditionalPinRecord,
   readMapSiteForPinPurchase,
   recordPendingPinPurchase,
+  redeemFreePinCredits,
 } from "@/lib/talispros/mapsite-additional-pins-service";
 import {
   buildClaimedMapSitePath,
@@ -62,20 +64,33 @@ async function authorizePinEdit(fastCode: string): Promise<PinActionError | null
   }
 }
 
+export type AdditionalPinCheckoutResult =
+  /** Remaining PINs go through Stripe; `freeRedeemed` were already added free. */
+  | { url: string; freeRedeemed: number; dashboard?: undefined; error?: undefined }
+  /** Fully covered by admin-granted free credits — no Stripe. */
+  | {
+      dashboard: MapSitePinDashboardState;
+      freeRedeemed: number;
+      url?: undefined;
+      error?: undefined;
+    }
+  | {
+      error: string;
+      url?: undefined;
+      dashboard?: undefined;
+      freeRedeemed?: undefined;
+    };
+
 export async function createAdditionalPinCheckout(input: {
   mapsiteId: string;
   fastCode: string;
   quantity: number;
   accountTypeSegment?: string | null;
-}): Promise<{ url: string } | PinActionError> {
+}): Promise<AdditionalPinCheckoutResult> {
   const fastCode = input.fastCode.trim();
   const mapsiteId = input.mapsiteId.trim();
   const denied = await authorizePinEdit(fastCode);
   if (denied) return denied;
-
-  if (!getStripeSecretKey()) {
-    return { error: "Stripe is not configured. Set STRIPE_SECRET_KEY." };
-  }
 
   const mapsite = await readMapSiteForPinPurchase(mapsiteId);
   if (!mapsite) return { error: "Mapsite was not found." };
@@ -96,6 +111,38 @@ export async function createAdditionalPinCheckout(input: {
   );
   if (quantityError) return { error: quantityError };
 
+  // Admin-granted free PIN credits cover PINs first; the rest is $7 CAD each.
+  const split = splitFreeAndPaidPins(input.quantity, mapsite.freePinCredits);
+  if (split.paid > 0 && !getStripeSecretKey()) {
+    return { error: "Stripe is not configured. Set STRIPE_SECRET_KEY." };
+  }
+
+  if (split.free > 0) {
+    const redeemed = await redeemFreePinCredits({
+      mapsiteId: mapsite.id,
+      quantity: split.free,
+      email: mapsite.email || null,
+      fastCode: mapsite.fastCode,
+    });
+    if (!redeemed.success) {
+      return { error: redeemed.error || "Could not apply free PINs." };
+    }
+    revalidateMapSite(mapsite.fastCode);
+  }
+
+  if (split.paid === 0) {
+    return {
+      dashboard: await loadMapSitePinDashboard(mapsite.id),
+      freeRedeemed: split.free,
+    };
+  }
+
+  const paidQuantity = split.paid;
+  const freeNote =
+    split.free > 0
+      ? ` ${split.free} free PIN${split.free === 1 ? "" : "s"} already added.`
+      : "";
+
   const origin = await resolveAppOrigin();
   const returnPath = buildClaimedMapSitePath({
     fastCode: mapsite.fastCode,
@@ -115,7 +162,7 @@ export async function createAdditionalPinCheckout(input: {
       client_reference_id: mapsite.id,
       line_items: [
         {
-          quantity: input.quantity,
+          quantity: paidQuantity,
           price_data: {
             currency: MAPSITE_ADDITIONAL_PIN_CURRENCY,
             unit_amount: MAPSITE_ADDITIONAL_PIN_PRICE_CENTS,
@@ -130,7 +177,8 @@ export async function createAdditionalPinCheckout(input: {
         purpose: ADDITIONAL_PINS_CHECKOUT_PURPOSE,
         mapSiteId: mapsite.id,
         fastCode: mapsite.fastCode,
-        quantity: String(input.quantity),
+        quantity: String(paidQuantity),
+        freeQuantity: String(split.free),
         unitAmountCents: String(MAPSITE_ADDITIONAL_PIN_PRICE_CENTS),
       },
       success_url: successUrlTemplate,
@@ -138,23 +186,23 @@ export async function createAdditionalPinCheckout(input: {
     });
 
     if (!session.url) {
-      return { error: "Stripe Checkout did not return a URL." };
+      return { error: `Stripe Checkout did not return a URL.${freeNote}` };
     }
 
     await recordPendingPinPurchase({
       mapsiteId: mapsite.id,
-      quantity: input.quantity,
+      quantity: paidQuantity,
       stripeCheckoutSessionId: session.id,
       email: mapsite.email || null,
       fastCode: mapsite.fastCode,
     });
 
-    return { url: session.url };
+    return { url: session.url, freeRedeemed: split.free };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unable to start Stripe Checkout.";
     console.error("[mapsite-pins] checkout session failed:", message);
-    return { error: message };
+    return { error: `${message}${freeNote}` };
   }
 }
 

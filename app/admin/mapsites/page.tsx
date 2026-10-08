@@ -1,6 +1,8 @@
 import { requireAdminPage } from "@/lib/admin-auth";
 import { listMapSitesForAdmin } from "@/lib/mapsite-service";
 import AdminMapSiteThumbnailCard from "@/components/admin/AdminMapSiteThumbnailCard";
+import AdminFreePinCreditsPanel from "@/components/admin/AdminFreePinCreditsPanel";
+import { listFreePinGrants } from "@/lib/talispros/mapsite-additional-pins-service";
 import { isSupabaseAdminConfigured, getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { purgeMapSitesAndBookshelvesWithoutFastCodes } from "@/lib/talispros/fast-code-cascade-delete";
 
@@ -11,7 +13,10 @@ export default async function AdminMapSitesPage() {
   if (isSupabaseAdminConfigured()) {
     await purgeMapSitesAndBookshelvesWithoutFastCodes(getSupabaseAdmin());
   }
-  const mapsites = await listMapSitesForAdmin();
+  const [mapsites, recentFreePinGrants] = await Promise.all([
+    listMapSitesForAdmin(),
+    listFreePinGrants({ limit: 20 }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -22,6 +27,8 @@ export default async function AdminMapSitesPage() {
           and the custom ebook editor (Front Cover / Back Cover, interiors, publish).
         </p>
       </div>
+
+      <AdminFreePinCreditsPanel initialGrants={recentFreePinGrants} />
 
       {mapsites.length === 0 ? (
         <div className="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500">

@@ -541,6 +541,17 @@ export const de: Dictionary = {
       noneYet: "Noch keine zusätzlichen PINs gesetzt.",
       fixing: "Wird korrigiert",
       fix: "Korrigieren",
+      freeCredits: "Gratis-PINs",
+      freeAvailableOne:
+        "Sie haben 1 Gratis-PIN vom Talispros™-Admin. Er wird vor jeder Zahlung verwendet.",
+      freeAvailableMany:
+        "Sie haben {count} Gratis-PINs vom Talispros™-Admin. Sie werden vor jeder Zahlung verwendet.",
+      useFreeOne: "1 Gratis-PIN hinzufügen",
+      useFreeMany: "{count} Gratis-PINs hinzufügen",
+      useFreeAndBuy: "{free} gratis + {paid} kaufen · {price} CAD",
+      applyingFree: "PINs werden hinzugefügt …",
+      freeAddedOne: "1 Gratis-PIN hinzugefügt. Keine Zahlung nötig.",
+      freeAddedMany: "{count} Gratis-PINs hinzugefügt. Keine Zahlung nötig.",
     },
   },
 

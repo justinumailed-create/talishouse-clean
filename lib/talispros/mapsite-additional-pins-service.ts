@@ -7,7 +7,9 @@ import {
   MAPSITE_ADDITIONAL_PIN_PRICE_CENTS,
   additionalPinPaymentMatches,
   capacityFromCounts,
+  clampFreePinCredits,
   defaultMapSitePinDashboard,
+  freePinGrantDeltaError,
   isAdditionalPinsCheckout,
   normalizePinCoordinate,
   normalizePinLabel,
@@ -22,9 +24,10 @@ import {
   stripePaymentIntentIdFromSession,
 } from "@/lib/talispros/stripe-mapsite-session";
 import { DEMO_MAPSITE_ID } from "@/lib/talispros/mapsite-state";
+import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 
 const MIGRATION_HINT =
-  "Additional PIN storage is not ready. Apply supabase/migrations/092_mapsite_additional_pins.sql.";
+  "Additional PIN storage is not ready. Apply supabase/migrations/092_mapsite_additional_pins.sql and 095_mapsite_free_pin_credits.sql.";
 
 export type AdditionalPinFulfillmentResult = {
   success: boolean;
@@ -65,7 +68,7 @@ export function mapsiteCannotSellAdditionalPins(input: {
 }
 
 function isMissingPinSchema(message: string): boolean {
-  return /pin_quota|purchased_pins|mapsite_additional_pins|mapsite_pin_purchases|schema cache|does not exist|grant_mapsite_additional_pins/i.test(
+  return /pin_quota|purchased_pins|free_pin_credits|free_quantity|mapsite_additional_pins|mapsite_pin_purchases|mapsite_free_pin_grants|schema cache|does not exist|grant_mapsite_additional_pins|redeem_mapsite_free_pins|admin_grant_mapsite_free_pins/i.test(
     message,
   );
 }
@@ -90,7 +93,7 @@ export async function loadMapSitePinDashboard(
       await Promise.all([
         supabase
           .from("mapsites")
-          .select("pin_quota, purchased_pins")
+          .select("pin_quota, purchased_pins, free_pin_credits")
           .eq("id", id)
           .maybeSingle(),
         supabase
@@ -119,6 +122,7 @@ export async function loadMapSitePinDashboard(
     return capacityFromCounts({
       pinQuota: row?.pin_quota,
       purchasedPins: row?.purchased_pins,
+      freePinCredits: row?.free_pin_credits,
       placedPins: pins.length,
       pins,
     });
@@ -217,13 +221,14 @@ export async function readMapSiteForPinPurchase(mapsiteId: string): Promise<{
   isDemonstration: boolean;
   pinQuota: number;
   purchasedPins: number;
+  freePinCredits: number;
 } | null> {
   if (!isSupabaseAdminConfigured()) return null;
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("mapsites")
     .select(
-      "id, fast_code, email, account_type, is_demonstration, pin_quota, purchased_pins",
+      "id, fast_code, email, account_type, is_demonstration, pin_quota, purchased_pins, free_pin_credits",
     )
     .eq("id", mapsiteId)
     .maybeSingle();
@@ -240,6 +245,7 @@ export async function readMapSiteForPinPurchase(mapsiteId: string): Promise<{
     isDemonstration: Boolean(data.is_demonstration),
     pinQuota: quota.pinQuota,
     purchasedPins: quota.purchasedPins,
+    freePinCredits: clampFreePinCredits(data.free_pin_credits),
   };
 }
 
@@ -381,5 +387,223 @@ export async function fixAdditionalPinRecord(input: {
       sortOrder: data.sort_order || 0,
     },
     dashboard: await loadMapSitePinDashboard(input.mapsiteId),
+  };
+}
+
+type FreePinRpcPayload = {
+  ok?: boolean;
+  error?: string;
+  redeemed?: number;
+  applied?: number;
+  pinQuota?: number;
+  purchasedPins?: number;
+  freePinCredits?: number;
+};
+
+function readFreePinPayload(data: unknown): FreePinRpcPayload | null {
+  if (!data || typeof data !== "object") return null;
+  return data as FreePinRpcPayload;
+}
+
+/**
+ * Spend admin-granted free PIN credits to raise pin_quota without Stripe.
+ * Atomic in Postgres (row lock); fails if credits or room are insufficient.
+ */
+export async function redeemFreePinCredits(input: {
+  mapsiteId: string;
+  quantity: number;
+  email: string | null;
+  fastCode: string | null;
+}): Promise<{
+  success: boolean;
+  error?: string;
+  redeemed?: number;
+  freePinCredits?: number;
+}> {
+  if (!Number.isInteger(input.quantity) || input.quantity < 1) {
+    return { success: false, error: "Choose at least 1 PIN." };
+  }
+  if (!isSupabaseAdminConfigured()) {
+    return { success: false, error: "Supabase is not configured." };
+  }
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.rpc("redeem_mapsite_free_pins", {
+    p_mapsite_id: input.mapsiteId,
+    p_quantity: input.quantity,
+    p_email: input.email,
+    p_fast_code: input.fastCode,
+  });
+  if (error) {
+    console.error("[mapsite-pins] free redemption failed:", error.message);
+    return {
+      success: false,
+      error: isMissingPinSchema(error.message)
+        ? MIGRATION_HINT
+        : "Could not apply free PINs.",
+    };
+  }
+  const payload = readFreePinPayload(data);
+  if (!payload?.ok) {
+    return {
+      success: false,
+      error: payload?.error || "Could not apply free PINs.",
+      freePinCredits: payload?.freePinCredits,
+    };
+  }
+  return {
+    success: true,
+    redeemed: payload.redeemed ?? input.quantity,
+    freePinCredits: payload.freePinCredits,
+  };
+}
+
+export type FreePinGrantRecord = {
+  id: string;
+  fastCode: string;
+  delta: number;
+  balanceAfter: number;
+  grantedBy: string;
+  note: string | null;
+  createdAt: string;
+};
+
+export type FreePinAdminSnapshot = {
+  mapsiteId: string;
+  fastCode: string;
+  freePinCredits: number;
+  pinQuota: number;
+  purchasedPins: number;
+};
+
+async function findMapSiteRowByFastCode(fastCode: string) {
+  const code = fastCode.trim();
+  if (!code || !isSupabaseAdminConfigured()) return null;
+  // Same FAST Code™ resolution as the Mapsite pages (fast_codes link + mapsites.fast_code).
+  const mapsite = await getMapSiteByFastCode(code);
+  if (!mapsite?.id) return null;
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("mapsites")
+    .select("id, fast_code, is_demonstration, pin_quota, purchased_pins, free_pin_credits")
+    .eq("id", mapsite.id)
+    .maybeSingle();
+  if (error) {
+    if (!isMissingPinSchema(error.message)) {
+      console.warn("[mapsite-pins] FAST Code lookup failed:", error.message);
+    }
+    return null;
+  }
+  return data;
+}
+
+export async function loadFreePinAdminSnapshot(
+  fastCode: string,
+): Promise<FreePinAdminSnapshot | null> {
+  const row = await findMapSiteRowByFastCode(fastCode);
+  if (!row?.id) return null;
+  const quota = resolvePinQuota({
+    pinQuota: row.pin_quota,
+    purchasedPins: row.purchased_pins,
+  });
+  return {
+    mapsiteId: row.id,
+    fastCode: row.fast_code,
+    freePinCredits: clampFreePinCredits(row.free_pin_credits),
+    pinQuota: quota.pinQuota,
+    purchasedPins: quota.purchasedPins,
+  };
+}
+
+export async function listFreePinGrants(options: {
+  mapsiteId?: string | null;
+  limit?: number;
+} = {}): Promise<FreePinGrantRecord[]> {
+  if (!isSupabaseAdminConfigured()) return [];
+  const supabase = getSupabaseAdmin();
+  let query = supabase
+    .from("mapsite_free_pin_grants")
+    .select("id, fast_code, delta, balance_after, granted_by, note, created_at")
+    .order("created_at", { ascending: false })
+    .limit(Math.min(Math.max(options.limit ?? 20, 1), 100));
+  if (options.mapsiteId) query = query.eq("mapsite_id", options.mapsiteId);
+  const { data, error } = await query;
+  if (error) {
+    if (!isMissingPinSchema(error.message)) {
+      console.warn("[mapsite-pins] grant audit load failed:", error.message);
+    }
+    return [];
+  }
+  return (data ?? []).map((row) => ({
+    id: row.id,
+    fastCode: row.fast_code,
+    delta: row.delta,
+    balanceAfter: row.balance_after,
+    grantedBy: row.granted_by,
+    note: row.note,
+    createdAt: row.created_at,
+  }));
+}
+
+/** Admin grant (positive delta) or revoke (negative delta), with audit row. */
+export async function grantFreePinCreditsForFastCode(input: {
+  fastCode: string;
+  delta: number;
+  grantedBy: string;
+  note?: string | null;
+}): Promise<{
+  success: boolean;
+  error?: string;
+  applied?: number;
+  snapshot?: FreePinAdminSnapshot;
+}> {
+  const deltaError = freePinGrantDeltaError(input.delta);
+  if (deltaError) return { success: false, error: deltaError };
+  if (!isSupabaseAdminConfigured()) {
+    return { success: false, error: "Supabase is not configured." };
+  }
+
+  const row = await findMapSiteRowByFastCode(input.fastCode);
+  if (!row?.id) {
+    return { success: false, error: "No Mapsite found for that FAST Code™." };
+  }
+  if (input.delta > 0) {
+    const blocked = mapsiteCannotSellAdditionalPins({
+      mapsiteId: row.id,
+      fastCode: row.fast_code,
+      isDemonstration: row.is_demonstration,
+    });
+    if (blocked) {
+      return {
+        success: false,
+        error: blocked.replace("cannot buy additional PINs", "cannot receive free PINs"),
+      };
+    }
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.rpc("admin_grant_mapsite_free_pins", {
+    p_mapsite_id: row.id,
+    p_delta: input.delta,
+    p_granted_by: input.grantedBy,
+    p_note: input.note?.trim() || null,
+  });
+  if (error) {
+    console.error("[mapsite-pins] free grant failed:", error.message);
+    return {
+      success: false,
+      error: isMissingPinSchema(error.message)
+        ? MIGRATION_HINT
+        : "Could not grant free PINs.",
+    };
+  }
+  const payload = readFreePinPayload(data);
+  if (!payload?.ok) {
+    return { success: false, error: payload?.error || "Could not grant free PINs." };
+  }
+  const snapshot = await loadFreePinAdminSnapshot(row.fast_code);
+  return {
+    success: true,
+    applied: payload.applied ?? input.delta,
+    snapshot: snapshot ?? undefined,
   };
 }

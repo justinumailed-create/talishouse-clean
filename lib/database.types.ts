@@ -514,6 +514,7 @@ export interface Database {
           interest_form_enabled: boolean
           pin_quota: number
           purchased_pins: number
+          free_pin_credits: number
           created_at: string
           updated_at: string
         }
@@ -558,6 +559,7 @@ export interface Database {
           interest_form_enabled?: boolean
           pin_quota?: number
           purchased_pins?: number
+          free_pin_credits?: number
           created_at?: string
           updated_at?: string
         }
@@ -602,6 +604,7 @@ export interface Database {
           interest_form_enabled?: boolean
           pin_quota?: number
           purchased_pins?: number
+          free_pin_credits?: number
           created_at?: string
           updated_at?: string
         }
@@ -750,9 +753,10 @@ export interface Database {
           mapsite_id: string
           quantity: number
           granted_quantity: number | null
+          free_quantity: number
           unit_amount_cents: number
           currency: string
-          stripe_checkout_session_id: string
+          stripe_checkout_session_id: string | null
           stripe_payment_intent_id: string | null
           payment_status: string
           email: string | null
@@ -765,9 +769,10 @@ export interface Database {
           mapsite_id: string
           quantity: number
           granted_quantity?: number | null
+          free_quantity?: number
           unit_amount_cents: number
           currency?: string
-          stripe_checkout_session_id: string
+          stripe_checkout_session_id: string | null
           stripe_payment_intent_id?: string | null
           payment_status?: string
           email?: string | null
@@ -780,9 +785,10 @@ export interface Database {
           mapsite_id?: string
           quantity?: number
           granted_quantity?: number | null
+          free_quantity?: number
           unit_amount_cents?: number
           currency?: string
-          stripe_checkout_session_id?: string
+          stripe_checkout_session_id?: string | null
           stripe_payment_intent_id?: string | null
           payment_status?: string
           email?: string | null
@@ -792,6 +798,41 @@ export interface Database {
         }
         Relationships: [
           { foreignKeyName: "mapsite_pin_purchases_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] }
+        ]
+      }
+      mapsite_free_pin_grants: {
+        Row: {
+          id: string
+          mapsite_id: string
+          fast_code: string
+          delta: number
+          balance_after: number
+          granted_by: string
+          note: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          mapsite_id: string
+          fast_code: string
+          delta: number
+          balance_after: number
+          granted_by: string
+          note?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          mapsite_id?: string
+          fast_code?: string
+          delta?: number
+          balance_after?: number
+          granted_by?: string
+          note?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "mapsite_free_pin_grants_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] }
         ]
       }
       categories: {
@@ -2233,6 +2274,36 @@ export interface Database {
     }
     Views: Record<string, never>
     Functions: {
+      redeem_mapsite_free_pins: {
+        Args: {
+          p_mapsite_id: string
+          p_quantity: number
+          p_email: string | null
+          p_fast_code: string | null
+        }
+        Returns: {
+          ok: boolean
+          error?: string
+          redeemed?: number
+          pinQuota?: number
+          purchasedPins?: number
+          freePinCredits?: number
+        }
+      }
+      admin_grant_mapsite_free_pins: {
+        Args: {
+          p_mapsite_id: string
+          p_delta: number
+          p_granted_by: string
+          p_note: string | null
+        }
+        Returns: {
+          ok: boolean
+          error?: string
+          applied?: number
+          freePinCredits?: number
+        }
+      }
       grant_mapsite_additional_pins: {
         Args: {
           p_mapsite_id: string
