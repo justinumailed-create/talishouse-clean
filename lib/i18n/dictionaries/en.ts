@@ -473,6 +473,12 @@ export const en = {
 
   demo: {
     downloadPdf: "Download Demo PDF",
+    downloadMenuPdf: "Demo PDF",
+    downloadMenuTemplates: "Replace Image templates",
+    downloadMenuPptx: "PowerPoint (.pptx)",
+    downloadMenuKeynote: "Keynote (.key)",
+    downloadMenuGoogleSlides: "Google Slides (make a copy)",
+    downloadMenuHint: "20 pages recommended max. Replace the images, export as PDF, upload.",
     eyebrow: "DEMONSTRATION",
     title: "Demo eBook and Mapsite",
     placeAPin: "Place a pin.",

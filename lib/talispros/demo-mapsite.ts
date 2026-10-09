@@ -13,6 +13,19 @@ export const DEMO_MAPSITE_BUILD_PATH = "/talispros/demo-mapsite";
 export const DEMO_MAPSITE_PDF_HREF = "/talispros/demo-mapsite/Demo-PDF.pdf";
 export const DEMO_MAPSITE_PDF_FILE_NAME = "Demo-PDF.pdf";
 
+/**
+ * Ready-made "Replace Image" templates built from the Demo-PDF layout
+ * (1920 × 1080 pt, 20 slides: slide 1 = wrap cover, every later slide = one
+ * two-page spread). Users fill them in, export as PDF and upload.
+ */
+export const DEMO_TEMPLATE_PPTX_HREF = "/talisu/templates/Talispros-Demo-Template.pptx";
+export const DEMO_TEMPLATE_PPTX_FILE_NAME = "Talispros-Demo-Template.pptx";
+export const DEMO_TEMPLATE_KEYNOTE_HREF = "/talisu/templates/Talispros-Demo-Template.key";
+export const DEMO_TEMPLATE_KEYNOTE_FILE_NAME = "Talispros-Demo-Template.key";
+/** Google Slides "Make a copy" link (opens in a new tab). */
+export const DEMO_TEMPLATE_GOOGLE_SLIDES_COPY_HREF =
+  "https://docs.google.com/presentation/d/1UmNQdsJZtonuw16i54PNP16WXEfBP2f3x3TVthcb3kA/copy";
+
 /** True for the demo builder and its follow-on pages (e.g. /ebook). */
 export function isDemoMapSitePath(pathname: string | null | undefined): boolean {
   const path = pathname?.split("?")[0]?.split("#")[0]?.trim() || "";

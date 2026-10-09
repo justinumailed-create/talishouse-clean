@@ -689,6 +689,12 @@ export const de: Dictionary = {
 
   demo: {
     downloadPdf: "Demo-PDF herunterladen",
+    downloadMenuPdf: "Demo-PDF",
+    downloadMenuTemplates: "Vorlagen zum Bilder-Ersetzen",
+    downloadMenuPptx: "PowerPoint (.pptx)",
+    downloadMenuKeynote: "Keynote (.key)",
+    downloadMenuGoogleSlides: "Google Slides (Kopie erstellen)",
+    downloadMenuHint: "Max. 20 Seiten empfohlen. Bilder ersetzen, als PDF exportieren, hochladen.",
     eyebrow: "DEMONSTRATION",
     title: "Demo-eBook und Mapsite",
     placeAPin: "Setzen Sie einen PIN.",

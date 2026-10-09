@@ -231,7 +231,7 @@ describe("demo mapsite codes", () => {
       ),
       "utf8",
     );
-    expect(builder).toContain("DEMO_MAPSITE_PDF_HREF");
+    expect(builder).toContain("DemoDownloadMenu");
     expect(builder).toContain("handleSubmit");
     expect(builder).toContain("HomePinLocationSection");
   });
