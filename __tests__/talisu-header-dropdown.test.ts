@@ -114,11 +114,15 @@ describe("TalisU blue header dropdown", () => {
     const separatorIdx = header.indexOf("bg-white/45");
     const talisUIdx = header.indexOf("\n              {t.nav.talisu}\n");
     expect(marketsIdx).toBeGreaterThan(-1);
-    expect(mapsitesIdx).toBeGreaterThan(marketsIdx);
-    expect(bookshelvesIdx).toBeGreaterThan(mapsitesIdx);
+    const homeIdx = header.indexOf('item.label === "Home").map');
+    expect(homeIdx).toBeGreaterThan(-1);
+    expect(marketsIdx).toBeGreaterThan(homeIdx);
+    // Home, Markets, Bookshelf, Catalogue, Register, Mapsites, | TalisU
+    expect(bookshelvesIdx).toBeGreaterThan(marketsIdx);
     expect(catalogueIdx).toBeGreaterThan(bookshelvesIdx);
     expect(registerFilterIdx).toBeGreaterThan(catalogueIdx);
-    expect(separatorIdx).toBeGreaterThan(registerFilterIdx);
+    expect(mapsitesIdx).toBeGreaterThan(registerFilterIdx);
+    expect(separatorIdx).toBeGreaterThan(mapsitesIdx);
     expect(talisUIdx).toBeGreaterThan(separatorIdx);
   });
 

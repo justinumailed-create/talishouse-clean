@@ -92,7 +92,8 @@ export const TALISU_MKTS_HEADER_TAGLINE =
 
 /**
  * Primary top-bar links (home + claimed Mapsites blue header).
- * Bookshelf + Catalogue are the book links; Mapsites is a header dropdown (not here).
+ * Bookshelf + Catalogue are the book links; Mapsites is a header dropdown (not here)
+ * rendered right AFTER Register: Home, Markets, Bookshelf, Catalogue, Register, Mapsites.
  */
 export const TALISU_MKTS_HEADER_NAV = [
   /** Plain Home link (client request) — first item, even though the logo also links home. */

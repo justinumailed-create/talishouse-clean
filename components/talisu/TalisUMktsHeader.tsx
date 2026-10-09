@@ -64,7 +64,7 @@ export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 export type TalisUMktsHeaderProps = {
   /**
    * `claimed-mapsite`: replace Register with Dashboard (lock until real payment).
-   * `default`: Markets + Mapsites + Bookshelf + Catalogue + Register (homepage /talisu chrome).
+   * `default`: Home + Markets + Bookshelf + Catalogue + Register + Mapsites (homepage /talisu chrome).
    */
   variant?: TalisUMktsHeaderVariant;
   /**
@@ -464,7 +464,6 @@ export default function TalisUMktsHeader({
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Markets").map(
             (item) => renderNavLink(item),
           )}
-          <MapsitesNavDropdown />
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Bookshelf").map(
             (item) => renderNavLink(item),
           )}
@@ -476,6 +475,8 @@ export default function TalisUMktsHeader({
                 (item) => item.label === "Register",
               ).map((item) => renderNavLink(item))
             : <RegisterNavDropdown />}
+          {/* Mapsites comes right after Register — personal Mapsite access follows registration. */}
+          <MapsitesNavDropdown />
 
           <span
             aria-hidden
