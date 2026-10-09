@@ -583,12 +583,10 @@ export const de: Dictionary = {
   },
 
   viewer: {
-    continueToRegister: "Weiter zur Registrierung",
     eyebrowFsbo: "Talisbooks™ Privatverkauf-Demo (FSBO)",
     eyebrowMagazine: "Talisbooks™ Magazin",
     eyebrowViewer: "Talisbooks™ Viewer",
     home: "Startseite",
-    backToMapsite: "Zurück zur Mapsite",
     product: "Produkt",
     downloadPdf: "PDF herunterladen",
     markets: "Märkte",
@@ -621,7 +619,6 @@ export const de: Dictionary = {
 
   bookshelf: {
     title: "Bücherregal",
-    backToAllPins: "Zurück zu ALL-PINs",
     createEbook: "E-Book erstellen",
     ecosystem: "Talispros™-Ökosystem",
     rootAccount: "Root-Konto",

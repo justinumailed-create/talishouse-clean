@@ -78,8 +78,11 @@ describe("Back to Mapsite from a FAST-scoped page", () => {
     expect(mapsiteBackFromScheduleHref("")).toBe("/talispros/mapsite");
     expect(mapsiteBackFromScheduleHref("demo")).toBe("/talispros/mapsite");
 
+    // TalisTV no longer renders Back to Mapsite; the Talisbooks Library link remains.
     const talistv = repoSource("app/talistv/page.tsx");
-    expect(talistv).toContain("mapsiteBackFromScheduleHref(fastCode)");
+    expect(talistv).not.toContain("Back to Mapsite");
+    expect(talistv).not.toContain("mapsiteBackFromScheduleHref");
+    expect(talistv).toContain("Talisbooks™ Library");
   });
 });
 

@@ -148,9 +148,9 @@ describe("Mapsite URL gate", () => {
       join(process.cwd(), "components/talispros/TalisprosHeader.tsx"),
       "utf8",
     );
-    expect(header).toContain("Back to Mapsite");
-    expect(header).toContain("registerYourMapSiteFastCodeFromPath");
-    expect(header).toContain("buildClaimedMapSitePath");
+    // Back to Mapsite removed from the register-your-mapsite header (logo links Home).
+    expect(header).not.toContain("Back to Mapsite");
+    expect(header).toContain("href={logoHref}");
   });
 
   it("matches only the 6-digit PIN for that FAST Code and exposes admin notification code", () => {

@@ -374,12 +374,10 @@ export const en = {
   },
 
   viewer: {
-    continueToRegister: "Continue to register",
     eyebrowFsbo: "Talisbooks™ FSBO Demo",
     eyebrowMagazine: "Talisbooks™ Magazine",
     eyebrowViewer: "Talisbooks™ Viewer",
     home: "Home",
-    backToMapsite: "Back to Mapsite",
     product: "Product",
     downloadPdf: "Download PDF",
     markets: "Markets",
@@ -412,7 +410,6 @@ export const en = {
 
   bookshelf: {
     title: "Bookshelf",
-    backToAllPins: "Back to ALL-PINs",
     createEbook: "Create ebook",
     ecosystem: "Talispros™ Ecosystem",
     rootAccount: "Root Account",

@@ -5,13 +5,10 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { isTalisprosMarketLayoutPath } from "@/lib/talispros/market-pages";
 import { isTalisprosStartPath } from "@/lib/talispros/start-content";
-import { registerYourMapSiteFastCodeFromPath } from "@/lib/talispros/mapsite-url-gate";
-import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 import { ROUTES } from "@/lib/routes";
 
 export default function TalisprosHeader() {
   const pathname = usePathname();
-  const gateCode = registerYourMapSiteFastCodeFromPath(pathname);
   const logoHref = ROUTES.HOME;
 
   if (
@@ -39,14 +36,7 @@ export default function TalisprosHeader() {
               TalisPros™ PMC
             </span>
           </Link>
-          {gateCode ? (
-            <Link
-              href={buildClaimedMapSitePath({ fastCode: gateCode })}
-              className="inline-flex shrink-0 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 no-underline shadow-sm hover:bg-neutral-50"
-            >
-              Back to Mapsite
-            </Link>
-          ) : null}
+          {/* No Mapsite back link on the register-your-mapsite gate; the logo links Home. */}
         </div>
       </div>
     </header>

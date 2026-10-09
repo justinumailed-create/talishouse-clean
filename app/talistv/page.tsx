@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
-import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
 import {
   TALISTV_GUIDE_CHANNEL,
   TALISTV_GUIDE_SLOTS,
@@ -26,7 +25,6 @@ interface TalisTvPageProps {
 
 export default async function TalisTvPage({ searchParams }: TalisTvPageProps) {
   const { fastCode } = await searchParams;
-  const mapsiteHref = mapsiteBackFromScheduleHref(fastCode);
 
   return (
     <main className="min-h-dvh bg-[#f5f5f7] font-sans text-neutral-900">
@@ -44,12 +42,6 @@ export default async function TalisTvPage({ searchParams }: TalisTvPageProps) {
             <span className="m-0 text-[15px] font-semibold leading-none tracking-tight text-neutral-900 transition-colors group-hover:text-neutral-600">
               {TALISTV_GUIDE_CHANNEL.name}
             </span>
-          </Link>
-          <Link
-            href={mapsiteHref}
-            className="inline-flex shrink-0 rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 shadow-sm hover:bg-neutral-50"
-          >
-            Back to Mapsite
           </Link>
         </div>
       </header>
@@ -147,12 +139,6 @@ export default async function TalisTvPage({ searchParams }: TalisTvPageProps) {
         </section>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link
-            href={mapsiteHref}
-            className="inline-flex rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 shadow-sm hover:bg-neutral-50"
-          >
-            Back to Mapsite
-          </Link>
           <Link
             href={
               fastCode?.trim()
