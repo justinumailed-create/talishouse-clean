@@ -8,11 +8,7 @@ import {
   getRegisteredMapSiteFastCode,
 } from "@/lib/mapsite-edit-auth";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
-import {
-  REPLACE_IMAGE_TEMPLATE_DIR,
-  REPLACE_IMAGE_TEMPLATE_FILES,
-  type ReplaceImageTemplateFormat,
-} from "@/lib/talispros/replace-image-templates";
+import type { ReplaceImageTemplateFormat } from "@/lib/talispros/replace-image-templates";
 
 /**
  * Google Slides "Make a copy" link. Server-only: rendered only for registered
@@ -57,9 +53,17 @@ export async function canDownloadReplaceImageTemplates(
   return false;
 }
 
+/**
+ * Literal paths only: a computed `join(process.cwd(), dir, fileName)` makes the
+ * build's file tracer include the whole project (incl. the transient
+ * .next/lock), which broke the Vercel deploy with ENOENT .next/lock.
+ * The files are also listed in next.config outputFileTracingIncludes.
+ */
 export async function readReplaceImageTemplate(
   format: ReplaceImageTemplateFormat,
 ): Promise<Buffer> {
-  const { fileName } = REPLACE_IMAGE_TEMPLATE_FILES[format];
-  return readFile(join(process.cwd(), REPLACE_IMAGE_TEMPLATE_DIR, fileName));
+  if (format === "pptx") {
+    return readFile(join(process.cwd(), "private/templates/Talispros-Demo-Template.pptx"));
+  }
+  return readFile(join(process.cwd(), "private/templates/Talispros-Demo-Template.key"));
 }
