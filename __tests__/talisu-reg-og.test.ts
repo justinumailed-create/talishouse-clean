@@ -14,7 +14,7 @@ describe("/talisu/reg share metadata", () => {
       expect(m.title).not.toMatch(/Mapsite™/);
       expect(m.title).toBe(
         locale === "de"
-          ? "Registrieren Sie Ihre Talispros™ Mapsite und erhalten Sie globale Sichtbarkeit | TalisU™"
+          ? "Registrieren Sie Ihre Talispros™ Mapsite: globale Sichtbarkeit | TalisU™"
           : "Register Your Talispros™ Mapsite and Get Global Exposure | TalisU™",
       );
       // Lead with what Aisha's team does, not who she is.
@@ -27,6 +27,13 @@ describe("/talisu/reg share metadata", () => {
       expect(`${m.title} ${m.description} ${m.ogImageAlt}`).not.toMatch(
         /increased|mehr globale/i,
       );
+      if (locale === "de") {
+        // Ralf's edit: colon instead of "und erhalten Sie".
+        expect(`${m.title} ${m.description} ${m.ogImageAlt}`).not.toMatch(
+          /erhalten Sie/,
+        );
+        expect(m.ogImageAlt).toMatch(/Ihre Mapsite: globale Sichtbarkeit/);
+      }
       expect(m.ogImageAlt).toMatch(
         locale === "de" ? /globale Sichtbarkeit/ : /global exposure/,
       );

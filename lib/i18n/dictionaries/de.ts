@@ -784,12 +784,12 @@ export const de: Dictionary = {
         "Häufig gestellte Fragen zu Talispros™, Mapsites und TalisU™.",
     },
     talisuRegister: {
-      title: "Registrieren Sie Ihre Talispros™ Mapsite und erhalten Sie globale Sichtbarkeit | TalisU™",
+      title: "Registrieren Sie Ihre Talispros™ Mapsite: globale Sichtbarkeit | TalisU™",
       description:
-        "Branchennahes Marketing, das Ihrer Mapsite globale Sichtbarkeit verschafft: Mapsites, Talisbooks™ (TEB), Angebotsanalyse (TVA) und TalisTV™ (TTV). Registrieren Sie sich jetzt und arbeiten Sie mit dem Team von Aisha C.",
+        "Branchennahes Marketing für die globale Sichtbarkeit Ihrer Mapsite: Mapsites, Talisbooks™ (TEB), Angebotsanalyse (TVA) und TalisTV™ (TTV). Registrieren Sie sich jetzt und arbeiten Sie mit dem Team von Aisha C.",
       ogImage: "/og/talisu-reg-de.jpg",
       ogImageAlt:
-        "Aisha C., Teamleiterin, mit dem Talispros™-Baumlogo: Registrieren Sie Ihre Mapsite und erhalten Sie globale Sichtbarkeit mit branchennahem Marketing",
+        "Aisha C., Teamleiterin, mit dem Talispros™-Baumlogo – Registrieren Sie Ihre Mapsite: globale Sichtbarkeit durch branchennahes Marketing",
     },
     talisuEngage: {
       title: "Webster und sein Anpassungsteam beauftragen | TalisU™",
