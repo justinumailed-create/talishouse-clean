@@ -12,6 +12,18 @@ describe("/talisu/reg share metadata", () => {
         existsSync(path.join(process.cwd(), "public", m.ogImage)),
       ).toBe(true);
       expect(m.title).not.toMatch(/Mapsite™/);
+      expect(m.title).toBe(
+        locale === "de"
+          ? "Registrieren Sie Ihre Talispros™ Mapsite und erhalten Sie mehr globale Sichtbarkeit | TalisU™"
+          : "Register Your Talispros™ Mapsite and Get Increased Global Exposure | TalisU™",
+      );
+      expect(m.description).toMatch(
+        locale === "de" ? /mehr globale Sichtbarkeit/ : /increased global exposure/,
+      );
+      expect(m.description).toMatch(/Aisha C\./);
+      expect(m.ogImageAlt).toMatch(
+        locale === "de" ? /mehr globale Sichtbarkeit/ : /increased global exposure/,
+      );
       expect(m.description).not.toMatch(/USD|Mapsite™/);
       const meta = createTalisUMetadata({
         title: m.title,
