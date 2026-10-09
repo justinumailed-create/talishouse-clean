@@ -24,12 +24,14 @@ describe("TalisU blue header dropdown", () => {
     ]);
     expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.label).toBe("FAQ");
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.label)).toEqual([
+      "Home",
       "Markets",
       "Bookshelf",
       "Catalogue",
       "Register",
     ]);
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.href)).toEqual([
+      "/",
       "/talisu/mkts",
       "/catalogue/bookshelf",
       "/catalogue",

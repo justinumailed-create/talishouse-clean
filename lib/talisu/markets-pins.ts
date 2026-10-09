@@ -95,6 +95,8 @@ export const TALISU_MKTS_HEADER_TAGLINE =
  * Bookshelf + Catalogue are the book links; Mapsites is a header dropdown (not here).
  */
 export const TALISU_MKTS_HEADER_NAV = [
+  /** Plain Home link (client request) — first item, even though the logo also links home. */
+  { href: "/", label: "Home" },
   { href: "/talisu/mkts", label: "Markets" },
   { href: "/catalogue/bookshelf", label: "Bookshelf" },
   /** Talishouse™ Product Catalogue — opens on the front cover. */

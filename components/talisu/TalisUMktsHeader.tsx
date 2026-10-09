@@ -28,6 +28,8 @@ import type { Dictionary } from "@/lib/i18n/dictionaries";
 /** English nav label (stable id in TALISU_MKTS_HEADER_NAV) → localized text. */
 function navLabel(t: Dictionary, label: string): string {
   switch (label) {
+    case "Home":
+      return t.nav.home;
     case "Markets":
       return t.nav.markets;
     case "Bookshelf":
@@ -414,9 +416,10 @@ export default function TalisUMktsHeader({
       );
     }
 
-    // Catalogue (/catalogue) is exact-match so /catalogue/bookshelf only lights Bookshelf.
+    // Home (/) and Catalogue (/catalogue) are exact-match so sub-routes don't
+    // light them (e.g. /catalogue/bookshelf only lights Bookshelf).
     const active =
-      item.label === "Catalogue"
+      item.label === "Catalogue" || item.label === "Home"
         ? pathname === item.href
         : pathname === item.href || pathname.startsWith(`${item.href}/`);
     return (
@@ -455,6 +458,9 @@ export default function TalisUMktsHeader({
         </div>
 
         <nav className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
+          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Home").map(
+            (item) => renderNavLink(item),
+          )}
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Markets").map(
             (item) => renderNavLink(item),
           )}

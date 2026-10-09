@@ -31,6 +31,7 @@ export const de: Dictionary = {
   nav: {
     tagline: "Branchennahe Mapsite-Märkte",
     brandSr: "Marke: Talispros™",
+    home: "Startseite",
     markets: "Märkte",
     mapsites: "Mapsites",
     bookshelf: "Bücherregal",

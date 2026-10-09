@@ -51,6 +51,7 @@ export const en = {
   nav: {
     tagline: TALISU_MKTS_HEADER_TAGLINE,
     brandSr: "Brand: Talispros™",
+    home: "Home",
     markets: "Markets",
     mapsites: "Mapsites",
     bookshelf: "Bookshelf",
