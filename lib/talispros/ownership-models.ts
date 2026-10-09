@@ -23,15 +23,16 @@ export type OwnershipModelSection = {
   title: string;
   body: string;
   result: string;
-  /** Optional CTA shown in the popover (e.g. Tokenization → Learn More). */
+  /**
+   * Learn More CTA in the popover. Level 2 (transaction structures) always
+   * goes to the TalisU FAQ; it never re-opens TalisBOT (Level 1).
+   */
   learnMoreHref?: string;
   learnMoreLabel?: string;
-  /**
-   * When true, Learn More opens the ownership contact form
-   * (marketing + admin) instead of navigating.
-   */
-  learnMoreContact?: boolean;
 };
+
+/** Every homepage transaction-structure Learn More goes to the TalisU FAQ. */
+export const HOME_OWNERSHIP_LEARN_MORE_HREF = "/talisu";
 
 export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
   {
@@ -42,7 +43,7 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
     result:
       "The result: you have no ownership rights until you have paid in full, and full ownership rights when the transaction has closed.",
     learnMoreLabel: "Learn More",
-    learnMoreContact: true,
+    learnMoreHref: HOME_OWNERSHIP_LEARN_MORE_HREF,
   },
   {
     id: "splits",
@@ -52,7 +53,7 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
     result:
       "The result: you have full usage rights in accordance with a 'Lease-To-Own' Agreement drafted between lawyers.",
     learnMoreLabel: "Learn More",
-    learnMoreContact: true,
+    learnMoreHref: HOME_OWNERSHIP_LEARN_MORE_HREF,
   },
   {
     id: "fractionalization",
@@ -62,7 +63,7 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
     result:
       "The result: it fits partners and investor groups, who want shares in the collective without an all-or-nothing purchase.",
     learnMoreLabel: "Learn More",
-    learnMoreContact: true,
+    learnMoreHref: HOME_OWNERSHIP_LEARN_MORE_HREF,
   },
   {
     id: "tokenization",
@@ -72,6 +73,6 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
     result:
       "The result: it is easy to bring in co-owners while keeping stakes proportional and raising capital without touching the underlying asset.",
     learnMoreLabel: "Learn More",
-    learnMoreContact: true,
+    learnMoreHref: HOME_OWNERSHIP_LEARN_MORE_HREF,
   },
 ] as const;

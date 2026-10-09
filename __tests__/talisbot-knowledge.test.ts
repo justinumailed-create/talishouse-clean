@@ -38,7 +38,7 @@ describe("TalisBOT Talispros™ knowledge", () => {
     expect(en.bot.subtitle).toBe("Summary - max 280 characters");
     expect(bot).toContain("TALISU_MKTS_HEADER_BLUE");
     expect(bot).toContain("OwnershipLearnMoreForm");
-    expect(en.bot.getHelp).toBe("Leave contact");
+    expect(en.bot.getHelp).toBe("Propose a Project");
     expect(bot).not.toContain("TALISBOT_INTEREST_OPTIONS");
     expect(bot).not.toMatch(/text-green-500|bg-green-500|bg-green-50|text-green-600/);
   });

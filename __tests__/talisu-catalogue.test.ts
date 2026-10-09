@@ -31,15 +31,15 @@ import { TALISU_MKTS_HEADER_NAV } from "../lib/talisu/markets-pins";
 const read = (p: string) => readFileSync(resolve(p), "utf8");
 
 describe("Catalogue nav item", () => {
-  it("sits right after Bookshelf and before Register", () => {
+  it("sits right after Markets and before Register", () => {
     const labels = TALISU_MKTS_HEADER_NAV.map((i) => i.label);
-    expect(labels).toEqual(["Markets", "Bookshelf", "Catalogue", "Register"]);
+    expect(labels).toEqual(["Home", "Markets", "Catalogue", "Register"]);
     expect(TALISU_MKTS_HEADER_NAV[2]).toEqual({ href: "/catalogue", label: "Catalogue" });
     const header = read("components/talisu/TalisUMktsHeader.tsx");
-    const bookshelf = header.indexOf('item.label === "Bookshelf"');
+    const markets = header.indexOf('(item) => item.label === "Markets"');
     const catalogue = header.indexOf('(item) => item.label === "Catalogue"');
     const register = header.indexOf("<RegisterNavDropdown");
-    expect(catalogue).toBeGreaterThan(bookshelf);
+    expect(catalogue).toBeGreaterThan(markets);
     expect(register).toBeGreaterThan(catalogue);
   });
 });

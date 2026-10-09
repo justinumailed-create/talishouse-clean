@@ -2,11 +2,9 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { HOME_OWNERSHIP_SECTIONS } from "@/lib/talispros/ownership-models";
 import { useT } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/format";
 import HomeMountainMotion from "@/components/talispros/HomeMountainMotion";
-import { openOwnershipContactInTalisBot } from "@/lib/talispros/ownership-contact";
 
 /**
  * Homepage gate right column: looping mountain motion on the upper half with a
@@ -23,11 +21,6 @@ export default function TalisprosHomeShowcase() {
 
   const openSection =
     sections.find((section) => section.id === openId) ?? null;
-  /** English title stays the submitted contact topic (API validates it). */
-  const openSectionTopic =
-    HOME_OWNERSHIP_SECTIONS.find((section) => section.id === openId)?.title ??
-    openSection?.title ??
-    "";
 
   const close = useCallback(() => setOpenId(null), []);
 
@@ -104,26 +97,12 @@ export default function TalisprosHomeShowcase() {
             <p className="mt-2.5 text-[13.5px] leading-relaxed text-neutral-700 sm:text-[14.5px]">
               {openSection.result}
             </p>
-            {openSection.learnMoreContact ? (
+            {openSection.learnMoreHref ? (
               <p className="mt-3.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    // Opens the TalisBOT panel (bottom-left) with the
-                    // OwnershipLearnMoreForm inside; topic is sent silently.
-                    openOwnershipContactInTalisBot(openSectionTopic);
-                    close();
-                  }}
-                  className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
-                >
-                  {openSection.learnMoreLabel ?? t.home.learnMore}
-                  <span aria-hidden>→</span>
-                </button>
-              </p>
-            ) : openSection.learnMoreHref ? (
-              <p className="mt-3.5">
+                {/* Level 2 → TalisU FAQ (never back to TalisBOT, which is Level 1). */}
                 <Link
                   href={openSection.learnMoreHref}
+                  onClick={close}
                   className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
                 >
                   {openSection.learnMoreLabel ?? t.home.learnMore}

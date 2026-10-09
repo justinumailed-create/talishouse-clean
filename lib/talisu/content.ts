@@ -118,7 +118,7 @@ export const TALISU_FAQ: {
       question: "How do I submit a market application?",
       answer: "Please follow this sequence on Talispros.com:",
       bullets: [
-        "Select “System Demo”.",
+        "Select “Build Demo”.",
         "Choose the PIN closest to your home point.",
         "Select “Next Step” and build a demo eBook.",
         "Fill out the form: First initials of your first and last name generate half of your FAST Code™ (Free Access, Standard Tracking). The other half is a number between 01 and 99 to make you unique within our system. Your Street Address positions your Home PIN on your sample Mapsite. The sample Mapsite tells us if there are conflicts with other home markets.",

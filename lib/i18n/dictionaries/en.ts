@@ -101,7 +101,7 @@ export const en = {
   home: {
     motto: "PROMOTE - MANAGE - COOPERATE",
     openAccount: "Open your Account*",
-    systemDemo: "System Demo",
+    systemDemo: "Build Demo",
     legalSecondary: TALISPROS_LEGAL_SECONDARY_COPY,
     bannerTitle: HOME_OWNERSHIP_BANNER_TITLE,
     structuresTagline: HOME_OWNERSHIP_STRUCTURES_TAGLINE,
@@ -162,7 +162,7 @@ export const en = {
     openAria: "Open TalisBOT",
     closeAria: "Close TalisBOT",
     faq: "FAQ",
-    getHelp: "Leave contact",
+    getHelp: "Propose a Project",
     globalAdmin: "Global Admin",
     processesHeading: "Talispros™ processes",
     allTopics: "← All topics",
@@ -172,8 +172,7 @@ export const en = {
   },
 
   contactForm: {
-    title: "Quick Reference",
-    intro: "Propose a project without registering — we'll follow up.",
+    title: "Quick Reference - Propose a project without registering",
     /** Live counter under the proposal textarea. */
     projectCounter: "{count}/{max}",
     thanks: "Thanks — your message is on its way.",
@@ -187,9 +186,9 @@ export const en = {
     phonePlaceholder: "(555) 555-5555",
     phoneError: NANP_PHONE_ERROR,
     project: "Propose a Project",
-    projectPlaceholder: "Propose a Project",
+    projectPlaceholder: "Please include location",
     sending: "Sending…",
-    submit: "Send inquiry",
+    submit: "Submit",
     networkError: "Network error. Please try again.",
     genericError: "Something went wrong. Please try again.",
     back: "← Back",
@@ -457,6 +456,9 @@ export const en = {
   },
 
   catalogueUi: {
+    /** Headline above the /catalogue flipbook. */
+    headline:
+      "Every registered Market comes with preferred Supply Side Access to Talishouse™ Tiny Homes",
     register: "Register",
     home: "Home",
     bookshelf: "Bookshelf",

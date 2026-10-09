@@ -9,7 +9,7 @@ import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
 import { useT } from "@/lib/i18n/client";
 
 /**
- * Homepage gate left column: Talispros logo + Login (reveals FAST Code) + System Demo.
+ * Homepage gate left column: Talispros logo + Login (reveals FAST Code) + Build Demo.
  * Keeps the existing claimed-Mapsite cookie/session FAST flow.
  */
 export default function TalisprosHomeGate() {

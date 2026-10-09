@@ -16,7 +16,7 @@ import { fmt } from "@/lib/i18n/format";
 type OwnershipLearnMoreFormProps = {
   /** Recorded silently with the submission (which Learn More was clicked). */
   topic: OwnershipContactTopic | string;
-  /** Called from the Back / Close buttons. */
+  /** Called from the Done button after a successful submit. */
   onClose: () => void;
 };
 
@@ -38,13 +38,17 @@ function localizeApiError(
   return error;
 }
 
+/** Compact inputs so the whole form fits the TalisBOT panel without scrolling. */
 const INPUT_CLASS =
-  "w-full rounded-xl border bg-neutral-50 px-3 py-2.5 text-sm outline-none focus:border-[#046BD9]";
+  "w-full rounded-lg border bg-neutral-50 px-2.5 py-1.5 text-[13px] outline-none focus:border-[#046BD9]";
+const LABEL_CLASS = "mb-0.5 block text-[11px] font-medium text-neutral-600";
 
 /**
- * Ownership Learn More contact form, rendered inline inside the TalisBOT
- * chat panel (components/TalisBotChat.tsx). The topic is not shown as a
- * field; it is sent with the submission so leads route the same way.
+ * "Propose a Project" form (Quick Reference), rendered inline inside the
+ * TalisBOT chat panel (components/TalisBotChat.tsx). Compact layout so it
+ * fits the panel without scrolling; the panel header carries the always-visible
+ * Back button. The topic is not shown as a field; it is sent with the
+ * submission so leads route the same way.
  */
 export default function OwnershipLearnMoreForm({
   topic,
@@ -115,17 +119,13 @@ export default function OwnershipLearnMoreForm({
   return (
     <section
       aria-labelledby={titleId}
-      className="space-y-3 p-1 text-left animate-in fade-in slide-in-from-bottom-2 duration-300"
+      className="space-y-2 text-left animate-in fade-in slide-in-from-bottom-2 duration-300"
       data-ownership-topic={topic}
+      data-testid="talisbot-propose-form"
     >
-      <div>
-        <h4 id={titleId} className="text-[15px] font-semibold text-gray-900">
-          {c.title}
-        </h4>
-        <p className="mt-0.5 text-[12.5px] text-neutral-500">
-          {c.intro}
-        </p>
-      </div>
+      <h4 id={titleId} className="text-[13px] font-semibold leading-snug text-gray-900">
+        {c.title}
+      </h4>
 
       {done ? (
         <div className="space-y-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-5 text-center">
@@ -144,28 +144,59 @@ export default function OwnershipLearnMoreForm({
           </button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-2">
           <input type="hidden" name="topic" value={topic} />
-          <div>
-            <label className="mb-1 block text-[12px] font-medium text-neutral-600">
-              {c.name}
-            </label>
-            <input
-              type="text"
-              name="name"
-              required
-              autoComplete="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={`${INPUT_CLASS} border-neutral-200`}
-              placeholder={c.namePlaceholder}
-            />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="min-w-0">
+              <label htmlFor={`${titleId}-name`} className={LABEL_CLASS}>
+                {c.name}
+              </label>
+              <input
+                id={`${titleId}-name`}
+                type="text"
+                name="name"
+                required
+                autoComplete="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className={`${INPUT_CLASS} border-neutral-200`}
+                placeholder={c.namePlaceholder}
+              />
+            </div>
+            <div className="min-w-0">
+              <label htmlFor={`${titleId}-phone`} className={LABEL_CLASS}>
+                {c.phone}
+              </label>
+              <input
+                id={`${titleId}-phone`}
+                type="tel"
+                name="phone"
+                required
+                inputMode="tel"
+                autoComplete="tel-national"
+                value={phone}
+                onChange={(e) => setPhone(formatNanpPhoneInput(e.target.value))}
+                onBlur={() => setPhoneTouched(true)}
+                aria-invalid={phoneInvalid}
+                aria-describedby={phoneInvalid ? phoneErrorId : undefined}
+                className={`${INPUT_CLASS} ${
+                  phoneInvalid ? "border-red-500" : "border-neutral-200"
+                }`}
+                placeholder={c.phonePlaceholder}
+              />
+            </div>
           </div>
+          {phoneInvalid ? (
+            <p id={phoneErrorId} className="-mt-1 text-[11px] leading-snug text-red-600" role="alert">
+              {c.phoneError}
+            </p>
+          ) : null}
           <div>
-            <label className="mb-1 block text-[12px] font-medium text-neutral-600">
+            <label htmlFor={`${titleId}-email`} className={LABEL_CLASS}>
               {c.email}
             </label>
             <input
+              id={`${titleId}-email`}
               type="email"
               name="email"
               required
@@ -177,52 +208,27 @@ export default function OwnershipLearnMoreForm({
             />
           </div>
           <div>
-            <label className="mb-1 block text-[12px] font-medium text-neutral-600">
-              {c.phone}
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              required
-              inputMode="tel"
-              autoComplete="tel-national"
-              value={phone}
-              onChange={(e) => setPhone(formatNanpPhoneInput(e.target.value))}
-              onBlur={() => setPhoneTouched(true)}
-              aria-invalid={phoneInvalid}
-              aria-describedby={phoneInvalid ? phoneErrorId : undefined}
-              className={`${INPUT_CLASS} ${
-                phoneInvalid ? "border-red-500" : "border-neutral-200"
-              }`}
-              placeholder={c.phonePlaceholder}
-            />
-            {phoneInvalid ? (
-              <p id={phoneErrorId} className="mt-1 text-[12px] text-red-600" role="alert">
-                {c.phoneError}
-              </p>
-            ) : null}
-          </div>
-          <div>
-            <label className="mb-1 block text-[12px] font-medium text-neutral-600">
+            <label htmlFor={`${titleId}-message`} className={LABEL_CLASS}>
               {c.project}
             </label>
             <textarea
+              id={`${titleId}-message`}
               name="message"
               required
-              rows={4}
+              rows={3}
               maxLength={OWNERSHIP_CONTACT_MESSAGE_MAX}
               value={message}
               onChange={(e) =>
                 setMessage(e.target.value.slice(0, OWNERSHIP_CONTACT_MESSAGE_MAX))
               }
               aria-describedby={counterId}
-              className={`${INPUT_CLASS} resize-y border-neutral-200`}
+              className={`${INPUT_CLASS} block resize-none border-neutral-200 leading-snug`}
               placeholder={c.projectPlaceholder}
             />
             <p
               id={counterId}
               aria-live="polite"
-              className={`mt-1 text-right text-[11px] tabular-nums ${
+              className={`mt-0.5 text-right text-[10.5px] tabular-nums ${
                 message.length >= OWNERSHIP_CONTACT_MESSAGE_MAX
                   ? "font-semibold text-[#046BD9]"
                   : "text-neutral-400"
@@ -235,27 +241,19 @@ export default function OwnershipLearnMoreForm({
             </p>
           </div>
           {error ? (
-            <p className="text-sm text-red-600" role="alert">
+            <p className="text-[12px] text-red-600" role="alert">
               {error}
             </p>
           ) : null}
           <button
             type="submit"
             disabled={submitting}
-            className="inline-flex w-full items-center justify-center rounded-xl bg-[#046BD9] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#035bb8] disabled:opacity-60"
+            className="inline-flex w-full items-center justify-center rounded-lg bg-[#046BD9] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#035bb8] disabled:opacity-60"
           >
             {submitting ? c.sending : c.submit}
           </button>
         </form>
       )}
-
-      <button
-        type="button"
-        onClick={onClose}
-        className="text-sm font-medium text-gray-400 hover:text-black transition px-1"
-      >
-        {c.back}
-      </button>
     </section>
   );
 }

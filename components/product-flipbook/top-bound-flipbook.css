@@ -128,6 +128,26 @@
   width: min(100%, 72rem, calc((100dvh - 9rem) * 16 / 9));
 }
 
+/* One-line headline above the book (/catalogue); reserve its height in the book sizing. */
+.product-flipbook__headline {
+  position: relative;
+  z-index: 6;
+  flex: 0 0 auto;
+  margin: 0.15rem auto 0.1rem;
+  max-width: 64rem;
+  text-align: center;
+  font-size: clamp(0.9rem, 1.35vw, 1.15rem);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.005em;
+  color: #262626;
+  text-wrap: balance;
+}
+
+.product-flipbook[data-header="hidden"][data-headline="visible"] .product-flipbook__book {
+  width: min(100%, 72rem, calc((100dvh - 13.5rem) * 16 / 9));
+}
+
 .product-flipbook__hinge {
   position: relative;
   z-index: 5;
@@ -518,6 +538,10 @@
 
   .product-flipbook[data-header="hidden"] .product-flipbook__book {
     width: min(100%, 44rem, calc((100dvh - 11rem) * 16 / 9));
+  }
+
+  .product-flipbook[data-header="hidden"][data-headline="visible"] .product-flipbook__book {
+    width: min(100%, 44rem, calc((100dvh - 16rem) * 16 / 9));
   }
 }
 

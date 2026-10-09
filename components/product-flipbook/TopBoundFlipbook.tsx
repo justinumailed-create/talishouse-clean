@@ -83,6 +83,7 @@ export default function TopBoundFlipbook({
   title = "Catalogue",
   subtitle = "Top-bound · one page at a time",
   showHeader = true,
+  headline,
 }: {
   pages: ProductFlipbookPage[];
   eyebrow?: string;
@@ -90,6 +91,8 @@ export default function TopBoundFlipbook({
   subtitle?: string;
   /** Visible sub-header strip (logo, eyebrow, title, Home/Bookshelf). Off on /catalogue. */
   showHeader?: boolean;
+  /** Optional one-line headline above the book (e.g. /catalogue supply-side note). */
+  headline?: string;
 }) {
   const c = useT().catalogueUi;
   const leaves = pages;
@@ -215,6 +218,7 @@ export default function TopBoundFlipbook({
       data-testid="product-flipbook"
       data-binding="top"
       data-header={showHeader ? "visible" : "hidden"}
+      data-headline={headline ? "visible" : undefined}
     >
       {showHeader ? (
         <header className="product-flipbook__header">
@@ -251,6 +255,12 @@ export default function TopBoundFlipbook({
       ) : (
         <h1 className="sr-only">{title}</h1>
       )}
+
+      {headline ? (
+        <p className="product-flipbook__headline" data-testid="product-flipbook-headline">
+          {headline}
+        </p>
+      ) : null}
 
       <div className="product-flipbook__stage">
         <div className="product-flipbook__book">

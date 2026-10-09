@@ -77,7 +77,8 @@ export default function TalisBotChat({
     }
   }, [step, activeKnowledgeId]);
 
-  // Homepage Learn More buttons open the bot with the contact form inside it.
+  // Programmatic opener for the Propose a Project form (no homepage caller today:
+  // Level 2 Learn More buttons go to the TalisU FAQ, not back to the bot).
   useEffect(() => {
     function onOpenContact(event: Event) {
       const detail = (event as CustomEvent<OpenOwnershipContactDetail>).detail;
@@ -202,13 +203,6 @@ export default function TalisBotChat({
                 ))}
               </div>
             )}
-            <button
-              type="button"
-              onClick={reset}
-              className="text-sm font-medium text-gray-400 hover:text-black transition px-1"
-            >
-              {b.back}
-            </button>
           </div>
         );
     }
@@ -244,7 +238,7 @@ export default function TalisBotChat({
   const panel = (
     <div
       className={`bg-white rounded-[32px] shadow-[0_24px_60px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden border border-gray-100 animate-in fade-in zoom-in duration-300 font-sans ${panelOriginClass} ${
-        position === "left" ? "" : "w-[340px] max-h-[580px]"
+        position === "left" ? "" : "w-[340px] max-w-[calc(100vw-3rem)] max-h-[min(580px,calc(100dvh-3rem))]"
       }`}
       style={
         position === "left"
@@ -252,7 +246,8 @@ export default function TalisBotChat({
           : undefined
       }
     >
-      <div className="px-6 pt-6 pb-4 flex justify-between items-center bg-white">
+      {/* Sticky panel header: Back is always visible here (never scrolled away). */}
+      <div className="flex shrink-0 items-center justify-between gap-2 border-b border-gray-50 bg-white px-5 pt-4 pb-3">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-black rounded-xl flex items-center justify-center">
             <Image src="/logo.png" alt="Bot" width={16} height={16} className="invert" />
@@ -267,24 +262,41 @@ export default function TalisBotChat({
             </span>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setOpen(false)}
-          aria-label={b.closeAria}
-          className="p-2 text-gray-400 hover:bg-gray-50 rounded-xl transition"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          {step !== "greeting" ? (
+            <button
+              type="button"
+              onClick={reset}
+              className="rounded-lg px-2 py-1.5 text-[12px] font-semibold text-gray-500 transition hover:bg-gray-50 hover:text-black"
+              data-testid="talisbot-back"
+            >
+              {b.back}
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setOpen(false)}
+            aria-label={b.closeAria}
+            className="p-2 text-gray-400 hover:bg-gray-50 rounded-xl transition"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
 
-      <div ref={contentRef} className="flex-1 overflow-y-auto px-6 pb-8">
+      <div
+        ref={contentRef}
+        className={`min-h-0 flex-1 overflow-y-auto ${
+          step === "contact" ? "px-5 pt-3 pb-4" : "px-6 pb-8"
+        }`}
+      >
         {renderContent()}
       </div>
     </div>

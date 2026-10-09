@@ -81,7 +81,7 @@ export const de: Dictionary = {
   home: {
     motto: "BEWERBEN – VERWALTEN – KOOPERIEREN",
     openAccount: "Ihr Konto eröffnen*",
-    systemDemo: "System-Demo",
+    systemDemo: "Demo erstellen",
     legalSecondary: "*Es gelten bestimmte Einschränkungen.",
     bannerTitle: "Branchennahe Abwicklungsoptionen",
     structuresTagline: "Von uns unterstützte Transaktionsstrukturen",
@@ -107,7 +107,7 @@ export const de: Dictionary = {
         result:
           "Das Ergebnis: Bis zur vollständigen Bezahlung haben Sie keinerlei Eigentumsrechte – nach Abschluss der Transaktion dafür die vollen Eigentumsrechte.",
         learnMoreLabel: "Mehr erfahren",
-        learnMoreContact: true,
+        learnMoreHref: "/talisu",
       },
       {
         id: "splits",
@@ -116,7 +116,7 @@ export const de: Dictionary = {
         result:
           "Das Ergebnis: Sie haben volle Nutzungsrechte gemäß einem von Anwälten ausgearbeiteten Mietkaufvertrag („Lease-To-Own“).",
         learnMoreLabel: "Mehr erfahren",
-        learnMoreContact: true,
+        learnMoreHref: "/talisu",
       },
       {
         id: "fractionalization",
@@ -125,7 +125,7 @@ export const de: Dictionary = {
         result:
           "Das Ergebnis: Ideal für Partner und Investorengruppen, die Anteile am Gesamtobjekt erwerben möchten, ohne alles oder nichts kaufen zu müssen.",
         learnMoreLabel: "Mehr erfahren",
-        learnMoreContact: true,
+        learnMoreHref: "/talisu",
       },
       {
         id: "tokenization",
@@ -134,7 +134,7 @@ export const de: Dictionary = {
         result:
           "Das Ergebnis: Miteigentümer lassen sich leicht aufnehmen, die Anteile bleiben proportional, und Kapital kann beschafft werden, ohne den zugrunde liegenden Vermögenswert anzutasten.",
         learnMoreLabel: "Mehr erfahren",
-        learnMoreContact: true,
+        learnMoreHref: "/talisu",
       },
     ],
     corner: {
@@ -211,7 +211,7 @@ export const de: Dictionary = {
           question: "Wie reiche ich einen Marktantrag ein?",
           answer: "Bitte gehen Sie auf Talispros.com in dieser Reihenfolge vor:",
           bullets: [
-            "Wählen Sie „System-Demo“.",
+            "Wählen Sie „Demo erstellen“.",
             "Wählen Sie den PIN, der Ihrem Heimatstandort am nächsten liegt.",
             "Wählen Sie „Nächster Schritt“ und erstellen Sie ein Demo-eBook.",
             "Füllen Sie das Formular aus: Die Initialen Ihres Vor- und Nachnamens bilden die eine Hälfte Ihres FAST Code™ (Free Access, Standard Tracking). Die andere Hälfte ist eine Zahl zwischen 01 und 99, die Sie in unserem System eindeutig macht. Ihre Straßenadresse positioniert Ihren Home-PIN auf Ihrer Beispiel-Mapsite. Die Beispiel-Mapsite zeigt uns, ob es Überschneidungen mit anderen Heimatmärkten gibt.",
@@ -323,7 +323,7 @@ export const de: Dictionary = {
     openAria: "TalisBOT öffnen",
     closeAria: "TalisBOT schließen",
     faq: "FAQ",
-    getHelp: "Kontakt hinterlassen",
+    getHelp: "Projekt vorschlagen",
     globalAdmin: "Globaler Admin",
     processesHeading: "Talispros™-Prozesse",
     allTopics: "← Alle Themen",
@@ -379,8 +379,7 @@ export const de: Dictionary = {
   },
 
   contactForm: {
-    title: "Kurzübersicht",
-    intro: "Projekt ohne Registrierung vorschlagen – wir melden uns bei Ihnen.",
+    title: "Kurzübersicht - Projekt ohne Registrierung vorschlagen",
     projectCounter: "{count}/{max}",
     thanks: "Vielen Dank – Ihre Nachricht ist unterwegs.",
     advisor: "Ein Talispros™-Berater wird Sie zum Thema {topic} kontaktieren.",
@@ -394,9 +393,9 @@ export const de: Dictionary = {
     phoneError:
       "Bitte geben Sie eine gültige Telefonnummer aus den USA oder Kanada ein, z. B. (555) 555-5555.",
     project: "Projekt vorschlagen",
-    projectPlaceholder: "Beschreiben Sie Ihr Projekt",
+    projectPlaceholder: "Bitte Standort angeben",
     sending: "Wird gesendet …",
-    submit: "Anfrage senden",
+    submit: "Absenden",
     networkError: "Netzwerkfehler. Bitte versuchen Sie es erneut.",
     genericError: "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     back: "← Zurück",
@@ -666,6 +665,8 @@ export const de: Dictionary = {
   },
 
   catalogueUi: {
+    headline:
+      "Jeder registrierte Markt erhält bevorzugten angebotsseitigen Zugang zu Talishouse™ Tiny Homes",
     register: "Registrieren",
     home: "Startseite",
     bookshelf: "Bücherregal",

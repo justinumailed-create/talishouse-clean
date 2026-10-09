@@ -21,11 +21,13 @@ export async function generateMetadata(): Promise<Metadata> {
 /** Opens on the front cover; T-Dome is content page 1 (see loadCataloguePages). */
 export default async function CataloguePage() {
   const pages = loadCataloguePages();
+  const headline = getDictionary(await getLocale()).catalogueUi.headline;
   return (
     <TopBoundFlipbook
       pages={pages}
       title="Catalogue"
       showHeader={false}
+      headline={headline}
     />
   );
 }

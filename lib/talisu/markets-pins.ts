@@ -92,14 +92,14 @@ export const TALISU_MKTS_HEADER_TAGLINE =
 
 /**
  * Primary top-bar links (home + claimed Mapsites blue header).
- * Bookshelf + Catalogue are the book links; Mapsites is a header dropdown (not here)
- * rendered right AFTER Register: Home, Markets, Bookshelf, Catalogue, Register, Mapsites.
+ * Catalogue is the book link (Bookshelf lives in the TalisU dropdown); Mapsites is a
+ * header dropdown (not here) rendered right AFTER Register:
+ * Home, Markets, Catalogue, Register, Mapsites, | TalisU.
  */
 export const TALISU_MKTS_HEADER_NAV = [
   /** Plain Home link (client request) — first item, even though the logo also links home. */
   { href: "/", label: "Home" },
   { href: "/talisu/mkts", label: "Markets" },
-  { href: "/catalogue/bookshelf", label: "Bookshelf" },
   /** Talishouse™ Product Catalogue — opens on the front cover. */
   { href: "/catalogue", label: "Catalogue" },
   { href: "/talisu/reg", label: "Register" },
@@ -114,8 +114,12 @@ export const TALISU_MKTS_HEADER_REGISTER_DROPDOWN = [
 /** Placeholder marker — Mapsites dropdown is rendered in TalisUMktsHeader. */
 export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
 
-/** TalisU™ header dropdown — FAQ first, then KB / Audio / Video. */
+/**
+ * TalisU™ header dropdown — Bookshelf, then FAQ, then (after a divider)
+ * KB / Audio / Video. Bookshelf moved here from the top-level nav.
+ */
 export const TALISU_MKTS_HEADER_DROPDOWN = [
+  { href: "/catalogue/bookshelf", label: "Bookshelf" },
   { href: "/talisu#faq", label: "FAQ" },
   { href: "/talisu/kb", label: "Knowledge Base" },
   { href: "/talisu/au", label: "Audio" },

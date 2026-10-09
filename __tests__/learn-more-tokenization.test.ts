@@ -2,32 +2,32 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { en } from "../lib/i18n/dictionaries/en";
+import { de } from "../lib/i18n/dictionaries/de";
 import { HOME_OWNERSHIP_SECTIONS } from "../lib/talispros/ownership-models";
 
 const root = process.cwd();
 
 describe("Tokenization Learn More", () => {
-  it("opens contact-form Learn More for Tokenization like the other three", () => {
+  it("sends Tokenization Learn More to the TalisU FAQ like the other three", () => {
     const tokenization = HOME_OWNERSHIP_SECTIONS.find(
       (s) => s.id === "tokenization",
     );
-    expect(tokenization?.learnMoreContact).toBe(true);
+    expect(tokenization?.learnMoreHref).toBe("/talisu");
     expect(tokenization?.learnMoreLabel).toBe("Learn More");
-    expect(tokenization?.learnMoreHref).toBeUndefined();
 
     const showcase = readFileSync(
       join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
       "utf8",
     );
-    expect(showcase).toContain("learnMoreContact");
+    expect(showcase).toContain("openSection.learnMoreHref");
     expect(showcase).toContain("t.home.learnMore");
     expect(en.home.learnMore).toBe("Learn More");
-    // Learn More opens the form inside TalisBOT, not a page-level modal.
-    expect(showcase).toContain("openOwnershipContactInTalisBot");
+    // Level 2 (transaction structures) never reverts to TalisBOT (Level 1).
+    expect(showcase).not.toContain("openOwnershipContactInTalisBot");
+    expect(showcase).not.toContain("learnMoreContact");
     expect(showcase).not.toContain("<OwnershipLearnMoreForm");
 
     const bot = readFileSync(join(root, "components/TalisBotChat.tsx"), "utf8");
-    expect(bot).toContain("OPEN_OWNERSHIP_CONTACT_EVENT");
     expect(bot).toContain("<OwnershipLearnMoreForm topic={contactTopic}");
   });
 
@@ -53,12 +53,14 @@ describe("Tokenization Learn More", () => {
     expect(api).toContain("formatNanpPhone");
   });
 
-  it("opens a contact form Learn More for every ownership button", () => {
-    expect(HOME_OWNERSHIP_SECTIONS.length).toBeGreaterThan(0);
+  it("points every ownership Learn More (EN + DE) at the TalisU FAQ", () => {
+    expect(HOME_OWNERSHIP_SECTIONS.length).toBe(4);
     for (const section of HOME_OWNERSHIP_SECTIONS) {
-      expect(section.learnMoreContact).toBe(true);
       expect(section.learnMoreLabel).toBe("Learn More");
-      expect(section.learnMoreHref).toBeUndefined();
+      expect(section.learnMoreHref).toBe("/talisu");
+    }
+    for (const section of de.home.ownershipSections) {
+      expect(section.learnMoreHref).toBe("/talisu");
     }
 
     const contact = readFileSync(

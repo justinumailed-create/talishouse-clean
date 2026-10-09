@@ -74,7 +74,7 @@ export const TALISPROS_START_SEGMENTS = [
   },
 ] as const;
 
-/** System Demo destination from the homepage gate. */
+/** Build Demo destination from the homepage gate. */
 export const TALISPROS_HOME_SYSTEM_DEMO_HREF = "/talisu/mkts";
 
 export type TalisprosHomeDemoPrivacyMask = {
@@ -136,7 +136,7 @@ export const TALISPROS_HOME_DEMO_FLOW: readonly TalisprosHomeDemoStep[] = [
     title: "Claimed Mapsite",
     body: "Pin dashboard with URL, MLS®, TEB™, and TTV™ — identity details hidden in demo.",
     href: "/talisu/mkts",
-    hrefLabel: "System Demo",
+    hrefLabel: "Build Demo",
     imageSrc: "/assets/home-demo/03-claimed-mapsite-rm22.jpg",
     imageAlt: "Claimed Mapsite pin dashboard with address and FAST Code hidden",
     imageObjectPosition: "object-[center_35%]",

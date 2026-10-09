@@ -32,8 +32,6 @@ function navLabel(t: Dictionary, label: string): string {
       return t.nav.home;
     case "Markets":
       return t.nav.markets;
-    case "Bookshelf":
-      return t.nav.bookshelf;
     case "Catalogue":
       return t.nav.catalogue;
     case "Register":
@@ -46,6 +44,8 @@ function navLabel(t: Dictionary, label: string): string {
 /** English TalisU dropdown label → localized text. */
 function talisuMenuLabel(t: Dictionary, label: string): string {
   switch (label) {
+    case "Bookshelf":
+      return t.nav.bookshelf;
     case "FAQ":
       return t.nav.talisuMenu.faq;
     case "Knowledge Base":
@@ -64,7 +64,7 @@ export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 export type TalisUMktsHeaderProps = {
   /**
    * `claimed-mapsite`: replace Register with Dashboard (lock until real payment).
-   * `default`: Home + Markets + Bookshelf + Catalogue + Register + Mapsites (homepage /talisu chrome).
+   * `default`: Home + Markets + Catalogue + Register + Mapsites | TalisU (Bookshelf lives in TalisU).
    */
   variant?: TalisUMktsHeaderVariant;
   /**
@@ -417,7 +417,7 @@ export default function TalisUMktsHeader({
     }
 
     // Home (/) and Catalogue (/catalogue) are exact-match so sub-routes don't
-    // light them (e.g. /catalogue/bookshelf only lights Bookshelf).
+    // light them (e.g. /catalogue/bookshelf lights TalisU → Bookshelf, not Catalogue).
     const active =
       item.label === "Catalogue" || item.label === "Home"
         ? pathname === item.href
@@ -462,9 +462,6 @@ export default function TalisUMktsHeader({
             (item) => renderNavLink(item),
           )}
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Markets").map(
-            (item) => renderNavLink(item),
-          )}
-          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Bookshelf").map(
             (item) => renderNavLink(item),
           )}
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Catalogue").map(
@@ -538,7 +535,7 @@ export default function TalisUMktsHeader({
                   </div>
                 ) : (
                   <>
-                    {TALISU_MKTS_HEADER_DROPDOWN.map((item, index) => {
+                    {TALISU_MKTS_HEADER_DROPDOWN.map((item) => {
                       const active =
                         pathname === item.href ||
                         pathname.startsWith(`${item.href}/`) ||
@@ -575,8 +572,8 @@ export default function TalisUMktsHeader({
                           {talisuMenuLabel(t, item.label)}
                         </Link>
                       );
-                      // FAQ is first — horizontal split before Knowledge Base / Audio / Video.
-                      if (isFaq && index === 0) {
+                      // Bookshelf + FAQ on top — horizontal split before Knowledge Base / Audio / Video.
+                      if (isFaq) {
                         return (
                           <div key={`${item.href}-wrap`}>
                             {row}

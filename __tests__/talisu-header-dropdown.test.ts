@@ -9,34 +9,37 @@ import {
 } from "../lib/talisu/markets-pins";
 
 describe("TalisU blue header dropdown", () => {
-  it("exposes FAQ first, then Knowledge Base, Audio, and Video", () => {
+  it("exposes Bookshelf, FAQ, then Knowledge Base, Audio, and Video", () => {
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label)).toEqual([
+      "Bookshelf",
       "FAQ",
       "Knowledge Base",
       "Audio",
       "Video",
     ]);
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.href)).toEqual([
+      "/catalogue/bookshelf",
       "/talisu#faq",
       "/talisu/kb",
       "/talisu/au",
       "/talisu/video",
     ]);
-    expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.label).toBe("FAQ");
+    // Bookshelf sits ahead of FAQ inside TalisU (moved out of the top level).
+    expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.label).toBe("Bookshelf");
+    expect(TALISU_MKTS_HEADER_DROPDOWN[1]?.label).toBe("FAQ");
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.label)).toEqual([
       "Home",
       "Markets",
-      "Bookshelf",
       "Catalogue",
       "Register",
     ]);
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.href)).toEqual([
       "/",
       "/talisu/mkts",
-      "/catalogue/bookshelf",
       "/catalogue",
       "/talisu/reg",
     ]);
+    expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Bookshelf")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "All Books")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "FAST Shelves")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Create Demo")).toBe(false);
@@ -82,12 +85,14 @@ describe("TalisU blue header dropdown", () => {
     expect(navLib).toContain("claimed: []");
   });
 
-  it("puts a horizontal divider after FAQ in the TalisU dropdown", () => {
+  it("puts a horizontal divider after Bookshelf + FAQ in the TalisU dropdown", () => {
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
     );
     expect(header).toContain('item.label === "FAQ"');
+    expect(header).toContain('case "Bookshelf":');
+    expect(header).toContain("t.nav.bookshelf");
     expect(header).toContain('role="separator"');
     expect(header).toContain("border-t border-white/25");
   });
@@ -108,7 +113,6 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain("bg-white/45");
     const marketsIdx = header.indexOf('item.label === "Markets"');
     const mapsitesIdx = header.indexOf("<MapsitesNavDropdown");
-    const bookshelvesIdx = header.indexOf('item.label === "Bookshelf"');
     const catalogueIdx = header.indexOf('(item) => item.label === "Catalogue"');
     const registerFilterIdx = header.indexOf("<RegisterNavDropdown");
     const separatorIdx = header.indexOf("bg-white/45");
@@ -117,9 +121,9 @@ describe("TalisU blue header dropdown", () => {
     const homeIdx = header.indexOf('item.label === "Home").map');
     expect(homeIdx).toBeGreaterThan(-1);
     expect(marketsIdx).toBeGreaterThan(homeIdx);
-    // Home, Markets, Bookshelf, Catalogue, Register, Mapsites, | TalisU
-    expect(bookshelvesIdx).toBeGreaterThan(marketsIdx);
-    expect(catalogueIdx).toBeGreaterThan(bookshelvesIdx);
+    // Home, Markets, Catalogue, Register, Mapsites, | TalisU (Bookshelf, FAQ, …)
+    expect(header).not.toContain('(item) => item.label === "Bookshelf"');
+    expect(catalogueIdx).toBeGreaterThan(marketsIdx);
     expect(registerFilterIdx).toBeGreaterThan(catalogueIdx);
     expect(mapsitesIdx).toBeGreaterThan(registerFilterIdx);
     expect(separatorIdx).toBeGreaterThan(mapsitesIdx);

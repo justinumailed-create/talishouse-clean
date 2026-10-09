@@ -77,7 +77,7 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(gate).toContain("t.home.openAccount");
     expect(en.home.openAccount).toBe("Open your Account*");
     expect(gate).toContain("t.home.systemDemo");
-    expect(en.home.systemDemo).toBe("System Demo");
+    expect(en.home.systemDemo).toBe("Build Demo");
     expect(gate).toContain("TALISPROS_HOME_SYSTEM_DEMO_HREF");
     expect(gate).toContain("aria-expanded={loginOpen}");
     expect(gate).toContain("setLoginOpen");
@@ -96,7 +96,7 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(actions).toContain('return { success: true, href: "/" }');
   });
 
-  it("points System Demo at /talisu/mkts", () => {
+  it("points Build Demo at /talisu/mkts", () => {
     expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/talisu/mkts");
   });
 
@@ -116,7 +116,7 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(gatePage).toContain("TalisUMktsHeader");
     expect(gatePage).toContain("lg:grid-cols-");
     expect(gatePage).toContain("min-h-dvh");
-    expect(showcase).toContain("HOME_OWNERSHIP_SECTIONS");
+    expect(showcase).toContain("t.home.ownershipSections");
     expect(showcase).toContain("HomeMountainMotion");
     const motion = readFileSync(
       join(root, "components/talispros/HomeMountainMotion.tsx"),

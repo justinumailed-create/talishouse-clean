@@ -11,7 +11,7 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 /**
- * Homepage gate (`/`): TalisU blue navbar; Login + System Demo + FAST on the
+ * Homepage gate (`/`): TalisU blue navbar; Login + Build Demo + FAST on the
  * left (40%); right (60%) is mountain image above + metallic ownership-model
  * buttons (popover details) below. SamCart payment success returns here and
  * keeps the same gate flow. Former homepage content lives at `/start`.
