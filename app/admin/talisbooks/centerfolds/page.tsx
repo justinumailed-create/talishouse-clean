@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireTalisprosAdminPage } from "@/lib/talispros-admin-auth";
+import { requireAdminScopePage } from "@/lib/admin-auth";
 import { listCenterfoldPreviews } from "@/lib/talisbooks/centerfold-service";
 import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
@@ -8,7 +8,7 @@ import TalisBooksCenterfoldPreviewList from "@/components/talisbooks/centerfold/
 export const dynamic = "force-dynamic";
 
 export default async function TalisBooksCenterfoldsAdminPage() {
-  await requireTalisprosAdminPage();
+  await requireAdminScopePage("talisbooks");
   const previews = await listCenterfoldPreviews();
   const pending = previews.filter((p) => p.reviewStatus === "pending_preview");
 

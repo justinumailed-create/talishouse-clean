@@ -33,6 +33,17 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Retired Supabase email/password admin console → FAST-code Global Admin.
+      {
+        source: "/talispros/admin",
+        destination: "/admin/login",
+        permanent: false,
+      },
+      {
+        source: "/talispros/admin/:path*",
+        destination: "/admin/login",
+        permanent: false,
+      },
       {
         source: "/talisu/eb",
         destination: "/catalogue/bookshelf",

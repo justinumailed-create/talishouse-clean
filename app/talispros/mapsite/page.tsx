@@ -6,8 +6,8 @@ import {
   accountTypeForAudience,
   type MapSiteCapabilityAccountType,
 } from "@/lib/talispros/account-capabilities";
-import { getTalisprosAdminSession } from "@/lib/talispros-admin-auth";
-import { isMarketingManagerAuthenticated } from "@/lib/marketing-manager-auth";
+import { getAdminSessionAccount } from "@/lib/admin-auth";
+import { accountHasAdminScope } from "@/lib/admin-constants";
 import { listPmcRegionalPins } from "@/lib/talispros/pmc-pins-service";
 import {
   buildClaimedMapSitePath,
@@ -171,17 +171,16 @@ export default async function TalisprosMapSitePage({
     accountTypeForAudience(flowAudience);
 
   if (flowAudience === "brokers" && !showSinglePinMap) {
-    const [pins, adminSession, marketingManager] = await Promise.all([
+    const [pins, adminAccount] = await Promise.all([
       listPmcRegionalPins(),
-      getTalisprosAdminSession(),
-      isMarketingManagerAuthenticated(),
+      getAdminSessionAccount(),
     ]);
 
     return (
       <MapSitePmcApplication
         pins={pins}
         audience={flowAudience}
-        canEdit={Boolean(adminSession) || marketingManager}
+        canEdit={accountHasAdminScope(adminAccount, "mapsites")}
       />
     );
   }

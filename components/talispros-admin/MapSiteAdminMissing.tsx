@@ -27,10 +27,10 @@ export default function MapSiteAdminMissing({
         <code className="text-xs">npx supabase db push --include-all</code>.
       </p>
       <Link
-        href="/talispros/admin"
+        href="/admin/mapsites"
         className="inline-flex h-10 items-center rounded-xl bg-neutral-900 px-4 text-sm font-medium text-white hover:bg-neutral-800"
       >
-        Back to admin overview
+        Back to Mapsites
       </Link>
     </div>
   );

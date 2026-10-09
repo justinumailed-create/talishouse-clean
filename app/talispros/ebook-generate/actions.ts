@@ -120,7 +120,7 @@ export async function generateSelfServiceEbookAction(
   revalidatePath(ROUTES.TALISBOOKS_LIBRARY);
   revalidatePath(`${ROUTES.TALISBOOKS_VIEWER}/${result.slug}`);
   revalidatePath(MAPSITE_APP_PATH);
-  revalidatePath(`/talispros/admin/mapsites/${result.fastCode}`);
+  revalidatePath(`/admin/mapsites/${result.fastCode}`);
   if (result.fastCode) {
     revalidatePath(`/mapsite/${result.fastCode.toLowerCase()}`);
     revalidatePath(`/talispros/mapsites/${result.fastCode.toLowerCase()}`);

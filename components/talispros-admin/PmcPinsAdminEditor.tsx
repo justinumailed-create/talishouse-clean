@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { PmcRegionalPin } from "@/lib/talispros/pmc-regional-pins";
-import { savePmcRegionalPinAction } from "@/app/talispros/admin/pmc/actions";
+import { savePmcRegionalPinAction } from "@/app/admin/pmc/actions";
 
 interface PmcPinsAdminEditorProps {
   initialPins: PmcRegionalPin[];

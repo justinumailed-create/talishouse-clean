@@ -1,7 +1,6 @@
 "use server";
 
 import { isAdminAuthenticated } from "./admin-auth";
-import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
 
 export type FormsManagerSource = "build_mapsite" | "registration";
@@ -46,12 +45,7 @@ export interface ListFormsManagerResult {
 }
 
 async function requireFormsManagerAdminAccess(): Promise<void> {
-  const [legacyAdmin, talisprosAdmin] = await Promise.all([
-    isAdminAuthenticated(),
-    isTalisprosAdminAuthenticated(),
-  ]);
-
-  if (!legacyAdmin && !talisprosAdmin) {
+  if (!(await isAdminAuthenticated())) {
     throw new Error("Unauthorized");
   }
 }

@@ -6,8 +6,6 @@ import {
   MAPSITE_ROOT_ACCOUNT_COOKIE,
   MAPSITE_ROOT_ACCOUNT_MAX_AGE,
 } from "./mapsite-account-session";
-import { isMarketingManagerAuthenticated } from "./marketing-manager-auth";
-import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
 import { hasCompletedMapSiteActivationPayment } from "./talispros/mapsite-payment";
 
 export async function getMapSiteOwnerSession(): Promise<string | null> {
@@ -27,13 +25,9 @@ function normalizeFastCode(fastCode: string): string {
   return fastCode.trim().toLowerCase();
 }
 
-/** Platform / Talispros admin or marketing manager (may manage any Mapsite). */
+/** Global Admin FAST-code session (may manage any Mapsite). */
 export async function isMapSiteAdmin(): Promise<boolean> {
-  return (
-    (await isAdminAuthenticated()) ||
-    (await isTalisprosAdminAuthenticated()) ||
-    (await isMarketingManagerAuthenticated())
-  );
+  return isAdminAuthenticated();
 }
 
 export async function canEditMapSite(fastCode: string): Promise<boolean> {

@@ -63,6 +63,7 @@ describe("admin nav", () => {
       "/admin/notifications",
       "/admin/build-requests",
       "/admin/mapsites",
+      "/admin/pmc",
       "/admin/seo",
       "/admin/talisbooks/bookshelves",
     ]);
@@ -80,6 +81,7 @@ describe("admin nav", () => {
       "/admin/notifications",
       "/admin/build-requests",
       "/admin/mapsites",
+      "/admin/pmc",
       "/admin/seo",
       "/admin/talisbooks/bookshelves",
       "/admin/fast-codes",

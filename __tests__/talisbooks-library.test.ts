@@ -376,9 +376,9 @@ describe("Talisbooks™ library admin delete wiring", () => {
     );
     const actions = readFileSync(resolve("app/talisbooks/library/actions.ts"), "utf8");
 
-    expect(page).toContain("canDelete={Boolean(account) || talisprosAdmin}");
+    expect(page).toContain("canDelete={Boolean(account)}");
     expect(page).toContain("getAdminSessionAccount");
-    expect(page).toContain("isTalisprosAdminAuthenticated");
+    expect(page).not.toContain("isTalisprosAdminAuthenticated");
     expect(page).toContain("backHref={mapsiteBackFromScheduleHref(params.from)}");
     expect(shell).toContain("deleteLibraryEbookAction");
     expect(shell).toContain("canDelete");

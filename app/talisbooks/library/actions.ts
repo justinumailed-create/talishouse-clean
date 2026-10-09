@@ -20,7 +20,6 @@ import { sendEbookCompleted } from "@/lib/email";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
-import { isTalisprosAdminAuthenticated } from "@/lib/talispros-admin-auth";
 import { talisbooksScopeFromAdminAccount } from "@/lib/talisbooks/library";
 import {
   deleteTalisBooksLibraryBook,
@@ -43,7 +42,7 @@ async function requireAdminEbookAccess(fastCode: string): Promise<
 
 function revalidateEbookPaths(fastCode: string, slug?: string) {
   revalidatePath(ROUTES.TALISBOOKS_LIBRARY);
-  revalidatePath(`/talispros/admin/mapsites/${fastCode}`);
+  revalidatePath(`/admin/mapsites/${fastCode}`);
   revalidatePath(`/talispros/mapsites/${fastCode}/edit`);
   if (slug) {
     revalidatePath(`${ROUTES.TALISBOOKS_VIEWER}/${slug}`);
@@ -54,11 +53,8 @@ export async function deleteLibraryEbookAction(bookId: string): Promise<{
   success: boolean;
   error?: string;
 }> {
-  const [account, talisprosAdmin] = await Promise.all([
-    getAdminSessionAccount(),
-    isTalisprosAdminAuthenticated(),
-  ]);
-  if (!account && !talisprosAdmin) {
+  const account = await getAdminSessionAccount();
+  if (!account) {
     return { success: false, error: "Unauthorized." };
   }
 

@@ -8,7 +8,8 @@ import {
 } from "./mapsite-gallery";
 import { requireMapSiteEditAccess } from "./mapsite-edit-auth";
 import { isAdminAuthenticated } from "./admin-auth";
-import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
+import { getAdminSessionAccount } from "./admin-auth";
+import { accountHasAdminScope } from "./admin-constants";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
 import { getMapSiteByFastCode } from "./mapsite-service";
 import { ensureMapSiteTalisMap } from "@/lib/talismaps/map-service";
@@ -223,7 +224,10 @@ export async function updateMapSiteAdmin(
   }
 
   const supabase = client;
-  const canManageVisitorSubscription = await isTalisprosAdminAuthenticated();
+  const canManageVisitorSubscription = accountHasAdminScope(
+    await getAdminSessionAccount(),
+    "mapsites",
+  );
   const galleryItems = normalizeGalleryItemsForSave(
     input.galleryItems ??
       mapsite.galleryItems ??

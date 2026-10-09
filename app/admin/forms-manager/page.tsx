@@ -1,5 +1,9 @@
-import { redirect } from "next/navigation";
+import FormsManagerPage from "@/components/talispros-admin/FormsManagerPage";
+import { requireAdminPathAccess } from "@/lib/admin-auth";
 
-export default function AdminFormsManagerRedirectPage() {
-  redirect("/talispros/admin/forms-manager");
+export const dynamic = "force-dynamic";
+
+export default async function AdminFormsManagerPage() {
+  await requireAdminPathAccess("/admin/forms-manager");
+  return <FormsManagerPage />;
 }

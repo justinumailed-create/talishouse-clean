@@ -93,10 +93,10 @@ export default async function TalisMapsAdminHome() {
           Open Dashboard
         </Link>
         <Link
-          href="/talispros/admin"
+          href="/admin/mapsites"
           className="inline-flex rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-neutral-50"
         >
-          Talispros™ Admin
+          Mapsites Admin
         </Link>
       </div>
     </div>

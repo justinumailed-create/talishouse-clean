@@ -22,11 +22,10 @@ export default function TalisprosLayoutClient({
   );
   const showBlueNav = isDemoMapSite || isOwnerEbookEditor;
   const isEbookLikePage = isEbookGenerate || isDemoMapSite;
-  const isAdminRoute = pathname?.startsWith("/talispros/admin");
   const isMapSiteApp =
     pathname === "/talispros/mapsite" || pathname?.startsWith("/talispros/mapsite/");
 
-  if (isAdminRoute || isMapSiteApp) {
+  if (isMapSiteApp) {
     return <>{children}</>;
   }
 

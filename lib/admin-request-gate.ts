@@ -7,7 +7,6 @@ import {
   normalizeAppPath,
 } from "./admin-paths";
 
-export const TALISPROS_ADMIN_MARKER_COOKIE = "talispros_admin_session";
 export const ADMIN_PATHNAME_HEADER = "x-talispros-admin-pathname";
 
 export type AdminRequestGateResult =
@@ -17,13 +16,12 @@ export type AdminRequestGateResult =
 /**
  * Fail-closed gate for `/admin/*`.
  * Login is the only public admin path. A Mapsite / marketing / `auth` cookie
- * is never treated as Global Admin. Standalone `/admin/talismaps` may use the
- * Talispros admin marker in addition to a FAST-code admin session.
+ * is never treated as Global Admin. Standalone `/admin/talismaps` keeps its own
+ * chrome but still requires a FAST-code admin session.
  */
 export function resolveAdminRequestGate(input: {
   pathname: string | null | undefined;
   adminSessionCookie?: string | null;
-  talisprosAdminMarker?: string | null;
 }): AdminRequestGateResult {
   const pathname = normalizeAppPath(input.pathname);
   if (!isAdminAppPath(pathname)) {
@@ -35,10 +33,9 @@ export function resolveAdminRequestGate(input: {
   }
 
   const account = getAdminAccountByFastCode(input.adminSessionCookie);
-  const hasTalisprosMarker = input.talisprosAdminMarker === "1";
 
   if (isStandaloneAdminPath(pathname)) {
-    if (account || hasTalisprosMarker) {
+    if (account) {
       return { action: "next" };
     }
     return { action: "redirect", to: "/admin/login" };

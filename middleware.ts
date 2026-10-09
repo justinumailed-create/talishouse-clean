@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import { ADMIN_SESSION_COOKIE } from "@/lib/admin-constants";
 import {
   ADMIN_PATHNAME_HEADER,
-  TALISPROS_ADMIN_MARKER_COOKIE,
   resolveAdminRequestGate,
 } from "@/lib/admin-request-gate";
 import { isAdminAppPath } from "@/lib/admin-paths";
@@ -28,7 +27,6 @@ export function middleware(request: NextRequest) {
     const gate = resolveAdminRequestGate({
       pathname: path,
       adminSessionCookie: request.cookies.get(ADMIN_SESSION_COOKIE)?.value,
-      talisprosAdminMarker: request.cookies.get(TALISPROS_ADMIN_MARKER_COOKIE)?.value,
     });
 
     if (gate.action === "redirect") {

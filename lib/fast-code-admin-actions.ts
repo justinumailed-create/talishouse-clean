@@ -5,7 +5,6 @@ import { getAdminSessionAccount, requireAdminScope } from "./admin-auth";
 import { getMapSiteByFastCode } from "./mapsite-service";
 import { deleteMapSiteAndBookshelfForFastCode } from "./talispros/fast-code-cascade-delete";
 import { tierFromAccountType } from "./registration-fast-code-routing";
-import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
 import { attachFastCodePayments } from "./fast-code-admin-payment";
 
@@ -43,10 +42,6 @@ async function requireFastCodeAdminAccess(): Promise<void> {
   const account = await getAdminSessionAccount();
   if (account) {
     await requireAdminScope("fast-codes");
-    return;
-  }
-
-  if (await isTalisprosAdminAuthenticated()) {
     return;
   }
 

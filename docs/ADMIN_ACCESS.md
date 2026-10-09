@@ -49,4 +49,4 @@ Payment-driven Mapsite activation is unchanged. SUPERADMIN can edit listings; un
 9. Log out. Sign in as Arun with `ARUN`. Confirm “Signed in as Arun” and additional nav (Registrations, Marketing, Associates, …).
 10. Confirm `ADMIN123` still signs in to the full console.
 
-Optional: if `MARKETING_MANAGER_EMAILS` is set in the environment, `remecom@mac.com` and `arun@kyptronix.com` are still merged into that allowlist for the email + password marketing session. Primary access is `/admin/login` with FAST codes.
+The former Supabase email + password admin console (`/talispros/admin/*`) and the email + password Marketing Manager login were removed. Old `/talispros/admin/*` URLs redirect to `/admin/login`. PMC regional pins now live at `/admin/pmc`, Forms Manager at `/admin/forms-manager`, and the Marketing Manager portal (`/talispros/marketing/*`) requires a FAST-code admin session with Platform Content scope. `MARKETING_MANAGER_EMAILS` is no longer used for login (it still addresses some notification emails).

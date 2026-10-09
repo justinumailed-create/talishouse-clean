@@ -1,17 +1,10 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { clearTalisprosAdminSession, signInTalisprosAdminWithPassword } from "@/lib/talispros-admin-auth";
-import { MARKETING_LOGIN_PATH } from "@/lib/mapsite-account-session";
+import { clearAdminSessionCookie } from "@/lib/admin-auth";
 
-export async function establishMarketingManagerSession(
-  email: string,
-  password: string
-): Promise<{ success: boolean; error?: string }> {
-  return signInTalisprosAdminWithPassword(email, password);
-}
-
+/** Marketing Manager uses the Global Admin FAST-code session. */
 export async function signOutMarketingManager(): Promise<void> {
-  await clearTalisprosAdminSession();
-  redirect(MARKETING_LOGIN_PATH);
+  await clearAdminSessionCookie();
+  redirect("/admin/login");
 }

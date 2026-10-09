@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
@@ -58,7 +58,6 @@ describe("admin request gate", () => {
     expect(
       resolveAdminRequestGate({
         pathname: "/admin/dashboard",
-        talisprosAdminMarker: "1",
       }),
     ).toEqual({ action: "redirect", to: "/admin/login" });
     expect(
@@ -103,18 +102,42 @@ describe("admin request gate", () => {
     expect(
       resolveAdminRequestGate({
         pathname: "/admin/talismaps",
-        talisprosAdminMarker: "1",
-      }),
-    ).toEqual({ action: "next" });
-    expect(
-      resolveAdminRequestGate({
-        pathname: "/admin/talismaps",
         adminSessionCookie: "ARUN",
       }),
     ).toEqual({ action: "next" });
     const middleware = readSource("middleware.ts");
     expect(middleware).toContain("resolveAdminRequestGate");
     expect(middleware).not.toContain('path.startsWith("/admin/talismaps")');
+  });
+});
+
+describe("retired Supabase email/password admin (/talispros/admin)", () => {
+  it("removes the route tree and the email-login admin auth module", () => {
+    expect(existsSync(resolve("app/talispros/admin"))).toBe(false);
+    expect(existsSync(resolve("lib/talispros-admin-auth.ts"))).toBe(false);
+    expect(readSource("middleware.ts")).not.toContain("talispros_admin_session");
+    expect(readSource("lib/admin-request-gate.ts")).not.toContain("talisprosAdminMarker");
+  });
+
+  it("redirects old /talispros/admin URLs to the FAST-code admin login", () => {
+    const config = readSource("next.config.ts");
+    expect(config).toContain('source: "/talispros/admin",');
+    expect(config).toContain('source: "/talispros/admin/:path*",');
+    expect(config.match(/destination: "\/admin\/login"/g)?.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("gates the Marketing Manager portal on the FAST-code admin session only", () => {
+    const auth = readSource("lib/marketing-manager-auth.ts");
+    expect(auth).toContain("getAdminSessionAccount");
+    expect(auth).not.toContain("getTalisprosAdminSession");
+    expect(auth).not.toContain("process.env.MARKETING_MANAGER_EMAILS");
+    expect(readSource("app/talispros/marketing/login/page.tsx")).toContain('redirect("/admin/login")');
+  });
+
+  it("serves PMC pins and Forms Manager under /admin", () => {
+    expect(readSource("app/admin/pmc/page.tsx")).toContain('requireAdminScopePage("mapsites")');
+    expect(readSource("app/admin/pmc/actions.ts")).toContain('requireAdminScope("mapsites")');
+    expect(readSource("app/admin/forms-manager/page.tsx")).toContain("FormsManagerPage");
   });
 });
 

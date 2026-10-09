@@ -50,7 +50,7 @@ export async function submitRahulEbookAssistAction(formData: FormData): Promise<
   revalidatePath("/talispros/marketing/admin");
   revalidatePath("/admin/marketing");
   if (result.fastCode) {
-    revalidatePath(`/talispros/admin/mapsites/${result.fastCode}`);
+    revalidatePath(`/admin/mapsites/${result.fastCode}`);
   }
   if (result.previewUrl) {
     revalidatePath(result.previewUrl);

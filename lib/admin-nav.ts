@@ -11,6 +11,7 @@ export const ADMIN_SITE_OPS_NAV: readonly AdminNavItem[] = [
   { href: "/admin/notifications", label: "Notifications" },
   { href: "/admin/build-requests", label: "Build requests" },
   { href: "/admin/mapsites", label: "Mapsites" },
+  { href: "/admin/pmc", label: "PMC pins" },
   { href: "/admin/seo", label: "SEO" },
   { href: "/admin/talisbooks/bookshelves", label: "Bookshelves" },
 ];

@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
-import { isTalisprosAdminAuthenticated } from "@/lib/talispros-admin-auth";
 import {
   getTalisBooksBookshelf,
   talisbooksScopeFromAdminAccount,
@@ -45,10 +44,7 @@ export default async function TalisBooksLibraryPage({
     );
   }
   const accountType = params.accountType === "derivative" ? "derivative" : "root";
-  const [account, talisprosAdmin] = await Promise.all([
-    getAdminSessionAccount(),
-    isTalisprosAdminAuthenticated(),
-  ]);
+  const account = await getAdminSessionAccount();
   const scope = talisbooksScopeFromAdminAccount(account);
   const bookshelf = await getTalisBooksBookshelf({
     accountType,
@@ -59,7 +55,7 @@ export default async function TalisBooksLibraryPage({
   return (
     <TalisBooksLibraryShell
       bookshelf={bookshelf}
-      canDelete={Boolean(account) || talisprosAdmin}
+      canDelete={Boolean(account)}
       backHref={mapsiteBackFromScheduleHref(params.from)}
     />
   );

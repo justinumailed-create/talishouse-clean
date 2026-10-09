@@ -1,37 +1,17 @@
 import { redirect } from "next/navigation";
-import {
-  MARKETING_LOGIN_PATH,
-  MARKETING_UNAUTHORIZED_PATH,
-} from "./mapsite-account-session";
-import {
-  BUILTIN_ADMIN_EMAILS,
-  accountHasAdminScope,
-} from "./admin-constants";
+import { accountHasAdminScope } from "./admin-constants";
 import { getAdminSessionAccount } from "./admin-auth";
-import {
-  getTalisprosAdminSession,
-} from "./talispros-admin-auth";
 
+/**
+ * Marketing Manager portal (`/talispros/marketing/*`).
+ *
+ * Access is the Global Admin FAST-code session only (scope `platform-content`).
+ * The former Supabase email/password login (and `MARKETING_MANAGER_EMAILS`
+ * allowlist) was removed: an `auth.users` row never grants admin access.
+ */
 export interface MarketingManagerSession {
   userId: string;
   email: string | null;
-}
-
-function getAllowedMarketingManagerEmails(): string[] {
-  const raw = process.env.MARKETING_MANAGER_EMAILS ?? "";
-  const fromEnv = raw
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-
-  // When an allowlist is configured, always include Ralf + Arun.
-  // Do not create an allowlist from builtins alone — an empty env still
-  // means “any authenticated marketing session” (existing behavior).
-  if (fromEnv.length === 0) {
-    return [];
-  }
-
-  return [...new Set([...fromEnv, ...BUILTIN_ADMIN_EMAILS.map((email) => email.toLowerCase())])];
 }
 
 async function getFastCodePlatformContentSession(): Promise<MarketingManagerSession | null> {
@@ -47,52 +27,23 @@ async function getFastCodePlatformContentSession(): Promise<MarketingManagerSess
 }
 
 export async function requireMarketingManagerSession(): Promise<MarketingManagerSession> {
-  const fastCodeSession = await getFastCodePlatformContentSession();
-  if (fastCodeSession) {
-    return fastCodeSession;
-  }
-
-  const session = await getTalisprosAdminSession();
+  const session = await getFastCodePlatformContentSession();
   if (!session) {
     throw new Error("Unauthorized");
   }
-
-  const allowed = getAllowedMarketingManagerEmails();
-  const email = session.email?.toLowerCase() ?? "";
-
-  if (allowed.length > 0 && !allowed.includes(email)) {
-    throw new Error("Forbidden");
-  }
-
   return session;
 }
 
 export async function isMarketingManagerAuthenticated(): Promise<boolean> {
-  try {
-    await requireMarketingManagerSession();
-    return true;
-  } catch {
-    return false;
-  }
+  return (await getFastCodePlatformContentSession()) !== null;
 }
 
 export async function requireMarketingManagerPage(): Promise<MarketingManagerSession> {
-  const fastCodeSession = await getFastCodePlatformContentSession();
-  if (fastCodeSession) {
-    return fastCodeSession;
+  const session = await getFastCodePlatformContentSession();
+  if (session) {
+    return session;
   }
 
-  const session = await getTalisprosAdminSession();
-  if (!session) {
-    redirect(MARKETING_LOGIN_PATH);
-  }
-
-  const allowed = getAllowedMarketingManagerEmails();
-  const email = session.email?.toLowerCase() ?? "";
-
-  if (allowed.length > 0 && !allowed.includes(email)) {
-    redirect(MARKETING_UNAUTHORIZED_PATH);
-  }
-
-  return session;
+  const account = await getAdminSessionAccount();
+  redirect(account ? "/admin/dashboard" : "/admin/login");
 }

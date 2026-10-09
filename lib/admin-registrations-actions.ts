@@ -1,7 +1,6 @@
 "use server";
 
 import { isAdminAuthenticated } from "./admin-auth";
-import { isTalisprosAdminAuthenticated } from "./talispros-admin-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
 import {
   adminRegistrationFromTalisprosPayment,
@@ -17,7 +16,6 @@ export type ListAdminRegistrationsResult = {
 
 async function requireRegistrationsAdminAccess(): Promise<void> {
   if (await isAdminAuthenticated()) return;
-  if (await isTalisprosAdminAuthenticated()) return;
   throw new Error("Unauthorized");
 }
 

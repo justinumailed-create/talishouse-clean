@@ -607,7 +607,7 @@ export default function MarketingAdminRequestDetail({
             </label>
             {mapsite.fast_code ? (
               <a
-                href={`/talispros/admin/mapsites/${encodeURIComponent(mapsite.fast_code)}`}
+                href={`/admin/mapsites/${encodeURIComponent(mapsite.fast_code)}`}
                 className="inline-flex text-sm font-medium text-neutral-900 underline underline-offset-2"
               >
                 Open Talisbooks™ manager (create, images, reorder, publish, attach)

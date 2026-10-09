@@ -3,13 +3,13 @@
 import { setCenterfoldReviewStatus } from "@/lib/talisbooks/centerfold-service";
 import type { TalisBooksCenterfoldReviewStatus } from "@/lib/talisbooks/image-engine";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
-import { requireTalisprosAdminPage } from "@/lib/talispros-admin-auth";
+import { requireAdminScope } from "@/lib/admin-auth";
 
 export async function reviewCenterfoldAction(
   originalImageId: string,
   status: Extract<TalisBooksCenterfoldReviewStatus, "approved" | "rejected">,
 ) {
-  await requireTalisprosAdminPage();
+  await requireAdminScope("talisbooks");
   await setCenterfoldReviewStatus(originalImageId, status);
 }
 
@@ -20,7 +20,7 @@ export async function pinTalisBookAction(bookId: string): Promise<{
   ok: boolean;
   error?: string;
 }> {
-  await requireTalisprosAdminPage();
+  await requireAdminScope("talisbooks");
   const id = bookId.trim();
   if (!id) return { ok: false, error: "Book id is required." };
   if (!isSupabaseAdminConfigured()) {
