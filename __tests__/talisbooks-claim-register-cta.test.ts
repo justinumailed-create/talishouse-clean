@@ -40,8 +40,9 @@ describe("Talisbooks Claim vs Register vs Back", () => {
       }),
     ).toBe("claim");
     expect(talisBooksShelfCta("demo-abc123")).toBe("claim");
+    // Back to Mapsite is removed from every ebook viewer (blue navbar instead).
     expect(talisBooksViewerShowBack({ slug: PINNED_TALISBOOK_SLUG })).toBe(
-      true,
+      false,
     );
     expect(talisBooksShelfShowBack("demo-abc123")).toBe(false);
   });
@@ -68,17 +69,21 @@ describe("Talisbooks Claim vs Register vs Back", () => {
     );
 
     expect(viewer).toContain("talisBooksViewerCta");
-    expect(viewer).toContain("talisBooksViewerShowBack");
     expect(viewer).toContain("DemoClaimMarketButton");
-    expect(viewer).toContain("tv.continueToRegister");
-    expect(en.viewer.continueToRegister).toBe("Continue to register");
-    expect(viewer).toContain("TALISBOOKS_SAMCART_REGISTER_URL");
+    // No Back to Mapsite and no stray SamCart Register on the ebook page.
+    expect(viewer).not.toContain("tv.backToMapsite");
+    expect(viewer).not.toContain("viewerBackToMapsiteHref");
+    expect(viewer).not.toContain("tv.continueToRegister");
+    expect(viewer).not.toContain("TALISBOOKS_SAMCART_REGISTER_URL");
     expect(viewer).not.toContain("SHOW_BACK_TO_MAPSITE");
 
     expect(library).toContain("talisBooksShelfCta");
     expect(library).toContain("DemoClaimMarketButton");
     expect(library).toContain("TalisUMktsHeader");
     expect(library).not.toContain("Back to Mapsite");
+    expect(library).not.toContain("bs.backToAllPins");
+    expect(library).not.toContain("bs.register");
+    expect(library).not.toContain("TALISBOOKS_SAMCART_REGISTER_URL");
     expect(library).not.toContain("talisBooksShelfShowBack");
     expect(library).not.toContain("SHOW_BACK_TO_MAPSITE");
   });

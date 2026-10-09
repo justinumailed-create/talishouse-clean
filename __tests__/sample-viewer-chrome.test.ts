@@ -140,23 +140,16 @@ describe("sample Talisbooks™ viewer chrome", () => {
     expect(shell).toContain("talisbooks-viewer__subtitle");
   });
 
-  it("shows Register only on issued FAST ebooks; Claim on demo viewers", () => {
-    expect(shell).toContain("TALISBOOKS_SAMCART_REGISTER_URL");
-    expect(shell).toContain("tv.continueToRegister");
-    expect(en.viewer.continueToRegister).toBe("Continue to register");
-    expect(shell).toContain("talisbooks-viewer__register");
+  it("never shows a stray SamCart Register on ebooks; Claim on demo viewers", () => {
+    expect(shell).not.toContain("TALISBOOKS_SAMCART_REGISTER_URL");
+    expect(shell).not.toContain("tv.continueToRegister");
+    expect(shell).not.toContain("talisbooks-viewer__register");
+    expect(shell).not.toContain("mysamcart");
     expect(shell).toContain("talisBooksViewerCta");
     expect(shell).toContain("DemoClaimMarketButton");
     expect(shell).toContain("talisbooks-viewer__claim");
     const css = readSource("app/globals.css");
-    expect(css).toMatch(
-      /\.talisbooks-viewer__register[\s\S]*position:\s*absolute[\s\S]*bottom:/,
-    );
     expect(css).toContain("talisbooks-viewer__claim");
-    expect(css).toContain("--talis-nav-blue");
-    expect(css).toMatch(
-      /\.talisbooks-viewer__register[\s\S]*background:\s*var\(--talis-nav-blue\)/,
-    );
   });
 
   it("omits Live Edit from every viewer surface", () => {
@@ -268,7 +261,9 @@ describe("viewer edge chrome", () => {
     const shellSrc = readSource(
       "components/talisbooks/viewer/TalisBooksViewerShell.tsx",
     );
-    expect(shellSrc).toContain("viewerBackToMapsiteHref(book)");
+    // Viewer no longer renders Back to Mapsite at all.
+    expect(shellSrc).not.toContain("viewerBackToMapsiteHref(book)");
+    expect(shellSrc).not.toContain("tv.backToMapsite");
     expect(shellSrc).not.toContain(
       "mapsiteBackFromScheduleHref(book.fastCode)",
     );

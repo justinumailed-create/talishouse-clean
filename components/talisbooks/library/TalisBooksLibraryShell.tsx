@@ -27,7 +27,6 @@ import { sortLibraryBooks } from "@/lib/talisbooks/library/query";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import {
   resolveClaimMapsiteId,
-  TALISBOOKS_SAMCART_REGISTER_URL,
   talisBooksShelfCta,
 } from "@/lib/talisbooks/cta-mode";
 import DemoClaimMarketButton from "@/components/talispros/mapsite/DemoClaimMarketButton";
@@ -123,8 +122,8 @@ export default function TalisBooksLibraryShell({
   backHref: _backHref,
   headerExtra,
   compactHeader = false,
-  secondaryBackHref,
-  secondaryBackLabel = "Back to ALL-PINs",
+  secondaryBackHref: _secondaryBackHref,
+  secondaryBackLabel: _secondaryBackLabel,
 }: TalisBooksLibraryShellProps) {
   const bs = useT().bookshelf;
   const router = useRouter();
@@ -144,6 +143,8 @@ export default function TalisBooksLibraryShell({
 
   // _backHref retained for caller compatibility; shelves no longer render a Mapsite back CTA.
   void _backHref;
+  void _secondaryBackHref;
+  void _secondaryBackLabel;
   const shelfCta = scoped ? talisBooksShelfCta(bookshelf.fastCode) : null;
   const claimMapsiteId = resolveClaimMapsiteId(bookshelf.mapsiteId);
 
@@ -330,23 +331,10 @@ export default function TalisBooksLibraryShell({
               />
             </div>
           ) : null}
-          {scoped && shelfCta === "register" ? (
-            <a
-              href={TALISBOOKS_SAMCART_REGISTER_URL}
-              className="talisbooks-library__back"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {bs.register}
-            </a>
-          ) : null}
-          {secondaryBackHref ? (
-            <Link href={secondaryBackHref} className="talisbooks-library__back">
-              {secondaryBackLabel === "Back to ALL-PINs"
-                ? bs.backToAllPins
-                : secondaryBackLabel}
-            </Link>
-          ) : null}
+          {/*
+            No shelf Register (SamCart) and no Mapsite / ALL-PINs back links
+            (from=allpins) here — the blue TalisU navbar covers navigation + Register.
+          */}
         </div>
       </header>
 

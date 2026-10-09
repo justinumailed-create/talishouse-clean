@@ -17,9 +17,7 @@ import { PINNED_TALISBOOK_SLUG } from "@/lib/talisbooks/library/pinned-catalog";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 import {
   resolveClaimMapsiteId,
-  TALISBOOKS_SAMCART_REGISTER_URL,
   talisBooksViewerCta,
-  talisBooksViewerShowBack,
 } from "@/lib/talisbooks/cta-mode";
 import {
   convertViewerNavIndex,
@@ -30,24 +28,11 @@ import {
   notifyNarrationPageEnter,
   notifyNarrationPageLeave,
   useAutoPageTurn,
-  viewerBackToMapsiteHref,
   type TalisBooksNarrationController,
   type TalisBooksViewerBook,
   type TalisBooksViewerViewMode,
 } from "@/lib/talisbooks/viewer";
 import DemoClaimMarketButton from "@/components/talispros/mapsite/DemoClaimMarketButton";
-
-function TalisBooksViewerRegisterLink() {
-  const tv = useT().viewer;
-  return (
-    <a
-      href={TALISBOOKS_SAMCART_REGISTER_URL}
-      className="talisbooks-viewer__register"
-    >
-      {tv.continueToRegister}
-    </a>
-  );
-}
 
 function TalisBooksViewerClaimCta({ mapsiteId }: { mapsiteId: string }) {
   return (
@@ -213,13 +198,12 @@ export default function TalisBooksViewerShell({
     return (
       <div className="talisbooks-viewer">
         <p className="talisbooks-viewer__empty">This book has no pages yet.</p>
-        {talisBooksViewerCta(book) === "register" ? (
-          <TalisBooksViewerRegisterLink />
-        ) : (
+        {/* No stray SamCart Register on the ebook page — Register lives in the blue navbar. */}
+        {talisBooksViewerCta(book) === "claim" ? (
           <TalisBooksViewerClaimCta
             mapsiteId={resolveClaimMapsiteId(book.mapsiteId)}
           />
-        )}
+        ) : null}
       </div>
     );
   }
@@ -313,9 +297,7 @@ export default function TalisBooksViewerShell({
   };
 
   const isPinnedShowcase = book.slug === PINNED_TALISBOOK_SLUG;
-  const backToMapSiteHref = viewerBackToMapsiteHref(book);
   const surfaceCta = talisBooksViewerCta(book);
-  const showBackToMapsite = talisBooksViewerShowBack(book);
   const claimMapsiteId = resolveClaimMapsiteId(book.mapsiteId);
 
   return (
@@ -352,11 +334,8 @@ export default function TalisBooksViewerShell({
             <Link href={ROUTES.HOME} className="talisbooks-viewer__back">
               {tv.home}
             </Link>
-          ) : showBackToMapsite ? (
-            <Link href={backToMapSiteHref} className="talisbooks-viewer__back">
-              {tv.backToMapsite}
-            </Link>
           ) : null}
+          {/* No Back to Mapsite on the ebook viewer — the blue navbar handles navigation. */}
           {isPinnedShowcase ? (
             <Link href={ROUTES.CATALOG} className="talisbooks-viewer__back">
               {tv.product}
@@ -442,11 +421,10 @@ export default function TalisBooksViewerShell({
           />
         </div>
       </div>
-      {surfaceCta === "register" ? (
-        <TalisBooksViewerRegisterLink />
-      ) : (
+      {/* Issued-FAST ebooks: no stray SamCart Register (navbar dropdown covers it). */}
+      {surfaceCta === "claim" ? (
         <TalisBooksViewerClaimCta mapsiteId={claimMapsiteId} />
-      )}
+      ) : null}
     </div>
   );
 }

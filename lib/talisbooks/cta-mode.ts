@@ -45,8 +45,7 @@ export function talisBooksViewerCta(book: {
 }
 
 /**
- * Back on demo viewers + shelves; never on issued-FAST ebook viewers
- * (those show Register only).
+ * Back to Mapsite is removed from every ebook viewer and shelf.
  */
 export function talisBooksViewerShowBack(book: {
   fastCode?: string | null;
@@ -56,7 +55,9 @@ export function talisBooksViewerShowBack(book: {
   subtitle?: string | null;
   accountId?: string | null;
 }): boolean {
-  return talisBooksViewerCta(book) === "claim";
+  // Ebook viewers never render Back to Mapsite — the blue navbar handles navigation.
+  void book;
+  return false;
 }
 
 /** FAST shelf CTA: Claim on demo-* ; Register on issued connected codes. */

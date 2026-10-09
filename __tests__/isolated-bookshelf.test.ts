@@ -190,7 +190,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
   });
 
 
-  it("strips capacity chrome on Isolated Bookshelf and gates Back to ALL-PINs on from=allpins", () => {
+  it("strips capacity chrome on Isolated Bookshelf and never renders Back to ALL-PINs (even from=allpins)", () => {
     const shell = readFileSync(
       resolve("components/talisbooks/library/TalisBooksLibraryShell.tsx"),
       "utf8",
@@ -198,8 +198,8 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(shell).toContain("compactHeader");
     expect(shell).toMatch(/!compactHeader && !publicCatalog && !createdCatalog/);
     expect(shell).toContain("talisbooks-library__capacity");
-    expect(shell).toContain("secondaryBackHref");
-    expect(shell).toContain("Back to ALL-PINs");
+    expect(shell).not.toContain("bs.backToAllPins");
+    expect(shell).not.toContain("<Link href={secondaryBackHref}");
 
     const view = readFileSync(
       resolve("components/catalogue/IsolatedBookshelfView.tsx"),
@@ -243,7 +243,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(location).toContain("isolatedBookshelf");
     expect(location).toContain("viewerBackToMapsiteHref");
     expect(loadBook).toContain("isolatedBookshelf: isIsolatedBookshelfBook");
-    expect(shell).toContain("viewerBackToMapsiteHref(book)");
+    expect(shell).not.toContain("viewerBackToMapsiteHref(book)");
     // Isolated shelf uses the normal Mapsite-connected Talisbooks™ shell,
     // linked to ALLPINS (not admin123 / product-catalogue chrome).
     const shelf = readFileSync(

@@ -159,6 +159,8 @@ export default function TalisBotChat({
             </div>
             <Link
               href={ROUTES.ADMIN_LOGIN}
+              target="_blank"
+              rel="noopener noreferrer"
               className="mt-6 text-[11px] font-medium tracking-[0.04em] text-gray-400 no-underline hover:text-gray-600 hover:underline"
               data-testid="talisbot-global-admin-link"
             >
