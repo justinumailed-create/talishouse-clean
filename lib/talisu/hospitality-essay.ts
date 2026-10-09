@@ -1,6 +1,6 @@
 /**
  * Hospitality tokenization essay — second essay in the /talisu FAQ right rail
- * (switch via the "Tokenization" / "Hospitality" tabs, deep link ?essay=hospitality).
+ * (switch via the "Bare Land" / "Hospitality" tabs, deep link ?essay=hospitality).
  * Wording is verbatim from the source essay; only the formatting is structured.
  * Kept outside the i18n dictionaries (English for all locales), like the
  * bare-land essay in tokenization-essay.ts.

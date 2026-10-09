@@ -314,6 +314,7 @@ export const de: Dictionary = {
     engageChange: "Ändern",
     footerPartOf: "ein Teil von",
     essaySwitcher: "Aufsätze",
+    essayCheckBackSoon: "Schauen Sie bald wieder vorbei",
   },
 
   bot: {

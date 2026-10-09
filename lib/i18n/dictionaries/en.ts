@@ -152,6 +152,8 @@ export const en = {
     footerPartOf: "part of",
     /** Accessible name of the FAQ right-rail essay switcher (pill labels live in essay-registry.ts). */
     essaySwitcher: "Essays",
+    /** Shown in the rail for placeholder ("Coming soon") essay tabs. */
+    essayCheckBackSoon: "Check back soon",
   },
 
   bot: {
