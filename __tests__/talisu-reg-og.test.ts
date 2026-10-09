@@ -14,15 +14,21 @@ describe("/talisu/reg share metadata", () => {
       expect(m.title).not.toMatch(/Mapsite™/);
       expect(m.title).toBe(
         locale === "de"
-          ? "Registrieren Sie Ihre Talispros™ Mapsite und erhalten Sie mehr globale Sichtbarkeit | TalisU™"
-          : "Register Your Talispros™ Mapsite and Get Increased Global Exposure | TalisU™",
+          ? "Registrieren Sie Ihre Talispros™ Mapsite und erhalten Sie globale Sichtbarkeit | TalisU™"
+          : "Register Your Talispros™ Mapsite and Get Global Exposure | TalisU™",
+      );
+      // Lead with what Aisha's team does, not who she is.
+      expect(m.description).toMatch(
+        locale === "de" ? /^Branchennahes Marketing/ : /^Industry adjacent marketing/,
       );
       expect(m.description).toMatch(
-        locale === "de" ? /mehr globale Sichtbarkeit/ : /increased global exposure/,
+        locale === "de" ? /globale Sichtbarkeit/ : /global exposure/,
       );
-      expect(m.description).toMatch(/Aisha C\./);
+      expect(`${m.title} ${m.description} ${m.ogImageAlt}`).not.toMatch(
+        /increased|mehr globale/i,
+      );
       expect(m.ogImageAlt).toMatch(
-        locale === "de" ? /mehr globale Sichtbarkeit/ : /increased global exposure/,
+        locale === "de" ? /globale Sichtbarkeit/ : /global exposure/,
       );
       expect(m.description).not.toMatch(/USD|Mapsite™/);
       const meta = createTalisUMetadata({
