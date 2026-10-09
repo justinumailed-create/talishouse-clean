@@ -783,9 +783,12 @@ export const de: Dictionary = {
         "Registrieren Sie Ihr TalisU™-Marketingpartnerkonto über den SamCart-Checkout.",
     },
     talisuEngage: {
-      title: "TalisU™ | Das Team beauftragen",
+      title: "Webster und sein Anpassungsteam beauftragen | TalisU™",
       description:
-        "Leisten Sie eine Anzahlung, um Webster und das Anpassungsteam für Glasshouse-, Talishouse-, Talistown- oder Talisdome-Projekte zu beauftragen.",
+        "Arbeiten Sie mit Webster und seinem Anpassungsteam an Talishouse™ Modular Spaces: Glasshouse™, Talishouse™, Talistown™ und Talisdome™. Ihre Anzahlung wird vollständig auf Ihre Bestellung angerechnet.",
+      ogImage: "/og/talisu-engage-de.jpg",
+      ogImageAlt:
+        "Webster M., Teamleiter, mit dem Talispros™-Baumlogo: Beauftragen Sie Webster und sein Anpassungsteam für Talishouse™ Modular Spaces",
     },
   },
 };

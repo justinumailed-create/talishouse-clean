@@ -568,9 +568,12 @@ export const en = {
         "Register your TalisU™ marketing partner account via SamCart checkout.",
     },
     talisuEngage: {
-      title: "TalisU™ | Engage the Team",
+      title: "Engage Webster and His Customization Team | TalisU™",
       description:
-        "Send a down payment to engage Webster and the customization team for Glasshouse, Talishouse, Talistown, or Talisdome projects.",
+        "Work with Webster and his Customization Team on Talishouse™ Modular Spaces: Glasshouse™, Talishouse™, Talistown™ and Talisdome™. Your down payment is credited in full to your order.",
+      ogImage: "/og/talisu-engage-en.jpg",
+      ogImageAlt:
+        "Webster M., Team Leader, with the Talispros™ tree logo: Engage Webster and his Customization Team for Talishouse™ Modular Spaces",
     },
   },
 } as const;

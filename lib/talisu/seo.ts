@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { Locale } from "@/lib/i18n/config";
 import {
   localeAlternates,
+  localizedUrl,
   ogAlternateLocales,
   ogLocale,
 } from "@/lib/i18n/metadata";
@@ -19,11 +20,30 @@ export function createTalisUMetadata(overrides: {
    * hreflang alternates (German = `?lang=de`). Omit on English-only pages.
    */
   locale?: Locale;
+  /**
+   * Page-specific Open Graph / Twitter image (absolute URL or root-relative
+   * path under /public). Defaults to the shared Talispros brand card.
+   */
+  image?: { url: string; width?: number; height?: number; alt?: string };
 }): Metadata {
   const path = overrides.path.startsWith("/")
     ? overrides.path
     : `/${overrides.path}`;
   const url = `${TALISU_SITE_URL}${path}`;
+  const ogUrl = overrides.locale
+    ? localizedUrl(url, overrides.locale)
+    : url;
+  const imageUrl = overrides.image
+    ? overrides.image.url.startsWith("http")
+      ? overrides.image.url
+      : `${TALISU_SITE_URL}${overrides.image.url}`
+    : OG_IMAGE;
+  const image = {
+    url: imageUrl,
+    width: overrides.image?.width ?? 1200,
+    height: overrides.image?.height ?? 630,
+    alt: overrides.image?.alt ?? overrides.title,
+  };
   const robots = overrides.private
     ? { index: false as const, follow: false as const }
     : {
@@ -48,27 +68,20 @@ export function createTalisUMetadata(overrides: {
     openGraph: {
       title: overrides.title,
       description: overrides.description,
-      url,
+      url: ogUrl,
       siteName: "TalisU™",
       type: "website",
       locale: ogLocale(overrides.locale ?? "en"),
       ...(overrides.locale
         ? { alternateLocale: ogAlternateLocales(overrides.locale) }
         : {}),
-      images: [
-        {
-          url: OG_IMAGE,
-          width: 1200,
-          height: 630,
-          alt: overrides.title,
-        },
-      ],
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
       title: overrides.title,
       description: overrides.description,
-      images: [OG_IMAGE],
+      images: [{ url: image.url, alt: image.alt }],
     },
     robots,
   };
