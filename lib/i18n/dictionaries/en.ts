@@ -563,9 +563,12 @@ export const en = {
         "Frequently asked questions about Talispros™, Mapsites, and TalisU™.",
     },
     talisuRegister: {
-      title: "TalisU™ | Register Account",
+      title: "Register Your Talispros™ Mapsite and Get Started with Aisha | TalisU™",
       description:
-        "Register your TalisU™ marketing partner account via SamCart checkout.",
+        "Register your TalisU™ account and get started with Aisha C. and her team: Mapsites, Talisbooks™ (TEB), listing analysis (TVA) and TalisTV™ (TTV) for your real estate adjacent marketing initiatives.",
+      ogImage: "/og/talisu-reg-en.jpg",
+      ogImageAlt:
+        "Aisha C., Team Leader, with the Talispros™ tree logo: Register your Mapsite and get started with Aisha",
     },
     talisuEngage: {
       title: "Engage Webster and His Customization Team | TalisU™",

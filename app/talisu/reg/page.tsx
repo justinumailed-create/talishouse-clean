@@ -15,6 +15,13 @@ export async function generateMetadata() {
     description: m.description,
     path: "/talisu/reg",
     locale,
+    // Dedicated share card (Aisha + tree logo), not the shared brand card.
+    image: {
+      url: m.ogImage,
+      width: 1200,
+      height: 630,
+      alt: m.ogImageAlt,
+    },
   });
 }
 

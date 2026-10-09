@@ -778,9 +778,12 @@ export const de: Dictionary = {
         "Häufig gestellte Fragen zu Talispros™, Mapsites und TalisU™.",
     },
     talisuRegister: {
-      title: "TalisU™ | Konto registrieren",
+      title: "Registrieren Sie Ihre Talispros™ Mapsite und starten Sie mit Aisha | TalisU™",
       description:
-        "Registrieren Sie Ihr TalisU™-Marketingpartnerkonto über den SamCart-Checkout.",
+        "Registrieren Sie Ihr TalisU™-Konto und starten Sie mit Aisha C. und ihrem Team: Mapsites, Talisbooks™ (TEB), Angebotsanalyse (TVA) und TalisTV™ (TTV) für Ihre immobiliennahen Marketinginitiativen.",
+      ogImage: "/og/talisu-reg-de.jpg",
+      ogImageAlt:
+        "Aisha C., Teamleiterin, mit dem Talispros™-Baumlogo: Registrieren Sie Ihre Mapsite und starten Sie mit Aisha",
     },
     talisuEngage: {
       title: "Webster und sein Anpassungsteam beauftragen | TalisU™",
