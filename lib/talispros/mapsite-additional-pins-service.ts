@@ -306,7 +306,8 @@ export async function placeAdditionalPinRecord(input: {
       latitude,
       longitude,
       label: normalizePinLabel(input.label),
-      sort_order: dashboard.placedPins + 1,
+      sort_order:
+        dashboard.pins.reduce((max, pin) => Math.max(max, pin.sortOrder || 0), 0) + 1,
     })
     .select("id, latitude, longitude, label, sort_order")
     .single();
@@ -388,6 +389,34 @@ export async function fixAdditionalPinRecord(input: {
     },
     dashboard: await loadMapSitePinDashboard(input.mapsiteId),
   };
+}
+
+/** Remove a placed extra PIN. Capacity is unchanged, so it can be placed again. */
+export async function deleteAdditionalPinRecord(input: {
+  mapsiteId: string;
+  pinId: string;
+}): Promise<{ dashboard?: MapSitePinDashboardState; error?: string }> {
+  const pinId = input.pinId.trim();
+  if (!pinId) return { error: "PIN was not found on this Mapsite." };
+  if (!isSupabaseAdminConfigured()) {
+    return { error: "Supabase is not configured." };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("mapsite_additional_pins")
+    .delete()
+    .eq("id", pinId)
+    .eq("mapsite_id", input.mapsiteId)
+    .select("id");
+
+  if (error) {
+    if (isMissingPinSchema(error.message)) return { error: MIGRATION_HINT };
+    return { error: "Could not delete PIN." };
+  }
+  if (!data || data.length === 0) return { error: "PIN was not found on this Mapsite." };
+
+  return { dashboard: await loadMapSitePinDashboard(input.mapsiteId) };
 }
 
 type FreePinRpcPayload = {

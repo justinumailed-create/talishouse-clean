@@ -1,8 +1,9 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import {
   createAdditionalPinCheckout,
+  deleteMapSiteAdditionalPin,
   fixMapSiteAdditionalPin,
   placeMapSiteAdditionalPin,
 } from "@/app/talispros/mapsite/pin-actions";
@@ -14,6 +15,10 @@ import {
 } from "@/lib/talispros/mapsite-additional-pins";
 import { useT } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/format";
+import { useMapEngine } from "@/components/talismaps/map-engine/MapEngineProvider";
+import MapSitePlaceSearch, {
+  type MapSitePlaceSelection,
+} from "@/components/talispros/mapsite/MapSitePlaceSearch";
 
 export type PinEditorState =
   | { kind: "idle" }
@@ -56,6 +61,40 @@ export default function MapSitePinDashboard({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [paused, setPaused] = useState(false);
+  const [searchAvailable, setSearchAvailable] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [lastPlacedId, setLastPlacedId] = useState<string | null>(null);
+  const knownPinIdsRef = useRef<Set<string> | null>(null);
+  const { setViewport } = useMapEngine();
+
+  // Placement is always ready while the panel is open (unless the owner pauses it):
+  // map clicks drop the next PIN and every placed PIN can be dragged.
+  useEffect(() => {
+    if (open && !paused && editor.kind === "idle") {
+      onEditorChange({ kind: "place" });
+    }
+  }, [open, paused, editor.kind, onEditorChange]);
+
+  // A newly placed PIN (search, coordinates or map click) opens for naming + Undo.
+  const pinIdsKey = dashboard.pins.map((pin) => pin.id).join("|");
+  useEffect(() => {
+    const ids = new Set(pinIdsKey ? pinIdsKey.split("|") : []);
+    const known = knownPinIdsRef.current;
+    knownPinIdsRef.current = ids;
+    if (!known) return;
+    const added = [...ids].filter((id) => !known.has(id));
+    if (added.length !== 1) return;
+    const pin = dashboard.pins.find((item) => item.id === added[0]);
+    setLastPlacedId(added[0]);
+    setEditingId(added[0]);
+    setEditLabel(pin?.label || "");
+    setConfirmDeleteId(null);
+    setMessage(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pinIdsKey]);
 
   if (!open) return null;
 
@@ -64,10 +103,6 @@ export default function MapSitePinDashboard({
   const atMax = room <= 0;
   const freeCredits = dashboard.freePinCredits ?? 0;
   const split = splitFreeAndPaidPins(safeQuantity, freeCredits);
-  const fixing =
-    editor.kind === "fix"
-      ? dashboard.pins.find((pin) => pin.id === editor.pinId) ?? null
-      : null;
 
   function report(result: { error?: string; dashboard?: MapSitePinDashboardState }) {
     if (result.error) {
@@ -108,71 +143,96 @@ export default function MapSitePinDashboard({
     });
   }
 
-  function placeFromForm() {
-    const lat = normalizePinCoordinate(Number(latitude), "lat");
-    const lng = normalizePinCoordinate(Number(longitude), "lng");
-    if (lat == null || lng == null) {
-      setError(d.errCoordsOrMap);
-      return;
-    }
+  function placeAt(lat: number, lng: number, pinLabel: string, onDone?: () => void) {
     setError(null);
+    setMessage(null);
     startTransition(async () => {
       const result = await placeMapSiteAdditionalPin({
         mapsiteId,
         fastCode,
         latitude: lat,
         longitude: lng,
-        label,
+        label: pinLabel,
       });
       if (!("dashboard" in result)) {
         setError(result.error);
-        setMessage(null);
         return;
       }
       onDashboardChange(result.dashboard);
-      setError(null);
-      setMessage(d.placed);
-      setLabel("");
-      setLatitude("");
-      setLongitude("");
-      onEditorChange(
-        result.dashboard.remainingToPlace > 0 ? { kind: "place" } : { kind: "idle" },
-      );
+      onDone?.();
     });
   }
 
-  function saveFix() {
-    if (!fixing) return;
-    const lat = normalizePinCoordinate(Number(latitude || fixing.latitude), "lat");
-    const lng = normalizePinCoordinate(Number(longitude || fixing.longitude), "lng");
-    if (lat == null || lng == null) {
-      setError(d.errCoords);
+  function placeFromSearch(place: MapSitePlaceSelection) {
+    const lat = normalizePinCoordinate(place.latitude, "lat");
+    const lng = normalizePinCoordinate(place.longitude, "lng");
+    if (lat == null || lng == null) return;
+    setViewport({ center: { latitude: lat, longitude: lng }, zoom: 18 });
+    // Only the label is stored (no address column); default to the place name.
+    placeAt(lat, lng, place.name || place.formattedAddress);
+  }
+
+  function placeFromForm() {
+    const lat = normalizePinCoordinate(Number(latitude), "lat");
+    const lng = normalizePinCoordinate(Number(longitude), "lng");
+    if (latitude.trim() === "" || longitude.trim() === "" || lat == null || lng == null) {
+      setError(d.errCoordsOrMap);
       return;
     }
+    setViewport({ center: { latitude: lat, longitude: lng }, zoom: 18 });
+    placeAt(lat, lng, label, () => {
+      setLabel("");
+      setLatitude("");
+      setLongitude("");
+    });
+  }
+
+  function startEdit(pinId: string) {
+    const pin = dashboard.pins.find((item) => item.id === pinId);
+    setError(null);
+    setMessage(null);
+    setConfirmDeleteId(null);
+    setEditLabel(pin?.label || "");
+    setEditingId(pinId);
+  }
+
+  function saveLabel(pinId: string) {
+    const pin = dashboard.pins.find((item) => item.id === pinId);
+    if (!pin) return;
     setError(null);
     startTransition(async () => {
       const result = await fixMapSiteAdditionalPin({
         mapsiteId,
         fastCode,
-        pinId: fixing.id,
-        latitude: lat,
-        longitude: lng,
-        label: label || fixing.label,
+        pinId: pin.id,
+        latitude: pin.latitude,
+        longitude: pin.longitude,
+        label: editLabel,
       });
       if (!report(result)) return;
+      setEditingId(null);
       setMessage(d.updated);
-      onEditorChange({ kind: "idle" });
     });
   }
 
-  function startFix(pinId: string) {
-    const pin = dashboard.pins.find((item) => item.id === pinId);
+  function removePin(pinId: string) {
     setError(null);
     setMessage(null);
-    setLabel(pin?.label || "");
-    setLatitude(pin ? String(pin.latitude) : "");
-    setLongitude(pin ? String(pin.longitude) : "");
-    onEditorChange({ kind: "fix", pinId });
+    setConfirmDeleteId(null);
+    startTransition(async () => {
+      const result = await deleteMapSiteAdditionalPin({ mapsiteId, fastCode, pinId });
+      if (!report(result)) return;
+      if (editingId === pinId) setEditingId(null);
+      if (lastPlacedId === pinId) setLastPlacedId(null);
+      setMessage(d.deleted);
+    });
+  }
+
+  function togglePaused() {
+    setError(null);
+    const next = !paused;
+    setPaused(next);
+    onEditorChange(next ? { kind: "idle" } : { kind: "place" });
   }
 
   const checkoutNote =
@@ -318,67 +378,100 @@ export default function MapSitePinDashboard({
         </div>
 
         <div className="space-y-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-            {d.placeHeading}
-          </h3>
+          <div className="flex items-center justify-between gap-2">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+              {d.placeHeading}
+            </h3>
+            {dashboard.remainingToPlace > 0 || paused ? (
+              <button
+                type="button"
+                onClick={togglePaused}
+                className="rounded-md px-2 py-0.5 text-[11px] font-medium text-neutral-600 underline-offset-2 hover:underline"
+              >
+                {paused ? d.resumePlacing : d.stopPlacing}
+              </button>
+            ) : null}
+          </div>
           <p className="text-[11px] leading-relaxed text-neutral-500">
-            {d.placeHelp}
+            {searchAvailable ? d.placeHelp : d.placeHelpMapOnly}
           </p>
-          <button
-            type="button"
-            disabled={pending || dashboard.remainingToPlace <= 0}
-            onClick={() => {
-              setError(null);
-              setMessage(null);
-              setLabel("");
-              setLatitude("");
-              setLongitude("");
-              onEditorChange(
-                editor.kind === "place" ? { kind: "idle" } : { kind: "place" },
-              );
-            }}
-            className="rounded-md border border-neutral-300 px-3 py-1.5 text-xs font-semibold disabled:opacity-50"
-          >
-            {editor.kind === "place" ? d.cancelPlacement : d.placeAPin}
-          </button>
-          {editor.kind === "place" ? (
-            <p className="text-[11px] font-medium text-sky-800">
-              {d.clickMap}
-            </p>
+
+          {dashboard.remainingToPlace > 0 ? (
+            <>
+              {!paused ? (
+                <MapSitePlaceSearch
+                  label={d.searchLabel}
+                  placeholder={d.searchPlaceholder}
+                  noResults={d.searchNoResults}
+                  disabled={pending}
+                  onSelect={placeFromSearch}
+                  onAvailabilityChange={setSearchAvailable}
+                />
+              ) : null}
+              <p
+                className={`text-[11px] font-medium ${paused ? "text-neutral-500" : "text-sky-800"}`}
+              >
+                {paused
+                  ? d.pausedHint
+                  : dashboard.remainingToPlace === 1
+                    ? d.readyOne
+                    : fmt(d.readyMany, { count: dashboard.remainingToPlace })}
+              </p>
+            </>
+          ) : (
+            <p className="text-[11px] text-neutral-500">{d.allPlaced}</p>
+          )}
+
+          {lastPlacedId && dashboard.pins.some((pin) => pin.id === lastPlacedId) ? (
+            <div className="flex items-center justify-between gap-2 rounded-md bg-emerald-50 px-3 py-1.5 text-xs text-emerald-800">
+              <span>{d.placed}</span>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => removePin(lastPlacedId)}
+                className="font-semibold underline underline-offset-2 disabled:opacity-60"
+              >
+                {d.undo}
+              </button>
+            </div>
           ) : null}
 
-          {editor.kind === "place" || fixing ? (
-            <div className="space-y-2 rounded-md border border-neutral-200 p-2">
-              <label className="block text-xs text-neutral-600">
-                {d.label}
-                <input
-                  value={label}
-                  onChange={(event) => setLabel(event.target.value)}
-                  maxLength={80}
-                  className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
-                />
-              </label>
-              <div className="grid grid-cols-2 gap-2">
+          {dashboard.remainingToPlace > 0 && !paused ? (
+            <details className="rounded-md border border-neutral-200 px-2 py-1.5">
+              <summary className="cursor-pointer text-[11px] font-medium text-neutral-600">
+                {d.advancedCoords}
+              </summary>
+              <div className="mt-2 space-y-2">
                 <label className="block text-xs text-neutral-600">
-                  {d.latitude}
+                  {d.label}
                   <input
-                    value={latitude}
-                    onChange={(event) => setLatitude(event.target.value)}
-                    inputMode="decimal"
+                    value={label}
+                    onChange={(event) => setLabel(event.target.value)}
+                    maxLength={80}
+                    placeholder={d.labelPlaceholder}
                     className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
                   />
                 </label>
-                <label className="block text-xs text-neutral-600">
-                  {d.longitude}
-                  <input
-                    value={longitude}
-                    onChange={(event) => setLongitude(event.target.value)}
-                    inputMode="decimal"
-                    className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
-                  />
-                </label>
-              </div>
-              {editor.kind === "place" ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="block text-xs text-neutral-600">
+                    {d.latitude}
+                    <input
+                      value={latitude}
+                      onChange={(event) => setLatitude(event.target.value)}
+                      inputMode="decimal"
+                      className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
+                    />
+                  </label>
+                  <label className="block text-xs text-neutral-600">
+                    {d.longitude}
+                    <input
+                      value={longitude}
+                      onChange={(event) => setLongitude(event.target.value)}
+                      inputMode="decimal"
+                      className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
+                    />
+                  </label>
+                </div>
                 <button
                   type="button"
                   onClick={placeFromForm}
@@ -387,17 +480,8 @@ export default function MapSitePinDashboard({
                 >
                   {d.placeAtCoords}
                 </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={saveFix}
-                  disabled={pending}
-                  className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
-                >
-                  {d.savePin}
-                </button>
-              )}
-            </div>
+              </div>
+            </details>
           ) : null}
 
           {dashboard.pins.length === 0 ? (
@@ -407,25 +491,87 @@ export default function MapSitePinDashboard({
               {dashboard.pins.map((pin, index) => (
                 <li
                   key={pin.id}
-                  className="flex items-center justify-between gap-2 rounded-md border border-neutral-200 px-2 py-1.5"
+                  className="rounded-md border border-neutral-200 px-2 py-1.5"
                 >
-                  <span className="min-w-0">
-                    <span className="block truncate text-xs font-medium">
-                      {pin.label.trim() || `PIN ${index + 2}`}
-                    </span>
-                    <span className="block font-mono text-[10px] text-neutral-500">
-                      {pin.latitude.toFixed(5)}, {pin.longitude.toFixed(5)}
-                    </span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => startFix(pin.id)}
-                    className="shrink-0 rounded-md border border-neutral-300 px-2 py-1 text-[11px] font-semibold"
-                  >
-                    {editor.kind === "fix" && editor.pinId === pin.id
-                      ? d.fixing
-                      : d.fix}
-                  </button>
+                  {editingId === pin.id ? (
+                    <div className="space-y-1.5">
+                      <input
+                        value={editLabel}
+                        onChange={(event) => setEditLabel(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            event.preventDefault();
+                            saveLabel(pin.id);
+                          } else if (event.key === "Escape") {
+                            setEditingId(null);
+                          }
+                        }}
+                        maxLength={80}
+                        autoFocus
+                        aria-label={d.label}
+                        placeholder={d.labelPlaceholder}
+                        className="block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
+                      />
+                      <div className="flex gap-1.5">
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => saveLabel(pin.id)}
+                          className="rounded-md bg-neutral-900 px-2 py-1 text-[11px] font-semibold text-white disabled:opacity-60"
+                        >
+                          {d.save}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditingId(null)}
+                          className="rounded-md border border-neutral-300 px-2 py-1 text-[11px] font-semibold"
+                        >
+                          {d.cancel}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="min-w-0">
+                        <span className="block truncate text-xs font-medium">
+                          {pin.label.trim() || `PIN ${index + 2}`}
+                        </span>
+                        <span className="block font-mono text-[10px] text-neutral-500">
+                          {pin.latitude.toFixed(5)}, {pin.longitude.toFixed(5)}
+                        </span>
+                      </span>
+                      <span className="flex shrink-0 gap-1">
+                        <button
+                          type="button"
+                          onClick={() => startEdit(pin.id)}
+                          className="rounded-md border border-neutral-300 px-2 py-1 text-[11px] font-semibold"
+                        >
+                          {d.edit}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={pending}
+                          onClick={() => {
+                            if (confirmDeleteId === pin.id) {
+                              removePin(pin.id);
+                            } else {
+                              setConfirmDeleteId(pin.id);
+                            }
+                          }}
+                          onBlur={() =>
+                            setConfirmDeleteId((current) => (current === pin.id ? null : current))
+                          }
+                          className={`rounded-md border px-2 py-1 text-[11px] font-semibold disabled:opacity-60 ${
+                            confirmDeleteId === pin.id
+                              ? "border-red-600 bg-red-600 text-white"
+                              : "border-neutral-300 text-red-700"
+                          }`}
+                        >
+                          {confirmDeleteId === pin.id ? d.confirmDelete : d.delete}
+                        </button>
+                      </span>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

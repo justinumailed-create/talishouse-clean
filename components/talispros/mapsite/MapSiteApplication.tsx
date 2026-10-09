@@ -310,7 +310,11 @@ export default function MapSiteApplication({
   const fixAdditionalAt = useCallback(
     async (pinId: string, latitude: number, longitude: number) => {
       const code = mapsite.fast_code?.trim();
-      if (!code || pinEditor.kind !== "fix" || pinEditor.pinId !== pinId) return;
+      // While the PIN Dashboard is open (place mode) every extra PIN can be dragged.
+      const canDrag =
+        pinEditor.kind === "place" ||
+        (pinEditor.kind === "fix" && pinEditor.pinId === pinId);
+      if (!code || !canDrag) return;
       setPinDashboard((current) => ({
         ...current,
         pins: current.pins.map((pin) =>
@@ -339,7 +343,11 @@ export default function MapSiteApplication({
       initialViewport={viewport}
       selectedPinId={selectedPinId}
       draggablePinIds={
-        pinEditor.kind === "fix" ? [pinEditor.pinId] : []
+        pinEditor.kind === "fix"
+          ? [pinEditor.pinId]
+          : pinEditor.kind === "place"
+            ? pinDashboard.pins.map((pin) => pin.id)
+            : []
       }
       lockCenter={lockMapCenter}
       lockCenterOffset={lockCenterOffset}
@@ -348,7 +356,7 @@ export default function MapSiteApplication({
         setSelectedPinId(pinId);
       }}
       onMapClick={(coordinates) => {
-        if (pinEditor.kind === "place") {
+        if (pinEditor.kind === "place" && pinDashboard.remainingToPlace > 0) {
           const latitude = normalizePinCoordinate(coordinates.latitude, "lat");
           const longitude = normalizePinCoordinate(coordinates.longitude, "lng");
           if (latitude == null || longitude == null) return;

@@ -16,6 +16,7 @@ import {
   type MapSitePinDashboardState,
 } from "@/lib/talispros/mapsite-additional-pins";
 import {
+  deleteAdditionalPinRecord,
   fixAdditionalPinRecord,
   fulfillAdditionalPinsFromStripeCheckoutSession,
   loadMapSitePinDashboard,
@@ -298,4 +299,30 @@ export async function fixMapSiteAdditionalPin(input: {
   }
   revalidateMapSite(fastCode);
   return { dashboard: fixed.dashboard };
+}
+
+export async function deleteMapSiteAdditionalPin(input: {
+  mapsiteId: string;
+  fastCode: string;
+  pinId: string;
+}): Promise<PinActionOk | PinActionError> {
+  const fastCode = input.fastCode.trim();
+  const denied = await authorizePinEdit(fastCode);
+  if (denied) return denied;
+
+  const mapsite = await readMapSiteForPinPurchase(input.mapsiteId);
+  if (!mapsite) return { error: "Mapsite was not found." };
+  if (mapsite.fastCode.trim().toLowerCase() !== fastCode.toLowerCase()) {
+    return { error: "FAST Code™ does not match this Mapsite." };
+  }
+
+  const removed = await deleteAdditionalPinRecord({
+    mapsiteId: mapsite.id,
+    pinId: input.pinId,
+  });
+  if (removed.error || !removed.dashboard) {
+    return { error: removed.error || "Could not delete PIN." };
+  }
+  revalidateMapSite(fastCode);
+  return { dashboard: removed.dashboard };
 }

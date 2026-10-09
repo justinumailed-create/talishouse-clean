@@ -31,6 +31,7 @@ vi.mock("@/lib/stripe", () => ({
   getStripeClient: () => ({ checkout: { sessions: { create: mocks.sessionsCreate } } }),
 }));
 vi.mock("@/lib/talispros/mapsite-additional-pins-service", () => ({
+  deleteAdditionalPinRecord: vi.fn(),
   fixAdditionalPinRecord: vi.fn(),
   fulfillAdditionalPinsFromStripeCheckoutSession: vi.fn(),
   loadMapSitePinDashboard: mocks.loadMapSitePinDashboard,
