@@ -321,6 +321,7 @@ export const de: Dictionary = {
     closeAria: "TalisBOT schließen",
     faq: "FAQ",
     getHelp: "Kontakt hinterlassen",
+    globalAdmin: "Globaler Admin",
     processesHeading: "Talispros™-Prozesse",
     allTopics: "← Alle Themen",
     contactAbout: "Hierzu Kontakt aufnehmen",

@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ROUTES } from "@/lib/routes";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
 import { HOME_TALISBOT_SLOT_ID } from "@/components/talispros/TalisprosHomeCornerLinks";
@@ -156,6 +157,13 @@ export default function TalisBotChat({
                 {b.getHelp}
               </button>
             </div>
+            <Link
+              href={ROUTES.ADMIN_LOGIN}
+              className="mt-6 text-[11px] font-medium tracking-[0.04em] text-gray-400 no-underline hover:text-gray-600 hover:underline"
+              data-testid="talisbot-global-admin-link"
+            >
+              {b.globalAdmin}
+            </Link>
           </div>
         );
 
