@@ -6,6 +6,7 @@ import { useCallback, type ReactNode } from "react";
 import type { MapSiteLayoutData } from "@/lib/mapsite-layout";
 import type { TalisMapsPin } from "@/lib/talismaps";
 import MapSitePublishedMapFrame from "./MapSitePublishedMapOverlay";
+import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 
 const TalisMapsEmbed = dynamic(() => import("@/components/talismaps/TalisMapsEmbed"), {
   ssr: false,
@@ -23,7 +24,6 @@ interface MapSiteTalisMapsProps {
   pinLabel: string;
   fastCode: string;
   variant?: "embedded" | "window";
-  backHref?: string | null;
   children?: ReactNode;
 }
 
@@ -34,7 +34,6 @@ export default function MapSiteTalisMaps({
   pinLabel,
   fastCode,
   variant = "embedded",
-  backHref = null,
   children = null,
 }: MapSiteTalisMapsProps) {
   const router = useRouter();
@@ -52,11 +51,12 @@ export default function MapSiteTalisMaps({
   );
 
   const isWindow = variant === "window";
+  // Window: map fills the space under the blue navbar (flex-1), never under it.
   const frameClassName = isWindow
-    ? "relative h-dvh w-screen overflow-hidden bg-neutral-900"
+    ? "relative isolate min-h-0 w-full flex-1 overflow-hidden bg-neutral-900"
     : "relative min-h-[300px] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm sm:min-h-[440px] md:min-h-[520px]";
   const minHeightClassName = isWindow
-    ? "min-h-dvh"
+    ? "min-h-0"
     : "min-h-[300px] sm:min-h-[440px] md:min-h-[520px]";
 
   const mapEmbed = (
@@ -76,21 +76,16 @@ export default function MapSiteTalisMaps({
     />
   );
 
-  const backLink =
-    isWindow && backHref ? (
-      <a
-        href={backHref}
-        className="absolute right-3 top-3 z-[2147483647] inline-flex min-h-10 items-center rounded-xl border border-neutral-200 bg-white/95 px-3 py-2 text-sm font-medium text-neutral-900 shadow-md backdrop-blur transition hover:bg-white sm:right-4 sm:top-4"
-      >
-        Back to Mapsite
-      </a>
-    ) : null;
-
+  // Full-screen window: blue TalisU navbar on top (navigation), map below it.
+  // `isolate` keeps map pane z-indexes below the navbar dropdowns; any pin card
+  // positioned inside the frame starts at the navbar seam, never under it.
   const map = isWindow ? (
-    <div className={frameClassName}>
-      {mapEmbed}
-      {backLink}
-      {children}
+    <div className="flex h-dvh w-screen flex-col overflow-hidden bg-neutral-900">
+      <TalisUMktsHeader />
+      <div className={frameClassName} data-testid="mapsite-window-map">
+        {mapEmbed}
+        {children}
+      </div>
     </div>
   ) : (
     <MapSitePublishedMapFrame

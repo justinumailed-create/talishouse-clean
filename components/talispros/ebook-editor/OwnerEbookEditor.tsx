@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { postEbookGenerateOptimizedImage } from "@/lib/media/client-upload-ebook-image";
@@ -299,12 +298,8 @@ export default function OwnerEbookEditor({
   return (
     <div className="mx-auto max-w-4xl space-y-6 px-4 py-6 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          href={backHref}
-          className="inline-flex items-center gap-1 text-sm font-medium text-[#046BD9] hover:underline"
-        >
-          ← Back to Mapsite
-        </Link>
+        {/* Navigation via the blue TalisU navbar (TalisprosLayoutClient). */}
+        <span aria-hidden />
         <div className="flex flex-wrap items-center gap-2">
           <a href={viewerHref} target="_blank" rel="noopener noreferrer" className={btnGhost}>
             View ebook

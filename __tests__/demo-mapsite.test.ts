@@ -221,7 +221,8 @@ describe("demo mapsite codes", () => {
       "utf8",
     );
     expect(layout).toContain('import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader"');
-    expect(layout).toContain("isDemoMapSite ? <TalisUMktsHeader /> : <TalisprosHeader />");
+    expect(layout).toContain("const showBlueNav = isDemoMapSite || isOwnerEbookEditor;");
+    expect(layout).toContain("showBlueNav ? <TalisUMktsHeader /> : <TalisprosHeader />");
     // Builder form stays free of duplicate chrome wiring.
     const builder = readFileSync(
       join(

@@ -16,7 +16,6 @@ import {
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { resolveBrandedMapSiteOgImage } from "@/lib/talispros/mapsite-branding-service";
 import { ROUTES } from "@/lib/routes";
-import { mapsiteBackFromScheduleHref } from "@/lib/talispros/mapsite-state";
 
 export const dynamic = "force-dynamic";
 
@@ -95,7 +94,6 @@ export default async function MapSiteFullscreenMapPage({
       pinLabel={layout.pinLabel}
       fastCode={code}
       variant="window"
-      backHref={mapsiteBackFromScheduleHref(code)}
     />
   );
 }

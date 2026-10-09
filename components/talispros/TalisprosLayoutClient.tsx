@@ -16,6 +16,11 @@ export default function TalisprosLayoutClient({
   const pathname = usePathname();
   const isEbookGenerate = pathname?.startsWith("/talispros/ebook-generate");
   const isDemoMapSite = isDemoMapSitePath(pathname);
+  // Owner Ebook Editor (/talispros/mapsites/{code}/ebooks/...) had no header at all.
+  const isOwnerEbookEditor = /^\/talispros\/mapsites\/[^/]+\/ebooks(\/|$)/.test(
+    pathname ?? "",
+  );
+  const showBlueNav = isDemoMapSite || isOwnerEbookEditor;
   const isEbookLikePage = isEbookGenerate || isDemoMapSite;
   const isAdminRoute = pathname?.startsWith("/talispros/admin");
   const isMapSiteApp =
@@ -31,7 +36,7 @@ export default function TalisprosLayoutClient({
   return (
     <>
       {/* Demo Mapsite builder/ebook: shared blue TalisU nav (same as shelves/claimed). */}
-      {isDemoMapSite ? <TalisUMktsHeader /> : <TalisprosHeader />}
+      {showBlueNav ? <TalisUMktsHeader /> : <TalisprosHeader />}
       <main
         className={`font-sans text-neutral-900 selection:bg-neutral-900 selection:text-white [&:has(.mapsite-layout)]:p-0 ${
           isEbookLikePage ? "bg-[#f5f5f7]" : "bg-white"
