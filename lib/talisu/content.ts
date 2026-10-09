@@ -265,7 +265,7 @@ export const TALISU_ENGAGE = {
   ],
   helpHeading: "How we help:",
   helpItems: [
-    "Select a design and send a $2,000 Down Payment.",
+    "Select a design and send a $2,000 CAD Down Payment.",
     "It is applied in full to your order - and…",
     "Establishes your spot in the production and shipping queues.",
     "It also reserves time with our customization department to precisely realize your vision.",

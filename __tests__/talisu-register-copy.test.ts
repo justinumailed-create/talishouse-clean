@@ -52,10 +52,10 @@ describe("TalisU Register → Product (Webster) copy", () => {
     ]);
   });
 
-  it("lists the $2,000 down payment and 12-month protection", () => {
+  it("lists the $2,000 CAD down payment and 12-month protection", () => {
     expect(TALISU_ENGAGE.helpHeading).toBe("How we help:");
     expect(TALISU_ENGAGE.helpItems).toEqual([
-      "Select a design and send a $2,000 Down Payment.",
+      "Select a design and send a $2,000 CAD Down Payment.",
       "It is applied in full to your order - and…",
       "Establishes your spot in the production and shipping queues.",
       "It also reserves time with our customization department to precisely realize your vision.",
@@ -111,7 +111,7 @@ describe("TalisU Register → Product (Webster) copy", () => {
     expect(engage.paragraphs[1]).toContain("„Corten“-Stahl");
     expect(engage.helpHeading).toBe("So helfen wir Ihnen:");
     expect(engage.helpItems).toEqual([
-      "Wählen Sie ein Design und leisten Sie eine Anzahlung von 2.000 $.",
+      "Wählen Sie ein Design und leisten Sie eine Anzahlung von 2.000 CAD.",
       "Sie wird vollständig auf Ihre Bestellung angerechnet – und …",
       "Sie sichert Ihnen Ihren Platz in den Warteschlangen für Produktion und Versand.",
       "Außerdem reserviert sie Zeit bei unserer Anpassungsabteilung, um Ihre Vision präzise zu verwirklichen.",

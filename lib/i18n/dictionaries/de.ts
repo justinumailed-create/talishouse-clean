@@ -304,7 +304,7 @@ export const de: Dictionary = {
       ],
       helpHeading: "So helfen wir Ihnen:",
       helpItems: [
-        "Wählen Sie ein Design und leisten Sie eine Anzahlung von 2.000 $.",
+        "Wählen Sie ein Design und leisten Sie eine Anzahlung von 2.000 CAD.",
         "Sie wird vollständig auf Ihre Bestellung angerechnet – und …",
         "Sie sichert Ihnen Ihren Platz in den Warteschlangen für Produktion und Versand.",
         "Außerdem reserviert sie Zeit bei unserer Anpassungsabteilung, um Ihre Vision präzise zu verwirklichen.",

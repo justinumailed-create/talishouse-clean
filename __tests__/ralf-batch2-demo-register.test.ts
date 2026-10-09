@@ -63,3 +63,25 @@ describe("Ralf batch 2 — demo → registration", () => {
     }
   });
 });
+
+describe("Ralf follow-ups — blue navbar Register + Webster CAD", () => {
+  it("keeps every blue navbar Register entry on /talisu/reg (same tab)", async () => {
+    const pins = await import("../lib/talisu/markets-pins");
+    const register = pins.TALISU_MKTS_HEADER_NAV.find((i) => i.label === "Register");
+    expect(register?.href).toBe("/talisu/reg");
+    const dropdown = pins.TALISU_MKTS_HEADER_REGISTER_DROPDOWN;
+    expect(dropdown.find((i) => i.label === "Mapsite")?.href).toBe("/talisu/reg");
+    expect(dropdown.find((i) => i.label === "Product Options")?.href).toBe("/talisu/engage");
+    for (const item of [...pins.TALISU_MKTS_HEADER_NAV, ...dropdown]) {
+      expect(item.href).not.toContain("mysamcart");
+    }
+  });
+
+  it("labels Webster's down payment in CAD (EN + DE), amount unchanged", () => {
+    expect(en.talisu.engage.helpItems[0]).toBe(
+      "Select a design and send a $2,000 CAD Down Payment.",
+    );
+    expect(de.talisu.engage.helpItems[0]).toContain("2.000 CAD");
+    expect(de.talisu.engage.helpItems[0]).not.toContain("$");
+  });
+});

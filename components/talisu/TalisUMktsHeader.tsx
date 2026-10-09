@@ -9,7 +9,7 @@ import {
   TALISU_MKTS_HEADER_DROPDOWN,
   TALISU_MKTS_HEADER_NAV,
 } from "@/lib/talisu/markets-pins";
-import { TALISU_REGISTER } from "@/lib/talisu/content";
+import { ROUTES } from "@/lib/routes";
 import {
   readTalisUKbUnlocked,
   TALISU_KB_LOCKED_EVENT,
@@ -71,7 +71,7 @@ export type TalisUMktsHeaderProps = {
    * Real activation payment success (not demo-only). Unlocks Dashboard.
    */
   dashboardUnlocked?: boolean;
-  /** Destination when locked Dashboard → Register (SamCart / register flow). */
+  /** Destination when locked Dashboard → Register. Always Aisha's /talisu/reg, same tab. */
   registerHref?: string;
   /** When Dashboard is unlocked, open the Mapsite pin dashboard. */
   onOpenDashboard?: () => void;
@@ -117,7 +117,7 @@ type DropdownPanel = "menu" | "kb-unlock";
 export default function TalisUMktsHeader({
   variant = "default",
   dashboardUnlocked = false,
-  registerHref = TALISU_REGISTER.samcartUrl,
+  registerHref = ROUTES.TALISU_REGISTER,
   onOpenDashboard,
   dashboardMenuItems,
   onSelectDashboardItem,
@@ -397,14 +397,6 @@ export default function TalisUMktsHeader({
               </p>
               <a
                 href={registerHref}
-                target={
-                  registerHref.startsWith("http") ? "_blank" : undefined
-                }
-                rel={
-                  registerHref.startsWith("http")
-                    ? "noopener noreferrer"
-                    : undefined
-                }
                 className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-white px-3 py-2 text-[13px] font-semibold text-[#035bb8] transition hover:bg-white/95"
                 onClick={() => setRegisterPromptOpen(false)}
               >
