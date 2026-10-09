@@ -2,19 +2,16 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { useT } from "@/lib/i18n/client";
+import { ROUTES } from "@/lib/routes";
 import {
   DEMO_MAPSITE_PDF_FILE_NAME,
   DEMO_MAPSITE_PDF_HREF,
-  DEMO_TEMPLATE_GOOGLE_SLIDES_COPY_HREF,
-  DEMO_TEMPLATE_KEYNOTE_FILE_NAME,
-  DEMO_TEMPLATE_KEYNOTE_HREF,
-  DEMO_TEMPLATE_PPTX_FILE_NAME,
-  DEMO_TEMPLATE_PPTX_HREF,
 } from "@/lib/talispros/demo-mapsite";
 
 /**
- * "Download Demo PDF" control: the Centrefolds Demo PDF plus ready-made
- * "Replace Image" templates (PowerPoint, Keynote, Google Slides copy link).
+ * "Download Demo PDF" control on the public demo: the Centrefolds Demo PDF only.
+ * The Replace Image templates (PowerPoint, Keynote, Google Slides) are for
+ * registered Mapsite owners, so here they appear locked with a Register link.
  */
 export default function DemoDownloadMenu({ className = "" }: { className?: string }) {
   const d = useT().demo;
@@ -80,38 +77,20 @@ export default function DemoDownloadMenu({ className = "" }: { className?: strin
           <p className="mt-2 border-t border-neutral-100 px-3 pb-1 pt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">
             {d.downloadMenuTemplates}
           </p>
-          <a
-            role="menuitem"
-            href={DEMO_TEMPLATE_PPTX_HREF}
-            download={DEMO_TEMPLATE_PPTX_FILE_NAME}
-            onClick={close}
-            className={itemClass}
-          >
-            {d.downloadMenuPptx}
-          </a>
-          <a
-            role="menuitem"
-            href={DEMO_TEMPLATE_KEYNOTE_HREF}
-            download={DEMO_TEMPLATE_KEYNOTE_FILE_NAME}
-            onClick={close}
-            className={itemClass}
-          >
-            {d.downloadMenuKeynote}
-          </a>
-          <a
-            role="menuitem"
-            href={DEMO_TEMPLATE_GOOGLE_SLIDES_COPY_HREF}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={close}
-            className={itemClass}
-          >
-            {d.downloadMenuGoogleSlides}
-            <span aria-hidden="true" className="text-[12px] text-neutral-400">↗</span>
-          </a>
-          <p className="px-3 pb-1 pt-2 text-[12px] leading-snug text-neutral-500">
-            {d.downloadMenuHint}
-          </p>
+          <div className="px-3 pb-2" data-testid="demo-templates-locked">
+            <p className="flex items-start gap-2 text-[13px] leading-snug text-neutral-500">
+              <span aria-hidden="true">🔒</span>
+              <span>{d.downloadMenuLocked}</span>
+            </p>
+            <a
+              role="menuitem"
+              href={ROUTES.TALISU_REGISTER}
+              onClick={close}
+              className="mt-2 inline-flex min-h-9 items-center rounded-full bg-[#046BD9] px-3.5 text-[13px] font-medium text-white transition hover:bg-[#035bb8]"
+            >
+              {d.downloadMenuRegister}
+            </a>
+          </div>
         </div>
       ) : null}
     </div>

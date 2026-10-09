@@ -27,7 +27,8 @@ function normalizeFastCode(fastCode: string): string {
   return fastCode.trim().toLowerCase();
 }
 
-async function isMapSiteAdmin(): Promise<boolean> {
+/** Platform / Talispros admin or marketing manager (may manage any Mapsite). */
+export async function isMapSiteAdmin(): Promise<boolean> {
   return (
     (await isAdminAuthenticated()) ||
     (await isTalisprosAdminAuthenticated()) ||

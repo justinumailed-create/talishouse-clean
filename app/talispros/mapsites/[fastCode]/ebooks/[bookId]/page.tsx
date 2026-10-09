@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import OwnerEbookEditor from "@/components/talispros/ebook-editor/OwnerEbookEditor";
+import OwnerReplaceImageTemplates from "@/components/talispros/ebook-editor/OwnerReplaceImageTemplates";
+import { getReplaceImageGoogleSlidesCopyUrl } from "@/lib/talispros/replace-image-templates.server";
 import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { CLIENT_LOGIN_PATH } from "@/lib/mapsite-account-session";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
@@ -49,6 +51,12 @@ export default async function OwnerEbookEditorPage({
         initialBook={loaded.book}
         initialPages={loaded.pages}
       />
+      <div className="mx-auto max-w-4xl px-4 pb-10 sm:px-6">
+        <OwnerReplaceImageTemplates
+          fastCode={mapsite.fastCode.toLowerCase()}
+          googleSlidesCopyHref={getReplaceImageGoogleSlidesCopyUrl()}
+        />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import MapSiteAdminEbookPanel from "@/components/talispros-admin/MapSiteAdminEbookPanel";
+import OwnerReplaceImageTemplates from "@/components/talispros/ebook-editor/OwnerReplaceImageTemplates";
+import { getReplaceImageGoogleSlidesCopyUrl } from "@/lib/talispros/replace-image-templates.server";
 import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { CLIENT_LOGIN_PATH } from "@/lib/mapsite-account-session";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
@@ -39,6 +41,10 @@ export default async function OwnerEbookCreatePage({
     <div className="min-h-dvh bg-[#f5f5f7]">
       <div className="mx-auto max-w-4xl space-y-4 px-4 py-6 sm:px-6">
         {/* Navigation via the blue TalisU navbar (TalisprosLayoutClient). */}
+        <OwnerReplaceImageTemplates
+          fastCode={mapsite.fastCode.toLowerCase()}
+          googleSlidesCopyHref={getReplaceImageGoogleSlidesCopyUrl()}
+        />
         <MapSiteAdminEbookPanel
           fastCode={mapsite.fastCode}
           mapsiteId={mapsite.id}

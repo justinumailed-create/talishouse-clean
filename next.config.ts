@@ -4,6 +4,11 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
+  // Replace Image templates are private (registered owners only) — bundle them
+  // with the gated download route instead of serving them from public/.
+  outputFileTracingIncludes: {
+    "/api/templates/**": ["./private/templates/**/*"],
+  },
   async headers() {
     return [
       {
