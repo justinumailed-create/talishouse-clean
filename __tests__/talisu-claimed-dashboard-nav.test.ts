@@ -43,7 +43,7 @@ describe("Claimed FAST Mapsite header Dashboard nav", () => {
     expect(app).toContain(
       "const dashboardUnlocked = activationPaid && !isDemoListing",
     );
-    expect(app).toContain("TALISU_REGISTER.samcartUrl");
+    expect(app).toContain("registerHref={ROUTES.TALISU_REGISTER}");
     expect(app).toContain("onOpenDashboard={openOwnerDashboard}");
     expect(app).toContain("focusPinAndOpen()");
     expect(app).toContain("MapSitePinDashboard");

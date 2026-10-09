@@ -19,9 +19,13 @@ export const MAPSITE_URL_GATE_SENTINEL = "__url_gate__";
  */
 export const MAPSITE_URL_ADDITIONAL_PINS_SENTINEL = "__additional_pins__";
 
-/** Default Register destination for the published Mapsite URL button (visitors). */
-export const MAPSITE_DEFAULT_REGISTER_URL =
-  "https://talispros.mysamcart.com/checkout/register";
+/**
+ * Default Register destination for the published Mapsite URL button (visitors).
+ * Aisha's Register page (/talisu/reg) in the SAME tab — it asks for the
+ * business first, then embeds the SamCart register checkout. Never open the
+ * bare SamCart checkout in a new tab from the demo / Mapsite flow.
+ */
+export const MAPSITE_DEFAULT_REGISTER_URL: string = ROUTES.TALISU_REGISTER;
 
 /**
  * FAST codes that skip the Admin Notifications secure-code URL unlock.
@@ -99,7 +103,7 @@ export type ResolvePublishedUrlButtonOptions = {
 /**
  * Published Mapsite URL button href:
  * - paid owner session → additional-PIN Dashboard sentinel
- * - everyone else → Register (SamCart), never the broken FAST Code™ / secure-code gate
+ * - everyone else → Register (/talisu/reg, same tab), never the broken FAST Code™ / secure-code gate
  */
 export function resolvePublishedUrlButtonHref(
   fastCode: string | null | undefined,

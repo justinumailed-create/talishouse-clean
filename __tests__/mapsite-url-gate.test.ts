@@ -187,7 +187,7 @@ describe("Mapsite URL gate", () => {
     ).toBeNull();
   });
 
-  it("exempts DC01 and DC02 from the URL gate and forces the SamCart register URL", () => {
+  it("exempts DC01 and DC02 from the URL gate and forces Aisha's /talisu/reg Register page (same tab)", () => {
     expect(isMapsiteUrlGateExempt("DC01")).toBe(true);
     expect(isMapsiteUrlGateExempt("dc01")).toBe(true);
     expect(isMapsiteUrlGateExempt("Dc01")).toBe(true);
@@ -196,35 +196,35 @@ describe("Mapsite URL gate", () => {
     expect(isMapsiteUrlGateExempt("Dc02")).toBe(true);
     expect(isMapsiteUrlGateExempt("ar01")).toBe(false);
     expect(MAPSITE_URL_OVERRIDES.dc01).toBe(
-      "https://talispros.mysamcart.com/checkout/register",
+      "/talisu/reg",
     );
     expect(MAPSITE_URL_OVERRIDES.dc02).toBe(
-      "https://talispros.mysamcart.com/checkout/register",
+      "/talisu/reg",
     );
     expect(
       resolveMapsiteListingUrl("DC01", "https://www.talispros.com/talisu/reg"),
-    ).toBe("https://talispros.mysamcart.com/checkout/register");
+    ).toBe("/talisu/reg");
     expect(
       resolveMapsiteListingUrl("DC02", "https://www.talispros.com/talisu/reg"),
-    ).toBe("https://talispros.mysamcart.com/checkout/register");
+    ).toBe("/talisu/reg");
     expect(
       resolvePublishedUrlButtonHref(
         "dc01",
         "https://www.talispros.com/talisu/reg",
       ),
-    ).toBe("https://talispros.mysamcart.com/checkout/register");
+    ).toBe("/talisu/reg");
     expect(
       resolvePublishedUrlButtonHref(
         "dc02",
         "https://www.talispros.com/talisu/reg",
       ),
-    ).toBe("https://talispros.mysamcart.com/checkout/register");
+    ).toBe("/talisu/reg");
     expect(
       mapsiteUrlGateHref("DC01", "https://example.com/old"),
-    ).toBe("https://talispros.mysamcart.com/checkout/register");
+    ).toBe("/talisu/reg");
     expect(
       mapsiteUrlGateHref("DC02", "https://example.com/old"),
-    ).toBe("https://talispros.mysamcart.com/checkout/register");
+    ).toBe("/talisu/reg");
     expect(
       resolvePublishedUrlButtonHref("ar01", "https://example.com/paid"),
     ).toBe(MAPSITE_DEFAULT_REGISTER_URL);

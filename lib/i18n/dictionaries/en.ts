@@ -480,6 +480,8 @@ export const en = {
     fastCodeOnRegistration: "FAST Code issued upon registration",
     listingTitle: "Listing title",
     defaultListingTitle: "Demo Mapsite",
+    /** Ralf: shown under the editable "Demo Mapsite" name. Leading comma is deliberate. */
+    homePinNameHint: "(, or change to what you would like your Home Pin to be named)",
     errPlacePin: "Place a pin or enter an address to continue.",
     continue: "Continue to demo eBook",
     continuing: "Continue to demo eBook…",

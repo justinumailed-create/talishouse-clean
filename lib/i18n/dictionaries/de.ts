@@ -285,6 +285,10 @@ export const de: Dictionary = {
         },
       ],
       closing: "Nutzen Sie uns gern als Ressource …!",
+      askHeading: "Bevor Sie sich registrieren …",
+      askLine:
+        "Bitte wählen Sie „URL“ in der Flagge, um Ihren Markt zu registrieren.",
+      askProceed: "Weiter",
     },
     engage: {
       ...TALISU_ENGAGE,
@@ -308,6 +312,10 @@ export const de: Dictionary = {
       protectionHeading: "Schutz der Anzahlung:",
       protectionText:
         "Ihre Anzahlung ist bis zu 12 Monate geschützt (oder länger nach besonderer Vereinbarung von Fall zu Fall).",
+      askHeading: "Bevor Sie das Team beauftragen …",
+      askLine:
+        "Jedes Projekt beginnt mit Ihrer Vision. Bitte fahren Sie fort, um Webster und sein Anpassungsteam zu beauftragen.",
+      askProceed: "Weiter",
     },
     engageCustomizing: "Anpassung:",
     engageCataloguePage: "Talishouse™ Produktkatalog, Seite {page}",
@@ -688,6 +696,7 @@ export const de: Dictionary = {
     fastCodeOnRegistration: "FAST Code wird bei der Registrierung vergeben",
     listingTitle: "Titel des Angebots",
     defaultListingTitle: "Demo-Mapsite",
+    homePinNameHint: "(, oder ändern Sie ihn in den gewünschten Namen Ihres Home-PINs)",
     errPlacePin: "Setzen Sie einen PIN oder geben Sie eine Adresse ein, um fortzufahren.",
     continue: "Weiter zum Demo-eBook",
     continuing: "Weiter zum Demo-eBook …",

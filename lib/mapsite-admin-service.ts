@@ -598,7 +598,7 @@ export async function deleteAdminActiveMapSite(
     if (control !== "delete") {
       return {
         success: false,
-        error: "Only active unpaid Mapsites can be deleted from this list.",
+        error: "Only active or draft unpaid Mapsites can be deleted from this list.",
       };
     }
 

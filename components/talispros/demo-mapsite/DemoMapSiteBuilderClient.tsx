@@ -101,6 +101,12 @@ export default function DemoMapSiteBuilderClient() {
                 maxLength={120}
                 className="mt-2 w-full bg-transparent py-1 text-center text-[17px] leading-snug tracking-tight text-neutral-950 outline-none placeholder:text-neutral-400 disabled:opacity-40"
               />
+              <span
+                className="mt-1 block text-center text-[13px] leading-snug text-neutral-500"
+                data-testid="demo-home-pin-name-hint"
+              >
+                {d.homePinNameHint}
+              </span>
             </label>
           </div>
 

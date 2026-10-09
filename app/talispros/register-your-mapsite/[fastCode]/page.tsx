@@ -26,8 +26,10 @@ export async function generateMetadata({
 
 /**
  * Legacy URL-gate path. Claimed Mapsite URL buttons no longer land here; if
- * someone still hits this route, send them to Register instead of the broken
- * FAST Code™ / secure-code gate.
+ * someone still hits this route, send them to Aisha's Register page
+ * (/talisu/reg, same tab — server redirect) instead of the broken FAST Code™ /
+ * secure-code gate or a bare SamCart checkout. Checkout itself still happens
+ * on /talisu/reg (embedded SamCart register).
  */
 export default async function RegisterYourMapSitePage({
   params,

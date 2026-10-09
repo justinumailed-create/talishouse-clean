@@ -18,7 +18,19 @@ describe("admin Mapsite delete controls", () => {
     ).toBe("lock");
   });
 
-  it("hides delete on Mapsites that are not ACTIVE", () => {
+  it("offers delete on legacy draft Mapsites like LRG1 (unpaid) and locks paid drafts", () => {
+    expect(
+      adminMapSiteDeleteControl({ status: "draft", paymentReceived: false }),
+    ).toBe("delete");
+    expect(
+      adminMapSiteDeleteControl({ status: "DRAFT", paymentReceived: false }),
+    ).toBe("delete");
+    expect(
+      adminMapSiteDeleteControl({ status: "draft", paymentReceived: true }),
+    ).toBe("lock");
+  });
+
+  it("hides delete on Mapsites that are not ACTIVE or draft", () => {
     expect(
       adminMapSiteDeleteControl({
         status: "UNCLAIMED",
@@ -29,6 +41,12 @@ describe("admin Mapsite delete controls", () => {
       adminMapSiteDeleteControl({
         status: "BUILD_REQUEST_SUBMITTED",
         paymentReceived: true,
+      }),
+    ).toBe("none");
+    expect(
+      adminMapSiteDeleteControl({
+        status: "marketing_review",
+        paymentReceived: false,
       }),
     ).toBe("none");
   });

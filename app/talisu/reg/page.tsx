@@ -6,6 +6,11 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE } from "@/lib/talispros/market-pages";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
+import PartnerAskStep from "@/components/talisu/PartnerAskStep";
+import {
+  isTalisURegisterCheckoutStep,
+  talisURegisterCheckoutHref,
+} from "@/lib/talisu/ask-step";
 
 export async function generateMetadata() {
   const locale = await getLocale();
@@ -25,8 +30,51 @@ export async function generateMetadata() {
   });
 }
 
-export default async function TalisURegisterPage() {
+type TalisURegisterPageProps = {
+  searchParams?: Promise<{ step?: string | string[] }>;
+};
+
+export default async function TalisURegisterPage({
+  searchParams,
+}: TalisURegisterPageProps) {
   const TALISU_REGISTER = getDictionary(await getLocale()).talisu.register;
+  const params = (await searchParams) ?? {};
+
+  // Ask for the business first (Ralf): Aisha's write-up + Proceed. The SamCart
+  // register checkout only renders after Proceed (?step=register, same tab).
+  if (!isTalisURegisterCheckoutStep(params.step)) {
+    return (
+      <SectionShell title={TALISU_REGISTER.title}>
+        <PartnerAskStep
+          testId="talisu-register-ask"
+          imageSrc={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
+          imageAlt="Aisha C."
+          imageWidth={896}
+          imageHeight={1200}
+          heading={TALISU_REGISTER.partnerHeading}
+          name={TALISU_REGISTER.partnerName}
+          askHeading={TALISU_REGISTER.askHeading}
+          askLine={TALISU_REGISTER.askLine}
+          proceedLabel={TALISU_REGISTER.askProceed}
+          proceedHref={talisURegisterCheckoutHref()}
+        >
+          <p>{TALISU_REGISTER.partnerIntro}</p>
+          <ul className="mt-4 space-y-3 text-neutral-600">
+            {TALISU_REGISTER.bullets.map((b) => (
+              <li key={b.label}>
+                <span className="font-semibold text-neutral-900">{b.label}:</span>{" "}
+                {b.text}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 font-medium text-[#0069CF]">
+            {TALISU_REGISTER.closing}
+          </p>
+        </PartnerAskStep>
+      </SectionShell>
+    );
+  }
+
   return (
     <SectionShell title={TALISU_REGISTER.title} maxWidthClass="max-w-[1920px]">
       {/* Partner write-up stays compact; SamCart gets the remaining width so its

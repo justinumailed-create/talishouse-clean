@@ -244,6 +244,10 @@ export const TALISU_REGISTER = {
     },
   ],
   closing: "Please add us as a resource…!",
+  /** "Ask for the business" step before the Register checkout (Ralf). */
+  askHeading: "Before you register…",
+  askLine: "Please select 'URL' in the flag to register your market.",
+  askProceed: "Proceed",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
 } as const;
 
@@ -269,6 +273,11 @@ export const TALISU_ENGAGE = {
   protectionHeading: "Down Payment Protection:",
   protectionText:
     "Your downpayment is protected for up to 12 months (or more by special arrangement on a case by case basis).",
+  /** "Ask for the business" step before the down payment (Ralf). No pricing here. */
+  askHeading: "Before you engage the team…",
+  askLine:
+    "Every project starts with your vision. Please Proceed to engage Webster and his Customization Team.",
+  askProceed: "Proceed",
   samcartUrl: "https://talispros.mysamcart.com/checkout/custom",
 } as const;
 

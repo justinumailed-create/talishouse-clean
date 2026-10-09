@@ -7,6 +7,11 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { fmt } from "@/lib/i18n/format";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
+import PartnerAskStep from "@/components/talisu/PartnerAskStep";
+import {
+  isTalisUEngageCheckoutStep,
+  talisUEngageCheckoutHref,
+} from "@/lib/talisu/ask-step";
 import {
   CATALOGUE_PATH,
   catalogueProductCheckoutUrl,
@@ -32,7 +37,10 @@ export async function generateMetadata() {
 }
 
 type TalisUEngagePageProps = {
-  searchParams?: Promise<{ product?: string | string[] }>;
+  searchParams?: Promise<{
+    product?: string | string[];
+    step?: string | string[];
+  }>;
 };
 
 export default async function TalisUEngagePage({
@@ -47,6 +55,43 @@ export default async function TalisUEngagePage({
     TALISU_ENGAGE.samcartUrl,
     product,
   );
+
+  // Ask for the business first (Ralf): Webster's write-up + Proceed. The
+  // down-payment checkout only renders after Proceed (?step=pay, same tab);
+  // a catalogue ?product= code is carried through.
+  if (!isTalisUEngageCheckoutStep(params.step)) {
+    return (
+      <SectionShell title={TALISU_ENGAGE.title} subtitle={TALISU_ENGAGE.headline}>
+        <PartnerAskStep
+          testId="talisu-engage-ask"
+          imageSrc={TALISU_ENGAGE.partnerImage}
+          imageAlt={TALISU_ENGAGE.partnerImageAlt}
+          imageWidth={800}
+          imageHeight={800}
+          heading={TALISU_ENGAGE.partnerHeading}
+          name={TALISU_ENGAGE.partnerName}
+          askHeading={TALISU_ENGAGE.askHeading}
+          askLine={TALISU_ENGAGE.askLine}
+          proceedLabel={TALISU_ENGAGE.askProceed}
+          proceedHref={talisUEngageCheckoutHref(product?.code)}
+        >
+          {product ? (
+            <p className="mb-3" data-testid="engage-ask-product">
+              <span className="font-semibold text-[#046BD9]">{t.engageCustomizing}</span>{" "}
+              <span className="font-semibold text-neutral-950">{product.code}</span>
+              {" — "}
+              {product.title}
+            </p>
+          ) : null}
+          <div className="space-y-3">
+            {TALISU_ENGAGE.paragraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+        </PartnerAskStep>
+      </SectionShell>
+    );
+  }
 
   return (
     <SectionShell

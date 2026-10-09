@@ -55,7 +55,6 @@ import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
 import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
-import { TALISU_REGISTER } from "@/lib/talisu/content";
 import { getMapSiteActivationPaymentStatus } from "@/app/talispros/mapsite/actions";
 import {
   confirmAdditionalPinCheckout,
@@ -868,7 +867,7 @@ function MapSiteChrome({
         <TalisUMktsHeader
           variant="claimed-mapsite"
           dashboardUnlocked={dashboardUnlocked}
-          registerHref={TALISU_REGISTER.samcartUrl}
+          registerHref={ROUTES.TALISU_REGISTER}
           onOpenDashboard={openOwnerDashboard}
           dashboardMenuItems={dashboardManageable ? DASHBOARD_MENU : undefined}
           onSelectDashboardItem={selectDashboardItem}
