@@ -5134,6 +5134,14 @@ body.mapsite-gallery-open [data-paypal-button] {
     margin-bottom: 1.5rem;
   }
 
+  .talisu-essay-rail-inner,
+  .talisu-essay-panel {
+    position: static !important;
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
   .talisu-essay-column {
     position: static !important;
     display: block !important;

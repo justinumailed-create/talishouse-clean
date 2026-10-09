@@ -258,13 +258,9 @@ export default function TalisBotChat({
           <div className="flex flex-col">
             <span className="text-[13px] font-bold text-gray-900 leading-none">TalisBOT</span>
             <span
-              className="text-[10px] font-medium mt-1 flex items-center gap-1"
+              className="text-[10px] font-medium mt-1"
               style={{ color: TALISU_MKTS_HEADER_BLUE }}
             >
-              <span
-                className="w-1 h-1 rounded-full animate-pulse"
-                style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
-              />
               {b.subtitle}
             </span>
           </div>

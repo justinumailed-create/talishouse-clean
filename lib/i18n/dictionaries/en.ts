@@ -150,11 +150,13 @@ export const en = {
     engageCataloguePage: "Talishouse™ Product Catalogue page {page}",
     engageChange: "Change",
     footerPartOf: "part of",
+    /** Accessible name of the FAQ right-rail essay switcher (pill labels live in essay-registry.ts). */
+    essaySwitcher: "Essays",
   },
 
   bot: {
     name: "TalisBOT",
-    subtitle: "Talispros™ processes",
+    subtitle: "Summary - max 280 characters",
     openAria: "Open TalisBOT",
     closeAria: "Close TalisBOT",
     faq: "FAQ",
@@ -168,8 +170,10 @@ export const en = {
   },
 
   contactForm: {
-    title: "Learn More",
-    intro: "Tell us about your interest — we'll follow up.",
+    title: "Quick Reference",
+    intro: "Propose a project without registering — we'll follow up.",
+    /** Live counter under the proposal textarea. */
+    projectCounter: "{count}/{max}",
     thanks: "Thanks — your message is on its way.",
     advisor: "A Talispros™ advisor will contact you about {topic}.",
     done: "Done",
@@ -198,6 +202,7 @@ export const en = {
     apiErrors: {
       required: "Name, email, phone, and message are required.",
       email: "Enter a valid email.",
+      tooLong: "Please keep your proposal to 280 characters or fewer.",
       save: "Could not save your inquiry. Please try again.",
     },
   },

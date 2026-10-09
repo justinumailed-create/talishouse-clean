@@ -5,6 +5,7 @@ import {
   OWNERSHIP_CONTACT_RECIPIENTS,
   OWNERSHIP_CONTACT_SOURCE,
   OWNERSHIP_CONTACT_TOPICS,
+  OWNERSHIP_CONTACT_MESSAGE_MAX,
 } from "@/lib/talispros/ownership-contact";
 import { NANP_PHONE_ERROR, formatNanpPhone } from "@/lib/talispros/nanp-phone";
 
@@ -38,6 +39,13 @@ export async function POST(request: Request) {
   if (!name || !email || !rawPhone || !message || !topic) {
     return NextResponse.json(
       { ok: false, error: "Name, email, phone, and message are required." },
+      { status: 400 },
+    );
+  }
+
+  if (message.length > OWNERSHIP_CONTACT_MESSAGE_MAX) {
+    return NextResponse.json(
+      { ok: false, error: "Please keep your proposal to 280 characters or fewer." },
       { status: 400 },
     );
   }

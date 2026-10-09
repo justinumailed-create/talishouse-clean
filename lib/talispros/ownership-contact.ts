@@ -17,6 +17,12 @@ export const OWNERSHIP_CONTACT_TOPICS = [
   "Tokenization",
 ] as const;
 
+/**
+ * Max length of the "Propose a Project" message (TalisBOT form + API).
+ * Enough to understand the proposal — not a business plan.
+ */
+export const OWNERSHIP_CONTACT_MESSAGE_MAX = 280;
+
 export type OwnershipContactTopic =
   (typeof OWNERSHIP_CONTACT_TOPICS)[number];
 

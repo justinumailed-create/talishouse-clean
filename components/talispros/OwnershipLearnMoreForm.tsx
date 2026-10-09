@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import type { OwnershipContactTopic } from "@/lib/talispros/ownership-contact";
+import {
+  OWNERSHIP_CONTACT_MESSAGE_MAX,
+  type OwnershipContactTopic,
+} from "@/lib/talispros/ownership-contact";
 import {
   formatNanpPhoneInput,
   isValidNanpPhone,
@@ -20,13 +23,17 @@ type OwnershipLearnMoreFormProps = {
 /** Maps the contact API's English errors to the active locale. */
 function localizeApiError(
   error: string | undefined,
-  c: { apiErrors: { required: string; email: string; save: string }; phoneError: string },
+  c: {
+    apiErrors: { required: string; email: string; save: string; tooLong: string };
+    phoneError: string;
+  },
 ): string | undefined {
   if (!error) return undefined;
   const source = en.contactForm;
   if (error === source.apiErrors.required) return c.apiErrors.required;
   if (error === source.apiErrors.email) return c.apiErrors.email;
   if (error === source.apiErrors.save) return c.apiErrors.save;
+  if (error === source.apiErrors.tooLong) return c.apiErrors.tooLong;
   if (error === source.phoneError) return c.phoneError;
   return error;
 }
@@ -49,6 +56,7 @@ export default function OwnershipLearnMoreForm({
     (c.topics as Record<string, string>)[String(topic)] ?? String(topic);
   const titleId = useId();
   const phoneErrorId = useId();
+  const counterId = useId();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -202,11 +210,29 @@ export default function OwnershipLearnMoreForm({
               name="message"
               required
               rows={4}
+              maxLength={OWNERSHIP_CONTACT_MESSAGE_MAX}
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) =>
+                setMessage(e.target.value.slice(0, OWNERSHIP_CONTACT_MESSAGE_MAX))
+              }
+              aria-describedby={counterId}
               className={`${INPUT_CLASS} resize-y border-neutral-200`}
               placeholder={c.projectPlaceholder}
             />
+            <p
+              id={counterId}
+              aria-live="polite"
+              className={`mt-1 text-right text-[11px] tabular-nums ${
+                message.length >= OWNERSHIP_CONTACT_MESSAGE_MAX
+                  ? "font-semibold text-[#046BD9]"
+                  : "text-neutral-400"
+              }`}
+            >
+              {fmt(c.projectCounter, {
+                count: message.length,
+                max: OWNERSHIP_CONTACT_MESSAGE_MAX,
+              })}
+            </p>
           </div>
           {error ? (
             <p className="text-sm text-red-600" role="alert">

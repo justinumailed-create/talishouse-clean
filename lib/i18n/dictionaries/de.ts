@@ -313,11 +313,12 @@ export const de: Dictionary = {
     engageCataloguePage: "Talishouse™ Produktkatalog, Seite {page}",
     engageChange: "Ändern",
     footerPartOf: "ein Teil von",
+    essaySwitcher: "Aufsätze",
   },
 
   bot: {
     name: "TalisBOT",
-    subtitle: "Talispros™-Prozesse",
+    subtitle: "Zusammenfassung – max. 280 Zeichen",
     openAria: "TalisBOT öffnen",
     closeAria: "TalisBOT schließen",
     faq: "FAQ",
@@ -377,8 +378,9 @@ export const de: Dictionary = {
   },
 
   contactForm: {
-    title: "Mehr erfahren",
-    intro: "Erzählen Sie uns von Ihrem Interesse – wir melden uns bei Ihnen.",
+    title: "Kurzübersicht",
+    intro: "Projekt ohne Registrierung vorschlagen – wir melden uns bei Ihnen.",
+    projectCounter: "{count}/{max}",
     thanks: "Vielen Dank – Ihre Nachricht ist unterwegs.",
     advisor: "Ein Talispros™-Berater wird Sie zum Thema {topic} kontaktieren.",
     done: "Fertig",
@@ -406,6 +408,7 @@ export const de: Dictionary = {
     apiErrors: {
       required: "Name, E-Mail, Telefon und Nachricht sind Pflichtfelder.",
       email: "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+      tooLong: "Bitte fassen Sie Ihren Vorschlag in höchstens 280 Zeichen zusammen.",
       save: "Ihre Anfrage konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
     },
   },

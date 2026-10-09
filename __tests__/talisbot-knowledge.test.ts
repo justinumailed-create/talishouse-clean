@@ -35,7 +35,7 @@ describe("TalisBOT Talispros™ knowledge", () => {
     expect(en.bot.faq).toBe("FAQ");
     expect(bot).toContain('href="/talisu#faq"');
     expect(bot).not.toContain("Talispros FAQ");
-    expect(en.bot.subtitle).toBe("Talispros™ processes");
+    expect(en.bot.subtitle).toBe("Summary - max 280 characters");
     expect(bot).toContain("TALISU_MKTS_HEADER_BLUE");
     expect(bot).toContain("OwnershipLearnMoreForm");
     expect(en.bot.getHelp).toBe("Leave contact");

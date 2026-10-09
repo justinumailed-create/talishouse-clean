@@ -2,7 +2,11 @@ import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionaries";
-import TalisUTokenizationEssay from "@/components/talisu/TalisUTokenizationEssay";
+import TalisUEssayRail from "@/components/talisu/TalisUEssayRail";
+import {
+  TALISU_ESSAY_QUERY_PARAM,
+  resolveTalisUEssaySlug,
+} from "@/components/talisu/essay-registry";
 
 export async function generateMetadata() {
   const locale = await getLocale();
@@ -15,8 +19,14 @@ export async function generateMetadata() {
   });
 }
 
-export default async function TalisUHomePage() {
-  const faq = getDictionary(await getLocale()).talisu.faq;
+export default async function TalisUHomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const talisu = getDictionary(await getLocale()).talisu;
+  const faq = talisu.faq;
+  const initialEssay = resolveTalisUEssaySlug((await searchParams)[TALISU_ESSAY_QUERY_PARAM]);
   return (
     <div className="talisu-faq-page mx-auto max-w-[1400px] px-4 py-10 text-neutral-900 sm:px-5 sm:py-14">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-10 lg:items-stretch">
@@ -70,11 +80,19 @@ export default async function TalisUHomePage() {
           </div>
         </section>
 
+        {/* Rail height follows the FAQ column: on lg the inner box is
+            absolutely inset, so essay length never stretches the row and
+            the essay body scrolls inside the card. */}
         <aside
-          className="talisu-essay-column flex h-full min-w-0 flex-col lg:min-h-0 print:block print:h-auto"
-          aria-label="Tokenization essay"
+          className="talisu-essay-column flex min-w-0 flex-col lg:relative lg:min-h-0 print:block print:h-auto"
+          aria-label={talisu.essaySwitcher}
         >
-          <TalisUTokenizationEssay />
+          <div className="talisu-essay-rail-inner flex min-h-0 flex-1 flex-col lg:absolute lg:inset-0 print:static print:block">
+            <TalisUEssayRail
+              initialSlug={initialEssay}
+              switcherLabel={talisu.essaySwitcher}
+            />
+          </div>
         </aside>
       </div>
     </div>
