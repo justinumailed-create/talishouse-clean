@@ -33,5 +33,6 @@ export function isStandaloneAdminPath(pathname: string | null | undefined): bool
  * must never wrap Global Admin.
  */
 export function shouldHidePublicStorefrontChrome(pathname: string | null | undefined): boolean {
-  return isAdminAppPath(pathname);
+  const path = normalizeAppPath(pathname);
+  return isAdminAppPath(path) || path === "/agent" || path.startsWith("/agent/");
 }

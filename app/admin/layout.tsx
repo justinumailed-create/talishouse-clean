@@ -6,6 +6,7 @@ import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { ADMIN_PATHNAME_HEADER } from "@/lib/admin-request-gate";
 import { isProtectedAdminPath, isPublicAdminPath, isStandaloneAdminPath } from "@/lib/admin-paths";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
+import { adminHomePath } from "@/lib/admin-constants";
 import { ADMIN_CONSOLE_METADATA } from "@/lib/admin-seo";
 
 export const metadata: Metadata = ADMIN_CONSOLE_METADATA;
@@ -16,7 +17,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const pathname = (await headers()).get(ADMIN_PATHNAME_HEADER) || "";
 
   if (isPublicAdminPath(pathname) && account) {
-    redirect("/admin/dashboard");
+    redirect(adminHomePath(account));
+  }
+
+  // Agents on a temporary password must change it before using the console.
+  if (account?.access === "agent" && account.mustChangePassword && isProtectedAdminPath(pathname)) {
+    redirect("/agent/change-password");
   }
 
   if (isProtectedAdminPath(pathname) && !isStandaloneAdminPath(pathname)) {
@@ -24,8 +30,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       redirect("/admin/login");
     }
     if (!accountCanAccessAdminPath(account, pathname)) {
-      redirect("/admin/dashboard");
+      redirect(adminHomePath(account));
     }
+  }
+
+  // Standalone /admin/talismaps also requires a hardcoded admin or a granted scope.
+  if (isStandaloneAdminPath(pathname) && account && !accountCanAccessAdminPath(account, pathname)) {
+    redirect(adminHomePath(account));
   }
 
   return <AdminLayoutClient serverAccount={account}>{children}</AdminLayoutClient>;

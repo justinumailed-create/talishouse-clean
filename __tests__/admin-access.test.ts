@@ -63,7 +63,6 @@ describe("admin nav", () => {
       "/admin/notifications",
       "/admin/build-requests",
       "/admin/mapsites",
-      "/admin/pmc",
       "/admin/seo",
       "/admin/talisbooks/bookshelves",
     ]);
@@ -81,10 +80,11 @@ describe("admin nav", () => {
       "/admin/notifications",
       "/admin/build-requests",
       "/admin/mapsites",
-      "/admin/pmc",
       "/admin/seo",
       "/admin/talisbooks/bookshelves",
       "/admin/fast-codes",
+      "/admin/pmc",
+      "/admin/agents",
     ]);
     expect(hrefs).not.toContain("/admin/platform-content");
     expect(hrefs).not.toContain("/admin/content");

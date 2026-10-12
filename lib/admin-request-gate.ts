@@ -22,6 +22,8 @@ export type AdminRequestGateResult =
 export function resolveAdminRequestGate(input: {
   pathname: string | null | undefined;
   adminSessionCookie?: string | null;
+  /** Opaque Agent Admin session token (`agent_session` cookie). */
+  agentSessionCookie?: string | null;
 }): AdminRequestGateResult {
   const pathname = normalizeAppPath(input.pathname);
   if (!isAdminAppPath(pathname)) {
@@ -33,6 +35,13 @@ export function resolveAdminRequestGate(input: {
   }
 
   const account = getAdminAccountByFastCode(input.adminSessionCookie);
+
+  // Agent Admin session token: the Edge runtime cannot read
+  // `agent_admin_sessions`, so let a well-formed token through to the /admin
+  // layout, which validates it (hash, expiry, active agent, scopes) on every request.
+  if (!account && isAgentSessionShape(input.agentSessionCookie)) {
+    return { action: "next" };
+  }
 
   if (isStandaloneAdminPath(pathname)) {
     if (account) {
@@ -50,4 +59,8 @@ export function resolveAdminRequestGate(input: {
   }
 
   return { action: "next" };
+}
+
+function isAgentSessionShape(value: string | null | undefined): boolean {
+  return Boolean(value && /^[A-Za-z0-9_-]{43}$/.test(value));
 }

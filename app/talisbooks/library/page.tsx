@@ -1,3 +1,4 @@
+import { accountHasAdminScope } from "@/lib/admin-constants";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
@@ -44,7 +45,9 @@ export default async function TalisBooksLibraryPage({
     );
   }
   const accountType = params.accountType === "derivative" ? "derivative" : "root";
-  const account = await getAdminSessionAccount();
+  const sessionAccount = await getAdminSessionAccount();
+  // Agent Admins need the talisbooks privilege to manage library books.
+  const account = accountHasAdminScope(sessionAccount, "talisbooks") ? sessionAccount : null;
   const scope = talisbooksScopeFromAdminAccount(account);
   const bookshelf = await getTalisBooksBookshelf({
     accountType,

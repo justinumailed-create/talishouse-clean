@@ -17,6 +17,7 @@
     "@googlemaps/js-api-loader": "^2.1.1",
     "@paypal/react-paypal-js": "^9.1.0",
     "@supabase/supabase-js": "^2.100.1",
+    "bcryptjs": "^3.0.3",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.7.0",
     "maplibre-gl": "^4.7.1",

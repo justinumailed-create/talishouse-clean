@@ -224,10 +224,9 @@ export async function updateMapSiteAdmin(
   }
 
   const supabase = client;
-  const canManageVisitorSubscription = accountHasAdminScope(
-    await getAdminSessionAccount(),
-    "mapsites",
-  );
+  const sessionAccount = await getAdminSessionAccount();
+  const canManageVisitorSubscription =
+    accountHasAdminScope(sessionAccount, "mapsites") && sessionAccount?.access !== "agent";
   const galleryItems = normalizeGalleryItemsForSave(
     input.galleryItems ??
       mapsite.galleryItems ??

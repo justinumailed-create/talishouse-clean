@@ -17,17 +17,17 @@ vi.mock("@/lib/talisbooks/self-service-ebook", () => ({
 }));
 
 vi.mock("@/lib/mapsite-edit-auth", () => ({
-  canEditMapSite: vi.fn(),
+  canManageMapSiteEbooks: vi.fn(),
 }));
 
 import { resolveOnboardingFromRequest, resolveOnboardingFromMapSite } from "@/lib/talispros/resolve-onboarding-from-request";
 import { generateSelfServiceEbook } from "@/lib/talisbooks/self-service-ebook";
-import { canEditMapSite } from "@/lib/mapsite-edit-auth";
+import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
 
 const resolveMock = vi.mocked(resolveOnboardingFromRequest);
 const resolveMapSiteMock = vi.mocked(resolveOnboardingFromMapSite);
 const generateMock = vi.mocked(generateSelfServiceEbook);
-const canEditMock = vi.mocked(canEditMapSite);
+const canEditMock = vi.mocked(canManageMapSiteEbooks);
 
 function tinyPngFile(name = "test.png"): File {
   // 1x1 transparent PNG

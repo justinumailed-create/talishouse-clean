@@ -1,4 +1,5 @@
-import { requireAdminPage } from "@/lib/admin-auth";
+import { getAdminSessionAccount, requireAdminPage } from "@/lib/admin-auth";
+import { agentCanEditMapSite } from "@/lib/mapsite-edit-auth";
 import { listMapSitesForAdmin } from "@/lib/mapsite-service";
 import AdminMapSiteThumbnailCard from "@/components/admin/AdminMapSiteThumbnailCard";
 import AdminFreePinCreditsPanel from "@/components/admin/AdminFreePinCreditsPanel";
@@ -10,13 +11,19 @@ export const dynamic = "force-dynamic";
 
 export default async function AdminMapSitesPage() {
   await requireAdminPage();
-  if (isSupabaseAdminConfigured()) {
+  const account = await getAdminSessionAccount();
+  const isAgent = account?.access === "agent";
+  if (isSupabaseAdminConfigured() && !isAgent) {
     await purgeMapSitesAndBookshelvesWithoutFastCodes(getSupabaseAdmin());
   }
-  const [mapsites, recentFreePinGrants] = await Promise.all([
+  const [allMapSites, recentFreePinGrants] = await Promise.all([
     listMapSitesForAdmin(),
-    listFreePinGrants({ limit: 20 }),
+    isAgent ? Promise.resolve([]) : listFreePinGrants({ limit: 20 }),
   ]);
+  // Agent Admins only see the Mapsites they may edit.
+  const mapsites = isAgent
+    ? allMapSites.filter((mapsite) => agentCanEditMapSite(account, mapsite.fastCode))
+    : allMapSites;
 
   return (
     <div className="space-y-6">
@@ -28,7 +35,7 @@ export default async function AdminMapSitesPage() {
         </p>
       </div>
 
-      <AdminFreePinCreditsPanel initialGrants={recentFreePinGrants} />
+      {isAgent ? null : <AdminFreePinCreditsPanel initialGrants={recentFreePinGrants} />}
 
       {mapsites.length === 0 ? (
         <div className="rounded-xl border border-neutral-200 bg-white p-6 text-sm text-neutral-500">

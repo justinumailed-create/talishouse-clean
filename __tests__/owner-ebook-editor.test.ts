@@ -97,13 +97,13 @@ describe("owner ebook editor routes and gating", () => {
 
   it("enforces ownership on the server", () => {
     const actions = read("app/talispros/mapsite/ebook-editor-actions.ts");
-    expect(actions).toContain("requireMapSiteEditAccess");
+    expect(actions).toContain("requireMapSiteEbookAccess");
     const service = read("lib/talisbooks/owner-ebook-editor.ts");
     expect(service).toContain("assertOwnerBook");
     const editorPage = read("app/talispros/mapsites/[fastCode]/ebooks/[bookId]/page.tsx");
-    expect(editorPage).toContain("canEditMapSite");
+    expect(editorPage).toContain("canManageMapSiteEbooks");
     const createPage = read("app/talispros/mapsites/[fastCode]/ebooks/new/page.tsx");
-    expect(createPage).toContain("canEditMapSite");
+    expect(createPage).toContain("canManageMapSiteEbooks");
     expect(createPage).toContain("MapSiteAdminEbookPanel");
   });
 

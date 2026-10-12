@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { ADMIN_SESSION_COOKIE } from "@/lib/admin-constants";
+import { ADMIN_SESSION_COOKIE, AGENT_SESSION_COOKIE } from "@/lib/admin-constants";
 import {
   ADMIN_PATHNAME_HEADER,
   resolveAdminRequestGate,
@@ -27,6 +27,7 @@ export function middleware(request: NextRequest) {
     const gate = resolveAdminRequestGate({
       pathname: path,
       adminSessionCookie: request.cookies.get(ADMIN_SESSION_COOKIE)?.value,
+      agentSessionCookie: request.cookies.get(AGENT_SESSION_COOKIE)?.value,
     });
 
     if (gate.action === "redirect") {

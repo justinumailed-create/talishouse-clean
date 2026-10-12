@@ -3,14 +3,17 @@ import { accountHasAdminScope } from "./admin-constants";
 
 const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | null }> = [
   { prefix: "/admin/login", scope: null },
-  { prefix: "/admin/talismaps", scope: null },
+  // Agent's own dashboard: any signed-in admin account (page adapts).
+  { prefix: "/admin/agent/page", scope: "agent-pages" },
+  { prefix: "/admin/agents", scope: "agents" },
+  { prefix: "/admin/talismaps", scope: "mapsites" },
   { prefix: "/admin/platform-content", scope: "platform-content" },
   { prefix: "/admin/fast-codes", scope: "fast-codes" },
   { prefix: "/admin/content", scope: "site-content" },
   { prefix: "/admin/build-requests", scope: "build-requests" },
   { prefix: "/admin/marketing", scope: "build-requests" },
   { prefix: "/admin/mapsites", scope: "mapsites" },
-  { prefix: "/admin/pmc", scope: "mapsites" },
+  { prefix: "/admin/pmc", scope: "platform-content" },
   { prefix: "/admin/seo", scope: "mapsites" },
   { prefix: "/admin/talisbooks", scope: "talisbooks" },
   { prefix: "/admin/bookshelves", scope: "talisbooks" },
@@ -20,8 +23,8 @@ const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | nu
   { prefix: "/admin/associates", scope: "full-console" },
   { prefix: "/admin/talisbot", scope: "full-console" },
   { prefix: "/admin/leads-simulation", scope: "full-console" },
-  { prefix: "/admin/leads", scope: "full-console" },
-  { prefix: "/admin/contact-from-leads", scope: "full-console" },
+  { prefix: "/admin/leads", scope: "leads" },
+  { prefix: "/admin/contact-from-leads", scope: "leads" },
   { prefix: "/admin/deals", scope: "full-console" },
   { prefix: "/admin/users", scope: "full-console" },
   { prefix: "/admin/applications", scope: "full-console" },
@@ -39,6 +42,10 @@ export function getRequiredAdminScopeForPath(pathname: string): AdminScope | nul
 
   if (path === "/admin") {
     return "full-console";
+  }
+
+  if (path === "/admin/agent") {
+    return null;
   }
 
   const match = ADMIN_ROUTE_SCOPES.find(

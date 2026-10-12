@@ -1,6 +1,10 @@
 "use server";
 
-import { writeAdminSessionCookie, clearAdminSessionCookie } from "@/lib/admin-auth";
+import {
+  clearAdminSessionCookie,
+  clearAgentSessionCookie,
+  writeAdminSessionCookie,
+} from "@/lib/admin-auth";
 import { normalizeAdminFastCode } from "@/lib/admin-constants";
 
 export async function loginAdminWithFastCodeAction(
@@ -21,4 +25,5 @@ export async function loginAdminWithFastCodeAction(
 
 export async function logoutAdminAction(): Promise<void> {
   await clearAdminSessionCookie();
+  await clearAgentSessionCookie();
 }

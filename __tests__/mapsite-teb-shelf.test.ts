@@ -116,7 +116,7 @@ describe("Paid Mapsite TEB™ unlocks ebook admin", () => {
       join(process.cwd(), "app/talisbooks/fast/[fastCode]/page.tsx"),
       "utf8",
     );
-    expect(page).toContain("canEditMapSite");
+    expect(page).toContain("canManageMapSiteEbooks");
     expect(page).toContain("getTalisBooksBookshelf");
     expect(page).toContain("getPublicTalisBooksBookshelf");
     expect(page).toContain("canManageEbook");

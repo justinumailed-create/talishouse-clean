@@ -135,8 +135,8 @@ describe("retired Supabase email/password admin (/talispros/admin)", () => {
   });
 
   it("serves PMC pins and Forms Manager under /admin", () => {
-    expect(readSource("app/admin/pmc/page.tsx")).toContain('requireAdminScopePage("mapsites")');
-    expect(readSource("app/admin/pmc/actions.ts")).toContain('requireAdminScope("mapsites")');
+    expect(readSource("app/admin/pmc/page.tsx")).toContain('requireAdminScopePage("platform-content")');
+    expect(readSource("app/admin/pmc/actions.ts")).toContain('requireAdminScope("platform-content")');
     expect(readSource("app/admin/forms-manager/page.tsx")).toContain("FormsManagerPage");
   });
 });

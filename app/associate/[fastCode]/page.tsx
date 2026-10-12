@@ -1,6 +1,7 @@
 import { getAssociates } from "@/lib/db";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import AssociateHero from "@/components/associate/AssociateHero";
+import { getAgentByLoginId } from "@/lib/agent-admins";
 
 interface PageConfig {
   contentType: "map" | "pdf" | "image";
@@ -59,6 +60,26 @@ export default async function AssociatePage({ params }: { params: Promise<{ fast
       }
     } catch (err) {
       console.error("Supabase fetch error for associate page:", err);
+    }
+  }
+
+  // Agent Admin landing page (agent_admins, server-side only; active agents).
+  if (!pageConfig) {
+    const agent = await getAgentByLoginId(fastCode, { activeOnly: true }).catch(() => null);
+    if (agent) {
+      pageConfig = {
+        contentType: "map",
+        contentUrl: "",
+        headline: agent.pageHeadline || agent.name,
+        subtext: agent.pageSubtext || agent.pageBio || "",
+        ctaText: agent.pageCta || "Refer a Project",
+        showForm: agent.showContactForm,
+        showVideo: Boolean(agent.videoUrl),
+        videoUrl: agent.videoUrl || "",
+        name: agent.name,
+        email: agent.email || undefined,
+        phone: agent.phone || undefined,
+      };
     }
   }
 

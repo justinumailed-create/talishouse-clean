@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { agentCanEditMapSite } from "@/lib/mapsite-edit-auth";
 import MapSiteAdminEditor from "@/components/talispros-admin/MapSiteAdminEditor";
 import MapSiteAdminMissing from "@/components/talispros-admin/MapSiteAdminMissing";
 import { getAdminSessionAccount, requireAdminScopePage } from "@/lib/admin-auth";
@@ -14,8 +16,11 @@ import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
 
 export const dynamic = "force-dynamic";
 
-async function requireAdminMapSiteEditor() {
-  await requireAdminScopePage("mapsites");
+async function requireAdminMapSiteEditor(fastCode: string) {
+  const account = await requireAdminScopePage("mapsites");
+  if (account.access === "agent" && !agentCanEditMapSite(account, fastCode)) {
+    redirect("/admin/agent");
+  }
 }
 
 export default async function AdminMapSiteEditorPage({
@@ -23,9 +28,8 @@ export default async function AdminMapSiteEditorPage({
 }: {
   params: Promise<{ fastCode: string }>;
 }) {
-  await requireAdminMapSiteEditor();
-
   const { fastCode } = await params;
+  await requireAdminMapSiteEditor(fastCode);
   const { mapsite, error } = await getMapSiteByFastCodeResult(fastCode);
 
   if (!mapsite) {
@@ -34,7 +38,8 @@ export default async function AdminMapSiteEditorPage({
 
   const writesState = getMapSiteAdminWritesState();
   const adminAccount = await getAdminSessionAccount();
-  const canGrantFreePins = accountHasAdminScope(adminAccount, "mapsites");
+  const canGrantFreePins =
+    accountHasAdminScope(adminAccount, "mapsites") && adminAccount?.access !== "agent";
   const [paymentReceived, ebookContext, freePinSnapshot, freePinGrants] = await Promise.all([
     hasCompletedMapSiteActivationPayment({
       email: mapsite.email,

@@ -1,5 +1,5 @@
 import { getAdminSessionAccount } from "@/lib/admin-auth";
-import { canEditMapSite } from "@/lib/mapsite-edit-auth";
+import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
   logOnboardingStep,
@@ -335,7 +335,7 @@ export async function resolveOnboardingFromRequest(
 /**
  * Admin / paid-owner ebook identity from an existing Mapsite FAST Code.
  * Used when there is no Build Request (seeded listings like LRG1).
- * Callers must already have verified `canEditMapSite(fastCode)`.
+ * Callers must already have verified `canManageMapSiteEbooks(fastCode)`.
  */
 export async function resolveOnboardingFromMapSite(
   fastCodeRaw: string | null | undefined,
@@ -565,7 +565,7 @@ export function buildIsolatedBookshelfOnboardingContext(options: {
  * Isolated catalogue bookshelf onboarding.
  * Prefers a linked Mapsite when one exists; otherwise proceeds with the
  * admin FAST Code alone (no Mapsite required).
- * Callers must already have verified `canEditMapSite(fastCode)`.
+ * Callers must already have verified `canManageMapSiteEbooks(fastCode)`.
  */
 export async function resolveOnboardingForIsolatedBookshelf(
   fastCodeRaw: string | null | undefined,
@@ -646,7 +646,7 @@ export async function resolveMapSiteUploadScope(
   if (!fastCode) {
     return { ok: false, error: "This Mapsite has no FAST Code." };
   }
-  if (!(await canEditMapSite(fastCode))) {
+  if (!(await canManageMapSiteEbooks(fastCode))) {
     return { ok: false, error: "Unauthorized." };
   }
 

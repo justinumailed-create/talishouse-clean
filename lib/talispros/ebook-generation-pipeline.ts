@@ -1,7 +1,7 @@
 import { ISOLATED_BOOKSHELF_PATH } from "@/lib/talisbooks/isolated-bookshelf";
 import { resolvePersistedBookTitle } from "@/lib/talisbooks/book-title";
 import { generateSelfServiceEbook } from "@/lib/talisbooks/self-service-ebook";
-import { canEditMapSite } from "@/lib/mapsite-edit-auth";
+import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
 import { buildMapSiteAfterBookHref } from "@/lib/talispros/ebook-choice";
 import {
   resolveOnboardingForIsolatedBookshelf,
@@ -40,7 +40,7 @@ export {
 
 export type RunEbookGenerationInput = {
   requestId: string;
-  /** Admin / owner Mapsite path when no Build Request exists. Never trusted without canEditMapSite. */
+  /** Admin / owner Mapsite path when no Build Request exists. Never trusted without canManageMapSiteEbooks. */
   fastCode?: string | null;
   title: string;
   description: string;
@@ -83,7 +83,7 @@ function emit(
  * Tracked ebook generation job keyed by Build Request ID, or by an editable
  * Mapsite FAST Code when a Build Request was never created.
  * Public generate still requires requestId. Client FAST codes are ignored
- * unless `canEditMapSite` succeeds.
+ * unless `canManageMapSiteEbooks` succeeds.
  * Expects images already optimized + stored when `optimizedImages` is provided.
  */
 export async function runEbookGenerationPipeline(
@@ -137,7 +137,7 @@ export async function runEbookGenerationPipeline(
           if (!editorFastCode) {
             return fail("resolve_request", "Build Request ID is required.");
           }
-          if (!(await canEditMapSite(editorFastCode))) {
+          if (!(await canManageMapSiteEbooks(editorFastCode))) {
             return fail("resolve_request", "Build Request ID is required.");
           }
           resolved = input.isolatedBookshelf
@@ -219,7 +219,7 @@ export async function runEbookGenerationPipeline(
           rm22Template: input.rm22Template,
           rm22SlotHydration: input.rm22SlotHydration,
           replaceBookId: input.replaceBookId,
-          asAdmin: await canEditMapSite(ctx.fastCode),
+          asAdmin: await canManageMapSiteEbooks(ctx.fastCode),
           isolatedBookshelf: Boolean(input.isolatedBookshelf),
           flagIdentity: input.flagIdentity,
         });

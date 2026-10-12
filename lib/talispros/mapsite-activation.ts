@@ -214,7 +214,12 @@ export async function activateMapSiteAfterPayment(
   }
 }
 
-async function ensureMapSiteActiveAfterPayment(options: {
+/**
+ * Shared activation step (Mapsite → active, build request → Mapsite Active).
+ * Stripe/PayPal (via activateMapSiteAfterPayment) and manual cash payments
+ * (lib/manual-payments.ts) all go through here.
+ */
+export async function ensureMapSiteActiveAfterPayment(options: {
   mapsiteId: string;
   requestId?: string | null;
   audience?: string | null;

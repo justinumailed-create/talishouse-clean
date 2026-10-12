@@ -1,5 +1,5 @@
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { canEditMapSite } from "@/lib/mapsite-edit-auth";
+import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
   extensionForOptimizedMime,
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
       if (!(await isAdminAuthenticated())) {
         return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
       }
-      if (!(await canEditMapSite(fastCode))) {
+      if (!(await canManageMapSiteEbooks(fastCode))) {
         return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
       }
       scope = fastCode;

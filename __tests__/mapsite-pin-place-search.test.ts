@@ -14,9 +14,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("next/headers", () => ({ headers: async () => new Headers() }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/mapsite-edit-auth", () => ({
-  requireMapSiteEditAccess: vi.fn(async () => {
-    if (!mocks.authorized.value) throw new Error("denied");
-  }),
+  canManageMapSitePins: vi.fn(async () => mocks.authorized.value),
 }));
 vi.mock("@/lib/stripe", () => ({
   getStripeSecretKey: () => null,

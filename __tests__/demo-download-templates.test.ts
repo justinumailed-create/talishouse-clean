@@ -21,6 +21,11 @@ vi.mock("@/lib/mapsite-edit-auth", () => ({
     const owns = auth.ownerSession === code || auth.registeredCode === code;
     return owns && auth.paidCodes.has(code);
   }),
+  canManageMapSiteEbooks: vi.fn(async (code: string) => {
+    if (auth.admin) return true;
+    const owns = auth.ownerSession === code || auth.registeredCode === code;
+    return owns && auth.paidCodes.has(code);
+  }),
 }));
 
 import { GET } from "@/app/api/templates/[format]/route";
@@ -142,7 +147,7 @@ describe("templates are not public", () => {
       "app/talispros/mapsites/[fastCode]/ebooks/[bookId]/page.tsx",
     ]) {
       const source = readFileSync(join(process.cwd(), page), "utf8");
-      expect(source).toContain("canEditMapSite(fastCode)");
+      expect(source).toContain("canManageMapSiteEbooks(fastCode)");
       expect(source).toContain("<OwnerReplaceImageTemplates");
       expect(source).toContain("getReplaceImageGoogleSlidesCopyUrl()");
     }

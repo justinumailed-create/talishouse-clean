@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import {
   getMapSiteEditToolbarState,
-  requireMapSiteEditAccess,
+  requireMapSiteEbookAccess,
 } from "@/lib/mapsite-edit-auth";
 import { ROUTES } from "@/lib/routes";
 import { setAdminEbookPublishStatus } from "@/lib/talisbooks/admin-ebook-pages";
@@ -33,7 +33,7 @@ async function authorize(fastCodeRaw: string): Promise<{ fastCode: string } | Fa
   const fastCode = fastCodeRaw?.trim().toLowerCase() || "";
   if (!fastCode) return { success: false, error: "FAST Code™ is required." };
   try {
-    await requireMapSiteEditAccess(fastCode);
+    await requireMapSiteEbookAccess(fastCode);
   } catch {
     return { success: false, error: "Only the paid Mapsite owner can edit these ebooks." };
   }

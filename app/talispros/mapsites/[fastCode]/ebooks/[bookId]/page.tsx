@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import OwnerEbookEditor from "@/components/talispros/ebook-editor/OwnerEbookEditor";
 import OwnerReplaceImageTemplates from "@/components/talispros/ebook-editor/OwnerReplaceImageTemplates";
 import { getReplaceImageGoogleSlidesCopyUrl } from "@/lib/talispros/replace-image-templates.server";
-import { canEditMapSite } from "@/lib/mapsite-edit-auth";
+import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
 import { CLIENT_LOGIN_PATH } from "@/lib/mapsite-account-session";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { loadOwnerEbook } from "@/lib/talisbooks/owner-ebook-editor";
@@ -26,7 +26,7 @@ export default async function OwnerEbookEditorPage({
   const { fastCode, bookId } = await params;
   const query = await searchParams;
   // Owner (paid) or Mapsite admin only — same gate as PIN Dashboard actions.
-  if (!(await canEditMapSite(fastCode))) {
+  if (!(await canManageMapSiteEbooks(fastCode))) {
     redirect(CLIENT_LOGIN_PATH);
   }
 

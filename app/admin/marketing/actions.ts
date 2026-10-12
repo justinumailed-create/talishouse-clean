@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { hasAdminScope, isAdminAuthenticated } from "@/lib/admin-auth";
 import { publishBuildMapSite } from "@/lib/build-mapsite-publish";
 import { resolvePinStyleExtras } from "@/lib/build-request-pin-style-notes";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
@@ -17,6 +17,8 @@ type ActionResult = { ok: boolean; error?: string };
 
 async function unauthorizedIfNotAdmin(): Promise<ActionResult | null> {
   if (await isAdminAuthenticated()) return null;
+  // Agent Admins with the build-requests privilege.
+  if (await hasAdminScope("build-requests")) return null;
   return { ok: false, error: "Unauthorized" };
 }
 

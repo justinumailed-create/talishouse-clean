@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { logoutAdminAction } from "@/app/admin/actions";
-import type { AdminAccount } from "@/lib/admin-constants";
+import { adminHomePath, type AdminAccount } from "@/lib/admin-constants";
 import { clearAdminSession } from "@/lib/fast-code";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
 import { getAdminNavItems, isAdminNavItemActive, type AdminNavItem } from "@/lib/admin-nav";
@@ -20,12 +20,14 @@ function AdminSidebar({
   hidden,
   navItems,
   signedInAs,
+  serverAccountIsAgent,
 }: {
   isOpen: boolean;
   onClose: () => void;
   hidden: boolean;
   navItems: AdminNavItem[];
   signedInAs: string | null;
+  serverAccountIsAgent: boolean;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -61,7 +63,7 @@ function AdminSidebar({
           <div>
             <h1 className="text-base font-semibold tracking-tight">Talispros™</h1>
             <p className="text-[10px] text-[#1E4ED8] font-bold uppercase tracking-widest mt-1">
-              Admin Console
+              {serverAccountIsAgent ? "Agent Console" : "Admin Console"}
             </p>
             {signedInAs ? (
               <p className="text-[11px] text-[#6e6e73] mt-1">Signed in as {signedInAs}</p>
@@ -173,7 +175,7 @@ export default function AdminLayoutClient({
 
   useEffect(() => {
     if (isLoginPage && serverAccount) {
-      router.replace("/admin/dashboard");
+      router.replace(adminHomePath(serverAccount));
       return;
     }
     if (isProtectedAdminRoute && !serverAccount) {
@@ -181,7 +183,7 @@ export default function AdminLayoutClient({
       return;
     }
     if (isProtectedAdminRoute && serverAccount && !canAccessCurrentPath) {
-      router.replace("/admin/dashboard");
+      router.replace(adminHomePath(serverAccount));
     }
   }, [
     canAccessCurrentPath,
@@ -209,7 +211,7 @@ export default function AdminLayoutClient({
     return <>{children}</>;
   }
 
-  const navItems = serverAccount ? getAdminNavItems(serverAccount.access) : [];
+  const navItems = serverAccount ? getAdminNavItems(serverAccount.access, serverAccount.scopes) : [];
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
@@ -220,6 +222,7 @@ export default function AdminLayoutClient({
           hidden={isLoginPage || !serverAccount}
           navItems={navItems}
           signedInAs={serverAccount?.name ?? null}
+          serverAccountIsAgent={serverAccount?.access === "agent"}
         />
 
         <div className="flex-1 flex flex-col min-w-0">

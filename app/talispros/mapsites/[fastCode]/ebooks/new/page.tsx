@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import MapSiteAdminEbookPanel from "@/components/talispros-admin/MapSiteAdminEbookPanel";
 import OwnerReplaceImageTemplates from "@/components/talispros/ebook-editor/OwnerReplaceImageTemplates";
 import { getReplaceImageGoogleSlidesCopyUrl } from "@/lib/talispros/replace-image-templates.server";
-import { canEditMapSite } from "@/lib/mapsite-edit-auth";
+import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
 import { CLIENT_LOGIN_PATH } from "@/lib/mapsite-account-session";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
@@ -24,7 +24,7 @@ export default async function OwnerEbookCreatePage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { fastCode } = await params;
-  if (!(await canEditMapSite(fastCode))) {
+  if (!(await canManageMapSiteEbooks(fastCode))) {
     redirect(CLIENT_LOGIN_PATH);
   }
   const { mapsite } = await getMapSiteByFastCodeResult(fastCode);

@@ -21,7 +21,9 @@ export type FreePinAdminActionResult = {
 
 async function requireFreePinAdmin(): Promise<AdminAccount | null> {
   try {
-    return await requireAdminScope("mapsites");
+    const account = await requireAdminScope("mapsites");
+    // Free PIN credits are platform money — never delegated to Agent Admins.
+    return account.access === "agent" ? null : account;
   } catch {
     return null;
   }

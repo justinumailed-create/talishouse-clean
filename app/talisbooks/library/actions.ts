@@ -1,4 +1,5 @@
 "use server";
+import { accountHasAdminScope } from "@/lib/admin-constants";
 
 import { revalidatePath } from "next/cache";
 import {
@@ -18,7 +19,7 @@ import {
 } from "@/lib/talisbooks/admin-ebook-pages";
 import { sendEbookCompleted } from "@/lib/email";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
-import { canEditMapSite } from "@/lib/mapsite-edit-auth";
+import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { talisbooksScopeFromAdminAccount } from "@/lib/talisbooks/library";
 import {
@@ -34,7 +35,7 @@ function absoluteEbookUrl(viewerPath: string): string {
 async function requireAdminEbookAccess(fastCode: string): Promise<
   { ok: true } | { ok: false; error: string }
 > {
-  if (!(await canEditMapSite(fastCode))) {
+  if (!(await canManageMapSiteEbooks(fastCode))) {
     return { ok: false, error: "Unauthorized." };
   }
   return { ok: true };
@@ -53,7 +54,9 @@ export async function deleteLibraryEbookAction(bookId: string): Promise<{
   success: boolean;
   error?: string;
 }> {
-  const account = await getAdminSessionAccount();
+  const sessionAccount = await getAdminSessionAccount();
+  // Agent Admins need the talisbooks privilege to manage library books.
+  const account = accountHasAdminScope(sessionAccount, "talisbooks") ? sessionAccount : null;
   if (!account) {
     return { success: false, error: "Unauthorized." };
   }

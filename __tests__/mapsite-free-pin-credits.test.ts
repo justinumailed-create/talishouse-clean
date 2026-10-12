@@ -24,7 +24,7 @@ vi.mock("next/headers", () => ({
 }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("@/lib/mapsite-edit-auth", () => ({
-  requireMapSiteEditAccess: vi.fn(async () => undefined),
+  canManageMapSitePins: vi.fn(async () => true),
 }));
 vi.mock("@/lib/stripe", () => ({
   getStripeSecretKey: () => mocks.stripeKey.value,

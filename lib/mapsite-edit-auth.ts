@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
-import { isAdminAuthenticated } from "./admin-auth";
+import { getAdminSessionAccount, isAdminAuthenticated } from "./admin-auth";
+import { accountHasAdminScope, type AdminAccount, type AdminScope } from "./admin-constants";
 import {
   MAPSITE_OWNER_COOKIE,
   MAPSITE_OWNER_MAX_AGE,
@@ -30,14 +31,59 @@ export async function isMapSiteAdmin(): Promise<boolean> {
   return isAdminAuthenticated();
 }
 
+/**
+ * Agent Admin holding `scope` (default `mapsites`) for this FAST code. When the
+ * agent has assigned Mapsites, only those FAST codes qualify; empty means all.
+ */
+export function agentCanEditMapSite(
+  account: AdminAccount | null | undefined,
+  fastCode: string,
+  scope: AdminScope = "mapsites",
+): boolean {
+  if (!account || account.access !== "agent") return false;
+  if (!accountHasAdminScope(account, scope)) return false;
+  const assigned = account.assignedMapSites ?? [];
+  if (assigned.length === 0) return true;
+  return assigned.includes(normalizeFastCode(fastCode));
+}
+
 export async function canEditMapSite(fastCode: string): Promise<boolean> {
   if (await isMapSiteAdmin()) return true;
+  if (agentCanEditMapSite(await getAdminSessionAccount(), fastCode)) return true;
   const state = await getMapSiteEditToolbarState(fastCode);
   if (!state.isOwner) return false;
   return hasCompletedMapSiteActivationPayment({
     fastCode,
     reconcileFromStripe: true,
   });
+}
+
+async function canOwnerManage(fastCode: string): Promise<boolean> {
+  const state = await getMapSiteEditToolbarState(fastCode);
+  if (!state.isOwner) return false;
+  return hasCompletedMapSiteActivationPayment({ fastCode, reconcileFromStripe: true });
+}
+
+/** Ebook create/upload/attach: Global Admin, agent with `ebooks`, or paid owner. */
+export async function canManageMapSiteEbooks(fastCode: string): Promise<boolean> {
+  if (await isMapSiteAdmin()) return true;
+  const account = await getAdminSessionAccount();
+  if (agentCanEditMapSite(account, fastCode, "ebooks")) return true;
+  if (agentCanEditMapSite(account, fastCode, "mapsites")) return true;
+  return canOwnerManage(fastCode);
+}
+
+export async function requireMapSiteEbookAccess(fastCode: string): Promise<void> {
+  if (!(await canManageMapSiteEbooks(fastCode))) {
+    throw new Error("Unauthorized");
+  }
+}
+
+/** PIN placement: Global Admin, agent with `pins`, or paid owner. */
+export async function canManageMapSitePins(fastCode: string): Promise<boolean> {
+  if (await isMapSiteAdmin()) return true;
+  if (agentCanEditMapSite(await getAdminSessionAccount(), fastCode, "pins")) return true;
+  return canOwnerManage(fastCode);
 }
 
 export async function requireMapSiteEditAccess(fastCode: string): Promise<void> {
@@ -104,7 +150,14 @@ export interface MapSiteEditToolbarState {
 export async function getMapSiteEditToolbarState(
   fastCode: string
 ): Promise<MapSiteEditToolbarState> {
-  const isAdmin = await isMapSiteAdmin();
+  const account = await getAdminSessionAccount();
+  // Agents holding a Mapsite privilege for this code get the edit toolbar;
+  // destructive/pricing actions stay server-side restricted to Global Admin.
+  const isAdmin =
+    (await isMapSiteAdmin()) ||
+    (["mapsites", "ebooks", "pins"] as const).some((scope) =>
+      agentCanEditMapSite(account, fastCode, scope),
+    );
   const ownerSession = await getMapSiteOwnerSession();
   const registeredFastCode = await getRegisteredMapSiteFastCode();
   const target = normalizeFastCode(fastCode);

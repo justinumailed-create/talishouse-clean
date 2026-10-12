@@ -13,7 +13,7 @@ import {
   bookshelfOgMetadataImage,
   bookshelfSeoCopy,
 } from "@/lib/talispros/mapsite-og-image";
-import { canEditMapSite } from "@/lib/mapsite-edit-auth";
+import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +58,7 @@ export default async function FastCodeBookshelfPage({
   const { fastCode } = await params;
   const code = fastCode.trim();
   // Same owner/admin gate as Mapsite edit + library ebook actions — no parallel auth.
-  const canManageEbook = code ? await canEditMapSite(code) : false;
+  const canManageEbook = code ? await canManageMapSiteEbooks(code) : false;
 
   const bookshelf = canManageEbook
     ? await getTalisBooksBookshelf({ fastCode: code || null })

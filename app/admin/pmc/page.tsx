@@ -7,7 +7,7 @@ import PmcPinsAdminEditor from "@/components/talispros-admin/PmcPinsAdminEditor"
 export const dynamic = "force-dynamic";
 
 export default async function TalisprosPmcAdminPage() {
-  await requireAdminScopePage("mapsites");
+  await requireAdminScopePage("platform-content");
   const [pins, claimedMapSites] = await Promise.all([
     listPmcRegionalPins(),
     listPmcClaimedMapSites(),

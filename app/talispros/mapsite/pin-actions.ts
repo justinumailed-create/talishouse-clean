@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { requireMapSiteEditAccess } from "@/lib/mapsite-edit-auth";
+import { canManageMapSitePins } from "@/lib/mapsite-edit-auth";
 import { getStripeClient, getStripeSecretKey } from "@/lib/stripe";
 import {
   ADDITIONAL_PINS_CHECKOUT_PURPOSE,
@@ -57,12 +57,8 @@ async function resolveAppOrigin(): Promise<string> {
 }
 
 async function authorizePinEdit(fastCode: string): Promise<PinActionError | null> {
-  try {
-    await requireMapSiteEditAccess(fastCode);
-    return null;
-  } catch {
-    return { error: "Only the Mapsite owner can buy or place PINs." };
-  }
+  if (await canManageMapSitePins(fastCode)) return null;
+  return { error: "Only the Mapsite owner can buy or place PINs." };
 }
 
 export type AdditionalPinCheckoutResult =

@@ -71,7 +71,7 @@ describe("Mapsite admin ebook editor", () => {
     expect(generate).toContain("embedded = false");
     expect(generate).toContain("Talisbook™ template");
     expect(generate).toContain("loadRm22Template");
-    expect(pipeline).toContain("asAdmin: await canEditMapSite(ctx.fastCode)");
+    expect(pipeline).toContain("asAdmin: await canManageMapSiteEbooks(ctx.fastCode)");
     expect(generate).toContain("replaceBookId");
     expect(panel).toContain("Edit existing");
     expect(panel).toContain("Create another");

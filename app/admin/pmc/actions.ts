@@ -11,7 +11,7 @@ import {
 export async function savePmcRegionalPinAction(
   update: PmcRegionalPinUpdate
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  await requireAdminScope("mapsites");
+  await requireAdminScope("platform-content");
   const result = await upsertPmcRegionalPin(update);
   if (!result.ok) return result;
   revalidatePath("/talispros/mapsite");
@@ -22,7 +22,7 @@ export async function savePmcRegionalPinAction(
 export async function savePmcRegionalPinsAction(
   updates: PmcRegionalPinUpdate[]
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  await requireAdminScope("mapsites");
+  await requireAdminScope("platform-content");
   const result = await upsertPmcRegionalPins(updates);
   if (!result.ok) return result;
   revalidatePath("/talispros/mapsite");
