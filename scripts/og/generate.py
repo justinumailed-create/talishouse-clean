@@ -86,7 +86,15 @@ def card(lang, kicker, lines, chips, footer, photo, out, panel_bg=BLUE, wordmark
     im.save(out, quality=86, progressive=True, optimize=True)
 
 def alt_text(lang, photo, lines):
-    head = " ".join(l for l in lines if l)
+    head = ""
+    for l in (l for l in lines if l):
+        if head.endswith("-"):
+            # Soft line-break hyphen: "Produkt-" + "katalog" -> "Produktkatalog".
+            head = (head[:-1] + l) if l[:1].islower() else head + l
+        else:
+            head += (" " if head else "") + l
+    if head.endswith("-"):
+        head = head[:-1]
     who = photo[3] if photo and photo[3] else None
     if lang == "en":
         return f"{who} with the Talispros™ tree logo: {head}" if who else f"Talispros™ tree logo: {head}"
