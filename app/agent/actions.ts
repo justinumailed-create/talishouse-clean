@@ -49,12 +49,18 @@ export async function agentChangePasswordAction(
   if (!account || account.access !== "agent" || !account.agentId) {
     return { ok: false, error: "Please sign in again." };
   }
-  const result = await changeOwnAgentPassword(
-    account.agentId,
-    String(currentPassword || ""),
-    String(newPassword || ""),
-    await readAgentSessionToken(),
-  );
+  let result: Awaited<ReturnType<typeof changeOwnAgentPassword>>;
+  try {
+    result = await changeOwnAgentPassword(
+      account.agentId,
+      String(currentPassword || ""),
+      String(newPassword || ""),
+      await readAgentSessionToken(),
+    );
+  } catch (err) {
+    console.error("[agent/change-password] failed", err);
+    return { ok: false, error: "Could not update your password. Please try again." };
+  }
   if (!result.ok) return result;
   return { ok: true, next: "/admin/agent" };
 }

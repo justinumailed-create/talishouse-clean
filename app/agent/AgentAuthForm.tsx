@@ -167,7 +167,6 @@ function RuleItem({ ok, label }: { ok: boolean; label: string }) {
 }
 
 export function AgentChangePasswordForm() {
-  const router = useRouter();
   const ids = useId();
   const errorId = `${ids}-error`;
   const rulesId = `${ids}-rules`;
@@ -175,7 +174,7 @@ export function AgentChangePasswordForm() {
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const [pending, setSaving] = useState(false);
 
   const results = PASSWORD_RULES.map((rule) => rule.test(next));
   const metCount = results.filter(Boolean).length;
@@ -189,19 +188,29 @@ export function AgentChangePasswordForm() {
       aria-describedby={errorId}
       onSubmit={(e) => {
         e.preventDefault();
+        if (pending) return;
         if (!current) return setError("Enter your current (temporary) password.");
         if (!strong) return setError("Your new password doesn’t meet all the requirements yet.");
         if (next !== confirm) return setError("New passwords do not match.");
         setError(null);
-        startTransition(async () => {
-          const result = await agentChangePasswordAction(current, next);
-          if (!result.ok) {
-            setError(result.error);
-            return;
+        setSaving(true);
+        void (async () => {
+          try {
+            const result = await agentChangePasswordAction(current, next);
+            if (!result || !result.ok) {
+              setError(result?.error || "Could not update your password. Please try again.");
+              setSaving(false);
+              return;
+            }
+            // Hard navigation: the session's must-change flag is re-read on a fresh
+            // request, and a soft router transition across /agent -> /admin layouts
+            // could leave the button stuck on "Saving…".
+            window.location.assign(result.next || "/admin/agent");
+          } catch {
+            setError("Network error — your password may not have been saved. Please try again.");
+            setSaving(false);
           }
-          router.replace(result.next);
-          router.refresh();
-        });
+        })();
       }}
     >
       <ErrorBanner id={errorId} message={error} />
