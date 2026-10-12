@@ -1,13 +1,10 @@
-import { createTalisUMetadata } from "@/lib/talisu/seo";
 import SectionShell from "@/components/talisu/SectionShell";
 import SeaCansLocalNav from "@/components/talisu/SeaCansLocalNav";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata = createTalisUMetadata({
-  title: "TalisU Sea-Cans | Blog",
-  description: "TalisU Sea-Cans blog — coming soon.",
-  path: "/talisu/blog",
-  private: true,
-});
+export async function generateMetadata() {
+  return pageMetadata("/talisu/blog");
+}
 
 /** Empty shell — no broken RSS feed. */
 export default function TalisUBlogStubPage() {

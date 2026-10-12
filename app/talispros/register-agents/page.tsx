@@ -1,17 +1,11 @@
-import type { Metadata } from "next";
-import { createMetadata } from "@/lib/seo";
 import RegisterAgentsClient from "@/components/talispros/RegisterAgentsClient";
-import { REGISTER_AGENTS_PATH } from "@/lib/talispros/register-agents";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/register-agents");
+}
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = createMetadata({
-  title: "Register Your Agents | Talispros™",
-  description:
-    "After Root Account™ payment, register Derivative Account™ agents under your FAST Code™.",
-  path: REGISTER_AGENTS_PATH,
-  private: true,
-});
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

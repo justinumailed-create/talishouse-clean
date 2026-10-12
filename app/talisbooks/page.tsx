@@ -1,24 +1,14 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import { getPublicTalisBooksBookshelf } from "@/lib/talisbooks/library";
-import { createMetadata } from "@/lib/seo";
-import {
-  bookshelfOgMetadataImage,
-  bookshelfSeoCopy,
-} from "@/lib/talispros/mapsite-og-image";
 import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
 import { ROUTES } from "@/lib/routes";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
-const publicShelfCopy = bookshelfSeoCopy({});
+export async function generateMetadata() {
+  return pageMetadata("/talisbooks");
+}
 
-export const metadata: Metadata = createMetadata({
-  title: publicShelfCopy.title,
-  description:
-    "Explore Talisbooks™ — browse digital lookbooks and branded publications on the standing-book bookshelf. Mapsite pins your place on the map so buyers and partners can find your story.",
-  path: "/talisbooks",
-  image: bookshelfOgMetadataImage(publicShelfCopy.title),
-});
 
 export const dynamic = "force-dynamic";
 

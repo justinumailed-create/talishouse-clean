@@ -1,16 +1,13 @@
-import type { Metadata } from "next";
-import { createMetadata } from "@/lib/seo";
 import { parseRegistrationMarket } from "@/lib/registration-market";
 import { CLAIM_A_MARKET_PAGE } from "@/lib/talispros/market-pages";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 import TalisprosMarketPageLayout from "@/components/talispros/TalisprosMarketPageLayout";
 import ClaimMarketRegistrationClient from "@/components/talispros/ClaimMarketRegistrationClient";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata: Metadata = createMetadata({
-  title: CLAIM_A_MARKET_PAGE.metadataTitle,
-  description: CLAIM_A_MARKET_PAGE.whyBody,
-  path: `/talispros/markets/${CLAIM_A_MARKET_PAGE.slug}`,
-});
+export async function generateMetadata() {
+  return pageMetadata("/talispros/markets/claim-a-market");
+}
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

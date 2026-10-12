@@ -1,5 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/catalog");
+}
 
 /**
  * Talishouse e-commerce product line (storefront).

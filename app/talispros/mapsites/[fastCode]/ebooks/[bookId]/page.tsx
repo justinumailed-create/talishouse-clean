@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import OwnerEbookEditor from "@/components/talispros/ebook-editor/OwnerEbookEditor";
 import OwnerReplaceImageTemplates from "@/components/talispros/ebook-editor/OwnerReplaceImageTemplates";
@@ -8,13 +7,13 @@ import { CLIENT_LOGIN_PATH } from "@/lib/mapsite-account-session";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { loadOwnerEbook } from "@/lib/talisbooks/owner-ebook-editor";
 import { safeMapSiteBackHref } from "@/lib/talispros/owner-ebook-routes";
+import { adminMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return adminMetadata("eBook Editor");
+}
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = {
-  title: "Ebook Editor · Talispros™",
-  robots: { index: false, follow: false },
-};
 
 export default async function OwnerEbookEditorPage({
   params,

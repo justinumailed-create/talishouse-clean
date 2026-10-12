@@ -7,6 +7,11 @@ import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
+import { adminMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return adminMetadata("Mapsite Editor");
+}
 
 export const dynamic = "force-dynamic";
 

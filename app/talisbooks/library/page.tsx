@@ -1,5 +1,4 @@
 import { accountHasAdminScope } from "@/lib/admin-constants";
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
@@ -7,22 +6,13 @@ import {
   getTalisBooksBookshelf,
   talisbooksScopeFromAdminAccount,
 } from "@/lib/talisbooks/library";
-import { TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
-import { createMetadata } from "@/lib/seo";
-import {
-  bookshelfOgMetadataImage,
-} from "@/lib/talispros/mapsite-og-image";
 import { mapsiteBackFromScheduleHref } from "@/lib/mapsite-layout";
 import { ROUTES } from "@/lib/routes";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata: Metadata = createMetadata({
-  title: `Library | ${TALISBOOKS_PRODUCT_NAME}`,
-  description:
-    "Public Talisbooks™ bookshelf of created FAST-linked lookbooks — search, sort, and open covers in the viewer.",
-  path: "/talisbooks/library",
-  private: true,
-  image: bookshelfOgMetadataImage(`Library | ${TALISBOOKS_PRODUCT_NAME}`),
-});
+export async function generateMetadata() {
+  return pageMetadata("/talisbooks/library");
+}
 
 export const dynamic = "force-dynamic";
 

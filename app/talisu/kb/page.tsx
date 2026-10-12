@@ -1,20 +1,11 @@
-import { createTalisUMetadata } from "@/lib/talisu/seo";
-import { getLocale, getT } from "@/lib/i18n/server";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getT } from "@/lib/i18n/server";
 import SectionShell from "@/components/talisu/SectionShell";
 import TalisUKbPasswordGate from "@/components/talisu/TalisUKbPasswordGate";
 import TalisUKbDashboard from "@/components/talisu/TalisUKbDashboard";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
 export async function generateMetadata() {
-  const locale = await getLocale();
-  const m = getDictionary(locale).meta.talisuKb;
-  return createTalisUMetadata({
-    title: m.title,
-    description: m.description,
-    path: "/talisu/kb",
-    private: true,
-    locale,
-  });
+  return pageMetadata("/talisu/kb");
 }
 
 /**

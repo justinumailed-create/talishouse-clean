@@ -1,6 +1,4 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { createMetadata } from "@/lib/seo";
 import { parseRegistrationMarket } from "@/lib/registration-market";
 import {
   accountTypeForAudience,
@@ -39,16 +37,13 @@ import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
 import MapSitePmcApplication from "@/components/talispros/mapsite/MapSitePmcApplication";
 import MapSiteOnboardingEntry from "@/components/talispros/mapsite/MapSiteOnboardingEntry";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/mapsite");
+}
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = createMetadata({
-  title: "Talispros™ Mapsite",
-  description:
-    "Claim your market on the Talispros™ Mapsite — the fullscreen map application for FSBO, builders, and real estate professionals.",
-  path: "/talispros/mapsite",
-  image: false,
-});
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

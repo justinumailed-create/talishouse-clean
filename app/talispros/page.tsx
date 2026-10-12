@@ -2,6 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import FastCodeSidebarCard from "@/components/talispros/FastCodeSidebarCard";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros");
+}
 
 export default function TalisprosWelcomePage() {
   return (

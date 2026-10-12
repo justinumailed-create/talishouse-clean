@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import AdminLayoutClient from "@/components/admin/AdminLayoutClient";
@@ -7,9 +6,12 @@ import { ADMIN_PATHNAME_HEADER } from "@/lib/admin-request-gate";
 import { isProtectedAdminPath, isPublicAdminPath, isStandaloneAdminPath } from "@/lib/admin-paths";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
 import { adminHomePath } from "@/lib/admin-constants";
-import { ADMIN_CONSOLE_METADATA } from "@/lib/admin-seo";
+import { adminMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata: Metadata = ADMIN_CONSOLE_METADATA;
+export async function generateMetadata() {
+  return adminMetadata();
+}
+
 export const dynamic = "force-dynamic";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

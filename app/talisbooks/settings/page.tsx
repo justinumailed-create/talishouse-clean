@@ -1,6 +1,11 @@
 import { Settings } from "lucide-react";
 import TalisBooksEmptyState from "@/components/talisbooks/platform/TalisBooksEmptyState";
 import TalisBooksPageHeader from "@/components/talisbooks/platform/TalisBooksPageHeader";
+import { adminMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return adminMetadata("Talisbooks™ Settings");
+}
 
 export default function TalisBooksSettingsPage() {
   return (

@@ -1,5 +1,3 @@
-import type { Metadata } from "next";
-import { createMetadata } from "@/lib/seo";
 import EbookGenerateClient from "@/components/talispros/EbookGenerateClient";
 import { resolveOnboardingFromRequest } from "@/lib/talispros/resolve-onboarding-from-request";
 import { resolveMapSiteLogoUrlForServer } from "@/lib/talispros/mapsite-branding-service";
@@ -8,20 +6,16 @@ import {
   logOnboardingStep,
   onboardingNow,
 } from "@/lib/onboarding-timing";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/ebook-generate");
+}
 
 export const dynamic = "force-dynamic";
 
 /** Image encode + storage uploads need more than the default serverless window. */
 export const maxDuration = 300;
-
-export const metadata: Metadata = createMetadata({
-  title: "Generate E-Book | Talispros™",
-  description:
-    "Generate your own Talisbooks™ E-Book from property images, title, description, and location — no payment required.",
-  path: "/talispros/ebook-generate",
-  private: true,
-  image: false,
-});
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

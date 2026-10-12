@@ -1,3 +1,4 @@
+import { getLocale } from "@/lib/i18n/server";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
@@ -40,6 +41,7 @@ export async function generateMetadata({
   if (isAllPinsFastCode(code)) {
     const copy = allpinsSeoCopy();
     return createMetadata({
+      locale: await getLocale(),
       title: copy.title.replace(" | Mapsite", " map | Mapsite"),
       description: copy.description,
       path: `/mapsite/${code}/map`,
@@ -62,6 +64,7 @@ export async function generateMetadata({
     live.description ||
     `Full-screen Mapsite map and PIN for ${baseTitle}.`;
   return createMetadata({
+      locale: await getLocale(),
     title,
     description,
     path: `/mapsite/${code}/map`,

@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/associate-status");
+}
 
 export default function AssociateStatusPage() {
   return (

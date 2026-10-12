@@ -1,3 +1,4 @@
+import { getLocale } from "@/lib/i18n/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
@@ -33,6 +34,7 @@ export async function generateMetadata({
   if (isAllPinsFastCode(fastCode)) {
     const copy = bookshelfSeoCopy({ isolatedAllPins: true });
     return createMetadata({
+      locale: await getLocale(),
       title: copy.title,
       description: copy.description,
       path,
@@ -45,6 +47,7 @@ export async function generateMetadata({
     fields?.propertyTitle?.trim() || fields?.propertyAddress?.trim() || null;
   const copy = bookshelfSeoCopy({ fastCode: code, place });
   return createMetadata({
+      locale: await getLocale(),
     title: copy.title,
     description: copy.description,
     path,

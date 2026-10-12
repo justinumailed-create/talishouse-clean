@@ -1,3 +1,9 @@
+import { adminMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return adminMetadata("Access Denied");
+}
+
 export default function MarketingUnauthorizedPage() {
   return (
     <div className="min-h-screen bg-[#f5f5f7] flex items-center justify-center px-5">

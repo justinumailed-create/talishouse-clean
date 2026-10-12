@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
 import BuildMapSiteClient from "./BuildMapSiteClient";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/build-mapsite");
+}
 
 export default async function BuildMapSitePage({
   searchParams,

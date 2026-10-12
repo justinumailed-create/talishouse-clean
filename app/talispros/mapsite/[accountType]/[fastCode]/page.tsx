@@ -1,3 +1,4 @@
+import { getLocale } from "@/lib/i18n/server";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { createMetadata } from "@/lib/seo";
@@ -87,6 +88,7 @@ export async function generateMetadata({
   if (isAllPinsFastCode(fastCode)) {
     const copy = allpinsSeoCopy();
     return createMetadata({
+      locale: await getLocale(),
       title: copy.title,
       description: copy.description,
       path,
@@ -104,6 +106,7 @@ export async function generateMetadata({
   const title = fields?.metaTitle?.trim() || live.title;
   const description = fields?.metaDescription?.trim() || live.description;
   return createMetadata({
+      locale: await getLocale(),
     title,
     description,
     path,

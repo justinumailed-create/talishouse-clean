@@ -2,6 +2,11 @@ import Link from "next/link";
 import { Check, ArrowRight } from "lucide-react";
 import { formatCAD } from "@/utils/currency";
 import FastCodeSidebarCard from "@/components/talispros/FastCodeSidebarCard";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/claim-a-market");
+}
 
 const BENEFITS = [
   {

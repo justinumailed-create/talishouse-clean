@@ -2,6 +2,11 @@ import RahulBuildAssistClient from "@/components/talispros/RahulBuildAssistClien
 import TalisprosMarketPageLayout from "@/components/talispros/TalisprosMarketPageLayout";
 import { parseRegistrationMarket } from "@/lib/registration-market";
 import { CLAIM_A_MARKET_PAGE } from "@/lib/talispros/market-pages";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/build-mapsite/assisted");
+}
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

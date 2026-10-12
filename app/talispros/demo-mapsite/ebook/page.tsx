@@ -1,20 +1,14 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { createMetadata } from "@/lib/seo";
 import DemoEbookGenerateClient from "@/components/talispros/demo-mapsite/DemoEbookGenerateClient";
 import { loadDemoMapSiteForEbook } from "@/lib/talispros/demo-mapsite-service";
-import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/demo-mapsite/ebook");
+}
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
-
-export const metadata: Metadata = createMetadata({
-  title: "Demo Talisbook™ | Talispros™",
-  description:
-    "Extract the pinned Talispros eBook PDF, optimize its pages, and generate a demonstration Talisbook™.",
-  path: `${DEMO_MAPSITE_BUILD_PATH}/ebook`,
-  image: false,
-});
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

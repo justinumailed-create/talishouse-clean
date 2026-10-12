@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { ExplanationSections, INVESTOR_BULLETS } from "../shared";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/start/investor");
+}
 
 export default function InvestorPage() {
   return (

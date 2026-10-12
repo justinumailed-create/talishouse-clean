@@ -1,18 +1,12 @@
-import type { Metadata } from "next";
 import { requireMarketingManagerPage } from "@/lib/marketing-manager-auth";
-import { createMetadata } from "@/lib/seo";
-import { MARKETING_ADMIN_PATH } from "@/lib/mapsite-account-session";
 import MarketingAdminQueue from "./MarketingAdminQueue";
+import { adminMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return adminMetadata("Registrations");
+}
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = createMetadata({
-  title: "Registrations | Marketing Manager | Talispros™",
-  description:
-    "Review market registrations, create Mapsites, and send payment links.",
-  path: MARKETING_ADMIN_PATH,
-  private: true,
-});
 
 export default async function MarketingAdminPage() {
   await requireMarketingManagerPage();

@@ -1,3 +1,4 @@
+import { getLocale } from "@/lib/i18n/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import TalisBooksViewerShell from "@/components/talisbooks/viewer/TalisBooksViewerShell";
@@ -27,6 +28,7 @@ export async function generateMetadata({
   if (!book) {
     if (normalized === PINNED_TALISBOOK_SLUG) {
       return createMetadata({
+      locale: await getLocale(),
         title: "Explore Talisbooks™",
         description:
           "Explore Talisbooks™ — open the sample lookbook. Mapsite pins your place on the map so buyers and partners can find your story.",
@@ -40,6 +42,7 @@ export async function generateMetadata({
       });
     }
     return createMetadata({
+      locale: await getLocale(),
       title: "Talisbooks™ Viewer",
       description: "Read a Talisbook™ digital lookbook.",
       path: `${TALISBOOKS_ROUTES.VIEWER}/${normalized}`,
@@ -77,6 +80,7 @@ export async function generateMetadata({
       );
 
   return createMetadata({
+      locale: await getLocale(),
     title: book.title || copy.title,
     description: copy.description,
     path: `${TALISBOOKS_ROUTES.VIEWER}/${book.slug}`,

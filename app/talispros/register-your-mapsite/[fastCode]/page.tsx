@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { createMetadata } from "@/lib/seo";
+import { dynamicPageMetadata } from "@/lib/seo/page-metadata";
+import { mapsiteShareOgPath } from "@/lib/share/og-card";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import {
   MAPSITE_DEFAULT_REGISTER_URL,
@@ -16,12 +17,18 @@ export async function generateMetadata({
   params: Promise<{ fastCode: string }>;
 }): Promise<Metadata> {
   const { fastCode } = await params;
-  return createMetadata({
-    title: `${MAPSITE_URL_GATE_HEADLINE} | Talispros™`,
+  return dynamicPageMetadata((locale) => ({
+    title:
+      locale === "de"
+        ? "Für diese Mapsite registrieren | Talispros™"
+        : `${MAPSITE_URL_GATE_HEADLINE} | Talispros™`,
     description:
-      "Register for this Mapsite — visitors go straight to Register (no FAST Code™ dead-end gate).",
+      locale === "de"
+        ? "Registrieren Sie sich für diese Mapsite und arbeiten Sie mit dem Team von Aisha C."
+        : "Register for this Mapsite and work with Aisha C.'s team.",
     path: `/talispros/register-your-mapsite/${encodeURIComponent(fastCode)}`,
-  });
+    image: mapsiteShareOgPath(fastCode),
+  }));
 }
 
 /**

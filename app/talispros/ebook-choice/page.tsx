@@ -1,18 +1,12 @@
-import type { Metadata } from "next";
-import { createMetadata } from "@/lib/seo";
 import EbookChoiceClient from "@/components/talispros/EbookChoiceClient";
-import { EBOOK_CHOICE_PATH } from "@/lib/talispros/ebook-choice";
 import { establishOwnerMapSiteSession } from "@/app/talispros/build-mapsite/success-actions";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/ebook-choice");
+}
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = createMetadata({
-  title: "E-Book Choice | Talispros™",
-  description:
-    "After confirming with Rahul, choose whether to generate your own Talisbooks™ E-Book or have Rahul build it for you.",
-  path: EBOOK_CHOICE_PATH,
-  private: true,
-});
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

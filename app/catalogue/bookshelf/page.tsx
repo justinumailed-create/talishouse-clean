@@ -1,39 +1,16 @@
-import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import IsolatedBookshelfView from "@/components/catalogue/IsolatedBookshelfView";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
-import {
-  ISOLATED_BOOKSHELF_CREATE_PATH,
-  ISOLATED_BOOKSHELF_PATH,
-  ISOLATED_BOOKSHELF_UNLOCK_COOKIE,
-  isIsolatedBookshelfFromAllPins,
-} from "@/lib/talisbooks/isolated-bookshelf";
+import { ISOLATED_BOOKSHELF_CREATE_PATH, ISOLATED_BOOKSHELF_UNLOCK_COOKIE, isIsolatedBookshelfFromAllPins } from "@/lib/talisbooks/isolated-bookshelf";
 import { listIsolatedBookshelfBooks } from "@/lib/talisbooks/isolated-bookshelf-service";
-import { createMetadata } from "@/lib/seo";
-import { getLocale } from "@/lib/i18n/server";
-import { getDictionary } from "@/lib/i18n/dictionaries";
-import {
-  bookshelfOgMetadataImage,
-  bookshelfSeoCopy,
-} from "@/lib/talispros/mapsite-og-image";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/catalogue/bookshelf");
+}
 
 export const dynamic = "force-dynamic";
-
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getLocale();
-  const copy =
-    locale === "en"
-      ? bookshelfSeoCopy({ isolatedAllPins: true })
-      : getDictionary(locale).meta.bookshelf;
-  return createMetadata({
-    title: copy.title,
-    description: copy.description,
-    path: ISOLATED_BOOKSHELF_PATH,
-    image: bookshelfOgMetadataImage(copy.title),
-    locale,
-  });
-}
 
 /**
  * Isolated catalogue bookshelf — same Mapsite-connected Talisbooks™ shelf

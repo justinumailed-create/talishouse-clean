@@ -1,3 +1,5 @@
+import { dynamicPageMetadata } from "@/lib/seo/page-metadata";
+import { mapsiteShareOgPath } from "@/lib/share/og-card";
 import { getAssociates } from "@/lib/db";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import AssociateHero from "@/components/associate/AssociateHero";
@@ -15,6 +17,20 @@ interface PageConfig {
   name?: string;
   email?: string;
   phone?: string;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ fastCode?: string }>;
+}) {
+  const code = ((await params)?.fastCode ?? "").toUpperCase().trim();
+  return dynamicPageMetadata((locale) => ({
+    title: locale === "de" ? `Associate-Mapsite ${code} | Talispros™` : `Associate Mapsite ${code} | Talispros™`,
+    description: locale === "de" ? `Öffnen Sie die Talispros™ Associate-Mapsite zum FAST Code ${code}.` : `Open the Talispros™ associate Mapsite for FAST Code ${code}.`,
+    path: `/associate/${encodeURIComponent(code)}`,
+    image: mapsiteShareOgPath(code || "allpins"),
+  }));
 }
 
 export default async function AssociatePage({ params }: { params: Promise<{ fastCode?: string }> }) {

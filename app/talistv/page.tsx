@@ -8,6 +8,11 @@ import {
   TALISTV_LAUNCH_NOTICE,
   type TalisTvGuideShow,
 } from "@/lib/talistv/guide-schedule";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talistv");
+}
 
 export const dynamic = "force-dynamic";
 

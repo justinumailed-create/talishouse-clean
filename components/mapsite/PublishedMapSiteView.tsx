@@ -1,3 +1,4 @@
+import { getLocale } from "@/lib/i18n/server";
 import MapSiteLayout from "@/components/mapsite/MapSiteLayout";
 import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
 import { createMetadata } from "@/lib/seo";
@@ -209,6 +210,7 @@ export async function publishedMapSiteMetadata(mapsite: MapSiteView) {
   if (isAllPinsFastCode(mapsite.fastCode)) {
     const copy = allpinsSeoCopy();
     return createMetadata({
+      locale: await getLocale(),
       title: copy.title,
       description: copy.description,
       path: `/mapsite/${slug}`,
@@ -225,6 +227,7 @@ export async function publishedMapSiteMetadata(mapsite: MapSiteView) {
   const title = layoutData.metaTitle?.trim() || copy.title;
   const description = layoutData.metaDescription?.trim() || copy.description;
   return createMetadata({
+    locale: await getLocale(),
     title,
     description,
     path: `/mapsite/${slug}`,

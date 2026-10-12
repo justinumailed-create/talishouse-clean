@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { getTalisMapsData } from "@/lib/talismaps";
 import type { Metadata } from "next";
+import { dynamicPageMetadata } from "@/lib/seo/page-metadata";
+import { mapsiteShareOgPath } from "@/lib/share/og-card";
 
 export const dynamic = "force-dynamic";
 
@@ -20,13 +22,17 @@ function formatAccountType(type: string): string {
 export async function generateMetadata({ params }: { params: Promise<{ fastcode: string }> }): Promise<Metadata> {
   const { fastcode } = await params;
   const data = await getTalisMapsData(fastcode);
-  if (data.notFound || !data.mapsite) {
-    return { title: "Mapsite Not Found | Talismaps™" };
-  }
-  return {
-    title: `Mapsite ${data.mapsite.fastCode} | Talismaps™`,
-    description: `Mapsite with FAST Code ${data.mapsite.fastCode}`,
-  };
+  const code = (data.mapsite?.fastCode ?? fastcode).toUpperCase();
+  return dynamicPageMetadata((locale) => ({
+    title: locale === "de" ? `Mapsite ${code} | Talismaps™` : `Mapsite ${code} | Talismaps™`,
+    description:
+      locale === "de"
+        ? `Die Talismaps™ Mapsite zum FAST Code ${code} ansehen.`
+        : `View the Talismaps™ Mapsite for FAST Code ${code}.`,
+    path: `/ma/${encodeURIComponent(fastcode)}`,
+    image: mapsiteShareOgPath(code),
+    noindex: data.notFound || !data.mapsite,
+  }));
 }
 
 export default async function TalisMapsPage({ params }: { params: Promise<{ fastcode: string }> }) {

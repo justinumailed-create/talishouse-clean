@@ -1,6 +1,11 @@
 import { supabase } from "@/lib/supabase";
 import { redirect } from "next/navigation";
 import AssociateHero from "@/components/associate/AssociateHero";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/mapsite");
+}
 
 export default async function MapSiteRouterPage() {
   // Try to find the first enabled associate with a slug

@@ -1,16 +1,14 @@
 import { SEA_CAN_SHOW_HOME } from "@/lib/talisu/content";
-import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_BTN_PRIMARY } from "@/lib/talisu/ui";
 import SectionShell from "@/components/talisu/SectionShell";
 import SeaCanProductGrid from "@/components/talisu/SeaCanProductGrid";
 import SeaCansLocalNav from "@/components/talisu/SeaCansLocalNav";
 import TalisUShowHomeMap from "@/components/talisu/TalisUShowHomeMap";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata = createTalisUMetadata({
-  title: "TalisU Sea-Cans | Show Home",
-  description: SEA_CAN_SHOW_HOME.heading,
-  path: "/talisu/sh",
-});
+export async function generateMetadata() {
+  return pageMetadata("/talisu/sh");
+}
 
 export default function TalisUShowHomePage() {
   return (

@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import MapSiteAdminEbookPanel from "@/components/talispros-admin/MapSiteAdminEbookPanel";
 import OwnerReplaceImageTemplates from "@/components/talispros/ebook-editor/OwnerReplaceImageTemplates";
@@ -8,13 +7,13 @@ import { CLIENT_LOGIN_PATH } from "@/lib/mapsite-account-session";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { resolveMapSiteLogoUrlForServer } from "@/lib/talispros/mapsite-branding-service";
+import { adminMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return adminMetadata("Create eBook");
+}
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = {
-  title: "Create ebook · Talispros™",
-  robots: { index: false, follow: false },
-};
 
 /** Ebook Editor → Create new: the same Build Talisbook™ / upload builder. */
 export default async function OwnerEbookCreatePage({

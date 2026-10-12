@@ -1,16 +1,11 @@
-import type { Metadata } from "next";
-import { createMetadata } from "@/lib/seo";
 import EbookRahulAssistClient from "@/components/talispros/EbookRahulAssistClient";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/ebook-rahul");
+}
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = createMetadata({
-  title: "Rahul Assisted E-Book | Talispros™",
-  description:
-    "Upload agent photo, logo, property images, and details so Rahul can build your Talisbooks™ E-Book from Marketing Admin.",
-  path: "/talispros/ebook-rahul",
-  private: true,
-});
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

@@ -1,17 +1,8 @@
-import { createTalisUMetadata } from "@/lib/talisu/seo";
-import { getLocale } from "@/lib/i18n/server";
-import { getDictionary } from "@/lib/i18n/dictionaries";
 import TalisUTalisTvSoonPlaceholder from "@/components/talisu/TalisUTalisTvSoonPlaceholder";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
 export async function generateMetadata() {
-  const locale = await getLocale();
-  const m = getDictionary(locale).meta.talisuVideo;
-  return createTalisUMetadata({
-    title: m.title,
-    description: m.description,
-    path: "/talisu/video",
-    locale,
-  });
+  return pageMetadata("/talisu/video");
 }
 
 /** Video hub UI paused — restore prior SectionShell content when ready. */

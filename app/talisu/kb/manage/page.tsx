@@ -1,15 +1,11 @@
-import { createTalisUMetadata } from "@/lib/talisu/seo";
 import SectionShell from "@/components/talisu/SectionShell";
 import TalisUKbPasswordGate from "@/components/talisu/TalisUKbPasswordGate";
 import TalisUKbManagePanel from "@/components/talisu/TalisUKbManagePanel";
+import { adminMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata = createTalisUMetadata({
-  title: "TalisU™ | Knowledge Base — Update Content",
-  description:
-    "Update TalisU™ Knowledge Base Audios, Videos, and Learning Material.",
-  path: "/talisu/kb/manage",
-  private: true,
-});
+export async function generateMetadata() {
+  return adminMetadata("Knowledge Base Manager");
+}
 
 /**
  * KB content manage UI (same session unlock as /talisu/kb). Linked from rm22 Mapsite dashboard.

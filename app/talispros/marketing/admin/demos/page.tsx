@@ -1,18 +1,12 @@
-import type { Metadata } from "next";
 import { requireMarketingManagerPage } from "@/lib/marketing-manager-auth";
-import { createMetadata } from "@/lib/seo";
-import { MARKETING_ADMIN_DEMOS_PATH } from "@/lib/mapsite-account-session";
 import MarketingAdminDemosClient from "./MarketingAdminDemosClient";
+import { adminMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return adminMetadata("Demo Mapsites");
+}
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = createMetadata({
-  title: "Demo Mapsites | Marketing Manager | Talispros™",
-  description:
-    "Edit or delete demonstration Mapsites that use the pinned Talispros eBook.",
-  path: MARKETING_ADMIN_DEMOS_PATH,
-  private: true,
-});
 
 export default async function MarketingAdminDemosPage() {
   await requireMarketingManagerPage();

@@ -4,6 +4,11 @@ import TalisMapsPlatformSettingsForm from "@/components/talismaps/platform/Talis
 import { TALISMAPS_PRODUCT_NAME } from "@/lib/talismaps/constants";
 import { getTalisMapsPlatformSettings } from "@/lib/talismaps/platform-settings";
 import { TALISMAPS_ROUTES } from "@/lib/talismaps/routes";
+import { adminMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return adminMetadata("Talismaps™ Settings");
+}
 
 export const dynamic = "force-dynamic";
 

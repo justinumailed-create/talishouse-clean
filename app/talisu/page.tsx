@@ -1,4 +1,3 @@
-import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -7,16 +6,10 @@ import {
   TALISU_ESSAY_QUERY_PARAM,
   resolveTalisUEssaySlug,
 } from "@/components/talisu/essay-registry";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
 export async function generateMetadata() {
-  const locale = await getLocale();
-  const m = getDictionary(locale).meta.talisuFaq;
-  return createTalisUMetadata({
-    title: m.title,
-    description: m.description,
-    path: "/talisu",
-    locale,
-  });
+  return pageMetadata("/talisu");
 }
 
 export default async function TalisUHomePage({

@@ -2,6 +2,11 @@ import Link from "next/link";
 import { ArrowRight, Map, Sparkles } from "lucide-react";
 import { TALISMAPS_FUTURE_FEATURES, TALISMAPS_PRODUCT_NAME } from "@/lib/talismaps/constants";
 import { TALISMAPS_ROUTES } from "@/lib/talismaps/routes";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talismaps");
+}
 
 export default function TalisMapsMarketingPage() {
   return (

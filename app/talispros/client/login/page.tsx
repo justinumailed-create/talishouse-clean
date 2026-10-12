@@ -2,6 +2,11 @@ import { redirect } from "next/navigation";
 import { getClientAnalyticsSession } from "@/lib/client-analytics-auth";
 import { CLIENT_DASHBOARD_PATH } from "@/lib/mapsite-account-session";
 import ClientLoginForm from "./ClientLoginForm";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/client/login");
+}
 
 export default async function ClientLoginPage() {
   const session = await getClientAnalyticsSession();

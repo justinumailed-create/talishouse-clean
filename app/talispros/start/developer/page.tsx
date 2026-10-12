@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { ArrowRight, ChevronDown } from "lucide-react";
 import { ExplanationSections, DEVELOPER_BULLETS } from "../shared";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talispros/start/developer");
+}
 
 export default function DeveloperPage() {
   return (

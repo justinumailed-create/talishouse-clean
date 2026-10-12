@@ -1,14 +1,10 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { TALISU_BTN_PRIMARY, TALISU_CARD } from "@/lib/talisu/ui";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata: Metadata = {
-  title: "Learn More | Tokenization — Talispros™",
-  description:
-    "Explore Tokenization with the Talisbooks™ E-Book experience and TalisU™ Audio.",
-  alternates: { canonical: "/learn-more" },
-  robots: { index: true, follow: true },
-};
+export async function generateMetadata() {
+  return pageMetadata("/learn-more");
+}
 
 /**
  * Tokenization Learn More — 50/50 split entry to E-Book and Audio.

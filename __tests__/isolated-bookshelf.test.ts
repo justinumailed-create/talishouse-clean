@@ -170,13 +170,13 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
   });
 
 
-  it("catalogue bookshelf view is publicly shareable with portrait bookshelf OG", () => {
+  it("catalogue bookshelf view is publicly shareable with its dedicated bookshelf card", () => {
     const page = readFileSync(
       resolve("app/catalogue/bookshelf/page.tsx"),
       "utf8",
     );
-    expect(page).toContain("bookshelfOgMetadataImage");
-    expect(page).toContain("bookshelfSeoCopy");
+    // Page-specific SEO + dedicated EN/DE share card (lib/seo/pages.json).
+    expect(page).toContain('pageMetadata("/catalogue/bookshelf")');
     expect(page).toContain("canCreate={Boolean(account)}");
     expect(page).not.toContain("requireAdminPage");
     expect(page).toContain("getAdminSessionAccount");

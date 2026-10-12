@@ -1,13 +1,8 @@
-import type { Metadata } from "next";
-import { createMetadata } from "@/lib/seo";
+import { adminMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata: Metadata = createMetadata({
-  title: "Marketing Dashboard | Talispros™",
-  description:
-    "Track Facebook and Instagram impressions, reach, leads, and weekly marketing summaries for your Mapsite.",
-  path: "/talispros/client/dashboard",
-  private: true,
-});
+export async function generateMetadata() {
+  return adminMetadata("Marketing Dashboard");
+}
 
 export default function ClientDashboardLayout({
   children,

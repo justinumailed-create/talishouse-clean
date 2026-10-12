@@ -1,19 +1,14 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { requireClientAnalyticsSession } from "@/lib/client-analytics-auth";
 import { listTalisBooksByFastCode } from "@/lib/talisbooks/ecosystem-service";
 import { TALISBOOKS_ECOSYSTEM_CHAIN, TALISBOOKS_PRODUCT_NAME } from "@/lib/talisbooks/constants";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
-import { createMetadata } from "@/lib/seo";
+import { adminMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata: Metadata = createMetadata({
-  title: `My Books | ${TALISBOOKS_PRODUCT_NAME}`,
-  description:
-    "Client portal for Talisbooks™ digital publications linked to your Mapsite, account, and FAST Code.",
-  path: "/client/books",
-  private: true,
-});
+export async function generateMetadata() {
+  return adminMetadata("My Books");
+}
 
 export const dynamic = "force-dynamic";
 

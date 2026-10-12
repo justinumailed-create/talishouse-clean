@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import IsolatedBookshelfCreateClient from "@/components/catalogue/IsolatedBookshelfCreateClient";
@@ -13,16 +12,14 @@ import {
   ISOLATED_BOOKSHELF_DESTINATION,
   ISOLATED_BOOKSHELF_PATH,
 } from "@/lib/talisbooks/isolated-bookshelf";
+import { adminMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return adminMetadata("Create Shelf Book");
+}
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
-
-export const metadata: Metadata = {
-  title: "Create Isolated Shelf Book | T-All Catalogue",
-  description:
-    "Self-serve ebook flow for the admin-only T-All isolated bookshelf.",
-  robots: { index: false, follow: false },
-};
 
 /**
  * Self-serve ebook entry for the isolated catalogue bookshelf.

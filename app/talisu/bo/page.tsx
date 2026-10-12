@@ -1,15 +1,13 @@
 import { SEA_CAN_BO, SEA_CAN_SKUS, SEA_CAN_TAGLINE } from "@/lib/talisu/content";
-import { createTalisUMetadata } from "@/lib/talisu/seo";
 import SectionShell from "@/components/talisu/SectionShell";
 import SeaCanProductGrid from "@/components/talisu/SeaCanProductGrid";
 import SeaCansLocalNav from "@/components/talisu/SeaCansLocalNav";
 import TalisULeadForm from "@/components/talisu/TalisULeadForm";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata = createTalisUMetadata({
-  title: "TalisU Sea-Cans | Business Office",
-  description: SEA_CAN_TAGLINE,
-  path: "/talisu/bo",
-});
+export async function generateMetadata() {
+  return pageMetadata("/talisu/bo");
+}
 
 export default function TalisUBusinessOfficePage() {
   return (

@@ -1,16 +1,15 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
 import AgentAuthShell from "../AgentAuthShell";
 import { AgentLoginForm } from "../AgentAuthForm";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/agent/login");
+}
 
 export const dynamic = "force-dynamic";
-
-export const metadata: Metadata = {
-  title: "Agent Login | Talispros™",
-  robots: { index: false, follow: false },
-};
 
 export default async function AgentLoginPage() {
   const account = await getAdminSessionAccount();

@@ -1,23 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getSeaCanSku, SEA_CAN_TAGLINE } from "@/lib/talisu/content";
-import { createTalisUMetadata } from "@/lib/talisu/seo";
+import { getSeaCanSku } from "@/lib/talisu/content";
 import { TALISU_LINK } from "@/lib/talisu/ui";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/talisu/bo/sd20");
+}
 
 const SLUG = "sd20";
-const sku = getSeaCanSku(SLUG);
-
-export const metadata = createTalisUMetadata({
-  title: sku
-    ? `TalisU Sea-Cans | ${sku.code}`
-    : "TalisU Sea-Cans",
-  description: sku
-    ? `${sku.name} — ${sku.dimensions}. ${SEA_CAN_TAGLINE}`
-    : SEA_CAN_TAGLINE,
-  path: `/talisu/bo/${SLUG}`,
-});
 
 export default function TalisUSkuCheckoutPage() {
   const product = getSeaCanSku(SLUG);

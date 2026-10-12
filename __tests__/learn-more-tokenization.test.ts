@@ -95,7 +95,7 @@ describe("Tokenization Learn More", () => {
     expect(page).toContain("E-Book");
     expect(page).toContain("Audio");
     expect(page).toContain("Talisbooks™");
-    expect(page).toContain("Talispros™");
+    expect(page).toContain('pageMetadata("/learn-more")');
   });
 
   it("strips Talishouse storefront chrome (navbar/cart/Talisbot) like /talisu embed", () => {

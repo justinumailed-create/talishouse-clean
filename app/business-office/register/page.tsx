@@ -1,3 +1,9 @@
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/business-office/register");
+}
+
 export default function AssociateRegisterPage() {
   return (
     <div className="min-h-[70vh] bg-white py-12">

@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { pageMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return pageMetadata("/project-received");
+}
 
 export default function ProjectReceivedPage() {
   return (

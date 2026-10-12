@@ -1,3 +1,5 @@
+import { dynamicPageMetadata } from "@/lib/seo/page-metadata";
+import { mapsiteShareOgPath } from "@/lib/share/og-card";
 import { redirect } from "next/navigation";
 import { getAssociates } from "@/lib/db";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
@@ -15,6 +17,20 @@ interface PageConfig {
   name?: string;
   email?: string;
   phone?: string;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ fastCode?: string }>;
+}) {
+  const code = ((await params)?.fastCode ?? "").toUpperCase().trim();
+  return dynamicPageMetadata((locale) => ({
+    title: locale === "de" ? `TalisTV™ Zugang ${code} | Talispros™` : `TalisTV™ Access ${code} | Talispros™`,
+    description: locale === "de" ? `TalisTV™ auf der Talispros™ Mapsite zum FAST Code ${code} ansehen.` : `Watch TalisTV™ on the Talispros™ Mapsite for FAST Code ${code}.`,
+    path: `/ttvaccess/${encodeURIComponent(code)}`,
+    image: mapsiteShareOgPath(code || "allpins"),
+  }));
 }
 
 export default async function TTVAccessPage({ params }: { params: Promise<{ fastCode?: string }> }) {

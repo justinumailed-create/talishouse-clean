@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MarketingMetricsForm from "./MarketingMetricsForm";
 import { requireMarketingManagerPage } from "@/lib/marketing-manager-auth";
@@ -7,40 +6,13 @@ import {
   getRecentMetricsForClient,
   listActiveMapSitesForMarketing,
 } from "@/lib/client-marketing-service";
-import { createMetadata } from "@/lib/seo";
+import { adminMetadata } from "@/lib/seo/page-metadata";
+
+export async function generateMetadata() {
+  return adminMetadata("Client Dashboard");
+}
 
 export const dynamic = "force-dynamic";
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ fastCode: string }>;
-}): Promise<Metadata> {
-  const { fastCode } = await params;
-  const normalizedCode = fastCode.trim().toLowerCase();
-  const clients = await listActiveMapSitesForMarketing();
-  const client = clients.find(
-    (entry) => entry.fastCode.toLowerCase() === normalizedCode
-  );
-
-  if (!client) {
-    return createMetadata({
-      title: "Client Not Found | Marketing Manager | Talispros™",
-      description: "The requested client dashboard could not be found.",
-      path: `/talispros/marketing/clients/${normalizedCode}`,
-      private: true,
-    });
-  }
-
-  const label = client.propertyTitle ?? client.ownerName;
-
-  return createMetadata({
-    title: `${label} | Marketing Manager | Talispros™`,
-    description: `Post daily marketing metrics and checklist updates for ${client.ownerName} (${client.fastCode.toUpperCase()}).`,
-    path: `/talispros/marketing/clients/${normalizedCode}`,
-    private: true,
-  });
-}
 
 export default async function MarketingClientPage({
   params,

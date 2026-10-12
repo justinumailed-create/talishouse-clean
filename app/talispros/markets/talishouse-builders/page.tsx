@@ -1,14 +1,11 @@
-import type { Metadata } from "next";
 import TalisprosMarketRegistrationForm from "@/components/talispros/TalisprosMarketRegistrationForm";
 import TalisprosMarketPageLayout from "@/components/talispros/TalisprosMarketPageLayout";
-import { createMetadata } from "@/lib/seo";
 import { TALISHHOUSE_BUILDERS_MARKET } from "@/lib/talispros/market-pages";
+import { pageMetadata } from "@/lib/seo/page-metadata";
 
-export const metadata: Metadata = createMetadata({
-  title: TALISHHOUSE_BUILDERS_MARKET.metadataTitle,
-  description: TALISHHOUSE_BUILDERS_MARKET.whyBody,
-  path: `/talispros/markets/${TALISHHOUSE_BUILDERS_MARKET.slug}`,
-});
+export async function generateMetadata() {
+  return pageMetadata("/talispros/markets/talishouse-builders");
+}
 
 export default function TalishouseBuildersMarketPage() {
   return (
