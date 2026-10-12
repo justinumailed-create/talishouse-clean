@@ -24,7 +24,7 @@ export default function AgentAuthShell({
         className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(60%_100%_at_50%_0%,rgba(30,78,216,0.10),rgba(246,248,251,0))]"
       />
       <main className="relative flex flex-1 items-center justify-center px-4 py-10 sm:py-16">
-        <div className="w-full max-w-[400px]">
+        <div className="w-full" style={{ maxWidth: 400 }}>
           <div className="mb-7 flex flex-col items-center gap-3">
             <Link href="/" className="rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E4ED8]/50">
               <Image src="/logo-mark.png" alt="Talispros" width={44} height={47} priority className="h-11 w-auto" />
@@ -45,7 +45,7 @@ export default function AgentAuthShell({
       </main>
 
       <footer className="relative px-4 pb-6 pt-2">
-        <div className="mx-auto flex max-w-[400px] flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-neutral-400">
+        <div style={{ maxWidth: 400 }} className="mx-auto flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-neutral-400">
           <span>© {new Date().getFullYear()} Talispros™</span>
           <Link href="/privacy" className="hover:text-neutral-600 hover:underline">Privacy</Link>
           <span className="inline-flex items-center gap-1">
