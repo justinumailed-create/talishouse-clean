@@ -5201,3 +5201,16 @@ body.mapsite-gallery-open [data-paypal-button] {
     color: #111 !important;
   }
 }
+
+/* Admin console: shared card + typography polish (Stripe/PayPal-style). */
+.admin-main .rounded-2xl.border,
+.admin-main .rounded-xl.border.bg-white {
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+.admin-main h1 {
+  letter-spacing: -0.01em;
+}
+.admin-main table thead th {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}

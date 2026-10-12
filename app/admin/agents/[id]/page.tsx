@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { LinkButton, PageHeader } from "@/components/admin/ui";
 import { notFound } from "next/navigation";
 import AgentForm from "@/components/admin/agents/AgentForm";
 import AgentPasswordPanel from "@/components/admin/agents/AgentPasswordPanel";
@@ -17,27 +17,25 @@ export default async function AdminAgentEditPage({ params }: { params: Promise<{
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <Link href="/admin/agents" className="text-sm text-neutral-500 hover:text-neutral-900">
-            ← All agents
-          </Link>
-          <h1 className="mt-1 text-2xl font-semibold text-neutral-900">{agent.name}</h1>
-          <p className="text-sm text-neutral-500">
+      <PageHeader
+        kicker="Agent"
+        title={agent.name}
+        subtitle={
+          <>
             <span className="font-mono">{agent.loginId}</span> · created {agent.createdAt.slice(0, 10)}
             {agent.createdBy ? ` by ${agent.createdBy}` : ""}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/admin/agents/${agent.id}/preview`}
-            className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-900 hover:bg-neutral-50"
-          >
-            View as agent
-          </Link>
-          <AgentStatusButton id={agent.id} status={agent.status} />
-        </div>
-      </div>
+          </>
+        }
+        actions={
+          <>
+            <LinkButton href="/admin/agents">← All agents</LinkButton>
+            <LinkButton href={`/admin/agents/activity?agent=${agent.id}`}>Activity</LinkButton>
+            <LinkButton href={`/admin/agents/notes?agent=${agent.id}`}>Notes</LinkButton>
+            <LinkButton href={`/admin/agents/${agent.id}/preview`}>View as agent</LinkButton>
+            <AgentStatusButton id={agent.id} status={agent.status} />
+          </>
+        }
+      />
 
       <AgentForm
         initial={{
@@ -63,7 +61,7 @@ export default async function AdminAgentEditPage({ params }: { params: Promise<{
       />
 
 
-      <section className="rounded-2xl border border-neutral-200 bg-white p-6">
+      <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
         <h2 className="text-lg font-semibold text-neutral-900">Audit log</h2>
         {audit.length === 0 ? (
           <p className="mt-2 text-sm text-neutral-500">No changes logged yet.</p>

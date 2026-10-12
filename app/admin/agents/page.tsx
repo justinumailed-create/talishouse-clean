@@ -4,43 +4,43 @@ import AgentStatusButton from "@/components/admin/agents/AgentStatusButton";
 import { requireAdminScopePage } from "@/lib/admin-auth";
 import { AGENT_SCOPE_LABELS } from "@/lib/admin-constants";
 import { listAgents } from "@/lib/agent-admins";
+import { LinkButton, PageHeader, PresenceDot, StatusPill, cardClass } from "@/components/admin/ui";
+import { isAgentOnline, presenceLabel } from "@/lib/agent-collab";
+import { getAgentPresence } from "@/lib/agent-collab-server";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminAgentsPage() {
   await requireAdminScopePage("agents");
   const { agents, error } = await listAgents();
+  const presence = await getAgentPresence(agents.map((a) => a.id)).catch(() => new Map());
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-neutral-900">Agents</h1>
-        <p className="mt-1 text-sm text-neutral-500">
-          Agent Admins sign in at /agent/login with their login ID and password, and only see the privileges you grant.{" "}
-          <Link href="/admin/agents/payments" className="text-[#1E4ED8] underline">
-            Cash payments
-          </Link>
-          {" · "}
-          <Link href="/admin/agents/activity" className="text-[#1E4ED8] underline">
-            Activity log
-          </Link>
-          {" · "}
-          <Link href="/admin/agents/notes" className="text-[#1E4ED8] underline">
-            Daily notes
-          </Link>
-        </p>
-      </div>
+      <PageHeader
+        kicker="Superadmin"
+        title="Agents"
+        subtitle="Agents sign in at /agent/login with their login ID and password and only see the privileges you grant."
+        actions={
+          <>
+            <LinkButton href="/admin/agents/activity">Activity log</LinkButton>
+            <LinkButton href="/admin/agents/notes">Daily notes</LinkButton>
+            <LinkButton href="/admin/agents/payments">Cash payments</LinkButton>
+            <LinkButton href="#create-agent" variant="primary">New agent</LinkButton>
+          </>
+        }
+      />
 
       {error ? (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">Could not load agents: {error}</p>
       ) : null}
 
-      <section className="overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+      <section className={`${cardClass} overflow-hidden`}>
         {agents.length === 0 ? (
           <p className="p-6 text-sm text-neutral-500">No agents yet. Create the first one below.</p>
         ) : (
           <table className="w-full text-left text-sm">
-            <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
+            <thead className="border-b border-neutral-200 bg-neutral-50/70 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
               <tr>
                 <th className="px-4 py-3">Agent</th>
                 <th className="px-4 py-3">Login ID</th>
@@ -53,8 +53,13 @@ export default async function AdminAgentsPage() {
               {agents.map((agent) => (
                 <tr key={agent.id}>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-neutral-900">{agent.name}</p>
-                    <p className="text-xs text-neutral-500">{agent.email || "—"}</p>
+                    <div className="flex items-center gap-2.5">
+                      <PresenceDot online={isAgentOnline(presence.get(agent.id) ?? null)} />
+                      <div>
+                        <div className="font-medium text-neutral-900">{agent.name}</div>
+                        <div className="text-xs text-neutral-500">{presenceLabel(presence.get(agent.id) ?? null)}</div>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3 font-mono">{agent.loginId}{agent.hasPassword ? "" : " (no password)"}</td>
                   <td className="px-4 py-3 text-xs text-neutral-600">
@@ -63,13 +68,13 @@ export default async function AdminAgentsPage() {
                       : agent.privileges.map((p) => AGENT_SCOPE_LABELS[p].split(" (")[0]).join(", ")}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={agent.status === "active" ? "text-green-700" : "text-red-600"}>{agent.status}</span>
+                    <StatusPill tone={agent.status === "active" ? "green" : "red"}>{agent.status === "active" ? "Active" : "Disabled"}</StatusPill>
                   </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap space-x-3">
-                    <Link href={`/admin/agents/${agent.id}`} className="text-[#1E4ED8] underline">
+                    <Link href={`/admin/agents/${agent.id}`} className="font-semibold text-[#1E4ED8] hover:underline">
                       Edit
                     </Link>
-                    <Link href={`/admin/agents/${agent.id}/preview`} className="text-[#1E4ED8] underline">
+                    <Link href={`/admin/agents/${agent.id}/preview`} className="font-semibold text-[#1E4ED8] hover:underline">
                       View as agent
                     </Link>
                     <AgentStatusButton id={agent.id} status={agent.status} />
@@ -81,8 +86,8 @@ export default async function AdminAgentsPage() {
         )}
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold text-neutral-900">Create agent</h2>
+      <section id="create-agent" className="scroll-mt-6 space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-500">Create agent</h2>
         <AgentForm initial={EMPTY_AGENT_FORM} />
       </section>
     </div>

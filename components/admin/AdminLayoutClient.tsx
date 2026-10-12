@@ -9,6 +9,7 @@ import { clearAdminSession } from "@/lib/fast-code";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
 import { AGENT_HEARTBEAT_MS } from "@/lib/agent-collab";
 import { getAdminNavItems, isAdminNavItemActive, type AdminNavItem } from "@/lib/admin-nav";
+import { NAV_ICON, groupAdminNav } from "./admin-nav-groups";
 import {
   isProtectedAdminPath,
   isPublicAdminPath,
@@ -57,20 +58,20 @@ function AdminSidebar({
       <aside
         aria-hidden={hidden}
         className={[
-          "fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#e5e5e5] flex-col h-full transform transition-transform duration-200 ease-in-out",
+          "fixed lg:sticky lg:top-0 inset-y-0 left-0 z-50 w-64 bg-white border-r border-neutral-200 flex-col h-screen transform transition-transform duration-200 ease-in-out",
           hidden ? "hidden" : "flex",
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         ].join(" ")}
       >
-        <div className="p-6 border-b border-[#e5e5e5] flex items-center justify-between">
-          <div>
-            <h1 className="text-base font-semibold tracking-tight">Talispros™</h1>
-            <p className="text-[10px] text-[#1E4ED8] font-bold uppercase tracking-widest mt-1">
-              {serverAccountIsAgent ? "Agent Console" : "Admin Console"}
-            </p>
-            {signedInAs ? (
-              <p className="text-[11px] text-[#6e6e73] mt-1">Signed in as {signedInAs}</p>
-            ) : null}
+        <div className="px-5 py-5 border-b border-neutral-200 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#1E4ED8] text-sm font-bold text-white">T</span>
+            <div>
+              <h1 className="text-[15px] font-semibold leading-tight tracking-tight text-neutral-900">Talispros™</h1>
+              <p className="text-[10px] text-[#1E4ED8] font-bold uppercase tracking-widest mt-0.5">
+                {serverAccountIsAgent ? "Agent Console" : "Admin Console"}
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -83,32 +84,55 @@ function AdminSidebar({
           </button>
         </div>
 
-        <nav className="flex-1 p-3 overflow-y-auto">
-          <ul className="space-y-0.5">
-            {navItems.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  onClick={onClose}
-                  className={`block px-3 py-2 rounded-lg text-sm transition-all ${
-                    isAdminNavItemActive(item.href, pathname)
-                      ? "bg-[#f5f5f7] text-[#111] font-semibold"
-                      : "text-[#6e6e73] hover:text-[#111] hover:bg-[#f5f5f7]"
-                  }`}
-                >
-                  <span className="flex items-center justify-between gap-2">
-                    {item.label}
-                    {item.href === "/admin/agent/chat" && chatUnread > 0 ? (
-                      <span className="rounded-full bg-[#1E4ED8] px-2 py-0.5 text-[11px] font-semibold text-white">{chatUnread}</span>
-                    ) : null}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
+          {groupAdminNav(navItems).map((group) => (
+            <div key={group.title} className="mb-4">
+              <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-neutral-400">{group.title}</p>
+              <ul className="space-y-0.5">
+                {group.items.map((item) => {
+                  const active = isAdminNavItemActive(item.href, pathname);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        onClick={onClose}
+                        aria-current={active ? "page" : undefined}
+                        className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
+                          active
+                            ? "bg-[#1E4ED8]/10 font-semibold text-[#1E4ED8]"
+                            : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                        }`}
+                      >
+                        <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                          <path d={NAV_ICON[item.href] ?? "M12 12h.01"} />
+                        </svg>
+                        <span className="flex flex-1 items-center justify-between gap-2">
+                          {item.label}
+                          {item.href === "/admin/agent/chat" && chatUnread > 0 ? (
+                            <span className="rounded-full bg-[#1E4ED8] px-2 py-0.5 text-[11px] font-semibold text-white">{chatUnread}</span>
+                          ) : null}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
         </nav>
 
-        <div className="p-3 border-t border-[#e5e5e5] space-y-1">
+        <div className="p-3 border-t border-neutral-200 space-y-1">
+          {signedInAs ? (
+            <div className="mb-2 flex items-center gap-2.5 rounded-xl bg-neutral-50 px-3 py-2.5">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#1E4ED8]/10 text-xs font-semibold text-[#1E4ED8]">
+                {signedInAs.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join("")}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate text-sm font-medium text-neutral-900">{signedInAs}</span>
+                <span className="block text-[11px] text-neutral-500">{serverAccountIsAgent ? "Agent" : "Administrator"}</span>
+              </span>
+            </div>
+          ) : null}
           {serverAccountIsAgent ? null : (
           <Link
             href="/catalog"
@@ -264,7 +288,7 @@ export default function AdminLayoutClient({
         <div className="flex-1 flex flex-col min-w-0">
           <header
             className={[
-              "border-b border-[#e5e5e5] bg-white sticky top-0 z-30",
+              "border-b border-neutral-200 bg-white/90 backdrop-blur sticky top-0 z-30",
               isLoginPage || !serverAccount
                 ? "hidden"
                 : "lg:hidden flex items-center gap-4 p-4",
@@ -282,8 +306,8 @@ export default function AdminLayoutClient({
             <span className="text-sm font-medium text-gray-900">{serverAccount?.access === "agent" ? "Agent Console" : "Admin Console"}</span>
           </header>
 
-          <main className={isLoginPage ? "flex-1" : "flex-1 bg-[#f5f5f7] p-4 lg:p-8 overflow-y-auto pb-[120px]"}>
-            <div className={isLoginPage ? "" : "max-w-5xl mx-auto"}>{children}</div>
+          <main className={isLoginPage ? "flex-1" : "admin-main flex-1 bg-[#f6f8fb] px-4 py-6 lg:px-10 lg:py-10 overflow-y-auto pb-[120px]"}>
+            <div className={isLoginPage ? "" : "max-w-6xl mx-auto"}>{children}</div>
           </main>
         </div>
       </div>

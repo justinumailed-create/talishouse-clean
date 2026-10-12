@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireAdminScopePage } from "@/lib/admin-auth";
+import { LinkButton, PageHeader } from "@/components/admin/ui";
 import { listPmcRegionalPins } from "@/lib/talispros/pmc-pins-service";
 import { listPmcClaimedMapSites } from "@/lib/talispros/pmc-claimed-mapsites";
 import PmcPinsAdminEditor from "@/components/talispros-admin/PmcPinsAdminEditor";
@@ -14,27 +15,13 @@ export default async function TalisprosPmcAdminPage() {
   ]);
 
   return (
-    <div className="max-w-5xl space-y-10">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-            Global Admin
-          </p>
-          <h1 className="mt-1 text-2xl font-semibold text-neutral-900">
-            PMC Mapsite admin
-          </h1>
-          <p className="mt-2 max-w-2xl text-sm text-neutral-600">
-            Manage regional Root Account™ pins and every generated FAST Code /
-            claimed Mapsite (pin map, listing copy, MLS® / URL / TEB™ / TTV™).
-          </p>
-        </div>
-        <Link
-          href="/admin/mapsites"
-          className="rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50"
-        >
-          Back
-        </Link>
-      </div>
+    <div className="space-y-10">
+      <PageHeader
+        kicker="Global Admin"
+        title="PMC Mapsite admin"
+        subtitle="Manage regional Root Account™ pins and every generated FAST Code / claimed Mapsite (pin map, listing copy, MLS® / URL / TEB™ / TTV™)."
+        actions={<LinkButton href="/admin/mapsites">← Mapsites</LinkButton>}
+      />
 
       <section className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-2">
