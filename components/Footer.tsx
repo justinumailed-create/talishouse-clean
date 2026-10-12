@@ -114,14 +114,6 @@ export default function Footer() {
           </h4>
           <ul className="space-y-3">
             <li>
-              <Link
-                href={ROUTES.ASSOCIATE_STATUS}
-                className="text-[15px] text-neutral-600 hover:text-gray-900 transition-colors"
-              >
-                Associate Status
-              </Link>
-            </li>
-            <li>
               <Link href={ROUTES.TERMS} className="text-[15px] text-neutral-600 hover:text-gray-900 transition-colors">
                 Terms of Service
               </Link>

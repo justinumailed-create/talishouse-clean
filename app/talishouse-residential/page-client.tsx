@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import ProductLayout from "@/components/ProductLayout";
-import { useAssociate } from "@/context/AssociateContext";
+import { useStoredFastCode } from "@/hooks/useStoredFastCode";
 
 const SIZES = [
   { value: "1600", label: "1,600 sq ft" },
@@ -11,7 +11,7 @@ const SIZES = [
 ];
 
 export default function TalishouseResidentialPage() {
-  const { fastCode } = useAssociate();
+  const fastCode = useStoredFastCode();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [selectedSize, setSelectedSize] = useState("1600");

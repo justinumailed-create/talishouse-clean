@@ -55,7 +55,8 @@ describe("agent privileges", () => {
     expect(accountCanAccessAdminPath(a, "/admin/notifications")).toBe(false);
     expect(accountCanAccessAdminPath(a, "/admin/pmc")).toBe(false);
     expect(accountCanAccessAdminPath(a, "/admin/agent/page")).toBe(false);
-    expect(accountCanAccessAdminPath(agent(["agent-pages"]), "/admin/agent/page")).toBe(true);
+    // Agents can no longer edit their own pages: the route and privilege are gone.
+    expect(accountCanAccessAdminPath(agent(["mapsites", "ebooks", "pins", "cash-payments"]), "/admin/agent/page")).toBe(false);
     expect(adminHomePath(a)).toBe("/admin/agent");
   });
 
@@ -69,8 +70,8 @@ describe("agent privileges", () => {
 
   it("builds agent nav only from granted privileges", () => {
     expect(getAdminNavItems("agent", []).map((i) => i.href)).toEqual(["/admin/agent"]);
-    const hrefs = getAdminNavItems("agent", ["agent-pages", "build-requests"]).map((i) => i.href);
-    expect(hrefs).toEqual(["/admin/agent", "/admin/agent/page", "/admin/build-requests"]);
+    const hrefs = getAdminNavItems("agent", ["agent-pages", "build-requests"] as string[]).map((i) => i.href);
+    expect(hrefs).toEqual(["/admin/agent", "/admin/build-requests"]);
   });
 });
 

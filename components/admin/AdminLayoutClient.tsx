@@ -101,6 +101,7 @@ function AdminSidebar({
         </nav>
 
         <div className="p-3 border-t border-[#e5e5e5] space-y-1">
+          {serverAccountIsAgent ? null : (
           <Link
             href="/catalog"
             target="_blank"
@@ -117,6 +118,7 @@ function AdminSidebar({
             </svg>
             Talishouse™ site
           </Link>
+          )}
           <Link
             href="/"
             className="flex items-center gap-2 px-3 py-2 text-[#6e6e73] hover:text-[#111] text-xs font-medium transition-colors"
@@ -243,7 +245,7 @@ export default function AdminLayoutClient({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <span className="text-sm font-medium text-gray-900">Admin Console</span>
+            <span className="text-sm font-medium text-gray-900">{serverAccount?.access === "agent" ? "Agent Console" : "Admin Console"}</span>
           </header>
 
           <main className={isLoginPage ? "flex-1" : "flex-1 bg-[#f5f5f7] p-4 lg:p-8 overflow-y-auto pb-[120px]"}>

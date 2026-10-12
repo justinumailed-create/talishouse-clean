@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
-import { AssociateProvider } from "@/context/AssociateContext";
 import { AuthProvider } from "@/context/AuthContext";
 import RootShell from "@/components/RootShell";
 import { LocaleProvider } from "@/lib/i18n/client";
@@ -53,9 +52,7 @@ export default async function RootLayout({
         <LocaleProvider locale={locale}>
           <AuthProvider>
             <CartProvider>
-              <AssociateProvider>
-                <RootShell>{children}</RootShell>
-              </AssociateProvider>
+              <RootShell>{children}</RootShell>
             </CartProvider>
           </AuthProvider>
         </LocaleProvider>

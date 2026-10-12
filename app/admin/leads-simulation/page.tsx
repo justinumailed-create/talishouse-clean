@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase, safeInsertLead } from "@/lib/supabase";
 import { ToastContainer, useToast } from "@/components/Toast";
-import Link from "next/link";
 
 interface Associate {
   id: string;
@@ -366,13 +365,7 @@ Amanda Rodriguez,arodriguez@hotmail.com,514-555-0567,Ottawa ON,First Home,$600k-
                     </td>
                     <td className="text-gray-600">{lead.price_range}</td>
                     <td>
-                      <Link 
-                        href={`/associate/${lead.fast_code}`}
-                        className="text-[#1E4ED8] hover:underline"
-                        target="_blank"
-                      >
-                        {lead.associate_name}
-                      </Link>
+                      <span className="text-gray-700">{lead.associate_name}</span>
                     </td>
                   </tr>
                 ))}

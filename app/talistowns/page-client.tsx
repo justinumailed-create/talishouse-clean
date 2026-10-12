@@ -4,11 +4,11 @@ import { useState } from "react";
 import ProductLayout from "@/components/ProductLayout";
 import { productFamilies } from "@/lib/productFamilies";
 import { useRouter } from "next/navigation";
-import { useAssociate } from "@/context/AssociateContext";
+import { useStoredFastCode } from "@/hooks/useStoredFastCode";
 
 export default function TalistownsPage() {
   const router = useRouter();
-  const { fastCode } = useAssociate();
+  const fastCode = useStoredFastCode();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 

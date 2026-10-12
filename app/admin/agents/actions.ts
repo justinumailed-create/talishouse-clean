@@ -9,9 +9,7 @@ import {
   setAgentPassword,
   setAgentStatus,
   updateAgent,
-  updateAgentPage,
   type AgentInput,
-  type AgentPageInput,
   type AgentStatus,
 } from "@/lib/agent-admins";
 import { reverseManualCashPayment } from "@/lib/manual-payments";
@@ -64,19 +62,6 @@ export async function setAgentStatusAction(id: string, status: AgentStatus): Pro
   const result = await setAgentStatus(id, status === "disabled" ? "disabled" : "active", actorLabel(account));
   if (!result.ok) return result;
   revalidateAgents(id);
-  return { ok: true, id };
-}
-
-export async function updateAgentPageAsManagerAction(
-  id: string,
-  input: AgentPageInput,
-): Promise<AgentActionResult> {
-  const account = await requireAgentManager();
-  if (!account) return { ok: false, error: "Unauthorized" };
-  const result = await updateAgentPage(id, input, actorLabel(account));
-  if (!result.ok) return result;
-  revalidateAgents(id);
-  revalidatePath(`/associate/${result.agent.loginId}`);
   return { ok: true, id };
 }
 

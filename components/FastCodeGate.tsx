@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/lib/supabase";
 import { loginAdminWithFastCodeAction } from "@/app/admin/actions";
 import { ADMIN_FAST_CODE, normalizeFastCode, setAdminSession } from "@/lib/fast-code";
 
@@ -36,24 +35,6 @@ export default function FastCodeGate() {
         }
         setAdminSession(adminLogin.fastCode);
         login(code, "admin");
-        localStorage.setItem("auth", "true");
-        document.cookie = "auth=true; path=/; max-age=86400; SameSite=Lax";
-        console.log("AUTH:", localStorage.getItem("auth"));
-        // Auth flow → dashboard only
-        router.replace("/business-office");
-        return;
-      }
-
-      const { data: associate, error: dbError } = await supabase
-        .from("associates")
-        .select("*")
-        .eq("fast_code", code)
-        .maybeSingle();
-
-      if (dbError) {
-        console.warn("Associate lookup failed:", dbError.message);
-      } else if (associate) {
-        login(code, "associate", associate.id);
         localStorage.setItem("auth", "true");
         document.cookie = "auth=true; path=/; max-age=86400; SameSite=Lax";
         console.log("AUTH:", localStorage.getItem("auth"));

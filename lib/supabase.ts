@@ -123,18 +123,6 @@ export interface Application {
   created_at: string;
 }
 
-export interface AssociateApplication {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  location: string;
-  preferred_fast_code: string | null;
-  role_type: string;
-  status: string;
-  created_at: string;
-}
-
 export interface Transaction {
   id: string;
   deal_id: string | null;

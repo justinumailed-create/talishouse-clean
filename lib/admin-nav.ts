@@ -27,7 +27,6 @@ export const ADMIN_SUPERADMIN_NAV: readonly AdminNavItem[] = [
 export function getAgentNavItems(scopes: readonly string[] | null | undefined): AdminNavItem[] {
   const granted = new Set<AdminScope>(sanitizeAgentScopes(scopes ?? []));
   const items: AdminNavItem[] = [{ href: "/admin/agent", label: "My dashboard" }];
-  if (granted.has("agent-pages")) items.push({ href: "/admin/agent/page", label: "My page" });
   if (granted.has("mapsites")) {
     items.push({ href: "/admin/mapsites", label: "Mapsites" });
     items.push({ href: "/admin/seo", label: "SEO" });

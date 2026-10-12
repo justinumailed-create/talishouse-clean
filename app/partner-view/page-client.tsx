@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { useAssociate } from "@/context/AssociateContext";
+import { useStoredFastCode } from "@/hooks/useStoredFastCode";
 import { UI } from "@/styles/design-system";
 
 const TalisMapsEmbed = dynamic(() => import("@/components/talismaps/TalisMapsEmbed"), {
@@ -19,7 +19,7 @@ const TalisMapsEmbed = dynamic(() => import("@/components/talismaps/TalisMapsEmb
 
 export default function PartnerViewPage() {
   const router = useRouter();
-  const { fastCode } = useAssociate();
+  const fastCode = useStoredFastCode();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(false);

@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AgentForm from "@/components/admin/agents/AgentForm";
-import AgentPageForm from "@/components/admin/agents/AgentPageForm";
 import AgentPasswordPanel from "@/components/admin/agents/AgentPasswordPanel";
 import AgentStatusButton from "@/components/admin/agents/AgentStatusButton";
 import { requireAdminScopePage } from "@/lib/admin-auth";
 import { getAgentById, listAgentAudit } from "@/lib/agent-admins";
-import { updateAgentPageAsManagerAction } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -64,18 +62,6 @@ export default async function AdminAgentEditPage({ params }: { params: Promise<{
         lastLoginAt={agent.lastLoginAt}
       />
 
-      <AgentPageForm
-        save={updateAgentPageAsManagerAction.bind(null, agent.id)}
-        publicHref={`/associate/${encodeURIComponent(agent.loginId)}`}
-        initial={{
-          pageHeadline: agent.pageHeadline ?? "",
-          pageSubtext: agent.pageSubtext ?? "",
-          pageCta: agent.pageCta ?? "",
-          pageBio: agent.pageBio ?? "",
-          videoUrl: agent.videoUrl ?? "",
-          showContactForm: agent.showContactForm,
-        }}
-      />
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-6">
         <h2 className="text-lg font-semibold text-neutral-900">Audit log</h2>

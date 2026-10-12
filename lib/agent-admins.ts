@@ -197,15 +197,6 @@ export interface AgentInput {
   notes?: string | null;
 }
 
-export interface AgentPageInput {
-  pageHeadline?: string | null;
-  pageSubtext?: string | null;
-  pageCta?: string | null;
-  pageBio?: string | null;
-  videoUrl?: string | null;
-  showContactForm?: boolean;
-}
-
 function clean(value: string | null | undefined, max = 2000): string | null {
   const v = (value ?? "").trim();
   return v ? v.slice(0, max) : null;
@@ -393,38 +384,6 @@ export async function setAgentStatus(
     status: { from: before.status, to: status },
   });
   return { ok: true };
-}
-
-export async function updateAgentPage(
-  id: string,
-  input: AgentPageInput,
-  actor: string,
-): Promise<{ ok: true; agent: AgentAdminRecord } | { ok: false; error: string }> {
-  const before = await getAgentById(id);
-  if (!before) return { ok: false, error: "Agent not found." };
-  const videoUrl = clean(input.videoUrl, 1000);
-  if (videoUrl && !/^https:\/\//i.test(videoUrl)) {
-    return { ok: false, error: "Video URL must start with https://" };
-  }
-  const { data, error } = await db()
-    .from(AGENT_TABLE)
-    .update({
-      page_headline: clean(input.pageHeadline, 200),
-      page_subtext: clean(input.pageSubtext, 500),
-      page_cta: clean(input.pageCta, 80),
-      page_bio: clean(input.pageBio, 4000),
-      video_url: videoUrl,
-      show_contact_form: input.showContactForm ?? true,
-      updated_by: actor,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", id)
-    .select(AGENT_PUBLIC_COLUMNS)
-    .single();
-  if (error || !data) return { ok: false, error: error?.message || "Could not save page." };
-  const agent = toRecord(data as unknown as AgentRow);
-  await logAgentAudit(agent.id, "agent.page.update", actor, diff(before, agent));
-  return { ok: true, agent };
 }
 
 export interface AgentMapSiteSummary {

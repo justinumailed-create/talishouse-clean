@@ -4,7 +4,6 @@ import { accountHasAdminScope } from "./admin-constants";
 const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | null }> = [
   { prefix: "/admin/login", scope: null },
   // Agent's own dashboard: any signed-in admin account (page adapts).
-  { prefix: "/admin/agent/page", scope: "agent-pages" },
   { prefix: "/admin/agents", scope: "agents" },
   { prefix: "/admin/talismaps", scope: "mapsites" },
   { prefix: "/admin/platform-content", scope: "platform-content" },
@@ -20,15 +19,12 @@ const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | nu
   { prefix: "/admin/products", scope: "platform-content" },
   { prefix: "/admin/notifications", scope: "dashboard" },
   { prefix: "/admin/dashboard", scope: "dashboard" },
-  { prefix: "/admin/associates", scope: "full-console" },
   { prefix: "/admin/talisbot", scope: "full-console" },
   { prefix: "/admin/leads-simulation", scope: "full-console" },
   { prefix: "/admin/leads", scope: "leads" },
   { prefix: "/admin/contact-from-leads", scope: "leads" },
   { prefix: "/admin/deals", scope: "full-console" },
   { prefix: "/admin/users", scope: "full-console" },
-  { prefix: "/admin/applications", scope: "full-console" },
-  { prefix: "/admin/project-applications", scope: "full-console" },
   { prefix: "/admin/registrations", scope: "full-console" },
   { prefix: "/admin/pricing", scope: "full-console" },
   { prefix: "/admin/payments", scope: "full-console" },

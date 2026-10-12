@@ -4,12 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { useAssociate } from "@/context/AssociateContext";
+import { useStoredFastCode } from "@/hooks/useStoredFastCode";
 import { UI } from "@/styles/design-system";
 
 export default function AddProjectPage() {
   const router = useRouter();
-  const { fastCode, associateId } = useAssociate();
+  const fastCode = useStoredFastCode();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");

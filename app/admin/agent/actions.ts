@@ -2,35 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminSessionAccount, requireAdminScope } from "@/lib/admin-auth";
-import { logAgentAudit, updateAgentPage, type AgentPageInput } from "@/lib/agent-admins";
+import { logAgentAudit } from "@/lib/agent-admins";
 import { accountHasAdminScope, type AdminAccount, type AdminScope } from "@/lib/admin-constants";
 import { agentCanEditMapSite } from "@/lib/mapsite-edit-auth";
 import { parseCadAmount, parsePaidOnDate, recordManualCashPayment } from "@/lib/manual-payments";
 import { grantFreePinCreditsForFastCode } from "@/lib/talispros/mapsite-additional-pins-service";
 import type { AgentActionResult } from "@/app/admin/agents/actions";
-
-/** Signed-in Agent Admin edits ONLY their own landing page (needs the Pages privilege). */
-export async function updateOwnAgentPageAction(input: AgentPageInput): Promise<AgentActionResult> {
-  let account;
-  try {
-    account = await requireAdminScope("agent-pages");
-  } catch {
-    return { ok: false, error: "Unauthorized" };
-  }
-  if (account.access !== "agent" || !account.agentId) {
-    return { ok: false, error: "Only Agent Admin accounts have an agent page." };
-  }
-  const result = await updateAgentPage(
-    account.agentId,
-    input,
-    `${account.name} (${account.fastCode}) [self]`,
-  );
-  if (!result.ok) return result;
-  revalidatePath("/admin/agent");
-  revalidatePath("/admin/agent/page");
-  revalidatePath(`/associate/${result.agent.loginId}`);
-  return { ok: true, id: account.agentId };
-}
 
 const AGENT_MAX_PINS_PER_ACTION = 25;
 

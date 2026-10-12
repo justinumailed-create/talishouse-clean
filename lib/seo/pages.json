@@ -608,21 +608,6 @@
     "alt": "Talispros™ Baumlogo: Erzählen Sie uns von Ihrem Projekt"
    }
   },
-  "/associate-status": {
-   "kind": "public",
-   "noindex": false,
-   "image": "/og/pages/associate-status",
-   "en": {
-    "title": "Become a Talispros™ Associate",
-    "description": "Earn referral fees on completed projects, with exclusive product information, marketing support and priority access to new launches.",
-    "alt": "Talispros™ tree logo: Earn referral fees on completed projects"
-   },
-   "de": {
-    "title": "Werden Sie Talispros™ Associate",
-    "description": "Verdienen Sie Empfehlungsprovisionen für abgeschlossene Projekte, mit exklusiven Produktinfos, Marketing-Support und frühem Zugang.",
-    "alt": "Talispros™ Baumlogo: Empfehlungsprovisionen für Projekte"
-   }
-  },
   "/subscription": {
    "kind": "public",
    "noindex": false,
@@ -1103,21 +1088,6 @@
     "alt": "Talispros™ Baumlogo: Neues Passwort wählen"
    }
   },
-  "/associate/login": {
-   "kind": "login",
-   "noindex": true,
-   "image": "/og/pages/associate-login",
-   "en": {
-    "title": "Associate Login with FAST Code | Talispros™",
-    "description": "Talispros™ associates: sign in with your FAST Code to open your dashboard.",
-    "alt": "Talispros™ tree logo: Associate sign in with FAST Code"
-   },
-   "de": {
-    "title": "Associate-Anmeldung mit FAST Code | Talispros™",
-    "description": "Talispros™ Associates: Melden Sie sich mit Ihrem FAST Code an und öffnen Sie Ihr Dashboard.",
-    "alt": "Talispros™ Baumlogo: Associate-Anmeldung mit FAST Code"
-   }
-  },
   "/crm/login": {
    "kind": "login",
    "noindex": true,
@@ -1164,9 +1134,6 @@
    "kind": "dynamic"
   },
   "/talispros/register-your-mapsite/[fastCode]": {
-   "kind": "dynamic"
-  },
-  "/associate/[fastCode]": {
    "kind": "dynamic"
   },
   "/ttvaccess/[fastCode]": {
