@@ -8,6 +8,7 @@ import {
   MAPSITE_ROOT_ACCOUNT_MAX_AGE,
 } from "./mapsite-account-session";
 import { hasCompletedMapSiteActivationPayment } from "./talispros/mapsite-payment";
+import { logAgentAudit } from "./agent-admins";
 
 export async function getMapSiteOwnerSession(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -77,6 +78,17 @@ export async function requireMapSiteEbookAccess(fastCode: string): Promise<void>
   if (!(await canManageMapSiteEbooks(fastCode))) {
     throw new Error("Unauthorized");
   }
+  await logAgentMapSiteWork(fastCode, "agent.ebook.edit");
+}
+
+/** Activity log for Agent Admin write access (superadmins/owners are not logged here). */
+async function logAgentMapSiteWork(fastCode: string, action: string): Promise<void> {
+  if (await isMapSiteAdmin()) return;
+  const account = await getAdminSessionAccount();
+  if (!account || account.access !== "agent" || !account.agentId) return;
+  await logAgentAudit(account.agentId, action, `${account.name} (${account.fastCode}) [agent:${account.agentId}]`, {
+    fast_code: normalizeFastCode(fastCode),
+  });
 }
 
 /** PIN placement: Global Admin, agent with `pins`, or paid owner. */
@@ -90,6 +102,7 @@ export async function requireMapSiteEditAccess(fastCode: string): Promise<void> 
   if (!(await canEditMapSite(fastCode))) {
     throw new Error("Unauthorized");
   }
+  await logAgentMapSiteWork(fastCode, "agent.mapsite.edit");
 }
 
 export async function setMapSiteOwnerSession(fastCode: string): Promise<void> {

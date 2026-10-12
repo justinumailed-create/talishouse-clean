@@ -17,6 +17,7 @@ import {
   AGENT_SESSION_MAX_AGE,
   agentToAdminAccount,
   getAgentBySessionToken,
+  recordAgentLogout,
   revokeAgentSessionToken,
 } from "./agent-admins";
 
@@ -85,7 +86,9 @@ export async function readAgentSessionToken(): Promise<string | null> {
 /** Sign the agent out: delete the server-side session row and the cookie. */
 export async function clearAgentSessionCookie(): Promise<void> {
   const cookieStore = await cookies();
-  await revokeAgentSessionToken(cookieStore.get(AGENT_SESSION_COOKIE)?.value ?? null).catch(() => {});
+  const token = cookieStore.get(AGENT_SESSION_COOKIE)?.value ?? null;
+  await recordAgentLogout(token).catch(() => {});
+  await revokeAgentSessionToken(token).catch(() => {});
   cookieStore.set(AGENT_SESSION_COOKIE, "", adminSessionCookieOptions(0));
   cookieStore.delete(AGENT_SESSION_COOKIE);
 }

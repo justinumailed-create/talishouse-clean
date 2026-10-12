@@ -5,6 +5,7 @@ import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { accountHasAdminScope } from "@/lib/admin-constants";
 import { getAgentById, listAgentMapSites } from "@/lib/agent-admins";
 import { listManualPayments } from "@/lib/manual-payments";
+import { countUnreadChat } from "@/lib/agent-collab-server";
 
 export const dynamic = "force-dynamic";
 
@@ -32,11 +33,14 @@ export default async function AgentHomePage() {
 
   const agent = await getAgentById(account.agentId);
   if (!agent || agent.status !== "active") redirect("/admin/login");
-  const [mapsites, payments] = await Promise.all([
+  const [mapsites, payments, chatUnread] = await Promise.all([
     listAgentMapSites(agent.assignedMapSites),
     agent.privileges.includes("cash-payments") && !agent.mustChangePassword
       ? listManualPayments({ agentId: agent.id, limit: 50 })
       : Promise.resolve([]),
+    agent.mustChangePassword
+      ? Promise.resolve(0)
+      : countUnreadChat({ ...account, agentId: agent.id }).catch(() => 0),
   ]);
-  return <AgentDashboard agent={agent} mapsites={mapsites} payments={payments} />;
+  return <AgentDashboard agent={agent} mapsites={mapsites} payments={payments} chatUnread={chatUnread} />;
 }

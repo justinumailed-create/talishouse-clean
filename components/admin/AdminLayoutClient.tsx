@@ -7,6 +7,7 @@ import { logoutAdminAction } from "@/app/admin/actions";
 import { adminHomePath, type AdminAccount } from "@/lib/admin-constants";
 import { clearAdminSession } from "@/lib/fast-code";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
+import { AGENT_HEARTBEAT_MS } from "@/lib/agent-collab";
 import { getAdminNavItems, isAdminNavItemActive, type AdminNavItem } from "@/lib/admin-nav";
 import {
   isProtectedAdminPath,
@@ -21,7 +22,9 @@ function AdminSidebar({
   navItems,
   signedInAs,
   serverAccountIsAgent,
+  chatUnread = 0,
 }: {
+  chatUnread?: number;
   isOpen: boolean;
   onClose: () => void;
   hidden: boolean;
@@ -93,7 +96,12 @@ function AdminSidebar({
                       : "text-[#6e6e73] hover:text-[#111] hover:bg-[#f5f5f7]"
                   }`}
                 >
-                  {item.label}
+                  <span className="flex items-center justify-between gap-2">
+                    {item.label}
+                    {item.href === "/admin/agent/chat" && chatUnread > 0 ? (
+                      <span className="rounded-full bg-[#1E4ED8] px-2 py-0.5 text-[11px] font-semibold text-white">{chatUnread}</span>
+                    ) : null}
+                  </span>
                 </Link>
               </li>
             ))}
@@ -167,6 +175,31 @@ export default function AdminLayoutClient({
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [chatUnread, setChatUnread] = useState(0);
+  const isAgent = serverAccount?.access === "agent" && !serverAccount.mustChangePassword;
+
+  // Agent presence heartbeat (online dot / last seen) + chat unread badge.
+  useEffect(() => {
+    if (!isAgent) return;
+    let alive = true;
+    const beat = async () => {
+      if (document.visibilityState !== "visible") return;
+      try {
+        const res = await fetch("/api/agent/heartbeat", { method: "POST", cache: "no-store" });
+        if (res.ok && alive) setChatUnread(((await res.json()) as { unread?: number }).unread ?? 0);
+      } catch {
+        /* offline; next beat retries */
+      }
+    };
+    void beat();
+    const timer = window.setInterval(beat, AGENT_HEARTBEAT_MS);
+    document.addEventListener("visibilitychange", beat);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", beat);
+    };
+  }, [isAgent]);
 
   const currentPath = pathname.split("?")[0].trim();
   const isLoginPage = isPublicAdminPath(currentPath);
@@ -225,6 +258,7 @@ export default function AdminLayoutClient({
           navItems={navItems}
           signedInAs={serverAccount?.name ?? null}
           serverAccountIsAgent={serverAccount?.access === "agent"}
+          chatUnread={chatUnread}
         />
 
         <div className="flex-1 flex flex-col min-w-0">

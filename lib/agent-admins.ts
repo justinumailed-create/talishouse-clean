@@ -445,7 +445,7 @@ export async function hashAgentPassword(password: string): Promise<string> {
   return bcrypt.hash(password, BCRYPT_COST);
 }
 
-function hashToken(token: string): string {
+export function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
@@ -455,6 +455,25 @@ export function isAgentSessionTokenShape(value: string | null | undefined): bool
 
 export async function revokeAgentSessions(agentId: string): Promise<void> {
   await db().from(SESSION_TABLE).delete().eq("agent_id", agentId);
+}
+
+/** Explicit sign-out: log it (with session start + last activity) and mark presence offline. */
+export async function recordAgentLogout(token: string | null | undefined): Promise<void> {
+  if (!token || !isAgentSessionTokenShape(token) || !isSupabaseAdminConfigured()) return;
+  const { data } = await db()
+    .from(SESSION_TABLE)
+    .select("agent_id, created_at, last_seen_at")
+    .eq("token_hash", hashToken(token))
+    .maybeSingle();
+  const row = data as { agent_id: string; created_at: string; last_seen_at: string } | null;
+  if (!row) return;
+  const now = new Date().toISOString();
+  await db().from("agent_presence").upsert({ agent_id: row.agent_id, signed_out_at: now }, { onConflict: "agent_id" });
+  const agent = await getAgentById(row.agent_id);
+  await logAgentAudit(row.agent_id, "agent.logout", agent?.loginId ?? "agent", {
+    signed_in_at: row.created_at,
+    last_activity_at: row.last_seen_at,
+  });
 }
 
 export async function revokeAgentSessionToken(token: string | null | undefined): Promise<void> {
@@ -477,13 +496,18 @@ export async function getAgentBySessionToken(token: string | null | undefined): 
   if (!isAgentSessionTokenShape(token) || !isSupabaseAdminConfigured()) return null;
   const { data } = await db()
     .from(SESSION_TABLE)
-    .select("agent_id, expires_at")
+    .select("agent_id, expires_at, created_at, last_seen_at")
     .eq("token_hash", hashToken(token as string))
     .maybeSingle();
   if (!data) return null;
-  const row = data as { agent_id: string; expires_at: string };
+  const row = data as { agent_id: string; expires_at: string; created_at: string; last_seen_at: string };
   if (new Date(row.expires_at).getTime() <= Date.now()) {
     await revokeAgentSessionToken(token);
+    await logAgentAudit(row.agent_id, "agent.session.expired", "system", {
+      signed_in_at: row.created_at,
+      last_activity_at: row.last_seen_at,
+      expired_at: row.expires_at,
+    });
     return null;
   }
   const agent = await getAgentById(row.agent_id);
@@ -564,6 +588,10 @@ export async function loginAgent(loginId: string, password: string): Promise<Age
   if (!agent) return generic;
   const token = await createAgentSession(agent.id);
   await logAgentAudit(agent.id, "agent.login", agent.loginId, {});
+  await db()
+    .from("agent_presence")
+    .upsert({ agent_id: agent.id, last_seen_at: new Date().toISOString() }, { onConflict: "agent_id" })
+    .then(undefined, () => undefined);
   return { ok: true, token, agent };
 }
 

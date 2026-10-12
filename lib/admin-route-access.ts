@@ -4,6 +4,9 @@ import { accountHasAdminScope } from "./admin-constants";
 const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | null }> = [
   { prefix: "/admin/login", scope: null },
   // Agent's own dashboard: any signed-in admin account (page adapts).
+  // Agent-only tools (pages also require an agent session themselves).
+  { prefix: "/admin/agent/notes", scope: null },
+  { prefix: "/admin/agent/chat", scope: null },
   { prefix: "/admin/agents", scope: "agents" },
   { prefix: "/admin/talismaps", scope: "mapsites" },
   { prefix: "/admin/platform-content", scope: "platform-content" },

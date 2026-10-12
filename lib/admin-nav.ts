@@ -26,7 +26,11 @@ export const ADMIN_SUPERADMIN_NAV: readonly AdminNavItem[] = [
 /** Agent Admin nav: own dashboard plus one entry per granted privilege. */
 export function getAgentNavItems(scopes: readonly string[] | null | undefined): AdminNavItem[] {
   const granted = new Set<AdminScope>(sanitizeAgentScopes(scopes ?? []));
-  const items: AdminNavItem[] = [{ href: "/admin/agent", label: "My dashboard" }];
+  const items: AdminNavItem[] = [
+    { href: "/admin/agent", label: "My dashboard" },
+    { href: "/admin/agent/notes", label: "Daily notes" },
+    { href: "/admin/agent/chat", label: "Chat" },
+  ];
   if (granted.has("mapsites")) {
     items.push({ href: "/admin/mapsites", label: "Mapsites" });
     items.push({ href: "/admin/seo", label: "SEO" });

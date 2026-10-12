@@ -20,6 +20,14 @@ export default async function AdminAgentsPage() {
           <Link href="/admin/agents/payments" className="text-[#1E4ED8] underline">
             Cash payments
           </Link>
+          {" · "}
+          <Link href="/admin/agents/activity" className="text-[#1E4ED8] underline">
+            Activity log
+          </Link>
+          {" · "}
+          <Link href="/admin/agents/notes" className="text-[#1E4ED8] underline">
+            Daily notes
+          </Link>
         </p>
       </div>
 

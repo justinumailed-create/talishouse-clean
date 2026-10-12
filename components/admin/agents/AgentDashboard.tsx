@@ -26,7 +26,9 @@ export default function AgentDashboard({
   mapsites,
   readOnly = false,
   payments = [],
+  chatUnread = 0,
 }: {
+  chatUnread?: number;
   agent: AgentAdminRecord;
   mapsites: AgentMapSiteSummary[];
   readOnly?: boolean;
@@ -61,6 +63,34 @@ export default function AgentDashboard({
           {active ? "Active" : "Disabled"}
         </span>
       </header>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        {[
+          { href: "/admin/agent/notes", title: "Daily notes", text: "Log today’s tasks and upload documents.", badge: 0 },
+          { href: "/admin/agent/chat", title: "Chat", text: "Private messages with other agents.", badge: chatUnread },
+        ].map((item) => {
+          const inner = (
+            <>
+              <span>
+                <span className="block text-[15px] font-semibold text-neutral-900">{item.title}</span>
+                <span className="mt-0.5 block text-[13px] text-neutral-500">{item.text}</span>
+              </span>
+              {item.badge > 0 ? (
+                <span className="rounded-full bg-[#1E4ED8] px-2.5 py-0.5 text-xs font-semibold text-white">{item.badge} unread</span>
+              ) : (
+                <span aria-hidden className="text-neutral-400">→</span>
+              )}
+            </>
+          );
+          return readOnly ? (
+            <div key={item.href} className={`${card} flex items-center justify-between gap-3 p-5`}>{inner}</div>
+          ) : (
+            <Link key={item.href} href={item.href} className={`${card} flex items-center justify-between gap-3 p-5 transition hover:border-[#1E4ED8]/40`}>
+              {inner}
+            </Link>
+          );
+        })}
+      </div>
 
       <div>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">Tasks</h2>
