@@ -69,14 +69,14 @@ export default function DemoFastCodeCard({ className = "" }: { className?: strin
               <path d="M10.8 12.2 20 3M16 7l3 3M14 9l2 2" />
             </svg>
           </span>
-          <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-white/80">
+          <p className="m-0! text-[12px] font-semibold uppercase tracking-[0.16em] text-white/80!">
             {m.cardKicker}
           </p>
         </div>
-        <h2 id={titleId} className="mt-4 text-[26px] font-semibold leading-tight tracking-[-0.02em] sm:text-[30px]">
+        <h2 id={titleId} className="mt-4 text-[26px] font-semibold leading-tight tracking-[-0.02em] text-white! sm:text-[30px]">
           {m.cardTitle}
         </h2>
-        <p className="mt-2 text-[15px] leading-relaxed text-white/85">{m.prompt}</p>
+        <p className="mt-2 text-[15px] leading-relaxed text-white/85!">{m.prompt}</p>
 
         <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3 sm:flex-row">
           <label htmlFor={fieldId} className="sr-only">
@@ -108,7 +108,7 @@ export default function DemoFastCodeCard({ className = "" }: { className?: strin
           </button>
         </form>
         {error ? (
-          <p className="mt-3 rounded-xl bg-white/95 px-3 py-2 text-[13px] text-red-600" role="alert">
+          <p className="mt-3 rounded-xl bg-white/95 px-3 py-2 text-[13px] text-red-600!" role="alert">
             {error}
           </p>
         ) : null}

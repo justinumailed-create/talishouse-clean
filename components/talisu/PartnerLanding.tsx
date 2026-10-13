@@ -231,11 +231,11 @@ export default function PartnerLanding({
       {/* Closing CTA */}
       <section className="px-5 pb-16 sm:pb-24">
         <div className="mx-auto max-w-4xl rounded-[32px] bg-gradient-to-br from-[#046BD9] to-[#063f86] px-6 py-12 text-center text-white shadow-[0_24px_60px_rgba(4,107,217,0.3)] sm:px-12">
-          <h2 className="text-[28px] font-semibold leading-tight tracking-[-0.02em] sm:text-[36px]">
+          <h2 className="text-[28px] font-semibold leading-tight tracking-[-0.02em] text-white! sm:text-[36px]">
             {closingTitle}
           </h2>
           {closingText ? (
-            <p className="mx-auto mt-3 max-w-2xl text-[17px] leading-relaxed text-white/85">
+            <p className="mx-auto mt-3 max-w-2xl text-[17px] leading-relaxed text-white/85!">
               {closingText}
             </p>
           ) : null}

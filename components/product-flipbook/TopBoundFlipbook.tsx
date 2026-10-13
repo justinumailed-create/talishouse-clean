@@ -261,13 +261,17 @@ export default function TopBoundFlipbook({
         <h1 className="sr-only">{title}</h1>
       )}
 
-      {headline ? (
+      {headline && headlineAction ? (
+        <div className="relative z-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4">
+          <p className="product-flipbook__headline mx-0!" data-testid="product-flipbook-headline">
+            {headline}
+          </p>
+          {headlineAction}
+        </div>
+      ) : headline ? (
         <p className="product-flipbook__headline" data-testid="product-flipbook-headline">
           {headline}
         </p>
-      ) : null}
-      {headlineAction ? (
-        <div className="relative z-10 flex justify-center px-4 pb-2">{headlineAction}</div>
       ) : null}
 
       <div className="product-flipbook__stage">

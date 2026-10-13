@@ -73,7 +73,7 @@ export default function TalisUEssayRail({ initialSlug, switcherLabel }: TalisUEs
                 title={label}
                 data-placeholder={placeholder || undefined}
                 onClick={() => select(essay.slug)}
-                className={`shrink-0 truncate whitespace-nowrap rounded-full px-2.5 py-1 text-center text-[11px] leading-4 ring-1 transition sm:min-w-0 ${
+                className={`shrink-0 truncate whitespace-nowrap rounded-full px-2.5 py-1 text-center text-[11px] leading-4 ring-1 transition sm:min-w-0 sm:px-1.5 sm:tracking-tight ${
                   placeholder ? "font-medium print:hidden" : "font-semibold"
                 } ${
                   selected
