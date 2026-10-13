@@ -17,6 +17,7 @@ import type { Locale } from "@/lib/i18n/config";
 import TalisUTokenizationEssay from "@/components/talisu/TalisUTokenizationEssay";
 import TalisUHospitalityEssay from "@/components/talisu/TalisUHospitalityEssay";
 import TalisUStudentHousingEssay from "@/components/talisu/TalisUStudentHousingEssay";
+import TalisULongTermCareEssay from "@/components/talisu/TalisULongTermCareEssay";
 
 export type TalisUEssay = {
   /** URL slug: /talisu?essay=<slug>. */
@@ -49,8 +50,12 @@ export const TALISU_ESSAYS: readonly TalisUEssay[] = [
     label: { en: "Student Housing", de: "Studentenwohnen" },
     content: TalisUStudentHousingEssay,
   },
+  {
+    slug: "long-term-care",
+    label: { en: "Long-Term Care", de: "Langzeitpflege" },
+    content: TalisULongTermCareEssay,
+  },
   // Placeholder categories — rename label/slug and set `content` when ready.
-  { slug: "category-4", label: COMING_SOON, content: null },
   { slug: "category-5", label: COMING_SOON, content: null },
   { slug: "category-6", label: COMING_SOON, content: null },
   { slug: "category-7", label: COMING_SOON, content: null },

@@ -40,7 +40,7 @@ describe("Ralf 3 — Student Housing essay tab", () => {
   it("is the 3rd essay with 7 Coming soon placeholders after it", () => {
     expect(TALISU_ESSAYS[2]?.slug).toBe("student-housing");
     expect(TALISU_ESSAYS[2]?.label).toEqual({ en: "Student Housing", de: "Studentenwohnen" });
-    expect(TALISU_ESSAYS.filter((e) => e.content === null)).toHaveLength(7);
+    expect(TALISU_ESSAYS.filter((e) => e.content === null)).toHaveLength(6);
     expect(resolveTalisUEssaySlug("student-housing")).toBe("student-housing");
   });
 
