@@ -3,8 +3,7 @@ import { agentCanEditMapSite } from "@/lib/mapsite-edit-auth";
 import { listMapSitesForAdmin } from "@/lib/mapsite-service";
 import AdminMapSiteThumbnailCard from "@/components/admin/AdminMapSiteThumbnailCard";
 import AdminMapSitePartnerLinksPanel from "@/components/admin/AdminMapSitePartnerLinksPanel";
-import { listMapSitePartnerLinks } from "@/lib/talispros/mapsite-partner-links";
-import { isElevatedAdminAccess } from "@/lib/admin-constants";
+import { canLinkMapSitePartners, listMapSitePartnerLinks } from "@/lib/talispros/mapsite-partner-links";
 import AdminFreePinCreditsPanel from "@/components/admin/AdminFreePinCreditsPanel";
 import { listFreePinGrants } from "@/lib/talispros/mapsite-additional-pins-service";
 import { isSupabaseAdminConfigured, getSupabaseAdmin } from "@/lib/supabaseAdmin";
@@ -19,7 +18,7 @@ export default async function AdminMapSitesPage() {
   if (isSupabaseAdminConfigured() && !isAgent) {
     await purgeMapSitesAndBookshelvesWithoutFastCodes(getSupabaseAdmin());
   }
-  const canLinkPartners = isElevatedAdminAccess(account?.access);
+  const canLinkPartners = canLinkMapSitePartners(account?.access);
   const [allMapSites, recentFreePinGrants, partnerLinks] = await Promise.all([
     listMapSitesForAdmin(),
     isAgent ? Promise.resolve([]) : listFreePinGrants({ limit: 20 }),

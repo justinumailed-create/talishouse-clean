@@ -12,6 +12,11 @@ export type MapSitePartnerLink = {
   createdBy: string | null;
 };
 
+/** Only superadmins may link / unlink partner Mapsites (not "full" admins). */
+export function canLinkMapSitePartners(access: string | null | undefined): boolean {
+  return access === "superadmin";
+}
+
 export function normalizePartnerFastCode(value: string | null | undefined): string {
   return (value || "").trim().toLowerCase();
 }

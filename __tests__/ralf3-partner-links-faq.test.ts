@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { partnersFromLinks, sortPartnerPair } from "../lib/talispros/mapsite-partner-links";
+import { canLinkMapSitePartners, partnersFromLinks, sortPartnerPair } from "../lib/talispros/mapsite-partner-links";
 import { TALISU_ESSAYS, resolveTalisUEssaySlug } from "../components/talisu/essay-registry";
 import { TALISU_STUDENT_HOUSING_ESSAY } from "../lib/talisu/student-housing-essay";
 
@@ -17,6 +17,18 @@ describe("Ralf 3 — partner-linked Mapsites", () => {
     expect(partnersFromLinks(links, "zz99")).toEqual([]);
   });
 
+  it("restricts link/unlink to superadmins (UI + server action)", () => {
+    expect(canLinkMapSitePartners("superadmin")).toBe(true);
+    expect(canLinkMapSitePartners("full")).toBe(false);
+    expect(canLinkMapSitePartners("agent")).toBe(false);
+    expect(canLinkMapSitePartners(null)).toBe(false);
+    const actions = readFileSync(resolve("app/admin/mapsites/partner-link-actions.ts"), "utf8");
+    expect(actions).toContain("canLinkMapSitePartners(account.access)");
+    expect(actions).not.toContain("isElevatedAdminAccess");
+    const page = readFileSync(resolve("app/admin/mapsites/page.tsx"), "utf8");
+    expect(page).toContain("canLinkMapSitePartners(account?.access)");
+  });
+
   it("ships migration 103 with RLS", () => {
     const sql = readFileSync(resolve("supabase/migrations/103_mapsite_partner_links.sql"), "utf8");
     expect(sql).toContain("create table if not exists public.mapsite_partner_links");
@@ -27,7 +39,7 @@ describe("Ralf 3 — partner-linked Mapsites", () => {
 describe("Ralf 3 — Student Housing essay tab", () => {
   it("is the 3rd essay with 7 Coming soon placeholders after it", () => {
     expect(TALISU_ESSAYS[2]?.slug).toBe("student-housing");
-    expect(TALISU_ESSAYS[2]?.label).toEqual({ en: "Student Housing", de: "Studentenwohnheime" });
+    expect(TALISU_ESSAYS[2]?.label).toEqual({ en: "Student Housing", de: "Studentenwohnen" });
     expect(TALISU_ESSAYS.filter((e) => e.content === null)).toHaveLength(7);
     expect(resolveTalisUEssaySlug("student-housing")).toBe("student-housing");
   });

@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
-import { isElevatedAdminAccess } from "@/lib/admin-constants";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import {
+  canLinkMapSitePartners,
   deleteMapSitePartnerLink,
   insertMapSitePartnerLink,
   normalizePartnerFastCode,
@@ -12,7 +12,7 @@ import {
 
 async function requireSuperadmin() {
   const account = await getAdminSessionAccount();
-  if (!account || !isElevatedAdminAccess(account.access)) return null;
+  if (!account || !canLinkMapSitePartners(account.access)) return null;
   return account;
 }
 

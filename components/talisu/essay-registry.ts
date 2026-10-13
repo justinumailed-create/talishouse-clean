@@ -46,7 +46,7 @@ export const TALISU_ESSAYS: readonly TalisUEssay[] = [
   },
   {
     slug: "student-housing",
-    label: { en: "Student Housing", de: "Studentenwohnheime" },
+    label: { en: "Student Housing", de: "Studentenwohnen" },
     content: TalisUStudentHousingEssay,
   },
   // Placeholder categories — rename label/slug and set `content` when ready.
