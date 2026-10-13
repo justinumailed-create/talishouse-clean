@@ -9,7 +9,10 @@ import { normalizeAdminFastCode } from "@/lib/admin-constants";
 
 export async function loginAdminWithFastCodeAction(
   code: string,
-): Promise<{ ok: true; fastCode: string; name: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; fastCode: string; name: string; isGlobalAdmin: boolean }
+  | { ok: false; error: string }
+> {
   const normalized = normalizeAdminFastCode(code);
   if (!normalized) {
     return { ok: false, error: "Enter your FAST code" };
@@ -20,7 +23,12 @@ export async function loginAdminWithFastCodeAction(
     return { ok: false, error: "Invalid FAST code" };
   }
 
-  return { ok: true, fastCode: account.fastCode, name: account.name };
+  return {
+    ok: true,
+    fastCode: account.fastCode,
+    name: account.name,
+    isGlobalAdmin: account.access === "global",
+  };
 }
 
 export async function logoutAdminAction(): Promise<void> {

@@ -1,6 +1,6 @@
 "use server";
 
-import { hasAdminScope, isAdminAuthenticated } from "@/lib/admin-auth";
+import { hasAdminScope } from "@/lib/admin-auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import {
   sendMapSiteAssigned,
@@ -13,7 +13,7 @@ export interface EmailActionResult {
 }
 
 async function requireBuildRequestAdminAccess(): Promise<void> {
-  if (!(await isAdminAuthenticated()) && !(await hasAdminScope("build-requests"))) {
+  if (!(await hasAdminScope("build-requests"))) {
     throw new Error("Unauthorized");
   }
 }

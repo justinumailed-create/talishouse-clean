@@ -55,7 +55,7 @@ export default async function AdminDashboardPage() {
   const account = await getAdminSessionAccount();
   const canAgents = accountHasAdminScope(account, "agents");
   const summary = canAgents ? await agentSummary() : null;
-  const shortcuts = getAdminNavItems(account?.access, account?.scopes).filter((i) => i.href !== "/admin/dashboard");
+  const shortcuts = getAdminNavItems(account).filter((i) => i.href !== "/admin/dashboard");
 
   return (
     <div className="space-y-10">

@@ -17,16 +17,16 @@ describe("Ralf 3 — partner-linked Mapsites", () => {
     expect(partnersFromLinks(links, "zz99")).toEqual([]);
   });
 
-  it("restricts link/unlink to superadmins (UI + server action)", () => {
-    expect(canLinkMapSitePartners("superadmin")).toBe(true);
-    expect(canLinkMapSitePartners("full")).toBe(false);
-    expect(canLinkMapSitePartners("agent")).toBe(false);
+  it("link/unlink needs the partner-linking permission (Global Admin always)", async () => {
+    const c = await import("../lib/admin-constants");
+    expect(canLinkMapSitePartners(c.getAdminAccountByFastCode("ARUN"))).toBe(true);
+    expect(canLinkMapSitePartners(c.grantToAdminAccount({ fastCode: "RM22", displayName: "Ralf", permissions: ["partner-linking"] }))).toBe(true);
+    expect(canLinkMapSitePartners(c.grantToAdminAccount({ fastCode: "AB12", displayName: null, permissions: ["mapsites"] }))).toBe(false);
     expect(canLinkMapSitePartners(null)).toBe(false);
     const actions = readFileSync(resolve("app/admin/mapsites/partner-link-actions.ts"), "utf8");
-    expect(actions).toContain("canLinkMapSitePartners(account.access)");
-    expect(actions).not.toContain("isElevatedAdminAccess");
+    expect(actions).toContain("canLinkMapSitePartners(account)");
     const page = readFileSync(resolve("app/admin/mapsites/page.tsx"), "utf8");
-    expect(page).toContain("canLinkMapSitePartners(account?.access)");
+    expect(page).toContain("canLinkMapSitePartners(account)");
   });
 
   it("ships migration 103 with RLS", () => {

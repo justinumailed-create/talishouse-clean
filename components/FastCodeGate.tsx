@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { loginAdminWithFastCodeAction } from "@/app/admin/actions";
-import { ADMIN_FAST_CODE, normalizeFastCode, setAdminSession } from "@/lib/fast-code";
+import { normalizeFastCode, setAdminSession } from "@/lib/fast-code";
 
 export default function FastCodeGate() {
   const router = useRouter();
@@ -27,12 +27,9 @@ export default function FastCodeGate() {
     setLoading(true);
 
     try {
-      if (code === ADMIN_FAST_CODE) {
-        const adminLogin = await loginAdminWithFastCodeAction(ADMIN_FAST_CODE);
-        if (!adminLogin.ok) {
-          setError(adminLogin.error);
-          return;
-        }
+      // Business Office: Global Admin only (legacy ADMIN123 is retired).
+      const adminLogin = await loginAdminWithFastCodeAction(code);
+      if (adminLogin.ok && adminLogin.isGlobalAdmin) {
         setAdminSession(adminLogin.fastCode);
         login(code, "admin");
         localStorage.setItem("auth", "true");

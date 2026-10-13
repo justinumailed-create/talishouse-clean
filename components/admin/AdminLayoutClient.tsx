@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { logoutAdminAction } from "@/app/admin/actions";
-import { adminHomePath, type AdminAccount } from "@/lib/admin-constants";
+import { adminAccessLabel, adminHomePath, type AdminAccount } from "@/lib/admin-constants";
 import { clearAdminSession } from "@/lib/fast-code";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
 import { AGENT_HEARTBEAT_MS } from "@/lib/agent-collab";
@@ -23,6 +23,7 @@ function AdminSidebar({
   navItems,
   signedInAs,
   serverAccountIsAgent,
+  roleLabel,
   chatUnread = 0,
 }: {
   chatUnread?: number;
@@ -32,6 +33,7 @@ function AdminSidebar({
   navItems: AdminNavItem[];
   signedInAs: string | null;
   serverAccountIsAgent: boolean;
+  roleLabel: string;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -129,28 +131,10 @@ function AdminSidebar({
               </span>
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium text-neutral-900">{signedInAs}</span>
-                <span className="block text-[11px] text-neutral-500">{serverAccountIsAgent ? "Agent" : "Administrator"}</span>
+                <span className="block text-[11px] text-neutral-500">{roleLabel}</span>
               </span>
             </div>
           ) : null}
-          {serverAccountIsAgent ? null : (
-          <Link
-            href="/catalog"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-3 py-2 text-[#6e6e73] hover:text-[#111] text-xs font-medium transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-              />
-            </svg>
-            Talishouse™ site
-          </Link>
-          )}
           <Link
             href="/"
             className="flex items-center gap-2 px-3 py-2 text-[#6e6e73] hover:text-[#111] text-xs font-medium transition-colors"
@@ -270,7 +254,7 @@ export default function AdminLayoutClient({
     return <>{children}</>;
   }
 
-  const navItems = serverAccount ? getAdminNavItems(serverAccount.access, serverAccount.scopes) : [];
+  const navItems = serverAccount ? getAdminNavItems(serverAccount) : [];
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
@@ -282,6 +266,7 @@ export default function AdminLayoutClient({
           navItems={navItems}
           signedInAs={serverAccount?.name ?? null}
           serverAccountIsAgent={serverAccount?.access === "agent"}
+          roleLabel={adminAccessLabel(serverAccount)}
           chatUnread={chatUnread}
         />
 

@@ -60,17 +60,15 @@ describe("agent privileges", () => {
     expect(adminHomePath(a)).toBe("/admin/agent");
   });
 
-  it("gives superadmin (RM22) and full (ARUN) the Agents section, not site-ops", () => {
-    expect(accountHasAdminScope(getAdminAccountByFastCode("RM22"), "agents")).toBe(true);
+  it("gives the Global Admin (ARUN) the Agents section", () => {
     expect(accountHasAdminScope(getAdminAccountByFastCode("ARUN"), "agents")).toBe(true);
-    expect(getAdminNavItems("superadmin").map((i) => i.href)).toContain("/admin/agents");
-    expect(getAdminNavItems("site-ops").map((i) => i.href)).not.toContain("/admin/agents");
-    expect(ADMIN_ACCOUNTS.map((a) => a.fastCode)).toEqual(["ADMIN123", "RM22", "ARUN"]);
+    expect(getAdminNavItems(getAdminAccountByFastCode("ARUN")).map((i) => i.href)).toContain("/admin/agents");
+    expect(ADMIN_ACCOUNTS.map((a) => a.fastCode)).toEqual(["ARUN"]);
   });
 
   it("builds agent nav only from granted privileges", () => {
-    expect(getAdminNavItems("agent", []).map((i) => i.href)).toEqual(["/admin/agent", "/admin/agent/notes", "/chat"]);
-    const hrefs = getAdminNavItems("agent", ["agent-pages", "build-requests"] as string[]).map((i) => i.href);
+    expect(getAdminNavItems(agent([])).map((i) => i.href)).toEqual(["/admin/agent", "/admin/agent/notes", "/chat"]);
+    const hrefs = getAdminNavItems(agent(["agent-pages", "build-requests"] as string[])).map((i) => i.href);
     expect(hrefs).toEqual(["/admin/agent", "/admin/agent/notes", "/chat", "/admin/build-requests"]);
   });
 });
@@ -94,7 +92,7 @@ describe("agent session gate", () => {
     const auth = readSource("lib/admin-auth.ts");
     expect(auth).toContain("getAgentBySessionToken(token)");
     expect(auth).not.toContain("getAgentByFastCode");
-    expect(auth).toContain("return Boolean(account) && !isAgentAccount(account);");
+    expect(auth).toContain("return isGlobalAdmin(await resolveAdminSessionAccount());");
     const actions = readSource("app/admin/agents/actions.ts");
     expect(actions).toContain('requireAdminScope("agents")');
     expect(actions).toContain('account.access === "agent" ? null : account');

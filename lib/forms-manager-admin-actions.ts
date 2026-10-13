@@ -1,6 +1,6 @@
 "use server";
 
-import { isAdminAuthenticated } from "./admin-auth";
+import { hasAdminScope } from "./admin-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
 
 export type FormsManagerSource = "build_mapsite" | "registration";
@@ -45,7 +45,7 @@ export interface ListFormsManagerResult {
 }
 
 async function requireFormsManagerAdminAccess(): Promise<void> {
-  if (!(await isAdminAuthenticated())) {
+  if (!(await hasAdminScope("full-console"))) {
     throw new Error("Unauthorized");
   }
 }

@@ -1,14 +1,12 @@
 "use client";
 
 import {
-  ADMIN_FAST_CODE,
   ADMIN_SESSION_COOKIE,
-  getAdminAccountByFastCode,
-  isAuthorizedAdminFastCode,
-  isElevatedAdminAccess,
+  isGlobalAdminFastCode,
+  isRetiredAdminFastCode,
 } from "./admin-constants";
 
-export { ADMIN_FAST_CODE, ADMIN_SESSION_COOKIE };
+export { ADMIN_SESSION_COOKIE };
 
 const isBrowser = () => typeof window !== "undefined";
 
@@ -41,11 +39,12 @@ export const clearFastCode = () => {
  * `loginAdminWithFastCodeAction`). localStorage is used by Live Edit / gates
  * and is never treated as Global Admin authentication on its own.
  */
-export const setAdminSession = (code: string = ADMIN_FAST_CODE) => {
+/** Call only after the server login action confirmed the code (grants live in the DB). */
+export const setAdminSession = (code: string) => {
   if (!isBrowser()) return;
 
   const sessionCode = normalizeFastCode(code);
-  if (!isAuthorizedAdminFastCode(sessionCode)) return;
+  if (!sessionCode || isRetiredAdminFastCode(sessionCode)) return;
 
   localStorage.setItem("fast_code", sessionCode);
   localStorage.setItem("role", "admin");
@@ -67,8 +66,9 @@ export const hasAdminSession = (): boolean => {
   return false;
 };
 
+/** Client hint only: the Global Admin code. Granted admins are confirmed server-side. */
 export const isValidAdminFastCode = (code: string): boolean => {
-  return isAuthorizedAdminFastCode(code);
+  return isGlobalAdminFastCode(code);
 };
 
 export const isAuthorized = (): boolean => {
@@ -77,8 +77,7 @@ export const isAuthorized = (): boolean => {
 };
 
 export const isSuperAdmin = (): boolean => {
-  const account = getAdminAccountByFastCode(getFastCode());
-  return isElevatedAdminAccess(account?.access);
+  return isGlobalAdminFastCode(getFastCode());
 };
 
 export const getRole = (): "admin" | "associate" | null => {

@@ -1,4 +1,4 @@
-import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { hasAdminScope } from "@/lib/admin-auth";
 import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
@@ -115,7 +115,7 @@ export async function POST(request: Request) {
       }
     } else if (isolatedBookshelf && fastCode) {
       // Isolated bookshelf create — Global Admin FAST Code, Mapsite optional.
-      if (!(await isAdminAuthenticated())) {
+      if (!(await hasAdminScope("talisbooks"))) {
         return Response.json({ ok: false, error: "Unauthorized." }, { status: 401 });
       }
       if (!(await canManageMapSiteEbooks(fastCode))) {

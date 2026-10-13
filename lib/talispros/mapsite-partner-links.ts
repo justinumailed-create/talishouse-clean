@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { accountHasAdminScope, type AdminAccount } from "@/lib/admin-constants";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 
 /** Partner-linked Mapsites (migration 103). Pairs stored sorted, lower-case. */
@@ -12,9 +13,9 @@ export type MapSitePartnerLink = {
   createdBy: string | null;
 };
 
-/** Only superadmins may link / unlink partner Mapsites (not "full" admins). */
-export function canLinkMapSitePartners(access: string | null | undefined): boolean {
-  return access === "superadmin";
+/** Link / unlink partner Mapsites: Global Admin, or a grant with "Partner-linked Mapsites". */
+export function canLinkMapSitePartners(account: AdminAccount | null | undefined): boolean {
+  return accountHasAdminScope(account, "partner-linking");
 }
 
 export function normalizePartnerFastCode(value: string | null | undefined): string {

@@ -17,10 +17,12 @@ const GROUP_OF: Record<string, string> = {
   "/admin/talisbooks": "Mapsites & content",
   "/admin/talisbooks/bookshelves": "Mapsites & content",
   "/admin/pmc": "Mapsites & content",
-  "/admin/fast-codes": "Superadmin",
-  "/admin/agents": "Superadmin",
+  "/admin/payments": "Operations",
+  "/admin/fast-codes": "Administration",
+  "/admin/agents": "Administration",
+  "/admin/access": "Administration",
 };
-const ORDER = ["Overview", "Workspace", "Operations", "Mapsites & content", "Superadmin", "More"];
+const ORDER = ["Overview", "Workspace", "Operations", "Mapsites & content", "Administration", "More"];
 
 export function groupAdminNav(items: readonly AdminNavItem[]): Array<{ title: string; items: AdminNavItem[] }> {
   const map = new Map<string, AdminNavItem[]>();
@@ -50,5 +52,7 @@ export const NAV_ICON: Record<string, string> = {
   "/admin/talisbooks/bookshelves": "M4 4h4v16H4V4Zm6 0h4v16h-4V4Zm6.5 1 3.5 1-3.5 14-3.5-1 3.5-14Z",
   "/admin/pmc": "M12 21s-7-6.1-7-11a7 7 0 1 1 14 0c0 4.9-7 11-7 11Zm0-8.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z",
   "/admin/fast-codes": "M15 7a4 4 0 1 1-3.9 5H8v3H5v-3H3V9h8.1A4 4 0 0 1 15 7Z",
+  "/admin/access": "M12 3 4.5 6v6c0 4.5 3.2 8 7.5 9 4.3-1 7.5-4.5 7.5-9V6L12 3Zm-3 9 2 2 4-4",
+  "/admin/payments": "M3 6h18v12H3V6Zm0 4h18M7 15h3",
   "/admin/agents": "M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-6 9a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-4-5.7",
 };

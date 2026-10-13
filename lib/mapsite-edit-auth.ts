@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getAdminSessionAccount, isAdminAuthenticated } from "./admin-auth";
+import { getAdminSessionAccount } from "./admin-auth";
 import { accountHasAdminScope, type AdminAccount, type AdminScope } from "./admin-constants";
 import {
   MAPSITE_OWNER_COOKIE,
@@ -27,9 +27,10 @@ function normalizeFastCode(fastCode: string): string {
   return fastCode.trim().toLowerCase();
 }
 
-/** Global Admin FAST-code session (may manage any Mapsite). */
+/** FAST-code admin (Global Admin or grant) with the Mapsites permission: may manage any Mapsite. */
 export async function isMapSiteAdmin(): Promise<boolean> {
-  return isAdminAuthenticated();
+  const account = await getAdminSessionAccount();
+  return Boolean(account) && account?.access !== "agent" && accountHasAdminScope(account, "mapsites");
 }
 
 /**

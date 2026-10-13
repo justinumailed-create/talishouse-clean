@@ -18,7 +18,7 @@ export default async function AdminMapSitesPage() {
   if (isSupabaseAdminConfigured() && !isAgent) {
     await purgeMapSitesAndBookshelvesWithoutFastCodes(getSupabaseAdmin());
   }
-  const canLinkPartners = canLinkMapSitePartners(account?.access);
+  const canLinkPartners = canLinkMapSitePartners(account);
   const [allMapSites, recentFreePinGrants, partnerLinks] = await Promise.all([
     listMapSitesForAdmin(),
     isAgent ? Promise.resolve([]) : listFreePinGrants({ limit: 20 }),

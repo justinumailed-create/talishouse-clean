@@ -12,7 +12,7 @@ import {
 
 async function requireSuperadmin() {
   const account = await getAdminSessionAccount();
-  if (!account || !canLinkMapSitePartners(account.access)) return null;
+  if (!account || !canLinkMapSitePartners(account)) return null;
   return account;
 }
 
@@ -21,7 +21,7 @@ export async function linkMapSitePartnersAction(
   codeB: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const account = await requireSuperadmin();
-  if (!account) return { ok: false, error: "Only superadmins can link Mapsites." };
+  if (!account) return { ok: false, error: "You do not have permission to link Mapsites." };
   const a = normalizePartnerFastCode(codeA);
   const b = normalizePartnerFastCode(codeB);
   if (!/^[a-z0-9-]+$/.test(a) || !/^[a-z0-9-]+$/.test(b)) {
@@ -38,7 +38,7 @@ export async function linkMapSitePartnersAction(
 
 export async function unlinkMapSitePartnersAction(id: string): Promise<{ ok: boolean; error?: string }> {
   const account = await requireSuperadmin();
-  if (!account) return { ok: false, error: "Only superadmins can unlink Mapsites." };
+  if (!account) return { ok: false, error: "You do not have permission to unlink Mapsites." };
   const result = await deleteMapSitePartnerLink(id);
   if (result.ok) revalidatePath("/admin/mapsites");
   return result;

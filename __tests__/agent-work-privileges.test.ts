@@ -67,10 +67,10 @@ describe("agent work privileges", () => {
     expect(manager).toMatch(/export async function reverseCashPaymentAction[\s\S]*requireAgentManager\(\)/);
   });
 
-  it("ebook and PIN flows use their own privilege checks; delete stays Global Admin", () => {
+  it("ebook and PIN flows use their own privilege checks; delete needs a non-agent admin with Mapsites", () => {
     expect(read("app/talispros/mapsite/pin-actions.ts")).toMatch(/canManageMapSitePins/);
     expect(read("app/talisbooks/library/actions.ts")).toMatch(/canManageMapSiteEbooks/);
-    expect(read("lib/mapsite-admin-service.ts")).toMatch(/deleteAdminActiveMapSite[\s\S]{0,200}isAdminAuthenticated/);
+    expect(read("lib/mapsite-admin-service.ts")).toMatch(/deleteAdminActiveMapSite[\s\S]{0,300}deleter\.access === "agent"/);
     const migration = read("supabase/migrations/097_agent_privileges_manual_payments.sql");
     expect(migration).toMatch(/enable row level security/);
     expect(migration).not.toMatch(/drop table/i);

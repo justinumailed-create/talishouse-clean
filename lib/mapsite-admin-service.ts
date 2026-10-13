@@ -7,7 +7,7 @@ import {
   normalizeGalleryItemsForSave,
 } from "./mapsite-gallery";
 import { requireMapSiteEditAccess } from "./mapsite-edit-auth";
-import { isAdminAuthenticated } from "./admin-auth";
+
 import { getAdminSessionAccount } from "./admin-auth";
 import { accountHasAdminScope } from "./admin-constants";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
@@ -527,7 +527,8 @@ export async function deleteAdminActiveMapSite(
   fastCode: string,
   mapsiteId?: string | null,
 ): Promise<MapSiteAdminActionResult> {
-  if (!(await isAdminAuthenticated())) {
+  const deleter = await getAdminSessionAccount();
+  if (!deleter || deleter.access === "agent" || !accountHasAdminScope(deleter, "mapsites")) {
     return { success: false, error: "Unauthorized" };
   }
 

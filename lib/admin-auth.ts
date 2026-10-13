@@ -7,12 +7,17 @@ import {
   accountHasAdminScope,
   adminHomePath,
   isAgentAccount,
+  isGlobalAdmin,
   getAdminAccountByFastCode,
+  grantToAdminAccount,
   isAuthorizedAdminFastCode,
+  isRetiredAdminFastCode,
+  normalizeAdminFastCode,
   type AdminAccount,
   type AdminScope,
 } from "./admin-constants";
 import { accountCanAccessAdminPath } from "./admin-route-access";
+import { getActiveAdminGrant } from "./admin-access-grants";
 import {
   AGENT_SESSION_MAX_AGE,
   agentToAdminAccount,
@@ -34,7 +39,17 @@ function adminSessionCookieOptions(maxAge: number) {
   };
 }
 
-/** Raw cookie value when it names a hardcoded admin account. */
+/** Global Admin, or an active admin access grant (revocation applies on the next request). */
+async function resolveFastCodeAdminAccount(code: string | null | undefined): Promise<AdminAccount | null> {
+  const normalized = normalizeAdminFastCode(code);
+  if (!normalized || isRetiredAdminFastCode(normalized)) return null;
+  const global = getAdminAccountByFastCode(normalized);
+  if (global) return global;
+  const grant = await getActiveAdminGrant(normalized);
+  return grant ? grantToAdminAccount(grant) : null;
+}
+
+/** Raw cookie value when it names the Global Admin. */
 export async function getAdminSessionValue(): Promise<string | null> {
   const cookieStore = await cookies();
   const value = cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null;
@@ -43,15 +58,18 @@ export async function getAdminSessionValue(): Promise<string | null> {
 
 /**
  * Resolve the signed-in admin account for this request.
- * - Hardcoded accounts (ADMIN123 / RM22 / ARUN): `admin_session` cookie is the FAST code.
+ * - Global Admin (ARUN) or a FAST Code with an active admin access grant:
+ *   `admin_session` cookie is the FAST code; grants are re-checked every request.
  * - Agent Admins: `agent_session` httpOnly cookie holds an opaque token; its
  *   SHA-256 hash must match an unexpired row in `agent_admin_sessions` and the
  *   agent must still be `active` (re-checked on every request).
  */
 const resolveAdminSessionAccount = cache(async (): Promise<AdminAccount | null> => {
   const cookieStore = await cookies();
-  const builtin = getAdminAccountByFastCode(cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null);
-  if (builtin) return builtin;
+  const fastCodeAccount = await resolveFastCodeAdminAccount(
+    cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null,
+  );
+  if (fastCodeAccount) return fastCodeAccount;
 
   const token = cookieStore.get(AGENT_SESSION_COOKIE)?.value ?? null;
   if (!token) return null;
@@ -59,9 +77,9 @@ const resolveAdminSessionAccount = cache(async (): Promise<AdminAccount | null> 
   return agent ? agentToAdminAccount(agent) : null;
 });
 
-/** FAST-code login for hardcoded admin accounts only (agents use /agent/login). */
+/** FAST-code login: Global Admin or an active grant (agents use /agent/login). */
 export async function writeAdminSessionCookie(fastCode: string): Promise<AdminAccount | null> {
-  const account = getAdminAccountByFastCode(fastCode);
+  const account = await resolveFastCodeAdminAccount(fastCode);
   if (!account) return null;
 
   const cookieStore = await cookies();
@@ -100,12 +118,12 @@ export async function clearAdminSessionCookie(): Promise<void> {
 }
 
 /**
- * True only for hardcoded Global Admin accounts. Agent Admins are never
+ * True only for the Global Admin. Granted admins and Agent Admins are never
  * "admin authenticated" — they must pass an explicit scope check.
  */
 export async function isAdminAuthenticated(): Promise<boolean> {
-  const account = await resolveAdminSessionAccount();
-  return Boolean(account) && !isAgentAccount(account);
+  // Only the Global Admin. Everyone else must pass an explicit scope check.
+  return isGlobalAdmin(await resolveAdminSessionAccount());
 }
 
 export async function getAdminSessionAccount(): Promise<AdminAccount | null> {

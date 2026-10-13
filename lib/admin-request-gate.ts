@@ -1,4 +1,8 @@
-import { getAdminAccountByFastCode } from "./admin-constants";
+import {
+  getAdminAccountByFastCode,
+  isRetiredAdminFastCode,
+  normalizeAdminFastCode,
+} from "./admin-constants";
 import { accountCanAccessAdminPath } from "./admin-route-access";
 import {
   isAdminAppPath,
@@ -43,6 +47,13 @@ export function resolveAdminRequestGate(input: {
     return { action: "next" };
   }
 
+  // Granted admin (admin_access_grants): Edge cannot read the DB either, so a
+  // well-formed non-retired FAST Code goes to the /admin layout, which checks
+  // the active grant and its permissions on every request (fail closed).
+  if (!account && isGrantedAdminCookieShape(input.adminSessionCookie)) {
+    return { action: "next" };
+  }
+
   if (isStandaloneAdminPath(pathname)) {
     if (account) {
       return { action: "next" };
@@ -63,4 +74,9 @@ export function resolveAdminRequestGate(input: {
 
 function isAgentSessionShape(value: string | null | undefined): boolean {
   return Boolean(value && /^[A-Za-z0-9_-]{43}$/.test(value));
+}
+
+function isGrantedAdminCookieShape(value: string | null | undefined): boolean {
+  const code = normalizeAdminFastCode(value);
+  return Boolean(code) && /^[A-Z0-9-]{2,40}$/.test(code) && !isRetiredAdminFastCode(code);
 }

@@ -40,10 +40,18 @@ describe("admin request gate", () => {
     expect(
       resolveAdminRequestGate({ pathname: "/admin/dashboard" }),
     ).toEqual({ action: "redirect", to: "/admin/login" });
+    // Retired / malformed codes are refused at the edge; other FAST Codes go to
+    // the /admin layout, which checks admin_access_grants server-side.
     expect(
       resolveAdminRequestGate({
         pathname: "/admin/dashboard",
-        adminSessionCookie: "DEMO",
+        adminSessionCookie: "ADMIN123",
+      }),
+    ).toEqual({ action: "redirect", to: "/admin/login" });
+    expect(
+      resolveAdminRequestGate({
+        pathname: "/admin/dashboard",
+        adminSessionCookie: "bad code!",
       }),
     ).toEqual({ action: "redirect", to: "/admin/login" });
     expect(
@@ -90,9 +98,11 @@ describe("admin request gate", () => {
     expect(
       resolveAdminRequestGate({
         pathname: "/admin/payments",
-        adminSessionCookie: "rm22",
+        adminSessionCookie: "ARUN",
       }),
-    ).toEqual({ action: "redirect", to: "/admin/dashboard" });
+    ).toEqual({ action: "next" });
+    // Grant permissions (e.g. RM22 has no Payments) are enforced in the layout.
+    expect(readSource("app/admin/layout.tsx")).toContain("accountCanAccessAdminPath(account, pathname)");
   });
 
   it("closes the previous public /admin/talismaps hole", () => {
@@ -154,14 +164,14 @@ describe("admin chrome must not inherit Talishouse storefront", () => {
     expect(readSource("components/TalisBotChat.tsx")).toContain("shouldHidePublicStorefrontChrome");
   });
 
-  it("exposes Talishouse site only as an admin-only external link (not Home/Catalogue)", () => {
+  it("has no Talishouse storefront / cart links in admin chrome", () => {
     const layout = readSource("components/admin/AdminLayoutClient.tsx");
     expect(layout).toContain('href="/"');
     expect(layout).toContain("Talispros™ home");
-    expect(layout).toContain('href="/catalog"');
-    expect(layout).toContain("Talishouse™ site");
+    expect(layout).not.toContain('href="/catalog"');
+    expect(layout).not.toContain("Talishouse™ site");
     expect(layout).not.toContain('href="/talishouse"');
-    expect(layout).toContain('target="_blank"');
+    expect(layout).not.toMatch(/cart/i);
     expect(layout).not.toContain("ROUTES.TALISHOUSE");
     expect(layout).not.toContain("/catalogue");
     // Must not use public storefront Home/Catalogue labels in admin chrome
