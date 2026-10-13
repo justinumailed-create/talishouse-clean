@@ -64,7 +64,7 @@ export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 export type TalisUMktsHeaderProps = {
   /**
    * `claimed-mapsite`: replace Register with Dashboard (lock until real payment).
-   * `default`: Home + Markets + Catalogue + Register + Mapsites | TalisU (Bookshelf lives in TalisU).
+   * `default`: Home + Markets + Mapsites + Catalogue + Register | TalisU (Bookshelf lives in TalisU).
    */
   variant?: TalisUMktsHeaderVariant;
   /**
@@ -458,9 +458,6 @@ export default function TalisUMktsHeader({
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Markets").map(
             (item) => renderNavLink(item),
           )}
-          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Catalogue").map(
-            (item) => renderNavLink(item),
-          )}
           {/* Mapsites: direct link to the Demo Mapsite page (FAST Code card lives there). */}
           <Link
             href={DEMO_MAPSITE_BUILD_PATH}
@@ -471,6 +468,9 @@ export default function TalisUMktsHeader({
           >
             {t.nav.mapsites}
           </Link>
+          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Catalogue").map(
+            (item) => renderNavLink(item),
+          )}
           {claimedMapsite
             ? TALISU_MKTS_HEADER_NAV.filter(
                 (item) => item.label === "Register",
