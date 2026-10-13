@@ -97,7 +97,7 @@ export default function DemoFastCodeCard({ className = "" }: { className?: strin
             autoCapitalize="characters"
             placeholder={m.placeholder}
             aria-invalid={Boolean(error)}
-            className="h-12 min-w-0 flex-1 rounded-full border-0 bg-white px-5 font-mono text-[15px] uppercase tracking-[0.18em] text-neutral-900 shadow-sm placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-white/40 disabled:opacity-60"
+            className="h-12! min-h-12 min-w-0 flex-1 rounded-full border-0 bg-white px-5! font-mono text-[15px] uppercase tracking-[0.18em] text-neutral-900 shadow-sm placeholder:font-sans placeholder:normal-case placeholder:tracking-normal placeholder:text-neutral-400 focus:outline-none focus:ring-4 focus:ring-white/40 disabled:opacity-60"
           />
           <button
             type="submit"
