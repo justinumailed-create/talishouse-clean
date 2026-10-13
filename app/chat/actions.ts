@@ -1,7 +1,7 @@
 "use server";
 
 import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
-import { getChatMe } from "@/lib/chat/server";
+import { getChatIdentity } from "@/lib/chat/server";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { getTalisBooksBookshelf } from "@/lib/talisbooks/library/bookshelf-service";
 
@@ -13,7 +13,7 @@ function cleanFastCode(raw: unknown): string | null {
 }
 
 async function authorize(raw: unknown): Promise<{ fastCode: string } | Fail> {
-  const me = await getChatMe();
+  const me = await getChatIdentity();
   if (!me) return { ok: false, error: "Please sign in again." };
   const fastCode = cleanFastCode(raw);
   if (!fastCode) return { ok: false, error: "Enter a valid FAST Code." };
@@ -25,7 +25,7 @@ async function authorize(raw: unknown): Promise<{ fastCode: string } | Fail> {
 
 /** FAST Codes this person can pick eBooks from (agents: their assigned Mapsites). */
 export async function chatEbookFastCodesAction(): Promise<{ ok: true; codes: string[]; any: boolean } | Fail> {
-  const me = await getChatMe();
+  const me = await getChatIdentity();
   if (!me) return { ok: false, error: "Please sign in again." };
   if (me.kind === "admin") return { ok: true, codes: [], any: true };
   const scopes = me.account.scopes ?? [];

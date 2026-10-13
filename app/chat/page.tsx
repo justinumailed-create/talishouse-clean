@@ -1,6 +1,6 @@
 import ChatApp from "@/components/chat/ChatApp";
 import { pageMetadata } from "@/lib/seo/page-metadata";
-import { loadViewer } from "./load";
+import { loadChat } from "./load";
 
 export async function generateMetadata() {
   return pageMetadata("/chat");
@@ -9,5 +9,6 @@ export async function generateMetadata() {
 export const dynamic = "force-dynamic";
 
 export default async function ChatInboxPage() {
-  return <ChatApp viewer={await loadViewer()} conversationId={null} />;
+  const data = await loadChat(null);
+  return <ChatApp viewer={data.viewer} conversationId={null} initialItems={data.items} initialThread={null} />;
 }

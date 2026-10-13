@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getAdminSessionAccount } from "../admin-auth";
-import { ADMIN_ACCOUNTS, type AdminAccount } from "../admin-constants";
-import { canManageMapSiteEbooks } from "../mapsite-edit-auth";
+import { GLOBAL_ADMIN_ACCOUNT, GLOBAL_ADMIN_FAST_CODE, isGlobalAdmin, type AdminAccount } from "../admin-constants";
+import { agentCanEditMapSite, canManageMapSiteEbooks } from "../mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "../supabaseAdmin";
 import {
   CHAT_FILES_BUCKET,
@@ -49,59 +49,41 @@ export interface ChatPresence {
 
 type MemberRow = { id: string; agent_id: string | null; admin_code: string | null; display_name: string; last_seen_at: string | null; signed_out_at: string | null };
 
-/** Signed-in agent (past first-login password change) or FAST-code admin. */
-export async function getChatMe(): Promise<ChatMe | null> {
+export interface ChatIdentity {
+  name: string;
+  kind: "agent" | "admin";
+  agentId: string | null;
+  adminCode: string | null;
+  account: AdminAccount;
+}
+
+/**
+ * Signed-in agent (past first-login password change) or FAST-code admin.
+ * Only resolves the session (no chat tables touched): the chat_* SQL
+ * functions resolve the member row + presence inside their single round trip.
+ */
+export async function getChatIdentity(): Promise<ChatIdentity | null> {
   if (!isSupabaseAdminConfigured()) return null;
   const account = await getAdminSessionAccount();
   if (!account) return null;
   if (account.access === "agent") {
     if (!account.agentId || account.mustChangePassword) return null;
-    const row = await upsertMember({ agent_id: account.agentId, display_name: account.name }, "agent_id", account.agentId);
-    return row ? { memberId: row.id, name: row.display_name, kind: "agent", agentId: account.agentId, adminCode: null, account } : null;
+    return { name: account.name, kind: "agent", agentId: account.agentId, adminCode: null, account };
   }
-  const row = await upsertMember({ admin_code: account.fastCode, display_name: account.name }, "admin_code", account.fastCode);
-  return row ? { memberId: row.id, name: row.display_name, kind: "admin", agentId: null, adminCode: account.fastCode, account } : null;
+  return { name: account.name, kind: "admin", agentId: null, adminCode: account.fastCode, account };
 }
 
-async function upsertMember(values: Record<string, string>, key: "agent_id" | "admin_code", id: string): Promise<MemberRow | null> {
-  const { data } = await db().from("chat_members").select("*").eq(key, id).maybeSingle();
-  if (data) {
-    const row = data as MemberRow;
-    if (row.display_name !== values.display_name) {
-      await db().from("chat_members").update({ display_name: values.display_name }).eq("id", row.id);
-      row.display_name = values.display_name;
-    }
-    return row;
-  }
-  await db().from("chat_members").upsert(values, { onConflict: key, ignoreDuplicates: true });
-  const again = await db().from("chat_members").select("*").eq(key, id).maybeSingle();
-  return (again.data as MemberRow | null) ?? null;
+function rpcIdentity(id: ChatIdentity) {
+  return { p_agent: id.agentId, p_admin: id.adminCode, p_name: id.name };
 }
 
-/** Make sure every active agent and every FAST-code admin can be messaged. */
-async function ensureDirectory(): Promise<void> {
-  const { data: agents } = await db().from("agent_admins").select("id, name").eq("status", "active");
-  const agentRows = ((agents ?? []) as Array<{ id: string; name: string }>).map((a) => ({ agent_id: a.id, display_name: a.name }));
-  const adminRows = ADMIN_ACCOUNTS.map((a) => ({ admin_code: a.fastCode, display_name: a.name }));
-  await Promise.all([
-    agentRows.length ? db().from("chat_members").upsert(agentRows, { onConflict: "agent_id", ignoreDuplicates: true }) : null,
-    db().from("chat_members").upsert(adminRows, { onConflict: "admin_code", ignoreDuplicates: true }),
-  ]);
-}
-
-/** Members who can currently chat: active agents + FAST-code admins. */
-async function activeMembers(): Promise<Map<string, MemberRow>> {
-  const [{ data: members }, { data: agents }] = await Promise.all([
-    db().from("chat_members").select("*"),
-    db().from("agent_admins").select("id").eq("status", "active"),
-  ]);
-  const activeAgents = new Set(((agents ?? []) as Array<{ id: string }>).map((a) => a.id));
-  const adminCodes = new Set(ADMIN_ACCOUNTS.map((a) => a.fastCode));
-  const out = new Map<string, MemberRow>();
-  for (const m of (members ?? []) as MemberRow[]) {
-    if ((m.agent_id && activeAgents.has(m.agent_id)) || (m.admin_code && adminCodes.has(m.admin_code))) out.set(m.id, m);
-  }
-  return out;
+/** Identity + member id (one RPC: upsert member row, mark online). Used by writes. */
+export async function getChatMe(): Promise<ChatMe | null> {
+  const id = await getChatIdentity();
+  if (!id) return null;
+  const { data, error } = await db().rpc("chat_touch_member", rpcIdentity(id));
+  if (error || !data) return null;
+  return { memberId: data as string, ...id };
 }
 
 // ---------------------------------------------------------------- presence
@@ -120,9 +102,6 @@ export async function syncAgentChatPresence(agentId: string, field: "last_seen_a
   await db().from("chat_members").update({ [field]: new Date().toISOString() }).eq("agent_id", agentId);
 }
 
-function presenceOf(m: MemberRow | undefined): ChatPresence {
-  return { lastSeenAt: m?.last_seen_at ?? null, signedOutAt: m?.signed_out_at ?? null };
-}
 
 // ---------------------------------------------------------------- inbox
 
@@ -140,19 +119,56 @@ export interface InboxItem {
 }
 
 type ConvRow = { id: string; kind: "dm" | "updates"; pair_key: string; last_message_at: string | null };
-type PartRow = { conversation_id: string; member_id: string; last_read_at: string | null; last_delivered_at: string | null };
 
-async function updatesConversation(): Promise<ConvRow | null> {
-  const { data } = await db().from("agent_chat_conversations").select("id, kind, pair_key, last_message_at").eq("pair_key", "updates").maybeSingle();
-  if (data) return data as ConvRow;
-  await db().from("agent_chat_conversations").upsert({ pair_key: "updates", kind: "updates" }, { onConflict: "pair_key", ignoreDuplicates: true });
-  const again = await db().from("agent_chat_conversations").select("id, kind, pair_key, last_message_at").eq("pair_key", "updates").maybeSingle();
-  return (again.data as ConvRow | null) ?? null;
-}
+type RpcMember = { id: string; name: string; kind: "agent" | "admin"; lastSeenAt: string | null; signedOutAt: string | null };
+type RpcInbox = {
+  me: string;
+  convs: Array<{ id: string; kind: "dm" | "updates"; lastMessageAt: string | null; peerId: string | null; unread: number;
+    last: { body: string; deletedAt: string | null; fileName: string | null; ebookTitle: string | null; senderId: string; createdAt: string } | null }>;
+  members: RpcMember[];
+};
 
 async function ensureParticipant(conversationId: string, memberId: string): Promise<void> {
   await db().from("agent_chat_participants").upsert({ conversation_id: conversationId, member_id: memberId }, { onConflict: "conversation_id,member_id", ignoreDuplicates: true });
 }
+
+/** Inbox in ONE database round trip (chat_inbox also marks waiting DMs delivered). */
+export async function listInbox(id: ChatIdentity): Promise<InboxItem[]> {
+  const { data, error } = await db().rpc("chat_inbox", {
+    ...rpcIdentity(id), p_global: GLOBAL_ADMIN_FAST_CODE, p_global_name: GLOBAL_ADMIN_ACCOUNT.name,
+  });
+  if (error || !data) throw new Error(`chat_inbox failed: ${error?.message ?? "no data"}`);
+  const r = data as RpcInbox;
+  const me = r.me;
+  const members = new Map(r.members.map((m) => [m.id, m]));
+  const list: InboxItem[] = [];
+  for (const c of r.convs) {
+    const lm = c.last;
+    const preview = lm ? messagePreview({ body: lm.body, deletedAt: lm.deletedAt, fileName: lm.fileName, ebookTitle: lm.ebookTitle }) : "";
+    const lastAt = lm?.createdAt ?? c.lastMessageAt;
+    const previewMine = Boolean(lm && lm.senderId === me);
+    if (c.kind === "updates") {
+      const who = lm && lm.senderId !== me ? `${members.get(lm.senderId)?.name ?? "Someone"}: ` : "";
+      list.push({ conversationId: c.id, kind: "updates", title: "Updates", peerMemberId: null, peerKind: null, presence: null,
+        preview: lm ? who + preview : "Status updates for everyone", previewMine, lastAt, unread: Number(c.unread) || 0 });
+      continue;
+    }
+    const peer = c.peerId ? members.get(c.peerId) : undefined;
+    if (!peer) continue; // peer disabled/removed
+    list.push({ conversationId: c.id, kind: "dm", title: peer.name, peerMemberId: peer.id, peerKind: peer.kind,
+      presence: { lastSeenAt: peer.lastSeenAt, signedOutAt: peer.signedOutAt }, preview, previewMine, lastAt, unread: Number(c.unread) || 0 });
+  }
+  const withConv = new Set(list.map((i) => i.peerMemberId).filter(Boolean));
+  for (const m of r.members) {
+    if (m.id === me || withConv.has(m.id)) continue;
+    list.push({ conversationId: null, kind: "dm", title: m.name, peerMemberId: m.id, peerKind: m.kind,
+      presence: { lastSeenAt: m.lastSeenAt, signedOutAt: m.signedOutAt }, preview: "", previewMine: false, lastAt: null, unread: 0 });
+  }
+  return list.sort((a, b) =>
+    (b.lastAt ?? "").localeCompare(a.lastAt ?? "") || (a.kind === "updates" ? -1 : b.kind === "updates" ? 1 : a.title.localeCompare(b.title)));
+}
+
+type PartRow = { conversation_id: string; last_read_at: string | null };
 
 async function unreadIn(conversationId: string, me: string, lastReadAt: string | null): Promise<number> {
   let q = db().from("agent_chat_messages").select("id", { count: "exact", head: true })
@@ -160,73 +176,6 @@ async function unreadIn(conversationId: string, me: string, lastReadAt: string |
   if (lastReadAt) q = q.gt("created_at", lastReadAt);
   const { count } = await q;
   return count ?? 0;
-}
-
-/** Mark every DM message waiting for me as delivered (my client has it). */
-async function markDelivered(me: string, convIds: string[]): Promise<void> {
-  if (!convIds.length) return;
-  const now = new Date().toISOString();
-  await Promise.all([
-    db().from("agent_chat_messages").update({ delivered_at: now })
-      .in("conversation_id", convIds).neq("sender_member_id", me).is("delivered_at", null),
-    db().from("agent_chat_participants").update({ last_delivered_at: now }).eq("member_id", me).in("conversation_id", convIds),
-  ]);
-}
-
-export async function listInbox(me: ChatMe): Promise<InboxItem[]> {
-  await ensureDirectory();
-  const updates = await updatesConversation();
-  if (updates) await ensureParticipant(updates.id, me.memberId);
-  const [members, { data: mine }] = await Promise.all([
-    activeMembers(),
-    db().from("agent_chat_participants").select("conversation_id, member_id, last_read_at, last_delivered_at").eq("member_id", me.memberId),
-  ]);
-  const myRows = (mine ?? []) as PartRow[];
-  const convIds = myRows.map((r) => r.conversation_id);
-  const [{ data: convs }, { data: peers }] = await Promise.all([
-    convIds.length ? db().from("agent_chat_conversations").select("id, kind, pair_key, last_message_at").in("id", convIds) : Promise.resolve({ data: [] }),
-    convIds.length ? db().from("agent_chat_participants").select("conversation_id, member_id").in("conversation_id", convIds).neq("member_id", me.memberId) : Promise.resolve({ data: [] }),
-  ]);
-  const convRows = (convs ?? []) as ConvRow[];
-  const dmIds = convRows.filter((c) => c.kind === "dm").map((c) => c.id);
-  const peerByConv = new Map<string, string>();
-  for (const p of (peers ?? []) as Array<{ conversation_id: string; member_id: string }>) {
-    if (dmIds.includes(p.conversation_id)) peerByConv.set(p.conversation_id, p.member_id);
-  }
-
-  await markDelivered(me.memberId, dmIds);
-
-  const items = await Promise.all(convRows.map(async (c): Promise<InboxItem | null> => {
-    const my = myRows.find((r) => r.conversation_id === c.id);
-    const [unread, { data: last }] = await Promise.all([
-      unreadIn(c.id, me.memberId, my?.last_read_at ?? null),
-      db().from("agent_chat_messages").select("body, deleted_at, file_name, ebook_title, sender_member_id, created_at")
-        .eq("conversation_id", c.id).order("created_at", { ascending: false }).limit(1).maybeSingle(),
-    ]);
-    const lm = last as { body: string; deleted_at: string | null; file_name: string | null; ebook_title: string | null; sender_member_id: string; created_at: string } | null;
-    const preview = lm ? messagePreview({ body: lm.body, deletedAt: lm.deleted_at, fileName: lm.file_name, ebookTitle: lm.ebook_title }) : "";
-    if (c.kind === "updates") {
-      const who = lm && lm.sender_member_id !== me.memberId ? `${members.get(lm.sender_member_id)?.display_name ?? "Someone"}: ` : "";
-      return { conversationId: c.id, kind: "updates", title: "Updates", peerMemberId: null, peerKind: null, presence: null,
-        preview: lm ? who + preview : "Status updates for everyone", previewMine: Boolean(lm && lm.sender_member_id === me.memberId),
-        lastAt: lm?.created_at ?? c.last_message_at, unread };
-    }
-    const peerId = peerByConv.get(c.id);
-    const peer = peerId ? members.get(peerId) : undefined;
-    if (!peer) return null; // peer disabled/removed
-    return { conversationId: c.id, kind: "dm", title: peer.display_name, peerMemberId: peer.id, peerKind: peer.agent_id ? "agent" : "admin",
-      presence: presenceOf(peer), preview, previewMine: Boolean(lm && lm.sender_member_id === me.memberId), lastAt: lm?.created_at ?? c.last_message_at, unread };
-  }));
-
-  const list = items.filter((i): i is InboxItem => Boolean(i));
-  const withConv = new Set(list.map((i) => i.peerMemberId).filter(Boolean));
-  for (const m of members.values()) {
-    if (m.id === me.memberId || withConv.has(m.id)) continue;
-    list.push({ conversationId: null, kind: "dm", title: m.display_name, peerMemberId: m.id, peerKind: m.agent_id ? "agent" : "admin",
-      presence: presenceOf(m), preview: "", previewMine: false, lastAt: null, unread: 0 });
-  }
-  return list.sort((a, b) =>
-    (b.lastAt ?? "").localeCompare(a.lastAt ?? "") || (a.kind === "updates" ? -1 : b.kind === "updates" ? 1 : a.title.localeCompare(b.title)));
 }
 
 export async function countChatUnread(memberId: string): Promise<number> {
@@ -260,8 +209,8 @@ async function conversationFor(me: ChatMe, conversationId: string): Promise<Conv
 
 export async function openDm(me: ChatMe, peerMemberId: string): Promise<ChatResult<string>> {
   if (!isUuid(peerMemberId) || peerMemberId === me.memberId) return { ok: false, error: "Pick someone to chat with." };
-  const members = await activeMembers();
-  if (!members.has(peerMemberId)) return { ok: false, error: "That person is not available." };
+  const { data: active } = await db().rpc("chat_active_members", { p_global: GLOBAL_ADMIN_FAST_CODE }).eq("id", peerMemberId);
+  if (!((active ?? []) as unknown[]).length) return { ok: false, error: "That person is not available." };
   const key = dmPairKey(me.memberId, peerMemberId);
   const find = async () => ((await db().from("agent_chat_conversations").select("id").eq("pair_key", key).maybeSingle()).data as { id: string } | null)?.id ?? null;
   let id = await find();
@@ -313,107 +262,81 @@ type MsgRow = {
 };
 const MSG_COLS = "id, sender_member_id, body, created_at, edited_at, deleted_at, delivered_at, read_at, pinned_at, reply_to_id, file_path, file_name, file_mime, file_size, ebook_fast_code, ebook_id, ebook_title";
 
-async function hydrate(me: ChatMe, rows: MsgRow[], members: Map<string, MemberRow>, nameOf: (id: string) => string): Promise<ChatMessageView[]> {
-  if (!rows.length) return [];
-  const ids = rows.map((r) => r.id);
-  const replyIds = [...new Set(rows.map((r) => r.reply_to_id).filter((x): x is string => Boolean(x)))];
-  const paths = rows.filter((r) => r.file_path && !r.deleted_at).map((r) => r.file_path!) ;
-  const fastCodes = [...new Set(rows.map((r) => r.ebook_fast_code).filter((x): x is string => Boolean(x)))];
-  const [{ data: reacts }, { data: replies }, signed, ebookAccess] = await Promise.all([
-    db().from("agent_chat_reactions").select("message_id, member_id, emoji").in("message_id", ids),
-    replyIds.length ? db().from("agent_chat_messages").select(MSG_COLS).in("id", replyIds) : Promise.resolve({ data: [] }),
-    paths.length ? db().storage.from(CHAT_FILES_BUCKET).createSignedUrls(paths, 3600) : Promise.resolve({ data: [] }),
-    Promise.all(fastCodes.map(async (fc) => [fc, await canManageMapSiteEbooks(fc).catch(() => false)] as const)),
-  ]);
-  const urlByPath = new Map<string, string>();
-  ((signed.data ?? []) as Array<{ path: string | null; signedUrl: string | null }>).forEach((s, i) => {
-    if (s.signedUrl) urlByPath.set(s.path ?? paths[i], s.signedUrl);
-  });
-  const replyById = new Map(((replies ?? []) as MsgRow[]).map((r) => [r.id, r]));
-  const access = new Map(ebookAccess);
-  const reactByMsg = new Map<string, Map<string, { count: number; mine: boolean }>>();
-  for (const r of (reacts ?? []) as Array<{ message_id: string; member_id: string; emoji: string }>) {
-    const m = reactByMsg.get(r.message_id) ?? new Map();
-    const e = m.get(r.emoji) ?? { count: 0, mine: false };
-    e.count += 1;
-    if (r.member_id === me.memberId) e.mine = true;
-    m.set(r.emoji, e);
-    reactByMsg.set(r.message_id, m);
+type RpcMsg = {
+  id: string; senderId: string; senderName: string; body: string; createdAt: string; editedAt: string | null; deletedAt: string | null;
+  deliveredAt: string | null; readAt: string | null; pinnedAt: string | null;
+  filePath: string | null; fileName: string | null; fileMime: string | null; fileSize: number | null;
+  ebookFastCode: string | null; ebookId: string | null; ebookTitle: string | null;
+  replyTo: { id: string; senderName: string; body: string; deletedAt: string | null; fileName: string | null; ebookTitle: string | null } | null;
+  reactions: Array<{ emoji: string; count: number; mine: boolean }>;
+};
+type RpcThread = {
+  me: string; id: string; kind: "dm" | "updates"; memberCount: number; typing: string[];
+  peer: (RpcMember & { active: boolean }) | null;
+  messages: RpcMsg[];
+};
+
+/** eBook edit access without network calls for agents and the Global Admin. */
+async function ebookAccess(id: ChatIdentity, fastCodes: string[]): Promise<Map<string, boolean>> {
+  const out = new Map<string, boolean>();
+  for (const fc of fastCodes) {
+    if (isGlobalAdmin(id.account)) out.set(fc, true);
+    else if (id.kind === "agent") out.set(fc, agentCanEditMapSite(id.account, fc, "ebooks") || agentCanEditMapSite(id.account, fc, "mapsites"));
+    else out.set(fc, await canManageMapSiteEbooks(fc).catch(() => false));
   }
-  void members;
-  return rows.map((r) => {
-    const reply = r.reply_to_id ? replyById.get(r.reply_to_id) : undefined;
-    const deleted = Boolean(r.deleted_at);
-    return {
-      id: r.id,
-      mine: r.sender_member_id === me.memberId,
-      senderId: r.sender_member_id,
-      senderName: nameOf(r.sender_member_id),
-      body: deleted ? "" : r.body,
-      createdAt: r.created_at,
-      editedAt: r.edited_at,
-      deletedAt: r.deleted_at,
-      deliveredAt: r.delivered_at,
-      readAt: r.read_at,
-      pinnedAt: deleted ? null : r.pinned_at,
-      replyTo: reply ? { id: reply.id, senderName: nameOf(reply.sender_member_id), preview: messagePreview({ body: reply.body, deletedAt: reply.deleted_at, fileName: reply.file_name, ebookTitle: reply.ebook_title }) } : null,
-      reactions: deleted ? [] : [...(reactByMsg.get(r.id) ?? new Map()).entries()].map(([emoji, v]) => ({ emoji, count: v.count, mine: v.mine })),
-      file: !deleted && r.file_path ? { name: r.file_name ?? "file", mime: r.file_mime ?? "", size: Number(r.file_size ?? 0), url: urlByPath.get(r.file_path) ?? null } : null,
-      ebook: !deleted && r.ebook_id && r.ebook_fast_code ? { fastCode: r.ebook_fast_code, bookId: r.ebook_id, title: r.ebook_title ?? "eBook", canEdit: access.get(r.ebook_fast_code) === true } : null,
-    };
-  });
+  return out;
 }
 
-export async function readThread(me: ChatMe, conversationId: string, markRead: boolean): Promise<ChatThreadView | null> {
-  const conv = await conversationFor(me, conversationId);
-  if (!conv) return null;
-  const [members, { data: parts }, { data: msgs }, { data: typing }] = await Promise.all([
-    activeMembers(),
-    db().from("agent_chat_participants").select("member_id").eq("conversation_id", conv.id),
-    db().from("agent_chat_messages").select(MSG_COLS).eq("conversation_id", conv.id).order("created_at", { ascending: false }).limit(200),
-    db().from("agent_chat_typing").select("member_id, typed_at").eq("conversation_id", conv.id)
-      .gt("typed_at", new Date(Date.now() - CHAT_TYPING_TTL_MS).toISOString()).neq("member_id", me.memberId),
+/** Whole thread in ONE database round trip (+1 storage call only when it has attachments). */
+export async function readThread(id: ChatIdentity, conversationId: string, markRead: boolean): Promise<ChatThreadView | null> {
+  if (!isUuid(conversationId)) return null;
+  const { data, error } = await db().rpc("chat_thread", {
+    ...rpcIdentity(id), p_global: GLOBAL_ADMIN_FAST_CODE, p_conv: conversationId, p_mark_read: markRead, p_typing_ttl_ms: CHAT_TYPING_TTL_MS,
+  });
+  if (error) throw new Error(`chat_thread failed: ${error.message}`);
+  if (!data) return null;
+  const t = data as RpcThread;
+  const deletedOr = (m: RpcMsg) => Boolean(m.deletedAt);
+  const paths = t.messages.filter((m) => m.filePath && !deletedOr(m)).map((m) => m.filePath!);
+  const fastCodes = [...new Set(t.messages.map((m) => m.ebookFastCode).filter((x): x is string => Boolean(x)))];
+  const [signed, access] = await Promise.all([
+    paths.length ? db().storage.from(CHAT_FILES_BUCKET).createSignedUrls(paths, 3600) : Promise.resolve({ data: [] }),
+    ebookAccess(id, fastCodes),
   ]);
-  const allNames = new Map<string, string>();
-  const { data: everyone } = await db().from("chat_members").select("id, display_name");
-  for (const m of (everyone ?? []) as Array<{ id: string; display_name: string }>) allNames.set(m.id, m.display_name);
-  const nameOf = (id: string) => allNames.get(id) ?? "Former member";
-
-  let peer: ChatThreadView["peer"] = null;
-  let title = "Updates";
-  if (conv.kind === "dm") {
-    const peerId = ((parts ?? []) as Array<{ member_id: string }>).map((p) => p.member_id).find((id) => id !== me.memberId);
-    const p = peerId ? members.get(peerId) : undefined;
-    title = peerId ? nameOf(peerId) : "Conversation";
-    if (p) peer = { memberId: p.id, kind: p.agent_id ? "agent" : "admin", presence: presenceOf(p) };
-  }
-
-  if (markRead) {
-    const now = new Date().toISOString();
-    await Promise.all([
-      db().from("agent_chat_participants").update({ last_read_at: now, last_delivered_at: now }).eq("conversation_id", conv.id).eq("member_id", me.memberId),
-      conv.kind === "dm"
-        ? db().from("agent_chat_messages").update({ read_at: now }).eq("conversation_id", conv.id).neq("sender_member_id", me.memberId).is("read_at", null)
-        : null,
-      conv.kind === "dm"
-        ? db().from("agent_chat_messages").update({ delivered_at: now }).eq("conversation_id", conv.id).neq("sender_member_id", me.memberId).is("delivered_at", null)
-        : null,
-    ]);
-  } else if (conv.kind === "dm") {
-    await markDelivered(me.memberId, [conv.id]);
-  }
-
-  const rows = ((msgs ?? []) as MsgRow[]).reverse();
-  const messages = await hydrate(me, rows, members, nameOf);
-  if (conv.kind === "updates") for (const m of messages) { m.deliveredAt = null; m.readAt = null; }
+  const urlByPath = new Map<string, string>();
+  ((signed.data ?? []) as Array<{ path: string | null; signedUrl: string | null }>).forEach((x, i) => {
+    if (x.signedUrl) urlByPath.set(x.path ?? paths[i], x.signedUrl);
+  });
+  const updates = t.kind === "updates";
+  const messages: ChatMessageView[] = t.messages.map((m) => {
+    const deleted = deletedOr(m);
+    return {
+      id: m.id,
+      mine: m.senderId === t.me,
+      senderId: m.senderId,
+      senderName: m.senderName,
+      body: deleted ? "" : m.body,
+      createdAt: m.createdAt,
+      editedAt: m.editedAt,
+      deletedAt: m.deletedAt,
+      deliveredAt: updates ? null : m.deliveredAt,
+      readAt: updates ? null : m.readAt,
+      pinnedAt: deleted ? null : m.pinnedAt,
+      replyTo: m.replyTo ? { id: m.replyTo.id, senderName: m.replyTo.senderName, preview: messagePreview({ body: m.replyTo.body, deletedAt: m.replyTo.deletedAt, fileName: m.replyTo.fileName, ebookTitle: m.replyTo.ebookTitle }) } : null,
+      reactions: deleted ? [] : m.reactions ?? [],
+      file: !deleted && m.filePath ? { name: m.fileName ?? "file", mime: m.fileMime ?? "", size: Number(m.fileSize ?? 0), url: urlByPath.get(m.filePath) ?? null } : null,
+      ebook: !deleted && m.ebookId && m.ebookFastCode ? { fastCode: m.ebookFastCode, bookId: m.ebookId, title: m.ebookTitle ?? "eBook", canEdit: access.get(m.ebookFastCode) === true } : null,
+    };
+  });
+  const peer = t.peer && t.peer.active ? { memberId: t.peer.id, kind: t.peer.kind, presence: { lastSeenAt: t.peer.lastSeenAt, signedOutAt: t.peer.signedOutAt } } : null;
   return {
-    conversationId: conv.id,
-    kind: conv.kind,
-    title,
+    conversationId: t.id,
+    kind: t.kind,
+    title: updates ? "Updates" : t.peer?.name ?? "Conversation",
     peer,
     messages,
-    typing: ((typing ?? []) as Array<{ member_id: string }>).map((t) => nameOf(t.member_id)),
-    memberCount: conv.kind === "updates" ? members.size : 2,
+    typing: t.typing ?? [],
+    memberCount: Number(t.memberCount) || 0,
   };
 }
 

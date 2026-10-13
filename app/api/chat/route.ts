@@ -4,6 +4,7 @@ import {
   createChatUpload,
   deleteMessage,
   editMessage,
+  getChatIdentity,
   getChatMe,
   listInbox,
   openDm,
@@ -14,7 +15,6 @@ import {
   setPinned,
   setTyping,
   toggleReaction,
-  touchChatPresence,
   type ChatResult,
 } from "@/lib/chat/server";
 
@@ -30,19 +30,33 @@ function result(r: ChatResult<unknown>) {
   return r.ok ? json({ ok: true, value: r.value ?? null }) : json({ ok: false, error: r.error }, 400);
 }
 
-/** GET ?view=inbox | ?view=thread&c=<id>[&read=0] | ?view=search&q= */
+/** GET ?view=inbox | ?view=thread&c=<id>[&read=0] | ?view=search&q= — each read is one DB round trip. */
 export async function GET(request: NextRequest) {
-  const me = await getChatMe();
-  if (!me) return json({ error: "Unauthorized" }, 401);
+  const t0 = performance.now();
+  const id = await getChatIdentity();
+  const tAuth = performance.now() - t0;
+  if (!id) return json({ error: "Unauthorized" }, 401);
   const p = request.nextUrl.searchParams;
   const view = p.get("view") ?? "inbox";
-  await touchChatPresence(me);
-  if (view === "inbox") return json({ items: await listInbox(me) });
-  if (view === "thread") {
-    const thread = await readThread(me, p.get("c") ?? "", p.get("read") !== "0");
-    return thread ? json({ thread }) : json({ error: "Not found" }, 404);
+  const timed = (body: unknown, status = 200) => {
+    const res = json(body, status);
+    res.headers.set("Server-Timing", `auth;dur=${tAuth.toFixed(0)}, db;dur=${(performance.now() - t0 - tAuth).toFixed(0)}, total;dur=${(performance.now() - t0).toFixed(0)}`);
+    return res;
+  };
+  try {
+    if (view === "inbox") return timed({ items: await listInbox(id) });
+    if (view === "thread") {
+      const thread = await readThread(id, p.get("c") ?? "", p.get("read") !== "0");
+      return thread ? timed({ thread }) : timed({ error: "Not found" }, 404);
+    }
+    if (view === "search") {
+      const me = await getChatMe();
+      return me ? result(await searchMessages(me, p.get("q"))) : json({ error: "Unauthorized" }, 401);
+    }
+  } catch (err) {
+    console.error("[api/chat] GET failed", view, err);
+    return timed({ error: "Chat is temporarily unavailable." }, 503);
   }
-  if (view === "search") return result(await searchMessages(me, p.get("q")));
   return json({ error: "Bad request" }, 400);
 }
 
@@ -60,7 +74,6 @@ export async function POST(request: NextRequest) {
   const c = String(b.conversationId ?? "");
   switch (b.op) {
     case "ping":
-      await touchChatPresence(me);
       return json({ ok: true, unread: await countChatUnread(me.memberId) });
     case "open":
       return result(await openDm(me, String(b.peerMemberId ?? "")));

@@ -88,7 +88,7 @@ describe("chat v2 wiring (static)", () => {
 
   it("checks membership before every conversation read/write", () => {
     const server = read("lib", "chat", "server.ts");
-    for (const fn of ["readThread", "sendMessage", "setTyping", "createChatUpload"]) {
+    for (const fn of ["sendMessage", "setTyping", "createChatUpload"]) {
       const body = server.slice(server.indexOf(`export async function ${fn}`));
       expect(body.slice(0, 600), fn).toMatch(/conversationFor\(me/);
     }
@@ -97,6 +97,23 @@ describe("chat v2 wiring (static)", () => {
     // search is scoped to my conversations
     const search = server.slice(server.indexOf("export async function searchMessages"));
     expect(search.slice(0, 900)).toMatch(/eq\("member_id", me\.memberId\)/);
+  });
+
+  it("reads inbox and thread in one round trip, with membership enforced in SQL", () => {
+    const server = read("lib", "chat", "server.ts");
+    expect(server).toMatch(/rpc\("chat_inbox"/);
+    expect(server).toMatch(/rpc\("chat_thread"/);
+    const sql = read("supabase", "migrations", "106_chat_perf.sql");
+    expect(sql).toMatch(/return null; -- not a participant/);
+    expect(sql).toMatch(/revoke all on function public\.chat_thread[^;]*from public, anon, authenticated/);
+    expect(sql).toMatch(/gin_trgm_ops/);
+  });
+
+  it("server-renders the first screen and polls only while visible", () => {
+    expect(read("app", "chat", "load.ts")).toMatch(/Promise\.all\(\[\s*listInbox/);
+    const client = read("components", "chat", "ChatApp.tsx");
+    expect(client).toMatch(/useState<ChatThreadView \| null>\(initial\)/);
+    expect(client).toMatch(/AbortSignal\.timeout/);
   });
 
   it("has no admin endpoint that reads other people's chats", () => {

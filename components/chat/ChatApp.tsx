@@ -63,10 +63,20 @@ function dayLabel(iso: string): string {
   return new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Kolkata", weekday: "short", day: "numeric", month: "short", year: "numeric" }).format(new Date(iso));
 }
 
-export default function ChatApp({ viewer, conversationId }: { viewer: ChatViewer; conversationId: string | null }) {
+const INBOX_POLL_MS = 15000;
+const THREAD_POLL_MS = CHAT_POLL_MS + 1000;
+
+/** GET with a hard timeout so a stalled request can never wedge polling. */
+async function getJson(url: string): Promise<Response> {
+  return fetch(url, { cache: "no-store", signal: AbortSignal.timeout(12000) });
+}
+
+export default function ChatApp({ viewer, conversationId, initialItems = null, initialThread = null }: {
+  viewer: ChatViewer; conversationId: string | null; initialItems?: InboxItem[] | null; initialThread?: ChatThreadView | null;
+}) {
   const router = useRouter();
   const rootRef = useRef<HTMLDivElement>(null);
-  const [items, setItems] = useState<InboxItem[] | null>(null);
+  const [items, setItems] = useState<InboxItem[] | null>(initialItems);
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<SearchHit[] | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -90,16 +100,19 @@ export default function ChatApp({ viewer, conversationId }: { viewer: ChatViewer
 
   const loadInbox = useCallback(async () => {
     try {
-      const res = await fetch("/api/chat?view=inbox", { cache: "no-store" });
+      const res = await getJson("/api/chat?view=inbox");
       if (res.status === 401) { router.replace("/agent/login"); return; }
       const data = (await res.json()) as { items?: InboxItem[] };
       if (data.items) setItems(data.items);
     } catch { /* offline: keep last list */ }
   }, [router]);
 
+  // Inbox arrives server-rendered; refresh it only while the tab is visible.
+  const inboxLoaded = useRef(initialItems !== null);
   useEffect(() => {
-    void loadInbox();
-    const t = setInterval(() => { if (document.visibilityState === "visible") void loadInbox(); setTick((n) => n + 1); }, CHAT_POLL_MS * 2);
+    if (!inboxLoaded.current) void loadInbox();
+    inboxLoaded.current = false;
+    const t = setInterval(() => { if (document.visibilityState === "visible") void loadInbox(); setTick((n) => n + 1); }, INBOX_POLL_MS);
     return () => clearInterval(t);
   }, [loadInbox, conversationId]);
 
@@ -194,7 +207,7 @@ export default function ChatApp({ viewer, conversationId }: { viewer: ChatViewer
     <div ref={rootRef} className="flex h-[100dvh] w-full overflow-hidden" onClick={() => menuOpen && setMenuOpen(false)}>
       {inbox}
       {conversationId ? (
-        <Thread key={conversationId} viewer={viewer} conversationId={conversationId} onChanged={loadInbox} />
+        <Thread key={conversationId} viewer={viewer} conversationId={conversationId} initial={initialThread?.conversationId === conversationId ? initialThread : null} onChanged={loadInbox} />
       ) : (
         <section className="hidden flex-1 flex-col items-center justify-center gap-3 text-center text-[#64748b] md:flex">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm"><IconSend className="h-7 w-7 text-[#1E4ED8]" /></div>
@@ -227,9 +240,9 @@ function InboxRow({ item, active, onOpen }: { item: InboxItem; active: boolean; 
   );
 }
 
-function Thread({ viewer, conversationId, onChanged }: { viewer: ChatViewer; conversationId: string; onChanged: () => void }) {
+function Thread({ viewer, conversationId, initial, onChanged }: { viewer: ChatViewer; conversationId: string; initial: ChatThreadView | null; onChanged: () => void }) {
   const router = useRouter();
-  const [thread, setThread] = useState<ChatThreadView | null>(null);
+  const [thread, setThread] = useState<ChatThreadView | null>(initial);
   const [missing, setMissing] = useState(false);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<ChatMessageView | null>(null);
@@ -249,6 +262,7 @@ function Thread({ viewer, conversationId, onChanged }: { viewer: ChatViewer; con
   const busy = useRef(false);
   const lastTyping = useRef(0);
   const lastCount = useRef(0);
+  const highlightDone = useRef(false);
   const stick = useRef(true);
   const fileUrls = useRef(new Map<string, { url: string; at: number }>());
 
@@ -257,7 +271,7 @@ function Thread({ viewer, conversationId, onChanged }: { viewer: ChatViewer; con
     busy.current = true;
     try {
       const visible = document.visibilityState === "visible";
-      const res = await fetch(`/api/chat?view=thread&c=${conversationId}${visible ? "" : "&read=0"}`, { cache: "no-store" });
+      const res = await getJson(`/api/chat?view=thread&c=${conversationId}${visible ? "" : "&read=0"}`);
       if (res.status === 404) { setMissing(true); return; }
       if (res.status === 401) { router.replace("/agent/login"); return; }
       const data = (await res.json()) as { thread?: ChatThreadView };
@@ -280,11 +294,12 @@ function Thread({ viewer, conversationId, onChanged }: { viewer: ChatViewer; con
   useEffect(() => {
     const m = new URLSearchParams(window.location.search).get("m");
     if (m) { setHighlight(m); stick.current = false; }
-    void load().then(onChanged);
-    const t = setInterval(() => void load(), CHAT_POLL_MS);
+    if (!initial) void load().then(onChanged);
+    const t = setInterval(() => { if (document.visibilityState === "visible") void load(); }, THREAD_POLL_MS);
     const onVis = () => { if (document.visibilityState === "visible") void load(); };
     document.addEventListener("visibilitychange", onVis);
     return () => { clearInterval(t); document.removeEventListener("visibilitychange", onVis); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load, onChanged]);
 
   // Auto-scroll to the newest message when it arrives (unless the user scrolled up).
@@ -292,7 +307,8 @@ function Thread({ viewer, conversationId, onChanged }: { viewer: ChatViewer; con
     const el = scrollRef.current;
     if (!el || !thread) return;
     const n = thread.messages.length;
-    if (highlight && lastCount.current === 0) {
+    if (highlight && !highlightDone.current) {
+      highlightDone.current = true;
       document.getElementById(`msg-${highlight}`)?.scrollIntoView({ block: "center" });
     } else if (stick.current || (n > lastCount.current && thread.messages[n - 1]?.mine)) {
       el.scrollTop = el.scrollHeight;
