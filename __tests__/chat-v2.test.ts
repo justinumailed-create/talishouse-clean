@@ -114,6 +114,7 @@ describe("chat v2 wiring (static)", () => {
     const client = read("components", "chat", "ChatApp.tsx");
     expect(client).toMatch(/useState<ChatThreadView \| null>\(initial\)/);
     expect(client).toMatch(/AbortSignal\.timeout/);
+    expect(client).toMatch(/data-testid="typing-bubble"/);
   });
 
   it("has no admin endpoint that reads other people's chats", () => {

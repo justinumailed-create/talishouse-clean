@@ -429,6 +429,18 @@ function Thread({ viewer, conversationId, initial, onChanged }: { viewer: ChatVi
             </div>
           );
         })}
+        {thread?.typing.length ? (
+          <div className="mb-1.5 flex justify-start" data-testid="typing-bubble" aria-live="polite">
+            <div className="rounded-2xl rounded-bl-md bg-white px-3.5 py-2.5 shadow-[0_1px_1px_rgba(15,23,42,0.06)]">
+              {thread.kind === "updates" ? <div className="mb-0.5 text-[12px] font-semibold text-[#64748b]">{thread.typing.join(", ")}</div> : null}
+              <span className="flex items-center gap-1" aria-label={`${thread.typing.join(", ")} typing`}>
+                {[0, 150, 300].map((d) => (
+                  <span key={d} className="block h-2 w-2 animate-bounce rounded-full bg-[#94a3b8]" style={{ animationDelay: `${d}ms`, animationDuration: "1s" }} />
+                ))}
+              </span>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <footer className="shrink-0 border-t border-[#e5e9f0] bg-white px-2 pt-2 md:px-4" style={{ paddingBottom: "max(env(safe-area-inset-bottom), 8px)" }} data-testid="composer">
