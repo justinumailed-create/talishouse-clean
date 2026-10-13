@@ -67,7 +67,7 @@ export default function AgentDashboard({
       <div className="grid gap-5 sm:grid-cols-2">
         {[
           { href: "/admin/agent/notes", title: "Daily notes", text: "Log today’s tasks and upload documents.", badge: 0 },
-          { href: "/admin/agent/chat", title: "Chat", text: "Private messages with other agents.", badge: chatUnread },
+          { href: "/chat", title: "Chat", text: "Private messages with other agents.", badge: chatUnread },
         ].map((item) => {
           const inner = (
             <>

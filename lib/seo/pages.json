@@ -1088,6 +1088,36 @@
     "alt": "Talispros™ Baumlogo: Neues Passwort wählen"
    }
   },
+  "/chat": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/chat",
+   "en": {
+    "title": "Chat | Talispros™ Agent Portal",
+    "description": "Private messages and team updates for Talispros™ agents and admins.",
+    "alt": "Talispros™ tree logo: Team chat & updates"
+   },
+   "de": {
+    "title": "Chat | Talispros™ Agent Portal",
+    "description": "Private Nachrichten und Team-Updates für Talispros™ Agenten und Admins.",
+    "alt": "Talispros™ Baumlogo: Team-Chat & Updates"
+   }
+  },
+  "/chat/[conversationId]": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/chat-conversation",
+   "en": {
+    "title": "Conversation | Talispros™ Chat",
+    "description": "A private Talispros™ conversation. Only its participants can read it.",
+    "alt": "Talispros™ tree logo: Private conversation"
+   },
+   "de": {
+    "title": "Unterhaltung | Talispros™ Chat",
+    "description": "Eine private Talispros™ Unterhaltung. Nur die Teilnehmer können sie lesen.",
+    "alt": "Talispros™ Baumlogo: Private Unterhaltung"
+   }
+  },
   "/crm/login": {
    "kind": "login",
    "noindex": true,

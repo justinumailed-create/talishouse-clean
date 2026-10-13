@@ -21,6 +21,7 @@ export const ADMIN_SUPERADMIN_NAV: readonly AdminNavItem[] = [
   { href: "/admin/fast-codes", label: "FAST Codes" },
   { href: "/admin/pmc", label: "PMC pins" },
   { href: "/admin/agents", label: "Agents" },
+  { href: "/chat", label: "Chat" },
 ];
 
 /** Agent Admin nav: own dashboard plus one entry per granted privilege. */
@@ -29,7 +30,7 @@ export function getAgentNavItems(scopes: readonly string[] | null | undefined): 
   const items: AdminNavItem[] = [
     { href: "/admin/agent", label: "My dashboard" },
     { href: "/admin/agent/notes", label: "Daily notes" },
-    { href: "/admin/agent/chat", label: "Chat" },
+    { href: "/chat", label: "Chat" },
   ];
   if (granted.has("mapsites")) {
     items.push({ href: "/admin/mapsites", label: "Mapsites" });

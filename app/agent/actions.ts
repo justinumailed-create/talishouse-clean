@@ -8,6 +8,12 @@ import {
   writeAgentSessionCookie,
 } from "@/lib/admin-auth";
 import { changeOwnAgentPassword, loginAgent } from "@/lib/agent-admins";
+import { getChatOnLogin } from "@/lib/chat/server";
+
+/** Agents land in chat after sign-in unless they turned that off. */
+async function agentHomePath(agentId: string): Promise<string> {
+  return (await getChatOnLogin(agentId).catch(() => false)) ? "/chat" : "/admin/agent";
+}
 
 type Result = { ok: true; next: string } | { ok: false; error: string };
 
@@ -38,7 +44,7 @@ export async function agentLoginAction(loginId: string, password: string): Promi
   const result = await loginAgent(String(loginId || ""), String(password || ""));
   if (!result.ok) return result;
   await writeAgentSessionCookie(result.token);
-  return { ok: true, next: result.agent.mustChangePassword ? "/agent/change-password" : "/admin/agent" };
+  return { ok: true, next: result.agent.mustChangePassword ? "/agent/change-password" : await agentHomePath(result.agent.id) };
 }
 
 export async function agentChangePasswordAction(
@@ -62,7 +68,7 @@ export async function agentChangePasswordAction(
     return { ok: false, error: "Could not update your password. Please try again." };
   }
   if (!result.ok) return result;
-  return { ok: true, next: "/admin/agent" };
+  return { ok: true, next: await agentHomePath(account.agentId) };
 }
 
 export async function agentLogoutAction(): Promise<void> {

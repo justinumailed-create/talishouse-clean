@@ -108,7 +108,7 @@ function AdminSidebar({
                         </svg>
                         <span className="flex flex-1 items-center justify-between gap-2">
                           {item.label}
-                          {item.href === "/admin/agent/chat" && chatUnread > 0 ? (
+                          {item.href === "/chat" && chatUnread > 0 ? (
                             <span className="rounded-full bg-[#1E4ED8] px-2 py-0.5 text-[11px] font-semibold text-white">{chatUnread}</span>
                           ) : null}
                         </span>

@@ -85,6 +85,7 @@ describe("admin nav", () => {
       "/admin/fast-codes",
       "/admin/pmc",
       "/admin/agents",
+      "/chat",
     ]);
     expect(hrefs).not.toContain("/admin/platform-content");
     expect(hrefs).not.toContain("/admin/content");

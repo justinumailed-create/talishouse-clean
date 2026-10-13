@@ -69,9 +69,9 @@ describe("agent privileges", () => {
   });
 
   it("builds agent nav only from granted privileges", () => {
-    expect(getAdminNavItems("agent", []).map((i) => i.href)).toEqual(["/admin/agent", "/admin/agent/notes", "/admin/agent/chat"]);
+    expect(getAdminNavItems("agent", []).map((i) => i.href)).toEqual(["/admin/agent", "/admin/agent/notes", "/chat"]);
     const hrefs = getAdminNavItems("agent", ["agent-pages", "build-requests"] as string[]).map((i) => i.href);
-    expect(hrefs).toEqual(["/admin/agent", "/admin/agent/notes", "/admin/agent/chat", "/admin/build-requests"]);
+    expect(hrefs).toEqual(["/admin/agent", "/admin/agent/notes", "/chat", "/admin/build-requests"]);
   });
 });
 

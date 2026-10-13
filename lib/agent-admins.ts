@@ -469,6 +469,7 @@ export async function recordAgentLogout(token: string | null | undefined): Promi
   if (!row) return;
   const now = new Date().toISOString();
   await db().from("agent_presence").upsert({ agent_id: row.agent_id, signed_out_at: now }, { onConflict: "agent_id" });
+  await db().from("chat_members").update({ signed_out_at: now }).eq("agent_id", row.agent_id);
   const agent = await getAgentById(row.agent_id);
   await logAgentAudit(row.agent_id, "agent.logout", agent?.loginId ?? "agent", {
     signed_in_at: row.created_at,

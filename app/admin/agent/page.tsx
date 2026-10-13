@@ -5,7 +5,7 @@ import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { accountHasAdminScope } from "@/lib/admin-constants";
 import { getAgentById, listAgentMapSites } from "@/lib/agent-admins";
 import { listManualPayments } from "@/lib/manual-payments";
-import { countUnreadChat } from "@/lib/agent-collab-server";
+import { countUnreadForAgent } from "@/lib/chat/server";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +40,7 @@ export default async function AgentHomePage() {
       : Promise.resolve([]),
     agent.mustChangePassword
       ? Promise.resolve(0)
-      : countUnreadChat({ ...account, agentId: agent.id }).catch(() => 0),
+      : countUnreadForAgent(agent.id).catch(() => 0),
   ]);
   return <AgentDashboard agent={agent} mapsites={mapsites} payments={payments} chatUnread={chatUnread} />;
 }

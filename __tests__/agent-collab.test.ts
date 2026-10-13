@@ -107,8 +107,7 @@ describe("chat privacy (static)", () => {
     for (const file of walk(path.join(process.cwd(), "app", "admin", "agents"))) {
       expect(readFileSync(file, "utf8")).not.toMatch(/agent_chat|readChatThread|listChatContacts/);
     }
-    const server = readFileSync(path.join(process.cwd(), "lib", "agent-collab-server.ts"), "utf8");
-    const send = server.slice(server.indexOf("export async function sendChatMessage"));
-    expect(send).not.toMatch(/logAgentAudit/);
+    const server = readFileSync(path.join(process.cwd(), "lib", "chat", "server.ts"), "utf8");
+    expect(server).not.toMatch(/logAgentAudit|from\("activity_logs"\)/);
   });
 });

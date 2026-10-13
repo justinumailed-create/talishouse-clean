@@ -4,6 +4,7 @@ import { getAdminSessionAccount } from "@/lib/admin-auth";
 import AgentAuthShell from "../AgentAuthShell";
 import { AgentLoginForm } from "../AgentAuthForm";
 import { pageMetadata } from "@/lib/seo/page-metadata";
+import { getChatOnLogin } from "@/lib/chat/server";
 
 export async function generateMetadata() {
   return pageMetadata("/agent/login");
@@ -14,7 +15,8 @@ export const dynamic = "force-dynamic";
 export default async function AgentLoginPage() {
   const account = await getAdminSessionAccount();
   if (account?.access === "agent") {
-    redirect(account.mustChangePassword ? "/agent/change-password" : "/admin/agent");
+    if (account.mustChangePassword) redirect("/agent/change-password");
+    redirect(account.agentId && (await getChatOnLogin(account.agentId)) ? "/chat" : "/admin/agent");
   }
 
   return (
