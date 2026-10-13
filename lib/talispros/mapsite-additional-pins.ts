@@ -24,6 +24,8 @@ export type MapSiteAdditionalPin = {
   longitude: number;
   label: string;
   sortOrder: number;
+  /** Who placed it: owner / admin / agent; null for older rows. */
+  createdByKind?: "owner" | "admin" | "agent" | null;
 };
 
 export type MapSitePinCapacity = {

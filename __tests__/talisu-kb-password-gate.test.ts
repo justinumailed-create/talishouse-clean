@@ -67,7 +67,7 @@ describe("TalisU Knowledge Base password gate", () => {
     expect(gate).toContain("TalisUKbUnlockForm");
     expect(gate).not.toContain("Incorrect password");
     expect(form).toContain("k.error");
-    expect(en.kbUnlock.error).toContain("Incorrect password");
+    expect(en.kbUnlock.error).toContain("FAST Code");
     expect(form).toContain("Unlock");
     expect(form).toContain("writeTalisUKbUnlocked");
   });

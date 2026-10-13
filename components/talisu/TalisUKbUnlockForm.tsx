@@ -1,11 +1,8 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
-import {
-  isTalisUKbPassword,
-  notifyTalisUKbUnlocked,
-  writeTalisUKbUnlocked,
-} from "@/lib/talisu/kb-gate";
+import { useId, useState, useTransition, type FormEvent } from "react";
+import { notifyTalisUKbUnlocked, writeTalisUKbUnlocked } from "@/lib/talisu/kb-gate";
+import { unlockTalisUKbAction } from "@/app/talisu/kb/access-actions";
 import { useT } from "@/lib/i18n/client";
 
 export type TalisUKbUnlockFormProps = {
@@ -34,17 +31,23 @@ export default function TalisUKbUnlockForm({
   const fieldId = useId();
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [pending, startTransition] = useTransition();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
-    if (!isTalisUKbPassword(password)) {
-      setError(k.error);
-      return;
-    }
-    writeTalisUKbUnlocked();
-    notifyTalisUKbUnlocked();
-    onSuccess();
+    const value = password;
+    startTransition(async () => {
+      // Server checks FAST Codes (admin or paid-up account) and the KB password.
+      const result = await unlockTalisUKbAction(value).catch(() => ({ ok: false }));
+      if (!result.ok) {
+        setError(k.error);
+        return;
+      }
+      writeTalisUKbUnlocked();
+      notifyTalisUKbUnlocked();
+      onSuccess();
+    });
   }
 
   return (
@@ -79,7 +82,8 @@ export default function TalisUKbUnlockForm({
           }}
           className="h-11 w-full rounded-lg border border-neutral-300 bg-white px-3.5 text-[14px] text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-[#0070ba] focus:outline-none focus:ring-2 focus:ring-[#0070ba]/25"
           placeholder={k.placeholder}
-          autoComplete="current-password"
+          autoComplete="off"
+          autoCapitalize="characters"
           autoFocus
           required
         />
@@ -91,9 +95,10 @@ export default function TalisUKbUnlockForm({
       ) : null}
       <button
         type="submit"
+        disabled={pending}
         className="inline-flex h-11 w-full items-center justify-center rounded-full bg-[#0070ba] text-[15px] font-semibold text-white shadow-sm transition hover:bg-[#005ea6] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0070ba]/40 focus-visible:ring-offset-2"
       >
-        {k.submit}
+        {pending ? k.checking : k.submit}
       </button>
     </form>
   );

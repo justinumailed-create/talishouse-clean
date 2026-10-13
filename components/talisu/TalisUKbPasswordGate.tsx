@@ -2,8 +2,11 @@
 
 import { useT } from "@/lib/i18n/client";
 import { useEffect, useState, type ReactNode } from "react";
+import { getTalisUKbSessionAccessAction } from "@/app/talisu/kb/access-actions";
 import {
+  notifyTalisUKbUnlocked,
   readTalisUKbUnlocked,
+  writeTalisUKbUnlocked,
   requestTalisUKbNavbarUnlock,
   TALISU_KB_LOCKED_EVENT,
   TALISU_KB_UNLOCKED_EVENT,
@@ -26,11 +29,25 @@ export default function TalisUKbPasswordGate({
   const [unlocked, setUnlocked] = useState(false);
 
   useEffect(() => {
-    const ok = readTalisUKbUnlocked();
-    setUnlocked(ok);
-    setReady(true);
-    if (!ok) {
-      requestTalisUKbNavbarUnlock();
+    let cancelled = false;
+    if (readTalisUKbUnlocked()) {
+      setUnlocked(true);
+      setReady(true);
+    } else {
+      // Signed-in active accounts get in directly; only visitors see the gate.
+      getTalisUKbSessionAccessAction()
+        .catch(() => false)
+        .then((granted) => {
+          if (cancelled) return;
+          if (granted) {
+            writeTalisUKbUnlocked();
+            notifyTalisUKbUnlocked();
+            setUnlocked(true);
+          } else {
+            requestTalisUKbNavbarUnlock();
+          }
+          setReady(true);
+        });
     }
 
     function onUnlocked() {
@@ -43,6 +60,7 @@ export default function TalisUKbPasswordGate({
     window.addEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
     window.addEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
     return () => {
+      cancelled = true;
       window.removeEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
       window.removeEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
     };

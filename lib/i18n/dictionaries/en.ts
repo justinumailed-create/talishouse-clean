@@ -98,11 +98,12 @@ export const en = {
 
   kbUnlock: {
     title: "Knowledge Base",
-    prompt: "Enter your password to unlock.",
-    passwordLabel: "Password",
-    placeholder: "Password",
-    error: "Incorrect password. Try again.",
+    prompt: "Enter your FAST Code to unlock. Signed-in accounts open it directly.",
+    passwordLabel: "FAST Code or password",
+    placeholder: "FAST Code",
+    error: "That FAST Code isn't active (or the password is wrong). Try again.",
     submit: "Unlock",
+    checking: "Checking…",
   },
 
   home: {
@@ -356,6 +357,8 @@ export const en = {
       delete: "Delete",
       confirmDelete: "Confirm",
       deleted: "PIN removed. You can place it again.",
+      placedByAdmin: "Placed by an admin — delete it if it isn't yours",
+      placedByAgent: "Placed by an agent — delete it if it isn't yours",
       freeCredits: "Free PINs",
       freeAvailableOne:
         "You have 1 free PIN from Talispros™ Admin. It is used before any payment.",
@@ -505,6 +508,13 @@ export const en = {
     cancel: "Cancel",
     claim: "Claim",
     claiming: "Claiming…",
+    assignCta: "Assign to account",
+    assignPrompt: "Enter the FAST Code of a paid-up account. The demo eBook moves to that account.",
+    assignSubmit: "Assign",
+    assigning: "Assigning…",
+    assignNotPaidTitle: "Not paid up.",
+    assignNotPaidBody: "That account has no completed payment yet (card or recorded cash). The eBook stays a Demo until it is paid.",
+    assignError: "Could not assign the eBook. Try again.",
     previewNeedName: "Enter a first and last name to preview your FAST Code™.",
     previewBased:
       "Based on “{name}” — initials {initials}. The final 2 digits are assigned when you claim.",

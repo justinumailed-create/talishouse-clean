@@ -78,11 +78,12 @@ export const de: Dictionary = {
 
   kbUnlock: {
     title: "Wissensdatenbank",
-    prompt: "Geben Sie Ihr Passwort ein, um die Inhalte freizuschalten.",
-    passwordLabel: "Passwort",
-    placeholder: "Passwort",
-    error: "Falsches Passwort. Bitte versuchen Sie es erneut.",
+    prompt: "Geben Sie Ihren FAST Code ein, um die Inhalte freizuschalten. Angemeldete Konten erhalten direkten Zugang.",
+    passwordLabel: "FAST Code oder Passwort",
+    placeholder: "FAST Code",
+    error: "Dieser FAST Code ist nicht aktiv (oder das Passwort ist falsch). Bitte erneut versuchen.",
     submit: "Freischalten",
+    checking: "Wird geprüft…",
   },
 
   home: {
@@ -579,6 +580,8 @@ export const de: Dictionary = {
       delete: "Löschen",
       confirmDelete: "Bestätigen",
       deleted: "PIN entfernt. Sie können ihn erneut setzen.",
+      placedByAdmin: "Von einem Admin gesetzt – löschen, falls nicht Ihrer",
+      placedByAgent: "Von einem Agenten gesetzt – löschen, falls nicht Ihrer",
       freeCredits: "Gratis-PINs",
       freeAvailableOne:
         "Sie haben 1 Gratis-PIN vom Talispros™-Admin. Er wird vor jeder Zahlung verwendet.",
@@ -728,6 +731,13 @@ export const de: Dictionary = {
     cancel: "Abbrechen",
     claim: "Beanspruchen",
     claiming: "Wird beansprucht …",
+    assignCta: "Konto zuweisen",
+    assignPrompt: "Geben Sie den FAST Code eines bezahlten Kontos ein. Das Demo-eBook wird diesem Konto zugewiesen.",
+    assignSubmit: "Zuweisen",
+    assigning: "Wird zugewiesen …",
+    assignNotPaidTitle: "Nicht bezahlt.",
+    assignNotPaidBody: "Für dieses Konto liegt noch keine abgeschlossene Zahlung vor (Karte oder erfasste Barzahlung). Das eBook bleibt eine Demo, bis bezahlt ist.",
+    assignError: "Das eBook konnte nicht zugewiesen werden. Bitte erneut versuchen.",
     previewNeedName:
       "Geben Sie Vor- und Nachnamen ein, um eine Vorschau Ihres FAST Code™ zu sehen.",
     previewBased:

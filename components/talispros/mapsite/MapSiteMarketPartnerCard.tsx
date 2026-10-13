@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import type { KeyboardEvent, RefObject } from "react";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import {
@@ -20,10 +19,6 @@ import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
 import { useT } from "@/lib/i18n/client";
-import {
-  TALISU_KB_MANAGE_PATH,
-  isTalisUKbMapsiteManagerFastCode,
-} from "@/lib/talisu/kb-content";
 
 function contentForAudience(audience: RegistrationMarket): TalisprosMarketPageContent {
   switch (audience) {
@@ -69,8 +64,8 @@ interface MapSiteMarketPartnerCardProps {
   /** Claimed path segment for Logout return (e.g. brokers, listings). */
   accountTypeSegment?: string | null;
   /**
-   * Real activation payment unlocked Dashboard — show Knowledge Base manage
-   * entry for rm22 (Ralf) Mapsite dashboard.
+   * @deprecated The Knowledge Base pill was removed from account pages (the KB
+   * lives under TalisU, top-right). Kept so callers still type-check.
    */
   showKnowledgeBaseManage?: boolean;
   /** Resolved partner photo (owner override via resolveMapSiteBranding). */
@@ -94,7 +89,6 @@ export default function MapSiteMarketPartnerCard({
   paid = false,
   isOwner = false,
   accountTypeSegment = null,
-  showKnowledgeBaseManage = false,
   partnerImageUrl = null,
   partnerName: partnerNameOverride = null,
   partnerTagline = null,
@@ -102,8 +96,6 @@ export default function MapSiteMarketPartnerCard({
   const t = useT();
   const content = contentForAudience(audience);
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
-  const showKbManage =
-    showKnowledgeBaseManage && isTalisUKbMapsiteManagerFastCode(fastCode);
   const address = mapsite.property_address?.trim().toUpperCase() || null;
   const partnerImage = mapsiteMarketPartnerImageUrl(
     partnerImageUrl,
@@ -185,16 +177,6 @@ export default function MapSiteMarketPartnerCard({
           </div>
         </div>
         <MarketingPartnerInterestLinks align="start" className="mt-3" />
-        {showKbManage ? (
-          <div className="mt-3 flex justify-start">
-            <Link
-              href={TALISU_KB_MANAGE_PATH}
-              className="inline-flex min-h-8 items-center justify-center rounded-full bg-[#046BD9] px-3 text-[12px] font-semibold text-white transition hover:bg-[#035bb8]"
-            >
-              {t.mapsite.knowledgeBase}
-            </Link>
-          </div>
-        ) : null}
         {isOwner ? (
           <MapSiteOwnerLogoutButton
             fastCode={fastCode}
@@ -255,16 +237,6 @@ export default function MapSiteMarketPartnerCard({
           </p>
         </div>
         <MarketingPartnerInterestLinks className="mt-4" />
-        {showKbManage ? (
-          <div className="mt-4 flex justify-center">
-            <Link
-              href={TALISU_KB_MANAGE_PATH}
-              className="inline-flex min-h-8 items-center justify-center rounded-full bg-[#046BD9] px-3 text-[12px] font-semibold text-white transition hover:bg-[#035bb8]"
-            >
-              {t.mapsite.knowledgeBase}
-            </Link>
-          </div>
-        ) : null}
         {isOwner ? (
           <MapSiteOwnerLogoutButton
             fastCode={fastCode}

@@ -2,7 +2,8 @@
 
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { canManageMapSitePins } from "@/lib/mapsite-edit-auth";
+import { canManageMapSitePins, isMapSiteAdmin, isOwnMapSite } from "@/lib/mapsite-edit-auth";
+import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { getStripeClient, getStripeSecretKey } from "@/lib/stripe";
 import {
   ADDITIONAL_PINS_CHECKOUT_PURPOSE,
@@ -54,6 +55,20 @@ async function resolveAppOrigin(): Promise<string> {
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "") ||
     "http://localhost:3000"
   );
+}
+
+/**
+ * Who is placing a PIN. The owner session wins (an owner signed in as admin is
+ * still the owner); otherwise admin / agent. Recorded on the row so owners can
+ * spot PINs they did not create (the "phantom flags" Ralf saw were placed from
+ * an admin test session on his account).
+ */
+async function resolvePinActor(fastCode: string): Promise<{ label: string; kind: "owner" | "admin" | "agent" }> {
+  if (await isOwnMapSite(fastCode)) return { label: `owner (${fastCode.toUpperCase()})`, kind: "owner" };
+  const account = await getAdminSessionAccount();
+  if (account && (await isMapSiteAdmin())) return { label: `${account.name} (${account.fastCode})`, kind: "admin" };
+  if (account?.access === "agent") return { label: `${account.name} (${account.fastCode}) [agent:${account.agentId ?? "?"}]`, kind: "agent" };
+  return { label: "unknown", kind: "owner" };
 }
 
 async function authorizePinEdit(fastCode: string): Promise<PinActionError | null> {
@@ -257,6 +272,7 @@ export async function placeMapSiteAdditionalPin(input: {
     latitude: input.latitude,
     longitude: input.longitude,
     label: input.label,
+    createdBy: await resolvePinActor(fastCode),
   });
   if (placed.error || !placed.dashboard) {
     return { error: placed.error || "Could not place PIN." };

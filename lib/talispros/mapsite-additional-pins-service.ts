@@ -98,7 +98,7 @@ export async function loadMapSitePinDashboard(
           .maybeSingle(),
         supabase
           .from("mapsite_additional_pins")
-          .select("id, latitude, longitude, label, sort_order")
+          .select("id, latitude, longitude, label, sort_order, created_by_kind")
           .eq("mapsite_id", id)
           .order("sort_order", { ascending: true }),
       ]);
@@ -117,6 +117,7 @@ export async function loadMapSitePinDashboard(
       longitude: pin.longitude,
       label: pin.label || "",
       sortOrder: pin.sort_order || 0,
+      createdByKind: (pin.created_by_kind as MapSiteAdditionalPin["createdByKind"]) ?? null,
     }));
 
     return capacityFromCounts({
@@ -278,6 +279,7 @@ export async function placeAdditionalPinRecord(input: {
   latitude: number;
   longitude: number;
   label?: string | null;
+  createdBy?: { label: string; kind: "owner" | "admin" | "agent" } | null;
 }): Promise<{ pin?: MapSiteAdditionalPin; dashboard?: MapSitePinDashboardState; error?: string }> {
   const latitude = normalizePinCoordinate(input.latitude, "lat");
   const longitude = normalizePinCoordinate(input.longitude, "lng");
@@ -308,6 +310,8 @@ export async function placeAdditionalPinRecord(input: {
       label: normalizePinLabel(input.label),
       sort_order:
         dashboard.pins.reduce((max, pin) => Math.max(max, pin.sortOrder || 0), 0) + 1,
+      created_by: input.createdBy?.label ?? null,
+      created_by_kind: input.createdBy?.kind ?? null,
     })
     .select("id, latitude, longitude, label, sort_order")
     .single();

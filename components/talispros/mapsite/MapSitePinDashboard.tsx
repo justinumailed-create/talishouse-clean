@@ -536,6 +536,14 @@ export default function MapSitePinDashboard({
                         <span className="block truncate text-xs font-medium">
                           {pin.label.trim() || `PIN ${index + 2}`}
                         </span>
+                        {pin.createdByKind === "admin" || pin.createdByKind === "agent" ? (
+                          <span
+                            className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900"
+                            data-testid="pin-placed-by-staff"
+                          >
+                            {pin.createdByKind === "admin" ? d.placedByAdmin : d.placedByAgent}
+                          </span>
+                        ) : null}
                         <span className="block font-mono text-[10px] text-neutral-500">
                           {pin.latitude.toFixed(5)}, {pin.longitude.toFixed(5)}
                         </span>

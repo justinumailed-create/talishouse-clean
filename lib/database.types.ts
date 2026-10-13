@@ -684,6 +684,8 @@ export interface Database {
           sort_order: number
           created_at: string
           updated_at: string
+          created_by: string | null
+          created_by_kind: string | null
         }
         Insert: {
           id?: string
@@ -694,6 +696,8 @@ export interface Database {
           sort_order?: number
           created_at?: string
           updated_at?: string
+          created_by?: string | null
+          created_by_kind?: string | null
         }
         Update: {
           id?: string
@@ -704,6 +708,8 @@ export interface Database {
           sort_order?: number
           created_at?: string
           updated_at?: string
+          created_by?: string | null
+          created_by_kind?: string | null
         }
         Relationships: [
           { foreignKeyName: "mapsite_additional_pins_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] }

@@ -265,15 +265,12 @@ export default function TalisUMktsHeader({
   }
 
   function handleKbMenuClick() {
-    if (kbUnlocked || readTalisUKbUnlocked()) {
-      setKbUnlocked(true);
-      setOpen(false);
-      setPanel("menu");
-      router.push(TALISU_KB_PATH);
-      return;
-    }
-    setKbNext(TALISU_KB_PATH);
-    setPanel("kb-unlock");
+    if (kbUnlocked || readTalisUKbUnlocked()) setKbUnlocked(true);
+    // Always go to the KB: its gate lets signed-in active accounts straight in
+    // and opens the FAST Code unlock only for visitors.
+    setOpen(false);
+    setPanel("menu");
+    router.push(TALISU_KB_PATH);
   }
 
   function handleKbUnlockSuccess() {

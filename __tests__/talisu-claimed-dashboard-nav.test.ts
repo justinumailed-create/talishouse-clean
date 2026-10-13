@@ -53,8 +53,7 @@ describe("Claimed FAST Mapsite header Dashboard nav", () => {
     expect(app).toContain("MapSitePinDashboard");
     expect(app).toContain("showKnowledgeBaseManage={dashboardUnlocked}");
 
-    expect(partner).toContain("isTalisUKbMapsiteManagerFastCode");
-    expect(partner).toContain("TALISU_KB_MANAGE_PATH");
-    expect(partner).toContain("Knowledge Base");
+    // Ralf: the Knowledge Base pill is gone from account pages (KB lives under TalisU).
+    expect(partner).not.toContain("TALISU_KB_MANAGE_PATH");
   });
 });

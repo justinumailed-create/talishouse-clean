@@ -40,7 +40,7 @@ function adminSessionCookieOptions(maxAge: number) {
 }
 
 /** Global Admin, or an active admin access grant (revocation applies on the next request). */
-async function resolveFastCodeAdminAccount(code: string | null | undefined): Promise<AdminAccount | null> {
+export async function resolveFastCodeAdminAccount(code: string | null | undefined): Promise<AdminAccount | null> {
   const normalized = normalizeAdminFastCode(code);
   if (!normalized || isRetiredAdminFastCode(normalized)) return null;
   const global = getAdminAccountByFastCode(normalized);
