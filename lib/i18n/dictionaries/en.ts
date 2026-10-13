@@ -86,6 +86,13 @@ export const en = {
       errEmpty: "Please enter a FAST Code™.",
       errChars: "Use letters and digits only (no & or +).",
       errOpen: "Unable to open that Mapsite.",
+      cardKicker: "Already have a FAST Code™?",
+      cardTitle: "Open your personal Mapsite",
+      registerPrompt: "Don't have a Mapsite yet?",
+      registerCta: "Register",
+      registerCatalogue: "Register a Mapsite",
+      partnerKicker: "Partner Mapsite",
+      partnerOpen: "Open {name}",
     },
   },
 

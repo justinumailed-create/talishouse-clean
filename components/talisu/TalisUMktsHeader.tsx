@@ -19,7 +19,7 @@ import {
 import { TALISU_KB_PATH } from "@/lib/talisu/kb-content";
 import TalisBrandMark from "@/components/talisu/TalisBrandMark";
 import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
-import MapsitesNavDropdown from "@/components/talisu/MapsitesNavDropdown";
+import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import RegisterNavDropdown from "@/components/talisu/RegisterNavDropdown";
 import LanguageSwitch from "@/components/i18n/LanguageSwitch";
 import { useT } from "@/lib/i18n/client";
@@ -144,6 +144,11 @@ export default function TalisUMktsHeader({
     dashboardUnlocked &&
     Boolean(dashboardMenuItems?.length) &&
     Boolean(onSelectDashboardItem);
+
+  const mapsitesActive =
+    pathname.startsWith("/talispros/mapsite") ||
+    pathname.startsWith("/mapsite") ||
+    pathname.startsWith("/talispros/demo-mapsite");
 
   const dropdownActive = TALISU_MKTS_HEADER_DROPDOWN.some(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
@@ -459,13 +464,21 @@ export default function TalisUMktsHeader({
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Catalogue").map(
             (item) => renderNavLink(item),
           )}
+          {/* Mapsites: direct link to the Demo Mapsite page (FAST Code card lives there). */}
+          <Link
+            href={DEMO_MAPSITE_BUILD_PATH}
+            data-testid="nav-mapsites-link"
+            className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
+              mapsitesActive ? "bg-white/20 text-white" : "text-white hover:bg-white/15"
+            }`}
+          >
+            {t.nav.mapsites}
+          </Link>
           {claimedMapsite
             ? TALISU_MKTS_HEADER_NAV.filter(
                 (item) => item.label === "Register",
               ).map((item) => renderNavLink(item))
             : <RegisterNavDropdown />}
-          {/* Mapsites comes right after Register — personal Mapsite access follows registration. */}
-          <MapsitesNavDropdown />
 
           <span
             aria-hidden

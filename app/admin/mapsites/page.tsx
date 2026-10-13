@@ -2,6 +2,9 @@ import { getAdminSessionAccount, requireAdminPage } from "@/lib/admin-auth";
 import { agentCanEditMapSite } from "@/lib/mapsite-edit-auth";
 import { listMapSitesForAdmin } from "@/lib/mapsite-service";
 import AdminMapSiteThumbnailCard from "@/components/admin/AdminMapSiteThumbnailCard";
+import AdminMapSitePartnerLinksPanel from "@/components/admin/AdminMapSitePartnerLinksPanel";
+import { listMapSitePartnerLinks } from "@/lib/talispros/mapsite-partner-links";
+import { isElevatedAdminAccess } from "@/lib/admin-constants";
 import AdminFreePinCreditsPanel from "@/components/admin/AdminFreePinCreditsPanel";
 import { listFreePinGrants } from "@/lib/talispros/mapsite-additional-pins-service";
 import { isSupabaseAdminConfigured, getSupabaseAdmin } from "@/lib/supabaseAdmin";
@@ -16,9 +19,11 @@ export default async function AdminMapSitesPage() {
   if (isSupabaseAdminConfigured() && !isAgent) {
     await purgeMapSitesAndBookshelvesWithoutFastCodes(getSupabaseAdmin());
   }
-  const [allMapSites, recentFreePinGrants] = await Promise.all([
+  const canLinkPartners = isElevatedAdminAccess(account?.access);
+  const [allMapSites, recentFreePinGrants, partnerLinks] = await Promise.all([
     listMapSitesForAdmin(),
     isAgent ? Promise.resolve([]) : listFreePinGrants({ limit: 20 }),
+    canLinkPartners ? listMapSitePartnerLinks() : Promise.resolve([]),
   ]);
   // Agent Admins only see the Mapsites they may edit.
   const mapsites = isAgent
@@ -34,6 +39,13 @@ export default async function AdminMapSitesPage() {
           and the custom ebook editor (Front Cover / Back Cover, interiors, publish).
         </p>
       </div>
+
+      {canLinkPartners ? (
+        <AdminMapSitePartnerLinksPanel
+          initialLinks={partnerLinks}
+          fastCodes={allMapSites.map((m) => m.fastCode).filter(Boolean)}
+        />
+      ) : null}
 
       {isAgent ? null : <AdminFreePinCreditsPanel initialGrants={recentFreePinGrants} />}
 

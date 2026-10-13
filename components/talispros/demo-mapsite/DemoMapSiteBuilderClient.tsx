@@ -11,6 +11,7 @@ import {
   type HomePinLocationValues,
 } from "@/components/build-mapsite/home-pin-types";
 import { createDemoMapSiteAction } from "@/app/talispros/demo-mapsite/actions";
+import DemoFastCodeCard from "@/components/talispros/demo-mapsite/DemoFastCodeCard";
 import DemoDownloadMenu from "@/components/talispros/demo-mapsite/DemoDownloadMenu";
 
 export default function DemoMapSiteBuilderClient() {
@@ -61,7 +62,8 @@ export default function DemoMapSiteBuilderClient() {
   return (
     <div className="relative flex min-h-dvh flex-col items-center bg-[#f5f5f7] px-6 py-16 text-neutral-950 antialiased sm:py-24">
       <DemoDownloadMenu className="absolute right-4 top-4 z-20 sm:right-6 sm:top-5" />
-      <div className="w-full max-w-[480px]">
+      <div className="w-full max-w-[560px]">
+        <DemoFastCodeCard className="mb-14" />
         <div className="text-center">
           <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">
             DEMONSTRATION

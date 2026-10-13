@@ -91,7 +91,7 @@ describe("TalisU Register → Product (Webster) copy", () => {
     expect(page).toContain("TALISU_ENGAGE.helpItems");
     expect(page).toContain("TALISU_ENGAGE.protectionHeading");
     expect(page).toContain("TALISU_ENGAGE.protectionText");
-    expect(page).toContain("list-disc");
+    expect(page).toContain("PartnerLanding");
     expect(page).toContain("TALISU_ENGAGE.headline");
     expect(page).toContain("t.engageCustomizing");
     expect(page).toContain("SamCartEmbed");

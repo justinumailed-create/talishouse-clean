@@ -47,18 +47,17 @@ describe("Ralf batch 2 — demo → registration", () => {
     expect(talisUEngageCheckoutHref("P07")).toBe("/talisu/engage?step=pay&product=P07");
     expect(talisUEngageCheckoutHref(null)).toBe("/talisu/engage?step=pay");
 
-    expect(en.talisu.register.askLine).toBe(
-      "Please select 'URL' in the flag to register your market.",
-    );
-    expect(en.talisu.register.askProceed).toBe("Proceed");
-    expect(en.talisu.engage.askProceed).toBe("Proceed");
-    expect(de.talisu.register.askLine).toContain("URL");
-    expect(en.talisu.engage.askLine).not.toMatch(/\$|USD/);
-    expect(de.talisu.engage.askLine).not.toMatch(/\$|USD/);
+    // Ralf 3: no "select URL in the flag / Proceed" box on Aisha's page.
+    expect("askLine" in en.talisu.register).toBe(false);
+    expect("askLine" in de.talisu.register).toBe(false);
+    expect(en.talisu.register.ctaLabel).toBe("Register now");
+    expect(de.talisu.register.ctaLabel).not.toBe(en.talisu.register.ctaLabel);
+    expect(en.talisu.engage.ctaNote).not.toMatch(/\$|USD/);
+    expect(de.talisu.engage.ctaNote).not.toMatch(/\$|USD/);
 
     for (const file of ["app/talisu/reg/page.tsx", "app/talisu/engage/page.tsx"]) {
       const page = readFileSync(resolve(file), "utf8");
-      expect(page).toContain("PartnerAskStep");
+      expect(page).toContain("PartnerLanding");
       expect(page).not.toMatch(/redirect\(|window\.location|setTimeout/);
     }
   });

@@ -19,6 +19,7 @@ import {
   type MapSiteCapabilityAccountType,
 } from "@/lib/talispros/account-capabilities";
 import {
+  buildClaimedMapSitePath,
   mapsiteAccountTypeSegment,
   MAPSITE_APP_PATH,
 } from "@/lib/talispros/mapsite-state";
@@ -30,6 +31,7 @@ import {
   resolveMapSiteRequestId,
   getMapSiteActivationPaymentStatus,
 } from "../../actions";
+import { resolveClaimedMapSiteAccountTypeSegment } from "@/app/talispros/mapsites/actions";
 import { shouldReconcileClaimedMapSiteFromStripe } from "@/lib/talispros/mapsite-payment";
 import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
@@ -45,6 +47,11 @@ import {
 import { loadMapSitePinDashboard } from "@/lib/talispros/mapsite-additional-pins-service";
 import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
+import MapSitePartnerButtons, {
+  type MapSitePartnerTarget,
+} from "@/components/talispros/mapsite/MapSitePartnerButtons";
+import { listMapSitePartnerCodes } from "@/lib/talispros/mapsite-partner-links";
+import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite";
 
 export const dynamic = "force-dynamic";
@@ -248,7 +255,10 @@ export default async function ClaimedMapSiteByAccountTypePage({
     { hideSecondInterior: paymentReceived },
   );
 
+  const partnerTargets = await loadPartnerTargets(fastCode);
+
   return (
+    <>
     <MapSiteApplication
       initialMapSite={listingMapSite}
       audience={audience}
@@ -274,5 +284,32 @@ export default async function ClaimedMapSiteByAccountTypePage({
       canManageDashboard={canManageDashboard}
       initialOwnerCustomizations={ownerCustomizations}
     />
+    <MapSitePartnerButtons partners={partnerTargets} />
+    </>
   );
+}
+
+/** Partner-linked Mapsites (migration 103) → buttons to the other Mapsite(s). */
+async function loadPartnerTargets(fastCode: string): Promise<MapSitePartnerTarget[]> {
+  try {
+    const codes = await listMapSitePartnerCodes(fastCode);
+    const targets = await Promise.all(
+      codes.map(async (code) => {
+        const partner = await getMapSiteByFastCode(code).catch(() => null);
+        if (!partner) return null;
+        const accountType = await resolveClaimedMapSiteAccountTypeSegment({
+          fastCode: code,
+          mapsiteId: partner.id,
+        }).catch(() => "listings");
+        return {
+          fastCode: code,
+          href: buildClaimedMapSitePath({ fastCode: code, accountType }),
+          title: partner.propertyTitle ?? null,
+        } satisfies MapSitePartnerTarget;
+      }),
+    );
+    return targets.filter((t): t is MapSitePartnerTarget => t !== null);
+  } catch {
+    return [];
+  }
 }

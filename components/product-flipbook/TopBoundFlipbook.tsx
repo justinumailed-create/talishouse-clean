@@ -1,5 +1,7 @@
 "use client";
 
+import type React from "react";
+
 import { useT } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/format";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -84,6 +86,7 @@ export default function TopBoundFlipbook({
   subtitle = "Top-bound · one page at a time",
   showHeader = true,
   headline,
+  headlineAction,
 }: {
   pages: ProductFlipbookPage[];
   eyebrow?: string;
@@ -93,6 +96,8 @@ export default function TopBoundFlipbook({
   showHeader?: boolean;
   /** Optional one-line headline above the book (e.g. /catalogue supply-side note). */
   headline?: string;
+  /** Optional secondary action shown beside the headline (e.g. Register link). */
+  headlineAction?: React.ReactNode;
 }) {
   const c = useT().catalogueUi;
   const leaves = pages;
@@ -260,6 +265,9 @@ export default function TopBoundFlipbook({
         <p className="product-flipbook__headline" data-testid="product-flipbook-headline">
           {headline}
         </p>
+      ) : null}
+      {headlineAction ? (
+        <div className="relative z-10 flex justify-center px-4 pb-2">{headlineAction}</div>
       ) : null}
 
       <div className="product-flipbook__stage">

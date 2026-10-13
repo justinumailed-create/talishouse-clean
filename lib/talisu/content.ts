@@ -244,10 +244,15 @@ export const TALISU_REGISTER = {
     },
   ],
   closing: "Please add us as a resource…!",
-  /** "Ask for the business" step before the Register checkout (Ralf). */
-  askHeading: "Before you register…",
-  askLine: "Please select 'URL' in the flag to register your market.",
-  askProceed: "Proceed",
+  /** Conversion landing before the Register checkout (Ralf, redesign). */
+  landingKicker: "Register your Mapsite",
+  landingTitle: "Get your listings seen worldwide",
+  landingLead:
+    "Aisha and her team grow your real estate adjacent marketing with Mapsites, Talisbooks™, listing analysis and TalisTV™ — all working together.",
+  offeringsHeading: "Four ways we grow your reach",
+  ctaLabel: "Register now",
+  ctaNote: "Secure checkout · takes about two minutes",
+  closingTitle: "Ready to put your market on the map?",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
 } as const;
 
@@ -273,11 +278,14 @@ export const TALISU_ENGAGE = {
   protectionHeading: "Down Payment Protection:",
   protectionText:
     "Your downpayment is protected for up to 12 months (or more by special arrangement on a case by case basis).",
-  /** "Ask for the business" step before the down payment (Ralf). No pricing here. */
-  askHeading: "Before you engage the team…",
-  askLine:
-    "Every project starts with your vision. Please Proceed to engage Webster and his Customization Team.",
-  askProceed: "Proceed",
+  /** Conversion landing before the down payment (Ralf, redesign). */
+  landingKicker: "Product Options",
+  whyHeading: "Why modular",
+  helpLabels: ["Choose your design", "Fully credited", "Secure your spot", "Built to your vision"],
+  ctaLabel: "Engage the team",
+  ctaNote: "Fully applied to your order · protected for up to 12 months",
+  finalTitle: "Every project starts with your vision.",
+  finalText: "Engage Webster and his Customization Team to bring it to life.",
   samcartUrl: "https://talispros.mysamcart.com/checkout/custom",
 } as const;
 

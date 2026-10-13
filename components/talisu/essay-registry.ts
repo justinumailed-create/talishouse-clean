@@ -16,6 +16,7 @@ import type { ComponentType } from "react";
 import type { Locale } from "@/lib/i18n/config";
 import TalisUTokenizationEssay from "@/components/talisu/TalisUTokenizationEssay";
 import TalisUHospitalityEssay from "@/components/talisu/TalisUHospitalityEssay";
+import TalisUStudentHousingEssay from "@/components/talisu/TalisUStudentHousingEssay";
 
 export type TalisUEssay = {
   /** URL slug: /talisu?essay=<slug>. */
@@ -43,8 +44,12 @@ export const TALISU_ESSAYS: readonly TalisUEssay[] = [
     aliases: ["tourism"],
     content: TalisUHospitalityEssay,
   },
+  {
+    slug: "student-housing",
+    label: { en: "Student Housing", de: "Studentenwohnheime" },
+    content: TalisUStudentHousingEssay,
+  },
   // Placeholder categories — rename label/slug and set `content` when ready.
-  { slug: "category-3", label: COMING_SOON, content: null },
   { slug: "category-4", label: COMING_SOON, content: null },
   { slug: "category-5", label: COMING_SOON, content: null },
   { slug: "category-6", label: COMING_SOON, content: null },

@@ -55,34 +55,26 @@ describe("TalisU blue header dropdown", () => {
   });
 
 
-  it("renders a Mapsites FAST Code™ gate (no public claimed list) before the TalisU rule", () => {
+  it("links Mapsites straight to the Demo Mapsite page, which hosts the FAST Code™ card", () => {
     expect(TALISU_MKTS_HEADER_MAPSITES_LABEL).toBe("Mapsites");
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
     );
-    expect(header).toContain("MapsitesNavDropdown");
-    const dropdown = readFileSync(
-      resolve("components/talisu/MapsitesNavDropdown.tsx"),
+    expect(header).not.toContain("MapsitesNavDropdown");
+    expect(header).toContain("DEMO_MAPSITE_BUILD_PATH");
+    expect(header).toContain('data-testid="nav-mapsites-link"');
+    const card = readFileSync(
+      resolve("components/talispros/demo-mapsite/DemoFastCodeCard.tsx"),
       "utf8",
     );
-    expect(dropdown).not.toContain("Claimed Mapsites");
-    expect(dropdown).toContain("FAST Code");
-    expect(dropdown).toContain("openClaimedMapSiteFromHomeFastCode");
-    expect(dropdown).toContain("Demo Mapsite");
-    expect(dropdown).toContain("DEMO_MAPSITE_BUILD_PATH");
-    expect(dropdown).toContain("rounded-2xl");
-    expect(dropdown).toContain("bg-white");
-    const api = readFileSync(
-      resolve("app/api/talisu/nav-mapsites/route.ts"),
+    expect(card).toContain("openClaimedMapSiteFromHomeFastCode");
+    expect(card).toContain('href="/talisu/reg"');
+    const builder = readFileSync(
+      resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),
       "utf8",
     );
-    expect(api).toContain("listNavMapSites");
-    const navLib = readFileSync(
-      resolve("lib/talisu/nav-mapsites.ts"),
-      "utf8",
-    );
-    expect(navLib).toContain("claimed: []");
+    expect(builder).toContain("<DemoFastCodeCard");
   });
 
   it("puts a horizontal divider after Bookshelf + FAQ in the TalisU dropdown", () => {
@@ -108,11 +100,10 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain('role="menu"');
     // TalisU trigger is rendered after primary nav + Mapsites + vertical separator
     expect(header).toContain("TALISU_MKTS_HEADER_NAV.filter");
-    expect(header).toContain("MapsitesNavDropdown");
     expect(header).toContain("RegisterNavDropdown");
     expect(header).toContain("bg-white/45");
     const marketsIdx = header.indexOf('item.label === "Markets"');
-    const mapsitesIdx = header.indexOf("<MapsitesNavDropdown");
+    const mapsitesIdx = header.indexOf('data-testid="nav-mapsites-link"');
     const catalogueIdx = header.indexOf('(item) => item.label === "Catalogue"');
     const registerFilterIdx = header.indexOf("<RegisterNavDropdown");
     const separatorIdx = header.indexOf("bg-white/45");
@@ -121,12 +112,12 @@ describe("TalisU blue header dropdown", () => {
     const homeIdx = header.indexOf('item.label === "Home").map');
     expect(homeIdx).toBeGreaterThan(-1);
     expect(marketsIdx).toBeGreaterThan(homeIdx);
-    // Home, Markets, Catalogue, Register, Mapsites, | TalisU (Bookshelf, FAQ, …)
+    // Home, Markets, Catalogue, Mapsites, Register | TalisU (Bookshelf, FAQ, …)
     expect(header).not.toContain('(item) => item.label === "Bookshelf"');
     expect(catalogueIdx).toBeGreaterThan(marketsIdx);
-    expect(registerFilterIdx).toBeGreaterThan(catalogueIdx);
-    expect(mapsitesIdx).toBeGreaterThan(registerFilterIdx);
-    expect(separatorIdx).toBeGreaterThan(mapsitesIdx);
+    expect(mapsitesIdx).toBeGreaterThan(catalogueIdx);
+    expect(registerFilterIdx).toBeGreaterThan(mapsitesIdx);
+    expect(separatorIdx).toBeGreaterThan(registerFilterIdx);
     expect(talisUIdx).toBeGreaterThan(separatorIdx);
   });
 
