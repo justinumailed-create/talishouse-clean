@@ -17,12 +17,27 @@ type Row = {
   partner_image_url: string | null;
   partner_name?: string | null;
   partner_tagline?: string | null;
+  card_title?: string | null;
+  card_address?: string | null;
+  card_phone?: string | null;
+  contract_text?: string | null;
   bookshelf_order: unknown;
   updated_at?: string | null;
 };
 
-const COLUMNS =
+const COLUMNS_V2 =
+  "mapsite_id, fast_code, logo_url, partner_image_url, partner_name, partner_tagline, card_title, card_address, card_phone, contract_text, bookshelf_order, updated_at";
+const COLUMNS_V1 =
   "mapsite_id, fast_code, logo_url, partner_image_url, partner_name, partner_tagline, bookshelf_order, updated_at";
+/** Falls back to the pre-107 column list if migration 107 is not applied yet. */
+let COLUMNS = COLUMNS_V2;
+function downgradeColumns(message: string | undefined): boolean {
+  if (COLUMNS === COLUMNS_V2 && /card_|contract_text|column/i.test(message || "")) {
+    COLUMNS = COLUMNS_V1;
+    return true;
+  }
+  return false;
+}
 
 function rowToCustomizations(row: Row | null | undefined): MapSiteOwnerCustomizations {
   if (!row) return emptyMapSiteOwnerCustomizations();
@@ -31,6 +46,10 @@ function rowToCustomizations(row: Row | null | undefined): MapSiteOwnerCustomiza
     partnerImageUrl: row.partner_image_url?.trim() || null,
     partnerName: row.partner_name?.trim() || null,
     partnerTagline: row.partner_tagline?.trim() || null,
+    cardTitle: row.card_title?.trim() || null,
+    cardAddress: row.card_address?.trim() || null,
+    cardPhone: row.card_phone?.trim() || null,
+    contractText: row.contract_text?.trim() || null,
     bookshelfOrder: normalizeBookshelfOrder(row.bookshelf_order),
     updatedAt: row.updated_at ?? null,
   };
@@ -43,11 +62,10 @@ export async function loadMapSiteOwnerCustomizations(
   const id = mapsiteId?.trim() || "";
   if (!id || !isSupabaseAdminConfigured()) return emptyMapSiteOwnerCustomizations();
   try {
-    const { data, error } = await getSupabaseAdmin()
-      .from(TABLE)
-      .select(COLUMNS)
-      .eq("mapsite_id", id)
-      .maybeSingle();
+    const read = () =>
+      getSupabaseAdmin().from(TABLE).select(COLUMNS).eq("mapsite_id", id).maybeSingle();
+    let { data, error } = await read();
+    if (error && downgradeColumns(error.message)) ({ data, error } = await read());
     if (error) return emptyMapSiteOwnerCustomizations();
     return rowToCustomizations(data as Row | null);
   } catch {
@@ -62,13 +80,16 @@ export async function loadMapSiteOwnerCustomizationsByFastCode(
   const code = fastCode?.trim().toLowerCase() || "";
   if (!code || !isSupabaseAdminConfigured()) return emptyMapSiteOwnerCustomizations();
   try {
-    const { data, error } = await getSupabaseAdmin()
-      .from(TABLE)
-      .select(COLUMNS)
-      .ilike("fast_code", code)
-      .order("updated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const read = () =>
+      getSupabaseAdmin()
+        .from(TABLE)
+        .select(COLUMNS)
+        .ilike("fast_code", code)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    let { data, error } = await read();
+    if (error && downgradeColumns(error.message)) ({ data, error } = await read());
     if (error) return emptyMapSiteOwnerCustomizations();
     return rowToCustomizations(data as Row | null);
   } catch {
@@ -105,6 +126,10 @@ export async function saveMapSiteOwnerCustomizations(input: {
     partner_image_url: string | null;
     partner_name: string | null;
     partner_tagline: string | null;
+    card_title: string | null;
+    card_address: string | null;
+    card_phone: string | null;
+    contract_text: string | null;
     bookshelf_order: string[];
   }>;
 }): Promise<{ customizations?: MapSiteOwnerCustomizations; error?: string }> {

@@ -553,6 +553,14 @@ add("/talispros/client/login", "client-login", "login", BRAND,
      "Mapsite-Inhaber: Melden Sie sich bei Ihrem Talispros™ Marketing-Dashboard und Ihren Büchern an.",
      "TALISPROS™  ·  MAPSITE-INHABER", ["Anmeldung für", "Mapsite-", "Inhaber"], []))
 
+add("/talispros/mapsite/contract/[fastCode]", "mapsite-contract", "utility", BRAND,
+    ("Mapsite Contract: Access Code and E-Signature | Talispros™",
+     "Open your Mapsite contract with your agent's access code, sign it electronically and continue to the purchase in CAD.",
+     "TALISPROS™  ·  CONTRACT", ["Mapsite", "contract", "& e-signature"], ["Access code", "E-signature", "CAD"]),
+    ("Mapsite-Vertrag: Zugangscode und E-Signatur | Talispros™",
+     "Öffnen Sie Ihren Mapsite-Vertrag mit dem Zugangscode Ihres Agenten, unterschreiben Sie elektronisch und kaufen Sie in CAD.",
+     "TALISPROS™  ·  VERTRAG", ["Mapsite-", "Vertrag", "& E-Signatur"], ["Zugangscode", "E-Signatur", "CAD"]))
+
 # ---------- dynamic pages: generated per record (existing /api/og routes) ----------
 for r, en_t, de_t in [
     ("/mapsite/[slug]", "Mapsite (name from record)", "Mapsite (Name aus Datensatz)"),

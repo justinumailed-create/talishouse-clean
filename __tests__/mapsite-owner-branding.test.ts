@@ -96,7 +96,14 @@ describe("partner text limits", () => {
       normalizePartnerText("x".repeat(MAPSITE_PARTNER_TEXT_LIMITS.partnerName + 1), "partnerName")
         .tooLong,
     ).toBe(true);
-    expect(MAPSITE_PARTNER_TEXT_LIMITS).toEqual({ partnerName: 60, partnerTagline: 140 });
+    expect(MAPSITE_PARTNER_TEXT_LIMITS).toEqual({
+      partnerName: 60,
+      partnerTagline: 140,
+      cardTitle: 60,
+      cardAddress: 160,
+      cardPhone: 40,
+      contractText: 20000,
+    });
   });
 
   it("matches the DB limits in migration 094", () => {

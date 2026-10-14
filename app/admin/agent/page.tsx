@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AgentDashboard from "@/components/admin/agents/AgentDashboard";
+import ContractAccessCodesPanel from "@/components/admin/agents/ContractAccessCodesPanel";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { accountHasAdminScope } from "@/lib/admin-constants";
 import { getAgentById, listAgentMapSites } from "@/lib/agent-admins";
@@ -14,7 +15,9 @@ export default async function AgentHomePage() {
   if (!account) redirect("/admin/login");
 
   if (account.access !== "agent" || !account.agentId) {
+    const canCodes = account.access === "global" || accountHasAdminScope(account, "mapsites");
     return (
+      <div className="space-y-6">
       <div className="rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">
         This is the Agent Admin dashboard. You are signed in as a built-in admin ({account.name}).
         {accountHasAdminScope(account, "agents") ? (
@@ -27,6 +30,8 @@ export default async function AgentHomePage() {
             to manage agents or “View as agent”.
           </>
         ) : null}
+      </div>
+      {canCodes ? <ContractAccessCodesPanel /> : null}
       </div>
     );
   }
@@ -42,5 +47,12 @@ export default async function AgentHomePage() {
       ? Promise.resolve(0)
       : countUnreadForAgent(agent.id).catch(() => 0),
   ]);
-  return <AgentDashboard agent={agent} mapsites={mapsites} payments={payments} chatUnread={chatUnread} />;
+  return (
+    <div className="space-y-6">
+      <AgentDashboard agent={agent} mapsites={mapsites} payments={payments} chatUnread={chatUnread} />
+      {agent.mustChangePassword ? null : (
+        <ContractAccessCodesPanel fastCodes={agent.assignedMapSites} />
+      )}
+    </div>
+  );
 }

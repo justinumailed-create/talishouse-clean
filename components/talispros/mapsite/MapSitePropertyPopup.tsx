@@ -78,6 +78,27 @@ const RESOURCES: {
   },
 ];
 
+/**
+ * Selling-tools sequence (URL → MLS® → TEB™ → TTV™) for the claimed Mapsite
+ * navbar, resolved exactly like the PIN card buttons.
+ */
+export function resolveMapSiteSellingTools(
+  site: MapSitePlatformRecord,
+  options: { canBuyAdditionalPins?: boolean } = {},
+): Array<{ key: ResourceKey; label: string; variant: "blue" | "gold"; href: string | null }> {
+  return RESOURCES.map((resource) => ({
+    key: resource.key,
+    label: resource.label,
+    variant: resource.variant,
+    href:
+      resource.key === "url"
+        ? resolvePublishedUrlButtonHref(site.fast_code, site.broker_url, {
+            canBuyAdditionalPins: options.canBuyAdditionalPins,
+          })
+        : resource.resolveHref(site),
+  }));
+}
+
 function ResourceButton({
   href,
   label,

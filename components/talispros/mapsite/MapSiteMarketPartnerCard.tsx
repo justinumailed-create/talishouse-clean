@@ -19,6 +19,9 @@ import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
 import { useT } from "@/lib/i18n/client";
+import { cardPhoneHref } from "@/lib/talispros/mapsite-owner-customizations";
+
+export type MapSitePinSwitchOption = { id: string; label: string };
 
 function contentForAudience(audience: RegistrationMarket): TalisprosMarketPageContent {
   switch (audience) {
@@ -73,6 +76,101 @@ interface MapSiteMarketPartnerCardProps {
   /** Resolved partner name / tagline (owner overrides via resolveMapSiteBranding). */
   partnerName?: string | null;
   partnerTagline?: string | null;
+  /** Owner overrides: title under the logo (e.g. "TSplits"), address, phone. */
+  cardTitle?: string | null;
+  cardAddress?: string | null;
+  cardPhone?: string | null;
+  /** Owner / admin Dashboard (moved here from the navbar). */
+  dashboardItems?: ReadonlyArray<{ id: string; label: string }>;
+  onSelectDashboardItem?: (id: string) => void;
+  /** FAST Code PIN switcher (owner / admin): main PIN + additional PINs. */
+  pinOptions?: ReadonlyArray<MapSitePinSwitchOption>;
+  activePinId?: string | null;
+  onSwitchPin?: (id: string) => void;
+}
+
+function CardPhone({ phone, label }: { phone: string; label: string }) {
+  const href = cardPhoneHref(phone);
+  const body = (
+    <>
+      <svg aria-hidden viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor">
+        <path d="M2.5 3.5A1.5 1.5 0 0 1 4 2h2.1a1 1 0 0 1 .97.76l.7 2.8a1 1 0 0 1-.29.98L6.2 7.8a11 11 0 0 0 6 6l1.26-1.28a1 1 0 0 1 .98-.29l2.8.7a1 1 0 0 1 .76.97V16a1.5 1.5 0 0 1-1.5 1.5h-.5C8.6 17.5 2.5 11.4 2.5 4v-.5Z" />
+      </svg>
+      <span>{phone}</span>
+    </>
+  );
+  return href ? (
+    <a
+      href={href}
+      aria-label={`${label}: ${phone}`}
+      data-testid="mapsite-card-phone"
+      className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#035bb8] hover:underline"
+    >
+      {body}
+    </a>
+  ) : (
+    <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold">{body}</span>
+  );
+}
+
+function CardTools({
+  dashboardItems,
+  onSelectDashboardItem,
+  pinOptions,
+  activePinId,
+  onSwitchPin,
+  labels,
+}: {
+  dashboardItems?: ReadonlyArray<{ id: string; label: string }>;
+  onSelectDashboardItem?: (id: string) => void;
+  pinOptions?: ReadonlyArray<MapSitePinSwitchOption>;
+  activePinId?: string | null;
+  onSwitchPin?: (id: string) => void;
+  labels: { dashboard: string; switchPin: string; menu: Record<string, string> };
+}) {
+  const showDashboard = Boolean(dashboardItems?.length && onSelectDashboardItem);
+  const showPins = Boolean(pinOptions && pinOptions.length > 1 && onSwitchPin);
+  if (!showDashboard && !showPins) return null;
+  return (
+    <div className="mt-4 space-y-3 border-t border-black/10 pt-3 text-left">
+      {showPins ? (
+        <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+          {labels.switchPin}
+          <select
+            data-testid="mapsite-pin-switcher"
+            value={activePinId ?? ""}
+            onChange={(event) => onSwitchPin!(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-[12px] font-semibold normal-case tracking-normal text-neutral-900"
+          >
+            {pinOptions!.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      {showDashboard ? (
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+            {labels.dashboard}
+          </p>
+          <div className="mt-1 grid grid-cols-2 gap-1.5" data-testid="mapsite-card-dashboard">
+            {dashboardItems!.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onSelectDashboardItem!(item.id)}
+                className="rounded-lg bg-white px-2 py-1.5 text-[11px] font-semibold text-neutral-800 ring-1 ring-black/10 transition hover:bg-[#035bb8] hover:text-white"
+              >
+                {labels.menu[item.id] ?? item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 /**
@@ -92,11 +190,37 @@ export default function MapSiteMarketPartnerCard({
   partnerImageUrl = null,
   partnerName: partnerNameOverride = null,
   partnerTagline = null,
+  cardTitle = null,
+  cardAddress = null,
+  cardPhone = null,
+  dashboardItems,
+  onSelectDashboardItem,
+  pinOptions,
+  activePinId = null,
+  onSwitchPin,
 }: MapSiteMarketPartnerCardProps) {
   const t = useT();
   const content = contentForAudience(audience);
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
-  const address = mapsite.property_address?.trim().toUpperCase() || null;
+  const address =
+    (cardAddress?.trim() || mapsite.property_address?.trim())?.toUpperCase() || null;
+  const agencyName = cardTitle?.trim() || mapsite.agency_name;
+  const phone = cardPhone?.trim() || null;
+  const toolLabels = {
+    dashboard: t.mapsite.leftCard.dashboard,
+    switchPin: t.mapsite.leftCard.switchPin,
+    menu: t.mapsite.dashboardMenu as Record<string, string>,
+  };
+  const tools = (
+    <CardTools
+      dashboardItems={dashboardItems}
+      onSelectDashboardItem={onSelectDashboardItem}
+      pinOptions={pinOptions}
+      activePinId={activePinId}
+      onSwitchPin={onSwitchPin}
+      labels={toolLabels}
+    />
+  );
   const partnerImage = mapsiteMarketPartnerImageUrl(
     partnerImageUrl,
     content.partnerImage,
@@ -144,7 +268,7 @@ export default function MapSiteMarketPartnerCard({
           {paid ? (
             <MapSiteAgencyLogo
               logoUrl={mapsite.logo_url}
-              agencyName={mapsite.agency_name}
+              agencyName={agencyName}
               compact
             />
           ) : null}
@@ -173,10 +297,12 @@ export default function MapSiteMarketPartnerCard({
               <p className="text-[12px] font-semibold leading-snug text-black">
                 {partnerLabel}
               </p>
+              {phone ? <CardPhone phone={phone} label={t.mapsite.leftCard.call} /> : null}
             </div>
           </div>
         </div>
         <MarketingPartnerInterestLinks align="start" className="mt-3" />
+        {tools}
         {isOwner ? (
           <MapSiteOwnerLogoutButton
             fastCode={fastCode}
@@ -198,7 +324,7 @@ export default function MapSiteMarketPartnerCard({
             <div className="relative mb-4">
               <MapSiteAgencyLogo
                 logoUrl={mapsite.logo_url}
-                agencyName={mapsite.agency_name}
+                agencyName={agencyName}
               />
             </div>
           ) : null}
@@ -215,6 +341,11 @@ export default function MapSiteMarketPartnerCard({
           {address ? (
             <p className="mt-2 text-[12px] font-bold uppercase leading-snug tracking-wide text-black">
               {address}
+            </p>
+          ) : null}
+          {phone ? (
+            <p className="mt-1.5">
+              <CardPhone phone={phone} label={t.mapsite.leftCard.call} />
             </p>
           ) : null}
 
@@ -237,6 +368,7 @@ export default function MapSiteMarketPartnerCard({
           </p>
         </div>
         <MarketingPartnerInterestLinks className="mt-4" />
+        {tools}
         {isOwner ? (
           <MapSiteOwnerLogoutButton
             fastCode={fastCode}

@@ -14,6 +14,7 @@ import {
   type MapSitePartnerTextField,
 } from "@/lib/talispros/mapsite-owner-customizations";
 import MapSiteDashboardPanel, { DashboardNotice } from "./MapSiteDashboardPanel";
+import { useT } from "@/lib/i18n/client";
 
 type MapSiteLogoImageEditorProps = {
   mapsiteId: string;
@@ -27,6 +28,10 @@ type MapSiteLogoImageEditorProps = {
   /** Default left-card partner name / tagline (Reset target). */
   defaultPartnerName: string;
   defaultPartnerTagline: string;
+  /** Defaults for the other left-card fields (Reset target; "" = hidden). */
+  defaultCardTitle?: string;
+  defaultCardAddress?: string;
+  defaultContractText?: string;
   customizations: MapSiteOwnerCustomizations;
   onClose: () => void;
   onSaved: (next: MapSiteOwnerCustomizations) => void;
@@ -72,14 +77,31 @@ export default function MapSiteLogoImageEditor({
   defaultPartnerImageUrl,
   defaultPartnerName,
   defaultPartnerTagline,
+  defaultCardTitle = "",
+  defaultCardAddress = "",
+  defaultContractText = "",
   customizations,
   onClose,
   onSaved,
 }: MapSiteLogoImageEditorProps) {
-  const [texts, setTexts] = useState<Record<MapSitePartnerTextField, string>>({
+  const t = useT();
+  const ed = t.mapsite.cardEditor;
+  const fallbacks: Record<MapSitePartnerTextField, string> = {
+    partnerName: defaultPartnerName,
+    partnerTagline: defaultPartnerTagline,
+    cardTitle: defaultCardTitle,
+    cardAddress: defaultCardAddress,
+    cardPhone: "",
+    contractText: defaultContractText,
+  };
+  const [texts, setTexts] = useState<Record<MapSitePartnerTextField, string>>(() => ({
     partnerName: customizations.partnerName ?? defaultPartnerName,
     partnerTagline: customizations.partnerTagline ?? defaultPartnerTagline,
-  });
+    cardTitle: customizations.cardTitle ?? defaultCardTitle,
+    cardAddress: customizations.cardAddress ?? defaultCardAddress,
+    cardPhone: customizations.cardPhone ?? "",
+    contractText: customizations.contractText ?? defaultContractText,
+  }));
   const [slots, setSlots] = useState<Record<MapSiteBrandingField, SlotState>>({
     logo: EMPTY_SLOT,
     partnerImage: EMPTY_SLOT,
@@ -154,11 +176,7 @@ export default function MapSiteLogoImageEditor({
       onSaved(result.customizations);
       setTexts((current) => ({
         ...current,
-        [field]:
-          (field === "partnerName"
-            ? result.customizations.partnerName
-            : result.customizations.partnerTagline) ??
-          (field === "partnerName" ? defaultPartnerName : defaultPartnerTagline),
+        [field]: result.customizations[field] ?? fallbacks[field],
       }));
       setMessage(done);
     });
@@ -181,6 +199,30 @@ export default function MapSiteLogoImageEditor({
       label: "Tagline",
       saved: customizations.partnerTagline,
       fallback: defaultPartnerTagline,
+    },
+    {
+      field: "cardTitle",
+      label: ed.cardTitle,
+      saved: customizations.cardTitle,
+      fallback: defaultCardTitle,
+    },
+    {
+      field: "cardAddress",
+      label: ed.address,
+      saved: customizations.cardAddress,
+      fallback: defaultCardAddress,
+    },
+    {
+      field: "cardPhone",
+      label: ed.phone,
+      saved: customizations.cardPhone,
+      fallback: "",
+    },
+    {
+      field: "contractText",
+      label: ed.contractText,
+      saved: customizations.contractText,
+      fallback: defaultContractText,
     },
   ];
 
@@ -303,19 +345,39 @@ export default function MapSiteLogoImageEditor({
                   {length}/{max} · {slot.saved ? "Custom" : "Default"}
                 </span>
               </div>
-              <input
-                id={inputId}
-                type="text"
-                value={value}
-                maxLength={max + 20}
-                onChange={(event) =>
-                  setTexts((currentTexts) => ({
-                    ...currentTexts,
-                    [slot.field]: event.target.value,
-                  }))
-                }
-                className="w-full rounded-md border border-neutral-300 px-2.5 py-1.5 text-sm"
-              />
+              {slot.field === "contractText" ? (
+                <textarea
+                  id={inputId}
+                  value={value}
+                  rows={8}
+                  maxLength={max + 20}
+                  onChange={(event) =>
+                    setTexts((currentTexts) => ({
+                      ...currentTexts,
+                      [slot.field]: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-md border border-neutral-300 px-2.5 py-1.5 font-mono text-xs leading-relaxed"
+                />
+              ) : (
+                <input
+                  id={inputId}
+                  type={slot.field === "cardPhone" ? "tel" : "text"}
+                  value={value}
+                  maxLength={max + 20}
+                  placeholder={slot.field === "cardPhone" ? "+1 902 555 0100" : undefined}
+                  onChange={(event) =>
+                    setTexts((currentTexts) => ({
+                      ...currentTexts,
+                      [slot.field]: event.target.value,
+                    }))
+                  }
+                  className="w-full rounded-md border border-neutral-300 px-2.5 py-1.5 text-sm"
+                />
+              )}
+              {slot.field === "contractText" ? (
+                <p className="text-[10px] leading-relaxed text-neutral-400">{ed.contractHelp}</p>
+              ) : null}
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -331,7 +393,13 @@ export default function MapSiteLogoImageEditor({
                   type="button"
                   disabled={!slot.saved || pending}
                   onClick={() => {
-                    if (!window.confirm(`Reset the ${slot.label.toLowerCase()} to “${slot.fallback}”?`)) {
+                    if (
+                      !window.confirm(
+                        slot.fallback && slot.field !== "contractText"
+                          ? `Reset the ${slot.label.toLowerCase()} to “${slot.fallback}”?`
+                          : `Reset the ${slot.label.toLowerCase()} to the default?`,
+                      )
+                    ) {
                       return;
                     }
                     saveText(slot.field, null, `${slot.label} reset to default.`);

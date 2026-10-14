@@ -6,7 +6,9 @@ import { getTalisBooksBookshelf } from "@/lib/talisbooks/library";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import {
   isAllowedOwnerImageUrl,
+  MAPSITE_PARTNER_TEXT_COLUMNS,
   MAPSITE_PARTNER_TEXT_LIMITS,
+  isValidCardPhone,
   normalizeBookshelfOrder,
   normalizePartnerText,
   type MapSiteBrandingField,
@@ -102,20 +104,30 @@ export async function saveMapSitePartnerTextAction(input: {
 }): Promise<{ customizations: MapSiteOwnerCustomizations } | ActionError> {
   const auth = await authorizeOwner(input);
   if ("error" in auth) return auth;
-  if (input.field !== "partnerName" && input.field !== "partnerTagline") {
+  if (!(input.field in MAPSITE_PARTNER_TEXT_COLUMNS)) {
     return { error: "Unknown card field." };
   }
   const normalized = normalizePartnerText(input.value, input.field);
+  const labels: Record<MapSitePartnerTextField, string> = {
+    partnerName: "Name",
+    partnerTagline: "Tagline",
+    cardTitle: "Card title",
+    cardAddress: "Address",
+    cardPhone: "Telephone",
+    contractText: "Contract text",
+  };
   if (normalized.tooLong) {
-    const label = input.field === "partnerName" ? "Name" : "Tagline";
     return {
-      error: `${label} must be ${MAPSITE_PARTNER_TEXT_LIMITS[input.field]} characters or fewer.`,
+      error: `${labels[input.field]} must be ${MAPSITE_PARTNER_TEXT_LIMITS[input.field]} characters or fewer.`,
     };
   }
   if (input.value !== null && !normalized.value) {
     return { error: "Enter some text, or use Reset to default." };
   }
-  const column = input.field === "partnerName" ? "partner_name" : "partner_tagline";
+  if (input.field === "cardPhone" && normalized.value && !isValidCardPhone(normalized.value)) {
+    return { error: "Enter a valid telephone number (digits, spaces, + ( ) -)." };
+  }
+  const column = MAPSITE_PARTNER_TEXT_COLUMNS[input.field];
   const saved = await saveMapSiteOwnerCustomizations({
     mapsiteId: auth.mapsiteId,
     fastCode: auth.fastCode,

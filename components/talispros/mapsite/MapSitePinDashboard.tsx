@@ -246,7 +246,7 @@ export default function MapSitePinDashboard({
     <section
       role="dialog"
       aria-labelledby={titleId}
-      className="pointer-events-auto absolute right-3 top-3 z-30 flex max-h-[min(72vh,40rem)] w-[min(calc(100%-1.5rem),22rem)] flex-col overflow-hidden rounded-xl bg-white text-neutral-900 shadow-xl sm:right-4 sm:top-4"
+      className="pointer-events-auto absolute left-3 top-3 z-30 flex max-h-[min(calc(100%-1.5rem),44rem)] w-[min(calc(100%-1.5rem),22rem)] flex-col overflow-hidden rounded-2xl bg-white text-neutral-900 shadow-xl ring-1 ring-black/5 sm:left-4 sm:top-4"
     >
       <header className="flex items-start justify-between gap-3 border-b border-neutral-200 px-4 py-3">
         <div>

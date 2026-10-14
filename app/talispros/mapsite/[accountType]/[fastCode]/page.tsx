@@ -181,13 +181,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
     claimed: true,
   });
 
-  const forceOpenPin =
-    firstParam(query.view)?.trim().toLowerCase() === "pin" ||
-    bookPending ||
-    Boolean(bookSlug) ||
-    showActivatePayment ||
-    Boolean(checkoutStatus);
-  // Real owner/paid browser session (not forceOpenPin query shortcuts).
+  // Real owner/paid browser session.
   const isOwner = await isOwnMapSite(fastCode);
 
   const paymentPlanType = await resolveMapSitePaymentPlanType({
@@ -218,9 +212,10 @@ export default async function ClaimedMapSiteByAccountTypePage({
       })
     ).paid;
 
-  // Paid claimed Mapsites always surface pin dashboard resources (URL/MLS/TEB/TTV).
-  // Owner session still gates Logout / owner-only chrome.
-  const openPinOnLoad = forceOpenPin || isOwner || paymentReceived;
+  // The PIN card opens only when a PIN is clicked. Explicit deep links
+  // (?view=pin, a pending book) still open it; selling tools live in the navbar.
+  const openPinOnLoad =
+    firstParam(query.view)?.trim().toLowerCase() === "pin" || bookPending;
 
   const [ebookContext, pinDashboard, ownerCustomizations, editAccess] = await Promise.all([
     getMapSiteEbookContext(fastCode, {

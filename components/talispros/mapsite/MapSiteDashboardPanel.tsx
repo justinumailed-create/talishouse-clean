@@ -14,7 +14,8 @@ type MapSiteDashboardPanelProps = {
 };
 
 /**
- * Closeable owner Dashboard panel over the Mapsite map canvas.
+ * Closeable owner Dashboard panel, opened from (and drawn over) the left
+ * Marketing card on the Mapsite map canvas.
  * Shared shell for PIN Dashboard, Logo & Card Editor, Bookshelf Editor and
  * Ebook Editor so every Dashboard item looks and closes the same way.
  */
@@ -42,7 +43,7 @@ export default function MapSiteDashboardPanel({
     <section
       role="dialog"
       aria-labelledby={titleId}
-      className={`pointer-events-auto absolute right-3 top-3 z-30 flex max-h-[min(72vh,40rem)] flex-col overflow-hidden rounded-xl bg-white text-neutral-900 shadow-xl sm:right-4 sm:top-4 ${
+      className={`pointer-events-auto absolute left-3 top-3 z-30 flex max-h-[min(calc(100%-1.5rem),44rem)] flex-col overflow-hidden rounded-2xl bg-white text-neutral-900 shadow-xl ring-1 ring-black/5 sm:left-4 sm:top-4 ${
         wide
           ? "w-[min(calc(100%-1.5rem),34rem)]"
           : "w-[min(calc(100%-1.5rem),22rem)]"

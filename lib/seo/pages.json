@@ -1148,6 +1148,21 @@
     "alt": "Talispros™ Baumlogo: Anmeldung für Mapsite-Inhaber"
    }
   },
+  "/talispros/mapsite/contract/[fastCode]": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/mapsite-contract",
+   "en": {
+    "title": "Mapsite Contract: Access Code and E-Signature | Talispros™",
+    "description": "Open your Mapsite contract with your agent's access code, sign it electronically and continue to the purchase in CAD.",
+    "alt": "Talispros™ tree logo: Mapsite contract & e-signature"
+   },
+   "de": {
+    "title": "Mapsite-Vertrag: Zugangscode und E-Signatur | Talispros™",
+    "description": "Öffnen Sie Ihren Mapsite-Vertrag mit dem Zugangscode Ihres Agenten, unterschreiben Sie elektronisch und kaufen Sie in CAD.",
+    "alt": "Talispros™ Baumlogo: Mapsite-Vertrag & E-Signatur"
+   }
+  },
   "/mapsite/[slug]": {
    "kind": "dynamic"
   },

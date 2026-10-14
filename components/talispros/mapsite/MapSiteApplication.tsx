@@ -52,7 +52,15 @@ import MapSiteBookshelfEditor from "./MapSiteBookshelfEditor";
 import MapSiteEbookEditorPanel from "./MapSiteEbookEditorPanel";
 import DemoClaimMarketButton from "./DemoClaimMarketButton";
 import MapSitePaymentCard from "./MapSitePaymentCard";
-import MapSitePropertyPopup from "./MapSitePropertyPopup";
+import MapSitePropertyPopup, { resolveMapSiteSellingTools } from "./MapSitePropertyPopup";
+import { MAPSITE_URL_ADDITIONAL_PINS_SENTINEL } from "@/lib/talispros/mapsite-url-gate";
+import {
+  defaultMapSiteContractText,
+  mapsiteContractPath,
+} from "@/lib/talispros/mapsite-contract";
+import { mapsiteAgencyDisplayName } from "@/lib/talispros/mapsite-listing-media";
+import { useLocale, useT } from "@/lib/i18n/client";
+import type { MapSiteSellingTool } from "@/components/talisu/TalisUMktsHeader";
 import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import { getMapSiteActivationPaymentStatus } from "@/app/talispros/mapsite/actions";
@@ -83,6 +91,36 @@ import { mapsiteAgencyLogoUrl } from "@/lib/talispros/mapsite-listing-media";
 
 /** Owner Dashboard dropdown: Ebook Editor, Logo & Card Editor, PIN Dashboard, Bookshelf Editor. */
 const DASHBOARD_MENU = MAPSITE_DASHBOARD_MENU_ITEMS;
+
+/** Map always frames every PIN of the FAST Code plus this buffer (miles). */
+export const MAPSITE_PIN_BUFFER_MILES = 20;
+const MILES_PER_DEGREE_LAT = 69.0;
+
+/**
+ * Bounding corners of `points` padded by `miles` on every side (used with
+ * fitToCoordinates so all PINs show with a 20-mile buffer around them).
+ */
+export function bufferedPinBounds(
+  points: ReadonlyArray<{ latitude: number; longitude: number }>,
+  miles = MAPSITE_PIN_BUFFER_MILES,
+): Array<{ latitude: number; longitude: number }> {
+  const valid = points.filter(
+    (p) => Number.isFinite(p.latitude) && Number.isFinite(p.longitude),
+  );
+  if (valid.length === 0) return [];
+  const lats = valid.map((p) => p.latitude);
+  const lngs = valid.map((p) => p.longitude);
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const midLat = (minLat + maxLat) / 2;
+  const dLat = miles / MILES_PER_DEGREE_LAT;
+  const dLng =
+    miles / (MILES_PER_DEGREE_LAT * Math.max(0.05, Math.cos((midLat * Math.PI) / 180)));
+  return [
+    { latitude: Math.max(-85, minLat - dLat), longitude: Math.min(...lngs) - dLng },
+    { latitude: Math.min(85, maxLat + dLat), longitude: Math.max(...lngs) + dLng },
+  ];
+}
 
 /** Minimum popup body height so hero + title + action row stay visible. */
 const MAPSITE_POPUP_MIN_HEIGHT_PX = 384;
@@ -473,6 +511,8 @@ function MapSiteChrome({
 }) {
   const { setViewport, isReady, fitToCoordinates } = useMapEngine();
   const router = useRouter();
+  const t = useT();
+  const locale = useLocale();
   const rootRef = useRef<HTMLDivElement>(null);
   const sidebarStackRef = useRef<HTMLDivElement>(null);
   const listingCardRef = useRef<HTMLDivElement>(null);
@@ -732,23 +772,24 @@ function MapSiteChrome({
   // Every paid (non-demo) Mapsite owner — or a Mapsite admin — gets the menu.
   const dashboardManageable = dashboardUnlocked && canManageDashboard;
 
+  // The PIN card opens only when a PIN is clicked — never from the Dashboard.
   const openOwnerDashboard = useCallback(() => {
-    focusPinAndOpen();
     if (dashboardManageable) {
+      setSelectedPinId(null);
       setDashboardPanel("pins");
     }
-  }, [dashboardManageable, focusPinAndOpen]);
+  }, [dashboardManageable, setSelectedPinId]);
 
   const selectDashboardItem = useCallback(
     (id: string) => {
       if (!dashboardManageable) return;
       const item = MAPSITE_DASHBOARD_MENU_ITEMS.find((entry) => entry.id === id);
       if (!item) return;
-      if (item.id === "pins") focusPinAndOpen();
+      setSelectedPinId(null);
       onPinEditorChange({ kind: "idle" });
       setDashboardPanel(item.id);
     },
-    [dashboardManageable, focusPinAndOpen, onPinEditorChange],
+    [dashboardManageable, onPinEditorChange, setSelectedPinId],
   );
 
   const closeDashboardPanel = useCallback(() => {
@@ -787,29 +828,82 @@ function MapSiteChrome({
     .map((pin) => `${pin.id}:${pin.latitude}:${pin.longitude}`)
     .join("|");
 
+  // Every PIN of this FAST Code (main + additional), framed with a 20-mile buffer.
+  const fastCodePinPoints = useMemo(
+    () => [
+      { latitude: mapsite.lat, longitude: mapsite.lng },
+      ...pinDashboard.pins.map((pin) => ({
+        latitude: pin.latitude,
+        longitude: pin.longitude,
+      })),
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [mapsite.lat, mapsite.lng, pinFitKey],
+  );
+
+  const fitAllFastCodePins = useCallback(() => {
+    const corners = bufferedPinBounds(fastCodePinPoints);
+    if (corners.length === 0) return;
+    beginFocusGuard();
+    fitToCoordinates(corners, { top: 24, right: 24, bottom: 24, left: 24 });
+  }, [beginFocusGuard, fastCodePinPoints, fitToCoordinates]);
+
   useEffect(() => {
-    if (!isReady || pinDashboard.pins.length === 0 || pinEditor.kind !== "idle") {
-      return;
-    }
-    fitToCoordinates(
-      [
-        { latitude: mapsite.lat, longitude: mapsite.lng },
-        ...pinDashboard.pins.map((pin) => ({
-          latitude: pin.latitude,
-          longitude: pin.longitude,
-        })),
-      ],
-      { top: 72, right: 48, bottom: 96, left: 48 },
-    );
-  }, [
-    fitToCoordinates,
-    isReady,
-    mapsite.lat,
-    mapsite.lng,
-    pinDashboard.pins,
-    pinEditor.kind,
-    pinFitKey,
-  ]);
+    if (!isReady || pinEditor.kind !== "idle") return;
+    // ?view=pin style deep links keep their focused PIN card.
+    if (openPinOnLoad) return;
+    fitAllFastCodePins();
+    // Re-frame when the PIN set changes (or the editor closes), not on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isReady, pinEditor.kind, pinFitKey]);
+
+  const [activePinId, setActivePinId] = useState<string>("all");
+  const pinOptions = useMemo(
+    () => [
+      { id: "all", label: t.mapsite.leftCard.allPins },
+      {
+        id: mapsite.id,
+        label: `${t.mapsite.leftCard.mainPin} · ${mapsite.property_address?.trim() || mapsite.fast_code || ""}`,
+      },
+      ...pinDashboard.pins.map((pin, index) => ({
+        id: pin.id,
+        label: `PIN ${index + 2} · ${pin.label || `${pin.latitude.toFixed(3)}, ${pin.longitude.toFixed(3)}`}`,
+      })),
+    ],
+    [mapsite.id, mapsite.property_address, mapsite.fast_code, pinDashboard.pins, t],
+  );
+
+  const switchPin = useCallback(
+    (id: string) => {
+      setActivePinId(id);
+      setSelectedPinId(null);
+      if (id === "all") {
+        fitAllFastCodePins();
+        return;
+      }
+      const target =
+        id === mapsite.id
+          ? { latitude: mapsite.lat, longitude: mapsite.lng }
+          : pinDashboard.pins.find((pin) => pin.id === id);
+      if (!target) return;
+      beginFocusGuard();
+      setViewport({
+        center: { latitude: target.latitude, longitude: target.longitude },
+        zoom: Math.max(mapsite.map_zoom ?? 12, 12),
+      });
+    },
+    [
+      beginFocusGuard,
+      fitAllFastCodePins,
+      mapsite.id,
+      mapsite.lat,
+      mapsite.lng,
+      mapsite.map_zoom,
+      pinDashboard.pins,
+      setSelectedPinId,
+      setViewport,
+    ],
+  );
 
   const bookHref =
     talisBookHref ||
@@ -861,6 +955,30 @@ function MapSiteChrome({
       />
     ) : null;
 
+  // Navbar: selling-tools sequence replaces Dashboard (Dashboard → left card).
+  const sellingTools: MapSiteSellingTool[] = [
+    ...resolveMapSiteSellingTools(cardMapSite, {
+      canBuyAdditionalPins: dashboardManageable,
+    }).map((tool) => ({
+      id: tool.key,
+      label: tool.label,
+      href: tool.href === MAPSITE_URL_ADDITIONAL_PINS_SENTINEL ? null : tool.href,
+      onClick:
+        tool.href === MAPSITE_URL_ADDITIONAL_PINS_SENTINEL ? openOwnerDashboard : undefined,
+      external: Boolean(tool.href && /^https?:\/\//i.test(tool.href)),
+      variant: tool.variant === "gold" ? ("gold" as const) : ("default" as const),
+    })),
+    ...(mapsite.fast_code
+      ? [
+          {
+            id: "contract",
+            label: t.mapsite.sellingTools.contract,
+            href: mapsiteContractPath(mapsite.fast_code),
+          },
+        ]
+      : []),
+  ];
+
   return (
     <div className="relative flex h-dvh max-h-dvh w-screen flex-col overflow-hidden overscroll-none bg-neutral-900">
       {claimed ? (
@@ -869,8 +987,7 @@ function MapSiteChrome({
           dashboardUnlocked={dashboardUnlocked}
           registerHref={ROUTES.TALISU_REGISTER}
           onOpenDashboard={openOwnerDashboard}
-          dashboardMenuItems={dashboardManageable ? DASHBOARD_MENU : undefined}
-          onSelectDashboardItem={selectDashboardItem}
+          sellingTools={sellingTools}
         />
       ) : null}
       <div
@@ -904,8 +1021,15 @@ function MapSiteChrome({
                   partnerName={branding.partnerName}
                   partnerTagline={branding.partnerTagline}
                   cardRef={listingCardRef}
-                  onSelect={focusPinAndOpen}
                   paid={paid}
+                  cardTitle={ownerCustomizations.cardTitle}
+                  cardAddress={ownerCustomizations.cardAddress}
+                  cardPhone={ownerCustomizations.cardPhone}
+                  dashboardItems={dashboardManageable ? DASHBOARD_MENU : undefined}
+                  onSelectDashboardItem={selectDashboardItem}
+                  pinOptions={isOwner || dashboardManageable ? pinOptions : undefined}
+                  activePinId={activePinId}
+                  onSwitchPin={switchPin}
                   isOwner={isOwner}
                   accountTypeSegment={accountTypeSegment}
                   showKnowledgeBaseManage={dashboardUnlocked}
@@ -953,6 +1077,9 @@ function MapSiteChrome({
             defaultPartnerImageUrl={defaultPartnerImage}
             defaultPartnerName={defaultPartnerName}
             defaultPartnerTagline={DEFAULT_MAPSITE_PARTNER_TAGLINE}
+            defaultCardTitle={mapsiteAgencyDisplayName(mapsite.logo_url, mapsite.agency_name)}
+            defaultCardAddress={mapsite.property_address?.trim() || ""}
+            defaultContractText={defaultMapSiteContractText(locale, mapsite.fast_code || "")}
             customizations={ownerCustomizations}
             onClose={closeDashboardPanel}
             onSaved={setOwnerCustomizations}

@@ -15,19 +15,58 @@ export type MapSiteOwnerCustomizations = {
   partnerImageUrl: string | null;
   partnerName: string | null;
   partnerTagline: string | null;
+  /** Left-card title under the logo (e.g. "TSplits"); null = agency name. */
+  cardTitle: string | null;
+  /** Left-card address; null = the Mapsite property address. */
+  cardAddress: string | null;
+  /** Left-card telephone number (shown as a tel: link). */
+  cardPhone: string | null;
+  /** Contract text shown on the gated contract page; null = placeholder. */
+  contractText: string | null;
   bookshelfOrder: string[];
   /** Row updated_at (cache-busts Open Graph cards after a change). */
   updatedAt?: string | null;
 };
 
 export type MapSiteBrandingField = "logo" | "partnerImage";
-export type MapSitePartnerTextField = "partnerName" | "partnerTagline";
+export type MapSitePartnerTextField =
+  | "partnerName"
+  | "partnerTagline"
+  | "cardTitle"
+  | "cardAddress"
+  | "cardPhone"
+  | "contractText";
+
+/** Text field → mapsite_owner_customizations column. */
+export const MAPSITE_PARTNER_TEXT_COLUMNS = {
+  partnerName: "partner_name",
+  partnerTagline: "partner_tagline",
+  cardTitle: "card_title",
+  cardAddress: "card_address",
+  cardPhone: "card_phone",
+  contractText: "contract_text",
+} as const satisfies Record<MapSitePartnerTextField, string>;
 
 /** Length limits (mirrored by DB checks in migration 094). */
 export const MAPSITE_PARTNER_TEXT_LIMITS: Record<MapSitePartnerTextField, number> = {
   partnerName: 60,
   partnerTagline: 140,
+  cardTitle: 60,
+  cardAddress: 160,
+  cardPhone: 40,
+  contractText: 20000,
 };
+
+/** Phone numbers: digits, spaces, + ( ) - . and an optional "ext". */
+export function isValidCardPhone(value: string): boolean {
+  return /^[+()\d][\d\s().+-]{2,30}(\s*(ext\.?|x)\s*\d{1,6})?$/i.test(value.trim());
+}
+
+/** tel: href for a card phone (keeps + and digits). */
+export function cardPhoneHref(value: string | null | undefined): string | null {
+  const digits = (value || "").replace(/(ext\.?|x)\s*\d+$/i, "").replace(/[^\d+]/g, "");
+  return digits.length >= 3 ? `tel:${digits}` : null;
+}
 
 /**
  * Normalize an owner-entered partner name / tagline: collapse whitespace,
@@ -39,7 +78,15 @@ export function normalizePartnerText(
   field: MapSitePartnerTextField,
 ): { value: string | null; tooLong: boolean } {
   if (typeof value !== "string") return { value: null, tooLong: false };
-  const cleaned = value.replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s+/g, " ").trim();
+  // Contract text keeps paragraphs (newlines); everything else is one line.
+  const cleaned =
+    field === "contractText"
+      ? value
+          .replace(/\r\n?/g, "\n")
+          .replace(/[\u0000-\u0009\u000b-\u001f\u007f]+/g, " ")
+          .replace(/\n{3,}/g, "\n\n")
+          .trim()
+      : value.replace(/[\u0000-\u001f\u007f]+/g, " ").replace(/\s+/g, " ").trim();
   if (!cleaned) return { value: null, tooLong: false };
   const max = MAPSITE_PARTNER_TEXT_LIMITS[field];
   if (Array.from(cleaned).length > max) return { value: cleaned, tooLong: true };
@@ -65,6 +112,10 @@ export function emptyMapSiteOwnerCustomizations(): MapSiteOwnerCustomizations {
     partnerImageUrl: null,
     partnerName: null,
     partnerTagline: null,
+    cardTitle: null,
+    cardAddress: null,
+    cardPhone: null,
+    contractText: null,
     bookshelfOrder: [],
     updatedAt: null,
   };

@@ -82,6 +82,23 @@ export type TalisUMktsHeaderProps = {
   dashboardMenuItems?: ReadonlyArray<{ id: string; label: string }>;
   /** Called with the chosen dashboard menu item id. */
   onSelectDashboardItem?: (id: string) => void;
+  /**
+   * Claimed Mapsite: the selling-tools sequence (URL → MLS® → TEB™ → TTV™ →
+   * Contract) replaces the Dashboard item. The Dashboard itself now lives on
+   * the left Marketing card.
+   */
+  sellingTools?: ReadonlyArray<MapSiteSellingTool>;
+};
+
+export type MapSiteSellingTool = {
+  id: string;
+  label: string;
+  /** null = not configured (shown disabled). */
+  href: string | null;
+  /** In-app action instead of navigation (e.g. owner multipin URL). */
+  onClick?: () => void;
+  external?: boolean;
+  variant?: "default" | "gold";
 };
 
 function LockIcon({ className }: { className?: string }) {
@@ -121,6 +138,7 @@ export default function TalisUMktsHeader({
   onOpenDashboard,
   dashboardMenuItems,
   onSelectDashboardItem,
+  sellingTools,
 }: TalisUMktsHeaderProps = {}) {
   const pathname = usePathname() || "/talisu/mkts";
   const router = useRouter();
@@ -298,7 +316,65 @@ export default function TalisUMktsHeader({
     });
   }
 
+  function renderSellingTools() {
+    const base =
+      "rounded-md px-2.5 py-1.5 text-[12px] font-semibold transition sm:text-[14px]";
+    return (
+      <div
+        key="selling-tools"
+        role="group"
+        aria-label={t.mapsite.sellingTools.aria}
+        data-testid="nav-selling-tools"
+        className="flex flex-wrap items-center gap-1 rounded-lg bg-white/10 p-0.5"
+      >
+        {sellingTools!.map((tool) => {
+          const cls = `${base} ${
+            tool.variant === "gold"
+              ? "bg-[#f6c343] text-neutral-900 hover:bg-[#ffd25e]"
+              : "text-white hover:bg-white/20"
+          }`;
+          if (tool.onClick) {
+            return (
+              <button key={tool.id} type="button" onClick={tool.onClick} className={cls}>
+                {tool.label}
+              </button>
+            );
+          }
+          if (!tool.href) {
+            return (
+              <span
+                key={tool.id}
+                aria-disabled="true"
+                className={`${base} cursor-not-allowed text-white/45`}
+              >
+                {tool.label}
+              </span>
+            );
+          }
+          return tool.external ? (
+            <a
+              key={tool.id}
+              href={tool.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cls}
+            >
+              {tool.label}
+            </a>
+          ) : (
+            <Link key={tool.id} href={tool.href} className={cls}>
+              {tool.label}
+            </Link>
+          );
+        })}
+      </div>
+    );
+  }
+
   function renderNavLink(item: (typeof TALISU_MKTS_HEADER_NAV)[number]) {
+    if (claimedMapsite && item.label === "Register" && sellingTools?.length) {
+      return renderSellingTools();
+    }
     if (claimedMapsite && item.label === "Register" && dashboardHasMenu) {
       return (
         <div key="dashboard" ref={dashboardMenuRef} className="relative">

@@ -272,7 +272,7 @@ export default async function TalisprosMapSitePage({
       showActivatePayment={showActivatePayment}
       checkoutStatus={checkoutStatus}
       checkoutSessionId={checkoutSessionId}
-      openPinOnLoad={isOwner || claimed || view === "pin"}
+      openPinOnLoad={view === "pin"}
       isOwner={isOwner}
       showStartHere={false}
       flagIdentity={ebookContext?.primaryEbook?.flagIdentity}
