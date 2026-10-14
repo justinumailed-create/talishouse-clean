@@ -1,11 +1,5 @@
 import Image from "next/image";
-import { redirect } from "next/navigation";
-import { readSignedContractId } from "@/app/talisu/contract/actions";
-import {
-  getSignedContractById,
-  getSignedContractForFastCode,
-} from "@/lib/talispros/mapsite-contract-service";
-import { PMC_PATHS, normalizeFastCodeParam, pmcHref } from "@/lib/talispros/mapsite-contract";
+import { enforcePmcRegistrationGate, firstParam } from "@/lib/talisu/pmc-gate";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
 import { getLocale } from "@/lib/i18n/server";
@@ -80,19 +74,10 @@ export default async function TalisURegisterPage({
     );
   }
 
-  // PMC gate: the registration payment (SamCart) requires a signed Service
-  // Agreement — via this browser's signed-contract cookie or the FAST Code.
-  // Otherwise start the TalisU sequence: Talispros → Media Directory → Contract.
-  const fastCodeParam = normalizeFastCodeParam(
-    Array.isArray(params.fastCode) ? params.fastCode[0] : params.fastCode,
-  );
-  const signedId = await readSignedContractId();
-  const signed =
-    (signedId ? await getSignedContractById(signedId) : null) ??
-    (await getSignedContractForFastCode(fastCodeParam));
-  if (!signed) {
-    redirect(pmcHref(PMC_PATHS.talispros, { fastCode: fastCodeParam }));
-  }
+  // PMC gate (every registrant): Demo → claim Mapsite → Talispros → Media
+  // Directory → Contract (agent code) → sign → here → payment. No claimed
+  // Mapsite → demo/claim start; unsigned → the sequence. Paid users pass.
+  await enforcePmcRegistrationGate(firstParam(params.fastCode));
 
   return (
     <SectionShell title={TALISU_REGISTER.title} maxWidthClass="max-w-[1920px]">

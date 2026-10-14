@@ -3,6 +3,7 @@ import Link from "next/link";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { resolveVisitorFastCode } from "@/lib/talisu/pmc-gate";
 import PmcStepper from "@/components/talisu/pmc/PmcStepper";
 import PmcFooter from "@/components/talisu/pmc/PmcFooter";
 import IframeLink from "@/components/talisu/pmc/IframeLink";
@@ -33,7 +34,7 @@ type Props = { searchParams?: Promise<{ fastCode?: string; agent?: string }> };
 export default async function TalisprosPitchPage({ searchParams }: Props) {
   const t = getDictionary(await getLocale()).pmc;
   const params = (await searchParams) ?? {};
-  const fastCode = normalizeFastCodeParam(params.fastCode);
+  const fastCode = normalizeFastCodeParam(await resolveVisitorFastCode(params.fastCode));
   const nextHref = pmcHref(PMC_PATHS.mediaDirectory, { fastCode, agent: params.agent });
   const countries = new Set(PMC_MEDIA_DIRECTORY.map((m) => m.location)).size;
   const flags = Array.from(new Set(PMC_MEDIA_DIRECTORY.map((m) => flagEmoji(m.iso))));

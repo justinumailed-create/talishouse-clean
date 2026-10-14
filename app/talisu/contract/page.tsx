@@ -6,12 +6,13 @@ import PmcStepper from "@/components/talisu/pmc/PmcStepper";
 import PmcFooter from "@/components/talisu/pmc/PmcFooter";
 import LegalDocument from "@/components/talisu/pmc/LegalDocument";
 import { ContractSignForm, ContractUnlockForm } from "@/components/talisu/pmc/ContractClient";
-import { readSignedContractId, readUnlockedContractAgent } from "@/app/talisu/contract/actions";
-import { getSignedContractById } from "@/lib/talispros/mapsite-contract-service";
+import { redirect } from "next/navigation";
+import { readUnlockedContractAgent } from "@/app/talisu/contract/actions";
+import { getSignedContractForFastCode } from "@/lib/talispros/mapsite-contract-service";
+import { PMC_CLAIM_START, findClaimedMapSite, resolveVisitorFastCode } from "@/lib/talisu/pmc-gate";
 import {
   PMC_PATHS,
   normalizeAgentCode,
-  normalizeFastCodeParam,
   pmcHref,
 } from "@/lib/talispros/mapsite-contract";
 import {
@@ -33,10 +34,13 @@ export default async function PmcContractPage({ searchParams }: Props) {
   const locale = await getLocale();
   const t = getDictionary(locale).pmc;
   const params = (await searchParams) ?? {};
-  const fastCode = normalizeFastCodeParam(params.fastCode);
-  const [agent, signedId] = await Promise.all([readUnlockedContractAgent(), readSignedContractId()]);
-  const signed = signedId ? await getSignedContractById(signedId) : null;
-  const signedMatches = signed && (!fastCode || signed.fastCode === fastCode);
+  // FAST Code is required: the signature ties to the visitor's claimed Mapsite.
+  const claimed = await findClaimedMapSite(await resolveVisitorFastCode(params.fastCode));
+  if (!claimed) redirect(PMC_CLAIM_START);
+  const fastCode = claimed.fastCode;
+  // Once signed for this FAST Code, never ask for an agent code again.
+  const signed = await getSignedContractForFastCode(fastCode);
+  const agent = signed ? null : await readUnlockedContractAgent();
 
   return (
     <div data-testid="pmc-contract" className="pmc-page">
@@ -50,7 +54,7 @@ export default async function PmcContractPage({ searchParams }: Props) {
       </section>
 
       <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-        {signedMatches ? (
+        {signed ? (
           <div className="mb-8 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800">
             <p className="font-semibold">
               ✓ {t.contract.alreadySigned}{" "}
@@ -73,7 +77,7 @@ export default async function PmcContractPage({ searchParams }: Props) {
           </div>
         ) : null}
 
-        {!agent ? (
+        {signed ? null : !agent ? (
           <ContractUnlockForm fastCode={fastCode} initialCode={normalizeAgentCode(params.agent ?? "")} />
         ) : (
           <div className="grid gap-8 lg:grid-cols-[1.35fr_1fr]">

@@ -1,3 +1,4 @@
+import { enforcePmcRegistrationGate, firstParam } from "@/lib/talisu/pmc-gate";
 import Image from "next/image";
 import Link from "next/link";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
@@ -40,6 +41,7 @@ type TalisUEngagePageProps = {
   searchParams?: Promise<{
     product?: string | string[];
     step?: string | string[];
+    fastCode?: string | string[];
   }>;
 };
 
@@ -125,6 +127,9 @@ export default async function TalisUEngagePage({
       />
     );
   }
+
+  // PMC gate (every registrant) before the down-payment checkout.
+  await enforcePmcRegistrationGate(firstParam(params.fastCode));
 
   return (
     <SectionShell

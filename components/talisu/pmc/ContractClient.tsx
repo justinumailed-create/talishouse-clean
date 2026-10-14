@@ -80,7 +80,7 @@ export function ContractSignForm({
   const [business, setBusiness] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [fc, setFc] = useState(fastCode?.toUpperCase() ?? "");
+  const fc = fastCode?.toUpperCase() ?? "";
   const [mode, setMode] = useState<"typed" | "drawn">("typed");
   const [typed, setTyped] = useState("");
   const [image, setImage] = useState<string | null>(null);
@@ -174,7 +174,7 @@ export function ContractSignForm({
         </label>
         <label className="text-[13px] font-semibold text-neutral-700">
           {t.fastCode}
-          <input className={`${field} mt-1.5 font-mono uppercase`} value={fc} onChange={(e) => setFc(e.target.value.toUpperCase())} maxLength={32} />
+          <input className={`${field} mt-1.5 bg-neutral-50 font-mono uppercase`} value={fc} readOnly aria-readonly="true" />
         </label>
       </div>
 

@@ -1,6 +1,7 @@
 import { pageMetadata } from "@/lib/seo/page-metadata";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { resolveVisitorFastCode } from "@/lib/talisu/pmc-gate";
 import PmcStepper from "@/components/talisu/pmc/PmcStepper";
 import PmcFooter from "@/components/talisu/pmc/PmcFooter";
 import MediaDirectoryClient from "@/components/talisu/pmc/MediaDirectoryClient";
@@ -16,7 +17,7 @@ type Props = { searchParams?: Promise<{ fastCode?: string; agent?: string }> };
 export default async function MediaDirectoryPage({ searchParams }: Props) {
   const t = getDictionary(await getLocale()).pmc;
   const params = (await searchParams) ?? {};
-  const fastCode = normalizeFastCodeParam(params.fastCode);
+  const fastCode = normalizeFastCodeParam(await resolveVisitorFastCode(params.fastCode));
 
   return (
     <div data-testid="pmc-media-directory" className="pmc-page">

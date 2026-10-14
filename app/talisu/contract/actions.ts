@@ -2,13 +2,14 @@
 
 import { cookies, headers } from "next/headers";
 import { getLocale } from "@/lib/i18n/server";
-import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { findClaimedMapSite } from "@/lib/talisu/pmc-gate";
 import {
   CONTRACT_AGENT_COOKIE,
   CONTRACT_AGENT_COOKIE_MAX_AGE,
   CONTRACT_SIGNED_COOKIE,
   CONTRACT_SIGNED_COOKIE_MAX_AGE,
   getContractAgentById,
+  getSignedContractForFastCode,
   recordServiceAgreementSignature,
   redeemAgentContractCode,
   signCookieValue,
@@ -75,26 +76,23 @@ export async function readSignedContractId(): Promise<string | null> {
 export async function signPmcContractAction(
   input: ContractSignatureInput,
 ): Promise<{ ok: true; href: string } | { ok: false; error: string }> {
-  const agent = await readUnlockedContractAgent();
-  if (!agent) return { ok: false, error: "locked" };
   const invalid = validateContractSignature(input);
   if (invalid) return { ok: false, error: invalid };
 
-  const fastCode = normalizeFastCodeParam(input.fastCode);
-  let mapsiteId: string | null = null;
-  if (fastCode && isSupabaseAdminConfigured()) {
-    const { data } = await getSupabaseAdmin()
-      .from("mapsites")
-      .select("id")
-      .ilike("fast_code", fastCode)
-      .limit(1)
-      .maybeSingle();
-    mapsiteId = (data as { id: string } | null)?.id ?? null;
+  // FAST Code required: must be the visitor's claimed (non-demo) Mapsite.
+  const claimed = await findClaimedMapSite(normalizeFastCodeParam(input.fastCode));
+  if (!claimed) return { ok: false, error: "needFastCode" };
+  const fastCode = claimed.fastCode;
+  const mapsiteId: string | null = claimed.id;
+  if (await getSignedContractForFastCode(fastCode)) {
+    return { ok: true, href: pmcHref(PMC_PATHS.register, { fastCode }) };
   }
   const email = input.signerEmail?.trim() || null;
   if (email && (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) {
     return { ok: false, error: "badEmail" };
   }
+  const agent = await readUnlockedContractAgent();
+  if (!agent) return { ok: false, error: "locked" };
   const meta = await requestMeta();
   const result = await recordServiceAgreementSignature({
     mapsiteId,

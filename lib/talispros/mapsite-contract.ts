@@ -58,7 +58,8 @@ export type ContractSignatureInput = {
   signerName: string;
   signerBusiness?: string | null;
   signerEmail?: string | null;
-  fastCode?: string | null;
+  /** Required: the claimed Mapsite's FAST Code. */
+  fastCode: string;
   signatureType: "typed" | "drawn";
   signatureText?: string | null;
   signatureImage?: string | null;
@@ -76,7 +77,8 @@ export function isValidSignatureImage(value: unknown): value is string {
 
 export function validateContractSignature(
   input: ContractSignatureInput,
-): "needName" | "needSignature" | "needConsent" | null {
+): "needFastCode" | "needName" | "needSignature" | "needConsent" | null {
+  if (!normalizeFastCodeParam(input.fastCode)) return "needFastCode";
   const name = input.signerName?.trim() || "";
   if (name.length < 2 || name.length > 120) return "needName";
   if (input.signatureType === "typed") {
