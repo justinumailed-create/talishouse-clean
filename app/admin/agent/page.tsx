@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import AgentDashboard from "@/components/admin/agents/AgentDashboard";
-import ContractAccessCodesPanel from "@/components/admin/agents/ContractAccessCodesPanel";
+import AgentContractCodeCard from "@/components/admin/agents/AgentContractCodeCard";
+import { getAgentContractCode, listSignedContracts } from "@/lib/talispros/mapsite-contract-service";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { accountHasAdminScope } from "@/lib/admin-constants";
 import { getAgentById, listAgentMapSites } from "@/lib/agent-admins";
@@ -15,7 +16,7 @@ export default async function AgentHomePage() {
   if (!account) redirect("/admin/login");
 
   if (account.access !== "agent" || !account.agentId) {
-    const canCodes = account.access === "global" || accountHasAdminScope(account, "mapsites");
+    const canContracts = account.access === "global" || accountHasAdminScope(account, "mapsites");
     return (
       <div className="space-y-6">
       <div className="rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">
@@ -31,14 +32,22 @@ export default async function AgentHomePage() {
           </>
         ) : null}
       </div>
-      {canCodes ? <ContractAccessCodesPanel /> : null}
+      {canContracts ? (
+        <div className="rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">
+          Agent codes are permanent per agent. See every agent&apos;s code and the clients who signed with it in{" "}
+          <Link href="/admin/contracts" className="text-[#1E4ED8] underline">
+            Contracts
+          </Link>
+          .
+        </div>
+      ) : null}
       </div>
     );
   }
 
   const agent = await getAgentById(account.agentId);
   if (!agent || agent.status !== "active") redirect("/admin/login");
-  const [mapsites, payments, chatUnread] = await Promise.all([
+  const [mapsites, payments, chatUnread, contractCode, signedClients] = await Promise.all([
     listAgentMapSites(agent.assignedMapSites),
     agent.privileges.includes("cash-payments") && !agent.mustChangePassword
       ? listManualPayments({ agentId: agent.id, limit: 50 })
@@ -46,12 +55,23 @@ export default async function AgentHomePage() {
     agent.mustChangePassword
       ? Promise.resolve(0)
       : countUnreadForAgent(agent.id).catch(() => 0),
+    getAgentContractCode(agent.id),
+    listSignedContracts({ agentId: agent.id, limit: 100 }),
   ]);
   return (
     <div className="space-y-6">
       <AgentDashboard agent={agent} mapsites={mapsites} payments={payments} chatUnread={chatUnread} />
       {agent.mustChangePassword ? null : (
-        <ContractAccessCodesPanel fastCodes={agent.assignedMapSites} />
+        <AgentContractCodeCard
+          code={contractCode}
+          clients={signedClients.map((c) => ({
+            id: c.id,
+            fastCode: c.fastCode,
+            signerName: c.signerName,
+            signerBusiness: c.signerBusiness,
+            signedAt: c.signedAt,
+          }))}
+        />
       )}
     </div>
   );

@@ -19,6 +19,7 @@ export const ADMIN_SCOPED_NAV: ReadonlyArray<AdminNavItem & { scope: AdminScope 
   { href: "/admin/leads", label: "Leads", scope: "leads" },
   { href: "/admin/contact-from-leads", label: "Contact from leads", scope: "leads" },
   { href: "/admin/mapsites", label: "Mapsites", scope: "mapsites" },
+  { href: "/admin/contracts", label: "Contracts", scope: "mapsites" },
   { href: "/admin/seo", label: "SEO", scope: "seo" },
   { href: "/admin/talisbooks/bookshelves", label: "Bookshelves", scope: "talisbooks" },
   { href: "/admin/pmc", label: "PMC pins", scope: "pmc-pins" },

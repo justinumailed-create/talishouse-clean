@@ -1,5 +1,6 @@
 "use server";
 
+import { getSignedContractForFastCode } from "@/lib/talispros/mapsite-contract-service";
 import { headers } from "next/headers";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import { parseRegistrationMarket } from "@/lib/registration-market";
@@ -359,6 +360,14 @@ export async function createMapSiteStripeCheckoutSession(input: {
 
   if (!mapsite?.id) {
     return { error: "Mapsite was not found." };
+  }
+
+  // PMC gate: no activation checkout before the Service Agreement is signed.
+  if (!(await getSignedContractForFastCode(mapsite.fast_code))) {
+    return {
+      error:
+        "Please sign the Service Agreement first (TalisU → Talispros → Media Directory → Contract).",
+    };
   }
 
   let requestId = input.requestId?.trim() || null;

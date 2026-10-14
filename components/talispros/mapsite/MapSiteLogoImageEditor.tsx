@@ -31,7 +31,6 @@ type MapSiteLogoImageEditorProps = {
   /** Defaults for the other left-card fields (Reset target; "" = hidden). */
   defaultCardTitle?: string;
   defaultCardAddress?: string;
-  defaultContractText?: string;
   customizations: MapSiteOwnerCustomizations;
   onClose: () => void;
   onSaved: (next: MapSiteOwnerCustomizations) => void;
@@ -79,7 +78,6 @@ export default function MapSiteLogoImageEditor({
   defaultPartnerTagline,
   defaultCardTitle = "",
   defaultCardAddress = "",
-  defaultContractText = "",
   customizations,
   onClose,
   onSaved,
@@ -92,7 +90,7 @@ export default function MapSiteLogoImageEditor({
     cardTitle: defaultCardTitle,
     cardAddress: defaultCardAddress,
     cardPhone: "",
-    contractText: defaultContractText,
+    contractText: "",
   };
   const [texts, setTexts] = useState<Record<MapSitePartnerTextField, string>>(() => ({
     partnerName: customizations.partnerName ?? defaultPartnerName,
@@ -100,7 +98,7 @@ export default function MapSiteLogoImageEditor({
     cardTitle: customizations.cardTitle ?? defaultCardTitle,
     cardAddress: customizations.cardAddress ?? defaultCardAddress,
     cardPhone: customizations.cardPhone ?? "",
-    contractText: customizations.contractText ?? defaultContractText,
+    contractText: customizations.contractText ?? "",
   }));
   const [slots, setSlots] = useState<Record<MapSiteBrandingField, SlotState>>({
     logo: EMPTY_SLOT,
@@ -217,12 +215,6 @@ export default function MapSiteLogoImageEditor({
       label: ed.phone,
       saved: customizations.cardPhone,
       fallback: "",
-    },
-    {
-      field: "contractText",
-      label: ed.contractText,
-      saved: customizations.contractText,
-      fallback: defaultContractText,
     },
   ];
 
@@ -375,9 +367,6 @@ export default function MapSiteLogoImageEditor({
                   className="w-full rounded-md border border-neutral-300 px-2.5 py-1.5 text-sm"
                 />
               )}
-              {slot.field === "contractText" ? (
-                <p className="text-[10px] leading-relaxed text-neutral-400">{ed.contractHelp}</p>
-              ) : null}
               <div className="flex items-center gap-2">
                 <button
                   type="button"

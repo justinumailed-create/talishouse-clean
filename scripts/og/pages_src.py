@@ -16,6 +16,7 @@ REC = ("images/talishouse/recreational/hero.png", 0.4, None, None)
 RES = ("images/talishouse/residential/hero.jpg", 0.4, None, None)
 TOWNS = ("images/talistowns.jpg", 0.4, None, None)
 COVER = ("talisbooks/pinned/front-cover.jpg", 0.5, None, None)
+WINDSWEPT = ("talisu/pmc/windswept.jpg", 0.45, None, None)
 BRAND = None   # blue panel with the white Windswept tree
 ADMIN = "admin"
 
@@ -64,6 +65,42 @@ add("/talisu", "talisu-faq", "public", AISHA,
     ("TalisU™ FAQ: Talispros™, Mapsites und FAST Codes",
      "Antworten auf häufige Fragen zu Talispros™, Mapsites, FAST Codes und den Abwicklungsoptionen von TalisU™.",
      "TALISU™  ·  FAQ", ["Häufig", "gestellte", "Fragen"], ["Mapsites", "FAST Codes", "TalisU™"]))
+# ---------- PMC sequence (TalisU dropdown, below the divider) ----------
+add("/talisu/talispros", "talisu-talispros", "public", WINDSWEPT,
+    ("Talispros PMC: Map-Based Marketing for Canadian Brokerages",
+     "Why Canadian brokerages add Talispros Mapsites beside MLS® and their website: earlier leads, sharper targeting, new ad revenue and stronger local brands.",
+     "TALISPROS  ·  PMC", ["Industry adjacent", "markets for", "brokerages"], ["Promote", "Manage", "Cooperate"]),
+    ("Talispros PMC: Kartenbasiertes Marketing für Makler",
+     "Warum kanadische Makler Talispros-Mapsites neben MLS® und ihrer Website nutzen: frühere Leads, präziseres Targeting, neue Werbeerlöse, stärkere Marken.",
+     "TALISPROS  ·  PMC", ["Branchennahe", "Märkte für", "Makler"], ["Promote", "Manage", "Cooperate"]))
+add("/talisu/media-directory", "talisu-media-directory", "public", MAP,
+    ("Media Directory: Where Talispros PINs Are Syndicated",
+     "The Talispros media directory: global property portals and classifieds where Mapsite PINs are auto-syndicated in 10-day cycles. Open any outlet in place.",
+     "TALISPROS  ·  MEDIA DIRECTORY", ["Your PINs,", "syndicated", "worldwide"], ["100+ outlets", "10-day cycles", "Global reach"]),
+    ("Mediendirektorium: Wohin Talispros-PINs syndiziert werden",
+     "Das Talispros-Mediendirektorium: weltweite Immobilienportale, in die Mapsite-PINs in 10-Tage-Zyklen automatisch syndiziert werden. Portale direkt öffnen.",
+     "TALISPROS  ·  MEDIENDIREKTORIUM", ["Ihre PINs,", "weltweit", "syndiziert"], ["100+ Portale", "10-Tage-Zyklen", "Globale Reichweite"]))
+add("/talisu/contract", "talisu-contract", "utility", BRAND,
+    ("Service Agreement: Sign with Your Agent Code | Talispros",
+     "Open the TalisALL PMC Service Agreement with your agent code, sign it electronically and continue to Talispros registration.",
+     "TALISPROS  ·  CONTRACT", ["Sign your", "Service", "Agreement"], ["Agent code", "E-signature", "Then register"]),
+    ("Dienstleistungsvertrag mit Agenten-Code signieren",
+     "Öffnen Sie den TalisALL PMC Dienstleistungsvertrag mit Ihrem Agenten-Code, unterschreiben Sie elektronisch und fahren Sie mit der Registrierung fort.",
+     "TALISPROS  ·  VERTRAG", ["Ihren", "Dienstleistungs-", "vertrag signieren"], ["Agenten-Code", "E-Signatur", "Dann registrieren"]))
+add("/talisu/terms", "talisu-terms", "public", BRAND,
+    ("Terms of Service | Talispros by TalisALL PMC",
+     "Talispros Terms of Service: platform role, customer responsibilities, warranties, liability, fees in CAD, intellectual property, termination and privacy.",
+     "TALISPROS  ·  TERMS", ["Terms of", "Service"], ["TalisALL PMC", "Fees in CAD", "No long-term commitment"]),
+    ("Nutzungsbedingungen | Talispros von TalisALL PMC",
+     "Talispros-Nutzungsbedingungen: Rolle der Plattform, Kundenpflichten, Gewährleistung, Haftung, Gebühren in CAD, geistiges Eigentum, Kündigung, Datenschutz.",
+     "TALISPROS  ·  BEDINGUNGEN", ["Nutzungs-", "bedingungen"], ["TalisALL PMC", "Gebühren in CAD", "Keine Langzeitbindung"]))
+add("/talisu/privacy", "talisu-privacy", "public", BRAND,
+    ("Privacy Policy | TalisALL (Talispros, TalisU, Taliswebs)",
+     "How TalisALL collects, uses, shares and protects information across talispros.com, talisu.com, taliswebs.com and talishouse.com, and your privacy rights.",
+     "TALISALL  ·  PRIVACY", ["Privacy", "Policy"], ["Your data", "Your rights", "Security"]),
+    ("Datenschutzerklärung | TalisALL (Talispros, TalisU)",
+     "Wie TalisALL Informationen auf talispros.com, talisu.com, taliswebs.com und talishouse.com erhebt, nutzt, teilt und schützt – und Ihre Datenschutzrechte.",
+     "TALISALL  ·  DATENSCHUTZ", ["Datenschutz-", "erklärung"], ["Ihre Daten", "Ihre Rechte", "Sicherheit"]))
 add("/catalogue/bookshelf", "bookshelf", "public", SHELF,
     ("Talisbooks™ Bookshelf | ALLPINS Mapsite",
      "The Mapsite-connected Talisbooks™ bookshelf for FAST Code ALLPINS. Open a cover to read the books on the shelf.",
@@ -552,14 +589,6 @@ add("/talispros/client/login", "client-login", "login", BRAND,
     ("Anmeldung für Mapsite-Inhaber | Talispros™",
      "Mapsite-Inhaber: Melden Sie sich bei Ihrem Talispros™ Marketing-Dashboard und Ihren Büchern an.",
      "TALISPROS™  ·  MAPSITE-INHABER", ["Anmeldung für", "Mapsite-", "Inhaber"], []))
-
-add("/talispros/mapsite/contract/[fastCode]", "mapsite-contract", "utility", BRAND,
-    ("Mapsite Contract: Access Code and E-Signature | Talispros™",
-     "Open your Mapsite contract with your agent's access code, sign it electronically and continue to the purchase in CAD.",
-     "TALISPROS™  ·  CONTRACT", ["Mapsite", "contract", "& e-signature"], ["Access code", "E-signature", "CAD"]),
-    ("Mapsite-Vertrag: Zugangscode und E-Signatur | Talispros™",
-     "Öffnen Sie Ihren Mapsite-Vertrag mit dem Zugangscode Ihres Agenten, unterschreiben Sie elektronisch und kaufen Sie in CAD.",
-     "TALISPROS™  ·  VERTRAG", ["Mapsite-", "Vertrag", "& E-Signatur"], ["Zugangscode", "E-Signatur", "CAD"]))
 
 # ---------- dynamic pages: generated per record (existing /api/og routes) ----------
 for r, en_t, de_t in [

@@ -31,8 +31,11 @@ function PreviewImage({
 
 export default function AdminMapSiteThumbnailCard({
   mapsite,
+  contractAgent = null,
 }: {
   mapsite: AdminMapSiteThumbnail;
+  /** Agent the signed Service Agreement (FAST Code) is attributed to. */
+  contractAgent?: string | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -100,6 +103,9 @@ export default function AdminMapSiteThumbnailCard({
                 </p>
                 <p className="m-0 text-[9px] font-medium uppercase tracking-[0.08em] text-neutral-500">
                   FAST Code: {mapsite.fastCode}
+                </p>
+                <p className="m-0 text-[9px] font-medium uppercase tracking-[0.08em] text-neutral-500">
+                  Agent: {contractAgent ?? "—"}
                 </p>
               </div>
             </div>

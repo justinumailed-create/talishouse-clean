@@ -1,3 +1,4 @@
+import { getSignedContractForFastCode } from "@/lib/talispros/mapsite-contract-service";
 import { getLocale } from "@/lib/i18n/server";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -252,6 +253,13 @@ export default async function ClaimedMapSiteByAccountTypePage({
 
   const partnerTargets = await loadPartnerTargets(fastCode);
 
+  // PMC gate: activation payment only after the Service Agreement is signed
+  // for this FAST Code. Paid / demo Mapsites are never gated.
+  const contractSigned =
+    paymentReceived ||
+    !showActivatePayment ||
+    Boolean(await getSignedContractForFastCode(mapsite.fast_code || fastCode));
+
   return (
     <>
     <MapSiteApplication
@@ -265,6 +273,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       hasTalisBook={hasTalisBook}
       talisBookHref={talisBookHref}
       showActivatePayment={showActivatePayment}
+      contractSigned={contractSigned}
       checkoutStatus={checkoutStatus}
       checkoutSessionId={checkoutSessionId}
       openPinOnLoad={openPinOnLoad}

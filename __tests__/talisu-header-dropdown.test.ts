@@ -16,6 +16,9 @@ describe("TalisU blue header dropdown", () => {
       "Knowledge Base",
       "Audio",
       "Video",
+      "Talispros",
+      "Media Directory",
+      "Contract",
     ]);
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.href)).toEqual([
       "/catalogue/bookshelf",
@@ -23,6 +26,9 @@ describe("TalisU blue header dropdown", () => {
       "/talisu/kb",
       "/talisu/au",
       "/talisu/video",
+      "/talisu/talispros",
+      "/talisu/media-directory",
+      "/talisu/contract",
     ]);
     // Bookshelf sits ahead of FAQ inside TalisU (moved out of the top level).
     expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.label).toBe("Bookshelf");
@@ -77,12 +83,12 @@ describe("TalisU blue header dropdown", () => {
     expect(builder).toContain("<DemoFastCodeCard");
   });
 
-  it("puts a horizontal divider after Bookshelf + FAQ in the TalisU dropdown", () => {
+  it("puts a horizontal divider after Video (PMC sequence below) in the TalisU dropdown", () => {
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
     );
-    expect(header).toContain('item.label === "FAQ"');
+    expect(header).toContain('item.label === "Video"');
     expect(header).toContain('case "Bookshelf":');
     expect(header).toContain("t.nav.bookshelf");
     expect(header).toContain('role="separator"');

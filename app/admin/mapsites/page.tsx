@@ -8,6 +8,7 @@ import AdminFreePinCreditsPanel from "@/components/admin/AdminFreePinCreditsPane
 import { listFreePinGrants } from "@/lib/talispros/mapsite-additional-pins-service";
 import { isSupabaseAdminConfigured, getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { purgeMapSitesAndBookshelvesWithoutFastCodes } from "@/lib/talispros/fast-code-cascade-delete";
+import { contractAgentsByFastCode } from "@/lib/talispros/mapsite-contract-service";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +20,11 @@ export default async function AdminMapSitesPage() {
     await purgeMapSitesAndBookshelvesWithoutFastCodes(getSupabaseAdmin());
   }
   const canLinkPartners = canLinkMapSitePartners(account);
-  const [allMapSites, recentFreePinGrants, partnerLinks] = await Promise.all([
+  const [allMapSites, recentFreePinGrants, partnerLinks, contractAgents] = await Promise.all([
     listMapSitesForAdmin(),
     isAgent ? Promise.resolve([]) : listFreePinGrants({ limit: 20 }),
     canLinkPartners ? listMapSitePartnerLinks() : Promise.resolve([]),
+    contractAgentsByFastCode(),
   ]);
   // Agent Admins only see the Mapsites they may edit.
   const mapsites = isAgent
@@ -58,6 +60,7 @@ export default async function AdminMapSitesPage() {
             <AdminMapSiteThumbnailCard
               key={mapsite.id || mapsite.fastCode}
               mapsite={mapsite}
+              contractAgent={contractAgents.get(mapsite.fastCode?.toLowerCase() ?? "")?.agentName ?? null}
             />
           ))}
         </ul>

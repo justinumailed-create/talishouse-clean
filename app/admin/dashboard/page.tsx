@@ -20,6 +20,7 @@ const DESCRIPTIONS: Record<string, string> = {
   "/admin/seo": "Titles, descriptions and share cards.",
   "/admin/talisbooks/bookshelves": "Curate Talisbooks™ bookshelves.",
   "/admin/fast-codes": "Issue and manage FAST Codes.",
+  "/admin/contracts": "Signed Service Agreements and agent codes — which client belongs to which agent.",
   "/admin/pmc": "Regional pins and claimed Mapsites.",
   "/admin/agents": "Agent accounts, activity and notes.",
   "/admin/registrations": "Market registrations.",

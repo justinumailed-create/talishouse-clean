@@ -1,4 +1,11 @@
 import Image from "next/image";
+import { redirect } from "next/navigation";
+import { readSignedContractId } from "@/app/talisu/contract/actions";
+import {
+  getSignedContractById,
+  getSignedContractForFastCode,
+} from "@/lib/talispros/mapsite-contract-service";
+import { PMC_PATHS, normalizeFastCodeParam, pmcHref } from "@/lib/talispros/mapsite-contract";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
 import { getLocale } from "@/lib/i18n/server";
@@ -31,7 +38,7 @@ export async function generateMetadata() {
 }
 
 type TalisURegisterPageProps = {
-  searchParams?: Promise<{ step?: string | string[] }>;
+  searchParams?: Promise<{ step?: string | string[]; fastCode?: string | string[] }>;
 };
 
 export default async function TalisURegisterPage({
@@ -71,6 +78,20 @@ export default async function TalisURegisterPage({
         closingText={TALISU_REGISTER.closing}
       />
     );
+  }
+
+  // PMC gate: the registration payment (SamCart) requires a signed Service
+  // Agreement — via this browser's signed-contract cookie or the FAST Code.
+  // Otherwise start the TalisU sequence: Talispros → Media Directory → Contract.
+  const fastCodeParam = normalizeFastCodeParam(
+    Array.isArray(params.fastCode) ? params.fastCode[0] : params.fastCode,
+  );
+  const signedId = await readSignedContractId();
+  const signed =
+    (signedId ? await getSignedContractById(signedId) : null) ??
+    (await getSignedContractForFastCode(fastCodeParam));
+  if (!signed) {
+    redirect(pmcHref(PMC_PATHS.talispros, { fastCode: fastCodeParam }));
   }
 
   return (

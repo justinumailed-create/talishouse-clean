@@ -42,11 +42,11 @@ describe("Claimed FAST Mapsite header Dashboard nav", () => {
     expect(header).toContain("registerHref = ROUTES.TALISU_REGISTER");
     expect(header).not.toContain("TALISU_REGISTER.samcartUrl");
     // Only external selling tools (e.g. an MLS® listing URL) open a new tab.
-    expect(header.match(/"_blank"/g)?.length ?? 0).toBeLessThanOrEqual(1);
-    expect(header).toContain("renderSellingTools");
-    // Claimed Mapsites: selling tools replace Dashboard in the navbar;
-    // the Dashboard moved onto the left Marketing card.
-    expect(app).toContain("sellingTools={sellingTools}");
+    expect(header).not.toContain('"_blank"');
+    expect(header).not.toContain("renderSellingTools");
+    // Claimed Mapsites: no selling-tool buttons in the navbar; the Dashboard
+    // lives on the left Marketing card.
+    expect(app).not.toContain("sellingTools");
     expect(app).toContain("dashboardItems={dashboardManageable ? DASHBOARD_MENU : undefined}");
 
     expect(app).toContain('variant="claimed-mapsite"');

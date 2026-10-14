@@ -83,6 +83,81 @@
     "alt": "Aisha C., Team Leader mit dem Talispros™ Baumlogo: Häufig gestellte Fragen"
    }
   },
+  "/talisu/talispros": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/talisu-talispros",
+   "en": {
+    "title": "Talispros PMC: Map-Based Marketing for Canadian Brokerages",
+    "description": "Why Canadian brokerages add Talispros Mapsites beside MLS® and their website: earlier leads, sharper targeting, new ad revenue and stronger local brands.",
+    "alt": "Talispros™ tree logo: Industry adjacent markets for brokerages"
+   },
+   "de": {
+    "title": "Talispros PMC: Kartenbasiertes Marketing für Makler",
+    "description": "Warum kanadische Makler Talispros-Mapsites neben MLS® und ihrer Website nutzen: frühere Leads, präziseres Targeting, neue Werbeerlöse, stärkere Marken.",
+    "alt": "Talispros™ Baumlogo: Branchennahe Märkte für Makler"
+   }
+  },
+  "/talisu/media-directory": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/talisu-media-directory",
+   "en": {
+    "title": "Media Directory: Where Talispros PINs Are Syndicated",
+    "description": "The Talispros media directory: global property portals and classifieds where Mapsite PINs are auto-syndicated in 10-day cycles. Open any outlet in place.",
+    "alt": "Talispros™ tree logo: Your PINs, syndicated worldwide"
+   },
+   "de": {
+    "title": "Mediendirektorium: Wohin Talispros-PINs syndiziert werden",
+    "description": "Das Talispros-Mediendirektorium: weltweite Immobilienportale, in die Mapsite-PINs in 10-Tage-Zyklen automatisch syndiziert werden. Portale direkt öffnen.",
+    "alt": "Talispros™ Baumlogo: Ihre PINs, weltweit syndiziert"
+   }
+  },
+  "/talisu/contract": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/talisu-contract",
+   "en": {
+    "title": "Service Agreement: Sign with Your Agent Code | Talispros",
+    "description": "Open the TalisALL PMC Service Agreement with your agent code, sign it electronically and continue to Talispros registration.",
+    "alt": "Talispros™ tree logo: Sign your Service Agreement"
+   },
+   "de": {
+    "title": "Dienstleistungsvertrag mit Agenten-Code signieren",
+    "description": "Öffnen Sie den TalisALL PMC Dienstleistungsvertrag mit Ihrem Agenten-Code, unterschreiben Sie elektronisch und fahren Sie mit der Registrierung fort.",
+    "alt": "Talispros™ Baumlogo: Ihren Dienstleistungsvertrag signieren"
+   }
+  },
+  "/talisu/terms": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/talisu-terms",
+   "en": {
+    "title": "Terms of Service | Talispros by TalisALL PMC",
+    "description": "Talispros Terms of Service: platform role, customer responsibilities, warranties, liability, fees in CAD, intellectual property, termination and privacy.",
+    "alt": "Talispros™ tree logo: Terms of Service"
+   },
+   "de": {
+    "title": "Nutzungsbedingungen | Talispros von TalisALL PMC",
+    "description": "Talispros-Nutzungsbedingungen: Rolle der Plattform, Kundenpflichten, Gewährleistung, Haftung, Gebühren in CAD, geistiges Eigentum, Kündigung, Datenschutz.",
+    "alt": "Talispros™ Baumlogo: Nutzungsbedingungen"
+   }
+  },
+  "/talisu/privacy": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/talisu-privacy",
+   "en": {
+    "title": "Privacy Policy | TalisALL (Talispros, TalisU, Taliswebs)",
+    "description": "How TalisALL collects, uses, shares and protects information across talispros.com, talisu.com, taliswebs.com and talishouse.com, and your privacy rights.",
+    "alt": "Talispros™ tree logo: Privacy Policy"
+   },
+   "de": {
+    "title": "Datenschutzerklärung | TalisALL (Talispros, TalisU)",
+    "description": "Wie TalisALL Informationen auf talispros.com, talisu.com, taliswebs.com und talishouse.com erhebt, nutzt, teilt und schützt – und Ihre Datenschutzrechte.",
+    "alt": "Talispros™ Baumlogo: Datenschutzerklärung"
+   }
+  },
   "/catalogue/bookshelf": {
    "kind": "public",
    "noindex": false,
@@ -1146,21 +1221,6 @@
     "title": "Anmeldung für Mapsite-Inhaber | Talispros™",
     "description": "Mapsite-Inhaber: Melden Sie sich bei Ihrem Talispros™ Marketing-Dashboard und Ihren Büchern an.",
     "alt": "Talispros™ Baumlogo: Anmeldung für Mapsite-Inhaber"
-   }
-  },
-  "/talispros/mapsite/contract/[fastCode]": {
-   "kind": "utility",
-   "noindex": true,
-   "image": "/og/pages/mapsite-contract",
-   "en": {
-    "title": "Mapsite Contract: Access Code and E-Signature | Talispros™",
-    "description": "Open your Mapsite contract with your agent's access code, sign it electronically and continue to the purchase in CAD.",
-    "alt": "Talispros™ tree logo: Mapsite contract & e-signature"
-   },
-   "de": {
-    "title": "Mapsite-Vertrag: Zugangscode und E-Signatur | Talispros™",
-    "description": "Öffnen Sie Ihren Mapsite-Vertrag mit dem Zugangscode Ihres Agenten, unterschreiben Sie elektronisch und kaufen Sie in CAD.",
-    "alt": "Talispros™ Baumlogo: Mapsite-Vertrag & E-Signatur"
    }
   },
   "/mapsite/[slug]": {

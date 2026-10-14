@@ -52,15 +52,10 @@ import MapSiteBookshelfEditor from "./MapSiteBookshelfEditor";
 import MapSiteEbookEditorPanel from "./MapSiteEbookEditorPanel";
 import DemoClaimMarketButton from "./DemoClaimMarketButton";
 import MapSitePaymentCard from "./MapSitePaymentCard";
-import MapSitePropertyPopup, { resolveMapSiteSellingTools } from "./MapSitePropertyPopup";
-import { MAPSITE_URL_ADDITIONAL_PINS_SENTINEL } from "@/lib/talispros/mapsite-url-gate";
-import {
-  defaultMapSiteContractText,
-  mapsiteContractPath,
-} from "@/lib/talispros/mapsite-contract";
+import MapSitePropertyPopup from "./MapSitePropertyPopup";
+import PmcContractGateCard from "@/components/talisu/pmc/PmcContractGateCard";
 import { mapsiteAgencyDisplayName } from "@/lib/talispros/mapsite-listing-media";
-import { useLocale, useT } from "@/lib/i18n/client";
-import type { MapSiteSellingTool } from "@/components/talisu/TalisUMktsHeader";
+import { useT } from "@/lib/i18n/client";
 import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import { getMapSiteActivationPaymentStatus } from "@/app/talispros/mapsite/actions";
@@ -145,6 +140,12 @@ interface MapSiteApplicationProps {
   talisBookHref?: string | null;
   /** Show activation checkout only for an explicit Activate link or a checkout return. */
   showActivatePayment?: boolean;
+  /**
+   * PMC gate: the Service Agreement for this FAST Code is signed (or the
+   * Mapsite is already paid). When false, the activation card points to the
+   * TalisU sequence (Talispros → Media Directory → Contract) instead of checkout.
+   */
+  contractSigned?: boolean;
   /** Stripe Checkout return. Never treated as proof of payment. */
   checkoutStatus?: "success" | "cancelled" | null;
   /** Checkout session id from success_url — used to activate if the webhook lagged. */
@@ -188,6 +189,7 @@ export default function MapSiteApplication({
   hasTalisBook = false,
   talisBookHref = null,
   showActivatePayment = false,
+  contractSigned = true,
   checkoutStatus = null,
   checkoutSessionId = null,
   onboardingMode = "self",
@@ -427,6 +429,7 @@ export default function MapSiteApplication({
         hasTalisBook={hasTalisBook}
         talisBookHref={talisBookHref}
         showActivatePayment={showActivatePayment}
+        contractSigned={contractSigned}
         checkoutStatus={checkoutStatus}
         checkoutSessionId={checkoutSessionId}
         isOwner={isOwner}
@@ -462,6 +465,7 @@ function MapSiteChrome({
   hasTalisBook,
   talisBookHref,
   showActivatePayment,
+  contractSigned,
   checkoutStatus,
   checkoutSessionId,
   isOwner,
@@ -492,6 +496,7 @@ function MapSiteChrome({
   hasTalisBook: boolean;
   talisBookHref: string | null;
   showActivatePayment: boolean;
+  contractSigned: boolean;
   checkoutStatus: "success" | "cancelled" | null;
   checkoutSessionId: string | null;
   isOwner: boolean;
@@ -512,7 +517,6 @@ function MapSiteChrome({
   const { setViewport, isReady, fitToCoordinates } = useMapEngine();
   const router = useRouter();
   const t = useT();
-  const locale = useLocale();
   const rootRef = useRef<HTMLDivElement>(null);
   const sidebarStackRef = useRef<HTMLDivElement>(null);
   const listingCardRef = useRef<HTMLDivElement>(null);
@@ -942,7 +946,9 @@ function MapSiteChrome({
   // Paid Mapsites: agency logo on the solid partner card. Checkout stays
   // off the first-look map unless the visitor opens Activate or returns from checkout.
   const registrationCard =
-    !isDemoListing && claimed && !paid && showExplicitPayment ? (
+    !isDemoListing && claimed && !paid && showExplicitPayment && !contractSigned ? (
+      <PmcContractGateCard fastCode={mapsite.fast_code} compact={mobileOverlay} />
+    ) : !isDemoListing && claimed && !paid && showExplicitPayment ? (
       <MapSitePaymentCard
         audience={audience}
         mapsiteId={mapsite.id}
@@ -955,30 +961,6 @@ function MapSiteChrome({
       />
     ) : null;
 
-  // Navbar: selling-tools sequence replaces Dashboard (Dashboard → left card).
-  const sellingTools: MapSiteSellingTool[] = [
-    ...resolveMapSiteSellingTools(cardMapSite, {
-      canBuyAdditionalPins: dashboardManageable,
-    }).map((tool) => ({
-      id: tool.key,
-      label: tool.label,
-      href: tool.href === MAPSITE_URL_ADDITIONAL_PINS_SENTINEL ? null : tool.href,
-      onClick:
-        tool.href === MAPSITE_URL_ADDITIONAL_PINS_SENTINEL ? openOwnerDashboard : undefined,
-      external: Boolean(tool.href && /^https?:\/\//i.test(tool.href)),
-      variant: tool.variant === "gold" ? ("gold" as const) : ("default" as const),
-    })),
-    ...(mapsite.fast_code
-      ? [
-          {
-            id: "contract",
-            label: t.mapsite.sellingTools.contract,
-            href: mapsiteContractPath(mapsite.fast_code),
-          },
-        ]
-      : []),
-  ];
-
   return (
     <div className="relative flex h-dvh max-h-dvh w-screen flex-col overflow-hidden overscroll-none bg-neutral-900">
       {claimed ? (
@@ -987,7 +969,6 @@ function MapSiteChrome({
           dashboardUnlocked={dashboardUnlocked}
           registerHref={ROUTES.TALISU_REGISTER}
           onOpenDashboard={openOwnerDashboard}
-          sellingTools={sellingTools}
         />
       ) : null}
       <div
@@ -1079,7 +1060,6 @@ function MapSiteChrome({
             defaultPartnerTagline={DEFAULT_MAPSITE_PARTNER_TAGLINE}
             defaultCardTitle={mapsiteAgencyDisplayName(mapsite.logo_url, mapsite.agency_name)}
             defaultCardAddress={mapsite.property_address?.trim() || ""}
-            defaultContractText={defaultMapSiteContractText(locale, mapsite.fast_code || "")}
             customizations={ownerCustomizations}
             onClose={closeDashboardPanel}
             onSaved={setOwnerCustomizations}
