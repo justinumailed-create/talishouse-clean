@@ -39,7 +39,7 @@ export default async function PmcContractPage({ searchParams }: Props) {
   const signedMatches = signed && (!fastCode || signed.fastCode === fastCode);
 
   return (
-    <div data-testid="pmc-contract">
+    <div data-testid="pmc-contract" className="pmc-page">
       <section className="bg-gradient-to-br from-[#06182f] to-[#0069CF] text-white">
         <div className="mx-auto max-w-5xl px-4 pb-10 pt-8 sm:px-6">
           <PmcStepper current={3} labels={t.steps} fastCode={fastCode} tone="dark" />

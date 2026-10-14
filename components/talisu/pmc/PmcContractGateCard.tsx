@@ -17,7 +17,7 @@ export default function PmcContractGateCard({
   return (
     <div
       data-testid="pmc-contract-gate"
-      className={`${compact ? "w-full" : MAPSITE_LISTING_CARD_WIDTH_CLASS} rounded-2xl border border-white/20 bg-white p-5 text-neutral-900 shadow-2xl`}
+      className={`pmc-page ${compact ? "w-full" : MAPSITE_LISTING_CARD_WIDTH_CLASS} rounded-2xl border border-white/20 bg-white p-5 text-neutral-900 shadow-2xl`}
     >
       <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#0069CF]">
         {t.steps.join(" → ")}

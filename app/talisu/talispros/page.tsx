@@ -39,7 +39,7 @@ export default async function TalisprosPitchPage({ searchParams }: Props) {
   const flags = Array.from(new Set(PMC_MEDIA_DIRECTORY.map((m) => flagEmoji(m.iso))));
 
   return (
-    <div data-testid="pmc-talispros" className="bg-white">
+    <div data-testid="pmc-talispros" className="pmc-page bg-white">
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="relative isolate overflow-hidden bg-[#06182f] text-white">
         <Image

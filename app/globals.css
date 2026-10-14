@@ -5214,3 +5214,11 @@ body.mapsite-gallery-open [data-paypal-button] {
   font-size: 11px;
   letter-spacing: 0.06em;
 }
+
+/* PMC sequence pages (/talisu/talispros, media-directory, contract, terms,
+   privacy): let Tailwind colour/margin utilities and inherited colours win
+   over the global unlayered h1–h3 / p defaults. */
+.pmc-page :is(h1, h2, h3, p) {
+  color: revert-layer;
+  margin-bottom: revert-layer;
+}

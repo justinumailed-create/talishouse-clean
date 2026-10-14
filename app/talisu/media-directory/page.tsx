@@ -19,7 +19,7 @@ export default async function MediaDirectoryPage({ searchParams }: Props) {
   const fastCode = normalizeFastCodeParam(params.fastCode);
 
   return (
-    <div data-testid="pmc-media-directory">
+    <div data-testid="pmc-media-directory" className="pmc-page">
       <section className="bg-gradient-to-br from-[#06182f] to-[#0069CF] text-white">
         <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6">
           <PmcStepper current={2} labels={t.steps} fastCode={fastCode} tone="dark" />

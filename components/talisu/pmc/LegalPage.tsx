@@ -23,7 +23,7 @@ export default async function LegalPage({
 }) {
   const t = getDictionary(await getLocale()).pmc;
   return (
-    <div data-testid={testId}>
+    <div data-testid={testId} className="pmc-page">
       <section className="bg-gradient-to-br from-[#06182f] to-[#0069CF] text-white">
         <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
           <p className="text-sm font-bold uppercase tracking-[0.25em] text-[#9fd0ff]">{kicker}</p>
