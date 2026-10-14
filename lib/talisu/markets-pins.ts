@@ -115,19 +115,20 @@ export const TALISU_MKTS_HEADER_REGISTER_DROPDOWN = [
 export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
 
 /**
- * TalisU™ header dropdown — Bookshelf, FAQ, Knowledge Base, Audio, Video,
- * then (after a divider) the PMC sequence: Talispros, Media Directory, Contract.
+ * TalisU™ header dropdown — Bookshelf, FAQ, Talispros, Media Directory,
+ * Contract, Knowledge Base, then (after a divider) Audio, Video.
  */
 export const TALISU_MKTS_HEADER_DROPDOWN = [
   { href: "/catalogue/bookshelf", label: "Bookshelf" },
   { href: "/talisu#faq", label: "FAQ" },
-  { href: "/talisu/kb", label: "Knowledge Base" },
-  { href: "/talisu/au", label: "Audio" },
-  { href: "/talisu/video", label: "Video" },
-  // Below the divider: the PMC sequence (Talispros → Media Directory → Contract).
+  // PMC sequence (Talispros → Media Directory → Contract).
   { href: "/talisu/talispros", label: "Talispros" },
   { href: "/talisu/media-directory", label: "Media Directory" },
   { href: "/talisu/contract", label: "Contract" },
+  { href: "/talisu/kb", label: "Knowledge Base" },
+  // ── divider ── Audio + Video stay below the marker.
+  { href: "/talisu/au", label: "Audio" },
+  { href: "/talisu/video", label: "Video" },
 ] as const;
 
 export type TalisUMktsPinKind = "market" | "do-more";

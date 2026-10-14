@@ -479,7 +479,10 @@ export default function TalisUMktsHeader({
           )}
           {/* Claimed Mapsites: the Dashboard lives on the left Marketing card;
               the PMC sequence (Talispros → Media Directory → Contract) lives in TalisU. */}
-          {claimedMapsite && dashboardHasMenu
+          {/* Paid Mapsite (real activation payment): never show Register. */}
+          {claimedMapsite && dashboardUnlocked && !dashboardHasMenu
+            ? null
+            : claimedMapsite && dashboardHasMenu
             ? TALISU_MKTS_HEADER_NAV.filter(
                 (item) => item.label === "Register",
               ).map((item) => renderNavLink(item))
@@ -553,7 +556,8 @@ export default function TalisUMktsHeader({
                           pathname === item.href.split("#")[0]);
                       const isKb = item.href === TALISU_KB_PATH;
                       // Divider after Video: PMC sequence below it.
-                      const isFaq = item.label === "Video";
+                      // Divider after Knowledge Base: Audio + Video below it.
+                      const isFaq = item.label === "Knowledge Base";
                       const row = isKb ? (
                         <button
                           key={item.href}
