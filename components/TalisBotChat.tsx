@@ -5,7 +5,11 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ROUTES } from "@/lib/routes";
+import {
+  TALISU_DISCUSS_PATH,
+  TALISU_GLOBAL_ADMIN_URL,
+  talisuHref,
+} from "@/lib/talisu/talisu-links";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
 import { HOME_TALISBOT_SLOT_ID } from "@/components/talispros/TalisprosHomeCornerLinks";
@@ -77,7 +81,7 @@ export default function TalisBotChat({
     }
   }, [step, activeKnowledgeId]);
 
-  // Programmatic opener for the Propose a Project form (no homepage caller today:
+  // Programmatic opener for the Discuss a Project form (no homepage caller today:
   // Level 2 Learn More buttons go to the TalisU FAQ, not back to the bot).
   useEffect(() => {
     function onOpenContact(event: Event) {
@@ -145,7 +149,7 @@ export default function TalisBotChat({
             <h3 className="text-lg font-semibold text-gray-900 mb-8">TalisBOT</h3>
             <div className="flex w-full flex-col gap-2">
               <Link
-                href="/talisu#faq"
+                href={talisuHref("/talisu#faq")}
                 className="w-full bg-black text-white py-4 rounded-2xl text-sm font-semibold hover:bg-gray-800 transition shadow-lg shadow-black/5"
               >
                 {b.faq}
@@ -153,20 +157,32 @@ export default function TalisBotChat({
               <button
                 type="button"
                 onClick={openContactForm}
+                data-testid="talisbot-discuss"
                 className="w-full border border-gray-200 bg-white text-gray-900 py-3.5 rounded-2xl text-sm font-semibold hover:bg-gray-50 transition"
               >
                 {b.getHelp}
               </button>
+              <p className="-mt-1 text-[11px] font-medium text-gray-400" data-testid="talisbot-discuss-note">
+                {b.getHelpNote}
+              </p>
+              <Link
+                href={talisuHref(TALISU_DISCUSS_PATH)}
+                data-testid="talisbot-discuss-page"
+                className="text-[12px] font-semibold text-[#046BD9] hover:underline"
+              >
+                {b.discussPage}
+              </Link>
             </div>
-            <Link
-              href={ROUTES.ADMIN_LOGIN}
+            {/* Global Admin → TalisU.com (Ralf: keep talispros admin separate). */}
+            <a
+              href={TALISU_GLOBAL_ADMIN_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 text-[11px] font-medium tracking-[0.04em] text-gray-400 no-underline hover:text-gray-600 hover:underline"
               data-testid="talisbot-global-admin-link"
             >
               {b.globalAdmin}
-            </Link>
+            </a>
           </div>
         );
 

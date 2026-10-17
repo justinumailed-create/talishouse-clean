@@ -169,11 +169,13 @@ export const en = {
 
   bot: {
     name: "TalisBOT",
-    subtitle: "Summary - max 280 characters",
+    subtitle: "Engage without registering first",
     openAria: "Open TalisBOT",
     closeAria: "Close TalisBOT",
     faq: "FAQ",
-    getHelp: "Propose a Project",
+    getHelp: "Discuss a Project",
+    getHelpNote: "without first registering",
+    discussPage: "Discuss a Project page →",
     globalAdmin: "Global Admin",
     processesHeading: "Talispros™ processes",
     allTopics: "← All topics",
@@ -183,7 +185,21 @@ export const en = {
   },
 
   contactForm: {
-    title: "Quick Reference - Propose a project without registering",
+    title: "Discuss a Project without first registering",
+    /** Full-page version (/talisu/discuss). */
+    pageTitle: "Discuss a Project",
+    pageSubtitle: "without first registering",
+    pageIntro:
+      "Tell us about your project and where it is. A Talispros™ advisor will contact you; no registration or FAST Code needed.",
+    openPage: "Open as a full page with a Google-recognized location →",
+    topic: "Transaction structure",
+    location: "Location",
+    locationPlaceholder: "Search a city, address or place",
+    locationFallbackPlaceholder: "City, Province / State, Country",
+    locationNoResults: "No matching places",
+    locationChange: "Change",
+    locationRequired: "Please choose the project location.",
+    locationVerified: "Google-recognized location",
     /** Live counter under the proposal textarea. */
     projectCounter: "{count}/{max}",
     thanks: "Thanks — your message is on its way.",
@@ -196,7 +212,7 @@ export const en = {
     phone: "Phone",
     phonePlaceholder: "(555) 555-5555",
     phoneError: NANP_PHONE_ERROR,
-    project: "Propose a Project",
+    project: "Your Project",
     projectPlaceholder: "Please include location",
     sending: "Sending…",
     submit: "Submit",

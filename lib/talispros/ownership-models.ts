@@ -16,7 +16,7 @@ export const HOME_OWNERSHIP_BANNER_TITLE =
 
 /** Very small tagline directly above the four ownership structure squares. */
 export const HOME_OWNERSHIP_STRUCTURES_TAGLINE =
-  "Transaction Structures we support";
+  "Explore Transaction Structures";
 
 export type OwnershipModelSection = {
   id: string;
@@ -24,15 +24,22 @@ export type OwnershipModelSection = {
   body: string;
   result: string;
   /**
-   * Learn More CTA in the popover. Level 2 (transaction structures) always
-   * goes to the TalisU FAQ; it never re-opens TalisBOT (Level 1).
+   * Learn More CTA in the popover. Level 2 (transaction structures) opens the
+   * TalisU Discuss a Project page; it never re-opens TalisBOT (Level 1).
    */
   learnMoreHref?: string;
   learnMoreLabel?: string;
 };
 
-/** Every homepage transaction-structure Learn More goes to the TalisU FAQ. */
-export const HOME_OWNERSHIP_LEARN_MORE_HREF = "/talisu";
+/**
+ * Every homepage transaction-structure Learn More opens the TalisU
+ * "Discuss a Project without first registering" page for that structure.
+ */
+export const HOME_OWNERSHIP_LEARN_MORE_HREF = "/talisu/discuss";
+
+function discussHref(id: string): string {
+  return `${HOME_OWNERSHIP_LEARN_MORE_HREF}?topic=${id}`;
+}
 
 export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
   {
@@ -43,7 +50,7 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
     result:
       "The result: you have no ownership rights until you have paid in full, and full ownership rights when the transaction has closed.",
     learnMoreLabel: "Learn More",
-    learnMoreHref: HOME_OWNERSHIP_LEARN_MORE_HREF,
+    learnMoreHref: discussHref("conventional"),
   },
   {
     id: "splits",
@@ -53,17 +60,17 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
     result:
       "The result: you have full usage rights in accordance with a 'Lease-To-Own' Agreement drafted between lawyers.",
     learnMoreLabel: "Learn More",
-    learnMoreHref: HOME_OWNERSHIP_LEARN_MORE_HREF,
+    learnMoreHref: discussHref("splits"),
   },
   {
     id: "fractionalization",
     title: "Fractionalization",
     body:
-      "Fractionalization enables several participants to share one over-arching physical interest, which is divided into clearly defined slices, each with its own claim on rights and proportional upside.",
+      "Fractionalization enables several participants to share one over-arching physical interest, which is divided into clearly defined entities, each with its own claim on ownership rights and proportional upside.",
     result:
-      "The result: it fits partners and investor groups, who want shares in the collective without an all-or-nothing purchase.",
+      "The result: it fits partners and investor groups, who want a part of a collective without an all-or-nothing purchase.",
     learnMoreLabel: "Learn More",
-    learnMoreHref: HOME_OWNERSHIP_LEARN_MORE_HREF,
+    learnMoreHref: discussHref("fractionalization"),
   },
   {
     id: "tokenization",
@@ -73,6 +80,6 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
     result:
       "The result: it is easy to bring in co-owners while keeping stakes proportional and raising capital without touching the underlying asset.",
     learnMoreLabel: "Learn More",
-    learnMoreHref: HOME_OWNERSHIP_LEARN_MORE_HREF,
+    learnMoreHref: discussHref("tokenization"),
   },
 ] as const;

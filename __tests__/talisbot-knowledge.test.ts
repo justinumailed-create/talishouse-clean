@@ -33,12 +33,15 @@ describe("TalisBOT Talispros™ knowledge", () => {
     expect(bot).not.toMatch(/Talishouse \(Residential\)/);
     expect(bot).toMatch(/\n\s*\{b\.faq\}\n/);
     expect(en.bot.faq).toBe("FAQ");
-    expect(bot).toContain('href="/talisu#faq"');
+    expect(bot).toContain('href={talisuHref("/talisu#faq")}');
     expect(bot).not.toContain("Talispros FAQ");
-    expect(en.bot.subtitle).toBe("Summary - max 280 characters");
+    expect(en.bot.subtitle).toBe("Engage without registering first");
     expect(bot).toContain("TALISU_MKTS_HEADER_BLUE");
     expect(bot).toContain("OwnershipLearnMoreForm");
-    expect(en.bot.getHelp).toBe("Propose a Project");
+    expect(en.bot.getHelp).toBe("Discuss a Project");
+    expect(en.bot.getHelpNote).toBe("without first registering");
+    expect(bot).toContain("TALISU_GLOBAL_ADMIN_URL");
+    expect(bot).toContain("talisuHref(TALISU_DISCUSS_PATH)");
     expect(bot).not.toContain("TALISBOT_INTEREST_OPTIONS");
     expect(bot).not.toMatch(/text-green-500|bg-green-500|bg-green-50|text-green-600/);
   });

@@ -95,7 +95,7 @@ export const de: Dictionary = {
     systemDemo: "Demo erstellen",
     legalSecondary: "*Es gelten bestimmte Einschränkungen.",
     bannerTitle: "Branchennahe Abwicklungsoptionen",
-    structuresTagline: "Von uns unterstützte Transaktionsstrukturen",
+    structuresTagline: "Transaktionsstrukturen erkunden",
     ownershipAria: "Eigentumsmodelle",
     closeDetails: "Details zu {title} schließen",
     learnMore: "Mehr erfahren",
@@ -118,7 +118,7 @@ export const de: Dictionary = {
         result:
           "Das Ergebnis: Bis zur vollständigen Bezahlung haben Sie keinerlei Eigentumsrechte – nach Abschluss der Transaktion dafür die vollen Eigentumsrechte.",
         learnMoreLabel: "Mehr erfahren",
-        learnMoreHref: "/talisu",
+        learnMoreHref: "/talisu/discuss?topic=conventional",
       },
       {
         id: "splits",
@@ -127,16 +127,16 @@ export const de: Dictionary = {
         result:
           "Das Ergebnis: Sie haben volle Nutzungsrechte gemäß einem von Anwälten ausgearbeiteten Mietkaufvertrag („Lease-To-Own“).",
         learnMoreLabel: "Mehr erfahren",
-        learnMoreHref: "/talisu",
+        learnMoreHref: "/talisu/discuss?topic=splits",
       },
       {
         id: "fractionalization",
         title: "Fraktionalisierung",
-        body: "Fraktionalisierung ermöglicht es mehreren Beteiligten, sich ein übergeordnetes physisches Interesse zu teilen. Dieses wird in klar definierte Anteile aufgeteilt, jeder mit eigenem Anspruch auf Rechte und auf eine anteilige Wertsteigerung.",
+        body: "Fraktionalisierung ermöglicht es mehreren Beteiligten, sich ein übergeordnetes physisches Interesse zu teilen. Dieses wird in klar definierte Einheiten aufgeteilt, jede mit eigenem Anspruch auf Eigentumsrechte und auf eine anteilige Wertsteigerung.",
         result:
-          "Das Ergebnis: Ideal für Partner und Investorengruppen, die Anteile am Gesamtobjekt erwerben möchten, ohne alles oder nichts kaufen zu müssen.",
+          "Das Ergebnis: Ideal für Partner und Investorengruppen, die einen Teil eines Gemeinschaftsobjekts möchten, ohne alles oder nichts kaufen zu müssen.",
         learnMoreLabel: "Mehr erfahren",
-        learnMoreHref: "/talisu",
+        learnMoreHref: "/talisu/discuss?topic=fractionalization",
       },
       {
         id: "tokenization",
@@ -145,7 +145,7 @@ export const de: Dictionary = {
         result:
           "Das Ergebnis: Miteigentümer lassen sich leicht aufnehmen, die Anteile bleiben proportional, und Kapital kann beschafft werden, ohne den zugrunde liegenden Vermögenswert anzutasten.",
         learnMoreLabel: "Mehr erfahren",
-        learnMoreHref: "/talisu",
+        learnMoreHref: "/talisu/discuss?topic=tokenization",
       },
     ],
     corner: {
@@ -345,11 +345,13 @@ export const de: Dictionary = {
 
   bot: {
     name: "TalisBOT",
-    subtitle: "Zusammenfassung – max. 280 Zeichen",
+    subtitle: "Kontakt aufnehmen – ohne vorherige Registrierung",
     openAria: "TalisBOT öffnen",
     closeAria: "TalisBOT schließen",
     faq: "FAQ",
-    getHelp: "Projekt vorschlagen",
+    getHelp: "Projekt besprechen",
+    getHelpNote: "ohne vorherige Registrierung",
+    discussPage: "Seite „Projekt besprechen“ →",
     globalAdmin: "Globaler Admin",
     processesHeading: "Talispros™-Prozesse",
     allTopics: "← Alle Themen",
@@ -405,7 +407,20 @@ export const de: Dictionary = {
   },
 
   contactForm: {
-    title: "Kurzübersicht - Projekt ohne Registrierung vorschlagen",
+    title: "Projekt besprechen – ohne vorherige Registrierung",
+    pageTitle: "Projekt besprechen",
+    pageSubtitle: "ohne vorherige Registrierung",
+    pageIntro:
+      "Erzählen Sie uns von Ihrem Projekt und seinem Standort. Ein Talispros™-Berater meldet sich bei Ihnen – ohne Registrierung und ohne FAST Code.",
+    openPage: "Als ganze Seite mit Google-erkanntem Standort öffnen →",
+    topic: "Transaktionsstruktur",
+    location: "Standort",
+    locationPlaceholder: "Stadt, Adresse oder Ort suchen",
+    locationFallbackPlaceholder: "Stadt, Provinz / Bundesstaat, Land",
+    locationNoResults: "Keine passenden Orte",
+    locationChange: "Ändern",
+    locationRequired: "Bitte wählen Sie den Standort des Projekts.",
+    locationVerified: "Von Google erkannter Standort",
     projectCounter: "{count}/{max}",
     thanks: "Vielen Dank – Ihre Nachricht ist unterwegs.",
     advisor: "Ein Talispros™-Berater wird Sie zum Thema {topic} kontaktieren.",
@@ -418,7 +433,7 @@ export const de: Dictionary = {
     phonePlaceholder: "(555) 555-5555",
     phoneError:
       "Bitte geben Sie eine gültige Telefonnummer aus den USA oder Kanada ein, z. B. (555) 555-5555.",
-    project: "Projekt vorschlagen",
+    project: "Ihr Projekt",
     projectPlaceholder: "Bitte Standort angeben",
     sending: "Wird gesendet …",
     submit: "Absenden",

@@ -163,17 +163,28 @@ export async function sendOwnershipLearnMoreInquiry(params: {
   phone?: string;
   topic: string;
   message: string;
+  /** Discuss a Project page: project location (Google formatted address). */
+  location?: string;
+  locationVerified?: boolean;
+  channel?: string | null;
 }): Promise<SendResult> {
   const phoneLine = params.phone?.trim()
     ? `<p><strong>Phone:</strong> ${escapeHtml(params.phone.trim())}</p>`
     : "";
+  const locationLine = params.location?.trim()
+    ? `<p><strong>Location:</strong> ${escapeHtml(params.location.trim())}${
+        params.locationVerified ? " (Google-recognized)" : ""
+      }</p>`
+    : "";
+  const discuss = params.channel === "discuss-page";
   const html = `
     <div style="font-family:system-ui,sans-serif;line-height:1.5;color:#111">
-      <h2 style="margin:0 0 12px">Ownership Learn More inquiry</h2>
+      <h2 style="margin:0 0 12px">${discuss ? "Discuss a Project (without first registering)" : "Ownership Learn More inquiry"}</h2>
       <p><strong>Topic:</strong> ${escapeHtml(params.topic)}</p>
       <p><strong>Name:</strong> ${escapeHtml(params.name)}</p>
       <p><strong>Email:</strong> ${escapeHtml(params.email)}</p>
       ${phoneLine}
+      ${locationLine}
       <p><strong>Message:</strong></p>
       <p style="white-space:pre-wrap">${escapeHtml(params.message)}</p>
     </div>
@@ -187,7 +198,7 @@ export async function sendOwnershipLearnMoreInquiry(params: {
       from: fromEmail,
       to: [...params.recipients],
       replyTo: params.email,
-      subject: `Learn More — ${params.topic} — ${params.name}`,
+      subject: `${discuss ? "Discuss a Project" : "Learn More"} — ${params.topic} — ${params.name}`,
       html,
     });
     if (error) {

@@ -8,18 +8,18 @@ import { HOME_OWNERSHIP_SECTIONS } from "../lib/talispros/ownership-models";
 const root = process.cwd();
 
 describe("Tokenization Learn More", () => {
-  it("sends Tokenization Learn More to the TalisU FAQ like the other three", () => {
+  it("sends Tokenization Learn More to the Discuss a Project page like the other three", () => {
     const tokenization = HOME_OWNERSHIP_SECTIONS.find(
       (s) => s.id === "tokenization",
     );
-    expect(tokenization?.learnMoreHref).toBe("/talisu");
+    expect(tokenization?.learnMoreHref).toBe("/talisu/discuss?topic=tokenization");
     expect(tokenization?.learnMoreLabel).toBe("Learn More");
 
     const showcase = readFileSync(
       join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
       "utf8",
     );
-    expect(showcase).toContain("openSection.learnMoreHref");
+    expect(showcase).toContain("talisuHref(openSection.learnMoreHref)");
     expect(showcase).toContain("t.home.learnMore");
     expect(en.home.learnMore).toBe("Learn More");
     // Level 2 (transaction structures) never reverts to TalisBOT (Level 1).
@@ -31,16 +31,20 @@ describe("Tokenization Learn More", () => {
     expect(bot).toContain("<OwnershipLearnMoreForm topic={contactTopic}");
   });
 
-  it("Learn More form: no Topic field, required NANP phone, Propose a Project", () => {
+  it("Learn More form: topic picker only on the page, required NANP phone, Discuss a Project", () => {
     const form = readFileSync(
       join(root, "components/talispros/OwnershipLearnMoreForm.tsx"),
       "utf8",
     );
-    expect(form).not.toContain("<select");
+    // Bot keeps a hidden topic; only the /talisu/discuss page shows a picker + location.
+    expect(form).toMatch(/isPage \? \([\s\S]*?<select/);
+    expect(form).toContain('<input type="hidden" name="topic"');
+    expect(form).toContain("MapSitePlaceSearch");
     expect(form).not.toContain("(optional)");
     expect(form).not.toContain("What would you like to know?");
     expect(form).toContain("c.project");
-    expect(en.contactForm.project).toBe("Propose a Project");
+    expect(en.contactForm.project).toBe("Your Project");
+    expect(en.contactForm.title).toBe("Discuss a Project without first registering");
     expect(form).toMatch(/type="tel"[\s\S]*?required/);
     expect(form).toContain("isValidNanpPhone");
     expect(form).toContain("topic,");
@@ -53,15 +57,18 @@ describe("Tokenization Learn More", () => {
     expect(api).toContain("formatNanpPhone");
   });
 
-  it("points every ownership Learn More (EN + DE) at the TalisU FAQ", () => {
+  it("points every ownership Learn More (EN + DE) at the Discuss a Project page", () => {
     expect(HOME_OWNERSHIP_SECTIONS.length).toBe(4);
     for (const section of HOME_OWNERSHIP_SECTIONS) {
       expect(section.learnMoreLabel).toBe("Learn More");
-      expect(section.learnMoreHref).toBe("/talisu");
+      expect(section.learnMoreHref).toBe(`/talisu/discuss?topic=${section.id}`);
     }
     for (const section of de.home.ownershipSections) {
-      expect(section.learnMoreHref).toBe("/talisu");
+      expect(section.learnMoreHref).toBe(`/talisu/discuss?topic=${section.id}`);
     }
+    const page = readFileSync(join(root, "app/talisu/discuss/page.tsx"), "utf8");
+    expect(page).toContain('pageMetadata("/talisu/discuss")');
+    expect(page).toContain("ownershipTopicFromId");
 
     const contact = readFileSync(
       join(root, "lib/talispros/ownership-contact.ts"),

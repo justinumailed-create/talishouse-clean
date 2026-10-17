@@ -1,10 +1,17 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
+import Link from "next/link";
 import {
+  OWNERSHIP_CONTACT_LOCATION_MAX,
   OWNERSHIP_CONTACT_MESSAGE_MAX,
+  OWNERSHIP_CONTACT_TOPICS,
   type OwnershipContactTopic,
 } from "@/lib/talispros/ownership-contact";
+import MapSitePlaceSearch, {
+  getMapSitePlacesApiKey,
+} from "@/components/talispros/mapsite/MapSitePlaceSearch";
+import { talisuDiscussHref } from "@/lib/talisu/talisu-links";
 import {
   formatNanpPhoneInput,
   isValidNanpPhone,
@@ -18,6 +25,11 @@ type OwnershipLearnMoreFormProps = {
   topic: OwnershipContactTopic | string;
   /** Called from the Done button after a successful submit. */
   onClose: () => void;
+  /**
+   * `bot` (default): compact form inside TalisBOT, with a link to the page.
+   * `page`: /talisu/discuss — topic picker + required Google Places location.
+   */
+  variant?: "bot" | "page";
 };
 
 /** Maps the contact API's English errors to the active locale. */
@@ -51,13 +63,21 @@ const LABEL_CLASS = "mb-0.5 block text-[11px] font-medium text-neutral-600";
  * submission so leads route the same way.
  */
 export default function OwnershipLearnMoreForm({
-  topic,
+  topic: initialTopic,
   onClose,
+  variant = "bot",
 }: OwnershipLearnMoreFormProps) {
   const t = useT();
   const c = t.contactForm;
+  const isPage = variant === "page";
+  const [topic, setTopic] = useState<string>(String(initialTopic));
+  useEffect(() => setTopic(String(initialTopic)), [initialTopic]);
   const topicLabel =
     (c.topics as Record<string, string>)[String(topic)] ?? String(topic);
+  const [location, setLocation] = useState("");
+  const [locationVerified, setLocationVerified] = useState(false);
+  const [placesAvailable, setPlacesAvailable] = useState(() => Boolean(getMapSitePlacesApiKey()));
+  const [locationError, setLocationError] = useState(false);
   const titleId = useId();
   const phoneErrorId = useId();
   const counterId = useId();
@@ -84,6 +104,10 @@ export default function OwnershipLearnMoreForm({
       setError(null);
       return;
     }
+    if (isPage && !location.trim()) {
+      setLocationError(true);
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -96,6 +120,9 @@ export default function OwnershipLearnMoreForm({
           phone,
           message,
           topic,
+          ...(isPage
+            ? { location: location.trim(), locationVerified, channel: "discuss-page" }
+            : {}),
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
@@ -109,6 +136,8 @@ export default function OwnershipLearnMoreForm({
       setPhone("");
       setPhoneTouched(false);
       setMessage("");
+      setLocation("");
+      setLocationVerified(false);
     } catch {
       setError(c.networkError);
     } finally {
@@ -123,9 +152,15 @@ export default function OwnershipLearnMoreForm({
       data-ownership-topic={topic}
       data-testid="talisbot-propose-form"
     >
-      <h4 id={titleId} className="text-[13px] font-semibold leading-snug text-gray-900">
-        {c.title}
-      </h4>
+      {isPage ? (
+        <h2 id={titleId} className="sr-only">
+          {c.title}
+        </h2>
+      ) : (
+        <h4 id={titleId} className="text-[13px] font-semibold leading-snug text-gray-900">
+          {c.title}
+        </h4>
+      )}
 
       {done ? (
         <div className="space-y-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-5 text-center">
@@ -144,8 +179,30 @@ export default function OwnershipLearnMoreForm({
           </button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-2">
-          <input type="hidden" name="topic" value={topic} />
+        <form onSubmit={handleSubmit} className={isPage ? "space-y-3" : "space-y-2"}>
+          {isPage ? (
+            <div>
+              <label htmlFor={`${titleId}-topic`} className={LABEL_CLASS}>
+                {c.topic}
+              </label>
+              <select
+                id={`${titleId}-topic`}
+                name="topic"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                data-testid="discuss-topic"
+                className={`${INPUT_CLASS} border-neutral-200`}
+              >
+                {OWNERSHIP_CONTACT_TOPICS.map((value) => (
+                  <option key={value} value={value}>
+                    {(c.topics as Record<string, string>)[value] ?? value}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <input type="hidden" name="topic" value={topic} />
+          )}
           <div className="grid grid-cols-2 gap-2">
             <div className="min-w-0">
               <label htmlFor={`${titleId}-name`} className={LABEL_CLASS}>
@@ -207,6 +264,63 @@ export default function OwnershipLearnMoreForm({
               placeholder={c.emailPlaceholder}
             />
           </div>
+          {isPage ? (
+            <div data-testid="discuss-location">
+              <p className={LABEL_CLASS}>{c.location}</p>
+              {location && locationVerified ? (
+                <div className="flex items-start justify-between gap-2 rounded-lg border border-[#046BD9]/30 bg-[#046BD9]/5 px-2.5 py-2">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold text-neutral-900" data-testid="discuss-location-value">
+                      {location}
+                    </p>
+                    <p className="text-[10.5px] text-[#046BD9]">{c.locationVerified}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocation("");
+                      setLocationVerified(false);
+                    }}
+                    className="shrink-0 text-[12px] font-semibold text-[#046BD9] hover:underline"
+                  >
+                    {c.locationChange}
+                  </button>
+                </div>
+              ) : placesAvailable ? (
+                <MapSitePlaceSearch
+                  label={c.location}
+                  placeholder={c.locationPlaceholder}
+                  noResults={c.locationNoResults}
+                  onAvailabilityChange={setPlacesAvailable}
+                  onSelect={(place) => {
+                    setLocation(place.formattedAddress.slice(0, OWNERSHIP_CONTACT_LOCATION_MAX));
+                    setLocationVerified(true);
+                    setLocationError(false);
+                  }}
+                />
+              ) : (
+                <input
+                  type="text"
+                  name="location"
+                  required
+                  maxLength={OWNERSHIP_CONTACT_LOCATION_MAX}
+                  value={location}
+                  onChange={(e) => {
+                    setLocation(e.target.value);
+                    setLocationVerified(false);
+                    setLocationError(false);
+                  }}
+                  className={`${INPUT_CLASS} border-neutral-200`}
+                  placeholder={c.locationFallbackPlaceholder}
+                />
+              )}
+              {locationError ? (
+                <p className="mt-0.5 text-[11px] text-red-600" role="alert">
+                  {c.locationRequired}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <div>
             <label htmlFor={`${titleId}-message`} className={LABEL_CLASS}>
               {c.project}
@@ -215,7 +329,7 @@ export default function OwnershipLearnMoreForm({
               id={`${titleId}-message`}
               name="message"
               required
-              rows={3}
+              rows={isPage ? 5 : 3}
               maxLength={OWNERSHIP_CONTACT_MESSAGE_MAX}
               value={message}
               onChange={(e) =>
@@ -252,6 +366,15 @@ export default function OwnershipLearnMoreForm({
           >
             {submitting ? c.sending : c.submit}
           </button>
+          {!isPage ? (
+            <Link
+              href={talisuDiscussHref(String(topic))}
+              data-testid="talisbot-discuss-page-link"
+              className="block text-center text-[11px] font-medium text-[#046BD9] hover:underline"
+            >
+              {c.openPage}
+            </Link>
+          ) : null}
         </form>
       )}
     </section>

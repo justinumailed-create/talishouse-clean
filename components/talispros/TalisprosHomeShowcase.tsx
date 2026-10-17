@@ -5,6 +5,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/format";
 import HomeMountainMotion from "@/components/talispros/HomeMountainMotion";
+import { talisuHref } from "@/lib/talisu/talisu-links";
 
 /**
  * Homepage gate right column: looping mountain motion on the upper half with a
@@ -99,9 +100,10 @@ export default function TalisprosHomeShowcase() {
             </p>
             {openSection.learnMoreHref ? (
               <p className="mt-3.5">
-                {/* Level 2 → TalisU FAQ (never back to TalisBOT, which is Level 1). */}
+                {/* Level 2 → TalisU "Discuss a Project without first registering" page. */}
                 <Link
-                  href={openSection.learnMoreHref}
+                  href={talisuHref(openSection.learnMoreHref)}
+                  data-testid="ownership-learn-more"
                   onClick={close}
                   className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
                 >

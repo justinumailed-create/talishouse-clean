@@ -52,7 +52,7 @@ describe("homepage mountain looping motion", () => {
       "Industry Adjacent Fulfilment Options",
     );
     expect(HOME_OWNERSHIP_STRUCTURES_TAGLINE).toBe(
-      "Transaction Structures we support",
+      "Explore Transaction Structures",
     );
     const showcase = readFileSync(
       resolve("components/talispros/TalisprosHomeShowcase.tsx"),

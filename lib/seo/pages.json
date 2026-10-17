@@ -128,6 +128,21 @@
     "alt": "Talispros™ Baumlogo: Ihren Dienstleistungsvertrag signieren"
    }
   },
+  "/talisu/discuss": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/talisu-discuss",
+   "en": {
+    "title": "Discuss a Project Without Registering | TalisU™",
+    "description": "Discuss your Conventional, SPLITS, Fractionalization or Tokenization project with a Talispros™ advisor. No registration or FAST Code needed.",
+    "alt": "Webster M., Team Leader with the Talispros™ tree logo: Discuss a Project"
+   },
+   "de": {
+    "title": "Projekt besprechen ohne Registrierung | TalisU™",
+    "description": "Besprechen Sie Ihr Projekt (Konventionell, SPLITS, Fraktionalisierung, Tokenisierung) mit einem Talispros™-Berater. Ohne Registrierung.",
+    "alt": "Webster M., Team Leader mit dem Talispros™ Baumlogo: Projekt besprechen"
+   }
+  },
   "/talisu/terms": {
    "kind": "public",
    "noindex": false,

@@ -23,6 +23,35 @@ export const OWNERSHIP_CONTACT_TOPICS = [
  */
 export const OWNERSHIP_CONTACT_MESSAGE_MAX = 280;
 
+/** Max length of the Discuss a Project page location (Google formatted address). */
+export const OWNERSHIP_CONTACT_LOCATION_MAX = 200;
+
+/** `?topic=fractionalization` → "Fractionalization" (default Conventional). */
+export function ownershipTopicFromId(id: string | null | undefined): OwnershipContactTopic {
+  const key = (id || "").trim().toLowerCase();
+  return (
+    OWNERSHIP_CONTACT_TOPICS.find((topic) => topic.toLowerCase() === key) ??
+    OWNERSHIP_CONTACT_TOPICS[0]
+  );
+}
+
+/** Lead `location` column: where the inquiry came from (+ project location). */
+export function ownershipLeadLocation(input: {
+  topic: string;
+  location?: string | null;
+  channel?: string | null;
+}): string {
+  const where = (input.location || "").trim();
+  if (input.channel === "discuss-page") {
+    return where
+      ? `Discuss a Project — ${input.topic} — ${where}`
+      : `Discuss a Project — ${input.topic}`;
+  }
+  return where
+    ? `Ownership Learn More — ${input.topic} — ${where}`
+    : `Ownership Learn More — ${input.topic}`;
+}
+
 export type OwnershipContactTopic =
   (typeof OWNERSHIP_CONTACT_TOPICS)[number];
 

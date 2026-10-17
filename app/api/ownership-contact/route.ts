@@ -6,6 +6,8 @@ import {
   OWNERSHIP_CONTACT_SOURCE,
   OWNERSHIP_CONTACT_TOPICS,
   OWNERSHIP_CONTACT_MESSAGE_MAX,
+  OWNERSHIP_CONTACT_LOCATION_MAX,
+  ownershipLeadLocation,
 } from "@/lib/talispros/ownership-contact";
 import { NANP_PHONE_ERROR, formatNanpPhone } from "@/lib/talispros/nanp-phone";
 
@@ -35,6 +37,12 @@ export async function POST(request: Request) {
   const rawPhone = String(body.phone || "").trim();
   const message = String(body.message || "").trim();
   const topic = String(body.topic || "").trim();
+  const channel = body.channel === "discuss-page" ? "discuss-page" : null;
+  const location = String(body.location || "")
+    .replace(/[\u0000-\u001f\u007f]+/g, " ")
+    .trim()
+    .slice(0, OWNERSHIP_CONTACT_LOCATION_MAX);
+  const locationVerified = body.locationVerified === true;
 
   if (!name || !email || !rawPhone || !message || !topic) {
     return NextResponse.json(
@@ -46,6 +54,13 @@ export async function POST(request: Request) {
   if (message.length > OWNERSHIP_CONTACT_MESSAGE_MAX) {
     return NextResponse.json(
       { ok: false, error: "Please keep your proposal to 280 characters or fewer." },
+      { status: 400 },
+    );
+  }
+
+  if (channel === "discuss-page" && !location) {
+    return NextResponse.json(
+      { ok: false, error: "Please choose the project location." },
       { status: 400 },
     );
   }
@@ -73,7 +88,7 @@ export async function POST(request: Request) {
         email,
         phone,
         message,
-        location: `Ownership Learn More — ${topic}`,
+        location: ownershipLeadLocation({ topic, location, channel }),
         fast_code: null,
         source: OWNERSHIP_CONTACT_SOURCE,
         status: "new",
@@ -101,6 +116,9 @@ export async function POST(request: Request) {
     phone,
     topic,
     message,
+    location: location || undefined,
+    locationVerified,
+    channel,
   });
 
   if (!mail.sent) {

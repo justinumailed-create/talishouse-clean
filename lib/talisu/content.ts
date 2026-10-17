@@ -28,7 +28,7 @@ export const TALISU_SEACANS_NAV: TalisUNavItem[] = [
 
 export const TALISU_WELCOME = {
   eyebrow: "Industry Adjacent Fulfilment Options",
-  heading: "Transaction Structures we support",
+  heading: "Explore Transaction Structures",
   structures: [
     {
       title: "Conventional",

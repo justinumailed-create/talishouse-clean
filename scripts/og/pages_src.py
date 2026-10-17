@@ -87,6 +87,13 @@ add("/talisu/contract", "talisu-contract", "utility", BRAND,
     ("Dienstleistungsvertrag mit Agenten-Code signieren",
      "Öffnen Sie den TalisALL PMC Dienstleistungsvertrag mit Ihrem Agenten-Code, unterschreiben Sie elektronisch und fahren Sie mit der Registrierung fort.",
      "TALISPROS  ·  VERTRAG", ["Ihren", "Dienstleistungs-", "vertrag signieren"], ["Agenten-Code", "E-Signatur", "Dann registrieren"]))
+add("/talisu/discuss", "talisu-discuss", "public", WEBSTER,
+    ("Discuss a Project Without Registering | TalisU™",
+     "Discuss your Conventional, SPLITS, Fractionalization or Tokenization project with a Talispros™ advisor. No registration or FAST Code needed.",
+     "TALISU™  ·  DISCUSS", ["Discuss a", "Project"], ["No registration", "Google location", "Advisor reply"]),
+    ("Projekt besprechen ohne Registrierung | TalisU™",
+     "Besprechen Sie Ihr Projekt (Konventionell, SPLITS, Fraktionalisierung, Tokenisierung) mit einem Talispros™-Berater. Ohne Registrierung.",
+     "TALISU™  ·  BESPRECHEN", ["Projekt", "besprechen"], ["Ohne Registrierung", "Google-Standort", "Berater-Antwort"]))
 add("/talisu/terms", "talisu-terms", "public", BRAND,
     ("Terms of Service | Talispros by TalisALL PMC",
      "Talispros Terms of Service: platform role, customer responsibilities, warranties, liability, fees in CAD, intellectual property, termination and privacy.",
