@@ -61,7 +61,7 @@ describe("Catalogue start page (front cover → T-Dome page 1)", () => {
     ]);
   });
 
-  it("opens on the front cover with T-Dome as content page 1 and uploaded back cover", () => {
+  it("opens on the front cover with the T-House / T-Dome / G-House spec sheets as pages 1–3 and uploaded back cover", () => {
     const all = loadProductFlipbookPages();
     const pages = loadCataloguePages();
     expect(all).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT);
@@ -69,7 +69,7 @@ describe("Catalogue start page (front cover → T-Dome page 1)", () => {
     const hiddenCount =
       CATALOGUE_HIDDEN_CONTENT_PAGES.to - CATALOGUE_HIDDEN_CONTENT_PAGES.from + 1;
     expect(CATALOGUE_HIDDEN_CONTENT_PAGES).toEqual({ from: 2, to: 19 });
-    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT + 1 - hiddenCount);
+    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT + 3 - hiddenCount);
     expect(pages[0]).toMatchObject({
       id: "page-01.webp",
       number: 0,
@@ -77,16 +77,20 @@ describe("Catalogue start page (front cover → T-Dome page 1)", () => {
       role: "front",
       src: "/product-flipbook/page-01.webp",
     });
-    expect(pages[1]).toMatchObject({
+    expect(pages.slice(1, 4).map((p) => [p.id, p.number, p.face, p.specId])).toEqual([
+      ["t-house", 1, "spec", "t-house"],
+      ["t-dome", 2, "spec", "t-dome"],
+      ["g-house", 3, "spec", "g-house"],
+    ]);
+    expect(pages[2]).toMatchObject({
       id: CATALOGUE_TDOME_PAGE_ID,
-      number: 1,
       sourcePage: 0,
       role: "content",
       src: CATALOGUE_TDOME_SRC,
       hotspots: [],
     });
-    // Next leaf after T-Dome is Design Ideas (page 20); pages 2–19 are omitted
-    expect(pages[2]).toMatchObject({
+    // Next leaf after the spec sheets is Design Ideas (page 20); pages 2–19 of the PDF stay omitted
+    expect(pages[4]).toMatchObject({
       id: "page-20.webp",
       number: 20,
       sourcePage: 20,
@@ -96,6 +100,7 @@ describe("Catalogue start page (front cover → T-Dome page 1)", () => {
       pages.some(
         (p) =>
           p.role === "content" &&
+          p.face !== "spec" &&
           p.number >= CATALOGUE_HIDDEN_CONTENT_PAGES.from &&
           p.number <= CATALOGUE_HIDDEN_CONTENT_PAGES.to,
       ),

@@ -1,9 +1,10 @@
-import Link from "next/link";
 import TopBoundFlipbook from "@/components/product-flipbook/TopBoundFlipbook";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { loadCataloguePages } from "@/lib/talisu/catalogue-pages";
 import { pageMetadata } from "@/lib/seo/page-metadata";
+import WorkingPageCtaLink, { WEBSTER_AVATAR_SRC } from "@/components/talispros/WorkingPageCtaLink";
+import { ROUTES } from "@/lib/routes";
 
 export async function generateMetadata() {
   return pageMetadata("/catalogue");
@@ -21,14 +22,14 @@ export default async function CataloguePage() {
       showHeader={false}
       headline={headline}
       headlineAction={
-        <Link
-          href="/talisu/reg"
-          data-testid="catalogue-register-link"
-          className="inline-flex items-center gap-1.5 rounded-full border border-[#046BD9]/40 bg-white px-4 py-1.5 text-[14px] font-semibold text-[#046BD9] shadow-sm transition hover:bg-[#046BD9] hover:text-white"
-        >
-          {dict.nav.mapsitesMenu.registerCatalogue}
-          <span aria-hidden>→</span>
-        </Link>
+        // Ralf (Oct 17): "Plan your Project" with Webster → /talisu/engage.
+        <WorkingPageCtaLink
+          href={ROUTES.TALISU_ENGAGE}
+          label={dict.catalogueUi.planProject}
+          avatarSrc={WEBSTER_AVATAR_SRC}
+          avatarAlt="Webster M."
+          testId="catalogue-plan-project-link"
+        />
       }
     />
   );

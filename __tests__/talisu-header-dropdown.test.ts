@@ -80,7 +80,11 @@ describe("TalisU blue header dropdown", () => {
       resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),
       "utf8",
     );
-    expect(builder).toContain("<DemoFastCodeCard");
+    // Ralf (Oct 17): the big "Open your Mapsite" FAST Code block is gone from the
+    // Mapsites page (Sign In is item one on the home page); beige working page.
+    expect(builder).not.toContain("<DemoFastCodeCard");
+    expect(builder).toContain("talis-working-bg");
+    expect(builder).toContain("ROUTES.TALISU_REGISTER");
   });
 
   it("puts a horizontal divider after Knowledge Base (Audio/Video below) in the TalisU dropdown", () => {

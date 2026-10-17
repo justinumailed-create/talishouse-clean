@@ -823,6 +823,16 @@ export const de: Dictionary = {
   catalogueUi: {
     headline:
       "Jeder registrierte Markt erhält bevorzugten angebotsseitigen Zugang zu Talishouse™ Tiny Homes",
+    planProject: "Ihr Projekt planen",
+    mapsitesHeadline:
+      "Jede registrierte Mapsite umfasst einen semi-exklusiven Radius von 50 Meilen um einen Heimatmarkt",
+    registerMapsite: "Mapsite registrieren",
+    specIncludes: "umfasst",
+    specMayInclude: "kann umfassen",
+    specFrom: "Ab",
+    specPerSqft: "/ sq.ft.",
+    specOptional: "Optionale Leistungen",
+    specWhereAvailable: "(sofern verfügbar)",
     register: "Registrieren",
     home: "Startseite",
     bookshelf: "Bücherregal",

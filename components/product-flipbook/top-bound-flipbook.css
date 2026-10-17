@@ -553,3 +553,101 @@
     animation-duration: 1ms;
   }
 }
+
+/* Catalogue spec sheets (T-House / T-Dome / G-House): photo 75% + HTML spec
+   panel 25%, sized in container units so the sheet scales with the page. */
+.catalogue-spec {
+  container-type: inline-size;
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 75% 25%;
+  background: #ffffff;
+  color: #111111;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  overflow: hidden;
+}
+.catalogue-spec__photo {
+  position: relative;
+  overflow: hidden;
+  background: #ffffff;
+}
+.catalogue-spec__photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  user-select: none;
+}
+.catalogue-spec__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  border-left: 0.15cqw solid #111111;
+  background: linear-gradient(180deg, #ececec 0%, #dcdcdc 100%);
+  padding: 1.8cqw 1.4cqw 1.2cqw;
+  text-align: center;
+  overflow: hidden;
+}
+.catalogue-spec__title {
+  margin: 0;
+  padding-bottom: 0.9cqw;
+  border-bottom: 0.08cqw solid #8a8a8a;
+  font-family: "Noteworthy", "Bradley Hand", "Segoe Print", "Comic Sans MS", cursive;
+  font-size: 2.45cqw;
+  font-weight: 400;
+  line-height: 1.15;
+  color: #111111;
+}
+.catalogue-spec__size {
+  margin: 1.3cqw 0 0;
+  font-size: 1.95cqw;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #0a74c9;
+}
+.catalogue-spec__small {
+  margin: 0.4cqw 0 0;
+  font-size: 0.95cqw;
+  line-height: 1.2;
+}
+.catalogue-spec__rooms {
+  margin-top: 0.4cqw;
+}
+.catalogue-spec__rooms p {
+  margin: 0;
+  font-size: 2cqw;
+  line-height: 1.22;
+}
+.catalogue-spec__notes,
+.catalogue-spec__services {
+  margin: 0.8cqw 0 0;
+  padding: 0 0 0 1cqw;
+  list-style: disc;
+  text-align: left;
+  font-size: 0.95cqw;
+  line-height: 1.3;
+}
+.catalogue-spec__price {
+  margin: 1.1cqw 0 0;
+  font-size: 1.35cqw;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #0a74c9;
+}
+.catalogue-spec__optional {
+  margin: 1.2cqw 0 0;
+  text-align: left;
+  font-size: 1.55cqw;
+  line-height: 1.1;
+}
+.catalogue-spec__where {
+  margin: 0.15cqw 0 0;
+  text-align: left;
+  font-size: 0.72cqw;
+}
+.catalogue-spec__services {
+  margin-top: 0.5cqw;
+}

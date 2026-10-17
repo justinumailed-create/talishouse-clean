@@ -13,6 +13,7 @@ import {
   type ProductFlipbookPage,
 } from "@/lib/product-flipbook/manifest";
 import WebsterCataloguePage from "@/components/product-flipbook/WebsterCataloguePage";
+import CatalogueSpecPage from "@/components/product-flipbook/CatalogueSpecPage";
 import "./top-bound-flipbook.css";
 
 const FLIP_MS = 720;
@@ -27,6 +28,7 @@ type Flip = {
 
 function CatalogueFace({ page }: { page: ProductFlipbookPage }) {
   if (page.face === "webster") return <WebsterCataloguePage />;
+  if (page.face === "spec" && page.specId) return <CatalogueSpecPage specId={page.specId} />;
   if (!page.src) return null;
   return (
     // Native img: next/image `fill` was painting the page against the viewport

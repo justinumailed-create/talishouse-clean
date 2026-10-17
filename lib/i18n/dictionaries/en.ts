@@ -601,6 +601,19 @@ export const en = {
     /** Headline above the /catalogue flipbook. */
     headline:
       "Every registered Market comes with preferred Supply Side Access to Talishouse™ Tiny Homes",
+    /** Catalogue headline action → /talisu/engage (Webster). */
+    planProject: "Plan your Project",
+    /** Mapsites page (/talispros/demo-mapsite), bottom right (Z-pattern) → /talisu/reg (Aisha). */
+    mapsitesHeadline:
+      "Every registered Mapsite comes with a semi-exclusive 50 miles radius around a home point market",
+    registerMapsite: "Register a Mapsite",
+    /** Catalogue spec sheets (T-House, T-Dome, G-House). */
+    specIncludes: "includes",
+    specMayInclude: "may include",
+    specFrom: "From",
+    specPerSqft: "/ sq.ft.",
+    specOptional: "Optional services",
+    specWhereAvailable: "(where available)",
     register: "Register",
     home: "Home",
     bookshelf: "Bookshelf",

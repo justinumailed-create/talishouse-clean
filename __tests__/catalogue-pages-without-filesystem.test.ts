@@ -39,10 +39,10 @@ describe("Catalogue page list without a readable public directory", () => {
     expect(readdirThrew).toBe(true);
     const pages = loadCataloguePages();
     expect(pages.length).toBeGreaterThan(0);
-    // Front + T-Dome + source 20–37 (2–19 hidden) + back
+    // Front + 3 spec sheets (T-House, T-Dome, G-House) + source 20–37 (2–19 hidden) + back
     const hiddenCount =
       CATALOGUE_HIDDEN_CONTENT_PAGES.to - CATALOGUE_HIDDEN_CONTENT_PAGES.from + 1;
-    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT + 1 - hiddenCount);
+    expect(pages).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT + 3 - hiddenCount);
     expect(pages[0]).toMatchObject({
       id: "page-01.webp",
       number: 0,
@@ -51,10 +51,11 @@ describe("Catalogue page list without a readable public directory", () => {
       src: "/product-flipbook/page-01.webp",
       alt: "Talishouse™ Product Catalogue front cover",
     });
-    expect(pages[1]).toMatchObject({
+    expect(pages[2]).toMatchObject({
       id: CATALOGUE_TDOME_PAGE_ID,
-      number: 1,
+      number: 2,
       role: "content",
+      face: "spec",
       src: CATALOGUE_TDOME_SRC,
     });
     expect(pages.some((page) => page.face === "webster")).toBe(false);

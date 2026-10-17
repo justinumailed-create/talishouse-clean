@@ -5222,3 +5222,12 @@ body.mapsite-gallery-open [data-paypal-button] {
   color: revert-layer;
   margin-bottom: revert-layer;
 }
+
+/* Beige "working page" surface (Catalogue + Mapsites) — Ralf, Oct 17 2026.
+   TalisU pages stay white. Same gradient as .product-flipbook. */
+.talis-working-bg {
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 12%, #f7f5f1 0%, transparent 55%),
+    linear-gradient(180deg, #ebe7e0 0%, #d9d3c9 48%, #cfc8bc 100%);
+  background-attachment: fixed;
+}

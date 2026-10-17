@@ -44,7 +44,7 @@ export interface ProductFlipbookHotspot {
  * `raster` paints `src`. `webster` is an optional HTML face (unused by the
  * current catalogue closing page, which uses the uploaded back-cover raster).
  */
-export type ProductFlipbookFace = "raster" | "webster";
+export type ProductFlipbookFace = "raster" | "webster" | "spec";
 
 /** Cover leaves are unnumbered; content pages use `number` (T-Dome = 1). */
 export type ProductFlipbookLeafRole = "front" | "back" | "content";
@@ -66,6 +66,8 @@ export interface ProductFlipbookPage {
   hotspots?: ProductFlipbookHotspot[];
   /** Omitted pages are rasters. */
   face?: ProductFlipbookFace;
+  /** `face: "spec"`: which catalogue spec sheet (lib/talisu/catalogue-specs). */
+  specId?: string;
   /** Omitted pages are treated as content. */
   role?: ProductFlipbookLeafRole;
 }

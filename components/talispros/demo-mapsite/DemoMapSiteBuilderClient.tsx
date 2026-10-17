@@ -11,14 +11,16 @@ import {
   type HomePinLocationValues,
 } from "@/components/build-mapsite/home-pin-types";
 import { createDemoMapSiteAction } from "@/app/talispros/demo-mapsite/actions";
-import DemoFastCodeCard from "@/components/talispros/demo-mapsite/DemoFastCodeCard";
+import WorkingPageCtaLink, { AISHA_AVATAR_SRC } from "@/components/talispros/WorkingPageCtaLink";
+import { ROUTES } from "@/lib/routes";
 import DemoDownloadMenu from "@/components/talispros/demo-mapsite/DemoDownloadMenu";
 
 export default function DemoMapSiteBuilderClient() {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [pin, setPin] = useState<HomePinLocationValues>(defaultHomePinLocationValues);
-  const d = useT().demo;
+  const t = useT();
+  const d = t.demo;
   const [title, setTitle] = useState(d.defaultListingTitle);
   const [error, setError] = useState<string | null>(null);
   const [pinErrors, setPinErrors] = useState<
@@ -60,10 +62,15 @@ export default function DemoMapSiteBuilderClient() {
     "overflow-hidden rounded-[28px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]";
 
   return (
-    <div className="relative flex min-h-dvh flex-col items-center bg-[#f5f5f7] px-6 py-16 text-neutral-950 antialiased sm:py-24">
+    // Mapsites page (Ralf, Oct 17): Catalogue look — beige working surface,
+    // narrow scan width, no big "Open your Mapsite" FAST Code block (Sign In is
+    // on the home page), and the next step bottom right (Z-pattern).
+    <div
+      className="talis-working-bg relative flex min-h-dvh flex-col items-center px-4 pb-32 pt-12 text-neutral-950 antialiased sm:px-6 sm:pt-14"
+      data-testid="mapsites-page"
+    >
       <DemoDownloadMenu className="absolute right-4 top-4 z-20 sm:right-6 sm:top-5" />
-      <div className="w-full max-w-[560px]">
-        <DemoFastCodeCard className="mb-14" />
+      <div className="w-full" style={{ maxWidth: "60rem" }} data-testid="mapsites-content">
         <div className="text-center">
           <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">
             DEMONSTRATION
@@ -127,10 +134,27 @@ export default function DemoMapSiteBuilderClient() {
           >
             {pending ? d.continuing : d.continue}
           </button>
-          <p className="text-center text-[12px] leading-relaxed text-neutral-400">
+          <p className="text-center text-[12px] leading-relaxed text-neutral-500">
             {d.nextNote}
           </p>
         </form>
+      </div>
+      <div
+        className="pointer-events-none fixed inset-x-0 bottom-0 z-30 flex justify-end px-3 pb-3 sm:px-6 sm:pb-5"
+        data-testid="mapsites-register-cta"
+      >
+        <div className="pointer-events-auto flex max-w-[46rem] flex-wrap items-center justify-end gap-x-3 gap-y-2 rounded-2xl bg-white/90 px-4 py-2.5 text-right shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur">
+          <p className="text-[13px] font-semibold leading-snug text-neutral-900 sm:text-[14px]">
+            {t.catalogueUi.mapsitesHeadline}
+          </p>
+          <WorkingPageCtaLink
+            href={ROUTES.TALISU_REGISTER}
+            label={t.catalogueUi.registerMapsite}
+            avatarSrc={AISHA_AVATAR_SRC}
+            avatarAlt="Aisha C."
+            testId="mapsites-register-link"
+          />
+        </div>
       </div>
     </div>
   );

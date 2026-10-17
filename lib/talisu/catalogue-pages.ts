@@ -5,6 +5,7 @@ import {
   catalogueProductRegisterHref,
   catalogueProductsForSourcePage,
 } from "@/lib/talisu/catalogue-products";
+import { CATALOGUE_SPECS } from "@/lib/talisu/catalogue-specs";
 
 /** Source PDF page 1 — Talishouse™ Product Catalogue front cover. */
 export const CATALOGUE_FRONT_SOURCE_PAGE = 1;
@@ -15,11 +16,18 @@ export const CATALOGUE_FRONT_SOURCE_PAGE = 1;
  */
 export const CATALOGUE_BACK_SOURCE_PAGE = 38;
 
-/** Synthetic first content leaf — T-Dome product sheet (not in T-All Final.pdf). */
+/**
+ * Synthetic first content leaves (not in T-All Final.pdf): Ralf's spec sheets,
+ * Oct 17 2026 — T-House, updated T-Dome (replaces the old dome raster), G-House.
+ * Photo is an image; the spec panel is HTML so prices read in CAD.
+ */
+export const CATALOGUE_SPEC_PAGE_IDS = CATALOGUE_SPECS.map((spec) => spec.id);
+
+/** T-Dome leaf id (kept for callers); now the HTML spec sheet. */
 export const CATALOGUE_TDOME_PAGE_ID = "t-dome";
 
-export const CATALOGUE_TDOME_SRC =
-  "/talisu/catalogue/t-dome.jpg";
+/** Updated T-Dome photo (Ralf, Oct 17 2026). */
+export const CATALOGUE_TDOME_SRC = "/talisu/catalogue/spec-tdome.webp";
 
 /**
  * Inclusive content-page range omitted from the public flipbook (toolbar +
@@ -69,21 +77,23 @@ export function loadCataloguePages(directory?: string): ProductFlipbookPage[] {
     hotspots: [],
   };
 
-  const tDome: ProductFlipbookPage = {
-    id: CATALOGUE_TDOME_PAGE_ID,
-    number: 1,
+  const specSheets: ProductFlipbookPage[] = CATALOGUE_SPECS.map((spec, index) => ({
+    id: spec.id,
+    number: index + 1,
     sourcePage: 0,
-    src: CATALOGUE_TDOME_SRC,
-    alt: "Talishouse™ T-Dome — Product Catalogue page 1",
+    src: spec.photo,
+    alt: `Talishouse™ ${spec.name} — Product Catalogue page ${index + 1}`,
     role: "content",
+    face: "spec",
+    specId: spec.id,
     hotspots: [],
-  };
+  }));
 
   const middle: ProductFlipbookPage[] = middleRasters
     .map((page) =>
       withHotspots({
         ...page,
-        // Source page N is content page N (T-Dome occupies content page 1).
+        // Source page N is content page N (spec sheets occupy pages 1–3; 2–19 stay hidden).
         number: page.sourcePage,
         role: "content",
       }),
@@ -102,5 +112,5 @@ export function loadCataloguePages(directory?: string): ProductFlipbookPage[] {
     hotspots: [],
   };
 
-  return [front, tDome, ...middle, back];
+  return [front, ...specSheets, ...middle, back];
 }
