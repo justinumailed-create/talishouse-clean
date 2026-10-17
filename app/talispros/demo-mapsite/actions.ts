@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { notifyDemoBuilt } from "@/lib/talispros/demo-built-notify";
 import { ROUTES } from "@/lib/routes";
 import type { OptimizedEbookImageAsset } from "@/lib/talisbooks/auto-draft-ebook";
 import { generateSelfServiceEbook } from "@/lib/talisbooks/self-service-ebook";
@@ -44,6 +46,19 @@ export async function createDemoMapSiteAction(formData: FormData): Promise<Creat
   });
 
   if (!result.ok) return result;
+
+  // Ralf (Oct 17): tell the team where a demo was built (Aritri CA / Enanko US
+  // follow up). Runs after the response so the visitor is never delayed.
+  after(() =>
+    notifyDemoBuilt({
+      code: result.code,
+      propertyTitle,
+      streetAddress,
+      latitude,
+      longitude,
+      mapsiteHref: result.mapsiteHref,
+    }).then(() => undefined),
+  );
 
   revalidatePath(MAPSITE_APP_PATH);
   revalidatePath(pathnameForRevalidate(result.publishedHref));

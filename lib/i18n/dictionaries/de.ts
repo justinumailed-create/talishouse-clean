@@ -522,7 +522,11 @@ export const de: Dictionary = {
       call: "Anrufen",
       switchPin: "PIN wechseln",
       mainPin: "Haupt-PIN",
-      allPins: "Alle PINs anzeigen",
+      selectPin: "PIN auswählen…",
+      teamMember: "Teammitglied",
+      selectCategory: "Kategorie wählen",
+      allCategories: "Alle Kategorien",
+      categoryEmpty: "Keine PINs in dieser Kategorie",
     },
     popup: {
       genericTitle: "Das erste von vielen E-Books",

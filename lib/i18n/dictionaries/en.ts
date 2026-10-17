@@ -301,7 +301,13 @@ export const en = {
       call: "Call",
       switchPin: "Switch PIN",
       mainPin: "Main PIN",
-      allPins: "Show all PINs",
+      /** PIN switcher placeholder: every PIN shows until one is picked. */
+      selectPin: "Select a PIN…",
+      /** WhatsApp / Telegram reach Ralf, labelled as a Team Member. */
+      teamMember: "Team Member",
+      selectCategory: "Select Category",
+      allCategories: "All categories",
+      categoryEmpty: "No PINs in this category",
     },
     popup: {
       genericTitle: "The first of many E-Books",

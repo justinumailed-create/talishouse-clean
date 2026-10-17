@@ -126,7 +126,12 @@ function CardTools({
   pinOptions?: ReadonlyArray<MapSitePinSwitchOption>;
   activePinId?: string | null;
   onSwitchPin?: (id: string) => void;
-  labels: { dashboard: string; switchPin: string; menu: Record<string, string> };
+  labels: {
+    dashboard: string;
+    switchPin: string;
+    selectPin: string;
+    menu: Record<string, string>;
+  };
 }) {
   const showDashboard = Boolean(dashboardItems?.length && onSelectDashboardItem);
   const showPins = Boolean(pinOptions && pinOptions.length > 1 && onSwitchPin);
@@ -142,6 +147,7 @@ function CardTools({
             onChange={(event) => onSwitchPin!(event.target.value)}
             className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-[12px] font-semibold normal-case tracking-normal text-neutral-900"
           >
+            <option value="">{labels.selectPin}</option>
             {pinOptions!.map((option) => (
               <option key={option.id} value={option.id}>
                 {option.label}
@@ -209,6 +215,7 @@ export default function MapSiteMarketPartnerCard({
   const toolLabels = {
     dashboard: t.mapsite.leftCard.dashboard,
     switchPin: t.mapsite.leftCard.switchPin,
+    selectPin: t.mapsite.leftCard.selectPin,
     menu: t.mapsite.dashboardMenu as Record<string, string>,
   };
   const tools = (

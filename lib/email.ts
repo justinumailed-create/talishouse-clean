@@ -213,6 +213,57 @@ export async function sendOwnershipLearnMoreInquiry(params: {
   }
 }
 
+/** Build Demo created → team notification (where + who follows up). */
+export async function sendDemoBuiltNotification(params: {
+  recipients: readonly string[];
+  code: string;
+  propertyTitle: string;
+  streetAddress: string;
+  latitude: number;
+  longitude: number;
+  mapsiteHref: string;
+  country: string | null;
+  region: string | null;
+  followUp: string | null;
+  followUpHasEmail: boolean;
+}): Promise<SendResult> {
+  const client = getClient();
+  if (!client) return { sent: false, error: "RESEND_API_KEY not configured" };
+  const site = (process.env.NEXT_PUBLIC_SITE_URL || "https://www.talispros.com").replace(/\/$/, "");
+  const where = [params.region, params.country].filter(Boolean).join(", ") || "Unknown location";
+  const mapsUrl = `https://www.google.com/maps?q=${params.latitude},${params.longitude}`;
+  const link = params.mapsiteHref.startsWith("http") ? params.mapsiteHref : `${site}${params.mapsiteHref}`;
+  const followUpLine = params.followUp
+    ? `<p><strong>Follow-up:</strong> ${escapeHtml(params.followUp)} (${escapeHtml(params.country || "")})${
+        params.followUpHasEmail ? "" : " — no email on file for this agent yet; please forward."
+      }</p>`
+    : `<p><strong>Follow-up:</strong> country not recognized — please assign.</p>`;
+  const html = `
+    <div style="font-family:system-ui,sans-serif;line-height:1.5;color:#111">
+      <h2 style="margin:0 0 12px">New Build Demo — ${escapeHtml(where)}</h2>
+      <p><strong>Where:</strong> ${escapeHtml(where)}</p>
+      <p><strong>Address:</strong> ${escapeHtml(params.streetAddress || "—")}</p>
+      <p><strong>Coordinates:</strong> <a href="${mapsUrl}">${params.latitude.toFixed(5)}, ${params.longitude.toFixed(5)}</a></p>
+      <p><strong>Listing title:</strong> ${escapeHtml(params.propertyTitle || "—")}</p>
+      <p><strong>Demo code:</strong> ${escapeHtml(params.code)}</p>
+      ${followUpLine}
+      <p><a href="${link}">Open the demo Mapsite</a></p>
+    </div>
+  `;
+  try {
+    const { data, error } = await client.emails.send({
+      from: fromEmail,
+      to: [...params.recipients],
+      subject: `Build Demo created — ${where}`,
+      html,
+    });
+    if (error) return { sent: false, error: error.message };
+    return { sent: true, id: data?.id };
+  } catch (err) {
+    return { sent: false, error: err instanceof Error ? err.message : "Unknown error" };
+  }
+}
+
 function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")

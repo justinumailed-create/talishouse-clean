@@ -861,10 +861,11 @@ function MapSiteChrome({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady, pinEditor.kind, pinFitKey]);
 
-  const [activePinId, setActivePinId] = useState<string>("all");
+  // Ralf (Oct 17): no "Show all PINs" option — every PIN shows until one is
+  // picked; the empty value is the "Select a PIN…" placeholder.
+  const [activePinId, setActivePinId] = useState<string>("");
   const pinOptions = useMemo(
     () => [
-      { id: "all", label: t.mapsite.leftCard.allPins },
       {
         id: mapsite.id,
         label: `${t.mapsite.leftCard.mainPin} · ${mapsite.property_address?.trim() || mapsite.fast_code || ""}`,
@@ -881,7 +882,7 @@ function MapSiteChrome({
     (id: string) => {
       setActivePinId(id);
       setSelectedPinId(null);
-      if (id === "all") {
+      if (!id) {
         fitAllFastCodePins();
         return;
       }
