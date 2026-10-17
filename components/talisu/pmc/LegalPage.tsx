@@ -2,7 +2,7 @@ import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import PmcFooter from "@/components/talisu/pmc/PmcFooter";
 import LegalDocument from "@/components/talisu/pmc/LegalDocument";
-import type { LegalSection } from "@/lib/talisu/pmc-legal";
+import { legalSectionId, type LegalSection } from "@/lib/talisu/pmc-legal";
 
 export default async function LegalPage({
   testId,
@@ -38,8 +38,8 @@ export default async function LegalPage({
       <section className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
         <nav className="mb-8 flex flex-wrap gap-2 text-[13px]">
           {sections.map((s) => (
-            <a key={s.n} href={`#section-${s.n}`} className="rounded-full bg-white px-3 py-1 font-medium text-neutral-600 ring-1 ring-black/10 hover:text-[#0069CF]">
-              {s.n}. {s.title}
+            <a key={legalSectionId(s)} href={`#${legalSectionId(s)}`} className="rounded-full bg-white px-3 py-1 font-medium text-neutral-600 ring-1 ring-black/10 hover:text-[#0069CF]">
+              {s.n != null ? `${s.n}. ` : ""}{s.title}
             </a>
           ))}
         </nav>

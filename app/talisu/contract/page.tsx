@@ -16,7 +16,8 @@ import {
   pmcHref,
 } from "@/lib/talispros/mapsite-contract";
 import {
-  SERVICE_AGREEMENT,
+  SERVICE_AGREEMENT_SIGNED,
+  SERVICE_AGREEMENT_VERSION,
   SERVICE_AGREEMENT_ACCEPTANCE,
   SERVICE_AGREEMENT_INTRO,
   SERVICE_AGREEMENT_PROVIDER,
@@ -83,8 +84,9 @@ export default async function PmcContractPage({ searchParams }: Props) {
           <div className="grid gap-8 lg:grid-cols-[1.35fr_1fr]">
             <article className="rounded-3xl border border-black/10 bg-white p-6 shadow-sm sm:p-8">
               <h2 className="text-2xl font-black text-[#06182f]">Service Agreement</h2>
+              <p className="mt-1 text-[12px] text-neutral-500">Version {SERVICE_AGREEMENT_VERSION}</p>
               <div className="mt-5 max-h-[70vh] overflow-y-auto pr-2">
-                <LegalDocument sections={SERVICE_AGREEMENT} intro={SERVICE_AGREEMENT_INTRO} compact />
+                <LegalDocument sections={SERVICE_AGREEMENT_SIGNED} intro={SERVICE_AGREEMENT_INTRO} compact />
                 <div className="mt-8 rounded-2xl bg-neutral-50 p-5 text-[14px] text-neutral-700">
                   <p className="font-bold text-neutral-900">Acceptance</p>
                   <p className="mt-1">{SERVICE_AGREEMENT_ACCEPTANCE}</p>

@@ -9,7 +9,60 @@
  */
 
 export type LegalBlock = string | { list: string[] } | { lettered: string[] };
-export type LegalSection = { n: number; title: string; blocks: LegalBlock[] };
+export type LegalSection = {
+  /** Section number; omitted for unnumbered sections (e.g. Deliverables). */
+  n?: number;
+  /** Anchor id when there is no number. */
+  id?: string;
+  title: string;
+  blocks: LegalBlock[];
+  /** Shown as a badge next to the title (e.g. draft notice). */
+  draft?: string;
+};
+
+export function legalSectionId(s: LegalSection): string {
+  return s.n != null ? `section-${s.n}` : s.id ?? s.title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+}
+
+/**
+ * Version of the Service Agreement text that gets signed. Each signature
+ * stores its own full text snapshot + SHA-256, so older signed records stay
+ * valid when the text changes; bump this whenever the signed text changes.
+ */
+export const SERVICE_AGREEMENT_VERSION = "2026-10-17 (Deliverables draft)";
+
+export const DELIVERABLES_DRAFT_LABEL = "Draft — pending Ralf’s approval";
+
+/**
+ * Deliverables — drafted only from the PMC PDF pitch (pages 1–6). Marketing
+ * tools only; no new guarantees. ToS variant has no fees; the contract
+ * variant references the section 7 fee schedule in CAD.
+ */
+export function deliverablesSection(variant: "tos" | "contract"): LegalSection {
+  const items = [
+    "Mapsite presence: a presence on a proprietary Talispros Mapsite for the Customer’s account, on which the Customer can place PINs (Place of Interest Nodes).",
+    "PIN flags: when selected, a PIN opens a flag revealing URL, RES, TEB and TTV links. URL can be a document repository or an outside location where anything can be linked. RES, if entered, leads to that listing on real estate sites, MLS®, a brokerage site or any other traditional site.",
+    "TEB (Talis eBook): Provider’s proprietary means to generate flip-books from PDF quickly and easily.",
+    "Auto-syndication: PINs from Talispros Mapsites are auto-syndicated to the publications listed in the Media Directory, in cycles of 10 days on and 3 days off to keep listings fresh. The Media Directory lists outlets in which Provider either already has automatic exposure or is in negotiations, and may change over time.",
+    "TTV (Talis TV) — optional extra at additional cost: Provider’s in-house online TV station, which requires set-up at additional cost. If selected, Provider acts as the Customer’s production department, generating content from source material the Customer provides (such as photography, audio and video) for formats such as virtual open houses, virtual walk-throughs, infomercials and green screen talk shows.",
+    "Account types: Root Account, Derivative Account (subordinate agent listings under a Root Account), FSBO Account and Adpro Account. The deliverables available depend on the Customer’s account type.",
+  ];
+  if (variant === "contract") {
+    items.push(
+      "Fees: deliverables are provided against the fees for the Customer’s account type set out in section 7 (Fees and Payment Schedule), in CAD — Root Account CAD 1,000 annually or CAD 100 monthly; Derivative Account CAD 200 annually or CAD 100 monthly, pin CAD 7 weekly; FSBO Account CAD 1,000 annually or CAD 100 monthly; Adpro Account CAD 1,000 annually or CAD 100 monthly. TTV set-up is charged separately.",
+    );
+  }
+  return {
+    id: "deliverables",
+    title: "Deliverables",
+    draft: DELIVERABLES_DRAFT_LABEL,
+    blocks: [
+      "Subject to this Agreement and the Customer’s account type, the Services include the following deliverables:",
+      { list: items },
+      "These deliverables are marketing tools only. Nothing in this section guarantees any visibility, placement, reach, traffic, leads or transactions; sections 3 to 5 apply.",
+    ],
+  };
+}
 
 export const SERVICE_AGREEMENT_INTRO =
   "This Service Agreement (“Agreement”) is entered into between TalisALL PMC (“Provider”), and the undersigned (“Customer”), effective as of the date signed (“Effective Date”).";
@@ -186,8 +239,23 @@ export const SERVICE_AGREEMENT: LegalSection[] = [
   },
 ];
 
-/** Terms of Service = Service Agreement minus section 12 (Governing Law). */
-export const TERMS_OF_SERVICE: LegalSection[] = SERVICE_AGREEMENT.filter((s) => s.n !== 12);
+/** Insert the Deliverables section right after section 1 (Services). */
+function withDeliverables(sections: LegalSection[], variant: "tos" | "contract"): LegalSection[] {
+  const i = sections.findIndex((s) => s.n === 1);
+  return [...sections.slice(0, i + 1), deliverablesSection(variant), ...sections.slice(i + 1)];
+}
+
+/** Contract (signed): full Service Agreement incl. section 12 + Deliverables (with CAD fees). */
+export const SERVICE_AGREEMENT_SIGNED: LegalSection[] = withDeliverables(SERVICE_AGREEMENT, "contract");
+
+/**
+ * Terms of Service = Service Agreement minus section 12 (Governing Law), with
+ * Deliverables (no fees). The contract preamble (“the undersigned”) is not used.
+ */
+export const TERMS_OF_SERVICE: LegalSection[] = withDeliverables(
+  SERVICE_AGREEMENT.filter((s) => s.n !== 12),
+  "tos",
+);
 
 export const SERVICE_AGREEMENT_PROVIDER = {
   business: "TalisALL PMC",
@@ -356,9 +424,15 @@ export const PRIVACY_POLICY: LegalSection[] = [
 
 /** Plain-text Service Agreement (stored with each signature + hashed). */
 export function serviceAgreementPlainText(): string {
-  const lines: string[] = ["SERVICE AGREEMENT", "", SERVICE_AGREEMENT_INTRO, ""];
-  for (const s of SERVICE_AGREEMENT) {
-    lines.push(`${s.n}. ${s.title}`);
+  const lines: string[] = [
+    "SERVICE AGREEMENT",
+    `Version: ${SERVICE_AGREEMENT_VERSION}`,
+    "",
+    SERVICE_AGREEMENT_INTRO,
+    "",
+  ];
+  for (const s of SERVICE_AGREEMENT_SIGNED) {
+    lines.push(s.n != null ? `${s.n}. ${s.title}` : `${s.title}${s.draft ? ` (${s.draft})` : ""}`);
     for (const b of s.blocks) {
       if (typeof b === "string") lines.push(b);
       else if ("list" in b) b.list.forEach((item) => lines.push(`  • ${item}`));

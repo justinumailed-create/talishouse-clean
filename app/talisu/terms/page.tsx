@@ -3,7 +3,7 @@ import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import LegalPage from "@/components/talisu/pmc/LegalPage";
 import { normalizeFastCodeParam } from "@/lib/talispros/mapsite-contract";
-import { SERVICE_AGREEMENT_INTRO, TERMS_OF_SERVICE } from "@/lib/talisu/pmc-legal";
+import { TERMS_OF_SERVICE } from "@/lib/talisu/pmc-legal";
 
 export async function generateMetadata() {
   return pageMetadata("/talisu/terms");
@@ -23,7 +23,6 @@ export default async function PmcTermsPage({
       kicker="Talispros · TalisALL PMC"
       title={t.terms}
       meta={["TalisALL PMC"]}
-      intro={SERVICE_AGREEMENT_INTRO}
       sections={TERMS_OF_SERVICE}
       fastCode={fastCode}
     />
