@@ -7,6 +7,8 @@ export type MapSitePartnerTarget = {
   fastCode: string;
   href: string;
   title: string | null;
+  /** Seen from the current Mapsite: the other side is its Root, Derivative or a plain partner. */
+  relation?: "root" | "derivative" | "partner";
 };
 
 /**
@@ -26,6 +28,7 @@ export default function MapSitePartnerButtons({ partners }: { partners: MapSiteP
         return (
           <a
             key={p.fastCode}
+            data-relation={p.relation ?? "partner"}
             href={p.href}
             data-testid="mapsite-partner-button"
             className="pointer-events-auto inline-flex max-w-full items-center gap-3 rounded-full bg-white py-2 pl-2 pr-5 text-left shadow-[0_12px_32px_rgba(0,0,0,0.25)] ring-1 ring-black/10 transition hover:-translate-y-0.5"
@@ -38,7 +41,7 @@ export default function MapSitePartnerButtons({ partners }: { partners: MapSiteP
             </span>
             <span className="min-w-0">
               <span className="block text-[11px] font-semibold uppercase tracking-[0.14em] text-[#046BD9]">
-                {m.partnerKicker} · {p.fastCode.toUpperCase()}
+                {p.relation === "root" ? m.rootKicker : m.partnerKicker} · {p.fastCode.toUpperCase()}
               </span>
               <span className="block truncate text-[15px] font-semibold text-neutral-950">
                 {fmt(m.partnerOpen, { name })}

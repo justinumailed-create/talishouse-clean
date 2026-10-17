@@ -19,6 +19,7 @@ import { useMapEngine } from "@/components/talismaps/map-engine/MapEngineProvide
 import MapSitePlaceSearch, {
   type MapSitePlaceSelection,
 } from "@/components/talispros/mapsite/MapSitePlaceSearch";
+import type { PinCategoryOption } from "@/lib/talispros/mapsite-pin-categories";
 
 export type PinEditorState =
   | { kind: "idle" }
@@ -31,6 +32,8 @@ type MapSitePinDashboardProps = {
   fastCode: string;
   accountTypeSegment?: string | null;
   dashboard: MapSitePinDashboardState;
+  /** Five mandatory + the Root's custom categories (Ralf, Oct 17). */
+  categoryOptions?: ReadonlyArray<PinCategoryOption>;
   editor: PinEditorState;
   checkoutStatus: "success" | "cancelled" | null;
   onClose: () => void;
@@ -44,6 +47,7 @@ export default function MapSitePinDashboard({
   fastCode,
   accountTypeSegment = null,
   dashboard,
+  categoryOptions = [],
   editor,
   checkoutStatus,
   onClose,
@@ -65,6 +69,8 @@ export default function MapSitePinDashboard({
   const [searchAvailable, setSearchAvailable] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editLabel, setEditLabel] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [placeCategory, setPlaceCategory] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [lastPlacedId, setLastPlacedId] = useState<string | null>(null);
   const knownPinIdsRef = useRef<Set<string> | null>(null);
@@ -91,6 +97,7 @@ export default function MapSitePinDashboard({
     setLastPlacedId(added[0]);
     setEditingId(added[0]);
     setEditLabel(pin?.label || "");
+    setEditCategory(pin?.category || "");
     setConfirmDeleteId(null);
     setMessage(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -153,6 +160,7 @@ export default function MapSitePinDashboard({
         latitude: lat,
         longitude: lng,
         label: pinLabel,
+        category: placeCategory || null,
       });
       if (!("dashboard" in result)) {
         setError(result.error);
@@ -193,6 +201,7 @@ export default function MapSitePinDashboard({
     setMessage(null);
     setConfirmDeleteId(null);
     setEditLabel(pin?.label || "");
+    setEditCategory(pin?.category || "");
     setEditingId(pinId);
   }
 
@@ -208,6 +217,7 @@ export default function MapSitePinDashboard({
         latitude: pin.latitude,
         longitude: pin.longitude,
         label: editLabel,
+        category: editCategory || null,
       });
       if (!report(result)) return;
       setEditingId(null);
@@ -396,6 +406,25 @@ export default function MapSitePinDashboard({
             {searchAvailable ? d.placeHelp : d.placeHelpMapOnly}
           </p>
 
+          {dashboard.remainingToPlace > 0 && categoryOptions.length > 0 && !paused ? (
+            <label className="block text-xs text-neutral-600">
+              {d.category}
+              <select
+                data-testid="pin-place-category"
+                value={placeCategory}
+                onChange={(event) => setPlaceCategory(event.target.value)}
+                className="mt-1 block w-full rounded-md border border-neutral-300 bg-white px-2 py-1 text-sm"
+              >
+                <option value="">{d.noCategory}</option>
+                {categoryOptions.map((option) => (
+                  <option key={option.value} value={option.value} title={option.description ?? undefined}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+
           {dashboard.remainingToPlace > 0 ? (
             <>
               {!paused ? (
@@ -512,6 +541,22 @@ export default function MapSitePinDashboard({
                         placeholder={d.labelPlaceholder}
                         className="block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
                       />
+                      {categoryOptions.length > 0 ? (
+                        <select
+                          data-testid="pin-edit-category"
+                          value={editCategory}
+                          onChange={(event) => setEditCategory(event.target.value)}
+                          aria-label={d.category}
+                          className="block w-full rounded-md border border-neutral-300 bg-white px-2 py-1 text-sm"
+                        >
+                          <option value="">{d.noCategory}</option>
+                          {categoryOptions.map((option) => (
+                            <option key={option.value} value={option.value} title={option.description ?? undefined}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      ) : null}
                       <div className="flex gap-1.5">
                         <button
                           type="button"
@@ -542,6 +587,15 @@ export default function MapSitePinDashboard({
                             data-testid="pin-placed-by-staff"
                           >
                             {pin.createdByKind === "admin" ? d.placedByAdmin : d.placedByAgent}
+                          </span>
+                        ) : null}
+                        {pin.category ? (
+                          <span
+                            className="mt-0.5 inline-block rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-900"
+                            data-testid="pin-category-chip"
+                          >
+                            {categoryOptions.find((option) => option.value === pin.category)?.label ??
+                              pin.category.replace(/^custom:/, "")}
                           </span>
                         ) : null}
                         <span className="block font-mono text-[10px] text-neutral-500">

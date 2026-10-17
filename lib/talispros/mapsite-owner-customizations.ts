@@ -99,6 +99,8 @@ export const MAPSITE_DASHBOARD_MENU_ITEMS = [
   { id: "branding", label: "Logo & Card Editor" },
   { id: "pins", label: "PIN Dashboard" },
   { id: "bookshelf", label: "Bookshelf Editor" },
+  { id: "categories", label: "PIN Categories" },
+  { id: "partners", label: "Partner Mapsites" },
 ] as const;
 
 export type MapSiteDashboardPanelId =

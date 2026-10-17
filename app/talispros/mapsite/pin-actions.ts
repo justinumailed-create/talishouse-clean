@@ -27,6 +27,8 @@ import {
   recordPendingPinPurchase,
   redeemFreePinCredits,
 } from "@/lib/talispros/mapsite-additional-pins-service";
+import { parsePinCategory } from "@/lib/talispros/mapsite-pin-categories";
+import { loadEffectiveCustomPinCategories } from "@/lib/talispros/mapsite-root-partners-service";
 import {
   buildClaimedMapSitePath,
   toShareableAbsoluteUrl,
@@ -69,6 +71,17 @@ async function resolvePinActor(fastCode: string): Promise<{ label: string; kind:
   if (account && (await isMapSiteAdmin())) return { label: `${account.name} (${account.fastCode})`, kind: "admin" };
   if (account?.access === "agent") return { label: `${account.name} (${account.fastCode}) [agent:${account.agentId ?? "?"}]`, kind: "agent" };
   return { label: "unknown", kind: "owner" };
+}
+
+/** null = none; undefined = not an allowed category for this Mapsite. */
+async function validatePinCategory(
+  mapsiteId: string,
+  fastCode: string,
+  value: string | null | undefined,
+): Promise<string | null | undefined> {
+  if (value == null || value === "") return null;
+  const { categories } = await loadEffectiveCustomPinCategories({ mapsiteId, fastCode });
+  return parsePinCategory(value, categories);
 }
 
 async function authorizePinEdit(fastCode: string): Promise<PinActionError | null> {
@@ -250,6 +263,7 @@ export async function placeMapSiteAdditionalPin(input: {
   latitude: number;
   longitude: number;
   label?: string | null;
+  category?: string | null;
 }): Promise<PinActionOk | PinActionError> {
   const fastCode = input.fastCode.trim();
   const denied = await authorizePinEdit(fastCode);
@@ -260,6 +274,8 @@ export async function placeMapSiteAdditionalPin(input: {
   if (mapsite.fastCode.trim().toLowerCase() !== fastCode.toLowerCase()) {
     return { error: "FAST Code™ does not match this Mapsite." };
   }
+  const category = await validatePinCategory(mapsite.id, fastCode, input.category);
+  if (category === undefined) return { error: "Choose one of the listed categories." };
   const blocked = mapsiteCannotSellAdditionalPins({
     mapsiteId: mapsite.id,
     fastCode: mapsite.fastCode,
@@ -272,6 +288,7 @@ export async function placeMapSiteAdditionalPin(input: {
     latitude: input.latitude,
     longitude: input.longitude,
     label: input.label,
+    category,
     createdBy: await resolvePinActor(fastCode),
   });
   if (placed.error || !placed.dashboard) {
@@ -288,6 +305,8 @@ export async function fixMapSiteAdditionalPin(input: {
   latitude: number;
   longitude: number;
   label?: string | null;
+  /** undefined = unchanged; null / "" = uncategorised. */
+  category?: string | null;
 }): Promise<PinActionOk | PinActionError> {
   const fastCode = input.fastCode.trim();
   const denied = await authorizePinEdit(fastCode);
@@ -298,6 +317,13 @@ export async function fixMapSiteAdditionalPin(input: {
   if (mapsite.fastCode.trim().toLowerCase() !== fastCode.toLowerCase()) {
     return { error: "FAST Code™ does not match this Mapsite." };
   }
+  const category =
+    input.category === undefined
+      ? undefined
+      : await validatePinCategory(mapsite.id, fastCode, input.category);
+  if (input.category !== undefined && category === undefined) {
+    return { error: "Choose one of the listed categories." };
+  }
 
   const fixed = await fixAdditionalPinRecord({
     mapsiteId: mapsite.id,
@@ -305,6 +331,7 @@ export async function fixMapSiteAdditionalPin(input: {
     latitude: input.latitude,
     longitude: input.longitude,
     label: input.label,
+    category,
   });
   if (fixed.error || !fixed.dashboard) {
     return { error: fixed.error || "Could not update PIN." };

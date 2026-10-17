@@ -83,6 +83,24 @@ import {
   type MapSiteOwnerCustomizations,
 } from "@/lib/talispros/mapsite-owner-customizations";
 import { mapsiteAgencyLogoUrl } from "@/lib/talispros/mapsite-listing-media";
+import { useLocale } from "@/lib/i18n/client";
+import {
+  filterPinsByCategory,
+  pinCategoryOptions,
+  type PinCategoryOption,
+} from "@/lib/talispros/mapsite-pin-categories";
+import type { MapSiteRootContext } from "@/lib/talispros/mapsite-root-partners-service";
+import { MapSiteCategoryEditor, MapSitePartnerPanel } from "./MapSiteRootPanels";
+
+const EMPTY_ROOT_CONTEXT: MapSiteRootContext = {
+  role: "other",
+  mainPinCategory: null,
+  customCategories: [],
+  ownCustomCategories: [],
+  rootFastCode: null,
+  partners: [],
+  partnerPins: [],
+};
 
 /** Owner Dashboard dropdown: Ebook Editor, Logo & Card Editor, PIN Dashboard, Bookshelf Editor. */
 const DASHBOARD_MENU = MAPSITE_DASHBOARD_MENU_ITEMS;
@@ -176,6 +194,8 @@ interface MapSiteApplicationProps {
   canManageDashboard?: boolean;
   /** Logo / left-card image overrides and saved bookshelf order. */
   initialOwnerCustomizations?: MapSiteOwnerCustomizations | null;
+  /** PIN categories + Root ↔ Derivative Partner Mapsites (migration 109). */
+  initialRootContext?: MapSiteRootContext | null;
 }
 
 export default function MapSiteApplication({
@@ -204,8 +224,19 @@ export default function MapSiteApplication({
   pinCheckoutSessionId = null,
   canManageDashboard,
   initialOwnerCustomizations = null,
+  initialRootContext = null,
 }: MapSiteApplicationProps) {
   const [mapsite] = useState(initialMapSite);
+  const locale = useLocale() === "de" ? "de" : "en";
+  const [rootContext, setRootContext] = useState<MapSiteRootContext>(
+    () => initialRootContext ?? EMPTY_ROOT_CONTEXT,
+  );
+  // "" = every category (Ralf: all PINs show before any selection).
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const categoryOptions = useMemo(
+    () => pinCategoryOptions(rootContext.customCategories, locale),
+    [rootContext.customCategories, locale],
+  );
   const [pinDashboard, setPinDashboard] = useState(
     () => initialPinDashboard ?? defaultMapSitePinDashboard(),
   );
@@ -234,7 +265,7 @@ export default function MapSiteApplication({
     accountType,
   });
   const phase = pinPhaseLabel(mapsite.status);
-  const pins: MapEnginePin[] = useMemo(() => {
+  const pins: Array<MapEnginePin & { category: string | null }> = useMemo(() => {
     const savedPin = resolveMapSitePinStyle({
       pinIcon: mapsite.pin_icon,
       pinColor: mapsite.pin_color,
@@ -261,6 +292,7 @@ export default function MapSiteApplication({
         label: pinLabel,
         featured: true,
         metadata: styleMetadata,
+        category: rootContext.mainPinCategory,
       },
       ...pinDashboard.pins.map((pin, index) => ({
         id: pin.id,
@@ -270,9 +302,35 @@ export default function MapSiteApplication({
         label: pin.label.trim() || `PIN ${index + 2}`,
         featured: false,
         metadata: { ...styleMetadata, additional: true },
+        category: pin.category ?? null,
+      })),
+      // Root map: every Derivative account holder's PINs (click opens that Mapsite).
+      ...rootContext.partnerPins.map((pin) => ({
+        id: pin.id,
+        latitude: pin.latitude,
+        longitude: pin.longitude,
+        color: savedPin.pinColor,
+        label: pin.label,
+        featured: false,
+        metadata: { ...styleMetadata, additional: true, partner: true },
+        category: pin.category,
       })),
     ];
-  }, [mapsite, phase, pinLabel, pinDashboard.pins]);
+  }, [mapsite, phase, pinLabel, pinDashboard.pins, rootContext.mainPinCategory, rootContext.partnerPins]);
+
+  const allPins = useMemo(
+    () =>
+      pins.map((pin) => {
+        const rest: MapEnginePin & { category?: string | null } = { ...pin };
+        delete rest.category;
+        return rest as MapEnginePin;
+      }),
+    [pins],
+  );
+  const visiblePins: MapEnginePin[] = useMemo(() => {
+    const kept = new Set(filterPinsByCategory(pins, categoryFilter).map((pin) => pin.id));
+    return allPins.filter((pin) => kept.has(pin.id));
+  }, [pins, allPins, categoryFilter]);
 
   const viewport = useMemo(
     () => ({
@@ -307,7 +365,7 @@ export default function MapSiteApplication({
   }, []);
 
   const pinEditorActive = pinEditor.kind !== "idle";
-  const lockMapCenter = pinDashboard.pins.length === 0 && !pinEditorActive;
+  const lockMapCenter = visiblePins.length <= 1 && !pinEditorActive;
 
   useEffect(() => {
     if (pinCheckoutStatus !== "success" || !pinCheckoutSessionId) return;
@@ -378,7 +436,7 @@ export default function MapSiteApplication({
     <MapEngineProvider
       key={`${mapsite.lat.toFixed(6)}-${mapsite.lng.toFixed(6)}`}
       providerId="google-maps"
-      initialPins={pins}
+      initialPins={visiblePins}
       initialViewport={viewport}
       selectedPinId={selectedPinId}
       draggablePinIds={
@@ -392,6 +450,11 @@ export default function MapSiteApplication({
       lockCenterOffset={lockCenterOffset}
       preserveViewport
       onPinSelect={(pinId) => {
+        const partnerPin = rootContext.partnerPins.find((pin) => pin.id === pinId);
+        if (partnerPin) {
+          window.location.assign(partnerPin.href);
+          return;
+        }
         setSelectedPinId(pinId);
       }}
       onMapClick={(coordinates) => {
@@ -446,6 +509,13 @@ export default function MapSiteApplication({
         onPinEditorChange={setPinEditor}
         canManageDashboard={canManageDashboard ?? isOwner}
         initialOwnerCustomizations={initialOwnerCustomizations}
+        rootContext={rootContext}
+        onRootContextChange={setRootContext}
+        visiblePins={visiblePins}
+        totalPinCount={pins.length}
+        categoryOptions={categoryOptions}
+        categoryFilter={categoryFilter}
+        onCategoryFilterChange={setCategoryFilter}
       />
     </MapEngineProvider>
   );
@@ -482,6 +552,13 @@ function MapSiteChrome({
   onPinEditorChange,
   canManageDashboard,
   initialOwnerCustomizations,
+  rootContext,
+  onRootContextChange,
+  visiblePins,
+  totalPinCount,
+  categoryOptions,
+  categoryFilter,
+  onCategoryFilterChange,
 }: {
   mapsite: MapSitePlatformRecord;
   audience: RegistrationMarket;
@@ -513,6 +590,13 @@ function MapSiteChrome({
   onPinEditorChange: (editor: PinEditorState) => void;
   canManageDashboard: boolean;
   initialOwnerCustomizations: MapSiteOwnerCustomizations | null;
+  rootContext: MapSiteRootContext;
+  onRootContextChange: (context: MapSiteRootContext) => void;
+  visiblePins: MapEnginePin[];
+  totalPinCount: number;
+  categoryOptions: PinCategoryOption[];
+  categoryFilter: string;
+  onCategoryFilterChange: (category: string) => void;
 }) {
   const { setViewport, isReady, fitToCoordinates } = useMapEngine();
   const router = useRouter();
@@ -828,19 +912,17 @@ function MapSiteChrome({
     [mapsite, ownerCustomizations],
   );
 
-  const pinFitKey = pinDashboard.pins
+  const pinFitKey = visiblePins
     .map((pin) => `${pin.id}:${pin.latitude}:${pin.longitude}`)
     .join("|");
 
-  // Every PIN of this FAST Code (main + additional), framed with a 20-mile buffer.
+  // Every visible PIN (main, additional, Derivative partners; category filter
+  // applied), framed with a 20-mile buffer.
   const fastCodePinPoints = useMemo(
-    () => [
-      { latitude: mapsite.lat, longitude: mapsite.lng },
-      ...pinDashboard.pins.map((pin) => ({
-        latitude: pin.latitude,
-        longitude: pin.longitude,
-      })),
-    ],
+    () =>
+      visiblePins.length > 0
+        ? visiblePins.map((pin) => ({ latitude: pin.latitude, longitude: pin.longitude }))
+        : [{ latitude: mapsite.lat, longitude: mapsite.lng }],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mapsite.lat, mapsite.lng, pinFitKey],
   );
@@ -874,8 +956,9 @@ function MapSiteChrome({
         id: pin.id,
         label: `PIN ${index + 2} · ${pin.label || `${pin.latitude.toFixed(3)}, ${pin.longitude.toFixed(3)}`}`,
       })),
+      ...rootContext.partnerPins.map((pin) => ({ id: pin.id, label: pin.label })),
     ],
-    [mapsite.id, mapsite.property_address, mapsite.fast_code, pinDashboard.pins, t],
+    [mapsite.id, mapsite.property_address, mapsite.fast_code, pinDashboard.pins, rootContext.partnerPins, t],
   );
 
   const switchPin = useCallback(
@@ -889,7 +972,8 @@ function MapSiteChrome({
       const target =
         id === mapsite.id
           ? { latitude: mapsite.lat, longitude: mapsite.lng }
-          : pinDashboard.pins.find((pin) => pin.id === id);
+          : pinDashboard.pins.find((pin) => pin.id === id) ??
+            rootContext.partnerPins.find((pin) => pin.id === id);
       if (!target) return;
       beginFocusGuard();
       setViewport({
@@ -905,6 +989,7 @@ function MapSiteChrome({
       mapsite.lng,
       mapsite.map_zoom,
       pinDashboard.pins,
+      rootContext.partnerPins,
       setSelectedPinId,
       setViewport,
     ],
@@ -1012,6 +1097,13 @@ function MapSiteChrome({
                   pinOptions={isOwner || dashboardManageable ? pinOptions : undefined}
                   activePinId={activePinId}
                   onSwitchPin={switchPin}
+                  categoryOptions={totalPinCount > 1 ? categoryOptions : undefined}
+                  activeCategory={categoryFilter}
+                  onCategoryChange={(category) => {
+                    setSelectedPinId(null);
+                    onCategoryFilterChange(category);
+                  }}
+                  categoryEmpty={Boolean(categoryFilter) && visiblePins.length === 0}
                   isOwner={isOwner}
                   accountTypeSegment={accountTypeSegment}
                   showKnowledgeBaseManage={dashboardUnlocked}
@@ -1041,6 +1133,7 @@ function MapSiteChrome({
             fastCode={mapsite.fast_code || ""}
             accountTypeSegment={accountTypeSegment}
             dashboard={pinDashboard}
+            categoryOptions={categoryOptions}
             editor={pinEditor}
             checkoutStatus={pinCheckoutStatus}
             onClose={closeDashboardPanel}
@@ -1072,6 +1165,26 @@ function MapSiteChrome({
             mapsiteId={mapsite.id}
             fastCode={mapsite.fast_code || ""}
             onClose={closeDashboardPanel}
+          />
+        ) : null}
+
+        {dashboardPanel === "categories" && dashboardManageable ? (
+          <MapSiteCategoryEditor
+            mapsiteId={mapsite.id}
+            fastCode={mapsite.fast_code || ""}
+            context={rootContext}
+            onClose={closeDashboardPanel}
+            onContextChange={onRootContextChange}
+          />
+        ) : null}
+
+        {dashboardPanel === "partners" && dashboardManageable ? (
+          <MapSitePartnerPanel
+            mapsiteId={mapsite.id}
+            fastCode={mapsite.fast_code || ""}
+            context={rootContext}
+            onClose={closeDashboardPanel}
+            onContextChange={onRootContextChange}
           />
         ) : null}
 

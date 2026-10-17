@@ -26,6 +26,8 @@ export type MapSiteAdditionalPin = {
   sortOrder: number;
   /** Who placed it: owner / admin / agent; null for older rows. */
   createdByKind?: "owner" | "admin" | "agent" | null;
+  /** PIN category (mandatory id or "custom:<label>"); null = uncategorised. */
+  category?: string | null;
 };
 
 export type MapSitePinCapacity = {

@@ -37,12 +37,14 @@ function book(id: string, createdAt: string): TalisBooksLibraryBook {
 }
 
 describe("Mapsite owner Dashboard menu", () => {
-  it("lists the four Dashboard items in navbar order", () => {
+  it("lists the Dashboard items in navbar order (PIN Categories + Partner Mapsites added Oct 17)", () => {
     expect(MAPSITE_DASHBOARD_MENU_ITEMS.map((item) => item.label)).toEqual([
       "Ebook Editor",
       "Logo & Card Editor",
       "PIN Dashboard",
       "Bookshelf Editor",
+      "PIN Categories",
+      "Partner Mapsites",
     ]);
   });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import type { PinCategoryOption } from "@/lib/talispros/mapsite-pin-categories";
 import type { KeyboardEvent, RefObject } from "react";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import {
@@ -87,6 +88,11 @@ interface MapSiteMarketPartnerCardProps {
   pinOptions?: ReadonlyArray<MapSitePinSwitchOption>;
   activePinId?: string | null;
   onSwitchPin?: (id: string) => void;
+  /** Public "Select Category" filter (Ralf, Oct 17): hides PINs outside it. */
+  categoryOptions?: ReadonlyArray<PinCategoryOption>;
+  activeCategory?: string;
+  onCategoryChange?: (category: string) => void;
+  categoryEmpty?: boolean;
 }
 
 function CardPhone({ phone, label }: { phone: string; label: string }) {
@@ -119,6 +125,10 @@ function CardTools({
   pinOptions,
   activePinId,
   onSwitchPin,
+  categoryOptions,
+  activeCategory = "",
+  onCategoryChange,
+  categoryEmpty = false,
   labels,
 }: {
   dashboardItems?: ReadonlyArray<{ id: string; label: string }>;
@@ -126,18 +136,62 @@ function CardTools({
   pinOptions?: ReadonlyArray<MapSitePinSwitchOption>;
   activePinId?: string | null;
   onSwitchPin?: (id: string) => void;
+  categoryOptions?: ReadonlyArray<PinCategoryOption>;
+  activeCategory?: string;
+  onCategoryChange?: (category: string) => void;
+  categoryEmpty?: boolean;
   labels: {
     dashboard: string;
     switchPin: string;
     selectPin: string;
+    selectCategory: string;
+    allCategories: string;
+    categoryEmpty: string;
     menu: Record<string, string>;
   };
 }) {
   const showDashboard = Boolean(dashboardItems?.length && onSelectDashboardItem);
   const showPins = Boolean(pinOptions && pinOptions.length > 1 && onSwitchPin);
-  if (!showDashboard && !showPins) return null;
+  const showCategories = Boolean(categoryOptions?.length && onCategoryChange);
+  if (!showDashboard && !showPins && !showCategories) return null;
+  const activeOption = categoryOptions?.find((option) => option.value === activeCategory);
   return (
     <div className="mt-4 space-y-3 border-t border-black/10 pt-3 text-left">
+      {showCategories ? (
+        <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+          {labels.selectCategory}
+          <select
+            data-testid="mapsite-category-filter"
+            value={activeCategory}
+            title={activeOption?.description ?? undefined}
+            onChange={(event) => onCategoryChange!(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-[12px] font-semibold normal-case tracking-normal text-neutral-900"
+          >
+            <option value="">{labels.allCategories}</option>
+            {categoryOptions!.map((option) => (
+              <option key={option.value} value={option.value} title={option.description ?? undefined}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          {activeOption?.description ? (
+            <span
+              className="mt-1 block text-[11px] font-normal normal-case tracking-normal text-neutral-500"
+              data-testid="mapsite-category-description"
+            >
+              {activeOption.description}
+            </span>
+          ) : null}
+          {categoryEmpty ? (
+            <span
+              className="mt-1 block text-[11px] font-semibold normal-case tracking-normal text-amber-800"
+              data-testid="mapsite-category-empty"
+            >
+              {labels.categoryEmpty}
+            </span>
+          ) : null}
+        </label>
+      ) : null}
       {showPins ? (
         <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
           {labels.switchPin}
@@ -204,6 +258,10 @@ export default function MapSiteMarketPartnerCard({
   pinOptions,
   activePinId = null,
   onSwitchPin,
+  categoryOptions,
+  activeCategory = "",
+  onCategoryChange,
+  categoryEmpty = false,
 }: MapSiteMarketPartnerCardProps) {
   const t = useT();
   const content = contentForAudience(audience);
@@ -216,6 +274,9 @@ export default function MapSiteMarketPartnerCard({
     dashboard: t.mapsite.leftCard.dashboard,
     switchPin: t.mapsite.leftCard.switchPin,
     selectPin: t.mapsite.leftCard.selectPin,
+    selectCategory: t.mapsite.leftCard.selectCategory,
+    allCategories: t.mapsite.leftCard.allCategories,
+    categoryEmpty: t.mapsite.leftCard.categoryEmpty,
     menu: t.mapsite.dashboardMenu as Record<string, string>,
   };
   const tools = (
@@ -225,6 +286,10 @@ export default function MapSiteMarketPartnerCard({
       pinOptions={pinOptions}
       activePinId={activePinId}
       onSwitchPin={onSwitchPin}
+      categoryOptions={categoryOptions}
+      activeCategory={activeCategory}
+      onCategoryChange={onCategoryChange}
+      categoryEmpty={categoryEmpty}
       labels={toolLabels}
     />
   );
