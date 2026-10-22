@@ -13,7 +13,13 @@ import {
  * The Replace Image templates (PowerPoint, Keynote, Google Slides) are for
  * registered Mapsite owners, so here they appear locked with a Register link.
  */
-export default function DemoDownloadMenu({ className = "" }: { className?: string }) {
+export default function DemoDownloadMenu({
+  className = "",
+  align = "right",
+}: {
+  className?: string;
+  align?: "left" | "right";
+}) {
   const d = useT().demo;
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -62,7 +68,7 @@ export default function DemoDownloadMenu({ className = "" }: { className?: strin
           id={menuId}
           role="menu"
           style={{ width: "min(320px, calc(100vw - 32px))", maxWidth: "none" }}
-          className="absolute right-0 mt-2 rounded-2xl bg-white p-2 text-left shadow-[0_1px_2px_rgba(0,0,0,0.06),0_16px_48px_rgba(0,0,0,0.14)] ring-1 ring-black/5"
+          className={`absolute ${align === "left" ? "left-0" : "right-0"} z-30 mt-2 rounded-2xl bg-white p-2 text-left shadow-[0_1px_2px_rgba(0,0,0,0.06),0_16px_48px_rgba(0,0,0,0.14)] ring-1 ring-black/5`}
         >
           <a
             role="menuitem"

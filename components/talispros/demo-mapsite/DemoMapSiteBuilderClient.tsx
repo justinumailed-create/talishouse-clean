@@ -85,7 +85,6 @@ export default function DemoMapSiteBuilderClient() {
           testId="mapsites-build-demo-link"
         />
       }
-      topRight={<DemoDownloadMenu className="absolute right-4 top-3 z-20 sm:right-6" />}
     >
       <form id={DEMO_FORM_ID} onSubmit={handleSubmit}>
         <HomePinLocationSection
@@ -120,15 +119,19 @@ export default function DemoMapSiteBuilderClient() {
               </label>
             </div>
           }
+          asideSlot={
+            // Z-pattern overflow (Ralf, Oct 18): download + next-step note sit
+            // in the left column; Continue stays bottom right.
+            <div className="space-y-3 px-1">
+              <DemoDownloadMenu className="relative inline-block" align="left" />
+              <p className="text-[11.5px] leading-snug text-neutral-500">{d.nextNote}</p>
+            </div>
+          }
           footerSlot={
             <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
               {error ? (
                 <p className="mr-auto text-[13px] leading-relaxed text-red-600">{error}</p>
-              ) : (
-                <p className="mr-auto max-w-[34rem] text-[11.5px] leading-snug text-neutral-500">
-                  {d.nextNote}
-                </p>
-              )}
+              ) : null}
               <button
                 type="submit"
                 disabled={pending}

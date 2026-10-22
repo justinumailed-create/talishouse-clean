@@ -106,6 +106,8 @@ export interface HomePinLocationSectionProps {
   variant?: "default" | "demo";
   leadSlot?: ReactNode;
   footerSlot?: ReactNode;
+  /** Demo variant: extra content at the bottom of the left column. */
+  asideSlot?: ReactNode;
   errors?: Partial<Record<keyof HomePinLocationValues | "pinImage", string>>;
 }
 
@@ -118,6 +120,7 @@ export default function HomePinLocationSection({
   variant = "default",
   leadSlot,
   footerSlot,
+  asideSlot,
   errors = {},
 }: HomePinLocationSectionProps) {
   const pinImageInputRef = useRef<HTMLInputElement>(null);
@@ -370,7 +373,7 @@ export default function HomePinLocationSection({
           hint="Zoom to the view you want — placing or moving the PIN keeps that zoom. The created Mapsite opens at the same depth."
         />
         <TalisMapsPinPicker
-          heightClassName={isDemo ? "h-[300px] lg:h-[400px]" : undefined}
+          heightClassName={isDemo ? "h-[300px] lg:h-[330px]" : undefined}
           latitude={values.latitude}
           longitude={values.longitude}
           streetAddress={values.streetAddress}
@@ -403,6 +406,7 @@ export default function HomePinLocationSection({
           <div className="rounded-[24px] bg-white px-5 py-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]">
             {addressField}
           </div>
+          {asideSlot}
         </aside>
         <div className="min-w-0 space-y-3" data-testid="demo-pin-right">
           <div className="rounded-[24px] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]">

@@ -199,7 +199,7 @@ export default function PartnerLanding({
           {cards.map((card) => (
             <article
               key={card.label}
-              className="flex gap-3 rounded-[20px] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_28px_rgba(0,0,0,0.05)]"
+              className="flex gap-3 rounded-[20px] bg-white px-4 py-3.5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_28px_rgba(0,0,0,0.05)]"
             >
               <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#046BD9]/10 text-[#046BD9]">
                 <PartnerIcon name={card.icon} className="h-5 w-5" />
@@ -215,16 +215,22 @@ export default function PartnerLanding({
     ) : null;
 
   // Z-pattern end: closing line + the primary CTA, bottom right.
+  const closingCopy = (
+    <div className="min-w-0 max-w-[36rem]">
+      <p className="text-[17px] font-semibold leading-snug tracking-[-0.01em] text-neutral-950">
+        {closingTitle}
+      </p>
+      {closingText ? (
+        <p className="mt-0.5 text-[13.5px] leading-snug text-neutral-600">{closingText}</p>
+      ) : null}
+    </div>
+  );
+
+  // With the default left column the closing line moves there (overflow to
+  // the left, Ralf Oct 18) and the CTA alone ends the Z bottom right.
   const closing = (
     <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-3 pt-1">
-      <div className="mr-auto min-w-0 max-w-[36rem]">
-        <p className="text-[17px] font-semibold leading-snug tracking-[-0.01em] text-neutral-950">
-          {closingTitle}
-        </p>
-        {closingText ? (
-          <p className="mt-0.5 text-[13.5px] leading-snug text-neutral-600">{closingText}</p>
-        ) : null}
-      </div>
+      {left ? <div className="mr-auto">{closingCopy}</div> : null}
       <Link
         href={ctaHref}
         data-testid="partner-cta"
@@ -245,6 +251,7 @@ export default function PartnerLanding({
     <div className="space-y-4">
       {partnerCard}
       {introBlock}
+      {closingCopy}
     </div>
   );
 
