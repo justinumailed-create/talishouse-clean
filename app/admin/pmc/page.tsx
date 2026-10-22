@@ -19,7 +19,7 @@ export default async function TalisprosPmcAdminPage() {
       <PageHeader
         kicker="Global Admin"
         title="PMC Mapsite admin"
-        subtitle="Manage regional Root Account™ pins and every generated FAST Code / claimed Mapsite (pin map, listing copy, MLS® / URL / TEB™ / TTV™)."
+        subtitle="Manage regional Root Account™ pins and every generated FAST Code / claimed Mapsite (pin map, listing copy, URL 1 / URL 2 / TEB™ / TTV™)."
         actions={<LinkButton href="/admin/mapsites">← Mapsites</LinkButton>}
       />
 

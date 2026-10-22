@@ -35,9 +35,9 @@ describe("TalisU Register copy", () => {
 });
 
 describe("TalisU Register → Product (Webster) copy", () => {
-  it("uses Customization Team in the engage headline", () => {
+  it("uses Fulfilment Team in the engage headline (Ralf, Oct 18)", () => {
     expect(TALISU_ENGAGE.headline).toBe(
-      "Send a Down Payment to engage Webster and his Customization Team",
+      "Send a Down Payment to engage Webster and his Fulfilment Team",
     );
   });
 

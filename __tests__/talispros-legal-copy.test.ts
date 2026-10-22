@@ -21,7 +21,7 @@ import {
 describe("Talispros legal copy and homepage products", () => {
   it("keeps the exact shared legal strings", () => {
     expect(TALISPROS_LEGAL_PRIMARY_COPY).toBe("");
-    expect(TALISPROS_LEGAL_SECONDARY_COPY).toBe("*Some limitations apply.");
+    expect(TALISPROS_LEGAL_SECONDARY_COPY).toBe("*Prior registration required.");
   });
 
   it("explains Mapsite on the homepage map card without a demo link", () => {

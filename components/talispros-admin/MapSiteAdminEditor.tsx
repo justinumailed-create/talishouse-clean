@@ -396,22 +396,22 @@ export default function MapSiteAdminEditor({
           Pin resource buttons
         </h2>
         <p className="text-sm text-neutral-500">
-          MLS® and URL stay greyed out on the Mapsite until these are set. TEB™ and
+          URL 1 and URL 2 stay greyed out on the Mapsite until these are set. TEB™ and
           TTV™ use platform defaults when empty.
         </p>
-        <Field label="MLS® URL">
-          <input
-            className={inputClass}
-            value={form.mlsUrl}
-            onChange={(e) => setForm((p) => ({ ...p, mlsUrl: e.target.value }))}
-            placeholder="https://"
-          />
-        </Field>
-        <Field label="URL (broker / listing)">
+        <Field label="URL 1 (sales tool)">
           <input
             className={inputClass}
             value={form.brokerUrl}
             onChange={(e) => setForm((p) => ({ ...p, brokerUrl: e.target.value }))}
+            placeholder="https://"
+          />
+        </Field>
+        <Field label="URL 2 (document repository or MLS®)">
+          <input
+            className={inputClass}
+            value={form.mlsUrl}
+            onChange={(e) => setForm((p) => ({ ...p, mlsUrl: e.target.value }))}
             placeholder="https://"
           />
         </Field>

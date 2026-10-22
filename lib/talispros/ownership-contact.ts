@@ -44,8 +44,8 @@ export function ownershipLeadLocation(input: {
   const where = (input.location || "").trim();
   if (input.channel === "discuss-page") {
     return where
-      ? `Discuss a Project — ${input.topic} — ${where}`
-      : `Discuss a Project — ${input.topic}`;
+      ? `Share a Project Vision — ${input.topic} — ${where}`
+      : `Share a Project Vision — ${input.topic}`;
   }
   return where
     ? `Ownership Learn More — ${input.topic} — ${where}`

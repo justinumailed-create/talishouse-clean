@@ -42,7 +42,9 @@ const RESOURCES: {
 }[] = [
   {
     key: "url",
-    label: "URL",
+    // Ralf (Oct 18): URL 1 = sales tool, URL 2 = document repository or MLS®
+    // (URL 2 keeps the existing mls_url column).
+    label: "URL 1",
     variant: "blue",
     // Resolved in render: Register for visitors, multipin Dashboard for paid owners.
     resolveHref: (site) =>
@@ -50,7 +52,7 @@ const RESOURCES: {
   },
   {
     key: "mls",
-    label: "MLS®",
+    label: "URL 2",
     variant: "blue",
     resolveHref: (site) => listingResourceHref(site.mls_url),
   },

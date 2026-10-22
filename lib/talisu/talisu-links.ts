@@ -29,3 +29,19 @@ export function talisuDiscussHref(topicId?: string | null): string {
   const id = (topicId || "").trim().toLowerCase();
   return talisuHref(id ? `${TALISU_DISCUSS_PATH}?topic=${encodeURIComponent(id)}` : TALISU_DISCUSS_PATH);
 }
+
+/**
+ * Taliswebs (USA) origin for the Markets "USA Markets" link (Ralf, Oct 18).
+ * Override with NEXT_PUBLIC_TALISWEBS_US_ORIGIN when Taliswebs gets its own
+ * domain. Its Markets page is /talisu/mkts (verified live Oct 23, 2026).
+ */
+export const TALISWEBS_US_ORIGIN = (
+  process.env.NEXT_PUBLIC_TALISWEBS_US_ORIGIN || "https://taliswebs-us.vercel.app"
+)
+  .trim()
+  .replace(/\/+$/, "");
+
+export const TALISWEBS_US_MARKETS_PATH = "/talisu/mkts";
+
+/** "USA Markets": Taliswebs Markets, same window. */
+export const TALISWEBS_US_MARKETS_URL = `${TALISWEBS_US_ORIGIN}${TALISWEBS_US_MARKETS_PATH}`;

@@ -179,7 +179,7 @@ export async function sendOwnershipLearnMoreInquiry(params: {
   const discuss = params.channel === "discuss-page";
   const html = `
     <div style="font-family:system-ui,sans-serif;line-height:1.5;color:#111">
-      <h2 style="margin:0 0 12px">${discuss ? "Discuss a Project (without first registering)" : "Ownership Learn More inquiry"}</h2>
+      <h2 style="margin:0 0 12px">${discuss ? "Share a Project Vision" : "Ownership Learn More inquiry"}</h2>
       <p><strong>Topic:</strong> ${escapeHtml(params.topic)}</p>
       <p><strong>Name:</strong> ${escapeHtml(params.name)}</p>
       <p><strong>Email:</strong> ${escapeHtml(params.email)}</p>
@@ -198,7 +198,7 @@ export async function sendOwnershipLearnMoreInquiry(params: {
       from: fromEmail,
       to: [...params.recipients],
       replyTo: params.email,
-      subject: `${discuss ? "Discuss a Project" : "Learn More"} — ${params.topic} — ${params.name}`,
+      subject: `${discuss ? "Share a Project Vision" : "Learn More"} — ${params.topic} — ${params.name}`,
       html,
     });
     if (error) {

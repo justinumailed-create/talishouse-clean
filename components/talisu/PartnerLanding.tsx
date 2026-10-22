@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import WorkingPageShell from "@/components/talispros/WorkingPageShell";
+import WorkingPageCtaLink from "@/components/talispros/WorkingPageCtaLink";
 
 export type PartnerLandingIcon =
   | "map"
@@ -93,10 +95,12 @@ export type PartnerLandingCard = {
 };
 
 /**
- * Conversion-focused partner landing (Aisha on /talisu/reg, Webster on
- * /talisu/engage): large hero with the partner photo, big readable type,
- * icon cards for the offerings and a strong primary CTA into the existing
- * SamCart step (same tab, visitor must click).
+ * Partner landing (Aisha on /talisu/reg, Webster on /talisu/engage), in the
+ * Catalogue design (Ralf, Oct 18): beige surface, ~1,400 px, one headline
+ * line + Team Leader link on top, nothing below the bottom of a ~1440×800
+ * screen. Z-pattern: partner + extras in the left column, title / offerings
+ * on the right, the primary CTA bottom right. The SamCart step still only
+ * renders after the CTA (same tab, visitor must click).
  */
 export default function PartnerLanding({
   testId,
@@ -119,6 +123,7 @@ export default function PartnerLanding({
   closingTitle,
   closingText,
   notice,
+  left,
 }: {
   testId?: string;
   kicker: string;
@@ -134,120 +139,144 @@ export default function PartnerLanding({
   ctaHref: string;
   ctaNote?: string;
   intro?: ReactNode;
-  cardsHeading: string;
+  cardsHeading?: string;
   cards: PartnerLandingCard[];
   belowCards?: ReactNode;
   closingTitle: string;
   closingText?: string;
   notice?: ReactNode;
+  /**
+   * Left-column content under the title (Webster: the CSFT buttons, in the
+   * same place as on /talisu/discuss). Without it the left column is the
+   * partner card and the title sits on the right.
+   */
+  left?: ReactNode;
 }) {
-  const cta = (extra = "") => (
-    <Link
-      href={ctaHref}
-      data-testid="partner-cta"
-      className={`inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-[#046BD9] px-9 text-[17px] font-semibold text-white shadow-[0_12px_30px_rgba(4,107,217,0.35)] transition hover:-translate-y-0.5 hover:bg-[#0558b3] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#046BD9]/30 ${extra}`}
-    >
-      {ctaLabel}
-      <span aria-hidden className="text-xl leading-none">→</span>
-    </Link>
+  const heading = (
+    <div>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#046BD9]">
+        {kicker}
+      </p>
+      <h1 className="mt-1 text-[30px] font-semibold leading-[1.1] tracking-[-0.03em] text-neutral-950 sm:text-[34px]">
+        {title}
+      </h1>
+    </div>
   );
 
-  return (
-    <div data-testid={testId} className="text-neutral-900">
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-white to-[#eef4fc]">
-        <div aria-hidden className="pointer-events-none absolute -right-40 -top-40 h-[28rem] w-[28rem] rounded-full bg-[#046BD9]/10 blur-2xl" />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-12 sm:py-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:gap-16 lg:py-20">
-          <div className="order-2 lg:order-1">
-            <p className="text-[13px] font-semibold uppercase tracking-[0.18em] text-[#046BD9]">
-              {kicker}
-            </p>
-            <h1 className="mt-4 text-[36px] font-semibold leading-[1.08] tracking-[-0.03em] text-neutral-950 sm:text-[48px] lg:text-[56px]">
-              {title}
-            </h1>
-            <p className="mt-5 max-w-xl text-[18px] leading-relaxed text-neutral-600 sm:text-[20px]">
-              {lead}
-            </p>
-            {notice ? <div className="mt-5">{notice}</div> : null}
-            <div className="mt-8 flex flex-col items-start gap-3">
-              {cta("w-full sm:w-auto")}
-              {ctaNote ? (
-                <p className="text-[14px] text-neutral-500">{ctaNote}</p>
-              ) : null}
-            </div>
-          </div>
-          <div className="order-1 flex justify-center lg:order-2">
-            <figure className="relative w-full max-w-[340px] sm:max-w-[380px]">
-              <div aria-hidden className="absolute inset-0 translate-x-4 translate-y-4 rounded-[32px] bg-[#046BD9]/15" />
-              <Image
-                src={imageSrc}
-                alt={imageAlt}
-                width={imageWidth}
-                height={imageHeight}
-                priority
-                sizes="(min-width: 1024px) 380px, 80vw"
-                className="relative aspect-[4/5] w-full rounded-[32px] object-cover object-top shadow-[0_24px_60px_rgba(0,0,0,0.18)]"
-              />
-              <figcaption className="absolute -bottom-5 left-1/2 w-[86%] -translate-x-1/2 rounded-2xl bg-white px-5 py-3 text-center shadow-[0_12px_30px_rgba(0,0,0,0.12)] ring-1 ring-black/5">
-                <span className="block text-[17px] font-semibold text-neutral-950">{partnerName}</span>
-                <span className="block text-[14px] text-[#046BD9]">{partnerRole}</span>
-              </figcaption>
-            </figure>
-          </div>
-        </div>
-      </section>
-
-      {/* Offerings */}
-      <section className="mx-auto max-w-6xl px-5 py-14 sm:py-20">
-        {intro ? (
-          <div className="mx-auto mb-10 max-w-3xl text-center text-[18px] leading-relaxed text-neutral-700 sm:text-[20px]">
-            {intro}
-          </div>
+  const partnerCard = (
+    <figure
+      className="flex items-center gap-4 rounded-[24px] bg-white p-3 pr-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]"
+      data-testid="partner-card"
+    >
+      <Image
+        src={imageSrc}
+        alt={imageAlt}
+        width={imageWidth}
+        height={imageHeight}
+        priority
+        sizes="120px"
+        className="h-[132px] w-[110px] shrink-0 rounded-[18px] object-cover object-top"
+      />
+      <figcaption className="min-w-0">
+        <span className="block text-[17px] font-semibold text-neutral-950">{partnerName}</span>
+        <span className="block text-[14px] text-[#046BD9]">{partnerRole}</span>
+        {ctaNote ? (
+          <span className="mt-2 block text-[12.5px] leading-snug text-neutral-500">{ctaNote}</span>
         ) : null}
-        <h2 className="text-center text-[28px] font-semibold tracking-[-0.02em] text-neutral-950 sm:text-[36px]">
-          {cardsHeading}
-        </h2>
-        <div className="mt-10 grid gap-5 sm:grid-cols-2">
+      </figcaption>
+    </figure>
+  );
+
+  const cardList =
+    cards.length > 0 ? (
+      <div>
+        {cardsHeading ? (
+          <h2 className="mb-2.5 text-[15px] font-semibold tracking-tight text-neutral-900">
+            {cardsHeading}
+          </h2>
+        ) : null}
+        <div className="grid gap-3 sm:grid-cols-2">
           {cards.map((card) => (
             <article
               key={card.label}
-              className="group rounded-[24px] bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_36px_rgba(0,0,0,0.07)] ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-[0_18px_44px_rgba(4,107,217,0.15)] sm:p-8"
+              className="flex gap-3 rounded-[20px] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_28px_rgba(0,0,0,0.05)]"
             >
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#046BD9]/10 text-[#046BD9] transition group-hover:bg-[#046BD9] group-hover:text-white">
-                <PartnerIcon name={card.icon} />
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#046BD9]/10 text-[#046BD9]">
+                <PartnerIcon name={card.icon} className="h-5 w-5" />
               </span>
-              <h3 className="mt-5 text-[21px] font-semibold tracking-[-0.01em] text-neutral-950">
-                {card.label}
-              </h3>
-              <p className="mt-3 text-[16px] leading-relaxed text-neutral-600 sm:text-[17px]">
-                {card.text}
-              </p>
+              <div className="min-w-0">
+                <h3 className="text-[14.5px] font-semibold text-neutral-950">{card.label}</h3>
+                <p className="mt-1 text-[12.5px] leading-[1.45] text-neutral-600">{card.text}</p>
+              </div>
             </article>
           ))}
         </div>
-        {belowCards ? <div className="mt-8">{belowCards}</div> : null}
-      </section>
+      </div>
+    ) : null;
 
-      {/* Closing CTA */}
-      <section className="px-5 pb-16 sm:pb-24">
-        <div className="mx-auto max-w-4xl rounded-[32px] bg-gradient-to-br from-[#046BD9] to-[#063f86] px-6 py-12 text-center text-white shadow-[0_24px_60px_rgba(4,107,217,0.3)] sm:px-12">
-          <h2 className="text-[28px] font-semibold leading-tight tracking-[-0.02em] text-white! sm:text-[36px]">
-            {closingTitle}
-          </h2>
-          {closingText ? (
-            <p className="mx-auto mt-3 max-w-2xl text-[17px] leading-relaxed text-white/85!">
-              {closingText}
-            </p>
-          ) : null}
-          <Link
-            href={ctaHref}
-            className="mt-8 inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-9 text-[17px] font-semibold text-[#046BD9] shadow-lg transition hover:-translate-y-0.5"
-          >
-            {ctaLabel}
-            <span aria-hidden className="text-xl leading-none">→</span>
-          </Link>
-        </div>
-      </section>
+  // Z-pattern end: closing line + the primary CTA, bottom right.
+  const closing = (
+    <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-3 pt-1">
+      <div className="mr-auto min-w-0 max-w-[36rem]">
+        <p className="text-[17px] font-semibold leading-snug tracking-[-0.01em] text-neutral-950">
+          {closingTitle}
+        </p>
+        {closingText ? (
+          <p className="mt-0.5 text-[13.5px] leading-snug text-neutral-600">{closingText}</p>
+        ) : null}
+      </div>
+      <Link
+        href={ctaHref}
+        data-testid="partner-cta"
+        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#046BD9] px-8 text-[16px] font-semibold text-white shadow-[0_10px_26px_rgba(4,107,217,0.3)] transition hover:bg-[#0558b3] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#046BD9]/30"
+      >
+        {ctaLabel}
+        <span aria-hidden className="text-lg leading-none">→</span>
+      </Link>
     </div>
+  );
+
+  const introBlock = intro ? (
+    <div className="text-[14.5px] leading-relaxed text-neutral-700">{intro}</div>
+  ) : null;
+
+  // Without a custom left slot: partner card + intro fill the left column.
+  const defaultLeft = (
+    <div className="space-y-4">
+      {partnerCard}
+      {introBlock}
+    </div>
+  );
+
+  const main = (
+    <div className="space-y-4">
+      {left ? partnerCard : heading}
+      {notice}
+      {left ? introBlock : null}
+      {cardList}
+      {belowCards}
+      {closing}
+    </div>
+  );
+
+  return (
+    <WorkingPageShell
+      testId={testId}
+      leftWidth={left ? "44rem" : "24rem"}
+      headline={lead}
+      headlineAction={
+        <WorkingPageCtaLink
+          href={ctaHref}
+          label={ctaLabel}
+          avatarSrc={imageSrc}
+          avatarAlt={imageAlt}
+          testId="partner-headline-cta"
+        />
+      }
+      title={left ? heading : undefined}
+      left={left ?? defaultLeft}
+    >
+      {main}
+    </WorkingPageShell>
   );
 }

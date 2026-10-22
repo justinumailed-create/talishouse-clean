@@ -37,14 +37,16 @@ describe("Tokenization Learn More", () => {
       "utf8",
     );
     // Bot keeps a hidden topic; only the /talisu/discuss page shows a picker + location.
-    expect(form).toMatch(/isPage \? \([\s\S]*?<select/);
+    // Ralf (Oct 18): the page picks the structure with the CSFT buttons, not a <select>.
+    expect(form).not.toContain("<select");
+    expect(form).toContain('data-testid="discuss-topic"');
     expect(form).toContain('<input type="hidden" name="topic"');
     expect(form).toContain("MapSitePlaceSearch");
     expect(form).not.toContain("(optional)");
     expect(form).not.toContain("What would you like to know?");
     expect(form).toContain("c.project");
     expect(en.contactForm.project).toBe("Your Project");
-    expect(en.contactForm.title).toBe("Discuss a Project without first registering");
+    expect(en.contactForm.title).toBe("Share a Project Vision");
     expect(form).toMatch(/type="tel"[\s\S]*?required/);
     expect(form).toContain("isValidNanpPhone");
     expect(form).toContain("topic,");

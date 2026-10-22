@@ -5231,3 +5231,11 @@ body.mapsite-gallery-open [data-paypal-button] {
     linear-gradient(180deg, #ebe7e0 0%, #d9d3c9 48%, #cfc8bc 100%);
   background-attachment: fixed;
 }
+
+/* Ralf (Oct 18): Catalogue-style working pages — left column + main (Z-pattern). */
+@media (min-width: 1024px) {
+  .working-page-grid:has(> aside) {
+    grid-template-columns: minmax(0, var(--wp-left, 26rem)) minmax(0, 1fr);
+    align-items: start;
+  }
+}

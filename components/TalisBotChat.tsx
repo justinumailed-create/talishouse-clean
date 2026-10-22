@@ -154,23 +154,14 @@ export default function TalisBotChat({
               >
                 {b.faq}
               </Link>
-              <button
-                type="button"
-                onClick={openContactForm}
+              {/* Ralf (Oct 18): "Share a Project Vision" goes straight to the
+                  TalisU page — no second in-bot form, no extra note/link. */}
+              <Link
+                href={talisuHref(TALISU_DISCUSS_PATH)}
                 data-testid="talisbot-discuss"
                 className="w-full border border-gray-200 bg-white text-gray-900 py-3.5 rounded-2xl text-sm font-semibold hover:bg-gray-50 transition"
               >
                 {b.getHelp}
-              </button>
-              <p className="-mt-1 text-[11px] font-medium text-gray-400" data-testid="talisbot-discuss-note">
-                {b.getHelpNote}
-              </p>
-              <Link
-                href={talisuHref(TALISU_DISCUSS_PATH)}
-                data-testid="talisbot-discuss-page"
-                className="text-[12px] font-semibold text-[#046BD9] hover:underline"
-              >
-                {b.discussPage}
               </Link>
             </div>
             {/* Global Admin → TalisU.com (Ralf: keep talispros admin separate). */}

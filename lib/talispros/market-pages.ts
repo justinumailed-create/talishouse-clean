@@ -88,7 +88,7 @@ export const CLAIM_A_MARKET_PAGE: TalisprosMarketPageContent = {
   partnerImageAlt: "Aisha C.",
   whyHeading: "Why build your Mapsite.",
   whyBody:
-    "Mapsite is the centre of Talispros™. Submit your Build Request here to receive a FAST Code™, create your first Talisbook™, and unlock MLS®, URL, TEB™, and TTV™ actions on your pin after activation — without leaving the map-first workflow.",
+    "Mapsite is the centre of Talispros™. Submit your Build Request here to receive a FAST Code™, create your first Talisbook™, and unlock URL 1, URL 2, TEB™, and TTV™ actions on your pin after activation — without leaving the map-first workflow.",
   metadataTitle: "Talispros™ | Build Mapsite",
 };
 

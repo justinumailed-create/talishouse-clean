@@ -49,6 +49,8 @@ export interface TalisMapsPinPickerProps {
   onLocationChange: (update: TalisMapsPinLocationUpdate) => void;
   /** Fired when the user zooms the preview (scroll / controls). */
   onMapZoomChange?: (zoom: number) => void;
+  /** Height classes for the map frame (default h-[280px] sm:h-[320px]). */
+  heightClassName?: string;
 }
 
 const HOME_PIN_ID = "home-pin";
@@ -394,7 +396,11 @@ export default function TalisMapsPinPicker({
   );
 
   return (
-    <div className="relative h-[280px] w-full touch-none rounded-xl border border-neutral-200 sm:h-[320px]">
+    <div
+      className={`relative w-full touch-none rounded-xl border border-neutral-200 ${
+        props.heightClassName ?? "h-[280px] sm:h-[320px]"
+      }`}
+    >
       <TalisMapsPinPickerMap {...props} pinStyle={stablePinStyle} />
       {!hasValidCoordinates(props.latitude, props.longitude) ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-white/95 to-transparent px-4 pb-3 pt-8 text-center text-xs text-neutral-500">

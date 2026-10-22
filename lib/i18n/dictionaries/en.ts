@@ -174,9 +174,7 @@ export const en = {
     openAria: "Open TalisBOT",
     closeAria: "Close TalisBOT",
     faq: "FAQ",
-    getHelp: "Discuss a Project",
-    getHelpNote: "without first registering",
-    discussPage: "Discuss a Project page →",
+    getHelp: "Share a Project Vision",
     globalAdmin: "Global Admin",
     processesHeading: "Talispros™ processes",
     allTopics: "← All topics",
@@ -186,12 +184,15 @@ export const en = {
   },
 
   contactForm: {
-    title: "Discuss a Project without first registering",
-    /** Full-page version (/talisu/discuss). */
-    pageTitle: "Discuss a Project",
-    pageSubtitle: "without first registering",
+    title: "Share a Project Vision",
+    /** Full-page version (/talisu/discuss), Ralf Oct 18: toward transaction structures. */
+    pageTitle: "Share a Project Vision",
+    pageSubtitle:
+      "Every project starts with a vision and the right transaction structure",
     pageIntro:
-      "Tell us about your project and where it is. A Talispros™ advisor will contact you; no registration or FAST Code needed.",
+      "Explore Conventional, SPLITS, Fractionalization and Tokenization, choose the structure that fits your project, then share your vision. An advisor will contact you; no registration or FAST Code needed.",
+    /** Beside the read-only structure chip on the page form. */
+    topicHint: "(choose with the buttons)",
     openPage: "Open as a full page with a Google-recognized location →",
     topic: "Transaction structure",
     location: "Location",
@@ -204,7 +205,7 @@ export const en = {
     /** Live counter under the proposal textarea. */
     projectCounter: "{count}/{max}",
     thanks: "Thanks — your message is on its way.",
-    advisor: "A Talispros™ advisor will contact you about {topic}.",
+    advisor: "An advisor will contact you about {topic}.",
     done: "Done",
     name: "Name",
     namePlaceholder: "Full name",
@@ -243,6 +244,10 @@ export const en = {
     footer: TALISU_MKTS_FOOTER,
     canada: "Canada",
     doMore: "Do More...",
+    /** Left-panel links (Ralf, Oct 18): switch sites in the same window. */
+    canadaMarkets: "Canada Markets",
+    usaMarkets: "USA Markets",
+    doMoreLink: "Do More",
     noMatches: "No matches",
     close: "Close",
     nextLabel: "Next Step...",
@@ -648,9 +653,9 @@ export const en = {
       "Every registered Market comes with preferred Supply Side Access to Talishouse™ Tiny Homes",
     /** Catalogue headline action → /talisu/engage (Webster). */
     planProject: "Plan your Project",
-    /** Mapsites page (/talispros/demo-mapsite), bottom right (Z-pattern) → /talisu/reg (Aisha). */
+    /** Mapsites page (/talispros/demo-mapsite) top line (Ralf, Oct 18) + "Build Mapsite Demo" (Aisha). */
     mapsitesHeadline:
-      "Every registered Mapsite comes with a semi-exclusive 50 miles radius around a home point market",
+      "Every registered Market has a semi-exclusive protected Market Zone of 50 miles (80 kilometres in Canada) around a home pin",
     registerMapsite: "Register a Mapsite",
     /** Catalogue spec sheets (T-House, T-Dome, G-House). */
     specIncludes: "includes",
@@ -682,10 +687,12 @@ export const en = {
     placeAPin: "Place a pin.",
     createFromSample: "Create Talisbook™ from pinned sample",
     fastCodeOnRegistration: "FAST Code issued upon registration",
-    listingTitle: "Listing title",
-    defaultListingTitle: "Demo Mapsite",
-    /** Ralf: shown under the editable "Demo Mapsite" name. Leading comma is deliberate. */
-    homePinNameHint: "(, or change to what you would like your Home Pin to be named)",
+    /** Ralf (Oct 18): box label "Demo Mapsite", prompt "Home PIN Address". */
+    listingTitle: "Demo Mapsite",
+    defaultListingTitle: "Home PIN Address",
+    homePinNameHint: "(or where you would like to centre your home market)",
+    /** Mapsites top-line action (Aisha): submits the demo form. */
+    buildMapsiteDemo: "Build Mapsite Demo",
     errPlacePin: "Place a pin or enter an address to continue.",
     continue: "Continue to demo eBook",
     continuing: "Continue to demo eBook…",
@@ -803,12 +810,12 @@ export const en = {
         "Aisha C., Team Leader, with the Talispros™ tree logo: Register your Mapsite and get global exposure with industry adjacent marketing",
     },
     talisuEngage: {
-      title: "Engage Webster and His Customization Team | TalisU™",
+      title: "Engage Webster and His Fulfilment Team | TalisU™",
       description:
-        "Work with Webster and his Customization Team on Talishouse™ Modular Spaces: Glasshouse™, Talishouse™, Talistown™ and Talisdome™. Your down payment is credited in full to your order.",
+        "Every project starts with your vision. Engage Webster and his Fulfilment Team using Conventional, SPLITS, Fractionalization or Tokenization structures. Your down payment is credited in full.",
       ogImage: "/og/talisu-engage-en.jpg",
       ogImageAlt:
-        "Webster M., Team Leader, with the Talispros™ tree logo: Engage Webster and his Customization Team for Talishouse™ Modular Spaces",
+        "Webster M., Team Leader, with the Talispros™ tree logo: Engage Webster and his Fulfilment Team to bring your project vision to life",
     },
   },
 } as const;

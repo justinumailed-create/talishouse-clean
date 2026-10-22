@@ -38,8 +38,9 @@ describe("TalisBOT Talispros™ knowledge", () => {
     expect(en.bot.subtitle).toBe("Engage without registering first");
     expect(bot).toContain("TALISU_MKTS_HEADER_BLUE");
     expect(bot).toContain("OwnershipLearnMoreForm");
-    expect(en.bot.getHelp).toBe("Discuss a Project");
-    expect(en.bot.getHelpNote).toBe("without first registering");
+    expect(en.bot.getHelp).toBe("Share a Project Vision");
+    expect("getHelpNote" in en.bot).toBe(false);
+    expect(bot).not.toContain("talisbot-discuss-page");
     expect(bot).toContain("TALISU_GLOBAL_ADMIN_URL");
     expect(bot).toContain("talisuHref(TALISU_DISCUSS_PATH)");
     expect(bot).not.toContain("TALISBOT_INTEREST_OPTIONS");

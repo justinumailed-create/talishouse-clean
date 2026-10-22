@@ -83,8 +83,10 @@ describe("TalisU blue header dropdown", () => {
     // Ralf (Oct 17): the big "Open your Mapsite" FAST Code block is gone from the
     // Mapsites page (Sign In is item one on the home page); beige working page.
     expect(builder).not.toContain("<DemoFastCodeCard");
-    expect(builder).toContain("talis-working-bg");
-    expect(builder).toContain("ROUTES.TALISU_REGISTER");
+    // Oct 18: beige Catalogue shell (WorkingPageShell); the bottom
+    // "Register a Mapsite" CTA is gone.
+    expect(builder).toContain("<WorkingPageShell");
+    expect(builder).not.toContain("ROUTES.TALISU_REGISTER");
   });
 
   it("puts a horizontal divider after Knowledge Base (Audio/Video below) in the TalisU dropdown", () => {

@@ -13,7 +13,7 @@ export function isTalisprosStartPath(pathname: string | null | undefined) {
 /** Removed from homepage gate — kept empty so secondary disclaimer can stand alone. */
 export const TALISPROS_LEGAL_PRIMARY_COPY = "";
 
-export const TALISPROS_LEGAL_SECONDARY_COPY = "*Some limitations apply.";
+export const TALISPROS_LEGAL_SECONDARY_COPY = "*Prior registration required.";
 
 /** Same default Home PIN as Claim a Market / Build A Mapsite. */
 export const TALISPROS_HOME_MAP_FALLBACK = {
@@ -134,7 +134,7 @@ export const TALISPROS_HOME_DEMO_FLOW: readonly TalisprosHomeDemoStep[] = [
     step: 3,
     eyebrow: "Mapsites",
     title: "Claimed Mapsite",
-    body: "Pin dashboard with URL, MLS®, TEB™, and TTV™ — identity details hidden in demo.",
+    body: "Pin dashboard with URL 1, URL 2, TEB™, and TTV™ — identity details hidden in demo.",
     href: "/talisu/mkts",
     hrefLabel: "Build Demo",
     imageSrc: "/assets/home-demo/03-claimed-mapsite-rm22.jpg",

@@ -17,9 +17,11 @@ import {
 describe("Ralf batch 2 — demo → registration", () => {
   it("shows the exact Home Pin name hint on the demo build page (EN + DE)", () => {
     expect(en.demo.homePinNameHint).toBe(
-      "(, or change to what you would like your Home Pin to be named)",
+      "(or where you would like to centre your home market)",
     );
-    expect(de.demo.homePinNameHint.startsWith("(, ")).toBe(true);
+    expect(en.demo.listingTitle).toBe("Demo Mapsite");
+    expect(en.demo.defaultListingTitle).toBe("Home PIN Address");
+    expect(de.demo.homePinNameHint.startsWith("(oder ")).toBe(true);
     const builder = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),
       "utf8",

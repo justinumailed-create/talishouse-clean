@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   OWNERSHIP_CONTACT_LOCATION_MAX,
   OWNERSHIP_CONTACT_MESSAGE_MAX,
-  OWNERSHIP_CONTACT_TOPICS,
   type OwnershipContactTopic,
 } from "@/lib/talispros/ownership-contact";
 import MapSitePlaceSearch, {
@@ -180,29 +179,20 @@ export default function OwnershipLearnMoreForm({
         </div>
       ) : (
         <form onSubmit={handleSubmit} className={isPage ? "space-y-3" : "space-y-2"}>
+          {/* Page: the structure is chosen with the CSFT buttons beside the
+              form (Ralf, Oct 18) and shown here read-only; still submitted. */}
+          <input type="hidden" name="topic" value={topic} />
           {isPage ? (
-            <div>
-              <label htmlFor={`${titleId}-topic`} className={LABEL_CLASS}>
-                {c.topic}
-              </label>
-              <select
-                id={`${titleId}-topic`}
-                name="topic"
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                data-testid="discuss-topic"
-                className={`${INPUT_CLASS} border-neutral-200`}
-              >
-                {OWNERSHIP_CONTACT_TOPICS.map((value) => (
-                  <option key={value} value={value}>
-                    {(c.topics as Record<string, string>)[value] ?? value}
-                  </option>
-                ))}
-              </select>
-            </div>
-          ) : (
-            <input type="hidden" name="topic" value={topic} />
-          )}
+            <p
+              className="flex flex-wrap items-baseline gap-x-2 rounded-lg border border-[#046BD9]/25 bg-[#046BD9]/5 px-2.5 py-1.5 text-[12px] text-neutral-600"
+              data-testid="discuss-topic"
+              data-topic={topic}
+            >
+              <span className="font-medium">{c.topic}:</span>
+              <span className="text-[13px] font-semibold text-neutral-950">{topicLabel}</span>
+              <span className="text-[11px] text-neutral-500">{c.topicHint}</span>
+            </p>
+          ) : null}
           <div className="grid grid-cols-2 gap-2">
             <div className="min-w-0">
               <label htmlFor={`${titleId}-name`} className={LABEL_CLASS}>

@@ -35,13 +35,16 @@ describe("Ralf Oct 17 catalogue spec sheets", () => {
     expect(en.catalogueUi.planProject).toBe("Plan your Project");
     expect(de.catalogueUi.planProject).toBeTruthy();
     expect(en.catalogueUi.mapsitesHeadline).toBe(
-      "Every registered Mapsite comes with a semi-exclusive 50 miles radius around a home point market",
+      "Every registered Market has a semi-exclusive protected Market Zone of 50 miles (80 kilometres in Canada) around a home pin",
     );
     const builder = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),
       "utf8",
     );
     expect(builder).toContain("AISHA_AVATAR_SRC");
-    expect(builder).toContain('data-testid="mapsites-register-cta"');
+    // Ralf (Oct 18): one line + "Build Mapsite Demo" (Aisha) on top; the
+    // bottom "Register a Mapsite" CTA is gone.
+    expect(builder).toContain('testId="mapsites-build-demo-link"');
+    expect(builder).not.toContain('data-testid="mapsites-register-cta"');
   });
 });

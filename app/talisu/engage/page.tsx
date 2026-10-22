@@ -8,7 +8,8 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { fmt } from "@/lib/i18n/format";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
-import PartnerLanding, { PartnerIcon, type PartnerLandingIcon } from "@/components/talisu/PartnerLanding";
+import PartnerLanding from "@/components/talisu/PartnerLanding";
+import { TransactionStructurePickerStandalone } from "@/components/talisu/TransactionStructurePicker";
 import {
   isTalisUEngageCheckoutStep,
   talisUEngageCheckoutHref,
@@ -58,30 +59,37 @@ export default async function TalisUEngagePage({
     product,
   );
 
-  // Conversion landing first (Ralf): Webster's hero + how we help. The
-  // down-payment checkout only renders after the CTA (?step=pay, same tab);
-  // a catalogue ?product= code is carried through.
+  // Landing first (Ralf, Oct 18): Catalogue design, Webster's one-line intro,
+  // the CSFT buttons in the left column (explanations open below them, same
+  // place as on /talisu/discuss). The down-payment checkout only renders
+  // after the CTA (?step=pay, same tab); a catalogue ?product= code is
+  // carried through.
   if (!isTalisUEngageCheckoutStep(params.step)) {
-    const icons: PartnerLandingIcon[] = ["design", "credit", "queue", "spark"];
     return (
       <PartnerLanding
         testId="talisu-engage-landing"
         kicker={TALISU_ENGAGE.landingKicker}
         title={TALISU_ENGAGE.title}
-        lead={TALISU_ENGAGE.headline}
+        lead={TALISU_ENGAGE.landingLead}
         imageSrc={TALISU_ENGAGE.partnerImage}
         imageAlt={TALISU_ENGAGE.partnerImageAlt}
         imageWidth={800}
         imageHeight={800}
         partnerName={TALISU_ENGAGE.partnerName.split(/ [—–-] /)[0] ?? "Webster M."}
-        partnerRole={TALISU_ENGAGE.partnerHeading}
+        partnerRole={TALISU_ENGAGE.landingRole}
         ctaLabel={TALISU_ENGAGE.ctaLabel}
         ctaHref={talisUEngageCheckoutHref(product?.code)}
-        ctaNote={TALISU_ENGAGE.ctaNote}
+        left={
+          <TransactionStructurePickerStandalone
+            initialOpenId="conventional"
+            testId="engage-structures"
+          />
+        }
+        intro={<p>{TALISU_ENGAGE.landingIntro}</p>}
         notice={
           product ? (
             <p
-              className="inline-block rounded-2xl border border-[#046BD9]/25 bg-white px-4 py-3 text-[16px] text-neutral-800 shadow-sm"
+              className="inline-block rounded-2xl border border-[#046BD9]/25 bg-white px-4 py-3 text-[15px] text-neutral-800 shadow-sm"
               data-testid="engage-ask-product"
             >
               <span className="font-semibold text-[#046BD9]">{t.engageCustomizing}</span>{" "}
@@ -91,39 +99,9 @@ export default async function TalisUEngagePage({
             </p>
           ) : null
         }
-        cardsHeading={TALISU_ENGAGE.helpHeading.replace(/:$/, "")}
-        cards={TALISU_ENGAGE.helpItems.map((text, i) => ({
-          icon: icons[i] ?? "spark",
-          label: TALISU_ENGAGE.helpLabels[i] ?? "",
-          text,
-        }))}
-        belowCards={
-          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-            <div className="rounded-[24px] bg-white p-6 ring-1 ring-black/5 sm:p-8">
-              <h3 className="text-[21px] font-semibold text-neutral-950">
-                {TALISU_ENGAGE.whyHeading}
-              </h3>
-              <div className="mt-3 space-y-3 text-[16px] leading-relaxed text-neutral-600 sm:text-[17px]">
-                {TALISU_ENGAGE.paragraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
-                ))}
-              </div>
-            </div>
-            <div className="rounded-[24px] bg-[#046BD9]/[0.06] p-6 ring-1 ring-[#046BD9]/15 sm:p-8">
-              <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#046BD9] text-white">
-                <PartnerIcon name="shield" />
-              </span>
-              <h3 className="mt-5 text-[21px] font-semibold text-neutral-950">
-                {TALISU_ENGAGE.protectionHeading.replace(/:$/, "")}
-              </h3>
-              <p className="mt-3 text-[16px] leading-relaxed text-neutral-700 sm:text-[17px]">
-                {TALISU_ENGAGE.protectionText}
-              </p>
-            </div>
-          </div>
-        }
-        closingTitle={TALISU_ENGAGE.finalTitle}
-        closingText={TALISU_ENGAGE.finalText}
+        cards={[]}
+        closingTitle={TALISU_ENGAGE.headline}
+        closingText={TALISU_ENGAGE.ctaNote}
       />
     );
   }

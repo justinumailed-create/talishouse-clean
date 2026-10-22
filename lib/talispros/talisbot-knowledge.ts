@@ -22,7 +22,7 @@ export function getTalisBotSystemRole(locale: "en" | "de" = "en"): string {
     " Always reply in natural, professional German using the formal \"Sie\" form." +
     " Keep brand names and trademarks unchanged (Talispros™, Talishouse™, Mapsites, Talisbooks™," +
     " TalisTV™, TalisU™, TalisBOT, FAST Codes™, TEB™, TTV™, PIN, SamCart) and keep acronyms" +
-    " such as URL, MLS®, TEB, TVA and TTV."
+    " such as URL 1, URL 2, TEB, TVA and TTV."
   );
 }
 

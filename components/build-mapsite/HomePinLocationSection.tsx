@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { Upload } from "lucide-react";
 import Image from "next/image";
 import {
@@ -98,6 +98,14 @@ export interface HomePinLocationSectionProps {
   onChange: (values: Partial<HomePinLocationValues>) => void;
   onPinImageChange: (file: File | null) => void;
   mode?: "full" | "essentials";
+  /**
+   * "demo" (Mapsites demo page, Ralf Oct 18): no URL / MLS® fields,
+   * geo-coordinates above the map, two columns (lead + address left,
+   * coordinates + map + footer right) so it fits one ~1440×800 screen.
+   */
+  variant?: "default" | "demo";
+  leadSlot?: ReactNode;
+  footerSlot?: ReactNode;
   errors?: Partial<Record<keyof HomePinLocationValues | "pinImage", string>>;
 }
 
@@ -107,6 +115,9 @@ export default function HomePinLocationSection({
   onChange,
   onPinImageChange,
   mode = "full",
+  variant = "default",
+  leadSlot,
+  footerSlot,
   errors = {},
 }: HomePinLocationSectionProps) {
   const pinImageInputRef = useRef<HTMLInputElement>(null);
@@ -276,8 +287,9 @@ export default function HomePinLocationSection({
     if (hasGeoInput) setShowOptionalGeo(true);
   }, [hasGeoInput]);
 
-  return (
-    <div className="space-y-6">
+  const isDemo = variant === "demo";
+
+  const addressField = (
       <GoogleAddressInput
         label="Street Address"
         value={values.streetAddress}
@@ -305,34 +317,60 @@ export default function HomePinLocationSection({
         required
         helper="If no street address is available, please enter one close to where you would like the PIN to appear, then manipulate the map to reflect the desired location. The geo-coordinates will adjust automatically."
       />
+  );
 
+  // Ralf (Oct 18): the MLS® field became a second URL. URL 2 keeps the
+  // existing mls_url column (no migration), so old MLS® links still open.
+  const linkFields = (
       <div className="grid gap-4 sm:grid-cols-2">
         <InputField
-          label="URL"
+          label="URL 1 (sales tool)"
           value={values.brokerUrl}
           onChange={(brokerUrl) => onChange({ brokerUrl })}
           placeholder="https://"
-          hint="Optional. Opens from the pin URL button."
+          hint="Optional. Opens from the pin URL 1 button."
           inputMode="url"
           error={errors.brokerUrl}
         />
         <InputField
-          label="MLS®"
+          label="URL 2 (document repository or MLS®)"
           value={values.mlsUrl}
           onChange={(mlsUrl) => onChange({ mlsUrl })}
-          placeholder="https://www.realtor.ca/..."
-          hint="Optional. Opens from the pin MLS® button."
+          placeholder="https://"
+          hint="Optional. Opens from the pin URL 2 button."
           inputMode="url"
           error={errors.mlsUrl}
         />
       </div>
+  );
 
+  const coordinateInputs = (
+    <>
+            <InputField
+              label="Latitude"
+              value={values.latitude}
+              onChange={(value) => handleCoordinateInput("latitude", value)}
+              placeholder="46.088287"
+              error={errors.latitude}
+            />
+            <InputField
+              label="Longitude"
+              value={values.longitude}
+              onChange={(value) => handleCoordinateInput("longitude", value)}
+              placeholder="-59.882749"
+              error={errors.longitude}
+            />
+    </>
+  );
+
+  const mapBlock = (
       <div>
         <FieldLabel
           label="PIN selector"
           hint="Zoom to the view you want — placing or moving the PIN keeps that zoom. The created Mapsite opens at the same depth."
         />
         <TalisMapsPinPicker
+          heightClassName={isDemo ? "h-[300px] lg:h-[400px]" : undefined}
           latitude={values.latitude}
           longitude={values.longitude}
           streetAddress={values.streetAddress}
@@ -355,6 +393,35 @@ export default function HomePinLocationSection({
           ) : null}
         </div>
       </div>
+  );
+
+  if (isDemo) {
+    return (
+      <div className="working-page-grid grid gap-5" style={{ ["--wp-left" as string]: "26rem" } as CSSProperties}>
+        <aside className="min-w-0 space-y-5" data-testid="demo-pin-left">
+          {leadSlot}
+          <div className="rounded-[24px] bg-white px-5 py-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]">
+            {addressField}
+          </div>
+        </aside>
+        <div className="min-w-0 space-y-3" data-testid="demo-pin-right">
+          <div className="rounded-[24px] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]">
+            <div className="grid gap-3 sm:grid-cols-2" data-testid="demo-geo-coordinates">
+              {coordinateInputs}
+            </div>
+            <div className="mt-3">{mapBlock}</div>
+          </div>
+          {footerSlot}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {addressField}
+      {linkFields}
+      {mapBlock}
 
       <div>
         <button
@@ -371,20 +438,7 @@ export default function HomePinLocationSection({
             <div className="sm:col-span-2">
               <FieldLabel label="Geo Coordinates" />
             </div>
-            <InputField
-              label="Latitude"
-              value={values.latitude}
-              onChange={(value) => handleCoordinateInput("latitude", value)}
-              placeholder="46.088287"
-              error={errors.latitude}
-            />
-            <InputField
-              label="Longitude"
-              value={values.longitude}
-              onChange={(value) => handleCoordinateInput("longitude", value)}
-              placeholder="-59.882749"
-              error={errors.longitude}
-            />
+            {coordinateInputs}
             <p className="text-xs text-neutral-400 sm:col-span-2">
               Paste coordinates like{" "}
               <span className="font-mono text-neutral-500">

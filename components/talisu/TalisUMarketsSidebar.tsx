@@ -3,6 +3,11 @@
 import { useMemo } from "react";
 import type { TalisUMktsPin } from "@/lib/talisu/markets-pins";
 import { useT } from "@/lib/i18n/client";
+import { ROUTES } from "@/lib/routes";
+import { TALISWEBS_US_MARKETS_URL } from "@/lib/talisu/talisu-links";
+
+const NAV_LINK =
+  "inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[11.5px] font-semibold tracking-tight ring-1 transition-colors";
 
 type Props = {
   pins: readonly TalisUMktsPin[];
@@ -59,6 +64,33 @@ export default function TalisUMarketsSidebar({ pins }: Props) {
               </li>
             ))}
           </ul>
+          {/* Ralf (Oct 18): Canada (this site) / USA (Taliswebs) / Do More
+              (Catalogue). Plain anchors: same window, full reload when the
+              site changes. */}
+          <nav className="mt-3 flex flex-wrap gap-1.5" data-testid="mkts-site-links">
+            <a
+              href={ROUTES.TALISU_MARKETS}
+              aria-current="page"
+              className={`${NAV_LINK} bg-neutral-950 text-white ring-neutral-950`}
+              data-testid="mkts-link-canada"
+            >
+              {m.canadaMarkets}
+            </a>
+            <a
+              href={TALISWEBS_US_MARKETS_URL}
+              className={`${NAV_LINK} bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-100`}
+              data-testid="mkts-link-usa"
+            >
+              {m.usaMarkets}
+            </a>
+            <a
+              href={ROUTES.CATALOG}
+              className={`${NAV_LINK} bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-100`}
+              data-testid="mkts-link-do-more"
+            >
+              {m.doMoreLink}
+            </a>
+          </nav>
         </div>
 
         <div className="border-t border-neutral-200/80 px-4 pb-3.5 pt-3" data-testid="mkts-do-more">

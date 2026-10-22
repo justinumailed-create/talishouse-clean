@@ -81,7 +81,7 @@ export const TALISU_FAQ: {
     {
       question: "What is the meaning of PMC?",
       answer:
-        "Promote - Manage - Cooperate. Mapsites contain pins whose flags reveal URL, MLS®, TEB and TTV links for every pin:",
+        "Promote - Manage - Cooperate. Mapsites contain pins whose flags reveal URL 1, URL 2, TEB and TTV links for every pin:",
       bullets: [
         "URL: a means to advance narratives and shape external communication.",
         "MLS®: a link specifically for real estate professionals to bypass distractions en route to specific listings.",
@@ -258,7 +258,7 @@ export const TALISU_REGISTER = {
 
 export const TALISU_ENGAGE = {
   title: "Engage the Team",
-  headline: "Send a Down Payment to engage Webster and his Customization Team",
+  headline: "Send a Down Payment to engage Webster and his Fulfilment Team",
   partnerHeading: "Your Customization Partner",
   partnerName: "Webster M. — Team Leader",
   partnerImage: "/talisu/webster-team-leader-v2.jpg",
@@ -285,7 +285,13 @@ export const TALISU_ENGAGE = {
   ctaLabel: "Engage the team",
   ctaNote: "Fully applied to your order · protected for up to 12 months",
   finalTitle: "Every project starts with your vision.",
-  finalText: "Engage Webster and his Customization Team to bring it to life.",
+  finalText: "Engage Webster and his Fulfilment Team to bring it to life.",
+  /** Landing (Ralf, Oct 18): one line on top, CSFT buttons, Webster as projects analyst. */
+  landingLead:
+    "Every project starts with your vision. Engage Webster and his Fulfilment Team to bring it to life utilizing Conventional, SPLITS, Fractionalization, or Tokenization capitalization structures",
+  landingRole: "Projects Analyst",
+  landingIntro:
+    "Choose the capitalization structure that fits your project. Webster analyzes your vision with you; his Fulfilment Team brings it to life.",
   samcartUrl: "https://talispros.mysamcart.com/checkout/custom",
 } as const;
 

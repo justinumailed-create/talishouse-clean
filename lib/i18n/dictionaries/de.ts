@@ -94,7 +94,7 @@ export const de: Dictionary = {
     motto: "BEWERBEN – VERWALTEN – KOOPERIEREN",
     openAccount: "Ihr Konto eröffnen*",
     systemDemo: "Demo erstellen",
-    legalSecondary: "*Es gelten bestimmte Einschränkungen.",
+    legalSecondary: "*Vorherige Registrierung erforderlich.",
     bannerTitle: "Branchennahe Abwicklungsoptionen",
     structuresTagline: "Transaktionsstrukturen erkunden",
     ownershipAria: "Eigentumsmodelle",
@@ -186,7 +186,7 @@ export const de: Dictionary = {
         {
           question: "Wofür steht PMC?",
           answer:
-            "Promote – Manage – Cooperate (Bewerben – Verwalten – Kooperieren). Mapsites enthalten PINs, deren Fähnchen für jeden PIN Links zu URL, MLS®, TEB und TTV anzeigen:",
+            "Promote – Manage – Cooperate (Bewerben – Verwalten – Kooperieren). Mapsites enthalten PINs, deren Fähnchen für jeden PIN Links zu URL 1, URL 2, TEB und TTV anzeigen:",
           bullets: [
             "URL: ein Mittel, um Ihre Botschaften voranzubringen und die externe Kommunikation zu gestalten.",
             "MLS®: ein Link speziell für Immobilienprofis, der ohne Ablenkungen direkt zu bestimmten Angeboten führt.",
@@ -310,7 +310,7 @@ export const de: Dictionary = {
       ...TALISU_ENGAGE,
       title: "Das Team beauftragen",
       headline:
-        "Leisten Sie eine Anzahlung, um Webster und sein Anpassungsteam zu beauftragen",
+        "Leisten Sie eine Anzahlung, um Webster und sein Fulfilment-Team zu beauftragen",
       partnerHeading: "Ihr Anpassungspartner",
       partnerName: "Webster M. – Teamleiter",
       paragraphs: [
@@ -334,7 +334,12 @@ export const de: Dictionary = {
       ctaLabel: "Team beauftragen",
       ctaNote: "Vollständig auf Ihre Bestellung angerechnet · bis zu 12 Monate geschützt",
       finalTitle: "Jedes Projekt beginnt mit Ihrer Vision.",
-      finalText: "Beauftragen Sie Webster und sein Anpassungsteam, um sie Wirklichkeit werden zu lassen.",
+      finalText: "Beauftragen Sie Webster und sein Fulfilment-Team, um sie Wirklichkeit werden zu lassen.",
+      landingLead:
+        "Jedes Projekt beginnt mit Ihrer Vision. Beauftragen Sie Webster und sein Fulfilment-Team, sie mit konventionellen, SPLITS-, Fraktionalisierungs- oder Tokenisierungs-Kapitalisierungsstrukturen Wirklichkeit werden zu lassen",
+      landingRole: "Projektanalyst",
+      landingIntro:
+        "Wählen Sie die Kapitalisierungsstruktur, die zu Ihrem Projekt passt. Webster analysiert Ihre Vision gemeinsam mit Ihnen; sein Fulfilment-Team setzt sie um.",
     },
     engageCustomizing: "Anpassung:",
     engageCataloguePage: "Talishouse™ Produktkatalog, Seite {page}",
@@ -350,9 +355,7 @@ export const de: Dictionary = {
     openAria: "TalisBOT öffnen",
     closeAria: "TalisBOT schließen",
     faq: "FAQ",
-    getHelp: "Projekt besprechen",
-    getHelpNote: "ohne vorherige Registrierung",
-    discussPage: "Seite „Projekt besprechen“ →",
+    getHelp: "Projektvision teilen",
     globalAdmin: "Globaler Admin",
     processesHeading: "Talispros™-Prozesse",
     allTopics: "← Alle Themen",
@@ -408,11 +411,13 @@ export const de: Dictionary = {
   },
 
   contactForm: {
-    title: "Projekt besprechen – ohne vorherige Registrierung",
-    pageTitle: "Projekt besprechen",
-    pageSubtitle: "ohne vorherige Registrierung",
+    title: "Projektvision teilen",
+    pageTitle: "Projektvision teilen",
+    pageSubtitle:
+      "Jedes Projekt beginnt mit einer Vision und der passenden Transaktionsstruktur",
     pageIntro:
-      "Erzählen Sie uns von Ihrem Projekt und seinem Standort. Ein Talispros™-Berater meldet sich bei Ihnen – ohne Registrierung und ohne FAST Code.",
+      "Entdecken Sie Konventionell, SPLITS, Fraktionalisierung und Tokenisierung, wählen Sie die Struktur, die zu Ihrem Projekt passt, und teilen Sie dann Ihre Vision. Ein Berater meldet sich bei Ihnen – ohne Registrierung und ohne FAST Code.",
+    topicHint: "(mit den Schaltflächen wählen)",
     openPage: "Als ganze Seite mit Google-erkanntem Standort öffnen →",
     topic: "Transaktionsstruktur",
     location: "Standort",
@@ -424,7 +429,7 @@ export const de: Dictionary = {
     locationVerified: "Von Google erkannter Standort",
     projectCounter: "{count}/{max}",
     thanks: "Vielen Dank – Ihre Nachricht ist unterwegs.",
-    advisor: "Ein Talispros™-Berater wird Sie zum Thema {topic} kontaktieren.",
+    advisor: "Ein Berater wird Sie zum Thema {topic} kontaktieren.",
     done: "Fertig",
     name: "Name",
     namePlaceholder: "Vor- und Nachname",
@@ -467,6 +472,9 @@ export const de: Dictionary = {
       "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 50 Meilen (80 Kilometern) um einen Mittelpunkt als teilexklusives Gebiet zu beanspruchen. Teilexklusiv bedeutet: Innerhalb dieses Kreises werden keine weiteren Märkte vergeben, benachbarte Märkte dürfen jedoch weiterhin Angebote pinnen, für die ihnen schriftliche und geprüfte Angebotsunterlagen vorliegen.",
     canada: "Kanada",
     doMore: "Do More...",
+    canadaMarkets: "Märkte Kanada",
+    usaMarkets: "Märkte USA",
+    doMoreLink: "Do More",
     noMatches: "Keine Treffer",
     close: "Schließen",
     nextLabel: "Nächster Schritt …",
@@ -868,7 +876,7 @@ export const de: Dictionary = {
       "Jeder registrierte Markt erhält bevorzugten angebotsseitigen Zugang zu Talishouse™ Tiny Homes",
     planProject: "Ihr Projekt planen",
     mapsitesHeadline:
-      "Jede registrierte Mapsite umfasst einen semi-exklusiven Radius von 50 Meilen um einen Heimatmarkt",
+      "Jeder registrierte Markt hat eine semi-exklusive, geschützte Marktzone von 50 Meilen (80 Kilometern in Kanada) um einen Home-PIN",
     registerMapsite: "Mapsite registrieren",
     specIncludes: "umfasst",
     specMayInclude: "kann umfassen",
@@ -899,9 +907,10 @@ export const de: Dictionary = {
     placeAPin: "Setzen Sie einen PIN.",
     createFromSample: "Talisbook™ aus dem angehefteten Muster erstellen",
     fastCodeOnRegistration: "FAST Code wird bei der Registrierung vergeben",
-    listingTitle: "Titel des Angebots",
-    defaultListingTitle: "Demo-Mapsite",
-    homePinNameHint: "(, oder ändern Sie ihn in den gewünschten Namen Ihres Home-PINs)",
+    listingTitle: "Demo-Mapsite",
+    defaultListingTitle: "Home-PIN-Adresse",
+    homePinNameHint: "(oder wo Sie Ihren Heimatmarkt zentrieren möchten)",
+    buildMapsiteDemo: "Mapsite-Demo erstellen",
     errPlacePin: "Setzen Sie einen PIN oder geben Sie eine Adresse ein, um fortzufahren.",
     continue: "Weiter zum Demo-eBook",
     continuing: "Weiter zum Demo-eBook …",
@@ -1022,12 +1031,12 @@ export const de: Dictionary = {
         "Aisha C., Teamleiterin, mit dem Talispros™-Baumlogo – Registrieren Sie Ihre Mapsite: globale Sichtbarkeit durch branchennahes Marketing",
     },
     talisuEngage: {
-      title: "Webster und sein Anpassungsteam beauftragen | TalisU™",
+      title: "Webster und sein Fulfilment-Team beauftragen | TalisU™",
       description:
-        "Arbeiten Sie mit Webster und seinem Anpassungsteam an Talishouse™ Modular Spaces: Glasshouse™, Talishouse™, Talistown™ und Talisdome™. Ihre Anzahlung wird vollständig auf Ihre Bestellung angerechnet.",
+        "Jedes Projekt beginnt mit Ihrer Vision. Beauftragen Sie Webster und sein Fulfilment-Team – mit konventionellen, SPLITS-, Fraktionalisierungs- oder Tokenisierungsstrukturen. Die Anzahlung wird vollständig angerechnet.",
       ogImage: "/og/talisu-engage-de.jpg",
       ogImageAlt:
-        "Webster M., Teamleiter, mit dem Talispros™-Baumlogo: Beauftragen Sie Webster und sein Anpassungsteam für Talishouse™ Modular Spaces",
+        "Webster M., Teamleiter, mit dem Talispros™-Baumlogo: Beauftragen Sie Webster und sein Fulfilment-Team für Ihre Projektvision",
     },
   },
 };
