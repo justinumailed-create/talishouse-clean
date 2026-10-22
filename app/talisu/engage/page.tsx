@@ -136,9 +136,6 @@ export default async function TalisUEngagePage({
           <p className="mt-3 text-sm font-medium text-neutral-950">
             {TALISU_ENGAGE.partnerName}
           </p>
-          <p className="mt-1 text-sm text-[#046BD9]" data-testid="engage-partner-framing">
-            {TALISU_ENGAGE.partnerFraming}
-          </p>
           <div className="mt-3 space-y-3 text-sm text-neutral-700">
             {TALISU_ENGAGE.paragraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>

@@ -262,9 +262,6 @@ export const TALISU_ENGAGE = {
   partnerHeading: "Your Customization Partner",
   partnerName: "Webster M. — Team Leader",
   partnerImage: "/talisu/webster-banker-v3.jpg",
-  /** Webster is the face of, and authority on, the CSFT fulfilment options. */
-  partnerFraming:
-    "The face of, and our authority on, fulfilment options: Conventional, SPLITS, Fractionalization and Tokenization.",
   partnerImageAlt: "Webster M.",
   paragraphs: [
     'Modular container or dome structures unlock "hyper-mobility" with structural reliability, allowing traffic-reliant businesses to deploy physical locations exactly where they find their customers.',
@@ -294,7 +291,7 @@ export const TALISU_ENGAGE = {
     "Every project starts with your vision. Engage Webster and his Fulfilment Team to bring it to life utilizing Conventional, SPLITS, Fractionalization, or Tokenization capitalization structures",
   landingRole: "Projects Analyst · Fulfilment Options",
   landingIntro:
-    "Webster is the face of, and our authority on, fulfilment options. Choose the capitalization structure that fits your project; he analyzes your vision with you and his Fulfilment Team brings it to life.",
+    "Webster and his Fulfilment Team help match your project to the right structure: Conventional, SPLITS, Fractionalization or Tokenization.",
   samcartUrl: "https://talispros.mysamcart.com/checkout/custom",
 } as const;
 

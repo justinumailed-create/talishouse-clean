@@ -313,8 +313,6 @@ export const de: Dictionary = {
         "Leisten Sie eine Anzahlung, um Webster und sein Fulfilment-Team zu beauftragen",
       partnerHeading: "Ihr Anpassungspartner",
       partnerName: "Webster M. – Teamleiter",
-      partnerFraming:
-        "Das Gesicht und unsere Autorität für Fulfilment-Optionen: konventionell, SPLITS, Fraktionalisierung und Tokenisierung.",
       paragraphs: [
         "Modulare Container- oder Kuppelbauten erschließen „Hypermobilität“ bei struktureller Zuverlässigkeit und ermöglichen Unternehmen, die auf Kundenfrequenz angewiesen sind, physische Standorte genau dort einzusetzen, wo sie ihre Kunden finden.",
         "Vorgefertigte Module aus standardisiertem, langlebigem „Corten“-Stahl (korrosionsbeständig und mit hoher Zugfestigkeit) oder aus Fiberglas lassen sich schnell in Betrieb nehmen.",
@@ -341,7 +339,7 @@ export const de: Dictionary = {
         "Jedes Projekt beginnt mit Ihrer Vision. Beauftragen Sie Webster und sein Fulfilment-Team, sie mit konventionellen, SPLITS-, Fraktionalisierungs- oder Tokenisierungs-Kapitalisierungsstrukturen Wirklichkeit werden zu lassen",
       landingRole: "Projektanalyst · Fulfilment-Optionen",
       landingIntro:
-        "Webster ist das Gesicht und unsere Autorität für Fulfilment-Optionen. Wählen Sie die Kapitalisierungsstruktur, die zu Ihrem Projekt passt; er analysiert Ihre Vision gemeinsam mit Ihnen, und sein Fulfilment-Team setzt sie um.",
+        "Webster und sein Fulfilment-Team finden mit Ihnen die passende Struktur für Ihr Projekt: konventionell, SPLITS, Fraktionalisierung oder Tokenisierung.",
     },
     engageCustomizing: "Anpassung:",
     engageCataloguePage: "Talishouse™ Produktkatalog, Seite {page}",
