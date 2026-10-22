@@ -88,12 +88,12 @@ add("/talisu/contract", "talisu-contract", "utility", BRAND,
      "Öffnen Sie den TalisALL PMC Dienstleistungsvertrag mit Ihrem Agenten-Code, unterschreiben Sie elektronisch und fahren Sie mit der Registrierung fort.",
      "TALISPROS  ·  VERTRAG", ["Ihren", "Dienstleistungs-", "vertrag signieren"], ["Agenten-Code", "E-Signatur", "Dann registrieren"]))
 add("/talisu/discuss", "talisu-discuss", "public", WEBSTER,
-    ("Discuss a Project Without Registering | TalisU™",
-     "Discuss your Conventional, SPLITS, Fractionalization or Tokenization project with a Talispros™ advisor. No registration or FAST Code needed.",
-     "TALISU™  ·  DISCUSS", ["Discuss a", "Project"], ["No registration", "Google location", "Advisor reply"]),
-    ("Projekt besprechen ohne Registrierung | TalisU™",
-     "Besprechen Sie Ihr Projekt (Konventionell, SPLITS, Fraktionalisierung, Tokenisierung) mit einem Talispros™-Berater. Ohne Registrierung.",
-     "TALISU™  ·  BESPRECHEN", ["Projekt", "besprechen"], ["Ohne Registrierung", "Google-Standort", "Berater-Antwort"]))
+    ("Share a Project Vision | TalisU™",
+     "Explore Conventional, SPLITS, Fractionalization and Tokenization structures and share your project vision with an advisor. No registration needed.",
+     "TALISU™  ·  PROJECT VISION", ["Share a", "Project Vision"], ["Conventional · SPLITS", "Fractionalization", "Tokenization"]),
+    ("Projektvision teilen | TalisU™",
+     "Entdecken Sie Konventionell, SPLITS, Fraktionalisierung und Tokenisierung und teilen Sie Ihre Projektvision mit einem Berater. Ohne Registrierung.",
+     "TALISU™  ·  PROJEKTVISION", ["Projektvision", "teilen"], ["Konventionell · SPLITS", "Fraktionalisierung", "Tokenisierung"]))
 add("/talisu/terms", "talisu-terms", "public", BRAND,
     ("Terms of Service | Talispros by TalisALL PMC",
      "Talispros Terms of Service: platform role, customer responsibilities, warranties, liability, fees in CAD, intellectual property, termination and privacy.",
