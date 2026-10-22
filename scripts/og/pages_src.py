@@ -3,7 +3,7 @@
 lib/seo/pages.json and render public/og/pages/<slug>-<locale>.jpg."""
 
 AISHA = ("images/mapsites/aisha-c.webp", 0.5, {"en": "Aisha C. — Team Leader", "de": "Aisha C. – Teamleiterin"}, "Aisha C., Team Leader")
-WEBSTER = ("talisu/webster-team-leader-v2.jpg", 0.5, {"en": "Webster M. — Team Leader", "de": "Webster M. – Teamleiter"}, "Webster M., Team Leader")
+WEBSTER = ("talisu/webster-banker-v3.jpg", 0.5, {"en": "Webster M. — Fulfilment Options", "de": "Webster M. – Fulfilment-Optionen"}, "Webster M., Projects Analyst")
 RAHUL = ("images/mapsites/lrg1-rahul.jpeg", 0.5, {"en": "Rahul — Marketing Admin", "de": "Rahul – Marketing-Admin"}, "Rahul, Marketing Admin")
 MAP = ("assets/home-demo/01-talismaps-mkts.jpg", 0.42, None, None)
 SHELF = ("assets/home-demo/02-talisbooks-bookshelf.jpg", 0.3, None, None)

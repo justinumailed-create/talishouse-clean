@@ -73,8 +73,8 @@ export default async function TalisUEngagePage({
         lead={TALISU_ENGAGE.landingLead}
         imageSrc={TALISU_ENGAGE.partnerImage}
         imageAlt={TALISU_ENGAGE.partnerImageAlt}
-        imageWidth={800}
-        imageHeight={800}
+        imageWidth={864}
+        imageHeight={1152}
         partnerName={TALISU_ENGAGE.partnerName.split(/ [—–-] /)[0] ?? "Webster M."}
         partnerRole={TALISU_ENGAGE.landingRole}
         ctaLabel={TALISU_ENGAGE.ctaLabel}
@@ -123,8 +123,8 @@ export default async function TalisUEngagePage({
             <Image
               src={TALISU_ENGAGE.partnerImage}
               alt={TALISU_ENGAGE.partnerImageAlt}
-              width={800}
-              height={800}
+              width={864}
+              height={1152}
               className="h-auto w-full max-w-[220px] rounded-xl object-cover shadow-sm"
               sizes="220px"
               priority
@@ -135,6 +135,9 @@ export default async function TalisUEngagePage({
           </h2>
           <p className="mt-3 text-sm font-medium text-neutral-950">
             {TALISU_ENGAGE.partnerName}
+          </p>
+          <p className="mt-1 text-sm text-[#046BD9]" data-testid="engage-partner-framing">
+            {TALISU_ENGAGE.partnerFraming}
           </p>
           <div className="mt-3 space-y-3 text-sm text-neutral-700">
             {TALISU_ENGAGE.paragraphs.map((paragraph) => (

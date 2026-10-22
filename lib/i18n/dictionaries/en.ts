@@ -815,7 +815,7 @@ export const en = {
         "Every project starts with your vision. Engage Webster and his Fulfilment Team using Conventional, SPLITS, Fractionalization or Tokenization structures. Your down payment is credited in full.",
       ogImage: "/og/talisu-engage-en.jpg",
       ogImageAlt:
-        "Webster M., Team Leader, with the Talispros™ tree logo: Engage Webster and his Fulfilment Team to bring your project vision to life",
+        "Webster M., Projects Analyst for fulfilment options, with the Talispros™ tree logo: Engage Webster and his Fulfilment Team to bring your project vision to life",
     },
   },
 } as const;

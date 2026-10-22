@@ -2,7 +2,7 @@ import Link from "next/link";
 
 /** Team Leader avatars for working-page CTAs (Aisha → Register, Webster → Plan). */
 export const AISHA_AVATAR_SRC = "/images/mapsites/aisha-c.webp";
-export const WEBSTER_AVATAR_SRC = "/talisu/webster-team-leader-v2.jpg";
+export const WEBSTER_AVATAR_SRC = "/talisu/webster-banker-v3.jpg";
 
 /**
  * Pill link with a round Team Leader photo, used on the beige working pages:

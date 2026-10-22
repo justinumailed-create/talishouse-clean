@@ -44,7 +44,7 @@ describe("TalisU Register → Product (Webster) copy", () => {
   it("introduces Webster as the customization partner", () => {
     expect(TALISU_ENGAGE.partnerHeading).toBe("Your Customization Partner");
     expect(TALISU_ENGAGE.partnerName).toBe("Webster M. — Team Leader");
-    expect(TALISU_ENGAGE.partnerImage).toBe("/talisu/webster-team-leader-v2.jpg");
+    expect(TALISU_ENGAGE.partnerImage).toBe("/talisu/webster-banker-v3.jpg");
     expect(TALISU_ENGAGE.paragraphs).toEqual([
       'Modular container or dome structures unlock "hyper-mobility" with structural reliability, allowing traffic-reliant businesses to deploy physical locations exactly where they find their customers.',
       "Built from standardized, durable “Corten” steel (corrosion resistant with high tensile strength) or fibreglass, prefabricated modules can be operationalized quickly.",

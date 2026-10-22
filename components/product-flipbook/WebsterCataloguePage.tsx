@@ -33,6 +33,7 @@ export default function WebsterCataloguePage() {
         <h2>{engage.partnerHeading}</h2>
         <p className="product-flipbook__partner-name">{engage.partnerName}</p>
         <div className="product-flipbook__partner-body">
+          <p>{engage.partnerFraming}</p>
           {engage.paragraphs.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
