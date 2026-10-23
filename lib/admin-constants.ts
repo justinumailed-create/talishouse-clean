@@ -39,7 +39,8 @@ export type AdminScope =
   | "cash-payments"
   | "payments"
   | "admin-access"
-  | "full-console";
+  | "full-console"
+  | "leads-crm";
 
 export type AdminAccount = {
   name: string;
@@ -77,6 +78,7 @@ export const AGENT_GRANTABLE_SCOPES = [
   "talisbooks",
   "build-requests",
   "leads",
+  "leads-crm",
 ] as const satisfies readonly AdminScope[];
 
 export type AgentGrantableScope = (typeof AGENT_GRANTABLE_SCOPES)[number];
@@ -89,6 +91,7 @@ export const AGENT_SCOPE_LABELS: Record<AgentGrantableScope, string> = {
   talisbooks: "Talisbooks™ (ebooks, bookshelves)",
   "build-requests": "Build requests / registrations queue",
   leads: "Leads",
+  "leads-crm": "Leads (CRM)",
 };
 
 export function sanitizeAgentScopes(input: readonly string[] | null | undefined): AgentGrantableScope[] {
@@ -203,6 +206,7 @@ export const ALL_ADMIN_SCOPES: readonly AdminScope[] = [
   "payments",
   "admin-access",
   "full-console",
+  "leads-crm",
 ];
 
 export function sanitizeGrantPermissions(

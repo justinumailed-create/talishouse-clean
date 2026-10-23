@@ -294,7 +294,7 @@ export async function listAgentActivity(filter: {
   let q = db()
     .from("activity_logs")
     .select("id, record_id, action, performed_by, details, created_at")
-    .eq("table_name", "agent_admins");
+    .or("table_name.eq.agent_admins,table_name.eq.brokerage_leads");
   if (filter.agentId) q = q.eq("record_id", filter.agentId);
   if (filter.action) q = q.eq("action", filter.action);
   if (isValidDateString(filter.from)) q = q.gte("created_at", new Date(`${filter.from}T00:00:00+05:30`).toISOString());

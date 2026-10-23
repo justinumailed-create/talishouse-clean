@@ -17,6 +17,7 @@ export const ADMIN_SCOPED_NAV: ReadonlyArray<AdminNavItem & { scope: AdminScope 
   { href: "/admin/registrations", label: "Registrations", scope: "registrations" },
   { href: "/admin/marketing", label: "Marketing", scope: "marketing" },
   { href: "/admin/leads", label: "Leads", scope: "leads" },
+  { href: "/admin/agent/leads", label: "Leads (CRM)", scope: "leads-crm" },
   { href: "/admin/contact-from-leads", label: "Contact from leads", scope: "leads" },
   { href: "/admin/mapsites", label: "Mapsites", scope: "mapsites" },
   { href: "/admin/contracts", label: "Contracts", scope: "mapsites" },
@@ -47,6 +48,7 @@ export function getAgentNavItems(scopes: readonly string[] | null | undefined): 
     items.push({ href: "/admin/talisbooks/bookshelves", label: "Bookshelves" });
   }
   if (granted.has("leads")) items.push({ href: "/admin/leads", label: "Leads" });
+  if (granted.has("leads-crm")) items.push({ href: "/admin/agent/leads", label: "Leads (CRM)" });
   return items;
 }
 
@@ -105,6 +107,10 @@ export function isAdminNavItemActive(href: string, pathname: string): boolean {
   }
 
   if (href === "/admin/access" && pathname.startsWith("/admin/access")) {
+    return true;
+  }
+
+  if (href === "/admin/agent/leads" && pathname.startsWith("/admin/agent/leads")) {
     return true;
   }
 

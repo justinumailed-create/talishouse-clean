@@ -7,6 +7,7 @@ const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | nu
   // Agent-only tools (pages also require an agent session themselves).
   { prefix: "/admin/agent/notes", scope: null },
   { prefix: "/admin/agent/chat", scope: null },
+  { prefix: "/admin/agent/leads", scope: "leads-crm" },
   { prefix: "/admin/agents", scope: "agents" },
   { prefix: "/admin/access", scope: "admin-access" },
   { prefix: "/admin/talismaps", scope: "mapsites" },

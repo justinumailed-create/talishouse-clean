@@ -169,6 +169,10 @@ export const AGENT_ACTIVITY_LABELS: Readonly<Record<string, string>> = {
   "agent.note.create": "Daily note added",
   "agent.note.update": "Daily note edited",
   "agent.note.upload": "Document uploaded",
+  "agent.lead.create": "Lead added",
+  "agent.lead.update": "Lead edited",
+  "agent.lead.import": "Lead imported",
+  "agent.lead.delete": "Lead deleted",
 };
 
 export function activityLabel(action: string): string {
