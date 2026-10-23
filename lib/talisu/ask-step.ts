@@ -1,4 +1,5 @@
 import { ROUTES } from "@/lib/routes";
+import { ENGAGE_STRUCTURE_PARAM, normalizeEngageStructure } from "@/lib/talisu/engage-structure";
 
 /**
  * "Ask for the business" interstitial (Ralf): /talisu/reg and /talisu/engage
@@ -31,12 +32,20 @@ export function talisURegisterCheckoutHref(): string {
   return `${ROUTES.TALISU_REGISTER}?${TALISU_ASK_STEP_PARAM}=${TALISU_REGISTER_CHECKOUT_STEP}`;
 }
 
-/** Webster's Proceed → down-payment checkout (same tab), keeping ?product=. */
-export function talisUEngageCheckoutHref(productCode?: string | null): string {
+/**
+ * Webster's Proceed → down-payment checkout (same tab), keeping ?product= and
+ * the chosen transaction structure (?structure=, one of the four ids).
+ */
+export function talisUEngageCheckoutHref(
+  productCode?: string | null,
+  structure?: string | null,
+): string {
   const params = new URLSearchParams({
     [TALISU_ASK_STEP_PARAM]: TALISU_ENGAGE_CHECKOUT_STEP,
   });
   const code = productCode?.trim();
   if (code) params.set("product", code);
+  const structureId = normalizeEngageStructure(structure);
+  if (structureId) params.set(ENGAGE_STRUCTURE_PARAM, structureId);
   return `${ROUTES.TALISU_ENGAGE}?${params.toString()}`;
 }

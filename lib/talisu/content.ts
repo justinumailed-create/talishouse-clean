@@ -292,6 +292,8 @@ export const TALISU_ENGAGE = {
   landingRole: "Projects Analyst · Fulfilment Options",
   landingIntro:
     "Webster and his Fulfilment Team help match your project to the right structure: Conventional, SPLITS, Fractionalization or Tokenization.",
+  landingStructureNote:
+    "The structure you settle on with Webster shapes how your Mapsite and eBook present your project.",
   samcartUrl: "https://talispros.mysamcart.com/checkout/custom",
 } as const;
 

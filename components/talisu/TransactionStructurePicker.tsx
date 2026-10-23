@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useId, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { talisuHref } from "@/lib/talisu/talisu-links";
+import { talisUEngageCheckoutHref } from "@/lib/talisu/ask-step";
 
 /** Brushed-metal face shared with the home EXPLORE TRANSACTION STRUCTURES buttons. */
 const METAL_BG = [
@@ -21,19 +22,23 @@ const METAL_BG = [
  * - `openId` / `onOpenChange`: controlled; on /talisu/discuss the open
  *   structure is also the one recorded with the form.
  * - `requireSelection`: a click on the open button keeps it open (discuss form).
- * - `learnMore`: Webster page — "Share a Project Vision →" link per structure.
+ * - `learnMore`: Webster page — "Engage Webster →" (down-payment checkout
+ *   with this structure) plus a secondary "Share a Project Vision →" link.
+ * - `productCode`: catalogue unit carried into the checkout link.
  */
 export default function TransactionStructurePicker({
   openId,
   onOpenChange,
   requireSelection = false,
   learnMore = false,
+  productCode = null,
   testId = "structure-picker",
 }: {
   openId: string | null;
   onOpenChange: (id: string | null) => void;
   requireSelection?: boolean;
   learnMore?: boolean;
+  productCode?: string | null;
   testId?: string;
 }) {
   const t = useT();
@@ -104,17 +109,28 @@ export default function TransactionStructurePicker({
             </h3>
             <p className="mt-1.5 text-[13.5px] leading-relaxed text-neutral-800">{open.body}</p>
             <p className="mt-1.5 text-[13.5px] leading-relaxed text-neutral-700">{open.result}</p>
-            {learnMore && open.learnMoreHref ? (
-              <p className="mt-2.5">
+            {learnMore ? (
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
                 <Link
-                  href={talisuHref(open.learnMoreHref)}
-                  data-testid={`${testId}-learn-more`}
-                  className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
+                  href={talisUEngageCheckoutHref(productCode, open.id)}
+                  data-testid={`${testId}-engage`}
+                  data-structure-id={open.id}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#046BD9] px-4 py-2 text-[13.5px] font-semibold text-white shadow-sm transition hover:bg-[#0358b3] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#046BD9]"
                 >
-                  {t.bot.getHelp}
+                  {t.talisu.engageWebster}
                   <span aria-hidden>→</span>
                 </Link>
-              </p>
+                {open.learnMoreHref ? (
+                  <Link
+                    href={talisuHref(open.learnMoreHref)}
+                    data-testid={`${testId}-learn-more`}
+                    className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
+                  >
+                    {t.bot.getHelp}
+                    <span aria-hidden>→</span>
+                  </Link>
+                ) : null}
+              </div>
             ) : null}
           </div>
         ) : null}
@@ -127,10 +143,12 @@ export default function TransactionStructurePicker({
 export function TransactionStructurePickerStandalone({
   initialOpenId = null,
   learnMore = true,
+  productCode = null,
   testId,
 }: {
   initialOpenId?: string | null;
   learnMore?: boolean;
+  productCode?: string | null;
   testId?: string;
 }) {
   const [openId, setOpenId] = useState<string | null>(initialOpenId);
@@ -139,6 +157,7 @@ export function TransactionStructurePickerStandalone({
       openId={openId}
       onOpenChange={setOpenId}
       learnMore={learnMore}
+      productCode={productCode}
       testId={testId}
     />
   );

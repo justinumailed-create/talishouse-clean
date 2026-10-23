@@ -342,10 +342,14 @@ export const de: Dictionary = {
       landingRole: "Projektanalyst · Fulfilment-Optionen",
       landingIntro:
         "Webster und sein Fulfilment-Team finden mit Ihnen die passende Struktur für Ihr Projekt: konventionell, SPLITS, Fraktionalisierung oder Tokenisierung.",
+      landingStructureNote:
+        "Die Struktur, die Sie mit Webster festlegen, bestimmt, wie Ihre Mapsite und Ihr eBook Ihr Projekt präsentieren.",
     },
     engageCustomizing: "Anpassung:",
     engageCataloguePage: "Talishouse™ Produktkatalog, Seite {page}",
     engageChange: "Ändern",
+    engageWebster: "Webster beauftragen",
+    engageStructure: "Struktur:",
     footerPartOf: "ein Teil von",
     essaySwitcher: "Aufsätze",
     essayCheckBackSoon: "Schauen Sie bald wieder vorbei",

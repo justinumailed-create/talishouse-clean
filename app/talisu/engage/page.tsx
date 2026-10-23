@@ -1,4 +1,3 @@
-import { enforcePmcRegistrationGate, firstParam } from "@/lib/talisu/pmc-gate";
 import Image from "next/image";
 import Link from "next/link";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
@@ -19,6 +18,10 @@ import {
   catalogueProductCheckoutUrl,
   findCatalogueProduct,
 } from "@/lib/talisu/catalogue-products";
+import {
+  engageStructureCheckoutUrl,
+  normalizeEngageStructure,
+} from "@/lib/talisu/engage-structure";
 
 export async function generateMetadata() {
   const locale = await getLocale();
@@ -42,21 +45,27 @@ type TalisUEngagePageProps = {
   searchParams?: Promise<{
     product?: string | string[];
     step?: string | string[];
-    fastCode?: string | string[];
+    structure?: string | string[];
   }>;
 };
 
 export default async function TalisUEngagePage({
   searchParams,
 }: TalisUEngagePageProps) {
-  const t = getDictionary(await getLocale()).talisu;
+  const dictionary = getDictionary(await getLocale());
+  const t = dictionary.talisu;
   const TALISU_ENGAGE = t.engage;
   const params = (await searchParams) ?? {};
   // Catalogue hotspots link here as ?product=P07. Unknown codes are ignored.
   const product = findCatalogueProduct(params.product);
-  const checkoutUrl = catalogueProductCheckoutUrl(
-    TALISU_ENGAGE.samcartUrl,
-    product,
+  // Structure chosen on the landing (?structure=), limited to the four ids.
+  const structure = normalizeEngageStructure(params.structure);
+  const structureSection = structure
+    ? dictionary.home.ownershipSections.find((s) => s.id === structure) ?? null
+    : null;
+  const checkoutUrl = engageStructureCheckoutUrl(
+    catalogueProductCheckoutUrl(TALISU_ENGAGE.samcartUrl, product),
+    structure,
   );
 
   // Landing first (Ralf, Oct 18): Catalogue design, Webster's one-line intro,
@@ -78,14 +87,22 @@ export default async function TalisUEngagePage({
         partnerName={TALISU_ENGAGE.partnerName.split(/ [—–-] /)[0] ?? "Webster M."}
         partnerRole={TALISU_ENGAGE.landingRole}
         ctaLabel={TALISU_ENGAGE.ctaLabel}
-        ctaHref={talisUEngageCheckoutHref(product?.code)}
+        ctaHref={talisUEngageCheckoutHref(product?.code, structure)}
         left={
           <TransactionStructurePickerStandalone
-            initialOpenId="conventional"
+            initialOpenId={structure ?? "conventional"}
+            productCode={product?.code ?? null}
             testId="engage-structures"
           />
         }
-        intro={<p>{TALISU_ENGAGE.landingIntro}</p>}
+        intro={
+          <>
+            <p>{TALISU_ENGAGE.landingIntro}</p>
+            <p className="mt-3" data-testid="engage-structure-note">
+              {TALISU_ENGAGE.landingStructureNote}
+            </p>
+          </>
+        }
         notice={
           product ? (
             <p
@@ -106,8 +123,8 @@ export default async function TalisUEngagePage({
     );
   }
 
-  // PMC gate (every registrant) before the down-payment checkout.
-  await enforcePmcRegistrationGate(firstParam(params.fastCode));
+  // Webster's clients pay the down payment directly and set up their Mapsite
+  // afterwards, so this checkout is open to every visitor (no PMC gate).
 
   return (
     <SectionShell
@@ -174,6 +191,25 @@ export default async function TalisUEngagePage({
               </span>{" "}
               <Link
                 href={CATALOGUE_PATH}
+                className="whitespace-nowrap font-medium text-[#046BD9] hover:underline"
+              >
+                {t.engageChange}
+              </Link>
+            </div>
+          ) : null}
+          {structureSection ? (
+            <div
+              className="mb-4 rounded-2xl border border-[#046BD9]/25 bg-white px-4 py-3 text-sm text-neutral-800 shadow-sm sm:text-base"
+              data-testid="engage-structure"
+              data-structure-id={structureSection.id}
+            >
+              <span className="font-semibold text-[#046BD9]">{t.engageStructure}</span>{" "}
+              <span className="font-semibold text-neutral-950">{structureSection.title}</span>{" "}
+              <Link
+                href={`/talisu/engage?${new URLSearchParams({
+                  ...(product ? { product: product.code } : {}),
+                  structure: structureSection.id,
+                }).toString()}`}
                 className="whitespace-nowrap font-medium text-[#046BD9] hover:underline"
               >
                 {t.engageChange}

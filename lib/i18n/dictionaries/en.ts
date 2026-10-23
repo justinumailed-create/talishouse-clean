@@ -163,6 +163,8 @@ export const en = {
     engageCustomizing: "Customizing:",
     engageCataloguePage: "Talishouse™ Product Catalogue page {page}",
     engageChange: "Change",
+    engageWebster: "Engage Webster",
+    engageStructure: "Structure:",
     footerPartOf: "part of",
     /** Accessible name of the FAQ right-rail essay switcher (pill labels live in essay-registry.ts). */
     essaySwitcher: "Essays",
