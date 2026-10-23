@@ -35,8 +35,8 @@ export const TALISU_WELCOME = {
       body: "We globally connect buyers or buyer's agents with sellers or seller's agents to complete transactions the old-fashioned way: find each other, have offers accepted and close them to earn percentage-based commissions. We do not charge referrals.",
     },
     {
-      title: "SPLITS",
-      body: "We help formalize LTO terms (Lease To Own) by introducing 'Simple Product Lead & Input Tracking System' options: downpayment plus instalment payments secured by lawyer-generated agreements until title changes hands.",
+      title: "Lease-to-Own",
+      body: "We help formalize lease-to-own terms: a down payment plus instalment payments secured by lawyer-generated agreements until title changes hands.",
     },
     {
       title: "Fractionalization",
@@ -236,7 +236,7 @@ export const TALISU_REGISTER = {
     },
     {
       label: "Listing analysis (TVA)",
-      text: "we analyze qualifying listings to establish suitability for investor classes that seek advanced transaction structures, including SPLITS, Fractionalization and Tokenization. Since all are often incompatible with exposure on traditional industry platforms they require Mapsites for promotional purposes.",
+      text: "we analyze qualifying listings to establish suitability for investor classes that seek advanced transaction structures, including Lease-to-Own, Fractionalization and Tokenization. Since all are often incompatible with exposure on traditional industry platforms they require Mapsites for promotional purposes.",
     },
     {
       label: "TalisTV™ (TTV)",
@@ -288,10 +288,10 @@ export const TALISU_ENGAGE = {
   finalText: "Engage Webster and his Fulfilment Team to bring it to life.",
   /** Landing (Ralf, Oct 18): one line on top, CSFT buttons, Webster as projects analyst. */
   landingLead:
-    "Every project starts with your vision. Engage Webster and his Fulfilment Team to bring it to life utilizing Conventional, SPLITS, Fractionalization, or Tokenization capitalization structures",
+    "Every project starts with your vision. Engage Webster and his Fulfilment Team to bring it to life utilizing Conventional, Lease-to-Own, Fractionalization, or Tokenization capitalization structures",
   landingRole: "Projects Analyst · Fulfilment Options",
   landingIntro:
-    "Webster and his Fulfilment Team help match your project to the right structure: Conventional, SPLITS, Fractionalization or Tokenization.",
+    "Webster and his Fulfilment Team help match your project to the right structure: Conventional, Lease-to-Own, Fractionalization or Tokenization.",
   landingStructureNote:
     "The structure you settle on with Webster shapes how your Mapsite and eBook present your project.",
   samcartUrl: "https://talispros.mysamcart.com/checkout/custom",

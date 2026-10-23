@@ -2,7 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { supabase, type Lead } from "@/lib/supabase";
-import { OWNERSHIP_CONTACT_SOURCE } from "@/lib/talispros/ownership-contact";
+import {
+  displayStoredStructureLabel,
+  OWNERSHIP_CONTACT_SOURCE,
+} from "@/lib/talispros/ownership-contact";
 
 type ContactLead = Lead & {
   notes?: string | null;
@@ -65,7 +68,7 @@ export default function ContactFromLeadsPage() {
         </h1>
         <p className="mt-1 text-sm text-neutral-500">
           Inquiries from homepage ownership Learn More forms (Conventional,
-          SPLITS, Fractionalization, Tokenization).
+          Lease-to-Own, Fractionalization, Tokenization).
         </p>
       </div>
 
@@ -120,9 +123,11 @@ export default function ContactFromLeadsPage() {
                     <div className="text-neutral-500">{lead.phone || ""}</div>
                   </td>
                   <td className="px-4 py-3 text-neutral-700">
-                    {(lead.location || "").replace(
-                      /^Ownership Learn More —\s*/,
-                      "",
+                    {displayStoredStructureLabel(
+                      (lead.location || "").replace(
+                        /^Ownership Learn More —\s*/,
+                        "",
+                      ),
                     ) || "—"}
                   </td>
                   <td className="max-w-md px-4 py-3 text-neutral-600">

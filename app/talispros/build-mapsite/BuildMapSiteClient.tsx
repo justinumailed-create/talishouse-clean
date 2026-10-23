@@ -318,7 +318,7 @@ function AccountTypeSelector({ value, onChange, error }: { value: string; onChan
           </span>
           <div className="flex-1 min-w-0">
             <span className={`block text-sm font-medium ${isRoot ? "text-neutral-900" : "text-neutral-700"}`}>Root Account™</span>
-            <span className="block text-xs text-neutral-500 mt-0.5 leading-relaxed">Up to 100 Derivative Accounts. SPLITS enabled. Market ownership. FAST Code generation.</span>
+            <span className="block text-xs text-neutral-500 mt-0.5 leading-relaxed">Up to 100 Derivative Accounts. Lease-to-Own enabled. Market ownership. FAST Code generation.</span>
           </div>
         </button>
 
@@ -331,7 +331,7 @@ function AccountTypeSelector({ value, onChange, error }: { value: string; onChan
           </span>
           <div className="flex-1 min-w-0">
             <span className={`block text-sm font-medium ${isDerivative ? "text-neutral-900" : "text-neutral-700"}`}>Derivative Account™</span>
-            <span className="block text-xs text-neutral-500 mt-0.5 leading-relaxed">Multi-PIN account. Operates under a Root Account. SPLITS enabled. FAST Code generation.</span>
+            <span className="block text-xs text-neutral-500 mt-0.5 leading-relaxed">Multi-PIN account. Operates under a Root Account. Lease-to-Own enabled. FAST Code generation.</span>
           </div>
         </button>
 
@@ -346,7 +346,7 @@ function AccountTypeSelector({ value, onChange, error }: { value: string; onChan
             </span>
             <div className="flex-1 min-w-0">
               <span className={`block text-sm font-medium ${isAdpro ? "text-neutral-900" : "text-neutral-700"}`}>Adpro PIN</span>
-              <span className="block text-xs text-neutral-500 mt-0.5">Individual and multi-PIN packages. No SPLITS.</span>
+              <span className="block text-xs text-neutral-500 mt-0.5">Individual and multi-PIN packages. No Lease-to-Own.</span>
             </div>
             <ChevronDown className={`flex-shrink-0 w-5 h-5 text-neutral-400 mt-1 transition-transform duration-200 ${adproExpanded ? "rotate-180" : ""}`} />
           </button>

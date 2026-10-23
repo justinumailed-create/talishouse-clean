@@ -53,14 +53,14 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
     learnMoreHref: discussHref("conventional"),
   },
   {
-    id: "splits",
-    title: "SPLITS",
+    id: "lease-to-own",
+    title: "Lease-to-Own",
     body:
-      'Similar to "Conventional", but includes a SPLITS period (Simple Project Lead & Input Tracking System). That avoids the bank, but requires money down and instalments until the transaction has closed.',
+      'Similar to "Conventional", but includes a lease-to-own period. That avoids the bank, but requires money down and instalments until the transaction has closed.',
     result:
-      "The result: you have full usage rights in accordance with a 'Lease-To-Own' Agreement drafted between lawyers.",
+      "The result: you have full usage rights in accordance with a lease-to-own agreement drafted between lawyers.",
     learnMoreLabel: "Learn More",
-    learnMoreHref: discussHref("splits"),
+    learnMoreHref: discussHref("lease-to-own"),
   },
   {
     id: "fractionalization",

@@ -218,11 +218,11 @@ export default function CartDrawer() {
                 </div>
               ))}
 
-              {/* 3. SPLITS SECTION (BELOW CONFIG) */}
+              {/* 3. LEASE-TO-OWN SECTION (BELOW CONFIG) */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
                    <div className="space-y-0.5">
-                     <span className="text-sm font-bold text-gray-900">Splits Required?</span>
+                     <span className="text-sm font-bold text-gray-900">Lease-to-Own required?</span>
                      <p className="text-[10px] text-gray-400 font-medium leading-none">Distribute payments across jobs</p>
                    </div>
                    <button
@@ -283,7 +283,7 @@ export default function CartDrawer() {
                  )}
               </div>
 
-              {/* 4. PRICING SUMMARY (BELOW SPLITS) */}
+              {/* 4. PRICING SUMMARY (BELOW LEASE-TO-OWN) */}
               <div className="bg-gray-50 rounded-2xl p-5 space-y-4 border border-gray-100 shadow-sm">
                 <div className="space-y-2.5">
                   <div className="flex justify-between items-center text-gray-500 text-sm">

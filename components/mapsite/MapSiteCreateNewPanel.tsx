@@ -69,7 +69,7 @@ export default function MapSiteCreateNewPanel({
       {pageInsertLocked ? (
         <p className="mt-3 max-w-md text-[15px] leading-snug text-neutral-500">
           Demonstration only — inserting pages stays locked so Fractionalization,
-          Tokenization, and SPLITS remain paid Mapsite capabilities.
+          Tokenization, and Lease-to-Own remain paid Mapsite capabilities.
         </p>
       ) : null}
       <div

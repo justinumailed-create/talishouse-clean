@@ -26,6 +26,7 @@ import {
 } from "../lib/talisu/engage-structure";
 import { en } from "../lib/i18n/dictionaries/en";
 import { de } from "../lib/i18n/dictionaries/de";
+import { canonicalOwnershipTopic, ownershipTopicFromId } from "../lib/talispros/ownership-contact";
 
 const read = (file: string) => readFileSync(resolve(file), "utf8");
 
@@ -92,6 +93,24 @@ describe("Webster down-payment checkout is open to everyone", () => {
     expect(text).toContain("Fraktionalisierung");
   });
 
+  it("maps a legacy splits link to Lease-to-Own and sends lease-to-own to SamCart", async () => {
+    const tree = await renderEngage({ step: "pay", structure: "splits" });
+    const src = String(findAll(tree, (el) => el.type === SamCartEmbed)[0]?.props.src);
+    const url = new URL(src);
+    expect(url.searchParams.get("structure")).toBe("lease-to-own");
+    expect(url.searchParams.get("utm_term")).toBe("lease-to-own");
+    const shown = findAll(tree, (el) => el.props["data-testid"] === "engage-structure")[0];
+    expect(shown.props["data-structure-id"]).toBe("lease-to-own");
+    expect(textOf(shown)).toContain("Lease-to-Own");
+    gate.locale = "de";
+    const german = findAll(
+      await renderEngage({ step: "pay", structure: "splits" }),
+      (el) => el.props["data-testid"] === "engage-structure",
+    )[0];
+    expect(textOf(german)).toContain("Mietkauf");
+    expect(textOf(german)).not.toContain("SPLITS");
+  });
+
   it("ignores unknown structure values", async () => {
     const tree = await renderEngage({ step: "pay", structure: "https://evil.example" });
     const src = String(findAll(tree, (el) => el.type === SamCartEmbed)[0]?.props.src);
@@ -121,12 +140,20 @@ describe("Webster down-payment checkout is open to everyone", () => {
 
 describe("transaction structure param", () => {
   it("accepts only the four structures, case-insensitively", () => {
-    expect(ENGAGE_STRUCTURE_IDS).toEqual(["conventional", "splits", "fractionalization", "tokenization"]);
+    expect(ENGAGE_STRUCTURE_IDS).toEqual(["conventional", "lease-to-own", "fractionalization", "tokenization"]);
     for (const id of ENGAGE_STRUCTURE_IDS) {
       expect(normalizeEngageStructure(id)).toBe(id);
       expect(normalizeEngageStructure(` ${id.toUpperCase()} `)).toBe(id);
     }
-    expect(normalizeEngageStructure(["splits", "tokenization"])).toBe("splits");
+    expect(normalizeEngageStructure(["splits", "tokenization"])).toBe("lease-to-own");
+    expect(normalizeEngageStructure("SPLITS")).toBe("lease-to-own");
+    expect(ownershipTopicFromId("splits")).toBe("Lease-to-Own");
+    expect(ownershipTopicFromId("lease-to-own")).toBe("Lease-to-Own");
+    expect(canonicalOwnershipTopic("SPLITS")).toBe("Lease-to-Own");
+    expect(en.contactForm.topics["Lease-to-Own"]).toBe("Lease-to-Own");
+    expect(de.contactForm.topics["Lease-to-Own"]).toBe("Mietkauf");
+    expect(en.home.ownershipSections.map((s) => s.title)).toContain("Lease-to-Own");
+    expect(de.home.ownershipSections.map((s) => s.title)).toContain("Mietkauf");
     for (const bad of ["", "token", "tokenization2", "<script>", "../x", "conventional&step=x", null, undefined]) {
       expect(normalizeEngageStructure(bad)).toBeNull();
     }
@@ -138,7 +165,10 @@ describe("transaction structure param", () => {
       "/talisu/engage?step=pay&structure=tokenization",
     );
     expect(talisUEngageCheckoutHref("P07", "SPLITS")).toBe(
-      "/talisu/engage?step=pay&product=P07&structure=splits",
+      "/talisu/engage?step=pay&product=P07&structure=lease-to-own",
+    );
+    expect(talisUEngageCheckoutHref("P07", "lease-to-own")).toBe(
+      "/talisu/engage?step=pay&product=P07&structure=lease-to-own",
     );
     expect(talisUEngageCheckoutHref(null, "nope")).toBe("/talisu/engage?step=pay");
     const href = talisUEngageCheckoutHref(null, "fractionalization");
@@ -227,6 +257,12 @@ describe("Webster landing links", () => {
       const html = await landingHtml({ structure: id, product: "P07" });
       expect(checkoutHrefs(html)).toEqual([`/talisu/engage?step=pay&product=P07&structure=${id}`]);
     }
+    const legacy = await landingHtml({ structure: "splits", product: "P07" });
+    expect(checkoutHrefs(legacy)).toEqual([
+      "/talisu/engage?step=pay&product=P07&structure=lease-to-own",
+    ]);
+    expect(legacy).toContain('data-structure-id="lease-to-own"');
+    expect(legacy).toContain("Lease-to-Own");
   });
 
   it("labels the button in German", async () => {

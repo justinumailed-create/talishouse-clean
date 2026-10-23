@@ -12,7 +12,7 @@ export const OWNERSHIP_CONTACT_SOURCE = "ownership_learn_more" as const;
 
 export const OWNERSHIP_CONTACT_TOPICS = [
   "Conventional",
-  "SPLITS",
+  "Lease-to-Own",
   "Fractionalization",
   "Tokenization",
 ] as const;
@@ -26,13 +26,26 @@ export const OWNERSHIP_CONTACT_MESSAGE_MAX = 280;
 /** Max length of the Discuss a Project page location (Google formatted address). */
 export const OWNERSHIP_CONTACT_LOCATION_MAX = 200;
 
-/** `?topic=fractionalization` → "Fractionalization" (default Conventional). */
-export function ownershipTopicFromId(id: string | null | undefined): OwnershipContactTopic {
+/**
+ * `?topic=fractionalization` → "Fractionalization" (default Conventional).
+ * `splits` is the previous Lease-to-Own id and still resolves.
+ */
+export function canonicalOwnershipTopic(
+  id: string | null | undefined,
+): OwnershipContactTopic | null {
   const key = (id || "").trim().toLowerCase();
-  return (
-    OWNERSHIP_CONTACT_TOPICS.find((topic) => topic.toLowerCase() === key) ??
-    OWNERSHIP_CONTACT_TOPICS[0]
-  );
+  if (!key) return null;
+  if (key === "splits") return "Lease-to-Own";
+  return OWNERSHIP_CONTACT_TOPICS.find((topic) => topic.toLowerCase() === key) ?? null;
+}
+
+export function ownershipTopicFromId(id: string | null | undefined): OwnershipContactTopic {
+  return canonicalOwnershipTopic(id) ?? OWNERSHIP_CONTACT_TOPICS[0];
+}
+
+/** Stored lead or deal text that still says SPLITS, shown as Lease-to-Own. */
+export function displayStoredStructureLabel(text: string): string {
+  return text.replace(/\bSPLITS\b/g, "Lease-to-Own");
 }
 
 /** Lead `location` column: where the inquiry came from (+ project location). */

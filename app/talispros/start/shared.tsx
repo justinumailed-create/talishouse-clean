@@ -141,20 +141,20 @@ export const FSBO_BULLETS = [
   "Month-to-month — no long-term commitment",
   "Advertise your property directly",
   "Get discovered by motivated buyers",
-  "No SPLITS — full control",
+  "No Lease-to-Own — full control",
 ];
 
 export const INVESTOR_BULLETS = [
   "Multi-PIN support for multiple properties",
   "FAST Code generation",
   "Operates under a Root Account™",
-  "SPLITS enabled for team collaboration",
+  "Lease-to-Own enabled for team collaboration",
   "Lower entry cost with room to grow",
 ];
 
 export const DEVELOPER_BULLETS = [
   "Up to 100 Derivative Accounts",
-  "SPLITS enabled",
+  "Lease-to-Own enabled",
   "Market ownership",
   "FAST Code generation",
   "Claim A Market™ eligibility",

@@ -120,7 +120,7 @@ export default function ApplyClient() {
                 <option value="">Select level...</option>
                 <option value="referral">Referral Partner - upto 10% in Referral Fees and CSI Rewards</option>
                 <option value="resale">Resale Partner - upto 20% in Procurement Margin</option>
-                <option value="fulfillment">Fulfilment Partner - upto 25% Procurement Margin plus SPLITS profits*</option>
+                <option value="fulfillment">Fulfilment Partner - upto 25% Procurement Margin plus Lease-to-Own profits*</option>
               </select>
             </div>
 

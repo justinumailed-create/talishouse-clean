@@ -124,13 +124,13 @@ export const de: Dictionary = {
         learnMoreHref: "/talisu/discuss?topic=conventional",
       },
       {
-        id: "splits",
-        title: "SPLITS",
-        body: "Ähnlich wie „Konventionell“, jedoch mit einer SPLITS-Phase (Simple Project Lead & Input Tracking System). So umgehen Sie die Bank, benötigen aber eine Anzahlung und Ratenzahlungen bis zum Abschluss der Transaktion.",
+        id: "lease-to-own",
+        title: "Mietkauf",
+        body: "Ähnlich wie „Konventionell“, jedoch mit einer Mietkaufphase. So umgehen Sie die Bank, benötigen aber eine Anzahlung und Ratenzahlungen bis zum Abschluss der Transaktion.",
         result:
-          "Das Ergebnis: Sie haben volle Nutzungsrechte gemäß einem von Anwälten ausgearbeiteten Mietkaufvertrag („Lease-To-Own“).",
+          "Das Ergebnis: Sie haben volle Nutzungsrechte gemäß einem von Anwälten ausgearbeiteten Mietkaufvertrag.",
         learnMoreLabel: "Mehr erfahren",
-        learnMoreHref: "/talisu/discuss?topic=splits",
+        learnMoreHref: "/talisu/discuss?topic=lease-to-own",
       },
       {
         id: "fractionalization",
@@ -291,7 +291,7 @@ export const de: Dictionary = {
         },
         {
           label: "Angebotsanalyse (TVA)",
-          text: "Wir analysieren qualifizierte Angebote, um ihre Eignung für Investorengruppen zu ermitteln, die fortgeschrittene Transaktionsstrukturen suchen – darunter SPLITS, Fraktionalisierung und Tokenisierung. Da diese oft nicht mit einer Präsentation auf herkömmlichen Branchenplattformen vereinbar sind, benötigen sie Mapsites für die Vermarktung.",
+          text: "Wir analysieren qualifizierte Angebote, um ihre Eignung für Investorengruppen zu ermitteln, die fortgeschrittene Transaktionsstrukturen suchen – darunter Mietkauf, Fraktionalisierung und Tokenisierung. Da diese oft nicht mit einer Präsentation auf herkömmlichen Branchenplattformen vereinbar sind, benötigen sie Mapsites für die Vermarktung.",
         },
         {
           label: "TalisTV™ (TTV)",
@@ -338,10 +338,10 @@ export const de: Dictionary = {
       finalTitle: "Jedes Projekt beginnt mit Ihrer Vision.",
       finalText: "Beauftragen Sie Webster und sein Fulfilment-Team, um sie Wirklichkeit werden zu lassen.",
       landingLead:
-        "Jedes Projekt beginnt mit Ihrer Vision. Beauftragen Sie Webster und sein Fulfilment-Team, sie mit konventionellen, SPLITS-, Fraktionalisierungs- oder Tokenisierungs-Kapitalisierungsstrukturen Wirklichkeit werden zu lassen",
+        "Jedes Projekt beginnt mit Ihrer Vision. Beauftragen Sie Webster und sein Fulfilment-Team, sie mit konventionellen, Mietkauf-, Fraktionalisierungs- oder Tokenisierungs-Kapitalisierungsstrukturen Wirklichkeit werden zu lassen",
       landingRole: "Projektanalyst · Fulfilment-Optionen",
       landingIntro:
-        "Webster und sein Fulfilment-Team finden mit Ihnen die passende Struktur für Ihr Projekt: konventionell, SPLITS, Fraktionalisierung oder Tokenisierung.",
+        "Webster und sein Fulfilment-Team finden mit Ihnen die passende Struktur für Ihr Projekt: konventionell, Mietkauf, Fraktionalisierung oder Tokenisierung.",
       landingStructureNote:
         "Die Struktur, die Sie mit Webster festlegen, bestimmt, wie Ihre Mapsite und Ihr eBook Ihr Projekt präsentieren.",
     },
@@ -422,7 +422,7 @@ export const de: Dictionary = {
     pageSubtitle:
       "Jedes Projekt beginnt mit einer Vision und der passenden Transaktionsstruktur",
     pageIntro:
-      "Entdecken Sie Konventionell, SPLITS, Fraktionalisierung und Tokenisierung, wählen Sie die Struktur, die zu Ihrem Projekt passt, und teilen Sie dann Ihre Vision. Ein Berater meldet sich bei Ihnen – ohne Registrierung und ohne FAST Code.",
+      "Entdecken Sie Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung, wählen Sie die Struktur, die zu Ihrem Projekt passt, und teilen Sie dann Ihre Vision. Ein Berater meldet sich bei Ihnen – ohne Registrierung und ohne FAST Code.",
     topicHint: "(mit den Schaltflächen wählen)",
     openPage: "Als ganze Seite mit Google-erkanntem Standort öffnen →",
     topic: "Transaktionsstruktur",
@@ -454,7 +454,7 @@ export const de: Dictionary = {
     back: "← Zurück",
     topics: {
       Conventional: "Konventionell",
-      SPLITS: "SPLITS",
+      "Lease-to-Own": "Mietkauf",
       Fractionalization: "Fraktionalisierung",
       Tokenization: "Tokenisierung",
     },
@@ -1021,7 +1021,7 @@ export const de: Dictionary = {
     talisuLayout: {
       title: "TalisU™",
       description:
-        "Branchennahe Abwicklungsoptionen – Konventionell, SPLITS, Fraktionalisierung und Tokenisierung.",
+        "Branchennahe Abwicklungsoptionen – Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung.",
     },
     talisuFaq: {
       title: "TalisU™ | FAQ",
@@ -1039,7 +1039,7 @@ export const de: Dictionary = {
     talisuEngage: {
       title: "Webster und sein Fulfilment-Team beauftragen | TalisU™",
       description:
-        "Jedes Projekt beginnt mit Ihrer Vision. Beauftragen Sie Webster und sein Fulfilment-Team – mit konventionellen, SPLITS-, Fraktionalisierungs- oder Tokenisierungsstrukturen. Die Anzahlung wird vollständig angerechnet.",
+        "Jedes Projekt beginnt mit Ihrer Vision. Beauftragen Sie Webster und sein Fulfilment-Team – mit konventionellen, Mietkauf-, Fraktionalisierungs- oder Tokenisierungsstrukturen. Die Anzahlung wird vollständig angerechnet.",
       ogImage: "/og/talisu-engage-de.jpg",
       ogImageAlt:
         "Webster M., Projektanalyst für Fulfilment-Optionen, mit dem Talispros™-Baumlogo: Beauftragen Sie Webster und sein Fulfilment-Team für Ihre Projektvision",

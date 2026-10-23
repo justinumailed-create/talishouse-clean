@@ -133,7 +133,7 @@ export const en = {
       failedNote:
         "Return detected but session setup failed. Use Login with your FAST Code™.",
     },
-    /** Keyed by section id (conventional / splits / fractionalization / tokenization). */
+    /** Keyed by section id (conventional / lease-to-own / fractionalization / tokenization). */
     ownershipSections: HOME_OWNERSHIP_SECTIONS,
     corner: {
       markets: "Markets",
@@ -194,7 +194,7 @@ export const en = {
     pageSubtitle:
       "Every project starts with a vision and the right transaction structure",
     pageIntro:
-      "Explore Conventional, SPLITS, Fractionalization and Tokenization, choose the structure that fits your project, then share your vision. An advisor will contact you; no registration or FAST Code needed.",
+      "Explore Conventional, Lease-to-Own, Fractionalization and Tokenization, choose the structure that fits your project, then share your vision. An advisor will contact you; no registration or FAST Code needed.",
     /** Beside the read-only structure chip on the page form. */
     topicHint: "(choose with the buttons)",
     openPage: "Open as a full page with a Google-recognized location →",
@@ -228,7 +228,7 @@ export const en = {
     /** Topic display names (the English topic is still what gets submitted). */
     topics: {
       Conventional: "Conventional",
-      SPLITS: "SPLITS",
+      "Lease-to-Own": "Lease-to-Own",
       Fractionalization: "Fractionalization",
       Tokenization: "Tokenization",
     },
@@ -798,7 +798,7 @@ export const en = {
     talisuLayout: {
       title: "TalisU™",
       description:
-        "Industry adjacent fulfilment options — Conventional, SPLITS, Fractionalization, and Tokenization.",
+        "Industry adjacent fulfilment options — Conventional, Lease-to-Own, Fractionalization, and Tokenization.",
     },
     talisuFaq: {
       title: "TalisU™ | FAQ",
@@ -816,7 +816,7 @@ export const en = {
     talisuEngage: {
       title: "Engage Webster and His Fulfilment Team | TalisU™",
       description:
-        "Every project starts with your vision. Engage Webster and his Fulfilment Team using Conventional, SPLITS, Fractionalization or Tokenization structures. Your down payment is credited in full.",
+        "Every project starts with your vision. Engage Webster and his Fulfilment Team using Conventional, Lease-to-Own, Fractionalization or Tokenization structures. Your down payment is credited in full.",
       ogImage: "/og/talisu-engage-en.jpg",
       ogImageAlt:
         "Webster M., Projects Analyst for fulfilment options, with the Talispros™ tree logo: Engage Webster and his Fulfilment Team to bring your project vision to life",

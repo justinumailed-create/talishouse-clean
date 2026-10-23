@@ -64,9 +64,19 @@ def card(lang, kicker, lines, chips, footer, photo, out, panel_bg=BLUE, wordmark
         y += int(size * 1.12)
     y += 22
     if chips:
-        cf = f("Medium", 17); cx = X
+        # Shrink the chip type so a longer label (Lease-to-Own) still fits on one row.
+        size = 17
+        cf = f("Medium", size)
+        pad = 24
+        while size > 13:
+            widths = [int(d.textlength(ch, font=cf) + pad) for ch in chips]
+            if X + sum(widths) + 8 * (len(chips) - 1) <= W - 30:
+                break
+            size -= 1
+            cf = f("Medium", size)
+        cx = X
         for ch in chips:
-            w = int(d.textlength(ch, font=cf) + 24)
+            w = int(d.textlength(ch, font=cf) + pad)
             if cx + w > W - 30: break
             d.rounded_rectangle([cx, y, cx + w, y + 38], radius=19, fill=CHIP, outline=BLUE, width=2)
             d.text((cx + 12, y + 19), ch, font=cf, fill=BLUE, anchor="lm"); cx += w + 8
@@ -137,10 +147,10 @@ def main():
     if not only or "talisu-engage" in only:
         webster = next(p["photo"] for p in P if p["route"] == "/talisu/engage")
         card("en", "TALISU™  ·  FULFILMENT OPTIONS", ["Engage Webster", "and his", "Fulfilment Team"],
-             ["Conventional · SPLITS", "Fractionalization", "Tokenization"], "talispros.com/talisu/engage",
+             ["Conventional · Lease-to-Own", "Fractionalization", "Tokenization"], "talispros.com/talisu/engage",
              webster, os.path.join(PUB, "og", "talisu-engage-en.jpg"))
         card("de", "TALISU™  ·  FULFILMENT-OPTIONEN", ["Beauftragen Sie", "Webster und sein", "Fulfilment-Team"],
-             ["Konventionell · SPLITS", "Fraktionalisierung", "Tokenisierung"], "talispros.com/talisu/engage",
+             ["Konventionell · Mietkauf", "Fraktionalisierung", "Tokenisierung"], "talispros.com/talisu/engage",
              webster, os.path.join(PUB, "og", "talisu-engage-de.jpg"))
     if not only or "admin" in only:
         card("en", "TALISPROS™  ·  ADMIN CONSOLE", ["Talispros™", "Admin"], ["Mapsites", "Talisbooks™", "Agents"],
