@@ -24,6 +24,12 @@ function detailSummary(details: Record<string, unknown>): string {
   if (typeof d.count === "number") parts.push(`${d.count} PINs`);
   if (typeof d.note_date === "string") parts.push(`note ${d.note_date}`);
   if (typeof d.file_name === "string") parts.push(d.file_name);
+  if (typeof d.brokerage_name === "string") parts.push(d.brokerage_name);
+  if (typeof d.decision_maker_name === "string") parts.push(d.decision_maker_name);
+  if (typeof d.country === "string") parts.push(d.country);
+  if (typeof d.status === "string") parts.push(d.status);
+  if (typeof d.owner_name === "string") parts.push(d.owner_name);
+  if (typeof d.imported === "number") parts.push(`${d.imported} leads`);
   if (typeof d.signed_in_at === "string") parts.push(`session from ${formatIst(d.signed_in_at)}`);
   if (typeof d.last_activity_at === "string") parts.push(`last activity ${formatIst(d.last_activity_at)}`);
   if (typeof d.attempts === "number") parts.push(`${d.attempts} attempts`);
@@ -105,7 +111,7 @@ export default async function AgentActivityPage({
                     <td className="px-4 py-3">
                       {a ? (
                         <Link href={`/admin/agents/${a.id}`} className="font-medium text-neutral-900 hover:underline">{a.name}</Link>
-                      ) : <span className="text-neutral-400">—</span>}
+                      ) : <span className="font-medium text-neutral-900">{e.performedBy || "—"}</span>}
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium text-neutral-800">{activityLabel(e.action)}</span>

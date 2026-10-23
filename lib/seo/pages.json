@@ -1223,6 +1223,66 @@
     "alt": "Talispros™ Baumlogo: CRM-Anmeldung"
    }
   },
+  "/admin/agent/leads": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/agent-leads",
+   "en": {
+    "title": "Brokerage Leads | Talispros™ Agent Portal",
+    "description": "Search, filter and export brokerage contacts agents prospect in Canada and the USA.",
+    "alt": "Talispros™ tree logo: Brokerage leads for your market"
+   },
+   "de": {
+    "title": "Makler-Leads | Talispros™ Agentenportal",
+    "description": "Maklerkontakte suchen, filtern und exportieren, die Agenten in Kanada und den USA ansprechen.",
+    "alt": "Talispros™ Baumlogo: Makler-Leads für Ihren Markt"
+   }
+  },
+  "/admin/agent/leads/new": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/agent-leads-new",
+   "en": {
+    "title": "Add a Brokerage Lead | Talispros™",
+    "description": "Add a decision maker at an independent brokerage. The lead is saved to the agent who enters it.",
+    "alt": "Talispros™ tree logo: Add a brokerage lead"
+   },
+   "de": {
+    "title": "Makler-Lead hinzufügen | Talispros™",
+    "description": "Einen Entscheider eines unabhängigen Maklerbüros hinzufügen. Der Lead gehört dem Agenten, der ihn erfasst.",
+    "alt": "Talispros™ Baumlogo: Makler-Lead hinzufügen"
+   }
+  },
+  "/admin/agent/leads/import": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/agent-leads-import",
+   "en": {
+    "title": "Import Brokerage Leads | Talispros™",
+    "description": "Upload a daily CSV, map the columns, and review duplicates before the leads are saved.",
+    "alt": "Talispros™ tree logo: Import a daily CSV"
+   },
+   "de": {
+    "title": "Makler-Leads importieren | Talispros™",
+    "description": "Laden Sie die tägliche CSV hoch, ordnen Sie die Spalten zu und prüfen Sie Dubletten vor dem Speichern.",
+    "alt": "Talispros™ Baumlogo: Tägliche CSV importieren"
+   }
+  },
+  "/admin/agent/leads/[id]": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/agent-leads-edit",
+   "en": {
+    "title": "Edit a Brokerage Lead | Talispros™",
+    "description": "Update a brokerage lead and read its edit history. Agents cannot delete a lead.",
+    "alt": "Talispros™ tree logo: Edit a brokerage lead"
+   },
+   "de": {
+    "title": "Makler-Lead bearbeiten | Talispros™",
+    "description": "Einen Makler-Lead aktualisieren und den Verlauf lesen. Agenten können einen Lead nicht löschen.",
+    "alt": "Talispros™ Baumlogo: Makler-Lead bearbeiten"
+   }
+  },
   "/talispros/client/login": {
    "kind": "login",
    "noindex": true,

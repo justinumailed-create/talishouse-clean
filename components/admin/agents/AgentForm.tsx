@@ -28,7 +28,7 @@ export const EMPTY_AGENT_FORM: AgentFormValues = {
   phone: "",
   loginId: "",
   status: "active",
-  privileges: [],
+  privileges: ["leads-crm"],
   assignedMapSites: "",
   regions: "",
   notes: "",

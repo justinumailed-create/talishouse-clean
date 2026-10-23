@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { AgentAdminRecord, AgentMapSiteSummary } from "@/lib/agent-admins";
 import type { ManualPaymentRecord } from "@/lib/manual-payments";
+import { crmCopy } from "@/lib/crm-leads/copy";
+import { getLocale } from "@/lib/i18n/server";
 import AgentWorkPanel from "./AgentWorkPanel";
 import CashPaymentsTable from "./CashPaymentsTable";
 
@@ -21,7 +23,7 @@ function initials(name: string): string {
  * Shows only agent tasks, each behind its privilege. Agents have no public
  * page of their own and cannot edit one.
  */
-export default function AgentDashboard({
+export default async function AgentDashboard({
   agent,
   mapsites,
   readOnly = false,
@@ -34,9 +36,12 @@ export default function AgentDashboard({
   readOnly?: boolean;
   payments?: ManualPaymentRecord[];
 }) {
-  const can = (scope: "mapsites" | "ebooks" | "pins" | "cash-payments") => agent.privileges.includes(scope);
+  const can = (scope: "mapsites" | "ebooks" | "pins" | "cash-payments" | "leads-crm") =>
+    agent.privileges.includes(scope);
   const canMapSites = can("mapsites");
   const canCash = can("cash-payments");
+  const canLeads = can("leads-crm");
+  const leadsCopy = crmCopy(await getLocale());
   const active = agent.status === "active";
 
   return (
@@ -68,6 +73,9 @@ export default function AgentDashboard({
         {[
           { href: "/admin/agent/notes", title: "Daily notes", text: "Log today’s tasks and upload documents.", badge: 0 },
           { href: "/chat", title: "Chat", text: "Private messages with other agents.", badge: chatUnread },
+          ...(canLeads
+            ? [{ href: "/admin/agent/leads", title: leadsCopy.dashboardTitle, text: leadsCopy.dashboardText, badge: 0 }]
+            : []),
         ].map((item) => {
           const inner = (
             <>
