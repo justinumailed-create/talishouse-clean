@@ -31,6 +31,14 @@ import {
   MKTS_PIN_CARD_MAX_WIDTH_PX,
   type MktsPinCardPlacement,
 } from "@/lib/talisu/mkts-pin-card-layout";
+import {
+  fitMktsViewport,
+  spreadMktsPins,
+  TALISU_MKTS_MOBILE_DO_MORE_PIN_SIZE,
+  TALISU_MKTS_MOBILE_MARKET_PIN_SIZE,
+  TALISU_MKTS_MOBILE_MAX_WIDTH_PX,
+} from "@/lib/talisu/mkts-mobile-layout";
+import type { MapEnginePin } from "@/lib/talismaps/map-engine/types";
 import TalisUMarketsPinCard from "./TalisUMarketsPinCard";
 import TalisUMarketsSidebar from "./TalisUMarketsSidebar";
 import { useT } from "@/lib/i18n/client";
@@ -39,7 +47,25 @@ const FOCUS_GESTURE_GUARD_MS = 900;
 /** Retry window while Google overlays settle after a camera move. */
 const PIN_ANCHOR_POLL_MS = 800;
 
+/** "unknown" until hydrated so neither layout's fit runs with the wrong size. */
+function useMktsLayout(): "unknown" | "mobile" | "desktop" {
+  const [layout, setLayout] = useState<"unknown" | "mobile" | "desktop">(
+    "unknown",
+  );
+  useEffect(() => {
+    const query = window.matchMedia(
+      `(max-width: ${TALISU_MKTS_MOBILE_MAX_WIDTH_PX}px)`,
+    );
+    const sync = () => setLayout(query.matches ? "mobile" : "desktop");
+    sync();
+    query.addEventListener("change", sync);
+    return () => query.removeEventListener("change", sync);
+  }, []);
+  return layout;
+}
+
 export default function TalisUMarketsMapApp() {
+  const layout = useMktsLayout();
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const focusingRef = useRef(false);
   const focusTimerRef = useRef<number | null>(null);
@@ -107,8 +133,15 @@ export default function TalisUMarketsMapApp() {
       scrollZoom={false}
       preserveViewport
     >
-      <MapEngineFitBounds coordinates={fitCoordinates} padding={fitPadding} />
+      {/* Desktop: unchanged Google fitBounds with the sidebar inset.
+          Phones: MarketsChrome fits to the container's real size instead. */}
+      {layout === "desktop" ? (
+        <MapEngineFitBounds coordinates={fitCoordinates} padding={fitPadding} />
+      ) : null}
       <MarketsChrome
+        mobile={layout === "mobile"}
+        basePins={enginePins}
+        fitCoordinates={fitCoordinates}
         pins={pins}
         footer={t.markets.footer}
         selectedPinId={selectedPinId}
@@ -121,6 +154,9 @@ export default function TalisUMarketsMapApp() {
 }
 
 function MarketsChrome({
+  mobile,
+  basePins,
+  fitCoordinates,
   pins,
   footer,
   selectedPinId,
@@ -128,6 +164,9 @@ function MarketsChrome({
   beginFocusGuard,
   recenterOnSelectRef,
 }: {
+  mobile: boolean;
+  basePins: MapEnginePin[];
+  fitCoordinates: { latitude: number; longitude: number }[];
   pins: readonly TalisUMktsPin[];
   footer: string;
   selectedPinId: string | null;
@@ -135,9 +174,120 @@ function MarketsChrome({
   beginFocusGuard: () => void;
   recenterOnSelectRef: MutableRefObject<boolean>;
 }) {
-  const { setViewport } = useMapEngine();
+  const {
+    setViewport,
+    setPins,
+    setCameraOptions,
+    isReady,
+    viewport,
+    pins: enginePins,
+  } = useMapEngine();
   const lastFocusedRef = useRef<string | null>(null);
   const mapRootRef = useRef<HTMLDivElement>(null);
+
+  // ── Phones: fill the map, fit Canada to the real container size, no wrap,
+  // smaller pins nudged apart so none overlap. Desktop never runs this. ──
+  const cameraOptionsSetRef = useRef(false);
+  const lastFitRef = useRef<{
+    zoom: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const wasMobilePinsRef = useRef(false);
+  const viewportZoomRef = useRef(viewport.zoom);
+  const selectedPinIdRef = useRef(selectedPinId);
+  useEffect(() => {
+    viewportZoomRef.current = viewport.zoom;
+    selectedPinIdRef.current = selectedPinId;
+  }, [viewport.zoom, selectedPinId]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (mobile) {
+      setCameraOptions({ fractionalZoom: true, restrictToWorld: true });
+      cameraOptionsSetRef.current = true;
+    } else if (cameraOptionsSetRef.current) {
+      setCameraOptions({ fractionalZoom: false, restrictToWorld: false });
+      cameraOptionsSetRef.current = false;
+    }
+  }, [isReady, mobile, setCameraOptions]);
+
+  useEffect(() => {
+    if (!isReady || !mobile) {
+      lastFitRef.current = null;
+      return;
+    }
+    const root = mapRootRef.current;
+    if (!root) return;
+    const refit = (force: boolean) => {
+      const { width, height } = root.getBoundingClientRect();
+      if (width < 50 || height < 50) return;
+      const last = lastFitRef.current;
+      if (!force && last) {
+        const widthChanged = Math.abs(last.width - width) > 1;
+        const heightChanged = Math.abs(last.height - height) > 1;
+        if (!widthChanged && !heightChanged) return;
+        // Height-only changes (Safari toolbar) keep a user's own pan/zoom.
+        const userMoved =
+          Math.abs(viewportZoomRef.current - last.zoom) > 0.01 ||
+          selectedPinIdRef.current != null;
+        if (!widthChanged && userMoved) return;
+      }
+      const fit = fitMktsViewport(fitCoordinates, width, height);
+      if (!fit) return;
+      lastFitRef.current = { zoom: fit.zoom, width, height };
+      setViewport(fit);
+    };
+    const raf = window.requestAnimationFrame(() => refit(true));
+    const observer = new ResizeObserver(() => refit(false));
+    observer.observe(root);
+    const onOrientation = () => window.setTimeout(() => refit(true), 250);
+    window.addEventListener("orientationchange", onOrientation);
+    return () => {
+      window.cancelAnimationFrame(raf);
+      observer.disconnect();
+      window.removeEventListener("orientationchange", onOrientation);
+    };
+  }, [isReady, mobile, fitCoordinates, setViewport]);
+
+  const zoomKey = Math.round(viewport.zoom * 10) / 10;
+  const spreadPins = useMemo(() => {
+    if (!mobile) return null;
+    const sized = basePins.map((pin) => ({
+      pin,
+      size:
+        pin.metadata?.pinSize === TALISU_MKTS_DO_MORE_PIN_SIZE
+          ? TALISU_MKTS_MOBILE_DO_MORE_PIN_SIZE
+          : TALISU_MKTS_MOBILE_MARKET_PIN_SIZE,
+    }));
+    const spread = spreadMktsPins(
+      sized.map(({ pin, size }) => ({
+        id: pin.id,
+        latitude: pin.latitude,
+        longitude: pin.longitude,
+        size,
+      })),
+      zoomKey,
+    );
+    return sized.map(({ pin, size }) => ({
+      ...pin,
+      ...(spread.get(pin.id) ?? {}),
+      metadata: { ...pin.metadata, pinSize: size },
+    }));
+  }, [mobile, basePins, zoomKey]);
+
+  useEffect(() => {
+    if (spreadPins) {
+      wasMobilePinsRef.current = true;
+      // Also re-applies if the provider reset pins (e.g. locale switch).
+      if (enginePins !== spreadPins) setPins(spreadPins);
+      return;
+    }
+    if (wasMobilePinsRef.current) {
+      wasMobilePinsRef.current = false;
+      setPins(basePins);
+    }
+  }, [spreadPins, enginePins, basePins, setPins]);
   const cardBodyRef = useRef<HTMLDivElement>(null);
   const [placement, setPlacement] = useState<MktsPinCardPlacement | null>(null);
   const [cardHeight, setCardHeight] = useState(MKTS_PIN_CARD_EST_HEIGHT_PX);
@@ -211,8 +361,12 @@ function MarketsChrome({
 
     const pinRadius =
       (selectedPin.kind === "do-more"
-        ? TALISU_MKTS_DO_MORE_PIN_SIZE
-        : TALISU_MKTS_MARKET_PIN_SIZE) / 2;
+        ? mobile
+          ? TALISU_MKTS_MOBILE_DO_MORE_PIN_SIZE
+          : TALISU_MKTS_DO_MORE_PIN_SIZE
+        : mobile
+          ? TALISU_MKTS_MOBILE_MARKET_PIN_SIZE
+          : TALISU_MKTS_MARKET_PIN_SIZE) / 2;
 
     const measuredHeight =
       cardBodyRef.current?.getBoundingClientRect().height ?? cardHeight;
@@ -238,7 +392,7 @@ function MarketsChrome({
         ? prev
         : next,
     );
-  }, [selectedPin, cardHeight]);
+  }, [selectedPin, cardHeight, mobile]);
 
   useEffect(() => {
     if (!selectedPinId) return;

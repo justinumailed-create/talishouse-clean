@@ -16,6 +16,7 @@ import {
 } from "@/lib/talismaps/map-engine";
 import type {
   MapBasemapView,
+  MapCameraOptions,
   MapCoordinates,
   MapEnginePin,
   MapFitPadding,
@@ -52,6 +53,7 @@ interface MapEngineContextValue {
   setReady: (ready: boolean) => void;
   registerMapInstance: (instance: MapInstance | null) => void;
   fitToCoordinates: (coordinates: MapCoordinates[], padding?: MapFitPadding) => void;
+  setCameraOptions: (options: MapCameraOptions) => void;
   onPinDrag?: (pinId: string, coordinates: MapViewport["center"]) => void;
   onPinDragStart?: (pinId: string) => void;
   onMapClick?: (coordinates: MapViewport["center"]) => void;
@@ -133,6 +135,10 @@ export function MapEngineProvider({
     },
     []
   );
+
+  const setCameraOptions = useCallback((options: MapCameraOptions) => {
+    mapInstanceRef.current?.setCameraOptions?.(options);
+  }, []);
 
   const setReadyState = useCallback((ready: boolean) => {
     setReady((current) => (current === ready ? current : ready));
@@ -266,6 +272,7 @@ export function MapEngineProvider({
       setReady: setReadyState,
       registerMapInstance,
       fitToCoordinates,
+      setCameraOptions,
       onPinDrag: handlePinDrag,
       onPinDragStart: handlePinDragStart,
       onMapClick: handleMapClick,
@@ -290,6 +297,7 @@ export function MapEngineProvider({
       setReadyState,
       registerMapInstance,
       fitToCoordinates,
+      setCameraOptions,
       handlePinDrag,
       handlePinDragStart,
       handleMapClick,

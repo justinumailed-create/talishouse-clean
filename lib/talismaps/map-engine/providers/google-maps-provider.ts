@@ -3,6 +3,7 @@ import { buildPinMarkerHtml, pinStyleCacheKey } from "../pin-marker-icon";
 import { allowMapGestures, allowMapScrollZoom } from "../mount-flags";
 import type {
   MapBasemapView,
+  MapCameraOptions,
   MapCoordinates,
   MapFitPadding,
   MapEngineEvent,
@@ -682,6 +683,17 @@ export class GoogleMapsProvider implements MapProvider {
       },
       getBasemapView() {
         return basemapView;
+      },
+      setCameraOptions(cameraOptions: MapCameraOptions) {
+        map.setOptions({
+          isFractionalZoomEnabled: Boolean(cameraOptions.fractionalZoom),
+          restriction: cameraOptions.restrictToWorld
+            ? {
+                latLngBounds: { north: 85, south: -85, west: -180, east: 180 },
+                strictBounds: true,
+              }
+            : null,
+        });
       },
       fitToPins(padding: MapFitPadding = 60) {
         instance.fitToCoordinates(

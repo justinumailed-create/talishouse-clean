@@ -127,6 +127,12 @@ export type MapEngineEventPayload =
 
 export type MapEngineEventHandler = (payload?: MapEngineEventPayload) => void;
 
+export interface MapCameraOptions {
+  fractionalZoom?: boolean;
+  /** Keep the camera inside one copy of the world (no horizontal repeat). */
+  restrictToWorld?: boolean;
+}
+
 export interface MapInstance {
   destroy(): void;
   setViewport(viewport: Partial<MapViewport>): void;
@@ -138,6 +144,11 @@ export interface MapInstance {
   getBasemapView?(): MapBasemapView;
   /** Update locked-pin screen offset without remounting (Mapsite responsive layout). */
   setLockCenterOffset?(offset: { x: number; y: number }): void;
+  /**
+   * Optional camera constraints (used by phone layouts): fractional zoom so a
+   * fit fills narrow screens, and a world restriction so the map never wraps.
+   */
+  setCameraOptions?(options: MapCameraOptions): void;
   fitToPins(padding?: MapFitPadding): void;
   fitToCoordinates(coordinates: MapCoordinates[], padding?: MapFitPadding): void;
   on(event: MapEngineEvent, handler: MapEngineEventHandler): void;
