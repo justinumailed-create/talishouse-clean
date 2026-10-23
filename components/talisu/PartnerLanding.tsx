@@ -124,6 +124,8 @@ export default function PartnerLanding({
   closingText,
   notice,
   left,
+  mainCta,
+  headlineCtaHref,
 }: {
   testId?: string;
   kicker: string;
@@ -151,6 +153,10 @@ export default function PartnerLanding({
    * partner card and the title sits on the right.
    */
   left?: ReactNode;
+  /** Replaces the default bottom-right CTA (Webster: live structure button). */
+  mainCta?: ReactNode;
+  /** Headline pill target when it differs from ctaHref (Webster: #structures). */
+  headlineCtaHref?: string;
 }) {
   const heading = (
     <div>
@@ -231,14 +237,16 @@ export default function PartnerLanding({
   const closing = (
     <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-3 pt-1">
       {left ? <div className="mr-auto">{closingCopy}</div> : null}
-      <Link
-        href={ctaHref}
-        data-testid="partner-cta"
-        className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#046BD9] px-8 text-[16px] font-semibold text-white shadow-[0_10px_26px_rgba(4,107,217,0.3)] transition hover:bg-[#0558b3] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#046BD9]/30"
-      >
-        {ctaLabel}
-        <span aria-hidden className="text-lg leading-none">→</span>
-      </Link>
+      {mainCta ?? (
+        <Link
+          href={ctaHref}
+          data-testid="partner-cta"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#046BD9] px-8 text-[16px] font-semibold text-white shadow-[0_10px_26px_rgba(4,107,217,0.3)] transition hover:bg-[#0558b3] focus:outline-none focus-visible:ring-4 focus-visible:ring-[#046BD9]/30"
+        >
+          {ctaLabel}
+          <span aria-hidden className="text-lg leading-none">→</span>
+        </Link>
+      )}
     </div>
   );
 
@@ -273,7 +281,7 @@ export default function PartnerLanding({
       headline={lead}
       headlineAction={
         <WorkingPageCtaLink
-          href={ctaHref}
+          href={headlineCtaHref ?? ctaHref}
           label={ctaLabel}
           avatarSrc={imageSrc}
           avatarAlt={imageAlt}

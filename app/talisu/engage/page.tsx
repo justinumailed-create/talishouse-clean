@@ -8,7 +8,11 @@ import { fmt } from "@/lib/i18n/format";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
 import PartnerLanding from "@/components/talisu/PartnerLanding";
-import { TransactionStructurePickerStandalone } from "@/components/talisu/TransactionStructurePicker";
+import {
+  EngageStructurePicker,
+  EngageStructureProvider,
+  EngageWebsterCta,
+} from "@/components/talisu/EngageStructureSelection";
 import {
   isTalisUEngageCheckoutStep,
   talisUEngageCheckoutHref,
@@ -19,6 +23,7 @@ import {
   findCatalogueProduct,
 } from "@/lib/talisu/catalogue-products";
 import {
+  ENGAGE_STRUCTURES_ANCHOR,
   engageStructureCheckoutUrl,
   normalizeEngageStructure,
 } from "@/lib/talisu/engage-structure";
@@ -61,7 +66,8 @@ export default async function TalisUEngagePage({
   // Structure chosen on the landing (?structure=), limited to the four ids.
   const structure = normalizeEngageStructure(params.structure);
   const structureSection = structure
-    ? dictionary.home.ownershipSections.find((s) => s.id === structure) ?? null
+    ? (dictionary.home.ownershipSections.find((s) => s.id === structure) ??
+      null)
     : null;
   const checkoutUrl = engageStructureCheckoutUrl(
     catalogueProductCheckoutUrl(TALISU_ENGAGE.samcartUrl, product),
@@ -75,51 +81,63 @@ export default async function TalisUEngagePage({
   // carried through.
   if (!isTalisUEngageCheckoutStep(params.step)) {
     return (
-      <PartnerLanding
-        testId="talisu-engage-landing"
-        kicker={TALISU_ENGAGE.landingKicker}
-        title={TALISU_ENGAGE.title}
-        lead={TALISU_ENGAGE.landingLead}
-        imageSrc={TALISU_ENGAGE.partnerImage}
-        imageAlt={TALISU_ENGAGE.partnerImageAlt}
-        imageWidth={864}
-        imageHeight={1152}
-        partnerName={TALISU_ENGAGE.partnerName.split(/ [—–-] /)[0] ?? "Webster M."}
-        partnerRole={TALISU_ENGAGE.landingRole}
-        ctaLabel={TALISU_ENGAGE.ctaLabel}
-        ctaHref={talisUEngageCheckoutHref(product?.code, structure)}
-        left={
-          <TransactionStructurePickerStandalone
-            initialOpenId={structure ?? "conventional"}
-            productCode={product?.code ?? null}
-            testId="engage-structures"
-          />
-        }
-        intro={
-          <>
-            <p>{TALISU_ENGAGE.landingIntro}</p>
-            <p className="mt-3" data-testid="engage-structure-note">
-              {TALISU_ENGAGE.landingStructureNote}
-            </p>
-          </>
-        }
-        notice={
-          product ? (
-            <p
-              className="inline-block rounded-2xl border border-[#046BD9]/25 bg-white px-4 py-3 text-[15px] text-neutral-800 shadow-sm"
-              data-testid="engage-ask-product"
-            >
-              <span className="font-semibold text-[#046BD9]">{t.engageCustomizing}</span>{" "}
-              <span className="font-semibold text-neutral-950">{product.code}</span>
-              {" — "}
-              {product.title}
-            </p>
-          ) : null
-        }
-        cards={[]}
-        closingTitle={TALISU_ENGAGE.headline}
-        closingText={TALISU_ENGAGE.ctaNote}
-      />
+      <EngageStructureProvider initialOpenId={structure}>
+        <PartnerLanding
+          testId="talisu-engage-landing"
+          kicker={TALISU_ENGAGE.landingKicker}
+          title={TALISU_ENGAGE.title}
+          lead={TALISU_ENGAGE.landingLead}
+          imageSrc={TALISU_ENGAGE.partnerImage}
+          imageAlt={TALISU_ENGAGE.partnerImageAlt}
+          imageWidth={864}
+          imageHeight={1152}
+          partnerName={
+            TALISU_ENGAGE.partnerName.split(/ [—–-] /)[0] ?? "Webster M."
+          }
+          partnerRole={TALISU_ENGAGE.landingRole}
+          ctaLabel={TALISU_ENGAGE.ctaLabel}
+          // Headline pill (as on Aisha's page) scrolls to the structure tabs;
+          // the button beside Webster's card goes to the down-payment checkout
+          // with the selected structure.
+          ctaHref={talisUEngageCheckoutHref(product?.code, structure)}
+          headlineCtaHref={`#${ENGAGE_STRUCTURES_ANCHOR}`}
+          mainCta={
+            <EngageWebsterCta
+              productCode={product?.code ?? null}
+              label={t.engageWebster}
+            />
+          }
+          left={<EngageStructurePicker testId="engage-structures" />}
+          intro={
+            <>
+              <p>{TALISU_ENGAGE.landingIntro}</p>
+              <p className="mt-3" data-testid="engage-structure-note">
+                {TALISU_ENGAGE.landingStructureNote}
+              </p>
+            </>
+          }
+          notice={
+            product ? (
+              <p
+                className="inline-block rounded-2xl border border-[#046BD9]/25 bg-white px-4 py-3 text-[15px] text-neutral-800 shadow-sm"
+                data-testid="engage-ask-product"
+              >
+                <span className="font-semibold text-[#046BD9]">
+                  {t.engageCustomizing}
+                </span>{" "}
+                <span className="font-semibold text-neutral-950">
+                  {product.code}
+                </span>
+                {" — "}
+                {product.title}
+              </p>
+            ) : null
+          }
+          cards={[]}
+          closingTitle={TALISU_ENGAGE.headline}
+          closingText={TALISU_ENGAGE.ctaNote}
+        />
+      </EngageStructureProvider>
     );
   }
 
@@ -181,8 +199,12 @@ export default async function TalisUEngagePage({
               data-testid="engage-product"
               data-product-code={product.code}
             >
-              <span className="font-semibold text-[#046BD9]">{t.engageCustomizing}</span>{" "}
-              <span className="font-semibold text-neutral-950">{product.code}</span>
+              <span className="font-semibold text-[#046BD9]">
+                {t.engageCustomizing}
+              </span>{" "}
+              <span className="font-semibold text-neutral-950">
+                {product.code}
+              </span>
               {" — "}
               {product.title}
               <span className="text-neutral-500">
@@ -203,13 +225,16 @@ export default async function TalisUEngagePage({
               data-testid="engage-structure"
               data-structure-id={structureSection.id}
             >
-              <span className="font-semibold text-[#046BD9]">{t.engageStructure}</span>{" "}
-              <span className="font-semibold text-neutral-950">{structureSection.title}</span>{" "}
+              <span className="font-semibold text-[#046BD9]">
+                {t.engageStructure}
+              </span>{" "}
+              <span className="font-semibold text-neutral-950">
+                {structureSection.title}
+              </span>{" "}
               <Link
-                href={`/talisu/engage?${new URLSearchParams({
-                  ...(product ? { product: product.code } : {}),
-                  structure: structureSection.id,
-                }).toString()}`}
+                href={`/talisu/engage${
+                  product ? `?product=${encodeURIComponent(product.code)}` : ""
+                }#${ENGAGE_STRUCTURES_ANCHOR}`}
                 className="whitespace-nowrap font-medium text-[#046BD9] hover:underline"
               >
                 {t.engageChange}

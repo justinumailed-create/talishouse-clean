@@ -3,6 +3,9 @@
  * along as ?structure= to the down-payment checkout and into the SamCart URL,
  * where SamCart stores it with the order (custom parameter + utm_term).
  */
+/** Anchor of the structure tabs on Webster's page (/talisu/engage#structures). */
+export const ENGAGE_STRUCTURES_ANCHOR = "structures";
+
 export const ENGAGE_STRUCTURE_PARAM = "structure";
 
 export const ENGAGE_STRUCTURE_IDS = [

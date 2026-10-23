@@ -153,18 +153,16 @@ describe("transaction structure param", () => {
     );
   });
 
-  it("adds Engage Webster to each structure on Webster's page, keeping Share a Project Vision", () => {
+  it("keeps only Share a Project Vision in the tab panels; Engage Webster sits beside Webster's card", () => {
     const picker = read("components/talisu/TransactionStructurePicker.tsx");
-    expect(picker).toContain("talisUEngageCheckoutHref(productCode, open.id)");
-    expect(picker).toContain("t.talisu.engageWebster");
-    expect(picker).toContain("${testId}-engage");
+    expect(picker).not.toContain("talisUEngageCheckoutHref");
+    expect(picker).not.toContain("t.talisu.engageWebster");
+    expect(picker).not.toContain("${testId}-engage");
     expect(picker).toContain("${testId}-learn-more");
     expect(en.talisu.engageWebster).toBe("Engage Webster");
     expect(de.talisu.engageWebster).toBe("Webster beauftragen");
     expect(en.talisu.engageStructure).toBe("Structure:");
     expect(de.talisu.engageStructure).toBe("Struktur:");
-    const page = read("app/talisu/engage/page.tsx");
-    expect(page).toContain("productCode={product?.code ?? null}");
   });
 });
 
@@ -184,5 +182,71 @@ describe("Webster landing structure note", () => {
     expect(landing.map((el) => textOf(el))).toEqual([en.talisu.engage.landingStructureNote]);
     const checkout = await renderEngage({ step: "pay" });
     expect(findAll(checkout, (el) => el.props["data-testid"] === "engage-structure-note")).toHaveLength(0);
+  });
+});
+
+describe("Webster landing links", () => {
+  beforeEach(() => {
+    gate.locale = "en";
+  });
+
+  async function landingHtml(params: Record<string, string> = {}) {
+    const { renderToStaticMarkup } = await import("react-dom/server");
+    return renderToStaticMarkup((await renderEngage(params)) as ReactElement);
+  }
+
+  const hrefs = (html: string) =>
+    [...html.matchAll(/href="([^"]*)"/g)].map((m) => m[1].replace(/&amp;/g, "&"));
+  const checkoutHrefs = (html: string) => hrefs(html).filter((h) => h.startsWith("/talisu/engage?step=pay"));
+  const tag = (html: string, testId: string) =>
+    html.match(new RegExp(`<a[^>]*data-testid="${testId}"[^>]*>`))?.[0] ?? "";
+
+  it("headline pill scrolls to the structure tabs instead of the checkout", async () => {
+    const html = await landingHtml();
+    expect(tag(html, "partner-headline-cta")).toContain('href="#structures"');
+    expect(html).toContain('id="structures"');
+    expect(html).toMatch(/<div[^>]*id="structures"[^>]*tabindex="-1"/);
+    expect(html).toContain(en.talisu.engage.ctaLabel);
+  });
+
+  it("has exactly one checkout link: Engage Webster beside the card, with the default structure", async () => {
+    const html = await landingHtml();
+    expect(checkoutHrefs(html)).toEqual(["/talisu/engage?step=pay&structure=conventional"]);
+    const cta = tag(html, "partner-cta");
+    expect(cta).toContain('data-structure-id="conventional"');
+    expect(html).toMatch(/data-testid="partner-cta"[^>]*>Engage Webster<span[^>]*>→<\/span><\/a>/);
+    expect(html).not.toContain("engage-structures-engage");
+    expect(html).toContain("engage-structures-learn-more");
+    expect(html).toContain(en.talisu.engage.headline);
+    expect(html).toContain(en.talisu.engage.ctaNote);
+    expect(html).not.toMatch(/<a[^>]*>[^<]*Send a Down Payment/);
+  });
+
+  it("uses the preselected structure and keeps ?product=", async () => {
+    for (const id of ENGAGE_STRUCTURE_IDS) {
+      const html = await landingHtml({ structure: id, product: "P07" });
+      expect(checkoutHrefs(html)).toEqual([`/talisu/engage?step=pay&product=P07&structure=${id}`]);
+    }
+  });
+
+  it("labels the button in German", async () => {
+    gate.locale = "de";
+    const html = await landingHtml();
+    expect(html).toMatch(/data-testid="partner-cta"[^>]*>Webster beauftragen<span/);
+    expect(tag(html, "partner-headline-cta")).toContain('href="#structures"');
+  });
+
+  it("checkout Change goes back to the structure tabs", async () => {
+    const html = await landingHtml({ step: "pay", structure: "tokenization", product: "P07" });
+    expect(hrefs(html)).toContain("/talisu/engage?product=P07#structures");
+    const plain = await landingHtml({ step: "pay", structure: "splits" });
+    expect(hrefs(plain)).toContain("/talisu/engage#structures");
+  });
+
+  it("leaves the pill and big CTA unchanged on Aisha's /talisu/reg landing", () => {
+    expect(read("app/talisu/reg/page.tsx")).not.toMatch(/headlineCtaHref|mainCta/);
+    const landing = read("components/talisu/PartnerLanding.tsx");
+    expect(landing).toContain("href={headlineCtaHref ?? ctaHref}");
+    expect(landing).toContain("{mainCta ?? (");
   });
 });
