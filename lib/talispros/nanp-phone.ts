@@ -8,7 +8,7 @@
  */
 
 export const NANP_PHONE_ERROR =
-  "Enter a valid US/Canada phone number, e.g. (555) 555-5555.";
+  "Enter a valid Canadian phone number, e.g. (555) 555-5555.";
 
 /** Characters allowed besides digits in a typed phone number. */
 const ALLOWED_PHONE_CHARS = /^[\d\s().+-]*$/;

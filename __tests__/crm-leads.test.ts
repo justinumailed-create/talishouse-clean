@@ -76,7 +76,7 @@ describe("brokerage lead CSV import", () => {
     });
 
     expect(existing[1].lead).toBeNull();
-    expect(existing[1].errors.map((issue) => issue.code)).toEqual(expect.arrayContaining(["position", "phone", "email"]));
+    expect(existing[1].errors.map((issue) => issue.code)).toEqual(expect.arrayContaining(["position", "phone", "email", "country"]));
 
     expect(existing[2].duplicate?.reason).toBe("email");
     expect(existing[2].duplicate?.matchId).toBeNull();
@@ -97,7 +97,7 @@ describe("brokerage lead CSV import", () => {
           position: "acting broker",
           cell_phone: "+1 (647) 555-0188",
           brokerage_name: "Harbour Realty",
-          country: "United States",
+          country: "Canada",
           status: "not interested",
         },
       }],
@@ -110,10 +110,33 @@ describe("brokerage lead CSV import", () => {
         decisionMakerName: "Aritri Shah",
       }],
     });
-    expect(row.lead?.country).toBe("USA");
+    expect(row.lead?.country).toBe("Canada");
     expect(row.lead?.position).toBe("acting_broker");
     expect(row.lead?.status).toBe("not_interested");
     expect(row.duplicate?.reason).toBe("phone");
+  });
+
+  it("rejects a new United States lead and keeps an existing USA row", () => {
+    const created = validateLeadValues({
+      decision_maker_name: "Sam Cole",
+      position: "broker",
+      brokerage_name: "Acme Homes",
+      country: "United States",
+    });
+    expect(created.lead).toBeNull();
+    expect(created.errors.map((issue) => issue.code)).toContain("country");
+
+    const kept = validateLeadValues(
+      {
+        decision_maker_name: "Sam Cole",
+        position: "broker",
+        brokerage_name: "Acme Homes",
+        country: "USA",
+      },
+      { storedCountry: "USA" },
+    );
+    expect(kept.errors).toEqual([]);
+    expect(kept.lead?.country).toBe("USA");
   });
 
   it("rejects a row that is missing the decision maker or a real country", () => {

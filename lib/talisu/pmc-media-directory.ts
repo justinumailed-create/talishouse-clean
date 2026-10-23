@@ -82,7 +82,6 @@ export const PMC_MEDIA_DIRECTORY: PmcMediaOutlet[] = [
   r("Oferty.net", "Poland", "PL", "https://www.oferty.net"),
   r("PerSquare.co.za", "South Africa", "ZA", "https://www.persquare.co.za"),
   r("Portia", "Switzerland", "CH", null),
-  r("Properstar.com", "United States", "US", "https://www.properstar.com"),
   r("Properstar AE", "United Arab Emirates", "AE", "https://www.properstar.ae"),
   r("Properstar CA", "Canada", "CA", "https://www.properstar.com/ca"),
   r("Properstar DE", "Germany", "DE", "https://www.properstar.com/de"),

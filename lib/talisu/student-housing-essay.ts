@@ -206,7 +206,7 @@ const EN: StudentHousingEssay = {
             { title: "Raise capital and administer the investment.", text: "Onboard eligible investors, issue tokens in accordance with the legal documents, report financial performance, and handle distributions and eventual exits." },
           ],
         },
-        { type: "note", text: "A blockchain can improve recordkeeping and automate certain permitted transactions, but it does not automatically make the investment liquid or replace legal ownership records. In the United States, the SEC has specifically distinguished issuer-sponsored, custodial, and synthetic tokenized securities, which can confer different rights." },
+        { type: "note", text: "A blockchain can improve recordkeeping and automate certain permitted transactions, but it does not automatically make the investment liquid or replace legal ownership records." },
       ],
     },
     {
@@ -391,7 +391,7 @@ const DE: StudentHousingEssay = {
             { title: "Kapital beschaffen und die Investition verwalten.", text: "Berechtigte Investoren aufnehmen, Token gemäß den Rechtsdokumenten ausgeben, über die finanzielle Entwicklung berichten sowie Ausschüttungen und spätere Ausstiege abwickeln." },
           ],
         },
-        { type: "note", text: "Eine Blockchain kann die Dokumentation verbessern und bestimmte zulässige Transaktionen automatisieren, macht die Investition aber nicht automatisch liquide und ersetzt keine rechtlichen Eigentumsnachweise. In den USA unterscheidet die SEC ausdrücklich zwischen vom Emittenten aufgelegten, verwahrten und synthetischen tokenisierten Wertpapieren, die unterschiedliche Rechte vermitteln können." },
+        { type: "note", text: "Eine Blockchain kann die Dokumentation verbessern und bestimmte zulässige Transaktionen automatisieren, macht die Investition aber nicht automatisch liquide und ersetzt keine rechtlichen Eigentumsnachweise." },
       ],
     },
     {

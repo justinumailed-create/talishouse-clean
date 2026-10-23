@@ -6,10 +6,11 @@ import { saveLeadAction } from "@/app/admin/agent/leads/actions";
 import { countryLabel, crmCopy, issueText, positionLabel, statusLabel } from "@/lib/crm-leads/copy";
 import { useLocale } from "@/lib/i18n/client";
 import {
-  LEAD_COUNTRIES,
+  LEAD_COUNTRY_CHOICES,
   LEAD_POSITIONS,
   LEAD_STATUSES,
   validateLeadValues,
+  type LeadCountry,
   type LeadField,
 } from "@/lib/crm-leads/model";
 import { fieldClass, primaryButton, secondaryButton, textareaClass } from "@/components/admin/agents/ui";
@@ -42,7 +43,9 @@ export default function LeadForm({
     e.preventDefault();
     if (readOnly) return;
     setError(null);
-    const parsed = validateLeadValues(values);
+    const parsed = validateLeadValues(values, {
+      storedCountry: initial.country === "USA" ? "USA" : null,
+    });
     if (!parsed.lead) {
       setIssues(parsed.errors.map((issue) => issueText(copy, issue)));
       setError(copy.genericError);
@@ -61,6 +64,9 @@ export default function LeadForm({
       router.refresh();
     });
   }
+
+  const countryOptions: readonly LeadCountry[] =
+    values.country === "USA" ? ["USA", ...LEAD_COUNTRY_CHOICES] : LEAD_COUNTRY_CHOICES;
 
   const field = (name: LeadField, control: React.ReactNode, hint?: string) => (
     <label className="block text-sm text-neutral-800">
@@ -115,7 +121,7 @@ export default function LeadForm({
           "country",
           <select className={fieldClass} value={values.country} disabled={readOnly} required onChange={(e) => set("country", e.target.value)}>
             <option value="">{copy.any}</option>
-            {LEAD_COUNTRIES.map((country) => (
+            {countryOptions.map((country) => (
               <option key={country} value={country}>{countryLabel(copy, country)}</option>
             ))}
           </select>,

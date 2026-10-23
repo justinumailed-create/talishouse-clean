@@ -136,14 +136,6 @@ function MapSitePmcChrome({
       beginFocusGuard();
       lastFocusedRef.current = null;
       setSelectedPinId(null);
-      if (group === "usa") {
-        const usa = regionPins[0];
-        setViewport({
-          center: { latitude: usa.latitude, longitude: usa.longitude },
-          zoom: 4,
-        });
-        return;
-      }
       setViewport({
         center: { latitude: 56.0, longitude: -96.0 },
         zoom: 4,
