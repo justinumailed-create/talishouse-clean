@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase, DealV2 } from "@/lib/supabase";
 import { formatCAD } from "@/utils/currency";
+import { displayStoredStructureLabel } from "@/lib/talispros/ownership-contact";
 
 interface DealWithUser extends DealV2 {
   userInfo?: {
@@ -147,7 +148,7 @@ export default function DealsPage() {
             <tbody>
               {deals.map((deal) => (
                 <tr key={deal.id} className="border-b border-[#e5e5e5] last:border-0">
-                  <td className="py-3 px-4 font-medium">{deal.client_name}</td>
+                  <td className="py-3 px-4 font-medium">{displayStoredStructureLabel(deal.client_name || "")}</td>
                   <td className="py-3 px-4 text-[#6e6e73]">{deal.phone || "—"}</td>
                   <td className="py-3 px-4">
                     {deal.userInfo ? (
@@ -214,7 +215,7 @@ function EditModal({ deal, onClose, onSave }: { deal: DealWithUser; onClose: () 
     <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-8 w-full max-w-md mx-4">
         <h3 className="text-xl font-semibold mb-2">Edit Deal</h3>
-        <p className="text-sm text-[#6e6e73] mb-6">{deal.client_name}</p>
+        <p className="text-sm text-[#6e6e73] mb-6">{displayStoredStructureLabel(deal.client_name || "")}</p>
         
         <div className="space-y-4">
           <div>

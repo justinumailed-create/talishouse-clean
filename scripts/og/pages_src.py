@@ -89,11 +89,11 @@ add("/talisu/contract", "talisu-contract", "utility", BRAND,
      "TALISPROS  ·  VERTRAG", ["Ihren", "Dienstleistungs-", "vertrag signieren"], ["Agenten-Code", "E-Signatur", "Dann registrieren"]))
 add("/talisu/discuss", "talisu-discuss", "public", WEBSTER,
     ("Share a Project Vision | TalisU™",
-     "Explore Conventional, SPLITS, Fractionalization and Tokenization structures and share your project vision with an advisor. No registration needed.",
-     "TALISU™  ·  PROJECT VISION", ["Share a", "Project Vision"], ["Conventional · SPLITS", "Fractionalization", "Tokenization"]),
+     "Explore Conventional, Lease-to-Own, Fractionalization and Tokenization structures and share your project vision with an advisor. No registration needed.",
+     "TALISU™  ·  PROJECT VISION", ["Share a", "Project Vision"], ["Conventional · Lease-to-Own", "Fractionalization", "Tokenization"]),
     ("Projektvision teilen | TalisU™",
-     "Entdecken Sie Konventionell, SPLITS, Fraktionalisierung und Tokenisierung und teilen Sie Ihre Projektvision mit einem Berater. Ohne Registrierung.",
-     "TALISU™  ·  PROJEKTVISION", ["Projektvision", "teilen"], ["Konventionell · SPLITS", "Fraktionalisierung", "Tokenisierung"]))
+     "Entdecken Sie Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung und teilen Sie Ihre Projektvision mit einem Berater. Ohne Registrierung.",
+     "TALISU™  ·  PROJEKTVISION", ["Projektvision", "teilen"], ["Konventionell · Mietkauf", "Fraktionalisierung", "Tokenisierung"]))
 add("/talisu/terms", "talisu-terms", "public", BRAND,
     ("Terms of Service | Talispros by TalisALL PMC",
      "Talispros Terms of Service: platform role, customer responsibilities, warranties, liability, fees in CAD, intellectual property, termination and privacy.",
@@ -266,11 +266,11 @@ add("/talispros/register-agents", "register-agents", "public", AISHA,
      "TALISPROS™  ·  AGENTEN", ["Registrieren Sie", "Ihre", "Agenten"], ["Root Account™", "Derivative Account™"]))
 add("/talispros/start/developer", "start-developer", "public", TOWNS,
     ("Developers and Builders: Own Your Market | Talispros™",
-     "Claim a market with a Root Account™. Deploy up to 100 Derivative Accounts, enable SPLITS and establish your organisation inside Talismaps™.",
-     "TALISPROS™  ·  DEVELOPER / BUILDER", ["Own your", "market", "territory"], ["Root Account™", "SPLITS", "Talismaps™"]),
+     "Claim a market with a Root Account™. Deploy up to 100 Derivative Accounts, enable Lease-to-Own and establish your organisation inside Talismaps™.",
+     "TALISPROS™  ·  DEVELOPER / BUILDER", ["Own your", "market", "territory"], ["Root Account™", "Lease-to-Own", "Talismaps™"]),
     ("Bauträger: Ihr eigenes Marktgebiet | Talispros™",
-     "Sichern Sie einen Markt mit einem Root Account™. Bis zu 100 Derivative Accounts, SPLITS und Ihre Organisation in Talismaps™.",
-     "TALISPROS™  ·  BAUTRÄGER", ["Ihr eigenes", "Markt-", "gebiet"], ["Root Account™", "SPLITS", "Talismaps™"]))
+     "Sichern Sie einen Markt mit einem Root Account™. Bis zu 100 Derivative Accounts, Mietkauf und Ihre Organisation in Talismaps™.",
+     "TALISPROS™  ·  BAUTRÄGER", ["Ihr eigenes", "Markt-", "gebiet"], ["Root Account™", "Mietkauf", "Talismaps™"]))
 add("/talispros/start/investor", "start-investor", "public", MAP,
     ("Real Estate Investors: Portfolio Presence | Talispros™",
      "Manage multiple properties under one Derivative Account™. Generate FAST Codes for each asset and track them all on Talismaps™.",

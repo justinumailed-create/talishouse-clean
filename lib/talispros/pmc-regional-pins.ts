@@ -32,7 +32,7 @@ export const PMC_MAP_VIEWPORT = {
 } as const;
 
 export const PMC_ACCOUNT_BULLETS = [
-  "Root Accounts can register Derivative Accounts, which are advertising and SPLITS enabled — you get a cut.",
+  "Root Accounts can register Derivative Accounts, which are advertising and Lease-to-Own enabled — you get a cut.",
   "Derivative Accounts promote pins and can earn advertising revenue.",
   "Adpro Accounts formalize referral and co-promotion networks.",
 ] as const;

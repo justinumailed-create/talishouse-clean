@@ -42,7 +42,7 @@ export default function RegisterAgentsClient({
         <p className="mt-4 text-sm leading-relaxed text-neutral-500 sm:text-base">
           Payment confirmed. Invite licensed professionals under your Root
           Account™ as Derivative Accounts™ so they can advertise, qualify for
-          SPLITS, and operate on your market.
+          Lease-to-Own, and operate on your market.
         </p>
 
         {fastCode ? (

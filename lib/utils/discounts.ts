@@ -105,7 +105,7 @@ export const DISCOUNT_CODES: Record<string, DiscountRule> = {
     code: "SPLITS",
     type: "percentage",
     value: 0.20,
-    label: "Wholesale SPLITS",
+    label: "Wholesale Lease-to-Own",
     description: "20% wholesale procurement margin",
     stackable: false,
     validPaymentModes: ["full", "deposit"],

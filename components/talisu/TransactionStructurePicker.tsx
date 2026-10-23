@@ -13,7 +13,7 @@ const METAL_BG = [
 
 /**
  * Ralf (Oct 18): the home page EXPLORE TRANSACTION STRUCTURES section
- * (Conventional, SPLITS, Fractionalization, Tokenization) resized for the
+ * (Conventional, Lease-to-Own, Fractionalization, Tokenization) resized for the
  * working pages (/talisu/discuss, Webster /talisu/engage). The explanation
  * opens BELOW the buttons, inline (no overlay), so the page never bleeds past
  * the bottom of the screen.
