@@ -58,7 +58,9 @@ export default function LanguageSwitch({
               lang={code}
               onClick={() => choose(code)}
               aria-pressed={active}
-              aria-label={code === "en" ? t.langSwitch.enName : t.langSwitch.deName}
+              aria-label={
+                code === "en" ? t.langSwitch.enName : t.langSwitch.deName
+              }
               title={code === "en" ? t.langSwitch.enName : t.langSwitch.deName}
               className={`rounded transition ${
                 size === "touch"
@@ -67,7 +69,9 @@ export default function LanguageSwitch({
               } ${
                 active
                   ? "bg-white text-[#046BD9]"
-                  : "text-white/90 hover:bg-white/15 hover:text-white"
+                  : size === "touch"
+                    ? "text-white hover:bg-white/15"
+                    : "text-white/90 hover:bg-white/15 hover:text-white"
               }`}
             >
               {code === "en" ? t.langSwitch.en : t.langSwitch.de}

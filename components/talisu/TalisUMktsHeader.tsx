@@ -68,8 +68,10 @@ function talisuMenuLabel(t: Dictionary, label: string): string {
 
 const MOBILE_LINK_CLASS =
   "flex min-h-11 items-center rounded-md px-3 text-[15px] font-medium text-white transition";
+// Rendered as a div (not <p>) so the global unlayered `p { color }` rule in
+// globals.css cannot override the light label colour on the blue panel.
 const MOBILE_GROUP_CLASS =
-  "mt-2 border-t border-white/25 px-3 pb-1 pt-2.5 text-[11px] font-semibold uppercase tracking-wider text-white/70";
+  "mt-2 border-t border-white/25 px-3 pb-1 pt-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-white";
 
 export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 
@@ -771,7 +773,13 @@ export default function TalisUMktsHeader({
 
               {claimedMapsite && dashboardHasMenu ? (
                 <>
-                  <p className={MOBILE_GROUP_CLASS}>{t.nav.dashboard}</p>
+                  <div
+                    role="heading"
+                    aria-level={2}
+                    className={MOBILE_GROUP_CLASS}
+                  >
+                    {t.nav.dashboard}
+                  </div>
                   {dashboardMenuItems!.map((menuItem) => (
                     <button
                       key={menuItem.id}
@@ -790,13 +798,13 @@ export default function TalisUMktsHeader({
                 </>
               ) : claimedMapsite && !dashboardUnlocked ? (
                 <div className="my-1 rounded-lg border border-white/20 p-3">
-                  <p className="flex items-center gap-1.5 text-[14px] font-semibold">
+                  <div className="flex items-center gap-1.5 text-[14px] font-semibold text-white">
                     <LockIcon className="h-3.5 w-3.5 shrink-0" />
                     {t.nav.dashboardLocked.title}
-                  </p>
-                  <p className="mt-1.5 text-[13px] leading-snug text-white/90">
+                  </div>
+                  <div className="mt-1.5 text-[13px] leading-snug text-white">
                     {t.nav.dashboardLocked.body}
-                  </p>
+                  </div>
                   <a
                     href={registerHref}
                     onClick={() => setMobileOpen(false)}
@@ -807,7 +815,13 @@ export default function TalisUMktsHeader({
                 </div>
               ) : claimedMapsite ? null : (
                 <>
-                  <p className={MOBILE_GROUP_CLASS}>{t.nav.register}</p>
+                  <div
+                    role="heading"
+                    aria-level={2}
+                    className={MOBILE_GROUP_CLASS}
+                  >
+                    {t.nav.register}
+                  </div>
                   {TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((item) =>
                     renderMobileLink(
                       item.href,
@@ -821,7 +835,9 @@ export default function TalisUMktsHeader({
                 </>
               )}
 
-              <p className={MOBILE_GROUP_CLASS}>{t.nav.talisu}</p>
+              <div role="heading" aria-level={2} className={MOBILE_GROUP_CLASS}>
+                {t.nav.talisu}
+              </div>
               {TALISU_MKTS_HEADER_DROPDOWN.map((item) => {
                 const active =
                   pathname === item.href ||
@@ -851,7 +867,7 @@ export default function TalisUMktsHeader({
               })}
 
               <div className="mt-2 flex items-center justify-between border-t border-white/25 pt-2">
-                <span className="text-[13px] text-white/80">
+                <span className="text-[13px] font-medium text-white">
                   {t.langSwitch.groupLabel}
                 </span>
                 <LanguageSwitch size="touch" />
