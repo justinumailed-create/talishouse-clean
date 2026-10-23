@@ -532,6 +532,18 @@
     width: 100%;
   }
 
+  /* Phones: let the one-line headline wrap instead of running off both edges. */
+  .product-flipbook__headline {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .product-flipbook__turn {
+    min-height: 44px;
+    min-width: 5.5rem;
+  }
+
   .product-flipbook__book {
     width: min(100%, 40rem, calc((100dvh - 18rem) * 16 / 9));
   }

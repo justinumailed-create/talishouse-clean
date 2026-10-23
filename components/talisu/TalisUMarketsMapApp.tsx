@@ -139,9 +139,7 @@ function MarketsChrome({
   const lastFocusedRef = useRef<string | null>(null);
   const mapRootRef = useRef<HTMLDivElement>(null);
   const cardBodyRef = useRef<HTMLDivElement>(null);
-  const [placement, setPlacement] = useState<MktsPinCardPlacement | null>(
-    null,
-  );
+  const [placement, setPlacement] = useState<MktsPinCardPlacement | null>(null);
   const [cardHeight, setCardHeight] = useState(MKTS_PIN_CARD_EST_HEIGHT_PX);
 
   const selectedPin = useMemo(
@@ -189,12 +187,7 @@ function MarketsChrome({
     });
     lastFocusedRef.current = selectedPinId;
     recenterOnSelectRef.current = false;
-  }, [
-    selectedPinId,
-    beginFocusGuard,
-    recenterOnSelectRef,
-    setViewport,
-  ]);
+  }, [selectedPinId, beginFocusGuard, recenterOnSelectRef, setViewport]);
 
   const syncPlacement = useCallback(() => {
     const root = mapRootRef.current;
@@ -203,9 +196,9 @@ function MarketsChrome({
     const rootRect = root.getBoundingClientRect();
     const marker =
       root.querySelector<HTMLElement>(".talismaps-pin-icon--highlighted") ??
-      root.querySelector<HTMLElement>(".talismaps-pin--selected")?.closest(
-        ".talismaps-pin-icon",
-      ) ??
+      root
+        .querySelector<HTMLElement>(".talismaps-pin--selected")
+        ?.closest(".talismaps-pin-icon") ??
       null;
 
     let pinX = rootRect.width / 2;
@@ -223,10 +216,7 @@ function MarketsChrome({
 
     const measuredHeight =
       cardBodyRef.current?.getBoundingClientRect().height ?? cardHeight;
-    if (
-      measuredHeight > 0 &&
-      Math.abs(measuredHeight - cardHeight) > 1
-    ) {
+    if (measuredHeight > 0 && Math.abs(measuredHeight - cardHeight) > 1) {
       setCardHeight(measuredHeight);
     }
 
@@ -291,28 +281,31 @@ function MarketsChrome({
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col bg-neutral-900">
-      <div
-        ref={mapRootRef}
-        className="relative min-h-0 flex-1 overflow-hidden"
-      >
-        <MapEngineCanvas className="h-full w-full" />
+      <div className="relative flex flex-col lg:min-h-0 lg:flex-1">
+        <div
+          ref={mapRootRef}
+          className="relative h-[58dvh] min-h-[18rem] shrink-0 overflow-hidden lg:h-auto lg:min-h-0 lg:flex-1"
+        >
+          <MapEngineCanvas className="h-full w-full" />
 
+          {selectedPin && placement ? (
+            <TalisUMarketsPinCard
+              pin={selectedPin}
+              onClose={() => setSelectedPinId(null)}
+              left={placement.left}
+              top={placement.top}
+              placement={placement.placement}
+              cardBodyRef={cardBodyRef}
+            />
+          ) : null}
+        </div>
+
+        {/* lg+: floats over the map (top-left). Phones: stacks below the map. */}
         <TalisUMarketsSidebar
           pins={pins}
           selectedPinId={selectedPinId}
           onSelectPin={focusPin}
         />
-
-        {selectedPin && placement ? (
-          <TalisUMarketsPinCard
-            pin={selectedPin}
-            onClose={() => setSelectedPinId(null)}
-            left={placement.left}
-            top={placement.top}
-            placement={placement.placement}
-            cardBodyRef={cardBodyRef}
-          />
-        ) : null}
       </div>
 
       <footer className="shrink-0 border-t border-black/10 bg-white px-4 py-3 text-center text-[12px] leading-snug text-neutral-700 sm:px-6 sm:text-[13px]">

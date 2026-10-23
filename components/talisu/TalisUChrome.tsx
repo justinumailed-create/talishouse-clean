@@ -19,7 +19,9 @@ export default function TalisUChrome({
   // fit-bounds / pin sizing — only the shared blue header wraps the map app.
   if (isMkts) {
     return (
-      <div className="flex h-dvh max-h-dvh flex-col overflow-hidden bg-neutral-950 text-white">
+      // Phones: the map gets a fixed share of the screen and the PMC card
+      // stacks below it (page scrolls). lg+: full-bleed, no page scroll.
+      <div className="flex min-h-dvh flex-col bg-neutral-950 text-white lg:h-dvh lg:max-h-dvh lg:overflow-hidden">
         <TalisUMktsHeader />
         <main className="flex min-h-0 flex-1 flex-col">{children}</main>
       </div>

@@ -42,7 +42,7 @@ export default function TalisUMarketsSidebar({ pins }: Props) {
 
   return (
     <aside
-      className="pointer-events-none absolute left-2 top-2 z-20 flex max-h-[calc(100%-1rem)] w-[min(92vw,20.5rem)] flex-col sm:left-3 sm:top-3 sm:max-h-[calc(100%-1.5rem)]"
+      className="relative z-20 flex w-full flex-col p-3 lg:pointer-events-none lg:absolute lg:left-3 lg:top-3 lg:max-h-[calc(100%-1.5rem)] lg:w-[min(92vw,20.5rem)] lg:p-0"
       data-testid="mkts-sidebar"
     >
       <div className="pointer-events-auto flex min-h-0 flex-col overflow-y-auto rounded-2xl bg-white shadow-[0_12px_36px_rgba(0,0,0,0.18)] ring-1 ring-black/5">

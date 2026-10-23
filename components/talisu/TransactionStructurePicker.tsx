@@ -59,6 +59,7 @@ export default function TransactionStructurePicker({
                 aria-expanded={isOpen}
                 aria-controls={isOpen ? `${baseId}-panel-${section.id}` : undefined}
                 data-testid={`${testId}-${section.id}`}
+                data-structure-id={section.id}
                 onClick={() =>
                   onOpenChange(isOpen && !requireSelection ? null : section.id)
                 }
