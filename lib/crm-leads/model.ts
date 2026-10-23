@@ -10,8 +10,12 @@
 export const LEAD_POSITIONS = ["broker", "acting_broker", "managing_broker", "team_leader"] as const;
 export type LeadPosition = (typeof LEAD_POSITIONS)[number];
 
+/** Stored countries. USA remains so existing rows can be read; it is not offered for new leads. */
 export const LEAD_COUNTRIES = ["Canada", "USA"] as const;
 export type LeadCountry = (typeof LEAD_COUNTRIES)[number];
+
+/** Countries an agent can choose when creating or editing a lead. */
+export const LEAD_COUNTRY_CHOICES = ["Canada"] as const;
 
 export const LEAD_STATUSES = ["new", "contacted", "replied", "registered", "not_interested"] as const;
 export type LeadStatus = (typeof LEAD_STATUSES)[number];
@@ -305,7 +309,10 @@ function optionalPhone(raw: string, field: "cell_phone" | "office_phone", errors
   return v.slice(0, 40);
 }
 
-export function validateLeadValues(values: Partial<Record<LeadField, string>>): {
+export function validateLeadValues(
+  values: Partial<Record<LeadField, string>>,
+  options?: { storedCountry?: string | null },
+): {
   lead: NormalizedLead | null;
   errors: LeadIssue[];
 } {
@@ -326,7 +333,11 @@ export function validateLeadValues(values: Partial<Record<LeadField, string>>): 
   const position = normalizePosition(values.position);
   if (!position) errors.push({ code: "position" });
   const country = normalizeCountry(values.country);
-  if (!country) errors.push({ code: "country" });
+  const storedCountry = normalizeCountry(options?.storedCountry ?? "");
+  // New leads are Canada only. An existing USA row may keep that country.
+  if (!country || (country !== "Canada" && country !== storedCountry)) {
+    errors.push({ code: "country" });
+  }
   const status = normalizeStatus(values.status);
   if (!status) errors.push({ code: "status" });
 

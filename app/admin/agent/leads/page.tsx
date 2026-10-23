@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import ExportLeadsButton from "@/components/admin/crm/ExportLeadsButton";
 import { PageHeader, cardClass, fieldClass, primaryButton, secondaryButton } from "@/components/admin/agents/ui";
 import { countryLabel, crmCopy, fill, positionLabel, statusLabel } from "@/lib/crm-leads/copy";
-import { LEAD_COUNTRIES, LEAD_SORTS, LEAD_STATUSES } from "@/lib/crm-leads/model";
+import { LEAD_COUNTRY_CHOICES, LEAD_SORTS, LEAD_STATUSES, type LeadCountry } from "@/lib/crm-leads/model";
 import { PAGE_SIZE, listBrokerageLeads, parseLeadFilters, requireCrmActor, type BrokerageLead } from "@/lib/crm-leads/server";
 import { getLocale } from "@/lib/i18n/server";
 import { pageMetadata } from "@/lib/seo/page-metadata";
@@ -107,7 +107,9 @@ export default async function BrokerageLeadsPage({
           <span className="mb-1.5 block text-xs font-medium">{copy.country}</span>
           <select name="country" defaultValue={filters.country} className={selectClass}>
             <option value="">{copy.any}</option>
-            {LEAD_COUNTRIES.map((country) => <option key={country} value={country}>{countryLabel(copy, country)}</option>)}
+            {(filters.country === "USA" ? (["USA", ...LEAD_COUNTRY_CHOICES] as const) : LEAD_COUNTRY_CHOICES).map((country: LeadCountry) => (
+              <option key={country} value={country}>{countryLabel(copy, country)}</option>
+            ))}
           </select>
         </label>
         <label className="text-sm text-neutral-700">

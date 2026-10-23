@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import type { TalisUMktsPin } from "@/lib/talisu/markets-pins";
 import { useT } from "@/lib/i18n/client";
 import { ROUTES } from "@/lib/routes";
-import { TALISWEBS_US_MARKETS_URL } from "@/lib/talisu/talisu-links";
 
 const NAV_LINK =
   "inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[11.5px] font-semibold tracking-tight ring-1 transition-colors";
@@ -18,9 +17,8 @@ type Props = {
 
 /**
  * Markets left panel (Ralf, Oct 17 2026): PMC intro + "Do More" headline.
- * The Canada market list was removed: every PIN is live, so visitors click a
- * PIN on the map to get where they are going (the Taliswebs USA list would
- * not fit without a scroll bar anyway). "Do More" stays as a headline with
+ * The market list was removed: every PIN is live, so visitors click a PIN on
+ * the map to get where they are going. "Do More" stays as a headline with
  * its write-up, not as a navigation item.
  */
 export default function TalisUMarketsSidebar({ pins }: Props) {
@@ -64,9 +62,6 @@ export default function TalisUMarketsSidebar({ pins }: Props) {
               </li>
             ))}
           </ul>
-          {/* Ralf (Oct 18): Canada (this site) / USA (Taliswebs) / Do More
-              (Catalogue). Plain anchors: same window, full reload when the
-              site changes. */}
           <nav className="mt-3 flex flex-wrap gap-1.5" data-testid="mkts-site-links">
             <a
               href={ROUTES.TALISU_MARKETS}
@@ -75,13 +70,6 @@ export default function TalisUMarketsSidebar({ pins }: Props) {
               data-testid="mkts-link-canada"
             >
               {m.canadaMarkets}
-            </a>
-            <a
-              href={TALISWEBS_US_MARKETS_URL}
-              className={`${NAV_LINK} bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-100`}
-              data-testid="mkts-link-usa"
-            >
-              {m.usaMarkets}
             </a>
             <a
               href={ROUTES.CATALOG}

@@ -6,10 +6,8 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { resolveVisitorFastCode } from "@/lib/talisu/pmc-gate";
 import PmcStepper from "@/components/talisu/pmc/PmcStepper";
 import PmcFooter from "@/components/talisu/pmc/PmcFooter";
-import IframeLink from "@/components/talisu/pmc/IframeLink";
 import {
   PMC_PATHS,
-  TALISWEBS_US_URL,
   normalizeFastCodeParam,
   pmcHref,
 } from "@/lib/talispros/mapsite-contract";
@@ -57,13 +55,6 @@ export default async function TalisprosPitchPage({ searchParams }: Props) {
           <PmcStepper current={1} labels={t.steps} fastCode={fastCode} tone="dark" />
           <div className="mt-10 flex flex-wrap items-center gap-2 text-[12px] font-semibold sm:mt-14">
             <span className="rounded-full bg-white px-3 py-1 text-[#06182f]">🇨🇦 {t.regionCanada} · Talispros</span>
-            <IframeLink
-              url={TALISWEBS_US_URL}
-              title="Taliswebs (United States)"
-              className="rounded-full border border-white/30 px-3 py-1 text-white/80 hover:bg-white/10"
-            >
-              🇺🇸 {t.regionUs} · Taliswebs ↗
-            </IframeLink>
           </div>
           <p className="mt-6 text-sm font-bold uppercase tracking-[0.25em] text-[#7cc0ff]">{t.pitch.kicker}</p>
           <h1 className="mt-3 text-5xl font-black leading-[0.95] tracking-tight sm:text-7xl lg:text-8xl">

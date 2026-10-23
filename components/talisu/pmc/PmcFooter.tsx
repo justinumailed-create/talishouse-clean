@@ -1,10 +1,9 @@
 import Link from "next/link";
-import IframeLink from "@/components/talisu/pmc/IframeLink";
-import { PMC_PATHS, TALISWEBS_US_URL, pmcHref } from "@/lib/talispros/mapsite-contract";
+import { PMC_PATHS, pmcHref } from "@/lib/talispros/mapsite-contract";
 
 /**
  * Footer on every PMC page: optional Back/Next, ToS + Privacy Policy links,
- * and the Canada (Talispros) / US (Taliswebs) region note.
+ * and the Canada region note.
  */
 export default function PmcFooter({
   labels,
@@ -17,7 +16,6 @@ export default function PmcFooter({
     privacy: string;
     footerNote: string;
     regionCanadaNote: string;
-    regionUsNote: string;
     back: string;
     englishOnly?: string;
   };
@@ -64,12 +62,7 @@ export default function PmcFooter({
             {labels.privacy}
           </Link>
         </div>
-        <p>
-          🇨🇦 {labels.regionCanadaNote}{" "}
-          <IframeLink url={TALISWEBS_US_URL} title="Taliswebs (United States)" className="text-[#0069CF] hover:underline">
-            🇺🇸 {labels.regionUsNote}
-          </IframeLink>
-        </p>
+        <p>🇨🇦 {labels.regionCanadaNote}</p>
         {labels.englishOnly ? <p className="text-[12px] text-neutral-400">{labels.englishOnly}</p> : null}
         <p className="text-[12px] text-neutral-400">{labels.footerNote}</p>
       </footer>

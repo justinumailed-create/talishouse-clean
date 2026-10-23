@@ -5,6 +5,7 @@ import { crmCopy } from "@/lib/crm-leads/copy";
 import {
   IMPORT_ROW_LIMIT,
   canDeleteLeads,
+  canEditLead,
   toCsv,
   validateLeadValues,
   type LeadField,
@@ -15,6 +16,7 @@ import {
   createBrokerageLead,
   deleteBrokerageLead,
   exportBrokerageLeads,
+  getBrokerageLead,
   importBrokerageLeads,
   parseLeadFilters,
   previewLeadImport,
@@ -40,7 +42,14 @@ export async function saveLeadAction(
   const copy = crmCopy(await getLocale());
   const actor = await requireCrmActor();
   if (!actor) return { ok: false, error: copy.unauthorized, issues: [] };
-  const parsed = validateLeadValues(values);
+  let storedCountry: string | null = null;
+  if (id) {
+    const existing = await getBrokerageLead(actor, id);
+    if (!existing) return { ok: false, error: copy.notFound, issues: [] };
+    if (!canEditLead(actor, existing)) return { ok: false, error: copy.editDenied, issues: [] };
+    storedCountry = existing.country;
+  }
+  const parsed = validateLeadValues(values, { storedCountry });
   if (!parsed.lead) return { ok: false, error: copy.genericError, issues: parsed.errors };
   if (!id) {
     const created = await createBrokerageLead(actor, parsed.lead, "create");

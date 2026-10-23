@@ -25,7 +25,6 @@ export default function MapSitePmcSidebar({
 }: MapSitePmcSidebarProps) {
   const [query, setQuery] = useState("");
   const [canadaOpen, setCanadaOpen] = useState(true);
-  const [usaOpen, setUsaOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -39,15 +38,10 @@ export default function MapSitePmcSidebar({
   }, [pins, query]);
 
   const canadaPins = pmcPinsByRegionGroup(filtered, "canada");
-  const usaPins = pmcPinsByRegionGroup(filtered, "usa");
   const canadaRootPins = canadaPins.filter(
     (pin) => pmcPinMarketType(pin) === "root"
   );
   const canadaCorporatePins = canadaPins.filter(
-    (pin) => pmcPinMarketType(pin) === "corporate"
-  );
-  const usaRootPins = usaPins.filter((pin) => pmcPinMarketType(pin) === "root");
-  const usaCorporatePins = usaPins.filter(
     (pin) => pmcPinMarketType(pin) === "corporate"
   );
 
@@ -103,16 +97,6 @@ export default function MapSitePmcSidebar({
           >
             Root Accounts: Canada
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setUsaOpen(true);
-              onFocusRegion("usa");
-            }}
-            className="block w-full rounded-md px-1 py-2 text-left text-[14px] font-medium text-sky-700 underline-offset-2 hover:underline sm:py-1 sm:text-[13px]"
-          >
-            Root Accounts: USA
-          </button>
         </div>
 
         <div className="mt-2 space-y-1">
@@ -144,39 +128,6 @@ export default function MapSitePmcSidebar({
                 />
               ))}
               {canadaCorporatePins.length === 0 ? (
-                <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
-              ) : null}
-            </RegionSubfolder>
-          </RegionFolder>
-
-          <RegionFolder
-            label="USA"
-            open={usaOpen}
-            onToggle={() => setUsaOpen((current) => !current)}
-          >
-            <RegionSubfolder label="Root Markets">
-              {usaRootPins.map((pin) => (
-                <RegionRow
-                  key={pin.id}
-                  label={pin.label}
-                  selected={selectedPinId === pin.id}
-                  onClick={() => onSelectPin(pin.id)}
-                />
-              ))}
-              {usaRootPins.length === 0 ? (
-                <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
-              ) : null}
-            </RegionSubfolder>
-            <RegionSubfolder label="Corporate Markets">
-              {usaCorporatePins.map((pin) => (
-                <RegionRow
-                  key={pin.id}
-                  label={pin.label}
-                  selected={selectedPinId === pin.id}
-                  onClick={() => onSelectPin(pin.id)}
-                />
-              ))}
-              {usaCorporatePins.length === 0 ? (
                 <p className="px-2 py-1 text-[12px] text-neutral-500">No matches</p>
               ) : null}
             </RegionSubfolder>

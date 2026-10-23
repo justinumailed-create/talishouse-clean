@@ -101,8 +101,8 @@ export const TALISU_TOKENIZATION_ESSAY = {
       id: "securities",
       title: "A major legal issue: securities",
       paragraphs: [
-        "Where purchasers expect profits from the efforts of others, tokens may be treated as securities under frameworks such as the Howey test (U.S.) and comparable analysis elsewhere.",
-        "That can imply purchaser limits, qualification or exemption pathways, disclosure, resale rules, KYC/AML, and transfer restrictions. Requirements in Canada and the United States differ — and neither is covered by a marketing summary.",
+        "Where purchasers expect profits from the efforts of others, tokens may be treated as securities under Canadian securities law.",
+        "That can imply purchaser limits, qualification or exemption pathways, disclosure, resale rules, KYC/AML, and transfer restrictions. Those Canadian requirements are not covered by a marketing summary.",
       ],
     },
     {
