@@ -60,6 +60,8 @@ export const en = {
     dashboard: "Dashboard",
     talisu: "TalisU",
     menuBack: "← Menu",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
     registerMenu: {
       mapsite: "Mapsite",
       product: "Product Options",

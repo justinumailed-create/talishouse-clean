@@ -8,6 +8,7 @@ import {
   TALISU_MKTS_HEADER_BLUE,
   TALISU_MKTS_HEADER_DROPDOWN,
   TALISU_MKTS_HEADER_NAV,
+  TALISU_MKTS_HEADER_REGISTER_DROPDOWN,
 } from "@/lib/talisu/markets-pins";
 import { ROUTES } from "@/lib/routes";
 import {
@@ -65,6 +66,11 @@ function talisuMenuLabel(t: Dictionary, label: string): string {
   }
 }
 
+const MOBILE_LINK_CLASS =
+  "flex min-h-11 items-center rounded-md px-3 text-[15px] font-medium text-white transition";
+const MOBILE_GROUP_CLASS =
+  "mt-2 border-t border-white/25 px-3 pb-1 pt-2.5 text-[11px] font-semibold uppercase tracking-wider text-white/70";
+
 export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 
 export type TalisUMktsHeaderProps = {
@@ -92,12 +98,7 @@ export type TalisUMktsHeaderProps = {
 
 function LockIcon({ className }: { className?: string }) {
   return (
-    <svg
-      aria-hidden
-      viewBox="0 0 16 16"
-      className={className}
-      fill="none"
-    >
+    <svg aria-hidden viewBox="0 0 16 16" className={className} fill="none">
       <path
         d="M4.5 7V5.5a3.5 3.5 0 0 1 7 0V7"
         stroke="currentColor"
@@ -142,6 +143,11 @@ export default function TalisUMktsHeader({
   const menuId = useId();
   const promptTitleId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
+  // Mobile (< lg): one compact bar; every nav link + EN/DE lives in this menu.
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileMenuId = useId();
+  const mobilePanelRef = useRef<HTMLDivElement>(null);
+  const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const promptRef = useRef<HTMLDivElement>(null);
 
   const claimedMapsite = variant === "claimed-mapsite";
@@ -191,6 +197,8 @@ export default function TalisUMktsHeader({
       setKbNext(next);
       setPanel("kb-unlock");
       setOpen(true);
+      // Desktop nav is hidden on phones: show the unlock form in the menu.
+      setMobileOpen(true);
     }
     window.addEventListener(TALISU_KB_OPEN_UNLOCK_EVENT, onOpenUnlock);
     return () => {
@@ -201,7 +209,11 @@ export default function TalisUMktsHeader({
   useEffect(() => {
     if (!open) return;
     function onPointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (
+        !rootRef.current?.contains(target) &&
+        !mobilePanelRef.current?.contains(target)
+      ) {
         setOpen(false);
         setPanel("menu");
       }
@@ -219,6 +231,42 @@ export default function TalisUMktsHeader({
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
+
+  // Close the mobile menu on navigation.
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    function onPointerDown(event: MouseEvent | TouchEvent) {
+      const target = event.target as Node;
+      if (
+        !mobilePanelRef.current?.contains(target) &&
+        !mobileButtonRef.current?.contains(target)
+      ) {
+        setMobileOpen(false);
+        setOpen(false);
+        setPanel("menu");
+      }
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setMobileOpen(false);
+        setOpen(false);
+        setPanel("menu");
+        mobileButtonRef.current?.focus();
+      }
+    }
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("touchstart", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("touchstart", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
     if (!registerPromptOpen) return;
@@ -276,11 +324,13 @@ export default function TalisUMktsHeader({
     // and opens the FAST Code unlock only for visitors.
     setOpen(false);
     setPanel("menu");
+    setMobileOpen(false);
     router.push(TALISU_KB_PATH);
   }
 
   function handleKbUnlockSuccess() {
     setKbUnlocked(true);
+    setMobileOpen(false);
     setOpen(false);
     setPanel("menu");
     const destination = kbNext || TALISU_KB_PATH;
@@ -302,6 +352,33 @@ export default function TalisUMktsHeader({
       if (!next) setPanel("menu");
       return next;
     });
+  }
+
+  function isNavActive(item: (typeof TALISU_MKTS_HEADER_NAV)[number]) {
+    return item.label === "Catalogue" || item.label === "Home"
+      ? pathname === item.href
+      : pathname === item.href || pathname.startsWith(`${item.href}/`);
+  }
+
+  function renderMobileLink(
+    href: string,
+    label: string,
+    active: boolean,
+    indent = false,
+  ) {
+    return (
+      <Link
+        key={`m-${href}`}
+        href={href}
+        aria-current={active ? "page" : undefined}
+        onClick={() => setMobileOpen(false)}
+        className={`${MOBILE_LINK_CLASS} ${indent ? "pl-6" : ""} ${
+          active ? "bg-white/20" : "hover:bg-white/15"
+        }`}
+      >
+        {label}
+      </Link>
+    );
   }
 
   function renderNavLink(item: (typeof TALISU_MKTS_HEADER_NAV)[number]) {
@@ -372,9 +449,7 @@ export default function TalisUMktsHeader({
             type="button"
             onClick={handleDashboardClick}
             aria-haspopup={dashboardUnlocked ? undefined : "dialog"}
-            aria-expanded={
-              dashboardUnlocked ? undefined : registerPromptOpen
-            }
+            aria-expanded={dashboardUnlocked ? undefined : registerPromptOpen}
             className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
               registerPromptOpen
                 ? "bg-white/20 text-white"
@@ -427,9 +502,7 @@ export default function TalisUMktsHeader({
         key={`${item.label}-${item.href}`}
         href={item.href}
         className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
-          active
-            ? "bg-white/20 text-white"
-            : "text-white hover:bg-white/15"
+          active ? "bg-white/20 text-white" : "text-white hover:bg-white/15"
         }`}
       >
         {navLabel(t, item.label)}
@@ -439,10 +512,11 @@ export default function TalisUMktsHeader({
 
   return (
     <header
+      data-testid="site-header"
       className="talisu-no-print sticky top-0 z-40 shrink-0 font-sans text-white shadow-sm print:hidden"
       style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
     >
-      <div className="mx-auto flex max-w-[1920px] flex-wrap items-center justify-between gap-3 px-3 py-2.5 pb-3 sm:px-5 sm:pb-3.5">
+      <div className="mx-auto flex max-w-[1920px] flex-nowrap items-center justify-between gap-3 px-3 py-2 sm:px-5 lg:flex-wrap lg:py-2.5 lg:pb-3.5">
         <div className="flex min-w-0 items-center gap-2.5">
           <Link href="/" className="shrink-0 self-start">
             <Image
@@ -457,36 +531,40 @@ export default function TalisUMktsHeader({
           <TalisBrandMark tagline={t.nav.tagline} />
         </div>
 
-        <nav className="flex flex-wrap items-center justify-end gap-1.5 sm:gap-2">
+        <nav className="hidden flex-wrap items-center justify-end gap-1.5 sm:gap-2 lg:flex">
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Home").map(
             (item) => renderNavLink(item),
           )}
-          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Markets").map(
-            (item) => renderNavLink(item),
-          )}
+          {TALISU_MKTS_HEADER_NAV.filter(
+            (item) => item.label === "Markets",
+          ).map((item) => renderNavLink(item))}
           {/* Mapsites: direct link to the Demo Mapsite page (FAST Code card lives there). */}
           <Link
             href={DEMO_MAPSITE_BUILD_PATH}
             data-testid="nav-mapsites-link"
             className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
-              mapsitesActive ? "bg-white/20 text-white" : "text-white hover:bg-white/15"
+              mapsitesActive
+                ? "bg-white/20 text-white"
+                : "text-white hover:bg-white/15"
             }`}
           >
             {t.nav.mapsites}
           </Link>
-          {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Catalogue").map(
-            (item) => renderNavLink(item),
-          )}
+          {TALISU_MKTS_HEADER_NAV.filter(
+            (item) => item.label === "Catalogue",
+          ).map((item) => renderNavLink(item))}
           {/* Claimed Mapsites: the Dashboard lives on the left Marketing card;
               the PMC sequence (Talispros → Media Directory → Contract) lives in TalisU. */}
           {/* Paid Mapsite (real activation payment): never show Register. */}
-          {claimedMapsite && dashboardUnlocked && !dashboardHasMenu
-            ? null
-            : claimedMapsite && dashboardHasMenu
-            ? TALISU_MKTS_HEADER_NAV.filter(
-                (item) => item.label === "Register",
-              ).map((item) => renderNavLink(item))
-            : <RegisterNavDropdown />}
+          {claimedMapsite &&
+          dashboardUnlocked &&
+          !dashboardHasMenu ? null : claimedMapsite && dashboardHasMenu ? (
+            TALISU_MKTS_HEADER_NAV.filter(
+              (item) => item.label === "Register",
+            ).map((item) => renderNavLink(item))
+          ) : (
+            <RegisterNavDropdown />
+          )}
 
           <span
             aria-hidden
@@ -609,7 +687,179 @@ export default function TalisUMktsHeader({
 
           <LanguageSwitch className="ml-0.5" />
         </nav>
+        {/* Mobile (< lg): single compact bar — menu button opens every nav link + EN/DE. */}
+        <button
+          ref={mobileButtonRef}
+          type="button"
+          data-testid="mobile-menu-button"
+          aria-expanded={mobileOpen}
+          aria-controls={mobileMenuId}
+          aria-label={mobileOpen ? t.nav.closeMenu : t.nav.openMenu}
+          onClick={() => setMobileOpen((value) => !value)}
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md text-white transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white lg:hidden"
+        >
+          <svg aria-hidden viewBox="0 0 24 24" className="h-6 w-6" fill="none">
+            {mobileOpen ? (
+              <path
+                d="M6 6l12 12M18 6 6 18"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            ) : (
+              <path
+                d="M4 7h16M4 12h16M4 17h16"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+              />
+            )}
+          </svg>
+        </button>
       </div>
+
+      {mobileOpen ? (
+        <div
+          ref={mobilePanelRef}
+          id={mobileMenuId}
+          data-testid="mobile-menu-panel"
+          className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto overscroll-contain border-t border-white/20 px-3 pt-2 shadow-lg lg:hidden"
+          style={{
+            backgroundColor: TALISU_MKTS_HEADER_BLUE,
+            paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+          }}
+        >
+          {open && panel === "kb-unlock" ? (
+            <div className="rounded-2xl bg-white p-4 text-neutral-900">
+              <button
+                type="button"
+                className="mb-3 inline-flex min-h-11 items-center text-[13px] font-medium text-neutral-500 transition hover:text-neutral-800"
+                onClick={() => setPanel("menu")}
+              >
+                {t.nav.menuBack}
+              </button>
+              <TalisUKbUnlockForm
+                variant="navbar"
+                onSuccess={handleKbUnlockSuccess}
+              />
+            </div>
+          ) : (
+            <nav aria-label={t.nav.talisu} className="flex flex-col">
+              {TALISU_MKTS_HEADER_NAV.filter(
+                (item) => item.label === "Home" || item.label === "Markets",
+              ).map((item) =>
+                renderMobileLink(
+                  item.href,
+                  navLabel(t, item.label),
+                  isNavActive(item),
+                ),
+              )}
+              {renderMobileLink(
+                DEMO_MAPSITE_BUILD_PATH,
+                t.nav.mapsites,
+                mapsitesActive,
+              )}
+              {TALISU_MKTS_HEADER_NAV.filter(
+                (item) => item.label === "Catalogue",
+              ).map((item) =>
+                renderMobileLink(
+                  item.href,
+                  navLabel(t, item.label),
+                  isNavActive(item),
+                ),
+              )}
+
+              {claimedMapsite && dashboardHasMenu ? (
+                <>
+                  <p className={MOBILE_GROUP_CLASS}>{t.nav.dashboard}</p>
+                  {dashboardMenuItems!.map((menuItem) => (
+                    <button
+                      key={menuItem.id}
+                      type="button"
+                      onClick={() => {
+                        setMobileOpen(false);
+                        onSelectDashboardItem!(menuItem.id);
+                      }}
+                      className={`${MOBILE_LINK_CLASS} w-full text-left text-white hover:bg-white/15`}
+                    >
+                      {(t.mapsite.dashboardMenu as Record<string, string>)[
+                        menuItem.id
+                      ] ?? menuItem.label}
+                    </button>
+                  ))}
+                </>
+              ) : claimedMapsite && !dashboardUnlocked ? (
+                <div className="my-1 rounded-lg border border-white/20 p-3">
+                  <p className="flex items-center gap-1.5 text-[14px] font-semibold">
+                    <LockIcon className="h-3.5 w-3.5 shrink-0" />
+                    {t.nav.dashboardLocked.title}
+                  </p>
+                  <p className="mt-1.5 text-[13px] leading-snug text-white/90">
+                    {t.nav.dashboardLocked.body}
+                  </p>
+                  <a
+                    href={registerHref}
+                    onClick={() => setMobileOpen(false)}
+                    className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-white px-3 text-[14px] font-semibold text-[#035bb8]"
+                  >
+                    {t.nav.dashboardLocked.cta}
+                  </a>
+                </div>
+              ) : claimedMapsite ? null : (
+                <>
+                  <p className={MOBILE_GROUP_CLASS}>{t.nav.register}</p>
+                  {TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((item) =>
+                    renderMobileLink(
+                      item.href,
+                      item.href === "/talisu/reg"
+                        ? t.nav.registerMenu.mapsite
+                        : t.nav.registerMenu.product,
+                      pathname === item.href,
+                      true,
+                    ),
+                  )}
+                </>
+              )}
+
+              <p className={MOBILE_GROUP_CLASS}>{t.nav.talisu}</p>
+              {TALISU_MKTS_HEADER_DROPDOWN.map((item) => {
+                const active =
+                  pathname === item.href ||
+                  pathname.startsWith(`${item.href}/`) ||
+                  (item.href.includes("#") &&
+                    pathname === item.href.split("#")[0]);
+                if (item.href === TALISU_KB_PATH) {
+                  return (
+                    <button
+                      key={item.href}
+                      type="button"
+                      onClick={handleKbMenuClick}
+                      className={`${MOBILE_LINK_CLASS} w-full pl-6 text-left ${
+                        active ? "bg-white/20" : "hover:bg-white/15"
+                      }`}
+                    >
+                      {talisuMenuLabel(t, item.label)}
+                    </button>
+                  );
+                }
+                return renderMobileLink(
+                  item.href,
+                  talisuMenuLabel(t, item.label),
+                  active,
+                  true,
+                );
+              })}
+
+              <div className="mt-2 flex items-center justify-between border-t border-white/25 pt-2">
+                <span className="text-[13px] text-white/80">
+                  {t.langSwitch.groupLabel}
+                </span>
+                <LanguageSwitch size="touch" />
+              </div>
+            </nav>
+          )}
+        </div>
+      ) : null}
     </header>
   );
 }

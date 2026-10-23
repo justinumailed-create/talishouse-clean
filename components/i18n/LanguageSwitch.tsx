@@ -10,7 +10,14 @@ import { useLocale, useT } from "@/lib/i18n/client";
  * EN | DE switch for the blue navbar. Writes the `talis_locale` cookie,
  * updates `<html lang>`, then re-renders server components in place.
  */
-export default function LanguageSwitch({ className = "" }: { className?: string }) {
+export default function LanguageSwitch({
+  className = "",
+  size = "default",
+}: {
+  className?: string;
+  /** `touch`: 44px tap targets (mobile header menu). */
+  size?: "default" | "touch";
+}) {
   const locale = useLocale();
   const t = useT();
   const router = useRouter();
@@ -53,7 +60,11 @@ export default function LanguageSwitch({ className = "" }: { className?: string 
               aria-pressed={active}
               aria-label={code === "en" ? t.langSwitch.enName : t.langSwitch.deName}
               title={code === "en" ? t.langSwitch.enName : t.langSwitch.deName}
-              className={`rounded px-1.5 py-1 transition ${
+              className={`rounded transition ${
+                size === "touch"
+                  ? "inline-flex min-h-11 min-w-11 items-center justify-center px-3 text-[14px]"
+                  : "px-1.5 py-1"
+              } ${
                 active
                   ? "bg-white text-[#046BD9]"
                   : "text-white/90 hover:bg-white/15 hover:text-white"

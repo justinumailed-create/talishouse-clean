@@ -40,6 +40,8 @@ export const de: Dictionary = {
     dashboard: "Dashboard",
     talisu: "TalisU",
     menuBack: "← Menü",
+    openMenu: "Menü öffnen",
+    closeMenu: "Menü schließen",
     registerMenu: {
       mapsite: "Mapsite",
       product: "Produktoptionen",
