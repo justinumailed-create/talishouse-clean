@@ -9,6 +9,7 @@ import {
 } from "@/lib/admin-auth";
 import { changeOwnAgentPassword, loginAgent } from "@/lib/agent-admins";
 import { getChatOnLogin } from "@/lib/chat/server";
+import { agentChangePasswordPath, safeAgentReturnPath } from "@/lib/agent-return-path";
 
 /** Agents land in chat after sign-in unless they turned that off. */
 async function agentHomePath(agentId: string): Promise<string> {
@@ -35,7 +36,11 @@ function throttled(ip: string): boolean {
   return entry.count > MAX_PER_WINDOW;
 }
 
-export async function agentLoginAction(loginId: string, password: string): Promise<Result> {
+export async function agentLoginAction(
+  loginId: string,
+  password: string,
+  returnTo?: string | null,
+): Promise<Result> {
   const h = await headers();
   const ip = (h.get("x-forwarded-for") || h.get("x-real-ip") || "unknown").split(",")[0].trim();
   if (throttled(ip)) {
@@ -44,12 +49,18 @@ export async function agentLoginAction(loginId: string, password: string): Promi
   const result = await loginAgent(String(loginId || ""), String(password || ""));
   if (!result.ok) return result;
   await writeAgentSessionCookie(result.token);
-  return { ok: true, next: result.agent.mustChangePassword ? "/agent/change-password" : await agentHomePath(result.agent.id) };
+  // Re-validated server-side: only a same-origin /admin/agent… path is honoured.
+  const safeReturn = safeAgentReturnPath(returnTo);
+  if (result.agent.mustChangePassword) {
+    return { ok: true, next: agentChangePasswordPath(safeReturn) };
+  }
+  return { ok: true, next: safeReturn ?? (await agentHomePath(result.agent.id)) };
 }
 
 export async function agentChangePasswordAction(
   currentPassword: string,
   newPassword: string,
+  returnTo?: string | null,
 ): Promise<Result> {
   const account = await getAdminSessionAccount();
   if (!account || account.access !== "agent" || !account.agentId) {
@@ -68,7 +79,7 @@ export async function agentChangePasswordAction(
     return { ok: false, error: "Could not update your password. Please try again." };
   }
   if (!result.ok) return result;
-  return { ok: true, next: await agentHomePath(account.agentId) };
+  return { ok: true, next: safeAgentReturnPath(returnTo) ?? (await agentHomePath(account.agentId)) };
 }
 
 export async function agentLogoutAction(): Promise<void> {

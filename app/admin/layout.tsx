@@ -7,6 +7,7 @@ import { isProtectedAdminPath, isPublicAdminPath, isStandaloneAdminPath } from "
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
 import { adminHomePath } from "@/lib/admin-constants";
 import { adminMetadata } from "@/lib/seo/page-metadata";
+import { agentChangePasswordPath, agentLoginPath, isAgentPortalPath } from "@/lib/agent-return-path";
 
 export async function generateMetadata() {
   return adminMetadata();
@@ -24,11 +25,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   // Agents on a temporary password must change it before using the console.
   if (account?.access === "agent" && account.mustChangePassword && isProtectedAdminPath(pathname)) {
-    redirect("/agent/change-password");
+    redirect(agentChangePasswordPath(isAgentPortalPath(pathname) ? pathname : null));
   }
 
   if (isProtectedAdminPath(pathname) && !isStandaloneAdminPath(pathname)) {
     if (!account) {
+      // e.g. an expired agent session token that passed the edge shape check.
+      if (isAgentPortalPath(pathname)) redirect(agentLoginPath(pathname));
       redirect("/admin/login");
     }
     if (!accountCanAccessAdminPath(account, pathname)) {

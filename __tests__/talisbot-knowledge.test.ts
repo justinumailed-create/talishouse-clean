@@ -41,7 +41,11 @@ describe("TalisBOT Talispros™ knowledge", () => {
     expect(en.bot.getHelp).toBe("Share a Project Vision");
     expect("getHelpNote" in en.bot).toBe(false);
     expect(bot).not.toContain("talisbot-discuss-page");
-    expect(bot).toContain("TALISU_GLOBAL_ADMIN_URL");
+    expect(bot).not.toContain("TALISU_GLOBAL_ADMIN_URL");
+    expect(bot).not.toContain("https://talisu.com");
+    expect(bot).toMatch(
+      /<Link\s+href=\{ROUTES\.ADMIN_LOGIN\}\s+target="_blank"\s+rel="noopener noreferrer"[^>]*data-testid="talisbot-global-admin-link"/,
+    );
     expect(bot).toContain("talisuHref(TALISU_DISCUSS_PATH)");
     expect(bot).not.toContain("TALISBOT_INTEREST_OPTIONS");
     expect(bot).not.toMatch(/text-green-500|bg-green-500|bg-green-50|text-green-600/);

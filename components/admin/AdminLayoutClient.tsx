@@ -8,6 +8,7 @@ import { adminAccessLabel, adminHomePath, type AdminAccount } from "@/lib/admin-
 import { clearAdminSession } from "@/lib/fast-code";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
 import { AGENT_HEARTBEAT_MS } from "@/lib/agent-collab";
+import { agentLoginPath, isAgentPortalPath } from "@/lib/agent-return-path";
 import { getAdminNavItems, isAdminNavItemActive, type AdminNavItem } from "@/lib/admin-nav";
 import { NAV_ICON, groupAdminNav } from "./admin-nav-groups";
 import {
@@ -222,7 +223,7 @@ export default function AdminLayoutClient({
       return;
     }
     if (isProtectedAdminRoute && !serverAccount) {
-      router.replace("/admin/login");
+      router.replace(isAgentPortalPath(currentPath) ? agentLoginPath(currentPath) : "/admin/login");
       return;
     }
     if (isProtectedAdminRoute && serverAccount && !canAccessCurrentPath) {
@@ -230,6 +231,7 @@ export default function AdminLayoutClient({
     }
   }, [
     canAccessCurrentPath,
+    currentPath,
     isLoginPage,
     isProtectedAdminRoute,
     router,

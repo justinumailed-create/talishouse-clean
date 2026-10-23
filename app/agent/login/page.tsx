@@ -5,6 +5,7 @@ import AgentAuthShell from "../AgentAuthShell";
 import { AgentLoginForm } from "../AgentAuthForm";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 import { getChatOnLogin } from "@/lib/chat/server";
+import { agentChangePasswordPath, agentReturnFromSearchParams } from "@/lib/agent-return-path";
 
 export async function generateMetadata() {
   return pageMetadata("/agent/login");
@@ -12,10 +13,17 @@ export async function generateMetadata() {
 
 export const dynamic = "force-dynamic";
 
-export default async function AgentLoginPage() {
+export default async function AgentLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // Only a same-origin /admin/agent… path is ever honoured (no open redirect).
+  const returnTo = agentReturnFromSearchParams(await searchParams);
   const account = await getAdminSessionAccount();
   if (account?.access === "agent") {
-    if (account.mustChangePassword) redirect("/agent/change-password");
+    if (account.mustChangePassword) redirect(agentChangePasswordPath(returnTo));
+    if (returnTo) redirect(returnTo);
     redirect(account.agentId && (await getChatOnLogin(account.agentId)) ? "/chat" : "/admin/agent");
   }
 
@@ -32,7 +40,7 @@ export default async function AgentLoginPage() {
         </>
       }
     >
-      <AgentLoginForm />
+      <AgentLoginForm returnTo={returnTo} />
     </AgentAuthShell>
   );
 }

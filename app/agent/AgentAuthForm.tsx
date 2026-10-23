@@ -73,7 +73,7 @@ function PasswordInput(props: InputHTMLAttributes<HTMLInputElement> & { id: stri
   );
 }
 
-export function AgentLoginForm() {
+export function AgentLoginForm({ returnTo = null }: { returnTo?: string | null } = {}) {
   const router = useRouter();
   const ids = useId();
   const errorId = `${ids}-error`;
@@ -94,7 +94,7 @@ export function AgentLoginForm() {
         }
         setError(null);
         startTransition(async () => {
-          const result = await agentLoginAction(loginId, password);
+          const result = await agentLoginAction(loginId, password, returnTo);
           if (!result.ok) {
             setError(friendlyLoginError(result.error));
             setPassword("");
@@ -166,7 +166,7 @@ function RuleItem({ ok, label }: { ok: boolean; label: string }) {
   );
 }
 
-export function AgentChangePasswordForm() {
+export function AgentChangePasswordForm({ returnTo = null }: { returnTo?: string | null } = {}) {
   const ids = useId();
   const errorId = `${ids}-error`;
   const rulesId = `${ids}-rules`;
@@ -196,7 +196,7 @@ export function AgentChangePasswordForm() {
         setSaving(true);
         void (async () => {
           try {
-            const result = await agentChangePasswordAction(current, next);
+            const result = await agentChangePasswordAction(current, next, returnTo);
             if (!result || !result.ok) {
               setError(result?.error || "Could not update your password. Please try again.");
               setSaving(false);

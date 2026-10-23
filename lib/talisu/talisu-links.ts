@@ -18,9 +18,6 @@ export function talisuHref(path: string): string {
   return `${TALISU_ORIGIN}${p}`;
 }
 
-/** TalisBOT "Global Admin" → TalisU.com (kept apart from talispros admin). */
-export const TALISU_GLOBAL_ADMIN_URL = "https://talisu.com";
-
 /** "Discuss a Project without first registering" page. */
 export const TALISU_DISCUSS_PATH = "/talisu/discuss";
 

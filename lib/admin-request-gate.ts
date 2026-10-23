@@ -10,12 +10,13 @@ import {
   isStandaloneAdminPath,
   normalizeAppPath,
 } from "./admin-paths";
+import { agentLoginPath, isAgentPortalPath } from "./agent-return-path";
 
 export const ADMIN_PATHNAME_HEADER = "x-talispros-admin-pathname";
 
 export type AdminRequestGateResult =
   | { action: "next" }
-  | { action: "redirect"; to: "/admin/login" | "/admin/dashboard" };
+  | { action: "redirect"; to: string };
 
 /**
  * Fail-closed gate for `/admin/*`.
@@ -28,6 +29,8 @@ export function resolveAdminRequestGate(input: {
   adminSessionCookie?: string | null;
   /** Opaque Agent Admin session token (`agent_session` cookie). */
   agentSessionCookie?: string | null;
+  /** Request query string (`?a=b`), kept in the agent portal return path. */
+  search?: string | null;
 }): AdminRequestGateResult {
   const pathname = normalizeAppPath(input.pathname);
   if (!isAdminAppPath(pathname)) {
@@ -62,6 +65,10 @@ export function resolveAdminRequestGate(input: {
   }
 
   if (!account) {
+    // Agents sign in at /agent/login; send them back to the page they asked for.
+    if (isAgentPortalPath(pathname)) {
+      return { action: "redirect", to: agentLoginPath(`${pathname}${input.search || ""}`) };
+    }
     return { action: "redirect", to: "/admin/login" };
   }
 

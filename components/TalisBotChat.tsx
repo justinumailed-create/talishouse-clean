@@ -7,9 +7,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   TALISU_DISCUSS_PATH,
-  TALISU_GLOBAL_ADMIN_URL,
   talisuHref,
 } from "@/lib/talisu/talisu-links";
+import { ROUTES } from "@/lib/routes";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 import { STOREFRONT_CHROME_CLASS } from "@/lib/storefront-chrome";
 import { HOME_TALISBOT_SLOT_ID } from "@/components/talispros/TalisprosHomeCornerLinks";
@@ -164,16 +164,16 @@ export default function TalisBotChat({
                 {b.getHelp}
               </Link>
             </div>
-            {/* Global Admin → TalisU.com (Ralf: keep talispros admin separate). */}
-            <a
-              href={TALISU_GLOBAL_ADMIN_URL}
+            {/* Global Admin → Talispros admin sign-in, in a new tab. */}
+            <Link
+              href={ROUTES.ADMIN_LOGIN}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 text-[11px] font-medium tracking-[0.04em] text-gray-400 no-underline hover:text-gray-600 hover:underline"
               data-testid="talisbot-global-admin-link"
             >
               {b.globalAdmin}
-            </a>
+            </Link>
           </div>
         );
 

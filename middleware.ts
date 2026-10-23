@@ -28,6 +28,7 @@ export function middleware(request: NextRequest) {
       pathname: path,
       adminSessionCookie: request.cookies.get(ADMIN_SESSION_COOKIE)?.value,
       agentSessionCookie: request.cookies.get(AGENT_SESSION_COOKIE)?.value,
+      search: request.nextUrl.search,
     });
 
     if (gate.action === "redirect") {

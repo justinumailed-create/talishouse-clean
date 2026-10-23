@@ -81,11 +81,11 @@ describe("agent session gate", () => {
     ).toEqual({ action: "next" });
     expect(
       resolveAdminRequestGate({ pathname: "/admin/agent", agentSessionCookie: "short" }),
-    ).toEqual({ action: "redirect", to: "/admin/login" });
+    ).toEqual({ action: "redirect", to: "/agent/login?next=%2Fadmin%2Fagent" });
     // Agent tokens are never accepted in the FAST-code admin cookie.
     expect(
       resolveAdminRequestGate({ pathname: "/admin/agent", adminSessionCookie: token }),
-    ).toEqual({ action: "redirect", to: "/admin/login" });
+    ).toEqual({ action: "redirect", to: "/agent/login?next=%2Fadmin%2Fagent" });
   });
 
   it("re-validates agents against the DB and keeps them out of builtin-only checks", () => {

@@ -8,12 +8,13 @@ import { accountHasAdminScope } from "@/lib/admin-constants";
 import { getAgentById, listAgentMapSites } from "@/lib/agent-admins";
 import { listManualPayments } from "@/lib/manual-payments";
 import { countUnreadForAgent } from "@/lib/chat/server";
+import { agentLoginPath } from "@/lib/agent-return-path";
 
 export const dynamic = "force-dynamic";
 
 export default async function AgentHomePage() {
   const account = await getAdminSessionAccount();
-  if (!account) redirect("/admin/login");
+  if (!account) redirect(agentLoginPath("/admin/agent"));
 
   if (account.access !== "agent" || !account.agentId) {
     const canContracts = account.access === "global" || accountHasAdminScope(account, "mapsites");
