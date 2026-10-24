@@ -32,13 +32,13 @@ function SyndicationPanel({ t, onClose }: { t: MediaLabels; onClose: () => void 
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-t-3xl bg-white px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 shadow-2xl sm:rounded-3xl sm:p-8"
+        className="w-full max-w-md! rounded-t-3xl bg-white px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 shadow-2xl sm:rounded-3xl sm:p-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#0069CF]">{t.panelKicker}</p>
-            <h2 id="pmc-syndication-title" className="mt-1 text-2xl font-black tracking-tight text-neutral-900">
+            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#0069CF]">{t.panelKicker}</div>
+            <h2 id="pmc-syndication-title" className="mb-0! mt-1 text-2xl font-black tracking-tight text-neutral-900">
               {t.panelTitle}
             </h2>
           </div>
@@ -51,15 +51,15 @@ function SyndicationPanel({ t, onClose }: { t: MediaLabels; onClose: () => void 
             ✕
           </button>
         </div>
-        <p className="mt-4 text-[16px] leading-relaxed text-neutral-700">{t.panelBody}</p>
+        <div className="mt-4 text-[16px] leading-relaxed text-neutral-700">{t.panelBody}</div>
         <div className="mt-5 grid grid-cols-2 gap-3 text-center">
           <div className="rounded-2xl bg-[#e8f3ff] px-3 py-3">
-            <p className="text-2xl font-black text-[#0069CF]">7</p>
-            <p className="text-[12px] font-semibold text-neutral-600">{t.panelOn}</p>
+            <div className="text-2xl font-black text-[#0069CF]">7</div>
+            <div className="text-[12px] font-semibold text-neutral-600">{t.panelOn}</div>
           </div>
           <div className="rounded-2xl bg-neutral-100 px-3 py-3">
-            <p className="text-2xl font-black text-neutral-700">3</p>
-            <p className="text-[12px] font-semibold text-neutral-600">{t.panelOff}</p>
+            <div className="text-2xl font-black text-neutral-700">3</div>
+            <div className="text-[12px] font-semibold text-neutral-600">{t.panelOff}</div>
           </div>
         </div>
         <button
