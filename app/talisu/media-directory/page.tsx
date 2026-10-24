@@ -5,6 +5,7 @@ import { resolveVisitorFastCode } from "@/lib/talisu/pmc-gate";
 import PmcStepper from "@/components/talisu/pmc/PmcStepper";
 import PmcFooter from "@/components/talisu/pmc/PmcFooter";
 import MediaDirectoryClient from "@/components/talisu/pmc/MediaDirectoryClient";
+import { pmcMediaRows } from "@/lib/talisu/pmc-media-directory";
 import { PMC_PATHS, normalizeFastCodeParam, pmcHref } from "@/lib/talispros/mapsite-contract";
 import { PMC_MEDIA_DIRECTORY_INTRO, PMC_SYNDICATION_NOTE } from "@/lib/talisu/pmc-pitch";
 
@@ -35,7 +36,7 @@ export default async function MediaDirectoryPage({ searchParams }: Props) {
         </div>
       </section>
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <MediaDirectoryClient />
+        <MediaDirectoryClient rows={pmcMediaRows()} />
       </section>
       <PmcFooter
         labels={t}
