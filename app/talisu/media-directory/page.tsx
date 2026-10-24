@@ -7,7 +7,6 @@ import PmcFooter from "@/components/talisu/pmc/PmcFooter";
 import MediaDirectoryClient from "@/components/talisu/pmc/MediaDirectoryClient";
 import { pmcMediaRows } from "@/lib/talisu/pmc-media-directory";
 import { PMC_PATHS, normalizeFastCodeParam, pmcHref } from "@/lib/talispros/mapsite-contract";
-import { PMC_MEDIA_DIRECTORY_INTRO, PMC_SYNDICATION_NOTE } from "@/lib/talisu/pmc-pitch";
 
 export async function generateMetadata() {
   return pageMetadata("/talisu/media-directory");
@@ -28,10 +27,10 @@ export default async function MediaDirectoryPage({ searchParams }: Props) {
           <p className="mt-10 text-sm font-bold uppercase tracking-[0.25em] text-[#9fd0ff]">{t.media.kicker}</p>
           <h1 className="mt-2 text-4xl font-black tracking-tight sm:text-5xl">{t.media.title}</h1>
           <div className="mt-5 max-w-3xl space-y-3 text-[16px] leading-relaxed text-white/85">
-            {PMC_MEDIA_DIRECTORY_INTRO.map((p) => (
+            {t.media.intro.map((p) => (
               <p key={p}>{p}</p>
             ))}
-            <p className="font-semibold text-white">{PMC_SYNDICATION_NOTE}</p>
+            <p className="font-semibold text-white">{t.media.syndicationNote}</p>
           </div>
         </div>
       </section>

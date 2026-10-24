@@ -37,6 +37,20 @@ describe("PMC Media Directory", () => {
     }
   });
 
+  it("intro is localised: EN unchanged from the pitch copy, DE fully translated", async () => {
+    const { PMC_MEDIA_DIRECTORY_INTRO, PMC_SYNDICATION_NOTE } = await import("@/lib/talisu/pmc-pitch");
+    expect(en.pmc.media.intro).toEqual(PMC_MEDIA_DIRECTORY_INTRO);
+    expect(en.pmc.media.syndicationNote).toBe(PMC_SYNDICATION_NOTE);
+    expect(de.pmc.media.intro).toHaveLength(en.pmc.media.intro.length);
+    for (const line of [...de.pmc.media.intro, de.pmc.media.syndicationNote]) {
+      expect(en.pmc.media.intro).not.toContain(line);
+      expect(line).not.toMatch(/TODO|TBD|Ralf|Mapsites?™/);
+    }
+    const pageSrc = readFileSync(path.resolve(__dirname, "../app/talisu/media-directory/page.tsx"), "utf8");
+    expect(pageSrc).toContain("t.media.intro");
+    expect(pageSrc).not.toContain("PMC_MEDIA_DIRECTORY_INTRO");
+  });
+
   it("client opens one syndication panel, never an outlet iframe or URL", () => {
     expect(clientSrc).not.toMatch(/IframeModal|<iframe|\.url\b|href=/);
     expect(clientSrc).toContain("pmc-syndication-panel");

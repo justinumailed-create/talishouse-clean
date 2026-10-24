@@ -732,6 +732,12 @@ export const de: Dictionary = {
       panelBody: "Ihre Immobilie wird im 10-Tage-Zyklus syndiziert: 7 Tage online, 3 Tage Pause. So bleibt sie in jedem Anzeigenportal, in dem sie erscheint, stets frisch.",
       panelOn: "Tage online",
       panelOff: "Tage Pause",
+      intro: [
+        "Im Folgenden finden Sie unser Mediendirektorium: Bei den aufgeführten Anzeigenportalen sind wir entweder bereits automatisch präsent oder stehen mit ihnen in Verhandlungen.",
+        "Für Jahresabonnements bieten wir einen besonderen Einführungspreis an. Sobald weitere gelistete und noch nicht gelistete Medienportale hinzukommen, verdoppelt sich der Jahrespreis für alle, die sich bis dahin noch nicht registriert haben.",
+      ],
+      syndicationNote:
+        "PINs aus Talispros Mapsites werden automatisch an die unten aufgeführten internationalen Portale syndiziert – in 10-Tage-Zyklen mit jeweils 3 Tagen Pause, damit die Inserate stets frisch bleiben.",
       count: "{n} Portale",
       modalNote: "Manche Anbieter blockieren das Einbetten. Bleibt die Seite leer, öffnen Sie sie in einem neuen Tab.",
       newTab: "In neuem Tab öffnen",

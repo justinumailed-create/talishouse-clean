@@ -6,6 +6,7 @@
  * `de.ts` must provide the same shape — enforced by the `Dictionary` type and
  * __tests__/i18n-dictionary-parity.test.ts.
  */
+import { PMC_MEDIA_DIRECTORY_INTRO, PMC_SYNDICATION_NOTE } from "@/lib/talisu/pmc-pitch";
 import {
   TALISU_ENGAGE,
   TALISU_FAQ,
@@ -507,6 +508,8 @@ export const en = {
       panelBody: "Your property is in exposure syndication on a 10-day cycle: 7 days on, 3 days off, to keep it fresh in every classified where it appears.",
       panelOn: "days on",
       panelOff: "days off",
+      intro: PMC_MEDIA_DIRECTORY_INTRO,
+      syndicationNote: PMC_SYNDICATION_NOTE,
       count: "{n} outlets",
       modalNote: "Some publishers block embedding. If the page stays blank, open it in a new tab.",
       newTab: "Open in new tab",
