@@ -40,31 +40,31 @@ export default function Transactions() {
 
   const getPaymentAmount = (): number => {
     const amount = Math.max(Number(splitsAmount) || 0, MIN_AMOUNT);
-    console.log("SPLITS PAYING AMOUNT:", amount);
+    console.log("LEASE-TO-OWN PAYING AMOUNT:", amount);
     return amount;
   };
 
   const savePayment = async (amount: number) => {
     try {
       const dealPayload = {
-        client_name: "SPLITS",
+        client_name: "Lease-to-Own",
         phone: "",
-        project_details: splitsDetails || "SPLITS payment",
+        project_details: splitsDetails || "Lease-to-Own payment",
         status: "pending",
         fast_code: fastCode.toUpperCase(),
         source: "splits",
         base_price: amount,
       };
-      console.log("SPLITS DEAL INSERT - Payload:", JSON.stringify(dealPayload, null, 2));
+      console.log("LEASE-TO-OWN DEAL INSERT - Payload:", JSON.stringify(dealPayload, null, 2));
 
       const { data: dealData, error: dealError } = await supabase.from("deals_v2").insert([dealPayload]).select().single();
 
       if (dealError) {
-        console.error("SPLITS DEAL INSERT ERROR:", JSON.stringify(dealError, null, 2));
+        console.error("LEASE-TO-OWN DEAL INSERT ERROR:", JSON.stringify(dealError, null, 2));
         setPaymentSuccess(true);
         return;
       }
-      console.log("SPLITS DEAL INSERT SUCCESS:", JSON.stringify(dealData, null, 2));
+      console.log("LEASE-TO-OWN DEAL INSERT SUCCESS:", JSON.stringify(dealData, null, 2));
 
       if (dealData) {
         const txPayload = {
@@ -73,13 +73,13 @@ export default function Transactions() {
           amount: amount,
           payment_type: "splits",
         };
-        console.log("SPLITS TRANSACTION INSERT - Payload:", JSON.stringify(txPayload, null, 2));
+        console.log("LEASE-TO-OWN TRANSACTION INSERT - Payload:", JSON.stringify(txPayload, null, 2));
 
         const { error: txError } = await supabase.from("transactions").insert([txPayload]);
         if (txError) {
-          console.error("SPLITS TRANSACTION INSERT ERROR:", JSON.stringify(txError, null, 2));
+          console.error("LEASE-TO-OWN TRANSACTION INSERT ERROR:", JSON.stringify(txError, null, 2));
         } else {
-          console.log("SPLITS TRANSACTION INSERT SUCCESS");
+          console.log("LEASE-TO-OWN TRANSACTION INSERT SUCCESS");
         }
       }
 
@@ -94,7 +94,7 @@ export default function Transactions() {
   const handlePayPalApprove = async (_data: any, actions: any) => {
     await actions.order.capture();
     const amount = getPaymentAmount();
-    console.log("SPLITS PAYPAL CAPTURE AMOUNT:", amount);
+    console.log("LEASE-TO-OWN PAYPAL CAPTURE AMOUNT:", amount);
     await savePayment(amount);
   };
 
@@ -114,7 +114,7 @@ export default function Transactions() {
                 </svg>
               </div>
               <h2 className="text-2xl font-semibold text-[#1d1d1f] mb-2 tracking-tight">
-                SPLITS Recorded
+                Lease-to-Own recorded
               </h2>
               <p className="text-[#6e6e73] mb-6">
                 FAST Code: <span className="font-semibold">{fastCode.toUpperCase()}</span>
@@ -189,10 +189,10 @@ export default function Transactions() {
                       />
                     </div>
 
-                    {/* SPLITS COST */}
+                    {/* Lease-to-Own cost */}
                     <div className="w-full">
                       <label className="block text-sm font-semibold text-[#1d1d1f] mb-1.5">
-                        SPLITS COST <span className="text-red-500">*</span>
+                        Lease-to-Own cost <span className="text-red-500">*</span>
                       </label>
 
                       <div
@@ -233,10 +233,10 @@ export default function Transactions() {
                       />
                     </div>
 
-                    {/* SPLITS details */}
+                    {/* Lease-to-Own details */}
                     <div>
                       <label className="block text-sm font-semibold text-[#1d1d1f] mb-1.5">
-                        SPLITS details <span className="text-red-500">*</span>
+                        Lease-to-Own details <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         value={splitsDetails}

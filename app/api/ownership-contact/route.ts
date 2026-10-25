@@ -4,9 +4,9 @@ import { sendOwnershipLearnMoreInquiry } from "@/lib/email";
 import {
   OWNERSHIP_CONTACT_RECIPIENTS,
   OWNERSHIP_CONTACT_SOURCE,
-  OWNERSHIP_CONTACT_TOPICS,
   OWNERSHIP_CONTACT_MESSAGE_MAX,
   OWNERSHIP_CONTACT_LOCATION_MAX,
+  canonicalOwnershipTopic,
   ownershipLeadLocation,
 } from "@/lib/talispros/ownership-contact";
 import { NANP_PHONE_ERROR, formatNanpPhone } from "@/lib/talispros/nanp-phone";
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   const email = String(body.email || "").trim();
   const rawPhone = String(body.phone || "").trim();
   const message = String(body.message || "").trim();
-  const topic = String(body.topic || "").trim();
+  const rawTopic = String(body.topic || "").trim();
   const channel = body.channel === "discuss-page" ? "discuss-page" : null;
   const location = String(body.location || "")
     .replace(/[\u0000-\u001f\u007f]+/g, " ")
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     .slice(0, OWNERSHIP_CONTACT_LOCATION_MAX);
   const locationVerified = body.locationVerified === true;
 
-  if (!name || !email || !rawPhone || !message || !topic) {
+  if (!name || !email || !rawPhone || !message || !rawTopic) {
     return NextResponse.json(
       { ok: false, error: "Name, email, phone, and message are required." },
       { status: 400 },
@@ -65,7 +65,8 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!OWNERSHIP_CONTACT_TOPICS.includes(topic as (typeof OWNERSHIP_CONTACT_TOPICS)[number])) {
+  const topic = canonicalOwnershipTopic(rawTopic);
+  if (!topic) {
     return NextResponse.json({ ok: false, error: "Unknown topic." }, { status: 400 });
   }
 

@@ -10,21 +10,30 @@ export const ENGAGE_STRUCTURE_PARAM = "structure";
 
 export const ENGAGE_STRUCTURE_IDS = [
   "conventional",
-  "splits",
+  "lease-to-own",
   "fractionalization",
   "tokenization",
 ] as const;
 
 export type EngageStructureId = (typeof ENGAGE_STRUCTURE_IDS)[number];
 
+/**
+ * Webster checkout used to pass ?structure=splits. Those links still open
+ * Lease-to-Own; SamCart receives the current id.
+ */
+const ENGAGE_STRUCTURE_ALIASES: Record<string, EngageStructureId> = {
+  splits: "lease-to-own",
+};
+
 /** One of the four structure ids, or null for anything else. */
 export function normalizeEngageStructure(
   value: string | string[] | null | undefined,
 ): EngageStructureId | null {
   const raw = (Array.isArray(value) ? value[0] : value)?.trim().toLowerCase() || "";
-  return (ENGAGE_STRUCTURE_IDS as readonly string[]).includes(raw)
-    ? (raw as EngageStructureId)
-    : null;
+  if ((ENGAGE_STRUCTURE_IDS as readonly string[]).includes(raw)) {
+    return raw as EngageStructureId;
+  }
+  return ENGAGE_STRUCTURE_ALIASES[raw] ?? null;
 }
 
 /** SamCart checkout URL with the chosen structure recorded on the order. */

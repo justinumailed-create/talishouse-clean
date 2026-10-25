@@ -18,7 +18,7 @@ export default function DeveloperPage() {
           </h1>
           <p className="text-sm sm:text-base text-neutral-500 max-w-xl mx-auto leading-relaxed mb-8">
             Claim a market with a Root Account™. Deploy up to 100 Derivative
-            Accounts, enable SPLITS, and establish your organization inside
+            Accounts, enable Lease-to-Own, and establish your organization inside
             Talismaps™.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

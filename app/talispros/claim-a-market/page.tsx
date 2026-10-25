@@ -113,7 +113,7 @@ export default function ClaimAMarketPage() {
               <ul className="space-y-1.5 mb-5">
                 {[
                   "Up to 100 Derivative Accounts",
-                  "SPLITS enabled",
+                  "Lease-to-Own enabled",
                   "Market ownership",
                   "FAST Code generation",
                   "Claim A Market™ eligibility",
@@ -173,7 +173,7 @@ export default function ClaimAMarketPage() {
           <section className="mb-12">
             <div className="rounded-2xl border-2 border-neutral-200 p-6 sm:p-8">
               <h2 className="text-xl font-semibold text-neutral-900 mb-1">Adpro PIN</h2>
-              <p className="text-sm text-neutral-500 mb-5">Individual and multi-PIN packages. No SPLITS.</p>
+              <p className="text-sm text-neutral-500 mb-5">Individual and multi-PIN packages. No Lease-to-Own.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                 {ADPRE_PACKAGES.map((pkg) => (
                   <div key={pkg.label} className="bg-neutral-50 rounded-xl border border-neutral-200 p-4">

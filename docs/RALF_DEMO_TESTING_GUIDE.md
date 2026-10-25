@@ -41,11 +41,11 @@ A FAST Code is a short access code that identifies an account or Mapsite (exampl
 
 ## What Root Accounts are
 
-A Root Account™ is the primary market-owner account type. Registration plans describe Root as market ownership with Derivative capacity, SPLITS eligibility, Claim a Market eligibility, and FAST Code generation. Pricing is the full Root Account™ (CAD $998.50 setup). The former $1 demo activation plan is retired and is not offered at checkout.
+A Root Account™ is the primary market-owner account type. Registration plans describe Root as market ownership with Derivative capacity, Lease-to-Own eligibility, Claim a Market eligibility, and FAST Code generation. Pricing is the full Root Account™ (CAD $998.50 setup). The former $1 demo activation plan is retired and is not offered at checkout.
 
 ## What Derivative Accounts are
 
-A Derivative Account™ sits under a Root Account™. Plans describe multi-PIN support, operation under a Root, SPLITS, and FAST Code generation. Derivative accounts are selected during registration via account category / plan parameters.
+A Derivative Account™ sits under a Root Account™. Plans describe multi-PIN support, operation under a Root, Lease-to-Own, and FAST Code generation. Derivative accounts are selected during registration via account category / plan parameters.
 
 ## What AdPro PINs are
 

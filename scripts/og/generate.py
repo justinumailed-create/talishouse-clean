@@ -64,9 +64,19 @@ def card(lang, kicker, lines, chips, footer, photo, out, panel_bg=BLUE, wordmark
         y += int(size * 1.12)
     y += 22
     if chips:
-        cf = f("Medium", 17); cx = X
+        # Shrink the chip type so a longer label (Lease-to-Own) still fits on one row.
+        size = 17
+        cf = f("Medium", size)
+        pad = 24
+        while size > 13:
+            widths = [int(d.textlength(ch, font=cf) + pad) for ch in chips]
+            if X + sum(widths) + 8 * (len(chips) - 1) <= W - 30:
+                break
+            size -= 1
+            cf = f("Medium", size)
+        cx = X
         for ch in chips:
-            w = int(d.textlength(ch, font=cf) + 24)
+            w = int(d.textlength(ch, font=cf) + pad)
             if cx + w > W - 30: break
             d.rounded_rectangle([cx, y, cx + w, y + 38], radius=19, fill=CHIP, outline=BLUE, width=2)
             d.text((cx + 12, y + 19), ch, font=cf, fill=BLUE, anchor="lm"); cx += w + 8

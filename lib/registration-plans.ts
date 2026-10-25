@@ -81,7 +81,7 @@ export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
     description: "Market ownership and full platform access.",
     bullets: [
       "Up to 100 Derivative Accounts",
-      "SPLITS enabled",
+      "Lease-to-Own enabled",
       "Claim A Market™ eligible",
       "FAST Code generation",
       "Market ownership capabilities",
@@ -95,7 +95,7 @@ export const PLAN_DETAILS: Record<PlanType, PlanDetail> = {
     bullets: [
       "Multi-PIN support",
       "Operates under Root Account™",
-      "SPLITS enabled",
+      "Lease-to-Own enabled",
       "FAST Code generation",
     ],
   },

@@ -34,7 +34,7 @@ export const REGISTRATION_MARKET_COPY: Record<
   brokers: {
     label: "Real Estate Broker or Owner",
     subtitle:
-      "Register your Talispros™ Root Account so licensed professionals beneath you qualify for SPLITS ads.",
+      "Register your Talispros™ Root Account so licensed professionals beneath you qualify for Lease-to-Own ads.",
   },
   adpro: {
     label: "Adpro Service Provider",
@@ -91,6 +91,6 @@ export function accountCategoryFromLegacyPlan(
 
 export const ROOT_ACCOUNT_DISPLAY_BULLETS = [
   "Up to 100 Derivative Accounts",
-  "SPLITS enabled",
+  "Lease-to-Own enabled",
   "Claim A Market™ eligible",
 ] as const;

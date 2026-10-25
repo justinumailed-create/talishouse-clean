@@ -129,7 +129,7 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(HOME_OWNERSHIP_SECTIONS).toHaveLength(4);
     expect(HOME_OWNERSHIP_SECTIONS.map((s) => s.title)).toEqual([
       "Conventional",
-      "SPLITS",
+      "Lease-to-Own",
       "Fractionalization",
       "Tokenization",
     ]);
@@ -137,7 +137,7 @@ describe("homepage FAST Code → claimed Mapsite", () => {
       "title changes hands upon that last penny having been paid.",
     );
     expect(HOME_OWNERSHIP_SECTIONS[1].body).toContain("instalments");
-    expect(HOME_OWNERSHIP_SECTIONS[1].result).toContain("'Lease-To-Own'");
+    expect(HOME_OWNERSHIP_SECTIONS[1].result).toContain("lease-to-own agreement");
     expect(HOME_OWNERSHIP_SECTIONS[2].body).toContain("over-arching");
     expect(HOME_OWNERSHIP_SECTIONS[3].body).toContain("interest—whole or fractional");
     expect(TALISU_MKTS_HEADER_BLUE).toBe("#046BD9");

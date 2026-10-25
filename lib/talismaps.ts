@@ -101,7 +101,7 @@ export async function getTalisMapsData(
       name: c.name,
       slug: c.slug,
       color: normalizeColor(c.color),
-      description: c.description,
+      description: (c.description || "").replace(/\bSPLITS\b/g, "Lease-to-Own"),
       sortOrder: c.sort_order,
     })
   );
