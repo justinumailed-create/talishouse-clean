@@ -3,19 +3,23 @@
 import type { ReactElement } from "react";
 import type { TalisUMktsPin } from "@/lib/talisu/markets-pins";
 import { useT } from "@/lib/i18n/client";
+import { ADVISER_METAL_BG } from "@/components/talisu/AdviserLayout";
+import {
+  METAL_TAB,
+  METAL_TAB_LABEL,
+  METAL_TAB_SELECTED,
+  METAL_TAB_SHEEN,
+  METAL_TAB_UNSELECTED,
+} from "@/components/talisu/metal-tab";
 import { ROUTES } from "@/lib/routes";
 import { TALISWEBS_US_MARKETS_URL } from "@/lib/talisu/talisu-links";
 
 /**
- * Market buttons share the Thorsten P (/talisu/engage) CTA shape: full pill,
- * min 48px tall, 15–16px semibold label with a trailing arrow. The market
- * shown on this page uses the primary (filled blue) style; the other market
- * uses the secondary (white, blue outline) style.
+ * Market buttons use the metal tabs from Aisha's structure picker
+ * (/talisu/reg): the market shown on this page is the selected tab.
  */
-const MARKET_BUTTON =
-  "inline-flex min-h-12 w-full flex-wrap items-center justify-center gap-x-2 rounded-full px-6 py-2 text-center text-[15px] font-semibold transition sm:text-[16px]";
-const MARKET_BUTTON_PRIMARY = `${MARKET_BUTTON} bg-[#046BD9] text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] hover:bg-[#0358b3]`;
-const MARKET_BUTTON_SECONDARY = `${MARKET_BUTTON} bg-white text-[#046BD9] shadow-sm ring-1 ring-inset ring-[#046BD9]/40 hover:bg-[#046BD9]/5`;
+const MARKET_BUTTON_SELECTED = `${METAL_TAB} ${METAL_TAB_SELECTED}`;
+const MARKET_BUTTON_UNSELECTED = `${METAL_TAB} ${METAL_TAB_UNSELECTED}`;
 
 type Props = {
   /** Kept for callers; the panel no longer lists PINs (PIN-only navigation). */
@@ -48,23 +52,25 @@ const TalisUMarketsSidebar: (props: Props) => ReactElement = () => {
           </p>
           {/* Canada (this site) / USA (Taliswebs). Plain anchors: same window,
               full reload when the site changes. */}
-          <nav className="mt-3 flex flex-col gap-2" data-testid="mkts-site-links">
+          <nav className="mt-3 flex flex-col gap-2.5" data-testid="mkts-site-links">
             <a
               href={ROUTES.TALISU_MARKETS}
               aria-current="page"
-              className={MARKET_BUTTON_PRIMARY}
+              className={MARKET_BUTTON_SELECTED}
+              style={{ backgroundImage: ADVISER_METAL_BG }}
               data-testid="mkts-link-canada"
             >
-              <span className="whitespace-nowrap">{m.canadaMarkets}</span>
-              <span aria-hidden>→</span>
+              <span className={METAL_TAB_SHEEN} aria-hidden />
+              <span className={METAL_TAB_LABEL}>{m.canadaMarkets}</span>
             </a>
             <a
               href={TALISWEBS_US_MARKETS_URL}
-              className={MARKET_BUTTON_SECONDARY}
+              className={MARKET_BUTTON_UNSELECTED}
+              style={{ backgroundImage: ADVISER_METAL_BG }}
               data-testid="mkts-link-usa"
             >
-              <span className="whitespace-nowrap">{m.usaMarkets}</span>
-              <span aria-hidden>→</span>
+              <span className={METAL_TAB_SHEEN} aria-hidden />
+              <span className={METAL_TAB_LABEL}>{m.usaMarkets}</span>
             </a>
           </nav>
           <ul className="mt-3.5 space-y-1.5">

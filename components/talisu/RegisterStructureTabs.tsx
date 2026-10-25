@@ -3,6 +3,13 @@
 import Link from "next/link";
 import { useId, useState } from "react";
 import { ADVISER_METAL_BG } from "@/components/talisu/AdviserLayout";
+import {
+  METAL_TAB,
+  METAL_TAB_LABEL,
+  METAL_TAB_SELECTED,
+  METAL_TAB_SHEEN,
+  METAL_TAB_UNSELECTED,
+} from "@/components/talisu/metal-tab";
 import { talisURegisterCheckoutHref } from "@/lib/talisu/ask-step";
 import {
   normalizeRegisterStructure,
@@ -83,21 +90,11 @@ export default function RegisterStructureTabs({
                 event.preventDefault();
                 select(isOpen ? null : id);
               }}
-              className={[
-                "group relative flex min-h-14 w-full items-center justify-center overflow-hidden rounded-xl border px-2 py-2 no-underline",
-                "shadow-[inset_0_1px_0_rgba(255,255,255,0.75),inset_0_-1px_0_rgba(0,0,0,0.22),0_6px_14px_rgba(0,0,0,0.22)]",
-                "transition duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-neutral-800",
-                isOpen
-                  ? "scale-[0.98] border-neutral-700/70 ring-1 ring-neutral-700/60"
-                  : "border-white/55 hover:brightness-105 active:scale-[0.98]",
-              ].join(" ")}
+              className={`${METAL_TAB} ${isOpen ? METAL_TAB_SELECTED : METAL_TAB_UNSELECTED}`}
               style={{ backgroundImage: ADVISER_METAL_BG }}
             >
-              <span
-                className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/35 via-transparent to-black/20"
-                aria-hidden
-              />
-              <span className="relative z-10 text-center text-[12px] font-semibold tracking-wide text-neutral-900 sm:text-[14px]">
+              <span className={METAL_TAB_SHEEN} aria-hidden />
+              <span className={METAL_TAB_LABEL}>
                 {tab.label}
               </span>
             </a>
