@@ -19,8 +19,6 @@ export const PMC_PATHS = {
   privacy: "/talisu/privacy",
 } as const;
 
-export const TALISWEBS_US_URL = "https://www.taliswebs.com";
-
 /** Keep the client's FAST Code (and agent code) across the sequence. */
 export function pmcHref(
   path: string,

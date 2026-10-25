@@ -23,6 +23,22 @@ export interface ActionResult {
   error?: string;
 }
 
+const CANADIAN_PROVINCES = new Set([
+  "Ontario",
+  "British Columbia",
+  "Alberta",
+  "Quebec",
+  "Nova Scotia",
+  "Manitoba",
+  "Saskatchewan",
+  "New Brunswick",
+  "Prince Edward Island",
+  "Newfoundland and Labrador",
+  "Northwest Territories",
+  "Nunavut",
+  "Yukon",
+]);
+
 function validate(data: FormFields): string | null {
   if (!data.firstName.trim()) return "First name is required";
   if (!data.lastName.trim()) return "Last name is required";
@@ -31,7 +47,10 @@ function validate(data: FormFields): string | null {
     return "Invalid email format";
   if (!data.phone.trim()) return "Phone number is required";
   if (!data.address.trim()) return "Address is required";
-  if (!data.province.trim()) return "State / Province is required";
+  if (!data.province.trim()) return "Province is required";
+  if (!CANADIAN_PROVINCES.has(data.province.trim())) {
+    return "Choose a Canadian province or territory";
+  }
   return null;
 }
 

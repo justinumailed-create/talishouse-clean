@@ -1,6 +1,5 @@
 /**
  * Talispros pitch (PMC PDF pages 1–6, points 1–6), Canada edition.
- * The US edition lives in the separate Taliswebs repo (taliswebs.com);
  * "TW" in the PDF is "Talispros" here.
  */
 

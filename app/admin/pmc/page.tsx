@@ -79,7 +79,7 @@ export default async function TalisprosPmcAdminPage() {
             Regional Root Account pins
           </h2>
           <p className="mt-1 text-sm text-neutral-600">
-            Canada / USA pins on the brokers browse map (
+            Canada pins on the brokers browse map (
             <code className="rounded bg-neutral-100 px-1.5 py-0.5 text-xs">
               /talispros/mapsite?audience=brokers
             </code>

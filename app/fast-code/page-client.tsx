@@ -23,19 +23,6 @@ const PROVINCES = [
   "Yukon",
 ];
 
-const US_STATES = [
-  "Alabama", "Alaska", "Arizona", "Arkansas", "California",
-  "Colorado", "Connecticut", "Delaware", "Florida", "Georgia",
-  "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
-  "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
-  "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri",
-  "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey",
-  "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio",
-  "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina",
-  "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
-  "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
-];
-
 export default function FastCodeGeneratorPage() {
   useEffect(() => {
     document.documentElement.style.height = "auto";
@@ -207,7 +194,7 @@ export default function FastCodeGeneratorPage() {
             />
 
             <div>
-              <label className="text-xs font-medium text-neutral-500 mb-1.5 block">State / Province</label>
+              <label className="text-xs font-medium text-neutral-500 mb-1.5 block">Province / Territory</label>
               <select
                 value={fields.province}
                 onChange={(e) => setField("province", e.target.value)}
@@ -215,17 +202,10 @@ export default function FastCodeGeneratorPage() {
                   fieldErrors.province ? "border-red-300" : "border-neutral-300"
                 }`}
               >
-                <option value="">Select State / Province</option>
-                <optgroup label="Canada">
-                  {PROVINCES.map((p) => (
-                    <option key={p} value={p}>{p}</option>
-                  ))}
-                </optgroup>
-                <optgroup label="United States">
-                  {US_STATES.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </optgroup>
+                <option value="">Select province or territory</option>
+                {PROVINCES.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
                 <option disabled>──────────</option>
                 <option value="admin-apply">National Super Admin. wanted, apply here</option>
               </select>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useT } from "@/lib/i18n/client";
+import { formatCAD } from "@/utils/currency";
 import { fmt } from "@/lib/i18n/format";
 import { useMemo, useState, useTransition, type ReactNode } from "react";
 import Link from "next/link";
@@ -317,7 +318,7 @@ export default function TalisBooksLibraryShell({
                 {stocked}/{TALISBOOKS_LIBRARY_SHELF_CAPACITY}
               </strong>
               <span className="talisbooks-library__capacity-value">
-                ${monthlyEstimate.toFixed(2)} / ${TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD.toFixed(2)}{" "}
+                {formatCAD(monthlyEstimate)} / {formatCAD(TALISBOOKS_LIBRARY_MONTHLY_CAPACITY_USD)}{" "}
                 {bs.perMonth}
               </span>
             </div>
