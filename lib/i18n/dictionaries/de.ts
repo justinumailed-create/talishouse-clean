@@ -511,10 +511,8 @@ export const de: Dictionary = {
     footer:
       "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 50 Meilen (80 Kilometern) um einen Mittelpunkt als teilexklusives Gebiet zu beanspruchen. Teilexklusiv bedeutet: Innerhalb dieses Kreises werden keine weiteren Märkte vergeben, benachbarte Märkte dürfen jedoch weiterhin Angebote pinnen, für die ihnen schriftliche und geprüfte Angebotsunterlagen vorliegen.",
     canada: "Kanada",
-    doMore: "Do More...",
     canadaMarkets: "Märkte Kanada",
     usaMarkets: "Märkte USA",
-    doMoreLink: "Do More",
     noMatches: "Keine Treffer",
     close: "Schließen",
     nextLabel: "Nächster Schritt …",

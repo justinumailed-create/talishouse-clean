@@ -248,11 +248,9 @@ export const en = {
     pmcTagline: "Promote - Manage - Cooperate",
     footer: TALISU_MKTS_FOOTER,
     canada: "Canada",
-    doMore: "Do More...",
     /** Left-panel links (Ralf, Oct 18): switch sites in the same window. */
     canadaMarkets: "Canada Markets",
     usaMarkets: "USA Markets",
-    doMoreLink: "Do More",
     noMatches: "No matches",
     close: "Close",
     nextLabel: "Next Step...",

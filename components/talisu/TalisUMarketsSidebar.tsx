@@ -1,44 +1,37 @@
 "use client";
 
-import { useMemo } from "react";
+import type { ReactElement } from "react";
 import type { TalisUMktsPin } from "@/lib/talisu/markets-pins";
 import { useT } from "@/lib/i18n/client";
 import { ROUTES } from "@/lib/routes";
 import { TALISWEBS_US_MARKETS_URL } from "@/lib/talisu/talisu-links";
 
-const NAV_LINK =
-  "inline-flex items-center justify-center rounded-full px-2.5 py-1 text-[11.5px] font-semibold tracking-tight ring-1 transition-colors";
+/**
+ * Market buttons share the Thorsten P (/talisu/engage) CTA shape: full pill,
+ * min 48px tall, 15–16px semibold label with a trailing arrow. The market
+ * shown on this page uses the primary (filled blue) style; the other market
+ * uses the secondary (white, blue outline) style.
+ */
+const MARKET_BUTTON =
+  "inline-flex min-h-12 w-full flex-wrap items-center justify-center gap-x-2 rounded-full px-6 py-2 text-center text-[15px] font-semibold transition sm:text-[16px]";
+const MARKET_BUTTON_PRIMARY = `${MARKET_BUTTON} bg-[#046BD9] text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] hover:bg-[#0358b3]`;
+const MARKET_BUTTON_SECONDARY = `${MARKET_BUTTON} bg-white text-[#046BD9] shadow-sm ring-1 ring-inset ring-[#046BD9]/40 hover:bg-[#046BD9]/5`;
 
 type Props = {
-  pins: readonly TalisUMktsPin[];
   /** Kept for callers; the panel no longer lists PINs (PIN-only navigation). */
+  pins?: readonly TalisUMktsPin[];
   selectedPinId?: string | null;
   onSelectPin?: (pinId: string) => void;
 };
 
 /**
- * Markets left panel (Ralf, Oct 17 2026): PMC intro + "Do More" headline.
- * The Canada market list was removed: every PIN is live, so visitors click a
- * PIN on the map to get where they are going (the Taliswebs USA list would
- * not fit without a scroll bar anyway). "Do More" stays as a headline with
- * its write-up, not as a navigation item.
+ * Markets left panel: PMC title and tagline, the market buttons (stacked,
+ * full width), then the PMC bullets. Every PIN is live, so visitors click a
+ * PIN on the map to get where they are going.
  */
-export default function TalisUMarketsSidebar({ pins }: Props) {
+const TalisUMarketsSidebar: (props: Props) => ReactElement = () => {
   const t = useT();
   const m = t.markets;
-  const descriptions = m.doMoreDescriptions as Record<string, string>;
-  const labels = m.pinLabels as Record<string, string>;
-  const doMore = useMemo(
-    () =>
-      pins
-        .filter((pin) => pin.kind === "do-more")
-        .map((pin) => ({
-          id: pin.id,
-          label: labels[pin.id] ?? pin.label,
-          text: descriptions[pin.id] ?? pin.description ?? "",
-        })),
-    [pins, descriptions, labels],
-  );
 
   return (
     <aside
@@ -46,14 +39,35 @@ export default function TalisUMarketsSidebar({ pins }: Props) {
       data-testid="mkts-sidebar"
     >
       <div className="pointer-events-auto flex min-h-0 flex-col overflow-y-auto rounded-2xl bg-white shadow-[0_12px_36px_rgba(0,0,0,0.18)] ring-1 ring-black/5">
-        <div className="px-4 pb-3 pt-3.5">
+        <div className="px-4 pb-4 pt-3.5">
           <h1 className="text-[17px] font-semibold tracking-tight text-neutral-950">
             {m.pmcTitle}
           </h1>
           <p className="mt-0.5 text-[11px] font-medium tracking-wide text-neutral-500">
             {m.pmcTagline}
           </p>
-          <ul className="mt-2.5 space-y-1.5">
+          {/* Canada (this site) / USA (Taliswebs). Plain anchors: same window,
+              full reload when the site changes. */}
+          <nav className="mt-3 flex flex-col gap-2" data-testid="mkts-site-links">
+            <a
+              href={ROUTES.TALISU_MARKETS}
+              aria-current="page"
+              className={MARKET_BUTTON_PRIMARY}
+              data-testid="mkts-link-canada"
+            >
+              <span className="whitespace-nowrap">{m.canadaMarkets}</span>
+              <span aria-hidden>→</span>
+            </a>
+            <a
+              href={TALISWEBS_US_MARKETS_URL}
+              className={MARKET_BUTTON_SECONDARY}
+              data-testid="mkts-link-usa"
+            >
+              <span className="whitespace-nowrap">{m.usaMarkets}</span>
+              <span aria-hidden>→</span>
+            </a>
+          </nav>
+          <ul className="mt-3.5 space-y-1.5">
             {m.pmcBullets.map((bullet) => (
               <li
                 key={bullet}
@@ -64,47 +78,10 @@ export default function TalisUMarketsSidebar({ pins }: Props) {
               </li>
             ))}
           </ul>
-          {/* Ralf (Oct 18): Canada (this site) / USA (Taliswebs) / Do More
-              (Catalogue). Plain anchors: same window, full reload when the
-              site changes. */}
-          <nav className="mt-3 flex flex-wrap gap-1.5" data-testid="mkts-site-links">
-            <a
-              href={ROUTES.TALISU_MARKETS}
-              aria-current="page"
-              className={`${NAV_LINK} bg-neutral-950 text-white ring-neutral-950`}
-              data-testid="mkts-link-canada"
-            >
-              {m.canadaMarkets}
-            </a>
-            <a
-              href={TALISWEBS_US_MARKETS_URL}
-              className={`${NAV_LINK} bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-100`}
-              data-testid="mkts-link-usa"
-            >
-              {m.usaMarkets}
-            </a>
-            <a
-              href={ROUTES.CATALOG}
-              className={`${NAV_LINK} bg-white text-neutral-900 ring-neutral-300 hover:bg-neutral-100`}
-              data-testid="mkts-link-do-more"
-            >
-              {m.doMoreLink}
-            </a>
-          </nav>
-        </div>
-
-        <div className="border-t border-neutral-200/80 px-4 pb-3.5 pt-3" data-testid="mkts-do-more">
-          <h2 className="text-[15px] font-semibold tracking-tight text-neutral-950">{m.doMore}</h2>
-          {doMore.map((item) => (
-            <div key={item.id} className="mt-1.5">
-              <p className="text-[12px] font-semibold text-neutral-800">{item.label}</p>
-              {item.text ? (
-                <p className="mt-0.5 text-[11.5px] leading-[1.35] text-neutral-600">{item.text}</p>
-              ) : null}
-            </div>
-          ))}
         </div>
       </div>
     </aside>
   );
-}
+};
+
+export default TalisUMarketsSidebar;
