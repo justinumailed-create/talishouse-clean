@@ -7,12 +7,9 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { fmt } from "@/lib/i18n/format";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
-import PartnerLanding from "@/components/talisu/PartnerLanding";
-import {
-  EngageStructurePicker,
-  EngageStructureProvider,
-  EngageWebsterCta,
-} from "@/components/talisu/EngageStructureSelection";
+import AdviserLayout from "@/components/talisu/AdviserLayout";
+import TopBoundFlipbook from "@/components/product-flipbook/TopBoundFlipbook";
+import { loadCataloguePages } from "@/lib/talisu/catalogue-pages";
 import {
   isTalisUEngageCheckoutStep,
   talisUEngageCheckoutHref,
@@ -23,7 +20,6 @@ import {
   findCatalogueProduct,
 } from "@/lib/talisu/catalogue-products";
 import {
-  ENGAGE_STRUCTURES_ANCHOR,
   engageStructureCheckoutUrl,
   normalizeEngageStructure,
 } from "@/lib/talisu/engage-structure";
@@ -36,7 +32,7 @@ export async function generateMetadata() {
     description: m.description,
     path: "/talisu/engage",
     locale,
-    // Dedicated share card (Webster + tree logo), not the shared brand card.
+    // Dedicated share card (Thorsten P + tree logo), not the shared brand card.
     image: {
       url: m.ogImage,
       width: 1200,
@@ -63,7 +59,7 @@ export default async function TalisUEngagePage({
   const params = (await searchParams) ?? {};
   // Catalogue hotspots link here as ?product=P07. Unknown codes are ignored.
   const product = findCatalogueProduct(params.product);
-  // Structure chosen on the landing (?structure=), limited to the four ids.
+  // Structure from older landing links (?structure=), limited to the four ids.
   const structure = normalizeEngageStructure(params.structure);
   const structureSection = structure
     ? (dictionary.home.ownershipSections.find((s) => s.id === structure) ??
@@ -74,74 +70,74 @@ export default async function TalisUEngagePage({
     structure,
   );
 
-  // Landing first (Ralf, Oct 18): Catalogue design, Webster's one-line intro,
-  // the CSFT buttons in the left column (explanations open below them, same
-  // place as on /talisu/discuss). The down-payment checkout only renders
-  // after the CTA (?step=pay, same tab); a catalogue ?product= code is
-  // carried through.
+  // Adviser landing (Oct 26): Thorsten P's portrait + the Talishouse™
+  // catalogue flipbook. Each unit links to the $2,000 CAD down-payment
+  // checkout (?step=pay&product=Pxx); the button below goes there too,
+  // keeping a catalogue ?product= code. Older ?structure= links still work:
+  // the value is carried to the checkout and shown there.
   if (!isTalisUEngageCheckoutStep(params.step)) {
+    const pages = loadCataloguePages();
     return (
-      <EngageStructureProvider initialOpenId={structure}>
-        <PartnerLanding
-          testId="talisu-engage-landing"
-          kicker={TALISU_ENGAGE.landingKicker}
-          title={TALISU_ENGAGE.title}
-          lead={TALISU_ENGAGE.landingLead}
-          imageSrc={TALISU_ENGAGE.partnerImage}
-          imageAlt={TALISU_ENGAGE.partnerImageAlt}
-          imageWidth={864}
-          imageHeight={1152}
-          partnerName={
-            TALISU_ENGAGE.partnerName.split(/ [—–-] /)[0] ?? "Webster M."
-          }
-          partnerRole={TALISU_ENGAGE.landingRole}
-          ctaLabel={TALISU_ENGAGE.ctaLabel}
-          // Headline pill (as on Aisha's page) scrolls to the structure tabs;
-          // the button beside Webster's card goes to the down-payment checkout
-          // with the selected structure.
-          ctaHref={talisUEngageCheckoutHref(product?.code, structure)}
-          headlineCtaHref={`#${ENGAGE_STRUCTURES_ANCHOR}`}
-          mainCta={
-            <EngageWebsterCta
-              productCode={product?.code ?? null}
-              label={t.engageWebster}
-            />
-          }
-          left={<EngageStructurePicker testId="engage-structures" />}
-          intro={
-            <>
-              <p>{TALISU_ENGAGE.landingIntro}</p>
-              <p className="mt-3" data-testid="engage-structure-note">
-                {TALISU_ENGAGE.landingStructureNote}
-              </p>
-            </>
-          }
-          notice={
-            product ? (
-              <p
-                className="inline-block rounded-2xl border border-[#046BD9]/25 bg-white px-4 py-3 text-[15px] text-neutral-800 shadow-sm"
-                data-testid="engage-ask-product"
-              >
-                <span className="font-semibold text-[#046BD9]">
-                  {t.engageCustomizing}
-                </span>{" "}
-                <span className="font-semibold text-neutral-950">
-                  {product.code}
-                </span>
-                {" — "}
-                {product.title}
-              </p>
-            ) : null
-          }
-          cards={[]}
-          closingTitle={TALISU_ENGAGE.headline}
-          closingText={TALISU_ENGAGE.ctaNote}
-        />
-      </EngageStructureProvider>
+      <AdviserLayout
+        testId="talisu-engage-landing"
+        imageSrc={TALISU_ENGAGE.partnerImage}
+        imageAlt={TALISU_ENGAGE.partnerImageAlt}
+        imagePosition="center 18%"
+        kicker={TALISU_ENGAGE.adviserKicker}
+        title={TALISU_ENGAGE.adviserTitle}
+      >
+        <section
+          className="mt-4 sm:mt-6"
+          data-testid="engage-catalogue"
+          aria-label={TALISU_ENGAGE.catalogueLabel}
+        >
+          <div className="mb-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-600">
+            {TALISU_ENGAGE.catalogueLabel}
+          </div>
+          <TopBoundFlipbook
+            pages={pages}
+            title={TALISU_ENGAGE.catalogueLabel}
+            showHeader={false}
+            variant="embedded"
+          />
+          <div className="mt-1 text-center text-[12.5px] text-neutral-600" data-testid="engage-catalogue-hint">
+            {TALISU_ENGAGE.catalogueHint}
+          </div>
+        </section>
+        {product ? (
+          <div
+            className="mt-4 inline-block self-start rounded-2xl border border-[#046BD9]/25 bg-white px-4 py-3 text-[14px] text-neutral-800 shadow-sm sm:text-[15px]"
+            data-testid="engage-ask-product"
+          >
+            <span className="font-semibold text-[#046BD9]">{t.engageCustomizing}</span>{" "}
+            <span className="font-semibold text-neutral-950">{product.code}</span>
+            {" — "}
+            {product.title}
+          </div>
+        ) : null}
+        <div className="mt-5 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4 lg:flex-col lg:items-start lg:gap-2 xl:flex-row xl:items-center xl:gap-4">
+          <Link
+            href={talisUEngageCheckoutHref(product?.code, structure)}
+            data-testid="partner-cta"
+            className="inline-flex min-h-12 shrink-0 flex-wrap items-center justify-center gap-x-2 rounded-full bg-[#046BD9] px-6 py-2 text-center text-[15px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] transition hover:bg-[#0358b3] sm:text-[16px]"
+          >
+            <span className="whitespace-nowrap">{t.engageWebster}</span>
+            <span aria-hidden>→</span>
+          </Link>
+          <div className="text-[12.5px] text-neutral-600 sm:text-[13px]">
+            {TALISU_ENGAGE.adviserCtaNote}
+          </div>
+        </div>
+        <div className="mt-6 text-[13px] text-neutral-600" data-testid="talisu-engage-partner">
+          <span className="font-semibold text-neutral-900">{TALISU_ENGAGE.partnerName}</span>
+          {" · "}
+          {TALISU_ENGAGE.landingRole}
+        </div>
+      </AdviserLayout>
     );
   }
 
-  // Webster's clients pay the down payment directly and set up their Mapsite
+  // Thorsten P's clients pay the down payment directly and set up their Mapsite
   // afterwards, so this checkout is open to every visitor (no PMC gate).
 
   return (
@@ -158,8 +154,8 @@ export default async function TalisUEngagePage({
             <Image
               src={TALISU_ENGAGE.partnerImage}
               alt={TALISU_ENGAGE.partnerImageAlt}
-              width={864}
-              height={1152}
+              width={800}
+              height={800}
               className="h-auto w-full max-w-[220px] rounded-xl object-cover shadow-sm"
               sizes="220px"
               priority
@@ -234,7 +230,7 @@ export default async function TalisUEngagePage({
               <Link
                 href={`/talisu/engage${
                   product ? `?product=${encodeURIComponent(product.code)}` : ""
-                }#${ENGAGE_STRUCTURES_ANCHOR}`}
+                }`}
                 className="whitespace-nowrap font-medium text-[#046BD9] hover:underline"
               >
                 {t.engageChange}

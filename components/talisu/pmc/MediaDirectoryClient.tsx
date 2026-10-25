@@ -1,23 +1,97 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n/client";
-import { IframeModal } from "@/components/talisu/pmc/IframeLink";
-import { PMC_MEDIA_DIRECTORY, flagEmoji, type PmcMediaOutlet } from "@/lib/talisu/pmc-media-directory";
+import type { PmcMediaRow } from "@/lib/talisu/pmc-media-directory";
 
-/** Searchable directory; every outlet opens in an iframe modal on click. */
-export default function MediaDirectoryClient() {
+type MediaLabels = ReturnType<typeof useT>["pmc"]["media"];
+
+/** One shared panel explaining the exposure syndication cycle (bottom sheet on mobile). */
+function SyndicationPanel({ t, onClose }: { t: MediaLabels; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+
+  return createPortal(
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pmc-syndication-title"
+      data-testid="pmc-syndication-panel"
+      className="fixed inset-0 z-[200] flex items-end justify-center bg-[#06182f]/70 backdrop-blur-sm sm:items-center sm:p-6"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md! rounded-t-3xl bg-white px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-6 shadow-2xl sm:rounded-3xl sm:p-8"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#0069CF]">{t.panelKicker}</div>
+            <h2 id="pmc-syndication-title" className="mb-0! mt-1 text-2xl font-black tracking-tight text-neutral-900">
+              {t.panelTitle}
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t.close}
+            className="-mr-2 -mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900"
+          >
+            ✕
+          </button>
+        </div>
+        <div className="mt-4 text-[16px] leading-relaxed text-neutral-700">{t.panelBody}</div>
+        <div className="mt-5 grid grid-cols-2 gap-3 text-center">
+          <div className="rounded-2xl bg-[#e8f3ff] px-3 py-3">
+            <div className="text-2xl font-black text-[#0069CF]">7</div>
+            <div className="text-[12px] font-semibold text-neutral-600">{t.panelOn}</div>
+          </div>
+          <div className="rounded-2xl bg-neutral-100 px-3 py-3">
+            <div className="text-2xl font-black text-neutral-700">3</div>
+            <div className="text-[12px] font-semibold text-neutral-600">{t.panelOff}</div>
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          data-testid="pmc-syndication-close"
+          className="mt-6 w-full rounded-full bg-[#06182f] px-5 py-3 text-sm font-bold text-white hover:bg-black"
+        >
+          {t.close}
+        </button>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+/**
+ * Searchable directory. Rows arrive URL-free from the server; every row and
+ * every "Syndicated <location>" pill opens the same syndication panel.
+ */
+export default function MediaDirectoryClient({ rows: allRows }: { rows: PmcMediaRow[] }) {
   const t = useT().pmc.media;
   const [query, setQuery] = useState("");
-  const [open, setOpen] = useState<PmcMediaOutlet | null>(null);
+  const [open, setOpen] = useState(false);
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return PMC_MEDIA_DIRECTORY;
-    return PMC_MEDIA_DIRECTORY.filter(
+    if (!q) return allRows;
+    return allRows.filter(
       (m) => m.outlet.toLowerCase().includes(q) || m.location.toLowerCase().includes(q),
     );
-  }, [query]);
+  }, [query, allRows]);
 
   return (
     <div>
@@ -48,36 +122,29 @@ export default function MediaDirectoryClient() {
             {rows.map((m, i) => (
               <tr
                 key={`${m.outlet}-${m.location}`}
-                className={`border-t border-black/5 ${i % 2 ? "bg-[#f5f9fe]" : "bg-white"} ${
-                  m.url ? "cursor-pointer hover:bg-[#e8f3ff]" : ""
+                className={`cursor-pointer border-t border-black/5 hover:bg-[#e8f3ff] ${
+                  i % 2 ? "bg-[#f5f9fe]" : "bg-white"
                 }`}
-                onClick={() => m.url && setOpen(m)}
+                onClick={() => setOpen(true)}
               >
-                <td className="px-3 py-2.5 text-xl leading-none">{flagEmoji(m.iso)}</td>
+                <td className="px-3 py-2.5 text-xl leading-none">{m.flag}</td>
                 <td className="px-3 py-2.5 font-semibold text-neutral-900">
                   {m.outlet}
                   <span className="block text-[12px] font-normal text-neutral-500 sm:hidden">{m.location}</span>
                 </td>
                 <td className="hidden px-3 py-2.5 text-neutral-600 sm:table-cell">{m.location}</td>
                 <td className="px-3 py-2.5">
-                  {m.url ? (
-                    <a
-                      href={m.url}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setOpen(m);
-                      }}
-                      className="inline-flex items-center gap-1.5 break-all text-[#0069CF] hover:underline"
-                    >
-                      {m.url.replace(/^https?:\/\//, "")}
-                      <span className="rounded-full bg-[#0069CF]/10 px-2 py-0.5 text-[11px] font-bold no-underline">
-                        {t.open}
-                      </span>
-                    </a>
-                  ) : (
-                    <span className="text-[13px] text-neutral-400">{t.noSite}</span>
-                  )}
+                  <button
+                    type="button"
+                    data-testid="pmc-syndicated"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpen(true);
+                    }}
+                    className="inline-flex items-center rounded-full bg-[#0069CF]/10 px-3 py-1 text-left text-[13px] font-semibold text-[#0069CF] hover:bg-[#0069CF]/20"
+                  >
+                    {syndicatedLabel(t.syndicated, m.location)}
+                  </button>
                 </td>
               </tr>
             ))}
@@ -85,9 +152,11 @@ export default function MediaDirectoryClient() {
         </table>
       </div>
 
-      {open?.url ? (
-        <IframeModal url={open.url} title={`${open.outlet} — ${open.location}`} onClose={() => setOpen(null)} />
-      ) : null}
+      {open ? <SyndicationPanel t={t} onClose={() => setOpen(false)} /> : null}
     </div>
   );
+}
+
+function syndicatedLabel(template: string, location: string): string {
+  return template.replace("{location}", location);
 }

@@ -1,9 +1,10 @@
 /**
  * PMC Media Directory (Ralf's PMC PDF, pages 7–11, transcribed).
  * PINs from Talispros Mapsites are auto-syndicated to these publications:
- * 10-day cycles, 3 days off to keep listings fresh.
- * `iso` = ISO 3166-1 alpha-2 for the flag; null = Global. `url` null = no
- * official site listed in the source workbook.
+ * 10-day cycles, 7 days on and 3 days off to keep listings fresh.
+ * `iso` = ISO 3166-1 alpha-2 for the flag; null = Global. `url` is internal
+ * reference only (null = none listed in the source workbook) and is never
+ * rendered: the public page receives `pmcMediaRows()`.
  */
 export type PmcMediaOutlet = {
   outlet: string;
@@ -126,4 +127,11 @@ export function flagEmoji(iso: string | null): string {
   return String.fromCodePoint(
     ...iso.toUpperCase().split("").map((c) => 0x1f1e6 + c.charCodeAt(0) - 65),
   );
+}
+
+/** What the public Media Directory renders: outlet URLs never leave the server. */
+export type PmcMediaRow = { outlet: string; location: string; flag: string };
+
+export function pmcMediaRows(list: PmcMediaOutlet[] = PMC_MEDIA_DIRECTORY): PmcMediaRow[] {
+  return list.map((m) => ({ outlet: m.outlet, location: m.location, flag: flagEmoji(m.iso) }));
 }

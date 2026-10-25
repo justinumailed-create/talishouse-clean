@@ -1,7 +1,7 @@
 /**
  * Identifier colours for audio transcript speaker labels (site-wide).
- * Aisha → Orange; Webster → Blue; Ralf → Blue when the male track
- * is the same person, or a distinct teal when both Webster and Ralf
+ * Aisha → Orange; Thorsten P → Blue; Ralf → Blue when the male track
+ * is the same person, or a distinct teal when both Thorsten P and Ralf
  * appear as separate labeled speakers in the same transcript.
  */
 
@@ -45,6 +45,11 @@ function hasSpeakerNamed(speakers: Set<string>, name: string): boolean {
   return false;
 }
 
+/** The male team-leader track: "Thorsten P" (older transcripts: "Webster"). */
+function isThorstenLabel(key: string): boolean {
+  return key === "thorsten p" || key === "thorsten" || key === "webster";
+}
+
 /**
  * Resolve label colour for a speaker given who appears in the transcript.
  */
@@ -54,10 +59,14 @@ export function speakerLabelColor(
 ): string {
   const key = speaker.trim().toLowerCase();
   if (key === "aisha") return TALISU_SPEAKER_AISHA_COLOR;
-  if (key === "webster") return TALISU_SPEAKER_WEBSTER_COLOR;
+  if (isThorstenLabel(key)) return TALISU_SPEAKER_WEBSTER_COLOR;
   if (key === "ralf") {
-    // Same male track → Blue; distinct only when Webster + Ralf both labeled.
-    if (hasSpeakerNamed(presentSpeakers, "webster")) {
+    // Same male track → Blue; distinct only when Thorsten P + Ralf both labeled.
+    if (
+      hasSpeakerNamed(presentSpeakers, "thorsten p") ||
+      hasSpeakerNamed(presentSpeakers, "thorsten") ||
+      hasSpeakerNamed(presentSpeakers, "webster")
+    ) {
       return TALISU_SPEAKER_RALF_DISTINCT_COLOR;
     }
     return TALISU_SPEAKER_WEBSTER_COLOR;

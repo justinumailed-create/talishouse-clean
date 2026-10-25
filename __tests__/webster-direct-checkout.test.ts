@@ -18,6 +18,8 @@ vi.mock("@/lib/i18n/server", () => ({ getLocale: async () => gate.locale }));
 
 import TalisUEngagePage from "../app/talisu/engage/page";
 import SamCartEmbed from "../components/talisu/SamCartEmbed";
+import AdviserLayout from "../components/talisu/AdviserLayout";
+import TopBoundFlipbook from "../components/product-flipbook/TopBoundFlipbook";
 import { talisUEngageCheckoutHref } from "../lib/talisu/ask-step";
 import {
   ENGAGE_STRUCTURE_IDS,
@@ -57,7 +59,7 @@ async function renderEngage(params: Record<string, string>) {
   return (await TalisUEngagePage({ searchParams: Promise.resolve(params) })) as ReactNode;
 }
 
-describe("Webster down-payment checkout is open to everyone", () => {
+describe("Thorsten P down-payment checkout is open to everyone", () => {
   beforeEach(() => {
     gate.enforce.mockClear();
     gate.locale = "en";
@@ -183,106 +185,100 @@ describe("transaction structure param", () => {
     );
   });
 
-  it("keeps only Share a Project Vision in the tab panels; Engage Webster sits beside Webster's card", () => {
+  it("keeps only Share a Project Vision in the tab panels; Engage Thorsten P is the landing button", () => {
     const picker = read("components/talisu/TransactionStructurePicker.tsx");
     expect(picker).not.toContain("talisUEngageCheckoutHref");
     expect(picker).not.toContain("t.talisu.engageWebster");
     expect(picker).not.toContain("${testId}-engage");
     expect(picker).toContain("${testId}-learn-more");
-    expect(en.talisu.engageWebster).toBe("Engage Webster");
-    expect(de.talisu.engageWebster).toBe("Webster beauftragen");
+    expect(en.talisu.engageWebster).toBe("Engage Thorsten P");
+    expect(de.talisu.engageWebster).toBe("Thorsten P beauftragen");
     expect(en.talisu.engageStructure).toBe("Structure:");
     expect(de.talisu.engageStructure).toBe("Struktur:");
   });
 });
 
-describe("Webster landing structure note", () => {
-  it("follows the intro line in EN and DE, on the landing only", async () => {
-    expect(en.talisu.engage.landingStructureNote).toBe(
-      "The structure you settle on with Webster shapes how your Mapsite and eBook present your project.",
-    );
-    expect(de.talisu.engage.landingStructureNote).toBe(
-      "Die Struktur, die Sie mit Webster festlegen, bestimmt, wie Ihre Mapsite und Ihr eBook Ihr Projekt präsentieren.",
-    );
-    const page = read("app/talisu/engage/page.tsx");
-    expect(page.match(/landingStructureNote/g)).toHaveLength(1);
-    expect(page.indexOf("landingStructureNote")).toBeGreaterThan(page.indexOf("TALISU_ENGAGE.landingIntro"));
-    gate.locale = "en";
-    const landing = findAll(await renderEngage({}), (el) => el.props["data-testid"] === "engage-structure-note");
-    expect(landing.map((el) => textOf(el))).toEqual([en.talisu.engage.landingStructureNote]);
-    const checkout = await renderEngage({ step: "pay" });
-    expect(findAll(checkout, (el) => el.props["data-testid"] === "engage-structure-note")).toHaveLength(0);
-  });
-});
-
-describe("Webster landing links", () => {
+describe("Thorsten P catalogue landing", () => {
   beforeEach(() => {
     gate.locale = "en";
   });
 
-  async function landingHtml(params: Record<string, string> = {}) {
-    const { renderToStaticMarkup } = await import("react-dom/server");
-    return renderToStaticMarkup((await renderEngage(params)) as ReactElement);
-  }
+  const byTestId = (tree: ReactNode, id: string) =>
+    findAll(tree, (el) => el.props["data-testid"] === id);
+  const checkoutHrefs = (tree: ReactNode) =>
+    findAll(tree, (el) => typeof el.props.href === "string")
+      .map((el) => String(el.props.href))
+      .filter((h) => h.startsWith("/talisu/engage?step=pay"));
 
-  const hrefs = (html: string) =>
-    [...html.matchAll(/href="([^"]*)"/g)].map((m) => m[1].replace(/&amp;/g, "&"));
-  const checkoutHrefs = (html: string) => hrefs(html).filter((h) => h.startsWith("/talisu/engage?step=pay"));
-  const tag = (html: string, testId: string) =>
-    html.match(new RegExp(`<a[^>]*data-testid="${testId}"[^>]*>`))?.[0] ?? "";
-
-  it("headline pill scrolls to the structure tabs instead of the checkout", async () => {
-    const html = await landingHtml();
-    expect(tag(html, "partner-headline-cta")).toContain('href="#structures"');
-    expect(html).toContain('id="structures"');
-    expect(html).toMatch(/<div[^>]*id="structures"[^>]*tabindex="-1"/);
-    expect(html).toContain(en.talisu.engage.ctaLabel);
+  it("shows Thorsten P's portrait with the embedded catalogue flipbook instead of structure tabs", async () => {
+    const tree = await renderEngage({});
+    const layout = findAll(tree, (el) => el.type === AdviserLayout);
+    expect(layout).toHaveLength(1);
+    expect(layout[0].props.imageSrc).toBe("/talisu/webster-team-leader-v2.jpg");
+    expect(layout[0].props.imageAlt).toBe("Thorsten P");
+    expect(layout[0].props.kicker).toBe(en.talisu.engage.adviserKicker);
+    expect(layout[0].props.title).toBe(en.talisu.engage.adviserTitle);
+    const books = findAll(tree, (el) => el.type === TopBoundFlipbook);
+    expect(books).toHaveLength(1);
+    expect(books[0].props.variant).toBe("embedded");
+    expect((books[0].props.pages as unknown[]).length).toBeGreaterThan(1);
+    expect(byTestId(tree, "engage-structures")).toHaveLength(0);
+    expect(read("app/talisu/engage/page.tsx")).not.toMatch(/EngageStructureSelection|TransactionStructurePicker/);
+    expect(gate.enforce).not.toHaveBeenCalled();
   });
 
-  it("has exactly one checkout link: Engage Webster beside the card, with the default structure", async () => {
-    const html = await landingHtml();
-    expect(checkoutHrefs(html)).toEqual(["/talisu/engage?step=pay&structure=conventional"]);
-    const cta = tag(html, "partner-cta");
-    expect(cta).toContain('data-structure-id="conventional"');
-    expect(html).toMatch(/data-testid="partner-cta"[^>]*>Engage Webster<span[^>]*>→<\/span><\/a>/);
-    expect(html).not.toContain("engage-structures-engage");
-    expect(html).toContain("engage-structures-learn-more");
-    expect(html).toContain(en.talisu.engage.headline);
-    expect(html).toContain(en.talisu.engage.ctaNote);
-    expect(html).not.toMatch(/<a[^>]*>[^<]*Send a Down Payment/);
+  it("has one checkout link: Engage Thorsten P → the down-payment checkout", async () => {
+    const tree = await renderEngage({});
+    expect(checkoutHrefs(tree)).toEqual(["/talisu/engage?step=pay"]);
+    const cta = byTestId(tree, "partner-cta")[0];
+    expect(textOf(cta)).toContain("Engage Thorsten P");
+    expect(textOf(byTestId(tree, "talisu-engage-partner")[0])).toContain("Thorsten P — Team Leader");
   });
 
-  it("uses the preselected structure and keeps ?product=", async () => {
-    for (const id of ENGAGE_STRUCTURE_IDS) {
-      const html = await landingHtml({ structure: id, product: "P07" });
-      expect(checkoutHrefs(html)).toEqual([`/talisu/engage?step=pay&product=P07&structure=${id}`]);
+  it("keeps a catalogue ?product= code on the checkout link", async () => {
+    const tree = await renderEngage({ product: "P07" });
+    expect(checkoutHrefs(tree)).toEqual(["/talisu/engage?step=pay&product=P07"]);
+    expect(byTestId(tree, "engage-ask-product")).toHaveLength(1);
+  });
+
+  it("still resolves old ?structure= links without errors and carries the value to checkout", async () => {
+    for (const id of [...ENGAGE_STRUCTURE_IDS, "lease-to-own", "nonsense"]) {
+      const tree = await renderEngage({ structure: id, product: "P07" });
+      const hrefs = checkoutHrefs(tree);
+      expect(hrefs).toHaveLength(1);
+      expect(hrefs[0].startsWith("/talisu/engage?step=pay&product=P07")).toBe(true);
     }
-    const legacy = await landingHtml({ structure: "splits", product: "P07" });
+    const tree = await renderEngage({ structure: "tokenization" });
+    expect(checkoutHrefs(tree)).toEqual(["/talisu/engage?step=pay&structure=tokenization"]);
+    const legacy = await renderEngage({ structure: "splits", product: "P07" });
     expect(checkoutHrefs(legacy)).toEqual([
       "/talisu/engage?step=pay&product=P07&structure=lease-to-own",
     ]);
-    expect(legacy).toContain('data-structure-id="lease-to-own"');
-    expect(legacy).toContain("Lease-to-Own");
   });
 
-  it("labels the button in German", async () => {
+  it("labels the landing in German", async () => {
     gate.locale = "de";
-    const html = await landingHtml();
-    expect(html).toMatch(/data-testid="partner-cta"[^>]*>Webster beauftragen<span/);
-    expect(tag(html, "partner-headline-cta")).toContain('href="#structures"');
+    const tree = await renderEngage({});
+    expect(textOf(byTestId(tree, "partner-cta")[0])).toContain("Thorsten P beauftragen");
+    const layout = findAll(tree, (el) => el.type === AdviserLayout)[0];
+    expect(layout.props.kicker).toBe("Produktkatalog");
+    expect(String(layout.props.title)).toContain("Thorsten P");
   });
 
-  it("checkout Change goes back to the structure tabs", async () => {
-    const html = await landingHtml({ step: "pay", structure: "tokenization", product: "P07" });
-    expect(hrefs(html)).toContain("/talisu/engage?product=P07#structures");
-    const plain = await landingHtml({ step: "pay", structure: "splits" });
-    expect(hrefs(plain)).toContain("/talisu/engage#structures");
+  it("checkout Change goes back to the landing (no structure tabs anchor)", async () => {
+    const { renderToStaticMarkup } = await import("react-dom/server");
+    const hrefs = (html: string) =>
+      [...html.matchAll(/href="([^"]*)"/g)].map((m) => m[1].replace(/&amp;/g, "&"));
+    const html = renderToStaticMarkup(
+      (await renderEngage({ step: "pay", structure: "tokenization", product: "P07" })) as ReactElement,
+    );
+    expect(hrefs(html)).toContain("/talisu/engage?product=P07");
+    expect(html).not.toContain("#structures");
+    expect(html).toContain("Thorsten P");
+    expect(html).not.toContain("Webster");
   });
 
-  it("leaves the pill and big CTA unchanged on Aisha's /talisu/reg landing", () => {
+  it("leaves the pill and big CTA props unused on Aisha's /talisu/reg landing", () => {
     expect(read("app/talisu/reg/page.tsx")).not.toMatch(/headlineCtaHref|mainCta/);
-    const landing = read("components/talisu/PartnerLanding.tsx");
-    expect(landing).toContain("href={headlineCtaHref ?? ctaHref}");
-    expect(landing).toContain("{mainCta ?? (");
   });
 });

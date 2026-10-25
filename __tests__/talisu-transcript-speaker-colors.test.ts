@@ -12,30 +12,35 @@ import {
 import { TALISU_AISHA_WEBSTER_TRANSCRIPT } from "../lib/talisu/transcript";
 
 describe("TalisU transcript speaker colours", () => {
-  it("parses Aisha / Webster labeled lines", () => {
+  it("parses Aisha / Thorsten P labeled lines", () => {
     const a = parseTranscriptLine("Aisha: Hello there.");
     expect(a.speaker).toBe("Aisha");
     expect(a.text).toBe("Hello there.");
-    const w = parseTranscriptLine("Webster: Completely locked up.");
-    expect(w.speaker).toBe("Webster");
+    const w = parseTranscriptLine("Thorsten P: Completely locked up.");
+    expect(w.speaker).toBe("Thorsten P");
   });
 
-  it("colours Aisha orange and Webster blue", () => {
+  it("labels the male speaker Thorsten P in the transcript (no Webster)", () => {
+    expect(TALISU_AISHA_WEBSTER_TRANSCRIPT.some((l) => l.startsWith("Thorsten P: "))).toBe(true);
+    expect(TALISU_AISHA_WEBSTER_TRANSCRIPT.join("\n")).not.toContain("Webster");
+  });
+
+  it("colours Aisha orange and Thorsten P blue", () => {
     const present = collectTranscriptSpeakers(TALISU_AISHA_WEBSTER_TRANSCRIPT);
     expect(speakerLabelColor("Aisha", present)).toBe(TALISU_SPEAKER_AISHA_COLOR);
-    expect(speakerLabelColor("Webster", present)).toBe(
+    expect(speakerLabelColor("Thorsten P", present)).toBe(
       TALISU_SPEAKER_WEBSTER_COLOR,
     );
   });
 
-  it("colours Ralf blue when Webster is not also present", () => {
+  it("colours Ralf blue when Thorsten P is not also present", () => {
     const present = new Set(["Aisha", "Ralf"]);
     expect(speakerLabelColor("Ralf", present)).toBe(TALISU_SPEAKER_WEBSTER_COLOR);
   });
 
-  it("colours Ralf distinctly when Webster and Ralf both appear", () => {
-    const present = new Set(["Aisha", "Webster", "Ralf"]);
-    expect(speakerLabelColor("Webster", present)).toBe(
+  it("colours Ralf distinctly when Thorsten P and Ralf both appear", () => {
+    const present = new Set(["Aisha", "Thorsten P", "Ralf"]);
+    expect(speakerLabelColor("Thorsten P", present)).toBe(
       TALISU_SPEAKER_WEBSTER_COLOR,
     );
     expect(speakerLabelColor("Ralf", present)).toBe(

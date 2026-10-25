@@ -6,12 +6,14 @@ import { getDictionary } from "../lib/i18n/dictionaries";
 
 describe("/talisu/engage share metadata", () => {
   for (const locale of ["en", "de"] as const) {
-    it(`uses the dedicated Webster card (${locale})`, () => {
+    it(`uses the dedicated Thorsten P card (${locale})`, () => {
       const m = getDictionary(locale).meta.talisuEngage;
       expect(
         existsSync(path.join(process.cwd(), "public", m.ogImage)),
       ).toBe(true);
       expect(m.title).not.toMatch(/Mapsite™/);
+      expect(m.title).toContain("Thorsten P");
+      expect(`${m.title} ${m.description} ${m.ogImageAlt}`).not.toContain("Webster");
       expect(m.description).not.toMatch(/USD|Mapsite™/);
       const meta = createTalisUMetadata({
         title: m.title,

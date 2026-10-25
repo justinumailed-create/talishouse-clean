@@ -663,3 +663,20 @@
 .catalogue-spec__services {
   margin-top: 0.5cqw;
 }
+
+/* Embedded in the Thorsten P adviser column (/talisu/engage, Oct 26 2026). */
+.product-flipbook[data-variant="embedded"] {
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.product-flipbook[data-variant="embedded"] .product-flipbook__book,
+.product-flipbook[data-variant="embedded"][data-header="hidden"] .product-flipbook__book {
+  width: 100%;
+}
+
+.product-flipbook[data-variant="embedded"] .product-flipbook__stage {
+  padding: 0.25rem 0 0.5rem;
+}

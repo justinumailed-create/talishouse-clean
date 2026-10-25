@@ -1,5 +1,9 @@
 import { ROUTES } from "@/lib/routes";
 import { ENGAGE_STRUCTURE_PARAM, normalizeEngageStructure } from "@/lib/talisu/engage-structure";
+import {
+  REGISTER_STRUCTURE_PARAM,
+  normalizeRegisterStructure,
+} from "@/lib/talisu/register-structure";
 
 /**
  * "Ask for the business" interstitial (Ralf): /talisu/reg and /talisu/engage
@@ -27,9 +31,14 @@ export function isTalisUEngageCheckoutStep(
   return firstValue(value) === TALISU_ENGAGE_CHECKOUT_STEP;
 }
 
-/** Aisha's Proceed → Register checkout (same tab). */
-export function talisURegisterCheckoutHref(): string {
-  return `${ROUTES.TALISU_REGISTER}?${TALISU_ASK_STEP_PARAM}=${TALISU_REGISTER_CHECKOUT_STEP}`;
+/**
+ * Aisha's Proceed → Register checkout (same tab), tagged with the selected
+ * structure tab (?structure=, one of the four register ids) when there is one.
+ */
+export function talisURegisterCheckoutHref(structure?: string | null): string {
+  const base = `${ROUTES.TALISU_REGISTER}?${TALISU_ASK_STEP_PARAM}=${TALISU_REGISTER_CHECKOUT_STEP}`;
+  const id = normalizeRegisterStructure(structure);
+  return id ? `${base}&${REGISTER_STRUCTURE_PARAM}=${id}` : base;
 }
 
 /**

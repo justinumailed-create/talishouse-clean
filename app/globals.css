@@ -5239,3 +5239,30 @@ body.mapsite-gallery-open [data-paypal-button] {
     align-items: start;
   }
 }
+
+/* Adviser pages (Aisha /talisu/reg, Thorsten P /talisu/engage), Oct 26 2026:
+   portrait band on phones, full-height left half from 1024 px. */
+.talis-adviser {
+  min-height: calc(100dvh - 68px);
+  /* Scroll with the page so the beige surface covers tall phone layouts. */
+  background-attachment: scroll;
+}
+.talis-adviser__photo {
+  height: 9rem;
+}
+@media (min-width: 640px) {
+  .talis-adviser__photo {
+    height: 13rem;
+  }
+}
+@media (max-height: 720px) and (max-width: 1023px) {
+  .talis-adviser__photo {
+    height: 7rem;
+  }
+}
+@media (min-width: 1024px) {
+  .talis-adviser__photo {
+    height: auto;
+    min-height: 100%;
+  }
+}

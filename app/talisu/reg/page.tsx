@@ -1,4 +1,6 @@
 import Image from "next/image";
+import Link from "next/link";
+import { cookies } from "next/headers";
 import { enforcePmcRegistrationGate, firstParam } from "@/lib/talisu/pmc-gate";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
@@ -7,11 +9,15 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE } from "@/lib/talispros/market-pages";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
-import PartnerLanding, { type PartnerLandingIcon } from "@/components/talisu/PartnerLanding";
+import AdviserLayout from "@/components/talisu/AdviserLayout";
+import RegisterStructureTabs from "@/components/talisu/RegisterStructureTabs";
+import { isTalisURegisterCheckoutStep } from "@/lib/talisu/ask-step";
 import {
-  isTalisURegisterCheckoutStep,
-  talisURegisterCheckoutHref,
-} from "@/lib/talisu/ask-step";
+  REGISTER_STRUCTURE_COOKIE,
+  normalizeRegisterStructure,
+  registerStructureCheckoutUrl,
+  talisURegisterStructureHref,
+} from "@/lib/talisu/register-structure";
 
 export async function generateMetadata() {
   const locale = await getLocale();
@@ -32,7 +38,11 @@ export async function generateMetadata() {
 }
 
 type TalisURegisterPageProps = {
-  searchParams?: Promise<{ step?: string | string[]; fastCode?: string | string[] }>;
+  searchParams?: Promise<{
+    step?: string | string[];
+    fastCode?: string | string[];
+    structure?: string | string[];
+  }>;
 };
 
 export default async function TalisURegisterPage({
@@ -41,36 +51,43 @@ export default async function TalisURegisterPage({
   const TALISU_REGISTER = getDictionary(await getLocale()).talisu.register;
   const params = (await searchParams) ?? {};
 
-  // Conversion landing first (Ralf): Aisha's hero + the four offerings. The
-  // SamCart register checkout only renders after the CTA (?step=register, same tab).
-  // No "select URL in the flag" box — visitors already arrive here from the URL flag.
+  // Structure tag (Oct 26): ?structure=<id> from Aisha's tabs, else the
+  // remembered choice (cookie) so it survives the PMC registration sequence.
+  const cookieStore = await cookies();
+  const structure =
+    normalizeRegisterStructure(params.structure) ??
+    normalizeRegisterStructure(cookieStore.get(REGISTER_STRUCTURE_COOKIE)?.value);
+  const structureTab = structure
+    ? TALISU_REGISTER.structures.find((s) => s.id === structure) ?? null
+    : null;
+
+  // Adviser landing first: Aisha's portrait + the four structure tabs. The
+  // SamCart register checkout only renders after the CTA (?step=register).
   if (!isTalisURegisterCheckoutStep(params.step)) {
-    const icons: PartnerLandingIcon[] = ["map", "book", "chart", "tv"];
     return (
-      <PartnerLanding
+      <AdviserLayout
         testId="talisu-register-landing"
-        kicker={TALISU_REGISTER.landingKicker}
-        title={TALISU_REGISTER.landingTitle}
-        lead={TALISU_REGISTER.landingLead}
         imageSrc={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
         imageAlt="Aisha C."
-        imageWidth={896}
-        imageHeight={1200}
-        partnerName={TALISU_REGISTER.partnerName.split(/ [—–-] /)[0] ?? "Aisha C."}
-        partnerRole={TALISU_REGISTER.partnerHeading}
-        ctaLabel={TALISU_REGISTER.ctaLabel}
-        ctaHref={talisURegisterCheckoutHref()}
-        ctaNote={TALISU_REGISTER.ctaNote}
-        intro={<p>{TALISU_REGISTER.partnerIntro}</p>}
-        cardsHeading={TALISU_REGISTER.offeringsHeading}
-        cards={TALISU_REGISTER.bullets.map((b, i) => ({
-          icon: icons[i] ?? "spark",
-          label: b.label,
-          text: b.text.charAt(0).toUpperCase() + b.text.slice(1),
-        }))}
-        closingTitle={TALISU_REGISTER.closingTitle}
-        closingText={TALISU_REGISTER.closing}
-      />
+        imagePosition="center 20%"
+        kicker={TALISU_REGISTER.adviserKicker}
+        title={TALISU_REGISTER.adviserTitle}
+      >
+        <RegisterStructureTabs
+          tabs={TALISU_REGISTER.structures}
+          initialId={normalizeRegisterStructure(params.structure)}
+          label={TALISU_REGISTER.structuresLabel}
+          selectedLabel={TALISU_REGISTER.structureSelected}
+          closeLabel={TALISU_REGISTER.structureClose}
+          ctaLabel={TALISU_REGISTER.ctaLabel}
+          ctaNote={TALISU_REGISTER.ctaNote}
+        />
+        <div className="mt-6 text-[13px] text-neutral-600" data-testid="talisu-register-partner">
+          <span className="font-semibold text-neutral-900">{TALISU_REGISTER.partnerName}</span>
+          {" · "}
+          {TALISU_REGISTER.partnerHeading}
+        </div>
+      </AdviserLayout>
     );
   }
 
@@ -78,6 +95,8 @@ export default async function TalisURegisterPage({
   // Directory → Contract (agent code) → sign → here → payment. No claimed
   // Mapsite → demo/claim start; unsigned → the sequence. Paid users pass.
   await enforcePmcRegistrationGate(firstParam(params.fastCode));
+
+  const checkoutUrl = registerStructureCheckoutUrl(TALISU_REGISTER.samcartUrl, structure);
 
   return (
     <SectionShell title={TALISU_REGISTER.title} maxWidthClass="max-w-[1920px]">
@@ -102,6 +121,25 @@ export default async function TalisURegisterPage({
           <p className="mt-3 text-sm font-medium text-neutral-950">
             {TALISU_REGISTER.partnerName}
           </p>
+          {structureTab ? (
+            <div
+              data-testid="register-structure"
+              data-structure-id={structureTab.id}
+              className="mt-4 rounded-xl border border-[#046BD9]/25 bg-[#EAF3FF] px-3 py-2.5 text-sm text-neutral-800"
+            >
+              <span className="font-semibold text-neutral-950">
+                {TALISU_REGISTER.structureSelected}
+              </span>{" "}
+              {structureTab.label}
+              {" · "}
+              <Link
+                href={talisURegisterStructureHref(structureTab.id)}
+                className="font-semibold text-[#046BD9] underline-offset-2 hover:underline"
+              >
+                {TALISU_REGISTER.structureChange}
+              </Link>
+            </div>
+          ) : null}
           <p className="mt-3 text-sm text-neutral-700">
             {TALISU_REGISTER.partnerIntro}
           </p>
@@ -120,7 +158,8 @@ export default async function TalisURegisterPage({
 
         <div className="min-w-0">
           <SamCartEmbed
-            src={TALISU_REGISTER.samcartUrl}
+            key={checkoutUrl}
+            src={checkoutUrl}
             title="TalisU Register — SamCart"
             height={1500}
           />

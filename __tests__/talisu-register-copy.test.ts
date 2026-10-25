@@ -34,17 +34,18 @@ describe("TalisU Register copy", () => {
   });
 });
 
-describe("TalisU Register → Product (Webster) copy", () => {
+describe("TalisU Register → Product (Thorsten P) copy", () => {
   it("uses Fulfilment Team in the engage headline (Ralf, Oct 18)", () => {
     expect(TALISU_ENGAGE.headline).toBe(
-      "Send a Down Payment to engage Webster and his Fulfilment Team",
+      "Send a Down Payment to engage Thorsten P and his Fulfilment Team",
     );
   });
 
-  it("introduces Webster as the customization partner", () => {
+  it("introduces Thorsten P as the customization partner", () => {
     expect(TALISU_ENGAGE.partnerHeading).toBe("Your Customization Partner");
-    expect(TALISU_ENGAGE.partnerName).toBe("Webster M. — Team Leader");
-    expect(TALISU_ENGAGE.partnerImage).toBe("/talisu/webster-banker-v3.jpg");
+    expect(TALISU_ENGAGE.partnerName).toBe("Thorsten P — Team Leader");
+    expect(TALISU_ENGAGE.partnerImage).toBe("/talisu/webster-team-leader-v2.jpg");
+    expect(TALISU_ENGAGE.partnerImageAlt).toBe("Thorsten P");
     expect(TALISU_ENGAGE.paragraphs).toEqual([
       'Modular container or dome structures unlock "hyper-mobility" with structural reliability, allowing traffic-reliant businesses to deploy physical locations exactly where they find their customers.',
       "Built from standardized, durable “Corten” steel (corrosion resistant with high tensile strength) or fibreglass, prefabricated modules can be operationalized quickly.",
@@ -91,7 +92,7 @@ describe("TalisU Register → Product (Webster) copy", () => {
     expect(page).toContain("TALISU_ENGAGE.helpItems");
     expect(page).toContain("TALISU_ENGAGE.protectionHeading");
     expect(page).toContain("TALISU_ENGAGE.protectionText");
-    expect(page).toContain("PartnerLanding");
+    expect(page).toContain("AdviserLayout");
     expect(page).toContain("TALISU_ENGAGE.headline");
     expect(page).toContain("t.engageCustomizing");
     expect(page).toContain("SamCartEmbed");
@@ -104,7 +105,7 @@ describe("TalisU Register → Product (Webster) copy", () => {
   it("translates the customization partner card into German (Sie)", () => {
     const engage = de.talisu.engage;
     expect(engage.partnerHeading).toBe("Ihr Anpassungspartner");
-    expect(engage.partnerName).toBe("Webster M. – Teamleiter");
+    expect(engage.partnerName).toBe("Thorsten P – Teamleiter");
     expect(engage.partnerImage).toBe(TALISU_ENGAGE.partnerImage);
     expect(engage.paragraphs).toHaveLength(3);
     expect(engage.paragraphs[0]).toContain("„Hypermobilität“");

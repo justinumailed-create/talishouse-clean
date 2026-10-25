@@ -142,16 +142,16 @@ def main():
                     "alt": "Talispros™ tree logo: Talispros™ Admin console"},
              "de": {"title": "Talispros™ Admin", "description": "Interne Talispros™ Admin-Werkzeuge. Anmeldung erforderlich.",
                     "alt": "Talispros™ Baumlogo: Talispros™ Admin-Konsole"}}
-    # Dedicated /talisu/engage share card (Webster, fulfilment options), served
+    # Dedicated /talisu/engage share card (Thorsten P, product catalogue), served
     # from /og/talisu-engage-<lang>.jpg via meta.talisuEngage.
     if not only or "talisu-engage" in only:
-        webster = next(p["photo"] for p in P if p["route"] == "/talisu/engage")
-        card("en", "TALISU™  ·  FULFILMENT OPTIONS", ["Engage Webster", "and his", "Fulfilment Team"],
-             ["Conventional · Lease-to-Own", "Fractionalization", "Tokenization"], "talispros.com/talisu/engage",
-             webster, os.path.join(PUB, "og", "talisu-engage-en.jpg"))
-        card("de", "TALISU™  ·  FULFILMENT-OPTIONEN", ["Beauftragen Sie", "Webster und sein", "Fulfilment-Team"],
-             ["Konventionell · Mietkauf", "Fraktionalisierung", "Tokenisierung"], "talispros.com/talisu/engage",
-             webster, os.path.join(PUB, "og", "talisu-engage-de.jpg"))
+        thorsten = next(p["photo"] for p in P if p["route"] == "/talisu/engage")
+        card("en", "TALISU™  ·  PRODUCT CATALOGUE", ["Engage Thorsten P", "and his", "Fulfilment Team"],
+             ["Talishouse™ Catalogue", "$2,000 CAD Down Payment"], "talispros.com/talisu/engage",
+             thorsten, os.path.join(PUB, "og", "talisu-engage-en.jpg"))
+        card("de", "TALISU™  ·  PRODUKTKATALOG", ["Beauftragen Sie", "Thorsten P und sein", "Fulfilment-Team"],
+             ["Talishouse™ Katalog", "Anzahlung 2.000 CAD"], "talispros.com/talisu/engage",
+             thorsten, os.path.join(PUB, "og", "talisu-engage-de.jpg"))
     if not only or "admin" in only:
         card("en", "TALISPROS™  ·  ADMIN CONSOLE", ["Talispros™", "Admin"], ["Mapsites", "Talisbooks™", "Agents"],
              "Internal tools · sign in required", None, os.path.join(OUT, "admin-en.jpg"), panel_bg=NAVY)

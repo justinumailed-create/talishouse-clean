@@ -75,7 +75,7 @@ export default function LearnMorePage() {
               Audio
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-neutral-700 sm:text-[15px]">
-              Hear Aisha &amp; Webster on digital property fractionalization —
+              Hear Aisha &amp; Thorsten P on digital property fractionalization —
               with full transcript on the TalisU™ Audio page.
             </p>
           </div>

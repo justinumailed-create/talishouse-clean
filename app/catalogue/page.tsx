@@ -22,12 +22,12 @@ export default async function CataloguePage() {
       showHeader={false}
       headline={headline}
       headlineAction={
-        // Ralf (Oct 17): "Plan your Project" with Webster → /talisu/engage.
+        // Ralf (Oct 17): "Plan your Project" with Thorsten P → /talisu/engage.
         <WorkingPageCtaLink
           href={ROUTES.TALISU_ENGAGE}
           label={dict.catalogueUi.planProject}
           avatarSrc={WEBSTER_AVATAR_SRC}
-          avatarAlt="Webster M."
+          avatarAlt="Thorsten P"
           testId="catalogue-plan-project-link"
         />
       }

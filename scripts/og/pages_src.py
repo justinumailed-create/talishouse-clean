@@ -3,7 +3,7 @@
 lib/seo/pages.json and render public/og/pages/<slug>-<locale>.jpg."""
 
 AISHA = ("images/mapsites/aisha-c.webp", 0.5, {"en": "Aisha C. — Team Leader", "de": "Aisha C. – Teamleiterin"}, "Aisha C., Team Leader")
-WEBSTER = ("talisu/webster-banker-v3.jpg", 0.5, {"en": "Webster M. — Fulfilment Options", "de": "Webster M. – Fulfilment-Optionen"}, "Webster M., Projects Analyst")
+WEBSTER = ("talisu/webster-team-leader-v2.jpg", 0.5, {"en": "Thorsten P — Fulfilment Options", "de": "Thorsten P – Fulfilment-Optionen"}, "Thorsten P, Team Leader")
 RAHUL = ("images/mapsites/lrg1-rahul.jpeg", 0.5, {"en": "Rahul — Marketing Admin", "de": "Rahul – Marketing-Admin"}, "Rahul, Marketing Admin")
 MAP = ("assets/home-demo/01-talismaps-mkts.jpg", 0.42, None, None)
 SHELF = ("assets/home-demo/02-talisbooks-bookshelf.jpg", 0.3, None, None)
@@ -165,12 +165,12 @@ add("/talisu/kb", "talisu-kb", "public", LAPTOP,
      "TalisU™ Wissensdatenbank: Audios, Videos und Lernmaterial zu Mapsites und FAST Codes.",
      "TALISU™  ·  WISSENSDATENBANK", ["Wissensdatenbank", "Audio, Video", "und Lernen"], ["Audio", "Video", "Mapsites"]))
 add("/talisu/au", "talisu-audio", "public", AISHA,
-    ("TalisU™ Audio: Aisha & Webster",
-     "Listen to TalisU™ audio: a short welcome plus Aisha & Webster on digital property fractionalization.",
-     "TALISU™  ·  AUDIO", ["Listen:", "Aisha & Webster", "on TalisU™"], ["Welcome", "Fractionalization"]),
-    ("TalisU™ Audio: Aisha & Webster",
-     "Hören Sie TalisU™ Audio: eine kurze Begrüßung sowie Aisha & Webster über die digitale Fraktionalisierung von Immobilien.",
-     "TALISU™  ·  AUDIO", ["Hören Sie:", "Aisha & Webster", "bei TalisU™"], ["Begrüßung", "Fraktionalisierung"]))
+    ("TalisU™ Audio: Aisha & Thorsten P",
+     "Listen to TalisU™ audio: a short welcome plus Aisha & Thorsten P on digital property fractionalization.",
+     "TALISU™  ·  AUDIO", ["Listen:", "Aisha & Thorsten P", "on TalisU™"], ["Welcome", "Fractionalization"]),
+    ("TalisU™ Audio: Aisha & Thorsten P",
+     "Hören Sie TalisU™ Audio: eine kurze Begrüßung sowie Aisha & Thorsten P über die digitale Fraktionalisierung von Immobilien.",
+     "TALISU™  ·  AUDIO", ["Hören Sie:", "Aisha & Thorsten P", "bei TalisU™"], ["Begrüßung", "Fraktionalisierung"]))
 add("/talisu/video", "talisu-video", "public", LAPTOP,
     ("TalisU™ Video Library and TalisTV™",
      "The TalisU™ video library and TalisTV™ programming.",
