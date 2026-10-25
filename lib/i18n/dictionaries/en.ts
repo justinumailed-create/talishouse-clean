@@ -164,7 +164,7 @@ export const en = {
     engageCustomizing: "Customizing:",
     engageCataloguePage: "Talishouse™ Product Catalogue page {page}",
     engageChange: "Change",
-    engageWebster: "Engage Webster",
+    engageWebster: "Engage Thorsten P",
     engageStructure: "Structure:",
     footerPartOf: "part of",
     /** Accessible name of the FAQ right-rail essay switcher (pill labels live in essay-registry.ts). */
@@ -662,7 +662,7 @@ export const en = {
     /** Headline above the /catalogue flipbook. */
     headline:
       "Every registered Market comes with preferred Supply Side Access to Talishouse™ Tiny Homes",
-    /** Catalogue headline action → /talisu/engage (Webster). */
+    /** Catalogue headline action → /talisu/engage (Thorsten P). */
     planProject: "Plan your Project",
     /** Mapsites page (/talispros/demo-mapsite) top line (Ralf, Oct 18) + "Build Mapsite Demo" (Aisha). */
     mapsitesHeadline:
@@ -682,6 +682,8 @@ export const en = {
     next: "Next",
     customize: "Customize {label}",
     customizeDesign: "Customize a design",
+    /** Flipbook hint under the page-turn buttons. */
+    flipHint: "Flip up from the top edge. Swipe down to turn back.",
     pageOf: "Page {page} of {count}",
     front: "Front",
     back: "Back",
@@ -786,7 +788,7 @@ export const en = {
     talisuAudio: {
       title: "TalisU™ | Audio",
       description:
-        "Listen to TalisU™ audio — a short welcome autoplays, plus Aisha & Webster on digital property fractionalization.",
+        "Listen to TalisU™ audio — a short welcome autoplays, plus Aisha & Thorsten P on digital property fractionalization.",
     },
     talisuMarkets: {
       title: "TalisU™ | Markets served",
@@ -821,12 +823,12 @@ export const en = {
         "Aisha C., Team Leader, with the Talispros™ tree logo: Register your Mapsite and get global exposure with industry adjacent marketing",
     },
     talisuEngage: {
-      title: "Engage Webster and His Fulfilment Team | TalisU™",
+      title: "Engage Thorsten P and His Fulfilment Team | TalisU™",
       description:
-        "Every project starts with your vision. Engage Webster and his Fulfilment Team using Conventional, SPLITS, Fractionalization or Tokenization structures. Your down payment is credited in full.",
+        "Every project starts with your vision. Choose a Talishouse™ design from the catalogue and engage Thorsten P and his Fulfilment Team. Your $2,000 CAD down payment is credited in full.",
       ogImage: "/og/talisu-engage-en.jpg",
       ogImageAlt:
-        "Webster M., Projects Analyst for fulfilment options, with the Talispros™ tree logo: Engage Webster and his Fulfilment Team to bring your project vision to life",
+        "Thorsten P, Team Leader for fulfilment options, with the Talispros™ tree logo: Engage Thorsten P and his Fulfilment Team to bring your project vision to life",
     },
   },
 } as const;

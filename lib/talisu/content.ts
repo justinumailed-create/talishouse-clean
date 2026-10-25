@@ -180,10 +180,10 @@ export const TALISU_AUDIO = {
   autoplaySrc: "/talisu/Aisha.mp3",
   autoplayTitle: "Aisha — Welcome Summary",
   autoplaySubtitle: "About one minute — plays when you open Audio.",
-  /** Local NotebookLM-style dialogue (Aisha + Webster) on digital property fractionalization. */
+  /** Local NotebookLM-style dialogue (Aisha + Thorsten P) on digital property fractionalization. */
   aishaWebsterSrc: "/talisu/Aisha-Webster.mp3",
   aishaWebsterSubtitle:
-    "Digital Property Fractionalization — with Aisha & Webster",
+    "Digital Property Fractionalization — with Aisha & Thorsten P",
   aishaWebsterVtt: "/talisu/Aisha-Webster.vtt",
   playHint: "A short welcome plays first. Other clips list and play like Knowledge Base Audios.",
 } as const;
@@ -210,7 +210,7 @@ export const TALISU_AUDIO_LIBRARY: readonly TalisUAudioLibraryItem[] = [
   },
   {
     id: "aisha-webster",
-    title: "Digital Property Fractionalization — Aisha & Webster",
+    title: "Digital Property Fractionalization — Aisha & Thorsten P",
     description:
       "NotebookLM-style dialogue on digital property fractionalization. Transcript below.",
     src: "/talisu/Aisha-Webster.mp3",
@@ -253,16 +253,50 @@ export const TALISU_REGISTER = {
   ctaLabel: "Register now",
   ctaNote: "Secure checkout · takes about two minutes",
   closingTitle: "Ready to put your market on the map?",
+  /** Adviser landing (Oct 26): Aisha's photo + four structure tabs. */
+  adviserKicker: "Registration options",
+  adviserTitle:
+    "Put your listings on the map. Register your Mapsite with Aisha and her team, and choose the structure your properties are offered under.",
+  structuresLabel: "Choose your structure",
+  structures: [
+    {
+      id: "conventional",
+      label: "Conventional",
+      body: "A straightforward sale or lease. Your Mapsite presents the property, the price in CAD and the terms buyers already know, so serious enquiries reach you without detours.",
+      result: "Best for: listings sold or leased outright.",
+    },
+    {
+      id: "lease-to-own",
+      label: "Lease-to-Own",
+      body: "Buyers move in now and build ownership with every payment. Aisha's team sets up your Mapsite to explain the lease term, the purchase option and how rent is credited toward the price.",
+      result: "Best for: buyers who need time before full financing.",
+    },
+    {
+      id: "fractionalization",
+      label: "Fractionalization",
+      body: "One property, several co-owners. Your Mapsite shows each share, what it includes and how owners use and benefit from the property, so groups can commit with confidence.",
+      result: "Best for: higher-value properties shared by several owners.",
+    },
+    {
+      id: "tokenization",
+      label: "Tokenization",
+      body: "Ownership recorded as digital tokens. Your Mapsite links the property to its token offering and explains, in plain terms, how participation, transfers and reporting work.",
+      result: "Best for: offerings to a wider pool of digital investors.",
+    },
+  ],
+  structureSelected: "Selected structure:",
+  structureClose: "Close",
+  structureChange: "Change",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
 } as const;
 
 export const TALISU_ENGAGE = {
   title: "Engage the Team",
-  headline: "Send a Down Payment to engage Webster and his Fulfilment Team",
+  headline: "Send a Down Payment to engage Thorsten P and his Fulfilment Team",
   partnerHeading: "Your Customization Partner",
-  partnerName: "Webster M. — Team Leader",
-  partnerImage: "/talisu/webster-banker-v3.jpg",
-  partnerImageAlt: "Webster M.",
+  partnerName: "Thorsten P — Team Leader",
+  partnerImage: "/talisu/webster-team-leader-v2.jpg",
+  partnerImageAlt: "Thorsten P",
   paragraphs: [
     'Modular container or dome structures unlock "hyper-mobility" with structural reliability, allowing traffic-reliant businesses to deploy physical locations exactly where they find their customers.',
     "Built from standardized, durable “Corten” steel (corrosion resistant with high tensile strength) or fibreglass, prefabricated modules can be operationalized quickly.",
@@ -285,15 +319,16 @@ export const TALISU_ENGAGE = {
   ctaLabel: "Engage the team",
   ctaNote: "Fully applied to your order · protected for up to 12 months",
   finalTitle: "Every project starts with your vision.",
-  finalText: "Engage Webster and his Fulfilment Team to bring it to life.",
-  /** Landing (Ralf, Oct 18): one line on top, CSFT buttons, Webster as projects analyst. */
-  landingLead:
-    "Every project starts with your vision. Engage Webster and his Fulfilment Team to bring it to life utilizing Conventional, SPLITS, Fractionalization, or Tokenization capitalization structures",
+  finalText: "Engage Thorsten P and his Fulfilment Team to bring it to life.",
   landingRole: "Projects Analyst · Fulfilment Options",
-  landingIntro:
-    "Webster and his Fulfilment Team help match your project to the right structure: Conventional, SPLITS, Fractionalization or Tokenization.",
-  landingStructureNote:
-    "The structure you settle on with Webster shapes how your Mapsite and eBook present your project.",
+  /** Adviser landing (Oct 26): Thorsten P's photo + the product catalogue. */
+  adviserKicker: "Product catalogue",
+  adviserTitle:
+    "Every project starts with your vision. Choose a Talishouse™ design from the catalogue and engage Thorsten P and his Fulfilment Team to bring it to life.",
+  catalogueLabel: "Talishouse™ Product Catalogue",
+  catalogueHint: "Tap any unit to reserve it with your down payment.",
+  adviserCtaNote:
+    "$2,000 CAD down payment · fully applied to your order · protected for up to 12 months",
   samcartUrl: "https://talispros.mysamcart.com/checkout/custom",
 } as const;
 

@@ -27,7 +27,7 @@ export const TALISU_KB_MAPSITE_MANAGER_FAST_CODE = "rm22";
 export const TALISU_KB_DEFAULT_AUDIOS: readonly TalisUKbItem[] = [
   {
     id: "aisha-webster",
-    title: "Digital Property Fractionalization — Aisha & Webster",
+    title: "Digital Property Fractionalization — Aisha & Thorsten P",
     description:
       "Listen to the NotebookLM-style dialogue, or open the full transcript on Audio Files.",
     href: "/talisu/au",

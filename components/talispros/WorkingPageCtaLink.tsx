@@ -1,12 +1,12 @@
 import Link from "next/link";
 
-/** Team Leader avatars for working-page CTAs (Aisha → Register, Webster → Plan). */
+/** Team Leader avatars for working-page CTAs (Aisha → Register, Thorsten P → Plan). */
 export const AISHA_AVATAR_SRC = "/images/mapsites/aisha-c.webp";
-export const WEBSTER_AVATAR_SRC = "/talisu/webster-banker-v3.jpg";
+export const WEBSTER_AVATAR_SRC = "/talisu/webster-team-leader-v2.jpg";
 
 /**
  * Pill link with a round Team Leader photo, used on the beige working pages:
- * Catalogue "Plan your Project" (Webster) and Mapsites "Register a Mapsite" (Aisha).
+ * Catalogue "Plan your Project" (Thorsten P) and Mapsites "Register a Mapsite" (Aisha).
  */
 export default function WorkingPageCtaLink({
   href,

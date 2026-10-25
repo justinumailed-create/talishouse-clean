@@ -307,14 +307,47 @@ export const de: Dictionary = {
       ctaLabel: "Jetzt registrieren",
       ctaNote: "Sicherer Checkout · dauert etwa zwei Minuten",
       closingTitle: "Bereit, Ihren Markt auf die Karte zu bringen?",
+      adviserKicker: "Registrierungsoptionen",
+      adviserTitle:
+        "Bringen Sie Ihre Angebote auf die Karte. Registrieren Sie Ihre Mapsite bei Aisha und ihrem Team und wählen Sie die Struktur, unter der Ihre Immobilien angeboten werden.",
+      structuresLabel: "Wählen Sie Ihre Struktur",
+      structures: [
+        {
+          id: "conventional",
+          label: "Konventionell",
+          body: "Klassischer Verkauf oder klassische Vermietung. Ihre Mapsite zeigt die Immobilie, den Preis in CAD und die Konditionen, die Käufer bereits kennen – so erreichen Sie ernsthafte Anfragen ohne Umwege.",
+          result: "Ideal für: Angebote, die direkt verkauft oder vermietet werden.",
+        },
+        {
+          id: "lease-to-own",
+          label: "Mietkauf",
+          body: "Käufer ziehen sofort ein und bauen mit jeder Zahlung Eigentum auf. Aishas Team richtet Ihre Mapsite so ein, dass Mietdauer, Kaufoption und die Anrechnung der Miete auf den Kaufpreis klar erklärt sind.",
+          result: "Ideal für: Käufer, die vor der vollen Finanzierung noch Zeit brauchen.",
+        },
+        {
+          id: "fractionalization",
+          label: "Fraktionalisierung",
+          body: "Eine Immobilie, mehrere Miteigentümer. Ihre Mapsite zeigt jeden Anteil, was er umfasst und wie die Eigentümer die Immobilie nutzen und davon profitieren – so können sich Gruppen mit Zuversicht entscheiden.",
+          result: "Ideal für: höherwertige Immobilien, die sich mehrere Eigentümer teilen.",
+        },
+        {
+          id: "tokenization",
+          label: "Tokenisierung",
+          body: "Eigentum, erfasst als digitale Token. Ihre Mapsite verbindet die Immobilie mit ihrem Token-Angebot und erklärt verständlich, wie Beteiligung, Übertragungen und Berichte funktionieren.",
+          result: "Ideal für: Angebote an einen breiteren Kreis digitaler Investoren.",
+        },
+      ],
+      structureSelected: "Gewählte Struktur:",
+      structureClose: "Schließen",
+      structureChange: "Ändern",
     },
     engage: {
       ...TALISU_ENGAGE,
       title: "Das Team beauftragen",
       headline:
-        "Leisten Sie eine Anzahlung, um Webster und sein Fulfilment-Team zu beauftragen",
+        "Leisten Sie eine Anzahlung, um Thorsten P und sein Fulfilment-Team zu beauftragen",
       partnerHeading: "Ihr Anpassungspartner",
-      partnerName: "Webster M. – Teamleiter",
+      partnerName: "Thorsten P – Teamleiter",
       paragraphs: [
         "Modulare Container- oder Kuppelbauten erschließen „Hypermobilität“ bei struktureller Zuverlässigkeit und ermöglichen Unternehmen, die auf Kundenfrequenz angewiesen sind, physische Standorte genau dort einzusetzen, wo sie ihre Kunden finden.",
         "Vorgefertigte Module aus standardisiertem, langlebigem „Corten“-Stahl (korrosionsbeständig und mit hoher Zugfestigkeit) oder aus Fiberglas lassen sich schnell in Betrieb nehmen.",
@@ -336,19 +369,20 @@ export const de: Dictionary = {
       ctaLabel: "Team beauftragen",
       ctaNote: "Vollständig auf Ihre Bestellung angerechnet · bis zu 12 Monate geschützt",
       finalTitle: "Jedes Projekt beginnt mit Ihrer Vision.",
-      finalText: "Beauftragen Sie Webster und sein Fulfilment-Team, um sie Wirklichkeit werden zu lassen.",
-      landingLead:
-        "Jedes Projekt beginnt mit Ihrer Vision. Beauftragen Sie Webster und sein Fulfilment-Team, sie mit konventionellen, SPLITS-, Fraktionalisierungs- oder Tokenisierungs-Kapitalisierungsstrukturen Wirklichkeit werden zu lassen",
+      finalText: "Beauftragen Sie Thorsten P und sein Fulfilment-Team, um sie Wirklichkeit werden zu lassen.",
       landingRole: "Projektanalyst · Fulfilment-Optionen",
-      landingIntro:
-        "Webster und sein Fulfilment-Team finden mit Ihnen die passende Struktur für Ihr Projekt: konventionell, SPLITS, Fraktionalisierung oder Tokenisierung.",
-      landingStructureNote:
-        "Die Struktur, die Sie mit Webster festlegen, bestimmt, wie Ihre Mapsite und Ihr eBook Ihr Projekt präsentieren.",
+      adviserKicker: "Produktkatalog",
+      adviserTitle:
+        "Jedes Projekt beginnt mit Ihrer Vision. Wählen Sie ein Talishouse™-Design aus dem Katalog und beauftragen Sie Thorsten P und sein Fulfilment-Team, sie Wirklichkeit werden zu lassen.",
+      catalogueLabel: "Talishouse™ Produktkatalog",
+      catalogueHint: "Tippen Sie auf eine Einheit, um sie mit Ihrer Anzahlung zu reservieren.",
+      adviserCtaNote:
+        "Anzahlung von 2.000 CAD · vollständig auf Ihre Bestellung angerechnet · bis zu 12 Monate geschützt",
     },
     engageCustomizing: "Anpassung:",
     engageCataloguePage: "Talishouse™ Produktkatalog, Seite {page}",
     engageChange: "Ändern",
-    engageWebster: "Webster beauftragen",
+    engageWebster: "Thorsten P beauftragen",
     engageStructure: "Struktur:",
     footerPartOf: "ein Teil von",
     essaySwitcher: "Aufsätze",
@@ -907,6 +941,7 @@ export const de: Dictionary = {
     next: "Weiter",
     customize: "{label} anpassen",
     customizeDesign: "Ein Design anpassen",
+    flipHint: "Von der Oberkante nach oben blättern. Zum Zurückblättern nach unten wischen.",
     pageOf: "Seite {page} von {count}",
     front: "Vorderseite",
     back: "Rückseite",
@@ -1012,7 +1047,7 @@ export const de: Dictionary = {
     talisuAudio: {
       title: "TalisU™ | Audio",
       description:
-        "Hören Sie TalisU™-Audios – eine kurze Begrüßung startet automatisch, dazu Aisha & Webster über die digitale Fraktionalisierung von Immobilien.",
+        "Hören Sie TalisU™-Audios – eine kurze Begrüßung startet automatisch, dazu Aisha & Thorsten P über die digitale Fraktionalisierung von Immobilien.",
     },
     talisuMarkets: {
       title: "TalisU™ | Unsere Märkte",
@@ -1047,12 +1082,12 @@ export const de: Dictionary = {
         "Aisha C., Teamleiterin, mit dem Talispros™-Baumlogo – Registrieren Sie Ihre Mapsite: globale Sichtbarkeit durch branchennahes Marketing",
     },
     talisuEngage: {
-      title: "Webster und sein Fulfilment-Team beauftragen | TalisU™",
+      title: "Thorsten P und sein Fulfilment-Team beauftragen | TalisU™",
       description:
-        "Jedes Projekt beginnt mit Ihrer Vision. Beauftragen Sie Webster und sein Fulfilment-Team – mit konventionellen, SPLITS-, Fraktionalisierungs- oder Tokenisierungsstrukturen. Die Anzahlung wird vollständig angerechnet.",
+        "Jedes Projekt beginnt mit Ihrer Vision. Wählen Sie ein Talishouse™-Design aus dem Katalog und beauftragen Sie Thorsten P und sein Fulfilment-Team. Ihre Anzahlung von 2.000 CAD wird vollständig angerechnet.",
       ogImage: "/og/talisu-engage-de.jpg",
       ogImageAlt:
-        "Webster M., Projektanalyst für Fulfilment-Optionen, mit dem Talispros™-Baumlogo: Beauftragen Sie Webster und sein Fulfilment-Team für Ihre Projektvision",
+        "Thorsten P, Teamleiter für Fulfilment-Optionen, mit dem Talispros™-Baumlogo: Beauftragen Sie Thorsten P und sein Fulfilment-Team für Ihre Projektvision",
     },
   },
 };
