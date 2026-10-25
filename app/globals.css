@@ -5244,6 +5244,8 @@ body.mapsite-gallery-open [data-paypal-button] {
    portrait band on phones, full-height left half from 1024 px. */
 .talis-adviser {
   min-height: calc(100dvh - 68px);
+  /* Scroll with the page so the beige surface covers tall phone layouts. */
+  background-attachment: scroll;
 }
 .talis-adviser__photo {
   height: 9rem;

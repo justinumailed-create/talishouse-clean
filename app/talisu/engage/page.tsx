@@ -115,13 +115,13 @@ export default async function TalisUEngagePage({
             {product.title}
           </div>
         ) : null}
-        <div className="mt-5 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <div className="mt-5 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4 lg:flex-col lg:items-start lg:gap-2 xl:flex-row xl:items-center xl:gap-4">
           <Link
             href={talisUEngageCheckoutHref(product?.code, structure)}
             data-testid="partner-cta"
-            className="inline-flex min-h-12 items-center gap-2 rounded-full bg-[#046BD9] px-6 text-[15px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] transition hover:bg-[#0358b3] sm:text-[16px]"
+            className="inline-flex min-h-12 shrink-0 flex-wrap items-center justify-center gap-x-2 rounded-full bg-[#046BD9] px-6 py-2 text-center text-[15px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] transition hover:bg-[#0358b3] sm:text-[16px]"
           >
-            {t.engageWebster}
+            <span className="whitespace-nowrap">{t.engageWebster}</span>
             <span aria-hidden>→</span>
           </Link>
           <div className="text-[12.5px] text-neutral-600 sm:text-[13px]">
