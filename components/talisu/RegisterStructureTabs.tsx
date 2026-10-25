@@ -148,13 +148,21 @@ export default function RegisterStructureTabs({
           onClick={() => remember(openId)}
           className="inline-flex min-h-12 shrink-0 flex-wrap items-center justify-center gap-x-2 rounded-full bg-[#046BD9] px-6 py-2 text-center text-[15px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] transition hover:bg-[#0358b3] sm:text-[16px]"
         >
-          <span className="whitespace-nowrap">{ctaLabel}</span>
           {open ? (
-            <span className="whitespace-nowrap font-medium text-white/85" data-testid="partner-cta-structure">
-              · {open.label}
+            <>
+              <span className="whitespace-nowrap">{ctaLabel}</span>
+              <span className="whitespace-nowrap">
+                <span className="font-medium text-white/85" data-testid="partner-cta-structure">
+                  · {open.label}
+                </span>{" "}
+                <span aria-hidden>→</span>
+              </span>
+            </>
+          ) : (
+            <span className="whitespace-nowrap">
+              {ctaLabel} <span aria-hidden>→</span>
             </span>
-          ) : null}
-          <span aria-hidden>→</span>
+          )}
         </Link>
         <div className="text-[12.5px] text-neutral-600 sm:text-[13px]">
           {open ? (
