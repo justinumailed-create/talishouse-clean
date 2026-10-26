@@ -1,54 +1,64 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /** Time each live Mapsite stays on screen, and the crossfade length. */
 export const DEMO_SLIDE_INTERVAL_MS = 5500;
 export const DEMO_SLIDE_FADE_MS = 1400;
 
 /**
- * Gentle auto-rotating crossfade of live Mapsite screenshots (Ralf, Oct 26).
+ * Gentle auto-rotating crossfade of claimed Mapsite screenshots.
  * Not a flipbook: every slide sits in the same frame and the next one fades
- * in over the last. Personal details (FAST Code, address, owner name, phone,
- * email) are burned out of the image files themselves, never covered by CSS.
- * Reduced motion: no auto-rotation; the dots still switch slides.
+ * in over the last. Personal details are burned out of the image files
+ * themselves, never covered by CSS. Reduced motion: no auto-rotation; the
+ * dots and feature links still switch slides.
  */
 export default function DemoMapsiteSlides({
   slides,
-  altTemplate,
+  alts,
+  active,
+  onSelect,
+  held,
   label,
 }: {
   slides: readonly string[];
-  /** "… {n} of {total} …" */
-  altTemplate: string;
+  alts: readonly string[];
+  active: number;
+  onSelect: (index: number) => void;
+  /** Pause rotation while a feature link is being chosen. */
+  held: boolean;
   label: string;
 }) {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const onSelectRef = useRef(onSelect);
+  const activeRef = useRef(active);
+  onSelectRef.current = onSelect;
+  activeRef.current = active;
+  const paused = held || hovered;
 
   useEffect(() => {
     if (slides.length < 2 || paused) return;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setInterval(() => {
       if (document.visibilityState === "hidden") return;
-      setActive((current) => (current + 1) % slides.length);
+      onSelectRef.current((activeRef.current + 1) % slides.length);
     }, DEMO_SLIDE_INTERVAL_MS);
     return () => window.clearInterval(timer);
-  }, [slides.length, paused]);
+  }, [paused, slides.length]);
 
   const total = slides.length;
 
   return (
     <div
-      className="demo-hero__slides relative h-full w-full overflow-hidden bg-[#e9e6e0]"
+      className="demo-hero__slides relative h-full w-full overflow-hidden bg-[#e7e4de]"
       role="group"
       aria-roledescription="carousel"
       aria-label={label}
       data-testid="demo-hero-slides"
       data-active-slide={active}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {slides.map((src, index) => (
         <div
@@ -60,11 +70,11 @@ export default function DemoMapsiteSlides({
         >
           <Image
             src={src}
-            alt={altTemplate.replace("{n}", String(index + 1)).replace("{total}", String(total))}
+            alt={alts[index] ?? ""}
             fill
             priority={index === 0}
-            sizes="(min-width: 1024px) 36rem, 100vw"
-            className="object-cover object-top"
+            sizes="(min-width: 1024px) 40rem, 100vw"
+            className="object-cover object-center"
           />
         </div>
       ))}
@@ -76,9 +86,10 @@ export default function DemoMapsiteSlides({
               type="button"
               aria-label={`${index + 1} / ${total}`}
               aria-current={index === active ? "true" : undefined}
-              onClick={() => setActive(index)}
+              data-testid="demo-hero-dot"
+              onClick={() => onSelect(index)}
               className={`h-1.5 rounded-full transition-all ${
-                index === active ? "w-5 bg-neutral-900/80" : "w-1.5 bg-neutral-900/30 hover:bg-neutral-900/50"
+                index === active ? "w-5 bg-white shadow-[0_0_0_1px_rgba(0,0,0,0.35)]" : "w-1.5 bg-white/70 hover:bg-white"
               }`}
             />
           ))}

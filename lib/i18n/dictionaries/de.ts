@@ -982,10 +982,23 @@ export const de: Dictionary = {
       body1:
         "Eine Demo-Mapsite ist eine funktionierende Vorschau Ihrer eigenen Mapsite. Sie richten sie um Ihren Home-PIN ein, und sie zeigt die 80-km-Marktzone, die ein registrierter Markt rund um diesen PIN schützt.",
       body2:
-        "Geben Sie eine Adresse ein, prüfen Sie den PIN auf der Karte und fügen Sie dann ein Demo-Talisbook™ hinzu. Das dauert nur ein paar Minuten, und es wird kein FAST Code vergeben.",
-      cta: "Demo-Mapsite erstellen",
-      slidesLabel: "Beispiele aktiver Mapsites",
-      slideAlt: "Beispiel {n} von {total} einer aktiven Mapsite, persönliche Angaben ausgeblendet",
+        "Die Aufnahmen zeigen eine registrierte Mapsite: die Karte, den Talisbook™-Editor, das Bücherregal, die Wissensdatenbank und weitere PINs. Öffnen Sie eines davon und tippen Sie dann oben auf „Ihre Mapsite erstellen“. Das dauert nur ein paar Minuten, und es wird kein FAST Code vergeben.",
+      featuresLabel: "Mapsite-Funktionen",
+      features: {
+        mapsite: "Mapsite",
+        ebooks: "eBooks",
+        bookshelf: "Bücherregal",
+        knowledge: "Wissensdatenbank",
+        pins: "PINs",
+      },
+      alts: {
+        mapsite: "Karte einer registrierten Mapsite mit Home-PIN und Marktzone, persönliche Angaben ausgeblendet",
+        ebooks: "Talisbook™-Editor einer registrierten Mapsite, persönliche Angaben ausgeblendet",
+        bookshelf: "Bücherregal einer registrierten Mapsite, persönliche Angaben ausgeblendet",
+        knowledge: "TalisU™ Wissensdatenbank für Partner, persönliche Angaben ausgeblendet",
+        pins: "PIN-Dashboard zum Kauf weiterer PINs, Preise in CAD",
+      },
+      slidesLabel: "Funktionen einer registrierten Mapsite",
     },
     addressPlaceholder: "Adresse eingeben …",
     addressLookupUnavailable: "Adresssuche nicht verfügbar. Geben Sie die vollständige Adresse ein und drücken Sie Enter.",

@@ -12,13 +12,23 @@ export const DEMO_ADDRESS_INPUT_NAME = "demo-location-street";
 /** Query flag that opens the builder card directly (deep links, Back). */
 export const DEMO_BUILD_QUERY = "build";
 
-/** Live Mapsite screenshots (personal details burned out of the files). */
-export const DEMO_HERO_SLIDES = [
-  "/talispros/demo-slides/mapsite-example-1.webp",
-  "/talispros/demo-slides/mapsite-example-2.webp",
-  "/talispros/demo-slides/mapsite-example-3.webp",
-  "/talispros/demo-slides/mapsite-example-4.webp",
+/**
+ * Claimed Mapsite feature screens (personal details burned out of the files).
+ * Each chip switches to that screen and links to a public page — never a
+ * private dashboard.
+ */
+export const DEMO_HERO_FEATURES = [
+  { id: "mapsite", src: "/talispros/demo-slides/feature-mapsite.webp", href: "/talisu/mkts" },
+  { id: "ebooks", src: "/talispros/demo-slides/feature-ebooks.webp", href: "/talisbooks" },
+  { id: "bookshelf", src: "/talispros/demo-slides/feature-bookshelf.webp", href: "/catalogue/bookshelf" },
+  { id: "knowledge", src: "/talispros/demo-slides/feature-knowledge.webp", href: "/talisu/kb" },
+  { id: "pins", src: "/talispros/demo-slides/feature-pins.webp", href: "/talisu#faq" },
 ] as const;
+
+export type DemoHeroFeatureId = (typeof DEMO_HERO_FEATURES)[number]["id"];
+
+/** Live Mapsite screenshots, in feature order. */
+export const DEMO_HERO_SLIDES = DEMO_HERO_FEATURES.map((feature) => feature.src);
 
 /** The builder card starts open when the URL already carries build/address/PIN state. */
 export function demoBuilderStartsOpen(params: Record<string, string | string[] | undefined>): boolean {
