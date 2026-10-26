@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import { MapEngineProvider } from "@/components/talismaps/map-engine/MapEngineProvider";
 import type { MapEnginePin } from "@/lib/talismaps/map-engine/types";
 import { useT } from "@/lib/i18n/client";
@@ -26,37 +26,10 @@ const SAMPLE_HERO = "/talisbooks/sample/img-11-1280x720.jpeg";
  * colour, weight and shadow, sized to sit in the PIN card.
  */
 const PIN_ACTION_CLASS =
-  "pointer-events-none inline-flex min-h-9 w-full items-center justify-center rounded-full bg-[#046BD9] px-2 text-center text-[12px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] sm:min-h-10 sm:text-[13px]";
+  "pointer-events-none inline-flex min-h-9 w-full items-center justify-center whitespace-nowrap rounded-full bg-[#046BD9] px-1.5 text-center text-[11px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] sm:min-h-10 sm:px-2 sm:text-[13px]";
 
 export default function DemoHeroMap() {
   const card = useT().demo.hero.pinCard;
-  const rootRef = useRef<HTMLDivElement>(null);
-  const cardRef = useRef<HTMLElement>(null);
-  const [pinOffsetY, setPinOffsetY] = useState(120);
-
-  useEffect(() => {
-    const root = rootRef.current;
-    const pinCard = cardRef.current;
-    if (!root || !pinCard) return;
-    const place = () => {
-      const rootBox = root.getBoundingClientRect();
-      const cardBox = pinCard.getBoundingClientRect();
-      if (rootBox.height < 40) return;
-      // The marker hangs above its anchor, so leave room for the whole PIN.
-      const pinY = cardBox.bottom + 96 - rootBox.top;
-      const next = Math.round(pinY - rootBox.height / 2);
-      setPinOffsetY((current) => (Math.abs(current - next) < 2 ? current : next));
-    };
-    place();
-    const observer = new ResizeObserver(place);
-    observer.observe(root);
-    observer.observe(pinCard);
-    const timer = window.setTimeout(place, 700);
-    return () => {
-      window.clearTimeout(timer);
-      observer.disconnect();
-    };
-  }, []);
   const pins: MapEnginePin[] = useMemo(() => {
     const visual = mapSitePinVisualFields();
     return [
@@ -89,10 +62,8 @@ export default function DemoHeroMap() {
 
   return (
     <div
-      ref={rootRef}
       className="relative h-full w-full overflow-hidden bg-[#c9c3b8]"
       data-testid="demo-hero-map"
-      data-pin-offset={pinOffsetY}
       aria-label={card.mapLabel}
     >
       <MapEngineProvider
@@ -101,7 +72,7 @@ export default function DemoHeroMap() {
         initialViewport={viewport}
         selectedPinId={DEMO_DISPLAY_PIN.id}
         lockCenter
-        lockCenterOffset={{ x: 0, y: pinOffsetY }}
+        lockCenterOffset={{ x: 0, y: 0 }}
         interactive={false}
         scrollZoom={false}
         preserveViewport
@@ -109,13 +80,11 @@ export default function DemoHeroMap() {
         <MapEngineCanvas className="absolute inset-0 h-full w-full" />
       </MapEngineProvider>
 
-      <div className="pointer-events-none absolute inset-x-0 top-3 z-10 flex justify-center px-3 sm:top-4">
-        <article
-          ref={cardRef}
-          className="w-[min(92%,16.5rem)]"
-          data-testid="demo-hero-pin-card"
-          aria-label={card.title}
-        >
+      <div
+        className="pointer-events-none absolute inset-x-0 top-2 z-10 flex items-end justify-center px-3"
+        style={{ bottom: "calc(50% + 3.25rem)" }}
+      >
+        <article className="w-[min(92%,16.5rem)]" data-testid="demo-hero-pin-card" aria-label={card.title}>
           <div className="overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm">
             <div className="relative h-16 w-full bg-neutral-200/80 sm:h-20 lg:h-28">
               <Image
@@ -130,7 +99,7 @@ export default function DemoHeroMap() {
             <div className="bg-gradient-to-b from-white/70 to-white/80 px-3.5 pb-3 pt-2">
               <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">{card.title}</h2>
               <p className="m-0 mt-0.5 text-[12px] leading-snug text-neutral-800">{card.body}</p>
-              <div className="mt-2.5 grid grid-cols-2 gap-1.5">
+              <div className="mt-2.5 grid grid-cols-4 gap-1.5 sm:grid-cols-2">
                 {DEMO_PIN_CARD_ACTIONS.map((label) => (
                   <button key={label} type="button" tabIndex={-1} data-testid="demo-hero-pin-action" className={PIN_ACTION_CLASS}>
                     {label}
