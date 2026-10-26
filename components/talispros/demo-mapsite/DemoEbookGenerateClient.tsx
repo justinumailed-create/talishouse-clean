@@ -500,7 +500,7 @@ export default function DemoEbookGenerateClient({
   return (
     <div className="relative flex min-h-dvh flex-col items-center bg-[#f5f5f7] px-6 py-16 text-neutral-950 antialiased sm:py-24">
       <Link
-        href={DEMO_MAPSITE_BUILD_PATH}
+        href={`${DEMO_MAPSITE_BUILD_PATH}?build=1`}
         className="absolute left-6 top-6 text-[12px] tracking-tight text-neutral-400 transition hover:text-neutral-600"
       >
         {copy.backToPins}

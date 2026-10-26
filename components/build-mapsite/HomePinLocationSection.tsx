@@ -148,6 +148,8 @@ export interface HomePinLocationSectionProps {
   demoCopy?: HomePinDemoCopy;
   /** Demo variant: DOM id of the single address input. */
   addressInputId?: string;
+  /** Neutral form-control name for the demo address box. */
+  addressInputName?: string;
   /** Demo variant: highlight the address box (message shown by the page). */
   addressInvalid?: boolean;
   errors?: Partial<Record<keyof HomePinLocationValues | "pinImage", string>>;
@@ -165,6 +167,7 @@ export default function HomePinLocationSection({
   asideSlot,
   demoCopy,
   addressInputId,
+  addressInputName,
   addressInvalid = false,
   errors = {},
 }: HomePinLocationSectionProps) {
@@ -463,9 +466,12 @@ export default function HomePinLocationSection({
             <div className="mt-3">
               <GoogleAddressInput
                 id={addressInputId}
+                name={addressInputName}
+                autoComplete="off"
+                ignorePasswordManagers
                 inputTestId="demo-address-input"
                 hideLabel
-                label={copy?.addressLabel ?? "Home PIN Address"}
+                label={copy?.addressLabel ?? "Street address"}
                 value={values.streetAddress}
                 onChange={(streetAddress) => onChange({ streetAddress, manualPlacement: false })}
                 onPlaceSelected={handleGooglePlaceSelected}

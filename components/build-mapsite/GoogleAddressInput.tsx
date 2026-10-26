@@ -38,6 +38,16 @@ interface GoogleAddressInputProps {
   invalid?: boolean;
   /** Localised "lookup unavailable" note. */
   fallbackHintText?: string;
+  /** Form-control name (default none). */
+  name?: string;
+  /** Browser autofill token (default "street-address"). */
+  autoComplete?: string;
+  /**
+   * Tell browsers and password managers (iCloud Keychain, 1Password,
+   * LastPass, Bitwarden) this is not a login field, so no
+   * "Enable Password AutoFill" prompt appears under it.
+   */
+  ignorePasswordManagers?: boolean;
 }
 
 /**
@@ -61,6 +71,9 @@ export default function GoogleAddressInput({
   hideLabel = false,
   invalid = false,
   fallbackHintText,
+  name,
+  autoComplete = "street-address",
+  ignorePasswordManagers = false,
 }: GoogleAddressInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const onPlaceSelectedRef = useRef(onPlaceSelected);
@@ -149,7 +162,17 @@ export default function GoogleAddressInput({
         onBlur={onBlur}
         onKeyDown={onKeyDown}
         required={required}
-        autoComplete="street-address"
+        name={name}
+        autoComplete={autoComplete}
+        autoCorrect={ignorePasswordManagers ? "off" : undefined}
+        autoCapitalize={ignorePasswordManagers ? "off" : undefined}
+        spellCheck={ignorePasswordManagers ? false : undefined}
+        inputMode={ignorePasswordManagers ? "search" : undefined}
+        enterKeyHint={ignorePasswordManagers ? "search" : undefined}
+        data-1p-ignore={ignorePasswordManagers ? "true" : undefined}
+        data-lpignore={ignorePasswordManagers ? "true" : undefined}
+        data-bwignore={ignorePasswordManagers ? "true" : undefined}
+        data-form-type={ignorePasswordManagers ? "other" : undefined}
         placeholder={placeholder}
         className={`w-full h-11 px-4 bg-white border text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-xl ${
           error || invalid ? "border-red-300" : "border-neutral-200"

@@ -709,6 +709,22 @@ export const en = {
     homePinNameHint: "(or where you would like to centre your home market)",
     /** Mapsites top-line action (Aisha): submits the demo form. */
     buildMapsiteDemo: "Build Mapsite Demo",
+    /** Mapsites page (Ralf, Oct 26): the strip pill that reveals the builder card. */
+    buildYourMapsite: "Build your Mapsite",
+    /** Accessible label of the address box (neutral wording, no "PIN"/password cues). */
+    addressFieldLabel: "Street address",
+    /** Mapsites page hero (Ralf, Oct 26): live Mapsite slides left, write-up right. */
+    hero: {
+      eyebrow: "Demo Mapsite",
+      headline: "See your Market on a Mapsite before you register",
+      body1:
+        "A demo Mapsite is a working preview of your own Mapsite. You set it up around your home PIN, and it shows the 80 km Market Zone that a registered Market protects around that PIN.",
+      body2:
+        "Type an address, check the PIN on the map, then add a demo Talisbook™. It takes a couple of minutes, and no FAST Code is issued.",
+      cta: "Build a demo Mapsite",
+      slidesLabel: "Live Mapsite examples",
+      slideAlt: "Live Mapsite example {n} of {total}, with personal details hidden",
+    },
     /** Demo builder card (Ralf, Oct 26): numbered steps, one address box. */
     addressPlaceholder: "Start typing an address…",
     addressLookupUnavailable: "Address search is unavailable. Type a full address, then press Enter.",

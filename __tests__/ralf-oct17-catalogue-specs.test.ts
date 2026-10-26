@@ -42,7 +42,7 @@ describe("Ralf Oct 17 catalogue spec sheets", () => {
       "utf8",
     );
     expect(builder).toContain("AISHA_AVATAR_SRC");
-    // Ralf (Oct 18): one line + "Build Mapsite Demo" (Aisha) on top; the
+    // Ralf (Oct 18/26): one line + "Build your Mapsite" (Aisha) on top; the
     // bottom "Register a Mapsite" CTA is gone.
     expect(builder).toContain('testId="mapsites-build-demo-link"');
     expect(builder).not.toContain('data-testid="mapsites-register-cta"');

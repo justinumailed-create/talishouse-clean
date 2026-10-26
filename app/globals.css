@@ -5274,6 +5274,35 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 /* Adviser pages (Aisha /talisu/reg, Thorsten P /talisu/engage), Oct 26 2026:
    portrait band on phones, full-height left half from 1024 px. */
+/* Mapsites page hero (Ralf, Oct 26): sits under the Catalogue strip the way
+   the Catalogue book does (centred, about 72rem wide, fills the screen
+   height). Mobile: the live Mapsite slides stack above the write-up. */
+.demo-hero {
+  max-width: 72rem;
+  padding-top: 0.35rem;
+}
+.demo-hero__media {
+  height: 15rem;
+}
+@media (min-width: 640px) {
+  .demo-hero__media {
+    height: 22rem;
+  }
+}
+@media (max-height: 720px) and (max-width: 1023px) {
+  .demo-hero__media {
+    height: 12rem;
+  }
+}
+@media (min-width: 1024px) {
+  .demo-hero__panel {
+    height: clamp(30rem, calc(100dvh - 11rem), 42rem);
+  }
+  .demo-hero__media {
+    height: 100%;
+  }
+}
+
 .talis-adviser {
   min-height: calc(100dvh - 68px);
   /* Scroll with the page so the beige surface covers tall phone layouts. */

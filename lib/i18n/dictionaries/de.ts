@@ -974,6 +974,19 @@ export const de: Dictionary = {
     defaultListingTitle: "Home-PIN-Adresse",
     homePinNameHint: "(oder wo Sie Ihren Heimatmarkt zentrieren möchten)",
     buildMapsiteDemo: "Mapsite-Demo erstellen",
+    buildYourMapsite: "Ihre Mapsite erstellen",
+    addressFieldLabel: "Straßenadresse",
+    hero: {
+      eyebrow: "Demo-Mapsite",
+      headline: "Sehen Sie Ihren Markt auf einer Mapsite, bevor Sie sich registrieren",
+      body1:
+        "Eine Demo-Mapsite ist eine funktionierende Vorschau Ihrer eigenen Mapsite. Sie richten sie um Ihren Home-PIN ein, und sie zeigt die 80-km-Marktzone, die ein registrierter Markt rund um diesen PIN schützt.",
+      body2:
+        "Geben Sie eine Adresse ein, prüfen Sie den PIN auf der Karte und fügen Sie dann ein Demo-Talisbook™ hinzu. Das dauert nur ein paar Minuten, und es wird kein FAST Code vergeben.",
+      cta: "Demo-Mapsite erstellen",
+      slidesLabel: "Beispiele aktiver Mapsites",
+      slideAlt: "Beispiel {n} von {total} einer aktiven Mapsite, persönliche Angaben ausgeblendet",
+    },
     addressPlaceholder: "Adresse eingeben …",
     addressLookupUnavailable: "Adresssuche nicht verfügbar. Geben Sie die vollständige Adresse ein und drücken Sie Enter.",
     step2Title: "PIN auf der Karte anpassen",
