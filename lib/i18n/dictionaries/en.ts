@@ -72,7 +72,6 @@ export const en = {
       knowledgeBase: "Knowledge Base",
       audio: "Audio",
       video: "Video",
-      talispros: "Talispros",
       mediaDirectory: "Media Directory",
       contract: "Contract",
     },

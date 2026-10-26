@@ -51,7 +51,6 @@ export const de: Dictionary = {
       knowledgeBase: "Wissensdatenbank",
       audio: "Audio",
       video: "Video",
-      talispros: "Talispros",
       mediaDirectory: "Mediendirektorium",
       contract: "Vertrag",
     },

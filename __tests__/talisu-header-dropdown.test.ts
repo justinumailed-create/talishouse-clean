@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   TALISU_MKTS_HEADER_DROPDOWN,
+  TALISU_MKTS_HEADER_LOGO_HREF,
   TALISU_MKTS_HEADER_NAV,
   TALISU_MKTS_HEADER_MAPSITES_LABEL,
   TALISU_MKTS_HEADER_REGISTER_DROPDOWN,
@@ -13,7 +14,6 @@ describe("TalisU blue header dropdown", () => {
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label)).toEqual([
       "Bookshelf",
       "FAQ",
-      "Talispros",
       "Media Directory",
       "Contract",
       "Knowledge Base",
@@ -23,13 +23,17 @@ describe("TalisU blue header dropdown", () => {
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.href)).toEqual([
       "/catalogue/bookshelf",
       "/talisu#faq",
-      "/talisu/talispros",
       "/talisu/media-directory",
       "/talisu/contract",
       "/talisu/kb",
       "/talisu/au",
       "/talisu/video",
     ]);
+    // Talispros™ moved out of the dropdown: the header logo opens that page.
+    expect(TALISU_MKTS_HEADER_DROPDOWN.some((i) => (i.label as string) === "Talispros")).toBe(false);
+    expect(
+      TALISU_MKTS_HEADER_DROPDOWN.some((i) => (i.href as string) === TALISU_MKTS_HEADER_LOGO_HREF),
+    ).toBe(false);
     // Bookshelf sits ahead of FAQ inside TalisU (moved out of the top level).
     expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.label).toBe("Bookshelf");
     expect(TALISU_MKTS_HEADER_DROPDOWN[1]?.label).toBe("FAQ");
@@ -147,5 +151,38 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain("max-w-none!");
     expect(header).toContain("min-w-[280px]");
     expect(header).toContain("w-80!");
+  });
+
+  it("makes the tree icon, Talispros™ and the tagline one logo link to the Talispros™ page", () => {
+    expect(TALISU_MKTS_HEADER_LOGO_HREF).toBe("/talisu/talispros");
+    const header = readFileSync(
+      resolve("components/talisu/TalisUMktsHeader.tsx"),
+      "utf8",
+    );
+    const start = header.indexOf('data-testid="header-logo-link"');
+    expect(start).toBeGreaterThan(-1);
+    const linkOpen = header.lastIndexOf("<Link", start);
+    const linkClose = header.indexOf("</Link>", start);
+    const logo = header.slice(linkOpen, linkClose);
+    expect(logo).toContain("href={TALISU_MKTS_HEADER_LOGO_HREF}");
+    expect(logo).toContain("cursor-pointer");
+    expect(logo).toContain("select-none");
+    expect(logo).toContain("talisu-mark.png");
+    expect(logo).toContain("<TalisBrandMark tagline={t.nav.tagline} />");
+    // Exactly one header logo link; no separate icon link to "/".
+    expect(header.split('data-testid="header-logo-link"').length).toBe(2);
+    expect(header).not.toContain('href="/" className="shrink-0 self-start"');
+    expect(header).not.toContain("t.nav.talisuMenu.talispros");
+    // Home stays a navbar link.
+    expect(header).toContain('item.label === "Home").map');
+    const mark = readFileSync(
+      resolve("components/talisu/TalisBrandMark.tsx"),
+      "utf8",
+    );
+    // Wordmark + tagline sit inside the logo link: no nested link.
+    expect(mark).not.toContain("<Link");
+    expect(mark).not.toContain("<a ");
+    expect(mark).toContain("Talispros™");
+    expect(mark).toContain("{tagline}");
   });
 });

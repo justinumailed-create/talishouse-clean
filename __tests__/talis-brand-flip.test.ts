@@ -25,19 +25,20 @@ describe("Talispros™ static brand mark (no flip)", () => {
     expect(mark).not.toContain("setTimeout");
   });
 
-  it("points blue-bar logo mark at homepage / (not /talisu)", () => {
+  it("points the blue-bar logo (icon + wordmark + tagline) at the Talispros™ page", () => {
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
     );
-    expect(header).toContain('href="/" className="shrink-0 self-start"');
+    expect(header).toContain("href={TALISU_MKTS_HEADER_LOGO_HREF}");
+    expect(header).not.toContain('href="/" className="shrink-0 self-start"');
     expect(header).not.toContain('href="/talisu" className="shrink-0 self-start"');
     expect(header).toContain("font-sans");
     const mark = readFileSync(
       resolve("components/talisu/TalisBrandMark.tsx"),
       "utf8",
     );
-    expect(mark).toContain('href="/"');
+    expect(mark).not.toContain("<Link");
   });
 
 });

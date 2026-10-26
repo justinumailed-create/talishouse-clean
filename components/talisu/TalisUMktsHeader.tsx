@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   TALISU_MKTS_HEADER_BLUE,
   TALISU_MKTS_HEADER_DROPDOWN,
+  TALISU_MKTS_HEADER_LOGO_HREF,
   TALISU_MKTS_HEADER_NAV,
   TALISU_MKTS_HEADER_REGISTER_DROPDOWN,
 } from "@/lib/talisu/markets-pins";
@@ -55,8 +56,6 @@ function talisuMenuLabel(t: Dictionary, label: string): string {
       return t.nav.talisuMenu.audio;
     case "Video":
       return t.nav.talisuMenu.video;
-    case "Talispros":
-      return t.nav.talisuMenu.talispros;
     case "Media Directory":
       return t.nav.talisuMenu.mediaDirectory;
     case "Contract":
@@ -519,19 +518,23 @@ export default function TalisUMktsHeader({
       style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
     >
       <div className="mx-auto flex max-w-[1920px] flex-nowrap items-center justify-between gap-3 px-3 py-2 sm:px-5 lg:flex-wrap lg:py-2.5 lg:pb-3.5">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <Link href="/" className="shrink-0 self-start">
-            <Image
-              src="/talisu/mkts/talisu-mark.png"
-              alt="TalisU™"
-              width={40}
-              height={43}
-              className="h-10 w-auto rounded-sm object-contain object-top sm:h-11"
-              priority
-            />
-          </Link>
+        {/* One logo link: tree icon + Talispros™ + tagline → Talispros™ page. */}
+        <Link
+          href={TALISU_MKTS_HEADER_LOGO_HREF}
+          data-testid="header-logo-link"
+          className="flex min-w-0 cursor-pointer select-none items-center gap-2.5 rounded-md text-white no-underline hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          <Image
+            src="/talisu/mkts/talisu-mark.png"
+            alt=""
+            width={40}
+            height={43}
+            draggable={false}
+            className="pointer-events-none h-10 w-auto shrink-0 self-start rounded-sm object-contain object-top sm:h-11"
+            priority
+          />
           <TalisBrandMark tagline={t.nav.tagline} />
-        </div>
+        </Link>
 
         <nav className="hidden flex-wrap items-center justify-end gap-1.5 sm:gap-2 lg:flex">
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Home").map(
@@ -556,7 +559,8 @@ export default function TalisUMktsHeader({
             (item) => item.label === "Catalogue",
           ).map((item) => renderNavLink(item))}
           {/* Claimed Mapsites: the Dashboard lives on the left Marketing card;
-              the PMC sequence (Talispros → Media Directory → Contract) lives in TalisU. */}
+              the PMC sequence (Media Directory → Contract) lives in TalisU;
+              the Talispros™ page is the header logo link. */}
           {/* Paid Mapsite (real activation payment): never show Register. */}
           {claimedMapsite &&
           dashboardUnlocked &&

@@ -91,6 +91,12 @@ export const TALISU_MKTS_HEADER_TAGLINE =
   "Industry Adjacent Mapsite Markets";
 
 /**
+ * Header logo target: tree icon + Talispros™ + tagline are one link to the
+ * Talispros™ pitch page (start of the PMC sequence).
+ */
+export const TALISU_MKTS_HEADER_LOGO_HREF = "/talisu/talispros";
+
+/**
  * Primary top-bar links (home + claimed Mapsites blue header).
  * Catalogue is the book link (Bookshelf lives in the TalisU dropdown); Mapsites is a
  * header dropdown (not here) rendered right AFTER Register:
@@ -115,14 +121,14 @@ export const TALISU_MKTS_HEADER_REGISTER_DROPDOWN = [
 export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
 
 /**
- * TalisU™ header dropdown — Bookshelf, FAQ, Talispros, Media Directory,
- * Contract, Knowledge Base, then (after a divider) Audio, Video.
+ * TalisU™ header dropdown — Bookshelf, FAQ, Media Directory, Contract,
+ * Knowledge Base, then (after a divider) Audio, Video. The Talispros™ page is
+ * reached from the header logo (TALISU_MKTS_HEADER_LOGO_HREF), not this menu.
  */
 export const TALISU_MKTS_HEADER_DROPDOWN = [
   { href: "/catalogue/bookshelf", label: "Bookshelf" },
   { href: "/talisu#faq", label: "FAQ" },
-  // PMC sequence (Talispros → Media Directory → Contract).
-  { href: "/talisu/talispros", label: "Talispros" },
+  // PMC sequence (Media Directory → Contract); Talispros™ is the logo link.
   { href: "/talisu/media-directory", label: "Media Directory" },
   { href: "/talisu/contract", label: "Contract" },
   { href: "/talisu/kb", label: "Knowledge Base" },
