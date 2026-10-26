@@ -248,10 +248,11 @@ describe("Engage page product param", () => {
 
   it("shows Customizing: on /talisu/engage and embeds the product checkout", () => {
     const page = read("app/talisu/engage/page.tsx");
-    expect(page).toContain("findCatalogueProduct(params.product)");
+    expect(page).toContain("parseEngageProducts(params.product)");
+    expect(read("lib/talisu/engage-lock.ts")).toContain("findCatalogueProduct(");
     expect(page).toContain("t.engageCustomizing");
     expect(en.talisu.engageCustomizing).toBe("Customizing:");
-    expect(page).toContain("catalogueProductCheckoutUrl");
+    expect(page).toContain("engageProductsCheckoutUrl");
     expect(page).toContain("src={checkoutUrl}");
   });
 });

@@ -29,19 +29,29 @@ describe("/talisu/engage design gallery", () => {
 
   it("replaces the flipbook on /talisu/engage; /catalogue keeps it", () => {
     const engage = read("app/talisu/engage/page.tsx");
-    expect(engage).toContain("<EngageDesignGallery designs={designs} />");
+    expect(engage).toContain("<EngageSelection");
+    expect(read("components/talisu/EngageSelection.tsx")).toContain(
+      "<EngageDesignGallery designs={designs} selected={selected} onToggle={toggle} />",
+    );
     expect(engage).not.toContain("TopBoundFlipbook");
-    expect(engage).toContain("engage-catalogue-hint");
+    expect(read("components/talisu/EngageSelection.tsx")).toContain("engage-catalogue-hint");
     expect(read("app/catalogue/page.tsx")).toContain("TopBoundFlipbook");
   });
 
-  it("has no zoom: each tile and its Reserve button go straight to step=pay&product=Pxx", () => {
+  it("has no zoom; each tile is a Select / Selected toggle and never links to step=pay", () => {
     const g = read("components/talisu/EngageDesignGallery.tsx");
-    expect(g).toContain("href={talisUEngageCheckoutHref(design.code)}");
-    expect(g).toContain('data-testid="engage-design-reserve"');
-    expect(g).toContain("fmt(e.galleryReserve, { code: design.code })");
-    // Lightbox and its handlers are gone, not hidden.
-    expect(g).not.toMatch(/lightbox|role="dialog"|aria-modal|onTouch|keydown|Escape|ArrowRight|ArrowLeft|useState|useEffect/);
+    // Engage lock: tiles select designs; only the one CTA goes to the down payment.
+    expect(g).not.toContain("talisUEngageCheckoutHref");
+    expect(g).not.toMatch(/href=|<Link|next\/link/);
+    expect(g).toContain("onClick={() => onToggle(design.code)}");
+    expect(g).toContain("aria-pressed={isSelected}");
+    expect(g).toContain('data-testid="engage-design-select"');
+    expect(g).toContain('data-testid="engage-design-check"');
+    expect(g).toContain("e.gallerySelected");
+    expect(g).toContain("e.gallerySelect");
+    expect(g).not.toContain("galleryReserve");
+    // No lightbox / dialog: the hooks only drive the scroll arrows.
+    expect(g).not.toMatch(/lightbox|role="dialog"|aria-modal|onTouch|keydown|Escape|ArrowRight|ArrowLeft/);
     expect(g).not.toMatch(/galleryOpen|galleryClose|galleryPrev|galleryNext|galleryCount|galleryDialog/);
     // Client bundle must not pull in the fs-based page loader.
     expect(g).toContain('import type { EngageDesign } from "@/lib/talisu/engage-designs";');
@@ -51,17 +61,50 @@ describe("/talisu/engage design gallery", () => {
     expect(g).toContain('maxWidth: "none"');
   });
 
+  it("shows the designs in ONE horizontal row that scrolls right (Ralf, Oct 26)", () => {
+    const g = read("components/talisu/EngageDesignGallery.tsx");
+    // Single row: flex + horizontal overflow, no multi-row grid / vertical scroll box.
+    expect(g).toContain("flex snap-x snap-mandatory");
+    expect(g).toContain("overflow-x-auto overflow-y-hidden");
+    expect(g).toContain("scroll-smooth");
+    expect(g).not.toMatch(/grid-cols-|max-h-\[|overflow-y-auto/);
+    // Fixed-width snapping tiles so a partial next tile peeks in.
+    expect(g).toContain("w-[8.5rem] shrink-0 snap-start sm:w-[9.75rem]");
+    // Arrows on desktop only (md:flex), swipe on touch; smooth paging.
+    expect(g).toContain('data-testid="engage-gallery-prev"');
+    expect(g).toContain('data-testid="engage-gallery-next"');
+    expect(g).toContain("md:flex");
+    expect(g).toContain('behavior: reduceMotion ? "auto" : "smooth"');
+    expect(g).toContain("aria-label={e.galleryScrollBack}");
+    expect(g).toContain("aria-label={e.galleryScrollMore}");
+    // The column is min-w-0 so the row never widens the page.
+    expect(read("components/talisu/EngageSelection.tsx")).toContain('className="mt-4 min-w-0"');
+    expect(en.talisu.engage.galleryScrollMore).toBe("Scroll designs right");
+    expect(de.talisu.engage.galleryScrollMore).toBe("Designs nach rechts scrollen");
+    expect(de.talisu.engage.galleryScrollBack).toBe("Designs nach links scrollen");
+  });
+
   it("has final EN and DE gallery copy", () => {
     const e = en.talisu.engage;
     const d = de.talisu.engage;
-    expect(e.catalogueHint).toBe("Choose a design and reserve it with your $2,000 CAD down payment.");
-    expect(d.catalogueHint).toBe("Wählen Sie ein Design und reservieren Sie es mit Ihrer Anzahlung von 2.000 CAD.");
+    expect(e.catalogueHint).toBe("Select one or more designs, then reserve them with your $2,000 CAD down payment.");
+    expect(d.catalogueHint).toBe(
+      "Wählen Sie ein oder mehrere Designs aus und reservieren Sie sie mit Ihrer Anzahlung von 2.000 CAD.",
+    );
     expect(`${e.catalogueHint} ${d.catalogueHint}`).not.toMatch(/zoom|vergrößer|flip|unit/i);
-    expect(fmt(e.galleryReserve, { code: "P07" })).toBe("Reserve P07");
-    expect(fmt(d.galleryReserve, { code: "P07" })).toBe("P07 reservieren");
+    expect(e.gallerySelect).toBe("Select");
+    expect(e.gallerySelected).toBe("Selected");
+    expect(d.gallerySelect).toBe("Auswählen");
+    expect(d.gallerySelected).toBe("Ausgewählt");
+    expect(fmt(e.selectedSummary, { codes: "P03, P07" })).toBe("Selected: P03, P07");
+    expect(fmt(d.selectedSummary, { codes: "P03, P07" })).toBe("Ausgewählt: P03, P07");
+    expect(e.lockNeedStructure).toBe("Choose a structure on Aisha's page first");
+    expect(e.lockNeedDesign).toBe("Select at least one design");
+    expect(d.lockNeedStructure).toBe("Wählen Sie zuerst auf Aishas Seite eine Struktur");
+    expect(d.lockNeedDesign).toBe("Wählen Sie mindestens ein Design aus");
     expect(e.galleryDefaultName).toBe("Talishouse™ design suggestion");
     expect(d.galleryDefaultName).toBe("Talishouse™-Designvorschlag");
-    for (const key of ["galleryOpen", "galleryDialog", "galleryClose", "galleryPrev", "galleryNext", "galleryCount", "galleryReserveNote"]) {
+    for (const key of ["galleryOpen", "galleryDialog", "galleryClose", "galleryPrev", "galleryNext", "galleryCount", "galleryReserveNote", "galleryReserve"]) {
       expect(key in e).toBe(false);
       expect(key in d).toBe(false);
     }

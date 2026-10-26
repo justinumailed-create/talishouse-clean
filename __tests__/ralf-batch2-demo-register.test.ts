@@ -61,10 +61,13 @@ describe("Ralf batch 2 — demo → registration", () => {
       const page = readFileSync(resolve(file), "utf8");
       expect(page).toContain("AdviserLayout");
       expect(page).not.toMatch(/window\.location|setTimeout/);
-      // Only redirect allowed: the PMC gate back to the TalisU sequence
-      // (unsigned Service Agreement) — never an auto-redirect to checkout.
+      // Only redirects allowed: the PMC gate back to the TalisU sequence
+      // (unsigned Service Agreement), and the Engage lock bouncing step=pay
+      // back to the landing — never an auto-redirect to checkout.
       const redirects = page.match(/redirect\([^;]*\)/g) ?? [];
-      for (const r of redirects) expect(r).toContain("PMC_PATHS.talispros");
+      for (const r of redirects) {
+        expect(r).toMatch(/PMC_PATHS\.talispros|^redirect\(engageLockedHref\(/);
+      }
     }
   });
 });

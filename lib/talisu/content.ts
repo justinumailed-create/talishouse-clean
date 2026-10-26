@@ -326,10 +326,19 @@ export const TALISU_ENGAGE = {
   adviserTitle:
     "Every project starts with your vision. Choose a Talishouse™ design from the catalogue and engage Thorsten P and his Fulfilment Team to bring it to life.",
   catalogueLabel: "Talishouse™ Product Catalogue",
-  catalogueHint: "Choose a design and reserve it with your $2,000 CAD down payment.",
-  /** Design gallery on /talisu/engage (thumbnails; each tile reserves its design). */
+  catalogueHint: "Select one or more designs, then reserve them with your $2,000 CAD down payment.",
+  /** Design gallery on /talisu/engage (thumbnails; each tile is a Select toggle). */
   galleryDefaultName: "Talishouse™ design suggestion",
-  galleryReserve: "Reserve {code}",
+  gallerySelect: "Select",
+  gallerySelected: "Selected",
+  /** Engage lock (Oct 26): structure from Aisha's page + at least one design. */
+  selectedSummary: "Selected: {codes}",
+  structureSummary: "Structure: {structure}",
+  lockNeedStructure: "Choose a structure on Aisha's page first",
+  lockNeedDesign: "Select at least one design",
+  /** Single-row gallery arrows (desktop). */
+  galleryScrollBack: "Scroll designs left",
+  galleryScrollMore: "Scroll designs right",
   adviserCtaNote:
     "$2,000 CAD down payment · fully applied to your order · protected for up to 12 months",
   samcartUrl: "https://talispros.mysamcart.com/checkout/custom",

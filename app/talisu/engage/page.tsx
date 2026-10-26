@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
 import { getLocale } from "@/lib/i18n/server";
@@ -8,21 +10,22 @@ import { fmt } from "@/lib/i18n/format";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
 import AdviserLayout from "@/components/talisu/AdviserLayout";
-import EngageDesignGallery from "@/components/talisu/EngageDesignGallery";
+import EngageSelection from "@/components/talisu/EngageSelection";
 import { loadEngageDesigns } from "@/lib/talisu/engage-designs";
+import { isTalisUEngageCheckoutStep } from "@/lib/talisu/ask-step";
+import { engageStructureCheckoutUrl } from "@/lib/talisu/engage-structure";
 import {
-  isTalisUEngageCheckoutStep,
-  talisUEngageCheckoutHref,
-} from "@/lib/talisu/ask-step";
+  engageLockReason,
+  engageLockedHref,
+  engageProductsCheckoutUrl,
+  normalizeEngageLockReason,
+  parseEngageProducts,
+  resolveEngageStructure,
+} from "@/lib/talisu/engage-lock";
 import {
-  CATALOGUE_PATH,
-  catalogueProductCheckoutUrl,
-  findCatalogueProduct,
-} from "@/lib/talisu/catalogue-products";
-import {
-  engageStructureCheckoutUrl,
-  normalizeEngageStructure,
-} from "@/lib/talisu/engage-structure";
+  REGISTER_STRUCTURE_COOKIE,
+  talisURegisterStructureHref,
+} from "@/lib/talisu/register-structure";
 
 export async function generateMetadata() {
   const locale = await getLocale();
@@ -47,6 +50,7 @@ type TalisUEngagePageProps = {
     product?: string | string[];
     step?: string | string[];
     structure?: string | string[];
+    locked?: string | string[];
   }>;
 };
 
@@ -57,25 +61,26 @@ export default async function TalisUEngagePage({
   const t = dictionary.talisu;
   const TALISU_ENGAGE = t.engage;
   const params = (await searchParams) ?? {};
-  // Catalogue hotspots link here as ?product=P07. Unknown codes are ignored.
-  const product = findCatalogueProduct(params.product);
-  // Structure from older landing links (?structure=), limited to the four ids.
-  const structure = normalizeEngageStructure(params.structure);
-  const structureSection = structure
-    ? (dictionary.home.ownershipSections.find((s) => s.id === structure) ??
-      null)
-    : null;
-  const checkoutUrl = engageStructureCheckoutUrl(
-    catalogueProductCheckoutUrl(TALISU_ENGAGE.samcartUrl, product),
-    structure,
+  // Catalogue hotspots link here as ?product=P07 (preselected); several
+  // designs travel as ?product=P03,P07. Unknown codes are ignored.
+  const products = parseEngageProducts(params.product);
+  const productCodes = products.map((p) => p.code);
+  // Engage lock: the structure chosen on Aisha's page (/talisu/reg), from
+  // ?structure= or the talisu_reg_structure cookie, limited to the four ids.
+  const cookieStore = await cookies();
+  const structure = resolveEngageStructure(
+    params.structure,
+    cookieStore.get(REGISTER_STRUCTURE_COOKIE)?.value,
+  );
+  const structureTitles = Object.fromEntries(
+    dictionary.home.ownershipSections.map((s) => [s.id, s.title]),
   );
 
-  // Adviser landing (Oct 26): Thorsten P's portrait + a gallery of the
+  // Adviser landing (Oct 26): Thorsten P's portrait + a single-row gallery of the
   // Talishouse™ catalogue designs (no flipbook here; /catalogue keeps it).
-  // Each design tile (and its Reserve button) goes straight to the $2,000 CAD
-  // down-payment checkout (?step=pay&product=Pxx); the button below goes there too,
-  // keeping a catalogue ?product= code. Older ?structure= links still work:
-  // the value is carried to the checkout and shown there.
+  // Tiles are Select toggles; the one "Engage Thorsten P" button below unlocks
+  // once a structure (Aisha's page) and at least one design are chosen, and is
+  // the only way to the $2,000 CAD down payment (?step=pay).
   if (!isTalisUEngageCheckoutStep(params.step)) {
     const designs = loadEngageDesigns();
     return (
@@ -87,44 +92,14 @@ export default async function TalisUEngagePage({
         kicker={TALISU_ENGAGE.adviserKicker}
         title={TALISU_ENGAGE.adviserTitle}
       >
-        <section
-          className="mt-4 sm:mt-6"
-          data-testid="engage-catalogue"
-          aria-label={TALISU_ENGAGE.catalogueLabel}
-        >
-          <div className="mb-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-600">
-            {TALISU_ENGAGE.catalogueLabel}
-          </div>
-          <EngageDesignGallery designs={designs} />
-          <div className="mt-2 text-center text-[12.5px] text-neutral-600" data-testid="engage-catalogue-hint">
-            {TALISU_ENGAGE.catalogueHint}
-          </div>
-        </section>
-        {product ? (
-          <div
-            className="mt-4 inline-block self-start rounded-2xl border border-[#046BD9]/25 bg-white px-4 py-3 text-[14px] text-neutral-800 shadow-sm sm:text-[15px]"
-            data-testid="engage-ask-product"
-          >
-            <span className="font-semibold text-[#046BD9]">{t.engageCustomizing}</span>{" "}
-            <span className="font-semibold text-neutral-950">{product.code}</span>
-            {" — "}
-            {product.title}
-          </div>
-        ) : null}
-        <div className="mt-5 flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-4 lg:flex-col lg:items-start lg:gap-2 xl:flex-row xl:items-center xl:gap-4">
-          <Link
-            href={talisUEngageCheckoutHref(product?.code, structure)}
-            data-testid="partner-cta"
-            className="inline-flex min-h-12 shrink-0 flex-wrap items-center justify-center gap-x-2 rounded-full bg-[#046BD9] px-6 py-2 text-center text-[15px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] transition hover:bg-[#0358b3] sm:text-[16px]"
-          >
-            <span className="whitespace-nowrap">{t.engageWebster}</span>
-            <span aria-hidden>→</span>
-          </Link>
-          <div className="text-[12.5px] text-neutral-600 sm:text-[13px]">
-            {TALISU_ENGAGE.adviserCtaNote}
-          </div>
-        </div>
-        <div className="mt-6 text-[13px] text-neutral-600" data-testid="talisu-engage-partner">
+        <EngageSelection
+          designs={designs}
+          initialStructure={structure}
+          initialCodes={productCodes}
+          structureTitles={structureTitles}
+          bouncedReason={normalizeEngageLockReason(params.locked)}
+        />
+        <div className="mt-4 text-[13px] text-neutral-600" data-testid="talisu-engage-partner">
           <span className="font-semibold text-neutral-900">{TALISU_ENGAGE.partnerName}</span>
           {" · "}
           {TALISU_ENGAGE.landingRole}
@@ -132,6 +107,21 @@ export default async function TalisUEngagePage({
       </AdviserLayout>
     );
   }
+
+  // Server side of the lock: a direct ?step=pay URL without a valid structure
+  // and at least one valid design goes back to the landing with the reason
+  // (?locked=structure|design); the checkout is never loaded.
+  const lockReason = engageLockReason(structure, productCodes);
+  if (lockReason) {
+    redirect(engageLockedHref(lockReason, productCodes, structure));
+  }
+
+  const structureSection =
+    dictionary.home.ownershipSections.find((s) => s.id === structure) ?? null;
+  const checkoutUrl = engageStructureCheckoutUrl(
+    engageProductsCheckoutUrl(TALISU_ENGAGE.samcartUrl, products),
+    structure,
+  );
 
   // Thorsten P's clients pay the down payment directly and set up their Mapsite
   // afterwards, so this checkout is open to every visitor (no PMC gate).
@@ -185,26 +175,30 @@ export default async function TalisUEngagePage({
         </div>
 
         <div className="min-w-0">
-          {product ? (
+          {products.length ? (
             <div
               className="mb-4 rounded-2xl border border-[#046BD9]/25 bg-white px-4 py-3 text-sm text-neutral-800 shadow-sm sm:text-base"
               data-testid="engage-product"
-              data-product-code={product.code}
+              data-product-code={products[0].code}
+              data-product-codes={productCodes.join(",")}
             >
               <span className="font-semibold text-[#046BD9]">
                 {t.engageCustomizing}
               </span>{" "}
-              <span className="font-semibold text-neutral-950">
-                {product.code}
-              </span>
-              {" — "}
-              {product.title}
-              <span className="text-neutral-500">
-                {" "}
-                · {fmt(t.engageCataloguePage, { page: product.cataloguePage })}
-              </span>{" "}
+              {products.map((item, index) => (
+                <span key={item.code}>
+                  {index ? "; " : null}
+                  <span className="font-semibold text-neutral-950">{item.code}</span>
+                  {" — "}
+                  {item.title}
+                  <span className="text-neutral-500">
+                    {" "}
+                    · {fmt(t.engageCataloguePage, { page: item.cataloguePage })}
+                  </span>
+                </span>
+              ))}{" "}
               <Link
-                href={CATALOGUE_PATH}
+                href={`/talisu/engage?${new URLSearchParams({ structure: structure ?? "", product: productCodes.join(",") }).toString()}`}
                 className="whitespace-nowrap font-medium text-[#046BD9] hover:underline"
               >
                 {t.engageChange}
@@ -224,9 +218,7 @@ export default async function TalisUEngagePage({
                 {structureSection.title}
               </span>{" "}
               <Link
-                href={`/talisu/engage${
-                  product ? `?product=${encodeURIComponent(product.code)}` : ""
-                }`}
+                href={talisURegisterStructureHref(structure)}
                 className="whitespace-nowrap font-medium text-[#046BD9] hover:underline"
               >
                 {t.engageChange}
