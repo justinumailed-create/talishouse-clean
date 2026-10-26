@@ -1,15 +1,11 @@
 "use client";
 
-import { useLocale, useT } from "@/lib/i18n/client";
+import { useLocale } from "@/lib/i18n/client";
 import type { Locale } from "@/lib/i18n/config";
 import { faqEssayLibraryBooks } from "@/lib/talisbooks/library/faq-essay-books";
-import Link from "next/link";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import type { IsolatedBookshelfBook } from "@/lib/talisbooks/isolated-bookshelf-service";
-import {
-  ISOLATED_BOOKSHELF_CREATE_PATH,
-  ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
-} from "@/lib/talisbooks/isolated-bookshelf";
+import { ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION } from "@/lib/talisbooks/isolated-bookshelf";
 import { allPinsClaimedHref } from "@/lib/talispros/allpins-mapsite-ui";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import { ALLPINS_FAST_CODE } from "@/lib/talispros/allpins-mapsite-constants";
@@ -270,23 +266,21 @@ export function buildIsolatedAllPinsBookshelf(
 
 /**
  * Isolated catalogue shelf — same Mapsite-connected Talisbooks™ shelf UX
- * as `/talisbooks/fast/{code}`, scoped to ALLPINS. Admin-only create stays
- * available when `canCreate`; the chrome matches a normal connected shelf.
+ * as `/talisbooks/fast/{code}`, scoped to ALLPINS. The shelf header carries
+ * no Create ebook control; admins create from `/catalogue/bookshelf/create`.
  */
 export default function IsolatedBookshelfView({
   books,
-  canCreate = false,
   fromAllPins = false,
 }: {
   books: IsolatedBookshelfBook[];
   /** Retained for callers; no longer shown in shelf chrome. */
   adminFastCode?: string;
-  /** Show the Create ebook control (Global Admin session only). */
+  /** Retained for callers; the shelf header no longer shows Create ebook. */
   canCreate?: boolean;
   /** True when the reader opened this shelf from the ALLPINS Mapsite chrome. */
   fromAllPins?: boolean;
 }) {
-  const bs = useT().bookshelf;
   const locale = useLocale();
   const bookshelf = buildIsolatedAllPinsBookshelf(books, locale);
   const backHref = allPinsClaimedHref();
@@ -299,17 +293,6 @@ export default function IsolatedBookshelfView({
         compactHeader
         secondaryBackHref={fromAllPins ? backHref : undefined}
         secondaryBackLabel="Back to ALL-PINs"
-        headerExtra={
-          canCreate ? (
-            <Link
-              href={ISOLATED_BOOKSHELF_CREATE_PATH}
-              className="inline-flex flex-shrink-0 items-center justify-center rounded-xl bg-[var(--talis-nav-blue)] px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-[var(--talis-nav-blue-hover)]"
-              data-testid="isolated-bookshelf-create"
-            >
-              {bs.createEbook}
-            </Link>
-          ) : null
-        }
       />
     </div>
   );

@@ -254,8 +254,10 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(shelf).toContain("TalisBooksLibraryShell");
     expect(shelf).toContain("ALLPINS_FAST_CODE");
     expect(shelf).toContain("scopedToFastCode: true");
-    expect(shelf).toContain("headerExtra");
-    expect(shelf).toContain("isolated-bookshelf-create");
+    // Bookshelf header has no Create ebook button (create page keeps it).
+    expect(shelf).not.toContain("headerExtra");
+    expect(shelf).not.toContain("isolated-bookshelf-create");
+    expect(shelf).not.toContain("createEbook");
     expect(shelf).toContain("canCreate");
     expect(shelf).toContain("displayShelfBookTitle");
     expect(shelf).not.toContain("cowboyGuideLibraryEntry");
