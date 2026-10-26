@@ -16,6 +16,7 @@ import {
   type AdminAccount,
   type AdminScope,
 } from "./admin-constants";
+import { ADMIN_ACTIVITY_COOKIE, adminActivityCookieOptions } from "./admin-idle";
 import { accountCanAccessAdminPath } from "./admin-route-access";
 import { getActiveAdminGrant } from "./admin-access-grants";
 import {
@@ -88,7 +89,20 @@ export async function writeAdminSessionCookie(fastCode: string): Promise<AdminAc
     account.fastCode,
     adminSessionCookieOptions(ADMIN_SESSION_MAX_AGE),
   );
+  // Idle cap: middleware ends the session once this short-lived cookie lapses.
+  cookieStore.set(ADMIN_ACTIVITY_COOKIE, "1", adminActivityCookieOptions());
   return account;
+}
+
+/** Activity heartbeat: slide the admin idle cap forward (FAST-code admins only). */
+export async function touchAdminActivityCookie(): Promise<boolean> {
+  const cookieStore = await cookies();
+  const account = await resolveFastCodeAdminAccount(
+    cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null,
+  );
+  if (!account || !cookieStore.get(ADMIN_ACTIVITY_COOKIE)) return false;
+  cookieStore.set(ADMIN_ACTIVITY_COOKIE, "1", adminActivityCookieOptions());
+  return true;
 }
 
 export async function writeAgentSessionCookie(token: string): Promise<void> {
@@ -115,6 +129,8 @@ export async function clearAdminSessionCookie(): Promise<void> {
   const cookieStore = await cookies();
   cookieStore.set(ADMIN_SESSION_COOKIE, "", adminSessionCookieOptions(0));
   cookieStore.delete(ADMIN_SESSION_COOKIE);
+  cookieStore.set(ADMIN_ACTIVITY_COOKIE, "", adminActivityCookieOptions(0));
+  cookieStore.delete(ADMIN_ACTIVITY_COOKIE);
 }
 
 /**

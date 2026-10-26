@@ -6,6 +6,8 @@ import { useEffect, useState, useTransition } from "react";
 import { logoutAdminAction } from "@/app/admin/actions";
 import { adminAccessLabel, adminHomePath, type AdminAccount } from "@/lib/admin-constants";
 import { clearAdminSession } from "@/lib/fast-code";
+import { isIdleLogoutAccess } from "@/lib/admin-idle";
+import AdminIdleLogout from "./AdminIdleLogout";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
 import { AGENT_HEARTBEAT_MS } from "@/lib/agent-collab";
 import { agentLoginPath, isAgentPortalPath } from "@/lib/agent-return-path";
@@ -252,14 +254,24 @@ export default function AdminLayoutClient({
     return <AdminGatePlaceholder />;
   }
 
+  // 1-minute idle logout: Global Admin + granted admins only (not agents).
+  const idleLogout = (
+    <AdminIdleLogout enabled={!isLoginPage && isIdleLogoutAccess(serverAccount?.access)} />
+  );
   if (isTalisMapsAdmin || isLoginPage) {
-    return <>{children}</>;
+    return (
+      <>
+        {idleLogout}
+        {children}
+      </>
+    );
   }
 
   const navItems = serverAccount ? getAdminNavItems(serverAccount) : [];
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+      {idleLogout}
       <div className="flex min-h-screen bg-white overflow-x-hidden">
         <AdminSidebar
           isOpen={sidebarOpen}

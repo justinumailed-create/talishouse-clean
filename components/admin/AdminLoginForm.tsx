@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { loginAdminWithFastCodeAction } from "@/app/admin/actions";
 import { normalizeFastCode, setAdminSession } from "@/lib/fast-code";
 
-export default function AdminLoginForm() {
+export default function AdminLoginForm({ notice = null }: { notice?: string | null }) {
   const [fastCode, setFastCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -48,6 +48,16 @@ export default function AdminLoginForm() {
         <p className="text-sm text-[#6e6e73] text-center mb-8">
           Enter your authorized admin FAST code
         </p>
+
+        {notice ? (
+          <p
+            role="status"
+            data-testid="admin-idle-notice"
+            className="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-center text-sm text-amber-900"
+          >
+            {notice}
+          </p>
+        ) : null}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

@@ -128,14 +128,16 @@ export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
 export const TALISU_MKTS_HEADER_DROPDOWN = [
   { href: "/catalogue/bookshelf", label: "Bookshelf" },
   { href: "/talisu#faq", label: "FAQ" },
-  // PMC sequence (Media Directory → Contract); Talispros™ is the logo link.
   { href: "/talisu/media-directory", label: "Media Directory" },
+  // ── divider (after Media Directory) ── Contract + Knowledge Base below.
+  // Audio and Video are no longer in the menu (their routes still exist).
+  // Talispros™ is the logo link.
   { href: "/talisu/contract", label: "Contract" },
   { href: "/talisu/kb", label: "Knowledge Base" },
-  // ── divider ── Audio + Video stay below the marker.
-  { href: "/talisu/au", label: "Audio" },
-  { href: "/talisu/video", label: "Video" },
 ] as const;
+
+/** TalisU dropdown row that the horizontal divider follows. */
+export const TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER = "Media Directory";
 
 export type TalisUMktsPinKind = "market" | "do-more";
 

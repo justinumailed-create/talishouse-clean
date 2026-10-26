@@ -1,7 +1,6 @@
 "use server";
 
-import { getAdminSessionAccount, resolveFastCodeAdminAccount } from "@/lib/admin-auth";
-import { getMapSiteOwnerSession, getRegisteredMapSiteFastCode } from "@/lib/mapsite-edit-auth";
+import { resolveFastCodeAdminAccount } from "@/lib/admin-auth";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { isTalisUKbPassword } from "@/lib/talisu/kb-gate";
 
@@ -12,21 +11,7 @@ async function isActiveAccountFastCode(code: string | null | undefined): Promise
   return hasCompletedMapSiteActivationPayment({ fastCode, reconcileFromStripe: false });
 }
 
-/**
- * Signed-in active accounts open the Knowledge Base directly: any admin /
- * agent session, or a Mapsite owner / registered-account session whose FAST
- * Code is paid up. Visitors (no session) still get the FAST Code gate.
- */
-export async function getTalisUKbSessionAccessAction(): Promise<boolean> {
-  if (await getAdminSessionAccount()) return true;
-  const codes = new Set(
-    [await getMapSiteOwnerSession(), await getRegisteredMapSiteFastCode()].filter(Boolean) as string[],
-  );
-  for (const code of codes) {
-    if (await isActiveAccountFastCode(code)) return true;
-  }
-  return false;
-}
+// No signed-in bypass: owners, agents and admins all enter a FAST Code below.
 
 /**
  * Gate unlock: a valid FAST Code (admin FAST Code incl. ARUN, or any paid-up

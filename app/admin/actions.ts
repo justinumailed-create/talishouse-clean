@@ -3,6 +3,7 @@
 import {
   clearAdminSessionCookie,
   clearAgentSessionCookie,
+  touchAdminActivityCookie,
   writeAdminSessionCookie,
 } from "@/lib/admin-auth";
 import { normalizeAdminFastCode } from "@/lib/admin-constants";
@@ -34,4 +35,9 @@ export async function loginAdminWithFastCodeAction(
 export async function logoutAdminAction(): Promise<void> {
   await clearAdminSessionCookie();
   await clearAgentSessionCookie();
+}
+
+/** Idle-logout heartbeat from an active admin tab (slides the server idle cap). */
+export async function touchAdminActivityAction(): Promise<boolean> {
+  return touchAdminActivityCookie();
 }

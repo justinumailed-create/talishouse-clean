@@ -70,8 +70,6 @@ export const en = {
     talisuMenu: {
       faq: "FAQ",
       knowledgeBase: "Knowledge Base",
-      audio: "Audio",
-      video: "Video",
       mediaDirectory: "Media Directory",
       contract: "Contract",
     },
@@ -102,9 +100,13 @@ export const en = {
     },
   },
 
+  adminIdle: {
+    signedOut: "Signed out after 1 minute of inactivity.",
+  },
+
   kbUnlock: {
     title: "Knowledge Base",
-    prompt: "Enter your FAST Code to unlock. Signed-in accounts open it directly.",
+    prompt: "Enter your FAST Code to unlock.",
     passwordLabel: "FAST Code or password",
     placeholder: "FAST Code",
     error: "That FAST Code isn't active (or the password is wrong). Try again.",

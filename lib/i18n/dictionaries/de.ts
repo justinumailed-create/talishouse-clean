@@ -49,8 +49,6 @@ export const de: Dictionary = {
     talisuMenu: {
       faq: "FAQ",
       knowledgeBase: "Wissensdatenbank",
-      audio: "Audio",
-      video: "Video",
       mediaDirectory: "Mediendirektorium",
       contract: "Vertrag",
     },
@@ -81,9 +79,13 @@ export const de: Dictionary = {
     },
   },
 
+  adminIdle: {
+    signedOut: "Nach 1 Minute Inaktivität abgemeldet.",
+  },
+
   kbUnlock: {
     title: "Wissensdatenbank",
-    prompt: "Geben Sie Ihren FAST Code ein, um die Inhalte freizuschalten. Angemeldete Konten erhalten direkten Zugang.",
+    prompt: "Geben Sie Ihren FAST Code ein, um die Inhalte freizuschalten.",
     passwordLabel: "FAST Code oder Passwort",
     placeholder: "FAST Code",
     error: "Dieser FAST Code ist nicht aktiv (oder das Passwort ist falsch). Bitte erneut versuchen.",

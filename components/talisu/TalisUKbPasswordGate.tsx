@@ -1,12 +1,9 @@
 "use client";
 
 import { useT } from "@/lib/i18n/client";
-import { useEffect, useState, type ReactNode } from "react";
-import { getTalisUKbSessionAccessAction } from "@/app/talisu/kb/access-actions";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 import {
-  notifyTalisUKbUnlocked,
   readTalisUKbUnlocked,
-  writeTalisUKbUnlocked,
   requestTalisUKbNavbarUnlock,
   TALISU_KB_LOCKED_EVENT,
   TALISU_KB_UNLOCKED_EVENT,
@@ -15,55 +12,50 @@ import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
 
 /**
  * Protects /talisu/kb and manage routes.
- * Unlocked session → children.
+ * Everyone — visitors and signed-in owners, agents and admins alike — must
+ * enter a valid FAST Code; a signed-in session no longer opens it directly.
+ * The unlock lasts for this browser tab only (sessionStorage) → children.
  * Locked → stay on this URL; open the TalisU navbar unlock popover and show
  * an inline PayPal-style unlock card (never bounce to /talisu?kbUnlock=…).
  */
+function subscribeKbUnlock(onChange: () => void) {
+  window.addEventListener(TALISU_KB_UNLOCKED_EVENT, onChange);
+  window.addEventListener(TALISU_KB_LOCKED_EVENT, onChange);
+  return () => {
+    window.removeEventListener(TALISU_KB_UNLOCKED_EVENT, onChange);
+    window.removeEventListener(TALISU_KB_LOCKED_EVENT, onChange);
+  };
+}
+
 export default function TalisUKbPasswordGate({
   children,
 }: {
   children: ReactNode;
 }) {
   const h = useT().talisuHub;
-  const [ready, setReady] = useState(false);
-  const [unlocked, setUnlocked] = useState(false);
+  // null on the server / first paint ("Checking…"); then this tab's unlock.
+  // No session bypass: only a FAST Code unlock from this tab opens the KB.
+  const stored = useSyncExternalStore(
+    subscribeKbUnlock,
+    () => readTalisUKbUnlocked(),
+    () => null,
+  );
+  // Fallback when sessionStorage is blocked: unlocked for this page view only.
+  const [unlockedHere, setUnlockedHere] = useState(false);
+  const ready = stored !== null;
+  const unlocked = stored === true || unlockedHere;
 
   useEffect(() => {
-    let cancelled = false;
-    if (readTalisUKbUnlocked()) {
-      setUnlocked(true);
-      setReady(true);
-    } else {
-      // Signed-in active accounts get in directly; only visitors see the gate.
-      getTalisUKbSessionAccessAction()
-        .catch(() => false)
-        .then((granted) => {
-          if (cancelled) return;
-          if (granted) {
-            writeTalisUKbUnlocked();
-            notifyTalisUKbUnlocked();
-            setUnlocked(true);
-          } else {
-            requestTalisUKbNavbarUnlock();
-          }
-          setReady(true);
-        });
-    }
+    if (stored === false && !unlockedHere) requestTalisUKbNavbarUnlock();
+  }, [stored, unlockedHere]);
 
-    function onUnlocked() {
-      setUnlocked(true);
-    }
+  useEffect(() => {
+    // KB logout locks again even when the fallback unlocked this view.
     function onLocked() {
-      setUnlocked(false);
-      requestTalisUKbNavbarUnlock();
+      setUnlockedHere(false);
     }
-    window.addEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
     window.addEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
-    return () => {
-      cancelled = true;
-      window.removeEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
-      window.removeEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
-    };
+    return () => window.removeEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
   }, []);
 
   if (!ready) {
@@ -80,7 +72,7 @@ export default function TalisUKbPasswordGate({
         <div className="w-full rounded-2xl border border-neutral-200 bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)]">
           <TalisUKbUnlockForm
             variant="inline"
-            onSuccess={() => setUnlocked(true)}
+            onSuccess={() => setUnlockedHere(true)}
           />
         </div>
         <p className="mt-4 text-center text-[12px] text-neutral-500">

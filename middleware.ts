@@ -5,7 +5,12 @@ import {
   ADMIN_PATHNAME_HEADER,
   resolveAdminRequestGate,
 } from "@/lib/admin-request-gate";
-import { isAdminAppPath } from "@/lib/admin-paths";
+import { isAdminAppPath, isPublicAdminPath } from "@/lib/admin-paths";
+import {
+  ADMIN_ACTIVITY_COOKIE,
+  ADMIN_IDLE_LOGIN_PATH,
+  adminActivityCookieOptions,
+} from "@/lib/admin-idle";
 import {
   localeFromRequestUrl,
   persistLocaleCookie,
@@ -24,6 +29,16 @@ export function middleware(request: NextRequest) {
   const locale = localeFromRequestUrl(request.nextUrl);
 
   if (isAdminAppPath(path)) {
+    // Admin idle cap (Global / granted FAST-code admins): no recent activity
+    // cookie → end the admin session server-side and show the idle notice.
+    const adminSession = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+    const adminActive = Boolean(request.cookies.get(ADMIN_ACTIVITY_COOKIE)?.value);
+    if (adminSession && !adminActive && !isPublicAdminPath(path)) {
+      const res = NextResponse.redirect(new URL(ADMIN_IDLE_LOGIN_PATH, request.url));
+      res.cookies.set(ADMIN_SESSION_COOKIE, "", adminActivityCookieOptions(0));
+      return persistLocaleCookie(res, locale);
+    }
+
     const gate = resolveAdminRequestGate({
       pathname: path,
       adminSessionCookie: request.cookies.get(ADMIN_SESSION_COOKIE)?.value,
@@ -40,12 +55,14 @@ export function middleware(request: NextRequest) {
 
     const requestHeaders = withLocaleRequestHeader(new Headers(request.headers), locale);
     requestHeaders.set(ADMIN_PATHNAME_HEADER, path);
-    return persistLocaleCookie(
-      NextResponse.next({
-        request: { headers: requestHeaders },
-      }),
-      locale,
-    );
+    const res = NextResponse.next({
+      request: { headers: requestHeaders },
+    });
+    // Every /admin request by an active admin slides the idle cap forward.
+    if (adminSession && adminActive) {
+      res.cookies.set(ADMIN_ACTIVITY_COOKIE, "1", adminActivityCookieOptions());
+    }
+    return persistLocaleCookie(res, locale);
   }
 
   if (isBusinessOfficePath(path) && !PUBLIC_ROUTES.includes(path)) {

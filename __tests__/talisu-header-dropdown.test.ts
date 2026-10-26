@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   TALISU_MKTS_HEADER_DROPDOWN,
+  TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER,
   TALISU_MKTS_HEADER_LOGO_HREF,
   TALISU_MKTS_HEADER_NAV,
   TALISU_MKTS_HEADER_MAPSITES_LABEL,
@@ -10,15 +11,13 @@ import {
 } from "../lib/talisu/markets-pins";
 
 describe("TalisU blue header dropdown", () => {
-  it("exposes Bookshelf, FAQ, then Knowledge Base, Audio, and Video", () => {
+  it("exposes Bookshelf, FAQ, Media Directory | Contract, Knowledge Base (no Audio / Video)", () => {
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label)).toEqual([
       "Bookshelf",
       "FAQ",
       "Media Directory",
       "Contract",
       "Knowledge Base",
-      "Audio",
-      "Video",
     ]);
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.href)).toEqual([
       "/catalogue/bookshelf",
@@ -26,9 +25,14 @@ describe("TalisU blue header dropdown", () => {
       "/talisu/media-directory",
       "/talisu/contract",
       "/talisu/kb",
-      "/talisu/au",
-      "/talisu/video",
     ]);
+    expect(TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER).toBe("Media Directory");
+    const labels = TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label as string);
+    expect(labels).not.toContain("Audio");
+    expect(labels).not.toContain("Video");
+    const header = readFileSync(resolve("components/talisu/TalisUMktsHeader.tsx"), "utf8");
+    expect(header).not.toContain("t.nav.talisuMenu.audio");
+    expect(header).not.toContain("t.nav.talisuMenu.video");
     // Talispros™ moved out of the dropdown: the header logo opens that page.
     expect(TALISU_MKTS_HEADER_DROPDOWN.some((i) => (i.label as string) === "Talispros")).toBe(false);
     expect(
@@ -93,12 +97,15 @@ describe("TalisU blue header dropdown", () => {
     expect(builder).not.toContain("ROUTES.TALISU_REGISTER");
   });
 
-  it("puts a horizontal divider after Knowledge Base (Audio/Video below) in the TalisU dropdown", () => {
+  it("puts a horizontal divider after Media Directory (Contract + Knowledge Base below) on desktop and mobile", () => {
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
     );
-    expect(header).toContain('item.label === "Knowledge Base"');
+    expect(header).not.toContain('item.label === "Knowledge Base"');
+    // Desktop dropdown + mobile menu both split after Media Directory.
+    expect(header.split("item.label === TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER").length).toBe(3);
+    expect(header).toContain('data-testid="mobile-talisu-divider"');
     expect(header).toContain('case "Bookshelf":');
     expect(header).toContain("t.nav.bookshelf");
     expect(header).toContain('role="separator"');

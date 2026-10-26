@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   TALISU_MKTS_HEADER_BLUE,
   TALISU_MKTS_HEADER_DROPDOWN,
+  TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER,
   TALISU_MKTS_HEADER_LOGO_HREF,
   TALISU_MKTS_HEADER_NAV,
   TALISU_MKTS_HEADER_REGISTER_DROPDOWN,
@@ -52,10 +53,6 @@ function talisuMenuLabel(t: Dictionary, label: string): string {
       return t.nav.talisuMenu.faq;
     case "Knowledge Base":
       return t.nav.talisuMenu.knowledgeBase;
-    case "Audio":
-      return t.nav.talisuMenu.audio;
-    case "Video":
-      return t.nav.talisuMenu.video;
     case "Media Directory":
       return t.nav.talisuMenu.mediaDirectory;
     case "Contract":
@@ -321,8 +318,8 @@ export default function TalisUMktsHeader({
 
   function handleKbMenuClick() {
     if (kbUnlocked || readTalisUKbUnlocked()) setKbUnlocked(true);
-    // Always go to the KB: its gate lets signed-in active accounts straight in
-    // and opens the FAST Code unlock only for visitors.
+    // Always go to the KB: its gate asks everyone (signed in or not) for a
+    // FAST Code unless this tab already unlocked it.
     setOpen(false);
     setPanel("menu");
     setMobileOpen(false);
@@ -639,9 +636,9 @@ export default function TalisUMktsHeader({
                         (item.href.includes("#") &&
                           pathname === item.href.split("#")[0]);
                       const isKb = item.href === TALISU_KB_PATH;
-                      // Divider after Video: PMC sequence below it.
-                      // Divider after Knowledge Base: Audio + Video below it.
-                      const isFaq = item.label === "Knowledge Base";
+                      // Divider after Media Directory: Contract + Knowledge Base below it.
+                      const dividerAfter =
+                        item.label === TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER;
                       const row = isKb ? (
                         <button
                           key={item.href}
@@ -671,8 +668,8 @@ export default function TalisUMktsHeader({
                           {talisuMenuLabel(t, item.label)}
                         </Link>
                       );
-                      // Bookshelf, FAQ, KB, Audio, Video on top — split before the PMC sequence.
-                      if (isFaq) {
+                      // Bookshelf, FAQ, Media Directory | Contract, Knowledge Base.
+                      if (dividerAfter) {
                         return (
                           <div key={`${item.href}-wrap`}>
                             {row}
@@ -862,12 +859,26 @@ export default function TalisUMktsHeader({
                     </button>
                   );
                 }
-                return renderMobileLink(
+                const link = renderMobileLink(
                   item.href,
                   talisuMenuLabel(t, item.label),
                   active,
                   true,
                 );
+                // Same divider as desktop: after Media Directory.
+                if (item.label === TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER) {
+                  return (
+                    <div key={`m-${item.href}-wrap`}>
+                      {link}
+                      <div
+                        role="separator"
+                        data-testid="mobile-talisu-divider"
+                        className="my-1 ml-6 border-t border-white/25"
+                      />
+                    </div>
+                  );
+                }
+                return link;
               })}
 
               <div className="mt-2 flex items-center justify-between border-t border-white/25 pt-2">

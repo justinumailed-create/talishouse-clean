@@ -48,12 +48,18 @@ describe("Ralf 4 — Knowledge Base", () => {
     expect(card).not.toContain("t.mapsite.knowledgeBase");
   });
 
-  it("lets signed-in active accounts in directly and unlocks with a valid FAST Code", () => {
+  it("always asks for a FAST Code (no signed-in bypass) and unlocks with a valid one", () => {
     const actions = read("app/talisu/kb/access-actions.ts");
-    expect(actions).toContain("getTalisUKbSessionAccessAction");
+    // Oct 26: signed-in owners / agents / admins no longer open the KB directly.
+    expect(actions).not.toContain("getTalisUKbSessionAccessAction");
+    expect(actions).not.toContain("getAdminSessionAccount");
+    expect(actions).not.toContain("getMapSiteOwnerSession");
     expect(actions).toContain("resolveFastCodeAdminAccount(value)");
     expect(actions).toContain("hasCompletedMapSiteActivationPayment");
-    expect(read("components/talisu/TalisUKbPasswordGate.tsx")).toContain("getTalisUKbSessionAccessAction()");
+    const gate = read("components/talisu/TalisUKbPasswordGate.tsx");
+    expect(gate).not.toContain("getTalisUKbSessionAccessAction");
+    expect(gate).not.toContain("writeTalisUKbUnlocked");
+    expect(gate).toContain("readTalisUKbUnlocked()");
     const form = read("components/talisu/TalisUKbUnlockForm.tsx");
     expect(form).toContain("unlockTalisUKbAction(value)");
     expect(form).not.toContain("isTalisUKbPassword(password)");
