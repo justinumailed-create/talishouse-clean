@@ -27,6 +27,12 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(builder).toContain("label={d.buildYourMapsite}");
     expect(en.demo.buildYourMapsite).toBe("Build your Mapsite");
     expect(de.demo.buildYourMapsite).toBe("Ihre Mapsite erstellen");
+    // The pill is only in the strip while the hero is showing. Once the
+    // builder card is open (?build=1, including Back), the Market Zone line
+    // stays and is centred on its own.
+    const strip = builder.slice(builder.indexOf("headlineAction="), builder.indexOf("{!showCard ? ("));
+    expect(strip).toMatch(/showCard \? null : \(/);
+    expect(strip).toContain('testId="mapsites-build-demo-link"');
   });
 
   it("shows the hero first and hides the step 1-3 card until Build", () => {
