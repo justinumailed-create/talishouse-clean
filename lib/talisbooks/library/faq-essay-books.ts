@@ -215,7 +215,6 @@ export function createFaqEssayViewerBook(
     title: copy.title,
     subtitle: copy.subtitle,
     description: copy.subtitle,
-    listingProfile: "fsbo",
     viewerStyle: "magazine",
     coverSpreadOpening: false,
     isolatedBookshelf: true,
