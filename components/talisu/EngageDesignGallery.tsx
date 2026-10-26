@@ -81,7 +81,9 @@ export default function EngageDesignGallery({ designs }: { designs: EngageDesign
               <span className="mt-auto block p-1.5">
                 <span
                   data-testid="engage-design-reserve"
-                  className="flex min-h-8 w-full items-center justify-center whitespace-nowrap rounded-full bg-[#046BD9] px-1.5 text-[10.5px] font-semibold text-white transition group-hover:bg-[#0358b3] sm:text-[12px]"
+                  // Narrow phones: long labels ("P100 reservieren") wrap onto two
+                  // lines inside the button instead of overflowing it.
+                  className="flex min-h-8 w-full items-center justify-center rounded-2xl bg-[#046BD9] px-1.5 py-1 text-center text-[10.5px] leading-tight font-semibold text-balance text-white transition group-hover:bg-[#0358b3] sm:text-[12px]"
                 >
                   {fmt(e.galleryReserve, { code: design.code })}
                 </span>
