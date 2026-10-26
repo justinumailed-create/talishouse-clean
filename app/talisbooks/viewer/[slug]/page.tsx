@@ -23,7 +23,7 @@ export async function generateMetadata({
 }: TalisBooksViewerSlugPageProps): Promise<Metadata> {
   const { slug } = await params;
   const normalized = slug.trim();
-  const book = await resolveViewerBookBySlug(normalized);
+  const book = await resolveViewerBookBySlug(normalized, await getLocale());
 
   if (!book) {
     if (normalized === PINNED_TALISBOOK_SLUG) {
@@ -92,7 +92,7 @@ export default async function TalisBooksViewerSlugPage({
   params,
 }: TalisBooksViewerSlugPageProps) {
   const { slug } = await params;
-  const book = await resolveViewerBookBySlug(slug);
+  const book = await resolveViewerBookBySlug(slug, await getLocale());
 
   if (!book) {
     notFound();

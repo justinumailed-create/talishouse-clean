@@ -1,6 +1,8 @@
 "use client";
 
-import { useT } from "@/lib/i18n/client";
+import { useLocale, useT } from "@/lib/i18n/client";
+import type { Locale } from "@/lib/i18n/config";
+import { faqEssayLibraryBooks } from "@/lib/talisbooks/library/faq-essay-books";
 import Link from "next/link";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import type { IsolatedBookshelfBook } from "@/lib/talisbooks/isolated-bookshelf-service";
@@ -169,42 +171,14 @@ function tokenizationLibraryEntry(
   };
 }
 
-/** Left hero slots 2–5: sample/dummy covers under Tokenization. */
-const LEFT_HERO_DUMMY_TITLES = [
-  "Harbour Lookbook",
-  "Prairie Estates",
-  "Lakefront Digest",
-  "Canyon Collection",
-] as const;
-
-function leftHeroDummyBooks(): TalisBooksLibraryBook[] {
-  return LEFT_HERO_DUMMY_TITLES.map((title, index) => ({
-    id: `left-hero-dummy-${index + 1}`,
-    slug: `left-hero-dummy-${index + 1}`,
-    title,
-    subtitle: "",
-    coverImageUrl: null,
-    coverTemplateId: null,
-    coverGradient:
-      TALISBOOKS_LIBRARY_SPINE_PALETTES[
-        (index + 2) % TALISBOOKS_LIBRARY_SPINE_PALETTES.length
-      ]!,
-    publishStatus: "published" as const,
-    publishedAt: "2020-01-01T00:00:00.000Z",
-    createdAt: "2020-01-01T00:00:00.000Z",
-    views: 0,
-    clicks: 0,
-    pageCount: 0,
-    accountId: null,
-    accountType: "root" as const,
-    mapsiteId: null,
-    fastCode: ALLPINS_FAST_CODE,
-    parentBookId: null,
-    isPinned: true,
-    pinRank: 1 + index,
-    decorative: true,
-    metadata: { decorative: true, isolatedBookshelf: true },
-  }));
+/**
+ * Left hero slots 2–5: the four TalisU™ FAQ essays as real Talisbooks™
+ * (front cover, landscape essay spreads, back cover) in the reader's locale.
+ */
+function leftHeroFaqBooks(locale: Locale): TalisBooksLibraryBook[] {
+  return faqEssayLibraryBooks(locale, TALISBOOKS_LIBRARY_SPINE_PALETTES).map(
+    (book) => ({ ...book, fastCode: ALLPINS_FAST_CODE }),
+  );
 }
 
 /** Right-shelf decorative fillers (unpinned) — packed at 10 per row. */
@@ -251,6 +225,7 @@ function decorativeShelfFillers(count = 10): TalisBooksLibraryBook[] {
 
 export function buildIsolatedAllPinsBookshelf(
   books: IsolatedBookshelfBook[],
+  locale: Locale = "en",
 ): TalisBooksBookshelf {
   return {
     accountId: null,
@@ -271,7 +246,7 @@ export function buildIsolatedAllPinsBookshelf(
           book.id !== "pinned-talispros-ebook-sample" &&
           book.slug !== PINNED_TALISBOOK_SLUG,
       );
-      // Left hero-5 (newest-mode): ALLPINS Tokenization as primary hero + 4 sample dummies.
+      // Left hero-5 (newest-mode): ALLPINS Tokenization as primary hero + 4 TalisU™ FAQ books.
       const tokenizationSource =
         withoutDup.find(isTokenizationBook) ?? null;
       const rightCatalog = withoutDup.filter(
@@ -281,12 +256,12 @@ export function buildIsolatedAllPinsBookshelf(
         tokenizationSource,
         "2099-12-31T23:59:59.000Z",
       );
-      const leftDummies = leftHeroDummyBooks();
+      const leftFaqBooks = leftHeroFaqBooks(locale);
       // Right niche: remaining real books + decorative fillers (10 per row).
       return [
         ...rightCatalog,
         ...decorativeShelfFillers(10),
-        ...leftDummies,
+        ...leftFaqBooks,
         tokenization,
       ];
     })(),
@@ -312,7 +287,8 @@ export default function IsolatedBookshelfView({
   fromAllPins?: boolean;
 }) {
   const bs = useT().bookshelf;
-  const bookshelf = buildIsolatedAllPinsBookshelf(books);
+  const locale = useLocale();
+  const bookshelf = buildIsolatedAllPinsBookshelf(books, locale);
   const backHref = allPinsClaimedHref();
 
   return (

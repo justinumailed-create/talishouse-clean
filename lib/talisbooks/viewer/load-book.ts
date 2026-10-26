@@ -347,8 +347,15 @@ export async function getViewerBookBySlug(
 }
 
 export async function resolveViewerBookBySlug(
-  slug: string
+  slug: string,
+  locale?: string | null
 ): Promise<TalisBooksViewerBook | null> {
+  const { createFaqEssayViewerBook } = await import(
+    "@/lib/talisbooks/library/faq-essay-books"
+  );
+  const faqBook = createFaqEssayViewerBook(slug, locale);
+  if (faqBook) return faqBook;
+
   const fromDb = await getViewerBookBySlug(slug);
   if (fromDb) return fromDb;
 

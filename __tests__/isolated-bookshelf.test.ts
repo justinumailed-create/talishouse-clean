@@ -261,7 +261,8 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(shelf).not.toContain("cowboyGuideLibraryEntry");
     expect(shelf).not.toContain("Cowboy's Guide");
     expect(shelf).toContain("tokenizationLibraryEntry");
-    expect(shelf).toContain("leftHeroDummyBooks");
+    expect(shelf).toContain("leftHeroFaqBooks");
+    expect(shelf).toContain("faqEssayLibraryBooks");
     expect(shelf).toContain("Real-World Asset Tokenization");
     expect(shelf).toContain("allpins-isolated-tokenization");
     expect(shelf).not.toContain("common-shelf-tokenization");
@@ -269,7 +270,8 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(shelf).toContain("ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION");
     expect(shelf).toContain("allpins-isolated");
     expect(shelf).toContain("pinRank: 0");
-    expect(shelf).toContain("Canyon Collection");
+    expect(shelf).not.toContain("Canyon Collection");
+    expect(shelf).toContain("useLocale");
     expect(shelf).toContain("2099-12-31T23:59:59.000Z");
     expect(shelf).toContain("book.subtitle");
     expect(shelf).toContain("book.slug");
