@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getAdminSessionAccount } from "@/lib/admin-auth";
+import { getAdminSessionAccount, revokeAllOtherAdminSessions } from "@/lib/admin-auth";
 import { isGlobalAdmin } from "@/lib/admin-constants";
 import { createAdminGrant, revokeAdminGrant, updateAdminGrant } from "@/lib/admin-access-grants";
 
@@ -45,4 +45,15 @@ export async function revokeAdminGrantAction(id: string): Promise<Result> {
   const result = await revokeAdminGrant(id, actor.fastCode);
   if (result.ok) revalidatePath("/admin/access");
   return result;
+}
+
+/** Global Admin: sign out every other FAST-code admin session (server-side revoke). */
+export async function revokeAllOtherAdminSessionsAction(): Promise<Result & { revoked?: number }> {
+  const actor = await requireGlobalAdmin();
+  if (!actor) return { ok: false, error: "Only the Global Admin can sign out admin sessions." };
+  try {
+    return { ok: true, revoked: await revokeAllOtherAdminSessions() };
+  } catch {
+    return { ok: false, error: "Could not revoke admin sessions." };
+  }
 }

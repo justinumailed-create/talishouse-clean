@@ -76,30 +76,17 @@ describe("admin request gate", () => {
     ).toEqual({ action: "next" });
   });
 
-  it("still admits Ralf (RM22) and Arun (ARUN) after a real FAST login", () => {
+  it("refuses a FAST Code in the admin cookie; only an opaque session token passes the edge", () => {
+    const token = "A".repeat(43);
+    for (const code of ["rm22", "RM22", "ARUN", "arun"]) {
+      expect(
+        resolveAdminRequestGate({ pathname: "/admin/dashboard", adminSessionCookie: code }),
+      ).toEqual({ action: "redirect", to: "/admin/login" });
+    }
+    // Token-shaped values go on to the /admin layout, which validates the hash
+    // against admin_sessions (forged tokens are rejected there).
     expect(
-      resolveAdminRequestGate({
-        pathname: "/admin/dashboard",
-        adminSessionCookie: "rm22",
-      }),
-    ).toEqual({ action: "next" });
-    expect(
-      resolveAdminRequestGate({
-        pathname: "/admin/platform-content",
-        adminSessionCookie: "RM22",
-      }),
-    ).toEqual({ action: "next" });
-    expect(
-      resolveAdminRequestGate({
-        pathname: "/admin/users",
-        adminSessionCookie: "ARUN",
-      }),
-    ).toEqual({ action: "next" });
-    expect(
-      resolveAdminRequestGate({
-        pathname: "/admin/payments",
-        adminSessionCookie: "ARUN",
-      }),
+      resolveAdminRequestGate({ pathname: "/admin/users", adminSessionCookie: token }),
     ).toEqual({ action: "next" });
     // Grant permissions (e.g. RM22 has no Payments) are enforced in the layout.
     expect(readSource("app/admin/layout.tsx")).toContain("accountCanAccessAdminPath(account, pathname)");
@@ -110,11 +97,13 @@ describe("admin request gate", () => {
       resolveAdminRequestGate({ pathname: "/admin/talismaps" }),
     ).toEqual({ action: "redirect", to: "/admin/login" });
     expect(
-      resolveAdminRequestGate({
-        pathname: "/admin/talismaps",
-        adminSessionCookie: "ARUN",
-      }),
+      resolveAdminRequestGate({ pathname: "/admin/talismaps", adminSessionCookie: "ARUN" }),
+    ).toEqual({ action: "redirect", to: "/admin/login" });
+    expect(
+      resolveAdminRequestGate({ pathname: "/admin/talismaps", adminSessionCookie: "B".repeat(43) }),
     ).toEqual({ action: "next" });
+    // ...and the layout requires a validated session on the standalone route too.
+    expect(readSource("app/admin/layout.tsx")).toMatch(/isStandaloneAdminPath\(pathname\)\) \{\n\s+if \(!account\) redirect\("\/admin\/login"\)/);
     const middleware = readSource("middleware.ts");
     expect(middleware).toContain("resolveAdminRequestGate");
     expect(middleware).not.toContain('path.startsWith("/admin/talismaps")');

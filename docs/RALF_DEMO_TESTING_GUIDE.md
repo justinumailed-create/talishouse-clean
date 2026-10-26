@@ -131,7 +131,7 @@ Routes below were read from the App Router (`app/**/page.tsx`) and `next.config.
 
 | Route | Purpose | Who | Expected result |
 |-------|---------|-----|-----------------|
-| `/admin/login` | Platform admin via FAST Code | Super admin | Accepts hardcoded admin FAST Code `ADMIN123` |
+| `/admin/login` | Platform admin via FAST Code | Super admin | Accepts hardcoded admin FAST Code `RETIRED-LEGACY-CODE` |
 | `/admin` | Admin root | Admins | Admin landing |
 | `/admin/dashboard` | Admin dashboard | Admins | Dashboard after login |
 | `/admin/build-requests` | Build requests | Admins | Request list |
@@ -303,7 +303,7 @@ Also usable via redirected path `/marketing/login` → `/talispros/marketing/log
 | Login URL | `/admin/login` |
 | Email / Username | N/A (FAST code only) |
 | Password | N/A |
-| FAST codes | `ADMIN123` (full), `rm22` (Ralf / SUPERADMIN), `ARUN` (Arun / full) |
+| FAST codes | `RETIRED-LEGACY-CODE` (full), `rm22` (Ralf / SUPERADMIN), `ARUN` (Arun / full) |
 | Expected result | Session cookie; redirect to `/admin/dashboard` |
 
 See `docs/ADMIN_ACCESS.md` for Ralf SUPERADMIN and Arun verify steps.
@@ -860,7 +860,7 @@ Only items evidenced in code as incomplete, stubbed, “coming soon,” placehol
 - [ ] Open active Mapsite by FAST Code  
 - [ ] Optional: client login `rahulc@talispros.com` + `lrg1`  
 - [ ] Optional: CRM codes ADMIN / MANAGER / ASSOCIATE  
-- [ ] Optional: platform admin FAST Code `ADMIN123`  
+- [ ] Optional: platform admin FAST Code `RETIRED-LEGACY-CODE`  
 
 ## Negative / env checks
 
@@ -975,7 +975,7 @@ From `lib/database.types.ts` / migrations (non-exhaustive but demo-critical):
 | Surface | Mechanism |
 |---------|-----------|
 | Marketing / Talispros admin | Supabase email+password session (`lib/talispros-admin-auth.ts`); marketing gated by `MARKETING_MANAGER_EMAILS` |
-| Platform `/admin` | FAST Code `ADMIN123` → `admin_session` cookie |
+| Platform `/admin` | FAST Code `RETIRED-LEGACY-CODE` → `admin_session` cookie |
 | Client analytics | Email + FAST Code match on `accounts` or `mapsites` → `client_analytics_session` cookie |
 | CRM | Local role codes ADMIN / MANAGER / ASSOCIATE |
 | Mapsite owner | `mapsite_owner_fast_code` / root account cookies after claim |
@@ -989,7 +989,7 @@ From `lib/database.types.ts` / migrations (non-exhaustive but demo-critical):
 2. Marketing Admin: `assignFastCode(requestId)` from build request workflow  
 3. Claim success may return a new FAST Code and establish owner session  
 
-Seeded codes: `DEMO`, `LRG1`/`lrg1`. Admin login code: `ADMIN123`.
+Seeded codes: `DEMO`, `LRG1`/`lrg1`. Admin login code: `RETIRED-LEGACY-CODE`.
 
 ---
 

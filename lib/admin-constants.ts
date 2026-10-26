@@ -8,12 +8,6 @@ export const ADMIN_SESSION_COOKIE = "admin_session";
 export const GLOBAL_ADMIN_FAST_CODE = "ARUN";
 
 /**
- * Retired legacy platform code. Kept only so old audit rows that reference it
- * stay readable; it can never log in (see isRetiredAdminFastCode).
- */
-export const RETIRED_ADMIN_FAST_CODES: readonly string[] = ["ADMIN123"];
-
-/**
  * `global` = the single Global Admin (ARUN). `granted` = a FAST Code holding an
  * active admin access grant. `agent` = DB-backed Agent Admin (`agent_admins`).
  */
@@ -260,9 +254,6 @@ export function isGlobalAdminFastCode(code: string | null | undefined): boolean 
   return normalizeAdminFastCode(code) === GLOBAL_ADMIN_FAST_CODE;
 }
 
-export function isRetiredAdminFastCode(code: string | null | undefined): boolean {
-  return RETIRED_ADMIN_FAST_CODES.includes(normalizeAdminFastCode(code));
-}
 
 export function isGlobalAdmin(account: AdminAccount | null | undefined): boolean {
   return account?.access === "global";

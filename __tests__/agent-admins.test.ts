@@ -82,9 +82,14 @@ describe("agent session gate", () => {
     expect(
       resolveAdminRequestGate({ pathname: "/admin/agent", agentSessionCookie: "short" }),
     ).toEqual({ action: "redirect", to: "/agent/login?next=%2Fadmin%2Fagent" });
-    // Agent tokens are never accepted in the FAST-code admin cookie.
+    // admin_session now also holds an opaque token, so the edge lets it through;
+    // the layout looks it up in admin_sessions only (agent tokens are read solely
+    // from agent_session), so an agent token in admin_session resolves to nobody.
     expect(
       resolveAdminRequestGate({ pathname: "/admin/agent", adminSessionCookie: token }),
+    ).toEqual({ action: "next" });
+    expect(
+      resolveAdminRequestGate({ pathname: "/admin/agent", adminSessionCookie: "ARUN" }),
     ).toEqual({ action: "redirect", to: "/agent/login?next=%2Fadmin%2Fagent" });
   });
 

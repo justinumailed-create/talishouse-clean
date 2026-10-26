@@ -27,7 +27,7 @@ export const maxDuration = 300;
  * the self-serve generate process — admin only.
  *
  * A linked Mapsite is optional: isolated create works with any admin FAST
- * Code (e.g. ADMIN123) even when no Mapsite exists for that code.
+ * Code (e.g. RETIRED-LEGACY-CODE) even when no Mapsite exists for that code.
  */
 export default async function CatalogueIsolatedBookshelfCreatePage() {
   await requireAdminPage();

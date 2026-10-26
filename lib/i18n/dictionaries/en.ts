@@ -107,9 +107,9 @@ export const en = {
   kbUnlock: {
     title: "Knowledge Base",
     prompt: "Enter your FAST Code to unlock.",
-    passwordLabel: "FAST Code or password",
+    passwordLabel: "FAST Code",
     placeholder: "FAST Code",
-    error: "That FAST Code isn't active (or the password is wrong). Try again.",
+    error: "That FAST Code isn't active. Try again.",
     submit: "Unlock",
     checking: "Checking…",
   },

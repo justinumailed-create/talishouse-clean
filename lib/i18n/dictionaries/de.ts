@@ -86,9 +86,9 @@ export const de: Dictionary = {
   kbUnlock: {
     title: "Wissensdatenbank",
     prompt: "Geben Sie Ihren FAST Code ein, um die Inhalte freizuschalten.",
-    passwordLabel: "FAST Code oder Passwort",
+    passwordLabel: "FAST Code",
     placeholder: "FAST Code",
-    error: "Dieser FAST Code ist nicht aktiv (oder das Passwort ist falsch). Bitte erneut versuchen.",
+    error: "Dieser FAST Code ist nicht aktiv. Bitte erneut versuchen.",
     submit: "Freischalten",
     checking: "Wird geprüft…",
   },

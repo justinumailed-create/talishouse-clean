@@ -27,7 +27,7 @@ export default function FastCodeGate() {
     setLoading(true);
 
     try {
-      // Business Office: Global Admin only (legacy ADMIN123 is retired).
+      // Business Office: Global Admin only (legacy RETIRED-LEGACY-CODE is retired).
       const adminLogin = await loginAdminWithFastCodeAction(code);
       if (adminLogin.ok && adminLogin.isGlobalAdmin) {
         setAdminSession(adminLogin.fastCode);

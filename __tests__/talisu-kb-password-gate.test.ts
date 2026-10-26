@@ -2,11 +2,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { en } from "../lib/i18n/dictionaries/en";
+import * as kbGateModule from "../lib/talisu/kb-gate";
 import {
-  isTalisUKbPassword,
   TALISU_KB_LOCKED_EVENT,
   TALISU_KB_OPEN_UNLOCK_EVENT,
-  TALISU_KB_PASSWORD,
   TALISU_KB_UNLOCKED_EVENT,
   TALISU_KB_UNLOCK_STORAGE_KEY,
 } from "../lib/talisu/kb-gate";
@@ -14,12 +13,21 @@ import {
 const root = process.cwd();
 
 describe("TalisU Knowledge Base password gate", () => {
-  it("accepts exactly Admin123", () => {
-    expect(TALISU_KB_PASSWORD).toBe("Admin123");
-    expect(isTalisUKbPassword("Admin123")).toBe(true);
-    expect(isTalisUKbPassword("admin123")).toBe(false);
-    expect(isTalisUKbPassword("")).toBe(false);
+  it("has no shared KB password anywhere (FAST Code only, checked on the server)", () => {
+    expect(Object.keys(kbGateModule)).not.toContain("TALISU_KB_PASSWORD");
+    expect(Object.keys(kbGateModule)).not.toContain("isTalisUKbPassword");
     expect(TALISU_KB_UNLOCK_STORAGE_KEY).toBe("talisu_kb_unlocked_v1");
+    const kbGate = readFileSync(join(root, "lib/talisu/kb-gate.ts"), "utf8");
+    const actions = readFileSync(join(root, "app/talisu/kb/access-actions.ts"), "utf8");
+    const form = readFileSync(join(root, "components/talisu/TalisUKbUnlockForm.tsx"), "utf8");
+    expect(kbGate).not.toMatch(/PASSWORD\s*=/);
+    expect(actions).toContain('"use server"');
+    expect(actions).not.toContain("kb-gate");
+    expect(actions).toContain("resolveFastCodeAdminAccount");
+    expect(form).toContain("unlockTalisUKbAction");
+    expect(en.kbUnlock.placeholder).toBe("FAST Code");
+    expect(en.kbUnlock.passwordLabel).toBe("FAST Code");
+    expect(en.kbUnlock.error).not.toMatch(/password/i);
   });
 
   it("opens unlock in-navbar / inline without redirecting to /talisu?kbUnlock=", () => {

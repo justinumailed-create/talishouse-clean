@@ -6,7 +6,7 @@ import { unlockTalisUKbAction } from "@/app/talisu/kb/access-actions";
 import { useT } from "@/lib/i18n/client";
 
 export type TalisUKbUnlockFormProps = {
-  /** Called after password succeeds and session unlock is stored. */
+  /** Called after the FAST Code is accepted and session unlock is stored. */
   onSuccess: () => void;
   /**
    * PayPal-style light floating card (navbar drop-pop + inline gate).
@@ -17,7 +17,7 @@ export type TalisUKbUnlockFormProps = {
 };
 
 /**
- * Knowledge Base password form (Unlock).
+ * Knowledge Base FAST Code form (Unlock).
  * Light floating card — same look in the TalisU navbar popover and on-page gate.
  */
 export default function TalisUKbUnlockForm({
@@ -38,7 +38,7 @@ export default function TalisUKbUnlockForm({
     setError("");
     const value = password;
     startTransition(async () => {
-      // Server checks FAST Codes (admin or paid-up account) and the KB password.
+      // Server-only check: admin or paid-up account FAST Code (no shared password).
       const result = await unlockTalisUKbAction(value).catch(() => ({ ok: false }));
       if (!result.ok) {
         setError(k.error);

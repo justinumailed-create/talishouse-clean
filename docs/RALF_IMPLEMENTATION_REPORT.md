@@ -124,7 +124,7 @@ The platform has **67 active routes**. This section lists every route with its s
 
 | Page | URL | Purpose | Status |
 |---|---|---|---|
-| Admin Login | `/admin/login` | Login with ADMIN123 code | Production Ready |
+| Admin Login | `/admin/login` | Login with RETIRED-LEGACY-CODE code | Production Ready |
 | Admin Dashboard | `/admin/dashboard` | Overview stats (deals, earnings) | Production Ready |
 | Admin Leads | `/admin/leads` | Lead management with deal creation | Production Ready |
 | Admin Build Requests | `/admin/build-requests` | Table view with search/sort/pagination/assign/complete | Needs migration deploy |
@@ -392,11 +392,11 @@ Step 5: Mapsite Production
 
 **Recommended Fix:** Add `SUPABASE_SERVICE_ROLE_KEY=<service-role-key>` to `.env` and `.env.local`. The key can be obtained from the Supabase project dashboard under Settings → API → service_role key.
 
-### 3. Hardcoded Admin Session Code (`ADMIN123`)
+### 3. Hardcoded Admin Session Code (`RETIRED-LEGACY-CODE`)
 
-**Description:** The admin session system in `lib/fast-code.ts` uses a **hardcoded code** (`ADMIN123`) checked entirely in client-side JavaScript (localStorage + cookie). There is no server-side verification.
+**Description:** The admin session system in `lib/fast-code.ts` uses a **hardcoded code** (`RETIRED-LEGACY-CODE`) checked entirely in client-side JavaScript (localStorage + cookie). There is no server-side verification.
 
-**Impact:** Anyone who knows or guesses `ADMIN123` can access the admin console. While this is acceptable for development, it is a security risk for production.
+**Impact:** Anyone who knows or guesses `RETIRED-LEGACY-CODE` can access the admin console. While this is acceptable for development, it is a security risk for production.
 
 **Recommended Fix:** Replace the hardcoded code with a server-side authentication system (Supabase Auth with email/password or magic link, or a configurable environment variable `ADMIN_ACCESS_CODE` checked server-side).
 
@@ -566,7 +566,7 @@ The Mapsite page shows:
 
 ### How to Review Registrations
 
-1. Log in to the Admin console using the FAST Code **ADMIN123** at:
+1. Log in to the Admin console using the FAST Code **RETIRED-LEGACY-CODE** at:
    **https://talishouse.com/admin/login**
 2. Navigate to **"FAST Codes"** in the sidebar to see all generated codes.
 3. To see detailed registrations, go to **"Associates"** in the sidebar.
@@ -650,7 +650,7 @@ For per-partner details, navigate to:
 | Component | Technology |
 |---|---|
 | Public Access | Supabase anon key (no session persistence) |
-| Admin Access | **Hardcoded code ADMIN123** via localStorage + cookie |
+| Admin Access | **Hardcoded code RETIRED-LEGACY-CODE** via localStorage + cookie |
 | CRM Access | Role codes (ADMIN/MANAGER/ASSOCIATE) via localStorage |
 | Associate Access | FAST Code lookup in `users` table |
 | Supabase Auth | Session persistence **disabled** — not used for user auth |
@@ -680,7 +680,7 @@ For per-partner details, navigate to:
 4. **Test admin workflows** — Log in to admin, view build requests, assign to an associate, mark complete. Verify emails.
 5. **Test associate dashboard** — Log in as an associate, view assigned requests, verify status display.
 6. **Test CRM** — Log in with ADMIN/MANAGER/ASSOCIATE roles, verify permission gating works as expected.
-7. **Address critical security issues** — Remove `.env` from git history, replace hardcoded `ADMIN123` with configurable env var.
+7. **Address critical security issues** — Remove `.env` from git history, replace hardcoded `RETIRED-LEGACY-CODE` with configurable env var.
 8. **Add database transactions** — Wrap multi-table writes in a PostgreSQL function or Supabase RPC to prevent orphan records.
 
 **Deliverables:**

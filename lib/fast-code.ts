@@ -3,7 +3,6 @@
 import {
   ADMIN_SESSION_COOKIE,
   isGlobalAdminFastCode,
-  isRetiredAdminFastCode,
 } from "./admin-constants";
 
 export { ADMIN_SESSION_COOKIE };
@@ -44,7 +43,8 @@ export const setAdminSession = (code: string) => {
   if (!isBrowser()) return;
 
   const sessionCode = normalizeFastCode(code);
-  if (!sessionCode || isRetiredAdminFastCode(sessionCode)) return;
+  // Retired codes are refused by the server login action before this runs.
+  if (!sessionCode) return;
 
   localStorage.setItem("fast_code", sessionCode);
   localStorage.setItem("role", "admin");

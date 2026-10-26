@@ -13,11 +13,11 @@ Enter the FAST code and continue. Codes are case-insensitive.
 |--------|-------|-----------|--------|
 | Ralf | `remecom@mac.com` | `rm22` | SUPERADMIN: Platform Content (Marketing Admin), Mapsites, FAST Codes, Talisbooks / custom ebook editor |
 | Arun | `arun@kyptronix.com` | `ARUN` | Full `/admin` console |
-| Platform | — | `ADMIN123` | Full `/admin` console (existing) |
+| Platform | — | `RETIRED-LEGACY-CODE` | Full `/admin` console (existing) |
 
 There is no password on this screen. The FAST code *is* the credential, matching the existing admin auth.
 
-Arun was not given a customer FAST code, so `ARUN` is the admin login code. Ralf’s `rm22` is also his live Root Mapsite code; using it at `/admin/login` opens admin. Entering `rm22` on a Mapsite / business-office gate does **not** grant admin (only `ADMIN123` still does there).
+Arun was not given a customer FAST code, so `ARUN` is the admin login code. Ralf’s `rm22` is also his live Root Mapsite code; using it at `/admin/login` opens admin. Entering `rm22` on a Mapsite / business-office gate does **not** grant admin (only `RETIRED-LEGACY-CODE` still does there).
 
 ## What each person can edit
 
@@ -47,6 +47,6 @@ Payment-driven Mapsite activation is unchanged. SUPERADMIN can edit listings; un
 7. Open a viewer book while signed in as Ralf and confirm Live Edit is available (SUPERADMIN bypass). Non-admins still cannot edit.
 8. Try `/admin/pricing` or `/admin/payments` while signed in as Ralf — should redirect to `/admin/dashboard`.
 9. Log out. Sign in as Arun with `ARUN`. Confirm “Signed in as Arun” and additional nav (Registrations, Marketing, Associates, …).
-10. Confirm `ADMIN123` still signs in to the full console.
+10. Confirm `RETIRED-LEGACY-CODE` still signs in to the full console.
 
 The former Supabase email + password admin console (`/talispros/admin/*`) and the email + password Marketing Manager login were removed. Old `/talispros/admin/*` URLs redirect to `/admin/login`. PMC regional pins now live at `/admin/pmc`, Forms Manager at `/admin/forms-manager`, and the Marketing Manager portal (`/talispros/marketing/*`) requires a FAST-code admin session with Platform Content scope. `MARKETING_MANAGER_EMAILS` is no longer used for login (it still addresses some notification emails).

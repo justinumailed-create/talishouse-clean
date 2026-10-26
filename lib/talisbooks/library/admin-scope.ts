@@ -15,7 +15,7 @@ export type TalisBooksAdminLibraryScope = {
 
 /**
  * Mapsite-linked admins (rm22) see only that FAST Code's created books.
- * Platform-only admins (ARUN, ADMIN123) see every real (non-demo) book.
+ * Platform-only admins (ARUN, RETIRED-LEGACY-CODE) see every real (non-demo) book.
  * Anonymous / no admin session loads the created FAST-linked catalog
  * (no in-memory Meat Cove / preview shelf).
  */

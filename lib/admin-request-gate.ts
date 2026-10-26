@@ -1,10 +1,4 @@
 import {
-  getAdminAccountByFastCode,
-  isRetiredAdminFastCode,
-  normalizeAdminFastCode,
-} from "./admin-constants";
-import { accountCanAccessAdminPath } from "./admin-route-access";
-import {
   isAdminAppPath,
   isPublicAdminPath,
   isStandaloneAdminPath,
@@ -41,49 +35,24 @@ export function resolveAdminRequestGate(input: {
     return { action: "next" };
   }
 
-  const account = getAdminAccountByFastCode(input.adminSessionCookie);
-
-  // Agent Admin session token: the Edge runtime cannot read
-  // `agent_admin_sessions`, so let a well-formed token through to the /admin
-  // layout, which validates it (hash, expiry, active agent, scopes) on every request.
-  if (!account && isAgentSessionShape(input.agentSessionCookie)) {
+  // Cheap presence check only. The Edge runtime does not query Supabase, so a
+  // well-formed opaque session token (admin_session or agent_session) goes on
+  // to the /admin layout and server actions, which validate it against
+  // `admin_sessions` / `agent_admin_sessions` (hash, revoked, expiry, idle cap,
+  // grant/agent still active, path scopes) on every request — fail closed.
+  // A FAST Code or any other non-token value in the cookie is refused here.
+  if (isSessionTokenShape(input.adminSessionCookie) || isSessionTokenShape(input.agentSessionCookie)) {
     return { action: "next" };
   }
 
-  // Granted admin (admin_access_grants): Edge cannot read the DB either, so a
-  // well-formed non-retired FAST Code goes to the /admin layout, which checks
-  // the active grant and its permissions on every request (fail closed).
-  if (!account && isGrantedAdminCookieShape(input.adminSessionCookie)) {
-    return { action: "next" };
+  // Agents sign in at /agent/login; send them back to the page they asked for.
+  if (isAgentPortalPath(pathname) && !isStandaloneAdminPath(pathname)) {
+    return { action: "redirect", to: agentLoginPath(`${pathname}${input.search || ""}`) };
   }
-
-  if (isStandaloneAdminPath(pathname)) {
-    if (account) {
-      return { action: "next" };
-    }
-    return { action: "redirect", to: "/admin/login" };
-  }
-
-  if (!account) {
-    // Agents sign in at /agent/login; send them back to the page they asked for.
-    if (isAgentPortalPath(pathname)) {
-      return { action: "redirect", to: agentLoginPath(`${pathname}${input.search || ""}`) };
-    }
-    return { action: "redirect", to: "/admin/login" };
-  }
-
-  if (!accountCanAccessAdminPath(account, pathname)) {
-    return { action: "redirect", to: "/admin/dashboard" };
-  }
-
-  return { action: "next" };
+  return { action: "redirect", to: "/admin/login" };
 }
 
-function isAgentSessionShape(value: string | null | undefined): boolean {
+/** 32 random bytes, base64url (43 chars): admin and agent session tokens. */
+export function isSessionTokenShape(value: string | null | undefined): boolean {
   return Boolean(value && /^[A-Za-z0-9_-]{43}$/.test(value));
-}
-
-function isGrantedAdminCookieShape(value: string | null | undefined): boolean {
-  const code = normalizeAdminFastCode(value);
-  return Boolean(code) && /^[A-Z0-9-]{2,40}$/.test(code) && !isRetiredAdminFastCode(code);
 }

@@ -4,7 +4,7 @@
  * Separate from the public /talisbooks product shelf and from Mapsite TEB™
  * shelves. Only Global Admin creates books for it, through the self-serve
  * ebook generate flow. A linked Mapsite is optional — admin FAST Codes
- * such as ADMIN123 can create for this shelf without one.
+ * such as RETIRED-LEGACY-CODE can create for this shelf without one.
  */
 
 export const ISOLATED_BOOKSHELF_PATH = "/catalogue/bookshelf";
@@ -18,7 +18,7 @@ export const ISOLATED_BOOKSHELF_FROM_ALLPINS = "allpins";
 
 /**
  * Default book / OG description for isolated-shelf drafts when the creator
- * leaves description blank. Avoids persisting the ADMIN123 FAST-code placeholder.
+ * leaves description blank. Avoids persisting the RETIRED-LEGACY-CODE FAST-code placeholder.
  */
 export const ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION =
   "Talispros™ Real-World Asset Tokenization";

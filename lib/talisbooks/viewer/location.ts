@@ -32,7 +32,7 @@ export function viewerFastCodeLabel(fastCode?: string | null): string | null {
 
 /**
  * FAST Code used for Mapsite navigation from a viewer book.
- * Isolated-shelf books are stored under the admin creator code (ADMIN123)
+ * Isolated-shelf books are stored under the admin creator code (RETIRED-LEGACY-CODE)
  * but belong to the ALLPINS showcase Mapsite.
  */
 export function viewerMapsiteFastCode(

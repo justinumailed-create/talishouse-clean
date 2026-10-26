@@ -39,9 +39,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     }
   }
 
-  // Standalone /admin/talismaps also requires a hardcoded admin or a granted scope.
-  if (isStandaloneAdminPath(pathname) && account && !accountCanAccessAdminPath(account, pathname)) {
-    redirect(adminHomePath(account));
+  // Standalone /admin/talismaps also requires a validated admin session with access.
+  if (isStandaloneAdminPath(pathname)) {
+    if (!account) redirect("/admin/login");
+    if (!accountCanAccessAdminPath(account, pathname)) redirect(adminHomePath(account));
   }
 
   return <AdminLayoutClient serverAccount={account}>{children}</AdminLayoutClient>;

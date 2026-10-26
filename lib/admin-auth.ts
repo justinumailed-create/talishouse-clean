@@ -1,3 +1,4 @@
+import { isRetiredAdminFastCode } from "./admin-retired-codes";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -6,19 +7,26 @@ import {
   AGENT_SESSION_COOKIE,
   accountHasAdminScope,
   adminHomePath,
-  isAgentAccount,
   isGlobalAdmin,
+  GLOBAL_ADMIN_ACCOUNT,
   getAdminAccountByFastCode,
   grantToAdminAccount,
-  isAuthorizedAdminFastCode,
-  isRetiredAdminFastCode,
+  isGlobalAdminFastCode,
   normalizeAdminFastCode,
   type AdminAccount,
   type AdminScope,
 } from "./admin-constants";
 import { ADMIN_ACTIVITY_COOKIE, adminActivityCookieOptions } from "./admin-idle";
 import { accountCanAccessAdminPath } from "./admin-route-access";
-import { getActiveAdminGrant } from "./admin-access-grants";
+import { getActiveAdminGrant, getActiveAdminGrantById } from "./admin-access-grants";
+import {
+  ADMIN_SESSION_TTL_SECONDS,
+  createAdminSession,
+  resolveAdminSessionToken,
+  revokeAdminSessionToken,
+  revokeAllAdminSessions,
+  type AdminSessionRow,
+} from "./admin-sessions";
 import {
   AGENT_SESSION_MAX_AGE,
   agentToAdminAccount,
@@ -27,8 +35,8 @@ import {
   revokeAgentSessionToken,
 } from "./agent-admins";
 
-/** FAST-code Global Admin session — 24 hours after a successful login. */
-export const ADMIN_SESSION_MAX_AGE = 60 * 60 * 24;
+/** FAST-code admin session cookie lifetime (the DB row also expires; idle cap ~90s). */
+export const ADMIN_SESSION_MAX_AGE = ADMIN_SESSION_TTL_SECONDS;
 
 function adminSessionCookieOptions(maxAge: number) {
   return {
@@ -50,27 +58,34 @@ export async function resolveFastCodeAdminAccount(code: string | null | undefine
   return grant ? grantToAdminAccount(grant) : null;
 }
 
-/** Raw cookie value when it names the Global Admin. */
-export async function getAdminSessionValue(): Promise<string | null> {
-  const cookieStore = await cookies();
-  const value = cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null;
-  return isAuthorizedAdminFastCode(value) ? value : null;
+/** Session row → account. Granted admins are re-checked against their active grant. */
+async function accountForAdminSessionRow(row: AdminSessionRow): Promise<AdminAccount | null> {
+  if (row.access === "global") return GLOBAL_ADMIN_ACCOUNT;
+  if (row.access === "granted") {
+    const grant = await getActiveAdminGrantById(row.grant_id);
+    return grant ? grantToAdminAccount(grant) : null;
+  }
+  return null;
 }
 
 /**
- * Resolve the signed-in admin account for this request.
- * - Global Admin (ARUN) or a FAST Code with an active admin access grant:
- *   `admin_session` cookie is the FAST code; grants are re-checked every request.
+ * Resolve the signed-in admin account for this request (the single choke
+ * point used by the /admin layout, every admin page guard and server action).
+ * - Global Admin / granted admins: `admin_session` httpOnly cookie holds a
+ *   random token; its SHA-256 hash must match an `admin_sessions` row that is
+ *   not revoked, not expired and seen within ~90s (last_seen_at is refreshed).
+ *   A FAST Code or any other value in the cookie is rejected.
  * - Agent Admins: `agent_session` httpOnly cookie holds an opaque token; its
  *   SHA-256 hash must match an unexpired row in `agent_admin_sessions` and the
  *   agent must still be `active` (re-checked on every request).
  */
 const resolveAdminSessionAccount = cache(async (): Promise<AdminAccount | null> => {
   const cookieStore = await cookies();
-  const fastCodeAccount = await resolveFastCodeAdminAccount(
-    cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null,
-  );
-  if (fastCodeAccount) return fastCodeAccount;
+  const row = await resolveAdminSessionToken(cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null);
+  if (row) {
+    const account = await accountForAdminSessionRow(row);
+    if (account) return account;
+  }
 
   const token = cookieStore.get(AGENT_SESSION_COOKIE)?.value ?? null;
   if (!token) return null;
@@ -78,31 +93,53 @@ const resolveAdminSessionAccount = cache(async (): Promise<AdminAccount | null> 
   return agent ? agentToAdminAccount(agent) : null;
 });
 
-/** FAST-code login: Global Admin or an active grant (agents use /agent/login). */
+/**
+ * FAST-code login: Global Admin or an active grant (agents use /agent/login).
+ * After the code check, a server-side session is created and only its random
+ * token goes into the cookie.
+ */
 export async function writeAdminSessionCookie(fastCode: string): Promise<AdminAccount | null> {
-  const account = await resolveFastCodeAdminAccount(fastCode);
-  if (!account) return null;
+  const normalized = normalizeAdminFastCode(fastCode);
+  if (!normalized || isRetiredAdminFastCode(normalized)) return null;
+
+  let account: AdminAccount | null = null;
+  let token: string | null = null;
+  if (isGlobalAdminFastCode(normalized)) {
+    account = GLOBAL_ADMIN_ACCOUNT;
+    token = await createAdminSession({ access: "global", grantId: null });
+  } else {
+    const grant = await getActiveAdminGrant(normalized);
+    if (grant) {
+      account = grantToAdminAccount(grant);
+      token = await createAdminSession({ access: "granted", grantId: grant.id });
+    }
+  }
+  if (!account || !token) return null;
 
   const cookieStore = await cookies();
-  cookieStore.set(
-    ADMIN_SESSION_COOKIE,
-    account.fastCode,
-    adminSessionCookieOptions(ADMIN_SESSION_MAX_AGE),
-  );
-  // Idle cap: middleware ends the session once this short-lived cookie lapses.
+  cookieStore.set(ADMIN_SESSION_COOKIE, token, adminSessionCookieOptions(ADMIN_SESSION_MAX_AGE));
+  // Idle cap UX: middleware shows the idle notice once this short-lived cookie
+  // lapses; the authoritative cap is admin_sessions.last_seen_at (~90s).
   cookieStore.set(ADMIN_ACTIVITY_COOKIE, "1", adminActivityCookieOptions());
   return account;
 }
 
-/** Activity heartbeat: slide the admin idle cap forward (FAST-code admins only). */
+/** Activity heartbeat: refreshes last_seen_at and slides the idle cookie (FAST-code admins only). */
 export async function touchAdminActivityCookie(): Promise<boolean> {
   const cookieStore = await cookies();
-  const account = await resolveFastCodeAdminAccount(
-    cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null,
-  );
-  if (!account || !cookieStore.get(ADMIN_ACTIVITY_COOKIE)) return false;
+  if (!cookieStore.get(ADMIN_ACTIVITY_COOKIE)) return false;
+  const row = await resolveAdminSessionToken(cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null);
+  if (!row || !(await accountForAdminSessionRow(row))) return false;
   cookieStore.set(ADMIN_ACTIVITY_COOKIE, "1", adminActivityCookieOptions());
   return true;
+}
+
+/** Superadmin only: revoke every FAST-code admin session except the caller's. */
+export async function revokeAllOtherAdminSessions(): Promise<number> {
+  const account = await resolveAdminSessionAccount();
+  if (!isGlobalAdmin(account)) throw new Error("Unauthorized");
+  const cookieStore = await cookies();
+  return revokeAllAdminSessions({ keepToken: cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null });
 }
 
 export async function writeAgentSessionCookie(token: string): Promise<void> {
@@ -125,8 +162,10 @@ export async function clearAgentSessionCookie(): Promise<void> {
   cookieStore.delete(AGENT_SESSION_COOKIE);
 }
 
+/** Normal + idle logout: revoke the session row server-side, then drop the cookies. */
 export async function clearAdminSessionCookie(): Promise<void> {
   const cookieStore = await cookies();
+  await revokeAdminSessionToken(cookieStore.get(ADMIN_SESSION_COOKIE)?.value ?? null).catch(() => {});
   cookieStore.set(ADMIN_SESSION_COOKIE, "", adminSessionCookieOptions(0));
   cookieStore.delete(ADMIN_SESSION_COOKIE);
   cookieStore.set(ADMIN_ACTIVITY_COOKIE, "", adminActivityCookieOptions(0));

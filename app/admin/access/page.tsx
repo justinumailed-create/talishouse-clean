@@ -4,6 +4,7 @@ import { adminHomePath, isGlobalAdmin } from "@/lib/admin-constants";
 import { listAdminGrantEvents, listAdminGrants } from "@/lib/admin-access-grants";
 import { PageHeader } from "@/components/admin/ui";
 import AdminAccessGrantsClient from "@/components/admin/AdminAccessGrantsClient";
+import AdminRevokeSessionsButton from "@/components/admin/AdminRevokeSessionsButton";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,7 @@ export default async function AdminAccessPage() {
         title="Admin access"
         subtitle="You are the Global Admin. Grant other FAST Codes admin access and choose exactly which sections they can use. Only you can grant."
       />
+      <AdminRevokeSessionsButton />
       <AdminAccessGrantsClient grants={grants} events={events} />
     </div>
   );

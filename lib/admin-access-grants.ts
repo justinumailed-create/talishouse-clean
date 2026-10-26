@@ -1,8 +1,9 @@
+import { isRetiredAdminFastCode } from "./admin-retired-codes";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "./supabaseAdmin";
+import { revokeAdminSessionsForGrant } from "./admin-sessions";
 import {
   isGlobalAdminFastCode,
-  isRetiredAdminFastCode,
   normalizeAdminFastCode,
   sanitizeGrantPermissions,
   type AdminGrantPermission,
@@ -66,7 +67,7 @@ function toGrant(row: GrantRow): AdminAccessGrant {
   };
 }
 
-/** FAST Codes that can never hold a grant (Global Admin, retired ADMIN123). */
+/** FAST Codes that can never hold a grant (Global Admin, retired RETIRED-LEGACY-CODE). */
 export function isGrantableAdminFastCode(code: string | null | undefined): boolean {
   const c = normalizeAdminFastCode(code);
   return Boolean(c) && /^[A-Z0-9-]{2,40}$/.test(c) && !isGlobalAdminFastCode(c) && !isRetiredAdminFastCode(c);
@@ -85,6 +86,24 @@ export async function getActiveAdminGrant(code: string | null | undefined): Prom
       .maybeSingle();
     if (error || !data) return null;
     return toGrant(data as GrantRow);
+  } catch {
+    return null;
+  }
+}
+
+/** Active grant by id (admin session lookups reference the grant, not the code). Fails closed. */
+export async function getActiveAdminGrantById(id: string | null | undefined): Promise<AdminAccessGrant | null> {
+  if (!id || !/^[0-9a-f-]{36}$/i.test(id) || !isSupabaseAdminConfigured()) return null;
+  try {
+    const { data, error } = await db()
+      .from("admin_access_grants")
+      .select(GRANT_COLUMNS)
+      .eq("id", id)
+      .is("revoked_at", null)
+      .maybeSingle();
+    if (error || !data) return null;
+    const grant = toGrant(data as GrantRow);
+    return isGrantableAdminFastCode(grant.fastCode) ? grant : null;
   } catch {
     return null;
   }
@@ -216,5 +235,6 @@ export async function revokeAdminGrant(id: string, actor: string): Promise<Resul
   if (!data) return { ok: false, error: "Grant not found or already revoked." };
   const row = data as { fast_code: string; permissions: string[] | null };
   await logEvent(id, row.fast_code, "revoked", row.permissions ?? [], actor);
+  await revokeAdminSessionsForGrant(id).catch(() => {});
   return { ok: true };
 }

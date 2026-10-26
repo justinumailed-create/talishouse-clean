@@ -1,3 +1,4 @@
+import { isRetiredAdminFastCode } from "../lib/admin-retired-codes";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -13,7 +14,6 @@ import {
   grantToAdminAccount,
   isAuthorizedAdminFastCode,
   isGlobalAdmin,
-  isRetiredAdminFastCode,
   sanitizeGrantPermissions,
   scopesForGrantPermissions,
 } from "../lib/admin-constants";
@@ -119,6 +119,6 @@ describe("admin nav + routes follow scopes", () => {
     const page = readFileSync(resolve("app/admin/access/page.tsx"), "utf8");
     expect(page).toContain("isGlobalAdmin(account)");
     const actions = readFileSync(resolve("app/admin/access/actions.ts"), "utf8");
-    expect(actions.match(/await requireGlobalAdmin\(\)/g)?.length).toBe(3);
+    expect(actions.match(/await requireGlobalAdmin\(\)/g)?.length).toBe(4);
   });
 });

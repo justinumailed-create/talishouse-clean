@@ -38,7 +38,7 @@
 |---|---|
 | **Type** | **Client-side only** — localStorage + cookies |
 | Mechanism | FAST code-based identity via `lib/fast-code.ts` |
-| Admin auth | Hardcoded code `"ADMIN123"` checked via `isValidAdminFastCode()` |
+| Admin auth | Hardcoded code `"RETIRED-LEGACY-CODE"` checked via `isValidAdminFastCode()` |
 | Cookie name | `admin_session` (24hr expiry) — set by `setAdminSession()` |
 | Middleware check | `middleware.ts` checks cookie named `auth` (⚠️ **mismatch** — middleware cookie `auth` ≠ client cookie `admin_session`) |
 | Context | `context/AuthContext.tsx` — wraps `useState` + localStorage sync |
@@ -426,7 +426,7 @@ supabase
 
 | Concern | Current | Recommended |
 |---|---|---|
-| Admin auth | "ADMIN123" hardcoded, client-side | Supabase Auth or Auth.js with credentials |
+| Admin auth | "RETIRED-LEGACY-CODE" hardcoded, client-side | Supabase Auth or Auth.js with credentials |
 | Associate auth | localStorage `fast_code` | Server-validated session with HTTP-only cookie |
 | Middleware | Cookie `auth` (dead code) | Sync middleware with actual auth cookie name |
 | RLS | Anon users can SELECT/INSERT most tables | Restrict to authenticated-only with associate-scoped policies |

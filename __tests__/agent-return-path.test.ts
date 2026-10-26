@@ -88,7 +88,8 @@ describe("admin request gate for the agent portal", () => {
 
   it("still admits Global Admin and agent sessions to the agent portal", () => {
     expect(
-      resolveAdminRequestGate({ pathname: "/admin/agent/leads", adminSessionCookie: "ARUN" }),
+      // Admin cookie now carries an opaque session token (validated in the layout).
+      resolveAdminRequestGate({ pathname: "/admin/agent/leads", adminSessionCookie: "Z".repeat(43) }),
     ).toEqual({ action: "next" });
     expect(
       resolveAdminRequestGate({
