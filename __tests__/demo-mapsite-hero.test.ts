@@ -9,6 +9,7 @@ import {
   DEMO_DISPLAY_PIN,
   DEMO_PIN_CARD_ACTIONS,
   demoBuilderStartsOpen,
+  demoHeroPinScreenOffset,
   demoInitialPinFromParams,
 } from "../lib/talispros/demo-builder";
 
@@ -82,6 +83,11 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(map).toContain("interactive={false}");
     expect(map).toContain("selectedPinId={DEMO_DISPLAY_PIN.id}");
     expect(map).toContain('data-testid="demo-hero-pin-card"');
+    // The open card hangs from the top of the map so its photo stays inside
+    // the panel. The PIN is offset down to sit under the pointer.
+    expect(map).toContain("top-4");
+    expect(map).toContain("demoHeroPinScreenOffset");
+    expect(map).not.toContain("calc(50%");
     expect(map).not.toMatch(/href=/);
     expect(map).toContain("pointer-events-none");
     expect(map).toContain("bg-[#046BD9]");
@@ -93,6 +99,17 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(DEMO_DISPLAY_PIN.latitude).toBeLessThan(70);
     expect(DEMO_DISPLAY_PIN.longitude).toBeLessThan(-50);
     expect(map).not.toMatch(/FAST Code|@[a-z]/i);
+  });
+
+  it("drops the sample PIN under the open card without leaving the panel", () => {
+    expect(demoHeroPinScreenOffset(0, 200)).toBe(0);
+    expect(demoHeroPinScreenOffset(672, 0)).toBe(0);
+    const offset = demoHeroPinScreenOffset(672, 300);
+    const pinCenter = 672 / 2 + offset;
+    expect(pinCenter).toBeGreaterThan(300 + 39);
+    expect(pinCenter + 39).toBeLessThan(672);
+    const short = demoHeroPinScreenOffset(480, 300);
+    expect(480 / 2 + short + 39).toBeLessThanOrEqual(480 - 16);
   });
 
   it("stacks the map above the write-up on mobile, two columns on desktop", () => {

@@ -27,6 +27,32 @@ export function getGoogleMapsApiKey(): string {
   );
 }
 
+/**
+ * Camera center that places `locked` at `offset` pixels from the middle of
+ * the map. Positive y puts that point below center — the same shift as
+ * `panBy(-x, -y)`. Returns null until the map can project.
+ *
+ * `panBy` animates, and `center_changed` was snapping the locked pin back to
+ * the middle before the animation finished. Setting the center directly keeps
+ * the offset.
+ */
+export function cameraCenterForLockedPoint(
+  map: google.maps.Map,
+  locked: google.maps.LatLngLiteral,
+  offset: { x: number; y: number },
+): google.maps.LatLng | google.maps.LatLngLiteral | null {
+  if (offset.x === 0 && offset.y === 0) return locked;
+  const projection = map.getProjection();
+  const zoom = map.getZoom();
+  if (!projection || zoom == null) return null;
+  const scale = 2 ** zoom;
+  const world = projection.fromLatLngToPoint(new google.maps.LatLng(locked.lat, locked.lng));
+  if (!world) return null;
+  return projection.fromPointToLatLng(
+    new google.maps.Point(world.x - offset.x / scale, world.y - offset.y / scale),
+  );
+}
+
 /** Hide third-party business / POI branding — Talismaps™ pins are the only markers. */
 const NO_THIRD_PARTY_POI_STYLES: google.maps.MapTypeStyle[] = [
   { featureType: "poi", stylers: [{ visibility: "off" }] },
@@ -415,19 +441,32 @@ export class GoogleMapsProvider implements MapProvider {
       y: options.lockCenterOffset?.y ?? 0,
     };
     let placingLockedPin = false;
+    let lockGeneration = 0;
+    let pendingProjection: google.maps.MapsEventListener | null = null;
     /** Ignore zoom/drag events caused by setViewport (not user gestures). */
     let suppressCameraGestureEvents = false;
 
     const placeLockedPin = () => {
-      if (!lockedCenter || placingLockedPin || isCancelled()) return;
-      placingLockedPin = true;
-      map.setCenter(lockedCenter);
-      if (screenOffset.x !== 0 || screenOffset.y !== 0) {
-        // panBy moves the map; negate so the lat/lng shifts on-screen by offset.
-        map.panBy(-screenOffset.x, -screenOffset.y);
+      if (!lockedCenter || isCancelled()) return;
+      const target = cameraCenterForLockedPoint(map, lockedCenter, screenOffset);
+      if (!target) {
+        if (!pendingProjection) {
+          pendingProjection = map.addListener("projection_changed", () => {
+            pendingProjection?.remove();
+            pendingProjection = null;
+            if (!isCancelled()) placeLockedPin();
+          });
+        }
+        return;
       }
+      pendingProjection?.remove();
+      pendingProjection = null;
+      const generation = ++lockGeneration;
+      placingLockedPin = true;
+      map.setCenter(target);
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
+          if (generation !== lockGeneration) return;
           placingLockedPin = false;
         });
       });
@@ -598,6 +637,8 @@ export class GoogleMapsProvider implements MapProvider {
     const instance: MapInstance = {
       destroy() {
         disposed = true;
+        pendingProjection?.remove();
+        pendingProjection = null;
         idleListener.remove();
         centerListener?.remove();
         zoomListener?.remove();

@@ -26,6 +26,25 @@ export const DEMO_DISPLAY_PIN = {
 /** Actions a Mapsite PIN card shows. Display only — they do not navigate. */
 export const DEMO_PIN_CARD_ACTIONS = ["URL 1", "URL 2", "TEB™", "TTV™"] as const;
 
+/** Selected Mapsite pin body. The marker is anchored at its center. */
+const DEMO_HERO_PIN_RADIUS = 39;
+/** Clear space between the card pointer and the top of the pin. */
+const DEMO_HERO_PIN_GAP = 16;
+/** Keep the pin this far inside the bottom of the map panel. */
+const DEMO_HERO_PIN_BOTTOM_MARGIN = 16;
+
+/**
+ * Pixels to drop the locked map center so the sample PIN sits just under the
+ * open card. `cardBottom` is the card's bottom edge, in pixels, from the top
+ * of the map panel. Positive values move the PIN down.
+ */
+export function demoHeroPinScreenOffset(rootHeight: number, cardBottom: number): number {
+  if (!(rootHeight > 0) || !(cardBottom > 0)) return 0;
+  const desired = cardBottom + DEMO_HERO_PIN_GAP + DEMO_HERO_PIN_RADIUS;
+  const max = Math.max(0, rootHeight / 2 - DEMO_HERO_PIN_RADIUS - DEMO_HERO_PIN_BOTTOM_MARGIN);
+  return Math.max(0, Math.round(Math.min(desired - rootHeight / 2, max)));
+}
+
 /** The builder card starts open when the URL already carries build/address/PIN state. */
 export function demoBuilderStartsOpen(params: Record<string, string | string[] | undefined>): boolean {
   return ["build", "address", "lat", "lng", "latitude", "longitude"].some((key) => {
