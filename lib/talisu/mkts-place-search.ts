@@ -1,12 +1,10 @@
 /**
  * Atlist-parity place search helpers for /talisu/mkts:
- * haversine miles from a searched point → nearest PIN ranking + list labels.
+ * haversine kilometres from a searched point → nearest PIN ranking + list labels.
  */
 
 import { haversineDistanceKm } from "@/lib/mapsite/visitor-location";
 import type { TalisUMktsPin, TalisUMktsPinKind } from "@/lib/talisu/markets-pins";
-
-const KM_PER_MILE = 1.609344;
 
 /** Default camera zoom after a place/postal search (town-scale). */
 export const TALISU_MKTS_PLACE_SEARCH_ZOOM = 10;
@@ -20,25 +18,21 @@ export type MktsSearchOrigin = {
 
 export type MktsDistanceResult = {
   pin: TalisUMktsPin;
-  /** Straight-line distance in miles. */
-  distanceMiles: number;
+  /** Straight-line distance in kilometres. */
+  distanceKm: number;
 };
 
-export function kmToMiles(km: number): number {
-  return km / KM_PER_MILE;
-}
-
-export function haversineDistanceMiles(
+export function haversineDistanceKmBetween(
   from: { latitude: number; longitude: number },
   to: { latitude: number; longitude: number },
 ): number {
-  return kmToMiles(haversineDistanceKm(from, to));
+  return haversineDistanceKm(from, to);
 }
 
-/** Atlist-style one-decimal miles, e.g. "171.4 Miles". */
-export function formatMilesDistance(miles: number): string {
-  if (!Number.isFinite(miles) || miles < 0) return "0.0 Miles";
-  return `${miles.toFixed(1)} Miles`;
+/** One-decimal kilometres, e.g. "275.9 km". */
+export function formatKmDistance(km: number): string {
+  if (!Number.isFinite(km) || km < 0) return "0.0 km";
+  return `${km.toFixed(1)} km`;
 }
 
 /**
@@ -56,13 +50,13 @@ export function formatMktsDistanceListLabel(
   return `${opts.canada} ${pin.label}`.trim();
 }
 
-/** Full Atlist row: "171.4 Miles • Canada Saskatchewan". */
+/** Full Atlist-style row: "275.9 km • Canada Saskatchewan". */
 export function formatMktsDistanceRow(
-  miles: number,
+  km: number,
   pin: Pick<TalisUMktsPin, "kind" | "label">,
   opts: { canada: string; doMore: string },
 ): string {
-  return `${formatMilesDistance(miles)} • ${formatMktsDistanceListLabel(pin, opts)}`;
+  return `${formatKmDistance(km)} • ${formatMktsDistanceListLabel(pin, opts)}`;
 }
 
 /**
@@ -79,14 +73,14 @@ export function rankMktsPinsByDistance(
     .filter((pin) => (allowed ? allowed.has(pin.kind) : true))
     .map((pin) => ({
       pin,
-      distanceMiles: haversineDistanceMiles(origin, {
+      distanceKm: haversineDistanceKmBetween(origin, {
         latitude: pin.latitude,
         longitude: pin.longitude,
       }),
     }))
     .sort((a, b) => {
-      if (a.distanceMiles !== b.distanceMiles) {
-        return a.distanceMiles - b.distanceMiles;
+      if (a.distanceKm !== b.distanceKm) {
+        return a.distanceKm - b.distanceKm;
       }
       return a.pin.sortOrder - b.pin.sortOrder;
     });

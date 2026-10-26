@@ -120,9 +120,9 @@ describe("demo ebook wrap cover", () => {
     );
 
     expect(client).toContain("TALISU_MKTS_HEADER_BLUE");
-    expect(client).toContain("Upload PDF");
-    expect(client).toContain("Clear and re-upload");
-    expect(client).toContain("Build Talisbook™");
+    expect(client).toContain("copy.uploadPdf");
+    expect(client).toContain("copy.clearReupload");
+    expect(client).toContain("copy.build}");
     expect(client).toContain("await optimizePages(assets, runId)");
     expect(client).toContain("DemoVisaProgress");
     expect(client).not.toContain("Optimize pages");

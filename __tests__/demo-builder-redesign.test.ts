@@ -78,6 +78,19 @@ describe("Demo Mapsite builder redesign (Ralf, Oct 26)", () => {
       "Just before we build your own Mapsite, let's curate your property in a demo Talisbook™. Pick the eBook pages that tell its story best, because they're what prospects will see once your Mapsite goes live.",
     );
     expect(en.demo.ebookIntroNote).toBe("This is a demo, so no FAST Code is issued.");
+    expect(ebook).toContain("copy.footer}");
+    expect(en.demo.ebookPage.footer).toBe(
+      "Page 1 becomes the wrap cover, and the remaining pages become the inside pages.",
+    );
+    expect(de.demo.ebookPage.footer).toBe(
+      "Seite 1 wird zum Umschlag, die übrigen Seiten werden zu den Innenseiten.",
+    );
+    for (const dev of ["upload-image", "Storage is used", "pinned interior assets", "Optimizing"]) {
+      expect(ebook).not.toContain(dev);
+    }
+    for (const dev of ["upload-image", "Storage", "interior", "pinned", "Optimiz"]) {
+      expect(JSON.stringify(en.demo.ebookPage)).not.toContain(dev);
+    }
     expect(de.demo.ebookIntro).toContain("Demo-Talisbook™");
     expect(de.demo.ebookIntroNote).toContain("kein FAST Code");
     // SEO / OG of the eBook page are untouched: still the shared EN/DE page metadata.

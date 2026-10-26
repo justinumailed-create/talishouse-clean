@@ -15,10 +15,6 @@ import {
 } from "@/lib/talisbooks/pdf-pages-to-images";
 import { EBOOK_UPLOAD_ACCEPT } from "@/lib/talisbooks/ebook-upload-formats";
 import { SELF_SERVICE_MAX_UPLOAD_IMAGES } from "@/lib/talisbooks/self-service-page-plan";
-import {
-  EBOOK_GENERATE_COVER_PDF_HELP,
-  EBOOK_GENERATE_UPLOAD_HINT,
-} from "@/lib/talispros/ebook-generate-copy";
 import { postEbookGenerateOptimizedImage } from "@/lib/media/client-upload-ebook-image";
 import {
   DEMO_MAPSITE_BUILD_PATH,
@@ -136,12 +132,12 @@ async function withTimeout<T>(
   }
 }
 
-function uploadLabelFromFiles(files: File[]): string {
-  if (files.length === 1) return files[0]!.name || "PDF uploaded";
+function uploadLabelFromFiles(files: File[], fallback: string): string {
+  if (files.length === 1) return files[0]!.name || fallback;
   if (files.length > 1) {
-    return `${files[0]!.name || "PDF"} + ${files.length - 1} more`;
+    return `${files[0]!.name || "PDF"} +${files.length - 1}`;
   }
-  return "PDF uploaded";
+  return fallback;
 }
 
 export default function DemoEbookGenerateClient({
@@ -152,6 +148,11 @@ export default function DemoEbookGenerateClient({
   title: string;
 }) {
   const demoCopy = useT().demo;
+  const copy = demoCopy.ebookPage;
+  const fill = (template: string, values: Record<string, string | number>) =>
+    template.replace(/\{(\w+)\}/g, (match, key: string) =>
+      key in values ? String(values[key]) : match,
+    );
   const [phase, setPhase] = useState<
     "idle" | "extracting" | "converting" | "optimizing" | "building"
   >("idle");
@@ -204,10 +205,10 @@ export default function DemoEbookGenerateClient({
       {
         maxInteriorPages: SELF_SERVICE_MAX_UPLOAD_IMAGES,
         onProgress: (done, total) => {
-          setStage(`Reading upload… ${done}/${total}`);
+          setStage(copy.readingFile);
           setProgress({
-            label: "Reading upload…",
-            detail: `${done} of ${total}`,
+            label: copy.readingFile,
+            detail: fill(copy.pageOf, { done, total }),
             current: done,
             total,
           });
@@ -221,11 +222,7 @@ export default function DemoEbookGenerateClient({
     setOptimized([]);
     setOptimizedCovers(null);
     setProgress(null);
-    setStage(
-      `Wrap cover from page 1 plus ${interiors.length} interior page${
-        interiors.length === 1 ? "" : "s"
-      }. Preparing Talisbook™…`,
-    );
+    setStage(copy.preparingPages);
     return { front, back, interiors, source, label };
   }
 
@@ -238,7 +235,7 @@ export default function DemoEbookGenerateClient({
   } | null> {
     const { front, back, interiors, source } = assets;
     if (interiors.length === 0) {
-      setError("Extract the pinned PDF or upload a PDF first.");
+      setError(copy.errNoPages);
       return null;
     }
     setError(null);
@@ -246,10 +243,10 @@ export default function DemoEbookGenerateClient({
     const coverSteps = 1;
     const totalSteps = coverSteps + interiors.length;
     try {
-      setStage("Optimizing wrap cover…");
+      setStage(copy.preparingCover);
       setProgress({
-        label: "Optimizing pages…",
-        detail: "Optimizing wrap cover…",
+        label: copy.preparingPages,
+        detail: copy.preparingCover,
         current: 0,
         total: totalSteps,
       });
@@ -269,13 +266,12 @@ export default function DemoEbookGenerateClient({
       const covers = { front: frontCover, back: backCover };
       setOptimizedCovers(covers);
       setProgress({
-        label: "Optimizing pages…",
-        detail: `Cover ready · 0 of ${interiors.length} interiors`,
+        label: copy.preparingPages,
+        detail: copy.coverReady,
         current: coverSteps,
         total: totalSteps,
       });
 
-      let usedPinnedFallback = false;
       let uploadError: string | null = null;
       let completedInteriors = 0;
       const pinnedInteriorFallbacks =
@@ -291,10 +287,10 @@ export default function DemoEbookGenerateClient({
             completedInteriors += 1;
             const done = completedInteriors;
             if (runId === runIdRef.current) {
-              setStage(`Optimizing page ${done} of ${interiors.length}…`);
+              setStage(copy.preparingPages);
               setProgress({
-                label: "Optimizing pages…",
-                detail: `Page ${done} of ${interiors.length}`,
+                label: copy.preparingPages,
+                detail: fill(copy.pageOf, { done, total: interiors.length }),
                 current: coverSteps + done,
                 total: totalSteps,
               });
@@ -305,7 +301,6 @@ export default function DemoEbookGenerateClient({
             if (!fallback) {
               throw caught;
             }
-            usedPinnedFallback = true;
             uploadError =
               caught instanceof Error ? caught.message : "Image upload failed.";
             console.warn(
@@ -315,10 +310,10 @@ export default function DemoEbookGenerateClient({
             completedInteriors += 1;
             const done = completedInteriors;
             if (runId === runIdRef.current) {
-              setStage(`Optimizing page ${done} of ${interiors.length}…`);
+              setStage(copy.preparingPages);
               setProgress({
-                label: "Optimizing pages…",
-                detail: `Page ${done} of ${interiors.length}`,
+                label: copy.preparingPages,
+                detail: fill(copy.pageOf, { done, total: interiors.length }),
                 current: coverSteps + done,
                 total: totalSteps,
               });
@@ -330,21 +325,14 @@ export default function DemoEbookGenerateClient({
       if (runId !== runIdRef.current) return null;
       setOptimized(uploaded);
       setProgress(null);
-      setStage(
-        usedPinnedFallback
-          ? `${uploaded.length} interiors ready using pinned assets. ${uploadError || "upload-image was unavailable."} Ready to build.`
-          : `Wrap cover and ${uploaded.length} pages ready. Build your Talisbook™.`,
-      );
+      setStage(fill(copy.readyToBuild, { count: uploaded.length }));
       return { interiors: uploaded, covers };
     } catch (caught) {
       if (runId !== runIdRef.current) return null;
       setOptimized([]);
       setOptimizedCovers(null);
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Could not optimize the demonstration pages.",
-      );
+      console.warn("[demo-ebook] Page preparation failed.", caught);
+      setError(copy.errPrepare);
       setStage("");
       setProgress(null);
       return null;
@@ -360,10 +348,10 @@ export default function DemoEbookGenerateClient({
     setError(null);
     resetBookAssets();
     setPhase("extracting");
-    setStage("Loading pinned Talispros eBook pages…");
+    setStage(copy.loadingSample);
     setProgress({
-      label: "Extracting pages…",
-      detail: "Loading pinned Talispros eBook…",
+      label: copy.loadingSample,
+      detail: copy.sampleLabel,
       current: 0,
       total: 1,
     });
@@ -371,10 +359,10 @@ export default function DemoEbookGenerateClient({
       const pageFiles = await loadPinnedTalisBookPageFiles({
         onProgress: (done, total) => {
           if (runId !== runIdRef.current) return;
-          setStage(`Extracting pages: ${done} of ${total}…`);
+          setStage(copy.loadingSample);
           setProgress({
-            label: "Extracting pages…",
-            detail: `Page ${done} of ${total}`,
+            label: copy.loadingSample,
+            detail: fill(copy.pageOf, { done, total }),
             current: done,
             total,
           });
@@ -384,18 +372,15 @@ export default function DemoEbookGenerateClient({
       const assets = await applyWrapCoverFromFiles(
         pageFiles,
         "pinned",
-        "Pinned Talispros eBook",
+        copy.sampleLabel,
       );
       if (runId !== runIdRef.current) return;
       await optimizePages(assets, runId);
     } catch (caught) {
       if (runId !== runIdRef.current) return;
       resetBookAssets();
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "Could not extract the pinned PDF.",
-      );
+      console.warn("[demo-ebook] Loading sample pages failed.", caught);
+      setError(copy.errSample);
       setStage("");
       setProgress(null);
       setPhase("idle");
@@ -410,10 +395,10 @@ export default function DemoEbookGenerateClient({
     setError(null);
     resetBookAssets();
     setPhase("converting");
-    setStage("Reading upload…");
+    setStage(copy.readingFile);
     setProgress({
-      label: "Reading upload…",
-      detail: "Preparing pages…",
+      label: copy.readingFile,
+      detail: copy.preparingPages,
       current: 0,
       total: 1,
     });
@@ -421,7 +406,7 @@ export default function DemoEbookGenerateClient({
       const assets = await applyWrapCoverFromFiles(
         files,
         "upload",
-        uploadLabelFromFiles(files),
+        uploadLabelFromFiles(files, copy.pdfUploaded),
       );
       if (runId !== runIdRef.current) return;
       await optimizePages(assets, runId);
@@ -441,16 +426,16 @@ export default function DemoEbookGenerateClient({
 
   async function buildEbook() {
     if (!optimizedReady || !optimizedCovers) {
-      setError("Prepare pages first, then Build.");
+      setError(copy.errNotReady);
       return;
     }
     const runId = runIdRef.current;
     setError(null);
     setPhase("building");
-    setStage("Building demonstration Talisbook™…");
+    setStage(copy.building);
     setProgress({
-      label: "Building Talisbook™…",
-      detail: "Assembling your demonstration Talisbook™",
+      label: copy.building,
+      detail: copy.buildingDetail,
       current: 0,
       total: 0,
     });
@@ -463,21 +448,21 @@ export default function DemoEbookGenerateClient({
           backCover: optimizedCovers.back,
         }),
         ONBOARDING_JOB_TIMEOUT_MS,
-        "Generation timed out. Please try Build again.",
+        copy.errTimeout,
       );
       if (runId !== runIdRef.current) return;
       if (!result.ok) {
         throw new Error(result.error);
       }
-      setStage("Opening your demo Mapsite…");
+      setStage(copy.opening);
       setProgress({
-        label: "Opening Mapsite…",
-        detail: "Demonstration Talisbook™ ready",
+        label: copy.opening,
+        detail: copy.ready,
         current: 1,
         total: 1,
       });
       // Full navigation avoids a failed App Router RSC render leaving this
-      // page stuck on "Building demonstration Talisbook™…".
+      // page stuck on the building status.
       window.location.assign(result.mapsiteHref || result.viewerUrl);
     } catch (caught) {
       if (runId !== runIdRef.current) return;
@@ -493,7 +478,7 @@ export default function DemoEbookGenerateClient({
 
   async function retryOptimize() {
     if (!coverFiles || pages.length === 0) {
-      setError("Extract the pinned PDF or upload a PDF first.");
+      setError(copy.errNoPages);
       return;
     }
     const runId = ++runIdRef.current;
@@ -518,28 +503,27 @@ export default function DemoEbookGenerateClient({
         href={DEMO_MAPSITE_BUILD_PATH}
         className="absolute left-6 top-6 text-[12px] tracking-tight text-neutral-400 transition hover:text-neutral-600"
       >
-        Back to pin placement
+        {copy.backToPins}
       </Link>
       <a
         href={`${TALISBOOKS_ROUTES.VIEWER}/${PINNED_TALISBOOK_SLUG}`}
         className="absolute right-6 top-6 text-[12px] tracking-tight text-neutral-400 transition hover:text-neutral-600"
       >
-        View pinned eBook
+        {copy.viewSample}
       </a>
       <div className="w-full max-w-[480px]">
         <div className="text-center">
           <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">
-            DEMONSTRATION
+            {copy.eyebrow}
           </p>
           <h1 className="mt-5 text-[34px] font-semibold leading-[1.08] tracking-[-0.035em] sm:text-[40px]">
-            Create the demo Talisbook™
+            {copy.title}
           </h1>
           <p className="mx-auto mt-4 max-w-[26rem] text-[22px] font-semibold leading-snug tracking-[-0.03em] text-neutral-950">
-            Extract the pinned pages, or upload a PDF.
+            {copy.lead}
           </p>
           <p className="mx-auto mt-2 max-w-[26rem] text-[13px] leading-relaxed text-neutral-500">
-            We prepare the pages automatically. Then Build the demonstration
-            Talisbook™ — when that finishes, we open your demo Mapsite.
+            {copy.leadNote}
           </p>
           <p className="mt-3 text-[12px] tracking-tight text-neutral-400">
             {title}
@@ -575,13 +559,13 @@ export default function DemoEbookGenerateClient({
                   className={primaryButtonClass}
                   style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
                 >
-                  Extract PDF from pinned Talispros eBook
+                  {copy.useSample}
                 </button>
 
                 <div className="flex items-center gap-3 px-1">
                   <span className="h-px flex-1 bg-black/[0.08]" />
                   <span className="text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-400">
-                    or
+                    {copy.or}
                   </span>
                   <span className="h-px flex-1 bg-black/[0.08]" />
                 </div>
@@ -593,10 +577,10 @@ export default function DemoEbookGenerateClient({
                   className={primaryButtonClass}
                   style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
                 >
-                  Upload PDF
+                  {copy.uploadPdf}
                 </button>
                 <p className="text-center text-[12px] leading-relaxed text-neutral-400">
-                  {EBOOK_GENERATE_COVER_PDF_HELP} {EBOOK_GENERATE_UPLOAD_HINT}
+                  {fill(copy.uploadHelp, { max: SELF_SERVICE_MAX_UPLOAD_IMAGES })}
                 </p>
               </>
             ) : (
@@ -615,14 +599,14 @@ export default function DemoEbookGenerateClient({
                 <span className="min-w-0 flex-1 truncate">
                   {sourceLabel ||
                     (pageSource === "pinned"
-                      ? "Pinned Talispros eBook"
-                      : "PDF uploaded")}
+                      ? copy.sampleLabel
+                      : copy.pdfUploaded)}
                 </span>
                 <button
                   type="button"
                   disabled={busy}
                   onClick={clearSourceAndReupload}
-                  aria-label="Clear and re-upload"
+                  aria-label={copy.clearReupload}
                   className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-[18px] leading-none transition hover:bg-white/25 disabled:opacity-40"
                 >
                   ×
@@ -653,7 +637,7 @@ export default function DemoEbookGenerateClient({
                 className={primaryButtonClass}
                 style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
               >
-                Try again
+                {copy.tryAgain}
               </button>
             ) : null}
 
@@ -665,7 +649,7 @@ export default function DemoEbookGenerateClient({
                 className={primaryButtonClass}
                 style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
               >
-                Build Talisbook™
+                {copy.build}
               </button>
             ) : null}
 
@@ -686,11 +670,11 @@ export default function DemoEbookGenerateClient({
             ) : null}
           </div>
 
-          <p className="text-center text-[12px] leading-relaxed text-neutral-400">
-            Extract the pinned sample pages or upload a PDF. Page 1 becomes
-            the wrap cover; remaining pages become interiors. Storage is used
-            when available; pinned interior assets are used if upload-image is
-            not configured.
+          <p
+            className="text-center text-[12px] leading-relaxed text-neutral-400"
+            data-testid="demo-ebook-footer-note"
+          >
+            {copy.footer}
           </p>
         </div>
       </div>

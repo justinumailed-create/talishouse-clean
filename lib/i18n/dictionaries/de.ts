@@ -520,7 +520,7 @@ export const de: Dictionary = {
     ],
     pmcTagline: "Bewerben - Verwalten - Kooperieren",
     footer:
-      "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 50 Meilen (80 Kilometern) um einen Mittelpunkt als teilexklusives Gebiet zu beanspruchen. Teilexklusiv bedeutet: Innerhalb dieses Kreises werden keine weiteren Märkte vergeben, benachbarte Märkte dürfen jedoch weiterhin Angebote pinnen, für die ihnen schriftliche und geprüfte Angebotsunterlagen vorliegen.",
+      "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 80 Kilometern um einen Mittelpunkt als teilexklusives Gebiet zu beanspruchen. Teilexklusiv bedeutet: Innerhalb dieses Kreises werden keine weiteren Märkte vergeben, benachbarte Märkte dürfen jedoch weiterhin Angebote pinnen, für die ihnen schriftliche und geprüfte Angebotsunterlagen vorliegen.",
     canada: "Kanada",
     canadaMarkets: "Märkte Kanada",
     usaMarkets: "Märkte USA",
@@ -989,6 +989,42 @@ export const de: Dictionary = {
     ebookIntro:
       "Bevor wir Ihre eigene Mapsite erstellen, setzen wir Ihre Immobilie in einem Demo-Talisbook™ in Szene. Wählen Sie die eBook-Seiten, die ihre Geschichte am besten erzählen – genau diese sehen Interessenten, sobald Ihre Mapsite live ist.",
     ebookIntroNote: "Dies ist eine Demo, daher wird kein FAST Code vergeben.",
+    ebookPage: {
+      backToPins: "Zurück zur PIN-Platzierung",
+      viewSample: "Beispiel-eBook ansehen",
+      eyebrow: "DEMO",
+      title: "Demo-Talisbook™ erstellen",
+      lead: "Nutzen Sie die Beispielseiten oder laden Sie ein PDF hoch.",
+      leadNote:
+        "Wir bereiten die Seiten für Sie vor. Tippen Sie dann auf „Talisbook™ erstellen“ – sobald es fertig ist, öffnet sich Ihre Demo-Mapsite.",
+      useSample: "Talispros-Beispiel-eBook verwenden",
+      or: "oder",
+      uploadPdf: "PDF hochladen",
+      uploadHelp:
+        "Auf Seite 1 ist die linke Hälfte die Rückseite und die rechte Hälfte die Vorderseite des Umschlags. PDF, JPG, JPEG oder PNG, bis zu {max} Innenseiten.",
+      sampleLabel: "Talispros-Beispiel-eBook",
+      pdfUploaded: "PDF hochgeladen",
+      clearReupload: "Entfernen und neu hochladen",
+      tryAgain: "Erneut versuchen",
+      build: "Talisbook™ erstellen",
+      footer: "Seite 1 wird zum Umschlag, die übrigen Seiten werden zu den Innenseiten.",
+      readingFile: "Ihre Datei wird gelesen …",
+      loadingSample: "Die Beispielseiten werden geladen …",
+      preparingPages: "Ihre Seiten werden vorbereitet …",
+      preparingCover: "Der Umschlag wird vorbereitet …",
+      pageOf: "Seite {done} von {total}",
+      coverReady: "Umschlag bereit",
+      readyToBuild: "Ihr Umschlag und {count} Seiten sind bereit. Erstellen Sie jetzt Ihr Talisbook™.",
+      building: "Ihr Demo-Talisbook™ wird erstellt …",
+      buildingDetail: "Ihr Demo-Talisbook™ wird zusammengestellt",
+      opening: "Ihre Demo-Mapsite wird geöffnet …",
+      ready: "Ihr Demo-Talisbook™ ist fertig",
+      errNoPages: "Nutzen Sie zuerst die Beispielseiten oder laden Sie ein PDF hoch.",
+      errNotReady: "Bitte warten Sie, bis Ihre Seiten bereit sind, und tippen Sie dann auf „Talisbook™ erstellen“.",
+      errTimeout: "Das dauert länger als erwartet. Bitte tippen Sie erneut auf „Talisbook™ erstellen“.",
+      errPrepare: "Ihre Seiten konnten nicht vorbereitet werden. Bitte versuchen Sie es erneut.",
+      errSample: "Die Beispielseiten konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+    },
     claimDescribe: "Was beschreibt Sie am besten?",
     claimChooseError:
       "Wählen Sie vor dem Beanspruchen aus, wer Sie sind (dieselben Optionen wie unter /start).",
@@ -1074,7 +1110,7 @@ export const de: Dictionary = {
     talisuMarkets: {
       title: "TalisU™ | Unsere Märkte",
       description:
-        "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 50 Meilen (80 Kilometern) als teilexklusives Gebiet zu beanspruchen.",
+        "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 80 Kilometern als teilexklusives Gebiet zu beanspruchen.",
     },
     root: {
       title: "Talishouse | Häuser & Cottages",

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { TALISU_MKTS_PINS } from "@/lib/talisu/markets-pins";
 import {
-  formatMilesDistance,
+  formatKmDistance,
   formatMktsDistanceListLabel,
   formatMktsDistanceRow,
-  haversineDistanceMiles,
+  haversineDistanceKmBetween,
   parseMktsGeocodePayload,
   rankMktsPinsByDistance,
 } from "@/lib/talisu/mkts-place-search";
@@ -13,9 +13,9 @@ import {
 const LAJORD = { latitude: 50.2167, longitude: -104.3333 };
 
 describe("mkts place-search distance helpers", () => {
-  it("formats Atlist-style one-decimal miles", () => {
-    expect(formatMilesDistance(171.41)).toBe("171.4 Miles");
-    expect(formatMilesDistance(0)).toBe("0.0 Miles");
+  it("formats one-decimal kilometres", () => {
+    expect(formatKmDistance(275.86)).toBe("275.9 km");
+    expect(formatKmDistance(0)).toBe("0.0 km");
   });
 
   it("builds Canada / Do More list labels like Atlist", () => {
@@ -36,11 +36,11 @@ describe("mkts place-search distance helpers", () => {
 
   it("formats a full distance row", () => {
     const row = formatMktsDistanceRow(
-      171.4,
+      275.9,
       { kind: "market", label: "Saskatchewan" },
       { canada: "Canada", doMore: "Do More..." },
     );
-    expect(row).toBe("171.4 Miles • Canada Saskatchewan");
+    expect(row).toBe("275.9 km • Canada Saskatchewan");
   });
 
   it("ranks pins nearest-first from Lajord and includes Modular Spaces", () => {
@@ -48,20 +48,20 @@ describe("mkts place-search distance helpers", () => {
     expect(ranked.length).toBe(TALISU_MKTS_PINS.length);
     expect(ranked[0]?.pin.id).toBe("sk");
     expect(ranked.map((r) => r.pin.id)).toContain("modular-spaces");
-    expect(ranked[0]?.distanceMiles).toBeLessThan(ranked.at(-1)!.distanceMiles);
-    // SK pin is near Saskatoon (~140–200 mi from Lajord); stay in a sane band.
-    expect(ranked[0]?.distanceMiles).toBeGreaterThan(50);
-    expect(ranked[0]?.distanceMiles).toBeLessThan(250);
+    expect(ranked[0]?.distanceKm).toBeLessThan(ranked.at(-1)!.distanceKm);
+    // SK pin is near Saskatoon (~225–320 km from Lajord); stay in a sane band.
+    expect(ranked[0]?.distanceKm).toBeGreaterThan(80);
+    expect(ranked[0]?.distanceKm).toBeLessThan(400);
   });
 
-  it("computes haversine miles between known points", () => {
+  it("computes haversine kilometres between known points", () => {
     const sk = TALISU_MKTS_PINS.find((p) => p.id === "sk")!;
-    const miles = haversineDistanceMiles(LAJORD, {
+    const km = haversineDistanceKmBetween(LAJORD, {
       latitude: sk.latitude,
       longitude: sk.longitude,
     });
-    expect(miles).toBeGreaterThan(100);
-    expect(miles).toBeLessThan(220);
+    expect(km).toBeGreaterThan(160);
+    expect(km).toBeLessThan(355);
   });
 
   it("parses geocode API payloads", () => {

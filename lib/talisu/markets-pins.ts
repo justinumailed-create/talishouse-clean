@@ -77,7 +77,7 @@ export const TALISU_MKTS_MARKET_PIN_SIZE = 41;
 export const TALISU_MKTS_DO_MORE_PIN_SIZE = 58;
 
 export const TALISU_MKTS_FOOTER =
-  "Select the PIN nearest you to claim a market of 50 miles (80 kilometres) around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.";
+  "Select the PIN nearest you to claim a market of 80 kilometres around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.";
 
 export const TALISU_MKTS_PMC_TITLE = "Talispros™ PMC";
 

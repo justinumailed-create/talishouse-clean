@@ -105,17 +105,17 @@ const EMPTY_ROOT_CONTEXT: MapSiteRootContext = {
 /** Owner Dashboard dropdown: Ebook Editor, Logo & Card Editor, PIN Dashboard, Bookshelf Editor. */
 const DASHBOARD_MENU = MAPSITE_DASHBOARD_MENU_ITEMS;
 
-/** Map always frames every PIN of the FAST Code plus this buffer (miles). */
-export const MAPSITE_PIN_BUFFER_MILES = 20;
-const MILES_PER_DEGREE_LAT = 69.0;
+/** Map always frames every PIN of the FAST Code plus this buffer (kilometres). */
+export const MAPSITE_PIN_BUFFER_KM = 32;
+const KM_PER_DEGREE_LAT = 111.0;
 
 /**
- * Bounding corners of `points` padded by `miles` on every side (used with
- * fitToCoordinates so all PINs show with a 20-mile buffer around them).
+ * Bounding corners of `points` padded by `km` on every side (used with
+ * fitToCoordinates so all PINs show with a ~32 km buffer around them).
  */
 export function bufferedPinBounds(
   points: ReadonlyArray<{ latitude: number; longitude: number }>,
-  miles = MAPSITE_PIN_BUFFER_MILES,
+  km = MAPSITE_PIN_BUFFER_KM,
 ): Array<{ latitude: number; longitude: number }> {
   const valid = points.filter(
     (p) => Number.isFinite(p.latitude) && Number.isFinite(p.longitude),
@@ -126,9 +126,9 @@ export function bufferedPinBounds(
   const minLat = Math.min(...lats);
   const maxLat = Math.max(...lats);
   const midLat = (minLat + maxLat) / 2;
-  const dLat = miles / MILES_PER_DEGREE_LAT;
+  const dLat = km / KM_PER_DEGREE_LAT;
   const dLng =
-    miles / (MILES_PER_DEGREE_LAT * Math.max(0.05, Math.cos((midLat * Math.PI) / 180)));
+    km / (KM_PER_DEGREE_LAT * Math.max(0.05, Math.cos((midLat * Math.PI) / 180)));
   return [
     { latitude: Math.max(-85, minLat - dLat), longitude: Math.min(...lngs) - dLng },
     { latitude: Math.min(85, maxLat + dLat), longitude: Math.max(...lngs) + dLng },
@@ -917,7 +917,7 @@ function MapSiteChrome({
     .join("|");
 
   // Every visible PIN (main, additional, Derivative partners; category filter
-  // applied), framed with a 20-mile buffer.
+  // applied), framed with a ~32 km buffer.
   const fastCodePinPoints = useMemo(
     () =>
       visiblePins.length > 0
