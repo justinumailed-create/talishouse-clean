@@ -16,6 +16,7 @@ import WebsterCataloguePage, {
   type CatalogueJumpTarget,
 } from "@/components/product-flipbook/WebsterCataloguePage";
 import CatalogueSpecPage from "@/components/product-flipbook/CatalogueSpecPage";
+import TopStrip from "@/components/talispros/TopStrip";
 import "./top-bound-flipbook.css";
 
 const FLIP_MS = 720;
@@ -310,14 +311,15 @@ export default function TopBoundFlipbook({
       )}
 
       {headline && headlineAction ? (
-        <div className="relative z-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-4">
-          <p className="product-flipbook__headline mx-0!" data-testid="product-flipbook-headline">
-            {headline}
-          </p>
-          {headlineAction}
-        </div>
+        <TopStrip
+          className="relative z-10 px-4"
+          textClassName="product-flipbook__headline mx-0!"
+          textTestId="product-flipbook-headline"
+          headline={headline}
+          action={headlineAction}
+        />
       ) : headline ? (
-        <p className="product-flipbook__headline" data-testid="product-flipbook-headline">
+        <p className="product-flipbook__headline talis-top-strip__text" data-testid="product-flipbook-headline">
           {headline}
         </p>
       ) : null}

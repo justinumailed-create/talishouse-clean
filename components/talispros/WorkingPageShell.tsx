@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import TopStrip from "./TopStrip";
 
 /** Ralf (Oct 18): working-page content width, about 1,400 px (Catalogue). */
 export const WORKING_PAGE_MAX_WIDTH = "87.5rem";
@@ -21,6 +22,7 @@ export default function WorkingPageShell({
   testId,
   contentTestId,
   topRight,
+  headlineVariant = "default",
 }: {
   /** One-line headline (Catalogue style), centered above the body. */
   headline?: ReactNode;
@@ -37,6 +39,8 @@ export default function WorkingPageShell({
   contentTestId?: string;
   /** Absolutely positioned top-right control (e.g. Download Demo PDF). */
   topRight?: ReactNode;
+  /** "catalogue": render the shared Catalogue top strip (TopStrip) verbatim. */
+  headlineVariant?: "default" | "catalogue";
 }) {
   return (
     <div
@@ -50,7 +54,15 @@ export default function WorkingPageShell({
         style={{ maxWidth: WORKING_PAGE_MAX_WIDTH }}
         data-testid={contentTestId}
       >
-        {headline || headlineAction ? (
+        {headlineVariant === "catalogue" && headline ? (
+          <TopStrip
+            className="px-2 pb-3"
+            testId="working-page-top-strip"
+            textTestId="working-page-headline"
+            headline={headline}
+            action={headlineAction}
+          />
+        ) : headline || headlineAction ? (
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 px-2 pb-3 text-center">
             {headline ? (
               <p

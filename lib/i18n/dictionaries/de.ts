@@ -928,7 +928,7 @@ export const de: Dictionary = {
       "Jeder registrierte Markt erhält bevorzugten angebotsseitigen Zugang zu Talishouse™ Tiny Homes",
     planProject: "Ihr Projekt planen",
     mapsitesHeadline:
-      "Jeder registrierte Markt hat eine semi-exklusive, geschützte Marktzone von 50 Meilen (80 Kilometern in Kanada) um einen Home-PIN",
+      "Jeder registrierte Markt hat eine semi-exklusive, geschützte Marktzone von 80 Kilometern um einen Home-PIN",
     registerMapsite: "Mapsite registrieren",
     specIncludes: "umfasst",
     specMayInclude: "kann umfassen",

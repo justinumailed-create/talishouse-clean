@@ -75,6 +75,7 @@ export default function DemoMapSiteBuilderClient() {
       testId="mapsites-page"
       contentTestId="mapsites-content"
       headline={t.catalogueUi.mapsitesHeadline}
+      headlineVariant="catalogue"
       headlineAction={
         <WorkingPageCtaButton
           form={DEMO_FORM_ID}

@@ -665,7 +665,7 @@ export const en = {
     planProject: "Plan your Project",
     /** Mapsites page (/talispros/demo-mapsite) top line (Ralf, Oct 18) + "Build Mapsite Demo" (Aisha). */
     mapsitesHeadline:
-      "Every registered Market has a semi-exclusive protected Market Zone of 50 miles (80 kilometres in Canada) around a home pin",
+      "Every registered Market has a semi-exclusive protected Market Zone of 80 kilometres around a home pin",
     registerMapsite: "Register a Mapsite",
     /** Catalogue spec sheets (T-House, T-Dome, G-House). */
     specIncludes: "includes",

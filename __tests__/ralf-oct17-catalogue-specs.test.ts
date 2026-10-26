@@ -35,7 +35,7 @@ describe("Ralf Oct 17 catalogue spec sheets", () => {
     expect(en.catalogueUi.planProject).toBe("Plan your Project");
     expect(de.catalogueUi.planProject).toBeTruthy();
     expect(en.catalogueUi.mapsitesHeadline).toBe(
-      "Every registered Market has a semi-exclusive protected Market Zone of 50 miles (80 kilometres in Canada) around a home pin",
+      "Every registered Market has a semi-exclusive protected Market Zone of 80 kilometres around a home pin",
     );
     const builder = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),

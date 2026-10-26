@@ -5232,6 +5232,38 @@ body.mapsite-gallery-open [data-paypal-button] {
   background-attachment: fixed;
 }
 
+/* Shared top strip (Catalogue + Mapsites): one centred line + pill beside it.
+   Same font colour, weight and size everywhere (components/talispros/TopStrip). */
+.talis-top-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  column-gap: 0.75rem;
+  row-gap: 0.25rem;
+  text-align: center;
+}
+
+.talis-top-strip__text {
+  margin: 0;
+  max-width: 64rem;
+  text-align: center;
+  font-size: clamp(0.9rem, 1.35vw, 1.15rem);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.005em;
+  color: #262626;
+  text-wrap: balance;
+}
+
+@media (max-width: 720px) {
+  .talis-top-strip__text {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+}
+
 /* Ralf (Oct 18): Catalogue-style working pages — left column + main (Z-pattern). */
 @media (min-width: 1024px) {
   .working-page-grid:has(> aside) {
