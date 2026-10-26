@@ -35,19 +35,14 @@ describe("/talisu/engage design gallery", () => {
     expect(read("app/catalogue/page.tsx")).toContain("TopBoundFlipbook");
   });
 
-  it("opens a lightbox with X, wrap-around arrows, Esc/←/→, swipe and Reserve → step=pay", () => {
+  it("has no zoom: each tile and its Reserve button go straight to step=pay&product=Pxx", () => {
     const g = read("components/talisu/EngageDesignGallery.tsx");
-    expect(g).toContain('role="dialog"');
-    expect(g).toContain('data-testid="engage-lightbox-close"');
-    expect(g).toContain('data-testid="engage-lightbox-prev"');
-    expect(g).toContain('data-testid="engage-lightbox-next"');
-    expect(g).toContain("(i + delta + count) % count");
-    expect(g).toContain('event.key === "Escape"');
-    expect(g).toContain('event.key === "ArrowRight"');
-    expect(g).toContain('event.key === "ArrowLeft"');
-    expect(g).toContain("onTouchEnd");
-    // Reservation keeps the selected-unit tag (?product=Pxx)
-    expect(g).toContain("href={talisUEngageCheckoutHref(current.code)}");
+    expect(g).toContain("href={talisUEngageCheckoutHref(design.code)}");
+    expect(g).toContain('data-testid="engage-design-reserve"');
+    expect(g).toContain("fmt(e.galleryReserve, { code: design.code })");
+    // Lightbox and its handlers are gone, not hidden.
+    expect(g).not.toMatch(/lightbox|role="dialog"|aria-modal|onTouch|keydown|Escape|ArrowRight|ArrowLeft|useState|useEffect/);
+    expect(g).not.toMatch(/galleryOpen|galleryClose|galleryPrev|galleryNext|galleryCount|galleryDialog/);
     // Client bundle must not pull in the fs-based page loader.
     expect(g).toContain('import type { EngageDesign } from "@/lib/talisu/engage-designs";');
     expect(g).not.toMatch(/^import \{[^}]*\} from "@\/lib\/talisu\/engage-designs"/m);
@@ -59,23 +54,16 @@ describe("/talisu/engage design gallery", () => {
   it("has final EN and DE gallery copy", () => {
     const e = en.talisu.engage;
     const d = de.talisu.engage;
-    expect(e.catalogueHint).toBe("Tap any design to zoom in, then reserve it with your down payment.");
-    expect(d.catalogueHint).toBe(
-      "Tippen Sie auf ein Design, um es zu vergrößern, und reservieren Sie es mit Ihrer Anzahlung.",
-    );
-    expect(e.catalogueHint).not.toMatch(/flip|unit/i);
+    expect(e.catalogueHint).toBe("Choose a design and reserve it with your $2,000 CAD down payment.");
+    expect(d.catalogueHint).toBe("Wählen Sie ein Design und reservieren Sie es mit Ihrer Anzahlung von 2.000 CAD.");
+    expect(`${e.catalogueHint} ${d.catalogueHint}`).not.toMatch(/zoom|vergrößer|flip|unit/i);
     expect(fmt(e.galleryReserve, { code: "P07" })).toBe("Reserve P07");
     expect(fmt(d.galleryReserve, { code: "P07" })).toBe("P07 reservieren");
-    expect(e.galleryReserveNote).toContain("$2,000 CAD");
-    expect(d.galleryReserveNote).toContain("2.000 CAD");
-    expect(fmt(e.galleryCount, { index: 2, count: 108 })).toBe("2 of 108");
-    expect(fmt(d.galleryCount, { index: 2, count: 108 })).toBe("2 von 108");
     expect(e.galleryDefaultName).toBe("Talishouse™ design suggestion");
     expect(d.galleryDefaultName).toBe("Talishouse™-Designvorschlag");
-    for (const key of ["galleryClose", "galleryPrev", "galleryNext", "galleryOpen", "galleryDialog"] as const) {
-      expect(e[key]).toBeTruthy();
-      expect(d[key]).toBeTruthy();
+    for (const key of ["galleryOpen", "galleryDialog", "galleryClose", "galleryPrev", "galleryNext", "galleryCount", "galleryReserveNote"]) {
+      expect(key in e).toBe(false);
+      expect(key in d).toBe(false);
     }
-    expect(d.galleryClose).toBe("Schließen");
   });
 });

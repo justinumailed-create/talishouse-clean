@@ -72,7 +72,7 @@ export default async function TalisUEngagePage({
 
   // Adviser landing (Oct 26): Thorsten P's portrait + a gallery of the
   // Talishouse™ catalogue designs (no flipbook here; /catalogue keeps it).
-  // Each design opens a lightbox whose Reserve button goes to the $2,000 CAD
+  // Each design tile (and its Reserve button) goes straight to the $2,000 CAD
   // down-payment checkout (?step=pay&product=Pxx); the button below goes there too,
   // keeping a catalogue ?product= code. Older ?structure= links still work:
   // the value is carried to the checkout and shown there.
