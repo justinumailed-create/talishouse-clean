@@ -1,6 +1,7 @@
 /**
  * Aisha's registration page (/talisu/reg): the four transaction structures a
- * Mapsite can be registered for. The selected tab travels as ?structure=<id>
+ * Mapsite can be registered for. The selected tabs (one or more) travel as
+ * ?structure=<id>[,<id>…]
  * from the landing to the register checkout and into the SamCart URL
  * (structure + utm_term), so every registration is tagged with it.
  *
@@ -41,25 +42,85 @@ export function normalizeRegisterStructure(value: unknown): RegisterStructureId 
   return REGISTER_STRUCTURE_ALIASES[key] ?? null;
 }
 
-/** Aisha's landing with a structure tab open: /talisu/reg?structure=<id>. */
-export function talisURegisterStructureHref(structure: unknown): string {
-  const id = normalizeRegisterStructure(structure);
-  return id ? `/talisu/reg?${REGISTER_STRUCTURE_PARAM}=${id}` : "/talisu/reg";
+/**
+ * The selection after clicking one of the four toggles: adds it (at the end)
+ * when it was not selected, removes it when it was. Order stays as clicked.
+ */
+export function toggleRegisterStructure(
+  selected: readonly RegisterStructureId[],
+  id: RegisterStructureId,
+): RegisterStructureId[] {
+  return selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id];
 }
 
-/** Adds structure + utm_term to the SamCart register checkout URL. */
+/**
+ * Every valid structure in a ?structure= value (comma-separated and/or
+ * repeated, like ?product=P03,P07), de-duplicated in the order given.
+ * Unknown values are dropped. Cookie values may arrive URL-encoded (%2C).
+ */
+export function parseRegisterStructures(value: unknown): RegisterStructureId[] {
+  const raw = (Array.isArray(value) ? value : [value]).flatMap((v) =>
+    typeof v === "string" ? v.split(/,|%2c/i) : [],
+  );
+  const out: RegisterStructureId[] = [];
+  for (const part of raw) {
+    const id = normalizeRegisterStructure(part);
+    if (id && !out.includes(id)) out.push(id);
+  }
+  return out;
+}
+
+/** "lease-to-own,tokenization" (readable commas) for URLs and SamCart. */
+export function registerStructuresParam(structures: unknown): string {
+  return parseRegisterStructures(structures).join(",");
+}
+
+/** Aisha's landing with the given tabs selected: /talisu/reg?structure=a,b. */
+export function talisURegisterStructureHref(structure: unknown): string {
+  const ids = registerStructuresParam(structure);
+  return ids ? `/talisu/reg?${REGISTER_STRUCTURE_PARAM}=${ids}` : "/talisu/reg";
+}
+
+/**
+ * Register lock (Arun, Oct 26): "Register now" and the checkout step need at
+ * least one structure. A checkout URL without one is sent back to the landing
+ * with ?locked=structure.
+ */
+export const REGISTER_LOCK_PARAM = "locked";
+export type RegisterLockReason = "structure";
+
+export function normalizeRegisterLockReason(value: unknown): RegisterLockReason | null {
+  const first = Array.isArray(value) ? value[0] : value;
+  return typeof first === "string" && first.trim().toLowerCase() === "structure"
+    ? "structure"
+    : null;
+}
+
+/** Where a checkout URL without a structure goes back to. */
+export function registerLockedHref(fastCode?: string | null): string {
+  const params = new URLSearchParams({ [REGISTER_LOCK_PARAM]: "structure" });
+  const code = fastCode?.trim();
+  if (code) params.set("fastCode", code);
+  return `/talisu/reg?${params.toString()}`;
+}
+
+/**
+ * Adds structure + utm_term to the SamCart register checkout URL; several
+ * structures ride comma-separated in those same two keys.
+ */
 export function registerStructureCheckoutUrl(base: string, structure: unknown): string {
-  const id = normalizeRegisterStructure(structure);
-  if (!id) return base;
+  const ids = registerStructuresParam(structure);
+  if (!ids) return base;
   const url = new URL(base);
-  url.searchParams.set(REGISTER_STRUCTURE_PARAM, id);
-  url.searchParams.set("utm_term", id);
+  url.searchParams.set(REGISTER_STRUCTURE_PARAM, ids);
+  url.searchParams.set("utm_term", ids);
   return url.toString();
 }
 
-/** Client-side cookie string for the chosen structure. */
-export function registerStructureCookie(structure: RegisterStructureId): string {
-  return `${REGISTER_STRUCTURE_COOKIE}=${structure}; path=/; max-age=${REGISTER_STRUCTURE_COOKIE_MAX_AGE}; samesite=lax`;
+/** Client-side cookie string for the chosen structure(s). */
+export function registerStructureCookie(structure: unknown): string {
+  const value = encodeURIComponent(registerStructuresParam(structure));
+  return `${REGISTER_STRUCTURE_COOKIE}=${value}; path=/; max-age=${REGISTER_STRUCTURE_COOKIE_MAX_AGE}; samesite=lax`;
 }
 
 /** Client-side cookie string that forgets the chosen structure. */
@@ -68,18 +129,24 @@ export function clearRegisterStructureCookie(): string {
 }
 
 /**
- * Browser only: remember (or forget) the chosen structure so it survives the
- * PMC registration sequence, and keep the address bar on the shareable
- * /talisu/reg?structure=<id> link.
+ * Browser only: remember (or forget) the chosen structure(s) so they survive
+ * the PMC registration sequence, and keep the address bar on the shareable
+ * /talisu/reg?structure=a,b link.
  */
-export function rememberRegisterStructure(structure: RegisterStructureId | null): void {
+export function rememberRegisterStructure(structures: readonly RegisterStructureId[]): void {
   if (typeof window === "undefined") return;
-  document.cookie = structure
-    ? registerStructureCookie(structure)
+  document.cookie = structures.length
+    ? registerStructureCookie(structures)
     : clearRegisterStructureCookie();
+  const url = new URL(window.location.href);
+  const ids = registerStructuresParam(structures);
+  if (ids) url.searchParams.set(REGISTER_STRUCTURE_PARAM, ids);
+  else url.searchParams.delete(REGISTER_STRUCTURE_PARAM);
+  url.searchParams.delete(REGISTER_LOCK_PARAM);
+  const query = url.searchParams.toString().replace(/%2C/gi, ",");
   window.history.replaceState(
     window.history.state,
     "",
-    talisURegisterStructureHref(structure),
+    `${url.pathname}${query ? `?${query}` : ""}`,
   );
 }

@@ -7,23 +7,11 @@ import {
   engageProductsCheckoutUrl,
   normalizeEngageLockReason,
   parseEngageProducts,
-  resolveEngageStructure,
 } from "../lib/talisu/engage-lock";
-import { REGISTER_STRUCTURE_COOKIE } from "../lib/talisu/register-structure";
 
 const base = "https://talispros.mysamcart.com/checkout/custom";
 
 describe("Engage lock helpers", () => {
-  it("reads the structure from ?structure= first, then Aisha's cookie, and validates both", () => {
-    expect(REGISTER_STRUCTURE_COOKIE).toBe("talisu_reg_structure");
-    expect(resolveEngageStructure("tokenization", "conventional")).toBe("tokenization");
-    expect(resolveEngageStructure(undefined, "conventional")).toBe("conventional");
-    expect(resolveEngageStructure("nonsense", "lease-to-own")).toBe("lease-to-own");
-    expect(resolveEngageStructure("SPLITS", null)).toBe("lease-to-own");
-    expect(resolveEngageStructure("https://evil.example", "<script>")).toBeNull();
-    expect(resolveEngageStructure(undefined, undefined)).toBeNull();
-  });
-
   it("parses comma-separated / repeated design codes, drops unknown ones, de-duplicates", () => {
     expect(parseEngageProducts("P03,P07").map((p) => p.code)).toEqual(["P03", "P07"]);
     expect(parseEngageProducts(["p07", "P03,P07", "P999", "<x>"]).map((p) => p.code)).toEqual(["P07", "P03"]);
@@ -31,23 +19,21 @@ describe("Engage lock helpers", () => {
     expect(parseEngageProducts("")).toEqual([]);
   });
 
-  it("locks on the structure first, then on the design", () => {
-    expect(engageLockReason(null, [])).toBe("structure");
-    expect(engageLockReason(null, ["P07"])).toBe("structure");
-    expect(engageLockReason("tokenization", [])).toBe("design");
-    expect(engageLockReason("tokenization", ["P999"])).toBe("design");
-    expect(engageLockReason("tokenization", ["P03", "P07"])).toBeNull();
+  it("locks only on the design (Oct 26: no structure condition for Thorsten)", () => {
+    expect(engageLockReason([])).toBe("design");
+    expect(engageLockReason(["P999"])).toBe("design");
+    // A design with no structure anywhere is enough.
+    expect(engageLockReason(["P01"])).toBeNull();
+    expect(engageLockReason(["P03", "P07"])).toBeNull();
     expect(normalizeEngageLockReason("Design")).toBe("design");
+    expect(normalizeEngageLockReason("structure")).toBeNull();
     expect(normalizeEngageLockReason("evil")).toBeNull();
   });
 
-  it("builds the single pay link and the bounce link with readable comma-joined codes", () => {
-    expect(engagePayHref(["P03", "P07"], "fractionalization")).toBe(
-      "/talisu/engage?step=pay&structure=fractionalization&product=P03,P07",
-    );
-    expect(engagePayHref(["P07"], "splits")).toBe("/talisu/engage?step=pay&structure=lease-to-own&product=P07");
-    expect(engageLockedHref("structure", ["P07"], null)).toBe("/talisu/engage?locked=structure&product=P07");
-    expect(engageLockedHref("design", [], "conventional")).toBe("/talisu/engage?locked=design&structure=conventional");
+  it("builds the single pay link and the bounce link without any structure", () => {
+    expect(engagePayHref(["P03", "P07"])).toBe("/talisu/engage?step=pay&product=P03,P07");
+    expect(engagePayHref(["P01"])).toBe("/talisu/engage?step=pay&product=P01");
+    expect(engageLockedHref("design")).toBe("/talisu/engage?locked=design");
   });
 
   it("tags SamCart with every design in the existing product / utm_content keys", () => {

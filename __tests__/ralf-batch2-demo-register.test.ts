@@ -63,10 +63,11 @@ describe("Ralf batch 2 — demo → registration", () => {
       expect(page).not.toMatch(/window\.location|setTimeout/);
       // Only redirects allowed: the PMC gate back to the TalisU sequence
       // (unsigned Service Agreement), and the Engage lock bouncing step=pay
-      // back to the landing — never an auto-redirect to checkout.
+      // back to the landing, and Aisha's lock bouncing a structure-less
+      // step=register back to hers — never an auto-redirect to checkout.
       const redirects = page.match(/redirect\([^;]*\)/g) ?? [];
       for (const r of redirects) {
-        expect(r).toMatch(/PMC_PATHS\.talispros|^redirect\(engageLockedHref\(/);
+        expect(r).toMatch(/PMC_PATHS\.talispros|^redirect\((engageLockedHref|registerLockedHref)\(/);
       }
     }
   });

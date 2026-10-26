@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
 import { TALISU_CARD } from "@/lib/talisu/ui";
@@ -13,19 +12,13 @@ import AdviserLayout from "@/components/talisu/AdviserLayout";
 import EngageSelection from "@/components/talisu/EngageSelection";
 import { loadEngageDesigns } from "@/lib/talisu/engage-designs";
 import { isTalisUEngageCheckoutStep } from "@/lib/talisu/ask-step";
-import { engageStructureCheckoutUrl } from "@/lib/talisu/engage-structure";
 import {
   engageLockReason,
   engageLockedHref,
   engageProductsCheckoutUrl,
   normalizeEngageLockReason,
   parseEngageProducts,
-  resolveEngageStructure,
 } from "@/lib/talisu/engage-lock";
-import {
-  REGISTER_STRUCTURE_COOKIE,
-  talisURegisterStructureHref,
-} from "@/lib/talisu/register-structure";
 
 export async function generateMetadata() {
   const locale = await getLocale();
@@ -49,7 +42,6 @@ type TalisUEngagePageProps = {
   searchParams?: Promise<{
     product?: string | string[];
     step?: string | string[];
-    structure?: string | string[];
     locked?: string | string[];
   }>;
 };
@@ -65,22 +57,12 @@ export default async function TalisUEngagePage({
   // designs travel as ?product=P03,P07. Unknown codes are ignored.
   const products = parseEngageProducts(params.product);
   const productCodes = products.map((p) => p.code);
-  // Engage lock: the structure chosen on Aisha's page (/talisu/reg), from
-  // ?structure= or the talisu_reg_structure cookie, limited to the four ids.
-  const cookieStore = await cookies();
-  const structure = resolveEngageStructure(
-    params.structure,
-    cookieStore.get(REGISTER_STRUCTURE_COOKIE)?.value,
-  );
-  const structureTitles = Object.fromEntries(
-    dictionary.home.ownershipSections.map((s) => [s.id, s.title]),
-  );
 
   // Adviser landing (Oct 26): Thorsten P's portrait + a single-row gallery of the
   // Talishouse™ catalogue designs (no flipbook here; /catalogue keeps it).
   // Tiles are Select toggles; the one "Engage Thorsten P" button below unlocks
-  // once a structure (Aisha's page) and at least one design are chosen, and is
-  // the only way to the $2,000 CAD down payment (?step=pay).
+  // once at least one design is selected (Thorsten's own path; nothing from
+  // Aisha's page is needed), and is the only way to the $2,000 CAD down payment (?step=pay).
   if (!isTalisUEngageCheckoutStep(params.step)) {
     const designs = loadEngageDesigns();
     return (
@@ -94,9 +76,7 @@ export default async function TalisUEngagePage({
       >
         <EngageSelection
           designs={designs}
-          initialStructure={structure}
           initialCodes={productCodes}
-          structureTitles={structureTitles}
           bouncedReason={normalizeEngageLockReason(params.locked)}
         />
         <div className="mt-4 text-[13px] text-neutral-600" data-testid="talisu-engage-partner">
@@ -108,20 +88,15 @@ export default async function TalisUEngagePage({
     );
   }
 
-  // Server side of the lock: a direct ?step=pay URL without a valid structure
-  // and at least one valid design goes back to the landing with the reason
-  // (?locked=structure|design); the checkout is never loaded.
-  const lockReason = engageLockReason(structure, productCodes);
+  // Server side of the lock: a direct ?step=pay URL without at least one
+  // valid design goes back to the landing with the reason (?locked=design);
+  // the checkout is never loaded.
+  const lockReason = engageLockReason(productCodes);
   if (lockReason) {
-    redirect(engageLockedHref(lockReason, productCodes, structure));
+    redirect(engageLockedHref(lockReason));
   }
 
-  const structureSection =
-    dictionary.home.ownershipSections.find((s) => s.id === structure) ?? null;
-  const checkoutUrl = engageStructureCheckoutUrl(
-    engageProductsCheckoutUrl(TALISU_ENGAGE.samcartUrl, products),
-    structure,
-  );
+  const checkoutUrl = engageProductsCheckoutUrl(TALISU_ENGAGE.samcartUrl, products);
 
   // Thorsten P's clients pay the down payment directly and set up their Mapsite
   // afterwards, so this checkout is open to every visitor (no PMC gate).
@@ -198,27 +173,7 @@ export default async function TalisUEngagePage({
                 </span>
               ))}{" "}
               <Link
-                href={`/talisu/engage?${new URLSearchParams({ structure: structure ?? "", product: productCodes.join(",") }).toString()}`}
-                className="whitespace-nowrap font-medium text-[#046BD9] hover:underline"
-              >
-                {t.engageChange}
-              </Link>
-            </div>
-          ) : null}
-          {structureSection ? (
-            <div
-              className="mb-4 rounded-2xl border border-[#046BD9]/25 bg-white px-4 py-3 text-sm text-neutral-800 shadow-sm sm:text-base"
-              data-testid="engage-structure"
-              data-structure-id={structureSection.id}
-            >
-              <span className="font-semibold text-[#046BD9]">
-                {t.engageStructure}
-              </span>{" "}
-              <span className="font-semibold text-neutral-950">
-                {structureSection.title}
-              </span>{" "}
-              <Link
-                href={talisURegisterStructureHref(structure)}
+                href={`/talisu/engage?${new URLSearchParams({ product: productCodes.join(",") }).toString().replace(/%2C/g, ",")}`}
                 className="whitespace-nowrap font-medium text-[#046BD9] hover:underline"
               >
                 {t.engageChange}

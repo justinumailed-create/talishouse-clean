@@ -25,7 +25,7 @@ describe("Markets sidebar card", () => {
   });
 
   it("styles the market links as Aisha's metal structure tabs, Canada selected", () => {
-    expect(tabsSource).toContain("isOpen ? METAL_TAB_SELECTED : METAL_TAB_UNSELECTED");
+    expect(tabsSource).toContain("isSelected ? `${METAL_TAB_SELECTED} ${TAB_CHECKED}` : METAL_TAB_UNSELECTED");
     expect(source).toContain("const MARKET_BUTTON_SELECTED = `${METAL_TAB} ${METAL_TAB_SELECTED}`");
     expect(source).toContain("const MARKET_BUTTON_UNSELECTED = `${METAL_TAB} ${METAL_TAB_UNSELECTED}`");
     expect(source).toMatch(

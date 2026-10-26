@@ -285,6 +285,9 @@ export const TALISU_REGISTER = {
     },
   ],
   structureSelected: "Selected structure:",
+  structuresSelected: "Selected structures:",
+  /** Register lock: at least one structure tab must be selected. */
+  lockNeedStructure: "Choose at least one structure",
   structureClose: "Close",
   structureChange: "Change",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
@@ -331,10 +334,8 @@ export const TALISU_ENGAGE = {
   galleryDefaultName: "Talishouse™ design suggestion",
   gallerySelect: "Select",
   gallerySelected: "Selected",
-  /** Engage lock (Oct 26): structure from Aisha's page + at least one design. */
+  /** Engage lock (Oct 26): at least one design is the only condition. */
   selectedSummary: "Selected: {codes}",
-  structureSummary: "Structure: {structure}",
-  lockNeedStructure: "Choose a structure on Aisha's page first",
   lockNeedDesign: "Select at least one design",
   /** Single-row gallery arrows (desktop). */
   galleryScrollBack: "Scroll designs left",

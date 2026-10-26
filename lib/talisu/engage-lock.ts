@@ -8,41 +8,25 @@ import {
   findCatalogueProduct,
   type CatalogueProduct,
 } from "@/lib/talisu/catalogue-products";
-import {
-  ENGAGE_STRUCTURE_PARAM,
-  normalizeEngageStructure,
-  type EngageStructureId,
-} from "@/lib/talisu/engage-structure";
 
 /**
- * Engage lock (Ralf, Oct 26): the $2,000 CAD down payment on /talisu/engage
- * stays locked until BOTH
- *   (a) a structure was chosen on Aisha's page (/talisu/reg), read from
- *       ?structure= or the talisu_reg_structure cookie and validated against
- *       the four ids, and
- *   (b) at least one catalogue design (P-code) is selected.
- * The single "Engage Thorsten P" button is the only way to ?step=pay, and the
- * pay step re-checks both on the server.
+ * Engage lock (Arun, Oct 26 correction): Thorsten P's page is its own path,
+ * separate from Aisha's registration page. The $2,000 CAD down payment on
+ * /talisu/engage stays locked until at least one catalogue design (P-code)
+ * is selected; nothing else is required. The single "Engage Thorsten P"
+ * button is the only way to ?step=pay, and the pay step re-checks it on the
+ * server.
  */
 export const ENGAGE_LOCK_PARAM = "locked";
-export const ENGAGE_REGISTER_PATH = ROUTES.TALISU_REGISTER;
 
-export type EngageLockReason = "structure" | "design";
+export type EngageLockReason = "design";
 
 /** ?locked= value from a bounced pay URL; anything else is ignored. */
 export function normalizeEngageLockReason(
   value: string | string[] | null | undefined,
 ): EngageLockReason | null {
   const raw = (Array.isArray(value) ? value[0] : value)?.trim().toLowerCase();
-  return raw === "structure" || raw === "design" ? raw : null;
-}
-
-/** ?structure= first, else the structure remembered on Aisha's page. */
-export function resolveEngageStructure(
-  param: string | string[] | null | undefined,
-  cookieValue: string | null | undefined,
-): EngageStructureId | null {
-  return normalizeEngageStructure(param) ?? normalizeEngageStructure(cookieValue);
+  return raw === "design" ? raw : null;
 }
 
 /**
@@ -67,42 +51,27 @@ export function parseEngageProducts(
   return products;
 }
 
-/** Which condition is still missing (structure first), or null when unlocked. */
+/** "design" while no valid design is selected, else null (unlocked). */
 export function engageLockReason(
-  structure: string | null | undefined,
   productCodes: readonly string[],
 ): EngageLockReason | null {
-  if (!normalizeEngageStructure(structure)) return "structure";
-  if (!productCodes.some((code) => findCatalogueProduct(code))) return "design";
-  return null;
+  return productCodes.some((code) => findCatalogueProduct(code)) ? null : "design";
 }
 
-/** The one route to the down payment: ?step=pay&structure=<id>&product=P03,P07. */
-export function engagePayHref(
-  productCodes: readonly string[],
-  structure: string | null | undefined,
-): string {
+/** The one route to the down payment: ?step=pay&product=P03,P07. */
+export function engagePayHref(productCodes: readonly string[]): string {
   const params = new URLSearchParams({
     [TALISU_ASK_STEP_PARAM]: TALISU_ENGAGE_CHECKOUT_STEP,
   });
-  const id = normalizeEngageStructure(structure);
-  if (id) params.set(ENGAGE_STRUCTURE_PARAM, id);
   const codes = productCodes.filter((code) => findCatalogueProduct(code));
   if (codes.length) params.set(CATALOGUE_PRODUCT_PARAM, codes.join(","));
   return `${ROUTES.TALISU_ENGAGE}?${params.toString().replace(/%2C/g, ",")}`;
 }
 
 /** Where a locked pay URL is sent back to: the landing with the reason. */
-export function engageLockedHref(
-  reason: EngageLockReason,
-  productCodes: readonly string[],
-  structure: string | null | undefined,
-): string {
+export function engageLockedHref(reason: EngageLockReason): string {
   const params = new URLSearchParams({ [ENGAGE_LOCK_PARAM]: reason });
-  const id = normalizeEngageStructure(structure);
-  if (id) params.set(ENGAGE_STRUCTURE_PARAM, id);
-  if (productCodes.length) params.set(CATALOGUE_PRODUCT_PARAM, productCodes.join(","));
-  return `${ROUTES.TALISU_ENGAGE}?${params.toString().replace(/%2C/g, ",")}`;
+  return `${ROUTES.TALISU_ENGAGE}?${params.toString()}`;
 }
 
 /**

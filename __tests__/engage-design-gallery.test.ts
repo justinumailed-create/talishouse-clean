@@ -98,9 +98,12 @@ describe("/talisu/engage design gallery", () => {
     expect(d.gallerySelected).toBe("Ausgewählt");
     expect(fmt(e.selectedSummary, { codes: "P03, P07" })).toBe("Selected: P03, P07");
     expect(fmt(d.selectedSummary, { codes: "P03, P07" })).toBe("Ausgewählt: P03, P07");
-    expect(e.lockNeedStructure).toBe("Choose a structure on Aisha's page first");
+    // Oct 26: the design is Thorsten's only lock condition.
+    expect("lockNeedStructure" in e).toBe(false);
+    expect("lockNeedStructure" in d).toBe(false);
+    expect("structureSummary" in e).toBe(false);
+    expect("structureSummary" in d).toBe(false);
     expect(e.lockNeedDesign).toBe("Select at least one design");
-    expect(d.lockNeedStructure).toBe("Wählen Sie zuerst auf Aishas Seite eine Struktur");
     expect(d.lockNeedDesign).toBe("Wählen Sie mindestens ein Design aus");
     expect(e.galleryDefaultName).toBe("Talishouse™ design suggestion");
     expect(d.galleryDefaultName).toBe("Talishouse™-Designvorschlag");
