@@ -67,10 +67,12 @@ export default function DemoMapSiteBuilderClient({
       // shared links land on the card, not the hero.
       const url = new URL(window.location.href);
       url.searchParams.set(DEMO_BUILD_QUERY, "1");
-      window.history.pushState(null, "", `${url.pathname}${url.search}${url.hash}`);
+      // Through the Next router (not raw pushState) so its canonical URL keeps
+      // ?build=1 and a later router.push to the eBook step doesn't drop it.
+      router.push(`${url.pathname}${url.search}${url.hash}`, { scroll: false });
     }
     setFocusRequest((current) => current + 1);
-  }, [showCard]);
+  }, [showCard, router]);
 
   useEffect(() => {
     function syncFromUrl() {
