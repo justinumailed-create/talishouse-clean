@@ -29,6 +29,15 @@ interface GoogleAddressInputProps {
   label?: string;
   onBlur?: () => void;
   onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
+  /** DOM id for the input (lets a page CTA scroll to and focus it). */
+  id?: string;
+  inputTestId?: string;
+  /** Keep the label for screen readers only (a step heading shows instead). */
+  hideLabel?: boolean;
+  /** Red border without the error text (message shown elsewhere). */
+  invalid?: boolean;
+  /** Localised "lookup unavailable" note. */
+  fallbackHintText?: string;
 }
 
 /**
@@ -47,6 +56,11 @@ export default function GoogleAddressInput({
   label = "Street Address",
   onBlur,
   onKeyDown,
+  id,
+  inputTestId,
+  hideLabel = false,
+  invalid = false,
+  fallbackHintText,
 }: GoogleAddressInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const onPlaceSelectedRef = useRef(onPlaceSelected);
@@ -59,7 +73,8 @@ export default function GoogleAddressInput({
   const [placesFailed, setPlacesFailed] = useState(false);
   const fallbackHint =
     !apiKey || placesFailed
-      ? "Address lookup unavailable — enter a full street address, then press Enter or tab out to geocode."
+      ? fallbackHintText ||
+        "Address lookup unavailable — enter a full street address, then press Enter or tab out to geocode."
       : null;
 
   useEffect(() => {
@@ -116,8 +131,8 @@ export default function GoogleAddressInput({
 
   return (
     <div>
-      <div className="mb-1.5">
-        <label className="text-sm font-medium text-neutral-800">
+      <div className={hideLabel ? "sr-only" : "mb-1.5"}>
+        <label htmlFor={id} className="text-sm font-medium text-neutral-800">
           {label}
           {required ? <span className="text-red-500"> *</span> : null}
         </label>
@@ -125,6 +140,9 @@ export default function GoogleAddressInput({
       </div>
       <input
         ref={inputRef}
+        id={id}
+        data-testid={inputTestId}
+        aria-invalid={invalid || Boolean(error) || undefined}
         type="text"
         value={value}
         onChange={(event) => onChange(event.target.value)}
@@ -134,7 +152,7 @@ export default function GoogleAddressInput({
         autoComplete="street-address"
         placeholder={placeholder}
         className={`w-full h-11 px-4 bg-white border text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-xl ${
-          error ? "border-red-300" : "border-neutral-200"
+          error || invalid ? "border-red-300" : "border-neutral-200"
         }`}
       />
       {error ? <p className="mt-1 text-xs text-red-500">{error}</p> : null}

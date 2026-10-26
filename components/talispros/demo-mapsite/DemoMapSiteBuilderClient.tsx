@@ -14,9 +14,21 @@ import { createDemoMapSiteAction } from "@/app/talispros/demo-mapsite/actions";
 import { WorkingPageCtaButton, AISHA_AVATAR_SRC } from "@/components/talispros/WorkingPageCtaLink";
 import WorkingPageShell from "@/components/talispros/WorkingPageShell";
 import DemoDownloadMenu from "@/components/talispros/demo-mapsite/DemoDownloadMenu";
+import {
+  DEMO_ADDRESS_INPUT_ID,
+  demoTitleFromAddress,
+  hasDemoPinChoice,
+} from "@/lib/talispros/demo-builder";
 
 const DEMO_FALLBACK_TITLE = "Demo Mapsite";
 const DEMO_FORM_ID = "demo-mapsite-form";
+function focusAddressBox() {
+  const input = document.getElementById(DEMO_ADDRESS_INPUT_ID) as HTMLInputElement | null;
+  if (!input) return;
+  const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+  input.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+  input.focus({ preventScroll: true });
+}
 
 export default function DemoMapSiteBuilderClient() {
   const router = useRouter();
@@ -24,29 +36,27 @@ export default function DemoMapSiteBuilderClient() {
   const [pin, setPin] = useState<HomePinLocationValues>(defaultHomePinLocationValues);
   const t = useT();
   const d = t.demo;
-  // Ralf (Oct 18): the box is labelled "Demo Mapsite" and shows "Home PIN
-  // Address" as its prompt; an empty box falls back to "Demo Mapsite".
-  const [title, setTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [pinErrors, setPinErrors] = useState<
-    Partial<Record<keyof HomePinLocationValues, string>>
-  >({});
+  const [addressInvalid, setAddressInvalid] = useState(false);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextPinErrors = validateHomePinLocation(pin);
-    setPinErrors(nextPinErrors);
-    if (Object.keys(nextPinErrors).length > 0) {
+    // Validation only on Continue, as one friendly inline message (no native
+    // required-field popups: the form is noValidate and nothing is required).
+    const pinErrors = validateHomePinLocation(pin);
+    if (!hasDemoPinChoice(pin) || Object.keys(pinErrors).length > 0) {
+      setAddressInvalid(true);
       setError(d.errPlacePin);
       return;
     }
+    setAddressInvalid(false);
 
+    // One address box: the Places result is both the street address and the
+    // listing title (an untouched demo falls back to "Demo Mapsite").
+    const streetAddress = pin.streetAddress.trim() || pin.reverseGeocodedAddress.trim();
     const formData = new FormData();
-    formData.set("propertyTitle", title.trim() || DEMO_FALLBACK_TITLE);
-    formData.set(
-      "streetAddress",
-      pin.streetAddress.trim() || pin.reverseGeocodedAddress.trim(),
-    );
+    formData.set("propertyTitle", demoTitleFromAddress(streetAddress) || DEMO_FALLBACK_TITLE);
+    formData.set("streetAddress", streetAddress);
     formData.set("description", pin.pinWriteup);
     formData.set("latitude", pin.latitude);
     formData.set("longitude", pin.longitude);
@@ -63,14 +73,9 @@ export default function DemoMapSiteBuilderClient() {
     });
   }
 
-  const cardClass =
-    "overflow-hidden rounded-[24px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]";
-
   return (
-    // Mapsites page (Ralf, Oct 17 + Oct 18): Catalogue look at ~1,400 px —
-    // one line + Aisha link on top ("Build Mapsite Demo" submits the form),
-    // nothing else above or below the form. Name + address on the left,
-    // geo-coordinates above the map on the right (Z-pattern).
+    // Mapsites page (Ralf, Oct 17/18/26): Catalogue top strip + Aisha pill
+    // ("Build Mapsite Demo" scrolls to and focuses Step 1), then ONE card.
     <WorkingPageShell
       testId="mapsites-page"
       contentTestId="mapsites-content"
@@ -78,7 +83,7 @@ export default function DemoMapSiteBuilderClient() {
       headlineVariant="catalogue"
       headlineAction={
         <WorkingPageCtaButton
-          form={DEMO_FORM_ID}
+          onClick={focusAddressBox}
           disabled={pending}
           label={d.buildMapsiteDemo}
           avatarSrc={AISHA_AVATAR_SRC}
@@ -87,60 +92,77 @@ export default function DemoMapSiteBuilderClient() {
         />
       }
     >
-      <form id={DEMO_FORM_ID} onSubmit={handleSubmit}>
+      <form id={DEMO_FORM_ID} onSubmit={handleSubmit} noValidate>
         <HomePinLocationSection
           values={pin}
           pinImage={null}
-          onChange={(values) => setPin((current) => ({ ...current, ...values }))}
+          onChange={(values) => {
+            setPin((current) => ({ ...current, ...values }));
+            if (error || addressInvalid) {
+              setAddressInvalid(false);
+              setError(null);
+            }
+          }}
           onPinImageChange={() => undefined}
           mode="essentials"
           variant="demo"
-          errors={pinErrors}
+          addressInputId={DEMO_ADDRESS_INPUT_ID}
+          addressInvalid={addressInvalid}
+          demoCopy={{
+            step1Title: d.defaultListingTitle,
+            step1Hint: d.homePinNameHint,
+            addressLabel: d.defaultListingTitle,
+            addressPlaceholder: d.addressPlaceholder,
+            addressLookupUnavailable: d.addressLookupUnavailable,
+            step2Title: d.step2Title,
+            step2Hint: d.step2Hint,
+            coordsLabel: d.coordsLabel,
+            manualPlacement: d.manualPlacement,
+            nearby: d.nearby,
+          }}
           leadSlot={
-            <div className={`${cardClass} px-5 py-5`}>
-              <label className="block">
-                <span className="block text-[13px] font-medium text-neutral-800">
-                  {d.listingTitle}
-                </span>
-                <input
-                  value={title}
-                  onChange={(event) => setTitle(event.target.value)}
-                  disabled={pending}
-                  maxLength={120}
-                  placeholder={d.defaultListingTitle}
-                  data-testid="demo-home-pin-name"
-                  className="mt-1.5 h-11 w-full rounded-xl border border-neutral-200 bg-white px-4 text-[15px] tracking-tight text-neutral-950 outline-none placeholder:text-neutral-500 focus:ring-2 focus:ring-neutral-900/20 disabled:opacity-40"
-                />
-                <span
-                  className="mt-1 block text-[12px] leading-snug text-neutral-500"
-                  data-testid="demo-home-pin-name-hint"
-                >
-                  {d.homePinNameHint}
-                </span>
-              </label>
-            </div>
-          }
-          asideSlot={
-            // Z-pattern overflow (Ralf, Oct 18): download + next-step note sit
-            // in the left column; Continue stays bottom right.
-            <div className="space-y-3 px-1">
-              <DemoDownloadMenu className="relative inline-block" align="left" />
-              <p className="text-[11.5px] leading-snug text-neutral-500">{d.nextNote}</p>
-            </div>
+            <h2
+              className="mb-5 text-[13px] font-medium uppercase tracking-[0.14em] text-neutral-500"
+              data-testid="demo-card-title"
+            >
+              {d.listingTitle}
+            </h2>
           }
           footerSlot={
-            <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2">
-              {error ? (
-                <p className="mr-auto text-[13px] leading-relaxed text-red-600">{error}</p>
-              ) : null}
-              <button
-                type="submit"
-                disabled={pending}
-                data-testid="demo-continue"
-                className="flex h-11 items-center justify-center rounded-full bg-neutral-950 px-7 text-[15px] font-medium text-white transition disabled:opacity-40"
-              >
-                {pending ? d.continuing : d.continue}
-              </button>
+            <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-end sm:justify-between">
+              <div className="min-w-0 space-y-2 sm:max-w-[26rem]">
+                <DemoDownloadMenu className="relative inline-block" align="left" variant="secondary" />
+                <p className="text-[11.5px] leading-snug text-neutral-500" data-testid="demo-next-note">
+                  {d.nextNote}
+                </p>
+              </div>
+              <div className="flex flex-col items-stretch gap-2 sm:items-end">
+                {error ? (
+                  <p
+                    role="alert"
+                    data-testid="demo-inline-error"
+                    className="rounded-xl bg-amber-50 px-3 py-2 text-[13px] leading-snug text-amber-900 sm:max-w-[24rem]"
+                  >
+                    {error}
+                  </p>
+                ) : null}
+                <div className="flex items-center gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-950 text-[13px] font-semibold text-white"
+                  >
+                    3
+                  </span>
+                  <button
+                    type="submit"
+                    disabled={pending}
+                    data-testid="demo-continue"
+                    className="flex h-11 flex-1 items-center justify-center rounded-full bg-neutral-950 px-7 text-[15px] font-medium text-white transition hover:bg-neutral-800 disabled:opacity-40 sm:flex-none"
+                  >
+                    {pending ? d.continuing : d.continue}
+                  </button>
+                </div>
+              </div>
             </div>
           }
         />

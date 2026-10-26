@@ -16,9 +16,12 @@ import {
 export default function DemoDownloadMenu({
   className = "",
   align = "right",
+  variant = "primary",
 }: {
   className?: string;
   align?: "left" | "right";
+  /** "secondary": quiet outlined button (demo builder card). */
+  variant?: "primary" | "secondary";
 }) {
   const d = useT().demo;
   const [open, setOpen] = useState(false);
@@ -53,7 +56,12 @@ export default function DemoDownloadMenu({
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-neutral-950 px-4 text-[13px] font-medium text-white transition hover:bg-neutral-800 sm:text-[14px]"
+        data-testid="demo-download-button"
+        className={
+          variant === "secondary"
+            ? "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-neutral-300 bg-white px-4 text-[13px] font-medium text-neutral-800 transition hover:bg-neutral-50 sm:text-[14px]"
+            : "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-neutral-950 px-4 text-[13px] font-medium text-white transition hover:bg-neutral-800 sm:text-[14px]"
+        }
       >
         {d.downloadPdf}
         <span

@@ -710,11 +710,19 @@ export const en = {
     homePinNameHint: "(or where you would like to centre your home market)",
     /** Mapsites top-line action (Aisha): submits the demo form. */
     buildMapsiteDemo: "Build Mapsite Demo",
-    errPlacePin: "Place a pin or enter an address to continue.",
+    /** Demo builder card (Ralf, Oct 26): numbered steps, one address box. */
+    addressPlaceholder: "Start typing an address…",
+    addressLookupUnavailable: "Address search is unavailable. Type a full address, then press Enter.",
+    step2Title: "Adjust the PIN on the map",
+    step2Hint: "Tap the map or drag the PIN. The Mapsite opens at this zoom.",
+    coordsLabel: "PIN",
+    manualPlacement: "Manual placement",
+    nearby: "Nearby",
+    errPlacePin: "Search for an address or move the PIN on the map, then press Continue.",
     continue: "Continue to demo eBook",
     continuing: "Continue to demo eBook…",
     nextNote:
-      "Next you will extract the pinned Talispros eBook pages, optimize them, and Build the demonstration Talisbook™. No FAST Code is issued.",
+      "Next, build the demonstration Talisbook™ from the pinned Talispros eBook pages. No FAST Code is issued.",
     claimDescribe: "What best describes you?",
     claimChooseError: "Choose who you are (same options as /start) before claiming.",
     firstName: "First name",

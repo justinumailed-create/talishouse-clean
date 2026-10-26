@@ -234,6 +234,7 @@ describe("demo mapsite codes", () => {
     expect(builder).toContain("DemoDownloadMenu");
     expect(builder).toContain("handleSubmit");
     expect(builder).toContain("HomePinLocationSection");
+    expect(builder).toContain('variant="demo"');
   });
 
   it("seeds demo Mapsites with stock gallery so pin hero uses shared ebook helper", () => {

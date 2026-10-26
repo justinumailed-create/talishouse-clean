@@ -52,18 +52,23 @@ export function WorkingPageCtaButton({
   avatarAlt,
   testId,
   disabled,
+  onClick,
 }: {
-  form: string;
+  /** Submits this form id. Ignored when onClick is set. */
+  form?: string;
   label: string;
   avatarSrc: string;
   avatarAlt: string;
   testId?: string;
   disabled?: boolean;
+  /** Plain button (no form submit, so no native required-field popups). */
+  onClick?: () => void;
 }) {
   return (
     <button
-      type="submit"
-      form={form}
+      type={onClick ? "button" : "submit"}
+      form={onClick ? undefined : form}
+      onClick={onClick}
       disabled={disabled}
       data-testid={testId}
       className="inline-flex shrink-0 items-center gap-2 rounded-full border border-[#046BD9]/40 bg-white py-1 pl-1 pr-4 text-[14px] font-semibold text-[#046BD9] shadow-sm transition hover:bg-[#046BD9] hover:text-white disabled:opacity-50"

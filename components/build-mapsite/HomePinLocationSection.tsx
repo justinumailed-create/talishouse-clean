@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Upload } from "lucide-react";
 import Image from "next/image";
 import {
@@ -92,6 +92,42 @@ function InputField({
   );
 }
 
+/** Localised copy for the demo builder card (EN + DE dictionaries). */
+export interface HomePinDemoCopy {
+  step1Title: string;
+  step1Hint: string;
+  addressLabel: string;
+  addressPlaceholder: string;
+  addressLookupUnavailable: string;
+  step2Title: string;
+  step2Hint: string;
+  coordsLabel: string;
+  manualPlacement: string;
+  nearby: string;
+}
+
+function formatCoordinateLine(value: string): string {
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed.toFixed(6) : "—";
+}
+
+function DemoStepHeading({ step, title, hint }: { step: number; title: string; hint?: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span
+        aria-hidden="true"
+        className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-950 text-[13px] font-semibold text-white"
+      >
+        {step}
+      </span>
+      <div className="min-w-0">
+        <h3 className="text-[15px] font-semibold leading-snug tracking-tight text-neutral-950">{title}</h3>
+        {hint ? <p className="mt-0.5 text-[12.5px] leading-snug text-neutral-500">{hint}</p> : null}
+      </div>
+    </div>
+  );
+}
+
 export interface HomePinLocationSectionProps {
   values: HomePinLocationValues;
   pinImage: File | null;
@@ -99,15 +135,21 @@ export interface HomePinLocationSectionProps {
   onPinImageChange: (file: File | null) => void;
   mode?: "full" | "essentials";
   /**
-   * "demo" (Mapsites demo page, Ralf Oct 18): no URL / MLS® fields,
-   * geo-coordinates above the map, two columns (lead + address left,
-   * coordinates + map + footer right) so it fits one ~1440×800 screen.
+   * "demo" (Mapsites demo page, Ralf Oct 26): one card, numbered steps —
+   * single Places address box, PIN map beside it (stacked on mobile),
+   * read-only coordinates line, footer row for Continue.
    */
   variant?: "default" | "demo";
   leadSlot?: ReactNode;
   footerSlot?: ReactNode;
   /** Demo variant: extra content at the bottom of the left column. */
   asideSlot?: ReactNode;
+  /** Demo variant: localised step copy. */
+  demoCopy?: HomePinDemoCopy;
+  /** Demo variant: DOM id of the single address input. */
+  addressInputId?: string;
+  /** Demo variant: highlight the address box (message shown by the page). */
+  addressInvalid?: boolean;
   errors?: Partial<Record<keyof HomePinLocationValues | "pinImage", string>>;
 }
 
@@ -121,6 +163,9 @@ export default function HomePinLocationSection({
   leadSlot,
   footerSlot,
   asideSlot,
+  demoCopy,
+  addressInputId,
+  addressInvalid = false,
   errors = {},
 }: HomePinLocationSectionProps) {
   const pinImageInputRef = useRef<HTMLInputElement>(null);
@@ -292,6 +337,23 @@ export default function HomePinLocationSection({
 
   const isDemo = variant === "demo";
 
+  function handleAddressBlur() {
+    if (!values.streetAddress.trim()) return;
+    // Fallback geocode when Places wasn't used (or key unavailable).
+    if (hasValidCoordinates(values.latitude, values.longitude)) return;
+    onChange({ manualPlacement: false });
+    setAddressLookupNonce((current) => current + 1);
+  }
+
+  function handleAddressKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    if (!values.streetAddress.trim()) return;
+    if (hasValidCoordinates(values.latitude, values.longitude)) return;
+    onChange({ manualPlacement: false });
+    setAddressLookupNonce((current) => current + 1);
+  }
+
   const addressField = (
       <GoogleAddressInput
         label="Street Address"
@@ -300,21 +362,8 @@ export default function HomePinLocationSection({
           onChange({ streetAddress, manualPlacement: false })
         }
         onPlaceSelected={handleGooglePlaceSelected}
-        onBlur={() => {
-          if (!values.streetAddress.trim()) return;
-          // Fallback geocode when Places wasn't used (or key unavailable).
-          if (hasValidCoordinates(values.latitude, values.longitude)) return;
-          onChange({ manualPlacement: false });
-          setAddressLookupNonce((current) => current + 1);
-        }}
-        onKeyDown={(event) => {
-          if (event.key !== "Enter") return;
-          event.preventDefault();
-          if (!values.streetAddress.trim()) return;
-          if (hasValidCoordinates(values.latitude, values.longitude)) return;
-          onChange({ manualPlacement: false });
-          setAddressLookupNonce((current) => current + 1);
-        }}
+        onBlur={handleAddressBlur}
+        onKeyDown={handleAddressKeyDown}
         placeholder="123 Main Street"
         error={errors.streetAddress}
         required
@@ -373,7 +422,6 @@ export default function HomePinLocationSection({
           hint="Zoom to the view you want — placing or moving the PIN keeps that zoom. The created Mapsite opens at the same depth."
         />
         <TalisMapsPinPicker
-          heightClassName={isDemo ? "h-[300px] lg:h-[330px]" : undefined}
           latitude={values.latitude}
           longitude={values.longitude}
           streetAddress={values.streetAddress}
@@ -399,25 +447,78 @@ export default function HomePinLocationSection({
   );
 
   if (isDemo) {
+    // Demo builder (Ralf, Oct 26): ONE card with numbered steps — 1 search the
+    // address (Places places the PIN), 2 adjust the PIN on the map (beside on
+    // desktop, stacked on mobile), 3 Continue. Coordinates are a read-only line.
+    const copy = demoCopy;
     return (
-      <div className="working-page-grid grid gap-5" style={{ ["--wp-left" as string]: "26rem" } as CSSProperties}>
-        <aside className="min-w-0 space-y-5" data-testid="demo-pin-left">
-          {leadSlot}
-          <div className="rounded-[24px] bg-white px-5 py-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]">
-            {addressField}
-          </div>
-          {asideSlot}
-        </aside>
-        <div className="min-w-0 space-y-3" data-testid="demo-pin-right">
-          <div className="rounded-[24px] bg-white px-5 py-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]">
-            <div className="grid gap-3 sm:grid-cols-2" data-testid="demo-geo-coordinates">
-              {coordinateInputs}
+      <section
+        data-testid="demo-builder-card"
+        className="rounded-[24px] bg-white px-5 py-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)] sm:px-7 sm:py-6"
+      >
+        {leadSlot}
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,23rem)_minmax(0,1fr)] lg:gap-8">
+          <div className="min-w-0" data-testid="demo-step-address">
+            <DemoStepHeading step={1} title={copy?.step1Title ?? "Home PIN Address"} hint={copy?.step1Hint} />
+            <div className="mt-3">
+              <GoogleAddressInput
+                id={addressInputId}
+                inputTestId="demo-address-input"
+                hideLabel
+                label={copy?.addressLabel ?? "Home PIN Address"}
+                value={values.streetAddress}
+                onChange={(streetAddress) => onChange({ streetAddress, manualPlacement: false })}
+                onPlaceSelected={handleGooglePlaceSelected}
+                onBlur={handleAddressBlur}
+                onKeyDown={handleAddressKeyDown}
+                placeholder={copy?.addressPlaceholder}
+                invalid={addressInvalid}
+                fallbackHintText={copy?.addressLookupUnavailable}
+              />
             </div>
-            <div className="mt-3">{mapBlock}</div>
+            {asideSlot}
           </div>
-          {footerSlot}
+          <div className="min-w-0" data-testid="demo-step-pin">
+            <DemoStepHeading step={2} title={copy?.step2Title ?? "Adjust the PIN on the map"} hint={copy?.step2Hint} />
+            <div className="mt-3">
+              <TalisMapsPinPicker
+                heightClassName="h-[280px] sm:h-[320px] lg:h-[340px]"
+                latitude={values.latitude}
+                longitude={values.longitude}
+                streetAddress={values.streetAddress}
+                manualPlacement={values.manualPlacement}
+                addressLookupNonce={addressLookupNonce}
+                mapZoom={values.mapZoom}
+                pinStyle={pinPickerStyle}
+                onLocationChange={handleLocationChange}
+                onMapZoomChange={(mapZoom) => onChange({ mapZoom })}
+              />
+              <p
+                className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-500"
+                data-testid="demo-pin-coordinates"
+              >
+                <span className="font-mono tabular-nums text-neutral-700" data-testid="demo-pin-coordinates-value">
+                  {copy?.coordsLabel ?? "PIN"} {formatCoordinateLine(values.latitude)}, {formatCoordinateLine(values.longitude)}
+                </span>
+                <span className="text-neutral-400">Powered by Talismaps™</span>
+                {values.manualPlacement ? (
+                  <span className="text-neutral-600">{copy?.manualPlacement ?? "Manual placement"}</span>
+                ) : null}
+                {hasCoords && values.reverseGeocodedAddress ? (
+                  <span className="min-w-0 max-w-full truncate" title={values.reverseGeocodedAddress}>
+                    {copy?.nearby ?? "Nearby"}: {values.reverseGeocodedAddress}
+                  </span>
+                ) : null}
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
+        {footerSlot ? (
+          <div className="mt-6 border-t border-neutral-100 pt-5" data-testid="demo-step-continue">
+            {footerSlot}
+          </div>
+        ) : null}
+      </section>
     );
   }
 
