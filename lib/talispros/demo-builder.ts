@@ -13,22 +13,37 @@ export const DEMO_ADDRESS_INPUT_NAME = "demo-location-street";
 export const DEMO_BUILD_QUERY = "build";
 
 /**
- * Claimed Mapsite feature screens (personal details burned out of the files).
- * Each chip switches to that screen and links to a public page — never a
- * private dashboard.
+ * One sample PIN for the hero display map. Same Canada preview point the
+ * builder map uses (Niagara Falls region). Not a street address.
  */
-export const DEMO_HERO_FEATURES = [
-  { id: "mapsite", src: "/talispros/demo-slides/feature-mapsite.webp", href: "/talisu/mkts" },
-  { id: "ebooks", src: "/talispros/demo-slides/feature-ebooks.webp", href: "/talisbooks" },
-  { id: "bookshelf", src: "/talispros/demo-slides/feature-bookshelf.webp", href: "/catalogue/bookshelf" },
-  { id: "knowledge", src: "/talispros/demo-slides/feature-knowledge.webp", href: "/talisu/kb" },
-  { id: "pins", src: "/talispros/demo-slides/feature-pins.webp", href: "/talisu#faq" },
-] as const;
+export const DEMO_DISPLAY_PIN = {
+  id: "demo-display-pin",
+  latitude: BUILD_MAPSITE_PREVIEW_LOCATION.latitude,
+  longitude: BUILD_MAPSITE_PREVIEW_LOCATION.longitude,
+  zoom: BUILD_MAPSITE_PREVIEW_LOCATION.mapZoom,
+} as const;
 
-export type DemoHeroFeatureId = (typeof DEMO_HERO_FEATURES)[number]["id"];
+/** Actions a Mapsite PIN card shows. Display only — they do not navigate. */
+export const DEMO_PIN_CARD_ACTIONS = ["URL 1", "URL 2", "TEB™", "TTV™"] as const;
 
-/** Live Mapsite screenshots, in feature order. */
-export const DEMO_HERO_SLIDES = DEMO_HERO_FEATURES.map((feature) => feature.src);
+/** Selected Mapsite pin body. The marker is anchored at its center. */
+const DEMO_HERO_PIN_RADIUS = 39;
+/** Clear space between the card pointer and the top of the pin. */
+const DEMO_HERO_PIN_GAP = 16;
+/** Keep the pin this far inside the bottom of the map panel. */
+const DEMO_HERO_PIN_BOTTOM_MARGIN = 16;
+
+/**
+ * Pixels to drop the locked map center so the sample PIN sits just under the
+ * open card. `cardBottom` is the card's bottom edge, in pixels, from the top
+ * of the map panel. Positive values move the PIN down.
+ */
+export function demoHeroPinScreenOffset(rootHeight: number, cardBottom: number): number {
+  if (!(rootHeight > 0) || !(cardBottom > 0)) return 0;
+  const desired = cardBottom + DEMO_HERO_PIN_GAP + DEMO_HERO_PIN_RADIUS;
+  const max = Math.max(0, rootHeight / 2 - DEMO_HERO_PIN_RADIUS - DEMO_HERO_PIN_BOTTOM_MARGIN);
+  return Math.max(0, Math.round(Math.min(desired - rootHeight / 2, max)));
+}
 
 /** The builder card starts open when the URL already carries build/address/PIN state. */
 export function demoBuilderStartsOpen(params: Record<string, string | string[] | undefined>): boolean {

@@ -5282,24 +5282,24 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 /* Adviser pages (Aisha /talisu/reg, Thorsten P /talisu/engage), Oct 26 2026:
    portrait band on phones, full-height left half from 1024 px. */
-/* Mapsites page hero (Ralf, Oct 26): sits under the Catalogue strip the way
-   the Catalogue book does (centred, about 72rem wide, fills the screen
-   height). Mobile: the live Mapsite slides stack above the write-up. */
+/* Mapsites page hero: sits under the Catalogue strip the way the Catalogue
+   book does (centred, about 72rem wide, fills the screen height). Mobile:
+   the display map stacks above the write-up. Tall enough for the open PIN card. */
 .demo-hero {
   max-width: 72rem;
   padding-top: 0.35rem;
 }
 .demo-hero__media {
-  height: 15rem;
+  height: 32rem;
 }
 @media (min-width: 640px) {
   .demo-hero__media {
-    height: 22rem;
+    height: 34rem;
   }
 }
 @media (max-height: 720px) and (max-width: 1023px) {
   .demo-hero__media {
-    height: 12rem;
+    height: 28rem;
   }
 }
 @media (min-width: 1024px) {

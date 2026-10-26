@@ -165,6 +165,8 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
 
         instanceRef.current = instance;
         registerMapInstanceRef.current(instance);
+        // Offset can change while Google Maps is still loading. Apply the latest one.
+        instance.setLockCenterOffset?.(lockCenterOffsetRef.current);
         instance.on("viewportchange", handleViewportChange);
         instance.on("pinclick", handlePinClick);
         instance.on("mapclick", handleMapClick);

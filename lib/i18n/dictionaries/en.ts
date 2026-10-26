@@ -715,30 +715,19 @@ export const en = {
     buildYourMapsite: "Build your Mapsite",
     /** Accessible label of the address box (neutral wording, no "PIN"/password cues). */
     addressFieldLabel: "Street address",
-    /** Mapsites page hero (Ralf, Oct 26): live Mapsite slides left, write-up right. */
+    /** Mapsites page hero: one sample PIN on the map, write-up on the right. */
     hero: {
       eyebrow: "Demo Mapsite",
       headline: "See your Market on a Mapsite before you register",
       body1:
         "A demo Mapsite is a working preview of your own Mapsite. You set it up around your home PIN, and it shows the 80 km Market Zone that a registered Market protects around that PIN.",
       body2:
-        "The screens are from a registered Mapsite: the map, the Talisbook™ editor, the bookshelf, the Knowledge Base and extra PINs. Open any of them, then use Build your Mapsite above. It takes a couple of minutes.",
-      featuresLabel: "Mapsite features",
-      features: {
-        mapsite: "Mapsite",
-        ebooks: "eBooks",
-        bookshelf: "Bookshelf",
-        knowledge: "Knowledge Base",
-        pins: "PINs",
+        "One sample PIN in Canada sits on the map, with its card already open. Use Build your Mapsite above. It takes a couple of minutes.",
+      pinCard: {
+        mapLabel: "Sample Mapsite map",
+        title: "Niagara Falls, Ontario",
+        body: "A sample home in Canada.",
       },
-      alts: {
-        mapsite: "Registered Mapsite map with the home PIN and Market Zone, personal details hidden",
-        ebooks: "Talisbook™ editor on a registered Mapsite, personal details hidden",
-        bookshelf: "Bookshelf on a registered Mapsite, personal details hidden",
-        knowledge: "TalisU™ Knowledge Base for partners, personal details hidden",
-        pins: "PIN dashboard for buying additional PINs, priced in CAD",
-      },
-      slidesLabel: "Registered Mapsite features",
     },
     /** Demo builder card (Ralf, Oct 26): numbered steps, one address box. */
     addressPlaceholder: "Start typing an address…",
