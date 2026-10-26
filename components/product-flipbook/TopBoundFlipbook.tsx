@@ -13,7 +13,9 @@ import {
   type ProductFlipbookHotspot,
   type ProductFlipbookPage,
 } from "@/lib/product-flipbook/manifest";
-import WebsterCataloguePage from "@/components/product-flipbook/WebsterCataloguePage";
+import WebsterCataloguePage, {
+  type CatalogueJumpTarget,
+} from "@/components/product-flipbook/WebsterCataloguePage";
 import CatalogueSpecPage from "@/components/product-flipbook/CatalogueSpecPage";
 import "./top-bound-flipbook.css";
 
@@ -27,8 +29,31 @@ type Flip = {
   toIndex: number;
 };
 
-function CatalogueFace({ page }: { page: ProductFlipbookPage }) {
-  if (page.face === "webster") return <WebsterCataloguePage />;
+type ClosingProps = {
+  targets: CatalogueJumpTarget[];
+  onJump: (index: number) => void;
+  ctaHref: string;
+};
+
+function CatalogueFace({
+  page,
+  closing,
+  interactive = true,
+}: {
+  page: ProductFlipbookPage;
+  closing?: ClosingProps;
+  interactive?: boolean;
+}) {
+  if (page.face === "webster") {
+    return (
+      <WebsterCataloguePage
+        targets={closing?.targets}
+        onJump={closing?.onJump}
+        ctaHref={closing?.ctaHref ?? ROUTES.TALISU_ENGAGE}
+        interactive={interactive}
+      />
+    );
+  }
   if (page.face === "spec" && page.specId) return <CatalogueSpecPage specId={page.specId} />;
   if (!page.src) return null;
   return (
@@ -146,6 +171,28 @@ export default function TopBoundFlipbook({
     },
     [leaves.length],
   );
+
+  /** Closing-page buttons: jump straight to a leaf (no turn animation). */
+  const jumpTo = useCallback(
+    (toIndex: number) => {
+      if (flipRef.current) return;
+      if (toIndex < 0 || toIndex >= leaves.length) return;
+      indexRef.current = toIndex;
+      setIndex(toIndex);
+    },
+    [leaves.length],
+  );
+
+  // Every visible content page (hidden pages are not in the leaf list).
+  const closing: ClosingProps = {
+    targets: leaves.flatMap((page, leafIndex) =>
+      page.role === "content" ? [{ number: page.number, index: leafIndex }] : [],
+    ),
+    onJump: jumpTo,
+    // Embedded on /talisu/engage: straight to the $2,000 CAD down payment.
+    // Elsewhere (/catalogue): Thorsten P's page, which leads to the same checkout.
+    ctaHref: embedded ? talisUEngageCheckoutHref() : ROUTES.TALISU_ENGAGE,
+  };
 
   useEffect(() => {
     if (!flip) return;
@@ -321,7 +368,9 @@ export default function TopBoundFlipbook({
           >
             <div className="product-flipbook__slot relative aspect-video">
               <div className="product-flipbook__settled absolute inset-0 overflow-hidden" data-testid="product-flipbook-page">
-                {underPage ? <CatalogueFace page={underPage} /> : null}
+                {underPage ? (
+                  <CatalogueFace page={underPage} closing={closing} interactive={!flip} />
+                ) : null}
                 {!flip && underPage?.hotspots?.length ? (
                   <CatalogueHotspots hotspots={underPage.hotspots} toCheckout={embedded} />
                 ) : null}
@@ -337,7 +386,7 @@ export default function TopBoundFlipbook({
                   onAnimationEnd={onSheetAnimationEnd}
                 >
                   <div className="product-flipbook__face product-flipbook__face--front">
-                    <CatalogueFace page={sheetPage} />
+                    <CatalogueFace page={sheetPage} closing={closing} interactive={false} />
                     <span className="product-flipbook__curl" aria-hidden="true" />
                   </div>
                   <div className="product-flipbook__face product-flipbook__face--back" aria-hidden="true" />

@@ -938,6 +938,11 @@ export const de: Dictionary = {
     next: "Weiter",
     customize: "{label} anpassen",
     customizeDesign: "Ein Design anpassen",
+    /** Closing page: one button per visible catalogue page. */
+    pageButton: "Seite {page}",
+    pageButtonsLabel: "Zu einer Seite",
+    /** Closing page adviser name. */
+    closingPartnerName: "Thorsten P",
     flipHint: "Von der Oberkante nach oben blättern. Zum Zurückblättern nach unten wischen.",
     pageOf: "Seite {page} von {count}",
     front: "Vorderseite",

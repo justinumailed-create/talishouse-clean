@@ -680,3 +680,69 @@
 .product-flipbook[data-variant="embedded"] .product-flipbook__stage {
   padding: 0.25rem 0 0.5rem;
 }
+
+/* Closing page: narrower photo, page buttons + CTA (16:9 slot, all sizes). */
+.product-flipbook__closing {
+  grid-template-columns: minmax(0, 36fr) minmax(0, 64fr);
+}
+
+.product-flipbook__closing .product-flipbook__partner-photo img {
+  object-position: center 18%;
+}
+
+.product-flipbook__closing-copy {
+  padding: 4.5% 4.4% 4%;
+  font-size: 13px;
+  font-size: clamp(8.5px, 3.3cqh, 17px);
+}
+
+.product-flipbook__closing-nav {
+  margin-top: 0.9em;
+}
+
+.product-flipbook__closing-nav-label {
+  margin: 0 0 0.4em;
+  color: #57534e;
+  font-size: 0.78em;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.product-flipbook__closing-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.45em;
+}
+
+.product-flipbook__closing-tab {
+  height: 2.1em;
+  font-size: 0.86em;
+}
+
+.product-flipbook__closing .product-flipbook__partner-cta {
+  margin-top: 1em;
+}
+
+@container (max-width: 560px) {
+  .product-flipbook__closing-copy {
+    padding: 3% 3.2% 2.6%;
+  }
+
+  .product-flipbook__closing-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.3em;
+  }
+
+  .product-flipbook__closing-tab {
+    height: 1.9em;
+  }
+
+  .product-flipbook__closing-nav {
+    margin-top: 0.5em;
+  }
+
+  .product-flipbook__closing .product-flipbook__partner-cta {
+    margin-top: 0.6em;
+  }
+}

@@ -41,8 +41,8 @@ export interface ProductFlipbookHotspot {
 }
 
 /**
- * `raster` paints `src`. `webster` is an optional HTML face (unused by the
- * current catalogue closing page, which uses the uploaded back-cover raster).
+ * `raster` paints `src`. `webster` is the HTML closing page of the catalogue
+ * (Thorsten P, page buttons, CTA); `spec` is a T-House / T-Dome / G-House sheet.
  */
 export type ProductFlipbookFace = "raster" | "webster" | "spec";
 

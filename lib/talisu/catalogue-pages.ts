@@ -6,15 +6,20 @@ import {
   catalogueProductsForSourcePage,
 } from "@/lib/talisu/catalogue-products";
 import { CATALOGUE_SPECS } from "@/lib/talisu/catalogue-specs";
+import { TALISU_ENGAGE } from "@/lib/talisu/content";
 
 /** Source PDF page 1 — Talishouse™ Product Catalogue front cover. */
 export const CATALOGUE_FRONT_SOURCE_PAGE = 1;
 
 /**
- * Uploaded closing raster (`page-38.webp`). Kept as the back cover; not
- * replaced by the Webster HTML sheet.
+ * Source page 38 is the closing leaf. It renders as the HTML closing page
+ * (`face: "webster"`): Thorsten P's photo, page buttons and the down-payment
+ * CTA, instead of the uploaded raster.
  */
 export const CATALOGUE_BACK_SOURCE_PAGE = 38;
+
+/** Closing-page photo: Thorsten P (same portrait as /talisu/engage). */
+export const CATALOGUE_CLOSING_PHOTO_SRC = TALISU_ENGAGE.partnerImage;
 
 /**
  * Synthetic first content leaves (not in T-All Final.pdf): Ralf's spec sheets,
@@ -43,7 +48,7 @@ export const CATALOGUE_HIDDEN_CONTENT_PAGES = {
  *   Front cover (source page 1)
  *   → Page 1 = T-Dome
  *   → source pages 20–37 (Design Ideas / hotspots P01–P108); pages 2–19 hidden
- *   → Back cover = uploaded source page 38
+ *   → Back cover = closing page (Thorsten P + page buttons + CTA)
  *
  * Opens on the front cover (not mid-book Design Ideas). Page list comes from
  * the bundled flipbook manifest, not a request-time read of public/.
@@ -108,7 +113,9 @@ export function loadCataloguePages(directory?: string): ProductFlipbookPage[] {
     ...backRaster,
     number: 0,
     role: "back",
-    alt: "Talishouse™ Product Catalogue back cover",
+    src: CATALOGUE_CLOSING_PHOTO_SRC,
+    alt: "Talishouse™ Product Catalogue back cover — Thorsten P",
+    face: "webster",
     hotspots: [],
   };
 

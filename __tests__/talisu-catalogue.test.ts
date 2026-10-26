@@ -61,7 +61,7 @@ describe("Catalogue start page (front cover → T-Dome page 1)", () => {
     ]);
   });
 
-  it("opens on the front cover with the T-House / T-Dome / G-House spec sheets as pages 1–3 and uploaded back cover", () => {
+  it("opens on the front cover with the T-House / T-Dome / G-House spec sheets as pages 1–3 and the Thorsten P closing page", () => {
     const all = loadProductFlipbookPages();
     const pages = loadCataloguePages();
     expect(all).toHaveLength(PRODUCT_FLIPBOOK_PAGE_COUNT);
@@ -117,11 +117,11 @@ describe("Catalogue start page (front cover → T-Dome page 1)", () => {
       number: 0,
       sourcePage: 38,
       role: "back",
-      src: "/product-flipbook/page-38.webp",
+      src: "/talisu/webster-team-leader-v2.jpg",
+      face: "webster",
       hotspots: [],
     });
-    expect(pages.at(-1)?.face).toBeUndefined();
-    expect(pages.some((p) => p.face === "webster")).toBe(false);
+    expect(pages.filter((p) => p.face === "webster")).toEqual([pages.at(-1)]);
   });
 
   it("renders /catalogue through the flipbook with the full-book loader and no purchase embed", () => {
@@ -195,10 +195,10 @@ describe("Catalogue product numbering", () => {
       number: 0,
       sourcePage: 38,
       role: "back",
-      src: "/product-flipbook/page-38.webp",
+      src: "/talisu/webster-team-leader-v2.jpg",
+      face: "webster",
       hotspots: [],
     });
-    expect(closing?.face).toBeUndefined();
     const lastDesign = pages.find((p) => p.sourcePage === 37);
     expect(lastDesign?.hotspots?.map((h) => h.code)).toEqual([
       "P103",

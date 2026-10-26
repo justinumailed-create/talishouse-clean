@@ -679,6 +679,11 @@ export const en = {
     next: "Next",
     customize: "Customize {label}",
     customizeDesign: "Customize a design",
+    /** Closing page: one button per visible catalogue page. */
+    pageButton: "Page {page}",
+    pageButtonsLabel: "Go to a page",
+    /** Closing page adviser name. */
+    closingPartnerName: "Thorsten P",
     /** Flipbook hint under the page-turn buttons. */
     flipHint: "Flip up from the top edge. Swipe down to turn back.",
     pageOf: "Page {page} of {count}",

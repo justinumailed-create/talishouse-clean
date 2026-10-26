@@ -58,13 +58,15 @@ describe("Catalogue page list without a readable public directory", () => {
       face: "spec",
       src: CATALOGUE_TDOME_SRC,
     });
-    expect(pages.some((page) => page.face === "webster")).toBe(false);
+    // Only the closing leaf is the HTML Thorsten P page
+    expect(pages.filter((page) => page.face === "webster")).toHaveLength(1);
     expect(pages.at(-1)).toMatchObject({
       id: "page-38.webp",
       number: 0,
       sourcePage: PRODUCT_FLIPBOOK_PAGE_COUNT,
       role: "back",
-      src: "/product-flipbook/page-38.webp",
+      src: "/talisu/webster-team-leader-v2.jpg",
+      face: "webster",
       hotspots: [],
     });
     const design = pages.find((page) => page.sourcePage === 20);
