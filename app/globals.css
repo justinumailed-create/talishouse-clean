@@ -5223,6 +5223,14 @@ body.mapsite-gallery-open [data-paypal-button] {
   margin-bottom: revert-layer;
 }
 
+/* /talisu/tsplits: same escape hatch as .pmc-page, plus font-size so the
+   mobile h1/h2 defaults don't override the page's Tailwind sizes. */
+.tsplits-page :is(h1, h2, h3, p) {
+  color: revert-layer;
+  margin-bottom: revert-layer;
+  font-size: revert-layer;
+}
+
 /* Beige "working page" surface (Catalogue + Mapsites) — Ralf, Oct 17 2026.
    TalisU pages stay white. Same gradient as .product-flipbook. */
 .talis-working-bg {

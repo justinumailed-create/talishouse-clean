@@ -11,8 +11,9 @@ import {
 } from "../lib/talisu/markets-pins";
 
 describe("TalisU blue header dropdown", () => {
-  it("exposes Bookshelf, FAQ, Media Directory | Contract, Knowledge Base (no Audio / Video)", () => {
+  it("exposes TSPLITS™, Bookshelf, FAQ, Media Directory | Contract, Knowledge Base (no Audio / Video)", () => {
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label)).toEqual([
+      "TSPLITS™",
       "Bookshelf",
       "FAQ",
       "Media Directory",
@@ -20,6 +21,7 @@ describe("TalisU blue header dropdown", () => {
       "Knowledge Base",
     ]);
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.href)).toEqual([
+      "/talisu/tsplits",
       "/catalogue/bookshelf",
       "/talisu#faq",
       "/talisu/media-directory",
@@ -38,9 +40,10 @@ describe("TalisU blue header dropdown", () => {
     expect(
       TALISU_MKTS_HEADER_DROPDOWN.some((i) => (i.href as string) === TALISU_MKTS_HEADER_LOGO_HREF),
     ).toBe(false);
-    // Bookshelf sits ahead of FAQ inside TalisU (moved out of the top level).
-    expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.label).toBe("Bookshelf");
-    expect(TALISU_MKTS_HEADER_DROPDOWN[1]?.label).toBe("FAQ");
+    // TSPLITS™ is item one (Arun, Oct 26); Bookshelf then FAQ follow.
+    expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.label).toBe("TSPLITS™");
+    expect(TALISU_MKTS_HEADER_DROPDOWN[1]?.label).toBe("Bookshelf");
+    expect(TALISU_MKTS_HEADER_DROPDOWN[2]?.label).toBe("FAQ");
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.label)).toEqual([
       "Home",
       "Markets",

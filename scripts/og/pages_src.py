@@ -94,6 +94,13 @@ add("/talisu/discuss", "talisu-discuss", "public", WEBSTER,
     ("Projektvision teilen | TalisU™",
      "Entdecken Sie Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung und teilen Sie Ihre Projektvision mit einem Berater. Ohne Registrierung.",
      "TALISU™  ·  PROJEKTVISION", ["Projektvision", "teilen"], ["Konventionell · Mietkauf", "Fraktionalisierung", "Tokenisierung"]))
+add("/talisu/tsplits", "talisu-tsplits", "public", PIN,
+    ("TSPLITS™ – from Vision to Implementation | TalisU™",
+     "TSPLITS™ turns a listing vision into a project: Conventional, Lease-to-Own, Fractionalization or Tokenization, plus Mapsite PINs and syndication.",
+     "TALISU™  ·  TSPLITS™", ["TSPLITS™", "From Vision to", "Implementation"], ["Conventional · Lease-to-Own", "Fractionalization", "Tokenization"]),
+    ("TSPLITS™ – von der Vision zur Umsetzung | TalisU™",
+     "TSPLITS™ macht aus einer Listing-Vision ein Projekt: Konventionell, Mietkauf, Fraktionalisierung oder Tokenisierung, dazu Mapsite-PINs und Syndizierung.",
+     "TALISU™  ·  TSPLITS™", ["TSPLITS™", "Von der Vision", "zur Umsetzung"], ["Konventionell · Mietkauf", "Fraktionalisierung", "Tokenisierung"]))
 add("/talisu/terms", "talisu-terms", "public", BRAND,
     ("Terms of Service | Talispros by TalisALL PMC",
      "Talispros Terms of Service: platform role, customer responsibilities, warranties, liability, fees in CAD, intellectual property, termination and privacy.",

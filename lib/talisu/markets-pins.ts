@@ -121,11 +121,12 @@ export const TALISU_MKTS_HEADER_REGISTER_DROPDOWN = [
 export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
 
 /**
- * TalisU™ header dropdown — Bookshelf, FAQ, Media Directory, Contract,
+ * TalisU™ header dropdown — TSPLITS™, Bookshelf, FAQ, Media Directory, Contract,
  * Knowledge Base, then (after a divider) Audio, Video. The Talispros™ page is
  * reached from the header logo (TALISU_MKTS_HEADER_LOGO_HREF), not this menu.
  */
 export const TALISU_MKTS_HEADER_DROPDOWN = [
+  { href: "/talisu/tsplits", label: "TSPLITS™" },
   { href: "/catalogue/bookshelf", label: "Bookshelf" },
   { href: "/talisu#faq", label: "FAQ" },
   { href: "/talisu/media-directory", label: "Media Directory" },

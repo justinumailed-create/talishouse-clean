@@ -143,6 +143,21 @@
     "alt": "Thorsten P, Team Leader mit dem Talispros™ Baumlogo: Projektvision teilen"
    }
   },
+  "/talisu/tsplits": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/talisu-tsplits",
+   "en": {
+    "title": "TSPLITS™ – from Vision to Implementation | TalisU™",
+    "description": "TSPLITS™ turns a listing vision into a project: Conventional, Lease-to-Own, Fractionalization or Tokenization, plus Mapsite PINs and syndication.",
+    "alt": "Talispros™ tree logo: TSPLITS™ From Vision to Implementation"
+   },
+   "de": {
+    "title": "TSPLITS™ – von der Vision zur Umsetzung | TalisU™",
+    "description": "TSPLITS™ macht aus einer Listing-Vision ein Projekt: Konventionell, Mietkauf, Fraktionalisierung oder Tokenisierung, dazu Mapsite-PINs und Syndizierung.",
+    "alt": "Talispros™ Baumlogo: TSPLITS™ Von der Vision zur Umsetzung"
+   }
+  },
   "/talisu/terms": {
    "kind": "public",
    "noindex": false,

@@ -47,6 +47,8 @@ function navLabel(t: Dictionary, label: string): string {
 /** English TalisU dropdown label → localized text. */
 function talisuMenuLabel(t: Dictionary, label: string): string {
   switch (label) {
+    case "TSPLITS™":
+      return t.nav.talisuMenu.tsplits;
     case "Bookshelf":
       return t.nav.bookshelf;
     case "FAQ":
