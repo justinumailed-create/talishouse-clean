@@ -720,10 +720,23 @@ export const en = {
       body1:
         "A demo Mapsite is a working preview of your own Mapsite. You set it up around your home PIN, and it shows the 80 km Market Zone that a registered Market protects around that PIN.",
       body2:
-        "Type an address, check the PIN on the map, then add a demo Talisbook™. It takes a couple of minutes, and no FAST Code is issued.",
-      cta: "Build a demo Mapsite",
-      slidesLabel: "Live Mapsite examples",
-      slideAlt: "Live Mapsite example {n} of {total}, with personal details hidden",
+        "The screens are from a registered Mapsite: the map, the Talisbook™ editor, the bookshelf, the Knowledge Base and extra PINs. Open any of them, then use Build your Mapsite above. It takes a couple of minutes.",
+      featuresLabel: "Mapsite features",
+      features: {
+        mapsite: "Mapsite",
+        ebooks: "eBooks",
+        bookshelf: "Bookshelf",
+        knowledge: "Knowledge Base",
+        pins: "PINs",
+      },
+      alts: {
+        mapsite: "Registered Mapsite map with the home PIN and Market Zone, personal details hidden",
+        ebooks: "Talisbook™ editor on a registered Mapsite, personal details hidden",
+        bookshelf: "Bookshelf on a registered Mapsite, personal details hidden",
+        knowledge: "TalisU™ Knowledge Base for partners, personal details hidden",
+        pins: "PIN dashboard for buying additional PINs, priced in CAD",
+      },
+      slidesLabel: "Registered Mapsite features",
     },
     /** Demo builder card (Ralf, Oct 26): numbered steps, one address box. */
     addressPlaceholder: "Start typing an address…",

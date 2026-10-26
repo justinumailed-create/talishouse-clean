@@ -6,6 +6,7 @@ import { de } from "../lib/i18n/dictionaries/de";
 import {
   DEMO_ADDRESS_INPUT_ID,
   DEMO_ADDRESS_INPUT_NAME,
+  DEMO_HERO_FEATURES,
   DEMO_HERO_SLIDES,
   demoBuilderStartsOpen,
   demoInitialPinFromParams,
@@ -31,8 +32,10 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(builder).toContain("useState(initialOpen)");
     expect(builder).toContain("{!showCard ? (");
     expect(builder).toContain('data-testid="demo-hero"');
-    expect(builder).toContain('data-testid="demo-hero-build"');
-    expect(builder.match(/onClick={revealBuilder}/g)).toHaveLength(2);
+    // The only build trigger is the top-strip pill. No button inside the card.
+    expect(builder).not.toContain('data-testid="demo-hero-build"');
+    expect(builder).not.toContain("d.hero.cta");
+    expect(builder.match(/onClick={revealBuilder}/g)).toHaveLength(1);
     expect(builder).toContain("frame = window.requestAnimationFrame(focusAddressBox)");
     expect(builder).toContain("url.searchParams.set(DEMO_BUILD_QUERY");
     expect(builder).toContain('addEventListener("popstate"');
@@ -63,14 +66,31 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
   });
 
   it("crossfades 3-5 live Mapsite screenshots (no flipbook) and respects reduced motion", () => {
+    expect(DEMO_HERO_FEATURES.map((feature) => feature.id)).toEqual([
+      "mapsite",
+      "ebooks",
+      "bookshelf",
+      "knowledge",
+      "pins",
+    ]);
+    expect(DEMO_HERO_FEATURES.map((feature) => feature.href)).toEqual([
+      "/talisu/mkts",
+      "/talisbooks",
+      "/catalogue/bookshelf",
+      "/talisu/kb",
+      "/talisu#faq",
+    ]);
+    expect(DEMO_HERO_SLIDES).toEqual(DEMO_HERO_FEATURES.map((feature) => feature.src));
     expect(DEMO_HERO_SLIDES.length).toBeGreaterThanOrEqual(3);
     expect(DEMO_HERO_SLIDES.length).toBeLessThanOrEqual(5);
     for (const src of DEMO_HERO_SLIDES) {
-      expect(src).toMatch(/^\/talispros\/demo-slides\/mapsite-example-\d\.webp$/);
+      expect(src).toMatch(/^\/talispros\/demo-slides\/feature-[a-z]+\.webp$/);
       const file = resolve("public" + src);
       expect(existsSync(file)).toBe(true);
       expect(statSync(file).size).toBeGreaterThan(20_000);
     }
+    expect(builder).toContain('data-testid={`demo-hero-feature-${feature.id}`}');
+    expect(builder).toContain("href={feature.href}");
     expect(slides).toContain("transition-opacity");
     expect(slides).toContain("prefers-reduced-motion: reduce");
     expect(slides).not.toMatch(/import .*flipbook|rotateX|rotateY/i);
@@ -103,18 +123,36 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
   });
 
   it("has EN + DE hero copy; Mapsite never carries ™, Talisbook™ always does", () => {
+    function strings(value: unknown, out: string[] = []): string[] {
+      if (typeof value === "string") out.push(value);
+      else if (value && typeof value === "object") {
+        for (const nested of Object.values(value)) strings(nested, out);
+      }
+      return out;
+    }
     for (const dict of [en, de]) {
       const hero = dict.demo.hero;
-      for (const value of Object.values(hero)) {
+      for (const value of strings(hero)) {
         expect(value).toBeTruthy();
         expect(value).not.toMatch(/Mapsite™/);
       }
       expect(hero.body1).toMatch(/80/);
       expect(hero.body2).toContain("Talisbook™");
-      expect(hero.slideAlt).toContain("{n}");
-      expect(hero.slideAlt).toContain("{total}");
+      expect(hero.features.pins).toBeTruthy();
+      expect(hero.alts.pins).toContain("CAD");
+      for (const alt of Object.values(hero.alts)) {
+        expect(alt.toLowerCase()).not.toMatch(/\b[a-z]{2}\d{2}\b/);
+      }
     }
-    expect(en.demo.hero.body2).toContain("couple of minutes");
-    expect(de.demo.hero.body2).toContain("paar Minuten");
+    expect(en.demo.hero.body2).toBe(
+      "The screens are from a registered Mapsite: the map, the Talisbook™ editor, the bookshelf, the Knowledge Base and extra PINs. Open any of them, then use Build your Mapsite above. It takes a couple of minutes.",
+    );
+    expect(de.demo.hero.body2).toBe(
+      "Die Aufnahmen zeigen eine registrierte Mapsite: die Karte, den Talisbook™-Editor, das Bücherregal, die Wissensdatenbank und weitere PINs. Öffnen Sie eines davon und tippen Sie dann oben auf „Ihre Mapsite erstellen“. Das dauert nur ein paar Minuten.",
+    );
+    expect(en.demo.hero.body2).not.toMatch(/no FAST Code is issued/i);
+    expect(de.demo.hero.body2).not.toMatch(/kein FAST Code/);
+    expect(en.demo.hero.features.knowledge).toBe("Knowledge Base");
+    expect(de.demo.hero.features.knowledge).toBe("Wissensdatenbank");
   });
 });
