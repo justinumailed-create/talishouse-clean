@@ -85,7 +85,7 @@ describe("Claim Your Market on demo Mapsites only", () => {
     expect(builder).not.toContain("Claim Your Market");
     expect(builder).not.toContain('href="/start"');
     expect(builder).not.toContain("Realtor / FSBO claim");
-    expect(builder).toContain("DemoDownloadMenu");
+    expect(builder).not.toContain("DemoDownloadMenu");
 
     const ebook = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoEbookGenerateClient.tsx"),

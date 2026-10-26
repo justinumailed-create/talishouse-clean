@@ -13,7 +13,6 @@ import {
 import { createDemoMapSiteAction } from "@/app/talispros/demo-mapsite/actions";
 import { WorkingPageCtaButton, AISHA_AVATAR_SRC } from "@/components/talispros/WorkingPageCtaLink";
 import WorkingPageShell from "@/components/talispros/WorkingPageShell";
-import DemoDownloadMenu from "@/components/talispros/demo-mapsite/DemoDownloadMenu";
 import {
   DEMO_ADDRESS_INPUT_ID,
   demoTitleFromAddress,
@@ -129,14 +128,8 @@ export default function DemoMapSiteBuilderClient() {
             </h2>
           }
           footerSlot={
-            <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div className="min-w-0 space-y-2 sm:max-w-[26rem]">
-                <DemoDownloadMenu className="relative inline-block" align="left" variant="secondary" />
-                <p className="text-[11.5px] leading-snug text-neutral-500" data-testid="demo-next-note">
-                  {d.nextNote}
-                </p>
-              </div>
-              <div className="flex flex-col items-stretch gap-2 sm:items-end">
+            <div className="flex sm:justify-end">
+              <div className="flex w-full flex-col items-stretch gap-2 sm:w-auto sm:items-end">
                 {error ? (
                   <p
                     role="alert"

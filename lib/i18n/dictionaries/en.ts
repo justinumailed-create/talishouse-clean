@@ -719,10 +719,11 @@ export const en = {
     manualPlacement: "Manual placement",
     nearby: "Nearby",
     errPlacePin: "Search for an address or move the PIN on the map, then press Continue.",
-    continue: "Continue to demo eBook",
-    continuing: "Continue to demo eBook…",
-    nextNote:
-      "Next, build the demonstration Talisbook™ from the pinned Talispros eBook pages. No FAST Code is issued.",
+    continue: "Continue",
+    continuing: "Continue…",
+    ebookIntro:
+      "Just before we build your own Mapsite, let's curate your property in a demo Talisbook™. Pick the eBook pages that tell its story best, because they're what prospects will see once your Mapsite goes live.",
+    ebookIntroNote: "This is a demo, so no FAST Code is issued.",
     claimDescribe: "What best describes you?",
     claimChooseError: "Choose who you are (same options as /start) before claiming.",
     firstName: "First name",

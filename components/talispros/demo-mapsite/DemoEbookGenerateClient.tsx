@@ -28,6 +28,8 @@ import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { ONBOARDING_JOB_TIMEOUT_MS } from "@/lib/onboarding-timing";
 import { TALISU_MKTS_HEADER_BLUE } from "@/lib/talisu/markets-pins";
 import Link from "next/link";
+import DemoDownloadMenu from "@/components/talispros/demo-mapsite/DemoDownloadMenu";
+import { useT } from "@/lib/i18n/client";
 import { DemoVisaProgress } from "@/components/talispros/demo-mapsite/DemoVisaProgress";
 
 type OptimizedAsset = {
@@ -149,6 +151,7 @@ export default function DemoEbookGenerateClient({
   mapsiteId: string;
   title: string;
 }) {
+  const demoCopy = useT().demo;
   const [phase, setPhase] = useState<
     "idle" | "extracting" | "converting" | "optimizing" | "building"
   >("idle");
@@ -542,6 +545,24 @@ export default function DemoEbookGenerateClient({
             {title}
           </p>
         </div>
+
+        <section
+          className="mt-8 rounded-[22px] bg-white/70 px-5 py-5 text-center ring-1 ring-black/[0.05]"
+          data-testid="demo-ebook-intro"
+        >
+          <div className="text-[14px] leading-relaxed text-neutral-700">
+            {demoCopy.ebookIntro}
+          </div>
+          <div
+            className="mt-2 text-[11.5px] leading-snug text-neutral-400"
+            data-testid="demo-ebook-intro-note"
+          >
+            {demoCopy.ebookIntroNote}
+          </div>
+          <div className="mt-4 flex justify-center">
+            <DemoDownloadMenu className="relative inline-block" align="left" variant="secondary" />
+          </div>
+        </section>
 
         <div className="mt-12 space-y-5">
           <div className={`${cardClass} space-y-3 px-6 py-7`}>

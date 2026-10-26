@@ -230,7 +230,7 @@ export const de: Dictionary = {
             "Wählen Sie den PIN, der Ihrem Heimatstandort am nächsten liegt.",
             "Wählen Sie „Nächster Schritt“ und erstellen Sie ein Demo-eBook.",
             "Füllen Sie das Formular aus: Die Initialen Ihres Vor- und Nachnamens bilden die eine Hälfte Ihres FAST Code™ (Free Access, Standard Tracking). Die andere Hälfte ist eine Zahl zwischen 01 und 99, die Sie in unserem System eindeutig macht. Ihre Straßenadresse positioniert Ihren Home-PIN auf Ihrer Beispiel-Mapsite. Die Beispiel-Mapsite zeigt uns, ob es Überschneidungen mit anderen Heimatmärkten gibt.",
-            "Wählen Sie „Weiter zum Demo-eBook“.",
+            "Wählen Sie „Weiter“.",
             "Ihre Mapsite wird erstellt und ein Fähnchen öffnet sich.",
             "Sie können Ihren Markt beanspruchen, indem Sie sich unter URL registrieren und die TEB- und TTV-Links öffnen.",
             "MLS® gilt nur für lizenzierte Immobilienprofis, die über Inhaber von Root-Konten registriert sind.",
@@ -977,10 +977,11 @@ export const de: Dictionary = {
     manualPlacement: "Manuell platziert",
     nearby: "In der Nähe",
     errPlacePin: "Suchen Sie eine Adresse oder verschieben Sie den PIN auf der Karte und tippen Sie dann auf Weiter.",
-    continue: "Weiter zum Demo-eBook",
-    continuing: "Weiter zum Demo-eBook …",
-    nextNote:
-      "Als Nächstes erstellen Sie das Demonstrations-Talisbook™ aus den Seiten des angehefteten Talispros-eBooks. Es wird kein FAST Code vergeben.",
+    continue: "Weiter",
+    continuing: "Weiter …",
+    ebookIntro:
+      "Bevor wir Ihre eigene Mapsite erstellen, setzen wir Ihre Immobilie in einem Demo-Talisbook™ in Szene. Wählen Sie die eBook-Seiten, die ihre Geschichte am besten erzählen – genau diese sehen Interessenten, sobald Ihre Mapsite live ist.",
+    ebookIntroNote: "Dies ist eine Demo, daher wird kein FAST Code vergeben.",
     claimDescribe: "Was beschreibt Sie am besten?",
     claimChooseError:
       "Wählen Sie vor dem Beanspruchen aus, wer Sie sind (dieselben Optionen wie unter /start).",

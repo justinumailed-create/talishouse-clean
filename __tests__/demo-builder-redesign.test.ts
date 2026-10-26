@@ -56,9 +56,32 @@ describe("Demo Mapsite builder redesign (Ralf, Oct 26)", () => {
     expect(DEMO_ADDRESS_INPUT_ID).toBe("demo-home-pin-address");
   });
 
-  it("Download Demo PDF is a quiet secondary button inside the card", () => {
-    expect(builder).toContain('variant="secondary"');
+  it("the PIN page has no Download Demo PDF and no next-step note; Continue is just Continue", () => {
+    expect(builder).not.toContain("DemoDownloadMenu");
+    expect(builder).not.toContain("nextNote");
+    expect(builder).not.toContain("demo-next-note");
+    expect(en.demo.continue).toBe("Continue");
+    expect(de.demo.continue).toBe("Weiter");
+    expect(JSON.stringify(en)).not.toContain("Next, build the demonstration Talisbook");
+    expect(JSON.stringify(de)).not.toContain("Als Nächstes erstellen Sie das Demonstrations-Talisbook");
+  });
+
+  it("the demo eBook page carries the intro, the no-FAST-Code note and the Download Demo PDF menu", () => {
+    const ebook = read("components/talispros/demo-mapsite/DemoEbookGenerateClient.tsx");
+    expect(ebook).toContain("DemoDownloadMenu");
+    expect(ebook).toContain('variant="secondary"');
     expect(read("components/talispros/demo-mapsite/DemoDownloadMenu.tsx")).toContain('variant === "secondary"');
+    expect(ebook).toContain("demoCopy.ebookIntro}");
+    expect(ebook).toContain("demoCopy.ebookIntroNote}");
+    expect(ebook.indexOf('data-testid="demo-ebook-intro"')).toBeLessThan(ebook.indexOf("cardClass} space-y-3"));
+    expect(en.demo.ebookIntro).toBe(
+      "Just before we build your own Mapsite, let's curate your property in a demo Talisbook™. Pick the eBook pages that tell its story best, because they're what prospects will see once your Mapsite goes live.",
+    );
+    expect(en.demo.ebookIntroNote).toBe("This is a demo, so no FAST Code is issued.");
+    expect(de.demo.ebookIntro).toContain("Demo-Talisbook™");
+    expect(de.demo.ebookIntroNote).toContain("kein FAST Code");
+    // SEO / OG of the eBook page are untouched: still the shared EN/DE page metadata.
+    expect(read("app/talispros/demo-mapsite/ebook/page.tsx")).toContain('pageMetadata("/talispros/demo-mapsite/ebook")');
   });
 
   it("needs an address or a moved PIN; derives the title from the address", () => {
@@ -80,7 +103,8 @@ describe("Demo Mapsite builder redesign (Ralf, Oct 26)", () => {
       "manualPlacement",
       "nearby",
       "errPlacePin",
-      "nextNote",
+      "ebookIntro",
+      "ebookIntroNote",
     ] as const;
     for (const key of keys) {
       expect(en.demo[key]).toBeTruthy();
@@ -88,7 +112,6 @@ describe("Demo Mapsite builder redesign (Ralf, Oct 26)", () => {
       expect(en.demo[key]).not.toMatch(/Mapsite™/);
       expect(de.demo[key]).not.toMatch(/Mapsite™/);
     }
-    expect(en.demo.nextNote).toContain("No FAST Code is issued.");
-    expect(de.demo.nextNote).toContain("Es wird kein FAST Code vergeben.");
+    expect(en.demo.ebookIntro).toContain("Mapsite");
   });
 });
