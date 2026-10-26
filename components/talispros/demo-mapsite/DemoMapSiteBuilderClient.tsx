@@ -128,24 +128,26 @@ export default function DemoMapSiteBuilderClient({
   }
 
   return (
-    // Mapsites page: the Catalogue top strip + Aisha pill ("Build your Mapsite"
-    // reveals the card and focuses Step 1). Below it, one sample PIN on the
-    // Mapsite map, with its card already open, and a short write-up. The
-    // step 1-3 card stays hidden until that pill is clicked.
+    // Mapsites page: the Catalogue top strip. While the hero is showing, the
+    // Aisha pill ("Build your Mapsite") reveals the card and focuses Step 1.
+    // Once the card is open — including ?build=1 and Back — that pill is gone
+    // and the Market Zone line stays centred on its own.
     <WorkingPageShell
       testId="mapsites-page"
       contentTestId="mapsites-content"
       headline={t.catalogueUi.mapsitesHeadline}
       headlineVariant="catalogue"
       headlineAction={
-        <WorkingPageCtaButton
-          onClick={revealBuilder}
-          disabled={pending}
-          label={d.buildYourMapsite}
-          avatarSrc={AISHA_AVATAR_SRC}
-          avatarAlt="Aisha C."
-          testId="mapsites-build-demo-link"
-        />
+        showCard ? null : (
+          <WorkingPageCtaButton
+            onClick={revealBuilder}
+            disabled={pending}
+            label={d.buildYourMapsite}
+            avatarSrc={AISHA_AVATAR_SRC}
+            avatarAlt="Aisha C."
+            testId="mapsites-build-demo-link"
+          />
+        )
       }
     >
       {!showCard ? (
