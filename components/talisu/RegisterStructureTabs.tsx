@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { ADVISER_METAL_BG } from "@/components/talisu/AdviserLayout";
 import {
   METAL_TAB,
-  METAL_TAB_LABEL,
   METAL_TAB_SELECTED,
   METAL_TAB_SHEEN,
   METAL_TAB_UNSELECTED,
@@ -14,7 +13,7 @@ import { talisURegisterCheckoutHref } from "@/lib/talisu/ask-step";
 import {
   normalizeRegisterStructure,
   rememberRegisterStructure,
-  toggleRegisterStructure,
+  selectRegisterStructure,
   type RegisterLockReason,
   type RegisterStructureId,
 } from "@/lib/talisu/register-structure";
@@ -30,21 +29,37 @@ export type RegisterStructureTab = {
 const TAB_CHECKED = "ring-2 ring-[#046BD9] ring-offset-1 ring-offset-[#e9e6df]";
 
 /**
+ * The shared metal label, but always on one line (no truncation): 13px with
+ * normal letter-spacing so the longest German label ("Fraktionalisierung")
+ * fits four-across in the adviser column. The grid below sizes each column to
+ * at least its label and only goes four-across when the row really fits.
+ */
+const TAB_LABEL =
+  "relative z-10 whitespace-nowrap text-center text-[12px] font-semibold tracking-normal text-neutral-900 sm:text-[13px]";
+
+/**
+ * Four-across only when the row fits (about 31rem of labels + padding + gaps
+ * in EN/DE); otherwise 2 x 2, and one column on the narrowest screens.
+ */
+const TAB_GRID =
+  "grid grid-cols-1 gap-2.5 @min-[19rem]:grid-cols-[repeat(2,minmax(max-content,1fr))] @min-[34rem]:grid-cols-[repeat(4,minmax(max-content,1fr))]";
+
+/**
  * Aisha's four structure tabs (Conventional, Lease-to-Own, Fractionalization,
- * Tokenization), Oct 26: the tabs are toggles, like Thorsten's design tiles.
- * The page loads with none selected (only ?structure= preselects), several
- * can be selected, and "Register now" stays disabled until at least one is.
- * Enabled, it goes to ?step=register&structure=a,b; the selection is also
- * remembered (cookie) and kept in the address bar. The explanation card shows
- * the most recently selected tab.
+ * Tokenization), Oct 26: single-select, like radio buttons. Picking one
+ * deselects the previous one; clicking the selected one again keeps it. The
+ * page loads with none selected (only ?structure=<id> preselects) and
+ * "Register now" stays disabled until one is chosen. Enabled, it goes to
+ * ?step=register&structure=<id>; the choice is also remembered (cookie, one
+ * value) and kept in the address bar. The explanation card shows the chosen
+ * tab. Arrow keys move the choice, as in a radio group.
  */
 export default function RegisterStructureTabs({
   tabs,
-  initialIds = [],
+  initialId = null,
   bouncedReason = null,
   label,
   selectedLabel,
-  selectedPluralLabel,
   lockLabel,
   closeLabel,
   ctaLabel,
@@ -52,12 +67,11 @@ export default function RegisterStructureTabs({
   testId = "register-structures",
 }: {
   tabs: readonly RegisterStructureTab[];
-  initialIds?: readonly RegisterStructureId[];
+  initialId?: RegisterStructureId | null;
   /** Set when a checkout URL without a structure was sent back here. */
   bouncedReason?: RegisterLockReason | null;
   label: string;
   selectedLabel: string;
-  selectedPluralLabel: string;
   lockLabel: string;
   closeLabel: string;
   ctaLabel: string;
@@ -66,76 +80,116 @@ export default function RegisterStructureTabs({
 }) {
   const baseId = useId();
   const statusId = `${baseId}-status`;
-  const [selected, setSelected] = useState<RegisterStructureId[]>(() => [...initialIds]);
-  const [openId, setOpenId] = useState<RegisterStructureId | null>(
-    initialIds.length ? initialIds[initialIds.length - 1] : null,
-  );
+  const [selected, setSelected] = useState<RegisterStructureId | null>(initialId);
+  const [openId, setOpenId] = useState<RegisterStructureId | null>(initialId);
 
   // Fresh visit without ?structure=: forget any older remembered choice.
   useEffect(() => {
-    if (!initialIds.length) rememberRegisterStructure([]);
+    if (!initialId) rememberRegisterStructure(null);
     // Only on first load.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function toggle(id: RegisterStructureId) {
-    const next = toggleRegisterStructure(selected, id);
+  const groupRef = useRef<HTMLDivElement>(null);
+  const ids = tabs
+    .map((tab) => normalizeRegisterStructure(tab.id))
+    .filter((id): id is RegisterStructureId => id !== null);
+
+  function choose(id: RegisterStructureId) {
+    const next = selectRegisterStructure(selected, id);
     setSelected(next);
-    if (next.includes(id)) setOpenId(id);
-    else if (openId === id) setOpenId(next.length ? next[next.length - 1] : null);
+    setOpenId(next);
     rememberRegisterStructure(next);
   }
 
+  // Radio-group keys: arrows move (and select), wrapping around.
+  function onKeyDown(event: KeyboardEvent<HTMLButtonElement>, id: RegisterStructureId) {
+    const step =
+      event.key === "ArrowRight" || event.key === "ArrowDown"
+        ? 1
+        : event.key === "ArrowLeft" || event.key === "ArrowUp"
+          ? -1
+          : 0;
+    if (!step) return;
+    event.preventDefault();
+    const next = ids[(ids.indexOf(id) + step + ids.length) % ids.length];
+    choose(next);
+    groupRef.current?.querySelector<HTMLElement>(`[data-structure-id="${next}"]`)?.focus();
+  }
+
   const open = tabs.find((tab) => tab.id === openId) ?? null;
-  const openIndex = open ? tabs.indexOf(open) : -1;
-  const locked = selected.length === 0;
-  const selectedNames = tabs
-    .filter((tab) => selected.includes(tab.id as RegisterStructureId))
-    .map((tab) => tab.label)
-    .join(", ");
+
+  // Point the panel's arrow at the open tab (columns are content-sized).
+  const [arrowLeft, setArrowLeft] = useState<number | null>(null);
+  useLayoutEffect(() => {
+    const group = groupRef.current;
+    if (!group || !openId) return;
+    const place = () => {
+      const tab = group.querySelector<HTMLElement>(`[data-structure-id="${openId}"]`);
+      if (!tab) return;
+      const g = group.getBoundingClientRect();
+      const t = tab.getBoundingClientRect();
+      setArrowLeft(t.left - g.left + t.width / 2);
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [openId]);
+  const locked = selected === null;
+  const selectedName = tabs.find((tab) => tab.id === selected)?.label ?? "";
 
   const ctaClass =
     "inline-flex min-h-12 shrink-0 flex-wrap items-center justify-center gap-x-2 rounded-full px-6 py-2 text-center text-[15px] font-semibold transition sm:text-[16px]";
 
   return (
-    <div className="mt-4 sm:mt-6" data-testid={testId} data-selected-structure={selected.join(",")}>
+    <div className="mt-4 sm:mt-6" data-testid={testId} data-selected-structure={selected ?? ""}>
       <div className="mb-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-600">
         {label}
       </div>
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3" role="group" aria-label={label}>
-        {tabs.map((tab) => {
-          const id = normalizeRegisterStructure(tab.id);
-          if (!id) return null;
-          const isSelected = selected.includes(id);
-          return (
-            <button
-              key={id}
-              type="button"
-              data-testid={`${testId}-${id}`}
-              data-structure-id={id}
-              data-selected={isSelected ? "true" : "false"}
-              aria-pressed={isSelected}
-              aria-controls={openId === id ? `${baseId}-panel` : undefined}
-              onClick={() => toggle(id)}
-              className={`${METAL_TAB} ${isSelected ? `${METAL_TAB_SELECTED} ${TAB_CHECKED}` : METAL_TAB_UNSELECTED} cursor-pointer`}
-              style={{ backgroundImage: ADVISER_METAL_BG }}
-            >
-              <span className={METAL_TAB_SHEEN} aria-hidden />
-              {isSelected ? (
-                <span
-                  aria-hidden
-                  data-testid={`${testId}-${id}-check`}
-                  className="absolute right-1.5 top-1.5 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[#046BD9] text-[11px] font-bold leading-none text-white shadow ring-2 ring-white"
+      <div className="@container">
+        <div ref={groupRef} className={TAB_GRID} role="radiogroup" aria-label={label}>
+          {tabs.map((tab) => {
+            const id = normalizeRegisterStructure(tab.id);
+            if (!id) return null;
+            const isSelected = selected === id;
+            // Roving focus: the chosen tab, or the first when none is.
+            const focusable = selected ? isSelected : id === ids[0];
+            return (
+              // The button clips its sheen (overflow-hidden), so the check
+              // badge sits on this wrapper, on the tab's top-right corner.
+              <div key={id} className="relative">
+                <button
+                  type="button"
+                  data-testid={`${testId}-${id}`}
+                  data-structure-id={id}
+                  data-selected={isSelected ? "true" : "false"}
+                  role="radio"
+                  aria-checked={isSelected}
+                  tabIndex={focusable ? 0 : -1}
+                  aria-controls={openId === id ? `${baseId}-panel` : undefined}
+                  onClick={() => choose(id)}
+                  onKeyDown={(event) => onKeyDown(event, id)}
+                  className={`${METAL_TAB} ${isSelected ? `${METAL_TAB_SELECTED} ${TAB_CHECKED}` : METAL_TAB_UNSELECTED} cursor-pointer`}
+                  style={{ backgroundImage: ADVISER_METAL_BG }}
                 >
-                  ✓
-                </span>
-              ) : null}
-              <span className={METAL_TAB_LABEL}>
-                {tab.label}
-              </span>
-            </button>
-          );
-        })}
+                  <span className={METAL_TAB_SHEEN} aria-hidden />
+                  <span className={TAB_LABEL} data-testid={`${testId}-${id}-label`}>
+                    {tab.label}
+                  </span>
+                </button>
+                {isSelected ? (
+                  <span
+                    aria-hidden
+                    data-testid={`${testId}-${id}-check`}
+                    className="pointer-events-none absolute -right-2 -top-2 z-20 flex h-5 w-5 items-center justify-center rounded-full bg-[#046BD9] text-[11px] font-bold leading-none text-white shadow ring-2 ring-white"
+                  >
+                    ✓
+                  </span>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {open ? (
@@ -149,8 +203,8 @@ export default function RegisterStructureTabs({
         >
           <span
             aria-hidden
-            className="pointer-events-none absolute bottom-full hidden h-0 w-0 -translate-x-1/2 border-x-[9px] border-b-[10px] border-x-transparent border-b-[#fafaf7] sm:block"
-            style={{ left: `${((openIndex + 0.5) / tabs.length) * 100}%` }}
+            className={`pointer-events-none absolute bottom-full hidden h-0 w-0 -translate-x-1/2 border-x-[9px] border-b-[10px] border-x-transparent border-b-[#fafaf7] ${arrowLeft === null ? "" : "sm:block"}`}
+            style={arrowLeft === null ? undefined : { left: `${arrowLeft}px` }}
           />
           <div className="flex items-start justify-between gap-3">
             <div className="text-[15px] font-semibold tracking-wide text-neutral-900 sm:text-[16px]">
@@ -194,7 +248,7 @@ export default function RegisterStructureTabs({
             href={talisURegisterCheckoutHref(selected)}
             data-testid="partner-cta"
             data-locked=""
-            data-structure-id={selected.join(",")}
+            data-structure-id={selected}
             aria-describedby={statusId}
             onClick={() => rememberRegisterStructure(selected)}
             className={`${ctaClass} bg-[#046BD9] text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] hover:bg-[#0358b3]`}
@@ -219,9 +273,9 @@ export default function RegisterStructureTabs({
         ) : (
           <span className="text-neutral-800" data-testid="register-selection-summary">
             <span className="font-semibold text-neutral-900">
-              {selected.length > 1 ? selectedPluralLabel : selectedLabel}
+              {selectedLabel}
             </span>{" "}
-            {selectedNames}
+            {selectedName}
           </span>
         )}
       </div>

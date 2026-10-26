@@ -16,7 +16,7 @@ import { isTalisURegisterCheckoutStep } from "@/lib/talisu/ask-step";
 import {
   REGISTER_STRUCTURE_COOKIE,
   normalizeRegisterLockReason,
-  parseRegisterStructures,
+  parseSingleRegisterStructure,
   registerLockedHref,
   registerStructureCheckoutUrl,
   talisURegisterStructureHref,
@@ -55,14 +55,14 @@ export default async function TalisURegisterPage({
   const TALISU_REGISTER = getDictionary(await getLocale()).talisu.register;
   const params = (await searchParams) ?? {};
 
-  // Selected structures (Oct 26): one or more of the four ids, from
-  // ?structure=a,b. The landing loads with none selected unless the URL
-  // names some (an older remembered choice is ignored there).
-  const urlStructures = parseRegisterStructures(params.structure);
+  // Selected structure (Oct 26): exactly one of the four ids, from
+  // ?structure=<id>. The landing loads with none selected unless the URL
+  // names one (an older remembered choice is ignored there).
+  const urlStructure = parseSingleRegisterStructure(params.structure);
 
-  // Adviser landing first: Aisha's portrait + the four structure toggles.
-  // "Register now" unlocks with at least one structure; the SamCart register
-  // checkout only renders after it (?step=register&structure=a,b).
+  // Adviser landing first: Aisha's portrait + the four single-select
+  // structure tabs. "Register now" unlocks once one is chosen; the SamCart
+  // register checkout only renders after it (?step=register&structure=<id>).
   if (!isTalisURegisterCheckoutStep(params.step)) {
     return (
       <AdviserLayout
@@ -75,11 +75,10 @@ export default async function TalisURegisterPage({
       >
         <RegisterStructureTabs
           tabs={TALISU_REGISTER.structures}
-          initialIds={urlStructures}
+          initialId={urlStructure}
           bouncedReason={normalizeRegisterLockReason(params.locked)}
           label={TALISU_REGISTER.structuresLabel}
           selectedLabel={TALISU_REGISTER.structureSelected}
-          selectedPluralLabel={TALISU_REGISTER.structuresSelected}
           lockLabel={TALISU_REGISTER.lockNeedStructure}
           closeLabel={TALISU_REGISTER.structureClose}
           ctaLabel={TALISU_REGISTER.ctaLabel}
@@ -94,26 +93,26 @@ export default async function TalisURegisterPage({
     );
   }
 
-  // Server side of the lock: the checkout needs at least one valid structure
-  // (the URL first, else the choice remembered on this page for the PMC
-  // sequence). Without one it goes back to the landing (?locked=structure).
+  // Server side of the lock: the checkout needs exactly one valid structure.
+  // A ?structure= that is a comma list or unknown goes back to the landing
+  // (?locked=structure); only with no ?structure= at all is the choice
+  // remembered on this page (cookie, one value) used.
   const cookieStore = await cookies();
-  const structures = urlStructures.length
-    ? urlStructures
-    : parseRegisterStructures(cookieStore.get(REGISTER_STRUCTURE_COOKIE)?.value);
-  if (!structures.length) {
+  const structure =
+    params.structure === undefined
+      ? parseSingleRegisterStructure(cookieStore.get(REGISTER_STRUCTURE_COOKIE)?.value)
+      : urlStructure;
+  if (!structure) {
     redirect(registerLockedHref(firstParam(params.fastCode)));
   }
-  const structureTabs = TALISU_REGISTER.structures.filter((s) =>
-    (structures as readonly string[]).includes(s.id),
-  );
+  const structureTab = TALISU_REGISTER.structures.find((s) => s.id === structure) ?? null;
 
   // PMC gate (every registrant): Demo → claim Mapsite → Talispros → Media
   // Directory → Contract (agent code) → sign → here → payment. No claimed
   // Mapsite → demo/claim start; unsigned → the sequence. Paid users pass.
   await enforcePmcRegistrationGate(firstParam(params.fastCode));
 
-  const checkoutUrl = registerStructureCheckoutUrl(TALISU_REGISTER.samcartUrl, structures);
+  const checkoutUrl = registerStructureCheckoutUrl(TALISU_REGISTER.samcartUrl, structure);
 
   return (
     <SectionShell title={TALISU_REGISTER.title} maxWidthClass="max-w-[1920px]">
@@ -138,21 +137,19 @@ export default async function TalisURegisterPage({
           <p className="mt-3 text-sm font-medium text-neutral-950">
             {TALISU_REGISTER.partnerName}
           </p>
-          {structureTabs.length ? (
+          {structureTab ? (
             <div
               data-testid="register-structure"
-              data-structure-id={structures.join(",")}
+              data-structure-id={structureTab.id}
               className="mt-4 rounded-xl border border-[#046BD9]/25 bg-[#EAF3FF] px-3 py-2.5 text-sm text-neutral-800"
             >
               <span className="font-semibold text-neutral-950">
-                {structureTabs.length > 1
-                  ? TALISU_REGISTER.structuresSelected
-                  : TALISU_REGISTER.structureSelected}
+                {TALISU_REGISTER.structureSelected}
               </span>{" "}
-              {structureTabs.map((s) => s.label).join(", ")}
+              {structureTab.label}
               {" · "}
               <Link
-                href={talisURegisterStructureHref(structures)}
+                href={talisURegisterStructureHref(structureTab.id)}
                 className="font-semibold text-[#046BD9] underline-offset-2 hover:underline"
               >
                 {TALISU_REGISTER.structureChange}

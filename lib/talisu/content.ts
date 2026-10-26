@@ -285,9 +285,8 @@ export const TALISU_REGISTER = {
     },
   ],
   structureSelected: "Selected structure:",
-  structuresSelected: "Selected structures:",
   /** Register lock: at least one structure tab must be selected. */
-  lockNeedStructure: "Choose at least one structure",
+  lockNeedStructure: "Choose a structure",
   structureClose: "Close",
   structureChange: "Change",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",

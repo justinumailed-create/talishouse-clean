@@ -38,12 +38,12 @@ import {
   clearRegisterStructureCookie,
   normalizeRegisterLockReason,
   normalizeRegisterStructure,
-  parseRegisterStructures,
+  parseSingleRegisterStructure,
   registerLockedHref,
   registerStructureCheckoutUrl,
   registerStructureCookie,
+  selectRegisterStructure,
   talisURegisterStructureHref,
-  toggleRegisterStructure,
 } from "../lib/talisu/register-structure";
 import { en } from "../lib/i18n/dictionaries/en";
 import { de } from "../lib/i18n/dictionaries/de";
@@ -91,55 +91,55 @@ describe("Aisha's register structure ids", () => {
     }
   });
 
-  it("parses one or more structures (comma / repeated), drops unknown ones, de-duplicates", () => {
-    expect(parseRegisterStructures("lease-to-own,tokenization")).toEqual(["lease-to-own", "tokenization"]);
-    expect(parseRegisterStructures(["Tokenization", "splits,conventional", "evil", "tokenization"])).toEqual([
-      "tokenization",
-      "lease-to-own",
-      "conventional",
-    ]);
-    expect(parseRegisterStructures("conventional%2Cfractionalization")).toEqual(["conventional", "fractionalization"]);
-    expect(parseRegisterStructures(undefined)).toEqual([]);
-    expect(parseRegisterStructures("<script>,https://evil.example")).toEqual([]);
+  it("parses exactly one structure; comma lists, repeats and unknown values are rejected", () => {
+    expect(parseSingleRegisterStructure("Tokenization")).toBe("tokenization");
+    expect(parseSingleRegisterStructure("splits")).toBe("lease-to-own");
+    expect(parseSingleRegisterStructure(["conventional"])).toBe("conventional");
+    for (const bad of [
+      "lease-to-own,tokenization",
+      "conventional%2Cfractionalization",
+      "tokenization,",
+      ["tokenization", "conventional"],
+      ["tokenization", "tokenization"],
+      "evil",
+      "",
+      "%E0%A4%A",
+      undefined,
+      null,
+    ]) {
+      expect(parseSingleRegisterStructure(bad)).toBeNull();
+    }
   });
 
-  it("toggles structures on and off, several at once", () => {
-    let sel = toggleRegisterStructure([], "lease-to-own");
-    expect(sel).toEqual(["lease-to-own"]);
-    sel = toggleRegisterStructure(sel, "tokenization");
-    expect(sel).toEqual(["lease-to-own", "tokenization"]);
-    sel = toggleRegisterStructure(sel, "lease-to-own");
-    expect(sel).toEqual(["tokenization"]);
-    expect(toggleRegisterStructure(sel, "tokenization")).toEqual([]);
+  it("is single-select: switching tabs replaces the selection, re-clicking keeps it", () => {
+    let sel = selectRegisterStructure(null, "lease-to-own");
+    expect(sel).toBe("lease-to-own");
+    sel = selectRegisterStructure(sel, "tokenization");
+    expect(sel).toBe("tokenization");
+    // Clicking the selected tab again keeps it (radio behaviour, no clearing).
+    expect(selectRegisterStructure(sel, "tokenization")).toBe("tokenization");
+    expect(selectRegisterStructure(sel, "evil")).toBe("tokenization");
   });
 
-  it("builds the tab, checkout, bounce and SamCart links with ?structure=a,b", () => {
+  it("builds the tab, checkout, bounce and SamCart links with exactly one ?structure=", () => {
     expect(talisURegisterStructureHref("lease-to-own")).toBe("/talisu/reg?structure=lease-to-own");
-    expect(talisURegisterStructureHref(["lease-to-own", "tokenization"])).toBe(
-      "/talisu/reg?structure=lease-to-own,tokenization",
-    );
+    expect(talisURegisterStructureHref("lease-to-own,tokenization")).toBe("/talisu/reg");
     expect(talisURegisterStructureHref("nope")).toBe("/talisu/reg");
     expect(talisURegisterCheckoutHref()).toBe("/talisu/reg?step=register");
     expect(talisURegisterCheckoutHref("Tokenization")).toBe("/talisu/reg?step=register&structure=tokenization");
-    expect(talisURegisterCheckoutHref(["lease-to-own", "tokenization"])).toBe(
-      "/talisu/reg?step=register&structure=lease-to-own,tokenization",
-    );
+    expect(talisURegisterCheckoutHref(["lease-to-own", "tokenization"])).toBe("/talisu/reg?step=register");
+    expect(talisURegisterCheckoutHref("lease-to-own,tokenization")).toBe("/talisu/reg?step=register");
     expect(talisURegisterCheckoutHref("evil")).toBe("/talisu/reg?step=register");
     expect(registerLockedHref()).toBe("/talisu/reg?locked=structure");
     expect(normalizeRegisterLockReason("Structure")).toBe("structure");
     expect(normalizeRegisterLockReason("design")).toBeNull();
     expect(registerStructureCheckoutUrl(BASE, null)).toBe(BASE);
     expect(registerStructureCheckoutUrl(BASE, "evil")).toBe(BASE);
+    expect(registerStructureCheckoutUrl(BASE, "lease-to-own,tokenization")).toBe(BASE);
     expect(registerStructureCheckoutUrl(BASE, "fractionalization")).toBe(
       `${BASE}?structure=fractionalization&utm_term=fractionalization`,
     );
-    const multi = new URL(registerStructureCheckoutUrl(BASE, ["lease-to-own", "tokenization"]));
-    expect(multi.searchParams.getAll("structure")).toEqual(["lease-to-own,tokenization"]);
-    expect(multi.searchParams.getAll("utm_term")).toEqual(["lease-to-own,tokenization"]);
     expect(registerStructureCookie("conventional")).toMatch(/^talisu_reg_structure=conventional; path=\//);
-    expect(registerStructureCookie(["conventional", "tokenization"])).toMatch(
-      /^talisu_reg_structure=conventional%2Ctokenization; path=\//,
-    );
     expect(clearRegisterStructureCookie()).toContain("max-age=0");
   });
 
@@ -176,28 +176,32 @@ describe("Aisha's /talisu/reg landing", () => {
     expect(layout.props.imageSrc).toBe("/images/mapsites/aisha-c.webp");
     expect(layout.props.title).toBe(en.talisu.register.adviserTitle);
     const tabs = findAll(tree, (el) => el.type === RegisterStructureTabs)[0];
-    expect(tabs.props.initialIds).toEqual([]);
+    expect(tabs.props.initialId).toBeNull();
     expect(env.enforce).not.toHaveBeenCalled();
   });
 
   it("ignores an older remembered structure on load", async () => {
     env.cookie = "conventional";
     const tree = await renderReg({});
-    expect(findAll(tree, (el) => el.type === RegisterStructureTabs)[0].props.initialIds).toEqual([]);
+    expect(findAll(tree, (el) => el.type === RegisterStructureTabs)[0].props.initialId).toBeNull();
     const html = renderToStaticMarkup(tree as ReactElement);
     expect(html).toContain('data-selected-structure=""');
     expect(html).not.toContain('data-selected="true"');
   });
 
-  it("locked with none: four unpressed toggles, a disabled Register button and the reason", async () => {
+  it("locked with none: a radiogroup of four unchecked radios, a disabled Register button and the reason", async () => {
     const html = renderToStaticMarkup((await renderReg({})) as ReactElement);
+    expect(html).toMatch(/role="radiogroup" aria-label="Choose your structure"/);
     for (const id of REGISTER_STRUCTURE_IDS) {
       expect(html).toMatch(
-        new RegExp(`<button type="button" data-testid="register-structures-${id}"[^>]*data-selected="false" aria-pressed="false"`),
+        new RegExp(`<button type="button" data-testid="register-structures-${id}"[^>]*data-selected="false" role="radio" aria-checked="false"`),
       );
     }
+    expect(html).not.toContain("aria-pressed");
+    // Roving focus: only the first radio is tabbable when none is chosen.
+    expect(html.match(/tabindex="0"/g)).toHaveLength(1);
     expect(html).toMatch(/<button[^>]*disabled=""[^>]*data-testid="partner-cta" data-locked="structure"/);
-    expect(html).toContain("Choose at least one structure");
+    expect(html).toContain("Choose a structure");
     expect(html).toContain('data-testid="register-lock-reason-structure"');
     expect(html).not.toContain('data-testid="register-structures-panel"');
     expect(hrefs(html).some((h) => h.includes("step=register"))).toBe(false);
@@ -206,40 +210,42 @@ describe("Aisha's /talisu/reg landing", () => {
   it("unlocked with one: ?structure= pre-selects it and the Register link carries it", async () => {
     for (const id of REGISTER_STRUCTURE_IDS) {
       const html = renderToStaticMarkup((await renderReg({ structure: id })) as ReactElement);
-      expect(html).toMatch(new RegExp(`data-testid="register-structures-${id}"[^>]*data-selected="true" aria-pressed="true"`));
+      expect(html).toMatch(new RegExp(`data-testid="register-structures-${id}"[^>]*data-selected="true" role="radio" aria-checked="true"`));
+      expect(html.match(/aria-checked="true"/g)).toHaveLength(1);
+      expect(html.match(/-check"/g)).toHaveLength(1);
       expect(html).toContain(`data-testid="register-structures-${id}-check"`);
       expect(html).toContain(`data-testid="register-structures-panel" data-structure-id="${id}"`);
       expect(hrefs(html)).toContain(`/talisu/reg?step=register&structure=${id}`);
       expect(html).not.toContain('data-locked="structure"');
-      expect(html).not.toContain("Choose at least one structure");
+      expect(html).not.toContain("Choose a structure");
       expect(html).toContain("Selected structure:");
     }
   });
 
-  it("multiple selected: both are pressed and both go to checkout", async () => {
+  it("never multi-selects: a comma list in ?structure= pre-selects nothing and stays locked", async () => {
     const html = renderToStaticMarkup(
       (await renderReg({ structure: "lease-to-own,tokenization" })) as ReactElement,
     );
-    expect(html).toContain('data-selected-structure="lease-to-own,tokenization"');
-    expect(html.match(/aria-pressed="true"/g)).toHaveLength(2);
-    expect(hrefs(html)).toContain("/talisu/reg?step=register&structure=lease-to-own,tokenization");
-    expect(html).toContain("Selected structures:");
-    expect(html).toMatch(/Lease-to-Own, Tokenization/);
+    expect(html).toContain('data-selected-structure=""');
+    expect(html).not.toContain('aria-checked="true"');
+    expect(html).toContain('data-locked="structure"');
+    expect(html).not.toContain("Selected structures");
   });
 
   it("shows the bounce reason as an alert after a checkout URL without a structure", async () => {
     const html = renderToStaticMarkup((await renderReg({ locked: "structure" })) as ReactElement);
     expect(html).toMatch(/role="alert"[^>]*data-testid="register-lock-status"/);
-    expect(html).toContain("Choose at least one structure");
+    expect(html).toContain("Choose a structure");
   });
 
   it("shows the German tab names and reason", async () => {
     env.locale = "de";
     let html = renderToStaticMarkup((await renderReg({})) as ReactElement);
-    expect(html).toContain("Wählen Sie mindestens eine Struktur");
-    html = renderToStaticMarkup((await renderReg({ structure: "lease-to-own,tokenization" })) as ReactElement);
+    expect(html).toContain("Wählen Sie eine Struktur");
+    html = renderToStaticMarkup((await renderReg({ structure: "lease-to-own" })) as ReactElement);
     expect(html).toContain("Mietkauf");
-    expect(html).toContain("Gewählte Strukturen:");
+    expect(html).toContain("Gewählte Struktur:");
+    expect(html).not.toContain("Strukturen:");
     expect(html).toContain("Wählen Sie Ihre Struktur");
   });
 });
@@ -275,6 +281,8 @@ describe("Aisha's register checkout keeps the structure", () => {
       { step: "register" },
       { step: "register", structure: "evil" },
       { step: "register", structure: "" },
+      { step: "register", structure: "lease-to-own,tokenization" },
+      { step: "register", structure: "conventional%2Ctokenization" },
     ];
     for (const params of bypasses) {
       await expect(renderReg(params)).rejects.toThrow("NEXT_REDIRECT;/talisu/reg?locked=structure");
@@ -286,16 +294,19 @@ describe("Aisha's register checkout keeps the structure", () => {
     expect(env.enforce).not.toHaveBeenCalled();
   });
 
-  it("tags SamCart with every selected structure", async () => {
-    const tree = await renderReg({ step: "register", structure: "lease-to-own,tokenization" });
-    const url = new URL(String(findAll(tree, (el) => el.type === SamCartEmbed)[0].props.src));
-    expect(url.searchParams.get("structure")).toBe("lease-to-own,tokenization");
-    expect(url.searchParams.get("utm_term")).toBe("lease-to-own,tokenization");
-    const html = renderToStaticMarkup(tree as ReactElement);
-    expect(html).toContain('data-testid="register-structure" data-structure-id="lease-to-own,tokenization"');
-    expect(html).toContain("Selected structures:");
-    expect(html).toContain("Lease-to-Own, Tokenization");
-    expect(hrefs(html)).toContain("/talisu/reg?structure=lease-to-own,tokenization");
+  it("a comma list redirects even when a valid structure is remembered", async () => {
+    env.cookie = "conventional";
+    for (const structure of ["lease-to-own,tokenization", "tokenization,", "evil"]) {
+      await expect(renderReg({ step: "register", structure })).rejects.toThrow(
+        "NEXT_REDIRECT;/talisu/reg?locked=structure",
+      );
+    }
+    expect(env.enforce).not.toHaveBeenCalled();
+  });
+
+  it("an old multi-value cookie does not unlock the checkout", async () => {
+    env.cookie = "lease-to-own%2Ctokenization";
+    await expect(renderReg({ step: "register" })).rejects.toThrow("NEXT_REDIRECT;/talisu/reg?locked=structure");
   });
 
   it("falls back to the remembered structure after the PMC sequence", async () => {
@@ -322,13 +333,39 @@ describe("Aisha's register checkout keeps the structure", () => {
     expect(html).toContain("Mietkauf");
   });
 
+  it("keeps every tab label on one line, never truncated, and the check badge off the label", async () => {
+    const tabs = readFileSync(resolve("components/talisu/RegisterStructureTabs.tsx"), "utf8");
+    expect(tabs).toMatch(/const TAB_LABEL =\s*"[^"]*whitespace-nowrap/);
+    expect(tabs).not.toMatch(/truncate|text-ellipsis|line-clamp/);
+    // Four-across only when it fits, columns never narrower than their label.
+    expect(tabs).toContain("@container");
+    expect(tabs).toContain("@min-[34rem]:grid-cols-[repeat(4,minmax(max-content,1fr))]");
+    expect(tabs).toContain("@min-[19rem]:grid-cols-[repeat(2,minmax(max-content,1fr))]");
+    // The shared metal style is reused unchanged.
+    const metal = readFileSync(resolve("components/talisu/metal-tab.ts"), "utf8");
+    expect(metal).toContain("overflow-hidden rounded-xl border px-2 py-2");
+    for (const locale of ["en", "de"] as const) {
+      env.locale = locale;
+      for (const id of REGISTER_STRUCTURE_IDS) {
+        const html = renderToStaticMarkup((await renderReg({ structure: id })) as ReactElement);
+        // The badge is a sibling after the button (on the corner), not inside it.
+        expect(html).toMatch(
+          new RegExp(`data-testid="register-structures-${id}-label"[^>]*>[^<]+</span></button><span aria-hidden="true" data-testid="register-structures-${id}-check"[^>]*-right-2 -top-2`),
+        );
+      }
+    }
+  });
+
   it("keeps the client tabs writing the cookie and URL", () => {
     const tabs = readFileSync(resolve("components/talisu/RegisterStructureTabs.tsx"), "utf8");
     expect(tabs).toContain("rememberRegisterStructure(next)");
+    expect(tabs).toContain("selectRegisterStructure(selected, id)");
     expect(tabs).toContain("talisURegisterCheckoutHref(selected)");
-    expect(tabs).toContain("aria-pressed={isSelected}");
+    expect(tabs).toContain('role="radiogroup"');
+    expect(tabs).toContain("aria-checked={isSelected}");
+    expect(tabs).not.toContain("aria-pressed");
     const lib = readFileSync(resolve("lib/talisu/register-structure.ts"), "utf8");
-    expect(lib).toContain("registerStructureCookie(structures)");
+    expect(lib).toContain("registerStructureCookie(structure)");
     expect(lib).toContain("clearRegisterStructureCookie()");
     expect(lib).toContain("window.history.replaceState");
   });
