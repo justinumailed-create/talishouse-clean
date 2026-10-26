@@ -99,7 +99,7 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(builder).toContain("lg:grid-cols-2");
     expect(builder.indexOf("<DemoHeroMap")).toBeLessThan(builder.indexOf("{d.hero.headline}"));
     const css = read("app/globals.css");
-    expect(css).toContain(".demo-hero__media {\n  height: 26rem;");
+    expect(css).toContain(".demo-hero__media {\n  height: 32rem;");
   });
 
   it("does not look like a login field to Safari / iCloud Keychain", () => {

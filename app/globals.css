@@ -5282,16 +5282,16 @@ body.mapsite-gallery-open [data-paypal-button] {
   padding-top: 0.35rem;
 }
 .demo-hero__media {
-  height: 26rem;
+  height: 32rem;
 }
 @media (min-width: 640px) {
   .demo-hero__media {
-    height: 30rem;
+    height: 34rem;
   }
 }
 @media (max-height: 720px) and (max-width: 1023px) {
   .demo-hero__media {
-    height: 22rem;
+    height: 28rem;
   }
 }
 @media (min-width: 1024px) {

@@ -42,8 +42,8 @@ export default function DemoHeroMap() {
       const rootBox = root.getBoundingClientRect();
       const cardBox = pinCard.getBoundingClientRect();
       if (rootBox.height < 40) return;
-      // Anchor the marker just under the card tip so the PIN stays visible.
-      const pinY = cardBox.bottom + 28 - rootBox.top;
+      // The marker hangs above its anchor, so leave room for the whole PIN.
+      const pinY = cardBox.bottom + 96 - rootBox.top;
       const next = Math.round(pinY - rootBox.height / 2);
       setPinOffsetY((current) => (Math.abs(current - next) < 2 ? current : next));
     };
@@ -51,7 +51,11 @@ export default function DemoHeroMap() {
     const observer = new ResizeObserver(place);
     observer.observe(root);
     observer.observe(pinCard);
-    return () => observer.disconnect();
+    const timer = window.setTimeout(place, 700);
+    return () => {
+      window.clearTimeout(timer);
+      observer.disconnect();
+    };
   }, []);
   const pins: MapEnginePin[] = useMemo(() => {
     const visual = mapSitePinVisualFields();
@@ -88,6 +92,7 @@ export default function DemoHeroMap() {
       ref={rootRef}
       className="relative h-full w-full overflow-hidden bg-[#c9c3b8]"
       data-testid="demo-hero-map"
+      data-pin-offset={pinOffsetY}
       aria-label={card.mapLabel}
     >
       <MapEngineProvider
@@ -112,7 +117,7 @@ export default function DemoHeroMap() {
           aria-label={card.title}
         >
           <div className="overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm">
-            <div className="relative h-20 w-full bg-neutral-200/80 sm:h-24 lg:h-28">
+            <div className="relative h-16 w-full bg-neutral-200/80 sm:h-20 lg:h-28">
               <Image
                 src={SAMPLE_HERO}
                 alt={card.title}
