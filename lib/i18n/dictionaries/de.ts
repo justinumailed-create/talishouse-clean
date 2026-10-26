@@ -374,7 +374,17 @@ export const de: Dictionary = {
       adviserTitle:
         "Jedes Projekt beginnt mit Ihrer Vision. Wählen Sie ein Talishouse™-Design aus dem Katalog und beauftragen Sie Thorsten P und sein Fulfilment-Team, sie Wirklichkeit werden zu lassen.",
       catalogueLabel: "Talishouse™ Produktkatalog",
-      catalogueHint: "Tippen Sie auf eine Einheit, um sie mit Ihrer Anzahlung zu reservieren.",
+      catalogueHint:
+        "Tippen Sie auf ein Design, um es zu vergrößern, und reservieren Sie es mit Ihrer Anzahlung.",
+      galleryDefaultName: "Talishouse™-Designvorschlag",
+      galleryOpen: "{code} ansehen, {name}",
+      galleryDialog: "Design {code}",
+      galleryClose: "Schließen",
+      galleryPrev: "Vorheriges Design",
+      galleryNext: "Nächstes Design",
+      galleryCount: "{index} von {count}",
+      galleryReserve: "{code} reservieren",
+      galleryReserveNote: "Anzahlung von 2.000 CAD · vollständig auf Ihre Bestellung angerechnet",
       adviserCtaNote:
         "Anzahlung von 2.000 CAD · vollständig auf Ihre Bestellung angerechnet · bis zu 12 Monate geschützt",
     },

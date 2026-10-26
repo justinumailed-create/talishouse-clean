@@ -8,8 +8,8 @@ import { fmt } from "@/lib/i18n/format";
 import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
 import AdviserLayout from "@/components/talisu/AdviserLayout";
-import TopBoundFlipbook from "@/components/product-flipbook/TopBoundFlipbook";
-import { loadCataloguePages } from "@/lib/talisu/catalogue-pages";
+import EngageDesignGallery from "@/components/talisu/EngageDesignGallery";
+import { loadEngageDesigns } from "@/lib/talisu/engage-designs";
 import {
   isTalisUEngageCheckoutStep,
   talisUEngageCheckoutHref,
@@ -70,13 +70,14 @@ export default async function TalisUEngagePage({
     structure,
   );
 
-  // Adviser landing (Oct 26): Thorsten P's portrait + the Talishouse™
-  // catalogue flipbook. Each unit links to the $2,000 CAD down-payment
-  // checkout (?step=pay&product=Pxx); the button below goes there too,
+  // Adviser landing (Oct 26): Thorsten P's portrait + a gallery of the
+  // Talishouse™ catalogue designs (no flipbook here; /catalogue keeps it).
+  // Each design opens a lightbox whose Reserve button goes to the $2,000 CAD
+  // down-payment checkout (?step=pay&product=Pxx); the button below goes there too,
   // keeping a catalogue ?product= code. Older ?structure= links still work:
   // the value is carried to the checkout and shown there.
   if (!isTalisUEngageCheckoutStep(params.step)) {
-    const pages = loadCataloguePages();
+    const designs = loadEngageDesigns();
     return (
       <AdviserLayout
         testId="talisu-engage-landing"
@@ -94,13 +95,8 @@ export default async function TalisUEngagePage({
           <div className="mb-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-600">
             {TALISU_ENGAGE.catalogueLabel}
           </div>
-          <TopBoundFlipbook
-            pages={pages}
-            title={TALISU_ENGAGE.catalogueLabel}
-            showHeader={false}
-            variant="embedded"
-          />
-          <div className="mt-1 text-center text-[12.5px] text-neutral-600" data-testid="engage-catalogue-hint">
+          <EngageDesignGallery designs={designs} />
+          <div className="mt-2 text-center text-[12.5px] text-neutral-600" data-testid="engage-catalogue-hint">
             {TALISU_ENGAGE.catalogueHint}
           </div>
         </section>

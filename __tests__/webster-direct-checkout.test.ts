@@ -19,7 +19,7 @@ vi.mock("@/lib/i18n/server", () => ({ getLocale: async () => gate.locale }));
 import TalisUEngagePage from "../app/talisu/engage/page";
 import SamCartEmbed from "../components/talisu/SamCartEmbed";
 import AdviserLayout from "../components/talisu/AdviserLayout";
-import TopBoundFlipbook from "../components/product-flipbook/TopBoundFlipbook";
+import EngageDesignGallery from "../components/talisu/EngageDesignGallery";
 import { talisUEngageCheckoutHref } from "../lib/talisu/ask-step";
 import {
   ENGAGE_STRUCTURE_IDS,
@@ -210,7 +210,7 @@ describe("Thorsten P catalogue landing", () => {
       .map((el) => String(el.props.href))
       .filter((h) => h.startsWith("/talisu/engage?step=pay"));
 
-  it("shows Thorsten P's portrait with the embedded catalogue flipbook instead of structure tabs", async () => {
+  it("shows Thorsten P's portrait with the catalogue design gallery (no flipbook, no structure tabs)", async () => {
     const tree = await renderEngage({});
     const layout = findAll(tree, (el) => el.type === AdviserLayout);
     expect(layout).toHaveLength(1);
@@ -218,10 +218,10 @@ describe("Thorsten P catalogue landing", () => {
     expect(layout[0].props.imageAlt).toBe("Thorsten P");
     expect(layout[0].props.kicker).toBe(en.talisu.engage.adviserKicker);
     expect(layout[0].props.title).toBe(en.talisu.engage.adviserTitle);
-    const books = findAll(tree, (el) => el.type === TopBoundFlipbook);
-    expect(books).toHaveLength(1);
-    expect(books[0].props.variant).toBe("embedded");
-    expect((books[0].props.pages as unknown[]).length).toBeGreaterThan(1);
+    const galleries = findAll(tree, (el) => el.type === EngageDesignGallery);
+    expect(galleries).toHaveLength(1);
+    expect((galleries[0].props.designs as unknown[]).length).toBe(108);
+    expect(read("app/talisu/engage/page.tsx")).not.toContain("TopBoundFlipbook");
     expect(byTestId(tree, "engage-structures")).toHaveLength(0);
     expect(read("app/talisu/engage/page.tsx")).not.toMatch(/EngageStructureSelection|TransactionStructurePicker/);
     expect(gate.enforce).not.toHaveBeenCalled();

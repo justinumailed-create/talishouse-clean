@@ -8,7 +8,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ROUTES } from "@/lib/routes";
-import { talisUEngageCheckoutHref } from "@/lib/talisu/ask-step";
 import {
   type ProductFlipbookHotspot,
   type ProductFlipbookPage,
@@ -74,21 +73,14 @@ function CatalogueFace({
  * scale with the viewer. Pointer events stop here so a tap on a block routes
  * to registration instead of turning the page.
  */
-function CatalogueHotspots({
-  hotspots,
-  toCheckout = false,
-}: {
-  hotspots: ProductFlipbookHotspot[];
-  /** Embedded on /talisu/engage: a unit goes straight to the down-payment checkout. */
-  toCheckout?: boolean;
-}) {
+function CatalogueHotspots({ hotspots }: { hotspots: ProductFlipbookHotspot[] }) {
   const c = useT().catalogueUi;
   return (
     <div className="absolute inset-0" data-testid="product-flipbook-hotspots">
       {hotspots.map((spot) => (
         <Link
           key={spot.code}
-          href={toCheckout ? talisUEngageCheckoutHref(spot.code) : spot.href}
+          href={spot.href}
           aria-label={fmt(c.customize, { label: spot.label })}
           title={`Customize ${spot.label}`}
           data-product-code={spot.code}
@@ -122,7 +114,6 @@ export default function TopBoundFlipbook({
   showHeader = true,
   headline,
   headlineAction,
-  variant = "page",
 }: {
   pages: ProductFlipbookPage[];
   eyebrow?: string;
@@ -134,14 +125,7 @@ export default function TopBoundFlipbook({
   headline?: string;
   /** Optional secondary action shown beside the headline (e.g. Register link). */
   headlineAction?: React.ReactNode;
-  /**
-   * "embedded": inside the Thorsten P adviser column on /talisu/engage — no
-   * page background/padding, full column width, arrow keys only, and units
-   * link to the $2,000 CAD down-payment checkout.
-   */
-  variant?: "page" | "embedded";
 }) {
-  const embedded = variant === "embedded";
   const c = useT().catalogueUi;
   const leaves = pages;
   const [index, setIndex] = useState(0);
@@ -189,9 +173,8 @@ export default function TopBoundFlipbook({
       page.role === "content" ? [{ number: page.number, index: leafIndex }] : [],
     ),
     onJump: jumpTo,
-    // Embedded on /talisu/engage: straight to the $2,000 CAD down payment.
-    // Elsewhere (/catalogue): Thorsten P's page, which leads to the same checkout.
-    ctaHref: embedded ? talisUEngageCheckoutHref() : ROUTES.TALISU_ENGAGE,
+    // Thorsten P's page: design gallery + the $2,000 CAD down payment.
+    ctaHref: ROUTES.TALISU_ENGAGE,
   };
 
   useEffect(() => {
@@ -214,18 +197,6 @@ export default function TopBoundFlipbook({
       const target = event.target as HTMLElement | null;
       const tag = target?.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable) return;
-      // Embedded on a scrolling page: only left/right turn pages, so the
-      // usual page keys (Space, PageUp/Down, Home/End, up/down) still scroll.
-      if (embedded) {
-        if (event.key === "ArrowRight") {
-          event.preventDefault();
-          go("next");
-        } else if (event.key === "ArrowLeft") {
-          event.preventDefault();
-          go("prev");
-        }
-        return;
-      }
       if (event.key === "ArrowDown" || event.key === "ArrowRight" || event.key === "PageDown") {
         event.preventDefault();
         go("next");
@@ -251,7 +222,7 @@ export default function TopBoundFlipbook({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [go, leaves.length, embedded]);
+  }, [go, leaves.length]);
 
   const underIndex = flip
     ? flip.direction === "next"
@@ -300,7 +271,6 @@ export default function TopBoundFlipbook({
       data-testid="product-flipbook"
       data-binding="top"
       data-header={showHeader ? "visible" : "hidden"}
-      data-variant={variant}
       data-headline={headline ? "visible" : undefined}
     >
       {showHeader ? (
@@ -372,7 +342,7 @@ export default function TopBoundFlipbook({
                   <CatalogueFace page={underPage} closing={closing} interactive={!flip} />
                 ) : null}
                 {!flip && underPage?.hotspots?.length ? (
-                  <CatalogueHotspots hotspots={underPage.hotspots} toCheckout={embedded} />
+                  <CatalogueHotspots hotspots={underPage.hotspots} />
                 ) : null}
               </div>
               {flip && sheetPage ? (

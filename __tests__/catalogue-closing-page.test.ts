@@ -64,9 +64,11 @@ describe("Catalogue closing page (Thorsten P + page buttons)", () => {
     expect(page).toContain("onPointerDown={stopFlip}");
   });
 
-  it("sends the CTA to Thorsten P's $2,000 CAD down payment", () => {
+  it("sends the CTA to Thorsten P's page (design gallery + $2,000 CAD down payment)", () => {
     const flipbook = read("components/product-flipbook/TopBoundFlipbook.tsx");
-    expect(flipbook).toContain("ctaHref: embedded ? talisUEngageCheckoutHref() : ROUTES.TALISU_ENGAGE");
+    expect(flipbook).toContain("ctaHref: ROUTES.TALISU_ENGAGE");
+    // No embedded variant left: the flipbook only lives on /catalogue.
+    expect(flipbook).not.toMatch(/embedded|talisUEngageCheckoutHref/);
     const page = read("components/product-flipbook/WebsterCataloguePage.tsx");
     expect(page).toContain("t.talisu.engageWebster");
     expect(page).toContain("href={ctaHref}");

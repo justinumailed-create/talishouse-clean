@@ -122,6 +122,9 @@ export function normalizeCatalogueProductCode(
   return formatCatalogueProductCode(n);
 }
 
+/** Name used for a block that has no `title` of its own. */
+export const CATALOGUE_DEFAULT_PRODUCT_TITLE = "Talishouse™ design suggestion";
+
 export function buildCatalogueProducts(
   pages: CatalogueDesignPage[] = CATALOGUE_DESIGN_PAGES,
   /** Content-page offset: source page N maps to catalogue page N when 1. */
@@ -139,7 +142,7 @@ export function buildCatalogueProducts(
         cataloguePage: page.sourcePage - startPage + 1,
         slot: blockIndex + 1,
         rect,
-        title: title?.trim() || "Talishouse™ design suggestion",
+        title: title?.trim() || CATALOGUE_DEFAULT_PRODUCT_TITLE,
       });
     });
   }
