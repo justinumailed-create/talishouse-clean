@@ -76,6 +76,9 @@ export default function DemoMapSiteBuilderClient({
     function syncFromUrl() {
       setShowCard(demoBuilderStartsOpen(searchParamsObject()));
     }
+    // Back from the eBook step restores this page from the client router
+    // cache with the first render's props, so re-read ?build=1 on mount too.
+    if (demoBuilderStartsOpen(searchParamsObject())) syncFromUrl();
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
   }, []);

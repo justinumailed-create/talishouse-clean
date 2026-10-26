@@ -36,6 +36,8 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(builder).toContain("frame = window.requestAnimationFrame(focusAddressBox)");
     expect(builder).toContain("url.searchParams.set(DEMO_BUILD_QUERY");
     expect(builder).toContain('addEventListener("popstate"');
+    // Back from the eBook step (client router cache) re-reads ?build=1 on mount.
+    expect(builder).toContain("if (demoBuilderStartsOpen(searchParamsObject())) syncFromUrl();");
   });
 
   it("opens the card directly for deep links or Back that carry build/address/PIN state", () => {
