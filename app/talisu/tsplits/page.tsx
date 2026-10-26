@@ -161,8 +161,9 @@ function StructuresTable({ s }: { s: TsplitsContent["structures"] }) {
 export default async function TsplitsPage() {
   const c = getDictionary(await getLocale()).tsplits as TsplitsContent;
   return (
-    <div data-testid="tsplits-page" className="tsplits-page bg-neutral-100">
-      <section className="relative isolate overflow-hidden bg-gradient-to-br from-[#06182f] via-[#073a74] to-[#0069CF] text-white">
+    <div data-testid="tsplits-page" className="tsplits-page talis-working-bg min-h-dvh px-3 pb-16 pt-4 sm:px-6 sm:pt-6">
+      <div data-testid="tsplits-frame" className="mx-auto w-full max-w-[1400px]">
+      <section data-testid="tsplits-hero" className="relative isolate overflow-hidden rounded-[28px] bg-gradient-to-br from-[#06182f] via-[#073a74] to-[#0069CF] text-white">
         <div className="absolute -right-32 -top-32 -z-10 h-[28rem] w-[28rem] rounded-full bg-[#2f8cff]/25 blur-3xl" />
         <div className="mx-auto max-w-5xl px-4 pb-14 pt-12 text-center sm:px-6 sm:pb-20 sm:pt-16">
           <h1 className="text-[34px] font-black leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl">{c.title}</h1>
@@ -181,7 +182,7 @@ export default async function TsplitsPage() {
         </div>
       </section>
 
-      <div className="mx-auto -mt-8 max-w-5xl px-3 pb-16 sm:-mt-10 sm:px-6">
+      <div data-testid="tsplits-body" className="relative z-10 mx-auto -mt-8 w-full sm:-mt-10 sm:px-4 lg:px-6">
         <article className="space-y-10 rounded-[28px] bg-white px-5 py-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_18px_50px_rgba(0,0,0,0.08)] sm:px-10 sm:py-12 lg:px-14">
           <section id="approach" data-testid="tsplits-approach">
             <h2 className="text-[22px] font-semibold leading-snug tracking-[-0.02em] text-[#0069CF] sm:text-[26px]">
@@ -226,6 +227,7 @@ export default async function TsplitsPage() {
           <p className="mx-auto mt-5 max-w-xl text-[15px] leading-relaxed text-white/80">{c.cta.body}</p>
           <p className="mt-4 text-[13px] font-medium tracking-wide text-[#9fd0ff]">{c.cta.signoff}</p>
         </section>
+      </div>
       </div>
     </div>
   );

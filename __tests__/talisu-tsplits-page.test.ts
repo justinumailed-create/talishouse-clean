@@ -97,4 +97,15 @@ describe("TSPLITS™ page (/talisu/tsplits)", () => {
     expect(TSPLITS_EN.cta.signoff).toBe("Webster M. · Projects Analyst");
     expect(TSPLITS_DE.cta.button).toBe(getDictionary("de").tsplits.cta.button);
   });
+
+  it("uses the standard beige inner-page surface with header band and body capped at 1,400px", () => {
+    const src = pageSrc();
+    expect(src).toMatch(/data-testid="tsplits-page" className="[^"]*talis-working-bg/);
+    expect(src).not.toContain("bg-neutral-100");
+    expect(src).toMatch(/data-testid="tsplits-frame" className="[^"]*mx-auto[^"]*max-w-\[1400px\]/);
+    const frame = src.indexOf('data-testid="tsplits-frame"');
+    expect(frame).toBeGreaterThan(-1);
+    expect(src.indexOf('data-testid="tsplits-hero"')).toBeGreaterThan(frame);
+    expect(src.indexOf('data-testid="tsplits-body"')).toBeGreaterThan(frame);
+  });
 });
