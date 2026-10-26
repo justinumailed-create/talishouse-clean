@@ -720,7 +720,7 @@ export const en = {
       body1:
         "A demo Mapsite is a working preview of your own Mapsite. You set it up around your home PIN, and it shows the 80 km Market Zone that a registered Market protects around that PIN.",
       body2:
-        "The screens are from a registered Mapsite: the map, the Talisbook™ editor, the bookshelf, the Knowledge Base and extra PINs. Open any of them, then use Build your Mapsite above. It takes a couple of minutes, and no FAST Code is issued.",
+        "The screens are from a registered Mapsite: the map, the Talisbook™ editor, the bookshelf, the Knowledge Base and extra PINs. Open any of them, then use Build your Mapsite above. It takes a couple of minutes.",
       featuresLabel: "Mapsite features",
       features: {
         mapsite: "Mapsite",

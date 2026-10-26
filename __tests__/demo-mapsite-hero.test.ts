@@ -144,8 +144,14 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
         expect(alt.toLowerCase()).not.toMatch(/\b[a-z]{2}\d{2}\b/);
       }
     }
-    expect(en.demo.hero.body2).toContain("couple of minutes");
-    expect(de.demo.hero.body2).toContain("paar Minuten");
+    expect(en.demo.hero.body2).toBe(
+      "The screens are from a registered Mapsite: the map, the Talisbook™ editor, the bookshelf, the Knowledge Base and extra PINs. Open any of them, then use Build your Mapsite above. It takes a couple of minutes.",
+    );
+    expect(de.demo.hero.body2).toBe(
+      "Die Aufnahmen zeigen eine registrierte Mapsite: die Karte, den Talisbook™-Editor, das Bücherregal, die Wissensdatenbank und weitere PINs. Öffnen Sie eines davon und tippen Sie dann oben auf „Ihre Mapsite erstellen“. Das dauert nur ein paar Minuten.",
+    );
+    expect(en.demo.hero.body2).not.toMatch(/no FAST Code is issued/i);
+    expect(de.demo.hero.body2).not.toMatch(/kein FAST Code/);
     expect(en.demo.hero.features.knowledge).toBe("Knowledge Base");
     expect(de.demo.hero.features.knowledge).toBe("Wissensdatenbank");
   });

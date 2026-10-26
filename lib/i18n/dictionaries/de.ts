@@ -982,7 +982,7 @@ export const de: Dictionary = {
       body1:
         "Eine Demo-Mapsite ist eine funktionierende Vorschau Ihrer eigenen Mapsite. Sie richten sie um Ihren Home-PIN ein, und sie zeigt die 80-km-Marktzone, die ein registrierter Markt rund um diesen PIN schützt.",
       body2:
-        "Die Aufnahmen zeigen eine registrierte Mapsite: die Karte, den Talisbook™-Editor, das Bücherregal, die Wissensdatenbank und weitere PINs. Öffnen Sie eines davon und tippen Sie dann oben auf „Ihre Mapsite erstellen“. Das dauert nur ein paar Minuten, und es wird kein FAST Code vergeben.",
+        "Die Aufnahmen zeigen eine registrierte Mapsite: die Karte, den Talisbook™-Editor, das Bücherregal, die Wissensdatenbank und weitere PINs. Öffnen Sie eines davon und tippen Sie dann oben auf „Ihre Mapsite erstellen“. Das dauert nur ein paar Minuten.",
       featuresLabel: "Mapsite-Funktionen",
       features: {
         mapsite: "Mapsite",
