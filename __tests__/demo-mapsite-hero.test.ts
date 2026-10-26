@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, statSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { en } from "../lib/i18n/dictionaries/en";
@@ -6,15 +6,15 @@ import { de } from "../lib/i18n/dictionaries/de";
 import {
   DEMO_ADDRESS_INPUT_ID,
   DEMO_ADDRESS_INPUT_NAME,
-  DEMO_HERO_FEATURES,
-  DEMO_HERO_SLIDES,
+  DEMO_DISPLAY_PIN,
+  DEMO_PIN_CARD_ACTIONS,
   demoBuilderStartsOpen,
   demoInitialPinFromParams,
 } from "../lib/talispros/demo-builder";
 
 const read = (p: string) => readFileSync(resolve(p), "utf8");
 const builder = read("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx");
-const slides = read("components/talispros/demo-mapsite/DemoMapsiteSlides.tsx");
+const map = read("components/talispros/demo-mapsite/DemoHeroMap.tsx");
 const address = read("components/build-mapsite/GoogleAddressInput.tsx");
 const section = read("components/build-mapsite/HomePinLocationSection.tsx");
 const demoBranch = section.slice(section.indexOf("if (isDemo) {"), section.indexOf('<div className="space-y-6">'));
@@ -65,44 +65,41 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     );
   });
 
-  it("crossfades 3-5 live Mapsite screenshots (no flipbook) and respects reduced motion", () => {
-    expect(DEMO_HERO_FEATURES.map((feature) => feature.id)).toEqual([
-      "mapsite",
-      "ebooks",
-      "bookshelf",
-      "knowledge",
-      "pins",
-    ]);
-    expect(DEMO_HERO_FEATURES.map((feature) => feature.href)).toEqual([
-      "/talisu/mkts",
-      "/talisbooks",
-      "/catalogue/bookshelf",
-      "/talisu/kb",
-      "/talisu#faq",
-    ]);
-    expect(DEMO_HERO_SLIDES).toEqual(DEMO_HERO_FEATURES.map((feature) => feature.src));
-    expect(DEMO_HERO_SLIDES.length).toBeGreaterThanOrEqual(3);
-    expect(DEMO_HERO_SLIDES.length).toBeLessThanOrEqual(5);
-    for (const src of DEMO_HERO_SLIDES) {
-      expect(src).toMatch(/^\/talispros\/demo-slides\/feature-[a-z]+\.webp$/);
-      const file = resolve("public" + src);
-      expect(existsSync(file)).toBe(true);
-      expect(statSync(file).size).toBeGreaterThan(20_000);
+  it("shows one Mapsite display map and an open PIN card, with no slider or feature links", () => {
+    expect(builder).toContain("<DemoHeroMap />");
+    expect(builder).not.toContain("DemoMapsiteSlides");
+    expect(builder).not.toContain("demo-hero-feature");
+    expect(builder).not.toContain("<nav");
+    const writeup = builder.slice(builder.indexOf('id="demo-hero-title"'), builder.indexOf("</section>"));
+    expect(writeup).not.toContain("<a");
+    expect(existsSync(resolve("components/talispros/demo-mapsite/DemoMapsiteSlides.tsx"))).toBe(false);
+    for (const name of ["mapsite", "ebooks", "bookshelf", "knowledge", "pins"]) {
+      expect(existsSync(resolve(`public/talispros/demo-slides/feature-${name}.webp`))).toBe(false);
     }
-    expect(builder).toContain('data-testid={`demo-hero-feature-${feature.id}`}');
-    expect(builder).toContain("href={feature.href}");
-    expect(slides).toContain("transition-opacity");
-    expect(slides).toContain("prefers-reduced-motion: reduce");
-    expect(slides).not.toMatch(/import .*flipbook|rotateX|rotateY/i);
-    // Redaction is in the files, not CSS overlays.
-    expect(slides).not.toMatch(/backdrop-blur|blur-|filter:/i);
+
+    expect(map).toContain('basemapView="satellite"');
+    expect(map).toContain("MapEngineProvider");
+    expect(map).toContain("interactive={false}");
+    expect(map).toContain("selectedPinId={DEMO_DISPLAY_PIN.id}");
+    expect(map).toContain('data-testid="demo-hero-pin-card"');
+    expect(map).not.toMatch(/href=/);
+    expect(map).toContain("pointer-events-none");
+    expect(map).toContain("bg-[#046BD9]");
+    expect(map).toContain("rounded-full");
+    expect(map).toContain("shadow-[0_6px_14px_rgba(4,107,217,0.3)]");
+    expect(DEMO_PIN_CARD_ACTIONS).toEqual(["URL 1", "URL 2", "TEB™", "TTV™"]);
+    expect(map.match(/data-testid="demo-hero-pin-action"/g)).toHaveLength(1);
+    expect(DEMO_DISPLAY_PIN.latitude).toBeGreaterThan(41);
+    expect(DEMO_DISPLAY_PIN.latitude).toBeLessThan(70);
+    expect(DEMO_DISPLAY_PIN.longitude).toBeLessThan(-50);
+    expect(map).not.toMatch(/FAST Code|@[a-z]/i);
   });
 
-  it("stacks the slides above the write-up on mobile, two columns on desktop", () => {
+  it("stacks the map above the write-up on mobile, two columns on desktop", () => {
     expect(builder).toContain("lg:grid-cols-2");
-    expect(builder.indexOf("<DemoMapsiteSlides")).toBeLessThan(builder.indexOf("{d.hero.headline}"));
+    expect(builder.indexOf("<DemoHeroMap")).toBeLessThan(builder.indexOf("{d.hero.headline}"));
     const css = read("app/globals.css");
-    expect(css).toContain(".demo-hero__media {\n  height: 15rem;");
+    expect(css).toContain(".demo-hero__media {\n  height: 26rem;");
   });
 
   it("does not look like a login field to Safari / iCloud Keychain", () => {
@@ -122,7 +119,7 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(address).toContain('type="text"');
   });
 
-  it("has EN + DE hero copy; Mapsite never carries ™, Talisbook™ always does", () => {
+  it("has EN + DE hero copy; Mapsite never carries ™", () => {
     function strings(value: unknown, out: string[] = []): string[] {
       if (typeof value === "string") out.push(value);
       else if (value && typeof value === "object") {
@@ -137,22 +134,21 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
         expect(value).not.toMatch(/Mapsite™/);
       }
       expect(hero.body1).toMatch(/80/);
-      expect(hero.body2).toContain("Talisbook™");
-      expect(hero.features.pins).toBeTruthy();
-      expect(hero.alts.pins).toContain("CAD");
-      for (const alt of Object.values(hero.alts)) {
-        expect(alt.toLowerCase()).not.toMatch(/\b[a-z]{2}\d{2}\b/);
-      }
+      expect(hero.body1 + hero.body2).not.toMatch(/screen|editor|bookshelf|Knowledge Base|Bildschirm|Bücherregal|Wissensdatenbank/i);
+      expect(hero.body2).not.toMatch(/open any|Öffnen Sie eines/i);
+      expect(`${hero.body1} ${hero.body2} ${hero.pinCard.title} ${hero.pinCard.body}`).not.toMatch(
+        /FAST Code|USD|\$|miles?\b/i,
+      );
     }
     expect(en.demo.hero.body2).toBe(
-      "The screens are from a registered Mapsite: the map, the Talisbook™ editor, the bookshelf, the Knowledge Base and extra PINs. Open any of them, then use Build your Mapsite above. It takes a couple of minutes.",
+      "One sample PIN in Canada sits on the map, with its card already open. Use Build your Mapsite above. It takes a couple of minutes.",
     );
     expect(de.demo.hero.body2).toBe(
-      "Die Aufnahmen zeigen eine registrierte Mapsite: die Karte, den Talisbook™-Editor, das Bücherregal, die Wissensdatenbank und weitere PINs. Öffnen Sie eines davon und tippen Sie dann oben auf „Ihre Mapsite erstellen“. Das dauert nur ein paar Minuten.",
+      "Ein Beispiel-PIN in Kanada liegt auf der Karte, und seine Infokarte ist bereits geöffnet. Nutzen Sie oben „Ihre Mapsite erstellen“. Das dauert nur ein paar Minuten.",
     );
-    expect(en.demo.hero.body2).not.toMatch(/no FAST Code is issued/i);
-    expect(de.demo.hero.body2).not.toMatch(/kein FAST Code/);
-    expect(en.demo.hero.features.knowledge).toBe("Knowledge Base");
-    expect(de.demo.hero.features.knowledge).toBe("Wissensdatenbank");
+    expect(en.demo.hero.pinCard.title).toBe("Niagara Falls, Ontario");
+    expect(de.demo.hero.pinCard.title).toBe("Niagara Falls, Ontario");
+    expect(en.demo.hero.body1).toMatch(/80 km/);
+    expect(de.demo.hero.body1).toMatch(/80-km/);
   });
 });

@@ -13,16 +13,14 @@ import {
 import { createDemoMapSiteAction } from "@/app/talispros/demo-mapsite/actions";
 import { WorkingPageCtaButton, AISHA_AVATAR_SRC } from "@/components/talispros/WorkingPageCtaLink";
 import WorkingPageShell from "@/components/talispros/WorkingPageShell";
-import DemoMapsiteSlides from "@/components/talispros/demo-mapsite/DemoMapsiteSlides";
+import DemoHeroMap from "@/components/talispros/demo-mapsite/DemoHeroMap";
 import {
   DEMO_ADDRESS_INPUT_ID,
   DEMO_ADDRESS_INPUT_NAME,
   DEMO_BUILD_QUERY,
-  DEMO_HERO_FEATURES,
   demoBuilderStartsOpen,
   demoTitleFromAddress,
   hasDemoPinChoice,
-  type DemoHeroFeatureId,
 } from "@/lib/talispros/demo-builder";
 
 const DEMO_FALLBACK_TITLE = "Demo Mapsite";
@@ -60,8 +58,6 @@ export default function DemoMapSiteBuilderClient({
   // the top-strip "Build your Mapsite" pill.
   const [showCard, setShowCard] = useState(initialOpen);
   const [focusRequest, setFocusRequest] = useState(0);
-  const [featureIndex, setFeatureIndex] = useState(0);
-  const [featureHeld, setFeatureHeld] = useState(false);
 
   const revealBuilder = useCallback(() => {
     if (!showCard) {
@@ -133,8 +129,8 @@ export default function DemoMapSiteBuilderClient({
 
   return (
     // Mapsites page: the Catalogue top strip + Aisha pill ("Build your Mapsite"
-    // reveals the card and focuses Step 1). Below it, claimed Mapsite screens
-    // on the left and a short write-up with feature links on the right. The
+    // reveals the card and focuses Step 1). Below it, one sample PIN on the
+    // Mapsite map, with its card already open, and a short write-up. The
     // step 1-3 card stays hidden until that pill is clicked.
     <WorkingPageShell
       testId="mapsites-page"
@@ -157,18 +153,10 @@ export default function DemoMapSiteBuilderClient({
           className="demo-hero mx-auto w-full"
           data-testid="demo-hero"
           aria-labelledby="demo-hero-title"
-          onMouseLeave={() => setFeatureHeld(false)}
         >
           <div className="demo-hero__panel grid overflow-hidden rounded-[20px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05),0_18px_48px_rgba(0,0,0,0.10)] lg:grid-cols-2">
             <div className="demo-hero__media relative min-w-0">
-              <DemoMapsiteSlides
-                slides={DEMO_HERO_FEATURES.map((feature) => feature.src)}
-                alts={DEMO_HERO_FEATURES.map((feature) => d.hero.alts[feature.id])}
-                active={featureIndex}
-                onSelect={setFeatureIndex}
-                held={featureHeld}
-                label={d.hero.slidesLabel}
-              />
+              <DemoHeroMap />
             </div>
             <div className="flex min-w-0 flex-col justify-center px-6 py-7 sm:px-10 sm:py-10 lg:px-12">
               <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-neutral-500 sm:text-[13px]">
@@ -183,35 +171,6 @@ export default function DemoMapSiteBuilderClient({
               </h1>
               <p className="mt-4 text-[15px] leading-relaxed text-neutral-700 sm:text-[16px]">{d.hero.body1}</p>
               <p className="mt-3 text-[15px] leading-relaxed text-neutral-700 sm:text-[16px]">{d.hero.body2}</p>
-              <nav className="mt-6 flex flex-wrap gap-2" aria-label={d.hero.featuresLabel}>
-                {DEMO_HERO_FEATURES.map((feature, index) => {
-                  const selected = index === featureIndex;
-                  return (
-                    <a
-                      key={feature.id}
-                      href={feature.href}
-                      data-testid={`demo-hero-feature-${feature.id}`}
-                      aria-current={selected ? "true" : undefined}
-                      onMouseEnter={() => {
-                        setFeatureIndex(index);
-                        setFeatureHeld(true);
-                      }}
-                      onFocus={() => {
-                        setFeatureIndex(index);
-                        setFeatureHeld(true);
-                      }}
-                      onClick={() => setFeatureIndex(index)}
-                      className={`inline-flex h-9 items-center rounded-full px-3.5 text-[13px] font-semibold ring-1 transition ${
-                        selected
-                          ? "bg-neutral-950 text-white ring-neutral-950"
-                          : "bg-white text-neutral-800 ring-neutral-300 hover:ring-neutral-800"
-                      }`}
-                    >
-                      {d.hero.features[feature.id as DemoHeroFeatureId]}
-                    </a>
-                  );
-                })}
-              </nav>
             </div>
           </div>
         </section>

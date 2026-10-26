@@ -13,22 +13,18 @@ export const DEMO_ADDRESS_INPUT_NAME = "demo-location-street";
 export const DEMO_BUILD_QUERY = "build";
 
 /**
- * Claimed Mapsite feature screens (personal details burned out of the files).
- * Each chip switches to that screen and links to a public page — never a
- * private dashboard.
+ * One sample PIN for the hero display map. Same Canada preview point the
+ * builder map uses (Niagara Falls region). Not a street address.
  */
-export const DEMO_HERO_FEATURES = [
-  { id: "mapsite", src: "/talispros/demo-slides/feature-mapsite.webp", href: "/talisu/mkts" },
-  { id: "ebooks", src: "/talispros/demo-slides/feature-ebooks.webp", href: "/talisbooks" },
-  { id: "bookshelf", src: "/talispros/demo-slides/feature-bookshelf.webp", href: "/catalogue/bookshelf" },
-  { id: "knowledge", src: "/talispros/demo-slides/feature-knowledge.webp", href: "/talisu/kb" },
-  { id: "pins", src: "/talispros/demo-slides/feature-pins.webp", href: "/talisu#faq" },
-] as const;
+export const DEMO_DISPLAY_PIN = {
+  id: "demo-display-pin",
+  latitude: BUILD_MAPSITE_PREVIEW_LOCATION.latitude,
+  longitude: BUILD_MAPSITE_PREVIEW_LOCATION.longitude,
+  zoom: BUILD_MAPSITE_PREVIEW_LOCATION.mapZoom,
+} as const;
 
-export type DemoHeroFeatureId = (typeof DEMO_HERO_FEATURES)[number]["id"];
-
-/** Live Mapsite screenshots, in feature order. */
-export const DEMO_HERO_SLIDES = DEMO_HERO_FEATURES.map((feature) => feature.src);
+/** Actions a Mapsite PIN card shows. Display only — they do not navigate. */
+export const DEMO_PIN_CARD_ACTIONS = ["URL 1", "URL 2", "TEB™", "TTV™"] as const;
 
 /** The builder card starts open when the URL already carries build/address/PIN state. */
 export function demoBuilderStartsOpen(params: Record<string, string | string[] | undefined>): boolean {
