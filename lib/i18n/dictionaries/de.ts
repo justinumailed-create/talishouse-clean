@@ -929,6 +929,20 @@ export const de: Dictionary = {
     next: "Weiter",
     rootShelf: "Root-Regal",
     derivativeShelf: "Derivative-Regal",
+    lock: {
+      register: "Registrieren, um das Bücherregal freizuschalten",
+      haveCode: "Haben Sie bereits einen FAST Code?",
+      fieldLabel: "FAST Code",
+      placeholder: "FAST Code eingeben",
+      submit: "Bücherregal öffnen",
+      opening: "Wird geöffnet…",
+      errEmpty: "Bitte geben Sie Ihren FAST Code ein.",
+      errFormat: "Nur Buchstaben, Ziffern oder Bindestriche verwenden.",
+      errNotFound: "Dieser FAST Code ist ungültig. Bitte prüfen und erneut versuchen.",
+      errFailed: "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
+      lockedAria: "Gesperrtes Bücherregal",
+      readOnly: "Dieses Bücherregal ist schreibgeschützt, bis die Registrierung abgeschlossen ist.",
+    },
   },
 
   catalogueUi: {

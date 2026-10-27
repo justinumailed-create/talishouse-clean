@@ -33,10 +33,10 @@ describe("TalisU™ FAQ essay Talisbooks™", () => {
         expect(book.decorative).toBeFalsy();
         expect(book.coverImageUrl).toContain(`/${locale}/cover-thumb.jpg`);
       }
-      // Right shelf keeps its 10 decorative fillers.
+      // Locked right shelf: 4 rows × 10 dummy covers.
       expect(
         bookshelf.books.filter((book) => book.id.startsWith("decorative-shelf-")),
-      ).toHaveLength(10);
+      ).toHaveLength(40);
       expect(bookshelf.books.some((book) => book.id.startsWith("left-hero-dummy"))).toBe(
         false,
       );

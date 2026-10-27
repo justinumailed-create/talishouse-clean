@@ -15,6 +15,8 @@ import {
   bookshelfSeoCopy,
 } from "@/lib/talispros/mapsite-og-image";
 import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
+import BookshelfUnregisteredNotice from "@/components/talisbooks/library/BookshelfUnregisteredNotice";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +63,15 @@ export default async function FastCodeBookshelfPage({
   const { fastCode } = await params;
   const code = fastCode.trim();
   // Same owner/admin gate as Mapsite edit + library ebook actions — no parallel auth.
+  // Owner tools need a registered (activation-paid) FAST Code — canManageMapSiteEbooks
+  // already requires payment for owners; admins/agents keep their access.
   const canManageEbook = code ? await canManageMapSiteEbooks(code) : false;
+  // Registration = the same completed activation payment the Mapsite gate uses.
+  // ALLPINS is the platform shelf and never shows a Register CTA here.
+  const registered =
+    canManageEbook || !code || isAllPinsFastCode(code)
+      ? true
+      : await hasCompletedMapSiteActivationPayment({ fastCode: code });
 
   const bookshelf = canManageEbook
     ? await getTalisBooksBookshelf({ fastCode: code || null })
@@ -107,6 +117,8 @@ export default async function FastCodeBookshelfPage({
               </Link>
             ) : null}
           </div>
+        ) : !registered ? (
+          <BookshelfUnregisteredNotice />
         ) : null
       }
     />

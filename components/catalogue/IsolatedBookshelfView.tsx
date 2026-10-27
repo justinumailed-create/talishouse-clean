@@ -5,6 +5,11 @@ import type { Locale } from "@/lib/i18n/config";
 import { faqEssayLibraryBooks } from "@/lib/talisbooks/library/faq-essay-books";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
 import { TalisBooksViewerOriginProvider } from "@/components/talisbooks/library/ViewerOriginContext";
+import BookshelfUnlockPanel from "@/components/talisbooks/library/BookshelfUnlockPanel";
+import {
+  LOCKED_SHELF_DUMMY_COUNT,
+  lockedShelfDummyCover,
+} from "@/lib/talisbooks/bookshelf/lock";
 import { VIEWER_ORIGIN_BOOKSHELF } from "@/lib/talisbooks/viewer/origin";
 import type { IsolatedBookshelfBook } from "@/lib/talisbooks/isolated-bookshelf-service";
 import { ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION } from "@/lib/talisbooks/isolated-bookshelf";
@@ -179,31 +184,21 @@ function leftHeroFaqBooks(locale: Locale): TalisBooksLibraryBook[] {
   );
 }
 
-/** Right-shelf decorative fillers (unpinned) — packed at 10 per row. */
-function decorativeShelfFillers(count = 10): TalisBooksLibraryBook[] {
-  const titles = [
-    "Summit Residences",
-    "Garden Court",
-    "Northshore Collection",
-    "Cedar Ridge",
-    "Market Square",
-    "Vista Heights",
-    "Riverbend Homes",
-    "Canal District",
-    "Oak Hollow",
-    "Bayview Commons",
-  ];
-  return titles.slice(0, count).map((title, index) => ({
+/**
+ * Locked right shelf: dummy covers only (no links, no titles shown) —
+ * 4 rows × 10 behind the blur. Real catalogue books stay off the locked shelf.
+ */
+export function lockedShelfDummyBooks(
+  count = LOCKED_SHELF_DUMMY_COUNT,
+): TalisBooksLibraryBook[] {
+  return Array.from({ length: count }, (_, index) => ({
     id: `decorative-shelf-${index + 1}`,
     slug: `decorative-shelf-${index + 1}`,
-    title,
+    title: "",
     subtitle: "",
     coverImageUrl: null,
     coverTemplateId: null,
-    coverGradient:
-      TALISBOOKS_LIBRARY_SPINE_PALETTES[
-        index % TALISBOOKS_LIBRARY_SPINE_PALETTES.length
-      ]!,
+    coverGradient: lockedShelfDummyCover(index),
     publishStatus: "published" as const,
     publishedAt: "2019-01-01T00:00:00.000Z",
     createdAt: "2019-01-01T00:00:00.000Z",
@@ -247,18 +242,14 @@ export function buildIsolatedAllPinsBookshelf(
       // Left hero-5 (newest-mode): ALLPINS Tokenization as primary hero + 4 TalisU™ FAQ books.
       const tokenizationSource =
         withoutDup.find(isTokenizationBook) ?? null;
-      const rightCatalog = withoutDup.filter(
-        (book) => !tokenizationSource || book.id !== tokenizationSource.id,
-      );
       const tokenization = tokenizationLibraryEntry(
         tokenizationSource,
         "2099-12-31T23:59:59.000Z",
       );
       const leftFaqBooks = leftHeroFaqBooks(locale);
-      // Right niche: remaining real books + decorative fillers (10 per row).
+      // Right niche: locked — dummy covers only (blurred, Register / FAST Code unlock).
       return [
-        ...rightCatalog,
-        ...decorativeShelfFillers(10),
+        ...lockedShelfDummyBooks(),
         ...leftFaqBooks,
         tokenization,
       ];
@@ -297,6 +288,7 @@ export default function IsolatedBookshelfView({
           compactHeader
           secondaryBackHref={fromAllPins ? backHref : undefined}
           secondaryBackLabel="Back to ALL-PINs"
+          generalLock={<BookshelfUnlockPanel />}
         />
       </TalisBooksViewerOriginProvider>
     </div>

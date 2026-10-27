@@ -49,6 +49,11 @@ interface TalisBooksLibraryShellProps {
   /** Optional second back control (e.g. Back to ALL-PINs). */
   secondaryBackHref?: string;
   secondaryBackLabel?: string;
+  /**
+   * Lock the right (general) shelf: every row shows (no paging), blurred and
+   * inert, with this node centred over it (e.g. Register / FAST Code unlock).
+   */
+  generalLock?: ReactNode;
 }
 
 function chunkRows<T>(items: T[], columns: number): T[][] {
@@ -124,7 +129,9 @@ export default function TalisBooksLibraryShell({
   compactHeader = false,
   secondaryBackHref: _secondaryBackHref,
   secondaryBackLabel: _secondaryBackLabel,
+  generalLock,
 }: TalisBooksLibraryShellProps) {
+  const generalLocked = Boolean(generalLock);
   const bs = useT().bookshelf;
   const router = useRouter();
   const ownerOrdered = Boolean(bookshelf.ownerOrdered);
@@ -222,10 +229,13 @@ export default function TalisBooksLibraryShell({
     Math.ceil(generalRowsAll.length / TALISBOOKS_LIBRARY_GENERAL_ROWS),
   );
   const generalPage = Math.min(page, generalPageCount);
-  const generalRows = generalRowsAll.slice(
-    (generalPage - 1) * TALISBOOKS_LIBRARY_GENERAL_ROWS,
-    generalPage * TALISBOOKS_LIBRARY_GENERAL_ROWS,
-  );
+  // A locked shelf shows every dummy row at once behind the blur — no pager.
+  const generalRows = generalLocked
+    ? generalRowsAll
+    : generalRowsAll.slice(
+        (generalPage - 1) * TALISBOOKS_LIBRARY_GENERAL_ROWS,
+        generalPage * TALISBOOKS_LIBRARY_GENERAL_ROWS,
+      );
   const generalTotal = sortedGeneral.length + mainAnchors.length;
 
   const stocked = Math.min(visibleBooks.length, TALISBOOKS_LIBRARY_SHELF_CAPACITY);
@@ -440,13 +450,28 @@ export default function TalisBooksLibraryShell({
           <div className="talisbooks-library__mullion" aria-hidden="true" />
 
           <section
-            className="talisbooks-library__niche talisbooks-library__niche--general"
-            aria-label={bs.generalAria}
+            className={[
+              "talisbooks-library__niche talisbooks-library__niche--general",
+              generalLocked ? "talisbooks-library__niche--locked" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            aria-label={generalLocked ? bs.lock.lockedAria : bs.generalAria}
+            data-locked={generalLocked ? "true" : undefined}
           >
-            <div className="talisbooks-library__niche-inner">
+            {generalLocked ? (
+              <div className="talisbooks-library__lock-overlay" data-testid="bookshelf-lock-overlay">
+                {generalLock}
+              </div>
+            ) : null}
+            <div
+              className="talisbooks-library__niche-inner"
+              aria-hidden={generalLocked ? true : undefined}
+              inert={generalLocked ? true : undefined}
+            >
               <div className="talisbooks-library__niche-header talisbooks-library__niche-header--end">
                 <div className="talisbooks-library__sort-pills">
-                  {ownerOrdered ? (
+                  {!generalLocked && ownerOrdered ? (
                     <button
                       type="button"
                       className={[
@@ -461,7 +486,7 @@ export default function TalisBooksLibraryShell({
                       {bs.savedOrder}
                     </button>
                   ) : null}
-                  {TALISBOOKS_LIBRARY_SORT_OPTIONS.filter(
+                  {(generalLocked ? [] : TALISBOOKS_LIBRARY_SORT_OPTIONS).filter(
                     (option) =>
                       option.value === "title_asc" || option.value === "published_desc",
                   ).map((option) => (
@@ -515,6 +540,7 @@ export default function TalisBooksLibraryShell({
                 )}
               </div>
 
+              {generalLocked ? null : (
               <div className="talisbooks-library__pager">
                 <span>
                   {fmt(bs.pageCount, {
@@ -544,6 +570,7 @@ export default function TalisBooksLibraryShell({
                   </div>
                 ) : null}
               </div>
+              )}
             </div>
           </section>
         </div>

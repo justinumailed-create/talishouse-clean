@@ -657,6 +657,20 @@ export const en = {
     next: "Next",
     rootShelf: "Root shelf",
     derivativeShelf: "Derivative shelf",
+    lock: {
+      register: "Register to Unlock Bookshelf",
+      haveCode: "Already have a FAST Code?",
+      fieldLabel: "FAST Code",
+      placeholder: "Enter your FAST Code",
+      submit: "Open Bookshelf",
+      opening: "Opening…",
+      errEmpty: "Please enter your FAST Code.",
+      errFormat: "Use letters, numbers or hyphens only.",
+      errNotFound: "That FAST Code isn't valid. Check it and try again.",
+      errFailed: "Something went wrong. Please try again.",
+      lockedAria: "Locked bookshelf",
+      readOnly: "This bookshelf is read-only until registration is complete.",
+    },
   },
 
   catalogueUi: {
