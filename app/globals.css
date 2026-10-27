@@ -1280,6 +1280,20 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 
+.talisbooks-viewer__header--with-back {
+  justify-content: flex-start;
+}
+
+.talisbooks-viewer__header--with-back .talisbooks-viewer__header-actions {
+  margin-left: auto;
+}
+
+.talisbooks-viewer__back--bookshelf {
+  gap: 0.4rem;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .talisbooks-viewer__claim {
   position: absolute;
   right: max(0.75rem, env(safe-area-inset-right));

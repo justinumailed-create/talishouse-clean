@@ -5,6 +5,8 @@ import { X } from "lucide-react";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import type { TalisBooksLibraryBook } from "@/lib/talisbooks/library/types";
+import { viewerHrefWithOrigin } from "@/lib/talisbooks/viewer/origin";
+import { useTalisBooksViewerOrigin } from "@/components/talisbooks/library/ViewerOriginContext";
 
 export type TalisBooksShelfBookSize = "hero" | "featured" | "compact";
 
@@ -28,7 +30,11 @@ export default function TalisBooksStandingBook({
   deleting = false,
   onDelete,
 }: TalisBooksStandingBookProps) {
-  const href = `${TALISBOOKS_ROUTES.VIEWER}/${book.slug}`;
+  const viewerOrigin = useTalisBooksViewerOrigin();
+  const href = viewerHrefWithOrigin(
+    `${TALISBOOKS_ROUTES.VIEWER}/${book.slug}`,
+    viewerOrigin,
+  );
   const displayTitle = displayShelfBookTitle(book.title);
   const openLabel = displayTitle
     ? `Open ${displayTitle}${book.subtitle ? ` — ${book.subtitle}` : ""}`

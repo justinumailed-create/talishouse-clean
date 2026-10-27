@@ -865,6 +865,7 @@ export const de: Dictionary = {
     home: "Startseite",
     product: "Produkt",
     downloadPdf: "PDF herunterladen",
+    backToBookshelf: "Zurück zum Bücherregal",
     markets: "Märkte",
     globalAdmin: "Globaler Admin",
     portraitStage: "Hochformat",

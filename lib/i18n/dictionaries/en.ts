@@ -593,6 +593,7 @@ export const en = {
     home: "Home",
     product: "Product",
     downloadPdf: "Download PDF",
+    backToBookshelf: "Back to Bookshelf",
     markets: "Markets",
     globalAdmin: "Global Admin",
     portraitStage: "Portrait stage",

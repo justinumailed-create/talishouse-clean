@@ -4,6 +4,8 @@ import { useLocale } from "@/lib/i18n/client";
 import type { Locale } from "@/lib/i18n/config";
 import { faqEssayLibraryBooks } from "@/lib/talisbooks/library/faq-essay-books";
 import TalisBooksLibraryShell from "@/components/talisbooks/library/TalisBooksLibraryShell";
+import { TalisBooksViewerOriginProvider } from "@/components/talisbooks/library/ViewerOriginContext";
+import { VIEWER_ORIGIN_BOOKSHELF } from "@/lib/talisbooks/viewer/origin";
 import type { IsolatedBookshelfBook } from "@/lib/talisbooks/isolated-bookshelf-service";
 import { ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION } from "@/lib/talisbooks/isolated-bookshelf";
 import { allPinsClaimedHref } from "@/lib/talispros/allpins-mapsite-ui";
@@ -287,13 +289,16 @@ export default function IsolatedBookshelfView({
 
   return (
     <div data-testid="isolated-bookshelf" className="relative min-h-dvh">
-      <TalisBooksLibraryShell
-        bookshelf={bookshelf}
-        backHref={backHref}
-        compactHeader
-        secondaryBackHref={fromAllPins ? backHref : undefined}
-        secondaryBackLabel="Back to ALL-PINs"
-      />
+      {/* Viewer links from this shelf carry ?from=bookshelf (no Claim / Assign, Back to Bookshelf). */}
+      <TalisBooksViewerOriginProvider value={VIEWER_ORIGIN_BOOKSHELF}>
+        <TalisBooksLibraryShell
+          bookshelf={bookshelf}
+          backHref={backHref}
+          compactHeader
+          secondaryBackHref={fromAllPins ? backHref : undefined}
+          secondaryBackLabel="Back to ALL-PINs"
+        />
+      </TalisBooksViewerOriginProvider>
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useT } from "@/lib/i18n/client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { RotateCw } from "lucide-react";
+import { ArrowLeft, RotateCw } from "lucide-react";
 import {
   orderedViewerImageUrls,
   warmViewerImages,
@@ -33,6 +33,7 @@ import {
   type TalisBooksViewerViewMode,
 } from "@/lib/talisbooks/viewer";
 import DemoClaimMarketButton from "@/components/talispros/mapsite/DemoClaimMarketButton";
+import { CATALOGUE_BOOKSHELF_PATH } from "@/lib/talisbooks/viewer/origin";
 
 function TalisBooksViewerClaimCta({ mapsiteId }: { mapsiteId: string }) {
   return (
@@ -46,6 +47,8 @@ interface TalisBooksViewerShellProps {
   book: TalisBooksViewerBook;
   /** Reserved for future audio narration — unused in playback today. */
   narration?: TalisBooksNarrationController | null;
+  /** Opened from the public catalogue Bookshelf: Back to Bookshelf, no Claim / Assign CTA. */
+  fromBookshelf?: boolean;
 }
 
 function withCoverBranding(book: TalisBooksViewerBook): TalisBooksViewerBook {
@@ -58,6 +61,7 @@ function withCoverBranding(book: TalisBooksViewerBook): TalisBooksViewerBook {
 export default function TalisBooksViewerShell({
   book: initialBook,
   narration = null,
+  fromBookshelf = false,
 }: TalisBooksViewerShellProps) {
   const tv = useT().viewer;
   const narrationController = narration ?? createEmptyNarrationController();
@@ -199,7 +203,7 @@ export default function TalisBooksViewerShell({
       <div className="talisbooks-viewer">
         <p className="talisbooks-viewer__empty">This book has no pages yet.</p>
         {/* No stray SamCart Register on the ebook page — Register lives in the blue navbar. */}
-        {talisBooksViewerCta(book) === "claim" ? (
+        {!fromBookshelf && talisBooksViewerCta(book) === "claim" ? (
           <TalisBooksViewerClaimCta
             mapsiteId={resolveClaimMapsiteId(book.mapsiteId)}
           />
@@ -310,7 +314,24 @@ export default function TalisBooksViewerShell({
         .filter(Boolean)
         .join(" ")}
     >
-      <header className="talisbooks-viewer__header">
+      <header
+        className={[
+          "talisbooks-viewer__header",
+          fromBookshelf ? "talisbooks-viewer__header--with-back" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {fromBookshelf ? (
+          <Link
+            href={CATALOGUE_BOOKSHELF_PATH}
+            className="talisbooks-viewer__back talisbooks-viewer__back--bookshelf"
+            data-testid="viewer-back-to-bookshelf"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <span>{tv.backToBookshelf}</span>
+          </Link>
+        ) : null}
         <div className="talisbooks-viewer__heading">
           <p className="talisbooks-viewer__eyebrow">
             {isMagazine
@@ -422,7 +443,7 @@ export default function TalisBooksViewerShell({
         </div>
       </div>
       {/* Issued-FAST ebooks: no stray SamCart Register (navbar dropdown covers it). */}
-      {surfaceCta === "claim" ? (
+      {!fromBookshelf && surfaceCta === "claim" ? (
         <TalisBooksViewerClaimCta mapsiteId={claimMapsiteId} />
       ) : null}
     </div>

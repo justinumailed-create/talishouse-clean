@@ -13,9 +13,11 @@ import {
   viewerRealtimeSeoCopy,
 } from "@/lib/talispros/mapsite-og-image";
 import { createMetadata } from "@/lib/seo";
+import { isBookshelfViewerOrigin } from "@/lib/talisbooks/viewer/origin";
 
 interface TalisBooksViewerSlugPageProps {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ from?: string | string[] }>;
 }
 
 export async function generateMetadata({
@@ -90,13 +92,16 @@ export async function generateMetadata({
 
 export default async function TalisBooksViewerSlugPage({
   params,
+  searchParams,
 }: TalisBooksViewerSlugPageProps) {
   const { slug } = await params;
+  const query = searchParams ? await searchParams : {};
+  const fromBookshelf = isBookshelfViewerOrigin(query.from);
   const book = await resolveViewerBookBySlug(slug, await getLocale());
 
   if (!book) {
     notFound();
   }
 
-  return <TalisBooksViewerShell book={book} />;
+  return <TalisBooksViewerShell book={book} fromBookshelf={fromBookshelf} />;
 }
