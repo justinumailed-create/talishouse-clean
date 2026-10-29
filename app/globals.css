@@ -5459,7 +5459,8 @@ body.mapsite-gallery-open [data-paypal-button] {
    frame width ÷ spread aspect (3704×2400 ≈ 1.543) + the compact header and
    the hint strip. Phones read one portrait page (926×1200 ≈ 0.772). */
 .tsplits-book {
-  height: calc((min(100vw - 3rem, 1400px) - 1rem) / 1.543 + 5.25rem);
+  /* Spread height, but never taller than the window under the navbar. */
+  height: min(calc((min(100vw - 3rem, 1400px) - 1rem) / 1.543 + 5.25rem), calc(100dvh - 6.5rem));
   min-height: 22rem;
 }
 @media (max-width: 640px) {

@@ -28,7 +28,12 @@ export default async function TsplitsPage() {
       data-testid="tsplits-page"
       className="tsplits-page talis-working-bg min-h-dvh px-3 pb-16 pt-4 sm:px-6 sm:pt-6"
     >
-      <div data-testid="tsplits-frame" className="mx-auto w-full max-w-[1400px]">
+      {/* Inline max-width: the global `* { max-width: 100% }` reset is unlayered and beats the Tailwind utility. */}
+      <div
+        data-testid="tsplits-frame"
+        className="mx-auto w-full max-w-[1400px]"
+        style={{ maxWidth: 1400 }}
+      >
         <div
           data-testid="tsplits-book"
           className="tsplits-book overflow-hidden rounded-[20px] shadow-[0_1px_2px_rgba(0,0,0,0.05),0_18px_50px_rgba(0,0,0,0.10)]"
