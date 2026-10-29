@@ -6,7 +6,6 @@
  * nur ihre Erklärungen werden übersetzt.
  */
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { TSPLITS_DE } from "@/lib/talisu/tsplits-content";
 import {
   TALISU_ENGAGE,
   TALISU_REGISTER,
@@ -1178,6 +1177,4 @@ export const de: Dictionary = {
         "Thorsten P, Teamleiter für Fulfilment-Optionen, mit dem Talispros™-Baumlogo: Beauftragen Sie Thorsten P und sein Fulfilment-Team für Ihre Projektvision",
     },
   },
-  /** /talisu/tsplits — TSPLITS™ – von der Vision zur Umsetzung. */
-  tsplits: TSPLITS_DE,
 };

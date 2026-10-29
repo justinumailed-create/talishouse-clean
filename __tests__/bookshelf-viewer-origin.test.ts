@@ -53,8 +53,9 @@ describe("Bookshelf-opened viewer chrome", () => {
 
   it("viewer hides Claim / Assign and shows Back to Bookshelf only when fromBookshelf", () => {
     const shell = read("components/talisbooks/viewer/TalisBooksViewerShell.tsx");
-    expect(shell).toContain('!fromBookshelf && surfaceCta === "claim"');
-    expect(shell).toContain('!fromBookshelf && talisBooksViewerCta(book) === "claim"');
+    expect(shell).toContain("const showClaim = !fromBookshelf && !hideClaim;");
+    expect(shell).toContain('showClaim && surfaceCta === "claim"');
+    expect(shell).toContain('showClaim && talisBooksViewerCta(book) === "claim"');
     expect(shell).toContain("{fromBookshelf ? (");
     expect(shell).toContain("href={CATALOGUE_BOOKSHELF_PATH}");
     const page = read("app/talisbooks/viewer/[slug]/page.tsx");

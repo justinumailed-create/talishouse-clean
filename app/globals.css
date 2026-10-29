@@ -5349,14 +5349,6 @@ body.mapsite-gallery-open [data-paypal-button] {
   margin-bottom: revert-layer;
 }
 
-/* /talisu/tsplits: same escape hatch as .pmc-page, plus font-size so the
-   mobile h1/h2 defaults don't override the page's Tailwind sizes. */
-.tsplits-page :is(h1, h2, h3, p) {
-  color: revert-layer;
-  margin-bottom: revert-layer;
-  font-size: revert-layer;
-}
-
 /* Beige "working page" surface (Catalogue + Mapsites) — Ralf, Oct 17 2026.
    TalisU pages stay white. Same gradient as .product-flipbook. */
 .talis-working-bg {
@@ -5459,5 +5451,19 @@ body.mapsite-gallery-open [data-paypal-button] {
   .talis-adviser__photo {
     height: auto;
     min-height: 100%;
+  }
+}
+
+/* /talisu/tsplits — the TSPLITS™ Talisbook™ inside the 1400 px working frame.
+   The viewer is height-driven (100%), so give it the open spread's height:
+   frame width ÷ spread aspect (3704×2400 ≈ 1.543) + the compact header and
+   the hint strip. Phones read one portrait page (926×1200 ≈ 0.772). */
+.tsplits-book {
+  height: calc((min(100vw - 3rem, 1400px) - 1rem) / 1.543 + 5.25rem);
+  min-height: 22rem;
+}
+@media (max-width: 640px) {
+  .tsplits-book {
+    height: calc((100vw - 1.5rem - 1rem) / 0.772 + 7.5rem);
   }
 }

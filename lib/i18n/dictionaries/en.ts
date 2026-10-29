@@ -6,7 +6,6 @@
  * `de.ts` must provide the same shape — enforced by the `Dictionary` type and
  * __tests__/i18n-dictionary-parity.test.ts.
  */
-import { TSPLITS_EN } from "@/lib/talisu/tsplits-content";
 import { PMC_MEDIA_DIRECTORY_INTRO, PMC_SYNDICATION_NOTE } from "@/lib/talisu/pmc-pitch";
 import {
   TALISU_ENGAGE,
@@ -914,6 +913,4 @@ export const en = {
         "Thorsten P, Team Leader for fulfilment options, with the Talispros™ tree logo: Engage Thorsten P and his Fulfilment Team to bring your project vision to life",
     },
   },
-  /** /talisu/tsplits — TSPLITS™ – from Vision to Implementation. */
-  tsplits: TSPLITS_EN,
 } as const;

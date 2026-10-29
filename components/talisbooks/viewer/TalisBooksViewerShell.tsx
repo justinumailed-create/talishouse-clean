@@ -49,6 +49,12 @@ interface TalisBooksViewerShellProps {
   narration?: TalisBooksNarrationController | null;
   /** Opened from the public catalogue Bookshelf: Back to Bookshelf, no Claim / Assign CTA. */
   fromBookshelf?: boolean;
+  /** Embedded reader (e.g. /talisu/tsplits): no Claim / Assign CTA, no Back to Bookshelf. */
+  hideClaim?: boolean;
+  /** ArrowLeft / ArrowRight turn pages while the reader is on screen. */
+  keyboardNav?: boolean;
+  /** Phones (≤ 640 px wide) open in single-page view instead of spreads. */
+  singleOnMobile?: boolean;
 }
 
 function withCoverBranding(book: TalisBooksViewerBook): TalisBooksViewerBook {
@@ -62,7 +68,11 @@ export default function TalisBooksViewerShell({
   book: initialBook,
   narration = null,
   fromBookshelf = false,
+  hideClaim = false,
+  keyboardNav = false,
+  singleOnMobile = false,
 }: TalisBooksViewerShellProps) {
+  const showClaim = !fromBookshelf && !hideClaim;
   const tv = useT().viewer;
   const narrationController = narration ?? createEmptyNarrationController();
 
@@ -174,6 +184,45 @@ export default function TalisBooksViewerShell({
     goToRef.current = goTo;
   }, [goTo]);
 
+  // Latest nav handlers for window-level listeners (keyboard, media query).
+  const navHandlersRef = useRef<{
+    next: () => void;
+    previous: () => void;
+    setMode: (mode: TalisBooksViewerViewMode) => void;
+  }>({ next: () => {}, previous: () => {}, setMode: () => {} });
+
+  useEffect(() => {
+    if (!keyboardNav) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+      const target = event.target as HTMLElement | null;
+      if (
+        target &&
+        (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))
+      ) {
+        return;
+      }
+      if (event.key === "ArrowRight") {
+        event.preventDefault();
+        navHandlersRef.current.next();
+      } else if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        navHandlersRef.current.previous();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [keyboardNav]);
+
+  useEffect(() => {
+    if (!singleOnMobile || typeof window.matchMedia !== "function") return;
+    const query = window.matchMedia("(max-width: 640px)");
+    const apply = () => navHandlersRef.current.setMode(query.matches ? "single" : "spread");
+    apply();
+    query.addEventListener("change", apply);
+    return () => query.removeEventListener("change", apply);
+  }, [singleOnMobile]);
+
   const syncStagePause = () => {
     setPausedByHover(stageHoverRef.current || flippingRef.current);
   };
@@ -203,7 +252,7 @@ export default function TalisBooksViewerShell({
       <div className="talisbooks-viewer">
         <p className="talisbooks-viewer__empty">This book has no pages yet.</p>
         {/* No stray SamCart Register on the ebook page — Register lives in the blue navbar. */}
-        {!fromBookshelf && talisBooksViewerCta(book) === "claim" ? (
+        {showClaim && talisBooksViewerCta(book) === "claim" ? (
           <TalisBooksViewerClaimCta
             mapsiteId={resolveClaimMapsiteId(book.mapsiteId)}
           />
@@ -285,6 +334,12 @@ export default function TalisBooksViewerShell({
     setDirection(-1);
     setAutoPlaying(false);
     goPrevious();
+  };
+
+  navHandlersRef.current = {
+    next: handleNext,
+    previous: handlePrevious,
+    setMode: handleViewModeChange,
   };
 
   const handleToggleAutoplay = () => {
@@ -443,7 +498,7 @@ export default function TalisBooksViewerShell({
         </div>
       </div>
       {/* Issued-FAST ebooks: no stray SamCart Register (navbar dropdown covers it). */}
-      {!fromBookshelf && surfaceCta === "claim" ? (
+      {showClaim && surfaceCta === "claim" ? (
         <TalisBooksViewerClaimCta mapsiteId={claimMapsiteId} />
       ) : null}
     </div>
