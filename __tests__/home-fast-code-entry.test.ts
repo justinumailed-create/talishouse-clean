@@ -96,8 +96,10 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(actions).toContain('return { success: true, href: "/" }');
   });
 
-  it("points Build Demo at /talisu/mkts", () => {
-    expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/talisu/mkts");
+  it("points Claim Market at the Taliswebs Webster page", () => {
+    expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe(
+      "https://taliswebs-us.vercel.app/talisu/adviser",
+    );
   });
 
   it("uses ownership models over photo on homepage right rail (not Markets map)", () => {
