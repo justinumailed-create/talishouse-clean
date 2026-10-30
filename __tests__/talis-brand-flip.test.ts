@@ -19,7 +19,7 @@ describe("Talispros™ static brand mark (no flip)", () => {
       resolve("components/talisu/TalisBrandMark.tsx"),
       "utf8",
     );
-    expect(mark).toContain("Talispros™");
+    expect(mark).toContain("TSPLITS™");
     expect(mark).not.toContain("TalisU™");
     expect(mark).not.toContain("setInterval");
     expect(mark).not.toContain("setTimeout");

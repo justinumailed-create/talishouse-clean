@@ -36,6 +36,7 @@ import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/tali
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { personalHomePath } from "@/lib/talispros/personal-home";
+import { loadPersonalHomeOwnerPill } from "@/lib/talispros/personal-home-page";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, CHECKOUT_SESSION_QUERY, parseCheckoutSessionId, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import {
@@ -268,6 +269,9 @@ export default async function ClaimedMapSiteByAccountTypePage({
     !showActivatePayment ||
     Boolean(await getSignedContractForFastCode(mapsite.fast_code || fastCode));
 
+  // Account holder pill in the navbar: the signed-in owner only.
+  const ownerPill = await loadPersonalHomeOwnerPill(fastCode, await getLocale());
+
   return (
     <>
     <MapSiteApplication
@@ -299,6 +303,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       personalHomeNav={{
         homeHref: personalHomePath(fastCode),
         mapsiteHref: `${MAPSITE_APP_PATH}/${accountType}/${fastCode.toLowerCase()}`,
+        owner: ownerPill,
       }}
     />
     <MapSitePartnerButtons partners={partnerTargets} />

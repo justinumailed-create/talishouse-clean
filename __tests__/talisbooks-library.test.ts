@@ -391,7 +391,7 @@ describe("Talisbooks™ library admin delete wiring", () => {
       resolve("app/talisbooks/fast/[fastCode]/page.tsx"),
       "utf8",
     );
-    expect(fastPage).toContain("buildClaimedMapSitePath");
+    expect(fastPage).toContain("personalHomePath(fastCode)");
     expect(fastPage).not.toContain("mapsiteBackFromScheduleHref");
     expect(standing).toContain("talisbooks-standing-book__delete");
     expect(standing).toContain("displayShelfBookTitle");

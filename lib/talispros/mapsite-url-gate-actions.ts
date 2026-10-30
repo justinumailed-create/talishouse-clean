@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { personalHomePath } from "@/lib/talispros/personal-home";
 import { requireMapSiteEditAccess } from "@/lib/mapsite-edit-auth";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
@@ -16,10 +17,6 @@ import {
   resolveMapsiteListingUrl,
   urlGateExpiresAt,
 } from "@/lib/talispros/mapsite-url-gate";
-import {
-  buildClaimedMapSitePath,
-  claimedMapSiteSegmentForAccountOrPlan,
-} from "@/lib/talispros/mapsite-state";
 import {
   generateUrlGatePin,
   hashUrlGatePin,
@@ -196,11 +193,8 @@ function resolveUrlGateUnlockHref(mapsite: {
   const dest = resolveMapsiteListingUrl(mapsite.fastCode, mapsite.brokerUrl);
   if (!dest) return null;
   if (isMapsiteRegisterPathStandIn(dest)) {
-    const segment = claimedMapSiteSegmentForAccountOrPlan(mapsite.accountType);
-    return buildClaimedMapSitePath({
-      fastCode: mapsite.fastCode,
-      accountType: segment,
-    });
+    // FAST Code entry opens the personal home page first, never the Mapsite.
+    return personalHomePath(mapsite.fastCode);
   }
   return dest;
 }

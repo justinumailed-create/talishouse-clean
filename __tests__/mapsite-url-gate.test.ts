@@ -283,7 +283,9 @@ describe("Mapsite URL gate", () => {
       "utf8",
     );
     expect(actions).toContain("isMapsiteRegisterPathStandIn");
-    expect(actions).toContain("buildClaimedMapSitePath");
+    // FAST Code entry from the URL gate opens the personal home page first.
+    expect(actions).toContain("personalHomePath(mapsite.fastCode)");
+    expect(actions).not.toContain("buildClaimedMapSitePath");
     expect(actions).toContain("resolveUrlGateUnlockHref");
   });
 

@@ -1,11 +1,12 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useT } from "@/lib/i18n/client";
 import { optimizeImageFileForUpload } from "@/lib/media/client-optimize-upload-image";
 import {
   PERSONAL_HOME_LIMITS,
+  PERSONAL_HOME_OPEN_EDITOR_EVENT,
   type PersonalHomeButton,
   type PersonalHomeContent,
   type PersonalHomeDefaults,
@@ -20,6 +21,8 @@ type PersonalHomeEditorProps = {
   fastCode: string;
   saved: PersonalHomeContent;
   defaults: PersonalHomeDefaults;
+  /** Open the editor on arrival (navbar account pill from the Mapsite). */
+  initialOpen?: boolean;
 };
 
 type ButtonDraft = { label: string; href: string };
@@ -41,12 +44,19 @@ export default function PersonalHomeEditor({
   fastCode,
   saved,
   defaults,
+  initialOpen = false,
 }: PersonalHomeEditorProps) {
   const { personalHome } = useT();
   const t = personalHome.edit;
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initialOpen);
+
+  useEffect(() => {
+    const openEditor = () => setOpen(true);
+    window.addEventListener(PERSONAL_HOME_OPEN_EDITOR_EVENT, openEditor);
+    return () => window.removeEventListener(PERSONAL_HOME_OPEN_EDITOR_EVENT, openEditor);
+  }, []);
   const [pending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(saved.imageUrl);

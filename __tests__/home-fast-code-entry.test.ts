@@ -77,7 +77,7 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(gate).toContain("t.home.openAccount");
     expect(en.home.openAccount).toBe("Open your Account*");
     expect(gate).toContain("t.home.systemDemo");
-    expect(en.home.systemDemo).toBe("Build Demo");
+    expect(en.home.systemDemo).toBe("Claim Market");
     expect(gate).toContain("TALISPROS_HOME_SYSTEM_DEMO_HREF");
     expect(gate).toContain("aria-expanded={loginOpen}");
     expect(gate).toContain("setLoginOpen");

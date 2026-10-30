@@ -127,3 +127,39 @@ describe("personal home wiring", () => {
     expect(migration).toContain("ENABLE ROW LEVEL SECURITY");
   });
 });
+
+describe("personal home v2: entry points, account pill, logo", () => {
+  const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
+
+  it("opens the personal home page first from every FAST Code entry", () => {
+    expect(read("app/partner-access/page-client.tsx")).toContain(
+      "personalHomePath(normalized)",
+    );
+    expect(read("lib/talispros/mapsite-url-gate-actions.ts")).toContain(
+      "personalHomePath(mapsite.fastCode)",
+    );
+    expect(read("app/talispros/start/samcart-return-actions.ts")).toContain(
+      "base.href = personalHomePath(resolved.fastCode)",
+    );
+    expect(read("app/talispros/mapsites/actions.ts")).toContain("personalHomePath");
+    // The Bookshelf "Already have a FAST Code?" unlock still opens the shelf.
+    expect(read("app/talisbooks/fast/actions.ts")).toContain("connectedBookshelfPath");
+  });
+
+  it("shows the account pill before Home for owners only and opens the editor", () => {
+    const nav = read("components/talispros/personal-home/PersonalHomeNav.tsx");
+    expect(nav).toContain('data-testid="personal-home-nav-owner"');
+    expect(nav.indexOf("{ownerPill}")).toBeLessThan(nav.indexOf('key: "home"'));
+    expect(nav).toContain("rounded-xl bg-white/20");
+    const page = read("app/talispros/home/[fastCode]/page.tsx");
+    expect(page).toContain("canEdit\n            ? {");
+    expect(page).toContain('initialOpen={query.edit === "1"}');
+    const helper = read("lib/talispros/personal-home-page.ts");
+    expect(helper).toContain("if (!(await canEditPersonalHome(code))) return null;");
+  });
+
+  it("uses TSPLITS™ in the navbar logo and keeps Talispros on the homepage hero", () => {
+    expect(read("components/talisu/TalisBrandMark.tsx")).toContain("TSPLITS™");
+    expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("Talispros\n");
+  });
+});

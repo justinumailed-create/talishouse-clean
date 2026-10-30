@@ -7,7 +7,7 @@ import {
   getTalisBooksBookshelf,
 } from "@/lib/talisbooks/library";
 import { createMetadata } from "@/lib/seo";
-import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
+import { personalHomePath } from "@/lib/talispros/personal-home";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { loadMapsiteSeoFields } from "@/lib/talispros/load-mapsite-seo-fields";
 import {
@@ -91,11 +91,7 @@ export default async function FastCodeBookshelfPage({
     <TalisBooksLibraryShell
       bookshelf={bookshelf}
       backHref={
-        bookshelf.registrationHref ||
-        buildClaimedMapSitePath({
-          fastCode,
-          accountType: bookshelf.accountType,
-        })
+        bookshelf.registrationHref || personalHomePath(fastCode)
       }
       headerExtra={
         canManageEbook ? (

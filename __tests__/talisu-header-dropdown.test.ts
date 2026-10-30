@@ -192,7 +192,7 @@ describe("TalisU blue header dropdown", () => {
     // Wordmark + tagline sit inside the logo link: no nested link.
     expect(mark).not.toContain("<Link");
     expect(mark).not.toContain("<a ");
-    expect(mark).toContain("Talispros™");
+    expect(mark).toContain("TSPLITS™");
     expect(mark).toContain("{tagline}");
   });
 });

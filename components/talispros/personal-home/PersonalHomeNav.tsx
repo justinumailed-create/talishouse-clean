@@ -9,6 +9,11 @@ import {
   TALISU_MKTS_HEADER_BLUE,
   TALISU_MKTS_HEADER_LOGO_HREF,
 } from "@/lib/talisu/markets-pins";
+import {
+  fillPersonalHomeCopy,
+  PERSONAL_HOME_OPEN_EDITOR_EVENT,
+  type PersonalHomeOwnerPill,
+} from "@/lib/talispros/personal-home";
 
 type PersonalHomeNavProps = {
   homeHref: string;
@@ -19,6 +24,8 @@ type PersonalHomeNavProps = {
    * sub: slim Home / Mapsite bar under an existing Mapsite header.
    */
   variant?: "full" | "sub";
+  /** Account holder pill before Home; passed for the signed-in owner only. */
+  owner?: PersonalHomeOwnerPill | null;
 };
 
 const LINK =
@@ -30,8 +37,38 @@ export default function PersonalHomeNav({
   mapsiteHref,
   active,
   variant = "full",
+  owner = null,
 }: PersonalHomeNavProps) {
   const { personalHome: t, nav } = useT();
+
+  const ownerPill = owner ? (
+    <Link
+      href={owner.editHref}
+      prefetch={false}
+      aria-label={fillPersonalHomeCopy(t.navOwner, { name: owner.name })}
+      title={fillPersonalHomeCopy(t.navOwner, { name: owner.name })}
+      data-testid="personal-home-nav-owner"
+      onClick={(event) => {
+        // Already on the home page: open the editor in place.
+        if (active === "home") {
+          event.preventDefault();
+          window.dispatchEvent(new Event(PERSONAL_HOME_OPEN_EDITOR_EVENT));
+        }
+      }}
+      className="inline-flex min-h-9 max-w-[11rem] items-center gap-2 rounded-xl bg-white/20 py-1 pl-1 pr-1 text-[13px] font-semibold text-white no-underline transition hover:bg-white/30 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:max-w-[15rem] sm:pr-3 sm:text-[14px]"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={owner.imageUrl}
+        alt=""
+        width={28}
+        height={28}
+        className="h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-white/40"
+        draggable={false}
+      />
+      <span className="hidden min-w-0 truncate sm:inline">{owner.name}</span>
+    </Link>
+  ) : null;
 
   const links = (
     <nav
@@ -39,6 +76,7 @@ export default function PersonalHomeNav({
       className="flex items-center gap-1 sm:gap-1.5"
       data-testid="personal-home-nav"
     >
+      {ownerPill}
       {(
         [
           { key: "home", href: homeHref, label: t.navHome },

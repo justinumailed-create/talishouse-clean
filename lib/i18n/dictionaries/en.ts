@@ -51,7 +51,7 @@ export const en = {
 
   nav: {
     tagline: TALISU_MKTS_HEADER_TAGLINE,
-    brandSr: "Brand: Talispros™",
+    brandSr: "Brand: TSPLITS™",
     home: "Home",
     markets: "Markets",
     mapsites: "Mapsites",
@@ -118,7 +118,7 @@ export const en = {
   home: {
     motto: "PROMOTE - MANAGE - COOPERATE",
     openAccount: "Open your Account*",
-    systemDemo: "Build Demo",
+    systemDemo: "Claim Market",
     legalSecondary: TALISPROS_LEGAL_SECONDARY_COPY,
     bannerTitle: HOME_OWNERSHIP_BANNER_TITLE,
     structuresTagline: HOME_OWNERSHIP_STRUCTURES_TAGLINE,
@@ -130,7 +130,7 @@ export const en = {
       received: "Payment return received — Mapsite unlock in progress.",
       detected: "Payment return detected.",
       order: "SamCart order",
-      openClaimed: "Open your claimed Mapsite",
+      openClaimed: "Open your home page",
       useAccountBefore: "Use",
       useAccountAfter: "with your FAST Code™ to open your Mapsite.",
       failedNote:
@@ -845,6 +845,7 @@ export const en = {
     navLabel: "Personal home and Mapsite",
     navHome: "Home",
     navMapsite: "Mapsite",
+    navOwner: "Edit my home page ({name})",
     kicker: "Welcome",
     fallbackName: "My Mapsite",
     defaultWriteUp:

@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { personalHomePath } from "@/lib/talispros/personal-home";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import { establishPaidMapSiteBrowserSession } from "@/lib/mapsite-edit-auth";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
@@ -14,10 +15,6 @@ import {
   samcartExternalOrderKey,
   type SamCartReturnParams,
 } from "@/lib/talispros/samcart-return";
-import {
-  buildClaimedMapSitePath,
-} from "@/lib/talispros/mapsite-state";
-import { resolveClaimedMapSiteAccountTypeSegment } from "@/app/talispros/mapsites/actions";
 
 export type SamCartStartReturnResult = {
   detected: boolean;
@@ -193,18 +190,8 @@ export async function handleSamCartStartReturn(
       console.warn("[samcart-return] Could not establish paid session:", error);
     }
 
-    try {
-      const accountType = await resolveClaimedMapSiteAccountTypeSegment({
-        fastCode: resolved.fastCode,
-        mapsiteId: resolved.mapsiteId,
-      });
-      base.href = buildClaimedMapSitePath({
-        fastCode: resolved.fastCode,
-        accountType,
-      });
-    } catch {
-      /* href optional */
-    }
+    // After payment the FAST Code opens the personal home page first.
+    base.href = personalHomePath(resolved.fastCode);
   }
 
   if (

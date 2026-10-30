@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, FormEvent } from "react";
 import Image from "next/image";
-import { buildMapSiteRedirectUrl } from "@/lib/registration-fast-code-routing";
+import { personalHomePath } from "@/lib/talispros/personal-home";
 
 export default function PartnerAccessPage() {
   useEffect(() => {
@@ -37,7 +37,8 @@ export default function PartnerAccessPage() {
     }
 
     setIsSubmitting(true);
-    const targetUrl = buildMapSiteRedirectUrl(normalized);
+    // FAST Code entry opens the account holder's personal home page first.
+    const targetUrl = personalHomePath(normalized);
     if (window.self !== window.top) {
       window.top!.location.assign(targetUrl);
     } else {

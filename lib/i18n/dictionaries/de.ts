@@ -30,7 +30,7 @@ export const de: Dictionary = {
 
   nav: {
     tagline: "Branchennahe Mapsite-Märkte",
-    brandSr: "Marke: Talispros™",
+    brandSr: "Marke: TSPLITS™",
     home: "Startseite",
     markets: "Märkte",
     mapsites: "Mapsites",
@@ -97,7 +97,7 @@ export const de: Dictionary = {
   home: {
     motto: "BEWERBEN – VERWALTEN – KOOPERIEREN",
     openAccount: "Ihr Konto eröffnen*",
-    systemDemo: "Demo erstellen",
+    systemDemo: "Markt beanspruchen",
     legalSecondary: "*Vorherige Registrierung erforderlich.",
     bannerTitle: "Branchennahe Abwicklungsoptionen",
     structuresTagline: "Transaktionsstrukturen erkunden",
@@ -109,7 +109,7 @@ export const de: Dictionary = {
       received: "Zahlungsrückmeldung erhalten – Ihre Mapsite wird freigeschaltet.",
       detected: "Zahlungsrückmeldung erkannt.",
       order: "SamCart-Bestellung",
-      openClaimed: "Ihre beanspruchte Mapsite öffnen",
+      openClaimed: "Ihre Startseite öffnen",
       useAccountBefore: "Nutzen Sie",
       useAccountAfter: "mit Ihrem FAST Code™, um Ihre Mapsite zu öffnen.",
       failedNote:
@@ -227,7 +227,7 @@ export const de: Dictionary = {
           question: "Wie reiche ich einen Marktantrag ein?",
           answer: "Bitte gehen Sie auf Talispros.com in dieser Reihenfolge vor:",
           bullets: [
-            "Wählen Sie „Demo erstellen“.",
+            "Wählen Sie „Markt beanspruchen“.",
             "Wählen Sie den PIN, der Ihrem Heimatstandort am nächsten liegt.",
             "Wählen Sie „Nächster Schritt“ und erstellen Sie ein Demo-eBook.",
             "Füllen Sie das Formular aus: Die Initialen Ihres Vor- und Nachnamens bilden die eine Hälfte Ihres FAST Code™ (Free Access, Standard Tracking). Die andere Hälfte ist eine Zahl zwischen 01 und 99, die Sie in unserem System eindeutig macht. Ihre Straßenadresse positioniert Ihren Home-PIN auf Ihrer Beispiel-Mapsite. Die Beispiel-Mapsite zeigt uns, ob es Überschneidungen mit anderen Heimatmärkten gibt.",
@@ -1109,6 +1109,7 @@ export const de: Dictionary = {
     navLabel: "Persönliche Startseite und Mapsite",
     navHome: "Startseite",
     navMapsite: "Mapsite",
+    navOwner: "Meine Startseite bearbeiten ({name})",
     kicker: "Willkommen",
     fallbackName: "Meine Mapsite",
     defaultWriteUp:

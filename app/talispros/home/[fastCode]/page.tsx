@@ -11,6 +11,7 @@ import {
   clampSeoText,
   fillPersonalHomeCopy,
   isExternalPersonalHomeHref,
+  personalHomeEditPath,
 } from "@/lib/talispros/personal-home";
 import {
   canEditPersonalHome,
@@ -21,6 +22,7 @@ export const dynamic = "force-dynamic";
 
 type PersonalHomePageProps = {
   params: Promise<{ fastCode: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 const CTA =
@@ -58,8 +60,12 @@ export async function generateMetadata({ params }: PersonalHomePageProps) {
  * /talisu/engage) with the owner's photo, write-up and buttons; content falls
  * back to the Mapsite record until the owner customises it.
  */
-export default async function PersonalHomePage({ params }: PersonalHomePageProps) {
+export default async function PersonalHomePage({
+  params,
+  searchParams,
+}: PersonalHomePageProps) {
   const { fastCode } = await params;
+  const query = (await searchParams) ?? {};
   const locale = await getLocale();
   const lookup = await loadPersonalHomePage(fastCode, locale);
   if (lookup.kind === "allpins") redirect(ROUTES.TALISU_MARKETS);
@@ -72,7 +78,20 @@ export default async function PersonalHomePage({ params }: PersonalHomePageProps
 
   return (
     <div className="flex min-h-dvh flex-col bg-[#f5f1ea]" data-testid="personal-home-page">
-      <PersonalHomeNav homeHref={data.homeHref} mapsiteHref={data.mapsiteHref} active="home" />
+      <PersonalHomeNav
+        homeHref={data.homeHref}
+        mapsiteHref={data.mapsiteHref}
+        active="home"
+        owner={
+          canEdit
+            ? {
+                name: resolved.headline,
+                imageUrl: resolved.imageUrl,
+                editHref: personalHomeEditPath(data.code),
+              }
+            : null
+        }
+      />
       <main className="flex-1">
         <AdviserLayout
           testId="personal-home"
@@ -131,7 +150,12 @@ export default async function PersonalHomePage({ params }: PersonalHomePageProps
         </AdviserLayout>
       </main>
       {canEdit ? (
-        <PersonalHomeEditor fastCode={data.code} saved={data.saved} defaults={data.defaults} />
+        <PersonalHomeEditor
+          fastCode={data.code}
+          saved={data.saved}
+          defaults={data.defaults}
+          initialOpen={query.edit === "1"}
+        />
       ) : null}
     </div>
   );

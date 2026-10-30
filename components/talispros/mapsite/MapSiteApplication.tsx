@@ -91,6 +91,7 @@ import {
   type PinCategoryOption,
 } from "@/lib/talispros/mapsite-pin-categories";
 import type { MapSiteRootContext } from "@/lib/talispros/mapsite-root-partners-service";
+import type { PersonalHomeOwnerPill } from "@/lib/talispros/personal-home";
 import { MapSiteCategoryEditor, MapSitePartnerPanel } from "./MapSiteRootPanels";
 
 const EMPTY_ROOT_CONTEXT: MapSiteRootContext = {
@@ -201,7 +202,11 @@ interface MapSiteApplicationProps {
    * Owner navbar (Home = personal home page, Mapsite = this page). Null hides
    * the Home / Mapsite bar (ALLPINS, unclaimed platform records).
    */
-  personalHomeNav?: { homeHref: string; mapsiteHref: string } | null;
+  personalHomeNav?: {
+    homeHref: string;
+    mapsiteHref: string;
+    owner?: PersonalHomeOwnerPill | null;
+  } | null;
 }
 
 export default function MapSiteApplication({
@@ -606,7 +611,11 @@ function MapSiteChrome({
   categoryOptions: PinCategoryOption[];
   categoryFilter: string;
   onCategoryFilterChange: (category: string) => void;
-  personalHomeNav: { homeHref: string; mapsiteHref: string } | null;
+  personalHomeNav: {
+    homeHref: string;
+    mapsiteHref: string;
+    owner?: PersonalHomeOwnerPill | null;
+  } | null;
 }) {
   const { setViewport, isReady, fitToCoordinates } = useMapEngine();
   const router = useRouter();
@@ -1084,6 +1093,7 @@ function MapSiteChrome({
         <PersonalHomeNav
           homeHref={personalHomeNav.homeHref}
           mapsiteHref={personalHomeNav.mapsiteHref}
+          owner={personalHomeNav.owner ?? null}
           active="mapsite"
           variant={claimed ? "sub" : "full"}
         />

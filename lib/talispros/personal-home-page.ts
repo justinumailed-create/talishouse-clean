@@ -17,8 +17,10 @@ import {
   fillPersonalHomeCopy,
   personalHomeDefaultImage,
   personalHomeDisplayName,
+  personalHomeEditPath,
   personalHomePath,
   resolvePersonalHome,
+  type PersonalHomeOwnerPill,
   type PersonalHomeContent,
   type PersonalHomeDefaults,
   type ResolvedPersonalHome,
@@ -171,5 +173,28 @@ export async function canEditPersonalHome(code: string): Promise<boolean> {
     return Boolean(state.showToolbar);
   } catch {
     return false;
+  }
+}
+
+/**
+ * Navbar account pill (photo + name) for the signed-in account holder only.
+ * Visitors get null, so the pill and its editor link are never shown to them.
+ */
+export async function loadPersonalHomeOwnerPill(
+  rawCode: string,
+  locale: Locale,
+): Promise<PersonalHomeOwnerPill | null> {
+  const code = decodeURIComponent(rawCode || "").trim().toLowerCase();
+  if (!(await canEditPersonalHome(code))) return null;
+  try {
+    const lookup = await loadPersonalHomePage(code, locale);
+    if (lookup.kind !== "ok") return null;
+    return {
+      name: lookup.data.resolved.headline,
+      imageUrl: lookup.data.resolved.imageUrl,
+      editHref: personalHomeEditPath(code),
+    };
+  } catch {
+    return null;
   }
 }

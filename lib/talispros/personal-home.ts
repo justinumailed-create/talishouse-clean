@@ -63,6 +63,21 @@ export function personalHomePath(fastCode: string): string {
   return `${PERSONAL_HOME_PATH}/${encodeURIComponent(code)}`;
 }
 
+/** Event the navbar account pill fires to open the editor on the home page. */
+export const PERSONAL_HOME_OPEN_EDITOR_EVENT = "talispros:personal-home-open-editor";
+
+/** Personal home page with the owner editor opened on arrival. */
+export function personalHomeEditPath(fastCode: string): string {
+  return `${personalHomePath(fastCode)}?edit=1`;
+}
+
+/** Account holder pill shown in the navbar (owners only). */
+export type PersonalHomeOwnerPill = {
+  name: string;
+  imageUrl: string;
+  editHref: string;
+};
+
 export function isPersonalHomePath(pathname: string | null | undefined): boolean {
   return Boolean(pathname && pathname.startsWith(`${PERSONAL_HOME_PATH}/`));
 }
