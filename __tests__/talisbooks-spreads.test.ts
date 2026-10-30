@@ -70,3 +70,14 @@ describe("Talisbooks™ open-book spreads", () => {
     expect(describeViewerSpread(getViewerSpread(pages, 2))).toBe("Back cover");
   });
 });
+
+describe("describeViewerSpread localized labels", () => {
+  it("uses the German viewer dictionary labels in DE", async () => {
+    const { de } = await import("../lib/i18n/dictionaries/de");
+    const pages = makePages(4);
+    expect(describeViewerSpread(getViewerSpread(pages, 0), de.viewer.describe)).toBe("Titelseite");
+    expect(describeViewerSpread(getViewerSpread(pages, 1), de.viewer.describe)).toBe("Seiten 2–3");
+    expect(describeViewerSpread(getViewerSpread(pages, 2), de.viewer.describe)).toBe("Rückseite");
+    expect(de.viewer.hintSpread).not.toMatch(/arrows|swipe/i);
+  });
+});

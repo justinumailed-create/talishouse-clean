@@ -619,6 +619,21 @@ export const en = {
     openBookSingle: "Open book · single page",
     closedOpen: "Closed hardcover · Click to open",
     closedReopen: "Closed hardcover · Click to reopen",
+    hintSpread: "Use arrows, click, or swipe",
+    hintSingle: "Use arrows or swipe",
+    spreadOf: "Spread {n} of {total}",
+    pageOf: "{n} of {total}",
+    openTitle: "Open {title}",
+    reopenTitle: "Reopen {title}",
+    describe: {
+      coverSpread: "Cover spread",
+      frontCover: "Front cover",
+      backCover: "Back cover",
+      pagesRange: "Pages {from}–{to}",
+      page: "Page {n}",
+      emptySpread: "Empty spread",
+      emptyPage: "Empty page",
+    },
   },
 
   bookshelf: {

@@ -414,6 +414,7 @@ function ClosedHardCover({
   imageUrl: string;
   onOpen: () => void;
 }) {
+  const tv = useT().viewer;
   return (
     <button
       type="button"
@@ -440,7 +441,7 @@ function ClosedHardCover({
           onOpen();
         }
       }}
-      aria-label={side === "front" ? `Open ${title}` : `Reopen ${title}`}
+      aria-label={(side === "front" ? tv.openTitle : tv.reopenTitle).replace("{title}", title)}
     >
       <span className="talisbooks-viewer-hardcover__cast" aria-hidden="true" />
       <span className="talisbooks-viewer-hardcover__case" aria-hidden="true">
@@ -1160,8 +1161,10 @@ function OpenBookSpread({
       </div>
 
       <p className="talisbooks-viewer-stage__hint" aria-live="polite">
-        Use arrows, click, or swipe · {describeViewerSpread(labelSpread)} · Spread{" "}
-        {Math.min(displayedIndex, navCount - 1) + 1} of {navCount}
+        {tv.hintSpread} · {describeViewerSpread(labelSpread, tv.describe)} ·{" "}
+        {tv.spreadOf
+          .replace("{n}", String(Math.min(displayedIndex, navCount - 1) + 1))
+          .replace("{total}", String(navCount))}
       </p>
     </>
   );
@@ -1664,8 +1667,10 @@ function OpenBookSingle({
       </div>
 
       <p className="talisbooks-viewer-stage__hint" aria-live="polite">
-        Use arrows or swipe · {describeViewerPage(labelPage)} ·{" "}
-        {Math.min(displayedIndex, navCount - 1) + 1} of {navCount}
+        {tv.hintSingle} · {describeViewerPage(labelPage, tv.describe)} ·{" "}
+        {tv.pageOf
+          .replace("{n}", String(Math.min(displayedIndex, navCount - 1) + 1))
+          .replace("{total}", String(navCount))}
       </p>
     </>
   );

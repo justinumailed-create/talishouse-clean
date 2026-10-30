@@ -97,7 +97,33 @@ export function primaryPageIndexFromSpread(spreadIndex: number): number {
   return spreadIndex * 2 - 1;
 }
 
-export function describeViewerSpread(spread: TalisBooksViewerSpread): string {
+/** Locale-specific labels for the viewer hint ("Front cover", "Pages 2–3", …). */
+export type TalisBooksViewerDescribeLabels = {
+  coverSpread: string;
+  frontCover: string;
+  backCover: string;
+  /** "{from}" and "{to}" are replaced with page numbers. */
+  pagesRange: string;
+  /** "{n}" is replaced with the page number. */
+  page: string;
+  emptySpread: string;
+  emptyPage: string;
+};
+
+export const TALISBOOKS_VIEWER_DESCRIBE_LABELS_EN: TalisBooksViewerDescribeLabels = {
+  coverSpread: "Cover spread",
+  frontCover: "Front cover",
+  backCover: "Back cover",
+  pagesRange: "Pages {from}–{to}",
+  page: "Page {n}",
+  emptySpread: "Empty spread",
+  emptyPage: "Empty page",
+};
+
+export function describeViewerSpread(
+  spread: TalisBooksViewerSpread,
+  labels: TalisBooksViewerDescribeLabels = TALISBOOKS_VIEWER_DESCRIBE_LABELS_EN,
+): string {
   const left = spread.left?.pageNumber;
   const right = spread.right?.pageNumber;
   if (
@@ -105,34 +131,37 @@ export function describeViewerSpread(spread: TalisBooksViewerSpread): string {
     spread.left?.id === "opening-back-cover" &&
     right != null
   ) {
-    return "Cover spread";
+    return labels.coverSpread;
   }
   if (left != null && right != null) {
-    return `Pages ${left}–${right}`;
+    return labels.pagesRange.replace("{from}", String(left)).replace("{to}", String(right));
   }
   if (right != null && spread.index === 0) {
-    return "Front cover";
+    return labels.frontCover;
   }
   if (left != null && right == null) {
-    return "Back cover";
+    return labels.backCover;
   }
   if (right != null) {
-    return `Page ${right}`;
+    return labels.page.replace("{n}", String(right));
   }
   if (left != null) {
-    return `Page ${left}`;
+    return labels.page.replace("{n}", String(left));
   }
-  return "Empty spread";
+  return labels.emptySpread;
 }
 
-export function describeViewerPage(page: TalisBooksViewerPage | null): string {
+export function describeViewerPage(
+  page: TalisBooksViewerPage | null,
+  labels: TalisBooksViewerDescribeLabels = TALISBOOKS_VIEWER_DESCRIBE_LABELS_EN,
+): string {
   if (page?.pageNumber != null && page.pageNumber > 0) {
-    return `Page ${page.pageNumber}`;
+    return labels.page.replace("{n}", String(page.pageNumber));
   }
   if (page?.id === "opening-back-cover") {
-    return "Back cover";
+    return labels.backCover;
   }
-  return "Empty page";
+  return labels.emptyPage;
 }
 
 /**

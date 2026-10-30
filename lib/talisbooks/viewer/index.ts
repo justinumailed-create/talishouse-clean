@@ -66,6 +66,8 @@ export {
   convertViewerNavIndex,
   describeViewerPage,
   describeViewerSpread,
+  TALISBOOKS_VIEWER_DESCRIBE_LABELS_EN,
+  type TalisBooksViewerDescribeLabels,
   getViewerSpread,
   getViewerSpreadCount,
   primaryPageIndexFromSpread,

@@ -891,6 +891,21 @@ export const de: Dictionary = {
     openBookSingle: "Buch öffnen · Einzelseite",
     closedOpen: "Geschlossener Hardcover-Einband · Zum Öffnen klicken",
     closedReopen: "Geschlossener Hardcover-Einband · Zum erneuten Öffnen klicken",
+    hintSpread: "Mit Pfeiltasten, Klick oder Wischen blättern",
+    hintSingle: "Mit Pfeiltasten oder Wischen blättern",
+    spreadOf: "Doppelseite {n} von {total}",
+    pageOf: "{n} von {total}",
+    openTitle: "{title} öffnen",
+    reopenTitle: "{title} erneut öffnen",
+    describe: {
+      coverSpread: "Umschlag-Doppelseite",
+      frontCover: "Titelseite",
+      backCover: "Rückseite",
+      pagesRange: "Seiten {from}–{to}",
+      page: "Seite {n}",
+      emptySpread: "Leere Doppelseite",
+      emptyPage: "Leere Seite",
+    },
   },
 
   bookshelf: {
