@@ -19,7 +19,7 @@ import type { TalisBooksViewerBook, TalisBooksViewerPage } from "../viewer/types
 export const PINNED_TALISBOOK_SLUG = "talispros-ebook-sample";
 export const PINNED_TALISBOOK_ASSET_ROOT = "/talisbooks/pinned";
 export const PINNED_TALISBOOK_PDF_PATH = `${PINNED_TALISBOOK_ASSET_ROOT}/talispros-ebook-sample.pdf`;
-export const PINNED_TALISBOOK_PDF_FILE_NAME = "TalisPros-Ebook-Sample.pdf";
+export const PINNED_TALISBOOK_PDF_FILE_NAME = "Tsplits-Ebook-Sample.pdf";
 export const PINNED_TALISBOOK_INTERIOR_PAGE_COUNT = 11;
 
 /** Front + back covers + 2 leaves per interior landscape slide. */
@@ -98,7 +98,7 @@ export function pinnedTalisBookLibraryEntry(): TalisBooksLibraryBook {
   return {
     id: "pinned-talispros-ebook-sample",
     slug: PINNED_TALISBOOK_SLUG,
-    title: "Talispros eBook",
+    title: "Tsplits™ eBook",
     subtitle: "Pinned demonstration · cover wrap + interior PDF",
     coverImageUrl: `${PINNED_TALISBOOK_ASSET_ROOT}/front-cover.jpg`,
     coverTemplateId: null,
@@ -126,7 +126,7 @@ export function createPinnedTalisBookViewer(): TalisBooksViewerBook {
       pageNumber: 1,
       pageRole: "cover",
       layout: "cover",
-      title: "Talispros eBook",
+      title: "Tsplits™ eBook",
       subtitle: "Demonstration TalisBook™",
       heroImageUrl: front,
       exactPdfPage: true,
@@ -144,7 +144,7 @@ export function createPinnedTalisBookViewer(): TalisBooksViewerBook {
     pageNumber: PINNED_TALISBOOK_PAGE_COUNT,
     pageRole: "cover",
     layout: "cover",
-    title: "Talispros eBook",
+    title: "Tsplits™ eBook",
     heroImageUrl: back,
     exactPdfPage: true,
     clientEditable: false,
@@ -153,7 +153,7 @@ export function createPinnedTalisBookViewer(): TalisBooksViewerBook {
   return {
     id: "pinned-talispros-ebook-sample",
     slug: PINNED_TALISBOOK_SLUG,
-    title: "Talispros eBook",
+    title: "Tsplits™ eBook",
     subtitle: "Pinned demonstration",
     listingProfile: "fsbo",
     viewerStyle: "magazine",

@@ -4,7 +4,7 @@
     python3 scripts/og/generate.py            # from the repo root (needs Pillow)
 
 Design follows public/og/talisu-reg-*.jpg: photo/brand panel left, blue rule,
-tree logo + Talispros™ wordmark, 3-line headline (last line blue), chips, URL.
+tree logo + Tsplits™ wordmark, 3-line headline (last line blue), chips, URL.
 """
 import json, os, sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageOps
@@ -42,7 +42,7 @@ def brand_panel(bg):
     panel.paste((255, 255, 255), ((500 - tw) // 2, (H - th) // 2 - 10), a)
     return panel
 
-def card(lang, kicker, lines, chips, footer, photo, out, panel_bg=BLUE, wordmark="Talispros™"):
+def card(lang, kicker, lines, chips, footer, photo, out, panel_bg=BLUE, wordmark="Tsplits™"):
     im = Image.new("RGB", (W, H), "white"); d = ImageDraw.Draw(im)
     if photo:
         src, focus, pill, _ = photo
@@ -107,8 +107,8 @@ def alt_text(lang, photo, lines):
         head = head[:-1]
     who = photo[3] if photo and photo[3] else None
     if lang == "en":
-        return f"{who} with the Talispros™ tree logo: {head}" if who else f"Talispros™ tree logo: {head}"
-    return f"{who} mit dem Talispros™ Baumlogo: {head}" if who else f"Talispros™ Baumlogo: {head}"
+        return f"{who} with the Tsplits™ tree logo: {head}" if who else f"Tsplits™ tree logo: {head}"
+    return f"{who} mit dem Tsplits™ Baumlogo: {head}" if who else f"Tsplits™ Baumlogo: {head}"
 
 BAD = ["Mapsite™", "Mapsites™", "USD", "$"]
 def check(route, lang, t, dsc):
@@ -138,10 +138,10 @@ def main():
         pages[r] = e
     # shared admin card
     admin = {"kind": "admin", "noindex": True, "image": "/og/pages/admin",
-             "en": {"title": "Talispros™ Admin", "description": "Internal Talispros™ admin tools. Sign in required.",
-                    "alt": "Talispros™ tree logo: Talispros™ Admin console"},
-             "de": {"title": "Talispros™ Admin", "description": "Interne Talispros™ Admin-Werkzeuge. Anmeldung erforderlich.",
-                    "alt": "Talispros™ Baumlogo: Talispros™ Admin-Konsole"}}
+             "en": {"title": "Tsplits™ Admin", "description": "Internal Tsplits™ admin tools. Sign in required.",
+                    "alt": "Tsplits™ tree logo: Tsplits™ Admin console"},
+             "de": {"title": "Tsplits™ Admin", "description": "Interne Tsplits™ Admin-Werkzeuge. Anmeldung erforderlich.",
+                    "alt": "Tsplits™ Baumlogo: Tsplits™ Admin-Konsole"}}
     # Dedicated /talisu/engage share card (Thorsten P, product catalogue), served
     # from /og/talisu-engage-<lang>.jpg via meta.talisuEngage.
     if not only or "talisu-engage" in only:
@@ -153,9 +153,9 @@ def main():
              ["Talishouse™ Katalog", "Anzahlung 2.000 CAD"], "talispros.com/talisu/engage",
              thorsten, os.path.join(PUB, "og", "talisu-engage-de.jpg"))
     if not only or "admin" in only:
-        card("en", "TALISPROS™  ·  ADMIN CONSOLE", ["Talispros™", "Admin"], ["Mapsites", "Talisbooks™", "Agents"],
+        card("en", "TSPLITS™  ·  ADMIN CONSOLE", ["Tsplits™", "Admin"], ["Mapsites", "Talisbooks™", "Agents"],
              "Internal tools · sign in required", None, os.path.join(OUT, "admin-en.jpg"), panel_bg=NAVY)
-        card("de", "TALISPROS™  ·  ADMIN-KONSOLE", ["Talispros™", "Admin"], ["Mapsites", "Talisbooks™", "Agenten"],
+        card("de", "TSPLITS™  ·  ADMIN-KONSOLE", ["Tsplits™", "Admin"], ["Mapsites", "Talisbooks™", "Agenten"],
              "Interne Werkzeuge · Anmeldung erforderlich", None, os.path.join(OUT, "admin-de.jpg"), panel_bg=NAVY)
     with open(os.path.join(ROOT, "lib", "seo", "pages.json"), "w", encoding="utf-8") as fh:
         json.dump({"pages": pages, "admin": admin}, fh, ensure_ascii=False, indent=1)

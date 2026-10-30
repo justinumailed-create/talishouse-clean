@@ -19,7 +19,7 @@ export default function MapSiteHeader({
           <Link href="/talispros" className="flex items-center gap-3">
             <Image
               src="/logo.png"
-              alt="Talispros™"
+              alt="Tsplits™"
               width={28}
               height={28}
               className="w-7 h-7 object-contain"

@@ -9,7 +9,7 @@ import {
 } from "../lib/talispros/talisbot-knowledge";
 import { en } from "../lib/i18n/dictionaries/en";
 
-describe("TalisBOT Talispros™ knowledge", () => {
+describe("TalisBOT Tsplits™ knowledge", () => {
   it("never mentions Talishouse in system role or knowledge", () => {
     expect(assertNoTalishouseInBotCopy(TALISBOT_SYSTEM_ROLE)).toBe(true);
     for (const item of TALISBOT_KNOWLEDGE) {
@@ -18,7 +18,7 @@ describe("TalisBOT Talispros™ knowledge", () => {
     expect(TALISBOT_SYSTEM_ROLE).toContain("Mapsites");
     expect(TALISBOT_SYSTEM_ROLE).toContain("Talisbooks™");
     expect(TALISBOT_SYSTEM_ROLE).toMatch(/Do not discuss or recommend/i);
-    expect(TALISBOT_SYSTEM_ROLE).toContain("Talispros™");
+    expect(TALISBOT_SYSTEM_ROLE).toContain("Tsplits™");
   });
 
   it("wires knowledge into TalisBotChat without Talishouse product types", () => {
@@ -34,7 +34,7 @@ describe("TalisBOT Talispros™ knowledge", () => {
     expect(bot).toMatch(/\n\s*\{b\.faq\}\n/);
     expect(en.bot.faq).toBe("FAQ");
     expect(bot).toContain('href={talisuHref("/talisu#faq")}');
-    expect(bot).not.toContain("Talispros FAQ");
+    expect(bot).not.toContain("Tsplits™ FAQ");
     expect(en.bot.subtitle).toBe("Engage without registering first");
     expect(bot).toContain("TALISU_MKTS_HEADER_BLUE");
     expect(bot).toContain("OwnershipLearnMoreForm");

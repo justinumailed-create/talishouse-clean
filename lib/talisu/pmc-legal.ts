@@ -40,10 +40,10 @@ export const DELIVERABLES_DRAFT_LABEL = "Draft — pending Ralf’s approval";
  */
 export function deliverablesSection(variant: "tos" | "contract"): LegalSection {
   const items = [
-    "Mapsite presence: a presence on a proprietary Talispros Mapsite for the Customer’s account, on which the Customer can place PINs (Place of Interest Nodes).",
+    "Mapsite presence: a presence on a proprietary Tsplits™ Mapsite for the Customer’s account, on which the Customer can place PINs (Place of Interest Nodes).",
     "PIN flags: when selected, a PIN opens a flag revealing URL, RES, TEB and TTV links. URL can be a document repository or an outside location where anything can be linked. RES, if entered, leads to that listing on real estate sites, MLS®, a brokerage site or any other traditional site.",
     "TEB (Talis eBook): Provider’s proprietary means to generate flip-books from PDF quickly and easily.",
-    "Auto-syndication: PINs from Talispros Mapsites are auto-syndicated to the publications listed in the Media Directory, in cycles of 10 days on and 3 days off to keep listings fresh. The Media Directory lists outlets in which Provider either already has automatic exposure or is in negotiations, and may change over time.",
+    "Auto-syndication: PINs from Tsplits™ Mapsites are auto-syndicated to the publications listed in the Media Directory, in cycles of 10 days on and 3 days off to keep listings fresh. The Media Directory lists outlets in which Provider either already has automatic exposure or is in negotiations, and may change over time.",
     "TTV (Talis TV) — optional extra at additional cost: Provider’s in-house online TV station, which requires set-up at additional cost. If selected, Provider acts as the Customer’s production department, generating content from source material the Customer provides (such as photography, audio and video) for formats such as virtual open houses, virtual walk-throughs, infomercials and green screen talk shows.",
     "Account types: Root Account, Derivative Account (subordinate agent listings under a Root Account), FSBO Account and Adpro Account. The deliverables available depend on the Customer’s account type.",
   ];

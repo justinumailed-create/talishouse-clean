@@ -30,7 +30,7 @@ function pixel(
   return [data[i] ?? 0, data[i + 1] ?? 0, data[i + 2] ?? 0];
 }
 
-describe("Talispros brand OG (homepage + T-All catalogue)", () => {
+describe("Tsplits™ brand OG (homepage + T-All catalogue)", () => {
   it("uses the landscape Mapsite frame with logo + partner left and map right", () => {
     expect(TALISPROS_OG_WIDTH).toBe(SHARE_OG_WIDTH);
     expect(TALISPROS_OG_HEIGHT).toBe(SHARE_OG_HEIGHT);
@@ -114,19 +114,19 @@ describe("Talispros brand OG (homepage + T-All catalogue)", () => {
     expect(resolveTalisprosBrandOgImage()).toBe(
       "https://www.talispros.com/api/og/talispros",
     );
-    const image = talisprosBrandOgMetadataImage("Talispros™ | Claim your market");
+    const image = talisprosBrandOgMetadataImage("Tsplits™ | Claim your market");
     expect(image).toEqual({
       url: "https://www.talispros.com/api/og/talispros",
       width: TALISPROS_OG_WIDTH,
       height: TALISPROS_OG_HEIGHT,
-      alt: "Talispros™ | Claim your market",
+      alt: "Tsplits™ | Claim your market",
     });
     expect(image.url).not.toContain("talishouse.com");
     expect(image.url).not.toContain("/seo/talispros-og.jpg");
 
     const home = createMetadata({
       title: image.alt!,
-      description: "Claim your market on Talispros™.",
+      description: "Claim your market on Tsplits™.",
       path: "/",
       image,
     });
@@ -137,17 +137,17 @@ describe("Talispros brand OG (homepage + T-All catalogue)", () => {
     });
 
     const catalogue = createMetadata({
-      title: "T-All Catalogue | Talispros",
+      title: "T-All Catalogue | Tsplits™",
       description: "Top-bound T-All product catalogue.",
       path: "/catalogue",
-      image: talisprosBrandOgMetadataImage("T-All Catalogue | Talispros"),
+      image: talisprosBrandOgMetadataImage("T-All Catalogue | Tsplits™"),
     });
     expect(catalogue.openGraph?.images).toEqual([
       {
         url: "https://www.talispros.com/api/og/talispros",
         width: TALISPROS_OG_WIDTH,
         height: TALISPROS_OG_HEIGHT,
-        alt: "T-All Catalogue | Talispros",
+        alt: "T-All Catalogue | Tsplits™",
       },
     ]);
   });

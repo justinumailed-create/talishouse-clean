@@ -110,7 +110,7 @@ export function adIntroSectionContentPayload(
         sectionLeaf: leaf,
       };
     case "company_agent_left": {
-      const brokerageName = agent?.brokerageName?.trim() || "Talispros™";
+      const brokerageName = agent?.brokerageName?.trim() || "Tsplits™";
       const agentName = agent?.name?.trim() || "Listing contact";
       const mission =
         agent?.brokerageLine?.trim() ||

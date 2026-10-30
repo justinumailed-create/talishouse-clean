@@ -377,7 +377,7 @@ export async function ensureAllPinsMapSite(): Promise<AllPinsAggregation | null>
       fast_code: ALLPINS_FAST_CODE,
       slug: ALLPINS_FAST_CODE,
       account_type: "Root Account™",
-      owner_first_name: "Talispros",
+      owner_first_name: "Tsplits™",
       owner_last_name: "ALLPINS",
       agent_name: "ALLPINS Showcase",
       email: "allpins@talispros.com",

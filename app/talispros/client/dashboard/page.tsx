@@ -20,7 +20,7 @@ export default async function ClientDashboardPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
-              TalisPros™
+              Tsplits™
             </p>
             <h1 className="text-sm font-semibold text-neutral-900">
               Client Analytics

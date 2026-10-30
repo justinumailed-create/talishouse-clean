@@ -604,7 +604,7 @@ async function loadSelfServiceAgentDetails(input: {
   const fallback: SelfServiceAgentDetails = {
     name: "Listing contact",
     title: "Mapsite owner",
-    brokerageName: "Talispros™",
+    brokerageName: "Tsplits™",
   };
 
   const overrides = {
@@ -739,7 +739,7 @@ async function loadSelfServiceAgentDetails(input: {
       assets?.profile_image ||
       mapsite?.profile_image_url ||
       undefined,
-    brokerageName: "Talispros™",
+    brokerageName: "Tsplits™",
     brokerageLine: mapsite?.property_address || undefined,
     brokerageLogoUrl:
       uploadedLogoUrl ||

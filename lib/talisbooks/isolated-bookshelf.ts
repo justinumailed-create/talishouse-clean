@@ -21,7 +21,7 @@ export const ISOLATED_BOOKSHELF_FROM_ALLPINS = "allpins";
  * leaves description blank. Avoids persisting the RETIRED-LEGACY-CODE FAST-code placeholder.
  */
 export const ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION =
-  "Talispros™ Real-World Asset Tokenization";
+  "Tsplits™ Real-World Asset Tokenization";
 
 export function resolveIsolatedBookshelfBookDescription(
   description?: string | null,

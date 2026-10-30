@@ -103,7 +103,7 @@ export async function loadPinnedTalisBookPdfFile(options?: {
       fetchImpl,
     );
   } catch {
-    throw new Error("Could not load the pinned Talispros eBook PDF.");
+    throw new Error("Could not load the pinned Tsplits™ eBook PDF.");
   }
   return fileFromResponse(
     response,

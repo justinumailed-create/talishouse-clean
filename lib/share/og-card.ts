@@ -1,7 +1,7 @@
 /**
  * Landscape Open Graph card shared by Mapsite and Talisbooks™ viewer links.
  * 1200×630 (~1.91:1). Full-bleed photo, red pin at the frame center when the
- * card represents a listing location, Talispros™ mark vertically centered
+ * card represents a listing location, Tsplits™ mark vertically centered
  * on the right.
  */
 

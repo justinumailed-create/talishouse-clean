@@ -18,7 +18,7 @@ export const TALISBOOKS_BROKERAGE_DEMO_AGENT = {
   phone: "902-317-2223",
   email: "remecom@mac.com",
   photoUrl: `${ASSET}/portrait.jpg`,
-  brokerageName: "Talispros™ Partner Realty",
+  brokerageName: "Tsplits™ Partner Realty",
   brokerageLine: "Cape Breton · Meat Cove · Atlantic Shore",
   brokerageLogoUrl: `${ASSET}/brokerage-banner.jpg`,
   slogan: "Where the Atlantic finds you.",

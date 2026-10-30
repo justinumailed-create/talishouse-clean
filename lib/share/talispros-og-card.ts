@@ -1,6 +1,6 @@
 /**
- * Landscape Open Graph card for Talispros™ homepage + T-All Product catalogue.
- * 1200×630. Soft market-chrome background, Talispros™ logo and Aisha portrait
+ * Landscape Open Graph card for Tsplits™ homepage + T-All Product catalogue.
+ * 1200×630. Soft market-chrome background, Tsplits™ logo and Aisha portrait
  * stacked on the left; ALLPINS Mapsite multi-pin Canada map on the right.
  */
 

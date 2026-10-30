@@ -20,7 +20,7 @@ export default async function PmcTermsPage({
   return (
     <LegalPage
       testId="pmc-terms"
-      kicker="Talispros · TalisALL PMC"
+      kicker="Tsplits™ · TalisALL PMC"
       title={t.terms}
       meta={["TalisALL PMC"]}
       sections={TERMS_OF_SERVICE}

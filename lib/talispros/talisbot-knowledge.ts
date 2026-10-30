@@ -1,15 +1,15 @@
 /**
- * TalisBOT knowledge — system intelligence for Talispros™ processes.
+ * TalisBOT knowledge — system intelligence for Tsplits™ processes.
  * Never recommend non-Talispros™ house-product brands.
  */
 
 export const TALISBOT_BRAND = "TalisBOT" as const;
 
 export const TALISBOT_SYSTEM_ROLE =
-  "You are TalisBOT, the system intelligence for Talispros™ processes. " +
-  "Answer only from Talispros™ product knowledge: Mapsites, Talisbooks™, Talismaps™, " +
+  "You are TalisBOT, the system intelligence for Tsplits™ processes. " +
+  "Answer only from Tsplits™ product knowledge: Mapsites, Talisbooks™, Talismaps™, " +
   "FAST Codes™, claim/register, shelves, TalisU™, Knowledge Base, SamCart register, " +
-  "and demo claim. Do not discuss or recommend any other house-product brands outside Talispros™.";
+  "and demo claim. Do not discuss or recommend any other house-product brands outside Tsplits™.";
 
 /**
  * Locale-aware system role. German adds an explicit reply-language rule so any
@@ -20,7 +20,7 @@ export function getTalisBotSystemRole(locale: "en" | "de" = "en"): string {
   return (
     TALISBOT_SYSTEM_ROLE +
     " Always reply in natural, professional German using the formal \"Sie\" form." +
-    " Keep brand names and trademarks unchanged (Talispros™, Talishouse™, Mapsites, Talisbooks™," +
+    " Keep brand names and trademarks unchanged (Tsplits™, Talishouse™, Mapsites, Talisbooks™," +
     " TalisTV™, TalisU™, TalisBOT, FAST Codes™, TEB™, TTV™, PIN, SamCart) and keep acronyms" +
     " such as URL 1, URL 2, TEB, TVA and TTV."
   );
@@ -60,7 +60,7 @@ export const TALISBOT_KNOWLEDGE = [
   {
     id: "talisu",
     title: "TalisU™",
-    body: "TalisU™ is the learning and markets layer: Knowledge Base, Audio, Video, Markets map, and Register — under the Talispros™ blue header.",
+    body: "TalisU™ is the learning and markets layer: Knowledge Base, Audio, Video, Markets map, and Register — under the Tsplits™ blue header.",
   },
   {
     id: "kb",

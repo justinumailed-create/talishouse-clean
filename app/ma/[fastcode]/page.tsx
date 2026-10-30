@@ -64,7 +64,7 @@ export default async function TalisMapsPage({ params }: { params: Promise<{ fast
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900">
             Welcome To Your Mapsite
           </h1>
-          <p className="text-sm text-neutral-500 mt-2">Your TalisPros™ account is active and ready.</p>
+          <p className="text-sm text-neutral-500 mt-2">Your Tsplits™ account is active and ready.</p>
         </div>
 
         <div className="bg-white rounded-2xl border border-neutral-200 p-6 sm:p-8 shadow-sm mb-8">

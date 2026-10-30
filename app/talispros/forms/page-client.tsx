@@ -53,7 +53,7 @@ export default function TalisFormsPage() {
       <section className="py-20 sm:py-28">
         <div className="max-w-4xl mx-auto px-5 text-center">
           <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-4">
-            A Talispros™ Platform Product
+            A Tsplits™ Platform Product
           </p>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-neutral-900 mb-3">
             TalisForms™
@@ -62,7 +62,7 @@ export default function TalisFormsPage() {
             Enterprise Form Infrastructure
           </p>
           <p className="text-sm text-neutral-400 max-w-2xl mx-auto leading-relaxed mb-8">
-            TalisForms™ powers the entire Talispros™ ecosystem including Mapsites, FAST Codes™, registrations, partner onboarding, CRM intake workflows, lead generation, and white-label form deployments.
+            TalisForms™ powers the entire Tsplits™ ecosystem including Mapsites, FAST Codes™, registrations, partner onboarding, CRM intake workflows, lead generation, and white-label form deployments.
           </p>
           <a
             href="#demo"
@@ -104,7 +104,7 @@ export default function TalisFormsPage() {
             White Label Forms
           </h2>
           <p className="text-sm text-neutral-500 text-center max-w-2xl mx-auto leading-relaxed mb-8">
-            Deploy fully white-labeled forms under your own brand across the Talispros™ platform. Every form — from Mapsite registrations to partner onboarding — can be customized with your logo, colors, and domain.
+            Deploy fully white-labeled forms under your own brand across the Tsplits™ platform. Every form — from Mapsite registrations to partner onboarding — can be customized with your logo, colors, and domain.
           </p>
           <div className="bg-neutral-50 rounded-2xl p-8 border border-neutral-200">
             <ul className="space-y-3">
@@ -267,7 +267,7 @@ export default function TalisFormsPage() {
             Marketplace Forms
           </h2>
           <p className="text-sm text-neutral-500 text-center max-w-2xl mx-auto leading-relaxed mb-8">
-            Deploy forms across the Talispros™ marketplace ecosystem. From Mapsite builder requests to partner registration, every marketplace touchpoint is powered by TalisForms™.
+            Deploy forms across the Tsplits™ marketplace ecosystem. From Mapsite builder requests to partner registration, every marketplace touchpoint is powered by TalisForms™.
           </p>
           <div className="bg-neutral-50 rounded-2xl p-8 border border-neutral-200">
             <ul className="space-y-3">
@@ -293,13 +293,13 @@ export default function TalisFormsPage() {
       <section id="demo" className="py-20">
         <div className="max-w-2xl mx-auto px-5 text-center">
           <p className="text-xs font-medium text-neutral-400 uppercase tracking-widest mb-4">
-            A Talispros™ Platform Product
+            A Tsplits™ Platform Product
           </p>
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-neutral-900 mb-3">
             Ready to see TalisForms™ in action?
           </h2>
           <p className="text-sm text-neutral-500 mb-8 max-w-md mx-auto leading-relaxed">
-            Schedule a demo to learn how TalisForms™ powers forms, payments, and registrations across the Talispros™ ecosystem.
+            Schedule a demo to learn how TalisForms™ powers forms, payments, and registrations across the Tsplits™ ecosystem.
           </p>
           <a
             href="/talispros/build-mapsite"
@@ -310,7 +310,7 @@ export default function TalisFormsPage() {
           <p className="text-xs text-neutral-400 mt-4">
             Or{" "}
             <Link href="/talispros" className="text-neutral-600 underline underline-offset-2 hover:text-neutral-900 transition-colors">
-              return to TalisPros™
+              return to Tsplits™
             </Link>
           </p>
         </div>

@@ -283,7 +283,7 @@ export default function TalisBooksLibraryShell({
               <p className="talisbooks-library__eyebrow">
                 {publicCatalog
                   ? scoped
-                    ? `Talispros™ Ecosystem · ${bookshelf.fastCode!.toUpperCase()}`
+                    ? `Tsplits™ Ecosystem · ${bookshelf.fastCode!.toUpperCase()}`
                     : bs.ecosystem
                   : createdCatalog
                     ? bs.ecosystem

@@ -107,7 +107,7 @@ export default async function TalisURegisterPage({
   }
   const structureTab = TALISU_REGISTER.structures.find((s) => s.id === structure) ?? null;
 
-  // PMC gate (every registrant): Demo → claim Mapsite → Talispros → Media
+  // PMC gate (every registrant): Demo → claim Mapsite → Tsplits™ → Media
   // Directory → Contract (agent code) → sign → here → payment. No claimed
   // Mapsite → demo/claim start; unsigned → the sequence. Paid users pass.
   await enforcePmcRegistrationGate(firstParam(params.fastCode));

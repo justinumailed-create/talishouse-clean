@@ -158,8 +158,9 @@ describe("personal home v2: entry points, account pill, logo", () => {
     expect(helper).toContain("if (!(await canEditPersonalHome(code))) return null;");
   });
 
-  it("uses TSPLITS™ in the navbar logo and keeps Talispros on the homepage hero", () => {
-    expect(read("components/talisu/TalisBrandMark.tsx")).toContain("TSPLITS™");
-    expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("Talispros\n");
+  it("uses Tsplits™ in the navbar logo and on the homepage hero", () => {
+    expect(read("components/talisu/TalisBrandMark.tsx")).toContain("Tsplits™\n");
+    expect(read("components/talisu/TalisBrandMark.tsx")).not.toMatch(/>\s*Talispros/);
+    expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("Tsplits™\n");
   });
 });

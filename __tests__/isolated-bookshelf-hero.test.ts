@@ -17,8 +17,8 @@ function isolatedBook(
     viewerHref: `/talisbooks/viewer/${partial.slug}`,
     metadata: {
       isolatedBookshelf: true,
-      seoDescription: "Talispros™ Real-World Asset Tokenization",
-      metaDescription: "Talispros™ Real-World Asset Tokenization",
+      seoDescription: "Tsplits™ Real-World Asset Tokenization",
+      metaDescription: "Tsplits™ Real-World Asset Tokenization",
       bookshelfPlacement: { shelf: 2, row: 2, position: 1 },
     },
     ...partial,

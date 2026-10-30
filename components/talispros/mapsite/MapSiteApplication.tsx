@@ -163,7 +163,7 @@ interface MapSiteApplicationProps {
   /**
    * PMC gate: the Service Agreement for this FAST Code is signed (or the
    * Mapsite is already paid). When false, the activation card points to the
-   * TalisU sequence (Talispros → Media Directory → Contract) instead of checkout.
+   * TalisU sequence (Tsplits™ → Media Directory → Contract) instead of checkout.
    */
   contractSigned?: boolean;
   /** Stripe Checkout return. Never treated as proof of payment. */

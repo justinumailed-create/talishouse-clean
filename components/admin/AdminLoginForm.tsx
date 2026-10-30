@@ -99,7 +99,7 @@ export default function AdminLoginForm({ notice = null }: { notice?: string | nu
             }}
             className="text-sm text-[#6e6e73] hover:text-[#111] transition-colors"
           >
-            Back to Talispros™
+            Back to Tsplits™
           </button>
         </div>
       </div>

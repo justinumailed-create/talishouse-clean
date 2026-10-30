@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-/** Full cycle: Talispros™ dominates (~75%), brief TalisU™ (~25%). */
+/** Full cycle: Tsplits™ dominates (~75%), brief TalisU™ (~25%). */
 export const TALIS_BRAND_FLIP_TALISPROS_MS = 6000;
 export const TALIS_BRAND_FLIP_TALISU_MS = 2000;
 export const TALIS_BRAND_FLIP_CYCLE_MS =
@@ -25,7 +25,7 @@ type TalisBrandFlipProps = {
 
 /**
  * Flip/rotate wordmark beside the blue header logo.
- * Talispros™ stays longer; TalisU™ is a shorter glimpse.
+ * Tsplits™ stays longer; TalisU™ is a shorter glimpse.
  */
 export default function TalisBrandFlip({
   tagline,
@@ -68,7 +68,7 @@ export default function TalisBrandFlip({
   }, [reduceMotion]);
 
   const href = brand === "talispros" ? "/" : "/talisu";
-  const label = brand === "talispros" ? "Talispros™" : "TalisU™";
+  const label = brand === "talispros" ? "Tsplits™" : "TalisU™";
 
   return (
     <div className={`min-w-0 leading-tight ${className}`}>
@@ -85,7 +85,7 @@ export default function TalisBrandFlip({
               : "talis-brand-flip-face block text-white hover:text-white/95"
           }
         >
-          {brand === "talispros" ? "Talispros™" : "TalisU™"}
+          {brand === "talispros" ? "Tsplits™" : "TalisU™"}
         </Link>
       </div>
       <div className="text-[12px] text-white/95 sm:text-[13px]">{tagline}</div>

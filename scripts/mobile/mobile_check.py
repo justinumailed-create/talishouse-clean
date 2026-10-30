@@ -1,4 +1,4 @@
-"""Talispros mobile layout check.
+"""Tsplits™ mobile layout check.
 
 Loads every public page at 390x844, 375x667 and 430x932 (EN; DE for a subset)
 and FAILS on: horizontal overflow, key text covered by another element,

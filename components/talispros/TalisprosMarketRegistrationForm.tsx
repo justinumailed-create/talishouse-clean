@@ -381,7 +381,7 @@ export default function TalisprosMarketRegistrationForm({
           className="mt-1"
         />
         <span>
-          I consent to Talispros™ processing my registration data to prepare my
+          I consent to Tsplits™ processing my registration data to prepare my
           Mapsite and coordinate payment and onboarding.
         </span>
       </label>

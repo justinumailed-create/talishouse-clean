@@ -20,8 +20,8 @@ export async function generateMetadata({
   return dynamicPageMetadata((locale) => ({
     title:
       locale === "de"
-        ? "Für diese Mapsite registrieren | Talispros™"
-        : `${MAPSITE_URL_GATE_HEADLINE} | Talispros™`,
+        ? "Für diese Mapsite registrieren | Tsplits™"
+        : `${MAPSITE_URL_GATE_HEADLINE} | Tsplits™`,
     description:
       locale === "de"
         ? "Registrieren Sie sich für diese Mapsite und arbeiten Sie mit dem Team von Aisha C."

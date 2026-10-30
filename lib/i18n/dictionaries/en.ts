@@ -51,7 +51,7 @@ export const en = {
 
   nav: {
     tagline: TALISU_MKTS_HEADER_TAGLINE,
-    brandSr: "Brand: TSPLITS™",
+    brandSr: "Brand: Tsplits™",
     home: "Home",
     markets: "Markets",
     mapsites: "Mapsites",
@@ -182,7 +182,7 @@ export const en = {
     faq: "FAQ",
     getHelp: "Share a Project Vision",
     globalAdmin: "Global Admin",
-    processesHeading: "Talispros™ processes",
+    processesHeading: "Tsplits™ processes",
     allTopics: "← All topics",
     contactAbout: "Contact about this",
     back: "← Back",
@@ -362,7 +362,7 @@ export const en = {
         "Upon registration your Mapsite will be able to promote up to 10 categories containing 100 PINs generating 1,000 views, monthly. No referral fees - ever",
       claimedFallback: "FAST Code™ {code} · claimed Mapsite.",
       welcomeFallback:
-        "Welcome to Talispros™. Choose your market and begin onboarding.",
+        "Welcome to Tsplits™. Choose your market and begin onboarding.",
       tebPreparing:
         "Your first Talisbook™ is being prepared. TEB™ unlocks here when it's ready.",
       resourceUnavailable: "{label} unavailable",
@@ -446,9 +446,9 @@ export const en = {
       placedByAgent: "Placed by an agent — delete it if it isn't yours",
       freeCredits: "Free PINs",
       freeAvailableOne:
-        "You have 1 free PIN from Talispros™ Admin. It is used before any payment.",
+        "You have 1 free PIN from Tsplits™ Admin. It is used before any payment.",
       freeAvailableMany:
-        "You have {count} free PINs from Talispros™ Admin. They are used before any payment.",
+        "You have {count} free PINs from Tsplits™ Admin. They are used before any payment.",
       useFreeOne: "Add 1 free PIN",
       useFreeMany: "Add {count} free PINs",
       useFreeAndBuy: "Add {free} free + buy {paid} · {price} CAD",
@@ -459,7 +459,7 @@ export const en = {
   },
 
   pmc: {
-    steps: ["Talispros", "Media Directory", "Contract", "Register"],
+    steps: ["Tsplits™", "Media Directory", "Contract", "Register"],
     stepLabel: "Step {n} of 4",
     next: "Next",
     back: "Back",
@@ -467,15 +467,15 @@ export const en = {
     nextContract: "Next: Contract",
     regionCanada: "Canada",
     regionUs: "United States",
-    regionCanadaNote: "You are here — Talispros serves Canada (CAD).",
-    regionUsNote: "In the US? Visit Taliswebs.",
+    regionCanadaNote: "You are here — Tsplits™ serves Canada (CAD).",
+    regionUsNote: "In the US? Visit Tsplits™ USA.",
     terms: "Terms of Service",
     privacy: "Privacy Policy",
     footerNote: "TalisALL PMC · promote – manage – cooperate",
     englishOnly: "",
     pitch: {
       kicker: "Industry adjacent markets",
-      heroTitle: "Talispros PMC",
+      heroTitle: "Tsplits™ PMC",
       heroLead: "Map-based marketing that sits beside MLS® and your brokerage website — and turns location into leads, revenue and reputation.",
       ctaPrimary: "Explore the Media Directory",
       ctaSecondary: "Read the value proposition",
@@ -483,11 +483,11 @@ export const en = {
       statCountries: "countries & regions",
       statCycle: "day syndication cycles",
       valueTitle: "Value Proposition",
-      fitTitle: "Talispros’ strategic fit",
-      fitLead: "Three layers, one market. Talispros adds the demand-generating layer without replacing the first two.",
-      reasonsTitle: "Seven good reasons why Brokerages would want Talispros",
+      fitTitle: "Tsplits™’ strategic fit",
+      fitLead: "Three layers, one market. Tsplits™ adds the demand-generating layer without replacing the first two.",
+      reasonsTitle: "Seven good reasons why Brokerages would want Tsplits™",
       benefitLabel: "Brokerage benefit",
-      moneyTitle: "Additional ways Talispros could make money",
+      moneyTitle: "Additional ways Tsplits™ could make money",
       adjacentKicker: "Point 4",
       weDoTitle: "What we do for you",
       mediaTitle: "The Media Directory",
@@ -518,7 +518,7 @@ export const en = {
       kicker: "Step 3 · Contract",
       title: "Service Agreement",
       lockedTitle: "Enter your agent code",
-      lockedBody: "The contract is authorised by your Talispros agent. Enter the agent code they gave you to open and sign it.",
+      lockedBody: "The contract is authorised by your Tsplits™ agent. Enter the agent code they gave you to open and sign it.",
       codeLabel: "Agent code",
       unlock: "Open contract",
       unlocking: "Checking…",
@@ -552,7 +552,7 @@ export const en = {
     },
     agentCode: {
       title: "Your agent code",
-      purpose: "Give this code to your client. It unlocks the Service Agreement (Contract) in the TalisU sequence — Talispros → Media Directory → Contract — and links every contract they sign, and their FAST Code, to you in the CRM.",
+      purpose: "Give this code to your client. It unlocks the Service Agreement (Contract) in the TalisU sequence — Tsplits™ → Media Directory → Contract — and links every contract they sign, and their FAST Code, to you in the CRM.",
       link: "Share link",
       clients: "Clients who signed with your code",
       none: "No signed contracts yet.",
@@ -561,8 +561,8 @@ export const en = {
     },
     gate: {
       title: "Sign the Service Agreement first",
-      body: "Before the registration payment, review Talispros, the Media Directory and sign the Service Agreement with your agent code.",
-      cta: "Start: Talispros → Contract",
+      body: "Before the registration payment, review Tsplits™, the Media Directory and sign the Service Agreement with your agent code.",
+      cta: "Start: Tsplits™ → Contract",
     },
   },
   talisuHub: {
@@ -624,7 +624,7 @@ export const en = {
   bookshelf: {
     title: "Bookshelf",
     createEbook: "Create ebook",
-    ecosystem: "Talispros™ Ecosystem",
+    ecosystem: "Tsplits™ Ecosystem",
     rootAccount: "Root Account",
     derivativeAccount: "Derivative Account",
     subtitleScoped:
@@ -765,12 +765,12 @@ export const en = {
       lead: "Use the sample pages, or upload a PDF.",
       leadNote:
         "We prepare the pages for you. Then tap Build Talisbook™, and your demo Mapsite opens as soon as it's ready.",
-      useSample: "Use the sample Talispros eBook",
+      useSample: "Use the sample Tsplits™ eBook",
       or: "or",
       uploadPdf: "Upload PDF",
       uploadHelp:
         "On page 1, the left half is the back cover and the right half is the front cover. PDF, JPG, JPEG or PNG, up to {max} inside pages.",
-      sampleLabel: "Talispros sample eBook",
+      sampleLabel: "Tsplits™ sample eBook",
       pdfUploaded: "PDF uploaded",
       clearReupload: "Clear and re-upload",
       tryAgain: "Try again",
@@ -889,10 +889,10 @@ export const en = {
   },
   meta: {
     personalHome: {
-      title: "{name} · Personal home | Talispros™",
+      title: "{name} · Personal home | Tsplits™",
       description:
-        "Welcome to the personal home page of {name}. Open the Mapsite, explore listings on the map and claim your market with Talispros™.",
-      ogImageAlt: "{name}: personal home page on Talispros™",
+        "Welcome to the personal home page of {name}. Open the Mapsite, explore listings on the map and claim your market with Tsplits™.",
+      ogImageAlt: "{name}: personal home page on Tsplits™",
     },
     bookshelf: {
       title: "ALLPINS Talisbooks™ · Bookshelf",
@@ -902,7 +902,7 @@ export const en = {
     demoMapsite: {
       title: "Build Demo eBook and Mapsite",
       description:
-        "Place a demonstration pin and attach the pinned Talispros eBook. No FAST Code is issued.",
+        "Place a demonstration pin and attach the pinned Tsplits™ eBook. No FAST Code is issued.",
     },
     catalogue: {
       title: "Catalogue | Talishouse™ Product Catalogue",
@@ -935,7 +935,7 @@ export const en = {
         "Modern homes and cottages starting from $58.50 per sq.ft. . Built in a day, move-in ready in a week. Lease-to-own options available.",
     },
     home: {
-      title: "Talispros™",
+      title: "Tsplits™",
       description: "Claim your market. Open your Mapsite.",
     },
     talisuLayout: {
@@ -946,15 +946,15 @@ export const en = {
     talisuFaq: {
       title: "TalisU™ | FAQ",
       description:
-        "Frequently asked questions about Talispros™, Mapsites, and TalisU™.",
+        "Frequently asked questions about Tsplits™, Mapsites, and TalisU™.",
     },
     talisuRegister: {
-      title: "Register Your Talispros™ Mapsite and Get Global Exposure | TalisU™",
+      title: "Register Your Tsplits™ Mapsite and Get Global Exposure | TalisU™",
       description:
         "Industry adjacent marketing that gets your Mapsite global exposure: Mapsites, Talisbooks™ (TEB), listing analysis (TVA) and TalisTV™ (TTV). Register today and work with Aisha C.'s team.",
       ogImage: "/og/talisu-reg-en.jpg",
       ogImageAlt:
-        "Aisha C., Team Leader, with the Talispros™ tree logo: Register your Mapsite and get global exposure with industry adjacent marketing",
+        "Aisha C., Team Leader, with the Tsplits™ tree logo: Register your Mapsite and get global exposure with industry adjacent marketing",
     },
     talisuEngage: {
       title: "Engage Thorsten P and His Fulfilment Team | TalisU™",
@@ -962,7 +962,7 @@ export const en = {
         "Every project starts with your vision. Choose a Talishouse™ design from the catalogue and engage Thorsten P and his Fulfilment Team. Your $2,000 CAD down payment is credited in full.",
       ogImage: "/og/talisu-engage-en.jpg",
       ogImageAlt:
-        "Thorsten P, Team Leader for fulfilment options, with the Talispros™ tree logo: Engage Thorsten P and his Fulfilment Team to bring your project vision to life",
+        "Thorsten P, Team Leader for fulfilment options, with the Tsplits™ tree logo: Engage Thorsten P and his Fulfilment Team to bring your project vision to life",
     },
   },
 } as const;

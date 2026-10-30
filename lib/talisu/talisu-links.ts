@@ -1,6 +1,6 @@
 /**
  * TalisU link targets (Ralf, Oct 17 2026): everything in TalisBOT points at
- * TalisU so future additions show up in Talispros and Taliswebs without
+ * TalisU so future additions show up in Tsplits™ and Taliswebs without
  * per-site edits.
  *
  * talisu.com currently serves Ralf's separate TalisU welcome site and has

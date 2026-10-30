@@ -15,7 +15,7 @@ import data from "./pages.json";
  * Copy + card design live in scripts/og/pages_src.py; `python3
  * scripts/og/generate.py` renders public/og/pages/<slug>-<locale>.jpg and
  * writes ./pages.json. Static JPGs only, so no OG route reads the filesystem.
- * Internal admin/agent pages share one "Talispros™ Admin" card and are noindex.
+ * Internal admin/agent pages share one "Tsplits™ Admin" card and are noindex.
  */
 
 export const PAGE_SEO_SITE_URL = "https://www.talispros.com";
@@ -66,7 +66,7 @@ function build(input: {
       title: input.title,
       description: input.description,
       url: localizedUrl(url, input.locale),
-      siteName: input.siteName ?? "Talispros™",
+      siteName: input.siteName ?? "Tsplits™",
       type: "website",
       locale: ogLocale(input.locale),
       alternateLocale: ogAlternateLocales(input.locale),
@@ -114,7 +114,7 @@ export function buildPageMetadata(
   });
 }
 
-/** Shared noindex "Talispros™ Admin" metadata for internal pages. */
+/** Shared noindex "Tsplits™ Admin" metadata for internal pages. */
 export function buildAdminMetadata(
   locale: Locale,
   title?: string,
@@ -122,7 +122,7 @@ export function buildAdminMetadata(
 ): Metadata {
   const copy = ADMIN_SEO[locale];
   return build({
-    title: title ? `${title} | Talispros™ Admin` : copy.title,
+    title: title ? `${title} | Tsplits™ Admin` : copy.title,
     description: copy.description,
     path,
     locale,

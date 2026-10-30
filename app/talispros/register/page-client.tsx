@@ -74,7 +74,7 @@ function RegisterForm() {
           <div className="max-w-2xl mx-auto px-5 py-8 sm:py-12 lg:py-16">
             <div className="text-center mb-8 sm:mb-10">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold tracking-tight text-neutral-900">
-                Register Your Talispros™ Account
+                Register Your Tsplits™ Account
               </h1>
               <p className="text-sm sm:text-base text-neutral-500 mt-2">
                 {marketCopy.subtitle}

@@ -77,7 +77,7 @@ export default function MapSitePmcSidebar({
 
       <div className="pointer-events-auto max-h-[min(70dvh,42rem)] overflow-y-auto rounded-2xl bg-white px-4 pb-4 pt-3.5 shadow-[0_12px_36px_rgba(0,0,0,0.18)] ring-1 ring-black/5 sm:max-h-[min(78dvh,42rem)]">
         <h1 className="text-[17px] font-semibold tracking-tight text-neutral-950">
-          Talispros™ PMC
+          Tsplits™ PMC
         </h1>
 
         <ul className="mt-3 space-y-2.5 border-b border-neutral-200/80 pb-3.5">

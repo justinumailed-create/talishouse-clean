@@ -223,7 +223,7 @@ describe("viewer edge chrome", () => {
     );
   });
 
-  it("sends the Talispros™ logo to the claimed Mapsite", () => {
+  it("sends the Tsplits™ logo to the claimed Mapsite", () => {
     expect(viewerMapsiteHref({ fastCode: "rm22", accountType: "root" })).toBe(
       "/talispros/mapsite/root/rm22",
     );

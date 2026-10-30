@@ -14,8 +14,8 @@ describe("/talisu/reg share metadata", () => {
       expect(m.title).not.toMatch(/Mapsite™/);
       expect(m.title).toBe(
         locale === "de"
-          ? "Registrieren Sie Ihre Talispros™ Mapsite: globale Sichtbarkeit | TalisU™"
-          : "Register Your Talispros™ Mapsite and Get Global Exposure | TalisU™",
+          ? "Registrieren Sie Ihre Tsplits™ Mapsite: globale Sichtbarkeit | TalisU™"
+          : "Register Your Tsplits™ Mapsite and Get Global Exposure | TalisU™",
       );
       // Lead with what Aisha's team does, not who she is.
       expect(m.description).toMatch(

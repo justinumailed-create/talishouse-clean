@@ -93,7 +93,7 @@ export default function MapSiteListingSidebar({
                 Unclaimed Market
               </p>
               <p className="mt-2 text-[12px] leading-relaxed text-neutral-700">
-                Welcome to Talispros™. Choose your market and begin onboarding.
+                Welcome to Tsplits™. Choose your market and begin onboarding.
               </p>
             </button>
           </div>

@@ -27,7 +27,7 @@ export default function AgentAuthShell({
         <div className="w-full" style={{ maxWidth: 400 }}>
           <div className="mb-7 flex flex-col items-center gap-3">
             <Link href="/" className="rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E4ED8]/50">
-              <Image src="/logo-mark.png" alt="Talispros" width={44} height={47} priority className="h-11 w-auto" />
+              <Image src="/logo-mark.png" alt="Tsplits™" width={44} height={47} priority className="h-11 w-auto" />
             </Link>
             <span className="rounded-full border border-[#1E4ED8]/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1E4ED8] shadow-sm">
               Agent Portal
@@ -46,7 +46,7 @@ export default function AgentAuthShell({
 
       <footer className="relative px-4 pb-6 pt-2">
         <div style={{ maxWidth: 400 }} className="mx-auto flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-neutral-400">
-          <span>© {new Date().getFullYear()} Talispros™</span>
+          <span>© {new Date().getFullYear()} Tsplits™</span>
           <Link href="/privacy" className="hover:text-neutral-600 hover:underline">Privacy</Link>
           <span className="inline-flex items-center gap-1">
             <svg aria-hidden viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor">

@@ -93,7 +93,7 @@ describe("every page has page-specific SEO and a share card", () => {
 
     it(`${route}`, () => {
       if (!entry) {
-        // Internal tools: shared noindex "Talispros™ Admin" card.
+        // Internal tools: shared noindex "Tsplits™ Admin" card.
         const ownsMetadata = /generateMetadata|export const metadata/.test(src);
         if (ownsMetadata) {
           expect(src, `${route}: register it in scripts/og/pages_src.py`).toMatch(/adminMetadata\(/);
@@ -155,7 +155,7 @@ describe("every page has page-specific SEO and a share card", () => {
   it("admin card is shared, noindex, 1200×630 in EN and DE", () => {
     for (const locale of ["en", "de"] as const) {
       const meta = buildAdminMetadata(locale, "Leads");
-      expect(meta.title).toBe("Leads | Talispros™ Admin");
+      expect(meta.title).toBe("Leads | Tsplits™ Admin");
       expect((meta.robots as { index: boolean }).index).toBe(false);
       const img = path.join(PUBLIC, `og/pages/admin-${locale}.jpg`);
       expect(jpegSize(img)).toEqual({ width: 1200, height: 630 });

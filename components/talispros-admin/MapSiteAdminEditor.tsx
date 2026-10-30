@@ -244,7 +244,7 @@ export default function MapSiteAdminEditor({
             </Link>
           ) : null}
           <h1 className="text-2xl font-semibold text-neutral-900 tracking-tight">
-            Talispros™ Mapsite Admin
+            Tsplits™ Mapsite Admin
           </h1>
           <p className="text-sm text-neutral-500 mt-1 font-mono">{mapsite.fastCode}</p>
         </div>

@@ -6,8 +6,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Fast Code Generator | TalisPros™",
-  description: "Generate your unique Fast Code to access your TalisPros™ Mapsite.",
+  title: "Fast Code Generator | Tsplits™",
+  description: "Generate your unique Fast Code to access your Tsplits™ Mapsite.",
 };
 
 export default function FastCodeLayout({

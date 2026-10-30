@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createMetadata({
-  title: "Client Login | Talispros™",
+  title: "Client Login | Tsplits™",
   description:
     "Sign in with your email and FAST Code to access your read-only marketing analytics dashboard.",
   path: "/talispros/client/login",

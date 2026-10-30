@@ -8,7 +8,7 @@ const STEP_PATHS = [
   PMC_PATHS.register,
 ];
 
-/** Talispros → Media Directory → Contract → Register progress rail. */
+/** Tsplits™ → Media Directory → Contract → Register progress rail. */
 export default function PmcStepper({
   current,
   labels,

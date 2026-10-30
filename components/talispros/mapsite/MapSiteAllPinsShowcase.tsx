@@ -44,7 +44,7 @@ export default function MapSiteAllPinsShowcase({
               FAST Code · ALLPINS
             </span>
             <span className="mt-0.5 block truncate text-[14px] font-semibold tracking-tight text-neutral-950">
-              Talispros™ ALL-PINs
+              Tsplits™ ALL-PINs
             </span>
           </span>
           <span className="shrink-0 rounded-lg bg-neutral-950 px-2.5 py-1.5 text-[11px] font-medium text-white">
@@ -67,7 +67,7 @@ export default function MapSiteAllPinsShowcase({
                 FAST Code · ALLPINS
               </p>
               <h1 className="mt-1 text-[15px] font-semibold tracking-tight text-neutral-950">
-                Talispros™ ALL-PINs
+                Tsplits™ ALL-PINs
               </h1>
               <p className="mt-1 text-[12px] leading-snug text-neutral-600">
                 {pinCountLabel}

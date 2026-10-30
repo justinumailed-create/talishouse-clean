@@ -90,12 +90,12 @@ export const TALISU_FAQ: {
       ],
     },
     {
-      question: "What are Talispros™?",
+      question: "What are Tsplits™?",
       answer:
         "TalisU™ “graduates” who use Mapsites to visually chart, track, and manage the infrastructure of complex referral and/or co-promotion networks.",
     },
     {
-      question: "How can Mapsites increase revenues for Talispros™?",
+      question: "How can Mapsites increase revenues for Tsplits™?",
       answer: [
         "By setting up virtual monopolies that establish service floors.",
         "Example: an average service fee may be “X”, and an average term length may be “Y”, locally. How often would those averages be challenged when competing for clients the traditional way?",

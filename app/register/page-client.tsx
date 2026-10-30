@@ -270,7 +270,7 @@ function RegisterForm() {
               <div className="text-sm text-neutral-600 space-y-3 leading-relaxed">
                 <p>
                   To maintain marketplace quality and member value,
-                  TalisPros™ recommends minimum service fees and
+                  Tsplits™ recommends minimum service fees and
                   minimum participation terms for inclusion.
                 </p>
                 <p>

@@ -117,7 +117,7 @@ export const TALISTV_GUIDE_SLOTS: TalisTvGuideSlot[] = [
 export const TALISTV_GUIDE_CHANNEL = {
   callSign: "TTV",
   name: "TalisTV™",
-  tagline: "Video shelf for the Talispros™ ecosystem",
+  tagline: "Video shelf for the Tsplits™ ecosystem",
 } as const;
 
 export const TALISTV_LAUNCH_HEADLINE = "In-House Online TV Station";

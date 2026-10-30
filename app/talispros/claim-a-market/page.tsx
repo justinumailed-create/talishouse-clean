@@ -60,7 +60,7 @@ export default function ClaimAMarketPage() {
             <p className="text-sm text-neutral-400 max-w-xl mx-auto leading-relaxed mb-8">
               Root Accounts™, Derivative Accounts™, and AdPro™ placements
               allow professionals and organizations to participate in
-              industry-adjacent marketplaces powered by TalisPros™.
+              industry-adjacent marketplaces powered by Tsplits™.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
               <a
@@ -203,7 +203,7 @@ export default function ClaimAMarketPage() {
               <div className="text-sm text-neutral-600 space-y-3 leading-relaxed">
                 <p>
                   To maintain marketplace quality and member value,
-                  TalisPros™ recommends minimum service fees and
+                  Tsplits™ recommends minimum service fees and
                   minimum participation terms for inclusion.
                 </p>
                 <p>

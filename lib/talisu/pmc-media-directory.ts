@@ -1,6 +1,6 @@
 /**
  * PMC Media Directory (Ralf's PMC PDF, pages 7–11, transcribed).
- * PINs from Talispros Mapsites are auto-syndicated to these publications:
+ * PINs from Tsplits™ Mapsites are auto-syndicated to these publications:
  * 10-day cycles, 7 days on and 3 days off to keep listings fresh.
  * `iso` = ISO 3166-1 alpha-2 for the flag; null = Global. `url` is internal
  * reference only (null = none listed in the source workbook) and is never

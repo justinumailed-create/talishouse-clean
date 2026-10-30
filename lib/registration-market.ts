@@ -19,22 +19,22 @@ export const REGISTRATION_MARKET_COPY: Record<
   listings: {
     label: "Licensed Real Estate Professional",
     subtitle:
-      "Register your Talispros™ account to establish service floors and promote your listings globally.",
+      "Register your Tsplits™ account to establish service floors and promote your listings globally.",
   },
   homes: {
     label: "Homes & Cottages Representative",
     subtitle:
-      "Register your Talispros™ account to identify new projects and promote fractional ownership opportunities.",
+      "Register your Tsplits™ account to identify new projects and promote fractional ownership opportunities.",
   },
   fsbos: {
     label: "For-Sale-By-Owner",
     subtitle:
-      "Register your Talispros™ account to extend your FSBO reach and avoid expensive listing commitments.",
+      "Register your Tsplits™ account to extend your FSBO reach and avoid expensive listing commitments.",
   },
   brokers: {
     label: "Real Estate Broker or Owner",
     subtitle:
-      "Register your Talispros™ Root Account so licensed professionals beneath you qualify for Lease-to-Own ads.",
+      "Register your Tsplits™ Root Account so licensed professionals beneath you qualify for Lease-to-Own ads.",
   },
   adpro: {
     label: "Adpro Service Provider",

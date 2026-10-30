@@ -34,7 +34,7 @@ export default function RegisterAgentsClient({
     <div className="flex min-h-dvh flex-col items-center justify-center bg-white px-5 py-12 text-neutral-900">
       <div className="w-full max-w-lg text-center">
         <p className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-400">
-          Talispros™
+          Tsplits™
         </p>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight text-neutral-900 sm:text-4xl lg:text-5xl">
           REGISTER YOUR AGENTS

@@ -13,7 +13,7 @@ export const TALISU_MKTS_ATLIST_MAP_ID =
 export const TALISU_MKTS_FLAG_CA = "/talisu/mkts/atlist-canada-flag-pin.png";
 
 /**
- * Full Talispros windswept-tree mark for Do More pins.
+ * Full Tsplits™ windswept-tree mark for Do More pins.
  * Vector of the navbar tree (`/logo-mark.png`), cropped tight to the branch
  * tips and trunk base. White margin comes only from the logo-box inset —
  * this file has no baked padding (a padded PNG plus that inset rendered the
@@ -79,7 +79,7 @@ export const TALISU_MKTS_DO_MORE_PIN_SIZE = 58;
 export const TALISU_MKTS_FOOTER =
   "Select the PIN nearest you to claim a market of 80 kilometres around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.";
 
-export const TALISU_MKTS_PMC_TITLE = "Talispros™ PMC";
+export const TALISU_MKTS_PMC_TITLE = "Tsplits™ PMC";
 
 export const TALISU_MKTS_PMC_BULLETS = [
   "Root Accounts can register unlimited Derivative Accounts.",
@@ -91,8 +91,8 @@ export const TALISU_MKTS_HEADER_TAGLINE =
   "Industry Adjacent Mapsite Markets";
 
 /**
- * Header logo target: tree icon + Talispros™ + tagline are one link to the
- * Talispros™ pitch page (start of the PMC sequence).
+ * Header logo target: tree icon + Tsplits™ + tagline are one link to the
+ * Tsplits™ pitch page (start of the PMC sequence).
  */
 export const TALISU_MKTS_HEADER_LOGO_HREF = "/talisu/talispros";
 
@@ -122,7 +122,7 @@ export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
 
 /**
  * TalisU™ header dropdown — TSPLITS™, Bookshelf, FAQ, Media Directory, Contract,
- * Knowledge Base, then (after a divider) Audio, Video. The Talispros™ page is
+ * Knowledge Base, then (after a divider) Audio, Video. The Tsplits™ page is
  * reached from the header logo (TALISU_MKTS_HEADER_LOGO_HREF), not this menu.
  */
 export const TALISU_MKTS_HEADER_DROPDOWN = [
@@ -132,7 +132,7 @@ export const TALISU_MKTS_HEADER_DROPDOWN = [
   { href: "/talisu/media-directory", label: "Media Directory" },
   // ── divider (after Media Directory) ── Contract + Knowledge Base below.
   // Audio and Video are no longer in the menu (their routes still exist).
-  // Talispros™ is the logo link.
+  // Tsplits™ is the logo link.
   { href: "/talisu/contract", label: "Contract" },
   { href: "/talisu/kb", label: "Knowledge Base" },
 ] as const;

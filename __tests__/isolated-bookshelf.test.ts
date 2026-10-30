@@ -34,9 +34,9 @@ describe("isolated catalogue bookshelf", () => {
   });
 
 
-  it("defaults blank isolated-shelf descriptions to Talispros™ RWA copy (not ADMIN123)", () => {
+  it("defaults blank isolated-shelf descriptions to Tsplits™ RWA copy (not ADMIN123)", () => {
     expect(ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION).toBe(
-      "Talispros™ Real-World Asset Tokenization",
+      "Tsplits™ Real-World Asset Tokenization",
     );
     expect(resolveIsolatedBookshelfBookDescription("")).toBe(
       ISOLATED_BOOKSHELF_DEFAULT_DESCRIPTION,
@@ -334,7 +334,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(card).toContain("Open Mapsite");
   });
 
-  it("ALLPINS left rail uses Talispros™ ALL-PINs title with mobile collapse", () => {
+  it("ALLPINS left rail uses Tsplits™ ALL-PINs title with mobile collapse", () => {
     const app = readFileSync(
       resolve("components/talispros/mapsite/MapSiteAllPinsApplication.tsx"),
       "utf8",
@@ -345,7 +345,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     );
     expect(app).not.toContain("Canadian Mapsite pins");
     expect(app).not.toContain("absolute right-3 top-3");
-    expect(showcase).toContain("Talispros™ ALL-PINs");
+    expect(showcase).toContain("Tsplits™ ALL-PINs");
     expect(showcase).toContain("allpins-left-rail");
     expect(showcase).toContain("allpins-rail-collapse");
     expect(showcase).toContain("allpins-rail-expand");

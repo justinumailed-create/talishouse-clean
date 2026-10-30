@@ -4,8 +4,8 @@ import { TALISU_MKTS_HEADER_TAGLINE } from "../lib/talisu/markets-pins";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-describe("Talispros™ static brand mark (no flip)", () => {
-  it("wires static Talispros™ into blue TalisUMktsHeader (no TalisU flip)", () => {
+describe("Tsplits™ static brand mark (no flip)", () => {
+  it("wires static Tsplits™ into blue TalisUMktsHeader (no TalisU flip)", () => {
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
@@ -19,13 +19,13 @@ describe("Talispros™ static brand mark (no flip)", () => {
       resolve("components/talisu/TalisBrandMark.tsx"),
       "utf8",
     );
-    expect(mark).toContain("TSPLITS™");
+    expect(mark).toContain("Tsplits™");
     expect(mark).not.toContain("TalisU™");
     expect(mark).not.toContain("setInterval");
     expect(mark).not.toContain("setTimeout");
   });
 
-  it("points the blue-bar logo (icon + wordmark + tagline) at the Talispros™ page", () => {
+  it("points the blue-bar logo (icon + wordmark + tagline) at the Tsplits™ page", () => {
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",

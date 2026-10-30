@@ -70,7 +70,7 @@ export default function MarketingAdminDemosClient() {
             Demo Mapsites
           </h2>
           <p className="text-xs text-neutral-500">
-            Demonstration pins with the pinned Talispros eBook. No FAST Codes.
+            Demonstration pins with the pinned Tsplits™ eBook. No FAST Codes.
           </p>
         </div>
         <div className="flex gap-2">

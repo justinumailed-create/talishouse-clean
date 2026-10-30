@@ -9,8 +9,8 @@ export async function generateMetadata({
 }) {
   const code = ((await params)?.fastCode ?? "").toUpperCase().trim();
   return dynamicPageMetadata((locale) => ({
-    title: locale === "de" ? `TalisTV™ Zugang ${code} | Talispros™` : `TalisTV™ Access ${code} | Talispros™`,
-    description: locale === "de" ? `TalisTV™ auf der Talispros™ Mapsite zum FAST Code ${code} ansehen.` : `Watch TalisTV™ on the Talispros™ Mapsite for FAST Code ${code}.`,
+    title: locale === "de" ? `TalisTV™ Zugang ${code} | Tsplits™` : `TalisTV™ Access ${code} | Tsplits™`,
+    description: locale === "de" ? `TalisTV™ auf der Tsplits™ Mapsite zum FAST Code ${code} ansehen.` : `Watch TalisTV™ on the Tsplits™ Mapsite for FAST Code ${code}.`,
     path: `/ttvaccess/${encodeURIComponent(code)}`,
     image: mapsiteShareOgPath(code || "allpins"),
   }));

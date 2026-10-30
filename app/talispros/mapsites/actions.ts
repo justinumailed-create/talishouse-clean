@@ -216,7 +216,7 @@ export async function openClaimedMapSiteFromHomeFastCode(
 
 /**
  * Logout from claimed/paid Mapsite owner view: clear owner + paid cookies and
- * return to the Talispros home page so no claimed/public Mapsite shell remains.
+ * return to the Tsplits™ home page so no claimed/public Mapsite shell remains.
  */
 export async function logoutMapSiteOwnerSession(_options?: {
   fastCode?: string | null;

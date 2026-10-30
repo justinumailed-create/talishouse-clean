@@ -463,7 +463,7 @@ function FastCodeSidebar() {
         <div className="text-center">
         <Image
           src="/logo.png"
-          alt="Talispros™"
+          alt="Tsplits™"
           width={120}
           height={32}
           className="h-7 w-auto object-contain mx-auto mb-6"
@@ -503,7 +503,7 @@ function FastCodeSidebar() {
       <RegisterCta />
       <Image
         src="/logo.png"
-        alt="Talispros™"
+        alt="Tsplits™"
         width={120}
         height={32}
         className="h-7 w-auto object-contain mb-6"
@@ -1270,7 +1270,7 @@ export default function BuildMapSitePage() {
                 </h3>
 
                 <p className="text-sm text-neutral-600 mb-4 leading-relaxed">
-                  By checking the boxes below, you agree to receive communications from Talispros™. You can unsubscribe anytime.
+                  By checking the boxes below, you agree to receive communications from Tsplits™. You can unsubscribe anytime.
                 </p>
 
                 <label className="flex items-start gap-3 cursor-pointer mb-5">
@@ -1281,7 +1281,7 @@ export default function BuildMapSitePage() {
                     className="mt-0.5 w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
                   />
                   <span className="text-sm text-neutral-600 leading-relaxed">
-                    I agree to receive communications from Talispros™.
+                    I agree to receive communications from Tsplits™.
                   </span>
                 </label>
 
@@ -1297,7 +1297,7 @@ export default function BuildMapSitePage() {
                     className="mt-0.5 w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
                   />
                   <span className="text-sm text-neutral-600 leading-relaxed">
-                    I agree to allow Talispros™ to store and process my personal data.{" "}
+                    I agree to allow Tsplits™ to store and process my personal data.{" "}
                     <span className="text-red-400">*</span>
                   </span>
                 </label>

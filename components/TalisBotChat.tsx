@@ -164,7 +164,7 @@ export default function TalisBotChat({
                 {b.getHelp}
               </Link>
             </div>
-            {/* Global Admin → Talispros admin sign-in, in a new tab. */}
+            {/* Global Admin → Tsplits™ admin sign-in, in a new tab. */}
             <Link
               href={ROUTES.ADMIN_LOGIN}
               target="_blank"

@@ -54,7 +54,7 @@ export default function TalisMapsMarketingHeader() {
             href="/talispros"
             className="text-[14px] font-medium tracking-[0.3px] text-neutral-400 transition-colors duration-150 hover:text-neutral-700"
           >
-            Talispros™
+            Tsplits™
           </Link>
         </nav>
 
@@ -86,7 +86,7 @@ export default function TalisMapsMarketingHeader() {
               onClick={() => setOpen(false)}
               className="rounded-lg px-3 py-2.5 text-[14px] font-medium tracking-[0.3px] text-neutral-400 transition-colors duration-150 hover:bg-neutral-100 hover:text-neutral-700"
             >
-              Talispros™
+              Tsplits™
             </Link>
           </nav>
         </div>

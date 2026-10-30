@@ -56,19 +56,19 @@ export default async function TalisprosPitchPage({ searchParams }: Props) {
         <div className="mx-auto max-w-6xl px-4 pb-16 pt-8 sm:px-6 sm:pb-24 sm:pt-10">
           <PmcStepper current={1} labels={t.steps} fastCode={fastCode} tone="dark" />
           <div className="mt-10 flex flex-wrap items-center gap-2 text-[12px] font-semibold sm:mt-14">
-            <span className="rounded-full bg-white px-3 py-1 text-[#06182f]">🇨🇦 {t.regionCanada} · Talispros</span>
+            <span className="rounded-full bg-white px-3 py-1 text-[#06182f]">🇨🇦 {t.regionCanada} · Tsplits™</span>
             <IframeLink
               url={TALISWEBS_US_URL}
-              title="Taliswebs (United States)"
+              title="Tsplits™ (United States)"
               className="rounded-full border border-white/30 px-3 py-1 text-white/80 hover:bg-white/10"
             >
-              🇺🇸 {t.regionUs} · Taliswebs ↗
+              🇺🇸 {t.regionUs} · Tsplits™ USA ↗
             </IframeLink>
           </div>
           <p className="mt-6 text-sm font-bold uppercase tracking-[0.25em] text-[#7cc0ff]">{t.pitch.kicker}</p>
           <h1 className="mt-3 text-5xl font-black leading-[0.95] tracking-tight sm:text-7xl lg:text-8xl">
             <span className="bg-gradient-to-r from-[#7cc0ff] via-[#3d9bff] to-[#0069CF] bg-clip-text text-transparent">
-              TALISPROS
+              TSPLITS™
             </span>
             <br />
             PMC

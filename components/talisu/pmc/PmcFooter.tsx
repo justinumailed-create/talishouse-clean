@@ -4,7 +4,7 @@ import { PMC_PATHS, TALISWEBS_US_URL, pmcHref } from "@/lib/talispros/mapsite-co
 
 /**
  * Footer on every PMC page: optional Back/Next, ToS + Privacy Policy links,
- * and the Canada (Talispros) / US (Taliswebs) region note.
+ * and the Canada (Tsplits™) / US (Taliswebs) region note.
  */
 export default function PmcFooter({
   labels,
@@ -66,7 +66,7 @@ export default function PmcFooter({
         </div>
         <p>
           🇨🇦 {labels.regionCanadaNote}{" "}
-          <IframeLink url={TALISWEBS_US_URL} title="Taliswebs (United States)" className="text-[#0069CF] hover:underline">
+          <IframeLink url={TALISWEBS_US_URL} title="Tsplits™ (United States)" className="text-[#0069CF] hover:underline">
             🇺🇸 {labels.regionUsNote}
           </IframeLink>
         </p>

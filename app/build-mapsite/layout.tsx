@@ -6,7 +6,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Build A Mapsite | Talispros™",
+  title: "Build A Mapsite | Tsplits™",
   description:
     "Build a done-for-you Mapsite without obligation. We will follow up within two business days to optimize and publish.",
 };

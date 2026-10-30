@@ -30,7 +30,7 @@ export default function BusinessOfficePage() {
   ];
 
   const publicItems = [
-    { title: "Propose a Project", desc: "Start a side-business with Talispros™", href: ROUTES.BUSINESS_OFFICE_APPLY },
+    { title: "Propose a Project", desc: "Start a side-business with Tsplits™", href: ROUTES.BUSINESS_OFFICE_APPLY },
   ];
 
   return (

@@ -10,7 +10,7 @@ import {
 
 const COMPLIANCE: TalisBooksBrokerageCompliance = {
   brokerLogoId: "logo-1",
-  brokerName: "Talispros Partner Realty",
+  brokerName: "Tsplits™ Partner Realty",
   agentPhotoId: "agent-photo-1",
   agentContact: "alex@example.com · 416-555-0100",
   headline: "Your trusted advisor",

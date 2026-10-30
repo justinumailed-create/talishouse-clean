@@ -19,7 +19,7 @@ export async function GET() {
     return new Response(new Uint8Array(jpeg), { headers: HEADERS });
   } catch (error) {
     console.error(
-      "[og] Talispros brand card failed:",
+      "[og] Tsplits™ brand card failed:",
       error instanceof Error ? error.message : error,
     );
     return new Response("Open Graph image is unavailable.", { status: 500 });

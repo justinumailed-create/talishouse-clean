@@ -13,7 +13,7 @@ import {
 
 const DEMO_CONTENT: TalisBooksCoverContent = {
   title: "Lake Country Residences",
-  subtitle: "A Talispros™ Lookbook",
+  subtitle: "A Tsplits™ Lookbook",
   heroImageUrl: "",
   heroImageAlt: "Premium residential lookbook cover",
 };

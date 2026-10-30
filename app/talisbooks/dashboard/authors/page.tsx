@@ -7,7 +7,7 @@ export default function TalisBooksAuthorsPage() {
     <div className="mx-auto max-w-6xl">
       <TalisBooksPageHeader
         title="Authors"
-        description="Author profiles linked to books and optionally to Talispros™ accounts."
+        description="Author profiles linked to books and optionally to Tsplits™ accounts."
       />
       <TalisBooksEmptyState
         icon={Users}

@@ -1,7 +1,7 @@
 {
-  "name": "Talispros Chat",
+  "name": "Tsplits™ Chat",
   "short_name": "Chat",
-  "description": "Private messages and team updates for Talispros agents and admins.",
+  "description": "Private messages and team updates for Tsplits™ agents and admins.",
   "start_url": "/chat",
   "scope": "/chat",
   "display": "standalone",

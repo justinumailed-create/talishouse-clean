@@ -517,7 +517,7 @@ export default function TalisUMktsHeader({
       style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
     >
       <div className="mx-auto flex max-w-[1920px] flex-nowrap items-center justify-between gap-3 px-3 py-2 sm:px-5 lg:flex-wrap lg:py-2.5 lg:pb-3.5">
-        {/* One logo link: tree icon + Talispros™ + tagline → Talispros™ page. */}
+        {/* One logo link: tree icon + Tsplits™ + tagline → Tsplits™ page. */}
         <Link
           href={TALISU_MKTS_HEADER_LOGO_HREF}
           data-testid="header-logo-link"
@@ -559,7 +559,7 @@ export default function TalisUMktsHeader({
           ).map((item) => renderNavLink(item))}
           {/* Claimed Mapsites: the Dashboard lives on the left Marketing card;
               the PMC sequence (Media Directory → Contract) lives in TalisU;
-              the Talispros™ page is the header logo link. */}
+              the Tsplits™ page is the header logo link. */}
           {/* Paid Mapsite (real activation payment): never show Register. */}
           {claimedMapsite &&
           dashboardUnlocked &&

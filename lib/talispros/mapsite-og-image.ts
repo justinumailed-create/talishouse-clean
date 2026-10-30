@@ -55,7 +55,7 @@ export function toAbsoluteHttpsOgUrl(url: string): string {
   return `${publicOgOrigin()}${path}`;
 }
 
-/** Tall Talispros™ poster / header logos — these become the "huge logo" WhatsApp card. */
+/** Tall Tsplits™ poster / header logos — these become the "huge logo" WhatsApp card. */
 export function isLargeBrandLogoUrl(url: string): boolean {
   const value = url.trim().toLowerCase();
   if (!value) return false;

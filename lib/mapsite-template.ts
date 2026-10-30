@@ -21,7 +21,7 @@ export function getDefaultSections(data: {
       title: `${displayName}`,
       content: {
         headline: `Welcome to ${displayName}'s Mapsite`,
-        subtext: "Property discovery and modular home solutions powered by TalisPros™.",
+        subtext: "Property discovery and modular home solutions powered by Tsplits™.",
         fastCode: data.fastCode,
       },
     },
@@ -29,7 +29,7 @@ export function getDefaultSections(data: {
       type: "about",
       title: "About",
       content: {
-        description: `${displayName} is a registered TalisPros™ partner. Contact them to learn more about available properties and investment opportunities in your area.`,
+        description: `${displayName} is a registered Tsplits™ partner. Contact them to learn more about available properties and investment opportunities in your area.`,
       },
     },
     {

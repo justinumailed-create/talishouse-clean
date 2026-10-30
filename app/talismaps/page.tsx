@@ -14,7 +14,7 @@ export default function TalisMapsMarketingPage() {
       <section className="mx-auto max-w-6xl px-6 py-16 sm:py-24 lg:px-8">
         <div className="max-w-3xl">
           <p className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-neutral-400">
-            Talispros™ Ecosystem
+            Tsplits™ Ecosystem
           </p>
           <h1 className="text-4xl font-semibold tracking-tight text-neutral-900 sm:text-5xl lg:text-6xl">
             {TALISMAPS_PRODUCT_NAME}
@@ -67,7 +67,7 @@ export default function TalisMapsMarketingPage() {
       <section className="mx-auto max-w-6xl px-6 py-16 lg:px-8">
         <div className="rounded-2xl border border-neutral-200 bg-white p-8 sm:p-10">
           <h2 className="text-2xl font-semibold tracking-tight text-neutral-900">
-            Built for the Talispros™ ecosystem
+            Built for the Tsplits™ ecosystem
           </h2>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-neutral-500">
             Talismaps™ is a standalone product with its own dashboard, database models,
@@ -78,7 +78,7 @@ export default function TalisMapsMarketingPage() {
             href="/talispros"
             className="mt-6 inline-flex text-sm font-medium text-neutral-900 underline-offset-4 hover:underline"
           >
-            Return to Talispros™
+            Return to Tsplits™
           </Link>
         </div>
       </section>

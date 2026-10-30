@@ -35,8 +35,8 @@ describe("TalisU blue header dropdown", () => {
     const header = readFileSync(resolve("components/talisu/TalisUMktsHeader.tsx"), "utf8");
     expect(header).not.toContain("t.nav.talisuMenu.audio");
     expect(header).not.toContain("t.nav.talisuMenu.video");
-    // Talispros™ moved out of the dropdown: the header logo opens that page.
-    expect(TALISU_MKTS_HEADER_DROPDOWN.some((i) => (i.label as string) === "Talispros")).toBe(false);
+    // Tsplits™ moved out of the dropdown: the header logo opens that page.
+    expect(TALISU_MKTS_HEADER_DROPDOWN.some((i) => (i.label as string) === "Tsplits™")).toBe(false);
     expect(
       TALISU_MKTS_HEADER_DROPDOWN.some((i) => (i.href as string) === TALISU_MKTS_HEADER_LOGO_HREF),
     ).toBe(false);
@@ -163,7 +163,7 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain("w-80!");
   });
 
-  it("makes the tree icon, Talispros™ and the tagline one logo link to the Talispros™ page", () => {
+  it("makes the tree icon, Tsplits™ and the tagline one logo link to the Tsplits™ page", () => {
     expect(TALISU_MKTS_HEADER_LOGO_HREF).toBe("/talisu/talispros");
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
@@ -192,7 +192,7 @@ describe("TalisU blue header dropdown", () => {
     // Wordmark + tagline sit inside the logo link: no nested link.
     expect(mark).not.toContain("<Link");
     expect(mark).not.toContain("<a ");
-    expect(mark).toContain("TSPLITS™");
+    expect(mark).toContain("Tsplits™");
     expect(mark).toContain("{tagline}");
   });
 });

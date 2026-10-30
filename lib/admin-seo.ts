@@ -1,17 +1,17 @@
 import { createMetadata } from "./seo";
 
 export const ADMIN_CONSOLE_METADATA = createMetadata({
-  title: "Admin Console | Talispros",
+  title: "Admin Console | Tsplits™",
   description:
-    "Talispros admin console. Authorized operators sign in with a FAST code to manage site content, Mapsites, and operations.",
+    "Tsplits™ admin console. Authorized operators sign in with a FAST code to manage site content, Mapsites, and operations.",
   path: "/admin",
   private: true,
 });
 
 export const ADMIN_LOGIN_METADATA = createMetadata({
-  title: "Admin Login | Talispros",
+  title: "Admin Login | Tsplits™",
   description:
-    "Sign in to the Talispros admin console with your authorized FAST code.",
+    "Sign in to the Tsplits™ admin console with your authorized FAST code.",
   path: "/admin/login",
   private: true,
 });

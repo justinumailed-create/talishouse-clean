@@ -22,7 +22,7 @@ export default async function ClientBooksPage() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
-              Talispros™ Client Portal
+              Tsplits™ Client Portal
             </p>
             <h1 className="text-sm font-semibold text-neutral-900">{TALISBOOKS_PRODUCT_NAME}</h1>
           </div>

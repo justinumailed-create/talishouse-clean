@@ -353,7 +353,7 @@ function customContentRows(options: {
   description: string;
 }): SelfServicePageRowContent[] {
   const agent = options.agent;
-  const brokerageName = agent.brokerageName?.trim() || "Talispros™";
+  const brokerageName = agent.brokerageName?.trim() || "Tsplits™";
   const kicker = options.advertising ? "Advertisement" : undefined;
   return [
     {

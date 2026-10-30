@@ -324,7 +324,7 @@ export async function recordServiceAgreementSignature(input: {
     ["User agent", input.userAgent || "—"],
     ["Agreement SHA-256", sha],
     ["Record id", id],
-    ["Provider", "Talispros in-app e-signature"],
+    ["Provider", "Tsplits™ in-app e-signature"],
   ];
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>Signed Service Agreement ${escapeHtml(
     fastCode?.toUpperCase() || id,

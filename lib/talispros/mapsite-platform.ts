@@ -122,7 +122,7 @@ const DEMO_DESCRIPTION =
   "It's a million dollar neighbourhood. A driveway and building site were prepared some years ago. May come with a Tiny Home guest house to stay in, while you build your dream home.";
 
 const DEMO_SIDEBAR_BLURB =
-  "Register with Talispros to have Aisha manage your exposure globally...!";
+  "Register with Tsplits™ to have Aisha manage your exposure globally...!";
 
 export const MAPSITE_GENERIC_PARTNER_WRITEUP =
   "Upon registration your Mapsite will be able to promote 100 PINs generating 1,000 views, monthly. No referral fees - ever";
@@ -739,7 +739,7 @@ export async function markMapSiteClaimedByBuildRequest(params: {
         fast_code: DEMO_MAPSITE_FAST_CODE,
         slug: "demo-unclaimed",
         account_type: "demonstration",
-        owner_first_name: "Talispros",
+        owner_first_name: "Tsplits™",
         owner_last_name: "Demonstration",
         email: "demo@talispros.com",
         phone: "",

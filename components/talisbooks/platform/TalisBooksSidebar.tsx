@@ -19,7 +19,7 @@ export default function TalisBooksSidebar() {
     <aside className="flex h-full w-60 shrink-0 flex-col border-r border-neutral-200/80 bg-white/80 backdrop-blur-xl">
       <div className="border-b border-neutral-200/80 px-5 py-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-400">
-          Talispros™ Ecosystem
+          Tsplits™ Ecosystem
         </p>
         <h1 className="mt-1 text-lg font-semibold tracking-tight text-neutral-900">
           {TALISBOOKS_PRODUCT_NAME}

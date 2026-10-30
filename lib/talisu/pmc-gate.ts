@@ -20,7 +20,7 @@ import { PMC_PATHS, normalizeFastCodeParam, pmcHref } from "@/lib/talispros/maps
 
 /**
  * Registration gate (Arun, 2026-10-14) — every registrant, every entry point:
- *   Demo → claim Mapsite (FAST Code) → Talispros → Media Directory →
+ *   Demo → claim Mapsite (FAST Code) → Tsplits™ → Media Directory →
  *   Contract (agent code) → sign → Aisha Register → payment.
  * Paid Mapsites and Mapsite admins are never gated.
  */

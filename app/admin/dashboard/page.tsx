@@ -63,7 +63,7 @@ export default async function AdminDashboardPage() {
       <PageHeader
         kicker="Overview"
         title={account ? `Welcome back, ${account.name.split(" ")[0]}` : "Dashboard"}
-        subtitle="Talispros™ administration: Mapsites, Talisbooks™, Talismaps™ and agents."
+        subtitle="Tsplits™ administration: Mapsites, Talisbooks™, Talismaps™ and agents."
       />
 
       {summary ? (

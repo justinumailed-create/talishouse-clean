@@ -7,7 +7,7 @@ import {
 } from "@/lib/i18n/metadata";
 
 const SITE_URL = "https://www.talishouse.com";
-const SITE_NAME = "Talispros™";
+const SITE_NAME = "Tsplits™";
 /**
  * Sitewide default Open Graph / Twitter preview when a page omits `image`.
  * Must be the composed homepage brand card (logo+partner+map) — never the

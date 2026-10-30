@@ -35,7 +35,7 @@ describe("normalizeMapSiteBackCoverToArt", () => {
         title: "Agent details",
         agentName: "ret yuy",
         agentEmail: "test@test.com",
-        brokerageName: "TALISPROS™",
+        brokerageName: "TSPLITS™",
         heroImageUrl: "/property.jpg",
       }),
     ];

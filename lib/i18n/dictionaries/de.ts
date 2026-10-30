@@ -1,6 +1,6 @@
 /**
  * Deutsches UI-Wörterbuch — von Hand übersetzt (Sie-Form).
- * Marken bleiben unverändert: Talispros™, Talishouse™, Mapsites/Mapsite,
+ * Marken bleiben unverändert: Tsplits™, Talishouse™, Mapsites/Mapsite,
  * Talisbooks™, TalisTV™, TalisU / Talis“U”, TalisBOT, FAST Codes™, TEB™, TTV™,
  * PIN, SamCart. Akronyme (URL, MLS, TEB, TVA, TTV) bleiben,
  * nur ihre Erklärungen werden übersetzt.
@@ -30,7 +30,7 @@ export const de: Dictionary = {
 
   nav: {
     tagline: "Branchennahe Mapsite-Märkte",
-    brandSr: "Marke: TSPLITS™",
+    brandSr: "Marke: Tsplits™",
     home: "Startseite",
     markets: "Märkte",
     mapsites: "Mapsites",
@@ -199,12 +199,12 @@ export const de: Dictionary = {
           ],
         },
         {
-          question: "Wer sind Talispros™?",
+          question: "Wer sind Tsplits™?",
           answer:
             "„Absolventen“ der TalisU™, die Mapsites nutzen, um die Infrastruktur komplexer Empfehlungs- und/oder Co-Promotion-Netzwerke visuell darzustellen, nachzuverfolgen und zu verwalten.",
         },
         {
-          question: "Wie können Mapsites den Umsatz von Talispros™ steigern?",
+          question: "Wie können Mapsites den Umsatz von Tsplits™ steigern?",
           answer: [
             "Durch den Aufbau virtueller Monopole, die Untergrenzen für Servicegebühren etablieren.",
             "Beispiel: Vor Ort liegt die durchschnittliche Servicegebühr vielleicht bei „X“ und die durchschnittliche Vertragslaufzeit bei „Y“. Wie oft würden diese Durchschnittswerte infrage gestellt, wenn Sie auf herkömmliche Weise um Kunden konkurrieren?",
@@ -407,7 +407,7 @@ export const de: Dictionary = {
     faq: "FAQ",
     getHelp: "Projektvision teilen",
     globalAdmin: "Globaler Admin",
-    processesHeading: "Talispros™-Prozesse",
+    processesHeading: "Tsplits™-Prozesse",
     allTopics: "← Alle Themen",
     contactAbout: "Hierzu Kontakt aufnehmen",
     back: "← Zurück",
@@ -445,7 +445,7 @@ export const de: Dictionary = {
       {
         id: "talisu",
         title: "TalisU™",
-        body: "TalisU™ ist die Lern- und Marktebene: Wissensdatenbank, Audio, Video, Marktkarte und Registrierung – unter der blauen Talispros™-Kopfzeile.",
+        body: "TalisU™ ist die Lern- und Marktebene: Wissensdatenbank, Audio, Video, Marktkarte und Registrierung – unter der blauen Tsplits™-Kopfzeile.",
       },
       {
         id: "kb",
@@ -511,7 +511,7 @@ export const de: Dictionary = {
   },
 
   markets: {
-    pmcTitle: "Talispros™ PMC",
+    pmcTitle: "Tsplits™ PMC",
     pmcBullets: [
       "Root-Konten können unbegrenzt viele Derivative-Konten registrieren.",
       "Derivative-Konten veröffentlichen auf Root-Mapsites und bewerben dort jeweils bis zu 100 PINs.",
@@ -628,7 +628,7 @@ export const de: Dictionary = {
         "Nach der Registrierung kann Ihre Mapsite bis zu 10 Kategorien mit 100 PINs bewerben und so monatlich 1.000 Aufrufe erzielen. Niemals Vermittlungsprovisionen.",
       claimedFallback: "FAST Code™ {code} · beanspruchte Mapsite.",
       welcomeFallback:
-        "Willkommen bei Talispros™. Wählen Sie Ihren Markt und starten Sie das Onboarding.",
+        "Willkommen bei Tsplits™. Wählen Sie Ihren Markt und starten Sie das Onboarding.",
       tebPreparing:
         "Ihr erstes Talisbook™ wird vorbereitet. TEB™ wird hier freigeschaltet, sobald es fertig ist.",
       resourceUnavailable: "{label} nicht verfügbar",
@@ -713,9 +713,9 @@ export const de: Dictionary = {
       placedByAgent: "Von einem Agenten gesetzt – löschen, falls nicht Ihrer",
       freeCredits: "Gratis-PINs",
       freeAvailableOne:
-        "Sie haben 1 Gratis-PIN vom Talispros™-Admin. Er wird vor jeder Zahlung verwendet.",
+        "Sie haben 1 Gratis-PIN vom Tsplits™-Admin. Er wird vor jeder Zahlung verwendet.",
       freeAvailableMany:
-        "Sie haben {count} Gratis-PINs vom Talispros™-Admin. Sie werden vor jeder Zahlung verwendet.",
+        "Sie haben {count} Gratis-PINs vom Tsplits™-Admin. Sie werden vor jeder Zahlung verwendet.",
       useFreeOne: "1 Gratis-PIN hinzufügen",
       useFreeMany: "{count} Gratis-PINs hinzufügen",
       useFreeAndBuy: "{free} gratis + {paid} kaufen · {price} CAD",
@@ -726,7 +726,7 @@ export const de: Dictionary = {
   },
 
   pmc: {
-    steps: ["Talispros", "Mediendirektorium", "Vertrag", "Registrieren"],
+    steps: ["Tsplits™", "Mediendirektorium", "Vertrag", "Registrieren"],
     stepLabel: "Schritt {n} von 4",
     next: "Weiter",
     back: "Zurück",
@@ -734,15 +734,15 @@ export const de: Dictionary = {
     nextContract: "Weiter: Vertrag",
     regionCanada: "Kanada",
     regionUs: "Vereinigte Staaten",
-    regionCanadaNote: "Sie sind hier – Talispros bedient Kanada (CAD).",
-    regionUsNote: "In den USA? Besuchen Sie Taliswebs.",
+    regionCanadaNote: "Sie sind hier – Tsplits™ bedient Kanada (CAD).",
+    regionUsNote: "In den USA? Besuchen Sie Tsplits™ USA.",
     terms: "Nutzungsbedingungen",
     privacy: "Datenschutzerklärung",
     footerNote: "TalisALL PMC · fördern – verwalten – kooperieren",
     englishOnly: "Der Vertrags- und Dokumenttext ist auf Englisch; die englische Fassung ist maßgeblich.",
     pitch: {
       kicker: "Branchennahe Märkte",
-      heroTitle: "Talispros PMC",
+      heroTitle: "Tsplits™ PMC",
       heroLead: "Kartenbasiertes Marketing neben MLS® und Ihrer Makler-Website – es macht aus Standort Leads, Umsatz und Reputation.",
       ctaPrimary: "Zum Mediendirektorium",
       ctaSecondary: "Zum Wertversprechen",
@@ -750,11 +750,11 @@ export const de: Dictionary = {
       statCountries: "Länder & Regionen",
       statCycle: "Tage Syndizierungszyklus",
       valueTitle: "Wertversprechen",
-      fitTitle: "Die strategische Rolle von Talispros",
-      fitLead: "Drei Ebenen, ein Markt. Talispros ergänzt die nachfrageschaffende Ebene, ohne die ersten beiden zu ersetzen.",
-      reasonsTitle: "Sieben gute Gründe, warum Makler Talispros wollen",
+      fitTitle: "Die strategische Rolle von Tsplits™",
+      fitLead: "Drei Ebenen, ein Markt. Tsplits™ ergänzt die nachfrageschaffende Ebene, ohne die ersten beiden zu ersetzen.",
+      reasonsTitle: "Sieben gute Gründe, warum Makler Tsplits™ wollen",
       benefitLabel: "Vorteil für Makler",
-      moneyTitle: "Weitere Einnahmequellen mit Talispros",
+      moneyTitle: "Weitere Einnahmequellen mit Tsplits™",
       adjacentKicker: "Punkt 4",
       weDoTitle: "Was wir für Sie tun",
       mediaTitle: "Das Mediendirektorium",
@@ -779,7 +779,7 @@ export const de: Dictionary = {
         "Für Jahresabonnements bieten wir einen besonderen Einführungspreis an. Sobald weitere gelistete und noch nicht gelistete Medienportale hinzukommen, verdoppelt sich der Jahrespreis für alle, die sich bis dahin noch nicht registriert haben.",
       ],
       syndicationNote:
-        "PINs aus Talispros Mapsites werden automatisch an die unten aufgeführten internationalen Portale syndiziert – in 10-Tage-Zyklen mit jeweils 3 Tagen Pause, damit die Inserate stets frisch bleiben.",
+        "PINs aus Tsplits™ Mapsites werden automatisch an die unten aufgeführten internationalen Portale syndiziert – in 10-Tage-Zyklen mit jeweils 3 Tagen Pause, damit die Inserate stets frisch bleiben.",
       count: "{n} Portale",
       modalNote: "Manche Anbieter blockieren das Einbetten. Bleibt die Seite leer, öffnen Sie sie in einem neuen Tab.",
       newTab: "In neuem Tab öffnen",
@@ -789,7 +789,7 @@ export const de: Dictionary = {
       kicker: "Schritt 3 · Vertrag",
       title: "Dienstleistungsvertrag",
       lockedTitle: "Agenten-Code eingeben",
-      lockedBody: "Der Vertrag wird von Ihrem Talispros-Agenten freigegeben. Geben Sie den Agenten-Code ein, den Sie erhalten haben, um ihn zu öffnen und zu unterschreiben.",
+      lockedBody: "Der Vertrag wird von Ihrem Tsplits™-Agenten freigegeben. Geben Sie den Agenten-Code ein, den Sie erhalten haben, um ihn zu öffnen und zu unterschreiben.",
       codeLabel: "Agenten-Code",
       unlock: "Vertrag öffnen",
       unlocking: "Wird geprüft…",
@@ -823,7 +823,7 @@ export const de: Dictionary = {
     },
     agentCode: {
       title: "Ihr Agenten-Code",
-      purpose: "Geben Sie diesen Code Ihrem Kunden. Er schaltet den Dienstleistungsvertrag in der TalisU-Abfolge frei – Talispros → Mediendirektorium → Vertrag – und ordnet jeden unterschriebenen Vertrag samt FAST Code im CRM Ihnen zu.",
+      purpose: "Geben Sie diesen Code Ihrem Kunden. Er schaltet den Dienstleistungsvertrag in der TalisU-Abfolge frei – Tsplits™ → Mediendirektorium → Vertrag – und ordnet jeden unterschriebenen Vertrag samt FAST Code im CRM Ihnen zu.",
       link: "Link zum Teilen",
       clients: "Kunden, die mit Ihrem Code unterschrieben haben",
       none: "Noch keine unterschriebenen Verträge.",
@@ -832,8 +832,8 @@ export const de: Dictionary = {
     },
     gate: {
       title: "Zuerst den Dienstleistungsvertrag unterschreiben",
-      body: "Vor der Registrierungszahlung: Talispros und das Mediendirektorium ansehen und den Dienstleistungsvertrag mit Ihrem Agenten-Code unterschreiben.",
-      cta: "Start: Talispros → Vertrag",
+      body: "Vor der Registrierungszahlung: Tsplits™ und das Mediendirektorium ansehen und den Dienstleistungsvertrag mit Ihrem Agenten-Code unterschreiben.",
+      cta: "Start: Tsplits™ → Vertrag",
     },
   },
   talisuHub: {
@@ -896,7 +896,7 @@ export const de: Dictionary = {
   bookshelf: {
     title: "Bücherregal",
     createEbook: "E-Book erstellen",
-    ecosystem: "Talispros™-Ökosystem",
+    ecosystem: "Tsplits™-Ökosystem",
     rootAccount: "Root-Konto",
     derivativeAccount: "Derivative-Konto",
     subtitleScoped:
@@ -1026,12 +1026,12 @@ export const de: Dictionary = {
       lead: "Nutzen Sie die Beispielseiten oder laden Sie ein PDF hoch.",
       leadNote:
         "Wir bereiten die Seiten für Sie vor. Tippen Sie dann auf „Talisbook™ erstellen“ – sobald es fertig ist, öffnet sich Ihre Demo-Mapsite.",
-      useSample: "Talispros-Beispiel-eBook verwenden",
+      useSample: "Tsplits™-Beispiel-eBook verwenden",
       or: "oder",
       uploadPdf: "PDF hochladen",
       uploadHelp:
         "Auf Seite 1 ist die linke Hälfte die Rückseite und die rechte Hälfte die Vorderseite des Umschlags. PDF, JPG, JPEG oder PNG, bis zu {max} Innenseiten.",
-      sampleLabel: "Talispros-Beispiel-eBook",
+      sampleLabel: "Tsplits™-Beispiel-eBook",
       pdfUploaded: "PDF hochgeladen",
       clearReupload: "Entfernen und neu hochladen",
       tryAgain: "Erneut versuchen",
@@ -1153,10 +1153,10 @@ export const de: Dictionary = {
   },
   meta: {
     personalHome: {
-      title: "{name} · Persönliche Startseite | Talispros™",
+      title: "{name} · Persönliche Startseite | Tsplits™",
       description:
-        "Willkommen auf der persönlichen Startseite von {name}. Öffnen Sie die Mapsite, entdecken Sie Angebote auf der Karte und sichern Sie sich Ihren Markt mit Talispros™.",
-      ogImageAlt: "{name}: persönliche Startseite auf Talispros™",
+        "Willkommen auf der persönlichen Startseite von {name}. Öffnen Sie die Mapsite, entdecken Sie Angebote auf der Karte und sichern Sie sich Ihren Markt mit Tsplits™.",
+      ogImageAlt: "{name}: persönliche Startseite auf Tsplits™",
     },
     bookshelf: {
       title: "ALLPINS Talisbooks™ · Bücherregal",
@@ -1166,7 +1166,7 @@ export const de: Dictionary = {
     demoMapsite: {
       title: "Demo-eBook und Mapsite erstellen",
       description:
-        "Setzen Sie einen Demonstrations-PIN und hängen Sie das angeheftete Talispros-eBook an. Es wird kein FAST Code vergeben.",
+        "Setzen Sie einen Demonstrations-PIN und hängen Sie das angeheftete Tsplits™-eBook an. Es wird kein FAST Code vergeben.",
     },
     catalogue: {
       title: "Katalog | Talishouse™ Produktkatalog",
@@ -1199,7 +1199,7 @@ export const de: Dictionary = {
         "Moderne Häuser und Cottages ab 58,50 $ pro Quadratfuß. An einem Tag gebaut, in einer Woche bezugsfertig. Mietkauf-Optionen verfügbar.",
     },
     home: {
-      title: "Talispros™",
+      title: "Tsplits™",
       description: "Sichern Sie sich Ihren Markt. Eröffnen Sie Ihre Mapsite.",
     },
     talisuLayout: {
@@ -1210,15 +1210,15 @@ export const de: Dictionary = {
     talisuFaq: {
       title: "TalisU™ | FAQ",
       description:
-        "Häufig gestellte Fragen zu Talispros™, Mapsites und TalisU™.",
+        "Häufig gestellte Fragen zu Tsplits™, Mapsites und TalisU™.",
     },
     talisuRegister: {
-      title: "Registrieren Sie Ihre Talispros™ Mapsite: globale Sichtbarkeit | TalisU™",
+      title: "Registrieren Sie Ihre Tsplits™ Mapsite: globale Sichtbarkeit | TalisU™",
       description:
         "Branchennahes Marketing für die globale Sichtbarkeit Ihrer Mapsite: Mapsites, Talisbooks™ (TEB), Angebotsanalyse (TVA) und TalisTV™ (TTV). Registrieren Sie sich jetzt und arbeiten Sie mit dem Team von Aisha C.",
       ogImage: "/og/talisu-reg-de.jpg",
       ogImageAlt:
-        "Aisha C., Teamleiterin, mit dem Talispros™-Baumlogo – Registrieren Sie Ihre Mapsite: globale Sichtbarkeit durch branchennahes Marketing",
+        "Aisha C., Teamleiterin, mit dem Tsplits™-Baumlogo – Registrieren Sie Ihre Mapsite: globale Sichtbarkeit durch branchennahes Marketing",
     },
     talisuEngage: {
       title: "Thorsten P und sein Fulfilment-Team beauftragen | TalisU™",
@@ -1226,7 +1226,7 @@ export const de: Dictionary = {
         "Jedes Projekt beginnt mit Ihrer Vision. Wählen Sie ein Talishouse™-Design aus dem Katalog und beauftragen Sie Thorsten P und sein Fulfilment-Team. Ihre Anzahlung von 2.000 CAD wird vollständig angerechnet.",
       ogImage: "/og/talisu-engage-de.jpg",
       ogImageAlt:
-        "Thorsten P, Teamleiter für Fulfilment-Optionen, mit dem Talispros™-Baumlogo: Beauftragen Sie Thorsten P und sein Fulfilment-Team für Ihre Projektvision",
+        "Thorsten P, Teamleiter für Fulfilment-Optionen, mit dem Tsplits™-Baumlogo: Beauftragen Sie Thorsten P und sein Fulfilment-Team für Ihre Projektvision",
     },
   },
 };

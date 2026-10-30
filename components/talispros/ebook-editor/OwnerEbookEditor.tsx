@@ -158,7 +158,7 @@ function PageFields({
   if (page.locked) {
     return (
       <p className="text-xs text-neutral-500">
-        Locked system page (Talispros™ brochure). It is updated globally, not per book.
+        Locked system page (Tsplits™ brochure). It is updated globally, not per book.
       </p>
     );
   }

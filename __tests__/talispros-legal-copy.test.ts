@@ -18,7 +18,7 @@ import {
   resolveMapsiteFlagIdentity,
 } from "../lib/talispros/flag-identity";
 
-describe("Talispros legal copy and homepage products", () => {
+describe("Tsplits™ legal copy and homepage products", () => {
   it("keeps the exact shared legal strings", () => {
     expect(TALISPROS_LEGAL_PRIMARY_COPY).toBe("");
     expect(TALISPROS_LEGAL_SECONDARY_COPY).toBe("*Prior registration required.");

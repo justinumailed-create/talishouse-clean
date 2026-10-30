@@ -279,7 +279,7 @@ export default function TopBoundFlipbook({
           <div className="product-flipbook__brand">
             <Image
               src="/logo.png"
-              alt="Talispros"
+              alt="Tsplits™"
               width={36}
               height={36}
               className="product-flipbook__logo"
@@ -292,7 +292,7 @@ export default function TopBoundFlipbook({
             </div>
           </div>
           <div className="product-flipbook__header-tools">
-            <nav className="product-flipbook__actions" aria-label="Talispros">
+            <nav className="product-flipbook__actions" aria-label="Tsplits™">
               <Link href={ROUTES.HOME} className="product-flipbook__link">
                 {c.home}
               </Link>

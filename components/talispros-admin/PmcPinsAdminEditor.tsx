@@ -87,7 +87,7 @@ export default function PmcPinsAdminEditor({
           <div>
             <h2 className="text-lg font-semibold text-neutral-900">{active.label}</h2>
             <p className="mt-1 text-sm text-neutral-500">
-              Customize location, visibility, and pin branding for Talispros™ PMC.
+              Customize location, visibility, and pin branding for Tsplits™ PMC.
             </p>
           </div>
           <div className="flex items-center gap-2">

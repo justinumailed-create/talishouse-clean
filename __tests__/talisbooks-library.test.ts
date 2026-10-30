@@ -270,7 +270,7 @@ describe("Talisbooks™ admin library catalog policy", () => {
   const pinnedSample = {
     id: "pinned-talispros-ebook-sample",
     slug: "talispros-ebook-sample",
-    title: "Talispros eBook",
+    title: "Tsplits™ eBook",
     subtitle: "Pinned demonstration",
     fastCode: null as string | null,
   };
@@ -306,7 +306,7 @@ describe("Talisbooks™ admin library catalog policy", () => {
       isDemonstrationCatalogBook({
         id: "pinned-talispros-ebook-sample",
         slug: "talispros-ebook-sample",
-        title: "Talispros eBook",
+        title: "Tsplits™ eBook",
         fastCode: "rd01",
       }),
     ).toBe(false);

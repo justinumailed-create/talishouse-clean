@@ -18,7 +18,7 @@ export default function TalisprosWelcomePage() {
             {/* Hero */}
             <section className="text-center mb-12 sm:mb-16">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-neutral-900 mb-4">
-                TalisPros™ PMC
+                Tsplits™ PMC
               </h1>
               <p className="text-base sm:text-lg text-neutral-500 mb-3">
                 Industry Adjacent Market Places for Real Estate Professionals
@@ -32,7 +32,7 @@ export default function TalisprosWelcomePage() {
               <div className="relative aspect-[16/9] rounded-xl overflow-hidden bg-neutral-100">
                 <Image
                   src="/images/mapsite-bottom-right.jpg"
-                  alt="TalisPros™ PMC"
+                  alt="Tsplits™ PMC"
                   fill
                   className="object-cover"
                   sizes="(max-width: 672px) 100vw, 672px"
@@ -138,7 +138,7 @@ export default function TalisprosWelcomePage() {
             {/* Products */}
             <section className="mb-12 sm:mb-16">
               <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-neutral-900 text-center mb-8">
-                TalisPros™ Products
+                Tsplits™ Products
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {[

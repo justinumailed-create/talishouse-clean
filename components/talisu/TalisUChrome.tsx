@@ -37,7 +37,7 @@ export default function TalisUChrome({
         <p>
           TalisU&trade; · {t.talisu.footerPartOf}{" "}
           <Link href="/" className="font-medium text-[#0069CF] hover:underline">
-            Talispros&trade;
+            Tsplits&trade;
           </Link>
         </p>
       </footer>

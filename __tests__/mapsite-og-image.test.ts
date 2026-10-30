@@ -195,7 +195,7 @@ describe("ebookPageMediaFromRow", () => {
 });
 
 describe("Mapsite and viewer share image selection", () => {
-  it("never uses the large Talispros™ poster or /logo.png as the scenic layer", () => {
+  it("never uses the large Tsplits™ poster or /logo.png as the scenic layer", () => {
     expect(isLargeBrandLogoUrl("/seo/talispros-og.jpg")).toBe(true);
     expect(isLargeBrandLogoUrl("/logo.png")).toBe(true);
     expect(isLargeBrandLogoUrl("/api/og/talispros")).toBe(true);
@@ -384,7 +384,7 @@ describe("Mapsite and viewer share image selection", () => {
 
     const meta = createMetadata({
       title: "Mapsite DC02",
-      description: "Talispros™ Mapsite for FAST Code DC02.",
+      description: "Tsplits™ Mapsite for FAST Code DC02.",
       path: "/talispros/mapsite/fsbos/dc02",
       image: mapsiteImage,
     });

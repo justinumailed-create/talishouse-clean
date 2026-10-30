@@ -54,7 +54,7 @@ describe("bookshelf portrait OG", () => {
     expect(svg).toContain("url(#spine)");
   });
 
-  it("renders a portrait JPEG with the Talispros™ logo composited", async () => {
+  it("renders a portrait JPEG with the Tsplits™ logo composited", async () => {
     const logo = await readFile(path.join(process.cwd(), "public/logo.png"));
     const jpeg = await renderBookshelfOgCard({ logo });
     const { data, info } = await sharp(jpeg)

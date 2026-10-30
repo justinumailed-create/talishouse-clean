@@ -81,7 +81,7 @@ describe("i18n dictionary parity (EN ↔ DE)", () => {
     const deStrings: Array<[string, string]> = [];
     collect(de, "", deStrings);
     const all = deStrings.map(([, v]) => v).join("\n");
-    for (const mark of ["Talispros™", "Mapsite", "Talisbooks™", "TalisTV™", "FAST Code", "SamCart", "TalisBOT"]) {
+    for (const mark of ["Tsplits™", "Mapsite", "Talisbooks™", "TalisTV™", "FAST Code", "SamCart", "TalisBOT"]) {
       expect(all).toContain(mark);
     }
     expect(all).not.toMatch(/Talisbücher|Kartenseite|SCHNELL-Code/);

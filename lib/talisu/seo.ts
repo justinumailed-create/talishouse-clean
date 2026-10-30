@@ -22,7 +22,7 @@ export function createTalisUMetadata(overrides: {
   locale?: Locale;
   /**
    * Page-specific Open Graph / Twitter image (absolute URL or root-relative
-   * path under /public). Defaults to the shared Talispros brand card.
+   * path under /public). Defaults to the shared Tsplits™ brand card.
    */
   image?: { url: string; width?: number; height?: number; alt?: string };
 }): Metadata {

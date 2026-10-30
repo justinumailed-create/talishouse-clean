@@ -31,7 +31,7 @@ export function ExplanationSections({
         </h2>
         <div className="text-sm text-neutral-600 space-y-3 leading-relaxed">
           <p>
-            A FAST Code™ is your unique gateway identifier in the TalisPros™ ecosystem.
+            A FAST Code™ is your unique gateway identifier in the Tsplits™ ecosystem.
             It functions as a universal account access key — share it with clients,
             partners, and referral sources so they can find your Mapsite instantly.
           </p>
@@ -51,7 +51,7 @@ export function ExplanationSections({
         </h2>
         <div className="text-sm text-neutral-600 space-y-3 leading-relaxed">
           <p>
-            A Mapsite is your dedicated property discovery page inside the TalisPros™
+            A Mapsite is your dedicated property discovery page inside the Tsplits™
             marketplace. It serves as your professional storefront where potential
             buyers and sellers can find your listings, learn about your services,
             and connect with you directly.
@@ -72,7 +72,7 @@ export function ExplanationSections({
         </h2>
         <div className="text-sm text-neutral-600 space-y-3 leading-relaxed">
           <p>
-            Talismaps™ is the interactive mapping layer that powers all TalisPros™
+            Talismaps™ is the interactive mapping layer that powers all Tsplits™
             marketplaces. It displays property pins, AdPro™ placements, and market
             overlays on an interactive map, making it easy for clients to explore
             listings and for professionals to showcase their coverage areas.

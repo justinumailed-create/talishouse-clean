@@ -71,7 +71,7 @@ export async function createDemoMapSiteWithPinnedEbook(
   const address = input.streetAddress?.trim() || null;
   const description =
     input.description?.trim() ||
-    "Demonstration Mapsite with the pinned Talispros eBook. No FAST Code is issued.";
+    "Demonstration Mapsite with the pinned Tsplits™ eBook. No FAST Code is issued.";
   const mapZoom = clampMapZoom(input.mapZoom ?? 12);
 
   const supabase = getSupabaseAdmin();

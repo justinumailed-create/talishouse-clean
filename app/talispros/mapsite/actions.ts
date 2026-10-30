@@ -366,7 +366,7 @@ export async function createMapSiteStripeCheckoutSession(input: {
   if (!(await getSignedContractForFastCode(mapsite.fast_code))) {
     return {
       error:
-        "Please sign the Service Agreement first (TalisU → Talispros → Media Directory → Contract).",
+        "Please sign the Service Agreement first (TalisU → Tsplits™ → Media Directory → Contract).",
     };
   }
 
@@ -468,7 +468,7 @@ export async function createMapSiteStripeCheckoutSession(input: {
             currency: MAPSITE_ACTIVATION_CURRENCY,
             unit_amount: unitAmount,
             product_data: {
-              name: `Talispros™ ${summary.planLabel} — Mapsite activation`,
+              name: `Tsplits™ ${summary.planLabel} — Mapsite activation`,
               description: `${summary.priceLabel} + ${summary.taxLabel}`,
             },
           },

@@ -7,7 +7,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = createMetadata({
-  title: "Claim A Market™ | Talispros™",
+  title: "Claim A Market™ | Tsplits™",
   description:
     "Reserve and establish your target market before launching your Mapsite ecosystem.",
   path: "/talispros/claim-a-market",

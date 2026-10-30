@@ -17,7 +17,7 @@ export default async function MarketingAdminDemosPage() {
         <h1 className="text-2xl font-bold text-neutral-900">Demo Mapsites</h1>
         <p className="mt-1 text-sm text-neutral-500">
           Demonstration listings created from Build Demo eBook and Mapsite.
-          They use the pinned Talispros eBook and never receive a FAST Code.
+          They use the pinned Tsplits™ eBook and never receive a FAST Code.
         </p>
       </div>
       <MarketingAdminDemosClient />

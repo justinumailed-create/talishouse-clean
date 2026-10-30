@@ -85,7 +85,7 @@ export default async function TalisBooksAdminHome() {
       </h2>
       <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500">
         Manage the Talisbooks™ digital publication engine. Books link to Mapsites, accounts,
-        and FAST Codes across the Talispros™ ecosystem.
+        and FAST Codes across the Tsplits™ ecosystem.
       </p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -133,7 +133,7 @@ export default async function TalisBooksAdminHome() {
           </Link>
           . Set <code className="rounded bg-neutral-100 px-1">is_pinned</code> on one published
           public book (via <code className="rounded bg-neutral-100 px-1">pinTalisBookAction</code>)
-          to feature it first. Until a DB pin exists, the built-in TalisPros™ sample is shown.
+          to feature it first. Until a DB pin exists, the built-in Tsplits™ sample is shown.
         </p>
       </section>
 

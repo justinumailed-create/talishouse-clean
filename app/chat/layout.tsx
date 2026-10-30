@@ -8,7 +8,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   manifest: "/chat.webmanifest",
-  appleWebApp: { capable: true, title: "Talispros Chat", statusBarStyle: "default" },
+  appleWebApp: { capable: true, title: "Tsplits™ Chat", statusBarStyle: "default" },
   icons: { apple: "/chat-icon-192.png" },
 };
 

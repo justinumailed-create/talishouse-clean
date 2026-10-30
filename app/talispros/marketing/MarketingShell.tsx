@@ -32,7 +32,7 @@ export default function MarketingShell({
       <aside className="w-56 shrink-0 border-r border-neutral-200 bg-white p-5 flex flex-col">
         <div className="mb-8">
           <p className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
-            TalisPros™
+            Tsplits™
           </p>
           <h1 className="text-lg font-semibold text-neutral-900">Marketing</h1>
         </div>

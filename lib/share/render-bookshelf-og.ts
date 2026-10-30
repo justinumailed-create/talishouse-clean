@@ -16,7 +16,7 @@ export async function readBookshelfOgLogo(): Promise<Buffer> {
 }
 
 /**
- * Compose the portrait bookshelf share card: SVG shelf scene + Talispros™ logo.
+ * Compose the portrait bookshelf share card: SVG shelf scene + Tsplits™ logo.
  */
 export async function renderBookshelfOgCard(input?: {
   logo?: Buffer | null;

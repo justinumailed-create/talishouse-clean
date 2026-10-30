@@ -53,7 +53,7 @@ describe("pinned TalisBook sample centerfolds", () => {
   it("exposes a downloadable PDF of the pinned sample", () => {
     const book = createPinnedTalisBookViewer();
     expect(book.pdfDownloadUrl).toBe("/talisbooks/pinned/talispros-ebook-sample.pdf");
-    expect(book.pdfDownloadFileName).toBe("TalisPros-Ebook-Sample.pdf");
+    expect(book.pdfDownloadFileName).toBe("Tsplits-Ebook-Sample.pdf");
   });
 });
 

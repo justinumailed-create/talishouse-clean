@@ -211,7 +211,7 @@ export default function ChatApp({ viewer, conversationId, initialItems = null, i
       ) : (
         <section className="hidden flex-1 flex-col items-center justify-center gap-3 text-center text-[#64748b] md:flex">
           <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-sm"><IconSend className="h-7 w-7 text-[#1E4ED8]" /></div>
-          <div className="text-[18px] font-semibold text-[#0f172a]">Talispros Chat</div>
+          <div className="text-[18px] font-semibold text-[#0f172a]">Tsplits™ Chat</div>
           <div className="max-w-xs! text-[14px]">Pick a conversation or post in Updates. Messages are private to their participants.</div>
         </section>
       )}

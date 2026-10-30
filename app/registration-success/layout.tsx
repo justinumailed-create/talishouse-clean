@@ -9,7 +9,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Registration Successful | TalisPros™",
+  title: "Registration Successful | Tsplits™",
   description: "Your Mapsite has been created successfully.",
 };
 

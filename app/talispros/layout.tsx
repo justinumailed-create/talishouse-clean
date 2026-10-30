@@ -19,11 +19,11 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   ...createMetadata({
-    title: "Talispros™ | Claim your market",
+    title: "Tsplits™ | Claim your market",
     description:
-      "Claim your market on Talispros™. Mapsite pins your place on the map so buyers and partners can find you — Explore Talisbooks™ and grow your exposure worldwide.",
+      "Claim your market on Tsplits™. Mapsite pins your place on the map so buyers and partners can find you — Explore Talisbooks™ and grow your exposure worldwide.",
     path: "/talispros",
-    image: talisprosBrandOgMetadataImage("Talispros™ | Claim your market"),
+    image: talisprosBrandOgMetadataImage("Tsplits™ | Claim your market"),
   }),
   icons: {
     icon: "/favicon-v2.ico",

@@ -9,7 +9,7 @@ import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
 import { useT } from "@/lib/i18n/client";
 
 /**
- * Homepage gate left column: Talispros logo + Login (reveals FAST Code) + Build Demo.
+ * Homepage gate left column: Tsplits™ logo + Login (reveals FAST Code) + Build Demo.
  * Keeps the existing claimed-Mapsite cookie/session FAST flow.
  */
 export default function TalisprosHomeGate() {
@@ -22,14 +22,14 @@ export default function TalisprosHomeGate() {
         <div className="mb-8 text-center sm:mb-10">
           <Image
             src="/logo.png"
-            alt="Talispros™"
+            alt="Tsplits™"
             width={72}
             height={72}
             className="mx-auto mb-4 h-14 w-14 object-contain sm:h-16 sm:w-16"
             priority
           />
           <h1 className="text-[28px] leading-[1.1] tracking-[0.14em] text-neutral-900 sm:text-[34px]">
-            Talispros
+            Tsplits™
           </h1>
           <p className="mt-2 text-sm font-medium tracking-[0.14em] text-neutral-500 sm:text-[15px]">
             {t.home.motto}

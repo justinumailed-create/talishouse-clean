@@ -28,7 +28,7 @@ export default function TalisprosFooter() {
           Talisforms™
         </a>
         <br />
-        <span className="text-[10px] text-neutral-300">A Talispros™ Product</span>
+        <span className="text-[10px] text-neutral-300">A Tsplits™ Product</span>
       </p>
     </footer>
   );

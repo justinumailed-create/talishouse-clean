@@ -26,14 +26,14 @@ export default function TalisprosHeader() {
           <Link href={logoHref} className="flex items-center gap-3 no-underline group">
             <Image
               src="/logo.png"
-              alt="TalisPros™"
+              alt="Tsplits™"
               width={32}
               height={32}
               className="w-7 h-7 object-contain"
               priority
             />
             <span className="text-[15px] font-semibold tracking-tight text-neutral-900 group-hover:text-neutral-600 transition-colors">
-              TalisPros™ PMC
+              Tsplits™ PMC
             </span>
           </Link>
           {/* No Mapsite back link on the register-your-mapsite gate; the logo links Home. */}
