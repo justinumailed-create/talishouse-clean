@@ -51,6 +51,7 @@ import MapSiteLogoImageEditor from "./MapSiteLogoImageEditor";
 import MapSiteBookshelfEditor from "./MapSiteBookshelfEditor";
 import MapSiteEbookEditorPanel from "./MapSiteEbookEditorPanel";
 import DemoClaimMarketButton from "./DemoClaimMarketButton";
+import PersonalHomeNav from "@/components/talispros/personal-home/PersonalHomeNav";
 import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
 import PmcContractGateCard from "@/components/talisu/pmc/PmcContractGateCard";
@@ -196,6 +197,11 @@ interface MapSiteApplicationProps {
   initialOwnerCustomizations?: MapSiteOwnerCustomizations | null;
   /** PIN categories + Root ↔ Derivative Partner Mapsites (migration 109). */
   initialRootContext?: MapSiteRootContext | null;
+  /**
+   * Owner navbar (Home = personal home page, Mapsite = this page). Null hides
+   * the Home / Mapsite bar (ALLPINS, unclaimed platform records).
+   */
+  personalHomeNav?: { homeHref: string; mapsiteHref: string } | null;
 }
 
 export default function MapSiteApplication({
@@ -225,6 +231,7 @@ export default function MapSiteApplication({
   canManageDashboard,
   initialOwnerCustomizations = null,
   initialRootContext = null,
+  personalHomeNav = null,
 }: MapSiteApplicationProps) {
   const [mapsite] = useState(initialMapSite);
   const locale = useLocale() === "de" ? "de" : "en";
@@ -516,6 +523,7 @@ export default function MapSiteApplication({
         categoryOptions={categoryOptions}
         categoryFilter={categoryFilter}
         onCategoryFilterChange={setCategoryFilter}
+        personalHomeNav={personalHomeNav}
       />
     </MapEngineProvider>
   );
@@ -559,6 +567,7 @@ function MapSiteChrome({
   categoryOptions,
   categoryFilter,
   onCategoryFilterChange,
+  personalHomeNav,
 }: {
   mapsite: MapSitePlatformRecord;
   audience: RegistrationMarket;
@@ -597,6 +606,7 @@ function MapSiteChrome({
   categoryOptions: PinCategoryOption[];
   categoryFilter: string;
   onCategoryFilterChange: (category: string) => void;
+  personalHomeNav: { homeHref: string; mapsiteHref: string } | null;
 }) {
   const { setViewport, isReady, fitToCoordinates } = useMapEngine();
   const router = useRouter();
@@ -1025,6 +1035,19 @@ function MapSiteChrome({
     });
     return `/talispros/markets/claim-a-market?${params.toString()}`;
   }, [mapsite.id, audience, onboardingMode, sourceAudience]);
+  // Claim Your Market™ from the owner's own Mapsite: registers a new market
+  // for this account holder (no mapsiteId, so the claimed Mapsite is untouched).
+  const ownerClaimMarketHref = useMemo(() => {
+    const targetAudience = sourceAudience || audience;
+    const params = new URLSearchParams({
+      audience: targetAudience,
+      accountType: accountTypeForAudience(targetAudience),
+      returnTo: MAPSITE_APP_PATH,
+    });
+    return `/talispros/markets/claim-a-market?${params.toString()}`;
+  }, [audience, sourceAudience]);
+  const showOwnerClaimMarket =
+    claimed && !isDemoListing && Boolean(isOwner || canManageDashboard);
   const claimLabel =
     onboardingMode === "assisted"
       ? "Register Account now"
@@ -1055,6 +1078,14 @@ function MapSiteChrome({
           dashboardUnlocked={dashboardUnlocked}
           registerHref={ROUTES.TALISU_REGISTER}
           onOpenDashboard={openOwnerDashboard}
+        />
+      ) : null}
+      {personalHomeNav ? (
+        <PersonalHomeNav
+          homeHref={personalHomeNav.homeHref}
+          mapsiteHref={personalHomeNav.mapsiteHref}
+          active="mapsite"
+          variant={claimed ? "sub" : "full"}
         />
       ) : null}
       <div
@@ -1123,6 +1154,20 @@ function MapSiteChrome({
                 align="end"
               />
             </div>
+          </div>
+        ) : null}
+
+        {showOwnerClaimMarket && !dashboardOpen ? (
+          <div
+            className="pointer-events-none absolute bottom-3 right-3 z-30 flex flex-col items-end justify-end sm:bottom-4 sm:right-4"
+            data-testid="mapsite-owner-claim-market"
+          >
+            <a
+              href={ownerClaimMarketHref}
+              className="pointer-events-auto inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--talis-nav-blue)] px-4 py-2 text-sm font-medium text-white no-underline shadow-[0_6px_14px_rgba(4,107,217,0.3)] transition hover:bg-[var(--talis-nav-blue-hover)] hover:text-white"
+            >
+              Claim Your Market™
+            </a>
           </div>
         ) : null}
 

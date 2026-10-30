@@ -11,11 +11,9 @@ import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { ROUTES } from "@/lib/routes";
+import { personalHomePath } from "@/lib/talispros/personal-home";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
-import {
-  buildClaimedMapSitePath,
-  claimedMapSiteSegmentForAccountOrPlan,
-} from "@/lib/talispros/mapsite-state";
+import { claimedMapSiteSegmentForAccountOrPlan } from "@/lib/talispros/mapsite-state";
 
 export async function establishMapSiteOwnerSession(
   mapsiteFastCode: string,
@@ -211,17 +209,9 @@ export async function openClaimedMapSiteFromHomeFastCode(
     await setMapSiteOwnerSession(resolvedCode);
   }
 
-  const accountType = await resolveClaimedMapSiteAccountTypeSegment({
-    fastCode: resolvedCode,
-    mapsiteId: mapsite.id,
-  });
-
-  const href = buildClaimedMapSitePath({
-    fastCode: resolvedCode,
-    accountType,
-  });
-
-  return { success: true, href };
+  // Root account holders land on their personal home page first; its
+  // Home / Mapsite navbar opens the claimed Mapsite.
+  return { success: true, href: personalHomePath(resolvedCode) };
 }
 
 /**

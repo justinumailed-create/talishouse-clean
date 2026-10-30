@@ -462,8 +462,9 @@ export default function DemoEbookGenerateClient({
         total: 1,
       });
       // Full navigation avoids a failed App Router RSC render leaving this
-      // page stuck on the building status.
-      window.location.assign(result.mapsiteHref || result.viewerUrl);
+      // page stuck on the building status. The personal home page comes
+      // first; its Home / Mapsite navbar opens the Mapsite.
+      window.location.assign(result.homeHref || result.mapsiteHref || result.viewerUrl);
     } catch (caught) {
       if (runId !== runIdRef.current) return;
       setError(publicDemoGenerateError(caught));

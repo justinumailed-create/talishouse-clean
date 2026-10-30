@@ -23,7 +23,10 @@ export default function TalisprosLayoutClient({
   const showBlueNav = isDemoMapSite || isOwnerEbookEditor;
   const isEbookLikePage = isEbookGenerate || isDemoMapSite;
   const isMapSiteApp =
-    pathname === "/talispros/mapsite" || pathname?.startsWith("/talispros/mapsite/");
+    pathname === "/talispros/mapsite" ||
+    pathname?.startsWith("/talispros/mapsite/") ||
+    // Personal home page (/talispros/home/<code>) brings its own Home / Mapsite navbar.
+    pathname?.startsWith("/talispros/home/");
 
   if (isMapSiteApp) {
     return <>{children}</>;

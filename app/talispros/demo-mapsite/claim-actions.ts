@@ -9,6 +9,7 @@ import {
 import { pathnameForRevalidate } from "@/lib/talispros/demo-mapsite";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
+import { personalHomePath } from "@/lib/talispros/personal-home";
 
 export type ClaimDemoMapSiteActionResult = ClaimDemoMapSiteResult;
 
@@ -25,9 +26,13 @@ export async function claimDemoMapSiteAction(input: {
   const result = await claimDemoMapSite(input);
   if (!result.ok) return result;
 
-  if (isIssuedFastCode(result.fastCode)) {
-    await setMapSiteOwnerSession(result.fastCode);
+  if (!isIssuedFastCode(result.fastCode)) {
+    revalidatePath(MAPSITE_APP_PATH);
+    revalidatePath(pathnameForRevalidate(result.href));
+    return result;
   }
+
+  await setMapSiteOwnerSession(result.fastCode);
 
   revalidatePath(MAPSITE_APP_PATH);
   revalidatePath(pathnameForRevalidate(result.href));
@@ -35,5 +40,9 @@ export async function claimDemoMapSiteAction(input: {
     revalidatePath(pathnameForRevalidate(result.tebHref));
   }
 
-  return result;
+  // New root account holders open their personal home page first; its
+  // Home / Mapsite navbar leads to the claimed Mapsite (result.href).
+  const homeHref = personalHomePath(result.fastCode);
+  revalidatePath(homeHref);
+  return { ...result, href: homeHref };
 }

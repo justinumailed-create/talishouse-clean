@@ -639,6 +639,7 @@ for r, en_t, de_t in [
     ("/ma/[fastcode]", "Mapsite by FAST Code", "Mapsite nach FAST Code"),
     ("/talispros/mapsite/[accountType]/[fastCode]", "Mapsite by FAST Code", "Mapsite nach FAST Code"),
     ("/talispros/mapsites/[fastCode]", "Published Mapsite", "Veröffentlichte Mapsite"),
+    ("/talispros/home/[fastCode]", "Personal home page", "Persönliche Startseite"),
     ("/talispros/register-your-mapsite/[fastCode]", "Register for this Mapsite", "Für diese Mapsite registrieren"),
     ("/ttvaccess/[fastCode]", "TalisTV™ access", "TalisTV™ Zugang"),
     ("/talisbooks/fast/[fastCode]", "Mapsite bookshelf", "Mapsite-Bücherregal"),

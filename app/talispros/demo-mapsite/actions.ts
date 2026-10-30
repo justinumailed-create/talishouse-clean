@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { personalHomePath } from "@/lib/talispros/personal-home";
 import { after } from "next/server";
 import { notifyDemoBuilt } from "@/lib/talispros/demo-built-notify";
 import { ROUTES } from "@/lib/routes";
@@ -73,6 +74,8 @@ export type GenerateDemoEbookActionResult =
       slug: string;
       viewerUrl: string;
       mapsiteHref: string;
+      /** Personal home page shown first after the demo build completes. */
+      homeHref: string | null;
     }
   | { ok: false; error: string };
 
@@ -128,6 +131,7 @@ export async function generateDemoEbookAction(input: {
       slug: result.slug,
       viewerUrl: result.viewerUrl,
       mapsiteHref: mapsite.mapsiteHref,
+      homeHref: mapsite.code?.trim() ? personalHomePath(mapsite.code) : null,
     };
   } catch (error) {
     console.error("[generateDemoEbookAction]", error);

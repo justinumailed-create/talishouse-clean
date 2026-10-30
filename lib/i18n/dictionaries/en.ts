@@ -841,7 +841,58 @@ export const en = {
     crmDemoCodes: "Demo access codes",
   },
 
+  personalHome: {
+    navLabel: "Personal home and Mapsite",
+    navHome: "Home",
+    navMapsite: "Mapsite",
+    kicker: "Welcome",
+    fallbackName: "My Mapsite",
+    defaultWriteUp:
+      "Welcome to my personal home page. Open my Mapsite to explore my listings on the map, read my Talisbooks™ and get to know the market I serve.",
+    defaultWriteUpWithAddress:
+      "Welcome to my personal home page. Open my Mapsite to explore my listings around {address}, read my Talisbooks™ and get to know the market I serve.",
+    openMapsite: "Open Mapsite",
+    claimMarket: "Claim Your Market™",
+    photoAlt: "{name}",
+    edit: {
+      open: "Edit my home page",
+      title: "Edit your home page",
+      intro: "Only you can see these controls. Changes go live as soon as you save.",
+      defaultHint: "Leave a field empty to use the default from your Mapsite.",
+      photo: "Photo",
+      uploadPhoto: "Upload photo",
+      replacePhoto: "Replace photo",
+      removePhoto: "Use default photo",
+      uploading: "Uploading…",
+      kicker: "Small line above the heading",
+      headline: "Heading",
+      writeUp: "Write-up",
+      buttons: "Buttons",
+      buttonLabel: "Button label",
+      buttonLink: "Button link",
+      addButton: "Add button",
+      removeButton: "Remove",
+      buttonsHint:
+        "Up to 3 buttons. A link can be a page on this site (starting with /), a full web address, mailto: or tel:.",
+      save: "Save changes",
+      saving: "Saving…",
+      saved: "Saved. Your home page is updated.",
+      reset: "Restore defaults",
+      resetConfirm: "Restore the default photo, text and buttons from your Mapsite?",
+      close: "Close",
+      errSave: "Your changes could not be saved. Please try again.",
+      errButtons: "Check the highlighted buttons: each one needs a label and a valid link.",
+      errPhoto: "That photo could not be uploaded. Please use a JPG, PNG or WebP image.",
+      errAuth: "Open your Mapsite with your FAST Code™ to edit this page.",
+    },
+  },
   meta: {
+    personalHome: {
+      title: "{name} · Personal home | Talispros™",
+      description:
+        "Welcome to the personal home page of {name}. Open the Mapsite, explore listings on the map and claim your market with Talispros™.",
+      ogImageAlt: "{name}: personal home page on Talispros™",
+    },
     bookshelf: {
       title: "ALLPINS Talisbooks™ · Bookshelf",
       description:

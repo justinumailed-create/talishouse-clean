@@ -1325,6 +1325,9 @@
   "/talispros/mapsite/[accountType]/[fastCode]": {
    "kind": "dynamic"
   },
+  "/talispros/home/[fastCode]": {
+   "kind": "dynamic"
+  },
   "/talispros/mapsites/[fastCode]": {
    "kind": "dynamic"
   },

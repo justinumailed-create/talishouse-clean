@@ -718,6 +718,44 @@ export interface Database {
           { foreignKeyName: "mapsite_additional_pins_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] }
         ]
       }
+      mapsite_personal_home: {
+        Row: {
+          mapsite_id: string
+          fast_code: string
+          image_url: string | null
+          kicker: string | null
+          headline: string | null
+          write_up: string | null
+          buttons: Array<{ label: string; href: string }>
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          mapsite_id: string
+          fast_code: string
+          image_url?: string | null
+          kicker?: string | null
+          headline?: string | null
+          write_up?: string | null
+          buttons?: Array<{ label: string; href: string }>
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          mapsite_id?: string
+          fast_code?: string
+          image_url?: string | null
+          kicker?: string | null
+          headline?: string | null
+          write_up?: string | null
+          buttons?: Array<{ label: string; href: string }>
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          { foreignKeyName: "mapsite_personal_home_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] }
+        ]
+      }
       mapsite_owner_customizations: {
         Row: {
           mapsite_id: string

@@ -35,6 +35,7 @@ import { shouldReconcileClaimedMapSiteFromStripe } from "@/lib/talispros/mapsite
 import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
+import { personalHomePath } from "@/lib/talispros/personal-home";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, CHECKOUT_SESSION_QUERY, parseCheckoutSessionId, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import {
@@ -295,6 +296,10 @@ export default async function ClaimedMapSiteByAccountTypePage({
       canManageDashboard={canManageDashboard}
       initialOwnerCustomizations={ownerCustomizations}
       initialRootContext={rootContext}
+      personalHomeNav={{
+        homeHref: personalHomePath(fastCode),
+        mapsiteHref: `${MAPSITE_APP_PATH}/${accountType}/${fastCode.toLowerCase()}`,
+      }}
     />
     <MapSitePartnerButtons partners={partnerTargets} />
     </>

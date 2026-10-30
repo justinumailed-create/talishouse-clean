@@ -1105,7 +1105,58 @@ export const de: Dictionary = {
     crmDemoCodes: "Demo-Zugangscodes",
   },
 
+  personalHome: {
+    navLabel: "Persönliche Startseite und Mapsite",
+    navHome: "Startseite",
+    navMapsite: "Mapsite",
+    kicker: "Willkommen",
+    fallbackName: "Meine Mapsite",
+    defaultWriteUp:
+      "Willkommen auf meiner persönlichen Startseite. Öffnen Sie meine Mapsite, um meine Angebote auf der Karte zu entdecken, meine Talisbooks™ zu lesen und den Markt kennenzulernen, den ich betreue.",
+    defaultWriteUpWithAddress:
+      "Willkommen auf meiner persönlichen Startseite. Öffnen Sie meine Mapsite, um meine Angebote rund um {address} zu entdecken, meine Talisbooks™ zu lesen und den Markt kennenzulernen, den ich betreue.",
+    openMapsite: "Mapsite öffnen",
+    claimMarket: "Claim Your Market™",
+    photoAlt: "{name}",
+    edit: {
+      open: "Meine Startseite bearbeiten",
+      title: "Startseite bearbeiten",
+      intro: "Nur Sie sehen diese Bedienelemente. Änderungen sind sofort nach dem Speichern live.",
+      defaultHint: "Lassen Sie ein Feld leer, um den Standard aus Ihrer Mapsite zu verwenden.",
+      photo: "Foto",
+      uploadPhoto: "Foto hochladen",
+      replacePhoto: "Foto ersetzen",
+      removePhoto: "Standardfoto verwenden",
+      uploading: "Wird hochgeladen…",
+      kicker: "Kurze Zeile über der Überschrift",
+      headline: "Überschrift",
+      writeUp: "Text",
+      buttons: "Schaltflächen",
+      buttonLabel: "Beschriftung",
+      buttonLink: "Link",
+      addButton: "Schaltfläche hinzufügen",
+      removeButton: "Entfernen",
+      buttonsHint:
+        "Bis zu 3 Schaltflächen. Ein Link kann eine Seite dieser Website (beginnend mit /), eine vollständige Webadresse, mailto: oder tel: sein.",
+      save: "Änderungen speichern",
+      saving: "Wird gespeichert…",
+      saved: "Gespeichert. Ihre Startseite ist aktualisiert.",
+      reset: "Standard wiederherstellen",
+      resetConfirm: "Standardfoto, Text und Schaltflächen aus Ihrer Mapsite wiederherstellen?",
+      close: "Schließen",
+      errSave: "Ihre Änderungen konnten nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+      errButtons: "Bitte prüfen Sie die markierten Schaltflächen: Jede braucht eine Beschriftung und einen gültigen Link.",
+      errPhoto: "Dieses Foto konnte nicht hochgeladen werden. Bitte verwenden Sie ein JPG-, PNG- oder WebP-Bild.",
+      errAuth: "Öffnen Sie Ihre Mapsite mit Ihrem FAST Code™, um diese Seite zu bearbeiten.",
+    },
+  },
   meta: {
+    personalHome: {
+      title: "{name} · Persönliche Startseite | Talispros™",
+      description:
+        "Willkommen auf der persönlichen Startseite von {name}. Öffnen Sie die Mapsite, entdecken Sie Angebote auf der Karte und sichern Sie sich Ihren Markt mit Talispros™.",
+      ogImageAlt: "{name}: persönliche Startseite auf Talispros™",
+    },
     bookshelf: {
       title: "ALLPINS Talisbooks™ · Bücherregal",
       description:

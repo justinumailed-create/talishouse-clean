@@ -23,7 +23,13 @@ import {
 import { shouldReconcileClaimedMapSiteFromStripe } from "@/lib/talispros/mapsite-payment";
 import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
-import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
+import {
+  DEMO_PINNED_EBOOK_HREF,
+  demoMapSiteApplicationHref,
+  isDemoMapSiteCode,
+} from "@/lib/talispros/demo-mapsite";
+import { personalHomePath } from "@/lib/talispros/personal-home";
+import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, CHECKOUT_SESSION_QUERY, parseCheckoutSessionId, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import {
@@ -282,6 +288,14 @@ export default async function TalisprosMapSitePage({
       pinCheckoutSessionId={pinCheckoutSessionId}
       canManageDashboard={canManageDashboard}
       initialOwnerCustomizations={ownerCustomizations}
+      personalHomeNav={
+        fastCode && !isAllPinsFastCode(fastCode)
+          ? {
+              homeHref: personalHomePath(fastCode),
+              mapsiteHref: demoMapSiteApplicationHref(mapsite.id, fastCode),
+            }
+          : null
+      }
     />
   );
 }
