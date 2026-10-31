@@ -15,9 +15,17 @@ import { formatNanpPhoneInput, isValidNanpPhone } from "@/lib/talispros/nanp-pho
 import { en } from "@/lib/i18n/dictionaries/en";
 import { useT } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/format";
+import { ADVISER_METAL_BG } from "@/components/talisu/AdviserLayout";
+import {
+  METAL_TAB,
+  METAL_TAB_LABEL,
+  METAL_TAB_SELECTED,
+  METAL_TAB_SHEEN,
+  METAL_TAB_UNSELECTED,
+} from "@/components/talisu/metal-tab";
 
 const FIELD =
-  "mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3.5 text-[17px] text-[#1d1d1f] outline-none transition focus:border-[#0071e3] focus:ring-4 focus:ring-[#0071e3]/15";
+  "mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3.5 text-[17px] text-[#1d1d1f] outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-700/15";
 const LABEL = "block text-[13px] font-medium text-[#1d1d1f]";
 
 /**
@@ -96,32 +104,36 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
   }
 
   return (
-    <div className="bg-[#fbfbfd] px-6 pb-28 pt-20 text-[#1d1d1f] antialiased sm:pt-28" data-testid="talisu-discuss">
+    <div
+      className="talis-working-bg px-6 pb-28 pt-20 text-[#1d1d1f] antialiased sm:pt-28"
+      style={{ minHeight: "calc(100dvh - 68px)", backgroundAttachment: "scroll" }}
+      data-testid="talisu-discuss"
+    >
       <div className="mx-auto w-full max-w-[560px]" style={{ maxWidth: 560 }} data-testid="talisu-discuss-content">
         {done ? (
           <div className="py-16 text-center" data-testid="discuss-done">
             <h1 className="text-[40px] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[48px]">
               {c.thanks}
             </h1>
-            <p className="mt-5 text-[19px] leading-relaxed text-[#6e6e73]">
+            <p className="mt-5 text-[19px] leading-relaxed text-neutral-600">
               {fmt(c.advisor, { topic: topicLabel })}
             </p>
-            <Link href="/" className="mt-10 inline-block text-[17px] text-[#0066cc] hover:underline">
+            <Link href="/" className="mt-10 inline-block text-[17px] text-neutral-900 underline-offset-2 hover:underline">
               {c.pageDoneBack} ›
             </Link>
           </div>
         ) : (
           <>
-            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-[#6e6e73]">{c.pageKicker}</p>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-neutral-600">{c.pageKicker}</p>
             <h1 className="mt-3 text-[44px] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-[56px]">
               {c.pageTitle}.
             </h1>
-            <p className="mt-5 text-[19px] leading-relaxed text-[#6e6e73]">{c.pageLead}</p>
+            <p className="mt-5 text-[19px] leading-relaxed text-neutral-600">{c.pageLead}</p>
 
             <form onSubmit={submit} noValidate={false} className="mt-14 space-y-7">
               <fieldset data-testid="discuss-topic" data-topic={topic}>
                 <legend className={LABEL}>{c.topic}</legend>
-                <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className="mt-2 grid grid-cols-2 gap-2.5">
                   {OWNERSHIP_CONTACT_TOPICS.map((option) => {
                     const on = option === topic;
                     return (
@@ -131,13 +143,13 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
                         aria-pressed={on}
                         onClick={() => setTopic(option)}
                         data-testid={`discuss-topic-${option.toLowerCase()}`}
-                        className={`rounded-2xl border px-4 py-3.5 text-left text-[15px] font-medium transition ${
-                          on
-                            ? "border-[#0071e3] bg-[#0071e3]/[0.06] text-[#1d1d1f] ring-1 ring-[#0071e3]"
-                            : "border-black/10 bg-white text-[#1d1d1f] hover:border-black/25"
-                        }`}
+                        className={`${METAL_TAB} ${on ? METAL_TAB_SELECTED : METAL_TAB_UNSELECTED} cursor-pointer`}
+                        style={{ backgroundImage: ADVISER_METAL_BG }}
                       >
-                        {(c.topics as Record<string, string>)[option] ?? option}
+                        <span className={METAL_TAB_SHEEN} aria-hidden />
+                        <span className={`${METAL_TAB_LABEL} whitespace-nowrap`}>
+                          {(c.topics as Record<string, string>)[option] ?? option}
+                        </span>
                       </button>
                     );
                   })}
@@ -168,12 +180,12 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
               <div data-testid="discuss-location">
                 <p className={LABEL}>{c.location}</p>
                 {location && locationVerified ? (
-                  <div className="mt-2 flex items-start justify-between gap-3 rounded-2xl border border-[#0071e3]/30 bg-[#0071e3]/[0.05] px-4 py-3.5">
+                  <div className="mt-2 flex items-start justify-between gap-3 rounded-2xl border border-black/10 bg-white/80 px-4 py-3.5">
                     <div className="min-w-0">
                       <p className="text-[17px] font-medium" data-testid="discuss-location-value">{location}</p>
-                      <p className="text-[12px] text-[#0066cc]">{c.locationVerified}</p>
+                      <p className="text-[12px] text-neutral-900 underline-offset-2">{c.locationVerified}</p>
                     </div>
-                    <button type="button" className="shrink-0 text-[15px] text-[#0066cc] hover:underline"
+                    <button type="button" className="shrink-0 text-[15px] text-neutral-900 underline-offset-2 hover:underline"
                       onClick={() => { setLocation(""); setLocationVerified(false); }}>
                       {c.locationChange}
                     </button>
@@ -205,7 +217,7 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
                   maxLength={OWNERSHIP_CONTACT_MESSAGE_MAX} value={message}
                   onChange={(e) => setMessage(e.target.value.slice(0, OWNERSHIP_CONTACT_MESSAGE_MAX))}
                   className={`${FIELD} resize-none leading-relaxed`} />
-                <p className="mt-1.5 text-right text-[12px] tabular-nums text-[#86868b]" aria-live="polite">
+                <p className="mt-1.5 text-right text-[12px] tabular-nums text-neutral-600" aria-live="polite">
                   {fmt(c.projectCounter, { count: message.length, max: OWNERSHIP_CONTACT_MESSAGE_MAX })}
                 </p>
               </div>
@@ -214,11 +226,19 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
                 <p className="text-[15px] text-red-600" role="alert" data-testid="discuss-error">{error}</p>
               ) : null}
 
-              <button type="submit" disabled={sending} data-testid="discuss-submit"
-                className="w-full rounded-full bg-[#0071e3] px-6 py-4 text-[17px] font-medium text-white transition hover:bg-[#0077ed] disabled:opacity-60">
-                {sending ? c.sending : c.pageSubmit}
+              <button
+                type="submit"
+                disabled={sending}
+                data-testid="discuss-submit"
+                className={`${METAL_TAB} ${METAL_TAB_UNSELECTED} cursor-pointer disabled:opacity-60`}
+                style={{ backgroundImage: ADVISER_METAL_BG }}
+              >
+                <span className={METAL_TAB_SHEEN} aria-hidden />
+                <span className={`${METAL_TAB_LABEL} whitespace-nowrap`}>
+                  {sending ? c.sending : c.pageSubmit}
+                </span>
               </button>
-              <p className="text-center text-[13px] text-[#86868b]">{c.pageNote}</p>
+              <p className="text-center text-[13px] text-neutral-600">{c.pageNote}</p>
             </form>
           </>
         )}

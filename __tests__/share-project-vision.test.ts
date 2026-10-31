@@ -12,6 +12,11 @@ describe("Share a Project Vision (/talisu/discuss) redesign", () => {
     expect(ui).toMatch(/text-\[56px\]/);
     expect(ui.match(/type="submit"/g)).toHaveLength(1);
     expect(ui).not.toContain("WorkingPageShell");
+    // Arun (Oct 31): Aisha's beige surface and her metal buttons.
+    expect(ui).toContain("talis-working-bg");
+    expect(ui).toContain("${METAL_TAB}");
+    expect(ui).toContain("backgroundImage: ADVISER_METAL_BG");
+    expect(ui).not.toContain("bg-[#0071e3]");
     expect(ui).not.toMatch(/console\.|TODO|lorem/i);
     expect(ui).not.toMatch(/placeholder=\{c\./);
   });
