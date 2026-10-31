@@ -82,7 +82,8 @@ export default function TalisBotChat({
   }, [step, activeKnowledgeId]);
 
   // Programmatic opener for the Discuss a Project form (no homepage caller today:
-  // Level 2 Learn More buttons go to the TalisU FAQ, not back to the bot).
+  // Level 2 Learn More buttons go to the TalisU FAQ, not back to the bot;
+  // the panel's first button is "Explore Tsplits" -> /talisu/tsplits).
   useEffect(() => {
     function onOpenContact(event: Event) {
       const detail = (event as CustomEvent<OpenOwnershipContactDetail>).detail;
@@ -149,10 +150,10 @@ export default function TalisBotChat({
             <h3 className="text-lg font-semibold text-gray-900 mb-8">TalisBOT</h3>
             <div className="flex w-full flex-col gap-2">
               <Link
-                href={talisuHref("/talisu#faq")}
+                href={talisuHref("/talisu/tsplits")}
                 className="w-full bg-black text-white py-4 rounded-2xl text-sm font-semibold hover:bg-gray-800 transition shadow-lg shadow-black/5"
               >
-                {b.faq}
+                {b.exploreTsplits}
               </Link>
               {/* Ralf (Oct 18): "Share a Project Vision" goes straight to the
                   TalisU page — no second in-bot form, no extra note/link. */}

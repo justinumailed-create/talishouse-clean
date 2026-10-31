@@ -74,9 +74,8 @@ export const TALISPROS_START_SEGMENTS = [
   },
 ] as const;
 
-/** Claim Market destination from the homepage gate: the Taliswebs™ Webster page (same tab). */
-export const TALISPROS_HOME_SYSTEM_DEMO_HREF =
-  "https://taliswebs-us.vercel.app/talisu/adviser";
+/** Claim Market destination from the homepage gate: Aisha's Register page on Talispros (same tab). */
+export const TALISPROS_HOME_SYSTEM_DEMO_HREF = "/talisu/reg";
 
 export type TalisprosHomeDemoPrivacyMask = {
   id: string;

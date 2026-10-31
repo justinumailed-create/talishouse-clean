@@ -7,6 +7,7 @@ import {
   TALISBOT_SYSTEM_ROLE,
   getTalisBotSystemRole,
 } from "../lib/talispros/talisbot-knowledge";
+import { de } from "../lib/i18n/dictionaries/de";
 import { en } from "../lib/i18n/dictionaries/en";
 
 describe("TalisBOT Tsplits™ knowledge", () => {
@@ -31,9 +32,10 @@ describe("TalisBOT Tsplits™ knowledge", () => {
     expect(getTalisBotSystemRole("de")).toMatch(/German/);
     expect(bot).not.toMatch(/Talishouse \(Recreational\)/);
     expect(bot).not.toMatch(/Talishouse \(Residential\)/);
-    expect(bot).toMatch(/\n\s*\{b\.faq\}\n/);
-    expect(en.bot.faq).toBe("FAQ");
-    expect(bot).toContain('href={talisuHref("/talisu#faq")}');
+    expect(bot).toMatch(/\n\s*\{b\.exploreTsplits\}\n/);
+    expect(en.bot.exploreTsplits).toBe("Explore Tsplits");
+    expect(de.bot.exploreTsplits).toBe("Tsplits entdecken");
+    expect(bot).toContain('href={talisuHref("/talisu/tsplits")}');
     expect(bot).not.toContain("Tsplits™ FAQ");
     expect(en.bot.subtitle).toBe("Engage without registering first");
     expect(bot).toContain("TALISU_MKTS_HEADER_BLUE");

@@ -68,7 +68,7 @@ export const en = {
       product: "Product Options",
     },
     talisuMenu: {
-      tsplits: "TSPLITS™",
+      tsplits: "Tsplits™",
       faq: "FAQ",
       knowledgeBase: "Knowledge Base",
       mediaDirectory: "Media Directory",
@@ -179,7 +179,7 @@ export const en = {
     subtitle: "Engage without registering first",
     openAria: "Open TalisBOT",
     closeAria: "Close TalisBOT",
-    faq: "FAQ",
+    exploreTsplits: "Explore Tsplits",
     getHelp: "Share a Project Vision",
     globalAdmin: "Global Admin",
     processesHeading: "Tsplits™ processes",

@@ -1,5 +1,5 @@
 /**
- * TSPLITS™ – from Vision to Implementation as a page-turning Talisbook™
+ * Tsplits™ – from Vision to Implementation as a page-turning Talisbook™
  * (EN + DE). Ten portrait pages: front cover (red map pin), eight interior
  * pages of the sales edition as four landscape spreads, then Webster on the
  * back cover. Assets live in `/public/talisbooks/tsplits/{locale}/` with the
@@ -24,7 +24,7 @@ type TsplitsBookCopy = {
 
 export const TSPLITS_BOOK_COPY: Record<Locale, TsplitsBookCopy> = {
   en: {
-    title: "TSPLITS™",
+    title: "Tsplits™",
     subtitle: "from Vision to Implementation",
     downloadPdf: "Download PDF",
     pdfUrl: `${TSPLITS_ASSET_ROOT}/TSPLITS-eBook-EN.pdf`,
@@ -32,7 +32,7 @@ export const TSPLITS_BOOK_COPY: Record<Locale, TsplitsBookCopy> = {
     discuss: "Share a Project Vision",
   },
   de: {
-    title: "TSPLITS™",
+    title: "Tsplits™",
     subtitle: "von der Vision zur Umsetzung",
     downloadPdf: "PDF herunterladen",
     pdfUrl: `${TSPLITS_ASSET_ROOT}/TSPLITS-eBook-DE.pdf`,

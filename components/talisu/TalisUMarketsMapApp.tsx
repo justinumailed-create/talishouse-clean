@@ -462,7 +462,7 @@ function MarketsChrome({
         />
       </div>
 
-      <footer className="shrink-0 border-t border-black/10 bg-white px-4 py-3 text-center text-[12px] leading-snug text-neutral-700 sm:px-6 sm:text-[13px]">
+      <footer className="shrink-0 border-t border-black/10 bg-white px-4 py-3 text-center text-[14px] leading-snug text-neutral-700 sm:px-6 sm:text-[15px]">
         {footer}
       </footer>
     </div>

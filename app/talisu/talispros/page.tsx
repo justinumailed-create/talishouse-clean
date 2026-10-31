@@ -68,7 +68,7 @@ export default async function TalisprosPitchPage({ searchParams }: Props) {
           <p className="mt-6 text-sm font-bold uppercase tracking-[0.25em] text-[#7cc0ff]">{t.pitch.kicker}</p>
           <h1 className="mt-3 text-5xl font-black leading-[0.95] tracking-tight sm:text-7xl lg:text-8xl">
             <span className="bg-gradient-to-r from-[#7cc0ff] via-[#3d9bff] to-[#0069CF] bg-clip-text text-transparent">
-              TSPLITS™
+              Tsplits™
             </span>
             <br />
             PMC

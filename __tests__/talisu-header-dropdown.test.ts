@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  TALISU_MKTS_HEADER_ADMIN_DROPDOWN,
   TALISU_MKTS_HEADER_DROPDOWN,
   TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER,
   TALISU_MKTS_HEADER_LOGO_HREF,
@@ -11,9 +12,9 @@ import {
 } from "../lib/talisu/markets-pins";
 
 describe("TalisU blue header dropdown", () => {
-  it("exposes TSPLITS™, Bookshelf, FAQ, Media Directory | Contract, Knowledge Base (no Audio / Video)", () => {
+  it("exposes Tsplits™, Bookshelf, FAQ, Media Directory | Contract, Knowledge Base (no Audio / Video)", () => {
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label)).toEqual([
-      "TSPLITS™",
+      "Tsplits™",
       "Bookshelf",
       "FAQ",
       "Media Directory",
@@ -35,27 +36,33 @@ describe("TalisU blue header dropdown", () => {
     const header = readFileSync(resolve("components/talisu/TalisUMktsHeader.tsx"), "utf8");
     expect(header).not.toContain("t.nav.talisuMenu.audio");
     expect(header).not.toContain("t.nav.talisuMenu.video");
-    // Tsplits™ moved out of the dropdown: the header logo opens that page.
-    expect(TALISU_MKTS_HEADER_DROPDOWN.some((i) => (i.label as string) === "Tsplits™")).toBe(false);
+    // Visible label is Tsplits™ (not TSPLITS™); the header logo goes Home, not to a dropdown page.
+    expect(labels).not.toContain("TSPLITS™");
     expect(
       TALISU_MKTS_HEADER_DROPDOWN.some((i) => (i.href as string) === TALISU_MKTS_HEADER_LOGO_HREF),
     ).toBe(false);
-    // TSPLITS™ is item one (Arun, Oct 26); Bookshelf then FAQ follow.
-    expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.label).toBe("TSPLITS™");
+    // Tsplits™ is item one (Arun, Oct 26); Bookshelf then FAQ follow.
+    expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.label).toBe("Tsplits™");
     expect(TALISU_MKTS_HEADER_DROPDOWN[1]?.label).toBe("Bookshelf");
     expect(TALISU_MKTS_HEADER_DROPDOWN[2]?.label).toBe("FAQ");
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.label)).toEqual([
       "Home",
-      "Markets",
       "Catalogue",
       "Register",
     ]);
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.href)).toEqual([
       "/",
-      "/talisu/mkts",
       "/catalogue",
       "/talisu/reg",
     ]);
+    // Markets left the top navbar (Arun, Oct 31): admin-only row below the TalisU divider.
+    expect(TALISU_MKTS_HEADER_NAV.some((i) => (i.label as string) === "Markets")).toBe(false);
+    expect(TALISU_MKTS_HEADER_ADMIN_DROPDOWN.map((i) => [i.label, i.href])).toEqual([
+      ["Markets", "/talisu/mkts"],
+    ]);
+    expect(header).toContain('fetch("/api/talisu/admin-status"');
+    expect(header).toContain('data-testid="talisu-admin-markets-link"');
+    expect(header).toContain("t.nav.markets");
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Bookshelf")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "All Books")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "FAST Shelves")).toBe(false);
@@ -128,7 +135,9 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain("TALISU_MKTS_HEADER_NAV.filter");
     expect(header).toContain("RegisterNavDropdown");
     expect(header).toContain("bg-white/45");
-    const marketsIdx = header.indexOf('item.label === "Markets"');
+    // Markets is no longer a navbar item (admin-only TalisU dropdown row).
+    expect(header).not.toContain('item.label === "Markets"');
+    const marketsIdx = header.indexOf('item.label === "Home").map') + 1;
     const mapsitesIdx = header.indexOf('data-testid="nav-mapsites-link"');
     const catalogueIdx = header.indexOf('(item) => item.label === "Catalogue"');
     const registerFilterIdx = header.indexOf("<RegisterNavDropdown");
@@ -138,7 +147,7 @@ describe("TalisU blue header dropdown", () => {
     const homeIdx = header.indexOf('item.label === "Home").map');
     expect(homeIdx).toBeGreaterThan(-1);
     expect(marketsIdx).toBeGreaterThan(homeIdx);
-    // Home, Markets, Mapsites, Catalogue, Register | TalisU (Bookshelf, FAQ, …)
+    // Home, Mapsites, Catalogue, Register | TalisU (Bookshelf, FAQ, …)
     expect(header).not.toContain('(item) => item.label === "Bookshelf"');
     expect(mapsitesIdx).toBeGreaterThan(marketsIdx);
     expect(catalogueIdx).toBeGreaterThan(mapsitesIdx);
@@ -163,8 +172,8 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain("w-80!");
   });
 
-  it("makes the tree icon, Tsplits™ and the tagline one logo link to the Tsplits™ page", () => {
-    expect(TALISU_MKTS_HEADER_LOGO_HREF).toBe("/talisu/talispros");
+  it("makes the tree icon, Tsplits™ and the tagline one logo link to Home", () => {
+    expect(TALISU_MKTS_HEADER_LOGO_HREF).toBe("/");
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",

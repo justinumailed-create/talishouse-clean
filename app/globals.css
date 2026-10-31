@@ -5454,7 +5454,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 }
 
-/* /talisu/tsplits — the TSPLITS™ Talisbook™ inside the 1400 px working frame.
+/* /talisu/tsplits — the Tsplits™ Talisbook™ inside the 1400 px working frame.
    The viewer is height-driven (100%), so give it the open spread's height:
    frame width ÷ spread aspect (3704×2400 ≈ 1.543) + the compact header and
    the hint strip. Phones read one portrait page (926×1200 ≈ 0.772). */

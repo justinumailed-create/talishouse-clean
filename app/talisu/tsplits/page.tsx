@@ -14,7 +14,7 @@ export async function generateMetadata() {
 }
 
 /**
- * /talisu/tsplits — TSPLITS™ – from Vision to Implementation as a
+ * /talisu/tsplits — Tsplits™ – from Vision to Implementation as a
  * page-turning Talisbook™ (EN / DE via the talis_locale cookie). First item
  * in the TalisU dropdown. Cover first, back cover last; click or use the
  * arrow keys to turn pages. Open spread on desktop, single page on phones.

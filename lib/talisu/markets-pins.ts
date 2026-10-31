@@ -76,8 +76,9 @@ export const TALISU_MKTS_MARKET_PIN_SIZE = 41;
  */
 export const TALISU_MKTS_DO_MORE_PIN_SIZE = 58;
 
+/** Markets page bottom write-up (Arun, Oct 31): ends at "...around a centre point." */
 export const TALISU_MKTS_FOOTER =
-  "Select the PIN nearest you to claim a market of 80 kilometres around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.";
+  "Select the PIN nearest you to claim a market of 80 kilometres around a centre point.";
 
 export const TALISU_MKTS_PMC_TITLE = "Tsplits™ PMC";
 
@@ -91,21 +92,21 @@ export const TALISU_MKTS_HEADER_TAGLINE =
   "Industry Adjacent Mapsite Markets";
 
 /**
- * Header logo target: tree icon + Tsplits™ + tagline are one link to the
- * Tsplits™ pitch page (start of the PMC sequence).
+ * Header logo target: tree icon + Tsplits™ + tagline are one link to Home "/".
  */
-export const TALISU_MKTS_HEADER_LOGO_HREF = "/talisu/talispros";
+export const TALISU_MKTS_HEADER_LOGO_HREF = "/";
 
 /**
  * Primary top-bar links (home + claimed Mapsites blue header).
  * Catalogue is the book link (Bookshelf lives in the TalisU dropdown); Mapsites is a
  * header dropdown (not here) rendered right AFTER Register:
- * Home, Markets, Catalogue, Register, Mapsites, | TalisU.
+ * Home, Mapsites, Catalogue, Register, | TalisU.
+ * Markets is admin-only: it lives in the TalisU dropdown below the divider
+ * (TALISU_MKTS_HEADER_ADMIN_DROPDOWN) and /talisu/mkts is gated server-side.
  */
 export const TALISU_MKTS_HEADER_NAV = [
   /** Plain Home link (client request) — first item, even though the logo also links home. */
   { href: "/", label: "Home" },
-  { href: "/talisu/mkts", label: "Markets" },
   /** Talishouse™ Product Catalogue — opens on the front cover. */
   { href: "/catalogue", label: "Catalogue" },
   { href: "/talisu/reg", label: "Register" },
@@ -121,12 +122,12 @@ export const TALISU_MKTS_HEADER_REGISTER_DROPDOWN = [
 export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
 
 /**
- * TalisU™ header dropdown — TSPLITS™, Bookshelf, FAQ, Media Directory, Contract,
+ * TalisU™ header dropdown — Tsplits™, Bookshelf, FAQ, Media Directory, Contract,
  * Knowledge Base, then (after a divider) Audio, Video. The Tsplits™ page is
  * reached from the header logo (TALISU_MKTS_HEADER_LOGO_HREF), not this menu.
  */
 export const TALISU_MKTS_HEADER_DROPDOWN = [
-  { href: "/talisu/tsplits", label: "TSPLITS™" },
+  { href: "/talisu/tsplits", label: "Tsplits™" },
   { href: "/catalogue/bookshelf", label: "Bookshelf" },
   { href: "/talisu#faq", label: "FAQ" },
   { href: "/talisu/media-directory", label: "Media Directory" },
@@ -135,6 +136,15 @@ export const TALISU_MKTS_HEADER_DROPDOWN = [
   // Tsplits™ is the logo link.
   { href: "/talisu/contract", label: "Contract" },
   { href: "/talisu/kb", label: "Knowledge Base" },
+] as const;
+
+/**
+ * Admin-only TalisU dropdown rows (signed-in admin session), rendered below
+ * the divider after Knowledge Base. Hidden for the public; the Markets route
+ * itself is gated server-side in app/talisu/mkts/page.tsx.
+ */
+export const TALISU_MKTS_HEADER_ADMIN_DROPDOWN = [
+  { href: "/talisu/mkts", label: "Markets" },
 ] as const;
 
 /** TalisU dropdown row that the horizontal divider follows. */

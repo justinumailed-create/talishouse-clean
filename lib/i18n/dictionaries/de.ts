@@ -47,7 +47,7 @@ export const de: Dictionary = {
       product: "Produktoptionen",
     },
     talisuMenu: {
-      tsplits: "TSPLITS™",
+      tsplits: "Tsplits™",
       faq: "FAQ",
       knowledgeBase: "Wissensdatenbank",
       mediaDirectory: "Mediendirektorium",
@@ -404,7 +404,7 @@ export const de: Dictionary = {
     subtitle: "Kontakt aufnehmen – ohne vorherige Registrierung",
     openAria: "TalisBOT öffnen",
     closeAria: "TalisBOT schließen",
-    faq: "FAQ",
+    exploreTsplits: "Tsplits entdecken",
     getHelp: "Projektvision teilen",
     globalAdmin: "Globaler Admin",
     processesHeading: "Tsplits™-Prozesse",
@@ -519,7 +519,7 @@ export const de: Dictionary = {
     ],
     pmcTagline: "Bewerben - Verwalten - Kooperieren",
     footer:
-      "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 80 Kilometern um einen Mittelpunkt als teilexklusives Gebiet zu beanspruchen. Teilexklusiv bedeutet: Innerhalb dieses Kreises werden keine weiteren Märkte vergeben, benachbarte Märkte dürfen jedoch weiterhin Angebote pinnen, für die ihnen schriftliche und geprüfte Angebotsunterlagen vorliegen.",
+      "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 80 Kilometern um einen Mittelpunkt zu beanspruchen.",
     canada: "Kanada",
     canadaMarkets: "Märkte Kanada",
     usaMarkets: "Märkte USA",

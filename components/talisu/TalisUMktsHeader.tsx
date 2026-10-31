@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  TALISU_MKTS_HEADER_ADMIN_DROPDOWN,
   TALISU_MKTS_HEADER_BLUE,
   TALISU_MKTS_HEADER_DROPDOWN,
   TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER,
@@ -47,8 +48,10 @@ function navLabel(t: Dictionary, label: string): string {
 /** English TalisU dropdown label → localized text. */
 function talisuMenuLabel(t: Dictionary, label: string): string {
   switch (label) {
-    case "TSPLITS™":
+    case "Tsplits™":
       return t.nav.talisuMenu.tsplits;
+    case "Markets":
+      return t.nav.markets;
     case "Bookshelf":
       return t.nav.bookshelf;
     case "FAQ":
@@ -76,7 +79,8 @@ export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 export type TalisUMktsHeaderProps = {
   /**
    * `claimed-mapsite`: replace Register with Dashboard (lock until real payment).
-   * `default`: Home + Markets + Mapsites + Catalogue + Register | TalisU (Bookshelf lives in TalisU).
+   * `default`: Home + Mapsites + Catalogue + Register | TalisU (Bookshelf lives in TalisU;
+   * Markets is an admin-only TalisU row).
    */
   variant?: TalisUMktsHeaderVariant;
   /**
@@ -149,6 +153,9 @@ export default function TalisUMktsHeader({
   const mobilePanelRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const promptRef = useRef<HTMLDivElement>(null);
+  // Admin-only TalisU rows (Markets). Public visitors never see them; the
+  // Markets route is also gated server-side.
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const claimedMapsite = variant === "claimed-mapsite";
   const dashboardHasMenu =
@@ -162,9 +169,29 @@ export default function TalisUMktsHeader({
     pathname.startsWith("/mapsite") ||
     pathname.startsWith("/talispros/demo-mapsite");
 
-  const dropdownActive = TALISU_MKTS_HEADER_DROPDOWN.some(
+  const adminDropdownItems = isAdmin ? TALISU_MKTS_HEADER_ADMIN_DROPDOWN : [];
+
+  const dropdownActive = [
+    ...TALISU_MKTS_HEADER_DROPDOWN,
+    ...adminDropdownItems,
+  ].some(
     (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
   );
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/talisu/admin-status", { cache: "no-store", credentials: "same-origin" })
+      .then((res) => (res.ok ? res.json() : { admin: false }))
+      .then((data: { admin?: boolean }) => {
+        if (!cancelled) setIsAdmin(data?.admin === true);
+      })
+      .catch(() => {
+        if (!cancelled) setIsAdmin(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     setKbUnlocked(readTalisUKbUnlocked());
@@ -517,7 +544,7 @@ export default function TalisUMktsHeader({
       style={{ backgroundColor: TALISU_MKTS_HEADER_BLUE }}
     >
       <div className="mx-auto flex max-w-[1920px] flex-nowrap items-center justify-between gap-3 px-3 py-2 sm:px-5 lg:flex-wrap lg:py-2.5 lg:pb-3.5">
-        {/* One logo link: tree icon + Tsplits™ + tagline → Tsplits™ page. */}
+        {/* One logo link: tree icon + Tsplits™ + tagline → Home "/". */}
         <Link
           href={TALISU_MKTS_HEADER_LOGO_HREF}
           data-testid="header-logo-link"
@@ -539,9 +566,6 @@ export default function TalisUMktsHeader({
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Home").map(
             (item) => renderNavLink(item),
           )}
-          {TALISU_MKTS_HEADER_NAV.filter(
-            (item) => item.label === "Markets",
-          ).map((item) => renderNavLink(item))}
           {/* Mapsites: direct link to the Demo Mapsite page (FAST Code card lives there). */}
           <Link
             href={DEMO_MAPSITE_BUILD_PATH}
@@ -684,6 +708,32 @@ export default function TalisUMktsHeader({
                       }
                       return row;
                     })}
+                    {/* Admin-only rows: below the divider, after Knowledge Base. */}
+                    {adminDropdownItems.length ? (
+                      <>
+                        {adminDropdownItems.map((item) => {
+                          const active =
+                            pathname === item.href ||
+                            pathname.startsWith(`${item.href}/`);
+                          return (
+                            <Link
+                              key={item.href}
+                              href={item.href}
+                              role="menuitem"
+                              data-testid="talisu-admin-markets-link"
+                              onClick={() => setOpen(false)}
+                              className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
+                                active
+                                  ? "bg-white/20 text-white"
+                                  : "text-white/95 hover:bg-white/15"
+                              }`}
+                            >
+                              {talisuMenuLabel(t, item.label)}
+                            </Link>
+                          );
+                        })}
+                      </>
+                    ) : null}
                   </>
                 )}
               </div>
@@ -751,7 +801,7 @@ export default function TalisUMktsHeader({
           ) : (
             <nav aria-label={t.nav.talisu} className="flex flex-col">
               {TALISU_MKTS_HEADER_NAV.filter(
-                (item) => item.label === "Home" || item.label === "Markets",
+                (item) => item.label === "Home",
               ).map((item) =>
                 renderMobileLink(
                   item.href,
@@ -882,6 +932,19 @@ export default function TalisUMktsHeader({
                 }
                 return link;
               })}
+              {adminDropdownItems.length ? (
+                <>
+                  {adminDropdownItems.map((item) =>
+                    renderMobileLink(
+                      item.href,
+                      talisuMenuLabel(t, item.label),
+                      pathname === item.href ||
+                        pathname.startsWith(`${item.href}/`),
+                      true,
+                    ),
+                  )}
+                </>
+              ) : null}
 
               <div className="mt-2 flex items-center justify-between border-t border-white/25 pt-2">
                 <span className="text-[13px] font-medium text-white">

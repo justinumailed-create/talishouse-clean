@@ -18,19 +18,19 @@ const shellSrc = () =>
 const flat = (v: unknown): string => JSON.stringify(v);
 const publicFile = (url: string) => resolve("public", url.replace(/^\//, ""));
 
-describe("TSPLITS™ page (/talisu/tsplits)", () => {
+describe("Tsplits™ page (/talisu/tsplits)", () => {
   it("is item one in the TalisU dropdown, above Bookshelf / FAQ / Media Directory and the divider", () => {
     const labels = TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label as string);
-    expect(labels[0]).toBe("TSPLITS™");
+    expect(labels[0]).toBe("Tsplits™");
     expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.href).toBe("/talisu/tsplits");
     expect(TSPLITS_PATH).toBe("/talisu/tsplits");
-    expect(labels.indexOf("TSPLITS™")).toBeLessThan(labels.indexOf(TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER));
+    expect(labels.indexOf("Tsplits™")).toBeLessThan(labels.indexOf(TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER));
     expect(labels.slice(1)).toEqual(["Bookshelf", "FAQ", "Media Directory", "Contract", "Knowledge Base"]);
     const header = readFileSync(resolve("components/talisu/TalisUMktsHeader.tsx"), "utf8");
-    expect(header).toContain('case "TSPLITS™":');
+    expect(header).toContain('case "Tsplits™":');
     expect(header).toContain("t.nav.talisuMenu.tsplits");
-    expect(getDictionary("en").nav.talisuMenu.tsplits).toBe("TSPLITS™");
-    expect(getDictionary("de").nav.talisuMenu.tsplits).toBe("TSPLITS™");
+    expect(getDictionary("en").nav.talisuMenu.tsplits).toBe("Tsplits™");
+    expect(getDictionary("de").nav.talisuMenu.tsplits).toBe("Tsplits™");
   });
 
   it("is a registered page with EN/DE eBook SEO metadata and OG cards", () => {
@@ -40,8 +40,8 @@ describe("TSPLITS™ page (/talisu/tsplits)", () => {
     };
     const page = seo.pages["/talisu/tsplits"];
     const entry = flat(page);
-    expect(page.en.title).toContain("TSPLITS™ eBook");
-    expect(page.de.title).toContain("TSPLITS™ eBook");
+    expect(page.en.title).toContain("Tsplits™ eBook");
+    expect(page.de.title).toContain("Tsplits™ eBook");
     expect(entry).toContain("\"image\":\"/og/pages/talisu-tsplits\"");
     expect(entry).not.toMatch(/USD|US\$/);
     expect(existsSync(resolve("public/og/pages/talisu-tsplits-en.jpg"))).toBe(true);

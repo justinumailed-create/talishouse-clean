@@ -96,9 +96,9 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(actions).toContain('return { success: true, href: "/" }');
   });
 
-  it("points Claim Market at the Taliswebs Webster page", () => {
+  it("points Claim Market at Aisha's Register page on Talispros", () => {
     expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe(
-      "https://taliswebs-us.vercel.app/talisu/adviser",
+      "/talisu/reg",
     );
   });
 
