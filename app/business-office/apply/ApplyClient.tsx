@@ -41,7 +41,7 @@ export default function ApplyClient() {
 
   return (
     <main data-testid="propose-project" className="min-h-screen bg-[#fbfbfd] text-[#1d1d1f]">
-      <div className="mx-auto w-full max-w-[560px] px-6 pb-28 pt-20 sm:pt-28">
+      <div className="mx-auto w-full max-w-[560px] px-6 pb-28 pt-20 sm:pt-28" style={{ maxWidth: 608 }}>
         {done ? (
           <div data-testid="propose-project-done" className="text-center">
             <h1 className="text-[44px] font-semibold leading-[1.05] tracking-[-0.02em] sm:text-[56px]">{t.doneTitle}</h1>

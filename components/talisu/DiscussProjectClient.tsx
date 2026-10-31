@@ -97,7 +97,7 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
 
   return (
     <div className="bg-[#fbfbfd] px-6 pb-28 pt-20 text-[#1d1d1f] antialiased sm:pt-28" data-testid="talisu-discuss">
-      <div className="mx-auto w-full max-w-[560px]" data-testid="talisu-discuss-content">
+      <div className="mx-auto w-full max-w-[560px]" style={{ maxWidth: 560 }} data-testid="talisu-discuss-content">
         {done ? (
           <div className="py-16 text-center" data-testid="discuss-done">
             <h1 className="text-[40px] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[48px]">
