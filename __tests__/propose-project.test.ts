@@ -60,9 +60,10 @@ describe("Propose a Project (Oct 31 redesign)", () => {
     expect(JSON.stringify([en.propose, de.propose])).not.toMatch(/TODO|TBD|USD|lorem/i);
   });
 
-  it("is linked from Webster's Value-Added page", () => {
+  it("Webster's Value-Added page links Propose a Project to Share a Project Vision", () => {
     const page = readFileSync(resolve("app/talisu/value-added/page.tsx"), "utf8");
-    expect(page).toContain("ROUTES.BUSINESS_OFFICE_APPLY");
+    expect(page).toContain("talisuHref(TALISU_DISCUSS_PATH)");
+    expect(page).not.toContain("BUSINESS_OFFICE_APPLY");
     expect(en.talisu.valueAdded.proposeCta).toBe("Propose a Project");
     expect(de.talisu.valueAdded.proposeCta).toBe("Projekt vorschlagen");
   });

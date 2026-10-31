@@ -238,6 +238,13 @@ export const en = {
     pageIntro:
       "Explore Conventional, Lease-to-Own, Fractionalization and Tokenization, choose the structure that fits your project, then share your vision. An advisor will contact you; no registration or FAST Code needed.",
     /** Beside the read-only structure chip on the page form. */
+    pageKicker: "Tsplits™ · Advisors",
+    pageLead:
+      "Tell us where your project is and what you imagine. An advisor will contact you; no registration or FAST Code needed.",
+    pageVision: "Your vision",
+    pageSubmit: "Share Your Vision",
+    pageNote: "All quotes and payments are in Canadian dollars (CAD).",
+    pageDoneBack: "Back to Tsplits™",
     topicHint: "(choose with the buttons)",
     openPage: "Open as a full page with a Google-recognized location →",
     topic: "Transaction structure",

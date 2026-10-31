@@ -394,7 +394,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
       expect(findAll(tree, (el) => el.type === RegisterStructureTabs)).toHaveLength(0);
       const actions = findAll(tree, (el) => el.type === RegisterActions)[0];
       expect(actions.props.hrefs).toEqual({
-        propose: "/business-office/apply",
+        propose: "/talisu/discuss",
         claim: "/talispros/demo-mapsite",
         terms: "/talisu/contract",
         register: "/talisu/reg?step=choose",

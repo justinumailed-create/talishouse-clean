@@ -1,3 +1,4 @@
+import { TALISU_DISCUSS_PATH, talisuHref } from "@/lib/talisu/talisu-links";
 import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
@@ -14,7 +15,6 @@ import AdviserLayout from "@/components/talisu/AdviserLayout";
 import RegisterStructureTabs from "@/components/talisu/RegisterStructureTabs";
 import RegisterActions from "@/components/talisu/RegisterActions";
 import { hasRegisterEntry } from "@/lib/talisu/register-entry";
-import { ROUTES } from "@/lib/routes";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { PMC_PATHS } from "@/lib/talispros/mapsite-contract";
 import { isTalisURegisterCheckoutStep } from "@/lib/talisu/ask-step";
@@ -106,7 +106,7 @@ export default async function TalisURegisterPage({
             entryGranted={entryGranted}
             initialOpen={wantsStructures || lockedParam === REGISTER_ENTRY_LOCK}
             hrefs={{
-              propose: ROUTES.BUSINESS_OFFICE_APPLY,
+              propose: talisuHref(TALISU_DISCUSS_PATH),
               claim: DEMO_MAPSITE_BUILD_PATH,
               terms: PMC_PATHS.contract,
               register: `/talisu/reg?step=${REGISTER_CHOOSE_STEP}`,

@@ -27,6 +27,8 @@ type Suggestion = {
 type MapSitePlaceSearchProps = {
   label: string;
   placeholder: string;
+  /** Replaces the default input styling (Share a Project Vision page). */
+  inputClassName?: string;
   noResults: string;
   disabled?: boolean;
   onSelect: (place: MapSitePlaceSelection) => void;
@@ -69,6 +71,7 @@ export function shortPlaceLabel(name: string | null | undefined, address: string
 export default function MapSitePlaceSearch({
   label,
   placeholder,
+  inputClassName,
   noResults,
   disabled = false,
   onSelect,
@@ -233,7 +236,10 @@ export default function MapSitePlaceSearch({
             setOpen(false);
           }
         }}
-        className="block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:border-neutral-500 focus:outline-none disabled:opacity-60"
+        className={
+          inputClassName ??
+          "block w-full rounded-md border border-neutral-300 px-3 py-2 text-sm placeholder:text-neutral-400 focus:border-neutral-500 focus:outline-none disabled:opacity-60"
+        }
       />
       {showList ? (
         <ul
