@@ -1,8 +1,9 @@
 /**
  * TSPLITS™ – from Vision to Implementation as a page-turning Talisbook™
- * (EN + DE). Ten portrait pages (926×1200, rendered at 2x): front cover,
- * eight interior pages as four landscape spreads, back cover. Assets live in
- * `/public/talisbooks/tsplits/{locale}/` with the matching PDFs one level up.
+ * (EN + DE). Ten portrait pages: front cover (red map pin), eight interior
+ * pages of the sales edition as four landscape spreads, then Webster on the
+ * back cover. Assets live in `/public/talisbooks/tsplits/{locale}/` with the
+ * matching PDFs one level up.
  */
 import type { Locale } from "@/lib/i18n/config";
 import type { TalisBooksViewerBook, TalisBooksViewerPage } from "@/lib/talisbooks/viewer/types";
