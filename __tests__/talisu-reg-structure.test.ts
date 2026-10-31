@@ -8,7 +8,11 @@ const env = vi.hoisted(() => ({
   enforce: vi.fn(async () => undefined),
   locale: "en" as "en" | "de",
   cookie: undefined as string | undefined,
+  entry: true,
 }));
+
+vi.mock("@/lib/talisu/register-entry", () => ({ hasRegisterEntry: async () => env.entry }));
+vi.mock("@/app/talisu/reg/actions", () => ({ redeemRegisterEntryAction: vi.fn() }));
 
 vi.mock("@/lib/talisu/pmc-gate", () => ({
   enforcePmcRegistrationGate: env.enforce,
@@ -17,6 +21,7 @@ vi.mock("@/lib/talisu/pmc-gate", () => ({
 vi.mock("@/lib/i18n/server", () => ({ getLocale: async () => env.locale }));
 vi.mock("next/navigation", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/navigation")>()),
+  useRouter: () => ({ push: () => undefined, refresh: () => undefined }),
   redirect: (url: string) => {
     throw new Error(`NEXT_REDIRECT;${url}`);
   },
@@ -32,6 +37,7 @@ import TalisURegisterPage from "../app/talisu/reg/page";
 import SamCartEmbed from "../components/talisu/SamCartEmbed";
 import AdviserLayout from "../components/talisu/AdviserLayout";
 import RegisterStructureTabs from "../components/talisu/RegisterStructureTabs";
+import RegisterActions from "../components/talisu/RegisterActions";
 import { talisURegisterCheckoutHref } from "../lib/talisu/ask-step";
 import {
   REGISTER_STRUCTURE_IDS,
@@ -168,10 +174,11 @@ describe("Aisha's /talisu/reg landing", () => {
     env.enforce.mockClear();
     env.locale = "en";
     env.cookie = undefined;
+    env.entry = true;
   });
 
   it("uses the adviser layout with Aisha and loads with no structure selected", async () => {
-    const tree = await renderReg({});
+    const tree = await renderReg({ step: "choose" });
     const layout = findAll(tree, (el) => el.type === AdviserLayout)[0];
     expect(layout.props.imageSrc).toBe("/images/mapsites/aisha-c.webp");
     expect(layout.props.title).toBe(en.talisu.register.adviserTitle);
@@ -182,7 +189,7 @@ describe("Aisha's /talisu/reg landing", () => {
 
   it("ignores an older remembered structure on load", async () => {
     env.cookie = "conventional";
-    const tree = await renderReg({});
+    const tree = await renderReg({ step: "choose" });
     expect(findAll(tree, (el) => el.type === RegisterStructureTabs)[0].props.initialId).toBeNull();
     const html = renderToStaticMarkup(tree as ReactElement);
     expect(html).toContain('data-selected-structure=""');
@@ -190,7 +197,7 @@ describe("Aisha's /talisu/reg landing", () => {
   });
 
   it("locked with none: a radiogroup of four unchecked radios, a disabled Register button and the reason", async () => {
-    const html = renderToStaticMarkup((await renderReg({})) as ReactElement);
+    const html = renderToStaticMarkup((await renderReg({ step: "choose" })) as ReactElement);
     expect(html).toMatch(/role="radiogroup" aria-label="Choose your structure"/);
     for (const id of REGISTER_STRUCTURE_IDS) {
       expect(html).toMatch(
@@ -240,7 +247,7 @@ describe("Aisha's /talisu/reg landing", () => {
 
   it("shows the German tab names and reason", async () => {
     env.locale = "de";
-    let html = renderToStaticMarkup((await renderReg({})) as ReactElement);
+    let html = renderToStaticMarkup((await renderReg({ step: "choose" })) as ReactElement);
     expect(html).toContain("Wählen Sie eine Struktur");
     html = renderToStaticMarkup((await renderReg({ structure: "lease-to-own" })) as ReactElement);
     expect(html).toContain("Mietkauf");
@@ -255,6 +262,7 @@ describe("Aisha's register checkout keeps the structure", () => {
     env.enforce.mockClear();
     env.locale = "en";
     env.cookie = undefined;
+    env.entry = true;
   });
 
   it("keeps the PMC gate", async () => {
@@ -368,5 +376,85 @@ describe("Aisha's register checkout keeps the structure", () => {
     expect(lib).toContain("registerStructureCookie(structure)");
     expect(lib).toContain("clearRegisterStructureCookie()");
     expect(lib).toContain("window.history.replaceState");
+  });
+});
+
+describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
+  beforeEach(() => {
+    env.enforce.mockClear();
+    env.locale = "en";
+    env.cookie = undefined;
+    env.entry = false;
+  });
+
+  it("bare landing: exactly four buttons in order Propose Project, Claim Market, Terms of Service, Register", async () => {
+    for (const entry of [false, true]) {
+      env.entry = entry;
+      const tree = await renderReg({});
+      expect(findAll(tree, (el) => el.type === RegisterStructureTabs)).toHaveLength(0);
+      const actions = findAll(tree, (el) => el.type === RegisterActions)[0];
+      expect(actions.props.hrefs).toEqual({
+        propose: "/business-office/apply",
+        claim: "/talispros/demo-mapsite",
+        terms: "/talisu/contract",
+        register: "/talisu/reg?step=choose",
+      });
+      expect(actions.props.entryGranted).toBe(entry);
+      const html = renderToStaticMarkup(tree as ReactElement);
+      const order = [...html.matchAll(/data-testid="register-action-(\w+)"/g)].map((m) => m[1]);
+      expect(order).toEqual(["propose", "claim", "terms", "register"]);
+      expect(html).toContain(">Propose Project<");
+      expect(html).toContain(">Claim Market<");
+      expect(html).toContain(">Terms of Service<");
+      expect(html).toContain(">Register<");
+      expect(html).not.toContain("register-structures-");
+    }
+  });
+
+  it("German labels", async () => {
+    env.locale = "de";
+    const html = renderToStaticMarkup((await renderReg({})) as ReactElement);
+    for (const label of ["Projekt vorschlagen", "Markt beanspruchen", "Nutzungsbedingungen", "Registrieren"]) {
+      expect(html).toContain(`>${label}<`);
+    }
+  });
+
+  it("without an entry code the structure step stays closed and the code prompt opens", async () => {
+    const cases: Record<string, string>[] = [{ step: "choose" }, { structure: "tokenization" }, { locked: "structure" }, { locked: "code" }];
+    for (const params of cases) {
+      const tree = await renderReg(params);
+      expect(findAll(tree, (el) => el.type === RegisterStructureTabs)).toHaveLength(0);
+      expect(findAll(tree, (el) => el.type === RegisterActions)[0].props.initialOpen).toBe(true);
+      const html = renderToStaticMarkup(tree as ReactElement);
+      expect(html).toContain('data-testid="register-entry"');
+      expect(html).toContain('data-testid="register-entry-code"');
+    }
+  });
+
+  it("server side: the register checkout redirects to the code prompt before any other gate", async () => {
+    await expect(renderReg({ step: "register", structure: "tokenization" })).rejects.toThrow(
+      "NEXT_REDIRECT;/talisu/reg?locked=code",
+    );
+    await expect(renderReg({ step: "register", structure: "conventional", fastCode: "ABC123" })).rejects.toThrow(
+      "NEXT_REDIRECT;/talisu/reg?locked=code&fastCode=ABC123",
+    );
+    env.cookie = "fractionalization";
+    await expect(renderReg({ step: "register" })).rejects.toThrow("NEXT_REDIRECT;/talisu/reg?locked=code");
+    expect(env.enforce).not.toHaveBeenCalled();
+  });
+
+  it("validates codes with the existing agent code system, server-side, with a signed cookie", () => {
+    const action = readFileSync(resolve("app/talisu/reg/actions.ts"), "utf8");
+    expect(action).toContain('"use server"');
+    expect(action).toContain("redeemAgentContractCode(");
+    expect(action).toContain("signCookieValue(REGISTER_ENTRY_COOKIE_SCOPE");
+    expect(action).toContain("httpOnly: true");
+    const entry = readFileSync(resolve("lib/talisu/register-entry.ts"), "utf8");
+    expect(entry).toContain('import "server-only"');
+    expect(entry).toContain("verifyCookieValue(");
+    expect(entry).toContain("getContractAgentById(");
+    const ui = readFileSync(resolve("components/talisu/RegisterActions.tsx"), "utf8");
+    expect(ui).not.toMatch(/placeholder=/);
+    expect(ui).toContain("redeemRegisterEntryAction(");
   });
 });

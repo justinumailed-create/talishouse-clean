@@ -67,7 +67,7 @@ describe("Ralf batch 2 — demo → registration", () => {
       // step=register back to hers — never an auto-redirect to checkout.
       const redirects = page.match(/redirect\([^;]*\)/g) ?? [];
       for (const r of redirects) {
-        expect(r).toMatch(/PMC_PATHS\.talispros|^redirect\((engageLockedHref|registerLockedHref)\(/);
+        expect(r).toMatch(/PMC_PATHS\.talispros|^redirect\((engageLockedHref|registerLockedHref|registerEntryLockedHref)\(/);
       }
     }
   });

@@ -6,9 +6,8 @@ import PmcStepper from "@/components/talisu/pmc/PmcStepper";
 import PmcFooter from "@/components/talisu/pmc/PmcFooter";
 import LegalDocument from "@/components/talisu/pmc/LegalDocument";
 import { ContractSignForm, ContractUnlockForm } from "@/components/talisu/pmc/ContractClient";
-import { redirect } from "next/navigation";
-import { readUnlockedContractAgent } from "@/app/talisu/contract/actions";
-import { getSignedContractForFastCode } from "@/lib/talispros/mapsite-contract-service";
+import { readSignedContractId, readUnlockedContractAgent } from "@/app/talisu/contract/actions";
+import { getSignedContractById } from "@/lib/talispros/mapsite-contract-service";
 import { PMC_CLAIM_START, findClaimedMapSite, resolveVisitorFastCode } from "@/lib/talisu/pmc-gate";
 import {
   PMC_PATHS,
@@ -29,18 +28,28 @@ export async function generateMetadata() {
   return pageMetadata("/talisu/contract");
 }
 
-type Props = { searchParams?: Promise<{ fastCode?: string; agent?: string }> };
+type Props = { searchParams?: Promise<{ fastCode?: string; agent?: string; new?: string }> };
 
 export default async function PmcContractPage({ searchParams }: Props) {
   const locale = await getLocale();
   const t = getDictionary(locale).pmc;
   const params = (await searchParams) ?? {};
-  // FAST Code is required: the signature ties to the visitor's claimed Mapsite.
-  const claimed = await findClaimedMapSite(await resolveVisitorFastCode(params.fastCode));
-  if (!claimed) redirect(PMC_CLAIM_START);
-  const fastCode = claimed.fastCode;
-  // Once signed for this FAST Code, never ask for an agent code again.
-  const signed = await getSignedContractForFastCode(fastCode);
+  // Per-signer contract (Oct 31 fix). The page used to resolve "the
+  // visitor's" FAST Code through every fallback (90-day signed cookie, Mapsite
+  // owner/root cookies), redirect anyone without one to the demo builder, and
+  // show the latest signature on file for that FAST Code to whoever opened it.
+  // Now: everyone gets the agreement to sign; the FAST Code is only prefilled
+  // (editable) and the signed banner is shown only to the browser that signed
+  // that very record (its signed-contract cookie), never to other visitors.
+  const fresh = params.new === "1";
+  const signedId = fresh ? null : await readSignedContractId();
+  const ownSigned = signedId ? await getSignedContractById(signedId) : null;
+  const claimed = fresh
+    ? await findClaimedMapSite(params.fastCode)
+    : await findClaimedMapSite(await resolveVisitorFastCode(params.fastCode));
+  const fastCode = claimed?.fastCode ?? null;
+  const signed =
+    ownSigned && (!fastCode || ownSigned.fastCode?.toLowerCase() === fastCode) ? ownSigned : null;
   const agent = signed ? null : await readUnlockedContractAgent();
 
   return (
@@ -75,6 +84,13 @@ export default async function PmcContractPage({ searchParams }: Props) {
             >
               {t.contract.continue} →
             </Link>
+            <Link
+              href={`${PMC_PATHS.contract}?new=1`}
+              data-testid="pmc-contract-new"
+              className="ml-4 mt-3 inline-flex text-sm font-semibold text-emerald-800 underline-offset-2 hover:underline"
+            >
+              {t.contract.signAnother}
+            </Link>
           </div>
         ) : null}
 
@@ -99,7 +115,7 @@ export default async function PmcContractPage({ searchParams }: Props) {
               </div>
             </article>
             <div className="lg:sticky lg:top-20 lg:self-start">
-              <ContractSignForm agentName={agent.name} fastCode={fastCode} />
+              <ContractSignForm agentName={agent.name} fastCode={fastCode} claimHref={PMC_CLAIM_START} />
             </div>
           </div>
         )}

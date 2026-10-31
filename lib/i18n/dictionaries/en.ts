@@ -176,6 +176,8 @@ export const en = {
       canada:
         "Webster and his Fulfilment Team work with project owners across Canada. Every quote, down payment and instalment is in Canadian dollars (CAD).",
       imageAlt: "Webster, Team Leader for fulfilment options",
+      proposeLead: "Have a project in mind?",
+      proposeCta: "Propose a Project",
       leaseToOwnBody:
         "Similar to “Conventional”, but includes a Tsplits™ period (Talisman Simple Project Lead & Income Tracking System). That avoids the bank, but requires money down and instalments until the transaction has closed.",
     },
@@ -184,6 +186,32 @@ export const en = {
     essaySwitcher: "Essays",
     /** Shown in the rail for placeholder ("Coming soon") essay tabs. */
     essayCheckBackSoon: "Check back soon",
+  },
+
+  /** /business-office/apply — Propose a Project (Apple-style single column). */
+  propose: {
+    kicker: "Tsplits™ · Business Office",
+    title: "Propose a Project.",
+    lead: "Tell us where it is and how you would like to take part. Webster and his Fulfilment Team reply within 2–3 business days.",
+    name: "Full name",
+    email: "Email",
+    phone: "Phone (optional)",
+    location: "Project location",
+    role: "How would you like to take part?",
+    roles: {
+      referral: { title: "Referral Partner", body: "Up to 10% in Referral Fees and CSI Rewards." },
+      resale: { title: "Resale Partner", body: "Up to 20% in Procurement Margin." },
+      fulfillment: { title: "Fulfilment Partner", body: "Up to 25% Procurement Margin plus Lease-to-Own profits." },
+    },
+    submit: "Send proposal",
+    sending: "Sending…",
+    required: "Please add your name, email, project location and how you would like to take part.",
+    badEmail: "Please check your email address.",
+    failed: "Your proposal could not be sent. Please try again in a moment.",
+    doneTitle: "Thank you.",
+    doneBody: "Your proposal is in. Webster and his Fulfilment Team will be in touch within 2–3 business days.",
+    doneBack: "Back to Value-Added",
+    note: "All quotes and payments are in Canadian dollars (CAD).",
   },
 
   bot: {
@@ -544,6 +572,9 @@ export const en = {
       representative: "Authorized Representative (full name)",
       email: "Email (optional, for your copy)",
       fastCode: "FAST Code (your claimed Mapsite)",
+      signAnother: "Sign for a different FAST Code",
+      fastCodeHint: "Use the FAST Code of your own claimed Mapsite.",
+      fastCodeClaim: "No FAST Code yet? Claim your Mapsite",
       needFastCode: "Claim your Mapsite first — the agreement is signed for its FAST Code.",
       typed: "Type signature",
       drawn: "Draw signature",

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useT } from "@/lib/i18n/client";
@@ -71,16 +73,21 @@ export function ContractUnlockForm({
 export function ContractSignForm({
   agentName,
   fastCode,
+  claimHref,
 }: {
   agentName: string;
   fastCode: string | null;
+  /** Where a visitor without a claimed Mapsite gets their FAST Code. */
+  claimHref?: string;
 }) {
   const t = useT().pmc.contract;
   const router = useRouter();
   const [business, setBusiness] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const fc = fastCode?.toUpperCase() ?? "";
+  // Prefilled from the visitor's own Mapsite when known, otherwise typed in;
+  // the server checks it is a claimed Mapsite before recording anything.
+  const [fc, setFc] = useState(fastCode?.toUpperCase() ?? "");
   const [mode, setMode] = useState<"typed" | "drawn">("typed");
   const [typed, setTyped] = useState("");
   const [image, setImage] = useState<string | null>(null);
@@ -174,9 +181,24 @@ export function ContractSignForm({
         </label>
         <label className="text-[13px] font-semibold text-neutral-700">
           {t.fastCode}
-          <input className={`${field} mt-1.5 bg-neutral-50 font-mono uppercase`} value={fc} readOnly aria-readonly="true" />
+          <input
+            data-testid="pmc-contract-fastcode"
+            className={`${field} mt-1.5 font-mono uppercase`}
+            value={fc}
+            onChange={(e) => setFc(e.target.value.toUpperCase().slice(0, 40))}
+            autoComplete="off"
+            spellCheck={false}
+          />
         </label>
       </div>
+      {claimHref && !fastCode ? (
+        <p className="mt-2 text-[12px] text-neutral-500" data-testid="pmc-contract-claim-hint">
+          {t.fastCodeHint}{" "}
+          <Link href={claimHref} className="font-semibold text-[#0069CF] underline-offset-2 hover:underline">
+            {t.fastCodeClaim}
+          </Link>
+        </p>
+      ) : null}
 
       <div className="mt-6 inline-flex rounded-full bg-neutral-100 p-1 text-[13px] font-semibold">
         {(["typed", "drawn"] as const).map((m) => (

@@ -12,6 +12,11 @@ import SectionShell from "@/components/talisu/SectionShell";
 import SamCartEmbed from "@/components/talisu/SamCartEmbed";
 import AdviserLayout from "@/components/talisu/AdviserLayout";
 import RegisterStructureTabs from "@/components/talisu/RegisterStructureTabs";
+import RegisterActions from "@/components/talisu/RegisterActions";
+import { hasRegisterEntry } from "@/lib/talisu/register-entry";
+import { ROUTES } from "@/lib/routes";
+import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
+import { PMC_PATHS } from "@/lib/talispros/mapsite-contract";
 import { isTalisURegisterCheckoutStep } from "@/lib/talisu/ask-step";
 import {
   REGISTER_STRUCTURE_COOKIE,
@@ -49,6 +54,18 @@ type TalisURegisterPageProps = {
   }>;
 };
 
+/** Structure step, opened after a valid agent entry code. */
+const REGISTER_CHOOSE_STEP = "choose";
+const REGISTER_ENTRY_LOCK = "code";
+
+/** Where a register URL without a valid agent entry goes back to. */
+function registerEntryLockedHref(fastCode?: string | null): string {
+  const params = new URLSearchParams({ locked: REGISTER_ENTRY_LOCK });
+  const code = fastCode?.trim();
+  if (code) params.set("fastCode", code);
+  return `/talisu/reg?${params.toString()}`;
+}
+
 export default async function TalisURegisterPage({
   searchParams,
 }: TalisURegisterPageProps) {
@@ -60,10 +77,53 @@ export default async function TalisURegisterPage({
   // names one (an older remembered choice is ignored there).
   const urlStructure = parseSingleRegisterStructure(params.structure);
 
-  // Adviser landing first: Aisha's portrait + the four single-select
-  // structure tabs. "Register now" unlocks once one is chosen; the SamCart
-  // register checkout only renders after it (?step=register&structure=<id>).
+  // Register entry (Oct 31): registration needs an entry code issued by an
+  // agent, checked server-side (lib/talisu/register-entry.ts). Without it the
+  // structure step and the SamCart checkout are never rendered.
+  const entryGranted = await hasRegisterEntry();
+  const step = firstParam(params.step)?.trim().toLowerCase() ?? "";
+  const lockedParam = firstParam(params.locked)?.trim().toLowerCase() ?? "";
+
   if (!isTalisURegisterCheckoutStep(params.step)) {
+    // Landing: Aisha's portrait + exactly four buttons, in this order:
+    // Propose Project · Claim Market · Terms of Service · Register.
+    const wantsStructures =
+      step === REGISTER_CHOOSE_STEP ||
+      params.structure !== undefined ||
+      lockedParam === "structure";
+    if (!entryGranted || !wantsStructures) {
+      return (
+        <AdviserLayout
+          testId="talisu-register-landing"
+          imageSrc={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
+          imageAlt="Aisha C."
+          imagePosition="center 20%"
+          kicker={TALISU_REGISTER.adviserKicker}
+          title={TALISU_REGISTER.adviserTitle}
+        >
+          <RegisterActions
+            labels={TALISU_REGISTER.actions}
+            entryGranted={entryGranted}
+            initialOpen={wantsStructures || lockedParam === REGISTER_ENTRY_LOCK}
+            hrefs={{
+              propose: ROUTES.BUSINESS_OFFICE_APPLY,
+              claim: DEMO_MAPSITE_BUILD_PATH,
+              terms: PMC_PATHS.contract,
+              register: `/talisu/reg?step=${REGISTER_CHOOSE_STEP}`,
+            }}
+          />
+          <div className="mt-6 text-[13px] text-neutral-600" data-testid="talisu-register-partner">
+            <span className="font-semibold text-neutral-900">{TALISU_REGISTER.partnerName}</span>
+            {" · "}
+            {TALISU_REGISTER.partnerHeading}
+          </div>
+        </AdviserLayout>
+      );
+    }
+
+    // Structure step (entry accepted): the four single-select structure
+    // tabs. "Register now" unlocks once one is chosen; the SamCart checkout
+    // only renders after it (?step=register&structure=<id>).
     return (
       <AdviserLayout
         testId="talisu-register-landing"
@@ -91,6 +151,11 @@ export default async function TalisURegisterPage({
         </div>
       </AdviserLayout>
     );
+  }
+
+  // Server side of the entry lock: no agent entry code, no checkout.
+  if (!entryGranted) {
+    redirect(registerEntryLockedHref(firstParam(params.fastCode)));
   }
 
   // Server side of the lock: the checkout needs exactly one valid structure.

@@ -290,6 +290,24 @@ export const TALISU_REGISTER = {
   structureClose: "Close",
   structureChange: "Change",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
+  /** Aisha's four buttons (Oct 31): Propose Project · Claim Market · Terms of Service · Register. */
+  actions: {
+    label: "How would you like to start?",
+    propose: "Propose Project",
+    claim: "Claim Market",
+    terms: "Terms of Service",
+    register: "Register",
+    entryTitle: "Enter your agent entry code",
+    entryBody: "Registration opens with the entry code your Tsplits™ agent gave you.",
+    entryLabel: "Agent entry code",
+    entrySubmit: "Continue to registration",
+    entryChecking: "Checking…",
+    entryBad: "That entry code is not valid. Please check it with your agent.",
+    entryTooMany: "Too many attempts. Please wait 15 minutes and try again.",
+    entryNotReady: "Registration is not available right now. Please try again shortly.",
+    entryNeeded: "Registration needs the entry code your Tsplits™ agent gave you. Enter it to continue.",
+    close: "Close",
+  },
 } as const;
 
 export const TALISU_ENGAGE = {

@@ -9,7 +9,7 @@ import {
   CONTRACT_SIGNED_COOKIE,
   CONTRACT_SIGNED_COOKIE_MAX_AGE,
   getContractAgentById,
-  getSignedContractForFastCode,
+  getSignedContractById,
   recordServiceAgreementSignature,
   redeemAgentContractCode,
   signCookieValue,
@@ -84,7 +84,12 @@ export async function signPmcContractAction(
   if (!claimed) return { ok: false, error: "needFastCode" };
   const fastCode = claimed.fastCode;
   const mapsiteId: string | null = claimed.id;
-  if (await getSignedContractForFastCode(fastCode)) {
+  // Already signed by THIS browser for this FAST Code → just continue. Another
+  // visitor's signature on file never blocks or stands in for this signer:
+  // they record their own (insert only; existing records are never changed).
+  const ownId = await readSignedContractId();
+  const own = ownId ? await getSignedContractById(ownId) : null;
+  if (own && own.fastCode?.toLowerCase() === fastCode.toLowerCase()) {
     return { ok: true, href: pmcHref(PMC_PATHS.register, { fastCode }) };
   }
   const email = input.signerEmail?.trim() || null;
