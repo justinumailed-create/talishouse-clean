@@ -70,6 +70,7 @@ export const en = {
     talisuMenu: {
       tsplits: "Tsplits™",
       faq: "FAQ",
+      valueAdded: "Value-Added",
       knowledgeBase: "Knowledge Base",
       mediaDirectory: "Media Directory",
       contract: "Contract",
@@ -167,6 +168,17 @@ export const en = {
     engageCataloguePage: "Talishouse™ Product Catalogue page {page}",
     engageChange: "Change",
     engageWebster: "Engage Thorsten P",
+    /** /talisu/value-added — Webster's Fulfilment Options page (TalisU "Value-Added"). */
+    valueAdded: {
+      kicker: "Value-Added · Fulfilment Options",
+      title:
+        "Every project starts with your vision. Engage Webster and his Fulfilment Team to bring it to life utilizing Conventional, Lease-to-Own, Fractionalization, or Tokenization capitalization structures.",
+      canada:
+        "Webster and his Fulfilment Team work with project owners across Canada. Every quote, down payment and instalment is in Canadian dollars (CAD).",
+      imageAlt: "Webster, Team Leader for fulfilment options",
+      leaseToOwnBody:
+        "Similar to “Conventional”, but includes a Tsplits™ period (Talisman Simple Project Lead & Income Tracking System). That avoids the bank, but requires money down and instalments until the transaction has closed.",
+    },
     footerPartOf: "part of",
     /** Accessible name of the FAQ right-rail essay switcher (pill labels live in essay-registry.ts). */
     essaySwitcher: "Essays",

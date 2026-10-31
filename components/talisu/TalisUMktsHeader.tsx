@@ -58,6 +58,10 @@ function talisuMenuLabel(t: Dictionary, label: string): string {
       return t.nav.talisuMenu.faq;
     case "Knowledge Base":
       return t.nav.talisuMenu.knowledgeBase;
+    case "Catalogue":
+      return t.nav.catalogue;
+    case "Value-Added":
+      return t.nav.talisuMenu.valueAdded;
     case "Media Directory":
       return t.nav.talisuMenu.mediaDirectory;
     case "Contract":
@@ -175,7 +179,9 @@ export default function TalisUMktsHeader({
     ...TALISU_MKTS_HEADER_DROPDOWN,
     ...adminDropdownItems,
   ].some(
-    (item) => pathname === item.href || pathname.startsWith(`${item.href}/`),
+    (item) =>
+      pathname === item.href ||
+      (item.label !== "Catalogue" && pathname.startsWith(`${item.href}/`)),
   );
 
   useEffect(() => {
@@ -382,7 +388,7 @@ export default function TalisUMktsHeader({
   }
 
   function isNavActive(item: (typeof TALISU_MKTS_HEADER_NAV)[number]) {
-    return item.label === "Catalogue" || item.label === "Home"
+    return item.label === "Home"
       ? pathname === item.href
       : pathname === item.href || pathname.startsWith(`${item.href}/`);
   }
@@ -518,10 +524,9 @@ export default function TalisUMktsHeader({
       );
     }
 
-    // Home (/) and Catalogue (/catalogue) are exact-match so sub-routes don't
-    // light them (e.g. /catalogue/bookshelf lights TalisU → Bookshelf, not Catalogue).
+    // Home (/) is exact-match so sub-routes don't light it.
     const active =
-      item.label === "Catalogue" || item.label === "Home"
+      item.label === "Home"
         ? pathname === item.href
         : pathname === item.href || pathname.startsWith(`${item.href}/`);
     return (
@@ -578,9 +583,6 @@ export default function TalisUMktsHeader({
           >
             {t.nav.mapsites}
           </Link>
-          {TALISU_MKTS_HEADER_NAV.filter(
-            (item) => item.label === "Catalogue",
-          ).map((item) => renderNavLink(item))}
           {/* Claimed Mapsites: the Dashboard lives on the left Marketing card;
               the PMC sequence (Media Directory → Contract) lives in TalisU;
               the Tsplits™ page is the header logo link. */}
@@ -658,7 +660,8 @@ export default function TalisUMktsHeader({
                     {TALISU_MKTS_HEADER_DROPDOWN.map((item) => {
                       const active =
                         pathname === item.href ||
-                        pathname.startsWith(`${item.href}/`) ||
+                        (item.label !== "Catalogue" &&
+                          pathname.startsWith(`${item.href}/`)) ||
                         (item.href.includes("#") &&
                           pathname === item.href.split("#")[0]);
                       const isKb = item.href === TALISU_KB_PATH;
@@ -708,7 +711,7 @@ export default function TalisUMktsHeader({
                       }
                       return row;
                     })}
-                    {/* Admin-only rows: below the divider, after Knowledge Base. */}
+                    {/* Admin/agent-only rows: below the divider, after Knowledge Base + Catalogue. */}
                     {adminDropdownItems.length ? (
                       <>
                         {adminDropdownItems.map((item) => {
@@ -814,15 +817,6 @@ export default function TalisUMktsHeader({
                 t.nav.mapsites,
                 mapsitesActive,
               )}
-              {TALISU_MKTS_HEADER_NAV.filter(
-                (item) => item.label === "Catalogue",
-              ).map((item) =>
-                renderMobileLink(
-                  item.href,
-                  navLabel(t, item.label),
-                  isNavActive(item),
-                ),
-              )}
 
               {claimedMapsite && dashboardHasMenu ? (
                 <>
@@ -894,7 +888,8 @@ export default function TalisUMktsHeader({
               {TALISU_MKTS_HEADER_DROPDOWN.map((item) => {
                 const active =
                   pathname === item.href ||
-                  pathname.startsWith(`${item.href}/`) ||
+                  (item.label !== "Catalogue" &&
+                    pathname.startsWith(`${item.href}/`)) ||
                   (item.href.includes("#") &&
                     pathname === item.href.split("#")[0]);
                 if (item.href === TALISU_KB_PATH) {

@@ -143,6 +143,21 @@
     "alt": "Thorsten P, Team Leader mit dem Tsplits™ Baumlogo: Projektvision teilen"
    }
   },
+  "/talisu/value-added": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/talisu-value-added",
+   "en": {
+    "title": "Value-Added: Engage Webster's Fulfilment Team | TalisU™",
+    "description": "Engage Webster and his Fulfilment Team in Canada: Conventional, Lease-to-Own (Tsplits™), Fractionalization or Tokenization structures, in CAD.",
+    "alt": "Webster, Team Leader with the Tsplits™ tree logo: Engage Webster and his Fulfilment Team"
+   },
+   "de": {
+    "title": "Mehrwert: Webster und sein Fulfilment-Team | TalisU™",
+    "description": "Beauftragen Sie Webster und sein Fulfilment-Team in Kanada: Konventionell, Mietkauf (Tsplits™), Fraktionalisierung oder Tokenisierung, in CAD.",
+    "alt": "Webster, Team Leader mit dem Tsplits™ Baumlogo: Beauftragen Sie Webster und sein Fulfilment-Team"
+   }
+  },
   "/talisu/tsplits": {
    "kind": "public",
    "noindex": false,

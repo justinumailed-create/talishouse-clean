@@ -17,17 +17,21 @@ describe("TalisU blue header dropdown", () => {
       "Tsplits™",
       "Bookshelf",
       "FAQ",
+      "Value-Added",
       "Media Directory",
       "Contract",
       "Knowledge Base",
+      "Catalogue",
     ]);
     expect(TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.href)).toEqual([
       "/talisu/tsplits",
       "/catalogue/bookshelf",
       "/talisu#faq",
+      "/talisu/value-added",
       "/talisu/media-directory",
       "/talisu/contract",
       "/talisu/kb",
+      "/catalogue",
     ]);
     expect(TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER).toBe("Media Directory");
     const labels = TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label as string);
@@ -47,12 +51,10 @@ describe("TalisU blue header dropdown", () => {
     expect(TALISU_MKTS_HEADER_DROPDOWN[2]?.label).toBe("FAQ");
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.label)).toEqual([
       "Home",
-      "Catalogue",
       "Register",
     ]);
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.href)).toEqual([
       "/",
-      "/catalogue",
       "/talisu/reg",
     ]);
     // Markets left the top navbar (Arun, Oct 31): admin-only row below the TalisU divider.
@@ -139,7 +141,9 @@ describe("TalisU blue header dropdown", () => {
     expect(header).not.toContain('item.label === "Markets"');
     const marketsIdx = header.indexOf('item.label === "Home").map') + 1;
     const mapsitesIdx = header.indexOf('data-testid="nav-mapsites-link"');
-    const catalogueIdx = header.indexOf('(item) => item.label === "Catalogue"');
+    // Catalogue moved into the TalisU dropdown (below the divider).
+    expect(header).not.toContain('(item) => item.label === "Catalogue"');
+    const catalogueIdx = mapsitesIdx + 1;
     const registerFilterIdx = header.indexOf("<RegisterNavDropdown");
     const separatorIdx = header.indexOf("bg-white/45");
     const talisUIdx = header.indexOf("\n              {t.nav.talisu}\n");
@@ -147,7 +151,7 @@ describe("TalisU blue header dropdown", () => {
     const homeIdx = header.indexOf('item.label === "Home").map');
     expect(homeIdx).toBeGreaterThan(-1);
     expect(marketsIdx).toBeGreaterThan(homeIdx);
-    // Home, Mapsites, Catalogue, Register | TalisU (Bookshelf, FAQ, …)
+    // Home, Mapsites, Register | TalisU (… | Contract, Knowledge Base, Catalogue) (Bookshelf, FAQ, …)
     expect(header).not.toContain('(item) => item.label === "Bookshelf"');
     expect(mapsitesIdx).toBeGreaterThan(marketsIdx);
     expect(catalogueIdx).toBeGreaterThan(mapsitesIdx);

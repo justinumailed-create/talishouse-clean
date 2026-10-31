@@ -4,6 +4,7 @@ lib/seo/pages.json and render public/og/pages/<slug>-<locale>.jpg."""
 
 AISHA = ("images/mapsites/aisha-c.webp", 0.5, {"en": "Aisha C. — Team Leader", "de": "Aisha C. – Teamleiterin"}, "Aisha C., Team Leader")
 WEBSTER = ("talisu/webster-team-leader-v2.jpg", 0.5, {"en": "Thorsten P — Fulfilment Options", "de": "Thorsten P – Fulfilment-Optionen"}, "Thorsten P, Team Leader")
+WEBSTER_BANKER = ("talisu/webster-banker-v3.jpg", 0.5, {"en": "Webster — Fulfilment Options", "de": "Webster – Fulfilment-Optionen"}, "Webster, Team Leader")
 RAHUL = ("images/mapsites/lrg1-rahul.jpeg", 0.5, {"en": "Rahul — Marketing Admin", "de": "Rahul – Marketing-Admin"}, "Rahul, Marketing Admin")
 MAP = ("assets/home-demo/01-talismaps-mkts.jpg", 0.42, None, None)
 SHELF = ("assets/home-demo/02-talisbooks-bookshelf.jpg", 0.3, None, None)
@@ -94,13 +95,20 @@ add("/talisu/discuss", "talisu-discuss", "public", WEBSTER,
     ("Projektvision teilen | TalisU™",
      "Entdecken Sie Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung und teilen Sie Ihre Projektvision mit einem Berater. Ohne Registrierung.",
      "TALISU™  ·  PROJEKTVISION", ["Projektvision", "teilen"], ["Konventionell · Mietkauf", "Fraktionalisierung", "Tokenisierung"]))
+add("/talisu/value-added", "talisu-value-added", "public", WEBSTER_BANKER,
+    ("Value-Added: Engage Webster's Fulfilment Team | TalisU™",
+     "Engage Webster and his Fulfilment Team in Canada: Conventional, Lease-to-Own (Tsplits™), Fractionalization or Tokenization structures, in CAD.",
+     "TALISU™  ·  VALUE-ADDED", ["Engage Webster", "and his", "Fulfilment Team"], ["Conventional · Lease-to-Own", "Tokenization", "Canada · CAD"]),
+    ("Mehrwert: Webster und sein Fulfilment-Team | TalisU™",
+     "Beauftragen Sie Webster und sein Fulfilment-Team in Kanada: Konventionell, Mietkauf (Tsplits™), Fraktionalisierung oder Tokenisierung, in CAD.",
+     "TALISU™  ·  MEHRWERT", ["Beauftragen Sie", "Webster und sein", "Fulfilment-Team"], ["Konventionell · Mietkauf", "Tokenisierung", "Kanada · CAD"]))
 add("/talisu/tsplits", "talisu-tsplits", "public", ("talisbooks/tsplits/og-cover.jpg", 0.5, None, None),
-    ("TSPLITS™ eBook – from Vision to Implementation | TalisU™",
-     "Read the TSPLITS™ eBook page by page: turn a listing vision into a project with Conventional, Lease-to-Own, Fractionalization or Tokenization.",
-     "TALISU™  ·  TSPLITS™ EBOOK", ["TSPLITS™", "From Vision to", "Implementation"], ["10-page eBook", "EN · DE", "Download PDF"]),
-    ("TSPLITS™ eBook – von der Vision zur Umsetzung | TalisU™",
-     "Das TSPLITS™ eBook zum Blättern: aus einer Listing-Vision wird ein Projekt – Konventionell, Mietkauf, Fraktionalisierung oder Tokenisierung.",
-     "TALISU™  ·  TSPLITS™ EBOOK", ["TSPLITS™", "Von der Vision", "zur Umsetzung"], ["10-seitiges eBook", "DE · EN", "PDF herunterladen"]))
+    ("Tsplits™ eBook – from Vision to Implementation | TalisU™",
+     "Read the Tsplits™ eBook page by page: turn a listing vision into a project with Conventional, Lease-to-Own, Fractionalization or Tokenization.",
+     "TALISU™  ·  TSPLITS™ EBOOK", ["Tsplits™", "From Vision to", "Implementation"], ["10-page eBook", "EN · DE", "Download PDF"]),
+    ("Tsplits™ eBook – von der Vision zur Umsetzung | TalisU™",
+     "Das Tsplits™ eBook zum Blättern: aus einer Listing-Vision wird ein Projekt – Konventionell, Mietkauf, Fraktionalisierung oder Tokenisierung.",
+     "TALISU™  ·  TSPLITS™ EBOOK", ["Tsplits™", "Von der Vision", "zur Umsetzung"], ["10-seitiges eBook", "DE · EN", "PDF herunterladen"]))
 add("/talisu/terms", "talisu-terms", "public", BRAND,
     ("Terms of Service | Tsplits™ by TalisALL PMC",
      "Tsplits™ Terms of Service: platform role, customer responsibilities, warranties, liability, fees in CAD, intellectual property, termination and privacy.",

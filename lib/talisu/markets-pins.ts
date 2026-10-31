@@ -107,8 +107,6 @@ export const TALISU_MKTS_HEADER_LOGO_HREF = "/";
 export const TALISU_MKTS_HEADER_NAV = [
   /** Plain Home link (client request) — first item, even though the logo also links home. */
   { href: "/", label: "Home" },
-  /** Talishouse™ Product Catalogue — opens on the front cover. */
-  { href: "/catalogue", label: "Catalogue" },
   { href: "/talisu/reg", label: "Register" },
 ] as const;
 
@@ -130,12 +128,16 @@ export const TALISU_MKTS_HEADER_DROPDOWN = [
   { href: "/talisu/tsplits", label: "Tsplits™" },
   { href: "/catalogue/bookshelf", label: "Bookshelf" },
   { href: "/talisu#faq", label: "FAQ" },
+  /** Webster's native Fulfilment Options page (Arun, Oct 31): replaces the old Taliswebs adviser link. */
+  { href: "/talisu/value-added", label: "Value-Added" },
   { href: "/talisu/media-directory", label: "Media Directory" },
   // ── divider (after Media Directory) ── Contract + Knowledge Base below.
   // Audio and Video are no longer in the menu (their routes still exist).
   // Tsplits™ is the logo link.
   { href: "/talisu/contract", label: "Contract" },
   { href: "/talisu/kb", label: "Knowledge Base" },
+  /** Talishouse™ Product Catalogue (public) — moved off the navbar (Arun, Oct 31); opens on the front cover. */
+  { href: "/catalogue", label: "Catalogue" },
 ] as const;
 
 /**

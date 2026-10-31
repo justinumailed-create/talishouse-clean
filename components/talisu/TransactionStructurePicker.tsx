@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useId, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { talisuHref } from "@/lib/talisu/talisu-links";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+
+type OwnershipSection = Dictionary["home"]["ownershipSections"][number];
 
 /** Brushed-metal face shared with the home EXPLORE TRANSACTION STRUCTURES buttons. */
 const METAL_BG = [
@@ -30,16 +33,22 @@ export default function TransactionStructurePicker({
   requireSelection = false,
   learnMore = false,
   testId = "structure-picker",
+  sections: sectionsOverride,
+  sectionLearnMoreLabel = false,
 }: {
   openId: string | null;
   onOpenChange: (id: string | null) => void;
   requireSelection?: boolean;
   learnMore?: boolean;
   testId?: string;
+  /** Replaces the home structure copy (Value-Added page: Tsplits™ wording). */
+  sections?: readonly OwnershipSection[];
+  /** Use each section's own "Learn More" label instead of the bot's Get Help. */
+  sectionLearnMoreLabel?: boolean;
 }) {
   const t = useT();
   const baseId = useId();
-  const sections = t.home.ownershipSections;
+  const sections = sectionsOverride ?? t.home.ownershipSections;
   const open = sections.find((s) => s.id === openId) ?? null;
 
   return (
@@ -112,7 +121,7 @@ export default function TransactionStructurePicker({
                   data-testid={`${testId}-learn-more`}
                   className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
                 >
-                  {t.bot.getHelp}
+                  {sectionLearnMoreLabel ? open.learnMoreLabel : t.bot.getHelp}
                   <span aria-hidden>→</span>
                 </Link>
               </div>

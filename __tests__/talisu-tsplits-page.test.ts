@@ -25,7 +25,7 @@ describe("Tsplits™ page (/talisu/tsplits)", () => {
     expect(TALISU_MKTS_HEADER_DROPDOWN[0]?.href).toBe("/talisu/tsplits");
     expect(TSPLITS_PATH).toBe("/talisu/tsplits");
     expect(labels.indexOf("Tsplits™")).toBeLessThan(labels.indexOf(TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER));
-    expect(labels.slice(1)).toEqual(["Bookshelf", "FAQ", "Media Directory", "Contract", "Knowledge Base"]);
+    expect(labels.slice(1)).toEqual(["Bookshelf", "FAQ", "Value-Added", "Media Directory", "Contract", "Knowledge Base", "Catalogue"]);
     const header = readFileSync(resolve("components/talisu/TalisUMktsHeader.tsx"), "utf8");
     expect(header).toContain('case "Tsplits™":');
     expect(header).toContain("t.nav.talisuMenu.tsplits");

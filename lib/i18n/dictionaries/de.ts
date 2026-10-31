@@ -49,6 +49,7 @@ export const de: Dictionary = {
     talisuMenu: {
       tsplits: "Tsplits™",
       faq: "FAQ",
+      valueAdded: "Mehrwert",
       knowledgeBase: "Wissensdatenbank",
       mediaDirectory: "Mediendirektorium",
       contract: "Vertrag",
@@ -394,6 +395,16 @@ export const de: Dictionary = {
     engageCataloguePage: "Talishouse™ Produktkatalog, Seite {page}",
     engageChange: "Ändern",
     engageWebster: "Thorsten P beauftragen",
+    valueAdded: {
+      kicker: "Mehrwert · Fulfilment-Optionen",
+      title:
+        "Jedes Projekt beginnt mit Ihrer Vision. Beauftragen Sie Webster und sein Fulfilment-Team, sie mit konventionellen, Mietkauf-, Fraktionalisierungs- oder Tokenisierungsstrukturen umzusetzen.",
+      canada:
+        "Webster und sein Fulfilment-Team arbeiten mit Projektinhabern in ganz Kanada. Alle Angebote, Anzahlungen und Raten erfolgen in kanadischen Dollar (CAD).",
+      imageAlt: "Webster, Teamleiter für Fulfilment-Optionen",
+      leaseToOwnBody:
+        "Ähnlich wie „Konventionell“, jedoch mit einer Tsplits™-Phase (Talisman Simple Project Lead & Einnahmen Tracking System). So umgehen Sie die Bank, benötigen aber eine Anzahlung und Ratenzahlungen bis zum Abschluss der Transaktion.",
+    },
     footerPartOf: "ein Teil von",
     essaySwitcher: "Aufsätze",
     essayCheckBackSoon: "Schauen Sie bald wieder vorbei",

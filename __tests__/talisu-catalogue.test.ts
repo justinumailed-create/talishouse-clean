@@ -26,22 +26,29 @@ import {
   formatCatalogueProductCode,
   normalizeCatalogueProductCode,
 } from "../lib/talisu/catalogue-products";
-import { TALISU_MKTS_HEADER_NAV } from "../lib/talisu/markets-pins";
+import {
+  TALISU_MKTS_HEADER_DROPDOWN,
+  TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER,
+  TALISU_MKTS_HEADER_NAV,
+} from "../lib/talisu/markets-pins";
 
 const read = (p: string) => readFileSync(resolve(p), "utf8");
 
 describe("Catalogue nav item", () => {
-  it("sits right after Home and before Register (Markets left the navbar)", () => {
-    const labels = TALISU_MKTS_HEADER_NAV.map((i) => i.label);
-    expect(labels).toEqual(["Home", "Catalogue", "Register"]);
-    expect(TALISU_MKTS_HEADER_NAV[1]).toEqual({ href: "/catalogue", label: "Catalogue" });
+  it("lives in the TalisU dropdown below the divider, public (off the navbar, Arun Oct 31)", () => {
+    const labels = TALISU_MKTS_HEADER_NAV.map((i) => i.label as string);
+    expect(labels).toEqual(["Home", "Register"]);
+    expect(labels).not.toContain("Catalogue");
+    const dropdown = TALISU_MKTS_HEADER_DROPDOWN.map((i) => i.label as string);
+    expect(dropdown.at(-1)).toBe("Catalogue");
+    expect(TALISU_MKTS_HEADER_DROPDOWN.at(-1)).toEqual({ href: "/catalogue", label: "Catalogue" });
+    expect(dropdown.indexOf("Catalogue")).toBeGreaterThan(
+      dropdown.indexOf(TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER),
+    );
     const header = read("components/talisu/TalisUMktsHeader.tsx");
+    expect(header).not.toContain('(item) => item.label === "Catalogue"');
     expect(header).not.toContain('(item) => item.label === "Markets"');
-    const markets = header.indexOf('item.label === "Home").map');
-    const catalogue = header.indexOf('(item) => item.label === "Catalogue"');
-    const register = header.indexOf("<RegisterNavDropdown");
-    expect(catalogue).toBeGreaterThan(markets);
-    expect(register).toBeGreaterThan(catalogue);
+    expect(header).toContain('case "Catalogue":\n      return t.nav.catalogue;');
   });
 });
 
