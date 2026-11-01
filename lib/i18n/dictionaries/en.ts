@@ -244,6 +244,8 @@ export const en = {
     pageVision: "Your vision",
     pageSubmit: "Share Your Vision",
     pageNote: "All quotes and payments are in Canadian dollars (CAD).",
+    pageImageAlt:
+      "Staked-out building lot beside a lake in a Canadian forest, with a modular cabin set on its foundation at sunrise",
     pageDoneBack: "Back to Tsplits™",
     topicHint: "(choose with the buttons)",
     openPage: "Open as a full page with a Google-recognized location →",
