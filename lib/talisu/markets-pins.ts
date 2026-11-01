@@ -147,6 +147,8 @@ export const TALISU_MKTS_HEADER_DROPDOWN = [
  */
 export const TALISU_MKTS_HEADER_ADMIN_DROPDOWN = [
   { href: "/talisu/mkts", label: "Markets" },
+  /** Native USA Markets map (Arun, Nov 1): no redirect to Taliswebs. */
+  { href: "/talisu/mkts/usa", label: "USA Markets" },
 ] as const;
 
 /** TalisU dropdown row that the horizontal divider follows. */

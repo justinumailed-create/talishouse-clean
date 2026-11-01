@@ -299,6 +299,15 @@ export const en = {
     /** Left-panel links (Ralf, Oct 18): switch sites in the same window. */
     canadaMarkets: "Canada Markets",
     usaMarkets: "USA Markets",
+    /** USA Markets page (/talisu/mkts/usa): footer + US market card copy. */
+    us: {
+      footer:
+        "Select your region's PIN to claim one of 30 US markets, each a contiguous region of about 8 to 12 million people.",
+      populationLabel: "Population",
+      millionUnit: "million",
+      decimalMark: ".",
+      anchorsLabel: "Anchor cities",
+    },
     noMatches: "No matches",
     close: "Close",
     nextLabel: "Next Step...",

@@ -585,6 +585,14 @@ export const de: Dictionary = {
     canada: "Kanada",
     canadaMarkets: "Märkte Kanada",
     usaMarkets: "Märkte USA",
+    us: {
+      footer:
+        "Wählen Sie den PIN Ihrer Region, um einen von 30 US-Märkten zu beanspruchen – jeweils eine zusammenhängende Region mit etwa 8 bis 12 Millionen Einwohnern.",
+      populationLabel: "Einwohner",
+      millionUnit: "Millionen",
+      decimalMark: ",",
+      anchorsLabel: "Ankerstädte",
+    },
     noMatches: "Keine Treffer",
     close: "Schließen",
     nextLabel: "Nächster Schritt …",

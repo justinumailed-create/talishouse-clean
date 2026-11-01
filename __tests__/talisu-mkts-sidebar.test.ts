@@ -24,15 +24,15 @@ describe("Markets sidebar card", () => {
     expect(METAL_TAB).toContain("w-full");
   });
 
-  it("styles the market links as Aisha's metal structure tabs, Canada selected", () => {
+  it("styles the market links as Aisha's metal structure tabs, the current region selected", () => {
     expect(tabsSource).toContain("isSelected ? `${METAL_TAB_SELECTED} ${TAB_CHECKED}` : METAL_TAB_UNSELECTED");
     expect(source).toContain("const MARKET_BUTTON_SELECTED = `${METAL_TAB} ${METAL_TAB_SELECTED}`");
     expect(source).toContain("const MARKET_BUTTON_UNSELECTED = `${METAL_TAB} ${METAL_TAB_UNSELECTED}`");
     expect(source).toMatch(
-      /href=\{ROUTES\.TALISU_MARKETS\}\s*aria-current="page"\s*className=\{MARKET_BUTTON_SELECTED\}\s*style=\{\{ backgroundImage: ADVISER_METAL_BG \}\}\s*data-testid="mkts-link-canada"/,
+      /href=\{ROUTES\.TALISU_MARKETS\}\s*aria-current=\{usa \? undefined : "page"\}\s*className=\{usa \? MARKET_BUTTON_UNSELECTED : MARKET_BUTTON_SELECTED\}\s*style=\{\{ backgroundImage: ADVISER_METAL_BG \}\}\s*data-testid="mkts-link-canada"/,
     );
     expect(source).toMatch(
-      /href=\{TALISWEBS_US_MARKETS_URL\}\s*className=\{MARKET_BUTTON_UNSELECTED\}\s*style=\{\{ backgroundImage: ADVISER_METAL_BG \}\}\s*data-testid="mkts-link-usa"/,
+      /href=\{ROUTES\.TALISU_US_MARKETS\}\s*aria-current=\{usa \? "page" : undefined\}\s*className=\{usa \? MARKET_BUTTON_SELECTED : MARKET_BUTTON_UNSELECTED\}\s*style=\{\{ backgroundImage: ADVISER_METAL_BG \}\}\s*data-testid="mkts-link-usa"/,
     );
     expect(source.match(/className=\{METAL_TAB_LABEL\}/g)).toHaveLength(2);
   });

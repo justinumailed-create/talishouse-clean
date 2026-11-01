@@ -45,6 +45,21 @@
     "alt": "Tsplits™ Baumlogo: Sichern Sie einen 80-km-Markt in Ihrer Nähe"
    }
   },
+  "/talisu/mkts/usa": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/talisu-mkts-usa",
+   "en": {
+    "title": "USA Markets: Claim One of 30 US Markets | TalisU™",
+    "description": "Select your region's PIN to claim one of 30 proprietary US markets, each a contiguous region of about 8 to 12 million people, on Talismaps™.",
+    "alt": "Tsplits™ tree logo: Claim one of 30 US markets in your region"
+   },
+   "de": {
+    "title": "Märkte USA: Einen von 30 US-Märkten sichern | TalisU™",
+    "description": "Wählen Sie den PIN Ihrer Region und sichern Sie einen von 30 US-Märkten, je eine Region mit etwa 8 bis 12 Mio. Einwohnern, auf Talismaps™.",
+    "alt": "Tsplits™ Baumlogo: Sichern Sie einen von 30 US-Märkten in Ihrer Region"
+   }
+  },
   "/catalogue": {
    "kind": "public",
    "noindex": false,

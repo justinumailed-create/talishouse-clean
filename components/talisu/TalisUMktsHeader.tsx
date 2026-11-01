@@ -52,6 +52,8 @@ function talisuMenuLabel(t: Dictionary, label: string): string {
       return t.nav.talisuMenu.tsplits;
     case "Markets":
       return t.nav.markets;
+    case "USA Markets":
+      return t.markets.usaMarkets;
     case "Bookshelf":
       return t.nav.bookshelf;
     case "FAQ":
@@ -715,15 +717,18 @@ export default function TalisUMktsHeader({
                     {adminDropdownItems.length ? (
                       <>
                         {adminDropdownItems.map((item) => {
-                          const active =
-                            pathname === item.href ||
-                            pathname.startsWith(`${item.href}/`);
+                          // Exact match: /talisu/mkts/usa must not light up Markets.
+                          const active = pathname === item.href;
                           return (
                             <Link
                               key={item.href}
                               href={item.href}
                               role="menuitem"
-                              data-testid="talisu-admin-markets-link"
+                              data-testid={
+                                item.label === "USA Markets"
+                                  ? "talisu-admin-us-markets-link"
+                                  : "talisu-admin-markets-link"
+                              }
                               onClick={() => setOpen(false)}
                               className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
                                 active
@@ -933,8 +938,7 @@ export default function TalisUMktsHeader({
                     renderMobileLink(
                       item.href,
                       talisuMenuLabel(t, item.label),
-                      pathname === item.href ||
-                        pathname.startsWith(`${item.href}/`),
+                      pathname === item.href,
                       true,
                     ),
                   )}

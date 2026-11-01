@@ -61,9 +61,12 @@ describe("TalisU blue header dropdown", () => {
     expect(TALISU_MKTS_HEADER_NAV.some((i) => (i.label as string) === "Markets")).toBe(false);
     expect(TALISU_MKTS_HEADER_ADMIN_DROPDOWN.map((i) => [i.label, i.href])).toEqual([
       ["Markets", "/talisu/mkts"],
+      ["USA Markets", "/talisu/mkts/usa"],
     ]);
+    expect(header).toContain('"talisu-admin-us-markets-link"');
+    expect(header).toContain("t.markets.usaMarkets");
     expect(header).toContain('fetch("/api/talisu/admin-status"');
-    expect(header).toContain('data-testid="talisu-admin-markets-link"');
+    expect(header).toContain('"talisu-admin-markets-link"');
     expect(header).toContain("t.nav.markets");
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Bookshelf")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "All Books")).toBe(false);

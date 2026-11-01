@@ -50,6 +50,13 @@ add("/talisu/mkts", "talisu-mkts", "public", MAP,
     ("Bediente Märkte: 80-km-Markt sichern | TalisU™",
      "Wählen Sie den PIN in Ihrer Nähe und sichern Sie einen semi-exklusiven Markt im Umkreis von 80 km um einen Mittelpunkt auf Talismaps™.",
      "TALISU™  ·  MÄRKTE", ["Sichern Sie", "einen 80-km-Markt", "in Ihrer Nähe"], ["Semi-exklusiv", "80 km Radius", "Talismaps™"]))
+add("/talisu/mkts/usa", "talisu-mkts-usa", "public", PIN,
+    ("USA Markets: Claim One of 30 US Markets | TalisU™",
+     "Select your region's PIN to claim one of 30 proprietary US markets, each a contiguous region of about 8 to 12 million people, on Talismaps™.",
+     "TALISU™  ·  USA MARKETS", ["Claim one of", "30 US markets", "in your region"], ["30 markets", "8–12M people", "Talismaps™"]),
+    ("Märkte USA: Einen von 30 US-Märkten sichern | TalisU™",
+     "Wählen Sie den PIN Ihrer Region und sichern Sie einen von 30 US-Märkten, je eine Region mit etwa 8 bis 12 Mio. Einwohnern, auf Talismaps™.",
+     "TALISU™  ·  MÄRKTE USA", ["Sichern Sie einen", "von 30 US-Märkten", "in Ihrer Region"], ["30 Märkte", "8–12 Mio. Einwohner", "Talismaps™"]))
 add("/catalogue", "catalogue", "public", TDOME,
     ("Talishouse™ Product Catalogue | Tsplits™",
      "Browse the Talishouse™ Product Catalogue. Every design is numbered (P01, P02…); tap one to register for that product.",

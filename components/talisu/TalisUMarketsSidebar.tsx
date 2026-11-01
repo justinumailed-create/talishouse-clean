@@ -12,7 +12,6 @@ import {
   METAL_TAB_UNSELECTED,
 } from "@/components/talisu/metal-tab";
 import { ROUTES } from "@/lib/routes";
-import { TALISWEBS_US_MARKETS_URL } from "@/lib/talisu/talisu-links";
 
 /**
  * Market buttons use the metal tabs from Aisha's structure picker
@@ -26,6 +25,8 @@ type Props = {
   pins?: readonly TalisUMktsPin[];
   selectedPinId?: string | null;
   onSelectPin?: (pinId: string) => void;
+  /** Which market map this panel sits on; that market's button is selected. */
+  region?: "ca" | "us";
 };
 
 /**
@@ -33,9 +34,10 @@ type Props = {
  * full width), then the PMC bullets. Every PIN is live, so visitors click a
  * PIN on the map to get where they are going.
  */
-const TalisUMarketsSidebar: (props: Props) => ReactElement = () => {
+const TalisUMarketsSidebar: (props: Props) => ReactElement = ({ region = "ca" }) => {
   const t = useT();
   const m = t.markets;
+  const usa = region === "us";
 
   return (
     <aside
@@ -50,13 +52,13 @@ const TalisUMarketsSidebar: (props: Props) => ReactElement = () => {
           <p className="mt-0.5 text-[11px] font-medium tracking-wide text-neutral-500">
             {m.pmcTagline}
           </p>
-          {/* Canada (this site) / USA (Taliswebs). Plain anchors: same window,
-              full reload when the site changes. */}
+          {/* Canada / USA Markets, both native pages on this site. Plain
+              anchors (full load) so each map mounts with its own PINs. */}
           <nav className="mt-3 flex flex-col gap-2.5" data-testid="mkts-site-links">
             <a
               href={ROUTES.TALISU_MARKETS}
-              aria-current="page"
-              className={MARKET_BUTTON_SELECTED}
+              aria-current={usa ? undefined : "page"}
+              className={usa ? MARKET_BUTTON_UNSELECTED : MARKET_BUTTON_SELECTED}
               style={{ backgroundImage: ADVISER_METAL_BG }}
               data-testid="mkts-link-canada"
             >
@@ -64,8 +66,9 @@ const TalisUMarketsSidebar: (props: Props) => ReactElement = () => {
               <span className={METAL_TAB_LABEL}>{m.canadaMarkets}</span>
             </a>
             <a
-              href={TALISWEBS_US_MARKETS_URL}
-              className={MARKET_BUTTON_UNSELECTED}
+              href={ROUTES.TALISU_US_MARKETS}
+              aria-current={usa ? "page" : undefined}
+              className={usa ? MARKET_BUTTON_SELECTED : MARKET_BUTTON_UNSELECTED}
               style={{ backgroundImage: ADVISER_METAL_BG }}
               data-testid="mkts-link-usa"
             >

@@ -60,6 +60,8 @@ export const ROUTES = {
   TALISPROS_REGISTER_YOUR_MAPSITE: "/talispros/register-your-mapsite",
   TALISU: "/talisu",
   TALISU_MARKETS: "/talisu/mkts",
+  /** USA Markets: native Tsplits™ map of the 30 US market PINs (same gate as Canada). */
+  TALISU_US_MARKETS: "/talisu/mkts/usa",
   TALISU_AUDIO: "/talisu/au",
   TALISU_KB: "/talisu/kb",
   TALISU_KB_MANAGE: "/talisu/kb/manage",

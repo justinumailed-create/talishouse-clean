@@ -26,6 +26,13 @@ import {
   type TalisUMktsPin,
 } from "@/lib/talisu/markets-pins";
 import {
+  TALISU_US_MKTS_PINS,
+  TALISU_US_MKTS_VIEWPORT,
+  localizeTalisUUsMktsPins,
+  talisuUsMktsMapCoordinates,
+  talisuUsMktsToEnginePins,
+} from "@/lib/talisu/us-markets-pins";
+import {
   computeMktsPinCardPlacement,
   MKTS_PIN_CARD_EST_HEIGHT_PX,
   MKTS_PIN_CARD_MAX_WIDTH_PX,
@@ -64,7 +71,15 @@ function useMktsLayout(): "unknown" | "mobile" | "desktop" {
   return layout;
 }
 
-export default function TalisUMarketsMapApp() {
+/** "ca" = Canada Markets (/talisu/mkts); "us" = USA Markets (/talisu/mkts/usa). */
+export type MarketsRegion = "ca" | "us";
+
+export default function TalisUMarketsMapApp({
+  region = "ca",
+}: {
+  region?: MarketsRegion;
+} = {}) {
+  const usa = region === "us";
   const layout = useMktsLayout();
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
   const focusingRef = useRef(false);
@@ -72,13 +87,22 @@ export default function TalisUMarketsMapApp() {
   /** Sidebar (or other) focus asked for a camera move; map clicks do not. */
   const recenterOnSelectRef = useRef(false);
   const t = useT();
-  const pins = useMemo(
-    () => localizeTalisUMktsPins(TALISU_MKTS_PINS, t.markets),
-    [t],
+  const pins = useMemo<readonly TalisUMktsPin[]>(
+    () =>
+      usa
+        ? localizeTalisUUsMktsPins(TALISU_US_MKTS_PINS, t.markets)
+        : localizeTalisUMktsPins(TALISU_MKTS_PINS, t.markets),
+    [t, usa],
   );
   // Engine pins keep the first-render labels (map re-init is avoided on switch).
-  const enginePins = useMemo(() => talisuMktsToEnginePins(pins), [pins]);
-  const fitCoordinates = useMemo(() => talisuMktsMapCoordinates(), []);
+  const enginePins = useMemo(
+    () => (usa ? talisuUsMktsToEnginePins(pins) : talisuMktsToEnginePins(pins)),
+    [pins, usa],
+  );
+  const fitCoordinates = useMemo(
+    () => (usa ? talisuUsMktsMapCoordinates() : talisuMktsMapCoordinates()),
+    [usa],
+  );
   const fitPadding = useMemo(
     () => ({
       top: TALISU_MKTS_FIT_PADDING.top,
@@ -117,7 +141,7 @@ export default function TalisUMarketsMapApp() {
     <MapEngineProvider
       providerId="google-maps"
       initialPins={enginePins}
-      initialViewport={TALISU_MKTS_VIEWPORT}
+      initialViewport={usa ? TALISU_US_MKTS_VIEWPORT : TALISU_MKTS_VIEWPORT}
       selectedPinId={selectedPinId}
       draggablePinIds={[]}
       onPinSelect={(pinId) => {
@@ -143,7 +167,8 @@ export default function TalisUMarketsMapApp() {
         basePins={enginePins}
         fitCoordinates={fitCoordinates}
         pins={pins}
-        footer={t.markets.footer}
+        footer={usa ? t.markets.us.footer : t.markets.footer}
+        region={region}
         selectedPinId={selectedPinId}
         setSelectedPinId={setSelectedPinId}
         beginFocusGuard={beginFocusGuard}
@@ -154,6 +179,7 @@ export default function TalisUMarketsMapApp() {
 }
 
 function MarketsChrome({
+  region,
   mobile,
   basePins,
   fitCoordinates,
@@ -164,6 +190,7 @@ function MarketsChrome({
   beginFocusGuard,
   recenterOnSelectRef,
 }: {
+  region: MarketsRegion;
   mobile: boolean;
   basePins: MapEnginePin[];
   fitCoordinates: { latitude: number; longitude: number }[];
@@ -303,7 +330,7 @@ function MarketsChrome({
 
   const focusPin = useCallback(
     (pinId: string) => {
-      const pin = TALISU_MKTS_PINS.find((item) => item.id === pinId);
+      const pin = pins.find((item) => item.id === pinId);
       if (!pin) return;
       beginFocusGuard();
       lastFocusedRef.current = pinId;
@@ -314,7 +341,7 @@ function MarketsChrome({
       });
       setSelectedPinId(pinId);
     },
-    [beginFocusGuard, recenterOnSelectRef, setSelectedPinId, setViewport],
+    [pins, beginFocusGuard, recenterOnSelectRef, setSelectedPinId, setViewport],
   );
 
   useEffect(() => {
@@ -328,7 +355,7 @@ function MarketsChrome({
       lastFocusedRef.current = selectedPinId;
       return;
     }
-    const pin = TALISU_MKTS_PINS.find((item) => item.id === selectedPinId);
+    const pin = pins.find((item) => item.id === selectedPinId);
     if (!pin) return;
     beginFocusGuard();
     setViewport({
@@ -337,7 +364,7 @@ function MarketsChrome({
     });
     lastFocusedRef.current = selectedPinId;
     recenterOnSelectRef.current = false;
-  }, [selectedPinId, beginFocusGuard, recenterOnSelectRef, setViewport]);
+  }, [pins, selectedPinId, beginFocusGuard, recenterOnSelectRef, setViewport]);
 
   const syncPlacement = useCallback(() => {
     const root = mapRootRef.current;
@@ -456,6 +483,7 @@ function MarketsChrome({
 
         {/* lg+: floats over the map (top-left). Phones: stacks below the map. */}
         <TalisUMarketsSidebar
+          region={region}
           pins={pins}
           selectedPinId={selectedPinId}
           onSelectPin={focusPin}
