@@ -33,7 +33,7 @@ export default function TsplitsPlaybookViewer({ copy }: { copy: TsplitsPlaybookC
 
   return (
     <div data-testid="tsplits-playbook" className="bg-[#e9edf3] pb-16 text-[#1d1d1f] antialiased">
-      <div className="mx-auto flex w-full max-w-[920px] flex-wrap items-center justify-between gap-4 px-4 pb-4 pt-6 sm:px-0">
+      <div style={{ maxWidth: 920 }} className="mx-auto flex w-full flex-wrap items-center justify-between gap-4 px-4 pb-4 pt-6 sm:px-0">
         <h1 className="text-[22px] font-semibold tracking-[-0.01em] text-[#12355B] sm:text-[26px]">
           {copy.title}
         </h1>

@@ -74,7 +74,7 @@ export default function TsplitsPlaybookGate({
       className="talis-discuss-surface flex items-center justify-center px-5 py-16 text-[#1d1d1f] antialiased sm:py-24"
       style={{ minHeight: "calc(100dvh - 68px)" }}
     >
-      <div className="w-full max-w-[440px] rounded-[28px] border border-black/[0.06] bg-white px-7 pb-9 pt-10 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_24px_60px_rgba(18,53,91,0.10)] sm:px-10">
+      <div style={{ width: "100%", maxWidth: 440 }} className="rounded-[28px] border border-black/[0.06] bg-white px-7 pb-9 pt-10 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_24px_60px_rgba(18,53,91,0.10)] sm:px-10">
         <div className="flex justify-center">
           <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#0069CF] shadow-[0_8px_20px_rgba(0,105,207,0.25)]">
             <Image src="/logo-mark.png" alt="" width={40} height={43} className="h-10 w-auto" priority />
