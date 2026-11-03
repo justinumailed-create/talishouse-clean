@@ -1,4 +1,5 @@
 import { ROUTES } from "@/lib/routes";
+import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 
 export const MAPSITE_URL_GATE_HEADLINE = "Secure URL access";
 
@@ -115,7 +116,13 @@ export function resolvePublishedUrlButtonHref(
   }
   // Prefer FAST-code override (e.g. DC01/DC02); otherwise always Register.
   // broker_url is intentionally ignored — visitors must not hit the broken gate.
-  return mapsiteListingUrlOverride(fastCode) ?? MAPSITE_DEFAULT_REGISTER_URL;
+  // Exception (Arun, Nov 4): prepared demo Mapsites carry the town's official
+  // site as URL 1, so a demo code with an absolute URL opens that site.
+  const override = mapsiteListingUrlOverride(fastCode);
+  if (override) return override;
+  const demoUrl = _brokerUrl?.trim() || "";
+  if (isDemoMapSiteCode(fastCode) && /^https:\/\//i.test(demoUrl)) return demoUrl;
+  return MAPSITE_DEFAULT_REGISTER_URL;
 }
 
 export function registerYourMapSiteFastCodeFromPath(

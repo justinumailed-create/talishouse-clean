@@ -33,6 +33,10 @@ describe("Ralf batch 2 — demo → registration", () => {
     expect(MAPSITE_DEFAULT_REGISTER_URL).toBe("/talisu/reg");
     expect(resolvePublishedUrlButtonHref("demo-abc12345", null)).toBe("/talisu/reg");
     expect(resolvePublishedUrlButtonHref("dc01", null)).toBe("/talisu/reg");
+    // Prepared demo Mapsites keep the town's official site as URL 1 (Arun, Nov 4).
+    expect(resolvePublishedUrlButtonHref("demo-cornwall", "https://www.cornwall.ca/")).toBe("https://www.cornwall.ca/");
+    expect(resolvePublishedUrlButtonHref("demo-cornwall", "/talisu/reg")).toBe("/talisu/reg");
+    expect(resolvePublishedUrlButtonHref("lrg1", "https://example.ca/")).toBe("/talisu/reg");
     const gate = readFileSync(
       resolve("app/talispros/register-your-mapsite/[fastCode]/page.tsx"),
       "utf8",
