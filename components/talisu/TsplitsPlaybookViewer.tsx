@@ -27,8 +27,26 @@ export default function TsplitsPlaybookViewer({ copy }: { copy: TsplitsPlaybookC
   }, []);
 
   useEffect(() => {
+    // The frame can finish loading before hydration attaches onLoad, so
+    // measure now and keep following the document's height afterwards.
+    let observer: ResizeObserver | undefined;
+    const watch = () => {
+      fit();
+      const doc = frame.current?.contentDocument;
+      if (!doc?.body || typeof ResizeObserver === "undefined") return;
+      observer?.disconnect();
+      observer = new ResizeObserver(fit);
+      observer.observe(doc.body);
+    };
+    const el = frame.current;
+    if (el?.contentDocument?.readyState === "complete") watch();
+    el?.addEventListener("load", watch);
     window.addEventListener("resize", fit);
-    return () => window.removeEventListener("resize", fit);
+    return () => {
+      observer?.disconnect();
+      el?.removeEventListener("load", watch);
+      window.removeEventListener("resize", fit);
+    };
   }, [fit]);
 
   return (
