@@ -188,6 +188,21 @@
     "alt": "Tsplits™ Baumlogo: Tsplits™ Von der Vision zur Umsetzung"
    }
   },
+  "/talisu/tsplits-playbook": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/talisu-tsplits-playbook",
+   "en": {
+    "title": "Tsplits™ Sales Playbook | TalisU™",
+    "description": "The Tsplits™ Sales Playbook for the sales team: call flow, objection handling and practice drills. Passcode required.",
+    "alt": "Tsplits™ tree logo: Tsplits™ Sales Playbook"
+   },
+   "de": {
+    "title": "Tsplits™ Sales Playbook | TalisU™",
+    "description": "Das Tsplits™ Sales Playbook für das Vertriebsteam: Gesprächsablauf, Einwandbehandlung und Übungen. Zugangscode erforderlich.",
+    "alt": "Tsplits™ Baumlogo: Tsplits™ Sales Playbook"
+   }
+  },
   "/talisu/terms": {
    "kind": "public",
    "noindex": false,

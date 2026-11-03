@@ -8,9 +8,18 @@ const nextConfig: NextConfig = {
   // with the gated download route instead of serving them from public/.
   outputFileTracingIncludes: {
     "/api/templates/**": ["./private/templates/**/*"],
+    // Tsplits™ Sales Playbook: served only by the passcode-checked API routes.
+    "/api/tsplits-playbook/**": ["./private/tsplits/**/*"],
   },
   async headers() {
     return [
+      {
+        source: "/talisu/tsplits-playbook",
+        headers: [
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          { key: "Cache-Control", value: "private, no-store" },
+        ],
+      },
       {
         source: "/assets/Demo-PDF.pdf",
         headers: [

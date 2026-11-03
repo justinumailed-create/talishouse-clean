@@ -116,6 +116,13 @@ add("/talisu/tsplits", "talisu-tsplits", "public", ("talisbooks/tsplits/og-cover
     ("Tsplits™ eBook – von der Vision zur Umsetzung | TalisU™",
      "Das Tsplits™ eBook zum Blättern: aus einer Listing-Vision wird ein Projekt – Konventionell, Mietkauf, Fraktionalisierung oder Tokenisierung.",
      "TALISU™  ·  TSPLITS™ EBOOK", ["Tsplits™", "Von der Vision", "zur Umsetzung"], ["10-seitiges eBook", "DE · EN", "PDF herunterladen"]))
+add("/talisu/tsplits-playbook", "talisu-tsplits-playbook", "utility", BRAND,
+    ("Tsplits™ Sales Playbook | TalisU™",
+     "The Tsplits™ Sales Playbook for the sales team: call flow, objection handling and practice drills. Passcode required.",
+     "TSPLITS™  ·  SALES TEAM", ["Tsplits™", "Sales", "Playbook"], ["Call flow", "Objections", "Passcode"]),
+    ("Tsplits™ Sales Playbook | TalisU™",
+     "Das Tsplits™ Sales Playbook für das Vertriebsteam: Gesprächsablauf, Einwandbehandlung und Übungen. Zugangscode erforderlich.",
+     "TSPLITS™  ·  VERTRIEBSTEAM", ["Tsplits™", "Sales", "Playbook"], ["Gesprächsablauf", "Einwände", "Zugangscode"]))
 add("/talisu/terms", "talisu-terms", "public", BRAND,
     ("Terms of Service | Tsplits™ by TalisALL PMC",
      "Tsplits™ Terms of Service: platform role, customer responsibilities, warranties, liability, fees in CAD, intellectual property, termination and privacy.",
