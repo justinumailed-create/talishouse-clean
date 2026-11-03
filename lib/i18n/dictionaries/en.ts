@@ -821,9 +821,7 @@ export const en = {
     },
     /** FAST Code slots panel beside the Mapsite card (one list per sales associate). */
     slots: {
-      title: "Prepared Mapsites",
-      countOne: "1 Mapsite prepared",
-      countMany: "{count} Mapsites prepared",
+      title: "Open a sample Mapsite",
       empty: "No Mapsites prepared yet",
       mine: "My FAST Codes",
       used: "{count} of {limit} slots used",

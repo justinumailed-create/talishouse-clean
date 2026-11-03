@@ -8,17 +8,29 @@ import {
   removeFastCodeSlotAction,
 } from "@/app/talispros/demo-mapsite/slots-actions";
 import {
-  demoMapsiteSlotOpenHref,
+  slotPlaceLabel,
   type FastCodeSlotsPanelData,
   type OwnSlotList,
+  type SlotEntry,
 } from "@/lib/talispros/fast-code-slots";
 
 type SlotsCopy = ReturnType<typeof useT>["demo"]["slots"];
 
-function countLabel(copy: SlotsCopy, count: number): string {
-  if (count === 0) return copy.empty;
-  if (count === 1) return copy.countOne;
-  return copy.countMany.replace("{count}", String(count));
+/** FAST Code first, then "Town, PR". Opens the Mapsite with Aisha's four buttons. */
+function CodeLink({ entry, testId }: { entry: SlotEntry; testId: string }) {
+  return (
+    <Link
+      href={entry.href}
+      prefetch={false}
+      className="group flex min-w-0 flex-1 items-baseline gap-2 rounded-lg px-2 py-1.5 -mx-2 text-[14px] leading-snug transition hover:bg-[#046BD9]/[0.06] sm:text-[15px]"
+      data-testid={testId}
+    >
+      <span className="shrink-0 font-mono text-[13px] font-semibold tracking-wide text-[#046BD9] group-hover:underline sm:text-[14px]">
+        {entry.fastCode}
+      </span>
+      <span className="min-w-0 truncate text-neutral-700">{slotPlaceLabel(entry.town, entry.province)}</span>
+    </Link>
+  );
 }
 
 const ERRORS: Record<string, keyof SlotsCopy> = {
@@ -58,25 +70,17 @@ function OwnList({ initial, copy }: { initial: OwnSlotList; copy: SlotsCopy }) {
           {copy.used.replace("{count}", String(list.count)).replace("{limit}", String(list.limit))}
         </span>
       </div>
-      <p className="m-0 mt-0.5 text-[13px] text-neutral-600">{list.name}</p>
       {list.entries.length ? (
-        <ul className="m-0 mt-3 list-none space-y-1.5 p-0">
+        <ul className="m-0 mt-2 list-none space-y-0.5 p-0">
           {list.entries.map((entry) => (
             <li key={entry.slotId} className="flex items-center gap-2">
-              <Link
-                href={entry.href}
-                className="flex min-w-0 flex-1 flex-col rounded-lg bg-white px-3 py-2 text-[13px] leading-snug ring-1 ring-black/5 transition hover:ring-[#046BD9]/40"
-                data-testid="fast-code-slot-own-link"
-              >
-                <span className="truncate font-medium text-neutral-900">{entry.town}</span>
-                <span className="truncate font-mono text-[12px] tracking-wide text-[#046BD9]">{entry.fastCode}</span>
-              </Link>
+              <CodeLink entry={entry} testId="fast-code-slot-own-link" />
               <button
                 type="button"
                 disabled={pending}
                 onClick={() => run(() => removeFastCodeSlotAction({ slotId: entry.slotId }))}
                 className="shrink-0 rounded-full px-2.5 py-1.5 text-[12px] font-medium text-neutral-500 transition hover:bg-neutral-200 hover:text-neutral-900 disabled:opacity-40"
-                aria-label={`${copy.remove}: ${entry.town}`}
+                aria-label={`${copy.remove}: ${entry.fastCode}`}
                 data-testid="fast-code-slot-remove"
               >
                 {copy.remove}
@@ -136,49 +140,35 @@ function OwnList({ initial, copy }: { initial: OwnSlotList; copy: SlotsCopy }) {
 }
 
 /**
- * Right-hand panel on the demo Mapsite page: one list per sales associate.
- * The public view gets names, towns and counts only (no FAST Codes); the
- * signed-in agent also gets their own list with codes and can edit it.
+ * FAST Codes under the demo write-up (Arun, Nov 4): each code with its town
+ * and province, linking straight to the Mapsite. One unlabeled group per
+ * sales associate, so the public page never says who prepared a code. The
+ * signed-in agent also gets their own list, which they can add to and trim.
  */
 export default function FastCodeSlotsPanel({ data }: { data: FastCodeSlotsPanelData }) {
   const copy = useT().demo.slots;
+  const groups = data.associates.filter((g) => g.entries.length > 0);
+  if (!data.own && !groups.length) return null;
   return (
-    <aside
-      className="flex flex-col gap-4 rounded-[20px] bg-white px-5 py-6 shadow-[0_1px_2px_rgba(0,0,0,0.05),0_18px_48px_rgba(0,0,0,0.10)] sm:px-6"
-      data-testid="fast-code-slots"
-      aria-labelledby="fast-code-slots-title"
-    >
-      <h2
-        id="fast-code-slots-title"
-        className="m-0 text-[12px]! font-semibold uppercase tracking-[0.16em] text-neutral-500 sm:text-[13px]!"
-      >
+    <div className="mt-5 flex flex-col gap-4 border-t border-neutral-200 pt-5" data-testid="fast-code-slots">
+      <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.16em] text-neutral-500 sm:text-[13px]" id="fast-code-slots-title">
         {copy.title}
-      </h2>
+      </p>
       {data.own ? <OwnList initial={data.own} copy={copy} /> : null}
-      {data.associates.map((associate) => (
-        <section key={associate.name} data-testid="fast-code-slots-associate">
-          <h3 className="m-0 text-[16px]! font-semibold text-neutral-950">{associate.name}</h3>
-          <p className="m-0 mt-0.5 text-[13px] text-neutral-600" data-testid="fast-code-slots-count">
-            {countLabel(copy, associate.count)}
-          </p>
-          {associate.entries.length ? (
-            <ul className="m-0 mt-2.5 flex list-none flex-wrap gap-1.5 p-0">
-              {associate.entries.map((entry) => (
-                <li key={entry.slotId}>
-                  <Link
-                    href={demoMapsiteSlotOpenHref(entry.slotId)}
-                    prefetch={false}
-                    className="inline-flex items-center rounded-full bg-neutral-100 px-3 py-1.5 text-[13px] font-medium text-neutral-800 ring-1 ring-black/5 transition hover:bg-[#046BD9] hover:text-white"
-                    data-testid="fast-code-slot-town"
-                  >
-                    {entry.town}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-        </section>
+      {groups.map((group, index) => (
+        <ul
+          key={index}
+          className="m-0 list-none space-y-0.5 p-0"
+          aria-labelledby="fast-code-slots-title"
+          data-testid="fast-code-slots-group"
+        >
+          {group.entries.map((entry) => (
+            <li key={entry.slotId} className="flex">
+              <CodeLink entry={entry} testId="fast-code-slot-code" />
+            </li>
+          ))}
+        </ul>
       ))}
-    </aside>
+    </div>
   );
 }

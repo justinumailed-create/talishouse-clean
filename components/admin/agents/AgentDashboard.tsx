@@ -3,6 +3,8 @@ import type { AgentAdminRecord, AgentMapSiteSummary } from "@/lib/agent-admins";
 import type { ManualPaymentRecord } from "@/lib/manual-payments";
 import { crmCopy } from "@/lib/crm-leads/copy";
 import { getLocale } from "@/lib/i18n/server";
+import { SALES_ASSOCIATE_LOGINS, slotPlaceLabel } from "@/lib/talispros/fast-code-slots";
+import { loadSlotListForAgentId } from "@/lib/talispros/fast-code-slots-server";
 import AgentWorkPanel from "./AgentWorkPanel";
 import CashPaymentsTable from "./CashPaymentsTable";
 
@@ -43,6 +45,9 @@ export default async function AgentDashboard({
   const canLeads = can("leads-crm");
   const leadsCopy = crmCopy(await getLocale());
   const active = agent.status === "active";
+  // Prepared Mapsites (FAST Code slots) for the sales associates.
+  const isAssociate = (SALES_ASSOCIATE_LOGINS as readonly string[]).includes(agent.loginId.toLowerCase());
+  const slots = isAssociate ? await loadSlotListForAgentId(agent.id).catch(() => null) : null;
 
   return (
     <div className="space-y-6">
@@ -146,6 +151,44 @@ export default async function AgentDashboard({
           {agent.regions.length > 0 ? (
             <p className="mt-3 text-sm text-neutral-500">Regions: {agent.regions.join(", ")}</p>
           ) : null}
+        </section>
+      ) : null}
+
+      {slots ? (
+        <section className={`${card} p-6`} data-testid="agent-fast-code-slots">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 className="text-[15px] font-semibold text-neutral-900">My prepared Mapsites</h2>
+            <span className="text-xs text-neutral-500">
+              {slots.count} of {slots.limit} FAST Code slots used
+            </span>
+          </div>
+          <p className="mt-1 text-sm text-neutral-500">
+            Listed by FAST Code on the{" "}
+            <Link href="/talispros/demo-mapsite" className="font-medium text-[#1E4ED8] underline">
+              Mapsites page
+            </Link>
+            . Add or remove codes there while signed in.
+          </p>
+          {slots.entries.length ? (
+            <ul className="mt-4 divide-y divide-neutral-200 overflow-hidden rounded-xl border border-neutral-200">
+              {slots.entries.map((entry) => (
+                <li key={entry.slotId} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                  <span className="min-w-0">
+                    <span className="font-mono font-semibold uppercase text-neutral-900">{entry.fastCode}</span>
+                    <span className="ml-2 truncate text-neutral-500">{slotPlaceLabel(entry.town, entry.province)}</span>
+                  </span>
+                  <Link
+                    href={entry.href}
+                    className="shrink-0 rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-50"
+                  >
+                    Open
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-3 text-sm text-neutral-500">No FAST Codes in your list yet.</p>
+          )}
         </section>
       ) : null}
 

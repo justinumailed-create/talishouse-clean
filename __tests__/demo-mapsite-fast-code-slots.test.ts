@@ -8,8 +8,10 @@ import {
   SALES_ASSOCIATE_LOGINS,
   demoMapsiteSlotOpenHref,
   mapsiteHrefForSlot,
+  mapsiteProvinceFromAddress,
   mapsiteTownFromAddress,
   normalizeSlotFastCode,
+  slotPlaceLabel,
 } from "../lib/talispros/fast-code-slots";
 import { NSNC_BOOK_HREF, NSNC_BOOK_SLUG, createNsncViewerBook } from "../lib/talispros/nsnc-book";
 
@@ -35,19 +37,35 @@ describe("FAST Code slots on the Mapsites page (Ralf, Nov 3)", () => {
     expect(mapsiteTownFromAddress("", "Sample")).toBe("Sample");
   });
 
-  it("opens public towns through the slot id, never the code", () => {
+  it("labels each code with town and province", () => {
+    expect(mapsiteProvinceFromAddress("6 Main St, Corner Brook, NL A2H 2Z3, Canada")).toBe("NL");
+    expect(mapsiteProvinceFromAddress("Lot 8, South Head Rd., Homeville, Nova Scotia, Canada")).toBe("NS");
+    expect(mapsiteProvinceFromAddress("Boulevard de la Rivière, Rimouski, QC G5L 4N3, Canada")).toBe("QC");
+    expect(mapsiteProvinceFromAddress("Somewhere")).toBe("");
+    expect(slotPlaceLabel("Corner Brook", "NL")).toBe("Corner Brook, NL");
+    expect(slotPlaceLabel("Sample", "")).toBe("Sample");
+  });
+
+  it("lists codes under the write-up and never says who prepared them (Arun, Nov 4)", () => {
     expect(demoMapsiteSlotOpenHref("abc")).toBe("/talispros/demo-mapsite/open/abc");
     expect(mapsiteHrefForSlot(null, " AB-12 ")).toMatch(/^\/talispros\/mapsite\/[^/]+\/ab-12$/);
     const server = read("lib/talispros/fast-code-slots-server.ts");
-    const publicLoader = server.slice(server.indexOf("async function loadPublicLists"), server.indexOf("export async function loadOwnSlotList"));
-    expect(publicLoader).toContain("mapsites(property_address, property_title)");
-    expect(publicLoader).not.toContain("fast_code");
+    const publicLoader = server.slice(server.indexOf("async function loadPublicLists"), server.indexOf("export async function loadSlotListForAgentId"));
+    expect(publicLoader).toContain('.select("id, login_id")');
+    expect(publicLoader).not.toMatch(/\bname\b/);
     const panel = read("components/talispros/demo-mapsite/FastCodeSlotsPanel.tsx");
-    expect(panel).toContain("demoMapsiteSlotOpenHref(entry.slotId)");
+    expect(panel).toContain("entry.fastCode");
+    expect(panel).toContain("slotPlaceLabel(entry.town, entry.province)");
+    expect(panel).not.toMatch(/\.name\b|<aside/);
+    const builder = read("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx");
+    expect(builder).not.toContain("_19rem]");
+    expect(builder.indexOf("{d.hero.body2}")).toBeLessThan(builder.indexOf("<FastCodeSlotsPanel"));
     const route = read("app/talispros/demo-mapsite/open/[slotId]/route.ts");
     expect(route).toContain("noindex");
     const actions = read("app/talispros/demo-mapsite/slots-actions.ts");
     expect(actions.match(/getCurrentAgent\(\)/g)?.length).toBeGreaterThanOrEqual(2);
+    const dashboard = read("components/admin/agents/AgentDashboard.tsx");
+    expect(dashboard).toContain("loadSlotListForAgentId(agent.id)");
   });
 
   it("shows Aisha's four buttons on prepared Mapsites, same links as /talisu/reg", () => {

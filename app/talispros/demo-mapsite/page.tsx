@@ -15,8 +15,8 @@ export default async function DemoMapSiteBuilderPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  // FAST Code slots: names, towns and counts for everyone; codes only in the
-  // signed-in agent's own list (decided here on the server).
+  // FAST Code slots: codes, towns and provinces for everyone, never who
+  // prepared them; the signed-in agent also gets their own editable list.
   const slotsPanel = await loadFastCodeSlotsPanel();
   // Deep links and Back (?build=1, ?address=…, ?lat=…&lng=…) open the card directly.
   return (

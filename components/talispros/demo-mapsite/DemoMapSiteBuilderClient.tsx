@@ -99,11 +99,10 @@ export default function DemoMapSiteBuilderClient({
   }
 
   return (
-    // Mapsites page (Ralf, Nov 3): no top strip line or build pill. The demo
-    // card sits on the left, the FAST Code slots panel on the right.
+    // Mapsites page (Ralf, Nov 3; Arun, Nov 4): no top strip line or build
+    // pill, no side card. The FAST Codes sit under the write-up.
     <WorkingPageShell testId="mapsites-page" contentTestId="mapsites-content">
       {!showCard ? (
-        <div className="mx-auto grid w-full max-w-[92rem] items-start gap-5 lg:grid-cols-[minmax(0,1fr)_19rem] xl:grid-cols-[minmax(0,1fr)_21rem]">
         <section
           className="demo-hero mx-auto w-full"
           data-testid="demo-hero"
@@ -126,15 +125,10 @@ export default function DemoMapSiteBuilderClient({
               </h1>
               <p className="mt-4 text-[15px] leading-relaxed text-neutral-700 sm:text-[16px]">{d.hero.body1}</p>
               <p className="mt-3 text-[15px] leading-relaxed text-neutral-700 sm:text-[16px]">{d.hero.body2}</p>
+              {slotsPanel ? <FastCodeSlotsPanel data={slotsPanel} /> : null}
             </div>
           </div>
         </section>
-        {slotsPanel ? (
-          <div className="lg:pt-[0.35rem]">
-            <FastCodeSlotsPanel data={slotsPanel} />
-          </div>
-        ) : null}
-        </div>
       ) : (
         <div data-testid="demo-builder">
         <HomePinLocationSection

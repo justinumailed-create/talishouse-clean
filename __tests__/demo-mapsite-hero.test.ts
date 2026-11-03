@@ -40,10 +40,11 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(builder).toContain("if (demoBuilderStartsOpen(searchParamsObject())) syncFromUrl();");
   });
 
-  it("puts the FAST Code slots panel on the right of the Mapsite card", () => {
+  it("puts the FAST Codes inside the write-up, with no side card (Arun, Nov 4)", () => {
     expect(builder).toContain("<FastCodeSlotsPanel data={slotsPanel} />");
-    expect(builder).toContain("lg:grid-cols-[minmax(0,1fr)_19rem]");
-    expect(builder.indexOf("</section>")).toBeLessThan(builder.indexOf("<FastCodeSlotsPanel"));
+    expect(builder).not.toContain("lg:grid-cols-[minmax(0,1fr)_19rem]");
+    expect(builder.indexOf("{d.hero.body2}")).toBeLessThan(builder.indexOf("<FastCodeSlotsPanel"));
+    expect(builder.indexOf("<FastCodeSlotsPanel")).toBeLessThan(builder.indexOf("</section>"));
     const page = read("app/talispros/demo-mapsite/page.tsx");
     expect(page).toContain("await loadFastCodeSlotsPanel()");
     expect(page).toContain("slotsPanel={slotsPanel}");
