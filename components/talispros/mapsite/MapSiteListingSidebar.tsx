@@ -17,6 +17,8 @@ interface MapSiteListingSidebarProps {
   aboveCard?: ReactNode;
   /** Payment CTA — rendered above the marketing sidebar on unpaid claimed Mapsites. */
   belowCard?: ReactNode;
+  /** Under the write-up card (Aisha's four buttons on prepared Mapsites). */
+  afterCard?: ReactNode;
 }
 
 function stopMapScrollSteal(event: WheelEvent<HTMLDivElement>) {
@@ -32,6 +34,7 @@ export default function MapSiteListingSidebar({
   onSelectListing,
   aboveCard,
   belowCard,
+  afterCard,
 }: MapSiteListingSidebarProps) {
   const claimed = !isClaimable(mapsite.status);
 
@@ -98,6 +101,19 @@ export default function MapSiteListingSidebar({
             </button>
           </div>
         )}
+
+        {afterCard ? (
+          <div
+            className={
+              mobileOverlay
+                ? "pointer-events-auto w-full shrink-0 translate-x-1"
+                : "w-full shrink-0"
+            }
+            data-testid="mapsite-below-write-up"
+          >
+            {afterCard}
+          </div>
+        ) : null}
         </div>
       </div>
     </aside>

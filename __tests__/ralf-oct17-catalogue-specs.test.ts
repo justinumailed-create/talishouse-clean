@@ -41,10 +41,9 @@ describe("Ralf Oct 17 catalogue spec sheets", () => {
       resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),
       "utf8",
     );
-    expect(builder).toContain("AISHA_AVATAR_SRC");
-    // Ralf (Oct 18/26): one line + "Build your Mapsite" (Aisha) on top; the
-    // bottom "Register a Mapsite" CTA is gone.
-    expect(builder).toContain('testId="mapsites-build-demo-link"');
+    // Ralf (Nov 3): the "Build your Mapsite" pill is gone; the bottom
+    // "Register a Mapsite" CTA stays gone.
+    expect(builder).not.toContain('testId="mapsites-build-demo-link"');
     expect(builder).not.toContain('data-testid="mapsites-register-cta"');
   });
 });

@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Link from "next/link";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { MapEngineProvider } from "@/components/talismaps/map-engine/MapEngineProvider";
 import type { MapEnginePin } from "@/lib/talismaps/map-engine/types";
@@ -13,6 +14,7 @@ import {
   DEMO_PIN_CARD_ACTIONS,
   demoHeroPinScreenOffset,
 } from "@/lib/talispros/demo-builder";
+import { NSNC_BOOK_HREF, NSNC_PIN_IMAGE, NSNC_TITLE } from "@/lib/talispros/nsnc-book";
 
 const MapEngineCanvas = dynamic(
   () => import("@/components/talismaps/map-engine/MapEngineCanvas"),
@@ -22,15 +24,15 @@ const MapEngineCanvas = dynamic(
   },
 );
 
-/** Same sample frame the Mapsite listing card uses when a property photo is not set. */
-const SAMPLE_HERO = "/talisbooks/sample/img-11-1280x720.jpeg";
+/** The PIN's TEB™ (North Shore Nature Centre eBook) and its lake photo. */
+const TEB_LABEL = "TEB™";
 
 /**
  * Blue pill from Aisha's register page (`RegisterStructureTabs`): same radius,
  * colour, weight and shadow, sized to sit in the PIN card.
  */
 const PIN_ACTION_CLASS =
-  "pointer-events-none inline-flex min-h-9 w-full items-center justify-center whitespace-nowrap rounded-full bg-[#046BD9] px-1.5 text-center text-[11px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] sm:min-h-10 sm:px-2 sm:text-[13px]";
+  "inline-flex min-h-9 w-full items-center justify-center whitespace-nowrap rounded-full bg-[#046BD9] px-1.5 text-center text-[11px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] sm:min-h-10 sm:px-2 sm:text-[13px]";
 
 export default function DemoHeroMap() {
   const card = useT().demo.hero.pinCard;
@@ -109,33 +111,66 @@ export default function DemoHeroMap() {
         <MapEngineCanvas className="absolute inset-0 h-full w-full" />
       </MapEngineProvider>
 
+      {/* The PIN itself opens its TEB™ (the map stays display only). */}
+      <Link
+        href={NSNC_BOOK_HREF}
+        aria-label={card.openEbook}
+        data-testid="demo-hero-pin-link"
+        className="absolute left-1/2 z-[5] block h-[78px] w-[78px] -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
+        style={{ top: `calc(50% + ${pinOffsetY}px)` }}
+      />
+
       <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4">
         <article
           ref={cardRef}
-          className="w-[min(92%,16.5rem)]"
+          className="pointer-events-auto w-[min(92%,16.5rem)]"
           data-testid="demo-hero-pin-card"
-          aria-label={card.title}
+          aria-label={NSNC_TITLE}
         >
           <div className="overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm">
-            <div className="relative h-16 w-full bg-neutral-200/80 sm:h-20 lg:h-28">
+            <Link
+              href={NSNC_BOOK_HREF}
+              className="relative block h-16 w-full bg-neutral-200/80 sm:h-20 lg:h-28"
+              aria-label={card.openEbook}
+              data-testid="demo-hero-pin-image"
+            >
               <Image
-                src={SAMPLE_HERO}
-                alt={card.title}
+                src={NSNC_PIN_IMAGE}
+                alt={NSNC_TITLE}
                 fill
                 className={MAPSITE_LISTING_IMAGE_CLASS}
                 sizes="280px"
                 priority
               />
-            </div>
+            </Link>
             <div className="bg-gradient-to-b from-white/70 to-white/80 px-3.5 pb-3 pt-2">
-              <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">{card.title}</h2>
+              <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">{NSNC_TITLE}</h2>
               <p className="m-0 mt-0.5 text-[12px] leading-snug text-neutral-800">{card.body}</p>
               <div className="mt-2.5 grid grid-cols-4 gap-1.5 sm:grid-cols-2">
-                {DEMO_PIN_CARD_ACTIONS.map((label) => (
-                  <button key={label} type="button" tabIndex={-1} data-testid="demo-hero-pin-action" className={PIN_ACTION_CLASS}>
-                    {label}
-                  </button>
-                ))}
+                {DEMO_PIN_CARD_ACTIONS.map((label) =>
+                  label === TEB_LABEL ? (
+                    <Link
+                      key={label}
+                      href={NSNC_BOOK_HREF}
+                      aria-label={card.openEbook}
+                      data-testid="demo-hero-pin-action"
+                      data-action="teb"
+                      className={`${PIN_ACTION_CLASS} transition hover:bg-[#0558b3]`}
+                    >
+                      {label}
+                    </Link>
+                  ) : (
+                    <button
+                      key={label}
+                      type="button"
+                      tabIndex={-1}
+                      data-testid="demo-hero-pin-action"
+                      className={`${PIN_ACTION_CLASS} pointer-events-none`}
+                    >
+                      {label}
+                    </button>
+                  ),
+                )}
               </div>
             </div>
           </div>

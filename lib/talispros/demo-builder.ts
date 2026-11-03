@@ -16,14 +16,20 @@ export const DEMO_BUILD_QUERY = "build";
  * One sample PIN for the hero display map. Same Canada preview point the
  * builder map uses (Niagara Falls region). Not a street address.
  */
+/**
+ * Mapsites page hero PIN (Ralf, Nov 3): Bay St. Lawrence, Nova Scotia B0C 1R0,
+ * a public spot (community centre) near the North Shore Nature Centre. Its
+ * card opens the North Shore Nature Centre TEB™. The builder card keeps its
+ * own preview location.
+ */
 export const DEMO_DISPLAY_PIN = {
   id: "demo-display-pin",
-  latitude: BUILD_MAPSITE_PREVIEW_LOCATION.latitude,
-  longitude: BUILD_MAPSITE_PREVIEW_LOCATION.longitude,
-  zoom: BUILD_MAPSITE_PREVIEW_LOCATION.mapZoom,
+  latitude: 46.99306,
+  longitude: -60.46497,
+  zoom: 12,
 } as const;
 
-/** Actions a Mapsite PIN card shows. Display only — they do not navigate. */
+/** Actions a Mapsite PIN card shows. Only TEB™ opens (the PIN's eBook). */
 export const DEMO_PIN_CARD_ACTIONS = ["URL 1", "URL 2", "TEB™", "TTV™"] as const;
 
 /** Selected Mapsite pin body. The marker is anchored at its center. */

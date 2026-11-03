@@ -1,0 +1,84 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
+import { de } from "../lib/i18n/dictionaries/de";
+import {
+  FAST_CODE_SLOT_LIMIT,
+  SALES_ASSOCIATE_LOGINS,
+  demoMapsiteSlotOpenHref,
+  mapsiteHrefForSlot,
+  mapsiteTownFromAddress,
+  normalizeSlotFastCode,
+} from "../lib/talispros/fast-code-slots";
+import { NSNC_BOOK_HREF, NSNC_BOOK_SLUG, createNsncViewerBook } from "../lib/talispros/nsnc-book";
+
+const read = (p: string) => readFileSync(resolve(p), "utf8");
+
+describe("FAST Code slots on the Mapsites page (Ralf, Nov 3)", () => {
+  it("keeps one list of up to 15 per sales associate", () => {
+    expect(FAST_CODE_SLOT_LIMIT).toBe(15);
+    expect([...SALES_ASSOCIATE_LOGINS]).toEqual(["aritri", "enanko"]);
+  });
+
+  it("validates codes before any lookup", () => {
+    expect(normalizeSlotFastCode("  ab-12 ")).toBe("ab-12");
+    expect(normalizeSlotFastCode("a")).toBeNull();
+    expect(normalizeSlotFastCode("x'; drop")).toBeNull();
+    expect(normalizeSlotFastCode(42)).toBeNull();
+  });
+
+  it("shows towns, not addresses, on the public list", () => {
+    expect(mapsiteTownFromAddress("8 Plessis Rd #1783, Winnipeg, MB R2C 2Y6, Canada")).toBe("Winnipeg");
+    expect(mapsiteTownFromAddress("Lot 8, South Head Rd., Homeville, Nova Scotia, Canada")).toBe("Homeville");
+    expect(mapsiteTownFromAddress("Halifax, NS B3H 1A1")).toBe("Halifax");
+    expect(mapsiteTownFromAddress("", "Sample")).toBe("Sample");
+  });
+
+  it("opens public towns through the slot id, never the code", () => {
+    expect(demoMapsiteSlotOpenHref("abc")).toBe("/talispros/demo-mapsite/open/abc");
+    expect(mapsiteHrefForSlot(null, " AB-12 ")).toMatch(/^\/talispros\/mapsite\/[^/]+\/ab-12$/);
+    const server = read("lib/talispros/fast-code-slots-server.ts");
+    const publicLoader = server.slice(server.indexOf("async function loadPublicLists"), server.indexOf("export async function loadOwnSlotList"));
+    expect(publicLoader).toContain("mapsites(property_address, property_title)");
+    expect(publicLoader).not.toContain("fast_code");
+    const panel = read("components/talispros/demo-mapsite/FastCodeSlotsPanel.tsx");
+    expect(panel).toContain("demoMapsiteSlotOpenHref(entry.slotId)");
+    const route = read("app/talispros/demo-mapsite/open/[slotId]/route.ts");
+    expect(route).toContain("noindex");
+    const actions = read("app/talispros/demo-mapsite/slots-actions.ts");
+    expect(actions.match(/getCurrentAgent\(\)/g)?.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("shows Aisha's four buttons on prepared Mapsites, same links as /talisu/reg", () => {
+    const page = read("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx");
+    expect(page).toContain("await isPreparedSlotMapsite(mapsite.id)");
+    expect(page).toContain("propose: talisuHref(TALISU_DISCUSS_PATH)");
+    expect(page).toContain("claim: DEMO_MAPSITE_BUILD_PATH");
+    expect(page).toContain("terms: PMC_PATHS.contract");
+    expect(page).toContain('register: "/talisu/reg?step=choose"');
+    expect(page).toContain("entryGranted={await hasRegisterEntry()}");
+  });
+
+  it("has EN + DE panel copy without dev text", () => {
+    for (const dict of [en, de]) {
+      const s = dict.demo.slots;
+      for (const value of Object.values(s)) {
+        expect(value).toBeTruthy();
+        expect(String(value)).not.toMatch(/TODO|placeholder|lorem|Mapsite™/i);
+      }
+      expect(s.used).toContain("{limit}");
+    }
+  });
+});
+
+describe("North Shore Nature Centre TEB™ on the demo PIN", () => {
+  it("is a 12-slide book with covers and the PDF", () => {
+    expect(NSNC_BOOK_HREF).toBe(`/talisbooks/viewer/${NSNC_BOOK_SLUG}`);
+    const book = createNsncViewerBook("de");
+    expect(book.title).toBe("North Shore Nature Centre");
+    expect(JSON.stringify(book)).toContain("/talisbooks/nsnc/pages/page-12.webp");
+    expect(JSON.stringify(book)).toContain("North-Shore-Nature-Centre.pdf");
+    expect(read("lib/talisbooks/viewer/load-book.ts")).toContain("createNsncViewerBook(locale)");
+  });
+});

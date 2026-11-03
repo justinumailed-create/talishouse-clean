@@ -1,7 +1,7 @@
 "use client";
 
 import { useT } from "@/lib/i18n/client";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import HomePinLocationSection, {
   validateHomePinLocation,
@@ -11,27 +11,19 @@ import {
   type HomePinLocationValues,
 } from "@/components/build-mapsite/home-pin-types";
 import { createDemoMapSiteAction } from "@/app/talispros/demo-mapsite/actions";
-import { WorkingPageCtaButton, AISHA_AVATAR_SRC } from "@/components/talispros/WorkingPageCtaLink";
 import WorkingPageShell from "@/components/talispros/WorkingPageShell";
 import DemoHeroMap from "@/components/talispros/demo-mapsite/DemoHeroMap";
+import FastCodeSlotsPanel from "@/components/talispros/demo-mapsite/FastCodeSlotsPanel";
+import type { FastCodeSlotsPanelData } from "@/lib/talispros/fast-code-slots";
 import {
   DEMO_ADDRESS_INPUT_ID,
   DEMO_ADDRESS_INPUT_NAME,
-  DEMO_BUILD_QUERY,
   demoBuilderStartsOpen,
   demoTitleFromAddress,
   hasDemoPinChoice,
 } from "@/lib/talispros/demo-builder";
 
 const DEMO_FALLBACK_TITLE = "Demo Mapsite";
-function focusAddressBox() {
-  const input = document.getElementById(DEMO_ADDRESS_INPUT_ID) as HTMLInputElement | null;
-  if (!input) return;
-  const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-  input.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
-  input.focus({ preventScroll: true });
-}
-
 function searchParamsObject(): Record<string, string> {
   return Object.fromEntries(new URLSearchParams(window.location.search).entries());
 }
@@ -39,10 +31,13 @@ function searchParamsObject(): Record<string, string> {
 export default function DemoMapSiteBuilderClient({
   initialOpen = false,
   initialPin,
+  slotsPanel,
 }: {
   /** Deep link / Back already carries build, address or PIN state. */
   initialOpen?: boolean;
   initialPin?: Partial<HomePinLocationValues>;
+  /** FAST Code slots beside the card (codes only for the signed-in agent's own list). */
+  slotsPanel?: FastCodeSlotsPanelData;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -54,24 +49,9 @@ export default function DemoMapSiteBuilderClient({
   const d = t.demo;
   const [error, setError] = useState<string | null>(null);
   const [addressInvalid, setAddressInvalid] = useState(false);
-  // Ralf (Oct 26): the hero shows first; the step 1-3 card stays hidden until
-  // the top-strip "Build your Mapsite" pill.
+  // The hero shows first. Deep links and Back that carry ?build=1, an address
+  // or a PIN open the step 1-3 card directly.
   const [showCard, setShowCard] = useState(initialOpen);
-  const [focusRequest, setFocusRequest] = useState(0);
-
-  const revealBuilder = useCallback(() => {
-    if (!showCard) {
-      setShowCard(true);
-      // Remember the open card in history so Back (from the eBook step) and
-      // shared links land on the card, not the hero.
-      const url = new URL(window.location.href);
-      url.searchParams.set(DEMO_BUILD_QUERY, "1");
-      // Through the Next router (not raw pushState) so its canonical URL keeps
-      // ?build=1 and a later router.push to the eBook step doesn't drop it.
-      router.push(`${url.pathname}${url.search}${url.hash}`, { scroll: false });
-    }
-    setFocusRequest((current) => current + 1);
-  }, [showCard, router]);
 
   useEffect(() => {
     function syncFromUrl() {
@@ -83,15 +63,6 @@ export default function DemoMapSiteBuilderClient({
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
   }, []);
-
-  useEffect(() => {
-    if (!showCard || focusRequest === 0) return;
-    // Wait for the card (and its address box) to mount, then focus it.
-    let frame = window.requestAnimationFrame(() => {
-      frame = window.requestAnimationFrame(focusAddressBox);
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [showCard, focusRequest]);
 
   function handleContinue() {
     // Validation only on Continue, as one friendly inline message. There is
@@ -128,29 +99,11 @@ export default function DemoMapSiteBuilderClient({
   }
 
   return (
-    // Mapsites page: the Catalogue top strip. While the hero is showing, the
-    // Aisha pill ("Build your Mapsite") reveals the card and focuses Step 1.
-    // Once the card is open — including ?build=1 and Back — that pill is gone
-    // and the Market Zone line stays centred on its own.
-    <WorkingPageShell
-      testId="mapsites-page"
-      contentTestId="mapsites-content"
-      headline={t.catalogueUi.mapsitesHeadline}
-      headlineVariant="catalogue"
-      headlineAction={
-        showCard ? null : (
-          <WorkingPageCtaButton
-            onClick={revealBuilder}
-            disabled={pending}
-            label={d.buildYourMapsite}
-            avatarSrc={AISHA_AVATAR_SRC}
-            avatarAlt="Aisha C."
-            testId="mapsites-build-demo-link"
-          />
-        )
-      }
-    >
+    // Mapsites page (Ralf, Nov 3): no top strip line or build pill. The demo
+    // card sits on the left, the FAST Code slots panel on the right.
+    <WorkingPageShell testId="mapsites-page" contentTestId="mapsites-content">
       {!showCard ? (
+        <div className="mx-auto grid w-full max-w-[92rem] items-start gap-5 lg:grid-cols-[minmax(0,1fr)_19rem] xl:grid-cols-[minmax(0,1fr)_21rem]">
         <section
           className="demo-hero mx-auto w-full"
           data-testid="demo-hero"
@@ -176,6 +129,12 @@ export default function DemoMapSiteBuilderClient({
             </div>
           </div>
         </section>
+        {slotsPanel ? (
+          <div className="lg:pt-[0.35rem]">
+            <FastCodeSlotsPanel data={slotsPanel} />
+          </div>
+        ) : null}
+        </div>
       ) : (
         <div data-testid="demo-builder">
         <HomePinLocationSection

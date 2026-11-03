@@ -366,6 +366,13 @@ export async function resolveViewerBookBySlug(
     return createPinnedTalisBookViewer();
   }
 
+  const { NSNC_BOOK_SLUG, createNsncViewerBook } = await import(
+    "@/lib/talispros/nsnc-book"
+  );
+  if (slug.trim() === NSNC_BOOK_SLUG) {
+    return createNsncViewerBook(locale);
+  }
+
   const demoSlugs = new Set(["sample-ebook", "demo", "preview"]);
   if (demoSlugs.has(slug)) {
     const demo = createDemoViewerBook();

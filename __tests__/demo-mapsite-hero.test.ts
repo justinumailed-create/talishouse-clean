@@ -21,34 +21,32 @@ const section = read("components/build-mapsite/HomePinLocationSection.tsx");
 const demoBranch = section.slice(section.indexOf("if (isDemo) {"), section.indexOf('<div className="space-y-6">'));
 
 describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
-  it("keeps the Catalogue strip with the Market Zone line and a 'Build your Mapsite' pill", () => {
-    expect(builder).toContain('headlineVariant="catalogue"');
-    expect(builder).toContain("headline={t.catalogueUi.mapsitesHeadline}");
-    expect(builder).toContain("label={d.buildYourMapsite}");
-    expect(en.demo.buildYourMapsite).toBe("Build your Mapsite");
-    expect(de.demo.buildYourMapsite).toBe("Ihre Mapsite erstellen");
-    // The pill is only in the strip while the hero is showing. Once the
-    // builder card is open (?build=1, including Back), the Market Zone line
-    // stays and is centred on its own.
-    const strip = builder.slice(builder.indexOf("headlineAction="), builder.indexOf("{!showCard ? ("));
-    expect(strip).toMatch(/showCard \? null : \(/);
-    expect(strip).toContain('testId="mapsites-build-demo-link"');
+  it("has no top strip line and no 'Build your Mapsite' pill (Ralf, Nov 3)", () => {
+    expect(builder).not.toContain("headline={t.catalogueUi.mapsitesHeadline}");
+    expect(builder).not.toContain("headlineAction=");
+    expect(builder).not.toContain("d.buildYourMapsite");
+    expect(builder).not.toContain('testId="mapsites-build-demo-link"');
+    expect(builder).not.toContain("revealBuilder");
   });
 
-  it("shows the hero first and hides the step 1-3 card until Build", () => {
+  it("shows the hero first; deep links still open the step 1-3 card", () => {
     expect(builder).toContain("useState(initialOpen)");
     expect(builder).toContain("{!showCard ? (");
     expect(builder).toContain('data-testid="demo-hero"');
-    // The only build trigger is the top-strip pill. No button inside the card.
     expect(builder).not.toContain('data-testid="demo-hero-build"');
     expect(builder).not.toContain("d.hero.cta");
-    expect(builder.match(/onClick={revealBuilder}/g)).toHaveLength(1);
-    expect(builder).toContain("frame = window.requestAnimationFrame(focusAddressBox)");
-    expect(builder).toContain("url.searchParams.set(DEMO_BUILD_QUERY");
     expect(builder).toContain('addEventListener("popstate"');
     // Back from the eBook step (client router cache) re-reads ?build=1 on mount.
-    expect(builder).toContain("router.push(`${url.pathname}${url.search}${url.hash}`, { scroll: false })");
     expect(builder).toContain("if (demoBuilderStartsOpen(searchParamsObject())) syncFromUrl();");
+  });
+
+  it("puts the FAST Code slots panel on the right of the Mapsite card", () => {
+    expect(builder).toContain("<FastCodeSlotsPanel data={slotsPanel} />");
+    expect(builder).toContain("lg:grid-cols-[minmax(0,1fr)_19rem]");
+    expect(builder.indexOf("</section>")).toBeLessThan(builder.indexOf("<FastCodeSlotsPanel"));
+    const page = read("app/talispros/demo-mapsite/page.tsx");
+    expect(page).toContain("await loadFastCodeSlotsPanel()");
+    expect(page).toContain("slotsPanel={slotsPanel}");
   });
 
   it("opens the card directly for deep links or Back that carry build/address/PIN state", () => {
@@ -93,17 +91,22 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     // the panel. The PIN is offset down to sit under the pointer.
     expect(map).toContain("top-4");
     expect(map).toContain("demoHeroPinScreenOffset");
-    expect(map).not.toContain("calc(50%");
-    expect(map).not.toMatch(/href=/);
+    // The PIN, its photo and its TEB™ button open the North Shore Nature
+    // Centre eBook; the other actions stay display only.
+    expect(map).toContain('data-testid="demo-hero-pin-link"');
+    expect(map).toContain("calc(50% + ${pinOffsetY}px)");
+    expect(map.match(/href={NSNC_BOOK_HREF}/g)).toHaveLength(3);
+    expect(map).toContain("src={NSNC_PIN_IMAGE}");
+    expect(map).not.toContain("img-11-1280x720");
     expect(map).toContain("pointer-events-none");
     expect(map).toContain("bg-[#046BD9]");
     expect(map).toContain("rounded-full");
     expect(map).toContain("shadow-[0_6px_14px_rgba(4,107,217,0.3)]");
     expect(DEMO_PIN_CARD_ACTIONS).toEqual(["URL 1", "URL 2", "TEB™", "TTV™"]);
-    expect(map.match(/data-testid="demo-hero-pin-action"/g)).toHaveLength(1);
-    expect(DEMO_DISPLAY_PIN.latitude).toBeGreaterThan(41);
-    expect(DEMO_DISPLAY_PIN.latitude).toBeLessThan(70);
-    expect(DEMO_DISPLAY_PIN.longitude).toBeLessThan(-50);
+    expect(map.match(/data-testid="demo-hero-pin-action"/g)).toHaveLength(2);
+    // Bay St. Lawrence, Nova Scotia B0C 1R0 (near the North Shore Nature Centre).
+    expect(DEMO_DISPLAY_PIN.latitude).toBeCloseTo(46.993, 2);
+    expect(DEMO_DISPLAY_PIN.longitude).toBeCloseTo(-60.465, 2);
     expect(map).not.toMatch(/FAST Code|@[a-z]/i);
   });
 
@@ -156,22 +159,21 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
         expect(value).toBeTruthy();
         expect(value).not.toMatch(/Mapsite™/);
       }
-      expect(hero.body1).toMatch(/80/);
+      // No distance anywhere on the page copy.
+      expect(`${hero.body1} ${hero.body2}`).not.toMatch(/\d|\bkm\b|kilomet/i);
       expect(hero.body1 + hero.body2).not.toMatch(/screen|editor|bookshelf|Knowledge Base|Bildschirm|Bücherregal|Wissensdatenbank/i);
       expect(hero.body2).not.toMatch(/open any|Öffnen Sie eines/i);
-      expect(`${hero.body1} ${hero.body2} ${hero.pinCard.title} ${hero.pinCard.body}`).not.toMatch(
+      expect(`${hero.body1} ${hero.body2} ${hero.pinCard.body}`).not.toMatch(
         /FAST Code|USD|\$|miles?\b/i,
       );
     }
-    expect(en.demo.hero.body2).toBe(
-      "One sample PIN in Canada sits on the map, with its card already open. Use Build your Mapsite above. It takes a couple of minutes.",
-    );
+    expect(en.demo.hero.body2).toBe("One sample PIN in Canada sits on the map, with its card already open.");
     expect(de.demo.hero.body2).toBe(
-      "Ein Beispiel-PIN in Kanada liegt auf der Karte, und seine Infokarte ist bereits geöffnet. Nutzen Sie oben „Ihre Mapsite erstellen“. Das dauert nur ein paar Minuten.",
+      "Ein Beispiel-PIN in Kanada liegt auf der Karte, und seine Infokarte ist bereits geöffnet.",
     );
-    expect(en.demo.hero.pinCard.title).toBe("Niagara Falls, Ontario");
-    expect(de.demo.hero.pinCard.title).toBe("Niagara Falls, Ontario");
-    expect(en.demo.hero.body1).toMatch(/80 km/);
-    expect(de.demo.hero.body1).toMatch(/80-km/);
+    expect(en.demo.hero.pinCard.body).toBe("Bay St. Lawrence, Nova Scotia");
+    expect(de.demo.hero.pinCard.body).toBe("Bay St. Lawrence, Neuschottland");
+    expect(en.demo.hero.pinCard.openEbook).toContain("TEB™");
+    expect(de.demo.hero.pinCard.openEbook).toContain("TEB™");
   });
 });

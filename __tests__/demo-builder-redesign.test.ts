@@ -42,7 +42,6 @@ describe("Demo Mapsite builder redesign (Ralf, Oct 26)", () => {
     expect(builder).not.toContain("<form");
     expect(builder).toContain("onClick={handleContinue}");
     expect(demoBranch).not.toMatch(/\brequired\b/);
-    expect(builder).toContain("onClick={revealBuilder}");
     expect(builder).not.toContain("form={DEMO_FORM_ID}");
     expect(builder).toContain('data-testid="demo-inline-error"');
     expect(builder).toContain("d.errPlacePin");
@@ -50,10 +49,7 @@ describe("Demo Mapsite builder redesign (Ralf, Oct 26)", () => {
     expect(cta).toContain('type={onClick ? "button" : "submit"}');
   });
 
-  it("the pill reveals the card, then smooth-scrolls to and focuses Step 1's address box", () => {
-    expect(builder).toContain("document.getElementById(DEMO_ADDRESS_INPUT_ID)");
-    expect(builder).toContain('behavior: reduceMotion ? "auto" : "smooth"');
-    expect(builder).toContain("input.focus({ preventScroll: true })");
+  it("Step 1's address box keeps its stable id", () => {
     expect(demoBranch).toContain("id={addressInputId}");
     expect(DEMO_ADDRESS_INPUT_ID).toBe("demo-home-location-street");
   });

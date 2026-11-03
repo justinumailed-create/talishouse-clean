@@ -24,7 +24,8 @@ describe("Market Zone top strip (Mapsites)", () => {
     expect(strip).toContain("talis-top-strip__text");
     expect(read("components/product-flipbook/TopBoundFlipbook.tsx")).toContain("<TopStrip");
     expect(read("components/talispros/WorkingPageShell.tsx")).toContain("<TopStrip");
-    expect(read("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx")).toContain('headlineVariant="catalogue"');
+    // Mapsites page (Ralf, Nov 3): no strip line there any more.
+    expect(read("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx")).not.toContain("mapsitesHeadline");
     const css = read("app/globals.css");
     expect(css).toMatch(/\.talis-top-strip__text \{[^}]*font-weight: 600;[^}]*color: #262626;/);
     // The flipbook class no longer sets its own typography.

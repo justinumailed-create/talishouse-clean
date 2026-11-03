@@ -810,14 +810,33 @@ export const en = {
       eyebrow: "Demo Mapsite",
       headline: "See your Market on a Mapsite before you register",
       body1:
-        "A demo Mapsite is a working preview of your own Mapsite. You set it up around your home PIN, and it shows the 80 km Market Zone that a registered Market protects around that PIN.",
+        "A demo Mapsite is a working preview of your own Mapsite. You set it up around your home PIN, and it shows the Market Zone that a registered Market protects around that PIN.",
       body2:
-        "One sample PIN in Canada sits on the map, with its card already open. Use Build your Mapsite above. It takes a couple of minutes.",
+        "One sample PIN in Canada sits on the map, with its card already open.",
       pinCard: {
         mapLabel: "Sample Mapsite map",
-        title: "Niagara Falls, Ontario",
-        body: "A sample home in Canada.",
+        body: "Bay St. Lawrence, Nova Scotia",
+        openEbook: "Open the North Shore Nature Centre TEB™",
       },
+    },
+    /** FAST Code slots panel beside the Mapsite card (one list per sales associate). */
+    slots: {
+      title: "Prepared Mapsites",
+      countOne: "1 Mapsite prepared",
+      countMany: "{count} Mapsites prepared",
+      empty: "No Mapsites prepared yet",
+      mine: "My FAST Codes",
+      used: "{count} of {limit} slots used",
+      inputLabel: "FAST Code",
+      add: "Add",
+      adding: "Adding…",
+      remove: "Remove",
+      errInvalid: "Enter a FAST Code with letters, digits and dashes only.",
+      errNotFound: "No Mapsite has this FAST Code.",
+      errDuplicate: "This Mapsite is already in your list.",
+      errFull: "All 15 slots are in use. Remove one first.",
+      errSignin: "Sign in again to change your list.",
+      errFailed: "That did not work. Please try again.",
     },
     /** Demo builder card (Ralf, Oct 26): numbered steps, one address box. */
     addressPlaceholder: "Start typing an address…",

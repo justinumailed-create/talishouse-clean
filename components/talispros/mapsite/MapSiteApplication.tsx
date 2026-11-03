@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import MapEngineCanvas from "@/components/talismaps/map-engine/MapEngineCanvas";
 import {
@@ -207,6 +207,8 @@ interface MapSiteApplicationProps {
     mapsiteHref: string;
     owner?: PersonalHomeOwnerPill | null;
   } | null;
+  /** Rendered under the Mapsite write-up card (e.g. Aisha's four buttons). */
+  belowWriteUp?: ReactNode;
 }
 
 export default function MapSiteApplication({
@@ -237,6 +239,7 @@ export default function MapSiteApplication({
   initialOwnerCustomizations = null,
   initialRootContext = null,
   personalHomeNav = null,
+  belowWriteUp = null,
 }: MapSiteApplicationProps) {
   const [mapsite] = useState(initialMapSite);
   const locale = useLocale() === "de" ? "de" : "en";
@@ -529,6 +532,7 @@ export default function MapSiteApplication({
         categoryFilter={categoryFilter}
         onCategoryFilterChange={setCategoryFilter}
         personalHomeNav={personalHomeNav}
+        belowWriteUp={belowWriteUp}
       />
     </MapEngineProvider>
   );
@@ -573,6 +577,7 @@ function MapSiteChrome({
   categoryFilter,
   onCategoryFilterChange,
   personalHomeNav,
+  belowWriteUp,
 }: {
   mapsite: MapSitePlatformRecord;
   audience: RegistrationMarket;
@@ -616,6 +621,7 @@ function MapSiteChrome({
     mapsiteHref: string;
     owner?: PersonalHomeOwnerPill | null;
   } | null;
+  belowWriteUp: ReactNode;
 }) {
   const { setViewport, isReady, fitToCoordinates } = useMapEngine();
   const router = useRouter();
@@ -1152,6 +1158,7 @@ function MapSiteChrome({
               ) : null
             }
             belowCard={registrationCard}
+            afterCard={belowWriteUp}
           />
         </div>
 
