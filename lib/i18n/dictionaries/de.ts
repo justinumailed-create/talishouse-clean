@@ -1096,7 +1096,7 @@ export const de: Dictionary = {
       },
     },
     slots: {
-      title: "Beispiel-Mapsite öffnen",
+      title: "Kürzlich hinzugefügte Mapsites",
       empty: "Noch keine Mapsites vorbereitet",
       mine: "Meine FAST Codes",
       used: "{count} von {limit} Plätzen belegt",

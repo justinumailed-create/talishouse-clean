@@ -104,7 +104,36 @@ export function mapsiteHrefForSlot(accountType: string | null | undefined, fastC
 }
 
 /** One prepared Mapsite: FAST Code, town, province and its Mapsite path. */
-export type SlotEntry = { slotId: string; fastCode: string; town: string; province: string; href: string };
+export type SlotEntry = {
+  slotId: string;
+  fastCode: string;
+  town: string;
+  province: string;
+  href: string;
+  /** When the Mapsite was added (created / claimed), ISO timestamp. */
+  addedAt: string | null;
+};
+
+/** Newest Mapsite first; entries without a date go last. */
+export function sortSlotEntriesNewestFirst<T extends { addedAt: string | null }>(entries: T[]): T[] {
+  const time = (value: string | null) => {
+    const ms = value ? Date.parse(value) : NaN;
+    return Number.isFinite(ms) ? ms : -Infinity;
+  };
+  return [...entries].sort((a, b) => time(b.addedAt) - time(a.addedAt));
+}
+
+/** "Nov 4, 2026" (EN) / "4. Nov. 2026" (DE). UTC so server and browser agree. */
+export function formatSlotAddedDate(value: string | null | undefined, locale: string): string {
+  const ms = value ? Date.parse(value) : NaN;
+  if (!Number.isFinite(ms)) return "";
+  return new Intl.DateTimeFormat(locale === "de" ? "de-DE" : "en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(ms));
+}
 /** One associate's list on the public page. Deliberately carries no name or id. */
 export type PublicSlotList = { entries: SlotEntry[] };
 

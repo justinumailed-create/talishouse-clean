@@ -7,6 +7,8 @@ import {
   FAST_CODE_SLOT_LIMIT,
   SALES_ASSOCIATE_LOGINS,
   demoMapsiteSlotOpenHref,
+  formatSlotAddedDate,
+  sortSlotEntriesNewestFirst,
   mapsiteHrefForSlot,
   mapsiteProvinceFromAddress,
   mapsiteTownFromAddress,
@@ -70,7 +72,8 @@ describe("FAST Code slots on the Mapsites page (Ralf, Nov 3)", () => {
 
   it("shows Aisha's four buttons on prepared Mapsites, same links as /talisu/reg", () => {
     const page = read("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx");
-    expect(page).toContain("await isPreparedSlotMapsite(mapsite.id)");
+    expect(page).toContain("isPreparedSlotMapsite(mapsite.id)");
+    expect(page).toContain("url1_opens_broker_url: preparedSlotMapsite");
     expect(page).toContain("propose: talisuHref(TALISU_DISCUSS_PATH)");
     expect(page).toContain("claim: DEMO_MAPSITE_BUILD_PATH");
     expect(page).toContain("terms: PMC_PATHS.contract");
@@ -98,5 +101,29 @@ describe("North Shore Nature Centre TEB™ on the demo PIN", () => {
     expect(JSON.stringify(book)).toContain("/talisbooks/nsnc/pages/page-12.webp");
     expect(JSON.stringify(book)).toContain("North-Shore-Nature-Centre.pdf");
     expect(read("lib/talisbooks/viewer/load-book.ts")).toContain("createNsncViewerBook(locale)");
+  });
+});
+
+describe("Recently added Mapsites list (Nov 4)", () => {
+  it("names the list in EN and DE without a mark on Mapsite", () => {
+    expect(en.demo.slots.title).toBe("Recently added Mapsites");
+    expect(de.demo.slots.title).toBe("Kürzlich hinzugefügte Mapsites");
+  });
+
+  it("formats the added date for each locale", () => {
+    expect(formatSlotAddedDate("2026-11-04T00:15:30Z", "en")).toBe("Nov 4, 2026");
+    expect(formatSlotAddedDate("2026-11-04T00:15:30Z", "de")).toBe("4. Nov. 2026");
+    expect(formatSlotAddedDate(null, "en")).toBe("");
+    expect(formatSlotAddedDate("not a date", "de")).toBe("");
+  });
+
+  it("sorts newest first and puts undated entries last", () => {
+    const sorted = sortSlotEntriesNewestFirst([
+      { code: "a1", addedAt: "2026-11-01T00:00:00Z" },
+      { code: "b1", addedAt: null },
+      { code: "c1", addedAt: "2026-11-04T00:16:00Z" },
+      { code: "d1", addedAt: "2026-11-04T00:15:00Z" },
+    ]);
+    expect(sorted.map((e) => e.code)).toEqual(["c1", "d1", "a1", "b1"]);
   });
 });

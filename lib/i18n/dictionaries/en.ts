@@ -821,7 +821,7 @@ export const en = {
     },
     /** FAST Code slots panel beside the Mapsite card (one list per sales associate). */
     slots: {
-      title: "Open a sample Mapsite",
+      title: "Recently added Mapsites",
       empty: "No Mapsites prepared yet",
       mine: "My FAST Codes",
       used: "{count} of {limit} slots used",

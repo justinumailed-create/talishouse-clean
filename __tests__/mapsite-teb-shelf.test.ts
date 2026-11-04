@@ -73,7 +73,8 @@ describe("Mapsite pin resource buttons", () => {
       "utf8",
     );
     expect(popup).toContain("listingResourceHref(site.mls_url)");
-    expect(popup).toContain("resolvePublishedUrlButtonHref(site.fast_code, site.broker_url)");
+    expect(popup).toContain("resolvePublishedUrlButtonHref(site.fast_code, site.broker_url, {");
+    expect(popup).toContain("opensBrokerUrl: site.url1_opens_broker_url");
     expect(popup).not.toContain("listingResourceHref(site.broker_url)");
     expect(popup).toContain("listingResourceHref(site.mls_url)");
     expect(popup).not.toContain("listingSearchHref");

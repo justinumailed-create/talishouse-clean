@@ -9,6 +9,7 @@ import {
   mapsiteProvinceFromAddress,
   mapsiteTownFromAddress,
   normalizeSlotFastCode,
+  sortSlotEntriesNewestFirst,
   type FastCodeSlotsPanelData,
   type OwnSlotList,
   type PublicSlotList,
@@ -31,6 +32,7 @@ type MapsiteJoin = {
   property_title?: string | null;
   fast_code?: string | null;
   account_type?: string | null;
+  created_at?: string | null;
 };
 
 function one<T>(value: T | T[] | null | undefined): T | null {
@@ -47,10 +49,11 @@ function toEntry(slotId: unknown, m: MapsiteJoin | null): SlotEntry | null {
     town: mapsiteTownFromAddress(m?.property_address, m?.property_title),
     province: mapsiteProvinceFromAddress(m?.property_address),
     href: mapsiteHrefForSlot(m?.account_type, code),
+    addedAt: m?.created_at ?? null,
   };
 }
 
-const SLOT_SELECT = "id, agent_id, position, created_at, mapsites(fast_code, account_type, property_address, property_title)";
+const SLOT_SELECT = "id, agent_id, position, created_at, mapsites(fast_code, account_type, property_address, property_title, created_at)";
 
 /** Public groups: codes, towns and provinces only. The agent's name is never selected. */
 async function loadPublicLists(excludeAgentId: string | null): Promise<PublicSlotList[]> {
@@ -72,13 +75,15 @@ async function loadPublicLists(excludeAgentId: string | null): Promise<PublicSlo
 
   return ordered
     .map((agent) => ({
-      entries: (slots || [])
-        .filter((s) => s.agent_id === agent.id)
-        .slice(0, FAST_CODE_SLOT_LIMIT)
-        .flatMap((s) => {
-          const entry = toEntry(s.id, one(s.mapsites as MapsiteJoin | MapsiteJoin[] | null));
-          return entry ? [entry] : [];
-        }),
+      entries: sortSlotEntriesNewestFirst(
+        (slots || [])
+          .filter((s) => s.agent_id === agent.id)
+          .slice(0, FAST_CODE_SLOT_LIMIT)
+          .flatMap((s) => {
+            const entry = toEntry(s.id, one(s.mapsites as MapsiteJoin | MapsiteJoin[] | null));
+            return entry ? [entry] : [];
+          }),
+      ),
     }))
     .filter((list) => list.entries.length > 0);
 }
@@ -92,10 +97,12 @@ export async function loadSlotListForAgentId(agentId: string): Promise<OwnSlotLi
     .eq("agent_id", agentId)
     .order("position", { ascending: true })
     .order("created_at", { ascending: true });
-  const entries = (slots || []).flatMap((s) => {
-    const entry = toEntry(s.id, one(s.mapsites as MapsiteJoin | MapsiteJoin[] | null));
-    return entry ? [entry] : [];
-  });
+  const entries = sortSlotEntriesNewestFirst(
+    (slots || []).flatMap((s) => {
+      const entry = toEntry(s.id, one(s.mapsites as MapsiteJoin | MapsiteJoin[] | null));
+      return entry ? [entry] : [];
+    }),
+  );
   return { count: entries.length, limit: FAST_CODE_SLOT_LIMIT, entries };
 }
 

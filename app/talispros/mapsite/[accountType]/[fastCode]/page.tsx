@@ -60,6 +60,7 @@ import { TALISU_DISCUSS_PATH, talisuHref } from "@/lib/talisu/talisu-links";
 import { PMC_PATHS } from "@/lib/talispros/mapsite-contract";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { isPreparedSlotMapsite } from "@/lib/talispros/fast-code-slots-server";
+import { loadOwnTebViewerHref } from "@/lib/talisbooks/own-teb-href";
 
 export const dynamic = "force-dynamic";
 
@@ -248,10 +249,16 @@ export default async function ClaimedMapSiteByAccountTypePage({
     bookSlug: primarySlug,
     tebUrl: mapsite.teb_url,
   });
+  const [preparedSlotMapsite, tebOwnBookHref] = await Promise.all([
+    isPreparedSlotMapsite(mapsite.id),
+    loadOwnTebViewerHref(mapsite.fast_code || fastCode),
+  ]);
   const listingMapSite = withEbookListingMedia(
     {
       ...mapsite,
       fast_code: mapsite.fast_code || fastCode.toUpperCase(),
+      teb_own_book_href: tebOwnBookHref,
+      url1_opens_broker_url: preparedSlotMapsite,
     },
     listingImageUrls,
     { hideSecondInterior: paymentReceived },
@@ -282,7 +289,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
   // Mapsites a sales associate prepared (FAST Code slots on the Mapsites
   // page): Aisha's four buttons under the write-up, same links and entry-code
   // gate as /talisu/reg.
-  const belowWriteUp = (await isPreparedSlotMapsite(mapsite.id)) ? (
+  const belowWriteUp = preparedSlotMapsite ? (
     <div
       className="rounded-2xl bg-white/90 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-sm"
       data-testid="mapsite-register-actions"

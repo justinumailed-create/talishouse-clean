@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useState, useTransition } from "react";
-import { useT } from "@/lib/i18n/client";
+import { useLocale, useT } from "@/lib/i18n/client";
 import {
   addFastCodeSlotAction,
   removeFastCodeSlotAction,
 } from "@/app/talispros/demo-mapsite/slots-actions";
 import {
+  formatSlotAddedDate,
   slotPlaceLabel,
   type FastCodeSlotsPanelData,
   type OwnSlotList,
@@ -16,8 +17,9 @@ import {
 
 type SlotsCopy = ReturnType<typeof useT>["demo"]["slots"];
 
-/** FAST Code first, then "Town, PR". Opens the Mapsite with Aisha's four buttons. */
+/** FAST Code, "Town, PR", then the date it was added. Opens the Mapsite with Aisha's four buttons. */
 function CodeLink({ entry, testId }: { entry: SlotEntry; testId: string }) {
+  const added = formatSlotAddedDate(entry.addedAt, useLocale());
   return (
     <Link
       href={entry.href}
@@ -29,6 +31,15 @@ function CodeLink({ entry, testId }: { entry: SlotEntry; testId: string }) {
         {entry.fastCode}
       </span>
       <span className="min-w-0 truncate text-neutral-700">{slotPlaceLabel(entry.town, entry.province)}</span>
+      {added ? (
+        <time
+          dateTime={entry.addedAt ?? undefined}
+          className="ml-auto shrink-0 pl-2 text-[12px] tabular-nums text-neutral-500 sm:text-[13px]"
+          data-testid="fast-code-slot-added"
+        >
+          {added}
+        </time>
+      ) : null}
     </Link>
   );
 }

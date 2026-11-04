@@ -48,7 +48,9 @@ const RESOURCES: {
     variant: "blue",
     // Resolved in render: Register for visitors, multipin Dashboard for paid owners.
     resolveHref: (site) =>
-      resolvePublishedUrlButtonHref(site.fast_code, site.broker_url),
+      resolvePublishedUrlButtonHref(site.fast_code, site.broker_url, {
+        opensBrokerUrl: site.url1_opens_broker_url,
+      }),
   },
   {
     key: "mls",
@@ -65,6 +67,9 @@ const RESOURCES: {
       const code = site.fast_code?.trim();
       // Prefer FAST-code shelf unless admin set a fully custom absolute TEB URL.
       if (custom && /^https?:\/\//i.test(custom)) return custom;
+      // FAST Code with exactly one own eBook: open it directly in the viewer.
+      const ownBook = site.teb_own_book_href?.trim() || "";
+      if (ownBook.startsWith(`${ROUTES.TALISBOOKS_VIEWER}/`)) return ownBook;
       if (code) {
         return `${ROUTES.TALISBOOKS}/fast/${encodeURIComponent(code.toLowerCase())}`;
       }
@@ -362,7 +367,10 @@ export default function MapSitePropertyPopup({
                         ? resolvePublishedUrlButtonHref(
                             mapsite.fast_code,
                             mapsite.broker_url,
-                            { canBuyAdditionalPins },
+                            {
+                              canBuyAdditionalPins,
+                              opensBrokerUrl: mapsite.url1_opens_broker_url,
+                            },
                           )
                         : resource.resolveHref(mapsite);
                     return (

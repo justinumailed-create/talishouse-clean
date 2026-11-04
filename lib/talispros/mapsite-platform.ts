@@ -46,6 +46,10 @@ export type MapSitePlatformRecord = {
   pin_white_center?: boolean;
   pin_animated?: boolean;
   pin_category_badge?: string | null;
+  /** Server-resolved viewer link when the FAST Code has exactly one own eBook. */
+  teb_own_book_href?: string | null;
+  /** Prepared prospect Mapsite: URL 1 opens the brokerage website (broker_url). */
+  url1_opens_broker_url?: boolean;
 };
 
 export type MapSiteBuildRequestLocation = {

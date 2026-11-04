@@ -99,6 +99,11 @@ export type ResolvePublishedUrlButtonOptions = {
    * When true, the URL button opens the multipin Dashboard instead of Register.
    */
   canBuyAdditionalPins?: boolean;
+  /**
+   * Mapsite prepared by a sales associate for a prospect brokerage: URL 1
+   * opens the brokerage website stored in broker_url (absolute https only).
+   */
+  opensBrokerUrl?: boolean;
 };
 
 /**
@@ -122,6 +127,7 @@ export function resolvePublishedUrlButtonHref(
   if (override) return override;
   const demoUrl = _brokerUrl?.trim() || "";
   if (isDemoMapSiteCode(fastCode) && /^https:\/\//i.test(demoUrl)) return demoUrl;
+  if (options?.opensBrokerUrl && /^https:\/\//i.test(demoUrl)) return demoUrl;
   return MAPSITE_DEFAULT_REGISTER_URL;
 }
 
