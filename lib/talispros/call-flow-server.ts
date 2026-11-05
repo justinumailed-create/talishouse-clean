@@ -7,14 +7,15 @@ import { getAgentContractCode } from "@/lib/talispros/mapsite-contract-service";
 import { mapsiteHrefForSlot, mapsiteTownFromAddress } from "@/lib/talispros/fast-code-slots";
 import { loadOwnTebViewerHref } from "@/lib/talisbooks/own-teb-href";
 import {
-  CHECKPOINT_KEYS,
   activityStreak,
   canCommentOnFlow,
   canEditFlowLead,
+  CHECKPOINT_KEYS,
   checkpointOpenedBy,
   compareNextAction,
   countryFromProvince,
   earnedBadges,
+  externalBrokerageWebsite,
   firstNameOf,
   isCallStepKey,
   isCheckpointKey,
@@ -27,6 +28,7 @@ import {
   pointsForSteps,
   progressPercent,
   rankLeaderboard,
+  resolveBrokerageWebsite,
   stageForOutcome,
   type BadgeKey,
   type CallStepKey,
@@ -400,18 +402,56 @@ function fromLink(row: LeadLink): LeadFormState {
   });
 }
 
+type SiteSources = { queue: string | null; brokerUrl: string | null; mapsiteWebsite: string | null };
+
+async function brokerageSiteSources(code: string, mapsiteId: string | null): Promise<SiteSources> {
+  const mapQuery = mapsiteId
+    ? db().from("mapsites").select("broker_url, website").eq("id", mapsiteId).maybeSingle()
+    : db().from("mapsites").select("broker_url, website").ilike("fast_code", code).maybeSingle();
+  const [{ data: mapData }, { data: queued }] = await Promise.all([
+    mapQuery,
+    db().from("prospect_queue").select("website").ilike("proposed_code", code).order("created_at", { ascending: false }).limit(1).maybeSingle(),
+  ]);
+  const map = mapData as { broker_url?: string | null; website?: string | null } | null;
+  return {
+    queue: (queued as { website?: string | null } | null)?.website ?? null,
+    brokerUrl: map?.broker_url ?? null,
+    mapsiteWebsite: map?.website ?? null,
+  };
+}
+
+/** Replace an internal path with the brokerage site. A real http(s) site stays. */
+async function healLeadWebsite(linked: LeadLink, sources: SiteSources): Promise<LeadFormState> {
+  if (externalBrokerageWebsite(linked.brokerage_website)) return fromLink(linked);
+  const next = resolveBrokerageWebsite(null, sources.queue, sources.brokerUrl, sources.mapsiteWebsite);
+  const current = linked.brokerage_website || null;
+  if (current === next || (!current && !next)) return fromLink(linked);
+  const { error } = await db().from("brokerage_leads").update({ brokerage_website: next }).eq("id", linked.id);
+  if (error) return fromLink(linked);
+  await db().from("brokerage_lead_edits").insert({
+    lead_id: linked.id,
+    action: "update",
+    actor_agent_id: null,
+    actor_name: "system",
+    actor_role: "superadmin",
+    changes: { brokerage_website: { from: current, to: next } },
+  });
+  return fromLink({ ...linked, brokerage_website: next });
+}
+
 async function ensureLead(
   code: string,
   tracked: { agentId: string | null; mapsiteId: string | null; stage: FastCodeStage },
   actorName: string,
 ): Promise<LeadFormState> {
   const linked = (await leadLinks([code])).get(code);
-  if (linked) return fromLink(linked);
+  const sources = await brokerageSiteSources(code, tracked.mapsiteId);
+  if (linked) return healLeadWebsite(linked, sources);
 
   const { data: mapData } = tracked.mapsiteId
     ? await db()
         .from("mapsites")
-        .select("id, property_title, agent_name, property_address, email, phone, website, owner_first_name, owner_last_name, latitude, longitude")
+        .select("id, property_title, agent_name, property_address, email, phone, website, broker_url, owner_first_name, owner_last_name, latitude, longitude")
         .eq("id", tracked.mapsiteId)
         .maybeSingle()
     : { data: null };
@@ -422,6 +462,7 @@ async function ensureLead(
     email: string | null;
     phone: string | null;
     website: string | null;
+    broker_url: string | null;
     owner_first_name: string | null;
     owner_last_name: string | null;
     latitude: number | null;
@@ -459,7 +500,7 @@ async function ensureLead(
   const seed = blankLead({
     decisionMakerName: decision,
     brokerageName: brokerage,
-    brokerageWebsite: queue?.website || mapsite?.website || "",
+    brokerageWebsite: resolveBrokerageWebsite(null, queue?.website, mapsite?.broker_url, mapsite?.website) || "",
     brokerageAddress: address,
     officePhone: queue?.office_phone || mapsite?.phone || "",
     email: mapsite?.email || "",
@@ -649,7 +690,7 @@ export async function saveLeadDetails(
     cell_phone: input.cellPhone,
     email: input.email,
     brokerage_name: input.brokerageName,
-    brokerage_website: input.brokerageWebsite,
+    brokerage_website: resolveBrokerageWebsite(input.brokerageWebsite) || "",
     brokerage_address: input.brokerageAddress,
     office_phone: input.officePhone,
     country: input.country,

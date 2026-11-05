@@ -6,6 +6,8 @@ const GROUP_OF: Record<string, string> = {
   "/admin/notifications": "Overview",
   "/admin/agent": "Workspace",
   "/admin/agent/notes": "Workspace",
+  "/admin/agent/review": "Workspace",
+  "/admin/agent/leads": "Operations",
   "/chat": "Workspace",
   "/admin/build-requests": "Operations",
   "/admin/registrations": "Operations",

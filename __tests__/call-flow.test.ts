@@ -1,6 +1,8 @@
-import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+import type { AdminAccount } from "@/lib/admin-constants";
+import { adminChrome } from "@/lib/admin-chrome";
 import {
   activityStreak,
   canCommentOnFlow,
@@ -9,6 +11,7 @@ import {
   compareNextAction,
   countryFromProvince,
   earnedBadges,
+  externalBrokerageWebsite,
   flowAccess,
   isStepUnlocked,
   nextActionOf,
@@ -16,10 +19,37 @@ import {
   pointsForSteps,
   progressPercent,
   rankLeaderboard,
+  resolveBrokerageWebsite,
   type SavedStep,
 } from "@/lib/talispros/call-flow";
 import { buildStepViews } from "@/lib/talispros/call-flow-copy";
-import type { AdminAccount } from "@/lib/admin-constants";
+
+describe("admin console chrome", () => {
+  it("translates the agent and admin shell when the locale is German", () => {
+    const de = adminChrome("de");
+    const en = adminChrome("en");
+    expect(de.agentConsole).toBe("Agentenkonsole");
+    expect(de.adminConsole).toBe("Adminkonsole");
+    expect(de.logout).toBe("Abmelden");
+    expect(de.nav("/admin/agent", "My dashboard")).toBe("Mein Dashboard");
+    expect(de.nav("/admin/agent/notes", "Daily notes")).toBe("Tagesnotizen");
+    expect(de.nav("/admin/leads", "Leads")).toBe("Interessenten");
+    expect(de.nav("/admin/agent/review", "Review")).toBe("Prüfung");
+    expect(de.group("Workspace")).toBe("Arbeitsbereich");
+    expect(en.nav("/admin/mapsites", "Mapsites")).toBe("Mapsites");
+    expect(de.nav("/admin/mapsites", "Mapsites")).toBe("Mapsites");
+    expect(de.nav("/admin/seo", "SEO")).toBe("SEO");
+    const layout = readFileSync(resolve("components/admin/AdminLayoutClient.tsx"), "utf8");
+    expect(layout).toContain("useLocale");
+    expect(layout).toContain("adminChrome");
+    expect(layout).toContain("Tsplits™ home");
+    const tracker = readFileSync(resolve("components/admin/FastCodesTracker.tsx"), "utf8");
+    expect(tracker).toContain('data-testid="fast-codes-cards"');
+    expect(tracker).toContain("md:hidden");
+    expect(tracker).toContain("t.checkpoint");
+    expect(tracker.indexOf("fast-codes-cards")).toBeLessThan(tracker.indexOf("fast-codes-table"));
+  });
+});
 
 function saved(step: SavedStep["step"], outcome: SavedStep["outcome"] = "continue"): SavedStep {
   return { step, outcome, response: "They agreed.", at: "2026-11-05T04:30:00.000Z" };
@@ -145,6 +175,15 @@ describe("reviewer access", () => {
     expect(flowAccess(ralf)).toBe("admin");
     expect(canCommentOnFlow(flowAccess(ralf)!)).toBe(true);
     expect(agent.scopes).not.toContain("agents");
+  });
+
+  it("keeps a real brokerage site and rejects an internal Mapsite path", () => {
+    expect(externalBrokerageWebsite("/talispros/register-your-mapsite/ys01")).toBeNull();
+    expect(externalBrokerageWebsite("https://www.talispros.com/talispros/register-your-mapsite/ys01")).toBeNull();
+    const real = externalBrokerageWebsite("https://grassrootsrealtygroup.ca/location/canmore/");
+    expect(real).toMatch(/^https:\/\/grassrootsrealtygroup\.ca\//);
+    expect(resolveBrokerageWebsite("https://example-broker.ca", "/talispros/register-your-mapsite/ys01")).toMatch(/^https:\/\/example-broker\.ca\/?$/);
+    expect(resolveBrokerageWebsite("/talispros/register-your-mapsite/ys01", null, "https://grassrootsrealtygroup.ca/location/canmore/")).toMatch(/grassrootsrealtygroup\.ca/);
   });
 
   it("treats unknown provinces as Canada", () => {
