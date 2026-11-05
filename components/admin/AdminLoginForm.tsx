@@ -24,7 +24,7 @@ export default function AdminLoginForm({ notice = null }: { notice?: string | nu
     setLoading(true);
 
     try {
-      const result = await loginAdminWithFastCodeAction(normalizedCode);
+      const result = await loginAdminWithFastCodeAction(fastCode.trim());
       if (!result.ok) {
         setError(result.error);
         return;
@@ -68,12 +68,12 @@ export default function AdminLoginForm({ notice = null }: { notice?: string | nu
                 setFastCode(e.target.value);
                 setError("");
               }}
-              className={`w-full h-12 px-4 text-center font-mono uppercase tracking-[0.3em] border rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20 ${
+              className={`w-full h-12 px-4 text-center font-mono tracking-[0.3em] border rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20 ${
                 error ? "border-red-500" : "border-neutral-200"
               }`}
               placeholder="FAST CODE"
               autoCorrect="off"
-              autoCapitalize="characters"
+              autoCapitalize="none"
               autoFocus
             />
             {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}

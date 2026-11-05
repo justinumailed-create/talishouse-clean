@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { isRetiredAdminFastCode } from "./admin-retired-codes";
 import { cache } from "react";
 import { cookies } from "next/headers";
@@ -94,17 +95,33 @@ const resolveAdminSessionAccount = cache(async (): Promise<AdminAccount | null> 
 });
 
 /**
+ * Global Admin password: case-sensitive, checked against the bcrypt hash in the
+ * server-only env var GLOBAL_ADMIN_PASSWORD_HASH. No hash configured → no
+ * Global Admin login (the identity code itself no longer logs in).
+ */
+async function isGlobalAdminPassword(raw: string): Promise<boolean> {
+  const hash = process.env.GLOBAL_ADMIN_PASSWORD_HASH?.trim();
+  if (!hash || !raw) return false;
+  try {
+    return await bcrypt.compare(raw, hash);
+  } catch {
+    return false;
+  }
+}
+
+/**
  * FAST-code login: Global Admin or an active grant (agents use /agent/login).
  * After the code check, a server-side session is created and only its random
  * token goes into the cookie.
  */
 export async function writeAdminSessionCookie(fastCode: string): Promise<AdminAccount | null> {
-  const normalized = normalizeAdminFastCode(fastCode);
+  const raw = (fastCode || "").trim();
+  const normalized = normalizeAdminFastCode(raw);
   if (!normalized || isRetiredAdminFastCode(normalized)) return null;
 
   let account: AdminAccount | null = null;
   let token: string | null = null;
-  if (isGlobalAdminFastCode(normalized)) {
+  if (await isGlobalAdminPassword(raw)) {
     account = GLOBAL_ADMIN_ACCOUNT;
     token = await createAdminSession({ access: "global", grantId: null });
   } else {

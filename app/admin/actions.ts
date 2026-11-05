@@ -19,7 +19,7 @@ export async function loginAdminWithFastCodeAction(
     return { ok: false, error: "Enter your FAST code" };
   }
 
-  const account = await writeAdminSessionCookie(normalized);
+  const account = await writeAdminSessionCookie(code.trim());
   if (!account) {
     return { ok: false, error: "Invalid FAST code" };
   }

@@ -56,6 +56,10 @@ import {
 } from "../lib/admin-sessions";
 import { getAdminSessionAccount, writeAdminSessionCookie, clearAdminSessionCookie } from "../lib/admin-auth";
 import { ADMIN_SESSION_COOKIE, GLOBAL_ADMIN_FAST_CODE } from "../lib/admin-constants";
+import bcrypt from "bcryptjs";
+
+const TEST_GLOBAL_PASSWORD = "Test-Global-Pw1";
+process.env.GLOBAL_ADMIN_PASSWORD_HASH = bcrypt.hashSync(TEST_GLOBAL_PASSWORD, 4);
 
 const GRANT_ID = "11111111-2222-4333-8444-555555555555";
 const GRANT_CODE = "ZZ99";
@@ -73,11 +77,12 @@ const sessions = () => tables.admin_sessions ?? [];
 
 describe("server-side admin sessions", () => {
   it("login stores only a SHA-256 hash; the cookie holds a random 43-char token, never the FAST Code", async () => {
-    const account = await writeAdminSessionCookie(GLOBAL_ADMIN_FAST_CODE);
+    const account = await writeAdminSessionCookie(TEST_GLOBAL_PASSWORD);
     expect(account?.access).toBe("global");
     const token = jar.get(ADMIN_SESSION_COOKIE)!;
     expect(isAdminSessionTokenShape(token)).toBe(true);
     expect(token).not.toContain(GLOBAL_ADMIN_FAST_CODE);
+    expect(token).not.toContain(TEST_GLOBAL_PASSWORD);
     expect(sessions()).toHaveLength(1);
     const row = sessions()[0];
     expect(row.token_hash).toBe(hashAdminSessionToken(token));
@@ -103,7 +108,7 @@ describe("server-side admin sessions", () => {
   });
 
   it("rejects a random or forged token", async () => {
-    await writeAdminSessionCookie(GLOBAL_ADMIN_FAST_CODE);
+    await writeAdminSessionCookie(TEST_GLOBAL_PASSWORD);
     jar.set(ADMIN_SESSION_COOKIE, "x".repeat(43));
     expect(await getAdminSessionAccount()).toBeNull();
     jar.set(ADMIN_SESSION_COOKIE, "not a token");
@@ -114,7 +119,7 @@ describe("server-side admin sessions", () => {
   });
 
   it("rejects revoked, expired and idle (>90s) sessions", async () => {
-    await writeAdminSessionCookie(GLOBAL_ADMIN_FAST_CODE);
+    await writeAdminSessionCookie(TEST_GLOBAL_PASSWORD);
     const row = sessions()[0];
     row.revoked_at = new Date().toISOString();
     expect(await getAdminSessionAccount()).toBeNull();
@@ -142,7 +147,7 @@ describe("server-side admin sessions", () => {
   });
 
   it("refreshes last_seen_at on use", async () => {
-    await writeAdminSessionCookie(GLOBAL_ADMIN_FAST_CODE);
+    await writeAdminSessionCookie(TEST_GLOBAL_PASSWORD);
     const old = new Date(Date.now() - 30_000).toISOString();
     sessions()[0].last_seen_at = old;
     expect(await getAdminSessionAccount()).not.toBeNull();
@@ -150,14 +155,14 @@ describe("server-side admin sessions", () => {
   });
 
   it("logout revokes the row server-side; revoke-all keeps only the caller", async () => {
-    await writeAdminSessionCookie(GLOBAL_ADMIN_FAST_CODE);
+    await writeAdminSessionCookie(TEST_GLOBAL_PASSWORD);
     const first = jar.get(ADMIN_SESSION_COOKIE)!;
     await clearAdminSessionCookie();
     expect(sessions()[0].revoked_at).not.toBeNull();
     jar.set(ADMIN_SESSION_COOKIE, first);
     expect(await getAdminSessionAccount()).toBeNull();
 
-    await writeAdminSessionCookie(GLOBAL_ADMIN_FAST_CODE);
+    await writeAdminSessionCookie(TEST_GLOBAL_PASSWORD);
     const mine = jar.get(ADMIN_SESSION_COOKIE)!;
     await writeAdminSessionCookie(GRANT_CODE);
     jar.set(ADMIN_SESSION_COOKIE, mine);
@@ -224,5 +229,13 @@ describe("no secret in client code", () => {
     };
     scan(dir);
     expect(hits).toEqual([]);
+  });
+});
+
+describe("Global Admin password", () => {
+  it("is case-sensitive and the identity code alone no longer logs in", async () => {
+    expect(await writeAdminSessionCookie(TEST_GLOBAL_PASSWORD.toUpperCase())).toBeNull();
+    expect(await writeAdminSessionCookie(GLOBAL_ADMIN_FAST_CODE)).toBeNull();
+    expect((await writeAdminSessionCookie(TEST_GLOBAL_PASSWORD))?.access).toBe("global");
   });
 });
