@@ -10,6 +10,7 @@ import {
 } from "@/app/talispros/demo-mapsite/slots-actions";
 import {
   formatSlotAddedDate,
+  formatSlotAddedLabel,
   slotPlaceLabel,
   type FastCodeSlotsPanelData,
   type OwnSlotList,
@@ -26,14 +27,14 @@ function SlotMark({ entry }: { entry: SlotEntry }) {
       <span
         aria-hidden
         data-testid="fast-code-slot-initials"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#e8f1fc] text-[11px] font-semibold tracking-wide text-[#046BD9] ring-1 ring-[#046BD9]/15"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#e8f1fc] text-[10px] font-semibold tracking-wide text-[#046BD9] ring-1 ring-[#046BD9]/15"
       >
         {entry.initials}
       </span>
     );
   }
   return (
-    <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-black/10">
+    <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white ring-1 ring-black/10">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={entry.logoUrl}
@@ -46,24 +47,57 @@ function SlotMark({ entry }: { entry: SlotEntry }) {
   );
 }
 
+/**
+ * Absolute date on the server and the first client render, then Today /
+ * Yesterday from the viewer's local calendar after mount.
+ */
+function SlotAdded({ addedAt }: { addedAt: string | null }) {
+  const locale = useLocale();
+  const copy = useT().demo.slots;
+  const absolute = formatSlotAddedDate(addedAt, locale);
+  const [label, setLabel] = useState(absolute);
+  useEffect(() => {
+    setLabel(
+      formatSlotAddedLabel(addedAt, locale, new Date(), {
+        today: copy.addedToday,
+        yesterday: copy.addedYesterday,
+      }),
+    );
+  }, [addedAt, locale, absolute, copy.addedToday, copy.addedYesterday]);
+  if (!label) return null;
+  return (
+    <time
+      dateTime={addedAt ?? undefined}
+      className="ml-auto shrink-0 pl-2 text-[12px] tabular-nums text-neutral-500"
+      data-testid="fast-code-slot-added"
+      suppressHydrationWarning
+    >
+      {label}
+    </time>
+  );
+}
+
+/** One compact strip: logo, FAST Code, realty name, date. Town only when the rail is wide. */
 function SlotIdentity({ entry }: { entry: SlotEntry }) {
-  const added = formatSlotAddedDate(entry.addedAt, useLocale());
+  const place = slotPlaceLabel(entry.town, entry.province);
+  const showPlace = Boolean(place) && place !== entry.brokerage;
   return (
     <>
       <SlotMark entry={entry} />
-      <span className="shrink-0 font-mono text-[13px] font-semibold tracking-wide text-[#046BD9] group-hover:underline sm:text-[14px]">
+      <span className="shrink-0 font-mono text-[13px] font-semibold tracking-wide text-[#046BD9] group-hover:underline">
         {entry.fastCode}
       </span>
-      <span className="min-w-0 flex-1 truncate text-neutral-700">{slotPlaceLabel(entry.town, entry.province)}</span>
-      {added ? (
-        <time
-          dateTime={entry.addedAt ?? undefined}
-          className="ml-auto shrink-0 pl-2 text-[12px] tabular-nums text-neutral-500 sm:text-[13px]"
-          data-testid="fast-code-slot-added"
-        >
-          {added}
-        </time>
-      ) : null}
+      <span className="flex min-w-0 flex-1 items-baseline gap-2">
+        <span className="truncate text-[14px] font-medium text-neutral-950" data-testid="fast-code-slot-brokerage">
+          {entry.brokerage}
+        </span>
+        {showPlace ? (
+          <span className="hidden shrink-0 truncate text-[12px] text-neutral-500 lg:inline" data-testid="fast-code-slot-place">
+            {place}
+          </span>
+        ) : null}
+      </span>
+      <SlotAdded addedAt={entry.addedAt} />
     </>
   );
 }
@@ -74,7 +108,7 @@ function CodeLink({ entry, testId }: { entry: SlotEntry; testId: string }) {
     <Link
       href={entry.href}
       prefetch={false}
-      className="group flex min-w-0 flex-1 items-center gap-2.5 rounded-lg px-2 py-1.5 text-[14px] leading-snug transition hover:bg-[#046BD9]/[0.06] sm:text-[15px]"
+      className="group flex h-12 min-w-0 flex-1 items-center gap-2.5 border-b border-neutral-100 px-1 text-left transition hover:bg-[#046BD9]/[0.05]"
       data-testid={testId}
     >
       <SlotIdentity entry={entry} />
@@ -334,7 +368,7 @@ export default function FastCodeSlotsPanel({ data }: { data: FastCodeSlotsPanelD
                     onClick={() => setOpenCode((cur) => (cur === code ? null : code))}
                     aria-expanded={open}
                     aria-controls={open ? `gate-${entry.slotId}` : undefined}
-                    className={`group flex w-full min-w-0 items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-[14px] leading-snug transition hover:bg-[#046BD9]/[0.06] sm:text-[15px] ${
+                    className={`group flex h-12 w-full min-w-0 items-center gap-2.5 border-b border-neutral-100 px-1 text-left transition hover:bg-[#046BD9]/[0.05] ${
                       open ? "bg-[#046BD9]/[0.08]" : ""
                     }`}
                     data-testid="fast-code-slot-code"

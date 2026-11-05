@@ -848,6 +848,8 @@ export const en = {
       gateLimited: "Too many attempts. Please wait 15 minutes and try again.",
       gateRequired: "This Mapsite opens for agents only. Click its FAST Code and enter your agent password.",
       gateClose: "Close",
+      addedToday: "Today",
+      addedYesterday: "Yesterday",
     },
     /** Demo builder card (Ralf, Oct 26): numbered steps, one address box. */
     addressPlaceholder: "Start typing an address…",

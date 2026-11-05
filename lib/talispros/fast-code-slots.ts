@@ -119,27 +119,57 @@ export type SlotEntry = {
   logoUrl: string | null;
   /** Letters for the badge when `logoUrl` is missing. */
   initials: string;
+  /** Realty / brokerage shown on the strip. */
+  brokerage: string;
 };
 
 /** Platform stand-in logos are not a prospect's own mark. */
 const GENERIC_SLOT_LOGOS = new Set([
   "/logo.png",
   "/images/mapsites/header-fallback-logo.jpeg",
+  "/assets/windswept-tree-logo.png",
 ]);
 
-/** First usable logo. Generic fallbacks and non-URLs are skipped. */
+/**
+ * Non-realty marks that must never appear on a FAST Code strip.
+ * The plug image is stored data, not a code fallback: `mapsites.logo_url`
+ * for FAST Code PP03, copied from build request "Rahul's PIN" (requested
+ * code pp01) and `mapsite_assets.logo_image` for that request. The file
+ * name is the stored object, so a later copy of the same upload is caught too.
+ */
+const BLOCKED_SLOT_LOGO_MARKERS = [
+  "powermycode",
+  "power-my-code",
+  "logo-1783763252674",
+];
+
+function isBlockedSlotLogo(url: string): boolean {
+  const path = (url.split("?")[0]?.split("#")[0] || url).toLowerCase();
+  if (GENERIC_SLOT_LOGOS.has(path)) return true;
+  return BLOCKED_SLOT_LOGO_MARKERS.some((marker) => path.includes(marker));
+}
+
+/** First usable realty logo. Platform and non-realty marks are skipped. */
 export function pickSlotLogoUrl(candidates: Array<string | null | undefined>): string | null {
   for (const raw of candidates) {
     if (typeof raw !== "string") continue;
     const url = raw.trim();
-    if (!url) continue;
-    const path = url.split("?")[0]?.split("#")[0] || url;
-    if (GENERIC_SLOT_LOGOS.has(path)) continue;
+    if (!url || isBlockedSlotLogo(url)) continue;
     if (url.startsWith("/") || url.startsWith("data:image/") || /^https?:\/\//i.test(url)) {
       return url;
     }
   }
   return null;
+}
+
+const GENERIC_BROKERAGE = /^(mapsite|demo mapsite|demo-mapsite|home pin address|rahul's pin)$/i;
+
+/** Realty name for the strip. A generic title falls back to the town. */
+export function slotBrokerageName(title: string | null | undefined, town: string): string {
+  const named = (title || "").replace(/\s+/g, " ").trim();
+  if (named && !GENERIC_BROKERAGE.test(named)) return named;
+  const place = town.trim();
+  return place && place.toLowerCase() !== "mapsite" ? place : "";
 }
 
 /** Agency logo stored on a Talisbook™ (RM22 hydration or a top-level logo field). */
@@ -225,6 +255,42 @@ export function formatSlotAddedDate(value: string | null | undefined, locale: st
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(ms));
+}
+
+export type SlotAddedLabels = { today: string; yesterday: string };
+
+/**
+ * Today / Yesterday, and the absolute date for anything older, use the
+ * viewer's local calendar. A time later than `now` on today's local date
+ * is still Today. Pass `now` so tests do not depend on the clock.
+ * `formatSlotAddedDate` stays UTC for the first paint, which matches the server.
+ */
+export function formatSlotAddedLabel(
+  value: string | null | undefined,
+  locale: string,
+  now: Date,
+  labels: SlotAddedLabels = { today: "Today", yesterday: "Yesterday" },
+): string {
+  const ms = value ? Date.parse(value) : NaN;
+  if (!Number.isFinite(ms)) return "";
+  const created = new Date(ms);
+  if (sameLocalDay(created, now)) return labels.today;
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  if (sameLocalDay(created, yesterday)) return labels.yesterday;
+  return formatSlotAddedLocalDate(created, locale);
+}
+
+/** Absolute added date in the local timezone (no clock time). */
+function formatSlotAddedLocalDate(created: Date, locale: string): string {
+  return new Intl.DateTimeFormat(locale === "de" ? "de-DE" : "en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(created);
+}
+
+function sameLocalDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 /** One associate's list on the public page. Deliberately carries no name or id. */
 export type PublicSlotList = { entries: SlotEntry[] };
