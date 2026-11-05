@@ -8,12 +8,11 @@ import {
   writeAgentSessionCookie,
 } from "@/lib/admin-auth";
 import { changeOwnAgentPassword, loginAgent } from "@/lib/agent-admins";
-import { getChatOnLogin } from "@/lib/chat/server";
 import { agentChangePasswordPath, safeAgentReturnPath } from "@/lib/agent-return-path";
 
-/** Agents land in chat after sign-in unless they turned that off. */
-async function agentHomePath(agentId: string): Promise<string> {
-  return (await getChatOnLogin(agentId).catch(() => false)) ? "/chat" : "/admin/agent";
+/** Agents land on the dashboard. Chat stays a button on that page. */
+function agentHomePath(): string {
+  return "/admin/agent";
 }
 
 type Result = { ok: true; next: string } | { ok: false; error: string };
@@ -54,7 +53,7 @@ export async function agentLoginAction(
   if (result.agent.mustChangePassword) {
     return { ok: true, next: agentChangePasswordPath(safeReturn) };
   }
-  return { ok: true, next: safeReturn ?? (await agentHomePath(result.agent.id)) };
+  return { ok: true, next: safeReturn ?? agentHomePath() };
 }
 
 export async function agentChangePasswordAction(
@@ -79,7 +78,7 @@ export async function agentChangePasswordAction(
     return { ok: false, error: "Could not update your password. Please try again." };
   }
   if (!result.ok) return result;
-  return { ok: true, next: safeAgentReturnPath(returnTo) ?? (await agentHomePath(account.agentId)) };
+  return { ok: true, next: safeAgentReturnPath(returnTo) ?? agentHomePath() };
 }
 
 export async function agentLogoutAction(): Promise<void> {

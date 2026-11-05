@@ -56,7 +56,9 @@ export function getAgentNavItems(scopes: readonly string[] | null | undefined): 
 export function getAdminNavItems(account: AdminAccount | null | undefined): AdminNavItem[] {
   if (!account) return [];
   if (account.access === "agent") {
-    return getAgentNavItems(account.scopes);
+    const items = getAgentNavItems(account.scopes);
+    if (account.reviewer) items.splice(1, 0, { href: "/admin/agent/review", label: "Review" });
+    return items;
   }
   const items: AdminNavItem[] = ADMIN_SCOPED_NAV.filter((item) =>
     accountHasAdminScope(account, item.scope),

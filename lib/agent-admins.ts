@@ -45,6 +45,7 @@ export interface AgentAdminRecord {
   updatedBy: string | null;
   createdAt: string;
   updatedAt: string;
+  reviewer: boolean;
 }
 
 export interface AgentAuditEntry {
@@ -82,13 +83,14 @@ type AgentRow = {
   updated_by: string | null;
   created_at: string;
   updated_at: string;
+  reviewer?: boolean | null;
 };
 
 export const AGENT_TABLE = "agent_admins";
 const SESSION_TABLE = "agent_admin_sessions";
 /** Columns safe to load (no password_hash). hasPassword is derived separately. */
 const AGENT_PUBLIC_COLUMNS =
-  "id, name, email, phone, login_id, must_change_password, failed_login_attempts, locked_until, last_login_at, password_changed_at, status, privileges, assigned_mapsites, regions, page_headline, page_subtext, page_cta, page_bio, video_url, show_contact_form, notes, created_by, updated_by, created_at, updated_at, has_password:password_hash";
+  "id, name, email, phone, login_id, must_change_password, failed_login_attempts, locked_until, last_login_at, password_changed_at, status, privileges, assigned_mapsites, regions, page_headline, page_subtext, page_cta, page_bio, video_url, show_contact_form, notes, created_by, updated_by, created_at, updated_at, reviewer, has_password:password_hash";
 const AUDIT_TABLE_NAME = "agent_admins";
 
 function db(): SupabaseClient {
@@ -125,6 +127,7 @@ function toRecord(row: AgentRow): AgentAdminRecord {
     updatedBy: row.updated_by,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    reviewer: row.reviewer === true,
   };
 }
 
@@ -141,6 +144,7 @@ export function agentToAdminAccount(agent: AgentAdminRecord): AdminAccount {
     assignedMapSites: agent.assignedMapSites,
     loginId: agent.loginId,
     mustChangePassword: agent.mustChangePassword,
+    reviewer: agent.reviewer,
   };
 }
 

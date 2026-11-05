@@ -81,7 +81,6 @@ export default function ChatApp({ viewer, conversationId, initialItems = null, i
   const [hits, setHits] = useState<SearchHit[] | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [chatOnLogin, setChatOnLogin] = useState(viewer.chatOnLogin);
   const [, setTick] = useState(0);
 
   // iOS: size the app to the visual viewport so the composer rides above the keyboard.
@@ -134,13 +133,6 @@ export default function ChatApp({ viewer, conversationId, initialItems = null, i
     if (r.ok && r.value) router.push(`/chat/${r.value}`);
   }
 
-  async function toggleChatOnLogin() {
-    const next = !chatOnLogin;
-    setChatOnLogin(next);
-    const r = await api({ op: "prefs", chatOnLogin: next });
-    if (!r.ok) setChatOnLogin(!next);
-  }
-
   const totalUnread = (items ?? []).reduce((a, i) => a + i.unread, 0);
   const recent = (items ?? []).filter((i) => i.conversationId && (i.lastAt || i.kind === "updates"));
   const people = (items ?? []).filter((i) => !(i.conversationId && (i.lastAt || i.kind === "updates")));
@@ -161,12 +153,6 @@ export default function ChatApp({ viewer, conversationId, initialItems = null, i
             <button type="button" onClick={() => setMenuOpen((v) => !v)} className="rounded-full p-2 text-[#475569] hover:bg-[#f1f5f9]" aria-label="Menu"><IconMenu /></button>
             {menuOpen ? (
               <div className="absolute right-0 top-11 z-30 w-64 rounded-2xl border border-[#e5e9f0] bg-white p-2 text-[14px] shadow-xl">
-                {chatOnLogin !== null ? (
-                  <button type="button" onClick={toggleChatOnLogin} className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left hover:bg-[#f8fafc]">
-                    <span>Open chat on login</span>
-                    <span className={`relative h-5 w-9 rounded-full transition ${chatOnLogin ? "bg-[#1E4ED8]" : "bg-[#cbd5e1]"}`}><span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${chatOnLogin ? "left-[18px]" : "left-0.5"}`} /></span>
-                  </button>
-                ) : null}
                 <Link href={viewer.dashboardHref} className="block rounded-xl px-3 py-2.5 hover:bg-[#f8fafc]">Go to dashboard</Link>
                 <div className="px-3 py-2 text-[12px] leading-snug text-[#64748b]">Tip: use “Add to Home Screen” in your browser to install Chat as an app.</div>
               </div>

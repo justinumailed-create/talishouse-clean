@@ -4,7 +4,6 @@ import { getAdminSessionAccount } from "@/lib/admin-auth";
 import AgentAuthShell from "../AgentAuthShell";
 import { AgentLoginForm } from "../AgentAuthForm";
 import { pageMetadata } from "@/lib/seo/page-metadata";
-import { getChatOnLogin } from "@/lib/chat/server";
 import { agentChangePasswordPath, agentReturnFromSearchParams } from "@/lib/agent-return-path";
 
 export async function generateMetadata() {
@@ -24,7 +23,7 @@ export default async function AgentLoginPage({
   if (account?.access === "agent") {
     if (account.mustChangePassword) redirect(agentChangePasswordPath(returnTo));
     if (returnTo) redirect(returnTo);
-    redirect(account.agentId && (await getChatOnLogin(account.agentId)) ? "/chat" : "/admin/agent");
+    redirect("/admin/agent");
   }
 
   return (
