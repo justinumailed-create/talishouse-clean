@@ -256,6 +256,42 @@ export function formatSlotAddedDate(value: string | null | undefined, locale: st
     timeZone: "UTC",
   }).format(new Date(ms));
 }
+
+export type SlotAddedLabels = { today: string; yesterday: string };
+
+/**
+ * Today / Yesterday, and the absolute date for anything older, use the
+ * viewer's local calendar. A time later than `now` on today's local date
+ * is still Today. Pass `now` so tests do not depend on the clock.
+ * `formatSlotAddedDate` stays UTC for the first paint, which matches the server.
+ */
+export function formatSlotAddedLabel(
+  value: string | null | undefined,
+  locale: string,
+  now: Date,
+  labels: SlotAddedLabels = { today: "Today", yesterday: "Yesterday" },
+): string {
+  const ms = value ? Date.parse(value) : NaN;
+  if (!Number.isFinite(ms)) return "";
+  const created = new Date(ms);
+  if (sameLocalDay(created, now)) return labels.today;
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  if (sameLocalDay(created, yesterday)) return labels.yesterday;
+  return formatSlotAddedLocalDate(created, locale);
+}
+
+/** Absolute added date in the local timezone (no clock time). */
+function formatSlotAddedLocalDate(created: Date, locale: string): string {
+  return new Intl.DateTimeFormat(locale === "de" ? "de-DE" : "en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(created);
+}
+
+function sameLocalDay(a: Date, b: Date): boolean {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
 /** One associate's list on the public page. Deliberately carries no name or id. */
 export type PublicSlotList = { entries: SlotEntry[] };
 

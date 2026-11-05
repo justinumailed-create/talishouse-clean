@@ -1121,6 +1121,8 @@ export const de: Dictionary = {
       gateLimited: "Zu viele Versuche. Bitte warten Sie 15 Minuten und versuchen Sie es erneut.",
       gateRequired: "Diese Mapsite öffnet sich nur für Agenten. Klicken Sie auf ihren FAST Code und geben Sie Ihr Agenten-Passwort ein.",
       gateClose: "Schließen",
+      addedToday: "Heute",
+      addedYesterday: "Gestern",
     },
     addressPlaceholder: "Adresse eingeben …",
     addressLookupUnavailable: "Adresssuche nicht verfügbar. Geben Sie die vollständige Adresse ein und drücken Sie Enter.",

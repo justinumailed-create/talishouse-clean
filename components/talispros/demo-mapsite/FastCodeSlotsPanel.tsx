@@ -10,6 +10,7 @@ import {
 } from "@/app/talispros/demo-mapsite/slots-actions";
 import {
   formatSlotAddedDate,
+  formatSlotAddedLabel,
   slotPlaceLabel,
   type FastCodeSlotsPanelData,
   type OwnSlotList,
@@ -46,9 +47,38 @@ function SlotMark({ entry }: { entry: SlotEntry }) {
   );
 }
 
+/**
+ * Absolute date on the server and the first client render, then Today /
+ * Yesterday from the viewer's local calendar after mount.
+ */
+function SlotAdded({ addedAt }: { addedAt: string | null }) {
+  const locale = useLocale();
+  const copy = useT().demo.slots;
+  const absolute = formatSlotAddedDate(addedAt, locale);
+  const [label, setLabel] = useState(absolute);
+  useEffect(() => {
+    setLabel(
+      formatSlotAddedLabel(addedAt, locale, new Date(), {
+        today: copy.addedToday,
+        yesterday: copy.addedYesterday,
+      }),
+    );
+  }, [addedAt, locale, absolute, copy.addedToday, copy.addedYesterday]);
+  if (!label) return null;
+  return (
+    <time
+      dateTime={addedAt ?? undefined}
+      className="ml-auto shrink-0 pl-2 text-[12px] tabular-nums text-neutral-500"
+      data-testid="fast-code-slot-added"
+      suppressHydrationWarning
+    >
+      {label}
+    </time>
+  );
+}
+
 /** One compact strip: logo, FAST Code, realty name, date. Town only when the rail is wide. */
 function SlotIdentity({ entry }: { entry: SlotEntry }) {
-  const added = formatSlotAddedDate(entry.addedAt, useLocale());
   const place = slotPlaceLabel(entry.town, entry.province);
   const showPlace = Boolean(place) && place !== entry.brokerage;
   return (
@@ -67,15 +97,7 @@ function SlotIdentity({ entry }: { entry: SlotEntry }) {
           </span>
         ) : null}
       </span>
-      {added ? (
-        <time
-          dateTime={entry.addedAt ?? undefined}
-          className="ml-auto shrink-0 pl-2 text-[12px] tabular-nums text-neutral-500"
-          data-testid="fast-code-slot-added"
-        >
-          {added}
-        </time>
-      ) : null}
+      <SlotAdded addedAt={entry.addedAt} />
     </>
   );
 }

@@ -8,6 +8,7 @@ import {
   SALES_ASSOCIATE_LOGINS,
   demoMapsiteSlotOpenHref,
   formatSlotAddedDate,
+  formatSlotAddedLabel,
   sortSlotEntriesNewestFirst,
   mapsiteHrefForSlot,
   mapsiteProvinceFromAddress,
@@ -121,6 +122,30 @@ describe("Recently added Mapsites list (Nov 4)", () => {
     expect(formatSlotAddedDate("2026-11-04T00:15:30Z", "de")).toBe("4. Nov. 2026");
     expect(formatSlotAddedDate(null, "en")).toBe("");
     expect(formatSlotAddedDate("not a date", "de")).toBe("");
+  });
+
+  it("labels today and yesterday in the viewer's local calendar", () => {
+    const now = new Date(2026, 10, 6, 15, 30, 0);
+    const today = new Date(2026, 10, 6, 0, 5, 0).toISOString();
+    const laterToday = new Date(2026, 10, 6, 23, 10, 0).toISOString();
+    const yesterday = new Date(2026, 10, 5, 23, 59, 0).toISOString();
+    const older = new Date(2026, 10, 4, 12, 0, 0).toISOString();
+    const deLabels = { today: "Heute", yesterday: "Gestern" };
+    expect(formatSlotAddedLabel(today, "en", now)).toBe("Today");
+    expect(formatSlotAddedLabel(laterToday, "en", now)).toBe("Today");
+    expect(formatSlotAddedLabel(yesterday, "en", now)).toBe("Yesterday");
+    expect(formatSlotAddedLabel(older, "en", now)).toBe("Nov 4, 2026");
+    expect(formatSlotAddedLabel(today, "de", now, deLabels)).toBe("Heute");
+    expect(formatSlotAddedLabel(laterToday, "de", now, deLabels)).toBe("Heute");
+    expect(formatSlotAddedLabel(yesterday, "de", now, deLabels)).toBe("Gestern");
+    expect(formatSlotAddedLabel(older, "de", now, deLabels)).toBe("4. Nov. 2026");
+    expect(formatSlotAddedLabel(null, "en", now)).toBe("");
+    expect(formatSlotAddedLabel("not a date", "de", now, deLabels)).toBe("");
+    const panel = read("components/talispros/demo-mapsite/FastCodeSlotsPanel.tsx");
+    expect(panel).toContain("formatSlotAddedLabel");
+    expect(panel).toContain("suppressHydrationWarning");
+    expect(panel).toContain("copy.addedToday");
+    expect(panel).toContain("copy.addedYesterday");
   });
 
   it("sorts newest first and puts undated entries last", () => {
