@@ -4,17 +4,21 @@ import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin
 import { SALES_ASSOCIATE_LOGINS } from "@/lib/talispros/fast-code-slots";
 import { RESERVED_FAST_CODES, pickLeastLoaded, proposeFastCode } from "@/lib/talispros/fast-code-tracker";
 import { recordFastCodeUpdate } from "@/lib/talispros/fast-code-tracker-server";
+import { ANCHOR_TOWNS, googleCustomSearch, googlePlacesKey, searchMarket } from "@/lib/talispros/google-sourcing";
+import { websiteHost } from "@/lib/talispros/prospect-markets";
 
 /**
  * Daily FAST Code job (Vercel cron 00:30 UTC = 06:00 IST, plus "Run now").
- *  1. Refresh: re-check each tracked code's REALTOR.ca office listings (same
- *     PropertySearch call as the eBook build) and its brokerage website; log
- *     new/removed listings and flag the eBook for a refresh.
+ *  1. Refresh: re-read each tracked brokerage's own website (MLS® numbers it
+ *     shows) and log new/removed listings + flag the eBook. Google only:
+ *     no REALTOR.ca requests.
+ *  1b. Sourcing: Google Places Text Search in the next anchor-town markets
+ *     (Ralf's parameters, lib/talispros/prospect-markets.ts) → review queue.
  *  2. Assign: approved sourcing-queue prospects get an initials FAST Code that
  *     collides with nothing (codes, Mapsites, build requests, reserved) and go
  *     to the less-loaded sales associate.
- * Sourcing itself stays human: researched brokerages enter the review queue
- * with a source link and need admin approval; nothing is invented here.
+ * Every candidate needs admin approval; fields Google does not give
+ * (decision maker, position, cell, email) stay blank ("to research").
  */
 
 function db(): SupabaseClient {
@@ -35,65 +39,178 @@ async function fetchWithTimeout(url: string, init: RequestInit = {}, ms = 10000)
   }
 }
 
-/** REALTOR.ca firm id from a stored office URL (…/office/firm/<id>/…). */
-export function realtorFirmId(mlsUrl: string | null | undefined): string | null {
-  const m = mlsUrl?.match(/\/office\/firm\/(\d+)/);
-  return m?.[1] ?? null;
+/** MLS® numbers mentioned on a page (e.g. "MLS® #202412345", "MLS: E1234567"). */
+export function extractMlsNumbers(html: string): string[] {
+  const text = html.replace(/<[^>]+>/g, " ").replace(/&reg;|®/g, "®").replace(/&nbsp;|\s+/g, " ");
+  const out = new Set<string>();
+  const re = /MLS®?\s*(?:#|No\.?|number|Num\.?)?\s*:?\s*#?\s*([A-Z]{0,2}\d{6,9})\b/gi;
+  for (const m of text.matchAll(re)) out.add(m[1]!.toUpperCase());
+  return [...out];
 }
 
-type Listing = { mls: string; address: string; price: string | null };
+async function fetchText(url: string): Promise<{ status: number; html: string }> {
+  const res = await fetchWithTimeout(url, { headers: { "user-agent": UA, accept: "text/html" } }, 8000);
+  if (!res) return { status: 0, html: "" };
+  const html = res.ok ? (await res.text().catch(() => "")).slice(0, 1_500_000) : "";
+  return { status: res.status, html };
+}
 
-/** Same query as /workspace build (rca_api): active residential sale listings for an office. */
-async function fetchOfficeListings(firmId: string): Promise<{ ok: true; listings: Listing[] } | { ok: false; status: string }> {
-  const listings: Listing[] = [];
-  for (let page = 1; page <= 4; page++) {
-    const body = new URLSearchParams({
-      OrganizationId: firmId,
-      ApplicationId: "1",
-      CultureId: "1",
-      Version: "7.0",
-      RecordsPerPage: "50",
-      CurrentPage: String(page),
-      PropertySearchTypeId: "0",
-      TransactionTypeId: "2",
-      Sort: "6-D",
-      PropertyTypeGroupID: "1",
-      LatitudeMax: "90",
-      LatitudeMin: "-90",
-      LongitudeMax: "180",
-      LongitudeMin: "-180",
-      ZoomLevel: "3",
-    });
-    const res = await fetchWithTimeout("https://api2.realtor.ca/Listing.svc/PropertySearch_Post", {
-      method: "POST",
-      body,
-      headers: { "content-type": "application/x-www-form-urlencoded; charset=UTF-8", "user-agent": UA },
-    });
-    if (!res) return { ok: false, status: "timeout" };
-    if (!res.ok) return { ok: false, status: `http ${res.status}` };
-    let json: { Results?: Record<string, unknown>[]; Paging?: { TotalPages?: number } };
-    try {
-      json = await res.json();
-    } catch {
-      return { ok: false, status: "blocked" };
-    }
-    for (const r of json.Results ?? []) {
-      const prop = (r.Property ?? {}) as { Address?: { AddressText?: string }; Price?: string };
-      listings.push({
-        mls: String(r.MlsNumber ?? ""),
-        address: (prop.Address?.AddressText ?? "").replace(/\|/g, ", "),
-        price: prop.Price ?? null,
-      });
-    }
-    if (!json.Paging || page >= (json.Paging.TotalPages ?? 1)) break;
+/** Brokerage's own website: homepage plus up to 3 same-site listing pages it links to. */
+async function scanBrokerageSite(url: string): Promise<{ status: number; ids: string[]; pages: number }> {
+  const home = await fetchText(url);
+  if (!home.html) return { status: home.status, ids: [], pages: 0 };
+  const ids = new Set(extractMlsNumbers(home.html));
+  let host: string;
+  try {
+    host = new URL(url).host;
+  } catch {
+    return { status: home.status, ids: [...ids], pages: 1 };
   }
-  return { ok: true, listings: listings.filter((l) => l.mls) };
+  const links = new Set<string>();
+  for (const m of home.html.matchAll(/href=["']([^"'#]+)["']/gi)) {
+    if (!/listing|propert|inscription|for-sale|a-vendre/i.test(m[1]!)) continue;
+    try {
+      const u = new URL(m[1]!, url);
+      if (u.host === host) links.add(u.toString());
+    } catch {
+      /* ignore */
+    }
+    if (links.size >= 3) break;
+  }
+  let pages = 1;
+  for (const link of links) {
+    const page = await fetchText(link);
+    if (page.html) {
+      pages++;
+      for (const id of extractMlsNumbers(page.html)) ids.add(id);
+    }
+  }
+  return { status: home.status, ids: [...ids], pages };
+}
+
+/** Optional: Google Programmable Search count of MLS® pages on the brokerage domain. */
+async function customSearchCount(host: string): Promise<number | null> {
+  const cse = googleCustomSearch();
+  if (!cse) return null;
+  const q = encodeURIComponent(`site:${host} MLS`);
+  const res = await fetchWithTimeout(`https://www.googleapis.com/customsearch/v1?key=${encodeURIComponent(cse.key)}&cx=${encodeURIComponent(cse.cx)}&q=${q}`);
+  if (!res?.ok) return null;
+  const json = (await res.json().catch(() => ({}))) as { searchInformation?: { totalResults?: string } };
+  const n = Number(json.searchInformation?.totalResults);
+  return Number.isFinite(n) ? n : null;
+}
+
+export const MARKETS_PER_RUN = 3;
+
+export interface SourcingSummary {
+  markets: { market: string; found: number; added: number; duplicates: number; error?: string }[];
+  added: number;
+  duplicates: number;
+  franchisesSkipped: number;
+  errors: string[];
+  keyEnv: string | null;
+  customSearch: boolean;
+  nextMarketIndex?: number;
+}
+
+/** Next markets in east→west order, continuing from the last run. */
+async function sourceFromGoogle(s: SourcingSummary): Promise<void> {
+  const key = googlePlacesKey();
+  s.keyEnv = key?.envName ?? null;
+  s.customSearch = Boolean(googleCustomSearch());
+  if (!key) {
+    s.errors.push("No Google Places key on the server");
+    return;
+  }
+  const { data: last } = await db()
+    .from("fast_code_job_runs")
+    .select("summary")
+    .not("finished_at", "is", null)
+    .order("started_at", { ascending: false })
+    .limit(20);
+  let start = 0;
+  for (const r of (last ?? []) as { summary: { sourcing?: SourcingSummary } | null }[]) {
+    const n = r.summary?.sourcing?.nextMarketIndex;
+    if (typeof n === "number") {
+      start = n;
+      break;
+    }
+  }
+  const [{ data: q }, { data: maps }] = await Promise.all([
+    db().from("prospect_queue").select("google_place_id, website"),
+    db().from("mapsites").select("broker_url"),
+  ]);
+  const places = new Set<string>();
+  const hosts = new Set<string>();
+  for (const r of (q ?? []) as { google_place_id: string | null; website: string | null }[]) {
+    if (r.google_place_id) places.add(r.google_place_id);
+    const h = websiteHost(r.website);
+    if (h) hosts.add(h);
+  }
+  for (const r of (maps ?? []) as { broker_url: string | null }[]) {
+    const h = websiteHost(r.broker_url);
+    if (h) hosts.add(h);
+  }
+  let i = start % ANCHOR_TOWNS.length;
+  for (let n = 0; n < MARKETS_PER_RUN; n++, i = (i + 1) % ANCHOR_TOWNS.length) {
+    const town = ANCHOR_TOWNS[i]!;
+    const res = await searchMarket(town);
+    s.franchisesSkipped += res.skippedFranchise;
+    const row = { market: res.market, found: res.candidates.length, added: 0, duplicates: 0, error: res.error };
+    if (res.error) s.errors.push(`${res.market}: ${res.error}`);
+    for (const c of res.candidates) {
+      const host = websiteHost(c.website);
+      if (places.has(c.placeId) || (host && hosts.has(host))) {
+        row.duplicates++;
+        continue;
+      }
+      const { error } = await db().from("prospect_queue").insert({
+        brokerage: c.name,
+        contact_name: null,
+        office_address: c.address,
+        town: town.town,
+        province: town.province,
+        website: c.website,
+        office_phone: c.phone,
+        source_url: c.mapsUri,
+        google_place_id: c.placeId,
+        market: res.market,
+        market_rank: c.rank,
+        rating: c.rating,
+        rating_count: c.ratingCount,
+        latitude: c.lat,
+        longitude: c.lng,
+        sourced_by: "google-places",
+        research_notes: `Google Places: ${c.rating ?? "–"}★ (${c.ratingCount ?? 0} reviews). Decision maker, position, cell and email: to research.`,
+        status: "pending",
+      });
+      if (error) {
+        if (/duplicate/i.test(error.message)) row.duplicates++;
+        else s.errors.push(`${c.name}: ${error.message}`);
+        continue;
+      }
+      places.add(c.placeId);
+      if (host) hosts.add(host);
+      row.added++;
+    }
+    s.added += row.added;
+    s.duplicates += row.duplicates;
+    s.markets.push(row);
+    if (res.error && /40[13]|PERMISSION|API_KEY|REQUEST_DENIED/i.test(res.error)) {
+      // Access problem: retry the same market next time.
+      i = (i + 1) % ANCHOR_TOWNS.length;
+      s.nextMarketIndex = start % ANCHOR_TOWNS.length;
+      return;
+    }
+  }
+  s.nextMarketIndex = i;
 }
 
 export interface DailyJobSummary {
   refreshed: number;
   listingChanges: number;
-  listingSourceUnavailable: number;
+  websitesScanned: number;
+  sourcing: SourcingSummary;
   brokerSitesDown: string[];
   assigned: { code: string; agent: string; brokerage: string }[];
   pendingReview: number;
@@ -103,41 +220,39 @@ export interface DailyJobSummary {
 async function refreshCodes(summary: DailyJobSummary): Promise<void> {
   const { data } = await db()
     .from("fast_code_status")
-    .select("fast_code, mapsite_id, agent_id, listings_snapshot, mapsites(mls_url, broker_url)");
+    .select("fast_code, mapsite_id, agent_id, website_listing_ids, mapsites(broker_url)");
   const rows = (data ?? []) as {
     fast_code: string;
     mapsite_id: string | null;
     agent_id: string | null;
-    listings_snapshot: Listing[] | null;
-    mapsites: { mls_url: string | null; broker_url: string | null } | { mls_url: string | null; broker_url: string | null }[] | null;
+    website_listing_ids: string[] | null;
+    mapsites: { broker_url: string | null } | { broker_url: string | null }[] | null;
   }[];
   for (const row of rows) {
     const m = Array.isArray(row.mapsites) ? row.mapsites[0] : row.mapsites;
     const now = new Date().toISOString();
     const update: Record<string, unknown> = { last_refreshed_at: now };
     const details: Record<string, unknown> = {};
-    // Brokerage website.
+    // Brokerage's own website (Google-listed site; no REALTOR.ca).
     if (m?.broker_url && /^https?:\/\//i.test(m.broker_url)) {
-      const res = await fetchWithTimeout(m.broker_url, { headers: { "user-agent": UA } }, 8000);
-      const status = res?.status ?? 0;
-      update.broker_site_status = status;
-      details.brokerSite = status;
-      if (!status || status >= 400) summary.brokerSitesDown.push(row.fast_code.toUpperCase());
-    }
-    // Office listings.
-    const firm = realtorFirmId(m?.mls_url);
-    if (firm) {
-      const result = await fetchOfficeListings(firm);
-      if (result.ok) {
-        const before = row.listings_snapshot;
-        const prev = new Set((before ?? []).map((l) => l.mls));
-        const next = new Set(result.listings.map((l) => l.mls));
-        const added = result.listings.filter((l) => !prev.has(l.mls));
-        const removed = (before ?? []).filter((l) => !next.has(l.mls));
-        update.listings_snapshot = result.listings;
-        update.listings_count = result.listings.length;
-        update.listings_source_status = "ok";
-        details.listings = result.listings.length;
+      const scan = await scanBrokerageSite(m.broker_url);
+      update.broker_site_status = scan.status;
+      details.brokerSite = scan.status;
+      if (!scan.status || scan.status >= 400) summary.brokerSitesDown.push(row.fast_code.toUpperCase());
+      if (scan.pages) {
+        summary.websitesScanned++;
+        const before = row.website_listing_ids;
+        const prev = new Set(before ?? []);
+        const next = new Set(scan.ids);
+        const added = scan.ids.filter((id) => !prev.has(id));
+        const removed = (before ?? []).filter((id) => !next.has(id));
+        update.website_listing_ids = scan.ids;
+        update.listings_count = scan.ids.length;
+        update.listings_source_status = "website";
+        details.websiteListings = scan.ids.length;
+        const host = websiteHost(m.broker_url);
+        const cseCount = host ? await customSearchCount(host) : null;
+        if (cseCount !== null) details.googleSitePages = cseCount;
         if (before && (added.length || removed.length)) {
           summary.listingChanges++;
           await recordFastCodeUpdate({
@@ -145,8 +260,8 @@ async function refreshCodes(summary: DailyJobSummary): Promise<void> {
             agentId: row.agent_id,
             mapsiteId: row.mapsite_id,
             eventType: "listings",
-            note: `${added.length} new, ${removed.length} removed`,
-            details: { added: added.slice(0, 20), removed: removed.slice(0, 20) },
+            note: `Brokerage website: ${added.length} new, ${removed.length} removed MLS® numbers`,
+            details: { added: added.slice(0, 20), removed: removed.slice(0, 20), source: "website" },
             createdBy: "daily-job",
           });
           await recordFastCodeUpdate({
@@ -159,10 +274,6 @@ async function refreshCodes(summary: DailyJobSummary): Promise<void> {
             createdBy: "daily-job",
           });
         }
-      } else {
-        summary.listingSourceUnavailable++;
-        update.listings_source_status = result.status;
-        details.listingsSource = result.status;
       }
     }
     await db().from("fast_code_status").update(update).eq("fast_code", row.fast_code);
@@ -202,7 +313,7 @@ export async function loadTakenCodes(): Promise<Set<string>> {
   return taken;
 }
 
-async function assignApproved(summary: DailyJobSummary): Promise<void> {
+export async function assignApproved(summary: DailyJobSummary): Promise<void> {
   const { data: agents } = await db()
     .from("agent_admins")
     .select("id, login_id, name, status")
@@ -253,7 +364,8 @@ export async function runFastCodeDailyJob(triggeredBy: string): Promise<DailyJob
   const summary: DailyJobSummary = {
     refreshed: 0,
     listingChanges: 0,
-    listingSourceUnavailable: 0,
+    websitesScanned: 0,
+    sourcing: { markets: [], added: 0, duplicates: 0, franchisesSkipped: 0, errors: [], keyEnv: null, customSearch: false },
     brokerSitesDown: [],
     assigned: [],
     pendingReview: 0,
@@ -268,6 +380,11 @@ export async function runFastCodeDailyJob(triggeredBy: string): Promise<DailyJob
     await refreshCodes(summary);
   } catch (e) {
     summary.errors.push(`refresh: ${e instanceof Error ? e.message : String(e)}`);
+  }
+  try {
+    await sourceFromGoogle(summary.sourcing);
+  } catch (e) {
+    summary.sourcing.errors.push(`sourcing: ${e instanceof Error ? e.message : String(e)}`);
   }
   try {
     await assignApproved(summary);

@@ -31,3 +31,22 @@ describe("FAST Code tracker (Ralf, Nov 5)", () => {
     expect(pickLeastLoaded([{ id: "a", count: 1 }, { id: "b", count: 1 }])?.id).toBe("a");
   });
 });
+
+import { ANCHOR_TOWNS, isFranchiseName, looksLikeBrokerageOffice } from "@/lib/talispros/prospect-markets";
+
+describe("v17 Google sourcing parameters", () => {
+  it("rejects franchise brokerages", () => {
+    expect(isFranchiseName("RE/MAX Riverside", null)).toBe(true);
+    expect(isFranchiseName("Royal LePage Atlantic", null)).toBe(true);
+    expect(isFranchiseName("Anything", "https://www.century21.ca/x")).toBe(true);
+    expect(isFranchiseName("Coastal Realty Ltd.", "https://coastalrealty.ca")).toBe(false);
+  });
+  it("keeps brokerage offices, not single agents", () => {
+    expect(looksLikeBrokerageOffice("Coastal Realty Ltd.")).toBe(true);
+  });
+  it("anchor towns: 10k–50k, no Nova Scotia, east before west", () => {
+    expect(ANCHOR_TOWNS.length).toBeGreaterThan(20);
+    expect(ANCHOR_TOWNS.every((t) => (t.province as string) !== "NS" && t.population2021 >= 10000 && t.population2021 <= 50000)).toBe(true);
+    expect(ANCHOR_TOWNS[0]!.lng).toBeGreaterThan(ANCHOR_TOWNS[ANCHOR_TOWNS.length - 1]!.lng);
+  });
+});

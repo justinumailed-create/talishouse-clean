@@ -88,3 +88,8 @@ alter table public.fast_code_status
   add column if not exists listings_snapshot jsonb,
   add column if not exists broker_site_status integer,
   add column if not exists listings_source_status text;
+
+-- v17 (Nov 5): Google-only sourcing fields on the review queue.
+alter table prospect_queue add column if not exists google_place_id text, add column if not exists office_phone text, add column if not exists market text, add column if not exists market_rank int, add column if not exists rating numeric, add column if not exists rating_count int, add column if not exists latitude double precision, add column if not exists longitude double precision, add column if not exists sourced_by text;
+create unique index if not exists prospect_queue_place_id_key on prospect_queue (google_place_id) where google_place_id is not null;
+alter table fast_code_status add column if not exists website_listing_ids jsonb;

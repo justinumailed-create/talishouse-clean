@@ -14,6 +14,7 @@ import FastCodesTracker from "@/components/admin/FastCodesTracker";
 import { getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300;
 
 const DESCRIPTIONS: Record<string, string> = {
   "/admin/notifications": "Alerts and recent platform events.",

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAdminScope } from "@/lib/admin-auth";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { runFastCodeDailyJob, type DailyJobSummary } from "@/lib/talispros/fast-code-daily-job";
+import { assignApproved, runFastCodeDailyJob, type DailyJobSummary } from "@/lib/talispros/fast-code-daily-job";
 
 function db(): SupabaseClient {
   return getSupabaseAdmin() as unknown as SupabaseClient;
@@ -47,7 +47,7 @@ export async function addProspectToQueueAction(form: FormData): Promise<void> {
   revalidatePath("/admin/dashboard");
 }
 
-/** Approve or reject a queued prospect. Approved ones are coded and assigned by the daily job (or Run now). */
+/** Approve or reject a queued prospect. Approved ones get a FAST Code and the agent with fewer codes immediately. */
 export async function reviewProspectAction(form: FormData): Promise<void> {
   const account = await requireAdminScope("agents");
   const id = clean(form.get("id"), 40);
@@ -60,6 +60,10 @@ export async function reviewProspectAction(form: FormData): Promise<void> {
     .eq("status", "pending")
     .select("brokerage")
     .maybeSingle();
-  void data;
+  if (data && decision === "approved") {
+    // Code + agent (whoever has fewer codes) right away, not on the next run.
+    const s = { assigned: [], errors: [] } as unknown as DailyJobSummary;
+    await assignApproved(s).catch(() => undefined);
+  }
   revalidatePath("/admin/dashboard");
 }

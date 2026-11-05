@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { runFastCodeJobNowAction } from "@/app/admin/dashboard/fast-code-tracker-actions";
 
 const COPY = {
-  en: { run: "Run now", running: "Running…", done: "Done: {n} codes checked, {a} assigned", failed: "Run failed. Please try again." },
-  de: { run: "Jetzt ausführen", running: "Läuft …", done: "Fertig: {n} Codes geprüft, {a} zugewiesen", failed: "Lauf fehlgeschlagen. Bitte erneut versuchen." },
+  en: { run: "Run now", running: "Running…", done: "Done: {n} codes checked, {s} new brokerages from Google, {a} assigned", failed: "Run failed. Please try again." },
+  de: { run: "Jetzt ausführen", running: "Läuft …", done: "Fertig: {n} Codes geprüft, {s} neue Maklerbüros von Google, {a} zugewiesen", failed: "Lauf fehlgeschlagen. Bitte erneut versuchen." },
 } as const;
 
 export default function FastCodeRunNowButton({ locale }: { locale: "en" | "de" }) {
@@ -25,7 +25,7 @@ export default function FastCodeRunNowButton({ locale }: { locale: "en" | "de" }
             setMsg(null);
             const res = await runFastCodeJobNowAction();
             if (!res.ok) return setMsg(t.failed);
-            setMsg(t.done.replace("{n}", String(res.summary.refreshed)).replace("{a}", String(res.summary.assigned.length)));
+            setMsg(t.done.replace("{n}", String(res.summary.refreshed)).replace("{s}", String(res.summary.sourcing?.added ?? 0)).replace("{a}", String(res.summary.assigned.length)));
             router.refresh();
           })
         }

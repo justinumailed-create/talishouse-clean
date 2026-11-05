@@ -42,7 +42,7 @@ const COPY = {
     runs: "Runs at 06:00 IST every day.",
     queue: "Sourcing review queue",
     queueHint:
-      "New brokerages enter here only from real research with a public source link (small independent brokerages, outside Nova Scotia). Approved prospects get a FAST Code and an agent on the next run.",
+      "The daily run searches Google for independent (non-franchise) brokerage offices: 3 per market of about 80 km around an anchor town of 10,000–50,000 people, east to west, outside Nova Scotia. Each entry links to its Google source. Approving gives it a FAST Code and the agent with fewer codes right away.",
     pending: "Pending review",
     approved: "Approved",
     approve: "Approve",
@@ -58,6 +58,14 @@ const COPY = {
     fNotes: "Research notes",
     submit: "Add to queue",
     queueEmpty: "Nothing waiting for review.",
+    websiteListings: "MLS® numbers on website",
+    googleSource: "Google source",
+    toResearch: "Decision maker, position, cell, email: to research",
+    rank: "Rank",
+    sourcingNone: "No Google search in this run.",
+    sourcingDone: (m: string, a: number, d: number) => `Google search in ${m}: ${a} new brokerages added, ${d} already known.`,
+    sourcingNoKey: "Google search could not run: no Google key on the server.",
+    sourcingError: "Google refused the search:",
     asOf: "As of",
     listings: "Listings",
   },
@@ -85,7 +93,7 @@ const COPY = {
     runs: "Läuft täglich um 06:00 IST.",
     queue: "Recherche-Prüfliste",
     queueHint:
-      "Neue Maklerbüros kommen nur aus echter Recherche mit öffentlichem Quellenlink hierher (kleine unabhängige Büros, außerhalb von Nova Scotia). Freigegebene Interessenten erhalten beim nächsten Lauf einen FAST Code und einen Agenten.",
+      "Der Tageslauf sucht über Google nach unabhängigen Maklerbüros (keine Franchise): 3 pro Markt von etwa 80 km um eine Ankerstadt mit 10.000–50.000 Einwohnern, von Ost nach West, außerhalb von Nova Scotia. Jeder Eintrag verlinkt seine Google-Quelle. Mit der Freigabe erhält er sofort einen FAST Code und den Agenten mit weniger Codes.",
     pending: "Zur Prüfung",
     approved: "Freigegeben",
     approve: "Freigeben",
@@ -101,6 +109,14 @@ const COPY = {
     fNotes: "Recherche-Notizen",
     submit: "Zur Liste hinzufügen",
     queueEmpty: "Nichts wartet auf Prüfung.",
+    websiteListings: "MLS®-Nummern auf der Website",
+    googleSource: "Google-Quelle",
+    toResearch: "Entscheider, Position, Mobil, E-Mail: noch zu recherchieren",
+    rank: "Rang",
+    sourcingNone: "Keine Google-Suche in diesem Lauf.",
+    sourcingDone: (m: string, a: number, d: number) => `Google-Suche in ${m}: ${a} neue Maklerbüros hinzugefügt, ${d} bereits bekannt.`,
+    sourcingNoKey: "Google-Suche nicht möglich: kein Google-Schlüssel auf dem Server.",
+    sourcingError: "Google hat die Suche abgelehnt:",
     asOf: "Stand",
     listings: "Inserate",
   },
@@ -129,7 +145,8 @@ function describe(u: FastCodeUpdate, locale: Locale): string {
     const parts: string[] = [];
     if (typeof u.details.listings === "number") parts.push(`${COPY[locale].listings}: ${u.details.listings}`);
     if (typeof u.details.brokerSite === "number") parts.push(`Website: ${u.details.brokerSite || "—"}`);
-    if (typeof u.details.listingsSource === "string") parts.push(`REALTOR.ca: ${u.details.listingsSource}`);
+    if (typeof u.details.websiteListings === "number")
+      parts.push(`${COPY[locale].websiteListings}: ${u.details.websiteListings}`);
     return `${ev}${parts.length ? ` · ${parts.join(" · ")}` : ""}`;
   }
   return u.note ? `${ev}: ${u.note}` : ev;
@@ -153,7 +170,7 @@ export default async function FastCodesTracker({
     listJobRuns(1),
     (getSupabaseAdmin() as unknown as import("@supabase/supabase-js").SupabaseClient)
       .from("prospect_queue")
-      .select("id, brokerage, contact_name, town, province, source_url, status, proposed_code, assigned_agent_id, created_at")
+      .select("id, brokerage, contact_name, office_address, office_phone, website, market, market_rank, town, province, source_url, status, proposed_code, assigned_agent_id, created_at")
       .in("status", ["pending", "approved"])
       .order("created_at", { ascending: false })
       .limit(50),
@@ -181,10 +198,23 @@ export default async function FastCodesTracker({
   const timelineCode = params.code?.toLowerCase() || null;
   const timeline = timelineCode ? view.find((r) => r.fastCode.toLowerCase() === timelineCode) ?? null : null;
   const lastRun = runs[0] ?? null;
+  const sourcing = (lastRun?.summary as { sourcing?: { markets?: { market: string }[]; added?: number; duplicates?: number; errors?: string[]; keyEnv?: string | null } } | undefined)?.sourcing;
+  const sourcingText = !sourcing
+    ? t.sourcingNone
+    : !sourcing.keyEnv
+      ? t.sourcingNoKey
+      : sourcing.errors?.length && !sourcing.added
+        ? `${t.sourcingError} ${sourcing.errors[0]!.replace(/^[^:]+: /, "")}`
+        : t.sourcingDone((sourcing.markets ?? []).map((m) => m.market).join("; "), sourcing.added ?? 0, sourcing.duplicates ?? 0);
   const queue = (queueRes.data ?? []) as {
     id: string;
     brokerage: string;
     contact_name: string | null;
+    office_address: string | null;
+    office_phone: string | null;
+    website: string | null;
+    market: string | null;
+    market_rank: number | null;
     town: string | null;
     province: string | null;
     source_url: string;
@@ -214,6 +244,7 @@ export default async function FastCodesTracker({
             {t.lastRun}: {lastRun ? fmt(lastRun.finishedAt ?? lastRun.startedAt, locale) : t.never}
           </p>
           <p>{t.runs}</p>
+          {lastRun ? <p className="max-w-xs" data-testid="sourcing-summary">{sourcingText}</p> : null}
           <div className="mt-2">
             <FastCodeRunNowButton locale={locale} />
           </div>
@@ -352,9 +383,19 @@ export default async function FastCodesTracker({
                 <span>
                   <span className="font-semibold text-neutral-900">{q.brokerage}</span>
                   <span className="ml-2 text-neutral-500">{[q.town, q.province].filter(Boolean).join(", ")}</span>
+                  {q.market_rank ? <span className="ml-2 text-xs text-neutral-500">{t.rank} {q.market_rank} · {q.market}</span> : null}
                   <a href={q.source_url} target="_blank" rel="noreferrer" className="ml-2 text-xs text-[#1E4ED8] underline">
-                    {t.fSource.split(" (")[0]}
+                    {q.source_url.includes("google.") ? t.googleSource : t.fSource.split(" (")[0]}
                   </a>
+                  {q.website ? (
+                    <a href={q.website} target="_blank" rel="noreferrer" className="ml-2 text-xs text-[#1E4ED8] underline">
+                      {t.fWebsite}
+                    </a>
+                  ) : null}
+                  {q.office_address || q.office_phone ? (
+                    <span className="block text-xs text-neutral-500">{[q.office_address, q.office_phone].filter(Boolean).join(" · ")}</span>
+                  ) : null}
+                  {!q.contact_name ? <span className="block text-xs text-amber-700">{t.toResearch}</span> : null}
                 </span>
                 {q.status === "pending" ? (
                   <span className="flex gap-2">
