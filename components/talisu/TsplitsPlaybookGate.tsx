@@ -15,6 +15,7 @@ import {
   type TsplitsPlaybookCopy,
   type TsplitsPlaybookUnlockError,
 } from "@/lib/talisu/tsplits-playbook";
+import SecretTextField from "@/components/talispros/SecretTextField";
 
 const FIELD =
   "mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3.5 text-[17px] text-[#1d1d1f] outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-700/15";
@@ -100,20 +101,19 @@ export default function TsplitsPlaybookGate({
               <label htmlFor={`${id}-passcode`} className="block text-[13px] font-medium text-[#1d1d1f]">
                 {copy.passcode}
               </label>
-              <input
+              <SecretTextField
                 id={`${id}-passcode`}
                 name="passcode"
-                type="password"
                 required
-                autoComplete="current-password"
                 autoCapitalize="none"
-                spellCheck={false}
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
                 aria-invalid={Boolean(error)}
                 aria-describedby={message ? `${id}-error` : undefined}
+                aria-label={copy.passcode}
                 data-testid="tsplits-playbook-passcode"
-                className={`${FIELD} ${error ? "border-red-400" : ""}`}
+                wrapperClassName="relative mt-2 w-full"
+                className={`${FIELD.replace("mt-2 ", "")} ${error ? "border-red-400" : ""}`}
               />
               {message ? (
                 <p id={`${id}-error`} role="alert" className="mt-2 text-[13px] text-red-600">

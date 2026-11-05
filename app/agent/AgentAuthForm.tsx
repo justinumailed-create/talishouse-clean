@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useId, useState, useTransition, type InputHTMLAttributes } from "react";
 import { agentChangePasswordAction, agentLoginAction } from "./actions";
+import SecretTextField from "@/components/talispros/SecretTextField";
 
 const fieldClass =
   "block h-12 w-full rounded-xl border border-neutral-300 bg-white px-4 text-[15px] text-neutral-900 placeholder:text-neutral-400 shadow-[0_1px_2px_rgba(16,24,40,0.04)] transition focus:border-[#1E4ED8] focus:outline-none focus:ring-4 focus:ring-[#1E4ED8]/15 aria-[invalid=true]:border-red-400 aria-[invalid=true]:focus:ring-red-500/15";
@@ -54,23 +55,13 @@ function Field({ label, id, hint, children }: { label: string; id: string; hint?
   );
 }
 
-function PasswordInput(props: InputHTMLAttributes<HTMLInputElement> & { id: string }) {
-  const [visible, setVisible] = useState(false);
-  return (
-    <div className="relative">
-      <input {...props} type={visible ? "text" : "password"} className={`${fieldClass} pr-16`} />
-      <button
-        type="button"
-        onClick={() => setVisible((v) => !v)}
-        aria-controls={props.id}
-        aria-pressed={visible}
-        aria-label={visible ? "Hide password" : "Show password"}
-        className="absolute inset-y-1.5 right-1.5 rounded-lg px-2.5 text-xs font-semibold text-neutral-500 hover:bg-neutral-100 hover:text-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1E4ED8]/40"
-      >
-        {visible ? "Hide" : "Show"}
-      </button>
-    </div>
-  );
+function PasswordInput(
+  props: Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "autoComplete" | "autoCorrect" | "spellCheck"> & {
+    id: string;
+    autoComplete?: "off" | "new-password" | "current-password";
+  },
+) {
+  return <SecretTextField {...props} className={fieldClass} />;
 }
 
 export function AgentLoginForm({ returnTo = null }: { returnTo?: string | null } = {}) {
@@ -84,6 +75,7 @@ export function AgentLoginForm({ returnTo = null }: { returnTo?: string | null }
 
   return (
     <form
+      method="post"
       noValidate
       aria-describedby={errorId}
       onSubmit={(e) => {
@@ -184,6 +176,7 @@ export function AgentChangePasswordForm({ returnTo = null }: { returnTo?: string
 
   return (
     <form
+      method="post"
       noValidate
       aria-describedby={errorId}
       onSubmit={(e) => {

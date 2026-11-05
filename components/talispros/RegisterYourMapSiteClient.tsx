@@ -12,6 +12,8 @@ import {
 } from "@/lib/talispros/mapsite-url-gate-actions";
 import { openClaimedMapSiteFromHomeFastCode } from "@/app/talispros/mapsites/actions";
 import { setFastCode } from "@/lib/fast-code";
+import SecretTextField from "@/components/talispros/SecretTextField";
+import { useT } from "@/lib/i18n/client";
 
 export default function RegisterYourMapSiteClient({
   fastCode,
@@ -27,6 +29,7 @@ export default function RegisterYourMapSiteClient({
    */
   unlockToMapsite?: boolean;
 }) {
+  const t = useT();
   const expected = fastCode.trim().toLowerCase();
   const [fastInput, setFastInput] = useState("");
   const [pin, setPin] = useState("");
@@ -154,18 +157,19 @@ export default function RegisterYourMapSiteClient({
 
             <label className="block">
               <span className="mb-1.5 block text-xs font-medium text-neutral-500">
-                6-digit secure code
+                {t.mapsite.urlGate.codeLabel}
               </span>
-              <input
+              <SecretTextField
                 inputMode="numeric"
-                autoComplete="one-time-code"
                 maxLength={6}
                 value={pin}
                 onChange={(event) =>
                   setPin(normalizeUrlGatePin(event.target.value))
                 }
+                aria-label={t.mapsite.urlGate.codeLabel}
                 className="h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-center font-mono text-xl tracking-[0.4em] text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
                 placeholder="••••••"
+                data-testid="register-secure-code"
               />
             </label>
             <button

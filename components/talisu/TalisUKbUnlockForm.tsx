@@ -4,6 +4,7 @@ import { useId, useState, useTransition, type FormEvent } from "react";
 import { notifyTalisUKbUnlocked, writeTalisUKbUnlocked } from "@/lib/talisu/kb-gate";
 import { unlockTalisUKbAction } from "@/app/talisu/kb/access-actions";
 import { useT } from "@/lib/i18n/client";
+import SecretTextField from "@/components/talispros/SecretTextField";
 
 export type TalisUKbUnlockFormProps = {
   /** Called after the FAST Code is accepted and session unlock is stored. */
@@ -72,9 +73,8 @@ export default function TalisUKbUnlockForm({
         <label htmlFor={fieldId} className="sr-only">
           {k.passwordLabel}
         </label>
-        <input
+        <SecretTextField
           id={fieldId}
-          type="password"
           value={password}
           onChange={(event) => {
             setPassword(event.target.value);
@@ -82,10 +82,11 @@ export default function TalisUKbUnlockForm({
           }}
           className="h-11 w-full rounded-lg border border-neutral-300 bg-white px-3.5 text-[14px] text-neutral-900 shadow-sm placeholder:text-neutral-400 focus:border-[#0070ba] focus:outline-none focus:ring-2 focus:ring-[#0070ba]/25"
           placeholder={k.placeholder}
-          autoComplete="off"
+          aria-label={k.passwordLabel}
           autoCapitalize="characters"
           autoFocus
           required
+          data-testid="kb-fast-code"
         />
       </div>
       {error ? (

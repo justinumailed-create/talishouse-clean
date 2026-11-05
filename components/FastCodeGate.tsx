@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { loginAdminWithFastCodeAction } from "@/app/admin/actions";
+import SecretTextField from "@/components/talispros/SecretTextField";
 import { normalizeFastCode, setAdminSession } from "@/lib/fast-code";
+import { useT } from "@/lib/i18n/client";
 
 export default function FastCodeGate() {
   const router = useRouter();
+  const t = useT();
   const { login } = useAuth();
   const [inputCode, setInputCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,15 +37,12 @@ export default function FastCodeGate() {
         login(code, "admin");
         localStorage.setItem("auth", "true");
         document.cookie = "auth=true; path=/; max-age=86400; SameSite=Lax";
-        console.log("AUTH:", localStorage.getItem("auth"));
-        // Auth flow → dashboard only
         router.replace("/business-office");
         return;
       }
 
       setError("Invalid access code. Please try again.");
-    } catch (err: any) {
-      console.warn("Gate error:", err?.message || err);
+    } catch {
       setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
@@ -57,22 +57,21 @@ export default function FastCodeGate() {
           <p className="text-sm text-[#6e6e73] tracking-[0.1em] uppercase font-medium">Business Office Access</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form method="post" onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-3">
-            <div className="relative">
-              <input
-                type="text"
-                value={inputCode}
-                onChange={(e) => {
-                  setInputCode(e.target.value);
-                  setError("");
-                }}
-                className={`w-full bg-[#f5f5f7] border ${error ? "border-red-500" : "border-[#e5e5e5]"} rounded-2xl px-4 py-5 text-center text-2xl font-mono font-bold tracking-[0.3em] outline-none focus:border-[#1E4ED8] transition-all`}
-                placeholder="••••••••"
-                autoFocus
-                required
-              />
-            </div>
+            <SecretTextField
+              value={inputCode}
+              onChange={(e) => {
+                setInputCode(e.target.value);
+                setError("");
+              }}
+              className={`w-full bg-[#f5f5f7] border ${error ? "border-red-500" : "border-[#e5e5e5]"} rounded-2xl px-4 py-5 text-center text-2xl font-mono font-bold tracking-[0.3em] outline-none focus:border-[#1E4ED8] transition-all`}
+              placeholder="••••••••"
+              aria-label={t.secretEntry.gateLabel}
+              autoFocus
+              required
+              data-testid="business-office-access-code"
+            />
             {error && (
               <p className="text-xs text-red-500 text-center font-bold uppercase tracking-wider animate-in fade-in slide-in-from-top-1">
                 {error}

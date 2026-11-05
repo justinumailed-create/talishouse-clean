@@ -47,6 +47,8 @@ export const en = {
     done: "Done",
     somethingWrong: "Something went wrong. Please try again.",
     opening: "Opening…",
+    showSecret: "Show",
+    hideSecret: "Hide",
   },
 
   nav: {
@@ -945,6 +947,15 @@ export const en = {
     crmEmpty: "Please enter your access code.",
     crmInvalid: "Invalid access code. Please try again.",
     crmDemoCodes: "Demo access codes",
+  },
+
+  secretEntry: {
+    adminLabel: "Admin FAST Code",
+    adminPlaceholder: "FAST Code",
+    gateLabel: "Access code",
+    editLabel: "FAST Code to edit this Mapsite",
+    editPlaceholder: "FAST Code",
+    secureCodeLabel: "Secure code",
   },
 
   personalHome: {

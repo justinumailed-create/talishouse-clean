@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginAdminWithFastCodeAction } from "@/app/admin/actions";
+import SecretTextField from "@/components/talispros/SecretTextField";
 import { normalizeFastCode, setAdminSession } from "@/lib/fast-code";
+import { useT } from "@/lib/i18n/client";
 
 export default function AdminLoginForm({ notice = null }: { notice?: string | null }) {
+  const t = useT();
   const [fastCode, setFastCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -59,10 +62,9 @@ export default function AdminLoginForm({ notice = null }: { notice?: string | nu
           </p>
         ) : null}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form method="post" onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <input
-              type="text"
+            <SecretTextField
               value={fastCode}
               onChange={(e) => {
                 setFastCode(e.target.value);
@@ -71,10 +73,11 @@ export default function AdminLoginForm({ notice = null }: { notice?: string | nu
               className={`w-full h-12 px-4 text-center font-mono tracking-[0.3em] border rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-900/20 ${
                 error ? "border-red-500" : "border-neutral-200"
               }`}
-              placeholder="FAST CODE"
-              autoCorrect="off"
+              placeholder={t.secretEntry.adminPlaceholder}
+              aria-label={t.secretEntry.adminLabel}
               autoCapitalize="none"
               autoFocus
+              data-testid="admin-fast-code"
             />
             {error && <p className="text-red-500 text-sm text-center font-medium">{error}</p>}
           </div>

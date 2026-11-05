@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { establishClientAnalyticsSession } from "@/app/talispros/client/actions";
 import { CLIENT_DASHBOARD_PATH } from "@/lib/mapsite-account-session";
+import SecretTextField from "@/components/talispros/SecretTextField";
 
 export default function ClientLoginForm() {
   const l = useT().login;
@@ -44,7 +45,7 @@ export default function ClientLoginForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form method="post" onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1.5">
             {l.email}
@@ -70,19 +71,19 @@ export default function ClientLoginForm() {
           <label htmlFor="fastCode" className="block text-sm font-medium text-neutral-700 mb-1.5">
             FAST Code
           </label>
-          <input
+          <SecretTextField
             id="fastCode"
-            type="password"
             value={fastCode}
             onChange={(e) => {
               setFastCode(e.target.value);
               setError("");
             }}
             placeholder={l.clientCodePlaceholder}
+            aria-label="FAST Code"
             className="w-full h-11 px-4 bg-white border border-neutral-200 rounded-xl text-sm font-mono uppercase tracking-wider focus:outline-none focus:border-neutral-900 transition-colors"
-            autoComplete="current-password"
             disabled={loading}
             required
+            data-testid="client-fast-code"
           />
         </div>
 
