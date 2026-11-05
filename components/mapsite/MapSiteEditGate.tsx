@@ -4,8 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { setFastCode } from "@/lib/fast-code";
 import { establishMapSiteOwnerSession } from "@/app/talispros/mapsites/actions";
+import SecretTextField from "@/components/talispros/SecretTextField";
+import { useT } from "@/lib/i18n/client";
 
 export default function MapSiteEditGate({ fastCode }: { fastCode: string }) {
+  const t = useT();
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,17 +44,18 @@ export default function MapSiteEditGate({ fastCode }: { fastCode: string }) {
           <span className="font-mono font-medium">{fastCode}</span> to edit this
           page.
         </p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
+        <form method="post" onSubmit={handleSubmit} className="space-y-4">
+          <SecretTextField
             value={code}
             onChange={(e) => {
               setCode(e.target.value);
               setError("");
             }}
             className="w-full h-11 px-4 border border-neutral-200 rounded-xl text-center font-mono uppercase tracking-[0.3em] focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
-            placeholder="FAST CODE"
+            placeholder={t.secretEntry.editPlaceholder}
+            aria-label={t.secretEntry.editLabel}
             autoFocus
+            data-testid="mapsite-edit-fast-code"
           />
           {error ? (
             <p className="text-red-600 text-sm text-center">{error}</p>

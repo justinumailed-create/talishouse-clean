@@ -12,6 +12,7 @@ import {
   METAL_TAB_UNSELECTED,
 } from "@/components/talisu/metal-tab";
 import { redeemRegisterEntryAction } from "@/app/talisu/reg/actions";
+import SecretTextField from "@/components/talispros/SecretTextField";
 
 export type RegisterActionLabels = {
   label: string;
@@ -129,6 +130,7 @@ export default function RegisterActions({
         <form
           id={`${baseId}-entry`}
           data-testid="register-entry"
+          method="post"
           className="relative mt-3 rounded-2xl border border-white/80 bg-[#fafaf7] px-4 py-4 text-neutral-900 shadow-[0_10px_30px_rgba(0,0,0,0.16)] sm:px-5"
           onSubmit={(e) => {
             e.preventDefault();
@@ -167,13 +169,14 @@ export default function RegisterActions({
           </div>
           <label className="mt-3 block text-[13px] font-semibold text-neutral-700">
             {labels.entryLabel}
-            <input
+            <SecretTextField
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
-              autoComplete="off"
-              spellCheck={false}
+              autoCapitalize="characters"
               data-testid="register-entry-code"
-              className="mt-1.5 w-full rounded-xl border border-black/15 bg-white px-3.5 py-2.5 text-center font-mono text-lg tracking-[0.2em] outline-none focus:border-[#046BD9] focus:ring-2 focus:ring-[#046BD9]/20"
+              aria-label={labels.entryLabel}
+              wrapperClassName="relative mt-1.5 w-full"
+              className="w-full rounded-xl border border-black/15 bg-white px-3.5 py-2.5 text-center font-mono text-lg tracking-[0.2em] outline-none focus:border-[#046BD9] focus:ring-2 focus:ring-[#046BD9]/20"
             />
           </label>
           {error ? (

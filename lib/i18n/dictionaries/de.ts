@@ -26,6 +26,8 @@ export const de: Dictionary = {
     done: "Fertig",
     somethingWrong: "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     opening: "Wird geöffnet …",
+    showSecret: "Zeigen",
+    hideSecret: "Verbergen",
   },
 
   nav: {
@@ -1222,6 +1224,15 @@ export const de: Dictionary = {
     crmEmpty: "Bitte geben Sie Ihren Zugangscode ein.",
     crmInvalid: "Ungültiger Zugangscode. Bitte versuchen Sie es erneut.",
     crmDemoCodes: "Demo-Zugangscodes",
+  },
+
+  secretEntry: {
+    adminLabel: "Admin-FAST-Code",
+    adminPlaceholder: "FAST Code",
+    gateLabel: "Zugangscode",
+    editLabel: "FAST Code zum Bearbeiten dieser Mapsite",
+    editPlaceholder: "FAST Code",
+    secureCodeLabel: "Sicherheitscode",
   },
 
   personalHome: {

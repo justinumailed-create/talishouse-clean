@@ -90,7 +90,9 @@ describe("TalisU Knowledge Base password gate", () => {
       "utf8",
     );
     expect(form).toContain("bg-white");
-    expect(form).toContain("type=\"password\"");
+    expect(form).toContain("SecretTextField");
+    const secret = readFileSync(join(root, "components/talispros/SecretTextField.tsx"), "utf8");
+    expect(secret).toContain('type={visible ? "text" : "password"}');
     expect(form).toContain("#0070ba");
     expect(form).not.toContain("bg-white/10");
     expect(form).not.toContain("text-white/90");

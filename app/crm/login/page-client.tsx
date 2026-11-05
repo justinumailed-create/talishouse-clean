@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { setRole, Role } from "@/lib/permissions";
+import SecretTextField from "@/components/talispros/SecretTextField";
 
 const VALID_ROLES: { code: string; role: Role; label: string }[] = [
   { code: "ADMIN", role: "admin", label: "Admin" },
@@ -74,16 +75,17 @@ export default function CrmLoginPage() {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form method="post" onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <input
-              type="text"
+            <SecretTextField
               value={code}
               onChange={(e) => setCode(e.target.value.toUpperCase())}
               placeholder={l.crmPlaceholder}
+              aria-label={l.crmPlaceholder}
               className="w-full h-11 px-4 bg-white border border-neutral-200 rounded-xl text-sm focus:outline-none focus:border-neutral-900 transition-colors uppercase tracking-wider text-center"
               autoFocus
               disabled={loading}
+              data-testid="crm-access-code"
             />
           </div>
 

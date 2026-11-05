@@ -3,6 +3,7 @@
 import { useEffect, useId, useState, useTransition } from "react";
 import { normalizeUrlGatePin } from "@/lib/talispros/mapsite-url-gate";
 import { useT } from "@/lib/i18n/client";
+import SecretTextField from "@/components/talispros/SecretTextField";
 import { fmt } from "@/lib/i18n/format";
 import {
   requestMapSiteUrlGateCode,
@@ -141,16 +142,17 @@ export default function MapSiteUrlGateDialog({
             <span className="mb-1.5 block text-xs font-medium text-neutral-500">
               {u.codeLabel}
             </span>
-            <input
+            <SecretTextField
               inputMode="numeric"
-              autoComplete="one-time-code"
               maxLength={6}
               value={pin}
               onChange={(event) =>
                 setPin(normalizeUrlGatePin(event.target.value))
               }
+              aria-label={u.codeLabel}
               className="h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-center font-mono text-xl tracking-[0.4em] text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
               placeholder="••••••"
+              data-testid="url-gate-secure-code"
             />
           </label>
 

@@ -8,6 +8,7 @@ import {
   openProspectMapsiteAction,
   removeFastCodeSlotAction,
 } from "@/app/talispros/demo-mapsite/slots-actions";
+import SecretTextField from "@/components/talispros/SecretTextField";
 import {
   formatSlotAddedDate,
   formatSlotAddedLabel,
@@ -139,6 +140,7 @@ function GateForm({
   return (
     <form
       id={fieldId}
+      method="post"
       className="shrink-0 rounded-xl bg-neutral-50 px-3 py-2.5 ring-1 ring-black/5"
       data-testid="fast-code-gate"
       onSubmit={(e) => {
@@ -176,15 +178,15 @@ function GateForm({
         {copy.gateLabel}
       </label>
       <div className="flex flex-col gap-2 sm:flex-row">
-        <input
+        <SecretTextField
           id={`${fieldId}-pw`}
-          type="password"
           autoFocus
-          autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder={copy.gateLabel}
-          className="h-10 min-w-0 flex-1 rounded-full border border-neutral-300 bg-white px-4 text-[14px] text-neutral-900 outline-none focus:border-[#046BD9]"
+          aria-label={copy.gateLabel}
+          wrapperClassName="relative min-w-0 flex-1"
+          className="h-10 w-full rounded-full border border-neutral-300 bg-white px-4 text-[14px] text-neutral-900 outline-none focus:border-[#046BD9]"
           data-testid="fast-code-gate-input"
         />
         <button

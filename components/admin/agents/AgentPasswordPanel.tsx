@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { setAgentPasswordAction } from "@/app/admin/agents/actions";
+import SecretTextField from "@/components/talispros/SecretTextField";
+import { useT } from "@/lib/i18n/client";
 
 /** Superadmin: set a chosen password or generate a temporary one (shown once). */
 export default function AgentPasswordPanel({
@@ -17,6 +19,7 @@ export default function AgentPasswordPanel({
   isLocked: boolean;
   lastLoginAt: string | null;
 }) {
+  const t = useT();
   const [password, setPassword] = useState("");
   const [shown, setShown] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -51,10 +54,10 @@ export default function AgentPasswordPanel({
       <div className="flex flex-wrap items-end gap-3">
         <label className="text-sm text-neutral-700">
           New password (min 12, upper/lower/digit)
-          <input
-            type="password"
-            autoComplete="new-password"
-            className="mt-1 block w-72 rounded-lg border border-neutral-200 px-3 py-2 text-sm"
+          <SecretTextField
+            aria-label={t.login.password}
+            wrapperClassName="relative mt-1 w-72"
+            className="block w-full rounded-lg border border-neutral-200 px-3 py-2 text-sm"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
