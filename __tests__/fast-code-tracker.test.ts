@@ -21,10 +21,15 @@ describe("FAST Code tracker (Ralf, Nov 5)", () => {
   it("ends an IST day at 18:30 UTC", () => {
     expect(istDayEndUtc("2026-11-05")).toBe("2026-11-05T18:30:00.000Z");
   });
-  it("proposes initials codes that skip taken and reserved ones", () => {
-    expect(proposeFastCode("Peak Point Realty", new Set())).toBe("ppr01");
-    expect(proposeFastCode("Peak Point", new Set())).toBe("pp03");
-    expect(proposeFastCode("Kingdom Realty", new Set(["kr01"]))).toBe("kr02");
+  it("proposes person-initials codes and skips taken/reserved; null without a person name", () => {
+    expect(proposeFastCode("Ralf Meyer", new Set())).toBe("rm01");
+    expect(proposeFastCode("Hermance Mercure Laplante", new Set())).toBe("hml01");
+    expect(proposeFastCode("Megan Kathleen John", new Set())).toBe("mkj01");
+    expect(proposeFastCode("Patricia Place", new Set(["pp01", "pp02"]))).toBe("pp03");
+    expect(proposeFastCode("Kingdom Broker", new Set(["kb01"]))).toBe("kb02");
+    expect(proposeFastCode(null, new Set())).toBeNull();
+    expect(proposeFastCode("", new Set())).toBeNull();
+    expect(proposeFastCode("Madonna", new Set())).toBeNull();
   });
   it("balances new codes between associates", () => {
     expect(pickLeastLoaded([{ id: "a", count: 3 }, { id: "b", count: 1 }])?.id).toBe("b");

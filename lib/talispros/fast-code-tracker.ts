@@ -1,5 +1,12 @@
 /** FAST Code conversation stages (Ralf, Nov 5). Shared by agent cards and the admin tracker. */
 
+import {
+  extractInitials,
+  splitPersonName,
+  validateAndNormalizeFastCodeInput,
+} from "@/validators/fast-code.validator";
+
+
 export const FAST_CODE_STAGES = [
   "new",
   "contacted",
@@ -117,20 +124,97 @@ export function stageAsOf(updates: readonly FastCodeUpdate[], beforeIso: string)
   return best?.stage ?? "new";
 }
 
-/** Initials-based FAST Code: "Jane Doe Realty" → "jdr01", skipping taken codes. */
-export function proposeFastCode(name: string, taken: ReadonlySet<string>): string {
-  const words = name
-    .normalize("NFKD")
-    .replace(/[^\p{L}\p{N}\s]/gu, " ")
-    .split(/\s+/)
-    .filter((w) => w && !/^(inc|ltd|llc|the|and|of)$/i.test(w));
-  let base = words.map((w) => w[0]!.toLowerCase()).join("").replace(/[^a-z]/g, "").slice(0, 4);
-  if (base.length < 2) base = (words.join("").toLowerCase().replace(/[^a-z]/g, "") + "xx").slice(0, 2);
+/**
+ * Prospect FAST Codes always come from the decision maker's person name
+ * (first + last initials), never from brokerage-name words.
+ * Matches Mapsite coding via extractInitials (e.g. Hermance Mercure Laplante → hml01).
+ */
+export function personNamePartsForFastCode(contactName: string | null | undefined): {
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+} | null {
+  const raw = (contactName ?? "").trim().replace(/\s+/g, " ");
+  if (!raw) return null;
+  if (/[&+]|\band\b/iu.test(raw)) {
+    const split = splitPersonName(raw);
+    if (!split.firstName.trim() || !split.lastName.trim()) return null;
+    return { firstName: split.firstName, middleName: null, lastName: split.lastName };
+  }
+  const words = raw.split(" ").filter(Boolean);
+  if (words.length < 2) return null;
+  if (words.length === 2) {
+    return { firstName: words[0]!, middleName: null, lastName: words[1]! };
+  }
+  return {
+    firstName: words[0]!,
+    middleName: words.slice(1, -1).join(" "),
+    lastName: words[words.length - 1]!,
+  };
+}
+
+/** Build first/middle/last from separate admin/CSV fields. Multi-word last names keep trailing surname. */
+export function personNamePartsFromFirstLast(
+  firstName: string | null | undefined,
+  lastName: string | null | undefined,
+): { firstName: string; middleName: string | null; lastName: string } | null {
+  const first = (firstName ?? "").trim().replace(/\s+/g, " ");
+  const last = (lastName ?? "").trim().replace(/\s+/g, " ");
+  if (!first || !last) return null;
+  const lastWords = last.split(" ").filter(Boolean);
+  if (lastWords.length > 1) {
+    return {
+      firstName: first,
+      middleName: lastWords.slice(0, -1).join(" "),
+      lastName: lastWords[lastWords.length - 1]!,
+    };
+  }
+  return { firstName: first, middleName: null, lastName: last };
+}
+
+export function displayContactName(parts: {
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+}): string {
+  return [parts.firstName, parts.middleName, parts.lastName].filter(Boolean).join(" ");
+}
+
+/** Initials prefix (2–3 letters) from a decision-maker name, or null when unusable. */
+export function personInitialsPrefix(contactName: string | null | undefined): string | null {
+  const parts = personNamePartsForFastCode(contactName);
+  if (!parts) return null;
+  try {
+    const normalized = validateAndNormalizeFastCodeInput(parts);
+    const prefix = extractInitials(normalized).replace(/[^a-z]/g, "");
+    return /^[a-z]{2,3}$/.test(prefix) ? prefix : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Person-initials FAST Code: "Ralf Meyer" → "rm01", "Hermance Mercure Laplante" → "hml01".
+ * Returns null when there is no usable decision-maker name (never falls back to brokerage words).
+ */
+export function proposeFastCode(contactName: string | null | undefined, taken: ReadonlySet<string>): string | null {
+  const prefix = personInitialsPrefix(contactName);
+  if (!prefix) return null;
   for (let n = 1; n < 100; n++) {
-    const code = `${base}${String(n).padStart(2, "0")}`;
+    const code = `${prefix}${String(n).padStart(2, "0")}`;
     if (!taken.has(code) && !(RESERVED_FAST_CODES as readonly string[]).includes(code)) return code;
   }
-  return `${base}${Date.now() % 10000}`;
+  return null;
+}
+
+export function proposeFastCodeFromParts(
+  firstName: string | null | undefined,
+  lastName: string | null | undefined,
+  taken: ReadonlySet<string>,
+): string | null {
+  const parts = personNamePartsFromFirstLast(firstName, lastName);
+  if (!parts) return null;
+  return proposeFastCode(displayContactName(parts), taken);
 }
 
 /** Reserved codes that must never be generated. */

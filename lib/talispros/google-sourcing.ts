@@ -1,3 +1,6 @@
+/** Google Places sourcing for the prospect review queue.
+ * FAST Codes are NOT derived here — they come from decision-maker first+last initials after research/approval.
+ */
 import "server-only";
 import {
   ANCHOR_TOWNS,

@@ -14,8 +14,9 @@ import { listFastCodeUpdates, listJobRuns, listTrackerRows } from "@/lib/talispr
 import { loadCheckpointRollup } from "@/lib/talispros/call-flow-server";
 import { CHECKPOINT_LABEL } from "@/lib/talispros/call-flow-copy";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import { addProspectToQueueAction, reviewProspectAction } from "@/app/admin/dashboard/fast-code-tracker-actions";
+import { addProspectToQueueAction } from "@/app/admin/dashboard/fast-code-tracker-actions";
 import FastCodeRunNowButton from "./FastCodeRunNowButton";
+import { ProspectCsvImport, ProspectQueueRow } from "./ProspectQueueControls";
 
 type Locale = "en" | "de";
 
@@ -44,7 +45,7 @@ const COPY = {
     runs: "Runs at 06:00 IST every day.",
     queue: "Sourcing review queue",
     queueHint:
-      "The daily run searches Google for independent (non-franchise) brokerage offices: 3 per market of about 80 km around an anchor town of 10,000–50,000 people, east to west, outside Nova Scotia. Each entry links to its Google source. Approving gives it a FAST Code and the agent with fewer codes right away.",
+      "The daily run searches Google for independent (non-franchise) brokerage offices: 3 per market of about 80 km around an anchor town of 10,000–50,000 people, east to west, outside Nova Scotia. Each entry links to its Google source. Approving assigns the agent with fewer codes; the FAST Code always uses the decision maker’s first and last name initials (never brokerage words). Without a name the code stays pending.",
     pending: "Pending review",
     approved: "Approved",
     approve: "Approve",
@@ -63,6 +64,12 @@ const COPY = {
     websiteListings: "MLS® numbers on website",
     googleSource: "Google source",
     toResearch: "Decision maker, position, cell, email: to research",
+    codePending: "Code pending: decision maker name needed",
+    fFirst: "Decision maker first name",
+    fLast: "Decision maker last name",
+    fPosition: "Position",
+    fPhone: "Phone",
+    fEmail: "Email",
     rank: "Rank",
     sourcingNone: "No Google search in this run.",
     sourcingDone: (m: string, a: number, d: number) => `Google search in ${m}: ${a} new brokerages added, ${d} already known.`,
@@ -97,7 +104,7 @@ const COPY = {
     runs: "Läuft täglich um 06:00 IST.",
     queue: "Recherche-Prüfliste",
     queueHint:
-      "Der Tageslauf sucht über Google nach unabhängigen Maklerbüros (keine Franchise): 3 pro Markt von etwa 80 km um eine Ankerstadt mit 10.000–50.000 Einwohnern, von Ost nach West, außerhalb von Nova Scotia. Jeder Eintrag verlinkt seine Google-Quelle. Mit der Freigabe erhält er sofort einen FAST Code und den Agenten mit weniger Codes.",
+      "Der Tageslauf sucht über Google nach unabhängigen Maklerbüros (keine Franchise): 3 pro Markt von etwa 80 km um eine Ankerstadt mit 10.000–50.000 Einwohnern, von Ost nach West, außerhalb von Nova Scotia. Jeder Eintrag verlinkt seine Google-Quelle. Mit der Freigabe wird der Agent mit weniger Codes zugewiesen; der FAST Code entsteht immer aus den Initialen von Vor- und Nachname des Entscheiders (nie aus Maklerbüro-Wörtern). Fehlt der Name, bleibt der Code ausstehend.",
     pending: "Zur Prüfung",
     approved: "Freigegeben",
     approve: "Freigeben",
@@ -116,6 +123,12 @@ const COPY = {
     websiteListings: "MLS®-Nummern auf der Website",
     googleSource: "Google-Quelle",
     toResearch: "Entscheider, Position, Mobil, E-Mail: noch zu recherchieren",
+    codePending: "Code ausstehend: Name des Entscheiders fehlt",
+    fFirst: "Vorname des Entscheiders",
+    fLast: "Nachname des Entscheiders",
+    fPosition: "Position",
+    fPhone: "Telefon",
+    fEmail: "E-Mail",
     rank: "Rang",
     sourcingNone: "Keine Google-Suche in diesem Lauf.",
     sourcingDone: (m: string, a: number, d: number) => `Google-Suche in ${m}: ${a} neue Maklerbüros hinzugefügt, ${d} bereits bekannt.`,
@@ -176,7 +189,7 @@ export default async function FastCodesTracker({
     listJobRuns(1),
     (getSupabaseAdmin() as unknown as import("@supabase/supabase-js").SupabaseClient)
       .from("prospect_queue")
-      .select("id, brokerage, contact_name, office_address, office_phone, website, market, market_rank, town, province, source_url, status, proposed_code, assigned_agent_id, created_at")
+      .select("id, brokerage, contact_name, contact_first_name, contact_last_name, contact_position, contact_phone, contact_email, office_address, office_phone, website, market, market_rank, town, province, source_url, status, proposed_code, assigned_agent_id, created_at")
       .in("status", ["pending", "approved"])
       .order("created_at", { ascending: false })
       .limit(50),
@@ -220,6 +233,11 @@ export default async function FastCodesTracker({
     id: string;
     brokerage: string;
     contact_name: string | null;
+    contact_first_name: string | null;
+    contact_last_name: string | null;
+    contact_position: string | null;
+    contact_phone: string | null;
+    contact_email: string | null;
     office_address: string | null;
     office_phone: string | null;
     website: string | null;
@@ -401,52 +419,32 @@ export default async function FastCodesTracker({
         {queue.length ? (
           <ul className="m-0 mt-3 list-none divide-y divide-neutral-100 p-0">
             {queue.map((q) => (
-              <li key={q.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
-                <span>
-                  <span className="font-semibold text-neutral-900">{q.brokerage}</span>
-                  <span className="ml-2 text-neutral-500">{[q.town, q.province].filter(Boolean).join(", ")}</span>
-                  {q.market_rank ? <span className="ml-2 text-xs text-neutral-500">{t.rank} {q.market_rank} · {q.market}</span> : null}
-                  <a href={q.source_url} target="_blank" rel="noreferrer" className="ml-2 text-xs text-[#1E4ED8] underline">
-                    {q.source_url.includes("google.") ? t.googleSource : t.fSource.split(" (")[0]}
-                  </a>
-                  {q.website ? (
-                    <a href={q.website} target="_blank" rel="noreferrer" className="ml-2 text-xs text-[#1E4ED8] underline">
-                      {t.fWebsite}
-                    </a>
-                  ) : null}
-                  {q.office_address || q.office_phone ? (
-                    <span className="block text-xs text-neutral-500">{[q.office_address, q.office_phone].filter(Boolean).join(" · ")}</span>
-                  ) : null}
-                  {!q.contact_name ? <span className="block text-xs text-amber-700">{t.toResearch}</span> : null}
-                </span>
-                {q.status === "pending" ? (
-                  <span className="flex gap-2">
-                    {(["approved", "rejected"] as const).map((d) => (
-                      <form key={d} action={reviewProspectAction}>
-                        <input type="hidden" name="id" value={q.id} />
-                        <input type="hidden" name="decision" value={d} />
-                        <button type="submit" className="rounded-lg border border-neutral-300 px-3 py-1 text-xs font-semibold text-neutral-800 hover:bg-neutral-50">
-                          {d === "approved" ? t.approve : t.reject}
-                        </button>
-                      </form>
-                    ))}
-                  </span>
-                ) : (
-                  <span className="text-xs text-neutral-600">
-                    {t.approved}
-                    {q.proposed_code ? ` · ${q.proposed_code.toUpperCase()}` : ""}
-                  </span>
-                )}
-              </li>
+              <ProspectQueueRow
+                key={q.id}
+                locale={locale}
+                row={q}
+                labels={{
+                  rank: t.rank,
+                  googleSource: t.googleSource,
+                  source: t.fSource.split(" (")[0]!,
+                  website: t.fWebsite,
+                  toResearch: t.toResearch,
+                }}
+              />
             ))}
           </ul>
         ) : (
           <p className="mt-3 text-sm text-neutral-500">{t.queueEmpty}</p>
         )}
+        <ProspectCsvImport locale={locale} />
         <form action={addProspectToQueueAction} className="mt-4 grid gap-2 sm:grid-cols-2">
           <p className="m-0 text-sm font-semibold text-neutral-800 sm:col-span-2">{t.add}</p>
           <input name="brokerage" required placeholder={t.fBrokerage} className={input} />
-          <input name="contact_name" placeholder={t.fContact} className={input} />
+          <input name="contact_first_name" placeholder={t.fFirst} className={input} />
+          <input name="contact_last_name" placeholder={t.fLast} className={input} />
+          <input name="contact_position" placeholder={t.fPosition} className={input} />
+          <input name="contact_phone" placeholder={t.fPhone} className={input} />
+          <input name="contact_email" placeholder={t.fEmail} className={input} />
           <input name="office_address" placeholder={t.fAddress} className={input} />
           <input name="town" placeholder={t.fTown} className={input} />
           <input name="province" placeholder={t.fProvince} className={input} />

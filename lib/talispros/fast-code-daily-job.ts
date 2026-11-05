@@ -14,9 +14,11 @@ import { websiteHost } from "@/lib/talispros/prospect-markets";
  *     no REALTOR.ca requests.
  *  1b. Sourcing: Google Places Text Search in the next anchor-town markets
  *     (Ralf's parameters, lib/talispros/prospect-markets.ts) → review queue.
- *  2. Assign: approved sourcing-queue prospects get an initials FAST Code that
+ *  2. Assign: approved sourcing-queue prospects get a person-initials FAST Code
+ *     from the decision maker's first+last name (never brokerage words) that
  *     collides with nothing (codes, Mapsites, build requests, reserved) and go
- *     to the less-loaded sales associate.
+ *     to the less-loaded sales associate. Without a decision-maker name the
+ *     proposed_code stays null ("Code pending").
  * Every candidate needs admin approval; fields Google does not give
  * (decision maker, position, cell, email) stay blank ("to research").
  */
@@ -334,29 +336,51 @@ export async function assignApproved(summary: DailyJobSummary): Promise<void> {
 
   const taken = await loadTakenCodes();
   for (const q of queue.filter((x) => x.status === "approved" && (!x.proposed_code || !x.assigned_agent_id))) {
-    const code = q.proposed_code || proposeFastCode(q.contact_name || q.brokerage, taken);
-    taken.add(code);
     const pick = pickLeastLoaded(active.map((a) => ({ id: a.id, count: load.get(a.id) ?? 0, name: a.name })));
     if (!pick) break;
-    load.set(pick.id, pick.count + 1);
+
+    let code = q.proposed_code?.trim().toLowerCase() || null;
+    if (!code) {
+      code = proposeFastCode(q.contact_name, taken);
+      if (!code) {
+        // Decision-maker name required for a code; still assign an agent if missing.
+        if (!q.assigned_agent_id) {
+          const { error } = await db()
+            .from("prospect_queue")
+            .update({ assigned_agent_id: pick.id })
+            .eq("id", q.id);
+          if (error) summary.errors.push(`assign ${q.brokerage}: ${error.message}`);
+          else {
+            load.set(pick.id, pick.count + 1);
+            summary.errors.push(`code pending for ${q.brokerage}: decision maker name needed`);
+          }
+        }
+        continue;
+      }
+    }
+
+    taken.add(code);
+    load.set(pick.id, (load.get(pick.id) ?? pick.count) + 1);
     const { error } = await db()
       .from("prospect_queue")
-      .update({ proposed_code: code, assigned_agent_id: pick.id })
+      .update({ proposed_code: code, assigned_agent_id: q.assigned_agent_id || pick.id })
       .eq("id", q.id);
     if (error) {
       summary.errors.push(`assign ${q.brokerage}: ${error.message}`);
       continue;
     }
+    const agentId = q.assigned_agent_id || pick.id;
+    const agentName = active.find((a) => a.id === agentId)?.name ?? pick.name;
     await recordFastCodeUpdate({
       fastCode: code,
-      agentId: pick.id,
+      agentId,
       eventType: "assigned",
       stage: "new",
-      note: `${q.brokerage} → ${pick.name}`,
+      note: `${q.brokerage} → ${agentName}`,
       details: { queueId: q.id },
       createdBy: "daily-job",
     });
-    summary.assigned.push({ code: code.toUpperCase(), agent: pick.name, brokerage: q.brokerage });
+    summary.assigned.push({ code: code.toUpperCase(), agent: agentName, brokerage: q.brokerage });
   }
 }
 
