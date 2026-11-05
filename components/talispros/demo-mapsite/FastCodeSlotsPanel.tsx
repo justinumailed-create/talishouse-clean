@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useLocale, useT } from "@/lib/i18n/client";
 import {
   addFastCodeSlotAction,
+  openProspectMapsiteAction,
   removeFastCodeSlotAction,
 } from "@/app/talispros/demo-mapsite/slots-actions";
 import {
@@ -41,6 +42,114 @@ function CodeLink({ entry, testId }: { entry: SlotEntry; testId: string }) {
         </time>
       ) : null}
     </Link>
+  );
+}
+
+function SlotRow({ entry }: { entry: SlotEntry }) {
+  const locale = useLocale();
+  const added = formatSlotAddedDate(entry.addedAt, locale);
+  return (
+    <>
+      <span className="shrink-0 font-mono text-[13px] font-semibold tracking-wide text-[#046BD9] group-hover:underline sm:text-[14px]">
+        {entry.fastCode}
+      </span>
+      <span className="min-w-0 truncate text-neutral-700">{slotPlaceLabel(entry.town, entry.province)}</span>
+      {added ? (
+        <time
+          dateTime={entry.addedAt ?? undefined}
+          className="ml-auto shrink-0 pl-2 text-[12px] tabular-nums text-neutral-500 sm:text-[13px]"
+          data-testid="fast-code-slot-added"
+        >
+          {added}
+        </time>
+      ) : null}
+    </>
+  );
+}
+
+/** Public prospect code: clicking it asks for an agent password below, then opens the Mapsite. */
+function GatedCode({
+  entry,
+  copy,
+  open,
+  notice,
+  onToggle,
+}: {
+  entry: SlotEntry;
+  copy: SlotsCopy;
+  open: boolean;
+  notice: boolean;
+  onToggle: () => void;
+}) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const fieldId = `gate-${entry.slotId}`;
+  return (
+    <li className="flex flex-col">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={open}
+        aria-controls={fieldId}
+        className="group -mx-2 flex min-w-0 flex-1 items-baseline gap-2 rounded-lg px-2 py-1.5 text-left text-[14px] leading-snug transition hover:bg-[#046BD9]/[0.06] sm:text-[15px]"
+        data-testid="fast-code-slot-code"
+      >
+        <SlotRow entry={entry} />
+      </button>
+      {open ? (
+        <form
+          id={fieldId}
+          className="mb-2 mt-1 rounded-xl bg-neutral-50 px-3 py-3 ring-1 ring-black/5"
+          data-testid="fast-code-gate"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!password) return;
+            setError(null);
+            start(async () => {
+              const res = await openProspectMapsiteAction({ code: entry.fastCode, password });
+              if (res.ok) {
+                setPassword("");
+                window.location.assign(res.href);
+              } else {
+                setError(res.error === "limited" ? copy.gateLimited : res.error === "wrong" ? copy.gateWrong : copy.errFailed);
+              }
+            });
+          }}
+        >
+          <p className="m-0 mb-2 text-[12px] text-neutral-600">{notice ? copy.gateRequired : copy.gateHint}</p>
+          <label className="sr-only" htmlFor={`${fieldId}-pw`}>
+            {copy.gateLabel}
+          </label>
+          <div className="flex gap-2">
+            <input
+              id={`${fieldId}-pw`}
+              type="password"
+              autoFocus
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={copy.gateLabel}
+              className="h-10 min-w-0 flex-1 rounded-full border border-neutral-300 bg-white px-4 text-[14px] text-neutral-900 outline-none focus:border-[#046BD9]"
+              data-testid="fast-code-gate-input"
+            />
+            <button
+              type="submit"
+              disabled={pending || !password}
+              className="h-10 shrink-0 rounded-full bg-[#046BD9] px-5 text-[14px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] disabled:opacity-40"
+              data-testid="fast-code-gate-submit"
+            >
+              {pending ? copy.gateChecking : copy.gateOpen}
+            </button>
+          </div>
+          {error ? (
+            <p role="alert" className="m-0 mt-2 text-[12px] text-amber-800" data-testid="fast-code-gate-error">
+              {error}
+            </p>
+          ) : null}
+        </form>
+      ) : null}
+    </li>
   );
 }
 
@@ -159,9 +268,20 @@ function OwnList({ initial, copy }: { initial: OwnSlotList; copy: SlotsCopy }) {
 export default function FastCodeSlotsPanel({ data }: { data: FastCodeSlotsPanelData }) {
   const copy = useT().demo.slots;
   const groups = data.associates.filter((g) => g.entries.length > 0);
+  const [openCode, setOpenCode] = useState<string | null>(null);
+  const [noticeCode, setNoticeCode] = useState<string | null>(null);
+  // A blocked direct link lands here with ?gate=<code>: open that code's password field.
+  useEffect(() => {
+    const gate = new URLSearchParams(window.location.search).get("gate")?.trim().toLowerCase();
+    if (gate && /^[a-z0-9-]{2,40}$/.test(gate)) {
+      setOpenCode(gate);
+      setNoticeCode(gate);
+      document.getElementById("fast-code-slots")?.scrollIntoView({ block: "center" });
+    }
+  }, []);
   if (!data.own && !groups.length) return null;
   return (
-    <div className="mt-5 flex flex-col gap-4 border-t border-neutral-200 pt-5" data-testid="fast-code-slots">
+    <div className="mt-5 flex flex-col gap-4 border-t border-neutral-200 pt-5" data-testid="fast-code-slots" id="fast-code-slots">
       <p className="m-0 text-[12px] font-semibold uppercase tracking-[0.16em] text-neutral-500 sm:text-[13px]" id="fast-code-slots-title">
         {copy.title}
       </p>
@@ -174,9 +294,16 @@ export default function FastCodeSlotsPanel({ data }: { data: FastCodeSlotsPanelD
           data-testid="fast-code-slots-group"
         >
           {group.entries.map((entry) => (
-            <li key={entry.slotId} className="flex">
-              <CodeLink entry={entry} testId="fast-code-slot-code" />
-            </li>
+            <GatedCode
+              key={entry.slotId}
+              entry={entry}
+              copy={copy}
+              open={openCode === entry.fastCode.toLowerCase()}
+              notice={noticeCode === entry.fastCode.toLowerCase()}
+              onToggle={() =>
+                setOpenCode((cur) => (cur === entry.fastCode.toLowerCase() ? null : entry.fastCode.toLowerCase()))
+              }
+            />
           ))}
         </ul>
       ))}

@@ -1,3 +1,4 @@
+import { requireProspectAccessForCode } from "@/lib/talispros/prospect-gate-server";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import PublishedMapSiteView, {
@@ -13,6 +14,7 @@ export async function generateMetadata({
   params: Promise<{ fastCode: string }>;
 }): Promise<Metadata> {
   const { fastCode } = await params;
+  await requireProspectAccessForCode(fastCode);
   const mapsite = await loadPublishedMapSiteView(fastCode);
 
   if (!mapsite) {

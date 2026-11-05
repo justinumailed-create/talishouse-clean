@@ -3,8 +3,8 @@ import type { AgentAdminRecord, AgentMapSiteSummary } from "@/lib/agent-admins";
 import type { ManualPaymentRecord } from "@/lib/manual-payments";
 import { crmCopy } from "@/lib/crm-leads/copy";
 import { getLocale } from "@/lib/i18n/server";
-import { SALES_ASSOCIATE_LOGINS, slotPlaceLabel } from "@/lib/talispros/fast-code-slots";
-import { loadSlotListForAgentId } from "@/lib/talispros/fast-code-slots-server";
+import { listFastCodeUpdates, listTrackerRows } from "@/lib/talispros/fast-code-tracker-server";
+import AgentFastCodeCards, { type AgentFastCodeCard } from "./AgentFastCodeCards";
 import AgentWorkPanel from "./AgentWorkPanel";
 import CashPaymentsTable from "./CashPaymentsTable";
 
@@ -43,11 +43,26 @@ export default async function AgentDashboard({
   const canMapSites = can("mapsites");
   const canCash = can("cash-payments");
   const canLeads = can("leads-crm");
-  const leadsCopy = crmCopy(await getLocale());
+  const locale = (await getLocale()) === "de" ? "de" : "en";
+  const leadsCopy = crmCopy(locale);
   const active = agent.status === "active";
-  // Prepared Mapsites (FAST Code slots) for the sales associates.
-  const isAssociate = (SALES_ASSOCIATE_LOGINS as readonly string[]).includes(agent.loginId.toLowerCase());
-  const slots = isAssociate ? await loadSlotListForAgentId(agent.id).catch(() => null) : null;
+  // FAST Code cards first (Arun, Nov 5): one card per assigned prospect code.
+  const trackerRows = await listTrackerRows({ agentId: agent.id }).catch(() => []);
+  const updates = trackerRows.length ? await listFastCodeUpdates({ limit: 500 }).catch(() => []) : [];
+  const cards: AgentFastCodeCard[] = trackerRows.map((r) => {
+    const mine = updates.filter((u) => u.fastCode === r.fastCode.toLowerCase());
+    return {
+      fastCode: r.fastCode,
+      brokerage: r.brokerage,
+      contact: r.contact,
+      address: r.address,
+      stage: r.stage,
+      mapsiteHref: r.mapsiteHref,
+      tebHref: r.tebHref,
+      lastNote: mine.find((u) => u.eventType === "note")?.note ?? null,
+      lastUpdate: mine[0]?.createdAt ?? null,
+    };
+  });
 
   return (
     <div className="space-y-6">
@@ -74,36 +89,7 @@ export default async function AgentDashboard({
         </span>
       </header>
 
-      <div className="grid gap-5 sm:grid-cols-2">
-        {[
-          { href: "/admin/agent/notes", title: "Daily notes", text: "Log today’s tasks and upload documents.", badge: 0 },
-          { href: "/chat", title: "Chat", text: "Private messages with other agents.", badge: chatUnread },
-          ...(canLeads
-            ? [{ href: "/admin/agent/leads", title: leadsCopy.dashboardTitle, text: leadsCopy.dashboardText, badge: 0 }]
-            : []),
-        ].map((item) => {
-          const inner = (
-            <>
-              <span>
-                <span className="block text-[15px] font-semibold text-neutral-900">{item.title}</span>
-                <span className="mt-0.5 block text-[13px] text-neutral-500">{item.text}</span>
-              </span>
-              {item.badge > 0 ? (
-                <span className="rounded-full bg-[#1E4ED8] px-2.5 py-0.5 text-xs font-semibold text-white">{item.badge} unread</span>
-              ) : (
-                <span aria-hidden className="text-neutral-400">→</span>
-              )}
-            </>
-          );
-          return readOnly ? (
-            <div key={item.href} className={`${card} flex items-center justify-between gap-3 p-5`}>{inner}</div>
-          ) : (
-            <Link key={item.href} href={item.href} className={`${card} flex items-center justify-between gap-3 p-5 transition hover:border-[#1E4ED8]/40`}>
-              {inner}
-            </Link>
-          );
-        })}
-      </div>
+      {cards.length ? <AgentFastCodeCards cards={cards} locale={locale} readOnly={readOnly} /> : null}
 
       <div>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">Tasks</h2>
@@ -154,50 +140,43 @@ export default async function AgentDashboard({
         </section>
       ) : null}
 
-      {slots ? (
-        <section className={`${card} p-6`} data-testid="agent-fast-code-slots">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-[15px] font-semibold text-neutral-900">My prepared Mapsites</h2>
-            <span className="text-xs text-neutral-500">
-              {slots.count} of {slots.limit} FAST Code slots used
-            </span>
-          </div>
-          <p className="mt-1 text-sm text-neutral-500">
-            Listed by FAST Code on the{" "}
-            <Link href="/talispros/demo-mapsite" className="font-medium text-[#1E4ED8] underline">
-              Mapsites page
-            </Link>
-            . Add or remove codes there while signed in.
-          </p>
-          {slots.entries.length ? (
-            <ul className="mt-4 divide-y divide-neutral-200 overflow-hidden rounded-xl border border-neutral-200">
-              {slots.entries.map((entry) => (
-                <li key={entry.slotId} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
-                  <span className="min-w-0">
-                    <span className="font-mono font-semibold uppercase text-neutral-900">{entry.fastCode}</span>
-                    <span className="ml-2 truncate text-neutral-500">{slotPlaceLabel(entry.town, entry.province)}</span>
-                  </span>
-                  <Link
-                    href={entry.href}
-                    className="shrink-0 rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-50"
-                  >
-                    Open
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="mt-3 text-sm text-neutral-500">No FAST Codes in your list yet.</p>
-          )}
-        </section>
-      ) : null}
-
       {canCash ? (
         <section className={`${card} p-6`}>
           <h2 className="mb-4 text-[15px] font-semibold text-neutral-900">Cash payments I recorded</h2>
           <CashPaymentsTable payments={payments} />
         </section>
       ) : null}
+      <div className="grid gap-5 sm:grid-cols-2" data-testid="agent-quick-links">
+        {[
+          { href: "/admin/agent/notes", title: "Daily notes", text: "Log today’s tasks and upload documents.", badge: 0 },
+          { href: "/chat", title: "Chat", text: "Private messages with other agents.", badge: chatUnread },
+          ...(canLeads
+            ? [{ href: "/admin/agent/leads", title: leadsCopy.dashboardTitle, text: leadsCopy.dashboardText, badge: 0 }]
+            : []),
+        ].map((item) => {
+          const inner = (
+            <>
+              <span>
+                <span className="block text-[15px] font-semibold text-neutral-900">{item.title}</span>
+                <span className="mt-0.5 block text-[13px] text-neutral-500">{item.text}</span>
+              </span>
+              {item.badge > 0 ? (
+                <span className="rounded-full bg-[#1E4ED8] px-2.5 py-0.5 text-xs font-semibold text-white">{item.badge} unread</span>
+              ) : (
+                <span aria-hidden className="text-neutral-400">→</span>
+              )}
+            </>
+          );
+          return readOnly ? (
+            <div key={item.href} className={`${card} flex items-center justify-between gap-3 p-5`}>{inner}</div>
+          ) : (
+            <Link key={item.href} href={item.href} className={`${card} flex items-center justify-between gap-3 p-5 transition hover:border-[#1E4ED8]/40`}>
+              {inner}
+            </Link>
+          );
+        })}
+      </div>
+
     </div>
   );
 }

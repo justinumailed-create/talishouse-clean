@@ -10,6 +10,8 @@ import { istDate, isAgentOnline } from "@/lib/agent-collab";
 import { getAgentPresence, listAgentNotes } from "@/lib/agent-collab-server";
 import { listAgents } from "@/lib/agent-admins";
 import { listManualPayments } from "@/lib/manual-payments";
+import FastCodesTracker from "@/components/admin/FastCodesTracker";
+import { getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 
@@ -51,8 +53,18 @@ async function agentSummary() {
   }
 }
 
-export default async function AdminDashboardPage() {
+function one(v: string | string[] | undefined): string | undefined {
+  return Array.isArray(v) ? v[0] : v;
+}
+
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   await requireAdminPage();
+  const query = await searchParams;
+  const locale = (await getLocale()) === "de" ? "de" : "en";
   const account = await getAdminSessionAccount();
   const canAgents = accountHasAdminScope(account, "agents");
   const summary = canAgents ? await agentSummary() : null;
@@ -65,6 +77,13 @@ export default async function AdminDashboardPage() {
         title={account ? `Welcome back, ${account.name.split(" ")[0]}` : "Dashboard"}
         subtitle="Tsplits™ administration: Mapsites, Talisbooks™, Talismaps™ and agents."
       />
+
+      {canAgents ? (
+        <FastCodesTracker
+          locale={locale}
+          params={{ day: one(query.day), agent: one(query.agent), stage: one(query.stage), code: one(query.code) }}
+        />
+      ) : null}
 
       {summary ? (
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

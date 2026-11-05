@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/weekly-marketing-report",
       "schedule": "0 14 * * 1"
+    },
+    {
+      "path": "/api/cron/fast-codes-daily",
+      "schedule": "30 0 * * *"
     }
   ]
 }

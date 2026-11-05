@@ -1,3 +1,4 @@
+import { requireProspectAccessForCode } from "@/lib/talispros/prospect-gate-server";
 import PublishedMapSiteView, {
   loadPublishedMapSiteView,
   publishedMapSiteMetadata,
@@ -21,6 +22,7 @@ export async function generateMetadata({
   if (!slug) {
     return { title: "Mapsite" };
   }
+  await requireProspectAccessForCode(slug);
   const published = await loadPublishedMapSiteView(slug);
   if (published) {
     return await publishedMapSiteMetadata(published);

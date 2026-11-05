@@ -6,8 +6,11 @@ import {
   addFastCodeSlot,
   loadOwnSlotList,
   removeFastCodeSlot,
+  resolvePreparedHrefByCode,
   type SlotMutationError,
 } from "@/lib/talispros/fast-code-slots-server";
+import { verifyProspectGate, type GateResult } from "@/lib/talispros/prospect-gate-server";
+import { normalizeSlotFastCode } from "@/lib/talispros/fast-code-slots";
 import type { OwnSlotList } from "@/lib/talispros/fast-code-slots";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 
@@ -31,4 +34,15 @@ export async function removeFastCodeSlotAction(input: { slotId: string }): Promi
   if (!res.ok) return res;
   revalidatePath(DEMO_MAPSITE_BUILD_PATH);
   return { ok: true, list: await loadOwnSlotList(agent) };
+}
+
+/** Agent password gate: a prepared FAST Code opens only for a matching agent password. */
+export async function openProspectMapsiteAction(input: {
+  code: string;
+  password: string;
+}): Promise<GateResult> {
+  const code = normalizeSlotFastCode(input?.code);
+  const target = code ? await resolvePreparedHrefByCode(code) : null;
+  if (!target) return { ok: false, error: "wrong" };
+  return verifyProspectGate(code, input?.password, target.href);
 }

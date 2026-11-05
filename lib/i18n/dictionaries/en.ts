@@ -835,6 +835,13 @@ export const en = {
       errFull: "All 15 slots are in use. Remove one first.",
       errSignin: "Sign in again to change your list.",
       errFailed: "That did not work. Please try again.",
+      gateLabel: "Agent password",
+      gateHint: "Enter your agent password to open this Mapsite.",
+      gateOpen: "Open Mapsite",
+      gateChecking: "Checking…",
+      gateWrong: "That password does not match an agent account. Please try again.",
+      gateLimited: "Too many attempts. Please wait 15 minutes and try again.",
+      gateRequired: "This Mapsite opens for agents only. Click its FAST Code and enter your agent password.",
     },
     /** Demo builder card (Ralf, Oct 26): numbered steps, one address box. */
     addressPlaceholder: "Start typing an address…",

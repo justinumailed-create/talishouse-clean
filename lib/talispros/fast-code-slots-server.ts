@@ -191,3 +191,17 @@ export async function isPreparedSlotMapsite(mapsiteId: string | null | undefined
     .eq("mapsite_id", mapsiteId);
   return (count ?? 0) > 0;
 }
+
+/** Mapsite link for a prepared (slot) FAST Code, or null when the code is not a prospect code. */
+export async function resolvePreparedHrefByCode(code: string): Promise<{ href: string; mapsiteId: string } | null> {
+  if (!isSupabaseAdminConfigured()) return null;
+  const { data } = await db()
+    .from("mapsites")
+    .select("id, fast_code, account_type")
+    .ilike("fast_code", code)
+    .limit(1)
+    .maybeSingle();
+  const m = data as { id: string; fast_code: string | null; account_type: string | null } | null;
+  if (!m?.fast_code || !(await isPreparedSlotMapsite(m.id))) return null;
+  return { href: mapsiteHrefForSlot(m.account_type, m.fast_code), mapsiteId: m.id };
+}

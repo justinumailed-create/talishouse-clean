@@ -60,6 +60,7 @@ import { TALISU_DISCUSS_PATH, talisuHref } from "@/lib/talisu/talisu-links";
 import { PMC_PATHS } from "@/lib/talispros/mapsite-contract";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { isPreparedSlotMapsite } from "@/lib/talispros/fast-code-slots-server";
+import { hasProspectAccess } from "@/lib/talispros/prospect-gate-server";
 import { loadOwnTebViewerHref } from "@/lib/talisbooks/own-teb-href";
 
 export const dynamic = "force-dynamic";
@@ -189,6 +190,12 @@ export default async function ClaimedMapSiteByAccountTypePage({
     claimed: true,
   });
 
+  // Prospect FAST Codes open only behind the agent password gate (Arun, Nov 5).
+  const preparedSlotMapsite = await isPreparedSlotMapsite(mapsite.id);
+  if (preparedSlotMapsite && !(await hasProspectAccess())) {
+    redirect(`${DEMO_MAPSITE_BUILD_PATH}?gate=${encodeURIComponent(fastCode.toLowerCase())}#fast-code-slots`);
+  }
+
   // Real owner/paid browser session.
   const isOwner = await isOwnMapSite(fastCode);
 
@@ -249,10 +256,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
     bookSlug: primarySlug,
     tebUrl: mapsite.teb_url,
   });
-  const [preparedSlotMapsite, tebOwnBookHref] = await Promise.all([
-    isPreparedSlotMapsite(mapsite.id),
-    loadOwnTebViewerHref(mapsite.fast_code || fastCode),
-  ]);
+  const tebOwnBookHref = await loadOwnTebViewerHref(mapsite.fast_code || fastCode);
   const listingMapSite = withEbookListingMedia(
     {
       ...mapsite,

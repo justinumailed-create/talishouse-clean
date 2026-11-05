@@ -1,3 +1,4 @@
+import { requireProspectAccessForCode } from "@/lib/talispros/prospect-gate-server";
 import { getLocale } from "@/lib/i18n/server";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
@@ -33,6 +34,7 @@ export async function generateMetadata({
   if (!code) {
     return { title: "Mapsite map" };
   }
+  await requireProspectAccessForCode(code);
   const published = await loadPublishedMapSiteView(code);
   const ogImage = isAllPinsFastCode(code)
     ? resolveMapSiteOgImage(code)
