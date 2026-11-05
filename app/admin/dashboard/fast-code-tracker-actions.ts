@@ -15,6 +15,11 @@ import {
   importProspectContactsCsv,
   type ProspectImportReport,
 } from "@/lib/talispros/prospect-contacts-import";
+import {
+  assignedCopy,
+  contactResultCopy,
+  postTalisbotCard,
+} from "@/lib/talispros/admin-talisbot-messages";
 
 function db(): SupabaseClient {
   return getSupabaseAdmin() as unknown as SupabaseClient;
@@ -119,8 +124,16 @@ export async function reviewProspectAction(form: FormData): Promise<ReviewProspe
     .maybeSingle();
   if (!data) return { ok: false, error: "not_found" };
   if (decision === "approved") {
-    const s = { assigned: [], errors: [] } as unknown as DailyJobSummary;
+    const s = { assigned: [], errors: [], refreshed: 0, listingChanges: 0, websitesScanned: 0, sourcing: { markets: [], added: 0, duplicates: 0, franchisesSkipped: 0, errors: [], keyEnv: null, customSearch: false }, brokerSitesDown: [], pendingReview: 0 } as DailyJobSummary;
     await assignApproved(s).catch(() => undefined);
+    if (s.assigned.length) {
+      await postTalisbotCard({
+        type: "assigned",
+        i18n: assignedCopy(s.assigned),
+        metadata: { assigned: s.assigned, reviewedBy: account.name },
+        createdBy: "talisbot",
+      }).catch(() => undefined);
+    }
   }
   revalidatePath("/admin/dashboard");
   return { ok: true };
@@ -201,6 +214,18 @@ export async function updateProspectContactAction(form: FormData): Promise<Updat
     }
   }
 
+  await postTalisbotCard({
+    type: "result",
+    i18n: contactResultCopy(
+      [contactName].filter(Boolean) as string[],
+      proposed ? [proposed] : [],
+    ),
+    fastCode: proposed,
+    brokerage: ex.brokerage,
+    prospectQueueId: id,
+    createdBy: "talisbot",
+  }).catch(() => undefined);
+
   revalidatePath("/admin/dashboard");
   return { ok: true, proposedCode: proposed };
 }
@@ -219,6 +244,16 @@ export async function importProspectContactsCsvAction(form: FormData): Promise<I
   const text = await file.text();
   try {
     const report = await importProspectContactsCsv(text, `admin:${account.name}`);
+    const names = report.queueUpdated.map((q) => q.brokerage);
+    const codes = report.queueUpdated.map((q) => q.newCode).filter(Boolean) as string[];
+    if (report.queueUpdated.length || report.leadsFilled.length) {
+      await postTalisbotCard({
+        type: "result",
+        i18n: contactResultCopy(names, codes),
+        metadata: { import: true, queueUpdated: report.queueUpdated.length, leadsFilled: report.leadsFilled.length },
+        createdBy: "talisbot",
+      }).catch(() => undefined);
+    }
     revalidatePath("/admin/dashboard");
     return { ok: true, report };
   } catch (e) {

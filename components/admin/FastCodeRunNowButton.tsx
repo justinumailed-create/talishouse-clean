@@ -23,6 +23,7 @@ export default function FastCodeRunNowButton({ locale }: { locale: "en" | "de" }
         onClick={() =>
           start(async () => {
             setMsg(null);
+            router.refresh(); // show searching card as soon as the job row exists
             const res = await runFastCodeJobNowAction();
             if (!res.ok) return setMsg(t.failed);
             setMsg(t.done.replace("{n}", String(res.summary.refreshed)).replace("{s}", String(res.summary.sourcing?.added ?? 0)).replace("{a}", String(res.summary.assigned.length)));

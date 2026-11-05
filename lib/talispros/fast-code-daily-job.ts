@@ -6,6 +6,12 @@ import { RESERVED_FAST_CODES, pickLeastLoaded, proposeFastCode } from "@/lib/tal
 import { recordFastCodeUpdate } from "@/lib/talispros/fast-code-tracker-server";
 import { ANCHOR_TOWNS, googleCustomSearch, googlePlacesKey, searchMarket } from "@/lib/talispros/google-sourcing";
 import { websiteHost } from "@/lib/talispros/prospect-markets";
+import {
+  assignedCopy,
+  postTalisbotCard,
+  progressCopy,
+  resultCopy,
+} from "@/lib/talispros/admin-talisbot-messages";
 
 /**
  * Daily FAST Code job (Vercel cron 00:30 UTC = 06:00 IST, plus "Run now").
@@ -400,6 +406,38 @@ export async function runFastCodeDailyJob(triggeredBy: string): Promise<DailyJob
     return summary;
   }
   const { data: run } = await db().from("fast_code_job_runs").insert({ triggered_by: triggeredBy }).select("id").single();
+
+  // Peek next markets for the progress card (same rotation as sourceFromGoogle).
+  const peekTowns: string[] = [];
+  try {
+    const { data: last } = await db()
+      .from("fast_code_job_runs")
+      .select("summary")
+      .not("finished_at", "is", null)
+      .order("started_at", { ascending: false })
+      .limit(20);
+    let start = 0;
+    for (const r of (last ?? []) as { summary: { sourcing?: { nextMarketIndex?: number } } | null }[]) {
+      const n = r.summary?.sourcing?.nextMarketIndex;
+      if (typeof n === "number") {
+        start = n;
+        break;
+      }
+    }
+    for (let n = 0, i = start % ANCHOR_TOWNS.length; n < MARKETS_PER_RUN && ANCHOR_TOWNS.length; n++, i = (i + 1) % ANCHOR_TOWNS.length) {
+      const t = ANCHOR_TOWNS[i]!;
+      peekTowns.push(`${t.town}, ${t.province}`);
+    }
+  } catch {
+    /* progress card is best-effort */
+  }
+  await postTalisbotCard({
+    type: "progress",
+    i18n: progressCopy(peekTowns),
+    metadata: { triggeredBy, towns: peekTowns, jobRunId: (run as { id?: string } | null)?.id ?? null },
+    createdBy: "talisbot",
+  }).catch(() => undefined);
+
   try {
     await refreshCodes(summary);
   } catch (e) {
@@ -421,5 +459,28 @@ export async function runFastCodeDailyJob(triggeredBy: string): Promise<DailyJob
       .update({ finished_at: new Date().toISOString(), summary })
       .eq("id", (run as { id: string }).id);
   }
+
+  const marketLabels = (summary.sourcing.markets ?? []).map((m) => m.market);
+  await postTalisbotCard({
+    type: "result",
+    i18n: resultCopy(summary.sourcing.added ?? 0, marketLabels),
+    metadata: {
+      triggeredBy,
+      added: summary.sourcing.added,
+      markets: marketLabels,
+      jobRunId: (run as { id?: string } | null)?.id ?? null,
+    },
+    createdBy: "talisbot",
+  }).catch(() => undefined);
+
+  if (summary.assigned.length) {
+    await postTalisbotCard({
+      type: "assigned",
+      i18n: assignedCopy(summary.assigned),
+      metadata: { triggeredBy, assigned: summary.assigned },
+      createdBy: "talisbot",
+    }).catch(() => undefined);
+  }
+
   return summary;
 }

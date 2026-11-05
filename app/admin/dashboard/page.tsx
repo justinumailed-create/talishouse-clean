@@ -82,7 +82,11 @@ export default async function AdminDashboardPage({
 
       {canAgents ? (
         <>
-          <TalisbotMessagesSection locale={locale} />
+          <TalisbotMessagesSection
+            locale={locale}
+            talisbotDay={one(query.talisbotDay)}
+            preview={one(query.talisbotPreview)}
+          />
           <FastCodesTracker
             locale={locale}
             params={{ day: one(query.day), agent: one(query.agent), stage: one(query.stage), code: one(query.code) }}
