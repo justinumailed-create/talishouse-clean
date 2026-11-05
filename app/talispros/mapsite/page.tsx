@@ -41,6 +41,7 @@ import {
 import { loadMapSitePinDashboard } from "@/lib/talispros/mapsite-additional-pins-service";
 import { withEbookListingMedia } from "@/lib/talispros/mapsite-listing-media";
 import MapSiteApplication from "@/components/talispros/mapsite/MapSiteApplication";
+import { readMapZoomExplicit } from "@/lib/talispros/system-mapsite-zoom-server";
 import MapSitePmcApplication from "@/components/talispros/mapsite/MapSitePmcApplication";
 import MapSiteOnboardingEntry from "@/components/talispros/mapsite/MapSiteOnboardingEntry";
 import { pageMetadata } from "@/lib/seo/page-metadata";
@@ -279,6 +280,7 @@ export default async function TalisprosMapSitePage({
       checkoutStatus={checkoutStatus}
       checkoutSessionId={checkoutSessionId}
       openPinOnLoad={view === "pin"}
+      mapZoomExplicit={await readMapZoomExplicit(mapsite.id)}
       isOwner={isOwner}
       showStartHere={false}
       flagIdentity={ebookContext?.primaryEbook?.flagIdentity}

@@ -23,6 +23,7 @@ import {
   mergeMapSiteWithSubmittedLocation,
   type MapSitePlatformRecord,
 } from "@/lib/talispros/mapsite-platform";
+import { readMapZoomExplicit } from "@/lib/talispros/system-mapsite-zoom-server";
 
 function mapSiteViewFromPlatform(record: MapSitePlatformRecord): MapSiteView {
   const code = (record.fast_code || "").trim();
@@ -241,7 +242,9 @@ export default async function PublishedMapSiteView({
 }: {
   mapsite: MapSiteView;
 }) {
-  const layoutData = buildMapSiteLayoutData(mapsite);
+  const layoutData = buildMapSiteLayoutData(mapsite, {
+    zoomExplicit: await readMapZoomExplicit(mapsite.id),
+  });
   const [visitorStatus, editAccess, buildRequestLink] = await Promise.all([
     getMapSiteVisitorAccountStatus(),
     getMapSiteEditToolbarState(mapsite.fastCode),

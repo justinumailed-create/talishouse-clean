@@ -9,6 +9,7 @@ import {
 } from "./mapsite-gallery";
 import { ROUTES } from "@/lib/routes";
 import { clampMapZoom } from "@/lib/home-pin-coordinates";
+import { systemMapsiteOpeningZoom } from "@/lib/talispros/system-mapsite-zoom";
 import {
   MAPSITE_PIN_DEFAULT_COLOR,
   MAPSITE_PIN_DEFAULT_ICON,
@@ -339,7 +340,10 @@ function pinLocationLabel(
   });
 }
 
-export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData {
+export function buildMapSiteLayoutData(
+  mapsite: MapSiteView,
+  options?: { zoomExplicit?: boolean },
+): MapSiteLayoutData {
   const primaryPin = getPrimaryPin(mapsite.pins);
   const ownerName = `${mapsite.ownerFirstName} ${mapsite.ownerLastName}`.trim();
   const agentName = mapsite.agentName?.trim() || ownerName;
@@ -350,6 +354,13 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
   const tebHref = mapsiteTebHref(mapsite.fastCode, mapsite.tebUrl);
   const pinStyle = mapsiteSavedPinStyle(mapsite);
   const pinLabel = pinLocationLabel(mapsite, primaryPin);
+
+  const mapCenter = resolveMapCenter(mapsite, primaryPin);
+  const mapZoom = options?.zoomExplicit
+    ? clampMapZoom(mapsite.mapZoom ?? DEFAULT_MAP_ZOOM)
+    : mapCenter
+      ? systemMapsiteOpeningZoom(mapCenter[0])
+      : clampMapZoom(mapsite.mapZoom ?? DEFAULT_MAP_ZOOM);
 
   const talisPins =
     mapsite.pins.length > 0
@@ -414,8 +425,8 @@ export function buildMapSiteLayoutData(mapsite: MapSiteView): MapSiteLayoutData 
       price: mapsite.price,
     },
     pins: talisPins,
-    mapCenter: resolveMapCenter(mapsite, primaryPin),
-    mapZoom: clampMapZoom(mapsite.mapZoom ?? DEFAULT_MAP_ZOOM),
+    mapCenter,
+    mapZoom,
     videoUrl: resolveVideoUrl(mapsite, primaryPin),
     galleryItems: visibleGalleryDisplayItems(mapsite.galleryItems),
     galleryImages: resolveGalleryImages(mapsite),
