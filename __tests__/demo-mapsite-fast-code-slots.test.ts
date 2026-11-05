@@ -61,7 +61,9 @@ describe("FAST Code slots on the Mapsites page (Ralf, Nov 3)", () => {
     expect(panel).not.toMatch(/\.name\b|<aside/);
     const builder = read("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx");
     expect(builder).not.toContain("_19rem]");
-    expect(builder.indexOf("{d.hero.body2}")).toBeLessThan(builder.indexOf("<FastCodeSlotsPanel"));
+    expect(builder).not.toContain("d.hero.body1");
+    expect(builder).not.toContain("d.hero.body2");
+    expect(builder.indexOf("{d.hero.headline}")).toBeLessThan(builder.indexOf("<FastCodeSlotsPanel"));
     const route = read("app/talispros/demo-mapsite/open/[slotId]/route.ts");
     expect(route).toContain("noindex");
     const actions = read("app/talispros/demo-mapsite/slots-actions.ts");
@@ -70,15 +72,17 @@ describe("FAST Code slots on the Mapsites page (Ralf, Nov 3)", () => {
     expect(dashboard).toContain("loadAgentBoard(agent.id)");
   });
 
-  it("shows Aisha's four buttons on prepared Mapsites, same links as /talisu/reg", () => {
+  it("keeps the prospect gate and does not mount the start panel on Mapsites", () => {
     const page = read("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx");
     expect(page).toContain("isPreparedSlotMapsite(mapsite.id)");
     expect(page).toContain("url1_opens_broker_url: preparedSlotMapsite");
-    expect(page).toContain("propose: talisuHref(TALISU_DISCUSS_PATH)");
-    expect(page).toContain("claim: DEMO_MAPSITE_BUILD_PATH");
-    expect(page).toContain("terms: PMC_PATHS.contract");
-    expect(page).toContain('register: "/talisu/reg?step=choose"');
-    expect(page).toContain("entryGranted={await hasRegisterEntry()}");
+    expect(page).toContain("hasProspectAccess()");
+    expect(page).not.toContain("RegisterActions");
+    expect(page).not.toContain("mapsite-register-actions");
+    expect(page).not.toContain("How would you like to start");
+    const reg = read("app/talisu/reg/page.tsx");
+    expect(reg).toContain("RegisterActions");
+    expect(reg).toContain("propose: talisuHref(TALISU_DISCUSS_PATH)");
   });
 
   it("has EN + DE panel copy without dev text", () => {

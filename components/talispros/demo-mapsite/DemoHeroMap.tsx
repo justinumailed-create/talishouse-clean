@@ -15,6 +15,9 @@ import {
   demoHeroPinScreenOffset,
 } from "@/lib/talispros/demo-builder";
 import { NSNC_BOOK_HREF, NSNC_PIN_IMAGE, NSNC_TITLE } from "@/lib/talispros/nsnc-book";
+import PinActionExplainer, {
+  type PinActionExplainerId,
+} from "@/components/talispros/mapsite/PinActionExplainer";
 
 const MapEngineCanvas = dynamic(
   () => import("@/components/talismaps/map-engine/MapEngineCanvas"),
@@ -147,30 +150,36 @@ export default function DemoHeroMap() {
               <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">{NSNC_TITLE}</h2>
               <p className="m-0 mt-0.5 text-[12px] leading-snug text-neutral-800">{card.body}</p>
               <div className="mt-2.5 grid grid-cols-4 gap-1.5 sm:grid-cols-2">
-                {DEMO_PIN_CARD_ACTIONS.map((label) =>
-                  label === TEB_LABEL ? (
-                    <Link
-                      key={label}
-                      href={NSNC_BOOK_HREF}
-                      aria-label={card.openEbook}
-                      data-testid="demo-hero-pin-action"
-                      data-action="teb"
-                      className={`${PIN_ACTION_CLASS} transition hover:bg-[#0558b3]`}
-                    >
-                      {label}
-                    </Link>
-                  ) : (
-                    <button
-                      key={label}
-                      type="button"
-                      tabIndex={-1}
-                      data-testid="demo-hero-pin-action"
-                      className={`${PIN_ACTION_CLASS} pointer-events-none`}
-                    >
-                      {label}
-                    </button>
-                  ),
-                )}
+                {DEMO_PIN_CARD_ACTIONS.map((label) => {
+                  const explainer: PinActionExplainerId = label.startsWith("TEB")
+                    ? "teb"
+                    : label.startsWith("TTV")
+                      ? "ttv"
+                      : "url";
+                  return (
+                    <PinActionExplainer key={label} action={explainer}>
+                      {label === TEB_LABEL ? (
+                        <Link
+                          href={NSNC_BOOK_HREF}
+                          aria-label={card.openEbook}
+                          data-testid="demo-hero-pin-action"
+                          data-action="teb"
+                          className={`${PIN_ACTION_CLASS} transition hover:bg-[#0558b3]`}
+                        >
+                          {label}
+                        </Link>
+                      ) : (
+                        <button
+                          type="button"
+                          data-testid="demo-hero-pin-action"
+                          className={PIN_ACTION_CLASS}
+                        >
+                          {label}
+                        </button>
+                      )}
+                    </PinActionExplainer>
+                  );
+                })}
               </div>
             </div>
           </div>

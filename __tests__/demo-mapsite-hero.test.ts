@@ -43,7 +43,9 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
   it("puts the FAST Codes inside the write-up, with no side card (Arun, Nov 4)", () => {
     expect(builder).toContain("<FastCodeSlotsPanel data={slotsPanel} />");
     expect(builder).not.toContain("lg:grid-cols-[minmax(0,1fr)_19rem]");
-    expect(builder.indexOf("{d.hero.body2}")).toBeLessThan(builder.indexOf("<FastCodeSlotsPanel"));
+    expect(builder).not.toContain("d.hero.body1");
+    expect(builder).not.toContain("d.hero.body2");
+    expect(builder.indexOf("{d.hero.headline}")).toBeLessThan(builder.indexOf("<FastCodeSlotsPanel"));
     expect(builder.indexOf("<FastCodeSlotsPanel")).toBeLessThan(builder.indexOf("</section>"));
     const page = read("app/talispros/demo-mapsite/page.tsx");
     expect(page).toContain("await loadFastCodeSlotsPanel()");
@@ -122,11 +124,13 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(480 / 2 + short + 39).toBeLessThanOrEqual(480 - 16);
   });
 
-  it("stacks the map above the write-up on mobile, two columns on desktop", () => {
-    expect(builder).toContain("lg:grid-cols-2");
+  it("stacks the map above the write-up on mobile, a wider rail on desktop", () => {
+    expect(builder).not.toContain("lg:grid-cols-2");
     expect(builder.indexOf("<DemoHeroMap")).toBeLessThan(builder.indexOf("{d.hero.headline}"));
     const css = read("app/globals.css");
     expect(css).toContain(".demo-hero__media {\n  height: 32rem;");
+    expect(css).toContain("grid-template-columns: minmax(0, 0.9fr) minmax(26rem, 1.15fr);");
+    expect(css).toContain(".demo-hero__list");
   });
 
   it("does not look like a login field to Safari / iCloud Keychain", () => {
@@ -160,18 +164,14 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
         expect(value).toBeTruthy();
         expect(value).not.toMatch(/Mapsite™/);
       }
-      // No distance anywhere on the page copy.
-      expect(`${hero.body1} ${hero.body2}`).not.toMatch(/\d|\bkm\b|kilomet/i);
-      expect(hero.body1 + hero.body2).not.toMatch(/screen|editor|bookshelf|Knowledge Base|Bildschirm|Bücherregal|Wissensdatenbank/i);
-      expect(hero.body2).not.toMatch(/open any|Öffnen Sie eines/i);
-      expect(`${hero.body1} ${hero.body2} ${hero.pinCard.body}`).not.toMatch(
-        /FAST Code|USD|\$|miles?\b/i,
-      );
+      expect(hero.headline).not.toMatch(/\bkm\b|kilomet|Mapsite™|FAST Code™|USD|\$|miles?\b|TODO|TBD/i);
+      expect(hero.pinCard.body).not.toMatch(/FAST Code|USD|\$|miles?\b/i);
     }
-    expect(en.demo.hero.body2).toBe("One sample PIN in Canada sits on the map, with its card already open.");
-    expect(de.demo.hero.body2).toBe(
-      "Ein Beispiel-PIN in Kanada liegt auf der Karte, und seine Infokarte ist bereits geöffnet.",
-    );
+    expect(en.demo.hero.headline).toBe("Please find your market & select FAST Code beside it");
+    expect(de.demo.hero.headline).toBe("Bitte finden Sie Ihren Markt und wählen Sie den FAST Code daneben.");
+    expect(en.demo.hero.headline).not.toBe(de.demo.hero.headline);
+    expect("body1" in en.demo.hero).toBe(false);
+    expect("body2" in de.demo.hero).toBe(false);
     expect(en.demo.hero.pinCard.body).toBe("Bay St. Lawrence, Nova Scotia");
     expect(de.demo.hero.pinCard.body).toBe("Bay St. Lawrence, Neuschottland");
     expect(en.demo.hero.pinCard.openEbook).toContain("TEB™");
