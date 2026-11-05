@@ -14,7 +14,6 @@ export async function generateMetadata({
   params: Promise<{ fastCode: string }>;
 }): Promise<Metadata> {
   const { fastCode } = await params;
-  await requireProspectAccessForCode(fastCode);
   const mapsite = await loadPublishedMapSiteView(fastCode);
 
   if (!mapsite) {
@@ -30,6 +29,7 @@ export default async function TalisprosMapSitePage({
   params: Promise<{ fastCode: string }>;
 }) {
   const { fastCode } = await params;
+  await requireProspectAccessForCode(fastCode);
   const mapsite = await loadPublishedMapSiteView(fastCode);
 
   if (!mapsite) {

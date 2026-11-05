@@ -34,7 +34,6 @@ export async function generateMetadata({
   if (!code) {
     return { title: "Mapsite map" };
   }
-  await requireProspectAccessForCode(code);
   const published = await loadPublishedMapSiteView(code);
   const ogImage = isAllPinsFastCode(code)
     ? resolveMapSiteOgImage(code)
@@ -81,6 +80,7 @@ export default async function MapSiteFullscreenMapPage({
   const { slug } = await params;
   const code = slug?.toLowerCase().trim() || "";
   if (!code) notFound();
+  await requireProspectAccessForCode(code);
 
   if (isAllPinsFastCode(code)) {
     redirect(ROUTES.TALISU_MARKETS);

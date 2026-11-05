@@ -22,7 +22,6 @@ export async function generateMetadata({
   if (!slug) {
     return { title: "Mapsite" };
   }
-  await requireProspectAccessForCode(slug);
   const published = await loadPublishedMapSiteView(slug);
   if (published) {
     return await publishedMapSiteMetadata(published);
@@ -35,6 +34,7 @@ export default async function MapSitePage({ params }: { params: Promise<{ slug?:
 
   const resolvedParams = await params;
   const slug = resolvedParams?.slug?.toLowerCase().trim();
+  await requireProspectAccessForCode(slug);
 
   if (slug && isAllPinsFastCode(slug)) {
     redirect(ROUTES.TALISU_MARKETS);
