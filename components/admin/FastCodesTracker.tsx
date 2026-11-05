@@ -72,6 +72,7 @@ const COPY = {
     listings: "Listings",
     checkpoint: "Checkpoint",
     comments: "Comments",
+    scrollHint: "Scroll sideways to see every column.",
   },
   de: {
     kicker: "Tägliche FAST Codes",
@@ -125,6 +126,7 @@ const COPY = {
     listings: "Inserate",
     checkpoint: "Prüfpunkt",
     comments: "Kommentare",
+    scrollHint: "Seitwärts scrollen, um jede Spalte zu sehen.",
   },
 } as const;
 
@@ -302,7 +304,47 @@ export default async function FastCodesTracker({
         </span>
       </form>
 
-      <div className="mt-4 overflow-x-auto">
+      <div className="mt-4 space-y-3 md:hidden" data-testid="fast-codes-cards">
+        {view.map((r) => (
+          <article key={r.fastCode} className="rounded-xl border border-neutral-200 p-3 text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-mono text-xs font-semibold text-[#1E4ED8]">{r.fastCode}</p>
+                <Link href={`/admin/agent/flow/${r.fastCode.toLowerCase()}`} className="font-semibold text-neutral-900">
+                  {r.brokerage}
+                </Link>
+                <p className="text-xs text-neutral-500">{r.agentName ?? "—"}</p>
+              </div>
+              <span className="rounded-full bg-[#1E4ED8]/10 px-2 py-0.5 text-xs font-semibold text-[#1E4ED8]">
+                {FAST_CODE_STAGE_LABELS[locale][r.stageThen]}
+              </span>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <dt className="font-semibold uppercase tracking-wide text-neutral-500">{t.checkpoint}</dt>
+                <dd className="text-neutral-800" data-testid="fast-code-checkpoint">{r.checkpointLabel}</dd>
+              </div>
+              <div>
+                <dt className="font-semibold uppercase tracking-wide text-neutral-500">{t.comments}</dt>
+                <dd className="text-neutral-800" data-testid="fast-code-comments">{r.commentCount}</dd>
+              </div>
+              <div className="col-span-2">
+                <dt className="font-semibold uppercase tracking-wide text-neutral-500">{t.lastUpdate}</dt>
+                <dd className="text-neutral-700">{r.last ? fmt(r.last.createdAt, locale) : "—"}</dd>
+              </div>
+            </dl>
+            <Link
+              href={href({ code: timelineCode === r.fastCode.toLowerCase() ? null : r.fastCode.toLowerCase() })}
+              className="mt-3 inline-flex text-xs font-semibold text-[#1E4ED8] underline"
+            >
+              {timelineCode === r.fastCode.toLowerCase() ? t.close : t.timeline}
+            </Link>
+          </article>
+        ))}
+      </div>
+
+      <div className="mt-4 hidden max-w-full overflow-x-auto md:block" data-testid="fast-codes-scroll">
+        <p className="mb-2 text-xs text-neutral-500 lg:hidden">{t.scrollHint}</p>
         <table className="w-full min-w-[860px] text-left text-sm" data-testid="fast-codes-table">
           <thead className="text-xs uppercase tracking-wider text-neutral-500">
             <tr className="border-b border-neutral-200">

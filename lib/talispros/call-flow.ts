@@ -226,6 +226,42 @@ export function firstNameOf(name: string | null | undefined): string {
   return token;
 }
 
+const INTERNAL_SITE_HOSTS = new Set(["talispros.com", "www.talispros.com", "localhost", "127.0.0.1"]);
+
+/**
+ * A brokerage website is an external http(s) address. Internal app paths
+ * such as /talispros/register-your-mapsite/ys01 are not the brokerage site.
+ */
+export function externalBrokerageWebsite(value: string | null | undefined): string | null {
+  const raw = (value || "").trim();
+  if (!raw || raw.startsWith("/") || /register-your-mapsite/i.test(raw)) return null;
+  const withScheme = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const url = new URL(withScheme);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    const host = url.hostname.toLowerCase();
+    if (!host.includes(".") || INTERNAL_SITE_HOSTS.has(host) || host.endsWith(".vercel.app")) return null;
+    if (url.pathname.toLowerCase().includes("/talispros/")) return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
+/** Keep a real site already on the lead. Otherwise take the first external candidate. */
+export function resolveBrokerageWebsite(
+  current: string | null | undefined,
+  ...candidates: (string | null | undefined)[]
+): string | null {
+  const kept = externalBrokerageWebsite(current);
+  if (kept) return kept;
+  for (const candidate of candidates) {
+    const site = externalBrokerageWebsite(candidate);
+    if (site) return site;
+  }
+  return null;
+}
+
 export type CallScriptVars = {
   firstName: string;
   agentName: string;
