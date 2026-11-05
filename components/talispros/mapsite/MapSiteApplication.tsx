@@ -93,6 +93,7 @@ import {
 import type { MapSiteRootContext } from "@/lib/talispros/mapsite-root-partners-service";
 import type { PersonalHomeOwnerPill } from "@/lib/talispros/personal-home";
 import { MapSiteCategoryEditor, MapSitePartnerPanel } from "./MapSiteRootPanels";
+import { systemMapsiteOpeningZoom } from "@/lib/talispros/system-mapsite-zoom";
 
 const EMPTY_ROOT_CONTEXT: MapSiteRootContext = {
   role: "other",
@@ -148,6 +149,13 @@ interface MapSiteApplicationProps {
   requestId?: string | null;
   /** Owner Mapsite only: select primary PIN and open the property flag on load. */
   openPinOnLoad?: boolean;
+  /**
+   * Prepared by the daily FAST Code job. Opens on an 80 km span around the
+   * pin unless an editor saved a zoom.
+   */
+  systemBuilt?: boolean;
+  /** True when an editor saved map_zoom. Ignored until that flag exists. */
+  mapZoomExplicit?: boolean;
   /** Owner Mapsite only: one-time guided prompt above the open property flag. */
   showStartHere?: boolean;
   /** Claim-form plan for activation checkout display (full Root Account™). */
@@ -216,6 +224,8 @@ export default function MapSiteApplication({
   audience,
   requestId = null,
   openPinOnLoad = false,
+  systemBuilt = false,
+  mapZoomExplicit = false,
   showStartHere = false,
   paymentPlanType = "ROOT_ACCOUNT",
   paymentReceived = false,
@@ -347,12 +357,13 @@ export default function MapSiteApplication({
     return allPins.filter((pin) => kept.has(pin.id));
   }, [pins, allPins, categoryFilter]);
 
+  const useSystemOpening = systemBuilt && !mapZoomExplicit;
   const viewport = useMemo(
     () => ({
       center: { latitude: mapsite.lat, longitude: mapsite.lng },
-      zoom: mapsite.map_zoom,
+      zoom: useSystemOpening ? systemMapsiteOpeningZoom(mapsite.lat) : mapsite.map_zoom,
     }),
-    [mapsite.lat, mapsite.lng, mapsite.map_zoom]
+    [mapsite.lat, mapsite.lng, mapsite.map_zoom, useSystemOpening]
   );
 
   const beginFocusGuard = useCallback(() => {
@@ -501,6 +512,7 @@ export default function MapSiteApplication({
         sourceAudience={sourceAudience}
         requestId={requestId}
         openPinOnLoad={openPinOnLoad}
+        useSystemOpening={useSystemOpening}
         showStartHere={showStartHere}
         paymentPlanType={paymentPlanType}
         paymentReceived={paymentReceived}
@@ -546,6 +558,7 @@ function MapSiteChrome({
   sourceAudience,
   requestId,
   openPinOnLoad,
+  useSystemOpening,
   showStartHere,
   paymentPlanType,
   paymentReceived,
@@ -586,6 +599,7 @@ function MapSiteChrome({
   sourceAudience: RegistrationMarket | null;
   requestId: string | null;
   openPinOnLoad: boolean;
+  useSystemOpening: boolean;
   showStartHere: boolean;
   paymentPlanType: PlanType;
   paymentReceived: boolean;
@@ -648,12 +662,18 @@ function MapSiteChrome({
       () => initialOwnerCustomizations ?? emptyMapSiteOwnerCustomizations(),
     );
 
+  const pinZoom = useCallback(
+    (latitude: number) =>
+      useSystemOpening ? systemMapsiteOpeningZoom(latitude) : mapsite.map_zoom,
+    [mapsite.map_zoom, useSystemOpening],
+  );
+
   const focusPinAndOpen = useCallback(() => {
     beginFocusGuard();
     lastFocusedForSelectionRef.current = mapsite.id;
     setViewport({
       center: { latitude: mapsite.lat, longitude: mapsite.lng },
-      zoom: mapsite.map_zoom,
+      zoom: pinZoom(mapsite.lat),
     });
     setSelectedPinId(mapsite.id);
   }, [
@@ -661,7 +681,7 @@ function MapSiteChrome({
     mapsite.id,
     mapsite.lat,
     mapsite.lng,
-    mapsite.map_zoom,
+    pinZoom,
     setSelectedPinId,
     setViewport,
   ]);
@@ -676,7 +696,7 @@ function MapSiteChrome({
     beginFocusGuard();
     setViewport({
       center: { latitude: mapsite.lat, longitude: mapsite.lng },
-      zoom: mapsite.map_zoom,
+      zoom: pinZoom(mapsite.lat),
     });
     lastFocusedForSelectionRef.current = mapsite.id;
   }, [
@@ -684,7 +704,7 @@ function MapSiteChrome({
     mapsite.id,
     mapsite.lat,
     mapsite.lng,
-    mapsite.map_zoom,
+    pinZoom,
     beginFocusGuard,
     setViewport,
   ]);
@@ -963,10 +983,25 @@ function MapSiteChrome({
     if (!isReady || pinEditor.kind !== "idle") return;
     // ?view=pin style deep links keep their focused PIN card.
     if (openPinOnLoad) return;
+    // System-built Mapsites keep the 80 km opening (or an editor zoom).
+    // fitBounds here was replacing the saved build zoom, and on a map that
+    // had not finished layout it framed the whole region (all of PEI).
+    if (useSystemOpening) {
+      const rect = rootRef.current?.getBoundingClientRect();
+      const minSide =
+        rect && rect.width > 200 && rect.height > 200
+          ? Math.min(rect.width, rect.height)
+          : 0;
+      setViewport({
+        center: { latitude: mapsite.lat, longitude: mapsite.lng },
+        zoom: minSide > 0 ? systemMapsiteOpeningZoom(mapsite.lat, minSide) : pinZoom(mapsite.lat),
+      });
+      return;
+    }
     fitAllFastCodePins();
     // Re-frame when the PIN set changes (or the editor closes), not on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady, pinEditor.kind, pinFitKey]);
+  }, [isReady, pinEditor.kind, pinFitKey, useSystemOpening]);
 
   // Ralf (Oct 17): no "Show all PINs" option — every PIN shows until one is
   // picked; the empty value is the "Select a PIN…" placeholder.
@@ -991,7 +1026,14 @@ function MapSiteChrome({
       setActivePinId(id);
       setSelectedPinId(null);
       if (!id) {
-        fitAllFastCodePins();
+        if (useSystemOpening) {
+          setViewport({
+            center: { latitude: mapsite.lat, longitude: mapsite.lng },
+            zoom: systemMapsiteOpeningZoom(mapsite.lat),
+          });
+        } else {
+          fitAllFastCodePins();
+        }
         return;
       }
       const target =
@@ -1003,7 +1045,9 @@ function MapSiteChrome({
       beginFocusGuard();
       setViewport({
         center: { latitude: target.latitude, longitude: target.longitude },
-        zoom: Math.max(mapsite.map_zoom ?? 12, 12),
+        zoom: useSystemOpening
+          ? systemMapsiteOpeningZoom(target.latitude)
+          : Math.max(mapsite.map_zoom ?? 12, 12),
       });
     },
     [
@@ -1013,6 +1057,7 @@ function MapSiteChrome({
       mapsite.lat,
       mapsite.lng,
       mapsite.map_zoom,
+      useSystemOpening,
       pinDashboard.pins,
       rootContext.partnerPins,
       setSelectedPinId,
@@ -1106,6 +1151,7 @@ function MapSiteChrome({
       ) : null}
       <div
         ref={rootRef}
+        data-map-opening={useSystemOpening ? "80km" : "fit"}
         className="relative min-h-0 flex-1 overflow-hidden bg-neutral-900"
       >
         <MapEngineCanvas className="h-full w-full" />

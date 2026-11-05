@@ -23,6 +23,7 @@ import {
   isLogoUploadField,
   stripLogoBackground,
 } from "./media/strip-logo-background";
+import { markMapZoomExplicit } from "@/lib/talispros/system-mapsite-zoom-server";
 
 export interface MapSiteAdminInput {
   fastCode: string;
@@ -280,6 +281,11 @@ export async function updateMapSiteAdmin(
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  const savedZoom = parseZoom(input.mapZoom);
+  if (savedZoom != null && savedZoom !== mapsite.mapZoom) {
+    await markMapZoomExplicit(mapsite.id);
   }
 
   const pinResult = await upsertPrimaryPin(mapsite.id, input);

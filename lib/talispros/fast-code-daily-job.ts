@@ -12,6 +12,8 @@ import {
   progressCopy,
   resultCopy,
 } from "@/lib/talispros/admin-talisbot-messages";
+import { systemMapsiteOpeningZoom } from "@/lib/talispros/system-mapsite-zoom";
+import { saveSystemMapsiteOpeningZoom } from "@/lib/talispros/system-mapsite-zoom-server";
 
 /**
  * Daily FAST Code job (Vercel cron 00:30 UTC = 06:00 IST, plus "Run now").
@@ -172,7 +174,7 @@ async function sourceFromGoogle(s: SourcingSummary): Promise<void> {
         row.duplicates++;
         continue;
       }
-      const { error } = await db().from("prospect_queue").insert({
+      const prospect = {
         brokerage: c.name,
         contact_name: null,
         office_address: c.address,
@@ -191,7 +193,15 @@ async function sourceFromGoogle(s: SourcingSummary): Promise<void> {
         sourced_by: "google-places",
         research_notes: `Google Places: ${c.rating ?? "–"}★ (${c.ratingCount ?? 0} reviews). Decision maker, position, cell and email: to research.`,
         status: "pending",
-      });
+      };
+      const latitude = typeof c.lat === "number" ? c.lat : null;
+      const openingZoom = latitude == null ? null : systemMapsiteOpeningZoom(latitude);
+      let { error } = await db()
+        .from("prospect_queue")
+        .insert(openingZoom == null ? prospect : { ...prospect, opening_zoom: openingZoom });
+      if (error && /opening_zoom/i.test(error.message)) {
+        ({ error } = await db().from("prospect_queue").insert(prospect));
+      }
       if (error) {
         if (/duplicate/i.test(error.message)) row.duplicates++;
         else s.errors.push(`${c.name}: ${error.message}`);
@@ -332,11 +342,11 @@ export async function assignApproved(summary: DailyJobSummary): Promise<void> {
   if (!active.length) return;
   const [{ data: statusRows }, { data: queueRows }] = await Promise.all([
     db().from("fast_code_status").select("agent_id"),
-    db().from("prospect_queue").select("id, brokerage, contact_name, assigned_agent_id, proposed_code, status"),
+    db().from("prospect_queue").select("id, brokerage, contact_name, assigned_agent_id, proposed_code, status, latitude"),
   ]);
   const load = new Map(active.map((a) => [a.id, 0]));
   for (const r of (statusRows ?? []) as { agent_id: string | null }[]) if (r.agent_id && load.has(r.agent_id)) load.set(r.agent_id, load.get(r.agent_id)! + 1);
-  const queue = (queueRows ?? []) as { id: string; brokerage: string; contact_name: string | null; assigned_agent_id: string | null; proposed_code: string | null; status: string }[];
+  const queue = (queueRows ?? []) as { id: string; brokerage: string; contact_name: string | null; assigned_agent_id: string | null; proposed_code: string | null; status: string; latitude: number | null }[];
   for (const q of queue) if (q.status === "approved" && q.assigned_agent_id && load.has(q.assigned_agent_id)) load.set(q.assigned_agent_id, load.get(q.assigned_agent_id)! + 1);
   summary.pendingReview = queue.filter((q) => q.status === "pending").length;
 
@@ -387,6 +397,9 @@ export async function assignApproved(summary: DailyJobSummary): Promise<void> {
       createdBy: "daily-job",
     });
     summary.assigned.push({ code: code.toUpperCase(), agent: agentName, brokerage: q.brokerage });
+    if (typeof q.latitude === "number") {
+      await saveSystemMapsiteOpeningZoom(code, q.latitude).catch(() => undefined);
+    }
   }
 }
 

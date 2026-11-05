@@ -55,6 +55,7 @@ import { loadMapSiteRootContext } from "@/lib/talispros/mapsite-root-partners-se
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { isPreparedSlotMapsite } from "@/lib/talispros/fast-code-slots-server";
+import { readMapZoomExplicit } from "@/lib/talispros/system-mapsite-zoom-server";
 import { hasProspectAccess } from "@/lib/talispros/prospect-gate-server";
 import { loadOwnTebViewerHref } from "@/lib/talisbooks/own-teb-href";
 
@@ -302,6 +303,8 @@ export default async function ClaimedMapSiteByAccountTypePage({
       checkoutStatus={checkoutStatus}
       checkoutSessionId={checkoutSessionId}
       openPinOnLoad={openPinOnLoad}
+      systemBuilt={preparedSlotMapsite}
+      mapZoomExplicit={preparedSlotMapsite ? await readMapZoomExplicit(mapsite.id) : false}
       isOwner={isOwner}
       accountTypeSegment={accountType}
       showStartHere={false}
