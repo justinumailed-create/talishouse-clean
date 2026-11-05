@@ -57,7 +57,9 @@ describe("FAST Code slots on the Mapsites page (Ralf, Nov 3)", () => {
     expect(publicLoader).not.toMatch(/\bname\b/);
     const panel = read("components/talispros/demo-mapsite/FastCodeSlotsPanel.tsx");
     expect(panel).toContain("entry.fastCode");
+    expect(panel).toContain("entry.brokerage");
     expect(panel).toContain("slotPlaceLabel(entry.town, entry.province)");
+    expect(panel).toContain("lg:inline");
     expect(panel).not.toMatch(/\.name\b|<aside/);
     const builder = read("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx");
     expect(builder).not.toContain("_19rem]");

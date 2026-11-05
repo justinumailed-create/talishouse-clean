@@ -7,6 +7,7 @@ import { TALISU_FAQ } from "../lib/talisu/content";
 import {
   ebookLogoFromBookMetadata,
   pickSlotLogoUrl,
+  slotBrokerageName,
   slotInitials,
 } from "../lib/talispros/fast-code-slots";
 
@@ -42,6 +43,17 @@ describe("Demo Mapsite rail (FAST Codes)", () => {
       ]),
     ).toBe("https://cdn.example/logo.png");
     expect(pickSlotLogoUrl(["/logo.png", "not a url", ""])).toBeNull();
+    const powermycode =
+      "https://cdn.example/mapsite-assets/7c8a3aa1/logo-1783763252674.png";
+    expect(pickSlotLogoUrl([powermycode, "https://cdn.example/realty.svg"])).toBe(
+      "https://cdn.example/realty.svg",
+    );
+    expect(pickSlotLogoUrl(["https://cdn.example/powermycode/mark.png"])).toBeNull();
+    expect(slotBrokerageName("Macdonald Realty Squamish", "Squamish")).toBe(
+      "Macdonald Realty Squamish",
+    );
+    expect(slotBrokerageName("Rahul's PIN", "Squamish")).toBe("Squamish");
+    expect(slotBrokerageName("Demo Mapsite", "Nelson")).toBe("Nelson");
     expect(
       ebookLogoFromBookMetadata({
         rm22SlotHydration: { agencyLogoUrl: " /uploads/agency.webp " },

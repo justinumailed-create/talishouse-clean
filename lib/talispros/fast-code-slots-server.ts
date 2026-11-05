@@ -11,6 +11,7 @@ import {
   mapsiteTownFromAddress,
   normalizeSlotFastCode,
   pickSlotLogoUrl,
+  slotBrokerageName,
   slotInitials,
   sortSlotEntriesNewestFirst,
   type FastCodeSlotsPanelData,
@@ -52,6 +53,7 @@ function toEntry(slotId: unknown, m: MapsiteJoin | null): SlotDraft | null {
   const mapsiteId = m?.id?.trim();
   if (!code || !mapsiteId) return null;
   const town = mapsiteTownFromAddress(m?.property_address, m?.property_title);
+  const brokerage = slotBrokerageName(m?.property_title, town);
   return {
     slotId: String(slotId),
     fastCode: code.toUpperCase(),
@@ -60,7 +62,8 @@ function toEntry(slotId: unknown, m: MapsiteJoin | null): SlotDraft | null {
     href: mapsiteHrefForSlot(m?.account_type, code),
     addedAt: m?.created_at ?? null,
     logoUrl: null,
-    initials: slotInitials(m?.property_title || town, code),
+    initials: slotInitials(brokerage || town, code),
+    brokerage,
     mapsiteId,
     mapsiteLogo: m?.logo_url ?? null,
   };
@@ -76,6 +79,7 @@ function toPublicEntry(draft: SlotDraft, logoUrl: string | null): SlotEntry {
     addedAt: draft.addedAt,
     logoUrl,
     initials: draft.initials,
+    brokerage: draft.brokerage,
   };
 }
 
