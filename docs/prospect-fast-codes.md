@@ -6,3 +6,7 @@ Prospect (queue) FAST Codes are always based on the **decision maker’s first a
 - Approving a queue row without a name is blocked until first and last name are saved (inline edit or CSV import).
 - Built / issued Mapsite codes are never changed by queue imports; CSV import only fills empty phone/email/position fields on existing Lead CRM rows and lists name mismatches.
 - Generator: `proposeFastCode` / `proposeFastCodeFromParts` in `lib/talispros/fast-code-tracker.ts`, reusing `extractInitials` from `validators/fast-code.validator.ts`.
+
+## Needs review
+
+When owner ≠ managing broker, a branch office is not the decision-maker site, or a built Mapsite looks like a larger regional firm (not a small independent), TalisBOT™ posts a `needs_review` message on the Admin dashboard and leaves the prospect code pending. See [admin-talisbot-messages.md](./admin-talisbot-messages.md).

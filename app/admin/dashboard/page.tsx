@@ -11,6 +11,7 @@ import { getAgentPresence, listAgentNotes } from "@/lib/agent-collab-server";
 import { listAgents } from "@/lib/agent-admins";
 import { listManualPayments } from "@/lib/manual-payments";
 import FastCodesTracker from "@/components/admin/FastCodesTracker";
+import TalisbotMessagesSection from "@/components/admin/TalisbotMessagesSection";
 import { getLocale } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
@@ -80,10 +81,13 @@ export default async function AdminDashboardPage({
       />
 
       {canAgents ? (
-        <FastCodesTracker
-          locale={locale}
-          params={{ day: one(query.day), agent: one(query.agent), stage: one(query.stage), code: one(query.code) }}
-        />
+        <>
+          <TalisbotMessagesSection locale={locale} />
+          <FastCodesTracker
+            locale={locale}
+            params={{ day: one(query.day), agent: one(query.agent), stage: one(query.stage), code: one(query.code) }}
+          />
+        </>
       ) : null}
 
       {summary ? (

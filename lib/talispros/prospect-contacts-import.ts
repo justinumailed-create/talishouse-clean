@@ -128,6 +128,7 @@ async function updateQueueContact(
   oldCode: string | null,
   brokerage: string,
   assignedAgentId: string | null,
+  holdCodePendingReview = false,
 ): Promise<void> {
   const parts = personNamePartsFromFirstLast(row.first_name || null, row.last_name || null);
   const contactName = parts ? displayContactName(parts) : null;
@@ -135,10 +136,13 @@ async function updateQueueContact(
 
   // Free the old proposed code from the taken set when regenerating.
   if (oldCode) taken.delete(oldCode.toLowerCase());
+  // Dual decision-makers / branch ambiguity: fill contacts but leave code pending.
   const newCode =
-    parts && row.first_name && row.last_name
-      ? proposeFastCodeFromParts(row.first_name, row.last_name, taken)
-      : null;
+    holdCodePendingReview
+      ? null
+      : parts && row.first_name && row.last_name
+        ? proposeFastCodeFromParts(row.first_name, row.last_name, taken)
+        : null;
   if (newCode) taken.add(newCode);
 
   const patch: Record<string, unknown> = {
@@ -305,7 +309,7 @@ export async function importProspectContactsCsv(
 
   const { data: queueRows } = await db()
     .from("prospect_queue")
-    .select("id, brokerage, contact_name, proposed_code, assigned_agent_id, status");
+    .select("id, brokerage, contact_name, proposed_code, assigned_agent_id, status, research_notes");
   type QueueRow = {
     id: string;
     brokerage: string;
@@ -313,6 +317,7 @@ export async function importProspectContactsCsv(
     proposed_code: string | null;
     assigned_agent_id: string | null;
     status: string;
+    research_notes: string | null;
   };
   const queueList = (queueRows ?? []) as QueueRow[];
   const byId = new Map(queueList.map((q) => [q.id, q]));
@@ -348,7 +353,8 @@ export async function importProspectContactsCsv(
         report.errors.push(`unknown queue id ${id}`);
         continue;
       }
-      await updateQueueContact(q.id, row, taken, actor, report, q.proposed_code, q.brokerage, q.assigned_agent_id);
+      const hold = /needs review|code pending/i.test(q.research_notes ?? "");
+      await updateQueueContact(q.id, row, taken, actor, report, q.proposed_code, q.brokerage, q.assigned_agent_id, hold);
       continue;
     }
 
@@ -370,7 +376,8 @@ export async function importProspectContactsCsv(
     const q = byCode.get(code);
     if (q) {
       // Queue-only code (not issued as Mapsite) — safe to re-derive from person name.
-      await updateQueueContact(q.id, row, taken, actor, report, q.proposed_code, q.brokerage, q.assigned_agent_id);
+      const hold = /needs review|code pending/i.test(q.research_notes ?? "");
+      await updateQueueContact(q.id, row, taken, actor, report, q.proposed_code, q.brokerage, q.assigned_agent_id, hold);
       continue;
     }
 
