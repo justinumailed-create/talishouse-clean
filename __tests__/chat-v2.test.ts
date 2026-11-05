@@ -82,8 +82,12 @@ describe("chat v2 wiring (static)", () => {
     expect(read("app", "admin", "agent", "chat", "page.tsx")).toMatch(/redirect\("\/chat"\)/);
   });
 
-  it("sends agents to chat after login when enabled", () => {
-    expect(read("app", "agent", "actions.ts")).toMatch(/"\/chat"/);
+  it("lands agents on the dashboard after login; chat stays a link", () => {
+    const actions = read("app", "agent", "actions.ts");
+    expect(actions).toMatch(/return "\/admin\/agent"/);
+    expect(actions).not.toMatch(/getChatOnLogin/);
+    expect(read("components", "admin", "agents", "AgentDashboard.tsx")).toMatch(/href="\/chat"/);
+    expect(read("components", "chat", "ChatApp.tsx")).not.toMatch(/Open chat on login/);
   });
 
   it("checks membership before every conversation read/write", () => {

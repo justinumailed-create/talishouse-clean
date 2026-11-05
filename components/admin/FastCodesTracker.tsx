@@ -11,6 +11,8 @@ import {
   type FastCodeUpdate,
 } from "@/lib/talispros/fast-code-tracker";
 import { listFastCodeUpdates, listJobRuns, listTrackerRows } from "@/lib/talispros/fast-code-tracker-server";
+import { loadCheckpointRollup } from "@/lib/talispros/call-flow-server";
+import { CHECKPOINT_LABEL } from "@/lib/talispros/call-flow-copy";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { addProspectToQueueAction, reviewProspectAction } from "@/app/admin/dashboard/fast-code-tracker-actions";
 import FastCodeRunNowButton from "./FastCodeRunNowButton";
@@ -68,6 +70,8 @@ const COPY = {
     sourcingError: "Google refused the search:",
     asOf: "As of",
     listings: "Listings",
+    checkpoint: "Checkpoint",
+    comments: "Comments",
   },
   de: {
     kicker: "Tägliche FAST Codes",
@@ -119,6 +123,8 @@ const COPY = {
     sourcingError: "Google hat die Suche abgelehnt:",
     asOf: "Stand",
     listings: "Inserate",
+    checkpoint: "Prüfpunkt",
+    comments: "Kommentare",
   },
 } as const;
 
@@ -164,7 +170,7 @@ export default async function FastCodesTracker({
   const day = params.day && /^\d{4}-\d{2}-\d{2}$/.test(params.day) && params.day <= today ? params.day : today;
   const end = istDayEndUtc(day);
   const start = new Date(Date.parse(end) - 24 * 60 * 60 * 1000).toISOString();
-  const [rows, updates, runs, queueRes] = await Promise.all([
+  const [rows, updates, runs, queueRes, rollup] = await Promise.all([
     listTrackerRows(),
     listFastCodeUpdates({ beforeIso: end, limit: 5000 }),
     listJobRuns(1),
@@ -174,6 +180,7 @@ export default async function FastCodesTracker({
       .in("status", ["pending", "approved"])
       .order("created_at", { ascending: false })
       .limit(50),
+    loadCheckpointRollup(),
   ]);
   const byCode = new Map<string, FastCodeUpdate[]>();
   for (const u of updates) {
@@ -185,12 +192,15 @@ export default async function FastCodesTracker({
   const view = rows
     .map((r) => {
       const list = byCode.get(r.fastCode.toLowerCase()) ?? [];
+      const hit = rollup.get(r.fastCode.toLowerCase());
       return {
         ...r,
         stageThen: stageAsOf(list, end),
         last: list[0] ?? null,
         dayChanges: list.filter((u) => u.createdAt >= start),
         list,
+        checkpointLabel: hit?.checkpoint ? CHECKPOINT_LABEL[locale][hit.checkpoint] : "—",
+        commentCount: hit?.comments ?? 0,
       };
     })
     .filter((r) => !params.agent || r.agentId === params.agent)
@@ -293,13 +303,15 @@ export default async function FastCodesTracker({
       </form>
 
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-sm" data-testid="fast-codes-table">
+        <table className="w-full min-w-[860px] text-left text-sm" data-testid="fast-codes-table">
           <thead className="text-xs uppercase tracking-wider text-neutral-500">
             <tr className="border-b border-neutral-200">
               <th className="py-2 pr-3">{t.code}</th>
               <th className="py-2 pr-3">{t.brokerage}</th>
               <th className="py-2 pr-3">{t.agent}</th>
               <th className="py-2 pr-3">{t.stage}</th>
+              <th className="py-2 pr-3">{t.checkpoint}</th>
+              <th className="py-2 pr-3">{t.comments}</th>
               <th className="py-2 pr-3">{t.lastUpdate}</th>
               <th className="py-2 pr-3">{t.changes}</th>
               <th className="py-2" />
@@ -313,12 +325,22 @@ export default async function FastCodesTracker({
                     {r.fastCode}
                   </a>
                 </td>
-                <td className="py-2 pr-3 text-neutral-800">{r.brokerage}</td>
+                <td className="py-2 pr-3 text-neutral-800">
+                  <Link href={`/admin/agent/flow/${r.fastCode.toLowerCase()}`} className="hover:text-[#1E4ED8] hover:underline">
+                    {r.brokerage}
+                  </Link>
+                </td>
                 <td className="py-2 pr-3 text-neutral-700">{r.agentName ?? "—"}</td>
                 <td className="py-2 pr-3">
                   <span className="rounded-full bg-[#1E4ED8]/10 px-2 py-0.5 text-xs font-semibold text-[#1E4ED8]">
                     {FAST_CODE_STAGE_LABELS[locale][r.stageThen]}
                   </span>
+                </td>
+                <td className="py-2 pr-3 text-xs text-neutral-700" data-testid="fast-code-checkpoint">
+                  {r.checkpointLabel}
+                </td>
+                <td className="py-2 pr-3 text-xs text-neutral-700" data-testid="fast-code-comments">
+                  {r.commentCount}
                 </td>
                 <td className="py-2 pr-3 text-xs text-neutral-600">{r.last ? fmt(r.last.createdAt, locale) : "—"}</td>
                 <td className="py-2 pr-3 text-xs text-neutral-700">

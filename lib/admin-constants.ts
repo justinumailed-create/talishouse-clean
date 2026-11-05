@@ -56,6 +56,11 @@ export type AdminAccount = {
   loginId?: string;
   /** Agent Admin only: temporary password must be changed before using the console. */
   mustChangePassword?: boolean;
+  /**
+   * Agent Admin only. Reviewer (Agent Arun) may view every lead and comment
+   * at checkpoints. Not an admin and not granted admin scopes.
+   */
+  reviewer?: boolean;
 };
 
 /**

@@ -33,11 +33,43 @@ export const FAST_CODE_STAGE_LABELS: Record<"en" | "de", Record<FastCodeStage, s
 };
 
 export const FAST_CODE_EVENT_LABELS: Record<"en" | "de", Record<FastCodeEventType, string>> = {
-  en: { stage: "Stage", note: "Note", listings: "Listings", ebook: "eBook", assigned: "Assigned", sourced: "Sourced", refresh: "Daily check" },
-  de: { stage: "Phase", note: "Notiz", listings: "Inserate", ebook: "eBook", assigned: "Zugewiesen", sourced: "Recherchiert", refresh: "Tägliche Prüfung" },
+  en: {
+    stage: "Stage",
+    note: "Note",
+    listings: "Listings",
+    ebook: "eBook",
+    assigned: "Assigned",
+    sourced: "Sourced",
+    refresh: "Daily check",
+    step: "Call step",
+    comment: "Checkpoint comment",
+    lead: "Lead",
+  },
+  de: {
+    stage: "Phase",
+    note: "Notiz",
+    listings: "Inserate",
+    ebook: "eBook",
+    assigned: "Zugewiesen",
+    sourced: "Recherchiert",
+    refresh: "Tägliche Prüfung",
+    step: "Gesprächsschritt",
+    comment: "Prüfpunkt-Kommentar",
+    lead: "Lead",
+  },
 };
 
-export type FastCodeEventType = "stage" | "note" | "listings" | "ebook" | "assigned" | "sourced" | "refresh";
+export type FastCodeEventType =
+  | "stage"
+  | "note"
+  | "listings"
+  | "ebook"
+  | "assigned"
+  | "sourced"
+  | "refresh"
+  | "step"
+  | "comment"
+  | "lead";
 
 export function isFastCodeStage(value: unknown): value is FastCodeStage {
   return typeof value === "string" && (FAST_CODE_STAGES as readonly string[]).includes(value);

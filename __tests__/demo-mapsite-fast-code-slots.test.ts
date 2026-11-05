@@ -67,7 +67,7 @@ describe("FAST Code slots on the Mapsites page (Ralf, Nov 3)", () => {
     const actions = read("app/talispros/demo-mapsite/slots-actions.ts");
     expect(actions.match(/getCurrentAgent\(\)/g)?.length).toBeGreaterThanOrEqual(2);
     const dashboard = read("components/admin/agents/AgentDashboard.tsx");
-    expect(dashboard).toContain("listTrackerRows({ agentId: agent.id })");
+    expect(dashboard).toContain("loadAgentBoard(agent.id)");
   });
 
   it("shows Aisha's four buttons on prepared Mapsites, same links as /talisu/reg", () => {
