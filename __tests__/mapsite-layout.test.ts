@@ -9,6 +9,7 @@ import {
 } from "../lib/mapsite-layout";
 import type { MapSiteView } from "../lib/mapsite-service";
 import { toMapEnginePin } from "../lib/talismaps/map-engine";
+import { systemMapsiteOpeningZoom } from "../lib/talispros/system-mapsite-zoom";
 
 const baseMapSite: MapSiteView = {
   id: "mapsite-1",
@@ -280,15 +281,18 @@ describe("buildMapSiteLayoutData", () => {
     );
   });
 
-  it("preserves the saved build-time map zoom on the published layout", () => {
-    expect(buildMapSiteLayoutData({ ...baseMapSite, mapZoom: 12 }).mapZoom).toBe(
-      12,
-    );
+  it("opens at about 80 km unless an editor saved the zoom", () => {
     expect(buildMapSiteLayoutData({ ...baseMapSite, mapZoom: 18 }).mapZoom).toBe(
-      18,
+      systemMapsiteOpeningZoom(43.65),
     );
-    expect(buildMapSiteLayoutData({ ...baseMapSite, mapZoom: null }).mapZoom).toBe(
-      15,
-    );
+    expect(
+      buildMapSiteLayoutData({ ...baseMapSite, mapZoom: 12 }, { zoomExplicit: true }).mapZoom,
+    ).toBe(12);
+    expect(
+      buildMapSiteLayoutData({ ...baseMapSite, mapZoom: 18 }, { zoomExplicit: true }).mapZoom,
+    ).toBe(18);
+    expect(
+      buildMapSiteLayoutData({ ...baseMapSite, mapZoom: null }, { zoomExplicit: true }).mapZoom,
+    ).toBe(15);
   });
 });

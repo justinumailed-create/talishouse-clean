@@ -24,14 +24,20 @@ describe("system-built Mapsite opening zoom", () => {
     );
   });
 
-  it("uses that zoom for a prepared Mapsite and keeps an editor zoom", () => {
+  it("uses that zoom for every Mapsite and keeps an editor zoom", () => {
     const app = read("components/talispros/mapsite/MapSiteApplication.tsx");
     const page = read("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx");
-    expect(page).toContain("systemBuilt={preparedSlotMapsite}");
-    expect(page).toContain("readMapZoomExplicit");
-    expect(app).toContain("useSystemOpening ? systemMapsiteOpeningZoom(mapsite.lat) : mapsite.map_zoom");
-    expect(app).toContain("if (useSystemOpening)");
-    expect(app).toContain('data-map-opening={useSystemOpening ? "80km" : "fit"}');
+    const queryPage = read("app/talispros/mapsite/page.tsx");
+    const reader = read("lib/talispros/system-mapsite-zoom-server.ts");
+    expect(page).toContain("mapZoomExplicit={await readMapZoomExplicit(mapsite.id)}");
+    expect(queryPage).toContain("readMapZoomExplicit");
+    expect(app).not.toContain("systemBuilt");
+    expect(app).toContain("const useOpeningZoom = !mapZoomExplicit");
+    expect(app).toContain("useOpeningZoom ? systemMapsiteOpeningZoom(mapsite.lat) : mapsite.map_zoom");
+    expect(app).not.toContain("fitAllFastCodePins");
+    expect(app).toContain('data-map-opening={useOpeningZoom ? "80km" : "saved"}');
+    expect(reader).toContain("application/openapi+json");
+    expect(reader).toContain("if (!mapsiteId || !(await explicitColumnReady())) return false");
     const job = read("lib/talispros/fast-code-daily-job.ts");
     expect(job).toContain("systemMapsiteOpeningZoom");
     expect(job).toContain("opening_zoom");
@@ -41,6 +47,7 @@ describe("system-built Mapsite opening zoom", () => {
     expect(migration).not.toMatch(/update\s+public\.mapsites/i);
     const backfill = read("scripts/backfill-system-mapsite-zoom.sql");
     expect(backfill).toContain("NOT RUN");
-    expect(backfill).toContain("agent_fast_code_slots");
+    expect(backfill).toContain("map_zoom_explicit = false");
+    expect(backfill).not.toContain("agent_fast_code_slots");
   });
 });

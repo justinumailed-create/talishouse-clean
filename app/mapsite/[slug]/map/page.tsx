@@ -18,6 +18,7 @@ import {
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { resolveBrandedMapSiteOgImage } from "@/lib/talispros/mapsite-branding-service";
 import { ROUTES } from "@/lib/routes";
+import { readMapZoomExplicit } from "@/lib/talispros/system-mapsite-zoom-server";
 
 export const dynamic = "force-dynamic";
 
@@ -89,7 +90,9 @@ export default async function MapSiteFullscreenMapPage({
   const published = await loadPublishedMapSiteView(code);
   if (!published) notFound();
 
-  const layout = buildMapSiteLayoutData(published);
+  const layout = buildMapSiteLayoutData(published, {
+    zoomExplicit: await readMapZoomExplicit(published.id),
+  });
 
   return (
     <MapSiteTalisMaps

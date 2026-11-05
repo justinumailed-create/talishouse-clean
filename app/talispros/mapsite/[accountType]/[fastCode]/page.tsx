@@ -303,8 +303,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       checkoutStatus={checkoutStatus}
       checkoutSessionId={checkoutSessionId}
       openPinOnLoad={openPinOnLoad}
-      systemBuilt={preparedSlotMapsite}
-      mapZoomExplicit={preparedSlotMapsite ? await readMapZoomExplicit(mapsite.id) : false}
+      mapZoomExplicit={await readMapZoomExplicit(mapsite.id)}
       isOwner={isOwner}
       accountTypeSegment={accountType}
       showStartHere={false}

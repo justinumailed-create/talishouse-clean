@@ -7,13 +7,52 @@ function db(): SupabaseClient {
   return getSupabaseAdmin() as unknown as SupabaseClient;
 }
 
-function missingColumn(error: { message?: string } | null): boolean {
-  return /map_zoom_explicit|opening_zoom|schema cache|column/i.test(error?.message || "");
+/**
+ * PostgREST OpenAPI lists columns that exist. Selecting a missing
+ * `map_zoom_explicit` would be a query error, so the page checks the schema
+ * first and treats a missing column as "not explicit".
+ */
+let explicitColumn: { value: boolean; at: number } | null = null;
+
+async function explicitColumnReady(): Promise<boolean> {
+  if (explicitColumn?.value) return true;
+  if (explicitColumn && Date.now() - explicitColumn.at < 60_000) return false;
+  if (!isSupabaseAdminConfigured()) {
+    explicitColumn = { value: false, at: Date.now() };
+    return false;
+  }
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    explicitColumn = { value: false, at: Date.now() };
+    return false;
+  }
+  try {
+    const response = await fetch(`${url}/rest/v1/`, {
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+        Accept: "application/openapi+json",
+      },
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      explicitColumn = { value: false, at: Date.now() };
+      return false;
+    }
+    const spec = await response.text();
+    const ready = spec.includes("map_zoom_explicit");
+    explicitColumn = { value: ready, at: Date.now() };
+    return ready;
+  } catch {
+    explicitColumn = { value: false, at: Date.now() };
+    return false;
+  }
 }
 
-/** True only after an editor save wrote the flag. Missing column means not explicit. */
+/** True only after an editor save wrote the flag. Missing column means false. */
 export async function readMapZoomExplicit(mapsiteId: string | null | undefined): Promise<boolean> {
-  if (!mapsiteId || !isSupabaseAdminConfigured()) return false;
+  if (!mapsiteId || !(await explicitColumnReady())) return false;
   const { data, error } = await db()
     .from("mapsites")
     .select("map_zoom_explicit")
@@ -25,12 +64,12 @@ export async function readMapZoomExplicit(mapsiteId: string | null | undefined):
 
 /** Mark the stored zoom as chosen by an editor. No-op until the column exists. */
 export async function markMapZoomExplicit(mapsiteId: string): Promise<void> {
-  if (!isSupabaseAdminConfigured()) return;
+  if (!isSupabaseAdminConfigured() || !(await explicitColumnReady())) return;
   const { error } = await db()
     .from("mapsites")
     .update({ map_zoom_explicit: true })
     .eq("id", mapsiteId);
-  if (error && !missingColumn(error)) {
+  if (error) {
     console.warn("[mapsite-zoom] Could not mark an editor zoom:", error.message);
   }
 }
@@ -54,8 +93,7 @@ export async function saveSystemMapsiteOpeningZoom(
     .limit(1)
     .maybeSingle();
   const id = (data as { id?: string } | null)?.id;
-  if (!id) return;
-  if (await readMapZoomExplicit(id)) return;
+  if (!id || (await readMapZoomExplicit(id))) return;
   const { error } = await client
     .from("mapsites")
     .update({ map_zoom: systemMapsiteOpeningZoom(latitude) })
