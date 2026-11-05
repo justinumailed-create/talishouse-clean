@@ -5404,11 +5404,19 @@ body.mapsite-gallery-open [data-paypal-button] {
    book does (centred, about 72rem wide, fills the screen height). Mobile:
    the display map stacks above the write-up. Tall enough for the open PIN card. */
 .demo-hero {
-  max-width: 72rem;
+  max-width: 78rem;
   padding-top: 0.35rem;
 }
 .demo-hero__media {
   height: 32rem;
+}
+/* The FAST Code list scrolls on its own. On a phone the rail stacks under
+   the map and the list stays inside the viewport. */
+.demo-hero__list {
+  max-height: min(70dvh, 34rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 @media (min-width: 640px) {
   .demo-hero__media {
@@ -5422,10 +5430,19 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 @media (min-width: 1024px) {
   .demo-hero__panel {
-    height: clamp(30rem, calc(100dvh - 11rem), 42rem);
+    height: clamp(36rem, calc(100dvh - 7.5rem), 48rem);
+    grid-template-columns: minmax(0, 0.9fr) minmax(26rem, 1.15fr);
   }
   .demo-hero__media {
     height: 100%;
+  }
+  .demo-hero__rail {
+    height: 100%;
+    min-height: 0;
+  }
+  .demo-hero__list {
+    max-height: none;
+    min-height: 0;
   }
 }
 

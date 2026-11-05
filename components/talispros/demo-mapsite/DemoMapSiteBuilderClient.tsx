@@ -108,23 +108,21 @@ export default function DemoMapSiteBuilderClient({
           data-testid="demo-hero"
           aria-labelledby="demo-hero-title"
         >
-          <div className="demo-hero__panel grid overflow-hidden rounded-[20px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05),0_18px_48px_rgba(0,0,0,0.10)] lg:grid-cols-2">
+          <div className="demo-hero__panel grid min-w-0 overflow-hidden rounded-[20px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05),0_18px_48px_rgba(0,0,0,0.10)]">
             <div className="demo-hero__media relative min-w-0">
               <DemoHeroMap />
             </div>
-            <div className="flex min-w-0 flex-col justify-center px-6 py-7 sm:px-10 sm:py-10 lg:px-12">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.16em] text-neutral-500 sm:text-[13px]">
+            <div className="demo-hero__rail flex min-h-0 min-w-0 flex-col px-5 py-6 sm:px-8 sm:py-7 lg:px-8 lg:py-5">
+              <p className="shrink-0 text-[12px] font-semibold uppercase tracking-[0.16em] text-neutral-500 sm:text-[13px]">
                 {d.hero.eyebrow}
               </p>
               <h1
                 id="demo-hero-title"
-                className="mt-2 text-[22px] font-semibold leading-tight tracking-[-0.01em] text-neutral-950 sm:text-[30px]"
+                className="mt-2 shrink-0 text-[22px] font-semibold leading-tight tracking-[-0.01em] text-neutral-950 sm:text-[28px]"
                 style={{ textWrap: "balance" }}
               >
                 {d.hero.headline}
               </h1>
-              <p className="mt-4 text-[15px] leading-relaxed text-neutral-700 sm:text-[16px]">{d.hero.body1}</p>
-              <p className="mt-3 text-[15px] leading-relaxed text-neutral-700 sm:text-[16px]">{d.hero.body2}</p>
               {slotsPanel ? <FastCodeSlotsPanel data={slotsPanel} /> : null}
             </div>
           </div>

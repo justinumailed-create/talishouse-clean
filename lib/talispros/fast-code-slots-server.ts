@@ -5,10 +5,13 @@ import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin
 import {
   FAST_CODE_SLOT_LIMIT,
   SALES_ASSOCIATE_LOGINS,
+  ebookLogoFromBookMetadata,
   mapsiteHrefForSlot,
   mapsiteProvinceFromAddress,
   mapsiteTownFromAddress,
   normalizeSlotFastCode,
+  pickSlotLogoUrl,
+  slotInitials,
   sortSlotEntriesNewestFirst,
   type FastCodeSlotsPanelData,
   type OwnSlotList,
@@ -28,32 +31,121 @@ function db(): SupabaseClient {
 }
 
 type MapsiteJoin = {
+  id?: string | null;
   property_address?: string | null;
   property_title?: string | null;
   fast_code?: string | null;
   account_type?: string | null;
   created_at?: string | null;
+  logo_url?: string | null;
 };
+
+type SlotDraft = SlotEntry & { mapsiteId: string; mapsiteLogo: string | null };
 
 function one<T>(value: T | T[] | null | undefined): T | null {
   if (Array.isArray(value)) return value[0] ?? null;
   return value ?? null;
 }
 
-function toEntry(slotId: unknown, m: MapsiteJoin | null): SlotEntry | null {
+function toEntry(slotId: unknown, m: MapsiteJoin | null): SlotDraft | null {
   const code = m?.fast_code?.trim();
-  if (!code) return null;
+  const mapsiteId = m?.id?.trim();
+  if (!code || !mapsiteId) return null;
+  const town = mapsiteTownFromAddress(m?.property_address, m?.property_title);
   return {
     slotId: String(slotId),
     fastCode: code.toUpperCase(),
-    town: mapsiteTownFromAddress(m?.property_address, m?.property_title),
+    town,
     province: mapsiteProvinceFromAddress(m?.property_address),
     href: mapsiteHrefForSlot(m?.account_type, code),
     addedAt: m?.created_at ?? null,
+    logoUrl: null,
+    initials: slotInitials(m?.property_title || town, code),
+    mapsiteId,
+    mapsiteLogo: m?.logo_url ?? null,
   };
 }
 
-const SLOT_SELECT = "id, agent_id, position, created_at, mapsites(fast_code, account_type, property_address, property_title, created_at)";
+function toPublicEntry(draft: SlotDraft, logoUrl: string | null): SlotEntry {
+  return {
+    slotId: draft.slotId,
+    fastCode: draft.fastCode,
+    town: draft.town,
+    province: draft.province,
+    href: draft.href,
+    addedAt: draft.addedAt,
+    logoUrl,
+    initials: draft.initials,
+  };
+}
+
+type LogoRow = { mapsite_id?: string | null; fast_code?: string | null; logo_url?: string | null };
+type BookLogoRow = {
+  mapsite_id?: string | null;
+  fast_code?: string | null;
+  metadata?: unknown;
+  updated_at?: string | null;
+};
+
+/**
+ * Logo & Card Editor override, then the eBook agency logo, then the Mapsite
+ * logo. A missing or generic logo stays null so the row can show initials.
+ */
+async function attachSlotLogos(drafts: SlotDraft[]): Promise<SlotEntry[]> {
+  if (!drafts.length) return [];
+  const fallback = () => drafts.map((draft) => toPublicEntry(draft, pickSlotLogoUrl([draft.mapsiteLogo])));
+  try {
+    const ids = [...new Set(drafts.map((draft) => draft.mapsiteId))];
+    const codes = [...new Set(drafts.flatMap((draft) => [draft.fastCode, draft.fastCode.toLowerCase()]))];
+    const [ownerRes, bookRes] = await Promise.all([
+      db().from("mapsite_owner_customizations").select("mapsite_id, fast_code, logo_url").in("mapsite_id", ids),
+      db()
+        .from("talisbooks_books")
+        .select("mapsite_id, fast_code, metadata, updated_at")
+        .in("fast_code", codes),
+    ]);
+    const ownerByMapsite = new Map<string, string>();
+    const ownerByCode = new Map<string, string>();
+    for (const row of (ownerRes.data || []) as LogoRow[]) {
+      const logo = row.logo_url?.trim();
+      if (!logo) continue;
+      if (row.mapsite_id) ownerByMapsite.set(row.mapsite_id, logo);
+      if (row.fast_code) ownerByCode.set(row.fast_code.toLowerCase(), logo);
+    }
+    const books = [...((bookRes.data || []) as BookLogoRow[])].sort((a, b) => {
+      const left = a.updated_at ? Date.parse(a.updated_at) : 0;
+      const right = b.updated_at ? Date.parse(b.updated_at) : 0;
+      return right - left;
+    });
+    const ebookByMapsite = new Map<string, string>();
+    const ebookByCode = new Map<string, string>();
+    for (const book of books) {
+      const logo = ebookLogoFromBookMetadata(book.metadata);
+      if (!logo) continue;
+      if (book.mapsite_id && !ebookByMapsite.has(book.mapsite_id)) ebookByMapsite.set(book.mapsite_id, logo);
+      const code = book.fast_code?.trim().toLowerCase();
+      if (code && !ebookByCode.has(code)) ebookByCode.set(code, logo);
+    }
+    return drafts.map((draft) => {
+      const code = draft.fastCode.toLowerCase();
+      return toPublicEntry(
+        draft,
+        pickSlotLogoUrl([
+          ownerByMapsite.get(draft.mapsiteId),
+          ownerByCode.get(code),
+          ebookByMapsite.get(draft.mapsiteId),
+          ebookByCode.get(code),
+          draft.mapsiteLogo,
+        ]),
+      );
+    });
+  } catch {
+    return fallback();
+  }
+}
+
+const SLOT_SELECT =
+  "id, agent_id, position, created_at, mapsites(id, fast_code, account_type, property_address, property_title, created_at, logo_url)";
 
 /** Public groups: codes, towns and provinces only. The agent's name is never selected. */
 async function loadPublicLists(excludeAgentId: string | null): Promise<PublicSlotList[]> {
@@ -73,19 +165,22 @@ async function loadPublicLists(excludeAgentId: string | null): Promise<PublicSlo
     .order("position", { ascending: true })
     .order("created_at", { ascending: true });
 
-  return ordered
-    .map((agent) => ({
-      entries: sortSlotEntriesNewestFirst(
-        (slots || [])
-          .filter((s) => s.agent_id === agent.id)
-          .slice(0, FAST_CODE_SLOT_LIMIT)
-          .flatMap((s) => {
-            const entry = toEntry(s.id, one(s.mapsites as MapsiteJoin | MapsiteJoin[] | null));
-            return entry ? [entry] : [];
-          }),
+  const lists = await Promise.all(
+    ordered.map(async (agent) => ({
+      entries: await attachSlotLogos(
+        sortSlotEntriesNewestFirst(
+          (slots || [])
+            .filter((s) => s.agent_id === agent.id)
+            .slice(0, FAST_CODE_SLOT_LIMIT)
+            .flatMap((s) => {
+              const entry = toEntry(s.id, one(s.mapsites as MapsiteJoin | MapsiteJoin[] | null));
+              return entry ? [entry] : [];
+            }),
+        ),
       ),
-    }))
-    .filter((list) => list.entries.length > 0);
+    })),
+  );
+  return lists.filter((list) => list.entries.length > 0);
 }
 
 /** One agent's list by id (their own page, and the admin "View as agent" preview). */
@@ -97,11 +192,13 @@ export async function loadSlotListForAgentId(agentId: string): Promise<OwnSlotLi
     .eq("agent_id", agentId)
     .order("position", { ascending: true })
     .order("created_at", { ascending: true });
-  const entries = sortSlotEntriesNewestFirst(
-    (slots || []).flatMap((s) => {
-      const entry = toEntry(s.id, one(s.mapsites as MapsiteJoin | MapsiteJoin[] | null));
-      return entry ? [entry] : [];
-    }),
+  const entries = await attachSlotLogos(
+    sortSlotEntriesNewestFirst(
+      (slots || []).flatMap((s) => {
+        const entry = toEntry(s.id, one(s.mapsites as MapsiteJoin | MapsiteJoin[] | null));
+        return entry ? [entry] : [];
+      }),
+    ),
   );
   return { count: entries.length, limit: FAST_CODE_SLOT_LIMIT, entries };
 }

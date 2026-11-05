@@ -112,7 +112,99 @@ export type SlotEntry = {
   href: string;
   /** When the Mapsite was added (created / claimed), ISO timestamp. */
   addedAt: string | null;
+  /**
+   * Logo from the prospect's eBook or the Logo & Card Editor.
+   * Null means the row shows an initials badge (never a broken image).
+   */
+  logoUrl: string | null;
+  /** Letters for the badge when `logoUrl` is missing. */
+  initials: string;
 };
+
+/** Platform stand-in logos are not a prospect's own mark. */
+const GENERIC_SLOT_LOGOS = new Set([
+  "/logo.png",
+  "/images/mapsites/header-fallback-logo.jpeg",
+]);
+
+/** First usable logo. Generic fallbacks and non-URLs are skipped. */
+export function pickSlotLogoUrl(candidates: Array<string | null | undefined>): string | null {
+  for (const raw of candidates) {
+    if (typeof raw !== "string") continue;
+    const url = raw.trim();
+    if (!url) continue;
+    const path = url.split("?")[0]?.split("#")[0] || url;
+    if (GENERIC_SLOT_LOGOS.has(path)) continue;
+    if (url.startsWith("/") || url.startsWith("data:image/") || /^https?:\/\//i.test(url)) {
+      return url;
+    }
+  }
+  return null;
+}
+
+/** Agency logo stored on a Talisbook™ (RM22 hydration or a top-level logo field). */
+export function ebookLogoFromBookMetadata(metadata: unknown): string | null {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return null;
+  const record = metadata as Record<string, unknown>;
+  const hydration = record.rm22SlotHydration;
+  if (hydration && typeof hydration === "object" && !Array.isArray(hydration)) {
+    const logo = (hydration as Record<string, unknown>).agencyLogoUrl;
+    if (typeof logo === "string" && logo.trim()) return logo.trim();
+  }
+  for (const key of ["agencyLogoUrl", "brokerageLogoUrl", "logoUrl", "logo_url"] as const) {
+    const value = record[key];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return null;
+}
+
+const INITIAL_SKIP = new Set([
+  "a",
+  "an",
+  "the",
+  "of",
+  "and",
+  "de",
+  "du",
+  "la",
+  "le",
+  "les",
+  "des",
+  "d",
+  "inc",
+  "ltd",
+  "llc",
+  "corp",
+  "co",
+  "group",
+  "limited",
+  "real",
+  "estate",
+  "realty",
+  "agence",
+  "immobiliere",
+  "immobilière",
+]);
+
+/**
+ * Badge letters from the prospect's name (property title), else the town,
+ * else the FAST Code. A leading acronym such as DFH is kept whole.
+ */
+export function slotInitials(label: string | null | undefined, fastCode: string): string {
+  const words = (label || "")
+    .replace(/[™®]/g, "")
+    .split(/[^A-Za-z0-9À-ÿ]+/)
+    .map((word) => word.trim())
+    .filter((word) => word && !INITIAL_SKIP.has(word.toLowerCase()));
+  if (words.length >= 1 && /^[A-Z0-9]{2,4}$/.test(words[0])) return words[0];
+  if (words.length >= 2) return (words[0][0] + words[1][0]).toUpperCase();
+  if (words.length === 1) {
+    const word = words[0];
+    return (word.length <= 3 ? word : word.slice(0, 2)).toUpperCase();
+  }
+  const code = fastCode.replace(/[^A-Za-z0-9]/g, "");
+  return (code.slice(0, 2) || "MS").toUpperCase();
+}
 
 /** Newest Mapsite first; entries without a date go last. */
 export function sortSlotEntriesNewestFirst<T extends { addedAt: string | null }>(entries: T[]): T[] {

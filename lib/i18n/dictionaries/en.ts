@@ -427,6 +427,15 @@ export const en = {
       resourceNotConfigured: "{label} not configured yet",
       fastCodeLabel: "FAST Code: {code}",
     },
+    /** Hover / focus / tap explainers on PIN card actions (URL 1, URL 2, TEB™, TTV™). */
+    pinActions: {
+      url: "A link the owner adds to this PIN, such as their website or a listing page.",
+      // TEB™ meaning, TalisU FAQ (“What is the meaning of PMC?”), with the mark used on the button.
+      teb: "TEB™: Talis eBooks / Talisbooks™ are digital lead magnets and authority-building tools that attract clients and stand out in competitive markets.",
+      ttv: "TTV™ Early Adopter: get TTV™ for 1 year for $2,000 CAD. A single marketing video in North America typically costs US$1,500–5,000. TTV™ is our first step toward tokenized Mapsites.",
+      learnMore: "Learn more",
+      learnMoreHref: "/talisu?essay=tokenization",
+    },
     startHere: {
       aria: "Start here. Continue to choose your E-Book.",
       title: "Start Here",
@@ -808,11 +817,7 @@ export const en = {
     /** Mapsites page hero: one sample PIN on the map, write-up on the right. */
     hero: {
       eyebrow: "Demo Mapsite",
-      headline: "See your Market on a Mapsite before you register",
-      body1:
-        "A demo Mapsite is a working preview of your own Mapsite. You set it up around your home PIN, and it shows the Market Zone that a registered Market protects around that PIN.",
-      body2:
-        "One sample PIN in Canada sits on the map, with its card already open.",
+      headline: "Please find your market & select FAST Code beside it",
       pinCard: {
         mapLabel: "Sample Mapsite map",
         body: "Bay St. Lawrence, Nova Scotia",
@@ -842,6 +847,7 @@ export const en = {
       gateWrong: "That password does not match an agent account. Please try again.",
       gateLimited: "Too many attempts. Please wait 15 minutes and try again.",
       gateRequired: "This Mapsite opens for agents only. Click its FAST Code and enter your agent password.",
+      gateClose: "Close",
     },
     /** Demo builder card (Ralf, Oct 26): numbered steps, one address box. */
     addressPlaceholder: "Start typing an address…",

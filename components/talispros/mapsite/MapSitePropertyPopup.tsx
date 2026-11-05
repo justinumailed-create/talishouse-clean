@@ -31,8 +31,16 @@ import {
   showsPinResourceButtons,
   type MapSiteOnboardingPhase,
 } from "@/lib/talispros/mapsite-onboarding-phase";
+import PinActionExplainer, { type PinActionExplainerId } from "@/components/talispros/mapsite/PinActionExplainer";
 
 type ResourceKey = MapSiteResourceKey;
+
+const PIN_EXPLAINER: Record<ResourceKey, PinActionExplainerId> = {
+  url: "url",
+  mls: "url",
+  teb: "teb",
+  ttv: "ttv",
+};
 
 const RESOURCES: {
   key: ResourceKey;
@@ -112,7 +120,7 @@ function ResourceButton({
         className={className}
         aria-label={fmt(t.mapsite.popup.resourceUnavailable, { label })}
         aria-disabled="true"
-        title={fmt(t.mapsite.popup.resourceNotConfigured, { label })}
+        tabIndex={0}
       >
         {label}
       </span>
@@ -374,17 +382,18 @@ export default function MapSitePropertyPopup({
                           )
                         : resource.resolveHref(mapsite);
                     return (
-                      <ResourceButton
-                        key={resource.key}
-                        href={href}
-                        label={resource.label}
-                        variant={resource.variant}
-                        onActionClick={
-                          resource.key === "url" && canBuyAdditionalPins
-                            ? onOpenAdditionalPins
-                            : undefined
-                        }
-                      />
+                      <PinActionExplainer key={resource.key} action={PIN_EXPLAINER[resource.key]}>
+                        <ResourceButton
+                          href={href}
+                          label={resource.label}
+                          variant={resource.variant}
+                          onActionClick={
+                            resource.key === "url" && canBuyAdditionalPins
+                              ? onOpenAdditionalPins
+                              : undefined
+                          }
+                        />
+                      </PinActionExplainer>
                     );
                   })}
                 </div>

@@ -707,6 +707,13 @@ export const de: Dictionary = {
       resourceNotConfigured: "{label} ist noch nicht eingerichtet",
       fastCodeLabel: "FAST Code: {code}",
     },
+    pinActions: {
+      url: "Ein Link, den der Inhaber diesem PIN hinzufügt, etwa die eigene Website oder eine Angebotsseite.",
+      teb: "TEB™: Talis eBooks / Talisbooks™ sind digitale Lead-Magneten und Werkzeuge für den Aufbau von Autorität, die Kunden anziehen und in umkämpften Märkten herausstechen.",
+      ttv: "TTV™ für Früheinsteiger: TTV™ ein Jahr lang für 2.000 CAD. Ein einzelnes Marketingvideo in Nordamerika kostet üblicherweise 1.500–5.000 US$. TTV™ ist unser erster Schritt zu tokenisierten Mapsites.",
+      learnMore: "Mehr erfahren",
+      learnMoreHref: "/talisu?essay=tokenization",
+    },
     startHere: {
       aria: "Hier starten. Weiter zur Auswahl Ihres E-Books.",
       title: "Hier starten",
@@ -1084,11 +1091,7 @@ export const de: Dictionary = {
     addressFieldLabel: "Straßenadresse",
     hero: {
       eyebrow: "Demo-Mapsite",
-      headline: "Sehen Sie Ihren Markt auf einer Mapsite, bevor Sie sich registrieren",
-      body1:
-        "Eine Demo-Mapsite ist eine funktionierende Vorschau Ihrer eigenen Mapsite. Sie richten sie um Ihren Home-PIN ein, und sie zeigt die Marktzone, die ein registrierter Markt rund um diesen PIN schützt.",
-      body2:
-        "Ein Beispiel-PIN in Kanada liegt auf der Karte, und seine Infokarte ist bereits geöffnet.",
+      headline: "Bitte finden Sie Ihren Markt und wählen Sie den FAST Code daneben.",
       pinCard: {
         mapLabel: "Beispielkarte einer Mapsite",
         body: "Bay St. Lawrence, Neuschottland",
@@ -1117,6 +1120,7 @@ export const de: Dictionary = {
       gateWrong: "Dieses Passwort gehört zu keinem Agentenkonto. Bitte versuchen Sie es erneut.",
       gateLimited: "Zu viele Versuche. Bitte warten Sie 15 Minuten und versuchen Sie es erneut.",
       gateRequired: "Diese Mapsite öffnet sich nur für Agenten. Klicken Sie auf ihren FAST Code und geben Sie Ihr Agenten-Passwort ein.",
+      gateClose: "Schließen",
     },
     addressPlaceholder: "Adresse eingeben …",
     addressLookupUnavailable: "Adresssuche nicht verfügbar. Geben Sie die vollständige Adresse ein und drücken Sie Enter.",

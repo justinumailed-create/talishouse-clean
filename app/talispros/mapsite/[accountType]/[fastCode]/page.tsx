@@ -53,11 +53,6 @@ import MapSitePartnerButtons, {
 } from "@/components/talispros/mapsite/MapSitePartnerButtons";
 import { loadMapSiteRootContext } from "@/lib/talispros/mapsite-root-partners-service";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite";
-import RegisterActions from "@/components/talisu/RegisterActions";
-import { getDictionary } from "@/lib/i18n/dictionaries";
-import { hasRegisterEntry } from "@/lib/talisu/register-entry";
-import { TALISU_DISCUSS_PATH, talisuHref } from "@/lib/talisu/talisu-links";
-import { PMC_PATHS } from "@/lib/talispros/mapsite-contract";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { isPreparedSlotMapsite } from "@/lib/talispros/fast-code-slots-server";
 import { hasProspectAccess } from "@/lib/talispros/prospect-gate-server";
@@ -290,27 +285,6 @@ export default async function ClaimedMapSiteByAccountTypePage({
   // Account holder pill in the navbar: the signed-in owner only.
   const ownerPill = await loadPersonalHomeOwnerPill(fastCode, await getLocale());
 
-  // Mapsites a sales associate prepared (FAST Code slots on the Mapsites
-  // page): Aisha's four buttons under the write-up, same links and entry-code
-  // gate as /talisu/reg.
-  const belowWriteUp = preparedSlotMapsite ? (
-    <div
-      className="rounded-2xl bg-white/90 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.18)] ring-1 ring-black/5 backdrop-blur-sm"
-      data-testid="mapsite-register-actions"
-    >
-      <RegisterActions
-        labels={getDictionary(await getLocale()).talisu.register.actions}
-        entryGranted={await hasRegisterEntry()}
-        hrefs={{
-          propose: talisuHref(TALISU_DISCUSS_PATH),
-          claim: DEMO_MAPSITE_BUILD_PATH,
-          terms: PMC_PATHS.contract,
-          register: "/talisu/reg?step=choose",
-        }}
-      />
-    </div>
-  ) : null;
-
   return (
     <>
     <MapSiteApplication
@@ -344,7 +318,6 @@ export default async function ClaimedMapSiteByAccountTypePage({
         mapsiteHref: `${MAPSITE_APP_PATH}/${accountType}/${fastCode.toLowerCase()}`,
         owner: ownerPill,
       }}
-      belowWriteUp={belowWriteUp}
     />
     <MapSitePartnerButtons partners={partnerTargets} />
     </>
