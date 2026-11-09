@@ -10,7 +10,11 @@ import {
 export type SystemFastCodeFacts = {
   systemGenerated: boolean;
   registeredOrClaimed: boolean;
+  /** Short non-secret trace for the personal-home data attribute. */
+  trace: string;
 };
+
+const PLACEHOLDER_CLAIM_EMAIL = "claim@talispros.com";
 
 /**
  * Database facts for a FAST Code. Does not read the visitor session.
@@ -53,7 +57,7 @@ async function hasOwnActivationPayment(
 export async function readSystemFastCodeFacts(rawCode: string): Promise<SystemFastCodeFacts> {
   const code = rawCode.trim().toLowerCase();
   if (!code || !isSupabaseAdminConfigured()) {
-    return { systemGenerated: false, registeredOrClaimed: false };
+    return { systemGenerated: false, registeredOrClaimed: false, trace: "no-admin" };
   }
 
   const db = getSupabaseAdmin();
@@ -65,11 +69,15 @@ export async function readSystemFastCodeFacts(rawCode: string): Promise<SystemFa
       .eq("fast_code", code)
       .eq("event_type", "assigned")
       .limit(8),
-    db.from("mapsites").select("id, account_id").ilike("fast_code", code).limit(1).maybeSingle(),
+    db.from("mapsites").select("id, account_id, email").ilike("fast_code", code).limit(1).maybeSingle(),
     db.from("fast_codes").select("request_id").ilike("code", code).maybeSingle(),
     db.from("fast_code_registrations").select("id").ilike("fast_code", code).limit(1),
   ]);
-  const mapsiteRowEarly = mapsite.data as { id?: string; account_id?: string | null } | null;
+  const mapsiteRowEarly = mapsite.data as {
+    id?: string;
+    account_id?: string | null;
+    email?: string | null;
+  } | null;
   const paid = await hasOwnActivationPayment(code, mapsiteRowEarly?.id ?? null);
 
   const mapsiteRow = mapsiteRowEarly;
@@ -87,10 +95,35 @@ export async function readSystemFastCodeFacts(rawCode: string): Promise<SystemFa
   );
   const registeredRow = (codeRow.data as { request_id?: string | null } | null)?.request_id;
   const registrationHit = Array.isArray(registration.data) && registration.data.length > 0;
+  const placeholderInbox = (mapsiteRow?.email || "").trim().toLowerCase() === PLACEHOLDER_CLAIM_EMAIL;
+  const registeredOrClaimed = Boolean(
+    paid || mapsiteRow?.account_id || registeredRow || registrationHit,
+  );
+  const note = (error: { message?: string } | null | undefined) =>
+    error?.message ? error.message.replace(/\s+/g, " ").slice(0, 80) : "";
+  const trace = [
+    status.data ? "status" : "no-status",
+    assignedBySystem ? "assigned" : "no-assigned",
+    prepared ? "slot" : "no-slot",
+    placeholderInbox ? "placeholder" : "no-placeholder",
+    registeredOrClaimed ? "claimed" : "open",
+    note(status.error),
+    note(assigned.error),
+    note(mapsite.error),
+    note(codeRow.error),
+    note(registration.error),
+  ]
+    .filter(Boolean)
+    .join("|");
 
   return {
-    systemGenerated: Boolean(status.data) || assignedBySystem || prepared,
-    registeredOrClaimed: Boolean(paid || mapsiteRow?.account_id || registeredRow || registrationHit),
+    systemGenerated:
+      Boolean(status.data) ||
+      assignedBySystem ||
+      prepared ||
+      (placeholderInbox && !registeredOrClaimed),
+    registeredOrClaimed,
+    trace,
   };
 }
 

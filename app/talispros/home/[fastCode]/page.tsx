@@ -23,8 +23,12 @@ import {
   loadPersonalHomePage,
   personalHomeClaimMarketHref,
 } from "@/lib/talispros/personal-home-page";
-import { isOwnerOnlyPersonalHomeHref } from "@/lib/talispros/system-fast-code-gate";
-import { isPublicSystemFastCode } from "@/lib/talispros/system-fast-code-access";
+import { hasProspectAccess } from "@/lib/talispros/prospect-gate-server";
+import {
+  isOwnerOnlyPersonalHomeHref,
+  restrictSystemFastCodeFeatures,
+} from "@/lib/talispros/system-fast-code-gate";
+import { readSystemFastCodeFacts } from "@/lib/talispros/system-fast-code-access";
 
 export const dynamic = "force-dynamic";
 
@@ -75,10 +79,16 @@ export default async function PersonalHomePage({
   const { fastCode } = await params;
   const query = (await searchParams) ?? {};
   const locale = await getLocale();
-  const [lookup, publicSystem] = await Promise.all([
+  const [lookup, facts, agentAccess] = await Promise.all([
     loadPersonalHomePage(fastCode, locale),
-    isPublicSystemFastCode(fastCode),
+    readSystemFastCodeFacts(fastCode),
+    hasProspectAccess().catch(() => false),
   ]);
+  const publicSystem = restrictSystemFastCodeFeatures({
+    systemGenerated: facts.systemGenerated,
+    registeredOrClaimed: facts.registeredOrClaimed,
+    agentAccess,
+  });
   if (lookup.kind === "allpins") redirect(ROUTES.TALISU_MARKETS);
   if (lookup.kind === "missing") notFound();
 
@@ -99,7 +109,12 @@ export default async function PersonalHomePage({
   const paragraphs = resolved.writeUp.split(/\n{2,}/).filter((part) => part.trim());
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[#f5f1ea]" data-testid="personal-home-page">
+    <div
+      className="flex min-h-dvh flex-col bg-[#f5f1ea]"
+      data-testid="personal-home-page"
+      data-gate={facts.trace}
+      data-agent={agentAccess ? "1" : "0"}
+    >
       <PersonalHomeNav
         homeHref={data.homeHref}
         mapsiteHref={mapsiteHref}

@@ -93,7 +93,9 @@ describe("system FAST Code feature gate", () => {
 
   it("gates owner APIs and shows the existing map on the public home", () => {
     const page = read("app/talispros/home/[fastCode]/page.tsx");
-    expect(page).toContain("isPublicSystemFastCode");
+    expect(page).toContain("readSystemFastCodeFacts");
+    expect(page).toContain("restrictSystemFastCodeFeatures");
+    expect(page).toContain("data-gate={facts.trace}");
     expect(page).toContain("PersonalHomeMapsite");
     expect(page).toContain("isOwnerOnlyPersonalHomeHref");
     expect(page).toContain('id="mapsite"');
