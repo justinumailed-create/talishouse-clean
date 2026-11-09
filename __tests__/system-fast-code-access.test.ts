@@ -99,6 +99,10 @@ describe("system FAST Code feature gate", () => {
     expect(page).toContain("PersonalHomeMapsite");
     expect(page).toContain("isOwnerOnlyPersonalHomeHref");
     expect(page).toContain('id="mapsite"');
+    const loader = read("lib/talispros/personal-home-map.ts");
+    expect(loader).toContain("isPlatformDemoPin");
+    expect(loader).not.toContain("getDemonstrationMapSite");
+    expect(loader).not.toContain("loadMapSiteApplicationState");
     const map = read("components/talispros/personal-home/PersonalHomeMapsite.tsx");
     expect(map).toContain("MapEngineCanvas");
     expect(map).toContain("MapSitePropertyPopup");
