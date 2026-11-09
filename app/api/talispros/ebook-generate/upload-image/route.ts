@@ -19,6 +19,7 @@ import {
   logOnboardingStep,
   onboardingNow,
 } from "@/lib/onboarding-timing";
+import { isBlockedListingUrl } from "@/lib/talisbooks/blocked-listing-sources";
 
 export const dynamic = "force-dynamic";
 /** Sharp + storage for a large phone photo routinely exceeds 30s. */
@@ -74,6 +75,15 @@ export async function POST(request: Request) {
         "isolated-bookshelf";
     const kind = parseOptimizeImageKind(String(formData.get("kind") || "property"));
     const label = String(formData.get("label") || "").trim();
+    const sourceUrl = String(
+      formData.get("sourceUrl") || formData.get("source") || "",
+    ).trim();
+    if (sourceUrl && isBlockedListingUrl(sourceUrl)) {
+      return Response.json(
+        { ok: false, error: "That image source is not allowed." },
+        { status: 400 },
+      );
+    }
     const fileEntry = formData.get("file");
 
     if (!isUploadBlob(fileEntry)) {

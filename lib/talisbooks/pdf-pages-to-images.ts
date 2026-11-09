@@ -8,6 +8,7 @@ import {
   isAllowedEbookImageUpload,
   isAllowedEbookPdfUpload,
 } from "@/lib/talisbooks/ebook-upload-formats";
+import { textReferencesBlockedListingSource } from "@/lib/talisbooks/blocked-listing-sources";
 
 const MAX_PAGES = 22;
 const PDF_LOAD_TIMEOUT_MS = 20_000;
@@ -42,6 +43,56 @@ function isImageFile(file: File): boolean {
   return isAllowedEbookImageUpload(file);
 }
 
+/** System builds must not rasterize a PDF whose text or metadata names realtor.ca. */
+export class BlockedListingSourcePdfError extends Error {
+  readonly code = "blocked-listing-source-pdf";
+
+  constructor() {
+    super(
+      "This PDF can't be used for this Talisbook. Photos will be taken from the brokerage website.",
+    );
+    this.name = "BlockedListingSourcePdfError";
+  }
+}
+
+async function pdfReferencesBlockedListingSource(document: {
+  getMetadata: () => Promise<unknown>;
+  numPages: number;
+  getPage: (pageNumber: number) => Promise<{
+    getTextContent: () => Promise<{ items: unknown[] }>;
+  }>;
+}): Promise<boolean> {
+  const parts: string[] = [];
+  try {
+    const meta = (await document.getMetadata()) as {
+      info?: unknown;
+      metadata?: { getRaw?: () => string } | null;
+    };
+    if (meta?.info) parts.push(JSON.stringify(meta.info));
+    const raw = meta?.metadata?.getRaw?.();
+    if (raw) parts.push(String(raw));
+  } catch {
+    /* metadata is optional */
+  }
+  const pageCount = Math.min(document.numPages, 8);
+  for (let pageNumber = 1; pageNumber <= pageCount; pageNumber += 1) {
+    try {
+      const page = await document.getPage(pageNumber);
+      const content = await page.getTextContent();
+      parts.push(
+        content.items
+          .map((item) =>
+            item && typeof item === "object" && "str" in item ? String(item.str || "") : "",
+          )
+          .join(" "),
+      );
+    } catch {
+      /* keep checking the remaining pages */
+    }
+  }
+  return textReferencesBlockedListingSource(parts.join("\n"));
+}
+
 export function classifyUploadFile(file: File): "image" | "pdf" | "other" {
   if (isPdfFile(file)) return "pdf";
   if (isImageFile(file)) return "image";
@@ -70,7 +121,12 @@ async function canvasToJpegFile(
  */
 export async function convertPdfFileToImageFiles(
   file: File,
-  options?: { maxPages?: number; onProgress?: (done: number, total: number) => void }
+  options?: {
+    maxPages?: number;
+    onProgress?: (done: number, total: number) => void;
+    /** Unclaimed system FAST Code builds skip Realtor.ca composite PDFs. */
+    systemBuild?: boolean;
+  }
 ): Promise<File[]> {
   const maxPages = options?.maxPages ?? MAX_PAGES;
   try {
@@ -91,6 +147,9 @@ export async function convertPdfFileToImageFiles(
       PDF_LOAD_TIMEOUT_MS,
       "Timed out reading the PDF. Check that the PDF.js worker is reachable.",
     );
+    if (options?.systemBuild && (await pdfReferencesBlockedListingSource(document))) {
+      throw new BlockedListingSourcePdfError();
+    }
     const pageCount = Math.min(document.numPages, maxPages);
     const baseName = file.name.replace(/\.pdf$/i, "") || "pdf";
     const pages: File[] = [];
@@ -126,6 +185,7 @@ export async function convertPdfFileToImageFiles(
 
     return pages;
   } catch (caught) {
+    if (caught instanceof BlockedListingSourcePdfError) throw caught;
     if (caught instanceof Error && caught.message && !caught.message.startsWith("Canvas")) {
       throw new Error(
         caught.message.includes("PDF")
@@ -224,12 +284,14 @@ export async function convertPdfToWrapCoverAndInteriors(
   options?: {
     maxInteriorPages?: number;
     onProgress?: (done: number, total: number) => void;
+    systemBuild?: boolean;
   },
 ): Promise<{ front: File; back: File; interiors: File[] }> {
   const maxInteriorPages = options?.maxInteriorPages ?? MAX_PAGES - 1;
   const pages = await convertPdfFileToImageFiles(file, {
     maxPages: Math.max(2, 1 + maxInteriorPages),
     onProgress: options?.onProgress,
+    systemBuild: options?.systemBuild,
   });
   const coverPage = pages[0];
   if (!coverPage) {
@@ -258,6 +320,7 @@ export async function assignBookAssetsFromUploads(
   options?: {
     maxInteriorPages?: number;
     onProgress?: (done: number, total: number) => void;
+    systemBuild?: boolean;
   },
 ): Promise<{
   front: File;

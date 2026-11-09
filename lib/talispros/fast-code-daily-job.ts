@@ -14,12 +14,19 @@ import {
 } from "@/lib/talispros/admin-talisbot-messages";
 import { systemMapsiteOpeningZoom } from "@/lib/talispros/system-mapsite-zoom";
 import { saveSystemMapsiteOpeningZoom } from "@/lib/talispros/system-mapsite-zoom-server";
+import { resolveBrokerageWebsiteUrl } from "@/lib/talisbooks/blocked-listing-sources";
+import {
+  isSystemListingEbookBuild,
+  refreshSystemEbookFromBrokerageWebsite,
+} from "@/lib/talisbooks/brokerage-site-listing-images";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 
 /**
  * Daily FAST Code job (Vercel cron 00:30 UTC = 06:00 IST, plus "Run now").
  *  1. Refresh: re-read each tracked brokerage's own website (MLS® numbers it
- *     shows) and log new/removed listings + flag the eBook. Google only:
- *     no REALTOR.ca requests.
+ *     shows) and log new/removed listings. eBook photos, when refreshed, come
+ *     from that same brokerage website. Google is used for place and page
+ *     counts only. Realtor.ca and its CDN are never requested.
  *  1b. Sourcing: Google Places Text Search in the next anchor-town markets
  *     (Ralf's parameters, lib/talispros/prospect-markets.ts) → review queue.
  *  2. Assign: approved sourcing-queue prospects get a person-initials FAST Code
@@ -238,22 +245,32 @@ export interface DailyJobSummary {
 async function refreshCodes(summary: DailyJobSummary): Promise<void> {
   const { data } = await db()
     .from("fast_code_status")
-    .select("fast_code, mapsite_id, agent_id, website_listing_ids, mapsites(broker_url)");
+    .select("fast_code, mapsite_id, agent_id, website_listing_ids, mapsites(broker_url, website, status)");
   const rows = (data ?? []) as {
     fast_code: string;
     mapsite_id: string | null;
     agent_id: string | null;
     website_listing_ids: string[] | null;
-    mapsites: { broker_url: string | null } | { broker_url: string | null }[] | null;
+    mapsites:
+      | { broker_url: string | null; website: string | null; status: string | null }
+      | { broker_url: string | null; website: string | null; status: string | null }[]
+      | null;
   }[];
   for (const row of rows) {
     const m = Array.isArray(row.mapsites) ? row.mapsites[0] : row.mapsites;
     const now = new Date().toISOString();
     const update: Record<string, unknown> = { last_refreshed_at: now };
     const details: Record<string, unknown> = {};
-    // Brokerage's own website (Google-listed site; no REALTOR.ca).
-    if (m?.broker_url && /^https?:\/\//i.test(m.broker_url)) {
-      const scan = await scanBrokerageSite(m.broker_url);
+    // Brokerage's own website only. Realtor.ca hosts are never fetched.
+    const brokerageWebsite = resolveBrokerageWebsiteUrl(m?.broker_url, m?.website);
+    if ((m?.broker_url || m?.website) && !brokerageWebsite) {
+      console.warn(
+        `[fast-code-daily-job] ${row.fast_code}: brokerage website is a blocked listing source; ebook images left unchanged`,
+      );
+      summary.errors.push(`${row.fast_code.toUpperCase()}: skipped a blocked listing website`);
+    }
+    if (brokerageWebsite) {
+      const scan = await scanBrokerageSite(brokerageWebsite);
       update.broker_site_status = scan.status;
       details.brokerSite = scan.status;
       if (!scan.status || scan.status >= 400) summary.brokerSitesDown.push(row.fast_code.toUpperCase());
@@ -268,7 +285,7 @@ async function refreshCodes(summary: DailyJobSummary): Promise<void> {
         update.listings_count = scan.ids.length;
         update.listings_source_status = "website";
         details.websiteListings = scan.ids.length;
-        const host = websiteHost(m.broker_url);
+        const host = websiteHost(brokerageWebsite);
         const cseCount = host ? await customSearchCount(host) : null;
         if (cseCount !== null) details.googleSitePages = cseCount;
         if (before && (added.length || removed.length)) {
@@ -282,13 +299,51 @@ async function refreshCodes(summary: DailyJobSummary): Promise<void> {
             details: { added: added.slice(0, 20), removed: removed.slice(0, 20), source: "website" },
             createdBy: "daily-job",
           });
+          const paymentReceived = await hasCompletedMapSiteActivationPayment({
+            fastCode: row.fast_code,
+            mapsiteId: row.mapsite_id,
+            reconcileFromStripe: false,
+          });
+          const systemEbook = isSystemListingEbookBuild({
+            fastCode: row.fast_code,
+            mapsiteStatus: m?.status,
+            paymentReceived,
+          });
+          let ebookImages: { updated: boolean; imageCount: number } = {
+            updated: false,
+            imageCount: 0,
+          };
+          if (systemEbook) {
+            try {
+              ebookImages = await refreshSystemEbookFromBrokerageWebsite({
+                fastCode: row.fast_code,
+                mapsiteId: row.mapsite_id,
+                brokerUrl: m?.broker_url,
+                website: m?.website,
+              });
+            } catch (error) {
+              const message = error instanceof Error ? error.message : String(error);
+              console.warn(
+                `[fast-code-daily-job] ${row.fast_code}: brokerage ebook refresh failed; images left unchanged`,
+                message,
+              );
+              summary.errors.push(`${row.fast_code.toUpperCase()}: ebook refresh failed`);
+            }
+          }
           await recordFastCodeUpdate({
             fastCode: row.fast_code,
             agentId: row.agent_id,
             mapsiteId: row.mapsite_id,
             eventType: "ebook",
-            note: "Listings changed: eBook pages need a refresh",
-            details: { added: added.length, removed: removed.length },
+            note: ebookImages.updated
+              ? "Listings changed: eBook photos refreshed from the brokerage website"
+              : "Listings changed: eBook pages need a refresh",
+            details: {
+              added: added.length,
+              removed: removed.length,
+              imageSource: ebookImages.updated ? "brokerage-website" : "unchanged",
+              imageCount: ebookImages.imageCount,
+            },
             createdBy: "daily-job",
           });
         }

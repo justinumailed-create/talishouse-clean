@@ -28,6 +28,10 @@ import type { Rm22TemplatePayload } from "@/lib/talisbooks/rm22-template";
 import type { EbookGenerationProgressEvent } from "@/lib/talispros/ebook-generation-stages";
 import type { MapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
 import { rejectDisallowedEbookFiles } from "@/lib/talisbooks/ebook-upload-formats-server";
+import {
+  isBlockedListingUrl,
+  stripRealtorCreditText,
+} from "@/lib/talisbooks/blocked-listing-sources";
 
 export type {
   EbookGenerationProgressEvent,
@@ -70,6 +74,8 @@ export type RunEbookGenerationInput = {
   onProgress?: (event: EbookGenerationProgressEvent) => void | Promise<void>;
   /** Override job timeout (ms). Defaults to ONBOARDING_JOB_TIMEOUT_MS. */
   timeoutMs?: number;
+  /** System build asked for brokerage-website photos instead of a blocked PDF. */
+  brokerageSitePhotos?: boolean;
 };
 
 function emit(
@@ -155,7 +161,11 @@ export async function runEbookGenerationPipeline(
         const progressRequestId = ctx.requestId || ctx.mapsiteId || ctx.fastCode;
 
         const optimizedImages = (input.optimizedImages || []).filter(
-          (item) => item.url && item.width > 0 && item.height > 0,
+          (item) =>
+            item.url &&
+            item.width > 0 &&
+            item.height > 0 &&
+            !isBlockedListingUrl(item.url),
         );
         const rawImages = input.images || [];
         const disallowed = rejectDisallowedEbookFiles([
@@ -167,7 +177,12 @@ export async function runEbookGenerationPipeline(
           return fail("uploading_images", disallowed);
         }
 
-        if (!optimizedImages.length && !rawImages.length && !input.rm22Template) {
+        if (
+          !optimizedImages.length &&
+          !rawImages.length &&
+          !input.rm22Template &&
+          !input.brokerageSitePhotos
+        ) {
           return fail(
             "uploading_images",
             "Upload at least one property image or PDF page."
@@ -197,7 +212,8 @@ export async function runEbookGenerationPipeline(
           accountType: ctx.accountType,
           requestId: ctx.requestId,
           title: resolvePersistedBookTitle(input.title),
-          description: input.description.trim(),
+          description: stripRealtorCreditText(input.description),
+          brokerageSitePhotos: input.brokerageSitePhotos,
           location:
             input.location.trim() ||
             ctx.pin.streetAddress ||
