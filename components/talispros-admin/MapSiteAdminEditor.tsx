@@ -31,6 +31,7 @@ import {
   type OfferedSubscriptionTier,
 } from "@/lib/mapsite-subscription";
 import type { MapSiteEbookDraft } from "@/lib/talisbooks/mapsite-ebook-service";
+import { toPlatformStatus } from "@/lib/talispros/mapsite-state";
 
 interface MapSiteAdminEditorProps {
   mapsite: MapSiteView;
@@ -327,6 +328,9 @@ export default function MapSiteAdminEditor({
           initialPinWriteup={mapsite.propertyDescription}
           initialPriceLine={mapsite.price}
           initialAgencyLogoUrl={mapsite.logoUrl}
+          systemListingBuild={
+            !paymentReceived && toPlatformStatus(mapsite.status) === "UNCLAIMED"
+          }
         />
       </div>
 

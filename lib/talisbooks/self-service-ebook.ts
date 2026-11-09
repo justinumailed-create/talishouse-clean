@@ -43,6 +43,8 @@ export type GenerateSelfServiceEbookInput = {
   /** Tag book for catalogue isolated bookshelf (admin-only, not public). */
   isolatedBookshelf?: boolean;
   flagIdentity?: MapsiteFlagIdentity;
+  /** System build: take page images from the brokerage website. */
+  brokerageSitePhotos?: boolean;
 };
 
 export type GenerateSelfServiceEbookResult =
@@ -94,6 +96,7 @@ export async function generateSelfServiceEbook(
       asAdmin: input.asAdmin,
       isolatedBookshelf: input.isolatedBookshelf,
       flagIdentity: input.flagIdentity,
+      brokerageSitePhotos: input.brokerageSitePhotos,
     });
 
     if (!result.success) {

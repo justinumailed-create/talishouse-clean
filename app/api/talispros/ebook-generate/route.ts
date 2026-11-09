@@ -18,6 +18,10 @@ import {
   assertAllowedEbookUploadFile,
   rejectDisallowedEbookFiles,
 } from "@/lib/talisbooks/ebook-upload-formats-server";
+import {
+  isBlockedListingUrl,
+  stripRealtorCreditText,
+} from "@/lib/talisbooks/blocked-listing-sources";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -35,7 +39,7 @@ function parseOptimizedImages(raw: FormDataEntryValue | null): OptimizedEbookIma
         const width = Number(record.width);
         const height = Number(record.height);
         if (!url || !Number.isFinite(width) || !Number.isFinite(height)) return null;
-        if (width <= 0 || height <= 0) return null;
+        if (width <= 0 || height <= 0 || isBlockedListingUrl(url)) return null;
         return { url, width: Math.round(width), height: Math.round(height) };
       })
       .filter((item): item is OptimizedEbookImageAsset => Boolean(item));
@@ -59,7 +63,9 @@ export async function POST(request: Request) {
     String(formData.get("destination") || "").trim().toLowerCase() ===
       "isolated-bookshelf";
   const title = String(formData.get("title") || "").trim();
-  const description = String(formData.get("description") || "").trim();
+  const description = stripRealtorCreditText(
+    String(formData.get("description") || ""),
+  );
   const location = String(formData.get("location") || "").trim();
   const agentName = String(formData.get("agentName") || "").trim();
   const agentEmail = String(formData.get("agentEmail") || "").trim();
@@ -69,9 +75,19 @@ export async function POST(request: Request) {
     .toLowerCase();
   const uploadMode = uploadModeRaw === "pdf" ? "pdf" : "images";
   const optimizedImages = parseOptimizedImages(formData.get("optimizedImages"));
-  const agentPhotoUrl = String(formData.get("agentPhotoUrl") || "").trim() || null;
+  const agentPhotoUrlRaw = String(formData.get("agentPhotoUrl") || "").trim();
+  const brokerageLogoUrlRaw =
+    String(formData.get("brokerageLogoUrl") || "").trim();
+  const blockedPortraitSource =
+    isBlockedListingUrl(agentPhotoUrlRaw) || isBlockedListingUrl(brokerageLogoUrlRaw);
+  const agentPhotoUrl =
+    agentPhotoUrlRaw && !isBlockedListingUrl(agentPhotoUrlRaw) ? agentPhotoUrlRaw : null;
   const brokerageLogoUrl =
-    String(formData.get("brokerageLogoUrl") || "").trim() || null;
+    brokerageLogoUrlRaw && !isBlockedListingUrl(brokerageLogoUrlRaw)
+      ? brokerageLogoUrlRaw
+      : null;
+  const brokerageSitePhotos =
+    String(formData.get("brokerageSitePhotos") || "").trim() === "1";
 
   const brokerageLogoRaw = formData.get("brokerageLogo");
   const brokerageLogo =
@@ -127,6 +143,18 @@ export async function POST(request: Request) {
         }
         if (agentPhoto) await assertAllowedEbookUploadFile(agentPhoto);
         if (brokerageLogo) await assertAllowedEbookUploadFile(brokerageLogo);
+        if (blockedPortraitSource) {
+          send({
+            stage: "failed",
+            requestId: requestId || null,
+            fastCode: null,
+            mapsiteId: null,
+            error: "That image source is not allowed.",
+            durationMs: onboardingNow() - started,
+            failedStage: "uploading_images",
+          });
+          return;
+        }
 
         const result = await runEbookGenerationPipeline({
           requestId,
@@ -167,6 +195,7 @@ export async function POST(request: Request) {
           ),
           replaceBookId: String(formData.get("replaceBookId") || "").trim() || null,
           isolatedBookshelf,
+          brokerageSitePhotos,
           onProgress: async (event) => {
             send(event);
           },

@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   assignBookAssetsFromUploads,
+  BlockedListingSourcePdfError,
   classifyUploadFile,
   convertPdfFileToImageFiles,
   COVER_WRAP_PDF_NOT_LANDSCAPE_MESSAGE,
@@ -160,6 +161,11 @@ interface EbookGenerateClientProps {
   isolatedBookshelf?: boolean;
   /** Destination token — when isolated-bookshelf, post-generate returns to that shelf. */
   destination?: string | null;
+  /**
+   * Unclaimed system FAST Code. Realtor.ca PDFs are not rasterized; photos
+   * come from the brokerage website instead.
+   */
+  systemListingBuild?: boolean;
 }
 
 type SelectedUpload = {
@@ -266,6 +272,7 @@ export default function EbookGenerateClient({
   onCompleted,
   isolatedBookshelf = false,
   destination = null,
+  systemListingBuild = false,
 }: EbookGenerateClientProps) {
   const router = useRouter();
   const inputId = useId();
@@ -294,6 +301,7 @@ export default function EbookGenerateClient({
   const [frontCover, setFrontCover] = useState<CoverPick | null>(null);
   const [backCover, setBackCover] = useState<CoverPick | null>(null);
   const [converting, setConverting] = useState(false);
+  const [brokeragePhotosOnly, setBrokeragePhotosOnly] = useState(false);
   const [convertProgress, setConvertProgress] = useState("");
   const [saving, setSaving] = useState(false);
   const [activeStage, setActiveStage] = useState<EbookGenerationStage | null>(
@@ -439,6 +447,7 @@ export default function EbookGenerateClient({
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (files.length === 0) return;
 
+    setBrokeragePhotosOnly(false);
     setConverting(true);
     setConvertProgress("Reading upload…");
     try {
@@ -446,6 +455,7 @@ export default function EbookGenerateClient({
         files,
         {
           maxInteriorPages: SELF_SERVICE_MAX_UPLOAD_IMAGES,
+          systemBuild: systemListingBuild,
           onProgress: (done, total) => {
             setConvertProgress(`Reading upload… ${done}/${total}`);
           },
@@ -470,11 +480,28 @@ export default function EbookGenerateClient({
         })),
       );
     } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : COVER_WRAP_PDF_NOT_LANDSCAPE_MESSAGE,
-      );
+      if (systemListingBuild && caught instanceof BlockedListingSourcePdfError) {
+        setUploads((current) => {
+          for (const item of current) revokePreviewUrl(item.previewUrl);
+          return [];
+        });
+        setFrontCover((current) => {
+          if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl);
+          return null;
+        });
+        setBackCover((current) => {
+          if (current?.previewUrl) URL.revokeObjectURL(current.previewUrl);
+          return null;
+        });
+        setBrokeragePhotosOnly(true);
+        setError("");
+      } else {
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : COVER_WRAP_PDF_NOT_LANDSCAPE_MESSAGE,
+        );
+      }
     } finally {
       setConverting(false);
       setConvertProgress("");
@@ -501,7 +528,10 @@ export default function EbookGenerateClient({
       let nextFile = file;
       let source: SelectedUpload["source"] = "image";
       if (kind === "pdf") {
-        const pages = await convertPdfFileToImageFiles(file, { maxPages: 1 });
+        const pages = await convertPdfFileToImageFiles(file, {
+          maxPages: 1,
+          systemBuild: systemListingBuild,
+        });
         const page = pages[0];
         if (!page) throw new Error("Could not read that PDF page.");
         nextFile = page;
@@ -993,7 +1023,11 @@ export default function EbookGenerateClient({
       );
       return;
     }
-    if (!templateMode && (uploads.length === 0 || !frontCover || !backCover)) {
+    if (
+      !templateMode &&
+      !brokeragePhotosOnly &&
+      (uploads.length === 0 || !frontCover || !backCover)
+    ) {
       setError(
         "Upload a PDF or images. Page 1 is the wrap cover; remaining pages are interiors.",
       );
@@ -1101,7 +1135,7 @@ export default function EbookGenerateClient({
         return;
       }
 
-      if (!templateMode && stored.optimizedImages.length === 0) {
+      if (!templateMode && !brokeragePhotosOnly && stored.optimizedImages.length === 0) {
         setError("Upload at least one property image or PDF.");
         setActiveStage("failed");
         return;
@@ -1124,12 +1158,12 @@ export default function EbookGenerateClient({
             originalBytes: 0,
           }
         : stored.backCover;
-      if (!reusedFront) {
+      if (!brokeragePhotosOnly && !reusedFront) {
         setError(FRONT_COVER_REQUIRED_MESSAGE);
         setActiveStage("failed");
         return;
       }
-      if (!reusedBack) {
+      if (!brokeragePhotosOnly && !reusedBack) {
         setError(BACK_COVER_REQUIRED_MESSAGE);
         setActiveStage("failed");
         return;
@@ -1172,7 +1206,15 @@ export default function EbookGenerateClient({
 
       // Captions apply to interior uploads only — never to covers.
       const interiorCount = optimizedImages.length;
-      if (applyCaptions && !templateMode && !fromPdf && interiorCount > 0 && !captionStep) {
+      if (
+        applyCaptions &&
+        !templateMode &&
+        !fromPdf &&
+        interiorCount > 0 &&
+        !captionStep &&
+        frontCoverAsset &&
+        backCoverAsset
+      ) {
         pendingGenerateRef.current = {
           optimizedImages,
           frontCover: frontCoverAsset,
@@ -1199,7 +1241,7 @@ export default function EbookGenerateClient({
       setActiveStage("generating_pages");
       setStageDetail("");
 
-      if (!frontCoverAsset || !backCoverAsset) {
+      if (!brokeragePhotosOnly && (!frontCoverAsset || !backCoverAsset)) {
         setError(
           !frontCoverAsset
             ? FRONT_COVER_REQUIRED_MESSAGE
@@ -1245,22 +1287,27 @@ export default function EbookGenerateClient({
           })),
         ),
       );
-      fd.set(
-        "frontCover",
-        JSON.stringify({
-          url: frontCoverAsset.url,
-          width: frontCoverAsset.width,
-          height: frontCoverAsset.height,
-        }),
-      );
-      fd.set(
-        "backCover",
-        JSON.stringify({
-          url: backCoverAsset.url,
-          width: backCoverAsset.width,
-          height: backCoverAsset.height,
-        }),
-      );
+      if (frontCoverAsset) {
+        fd.set(
+          "frontCover",
+          JSON.stringify({
+            url: frontCoverAsset.url,
+            width: frontCoverAsset.width,
+            height: frontCoverAsset.height,
+          }),
+        );
+      }
+      if (backCoverAsset) {
+        fd.set(
+          "backCover",
+          JSON.stringify({
+            url: backCoverAsset.url,
+            width: backCoverAsset.width,
+            height: backCoverAsset.height,
+          }),
+        );
+      }
+      if (brokeragePhotosOnly) fd.set("brokerageSitePhotos", "1");
       if (agentPhotoUrl) fd.set("agentPhotoUrl", agentPhotoUrl);
       if (brokerageLogoUrl) fd.set("brokerageLogoUrl", brokerageLogoUrl);
       if (rm22TemplatePayload) {
@@ -1848,6 +1895,12 @@ export default function EbookGenerateClient({
                     </button>
                   </div>
                 </div>
+              ) : null}
+
+              {brokeragePhotosOnly && !error ? (
+                <p className="px-1 text-center text-[13px] leading-relaxed text-neutral-500">
+                  Photos will be taken from the brokerage website.
+                </p>
               ) : null}
 
               {error ? (

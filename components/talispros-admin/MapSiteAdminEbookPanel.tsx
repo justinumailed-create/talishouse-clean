@@ -25,6 +25,8 @@ interface MapSiteAdminEbookPanelProps {
   initialPinWriteup?: string | null;
   initialPriceLine?: string | null;
   initialAgencyLogoUrl?: string | null;
+  /** Unclaimed system FAST Code: brokerage-website photos replace blocked PDFs. */
+  systemListingBuild?: boolean;
 }
 
 export default function MapSiteAdminEbookPanel({
@@ -44,6 +46,7 @@ export default function MapSiteAdminEbookPanel({
   initialPinWriteup = null,
   initialPriceLine = null,
   initialAgencyLogoUrl = null,
+  systemListingBuild = false,
 }: MapSiteAdminEbookPanelProps) {
   const router = useRouter();
   const [editExisting, setEditExisting] = useState(Boolean(initialEbook));
@@ -148,6 +151,7 @@ export default function MapSiteAdminEbookPanel({
             replaceBookId ? initialEbook?.listingImageUrls ?? [] : []
           }
           initialAgencyLogoUrl={initialAgencyLogoUrl}
+          systemListingBuild={systemListingBuild}
           initialAgentName={initialAgentName}
           initialAgentEmail={initialAgentEmail}
           initialAgentPhone={initialAgentPhone}

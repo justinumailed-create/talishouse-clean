@@ -8,6 +8,8 @@ import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { resolveMapSiteLogoUrlForServer } from "@/lib/talispros/mapsite-branding-service";
 import { adminMetadata } from "@/lib/seo/page-metadata";
+import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
+import { toPlatformStatus } from "@/lib/talispros/mapsite-state";
 
 export async function generateMetadata() {
   return adminMetadata("Create eBook");
@@ -30,6 +32,13 @@ export default async function OwnerEbookCreatePage({
   if (!mapsite) notFound();
 
   const writes = getMapSiteAdminWritesState();
+  const paymentReceived = await hasCompletedMapSiteActivationPayment({
+    email: mapsite.email,
+    mapsiteId: mapsite.id,
+    fastCode: mapsite.fastCode,
+    requestId: mapsite.requestId,
+    reconcileFromStripe: false,
+  });
   const agencyLogoUrl = await resolveMapSiteLogoUrlForServer({
     mapsiteId: mapsite.id,
     fastCode: mapsite.fastCode,
@@ -64,6 +73,9 @@ export default async function OwnerEbookCreatePage({
           initialPinWriteup={mapsite.propertyDescription}
           initialPriceLine={mapsite.price}
           initialAgencyLogoUrl={agencyLogoUrl}
+          systemListingBuild={
+            !paymentReceived && toPlatformStatus(mapsite.status) === "UNCLAIMED"
+          }
         />
       </div>
     </div>

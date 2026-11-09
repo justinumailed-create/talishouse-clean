@@ -50,6 +50,18 @@ import {
   resolveMapsiteFlagIdentity,
   type MapsiteFlagIdentity,
 } from "@/lib/talispros/flag-identity";
+import {
+  bytesReferenceBlockedListingSource,
+  isBlockedListingUrl,
+  sanitizeSystemEbookMetadata,
+  sanitizeSystemEbookValue,
+  stripRealtorCreditText,
+  systemEbookPayloadMentionsBlockedSource,
+} from "@/lib/talisbooks/blocked-listing-sources";
+import {
+  resolveEbookListingImages,
+  stripStoredEbookCreditText,
+} from "@/lib/talisbooks/brokerage-site-listing-images";
 
 function demoEbookPublishFields(fastCode: string, now: string): {
   publish_status: "published" | "draft";
@@ -116,7 +128,9 @@ async function persistMapsiteEbookListing(input: {
   ) {
     return;
   }
-  const urls = input.listingImageUrls.map((url) => url.trim()).filter(Boolean);
+  const urls = input.listingImageUrls
+    .map((url) => url.trim())
+    .filter((url) => url && !isBlockedListingUrl(url));
   await supabase
     .from("mapsites")
     .update({
@@ -162,7 +176,32 @@ async function persistGeneratedEbook(input: {
   metadata: Record<string, unknown>;
   publishFields: { publish_status: "published" | "draft"; published_at: string | null };
   now: string;
+  systemListingBuild?: boolean;
 }): Promise<{ id: string; slug: string } | { error: string }> {
+  const description = input.systemListingBuild
+    ? stripRealtorCreditText(input.description)
+    : input.description;
+  const metadata = input.systemListingBuild
+    ? sanitizeSystemEbookMetadata(input.metadata)
+    : input.metadata;
+  const pageRows = input.systemListingBuild
+    ? input.pageRows.map((row) => ({
+        ...row,
+        content: sanitizeSystemEbookValue(row.content) as Record<string, unknown>,
+      }))
+    : input.pageRows;
+  if (
+    input.systemListingBuild &&
+    systemEbookPayloadMentionsBlockedSource({ description, metadata, pageRows })
+  ) {
+    console.error(
+      `[system-ebook] ${input.fastCode}: blocked listing source remained in ebook payload`,
+    );
+    return {
+      error: "This Talisbook can't include photos from a blocked listing source.",
+    };
+  }
+  const persistedInput = { ...input, description, metadata, pageRows };
   const supabase = getSupabaseAdmin();
   const replaceId = input.replaceBookId?.trim() || "";
   const pageCount = input.pageRows.length;
@@ -190,14 +229,14 @@ async function persistGeneratedEbook(input: {
     const { error: updateError } = await supabase
       .from("talisbooks_books")
       .update({
-        title: input.title,
-        subtitle: input.subtitle,
-        description: input.description,
+        title: persistedInput.title,
+        subtitle: persistedInput.subtitle,
+        description: persistedInput.description,
         page_count: pageCount,
         mapsite_id: input.mapsiteId,
         metadata: preserveBookshelfPlacement(
           (existing.metadata as Record<string, unknown>) ?? {},
-          { ...input.metadata, previewUrl },
+          { ...persistedInput.metadata, previewUrl },
         ),
         updated_at: input.now,
       })
@@ -214,7 +253,7 @@ async function persistGeneratedEbook(input: {
     }
     const { error: pagesError } = await supabase
       .from("talisbooks_book_pages")
-      .insert(input.pageRows.map((row) => ({ ...row, book_id: existing.id })));
+      .insert(persistedInput.pageRows.map((row) => ({ ...row, book_id: existing.id })));
     if (pagesError) {
       console.error("[auto-draft-ebook] Pages replace failed:", pagesError.message);
     }
@@ -229,8 +268,8 @@ async function persistGeneratedEbook(input: {
       slug,
       title: input.title,
       subtitle: input.subtitle,
-      description: input.description,
-      ...input.publishFields,
+      description: persistedInput.description,
+      ...persistedInput.publishFields,
       page_count: pageCount,
       is_public:
         input.metadata?.isolatedBookshelf === true
@@ -239,7 +278,7 @@ async function persistGeneratedEbook(input: {
       mapsite_id: input.mapsiteId,
       fast_code: input.fastCode,
       account_type: input.accountType,
-      metadata: { ...input.metadata, previewUrl },
+      metadata: { ...persistedInput.metadata, previewUrl },
       created_at: input.now,
       updated_at: input.now,
     })
@@ -252,7 +291,7 @@ async function persistGeneratedEbook(input: {
 
   const { error: pagesError } = await supabase
     .from("talisbooks_book_pages")
-    .insert(input.pageRows.map((row) => ({ ...row, book_id: book.id })));
+    .insert(persistedInput.pageRows.map((row) => ({ ...row, book_id: book.id })));
   if (pagesError) {
     console.error("[auto-draft-ebook] Pages insert failed:", pagesError.message);
   }
@@ -613,8 +652,10 @@ async function loadSelfServiceAgentDetails(input: {
     phone: input.agentPhone?.trim() || "",
   };
 
-  const prePhoto = input.agentPhotoUrl?.trim() || "";
-  const preLogo = input.brokerageLogoUrl?.trim() || "";
+  const prePhotoRaw = input.agentPhotoUrl?.trim() || "";
+  const preLogoRaw = input.brokerageLogoUrl?.trim() || "";
+  const prePhoto = prePhotoRaw && !isBlockedListingUrl(prePhotoRaw) ? prePhotoRaw : "";
+  const preLogo = preLogoRaw && !isBlockedListingUrl(preLogoRaw) ? preLogoRaw : "";
 
   // Upload agent assets in parallel with DB lookups (unless URLs already provided).
   const [uploadedPhotoUrl, uploadedLogoUrl] = await Promise.all([
@@ -916,6 +957,11 @@ export type AutoDraftEbookInput = {
   rm22SlotHydration?: Rm22SlotHydration | null;
   /** Choose for Flag: Name or Address. FSBO is forced to Address. */
   flagIdentity?: MapsiteFlagIdentity;
+  /**
+   * System build: the PDF named a blocked listing source, so page images
+   * must come from the brokerage website instead of those rasters.
+   */
+  brokerageSitePhotos?: boolean;
 };
 
 export type AutoDraftEbookResult =
@@ -940,17 +986,18 @@ export async function autoGenerateDraftTalisBook(
   const pipelineStarted = onboardingNow();
   const fastCode = input.fastCode.trim().toLowerCase();
   const title = resolvePersistedBookTitle(input.title);
+  const descriptionInput = stripRealtorCreditText(input.description);
   const description = input.isolatedBookshelf
-    ? resolveIsolatedBookshelfBookDescription(input.description)
-    : input.description?.trim() ||
+    ? resolveIsolatedBookshelfBookDescription(descriptionInput)
+    : descriptionInput ||
       `Draft Talisbook™ for FAST Code ${fastCode.toUpperCase()}.`;
   const location = input.location?.trim() || "";
 
   if (!fastCode) return { success: false, error: "FAST Code is required." };
-  const optimizedImages = (input.optimizedImages || []).filter(
+  let optimizedImages = (input.optimizedImages || []).filter(
     (item) => item.url && item.width > 0 && item.height > 0,
   );
-  const rawImages = input.images || [];
+  let rawImages = input.images || [];
   const disallowed = rejectDisallowedEbookFiles([
     ...rawImages,
     ...(input.agentPhoto ? [input.agentPhoto] : []),
@@ -959,7 +1006,12 @@ export async function autoGenerateDraftTalisBook(
   if (disallowed) {
     return { success: false, error: disallowed };
   }
-  if (!optimizedImages.length && !rawImages.length && !input.rm22Template) {
+  if (
+    !optimizedImages.length &&
+    !rawImages.length &&
+    !input.rm22Template &&
+    !input.brokerageSitePhotos
+  ) {
     return { success: false, error: "Upload at least one property image." };
   }
   const frontProvided = Boolean(input.frontCover?.url.trim());
@@ -978,8 +1030,8 @@ export async function autoGenerateDraftTalisBook(
         : FRONT_COVER_REQUIRED_MESSAGE,
     };
   }
-  const frontCoverUrl = frontProvided ? input.frontCover!.url.trim() : null;
-  const backCoverUrl = backProvided ? input.backCover!.url.trim() : null;
+  let frontCoverUrl = frontProvided ? input.frontCover!.url.trim() : null;
+  let backCoverUrl = backProvided ? input.backCover!.url.trim() : null;
   if (!isSupabaseAdminConfigured()) {
     return { success: false, error: "Database is not configured." };
   }
@@ -1025,6 +1077,59 @@ export async function autoGenerateDraftTalisBook(
     preference: input.flagIdentity || MAPSITE_FLAG_IDENTITY_DEFAULT,
     accountType: input.accountType,
   });
+
+  const pdfBytes: Uint8Array[] = [];
+  for (const file of rawImages) {
+    const name = "name" in file && typeof file.name === "string" ? file.name : "";
+    const type = "type" in file && typeof file.type === "string" ? file.type : "";
+    if (type === "application/pdf" || /\.pdf$/i.test(name)) {
+      pdfBytes.push(new Uint8Array(await file.arrayBuffer()));
+    }
+  }
+  const listingResolution = await resolveEbookListingImages({
+    fastCode,
+    mapsiteId,
+    isolatedBookshelf: input.isolatedBookshelf,
+    replaceBookId: input.replaceBookId,
+    uploadMode: input.uploadMode,
+    description: input.description,
+    brokerageSitePhotos: input.brokerageSitePhotos,
+    optimizedImages,
+    pdfBytes,
+  });
+  if (listingResolution.action === "unchanged") {
+    await stripStoredEbookCreditText(listingResolution.bookId);
+    return {
+      success: true,
+      bookId: listingResolution.bookId,
+      slug: listingResolution.slug,
+      previewUrl: `${ROUTES.TALISBOOKS_VIEWER}/${listingResolution.slug}`,
+      pageCount: listingResolution.pageCount,
+      mapsiteId,
+    };
+  }
+  if (listingResolution.action === "blocked") {
+    return { success: false, error: listingResolution.error };
+  }
+  const systemListingBuild = listingResolution.systemListingBuild;
+  if (listingResolution.replacedWithBrokerage) {
+    optimizedImages = listingResolution.images;
+    rawImages = [];
+    frontCoverUrl = null;
+    backCoverUrl = null;
+  } else {
+    optimizedImages = listingResolution.images;
+  }
+  if (
+    (frontCoverUrl && isBlockedListingUrl(frontCoverUrl)) ||
+    (backCoverUrl && isBlockedListingUrl(backCoverUrl))
+  ) {
+    frontCoverUrl = null;
+    backCoverUrl = null;
+  }
+  if (!optimizedImages.length && !rawImages.length && !input.rm22Template) {
+    return { success: false, error: "Upload at least one property image." };
+  }
 
   const exactPdf = input.uploadMode === "pdf";
 
@@ -1148,6 +1253,7 @@ export async function autoGenerateDraftTalisBook(
         replacing: Boolean(input.replaceBookId?.trim()),
       }),
       now,
+      systemListingBuild,
       metadata: {
         coverImageUrl: frontCoverUrl,
         backCoverImageUrl: backCoverUrl,
@@ -1329,6 +1435,7 @@ export async function autoGenerateDraftTalisBook(
       replacing: Boolean(input.replaceBookId?.trim()),
     }),
     now,
+    systemListingBuild,
     metadata: {
       coverImageUrl,
       backCoverImageUrl,
