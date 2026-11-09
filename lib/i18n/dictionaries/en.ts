@@ -974,6 +974,9 @@ export const en = {
     openMapsite: "Open Mapsite",
     claimMarket: "Claim Your Market™",
     photoAlt: "{name}",
+    mapLabel: "Mapsite",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
     edit: {
       open: "Edit my home page",
       title: "Edit your home page",

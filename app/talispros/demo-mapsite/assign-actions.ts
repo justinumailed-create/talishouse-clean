@@ -31,7 +31,13 @@ async function resolveAssignActor(targetCode: string): Promise<AssignDemoEbookAc
   const owner = (await getMapSiteOwnerSession()) || null;
   const registered = (await getRegisteredMapSiteFastCode()) || null;
   if (owner === targetCode || registered === targetCode) {
-    return { kind: "owner", label: `owner (${targetCode.toUpperCase()})` };
+    const { isPublicSystemFastCode } = await import("@/lib/talispros/system-fast-code-access");
+    const publicSystem = await isPublicSystemFastCode(targetCode, {
+      registeredOwner: registered === targetCode,
+    });
+    if (!publicSystem) {
+      return { kind: "owner", label: `owner (${targetCode.toUpperCase()})` };
+    }
   }
   return null;
 }

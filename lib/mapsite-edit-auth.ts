@@ -52,6 +52,8 @@ export function agentCanEditMapSite(
 export async function canEditMapSite(fastCode: string): Promise<boolean> {
   if (await isMapSiteAdmin()) return true;
   if (agentCanEditMapSite(await getAdminSessionAccount(), fastCode)) return true;
+  const { isPublicSystemFastCode } = await import("@/lib/talispros/system-fast-code-access");
+  if (await isPublicSystemFastCode(fastCode)) return false;
   const state = await getMapSiteEditToolbarState(fastCode);
   if (!state.isOwner) return false;
   return hasCompletedMapSiteActivationPayment({
@@ -61,6 +63,8 @@ export async function canEditMapSite(fastCode: string): Promise<boolean> {
 }
 
 async function canOwnerManage(fastCode: string): Promise<boolean> {
+  const { isPublicSystemFastCode } = await import("@/lib/talispros/system-fast-code-access");
+  if (await isPublicSystemFastCode(fastCode)) return false;
   const state = await getMapSiteEditToolbarState(fastCode);
   if (!state.isOwner) return false;
   return hasCompletedMapSiteActivationPayment({ fastCode, reconcileFromStripe: true });
@@ -180,10 +184,19 @@ export async function getMapSiteEditToolbarState(
   const isRegisteredOwner =
     registeredFastCode !== null && registeredFastCode === target;
 
+  let isOwner = hasOwnerSession || isRegisteredOwner;
+  // Entering a system FAST Code must not unlock owner tools.
+  if (isOwner && !isAdmin && hasOwnerSession && !isRegisteredOwner) {
+    const { isPublicSystemFastCode } = await import("@/lib/talispros/system-fast-code-access");
+    if (await isPublicSystemFastCode(target, { registeredOwner: false })) {
+      isOwner = false;
+    }
+  }
+
   return {
     isAdmin,
-    isOwner: hasOwnerSession || isRegisteredOwner,
-    showToolbar: isAdmin || hasOwnerSession || isRegisteredOwner,
+    isOwner,
+    showToolbar: isAdmin || isOwner,
   };
 }
 

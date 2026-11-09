@@ -5476,6 +5476,21 @@ body.mapsite-gallery-open [data-paypal-button] {
     min-height: 100%;
   }
 }
+/* Personal-home Mapsite: tall enough for the pin flag above the office pin. */
+.talis-adviser__photo--map {
+  height: min(88dvh, 44rem);
+  min-height: 36rem;
+}
+@media (min-width: 1024px) {
+  .talis-adviser__photo--map {
+    height: auto;
+    min-height: calc(100dvh - 4.25rem);
+  }
+}
+/* The left-column map uses its own +/− controls. Hide the provider control. */
+.talis-adviser__photo--map .gm-bundled-control {
+  display: none !important;
+}
 
 /* /talisu/tsplits — the Tsplits™ Talisbook™ inside the 1400 px working frame.
    The viewer is height-driven (100%), so give it the open spread's height:

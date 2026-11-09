@@ -85,6 +85,8 @@ async function validatePinCategory(
 }
 
 async function authorizePinEdit(fastCode: string): Promise<PinActionError | null> {
+  // canManageMapSitePins refuses a public system FAST Code (owner cookie
+  // alone is not enough). Agents and paid owners still pass.
   if (await canManageMapSitePins(fastCode)) return null;
   return { error: "Only the Mapsite owner can buy or place PINs." };
 }
