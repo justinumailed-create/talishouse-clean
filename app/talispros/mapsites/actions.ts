@@ -202,10 +202,14 @@ export async function openClaimedMapSiteFromHomeFastCode(
     reconcileFromStripe: true,
   });
 
-  // Paid users get owner + root-account cookies; unpaid still get owner chrome.
+  // Paid users get owner + root-account cookies; unpaid claimed codes still
+  // get owner chrome. A system-generated code that nobody has registered
+  // stays public: no owner cookie, no dashboard.
+  const { isPublicSystemFastCode } = await import("@/lib/talispros/system-fast-code-access");
+  const publicSystem = await isPublicSystemFastCode(resolvedCode);
   if (paid) {
     await establishPaidMapSiteBrowserSession(resolvedCode);
-  } else {
+  } else if (!publicSystem) {
     await setMapSiteOwnerSession(resolvedCode);
   }
 

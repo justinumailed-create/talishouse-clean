@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import AdviserLayout from "@/components/talisu/AdviserLayout";
 import PersonalHomeEditor from "@/components/talispros/personal-home/PersonalHomeEditor";
+import PersonalHomeMapsite from "@/components/talispros/personal-home/PersonalHomeMapsite";
 import PersonalHomeNav from "@/components/talispros/personal-home/PersonalHomeNav";
+import { MAPSITE_OWNER_COOKIE } from "@/lib/mapsite-account-session";
+import { getMapSiteOwnerSession } from "@/lib/mapsite-edit-auth";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
 import { ROUTES } from "@/lib/routes";
@@ -13,10 +17,18 @@ import {
   isExternalPersonalHomeHref,
   personalHomeEditPath,
 } from "@/lib/talispros/personal-home";
+import { loadPersonalHomeMap } from "@/lib/talispros/personal-home-map";
 import {
   canEditPersonalHome,
   loadPersonalHomePage,
+  personalHomeClaimMarketHref,
 } from "@/lib/talispros/personal-home-page";
+import { hasProspectAccess } from "@/lib/talispros/prospect-gate-server";
+import {
+  isOwnerOnlyPersonalHomeHref,
+  restrictSystemFastCodeFeatures,
+} from "@/lib/talispros/system-fast-code-gate";
+import { readSystemFastCodeFacts } from "@/lib/talispros/system-fast-code-access";
 
 export const dynamic = "force-dynamic";
 
@@ -67,20 +79,45 @@ export default async function PersonalHomePage({
   const { fastCode } = await params;
   const query = (await searchParams) ?? {};
   const locale = await getLocale();
-  const lookup = await loadPersonalHomePage(fastCode, locale);
+  const [lookup, facts, agentAccess] = await Promise.all([
+    loadPersonalHomePage(fastCode, locale),
+    readSystemFastCodeFacts(fastCode),
+    hasProspectAccess().catch(() => false),
+  ]);
+  const publicSystem = restrictSystemFastCodeFeatures({
+    systemGenerated: facts.systemGenerated,
+    registeredOrClaimed: facts.registeredOrClaimed,
+    agentAccess,
+  });
   if (lookup.kind === "allpins") redirect(ROUTES.TALISU_MARKETS);
   if (lookup.kind === "missing") notFound();
 
   const { data } = lookup;
   const { resolved } = data;
-  const canEdit = await canEditPersonalHome(data.code);
+  if (publicSystem) {
+    const owner = await getMapSiteOwnerSession();
+    if (owner === data.code) {
+      (await cookies()).delete(MAPSITE_OWNER_COOKIE);
+    }
+  }
+  const canEdit = !publicSystem && (await canEditPersonalHome(data.code));
+  const homeMap = publicSystem ? await loadPersonalHomeMap(data.code) : null;
+  const mapsiteHref = publicSystem ? `${data.homeHref}#mapsite` : data.mapsiteHref;
+  const buttons = publicSystem
+    ? resolved.buttons.filter((button) => !isOwnerOnlyPersonalHomeHref(button.href))
+    : resolved.buttons;
   const paragraphs = resolved.writeUp.split(/\n{2,}/).filter((part) => part.trim());
 
   return (
-    <div className="flex min-h-dvh flex-col bg-[#f5f1ea]" data-testid="personal-home-page">
+    <div
+      className="flex min-h-dvh flex-col bg-[#f5f1ea]"
+      data-testid="personal-home-page"
+      data-gate={facts.trace}
+      data-agent={agentAccess ? "1" : "0"}
+    >
       <PersonalHomeNav
         homeHref={data.homeHref}
-        mapsiteHref={data.mapsiteHref}
+        mapsiteHref={mapsiteHref}
         active="home"
         owner={
           canEdit
@@ -102,6 +139,19 @@ export default async function PersonalHomePage({
           imagePosition="center 22%"
           kicker={resolved.kicker}
           title={resolved.headline}
+          media={
+            homeMap ? (
+              <div id="mapsite" className="absolute inset-0">
+                <PersonalHomeMapsite
+                  mapsite={homeMap.mapsite}
+                  flagIdentity={homeMap.flagIdentity}
+                  flagName={homeMap.flagName}
+                  hasTalisBook={homeMap.hasTalisBook}
+                  claimHref={personalHomeClaimMarketHref(data.view.claimAudience)}
+                />
+              </div>
+            ) : null
+          }
         >
           <div
             className="mt-4 max-w-[60ch] space-y-3 text-[15px] leading-relaxed text-neutral-800 sm:mt-5 sm:text-[17px]"
@@ -113,12 +163,12 @@ export default async function PersonalHomePage({
               </div>
             ))}
           </div>
-          {resolved.buttons.length ? (
+          {buttons.length ? (
             <div
               className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8"
               data-testid="personal-home-buttons"
             >
-              {resolved.buttons.map((button, index) => {
+              {buttons.map((button, index) => {
                 const className = index === 0 ? CTA_PRIMARY : CTA_SECONDARY;
                 return isExternalPersonalHomeHref(button.href) ? (
                   <a

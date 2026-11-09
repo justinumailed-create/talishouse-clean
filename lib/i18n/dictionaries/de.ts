@@ -1249,6 +1249,9 @@ export const de: Dictionary = {
     openMapsite: "Mapsite öffnen",
     claimMarket: "Claim Your Market™",
     photoAlt: "{name}",
+    mapLabel: "Mapsite",
+    zoomIn: "Vergrößern",
+    zoomOut: "Verkleinern",
     edit: {
       open: "Meine Startseite bearbeiten",
       title: "Startseite bearbeiten",

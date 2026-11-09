@@ -168,6 +168,8 @@ export async function loadPersonalHomePage(
 /** Owner edit gate: owner session (FAST Code entry), root account, or admin. */
 export async function canEditPersonalHome(code: string): Promise<boolean> {
   if (!code || isDemoMapSiteCode(code) || isAllPinsFastCode(code)) return false;
+  const { isPublicSystemFastCode } = await import("@/lib/talispros/system-fast-code-access");
+  if (await isPublicSystemFastCode(code)) return false;
   try {
     const state = await getMapSiteEditToolbarState(code);
     return Boolean(state.showToolbar);

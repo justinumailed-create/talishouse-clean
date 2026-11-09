@@ -23,6 +23,7 @@ export default function AdviserLayout({
   imagePosition = "center 22%",
   kicker,
   title,
+  media,
   children,
 }: {
   testId: string;
@@ -32,6 +33,8 @@ export default function AdviserLayout({
   imagePosition?: string;
   kicker: ReactNode;
   title: ReactNode;
+  /** Replaces the portrait. Used for the personal-home Mapsite. */
+  media?: ReactNode;
   children?: ReactNode;
 }) {
   return (
@@ -41,18 +44,20 @@ export default function AdviserLayout({
     >
       <article className="talis-adviser__grid mx-auto grid w-full max-w-[1400px] flex-1 lg:grid-cols-2">
         <div
-          className="talis-adviser__photo relative shrink-0 overflow-hidden bg-[#2a2a2a]"
+          className={`talis-adviser__photo relative shrink-0 overflow-hidden bg-[#2a2a2a] ${media ? "talis-adviser__photo--map" : ""}`}
           data-testid={`${testId}-photo`}
         >
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            fill
-            priority
-            sizes="(min-width: 1024px) 700px, 100vw"
-            className="object-cover"
-            style={{ objectPosition: imagePosition }}
-          />
+          {media ?? (
+            <Image
+              src={imageSrc}
+              alt={imageAlt}
+              fill
+              priority
+              sizes="(min-width: 1024px) 700px, 100vw"
+              className="object-cover"
+              style={{ objectPosition: imagePosition }}
+            />
+          )}
         </div>
         <div className="flex min-w-0 flex-col justify-start px-5 pb-8 pt-4 sm:px-10 sm:pb-10 sm:pt-6 lg:justify-center lg:py-8">
           <div

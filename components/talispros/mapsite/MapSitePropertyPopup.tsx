@@ -186,6 +186,8 @@ interface MapSitePropertyPopupProps {
   cardHeight?: number | null;
   /** Narrow layout: slightly tighter hero so the card fits above the shifted pin. */
   compact?: boolean;
+  /** Fixed card width so the flag stays clear of corner controls. */
+  widthPx?: number;
   onClose: () => void;
 }
 
@@ -207,6 +209,7 @@ export default function MapSitePropertyPopup({
   centerX = null,
   cardHeight = null,
   compact = false,
+  widthPx,
   onClose,
 }: MapSitePropertyPopupProps) {
   const t = useT();
@@ -270,8 +273,9 @@ export default function MapSitePropertyPopup({
       <div
         role="dialog"
         aria-label={mapsite.property_title}
-        className={`pointer-events-none absolute z-30 ${MAPSITE_LISTING_CARD_WIDTH_CLASS} -translate-x-1/2`}
+        className={`pointer-events-none absolute z-30 ${widthPx ? "" : MAPSITE_LISTING_CARD_WIDTH_CLASS} -translate-x-1/2`}
         style={{
+          width: widthPx,
           left: centerX == null ? "50%" : centerX,
           ...(cardHeight
             ? { top: alignTop }
