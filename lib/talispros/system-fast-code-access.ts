@@ -105,22 +105,13 @@ export async function readSystemFastCodeFacts(rawCode: string): Promise<SystemFa
   const registeredOrClaimed = Boolean(
     paid || mapsiteRow?.account_id || registeredRow || registrationHit,
   );
-  const note = (error: { message?: string } | null | undefined) =>
-    error?.message ? error.message.replace(/\s+/g, " ").slice(0, 80) : "";
   const trace = [
     status.data ? "status" : "no-status",
     assignedBySystem ? "assigned" : "no-assigned",
     prepared ? "slot" : "no-slot",
     placeholderInbox ? "placeholder" : "no-placeholder",
     registeredOrClaimed ? "claimed" : "open",
-    note(status.error),
-    note(assigned.error),
-    note(mapsite.error),
-    note(codeRow.error),
-    note(registration.error),
-  ]
-    .filter(Boolean)
-    .join("|");
+  ].join("|");
 
   return {
     systemGenerated:
