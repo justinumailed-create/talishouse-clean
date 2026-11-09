@@ -1,4 +1,5 @@
-import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { tryGetSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { supabase as publicSupabase } from "@/lib/supabaseClient";
 import {
   ensurePermanentClosingPages,
   getGlasshouseBrochureSource,
@@ -117,9 +118,11 @@ export async function getViewerBookBySlug(
   slugRaw: string
 ): Promise<TalisBooksViewerBook | null> {
   const slug = slugRaw.trim();
-  if (!slug || !isSupabaseAdminConfigured()) return null;
-
-  const supabase = getSupabaseAdmin();
+  if (!slug) return null;
+  // Service role when it is configured. Otherwise the public client, which
+  // can read published books and their pages.
+  const supabase = tryGetSupabaseAdmin() ?? publicSupabase;
+  if (!tryGetSupabaseAdmin() && !process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
   const { data: book, error } = await supabase
     .from("talisbooks_books")
     .select("*")
