@@ -1,6 +1,8 @@
 import "server-only";
 
-import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { tryGetSupabaseAdmin } from "@/lib/supabaseAdmin";
+import { isSupabaseConfigured, supabase } from "@/lib/supabaseClient";
 import { hasProspectAccess } from "@/lib/talispros/prospect-gate-server";
 import {
   isSystemFastCodeActor,
@@ -28,17 +30,21 @@ const COMPLETED_PAYMENT = new Set(["completed", "paid", "complete", "succeeded"]
  * placeholder inbox claim@talispros.com, and that helper treats any completed
  * payment on the inbox as this code's payment.
  */
+function db(): SupabaseClient {
+  return (tryGetSupabaseAdmin() ?? supabase) as unknown as SupabaseClient;
+}
+
 async function hasOwnActivationPayment(
   code: string,
   mapsiteId: string | null,
 ): Promise<boolean> {
-  const db = getSupabaseAdmin();
+  const client = db();
   const lookups = [
-    db.from("talispros_payments").select("payment_status").ilike("fast_code", code).limit(10),
+    client.from("talispros_payments").select("payment_status").ilike("fast_code", code).limit(10),
   ];
   if (mapsiteId) {
     lookups.push(
-      db
+      client
         .from("talispros_payments")
         .select("payment_status")
         .eq("mapsite_id", mapsiteId)
@@ -56,22 +62,22 @@ async function hasOwnActivationPayment(
 
 export async function readSystemFastCodeFacts(rawCode: string): Promise<SystemFastCodeFacts> {
   const code = rawCode.trim().toLowerCase();
-  if (!code || !isSupabaseAdminConfigured()) {
+  if (!code || (!tryGetSupabaseAdmin() && !isSupabaseConfigured)) {
     return { systemGenerated: false, registeredOrClaimed: false, trace: "no-admin" };
   }
 
-  const db = getSupabaseAdmin();
+  const client = db();
   const [status, assigned, mapsite, codeRow, registration] = await Promise.all([
-    db.from("fast_code_status").select("fast_code").eq("fast_code", code).maybeSingle(),
-    db
+    client.from("fast_code_status").select("fast_code").eq("fast_code", code).maybeSingle(),
+    client
       .from("fast_code_updates")
       .select("created_by")
       .eq("fast_code", code)
       .eq("event_type", "assigned")
       .limit(8),
-    db.from("mapsites").select("id, account_id, email").ilike("fast_code", code).limit(1).maybeSingle(),
-    db.from("fast_codes").select("request_id").ilike("code", code).maybeSingle(),
-    db.from("fast_code_registrations").select("id").ilike("fast_code", code).limit(1),
+    client.from("mapsites").select("id, account_id, email").ilike("fast_code", code).limit(1).maybeSingle(),
+    client.from("fast_codes").select("request_id").ilike("code", code).maybeSingle(),
+    client.from("fast_code_registrations").select("id").ilike("fast_code", code).limit(1),
   ]);
   const mapsiteRowEarly = mapsite.data as {
     id?: string;
@@ -83,7 +89,7 @@ export async function readSystemFastCodeFacts(rawCode: string): Promise<SystemFa
   const mapsiteRow = mapsiteRowEarly;
   let prepared = false;
   if (mapsiteRow?.id) {
-    const { count } = await db
+    const { count } = await client
       .from("agent_fast_code_slots")
       .select("id", { count: "exact", head: true })
       .eq("mapsite_id", mapsiteRow.id);
