@@ -1,7 +1,6 @@
 import "server-only";
 
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
-import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { hasProspectAccess } from "@/lib/talispros/prospect-gate-server";
 import {
   isSystemFastCodeActor,
@@ -17,6 +16,40 @@ export type SystemFastCodeFacts = {
  * Database facts for a FAST Code. Does not read the visitor session.
  * System-generated means the daily job or the system slot seed created it.
  */
+const COMPLETED_PAYMENT = new Set(["completed", "paid", "complete", "succeeded"]);
+
+/**
+ * Payment on this FAST Code or its Mapsite row only.
+ * Do not use the shared activation helper: system codes are stored with the
+ * placeholder inbox claim@talispros.com, and that helper treats any completed
+ * payment on the inbox as this code's payment.
+ */
+async function hasOwnActivationPayment(
+  code: string,
+  mapsiteId: string | null,
+): Promise<boolean> {
+  const db = getSupabaseAdmin();
+  const lookups = [
+    db.from("talispros_payments").select("payment_status").ilike("fast_code", code).limit(10),
+  ];
+  if (mapsiteId) {
+    lookups.push(
+      db
+        .from("talispros_payments")
+        .select("payment_status")
+        .eq("mapsite_id", mapsiteId)
+        .limit(10),
+    );
+  }
+  const results = await Promise.all(lookups);
+  for (const result of results) {
+    for (const row of (result.data ?? []) as { payment_status?: string | null }[]) {
+      if (COMPLETED_PAYMENT.has((row.payment_status || "").trim().toLowerCase())) return true;
+    }
+  }
+  return false;
+}
+
 export async function readSystemFastCodeFacts(rawCode: string): Promise<SystemFastCodeFacts> {
   const code = rawCode.trim().toLowerCase();
   if (!code || !isSupabaseAdminConfigured()) {
@@ -24,7 +57,7 @@ export async function readSystemFastCodeFacts(rawCode: string): Promise<SystemFa
   }
 
   const db = getSupabaseAdmin();
-  const [status, assigned, mapsite, codeRow, registration, paid] = await Promise.all([
+  const [status, assigned, mapsite, codeRow, registration] = await Promise.all([
     db.from("fast_code_status").select("fast_code").eq("fast_code", code).maybeSingle(),
     db
       .from("fast_code_updates")
@@ -35,13 +68,11 @@ export async function readSystemFastCodeFacts(rawCode: string): Promise<SystemFa
     db.from("mapsites").select("id, account_id").ilike("fast_code", code).limit(1).maybeSingle(),
     db.from("fast_codes").select("request_id").ilike("code", code).maybeSingle(),
     db.from("fast_code_registrations").select("id").ilike("fast_code", code).limit(1),
-    hasCompletedMapSiteActivationPayment({
-      fastCode: code,
-      reconcileFromStripe: false,
-    }).catch(() => false),
   ]);
+  const mapsiteRowEarly = mapsite.data as { id?: string; account_id?: string | null } | null;
+  const paid = await hasOwnActivationPayment(code, mapsiteRowEarly?.id ?? null);
 
-  const mapsiteRow = mapsite.data as { id?: string; account_id?: string | null } | null;
+  const mapsiteRow = mapsiteRowEarly;
   let prepared = false;
   if (mapsiteRow?.id) {
     const { count } = await db

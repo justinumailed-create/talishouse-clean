@@ -113,6 +113,10 @@ describe("system FAST Code feature gate", () => {
     expect(read("lib/mapsite-edit-auth.ts")).toContain("canOwnerManage");
     expect(read("app/talispros/demo-mapsite/assign-actions.ts")).toContain("isPublicSystemFastCode");
     expect(read("lib/talispros/personal-home-page.ts")).toContain("isPublicSystemFastCode");
+    const access = read("lib/talispros/system-fast-code-access.ts");
+    expect(access).toContain("hasOwnActivationPayment");
+    expect(access).not.toContain("hasCompletedMapSiteActivationPayment");
+    expect(access).toContain("claim@talispros.com");
     const mapsitePage = read("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx");
     expect(mapsitePage).toContain("hasProspectAccess()");
     expect(mapsitePage).toContain("isPreparedSlotMapsite");
