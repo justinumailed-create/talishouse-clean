@@ -1,9 +1,10 @@
 /**
  * North Shore Nature Centre TEB™, the eBook on the demo Mapsite PIN in
- * Bay St. Lawrence, Nova Scotia. Twelve landscape slides, each shown as a
- * centerfold (one image across the left and right leaves). The front cover is
- * the right half of slide 1, the back cover is its left half (Aisha and the
- * team contact). Assets live in `/public/talisbooks/nsnc/`.
+ * Bay St. Lawrence, Nova Scotia. Twelve landscape slides. Slide 1 is the
+ * cover wrap: its right half is the front cover and its left half is the
+ * back cover (Aisha and the team contact). Inner centerfolds start at
+ * slide 2, so the cover is not repeated as the first spread. Assets live
+ * in `/public/talisbooks/nsnc/`.
  */
 import type { Locale } from "@/lib/i18n/config";
 import type { TalisBooksViewerBook, TalisBooksViewerPage } from "@/lib/talisbooks/viewer/types";
@@ -11,6 +12,8 @@ import type { TalisBooksViewerBook, TalisBooksViewerPage } from "@/lib/talisbook
 export const NSNC_BOOK_SLUG = "north-shore-nature-centre";
 export const NSNC_ASSET_ROOT = "/talisbooks/nsnc";
 export const NSNC_SLIDE_COUNT = 12;
+/** Slide 1 is the cover wrap, so the book has one fewer inner centerfold. */
+export const NSNC_INNER_SPREAD_COUNT = NSNC_SLIDE_COUNT - 1;
 export const NSNC_PIN_IMAGE = `${NSNC_ASSET_ROOT}/pin.webp`;
 export const NSNC_FRONT_COVER = `${NSNC_ASSET_ROOT}/front-cover.webp`;
 export const NSNC_BACK_COVER = `${NSNC_ASSET_ROOT}/back-cover.webp`;
@@ -32,7 +35,7 @@ export function nsncSlideHref(slide: number): string {
 
 export function createNsncViewerBook(locale?: Locale | string | null): TalisBooksViewerBook {
   const copy = COPY[locale === "de" ? "de" : "en"];
-  const totalPages = 2 + NSNC_SLIDE_COUNT * 2;
+  const totalPages = 2 + NSNC_INNER_SPREAD_COUNT * 2;
   const pages: TalisBooksViewerPage[] = [
     {
       id: `${NSNC_BOOK_SLUG}-front`,
@@ -46,9 +49,10 @@ export function createNsncViewerBook(locale?: Locale | string | null): TalisBook
       clientEditable: false,
     },
   ];
-  for (let slide = 1; slide <= NSNC_SLIDE_COUNT; slide += 1) {
+  for (let offset = 0; offset < NSNC_INNER_SPREAD_COUNT; offset += 1) {
+    const slide = offset + 2;
     const image = nsncSlideHref(slide);
-    const left = slide * 2;
+    const left = 2 + offset * 2;
     for (const [side, pageNumber] of [
       ["left", left],
       ["right", left + 1],

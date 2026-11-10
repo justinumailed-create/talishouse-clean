@@ -16,7 +16,13 @@ import {
   normalizeSlotFastCode,
   slotPlaceLabel,
 } from "../lib/talispros/fast-code-slots";
-import { NSNC_BOOK_HREF, NSNC_BOOK_SLUG, createNsncViewerBook } from "../lib/talispros/nsnc-book";
+import {
+  NSNC_BOOK_HREF,
+  NSNC_BOOK_SLUG,
+  NSNC_INNER_SPREAD_COUNT,
+  NSNC_SLIDE_COUNT,
+  createNsncViewerBook,
+} from "../lib/talispros/nsnc-book";
 
 const read = (p: string) => readFileSync(resolve(p), "utf8");
 
@@ -107,7 +113,36 @@ describe("North Shore Nature Centre TEB™ on the demo PIN", () => {
     expect(book.title).toBe("North Shore Nature Centre");
     expect(JSON.stringify(book)).toContain("/talisbooks/nsnc/pages/page-12.webp");
     expect(JSON.stringify(book)).toContain("North-Shore-Nature-Centre.pdf");
+    expect(book.pdfDownloadUrl).toBe("/talisbooks/nsnc/North-Shore-Nature-Centre.pdf");
     expect(read("lib/talisbooks/viewer/load-book.ts")).toContain("createNsncViewerBook(locale)");
+  });
+
+  it("does not repeat slide 1 as the first inner spread", () => {
+    expect(NSNC_SLIDE_COUNT).toBe(12);
+    expect(NSNC_INNER_SPREAD_COUNT).toBe(11);
+    const book = createNsncViewerBook("en");
+    const inner = book.pages.filter((page) => page.pageRole !== "cover");
+    expect(inner).toHaveLength(NSNC_INNER_SPREAD_COUNT * 2);
+    expect(JSON.stringify(inner)).not.toContain("page-01.webp");
+    expect(inner[0]).toMatchObject({
+      pageNumber: 2,
+      layout: "centerfold_left",
+      heroImageUrl: "/talisbooks/nsnc/pages/page-02.webp",
+      spreadImageUrl: "/talisbooks/nsnc/pages/page-02.webp",
+    });
+    expect(inner[1]).toMatchObject({
+      pageNumber: 3,
+      layout: "centerfold_right",
+      spreadImageUrl: "/talisbooks/nsnc/pages/page-02.webp",
+    });
+    expect(inner.at(-2)?.spreadImageUrl).toBe("/talisbooks/nsnc/pages/page-12.webp");
+    const back = book.pages.at(-1);
+    expect(back?.pageRole).toBe("cover");
+    expect(back?.heroImageUrl).toBe("/talisbooks/nsnc/back-cover.webp");
+    expect(back?.pageNumber).toBe(book.pages.length);
+    expect(back?.pageNumber).toBe(2 + NSNC_INNER_SPREAD_COUNT * 2);
+    expect(book.pages[0]?.heroImageUrl).toBe("/talisbooks/nsnc/front-cover.webp");
+    expect(book.pages[0]?.pageNumber).toBe(1);
   });
 });
 
