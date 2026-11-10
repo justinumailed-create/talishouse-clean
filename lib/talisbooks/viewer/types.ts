@@ -99,6 +99,13 @@ export interface TalisBooksViewerPage {
     | "outro";
   /** Template sign-off (Intrinsic Value right leaf). */
   signoff?: string;
+  /**
+   * Designed cover: brokerage name and logo sit in the fixed leaf.
+   * A photo, when present, is cover-fitted behind them and does not set the page size.
+   */
+  composedCover?: boolean;
+  /** How a photo sits inside the fixed page frame. */
+  imageFit?: "cover" | "contain";
 }
 
 export interface TalisBooksViewerBook {
@@ -145,6 +152,11 @@ export interface TalisBooksViewerBook {
   pdfDownloadUrl?: string;
   /** Suggested filename for the PDF download. */
   pdfDownloadFileName?: string;
+  /**
+   * Keep the open book at the standard 16:9 frame. Photos are fitted inside
+   * the leaves and never change the page width.
+   */
+  fixedPageFrame?: boolean;
   pages: TalisBooksViewerPage[];
 }
 

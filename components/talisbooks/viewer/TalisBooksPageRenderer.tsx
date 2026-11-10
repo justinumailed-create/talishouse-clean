@@ -518,8 +518,17 @@ function PropertyContentPageView({ page }: { page: TalisBooksViewerPage }) {
   const layout = page.layout ?? "caption";
 
   if (layout === "quote") {
+    const essay = (page.body?.trim().length ?? 0) > 160;
     return (
-      <div className="talisbooks-viewer-page talisbooks-viewer-page--quote">
+      <div
+        className={[
+          "talisbooks-viewer-page",
+          "talisbooks-viewer-page--quote",
+          essay ? "talisbooks-viewer-page--essay" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
         <div className="talisbooks-viewer-page__quote-frame">
           {page.title?.trim() ? (
             <p className="talisbooks-viewer-page__quote-eyebrow">{page.title}</p>
@@ -594,7 +603,12 @@ function PropertyContentPageView({ page }: { page: TalisBooksViewerPage }) {
   return (
     <div className="talisbooks-viewer-page talisbooks-viewer-page--property">
       <div
-        className="talisbooks-viewer-page__hero"
+        className={[
+          "talisbooks-viewer-page__hero",
+          page.imageFit === "contain" ? "talisbooks-viewer-page__hero--contain" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         style={
           page.heroImageUrl
             ? { backgroundImage: `url(${page.heroImageUrl})` }
@@ -612,7 +626,47 @@ function PropertyContentPageView({ page }: { page: TalisBooksViewerPage }) {
   );
 }
 
+function ComposedCoverPageView({ page }: { page: TalisBooksViewerPage }) {
+  const hero = page.heroImageUrl?.trim() || "";
+  const logo = page.brokerageLogoUrl?.trim() || "";
+  const name = page.brokerageName?.trim() || page.title;
+  return (
+    <div className="talisbooks-viewer-page talisbooks-viewer-page--composed-cover">
+      {hero ? (
+        <img
+          className="talisbooks-viewer-page__composed-hero"
+          src={hero}
+          alt=""
+          draggable={false}
+        />
+      ) : (
+        <div className="talisbooks-viewer-page__composed-hero talisbooks-viewer-page__composed-hero--empty" />
+      )}
+      <div className="talisbooks-viewer-page__composed-scrim">
+        {logo ? (
+          <img
+            className="talisbooks-viewer-page__composed-logo"
+            src={logo}
+            alt=""
+            draggable={false}
+          />
+        ) : null}
+        <h2 className="talisbooks-viewer-page__composed-name">{name}</h2>
+        {page.subtitle?.trim() ? (
+          <p className="talisbooks-viewer-page__composed-subtitle">{page.subtitle}</p>
+        ) : null}
+        {page.body?.trim() ? (
+          <p className="talisbooks-viewer-page__composed-credit">{page.body}</p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
 function TebCoverPageView({ page }: { page: TalisBooksViewerPage }) {
+  if (page.composedCover) {
+    return <ComposedCoverPageView page={page} />;
+  }
   // Self-service / pinned / PDF covers: full-bleed art only (no agent chrome).
   if (page.heroImageUrl?.trim()) {
     return (

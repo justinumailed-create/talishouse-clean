@@ -76,6 +76,18 @@ export function getBookContinuousSpreadImageUrl(
   return null;
 }
 
+/**
+ * Open-book geometry. A fixed frame keeps the standard 16:9 spread
+ * (two 960×1080 leaves) no matter how large or small a photo is.
+ */
+export function bookFrameSpreadImageUrl(
+  pages: TalisBooksViewerPage[],
+  fixedPageFrame?: boolean,
+): string | null {
+  if (fixedPageFrame) return null;
+  return getBookContinuousSpreadImageUrl(pages);
+}
+
 export function clampSpreadAspectRatio(ratio: number): number {
   if (!Number.isFinite(ratio) || ratio <= 0) {
     return SPREAD_ASPECT_MIN;

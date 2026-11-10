@@ -295,6 +295,8 @@ export async function getViewerBookBySlug(
             templateRole,
             signoff:
               typeof content.signoff === "string" ? content.signoff : undefined,
+            composedCover: content.composedCover === true,
+            imageFit: content.imageFit === "contain" ? "contain" : undefined,
           };
         })
       : buildFallbackPages({
@@ -345,6 +347,7 @@ export async function getViewerBookBySlug(
     frontCoverImageUrl: coverImageUrl || undefined,
     backCoverImageUrl: artBackCoverUrl || undefined,
     coverSpreadOpening,
+    fixedPageFrame: metadata.fixedPageFrame === true,
     pages: enrichCoverPagesWithAgentBranding(withMapSiteBack),
   };
 }
@@ -356,6 +359,12 @@ export async function resolveViewerBookBySlug(
   const { createFaqEssayViewerBook } = await import(
     "@/lib/talisbooks/library/faq-essay-books"
   );
+  const { createSystemEbookPreview } = await import(
+    "@/lib/talisbooks/system-ebook-previews"
+  );
+  const preview = createSystemEbookPreview(slug);
+  if (preview) return preview;
+
   const faqBook = createFaqEssayViewerBook(slug, locale);
   if (faqBook) return faqBook;
 
