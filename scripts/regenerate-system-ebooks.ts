@@ -38,14 +38,17 @@ const SOURCES_ONLY = process.argv.includes("--sources-only");
  * Brokerage sites for --sources-only. Apply still reads broker_url from the
  * database. These are the offices behind the 12 published system books.
  */
-const SOURCE_SITES: Record<string, { brokerageName: string; website: string; town: string; province: string }> = {
+const SOURCE_SITES: Record<
+  string,
+  { brokerageName: string; website: string; town: string; province: string; latitude?: number; longitude?: number }
+> = {
   dw01: { brokerageName: "The Right Choice Realty", website: "https://therightchoicerealty.ca/", town: "Fredericton", province: "New Brunswick" },
   hml01: { brokerageName: "Alliance Realty", website: "https://www.alliancerealty.nb.ca/", town: "Edmundston", province: "New Brunswick" },
-  jdk01: { brokerageName: "Fair Realty", website: "https://fairrealty.com/", town: "Nelson", province: "British Columbia" },
+  jdk01: { brokerageName: "Fair Realty", website: "https://fairrealty.com/", town: "Nelson", province: "British Columbia", latitude: 49.4928, longitude: -117.2948 },
   km01: { brokerageName: "Dream Realty SK", website: "https://realestatethebattlefords.ca/", town: "North Battleford", province: "Saskatchewan" },
   lb01: { brokerageName: "Black Tusk Realty", website: "https://www.blacktuskrealty.com/", town: "Squamish", province: "British Columbia" },
-  pp03: { brokerageName: "Macdonald Realty", website: "https://macrealty.com/office/macdonald-realty-squamish", town: "Squamish", province: "British Columbia" },
-  sdp01: { brokerageName: "Parker Realty", website: "https://parkerrealty.ca/", town: "Charlottetown", province: "Prince Edward Island" },
+  pp03: { brokerageName: "Macdonald Realty", website: "https://macrealty.com/office/macdonald-realty-squamish", town: "Squamish", province: "British Columbia", latitude: 49.7016, longitude: -123.1558 },
+  sdp01: { brokerageName: "Parker Real Estate", website: "https://parkerproperty.ca/", town: "Charlottetown", province: "Prince Edward Island" },
   wg01: { brokerageName: "Valhalla Path Realty", website: "https://valhallapathrealty.com/", town: "Nelson", province: "British Columbia" },
   ys01: { brokerageName: "Grassroots Realty Group", website: "https://grassrootsrealtygroup.ca/", town: "Canmore", province: "Alberta" },
   kk01: { brokerageName: "East Coast Realty", website: "https://www.eastcoast-realty.ca/", town: "Souris", province: "Prince Edward Island" },
@@ -67,18 +70,14 @@ function reportBook(
   document: Awaited<ReturnType<typeof composeStandardSystemEbook>>,
   extras: string[] = [],
 ): void {
-  const visual = document.usedApprovedPreview
-    ? "visual=talismaps"
-    : document.listingCount > 0
-      ? "visual=site-or-town"
-      : "";
+  const visual = document.listingCount > 0 ? "visual=own-photo" : "";
   console.log(
     [
       code,
       `logo=${document.logoFound ? "found" : "initials"}`,
       `extracted=${document.extractedListingCount}`,
-      `book=${document.listingCount}`,
-      document.usedApprovedPreview ? "approved-preview" : "",
+      `listings=${document.listingCount}`,
+      `photos=${document.pages.filter((page) => page.layout === "listing" && page.heroImageUrl && !page.heroImageUrl.includes("/town-photos/")).length}`,
       document.lackedListings ? "NO_USABLE_LISTINGS" : "listings-ok",
       visual,
       ...extras,
@@ -116,6 +115,8 @@ async function main(): Promise<void> {
         town: site.town,
         province: site.province,
         website: site.website,
+        latitude: site.latitude ?? null,
+        longitude: site.longitude ?? null,
       });
       reportBook(code, document);
       if (document.listingCount === 0) flagged.push(code);

@@ -7,6 +7,8 @@ import {
   buildSystemEbook,
   chooseListingVisual,
   formatCad,
+  formatCanadianPhone,
+  isWithinOfficeRadius,
   milesToKilometres,
   parseCadAmount,
   placeFromOfficeAddress,
@@ -23,12 +25,12 @@ import {
 } from "../lib/talisbooks/system-ebook-format";
 import {
   bufferShowsCornerWatermark,
-  extractBrokerageLogo,
   dropWatermarkedListingPhotos,
+  extractBrokerageLogo,
   extractListingCandidates,
+  isPlaceholderBrandImage,
   isRejectedListingPhotoUrl,
 } from "../lib/talisbooks/system-ebook-sources";
-import { composeStandardSystemEbook } from "../lib/talisbooks/system-ebook-compose";
 import { createSystemEbookPreview } from "../lib/talisbooks/system-ebook-previews";
 
 const profile: SystemEbookProfile = {
@@ -285,23 +287,58 @@ describe("brokerage site reading", () => {
     expect(rightChoice[0]?.priceCad).toBe(234900);
   });
 
-  it("uses the approved dw01 preview when the crawl has not supplied listings", async () => {
-    const document = await composeStandardSystemEbook({
+  it("keeps only listings that have their own photo, and formats the phone", () => {
+    expect(formatCanadianPhone("5064551980")).toBe("506-455-1980");
+    expect(formatCanadianPhone("(506) 455-1980")).toBe("506-455-1980");
+    expect(isWithinOfficeRadius("Esquimalt", 49.4928, -117.2948)).toBe(false);
+    expect(isWithinOfficeRadius("660 Squilax Turtle Valley Road listing", 49.4928, -117.2948)).toBe(false);
+    expect(isWithinOfficeRadius("Salmo", 49.4928, -117.2948)).toBe(true);
+    expect(isPlaceholderBrandImage("https://realestatethebattlefords.ca/_media/custom/custom-banner-placeholder.jpg")).toBe(
+      true,
+    );
+    const document = buildSystemEbook({
       ...profile,
-      website: "",
-      listings: [],
-      logoUrl: null,
+      phone: "5064551980",
+      townPhotoUrls: ["https://example.supabase.co/town-photos/kk01/00.jpg"],
+      listings: [
+        {
+          street: "1 King Street",
+          town: "Fredericton",
+          priceCad: 100,
+          facts: [],
+          mapImageUrl: "/system-ebook-preview/dw01/listing-highland.png",
+        },
+        {
+          street: "2 Queen Street",
+          town: "Fredericton",
+          priceCad: 200,
+          facts: [],
+          photoUrl: "https://broker.example/queen.jpg",
+        },
+      ],
     });
-    expect(document.usedApprovedPreview).toBe(true);
-    expect(document.listingCount).toBe(4);
-    expect(document.pages.filter((page) => page.layout === "listing").map((page) => page.title)).toEqual([
-      "242 Highland Avenue",
-      "185 Reynolds Street, Unit 33",
-      "764 Route 10",
-      "37 Luanne Drive",
-    ]);
-    expect(document.pages.some((page) => page.heroImageUrl?.includes("listing-highland.png"))).toBe(true);
-    expect(document.lackedListings).toBe(false);
+    const listingPages = document.pages.filter((page) => page.layout === "listing");
+    expect(listingPages.map((page) => page.title)).toEqual(["2 Queen Street"]);
+    expect(listingPages[0]?.heroImageUrl).toBe("https://broker.example/queen.jpg");
+    expect(JSON.stringify(listingPages)).not.toMatch(/town-photos/);
+    expect(document.pages.find((page) => page.layout === "contact")?.agentPhone).toBe("506-455-1980");
+    const unit = extractListingCandidates(
+      `<span class="alt-addr">2 777 Belleville Street </span><span class="alt-city">Victoria</span><img data-src="https://www.dfh.ca/photos/belleville.jpg">`,
+      "https://www.dfh.ca/",
+    );
+    expect(unit[0]?.street).toBe("777 Belleville Street, Unit 2");
+    expect(unit[0]?.photoUrl).toBe("https://www.dfh.ca/photos/belleville.jpg");
+    const mlsPhoto = extractListingCandidates(
+      `<span class="alt-addr">606 Front Street </span><span class="alt-city">Nelson</span><img data-src="https://iss-cdn.myrealpage.com/photo.jpg">`,
+      "https://fairrealty.com/officelistings.html",
+    );
+    expect(mlsPhoto[0]?.photoUrl ?? null).toBeNull();
+    expect(
+      extractBrokerageLogo(
+        `<header><img src="/_media/custom/custom-banner-placeholder.jpg"><img src="/_media/site-logo.png" alt="Dream Realty logo"></header>`,
+        "https://realestatethebattlefords.ca/",
+      )?.url,
+    ).toBe("https://realestatethebattlefords.ca/_media/site-logo.png");
   });
 
   it("flags corner type that looks like a board watermark", async () => {

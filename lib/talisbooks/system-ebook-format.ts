@@ -140,6 +140,74 @@ export function formatCad(amount: number): string {
   return `CAD ${new Intl.NumberFormat("en-CA", { maximumFractionDigits: 0 }).format(rounded)}`;
 }
 
+/** 5064551980 and (506) 455-1980 both become 506-455-1980. */
+export function formatCanadianPhone(raw: string | null | undefined): string {
+  const digits = (raw || "").replace(/\D/g, "");
+  const local = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+  if (local.length !== 10) return (raw || "").trim();
+  return `${local.slice(0, 3)}-${local.slice(3, 6)}-${local.slice(6)}`;
+}
+
+const TOWN_COORDINATES: Record<string, [number, number]> = {
+  nelson: [49.4928, -117.2948],
+  esquimalt: [48.432, -123.414],
+  saanich: [48.484, -123.381],
+  victoria: [48.4284, -123.3656],
+  squilax: [50.883, -119.633],
+  chase: [50.819, -119.684],
+  "scotch creek": [50.89, -119.46],
+  "turtle valley": [50.92, -119.7],
+  kamloops: [50.6745, -120.3273],
+  vancouver: [49.2827, -123.1207],
+  surrey: [49.1913, -122.849],
+  squamish: [49.7016, -123.1558],
+  castlegar: [49.323, -117.659],
+  trail: [49.0966, -117.711],
+  salmo: [49.194, -117.277],
+  kaslo: [49.911, -116.916],
+  creston: [49.0955, -116.51],
+  kelowna: [49.888, -119.496],
+  "lake country": [50.026, -119.414],
+  vernon: [50.267, -119.272],
+  penticton: [49.5, -119.594],
+  "salmon arm": [50.702, -119.272],
+  revelstoke: [50.998, -118.196],
+  cranbrook: [49.51, -115.769],
+  invermere: [50.509, -116.03],
+  osoyoos: [49.033, -119.466],
+  sorrento: [50.883, -119.467],
+  sidney: [48.6501, -123.3986],
+  langford: [48.4506, -123.5058],
+  canmore: [51.089, -115.359],
+  cochrane: [51.189, -114.468],
+  calgary: [51.0447, -114.0719],
+  fredericton: [45.9636, -66.6431],
+  edmundston: [47.3737, -68.3251],
+  "north battleford": [52.7575, -108.2861],
+  battleford: [52.738, -108.315],
+  charlottetown: [46.2382, -63.1311],
+  souris: [46.355, -62.254],
+  moncton: [46.0878, -64.7782],
+};
+
+/** Known towns farther than 80 km from the office are left out. Unknown towns stay. */
+export function isWithinOfficeRadius(
+  town: string,
+  officeLatitude: number | null | undefined,
+  officeLongitude: number | null | undefined,
+  kilometres = 80,
+): boolean {
+  if (officeLatitude == null || officeLongitude == null) return true;
+  const blob = town.trim().toLowerCase().replace(/\s+/g, " ");
+  const names = Object.keys(TOWN_COORDINATES).sort((a, b) => b.length - a.length);
+  const mentioned = names.filter((name) => new RegExp(`\\b${name}\\b`).test(blob));
+  if (mentioned.length === 0) return true;
+  return mentioned.some((name) => {
+    const coords = TOWN_COORDINATES[name]!;
+    return distanceKm(officeLatitude, officeLongitude, coords[0], coords[1]) <= kilometres;
+  });
+}
+
 /** A dollar figure is CAD. An explicit foreign currency is omitted. */
 export function parseCadAmount(text: string | null | undefined): number | null {
   const raw = text?.trim() || "";
@@ -441,8 +509,9 @@ function pushPage(
 
 export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocument {
   const fastCode = profile.fastCode.trim().toLowerCase();
+  const phone = formatCanadianPhone(profile.phone);
   const listings = (profile.listings ?? [])
-    .filter((listing) => listing.street.trim() && listing.town.trim())
+    .filter((listing) => listing.street.trim() && listing.town.trim() && Boolean(listing.photoUrl?.trim()))
     .slice(0, MAX_LISTING_PAGES);
   const lackedListings = listings.length === 0;
   const logo = logoFor(profile);
@@ -485,7 +554,7 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     body: writeBrokerageAbout(profile),
     address: profile.officeAddress,
     brokerageLine: townsServed ? `Towns: ${townsServed}` : undefined,
-    agentPhone: profile.phone?.trim() || undefined,
+    agentPhone: phone || undefined,
     clientEditable: false,
   });
 
@@ -528,12 +597,7 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
   }
 
   listings.forEach((listing, index) => {
-    const townPhoto = townPhotos[index % Math.max(townPhotos.length, 1)] || "";
-    const visual = chooseListingVisual({
-      photoUrl: listing.photoUrl,
-      mapImageUrl: listing.mapImageUrl,
-      townPhotoUrl: listing.photoUrl || listing.mapImageUrl ? null : townPhoto,
-    });
+    const visual = chooseListingVisual({ photoUrl: listing.photoUrl });
     const address = `${listing.street.trim()}, ${listing.town.trim()}`;
     pushPage(pages, {
       slug: `listing-${String(index + 1).padStart(2, "0")}`,
@@ -548,7 +612,7 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
       pricingLine: listing.priceCad != null ? formatCad(listing.priceCad) : undefined,
       signoff: listingFactsLine(listing.facts),
       brokerageName: profile.brokerageName,
-      agentPhone: profile.phone?.trim() || undefined,
+      agentPhone: phone || undefined,
       slogan: host,
       latitude: listing.latitude ?? undefined,
       longitude: listing.longitude ?? undefined,
@@ -577,7 +641,7 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     title: profile.brokerName || profile.brokerageName,
     agentName: profile.brokerName || profile.brokerageName,
     agentTitle: "Broker",
-    agentPhone: profile.phone?.trim() || undefined,
+    agentPhone: phone || undefined,
     brokerageName: profile.brokerageName,
     brokerageLogoUrl: logo.url,
     address: profile.officeAddress,
