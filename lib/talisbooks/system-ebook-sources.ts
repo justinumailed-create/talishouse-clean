@@ -10,6 +10,9 @@ import {
   isSkippableBrokerageImage,
 } from "@/lib/talisbooks/blocked-listing-sources";
 import {
+  distanceKm,
+  formatCanadianPhone,
+  isWithinOfficeRadius,
   parseCadAmount,
   type SystemEbookListing,
   type SystemEbookProfile,
@@ -23,6 +26,42 @@ const ADDRESS =
 
 const WATERMARK_URL =
   /watermark|realtypress\/images\/listing|mrp-listings|logo-mls|mls-logo|realtor\.ca|glasshouse/i;
+
+/** Stock banners and empty marks are not a brokerage logo. */
+export function isPlaceholderBrandImage(url: string | null | undefined): boolean {
+  return /placeholder|custom-banner|banner-placeholder|spacer|blank|no-image|via\.placeholder|trans-256/i.test(
+    url || "",
+  );
+}
+
+/** MLS board CDNs. Their listing files carry the REALTOR® mark. */
+function isMlsCdnPhoto(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return host.endsWith("myrealpage.com") || host.endsWith("nine10.ca") || host.endsWith("realtyninja.com");
+  } catch {
+    return false;
+  }
+}
+
+function photoFromCard(slice: string, pageUrl: string, which: "first" | "last" = "first"): string | null {
+  const found: string[] = [];
+  const raws: string[] = [];
+  for (const match of slice.matchAll(/(?:data-full-src|data-src|src)\s*=\s*["']([^"']+)["']/gi)) {
+    raws.push(match[1] || "");
+  }
+  for (const match of slice.matchAll(/background(?:-image)?\s*:\s*url\(([^)]+)\)/gi)) {
+    raws.push((match[1] || "").replace(/['"]/g, ""));
+  }
+  for (const raw of raws) {
+    const url = resolveAgainst(raw, pageUrl);
+    if (!url || url.startsWith("data:") || isPlaceholderBrandImage(url)) continue;
+    if (isRejectedListingPhotoUrl(url) || isBlockedListingUrl(url) || isMlsCdnPhoto(url)) continue;
+    found.push(url);
+  }
+  if (found.length === 0) return null;
+  return which === "last" ? found[found.length - 1]! : found[0]!;
+}
 
 export type BrokerageLogoHit = {
   url: string;
@@ -90,7 +129,7 @@ export function extractBrokerageLogo(html: string, pageUrl: string): BrokerageLo
   for (const tag of headerImgs) {
     const src = resolveAgainst(readAttr(tag, "src") || readAttr(tag, "data-src"), pageUrl);
     const label = `${src ?? ""} ${readAttr(tag, "alt")} ${readAttr(tag, "class")} ${readAttr(tag, "id")}`;
-    if (!src || isRejectedSystemEbookImageUrl(src)) continue;
+    if (!src || isRejectedSystemEbookImageUrl(src) || isPlaceholderBrandImage(src)) continue;
     if (/mls|realtor|watermark|social|facebook|instagram/i.test(label)) continue;
     if (/logo|brand/i.test(label) || /class=['"][^'"]*logo/i.test(header.slice(Math.max(0, header.indexOf(tag) - 120), header.indexOf(tag)))) {
       return { url: src, source: "header" };
@@ -99,9 +138,18 @@ export function extractBrokerageLogo(html: string, pageUrl: string): BrokerageLo
   if (headerImgs.length > 0) {
     const tag = headerImgs[0]!;
     const src = resolveAgainst(readAttr(tag, "src") || readAttr(tag, "data-src"), pageUrl);
-    if (src && !isRejectedSystemEbookImageUrl(src) && !/mls|realtor|facebook|instagram/i.test(src)) {
+    if (src && !isRejectedSystemEbookImageUrl(src) && !isPlaceholderBrandImage(src) && !/mls|realtor|facebook|instagram/i.test(src)) {
       return { url: src, source: "header" };
     }
+  }
+
+  for (const tag of html.matchAll(/<img\b[^>]*>/gi)) {
+    const src = resolveAgainst(readAttr(tag[0]!, "src") || readAttr(tag[0]!, "data-src"), pageUrl);
+    const label = `${src ?? ""} ${readAttr(tag[0]!, "alt")} ${readAttr(tag[0]!, "class")}`;
+    if (!src || isRejectedSystemEbookImageUrl(src) || isPlaceholderBrandImage(src)) continue;
+    if (!/logo|brand/i.test(label)) continue;
+    if (/mls|realtor|watermark|facebook|instagram|favicon/i.test(label)) continue;
+    return { url: src, source: "header" };
   }
 
   const og = html.match(
@@ -109,7 +157,7 @@ export function extractBrokerageLogo(html: string, pageUrl: string): BrokerageLo
   );
   if (og) {
     const content = resolveAgainst(readAttr(og[0], "content"), pageUrl);
-    if (content && !isRejectedSystemEbookImageUrl(content) && !/mls|realtor/i.test(content)) {
+    if (content && !isRejectedSystemEbookImageUrl(content) && !isPlaceholderBrandImage(content) && !/mls|realtor/i.test(content)) {
       return { url: content, source: "og" };
     }
   }
@@ -119,7 +167,7 @@ export function extractBrokerageLogo(html: string, pageUrl: string): BrokerageLo
   );
   if (icon) {
     const href = resolveAgainst(readAttr(icon[0], "href"), pageUrl);
-    if (href && !isRejectedSystemEbookImageUrl(href)) {
+    if (href && !isRejectedSystemEbookImageUrl(href) && !isPlaceholderBrandImage(href)) {
       return { url: href, source: "icon" };
     }
   }
@@ -172,8 +220,14 @@ export type ListingExtractContext = {
 
 function normalizeStreet(raw: string): string {
   const cleaned = decodeHtml(raw).replace(/\s+/g, " ").replace(/^(\d{1,6})\s*,\s*/, "$1 ").trim();
-  const unit = cleaned.match(/^(\d{1,6})-(\d{1,4})\s+(.+)$/);
-  if (unit) return `${unit[1]} ${unit[3]}, Unit ${unit[2]}`;
+  const hyphen = cleaned.match(/^(\d{1,6})-(\d{1,4})\s+(.+)$/);
+  if (hyphen && new RegExp(`\\b(?:${STREET_TYPE})\\b`, "i").test(hyphen[3]!)) {
+    return `${hyphen[1]} ${hyphen[3]}, Unit ${hyphen[2]}`;
+  }
+  const unit = cleaned.match(/^(\d{1,4})\s+(\d{2,6})\s+(.+)$/);
+  if (unit && new RegExp(`\\b(?:${STREET_TYPE})\\b`, "i").test(unit[3]!)) {
+    return `${unit[2]} ${unit[3]}, Unit ${unit[1]}`;
+  }
   return cleaned.replace(/,\s*$/, "");
 }
 
@@ -262,6 +316,7 @@ function dedupeListings(listings: SystemEbookListing[]): SystemEbookListing[] {
 
 function extractStructuredListings(
   html: string,
+  pageUrl: string,
   context?: ListingExtractContext,
 ): SystemEbookListing[] {
   const found: SystemEbookListing[] = [];
@@ -279,11 +334,14 @@ function extractStructuredListings(
     if (kind && !facts.some((fact) => fact.toLowerCase() === kind[1]!.toLowerCase())) {
       facts.push(kind[1]!);
     }
+    const office = around.match(/contact-office">([^<]+)/i)?.[1] || "";
+    if (office && !brokerageLineAllows(office, context)) continue;
     found.push({
       street,
       town,
       priceCad: priceFrom(visibleText(around)),
       facts,
+      photoUrl: photoFromCard(around, pageUrl),
     });
   }
   for (const match of html.matchAll(/<h4>\s*([^<]+?)\s*<\/h4>((?:(?!<h4>)[\s\S]){0,1600})/gi)) {
@@ -304,18 +362,21 @@ function extractStructuredListings(
       town,
       priceCad: priceFrom(priceScope),
       facts: factsFrom(visibleText(tail)),
+      photoUrl: photoFromCard(priceScope, pageUrl),
     });
   }
-  for (const match of html.matchAll(/class="listing-card__address">\s*([^<]+?)\s*</gi)) {
+  for (const match of html.matchAll(/class="listing-(?:card__)?address">\s*([^<]+?)\s*</gi)) {
     const place = parsePlaceLabel(match[1] || "");
     if (!place) continue;
-    const around = html.slice(Math.max(0, (match.index ?? 0) - 700), (match.index ?? 0) + 200);
-    if (!brokerageLineAllows(visibleText(around), context)) continue;
+    const around = html.slice(Math.max(0, (match.index ?? 0) - 2500), (match.index ?? 0) + 400);
+    const credit = around.match(/(?:courtesy of|listed by|contact-office">)\s*([^<]{0,80})/i)?.[1] || "";
+    if (credit && !brokerageLineAllows(credit, context)) continue;
     found.push({
       street: place.street,
       town: place.town,
       priceCad: priceFrom(around),
       facts: factsFrom(visibleText(around)),
+      photoUrl: photoFromCard(around, pageUrl, "last"),
     });
   }
   for (const match of html.matchAll(
@@ -324,11 +385,13 @@ function extractStructuredListings(
     const place = parsePlaceLabel(match[1] || "");
     if (!place) continue;
     const tail = visibleText(match[2] || "");
+    const beforeTitle = html.slice(Math.max(0, (match.index ?? 0) - 1200), (match.index ?? 0) + (match[2] || "").length);
     found.push({
       street: place.street,
       town: place.town,
       priceCad: priceFrom(tail),
       facts: factsFrom(tail),
+      photoUrl: photoFromCard(beforeTitle, pageUrl),
     });
   }
   return found;
@@ -364,8 +427,23 @@ export function extractListingCandidates(
   pageUrl: string,
   context?: ListingExtractContext,
 ): SystemEbookListing[] {
-  const structured = dedupeListings(extractStructuredListings(html, context));
-  if (structured.length > 0) return structured;
+  const structured = dedupeListings(extractStructuredListings(html, pageUrl, context));
+  if (structured.length > 0) {
+    for (const listing of structured) {
+      if (listing.photoUrl) continue;
+      const needle = listing.street.toLowerCase().slice(0, 22);
+      for (const tag of html.matchAll(/<img\b[^>]*>/gi)) {
+        const blob = decodeHtml(tag[0]!).toLowerCase();
+        if (!blob.includes(needle)) continue;
+        const photo = photoFromCard(tag[0]!, pageUrl);
+        if (photo) {
+          listing.photoUrl = photo;
+          break;
+        }
+      }
+    }
+    return structured;
+  }
 
   const text = visibleText(html);
   const found: SystemEbookListing[] = [];
@@ -451,19 +529,23 @@ export async function bufferShowsCornerWatermark(buffer: Buffer): Promise<boolea
     const width = meta.width ?? 0;
     const height = meta.height ?? 0;
     if (width < 80 || height < 80) return false;
-    const cropW = Math.min(280, width);
-    const cropH = Math.min(48, height);
-    const raw = await sharp(buffer, { failOn: "none" })
-      .extract({
-        left: width - cropW,
-        top: height - cropH,
-        width: cropW,
-        height: cropH,
-      })
-      .removeAlpha()
-      .raw()
-      .toBuffer();
-    return glyphRatio(raw, cropW, cropH) > 0.015;
+    const cropW = Math.min(260, Math.floor(width * 0.34));
+    const cropH = Math.min(120, Math.floor(height * 0.24));
+    const corners = [
+      { left: 0, top: 0 },
+      { left: width - cropW, top: 0 },
+      { left: 0, top: height - cropH },
+      { left: width - cropW, top: height - cropH },
+    ];
+    for (const corner of corners) {
+      const raw = await sharp(buffer, { failOn: "none" })
+        .extract({ left: corner.left, top: corner.top, width: cropW, height: cropH })
+        .removeAlpha()
+        .raw()
+        .toBuffer();
+      if (glyphRatio(raw, cropW, cropH) > 0.02) return true;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -480,9 +562,16 @@ async function fetchImageBuffer(url: string): Promise<Buffer | null> {
       headers: { "user-agent": "Mozilla/5.0 (compatible; TalisprosEbookImages/1.0; +https://www.talispros.com)", accept: "image/*" },
     });
     if (!response.ok) return null;
-    if (isBlockedListingUrl(response.url)) return null;
+    if (isBlockedListingUrl(response.url) || isMlsCdnPhoto(response.url)) return null;
+    const type = response.headers.get("content-type") || "";
+    if (type && !type.startsWith("image/") && !type.startsWith("application/octet-stream")) return null;
     const buffer = Buffer.from(await response.arrayBuffer());
-    if (buffer.length < 4_000 || buffer.length > 12_000_000) return null;
+    const image =
+      (buffer[0] === 0xff && buffer[1] === 0xd8) ||
+      (buffer[0] === 0x89 && buffer[1] === 0x50) ||
+      buffer.subarray(0, 4).toString() === "RIFF" ||
+      (buffer[0] === 0x47 && buffer[1] === 0x49);
+    if (!image || buffer.length < 4_000 || buffer.length > 12_000_000) return null;
     return buffer;
   } catch {
     return null;
@@ -511,10 +600,60 @@ export async function dropWatermarkedListingPhotos(
   return next;
 }
 
+const townGeoCache = new Map<string, [number, number] | null>();
+
+async function townWithinOffice(
+  town: string,
+  province: string,
+  officeLatitude: number,
+  officeLongitude: number,
+): Promise<boolean> {
+  const place = town.trim();
+  if (!place || /^(listing|sale|residential|commercial|home|property|mls|the|for)$/i.test(place)) {
+    return true;
+  }
+  const key = `${place}|${province}`.toLowerCase();
+  if (!townGeoCache.has(key)) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 5000);
+    try {
+      const query = `${place}, ${province}, Canada`;
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(query)}`,
+        {
+          signal: ctrl.signal,
+          headers: { "user-agent": "TalisprosEbookImages/1.0 (listing radius; +https://www.talispros.com)", accept: "application/json" },
+        },
+      );
+      const rows = response.ok ? ((await response.json()) as Array<{ lat?: string; lon?: string }>) : [];
+      const lat = Number(rows[0]?.lat);
+      const lon = Number(rows[0]?.lon);
+      townGeoCache.set(key, Number.isFinite(lat) && Number.isFinite(lon) ? [lat, lon] : null);
+    } catch {
+      townGeoCache.set(key, null);
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  const coords = townGeoCache.get(key);
+  if (!coords) return true;
+  return distanceKm(officeLatitude, officeLongitude, coords[0], coords[1]) <= 80;
+}
+
+function crawlUrl(website: string): string {
+  try {
+    const host = new URL(website).hostname.replace(/^www\./, "");
+    if (host === "grassrootsrealtygroup.ca") return "https://grassrootsrealtygroup.ca/";
+  } catch {
+    return website;
+  }
+  return website;
+}
+
 export async function enrichProfileFromWebsite(
   profile: SystemEbookProfile,
 ): Promise<SystemEbookProfile> {
-  const page = await readBrokerageSite(profile.website);
+  const page = await readBrokerageSite(crawlUrl(profile.website));
   if (!page) return { ...profile, extractedListingCount: profile.listings?.length ?? 0 };
   const logo = extractBrokerageLogo(page.html, page.finalUrl);
   const context: ListingExtractContext = {
@@ -535,8 +674,7 @@ export async function enrichProfileFromWebsite(
   }
   const officeToken = profile.town.trim().toLowerCase().split(/\s+/)[0] || "";
   const crawledOfficePage =
-    officeToken.length > 3 &&
-    pages.some((source) => source.finalUrl.toLowerCase().includes(officeToken));
+    officeToken.length > 3 && crawlUrl(profile.website).toLowerCase().includes(officeToken);
   if (crawledOfficePage) {
     const local = listings.filter((listing) => {
       const place = listing.town.toLowerCase();
@@ -544,15 +682,30 @@ export async function enrichProfileFromWebsite(
     });
     if (local.length > 0) listings = local;
   }
-  const extractedListingCount = listings.length;
-  const photosChecked = await dropWatermarkedListingPhotos(listings.slice(0, 24));
+  const nearOffice: SystemEbookListing[] = [];
+  for (const listing of listings) {
+    const place = `${listing.street} ${listing.town}`;
+    if (!isWithinOfficeRadius(place, profile.latitude, profile.longitude)) continue;
+    if (
+      profile.latitude != null &&
+      profile.longitude != null &&
+      !(await townWithinOffice(listing.town, profile.province, profile.latitude, profile.longitude))
+    ) {
+      continue;
+    }
+    nearOffice.push(listing);
+  }
+  const extractedListingCount = nearOffice.length;
+  const photosChecked = await dropWatermarkedListingPhotos(nearOffice.slice(0, 24));
+  const withPhotos = photosChecked.filter((listing) => Boolean(listing.photoUrl?.trim()));
+  const phone = formatCanadianPhone(profile.phone?.trim() || extractPhone(page.html) || "");
   return {
     ...profile,
     logoUrl: profile.logoUrl?.trim() || logo?.url || null,
     foundedYear: profile.foundedYear ?? extractFoundedYear(page.html),
-    phone: profile.phone?.trim() || extractPhone(page.html),
+    phone: phone || null,
     extractedListingCount,
-    listings: profile.listings?.length ? profile.listings : photosChecked,
+    listings: profile.listings?.length ? profile.listings : withPhotos,
   };
 }
 

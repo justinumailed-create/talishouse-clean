@@ -5,7 +5,10 @@ import {
   type SystemEbookProfile,
 } from "@/lib/talisbooks/system-ebook-format";
 import { approvedSystemEbookProfile } from "@/lib/talisbooks/system-ebook-previews";
-import { enrichProfileFromWebsite } from "@/lib/talisbooks/system-ebook-sources";
+import {
+  enrichProfileFromWebsite,
+  isPlaceholderBrandImage,
+} from "@/lib/talisbooks/system-ebook-sources";
 
 /** Read the brokerage site, then build the standard book. Does not write a row. */
 export async function composeStandardSystemEbook(
@@ -14,27 +17,18 @@ export async function composeStandardSystemEbook(
   const enriched = await enrichProfileFromWebsite(profile);
   const approved = approvedSystemEbookProfile(profile.fastCode);
   const extractedListingCount = enriched.extractedListingCount ?? enriched.listings?.length ?? 0;
-  const merged: SystemEbookProfile = approved
-    ? {
-        ...enriched,
-        listings: approved.listings,
-        areas: approved.areas ?? enriched.areas,
-        areaPhotoUrl: enriched.townPhotoUrls?.length ? enriched.areaPhotoUrl : approved.areaPhotoUrl,
-        areaPhotoFit: approved.areaPhotoFit ?? enriched.areaPhotoFit,
-        coverMapUrl: approved.coverMapUrl ?? enriched.coverMapUrl,
-        areaMapUrl: approved.areaMapUrl ?? enriched.areaMapUrl,
-        marketMapUrl: approved.marketMapUrl ?? enriched.marketMapUrl,
-        logoPlate: approved.logoPlate ?? enriched.logoPlate,
-        logoUrl: enriched.logoUrl || approved.logoUrl,
-      }
-    : enriched;
-  const document = buildSystemEbook(merged);
+  const liveLogo = enriched.logoUrl?.trim() || "";
+  const logoUrl =
+    liveLogo && !isPlaceholderBrandImage(liveLogo)
+      ? liveLogo
+      : approved?.logoUrl || liveLogo || null;
+  const document = buildSystemEbook({ ...enriched, logoUrl });
   if (document.lackedListings) {
     console.warn(systemEbookLackedListingsMessage(profile.fastCode));
   }
   return {
     ...document,
     extractedListingCount,
-    usedApprovedPreview: Boolean(approved?.listings?.length),
+    usedApprovedPreview: false,
   };
 }
