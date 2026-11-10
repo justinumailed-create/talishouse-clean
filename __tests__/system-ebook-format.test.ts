@@ -1,5 +1,6 @@
-import sharp from "sharp";
+import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import sharp from "sharp";
 import { describe, expect, it } from "vitest";
 import { bookFrameSpreadImageUrl } from "../lib/talisbooks/viewer/spread-layout";
 import {
@@ -255,8 +256,8 @@ describe("brokerage site reading", () => {
         photoUrl: "https://cdn.realtor.ca/highland.jpg",
       },
     ]);
-    expect(kept).toHaveLength(1);
-    expect(kept[0]?.photoUrl).toBeNull();
+    expect(kept.kept).toHaveLength(0);
+    expect(kept.rejectedWatermarkCount).toBe(1);
 
     const myRealPage = `
       <span class="alt-addr">241 W 30th Street </span>
@@ -332,7 +333,7 @@ describe("brokerage site reading", () => {
       `<span class="alt-addr">606 Front Street </span><span class="alt-city">Nelson</span><img data-src="https://iss-cdn.myrealpage.com/photo.jpg">`,
       "https://fairrealty.com/officelistings.html",
     );
-    expect(mlsPhoto[0]?.photoUrl ?? null).toBeNull();
+    expect(mlsPhoto[0]?.photoUrl).toContain("myrealpage.com");
     expect(
       extractBrokerageLogo(
         `<header><img src="/_media/custom/custom-banner-placeholder.jpg"><img src="/_media/site-logo.png" alt="Dream Realty logo"></header>`,
@@ -341,24 +342,50 @@ describe("brokerage site reading", () => {
     ).toBe("https://realestatethebattlefords.ca/_media/site-logo.png");
   });
 
-  it("flags corner type that looks like a board watermark", async () => {
-    const width = 400;
-    const height = 300;
-    const flat = Buffer.alloc(width * height * 3, 90);
-    const marked = Buffer.from(flat);
-    for (let y = height - 28; y < height - 6; y += 1) {
-      for (let x = width - 90; x < width - 8; x += 1) {
-        if ((x + y) % 2 === 0) {
-          const index = (y * width + x) * 3;
-          marked[index] = 255;
-          marked[index + 1] = 255;
-          marked[index + 2] = 255;
-        }
+  it("flags the REALTOR mark burned into a corner and treats a tiny file as watermarked", async () => {
+    const width = 480;
+    const height = 360;
+    const plain = Buffer.alloc(width * height * 3);
+    for (let index = 0; index < plain.length; index += 3) {
+      const noise = (index * 17) % 36;
+      plain[index] = 70 + noise;
+      plain[index + 1] = 80 + (noise % 20);
+      plain[index + 2] = 64 + (noise % 24);
+    }
+    const marked = Buffer.from(plain);
+    const template = await sharp("lib/talisbooks/realtor-mark-template.png")
+      .resize({ width: 72 })
+      .greyscale()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    for (let y = 0; y < template.info.height; y += 1) {
+      for (let x = 0; x < template.info.width; x += 1) {
+        if (template.data[y * template.info.width + x]! > 128) continue;
+        const index = ((y + 10) * width + (x + 10)) * 3;
+        marked[index] = 246;
+        marked[index + 1] = 246;
+        marked[index + 2] = 246;
       }
     }
-    const flatJpeg = await sharp(flat, { raw: { width, height, channels: 3 } }).jpeg().toBuffer();
+    const plainJpeg = await sharp(plain, { raw: { width, height, channels: 3 } }).jpeg().toBuffer();
     const markedJpeg = await sharp(marked, { raw: { width, height, channels: 3 } }).jpeg().toBuffer();
-    expect(await bufferShowsCornerWatermark(flatJpeg)).toBe(false);
+    expect(await bufferShowsCornerWatermark(plainJpeg)).toBe(false);
     expect(await bufferShowsCornerWatermark(markedJpeg)).toBe(true);
+    const tiny = await sharp({ create: { width: 40, height: 40, channels: 3, background: "#888" } }).jpeg().toBuffer();
+    expect(await bufferShowsCornerWatermark(tiny)).toBe(true);
+    const tesseract = spawnSync("tesseract", ["--version"]);
+    if (tesseract.status === 0) {
+      const mls = await sharp(
+        Buffer.from(
+          `<svg xmlns="http://www.w3.org/2000/svg" width="480" height="360">
+            <rect width="480" height="360" fill="#6d7b4e"/>
+            <text x="250" y="340" font-family="Liberation Sans" font-size="32" font-weight="700" fill="white">SASK MLS</text>
+          </svg>`,
+        ),
+      )
+        .jpeg()
+        .toBuffer();
+      expect(await bufferShowsCornerWatermark(mls)).toBe(true);
+    }
   });
 });

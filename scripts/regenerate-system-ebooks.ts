@@ -70,14 +70,23 @@ function reportBook(
   document: Awaited<ReturnType<typeof composeStandardSystemEbook>>,
   extras: string[] = [],
 ): void {
-  const visual = document.listingCount > 0 ? "visual=own-photo" : "";
+  const visual =
+    document.listingCount === 0
+      ? ""
+      : document.mlsPhotoCount > 0 && document.ownSitePhotoCount === 0
+        ? "visual=mls-photo"
+        : document.mlsPhotoCount > 0
+          ? "visual=mixed-photo"
+          : "visual=own-photo";
   console.log(
     [
       code,
       `logo=${document.logoFound ? "found" : "initials"}`,
       `extracted=${document.extractedListingCount}`,
       `listings=${document.listingCount}`,
-      `photos=${document.pages.filter((page) => page.layout === "listing" && page.heroImageUrl && !page.heroImageUrl.includes("/town-photos/")).length}`,
+      `own-site=${document.ownSitePhotoCount}`,
+      `mls-clean=${document.mlsPhotoCount}`,
+      `rejected-watermark=${document.rejectedWatermarkCount}`,
       document.lackedListings ? "NO_USABLE_LISTINGS" : "listings-ok",
       visual,
       ...extras,
@@ -256,7 +265,7 @@ async function main(): Promise<void> {
       townPhotoUrls,
       photoCredit,
     };
-    const document = await composeStandardSystemEbook(profile);
+    const document = await composeStandardSystemEbook(profile, { storePhotos: APPLY });
     reportBook(code, document, [
       townPhotoUrls.length ? `town-photos=${townPhotoUrls.length}` : "",
       photoCredit ? "credit-kept" : "",

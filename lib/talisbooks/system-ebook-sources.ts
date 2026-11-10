@@ -1,8 +1,13 @@
 /**
  * Facts, logos, and listing cards from a brokerage's own website.
- * Realtor.ca hosts, board watermarks, and Glasshouse art are dropped.
+ * Own-site photos are preferred. An MLS CDN photo is kept only when the
+ * image itself has no REALTOR® / MLS® mark. Glasshouse art stays out.
  */
 
+import { execFile } from "node:child_process";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import sharp from "sharp";
 import {
   isBlockedListingUrl,
@@ -34,14 +39,27 @@ export function isPlaceholderBrandImage(url: string | null | undefined): boolean
   );
 }
 
-/** MLS board CDNs. Their listing files carry the REALTOR® mark. */
-function isMlsCdnPhoto(url: string): boolean {
+/**
+ * MLS / board CDNs. A file from one of these is allowed only after the
+ * pixels themselves show no REALTOR® or MLS® mark.
+ */
+export function isMlsCdnPhoto(url: string): boolean {
   try {
-    const host = new URL(url).hostname.toLowerCase();
-    return host.endsWith("myrealpage.com") || host.endsWith("nine10.ca") || host.endsWith("realtyninja.com");
+    const host = new URL(url).hostname.toLowerCase().replace(/\.$/, "");
+    return (
+      host.endsWith("myrealpage.com") ||
+      host.endsWith("nine10.ca") ||
+      host.endsWith("realtyninja.com") ||
+      host === "realtor.ca" ||
+      host.endsWith(".realtor.ca")
+    );
   } catch {
     return false;
   }
+}
+
+export function listingPhotoHost(url: string): "own-site" | "mls" {
+  return isMlsCdnPhoto(url) ? "mls" : "own-site";
 }
 
 function photoFromCard(slice: string, pageUrl: string, which: "first" | "last" = "first"): string | null {
@@ -56,11 +74,15 @@ function photoFromCard(slice: string, pageUrl: string, which: "first" | "last" =
   for (const raw of raws) {
     const url = resolveAgainst(raw, pageUrl);
     if (!url || url.startsWith("data:") || isPlaceholderBrandImage(url)) continue;
-    if (isRejectedListingPhotoUrl(url) || isBlockedListingUrl(url) || isMlsCdnPhoto(url)) continue;
+    if (isRejectedListingPhotoUrl(url) && !isMlsCdnPhoto(url)) continue;
+    if (isBlockedListingUrl(url) && !isMlsCdnPhoto(url)) continue;
+    if (/logo|icon|favicon|sprite|badge/i.test(url)) continue;
     found.push(url);
   }
   if (found.length === 0) return null;
-  return which === "last" ? found[found.length - 1]! : found[0]!;
+  const own = found.filter((url) => listingPhotoHost(url) === "own-site");
+  const pool = own.length > 0 ? own : found;
+  return which === "last" ? pool[pool.length - 1]! : pool[0]!;
 }
 
 export type BrokerageLogoHit = {
@@ -501,58 +523,273 @@ export function extractListingCandidates(
   return found;
 }
 
-function glyphRatio(data: Buffer, width: number, height: number): number {
-  const lum = (index: number) =>
-    data[index * 3]! + data[index * 3 + 1]! + data[index * 3 + 2]!;
-  let glyphs = 0;
-  let count = 0;
-  for (let y = 1; y < height - 1; y += 1) {
-    for (let x = 1; x < width - 1; x += 1) {
-      const index = y * width + x;
-      const value = lum(index);
-      const around = (lum(index - 1) + lum(index + 1) + lum(index - width) + lum(index + width)) / 4;
-      count += 1;
-      if (value > 520 && value > around + 90) glyphs += 1;
+/**
+ * The board mark is the REALTOR® R-in-a-square, light or dark, usually in a
+ * corner (sometimes inset under a white letterbox). Matching that silhouette
+ * against pixels that are lighter or darker than a local blur separates it
+ * from roofs, snow, and sky. A score in the gap between known clean photos
+ * and known marked photos is treated as marked.
+ */
+const MARK_TEMPLATE_PATH = join(process.cwd(), "lib/talisbooks/realtor-mark-template.png");
+const MARK_PRESENT_SCORE = 0.4;
+const MARK_UNSURE_SCORE = 0.36;
+
+type MarkTemplate = {
+  dev: Float32Array;
+  varT: number;
+  width: number;
+  height: number;
+};
+
+let markTemplates: MarkTemplate[] | null = null;
+
+async function realtorMarkTemplates(): Promise<MarkTemplate[]> {
+  if (markTemplates) return markTemplates;
+  const file = readFileSync(MARK_TEMPLATE_PATH);
+  const built: MarkTemplate[] = [];
+  for (const width of [48, 66]) {
+    const { data, info } = await sharp(file).resize({ width }).greyscale().raw().toBuffer({ resolveWithObject: true });
+    const pixels = new Float32Array(data.length);
+    for (let index = 0; index < data.length; index += 1) pixels[index] = 255 - data[index]!;
+    let sum = 0;
+    for (let index = 0; index < pixels.length; index += 1) sum += pixels[index]!;
+    const mean = sum / pixels.length;
+    const dev = new Float32Array(pixels.length);
+    let varT = 0;
+    for (let index = 0; index < pixels.length; index += 1) {
+      dev[index] = pixels[index]! - mean;
+      varT += dev[index]! * dev[index]!;
+    }
+    built.push({ dev, varT, width: info.width, height: info.height });
+  }
+  markTemplates = built;
+  return built;
+}
+
+function overlayMasks(data: Buffer, width: number, height: number): { light: Buffer; dark: Buffer } {
+  const lum = new Float32Array(width * height);
+  for (let index = 0; index < lum.length; index += 1) {
+    lum[index] = (data[index * 3]! + data[index * 3 + 1]! + data[index * 3 + 2]!) / 3;
+  }
+  const radius = 6;
+  const span = radius * 2 + 1;
+  const horizontal = new Float32Array(width * height);
+  const blur = new Float32Array(width * height);
+  for (let y = 0; y < height; y += 1) {
+    for (let x = 0; x < width; x += 1) {
+      let sum = 0;
+      for (let offset = -radius; offset <= radius; offset += 1) {
+        sum += lum[y * width + Math.min(width - 1, Math.max(0, x + offset))]!;
+      }
+      horizontal[y * width + x] = sum / span;
     }
   }
-  return count === 0 ? 0 : glyphs / count;
+  for (let x = 0; x < width; x += 1) {
+    for (let y = 0; y < height; y += 1) {
+      let sum = 0;
+      for (let offset = -radius; offset <= radius; offset += 1) {
+        sum += horizontal[Math.min(height - 1, Math.max(0, y + offset)) * width + x]!;
+      }
+      blur[y * width + x] = sum / span;
+    }
+  }
+  const light = Buffer.alloc(width * height);
+  const dark = Buffer.alloc(width * height);
+  for (let index = 0; index < lum.length; index += 1) {
+    const lift = lum[index]! - blur[index]!;
+    if (lift > 14 && lum[index]! > 120) light[index] = 255;
+    if (lift < -14) dark[index] = 255;
+  }
+  return { light, dark };
+}
+
+function templateScoreAt(
+  mask: Buffer,
+  imageWidth: number,
+  imageHeight: number,
+  template: MarkTemplate,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+): number {
+  const { dev, varT, width: templateWidth, height: templateHeight } = template;
+  if (varT < 1) return 0;
+  let best = 0;
+  const step = 2;
+  const yEnd = Math.min(y1, imageHeight - templateHeight);
+  const xEnd = Math.min(x1, imageWidth - templateWidth);
+  for (let y = y0; y <= yEnd; y += step) {
+    for (let x = x0; x <= xEnd; x += step) {
+      let sum = 0;
+      for (let ty = 0; ty < templateHeight; ty += 1) {
+        const row = (y + ty) * imageWidth + x;
+        for (let tx = 0; tx < templateWidth; tx += 1) sum += mask[row + tx]!;
+      }
+      const mean = sum / (templateWidth * templateHeight);
+      let corr = 0;
+      let varI = 0;
+      for (let ty = 0; ty < templateHeight; ty += 1) {
+        const row = (y + ty) * imageWidth + x;
+        const templateRow = ty * templateWidth;
+        for (let tx = 0; tx < templateWidth; tx += 1) {
+          const delta = mask[row + tx]! - mean;
+          varI += delta * delta;
+          corr += delta * dev[templateRow + tx]!;
+        }
+      }
+      const score = corr / Math.sqrt(varI * varT + 1e-3);
+      if (score > best) best = score;
+    }
+  }
+  return best;
+}
+
+async function realtorMarkScore(buffer: Buffer): Promise<number> {
+  const { data, info } = await sharp(buffer, { failOn: "none" })
+    .resize({ width: 520 })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const { light, dark } = overlayMasks(data, info.width, info.height);
+  const templates = await realtorMarkTemplates();
+  // The mark sits in the outer corner, sometimes below a white letterbox.
+  // A window or cabinet further inside the frame is not that mark.
+  const corners: Array<[number, number, number, number]> = [
+    [0, 0, 0.22, 0.32],
+    [0.78, 0, 1, 0.32],
+    [0, 0.72, 0.22, 1],
+    [0.78, 0.72, 1, 1],
+  ];
+  let best = 0;
+  for (const mask of [light, dark]) {
+    for (const template of templates) {
+      for (const [a, b, c, d] of corners) {
+        const score = templateScoreAt(
+          mask,
+          info.width,
+          info.height,
+          template,
+          Math.floor(a * info.width),
+          Math.floor(b * info.height),
+          Math.floor(c * info.width),
+          Math.floor(d * info.height),
+        );
+        if (score > best) best = score;
+        if (best >= 0.55) return best;
+      }
+    }
+  }
+  return best;
+}
+
+let tesseractReady: boolean | null = null;
+
+function boardMarkInOcr(text: string): boolean {
+  const upper = text.toUpperCase();
+  const compact = upper.replace(/[^A-Z]/g, "");
+  if (/REALTOR|EALTOR|REALTO|SASK/.test(compact)) return true;
+  if (/\bMLS\b/.test(upper)) return true;
+  if (/REAL\s+ESTATE\s+BOARD/.test(upper)) return true;
+  return false;
 }
 
 /**
- * Board marks such as REALTOR and SASK MLS sit as light type in a corner.
- * A smooth photograph does not. Skipping a false positive is safer than
- * printing a watermark in the book.
+ * White corner type such as SASK•MLS® is too small for the R-square template.
+ * Keeping only pixels brighter than the photo, then reading that strip, catches it.
+ * A failed read counts as marked.
  */
+async function cornerTextHasBoardMark(buffer: Buffer): Promise<boolean> {
+  if (tesseractReady === null) {
+    tesseractReady = await new Promise<boolean>((resolve) => {
+      execFile("tesseract", ["--version"], (error) => resolve(!error));
+    });
+  }
+  if (!tesseractReady) return false;
+  const meta = await sharp(buffer, { failOn: "none" }).metadata();
+  const width = meta.width ?? 0;
+  const height = meta.height ?? 0;
+  if (width < 120 || height < 120) return true;
+  const crops: Array<[number, number, number, number]> = [
+    [0, 0, 0.3, 0.18],
+    [0.7, 0, 0.3, 0.18],
+    [0, 0.82, 0.3, 0.18],
+    [0.7, 0.82, 0.3, 0.18],
+  ];
+  const file = join(tmpdir(), `talis-mark-${process.pid}.png`);
+  try {
+    for (const [fx, fy, fw, fh] of crops) {
+      const left = Math.floor(width * fx);
+      const top = Math.floor(height * fy);
+      const cropWidth = Math.max(24, Math.min(Math.floor(width * fw), width - left));
+      const cropHeight = Math.max(16, Math.min(Math.floor(height * fh), height - top));
+      const { data, info } = await sharp(buffer, { failOn: "none" })
+        .extract({ left, top, width: cropWidth, height: cropHeight })
+        .resize({ width: 900 })
+        .greyscale()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+      const ink = Buffer.alloc(data.length, 255);
+      for (let index = 0; index < data.length; index += 1) {
+        if (data[index]! >= 220) ink[index] = 0;
+      }
+      const png = await sharp(ink, { raw: { width: info.width, height: info.height, channels: 1 } }).png().toBuffer();
+      writeFileSync(file, png);
+      const text = await new Promise<string>((resolve) => {
+        execFile("tesseract", [file, "stdout", "--psm", "6"], { encoding: "utf8" }, (error, stdout) => {
+          resolve(error ? "" : String(stdout || ""));
+        });
+      });
+      if (boardMarkInOcr(text)) return true;
+    }
+    return false;
+  } catch {
+    return true;
+  } finally {
+    rmSync(file, { force: true });
+  }
+}
+
+async function canReadCornerText(): Promise<boolean> {
+  if (tesseractReady === null) {
+    tesseractReady = await new Promise<boolean>((resolve) => {
+      execFile("tesseract", ["--version"], (error) => resolve(!error));
+    });
+  }
+  return tesseractReady;
+}
+
+/** MLS files need the corner read. Without it a text mark such as SASK•MLS® would slip through. */
+async function photoBufferIsClean(url: string, buffer: Buffer): Promise<boolean> {
+  if (await bufferShowsCornerWatermark(buffer)) return false;
+  if (isMlsCdnPhoto(url) && !(await canReadCornerText())) return false;
+  return true;
+}
+
 export async function bufferShowsCornerWatermark(buffer: Buffer): Promise<boolean> {
   try {
     const meta = await sharp(buffer, { failOn: "none" }).metadata();
     const width = meta.width ?? 0;
     const height = meta.height ?? 0;
-    if (width < 80 || height < 80) return false;
-    const cropW = Math.min(260, Math.floor(width * 0.34));
-    const cropH = Math.min(120, Math.floor(height * 0.24));
-    const corners = [
-      { left: 0, top: 0 },
-      { left: width - cropW, top: 0 },
-      { left: 0, top: height - cropH },
-      { left: width - cropW, top: height - cropH },
-    ];
-    for (const corner of corners) {
-      const raw = await sharp(buffer, { failOn: "none" })
-        .extract({ left: corner.left, top: corner.top, width: cropW, height: cropH })
-        .removeAlpha()
-        .raw()
-        .toBuffer();
-      if (glyphRatio(raw, cropW, cropH) > 0.02) return true;
-    }
-    return false;
+    if (width < 120 || height < 120) return true;
+    const score = await realtorMarkScore(buffer);
+    if (score >= MARK_PRESENT_SCORE) return true;
+    if (score > MARK_UNSURE_SCORE) return true;
+    return cornerTextHasBoardMark(buffer);
   } catch {
-    return false;
+    return true;
   }
 }
 
+function extraMlsFrames(url: string): string[] {
+  if (!isMlsCdnPhoto(url)) return [];
+  const match = url.match(/^(.*)_1(\.[a-z0-9]+)(\?.*)?$/i);
+  if (!match) return [];
+  return [2, 3, 4].map((frame) => `${match[1]}_${frame}${match[2]}${match[3] || ""}`);
+}
+
 async function fetchImageBuffer(url: string): Promise<Buffer | null> {
-  if (isRejectedListingPhotoUrl(url)) return null;
+  if (isRejectedListingPhotoUrl(url) && !isMlsCdnPhoto(url)) return null;
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 12_000);
   try {
@@ -562,7 +799,7 @@ async function fetchImageBuffer(url: string): Promise<Buffer | null> {
       headers: { "user-agent": "Mozilla/5.0 (compatible; TalisprosEbookImages/1.0; +https://www.talispros.com)", accept: "image/*" },
     });
     if (!response.ok) return null;
-    if (isBlockedListingUrl(response.url) || isMlsCdnPhoto(response.url)) return null;
+    if (isBlockedListingUrl(response.url) && !isMlsCdnPhoto(response.url)) return null;
     const type = response.headers.get("content-type") || "";
     if (type && !type.startsWith("image/") && !type.startsWith("application/octet-stream")) return null;
     const buffer = Buffer.from(await response.arrayBuffer());
@@ -580,24 +817,74 @@ async function fetchImageBuffer(url: string): Promise<Buffer | null> {
   }
 }
 
-export async function dropWatermarkedListingPhotos(
+/**
+ * Apply-only. Copies each accepted photo into talisbooks-assets so the book
+ * does not hotlink a CDN. A file that fails a second watermark check is dropped.
+ */
+export async function copyAcceptedListingPhotos(
+  fastCode: string,
   listings: SystemEbookListing[],
 ): Promise<SystemEbookListing[]> {
-  const next: SystemEbookListing[] = [];
+  const { getSupabaseAdmin } = await import("@/lib/supabaseAdmin");
+  const { TALISBOOKS_IMAGE_STORAGE_BUCKET } = await import(
+    "@/lib/talisbooks/image-engine/constants"
+  );
+  const supabase = getSupabaseAdmin();
+  const code = fastCode.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "") || "code";
+  const stored: SystemEbookListing[] = [];
+  let index = 1;
   for (const listing of listings) {
     const photo = listing.photoUrl?.trim() || "";
-    if (!photo || isRejectedListingPhotoUrl(photo)) {
-      next.push({ ...listing, photoUrl: null });
-      continue;
-    }
+    if (!photo) continue;
     const buffer = await fetchImageBuffer(photo);
-    if (!buffer || (await bufferShowsCornerWatermark(buffer))) {
-      next.push({ ...listing, photoUrl: null });
+    if (!buffer || !(await photoBufferIsClean(photo, buffer))) continue;
+    const jpeg = await sharp(buffer, { failOn: "none" }).jpeg({ quality: 85 }).toBuffer();
+    const path = `brokerage-site/${code}/listing-${index}.jpg`;
+    const { error } = await supabase.storage.from(TALISBOOKS_IMAGE_STORAGE_BUCKET).upload(path, jpeg, {
+      contentType: "image/jpeg",
+      upsert: true,
+      cacheControl: "31536000",
+    });
+    if (error) {
+      console.error(`[system-ebook] ${code}: could not store listing ${index}`);
       continue;
     }
-    next.push(listing);
+    const url = supabase.storage.from(TALISBOOKS_IMAGE_STORAGE_BUCKET).getPublicUrl(path).data.publicUrl;
+    if (!url) continue;
+    stored.push({ ...listing, photoUrl: url });
+    index += 1;
   }
-  return next;
+  return stored;
+}
+
+export async function dropWatermarkedListingPhotos(
+  listings: SystemEbookListing[],
+): Promise<{ kept: SystemEbookListing[]; rejectedWatermarkCount: number }> {
+  const kept: SystemEbookListing[] = [];
+  let rejectedWatermarkCount = 0;
+  for (const listing of listings) {
+    const photo = listing.photoUrl?.trim() || "";
+    if (!photo || isPlaceholderBrandImage(photo) || (isRejectedListingPhotoUrl(photo) && !isMlsCdnPhoto(photo))) {
+      continue;
+    }
+    let cleanUrl: string | null = null;
+    let failedCheck = false;
+    for (const candidate of [photo, ...extraMlsFrames(photo)]) {
+      const buffer = await fetchImageBuffer(candidate);
+      if (!buffer || !(await photoBufferIsClean(candidate, buffer))) {
+        failedCheck = true;
+        continue;
+      }
+      cleanUrl = candidate;
+      break;
+    }
+    if (!cleanUrl) {
+      if (failedCheck) rejectedWatermarkCount += 1;
+      continue;
+    }
+    kept.push({ ...listing, photoUrl: cleanUrl, photoHost: listingPhotoHost(cleanUrl) });
+  }
+  return { kept, rejectedWatermarkCount };
 }
 
 const townGeoCache = new Map<string, [number, number] | null>();
@@ -696,16 +983,19 @@ export async function enrichProfileFromWebsite(
     nearOffice.push(listing);
   }
   const extractedListingCount = nearOffice.length;
-  const photosChecked = await dropWatermarkedListingPhotos(nearOffice.slice(0, 24));
-  const withPhotos = photosChecked.filter((listing) => Boolean(listing.photoUrl?.trim()));
+  const judged = await dropWatermarkedListingPhotos(nearOffice.slice(0, 24));
   const phone = formatCanadianPhone(profile.phone?.trim() || extractPhone(page.html) || "");
+  const chosen = profile.listings?.length ? profile.listings : judged.kept;
   return {
     ...profile,
     logoUrl: profile.logoUrl?.trim() || logo?.url || null,
     foundedYear: profile.foundedYear ?? extractFoundedYear(page.html),
     phone: phone || null,
     extractedListingCount,
-    listings: profile.listings?.length ? profile.listings : withPhotos,
+    rejectedWatermarkCount: judged.rejectedWatermarkCount,
+    ownSitePhotoCount: chosen.filter((listing) => listing.photoHost !== "mls" && listing.photoUrl).length,
+    mlsPhotoCount: chosen.filter((listing) => listing.photoHost === "mls").length,
+    listings: chosen,
   };
 }
 
