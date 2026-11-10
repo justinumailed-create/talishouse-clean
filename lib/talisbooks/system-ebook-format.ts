@@ -52,6 +52,8 @@ export type SystemEbookListing = {
   photoUrl?: string | null;
   /** Static Talismaps™ image when the listing has no clean photo. */
   mapImageUrl?: string | null;
+  /** Optional write-up. When set, it is used instead of the generated sentences. */
+  story?: string | null;
   photoFit?: "cover" | "contain";
   latitude?: number | null;
   longitude?: number | null;
@@ -224,19 +226,14 @@ export function writeBrokerageAbout(profile: SystemEbookProfile): string {
   const broker = profile.brokerName.trim();
   const areas = (profile.areas ?? []).filter((area) => area && area.toLowerCase() !== town.toLowerCase());
   const where = province ? `${town}, ${province}` : town;
-  const sentences = [`${name} is a real estate brokerage in ${where}.`];
+  const sentences = [`${name} is based in ${where}.`];
   if (profile.foundedYear && profile.foundedYear >= 1900 && profile.foundedYear <= 2100) {
-    sentences.push(`The office has been part of the ${town} market since ${profile.foundedYear}.`);
+    sentences.push(`The office has been part of the local market since ${profile.foundedYear}.`);
   }
-  if (broker) {
-    sentences.push(`${broker} leads the office.`);
-  }
+  if (broker) sentences.push(`${broker} leads the office.`);
   if (areas.length > 0) {
-    sentences.push(`The work also reaches ${joinList(areas.slice(0, 3))}.`);
+    sentences.push(`Listings also turn up in ${joinList(areas.slice(0, 3))}.`);
   }
-  sentences.push(
-    `This Talisbook introduces the brokerage, the market around ${town}, and the homes on the brokerage website.`,
-  );
   return polishSystemCopy(sentences.join(" "));
 }
 
@@ -244,16 +241,16 @@ export function writeAreaCopy(profile: SystemEbookProfile): string {
   const areas = (profile.areas ?? []).slice(0, 3);
   const reach =
     areas.length > 0
-      ? ` The same office also works in ${joinList(areas)}, still inside a Canadian market measured in kilometres.`
-      : ` Distances around ${profile.town} are counted in kilometres.`;
+      ? ` ${joinList(areas)} ${areas.length === 1 ? "sits" : "sit"} in the same market.`
+      : "";
   return polishSystemCopy(
-    `${profile.town}, ${profile.province} is the market ${profile.brokerageName} works in.${reach} The pages that follow stay with what the brokerage itself publishes.`,
+    `${profile.town} is home ground for ${profile.brokerageName}.${reach}`,
   );
 }
 
 export function writeMarketCopy(profile: SystemEbookProfile): string {
   return polishSystemCopy(
-    `${profile.town} is the home market for ${profile.brokerageName}. The pin marks the office at ${profile.officeAddress}. The circle around that pin is about 80 km.`,
+    `${profile.town} is the home market for ${profile.brokerageName}. The office is at ${profile.officeAddress}. The map takes in about 80 km around that office.`,
   );
 }
 
@@ -340,25 +337,46 @@ export function writeListingBody(
   const baths = factMatch(listing.facts, /(\d+)\s+bath/i);
   const area = factMatch(listing.facts, /([\d,]+\s*sq\s*ft)/i);
   const kind = factMatch(listing.facts, /residential|land|condo|townhouse|commercial/i);
+  if (listing.story?.trim()) return polishSystemCopy(listing.story);
   const homeKind = kind ? kind.toLowerCase() : "home";
   const details = [beds, baths, area].filter(Boolean).map((item) => item!.toLowerCase());
-  const detail = details.length ? `, with ${details.join(", ")}` : "";
-  const lead = `${street} is a ${homeKind} in ${town}${detail}.`;
-  let reach = `${profile.brokerageName} is the brokerage offering it, in the ${profile.town} market.`;
+  const detail = details.length
+    ? ` Inside: ${details.join(", ")}.`
+    : ` The listing is filed as ${homeKind}.`;
+  const sameTown = town.toLowerCase() === profile.town.trim().toLowerCase();
+  let place = sameTown
+    ? `It is in ${town}, the same town as the office.`
+    : `${town} is one of the places ${profile.brokerageName} already works.`;
   if (
     listing.latitude != null &&
     listing.longitude != null &&
     profile.latitude != null &&
     profile.longitude != null
   ) {
-    const km = distanceKm(profile.latitude, profile.longitude, listing.latitude, listing.longitude);
-    reach = `The pin sits ${formatDistanceKm(km)} from the ${profile.brokerageName} office in ${profile.town}.`;
+    const km = distanceKm(
+      profile.latitude,
+      profile.longitude,
+      listing.latitude,
+      listing.longitude,
+    );
+    const away = formatDistanceKm(km);
+    if (sameTown && km < 8) {
+      place = `Errands stay close: the office in ${profile.town} is about ${away} away.`;
+    } else if (sameTown) {
+      place = `Still in ${town}, about ${away} from the office.`;
+    } else if (km < 30) {
+      place = `${town} is a short drive from ${profile.town}, about ${away} from the office.`;
+    } else {
+      place = `${town} is a smaller centre, about ${away} from ${profile.town}.`;
+    }
   }
-  const price =
-    listing.priceCad != null
-      ? `The figure on the brokerage website is ${formatCad(listing.priceCad)}.`
-      : `${town} is part of the area the office already works in.`;
-  return polishSystemCopy(`${lead} ${reach} ${price}`);
+  const openings = [
+    `${street} is a ${homeKind} in ${town}.`,
+    `On ${street}, this ${homeKind} is in ${town}.`,
+    `${town} — ${street} is a ${homeKind}.`,
+  ];
+  const opening = openings[street.length % openings.length]!;
+  return polishSystemCopy(`${opening}${detail} ${place}`);
 }
 
 function logoFor(profile: SystemEbookProfile): { url: string; found: boolean } {

@@ -1,4 +1,5 @@
 import sharp from "sharp";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { bookFrameSpreadImageUrl } from "../lib/talisbooks/viewer/spread-layout";
 import {
@@ -13,6 +14,7 @@ import {
   systemEbookLackedListingsMessage,
   talismapsStaticMapUrl,
   writeBrokerageAbout,
+  writeListingBody,
   writeMarketCopy,
   SYSTEM_EBOOK_LEAF_HEIGHT,
   SYSTEM_EBOOK_LEAF_WIDTH,
@@ -25,6 +27,7 @@ import {
   extractListingCandidates,
   isRejectedListingPhotoUrl,
 } from "../lib/talisbooks/system-ebook-sources";
+import { createSystemEbookPreview } from "../lib/talisbooks/system-ebook-previews";
 
 const profile: SystemEbookProfile = {
   fastCode: "dw01",
@@ -162,7 +165,8 @@ describe("system ebook copy", () => {
       "A 8 km drive and a Mapsite with FAST Code for this Talisbook™.",
     );
     const about = writeBrokerageAbout(profile);
-    expect(about).toMatch(/Talisbook™/);
+    expect(about).toMatch(/Dave Watt/);
+    expect(about).not.toMatch(/This Talisbook introduces|pages that follow|brokerage itself publishes/);
     expect(about).not.toMatch(/TODO|TBD|placeholder|realtor\.ca/i);
     expect(about).not.toMatch(/Mapsite™|FAST Code™/);
     expect(placeFromOfficeAddress(profile.officeAddress)).toEqual({
@@ -170,6 +174,20 @@ describe("system ebook copy", () => {
       province: "New Brunswick",
     });
     expect(writeMarketCopy(profile)).toMatch(/80 km/);
+    expect(writeMarketCopy(profile)).not.toMatch(/pin marks|circle around/i);
+    const listing = writeListingBody(profile.listings![0]!, profile);
+    expect(listing).not.toMatch(/figure on the brokerage|pin sits|\bCAD\b/i);
+    expect(listing.split(/[.!?]/).filter((sentence) => sentence.trim()).length).toBeGreaterThanOrEqual(2);
+    const svg = readFileSync("public/system-ebook-preview/dw01/logo-mark.svg", "utf8");
+    const logoWidth = Number(svg.match(/viewBox="0 0 ([\d.]+)/)?.[1]);
+    expect(logoWidth).toBeGreaterThan(320);
+    for (const slug of ["preview-dw01-system-ebook", "preview-km01-system-ebook"]) {
+      const book = createSystemEbookPreview(slug);
+      const copy = (book?.pages ?? []).map((page) => page.body || "").join(" ");
+      expect(copy).not.toMatch(
+        /figure on the brokerage|pin sits|This Talisbook introduces|pages that follow|brokerage itself publishes/i,
+      );
+    }
     expect(chooseListingVisual({ photoUrl: "https://broker.example/office.jpg" }).kind).toBe(
       "brokerage-photo",
     );
