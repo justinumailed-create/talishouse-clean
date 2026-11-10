@@ -33,7 +33,10 @@ function asLayout(value: unknown): TalisBooksViewerPageLayout | undefined {
     value === "custom_content" ||
     value === "global_content" ||
     value === "split_copy_left" ||
-    value === "split_copy_right"
+    value === "split_copy_right" ||
+    value === "listing" ||
+    value === "essay" ||
+    value === "contact"
   ) {
     return value;
   }
@@ -297,6 +300,7 @@ export async function getViewerBookBySlug(
               typeof content.signoff === "string" ? content.signoff : undefined,
             composedCover: content.composedCover === true,
             imageFit: content.imageFit === "contain" ? "contain" : undefined,
+            logoPlate: content.logoPlate === "none" ? "none" : content.logoPlate === "light" ? "light" : undefined,
           };
         })
       : buildFallbackPages({

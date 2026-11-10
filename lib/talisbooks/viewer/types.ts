@@ -24,7 +24,13 @@ export type TalisBooksViewerPageLayout =
    * right leaf is the designed text region (Intrinsic Value).
    */
   | "split_copy_left"
-  | "split_copy_right";
+  | "split_copy_right"
+  /** System Talisbook listing: photo or map, price, facts, write-up. */
+  | "listing"
+  /** System Talisbook about page: heading, body, and a facts panel. */
+  | "essay"
+  /** System Talisbook contact page: logo or monogram, no portrait placeholder. */
+  | "contact";
 
 export interface TalisBooksViewerPage {
   id: string;
@@ -106,6 +112,8 @@ export interface TalisBooksViewerPage {
   composedCover?: boolean;
   /** How a photo sits inside the fixed page frame. */
   imageFit?: "cover" | "contain";
+  /** Cover logo plate. Plain leaves a dark logo file on its own ground. */
+  logoPlate?: "light" | "none";
 }
 
 export interface TalisBooksViewerBook {

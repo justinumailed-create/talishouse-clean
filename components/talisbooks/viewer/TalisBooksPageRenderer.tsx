@@ -645,7 +645,12 @@ function ComposedCoverPageView({ page }: { page: TalisBooksViewerPage }) {
       <div className="talisbooks-viewer-page__composed-scrim">
         {logo ? (
           <img
-            className="talisbooks-viewer-page__composed-logo"
+            className={[
+              "talisbooks-viewer-page__composed-logo",
+              page.logoPlate === "none"
+                ? "talisbooks-viewer-page__composed-logo--plain"
+                : "talisbooks-viewer-page__composed-logo--plate",
+            ].join(" ")}
             src={logo}
             alt=""
             draggable={false}
@@ -747,7 +752,111 @@ function TebCoverPageView({ page }: { page: TalisBooksViewerPage }) {
   );
 }
 
+function ListingPageView({ page }: { page: TalisBooksViewerPage }) {
+  const photo = page.heroImageUrl?.trim() || "";
+  return (
+    <div className="talisbooks-viewer-page talisbooks-viewer-page--listing">
+      <div className="talisbooks-viewer-page__listing-visual">
+        {photo ? (
+          <img src={photo} alt="" draggable={false} />
+        ) : (
+          <div className="talisbooks-viewer-page__listing-visual-empty" />
+        )}
+      </div>
+      <div className="talisbooks-viewer-page__listing-copy">
+        {page.subtitle?.trim() ? (
+          <p className="talisbooks-viewer-page__listing-kicker">{page.subtitle}</p>
+        ) : null}
+        <h2 className="talisbooks-viewer-page__listing-address">{page.title}</h2>
+        {page.pricingLine?.trim() ? (
+          <p className="talisbooks-viewer-page__listing-price">{page.pricingLine}</p>
+        ) : null}
+        {page.signoff?.trim() ? (
+          <p className="talisbooks-viewer-page__listing-facts">{page.signoff}</p>
+        ) : null}
+        {page.body?.trim() ? (
+          <p className="talisbooks-viewer-page__listing-body">{page.body}</p>
+        ) : null}
+        <footer className="talisbooks-viewer-page__listing-footer">
+          <span>{page.brokerageName}</span>
+          <span>{[page.agentPhone, page.slogan].filter(Boolean).join(" · ")}</span>
+          <span className="talisbooks-viewer-page__listing-number">{page.pageNumber}</span>
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+function EssayPageView({ page }: { page: TalisBooksViewerPage }) {
+  const facts = [page.address, page.brokerageLine, page.agentPhone].filter(
+    (line): line is string => Boolean(line?.trim()),
+  );
+  const sentences = (page.body || "").split(/(?<=\.)\s+/).filter(Boolean);
+  const pull = sentences[0] || "";
+  const rest = sentences.slice(1).join(" ");
+  return (
+    <div className="talisbooks-viewer-page talisbooks-viewer-page--essay">
+      <p className="talisbooks-viewer-page__essay-kicker">{page.subtitle || "The brokerage"}</p>
+      <h2 className="talisbooks-viewer-page__essay-title">{page.title}</h2>
+      {pull ? <p className="talisbooks-viewer-page__essay-pull">{pull}</p> : null}
+      {rest ? <p className="talisbooks-viewer-page__essay-body">{rest}</p> : null}
+      {facts.length > 0 ? (
+        <ul className="talisbooks-viewer-page__essay-facts">
+          {facts.map((fact) => (
+            <li key={fact}>{fact}</li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+function ContactPageView({ page }: { page: TalisBooksViewerPage }) {
+  const logo = page.brokerageLogoUrl?.trim() || "";
+  const monogram = (page.brokerageName || page.title || "")
+    .split(/\s+/)
+    .filter((word) => word && !/^(the|of|and|realty|real|estate|group|inc)$/i.test(word))
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+  return (
+    <div className="talisbooks-viewer-page talisbooks-viewer-page--contact">
+      <div className="talisbooks-viewer-page__contact-mark">
+        {logo ? (
+          <img src={logo} alt="" draggable={false} />
+        ) : (
+          <span>{monogram || "RE"}</span>
+        )}
+      </div>
+      <p className="talisbooks-viewer-page__contact-brokerage">{page.brokerageName}</p>
+      <h2 className="talisbooks-viewer-page__contact-name">{page.agentName || page.title}</h2>
+      {page.agentTitle?.trim() ? (
+        <p className="talisbooks-viewer-page__contact-role">{page.agentTitle}</p>
+      ) : null}
+      {page.agentPhone?.trim() ? (
+        <p className="talisbooks-viewer-page__contact-line">{page.agentPhone}</p>
+      ) : null}
+      {page.address?.trim() ? (
+        <p className="talisbooks-viewer-page__contact-line">{page.address}</p>
+      ) : null}
+      {page.slogan?.trim() ? (
+        <p className="talisbooks-viewer-page__contact-site">{page.slogan}</p>
+      ) : null}
+    </div>
+  );
+}
+
 export default function TalisBooksPageRenderer({ page }: TalisBooksPageRendererProps) {
+  if (page.layout === "listing") {
+    return <ListingPageView page={page} />;
+  }
+  if (page.layout === "essay") {
+    return <EssayPageView page={page} />;
+  }
+  if (page.layout === "contact") {
+    return <ContactPageView page={page} />;
+  }
   if (page.layout === "split_copy_left") {
     return <SplitCopyLeftView page={page} />;
   }

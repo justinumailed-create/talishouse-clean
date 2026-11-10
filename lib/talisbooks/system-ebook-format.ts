@@ -50,8 +50,14 @@ export type SystemEbookListing = {
   facts: string[];
   /** A photo from the brokerage site that is not watermarked. */
   photoUrl?: string | null;
+  /** Static Talismaps™ image when the listing has no clean photo. */
+  mapImageUrl?: string | null;
   photoFit?: "cover" | "contain";
+  latitude?: number | null;
+  longitude?: number | null;
 };
+
+export type ListingVisualKind = "brokerage-photo" | "talismaps" | "town-photo" | "none";
 
 export type SystemEbookProfile = {
   fastCode: string;
@@ -72,6 +78,14 @@ export type SystemEbookProfile = {
   /** Clean area photograph. Town-photo books pass their stored photos here. */
   areaPhotoUrl?: string | null;
   areaPhotoFit?: "cover" | "contain";
+  /** Talismaps™ still of the town, used when the site has no clean cover photo. */
+  coverMapUrl?: string | null;
+  /** Closer Talismaps™ still for the area leaf. */
+  areaMapUrl?: string | null;
+  /** Office pin with about an 80 km radius. */
+  marketMapUrl?: string | null;
+  /** Light plate behind a dark logo. None leaves a dark logo file as-is. */
+  logoPlate?: "light" | "none";
   latitude?: number | null;
   longitude?: number | null;
   /** Kept exactly, including the CC BY wording. */
@@ -207,29 +221,21 @@ export function writeBrokerageAbout(profile: SystemEbookProfile): string {
   const name = profile.brokerageName.trim();
   const town = profile.town.trim();
   const province = profile.province.trim();
-  const office = profile.officeAddress.trim();
   const broker = profile.brokerName.trim();
   const areas = (profile.areas ?? []).filter((area) => area && area.toLowerCase() !== town.toLowerCase());
   const where = province ? `${town}, ${province}` : town;
-  const sentences = [
-    `${name} is a real estate brokerage in ${where}.`,
-  ];
+  const sentences = [`${name} is a real estate brokerage in ${where}.`];
   if (profile.foundedYear && profile.foundedYear >= 1900 && profile.foundedYear <= 2100) {
     sentences.push(`The office has been part of the ${town} market since ${profile.foundedYear}.`);
   }
-  if (broker && office) {
-    sentences.push(`${broker} works from ${office}.`);
-  } else if (office) {
-    sentences.push(`The office is at ${office}.`);
+  if (broker) {
+    sentences.push(`${broker} leads the office.`);
   }
   if (areas.length > 0) {
-    sentences.push(`Listings on the brokerage website also reach ${joinList(areas.slice(0, 3))}.`);
-  }
-  if (profile.phone?.trim()) {
-    sentences.push(`The office number published on the website is ${profile.phone.trim()}.`);
+    sentences.push(`The work also reaches ${joinList(areas.slice(0, 3))}.`);
   }
   sentences.push(
-    `This Talisbook introduces the brokerage, the market around ${town}, and the homes the office is offering on its own website.`,
+    `This Talisbook introduces the brokerage, the market around ${town}, and the homes on the brokerage website.`,
   );
   return polishSystemCopy(sentences.join(" "));
 }
@@ -247,19 +253,112 @@ export function writeAreaCopy(profile: SystemEbookProfile): string {
 
 export function writeMarketCopy(profile: SystemEbookProfile): string {
   return polishSystemCopy(
-    `${profile.town} is the home market for ${profile.brokerageName}. The pin marks the office at ${profile.officeAddress}.`,
+    `${profile.town} is the home market for ${profile.brokerageName}. The pin marks the office at ${profile.officeAddress}. The circle around that pin is about 80 km.`,
   );
 }
 
-export function writeListingBody(listing: SystemEbookListing, brokerageName: string): string {
-  const place = `${listing.street.trim()}, ${listing.town.trim()}`;
-  const bits: string[] = [];
-  if (listing.priceCad != null) bits.push(formatCad(listing.priceCad));
-  const facts = listing.facts.map((fact) => fact.trim()).filter(Boolean);
-  if (facts.length) bits.push(facts.join(", "));
-  const lead = bits.join(". ");
-  const sentence = `${brokerageName} is offering ${place} on its own website.`;
-  return polishSystemCopy([lead, sentence].filter(Boolean).join(". ").replace(/\.\./g, "."));
+export function distanceKm(
+  fromLat: number,
+  fromLng: number,
+  toLat: number,
+  toLng: number,
+): number {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const dLat = toRad(toLat - fromLat);
+  const dLng = toRad(toLng - fromLng);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(fromLat)) * Math.cos(toRad(toLat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+export function formatDistanceKm(km: number): string {
+  if (!Number.isFinite(km) || km < 0) return "";
+  if (km < 1) return "under 1 km";
+  return `${Math.round(km)} km`;
+}
+
+function factMatch(facts: string[], pattern: RegExp): string | null {
+  const found = facts.find((fact) => pattern.test(fact));
+  return found?.trim() || null;
+}
+
+export function listingFactsLine(facts: string[]): string {
+  const beds = factMatch(facts, /bed/i);
+  const baths = factMatch(facts, /bath/i);
+  const area = factMatch(facts, /sq/i);
+  const kind = factMatch(facts, /residential|land|condo|townhouse|commercial|house|single/i);
+  return [beds, baths, area, kind].filter(Boolean).join("  ·  ");
+}
+
+export function chooseListingVisual(input: {
+  photoUrl?: string | null;
+  mapImageUrl?: string | null;
+  townPhotoUrl?: string | null;
+}): { kind: ListingVisualKind; url: string | null } {
+  const photo = input.photoUrl?.trim() || "";
+  if (photo) return { kind: "brokerage-photo", url: photo };
+  const map = input.mapImageUrl?.trim() || "";
+  if (map) return { kind: "talismaps", url: map };
+  const town = input.townPhotoUrl?.trim() || "";
+  if (town) return { kind: "town-photo", url: town };
+  return { kind: "none", url: null };
+}
+
+/**
+ * Talismaps™ static image. MapTiler is the basemap vendor for Talismaps™.
+ * Returns null when the key is still the placeholder, so a caller can use a
+ * prepared still instead of a broken tile request.
+ */
+export function talismapsStaticMapUrl(input: {
+  latitude: number;
+  longitude: number;
+  zoom: number;
+  width: number;
+  height: number;
+  apiKey?: string | null;
+}): string | null {
+  const key = input.apiKey?.trim() || "";
+  if (!key || key === "YOUR_MAPTILER_API_KEY" || key.length < 8) return null;
+  const zoom = Math.max(3, Math.min(16, Math.round(input.zoom)));
+  const lon = input.longitude.toFixed(5);
+  const lat = input.latitude.toFixed(5);
+  return (
+    `https://api.maptiler.com/maps/streets-v2/static/${lon},${lat},${zoom}/` +
+    `${input.width}x${input.height}.png?key=${encodeURIComponent(key)}` +
+    `&markers=${lon},${lat}`
+  );
+}
+
+export function writeListingBody(
+  listing: SystemEbookListing,
+  profile: SystemEbookProfile,
+): string {
+  const street = listing.street.trim();
+  const town = listing.town.trim();
+  const beds = factMatch(listing.facts, /(\d+)\s+bed/i);
+  const baths = factMatch(listing.facts, /(\d+)\s+bath/i);
+  const area = factMatch(listing.facts, /([\d,]+\s*sq\s*ft)/i);
+  const kind = factMatch(listing.facts, /residential|land|condo|townhouse|commercial/i);
+  const homeKind = kind ? kind.toLowerCase() : "home";
+  const details = [beds, baths, area].filter(Boolean).map((item) => item!.toLowerCase());
+  const detail = details.length ? `, with ${details.join(", ")}` : "";
+  const lead = `${street} is a ${homeKind} in ${town}${detail}.`;
+  let reach = `${profile.brokerageName} is the brokerage offering it, in the ${profile.town} market.`;
+  if (
+    listing.latitude != null &&
+    listing.longitude != null &&
+    profile.latitude != null &&
+    profile.longitude != null
+  ) {
+    const km = distanceKm(profile.latitude, profile.longitude, listing.latitude, listing.longitude);
+    reach = `The pin sits ${formatDistanceKm(km)} from the ${profile.brokerageName} office in ${profile.town}.`;
+  }
+  const price =
+    listing.priceCad != null
+      ? `The figure on the brokerage website is ${formatCad(listing.priceCad)}.`
+      : `${town} is part of the area the office already works in.`;
+  return polishSystemCopy(`${lead} ${reach} ${price}`);
 }
 
 function logoFor(profile: SystemEbookProfile): { url: string; found: boolean } {
@@ -298,7 +397,10 @@ function pageContent(page: TalisBooksViewerPage): Record<string, unknown> {
   copy("mapZoom");
   copy("composedCover");
   copy("imageFit");
+  copy("logoPlate");
   copy("slogan");
+  copy("pricingLine");
+  copy("signoff");
   return content;
 }
 
@@ -322,12 +424,19 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
   const lackedListings = listings.length === 0;
   const logo = logoFor(profile);
   const host = websiteHost(profile.website);
-  const officeLine = [profile.officeAddress.trim(), host].filter(Boolean).join(" · ");
-  const areaPhoto =
-    profile.areaPhotoUrl?.trim() ||
-    profile.townPhotoUrls?.find((url) => url.trim()) ||
-    "";
+  const townPhotos = (profile.townPhotoUrls ?? []).map((url) => url.trim()).filter(Boolean);
+  const areaPhoto = profile.areaPhotoUrl?.trim() || townPhotos[0] || "";
+  const coverHero = areaPhoto || profile.coverMapUrl?.trim() || profile.marketMapUrl?.trim() || "";
+  const areaVisual = profile.areaMapUrl?.trim() || "";
+  const marketVisual = profile.marketMapUrl?.trim() || areaVisual || "";
+  const townsServed = [profile.town, ...(profile.areas ?? [])]
+    .map((town) => town.trim())
+    .filter(Boolean)
+    .filter((town, index, all) => all.findIndex((item) => item.toLowerCase() === town.toLowerCase()) === index)
+    .slice(0, 4)
+    .join(", ");
   const pages: TalisBooksViewerPage[] = [];
+  const plate = profile.logoPlate ?? "light";
 
   pushPage(pages, {
     slug: "front-cover",
@@ -337,8 +446,9 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     subtitle: `${profile.town}, ${profile.province}`,
     brokerageName: profile.brokerageName,
     brokerageLogoUrl: logo.url,
-    heroImageUrl: areaPhoto || undefined,
+    heroImageUrl: coverHero || undefined,
     imageFit: "cover",
+    logoPlate: plate,
     composedCover: true,
     clientEditable: false,
   });
@@ -346,11 +456,13 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
   pushPage(pages, {
     slug: "about",
     pageRole: "property_content",
-    layout: "quote",
+    layout: "essay",
     title: profile.brokerageName,
+    subtitle: profile.town,
     body: writeBrokerageAbout(profile),
-    brokerageName: profile.brokerageName,
-    brokerageLogoUrl: logo.url,
+    address: profile.officeAddress,
+    brokerageLine: townsServed ? `Towns: ${townsServed}` : undefined,
+    agentPhone: profile.phone?.trim() || undefined,
     clientEditable: false,
   });
 
@@ -366,31 +478,57 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
       captionAlign: "left",
       clientEditable: false,
     });
+  } else if (areaVisual) {
+    pushPage(pages, {
+      slug: "area-map",
+      pageRole: "property_content",
+      layout: "maps",
+      title: profile.town,
+      address: profile.officeAddress,
+      body: writeAreaCopy(profile),
+      heroImageUrl: areaVisual,
+      latitude: profile.latitude ?? undefined,
+      longitude: profile.longitude ?? undefined,
+      clientEditable: false,
+    });
   } else {
     pushPage(pages, {
       slug: "area",
       pageRole: "property_content",
-      layout: "quote",
+      layout: "essay",
       title: profile.town,
+      subtitle: profile.province,
       body: writeAreaCopy(profile),
+      address: profile.officeAddress,
       clientEditable: false,
     });
   }
 
   listings.forEach((listing, index) => {
-    const photo = listing.photoUrl?.trim() || "";
+    const townPhoto = townPhotos[index % Math.max(townPhotos.length, 1)] || "";
+    const visual = chooseListingVisual({
+      photoUrl: listing.photoUrl,
+      mapImageUrl: listing.mapImageUrl,
+      townPhotoUrl: listing.photoUrl || listing.mapImageUrl ? null : townPhoto,
+    });
     const address = `${listing.street.trim()}, ${listing.town.trim()}`;
     pushPage(pages, {
       slug: `listing-${String(index + 1).padStart(2, "0")}`,
       pageRole: "property_content",
-      layout: photo ? "caption" : "quote",
-      title: address,
-      subtitle: listing.priceCad != null ? formatCad(listing.priceCad) : undefined,
-      body: writeListingBody(listing, profile.brokerageName),
-      heroImageUrl: photo || undefined,
-      imageFit: photo ? listing.photoFit ?? "cover" : undefined,
+      layout: "listing",
+      title: listing.street.trim(),
+      subtitle: listing.town.trim(),
+      body: writeListingBody(listing, profile),
+      heroImageUrl: visual.url || undefined,
+      imageFit: "cover",
       address,
       pricingLine: listing.priceCad != null ? formatCad(listing.priceCad) : undefined,
+      signoff: listingFactsLine(listing.facts),
+      brokerageName: profile.brokerageName,
+      agentPhone: profile.phone?.trim() || undefined,
+      slogan: host,
+      latitude: listing.latitude ?? undefined,
+      longitude: listing.longitude ?? undefined,
       clientEditable: false,
     });
   });
@@ -402,26 +540,25 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     title: profile.town,
     address: profile.officeAddress,
     body: writeMarketCopy(profile),
+    heroImageUrl: marketVisual || undefined,
     latitude: profile.latitude ?? undefined,
     longitude: profile.longitude ?? undefined,
-    mapZoom: 13,
+    mapZoom: 9,
     clientEditable: false,
   });
 
   pushPage(pages, {
     slug: "contact",
     pageRole: "agent_brokerage",
-    layout: "agent_summary",
+    layout: "contact",
     title: profile.brokerName || profile.brokerageName,
     agentName: profile.brokerName || profile.brokerageName,
     agentTitle: "Broker",
     agentPhone: profile.phone?.trim() || undefined,
-    agentEmail: profile.email?.trim() || undefined,
     brokerageName: profile.brokerageName,
     brokerageLogoUrl: logo.url,
-    brokerageLine: officeLine,
     address: profile.officeAddress,
-    slogan: [profile.officeAddress.trim(), host].filter(Boolean).join(" · "),
+    slogan: host,
     clientEditable: false,
   });
 
@@ -449,8 +586,9 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     body: credit || polishSystemCopy("A Talisbook on Tsplits."),
     brokerageName: profile.brokerageName,
     brokerageLogoUrl: logo.url,
-    heroImageUrl: areaPhoto || undefined,
+    heroImageUrl: coverHero || undefined,
     imageFit: "cover",
+    logoPlate: plate,
     composedCover: true,
     clientEditable: false,
   });

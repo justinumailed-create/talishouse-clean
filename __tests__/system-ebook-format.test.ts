@@ -4,13 +4,16 @@ import { bookFrameSpreadImageUrl } from "../lib/talisbooks/viewer/spread-layout"
 import {
   brokerageInitials,
   buildSystemEbook,
+  chooseListingVisual,
   formatCad,
   milesToKilometres,
   parseCadAmount,
   placeFromOfficeAddress,
   polishSystemCopy,
   systemEbookLackedListingsMessage,
+  talismapsStaticMapUrl,
   writeBrokerageAbout,
+  writeMarketCopy,
   SYSTEM_EBOOK_LEAF_HEIGHT,
   SYSTEM_EBOOK_LEAF_WIDTH,
   SYSTEM_EBOOK_SPREAD_ASPECT,
@@ -78,8 +81,9 @@ describe("standard system Talisbook", () => {
         true,
       ),
     ).toBeNull();
-    const listing = document.pages.find((page) => page.layout === "caption");
+    const listing = document.pages.find((page) => page.layout === "listing");
     expect(listing?.imageFit).toBe("cover");
+    expect(listing?.pricingLine).toBe("CAD 419,900");
     const cover = document.pages[0]!;
     expect(cover.composedCover).toBe(true);
     expect(cover.imageFit).toBe("cover");
@@ -94,16 +98,17 @@ describe("standard system Talisbook", () => {
       brokerageName: "The Right Choice Realty",
       brokerageLogoUrl: "https://therightchoicerealty.ca/logo.svg",
     });
-    expect(document.pages.some((page) => page.layout === "quote" && /Dave Watt/.test(page.body || ""))).toBe(
+    expect(document.pages.some((page) => page.layout === "essay" && /Dave Watt/.test(page.body || ""))).toBe(
       true,
     );
-    expect(document.pages.some((page) => page.layout === "caption" && page.title.includes("Highland"))).toBe(
+    expect(document.pages.some((page) => page.layout === "listing" && page.title.includes("Highland"))).toBe(
       true,
     );
     expect(document.pages.some((page) => page.layout === "maps")).toBe(true);
-    expect(document.pages.some((page) => page.layout === "agent_summary" && page.agentName === "Dave Watt")).toBe(
+    expect(document.pages.some((page) => page.layout === "contact" && page.agentName === "Dave Watt")).toBe(
       true,
     );
+    expect(document.pages.some((page) => page.agentPhotoUrl)).toBe(false);
     const back = document.pages[document.pages.length - 1]!;
     expect(back.layout).toBe("cover");
     expect(back.composedCover).toBe(true);
@@ -119,7 +124,7 @@ describe("standard system Talisbook", () => {
     expect(document.lackedListings).toBe(true);
     expect(document.listingCount).toBe(0);
     expect(document.pages.some((page) => page.layout === "maps")).toBe(true);
-    expect(document.pages.some((page) => page.layout === "agent_summary")).toBe(true);
+    expect(document.pages.some((page) => page.layout === "contact")).toBe(true);
     expect(document.pages[0]?.layout).toBe("cover");
     expect(document.pages.at(-1)?.layout).toBe("cover");
     expect(systemEbookLackedListingsMessage("DW01")).toBe(
@@ -164,6 +169,32 @@ describe("system ebook copy", () => {
       town: "Fredericton",
       province: "New Brunswick",
     });
+    expect(writeMarketCopy(profile)).toMatch(/80 km/);
+    expect(chooseListingVisual({ photoUrl: "https://broker.example/office.jpg" }).kind).toBe(
+      "brokerage-photo",
+    );
+    expect(chooseListingVisual({ mapImageUrl: "/maps/listing.png" }).kind).toBe("talismaps");
+    expect(chooseListingVisual({ townPhotoUrl: "/town-photos/kk01/00.jpg" }).kind).toBe(
+      "town-photo",
+    );
+    expect(
+      talismapsStaticMapUrl({
+        latitude: 45.97,
+        longitude: -66.64,
+        zoom: 12,
+        width: 960,
+        height: 640,
+        apiKey: "test-maptiler-key",
+      }),
+    ).toContain("api.maptiler.com/maps/streets-v2/static/");
+    expect(talismapsStaticMapUrl({
+      latitude: 45.97,
+      longitude: -66.64,
+      zoom: 12,
+      width: 960,
+      height: 640,
+      apiKey: "YOUR_MAPTILER_API_KEY",
+    })).toBeNull();
   });
 });
 
