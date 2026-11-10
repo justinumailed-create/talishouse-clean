@@ -300,7 +300,10 @@ export async function getViewerBookBySlug(
               typeof content.signoff === "string" ? content.signoff : undefined,
             composedCover: content.composedCover === true,
             imageFit: content.imageFit === "contain" ? "contain" : undefined,
-            logoPlate: content.logoPlate === "none" ? "none" : content.logoPlate === "light" ? "light" : undefined,
+            logoPlate:
+              content.logoPlate === "none" || content.logoPlate === "light" || content.logoPlate === "dark"
+                ? content.logoPlate
+                : undefined,
           };
         })
       : buildFallbackPages({

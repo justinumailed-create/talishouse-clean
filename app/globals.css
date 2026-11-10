@@ -3513,6 +3513,12 @@ body.mapsite-gallery-open [data-paypal-button] {
   overflow: visible;
 }
 
+.talisbooks-viewer-page__contact-mark--dark {
+  background: #1c1917;
+  padding: 0.7rem 0.9rem;
+  border-radius: 0.25rem;
+}
+
 .talisbooks-viewer-page__contact-mark img {
   width: 100%;
   height: auto;
@@ -3832,6 +3838,13 @@ body.mapsite-gallery-open [data-paypal-button] {
 
 .talisbooks-viewer-page__composed-logo--plate {
   background: #ffffff;
+  padding: 0.55rem 0.85rem;
+  border-radius: 0.2rem;
+  box-sizing: border-box;
+}
+
+.talisbooks-viewer-page__composed-logo--dark {
+  background: #1c1917;
   padding: 0.55rem 0.85rem;
   border-radius: 0.2rem;
   box-sizing: border-box;

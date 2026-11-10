@@ -112,8 +112,8 @@ export interface TalisBooksViewerPage {
   composedCover?: boolean;
   /** How a photo sits inside the fixed page frame. */
   imageFit?: "cover" | "contain";
-  /** Cover logo plate. Plain leaves a dark logo file on its own ground. */
-  logoPlate?: "light" | "none";
+  /** Cover logo plate. Dark keeps a white or transparent logo readable. */
+  logoPlate?: "light" | "dark" | "none";
 }
 
 export interface TalisBooksViewerBook {

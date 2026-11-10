@@ -16,7 +16,7 @@ import {
 } from "@/lib/talisbooks/blocked-listing-sources";
 import {
   distanceKm,
-  formatCanadianPhone,
+  preferUsablePhone,
   isWithinOfficeRadius,
   parseCadAmount,
   type SystemEbookListing,
@@ -37,6 +37,90 @@ export function isPlaceholderBrandImage(url: string | null | undefined): boolean
   return /placeholder|custom-banner|banner-placeholder|spacer|blank|no-image|via\.placeholder|trans-256/i.test(
     url || "",
   );
+}
+
+function colorIsLight(value: string): boolean {
+  const color = value.trim().toLowerCase();
+  if (color === "white" || color === "#fff" || color === "#ffffff") return true;
+  const hex = color.startsWith("#") ? color.slice(1) : "";
+  const expanded = hex.length === 3 ? hex.split("").map((part) => part + part).join("") : hex;
+  if (!/^[0-9a-f]{6}$/.test(expanded)) return false;
+  const red = Number.parseInt(expanded.slice(0, 2), 16);
+  const green = Number.parseInt(expanded.slice(2, 4), 16);
+  const blue = Number.parseInt(expanded.slice(4, 6), 16);
+  return (red + green + blue) / 3 >= 200;
+}
+
+function svgNeedsDarkPlate(svg: string): boolean {
+  const fills = [...svg.matchAll(/fill\s*[:=]\s*["']?([^"'\s;>]+)/gi)]
+    .map((match) => match[1]!.toLowerCase())
+    .filter((fill) => fill !== "none" && fill !== "transparent" && fill !== "currentcolor");
+  if (fills.length === 0) return true;
+  const light = fills.filter((fill) => colorIsLight(fill)).length;
+  return light > 0 && light >= fills.length / 2;
+}
+
+async function readLogoBuffer(url: string): Promise<Buffer | null> {
+  if (url.startsWith("data:")) return null;
+  if (url.startsWith("/")) {
+    try {
+      return readFileSync(join(process.cwd(), "public", url.replace(/^\//, "")));
+    } catch {
+      return null;
+    }
+  }
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 8_000);
+  try {
+    const response = await fetch(url, {
+      signal: ctrl.signal,
+      redirect: "follow",
+      headers: { "user-agent": "Mozilla/5.0 (compatible; TalisprosEbookImages/1.0)", accept: "image/*,*/*" },
+    });
+    if (!response.ok) return null;
+    return Buffer.from(await response.arrayBuffer());
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** A white or transparent mark disappears on a white panel. Those logos need a dark plate. */
+export async function bufferNeedsDarkPlate(buffer: Buffer): Promise<boolean> {
+  const head = buffer.subarray(0, 180).toString("utf8").trim().toLowerCase();
+  if (head.startsWith("<svg") || head.startsWith("<?xml") || head.includes("<svg")) {
+    return svgNeedsDarkPlate(buffer.toString("utf8"));
+  }
+  try {
+    const { data, info } = await sharp(buffer, { failOn: "none" })
+      .ensureAlpha()
+      .resize({ width: 64, withoutEnlargement: true })
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    let opaque = 0;
+    let light = 0;
+    const channels = info.channels;
+    for (let index = 0; index < data.length; index += channels) {
+      const alpha = channels > 3 ? data[index + 3]! : 255;
+      if (alpha < 24) continue;
+      opaque += 1;
+      const lum = (data[index]! + data[index + 1]! + data[index + 2]!) / 3;
+      if (lum >= 200) light += 1;
+    }
+    if (opaque < 8) return true;
+    return light / opaque >= 0.62;
+  } catch {
+    return false;
+  }
+}
+
+export async function logoNeedsDarkPlate(url: string | null | undefined): Promise<boolean> {
+  const raw = url?.trim() || "";
+  if (!raw || raw.startsWith("data:")) return false;
+  const buffer = await readLogoBuffer(raw);
+  if (!buffer || buffer.length < 40) return false;
+  return bufferNeedsDarkPlate(buffer);
 }
 
 /**
@@ -279,6 +363,14 @@ function factsFrom(text: string): string[] {
   if (bedCount >= 1 && bedCount <= 12) facts.push(`${bedCount} bedrooms`);
   if (bathCount >= 1 && bathCount <= 12) facts.push(`${bathCount} bathrooms`);
   if (area) facts.push(`${area[1]!.replace(/\s/g, "")} sq ft`);
+  const lot =
+    text.match(/\b([\d.]+)\s*(?:acres?|hectares?)\b/i) ||
+    text.match(/\blot(?:\s+size)?\s*:?\s*([\d,.]+)\s*(sq\.?\s*ft|acres?|hectares?)\b/i);
+  if (lot) {
+    const amount = (lot[1] || "").replace(/\s/g, "");
+    const unit = (lot[2] || (/\bhectares?\b/i.test(lot[0]!) ? "hectares" : "acres")).toLowerCase();
+    facts.push(`${amount} ${unit.includes("sq") ? "sq ft lot" : unit}`);
+  }
   if (kind) facts.push(kind[1]!);
   return facts;
 }
@@ -736,9 +828,14 @@ async function cornerTextHasBoardMark(buffer: Buffer): Promise<boolean> {
       const png = await sharp(ink, { raw: { width: info.width, height: info.height, channels: 1 } }).png().toBuffer();
       writeFileSync(file, png);
       const text = await new Promise<string>((resolve) => {
-        execFile("tesseract", [file, "stdout", "--psm", "6"], { encoding: "utf8" }, (error, stdout) => {
-          resolve(error ? "" : String(stdout || ""));
-        });
+        execFile(
+          "tesseract",
+          [file, "stdout", "--psm", "6"],
+          { encoding: "utf8", timeout: 8_000 },
+          (error, stdout) => {
+            resolve(error ? "" : String(stdout || ""));
+          },
+        );
       });
       if (boardMarkInOcr(text)) return true;
     }
@@ -984,7 +1081,7 @@ export async function enrichProfileFromWebsite(
   }
   const extractedListingCount = nearOffice.length;
   const judged = await dropWatermarkedListingPhotos(nearOffice.slice(0, 24));
-  const phone = formatCanadianPhone(profile.phone?.trim() || extractPhone(page.html) || "");
+  const phone = preferUsablePhone(profile.phone, extractPhone(page.html));
   const chosen = profile.listings?.length ? profile.listings : judged.kept;
   return {
     ...profile,

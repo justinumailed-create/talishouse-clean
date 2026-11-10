@@ -649,7 +649,9 @@ function ComposedCoverPageView({ page }: { page: TalisBooksViewerPage }) {
               "talisbooks-viewer-page__composed-logo",
               page.logoPlate === "none"
                 ? "talisbooks-viewer-page__composed-logo--plain"
-                : "talisbooks-viewer-page__composed-logo--plate",
+                : page.logoPlate === "dark"
+                  ? "talisbooks-viewer-page__composed-logo--dark"
+                  : "talisbooks-viewer-page__composed-logo--plate",
             ].join(" ")}
             src={logo}
             alt=""
@@ -822,7 +824,14 @@ function ContactPageView({ page }: { page: TalisBooksViewerPage }) {
     .toUpperCase();
   return (
     <div className="talisbooks-viewer-page talisbooks-viewer-page--contact">
-      <div className="talisbooks-viewer-page__contact-mark">
+      <div
+        className={[
+          "talisbooks-viewer-page__contact-mark",
+          page.logoPlate === "dark" ? "talisbooks-viewer-page__contact-mark--dark" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
         {logo ? (
           <img src={logo} alt="" draggable={false} />
         ) : (
