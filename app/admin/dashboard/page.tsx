@@ -11,6 +11,7 @@ import { getAgentPresence, listAgentNotes } from "@/lib/agent-collab-server";
 import { listAgents } from "@/lib/agent-admins";
 import { listManualPayments } from "@/lib/manual-payments";
 import FastCodesTracker from "@/components/admin/FastCodesTracker";
+import LeadsToApproveSection from "@/components/admin/LeadsToApproveSection";
 import TalisbotMessagesSection from "@/components/admin/TalisbotMessagesSection";
 import { getLocale } from "@/lib/i18n/server";
 
@@ -82,14 +83,22 @@ export default async function AdminDashboardPage({
 
       {canAgents ? (
         <>
+          <LeadsToApproveSection locale={locale} query={query} />
           <TalisbotMessagesSection
             locale={locale}
             talisbotDay={one(query.talisbotDay)}
             preview={one(query.talisbotPreview)}
+            query={query}
           />
           <FastCodesTracker
             locale={locale}
             params={{ day: one(query.day), agent: one(query.agent), stage: one(query.stage), code: one(query.code) }}
+            preserve={Object.fromEntries(
+              ["leadCountry", "leadStatus", "leadFrom", "leadTo", "leadComplete", "leadPage", "leadRun", "leadAdded", "talisbotDay"].flatMap((key) => {
+                const value = one(query[key]);
+                return value ? [[key, value]] : [];
+              }),
+            )}
           />
         </>
       ) : null}
