@@ -77,6 +77,8 @@ export type SystemEbookProfile = {
   /** Other towns the office actually works in. */
   areas?: string[];
   listings?: SystemEbookListing[];
+  /** How many own listings the site crawl found, before any approved-preview overlay. */
+  extractedListingCount?: number;
   /** Clean area photograph. Town-photo books pass their stored photos here. */
   areaPhotoUrl?: string | null;
   areaPhotoFit?: "cover" | "contain";
@@ -112,6 +114,9 @@ export type SystemEbookDocument = {
   lackedListings: boolean;
   logoFound: boolean;
   listingCount: number;
+  /** Listings read from the brokerage site. The book may instead use an approved preview. */
+  extractedListingCount: number;
+  usedApprovedPreview: boolean;
   metadata: Record<string, unknown>;
   pages: TalisBooksViewerPage[];
   pageRows: SystemEbookPageRow[];
@@ -660,6 +665,8 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     lackedListings,
     logoFound: logo.found,
     listingCount: listings.length,
+    extractedListingCount: profile.extractedListingCount ?? listings.length,
+    usedApprovedPreview: false,
     metadata,
     pages,
     pageRows,

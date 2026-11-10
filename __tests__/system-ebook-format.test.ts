@@ -24,9 +24,11 @@ import {
 import {
   bufferShowsCornerWatermark,
   extractBrokerageLogo,
+  dropWatermarkedListingPhotos,
   extractListingCandidates,
   isRejectedListingPhotoUrl,
 } from "../lib/talisbooks/system-ebook-sources";
+import { composeStandardSystemEbook } from "../lib/talisbooks/system-ebook-compose";
 import { createSystemEbookPreview } from "../lib/talisbooks/system-ebook-previews";
 
 const profile: SystemEbookProfile = {
@@ -239,6 +241,67 @@ describe("brokerage site reading", () => {
     expect(isRejectedListingPhotoUrl("https://cdn.realtor.ca/a.jpg")).toBe(true);
     expect(isRejectedListingPhotoUrl("https://harbour.example/images/glasshouse/hero.webp")).toBe(true);
     expect(isRejectedListingPhotoUrl("https://harbour.example/realtypress/images/listing/1.jpg")).toBe(true);
+  });
+
+  it("keeps a listing when the only photo is watermarked, and reads structured cards", async () => {
+    const kept = await dropWatermarkedListingPhotos([
+      {
+        street: "242 Highland Avenue",
+        town: "Fredericton",
+        priceCad: 419900,
+        facts: ["6 bedrooms"],
+        photoUrl: "https://cdn.realtor.ca/highland.jpg",
+      },
+    ]);
+    expect(kept).toHaveLength(1);
+    expect(kept[0]?.photoUrl).toBeNull();
+
+    const myRealPage = `
+      <span class="alt-addr">241 W 30th Street </span>
+      <span class="alt-city">Battleford</span>
+      <p>Residential $69,900 Bedrooms: 2 Bathrooms: 1 Floor Area: 1,526 sq. ft.</p>
+    `;
+    const office = extractListingCandidates(myRealPage, "https://realestatethebattlefords.ca/officelistings.html", {
+      brokerageName: "Dream Realty SK",
+      officeTown: "North Battleford",
+    });
+    expect(office.map((listing) => `${listing.street}|${listing.town}`)).toEqual([
+      "241 W 30th Street|Battleford",
+    ]);
+    expect(office[0]?.priceCad).toBe(69900);
+    expect(office[0]?.facts).toContain("2 bedrooms");
+
+    const slider = `
+      <span class="rcr-slider__title">185-33 Reynolds Street, Fredericton, New Brunswick</span>
+      <span class="rcr-slider__excerpt">Listed for $234,900 two bedrooms</span>
+      <span class="rcr-slider__title">764 Route 10, Noonan</span>
+    `;
+    const rightChoice = extractListingCandidates(slider, "https://therightchoicerealty.ca/listings/");
+    expect(rightChoice.map((listing) => listing.street)).toEqual([
+      "185 Reynolds Street, Unit 33",
+      "764 Route 10",
+    ]);
+    expect(rightChoice[0]?.town).toBe("Fredericton");
+    expect(rightChoice[0]?.priceCad).toBe(234900);
+  });
+
+  it("uses the approved dw01 preview when the crawl has not supplied listings", async () => {
+    const document = await composeStandardSystemEbook({
+      ...profile,
+      website: "",
+      listings: [],
+      logoUrl: null,
+    });
+    expect(document.usedApprovedPreview).toBe(true);
+    expect(document.listingCount).toBe(4);
+    expect(document.pages.filter((page) => page.layout === "listing").map((page) => page.title)).toEqual([
+      "242 Highland Avenue",
+      "185 Reynolds Street, Unit 33",
+      "764 Route 10",
+      "37 Luanne Drive",
+    ]);
+    expect(document.pages.some((page) => page.heroImageUrl?.includes("listing-highland.png"))).toBe(true);
+    expect(document.lackedListings).toBe(false);
   });
 
   it("flags corner type that looks like a board watermark", async () => {
