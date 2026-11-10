@@ -15,9 +15,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import TalisBooksPageRenderer from "@/components/talisbooks/viewer/TalisBooksPageRenderer";
 import { peekWarmedViewerImage } from "@/lib/talisbooks/viewer/image-preloader";
 import {
+  bookFrameSpreadImageUrl,
   clampSpreadAspectRatio,
   displayBookSpreadAspect,
-  getBookContinuousSpreadImageUrl,
   isMattedSpreadPage,
   RESERVED_BOOK_SPREAD_ASPECT,
 } from "@/lib/talisbooks/viewer/spread-layout";
@@ -1014,8 +1014,8 @@ function OpenBookSpread({
     openingFromFront && (coverOpenFirstHalf || flipProgress.get() < 0.52),
   );
   const bookSpreadUrl = useMemo(
-    () => getBookContinuousSpreadImageUrl(book.pages),
-    [book.pages],
+    () => bookFrameSpreadImageUrl(book.pages, book.fixedPageFrame),
+    [book.fixedPageFrame, book.pages],
   );
   const { aspect: spreadAspect, measured: geometryReady } =
     useContinuousSpreadAspectRatio(bookSpreadUrl);
@@ -1570,8 +1570,8 @@ function OpenBookSingle({
       : currentPage;
 
   const bookSpreadUrl = useMemo(
-    () => getBookContinuousSpreadImageUrl(book.pages),
-    [book.pages],
+    () => bookFrameSpreadImageUrl(book.pages, book.fixedPageFrame),
+    [book.fixedPageFrame, book.pages],
   );
   const { aspect: spreadAspect, measured: geometryReady } =
     useContinuousSpreadAspectRatio(bookSpreadUrl);

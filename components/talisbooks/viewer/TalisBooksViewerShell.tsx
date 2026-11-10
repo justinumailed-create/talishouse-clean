@@ -55,6 +55,10 @@ interface TalisBooksViewerShellProps {
   keyboardNav?: boolean;
   /** Phones (≤ 640 px wide) open in single-page view instead of spreads. */
   singleOnMobile?: boolean;
+  /** First paint: spread or one page. Used by preview links. */
+  initialViewMode?: TalisBooksViewerViewMode;
+  /** First paint index (a spread index, or a page index in single view). */
+  initialNavIndex?: number;
 }
 
 function withCoverBranding(book: TalisBooksViewerBook): TalisBooksViewerBook {
@@ -71,6 +75,8 @@ export default function TalisBooksViewerShell({
   hideClaim = false,
   keyboardNav = false,
   singleOnMobile = false,
+  initialViewMode = "spread",
+  initialNavIndex = 0,
 }: TalisBooksViewerShellProps) {
   const showClaim = !fromBookshelf && !hideClaim;
   const tv = useT().viewer;
@@ -84,7 +90,7 @@ export default function TalisBooksViewerShell({
     setBook(withCoverBranding(initialBook));
   }, [initialBook]);
 
-  const [viewMode, setViewMode] = useState<TalisBooksViewerViewMode>("spread");
+  const [viewMode, setViewMode] = useState<TalisBooksViewerViewMode>(initialViewMode);
   const viewModeRef = useRef(viewMode);
   useEffect(() => {
     viewModeRef.current = viewMode;
@@ -137,6 +143,7 @@ export default function TalisBooksViewerShell({
     setIntervalMs,
   } = useAutoPageTurn({
     pageCount: navCount,
+    initialIndex: initialNavIndex,
     initialAutoPlaying: false,
     wrap: false,
     onReachEnd: () => {

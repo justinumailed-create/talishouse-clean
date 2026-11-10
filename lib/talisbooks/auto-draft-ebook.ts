@@ -62,6 +62,11 @@ import {
   resolveEbookListingImages,
   stripStoredEbookCreditText,
 } from "@/lib/talisbooks/brokerage-site-listing-images";
+import { composeStandardSystemEbook } from "@/lib/talisbooks/system-ebook-compose";
+import {
+  placeFromOfficeAddress,
+  type SystemEbookProfile,
+} from "@/lib/talisbooks/system-ebook-format";
 
 function demoEbookPublishFields(fastCode: string, now: string): {
   publish_status: "published" | "draft";
@@ -975,10 +980,160 @@ export type AutoDraftEbookResult =
     }
   | { success: false; error: string };
 
+async function loadTownPhotoPreservation(fastCode: string, replaceBookId: string | null): Promise<{
+  townPhotoUrls: string[];
+  photoCredit: string | null;
+}> {
+  const code = fastCode.trim().toLowerCase();
+  if (!replaceBookId || !["kk01", "kd01", "mkj01"].includes(code) || !isSupabaseAdminConfigured()) {
+    return { townPhotoUrls: [], photoCredit: null };
+  }
+  const { data: pages } = await getSupabaseAdmin()
+    .from("talisbooks_book_pages")
+    .select("content")
+    .eq("book_id", replaceBookId);
+  const townPhotoUrls: string[] = [];
+  let photoCredit: string | null = null;
+  for (const page of pages ?? []) {
+    const content = page.content;
+    if (!content || typeof content !== "object") continue;
+    const record = content as Record<string, unknown>;
+    for (const key of ["heroImageUrl", "spreadImageUrl"]) {
+      const url = record[key];
+      if (typeof url === "string" && url.includes(`/town-photos/${code}/`) && !townPhotoUrls.includes(url)) {
+        townPhotoUrls.push(url);
+      }
+    }
+    if (typeof record.body === "string" && /CC BY/i.test(record.body)) {
+      photoCredit = record.body;
+    }
+  }
+  return { townPhotoUrls, photoCredit };
+}
+
+/**
+ * System FAST Code books use the standard written Talisbook™, not a stack of photos.
+ * The Mapsite link is left as it is.
+ */
+async function persistStandardSystemEbook(args: {
+  input: AutoDraftEbookInput;
+  fastCode: string;
+  mapsiteId: string | null;
+  accountType: string;
+  title: string;
+  description: string;
+  location: string;
+  flagIdentity: MapsiteFlagIdentity;
+  pipelineStarted: number;
+}): Promise<AutoDraftEbookResult> {
+  const { input, fastCode, mapsiteId } = args;
+  const supabase = getSupabaseAdmin();
+  const { data: mapsite } = await supabase
+    .from("mapsites")
+    .select(
+      "agent_name, property_title, property_address, phone, email, broker_url, website, latitude, longitude",
+    )
+    .ilike("fast_code", fastCode)
+    .maybeSingle();
+  const website =
+    (typeof mapsite?.broker_url === "string" && /^https?:\/\//i.test(mapsite.broker_url)
+      ? mapsite.broker_url
+      : null) ||
+    (typeof mapsite?.website === "string" && /^https?:\/\//i.test(mapsite.website)
+      ? mapsite.website
+      : "");
+  const preserved = await loadTownPhotoPreservation(
+    fastCode,
+    input.replaceBookId?.trim() || null,
+  );
+  const brokerEmail =
+    typeof mapsite?.email === "string" &&
+    mapsite.email.includes("@") &&
+    !/talispros\.com$/i.test(mapsite.email)
+      ? mapsite.email
+      : null;
+  const officeAddress =
+    (typeof mapsite?.property_address === "string" && mapsite.property_address.trim()) ||
+    args.location;
+  const place = placeFromOfficeAddress(officeAddress);
+  const profile: SystemEbookProfile = {
+    fastCode,
+    brokerageName:
+      (typeof mapsite?.property_title === "string" && mapsite.property_title.trim()) ||
+      args.title,
+    brokerName: (typeof mapsite?.agent_name === "string" && mapsite.agent_name.trim()) || "",
+    officeAddress,
+    town: place.town || args.location.split(",")[0]?.trim() || args.title,
+    province: place.province,
+    website,
+    phone: typeof mapsite?.phone === "string" ? mapsite.phone : null,
+    email: brokerEmail,
+    latitude: typeof mapsite?.latitude === "number" ? mapsite.latitude : null,
+    longitude: typeof mapsite?.longitude === "number" ? mapsite.longitude : null,
+    areaPhotoUrl: preserved.townPhotoUrls[0] ?? null,
+    townPhotoUrls: preserved.townPhotoUrls,
+    photoCredit: preserved.photoCredit,
+  };
+  const document = await composeStandardSystemEbook(profile);
+  const now = new Date().toISOString();
+  const pageRows = document.pageRows.map((row) => ({
+    ...row,
+    created_at: now,
+    updated_at: now,
+  }));
+  const persisted = await persistGeneratedEbook({
+    replaceBookId: input.replaceBookId,
+    fastCode,
+    mapsiteId,
+    accountType: args.accountType,
+    title: document.title || args.title,
+    subtitle: document.subtitle || args.location,
+    description: document.description || args.description,
+    pageRows,
+    publishFields: ebookInsertPublishFields({
+      fastCode,
+      now,
+      asAdmin: input.asAdmin,
+      replacing: Boolean(input.replaceBookId?.trim()),
+    }),
+    now,
+    systemListingBuild: true,
+    metadata: {
+      ...document.metadata,
+      location: args.location || null,
+      source: input.source || "self-service-pdf",
+      requestId: input.requestId ?? null,
+      globallyPublished: false,
+      paymentRequired: false,
+      flagIdentity: args.flagIdentity,
+      flagName: input.agentName?.trim() || null,
+      lackedListings: document.lackedListings,
+    },
+  });
+  if ("error" in persisted) {
+    return { success: false, error: persisted.error };
+  }
+  logOnboardingStep("Ebook pipeline", args.pipelineStarted, {
+    mode: "system-format",
+    fastCode,
+    pageCount: pageRows.length,
+    lackedListings: document.lackedListings,
+  });
+  return {
+    success: true,
+    bookId: persisted.id,
+    slug: persisted.slug,
+    previewUrl: `${ROUTES.TALISBOOKS_VIEWER}/${persisted.slug}`,
+    pageCount: pageRows.length,
+    mapsiteId,
+  };
+}
+
 /**
  * Automatically generate the first Talisbook™ as a Draft with a preview URL.
  * Self-service images: content-sized plan (≤20/22/24) with continuous landscape spreads.
  * PDF: exact page rasters (no Glasshouse / cover scaffolding).
+ * System FAST Code books: the standard written Talisbook™ at a fixed page size.
  */
 export async function autoGenerateDraftTalisBook(
   input: AutoDraftEbookInput
@@ -1108,8 +1263,25 @@ export async function autoGenerateDraftTalisBook(
       mapsiteId,
     };
   }
-  if (listingResolution.action === "blocked") {
-    return { success: false, error: listingResolution.error };
+  const replacedWithBrokerage =
+    listingResolution.action === "use" && listingResolution.replacedWithBrokerage;
+  if (
+    listingResolution.systemListingBuild &&
+    (listingResolution.action === "blocked" ||
+      input.brokerageSitePhotos === true ||
+      replacedWithBrokerage)
+  ) {
+    return persistStandardSystemEbook({
+      input,
+      fastCode,
+      mapsiteId,
+      accountType,
+      title,
+      description,
+      location,
+      flagIdentity,
+      pipelineStarted,
+    });
   }
   const systemListingBuild = listingResolution.systemListingBuild;
   if (listingResolution.replacedWithBrokerage) {

@@ -17,6 +17,30 @@ export default function TalisBooksMapsPageView({ page }: { page: TalisBooksViewe
     Number.isFinite(page.latitude) &&
     Number.isFinite(page.longitude);
 
+  const staticMap = page.heroImageUrl?.trim() || "";
+  if (staticMap) {
+    return (
+      <div className="talisbooks-viewer-page talisbooks-viewer-page--maps talisbooks-viewer-page--static-map">
+        <div className="talisbooks-viewer-page__maps-stage">
+          <img
+            className="talisbooks-viewer-page__static-map"
+            src={staticMap}
+            alt=""
+            draggable={false}
+          />
+        </div>
+        <div className="talisbooks-viewer-page__maps-caption">
+          <p className="talisbooks-viewer-page__eyebrow">Talismaps™</p>
+          {page.title ? <h2 className="talisbooks-viewer-page__title">{page.title}</h2> : null}
+          {page.address ? (
+            <p className="talisbooks-viewer-page__maps-address">{page.address}</p>
+          ) : null}
+          {page.body ? <p className="talisbooks-viewer-page__body-text">{page.body}</p> : null}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="talisbooks-viewer-page talisbooks-viewer-page--maps">
       <div className="talisbooks-viewer-page__maps-stage">

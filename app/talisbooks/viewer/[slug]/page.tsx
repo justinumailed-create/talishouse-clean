@@ -17,7 +17,7 @@ import { isBookshelfViewerOrigin } from "@/lib/talisbooks/viewer/origin";
 
 interface TalisBooksViewerSlugPageProps {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ from?: string | string[] }>;
+  searchParams?: Promise<{ from?: string | string[]; spread?: string | string[]; page?: string | string[] }>;
 }
 
 export async function generateMetadata({
@@ -103,5 +103,23 @@ export default async function TalisBooksViewerSlugPage({
     notFound();
   }
 
-  return <TalisBooksViewerShell book={book} fromBookshelf={fromBookshelf} />;
+  const first = (value: string | string[] | undefined) =>
+    Array.isArray(value) ? value[0] : value;
+  const pageIndex = Number(first(query.page));
+  const spreadIndex = Number(first(query.spread));
+  const single = Number.isFinite(pageIndex);
+  const initialNavIndex = Math.max(
+    0,
+    single ? pageIndex : Number.isFinite(spreadIndex) ? spreadIndex : 0,
+  );
+
+  return (
+    <TalisBooksViewerShell
+      book={book}
+      fromBookshelf={fromBookshelf}
+      singleOnMobile
+      initialViewMode={single ? "single" : "spread"}
+      initialNavIndex={initialNavIndex}
+    />
+  );
 }
