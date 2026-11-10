@@ -155,3 +155,15 @@ const BOOKS: Record<string, TalisBooksViewerBook> = {
 export function createSystemEbookPreview(slug: string): TalisBooksViewerBook | null {
   return BOOKS[slug.trim()] ?? null;
 }
+
+/**
+ * dw01 and km01 were approved as these pages. The live sites watermark their
+ * listing photos, so the book keeps the Talismaps™ stills and the write-ups
+ * from that review instead of swapping in a later crawl.
+ */
+export function approvedSystemEbookProfile(fastCode: string): SystemEbookProfile | null {
+  const code = fastCode.trim().toLowerCase();
+  if (code === "dw01") return DW01;
+  if (code === "km01") return KM01;
+  return null;
+}

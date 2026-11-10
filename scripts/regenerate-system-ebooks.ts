@@ -6,6 +6,10 @@
  *
  *   npx tsx scripts/regenerate-system-ebooks.ts
  *
+ * Extraction only, no database credentials and no writes:
+ *
+ *   npx tsx scripts/regenerate-system-ebooks.ts --sources-only
+ *
  * Apply, after the books have been reviewed:
  *
  *   SYSTEM_EBOOK_REGENERATE_CONFIRM=yes npx tsx scripts/regenerate-system-ebooks.ts --apply
@@ -28,6 +32,26 @@ import {
 } from "../lib/talisbooks/system-ebook-format";
 
 const APPLY = process.argv.includes("--apply");
+const SOURCES_ONLY = process.argv.includes("--sources-only");
+
+/**
+ * Brokerage sites for --sources-only. Apply still reads broker_url from the
+ * database. These are the offices behind the 12 published system books.
+ */
+const SOURCE_SITES: Record<string, { brokerageName: string; website: string; town: string; province: string }> = {
+  dw01: { brokerageName: "The Right Choice Realty", website: "https://therightchoicerealty.ca/", town: "Fredericton", province: "New Brunswick" },
+  hml01: { brokerageName: "Alliance Realty", website: "https://www.alliancerealty.nb.ca/", town: "Edmundston", province: "New Brunswick" },
+  jdk01: { brokerageName: "Fair Realty", website: "https://fairrealty.com/", town: "Nelson", province: "British Columbia" },
+  km01: { brokerageName: "Dream Realty SK", website: "https://realestatethebattlefords.ca/", town: "North Battleford", province: "Saskatchewan" },
+  lb01: { brokerageName: "Black Tusk Realty", website: "https://www.blacktuskrealty.com/", town: "Squamish", province: "British Columbia" },
+  pp03: { brokerageName: "Macdonald Realty", website: "https://macrealty.com/office/macdonald-realty-squamish", town: "Squamish", province: "British Columbia" },
+  sdp01: { brokerageName: "Parker Realty", website: "https://parkerrealty.ca/", town: "Charlottetown", province: "Prince Edward Island" },
+  wg01: { brokerageName: "Valhalla Path Realty", website: "https://valhallapathrealty.com/", town: "Nelson", province: "British Columbia" },
+  ys01: { brokerageName: "Grassroots Realty Group", website: "https://grassrootsrealtygroup.ca/", town: "Canmore", province: "Alberta" },
+  kk01: { brokerageName: "East Coast Realty", website: "https://www.eastcoast-realty.ca/", town: "Souris", province: "Prince Edward Island" },
+  kd01: { brokerageName: "LD Agence Immobilière", website: "https://www.ldagence.com/fr", town: "Sherbrooke", province: "Quebec" },
+  mkj01: { brokerageName: "DFH Real Estate", website: "https://www.dfh.ca/", town: "Sidney", province: "British Columbia" },
+};
 
 function csvCell(value: unknown): string {
   const text = value == null ? "" : typeof value === "string" ? value : JSON.stringify(value);
@@ -38,12 +62,71 @@ function townPhotoCode(fastCode: string): boolean {
   return (SYSTEM_EBOOK_TOWN_PHOTO_CODES as readonly string[]).includes(fastCode);
 }
 
+function reportBook(
+  code: string,
+  document: Awaited<ReturnType<typeof composeStandardSystemEbook>>,
+  extras: string[] = [],
+): void {
+  const visual = document.usedApprovedPreview
+    ? "visual=talismaps"
+    : document.listingCount > 0
+      ? "visual=site-or-town"
+      : "";
+  console.log(
+    [
+      code,
+      `logo=${document.logoFound ? "found" : "initials"}`,
+      `extracted=${document.extractedListingCount}`,
+      `book=${document.listingCount}`,
+      document.usedApprovedPreview ? "approved-preview" : "",
+      document.lackedListings ? "NO_USABLE_LISTINGS" : "listings-ok",
+      visual,
+      ...extras,
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
+}
+
 async function main(): Promise<void> {
+  if (APPLY && SOURCES_ONLY) {
+    console.error("Use either --apply or --sources-only, not both.");
+    process.exit(1);
+  }
   if (APPLY && process.env.SYSTEM_EBOOK_REGENERATE_CONFIRM !== "yes") {
     console.error(
       "Refusing to write. Set SYSTEM_EBOOK_REGENERATE_CONFIRM=yes to apply after review.",
     );
     process.exit(1);
+  }
+  if (SOURCES_ONLY) {
+    const flagged: string[] = [];
+    for (const code of SYSTEM_EBOOK_FAST_CODES) {
+      const site = SOURCE_SITES[code];
+      if (!site) {
+        flagged.push(code);
+        console.log(`${code} NO_SOURCE_SITE NO_USABLE_LISTINGS`);
+        continue;
+      }
+      const document = await composeStandardSystemEbook({
+        fastCode: code,
+        brokerageName: site.brokerageName,
+        brokerName: "",
+        officeAddress: "",
+        town: site.town,
+        province: site.province,
+        website: site.website,
+      });
+      reportBook(code, document);
+      if (document.listingCount === 0) flagged.push(code);
+    }
+    if (flagged.length > 0) {
+      console.log(`FLAGGED_NO_OWN_LISTINGS ${flagged.join(",")}`);
+      console.log("No book with zero listing pages was written. Sources-only does not write.");
+      process.exit(2);
+    }
+    console.log("Sources only. No rows were changed.");
+    return;
   }
   if (!isSupabaseAdminConfigured()) {
     console.error("Database credentials are not configured. Nothing was written.");
@@ -119,6 +202,7 @@ async function main(): Promise<void> {
     console.log(`Backed up ${systemBooks.length} books to ${file}`);
   }
 
+  const flagged: string[] = [];
   for (const code of SYSTEM_EBOOK_FAST_CODES) {
     const mapsite = (mapsites ?? []).find((row) => row.fast_code?.toLowerCase() === code);
     const book = systemBooks.find((row) => row.fast_code?.toLowerCase() === code);
@@ -172,19 +256,17 @@ async function main(): Promise<void> {
       photoCredit,
     };
     const document = await composeStandardSystemEbook(profile);
-    console.log(
-      [
-        code,
-        `logo=${document.logoFound ? "found" : "initials"}`,
-        `listings=${document.listingCount}`,
-        document.lackedListings ? "NO_USABLE_LISTINGS" : "listings-ok",
-        townPhotoUrls.length ? `town-photos=${townPhotoUrls.length}` : "",
-        photoCredit ? "credit-kept" : "",
-        book ? `book=${book.slug}` : "NO_PUBLISHED_BOOK",
-      ]
-        .filter(Boolean)
-        .join(" "),
-    );
+    reportBook(code, document, [
+      townPhotoUrls.length ? `town-photos=${townPhotoUrls.length}` : "",
+      photoCredit ? "credit-kept" : "",
+      book ? `book=${book.slug}` : "NO_PUBLISHED_BOOK",
+    ]);
+
+    if (document.listingCount === 0) {
+      flagged.push(code);
+      if (APPLY) console.error(`${code}: left the published book unchanged.`);
+      continue;
+    }
 
     if (!APPLY || !book) continue;
 
@@ -230,6 +312,10 @@ async function main(): Promise<void> {
     if (updateError) throw new Error(`${code}: ${updateError.message}`);
   }
 
+  if (flagged.length > 0) {
+    console.log(`FLAGGED_NO_OWN_LISTINGS ${flagged.join(",")}`);
+    process.exit(2);
+  }
   if (!APPLY) {
     console.log("Dry run only. No rows were changed.");
   }
