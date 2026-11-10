@@ -28,6 +28,7 @@ import RegisterNavDropdown from "@/components/talisu/RegisterNavDropdown";
 import LanguageSwitch from "@/components/i18n/LanguageSwitch";
 import { useT } from "@/lib/i18n/client";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { SHOW_TALISU_NAV } from "@/lib/talisu/ui-flags";
 
 /** English nav label (stable id in TALISU_MKTS_HEADER_NAV) → localized text. */
 function navLabel(t: Dictionary, label: string): string {
@@ -599,6 +600,8 @@ export default function TalisUMktsHeader({
             <RegisterNavDropdown />
           )}
 
+          {SHOW_TALISU_NAV ? (
+          <>
           <span
             aria-hidden
             className="mx-0.5 hidden h-5 w-px shrink-0 bg-white/45 sm:inline-block"
@@ -747,6 +750,8 @@ export default function TalisUMktsHeader({
               </div>
             ) : null}
           </div>
+          </>
+          ) : null}
 
           <LanguageSwitch className="ml-0.5" />
         </nav>
@@ -887,6 +892,8 @@ export default function TalisUMktsHeader({
                 </>
               )}
 
+              {SHOW_TALISU_NAV ? (
+              <>
               <div role="heading" aria-level={2} className={MOBILE_GROUP_CLASS}>
                 {t.nav.talisu}
               </div>
@@ -943,6 +950,8 @@ export default function TalisUMktsHeader({
                     ),
                   )}
                 </>
+              ) : null}
+              </>
               ) : null}
 
               <div className="mt-2 flex items-center justify-between border-t border-white/25 pt-2">

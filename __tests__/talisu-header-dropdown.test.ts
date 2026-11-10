@@ -10,6 +10,7 @@ import {
   TALISU_MKTS_HEADER_MAPSITES_LABEL,
   TALISU_MKTS_HEADER_REGISTER_DROPDOWN,
 } from "../lib/talisu/markets-pins";
+import { SHOW_TALISU_NAV } from "../lib/talisu/ui-flags";
 
 describe("TalisU blue header dropdown", () => {
   it("exposes Tsplits™, Bookshelf, FAQ, Media Directory | Contract, Knowledge Base (no Audio / Video)", () => {
@@ -210,5 +211,29 @@ describe("TalisU blue header dropdown", () => {
     expect(mark).not.toContain("<a ");
     expect(mark).toContain("Tsplits™");
     expect(mark).toContain("{tagline}");
+  });
+
+  it("hides the TalisU entry and dropdown behind SHOW_TALISU_NAV without deleting them", () => {
+    expect(SHOW_TALISU_NAV).toBe(false);
+    const header = readFileSync(
+      resolve("components/talisu/TalisUMktsHeader.tsx"),
+      "utf8",
+    );
+    // Desktop divider + trigger, and the mobile group, both stay in the file
+    // and are gated by the same flag (flip it to true to restore the menu).
+    const gates = header.split("SHOW_TALISU_NAV").length - 1;
+    expect(gates).toBeGreaterThanOrEqual(2);
+    expect(header).toContain("TALISU_MKTS_HEADER_DROPDOWN");
+    expect(header).toContain("{t.nav.talisu}");
+    const desktopGate = header.indexOf("{SHOW_TALISU_NAV ? (");
+    const separator = header.indexOf("bg-white/45");
+    const trigger = header.indexOf("\n              {t.nav.talisu}\n");
+    const mobileGate = header.indexOf("{SHOW_TALISU_NAV ? (", desktopGate + 1);
+    const mobileLabel = header.indexOf("\n                {t.nav.talisu}\n");
+    expect(desktopGate).toBeGreaterThan(-1);
+    expect(separator).toBeGreaterThan(desktopGate);
+    expect(trigger).toBeGreaterThan(separator);
+    expect(mobileGate).toBeGreaterThan(trigger);
+    expect(mobileLabel).toBeGreaterThan(mobileGate);
   });
 });
