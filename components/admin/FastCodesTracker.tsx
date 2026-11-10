@@ -13,10 +13,8 @@ import {
 import { listFastCodeUpdates, listJobRuns, listTrackerRows } from "@/lib/talispros/fast-code-tracker-server";
 import { loadCheckpointRollup } from "@/lib/talispros/call-flow-server";
 import { CHECKPOINT_LABEL } from "@/lib/talispros/call-flow-copy";
-import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { addProspectToQueueAction } from "@/app/admin/dashboard/fast-code-tracker-actions";
 import FastCodeRunNowButton from "./FastCodeRunNowButton";
-import { ProspectCsvImport, ProspectQueueRow } from "./ProspectQueueControls";
 
 type Locale = "en" | "de";
 
@@ -43,9 +41,9 @@ const COPY = {
     lastRun: "Last daily run",
     never: "Not run yet",
     runs: "Runs at 06:00 IST every day.",
-    queue: "Sourcing review queue",
+    queue: "Add a researched brokerage",
     queueHint:
-      "The daily run searches Google for independent (non-franchise) brokerage offices: 3 per market of about 80 km around an anchor town of 10,000–50,000 people, east to west, outside Nova Scotia. Each entry links to its Google source. Approving assigns the agent with fewer codes; the FAST Code always uses the decision maker’s first and last name initials (never brokerage words). Without a name the code stays pending.",
+      "Approve leads in Leads to approve, above. Add a brokerage here when it is not in that list yet. The FAST Code uses the decision maker’s first and last name initials. Without a name, phone and email the lead cannot be approved.",
     pending: "Pending review",
     approved: "Approved",
     approve: "Approve",
@@ -102,9 +100,9 @@ const COPY = {
     lastRun: "Letzter Tageslauf",
     never: "Noch nicht gelaufen",
     runs: "Läuft täglich um 06:00 IST.",
-    queue: "Recherche-Prüfliste",
+    queue: "Recherchiertes Maklerbüro hinzufügen",
     queueHint:
-      "Der Tageslauf sucht über Google nach unabhängigen Maklerbüros (keine Franchise): 3 pro Markt von etwa 80 km um eine Ankerstadt mit 10.000–50.000 Einwohnern, von Ost nach West, außerhalb von Nova Scotia. Jeder Eintrag verlinkt seine Google-Quelle. Mit der Freigabe wird der Agent mit weniger Codes zugewiesen; der FAST Code entsteht immer aus den Initialen von Vor- und Nachname des Entscheiders (nie aus Maklerbüro-Wörtern). Fehlt der Name, bleibt der Code ausstehend.",
+      "Leads werden oben unter Leads zur Freigabe freigegeben. Hier ein Maklerbüro hinzufügen, wenn es dort noch fehlt. Der FAST Code entsteht aus den Initialen von Vor- und Nachname. Ohne Name, Telefon und E-Mail ist keine Freigabe möglich.",
     pending: "Zur Prüfung",
     approved: "Freigegeben",
     approve: "Freigeben",
@@ -174,25 +172,21 @@ function describe(u: FastCodeUpdate, locale: Locale): string {
 export default async function FastCodesTracker({
   locale,
   params,
+  preserve = {},
 }: {
   locale: Locale;
   params: { day?: string; agent?: string; stage?: string; code?: string };
+  preserve?: Record<string, string>;
 }) {
   const t = COPY[locale];
   const today = istDay(new Date());
   const day = params.day && /^\d{4}-\d{2}-\d{2}$/.test(params.day) && params.day <= today ? params.day : today;
   const end = istDayEndUtc(day);
   const start = new Date(Date.parse(end) - 24 * 60 * 60 * 1000).toISOString();
-  const [rows, updates, runs, queueRes, rollup] = await Promise.all([
+  const [rows, updates, runs, rollup] = await Promise.all([
     listTrackerRows(),
     listFastCodeUpdates({ beforeIso: end, limit: 5000 }),
     listJobRuns(1),
-    (getSupabaseAdmin() as unknown as import("@supabase/supabase-js").SupabaseClient)
-      .from("prospect_queue")
-      .select("id, brokerage, contact_name, contact_first_name, contact_last_name, contact_position, contact_phone, contact_email, office_address, office_phone, website, market, market_rank, town, province, source_url, status, proposed_code, assigned_agent_id, created_at")
-      .in("status", ["pending", "approved"])
-      .order("created_at", { ascending: false })
-      .limit(50),
     loadCheckpointRollup(),
   ]);
   const byCode = new Map<string, FastCodeUpdate[]>();
@@ -229,27 +223,6 @@ export default async function FastCodesTracker({
       : sourcing.errors?.length && !sourcing.added
         ? `${t.sourcingError} ${sourcing.errors[0]!.replace(/^[^:]+: /, "")}`
         : t.sourcingDone((sourcing.markets ?? []).map((m) => m.market).join("; "), sourcing.added ?? 0, sourcing.duplicates ?? 0);
-  const queue = (queueRes.data ?? []) as {
-    id: string;
-    brokerage: string;
-    contact_name: string | null;
-    contact_first_name: string | null;
-    contact_last_name: string | null;
-    contact_position: string | null;
-    contact_phone: string | null;
-    contact_email: string | null;
-    office_address: string | null;
-    office_phone: string | null;
-    website: string | null;
-    market: string | null;
-    market_rank: number | null;
-    town: string | null;
-    province: string | null;
-    source_url: string;
-    status: string;
-    proposed_code: string | null;
-    assigned_agent_id: string | null;
-  }[];
   const href = (extra: Record<string, string | null>) => {
     const q = new URLSearchParams();
     const merged = { day, agent: params.agent ?? null, stage: params.stage ?? null, code: params.code ?? null, ...extra };
@@ -280,6 +253,9 @@ export default async function FastCodesTracker({
       </div>
 
       <form method="get" action="/admin/dashboard" className="mt-4 flex flex-wrap items-end gap-3" data-testid="fast-codes-filters">
+        {Object.entries(preserve).map(([key, value]) =>
+          value ? <input key={key} type="hidden" name={key} value={value} /> : null,
+        )}
         <label className="flex flex-col text-xs font-medium text-neutral-600">
           {t.date}
           <input type="date" name="day" defaultValue={day} max={today} className={input} data-testid="fast-codes-date" />
@@ -412,31 +388,8 @@ export default async function FastCodesTracker({
       ) : null}
 
       <details className="mt-5 rounded-xl border border-neutral-200 p-4" data-testid="prospect-queue">
-        <summary className="cursor-pointer text-[15px] font-semibold text-neutral-900">
-          {t.queue} ({queue.filter((q) => q.status === "pending").length})
-        </summary>
+        <summary className="cursor-pointer text-[15px] font-semibold text-neutral-900">{t.queue}</summary>
         <p className="mt-2 text-sm text-neutral-500">{t.queueHint}</p>
-        {queue.length ? (
-          <ul className="m-0 mt-3 list-none divide-y divide-neutral-100 p-0">
-            {queue.map((q) => (
-              <ProspectQueueRow
-                key={q.id}
-                locale={locale}
-                row={q}
-                labels={{
-                  rank: t.rank,
-                  googleSource: t.googleSource,
-                  source: t.fSource.split(" (")[0]!,
-                  website: t.fWebsite,
-                  toResearch: t.toResearch,
-                }}
-              />
-            ))}
-          </ul>
-        ) : (
-          <p className="mt-3 text-sm text-neutral-500">{t.queueEmpty}</p>
-        )}
-        <ProspectCsvImport locale={locale} />
         <form action={addProspectToQueueAction} className="mt-4 grid gap-2 sm:grid-cols-2">
           <p className="m-0 text-sm font-semibold text-neutral-800 sm:col-span-2">{t.add}</p>
           <input name="brokerage" required placeholder={t.fBrokerage} className={input} />

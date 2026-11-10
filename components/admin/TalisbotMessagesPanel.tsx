@@ -14,6 +14,9 @@ import {
   postTalisbotCommentAction,
 } from "@/app/admin/dashboard/talisbot-messages-actions";
 import { cardClass } from "@/components/admin/ui";
+import InlineLeadReview from "@/components/admin/InlineLeadReview";
+import { istDay } from "@/lib/talispros/fast-code-tracker";
+import type { ApprovalLead } from "@/lib/talispros/prospect-approval";
 
 const COPY = {
   en: {
@@ -40,6 +43,8 @@ const COPY = {
     statusAnswered: "Answered",
     comments: "Comments",
     noComments: "No comments yet.",
+    reviewToday: (n: number) => `Review today's ${n} leads`,
+    handled: (n: number) => `Handled (${n})`,
   },
   de: {
     kicker: "TalisBOT™",
@@ -65,6 +70,8 @@ const COPY = {
     statusAnswered: "Beantwortet",
     comments: "Kommentare",
     noComments: "Noch keine Kommentare.",
+    reviewToday: (n: number) => `Heute ${n} Leads prüfen`,
+    handled: (n: number) => `Erledigt (${n})`,
   },
 } as const;
 
@@ -99,7 +106,7 @@ function linkFor(m: AdminTalisbotMessage): { href: string; label: string } | nul
     };
   }
   if (m.brokerage) {
-    return { href: "/admin/dashboard#prospect-queue", label: m.brokerage };
+    return { href: "/admin/dashboard#leads-to-approve", label: m.brokerage };
   }
   return null;
 }
@@ -112,6 +119,8 @@ export type TalisbotPanelProps = {
   dayFilter?: string | null;
   /** Preview-only seed (screenshots); does not write to the DB. */
   preview?: boolean;
+  leadsByQueueId?: Record<string, ApprovalLead>;
+  preserve?: Record<string, string>;
 };
 
 export default function TalisbotMessagesPanel({
@@ -121,6 +130,8 @@ export default function TalisbotMessagesPanel({
   searching,
   dayFilter = null,
   preview = false,
+  leadsByQueueId = {},
+  preserve = {},
 }: TalisbotPanelProps) {
   const t = COPY[locale];
   const router = useRouter();
@@ -142,7 +153,8 @@ export default function TalisbotMessagesPanel({
     return () => window.clearInterval(id);
   }, [searching, preview, router]);
 
-  const groups = useMemo(() => groupMessagesByIstDay(messages), [messages]);
+  const openGroups = useMemo(() => groupMessagesByIstDay(messages.filter((m) => !m.readAt)), [messages]);
+  const handled = useMemo(() => messages.filter((m) => m.readAt), [messages]);
   const commentsByMessage = useMemo(() => {
     const map = new Map<string, AdminTalisbotComment[]>();
     const generalList: AdminTalisbotComment[] = [];
@@ -173,6 +185,9 @@ export default function TalisbotMessagesPanel({
           <p className="text-sm text-neutral-500">{t.subtitle}</p>
         </div>
         <form method="get" action="/admin/dashboard" className="flex flex-wrap items-end gap-2">
+          {Object.entries(preserve).map(([key, value]) =>
+            value ? <input key={key} type="hidden" name={key} value={value} /> : null,
+          )}
           <label className="flex flex-col text-xs font-medium text-neutral-600">
             {t.filterDate}
             <input
@@ -216,7 +231,7 @@ export default function TalisbotMessagesPanel({
         <p className="text-sm text-neutral-500">{t.empty}</p>
       ) : (
         <div className="space-y-5">
-          {groups.map((g) => (
+          {openGroups.map((g) => (
             <div key={g.day}>
               <p className="mb-2 text-xs font-semibold text-neutral-500">{dayLabel(g.day, locale)}</p>
               <ul className="m-0 list-none space-y-3 p-0">
@@ -266,6 +281,23 @@ export default function TalisbotMessagesPanel({
                             ) : null}
                           </p>
                           <p className="m-0 whitespace-pre-wrap text-sm text-neutral-800">{loc.body}</p>
+                          {m.type === "result" && typeof m.metadata.jobRunId === "string" ? (
+                            <Link
+                              href={`/admin/dashboard?leadRun=${encodeURIComponent(m.metadata.jobRunId)}&leadAdded=${istDay(m.createdAt)}#leads-to-approve`}
+                              className="inline-block text-sm font-semibold text-[#1E4ED8] underline"
+                              data-testid="talisbot-review-today"
+                            >
+                              {t.reviewToday(typeof m.metadata.added === "number" ? m.metadata.added : 0)}
+                            </Link>
+                          ) : null}
+                          {needs && m.prospectQueueId && leadsByQueueId[m.prospectQueueId] ? (
+                            <InlineLeadReview
+                              locale={locale}
+                              lead={leadsByQueueId[m.prospectQueueId]!}
+                              messageId={m.id}
+                              preview={preview}
+                            />
+                          ) : null}
                         </div>
                         <div className="flex flex-col items-end gap-1">
                           {unread && !preview ? (
@@ -356,6 +388,24 @@ export default function TalisbotMessagesPanel({
           ))}
         </div>
       )}
+
+      {handled.length ? (
+        <details className="mt-4 rounded-xl border border-neutral-200 px-4 py-3" data-testid="talisbot-handled">
+          <summary className="cursor-pointer text-sm font-semibold text-neutral-700">{t.handled(handled.length)}</summary>
+          <ul className="m-0 mt-3 list-none space-y-2 p-0">
+            {handled.map((m) => {
+              const loc = localizedMessage(m, locale);
+              return (
+                <li key={m.id} className="rounded-lg border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-700" data-testid="talisbot-message">
+                  <p className="m-0 font-semibold text-neutral-900">{loc.title}</p>
+                  <p className="m-0 text-xs text-neutral-500">{fmt(m.createdAt, locale)}</p>
+                  <p className="m-0 mt-1 whitespace-pre-wrap">{loc.body}</p>
+                </li>
+              );
+            })}
+          </ul>
+        </details>
+      ) : null}
 
       <div className="mt-5 rounded-xl border border-dashed border-neutral-300 p-4" data-testid="talisbot-general-box">
         <p className="m-0 text-sm font-semibold text-neutral-900">{t.general}</p>

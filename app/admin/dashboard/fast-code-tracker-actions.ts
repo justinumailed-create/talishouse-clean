@@ -10,6 +10,8 @@ import {
   personNamePartsFromFirstLast,
   proposeFastCodeFromParts,
 } from "@/lib/talispros/fast-code-tracker";
+import { countryFromRegion, partitionReview, type ApprovalLead } from "@/lib/talispros/prospect-approval";
+import { markAdminTalisbotMessageRead } from "@/lib/talispros/admin-talisbot-messages";
 import { recordFastCodeUpdate } from "@/lib/talispros/fast-code-tracker-server";
 import {
   importProspectContactsCsv,
@@ -58,7 +60,7 @@ export async function addProspectToQueueAction(form: FormData): Promise<void> {
     proposed = proposeFastCodeFromParts(first, last, taken);
   }
 
-  await db().from("prospect_queue").insert({
+  const inserted = {
     brokerage,
     contact_name: contactName,
     contact_first_name: first,
@@ -69,74 +71,87 @@ export async function addProspectToQueueAction(form: FormData): Promise<void> {
     office_address: clean(form.get("office_address"), 200),
     town: clean(form.get("town"), 80),
     province,
+    country: countryFromRegion(province),
     website: clean(form.get("website"), 300),
     source_url: source,
     research_notes: clean(form.get("research_notes"), 1000),
     proposed_code: proposed,
     reviewed_by: null,
-  });
+  };
+  let { error } = await db().from("prospect_queue").insert(inserted);
+  if (error && /country/i.test(error.message)) {
+    const { country: _country, ...rest } = inserted;
+    void _country;
+    ({ error } = await db().from("prospect_queue").insert(rest));
+  }
   void account;
   revalidatePath("/admin/dashboard");
 }
 
 export type ReviewProspectResult =
-  | { ok: true }
-  | { ok: false; error: "auth" | "missing_name" | "not_found" | "invalid" };
+  | {
+      ok: true;
+      updated: number;
+      decision: "approved" | "rejected" | "on_hold";
+      blocked: { id: string; brokerage: string; missing: ("name" | "phone" | "email")[]; reason: "incomplete" | "closed" }[];
+    }
+  | { ok: false; error: "auth" | "not_found" | "invalid" | "hold" };
 
-/** Approve or reject a queued prospect. Approved ones need a decision-maker name for a FAST Code. */
+/** Approve, reject or hold one or many queued leads. Incomplete contacts are skipped, not failed. */
 export async function reviewProspectAction(form: FormData): Promise<ReviewProspectResult> {
   const account = await requireAdminScope("agents").catch(() => null);
   if (!account) return { ok: false, error: "auth" };
-  const id = clean(form.get("id"), 40);
+  const ids = [...new Set(form.getAll("id").map((value) => (typeof value === "string" ? value.trim() : "")).filter((id) => /^[0-9a-f-]{36}$/i.test(id)))];
   const decision = clean(form.get("decision"), 10);
-  if (!id || !/^[0-9a-f-]{36}$/i.test(id) || (decision !== "approved" && decision !== "rejected")) {
+  if (!ids.length || (decision !== "approved" && decision !== "rejected" && decision !== "on_hold")) {
     return { ok: false, error: "invalid" };
-  }
-
-  if (decision === "approved") {
-    const { data: row } = await db()
-      .from("prospect_queue")
-      .select("contact_name, contact_first_name, contact_last_name, proposed_code")
-      .eq("id", id)
-      .eq("status", "pending")
-      .maybeSingle();
-    if (!row) return { ok: false, error: "not_found" };
-    const r = row as {
-      contact_name: string | null;
-      contact_first_name: string | null;
-      contact_last_name: string | null;
-      proposed_code: string | null;
-    };
-    const hasName = Boolean(
-      (r.contact_first_name && r.contact_last_name) || (r.contact_name && r.contact_name.trim().includes(" ")),
-    );
-    if (!hasName && !r.proposed_code) {
-      return { ok: false, error: "missing_name" };
-    }
   }
 
   const { data } = await db()
     .from("prospect_queue")
-    .update({ status: decision, reviewed_by: account.name, reviewed_at: new Date().toISOString() })
-    .eq("id", id)
-    .eq("status", "pending")
-    .select("brokerage")
-    .maybeSingle();
-  if (!data) return { ok: false, error: "not_found" };
-  if (decision === "approved") {
-    const s = { assigned: [], errors: [], refreshed: 0, listingChanges: 0, websitesScanned: 0, sourcing: { markets: [], added: 0, duplicates: 0, franchisesSkipped: 0, errors: [], keyEnv: null, customSearch: false }, brokerSitesDown: [], pendingReview: 0 } as DailyJobSummary;
-    await assignApproved(s).catch(() => undefined);
-    if (s.assigned.length) {
-      await postTalisbotCard({
-        type: "assigned",
-        i18n: assignedCopy(s.assigned),
-        metadata: { assigned: s.assigned, reviewedBy: account.name },
-        createdBy: "talisbot",
-      }).catch(() => undefined);
+    .select("id, brokerage, status, proposed_code, contact_first_name, contact_last_name, contact_name, contact_phone, contact_email, contact_position, town, province, research_notes, created_at")
+    .in("id", ids);
+  const rows = ((data ?? []) as Omit<ApprovalLead, "country">[]).map((row) => ({ ...row, country: "CA" as const }));
+  if (!rows.length) return { ok: false, error: "not_found" };
+
+  const { allow, blocked } = partitionReview(rows, decision);
+  const now = new Date().toISOString();
+  if (allow.length) {
+    const { error } = await db()
+      .from("prospect_queue")
+      .update({ status: decision, reviewed_by: account.name, reviewed_at: now })
+      .in("id", allow.map((row) => row.id))
+      .in("status", ["pending", "on_hold"]);
+    if (error) {
+      if (decision === "on_hold" && /check|status/i.test(error.message)) return { ok: false, error: "hold" };
+      return { ok: false, error: "invalid" };
+    }
+    if (decision === "approved") {
+      const s = { assigned: [], errors: [], refreshed: 0, listingChanges: 0, websitesScanned: 0, sourcing: { markets: [], added: 0, duplicates: 0, franchisesSkipped: 0, errors: [], keyEnv: null, customSearch: false }, brokerSitesDown: [], pendingReview: 0 } as DailyJobSummary;
+      await assignApproved(s).catch(() => undefined);
+      if (s.assigned.length) {
+        await postTalisbotCard({
+          type: "assigned",
+          i18n: assignedCopy(s.assigned),
+          metadata: { assigned: s.assigned, reviewedBy: account.name },
+          createdBy: "talisbot",
+        }).catch(() => undefined);
+      }
+    }
+    await db()
+      .from("admin_talisbot_messages")
+      .update({ read_at: now })
+      .in("prospect_queue_id", allow.map((row) => row.id))
+      .eq("type", "needs_review")
+      .is("read_at", null);
+  }
+  for (const messageId of form.getAll("message_id")) {
+    if (allow.length && typeof messageId === "string" && /^[0-9a-f-]{36}$/i.test(messageId)) {
+      await markAdminTalisbotMessageRead(messageId).catch(() => undefined);
     }
   }
   revalidatePath("/admin/dashboard");
-  return { ok: true };
+  return { ok: true, updated: allow.length, decision, blocked };
 }
 
 export type UpdateProspectContactResult =
@@ -238,15 +253,17 @@ export type ImportProspectCsvResult =
 export async function importProspectContactsCsvAction(form: FormData): Promise<ImportProspectCsvResult> {
   const account = await requireAdminScope("agents").catch(() => null);
   if (!account) return { ok: false, error: "auth" };
+  const csvField = form.get("csv");
   const file = form.get("file");
-  if (!(file instanceof File)) return { ok: false, error: "missing_file" };
-  if (file.size > 2_000_000) return { ok: false, error: "too_large" };
-  const text = await file.text();
+  const text = typeof csvField === "string" ? csvField : file instanceof File ? await file.text() : "";
+  if (!text.trim()) return { ok: false, error: "missing_file" };
+  if (text.length > 2_000_000) return { ok: false, error: "too_large" };
+  const confirm = form.get("confirm") === "yes";
   try {
-    const report = await importProspectContactsCsv(text, `admin:${account.name}`);
+    const report = await importProspectContactsCsv(text, `admin:${account.name}`, { dryRun: !confirm });
     const names = report.queueUpdated.map((q) => q.brokerage);
     const codes = report.queueUpdated.map((q) => q.newCode).filter(Boolean) as string[];
-    if (report.queueUpdated.length || report.leadsFilled.length) {
+    if (confirm && (report.queueUpdated.length || report.leadsFilled.length)) {
       await postTalisbotCard({
         type: "result",
         i18n: contactResultCopy(names, codes),

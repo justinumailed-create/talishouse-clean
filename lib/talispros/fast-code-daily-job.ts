@@ -128,6 +128,7 @@ export interface SourcingSummary {
   keyEnv: string | null;
   customSearch: boolean;
   nextMarketIndex?: number;
+  addedIds?: string[];
 }
 
 /** Next markets in east→west order, continuing from the last run. */
@@ -198,21 +199,45 @@ async function sourceFromGoogle(s: SourcingSummary): Promise<void> {
         latitude: c.lat,
         longitude: c.lng,
         sourced_by: "google-places",
+        country: "CA",
         research_notes: `Google Places: ${c.rating ?? "–"}★ (${c.ratingCount ?? 0} reviews). Decision maker, position, cell and email: to research.`,
         status: "pending",
       };
       const latitude = typeof c.lat === "number" ? c.lat : null;
       const openingZoom = latitude == null ? null : systemMapsiteOpeningZoom(latitude);
-      let { error } = await db()
-        .from("prospect_queue")
-        .insert(openingZoom == null ? prospect : { ...prospect, opening_zoom: openingZoom });
-      if (error && /opening_zoom/i.test(error.message)) {
-        ({ error } = await db().from("prospect_queue").insert(prospect));
+      let payload: Record<string, unknown> = openingZoom == null ? prospect : { ...prospect, opening_zoom: openingZoom };
+      let insertedId: string | null = null;
+      let errorMessage: string | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const res = await db().from("prospect_queue").insert(payload).select("id").maybeSingle();
+        if (!res.error) {
+          insertedId = (res.data as { id?: string } | null)?.id ?? null;
+          errorMessage = null;
+          break;
+        }
+        errorMessage = res.error.message;
+        if (/country/i.test(errorMessage) && "country" in payload) {
+          const { country: _country, ...rest } = payload;
+          void _country;
+          payload = rest;
+          continue;
+        }
+        if (/opening_zoom/i.test(errorMessage) && "opening_zoom" in payload) {
+          const { opening_zoom: _zoom, ...rest } = payload;
+          void _zoom;
+          payload = rest;
+          continue;
+        }
+        break;
       }
-      if (error) {
-        if (/duplicate/i.test(error.message)) row.duplicates++;
-        else s.errors.push(`${c.name}: ${error.message}`);
+      if (errorMessage) {
+        if (/duplicate/i.test(errorMessage)) row.duplicates++;
+        else s.errors.push(`${c.name}: ${errorMessage}`);
         continue;
+      }
+      if (insertedId) {
+        s.addedIds = s.addedIds ?? [];
+        s.addedIds.push(insertedId);
       }
       places.add(c.placeId);
       if (host) hosts.add(host);
@@ -463,7 +488,7 @@ export async function runFastCodeDailyJob(triggeredBy: string): Promise<DailyJob
     refreshed: 0,
     listingChanges: 0,
     websitesScanned: 0,
-    sourcing: { markets: [], added: 0, duplicates: 0, franchisesSkipped: 0, errors: [], keyEnv: null, customSearch: false },
+    sourcing: { markets: [], added: 0, duplicates: 0, franchisesSkipped: 0, errors: [], keyEnv: null, customSearch: false, addedIds: [] },
     brokerSitesDown: [],
     assigned: [],
     pendingReview: 0,
@@ -537,6 +562,7 @@ export async function runFastCodeDailyJob(triggeredBy: string): Promise<DailyJob
       added: summary.sourcing.added,
       markets: marketLabels,
       jobRunId: (run as { id?: string } | null)?.id ?? null,
+      addedIds: summary.sourcing.addedIds ?? [],
     },
     createdBy: "talisbot",
   }).catch(() => undefined);

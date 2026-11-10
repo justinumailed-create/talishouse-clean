@@ -29,9 +29,18 @@ const COPY = {
     failed: "Could not save. Please try again.",
     importTitle: "Import contacts CSV",
     importHint:
-      "Columns: fast_code, brokerage_name, first_name, last_name, position, phone, phone_type, email, town, province, status, source_url. Match by FAST Code or pq:<queue id>. Never changes issued Mapsite codes.",
-    importBtn: "Upload CSV",
-    importing: "Importing…",
+      "Admin columns (fast_code, first_name, last_name) or research columns (broker_name, cell, email, fast_code_or_prospect_id). Preview first. An existing value changes only when this preview lists it. Issued Mapsite codes stay as they are.",
+    importBtn: "Preview import",
+    importing: "Reading…",
+    confirm: "Import",
+    confirming: "Importing…",
+    matched: (n: number) => `${n} matched`,
+    newCa: (n: number) => `${n} new in Canada`,
+    newUs: (n: number) => `${n} new in the United States`,
+    skipped: (n: number) => `${n} skipped`,
+    overwrites: "Changes to existing values",
+    kept: "kept",
+    noOverwrites: "No existing value will be replaced.",
     importDone: (n: number, leads: number) =>
       `Import done: ${n} queue row(s) updated, ${leads} Mapsite lead field set(s) filled.`,
   },
@@ -53,9 +62,18 @@ const COPY = {
     failed: "Speichern fehlgeschlagen. Bitte erneut versuchen.",
     importTitle: "Kontakte-CSV importieren",
     importHint:
-      "Spalten: fast_code, brokerage_name, first_name, last_name, position, phone, phone_type, email, town, province, status, source_url. Zuordnung über FAST Code oder pq:<Warteschlangen-ID>. Ändert keine vergebenen Mapsite-Codes.",
-    importBtn: "CSV hochladen",
-    importing: "Importiert …",
+      "Admin-Spalten (fast_code, first_name, last_name) oder Recherche-Spalten (broker_name, cell, email, fast_code_or_prospect_id). Zuerst die Vorschau. Ein vorhandener Wert ändert sich nur, wenn diese Vorschau ihn nennt. Vergebene Mapsite-Codes bleiben unverändert.",
+    importBtn: "Import prüfen",
+    importing: "Liest …",
+    confirm: "Importieren",
+    confirming: "Importiert …",
+    matched: (n: number) => `${n} zugeordnet`,
+    newCa: (n: number) => `${n} neu in Kanada`,
+    newUs: (n: number) => `${n} neu in den USA`,
+    skipped: (n: number) => `${n} übersprungen`,
+    overwrites: "Änderungen vorhandener Werte",
+    kept: "bleibt",
+    noOverwrites: "Kein vorhandener Wert wird ersetzt.",
     importDone: (n: number, leads: number) =>
       `Import fertig: ${n} Warteschlangen-Eintrag(e) aktualisiert, ${leads} Mapsite-Lead-Feldgruppe(n) ergänzt.`,
   },
@@ -186,7 +204,11 @@ export function ProspectQueueRow({ locale, row, labels }: { locale: Locale; row:
                     fd.set("decision", d);
                     const res = await reviewProspectAction(fd);
                     if (!res.ok) {
-                      setMsg(res.error === "missing_name" ? t.missingName : t.failed);
+                      setMsg(t.failed);
+                      return;
+                    }
+                    if (res.blocked.length) {
+                      setMsg(res.blocked.some((row) => row.missing.includes("name")) ? t.missingName : t.failed);
                       return;
                     }
                     router.refresh();
@@ -208,10 +230,18 @@ export function ProspectQueueRow({ locale, row, labels }: { locale: Locale; row:
   );
 }
 
-export function ProspectCsvImport({ locale }: { locale: Locale }) {
+export function ProspectCsvImport({ locale, preview = false }: { locale: Locale; preview?: boolean }) {
   const t = COPY[locale];
   const router = useRouter();
   const [msg, setMsg] = useState<string | null>(null);
+  const [csv, setCsv] = useState<string | null>(null);
+  const [summary, setSummary] = useState<{
+    matched: number;
+    newCa: number;
+    newUs: number;
+    incomplete: number;
+    overwrites: { line: number; brokerage: string; field: string; from: string; to: string; apply: boolean }[];
+  } | null>(null);
   const [pending, start] = useTransition();
 
   return (
@@ -219,7 +249,7 @@ export function ProspectCsvImport({ locale }: { locale: Locale }) {
       <p className="m-0 text-sm font-semibold text-neutral-800">{t.importTitle}</p>
       <p className="mt-1 text-xs text-neutral-500">{t.importHint}</p>
       <label className="mt-2 inline-flex cursor-pointer items-center gap-2 rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white">
-        {pending ? t.importing : t.importBtn}
+        {pending && !summary ? t.importing : t.importBtn}
         <input
           type="file"
           accept=".csv,text/csv"
@@ -228,22 +258,69 @@ export function ProspectCsvImport({ locale }: { locale: Locale }) {
           onChange={(e) => {
             const file = e.target.files?.[0];
             e.target.value = "";
-            if (!file) return;
-            const fd = new FormData();
-            fd.set("file", file);
+            if (!file || preview) return;
             start(async () => {
               setMsg(null);
+              const text = await file.text();
+              const fd = new FormData();
+              fd.set("csv", text);
               const res = await importProspectContactsCsvAction(fd);
               if (!res.ok) {
                 setMsg(t.failed);
+                setSummary(null);
+                setCsv(null);
                 return;
               }
-              setMsg(t.importDone(res.report.queueUpdated.length, res.report.leadsFilled.length));
-              router.refresh();
+              setCsv(text);
+              setSummary(res.report.preview);
             });
           }}
         />
       </label>
+      {summary ? (
+        <div className="mt-3 text-xs text-neutral-800" data-testid="prospect-csv-preview">
+          <p className="m-0 font-semibold">
+            {t.matched(summary.matched)} · {t.newCa(summary.newCa)} · {t.newUs(summary.newUs)} · {t.skipped(summary.incomplete)}
+          </p>
+          <p className="mb-1 mt-2 font-semibold">{t.overwrites}</p>
+          {summary.overwrites.length ? (
+            <ul className="m-0 max-h-40 list-none space-y-1 overflow-auto p-0">
+              {summary.overwrites.slice(0, 40).map((row, i) => (
+                <li key={`${row.line}-${row.field}-${i}`}>
+                  {row.brokerage}: {row.field} · {row.from} → {row.to}
+                  {row.apply ? "" : ` (${t.kept})`}
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="m-0 text-neutral-500">{t.noOverwrites}</p>
+          )}
+          <button
+            type="button"
+            disabled={pending || !csv}
+            className="mt-2 rounded-lg bg-[#1E4ED8] px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+            onClick={() => {
+              if (!csv) return;
+              const fd = new FormData();
+              fd.set("csv", csv);
+              fd.set("confirm", "yes");
+              start(async () => {
+                const res = await importProspectContactsCsvAction(fd);
+                if (!res.ok) {
+                  setMsg(t.failed);
+                  return;
+                }
+                setMsg(t.importDone(res.report.queueUpdated.length, res.report.leadsFilled.length));
+                setSummary(null);
+                setCsv(null);
+                router.refresh();
+              });
+            }}
+          >
+            {pending ? t.confirming : t.confirm}
+          </button>
+        </div>
+      ) : null}
       {msg ? <p className="mt-2 text-xs text-neutral-700">{msg}</p> : null}
     </div>
   );

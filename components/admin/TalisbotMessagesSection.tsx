@@ -5,6 +5,8 @@ import {
   type AdminTalisbotComment,
   type AdminTalisbotMessage,
 } from "@/lib/talispros/admin-talisbot-messages";
+import type { ApprovalLead } from "@/lib/talispros/prospect-approval";
+import { loadLeadsByIds } from "@/lib/talispros/prospect-approval-server";
 import TalisbotMessagesPanel from "./TalisbotMessagesPanel";
 
 const PREVIEW_MESSAGES: AdminTalisbotMessage[] = [
@@ -67,7 +69,7 @@ const PREVIEW_MESSAGES: AdminTalisbotMessage[] = [
     body: "Hi Ralf — sample needs-review card for screenshots.",
     fastCode: null,
     brokerage: "KSAB Real Estate",
-    prospectQueueId: null,
+    prospectQueueId: "11111111-1111-4111-8111-111111111111",
     metadata: {},
     createdBy: "talisbot",
     parentId: null,
@@ -98,15 +100,45 @@ const PREVIEW_COMMENTS: AdminTalisbotComment[] = [
   },
 ];
 
+const PREVIEW_LEAD: ApprovalLead = {
+  id: "11111111-1111-4111-8111-111111111111",
+  brokerage: "KSAB Real Estate",
+  town: "Corner Brook",
+  province: "NL",
+  country: "CA",
+  status: "pending",
+  proposed_code: null,
+  contact_first_name: "Darren",
+  contact_last_name: "Brake",
+  contact_name: "Darren Brake",
+  contact_phone: "709-632-1415",
+  contact_email: "darren@example.com",
+  contact_position: "Owner",
+  research_notes: "Owner and managing broker differ. Needs review before a FAST Code is issued.",
+  created_at: new Date().toISOString(),
+};
+
+function one(v: string | string[] | undefined): string {
+  const value = Array.isArray(v) ? v[0] : v;
+  return value ?? "";
+}
+
 export default async function TalisbotMessagesSection({
   locale,
   talisbotDay,
   preview,
+  query,
 }: {
   locale: "en" | "de";
   talisbotDay?: string | null;
   preview?: string | null;
+  query?: Record<string, string | string[] | undefined>;
 }) {
+  const preserve: Record<string, string> = {};
+  for (const key of ["day", "agent", "stage", "code", "leadCountry", "leadStatus", "leadFrom", "leadTo", "leadComplete", "leadPage", "leadRun", "leadAdded"] as const) {
+    const value = one(query?.[key]);
+    if (value) preserve[key] = value;
+  }
   const isPreview = preview === "searching" || preview === "done" || preview === "history";
   if (isPreview) {
     return (
@@ -117,6 +149,8 @@ export default async function TalisbotMessagesSection({
         searching={preview === "searching"}
         dayFilter={null}
         preview
+        leadsByQueueId={{ [PREVIEW_LEAD.id]: PREVIEW_LEAD }}
+        preserve={preserve}
       />
     );
   }
@@ -127,6 +161,9 @@ export default async function TalisbotMessagesSection({
     listAdminTalisbotComments({ limit: 500 }),
     isTalisbotSearching(),
   ]);
+  const leadIds = messages.map((m) => m.prospectQueueId).filter((id): id is string => Boolean(id));
+  const leads = await loadLeadsByIds(leadIds);
+  const leadsByQueueId = Object.fromEntries(leads.map((lead) => [lead.id, lead]));
   return (
     <TalisbotMessagesPanel
       locale={locale}
@@ -134,6 +171,8 @@ export default async function TalisbotMessagesSection({
       comments={comments}
       searching={searching}
       dayFilter={day ?? null}
+      leadsByQueueId={leadsByQueueId}
+      preserve={preserve}
     />
   );
 }

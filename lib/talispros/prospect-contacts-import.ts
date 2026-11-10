@@ -1,16 +1,19 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
-import {
-  displayContactName,
-  personNamePartsFromFirstLast,
-  proposeFastCode,
-  proposeFastCodeFromParts,
-  RESERVED_FAST_CODES,
-} from "@/lib/talispros/fast-code-tracker";
+import { proposeFastCode, RESERVED_FAST_CODES } from "@/lib/talispros/fast-code-tracker";
 import { loadTakenCodes } from "@/lib/talispros/fast-code-daily-job";
 import { recordFastCodeUpdate } from "@/lib/talispros/fast-code-tracker-server";
-import { parseCsv } from "@/lib/crm-leads/model";
+import {
+  parseProspectImportCsv,
+  planProspectImport,
+  type CsvContactRow,
+  type ImportPlan,
+  type LeadSnapshot,
+  type PlanItem,
+  type ProspectCountry,
+  type QueueSnapshot,
+} from "@/lib/talispros/prospect-approval";
 
 function db(): SupabaseClient {
   return getSupabaseAdmin() as unknown as SupabaseClient;
@@ -31,83 +34,42 @@ export type ProspectCsvRow = {
   source_url: string;
 };
 
+export type ProspectImportPreview = {
+  matched: number;
+  newCa: number;
+  newUs: number;
+  incomplete: number;
+  contactIncomplete: number;
+  overwrites: ImportPlan["overwrites"];
+  skipped: { line: number; brokerage: string; reason: PlanItem extends { reason: infer R } ? R : string }[];
+  created: { line: number; brokerage: string; town: string | null; country: ProspectCountry }[];
+};
+
 export type ProspectImportReport = {
   queueUpdated: { id: string; brokerage: string; oldCode: string | null; newCode: string | null }[];
   leadsFilled: { fastCode: string; fields: string[] }[];
   nameMismatches: { fastCode: string; storedName: string; csvName: string }[];
   skipped: string[];
   errors: string[];
+  dryRun: boolean;
+  preview: ProspectImportPreview;
 };
 
-const COLS = [
-  "fast_code",
-  "brokerage_name",
-  "first_name",
-  "last_name",
-  "position",
-  "phone",
-  "phone_type",
-  "email",
-  "town",
-  "province",
-  "status",
-  "source_url",
-] as const;
-
-function headerIndex(head: string[]): Record<(typeof COLS)[number], number> {
-  const norm = (s: string) => s.replace(/^\uFEFF/, "").trim().toLowerCase();
-  const map = Object.fromEntries(COLS.map((c) => [c, -1])) as Record<(typeof COLS)[number], number>;
-  head.forEach((h, i) => {
-    const key = norm(h) as (typeof COLS)[number];
-    if (key in map) map[key] = i;
-  });
-  return map;
-}
-
-function cell(row: string[], idx: number): string {
-  if (idx < 0 || idx >= row.length) return "";
-  return (row[idx] ?? "").trim();
-}
-
-function isPlaceholderEmail(email: string | null | undefined): boolean {
-  const e = (email ?? "").trim().toLowerCase();
-  return !e || e === "claim@talispros.com";
-}
-
-function phoneBuckets(phone: string, phoneType: string): { cell: string | null; office: string | null } {
-  const p = phone.trim();
-  if (!p) return { cell: null, office: null };
-  const t = phoneType.toLowerCase();
-  if (/\bcell\b|\bmobile\b|personal|direct/.test(t) && !/\boffice\b/.test(t)) return { cell: p, office: null };
-  if (/\boffice\b/.test(t) && !/\bcell\b|\bmobile\b|direct/.test(t)) return { cell: null, office: p };
-  if (/\bcell\b|\bmobile\b|direct/.test(t)) return { cell: p, office: null };
-  return { cell: null, office: p };
-}
-
 export function parseProspectContactsCsv(text: string): ProspectCsvRow[] {
-  const table = parseCsv(text);
-  if (table.length < 2) return [];
-  const idx = headerIndex(table[0] ?? []);
-  if (idx.fast_code < 0) throw new Error("CSV missing fast_code column");
-  const rows: ProspectCsvRow[] = [];
-  for (const raw of table.slice(1)) {
-    if (!raw.some((c) => c.trim())) continue;
-    rows.push({
-      fast_code: cell(raw, idx.fast_code),
-      brokerage_name: cell(raw, idx.brokerage_name),
-      first_name: cell(raw, idx.first_name),
-      last_name: cell(raw, idx.last_name),
-      position: cell(raw, idx.position),
-      phone: cell(raw, idx.phone),
-      phone_type: cell(raw, idx.phone_type),
-      email: cell(raw, idx.email),
-      town: cell(raw, idx.town),
-      province: cell(raw, idx.province),
-      status: cell(raw, idx.status),
-      source_url: cell(raw, idx.source_url),
-    });
-  }
-  return rows;
+  return parseProspectImportCsv(text).map((row) => ({
+    fast_code: row.matchToken,
+    brokerage_name: row.brokerage,
+    first_name: row.firstName,
+    last_name: row.lastName,
+    position: row.position,
+    phone: row.phone,
+    phone_type: row.format,
+    email: row.email,
+    town: row.town,
+    province: row.region,
+    status: row.statusNote,
+    source_url: row.sourceUrl,
+  }));
 }
 
 async function mapsiteIssuedCodes(): Promise<Set<string>> {
@@ -119,280 +81,249 @@ async function mapsiteIssuedCodes(): Promise<Set<string>> {
   );
 }
 
-async function updateQueueContact(
-  rowId: string,
-  row: ProspectCsvRow,
-  taken: Set<string>,
-  actor: string,
-  report: ProspectImportReport,
-  oldCode: string | null,
-  brokerage: string,
-  assignedAgentId: string | null,
-  holdCodePendingReview = false,
-): Promise<void> {
-  const parts = personNamePartsFromFirstLast(row.first_name || null, row.last_name || null);
-  const contactName = parts ? displayContactName(parts) : null;
-  const phones = phoneBuckets(row.phone, row.phone_type);
+const QUEUE_COLUMNS =
+  "id, brokerage, town, province, status, proposed_code, contact_first_name, contact_last_name, contact_name, contact_phone, contact_email, contact_position, office_phone, office_address, website, source_url, research_notes, assigned_agent_id, country";
 
-  // Free the old proposed code from the taken set when regenerating.
-  if (oldCode) taken.delete(oldCode.toLowerCase());
-  // Dual decision-makers / branch ambiguity: fill contacts but leave code pending.
-  const newCode =
-    holdCodePendingReview
-      ? null
-      : parts && row.first_name && row.last_name
-        ? proposeFastCodeFromParts(row.first_name, row.last_name, taken)
-        : null;
-  if (newCode) taken.add(newCode);
-
-  const patch: Record<string, unknown> = {
-    contact_first_name: row.first_name || null,
-    contact_last_name: row.last_name || null,
-    contact_name: contactName,
-    contact_position: row.position || null,
-    contact_phone: phones.cell || phones.office || row.phone || null,
-    contact_email: row.email || null,
-    proposed_code: newCode,
-  };
-  if (row.town) patch.town = row.town;
-  if (row.province) patch.province = row.province;
-  if (row.source_url) patch.source_url = row.source_url;
-
-  const { error } = await db().from("prospect_queue").update(patch).eq("id", rowId);
-  if (error) {
-    report.errors.push(`queue ${rowId}: ${error.message}`);
-    return;
-  }
-
-  if (oldCode?.toLowerCase() !== (newCode ?? "").toLowerCase()) {
-    report.queueUpdated.push({
-      id: rowId,
-      brokerage,
-      oldCode: oldCode ? oldCode.toLowerCase() : null,
-      newCode,
-    });
-    if (newCode) {
-      await recordFastCodeUpdate({
-        fastCode: newCode,
-        agentId: assignedAgentId,
-        eventType: "note",
-        note: `Code corrected to decision-maker initials${oldCode ? ` (was ${oldCode.toLowerCase()})` : ""}`,
-        details: { queueId: rowId, from: oldCode, to: newCode, reason: "person_initials" },
-        createdBy: actor,
-      });
-    } else if (oldCode) {
-      await recordFastCodeUpdate({
-        fastCode: oldCode,
-        agentId: assignedAgentId,
-        eventType: "note",
-        note: "Code cleared: decision maker name needed",
-        details: { queueId: rowId, from: oldCode, to: null, reason: "person_initials" },
-        createdBy: actor,
-      });
-    }
-  } else {
-    report.queueUpdated.push({
-      id: rowId,
-      brokerage,
-      oldCode: oldCode ? oldCode.toLowerCase() : null,
-      newCode,
-    });
-  }
+function emptyPreview(): ProspectImportPreview {
+  return { matched: 0, newCa: 0, newUs: 0, incomplete: 0, contactIncomplete: 0, overwrites: [], skipped: [], created: [] };
 }
 
-async function fillLeadEmptyFields(row: ProspectCsvRow, report: ProspectImportReport): Promise<void> {
-  const code = row.fast_code.trim().toLowerCase();
-  const { data: lead } = await db()
-    .from("brokerage_leads")
-    .select("id, decision_maker_name, position, cell_phone, email, office_phone")
-    .eq("fast_code", code)
-    .maybeSingle();
-  if (!lead) {
-    report.skipped.push(`${code}: no brokerage_leads row`);
-    return;
-  }
-  const leadRow = lead as {
-    id: string;
-    decision_maker_name: string;
-    position: string;
-    cell_phone: string | null;
-    email: string | null;
-    office_phone: string | null;
+function previewFromPlan(plan: ImportPlan): ProspectImportPreview {
+  return {
+    matched: plan.matched,
+    newCa: plan.newCa,
+    newUs: plan.newUs,
+    incomplete: plan.incomplete,
+    contactIncomplete: plan.contactIncomplete,
+    overwrites: plan.overwrites,
+    skipped: plan.items.flatMap((item) =>
+      item.kind === "incomplete" ? [{ line: item.line, brokerage: item.brokerage, reason: item.reason }] : [],
+    ),
+    created: plan.items.flatMap((item) =>
+      item.kind === "new"
+        ? [{ line: item.line, brokerage: item.draft.brokerage, town: item.draft.town, country: item.country }]
+        : [],
+    ),
   };
+}
 
-  const csvName = [row.first_name, row.last_name].filter(Boolean).join(" ").trim();
-  const stored = (leadRow.decision_maker_name ?? "").trim();
-  if (csvName && stored) {
-    const norm = (s: string) => s.toLowerCase().replace(/\s+/g, " ");
-    // Exact or "stored contains csv" / "csv is subset of stored" (e.g. John vs John Duncan Knox)
-    const sn = norm(stored);
-    const cn = norm(csvName);
-    if (sn !== cn && !sn.includes(cn) && !cn.includes(sn)) {
-      report.nameMismatches.push({ fastCode: code, storedName: stored, csvName });
-    } else if (sn !== cn) {
-      // Soft mismatch (middle names): list but do not change.
-      report.nameMismatches.push({ fastCode: code, storedName: stored, csvName });
-    }
+async function loadQueueSnapshots(): Promise<{ rows: QueueSnapshot[]; agents: Map<string, string | null> }> {
+  let res = await db().from("prospect_queue").select(QUEUE_COLUMNS);
+  if (res.error && /country/i.test(res.error.message)) {
+    res = await db().from("prospect_queue").select(QUEUE_COLUMNS.replace(", country", ""));
   }
+  if (res.error) throw new Error(res.error.message);
+  const agents = new Map<string, string | null>();
+  const rows = ((res.data ?? []) as (QueueSnapshot & { assigned_agent_id?: string | null })[]).map((row) => {
+    agents.set(row.id, row.assigned_agent_id ?? null);
+    return {
+      id: row.id,
+      brokerage: row.brokerage,
+      town: row.town,
+      province: row.province,
+      country: row.country === "US" ? "US" : "CA",
+      status: row.status,
+      proposed_code: row.proposed_code,
+      contact_first_name: row.contact_first_name,
+      contact_last_name: row.contact_last_name,
+      contact_name: row.contact_name,
+      contact_phone: row.contact_phone,
+      contact_email: row.contact_email,
+      contact_position: row.contact_position,
+      office_phone: row.office_phone,
+      office_address: row.office_address,
+      website: row.website,
+      source_url: row.source_url,
+      research_notes: row.research_notes,
+    } satisfies QueueSnapshot;
+  });
+  return { rows, agents };
+}
 
-  const phones = phoneBuckets(row.phone, row.phone_type);
-  const patch: Record<string, unknown> = {};
-  const filled: string[] = [];
-
-  // Never overwrite non-empty values. Treat claim@ placeholder as empty for fill.
-  if (!leadRow.cell_phone && phones.cell) {
-    patch.cell_phone = phones.cell;
-    filled.push("cell_phone");
-  }
-  if (!leadRow.office_phone && phones.office) {
-    patch.office_phone = phones.office;
-    filled.push("office_phone");
-  }
-  // If phone_type was ambiguous and both empty, prefer cell when type mentions direct/cell else office.
-  if (!leadRow.cell_phone && !leadRow.office_phone && row.phone && !phones.cell && !phones.office) {
-    patch.office_phone = row.phone;
-    filled.push("office_phone");
-  }
-  if (isPlaceholderEmail(leadRow.email) && row.email) {
-    // Only fill when stored email is empty/placeholder; never overwrite a real email.
-    if (!leadRow.email || isPlaceholderEmail(leadRow.email)) {
-      // Task: never overwrite non-empty. claim@ is non-empty string — leave it.
-      // Only fill truly empty email.
-    }
-  }
-  if (!(leadRow.email ?? "").trim() && row.email) {
-    patch.email = row.email.toLowerCase();
-    filled.push("email");
-  }
-  // Position already required on leads; skip if set.
-
-  if (!filled.length) {
-    report.skipped.push(`${code}: no empty contact fields to fill`);
-    return;
-  }
-  const { error } = await db()
+async function loadLeadSnapshots(codes: string[]): Promise<LeadSnapshot[]> {
+  if (!codes.length) return [];
+  const { data } = await db()
     .from("brokerage_leads")
-    .update({ ...patch, updated_at: new Date().toISOString(), updated_by_name: "prospect-csv-import" })
-    .eq("id", leadRow.id);
-  if (error) {
-    report.errors.push(`lead ${code}: ${error.message}`);
+    .select("fast_code, decision_maker_name, cell_phone, office_phone, email")
+    .in("fast_code", codes);
+  return ((data ?? []) as {
+    fast_code: string;
+    decision_maker_name: string | null;
+    cell_phone: string | null;
+    office_phone: string | null;
+    email: string | null;
+  }[]).map((row) => ({
+    fastCode: row.fast_code.toLowerCase(),
+    decisionMakerName: row.decision_maker_name,
+    cellPhone: row.cell_phone,
+    officePhone: row.office_phone,
+    email: row.email,
+  }));
+}
+
+async function writeQueue(id: string | null, payload: Record<string, unknown>, insert: boolean): Promise<{ id: string | null; error: string | null }> {
+  const attempt = async (body: Record<string, unknown>) => {
+    if (insert) {
+      const res = await db().from("prospect_queue").insert(body).select("id").maybeSingle();
+      return { id: (res.data as { id?: string } | null)?.id ?? null, error: res.error?.message ?? null };
+    }
+    const res = await db().from("prospect_queue").update(body).eq("id", id!);
+    return { id, error: res.error?.message ?? null };
+  };
+  let result = await attempt(payload);
+  if (result.error && /country/i.test(result.error)) {
+    const { country: _country, ...rest } = payload;
+    void _country;
+    result = await attempt(rest);
+  }
+  return result;
+}
+
+async function applyPlanItem(
+  item: PlanItem,
+  actor: string,
+  agents: Map<string, string | null>,
+  report: ProspectImportReport,
+): Promise<void> {
+  if (item.kind === "incomplete") {
+    report.skipped.push(`${item.brokerage || "row " + item.line}: ${item.reason}`);
     return;
   }
-  report.leadsFilled.push({ fastCode: code, fields: filled });
+  if (item.kind === "matched" && item.target === "lead" && item.fastCode) {
+    const fields = Object.keys(item.patch);
+    if (!fields.length) {
+      report.skipped.push(`${item.fastCode}: no empty contact fields to fill`);
+      return;
+    }
+    const { error } = await db()
+      .from("brokerage_leads")
+      .update({ ...item.patch, updated_at: new Date().toISOString(), updated_by_name: "prospect-csv-import" })
+      .eq("fast_code", item.fastCode);
+    if (error) {
+      report.errors.push(`lead ${item.fastCode}: ${error.message}`);
+      return;
+    }
+    report.leadsFilled.push({ fastCode: item.fastCode, fields });
+    for (const change of item.changes) {
+      if (change.field === "first_name" && change.from && !change.apply) {
+        report.nameMismatches.push({ fastCode: item.fastCode, storedName: change.from, csvName: change.to });
+      }
+    }
+    return;
+  }
+  if (item.kind === "matched" && item.target === "queue" && item.queueId && !item.queueId.startsWith("new:")) {
+    const codeChange = item.changes.find((c) => c.field === "proposed_code" && c.apply);
+    if (!Object.keys(item.patch).length) {
+      report.queueUpdated.push({
+        id: item.queueId,
+        brokerage: item.brokerage,
+        oldCode: codeChange?.from || null,
+        newCode: codeChange?.to || item.fastCode,
+      });
+      return;
+    }
+    const written = await writeQueue(item.queueId, item.patch, false);
+    if (written.error) {
+      report.errors.push(`queue ${item.queueId}: ${written.error}`);
+      return;
+    }
+    const oldCode = codeChange?.from ? codeChange.from.toLowerCase() : item.fastCode;
+    const newCode = (item.patch.proposed_code as string | null | undefined) ?? item.fastCode;
+    report.queueUpdated.push({
+      id: item.queueId,
+      brokerage: item.brokerage,
+      oldCode: oldCode ? oldCode.toLowerCase() : null,
+      newCode: newCode ? newCode.toLowerCase() : null,
+    });
+    if (codeChange && newCode && oldCode?.toLowerCase() !== newCode.toLowerCase()) {
+      await recordFastCodeUpdate({
+        fastCode: newCode,
+        agentId: agents.get(item.queueId) ?? null,
+        eventType: "note",
+        note: `Code corrected to decision-maker initials${oldCode ? ` (was ${oldCode.toLowerCase()})` : ""}`,
+        details: { queueId: item.queueId, from: oldCode, to: newCode, reason: "person_initials" },
+        createdBy: actor,
+      });
+    }
+    return;
+  }
+  if (item.kind === "new") {
+    const written = await writeQueue(null, item.draft, true);
+    if (written.error || !written.id) {
+      report.errors.push(`${item.draft.brokerage}: ${written.error ?? "insert failed"}`);
+      return;
+    }
+    report.queueUpdated.push({
+      id: written.id,
+      brokerage: item.draft.brokerage,
+      oldCode: null,
+      newCode: item.draft.proposed_code,
+    });
+    if (item.draft.proposed_code) {
+      await recordFastCodeUpdate({
+        fastCode: item.draft.proposed_code,
+        agentId: null,
+        eventType: "note",
+        note: "Code set from decision-maker initials",
+        details: { queueId: written.id, from: null, to: item.draft.proposed_code, reason: "person_initials" },
+        createdBy: actor,
+      });
+    }
+  }
 }
 
 /**
- * Admin CSV import for prospect queue + empty lead CRM fields on built Mapsites.
- * Never changes issued Mapsite FAST Codes or owner names. Never deletes.
+ * Admin CSV import for the review queue and empty lead fields on built Mapsites.
+ * Pass dryRun to preview matched, new and skipped rows without writing.
+ * Issued Mapsite FAST Codes and non-empty lead values are never replaced.
  */
 export async function importProspectContactsCsv(
   text: string,
   actor: string,
+  opts?: { dryRun?: boolean },
 ): Promise<ProspectImportReport> {
+  const dryRun = opts?.dryRun !== false;
   const report: ProspectImportReport = {
     queueUpdated: [],
     leadsFilled: [],
     nameMismatches: [],
     skipped: [],
     errors: [],
+    dryRun,
+    preview: emptyPreview(),
   };
-  const rows = parseProspectContactsCsv(text);
+  let rows: CsvContactRow[] = [];
+  try {
+    rows = parseProspectImportCsv(text);
+  } catch (e) {
+    report.errors.push(e instanceof Error ? e.message : String(e));
+    return report;
+  }
   if (!rows.length) {
     report.errors.push("CSV has no data rows");
     return report;
   }
-
   const issued = await mapsiteIssuedCodes();
-  const taken = await loadTakenCodes();
-  // Also treat reserved as taken.
-  for (const r of RESERVED_FAST_CODES) taken.add(r);
-
-  const { data: queueRows } = await db()
-    .from("prospect_queue")
-    .select("id, brokerage, contact_name, proposed_code, assigned_agent_id, status, research_notes");
-  type QueueRow = {
-    id: string;
-    brokerage: string;
-    contact_name: string | null;
-    proposed_code: string | null;
-    assigned_agent_id: string | null;
-    status: string;
-    research_notes: string | null;
-  };
-  const queueList = (queueRows ?? []) as QueueRow[];
-  const byId = new Map(queueList.map((q) => [q.id, q]));
-  const byCode = new Map<string, QueueRow>();
-  for (const q of queueList) {
-    if (q.proposed_code) byCode.set(q.proposed_code.toLowerCase(), q);
+  const { rows: queue, agents } = await loadQueueSnapshots();
+  const codes = [...new Set(rows.map((row) => row.matchToken.trim().toLowerCase()).filter((code) => issued.has(code)))];
+  const [leads, taken] = await Promise.all([loadLeadSnapshots(codes), loadTakenCodes()]);
+  for (const reserved of RESERVED_FAST_CODES) taken.add(reserved);
+  const plan = planProspectImport({ rows, queue, issuedCodes: issued, leads, takenCodes: taken });
+  report.preview = previewFromPlan(plan);
+  if (dryRun) {
+    report.skipped = report.preview.skipped.map((row) => `${row.brokerage || "row " + row.line}: ${row.reason}`);
+    return report;
   }
-
-  // Also compare mapsite agent names for mismatches when we have a lead or mapsite.
-  const { data: maps } = await db()
-    .from("mapsites")
-    .select("fast_code, agent_name")
-    .not("fast_code", "is", null);
-  const mapNames = new Map(
-    ((maps ?? []) as { fast_code: string; agent_name: string | null }[]).map((m) => [
-      m.fast_code.toLowerCase(),
-      (m.agent_name ?? "").trim(),
-    ]),
-  );
-
-  for (const row of rows) {
-    const key = row.fast_code.trim();
-    if (!key) {
-      report.skipped.push("row with empty fast_code");
-      continue;
-    }
-
-    // partial status: skip blank fields (handled by only writing non-empty CSV values)
-    if (key.toLowerCase().startsWith("pq:")) {
-      const id = key.slice(3).trim();
-      const q = byId.get(id);
-      if (!q) {
-        report.errors.push(`unknown queue id ${id}`);
-        continue;
-      }
-      const hold = /needs review|code pending/i.test(q.research_notes ?? "");
-      await updateQueueContact(q.id, row, taken, actor, report, q.proposed_code, q.brokerage, q.assigned_agent_id, hold);
-      continue;
-    }
-
-    const code = key.toLowerCase();
-    if (issued.has(code)) {
-      const storedMapName = mapNames.get(code) ?? "";
-      const csvName = [row.first_name, row.last_name].filter(Boolean).join(" ").trim();
-      if (csvName && storedMapName) {
-        const sn = storedMapName.toLowerCase().replace(/\s+/g, " ");
-        const cn = csvName.toLowerCase().replace(/\s+/g, " ");
-        if (sn !== cn) {
-          report.nameMismatches.push({ fastCode: code, storedName: storedMapName, csvName });
-        }
-      }
-      await fillLeadEmptyFields(row, report);
-      continue;
-    }
-
-    const q = byCode.get(code);
-    if (q) {
-      // Queue-only code (not issued as Mapsite) — safe to re-derive from person name.
-      const hold = /needs review|code pending/i.test(q.research_notes ?? "");
-      await updateQueueContact(q.id, row, taken, actor, report, q.proposed_code, q.brokerage, q.assigned_agent_id, hold);
-      continue;
-    }
-
-    report.skipped.push(`${code}: not a queue row or known Mapsite lead target`);
+  for (const item of plan.items) {
+    await applyPlanItem(item, actor, agents, report);
   }
-
-  // Dedupe name mismatches
   const seen = new Set<string>();
   report.nameMismatches = report.nameMismatches.filter((m) => {
-    const k = `${m.fastCode}|${m.storedName}|${m.csvName}`;
-    if (seen.has(k)) return false;
-    seen.add(k);
+    const key = `${m.fastCode}|${m.storedName}|${m.csvName}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
-
   return report;
 }
 
@@ -404,6 +335,8 @@ export async function fixBrokerageDerivedQueueCodes(actor: string): Promise<Pros
     nameMismatches: [],
     skipped: [],
     errors: [],
+    dryRun: false,
+    preview: emptyPreview(),
   };
   const issued = await mapsiteIssuedCodes();
   const taken = await loadTakenCodes();
