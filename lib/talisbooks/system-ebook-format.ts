@@ -48,8 +48,10 @@ export type SystemEbookListing = {
   priceCad: number | null;
   /** Short facts already in our words: "6 bedrooms", "2 bathrooms", "2,559 sq ft". */
   facts: string[];
-  /** A photo from the brokerage site that is not watermarked. */
+  /** A photo of this listing. Own-site files are preferred. An MLS CDN file is kept only when the image has no visible board mark. */
   photoUrl?: string | null;
+  /** Where the accepted photo was hosted before any storage copy. */
+  photoHost?: "own-site" | "mls" | null;
   /** Static Talismaps™ image when the listing has no clean photo. */
   mapImageUrl?: string | null;
   /** Optional write-up. When set, it is used instead of the generated sentences. */
@@ -77,8 +79,14 @@ export type SystemEbookProfile = {
   /** Other towns the office actually works in. */
   areas?: string[];
   listings?: SystemEbookListing[];
-  /** How many own listings the site crawl found, before any approved-preview overlay. */
+  /** How many own listings the site crawl found, before photo checks. */
   extractedListingCount?: number;
+  /** Accepted photos hosted on the brokerage's own site. */
+  ownSitePhotoCount?: number;
+  /** Accepted photos from an MLS CDN with no visible watermark. */
+  mlsPhotoCount?: number;
+  /** Photos dropped because a mark was visible, or the file could not be checked. */
+  rejectedWatermarkCount?: number;
   /** Clean area photograph. Town-photo books pass their stored photos here. */
   areaPhotoUrl?: string | null;
   areaPhotoFit?: "cover" | "contain";
@@ -116,6 +124,9 @@ export type SystemEbookDocument = {
   listingCount: number;
   /** Listings read from the brokerage site. The book may instead use an approved preview. */
   extractedListingCount: number;
+  ownSitePhotoCount: number;
+  mlsPhotoCount: number;
+  rejectedWatermarkCount: number;
   usedApprovedPreview: boolean;
   metadata: Record<string, unknown>;
   pages: TalisBooksViewerPage[];
@@ -235,7 +246,8 @@ export function normalizeDistanceCopy(text: string): string {
 }
 
 export function polishSystemCopy(text: string): string {
-  return withBrandMarks(normalizeDistanceCopy(text)).replace(/\s+/g, " ").trim();
+  const withoutBoardLinks = text.replace(/https?:\/\/(?:[\w.-]+\.)?realtor\.ca\S*/gi, "").replace(/\brealtor\.ca\b/gi, "");
+  return withBrandMarks(normalizeDistanceCopy(withoutBoardLinks)).replace(/\s+/g, " ").trim();
 }
 
 export function initialsLogoDataUrl(initials: string): string {
@@ -730,6 +742,9 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     logoFound: logo.found,
     listingCount: listings.length,
     extractedListingCount: profile.extractedListingCount ?? listings.length,
+    ownSitePhotoCount: listings.filter((listing) => listing.photoHost !== "mls").length,
+    mlsPhotoCount: listings.filter((listing) => listing.photoHost === "mls").length,
+    rejectedWatermarkCount: profile.rejectedWatermarkCount ?? 0,
     usedApprovedPreview: false,
     metadata,
     pages,
