@@ -1,12 +1,9 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import AdviserLayout from "@/components/talisu/AdviserLayout";
 import PersonalHomeEditor from "@/components/talispros/personal-home/PersonalHomeEditor";
 import PersonalHomeMapsite from "@/components/talispros/personal-home/PersonalHomeMapsite";
 import PersonalHomeNav from "@/components/talispros/personal-home/PersonalHomeNav";
-import { MAPSITE_OWNER_COOKIE } from "@/lib/mapsite-account-session";
-import { getMapSiteOwnerSession } from "@/lib/mapsite-edit-auth";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
 import { ROUTES } from "@/lib/routes";
@@ -94,12 +91,8 @@ export default async function PersonalHomePage({
 
   const { data } = lookup;
   const { resolved } = data;
-  if (publicSystem) {
-    const owner = await getMapSiteOwnerSession();
-    if (owner === data.code) {
-      (await cookies()).delete(MAPSITE_OWNER_COOKIE);
-    }
-  }
+  // A system code has no owner session. The entry action clears a matching
+  // cookie before redirect; this render only ignores it (canEdit stays false).
   const canEdit = !publicSystem && (await canEditPersonalHome(data.code));
   const homeMap = publicSystem ? await loadPersonalHomeMap(data.code) : null;
   const mapsiteHref = publicSystem ? `${data.homeHref}#mapsite` : data.mapsiteHref;

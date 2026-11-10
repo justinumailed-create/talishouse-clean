@@ -32,8 +32,9 @@ async function resolveAssignActor(targetCode: string): Promise<AssignDemoEbookAc
   const registered = (await getRegisteredMapSiteFastCode()) || null;
   if (owner === targetCode || registered === targetCode) {
     const { isPublicSystemFastCode } = await import("@/lib/talispros/system-fast-code-access");
+    // The root cookie is not a claim. A public system code stays public.
     const publicSystem = await isPublicSystemFastCode(targetCode, {
-      registeredOwner: registered === targetCode,
+      registeredOwner: false,
     });
     if (!publicSystem) {
       return { kind: "owner", label: `owner (${targetCode.toUpperCase()})` };

@@ -34,6 +34,36 @@ export function restrictSystemFastCodeFeatures(input: SystemFastCodeAccessInput)
   return input.systemGenerated && !input.registeredOrClaimed && !input.agentAccess;
 }
 
+/**
+ * Owner and root-account cookies do not create a session on a public system
+ * FAST Code. Read them and ignore the match; do not delete them during render.
+ * Admins keep a matching cookie. A claimed code is not `publicSystem`.
+ */
+export function systemFastCodeGrantsOwnerSession(input: {
+  publicSystem: boolean;
+  isAdmin: boolean;
+  hasOwnerCookie: boolean;
+  hasRootCookie: boolean;
+}): boolean {
+  if (input.publicSystem && !input.isAdmin) return false;
+  return input.hasOwnerCookie || input.hasRootCookie;
+}
+
+/**
+ * Homepage FAST Code entry. A public system code never receives an owner
+ * session, even when the shared claim-inbox payment lookup says it is paid.
+ * Clearing a cookie that already names that code belongs in this action,
+ * before the redirect, never in the personal-home server component.
+ */
+export function systemFastCodeEntryCookieAction(input: {
+  publicSystem: boolean;
+  paid: boolean;
+}): "clear" | "paid-session" | "owner-session" {
+  if (input.publicSystem) return "clear";
+  if (input.paid) return "paid-session";
+  return "owner-session";
+}
+
 /** Owner-only destinations that must not appear on that public home page. */
 export function isOwnerOnlyPersonalHomeHref(href: string | null | undefined): boolean {
   const path = (href || "").trim().split("?")[0]?.split("#")[0] || "";

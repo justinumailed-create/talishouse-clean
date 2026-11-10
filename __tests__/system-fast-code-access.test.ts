@@ -8,6 +8,8 @@ import {
   personalHomeFlagFrame,
   restrictSystemFastCodeFeatures,
   stepPersonalHomeMapZoom,
+  systemFastCodeEntryCookieAction,
+  systemFastCodeGrantsOwnerSession,
 } from "../lib/talispros/system-fast-code-gate";
 
 const read = (path: string) => readFileSync(join(process.cwd(), path), "utf8");
@@ -118,6 +120,7 @@ describe("system FAST Code feature gate", () => {
     expect(read("app/talispros/mapsite/pin-actions.ts")).toContain("canManageMapSitePins");
     expect(read("lib/mapsite-edit-auth.ts")).toContain("canOwnerManage");
     expect(read("app/talispros/demo-mapsite/assign-actions.ts")).toContain("isPublicSystemFastCode");
+    expect(read("app/talispros/demo-mapsite/assign-actions.ts")).toContain("registeredOwner: false");
     expect(read("lib/talispros/personal-home-page.ts")).toContain("isPublicSystemFastCode");
     const access = read("lib/talispros/system-fast-code-access.ts");
     expect(access).toContain("hasOwnActivationPayment");
@@ -126,5 +129,72 @@ describe("system FAST Code feature gate", () => {
     const mapsitePage = read("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx");
     expect(mapsitePage).toContain("hasProspectAccess()");
     expect(mapsitePage).toContain("isPreparedSlotMapsite");
+  });
+
+  it("does not write cookies while rendering a system FAST Code", () => {
+    expect(
+      systemFastCodeGrantsOwnerSession({
+        publicSystem: true,
+        isAdmin: false,
+        hasOwnerCookie: true,
+        hasRootCookie: true,
+      }),
+    ).toBe(false);
+    expect(
+      systemFastCodeGrantsOwnerSession({
+        publicSystem: true,
+        isAdmin: true,
+        hasOwnerCookie: true,
+        hasRootCookie: false,
+      }),
+    ).toBe(true);
+    expect(
+      systemFastCodeGrantsOwnerSession({
+        publicSystem: false,
+        isAdmin: false,
+        hasOwnerCookie: false,
+        hasRootCookie: true,
+      }),
+    ).toBe(true);
+    expect(systemFastCodeEntryCookieAction({ publicSystem: true, paid: true })).toBe("clear");
+    expect(systemFastCodeEntryCookieAction({ publicSystem: false, paid: true })).toBe("paid-session");
+    expect(systemFastCodeEntryCookieAction({ publicSystem: false, paid: false })).toBe("owner-session");
+
+    const home = read("app/talispros/home/[fastCode]/page.tsx");
+    expect(home).not.toContain("cookies()");
+    expect(home).not.toContain("MAPSITE_OWNER_COOKIE");
+    expect(home).toContain("restrictSystemFastCodeFeatures");
+
+    const entry = read("app/talispros/mapsites/actions.ts");
+    const entryStart = entry.indexOf("export async function openClaimedMapSiteFromHomeFastCode");
+    const entryBody = entry.slice(entryStart, entry.indexOf("export async function logoutMapSiteOwnerSession"));
+    expect(entryBody).toContain("systemFastCodeEntryCookieAction");
+    expect(entryBody).toContain("clearMapSiteBrowserSessionForCode");
+    expect(entryBody.indexOf("sessionAction === \"clear\"")).toBeLessThan(
+      entryBody.indexOf("establishPaidMapSiteBrowserSession"),
+    );
+    expect(read("lib/mapsite-edit-auth.ts")).toContain("systemFastCodeGrantsOwnerSession");
+    expect(read("lib/mapsite-edit-auth.ts")).not.toContain("!isRegisteredOwner");
+
+    const renderSurfaces = [
+      "app/talispros/home/[fastCode]/page.tsx",
+      "app/talispros/mapsite/[accountType]/[fastCode]/page.tsx",
+      "app/talispros/mapsite/page.tsx",
+      "app/talispros/mapsite/layout.tsx",
+      "app/talispros/mapsites/layout.tsx",
+      "app/talisbooks/viewer/[slug]/page.tsx",
+      "app/talisbooks/viewer/page.tsx",
+      "app/talispros/demo-mapsite/ebook/page.tsx",
+      "app/talispros/mapsites/[fastCode]/ebooks/[bookId]/page.tsx",
+      "app/talispros/mapsites/[fastCode]/ebooks/new/page.tsx",
+    ];
+    for (const file of renderSurfaces) {
+      const source = read(file);
+      expect(source, file).not.toMatch(/cookies\(\)[^;\n]{0,120}\.(set|delete)\(/);
+      expect(source, file).not.toMatch(/cookieStore\.(set|delete)\(/);
+    }
+    expect(read("app/talispros/mapsite/actions.ts")).toContain(
+      "if (!publicSystem)",
+    );
   });
 });

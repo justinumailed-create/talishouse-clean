@@ -8,6 +8,7 @@ import {
   MAPSITE_ROOT_ACCOUNT_MAX_AGE,
 } from "./mapsite-account-session";
 import { hasCompletedMapSiteActivationPayment } from "./talispros/mapsite-payment";
+import { systemFastCodeGrantsOwnerSession } from "./talispros/system-fast-code-gate";
 import { logAgentAudit } from "./agent-admins";
 
 export async function getMapSiteOwnerSession(): Promise<string | null> {
@@ -159,6 +160,21 @@ export async function clearMapSiteBrowserSession(): Promise<void> {
   cookieStore.delete(MAPSITE_ROOT_ACCOUNT_COOKIE);
 }
 
+/**
+ * Drop owner/root cookies only when they name this FAST Code.
+ * Server Action or Route Handler only — a Server Component must not call this.
+ * A session for a different code is left alone.
+ */
+export async function clearMapSiteBrowserSessionForCode(fastCode: string): Promise<void> {
+  const code = normalizeFastCode(fastCode);
+  if (!code) return;
+  const cookieStore = await cookies();
+  const owner = cookieStore.get(MAPSITE_OWNER_COOKIE)?.value?.trim().toLowerCase() ?? "";
+  const root = cookieStore.get(MAPSITE_ROOT_ACCOUNT_COOKIE)?.value?.trim().toLowerCase() ?? "";
+  if (owner === code) cookieStore.delete(MAPSITE_OWNER_COOKIE);
+  if (root === code) cookieStore.delete(MAPSITE_ROOT_ACCOUNT_COOKIE);
+}
+
 export interface MapSiteEditToolbarState {
   isAdmin: boolean;
   isOwner: boolean;
@@ -184,14 +200,19 @@ export async function getMapSiteEditToolbarState(
   const isRegisteredOwner =
     registeredFastCode !== null && registeredFastCode === target;
 
-  let isOwner = hasOwnerSession || isRegisteredOwner;
-  // Entering a system FAST Code must not unlock owner tools.
-  if (isOwner && !isAdmin && hasOwnerSession && !isRegisteredOwner) {
+  // Ignore owner and root cookies for a public system code. The cookie is
+  // not a claim, including when the entry flow stored both of them.
+  let publicSystem = false;
+  if (!isAdmin && (hasOwnerSession || isRegisteredOwner)) {
     const { isPublicSystemFastCode } = await import("@/lib/talispros/system-fast-code-access");
-    if (await isPublicSystemFastCode(target, { registeredOwner: false })) {
-      isOwner = false;
-    }
+    publicSystem = await isPublicSystemFastCode(target, { registeredOwner: false });
   }
+  const isOwner = systemFastCodeGrantsOwnerSession({
+    publicSystem,
+    isAdmin,
+    hasOwnerCookie: hasOwnerSession,
+    hasRootCookie: isRegisteredOwner,
+  });
 
   return {
     isAdmin,
