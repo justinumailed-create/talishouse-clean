@@ -96,8 +96,8 @@ export type SystemEbookProfile = {
   areaMapUrl?: string | null;
   /** Office pin with about an 80 km radius. */
   marketMapUrl?: string | null;
-  /** Light plate behind a dark logo. None leaves a dark logo file as-is. */
-  logoPlate?: "light" | "none";
+  /** Light plate behind a dark logo. Dark plate behind a white or transparent logo. */
+  logoPlate?: "light" | "dark" | "none";
   latitude?: number | null;
   longitude?: number | null;
   /** Kept exactly, including the CC BY wording. */
@@ -151,12 +151,53 @@ export function formatCad(amount: number): string {
   return `CAD ${new Intl.NumberFormat("en-CA", { maximumFractionDigits: 0 }).format(rounded)}`;
 }
 
-/** 5064551980 and (506) 455-1980 both become 506-455-1980. */
+/**
+ * 5064551980 and (506) 455-1980 both become 506-455-1980.
+ * Anything that is not a North American number (area and exchange cannot
+ * start with 0 or 1) becomes an empty string so the book leaves the line out.
+ */
 export function formatCanadianPhone(raw: string | null | undefined): string {
   const digits = (raw || "").replace(/\D/g, "");
   const local = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
-  if (local.length !== 10) return (raw || "").trim();
+  if (local.length !== 10) return "";
+  if (local[0] === "0" || local[0] === "1") return "";
+  if (local[3] === "0" || local[3] === "1") return "";
   return `${local.slice(0, 3)}-${local.slice(3, 6)}-${local.slice(6)}`;
+}
+
+/** Record phone when it is a real number, otherwise the one scraped from the brokerage site. */
+export function preferUsablePhone(
+  record: string | null | undefined,
+  scraped: string | null | undefined,
+): string | null {
+  return formatCanadianPhone(record) || formatCanadianPhone(scraped) || null;
+}
+
+/** THIRD AVENUE becomes Third Avenue. Mixed-case words such as Route stay as written. */
+export function titleCaseAddress(value: string): string {
+  const small = new Set(["of", "and", "the", "de", "du", "la", "le", "des"]);
+  let wordIndex = 0;
+  return value
+    .trim()
+    .split(/(\s+)/)
+    .map((token) => {
+      if (!/[A-Za-zÀ-ÿ]/.test(token)) return token;
+      const letters = token.replace(/[^A-Za-zÀ-ÿ]/g, "");
+      const uniform = letters === letters.toUpperCase() || letters === letters.toLowerCase();
+      if (!uniform) {
+        wordIndex += 1;
+        return token;
+      }
+      const lower = token.toLowerCase();
+      const bare = lower.replace(/[^a-zà-ÿ]/gi, "");
+      const cased =
+        wordIndex > 0 && small.has(bare)
+          ? lower
+          : lower.replace(/[A-Za-zÀ-ÿ]+/g, (word) => word.charAt(0).toUpperCase() + word.slice(1));
+      wordIndex += 1;
+      return cased;
+    })
+    .join("");
 }
 
 const TOWN_COORDINATES: Record<string, [number, number]> = {
@@ -309,28 +350,54 @@ export function writeBrokerageAbout(profile: SystemEbookProfile): string {
   const town = profile.town.trim();
   const province = profile.province.trim();
   const broker = profile.brokerName.trim();
+  const address = profile.officeAddress.trim();
+  const host = websiteHost(profile.website);
   const areas = (profile.areas ?? []).filter((area) => area && area.toLowerCase() !== town.toLowerCase());
   const where = province ? `${town}, ${province}` : town;
-  const sentences = [`${name} is based in ${where}.`];
+  const sentences = [
+    address
+      ? `${name} keeps its office at ${address}.`
+      : `${name} is based in ${where}.`,
+  ];
+  if (broker) {
+    sentences.push(`${broker} leads the ${town} office.`);
+  } else if (address) {
+    sentences.push(`The office is in ${where}.`);
+  }
   if (profile.foundedYear && profile.foundedYear >= 1900 && profile.foundedYear <= 2100) {
-    sentences.push(`The office has been part of the local market since ${profile.foundedYear}.`);
+    sentences.push(`The firm has been part of the local market since ${profile.foundedYear}.`);
   }
-  if (broker) sentences.push(`${broker} leads the office.`);
   if (areas.length > 0) {
-    sentences.push(`Listings also turn up in ${joinList(areas.slice(0, 3))}.`);
+    sentences.push(`Work from this office also reaches ${joinList(areas.slice(0, 4))}.`);
+  } else {
+    sentences.push(`${town} is the home market, and the day-to-day work stays close to the office.`);
   }
+  if (host) sentences.push(`Current listings are on ${host}.`);
   return polishSystemCopy(sentences.join(" "));
 }
 
 export function writeAreaCopy(profile: SystemEbookProfile): string {
-  const areas = (profile.areas ?? []).slice(0, 3);
-  const reach =
-    areas.length > 0
-      ? ` ${joinList(areas)} ${areas.length === 1 ? "sits" : "sit"} in the same market.`
-      : "";
-  return polishSystemCopy(
-    `${profile.town} is home ground for ${profile.brokerageName}.${reach}`,
-  );
+  const name = profile.brokerageName.trim();
+  const town = profile.town.trim();
+  const address = profile.officeAddress.trim();
+  const areas = (profile.areas ?? [])
+    .map((area) => area.trim())
+    .filter((area) => area && area.toLowerCase() !== town.toLowerCase())
+    .slice(0, 4);
+  const sentences = [
+    address
+      ? `${town} is home ground for ${name}, and the office is at ${address}.`
+      : `${town} is home ground for ${name}.`,
+  ];
+  if (areas.length > 0) {
+    sentences.push(
+      `${joinList(areas)} ${areas.length === 1 ? "is" : "are"} in the same market, within about 80 km of the office.`,
+    );
+  } else {
+    sentences.push(`The market runs about 80 km around ${town}.`);
+  }
+  sentences.push(`The streets in this book are the ones the office is listing now.`);
+  return polishSystemCopy(sentences.join(" "));
 }
 
 export function writeMarketCopy(profile: SystemEbookProfile): string {
@@ -412,56 +479,69 @@ export function talismapsStaticMapUrl(input: {
   );
 }
 
+function listingKindPhrase(kind: string | null): string | null {
+  if (!kind) return null;
+  const lower = kind.toLowerCase();
+  if (/commercial/.test(lower)) return "commercial property";
+  if (/condo/.test(lower)) return "condo";
+  if (/townhouse/.test(lower)) return "townhouse";
+  if (/land|acreage/.test(lower)) return "piece of land";
+  if (/single|house|residential/.test(lower)) return "house";
+  return lower;
+}
+
+function pickVariant(seed: string, count: number): number {
+  let total = 0;
+  for (const char of seed) total = (total + char.charCodeAt(0)) % 997;
+  return total % count;
+}
+
 export function writeListingBody(
   listing: SystemEbookListing,
   profile: SystemEbookProfile,
 ): string {
-  const street = listing.street.trim();
+  if (listing.story?.trim()) return polishSystemCopy(listing.story);
+  const street = titleCaseAddress(listing.street.trim());
   const town = listing.town.trim();
+  const name = profile.brokerageName.trim();
+  const officeTown = profile.town.trim();
   const beds = factMatch(listing.facts, /(\d+)\s+bed/i);
   const baths = factMatch(listing.facts, /(\d+)\s+bath/i);
   const area = factMatch(listing.facts, /([\d,]+\s*sq\s*ft)/i);
-  const kind = factMatch(listing.facts, /residential|land|condo|townhouse|commercial/i);
-  if (listing.story?.trim()) return polishSystemCopy(listing.story);
-  const homeKind = kind ? kind.toLowerCase() : "home";
-  const details = [beds, baths, area].filter(Boolean).map((item) => item!.toLowerCase());
-  const detail = details.length
-    ? ` Inside: ${details.join(", ")}.`
-    : ` The listing is filed as ${homeKind}.`;
-  const sameTown = town.toLowerCase() === profile.town.trim().toLowerCase();
-  let place = sameTown
-    ? `It is in ${town}, the same town as the office.`
-    : `${town} is one of the places ${profile.brokerageName} already works.`;
-  if (
-    listing.latitude != null &&
-    listing.longitude != null &&
-    profile.latitude != null &&
-    profile.longitude != null
-  ) {
-    const km = distanceKm(
-      profile.latitude,
-      profile.longitude,
-      listing.latitude,
-      listing.longitude,
-    );
-    const away = formatDistanceKm(km);
-    if (sameTown && km < 8) {
-      place = `Errands stay close: the office in ${profile.town} is about ${away} away.`;
-    } else if (sameTown) {
-      place = `Still in ${town}, about ${away} from the office.`;
-    } else if (km < 30) {
-      place = `${town} is a short drive from ${profile.town}, about ${away} from the office.`;
-    } else {
-      place = `${town} is a smaller centre, about ${away} from ${profile.town}.`;
-    }
+  const lot = factMatch(listing.facts, /acre|hectare|lot/i);
+  const kind = listingKindPhrase(
+    factMatch(listing.facts, /residential|land|condo|townhouse|commercial|house|single|acreage/i),
+  );
+  const known = [beds, baths, area, lot].filter(Boolean).map((item) => item!.toLowerCase());
+  const sameTown = town.toLowerCase() === officeTown.toLowerCase();
+  const openings = kind
+    ? [
+        `${street} is a ${kind} in ${town}.`,
+        `In ${town}, ${street} is a ${kind}.`,
+        `${street}, in ${town}, is a ${kind}.`,
+      ]
+    : [
+        `${street} is listed in ${town}.`,
+        `The listing at ${street} is in ${town}.`,
+        `${town} is the setting for ${street}.`,
+      ];
+  const sentences = [openings[pickVariant(street, openings.length)]!];
+  if (known.length > 0) {
+    sentences.push(`It has ${joinList(known)}.`);
   }
-  const openings = [
-    `${street} is a ${homeKind} in ${town}.`,
-    `On ${street}, this ${homeKind} is in ${town}.`,
-    `${town} — ${street} is a ${homeKind}.`,
-  ];
-  const opening = openings[street.length % openings.length]!;
-  return polishSystemCopy(`${opening}${detail} ${place}`);
+  const places = sameTown
+    ? [
+        `The office is in ${town} as well.`,
+        `${name} works from ${town}.`,
+        `Buyers are already in ${town}, where the office sits.`,
+      ]
+    : [
+        `${town} is one of the communities ${name} serves from ${officeTown}.`,
+        `From the ${officeTown} office, ${name} already works in ${town}.`,
+        `${officeTown} is where the office is, and ${town} is part of that market.`,
+      ];
+  sentences.push(places[pickVariant(`${town}|${name}`, places.length)]!);
+  return polishSystemCopy(sentences.join(" "));
 }
 
 function logoFor(profile: SystemEbookProfile): { url: string; found: boolean } {
@@ -526,11 +606,28 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     .filter((listing) => listing.street.trim() && listing.town.trim() && Boolean(listing.photoUrl?.trim()))
     .slice(0, MAX_LISTING_PAGES);
   const lackedListings = listings.length === 0;
+  const servedTowns = new Set(
+    (profile.areas ?? []).map((area) => area.trim().toLowerCase()).filter(Boolean),
+  );
+  const areas = [...(profile.areas ?? []).map((area) => area.trim()).filter(Boolean)];
+  for (const listing of listings) {
+    const town = listing.town.trim();
+    const key = town.toLowerCase();
+    if (!town || key === profile.town.trim().toLowerCase() || servedTowns.has(key)) continue;
+    servedTowns.add(key);
+    areas.push(town);
+  }
+  profile = { ...profile, areas: areas.slice(0, 5) };
   const logo = logoFor(profile);
   const host = websiteHost(profile.website);
   const townPhotos = (profile.townPhotoUrls ?? []).map((url) => url.trim()).filter(Boolean);
-  const areaPhoto = profile.areaPhotoUrl?.trim() || townPhotos[0] || "";
-  const coverHero = areaPhoto || profile.coverMapUrl?.trim() || profile.marketMapUrl?.trim() || "";
+  const ownListingPhoto =
+    listings.find((listing) => listing.photoHost !== "mls" && listing.photoUrl?.trim())?.photoUrl?.trim() ||
+    listings.find((listing) => listing.photoUrl?.trim())?.photoUrl?.trim() ||
+    "";
+  const areaPhoto =
+    profile.areaPhotoUrl?.trim() || townPhotos[0] || profile.coverMapUrl?.trim() || ownListingPhoto;
+  const coverHero = areaPhoto;
   const areaVisual = profile.areaMapUrl?.trim() || "";
   const marketVisual = profile.marketMapUrl?.trim() || areaVisual || "";
   const townsServed = [profile.town, ...(profile.areas ?? [])]
@@ -572,14 +669,15 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
 
   if (areaPhoto) {
     pushPage(pages, {
-      slug: "area-photo",
+      slug: "area",
       pageRole: "property_content",
-      layout: "facing",
-      title: `${profile.town}, ${profile.province}`,
+      layout: "caption",
+      title: profile.town,
+      subtitle: profile.province,
+      body: writeAreaCopy(profile),
       heroImageUrl: areaPhoto,
-      imageFit: profile.areaPhotoFit ?? "contain",
-      captionsEnabled: true,
-      captionAlign: "left",
+      imageFit: profile.areaPhotoFit ?? "cover",
+      address: profile.officeAddress,
       clientEditable: false,
     });
   } else if (areaVisual) {
@@ -610,18 +708,19 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
 
   listings.forEach((listing, index) => {
     const visual = chooseListingVisual({ photoUrl: listing.photoUrl });
-    const address = `${listing.street.trim()}, ${listing.town.trim()}`;
+    const street = titleCaseAddress(listing.street.trim());
+    const address = `${street}, ${listing.town.trim()}`;
     pushPage(pages, {
       slug: `listing-${String(index + 1).padStart(2, "0")}`,
       pageRole: "property_content",
       layout: "listing",
-      title: listing.street.trim(),
+      title: street,
       subtitle: listing.town.trim(),
-      body: writeListingBody(listing, profile),
+      body: writeListingBody({ ...listing, street }, profile),
       heroImageUrl: visual.url || undefined,
       imageFit: "cover",
       address,
-      pricingLine: listing.priceCad != null ? formatCad(listing.priceCad) : undefined,
+      pricingLine: listing.priceCad != null && listing.priceCad > 0 ? formatCad(listing.priceCad) : undefined,
       signoff: listingFactsLine(listing.facts),
       brokerageName: profile.brokerageName,
       agentPhone: phone || undefined,
@@ -656,6 +755,7 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     agentPhone: phone || undefined,
     brokerageName: profile.brokerageName,
     brokerageLogoUrl: logo.url,
+    logoPlate: plate,
     address: profile.officeAddress,
     slogan: host,
     clientEditable: false,

@@ -9,6 +9,8 @@ import {
   chooseListingVisual,
   formatCad,
   formatCanadianPhone,
+  preferUsablePhone,
+  titleCaseAddress,
   isWithinOfficeRadius,
   milesToKilometres,
   parseCadAmount,
@@ -25,6 +27,7 @@ import {
   type SystemEbookProfile,
 } from "../lib/talisbooks/system-ebook-format";
 import {
+  bufferNeedsDarkPlate,
   bufferShowsCornerWatermark,
   dropWatermarkedListingPhotos,
   extractBrokerageLogo,
@@ -291,6 +294,54 @@ describe("brokerage site reading", () => {
   it("keeps only listings that have their own photo, and formats the phone", () => {
     expect(formatCanadianPhone("5064551980")).toBe("506-455-1980");
     expect(formatCanadianPhone("(506) 455-1980")).toBe("506-455-1980");
+    expect(formatCanadianPhone("09908078538")).toBe("");
+    expect(preferUsablePhone("09908078538", "(604) 815-4151")).toBe("604-815-4151");
+    expect(preferUsablePhone("09908078538", "not-a-phone")).toBeNull();
+    expect(titleCaseAddress("37861 THIRD AVENUE")).toBe("37861 Third Avenue");
+    expect(titleCaseAddress("1322 Route 148")).toBe("1322 Route 148");
+    const bare = writeListingBody(
+      { street: "764 Route 10", town: "Noonan", priceCad: null, facts: ["3,733 sq ft"] },
+      profile,
+    );
+    expect(bare).toMatch(/3,733 sq ft/);
+    expect(bare).not.toMatch(/filed as|is a home/i);
+    expect(bare.split(/[.!?]/).filter((sentence) => sentence.trim()).length).toBeGreaterThanOrEqual(2);
+    const commercial = writeListingBody(
+      {
+        street: "37861 THIRD AVENUE",
+        town: "Squamish",
+        priceCad: 9250000,
+        facts: ["6 bedrooms", "7 bathrooms", "9,209 sq ft", "Commercial"],
+      },
+      { ...profile, town: "Squamish", brokerageName: "Macdonald Realty" },
+    );
+    expect(commercial).toMatch(/37861 Third Avenue/);
+    expect(commercial).toMatch(/commercial property/);
+    expect(commercial).not.toMatch(/\ba commercial in\b/i);
+    const priced = buildSystemEbook({
+      ...profile,
+      areaPhotoUrl: null,
+      listings: [
+        {
+          street: "764 Route 10",
+          town: "Noonan",
+          priceCad: null,
+          facts: ["3,733 sq ft"],
+          photoUrl: "https://broker.example/route10.jpg",
+        },
+      ],
+    });
+    const routePage = priced.pages.find((page) => page.layout === "listing");
+    expect(routePage?.pricingLine).toBeUndefined();
+    expect(routePage?.title).toBe("764 Route 10");
+    expect(priced.pages[0]?.heroImageUrl).toBe("https://broker.example/route10.jpg");
+    expect(priced.pages.find((page) => page.id === "system-area")?.heroImageUrl).toBe(
+      "https://broker.example/route10.jpg",
+    );
+    expect(priced.pages.at(-1)?.heroImageUrl).toBe("https://broker.example/route10.jpg");
+    const about = writeBrokerageAbout(profile);
+    expect(about).toMatch(/Union Street/);
+    expect(about).toMatch(/Dave Watt/);
     expect(isWithinOfficeRadius("Esquimalt", 49.4928, -117.2948)).toBe(false);
     expect(isWithinOfficeRadius("660 Squilax Turtle Valley Road listing", 49.4928, -117.2948)).toBe(false);
     expect(isWithinOfficeRadius("Salmo", 49.4928, -117.2948)).toBe(true);
@@ -373,6 +424,29 @@ describe("brokerage site reading", () => {
     expect(await bufferShowsCornerWatermark(markedJpeg)).toBe(true);
     const tiny = await sharp({ create: { width: 40, height: 40, channels: 3, background: "#888" } }).jpeg().toBuffer();
     expect(await bufferShowsCornerWatermark(tiny)).toBe(true);
+    const whiteLogo = await sharp({
+      create: { width: 80, height: 40, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 0 } },
+    })
+      .composite([
+        {
+          input: await sharp({
+            create: { width: 50, height: 16, channels: 4, background: { r: 255, g: 255, b: 255, alpha: 1 } },
+          })
+            .png()
+            .toBuffer(),
+          left: 8,
+          top: 8,
+        },
+      ])
+      .png()
+      .toBuffer();
+    const darkLogo = await sharp({
+      create: { width: 80, height: 40, channels: 4, background: { r: 20, g: 20, b: 20, alpha: 1 } },
+    })
+      .png()
+      .toBuffer();
+    expect(await bufferNeedsDarkPlate(whiteLogo)).toBe(true);
+    expect(await bufferNeedsDarkPlate(darkLogo)).toBe(false);
     const tesseract = spawnSync("tesseract", ["--version"]);
     if (tesseract.status === 0) {
       const mls = await sharp(
