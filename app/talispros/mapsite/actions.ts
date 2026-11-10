@@ -276,7 +276,14 @@ export async function getMapSiteActivationPaymentStatus(options: {
   });
 
   if (paid && options.fastCode) {
-    await establishPaidMapSiteBrowserSession(options.fastCode);
+    // This action is also called while the Mapsite server component renders.
+    // A public system code must not receive an owner session from the shared
+    // claim-inbox payment match, and this render must not write that cookie.
+    const { isPublicSystemFastCode } = await import("@/lib/talispros/system-fast-code-access");
+    const publicSystem = await isPublicSystemFastCode(options.fastCode).catch(() => false);
+    if (!publicSystem) {
+      await establishPaidMapSiteBrowserSession(options.fastCode);
+    }
   }
 
   return { paid };

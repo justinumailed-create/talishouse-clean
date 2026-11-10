@@ -4,6 +4,7 @@ import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import {
   canEditMapSite,
   clearMapSiteBrowserSession,
+  clearMapSiteBrowserSessionForCode,
   establishPaidMapSiteBrowserSession,
   setMapSiteOwnerSession,
 } from "@/lib/mapsite-edit-auth";
@@ -12,6 +13,7 @@ import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { ROUTES } from "@/lib/routes";
 import { personalHomePath } from "@/lib/talispros/personal-home";
+import { systemFastCodeEntryCookieAction } from "@/lib/talispros/system-fast-code-gate";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { claimedMapSiteSegmentForAccountOrPlan } from "@/lib/talispros/mapsite-state";
 
@@ -202,14 +204,18 @@ export async function openClaimedMapSiteFromHomeFastCode(
     reconcileFromStripe: true,
   });
 
-  // Paid users get owner + root-account cookies; unpaid claimed codes still
-  // get owner chrome. A system-generated code that nobody has registered
-  // stays public: no owner cookie, no dashboard.
+  // Paid claimed codes get owner + root-account cookies; unpaid claimed
+  // codes still get owner chrome. A public system code has no owner session:
+  // the shared claim-inbox payment lookup must not set a cookie, and a cookie
+  // that already names this code is cleared here, before the redirect.
   const { isPublicSystemFastCode } = await import("@/lib/talispros/system-fast-code-access");
   const publicSystem = await isPublicSystemFastCode(resolvedCode);
-  if (paid) {
+  const sessionAction = systemFastCodeEntryCookieAction({ publicSystem, paid });
+  if (sessionAction === "clear") {
+    await clearMapSiteBrowserSessionForCode(resolvedCode);
+  } else if (sessionAction === "paid-session") {
     await establishPaidMapSiteBrowserSession(resolvedCode);
-  } else if (!publicSystem) {
+  } else {
     await setMapSiteOwnerSession(resolvedCode);
   }
 
