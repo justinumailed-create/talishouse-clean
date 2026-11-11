@@ -307,6 +307,8 @@ export const TALISU_REGISTER = {
     entryNotReady: "Registration is not available right now. Please try again shortly.",
     entryNeeded: "Registration needs the entry code your Tsplits™ agent gave you. Enter it to continue.",
     close: "Close",
+    pinNote:
+      "Additional PINs are $7 CAD each. Buy them from PIN Dashboard on your Mapsite.",
   },
 } as const;
 

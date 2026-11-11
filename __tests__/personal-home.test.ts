@@ -8,6 +8,7 @@ import {
   isPersonalHomePath,
   normalizePersonalHomeButtons,
   normalizePersonalHomeHref,
+  mapsiteBrokerageDisplayName,
   personalHomePath,
   resolvePersonalHome,
 } from "../lib/talispros/personal-home";
@@ -73,6 +74,43 @@ describe("personal home helpers", () => {
     expect(some.writeUp).toBe("Default write-up");
     expect(some.imageUrl).toBe("/default.jpg");
     expect(some.customized.headline).toBe(true);
+  });
+
+  it("uses the brokerage on a FAST Code home page and falls back to the person", () => {
+    expect(
+      mapsiteBrokerageDisplayName({
+        propertyTitle: "East Coast Realty",
+        ownerFirstName: "Kyle",
+        ownerLastName: "Kickham",
+        agentName: "Kyle Kickham",
+        fallback: "My Mapsite",
+      }),
+    ).toBe("East Coast Realty");
+    expect(
+      mapsiteBrokerageDisplayName({
+        brokerageName: "For-Sale-By-Owner",
+        propertyTitle: "Ralf Meyer",
+        ownerFirstName: "Ralf",
+        ownerLastName: "Meyer",
+        fallback: "My Mapsite",
+      }),
+    ).toBe("Ralf Meyer");
+    expect(
+      mapsiteBrokerageDisplayName({
+        propertyTitle: "95 Bonaventure Avenue",
+        ownerFirstName: "Aritri",
+        ownerLastName: "Dutta",
+        fallback: "My Mapsite",
+      }),
+    ).toBe("Aritri Dutta");
+    expect(
+      mapsiteBrokerageDisplayName({
+        propertyTitle: "The Right Choice Realty",
+        ownerFirstName: "Dave",
+        ownerLastName: "Watt",
+        fallback: "My Mapsite",
+      }),
+    ).toBe("The Right Choice Realty");
   });
 
   it("fills copy templates and clamps SEO text", () => {

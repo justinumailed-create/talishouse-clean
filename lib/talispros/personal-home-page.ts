@@ -16,6 +16,7 @@ import { HOME_OWNERSHIP_BG_SRC } from "@/lib/talispros/ownership-models";
 import {
   fillPersonalHomeCopy,
   personalHomeDefaultImage,
+  mapsiteBrokerageDisplayName,
   personalHomeDisplayName,
   personalHomeEditPath,
   personalHomePath,
@@ -99,6 +100,14 @@ function defaultsFor(
     propertyTitle: view.propertyTitle,
     fallback: copy.fallbackName,
   });
+  const brokerageName = mapsiteBrokerageDisplayName({
+    brokerageName: view.brokerageName,
+    propertyTitle: view.propertyTitle,
+    ownerFirstName: view.ownerFirstName,
+    ownerLastName: view.ownerLastName,
+    agentName: view.agentName,
+    fallback: displayName,
+  });
   const address = view.propertyAddress?.trim() || "";
   const description = isSystemMapSiteDescription(view.propertyDescription)
     ? ""
@@ -117,8 +126,8 @@ function defaultsFor(
         galleryImages: view.galleryImages,
         fallback: HOME_OWNERSHIP_BG_SRC,
       }),
-      kicker: view.brokerageName?.trim() || copy.kicker,
-      headline: displayName,
+      kicker: copy.kicker,
+      headline: brokerageName,
       writeUp,
       buttons: [
         { label: copy.openMapsite, href: mapsiteHref },

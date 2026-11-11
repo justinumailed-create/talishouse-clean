@@ -929,6 +929,12 @@ function MapSiteChrome({
     setDashboardPanel("pins");
   }, [pinCheckoutStatus, dashboardManageable]);
 
+  useEffect(() => {
+    if (!dashboardManageable) return;
+    if (window.location.hash !== "#additional-pins") return;
+    setDashboardPanel("pins");
+  }, [dashboardManageable]);
+
   const defaultPartnerImage = defaultMapSitePartnerImage(audience);
   const defaultPartnerName = defaultMapSitePartnerName(mapsite);
   // One resolver for logo + partner photo/name/tagline (owner overrides win).

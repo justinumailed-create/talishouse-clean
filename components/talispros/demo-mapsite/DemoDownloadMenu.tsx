@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { useT } from "@/lib/i18n/client";
-import { ROUTES } from "@/lib/routes";
 import {
   DEMO_MAPSITE_PDF_FILE_NAME,
   DEMO_MAPSITE_PDF_HREF,
@@ -11,7 +10,8 @@ import {
 /**
  * "Download Demo PDF" control on the public demo: the Centrefolds Demo PDF only.
  * The Replace Image templates (PowerPoint, Keynote, Google Slides) are for
- * registered Mapsite owners, so here they appear locked with a Register link.
+ * registered Mapsite owners. The public menu explains that and does not
+ * add a Register link — Register stays in the blue navbar.
  */
 export default function DemoDownloadMenu({
   className = "",
@@ -96,14 +96,6 @@ export default function DemoDownloadMenu({
               <span aria-hidden="true">🔒</span>
               <span>{d.downloadMenuLocked}</span>
             </p>
-            <a
-              role="menuitem"
-              href={ROUTES.TALISU_REGISTER}
-              onClick={close}
-              className="mt-2 inline-flex min-h-9 items-center rounded-full bg-[#046BD9] px-3.5 text-[13px] font-medium text-white transition hover:bg-[#035bb8]"
-            >
-              {d.downloadMenuRegister}
-            </a>
           </div>
         </div>
       ) : null}

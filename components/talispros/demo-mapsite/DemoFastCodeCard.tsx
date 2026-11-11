@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useId, useRef, useState } from "react";
 import { setFastCode } from "@/lib/fast-code";
 import { openClaimedMapSiteFromHomeFastCode } from "@/app/talispros/mapsites/actions";
@@ -8,8 +7,8 @@ import { useT } from "@/lib/i18n/client";
 
 /**
  * FAST Code™ entry card on the Demo Mapsite page (moved out of the old
- * navbar Mapsites dropdown). Enter a FAST Code™ to open your personal Mapsite,
- * plus a secondary Register link to Aisha's /talisu/reg.
+ * navbar Mapsites dropdown). Enter a FAST Code™ to open your personal Mapsite.
+ * Register stays in the blue navbar, not in this card.
  */
 export default function DemoFastCodeCard({ className = "" }: { className?: string }) {
   const t = useT();
@@ -112,18 +111,6 @@ export default function DemoFastCodeCard({ className = "" }: { className?: strin
             {error}
           </p>
         ) : null}
-
-        <div className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-white/20 pt-5 text-[14px] text-white/85">
-          <span>{m.registerPrompt}</span>
-          <Link
-            href="/talisu/reg"
-            data-testid="demo-register-link"
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/50 px-4 py-1.5 font-semibold text-white transition hover:bg-white hover:text-[#046BD9]"
-          >
-            {m.registerCta}
-            <span aria-hidden>→</span>
-          </Link>
-        </div>
       </div>
     </section>
   );

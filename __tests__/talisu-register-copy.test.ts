@@ -149,7 +149,8 @@ describe("Register page without catalogue purchase section", () => {
     expect(welcome).toContain('id="faq"');
     expect(welcome).toContain("talisu.faq");
     expect(page).toContain("max-w-[1920px]");
-    expect(page).toContain("minmax(16rem,20rem)_minmax(0,1fr)");
+    expect(page).toContain("xl:grid-cols-[minmax(0,10.75rem)_minmax(0,1fr)]");
+    expect(page).toContain("max-w-[108px]");
   });
 
   it("redirects Sea-Can routes to the Talishouse™ Product Catalogue", () => {

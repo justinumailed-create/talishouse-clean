@@ -96,10 +96,8 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(actions).toContain('return { success: true, href: "/" }');
   });
 
-  it("points Claim Market at Aisha's Register page on Talispros", () => {
-    expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe(
-      "/talisu/reg",
-    );
+  it("points Claim Market at the Claim Mapsite page, where FAST Codes are found", () => {
+    expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/talispros/demo-mapsite");
   });
 
   it("uses ownership models over photo on homepage right rail (not Markets map)", () => {

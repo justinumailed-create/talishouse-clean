@@ -5,7 +5,6 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { enforcePmcRegistrationGate, firstParam } from "@/lib/talisu/pmc-gate";
 import { createTalisUMetadata } from "@/lib/talisu/seo";
-import { TALISU_CARD } from "@/lib/talisu/ui";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE } from "@/lib/talispros/market-pages";
@@ -181,25 +180,25 @@ export default async function TalisURegisterPage({
 
   return (
     <SectionShell title={TALISU_REGISTER.title} maxWidthClass="max-w-[1920px]">
-      {/* Partner write-up stays compact; SamCart gets the remaining width so its
-          native two-column checkout (order + form) can sit side by side. */}
-      <div className="mb-14 grid items-start gap-8 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)]">
-        <div className={TALISU_CARD}>
-          <div className="mb-5 flex justify-center">
+      {/* A narrow partner column leaves the SamCart iframe wide enough for its
+          own two-column checkout at typical desktop widths (about 1280–1440px). */}
+      <div className="mb-14 grid items-start gap-6 xl:grid-cols-[minmax(0,10.75rem)_minmax(0,1fr)] xl:gap-5">
+        <div className="min-w-0 rounded-2xl bg-white p-3 shadow-[0_8px_24px_rgba(0,0,0,0.08)] ring-1 ring-black/5">
+          <div className="mb-3 flex justify-center">
             <Image
               src={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
               alt="Aisha C."
               width={896}
               height={1200}
-              className="h-auto w-full max-w-[220px] rounded-xl object-cover shadow-sm"
-              sizes="220px"
+              className="h-auto w-full max-w-[108px] rounded-lg object-cover shadow-sm"
+              sizes="108px"
               priority
             />
           </div>
-          <h2 className="text-xl font-semibold text-[#0069CF]">
+          <h2 className="text-base font-semibold leading-snug text-[#0069CF]">
             {TALISU_REGISTER.partnerHeading}
           </h2>
-          <p className="mt-3 text-sm font-medium text-neutral-950">
+          <p className="mt-2 text-xs font-medium text-neutral-950">
             {TALISU_REGISTER.partnerName}
           </p>
           {structureTab ? (
@@ -221,10 +220,10 @@ export default async function TalisURegisterPage({
               </Link>
             </div>
           ) : null}
-          <p className="mt-3 text-sm text-neutral-700">
+          <p className="mt-2 text-xs leading-snug text-neutral-700">
             {TALISU_REGISTER.partnerIntro}
           </p>
-          <ul className="mt-4 space-y-3 text-sm text-neutral-600">
+          <ul className="mt-3 space-y-2 text-xs leading-snug text-neutral-600">
             {TALISU_REGISTER.bullets.map((b) => (
               <li key={b.label}>
                 <span className="font-semibold text-neutral-900">{b.label}:</span>{" "}
@@ -232,7 +231,7 @@ export default async function TalisURegisterPage({
               </li>
             ))}
           </ul>
-          <p className="mt-4 text-sm font-medium text-[#0069CF]">
+          <p className="mt-3 text-xs font-medium text-[#0069CF]">
             {TALISU_REGISTER.closing}
           </p>
         </div>

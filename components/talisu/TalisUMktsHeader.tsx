@@ -26,6 +26,11 @@ import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import RegisterNavDropdown from "@/components/talisu/RegisterNavDropdown";
 import LanguageSwitch from "@/components/i18n/LanguageSwitch";
+import {
+  registerMenuItemActive,
+  registerMenuLabel,
+  useRegisterNavLocation,
+} from "@/components/talisu/register-nav";
 import { useT } from "@/lib/i18n/client";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { SHOW_TALISU_NAV } from "@/lib/talisu/ui-flags";
@@ -141,6 +146,7 @@ export default function TalisUMktsHeader({
   onSelectDashboardItem,
 }: TalisUMktsHeaderProps = {}) {
   const pathname = usePathname() || "/talisu/mkts";
+  const { search, hash } = useRegisterNavLocation();
   const router = useRouter();
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -882,10 +888,8 @@ export default function TalisUMktsHeader({
                   {TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((item) =>
                     renderMobileLink(
                       item.href,
-                      item.href === "/talisu/reg"
-                        ? t.nav.registerMenu.mapsite
-                        : t.nav.registerMenu.product,
-                      pathname === item.href,
+                      registerMenuLabel(t, item.menuKey),
+                      registerMenuItemActive(item.href, pathname, search, hash),
                       true,
                     ),
                   )}

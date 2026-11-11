@@ -46,7 +46,8 @@ export const de: Dictionary = {
     closeMenu: "Menü schließen",
     registerMenu: {
       mapsite: "Mapsite",
-      product: "Produktoptionen",
+      account: "Konto registrieren",
+      pin: "PIN registrieren",
     },
     talisuMenu: {
       tsplits: "Tsplits™",
@@ -362,6 +363,8 @@ export const de: Dictionary = {
         entryNotReady: "Die Registrierung ist gerade nicht verfügbar. Bitte versuchen Sie es in Kürze erneut.",
         entryNeeded: "Für die Registrierung benötigen Sie den Zugangscode Ihres Tsplits™ Agenten. Geben Sie ihn ein, um fortzufahren.",
         close: "Schließen",
+        pinNote:
+          "Zusätzliche PINs kosten je 7 CAD. Kaufen Sie sie im PIN-Dashboard Ihrer Mapsite.",
       },
     },
     engage: {
@@ -1248,6 +1251,7 @@ export const de: Dictionary = {
       "Willkommen auf meiner persönlichen Startseite. Öffnen Sie meine Mapsite, um meine Angebote rund um {address} zu entdecken, meine Talisbooks™ zu lesen und den Markt kennenzulernen, den ich betreue.",
     openMapsite: "Mapsite öffnen",
     claimMarket: "Claim Your Market™",
+    contactHeading: "Kontakt",
     photoAlt: "{name}",
     mapLabel: "Mapsite",
     zoomIn: "Vergrößern",

@@ -1,4 +1,5 @@
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
+import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { BUILD_MAPSITE_PREVIEW_LOCATION } from "@/components/build-mapsite/home-pin-types";
 
 /** Full-bleed chrome paths: homepage gate (`/`) + former homepage (`/start`). */
@@ -74,8 +75,11 @@ export const TALISPROS_START_SEGMENTS = [
   },
 ] as const;
 
-/** Claim Market destination from the homepage gate: Aisha's Register page on Talispros (same tab). */
-export const TALISPROS_HOME_SYSTEM_DEMO_HREF = "/talisu/reg";
+/**
+ * Home-page Claim Market control. Same destination as the blue-bar Mapsites
+ * link: the Claim Mapsite / Demo page, where FAST Codes are found.
+ */
+export const TALISPROS_HOME_SYSTEM_DEMO_HREF = DEMO_MAPSITE_BUILD_PATH;
 
 export type TalisprosHomeDemoPrivacyMask = {
   id: string;
