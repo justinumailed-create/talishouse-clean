@@ -85,7 +85,7 @@ export default async function TalisURegisterPage({
 
   if (!isTalisURegisterCheckoutStep(params.step)) {
     // Landing: Aisha's portrait + exactly four buttons, in this order:
-    // Propose Project · Claim Market · Terms of Service · Register.
+    // Propose Project · Claim Mapsite · Terms of Service · Register.
     const wantsStructures =
       step === REGISTER_CHOOSE_STEP ||
       params.structure !== undefined ||

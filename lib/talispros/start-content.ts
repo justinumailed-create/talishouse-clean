@@ -76,7 +76,7 @@ export const TALISPROS_START_SEGMENTS = [
 ] as const;
 
 /**
- * Home-page Claim Market control. Same destination as the blue-bar Mapsites
+ * Home-page Claim Mapsite control. Same destination as the blue-bar Mapsites
  * link: the Claim Mapsite / Demo page, where FAST Codes are found.
  */
 export const TALISPROS_HOME_SYSTEM_DEMO_HREF = DEMO_MAPSITE_BUILD_PATH;

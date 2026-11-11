@@ -387,7 +387,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     env.entry = false;
   });
 
-  it("bare landing: exactly four buttons in order Propose Project, Claim Market, Terms of Service, Register", async () => {
+  it("bare landing: exactly four buttons in order Propose Project, Claim Mapsite, Terms of Service, Register", async () => {
     for (const entry of [false, true]) {
       env.entry = entry;
       const tree = await renderReg({});
@@ -404,7 +404,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
       const order = [...html.matchAll(/data-testid="register-action-(\w+)"/g)].map((m) => m[1]);
       expect(order).toEqual(["propose", "claim", "terms", "register"]);
       expect(html).toContain(">Propose Project<");
-      expect(html).toContain(">Claim Market<");
+      expect(html).toContain(">Claim Mapsite<");
       expect(html).toContain(">Terms of Service<");
       expect(html).toContain(">Register<");
       expect(html).not.toContain("register-structures-");
@@ -414,7 +414,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
   it("German labels", async () => {
     env.locale = "de";
     const html = renderToStaticMarkup((await renderReg({})) as ReactElement);
-    for (const label of ["Projekt vorschlagen", "Markt beanspruchen", "Nutzungsbedingungen", "Registrieren"]) {
+    for (const label of ["Projekt vorschlagen", "Mapsite beanspruchen", "Nutzungsbedingungen", "Registrieren"]) {
       expect(html).toContain(`>${label}<`);
     }
   });

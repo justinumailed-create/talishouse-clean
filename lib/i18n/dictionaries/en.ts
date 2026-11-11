@@ -122,7 +122,7 @@ export const en = {
   home: {
     motto: "PROMOTE - MANAGE - COOPERATE",
     openAccount: "Open your Account*",
-    systemDemo: "Claim Market",
+    systemDemo: "Claim Mapsite",
     legalSecondary: TALISPROS_LEGAL_SECONDARY_COPY,
     bannerTitle: HOME_OWNERSHIP_BANNER_TITLE,
     structuresTagline: HOME_OWNERSHIP_STRUCTURES_TAGLINE,
