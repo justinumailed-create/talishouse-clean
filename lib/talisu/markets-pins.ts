@@ -110,11 +110,49 @@ export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/reg", label: "Register" },
 ] as const;
 
-/** Register dropdown — Mapsite account vs Product Options (Webster). */
+/**
+ * Register dropdown.
+ * Mapsite stays on Aisha's adviser page. Product Options (/talisu/engage)
+ * stays reachable by direct URL and is no longer listed here.
+ * Register Account starts the SamCart account purchase (agent code still required).
+ * Register PIN lands on the additional-PIN note on that same Register page —
+ * there is no separate public checkout route for the $7 CAD PIN.
+ */
 export const TALISU_MKTS_HEADER_REGISTER_DROPDOWN = [
-  { href: "/talisu/reg", label: "Mapsite" },
-  { href: "/talisu/engage", label: "Product Options" },
+  { href: "/talisu/reg", label: "Mapsite", menuKey: "mapsite" },
+  { href: "/talisu/reg?step=choose", label: "Register Account", menuKey: "account" },
+  { href: "/talisu/reg#additional-pins", label: "Register PIN", menuKey: "pin" },
 ] as const;
+
+export type RegisterDropdownMenuKey =
+  (typeof TALISU_MKTS_HEADER_REGISTER_DROPDOWN)[number]["menuKey"];
+
+/** Highlights the Register row that matches the current Register URL. */
+export function isRegisterDropdownItemActive(
+  href: string,
+  pathname: string,
+  search: string,
+  hash: string,
+): boolean {
+  const hashIndex = href.indexOf("#");
+  const bare = hashIndex >= 0 ? href.slice(0, hashIndex) : href;
+  const expectedHash = hashIndex >= 0 ? href.slice(hashIndex) : "";
+  const queryIndex = bare.indexOf("?");
+  const path = queryIndex >= 0 ? bare.slice(0, queryIndex) : bare;
+  const query = queryIndex >= 0 ? bare.slice(queryIndex + 1) : "";
+  if (pathname !== path) return false;
+  const current = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const expected = new URLSearchParams(query);
+  if (expectedHash) {
+    return hash === expectedHash && !current.has("step");
+  }
+  if (hash === "#additional-pins" && !expected.has("step")) return false;
+  for (const [key, value] of expected) {
+    if (current.get(key) !== value) return false;
+  }
+  if (!expected.has("step") && current.has("step")) return false;
+  return true;
+}
 
 /** Placeholder marker — Mapsites dropdown is rendered in TalisUMktsHeader. */
 export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;

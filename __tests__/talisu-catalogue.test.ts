@@ -228,7 +228,8 @@ describe("Catalogue product numbering", () => {
     expect(en.catalogueUi.front).toBe("Front");
     expect(en.catalogueUi.back).toBe("Back");
     expect(en.catalogueUi.customizeDesign).toBe("Customize a design");
-    expect(en.nav.registerMenu.product).toBe("Product Options");
+    expect(en.nav.registerMenu.account).toBe("Register Account");
+    expect(en.nav.registerMenu.pin).toBe("Register PIN");
   });
 });
 

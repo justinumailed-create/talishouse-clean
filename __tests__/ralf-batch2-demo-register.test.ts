@@ -84,7 +84,13 @@ describe("Ralf follow-ups — blue navbar Register + Webster CAD", () => {
     expect(register?.href).toBe("/talisu/reg");
     const dropdown = pins.TALISU_MKTS_HEADER_REGISTER_DROPDOWN;
     expect(dropdown.find((i) => i.label === "Mapsite")?.href).toBe("/talisu/reg");
-    expect(dropdown.find((i) => i.label === "Product Options")?.href).toBe("/talisu/engage");
+    expect(dropdown.find((i) => i.label === "Register Account")?.href).toBe(
+      "/talisu/reg?step=choose",
+    );
+    expect(dropdown.find((i) => i.label === "Register PIN")?.href).toBe(
+      "/talisu/reg#additional-pins",
+    );
+    expect(dropdown.some((i) => i.label === "Product Options")).toBe(false);
     for (const item of [...pins.TALISU_MKTS_HEADER_NAV, ...dropdown]) {
       expect(item.href).not.toContain("mysamcart");
     }

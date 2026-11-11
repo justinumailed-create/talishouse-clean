@@ -118,7 +118,7 @@ export const TALISU_FAQ: {
       question: "How do I submit a market application?",
       answer: "Please follow this sequence on Talispros.com:",
       bullets: [
-        "Select “Claim Market”.",
+        "Select “Claim Mapsite”.",
         "Choose the PIN closest to your home point.",
         "Select “Next Step” and build a demo eBook.",
         "Fill out the form: First initials of your first and last name generate half of your FAST Code™ (Free Access, Standard Tracking). The other half is a number between 01 and 99 to make you unique within our system. Your Street Address positions your Home PIN on your sample Mapsite. The sample Mapsite tells us if there are conflicts with other home markets.",
@@ -290,11 +290,11 @@ export const TALISU_REGISTER = {
   structureClose: "Close",
   structureChange: "Change",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
-  /** Aisha's four buttons (Oct 31): Propose Project · Claim Market · Terms of Service · Register. */
+  /** Aisha's four buttons: Propose Project · Claim Mapsite · Terms of Service · Register. */
   actions: {
     label: "How would you like to start?",
     propose: "Propose Project",
-    claim: "Claim Market",
+    claim: "Claim Mapsite",
     terms: "Terms of Service",
     register: "Register",
     entryTitle: "Enter your agent entry code",
@@ -307,6 +307,8 @@ export const TALISU_REGISTER = {
     entryNotReady: "Registration is not available right now. Please try again shortly.",
     entryNeeded: "Registration needs the entry code your Tsplits™ agent gave you. Enter it to continue.",
     close: "Close",
+    pinNote:
+      "Additional PINs are $7 CAD each. Buy them from PIN Dashboard on your Mapsite.",
   },
 } as const;
 

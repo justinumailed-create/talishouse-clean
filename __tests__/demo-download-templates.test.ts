@@ -114,7 +114,9 @@ describe("templates are not public", () => {
       "utf8",
     );
     expect(menu).toContain("DEMO_MAPSITE_PDF_HREF");
-    expect(menu).toContain("ROUTES.TALISU_REGISTER");
+    expect(menu).toContain("downloadMenuLocked");
+    expect(menu).not.toContain("ROUTES.TALISU_REGISTER");
+    expect(menu).not.toContain("downloadMenuRegister");
     expect(menu).not.toMatch(/\.pptx|Template\.key|api\/templates|docs\.google|replaceImageTemplateHref/);
     expect(menu).not.toContain('target="_blank"');
     expect(en.demo.downloadMenuRegister).toBe("Register to unlock templates");

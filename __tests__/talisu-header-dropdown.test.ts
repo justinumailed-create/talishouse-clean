@@ -76,12 +76,17 @@ describe("TalisU blue header dropdown", () => {
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Admin Places")).toBe(false);
     expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.label)).toEqual([
       "Mapsite",
-      "Product Options",
+      "Register Account",
+      "Register PIN",
     ]);
     expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.href)).toEqual([
       "/talisu/reg",
-      "/talisu/engage",
+      "/talisu/reg?step=choose",
+      "/talisu/reg#additional-pins",
     ]);
+    expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.href).join(" ")).not.toContain(
+      "/talisu/engage",
+    );
   });
 
 
@@ -99,7 +104,8 @@ describe("TalisU blue header dropdown", () => {
       "utf8",
     );
     expect(card).toContain("openClaimedMapSiteFromHomeFastCode");
-    expect(card).toContain('href="/talisu/reg"');
+    expect(card).not.toContain('href="/talisu/reg"');
+    expect(card).not.toContain("demo-register-link");
     const builder = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),
       "utf8",

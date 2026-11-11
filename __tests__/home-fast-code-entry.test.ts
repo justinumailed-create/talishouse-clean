@@ -77,7 +77,7 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(gate).toContain("t.home.openAccount");
     expect(en.home.openAccount).toBe("Open your Account*");
     expect(gate).toContain("t.home.systemDemo");
-    expect(en.home.systemDemo).toBe("Claim Market");
+    expect(en.home.systemDemo).toBe("Claim Mapsite");
     expect(gate).toContain("TALISPROS_HOME_SYSTEM_DEMO_HREF");
     expect(gate).toContain("aria-expanded={loginOpen}");
     expect(gate).toContain("setLoginOpen");
@@ -96,10 +96,8 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(actions).toContain('return { success: true, href: "/" }');
   });
 
-  it("points Claim Market at Aisha's Register page on Talispros", () => {
-    expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe(
-      "/talisu/reg",
-    );
+  it("points Claim Mapsite at the Claim Mapsite page, where FAST Codes are found", () => {
+    expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/talispros/demo-mapsite");
   });
 
   it("uses ownership models over photo on homepage right rail (not Markets map)", () => {

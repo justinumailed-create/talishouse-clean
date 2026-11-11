@@ -67,7 +67,8 @@ export const en = {
     closeMenu: "Close menu",
     registerMenu: {
       mapsite: "Mapsite",
-      product: "Product Options",
+      account: "Register Account",
+      pin: "Register PIN",
     },
     talisuMenu: {
       tsplits: "Tsplits™",
@@ -121,7 +122,7 @@ export const en = {
   home: {
     motto: "PROMOTE - MANAGE - COOPERATE",
     openAccount: "Open your Account*",
-    systemDemo: "Claim Market",
+    systemDemo: "Claim Mapsite",
     legalSecondary: TALISPROS_LEGAL_SECONDARY_COPY,
     bannerTitle: HOME_OWNERSHIP_BANNER_TITLE,
     structuresTagline: HOME_OWNERSHIP_STRUCTURES_TAGLINE,
@@ -973,6 +974,7 @@ export const en = {
       "Welcome to my personal home page. Open my Mapsite to explore my listings around {address}, read my Talisbooks™ and get to know the market I serve.",
     openMapsite: "Open Mapsite",
     claimMarket: "Claim Your Market™",
+    contactHeading: "Contact",
     photoAlt: "{name}",
     mapLabel: "Mapsite",
     zoomIn: "Zoom in",

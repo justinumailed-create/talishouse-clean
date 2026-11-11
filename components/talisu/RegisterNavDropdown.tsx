@@ -2,25 +2,23 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import { TALISU_MKTS_HEADER_REGISTER_DROPDOWN } from "@/lib/talisu/markets-pins";
 import { useT } from "@/lib/i18n/client";
-
-function isRegisterHrefActive(pathname: string, href: string) {
-  const path = href.split("#")[0] || href;
-  if (path === "/catalogue") return pathname === "/catalogue";
-  return pathname === path || pathname.startsWith(`${path}/`);
-}
+import {
+  registerMenuItemActive,
+  registerMenuLabel,
+  useRegisterNavLocation,
+} from "@/components/talisu/register-nav";
 
 export default function RegisterNavDropdown() {
-  const pathname = usePathname() || "";
+  const { pathname, search, hash } = useRegisterNavLocation();
   const t = useT();
   const [open, setOpen] = useState(false);
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
 
   const registerActive = TALISU_MKTS_HEADER_REGISTER_DROPDOWN.some((item) =>
-    isRegisterHrefActive(pathname, item.href),
+    registerMenuItemActive(item.href, pathname, search, hash),
   );
 
   useEffect(() => {
@@ -75,25 +73,23 @@ export default function RegisterNavDropdown() {
         <div
           id={menuId}
           role="menu"
-          className="absolute right-0 z-50 mt-1.5 min-w-[11.5rem] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] py-1 shadow-lg"
+          className="absolute right-0 z-50 mt-1.5 min-w-[13.5rem] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] py-1 shadow-lg"
         >
           {TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((item) => {
-            const active = isRegisterHrefActive(pathname, item.href);
+            const active = registerMenuItemActive(item.href, pathname, search, hash);
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
+                className={`block whitespace-nowrap px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
                   active
                     ? "bg-white/20 text-white"
                     : "text-white/95 hover:bg-white/15"
                 }`}
               >
-                {item.href === "/talisu/engage"
-                  ? t.nav.registerMenu.product
-                  : t.nav.registerMenu.mapsite}
+                {registerMenuLabel(t, item.menuKey)}
               </Link>
             );
           })}

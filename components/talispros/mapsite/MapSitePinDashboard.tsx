@@ -323,7 +323,7 @@ export default function MapSitePinDashboard({
           ) : null}
         </dl>
 
-        <div className="space-y-2">
+        <div id="additional-pins" className="space-y-2">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
             {fmt(d.buyHeading, { price: formatAdditionalPinMoneyFromCents(dashboard.unitPriceCents) })}
           </h3>

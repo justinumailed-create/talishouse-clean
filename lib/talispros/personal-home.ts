@@ -171,7 +171,63 @@ export type PersonalHomeDefaults = {
   buttons: PersonalHomeButton[];
 };
 
-/** Owner name for the heading: first + last, else agent name, else title. */
+/**
+ * Account-type labels stored in build_requests.company, plus generic titles.
+ * These are not a brokerage name.
+ */
+const GENERIC_BROKERAGE_NAME =
+  /^(mapsite|demo mapsite|demo-mapsite|home pin address|licensed real estate professional|for-sale-by-owner|for sale by owner|real estate broker or owner|assisted build request|adpro service provider|fsbo|listings|brokers|adpro)$/i;
+
+/** Street addresses stored in property_title are not the brokerage. */
+export function looksLikeStreetAddress(value: string): boolean {
+  const text = value.replace(/\s+/g, " ").trim();
+  if (!text) return false;
+  if (/^\d+\s+\S/.test(text)) return true;
+  if (/\d/.test(text) && text.includes(",")) return true;
+  return /\b(rd|road|st|street|ave|avenue|blvd|boulevard|highway|hwy|route|lot)\b/i.test(
+    text,
+  );
+}
+
+function cleanIdentity(value: string | null | undefined): string {
+  return value?.replace(/\s+/g, " ").trim() || "";
+}
+
+/**
+ * Public name for a FAST Code Mapsite home page.
+ * Prefer the brokerage stored on the Mapsite (property title, which system
+ * FAST Codes use as the firm) or a real company name. Fall back to the
+ * person only when neither is a brokerage name.
+ */
+export function mapsiteBrokerageDisplayName(input: {
+  brokerageName?: string | null;
+  propertyTitle?: string | null;
+  ownerFirstName?: string | null;
+  ownerLastName?: string | null;
+  agentName?: string | null;
+  fallback: string;
+}): string {
+  const person = personalHomeDisplayName({
+    ownerFirstName: input.ownerFirstName,
+    ownerLastName: input.ownerLastName,
+    agentName: input.agentName,
+    propertyTitle: null,
+    fallback: "",
+  });
+  const personKey = person.toLowerCase();
+  const candidates = [input.propertyTitle, input.brokerageName];
+  for (const raw of candidates) {
+    const name = cleanIdentity(raw);
+    if (!name) continue;
+    if (GENERIC_BROKERAGE_NAME.test(name)) continue;
+    if (personKey && name.toLowerCase() === personKey) continue;
+    if (looksLikeStreetAddress(name)) continue;
+    return name;
+  }
+  return person || input.fallback;
+}
+
+/** Owner name: first + last, else agent name, else title. */
 export function personalHomeDisplayName(input: {
   ownerFirstName?: string | null;
   ownerLastName?: string | null;

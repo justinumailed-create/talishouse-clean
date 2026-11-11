@@ -100,6 +100,11 @@ export default async function PersonalHomePage({
     ? resolved.buttons.filter((button) => !isOwnerOnlyPersonalHomeHref(button.href))
     : resolved.buttons;
   const paragraphs = resolved.writeUp.split(/\n{2,}/).filter((part) => part.trim());
+  const contactName = data.displayName.trim();
+  const showContactName =
+    Boolean(contactName) &&
+    contactName !== resolved.headline &&
+    contactName !== getDictionary(locale).personalHome.fallbackName;
 
   return (
     <div
@@ -156,6 +161,16 @@ export default async function PersonalHomePage({
               </div>
             ))}
           </div>
+          {showContactName ? (
+            <section className="mt-6 max-w-[60ch]" data-testid="personal-home-contact">
+              <h2 className="text-[13px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
+                {getDictionary(locale).personalHome.contactHeading}
+              </h2>
+              <p className="mt-2 text-[15px] font-medium text-neutral-950 sm:text-[16px]">
+                {contactName}
+              </p>
+            </section>
+          ) : null}
           {buttons.length ? (
             <div
               className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8"

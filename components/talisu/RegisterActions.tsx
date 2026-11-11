@@ -30,6 +30,7 @@ export type RegisterActionLabels = {
   entryNotReady: string;
   entryNeeded: string;
   close: string;
+  pinNote: string;
 };
 
 /** Where the first three buttons go (decided on the server page). */
@@ -46,7 +47,7 @@ const GRID =
 
 /**
  * Aisha's four buttons on /talisu/reg (Arun, Oct 31), in this order:
- * Propose Project · Claim Market · Terms of Service (the Service Agreement,
+ * Propose Project · Claim Mapsite · Terms of Service (the Service Agreement,
  * STEP 3 · CONTRACT) · Register. Register asks for the entry code an agent
  * issued; only a code the server accepts opens registration. The checkout
  * route checks the same entry server-side, so the button is not the lock.
@@ -194,6 +195,10 @@ export default function RegisterActions({
           </button>
         </form>
       ) : null}
+
+      <p id="additional-pins" className="mx-auto mt-4 max-w-[40rem] text-center text-[13px] leading-relaxed text-neutral-600">
+        {labels.pinNote}
+      </p>
     </div>
   );
 }
