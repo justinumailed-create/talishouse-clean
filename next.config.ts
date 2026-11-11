@@ -21,6 +21,11 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Unlisted growth-call deck (public file + clean URL). Not in nav or sitemap.
+        source: "/talisu/deck/growth-call-2026-11/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
         source: "/assets/Demo-PDF.pdf",
         headers: [
           {
@@ -39,6 +44,22 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
+  },
+  async rewrites() {
+    // public/.../index.html is not a directory index. Serve the deck as-is
+    // at the clean URL, with or without a trailing slash.
+    return {
+      beforeFiles: [
+        {
+          source: "/talisu/deck/growth-call-2026-11",
+          destination: "/talisu/deck/growth-call-2026-11/index.html",
+        },
+        {
+          source: "/talisu/deck/growth-call-2026-11/",
+          destination: "/talisu/deck/growth-call-2026-11/index.html",
+        },
+      ],
+    };
   },
   async redirects() {
     return [
