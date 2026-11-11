@@ -14,6 +14,8 @@ import { createTalisUMetadata } from "../lib/talisu/seo";
 import { createMetadata } from "../lib/seo";
 import { config as middlewareConfig, middleware } from "../middleware";
 import { NextRequest } from "next/server";
+import { de } from "../lib/i18n/dictionaries/de";
+import { en } from "../lib/i18n/dictionaries/en";
 
 describe("EN | DE switch", () => {
   it("defaults to English", () => {
@@ -60,6 +62,15 @@ describe("EN | DE switch", () => {
     expect(switchSrc).toContain("persistLocale(next, document)");
     expect(switchSrc).toContain("router.refresh()");
     expect(switchSrc).toContain("aria-pressed");
+    expect(switchSrc).toContain("t.langSwitch.comingSoon");
+    expect(switchSrc).toContain('aria-disabled="true"');
+    expect(switchSrc).toContain('role="tooltip"');
+  });
+
+  it("keeps EN active and labels FR, ES and DE as coming soon", () => {
+    expect(en.langSwitch.comingSoon).toBe("Coming soon");
+    expect(de.langSwitch.comingSoon).toBe("Demnächst");
+    expect(de.langSwitch.deName).toBe("Deutsch");
   });
 
   it("sets <html lang> from the server locale in the root layout", () => {

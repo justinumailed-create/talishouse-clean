@@ -149,7 +149,7 @@ export default function DemoHeroMap() {
             <div className="bg-gradient-to-b from-white/70 to-white/80 px-3.5 pb-3 pt-2">
               <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">{NSNC_TITLE}</h2>
               <p className="m-0 mt-0.5 text-[12px] leading-snug text-neutral-800">{card.body}</p>
-              <div className="mt-2.5 grid grid-cols-4 gap-1.5 sm:grid-cols-2">
+              <div className="mt-2.5 grid grid-cols-2 gap-1.5">
                 {DEMO_PIN_CARD_ACTIONS.map((label) => {
                   const explainer: PinActionExplainerId = label.startsWith("TEB")
                     ? "teb"

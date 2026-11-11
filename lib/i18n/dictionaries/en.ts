@@ -39,6 +39,7 @@ export const en = {
     de: "DE",
     enName: "English",
     deName: "Deutsch",
+    comingSoon: "Coming soon",
   },
 
   common: {
