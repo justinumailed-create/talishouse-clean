@@ -106,6 +106,7 @@ export default async function AgentDashboard({
           ui={agent.reviewer ? { ...ui, empty: ui.emptyReview } : ui}
           locale={locale}
           hrefFor={(code) => `/admin/agent/flow/${code.toLowerCase()}`}
+          showDisqualify={!readOnly && !agent.reviewer}
         />
         <Leaderboard rows={board} ui={ui} />
       </div>

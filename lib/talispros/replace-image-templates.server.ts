@@ -1,4 +1,5 @@
 import "server-only";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import {
@@ -8,7 +9,10 @@ import {
   getRegisteredMapSiteFastCode,
 } from "@/lib/mapsite-edit-auth";
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
-import type { ReplaceImageTemplateFormat } from "@/lib/talispros/replace-image-templates";
+import {
+  REPLACE_IMAGE_TEMPLATE_FILES,
+  type ReplaceImageTemplateFormat,
+} from "@/lib/talispros/replace-image-templates";
 
 /**
  * Google Slides "Make a copy" link. Server-only: rendered only for registered
@@ -19,10 +23,24 @@ const DEFAULT_GOOGLE_SLIDES_COPY_URL =
   "https://docs.google.com/presentation/d/1UmNQdsJZtonuw16i54PNP16WXEfBP2f3x3TVthcb3kA/copy";
 
 export function getReplaceImageGoogleSlidesCopyUrl(): string {
-  return (
-    process.env.TALISPROS_TEMPLATE_GOOGLE_SLIDES_COPY_URL?.trim() ||
-    DEFAULT_GOOGLE_SLIDES_COPY_URL
+  const override = process.env.TALISPROS_TEMPLATE_GOOGLE_SLIDES_COPY_URL;
+  if (override !== undefined && override.trim() === "") return "";
+  return override?.trim() || DEFAULT_GOOGLE_SLIDES_COPY_URL;
+}
+
+export function replaceImageFileReady(format: ReplaceImageTemplateFormat): boolean {
+  return existsSync(
+    join(process.cwd(), "private/templates", REPLACE_IMAGE_TEMPLATE_FILES[format].fileName),
   );
+}
+
+/** Which template buttons can download. Missing files stay visible as Coming soon. */
+export function replaceImageTemplateAvailability(): { pptx: boolean; key: boolean; slides: boolean } {
+  return {
+    pptx: replaceImageFileReady("pptx"),
+    key: replaceImageFileReady("key"),
+    slides: Boolean(getReplaceImageGoogleSlidesCopyUrl()),
+  };
 }
 
 /**

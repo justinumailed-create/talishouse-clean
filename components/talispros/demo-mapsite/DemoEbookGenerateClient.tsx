@@ -24,7 +24,7 @@ import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { ONBOARDING_JOB_TIMEOUT_MS } from "@/lib/onboarding-timing";
 import { TALISU_MKTS_HEADER_BLUE } from "@/lib/talisu/markets-pins";
 import Link from "next/link";
-import DemoDownloadMenu from "@/components/talispros/demo-mapsite/DemoDownloadMenu";
+import DemoDownloadMenu, { type TemplateAvailability } from "@/components/talispros/demo-mapsite/DemoDownloadMenu";
 import { useT } from "@/lib/i18n/client";
 import { DemoVisaProgress } from "@/components/talispros/demo-mapsite/DemoVisaProgress";
 
@@ -143,9 +143,11 @@ function uploadLabelFromFiles(files: File[], fallback: string): string {
 export default function DemoEbookGenerateClient({
   mapsiteId,
   title,
+  templateAvailability,
 }: {
   mapsiteId: string;
   title: string;
+  templateAvailability?: TemplateAvailability;
 }) {
   const demoCopy = useT().demo;
   const copy = demoCopy.ebookPage;
@@ -545,7 +547,12 @@ export default function DemoEbookGenerateClient({
             {demoCopy.ebookIntroNote}
           </div>
           <div className="mt-4 flex justify-center">
-            <DemoDownloadMenu className="relative inline-block" align="left" variant="secondary" />
+            <DemoDownloadMenu
+              className="relative inline-block"
+              align="left"
+              variant="secondary"
+              availability={templateAvailability}
+            />
           </div>
         </section>
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DisqualifyBrokerageControl from "@/components/admin/agents/DisqualifyBrokerageControl";
 import { CHECKPOINT_LABEL, stepLabel, type FlowLocale, type FlowUi } from "@/lib/talispros/call-flow-copy";
 import type { BoardCard, LeaderRow } from "@/lib/talispros/call-flow-server";
 import type { BadgeKey } from "@/lib/talispros/call-flow";
@@ -48,11 +49,13 @@ export function AssignedMapsites({
   ui,
   locale,
   hrefFor,
+  showDisqualify = false,
 }: {
   cards: BoardCard[];
   ui: FlowUi;
   locale: FlowLocale;
   hrefFor: (fastCode: string) => string;
+  showDisqualify?: boolean;
 }) {
   return (
     <section data-testid="agent-lead-list">
@@ -104,6 +107,7 @@ export function AssignedMapsites({
             <Link href={hrefFor(item.fastCode)} className="mt-3 inline-flex text-[13px] font-semibold text-[#1E4ED8]">
               {ui.open}
             </Link>
+            {showDisqualify ? <DisqualifyBrokerageControl locale={locale} fastCode={item.fastCode} /> : null}
           </li>
         ))}
       </ol>

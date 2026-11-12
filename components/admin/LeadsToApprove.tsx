@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { reviewProspectAction, updateProspectContactAction } from "@/app/admin/dashboard/fast-code-tracker-actions";
+import DisqualifyBrokerageControl from "@/components/admin/agents/DisqualifyBrokerageControl";
 import { cardClass } from "@/components/admin/ui";
 import { ProspectCsvImport } from "@/components/admin/ProspectQueueControls";
 import { istDay } from "@/lib/talispros/fast-code-tracker";
@@ -422,6 +423,11 @@ export default function LeadsToApprove({
                         {t.completeYes}
                       </span>
                     )}
+                    <DisqualifyBrokerageControl
+                      locale={locale}
+                      prospectQueueId={row.id}
+                      fastCode={row.proposed_code}
+                    />
                   </td>
                 </tr>
               );

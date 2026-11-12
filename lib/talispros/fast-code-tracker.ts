@@ -51,6 +51,8 @@ export const FAST_CODE_EVENT_LABELS: Record<"en" | "de", Record<FastCodeEventTyp
     step: "Call step",
     comment: "Checkpoint comment",
     lead: "Lead",
+    disqualified: "Disqualified",
+    requalified: "Restored",
   },
   de: {
     stage: "Phase",
@@ -63,6 +65,8 @@ export const FAST_CODE_EVENT_LABELS: Record<"en" | "de", Record<FastCodeEventTyp
     step: "Gesprächsschritt",
     comment: "Prüfpunkt-Kommentar",
     lead: "Lead",
+    disqualified: "Disqualifiziert",
+    requalified: "Wieder aufgenommen",
   },
 };
 
@@ -76,7 +80,9 @@ export type FastCodeEventType =
   | "refresh"
   | "step"
   | "comment"
-  | "lead";
+  | "lead"
+  | "disqualified"
+  | "requalified";
 
 export function isFastCodeStage(value: unknown): value is FastCodeStage {
   return typeof value === "string" && (FAST_CODE_STAGES as readonly string[]).includes(value);

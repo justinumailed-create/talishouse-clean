@@ -5,9 +5,10 @@
  * two 960×1080 leaves. Photos are cover-fitted or contain-fitted inside
  * that frame. They never become the page size.
  *
- * Page order follows the brokerage book already used by the editor:
- *   front cover, about the brokerage, listing pages, an area page,
- *   a market page, a contact page, and a back cover.
+ * Page order:
+ *   front cover, then the 80 km market map as the inside cover
+ *   (the first spread, the next two pages), then about the brokerage,
+ *   listing pages, a contact page, and a back cover.
  * Landscape centerfolds remain a viewer layout. System pages do not use a
  * photo as the spread that resizes the book.
  */
@@ -654,6 +655,36 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     clientEditable: false,
   });
 
+  // Inside cover: the first spread after the front cover is the 80 km market map.
+  const marketImage = marketVisual || areaVisual || undefined;
+  pushPage(pages, {
+    slug: "market-left",
+    pageRole: "property_content",
+    layout: "maps",
+    title: profile.town,
+    address: profile.officeAddress,
+    body: writeMarketCopy(profile),
+    heroImageUrl: marketImage,
+    latitude: profile.latitude ?? undefined,
+    longitude: profile.longitude ?? undefined,
+    mapZoom: 9,
+    clientEditable: false,
+  });
+  pushPage(pages, {
+    slug: "market-right",
+    pageRole: "property_content",
+    layout: "maps",
+    title: profile.town,
+    subtitle: profile.province,
+    address: profile.officeAddress,
+    body: writeAreaCopy(profile),
+    heroImageUrl: marketImage,
+    latitude: profile.latitude ?? undefined,
+    longitude: profile.longitude ?? undefined,
+    mapZoom: 9,
+    clientEditable: false,
+  });
+
   pushPage(pages, {
     slug: "about",
     pageRole: "property_content",
@@ -677,30 +708,6 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
       body: writeAreaCopy(profile),
       heroImageUrl: areaPhoto,
       imageFit: profile.areaPhotoFit ?? "cover",
-      address: profile.officeAddress,
-      clientEditable: false,
-    });
-  } else if (areaVisual) {
-    pushPage(pages, {
-      slug: "area-map",
-      pageRole: "property_content",
-      layout: "maps",
-      title: profile.town,
-      address: profile.officeAddress,
-      body: writeAreaCopy(profile),
-      heroImageUrl: areaVisual,
-      latitude: profile.latitude ?? undefined,
-      longitude: profile.longitude ?? undefined,
-      clientEditable: false,
-    });
-  } else {
-    pushPage(pages, {
-      slug: "area",
-      pageRole: "property_content",
-      layout: "essay",
-      title: profile.town,
-      subtitle: profile.province,
-      body: writeAreaCopy(profile),
       address: profile.officeAddress,
       clientEditable: false,
     });
@@ -729,20 +736,6 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
       longitude: listing.longitude ?? undefined,
       clientEditable: false,
     });
-  });
-
-  pushPage(pages, {
-    slug: "market",
-    pageRole: "property_content",
-    layout: "maps",
-    title: profile.town,
-    address: profile.officeAddress,
-    body: writeMarketCopy(profile),
-    heroImageUrl: marketVisual || undefined,
-    latitude: profile.latitude ?? undefined,
-    longitude: profile.longitude ?? undefined,
-    mapZoom: 9,
-    clientEditable: false,
   });
 
   pushPage(pages, {

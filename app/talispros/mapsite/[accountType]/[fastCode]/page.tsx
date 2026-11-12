@@ -58,6 +58,7 @@ import { isPreparedSlotMapsite } from "@/lib/talispros/fast-code-slots-server";
 import { readMapZoomExplicit } from "@/lib/talispros/system-mapsite-zoom-server";
 import { hasProspectAccess } from "@/lib/talispros/prospect-gate-server";
 import { loadOwnTebViewerHref } from "@/lib/talisbooks/own-teb-href";
+import { isFastCodeDisqualified } from "@/lib/talispros/market-disqualify-server";
 
 export const dynamic = "force-dynamic";
 
@@ -145,6 +146,11 @@ export default async function ClaimedMapSiteByAccountTypePage({
 
   if (!fastCode || fastCode.toLowerCase() === "demo") {
     notFound();
+  }
+
+  if (await isFastCodeDisqualified(fastCode)) {
+    const owner = await isOwnMapSite(fastCode).catch(() => false);
+    if (!owner) notFound();
   }
 
   const showActivatePayment = isTruthyParam(firstParam(query[ACTIVATE_QUERY]));
