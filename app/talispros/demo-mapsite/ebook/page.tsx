@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import DemoEbookGenerateClient from "@/components/talispros/demo-mapsite/DemoEbookGenerateClient";
 import { loadDemoMapSiteForEbook } from "@/lib/talispros/demo-mapsite-service";
 import { pageMetadata } from "@/lib/seo/page-metadata";
+import { replaceImageTemplateAvailability } from "@/lib/talispros/replace-image-templates.server";
 
 export async function generateMetadata() {
   return pageMetadata("/talispros/demo-mapsite/ebook");
@@ -32,6 +33,7 @@ export default async function DemoMapSiteEbookPage({
     <DemoEbookGenerateClient
       mapsiteId={mapsite.mapsiteId}
       title={mapsite.title}
+      templateAvailability={replaceImageTemplateAvailability()}
     />
   );
 }

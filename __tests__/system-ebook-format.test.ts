@@ -100,6 +100,21 @@ describe("standard system Talisbook", () => {
     expect(cover.imageFit).toBe("cover");
   });
 
+  it("puts the 80 km market map on the inside cover, the first spread after the front cover", () => {
+    const document = buildSystemEbook(profile);
+    expect(document.pages[0]?.layout).toBe("cover");
+    expect(document.pages[1]).toMatchObject({ id: "system-market-left", layout: "maps" });
+    expect(document.pages[2]).toMatchObject({ id: "system-market-right", layout: "maps" });
+    expect(document.pages[1]?.body).toMatch(/80 km/);
+    expect(document.pages[2]?.body).toMatch(/80 km/);
+    expect(document.pages[1]?.heroImageUrl).toBe(document.pages[2]?.heroImageUrl);
+    const aboutIndex = document.pages.findIndex((page) => page.layout === "essay");
+    expect(aboutIndex).toBeGreaterThan(2);
+    expect(document.pages.filter((page) => page.layout === "maps")).toHaveLength(2);
+    expect(document.pages.at(-1)?.layout).toBe("cover");
+    expect(document.pages.length % 2).toBe(0);
+  });
+
   it("builds cover, about, listings, market, contact, and a logo back cover", () => {
     const document = buildSystemEbook(profile);
     expect(document.pages.length % 2).toBe(0);

@@ -1,103 +1,101 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { useT } from "@/lib/i18n/client";
-import {
-  DEMO_MAPSITE_PDF_FILE_NAME,
-  DEMO_MAPSITE_PDF_HREF,
-} from "@/lib/talispros/demo-mapsite";
+import { ROUTES } from "@/lib/routes";
+import { REPLACE_IMAGE_TEMPLATE_FILES } from "@/lib/talispros/replace-image-templates";
+
+export type TemplateAvailability = {
+  pptx: boolean;
+  key: boolean;
+  slides: boolean;
+};
 
 /**
- * "Download Demo PDF" control on the public demo: the Centrefolds Demo PDF only.
- * The Replace Image templates (PowerPoint, Keynote, Google Slides) are for
- * registered Mapsite owners. The public menu explains that and does not
- * add a Register link — Register stays in the blue navbar.
+ * Replace Image templates on the public demo. The three buttons are visible
+ * to everyone. A download runs only for a registered owner; anyone else gets
+ * a short prompt to register. A missing file stays visible as Coming soon.
  */
 export default function DemoDownloadMenu({
   className = "",
-  align = "right",
   variant = "primary",
+  availability = { pptx: true, key: true, slides: true },
 }: {
   className?: string;
   align?: "left" | "right";
-  /** "secondary": quiet outlined button (demo builder card). */
   variant?: "primary" | "secondary";
+  availability?: TemplateAvailability;
 }) {
   const d = useT().demo;
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const menuId = useId();
+  const [prompt, setPrompt] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    function onPointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("pointerdown", onPointerDown);
-    document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown);
-      document.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open]);
+  const buttonClass =
+    variant === "secondary"
+      ? "inline-flex min-h-10 items-center justify-center rounded-full border border-neutral-300 bg-white px-4 text-left text-[13px] font-medium text-neutral-800 transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60 sm:text-[14px]"
+      : "inline-flex min-h-10 items-center justify-center rounded-full bg-neutral-950 px-4 text-left text-[13px] font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60 sm:text-[14px]";
 
-  const itemClass =
-    "flex min-h-10 items-center justify-between gap-3 rounded-xl px-3 text-[14px] text-neutral-900 transition hover:bg-neutral-100 focus-visible:bg-neutral-100 focus-visible:outline-none";
-  const close = () => setOpen(false);
+  async function openTemplate(format: "pptx" | "key" | "slides") {
+    setPrompt(false);
+    setBusy(format);
+    try {
+      const response = await fetch(`/api/templates/${format}`, { credentials: "same-origin" });
+      if (response.status === 403) {
+        setPrompt(true);
+        return;
+      }
+      if (!response.ok) return;
+      if (format === "slides") {
+        const data = (await response.json()) as { url?: string };
+        if (data.url) window.open(data.url, "_blank", "noopener,noreferrer");
+        return;
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = REPLACE_IMAGE_TEMPLATE_FILES[format].fileName;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const items = [
+    { format: "pptx" as const, ready: availability.pptx, label: d.downloadMenuPptx },
+    { format: "key" as const, ready: availability.key, label: d.downloadMenuKeynote },
+    {
+      format: "slides" as const,
+      ready: availability.slides,
+      label: availability.slides ? `${d.downloadMenuSlides} — ${d.downloadMenuMakeCopy}` : d.downloadMenuSlides,
+    },
+  ];
 
   return (
-    <div ref={rootRef} className={className || "relative"} data-testid="demo-download-menu">
-      <button
-        type="button"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={menuId}
-        onClick={() => setOpen((value) => !value)}
-        data-testid="demo-download-button"
-        className={
-          variant === "secondary"
-            ? "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-neutral-300 bg-white px-4 text-[13px] font-medium text-neutral-800 transition hover:bg-neutral-50 sm:text-[14px]"
-            : "inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-neutral-950 px-4 text-[13px] font-medium text-white transition hover:bg-neutral-800 sm:text-[14px]"
-        }
-      >
-        {d.downloadPdf}
-        <span
-          aria-hidden="true"
-          className="text-[10px] leading-none"
-        >
-          {open ? "▲" : "▼"}
-        </span>
-      </button>
-      {open ? (
-        <div
-          id={menuId}
-          role="menu"
-          style={{ width: "min(320px, calc(100vw - 32px))", maxWidth: "none" }}
-          className={`absolute ${align === "left" ? "left-0" : "right-0"} z-30 mt-2 rounded-2xl bg-white p-2 text-left shadow-[0_1px_2px_rgba(0,0,0,0.06),0_16px_48px_rgba(0,0,0,0.14)] ring-1 ring-black/5`}
-        >
-          <a
-            role="menuitem"
-            href={DEMO_MAPSITE_PDF_HREF}
-            download={DEMO_MAPSITE_PDF_FILE_NAME}
-            onClick={close}
-            className={itemClass}
+    <div className={className || "relative"} data-testid="demo-download-menu">
+      <div className="flex flex-wrap gap-2" data-testid="template-download-buttons">
+        {items.map((item) => (
+          <button
+            key={item.format}
+            type="button"
+            disabled={!item.ready || busy === item.format}
+            onClick={() => void openTemplate(item.format)}
+            data-testid={`template-${item.format}`}
+            className={buttonClass}
           >
-            {d.downloadMenuPdf}
-            <span className="text-[12px] text-neutral-400">PDF</span>
-          </a>
-          <p className="mt-2 border-t border-neutral-100 px-3 pb-1 pt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-neutral-400">
-            {d.downloadMenuTemplates}
-          </p>
-          <div className="px-3 pb-2" data-testid="demo-templates-locked">
-            <p className="flex items-start gap-2 text-[13px] leading-snug text-neutral-500">
-              <span aria-hidden="true">🔒</span>
-              <span>{d.downloadMenuLocked}</span>
-            </p>
-          </div>
-        </div>
+            {item.ready ? item.label : `${item.label} — ${d.downloadMenuComingSoon}`}
+          </button>
+        ))}
+      </div>
+      {prompt ? (
+        <p className="mt-2 max-w-sm text-[13px] leading-snug text-neutral-600" data-testid="template-register-prompt">
+          {d.downloadMenuPrompt}{" "}
+          <Link href={ROUTES.TALISU_REGISTER} className="font-semibold text-[#1E4ED8] underline">
+            {d.downloadMenuRegister}
+          </Link>
+        </p>
       ) : null}
     </div>
   );

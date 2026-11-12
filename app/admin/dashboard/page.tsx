@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getAdminSessionAccount, requireAdminPage } from "@/lib/admin-auth";
-import { accountHasAdminScope } from "@/lib/admin-constants";
+import { accountHasAdminScope, isGlobalAdmin } from "@/lib/admin-constants";
 import { getAdminNavItems } from "@/lib/admin-nav";
 import TalisBooksAdminHome from "@/components/admin/TalisBooksAdminHome";
 import TalisMapsAdminHome from "@/components/admin/TalisMapsAdminHome";
@@ -11,6 +11,7 @@ import { getAgentPresence, listAgentNotes } from "@/lib/agent-collab-server";
 import { listAgents } from "@/lib/agent-admins";
 import { listManualPayments } from "@/lib/manual-payments";
 import FastCodesTracker from "@/components/admin/FastCodesTracker";
+import MarketSourcePanel from "@/components/admin/MarketSourcePanel";
 import LeadsToApproveSection from "@/components/admin/LeadsToApproveSection";
 import TalisbotMessagesSection from "@/components/admin/TalisbotMessagesSection";
 import { getLocale } from "@/lib/i18n/server";
@@ -84,6 +85,7 @@ export default async function AdminDashboardPage({
       {canAgents ? (
         <>
           <LeadsToApproveSection locale={locale} query={query} />
+          <MarketSourcePanel locale={locale} canReverse={isGlobalAdmin(account)} />
           <TalisbotMessagesSection
             locale={locale}
             talisbotDay={one(query.talisbotDay)}

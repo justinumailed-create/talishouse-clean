@@ -15,6 +15,7 @@ import { loadCheckpointRollup } from "@/lib/talispros/call-flow-server";
 import { CHECKPOINT_LABEL } from "@/lib/talispros/call-flow-copy";
 import { addProspectToQueueAction } from "@/app/admin/dashboard/fast-code-tracker-actions";
 import FastCodeRunNowButton from "./FastCodeRunNowButton";
+import DisqualifyBrokerageControl from "@/components/admin/agents/DisqualifyBrokerageControl";
 
 type Locale = "en" | "de";
 
@@ -357,6 +358,7 @@ export default async function FastCodesTracker({
                   >
                     {timelineCode === r.fastCode.toLowerCase() ? t.close : t.timeline}
                   </Link>
+                  <DisqualifyBrokerageControl locale={locale} fastCode={r.fastCode} />
                 </td>
               </tr>
             ))}

@@ -96,6 +96,17 @@ describe("gated Replace Image template downloads", () => {
     auth.admin = true;
     expect((await get("pdf")).status).toBe(404);
   });
+
+  it("returns the Google Slides copy link only to a registered owner", async () => {
+    expect((await get("slides")).status).toBe(403);
+    auth.ownerSession = "lrg1";
+    auth.paidCodes.add("lrg1");
+    const slides = await get("slides", "lrg1");
+    expect(slides.status).toBe(200);
+    const body = (await slides.json()) as { url?: string };
+    expect(body.url).toContain("docs.google.com/presentation");
+    expect(body.url).toContain("/copy");
+  });
 });
 
 describe("templates are not public", () => {
@@ -108,18 +119,29 @@ describe("templates are not public", () => {
     expect(nextConfig).toMatch(/outputFileTracingIncludes[\s\S]*"\/api\/templates\/\*\*"[\s\S]*private\/templates/);
   });
 
-  it("demo download menu offers only the Demo PDF plus a Register-to-unlock note", () => {
+  it("demo download menu offers PowerPoint, Keynote and Google Slides, and prompts unregistered visitors to register", () => {
     const menu = readFileSync(
       join(process.cwd(), "components/talispros/demo-mapsite/DemoDownloadMenu.tsx"),
       "utf8",
     );
-    expect(menu).toContain("DEMO_MAPSITE_PDF_HREF");
-    expect(menu).toContain("downloadMenuLocked");
-    expect(menu).not.toContain("ROUTES.TALISU_REGISTER");
-    expect(menu).not.toContain("downloadMenuRegister");
-    expect(menu).not.toMatch(/\.pptx|Template\.key|api\/templates|docs\.google|replaceImageTemplateHref/);
-    expect(menu).not.toContain('target="_blank"');
+    expect(menu).not.toContain("DEMO_MAPSITE_PDF_HREF");
+    expect(menu).toContain("downloadMenuPptx");
+    expect(menu).toContain("downloadMenuKeynote");
+    expect(menu).toContain("downloadMenuSlides");
+    expect(menu).toContain("downloadMenuMakeCopy");
+    expect(menu).toContain("downloadMenuComingSoon");
+    expect(menu).toContain("downloadMenuRegister");
+    expect(menu).toContain("ROUTES.TALISU_REGISTER");
+    expect(menu).toContain("/api/templates/");
+    expect(menu).not.toMatch(/docs\.google|1UmNQdsJZtonuw16i54PNP16WXEfBP2f3x3TVthcb3kA/);
+    expect(en.demo.downloadMenuPptx).toBe("Microsoft PowerPoint (.pptx)");
+    expect(en.demo.downloadMenuKeynote).toBe("Apple Keynote (.key)");
+    expect(en.demo.downloadMenuSlides).toBe("Google Slides");
+    expect(en.demo.downloadMenuMakeCopy).toBe("Make a copy");
+    expect(en.demo.downloadMenuComingSoon).toBe("Coming soon");
     expect(en.demo.downloadMenuRegister).toBe("Register to unlock templates");
+    expect(de.demo.downloadMenuMakeCopy).toBe("Kopie erstellen");
+    expect(de.demo.downloadMenuComingSoon).toBe("Demnächst");
     expect(de.demo.downloadMenuRegister).toContain("Vorlagen freizuschalten");
   });
 

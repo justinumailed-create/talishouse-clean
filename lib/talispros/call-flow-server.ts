@@ -49,11 +49,14 @@ import {
   setFastCodeStage,
   type TrackerRow,
 } from "@/lib/talispros/fast-code-tracker-server";
+import { disqualificationForFastCode, activeDisqualifiedFastCodes } from "@/lib/talispros/market-disqualify-server";
 
 export type FlowActor = {
   access: "agent" | "reviewer" | "admin";
   agentId: string | null;
   name: string;
+  /** Global Admin may restore a disqualified brokerage. */
+  globalAdmin?: boolean;
 };
 
 export type BoardCard = {
@@ -124,6 +127,12 @@ export type LeadBundle = {
   comments: FlowComment[];
   checkpoints: CheckpointKey[];
   history: { id: string; at: string; label: string; note: string | null }[];
+  disqualification: {
+    reason: string;
+    actorName: string;
+    createdAt: string;
+  } | null;
+  canReverse: boolean;
 };
 
 const LEADER_LOGINS = ["aritri", "enanko"] as const;
@@ -277,12 +286,20 @@ async function assemble(rows: TrackerRow[]): Promise<BoardCard[]> {
   return cards.map((item) => item.card);
 }
 
+async function withoutDisqualified(rows: TrackerRow[]): Promise<TrackerRow[]> {
+  const hidden = await activeDisqualifiedFastCodes().catch(() => new Set<string>());
+  if (!hidden.size) return rows;
+  return rows.filter((row) => !hidden.has(row.fastCode.toLowerCase()));
+}
+
 export async function loadAgentBoard(agentId: string): Promise<BoardCard[]> {
-  return assemble(await listTrackerRows({ agentId }).catch(() => []));
+  const rows = await listTrackerRows({ agentId }).catch(() => [] as TrackerRow[]);
+  return assemble(await withoutDisqualified(rows));
 }
 
 export async function loadReviewBoard(): Promise<BoardCard[]> {
-  return assemble(await listTrackerRows().catch(() => []));
+  const rows = await listTrackerRows().catch(() => [] as TrackerRow[]);
+  return assemble(await withoutDisqualified(rows));
 }
 
 export async function loadCheckpointRollup(): Promise<Map<string, { checkpoint: CheckpointKey | null; comments: number }>> {
@@ -539,7 +556,7 @@ export async function loadLeadFlow(rawCode: string, actor: FlowActor, locale: Fl
   if (!allowed) return null;
 
   const lead = await ensureLead(code, tracked, actor.name);
-  const [steps, checks, commentRes, updates, teb, mapRow] = await Promise.all([
+  const [steps, checks, commentRes, updates, teb, mapRow, disqualification] = await Promise.all([
     stepRows([code]),
     checkpointMap([code]),
     db()
@@ -552,6 +569,7 @@ export async function loadLeadFlow(rawCode: string, actor: FlowActor, locale: Fl
     tracked.mapsiteId
       ? db().from("mapsites").select("account_type").eq("id", tracked.mapsiteId).maybeSingle()
       : Promise.resolve({ data: null }),
+    disqualificationForFastCode(code).catch(() => null),
   ]);
   const saved = toSaved(steps);
   const accountType = (mapRow.data as { account_type?: string | null } | null)?.account_type ?? null;
@@ -612,6 +630,10 @@ export async function loadLeadFlow(rawCode: string, actor: FlowActor, locale: Fl
       const text = historyLabel(update, locale);
       return { id: update.id, at: update.createdAt, label: text.label, note: text.note };
     }),
+    disqualification: disqualification
+      ? { reason: disqualification.reason, actorName: disqualification.actorName, createdAt: disqualification.createdAt }
+      : null,
+    canReverse: Boolean(actor.globalAdmin),
   };
 }
 
