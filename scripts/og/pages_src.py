@@ -9,6 +9,8 @@ RAHUL = ("images/mapsites/lrg1-rahul.jpeg", 0.5, {"en": "Rahul — Marketing Adm
 MAP = ("assets/home-demo/01-talismaps-mkts.jpg", 0.42, None, None)
 SHELF = ("assets/home-demo/02-talisbooks-bookshelf.jpg", 0.3, None, None)
 CLAIMED = ("assets/home-demo/03-claimed-mapsite-rm22.jpg", 0.12, None, None)
+# Demo Mapsites share card: North Shore flag, no portrait, thumbs-up through the page.
+NSNC_SHARE = ("og/source/north-shore-mapsite.jpg", 0.5, None, None)
 LAPTOP = ("images/mapsite-bottom-right.jpg", 0.55, None, None)
 TDOME = ("talisu/mkts/T-Dome-elevateNF.jpg", 0.5, None, None)
 PIN = ("talisu/mkts/PIN-Map-1920L.jpeg", 0.45, None, None)
@@ -172,13 +174,13 @@ add("/talistv", "talistv", "public", LAPTOP,
     ("TalisTV™ | Hauseigener Online-TV-Sender",
      "TalisTV™ ist der hauseigene Online-TV-Sender von Tsplits™. Im Programmführer sehen Sie, was live läuft und was als Nächstes kommt.",
      "TALISTV™  ·  PROGRAMMFÜHRER", ["TalisTV™", "hauseigener", "Online-TV-Sender"], ["Live", "Als Nächstes", "Programm"]))
-add("/talispros/demo-mapsite", "demo-mapsite", "public", CLAIMED,
-    ("Build a Demo eBook and Mapsite | Tsplits™",
-     "Place a demonstration pin and attach the pinned Tsplits™ eBook. Try a Mapsite with no FAST Code issued.",
-     "TSPLITS™  ·  DEMO", ["Build a", "demo eBook", "and Mapsite"], ["Demo pin", "eBook", "No FAST Code"]),
-    ("Demo-E-Book und Mapsite erstellen | Tsplits™",
-     "Setzen Sie einen Demo-Pin und hängen Sie das Tsplits™ E-Book an. Testen Sie eine Mapsite, ohne dass ein FAST Code vergeben wird.",
-     "TSPLITS™  ·  DEMO", ["Demo-E-Book", "und Mapsite", "erstellen"], ["Demo-Pin", "E-Book", "Ohne FAST Code"]))
+add("/talispros/demo-mapsite", "demo-mapsite", "public", NSNC_SHARE,
+    ("Demo Mapsites | Tsplits™",
+     "Demo Mapsites on Tsplits™. See the North Shore Nature Centre flag on the map and open the pinned Talisbook™.",
+     "TSPLITS™  ·  DEMO", ["Show your", "market on", "the map"], ["North Shore", "Flag", "Talisbook™"]),
+    ("Demo-Mapsites | Tsplits™",
+     "Demo-Mapsites auf Tsplits™. Sehen Sie das Fähnchen des North Shore Nature Centre auf der Karte und öffnen Sie das Talisbook™.",
+     "TSPLITS™  ·  DEMO", ["Zeigen Sie", "Ihren Markt", "auf der Karte"], ["North Shore", "Fähnchen", "Talisbook™"]))
 add("/talispros/demo-mapsite/ebook", "demo-ebook", "public", COVER,
     ("Demo Talisbook™ from the Pinned eBook | Tsplits™",
      "Turn the pinned Tsplits™ eBook PDF into a demonstration Talisbook™ with optimised pages.",

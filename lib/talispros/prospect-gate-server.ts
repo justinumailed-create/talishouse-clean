@@ -5,15 +5,23 @@ import { cookies, headers } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { signCookieValue, verifyCookieValue } from "@/lib/talispros/mapsite-contract-service";
-import { getAdminSessionAccount } from "@/lib/admin-auth";
+import { getAdminSessionAccount, matchesGlobalAdminPassword } from "@/lib/admin-auth";
+import { getActiveAdminGrant } from "@/lib/admin-access-grants";
+import { normalizeAgentCode } from "@/lib/talispros/mapsite-contract";
 import { normalizeSlotFastCode } from "@/lib/talispros/fast-code-slots";
 
 /**
- * Agent password gate for prospect Mapsites (Arun, Nov 5). A prepared FAST
- * Code opens only after an active agent's password is entered; the match is
- * checked here against agent_admins.password_hash and stored as a short-lived
- * signed cookie. Wrong guesses never lock an agent's own login; they are
- * rate-limited per IP instead.
+ * Agent gate for prospect Mapsites (Arun, Nov 5). A prepared FAST Code opens
+ * after an active agent's password or permanent agent code, or after a
+ * superadmin credential (global admin password, or an active admin-access
+ * grant). The match is stored as a short-lived signed cookie. Wrong guesses
+ * never lock an agent's own login; they are rate-limited per IP instead.
+ *
+ * Superadmins were rejected before this: the gate compared only
+ * agent_admins.password_hash. Ralf is a granted admin and also has an agent
+ * row, but the page asked for a password and did not accept his agent code
+ * or his admin sign-in. Arun, the owner, signs in as the global admin, which
+ * this gate also ignored.
  */
 
 export const PROSPECT_GATE_COOKIE = "talis_prospect_gate";
@@ -76,6 +84,26 @@ export async function verifyProspectGate(rawCode: unknown, rawPassword: unknown,
       matched = row.id;
       break;
     }
+  }
+  if (!matched) {
+    const agentCode = normalizeAgentCode(password);
+    if (agentCode) {
+      const { data: coded } = await db()
+        .from("agent_admins")
+        .select("id")
+        .eq("status", "active")
+        .eq("contract_code", agentCode)
+        .maybeSingle();
+      const codedRow = coded as { id: string } | null;
+      if (codedRow?.id) matched = codedRow.id;
+    }
+  }
+  if (!matched && (await matchesGlobalAdminPassword(password))) {
+    matched = "global-admin";
+  }
+  if (!matched) {
+    const grant = await getActiveAdminGrant(password);
+    if (grant) matched = `grant:${grant.id}`;
   }
   await db().from("fast_code_gate_attempts").insert({ ip_hash: ip, ok: Boolean(matched) });
   if (!matched) return { ok: false, error: "wrong" };

@@ -21,6 +21,8 @@ describe("TalisU blue header dropdown", () => {
       "Value-Added",
       "Media Directory",
       "Contract",
+      "Terms of Service",
+      "Privacy Policy",
       "Knowledge Base",
       "Catalogue",
     ]);
@@ -31,6 +33,8 @@ describe("TalisU blue header dropdown", () => {
       "/talisu/value-added",
       "/talisu/media-directory",
       "/talisu/contract",
+      "/terms",
+      "/privacy",
       "/talisu/kb",
       "/catalogue",
     ]);

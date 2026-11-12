@@ -5,9 +5,12 @@ import type {
   TalisMapsPinVisualProps,
 } from "./types";
 
-/** Previous default body was 44px; new default is ~1.5×. */
-export const TALISMAPS_PIN_BASE_SIZE = 66;
-export const TALISMAPS_PIN_SELECTED_SIZE = 78;
+/**
+ * Round marker body. 50px (was 66) so the circle covers less of an
+ * about-80 km map. Selected size keeps the same ratio.
+ */
+export const TALISMAPS_PIN_BASE_SIZE = 50;
+export const TALISMAPS_PIN_SELECTED_SIZE = 59;
 
 export const TALISMAPS_PIN_DEFAULT_COLOR = "#1C1C1E";
 export const TALISMAPS_PIN_DEFAULT_BORDER = "rgba(255,255,255,0.92)";
@@ -40,9 +43,9 @@ export const TALISMAPS_PIN_CENTER_RATIO = 0.254;
 export const TALISMAPS_PIN_BORDER_WIDTH = 0.5;
 
 const SIZE_PRESETS: Record<Exclude<TalisMapsPinSize, number>, number> = {
-  sm: 54,
+  sm: 41,
   md: TALISMAPS_PIN_BASE_SIZE,
-  lg: 84,
+  lg: 64,
 };
 
 export function resolvePinSize(

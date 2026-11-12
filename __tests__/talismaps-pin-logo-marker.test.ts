@@ -82,11 +82,10 @@ describe("Talismaps™ logo marker padding + border", () => {
       whiteCenter: true,
       customLogoUrl: "/assets/windswept-tree-logo.png",
     });
-    expect(plain.bodySize).toBe(66);
-    expect(withLogo.bodySize).toBe(Math.round(66 * (0.64 / 0.5)));
-    expect(pinLogoSizePx(withLogo.bodySize)).toBe(pinLogoSizePx(Math.round(66 * 1.28)));
-    // Absolute logo size ≈ legacy 0.64 * 66
-    expect(pinLogoSizePx(withLogo.bodySize)).toBe(Math.round(66 * 0.64));
+    expect(plain.bodySize).toBe(50);
+    expect(withLogo.bodySize).toBe(Math.round(50 * (0.64 / 0.5)));
+    expect(pinLogoSizePx(withLogo.bodySize)).toBe(pinLogoSizePx(Math.round(50 * 1.28)));
+    expect(pinLogoSizePx(withLogo.bodySize)).toBe(Math.round(50 * 0.64));
   });
 });
 

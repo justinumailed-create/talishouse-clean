@@ -99,7 +99,7 @@ const resolveAdminSessionAccount = cache(async (): Promise<AdminAccount | null> 
  * server-only env var GLOBAL_ADMIN_PASSWORD_HASH. No hash configured → no
  * Global Admin login (the identity code itself no longer logs in).
  */
-async function isGlobalAdminPassword(raw: string): Promise<boolean> {
+export async function matchesGlobalAdminPassword(raw: string): Promise<boolean> {
   const hash = process.env.GLOBAL_ADMIN_PASSWORD_HASH?.trim();
   if (!hash || !raw) return false;
   try {
@@ -121,7 +121,7 @@ export async function writeAdminSessionCookie(fastCode: string): Promise<AdminAc
 
   let account: AdminAccount | null = null;
   let token: string | null = null;
-  if (await isGlobalAdminPassword(raw)) {
+  if (await matchesGlobalAdminPassword(raw)) {
     account = GLOBAL_ADMIN_ACCOUNT;
     token = await createAdminSession({ access: "global", grantId: null });
   } else {

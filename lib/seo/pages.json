@@ -313,14 +313,14 @@
    "noindex": false,
    "image": "/og/pages/demo-mapsite",
    "en": {
-    "title": "Build a Demo eBook and Mapsite | Tsplits™",
-    "description": "Place a demonstration pin and attach the pinned Tsplits™ eBook. Try a Mapsite with no FAST Code issued.",
-    "alt": "Tsplits™ tree logo: Build a demo eBook and Mapsite"
+    "title": "Demo Mapsites | Tsplits™",
+    "description": "Demo Mapsites on Tsplits™. See the North Shore Nature Centre flag on the map and open the pinned Talisbook™.",
+    "alt": "Tsplits™ tree logo: Show your market on the map"
    },
    "de": {
-    "title": "Demo-E-Book und Mapsite erstellen | Tsplits™",
-    "description": "Setzen Sie einen Demo-Pin und hängen Sie das Tsplits™ E-Book an. Testen Sie eine Mapsite, ohne dass ein FAST Code vergeben wird.",
-    "alt": "Tsplits™ Baumlogo: Demo-E-Book und Mapsite erstellen"
+    "title": "Demo-Mapsites | Tsplits™",
+    "description": "Demo-Mapsites auf Tsplits™. Sehen Sie das Fähnchen des North Shore Nature Centre auf der Karte und öffnen Sie das Talisbook™.",
+    "alt": "Tsplits™ Baumlogo: Zeigen Sie Ihren Markt auf der Karte"
    }
   },
   "/talispros/demo-mapsite/ebook": {

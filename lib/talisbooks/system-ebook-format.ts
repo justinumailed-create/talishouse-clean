@@ -6,9 +6,10 @@
  * that frame. They never become the page size.
  *
  * Page order:
- *   front cover, then the 80 km market map as the inside cover
- *   (the first spread, the next two pages), then about the brokerage,
- *   listing pages, a contact page, and a back cover.
+ *   front cover, then the 80 km market map as the inside-cover spread
+ *   (the next two pages), then the protected-market page, then about
+ *   the brokerage, the area page, listing pages, a contact page, and a
+ *   back cover.
  * Landscape centerfolds remain a viewer layout. System pages do not use a
  * photo as the spread that resizes the book.
  */
@@ -679,6 +680,20 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
     address: profile.officeAddress,
     body: writeAreaCopy(profile),
     heroImageUrl: marketImage,
+    latitude: profile.latitude ?? undefined,
+    longitude: profile.longitude ?? undefined,
+    mapZoom: 9,
+    clientEditable: false,
+  });
+
+  pushPage(pages, {
+    slug: "market",
+    pageRole: "property_content",
+    layout: "maps",
+    title: profile.town,
+    address: profile.officeAddress,
+    body: writeMarketCopy(profile),
+    heroImageUrl: marketVisual || undefined,
     latitude: profile.latitude ?? undefined,
     longitude: profile.longitude ?? undefined,
     mapZoom: 9,

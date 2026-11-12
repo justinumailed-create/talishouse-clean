@@ -74,6 +74,10 @@ function talisuMenuLabel(t: Dictionary, label: string): string {
       return t.nav.talisuMenu.mediaDirectory;
     case "Contract":
       return t.nav.talisuMenu.contract;
+    case "Terms of Service":
+      return t.pmc.terms;
+    case "Privacy Policy":
+      return t.pmc.privacy;
     default:
       return label;
   }

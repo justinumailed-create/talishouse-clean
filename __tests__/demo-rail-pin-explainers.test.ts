@@ -16,7 +16,7 @@ const read = (p: string) => readFileSync(resolve(p), "utf8");
 const FAQ_TEB =
   TALISU_FAQ.items
     .flatMap((item) => item.bullets ?? [])
-    .find((bullet) => bullet.startsWith("TEB:")) ?? "";
+    .find((bullet) => bullet.startsWith("TEB™:")) ?? "";
 
 describe("Demo Mapsite rail (FAST Codes)", () => {
   it("scrolls the list on its own and keeps the password box above it", () => {
@@ -73,16 +73,22 @@ describe("Demo Mapsite rail (FAST Codes)", () => {
 
 describe("PIN action explainers", () => {
   it("uses the TalisU FAQ TEB™ sentence and a tokenization learn-more link", () => {
-    expect(FAQ_TEB.startsWith("TEB:")).toBe(true);
-    const exact = FAQ_TEB.replace(/^TEB:/, "TEB™:");
-    expect(en.mapsite.pinActions.teb).toBe(exact);
+    expect(FAQ_TEB.startsWith("TEB™:")).toBe(true);
+    expect(en.mapsite.pinActions.teb).toBe(FAQ_TEB);
+    expect(en.mapsite.pinActions.teb).toContain("Talis EBooks™");
+    expect(en.mapsite.pinActions.teb).toContain("help you stand out");
     expect(de.mapsite.pinActions.teb.startsWith("TEB™:")).toBe(true);
-    expect(de.mapsite.pinActions.teb).toContain("Talisbooks™");
+    expect(de.mapsite.pinActions.teb).toContain("Talis EBooks™");
+    expect(de.talisu.faq.items.flatMap((item) => item.bullets ?? []).find((b) => b.startsWith("TEB™:"))).toBe(
+      de.mapsite.pinActions.teb,
+    );
     expect(en.mapsite.pinActions.learnMoreHref).toBe("/talisu?essay=tokenization");
     expect(de.mapsite.pinActions.learnMoreHref).toBe(en.mapsite.pinActions.learnMoreHref);
-    expect(en.mapsite.pinActions.ttv).toContain("$2,000 CAD");
-    expect(en.mapsite.pinActions.ttv).toContain("US$1,500–5,000");
-    expect(de.mapsite.pinActions.ttv).toContain("2.000 CAD");
+    expect(en.mapsite.pinActions.ttv).toBe(
+      "TTV™: TalisTV™ sets up promotions for your In-House Online TV Station that allows for scheduled advertising producing measurable results.",
+    );
+    expect(de.mapsite.pinActions.ttv).toContain("TalisTV™");
+    expect(de.mapsite.pinActions.ttv).toContain("messbaren Ergebnissen");
     expect(en.mapsite.pinActions.ttv).not.toMatch(/month|TBD|TODO|token value/i);
     expect(de.mapsite.pinActions.ttv).not.toMatch(/Monat|TBD|TODO/i);
     expect(en.mapsite.pinActions.url).not.toMatch(/Mapsite™|TODO|TBD/);

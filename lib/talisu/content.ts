@@ -85,8 +85,8 @@ export const TALISU_FAQ: {
       bullets: [
         "URL: a means to advance narratives and shape external communication.",
         "MLS®: a link specifically for real estate professionals to bypass distractions en route to specific listings.",
-        "TEB: Talis eBooks / Talisbooks™ are digital lead magnets and authority-building tools that attract clients and stand out in competitive markets.",
-        "TTV: TalisTV™ serves to gain control over brand narratives, eliminate advertising dependencies and inspire deep audience engagement.",
+        "TEB™: Talis EBooks™ are digital lead magnets and authority-building tools that attract clients and help you stand out in competitive markets.",
+        "TTV™: TalisTV™ sets up promotions for your In-House Online TV Station that allows for scheduled advertising producing measurable results.",
       ],
     },
     {
@@ -290,13 +290,25 @@ export const TALISU_REGISTER = {
   structureClose: "Close",
   structureChange: "Change",
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
-  /** Aisha's four buttons: Propose Project · Claim Mapsite · Terms of Service · Register. */
+  /** Account checkouts on /talisu/reg. Each button opens its SamCart page. */
   actions: {
-    label: "How would you like to start?",
+    label: "Choose an account",
     propose: "Propose Project",
     claim: "Claim Mapsite",
     terms: "Terms of Service",
     register: "Register",
+    checkouts: [
+      { id: "broker", label: "Broker", href: "https://talispros.mysamcart.com/checkout/broker" },
+      { id: "agent", label: "Agent", href: "https://talispros.mysamcart.com/checkout/agent" },
+      { id: "fsbo", label: "FSBO", href: "https://talispros.mysamcart.com/checkout/fsbo" },
+      { id: "adpro", label: "Adpro", href: "https://talispros.mysamcart.com/checkout/adpro" },
+      { id: "pin", label: "PIN", href: "https://talispros.mysamcart.com/checkout/listpin" },
+    ],
+    consentBefore: "Registering means you agree to the",
+    consentTerms: "Terms of Service",
+    consentAnd: "and the",
+    consentPrivacy: "Privacy Policy",
+    consentAfter: ".",
     entryTitle: "Enter your agent entry code",
     entryBody: "Registration opens with the entry code your Tsplits™ agent gave you.",
     entryLabel: "Agent entry code",

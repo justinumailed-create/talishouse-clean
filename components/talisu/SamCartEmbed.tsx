@@ -1,3 +1,5 @@
+import RegistrationConsent from "@/components/talisu/RegistrationConsent";
+
 type SamCartEmbedProps = {
   src: string;
   title: string;
@@ -11,7 +13,9 @@ export default function SamCartEmbed({
   height = 1400,
 }: SamCartEmbedProps) {
   return (
-    <div className="w-full min-w-0 overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)] ring-1 ring-black/5">
+    <div className="w-full min-w-0">
+      <RegistrationConsent className="mb-3" />
+      <div className="overflow-hidden rounded-2xl bg-white shadow-[0_8px_24px_rgba(0,0,0,0.08)] ring-1 ring-black/5">
       <iframe
         title={title}
         src={src}
@@ -20,6 +24,7 @@ export default function SamCartEmbed({
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
       />
+      </div>
     </div>
   );
 }
