@@ -387,26 +387,29 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     env.entry = false;
   });
 
-  it("bare landing: exactly four buttons in order Propose Project, Claim Mapsite, Terms of Service, Register", async () => {
+  it("bare landing: five SamCart checkouts in order Broker, Agent, FSBO, Adpro, PIN", async () => {
     for (const entry of [false, true]) {
       env.entry = entry;
       const tree = await renderReg({});
       expect(findAll(tree, (el) => el.type === RegisterStructureTabs)).toHaveLength(0);
       const actions = findAll(tree, (el) => el.type === RegisterActions)[0];
-      expect(actions.props.hrefs).toEqual({
-        propose: "/talisu/discuss",
-        claim: "/talispros/demo-mapsite",
-        terms: "/talisu/contract",
-        register: "/talisu/reg?step=choose",
-      });
       expect(actions.props.entryGranted).toBe(entry);
       const html = renderToStaticMarkup(tree as ReactElement);
       const order = [...html.matchAll(/data-testid="register-action-(\w+)"/g)].map((m) => m[1]);
-      expect(order).toEqual(["propose", "claim", "terms", "register"]);
-      expect(html).toContain(">Propose Project<");
-      expect(html).toContain(">Claim Mapsite<");
-      expect(html).toContain(">Terms of Service<");
-      expect(html).toContain(">Register<");
+      expect(order).toEqual(["broker", "agent", "fsbo", "adpro", "pin"]);
+      expect(html).toContain("https://talispros.mysamcart.com/checkout/broker");
+      expect(html).toContain("https://talispros.mysamcart.com/checkout/agent");
+      expect(html).toContain("https://talispros.mysamcart.com/checkout/fsbo");
+      expect(html).toContain("https://talispros.mysamcart.com/checkout/adpro");
+      expect(html).toContain("https://talispros.mysamcart.com/checkout/listpin");
+      expect(html).toContain(">Broker<");
+      expect(html).toContain(">Agent<");
+      expect(html).toContain(">FSBO<");
+      expect(html).toContain(">Adpro<");
+      expect(html).toContain(">PIN<");
+      expect(html).toContain('data-testid="register-consent"');
+      expect(html).toContain('href="/terms"');
+      expect(html).toContain('href="/privacy"');
       expect(html).not.toContain("register-structures-");
     }
   });
@@ -414,9 +417,11 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
   it("German labels", async () => {
     env.locale = "de";
     const html = renderToStaticMarkup((await renderReg({})) as ReactElement);
-    for (const label of ["Projekt vorschlagen", "Mapsite beanspruchen", "Nutzungsbedingungen", "Registrieren"]) {
+    for (const label of ["Makler", "Agent", "FSBO", "Adpro", "PIN"]) {
       expect(html).toContain(`>${label}<`);
     }
+    expect(html).toContain("Nutzungsbedingungen");
+    expect(html).toContain("Datenschutzerklärung");
   });
 
   it("without an entry code the structure step stays closed and the code prompt opens", async () => {

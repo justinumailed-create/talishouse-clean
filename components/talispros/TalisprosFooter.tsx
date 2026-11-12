@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import LegalLinks from "@/components/legal/LegalLinks";
 import { isDemoMapSitePath } from "@/lib/talispros/demo-mapsite";
 import { isTalisprosMarketLayoutPath } from "@/lib/talispros/market-pages";
 import { isTalisprosStartPath } from "@/lib/talispros/start-content";
@@ -30,6 +31,9 @@ export default function TalisprosFooter() {
         <br />
         <span className="text-[10px] text-neutral-300">A Tsplits™ Product</span>
       </p>
+      <div className="mt-3 flex justify-center">
+        <LegalLinks />
+      </div>
     </footer>
   );
 }

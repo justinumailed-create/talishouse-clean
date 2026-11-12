@@ -103,6 +103,13 @@ describe("standard system Talisbook", () => {
   it("builds cover, about, listings, market, contact, and a logo back cover", () => {
     const document = buildSystemEbook(profile);
     expect(document.pages.length % 2).toBe(0);
+    expect(document.pages[1]).toMatchObject({
+      id: "system-market",
+      pageNumber: 2,
+      layout: "maps",
+      mapZoom: 9,
+    });
+    expect(document.pages[1]?.body).toMatch(/80 km/);
     expect(document.pages[0]).toMatchObject({
       layout: "cover",
       composedCover: true,

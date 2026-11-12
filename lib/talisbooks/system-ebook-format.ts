@@ -5,9 +5,10 @@
  * two 960×1080 leaves. Photos are cover-fitted or contain-fitted inside
  * that frame. They never become the page size.
  *
- * Page order follows the brokerage book already used by the editor:
- *   front cover, about the brokerage, listing pages, an area page,
- *   a market page, a contact page, and a back cover.
+ * Page order:
+ *   front cover, the protected market (about 80 km, page 2, beside the
+ *   Mapsite zoom), about the brokerage, the area page, listing pages,
+ *   a contact page, and a back cover.
  * Landscape centerfolds remain a viewer layout. System pages do not use a
  * photo as the spread that resizes the book.
  */
@@ -655,6 +656,20 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
   });
 
   pushPage(pages, {
+    slug: "market",
+    pageRole: "property_content",
+    layout: "maps",
+    title: profile.town,
+    address: profile.officeAddress,
+    body: writeMarketCopy(profile),
+    heroImageUrl: marketVisual || undefined,
+    latitude: profile.latitude ?? undefined,
+    longitude: profile.longitude ?? undefined,
+    mapZoom: 9,
+    clientEditable: false,
+  });
+
+  pushPage(pages, {
     slug: "about",
     pageRole: "property_content",
     layout: "essay",
@@ -729,20 +744,6 @@ export function buildSystemEbook(profile: SystemEbookProfile): SystemEbookDocume
       longitude: listing.longitude ?? undefined,
       clientEditable: false,
     });
-  });
-
-  pushPage(pages, {
-    slug: "market",
-    pageRole: "property_content",
-    layout: "maps",
-    title: profile.town,
-    address: profile.officeAddress,
-    body: writeMarketCopy(profile),
-    heroImageUrl: marketVisual || undefined,
-    latitude: profile.latitude ?? undefined,
-    longitude: profile.longitude ?? undefined,
-    mapZoom: 9,
-    clientEditable: false,
   });
 
   pushPage(pages, {

@@ -434,8 +434,8 @@ export const en = {
     pinActions: {
       url: "A link the owner adds to this PIN, such as their website or a listing page.",
       // TEB™ meaning, TalisU FAQ (“What is the meaning of PMC?”), with the mark used on the button.
-      teb: "TEB™: Talis eBooks / Talisbooks™ are digital lead magnets and authority-building tools that attract clients and stand out in competitive markets.",
-      ttv: "TTV™ Early Adopter: get TTV™ for 1 year for $2,000 CAD. A single marketing video in North America typically costs US$1,500–5,000. TTV™ is our first step toward tokenized Mapsites.",
+      teb: "TEB™: Talis EBooks™ are digital lead magnets and authority-building tools that attract clients and help you stand out in competitive markets.",
+      ttv: "TTV™: TalisTV™ sets up promotions for your In-House Online TV Station that allows for scheduled advertising producing measurable results.",
       learnMore: "Learn more",
       learnMoreHref: "/talisu?essay=tokenization",
     },
@@ -819,8 +819,8 @@ export const en = {
     addressFieldLabel: "Street address",
     /** Mapsites page hero: one sample PIN on the map, write-up on the right. */
     hero: {
-      eyebrow: "Demo Mapsite",
-      headline: "Please find your market & select FAST Code beside it",
+      eyebrow: "Mapsites",
+      headline: "Demo Mapsites",
       pinCard: {
         mapLabel: "Sample Mapsite map",
         body: "Bay St. Lawrence, Nova Scotia",
@@ -843,13 +843,13 @@ export const en = {
       errFull: "All 15 slots are in use. Remove one first.",
       errSignin: "Sign in again to change your list.",
       errFailed: "That did not work. Please try again.",
-      gateLabel: "Agent password",
-      gateHint: "Enter your agent password to open this Mapsite.",
+      gateLabel: "Agent code",
+      gateHint: "Enter your agent code or agent password to open this Mapsite.",
       gateOpen: "Open Mapsite",
       gateChecking: "Checking…",
-      gateWrong: "That password does not match an agent account. Please try again.",
+      gateWrong: "That does not match an agent account. Please try again.",
       gateLimited: "Too many attempts. Please wait 15 minutes and try again.",
-      gateRequired: "This Mapsite opens for agents only. Click its FAST Code and enter your agent password.",
+      gateRequired: "This Mapsite opens for agents only. Click its FAST Code and enter your agent code.",
       gateClose: "Close",
       addedToday: "Today",
       addedYesterday: "Yesterday",

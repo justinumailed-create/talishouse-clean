@@ -84,8 +84,8 @@ export default async function TalisURegisterPage({
   const lockedParam = firstParam(params.locked)?.trim().toLowerCase() ?? "";
 
   if (!isTalisURegisterCheckoutStep(params.step)) {
-    // Landing: Aisha's portrait + exactly four buttons, in this order:
-    // Propose Project · Claim Mapsite · Terms of Service · Register.
+    // Landing: Aisha's portrait + five SamCart checkouts, in this order:
+    // Broker · Agent · FSBO · Adpro · PIN.
     const wantsStructures =
       step === REGISTER_CHOOSE_STEP ||
       params.structure !== undefined ||

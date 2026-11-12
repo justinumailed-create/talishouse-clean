@@ -167,8 +167,8 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
       expect(hero.headline).not.toMatch(/\bkm\b|kilomet|Mapsite™|FAST Code™|USD|\$|miles?\b|TODO|TBD/i);
       expect(hero.pinCard.body).not.toMatch(/FAST Code|USD|\$|miles?\b/i);
     }
-    expect(en.demo.hero.headline).toBe("Please find your market & select FAST Code beside it");
-    expect(de.demo.hero.headline).toBe("Bitte finden Sie Ihren Markt und wählen Sie den FAST Code daneben.");
+    expect(en.demo.hero.headline).toBe("Demo Mapsites");
+    expect(de.demo.hero.headline).toBe("Demo-Mapsites");
     expect(en.demo.hero.headline).not.toBe(de.demo.hero.headline);
     expect("body1" in en.demo.hero).toBe(false);
     expect("body2" in de.demo.hero).toBe(false);

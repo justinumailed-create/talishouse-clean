@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import { useT } from "@/lib/i18n/client";
+import LegalLinks from "@/components/legal/LegalLinks";
 
 export default function TalisUChrome({
   children,
@@ -40,6 +41,9 @@ export default function TalisUChrome({
             Tsplits&trade;
           </Link>
         </p>
+        <div className="mt-2 flex justify-center">
+          <LegalLinks />
+        </div>
       </footer>
     </div>
   );

@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import AdviserLayout from "@/components/talisu/AdviserLayout";
 import PersonalHomeEditor from "@/components/talispros/personal-home/PersonalHomeEditor";
 import PersonalHomeMapsite from "@/components/talispros/personal-home/PersonalHomeMapsite";
+import LegalLinks from "@/components/legal/LegalLinks";
 import PersonalHomeNav from "@/components/talispros/personal-home/PersonalHomeNav";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
@@ -207,6 +208,11 @@ export default async function PersonalHomePage({
           ) : null}
         </AdviserLayout>
       </main>
+      <footer className="border-t border-black/10 bg-white px-4 py-4">
+        <div className="flex justify-center">
+          <LegalLinks />
+        </div>
+      </footer>
       {canEdit ? (
         <PersonalHomeEditor
           fastCode={data.code}

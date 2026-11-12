@@ -173,6 +173,8 @@ export const TALISU_MKTS_HEADER_DROPDOWN = [
   // Audio and Video are no longer in the menu (their routes still exist).
   // Tsplits™ is the logo link.
   { href: "/talisu/contract", label: "Contract" },
+  { href: "/terms", label: "Terms of Service" },
+  { href: "/privacy", label: "Privacy Policy" },
   { href: "/talisu/kb", label: "Knowledge Base" },
   /** Talishouse™ Product Catalogue (public) — moved off the navbar (Arun, Oct 31); opens on the front cover. */
   { href: "/catalogue", label: "Catalogue" },

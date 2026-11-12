@@ -20,6 +20,12 @@ export type RegisterActionLabels = {
   claim: string;
   terms: string;
   register: string;
+  checkouts: ReadonlyArray<{ id: string; label: string; href: string }>;
+  consentBefore: string;
+  consentTerms: string;
+  consentAnd: string;
+  consentPrivacy: string;
+  consentAfter: string;
   entryTitle: string;
   entryBody: string;
   entryLabel: string;
@@ -43,14 +49,12 @@ export type RegisterActionHrefs = {
 };
 
 const GRID =
-  "grid grid-cols-1 gap-2.5 @min-[19rem]:grid-cols-2 @min-[34rem]:grid-cols-4";
+  "grid grid-cols-2 gap-2.5 @min-[28rem]:grid-cols-3 @min-[46rem]:grid-cols-5";
 
 /**
- * Aisha's four buttons on /talisu/reg (Arun, Oct 31), in this order:
- * Propose Project · Claim Mapsite · Terms of Service (the Service Agreement,
- * STEP 3 · CONTRACT) · Register. Register asks for the entry code an agent
- * issued; only a code the server accepts opens registration. The checkout
- * route checks the same entry server-side, so the button is not the lock.
+ * Account checkouts on /talisu/reg, in this order:
+ * Broker · Agent · FSBO · Adpro · PIN. Each opens its SamCart page.
+ * A bounced checkout (no agent entry) can still open the entry-code form.
  */
 export default function RegisterActions({
   labels,
@@ -72,11 +76,6 @@ export default function RegisterActions({
   const [pending, start] = useTransition();
 
   const tab = `${METAL_TAB} ${METAL_TAB_UNSELECTED} cursor-pointer`;
-  const items = [
-    { id: "propose", label: labels.propose, href: hrefs.propose },
-    { id: "claim", label: labels.claim, href: hrefs.claim },
-    { id: "terms", label: labels.terms, href: hrefs.terms },
-  ] as const;
 
   return (
     <div className="mt-4 sm:mt-6" data-testid="register-actions">
@@ -85,8 +84,8 @@ export default function RegisterActions({
       </div>
       <div className="@container">
         <div className={GRID}>
-          {items.map((item) => (
-            <Link
+          {labels.checkouts.map((item) => (
+            <a
               key={item.id}
               href={item.href}
               data-testid={`register-action-${item.id}`}
@@ -95,37 +94,21 @@ export default function RegisterActions({
             >
               <span className={METAL_TAB_SHEEN} aria-hidden />
               <span className={`${METAL_TAB_LABEL} whitespace-nowrap`}>{item.label}</span>
-            </Link>
+            </a>
           ))}
-          {entryGranted ? (
-            <Link
-              href={hrefs.register}
-              data-testid="register-action-register"
-              className={tab}
-              style={{ backgroundImage: ADVISER_METAL_BG }}
-            >
-              <span className={METAL_TAB_SHEEN} aria-hidden />
-              <span className={`${METAL_TAB_LABEL} whitespace-nowrap`}>{labels.register}</span>
-            </Link>
-          ) : (
-            <button
-              type="button"
-              data-testid="register-action-register"
-              aria-expanded={open}
-              aria-controls={`${baseId}-entry`}
-              onClick={() => {
-                setOpen((v) => !v);
-                setError(null);
-              }}
-              className={`${METAL_TAB} ${open ? METAL_TAB_SELECTED : METAL_TAB_UNSELECTED} cursor-pointer`}
-              style={{ backgroundImage: ADVISER_METAL_BG }}
-            >
-              <span className={METAL_TAB_SHEEN} aria-hidden />
-              <span className={`${METAL_TAB_LABEL} whitespace-nowrap`}>{labels.register}</span>
-            </button>
-          )}
         </div>
       </div>
+      <p className="mx-auto mt-3 max-w-[40rem] text-center text-[13px] leading-relaxed text-neutral-600" data-testid="register-consent">
+        {labels.consentBefore}{" "}
+        <Link href="/terms" className="font-semibold text-[#046BD9] underline-offset-2 hover:underline">
+          {labels.consentTerms}
+        </Link>{" "}
+        {labels.consentAnd}{" "}
+        <Link href="/privacy" className="font-semibold text-[#046BD9] underline-offset-2 hover:underline">
+          {labels.consentPrivacy}
+        </Link>
+        {labels.consentAfter}
+      </p>
 
       {open && !entryGranted ? (
         <form
