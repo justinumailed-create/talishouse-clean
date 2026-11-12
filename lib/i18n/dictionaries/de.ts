@@ -18,6 +18,7 @@ export const de: Dictionary = {
     de: "DE",
     enName: "English",
     deName: "Deutsch",
+    comingSoon: "Demnächst",
   },
 
   common: {
@@ -1095,6 +1096,12 @@ export const de: Dictionary = {
     downloadMenuTemplates: "Vorlagen zum Bilder-Ersetzen",
     downloadMenuLocked: "Vorlagen für PowerPoint, Keynote und Google Slides sind in registrierten Mapsites enthalten.",
     downloadMenuRegister: "Registrieren, um Vorlagen freizuschalten",
+    downloadMenuPptx: "Microsoft PowerPoint (.pptx)",
+    downloadMenuKeynote: "Apple Keynote (.key)",
+    downloadMenuSlides: "Google Slides",
+    downloadMenuMakeCopy: "Kopie erstellen",
+    downloadMenuComingSoon: "Demnächst",
+    downloadMenuPrompt: "Diese Vorlagen sind für registrierte Inhaber.",
     eyebrow: "DEMONSTRATION",
     title: "Demo-eBook und Mapsite",
     placeAPin: "Setzen Sie einen PIN.",

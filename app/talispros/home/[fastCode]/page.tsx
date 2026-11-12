@@ -27,6 +27,7 @@ import {
   restrictSystemFastCodeFeatures,
 } from "@/lib/talispros/system-fast-code-gate";
 import { readSystemFastCodeFacts } from "@/lib/talispros/system-fast-code-access";
+import { isFastCodeDisqualified } from "@/lib/talispros/market-disqualify-server";
 
 export const dynamic = "force-dynamic";
 
@@ -95,6 +96,7 @@ export default async function PersonalHomePage({
   // A system code has no owner session. The entry action clears a matching
   // cookie before redirect; this render only ignores it (canEdit stays false).
   const canEdit = !publicSystem && (await canEditPersonalHome(data.code));
+  if (!canEdit && (await isFastCodeDisqualified(data.code))) notFound();
   const homeMap = publicSystem ? await loadPersonalHomeMap(data.code) : null;
   const mapsiteHref = publicSystem ? `${data.homeHref}#mapsite` : data.mapsiteHref;
   const buttons = publicSystem

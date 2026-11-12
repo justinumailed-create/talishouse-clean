@@ -39,6 +39,7 @@ export const en = {
     de: "DE",
     enName: "English",
     deName: "Deutsch",
+    comingSoon: "Coming soon",
   },
 
   common: {
@@ -802,6 +803,12 @@ export const en = {
     downloadMenuTemplates: "Replace Image templates",
     downloadMenuLocked: "PowerPoint, Keynote and Google Slides templates are included with registered Mapsites.",
     downloadMenuRegister: "Register to unlock templates",
+    downloadMenuPptx: "Microsoft PowerPoint (.pptx)",
+    downloadMenuKeynote: "Apple Keynote (.key)",
+    downloadMenuSlides: "Google Slides",
+    downloadMenuMakeCopy: "Make a copy",
+    downloadMenuComingSoon: "Coming soon",
+    downloadMenuPrompt: "These templates are for registered owners.",
     eyebrow: "DEMONSTRATION",
     title: "Demo eBook and Mapsite",
     placeAPin: "Place a pin.",

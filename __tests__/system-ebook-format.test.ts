@@ -100,16 +100,38 @@ describe("standard system Talisbook", () => {
     expect(cover.imageFit).toBe("cover");
   });
 
-  it("builds cover, about, listings, market, contact, and a logo back cover", () => {
+  it("puts the 80 km market map on the inside cover, then the protected-market page", () => {
     const document = buildSystemEbook(profile);
-    expect(document.pages.length % 2).toBe(0);
-    expect(document.pages[1]).toMatchObject({
+    expect(document.pages[0]?.layout).toBe("cover");
+    expect(document.pages[1]).toMatchObject({ id: "system-market-left", pageNumber: 2, layout: "maps" });
+    expect(document.pages[2]).toMatchObject({ id: "system-market-right", pageNumber: 3, layout: "maps" });
+    expect(document.pages[3]).toMatchObject({
       id: "system-market",
-      pageNumber: 2,
+      pageNumber: 4,
       layout: "maps",
       mapZoom: 9,
     });
     expect(document.pages[1]?.body).toMatch(/80 km/);
+    expect(document.pages[2]?.body).toMatch(/80 km/);
+    expect(document.pages[3]?.body).toMatch(/80 km/);
+    expect(document.pages[1]?.heroImageUrl).toBe(document.pages[2]?.heroImageUrl);
+    const aboutIndex = document.pages.findIndex((page) => page.layout === "essay");
+    expect(aboutIndex).toBeGreaterThan(3);
+    expect(document.pages.filter((page) => page.layout === "maps")).toHaveLength(3);
+    expect(document.pages.at(-1)?.layout).toBe("cover");
+    expect(document.pages.length % 2).toBe(0);
+  });
+
+  it("builds cover, about, listings, market, contact, and a logo back cover", () => {
+    const document = buildSystemEbook(profile);
+    expect(document.pages.length % 2).toBe(0);
+    expect(document.pages[3]).toMatchObject({
+      id: "system-market",
+      pageNumber: 4,
+      layout: "maps",
+      mapZoom: 9,
+    });
+    expect(document.pages[3]?.body).toMatch(/80 km/);
     expect(document.pages[0]).toMatchObject({
       layout: "cover",
       composedCover: true,

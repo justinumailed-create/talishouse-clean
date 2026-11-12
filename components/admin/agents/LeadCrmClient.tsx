@@ -8,6 +8,7 @@ import { CHECKPOINT_LABEL, type FlowLocale, type FlowUi } from "@/lib/talispros/
 import type { CheckpointKey } from "@/lib/talispros/call-flow";
 import type { LeadBundle } from "@/lib/talispros/call-flow-server";
 import { FAST_CODE_STAGE_LABELS } from "@/lib/talispros/fast-code-tracker";
+import DisqualifyBrokerageControl from "./DisqualifyBrokerageControl";
 import { fieldClass, primaryButton, secondaryButton, textareaClass } from "./ui";
 
 const POS: Record<FlowLocale, Record<string, string>> = {
@@ -54,6 +55,19 @@ export default function LeadCrmClient({ bundle, ui, locale }: { bundle: LeadBund
           {FAST_CODE_STAGE_LABELS[locale][bundle.stage]} · {ui.noDelete}
         </p>
         {!bundle.canEdit ? <p className="mt-2 text-sm text-neutral-600">{ui.reviewerNote}</p> : null}
+        {bundle.disqualification ? (
+          <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-950" data-testid="lead-disqualified">
+            {locale === "de"
+              ? `Disqualifiziert von ${bundle.disqualification.actorName}. ${bundle.disqualification.reason}`
+              : `Disqualified by ${bundle.disqualification.actorName}. ${bundle.disqualification.reason}`}
+          </p>
+        ) : null}
+        {bundle.disqualification && bundle.canReverse ? (
+          <DisqualifyBrokerageControl locale={locale} mode="restore" fastCode={bundle.fastCode} />
+        ) : null}
+        {!bundle.disqualification && bundle.canEdit ? (
+          <DisqualifyBrokerageControl locale={locale} fastCode={bundle.fastCode} />
+        ) : null}
         <div className="mt-4 flex flex-wrap gap-2">
           <a href={bundle.mapsiteHref} target="_blank" rel="noreferrer" className={primaryButton}>
             {ui.mapsite}

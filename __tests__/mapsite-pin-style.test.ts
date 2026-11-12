@@ -9,6 +9,7 @@ import {
   resolveMapSitePinStyle,
 } from "@/lib/mapsite-pin-style";
 import { pinStyleCacheKey } from "@/lib/talismaps/map-engine/pin-marker-icon";
+import { buildPinBodySvg, renderPinMarkerHtml, resolvePinVisual } from "@/lib/talismaps/pin";
 import { toMapEnginePin } from "@/lib/talismaps/map-engine";
 import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
 import type { MapSiteView } from "@/lib/mapsite-service";
@@ -52,6 +53,27 @@ describe("mapsite pin style", () => {
       whiteCenter: false,
       pinAnimated: false,
     });
+  });
+
+  it("draws a round marker whose anchor is the circle centre", () => {
+    const visual = resolvePinVisual({
+      pinIcon: "none",
+      pinColor: "#1A73E8",
+      pinSize: 66,
+      whiteCenter: false,
+    });
+    const svg = buildPinBodySvg(visual);
+    expect(svg).toContain('<circle cx="33" cy="33" r="28" fill="#1A73E8"/>');
+    expect(svg).toContain('<circle cx="33" cy="33" r="15" fill="#ffffff"/>');
+    expect(svg).not.toContain("<path");
+    const { iconAnchor, iconSize } = renderPinMarkerHtml({
+      pinIcon: "none",
+      pinColor: "#1A73E8",
+      pinSize: 66,
+      whiteCenter: false,
+    });
+    expect(iconAnchor[0]).toBe(iconSize[0] / 2);
+    expect(iconAnchor[1]).toBe(visual.bodySize / 2);
   });
 
   it("shares a marker cache key with the form hollow-drop PIN", () => {

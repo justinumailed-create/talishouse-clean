@@ -107,12 +107,13 @@ function ResourceButton({
   const t = useT();
   const disabled = !href;
   const className = [
-    "mapsite-paypal-btn",
-    variant === "gold" ? "mapsite-paypal-btn--gold" : "",
-    disabled ? "mapsite-paypal-btn--disabled" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
+    "inline-flex min-h-9 w-full items-center justify-center whitespace-nowrap rounded-full px-1.5 text-center text-[11px] font-semibold sm:min-h-10 sm:px-2 sm:text-[13px]",
+    disabled
+      ? "cursor-not-allowed bg-neutral-300 text-neutral-500 shadow-none"
+      : variant === "gold"
+        ? "bg-[#ffc439] text-[#003087] shadow-[0_4px_10px_rgba(212,160,23,0.35)]"
+        : "bg-[#046BD9] text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)]",
+  ].join(" ");
 
   if (disabled) {
     return (
@@ -188,6 +189,8 @@ interface MapSitePropertyPopupProps {
   compact?: boolean;
   /** Fixed card width so the flag stays clear of corner controls. */
   widthPx?: number;
+  /** Shorter hero, used when this flag sits in a half-page map. */
+  dense?: boolean;
   onClose: () => void;
 }
 
@@ -210,6 +213,7 @@ export default function MapSitePropertyPopup({
   cardHeight = null,
   compact = false,
   widthPx,
+  dense = false,
   onClose,
 }: MapSitePropertyPopupProps) {
   const t = useT();
@@ -291,7 +295,9 @@ export default function MapSitePropertyPopup({
         >
           <div
             className={`mapsite-popup-hero relative w-full shrink-0 bg-neutral-200/80 ${
-              useGenericCard
+              dense
+                ? "h-20 sm:h-24"
+                : useGenericCard
                 ? "aspect-video"
                 : showResourceButtons
                 ? "aspect-[16/9]"
@@ -372,7 +378,7 @@ export default function MapSitePropertyPopup({
                     {p.tebPreparing}
                   </p>
                 ) : null}
-                <div className="grid grid-cols-4 gap-1.5">
+                <div className="grid grid-cols-2 gap-1.5">
                   {RESOURCES.map((resource) => {
                     const href =
                       resource.key === "url"

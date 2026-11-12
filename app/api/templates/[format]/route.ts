@@ -2,7 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { isReplaceImageTemplateFormat, REPLACE_IMAGE_TEMPLATE_FILES } from "@/lib/talispros/replace-image-templates";
 import {
   canDownloadReplaceImageTemplates,
+  getReplaceImageGoogleSlidesCopyUrl,
   readReplaceImageTemplate,
+  replaceImageFileReady,
 } from "@/lib/talispros/replace-image-templates.server";
 
 export const dynamic = "force-dynamic";
@@ -22,17 +24,37 @@ export async function GET(
   context: { params: Promise<{ format: string }> },
 ) {
   const { format } = await context.params;
+  const fastCode = request.nextUrl.searchParams.get("fastCode");
+
+  if (format === "slides") {
+    const allowed = await canDownloadReplaceImageTemplates(fastCode).catch(() => false);
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Replace Image templates are available to registered Mapsite owners only." },
+        { status: 403, headers: PRIVATE_HEADERS },
+      );
+    }
+    const url = getReplaceImageGoogleSlidesCopyUrl();
+    if (!url) {
+      return NextResponse.json({ comingSoon: true }, { status: 404, headers: PRIVATE_HEADERS });
+    }
+    return NextResponse.json({ url }, { headers: PRIVATE_HEADERS });
+  }
+
   if (!isReplaceImageTemplateFormat(format)) {
     return NextResponse.json({ error: "Unknown template format." }, { status: 404, headers: PRIVATE_HEADERS });
   }
 
-  const fastCode = request.nextUrl.searchParams.get("fastCode");
   const allowed = await canDownloadReplaceImageTemplates(fastCode).catch(() => false);
   if (!allowed) {
     return NextResponse.json(
       { error: "Replace Image templates are available to registered Mapsite owners only." },
       { status: 403, headers: PRIVATE_HEADERS },
     );
+  }
+
+  if (!replaceImageFileReady(format)) {
+    return NextResponse.json({ comingSoon: true }, { status: 404, headers: PRIVATE_HEADERS });
   }
 
   let bytes: Buffer;

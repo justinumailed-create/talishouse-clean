@@ -114,12 +114,9 @@ export default function TalisMapsPinStyleSection({
                   title={swatch.label}
                   aria-label={`Use ${swatch.label} pin color`}
                 >
-                  <svg viewBox="0 0 100 130" className="h-10 w-full">
-                    <path
-                      d="M50 126 L21 82 C11 67 8 59 8 48 C8 24 26 8 50 8 C74 8 92 24 92 48 C92 59 89 67 79 82 Z"
-                      fill={swatch.color}
-                    />
-                    <circle cx="50" cy="46" r="29" fill="#ffffff" />
+                  <svg viewBox="0 0 100 100" className="h-10 w-full">
+                    <circle cx="50" cy="50" r="42" fill={swatch.color} />
+                    <circle cx="50" cy="50" r="22" fill="#ffffff" />
                   </svg>
                 </button>
               );

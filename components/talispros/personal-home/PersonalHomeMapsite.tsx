@@ -128,6 +128,7 @@ function PersonalHomeMapCanvas({
           canBuyAdditionalPins={false}
           centerX={flag.centerX}
           widthPx={flag.width}
+          dense
           onClose={() => setSelectedPinId(null)}
         />
       ) : null}

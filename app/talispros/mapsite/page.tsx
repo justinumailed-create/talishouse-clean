@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { parseRegistrationMarket } from "@/lib/registration-market";
 import {
   accountTypeForAudience,
@@ -31,6 +31,7 @@ import {
 import { personalHomePath } from "@/lib/talispros/personal-home";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
+import { isFastCodeDisqualified } from "@/lib/talispros/market-disqualify-server";
 import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, CHECKOUT_SESSION_QUERY, parseCheckoutSessionId, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import {
   PIN_CHECKOUT_QUERY,
@@ -207,6 +208,8 @@ export default async function TalisprosMapSitePage({
       console.warn("[mapsite] Could not resolve owner session:", error);
     }
   }
+
+  if (!isOwner && (await isFastCodeDisqualified(ownerCode))) notFound();
 
   const paymentPlanType = await resolveMapSitePaymentPlanType({
     requestId,

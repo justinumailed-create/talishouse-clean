@@ -8,9 +8,9 @@ import { useLocale, useT } from "@/lib/i18n/client";
 
 /**
  * Blue-navbar language control. Visible order is EN, FR, ES, DE.
- * Only English switches the site. French, Spanish and German are shown
- * blind: grey, not clickable, and with no extra caption. German pages
- * stay available by direct URL (`?lang=de`); this control does not open them.
+ * Only English switches the site. French, Spanish and German stay
+ * visibly disabled, with a Coming soon label. German pages stay
+ * available by direct URL (`?lang=de`); this control does not open them.
  */
 const SWITCH_ITEMS = [
   { code: "en", label: "EN", enabled: true },
@@ -96,15 +96,22 @@ export default function LanguageSwitch({
               <span
                 lang={item.code}
                 aria-disabled="true"
-                aria-label={names[item.code]}
+                title={t.langSwitch.comingSoon}
+                aria-label={`${names[item.code]} — ${t.langSwitch.comingSoon}`}
                 data-testid={`language-blind-${item.code}`}
-                className={`cursor-default select-none text-white/35 ${
+                className={`group relative cursor-not-allowed select-none text-white/40 ${
                   touch
                     ? "inline-flex min-h-11 min-w-11 items-center justify-center px-3 text-[14px]"
                     : "px-1.5 py-1"
                 }`}
               >
                 {item.label}
+                <span
+                  role="tooltip"
+                  className="pointer-events-none absolute top-full left-1/2 z-50 mt-1 hidden -translate-x-1/2 whitespace-nowrap rounded bg-neutral-950 px-2 py-1 text-[11px] font-medium normal-case text-white shadow-lg group-hover:block group-focus-within:block"
+                >
+                  {t.langSwitch.comingSoon}
+                </span>
               </span>
             )}
           </span>

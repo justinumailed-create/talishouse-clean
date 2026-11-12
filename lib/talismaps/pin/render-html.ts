@@ -40,28 +40,19 @@ function categoryBadgeLabel(value: string): string {
   return CATEGORY_LABELS[value] ?? value.replaceAll("-", " ");
 }
 
-function buildHollowDropPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
+/**
+ * Round marker. Both circles share the body centre so the map anchor
+ * (the body centre) sits on the address instead of a teardrop tip.
+ */
+function buildRoundPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
   const { bodySize: size, pinColor } = visual;
-  const w = size;
-  const h = size;
-  const cx = w / 2;
-  const top = h * 0.1;
-  const tipY = h * 0.96;
-  const leftX = w * 0.18;
-  const rightX = w * 0.82;
-  const shoulderY = h * 0.58;
-  // Keep a clear colored rim at the top; avoid over-cutting the cap.
-  const cutoutCy = h * 0.40;
-  const cutoutR = h * 0.24;
+  const c = size / 2;
+  const outerR = Math.round(size * 0.42);
+  const innerR = Math.round(size * 0.22);
 
   return `<g filter="url(#pinShadow)">
-    <path d="M ${cx} ${tipY}
-      L ${leftX} ${shoulderY}
-      C ${w * 0.03} ${h * 0.42}, ${w * 0.05} ${h * 0.14}, ${cx} ${top}
-      C ${w * 0.95} ${h * 0.14}, ${w * 0.97} ${h * 0.42}, ${rightX} ${shoulderY}
-      Z"
-      fill="${escapePinHtml(pinColor)}"/>
-    <circle cx="${cx}" cy="${cutoutCy}" r="${cutoutR}" fill="#ffffff"/>
+    <circle cx="${c}" cy="${c}" r="${outerR}" fill="${escapePinHtml(pinColor)}"/>
+    <circle cx="${c}" cy="${c}" r="${innerR}" fill="#ffffff"/>
   </g>`;
 }
 
@@ -127,7 +118,7 @@ function buildFlagPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
 export function buildPinBodySvg(visual: ResolvedTalisMapsPinVisual): string {
   const { bodySize: size } = visual;
   const body = visual.pinIcon === "none"
-    ? buildHollowDropPinBodySvg(visual)
+    ? buildRoundPinBodySvg(visual)
     : visual.whiteCenter
     ? buildClassicPinBodySvg(visual)
     : buildFlagPinBodySvg(visual);
@@ -194,6 +185,7 @@ export function renderPinMarkerHtml(
     : 0;
   const totalHeight = badgeBlockHeight + size + labelBlockHeight;
   const pinBodyTop = badgeBlockHeight;
+  // Anchor is the centre of the round body, which is the address.
   const anchorY = pinBodyTop + size / 2;
 
   return {
