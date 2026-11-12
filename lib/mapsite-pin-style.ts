@@ -1,7 +1,8 @@
 /**
  * Mapsite / published PIN visuals — same defaults as the Build / Claim form
  * (`defaultHomePinLocationValues` in `components/build-mapsite/home-pin-types.ts`).
- * Do not invent a separate marker: hollow drop (`none`) + Google-blue fill.
+ * Do not invent a separate marker: round marker (`none`) + Google-blue fill,
+ * anchored at the circle centre.
  */
 
 export const MAPSITE_PIN_DEFAULT_COLOR = "#1A73E8";

@@ -18,6 +18,7 @@ export const de: Dictionary = {
     de: "DE",
     enName: "English",
     deName: "Deutsch",
+    comingSoon: "Demnächst",
   },
 
   common: {

@@ -91,21 +91,22 @@ export function stepPersonalHomeMapZoom(current: number, delta: number): number 
 }
 
 /**
- * Flag card inside the left-column map. Stays clear of the top-right zoom
- * buttons and of the pin at the centre.
+ * Flag card inside the left-column map. Same width as the Mapsites hero
+ * card (16.5rem), and clear of the top-right zoom buttons.
  */
 export function personalHomeFlagFrame(
   mapWidth: number,
   mapHeight: number,
 ): { width: number; centerX: number; top: number; height: number } {
   const zoomRail = 72;
-  const width = Math.max(200, Math.min(352, Math.max(0, mapWidth - zoomRail - 16)));
+  const mapsiteFlagWidth = 264;
+  const width = Math.max(200, Math.min(mapsiteFlagWidth, Math.max(0, mapWidth - zoomRail - 16)));
   const rawCenter = mapWidth / 2;
   const overflow = rawCenter + width / 2 - (mapWidth - zoomRail);
   const centerX = rawCenter - Math.max(0, overflow);
   const top = 56;
   const tipY = mapHeight / 2 - 40;
   const bottom = Math.max(top + 160, tipY - 12);
-  const height = Math.min(340, Math.max(160, bottom - top));
+  const height = Math.min(280, Math.max(160, bottom - top));
   return { width, centerX, top, height };
 }
