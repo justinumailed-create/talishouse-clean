@@ -17,7 +17,14 @@ import {
  */
 export default function HomeMountainMotion() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [playing, setPlaying] = useState(false);
+  const [playMotion, setPlayMotion] = useState(false);
+
+  useEffect(() => {
+    const start = () => setPlayMotion(true);
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => window.removeEventListener("load", start);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -34,14 +41,9 @@ export default function HomeMountainMotion() {
     };
 
     tryPlay();
-    const onPlaying = () => setPlaying(true);
     video.addEventListener("loadeddata", tryPlay);
-    video.addEventListener("playing", onPlaying);
-    return () => {
-      video.removeEventListener("loadeddata", tryPlay);
-      video.removeEventListener("playing", onPlaying);
-    };
-  }, []);
+    return () => video.removeEventListener("loadeddata", tryPlay);
+  }, [playMotion]);
 
   return (
     <>
@@ -52,20 +54,20 @@ export default function HomeMountainMotion() {
         priority
         sizes="(min-width: 1024px) 60vw, 100vw"
         className="object-cover object-center motion-reduce:block"
-        aria-hidden
       />
-      <video
-        ref={videoRef}
-        className={`absolute inset-0 h-full w-full object-cover object-center motion-reduce:hidden ${playing ? "opacity-100" : "opacity-0"}`}
-        src={HOME_OWNERSHIP_BG_MP4}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="none"
-        poster={HOME_OWNERSHIP_BG_SRC}
-        aria-hidden
-      />
+      {playMotion ? (
+        <video
+          ref={videoRef}
+          className="absolute inset-0 h-full w-full object-cover object-center motion-reduce:hidden"
+          src={HOME_OWNERSHIP_BG_MP4}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          aria-hidden
+        />
+      ) : null}
     </>
   );
 }
