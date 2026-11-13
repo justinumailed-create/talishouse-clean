@@ -221,8 +221,7 @@ export const TALISU_AUDIO_LIBRARY: readonly TalisUAudioLibraryItem[] = [
 
 export const TALISU_REGISTER = {
   title: "Register Account",
-  partnerHeading: "Your Marketing Partner",
-  partnerName: "Aisha C. — Team Leader",
+  partnerName: "Aisha, AMBA",
   partnerIntro:
     "My team and I help grow your real estate adjacent marketing initiatives along four broad parameters:",
   bullets: [
@@ -256,7 +255,7 @@ export const TALISU_REGISTER = {
   /** Adviser landing (Oct 26): Aisha's photo + four structure tabs. */
   adviserKicker: "Registration options",
   adviserTitle:
-    "Put your listings on the map. Register your Mapsite with Aisha and her team, and choose the structure your properties are offered under.",
+    "Put your listings on the map. Register your Mapsite with Aisha and her team.",
   structuresLabel: "Choose your structure",
   structures: [
     {
@@ -322,7 +321,12 @@ export const TALISU_REGISTER = {
         sidebar:
           "You are an advertiser on the Broker or Team Mapsite, using your presence there to redirect their clients to your own website, or Mapsite. If the latter, it is included at no additional charge and you might develop your very own virtual market or monopoly.",
       },
-      { id: "pin", label: "PIN" },
+      {
+        id: "pin",
+        label: "PIN",
+        sidebar:
+          "Additional PINs are $7 CAD each. Buy them from PIN Dashboard on your Mapsite.",
+      },
     ],
     consentBefore: "Registering means you agree to the",
     consentTerms: "Terms of Service",
@@ -339,8 +343,6 @@ export const TALISU_REGISTER = {
     entryNotReady: "Checkout is not available right now. Please try again shortly.",
     entryNeeded: "Checkout needs your agent code or agent password. Enter it to continue.",
     close: "Close",
-    pinNote:
-      "Additional PINs are $7 CAD each. Buy them from PIN Dashboard on your Mapsite.",
   },
 } as const;
 

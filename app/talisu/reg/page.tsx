@@ -98,7 +98,7 @@ export default async function TalisURegisterPage({
         <AdviserLayout
           testId="talisu-register-landing"
           imageSrc={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
-          imageAlt="Aisha C."
+          imageAlt="Aisha, AMBA"
           imagePosition="center 20%"
           kicker={TALISU_REGISTER.adviserKicker}
           title={TALISU_REGISTER.adviserTitle}
@@ -115,10 +115,8 @@ export default async function TalisURegisterPage({
               register: `/talisu/reg?step=${REGISTER_CHOOSE_STEP}`,
             }}
           />
-          <div className="mt-6 text-[13px] text-neutral-600" data-testid="talisu-register-partner">
-            <span className="font-semibold text-neutral-900">{TALISU_REGISTER.partnerName}</span>
-            {" · "}
-            {TALISU_REGISTER.partnerHeading}
+          <div className="mt-6 text-[13px] font-semibold text-neutral-900" data-testid="talisu-register-partner">
+            {TALISU_REGISTER.partnerName}
           </div>
         </AdviserLayout>
       );
@@ -131,7 +129,7 @@ export default async function TalisURegisterPage({
       <AdviserLayout
         testId="talisu-register-landing"
         imageSrc={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
-        imageAlt="Aisha C."
+        imageAlt="Aisha, AMBA"
         imagePosition="center 20%"
         kicker={TALISU_REGISTER.adviserKicker}
         title={TALISU_REGISTER.adviserTitle}
@@ -147,10 +145,8 @@ export default async function TalisURegisterPage({
           ctaLabel={TALISU_REGISTER.ctaLabel}
           ctaNote={TALISU_REGISTER.ctaNote}
         />
-        <div className="mt-6 text-[13px] text-neutral-600" data-testid="talisu-register-partner">
-          <span className="font-semibold text-neutral-900">{TALISU_REGISTER.partnerName}</span>
-          {" · "}
-          {TALISU_REGISTER.partnerHeading}
+        <div className="mt-6 text-[13px] font-semibold text-neutral-900" data-testid="talisu-register-partner">
+          {TALISU_REGISTER.partnerName}
         </div>
       </AdviserLayout>
     );
@@ -191,7 +187,7 @@ export default async function TalisURegisterPage({
           <div className="mb-3 flex justify-center">
             <Image
               src={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
-              alt="Aisha C."
+              alt="Aisha, AMBA"
               width={896}
               height={1200}
               className="h-auto w-full max-w-[108px] rounded-lg object-cover shadow-sm"
@@ -200,11 +196,8 @@ export default async function TalisURegisterPage({
             />
           </div>
           <h2 className="text-base font-semibold leading-snug text-[#0069CF]">
-            {TALISU_REGISTER.partnerHeading}
-          </h2>
-          <p className="mt-2 text-xs font-medium text-neutral-950">
             {TALISU_REGISTER.partnerName}
-          </p>
+          </h2>
           {structureTab ? (
             <div
               data-testid="register-structure"
