@@ -110,7 +110,7 @@ export function buildPageMetadata(
     locale,
     image: pageOgImagePath(entry.image, locale),
     noindex: Boolean(entry.noindex),
-    siteName: route.startsWith("/talisu") ? "TalisU™" : undefined,
+    siteName: "Tsplits™",
   });
 }
 

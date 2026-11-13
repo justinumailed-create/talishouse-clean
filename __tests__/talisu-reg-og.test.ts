@@ -14,8 +14,8 @@ describe("/talisu/reg share metadata", () => {
       expect(m.title).not.toMatch(/Mapsite™/);
       expect(m.title).toBe(
         locale === "de"
-          ? "Registrieren Sie Ihre Tsplits™ Mapsite: globale Sichtbarkeit | TalisU™"
-          : "Register Your Tsplits™ Mapsite and Get Global Exposure | TalisU™",
+          ? "Registrieren Sie Ihre Tsplits™ Mapsite: globale Sichtbarkeit | Tsplits™"
+          : "Register Your Tsplits™ Mapsite and Get Global Exposure | Tsplits™",
       );
       // Lead with what Aisha's team does, not who she is.
       expect(m.description).toMatch(
@@ -53,6 +53,7 @@ describe("/talisu/reg share metadata", () => {
         height: 630,
         alt: m.ogImageAlt,
       });
+      expect(og.siteName).toBe("Tsplits™");
       expect(og.locale).toBe(locale === "de" ? "de_DE" : "en_US");
       expect(og.alternateLocale).toEqual([locale === "de" ? "en_US" : "de_DE"]);
       expect(og.url).toBe(

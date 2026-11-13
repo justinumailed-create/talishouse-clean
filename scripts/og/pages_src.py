@@ -46,19 +46,19 @@ add("/start", "start", "public", MAP,
      "Sichern Sie Ihren Markt auf Tsplits™. Die Mapsite setzt Sie auf die Karte, damit Käufer und Partner Sie finden. Entdecken Sie Talisbooks™.",
      "TSPLITS™  ·  START", ["Sichern Sie", "Ihren Markt auf", "Tsplits™"], ["Mapsites", "Talisbooks™"]))
 add("/talisu/mkts", "talisu-mkts", "public", MAP,
-    ("Markets Served: Claim an 80 km Market | TalisU™",
+    ("Markets Served: Claim an 80 km Market | Tsplits™",
      "Select the PIN nearest you to claim a semi-exclusive market of 80 km around a centre point on the Talismaps™ market map.",
-     "TALISU™  ·  MARKETS", ["Claim an", "80 km market", "near you"], ["Semi-exclusive", "80 km radius", "Talismaps™"]),
-    ("Bediente Märkte: 80-km-Markt sichern | TalisU™",
+     "TSPLITS™  ·  MARKETS", ["Claim an", "80 km market", "near you"], ["Semi-exclusive", "80 km radius", "Talismaps™"]),
+    ("Bediente Märkte: 80-km-Markt sichern | Tsplits™",
      "Wählen Sie den PIN in Ihrer Nähe und sichern Sie einen semi-exklusiven Markt im Umkreis von 80 km um einen Mittelpunkt auf Talismaps™.",
-     "TALISU™  ·  MÄRKTE", ["Sichern Sie", "einen 80-km-Markt", "in Ihrer Nähe"], ["Semi-exklusiv", "80 km Radius", "Talismaps™"]))
+     "TSPLITS™  ·  MÄRKTE", ["Sichern Sie", "einen 80-km-Markt", "in Ihrer Nähe"], ["Semi-exklusiv", "80 km Radius", "Talismaps™"]))
 add("/talisu/mkts/usa", "talisu-mkts-usa", "public", PIN,
-    ("USA Markets: Claim One of 30 US Markets | TalisU™",
+    ("USA Markets: Claim One of 30 US Markets | Tsplits™",
      "Select your region's PIN to claim one of 30 proprietary US markets, each a contiguous region of about 8 to 12 million people, on Talismaps™.",
-     "TALISU™  ·  USA MARKETS", ["Claim one of", "30 US markets", "in your region"], ["30 markets", "8–12M people", "Talismaps™"]),
-    ("Märkte USA: Einen von 30 US-Märkten sichern | TalisU™",
+     "TSPLITS™  ·  USA MARKETS", ["Claim one of", "30 US markets", "in your region"], ["30 markets", "8–12M people", "Talismaps™"]),
+    ("Märkte USA: Einen von 30 US-Märkten sichern | Tsplits™",
      "Wählen Sie den PIN Ihrer Region und sichern Sie einen von 30 US-Märkten, je eine Region mit etwa 8 bis 12 Mio. Einwohnern, auf Talismaps™.",
-     "TALISU™  ·  MÄRKTE USA", ["Sichern Sie einen", "von 30 US-Märkten", "in Ihrer Region"], ["30 Märkte", "8–12 Mio. Einwohner", "Talismaps™"]))
+     "TSPLITS™  ·  MÄRKTE USA", ["Sichern Sie einen", "von 30 US-Märkten", "in Ihrer Region"], ["30 Märkte", "8–12 Mio. Einwohner", "Talismaps™"]))
 add("/catalogue", "catalogue", "public", TDOME,
     ("Talishouse™ Product Catalogue | Tsplits™",
      "Browse the Talishouse™ Product Catalogue. Every design is numbered (P01, P02…); tap one to register for that product.",
@@ -69,12 +69,12 @@ add("/catalogue", "catalogue", "public", TDOME,
 add("/talisu/reg", "talisu-reg", "custom", AISHA, None, None)
 add("/talisu/engage", "talisu-engage", "custom", WEBSTER, None, None)
 add("/talisu", "talisu-faq", "public", AISHA,
-    ("TalisU™ FAQ: Tsplits™, Mapsites and FAST Codes",
-     "Answers to frequently asked questions about Tsplits™, Mapsites, FAST Codes and TalisU™ fulfilment options.",
-     "TALISU™  ·  FAQ", ["Frequently", "asked", "questions"], ["Mapsites", "FAST Codes", "TalisU™"]),
-    ("TalisU™ FAQ: Tsplits™, Mapsites und FAST Codes",
-     "Antworten auf häufige Fragen zu Tsplits™, Mapsites, FAST Codes und den Abwicklungsoptionen von TalisU™.",
-     "TALISU™  ·  FAQ", ["Häufig", "gestellte", "Fragen"], ["Mapsites", "FAST Codes", "TalisU™"]))
+    ("Tsplits™ FAQ: Mapsites and FAST Codes",
+     "Answers to frequently asked questions about Tsplits™, Mapsites, FAST Codes and Tsplits™ fulfilment options.",
+     "TSPLITS™  ·  FAQ", ["Frequently", "asked", "questions"], ["Mapsites", "FAST Codes", "Tsplits™"]),
+    ("Tsplits™ FAQ: Mapsites und FAST Codes",
+     "Antworten auf häufige Fragen zu Tsplits™, Mapsites, FAST Codes und den Abwicklungsoptionen von Tsplits™.",
+     "TSPLITS™  ·  FAQ", ["Häufig", "gestellte", "Fragen"], ["Mapsites", "FAST Codes", "Tsplits™"]))
 # ---------- PMC sequence (TalisU dropdown, below the divider) ----------
 add("/talisu/talispros", "talisu-talispros", "public", WINDSWEPT,
     ("Tsplits™ PMC: Map-Based Marketing for Canadian Brokerages",
@@ -98,31 +98,31 @@ add("/talisu/contract", "talisu-contract", "utility", BRAND,
      "Öffnen Sie den TalisALL PMC Dienstleistungsvertrag mit Ihrem Agenten-Code, unterschreiben Sie elektronisch und fahren Sie mit der Registrierung fort.",
      "TSPLITS™  ·  VERTRAG", ["Ihren", "Dienstleistungs-", "vertrag signieren"], ["Agenten-Code", "E-Signatur", "Dann registrieren"]))
 add("/talisu/discuss", "talisu-discuss", "public", WEBSTER,
-    ("Share a Project Vision | TalisU™",
+    ("Share a Project Vision | Tsplits™",
      "Explore Conventional, Lease-to-Own, Fractionalization and Tokenization structures and share your project vision with an advisor. No registration needed.",
-     "TALISU™  ·  PROJECT VISION", ["Share a", "Project Vision"], ["Conventional · Lease-to-Own", "Fractionalization", "Tokenization"]),
-    ("Projektvision teilen | TalisU™",
+     "TSPLITS™  ·  PROJECT VISION", ["Share a", "Project Vision"], ["Conventional · Lease-to-Own", "Fractionalization", "Tokenization"]),
+    ("Projektvision teilen | Tsplits™",
      "Entdecken Sie Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung und teilen Sie Ihre Projektvision mit einem Berater. Ohne Registrierung.",
-     "TALISU™  ·  PROJEKTVISION", ["Projektvision", "teilen"], ["Konventionell · Mietkauf", "Fraktionalisierung", "Tokenisierung"]))
+     "TSPLITS™  ·  PROJEKTVISION", ["Projektvision", "teilen"], ["Konventionell · Mietkauf", "Fraktionalisierung", "Tokenisierung"]))
 add("/talisu/value-added", "talisu-value-added", "public", WEBSTER_BANKER,
-    ("Value-Added: Engage Webster's Fulfilment Team | TalisU™",
+    ("Value-Added: Engage Webster's Fulfilment Team | Tsplits™",
      "Engage Webster and his Fulfilment Team in Canada: Conventional, Lease-to-Own (Tsplits™), Fractionalization or Tokenization structures, in CAD.",
-     "TALISU™  ·  VALUE-ADDED", ["Engage Webster", "and his", "Fulfilment Team"], ["Conventional · Lease-to-Own", "Tokenization", "Canada · CAD"]),
-    ("Mehrwert: Webster und sein Fulfilment-Team | TalisU™",
+     "TSPLITS™  ·  VALUE-ADDED", ["Engage Webster", "and his", "Fulfilment Team"], ["Conventional · Lease-to-Own", "Tokenization", "Canada · CAD"]),
+    ("Mehrwert: Webster und sein Fulfilment-Team | Tsplits™",
      "Beauftragen Sie Webster und sein Fulfilment-Team in Kanada: Konventionell, Mietkauf (Tsplits™), Fraktionalisierung oder Tokenisierung, in CAD.",
-     "TALISU™  ·  MEHRWERT", ["Beauftragen Sie", "Webster und sein", "Fulfilment-Team"], ["Konventionell · Mietkauf", "Tokenisierung", "Kanada · CAD"]))
+     "TSPLITS™  ·  MEHRWERT", ["Beauftragen Sie", "Webster und sein", "Fulfilment-Team"], ["Konventionell · Mietkauf", "Tokenisierung", "Kanada · CAD"]))
 add("/talisu/tsplits", "talisu-tsplits", "public", ("talisbooks/tsplits/og-cover.jpg", 0.5, None, None),
-    ("Tsplits™ eBook – from Vision to Implementation | TalisU™",
+    ("Tsplits™ eBook – from Vision to Implementation | Tsplits™",
      "Read the Tsplits™ eBook page by page: turn a listing vision into a project with Conventional, Lease-to-Own, Fractionalization or Tokenization.",
-     "TALISU™  ·  TSPLITS™ EBOOK", ["Tsplits™", "From Vision to", "Implementation"], ["10-page eBook", "EN · DE", "Download PDF"]),
-    ("Tsplits™ eBook – von der Vision zur Umsetzung | TalisU™",
+     "TSPLITS™  ·  TSPLITS™ EBOOK", ["Tsplits™", "From Vision to", "Implementation"], ["10-page eBook", "EN · DE", "Download PDF"]),
+    ("Tsplits™ eBook – von der Vision zur Umsetzung | Tsplits™",
      "Das Tsplits™ eBook zum Blättern: aus einer Listing-Vision wird ein Projekt – Konventionell, Mietkauf, Fraktionalisierung oder Tokenisierung.",
-     "TALISU™  ·  TSPLITS™ EBOOK", ["Tsplits™", "Von der Vision", "zur Umsetzung"], ["10-seitiges eBook", "DE · EN", "PDF herunterladen"]))
+     "TSPLITS™  ·  TSPLITS™ EBOOK", ["Tsplits™", "Von der Vision", "zur Umsetzung"], ["10-seitiges eBook", "DE · EN", "PDF herunterladen"]))
 add("/talisu/tsplits-playbook", "talisu-tsplits-playbook", "utility", BRAND,
-    ("Tsplits™ Sales Playbook | TalisU™",
+    ("Tsplits™ Sales Playbook | Tsplits™",
      "The Tsplits™ Sales Playbook for the sales team: call flow, objection handling and practice drills. Passcode required.",
      "TSPLITS™  ·  SALES TEAM", ["Tsplits™", "Sales", "Playbook"], ["Call flow", "Objections", "Passcode"]),
-    ("Tsplits™ Sales Playbook | TalisU™",
+    ("Tsplits™ Sales Playbook | Tsplits™",
      "Das Tsplits™ Sales Playbook für das Vertriebsteam: Gesprächsablauf, Einwandbehandlung und Übungen. Zugangscode erforderlich.",
      "TSPLITS™  ·  VERTRIEBSTEAM", ["Tsplits™", "Sales", "Playbook"], ["Gesprächsablauf", "Einwände", "Zugangscode"]))
 add("/talisu/terms", "talisu-terms", "public", BRAND,
@@ -189,33 +189,33 @@ add("/talispros/demo-mapsite/ebook", "demo-ebook", "public", COVER,
      "Verwandeln Sie das angeheftete Tsplits™ E-Book-PDF in ein Demo-Talisbook™ mit optimierten Seiten.",
      "TALISBOOKS™  ·  DEMO", ["Erstellen Sie", "ein Demo-", "Talisbook™"], []))
 add("/talisu/kb", "talisu-kb", "public", LAPTOP,
-    ("TalisU™ Knowledge Base: Audio, Video, Learning",
-     "TalisU™ Knowledge Base: audios, videos and learning material for Mapsites and FAST Codes.",
-     "TALISU™  ·  KNOWLEDGE BASE", ["Knowledge Base", "audio, video", "and learning"], ["Audio", "Video", "Mapsites"]),
-    ("TalisU™ Wissensdatenbank: Audio, Video, Lernen",
-     "TalisU™ Wissensdatenbank: Audios, Videos und Lernmaterial zu Mapsites und FAST Codes.",
-     "TALISU™  ·  WISSENSDATENBANK", ["Wissensdatenbank", "Audio, Video", "und Lernen"], ["Audio", "Video", "Mapsites"]))
+    ("Tsplits™ Knowledge Base: Audio, Video, Learning",
+     "Tsplits™ Knowledge Base: audios, videos and learning material for Mapsites and FAST Codes.",
+     "TSPLITS™  ·  KNOWLEDGE BASE", ["Knowledge Base", "audio, video", "and learning"], ["Audio", "Video", "Mapsites"]),
+    ("Tsplits™ Wissensdatenbank: Audio, Video, Lernen",
+     "Tsplits™ Wissensdatenbank: Audios, Videos und Lernmaterial zu Mapsites und FAST Codes.",
+     "TSPLITS™  ·  WISSENSDATENBANK", ["Wissensdatenbank", "Audio, Video", "und Lernen"], ["Audio", "Video", "Mapsites"]))
 add("/talisu/au", "talisu-audio", "public", AISHA,
-    ("TalisU™ Audio: Aisha & Thorsten P",
-     "Listen to TalisU™ audio: a short welcome plus Aisha & Thorsten P on digital property fractionalization.",
-     "TALISU™  ·  AUDIO", ["Listen:", "Aisha & Thorsten P", "on TalisU™"], ["Welcome", "Fractionalization"]),
-    ("TalisU™ Audio: Aisha & Thorsten P",
-     "Hören Sie TalisU™ Audio: eine kurze Begrüßung sowie Aisha & Thorsten P über die digitale Fraktionalisierung von Immobilien.",
-     "TALISU™  ·  AUDIO", ["Hören Sie:", "Aisha & Thorsten P", "bei TalisU™"], ["Begrüßung", "Fraktionalisierung"]))
+    ("Tsplits™ Audio: Aisha & Thorsten P",
+     "Listen to Tsplits™ audio: a short welcome plus Aisha & Thorsten P on digital property fractionalization.",
+     "TSPLITS™  ·  AUDIO", ["Listen:", "Aisha & Thorsten P", "on Tsplits™"], ["Welcome", "Fractionalization"]),
+    ("Tsplits™ Audio: Aisha & Thorsten P",
+     "Hören Sie Tsplits™ Audio: eine kurze Begrüßung sowie Aisha & Thorsten P über die digitale Fraktionalisierung von Immobilien.",
+     "TSPLITS™  ·  AUDIO", ["Hören Sie:", "Aisha & Thorsten P", "bei Tsplits™"], ["Begrüßung", "Fraktionalisierung"]))
 add("/talisu/video", "talisu-video", "public", LAPTOP,
-    ("TalisU™ Video Library and TalisTV™",
-     "The TalisU™ video library and TalisTV™ programming.",
-     "TALISU™  ·  VIDEO", ["TalisU™", "video library", "and TalisTV™"], []),
-    ("TalisU™ Videothek und TalisTV™",
-     "Die TalisU™ Videothek und das TalisTV™ Programm.",
-     "TALISU™  ·  VIDEO", ["TalisU™", "Videothek", "und TalisTV™"], []))
+    ("Tsplits™ Video Library and TalisTV™",
+     "The Tsplits™ video library and TalisTV™ programming.",
+     "TSPLITS™  ·  VIDEO", ["Tsplits™", "video library", "and TalisTV™"], []),
+    ("Tsplits™ Videothek und TalisTV™",
+     "Die Tsplits™ Videothek und das TalisTV™ Programm.",
+     "TSPLITS™  ·  VIDEO", ["Tsplits™", "Videothek", "und TalisTV™"], []))
 add("/learn-more", "learn-more", "public", COVER,
     ("Learn More About Tokenization | Tsplits™",
-     "Explore tokenization with the Talisbooks™ eBook experience and TalisU™ audio.",
-     "TALISU™  ·  LEARN MORE", ["Learn more", "about", "tokenization"], ["Talisbooks™", "TalisU™ Audio"]),
+     "Explore tokenization with the Talisbooks™ eBook experience and Tsplits™ audio.",
+     "TSPLITS™  ·  LEARN MORE", ["Learn more", "about", "tokenization"], ["Talisbooks™", "Tsplits™ Audio"]),
     ("Mehr über Tokenisierung erfahren | Tsplits™",
-     "Entdecken Sie die Tokenisierung mit dem Talisbooks™ E-Book-Erlebnis und TalisU™ Audio.",
-     "TALISU™  ·  MEHR ERFAHREN", ["Mehr über", "Tokenisierung", "erfahren"], ["Talisbooks™", "TalisU™ Audio"]))
+     "Entdecken Sie die Tokenisierung mit dem Talisbooks™ E-Book-Erlebnis und Tsplits™ Audio.",
+     "TSPLITS™  ·  MEHR ERFAHREN", ["Mehr über", "Tokenisierung", "erfahren"], ["Talisbooks™", "Tsplits™ Audio"]))
 
 # ---------- Mapsite / Tsplits™ pages ----------
 add("/talispros", "talispros-pmc", "public", LAPTOP,
@@ -373,12 +373,12 @@ add("/register", "register-legacy", "public", PIN,
      "Registrieren Sie Ihr Mapsite-Konto, wählen Sie einen Monatsplan und aktivieren Sie Ihre Tsplits™ Präsenz.",
      "TSPLITS™  ·  KONTO", ["Registrieren Sie", "Ihr Mapsite-", "Konto"], ["Monatsplan", "AdPro™ PINs"]))
 add("/partner-access", "partner-access", "public", BRAND,
-    ("Wholesale Partner Access with FAST Codes | TalisU™",
-     "Access dedicated TalisU™ Mapsites using your FAST Code.",
-     "TALISU™  ·  PARTNER ACCESS", ["Wholesale", "partner", "access"], ["FAST Code", "Mapsites"]),
-    ("Großhandels-Partnerzugang mit FAST Code | TalisU™",
-     "Greifen Sie mit Ihrem FAST Code auf eigene TalisU™ Mapsites zu.",
-     "TALISU™  ·  PARTNERZUGANG", ["Großhandels-", "Partner-", "zugang"], ["FAST Code", "Mapsites"]))
+    ("Wholesale Partner Access with FAST Codes | Tsplits™",
+     "Access dedicated Tsplits™ Mapsites using your FAST Code.",
+     "TSPLITS™  ·  PARTNER ACCESS", ["Wholesale", "partner", "access"], ["FAST Code", "Mapsites"]),
+    ("Großhandels-Partnerzugang mit FAST Code | Tsplits™",
+     "Greifen Sie mit Ihrem FAST Code auf eigene Tsplits™ Mapsites zu.",
+     "TSPLITS™  ·  PARTNERZUGANG", ["Großhandels-", "Partner-", "zugang"], ["FAST Code", "Mapsites"]))
 add("/partner-view", "partner-view", "public", LAPTOP,
     ("Tell Us About Your Project | Tsplits™",
      "Partners: tell us about your project and the Tsplits™ team will follow up.",
@@ -484,10 +484,10 @@ add("/lease-to-own", "lease-to-own", "public", RES,
 add("/talisu/bo", "talisu-bo", "public", BRAND,
     ("TalisU™ Sea-Cans | Business Office",
      "DIY container homes with TalisU™ Sea-Cans. Express an interest to qualify for our 'Friends of…' discount.",
-     "TALISU™  ·  SEA-CANS", ["DIY container", "homes with", "TalisU™ Sea-Cans"], ["20 ft.", "40 ft.", "High-Cube"]),
+     "TSPLITS™  ·  SEA-CANS", ["DIY container", "homes with", "TalisU™ Sea-Cans"], ["20 ft.", "40 ft.", "High-Cube"]),
     ("TalisU™ Sea-Cans | Business Office",
      "DIY-Containerhäuser mit TalisU™ Sea-Cans. Bekunden Sie Interesse und sichern Sie sich unseren „Friends of…“-Rabatt.",
-     "TALISU™  ·  SEA-CANS", ["DIY-Container-", "häuser mit", "TalisU™ Sea-Cans"], ["20 ft.", "40 ft.", "High-Cube"]))
+     "TSPLITS™  ·  SEA-CANS", ["DIY-Container-", "häuser mit", "TalisU™ Sea-Cans"], ["20 ft.", "40 ft.", "High-Cube"]))
 for slug, code, name, dims, en_b, de_b in [
     ("tsc20", "TSC20", "Sea-Cans 20 ft.", "20' × 8' × 8'6\"", "Practical half-length versatility.", "Praktische Vielseitigkeit in halber Länge."),
     ("tsc40", "TSC40", "Sea-Cans 40 ft.", "40' × 8' × 8'6\"", "Maximum full-length versatility.", "Maximale Vielseitigkeit in voller Länge."),
@@ -498,31 +498,31 @@ for slug, code, name, dims, en_b, de_b in [
     add(f"/talisu/bo/{slug}", f"talisu-bo-{slug}", "public", BRAND,
         (f"TalisU™ {name} ({code}) | Sea-Cans",
          f"TalisU™ {name}, {dims}. {en_b} Order online or express an interest.",
-         f"TALISU™  ·  SEA-CANS  ·  {code}", ["TalisU™", name, dims], []),
+         f"TSPLITS™  ·  SEA-CANS  ·  {code}", ["TalisU™", name, dims], []),
         (f"TalisU™ {name} ({code}) | Sea-Cans",
          f"TalisU™ {name}, {dims}. {de_b} Online bestellen oder Interesse bekunden.",
-         f"TALISU™  ·  SEA-CANS  ·  {code}", ["TalisU™", name, dims], []))
+         f"TSPLITS™  ·  SEA-CANS  ·  {code}", ["TalisU™", name, dims], []))
 add("/talisu/sh", "talisu-sh", "public", BRAND,
     ("TalisU™ Sea-Cans Show Home | By Appointment",
      "Visit the TalisU™ Sea-Cans building site in Nova Scotia, by appointment only.",
-     "TALISU™  ·  SEA-CANS SHOW HOME", ["Visit the", "show home by", "appointment"], ["Nova Scotia"]),
+     "TSPLITS™  ·  SEA-CANS SHOW HOME", ["Visit the", "show home by", "appointment"], ["Nova Scotia"]),
     ("TalisU™ Sea-Cans Musterhaus | Nach Termin",
      "Besuchen Sie die TalisU™ Sea-Cans Baustelle in Nova Scotia, nur nach Terminvereinbarung.",
-     "TALISU™  ·  SEA-CANS MUSTERHAUS", ["Besuchen Sie", "das Musterhaus", "nach Termin"], ["Nova Scotia"]))
+     "TSPLITS™  ·  SEA-CANS MUSTERHAUS", ["Besuchen Sie", "das Musterhaus", "nach Termin"], ["Nova Scotia"]))
 add("/talisu/cu", "talisu-cu", "public", BRAND,
     ("Contact TalisU™ Sea-Cans",
      "Contact TalisU™ Sea-Cans about DIY container homes, wholesale discounts and direct shipment.",
-     "TALISU™  ·  SEA-CANS", ["Contact", "TalisU™", "Sea-Cans"], []),
+     "TSPLITS™  ·  SEA-CANS", ["Contact", "TalisU™", "Sea-Cans"], []),
     ("Kontakt zu TalisU™ Sea-Cans",
      "Kontaktieren Sie TalisU™ Sea-Cans zu DIY-Containerhäusern, Großhandelsrabatten und Direktversand.",
-     "TALISU™  ·  SEA-CANS", ["Kontakt zu", "TalisU™", "Sea-Cans"], []))
+     "TSPLITS™  ·  SEA-CANS", ["Kontakt zu", "TalisU™", "Sea-Cans"], []))
 add("/talisu/blog", "talisu-blog", "public", BRAND,
     ("TalisU™ Sea-Cans Blog",
      "The TalisU™ Sea-Cans blog on DIY container homes is coming soon.",
-     "TALISU™  ·  SEA-CANS", ["TalisU™", "Sea-Cans", "blog"], []),
+     "TSPLITS™  ·  SEA-CANS", ["TalisU™", "Sea-Cans", "blog"], []),
     ("TalisU™ Sea-Cans Blog",
      "Der TalisU™ Sea-Cans Blog über DIY-Containerhäuser folgt in Kürze.",
-     "TALISU™  ·  SEA-CANS", ["TalisU™", "Sea-Cans", "Blog"], []))
+     "TSPLITS™  ·  SEA-CANS", ["TalisU™", "Sea-Cans", "Blog"], []))
 
 # ---------- legal ----------
 add("/privacy", "privacy", "public", BRAND,
