@@ -359,10 +359,30 @@ export const de: Dictionary = {
         terms: "Nutzungsbedingungen",
         register: "Registrieren",
         checkouts: [
-          { id: "broker", label: "Makler oder Teamleiter" },
-          { id: "agent", label: "Agent" },
-          { id: "fsbo", label: "FSBO" },
-          { id: "adpro", label: "Adpro" },
+          {
+            id: "broker",
+            label: "Makler oder Teamleiter",
+            sidebar:
+              "Sie sind Makler oder Teamleiter und stellen Ihren Agenten eine Mapsite bereit. Sie können einen Home-PIN und unbegrenzt viele Listing-PINs pro Agent setzen. Wir empfehlen jedoch, die Aufnahme über Leistungsuntergrenzen zu begrenzen: Aufgenommen wird nur ein Listing, das Ihr Minimum für Ihre Mindestlaufzeit zahlt.",
+          },
+          {
+            id: "agent",
+            label: "Agent",
+            sidebar:
+              "Sie sind Agent und arbeiten in einer Maklerfirma oder einem Team. Sie können unbegrenzt viele Listing-PINs setzen, die das Minimum Ihrer Maklerfirma bei Immobiliengebühren und Laufzeiten erfüllen. Zum Setzen dieser PINs benötigen Sie den FAST Code des Makler- oder Teamkontos.",
+          },
+          {
+            id: "fsbo",
+            label: "FSBO",
+            sidebar:
+              "Sie verkaufen als Eigentümer (For-Sale-By-Owner) und haben mit Ihrem bevorzugten teilnehmenden Makler oder Team vereinbart, einen PIN auf dessen Mapsite zu setzen. Sie sparen weiterhin bei den Immobiliengebühren, ermöglichen aber Käufervertretungsgeschäfte (Buyer's Agency) für Ihr Mere-Posting-Inserat.",
+          },
+          {
+            id: "adpro",
+            label: "Adpro",
+            sidebar:
+              "Sie werben auf der Mapsite eines Maklers oder Teams und nutzen Ihre Präsenz dort, um deren Kunden auf Ihre eigene Website oder Ihre eigene Mapsite zu leiten. Letztere ist ohne Mehrkosten enthalten, und so kann Ihr eigener virtueller Markt oder Ihr eigenes Monopol entstehen.",
+          },
           { id: "pin", label: "PIN" },
         ],
         consentBefore: "Mit der Registrierung stimmen Sie den",

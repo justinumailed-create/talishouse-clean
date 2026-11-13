@@ -475,6 +475,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(checkout.indexOf("hasCheckoutAccess()")).toBeLessThan(checkout.indexOf("<SamCartWebCheckout"));
     expect(checkout).not.toContain("<iframe");
     expect(checkout).not.toContain("SamCartEmbed");
+    expect(checkout).toContain('"sidebar" in checkout');
     const embed = readFileSync(resolve("components/talisu/SamCartWebCheckout.tsx"), "utf8");
     expect(embed).toContain('from "next/script"');
     expect(embed).toContain("https://static.samcart.com/checkouts/sc-checkout.js");
@@ -487,5 +488,30 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(ui).toContain("redeemRegisterEntryAction(");
     const entry = readFileSync(resolve("lib/talisu/register-entry.ts"), "utf8");
     expect(entry).toContain("hasCheckoutAccess");
+  });
+
+  it("uses Ralf's Aisha sidebar copy word for word, with a German translation, and none on PIN", () => {
+    const enCopy = en.talisu.register.actions.checkouts;
+    const deCopy = de.talisu.register.actions.checkouts;
+    const exact: Record<string, string> = {
+      broker:
+        "You are a Broker or Team Leader providing a Mapsite to your Agents. You can place one Home PIN and an unlimited number of Listing PINs per Agent, although we recommend you limit inclusion by introducing service floors: only Listing that pay your minimum for your minimum term get included.",
+      agent:
+        "You are an Agent working as part of a brokerage or team. You can place an unlimited number of Listing PINs that pay your brokerage minimum in Real Estate Fees and Term Lengths. You require your Broker or Team Account FAST Code to place those PINs.",
+      fsbo:
+        "You are a For-Sale-By-Owner having reached an agreement with your favourite participating Broker or Team to place a PIN on their Mapsite. You still save on your Real Estate Fees, but you set them up for Buyer's Agency transactions on Your Mere Posting listing.",
+      adpro:
+        "You are an advertiser on the Broker or Team Mapsite, using your presence there to redirect their clients to your own website, or Mapsite. If the latter, it is included at no additional charge and you might develop your very own virtual market or monopoly.",
+    };
+    for (const [id, text] of Object.entries(exact)) {
+      expect(enCopy.find((item) => item.id === id)?.sidebar).toBe(text);
+      expect(text).not.toMatch(/™|TODO|TBD/);
+      const german = deCopy.find((item) => item.id === id)?.sidebar ?? "";
+      expect(german.length).toBeGreaterThan(40);
+      expect(german).not.toBe(text);
+      expect(german).not.toMatch(/TODO|TBD|™/);
+    }
+    expect(enCopy.find((item) => item.id === "pin")?.sidebar ?? "").toBe("");
+    expect(deCopy.find((item) => item.id === "pin")?.sidebar ?? "").toBe("");
   });
 });
