@@ -410,7 +410,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
       } else {
         expect(html).not.toContain("/talisu/reg/checkout/");
       }
-      expect(html).toContain(">Broker<");
+      expect(html).toContain(">Broker or Team Leader<");
       expect(html).toContain(">Agent<");
       expect(html).toContain(">FSBO<");
       expect(html).toContain(">Adpro<");
@@ -425,7 +425,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
   it("German labels", async () => {
     env.locale = "de";
     const html = renderToStaticMarkup((await renderReg({})) as ReactElement);
-    for (const label of ["Makler", "Agent", "FSBO", "Adpro", "PIN"]) {
+    for (const label of ["Makler oder Teamleiter", "Agent", "FSBO", "Adpro", "PIN"]) {
       expect(html).toContain(`>${label}<`);
     }
     expect(html).toContain("Nutzungsbedingungen");
@@ -468,8 +468,19 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(gate).toContain("password_hash");
     const urls = readFileSync(resolve("lib/talisu/register-checkout.server.ts"), "utf8");
     expect(urls).toContain('import "server-only"');
-    expect(urls).toContain("https://talispros.mysamcart.com/checkout/broker");
-    expect(urls).toContain("https://talispros.mysamcart.com/checkout/listpin");
+    expect(urls).toContain('pin: "listpin"');
+    expect(urls).not.toContain("mysamcart.com/checkout");
+    const checkout = readFileSync(resolve("components/talisu/RegisterProductCheckout.tsx"), "utf8");
+    expect(checkout).toContain("hasCheckoutAccess()");
+    expect(checkout.indexOf("hasCheckoutAccess()")).toBeLessThan(checkout.indexOf("<SamCartWebCheckout"));
+    expect(checkout).not.toContain("<iframe");
+    expect(checkout).not.toContain("SamCartEmbed");
+    const embed = readFileSync(resolve("components/talisu/SamCartWebCheckout.tsx"), "utf8");
+    expect(embed).toContain('from "next/script"');
+    expect(embed).toContain("https://static.samcart.com/checkouts/sc-checkout.js");
+    expect(embed).toContain("<sc-checkout");
+    expect(embed).toContain('strategy="afterInteractive"');
+    expect(embed).not.toContain("listpin");
     const ui = readFileSync(resolve("components/talisu/RegisterActions.tsx"), "utf8");
     expect(ui).not.toMatch(/placeholder=/);
     expect(ui).not.toContain("mysamcart");

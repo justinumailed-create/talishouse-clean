@@ -298,7 +298,7 @@ export const TALISU_REGISTER = {
     terms: "Terms of Service",
     register: "Register",
     checkouts: [
-      { id: "broker", label: "Broker" },
+      { id: "broker", label: "Broker or Team Leader" },
       { id: "agent", label: "Agent" },
       { id: "fsbo", label: "FSBO" },
       { id: "adpro", label: "Adpro" },

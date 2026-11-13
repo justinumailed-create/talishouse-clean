@@ -359,7 +359,7 @@ export const de: Dictionary = {
         terms: "Nutzungsbedingungen",
         register: "Registrieren",
         checkouts: [
-          { id: "broker", label: "Makler" },
+          { id: "broker", label: "Makler oder Teamleiter" },
           { id: "agent", label: "Agent" },
           { id: "fsbo", label: "FSBO" },
           { id: "adpro", label: "Adpro" },
