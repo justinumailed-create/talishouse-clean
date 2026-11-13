@@ -31,7 +31,10 @@ import {
   resolveMapSiteRequestId,
   getMapSiteActivationPaymentStatus,
 } from "../../actions";
-import { shouldReconcileClaimedMapSiteFromStripe } from "@/lib/talispros/mapsite-payment";
+import {
+  reconcileMapSiteStripeForViewer,
+  shouldReconcileClaimedMapSiteFromStripe,
+} from "@/lib/talispros/mapsite-payment";
 import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
@@ -148,11 +151,6 @@ export default async function ClaimedMapSiteByAccountTypePage({
     notFound();
   }
 
-  if (await isFastCodeDisqualified(fastCode)) {
-    const owner = await isOwnMapSite(fastCode).catch(() => false);
-    if (!owner) notFound();
-  }
-
   const showActivatePayment = isTruthyParam(firstParam(query[ACTIVATE_QUERY]));
   const checkoutStatus = parseCheckoutStatus(firstParam(query[CHECKOUT_QUERY]));
   const checkoutSessionId = parseCheckoutSessionId(
@@ -173,17 +171,24 @@ export default async function ClaimedMapSiteByAccountTypePage({
     accountTypeForAudience(audience);
   const requestIdParam = firstParam(query.requestId);
   const mapsiteIdParam = firstParam(query.mapsiteId);
-  const requestId =
-    (await resolveMapSiteRequestId({
-      requestId: requestIdParam,
-      fastCode,
-      mapsiteId: mapsiteIdParam,
-    })) || null;
-
   if (isAllPinsFastCode(fastCode)) {
     // ALLPINS map view is the live /talisu/mkts Markets map (not an empty aggregate).
     redirect(ROUTES.TALISU_MARKETS);
   }
+
+  const [disqualified, requestIdResolved] = await Promise.all([
+    isFastCodeDisqualified(fastCode),
+    resolveMapSiteRequestId({
+      requestId: requestIdParam,
+      fastCode,
+      mapsiteId: mapsiteIdParam,
+    }),
+  ]);
+  if (disqualified) {
+    const owner = await isOwnMapSite(fastCode).catch(() => false);
+    if (!owner) notFound();
+  }
+  const requestId = requestIdResolved || null;
 
   const mapsite = await loadMapSiteApplicationState({
     mapsiteId: mapsiteIdParam,
@@ -192,8 +197,53 @@ export default async function ClaimedMapSiteByAccountTypePage({
     claimed: true,
   });
 
+  const demoFastCode =
+    isDemoMapSiteCode(mapsite.fast_code) || isDemoMapSiteCode(fastCode);
+  const treatAsDemoUnlock =
+    (mapsite.is_demonstration || demoFastCode) && !isIssuedFastCode(fastCode);
+  const checkoutReconcile =
+    Boolean(checkoutSessionId) || checkoutStatus === "success";
+  const stripeOptions = {
+    isDemo: treatAsDemoUnlock,
+    mapsiteStatus: mapsite.status,
+    checkoutSessionId,
+    checkoutStatus,
+  };
+
+  // These reads do not depend on each other. Start them together so the
+  // Mapsite pays one round trip to Supabase instead of a chain.
+  const preparedSlotPromise = isPreparedSlotMapsite(mapsite.id);
+  const planPromise = resolveMapSitePaymentPlanType({
+    requestId,
+    fastCode,
+    mapsiteId: mapsite.id,
+  });
+  const ebookPromise = getMapSiteEbookContext(fastCode, { bookSlug });
+  const pinPromise = loadMapSitePinDashboard(mapsite.id);
+  const customPromise = loadMapSiteOwnerCustomizations(mapsite.id);
+  const editPromise = fastCode
+    ? getMapSiteEditToolbarState(fastCode).catch(() => null)
+    : Promise.resolve(null);
+  const rootPromise = loadMapSiteRootContext({
+    mapsiteId: mapsite.id,
+    fastCode: mapsite.fast_code || fastCode,
+  });
+  const zoomPromise = readMapZoomExplicit(mapsite.id);
+  const tebPromise = loadOwnTebViewerHref(mapsite.fast_code || fastCode);
+  const localePromise = getLocale();
+  const paymentPromise = treatAsDemoUnlock
+    ? Promise.resolve({ paid: true })
+    : getMapSiteActivationPaymentStatus({
+        mapsiteId: mapsite.id,
+        fastCode,
+        requestId,
+        stripeCheckoutSessionId: checkoutSessionId,
+        reconcileFromStripe:
+          checkoutReconcile && shouldReconcileClaimedMapSiteFromStripe(stripeOptions),
+      });
+
   // Prospect FAST Codes open only behind the agent password gate (Arun, Nov 5).
-  const preparedSlotMapsite = await isPreparedSlotMapsite(mapsite.id);
+  const preparedSlotMapsite = await preparedSlotPromise;
   if (preparedSlotMapsite && !(await hasProspectAccess())) {
     redirect(`${DEMO_MAPSITE_BUILD_PATH}?gate=${encodeURIComponent(fastCode.toLowerCase())}#fast-code-slots`);
   }
@@ -201,49 +251,46 @@ export default async function ClaimedMapSiteByAccountTypePage({
   // Real owner/paid browser session.
   const isOwner = await isOwnMapSite(fastCode);
 
-  const paymentPlanType = await resolveMapSitePaymentPlanType({
-    requestId,
-    fastCode,
-    mapsiteId: mapsite.id,
-  });
+  const [
+    paymentPlanType,
+    ebookContext,
+    pinDashboard,
+    ownerCustomizations,
+    editAccess,
+    rootContext,
+    mapZoomExplicit,
+    tebOwnBookHref,
+    locale,
+    initialPayment,
+  ] = await Promise.all([
+    planPromise,
+    ebookPromise,
+    pinPromise,
+    customPromise,
+    editPromise,
+    rootPromise,
+    zoomPromise,
+    tebPromise,
+    localePromise,
+    paymentPromise,
+  ]);
 
-  const demoFastCode =
-    isDemoMapSiteCode(mapsite.fast_code) || isDemoMapSiteCode(fastCode);
-  const treatAsDemoUnlock =
-    (mapsite.is_demonstration || demoFastCode) && !isIssuedFastCode(fastCode);
-
-  const paymentReceived =
-    treatAsDemoUnlock ||
-    (
+  let paymentReceived = initialPayment.paid;
+  if (
+    !paymentReceived &&
+    reconcileMapSiteStripeForViewer({ ...stripeOptions, isOwner }) &&
+    !checkoutReconcile
+  ) {
+    paymentReceived = (
       await getMapSiteActivationPaymentStatus({
         mapsiteId: mapsite.id,
         fastCode,
         requestId,
         stripeCheckoutSessionId: checkoutSessionId,
-        reconcileFromStripe: shouldReconcileClaimedMapSiteFromStripe({
-          isDemo: treatAsDemoUnlock,
-          mapsiteStatus: mapsite.status,
-          checkoutSessionId,
-          checkoutStatus,
-        }),
+        reconcileFromStripe: true,
       })
     ).paid;
-
-  // The PIN card opens only when a PIN is clicked. Explicit deep links
-  // (?view=pin, a pending book) still open it; selling tools live in the navbar.
-  const openPinOnLoad =
-    firstParam(query.view)?.trim().toLowerCase() === "pin" || bookPending;
-
-  const [ebookContext, pinDashboard, ownerCustomizations, editAccess] = await Promise.all([
-    getMapSiteEbookContext(fastCode, {
-      bookSlug,
-    }),
-    loadMapSitePinDashboard(mapsite.id),
-    loadMapSiteOwnerCustomizations(mapsite.id),
-    fastCode
-      ? getMapSiteEditToolbarState(fastCode).catch(() => null)
-      : Promise.resolve(null),
-  ]);
+  }
   // Dashboard dropdown: owner session, or a Mapsite admin (e.g. FAST Code ARUN).
   // Paid + non-demo is enforced client-side (dashboardUnlocked) and in every action.
   const canManageDashboard = isOwner || Boolean(editAccess?.isAdmin);
@@ -253,12 +300,22 @@ export default async function ClaimedMapSiteByAccountTypePage({
     mapsite.teb_url?.trim() ||
     (treatAsDemoUnlock ? DEMO_PINNED_EBOOK_HREF : null);
   const hasTalisBook = Boolean(talisBookHref || ebookContext?.books?.length);
-  const listingImageUrls = await resolveEbookListingImageUrls({
-    listingImageUrls: ebookContext?.primaryEbook?.listingImageUrls,
-    bookSlug: primarySlug,
-    tebUrl: mapsite.teb_url,
-  });
-  const tebOwnBookHref = await loadOwnTebViewerHref(mapsite.fast_code || fastCode);
+  const [listingImageUrls, contractRow, ownerPill] = await Promise.all([
+    resolveEbookListingImageUrls({
+      listingImageUrls: ebookContext?.primaryEbook?.listingImageUrls,
+      bookSlug: primarySlug,
+      tebUrl: mapsite.teb_url,
+    }),
+    paymentReceived || !showActivatePayment
+      ? Promise.resolve(true)
+      : getSignedContractForFastCode(mapsite.fast_code || fastCode).then(Boolean),
+    loadPersonalHomeOwnerPill(fastCode, locale),
+  ]);
+  const contractSigned = paymentReceived || !showActivatePayment || contractRow;
+  // The PIN card opens only when a PIN is clicked. Explicit deep links
+  // (?view=pin, a pending book) still open it; selling tools live in the navbar.
+  const openPinOnLoad =
+    firstParam(query.view)?.trim().toLowerCase() === "pin" || bookPending;
   const listingMapSite = withEbookListingMedia(
     {
       ...mapsite,
@@ -271,10 +328,6 @@ export default async function ClaimedMapSiteByAccountTypePage({
   );
 
   // PIN categories + Partner Mapsites (Root shows its Derivatives' PINs).
-  const rootContext = await loadMapSiteRootContext({
-    mapsiteId: mapsite.id,
-    fastCode: mapsite.fast_code || fastCode,
-  });
   const partnerTargets: MapSitePartnerTarget[] = rootContext.partners.map((partner) => ({
     fastCode: partner.fastCode,
     href: partner.href,
@@ -284,13 +337,6 @@ export default async function ClaimedMapSiteByAccountTypePage({
 
   // PMC gate: activation payment only after the Service Agreement is signed
   // for this FAST Code. Paid / demo Mapsites are never gated.
-  const contractSigned =
-    paymentReceived ||
-    !showActivatePayment ||
-    Boolean(await getSignedContractForFastCode(mapsite.fast_code || fastCode));
-
-  // Account holder pill in the navbar: the signed-in owner only.
-  const ownerPill = await loadPersonalHomeOwnerPill(fastCode, await getLocale());
 
   return (
     <>
@@ -309,7 +355,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       checkoutStatus={checkoutStatus}
       checkoutSessionId={checkoutSessionId}
       openPinOnLoad={openPinOnLoad}
-      mapZoomExplicit={await readMapZoomExplicit(mapsite.id)}
+      mapZoomExplicit={mapZoomExplicit}
       isOwner={isOwner}
       accountTypeSegment={accountType}
       showStartHere={false}

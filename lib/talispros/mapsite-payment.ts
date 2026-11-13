@@ -12,6 +12,7 @@ import {
   isPaidRootOneDollarCheckoutSession,
   selectCheckoutSessionsForMapSite,
   selectPaidRootOneDollarCheckoutSessionsForEmail,
+  reconcileMapSiteStripeForViewer,
   shouldReconcileClaimedMapSiteFromStripe,
 } from "@/lib/talispros/stripe-root-checkout-match";
 import type Stripe from "stripe";
@@ -21,7 +22,7 @@ export {
   normalizePaymentEmail,
 } from "@/lib/talispros/mapsite-payment-status";
 
-export { shouldReconcileClaimedMapSiteFromStripe };
+export { reconcileMapSiteStripeForViewer, shouldReconcileClaimedMapSiteFromStripe };
 
 type PaymentLookupRow = {
   id?: string | null;
@@ -107,14 +108,26 @@ async function findCompletedMapSitePayment(
 
   let resolvedRequestId = requestId;
 
-  if (stripeCheckoutSessionId) {
-    const { data: bySession, error } = await supabase
-      .from("talispros_payments")
-      .select("id, payment_status")
-      .eq("stripe_checkout_session_id", stripeCheckoutSessionId)
-      .maybeSingle();
-    if (!error && rowIsCompletedPayment(bySession)) return true;
-  }
+  // A paid Mapsite is usually linked by id or FAST code. Check those before the
+  // email/account walk so a public view is one round trip, not a chain.
+  const [sessionPaid, directPaid] = await Promise.all([
+    (async () => {
+      if (!stripeCheckoutSessionId) return false;
+      const { data: bySession, error } = await supabase
+        .from("talispros_payments")
+        .select("id, payment_status")
+        .eq("stripe_checkout_session_id", stripeCheckoutSessionId)
+        .maybeSingle();
+      return !error && rowIsCompletedPayment(bySession);
+    })(),
+    paymentsHaveCompletedMatch({
+      mapsiteIds: new Set(mapsiteIds),
+      requestIds: new Set(requestIds),
+      fastCodes: new Set(fastCodes),
+      emails,
+    }),
+  ]);
+  if (sessionPaid || directPaid) return true;
 
   if (!resolvedRequestId && fastCode) {
     const { data: codeRow } = await supabase
@@ -141,42 +154,46 @@ async function findCompletedMapSitePayment(
     }
   }
 
-  for (const id of [...mapsiteIds]) {
-    const { data: mapsite } = await supabase
-      .from("mapsites")
-      .select("email, account_id, fast_code")
-      .eq("id", id)
-      .maybeSingle();
-    const email = normalizePaymentEmail(mapsite?.email);
-    if (email) emails.add(email);
-    if (mapsite?.fast_code) fastCodes.add(mapsite.fast_code);
+  await Promise.all(
+    [...mapsiteIds].map(async (id) => {
+      const [{ data: mapsite }, { data: linkedRequests }] = await Promise.all([
+        supabase
+          .from("mapsites")
+          .select("email, account_id, fast_code")
+          .eq("id", id)
+          .maybeSingle(),
+        supabase
+          .from("build_requests")
+          .select("id, email, requested_fast_code")
+          .eq("linked_mapsite_id", id)
+          .order("created_at", { ascending: false })
+          .limit(5),
+      ]);
+      const email = normalizePaymentEmail(mapsite?.email);
+      if (email) emails.add(email);
+      if (mapsite?.fast_code) fastCodes.add(mapsite.fast_code);
 
-    const { data: linkedRequests } = await supabase
-      .from("build_requests")
-      .select("id, email, requested_fast_code")
-      .eq("linked_mapsite_id", id)
-      .order("created_at", { ascending: false })
-      .limit(5);
-    for (const request of linkedRequests || []) {
-      if (request?.id) requestIds.add(request.id);
-      const requestEmail = normalizePaymentEmail(request?.email);
-      if (requestEmail) emails.add(requestEmail);
-      if (request?.requested_fast_code) {
-        fastCodes.add(request.requested_fast_code);
+      for (const request of linkedRequests || []) {
+        if (request?.id) requestIds.add(request.id);
+        const requestEmail = normalizePaymentEmail(request?.email);
+        if (requestEmail) emails.add(requestEmail);
+        if (request?.requested_fast_code) {
+          fastCodes.add(request.requested_fast_code);
+        }
       }
-    }
 
-    if (mapsite?.account_id) {
-      const { data: account } = await supabase
-        .from("accounts")
-        .select("email, fast_code")
-        .eq("id", mapsite.account_id)
-        .maybeSingle();
-      const accountEmail = normalizePaymentEmail(account?.email);
-      if (accountEmail) emails.add(accountEmail);
-      if (account?.fast_code) fastCodes.add(account.fast_code);
-    }
-  }
+      if (mapsite?.account_id) {
+        const { data: account } = await supabase
+          .from("accounts")
+          .select("email, fast_code")
+          .eq("id", mapsite.account_id)
+          .maybeSingle();
+        const accountEmail = normalizePaymentEmail(account?.email);
+        if (accountEmail) emails.add(accountEmail);
+        if (account?.fast_code) fastCodes.add(account.fast_code);
+      }
+    }),
+  );
 
   if (await paymentsHaveCompletedMatch({ mapsiteIds, requestIds, fastCodes, emails })) {
     return true;
@@ -214,63 +231,63 @@ async function paymentsHaveCompletedMatch(options: {
     }
   };
 
+  const checks: Promise<boolean>[] = [];
   for (const mapsiteId of options.mapsiteIds) {
-    if (
-      await completedIn(
+    checks.push(
+      completedIn(
         supabase
           .from("talispros_payments")
           .select("id, payment_status")
           .eq("mapsite_id", mapsiteId)
           .limit(20),
-      )
-    ) {
-      return true;
-    }
+      ),
+    );
   }
 
   for (const requestId of options.requestIds) {
-    if (
-      await completedIn(
+    checks.push(
+      completedIn(
         supabase
           .from("talispros_payments")
           .select("id, payment_status")
           .eq("request_id", requestId)
           .limit(20),
-      )
-    ) {
-      return true;
-    }
+      ),
+    );
   }
 
   for (const fastCode of options.fastCodes) {
-    if (
-      await completedIn(
+    checks.push(
+      completedIn(
         supabase
           .from("talispros_payments")
           .select("id, payment_status")
           .ilike("fast_code", fastCode)
           .limit(20),
-      )
-    ) {
-      return true;
-    }
+      ),
+    );
   }
 
   if (options.emails.size > 0) {
-    const { data: payments, error } = await supabase
-      .from("talispros_payments")
-      .select("id, payment_status, email")
-      .in("email", [...options.emails])
-      .limit(20);
-
-    if (error) {
-      console.warn("[mapsite-payment] email lookup failed:", error.message);
-    } else if (payments?.some((row) => rowIsCompletedPayment(row))) {
-      return true;
-    }
+    checks.push(
+      (async () => {
+        const { data: payments, error } = await supabase
+          .from("talispros_payments")
+          .select("id, payment_status, email")
+          .in("email", [...options.emails])
+          .limit(20);
+        if (error) {
+          console.warn("[mapsite-payment] email lookup failed:", error.message);
+          return false;
+        }
+        return Boolean(payments?.some((row) => rowIsCompletedPayment(row)));
+      })(),
+    );
   }
 
-  return false;
+  if (checks.length === 0) return false;
+  const found = await Promise.all(checks);
+  return found.some(Boolean);
 }
 
 function isMissingPaymentLinkColumnError(message: string | undefined): boolean {

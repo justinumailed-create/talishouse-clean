@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import MapEngineCanvas from "@/components/talismaps/map-engine/MapEngineCanvas";
 import {
   MapEngineProvider,
   useMapEngine,
@@ -94,6 +94,14 @@ import type { MapSiteRootContext } from "@/lib/talispros/mapsite-root-partners-s
 import type { PersonalHomeOwnerPill } from "@/lib/talispros/personal-home";
 import { MapSiteCategoryEditor, MapSitePartnerPanel } from "./MapSiteRootPanels";
 import { systemMapsiteOpeningZoom } from "@/lib/talispros/system-mapsite-zoom";
+
+const MapEngineCanvas = dynamic(
+  () => import("@/components/talismaps/map-engine/MapEngineCanvas"),
+  {
+    ssr: false,
+    loading: () => <div className="h-full w-full animate-pulse bg-[#e7eef6]" aria-hidden />,
+  },
+);
 
 const EMPTY_ROOT_CONTEXT: MapSiteRootContext = {
   role: "other",

@@ -323,6 +323,7 @@ describe("Stripe $1 Root checkout matching", () => {
       isPaidRootOneDollarCheckoutSession,
       checkoutSessionMatchesEmail,
       selectCheckoutSessionsForMapSite,
+      reconcileMapSiteStripeForViewer,
       shouldReconcileClaimedMapSiteFromStripe,
     } = await import("@/lib/talispros/stripe-root-checkout-match");
 
@@ -385,6 +386,32 @@ describe("Stripe $1 Root checkout matching", () => {
     expect(
       shouldReconcileClaimedMapSiteFromStripe({
         isDemo: true,
+        checkoutStatus: "success",
+      }),
+    ).toBe(false);
+    expect(
+      reconcileMapSiteStripeForViewer({
+        mapsiteStatus: "BUILD_REQUEST_SUBMITTED",
+        isOwner: false,
+      }),
+    ).toBe(false);
+    expect(
+      reconcileMapSiteStripeForViewer({
+        mapsiteStatus: "BUILD_REQUEST_SUBMITTED",
+        isOwner: true,
+      }),
+    ).toBe(true);
+    expect(
+      reconcileMapSiteStripeForViewer({
+        mapsiteStatus: "BUILD_REQUEST_SUBMITTED",
+        isOwner: false,
+        checkoutStatus: "success",
+      }),
+    ).toBe(true);
+    expect(
+      reconcileMapSiteStripeForViewer({
+        isDemo: true,
+        isOwner: true,
         checkoutStatus: "success",
       }),
     ).toBe(false);

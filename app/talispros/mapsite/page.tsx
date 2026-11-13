@@ -20,7 +20,10 @@ import {
   resolveMapSitePaymentPlanType,
   getMapSiteActivationPaymentStatus,
 } from "./actions";
-import { shouldReconcileClaimedMapSiteFromStripe } from "@/lib/talispros/mapsite-payment";
+import {
+  reconcileMapSiteStripeForViewer,
+  shouldReconcileClaimedMapSiteFromStripe,
+} from "@/lib/talispros/mapsite-payment";
 import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/talisbooks/mapsite-ebook-service";
 import { ROUTES } from "@/lib/routes";
 import {
@@ -188,18 +191,54 @@ export default async function TalisprosMapSitePage({
     );
   }
 
-  const mapsite = await loadMapSiteApplicationState({
-    mapsiteId,
-    fastCode,
-    requestId,
-    claimed: claimed || view === "pin" || Boolean(requestId),
-  });
+  const [mapsite, disqualified] = await Promise.all([
+    loadMapSiteApplicationState({
+      mapsiteId,
+      fastCode,
+      requestId,
+      claimed: claimed || view === "pin" || Boolean(requestId),
+    }),
+    fastCode ? isFastCodeDisqualified(fastCode) : Promise.resolve(false),
+  ]);
 
   const ownerCode = mapsite.fast_code || fastCode;
   const isDemoListing =
     (mapsite.is_demonstration || isDemoMapSiteCode(mapsite.fast_code)) &&
     !isIssuedFastCode(fastCode) &&
     !isIssuedFastCode(ownerCode);
+  const checkoutReconcile =
+    Boolean(checkoutSessionId) || checkoutStatus === "success";
+  const stripeOptions = {
+    isDemo: isDemoListing,
+    mapsiteStatus: mapsite.status,
+    checkoutSessionId,
+    checkoutStatus,
+  };
+  const planPromise = resolveMapSitePaymentPlanType({
+    requestId,
+    fastCode,
+    mapsiteId: mapsite.id,
+  });
+  const ebookPromise = ownerCode
+    ? getMapSiteEbookContext(ownerCode, { bookSlug })
+    : Promise.resolve(null);
+  const pinPromise = loadMapSitePinDashboard(mapsite.id);
+  const customPromise = loadMapSiteOwnerCustomizations(mapsite.id);
+  const editPromise = ownerCode
+    ? getMapSiteEditToolbarState(ownerCode).catch(() => null)
+    : Promise.resolve(null);
+  const zoomPromise = readMapZoomExplicit(mapsite.id);
+  const paymentPromise = isDemoListing
+    ? Promise.resolve({ paid: true })
+    : getMapSiteActivationPaymentStatus({
+        mapsiteId: mapsite.id,
+        fastCode,
+        requestId,
+        stripeCheckoutSessionId: checkoutSessionId,
+        reconcileFromStripe:
+          checkoutReconcile && shouldReconcileClaimedMapSiteFromStripe(stripeOptions),
+      });
+
   let isOwner = isDemoListing || showStartHere;
   if (!isOwner) {
     try {
@@ -209,39 +248,37 @@ export default async function TalisprosMapSitePage({
     }
   }
 
-  if (!isOwner && (await isFastCodeDisqualified(ownerCode))) notFound();
+  if (!isOwner && (disqualified || (ownerCode && ownerCode !== fastCode && (await isFastCodeDisqualified(ownerCode))))) {
+    notFound();
+  }
 
-  const paymentPlanType = await resolveMapSitePaymentPlanType({
-    requestId,
-    fastCode,
-    mapsiteId: mapsite.id,
-  });
+  const [paymentPlanType, ebookContext, pinDashboard, ownerCustomizations, editAccess, mapZoomExplicit, initialPayment] =
+    await Promise.all([
+      planPromise,
+      ebookPromise,
+      pinPromise,
+      customPromise,
+      editPromise,
+      zoomPromise,
+      paymentPromise,
+    ]);
 
-  const paymentReceived =
-    isDemoListing ||
-    (
+  let paymentReceived = initialPayment.paid;
+  if (
+    !paymentReceived &&
+    reconcileMapSiteStripeForViewer({ ...stripeOptions, isOwner }) &&
+    !checkoutReconcile
+  ) {
+    paymentReceived = (
       await getMapSiteActivationPaymentStatus({
         mapsiteId: mapsite.id,
         fastCode,
         requestId,
         stripeCheckoutSessionId: checkoutSessionId,
-        reconcileFromStripe: shouldReconcileClaimedMapSiteFromStripe({
-          isDemo: isDemoListing,
-          mapsiteStatus: mapsite.status,
-          checkoutSessionId,
-          checkoutStatus,
-        }),
+        reconcileFromStripe: true,
       })
     ).paid;
-
-  const [ebookContext, pinDashboard, ownerCustomizations, editAccess] = await Promise.all([
-    ownerCode ? getMapSiteEbookContext(ownerCode, { bookSlug }) : Promise.resolve(null),
-    loadMapSitePinDashboard(mapsite.id),
-    loadMapSiteOwnerCustomizations(mapsite.id),
-    ownerCode
-      ? getMapSiteEditToolbarState(ownerCode).catch(() => null)
-      : Promise.resolve(null),
-  ]);
+  }
   // Dashboard dropdown: owner session, or a Mapsite admin (e.g. FAST Code ARUN).
   // Paid + non-demo is enforced client-side (dashboardUnlocked) and in every action.
   const canManageDashboard = isOwner || Boolean(editAccess?.isAdmin);
@@ -283,7 +320,7 @@ export default async function TalisprosMapSitePage({
       checkoutStatus={checkoutStatus}
       checkoutSessionId={checkoutSessionId}
       openPinOnLoad={view === "pin"}
-      mapZoomExplicit={await readMapZoomExplicit(mapsite.id)}
+      mapZoomExplicit={mapZoomExplicit}
       isOwner={isOwner}
       showStartHere={false}
       flagIdentity={ebookContext?.primaryEbook?.flagIdentity}

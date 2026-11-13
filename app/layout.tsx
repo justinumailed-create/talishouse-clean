@@ -1,19 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { Poppins } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
 import { CartProvider } from "@/context/CartContext";
 import { AuthProvider } from "@/context/AuthContext";
+import NavigationProgress from "@/components/NavigationProgress";
 import RootShell from "@/components/RootShell";
+import { poppins } from "@/lib/fonts";
 import { LocaleProvider } from "@/lib/i18n/client";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { LOCALE_HTML_LANG } from "@/lib/i18n/config";
 
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
-});
+/** Supabase production is ca-central-1. Keep functions in Montreal (yul1). */
+export const preferredRegion = "yul1";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -49,6 +48,9 @@ export default async function RootLayout({
   return (
     <html lang={LOCALE_HTML_LANG[locale]}>
       <body className={`${poppins.variable} ${poppins.className}`}>
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <LocaleProvider locale={locale}>
           <AuthProvider>
             <CartProvider>

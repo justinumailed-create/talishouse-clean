@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import type { MapSiteSavedPinStyle } from "@/lib/mapsite-pin-style";
 import { getMapSiteTalisMapPinStyle } from "@/lib/talismaps/map-service";
@@ -467,40 +468,35 @@ export async function getMapSiteLocationFromBuildRequest(options: {
   const mapsiteId = options.mapsiteId?.trim() || null;
   const fastCode = options.fastCode?.trim() || null;
 
-  if (requestId) {
-    const { data } = await supabase
-      .from("build_requests")
-      .select(BUILD_REQUEST_SUBMISSION_COLUMNS)
-      .eq("id", requestId)
-      .maybeSingle();
-    const mapped = await mapSubmissionQueryResult(
-      data as BuildRequestSubmissionRow | null
-    );
-    if (mapped) return mapped;
-  }
+  const [byRequest, byMapsite, byCode] = await Promise.all([
+    requestId
+      ? supabase
+          .from("build_requests")
+          .select(BUILD_REQUEST_SUBMISSION_COLUMNS)
+          .eq("id", requestId)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    mapsiteId
+      ? supabase
+          .from("build_requests")
+          .select(BUILD_REQUEST_SUBMISSION_COLUMNS)
+          .eq("linked_mapsite_id", mapsiteId)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    fastCode
+      ? supabase
+          .from("build_requests")
+          .select(BUILD_REQUEST_SUBMISSION_COLUMNS)
+          .ilike("requested_fast_code", fastCode)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+  ]);
 
-  if (mapsiteId) {
-    const { data } = await supabase
-      .from("build_requests")
-      .select(BUILD_REQUEST_SUBMISSION_COLUMNS)
-      .eq("linked_mapsite_id", mapsiteId)
-      .order("submitted_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    const mapped = await mapSubmissionQueryResult(
-      data as BuildRequestSubmissionRow | null
-    );
-    if (mapped) return mapped;
-  }
-
-  if (fastCode) {
-    const { data } = await supabase
-      .from("build_requests")
-      .select(BUILD_REQUEST_SUBMISSION_COLUMNS)
-      .ilike("requested_fast_code", fastCode)
-      .order("submitted_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+  for (const data of [byRequest.data, byMapsite.data, byCode.data]) {
     const mapped = await mapSubmissionQueryResult(
       data as BuildRequestSubmissionRow | null
     );
@@ -517,22 +513,26 @@ export async function mergeMapSiteWithSubmittedLocation(
     fastCode?: string | null;
   } = {}
 ): Promise<MapSitePlatformRecord> {
-  const location = await getMapSiteLocationFromBuildRequest({
-    mapsiteId: mapsite.id,
-    requestId: options.requestId,
-    fastCode: options.fastCode || mapsite.fast_code,
-  });
+  const fastCode = options.fastCode || mapsite.fast_code;
+  const [location, talisStyle] = await Promise.all([
+    getMapSiteLocationFromBuildRequest({
+      mapsiteId: mapsite.id,
+      requestId: options.requestId,
+      fastCode,
+    }),
+    isSupabaseAdminConfigured()
+      ? getMapSiteTalisMapPinStyle({
+          mapsiteId: mapsite.id,
+          fastCode,
+        })
+      : Promise.resolve(null),
+  ]);
 
-  let merged = location
+  const merged = location
     ? applyBuildRequestLocationToMapSite(mapsite, location)
     : mapsite;
 
   if (!isSupabaseAdminConfigured()) return merged;
-
-  const talisStyle = await getMapSiteTalisMapPinStyle({
-    mapsiteId: mapsite.id,
-    fastCode: options.fastCode || mapsite.fast_code,
-  });
   return applySavedPinStyleToMapSite(merged, talisStyle);
 }
 
@@ -569,7 +569,7 @@ export async function getDemonstrationMapSite(): Promise<MapSitePlatformRecord> 
   }
 }
 
-export async function getMapSitePlatformById(
+export const getMapSitePlatformById = cache(async function getMapSitePlatformById(
   mapsiteId: string
 ): Promise<MapSitePlatformRecord | null> {
   if (!isSupabaseAdminConfigured()) {
@@ -591,7 +591,7 @@ export async function getMapSitePlatformById(
     console.warn("[mapsite-platform] Could not load Mapsite by id:", error);
     return null;
   }
-}
+});
 
 export async function transitionMapSiteStatus(
   mapsiteId: string,
@@ -867,7 +867,7 @@ export async function markMapSiteClaimedByBuildRequest(params: {
   );
 }
 
-export async function getMapSitePlatformByFastCode(
+export const getMapSitePlatformByFastCode = cache(async function getMapSitePlatformByFastCode(
   fastCode: string
 ): Promise<MapSitePlatformRecord | null> {
   if (!fastCode.trim()) return null;
@@ -887,4 +887,4 @@ export async function getMapSitePlatformByFastCode(
 
   if (error || !data) return null;
   return mapRow(data as MapSiteRow);
-}
+});

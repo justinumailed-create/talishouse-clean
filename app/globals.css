@@ -5891,3 +5891,12 @@ body.mapsite-gallery-open [data-paypal-button] {
     height: calc((100vw - 1.5rem - 1rem) / 0.772 + 7.5rem);
   }
 }
+
+@keyframes nav-progress {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(420%); }
+}
+
+.nav-progress-bar {
+  animation: nav-progress 1s ease-in-out infinite;
+}
