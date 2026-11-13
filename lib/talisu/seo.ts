@@ -69,7 +69,7 @@ export function createTalisUMetadata(overrides: {
       title: overrides.title,
       description: overrides.description,
       url: ogUrl,
-      siteName: "TalisU™",
+      siteName: "Tsplits™",
       type: "website",
       locale: ogLocale(overrides.locale ?? "en"),
       ...(overrides.locale

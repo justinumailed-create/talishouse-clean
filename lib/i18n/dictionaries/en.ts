@@ -1056,22 +1056,22 @@ export const en = {
         "Talishouse™ Product Catalogue design ideas. Every design is numbered (P01, P02…) — tap one to register for that product.",
     },
     talisuKb: {
-      title: "TalisU™ | Knowledge Base",
+      title: "Tsplits™ | Knowledge Base",
       description:
-        "TalisU™ Knowledge Base — Audios, Videos, and Learning Material for Mapsites and FAST Codes™.",
+        "Tsplits™ Knowledge Base — Audios, Videos, and Learning Material for Mapsites and FAST Codes™.",
     },
     talisuVideo: {
-      title: "TalisU™ | Video",
+      title: "Tsplits™ | Video",
       description:
-        "TalisU™ video library and TalisTV™ programming.",
+        "Tsplits™ video library and TalisTV™ programming.",
     },
     talisuAudio: {
-      title: "TalisU™ | Audio",
+      title: "Tsplits™ | Audio",
       description:
-        "Listen to TalisU™ audio — a short welcome autoplays, plus Aisha & Thorsten P on digital property fractionalization.",
+        "Listen to Tsplits™ audio — a short welcome autoplays, plus Aisha & Thorsten P on digital property fractionalization.",
     },
     talisuMarkets: {
-      title: "TalisU™ | Markets served",
+      title: "Tsplits™ | Markets served",
       description:
         "Select the PIN nearest you to claim a market of 80 kilometres around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.",
     },
@@ -1085,17 +1085,17 @@ export const en = {
       description: "Claim your market. Open your Mapsite.",
     },
     talisuLayout: {
-      title: "TalisU™",
+      title: "Tsplits™",
       description:
         "Industry adjacent fulfilment options — Conventional, Lease-to-Own, Fractionalization, and Tokenization.",
     },
     talisuFaq: {
-      title: "TalisU™ | FAQ",
+      title: "Tsplits™ | FAQ",
       description:
-        "Frequently asked questions about Tsplits™, Mapsites, and TalisU™.",
+        "Frequently asked questions about Tsplits™, Mapsites, and Tsplits™.",
     },
     talisuRegister: {
-      title: "Register Your Tsplits™ Mapsite and Get Global Exposure | TalisU™",
+      title: "Register Your Tsplits™ Mapsite and Get Global Exposure | Tsplits™",
       description:
         "Industry adjacent marketing that gets your Mapsite global exposure: Mapsites, Talisbooks™ (TEB), listing analysis (TVA) and TalisTV™ (TTV). Register today and work with Aisha C.'s team.",
       ogImage: "/og/talisu-reg-en.jpg",
@@ -1103,7 +1103,7 @@ export const en = {
         "Aisha C., Team Leader, with the Tsplits™ tree logo: Register your Mapsite and get global exposure with industry adjacent marketing",
     },
     talisuEngage: {
-      title: "Engage Thorsten P and His Fulfilment Team | TalisU™",
+      title: "Engage Thorsten P and His Fulfilment Team | Tsplits™",
       description:
         "Every project starts with your vision. Choose a Talishouse™ design from the catalogue and engage Thorsten P and his Fulfilment Team. Your $2,000 CAD down payment is credited in full.",
       ogImage: "/og/talisu-engage-en.jpg",

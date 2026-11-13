@@ -146,10 +146,10 @@ def main():
     # from /og/talisu-engage-<lang>.jpg via meta.talisuEngage.
     if not only or "talisu-engage" in only:
         thorsten = next(p["photo"] for p in P if p["route"] == "/talisu/engage")
-        card("en", "TALISU™  ·  PRODUCT CATALOGUE", ["Engage Thorsten P", "and his", "Fulfilment Team"],
+        card("en", "TSPLITS™  ·  PRODUCT CATALOGUE", ["Engage Thorsten P", "and his", "Fulfilment Team"],
              ["Talishouse™ Catalogue", "$2,000 CAD Down Payment"], "talispros.com/talisu/engage",
              thorsten, os.path.join(PUB, "og", "talisu-engage-en.jpg"))
-        card("de", "TALISU™  ·  PRODUKTKATALOG", ["Beauftragen Sie", "Thorsten P und sein", "Fulfilment-Team"],
+        card("de", "TSPLITS™  ·  PRODUKTKATALOG", ["Beauftragen Sie", "Thorsten P und sein", "Fulfilment-Team"],
              ["Talishouse™ Katalog", "Anzahlung 2.000 CAD"], "talispros.com/talisu/engage",
              thorsten, os.path.join(PUB, "og", "talisu-engage-de.jpg"))
     if not only or "admin" in only:

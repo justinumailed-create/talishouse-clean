@@ -1368,22 +1368,22 @@ export const de: Dictionary = {
         "Designideen aus dem Talishouse™ Produktkatalog. Jedes Design ist nummeriert (P01, P02 …) – tippen Sie auf ein Design, um sich für dieses Produkt zu registrieren.",
     },
     talisuKb: {
-      title: "TalisU™ | Wissensdatenbank",
+      title: "Tsplits™ | Wissensdatenbank",
       description:
-        "TalisU™-Wissensdatenbank – Audios, Videos und Lernmaterial für Mapsites und FAST Codes™.",
+        "Tsplits™-Wissensdatenbank – Audios, Videos und Lernmaterial für Mapsites und FAST Codes™.",
     },
     talisuVideo: {
-      title: "TalisU™ | Video",
+      title: "Tsplits™ | Video",
       description:
-        "Die TalisU™-Videothek und das TalisTV™-Programm.",
+        "Die Tsplits™-Videothek und das TalisTV™-Programm.",
     },
     talisuAudio: {
-      title: "TalisU™ | Audio",
+      title: "Tsplits™ | Audio",
       description:
-        "Hören Sie TalisU™-Audios – eine kurze Begrüßung startet automatisch, dazu Aisha & Thorsten P über die digitale Fraktionalisierung von Immobilien.",
+        "Hören Sie Tsplits™-Audios – eine kurze Begrüßung startet automatisch, dazu Aisha & Thorsten P über die digitale Fraktionalisierung von Immobilien.",
     },
     talisuMarkets: {
-      title: "TalisU™ | Unsere Märkte",
+      title: "Tsplits™ | Unsere Märkte",
       description:
         "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 80 Kilometern als teilexklusives Gebiet zu beanspruchen.",
     },
@@ -1397,17 +1397,17 @@ export const de: Dictionary = {
       description: "Sichern Sie sich Ihren Markt. Eröffnen Sie Ihre Mapsite.",
     },
     talisuLayout: {
-      title: "TalisU™",
+      title: "Tsplits™",
       description:
         "Branchennahe Abwicklungsoptionen – Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung.",
     },
     talisuFaq: {
-      title: "TalisU™ | FAQ",
+      title: "Tsplits™ | FAQ",
       description:
-        "Häufig gestellte Fragen zu Tsplits™, Mapsites und TalisU™.",
+        "Häufig gestellte Fragen zu Tsplits™, Mapsites und Tsplits™.",
     },
     talisuRegister: {
-      title: "Registrieren Sie Ihre Tsplits™ Mapsite: globale Sichtbarkeit | TalisU™",
+      title: "Registrieren Sie Ihre Tsplits™ Mapsite: globale Sichtbarkeit | Tsplits™",
       description:
         "Branchennahes Marketing für die globale Sichtbarkeit Ihrer Mapsite: Mapsites, Talisbooks™ (TEB), Angebotsanalyse (TVA) und TalisTV™ (TTV). Registrieren Sie sich jetzt und arbeiten Sie mit dem Team von Aisha C.",
       ogImage: "/og/talisu-reg-de.jpg",
@@ -1415,7 +1415,7 @@ export const de: Dictionary = {
         "Aisha C., Teamleiterin, mit dem Tsplits™-Baumlogo – Registrieren Sie Ihre Mapsite: globale Sichtbarkeit durch branchennahes Marketing",
     },
     talisuEngage: {
-      title: "Thorsten P und sein Fulfilment-Team beauftragen | TalisU™",
+      title: "Thorsten P und sein Fulfilment-Team beauftragen | Tsplits™",
       description:
         "Jedes Projekt beginnt mit Ihrer Vision. Wählen Sie ein Talishouse™-Design aus dem Katalog und beauftragen Sie Thorsten P und sein Fulfilment-Team. Ihre Anzahlung von 2.000 CAD wird vollständig angerechnet.",
       ogImage: "/og/talisu-engage-de.jpg",
