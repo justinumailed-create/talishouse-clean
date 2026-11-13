@@ -3,8 +3,9 @@
 import { acceptAgentGateSecret } from "@/lib/talispros/prospect-gate-server";
 
 /**
- * Agent code before SamCart checkout. Same check as /talispros/demo-mapsite:
- * agent password, permanent agent code, Global Admin password, or an admin grant.
+ * Agent code before SamCart checkout. Accepts the checkout allowlist only
+ * (aritri, enanko, ralf, arun, demo), case-insensitive, with surrounding
+ * spaces ignored.
  */
 export async function redeemRegisterEntryAction(input: {
   code: string;

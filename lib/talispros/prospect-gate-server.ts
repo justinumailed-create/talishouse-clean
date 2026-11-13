@@ -9,7 +9,12 @@ import { getAdminSessionAccount, matchesGlobalAdminPassword, writeAdminSessionCo
 import { getActiveAdminGrant } from "@/lib/admin-access-grants";
 import { normalizeAgentCode } from "@/lib/talispros/mapsite-contract";
 import { normalizeSlotFastCode } from "@/lib/talispros/fast-code-slots";
+import { isCheckoutAgentCode, normalizeCheckoutAgentCode } from "@/lib/talisu/checkout-codes";
 import {
+  CHECKOUT_CODE_COOKIE,
+  CHECKOUT_CODE_GRANT_ID,
+  CHECKOUT_CODE_MAX_AGE,
+  CHECKOUT_CODE_SCOPE,
   REGISTER_ENTRY_COOKIE,
   REGISTER_ENTRY_COOKIE_MAX_AGE,
   REGISTER_ENTRY_COOKIE_SCOPE,
@@ -167,10 +172,30 @@ async function acceptSecret(password: string): Promise<{ ok: true } | { ok: fals
   return saved ? { ok: true } : { ok: false, error: "failed" };
 }
 
-/** Register / SamCart checkout: the Demo Mapsite agent-code check, no FAST Code required. */
+/**
+ * Register checkout codes. Only the memorable allowlist (case-insensitive,
+ * trimmed). The Demo Mapsite gate still uses acceptSecret / matchAgentGateSecret.
+ */
 export async function acceptAgentGateSecret(raw: unknown): Promise<{ ok: true } | { ok: false; error: GateError }> {
-  const password = typeof raw === "string" ? raw : "";
-  return acceptSecret(password);
+  const code = normalizeCheckoutAgentCode(raw);
+  if (!code || code.length > 200) return { ok: false, error: "wrong" };
+  if (isSupabaseAdminConfigured() && (await failureCount()) >= GATE_MAX_FAILURES) {
+    return { ok: false, error: "limited" };
+  }
+  if (!isCheckoutAgentCode(code)) {
+    if (isSupabaseAdminConfigured()) await recordGateAttempt(false);
+    return { ok: false, error: "wrong" };
+  }
+  const jar = await cookies();
+  jar.set(CHECKOUT_CODE_COOKIE, signCookieValue(CHECKOUT_CODE_SCOPE, CHECKOUT_CODE_GRANT_ID, CHECKOUT_CODE_MAX_AGE), {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: CHECKOUT_CODE_MAX_AGE,
+  });
+  if (isSupabaseAdminConfigured()) await recordGateAttempt(true);
+  return { ok: true };
 }
 
 /**
