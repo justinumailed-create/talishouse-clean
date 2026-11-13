@@ -37,8 +37,8 @@ describe("Tsplits™ page (/talisu/tsplits)", () => {
       "Catalogue",
     ]);
     const header = readFileSync(resolve("components/talisu/TalisUMktsHeader.tsx"), "utf8");
-    expect(header).toContain('case "Tsplits™":');
-    expect(header).toContain("t.nav.talisuMenu.tsplits");
+    expect(header).not.toContain("{t.nav.talisu}");
+    expect(header).not.toContain("t.nav.talisuMenu.tsplits");
     expect(getDictionary("en").nav.talisuMenu.tsplits).toBe("Tsplits™");
     expect(getDictionary("de").nav.talisuMenu.tsplits).toBe("Tsplits™");
   });
