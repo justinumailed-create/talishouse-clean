@@ -21,11 +21,11 @@ describe("USA Markets (/talisu/mkts/usa): native page, no Taliswebs redirect", (
     expect(ROUTES.TALISU_US_MARKETS).toBe("/talisu/mkts/usa");
     const page = read("app/talisu/mkts/usa/page.tsx");
     expect(page).toContain('export const dynamic = "force-dynamic"');
-    expect(page).toContain("await getAdminSessionAccount()");
-    expect(page).toContain('if (!account) redirect("/")');
+    expect(page).toContain("<MarketsMapOrGate region=\"us\" />");
+    expect(read("components/talisu/MarketsMapOrGate.tsx")).toContain("await getAdminSessionAccount()");
+    expect(page).not.toContain('redirect("/")');
     expect(page).toContain("index: false");
     expect(page).toContain('pageMetadata("/talisu/mkts/usa")');
-    expect(page).toContain('<TalisUMarketsMapApp region="us" />');
     expect(page.toLowerCase()).not.toContain("taliswebs.com");
   });
 

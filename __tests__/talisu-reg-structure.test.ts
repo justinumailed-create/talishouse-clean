@@ -11,7 +11,10 @@ const env = vi.hoisted(() => ({
   entry: true,
 }));
 
-vi.mock("@/lib/talisu/register-entry", () => ({ hasRegisterEntry: async () => env.entry }));
+vi.mock("@/lib/talisu/register-entry", () => ({
+  hasRegisterEntry: async () => env.entry,
+  hasCheckoutAccess: async () => env.entry,
+}));
 vi.mock("@/app/talisu/reg/actions", () => ({ redeemRegisterEntryAction: vi.fn() }));
 
 vi.mock("@/lib/talisu/pmc-gate", () => ({
@@ -397,11 +400,16 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
       const html = renderToStaticMarkup(tree as ReactElement);
       const order = [...html.matchAll(/data-testid="register-action-(\w+)"/g)].map((m) => m[1]);
       expect(order).toEqual(["broker", "agent", "fsbo", "adpro", "pin"]);
-      expect(html).toContain("https://talispros.mysamcart.com/checkout/broker");
-      expect(html).toContain("https://talispros.mysamcart.com/checkout/agent");
-      expect(html).toContain("https://talispros.mysamcart.com/checkout/fsbo");
-      expect(html).toContain("https://talispros.mysamcart.com/checkout/adpro");
-      expect(html).toContain("https://talispros.mysamcart.com/checkout/listpin");
+      expect(html).not.toContain("mysamcart");
+      if (entry) {
+        expect(html).toContain('href="/talisu/reg/checkout/broker"');
+        expect(html).toContain('href="/talisu/reg/checkout/agent"');
+        expect(html).toContain('href="/talisu/reg/checkout/fsbo"');
+        expect(html).toContain('href="/talisu/reg/checkout/adpro"');
+        expect(html).toContain('href="/talisu/reg/checkout/pin"');
+      } else {
+        expect(html).not.toContain("/talisu/reg/checkout/");
+      }
       expect(html).toContain(">Broker<");
       expect(html).toContain(">Agent<");
       expect(html).toContain(">FSBO<");
@@ -448,18 +456,25 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(env.enforce).not.toHaveBeenCalled();
   });
 
-  it("validates codes with the existing agent code system, server-side, with a signed cookie", () => {
+  it("validates codes with the Demo Mapsite agent check, server-side, and hides SamCart URLs", () => {
     const action = readFileSync(resolve("app/talisu/reg/actions.ts"), "utf8");
     expect(action).toContain('"use server"');
-    expect(action).toContain("redeemAgentContractCode(");
-    expect(action).toContain("signCookieValue(REGISTER_ENTRY_COOKIE_SCOPE");
-    expect(action).toContain("httpOnly: true");
-    const entry = readFileSync(resolve("lib/talisu/register-entry.ts"), "utf8");
-    expect(entry).toContain('import "server-only"');
-    expect(entry).toContain("verifyCookieValue(");
-    expect(entry).toContain("getContractAgentById(");
+    expect(action).toContain("acceptAgentGateSecret(");
+    expect(action).not.toContain("mysamcart");
+    const gate = readFileSync(resolve("lib/talispros/prospect-gate-server.ts"), "utf8");
+    expect(gate).toContain("matchesGlobalAdminPassword");
+    expect(gate).toContain("getActiveAdminGrant");
+    expect(gate).toContain("normalizeAgentCode");
+    expect(gate).toContain("password_hash");
+    const urls = readFileSync(resolve("lib/talisu/register-checkout.server.ts"), "utf8");
+    expect(urls).toContain('import "server-only"');
+    expect(urls).toContain("https://talispros.mysamcart.com/checkout/broker");
+    expect(urls).toContain("https://talispros.mysamcart.com/checkout/listpin");
     const ui = readFileSync(resolve("components/talisu/RegisterActions.tsx"), "utf8");
     expect(ui).not.toMatch(/placeholder=/);
+    expect(ui).not.toContain("mysamcart");
     expect(ui).toContain("redeemRegisterEntryAction(");
+    const entry = readFileSync(resolve("lib/talisu/register-entry.ts"), "utf8");
+    expect(entry).toContain("hasCheckoutAccess");
   });
 });

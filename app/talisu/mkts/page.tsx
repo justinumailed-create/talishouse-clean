@@ -1,6 +1,4 @@
-import { redirect } from "next/navigation";
-import TalisUMarketsMapApp from "@/components/talisu/TalisUMarketsMapApp";
-import { getAdminSessionAccount } from "@/lib/admin-auth";
+import MarketsMapOrGate from "@/components/talisu/MarketsMapOrGate";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 
 export const dynamic = "force-dynamic";
@@ -15,12 +13,9 @@ export async function generateMetadata() {
  * First-party Talismaps™ rebuild of the live Atlist Markets UI
  * (talisu.com/mkts). Flag pins + sidebar + Next Step… → /talisu/demo.
  *
- * Admin-only: signed-in admins (Global Admin, granted admins, Agent Admins)
- * see the map; everyone else is redirected Home. ALLPINS / Mapsite redirects
- * still point here, so admins keep the same entry points.
+ * Signed-in admins see the map. Everyone else gets the Global Admin password
+ * form; a correct password opens this map and an admin session.
  */
 export default async function TalisUMarketsPage() {
-  const account = await getAdminSessionAccount();
-  if (!account) redirect("/");
-  return <TalisUMarketsMapApp />;
+  return <MarketsMapOrGate region="ca" />;
 }

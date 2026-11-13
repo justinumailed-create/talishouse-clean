@@ -2,13 +2,12 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
-  TALISU_MKTS_HEADER_ADMIN_DROPDOWN,
   TALISU_MKTS_HEADER_DROPDOWN,
   TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER,
   TALISU_MKTS_HEADER_LOGO_HREF,
+  TALISU_MKTS_HEADER_MARKETS_DROPDOWN,
   TALISU_MKTS_HEADER_NAV,
   TALISU_MKTS_HEADER_MAPSITES_LABEL,
-  TALISU_MKTS_HEADER_REGISTER_DROPDOWN,
 } from "../lib/talisu/markets-pins";
 import { SHOW_TALISU_NAV } from "../lib/talisu/ui-flags";
 
@@ -62,35 +61,27 @@ describe("TalisU blue header dropdown", () => {
       "/",
       "/talisu/reg",
     ]);
-    // Markets left the top navbar (Arun, Oct 31): admin-only row below the TalisU divider.
+    // Markets is its own navbar dropdown (USA, then Canada), not a TalisU admin row.
     expect(TALISU_MKTS_HEADER_NAV.some((i) => (i.label as string) === "Markets")).toBe(false);
-    expect(TALISU_MKTS_HEADER_ADMIN_DROPDOWN.map((i) => [i.label, i.href])).toEqual([
-      ["Markets", "/talisu/mkts"],
-      ["USA Markets", "/talisu/mkts/usa"],
+    expect(TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((i) => [i.label, i.href])).toEqual([
+      ["USA", "/talisu/mkts/usa"],
+      ["Canada", "/talisu/mkts"],
     ]);
-    expect(header).toContain('"talisu-admin-us-markets-link"');
-    expect(header).toContain("t.markets.usaMarkets");
-    expect(header).toContain('fetch("/api/talisu/admin-status"');
-    expect(header).toContain('"talisu-admin-markets-link"');
+    expect(header).toContain("<MarketsNavDropdown");
+    expect(header).toContain("TALISU_MKTS_HEADER_MARKETS_DROPDOWN");
+    expect(header).toContain("t.nav.marketsMenu.usa");
+    expect(header).toContain("t.nav.marketsMenu.canada");
+    expect(header).not.toContain('fetch("/api/talisu/admin-status"');
     expect(header).toContain("t.nav.markets");
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Bookshelf")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "All Books")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "FAST Shelves")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Create Demo")).toBe(false);
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Admin Places")).toBe(false);
-    expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.label)).toEqual([
-      "Mapsite",
-      "Register Account",
-      "Register PIN",
-    ]);
-    expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.href)).toEqual([
-      "/talisu/reg",
-      "/talisu/reg?step=choose",
-      "/talisu/reg#additional-pins",
-    ]);
-    expect(TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((i) => i.href).join(" ")).not.toContain(
-      "/talisu/engage",
-    );
+    expect(header).toContain('data-testid="nav-register-link"');
+    expect(header).toContain("ROUTES.TALISU_REGISTER");
+    expect(header).not.toContain("RegisterNavDropdown");
+    expect(header).not.toContain("/talisu/engage");
   });
 
 
@@ -149,28 +140,24 @@ describe("TalisU blue header dropdown", () => {
     expect(header).toContain('role="menu"');
     // TalisU trigger is rendered after primary nav + Mapsites + vertical separator
     expect(header).toContain("TALISU_MKTS_HEADER_NAV.filter");
-    expect(header).toContain("RegisterNavDropdown");
+    expect(header).toContain("<MarketsNavDropdown");
+    expect(header).toContain('data-testid="nav-register-link"');
     expect(header).toContain("bg-white/45");
-    // Markets is no longer a navbar item (admin-only TalisU dropdown row).
     expect(header).not.toContain('item.label === "Markets"');
-    const marketsIdx = header.indexOf('item.label === "Home").map') + 1;
+    const homeIdx = header.indexOf('item.label === "Home").map');
     const mapsitesIdx = header.indexOf('data-testid="nav-mapsites-link"');
-    // Catalogue moved into the TalisU dropdown (below the divider).
+    const marketsIdx = header.indexOf("<MarketsNavDropdown");
+    const registerIdx = header.indexOf('data-testid="nav-register-link"');
     expect(header).not.toContain('(item) => item.label === "Catalogue"');
-    const catalogueIdx = mapsitesIdx + 1;
-    const registerFilterIdx = header.indexOf("<RegisterNavDropdown");
     const separatorIdx = header.indexOf("bg-white/45");
     const talisUIdx = header.indexOf("\n              {t.nav.talisu}\n");
-    expect(marketsIdx).toBeGreaterThan(-1);
-    const homeIdx = header.indexOf('item.label === "Home").map');
     expect(homeIdx).toBeGreaterThan(-1);
-    expect(marketsIdx).toBeGreaterThan(homeIdx);
-    // Home, Mapsites, Register | TalisU (… | Contract, Knowledge Base, Catalogue) (Bookshelf, FAQ, …)
+    // Home, Mapsites, Markets, Register | TalisU
     expect(header).not.toContain('(item) => item.label === "Bookshelf"');
-    expect(mapsitesIdx).toBeGreaterThan(marketsIdx);
-    expect(catalogueIdx).toBeGreaterThan(mapsitesIdx);
-    expect(registerFilterIdx).toBeGreaterThan(catalogueIdx);
-    expect(separatorIdx).toBeGreaterThan(registerFilterIdx);
+    expect(mapsitesIdx).toBeGreaterThan(homeIdx);
+    expect(marketsIdx).toBeGreaterThan(mapsitesIdx);
+    expect(registerIdx).toBeGreaterThan(marketsIdx);
+    expect(separatorIdx).toBeGreaterThan(registerIdx);
     expect(talisUIdx).toBeGreaterThan(separatorIdx);
   });
 
@@ -223,8 +210,8 @@ describe("TalisU blue header dropdown", () => {
     expect(mark).toContain("{tagline}");
   });
 
-  it("hides the TalisU entry and dropdown behind SHOW_TALISU_NAV without deleting them", () => {
-    expect(SHOW_TALISU_NAV).toBe(false);
+  it("shows the TalisU entry and dropdown from SHOW_TALISU_NAV", () => {
+    expect(SHOW_TALISU_NAV).toBe(true);
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",

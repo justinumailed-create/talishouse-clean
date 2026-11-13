@@ -1,6 +1,4 @@
-import { redirect } from "next/navigation";
-import TalisUMarketsMapApp from "@/components/talisu/TalisUMarketsMapApp";
-import { getAdminSessionAccount } from "@/lib/admin-auth";
+import MarketsMapOrGate from "@/components/talisu/MarketsMapOrGate";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 
 export const dynamic = "force-dynamic";
@@ -16,11 +14,9 @@ export async function generateMetadata() {
  * same look, sidebar and Next Step… flow as Canada Markets (/talisu/mkts).
  * No redirect or link to Taliswebs.
  *
- * Gated exactly like Canada Markets: signed-in admins (Global Admin, granted
- * admins, Agent Admins) see the map; everyone else is redirected Home.
+ * Gated exactly like Canada Markets: signed-in admins see the map; everyone
+ * else enters the existing Global Admin password, which also opens admin access.
  */
 export default async function TalisUUsMarketsPage() {
-  const account = await getAdminSessionAccount();
-  if (!account) redirect("/");
-  return <TalisUMarketsMapApp region="us" />;
+  return <MarketsMapOrGate region="us" />;
 }

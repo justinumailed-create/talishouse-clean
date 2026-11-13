@@ -71,6 +71,10 @@ export const en = {
       account: "Register Account",
       pin: "Register PIN",
     },
+    marketsMenu: {
+      usa: "USA",
+      canada: "Canada",
+    },
     talisuMenu: {
       tsplits: "Tsplits™",
       faq: "FAQ",
@@ -305,6 +309,17 @@ export const en = {
     /** Left-panel links (Ralf, Oct 18): switch sites in the same window. */
     canadaMarkets: "Canada Markets",
     usaMarkets: "USA Markets",
+    /** Password form on /talisu/mkts and /talisu/mkts/usa. No secret is shown. */
+    adminGate: {
+      title: "Open this map",
+      body: "This map opens with the Global Admin password.",
+      label: "Global Admin password",
+      submit: "Open map",
+      checking: "Checking…",
+      wrong: "That password is not valid.",
+      limited: "Too many attempts. Please wait 15 minutes and try again.",
+      failed: "The map is not available right now. Please try again shortly.",
+    },
     /** USA Markets page (/talisu/mkts/usa): footer + US market card copy. */
     us: {
       footer:
