@@ -8,7 +8,7 @@ import {
   useState,
   type MutableRefObject,
 } from "react";
-import MapEngineCanvas from "@/components/talismaps/map-engine/MapEngineCanvas";
+import dynamic from "next/dynamic";
 import MapEngineFitBounds from "@/components/talismaps/map-engine/MapEngineFitBounds";
 import {
   MapEngineProvider,
@@ -49,6 +49,14 @@ import type { MapEnginePin } from "@/lib/talismaps/map-engine/types";
 import TalisUMarketsPinCard from "./TalisUMarketsPinCard";
 import TalisUMarketsSidebar from "./TalisUMarketsSidebar";
 import { useT } from "@/lib/i18n/client";
+
+const MapEngineCanvas = dynamic(
+  () => import("@/components/talismaps/map-engine/MapEngineCanvas"),
+  {
+    ssr: false,
+    loading: () => <div className="h-full w-full animate-pulse bg-[#e7eef6]" aria-hidden />,
+  },
+);
 
 const FOCUS_GESTURE_GUARD_MS = 900;
 /** Retry window while Google overlays settle after a camera move. */

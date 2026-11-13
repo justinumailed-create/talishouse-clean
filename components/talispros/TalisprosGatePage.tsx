@@ -1,14 +1,9 @@
-import { Libre_Baskerville } from "next/font/google";
 import TalisprosHomeGate from "@/components/talispros/TalisprosHomeGate";
+import { libreBaskerville } from "@/lib/fonts";
 import TalisprosHomeShowcase from "@/components/talispros/TalisprosHomeShowcase";
 import TalisprosSamCartReturnBanner from "@/components/talispros/TalisprosSamCartReturnBanner";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import TalisprosHomeCornerLinks from "@/components/talispros/TalisprosHomeCornerLinks";
-
-const libreBaskerville = Libre_Baskerville({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-});
 
 /**
  * Homepage gate (`/`): TalisU blue navbar; Login + Build Demo + FAST on the

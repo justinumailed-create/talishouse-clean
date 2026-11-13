@@ -15,9 +15,12 @@ import {
   type HomePinLocationValues,
 } from "./home-pin-types";
 import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
-import GoogleAddressInput from "./GoogleAddressInput";
 import TalisMapsPinStyleSection from "./TalisMapsPinStyleSection";
 import type { TalisMapsPinLocationUpdate } from "./TalisMapsPinPicker";
+
+const GoogleAddressInput = dynamic(() => import("./GoogleAddressInput"), {
+  loading: () => <div className="h-11 w-full animate-pulse rounded-xl bg-neutral-100" aria-hidden />,
+});
 
 const TalisMapsPinPicker = dynamic(() => import("./TalisMapsPinPicker"), {
   ssr: false,

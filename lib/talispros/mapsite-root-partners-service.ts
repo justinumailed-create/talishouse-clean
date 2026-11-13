@@ -76,9 +76,8 @@ async function paidPlanType(fastCode: string, mapsiteId: string | null): Promise
       : null,
     db().from("talispros_payments").select("plan_type, payment_status").ilike("fast_code", fastCode).order("created_at", { ascending: false }).limit(5),
   ];
-  for (const query of queries) {
-    if (!query) continue;
-    const { data } = await query;
+  const results = await Promise.all(queries.map((query) => (query ? query : Promise.resolve({ data: null }))));
+  for (const { data } of results) {
     for (const row of (data || []) as Array<{ plan_type: string | null; payment_status: string | null }>) {
       if (row.plan_type && PAID.has((row.payment_status || "").trim().toLowerCase())) {
         return row.plan_type;
@@ -199,24 +198,25 @@ export async function loadMapSiteRootContext(input: {
     const partnerSites = await readMapSitesByCodes(partnerCodes);
     const byCode = new Map(partnerSites.map((s) => [s.fastCode, s]));
 
-    const partners: MapSiteRootPartner[] = [];
-    for (const link of links) {
-      const other = otherSideOfLink(link, code);
-      const site = byCode.get(other);
-      const relation = partnerRelation(link, code);
-      const segment = site
-        ? claimedMapSiteSegmentForAccountOrPlan(
-            (await paidPlanType(other, site.id).catch(() => null)) || site.accountType,
-          )
-        : "listings";
-      partners.push({
-        linkId: link.id,
-        fastCode: other,
-        title: site?.title ?? null,
-        href: buildClaimedMapSitePath({ fastCode: other, accountType: segment }),
-        relation,
-      });
-    }
+    const partners: MapSiteRootPartner[] = await Promise.all(
+      links.map(async (link) => {
+        const other = otherSideOfLink(link, code);
+        const site = byCode.get(other);
+        const relation = partnerRelation(link, code);
+        const segment = site
+          ? claimedMapSiteSegmentForAccountOrPlan(
+              (await paidPlanType(other, site.id).catch(() => null)) || site.accountType,
+            )
+          : "listings";
+        return {
+          linkId: link.id,
+          fastCode: other,
+          title: site?.title ?? null,
+          href: buildClaimedMapSitePath({ fastCode: other, accountType: segment }),
+          relation,
+        };
+      }),
+    );
 
     // Root map: every Derivative holder's PINs (main + additional).
     const derivatives = partners.filter((p) => p.relation === "derivative");

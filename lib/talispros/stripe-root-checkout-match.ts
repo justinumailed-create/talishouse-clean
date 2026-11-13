@@ -120,3 +120,23 @@ export function shouldReconcileClaimedMapSiteFromStripe(options: {
   const platform = toPlatformStatus(options.mapsiteStatus);
   return !isClaimable(platform);
 }
+
+/**
+ * Anonymous Mapsite views stay on the database. Stripe session search is only
+ * for a checkout return or the signed-in owner healing a missing payment row.
+ * Demo listings never reconcile.
+ */
+export function reconcileMapSiteStripeForViewer(options: {
+  isDemo?: boolean;
+  mapsiteStatus?: string | null;
+  checkoutSessionId?: string | null;
+  checkoutStatus?: string | null;
+  isOwner: boolean;
+}): boolean {
+  if (options.isDemo) return false;
+  if (options.checkoutSessionId?.trim() || options.checkoutStatus === "success") {
+    return true;
+  }
+  if (!options.isOwner) return false;
+  return shouldReconcileClaimedMapSiteFromStripe(options);
+}

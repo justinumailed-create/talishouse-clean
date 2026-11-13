@@ -8,46 +8,42 @@ function db(): SupabaseClient {
 }
 
 /**
- * PostgREST OpenAPI lists columns that exist. Selecting a missing
- * `map_zoom_explicit` would be a query error, so the page checks the schema
- * first and treats a missing column as "not explicit".
+ * `map_zoom_explicit` was added in migration 120. Until that migration is
+ * applied, selecting it errors. Probe with one row instead of downloading the
+ * PostgREST OpenAPI document (that download sat on every cold Mapsite render).
+ * A missing column stays cached for 10 minutes; a present column stays cached
+ * for the life of the isolate.
  */
 let explicitColumn: { value: boolean; at: number } | null = null;
+let explicitProbe: Promise<boolean> | null = null;
+const MISSING_COLUMN_TTL_MS = 10 * 60_000;
+
+function columnIsMissing(message: string | undefined): boolean {
+  return /map_zoom_explicit|schema cache|does not exist|column/i.test(message || "");
+}
 
 async function explicitColumnReady(): Promise<boolean> {
   if (explicitColumn?.value) return true;
-  if (explicitColumn && Date.now() - explicitColumn.at < 60_000) return false;
+  if (explicitColumn && Date.now() - explicitColumn.at < MISSING_COLUMN_TTL_MS) return false;
   if (!isSupabaseAdminConfigured()) {
     explicitColumn = { value: false, at: Date.now() };
     return false;
   }
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) {
-    explicitColumn = { value: false, at: Date.now() };
-    return false;
-  }
-  try {
-    const response = await fetch(`${url}/rest/v1/`, {
-      headers: {
-        apikey: key,
-        Authorization: `Bearer ${key}`,
-        Accept: "application/openapi+json",
-      },
-      cache: "no-store",
+  if (!explicitProbe) {
+    explicitProbe = (async () => {
+      const { error } = await db().from("mapsites").select("map_zoom_explicit").limit(1);
+      const ready = !error;
+      if (error && !columnIsMissing(error.message)) {
+        explicitColumn = { value: false, at: Date.now() - MISSING_COLUMN_TTL_MS + 15_000 };
+        return false;
+      }
+      explicitColumn = { value: ready, at: Date.now() };
+      return ready;
+    })().finally(() => {
+      explicitProbe = null;
     });
-    if (!response.ok) {
-      explicitColumn = { value: false, at: Date.now() };
-      return false;
-    }
-    const spec = await response.text();
-    const ready = spec.includes("map_zoom_explicit");
-    explicitColumn = { value: ready, at: Date.now() };
-    return ready;
-  } catch {
-    explicitColumn = { value: false, at: Date.now() };
-    return false;
   }
+  return explicitProbe;
 }
 
 /** True only after an editor save wrote the flag. Missing column means false. */

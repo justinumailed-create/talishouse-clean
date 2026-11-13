@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   HOME_OWNERSHIP_BG_MP4,
   HOME_OWNERSHIP_BG_SRC,
@@ -17,6 +17,14 @@ import {
  */
 export default function HomeMountainMotion() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [playMotion, setPlayMotion] = useState(false);
+
+  useEffect(() => {
+    const start = () => setPlayMotion(true);
+    if (document.readyState === "complete") start();
+    else window.addEventListener("load", start, { once: true });
+    return () => window.removeEventListener("load", start);
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -35,31 +43,31 @@ export default function HomeMountainMotion() {
     tryPlay();
     video.addEventListener("loadeddata", tryPlay);
     return () => video.removeEventListener("loadeddata", tryPlay);
-  }, []);
+  }, [playMotion]);
 
   return (
     <>
-      <video
-        ref={videoRef}
-        className="absolute inset-0 h-full w-full object-cover object-center motion-reduce:hidden"
-        src={HOME_OWNERSHIP_BG_MP4}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        poster={HOME_OWNERSHIP_BG_SRC}
-        aria-hidden
-      />
       <Image
         src={HOME_OWNERSHIP_BG_SRC}
         alt=""
         fill
-        loading="lazy"
+        priority
         sizes="(min-width: 1024px) 60vw, 100vw"
-        className="hidden object-cover object-center motion-reduce:block"
-        aria-hidden
+        className="object-cover object-center motion-reduce:block"
       />
+      {playMotion ? (
+        <video
+          ref={videoRef}
+          className="absolute inset-0 h-full w-full object-cover object-center motion-reduce:hidden"
+          src={HOME_OWNERSHIP_BG_MP4}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          aria-hidden
+        />
+      ) : null}
     </>
   );
 }

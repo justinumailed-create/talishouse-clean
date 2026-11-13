@@ -151,8 +151,25 @@ async function attachSlotLogos(drafts: SlotDraft[]): Promise<SlotEntry[]> {
 const SLOT_SELECT =
   "id, agent_id, position, created_at, mapsites(id, fast_code, account_type, property_address, property_title, created_at, logo_url)";
 
+/** Anonymous demo page: the public lists do not depend on the visitor. */
+let anonPublicLists: { at: number; value: PublicSlotList[] } | null = null;
+const ANON_PUBLIC_LISTS_TTL_MS = 15_000;
+
 /** Public groups: codes, towns and provinces only. The agent's name is never selected. */
 async function loadPublicLists(excludeAgentId: string | null): Promise<PublicSlotList[]> {
+  if (
+    !excludeAgentId &&
+    anonPublicLists &&
+    Date.now() - anonPublicLists.at < ANON_PUBLIC_LISTS_TTL_MS
+  ) {
+    return anonPublicLists.value;
+  }
+  const value = await queryPublicLists(excludeAgentId);
+  if (!excludeAgentId) anonPublicLists = { at: Date.now(), value };
+  return value;
+}
+
+async function queryPublicLists(excludeAgentId: string | null): Promise<PublicSlotList[]> {
   const { data: agents } = await db()
     .from("agent_admins")
     .select("id, login_id")
@@ -169,22 +186,30 @@ async function loadPublicLists(excludeAgentId: string | null): Promise<PublicSlo
     .order("position", { ascending: true })
     .order("created_at", { ascending: true });
 
-  const lists = await Promise.all(
-    ordered.map(async (agent) => ({
-      entries: await attachSlotLogos(
-        sortSlotEntriesNewestFirst(
-          (slots || [])
-            .filter((s) => s.agent_id === agent.id)
-            .slice(0, FAST_CODE_SLOT_LIMIT)
-            .flatMap((s) => {
-              const entry = toEntry(s.id, one(s.mapsites as MapsiteJoin | MapsiteJoin[] | null));
-              return entry ? [entry] : [];
-            }),
-        ),
-      ),
-    })),
-  );
-  return lists.filter((list) => list.entries.length > 0);
+  const draftsByAgent = new Map<string, SlotDraft[]>();
+  const allDrafts: SlotDraft[] = [];
+  for (const agent of ordered) {
+    const drafts = sortSlotEntriesNewestFirst(
+      (slots || [])
+        .filter((s) => s.agent_id === agent.id)
+        .slice(0, FAST_CODE_SLOT_LIMIT)
+        .flatMap((s) => {
+          const entry = toEntry(s.id, one(s.mapsites as MapsiteJoin | MapsiteJoin[] | null));
+          return entry ? [entry] : [];
+        }),
+    );
+    draftsByAgent.set(agent.id, drafts);
+    allDrafts.push(...drafts);
+  }
+  const withLogos = await attachSlotLogos(allDrafts);
+  const bySlot = new Map(withLogos.map((entry) => [entry.slotId, entry]));
+  return ordered
+    .map((agent) => ({
+      entries: (draftsByAgent.get(agent.id) || [])
+        .map((draft) => bySlot.get(draft.slotId))
+        .filter((entry): entry is SlotEntry => Boolean(entry)),
+    }))
+    .filter((list) => list.entries.length > 0);
 }
 
 /** One agent's list by id (their own page, and the admin "View as agent" preview). */

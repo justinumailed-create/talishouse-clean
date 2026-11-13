@@ -1,14 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Poppins } from "next/font/google";
 import "../globals.css";
 import TalisprosLayoutClient from "@/components/talispros/TalisprosLayoutClient";
+import { poppins } from "@/lib/fonts";
 import { createMetadata } from "@/lib/seo";
 import { talisprosBrandOgMetadataImage } from "@/lib/talispros/mapsite-og-image";
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-});
 
 export const viewport: Viewport = {
   width: "device-width",
