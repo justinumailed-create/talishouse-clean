@@ -6,8 +6,6 @@ import { useEffect, useId, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   TALISU_MKTS_HEADER_BLUE,
-  TALISU_MKTS_HEADER_DROPDOWN,
-  TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER,
   TALISU_MKTS_HEADER_LOGO_HREF,
   TALISU_MKTS_HEADER_MARKETS_DROPDOWN,
   TALISU_MKTS_HEADER_NAV,
@@ -27,7 +25,6 @@ import MarketsNavDropdown from "@/components/talisu/MarketsNavDropdown";
 import LanguageSwitch from "@/components/i18n/LanguageSwitch";
 import { useT } from "@/lib/i18n/client";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { SHOW_TALISU_NAV } from "@/lib/talisu/ui-flags";
 
 /** English nav label (stable id in TALISU_MKTS_HEADER_NAV) → localized text. */
 function navLabel(t: Dictionary, label: string): string {
@@ -45,38 +42,6 @@ function navLabel(t: Dictionary, label: string): string {
   }
 }
 
-/** English TalisU dropdown label → localized text. */
-function talisuMenuLabel(t: Dictionary, label: string): string {
-  switch (label) {
-    case "Tsplits™":
-      return t.nav.talisuMenu.tsplits;
-    case "Markets":
-      return t.nav.markets;
-    case "USA Markets":
-      return t.markets.usaMarkets;
-    case "Bookshelf":
-      return t.nav.bookshelf;
-    case "FAQ":
-      return t.nav.talisuMenu.faq;
-    case "Knowledge Base":
-      return t.nav.talisuMenu.knowledgeBase;
-    case "Catalogue":
-      return t.nav.catalogue;
-    case "Value-Added":
-      return t.nav.talisuMenu.valueAdded;
-    case "Media Directory":
-      return t.nav.talisuMenu.mediaDirectory;
-    case "Contract":
-      return t.nav.talisuMenu.contract;
-    case "Terms of Service":
-      return t.pmc.terms;
-    case "Privacy Policy":
-      return t.pmc.privacy;
-    default:
-      return label;
-  }
-}
-
 const MOBILE_LINK_CLASS =
   "flex min-h-11 items-center rounded-md px-3 text-[15px] font-medium text-white transition";
 // Rendered as a div (not <p>) so the global unlayered `p { color }` rule in
@@ -89,7 +54,7 @@ export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 export type TalisUMktsHeaderProps = {
   /**
    * `claimed-mapsite`: replace Register with Dashboard (lock until real payment).
-   * `default`: Home + Mapsites + Markets + Register | TalisU (Bookshelf lives in TalisU).
+   * `default`: Home + Mapsites + Register | Markets. TalisU is not in the navbar.
    */
   variant?: TalisUMktsHeaderVariant;
   /**
@@ -147,7 +112,6 @@ export default function TalisUMktsHeader({
   const t = useT();
   const [open, setOpen] = useState(false);
   const [panel, setPanel] = useState<DropdownPanel>("menu");
-  const [kbUnlocked, setKbUnlocked] = useState(false);
   const [kbNext, setKbNext] = useState(TALISU_KB_PATH);
   const [registerPromptOpen, setRegisterPromptOpen] = useState(false);
   const [dashboardMenuOpen, setDashboardMenuOpen] = useState(false);
@@ -158,6 +122,11 @@ export default function TalisUMktsHeader({
   const rootRef = useRef<HTMLDivElement>(null);
   // Mobile (< lg): one compact bar; every nav link + EN/DE lives in this menu.
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobilePath, setMobilePath] = useState(pathname);
+  if (mobilePath !== pathname) {
+    setMobilePath(pathname);
+    setMobileOpen(false);
+  }
   const mobileMenuId = useId();
   const mobilePanelRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
@@ -175,36 +144,23 @@ export default function TalisUMktsHeader({
     pathname.startsWith("/mapsite") ||
     pathname.startsWith("/talispros/demo-mapsite");
 
-  const dropdownActive = TALISU_MKTS_HEADER_DROPDOWN.some(
-    (item) =>
-      pathname === item.href ||
-      (item.label !== "Catalogue" && pathname.startsWith(`${item.href}/`)),
-  );
-
   useEffect(() => {
-    setKbUnlocked(readTalisUKbUnlocked());
-
-    function onUnlocked() {
-      setKbUnlocked(true);
+    function closeKbPanel() {
+      setOpen(false);
+      setPanel("menu");
     }
-    function onLocked() {
-      setKbUnlocked(false);
-    }
-    window.addEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
-    window.addEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
+    window.addEventListener(TALISU_KB_UNLOCKED_EVENT, closeKbPanel);
+    window.addEventListener(TALISU_KB_LOCKED_EVENT, closeKbPanel);
     return () => {
-      window.removeEventListener(TALISU_KB_UNLOCKED_EVENT, onUnlocked);
-      window.removeEventListener(TALISU_KB_LOCKED_EVENT, onLocked);
+      window.removeEventListener(TALISU_KB_UNLOCKED_EVENT, closeKbPanel);
+      window.removeEventListener(TALISU_KB_LOCKED_EVENT, closeKbPanel);
     };
   }, []);
 
   // Locked /talisu/kb (or manage) asks the header to open unlock in-place — never /talisu?kbUnlock=
   useEffect(() => {
     function onOpenUnlock() {
-      if (readTalisUKbUnlocked()) {
-        setKbUnlocked(true);
-        return;
-      }
+      if (readTalisUKbUnlocked()) return;
       const next =
         pathname === TALISU_KB_PATH || pathname.startsWith(`${TALISU_KB_PATH}/`)
           ? pathname
@@ -246,11 +202,6 @@ export default function TalisUMktsHeader({
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [open]);
-
-  // Close the mobile menu on navigation.
-  useEffect(() => {
-    setMobileOpen(false);
-  }, [pathname]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -333,18 +284,7 @@ export default function TalisUMktsHeader({
     setRegisterPromptOpen(true);
   }
 
-  function handleKbMenuClick() {
-    if (kbUnlocked || readTalisUKbUnlocked()) setKbUnlocked(true);
-    // Always go to the KB: its gate asks everyone (signed in or not) for a
-    // FAST Code unless this tab already unlocked it.
-    setOpen(false);
-    setPanel("menu");
-    setMobileOpen(false);
-    router.push(TALISU_KB_PATH);
-  }
-
   function handleKbUnlockSuccess() {
-    setKbUnlocked(true);
     setMobileOpen(false);
     setOpen(false);
     setPanel("menu");
@@ -359,14 +299,6 @@ export default function TalisUMktsHeader({
       return;
     }
     router.push(destination);
-  }
-
-  function handleTalisUToggle() {
-    setOpen((value) => {
-      const next = !value;
-      if (!next) setPanel("menu");
-      return next;
-    });
   }
 
   function isNavActive(item: (typeof TALISU_MKTS_HEADER_NAV)[number]) {
@@ -565,7 +497,6 @@ export default function TalisUMktsHeader({
           >
             {t.nav.mapsites}
           </Link>
-          <MarketsNavDropdown />
           {/* Claimed Mapsites: the Dashboard lives on the left Marketing card;
               the PMC sequence (Media Directory → Contract) lives in TalisU;
               the Tsplits™ page is the header logo link. */}
@@ -591,129 +522,33 @@ export default function TalisUMktsHeader({
             </Link>
           )}
 
-          {SHOW_TALISU_NAV ? (
-          <>
           <span
             aria-hidden
+            data-testid="nav-register-divider"
             className="mx-0.5 hidden h-5 w-px shrink-0 bg-white/45 sm:inline-block"
           />
-
           <div ref={rootRef} className="relative">
-            <button
-              type="button"
-              aria-haspopup="menu"
-              aria-expanded={open}
-              aria-controls={menuId}
-              onClick={handleTalisUToggle}
-              className={`inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
-                dropdownActive || open
-                  ? "bg-white/20 text-white"
-                  : "text-white hover:bg-white/15"
-              }`}
-            >
-              {t.nav.talisu}
-              <svg
-                aria-hidden
-                viewBox="0 0 12 8"
-                className={`h-2.5 w-2.5 transition ${open ? "rotate-180" : ""}`}
-                fill="none"
-              >
-                <path
-                  d="M1 1.5 6 6.5 11 1.5"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            {open ? (
+            <MarketsNavDropdown />
+            {panel === "kb-unlock" ? (
               <div
                 id={menuId}
-                role="menu"
-                className={
-                  panel === "kb-unlock"
-                    ? "absolute right-0 z-50 mt-1.5 w-80! min-w-[280px] max-w-none! overflow-hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]"
-                    : "absolute right-0 z-50 mt-1.5 min-w-[11.5rem] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] py-1 shadow-lg"
-                }
+                role="dialog"
+                className="absolute right-0 z-50 mt-1.5 w-80! min-w-[280px] max-w-none! overflow-hidden rounded-2xl border border-neutral-200 bg-white p-5 shadow-[0_12px_40px_rgba(0,0,0,0.16)]"
               >
-                {panel === "kb-unlock" ? (
-                  <div>
-                    <button
-                      type="button"
-                      className="mb-3 text-[12px] font-medium text-neutral-500 transition hover:text-neutral-800"
-                      onClick={() => setPanel("menu")}
-                    >
-                      {t.nav.menuBack}
-                    </button>
-                    <TalisUKbUnlockForm
-                      variant="navbar"
-                      onSuccess={handleKbUnlockSuccess}
-                    />
-                  </div>
-                ) : (
-                  <>
-                    {TALISU_MKTS_HEADER_DROPDOWN.map((item) => {
-                      const active =
-                        pathname === item.href ||
-                        (item.label !== "Catalogue" &&
-                          pathname.startsWith(`${item.href}/`)) ||
-                        (item.href.includes("#") &&
-                          pathname === item.href.split("#")[0]);
-                      const isKb = item.href === TALISU_KB_PATH;
-                      // Divider after Media Directory: Contract + Knowledge Base below it.
-                      const dividerAfter =
-                        item.label === TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER;
-                      const row = isKb ? (
-                        <button
-                          key={item.href}
-                          type="button"
-                          role="menuitem"
-                          onClick={handleKbMenuClick}
-                          className={`block w-full px-3.5 py-2 text-left text-[13px] font-medium transition sm:text-[14px] ${
-                            active
-                              ? "bg-white/20 text-white"
-                              : "text-white/95 hover:bg-white/15"
-                          }`}
-                        >
-                          {talisuMenuLabel(t, item.label)}
-                        </button>
-                      ) : (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          role="menuitem"
-                          onClick={() => setOpen(false)}
-                          className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
-                            active
-                              ? "bg-white/20 text-white"
-                              : "text-white/95 hover:bg-white/15"
-                          }`}
-                        >
-                          {talisuMenuLabel(t, item.label)}
-                        </Link>
-                      );
-                      // Bookshelf, FAQ, Media Directory | Contract, Knowledge Base.
-                      if (dividerAfter) {
-                        return (
-                          <div key={`${item.href}-wrap`}>
-                            {row}
-                            <div
-                              role="separator"
-                              className="my-1 border-t border-white/25"
-                            />
-                          </div>
-                        );
-                      }
-                      return row;
-                    })}
-                  </>
-                )}
+                <button
+                  type="button"
+                  className="mb-3 text-[12px] font-medium text-neutral-500 transition hover:text-neutral-800"
+                  onClick={() => setPanel("menu")}
+                >
+                  {t.nav.menuBack}
+                </button>
+                <TalisUKbUnlockForm
+                  variant="navbar"
+                  onSuccess={handleKbUnlockSuccess}
+                />
               </div>
             ) : null}
           </div>
-          </>
-          ) : null}
 
           <LanguageSwitch className="ml-0.5" />
         </nav>
@@ -774,7 +609,7 @@ export default function TalisUMktsHeader({
               />
             </div>
           ) : (
-            <nav aria-label={t.nav.talisu} className="flex flex-col">
+            <nav aria-label={t.nav.openMenu} className="flex flex-col">
               {TALISU_MKTS_HEADER_NAV.filter(
                 (item) => item.label === "Home",
               ).map((item) =>
@@ -788,19 +623,6 @@ export default function TalisUMktsHeader({
                 DEMO_MAPSITE_BUILD_PATH,
                 t.nav.mapsites,
                 mapsitesActive,
-              )}
-              <div role="heading" aria-level={2} className={MOBILE_GROUP_CLASS}>
-                {t.nav.markets}
-              </div>
-              {TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((item) =>
-                renderMobileLink(
-                  item.href,
-                  item.menuKey === "usa" ? t.nav.marketsMenu.usa : t.nav.marketsMenu.canada,
-                  item.href === "/talisu/mkts"
-                    ? pathname === "/talisu/mkts"
-                    : pathname === item.href || pathname.startsWith(`${item.href}/`),
-                  true,
-                ),
               )}
 
               {claimedMapsite && dashboardHasMenu ? (
@@ -854,55 +676,28 @@ export default function TalisUMktsHeader({
                 )
               )}
 
-              {SHOW_TALISU_NAV ? (
-              <>
-              <div role="heading" aria-level={2} className={MOBILE_GROUP_CLASS}>
-                {t.nav.talisu}
+              <div
+                role="separator"
+                data-testid="mobile-register-divider"
+                className="my-1 border-t border-white/25"
+              />
+              <div
+                role="heading"
+                aria-level={2}
+                className="px-3 pb-1 pt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-white"
+              >
+                {t.nav.markets}
               </div>
-              {TALISU_MKTS_HEADER_DROPDOWN.map((item) => {
-                const active =
-                  pathname === item.href ||
-                  (item.label !== "Catalogue" &&
-                    pathname.startsWith(`${item.href}/`)) ||
-                  (item.href.includes("#") &&
-                    pathname === item.href.split("#")[0]);
-                if (item.href === TALISU_KB_PATH) {
-                  return (
-                    <button
-                      key={item.href}
-                      type="button"
-                      onClick={handleKbMenuClick}
-                      className={`${MOBILE_LINK_CLASS} w-full pl-6 text-left ${
-                        active ? "bg-white/20" : "hover:bg-white/15"
-                      }`}
-                    >
-                      {talisuMenuLabel(t, item.label)}
-                    </button>
-                  );
-                }
-                const link = renderMobileLink(
+              {TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((item) =>
+                renderMobileLink(
                   item.href,
-                  talisuMenuLabel(t, item.label),
-                  active,
+                  item.menuKey === "usa" ? t.nav.marketsMenu.usa : t.nav.marketsMenu.canada,
+                  item.href === "/talisu/mkts"
+                    ? pathname === "/talisu/mkts"
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`),
                   true,
-                );
-                // Same divider as desktop: after Media Directory.
-                if (item.label === TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER) {
-                  return (
-                    <div key={`m-${item.href}-wrap`}>
-                      {link}
-                      <div
-                        role="separator"
-                        data-testid="mobile-talisu-divider"
-                        className="my-1 ml-6 border-t border-white/25"
-                      />
-                    </div>
-                  );
-                }
-                return link;
-              })}
-              </>
-              ) : null}
+                ),
+              )}
 
               <div className="mt-2 flex items-center justify-between border-t border-white/25 pt-2">
                 <span className="text-[13px] font-medium text-white">

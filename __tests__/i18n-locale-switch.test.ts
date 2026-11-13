@@ -52,12 +52,12 @@ describe("EN | DE switch", () => {
     expect(stripLocaleQuery("https://x.test/talisu")).toBeNull();
   });
 
-  it("renders the switch in the blue navbar after TalisU", () => {
+  it("renders the switch in the blue navbar after Markets", () => {
     const header = readFileSync(resolve("components/talisu/TalisUMktsHeader.tsx"), "utf8");
-    const talisU = header.indexOf("{t.nav.talisu}");
+    const markets = header.indexOf("<MarketsNavDropdown");
     const sw = header.indexOf("<LanguageSwitch");
-    expect(talisU).toBeGreaterThan(-1);
-    expect(sw).toBeGreaterThan(talisU);
+    expect(markets).toBeGreaterThan(-1);
+    expect(sw).toBeGreaterThan(markets);
     const switchSrc = readFileSync(resolve("components/i18n/LanguageSwitch.tsx"), "utf8");
     expect(switchSrc).toContain("persistLocale(next, document)");
     expect(switchSrc).toContain("router.refresh()");

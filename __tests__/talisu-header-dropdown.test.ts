@@ -114,33 +114,30 @@ describe("TalisU blue header dropdown", () => {
     expect(builder).not.toContain("ROUTES.TALISU_REGISTER");
   });
 
-  it("puts a horizontal divider after Media Directory (Contract + Knowledge Base below) on desktop and mobile", () => {
+  it("keeps the TalisU menu data, and does not render that menu in the blue navbar", () => {
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
     );
-    expect(header).not.toContain('item.label === "Knowledge Base"');
-    // Desktop dropdown + mobile menu both split after Media Directory.
-    expect(header.split("item.label === TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER").length).toBe(3);
-    expect(header).toContain('data-testid="mobile-talisu-divider"');
-    expect(header).toContain('case "Bookshelf":');
-    expect(header).toContain("t.nav.bookshelf");
+    expect(TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER).toBe("Media Directory");
+    expect(header).not.toContain("TALISU_MKTS_HEADER_DROPDOWN");
+    expect(header).not.toContain("mobile-talisu-divider");
+    expect(header).not.toContain("{t.nav.talisu}");
     expect(header).toContain('role="separator"');
     expect(header).toContain("border-t border-white/25");
+    expect(header).toContain('data-testid="mobile-register-divider"');
   });
 
-  it("wires the blue header to render a TalisU dropdown as the last nav item", () => {
+  it("places one Markets dropdown after Register and the vertical divider", () => {
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
     );
-    expect(header).toContain("TALISU_MKTS_HEADER_DROPDOWN");
     expect(header).toContain('aria-haspopup="menu"');
-    expect(header).toMatch(/\n\s*\{t\.nav\.talisu\}\n/);
+    expect(header).not.toMatch(/\{t\.nav\.talisu\}/);
     expect(header).toContain('role="menu"');
-    // TalisU trigger is rendered after primary nav + Mapsites + vertical separator
     expect(header).toContain("TALISU_MKTS_HEADER_NAV.filter");
-    expect(header).toContain("<MarketsNavDropdown");
+    expect(header.split("<MarketsNavDropdown").length - 1).toBe(1);
     expect(header).toContain('data-testid="nav-register-link"');
     expect(header).toContain("bg-white/45");
     expect(header).not.toContain('item.label === "Markets"');
@@ -150,15 +147,16 @@ describe("TalisU blue header dropdown", () => {
     const registerIdx = header.indexOf('data-testid="nav-register-link"');
     expect(header).not.toContain('(item) => item.label === "Catalogue"');
     const separatorIdx = header.indexOf("bg-white/45");
-    const talisUIdx = header.indexOf("\n              {t.nav.talisu}\n");
+    const mobileMarkets = header.indexOf("{t.nav.markets}");
+    const mobileRegister = header.lastIndexOf("t.nav.register");
     expect(homeIdx).toBeGreaterThan(-1);
-    // Home, Mapsites, Markets, Register | TalisU
+    // Home, Mapsites, Register | Markets. TalisU is not a navbar item.
     expect(header).not.toContain('(item) => item.label === "Bookshelf"');
     expect(mapsitesIdx).toBeGreaterThan(homeIdx);
-    expect(marketsIdx).toBeGreaterThan(mapsitesIdx);
-    expect(registerIdx).toBeGreaterThan(marketsIdx);
+    expect(registerIdx).toBeGreaterThan(mapsitesIdx);
     expect(separatorIdx).toBeGreaterThan(registerIdx);
-    expect(talisUIdx).toBeGreaterThan(separatorIdx);
+    expect(marketsIdx).toBeGreaterThan(separatorIdx);
+    expect(mobileMarkets).toBeGreaterThan(mobileRegister);
   });
 
   it("opens Knowledge Base unlock as a navbar drop-pop (not a full page)", () => {
@@ -168,7 +166,6 @@ describe("TalisU blue header dropdown", () => {
     );
     expect(header).toContain("TalisUKbUnlockForm");
     expect(header).toContain("kb-unlock");
-    expect(header).toContain("handleKbMenuClick");
     expect(header).toContain("TALISU_KB_OPEN_UNLOCK_EVENT");
     expect(header).not.toContain("TALISU_KB_UNLOCK_QUERY");
     expect(header).toContain("bg-white p-5");
@@ -210,27 +207,14 @@ describe("TalisU blue header dropdown", () => {
     expect(mark).toContain("{tagline}");
   });
 
-  it("shows the TalisU entry and dropdown from SHOW_TALISU_NAV", () => {
-    expect(SHOW_TALISU_NAV).toBe(true);
+  it("leaves the TalisU navbar item off", () => {
+    expect(SHOW_TALISU_NAV).toBe(false);
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
     );
-    // Desktop divider + trigger, and the mobile group, both stay in the file
-    // and are gated by the same flag (flip it to true to restore the menu).
-    const gates = header.split("SHOW_TALISU_NAV").length - 1;
-    expect(gates).toBeGreaterThanOrEqual(2);
-    expect(header).toContain("TALISU_MKTS_HEADER_DROPDOWN");
-    expect(header).toContain("{t.nav.talisu}");
-    const desktopGate = header.indexOf("{SHOW_TALISU_NAV ? (");
-    const separator = header.indexOf("bg-white/45");
-    const trigger = header.indexOf("\n              {t.nav.talisu}\n");
-    const mobileGate = header.indexOf("{SHOW_TALISU_NAV ? (", desktopGate + 1);
-    const mobileLabel = header.indexOf("\n                {t.nav.talisu}\n");
-    expect(desktopGate).toBeGreaterThan(-1);
-    expect(separator).toBeGreaterThan(desktopGate);
-    expect(trigger).toBeGreaterThan(separator);
-    expect(mobileGate).toBeGreaterThan(trigger);
-    expect(mobileLabel).toBeGreaterThan(mobileGate);
+    expect(header).not.toContain("SHOW_TALISU_NAV");
+    expect(header).not.toContain("{t.nav.talisu}");
+    expect(header).not.toContain("TALISU_MKTS_HEADER_DROPDOWN");
   });
 });
