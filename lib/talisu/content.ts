@@ -255,7 +255,8 @@ export const TALISU_REGISTER = {
   /** Adviser landing (Oct 26): Aisha's photo + four structure tabs. */
   adviserKicker: "Registration options",
   adviserTitle:
-    "Put your listings on the map. Register your Mapsite with Aisha and her team.",
+    "Register your Mapsite with Tsplits™. Aisha and her team will promote it globally and enable you to save or make money on your advertising.",
+  leaderLine: "Team Leader: Aisha, AMBA",
   structuresLabel: "Choose your structure",
   structures: [
     {
@@ -291,7 +292,7 @@ export const TALISU_REGISTER = {
   samcartUrl: "https://talispros.mysamcart.com/checkout/register",
   /** Account checkouts on /talisu/reg. Buttons go to first-party pages; SamCart URLs stay server-side. */
   actions: {
-    label: "Choose an account",
+    label: "Choose an account or place a PIN:",
     propose: "Propose Project",
     claim: "Claim Mapsite",
     terms: "Terms of Service",
@@ -300,6 +301,7 @@ export const TALISU_REGISTER = {
       {
         id: "broker",
         label: "Broker or Team Leader",
+        listLabel: "Broker",
         sidebar:
           "You are a Broker or Team Leader providing a Mapsite to your Agents. You can place one Home PIN and an unlimited number of Listing PINs per Agent, although we recommend you limit inclusion by introducing service floors: only Listing that pay your minimum for your minimum term get included.",
       },
@@ -328,7 +330,7 @@ export const TALISU_REGISTER = {
           "Additional PINs are $7 CAD each. Buy them from PIN Dashboard on your Mapsite.",
       },
     ],
-    consentBefore: "Registering means you agree to the",
+    consentBefore: "Registration means you agree to the",
     consentTerms: "Terms of Service",
     consentAnd: "and the",
     consentPrivacy: "Privacy Policy",

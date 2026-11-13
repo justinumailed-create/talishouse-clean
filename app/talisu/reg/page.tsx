@@ -101,6 +101,7 @@ export default async function TalisURegisterPage({
           imageAlt="Aisha, AMBA"
           imagePosition="center 20%"
           kicker={TALISU_REGISTER.adviserKicker}
+          kickerClassName="text-[15px] font-semibold leading-snug text-neutral-950 sm:text-[16px]"
           title={TALISU_REGISTER.adviserTitle}
         >
           <RegisterActions
@@ -115,8 +116,8 @@ export default async function TalisURegisterPage({
               register: `/talisu/reg?step=${REGISTER_CHOOSE_STEP}`,
             }}
           />
-          <div className="mt-6 text-[13px] font-semibold text-neutral-900" data-testid="talisu-register-partner">
-            {TALISU_REGISTER.partnerName}
+          <div className="mt-6 text-[15px] font-semibold text-neutral-950" data-testid="talisu-register-partner">
+            {TALISU_REGISTER.leaderLine}
           </div>
         </AdviserLayout>
       );
@@ -132,6 +133,7 @@ export default async function TalisURegisterPage({
         imageAlt="Aisha, AMBA"
         imagePosition="center 20%"
         kicker={TALISU_REGISTER.adviserKicker}
+        kickerClassName="text-[15px] font-semibold leading-snug text-neutral-950 sm:text-[16px]"
         title={TALISU_REGISTER.adviserTitle}
       >
         <RegisterStructureTabs
@@ -145,8 +147,8 @@ export default async function TalisURegisterPage({
           ctaLabel={TALISU_REGISTER.ctaLabel}
           ctaNote={TALISU_REGISTER.ctaNote}
         />
-        <div className="mt-6 text-[13px] font-semibold text-neutral-900" data-testid="talisu-register-partner">
-          {TALISU_REGISTER.partnerName}
+        <div className="mt-6 text-[15px] font-semibold text-neutral-950" data-testid="talisu-register-partner">
+          {TALISU_REGISTER.leaderLine}
         </div>
       </AdviserLayout>
     );
@@ -196,7 +198,7 @@ export default async function TalisURegisterPage({
             />
           </div>
           <h2 className="text-base font-semibold leading-snug text-[#0069CF]">
-            {TALISU_REGISTER.partnerName}
+            {TALISU_REGISTER.leaderLine}
           </h2>
           {structureTab ? (
             <div
@@ -217,20 +219,6 @@ export default async function TalisURegisterPage({
               </Link>
             </div>
           ) : null}
-          <p className="mt-2 text-xs leading-snug text-neutral-700">
-            {TALISU_REGISTER.partnerIntro}
-          </p>
-          <ul className="mt-3 space-y-2 text-xs leading-snug text-neutral-600">
-            {TALISU_REGISTER.bullets.map((b) => (
-              <li key={b.label}>
-                <span className="font-semibold text-neutral-900">{b.label}:</span>{" "}
-                {b.text}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-3 text-xs font-medium text-[#0069CF]">
-            {TALISU_REGISTER.closing}
-          </p>
         </div>
 
         <div className="min-w-0">

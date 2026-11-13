@@ -319,7 +319,8 @@ export const de: Dictionary = {
       closingTitle: "Bereit, Ihren Markt auf die Karte zu bringen?",
       adviserKicker: "Registrierungsoptionen",
       adviserTitle:
-        "Bringen Sie Ihre Angebote auf die Karte. Registrieren Sie Ihre Mapsite bei Aisha und ihrem Team.",
+        "Registrieren Sie Ihre Mapsite mit Tsplits™. Aisha und ihr Team bewerben sie weltweit und ermöglichen Ihnen, bei Ihrer Werbung Geld zu sparen oder zu verdienen.",
+      leaderLine: "Teamleiterin: Aisha, AMBA",
       structuresLabel: "Wählen Sie Ihre Struktur",
       structures: [
         {
@@ -352,7 +353,7 @@ export const de: Dictionary = {
       structureClose: "Schließen",
       structureChange: "Ändern",
       actions: {
-        label: "Konto wählen",
+        label: "Wählen Sie ein Konto oder setzen Sie einen PIN:",
         propose: "Projekt vorschlagen",
         claim: "Mapsite beanspruchen",
         terms: "Nutzungsbedingungen",
@@ -361,6 +362,7 @@ export const de: Dictionary = {
           {
             id: "broker",
             label: "Makler oder Teamleiter",
+            listLabel: "Broker",
             sidebar:
               "Sie sind Makler oder Teamleiter und stellen Ihren Agenten eine Mapsite bereit. Sie können einen Home-PIN und unbegrenzt viele Listing-PINs pro Agent setzen. Wir empfehlen jedoch, die Aufnahme über Leistungsuntergrenzen zu begrenzen: Aufgenommen wird nur ein Listing, das Ihr Minimum für Ihre Mindestlaufzeit zahlt.",
           },
@@ -389,11 +391,11 @@ export const de: Dictionary = {
               "Zusätzliche PINs kosten je 7 CAD. Kaufen Sie sie im PIN-Dashboard Ihrer Mapsite.",
           },
         ],
-        consentBefore: "Mit der Registrierung stimmen Sie den",
+        consentBefore: "Die Registrierung bedeutet, dass Sie den",
         consentTerms: "Nutzungsbedingungen",
         consentAnd: "und der",
         consentPrivacy: "Datenschutzerklärung",
-        consentAfter: "zu.",
+        consentAfter: " zustimmen.",
         entryTitle: "Agenten-Code eingeben",
         entryBody: "Geben Sie Ihren Agenten-Code oder Ihr Agenten-Passwort ein, um den Checkout zu öffnen.",
         entryLabel: "Agenten-Code",
