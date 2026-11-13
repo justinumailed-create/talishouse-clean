@@ -110,7 +110,7 @@ export default function RegisterActions({
             const inner = (
               <>
                 <span className={METAL_TAB_SHEEN} aria-hidden />
-                <span className={`${METAL_TAB_LABEL} whitespace-nowrap`}>{item.label}</span>
+                <span className={`${METAL_TAB_LABEL} text-balance leading-tight`}>{item.label}</span>
               </>
             );
             if (entryGranted && isRegisterCheckoutId(item.id)) {

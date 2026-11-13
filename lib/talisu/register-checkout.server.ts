@@ -4,20 +4,24 @@ import {
   type RegisterCheckoutId,
 } from "@/lib/talisu/register-checkout";
 
+/** SamCart marketplace subdomain for the official sc-checkout embed. */
+export const SAMCART_CHECKOUT_SUBDOMAIN = "talispros";
+
 /**
- * SamCart product checkouts. Resolved only after the agent-code gate, so the
- * Register page HTML never includes these URLs. A person who already has the
- * raw link can still open SamCart directly — these addresses are public there.
+ * SamCart product slugs. The PIN page is our route `/pin`; SamCart's product
+ * id is `listpin`. Resolved only after the agent-code gate, so the embed is
+ * not in the HTML before verification. A raw checkout link on SamCart stays
+ * public for anyone who already has it.
  */
-const REGISTER_CHECKOUT_URLS: Record<RegisterCheckoutId, string> = {
-  broker: "https://talispros.mysamcart.com/checkout/broker",
-  agent: "https://talispros.mysamcart.com/checkout/agent",
-  fsbo: "https://talispros.mysamcart.com/checkout/fsbo",
-  adpro: "https://talispros.mysamcart.com/checkout/adpro",
-  pin: "https://talispros.mysamcart.com/checkout/listpin",
+const REGISTER_CHECKOUT_PRODUCTS: Record<RegisterCheckoutId, string> = {
+  broker: "broker",
+  agent: "agent",
+  fsbo: "fsbo",
+  adpro: "adpro",
+  pin: "listpin",
 };
 
-export function registerCheckoutUrl(id: string | null | undefined): string | null {
+export function registerCheckoutProduct(id: string | null | undefined): string | null {
   if (!isRegisterCheckoutId(id)) return null;
-  return REGISTER_CHECKOUT_URLS[id];
+  return REGISTER_CHECKOUT_PRODUCTS[id];
 }

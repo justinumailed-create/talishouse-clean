@@ -298,10 +298,30 @@ export const TALISU_REGISTER = {
     terms: "Terms of Service",
     register: "Register",
     checkouts: [
-      { id: "broker", label: "Broker" },
-      { id: "agent", label: "Agent" },
-      { id: "fsbo", label: "FSBO" },
-      { id: "adpro", label: "Adpro" },
+      {
+        id: "broker",
+        label: "Broker or Team Leader",
+        sidebar:
+          "You are a Broker or Team Leader providing a Mapsite to your Agents. You can place one Home PIN and an unlimited number of Listing PINs per Agent, although we recommend you limit inclusion by introducing service floors: only Listing that pay your minimum for your minimum term get included.",
+      },
+      {
+        id: "agent",
+        label: "Agent",
+        sidebar:
+          "You are an Agent working as part of a brokerage or team. You can place an unlimited number of Listing PINs that pay your brokerage minimum in Real Estate Fees and Term Lengths. You require your Broker or Team Account FAST Code to place those PINs.",
+      },
+      {
+        id: "fsbo",
+        label: "FSBO",
+        sidebar:
+          "You are a For-Sale-By-Owner having reached an agreement with your favourite participating Broker or Team to place a PIN on their Mapsite. You still save on your Real Estate Fees, but you set them up for Buyer's Agency transactions on Your Mere Posting listing.",
+      },
+      {
+        id: "adpro",
+        label: "Adpro",
+        sidebar:
+          "You are an advertiser on the Broker or Team Mapsite, using your presence there to redirect their clients to your own website, or Mapsite. If the latter, it is included at no additional charge and you might develop your very own virtual market or monopoly.",
+      },
       { id: "pin", label: "PIN" },
     ],
     consentBefore: "Registering means you agree to the",

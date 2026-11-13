@@ -410,7 +410,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
       } else {
         expect(html).not.toContain("/talisu/reg/checkout/");
       }
-      expect(html).toContain(">Broker<");
+      expect(html).toContain(">Broker or Team Leader<");
       expect(html).toContain(">Agent<");
       expect(html).toContain(">FSBO<");
       expect(html).toContain(">Adpro<");
@@ -425,7 +425,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
   it("German labels", async () => {
     env.locale = "de";
     const html = renderToStaticMarkup((await renderReg({})) as ReactElement);
-    for (const label of ["Makler", "Agent", "FSBO", "Adpro", "PIN"]) {
+    for (const label of ["Makler oder Teamleiter", "Agent", "FSBO", "Adpro", "PIN"]) {
       expect(html).toContain(`>${label}<`);
     }
     expect(html).toContain("Nutzungsbedingungen");
@@ -468,13 +468,50 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(gate).toContain("password_hash");
     const urls = readFileSync(resolve("lib/talisu/register-checkout.server.ts"), "utf8");
     expect(urls).toContain('import "server-only"');
-    expect(urls).toContain("https://talispros.mysamcart.com/checkout/broker");
-    expect(urls).toContain("https://talispros.mysamcart.com/checkout/listpin");
+    expect(urls).toContain('pin: "listpin"');
+    expect(urls).not.toContain("mysamcart.com/checkout");
+    const checkout = readFileSync(resolve("components/talisu/RegisterProductCheckout.tsx"), "utf8");
+    expect(checkout).toContain("hasCheckoutAccess()");
+    expect(checkout.indexOf("hasCheckoutAccess()")).toBeLessThan(checkout.indexOf("<SamCartWebCheckout"));
+    expect(checkout).not.toContain("<iframe");
+    expect(checkout).not.toContain("SamCartEmbed");
+    expect(checkout).toContain('"sidebar" in checkout');
+    const embed = readFileSync(resolve("components/talisu/SamCartWebCheckout.tsx"), "utf8");
+    expect(embed).toContain('from "next/script"');
+    expect(embed).toContain("https://static.samcart.com/checkouts/sc-checkout.js");
+    expect(embed).toContain("<sc-checkout");
+    expect(embed).toContain('strategy="afterInteractive"');
+    expect(embed).not.toContain("listpin");
     const ui = readFileSync(resolve("components/talisu/RegisterActions.tsx"), "utf8");
     expect(ui).not.toMatch(/placeholder=/);
     expect(ui).not.toContain("mysamcart");
     expect(ui).toContain("redeemRegisterEntryAction(");
     const entry = readFileSync(resolve("lib/talisu/register-entry.ts"), "utf8");
     expect(entry).toContain("hasCheckoutAccess");
+  });
+
+  it("uses Ralf's Aisha sidebar copy word for word, with a German translation, and none on PIN", () => {
+    const enCopy = en.talisu.register.actions.checkouts;
+    const deCopy = de.talisu.register.actions.checkouts;
+    const exact: Record<string, string> = {
+      broker:
+        "You are a Broker or Team Leader providing a Mapsite to your Agents. You can place one Home PIN and an unlimited number of Listing PINs per Agent, although we recommend you limit inclusion by introducing service floors: only Listing that pay your minimum for your minimum term get included.",
+      agent:
+        "You are an Agent working as part of a brokerage or team. You can place an unlimited number of Listing PINs that pay your brokerage minimum in Real Estate Fees and Term Lengths. You require your Broker or Team Account FAST Code to place those PINs.",
+      fsbo:
+        "You are a For-Sale-By-Owner having reached an agreement with your favourite participating Broker or Team to place a PIN on their Mapsite. You still save on your Real Estate Fees, but you set them up for Buyer's Agency transactions on Your Mere Posting listing.",
+      adpro:
+        "You are an advertiser on the Broker or Team Mapsite, using your presence there to redirect their clients to your own website, or Mapsite. If the latter, it is included at no additional charge and you might develop your very own virtual market or monopoly.",
+    };
+    for (const [id, text] of Object.entries(exact)) {
+      expect(enCopy.find((item) => item.id === id)?.sidebar).toBe(text);
+      expect(text).not.toMatch(/™|TODO|TBD/);
+      const german = deCopy.find((item) => item.id === id)?.sidebar ?? "";
+      expect(german.length).toBeGreaterThan(40);
+      expect(german).not.toBe(text);
+      expect(german).not.toMatch(/TODO|TBD|™/);
+    }
+    expect(enCopy.find((item) => item.id === "pin")?.sidebar ?? "").toBe("");
+    expect(deCopy.find((item) => item.id === "pin")?.sidebar ?? "").toBe("");
   });
 });
