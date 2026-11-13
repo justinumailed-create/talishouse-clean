@@ -5,10 +5,15 @@ import { describe, expect, it } from "vitest";
 const read = (p: string) => readFileSync(resolve(p), "utf8");
 
 describe("Markets page gate (admins, superadmins and signed-in agents only)", () => {
-  it("redirects anyone without an admin or agent session Home", () => {
+  it("asks for the existing Global Admin password instead of sending visitors Home", () => {
     const page = read("app/talisu/mkts/page.tsx");
-    expect(page).toContain("await getAdminSessionAccount()");
-    expect(page).toContain('if (!account) redirect("/")');
+    const gate = read("components/talisu/MarketsMapOrGate.tsx");
+    const action = read("app/talisu/mkts/actions.ts");
+    expect(page).toContain("<MarketsMapOrGate");
+    expect(gate).toContain("await getAdminSessionAccount()");
+    expect(gate).toContain("<MarketsAdminGate");
+    expect(gate).not.toContain('redirect("/")');
+    expect(action).toContain("acceptGlobalAdminPassword");
     expect(page).toContain("index: false");
   });
 

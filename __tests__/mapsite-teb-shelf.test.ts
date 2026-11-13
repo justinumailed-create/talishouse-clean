@@ -80,8 +80,9 @@ describe("Mapsite pin resource buttons", () => {
     expect(popup).not.toContain("listingSearchHref");
     expect(popup).not.toContain("google.com/search");
     expect(popup).not.toContain("realtor.ca/map");
-    expect(popup).toContain('variant: "blue"');
-    expect(popup).toContain('variant: "gold"');
+    expect(popup).toContain("bg-[#046BD9]");
+    expect(popup).not.toContain('variant: "gold"');
+    expect(popup).not.toContain("#ffc439");
     expect(popup).not.toContain("resource.key === \"ttv\"");
     expect(popup).toContain("canBuyAdditionalPins");
     expect(popup).toContain("onOpenAdditionalPins");

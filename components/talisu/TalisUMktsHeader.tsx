@@ -5,13 +5,12 @@ import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  TALISU_MKTS_HEADER_ADMIN_DROPDOWN,
   TALISU_MKTS_HEADER_BLUE,
   TALISU_MKTS_HEADER_DROPDOWN,
   TALISU_MKTS_HEADER_DROPDOWN_DIVIDER_AFTER,
   TALISU_MKTS_HEADER_LOGO_HREF,
+  TALISU_MKTS_HEADER_MARKETS_DROPDOWN,
   TALISU_MKTS_HEADER_NAV,
-  TALISU_MKTS_HEADER_REGISTER_DROPDOWN,
 } from "@/lib/talisu/markets-pins";
 import { ROUTES } from "@/lib/routes";
 import {
@@ -24,13 +23,8 @@ import { TALISU_KB_PATH } from "@/lib/talisu/kb-content";
 import TalisBrandMark from "@/components/talisu/TalisBrandMark";
 import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
-import RegisterNavDropdown from "@/components/talisu/RegisterNavDropdown";
+import MarketsNavDropdown from "@/components/talisu/MarketsNavDropdown";
 import LanguageSwitch from "@/components/i18n/LanguageSwitch";
-import {
-  registerMenuItemActive,
-  registerMenuLabel,
-  useRegisterNavLocation,
-} from "@/components/talisu/register-nav";
 import { useT } from "@/lib/i18n/client";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { SHOW_TALISU_NAV } from "@/lib/talisu/ui-flags";
@@ -95,8 +89,7 @@ export type TalisUMktsHeaderVariant = "default" | "claimed-mapsite";
 export type TalisUMktsHeaderProps = {
   /**
    * `claimed-mapsite`: replace Register with Dashboard (lock until real payment).
-   * `default`: Home + Mapsites + Catalogue + Register | TalisU (Bookshelf lives in TalisU;
-   * Markets is an admin-only TalisU row).
+   * `default`: Home + Mapsites + Markets + Register | TalisU (Bookshelf lives in TalisU).
    */
   variant?: TalisUMktsHeaderVariant;
   /**
@@ -150,7 +143,6 @@ export default function TalisUMktsHeader({
   onSelectDashboardItem,
 }: TalisUMktsHeaderProps = {}) {
   const pathname = usePathname() || "/talisu/mkts";
-  const { search, hash } = useRegisterNavLocation();
   const router = useRouter();
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -170,9 +162,6 @@ export default function TalisUMktsHeader({
   const mobilePanelRef = useRef<HTMLDivElement>(null);
   const mobileButtonRef = useRef<HTMLButtonElement>(null);
   const promptRef = useRef<HTMLDivElement>(null);
-  // Admin-only TalisU rows (Markets). Public visitors never see them; the
-  // Markets route is also gated server-side.
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const claimedMapsite = variant === "claimed-mapsite";
   const dashboardHasMenu =
@@ -186,31 +175,11 @@ export default function TalisUMktsHeader({
     pathname.startsWith("/mapsite") ||
     pathname.startsWith("/talispros/demo-mapsite");
 
-  const adminDropdownItems = isAdmin ? TALISU_MKTS_HEADER_ADMIN_DROPDOWN : [];
-
-  const dropdownActive = [
-    ...TALISU_MKTS_HEADER_DROPDOWN,
-    ...adminDropdownItems,
-  ].some(
+  const dropdownActive = TALISU_MKTS_HEADER_DROPDOWN.some(
     (item) =>
       pathname === item.href ||
       (item.label !== "Catalogue" && pathname.startsWith(`${item.href}/`)),
   );
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/talisu/admin-status", { cache: "no-store", credentials: "same-origin" })
-      .then((res) => (res.ok ? res.json() : { admin: false }))
-      .then((data: { admin?: boolean }) => {
-        if (!cancelled) setIsAdmin(data?.admin === true);
-      })
-      .catch(() => {
-        if (!cancelled) setIsAdmin(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   useEffect(() => {
     setKbUnlocked(readTalisUKbUnlocked());
@@ -596,6 +565,7 @@ export default function TalisUMktsHeader({
           >
             {t.nav.mapsites}
           </Link>
+          <MarketsNavDropdown />
           {/* Claimed Mapsites: the Dashboard lives on the left Marketing card;
               the PMC sequence (Media Directory → Contract) lives in TalisU;
               the Tsplits™ page is the header logo link. */}
@@ -607,7 +577,18 @@ export default function TalisUMktsHeader({
               (item) => item.label === "Register",
             ).map((item) => renderNavLink(item))
           ) : (
-            <RegisterNavDropdown />
+            <Link
+              href={ROUTES.TALISU_REGISTER}
+              data-testid="nav-register-link"
+              className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
+                pathname === ROUTES.TALISU_REGISTER ||
+                pathname.startsWith(`${ROUTES.TALISU_REGISTER}/`)
+                  ? "bg-white/20 text-white"
+                  : "text-white hover:bg-white/15"
+              }`}
+            >
+              {t.nav.register}
+            </Link>
           )}
 
           {SHOW_TALISU_NAV ? (
@@ -726,35 +707,6 @@ export default function TalisUMktsHeader({
                       }
                       return row;
                     })}
-                    {/* Admin/agent-only rows: below the divider, after Knowledge Base + Catalogue. */}
-                    {adminDropdownItems.length ? (
-                      <>
-                        {adminDropdownItems.map((item) => {
-                          // Exact match: /talisu/mkts/usa must not light up Markets.
-                          const active = pathname === item.href;
-                          return (
-                            <Link
-                              key={item.href}
-                              href={item.href}
-                              role="menuitem"
-                              data-testid={
-                                item.label === "USA Markets"
-                                  ? "talisu-admin-us-markets-link"
-                                  : "talisu-admin-markets-link"
-                              }
-                              onClick={() => setOpen(false)}
-                              className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
-                                active
-                                  ? "bg-white/20 text-white"
-                                  : "text-white/95 hover:bg-white/15"
-                              }`}
-                            >
-                              {talisuMenuLabel(t, item.label)}
-                            </Link>
-                          );
-                        })}
-                      </>
-                    ) : null}
                   </>
                 )}
               </div>
@@ -837,6 +789,19 @@ export default function TalisUMktsHeader({
                 t.nav.mapsites,
                 mapsitesActive,
               )}
+              <div role="heading" aria-level={2} className={MOBILE_GROUP_CLASS}>
+                {t.nav.markets}
+              </div>
+              {TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((item) =>
+                renderMobileLink(
+                  item.href,
+                  item.menuKey === "usa" ? t.nav.marketsMenu.usa : t.nav.marketsMenu.canada,
+                  item.href === "/talisu/mkts"
+                    ? pathname === "/talisu/mkts"
+                    : pathname === item.href || pathname.startsWith(`${item.href}/`),
+                  true,
+                ),
+              )}
 
               {claimedMapsite && dashboardHasMenu ? (
                 <>
@@ -881,23 +846,12 @@ export default function TalisUMktsHeader({
                   </a>
                 </div>
               ) : claimedMapsite ? null : (
-                <>
-                  <div
-                    role="heading"
-                    aria-level={2}
-                    className={MOBILE_GROUP_CLASS}
-                  >
-                    {t.nav.register}
-                  </div>
-                  {TALISU_MKTS_HEADER_REGISTER_DROPDOWN.map((item) =>
-                    renderMobileLink(
-                      item.href,
-                      registerMenuLabel(t, item.menuKey),
-                      registerMenuItemActive(item.href, pathname, search, hash),
-                      true,
-                    ),
-                  )}
-                </>
+                renderMobileLink(
+                  ROUTES.TALISU_REGISTER,
+                  t.nav.register,
+                  pathname === ROUTES.TALISU_REGISTER ||
+                    pathname.startsWith(`${ROUTES.TALISU_REGISTER}/`),
+                )
               )}
 
               {SHOW_TALISU_NAV ? (
@@ -947,18 +901,6 @@ export default function TalisUMktsHeader({
                 }
                 return link;
               })}
-              {adminDropdownItems.length ? (
-                <>
-                  {adminDropdownItems.map((item) =>
-                    renderMobileLink(
-                      item.href,
-                      talisuMenuLabel(t, item.label),
-                      pathname === item.href,
-                      true,
-                    ),
-                  )}
-                </>
-              ) : null}
               </>
               ) : null}
 

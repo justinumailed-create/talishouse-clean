@@ -1402,6 +1402,81 @@
     "description": "Richten Sie Ihre Tsplits™ Mapsite ein: Pin setzen, Angebotsdetails ergänzen, FAST Code und erstes Talisbook™ vorbereiten.",
     "alt": "Tsplits™ Baumlogo: Meine Mapsite erstellen"
    }
+  },
+  "/talisu/reg/checkout/broker": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/talisu-reg-broker",
+   "en": {
+    "title": "Broker Account Checkout | Tsplits™",
+    "description": "Register a Broker account with Aisha C. beside you. Checkout opens on Tsplits™ after your agent code is accepted. Prices are in CAD.",
+    "alt": "Aisha C., Team Leader with the Tsplits™ tree logo: Register a Broker account"
+   },
+   "de": {
+    "title": "Makler-Konto Checkout | Tsplits™",
+    "description": "Registrieren Sie ein Makler-Konto. Aisha C. bleibt an Ihrer Seite. Der Checkout öffnet sich nach dem Agenten-Code. Preise in CAD.",
+    "alt": "Aisha C., Team Leader mit dem Tsplits™ Baumlogo: Makler-Konto jetzt registrieren"
+   }
+  },
+  "/talisu/reg/checkout/agent": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/talisu-reg-agent",
+   "en": {
+    "title": "Agent Account Checkout | Tsplits™",
+    "description": "Register an Agent account with Aisha C. beside you. Checkout opens on Tsplits™ after your agent code is accepted. Prices are in CAD.",
+    "alt": "Aisha C., Team Leader with the Tsplits™ tree logo: Register an Agent account"
+   },
+   "de": {
+    "title": "Agenten-Konto Checkout | Tsplits™",
+    "description": "Registrieren Sie ein Agenten-Konto. Aisha C. bleibt an Ihrer Seite. Der Checkout öffnet sich nach dem Agenten-Code. Preise in CAD.",
+    "alt": "Aisha C., Team Leader mit dem Tsplits™ Baumlogo: Agenten-Konto jetzt registrieren"
+   }
+  },
+  "/talisu/reg/checkout/fsbo": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/talisu-reg-fsbo",
+   "en": {
+    "title": "FSBO Account Checkout | Tsplits™",
+    "description": "Register an FSBO account with Aisha C. beside you. Checkout opens on Tsplits™ after your agent code is accepted. Prices are in CAD.",
+    "alt": "Aisha C., Team Leader with the Tsplits™ tree logo: Register an FSBO account"
+   },
+   "de": {
+    "title": "FSBO-Konto Checkout | Tsplits™",
+    "description": "Registrieren Sie ein FSBO-Konto. Aisha C. bleibt an Ihrer Seite. Der Checkout öffnet sich nach dem Agenten-Code. Preise in CAD.",
+    "alt": "Aisha C., Team Leader mit dem Tsplits™ Baumlogo: FSBO-Konto jetzt registrieren"
+   }
+  },
+  "/talisu/reg/checkout/adpro": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/talisu-reg-adpro",
+   "en": {
+    "title": "Adpro Account Checkout | Tsplits™",
+    "description": "Register an Adpro account with Aisha C. beside you. Checkout opens on Tsplits™ after your agent code is accepted. Prices are in CAD.",
+    "alt": "Aisha C., Team Leader with the Tsplits™ tree logo: Register an Adpro account"
+   },
+   "de": {
+    "title": "Adpro-Konto Checkout | Tsplits™",
+    "description": "Registrieren Sie ein Adpro-Konto. Aisha C. bleibt an Ihrer Seite. Der Checkout öffnet sich nach dem Agenten-Code. Preise in CAD.",
+    "alt": "Aisha C., Team Leader mit dem Tsplits™ Baumlogo: Adpro-Konto jetzt registrieren"
+   }
+  },
+  "/talisu/reg/checkout/pin": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/talisu-reg-pin",
+   "en": {
+    "title": "PIN Checkout | Tsplits™",
+    "description": "Add a PIN with Aisha C. beside you. Checkout opens on Tsplits™ after your agent code is accepted. The PIN fee is quoted in CAD.",
+    "alt": "Aisha C., Team Leader with the Tsplits™ tree logo: Add a PIN to your account"
+   },
+   "de": {
+    "title": "PIN-Checkout | Tsplits™",
+    "description": "Registrieren Sie einen PIN. Aisha C. bleibt an Ihrer Seite. Der Checkout öffnet sich nach dem Agenten-Code. Die Gebühr steht in CAD.",
+    "alt": "Aisha C., Team Leader mit dem Tsplits™ Baumlogo: Einen PIN zum Konto hinzufügen"
+   }
   }
  },
  "admin": {

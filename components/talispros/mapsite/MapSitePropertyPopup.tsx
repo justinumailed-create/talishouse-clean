@@ -45,7 +45,6 @@ const PIN_EXPLAINER: Record<ResourceKey, PinActionExplainerId> = {
 const RESOURCES: {
   key: ResourceKey;
   label: string;
-  variant: "blue" | "gold";
   resolveHref: (site: MapSitePlatformRecord) => string | null;
 }[] = [
   {
@@ -53,7 +52,6 @@ const RESOURCES: {
     // Ralf (Oct 18): URL 1 = sales tool, URL 2 = document repository or MLS®
     // (URL 2 keeps the existing mls_url column).
     label: "URL 1",
-    variant: "blue",
     // Resolved in render: Register for visitors, multipin Dashboard for paid owners.
     resolveHref: (site) =>
       resolvePublishedUrlButtonHref(site.fast_code, site.broker_url, {
@@ -63,13 +61,11 @@ const RESOURCES: {
   {
     key: "mls",
     label: "URL 2",
-    variant: "blue",
     resolveHref: (site) => listingResourceHref(site.mls_url),
   },
   {
     key: "teb",
     label: "TEB™",
-    variant: "blue",
     resolveHref: (site) => {
       const custom = site.teb_url?.trim() || "";
       const code = site.fast_code?.trim();
@@ -88,7 +84,6 @@ const RESOURCES: {
   {
     key: "ttv",
     label: "TTV™",
-    variant: "gold",
     resolveHref: (site) => mapsiteScheduleHref(site.fast_code || ""),
   },
 ];
@@ -96,12 +91,10 @@ const RESOURCES: {
 function ResourceButton({
   href,
   label,
-  variant,
   onActionClick,
 }: {
   href: string | null;
   label: string;
-  variant: "blue" | "gold";
   onActionClick?: () => void;
 }) {
   const t = useT();
@@ -110,9 +103,7 @@ function ResourceButton({
     "inline-flex min-h-9 w-full items-center justify-center whitespace-nowrap rounded-full px-1.5 text-center text-[11px] font-semibold sm:min-h-10 sm:px-2 sm:text-[13px]",
     disabled
       ? "cursor-not-allowed bg-neutral-300 text-neutral-500 shadow-none"
-      : variant === "gold"
-        ? "bg-[#ffc439] text-[#003087] shadow-[0_4px_10px_rgba(212,160,23,0.35)]"
-        : "bg-[#046BD9] text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)]",
+      : "bg-[#046BD9] text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)]",
   ].join(" ");
 
   if (disabled) {
@@ -396,7 +387,6 @@ export default function MapSitePropertyPopup({
                         <ResourceButton
                           href={href}
                           label={resource.label}
-                          variant={resource.variant}
                           onActionClick={
                             resource.key === "url" && canBuyAdditionalPins
                               ? onOpenAdditionalPins

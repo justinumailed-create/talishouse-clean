@@ -13,6 +13,10 @@ import {
 } from "@/components/talisu/metal-tab";
 import { redeemRegisterEntryAction } from "@/app/talisu/reg/actions";
 import SecretTextField from "@/components/talispros/SecretTextField";
+import {
+  isRegisterCheckoutId,
+  registerCheckoutPath,
+} from "@/lib/talisu/register-checkout";
 
 export type RegisterActionLabels = {
   label: string;
@@ -20,7 +24,7 @@ export type RegisterActionLabels = {
   claim: string;
   terms: string;
   register: string;
-  checkouts: ReadonlyArray<{ id: string; label: string; href: string }>;
+  checkouts: ReadonlyArray<{ id: string; label: string }>;
   consentBefore: string;
   consentTerms: string;
   consentAnd: string;
@@ -53,29 +57,47 @@ const GRID =
 
 /**
  * Account checkouts on /talisu/reg, in this order:
- * Broker · Agent · FSBO · Adpro · PIN. Each opens its SamCart page.
- * A bounced checkout (no agent entry) can still open the entry-code form.
+ * Broker · Agent · FSBO · Adpro · PIN. Each opens a first-party page.
+ * SamCart addresses are not in this component. Without an agent code the
+ * button opens the code form; the checkout page checks the code again.
  */
 export default function RegisterActions({
   labels,
   hrefs,
   entryGranted,
   initialOpen = false,
+  nextProduct = null,
 }: {
   labels: RegisterActionLabels;
   hrefs: RegisterActionHrefs;
   entryGranted: boolean;
   /** Open the entry-code panel on load (bounced from a locked step). */
   initialOpen?: boolean;
+  /** Product the visitor was sent back from, when the checkout was locked. */
+  nextProduct?: string | null;
 }) {
   const router = useRouter();
   const baseId = useId();
   const [open, setOpen] = useState(initialOpen && !entryGranted);
+  const [chosen, setChosen] = useState<string | null>(
+    nextProduct && isRegisterCheckoutId(nextProduct) ? nextProduct : null,
+  );
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
   const tab = `${METAL_TAB} ${METAL_TAB_UNSELECTED} cursor-pointer`;
+
+  function goAfterCode(productId: string | null) {
+    const id =
+      productId && isRegisterCheckoutId(productId)
+        ? productId
+        : chosen && isRegisterCheckoutId(chosen)
+          ? chosen
+          : null;
+    router.push(id ? registerCheckoutPath(id) : hrefs.register);
+    router.refresh();
+  }
 
   return (
     <div className="mt-4 sm:mt-6" data-testid="register-actions">
@@ -84,18 +106,43 @@ export default function RegisterActions({
       </div>
       <div className="@container">
         <div className={GRID}>
-          {labels.checkouts.map((item) => (
-            <a
-              key={item.id}
-              href={item.href}
-              data-testid={`register-action-${item.id}`}
-              className={tab}
-              style={{ backgroundImage: ADVISER_METAL_BG }}
-            >
-              <span className={METAL_TAB_SHEEN} aria-hidden />
-              <span className={`${METAL_TAB_LABEL} whitespace-nowrap`}>{item.label}</span>
-            </a>
-          ))}
+          {labels.checkouts.map((item) => {
+            const inner = (
+              <>
+                <span className={METAL_TAB_SHEEN} aria-hidden />
+                <span className={`${METAL_TAB_LABEL} whitespace-nowrap`}>{item.label}</span>
+              </>
+            );
+            if (entryGranted && isRegisterCheckoutId(item.id)) {
+              return (
+                <Link
+                  key={item.id}
+                  href={registerCheckoutPath(item.id)}
+                  data-testid={`register-action-${item.id}`}
+                  className={tab}
+                  style={{ backgroundImage: ADVISER_METAL_BG }}
+                >
+                  {inner}
+                </Link>
+              );
+            }
+            return (
+              <button
+                key={item.id}
+                type="button"
+                data-testid={`register-action-${item.id}`}
+                className={tab}
+                style={{ backgroundImage: ADVISER_METAL_BG }}
+                onClick={() => {
+                  setChosen(item.id);
+                  setError(null);
+                  setOpen(true);
+                }}
+              >
+                {inner}
+              </button>
+            );
+          })}
         </div>
       </div>
       <p className="mx-auto mt-3 max-w-[40rem] text-center text-[13px] leading-relaxed text-neutral-600" data-testid="register-consent">
@@ -122,7 +169,7 @@ export default function RegisterActions({
             start(async () => {
               const res = await redeemRegisterEntryAction({ code });
               if (res.ok) {
-                router.push(hrefs.register);
+                goAfterCode(chosen);
                 return;
               }
               setError(
@@ -155,8 +202,8 @@ export default function RegisterActions({
             {labels.entryLabel}
             <SecretTextField
               value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              autoCapitalize="characters"
+              onChange={(e) => setCode(e.target.value)}
+              autoCapitalize="off"
               data-testid="register-entry-code"
               aria-label={labels.entryLabel}
               wrapperClassName="relative mt-1.5 w-full"
@@ -170,7 +217,7 @@ export default function RegisterActions({
           ) : null}
           <button
             type="submit"
-            disabled={pending || code.trim().length < 6}
+            disabled={pending || code.trim().length === 0}
             data-testid="register-entry-submit"
             className="mt-4 inline-flex min-h-12 items-center justify-center rounded-full bg-[#046BD9] px-6 py-2 text-[15px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] hover:bg-[#0358b3] disabled:cursor-not-allowed disabled:bg-neutral-300 disabled:shadow-none sm:text-[16px]"
           >

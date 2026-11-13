@@ -5,10 +5,15 @@ import { cookies, headers } from "next/headers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { signCookieValue, verifyCookieValue } from "@/lib/talispros/mapsite-contract-service";
-import { getAdminSessionAccount, matchesGlobalAdminPassword } from "@/lib/admin-auth";
+import { getAdminSessionAccount, matchesGlobalAdminPassword, writeAdminSessionCookie } from "@/lib/admin-auth";
 import { getActiveAdminGrant } from "@/lib/admin-access-grants";
 import { normalizeAgentCode } from "@/lib/talispros/mapsite-contract";
 import { normalizeSlotFastCode } from "@/lib/talispros/fast-code-slots";
+import {
+  REGISTER_ENTRY_COOKIE,
+  REGISTER_ENTRY_COOKIE_MAX_AGE,
+  REGISTER_ENTRY_COOKIE_SCOPE,
+} from "@/lib/talisu/register-entry";
 
 /**
  * Agent gate for prospect Mapsites (Arun, Nov 5). A prepared FAST Code opens
@@ -55,13 +60,12 @@ export async function hasProspectAccess(): Promise<boolean> {
 
 export type GateResult = { ok: true; href: string } | { ok: false; error: "wrong" | "limited" | "failed" };
 
-/** Verify the password against every active agent with a password. */
-export async function verifyProspectGate(rawCode: unknown, rawPassword: unknown, href: string): Promise<GateResult> {
-  if (!isSupabaseAdminConfigured()) return { ok: false, error: "failed" };
-  const code = normalizeSlotFastCode(rawCode);
-  const password = typeof rawPassword === "string" ? rawPassword : "";
-  if (!code || !password || password.length > 200) return { ok: false, error: "wrong" };
+export type GateError = "wrong" | "limited" | "failed";
 
+/** Cookie ids that verifyCookieValue will accept (agent UUIDs). */
+const AGENT_ID = /^[0-9a-f-]{36}$/i;
+
+async function failureCount(): Promise<number> {
   const ip = await ipHash();
   const since = new Date(Date.now() - GATE_WINDOW_MINUTES * 60 * 1000).toISOString();
   const { count } = await db()
@@ -70,52 +74,129 @@ export async function verifyProspectGate(rawCode: unknown, rawPassword: unknown,
     .eq("ip_hash", ip)
     .eq("ok", false)
     .gte("created_at", since);
-  if ((count ?? 0) >= GATE_MAX_FAILURES) return { ok: false, error: "limited" };
+  return count ?? 0;
+}
 
+async function recordGateAttempt(ok: boolean): Promise<void> {
+  if (!isSupabaseAdminConfigured()) return;
+  await db().from("fast_code_gate_attempts").insert({ ip_hash: await ipHash(), ok });
+}
+
+/**
+ * Same secret the Demo Mapsite gate accepts: an active agent's password, that
+ * agent's permanent code, the Global Admin password, or an admin grant.
+ * Returns an agent id, "global-admin", or "grant:<id>". Never logs the secret.
+ */
+export async function matchAgentGateSecret(password: string): Promise<string | null> {
+  if (!isSupabaseAdminConfigured() || !password || password.length > 200) return null;
   const { data } = await db()
     .from("agent_admins")
     .select("id, password_hash")
     .eq("status", "active")
     .not("password_hash", "is", null);
   const rows = (data ?? []) as { id: string; password_hash: string | null }[];
-  let matched: string | null = null;
   for (const row of rows) {
     if (row.password_hash && (await bcrypt.compare(password, row.password_hash))) {
-      matched = row.id;
-      break;
+      return row.id;
     }
   }
-  if (!matched) {
-    const agentCode = normalizeAgentCode(password);
-    if (agentCode) {
-      const { data: coded } = await db()
-        .from("agent_admins")
-        .select("id")
-        .eq("status", "active")
-        .eq("contract_code", agentCode)
-        .maybeSingle();
-      const codedRow = coded as { id: string } | null;
-      if (codedRow?.id) matched = codedRow.id;
-    }
+  const agentCode = normalizeAgentCode(password);
+  if (agentCode) {
+    const { data: coded } = await db()
+      .from("agent_admins")
+      .select("id")
+      .eq("status", "active")
+      .eq("contract_code", agentCode)
+      .maybeSingle();
+    const codedRow = coded as { id: string } | null;
+    if (codedRow?.id) return codedRow.id;
   }
-  if (!matched && (await matchesGlobalAdminPassword(password))) {
-    matched = "global-admin";
-  }
-  if (!matched) {
-    const grant = await getActiveAdminGrant(password);
-    if (grant) matched = `grant:${grant.id}`;
-  }
-  await db().from("fast_code_gate_attempts").insert({ ip_hash: ip, ok: Boolean(matched) });
-  if (!matched) return { ok: false, error: "wrong" };
+  if (await matchesGlobalAdminPassword(password)) return "global-admin";
+  const grant = await getActiveAdminGrant(password);
+  if (grant) return `grant:${grant.id}`;
+  return null;
+}
 
+/**
+ * Remember a successful match. Agent ids use the signed cookies (the cookie
+ * signer only accepts UUID ids). Global Admin and grants open a real admin
+ * session — the same session as /admin/login — because those ids cannot be
+ * stored in the UUID cookie.
+ */
+async function persistAgentGateMatch(password: string, matched: string): Promise<boolean> {
+  if (matched === "global-admin" || matched.startsWith("grant:")) {
+    const account = await writeAdminSessionCookie(password).catch(() => null);
+    return Boolean(account);
+  }
+  if (!AGENT_ID.test(matched)) return false;
   const jar = await cookies();
-  jar.set(PROSPECT_GATE_COOKIE, signCookieValue(GATE_SCOPE, matched, GATE_TTL_SECONDS), {
+  const cookie = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
+  };
+  jar.set(PROSPECT_GATE_COOKIE, signCookieValue(GATE_SCOPE, matched, GATE_TTL_SECONDS), {
+    ...cookie,
     maxAge: GATE_TTL_SECONDS,
   });
+  jar.set(
+    REGISTER_ENTRY_COOKIE,
+    signCookieValue(REGISTER_ENTRY_COOKIE_SCOPE, matched, REGISTER_ENTRY_COOKIE_MAX_AGE),
+    { ...cookie, maxAge: REGISTER_ENTRY_COOKIE_MAX_AGE },
+  );
+  return true;
+}
+
+async function acceptSecret(password: string): Promise<{ ok: true } | { ok: false; error: GateError }> {
+  if (!isSupabaseAdminConfigured()) return { ok: false, error: "failed" };
+  if (!password || password.length > 200) return { ok: false, error: "wrong" };
+  if ((await failureCount()) >= GATE_MAX_FAILURES) return { ok: false, error: "limited" };
+  let matched: string | null = null;
+  try {
+    matched = await matchAgentGateSecret(password);
+  } catch {
+    return { ok: false, error: "failed" };
+  }
+  if (!matched) {
+    await recordGateAttempt(false);
+    return { ok: false, error: "wrong" };
+  }
+  const saved = await persistAgentGateMatch(password, matched);
+  await recordGateAttempt(saved);
+  return saved ? { ok: true } : { ok: false, error: "failed" };
+}
+
+/** Register / SamCart checkout: the Demo Mapsite agent-code check, no FAST Code required. */
+export async function acceptAgentGateSecret(raw: unknown): Promise<{ ok: true } | { ok: false; error: GateError }> {
+  const password = typeof raw === "string" ? raw : "";
+  return acceptSecret(password);
+}
+
+/**
+ * Markets maps: existing Global Admin password or an existing admin grant.
+ * A match creates the admin session, so the map is a second door into Global Admin.
+ * Agent passwords are not accepted here.
+ */
+export async function acceptGlobalAdminPassword(
+  raw: unknown,
+): Promise<{ ok: true } | { ok: false; error: GateError }> {
+  if (!isSupabaseAdminConfigured()) return { ok: false, error: "failed" };
+  const password = typeof raw === "string" ? raw.trim() : "";
+  if (!password || password.length > 200) return { ok: false, error: "wrong" };
+  if ((await failureCount()) >= GATE_MAX_FAILURES) return { ok: false, error: "limited" };
+  const account = await writeAdminSessionCookie(password).catch(() => null);
+  await recordGateAttempt(Boolean(account));
+  return account ? { ok: true } : { ok: false, error: "wrong" };
+}
+
+/** Verify the password against every active agent with a password. */
+export async function verifyProspectGate(rawCode: unknown, rawPassword: unknown, href: string): Promise<GateResult> {
+  const code = normalizeSlotFastCode(rawCode);
+  const password = typeof rawPassword === "string" ? rawPassword : "";
+  if (!code || !password || password.length > 200) return { ok: false, error: "wrong" };
+  const accepted = await acceptSecret(password);
+  if (!accepted.ok) return accepted;
   return { ok: true, href };
 }
 

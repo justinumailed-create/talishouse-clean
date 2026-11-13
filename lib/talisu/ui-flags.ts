@@ -9,4 +9,4 @@
  *
  * Does not remove /talisu/* routes or in-content links (FAQ, Register, …).
  */
-export const SHOW_TALISU_NAV: boolean = false;
+export const SHOW_TALISU_NAV: boolean = true;

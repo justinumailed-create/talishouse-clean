@@ -13,7 +13,7 @@ import SamCartEmbed from "@/components/talisu/SamCartEmbed";
 import AdviserLayout from "@/components/talisu/AdviserLayout";
 import RegisterStructureTabs from "@/components/talisu/RegisterStructureTabs";
 import RegisterActions from "@/components/talisu/RegisterActions";
-import { hasRegisterEntry } from "@/lib/talisu/register-entry";
+import { hasCheckoutAccess, hasRegisterEntry } from "@/lib/talisu/register-entry";
 import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
 import { PMC_PATHS } from "@/lib/talispros/mapsite-contract";
 import { isTalisURegisterCheckoutStep } from "@/lib/talisu/ask-step";
@@ -50,6 +50,7 @@ type TalisURegisterPageProps = {
     fastCode?: string | string[];
     structure?: string | string[];
     locked?: string | string[];
+    product?: string | string[];
   }>;
 };
 
@@ -80,8 +81,10 @@ export default async function TalisURegisterPage({
   // agent, checked server-side (lib/talisu/register-entry.ts). Without it the
   // structure step and the SamCart checkout are never rendered.
   const entryGranted = await hasRegisterEntry();
+  const checkoutGranted = await hasCheckoutAccess();
   const step = firstParam(params.step)?.trim().toLowerCase() ?? "";
   const lockedParam = firstParam(params.locked)?.trim().toLowerCase() ?? "";
+  const nextProduct = firstParam(params.product)?.trim().toLowerCase() ?? null;
 
   if (!isTalisURegisterCheckoutStep(params.step)) {
     // Landing: Aisha's portrait + five SamCart checkouts, in this order:
@@ -102,7 +105,8 @@ export default async function TalisURegisterPage({
         >
           <RegisterActions
             labels={TALISU_REGISTER.actions}
-            entryGranted={entryGranted}
+            entryGranted={checkoutGranted}
+            nextProduct={nextProduct}
             initialOpen={wantsStructures || lockedParam === REGISTER_ENTRY_LOCK}
             hrefs={{
               propose: talisuHref(TALISU_DISCUSS_PATH),

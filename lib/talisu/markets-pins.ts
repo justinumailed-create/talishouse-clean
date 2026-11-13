@@ -100,9 +100,9 @@ export const TALISU_MKTS_HEADER_LOGO_HREF = "/";
  * Primary top-bar links (home + claimed Mapsites blue header).
  * Catalogue is the book link (Bookshelf lives in the TalisU dropdown); Mapsites is a
  * header dropdown (not here) rendered right AFTER Register:
- * Home, Mapsites, Catalogue, Register, | TalisU.
- * Markets is admin-only: it lives in the TalisU dropdown below the divider
- * (TALISU_MKTS_HEADER_ADMIN_DROPDOWN) and /talisu/mkts is gated server-side.
+ * Home, Mapsites, Markets (USA / Canada), Register, | TalisU.
+ * Markets is a navbar dropdown. Both maps ask for the Global Admin password
+ * when there is no admin session.
  */
 export const TALISU_MKTS_HEADER_NAV = [
   /** Plain Home link (client request) — first item, even though the logo also links home. */
@@ -110,49 +110,11 @@ export const TALISU_MKTS_HEADER_NAV = [
   { href: "/talisu/reg", label: "Register" },
 ] as const;
 
-/**
- * Register dropdown.
- * Mapsite stays on Aisha's adviser page. Product Options (/talisu/engage)
- * stays reachable by direct URL and is no longer listed here.
- * Register Account starts the SamCart account purchase (agent code still required).
- * Register PIN lands on the additional-PIN note on that same Register page —
- * there is no separate public checkout route for the $7 CAD PIN.
- */
-export const TALISU_MKTS_HEADER_REGISTER_DROPDOWN = [
-  { href: "/talisu/reg", label: "Mapsite", menuKey: "mapsite" },
-  { href: "/talisu/reg?step=choose", label: "Register Account", menuKey: "account" },
-  { href: "/talisu/reg#additional-pins", label: "Register PIN", menuKey: "pin" },
+/** Markets navbar dropdown: USA (30 market pins) then Canada (15 market pins). */
+export const TALISU_MKTS_HEADER_MARKETS_DROPDOWN = [
+  { href: "/talisu/mkts/usa", label: "USA", menuKey: "usa" },
+  { href: "/talisu/mkts", label: "Canada", menuKey: "canada" },
 ] as const;
-
-export type RegisterDropdownMenuKey =
-  (typeof TALISU_MKTS_HEADER_REGISTER_DROPDOWN)[number]["menuKey"];
-
-/** Highlights the Register row that matches the current Register URL. */
-export function isRegisterDropdownItemActive(
-  href: string,
-  pathname: string,
-  search: string,
-  hash: string,
-): boolean {
-  const hashIndex = href.indexOf("#");
-  const bare = hashIndex >= 0 ? href.slice(0, hashIndex) : href;
-  const expectedHash = hashIndex >= 0 ? href.slice(hashIndex) : "";
-  const queryIndex = bare.indexOf("?");
-  const path = queryIndex >= 0 ? bare.slice(0, queryIndex) : bare;
-  const query = queryIndex >= 0 ? bare.slice(queryIndex + 1) : "";
-  if (pathname !== path) return false;
-  const current = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
-  const expected = new URLSearchParams(query);
-  if (expectedHash) {
-    return hash === expectedHash && !current.has("step");
-  }
-  if (hash === "#additional-pins" && !expected.has("step")) return false;
-  for (const [key, value] of expected) {
-    if (current.get(key) !== value) return false;
-  }
-  if (!expected.has("step") && current.has("step")) return false;
-  return true;
-}
 
 /** Placeholder marker — Mapsites dropdown is rendered in TalisUMktsHeader. */
 export const TALISU_MKTS_HEADER_MAPSITES_LABEL = "Mapsites" as const;
@@ -178,17 +140,6 @@ export const TALISU_MKTS_HEADER_DROPDOWN = [
   { href: "/talisu/kb", label: "Knowledge Base" },
   /** Talishouse™ Product Catalogue (public) — moved off the navbar (Arun, Oct 31); opens on the front cover. */
   { href: "/catalogue", label: "Catalogue" },
-] as const;
-
-/**
- * Admin-only TalisU dropdown rows (signed-in admin session), rendered below
- * the divider after Knowledge Base. Hidden for the public; the Markets route
- * itself is gated server-side in app/talisu/mkts/page.tsx.
- */
-export const TALISU_MKTS_HEADER_ADMIN_DROPDOWN = [
-  { href: "/talisu/mkts", label: "Markets" },
-  /** Native USA Markets map (Arun, Nov 1): no redirect to Taliswebs. */
-  { href: "/talisu/mkts/usa", label: "USA Markets" },
 ] as const;
 
 /** TalisU dropdown row that the horizontal divider follows. */

@@ -31,3 +31,13 @@ export async function hasRegisterEntry(): Promise<boolean> {
   if (!agentId) return false;
   return Boolean(await getContractAgentById(agentId));
 }
+
+/**
+ * Checkout may open after the register-entry cookie, the Demo Mapsite agent
+ * gate, or an admin session (Global Admin password or an admin grant).
+ */
+export async function hasCheckoutAccess(): Promise<boolean> {
+  if (await hasRegisterEntry()) return true;
+  const { hasProspectAccess } = await import("@/lib/talispros/prospect-gate-server");
+  return hasProspectAccess();
+}
