@@ -490,7 +490,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(entry).toContain("hasCheckoutAccess");
   });
 
-  it("uses Ralf's Aisha sidebar copy word for word, with a German translation, and none on PIN", () => {
+  it("uses Ralf's Aisha sidebar copy word for word, with a German translation, and the PIN price on PIN only", () => {
     const enCopy = en.talisu.register.actions.checkouts;
     const deCopy = de.talisu.register.actions.checkouts;
     const exact: Record<string, string> = {
@@ -511,7 +511,34 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
       expect(german).not.toBe(text);
       expect(german).not.toMatch(/TODO|TBD|™/);
     }
-    expect(enCopy.find((item) => item.id === "pin")?.sidebar ?? "").toBe("");
-    expect(deCopy.find((item) => item.id === "pin")?.sidebar ?? "").toBe("");
+    const pinEn = enCopy.find((item) => item.id === "pin")?.sidebar ?? "";
+    const pinDe = deCopy.find((item) => item.id === "pin")?.sidebar ?? "";
+    expect(pinEn).toBe(
+      "Additional PINs are $7 CAD each. Buy them from PIN Dashboard on your Mapsite.",
+    );
+    expect(pinEn).not.toMatch(/USD|TODO|TBD/);
+    expect(pinDe.length).toBeGreaterThan(20);
+    expect(pinDe).toContain("CAD");
+    expect(pinDe).not.toBe(pinEn);
+    expect(pinDe).not.toMatch(/USD|TODO|TBD/);
+    expect(en.talisu.register.adviserTitle).not.toMatch(/choose the structure/i);
+    expect(de.talisu.register.adviserTitle).not.toMatch(/Struktur/);
+    expect(en.talisu.register.actions).not.toHaveProperty("pinNote");
+    expect(de.talisu.register.actions).not.toHaveProperty("pinNote");
+    expect(en.talisu.register.partnerName).toBe("Aisha, AMBA");
+    expect(de.talisu.register.partnerName).toBe("Aisha, AMBA");
+    const registerPage = readFileSync(resolve("app/talisu/reg/page.tsx"), "utf8");
+    const checkout = readFileSync(resolve("components/talisu/RegisterProductCheckout.tsx"), "utf8");
+    expect(registerPage).not.toContain("partnerHeading");
+    expect(checkout).not.toContain("partnerHeading");
+    expect(en.talisu.register).not.toHaveProperty("partnerHeading");
+    expect(de.talisu.register).not.toHaveProperty("partnerHeading");
+    expect(checkout).toContain('href={ROUTES.TERMS}');
+    expect(checkout).toContain('href={ROUTES.PRIVACY}');
+    expect(checkout).toContain("register-checkout-terms");
+    expect(checkout).toContain("register-checkout-privacy");
+    const actions = readFileSync(resolve("components/talisu/RegisterActions.tsx"), "utf8");
+    expect(actions).not.toContain("pinNote");
+    expect(actions).not.toContain("additional-pins");
   });
 });

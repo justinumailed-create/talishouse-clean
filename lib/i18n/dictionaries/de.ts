@@ -287,8 +287,7 @@ export const de: Dictionary = {
     register: {
       ...TALISU_REGISTER,
       title: "Konto registrieren",
-      partnerHeading: "Ihre Marketingpartnerin",
-      partnerName: "Aisha C. – Teamleiterin",
+      partnerName: "Aisha, AMBA",
       partnerIntro:
         "Mein Team und ich helfen Ihnen, Ihre immobiliennahen Marketinginitiativen entlang von vier großen Schwerpunkten auszubauen:",
       bullets: [
@@ -320,7 +319,7 @@ export const de: Dictionary = {
       closingTitle: "Bereit, Ihren Markt auf die Karte zu bringen?",
       adviserKicker: "Registrierungsoptionen",
       adviserTitle:
-        "Bringen Sie Ihre Angebote auf die Karte. Registrieren Sie Ihre Mapsite bei Aisha und ihrem Team und wählen Sie die Struktur, unter der Ihre Immobilien angeboten werden.",
+        "Bringen Sie Ihre Angebote auf die Karte. Registrieren Sie Ihre Mapsite bei Aisha und ihrem Team.",
       structuresLabel: "Wählen Sie Ihre Struktur",
       structures: [
         {
@@ -383,7 +382,12 @@ export const de: Dictionary = {
             sidebar:
               "Sie werben auf der Mapsite eines Maklers oder Teams und nutzen Ihre Präsenz dort, um deren Kunden auf Ihre eigene Website oder Ihre eigene Mapsite zu leiten. Letztere ist ohne Mehrkosten enthalten, und so kann Ihr eigener virtueller Markt oder Ihr eigenes Monopol entstehen.",
           },
-          { id: "pin", label: "PIN" },
+          {
+            id: "pin",
+            label: "PIN",
+            sidebar:
+              "Zusätzliche PINs kosten je 7 CAD. Kaufen Sie sie im PIN-Dashboard Ihrer Mapsite.",
+          },
         ],
         consentBefore: "Mit der Registrierung stimmen Sie den",
         consentTerms: "Nutzungsbedingungen",
@@ -400,8 +404,6 @@ export const de: Dictionary = {
         entryNotReady: "Der Checkout ist gerade nicht verfügbar. Bitte versuchen Sie es in Kürze erneut.",
         entryNeeded: "Für den Checkout brauchen Sie Ihren Agenten-Code oder Ihr Agenten-Passwort.",
         close: "Schließen",
-        pinNote:
-          "Zusätzliche PINs kosten je 7 CAD. Kaufen Sie sie im PIN-Dashboard Ihrer Mapsite.",
       },
     },
     engage: {

@@ -1,9 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import SamCartWebCheckout from "@/components/talisu/SamCartWebCheckout";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
 import { MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE } from "@/lib/talispros/market-pages";
+import { ROUTES } from "@/lib/routes";
 import { hasCheckoutAccess } from "@/lib/talisu/register-entry";
 import {
   isRegisterCheckoutId,
@@ -39,17 +41,11 @@ export default async function RegisterProductCheckout({
   return (
     <div className="talis-working-bg text-neutral-950" data-testid={`register-checkout-${product}`}>
       <div className="mx-auto grid w-full max-w-[1600px] grid-cols-1 lg:grid-cols-4 lg:items-start">
-        <aside
-          className={
-            sidebar
-              ? "flex flex-col bg-[#f6f3ee] lg:sticky lg:top-16 lg:col-span-1 lg:max-h-[calc(100dvh-4.5rem)] lg:overflow-y-auto"
-              : "relative min-h-[220px] sm:min-h-[280px] lg:sticky lg:top-16 lg:col-span-1 lg:min-h-[calc(100dvh-4.5rem)]"
-          }
-        >
-          <div className={sidebar ? "relative h-[220px] shrink-0 sm:h-[260px] lg:h-[300px]" : "absolute inset-0"}>
+        <aside className="flex flex-col bg-[#f6f3ee] lg:sticky lg:top-16 lg:col-span-1 lg:max-h-[calc(100dvh-4.5rem)] lg:min-h-[calc(100dvh-4.5rem)] lg:overflow-y-auto">
+          <div className="relative h-[220px] shrink-0 sm:h-[260px] lg:h-[300px]">
             <Image
               src={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
-              alt="Aisha C."
+              alt="Aisha, AMBA"
               fill
               priority
               sizes="(min-width: 1024px) 25vw, 100vw"
@@ -57,10 +53,7 @@ export default async function RegisterProductCheckout({
               style={{ objectPosition: "center 20%" }}
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pb-4 pt-14 text-white">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80">
-                {copy.partnerHeading}
-              </div>
-              <div className="mt-1 text-[18px] font-semibold leading-tight">{copy.partnerName}</div>
+              <div className="text-[18px] font-semibold leading-tight">{copy.partnerName}</div>
               <div className="mt-1 text-[13px] leading-snug text-white/90">{label}</div>
             </div>
           </div>
@@ -72,6 +65,22 @@ export default async function RegisterProductCheckout({
               {sidebar}
             </div>
           ) : null}
+          <div className="mt-auto flex flex-1 flex-col justify-end gap-3 px-4 pb-5 pt-2">
+            <Link
+              href={ROUTES.TERMS}
+              data-testid="register-checkout-terms"
+              className="inline-flex min-h-14 flex-1 items-center justify-center rounded-2xl bg-[#046BD9] px-4 py-4 text-center text-[15px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.28)] transition hover:bg-[#0358b3]"
+            >
+              {copy.actions.consentTerms}
+            </Link>
+            <Link
+              href={ROUTES.PRIVACY}
+              data-testid="register-checkout-privacy"
+              className="inline-flex min-h-14 flex-1 items-center justify-center rounded-2xl border-2 border-[#046BD9] bg-white px-4 py-4 text-center text-[15px] font-semibold text-[#046BD9] transition hover:bg-[#EAF3FF]"
+            >
+              {copy.actions.consentPrivacy}
+            </Link>
+          </div>
         </aside>
         <div className="min-w-0 w-full px-3 py-4 sm:px-5 lg:col-span-3 lg:py-6">
           <SamCartWebCheckout product={samcartProduct} subdomain={SAMCART_CHECKOUT_SUBDOMAIN} />
