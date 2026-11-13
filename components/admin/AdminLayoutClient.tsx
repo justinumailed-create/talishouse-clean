@@ -4,13 +4,15 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { logoutAdminAction } from "@/app/admin/actions";
-import { adminAccessLabel, adminHomePath, type AdminAccount } from "@/lib/admin-constants";
+import { adminHomePath, type AdminAccount } from "@/lib/admin-constants";
 import { clearAdminSession } from "@/lib/fast-code";
 import { isIdleLogoutAccess } from "@/lib/admin-idle";
 import AdminIdleLogout from "./AdminIdleLogout";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
 import { AGENT_HEARTBEAT_MS } from "@/lib/agent-collab";
 import { agentLoginPath, isAgentPortalPath } from "@/lib/agent-return-path";
+import { adminChrome } from "@/lib/admin-chrome";
+import { useLocale } from "@/lib/i18n/client";
 import { getAdminNavItems, isAdminNavItemActive, type AdminNavItem } from "@/lib/admin-nav";
 import { NAV_ICON, groupAdminNav } from "./admin-nav-groups";
 import {
@@ -28,6 +30,8 @@ function AdminSidebar({
   serverAccountIsAgent,
   roleLabel,
   chatUnread = 0,
+  chrome,
+  homeLabel,
 }: {
   chatUnread?: number;
   isOpen: boolean;
@@ -37,6 +41,8 @@ function AdminSidebar({
   signedInAs: string | null;
   serverAccountIsAgent: boolean;
   roleLabel: string;
+  chrome: ReturnType<typeof adminChrome>;
+  homeLabel: string;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -74,14 +80,14 @@ function AdminSidebar({
             <div>
               <h1 className="text-[15px] font-semibold leading-tight tracking-tight text-neutral-900">Tsplits™</h1>
               <p className="text-[10px] text-[#1E4ED8] font-bold uppercase tracking-widest mt-0.5">
-                {serverAccountIsAgent ? "Agent Console" : "Admin Console"}
+                {serverAccountIsAgent ? chrome.agentConsole : chrome.adminConsole}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
             className="lg:hidden p-1 text-gray-500 hover:text-gray-700"
-            aria-label="Close sidebar"
+            aria-label={chrome.closeSidebar}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -92,7 +98,7 @@ function AdminSidebar({
         <nav className="flex-1 overflow-y-auto px-3 py-4">
           {groupAdminNav(navItems).map((group) => (
             <div key={group.title} className="mb-4">
-              <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-neutral-400">{group.title}</p>
+              <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-neutral-400">{chrome.group(group.title)}</p>
               <ul className="space-y-0.5">
                 {group.items.map((item) => {
                   const active = isAdminNavItemActive(item.href, pathname);
@@ -112,7 +118,7 @@ function AdminSidebar({
                           <path d={NAV_ICON[item.href] ?? "M12 12h.01"} />
                         </svg>
                         <span className="flex flex-1 items-center justify-between gap-2">
-                          {item.label}
+                          {chrome.nav(item.href, item.label)}
                           {item.href === "/chat" && chatUnread > 0 ? (
                             <span className="rounded-full bg-[#1E4ED8] px-2 py-0.5 text-[11px] font-semibold text-white">{chatUnread}</span>
                           ) : null}
@@ -150,7 +156,7 @@ function AdminSidebar({
                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
               />
             </svg>
-            Tsplits™ home
+            {homeLabel}
           </Link>
           <button
             onClick={handleLogout}
@@ -164,7 +170,7 @@ function AdminSidebar({
                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
               />
             </svg>
-            Logout
+            {chrome.logout}
           </button>
         </div>
       </aside>
@@ -185,6 +191,7 @@ export default function AdminLayoutClient({
 }) {
   const pathname = usePathname();
   const router = useRouter();
+  const locale = useLocale() === "de" ? "de" : "en";
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [chatUnread, setChatUnread] = useState(0);
   const isAgent = serverAccount?.access === "agent" && !serverAccount.mustChangePassword;
@@ -267,6 +274,17 @@ export default function AdminLayoutClient({
     );
   }
 
+  const chrome = adminChrome(locale);
+  const roleLabel = !serverAccount
+    ? ""
+    : serverAccount.reviewer
+      ? chrome.reviewer
+      : serverAccount.access === "global"
+        ? chrome.globalAdmin
+        : serverAccount.access === "agent"
+          ? chrome.agent
+          : chrome.admin;
+  const homeLabel = locale === "de" ? "Tsplits™ Startseite" : "Tsplits™ home";
   const navItems = serverAccount ? getAdminNavItems(serverAccount) : [];
 
   return (
@@ -280,8 +298,10 @@ export default function AdminLayoutClient({
           navItems={navItems}
           signedInAs={serverAccount?.name ?? null}
           serverAccountIsAgent={serverAccount?.access === "agent"}
-          roleLabel={adminAccessLabel(serverAccount)}
+          roleLabel={roleLabel}
           chatUnread={chatUnread}
+          chrome={chrome}
+          homeLabel={homeLabel}
         />
 
         <div className="flex-1 flex flex-col min-w-0">
@@ -296,13 +316,13 @@ export default function AdminLayoutClient({
             <button
               onClick={() => setSidebarOpen(true)}
               className="p-2 text-gray-600 hover:text-gray-900 -ml-2"
-              aria-label="Open sidebar"
+              aria-label={chrome.openSidebar}
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <span className="text-sm font-medium text-gray-900">{serverAccount?.access === "agent" ? "Agent Console" : "Admin Console"}</span>
+            <span className="text-sm font-medium text-gray-900">{serverAccount?.access === "agent" ? chrome.agentConsole : chrome.adminConsole}</span>
           </header>
 
           <main className={isLoginPage ? "flex-1" : "admin-main flex-1 bg-[#f6f8fb] px-4 py-6 lg:px-10 lg:py-10 overflow-y-auto pb-[120px]"}>
