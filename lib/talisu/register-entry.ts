@@ -43,14 +43,11 @@ export async function hasRegisterEntry(): Promise<boolean> {
 }
 
 /**
- * Checkout opens after an allowlist code, or after an earlier register,
- * Demo Mapsite, or admin session that is still valid.
+ * Checkout opens only after one of the allowlist codes. Older agent,
+ * contract, and admin sessions do not skip this gate.
  */
 export async function hasCheckoutAccess(): Promise<boolean> {
   const jar = await cookies();
   const grant = verifyCookieValue(CHECKOUT_CODE_SCOPE, jar.get(CHECKOUT_CODE_COOKIE)?.value);
-  if (grant === CHECKOUT_CODE_GRANT_ID) return true;
-  if (await hasRegisterEntry()) return true;
-  const { hasProspectAccess } = await import("@/lib/talispros/prospect-gate-server");
-  return hasProspectAccess();
+  return grant === CHECKOUT_CODE_GRANT_ID;
 }
