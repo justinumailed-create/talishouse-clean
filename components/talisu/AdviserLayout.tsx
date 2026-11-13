@@ -22,6 +22,7 @@ export default function AdviserLayout({
   imageAlt,
   imagePosition = "center 22%",
   kicker,
+  kickerClassName,
   title,
   media,
   children,
@@ -32,6 +33,8 @@ export default function AdviserLayout({
   /** CSS object-position for the portrait crop. */
   imagePosition?: string;
   kicker: ReactNode;
+  /** Replaces the default small-caps kicker so the words keep their written case. */
+  kickerClassName?: string;
   title: ReactNode;
   /** Replaces the portrait. Used for the personal-home Mapsite. */
   media?: ReactNode;
@@ -61,7 +64,10 @@ export default function AdviserLayout({
         </div>
         <div className="flex min-w-0 flex-col justify-start px-5 pb-8 pt-4 sm:px-10 sm:pb-10 sm:pt-6 lg:justify-center lg:py-8">
           <div
-            className="text-[12px] font-semibold uppercase tracking-[0.16em] text-neutral-600 sm:text-[13px]"
+            className={
+              kickerClassName ??
+              "text-[12px] font-semibold uppercase tracking-[0.16em] text-neutral-600 sm:text-[13px]"
+            }
             data-testid={`${testId}-kicker`}
           >
             {kicker}

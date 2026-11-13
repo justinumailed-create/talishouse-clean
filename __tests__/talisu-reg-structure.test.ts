@@ -410,7 +410,8 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
       } else {
         expect(html).not.toContain("/talisu/reg/checkout/");
       }
-      expect(html).toContain(">Broker or Team Leader<");
+      expect(html).toContain(">Broker<");
+      expect(html).not.toContain(">Broker or Team Leader<");
       expect(html).toContain(">Agent<");
       expect(html).toContain(">FSBO<");
       expect(html).toContain(">Adpro<");
@@ -425,9 +426,12 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
   it("German labels", async () => {
     env.locale = "de";
     const html = renderToStaticMarkup((await renderReg({})) as ReactElement);
-    for (const label of ["Makler oder Teamleiter", "Agent", "FSBO", "Adpro", "PIN"]) {
+    for (const label of ["Broker", "Agent", "FSBO", "Adpro", "PIN"]) {
       expect(html).toContain(`>${label}<`);
     }
+    expect(html).toContain("Wählen Sie ein Konto oder setzen Sie einen PIN:");
+    expect(html).toContain("Teamleiterin: Aisha, AMBA");
+    expect(html).not.toContain("Makler oder Teamleiter");
     expect(html).toContain("Nutzungsbedingungen");
     expect(html).toContain("Datenschutzerklärung");
   });
@@ -521,8 +525,20 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(pinDe).toContain("CAD");
     expect(pinDe).not.toBe(pinEn);
     expect(pinDe).not.toMatch(/USD|TODO|TBD/);
-    expect(en.talisu.register.adviserTitle).not.toMatch(/choose the structure/i);
-    expect(de.talisu.register.adviserTitle).not.toMatch(/Struktur/);
+    expect(en.talisu.register.adviserTitle).toBe(
+      "Register your Mapsite with Tsplits™. Aisha and her team will promote it globally and enable you to save or make money on your advertising.",
+    );
+    expect(en.talisu.register.adviserKicker).toBe("Registration options");
+    expect(en.talisu.register.actions.label).toBe("Choose an account or place a PIN:");
+    expect(en.talisu.register.leaderLine).toBe("Team Leader: Aisha, AMBA");
+    expect(en.talisu.register.actions.consentBefore).toBe("Registration means you agree to the");
+    expect(de.talisu.register.adviserTitle).toContain("Tsplits™");
+    expect(de.talisu.register.adviserTitle).not.toBe(en.talisu.register.adviserTitle);
+    expect(de.talisu.register.leaderLine).toBe("Teamleiterin: Aisha, AMBA");
+    expect(de.talisu.register.actions.checkouts.find((item) => item.id === "broker")?.listLabel).toBe("Broker");
+    expect(en.talisu.register.actions.checkouts.find((item) => item.id === "broker")?.label).toBe(
+      "Broker or Team Leader",
+    );
     expect(en.talisu.register.actions).not.toHaveProperty("pinNote");
     expect(de.talisu.register.actions).not.toHaveProperty("pinNote");
     expect(en.talisu.register.partnerName).toBe("Aisha, AMBA");

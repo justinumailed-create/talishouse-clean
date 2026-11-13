@@ -24,7 +24,7 @@ export type RegisterActionLabels = {
   claim: string;
   terms: string;
   register: string;
-  checkouts: ReadonlyArray<{ id: string; label: string }>;
+  checkouts: ReadonlyArray<{ id: string; label: string; listLabel?: string }>;
   consentBefore: string;
   consentTerms: string;
   consentAnd: string;
@@ -100,7 +100,7 @@ export default function RegisterActions({
 
   return (
     <div className="mt-4 sm:mt-6" data-testid="register-actions">
-      <div className="mb-2.5 text-center text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-600">
+      <div className="mb-3 text-[15px] font-medium leading-relaxed text-neutral-950 sm:text-[16px]">
         {labels.label}
       </div>
       <div className="@container">
@@ -109,7 +109,9 @@ export default function RegisterActions({
             const inner = (
               <>
                 <span className={METAL_TAB_SHEEN} aria-hidden />
-                <span className={`${METAL_TAB_LABEL} text-balance leading-tight`}>{item.label}</span>
+                <span className={`${METAL_TAB_LABEL} text-balance leading-tight`}>
+                  {item.listLabel ?? item.label}
+                </span>
               </>
             );
             if (entryGranted && isRegisterCheckoutId(item.id)) {
