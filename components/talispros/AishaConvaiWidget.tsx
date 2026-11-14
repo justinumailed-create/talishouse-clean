@@ -108,37 +108,6 @@ function usePageOrigin(): string {
   );
 }
 
-const BUBBLE_DISMISS_KEY = "aisha-bubble-dismissed";
-const bubbleDismissListeners = new Set<() => void>();
-
-function readBubbleDismissed(): boolean {
-  try {
-    return sessionStorage.getItem(BUBBLE_DISMISS_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function dismissAishaBubble() {
-  try {
-    sessionStorage.setItem(BUBBLE_DISMISS_KEY, "1");
-  } catch {
-    /* private browsing can block storage; the click still hides it */
-  }
-  bubbleDismissListeners.forEach((listener) => listener());
-}
-
-function useBubbleDismissed(): boolean {
-  return useSyncExternalStore(
-    (listener) => {
-      bubbleDismissListeners.add(listener);
-      return () => bubbleDismissListeners.delete(listener);
-    },
-    readBubbleDismissed,
-    () => false,
-  );
-}
-
 function usePortalHost(): HTMLElement | null {
   return useSyncExternalStore(
     () => () => {},
@@ -190,7 +159,7 @@ export default function AishaConvaiWidget({
   const labelRef = useRef<HTMLButtonElement>(null);
   const [bubbleSize, setBubbleSize] = useState({ width: 0, height: 0 });
   const [surfaceOpen, setSurfaceOpen] = useState(false);
-  const bubbleDismissed = useBubbleDismissed();
+  const [bubbleDismissed, setBubbleDismissed] = useState(false);
   const avatar = origin ? `${origin}${persona.portraitSrc}` : persona.portraitSrc;
 
   useEffect(() => {
@@ -311,7 +280,7 @@ export default function AishaConvaiWidget({
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();
-          dismissAishaBubble();
+          setBubbleDismissed(true);
         }}
       >
         <span aria-hidden="true">×</span>
