@@ -23,7 +23,7 @@ describe("Aisha Convai widget on the homepage", () => {
     expect(ASSISTANT_PERSONAS.aisha.portraitSrc).toBe("/images/mapsites/aisha-c.webp");
     expect(widget).toContain("https://unpkg.com/@elevenlabs/convai-widget-embed");
     expect(widget).toContain('strategy="lazyOnload"');
-    expect(widget).toContain('placement="bottom-left"');
+    expect(widget).toContain('placement = "bottom-left"');
     expect(widget).toContain("startAishaConversation");
     expect(widget).toContain("data-start-label={copy.startCall}");
     expect(widget).toContain("shadowRoot");
