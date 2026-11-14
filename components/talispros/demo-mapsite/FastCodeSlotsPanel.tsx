@@ -375,6 +375,11 @@ export default function FastCodeSlotsPanel({
     setFolderError(null);
   }
 
+  useEffect(() => {
+    if (!folderForm || unlocked) return;
+    document.querySelector("[data-testid='mapsites-folder-open']")?.scrollIntoView({ block: "nearest" });
+  }, [folderForm, unlocked]);
+
   return (
     <div className="mt-4 flex min-h-0 flex-1 flex-col border-t border-neutral-200 pt-4" data-testid="fast-code-slots" id="fast-code-slots">
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
