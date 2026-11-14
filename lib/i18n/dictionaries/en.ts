@@ -136,9 +136,9 @@ export const en = {
     learnMore: "Learn More",
     assistants: {
       aisha: {
-        label: "Aisha, T-Splits Mapsites and Fulfilment Team Leader",
+        label: "Hi, I'm Aisha. I can help make your advertising revenue producing",
         greeting:
-          "Hello, I'm Aisha, Your T-Splits Mapsites and Fulfilment Team Leader. May I have your name?",
+          "Hi, I'm Aisha. I can help make your advertising revenue producing",
         startCall: "Start a call",
         endCall: "End call",
         openChat: "Open chat",

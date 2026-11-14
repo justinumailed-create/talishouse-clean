@@ -8,9 +8,9 @@ import { ASSISTANT_PERSONAS } from "../lib/talispros/assistant-personas";
 const read = (path: string) => readFileSync(resolve(path), "utf8");
 
 const EN_GREETING =
-  "Hello, I'm Aisha, Your T-Splits Mapsites and Fulfilment Team Leader. May I have your name?";
+  "Hi, I'm Aisha. I can help make your advertising revenue producing";
 const DE_GREETING =
-  "Hallo, ich bin Aisha, Ihre T-Splits Mapsites- und Fulfilment-Teamleiterin. Darf ich Ihren Namen erfahren?";
+  "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen";
 
 describe("Aisha Convai widget on the homepage", () => {
   it("loads the public embed after the page is interactive, with no key", () => {
@@ -24,6 +24,16 @@ describe("Aisha Convai widget on the homepage", () => {
     expect(widget).toContain("https://unpkg.com/@elevenlabs/convai-widget-embed");
     expect(widget).toContain('strategy="lazyOnload"');
     expect(widget).toContain('placement="bottom-left"');
+    expect(widget).toContain("startAishaConversation");
+    expect(widget).toContain("data-start-label={copy.startCall}");
+    expect(widget).toContain("shadowRoot");
+    const css = read("app/globals.css");
+    expect(css).toMatch(
+      /\.aisha-convai-slot elevenlabs-convai\s*\{[^}]*pointer-events:\s*none\s*!important/,
+    );
+    expect(css).not.toMatch(
+      /\.aisha-convai-slot elevenlabs-convai\s*\{[^}]*pointer-events:\s*auto/,
+    );
     expect(widget).not.toMatch(/api[_-]?key|xi-api-key|ELEVENLABS_API_KEY/i);
     expect(widget).not.toMatch(/talispros\.com/);
     expect(shell).not.toContain('<TalisBotChat position="left" />');
@@ -33,12 +43,8 @@ describe("Aisha Convai widget on the homepage", () => {
   it("uses the exact greeting in English and German", () => {
     expect(en.home.assistants.aisha.greeting).toBe(EN_GREETING);
     expect(de.home.assistants.aisha.greeting).toBe(DE_GREETING);
-    expect(en.home.assistants.aisha.label).toBe(
-      "Aisha, T-Splits Mapsites and Fulfilment Team Leader",
-    );
-    expect(de.home.assistants.aisha.label).toBe(
-      "Aisha, T-Splits Mapsites- und Fulfilment-Teamleiterin",
-    );
+    expect(en.home.assistants.aisha.label).toBe(EN_GREETING);
+    expect(de.home.assistants.aisha.label).toBe(DE_GREETING);
     expect(en.home.assistants.aisha.greeting).not.toMatch(/talispros|—/);
     expect(de.home.assistants.aisha.greeting).not.toMatch(/talispros|—/);
   });
