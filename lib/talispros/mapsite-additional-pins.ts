@@ -294,6 +294,14 @@ export function normalizePinLabel(value: string | null | undefined): string {
   return (value || "").replace(/\s+/g, " ").trim().slice(0, 80);
 }
 
+/**
+ * Caption drawn under an extra pin. A blank stored label stays blank.
+ * A generated "PIN 3" sits on top of a nearby address pin.
+ */
+export function additionalPinMapLabel(label: string | null | undefined): string {
+  return normalizePinLabel(label);
+}
+
 export function normalizePinCoordinate(
   value: number,
   axis: "lat" | "lng",

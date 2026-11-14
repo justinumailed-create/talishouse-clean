@@ -20,7 +20,6 @@ import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
 import { useT } from "@/lib/i18n/client";
-import { cardPhoneHref } from "@/lib/talispros/mapsite-owner-customizations";
 
 export type MapSitePinSwitchOption = { id: string; label: string };
 
@@ -53,7 +52,7 @@ export function defaultMapSitePartnerName(
   );
 }
 
-/** Default left-card tagline. */
+/** Default left-card tagline. Owner editors still start from this line. */
 export const DEFAULT_MAPSITE_PARTNER_TAGLINE = MARKETING_PARTNER_CARD_INTRO;
 
 interface MapSiteMarketPartnerCardProps {
@@ -95,30 +94,8 @@ interface MapSiteMarketPartnerCardProps {
   categoryEmpty?: boolean;
   /** Owner switch. Stays visible when the dashboard itself is hidden. */
   dashboardViewToggle?: ReactNode;
-}
-
-function CardPhone({ phone, label }: { phone: string; label: string }) {
-  const href = cardPhoneHref(phone);
-  const body = (
-    <>
-      <svg aria-hidden viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor">
-        <path d="M2.5 3.5A1.5 1.5 0 0 1 4 2h2.1a1 1 0 0 1 .97.76l.7 2.8a1 1 0 0 1-.29.98L6.2 7.8a11 11 0 0 0 6 6l1.26-1.28a1 1 0 0 1 .98-.29l2.8.7a1 1 0 0 1 .76.97V16a1.5 1.5 0 0 1-1.5 1.5h-.5C8.6 17.5 2.5 11.4 2.5 4v-.5Z" />
-      </svg>
-      <span>{phone}</span>
-    </>
-  );
-  return href ? (
-    <a
-      href={href}
-      aria-label={`${label}: ${phone}`}
-      data-testid="mapsite-card-phone"
-      className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#035bb8] hover:underline"
-    >
-      {body}
-    </a>
-  ) : (
-    <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold">{body}</span>
-  );
+  /** Tree or owner logo. A generated placeholder is already replaced. */
+  brandLogoUrl?: string | null;
 }
 
 function CardTools({
@@ -251,10 +228,8 @@ export default function MapSiteMarketPartnerCard({
   accountTypeSegment = null,
   partnerImageUrl = null,
   partnerName: partnerNameOverride = null,
-  partnerTagline = null,
   cardTitle = null,
   cardAddress = null,
-  cardPhone = null,
   dashboardItems,
   onSelectDashboardItem,
   pinOptions,
@@ -265,6 +240,7 @@ export default function MapSiteMarketPartnerCard({
   onCategoryChange,
   categoryEmpty = false,
   dashboardViewToggle = null,
+  brandLogoUrl = null,
 }: MapSiteMarketPartnerCardProps) {
   const t = useT();
   const content = contentForAudience(audience);
@@ -272,7 +248,6 @@ export default function MapSiteMarketPartnerCard({
   const address =
     (cardAddress?.trim() || mapsite.property_address?.trim())?.toUpperCase() || null;
   const agencyName = cardTitle?.trim() || mapsite.agency_name;
-  const phone = cardPhone?.trim() || null;
   const toolLabels = {
     dashboard: t.mapsite.leftCard.dashboard,
     switchPin: t.mapsite.leftCard.switchPin,
@@ -302,14 +277,8 @@ export default function MapSiteMarketPartnerCard({
   );
   const partnerName =
     partnerNameOverride?.trim() || defaultMapSitePartnerName(mapsite);
-  const representInventory = (mapsite.fast_code || "").trim().toLowerCase() === "dc06";
-  const ownerTagline = partnerTagline?.trim();
-  const partnerLabel = representInventory
-    ? t.mapsite.leftCard.inventory
-    : ownerTagline && ownerTagline !== DEFAULT_MAPSITE_PARTNER_TAGLINE
-      ? ownerTagline
-      : t.mapsite.partnerIntro;
-  const shownPhone = representInventory ? null : phone;
+  const partnerLabel = t.mapsite.leftCard.inventory;
+  const markUrl = brandLogoUrl ?? mapsite.logo_url;
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (!onSelect) return;
@@ -345,7 +314,7 @@ export default function MapSiteMarketPartnerCard({
         >
           {paid ? (
             <MapSiteAgencyLogo
-              logoUrl={mapsite.logo_url}
+              logoUrl={markUrl}
               agencyName={agencyName}
               compact
             />
@@ -375,13 +344,12 @@ export default function MapSiteMarketPartnerCard({
               <p className="text-[12px] font-semibold leading-snug text-black">
                 {partnerLabel}
               </p>
-              {shownPhone ? <CardPhone phone={shownPhone} label={t.mapsite.leftCard.call} /> : null}
             </div>
           </div>
         </div>
         <MarketingPartnerInterestLinks
           align="start"
-          hideRole={representInventory}
+          hideRole
           className="mt-3"
         />
         {tools}
@@ -406,7 +374,7 @@ export default function MapSiteMarketPartnerCard({
           {paid ? (
             <div className="relative mb-4">
               <MapSiteAgencyLogo
-                logoUrl={mapsite.logo_url}
+                logoUrl={markUrl}
                 agencyName={agencyName}
               />
             </div>
@@ -424,11 +392,6 @@ export default function MapSiteMarketPartnerCard({
           {address ? (
             <p className="mt-2 text-[12px] font-bold uppercase leading-snug tracking-wide text-black">
               {address}
-            </p>
-          ) : null}
-          {shownPhone ? (
-            <p className="mt-1.5">
-              <CardPhone phone={shownPhone} label={t.mapsite.leftCard.call} />
             </p>
           ) : null}
 
@@ -451,7 +414,7 @@ export default function MapSiteMarketPartnerCard({
           </p>
         </div>
         <MarketingPartnerInterestLinks
-          hideRole={representInventory}
+          hideRole
           className="mt-4"
         />
         {tools}

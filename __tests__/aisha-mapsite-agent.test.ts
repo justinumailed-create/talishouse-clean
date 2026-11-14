@@ -25,10 +25,10 @@ describe("Aisha agent by page", () => {
   it("uses the stored first name, then the display name, and never a guessed split", () => {
     expect(aishaOwnerName({ ownerFirstName: " Doug ", agentName: "Doug Copp" })).toBe("Doug");
     expect(aishaOwnerName({ ownerFirstName: "", agentName: "Doug Copp" })).toBe("Doug Copp");
-    expect(aishaOwnerName({ ownerFirstName: null, agentName: "  " })).toBeNull();
+    expect(aishaOwnerName({ ownerFirstName: null, agentName: "  " })).toBe("there");
   });
 
-  it("omits blank keys and escapes the JSON for an HTML attribute", () => {
+  it("always sends owner_name, fast_code, and mapsite_title", () => {
     const json = aishaMapsiteDynamicVariables({
       ownerFirstName: 'Doug "Ace"',
       fastCode: " DC06 ",
@@ -41,20 +41,32 @@ describe("Aisha agent by page", () => {
       mapsite_title: "Loch <Lomond>",
     });
     expect(
-      aishaMapsiteDynamicVariables({
-        ownerFirstName: "  ",
-        agentName: null,
-        fastCode: "dc06",
-        mapsiteTitle: "",
-      }),
-    ).toBe('{"fast_code":"dc06"}');
+      JSON.parse(
+        aishaMapsiteDynamicVariables({
+          ownerFirstName: "  ",
+          agentName: null,
+          fastCode: "dc06",
+          mapsiteTitle: "",
+        })!,
+      ),
+    ).toEqual({
+      owner_name: "there",
+      fast_code: "dc06",
+      mapsite_title: "",
+    });
     expect(
-      aishaMapsiteDynamicVariables({
-        ownerFirstName: null,
-        agentName: null,
-        fastCode: " ",
-        mapsiteTitle: null,
-      }),
-    ).toBeUndefined();
+      JSON.parse(
+        aishaMapsiteDynamicVariables({
+          ownerFirstName: null,
+          agentName: null,
+          fastCode: " ",
+          mapsiteTitle: null,
+        })!,
+      ),
+    ).toEqual({
+      owner_name: "there",
+      fast_code: "",
+      mapsite_title: "",
+    });
   });
 });

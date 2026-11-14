@@ -11,6 +11,9 @@ export const MAPSITE_LISTING_CARD_WIDTH_CLASS = "w-[min(92vw,22rem)]";
 
 export const MAPSITE_FALLBACK_AGENCY_NAME = "TSplits";
 
+/** Windswept tree used on a claimed card when the stored mark is a placeholder. */
+export const MAPSITE_TREE_LOGO = "/assets/windswept-tree-logo.png";
+
 export function mapsiteAgencyLogoUrl(
   logoUrl: string | null | undefined,
 ): string {
@@ -19,11 +22,44 @@ export function mapsiteAgencyLogoUrl(
   return logo;
 }
 
+/** Generated mark on the Mapsite row, not a logo the owner chose. */
+export function isPlaceholderAgencyLogo(logoUrl: string | null | undefined): boolean {
+  const logo = logoUrl?.trim() || "";
+  if (!logo || logo === "/logo.png") return true;
+  return logo.includes("/auto-draft/");
+}
+
+/**
+ * Left-card mark. An owner override is kept, including DC06's tree.
+ * A generated placeholder is replaced with the Tsplits tree, and no
+ * other name is invented to sit under it.
+ */
+export function mapsiteCardLogoUrl(
+  logoUrl: string | null | undefined,
+  ownerOverride: boolean,
+): string {
+  const logo = logoUrl?.trim() || "";
+  if (ownerOverride && logo) return logo;
+  if (logo && !isPlaceholderAgencyLogo(logo)) return logo;
+  return MAPSITE_TREE_LOGO;
+}
+
+/** Old brand word under the logo. It is removed, not swapped for another name. */
+export function isRetiredBrandName(value: string | null | undefined): boolean {
+  const normalized = (value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[™®]/g, "")
+    .replace(/\s+/g, " ");
+  return normalized === "taliswebs";
+}
+
 export function mapsiteAgencyDisplayName(
   logoUrl: string | null | undefined,
   agencyName?: string | null,
 ): string {
   const named = agencyName?.trim() || "";
+  if (isRetiredBrandName(named)) return "";
   if (named && !looksLikeMarketLabel(named)) return named;
   return MAPSITE_FALLBACK_AGENCY_NAME;
 }

@@ -11,32 +11,31 @@ export type AishaMapsiteDynamicInput = {
   mapsiteTitle?: string | null;
 };
 
+/** Spoken when the Mapsite has no stored owner name. */
+export const AISHA_OWNER_NAME_FALLBACK = "there";
+
 /**
  * First name from the Mapsite row when it is stored.
  * Otherwise the display name already on the record. Never a guessed split.
+ * Always a name the agent can say, so {{owner_name}} is never left literal.
  */
-export function aishaOwnerName(input: AishaMapsiteDynamicInput): string | null {
+export function aishaOwnerName(input: AishaMapsiteDynamicInput): string {
   const first = input.ownerFirstName?.trim() || "";
   if (first) return first;
   const display = input.agentName?.trim() || "";
-  return display || null;
+  return display || AISHA_OWNER_NAME_FALLBACK;
 }
 
 /**
  * JSON for the widget `dynamic-variables` attribute.
- * Blank values are left out. `<` is escaped so the attribute cannot break HTML.
- * Returns undefined when nothing is known, so the attribute is omitted.
+ * owner_name, fast_code, and mapsite_title are always present.
+ * `<` is escaped so the attribute cannot break HTML.
  */
-export function aishaMapsiteDynamicVariables(
-  input: AishaMapsiteDynamicInput,
-): string | undefined {
-  const vars: Record<string, string> = {};
-  const owner = aishaOwnerName(input);
-  const code = input.fastCode?.trim() || "";
-  const title = input.mapsiteTitle?.trim() || "";
-  if (owner) vars.owner_name = owner;
-  if (code) vars.fast_code = code;
-  if (title) vars.mapsite_title = title;
-  if (Object.keys(vars).length === 0) return undefined;
+export function aishaMapsiteDynamicVariables(input: AishaMapsiteDynamicInput): string {
+  const vars = {
+    owner_name: aishaOwnerName(input),
+    fast_code: input.fastCode?.trim() || "",
+    mapsite_title: input.mapsiteTitle?.trim() || "",
+  };
   return JSON.stringify(vars).replace(/</g, "\\u003c");
 }

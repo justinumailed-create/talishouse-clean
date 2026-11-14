@@ -124,6 +124,7 @@ export const de: Dictionary = {
           "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen",
         callback:
           "Schlagen Sie ein Projekt vor. Starten Sie einfach einen Anruf und erzählen Sie mir, was Sie hier sehen.",
+        mapsite: "Starten Sie einen Anruf und erzählen Sie mir, was Sie sehen.",
         startCall: "Anruf starten",
         endCall: "Anruf beenden",
         openChat: "Chat öffnen",

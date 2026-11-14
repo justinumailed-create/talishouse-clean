@@ -23,6 +23,17 @@ button.aisha-call-pill {
   border: 0 !important;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.16) !important;
 }
+[data-variant="expanded"].sheet,
+[data-variant="fullscreen"].sheet {
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: auto !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  margin: 0 !important;
+  max-width: min(440px, 100%) !important;
+}
 `;
 
 const OPEN_LABEL = /^(terms and conditions|end call|anruf beenden)$/i;
