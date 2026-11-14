@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import AishaConvaiWidget from "@/components/talispros/AishaConvaiWidget";
@@ -667,6 +667,7 @@ function MapSiteChrome({
   const [alignTop, setAlignTop] = useState(MAPSITE_LISTING_TILE_TOP_FALLBACK_PX);
   const [popupCenterX, setPopupCenterX] = useState<number | null>(null);
   const [zoomTop, setZoomTop] = useState(12);
+  const [mapAnchor, setMapAnchor] = useState({ top: 120, right: 12 });
   const [expandedCardHeight, setExpandedCardHeight] = useState<number | null>(
     null
   );
@@ -730,6 +731,26 @@ function MapSiteChrome({
     didOpenOnLoadRef.current = true;
     focusPinAndOpen();
   }, [openPinOnLoad, isReady, focusPinAndOpen]);
+
+  useLayoutEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const place = () => {
+      const rect = el.getBoundingClientRect();
+      setMapAnchor({
+        top: Math.round(rect.top),
+        right: Math.round(window.innerWidth - rect.right),
+      });
+    };
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(el);
+    window.addEventListener("resize", place);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", place);
+    };
+  }, []);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -1167,7 +1188,7 @@ function MapSiteChrome({
         className="relative min-h-0 flex-1 overflow-hidden bg-neutral-900"
       >
         <MapEngineCanvas className="h-full w-full" />
-        <MapSiteZoomControls mapRef={rootRef} top={zoomTop} />
+        <MapSiteZoomControls top={mapAnchor.top + zoomTop} right={mapAnchor.right + 12} />
 
         <div
           ref={sidebarStackRef}
