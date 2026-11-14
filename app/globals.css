@@ -552,8 +552,8 @@ p {
 .aisha-convai-slot {
   position: fixed;
   z-index: 35;
-  right: 0.75rem;
-  bottom: 15.5rem;
+  right: 1rem;
+  bottom: 7.25rem;
   left: auto;
   display: flex;
   max-width: min(18rem, calc(100vw - 1.5rem));
@@ -581,10 +581,10 @@ p {
 
 @media (min-width: 1024px) {
   .aisha-convai-slot {
-    right: auto;
-    left: 1.25rem;
-    bottom: 8.5rem;
-    align-items: flex-start;
+    right: 1.25rem;
+    left: auto;
+    bottom: 6.75rem;
+    align-items: flex-end;
   }
 }
 
