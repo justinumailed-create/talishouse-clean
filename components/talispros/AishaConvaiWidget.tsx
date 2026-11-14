@@ -4,9 +4,10 @@ import Script from "next/script";
 import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n/client";
-import { AISHA_AVATAR_SRC } from "@/components/talispros/WorkingPageCtaLink";
-
-const AGENT_ID = "agent_0401m7cxgba1fhwb35aqr43acnv1";
+import {
+  DEFAULT_ASSISTANT_PERSONA,
+  type AssistantPersona,
+} from "@/lib/talispros/assistant-personas";
 
 function usePageOrigin(): string {
   return useSyncExternalStore(
@@ -25,22 +26,27 @@ function usePortalHost(): HTMLElement | null {
 }
 
 /**
- * Public Aisha voice and chat widget on the homepage.
- * The embed script loads after the page is interactive. No API key.
+ * Public voice and chat widget. The embed script loads after the page is
+ * interactive. The spoken first message is set in ElevenLabs, not here.
  */
-export default function AishaConvaiWidget() {
-  const copy = useT().home.aisha;
+export default function AishaConvaiWidget({
+  persona = DEFAULT_ASSISTANT_PERSONA,
+}: {
+  persona?: AssistantPersona;
+}) {
+  const copy = useT().home.assistants[persona.id];
   const origin = usePageOrigin();
   const host = usePortalHost();
-  const avatar = origin ? `${origin}${AISHA_AVATAR_SRC}` : AISHA_AVATAR_SRC;
-  if (!host) return null;
+  const avatar = origin ? `${origin}${persona.portraitSrc}` : persona.portraitSrc;
+  if (!host || !copy) return null;
 
   return createPortal(
-    <div className="aisha-convai-slot" data-testid="aisha-convai">
+    <div className="aisha-convai-slot" data-testid="aisha-convai" data-persona={persona.id}>
       <p className="aisha-convai-label">{copy.label}</p>
       <elevenlabs-convai
-        agent-id={AGENT_ID}
-        action-text={copy.action}
+        agent-id={persona.agentId}
+        action-text={copy.greeting}
+        aria-label={copy.greeting}
         start-call-text={copy.startCall}
         end-call-text={copy.endCall}
         expand-text={copy.openChat}
@@ -48,6 +54,7 @@ export default function AishaConvaiWidget() {
         avatar-orb-color-1="#046BD9"
         avatar-orb-color-2="#d6e8fb"
         variant="compact"
+        placement="bottom-left"
       />
       <Script
         src="https://unpkg.com/@elevenlabs/convai-widget-embed"

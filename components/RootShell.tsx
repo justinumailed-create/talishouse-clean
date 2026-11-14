@@ -37,16 +37,11 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     pathname === "/partner-access" ||
     pathname.startsWith("/talistv") ||
     /\/mapsite\/[^/]+\/map\/?$/.test(pathname);
-  // Homepage stays embed (no Talishouse navbar/cart) but still shows Talisbot, bottom-left.
-  const showHomeTalisBot = pathname === "/";
+  // Homepage stays embed (no Talishouse navbar/cart). Aisha's widget, mounted
+  // by the gate page, replaces the floating TalisBOT launcher there.
 
   if (isEmbed) {
-    return (
-      <>
-        {children}
-        {showHomeTalisBot && <TalisBotChat position="left" />}
-      </>
-    );
+    return <>{children}</>;
   }
 
   return (

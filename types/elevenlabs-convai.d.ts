@@ -14,6 +14,13 @@ type ElevenLabsConvaiProps = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTML
   "avatar-orb-color-1"?: string;
   "avatar-orb-color-2"?: string;
   variant?: "compact" | "expanded";
+  placement?:
+    | "bottom-right"
+    | "bottom-left"
+    | "bottom"
+    | "top-right"
+    | "top-left"
+    | "top";
 };
 
 declare module "react" {
