@@ -480,12 +480,11 @@ export default function MapSiteApplication({
       lockCenterOffset={lockCenterOffset}
       preserveViewport
       onPinSelect={(pinId) => {
-        const partnerPin = rootContext.partnerPins.find((pin) => pin.id === pinId);
-        if (partnerPin) {
-          window.location.assign(partnerPin.href);
-          return;
-        }
-        setSelectedPinId(pinId);
+        if (!pinId) return;
+        // A partner pin used to leave the page, so DC05 and DC06 only swapped
+        // and the flag never opened. Open the flag here. The partner control
+        // still switches projects.
+        setSelectedPinId(mapsite.id);
       }}
       onMapClick={(coordinates) => {
         if (pinEditor.kind === "place" && pinDashboard.remainingToPlace > 0) {
@@ -840,7 +839,8 @@ function MapSiteChrome({
   // Checkout stays until a completed payment note exists (not merely ACTIVE status).
   const paid = isDemoListing || activationPaid;
   // Header Dashboard unlocks only on real activation payment — never demo-only.
-  const dashboardUnlocked = activationPaid && !isDemoListing;
+  const dashboardViewEnabled = mapsite.dashboard_view_enabled !== false;
+  const dashboardUnlocked = activationPaid && !isDemoListing && dashboardViewEnabled;
   const onboardingPhase = getMapSiteOnboardingPhase({
     status: mapsite.status,
     paymentReceived: paid,
@@ -1096,8 +1096,9 @@ function MapSiteChrome({
     });
     return `/talispros/markets/claim-a-market?${params.toString()}`;
   }, [audience, sourceAudience]);
-  const showOwnerClaimMarket =
-    claimed && !isDemoListing && Boolean(isOwner || canManageDashboard);
+  // Claim Your Market was shown on an already-claimed Mapsite. Hide it there,
+  // including Doug's page. Demonstration listings keep their own claim button.
+  const showOwnerClaimMarket = false;
   const claimLabel =
     onboardingMode === "assisted"
       ? "Register Account now"

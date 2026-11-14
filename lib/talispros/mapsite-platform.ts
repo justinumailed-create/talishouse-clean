@@ -51,6 +51,11 @@ export type MapSitePlatformRecord = {
   teb_own_book_href?: string | null;
   /** Prepared prospect Mapsite: URL 1 opens the brokerage website (broker_url). */
   url1_opens_broker_url?: boolean;
+  /**
+   * Global Admin dashboard view. Missing means on, including before migration
+   * 126 is applied.
+   */
+  dashboard_view_enabled?: boolean;
 };
 
 export type MapSiteBuildRequestLocation = {

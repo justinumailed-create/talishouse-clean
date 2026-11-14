@@ -143,7 +143,8 @@ export const en = {
         label: "Hi, I'm Aisha. I can help make your advertising revenue producing",
         greeting:
           "Hi, I'm Aisha. I can help make your advertising revenue producing",
-        callback: "Hi, I'm Aisha. Would you like a call back?",
+        callback:
+          "Propose a Project. Just start a call and tell me what you can see for here.",
         startCall: "Start a call",
         endCall: "End call",
         openChat: "Open chat",
@@ -446,6 +447,8 @@ export const en = {
       selectPin: "Select a PIN…",
       /** WhatsApp / Telegram reach Ralf, labelled as a Team Member. */
       teamMember: "Team Member",
+      /** Doug's claimed Mapsite card, in place of the marketing-partner line. */
+      inventory: "I represent this Inventory",
       selectCategory: "Select Category",
       allCategories: "All categories",
       categoryEmpty: "No PINs in this category",
