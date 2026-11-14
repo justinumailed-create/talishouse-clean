@@ -78,10 +78,10 @@ export default async function TalisUHomePage({
             absolutely inset, so essay length never stretches the row and
             the essay body scrolls inside the card. */}
         <aside
-          className="talisu-essay-column flex min-w-0 flex-col lg:relative lg:min-h-0 print:block print:h-auto"
+          className="talisu-essay-column flex min-w-0 flex-col print:block print:h-auto"
           aria-label={talisu.essaySwitcher}
         >
-          <div className="talisu-essay-rail-inner flex min-h-0 flex-1 flex-col lg:absolute lg:inset-0 print:static print:block">
+          <div className="talisu-essay-rail-inner flex min-h-0 flex-col print:static print:block">
             <TalisUEssayRail
               initialSlug={initialEssay}
               switcherLabel={talisu.essaySwitcher}
