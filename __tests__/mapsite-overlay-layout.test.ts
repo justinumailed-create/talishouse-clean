@@ -135,18 +135,18 @@ describe("mapSiteZoomControlTop", () => {
     ).toBe(12);
   });
 
-  it("drops phone zoom below the left card and above Aisha", () => {
+  it("drops phone zoom under the open flag and above Aisha", () => {
     const top = mapSiteZoomControlTop({
       rootWidth: 390,
-      rootHeight: 740,
+      rootHeight: 743,
       compact: true,
-      overlayBottom: 220,
+      overlayBottom: 700,
       popupOpen: true,
-      popupTop: 228,
-      popupHeight: 300,
+      popupTop: 16,
+      popupHeight: 420,
       popupRight: 195,
     });
-    expect(top).toBeGreaterThanOrEqual(232);
-    expect(top).toBeLessThan(740 - 176);
+    expect(top).toBe(440);
+    expect(top + 94).toBeLessThanOrEqual(743 - 200);
   });
 });

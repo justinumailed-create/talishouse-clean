@@ -147,13 +147,13 @@ export const MAPSITE_POPUP_OPEN_HEIGHT_PX = 420;
 export const MAPSITE_POPUP_SAFE_TOP_PX = 12;
 
 /** Two zoom buttons plus the gap between them. */
-export const MAPSITE_ZOOM_BUTTON_STACK_PX = 100;
+export const MAPSITE_ZOOM_BUTTON_STACK_PX = 96;
 
 /**
- * Room above the bottom of the map so zoom stays clear of Aisha,
- * who sits fixed at the bottom right.
+ * Room above the bottom of the map so zoom stays clear of Aisha.
+ * Her bubble sits above the call pill, so this is taller than the pill alone.
  */
-export const MAPSITE_ZOOM_AISHA_CLEARANCE_PX = 176;
+export const MAPSITE_ZOOM_AISHA_CLEARANCE_PX = 200;
 
 /** Width of the zoom rail measured from the right edge of the map. */
 export const MAPSITE_ZOOM_RAIL_PX = 64;
@@ -264,7 +264,14 @@ export function mapSiteZoomControlTop(input: {
   );
   const clamp = (top: number) => Math.round(Math.min(Math.max(12, top), maxTop));
 
-  if (input.compact) return clamp(input.overlayBottom + 12);
+  if (input.compact) {
+    // The left column is full height on a phone. Sit under the open flag,
+    // which leaves a gap above Aisha, instead of following that tall column.
+    const below = input.popupOpen
+      ? input.popupTop + input.popupHeight + 4
+      : input.overlayBottom + 12;
+    return clamp(below);
+  }
 
   const railLeft = input.rootWidth - MAPSITE_ZOOM_RAIL_PX;
   if (input.popupOpen && input.popupRight > railLeft - 8) {
