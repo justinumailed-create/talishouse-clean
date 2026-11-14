@@ -29,7 +29,7 @@ const FIELD =
   "mt-2 block w-full rounded-2xl border border-black/10 bg-white px-4 py-3.5 text-[17px] text-[#1d1d1f] outline-none transition focus:border-neutral-700 focus:ring-4 focus:ring-neutral-700/15";
 const LABEL = "block text-[13px] font-medium text-[#1d1d1f]";
 
-/** Staked-out lakeside lot with a modular cabin (generated for this page, Nov 1). */
+/** Muted 2×2 of the four transaction structures. Background for the left column. */
 export const DISCUSS_VISION_IMAGE = "/talisu/discuss-project-vision.webp";
 
 /**
@@ -117,7 +117,7 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
     >
       <article className="grid w-full lg:grid-cols-2">
         <div
-          className="relative h-64 overflow-hidden bg-[#2a2a2a] sm:h-80 lg:sticky lg:top-[68px] lg:h-[calc(100dvh-68px)]"
+          className="relative aspect-[2/3] max-h-[72vh] overflow-hidden bg-[#e8e4dc] sm:max-h-[78vh] lg:sticky lg:top-[68px] lg:aspect-auto lg:h-[calc(100dvh-68px)] lg:max-h-none"
           data-testid="talisu-discuss-photo"
         >
           <Image
@@ -126,9 +126,9 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
             fill
             priority
             sizes="(min-width: 1024px) 50vw, 100vw"
-            className="object-cover"
-            style={{ objectPosition: "center 60%" }}
+            className="object-contain object-center"
           />
+          <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#f6f3ee]/28" />
         </div>
         <div className="min-w-0 px-6 pb-24 pt-12 sm:px-10 sm:pt-16 lg:px-14 lg:pb-28 lg:pt-20">
           <div className="mx-auto w-full max-w-[560px]" style={{ maxWidth: 560 }} data-testid="talisu-discuss-content">

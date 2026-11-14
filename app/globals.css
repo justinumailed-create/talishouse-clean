@@ -5958,8 +5958,7 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
 }
 
-/* /talisu/discuss (Share a Project Vision, Arun Nov 1): warm ivory beside the
-   golden-hour lot photo; lighter and calmer than the beige working surface. */
+/* /talisu/discuss: warm ivory beside the muted structures grid. */
 .talis-discuss-surface {
   background: linear-gradient(180deg, #fbfaf7 0%, #f4f1eb 100%);
 }

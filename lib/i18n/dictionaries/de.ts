@@ -591,7 +591,7 @@ export const de: Dictionary = {
     pageSubmit: "Vision teilen",
     pageNote: "Alle Angebote und Zahlungen erfolgen in kanadischen Dollar (CAD).",
     pageImageAlt:
-      "Abgesteckter Bauplatz an einem See in einem kanadischen Wald, mit einem Modulhaus auf seinem Fundament bei Sonnenaufgang",
+      "Vier ruhigere Szenen: ein Haus zum Verkauf, ein Mietkauf-Handschlag, eine geteilte Entwicklung und ein tokenisiertes Gebäude",
     pageDoneBack: "Zurück zu Tsplits™",
     topicHint: "(mit den Schaltflächen wählen)",
     openPage: "Als ganze Seite mit Google-erkanntem Standort öffnen →",
