@@ -31,6 +31,8 @@ export type MapSitePlatformRecord = {
   profile_image_url: string | null;
   /** Agent / owner name from Mapsite or Build Request. */
   agent_name: string | null;
+  /** Owner first name from the Mapsite row, when that column is filled. */
+  owner_first_name?: string | null;
   gallery_images: string[];
   mls_url: string | null;
   broker_url: string | null;
@@ -238,6 +240,7 @@ function mapRow(row: MapSiteRow): MapSitePlatformRecord {
         .filter(Boolean)
         .join(" ") ||
       null,
+    owner_first_name: row.owner_first_name?.trim() || null,
     gallery_images: gallery,
     mls_url: row.mls_url ?? null,
     broker_url: row.broker_url ?? row.website ?? null,
