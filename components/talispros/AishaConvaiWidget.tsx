@@ -19,7 +19,7 @@ import {
 const BUBBLE_STYLE = `
 .aisha-convai-label {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   margin: 0 0 10px;
   max-width: min(18.5rem, calc(100vw - 2rem));
   border: 0;
@@ -48,9 +48,15 @@ const BUBBLE_STYLE = `
 .aisha-bubble-glass {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.55);
-  -webkit-backdrop-filter: saturate(180%) blur(28px);
-  backdrop-filter: saturate(180%) blur(28px);
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  backdrop-filter: saturate(160%) blur(16px);
+}
+.aisha-convai-slot[data-surface="open"] .aisha-convai-label {
+  display: none !important;
+}
+.aisha-convai-slot elevenlabs-convai {
+  z-index: 2;
 }
 .aisha-bubble-stroke {
   position: absolute;
@@ -118,12 +124,13 @@ export default function AishaConvaiWidget({
   const slotRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLButtonElement>(null);
   const [bubbleSize, setBubbleSize] = useState({ width: 0, height: 0 });
+  const [surfaceOpen, setSurfaceOpen] = useState(false);
   const avatar = origin ? `${origin}${persona.portraitSrc}` : persona.portraitSrc;
 
   useEffect(() => {
     const slot = slotRef.current;
     if (!slot) return;
-    return watchPoweredByBanner(slot);
+    return watchPoweredByBanner(slot, setSurfaceOpen);
   }, [host]);
 
   const line = !copy ? "" : invitation === "callback" ? copy.callback : copy.greeting;
@@ -161,6 +168,7 @@ export default function AishaConvaiWidget({
       data-testid="aisha-convai"
       data-persona={persona.id}
       data-placement={placement}
+      data-surface={surfaceOpen ? "open" : "idle"}
     >
       <style>{BUBBLE_STYLE}</style>
       <button
@@ -184,7 +192,7 @@ export default function AishaConvaiWidget({
               <path
                 d={bubblePath}
                 fill="none"
-                stroke="rgba(255, 255, 255, 0.92)"
+                stroke="rgba(0, 0, 0, 0.14)"
                 strokeWidth="1"
               />
             </svg>
