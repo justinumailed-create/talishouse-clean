@@ -1167,7 +1167,7 @@ function MapSiteChrome({
         className="relative min-h-0 flex-1 overflow-hidden bg-neutral-900"
       >
         <MapEngineCanvas className="h-full w-full" />
-        <MapSiteZoomControls top={zoomTop} />
+        <MapSiteZoomControls mapRef={rootRef} top={zoomTop} />
 
         <div
           ref={sidebarStackRef}
