@@ -2,6 +2,7 @@
 
 import Script from "next/script";
 import { useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n/client";
 import { AISHA_AVATAR_SRC } from "@/components/talispros/WorkingPageCtaLink";
 
@@ -15,6 +16,14 @@ function usePageOrigin(): string {
   );
 }
 
+function usePortalHost(): HTMLElement | null {
+  return useSyncExternalStore(
+    () => () => {},
+    () => document.body,
+    () => null,
+  );
+}
+
 /**
  * Public Aisha voice and chat widget on the homepage.
  * The embed script loads after the page is interactive. No API key.
@@ -22,9 +31,11 @@ function usePageOrigin(): string {
 export default function AishaConvaiWidget() {
   const copy = useT().home.aisha;
   const origin = usePageOrigin();
+  const host = usePortalHost();
   const avatar = origin ? `${origin}${AISHA_AVATAR_SRC}` : AISHA_AVATAR_SRC;
+  if (!host) return null;
 
-  return (
+  return createPortal(
     <div className="aisha-convai-slot" data-testid="aisha-convai">
       <p className="aisha-convai-label">{copy.label}</p>
       <elevenlabs-convai
@@ -54,6 +65,7 @@ export default function AishaConvaiWidget() {
           el.style.bottom = wide ? "28px" : "168px";
         }}
       />
-    </div>
+    </div>,
+    host,
   );
 }
