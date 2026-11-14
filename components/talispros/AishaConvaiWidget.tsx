@@ -45,29 +45,40 @@ function startAishaConversation(event: MouseEvent<HTMLButtonElement>) {
  */
 export default function AishaConvaiWidget({
   persona = DEFAULT_ASSISTANT_PERSONA,
+  invitation = "greeting",
+  placement = "bottom-left",
 }: {
   persona?: AssistantPersona;
+  /** Homepage greeting, or the call-back line used on an allowlisted Mapsite. */
+  invitation?: "greeting" | "callback";
+  placement?: "bottom-left" | "bottom-right";
 }) {
   const copy = useT().home.assistants[persona.id];
   const origin = usePageOrigin();
   const host = usePortalHost();
   const avatar = origin ? `${origin}${persona.portraitSrc}` : persona.portraitSrc;
   if (!host || !copy) return null;
+  const line = invitation === "callback" ? copy.callback : copy.greeting;
 
   return createPortal(
-    <div className="aisha-convai-slot" data-testid="aisha-convai" data-persona={persona.id}>
+    <div
+      className="aisha-convai-slot"
+      data-testid="aisha-convai"
+      data-persona={persona.id}
+      data-placement={placement}
+    >
       <button
         type="button"
         className="aisha-convai-label"
         data-start-label={copy.startCall}
         onClick={startAishaConversation}
       >
-        {copy.greeting}
+        {line}
       </button>
       <elevenlabs-convai
         agent-id={persona.agentId}
-        action-text={copy.greeting}
-        aria-label={copy.greeting}
+        action-text={line}
+        aria-label={line}
         start-call-text={copy.startCall}
         end-call-text={copy.endCall}
         expand-text={copy.openChat}
@@ -75,7 +86,7 @@ export default function AishaConvaiWidget({
         avatar-orb-color-1="#046BD9"
         avatar-orb-color-2="#d6e8fb"
         variant="compact"
-        placement="bottom-left"
+        placement={placement}
       />
       <Script
         src="https://unpkg.com/@elevenlabs/convai-widget-embed"

@@ -593,6 +593,20 @@ p {
   }
 }
 
+/* Claimed Mapsites keep the listing card on the left, so Aisha sits on the map. */
+.aisha-convai-slot[data-placement="bottom-right"] {
+  left: auto;
+  right: 1rem;
+  align-items: flex-end;
+}
+
+@media (min-width: 1024px) {
+  .aisha-convai-slot[data-placement="bottom-right"] {
+    left: auto;
+    right: 1.5rem;
+  }
+}
+
 .ralf-legal-wordmark {
   background-image: linear-gradient(180deg, #4c97ea 0%, #0c4ea8 58%, #062f66 100%);
   -webkit-background-clip: text;

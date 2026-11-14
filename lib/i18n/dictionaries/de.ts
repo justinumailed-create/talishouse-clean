@@ -122,6 +122,7 @@ export const de: Dictionary = {
         label: "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen",
         greeting:
           "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen",
+        callback: "Hallo, ich bin Aisha. Möchten Sie einen Rückruf?",
         startCall: "Anruf starten",
         endCall: "Anruf beenden",
         openChat: "Chat öffnen",

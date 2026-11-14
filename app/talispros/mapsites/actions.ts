@@ -12,6 +12,7 @@ import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { ROUTES } from "@/lib/routes";
+import { fastCodeEntryHref } from "@/lib/talispros/aisha-mapsites";
 import { personalHomePath } from "@/lib/talispros/personal-home";
 import { systemFastCodeEntryCookieAction } from "@/lib/talispros/system-fast-code-gate";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
@@ -219,8 +220,18 @@ export async function openClaimedMapSiteFromHomeFastCode(
     await setMapSiteOwnerSession(resolvedCode);
   }
 
-  // Root account holders land on their personal home page first; its
-  // Home / Mapsite navbar opens the claimed Mapsite.
+  // Allowlisted Mapsites (DC06) open the claimed Mapsite directly.
+  // Every other code still lands on the personal home page first.
+  if (mapsite.id) {
+    const segment = await resolveClaimedMapSiteAccountTypeSegment({
+      fastCode: resolvedCode,
+      mapsiteId: mapsite.id,
+    });
+    return {
+      success: true,
+      href: fastCodeEntryHref({ fastCode: resolvedCode, accountType: segment }),
+    };
+  }
   return { success: true, href: personalHomePath(resolvedCode) };
 }
 

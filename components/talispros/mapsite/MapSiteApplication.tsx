@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
+import AishaConvaiWidget from "@/components/talispros/AishaConvaiWidget";
 import {
   MapEngineProvider,
   useMapEngine,
@@ -28,6 +29,7 @@ import {
   accountTypeForAudience,
   type MapSiteCapabilityAccountType,
 } from "@/lib/talispros/account-capabilities";
+import { mapsiteShowsAisha } from "@/lib/talispros/aisha-mapsites";
 import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
 import type { MapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
 import {
@@ -548,6 +550,9 @@ export default function MapSiteApplication({
         personalHomeNav={personalHomeNav}
         belowWriteUp={belowWriteUp}
       />
+      {mapsiteShowsAisha(mapsite.fast_code) ? (
+        <AishaConvaiWidget invitation="callback" placement="bottom-right" />
+      ) : null}
     </MapEngineProvider>
   );
 }

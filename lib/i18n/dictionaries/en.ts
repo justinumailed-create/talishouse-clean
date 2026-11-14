@@ -143,6 +143,7 @@ export const en = {
         label: "Hi, I'm Aisha. I can help make your advertising revenue producing",
         greeting:
           "Hi, I'm Aisha. I can help make your advertising revenue producing",
+        callback: "Hi, I'm Aisha. Would you like a call back?",
         startCall: "Start a call",
         endCall: "End call",
         openChat: "Open chat",
