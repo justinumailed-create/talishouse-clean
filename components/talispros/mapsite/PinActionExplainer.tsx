@@ -130,7 +130,7 @@ export default function PinActionExplainer({
   }
 
   function onKeyDown(event: ReactKeyboardEvent<HTMLSpanElement>) {
-    if (event.key !== "Tab" || event.shiftKey || action !== "ttv" || !open) return;
+    if (event.key !== "Tab" || event.shiftKey || action === "teb" || !open) return;
     const link = popRef.current?.querySelector("a");
     if (!link) return;
     event.preventDefault();
@@ -141,9 +141,9 @@ export default function PinActionExplainer({
     <div
       ref={popRef}
       id={popoverId}
-      role={action === "ttv" ? "dialog" : "tooltip"}
+      role={action === "teb" ? "tooltip" : "dialog"}
       data-testid={`pin-action-explainer-${action}`}
-      className="pointer-events-auto w-[min(20rem,calc(100vw-1rem))] rounded-xl bg-white px-3 py-2.5 text-[13px] leading-snug text-neutral-800 shadow-[0_12px_40px_rgba(0,0,0,0.22)] ring-1 ring-black/10"
+      className="pointer-events-auto w-[min(22rem,calc(100vw-1rem))] rounded-xl bg-white px-4 py-3 text-[16px] leading-relaxed text-neutral-950 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-neutral-900/15"
       style={{
         position: "fixed",
         top: pos?.top ?? -9999,
@@ -154,15 +154,15 @@ export default function PinActionExplainer({
       onMouseLeave={scheduleHide}
     >
       <p className="m-0">{text}</p>
-      {action === "ttv" ? (
+      {action === "teb" ? null : (
         <Link
           href={copy.learnMoreHref}
-          className="mt-1.5 inline-flex font-semibold text-[#046BD9] underline decoration-[#046BD9]/40 underline-offset-2 hover:decoration-[#046BD9]"
-          data-testid="pin-action-ttv-learn-more"
+          className="mt-2 inline-flex text-[16px] font-semibold text-[#0356b0] underline decoration-[#0356b0] underline-offset-2"
+          data-testid={`pin-action-${action}-learn-more`}
         >
           {copy.learnMore}
         </Link>
-      ) : null}
+      )}
     </div>
   ) : null;
 

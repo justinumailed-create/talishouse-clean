@@ -192,6 +192,7 @@ export const en = {
     footerPartOf: "part of",
     /** Accessible name of the FAQ right-rail essay switcher (pill labels live in essay-registry.ts). */
     essaySwitcher: "Essays",
+    printEssay: "Print",
     /** Shown in the rail for placeholder ("Coming soon") essay tabs. */
     essayCheckBackSoon: "Check back soon",
   },
@@ -875,6 +876,20 @@ export const en = {
       gateClose: "Close",
       addedToday: "Today",
       addedYesterday: "Yesterday",
+      calendarLabel: "Week calendar",
+      weekNumber: "Week {week}",
+      prevWeek: "Previous week",
+      nextWeek: "Next week",
+      slotLabel: "{date}, {time}",
+      folderThisWeek: "Week {week}",
+      folderEarlier: "Earlier weeks",
+      folderEmpty: "No FAST Codes in this week.",
+      folderEarlierEmpty: "No earlier FAST Codes.",
+      folderLocked: "Enter the access code to open this folder.",
+      folderCodeLabel: "Access code",
+      folderOpen: "Open folder",
+      folderChecking: "Checking…",
+      folderWrong: "That access code is not right. Please try again.",
     },
     /** Demo builder card (Ralf, Oct 26): numbered steps, one address box. */
     addressPlaceholder: "Start typing an address…",

@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { useLocale, useT } from "@/lib/i18n/client";
+import { useRouter } from "next/navigation";
 import {
   addFastCodeSlotAction,
   openProspectMapsiteAction,
   removeFastCodeSlotAction,
 } from "@/app/talispros/demo-mapsite/slots-actions";
+import { unlockMapsitesFoldersAction } from "@/app/talispros/demo-mapsite/folder-actions";
+import MapsitesWeekCalendar from "@/components/talispros/demo-mapsite/MapsitesWeekCalendar";
 import SecretTextField from "@/components/talispros/SecretTextField";
 import {
   formatSlotAddedDate,
@@ -17,6 +20,7 @@ import {
   type OwnSlotList,
   type SlotEntry,
 } from "@/lib/talispros/fast-code-slots";
+import { isoWeek, isoWeekKey, startOfIsoWeek, weekKeyFromAddedAt } from "@/lib/talispros/iso-week";
 
 type SlotsCopy = ReturnType<typeof useT>["demo"]["slots"];
 
@@ -319,9 +323,34 @@ function OwnList({ initial, copy }: { initial: OwnSlotList; copy: SlotsCopy }) {
  * unlabeled group per sales associate. The password field opens above the
  * list so the other rows stay reachable.
  */
-export default function FastCodeSlotsPanel({ data }: { data: FastCodeSlotsPanelData }) {
+function allEntries(data: FastCodeSlotsPanelData): SlotEntry[] {
+  return [
+    ...(data.own?.entries ?? []),
+    ...data.associates.flatMap((group) => group.entries),
+  ];
+}
+
+export default function FastCodeSlotsPanel({
+  data,
+  foldersUnlocked,
+}: {
+  data: FastCodeSlotsPanelData;
+  foldersUnlocked: boolean;
+}) {
+  const router = useRouter();
   const copy = useT().demo.slots;
-  const groups = data.associates.filter((g) => g.entries.length > 0);
+  const [weekStart, setWeekStart] = useState(() => startOfIsoWeek(new Date()));
+  const [unlocked, setUnlocked] = useState(foldersUnlocked);
+  if (foldersUnlocked && !unlocked) setUnlocked(true);
+  const [folderForm, setFolderForm] = useState(false);
+  const [folderCode, setFolderCode] = useState("");
+  const [folderError, setFolderError] = useState<string | null>(null);
+  const [folderPending, startFolder] = useTransition();
+  const weekKey = isoWeekKey(weekStart);
+  const weekNumber = isoWeek(weekStart).week;
+  const entries = allEntries(data);
+  const thisWeek = entries.filter((entry) => weekKeyFromAddedAt(entry.addedAt) === weekKey);
+  const earlier = entries.filter((entry) => weekKeyFromAddedAt(entry.addedAt) !== weekKey);
   const [openCode, setOpenCode] = useState<string | null>(null);
   const [noticeCode, setNoticeCode] = useState<string | null>(null);
   // A blocked direct link lands here with ?gate=<code>: open that code's password field.
@@ -334,14 +363,85 @@ export default function FastCodeSlotsPanel({ data }: { data: FastCodeSlotsPanelD
       document.getElementById(`fast-code-slot-${gate}`)?.scrollIntoView({ block: "nearest" });
     }
   }, []);
-  if (!data.own && !groups.length) return null;
   const openEntry =
-    groups.flatMap((group) => group.entries).find((entry) => entry.fastCode.toLowerCase() === openCode) ?? null;
+    entries.find((entry) => entry.fastCode.toLowerCase() === openCode) ?? null;
+  function askUnlock() {
+    setFolderForm(true);
+    setFolderError(null);
+  }
+
   return (
     <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 border-t border-neutral-200 pt-4" data-testid="fast-code-slots" id="fast-code-slots">
-      <p className="m-0 shrink-0 text-[12px] font-semibold uppercase tracking-[0.16em] text-neutral-500 sm:text-[13px]" id="fast-code-slots-title">
-        {copy.title}
-      </p>
+      <MapsitesWeekCalendar weekStart={weekStart} onWeekStart={setWeekStart} />
+      <div className="flex flex-col gap-2" data-testid="mapsites-code-folders">
+        <FolderButton
+          id="mapsites-week-folder"
+          title={copy.folderThisWeek.replace("{week}", String(weekNumber))}
+          testId="mapsites-folder-week"
+          unlocked={unlocked}
+          onAsk={askUnlock}
+        >
+          <CodeList entries={thisWeek} empty={copy.folderEmpty} openCode={openCode} setOpenCode={setOpenCode} />
+        </FolderButton>
+        <FolderButton
+          title={copy.folderEarlier}
+          testId="mapsites-folder-earlier"
+          unlocked={unlocked}
+          onAsk={askUnlock}
+        >
+          <CodeList entries={earlier} empty={copy.folderEarlierEmpty} openCode={openCode} setOpenCode={setOpenCode} />
+          {data.own ? <OwnList initial={data.own} copy={copy} /> : null}
+        </FolderButton>
+        {folderForm && !unlocked ? (
+          <form
+            className="rounded-2xl bg-neutral-50 px-3 py-3 ring-1 ring-black/10"
+            data-testid="mapsites-folder-gate"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (!folderCode.trim()) return;
+              setFolderError(null);
+              startFolder(async () => {
+                const res = await unlockMapsitesFoldersAction(folderCode);
+                if (!res.ok) {
+                  setFolderError(copy.folderWrong);
+                  return;
+                }
+                setFolderCode("");
+                setFolderForm(false);
+                setUnlocked(true);
+                router.refresh();
+              });
+            }}
+          >
+            <p className="m-0 text-[16px] leading-snug text-neutral-950">{copy.folderLocked}</p>
+            <label className="mt-2 block text-[15px] font-semibold text-neutral-950" htmlFor="mapsites-folder-code">
+              {copy.folderCodeLabel}
+            </label>
+            <SecretTextField
+              id="mapsites-folder-code"
+              value={folderCode}
+              onChange={(event) => setFolderCode(event.target.value)}
+              aria-label={copy.folderCodeLabel}
+              autoComplete="off"
+              wrapperClassName="relative mt-1.5"
+              className="h-11 w-full rounded-xl border border-neutral-400 bg-white px-3 text-[16px] text-neutral-950 outline-none focus:border-[#0356b0]"
+              data-testid="mapsites-folder-code"
+            />
+            {folderError ? (
+              <p role="alert" className="m-0 mt-2 text-[15px] font-medium text-red-800" data-testid="mapsites-folder-error">
+                {folderError}
+              </p>
+            ) : null}
+            <button
+              type="submit"
+              disabled={folderPending || !folderCode.trim()}
+              className="mt-3 inline-flex h-11 items-center justify-center rounded-full bg-[#046BD9] px-5 text-[16px] font-semibold text-white disabled:opacity-40"
+            >
+              {folderPending ? copy.folderChecking : copy.folderOpen}
+            </button>
+          </form>
+        ) : null}
+      </div>
       {openEntry ? (
         <GateForm
           key={openEntry.slotId}
@@ -351,38 +451,86 @@ export default function FastCodeSlotsPanel({ data }: { data: FastCodeSlotsPanelD
           onClose={() => setOpenCode(null)}
         />
       ) : null}
-      <div className="demo-hero__list min-h-0 flex-1" data-testid="fast-code-slots-scroll">
-        {data.own ? <OwnList initial={data.own} copy={copy} /> : null}
-        {groups.map((group, index) => (
-          <ul
-            key={index}
-            className="m-0 list-none space-y-0.5 p-0"
-            aria-labelledby="fast-code-slots-title"
-            data-testid="fast-code-slots-group"
-          >
-            {group.entries.map((entry) => {
-              const code = entry.fastCode.toLowerCase();
-              const open = openCode === code;
-              return (
-                <li key={entry.slotId} id={`fast-code-slot-${code}`}>
-                  <button
-                    type="button"
-                    onClick={() => setOpenCode((cur) => (cur === code ? null : code))}
-                    aria-expanded={open}
-                    aria-controls={open ? `gate-${entry.slotId}` : undefined}
-                    className={`group flex h-12 w-full min-w-0 items-center gap-2.5 border-b border-neutral-100 px-1 text-left transition hover:bg-[#046BD9]/[0.05] ${
-                      open ? "bg-[#046BD9]/[0.08]" : ""
-                    }`}
-                    data-testid="fast-code-slot-code"
-                  >
-                    <SlotIdentity entry={entry} />
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        ))}
-      </div>
     </div>
+  );
+}
+
+function FolderButton({
+  id,
+  title,
+  testId,
+  unlocked,
+  onAsk,
+  children,
+}: {
+  id?: string;
+  title: string;
+  testId: string;
+  unlocked: boolean;
+  onAsk: () => void;
+  children: ReactNode;
+}) {
+  if (!unlocked) {
+    return (
+      <button
+        type="button"
+        id={id}
+        onClick={onAsk}
+        className="flex min-h-12 w-full items-center justify-between rounded-2xl bg-white px-4 text-left text-[16px] font-semibold text-neutral-950 ring-1 ring-neutral-300 hover:bg-neutral-50"
+        data-testid={testId}
+        aria-expanded={false}
+      >
+        {title}
+      </button>
+    );
+  }
+  return (
+    <details id={id} className="rounded-2xl bg-white ring-1 ring-neutral-300" data-testid={testId}>
+      <summary className="cursor-pointer list-none px-4 py-3 text-[16px] font-semibold text-neutral-950 marker:content-none [&::-webkit-details-marker]:hidden">
+        {title}
+      </summary>
+      <div className="demo-hero__list max-h-64 overflow-y-auto border-t border-neutral-200 px-3 pb-3" data-testid="fast-code-slots-scroll">
+        {children}
+      </div>
+    </details>
+  );
+}
+
+function CodeList({
+  entries,
+  empty,
+  openCode,
+  setOpenCode,
+}: {
+  entries: SlotEntry[];
+  empty: string;
+  openCode: string | null;
+  setOpenCode: Dispatch<SetStateAction<string | null>>;
+}) {
+  if (!entries.length) {
+    return <p className="m-0 mt-2 text-[15px] text-neutral-800">{empty}</p>;
+  }
+  return (
+    <ul className="m-0 mt-1 list-none p-0" data-testid="fast-code-slots-group">
+      {entries.map((entry) => {
+        const code = entry.fastCode.toLowerCase();
+        const open = openCode === code;
+        return (
+          <li key={entry.slotId} id={`fast-code-slot-${code}`}>
+            <button
+              type="button"
+              onClick={() => setOpenCode((current) => (current === code ? null : code))}
+              aria-expanded={open}
+              className={`group flex h-12 w-full min-w-0 items-center gap-2.5 border-b border-neutral-100 px-1 text-left text-neutral-950 hover:bg-[#046BD9]/[0.05] ${
+                open ? "bg-[#046BD9]/[0.08]" : ""
+              }`}
+              data-testid="fast-code-slot-code"
+            >
+              <SlotIdentity entry={entry} />
+            </button>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
