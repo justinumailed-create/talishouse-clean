@@ -11,6 +11,56 @@ import {
   type AssistantPersona,
 } from "@/lib/talispros/assistant-personas";
 
+/**
+ * Same rules as globals.css, shipped beside the widget so a cached
+ * stylesheet cannot leave the write-up as a solid white pill.
+ */
+const BUBBLE_STYLE = `
+.aisha-convai-label {
+  position: relative;
+  z-index: 2;
+  margin: 0 0 14px;
+  max-width: min(18.5rem, calc(100vw - 2rem));
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  backdrop-filter: saturate(180%) blur(28px);
+  padding: 14px 16px;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.011em;
+  text-align: left;
+  text-wrap: balance;
+  color: #1d1d1f;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  pointer-events: auto;
+  cursor: pointer;
+}
+.aisha-convai-lead { font-weight: 500; }
+.aisha-convai-rest { font-weight: 400; }
+.aisha-convai-label::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  left: 28px;
+  bottom: -8px;
+  width: 16px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.08);
+  transform: rotate(45deg);
+}
+.aisha-convai-slot[data-placement="bottom-right"] .aisha-convai-label::after {
+  left: auto;
+  right: 28px;
+}
+`;
+
 function usePageOrigin(): string {
   return useSyncExternalStore(
     () => () => {},
@@ -79,6 +129,7 @@ export default function AishaConvaiWidget({
       data-persona={persona.id}
       data-placement={placement}
     >
+      <style>{BUBBLE_STYLE}</style>
       <button
         type="button"
         className="aisha-convai-label"
