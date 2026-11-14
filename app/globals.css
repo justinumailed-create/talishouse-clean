@@ -547,18 +547,18 @@ p {
   aspect-ratio: 16 / 9;
 }
 
-/* Aisha sits above the homepage ownership buttons on a phone, and in the
-   open corner of the left column on a wide screen. */
+/* Aisha sits on the left, in the corner the TalisBOT launcher used.
+   The label stays above the orb and clear of the account buttons. */
 .aisha-convai-slot {
   position: fixed;
   z-index: 35;
-  right: 1rem;
-  bottom: 7.25rem;
-  left: auto;
+  left: 1rem;
+  right: auto;
+  bottom: 6.5rem;
   display: flex;
-  max-width: min(18rem, calc(100vw - 1.5rem));
+  max-width: min(20rem, calc(100vw - 1.5rem));
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   pointer-events: none;
 }
 
@@ -581,10 +581,8 @@ p {
 
 @media (min-width: 1024px) {
   .aisha-convai-slot {
-    right: 1.25rem;
-    left: auto;
-    bottom: 6.75rem;
-    align-items: flex-end;
+    left: 1.5rem;
+    bottom: 6.25rem;
   }
 }
 

@@ -134,12 +134,15 @@ export const en = {
     ownershipAria: "Ownership models",
     closeDetails: "Close {title} details",
     learnMore: "Learn More",
-    aisha: {
-      label: "Aisha, Tsplits™ team leader",
-      action: "Talk with Aisha",
-      startCall: "Start a call",
-      endCall: "End call",
-      openChat: "Open chat",
+    assistants: {
+      aisha: {
+        label: "Aisha, T-Splits Mapsites and Fulfilment Team Leader",
+        greeting:
+          "Hello, I'm Aisha, Your T-Splits Mapsites and Fulfilment Team Leader. May I have your name?",
+        startCall: "Start a call",
+        endCall: "End call",
+        openChat: "Open chat",
+      },
     },
     samcartReturn: {
       confirming: "Confirming payment return…",

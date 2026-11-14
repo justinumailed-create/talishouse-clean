@@ -120,8 +120,11 @@ describe("Tokenization Learn More", () => {
 
   it("shows bottom-left Talisbot on homepage embed only", () => {
     const shell = readFileSync(join(root, "components/RootShell.tsx"), "utf8");
-    expect(shell).toContain('const showHomeTalisBot = pathname === "/"');
-    expect(shell).toContain('<TalisBotChat position="left" />');
+    expect(shell).not.toContain("showHomeTalisBot");
+    expect(shell).not.toContain('<TalisBotChat position="left" />');
+    expect(readFileSync(join(root, "components/talispros/TalisprosGatePage.tsx"), "utf8")).toContain(
+      "<AishaConvaiWidget",
+    );
     // /learn-more remains embed without the home-only bot flag
     expect(shell).toMatch(/isEmbed[\s\S]*pathname === "\/learn-more"/);
     expect(shell).not.toMatch(/showHomeTalisBot = pathname === "\/learn-more"/);
