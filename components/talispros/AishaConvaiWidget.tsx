@@ -42,14 +42,6 @@ export default function AishaConvaiWidget() {
         src="https://unpkg.com/@elevenlabs/convai-widget-embed"
         strategy="lazyOnload"
         async
-        onLoad={() => {
-          const el = document.querySelector("elevenlabs-convai");
-          if (!(el instanceof HTMLElement)) return;
-          el.style.position = "static";
-          el.style.right = "auto";
-          el.style.bottom = "auto";
-          el.style.left = "auto";
-        }}
       />
     </div>
   );
