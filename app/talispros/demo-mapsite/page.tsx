@@ -3,6 +3,7 @@ import { pageMetadata } from "@/lib/seo/page-metadata";
 import { demoBuilderStartsOpen, demoInitialPinFromParams } from "@/lib/talispros/demo-builder";
 import { loadFastCodeSlotsPanel } from "@/lib/talispros/fast-code-slots-server";
 import { mapsitesFoldersUnlocked } from "@/lib/talispros/mapsites-folder-access.server";
+import { loadSourcedLeadCalendar } from "@/lib/talispros/sourced-leads-server";
 
 export async function generateMetadata() {
   return pageMetadata("/talispros/demo-mapsite");
@@ -19,9 +20,10 @@ export default async function DemoMapSiteBuilderPage({
   // FAST Code slots: codes, towns and provinces for everyone, never who
   // prepared them; the signed-in agent also gets their own editable list.
   const foldersUnlocked = await mapsitesFoldersUnlocked();
-  const slotsPanel = foldersUnlocked
-    ? await loadFastCodeSlotsPanel()
-    : { associates: [], own: null };
+  const [slotsPanel, sourced] = await Promise.all([
+    foldersUnlocked ? loadFastCodeSlotsPanel() : Promise.resolve({ associates: [], own: null }),
+    loadSourcedLeadCalendar(foldersUnlocked),
+  ]);
   // Deep links and Back (?build=1, ?address=…, ?lat=…&lng=…) open the card directly.
   return (
     <DemoMapSiteBuilderClient
@@ -29,6 +31,7 @@ export default async function DemoMapSiteBuilderPage({
       initialPin={demoInitialPinFromParams(params)}
       slotsPanel={slotsPanel}
       foldersUnlocked={foldersUnlocked}
+      sourced={sourced}
     />
   );
 }

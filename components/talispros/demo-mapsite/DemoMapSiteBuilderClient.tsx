@@ -15,6 +15,7 @@ import WorkingPageShell from "@/components/talispros/WorkingPageShell";
 import DemoHeroMap from "@/components/talispros/demo-mapsite/DemoHeroMap";
 import FastCodeSlotsPanel from "@/components/talispros/demo-mapsite/FastCodeSlotsPanel";
 import type { FastCodeSlotsPanelData } from "@/lib/talispros/fast-code-slots";
+import type { SourcedLeadCalendar } from "@/lib/talispros/canada-calendar";
 import {
   DEMO_ADDRESS_INPUT_ID,
   DEMO_ADDRESS_INPUT_NAME,
@@ -33,6 +34,7 @@ export default function DemoMapSiteBuilderClient({
   initialPin,
   slotsPanel,
   foldersUnlocked = false,
+  sourced,
 }: {
   /** Deep link / Back already carries build, address or PIN state. */
   initialOpen?: boolean;
@@ -41,6 +43,8 @@ export default function DemoMapSiteBuilderClient({
   slotsPanel?: FastCodeSlotsPanelData;
   /** Server-checked folder access. Codes are omitted until this is true. */
   foldersUnlocked?: boolean;
+  /** Day counts always. Brokerage names only after the folder code. */
+  sourced?: SourcedLeadCalendar;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -127,7 +131,7 @@ export default function DemoMapSiteBuilderClient({
                 {d.hero.headline}
               </h1>
               {slotsPanel ? (
-                <FastCodeSlotsPanel data={slotsPanel} foldersUnlocked={foldersUnlocked} />
+                <FastCodeSlotsPanel data={slotsPanel} foldersUnlocked={foldersUnlocked} sourced={sourced} />
               ) : null}
             </div>
           </div>

@@ -6027,6 +6027,11 @@ body.mapsite-gallery-open [data-paypal-button] {
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+.demo-hero__rail {
+  min-height: 0;
+  max-height: min(70dvh, 40rem);
+  overflow: hidden;
+}
 @media (min-width: 640px) {
   .demo-hero__media {
     height: 34rem;
@@ -6047,7 +6052,9 @@ body.mapsite-gallery-open [data-paypal-button] {
   }
   .demo-hero__rail {
     height: 100%;
+    max-height: none;
     min-height: 0;
+    overflow: hidden;
   }
   .demo-hero__list {
     max-height: none;

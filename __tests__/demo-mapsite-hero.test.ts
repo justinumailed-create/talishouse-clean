@@ -48,7 +48,7 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(builder.indexOf("{d.hero.headline}")).toBeLessThan(builder.indexOf("<FastCodeSlotsPanel"));
     expect(builder.indexOf("<FastCodeSlotsPanel")).toBeLessThan(builder.indexOf("</section>"));
     const page = read("app/talispros/demo-mapsite/page.tsx");
-    expect(page).toContain("await loadFastCodeSlotsPanel()");
+    expect(page).toContain("loadFastCodeSlotsPanel()");
     expect(page).toContain("slotsPanel={slotsPanel}");
   });
 

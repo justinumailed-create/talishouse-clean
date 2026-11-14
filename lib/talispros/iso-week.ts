@@ -54,9 +54,33 @@ export function halfHourLabels(): string[] {
   return labels;
 }
 
+/** Ontario and Quebec hold most sourced leads, so the day is Eastern Time. */
+export const CANADA_SOURCE_TIME_ZONE = "America/Toronto";
+
+/** Calendar day in Canada for an instant. Null when the timestamp cannot be read. */
+export function canadaSourcedDay(iso: string | null | undefined): string | null {
+  if (!iso) return null;
+  const ms = Date.parse(iso);
+  if (!Number.isFinite(ms)) return null;
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: CANADA_SOURCE_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(ms));
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  if (!year || !month || !day) return null;
+  return `${year}-${month}-${day}`;
+}
+
+/** ISO week of the Canada day, not the viewer's local day. */
 export function weekKeyFromAddedAt(addedAt: string | null): string | null {
-  if (!addedAt) return null;
-  const date = new Date(addedAt);
-  if (Number.isNaN(date.getTime())) return null;
+  const day = canadaSourcedDay(addedAt);
+  if (!day) return null;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day);
+  if (!match) return null;
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
   return isoWeekKey(date);
 }

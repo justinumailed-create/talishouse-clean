@@ -12,6 +12,7 @@ import {
 import { unlockMapsitesFoldersAction } from "@/app/talispros/demo-mapsite/folder-actions";
 import MapsitesWeekCalendar from "@/components/talispros/demo-mapsite/MapsitesWeekCalendar";
 import SecretTextField from "@/components/talispros/SecretTextField";
+import { openingWeekStart, type SourcedLeadCalendar } from "@/lib/talispros/canada-calendar";
 import {
   formatSlotAddedDate,
   formatSlotAddedLabel,
@@ -20,7 +21,7 @@ import {
   type OwnSlotList,
   type SlotEntry,
 } from "@/lib/talispros/fast-code-slots";
-import { isoWeek, isoWeekKey, startOfIsoWeek, weekKeyFromAddedAt } from "@/lib/talispros/iso-week";
+import { isoWeek, isoWeekKey, weekKeyFromAddedAt } from "@/lib/talispros/iso-week";
 
 type SlotsCopy = ReturnType<typeof useT>["demo"]["slots"];
 
@@ -333,13 +334,17 @@ function allEntries(data: FastCodeSlotsPanelData): SlotEntry[] {
 export default function FastCodeSlotsPanel({
   data,
   foldersUnlocked,
+  sourced = { counts: [], leads: [] },
 }: {
   data: FastCodeSlotsPanelData;
   foldersUnlocked: boolean;
+  sourced?: SourcedLeadCalendar;
 }) {
   const router = useRouter();
   const copy = useT().demo.slots;
-  const [weekStart, setWeekStart] = useState(() => startOfIsoWeek(new Date()));
+  const leadDays = sourced.counts.map((row) => row.day);
+  const leadCounts = new Map(sourced.counts.map((row) => [row.day, row.count]));
+  const [weekStart, setWeekStart] = useState(() => openingWeekStart(leadDays));
   const [unlocked, setUnlocked] = useState(foldersUnlocked);
   if (foldersUnlocked && !unlocked) setUnlocked(true);
   const [folderForm, setFolderForm] = useState(false);
@@ -371,8 +376,17 @@ export default function FastCodeSlotsPanel({
   }
 
   return (
-    <div className="mt-4 flex min-h-0 flex-1 flex-col gap-3 border-t border-neutral-200 pt-4" data-testid="fast-code-slots" id="fast-code-slots">
-      <MapsitesWeekCalendar weekStart={weekStart} onWeekStart={setWeekStart} />
+    <div className="mt-4 flex min-h-0 flex-1 flex-col border-t border-neutral-200 pt-4" data-testid="fast-code-slots" id="fast-code-slots">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto">
+      <MapsitesWeekCalendar
+        weekStart={weekStart}
+        onWeekStart={setWeekStart}
+        leadDays={leadDays}
+        counts={leadCounts}
+        leads={sourced.leads}
+        unlocked={unlocked}
+        onAskUnlock={askUnlock}
+      />
       <div className="flex flex-col gap-2" data-testid="mapsites-code-folders">
         <FolderButton
           id="mapsites-week-folder"
@@ -392,13 +406,20 @@ export default function FastCodeSlotsPanel({
           <CodeList entries={earlier} empty={copy.folderEarlierEmpty} openCode={openCode} setOpenCode={setOpenCode} />
           {data.own ? <OwnList initial={data.own} copy={copy} /> : null}
         </FolderButton>
+      </div>
+      </div>
         {folderForm && !unlocked ? (
           <form
-            className="rounded-2xl bg-neutral-50 px-3 py-3 ring-1 ring-black/10"
+            className="mt-3 shrink-0 rounded-2xl bg-neutral-50 px-3 py-3 ring-1 ring-black/10"
             data-testid="mapsites-folder-gate"
+            onKeyDown={(event) => {
+              if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
+              event.preventDefault();
+              event.currentTarget.requestSubmit();
+            }}
             onSubmit={(event) => {
               event.preventDefault();
-              if (!folderCode.trim()) return;
+              if (folderPending || !folderCode.trim()) return;
               setFolderError(null);
               startFolder(async () => {
                 const res = await unlockMapsitesFoldersAction(folderCode);
@@ -434,14 +455,14 @@ export default function FastCodeSlotsPanel({
             ) : null}
             <button
               type="submit"
-              disabled={folderPending || !folderCode.trim()}
-              className="mt-3 inline-flex h-11 items-center justify-center rounded-full bg-[#046BD9] px-5 text-[16px] font-semibold text-white disabled:opacity-40"
+              disabled={folderPending}
+              className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full bg-[#046BD9] px-5 text-[16px] font-semibold text-white disabled:opacity-40 sm:w-auto"
+              data-testid="mapsites-folder-open"
             >
               {folderPending ? copy.folderChecking : copy.folderOpen}
             </button>
           </form>
         ) : null}
-      </div>
       {openEntry ? (
         <GateForm
           key={openEntry.slotId}
