@@ -3,13 +3,17 @@ import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 
 /**
  * FAST Codes that show Aisha and open straight onto the claimed Mapsite.
- * Add a code here to turn the widget on for another Mapsite.
+ * The value is the Mapsite path segment. DC06 has a completed Root Account
+ * plan, which opens under brokers. Add a code here to turn the widget on
+ * for another Mapsite.
  */
-export const AISHA_MAPSITE_FAST_CODES = ["dc06"] as const;
+export const AISHA_MAPSITE_FAST_CODES: Record<string, string> = {
+  dc06: "brokers",
+};
 
 export function mapsiteShowsAisha(fastCode: string | null | undefined): boolean {
   const code = fastCode?.trim().toLowerCase() || "";
-  return (AISHA_MAPSITE_FAST_CODES as readonly string[]).includes(code);
+  return Object.prototype.hasOwnProperty.call(AISHA_MAPSITE_FAST_CODES, code);
 }
 
 /**
@@ -24,7 +28,7 @@ export function fastCodeEntryHref(options: {
   if (mapsiteShowsAisha(code)) {
     return buildClaimedMapSitePath({
       fastCode: code,
-      accountType: options.accountType,
+      accountType: AISHA_MAPSITE_FAST_CODES[code] || options.accountType,
     });
   }
   return personalHomePath(code);

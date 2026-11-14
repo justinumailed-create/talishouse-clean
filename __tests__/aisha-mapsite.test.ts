@@ -32,7 +32,7 @@ describe("Aisha on an allowlisted Mapsite", () => {
   });
 
   it("sends DC06 from the FAST Code gate to the claimed Mapsite", () => {
-    expect(fastCodeEntryHref({ fastCode: "DC06", accountType: "brokers" })).toBe(
+    expect(fastCodeEntryHref({ fastCode: "DC06", accountType: "listings" })).toBe(
       "/talispros/mapsite/brokers/dc06",
     );
     expect(fastCodeEntryHref({ fastCode: "rm22", accountType: "brokers" })).toBe(
