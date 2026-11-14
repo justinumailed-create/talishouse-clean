@@ -1,9 +1,10 @@
 "use client";
 
 import Script from "next/script";
-import { useSyncExternalStore, type MouseEvent } from "react";
+import { useEffect, useRef, useSyncExternalStore, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n/client";
+import { watchPoweredByBanner } from "@/lib/talispros/hide-elevenlabs-banner";
 import {
   DEFAULT_ASSISTANT_PERSONA,
   type AssistantPersona,
@@ -56,12 +57,21 @@ export default function AishaConvaiWidget({
   const copy = useT().home.assistants[persona.id];
   const origin = usePageOrigin();
   const host = usePortalHost();
+  const slotRef = useRef<HTMLDivElement>(null);
   const avatar = origin ? `${origin}${persona.portraitSrc}` : persona.portraitSrc;
+
+  useEffect(() => {
+    const slot = slotRef.current;
+    if (!slot) return;
+    return watchPoweredByBanner(slot);
+  }, [host]);
+
   if (!host || !copy) return null;
   const line = invitation === "callback" ? copy.callback : copy.greeting;
 
   return createPortal(
     <div
+      ref={slotRef}
       className="aisha-convai-slot"
       data-testid="aisha-convai"
       data-persona={persona.id}
