@@ -153,7 +153,7 @@ export const MAPSITE_ZOOM_BUTTON_STACK_PX = 96;
  * Room above the bottom of the map so zoom stays clear of Aisha.
  * Her bubble sits above the call pill, so this is taller than the pill alone.
  */
-export const MAPSITE_ZOOM_AISHA_CLEARANCE_PX = 200;
+export const MAPSITE_ZOOM_AISHA_CLEARANCE_PX = 320;
 
 /** Width of the zoom rail measured from the right edge of the map. */
 export const MAPSITE_ZOOM_RAIL_PX = 64;

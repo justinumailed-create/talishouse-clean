@@ -146,7 +146,7 @@ describe("mapSiteZoomControlTop", () => {
       popupHeight: 420,
       popupRight: 195,
     });
-    expect(top).toBe(440);
-    expect(top + 94).toBeLessThanOrEqual(743 - 200);
+    expect(top).toBe(743 - 320 - 96);
+    expect(top + 94).toBeLessThanOrEqual(743 - 320);
   });
 });
