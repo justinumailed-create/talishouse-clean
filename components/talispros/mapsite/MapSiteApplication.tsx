@@ -18,10 +18,12 @@ import type { RegistrationMarket } from "@/lib/registration-market";
 import type { PlanType } from "@/lib/registration-plans";
 import {
   MAPSITE_CLAIMED_NAV_PIN_NUDGE_Y_PX,
+  MAPSITE_LISTING_CARD_MAX_WIDTH_PX,
   MAPSITE_MIN_CARD_HEIGHT_PX,
-  MAPSITE_PIN_TIP_CLEARANCE_PX,
-  MAPSITE_POPUP_TIP_HEIGHT_PX,
   computeMapSiteOverlayLayout,
+  mapSiteZoomControlTop,
+  placeOpenMapSiteCard,
+  stickyChromeOverlap,
 } from "@/lib/talispros/mapsite-overlay-layout";
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import { MAPSITE_LISTING_TILE_TOP_FALLBACK_PX } from "@/lib/talispros/mapsite-listing-media";
@@ -56,6 +58,8 @@ import DemoClaimMarketButton from "./DemoClaimMarketButton";
 import PersonalHomeNav from "@/components/talispros/personal-home/PersonalHomeNav";
 import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
+import MapSiteZoomControls from "./MapSiteZoomControls";
+import MapSiteOwnerDashboardToggle from "./MapSiteOwnerDashboardToggle";
 import PmcContractGateCard from "@/components/talisu/pmc/PmcContractGateCard";
 import { mapsiteAgencyDisplayName } from "@/lib/talispros/mapsite-listing-media";
 import { useT } from "@/lib/i18n/client";
@@ -148,8 +152,6 @@ export function bufferedPinBounds(
   ];
 }
 
-/** Minimum popup body height so hero + title + action row stay visible. */
-const MAPSITE_POPUP_MIN_HEIGHT_PX = 384;
 /** Ignore residual camera events right after programmatic pin focus. */
 const FOCUS_GESTURE_GUARD_MS = 900;
 
@@ -207,6 +209,11 @@ interface MapSiteApplicationProps {
    * actions still re-check requireMapSiteEditAccess (owner + paid, or admin).
    */
   canManageDashboard?: boolean;
+  /**
+   * This Mapsite's owner, or a Mapsites admin, may show or hide the dashboard.
+   * Visitors never see the switch. The owner still sees it when the view is off.
+   */
+  canToggleDashboardView?: boolean;
   /** Logo / left-card image overrides and saved bookshelf order. */
   initialOwnerCustomizations?: MapSiteOwnerCustomizations | null;
   /** PIN categories + Root ↔ Derivative Partner Mapsites (migration 109). */
@@ -250,6 +257,7 @@ export default function MapSiteApplication({
   pinCheckoutStatus = null,
   pinCheckoutSessionId = null,
   canManageDashboard,
+  canToggleDashboardView = false,
   initialOwnerCustomizations = null,
   initialRootContext = null,
   personalHomeNav = null,
@@ -536,6 +544,7 @@ export default function MapSiteApplication({
         onPinDashboardChange={setPinDashboard}
         onPinEditorChange={setPinEditor}
         canManageDashboard={canManageDashboard ?? isOwner}
+        canToggleDashboardView={canToggleDashboardView}
         initialOwnerCustomizations={initialOwnerCustomizations}
         rootContext={rootContext}
         onRootContextChange={setRootContext}
@@ -585,6 +594,7 @@ function MapSiteChrome({
   onPinDashboardChange,
   onPinEditorChange,
   canManageDashboard,
+  canToggleDashboardView,
   initialOwnerCustomizations,
   rootContext,
   onRootContextChange,
@@ -626,6 +636,7 @@ function MapSiteChrome({
   onPinDashboardChange: (dashboard: MapSitePinDashboardState) => void;
   onPinEditorChange: (editor: PinEditorState) => void;
   canManageDashboard: boolean;
+  canToggleDashboardView: boolean;
   initialOwnerCustomizations: MapSiteOwnerCustomizations | null;
   rootContext: MapSiteRootContext;
   onRootContextChange: (context: MapSiteRootContext) => void;
@@ -655,6 +666,7 @@ function MapSiteChrome({
   const [activationPaid, setActivationPaid] = useState(paymentReceived);
   const [alignTop, setAlignTop] = useState(MAPSITE_LISTING_TILE_TOP_FALLBACK_PX);
   const [popupCenterX, setPopupCenterX] = useState<number | null>(null);
+  const [zoomTop, setZoomTop] = useState(12);
   const [expandedCardHeight, setExpandedCardHeight] = useState<number | null>(
     null
   );
@@ -732,64 +744,64 @@ function MapSiteChrome({
       const popupOpen = selectedPinId === mapsite.id;
       const isMobileOverlay = rootRect.width < 640;
 
+      const listingRight = Math.round(cardRect.right - rootRect.left);
+      const overlayBottom = Math.round(
+        (stackRect?.bottom ?? cardRect.bottom) - rootRect.top
+      );
       const layout = computeMapSiteOverlayLayout({
         rootWidth: rootRect.width,
         rootHeight: rootRect.height,
         listingTop: Math.max(0, Math.round(cardRect.top - rootRect.top)),
-        listingRight: Math.round(cardRect.right - rootRect.left),
-        overlayBottom: Math.round(
-          (stackRect?.bottom ?? cardRect.bottom) - rootRect.top
-        ),
+        listingRight,
+        overlayBottom,
         popupOpen,
       });
 
       setCompact(layout.compact);
       setMobileOverlay(isMobileOverlay);
 
-      // Phone-only composition: search at top, manager strip at bottom,
-      // and the property card above the centered map pin.
+      const chromeOverlap = stickyChromeOverlap(
+        rootRect.top,
+        [...document.querySelectorAll("header, nav")].map((el) => {
+          const rect = el.getBoundingClientRect();
+          return { top: rect.top, bottom: rect.bottom, height: rect.height };
+        }),
+      );
       const navNudge = showClaimedNav ? MAPSITE_CLAIMED_NAV_PIN_NUDGE_Y_PX : 0;
-
-      if (popupOpen && isMobileOverlay) {
-        // Anchored under the search bar, but never tall enough to reach the pin.
-        // Nudge pin/card down when the blue TalisU™ navbar is present.
-        const tipPointY = Math.round(
-          rootRect.height / 2 - MAPSITE_PIN_TIP_CLEARANCE_PX + navNudge
-        );
-        const top = Math.max(
-          MAPSITE_LISTING_TILE_TOP_FALLBACK_PX,
-          8 + navNudge,
-        );
-        const height = Math.max(
-          MAPSITE_MIN_CARD_HEIGHT_PX,
-          Math.min(
-            MAPSITE_POPUP_MIN_HEIGHT_PX,
-            tipPointY - MAPSITE_POPUP_TIP_HEIGHT_PX - top
-          )
-        );
-        setAlignTop((prev) => (prev === top ? prev : top));
-        setExpandedCardHeight((prev) => (prev === height ? prev : height));
-        setPopupCenterX((prev) => {
-          const next = Math.round(rootRect.width / 2);
-          return prev === next ? prev : next;
-        });
-        onLockCenterOffsetChange({ x: 0, y: navNudge });
-        return;
-      }
+      const compactCard = layout.compact || isMobileOverlay;
 
       if (popupOpen) {
-        const tipPointY = Math.round(
-          rootRect.height / 2 - MAPSITE_PIN_TIP_CLEARANCE_PX + navNudge
-        );
-        const cardBottom = tipPointY - MAPSITE_POPUP_TIP_HEIGHT_PX;
-        const top = Math.max(8 + navNudge, cardBottom - MAPSITE_POPUP_MIN_HEIGHT_PX);
-        setAlignTop((prev) => (prev === top ? prev : top));
-        setExpandedCardHeight((prev) => (prev === null ? prev : null));
-        setPopupCenterX((prev) => {
-          const next = Math.round(rootRect.width / 2);
-          return prev === next ? prev : next;
+        const placed = placeOpenMapSiteCard({
+          rootWidth: rootRect.width,
+          rootHeight: rootRect.height,
+          chromeOverlap,
+          overlayBottom,
+          listingRight,
+          compact: compactCard,
         });
-        onLockCenterOffsetChange({ x: 0, y: navNudge });
+        setAlignTop((prev) => (prev === placed.alignTop ? prev : placed.alignTop));
+        setExpandedCardHeight((prev) =>
+          prev === placed.cardHeight ? prev : placed.cardHeight,
+        );
+        setPopupCenterX((prev) =>
+          prev === placed.popupCenterX ? prev : placed.popupCenterX,
+        );
+        onLockCenterOffsetChange(placed.pinOffset);
+        const cardWidth = Math.min(
+          rootRect.width * 0.92,
+          MAPSITE_LISTING_CARD_MAX_WIDTH_PX,
+        );
+        const nextZoomTop = mapSiteZoomControlTop({
+          rootWidth: rootRect.width,
+          rootHeight: rootRect.height,
+          compact: compactCard,
+          overlayBottom,
+          popupOpen: true,
+          popupTop: placed.alignTop,
+          popupHeight: placed.cardHeight,
+          popupRight: placed.popupCenterX + cardWidth / 2,
+        });
+        setZoomTop((prev) => (prev === nextZoomTop ? prev : nextZoomTop));
         return;
       }
 
@@ -807,6 +819,17 @@ function MapSiteChrome({
         x: layout.pinOffset.x,
         y: layout.pinOffset.y + navNudge,
       });
+      const nextZoomTop = mapSiteZoomControlTop({
+        rootWidth: rootRect.width,
+        rootHeight: rootRect.height,
+        compact: compactCard,
+        overlayBottom,
+        popupOpen: false,
+        popupTop: 0,
+        popupHeight: 0,
+        popupRight: 0,
+      });
+      setZoomTop((prev) => (prev === nextZoomTop ? prev : nextZoomTop));
     };
 
     syncLayout();
@@ -1144,6 +1167,7 @@ function MapSiteChrome({
         className="relative min-h-0 flex-1 overflow-hidden bg-neutral-900"
       >
         <MapEngineCanvas className="h-full w-full" />
+        <MapSiteZoomControls top={zoomTop} />
 
         <div
           ref={sidebarStackRef}
@@ -1189,6 +1213,14 @@ function MapSiteChrome({
                   isOwner={isOwner}
                   accountTypeSegment={accountTypeSegment}
                   showKnowledgeBaseManage={dashboardUnlocked}
+                  dashboardViewToggle={
+                    canToggleDashboardView ? (
+                      <MapSiteOwnerDashboardToggle
+                        fastCode={mapsite.fast_code || ""}
+                        initialEnabled={dashboardViewEnabled}
+                      />
+                    ) : null
+                  }
                 />
               ) : null
             }

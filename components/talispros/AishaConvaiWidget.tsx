@@ -4,6 +4,7 @@ import Script from "next/script";
 import { useEffect, useRef, useSyncExternalStore, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n/client";
+import { aishaInvitationParts } from "@/lib/talispros/aisha-invitation";
 import { watchPoweredByBanner } from "@/lib/talispros/hide-elevenlabs-banner";
 import {
   DEFAULT_ASSISTANT_PERSONA,
@@ -68,6 +69,7 @@ export default function AishaConvaiWidget({
 
   if (!host || !copy) return null;
   const line = invitation === "callback" ? copy.callback : copy.greeting;
+  const invitationParts = aishaInvitationParts(line);
 
   return createPortal(
     <div
@@ -83,7 +85,10 @@ export default function AishaConvaiWidget({
         data-start-label={copy.startCall}
         onClick={startAishaConversation}
       >
-        {line}
+        <span className="aisha-convai-lead">{invitationParts.lead}</span>
+        {invitationParts.rest ? (
+          <span className="aisha-convai-rest"> {invitationParts.rest}</span>
+        ) : null}
       </button>
       <elevenlabs-convai
         agent-id={persona.agentId}

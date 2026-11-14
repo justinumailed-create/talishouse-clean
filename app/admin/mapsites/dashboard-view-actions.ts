@@ -3,9 +3,14 @@
 import { revalidatePath } from "next/cache";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { accountHasAdminScope } from "@/lib/admin-constants";
+import { isOwnMapSite } from "@/lib/mapsite-edit-auth";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
-import { isMissingDashboardViewColumn } from "@/lib/talispros/mapsite-dashboard-view";
+import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
+import {
+  canChangeMapsiteDashboardView,
+  isMissingDashboardViewColumn,
+} from "@/lib/talispros/mapsite-dashboard-view";
 
 async function requireMapsAdmin() {
   const account = await getAdminSessionAccount();
@@ -18,9 +23,14 @@ export async function setMapsiteDashboardViewAction(
   fastCode: string,
   enabled: boolean,
 ): Promise<{ ok: true } | { ok: false; error: string; pendingMigration?: boolean }> {
-  const account = await requireMapsAdmin();
-  if (!account) return { ok: false, error: "You do not have permission to change this Mapsite." };
   const code = fastCode.trim().toLowerCase();
+  const [account, owner] = await Promise.all([
+    requireMapsAdmin(),
+    code ? isOwnMapSite(code) : Promise.resolve(false),
+  ]);
+  if (!canChangeMapsiteDashboardView({ isMapsAdmin: Boolean(account), isOwner: owner })) {
+    return { ok: false, error: "You do not have permission to change this Mapsite." };
+  }
   if (!code || !isSupabaseAdminConfigured()) {
     return { ok: false, error: "Mapsite storage is not available." };
   }
@@ -46,6 +56,11 @@ export async function setMapsiteDashboardViewAction(
     return { ok: false, error: "Could not update the dashboard view." };
   }
   revalidatePath(`/admin/mapsites/${code}`);
-  revalidatePath(`/talispros/mapsite`);
+  revalidatePath("/talispros/mapsite", "layout");
+  if (mapsite.claimAudience) {
+    revalidatePath(
+      buildClaimedMapSitePath({ fastCode: code, audience: mapsite.claimAudience }),
+    );
+  }
   return { ok: true };
 }

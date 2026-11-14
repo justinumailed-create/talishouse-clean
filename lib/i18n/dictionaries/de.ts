@@ -710,6 +710,16 @@ export const de: Dictionary = {
     loggingOut: "Abmeldung läuft …",
     logoutAria: "Von der Mapsite-Inhabersitzung abmelden",
     close: "Schließen",
+    zoomIn: "Vergrößern",
+    zoomOut: "Verkleinern",
+    dashboardView: {
+      label: "Dashboard-Ansicht",
+      hint: "Dashboard auf dieser Mapsite anzeigen.",
+      on: "Dashboard-Ansicht ist an.",
+      off: "Dashboard-Ansicht ist aus.",
+      denied: "Sie dürfen diese Mapsite nicht ändern.",
+      failed: "Die Dashboard-Ansicht konnte nicht gespeichert werden.",
+    },
     dashboardMenu: {
       ebooks: "E-Book-Editor",
       branding: "Logo- & Karten-Editor",

@@ -23,7 +23,7 @@ import {
   mapsiteAccountTypeSegment,
   MAPSITE_APP_PATH,
 } from "@/lib/talispros/mapsite-state";
-import { getMapSiteEditToolbarState, isOwnMapSite } from "@/lib/mapsite-edit-auth";
+import { getMapSiteEditToolbarState, isMapSiteAdmin, isOwnMapSite } from "@/lib/mapsite-edit-auth";
 import { loadMapSiteOwnerCustomizations } from "@/lib/talispros/mapsite-owner-customizations-service";
 import {
   loadMapSiteApplicationState,
@@ -294,6 +294,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
   // Dashboard dropdown: owner session, or a Mapsite admin (e.g. FAST Code ARUN).
   // Paid + non-demo is enforced client-side (dashboardUnlocked) and in every action.
   const canManageDashboard = isOwner || Boolean(editAccess?.isAdmin);
+  const canToggleDashboardView = isOwner || (await isMapSiteAdmin());
   const primarySlug = ebookContext?.primaryEbook?.slug || bookSlug;
   const talisBookHref =
     (primarySlug ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}` : null) ||
@@ -365,6 +366,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       pinCheckoutStatus={pinCheckoutStatus}
       pinCheckoutSessionId={pinCheckoutSessionId}
       canManageDashboard={canManageDashboard}
+      canToggleDashboardView={canToggleDashboardView}
       initialOwnerCustomizations={ownerCustomizations}
       initialRootContext={rootContext}
       personalHomeNav={{
