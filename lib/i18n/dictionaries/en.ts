@@ -391,6 +391,16 @@ export const en = {
     loggingOut: "Logging out…",
     logoutAria: "Log out of Mapsite owner session",
     close: "Close",
+    zoomIn: "Zoom in",
+    zoomOut: "Zoom out",
+    dashboardView: {
+      label: "Dashboard view",
+      hint: "Show the dashboard on this Mapsite.",
+      on: "Dashboard view is on.",
+      off: "Dashboard view is off.",
+      denied: "You do not have permission to change this Mapsite.",
+      failed: "Could not update the dashboard view.",
+    },
     dashboardMenu: {
       ebooks: "Ebook Editor",
       branding: "Logo & Card Editor",

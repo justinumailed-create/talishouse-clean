@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import type { PinCategoryOption } from "@/lib/talispros/mapsite-pin-categories";
-import type { KeyboardEvent, RefObject } from "react";
+import type { KeyboardEvent, ReactNode, RefObject } from "react";
 import type { RegistrationMarket } from "@/lib/registration-market";
 import {
   CLAIM_A_MARKET_PAGE,
@@ -93,6 +93,8 @@ interface MapSiteMarketPartnerCardProps {
   activeCategory?: string;
   onCategoryChange?: (category: string) => void;
   categoryEmpty?: boolean;
+  /** Owner switch. Stays visible when the dashboard itself is hidden. */
+  dashboardViewToggle?: ReactNode;
 }
 
 function CardPhone({ phone, label }: { phone: string; label: string }) {
@@ -262,6 +264,7 @@ export default function MapSiteMarketPartnerCard({
   activeCategory = "",
   onCategoryChange,
   categoryEmpty = false,
+  dashboardViewToggle = null,
 }: MapSiteMarketPartnerCardProps) {
   const t = useT();
   const content = contentForAudience(audience);
@@ -382,6 +385,7 @@ export default function MapSiteMarketPartnerCard({
           className="mt-3"
         />
         {tools}
+        {dashboardViewToggle}
         {isOwner ? (
           <MapSiteOwnerLogoutButton
             fastCode={fastCode}
@@ -451,6 +455,7 @@ export default function MapSiteMarketPartnerCard({
           className="mt-4"
         />
         {tools}
+        {dashboardViewToggle}
         {isOwner ? (
           <MapSiteOwnerLogoutButton
             fastCode={fastCode}

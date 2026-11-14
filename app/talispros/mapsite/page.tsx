@@ -13,7 +13,7 @@ import {
   MAPSITE_APP_PATH,
   mapsiteAccountTypeSegment,
 } from "@/lib/talispros/mapsite-state";
-import { getMapSiteEditToolbarState, isOwnMapSite } from "@/lib/mapsite-edit-auth";
+import { getMapSiteEditToolbarState, isMapSiteAdmin, isOwnMapSite } from "@/lib/mapsite-edit-auth";
 import { loadMapSiteOwnerCustomizations } from "@/lib/talispros/mapsite-owner-customizations-service";
 import {
   loadMapSiteApplicationState,
@@ -239,14 +239,13 @@ export default async function TalisprosMapSitePage({
           checkoutReconcile && shouldReconcileClaimedMapSiteFromStripe(stripeOptions),
       });
 
-  let isOwner = isDemoListing || showStartHere;
-  if (!isOwner) {
-    try {
-      isOwner = await isOwnMapSite(ownerCode);
-    } catch (error) {
-      console.warn("[mapsite] Could not resolve owner session:", error);
-    }
+  let ownerSession = false;
+  try {
+    ownerSession = await isOwnMapSite(ownerCode);
+  } catch (error) {
+    console.warn("[mapsite] Could not resolve owner session:", error);
   }
+  const isOwner = isDemoListing || showStartHere || ownerSession;
 
   if (!isOwner && (disqualified || (ownerCode && ownerCode !== fastCode && (await isFastCodeDisqualified(ownerCode))))) {
     notFound();
@@ -282,6 +281,7 @@ export default async function TalisprosMapSitePage({
   // Dashboard dropdown: owner session, or a Mapsite admin (e.g. FAST Code ARUN).
   // Paid + non-demo is enforced client-side (dashboardUnlocked) and in every action.
   const canManageDashboard = isOwner || Boolean(editAccess?.isAdmin);
+  const canToggleDashboardView = ownerSession || (await isMapSiteAdmin());
   const primarySlug = ebookContext?.primaryEbook?.slug || bookSlug;
   const talisBookHref =
     (primarySlug ? `${ROUTES.TALISBOOKS_VIEWER}/${primarySlug}` : null) ||
@@ -329,6 +329,7 @@ export default async function TalisprosMapSitePage({
       pinCheckoutStatus={pinCheckoutStatus}
       pinCheckoutSessionId={pinCheckoutSessionId}
       canManageDashboard={canManageDashboard}
+      canToggleDashboardView={canToggleDashboardView}
       initialOwnerCustomizations={ownerCustomizations}
       personalHomeNav={
         fastCode && !isAllPinsFastCode(fastCode)

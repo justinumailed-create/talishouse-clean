@@ -5,6 +5,17 @@ export function mapsiteDashboardViewEnabled(value: boolean | null | undefined): 
   return value !== false;
 }
 
+/**
+ * The Mapsite's owner and a Mapsites admin may change the flag.
+ * An agent session is neither.
+ */
+export function canChangeMapsiteDashboardView(input: {
+  isMapsAdmin: boolean;
+  isOwner: boolean;
+}): boolean {
+  return input.isMapsAdmin || input.isOwner;
+}
+
 export function isMissingDashboardViewColumn(message: string | null | undefined): boolean {
   const text = (message || "").toLowerCase();
   return text.includes("dashboard_view_enabled") && (text.includes("column") || text.includes("schema"));
