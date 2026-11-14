@@ -1,9 +1,10 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { en } from "../lib/i18n/dictionaries/en";
 import { de } from "../lib/i18n/dictionaries/de";
 import { ASSISTANT_PERSONAS } from "../lib/talispros/assistant-personas";
+import { isPoweredByBanner } from "../lib/talispros/hide-elevenlabs-banner";
 
 const read = (path: string) => readFileSync(resolve(path), "utf8");
 
@@ -27,6 +28,23 @@ describe("Aisha Convai widget on the homepage", () => {
     expect(widget).toContain("startAishaConversation");
     expect(widget).toContain("data-start-label={copy.startCall}");
     expect(widget).toContain("shadowRoot");
+    expect(widget).toContain("watchPoweredByBanner");
+    expect(read("lib/talispros/hide-elevenlabs-banner.ts")).toContain("elevenlabs.io");
+    const embeds: string[] = [];
+    const walk = (path: string) => {
+      for (const entry of readdirSync(path)) {
+        const full = join(path, entry);
+        if (statSync(full).isDirectory()) {
+          if (entry === "node_modules" || entry === ".next") continue;
+          walk(full);
+          continue;
+        }
+        if (!/\.(tsx|jsx)$/.test(entry)) continue;
+        if (read(full).includes("<elevenlabs-convai")) embeds.push(full);
+      }
+    };
+    for (const dir of ["components", "app", "lib"]) walk(dir);
+    expect(embeds).toEqual(["components/talispros/AishaConvaiWidget.tsx"]);
     const css = read("app/globals.css");
     expect(css).toMatch(
       /\.aisha-convai-slot elevenlabs-convai\s*\{[^}]*pointer-events:\s*none\s*!important/,
@@ -38,6 +56,13 @@ describe("Aisha Convai widget on the homepage", () => {
     expect(widget).not.toMatch(/talispros\.com/);
     expect(shell).not.toContain('<TalisBotChat position="left" />');
     expect(read("types/elevenlabs-convai.d.ts")).toContain('"elevenlabs-convai"');
+  });
+
+  it("hides only the Powered by line", () => {
+    expect(isPoweredByBanner("Powered by ElevenAgents")).toBe(true);
+    expect(isPoweredByBanner("  Powered by   ElevenAgents ")).toBe(true);
+    expect(isPoweredByBanner("By clicking Agree, I consent to the ElevenLabs terms.")).toBe(false);
+    expect(isPoweredByBanner("Start a call")).toBe(false);
   });
 
   it("uses the exact greeting in English and German", () => {
