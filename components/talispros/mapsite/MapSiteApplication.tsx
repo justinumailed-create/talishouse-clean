@@ -563,7 +563,7 @@ export default function MapSiteApplication({
       />
       {mapsiteShowsAisha(mapsite.status) ? (
         <AishaConvaiWidget
-          invitation={mapsiteAishaInvitation(mapsite.fast_code)}
+          invitation={mapsiteAishaInvitation()}
           placement="bottom-right"
           agentId={AISHA_MAPSITE_AGENT_ID}
           dynamicVariables={aishaMapsiteDynamicVariables({

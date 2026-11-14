@@ -5,7 +5,7 @@ import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, typ
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n/client";
 import { aishaInvitationParts } from "@/lib/talispros/aisha-invitation";
-import { aishaSpeechBubblePath } from "@/lib/talispros/aisha-speech-bubble";
+import { aishaBubbleFrame, aishaSpeechBubblePath } from "@/lib/talispros/aisha-speech-bubble";
 import { watchPoweredByBanner } from "@/lib/talispros/hide-elevenlabs-banner";
 import {
   DEFAULT_ASSISTANT_PERSONA,
@@ -53,6 +53,17 @@ const BUBBLE_STYLE = `
   backdrop-filter: saturate(160%) blur(16px);
 }
 .aisha-convai-bubble { position: relative; }
+.aisha-convai-bubble--aligned {
+  position: fixed;
+  margin: 0;
+  max-width: none;
+}
+.aisha-convai-bubble--aligned .aisha-convai-label {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
+}
 .aisha-convai-dismiss {
   position: absolute;
   top: 8px;
@@ -160,6 +171,12 @@ export default function AishaConvaiWidget({
   const [bubbleSize, setBubbleSize] = useState({ width: 0, height: 0 });
   const [surfaceOpen, setSurfaceOpen] = useState(false);
   const [bubbleDismissed, setBubbleDismissed] = useState(false);
+  const [pillFrame, setPillFrame] = useState<{
+    left: number;
+    width: number;
+    bottom: number;
+    tip: number;
+  } | null>(null);
   const avatar = origin ? `${origin}${persona.portraitSrc}` : persona.portraitSrc;
 
   useEffect(() => {
@@ -193,13 +210,74 @@ export default function AishaConvaiWidget({
     return () => window.removeEventListener("resize", apply);
   }, [host, surfaceOpen]);
 
-  const line = !copy
-    ? ""
-    : invitation === "callback"
-      ? copy.callback
-      : invitation === "mapsite"
-        ? copy.mapsite
-        : copy.greeting;
+  useLayoutEffect(() => {
+    const slot = slotRef.current;
+    const startLabel = copy?.startCall ?? "";
+    if (!slot || bubbleDismissed || !startLabel) return;
+    const measure = () => {
+      const hostEl = slot.querySelector("elevenlabs-convai");
+      const root = hostEl && "shadowRoot" in hostEl ? hostEl.shadowRoot : null;
+      if (!root) return;
+      const wanted = startLabel.trim().toLowerCase();
+      const start = [...root.querySelectorAll("button")].find((button) => {
+        const text = button.textContent?.replace(/\s+/g, " ").trim().toLowerCase() ?? "";
+        return text === wanted;
+      });
+      if (!start) return;
+      const sheet = start.closest(".rounded-compact-sheet");
+      let bar: HTMLElement = sheet instanceof HTMLElement ? sheet : start;
+      if (!(sheet instanceof HTMLElement)) {
+        const startBox = start.getBoundingClientRect();
+        let node: HTMLElement = start;
+        for (let i = 0; i < 6 && node.parentElement instanceof HTMLElement; i += 1) {
+          const parent = node.parentElement;
+          if (parent.getBoundingClientRect().width > startBox.width + 20) {
+            bar = parent;
+            break;
+          }
+          node = parent;
+        }
+      }
+      const box = bar.getBoundingClientRect();
+      if (box.width < 40 || box.height < 20) return;
+      const image = bar.querySelector("img");
+      const imageBox = image?.getBoundingClientRect();
+      const avatarCenter =
+        imageBox && imageBox.width > 8 ? imageBox.left + imageBox.width / 2 : null;
+      const next = aishaBubbleFrame({
+        pillLeft: box.left,
+        pillTop: box.top,
+        pillWidth: box.width,
+        avatarCenter,
+        viewportHeight: window.innerHeight,
+      });
+      setPillFrame((current) =>
+        current &&
+        current.left === next.left &&
+        current.width === next.width &&
+        current.bottom === next.bottom &&
+        current.tip === next.tip
+          ? current
+          : next,
+      );
+    };
+    measure();
+    const hostEl = slot.querySelector("elevenlabs-convai");
+    const root = hostEl && "shadowRoot" in hostEl ? hostEl.shadowRoot : null;
+    const observer = new MutationObserver(measure);
+    if (root) observer.observe(root, { childList: true, subtree: true });
+    window.addEventListener("resize", measure);
+    const timer = window.setInterval(measure, 400);
+    const stop = window.setTimeout(() => window.clearInterval(timer), 8000);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+      window.clearInterval(timer);
+      window.clearTimeout(stop);
+    };
+  }, [host, bubbleDismissed, copy, surfaceOpen]);
+
+  const line = !copy ? "" : invitation === "callback" ? copy.callback : copy.greeting;
   const bubbleSide = placement === "bottom-right" ? "right" : "left";
 
   useLayoutEffect(() => {
@@ -223,7 +301,14 @@ export default function AishaConvaiWidget({
   const invitationParts = aishaInvitationParts(line);
   const bubblePath =
     bubbleSize.width > 0 && bubbleSize.height > 0
-      ? aishaSpeechBubblePath(bubbleSize.width, bubbleSize.height, bubbleSide)
+      ? aishaSpeechBubblePath(
+          bubbleSize.width,
+          bubbleSize.height,
+          bubbleSide,
+          pillFrame && bubbleSize.width > 0
+            ? (pillFrame.tip / pillFrame.width) * bubbleSize.width
+            : null,
+        )
       : "";
   const agentId = agentIdOverride?.trim() || persona.agentId;
 
@@ -238,7 +323,16 @@ export default function AishaConvaiWidget({
     >
       <style>{BUBBLE_STYLE}</style>
       {bubbleDismissed ? null : (
-      <div className="aisha-convai-bubble">
+      <div
+        className={
+          pillFrame ? "aisha-convai-bubble aisha-convai-bubble--aligned" : "aisha-convai-bubble"
+        }
+        style={
+          pillFrame
+            ? { left: pillFrame.left, width: pillFrame.width, bottom: pillFrame.bottom }
+            : undefined
+        }
+      >
       <button
         ref={labelRef}
         type="button"

@@ -145,7 +145,6 @@ export const en = {
           "Hi, I'm Aisha. I can help make your advertising revenue producing",
         callback:
           "Propose a Project. Just start a call and tell me what you can see for here.",
-        mapsite: "Start a call and tell me what you can see.",
         startCall: "Start a call",
         endCall: "End call",
         openChat: "Open chat",

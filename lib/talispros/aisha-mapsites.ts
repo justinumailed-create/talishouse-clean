@@ -13,13 +13,11 @@ export function mapsiteShowsAisha(status: string | null | undefined): boolean {
 }
 
 /**
- * DC06 keeps its project invitation. Every other claimed Mapsite uses the
- * short default line.
+ * Every claimed Mapsite uses DC06's project line. The homepage keeps its
+ * own greeting.
  */
-export function mapsiteAishaInvitation(
-  fastCode: string | null | undefined,
-): "callback" | "mapsite" {
-  return fastCode?.trim().toLowerCase() === "dc06" ? "callback" : "mapsite";
+export function mapsiteAishaInvitation(): "callback" {
+  return "callback";
 }
 
 /**
