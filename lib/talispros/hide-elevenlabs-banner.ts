@@ -41,10 +41,12 @@ function elementIsShown(el: HTMLElement): boolean {
 export function convaiSurfaceOpen(root: ParentNode): boolean {
   const terms = root.querySelector(".terms");
   if (terms instanceof HTMLElement && elementIsShown(terms)) return true;
-  for (const node of root.querySelectorAll("h1, h2, h3, h4, button, span, textarea")) {
+  const textarea = root.querySelector("textarea");
+  if (textarea instanceof HTMLElement && elementIsShown(textarea)) return true;
+  for (const node of root.querySelectorAll("h1, h2, h3, h4, button")) {
     if (!(node instanceof HTMLElement) || !elementIsShown(node)) continue;
     const text = node.textContent?.replace(/\s+/g, " ").trim() ?? "";
-    if (node.tagName === "TEXTAREA" || OPEN_LABEL.test(text)) return true;
+    if (OPEN_LABEL.test(text)) return true;
   }
   return false;
 }
@@ -103,7 +105,11 @@ export function watchPoweredByBanner(
       hidePoweredByBanner(root);
       onSurface?.(convaiSurfaceOpen(root));
     });
-    shadowObserver.observe(root, { childList: true, subtree: true, attributes: true });
+    // The orb rewrites attributes every frame. Watching those and then
+    // measuring the tree forces layout on every frame and freezes the page.
+    // Panels are inserted as nodes. A short interval covers a panel that
+    // only changes visibility.
+    shadowObserver.observe(root, { childList: true, subtree: true });
     if (host instanceof HTMLElement) {
       host.addEventListener("elevenlabs-convai:call", () => onSurface?.(true));
     }

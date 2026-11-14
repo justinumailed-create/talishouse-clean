@@ -16,5 +16,6 @@ describe("Aisha bubble while the widget panel is open", () => {
     expect(css).toContain("-webkit-backdrop-filter");
     expect(banner).toContain("function convaiSurfaceOpen");
     expect(banner).toContain(".terms");
+    expect(banner).not.toContain("attributes: true");
   });
 });
