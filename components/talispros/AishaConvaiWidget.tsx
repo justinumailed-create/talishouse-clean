@@ -99,11 +99,17 @@ export default function AishaConvaiWidget({
   persona = DEFAULT_ASSISTANT_PERSONA,
   invitation = "greeting",
   placement = "bottom-left",
+  agentId: agentIdOverride,
+  dynamicVariables,
 }: {
   persona?: AssistantPersona;
   /** Homepage greeting, or the call-back line used on an allowlisted Mapsite. */
   invitation?: "greeting" | "callback";
   placement?: "bottom-left" | "bottom-right";
+  /** Mapsite pages pass their own agent. Other pages keep the homepage agent. */
+  agentId?: string;
+  /** JSON for the Mapsite agent. Omitted on the homepage. */
+  dynamicVariables?: string;
 }) {
   const copy = useT().home.assistants[persona.id];
   const origin = usePageOrigin();
@@ -120,6 +126,7 @@ export default function AishaConvaiWidget({
   if (!host || !copy) return null;
   const line = invitation === "callback" ? copy.callback : copy.greeting;
   const invitationParts = aishaInvitationParts(line);
+  const agentId = agentIdOverride?.trim() || persona.agentId;
 
   return createPortal(
     <div
@@ -142,7 +149,8 @@ export default function AishaConvaiWidget({
         ) : null}
       </button>
       <elevenlabs-convai
-        agent-id={persona.agentId}
+        agent-id={agentId}
+        dynamic-variables={dynamicVariables || undefined}
         action-text={line}
         aria-label={line}
         start-call-text={copy.startCall}

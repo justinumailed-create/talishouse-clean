@@ -20,7 +20,9 @@ describe("Aisha on an allowlisted Mapsite", () => {
     expect(mapsiteShowsAisha("")).toBe(false);
     const app = read("components/talispros/mapsite/MapSiteApplication.tsx");
     expect(app).toContain("mapsiteShowsAisha(mapsite.fast_code)");
-    expect(app).toContain('<AishaConvaiWidget invitation="callback" placement="bottom-right" />');
+    expect(app).toContain('invitation="callback"');
+    expect(app).toContain('placement="bottom-right"');
+    expect(app).toContain("agentId={AISHA_MAPSITE_AGENT_ID}");
   });
 
   it("uses the call-back invitation in English and German", () => {

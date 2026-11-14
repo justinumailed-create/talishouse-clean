@@ -6,6 +6,8 @@ import type { DetailedHTMLProps, HTMLAttributes } from "react";
  */
 type ElevenLabsConvaiProps = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement> & {
   "agent-id": string;
+  /** JSON object. Omitted when the page has no Mapsite variables. */
+  "dynamic-variables"?: string;
   "action-text"?: string;
   "start-call-text"?: string;
   "end-call-text"?: string;

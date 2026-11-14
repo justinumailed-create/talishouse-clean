@@ -32,6 +32,10 @@ import {
   type MapSiteCapabilityAccountType,
 } from "@/lib/talispros/account-capabilities";
 import { mapsiteShowsAisha } from "@/lib/talispros/aisha-mapsites";
+import {
+  AISHA_MAPSITE_AGENT_ID,
+  aishaMapsiteDynamicVariables,
+} from "@/lib/talispros/aisha-mapsite-agent";
 import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
 import type { MapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
 import {
@@ -557,7 +561,17 @@ export default function MapSiteApplication({
         belowWriteUp={belowWriteUp}
       />
       {mapsiteShowsAisha(mapsite.fast_code) ? (
-        <AishaConvaiWidget invitation="callback" placement="bottom-right" />
+        <AishaConvaiWidget
+          invitation="callback"
+          placement="bottom-right"
+          agentId={AISHA_MAPSITE_AGENT_ID}
+          dynamicVariables={aishaMapsiteDynamicVariables({
+            ownerFirstName: mapsite.owner_first_name,
+            agentName: mapsite.agent_name,
+            fastCode: mapsite.fast_code,
+            mapsiteTitle: mapsite.property_title,
+          })}
+        />
       ) : null}
     </MapEngineProvider>
   );
