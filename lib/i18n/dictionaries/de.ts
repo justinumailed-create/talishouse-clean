@@ -634,6 +634,8 @@ export const de: Dictionary = {
     canada: "Kanada",
     canadaMarkets: "Märkte Kanada",
     usaMarkets: "Märkte USA",
+    claimMarket: "Markt beanspruchen™",
+    logoAlt: "Windswept-Baum",
     adminGate: {
       title: "Karte öffnen",
       body: "Diese Karte öffnet sich mit dem Global-Admin-Passwort.",

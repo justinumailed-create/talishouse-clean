@@ -8,7 +8,8 @@ const read = (p: string) => readFileSync(resolve(p), "utf8");
 describe("Ralf 4 — Assign demo eBook to account", () => {
   it("shows ASSIGN TO ACCOUNT beside Claim Your Market™ (EN/DE)", () => {
     const claim = read("components/talispros/mapsite/DemoClaimMarketButton.tsx");
-    expect(claim).toContain("<DemoAssignToAccountButton");
+    expect(claim).not.toContain("DemoAssignToAccountButton");
+    expect(claim).toContain("Claim Your Market™");
     expect(read("lib/i18n/dictionaries/en.ts")).toContain('assignCta: "Assign to account"');
     expect(read("lib/i18n/dictionaries/de.ts")).toContain('assignCta: "Konto zuweisen"');
   });

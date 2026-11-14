@@ -14,6 +14,7 @@ import {
 } from "@/lib/talispros/mapsite-og-image";
 import { createMetadata } from "@/lib/seo";
 import { isBookshelfViewerOrigin } from "@/lib/talisbooks/viewer/origin";
+import { canDownloadReplaceImageTemplates } from "@/lib/talispros/replace-image-templates.server";
 
 interface TalisBooksViewerSlugPageProps {
   params: Promise<{ slug: string }>;
@@ -98,6 +99,9 @@ export default async function TalisBooksViewerSlugPage({
   const query = searchParams ? await searchParams : {};
   const fromBookshelf = isBookshelfViewerOrigin(query.from);
   const book = await resolveViewerBookBySlug(slug, await getLocale());
+  const platformLinksUnlocked = book
+    ? await canDownloadReplaceImageTemplates(book.fastCode).catch(() => false)
+    : false;
 
   if (!book) {
     notFound();
@@ -120,6 +124,7 @@ export default async function TalisBooksViewerSlugPage({
       singleOnMobile
       initialViewMode={single ? "single" : "spread"}
       initialNavIndex={initialNavIndex}
+      platformLinksUnlocked={platformLinksUnlocked}
     />
   );
 }

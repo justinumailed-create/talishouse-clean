@@ -105,6 +105,11 @@ describe("North Shore Nature Centre TEB™ on the demo PIN", () => {
     expect(NSNC_BOOK_HREF).toBe(`/talisbooks/viewer/${NSNC_BOOK_SLUG}`);
     const book = createNsncViewerBook("de");
     expect(book.title).toBe("North Shore Nature Centre");
+    expect(book.pages[0]?.pageNumber).toBe(1);
+    expect(book.pages[0]?.heroImageUrl).toContain("front-cover");
+    expect(book.pages[1]?.spreadImageUrl).toContain("page-02.webp");
+    expect(book.pages.at(-1)?.heroImageUrl).toContain("back-cover");
+    expect(JSON.stringify(book.pages.slice(1, -1))).not.toContain("page-01.webp");
     expect(JSON.stringify(book)).toContain("/talisbooks/nsnc/pages/page-12.webp");
     expect(JSON.stringify(book)).toContain("North-Shore-Nature-Centre.pdf");
     expect(read("lib/talisbooks/viewer/load-book.ts")).toContain("createNsncViewerBook(locale)");

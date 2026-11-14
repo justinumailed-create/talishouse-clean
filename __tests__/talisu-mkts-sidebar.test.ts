@@ -18,7 +18,10 @@ describe("Markets sidebar card", () => {
   it("shows the market buttons above the PMC bullets, stacked full width", () => {
     const nav = source.indexOf('data-testid="mkts-site-links"');
     const bullets = source.indexOf("m.pmcBullets.map");
-    expect(nav).toBeGreaterThan(source.indexOf("m.pmcTagline"));
+    expect(source).toContain('data-testid="mkts-windswept-logo"');
+    expect(source).not.toContain("m.pmcTitle");
+    expect(source).not.toContain("m.pmcTagline");
+    expect(nav).toBeGreaterThan(source.indexOf("mkts-windswept-logo"));
     expect(nav).toBeLessThan(bullets);
     expect(source).toContain('className="mt-3 flex flex-col gap-2.5"');
     expect(METAL_TAB).toContain("w-full");

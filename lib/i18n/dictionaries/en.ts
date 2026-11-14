@@ -310,6 +310,8 @@ export const en = {
     /** Left-panel links (Ralf, Oct 18): switch sites in the same window. */
     canadaMarkets: "Canada Markets",
     usaMarkets: "USA Markets",
+    claimMarket: "Claim Your Market™",
+    logoAlt: "Windswept tree",
     /** Password form on /talisu/mkts and /talisu/mkts/usa. No secret is shown. */
     adminGate: {
       title: "Open this map",

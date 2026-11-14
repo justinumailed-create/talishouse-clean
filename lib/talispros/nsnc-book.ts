@@ -1,6 +1,6 @@
 /**
  * North Shore Nature Centre TEB™, the eBook on the demo Mapsite PIN in
- * Bay St. Lawrence, Nova Scotia. Twelve landscape slides, each shown as a
+ * Bay St. Lawrence, Nova Scotia. Interior centerfolds after the cover wrap. Each slide is shown as a
  * centerfold (one image across the left and right leaves). The front cover is
  * the right half of slide 1, the back cover is its left half (Aisha and the
  * team contact). Assets live in `/public/talisbooks/nsnc/`.
@@ -32,7 +32,8 @@ export function nsncSlideHref(slide: number): string {
 
 export function createNsncViewerBook(locale?: Locale | string | null): TalisBooksViewerBook {
   const copy = COPY[locale === "de" ? "de" : "en"];
-  const totalPages = 2 + NSNC_SLIDE_COUNT * 2;
+  const interiorSlides = NSNC_SLIDE_COUNT - 1;
+  const totalPages = 2 + interiorSlides * 2;
   const pages: TalisBooksViewerPage[] = [
     {
       id: `${NSNC_BOOK_SLUG}-front`,
@@ -46,9 +47,9 @@ export function createNsncViewerBook(locale?: Locale | string | null): TalisBook
       clientEditable: false,
     },
   ];
-  for (let slide = 1; slide <= NSNC_SLIDE_COUNT; slide += 1) {
+  for (let slide = 2; slide <= NSNC_SLIDE_COUNT; slide += 1) {
     const image = nsncSlideHref(slide);
-    const left = slide * 2;
+    const left = (slide - 1) * 2;
     for (const [side, pageNumber] of [
       ["left", left],
       ["right", left + 1],
