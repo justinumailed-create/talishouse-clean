@@ -553,7 +553,7 @@ p {
   position: fixed;
   z-index: 35;
   right: 0.75rem;
-  bottom: 14.5rem;
+  bottom: 15.5rem;
   left: auto;
   display: flex;
   max-width: min(18rem, calc(100vw - 1.5rem));
@@ -563,11 +563,6 @@ p {
 }
 
 .aisha-convai-slot elevenlabs-convai {
-  position: fixed !important;
-  z-index: 35;
-  right: 0.75rem !important;
-  bottom: 9.75rem !important;
-  left: auto !important;
   pointer-events: auto;
 }
 
@@ -588,14 +583,8 @@ p {
   .aisha-convai-slot {
     right: auto;
     left: 1.25rem;
-    bottom: 6.25rem;
+    bottom: 8.5rem;
     align-items: flex-start;
-  }
-
-  .aisha-convai-slot elevenlabs-convai {
-    right: auto !important;
-    left: 1.25rem !important;
-    bottom: 1.25rem !important;
   }
 }
 
