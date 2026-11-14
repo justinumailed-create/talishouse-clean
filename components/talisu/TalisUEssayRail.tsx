@@ -1,110 +1,137 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useLocale, useT } from "@/lib/i18n/client";
+import { TALISU_DISCUSS_PATH, talisuHref } from "@/lib/talisu/talisu-links";
 import {
-  TALISU_DEFAULT_ESSAY_SLUG,
   TALISU_ESSAYS,
   TALISU_ESSAY_QUERY_PARAM,
   resolveTalisUEssaySlug,
 } from "@/components/talisu/essay-registry";
 
 type TalisUEssayRailProps = {
-  /** Slug selected on the server from `?essay=` (defaults to bare land). */
+  /** Slug selected on the server from `?essay=` so that essay starts open. */
   initialSlug: string;
-  /** Accessible name of the switcher (localized FAQ chrome). */
+  /** Accessible name of the essay group. */
   switcherLabel: string;
 };
 
 /**
- * Right rail of /talisu FAQ: compact pill switcher (opposite the FAQ heading)
- * over the selected essay. Pills use a 5-column grid (≤ 2 rows for 10
- * entries; horizontal scroll on phones); the rail itself is sized by the page (matches the FAQ column)
- * and the essay body scrolls inside it. Only the selected essay renders, so
- * Print prints that essay. Deep link: /talisu?essay=<slug>.
+ * Right rail of /talisu: Propose a Project, then each essay as a closed
+ * disclosure. A deep link opens that one essay. Print prints only that essay.
  */
 export default function TalisUEssayRail({ initialSlug, switcherLabel }: TalisUEssayRailProps) {
   const locale = useLocale();
   const t = useT();
-  const [slug, setSlug] = useState(initialSlug);
+  const [openSlug, setOpenSlug] = useState<string | null>(
+    initialSlug ? initialSlug : null,
+  );
 
-  // Back/forward between essay deep links.
   useEffect(() => {
     function onPopState() {
       const params = new URLSearchParams(window.location.search);
-      setSlug(resolveTalisUEssaySlug(params.get(TALISU_ESSAY_QUERY_PARAM)));
+      const next = params.get(TALISU_ESSAY_QUERY_PARAM);
+      setOpenSlug(next ? resolveTalisUEssaySlug(next) : null);
     }
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
 
-  function select(next: string) {
-    if (next === slug) return;
-    setSlug(next);
+  function toggle(slug: string) {
+    const next = openSlug === slug ? null : slug;
+    setOpenSlug(next);
     const url = new URL(window.location.href);
-    if (next === TALISU_DEFAULT_ESSAY_SLUG) url.searchParams.delete(TALISU_ESSAY_QUERY_PARAM);
+    if (!next) url.searchParams.delete(TALISU_ESSAY_QUERY_PARAM);
     else url.searchParams.set(TALISU_ESSAY_QUERY_PARAM, next);
     window.history.replaceState(window.history.state, "", url);
   }
 
-  const active = TALISU_ESSAYS.find((essay) => essay.slug === slug) ?? TALISU_ESSAYS[0];
-  const Content = active.content;
+  function printEssay(slug: string) {
+    setOpenSlug(slug);
+    document.body.dataset.printEssay = slug;
+    const cleanup = () => {
+      delete document.body.dataset.printEssay;
+      window.removeEventListener("afterprint", cleanup);
+    };
+    window.addEventListener("afterprint", cleanup);
+    window.setTimeout(() => window.print(), 0);
+  }
 
   return (
-    <>
-      <div className="talisu-no-print mb-3 flex shrink-0 items-center lg:mb-6 lg:min-h-10">
-        <div
-          role="tablist"
-          aria-label={switcherLabel}
-          className="-mx-1 flex w-full gap-1 overflow-x-auto px-1 pb-1 sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 sm:pb-0"
-        >
-          {TALISU_ESSAYS.map((essay) => {
-            const selected = essay.slug === active.slug;
-            const placeholder = essay.content === null;
-            const label = essay.label[locale] ?? essay.label.en;
-            return (
-              <button
-                key={essay.slug}
-                type="button"
-                role="tab"
-                id={`talisu-essay-tab-${essay.slug}`}
-                aria-selected={selected}
-                aria-controls="talisu-essay-panel"
-                title={label}
-                data-placeholder={placeholder || undefined}
-                onClick={() => select(essay.slug)}
-                className={`shrink-0 truncate whitespace-nowrap rounded-full px-2.5 py-1 text-center text-[11px] leading-4 ring-1 transition sm:min-w-0 sm:px-1.5 sm:tracking-tight ${
-                  placeholder ? "font-medium print:hidden" : "font-semibold"
-                } ${
-                  selected
-                    ? placeholder
-                      ? "bg-neutral-200 text-neutral-600 ring-neutral-300"
-                      : "bg-[#046BD9] text-white ring-[#046BD9]"
-                    : placeholder
-                      ? "bg-neutral-50 text-neutral-400 ring-neutral-200 hover:text-neutral-500"
-                      : "bg-white text-neutral-700 ring-neutral-200 hover:bg-neutral-50 hover:text-neutral-950"
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       <div
-        id="talisu-essay-panel"
-        role="tabpanel"
-        aria-labelledby={`talisu-essay-tab-${active.slug}`}
-        className="talisu-essay-panel flex min-h-0 flex-1 flex-col print:block"
+        className="talisu-propose talisu-no-print shrink-0 rounded-2xl bg-white px-4 py-4 ring-1 ring-neutral-900/10"
+        data-testid="talisu-suggest-project"
       >
-        {Content ? (
-          <Content />
-        ) : (
-          <div className="talisu-no-print flex h-full min-h-[12rem] flex-1 items-center justify-center rounded-2xl bg-white p-6 text-center ring-1 ring-black/5">
-            <p className="text-sm font-medium text-neutral-500">{t.talisu.essayCheckBackSoon}</p>
-          </div>
-        )}
+        <p className="m-0 text-[17px] leading-relaxed text-neutral-950">{t.talisu.valueAdded.proposeLead}</p>
+        <Link
+          href={talisuHref(TALISU_DISCUSS_PATH)}
+          className="mt-3 inline-flex min-h-11 items-center rounded-full bg-[#046BD9] px-5 text-[16px] font-semibold text-white"
+          data-testid="talisu-suggest-project-link"
+        >
+          {t.talisu.valueAdded.proposeCta}
+        </Link>
       </div>
-    </>
+      <div role="group" aria-label={switcherLabel} className="flex min-h-0 flex-1 flex-col gap-3">
+        {TALISU_ESSAYS.map((essay) => {
+          const label = essay.label[locale] ?? essay.label.en;
+          const Content = essay.content;
+          const open = openSlug === essay.slug;
+          const placeholder = Content === null;
+          return (
+            <section
+              key={essay.slug}
+              className="talisu-essay-accordion rounded-2xl bg-white ring-1 ring-neutral-900/15"
+              data-print-target={open ? essay.slug : undefined}
+            >
+              <h2 className="m-0">
+                <button
+                  type="button"
+                  id={`talisu-essay-tab-${essay.slug}`}
+                  aria-expanded={open}
+                  aria-controls={`talisu-essay-panel-${essay.slug}`}
+                  onClick={() => toggle(essay.slug)}
+                  className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-[17px] font-semibold text-neutral-950"
+                >
+                  <span>{label}</span>
+                  <span aria-hidden className={`text-neutral-700 ${open ? "rotate-180" : ""}`}>
+                    ▾
+                  </span>
+                </button>
+              </h2>
+              {open ? (
+                <div
+                  id={`talisu-essay-panel-${essay.slug}`}
+                  role="region"
+                  aria-labelledby={`talisu-essay-tab-${essay.slug}`}
+                  className="talisu-essay-panel border-t border-neutral-200 px-4 pb-4"
+                >
+                  {placeholder || !Content ? (
+                    <p className="m-0 pt-3 text-[16px] text-neutral-800">{t.talisu.essayCheckBackSoon}</p>
+                  ) : (
+                    <>
+                      <div className="talisu-no-print pt-3">
+                        <button
+                          type="button"
+                          onClick={() => printEssay(essay.slug)}
+                          className="talisu-essay-print-btn inline-flex min-h-10 items-center rounded-full px-4 text-[16px] font-semibold text-[#0356b0] ring-1 ring-[#0356b0]"
+                          data-testid={`talisu-essay-print-${essay.slug}`}
+                        >
+                          {t.talisu.printEssay}
+                        </button>
+                      </div>
+                      <div className="pt-3 text-[17px] leading-relaxed text-neutral-950">
+                        <Content />
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : null}
+            </section>
+          );
+        })}
+      </div>
+    </div>
   );
 }

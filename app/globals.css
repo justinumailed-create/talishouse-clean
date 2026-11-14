@@ -5645,6 +5645,19 @@ body.mapsite-gallery-open [data-paypal-button] {
     margin-bottom: 1.5rem;
   }
 
+  body[data-print-essay] .talisu-faq-column,
+  body[data-print-essay] .talisu-propose,
+  body[data-print-essay] .talisu-essay-print-btn,
+  body[data-print-essay] header,
+  body[data-print-essay] footer,
+  body[data-print-essay] .talisu-essay-accordion:not([data-print-target]) {
+    display: none !important;
+  }
+
+  body[data-print-essay] .talisu-essay-accordion {
+    break-inside: avoid;
+  }
+
   .talisu-essay-rail-inner,
   .talisu-essay-panel {
     position: static !important;

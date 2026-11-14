@@ -103,7 +103,8 @@ describe("PIN action explainers", () => {
     const explainer = read("components/talispros/mapsite/PinActionExplainer.tsx");
     expect(explainer).toContain("createPortal");
     expect(explainer).toContain('zIndex: 80');
-    expect(explainer).toContain("pin-action-ttv-learn-more");
+    expect(explainer).toContain("pin-action-${action}-learn-more");
+    expect(explainer).toContain('action === "teb" ? null');
     expect(explainer).toContain("coarsePointer");
   });
 });

@@ -32,12 +32,15 @@ export default function DemoMapSiteBuilderClient({
   initialOpen = false,
   initialPin,
   slotsPanel,
+  foldersUnlocked = false,
 }: {
   /** Deep link / Back already carries build, address or PIN state. */
   initialOpen?: boolean;
   initialPin?: Partial<HomePinLocationValues>;
   /** FAST Code slots beside the card (codes only for the signed-in agent's own list). */
   slotsPanel?: FastCodeSlotsPanelData;
+  /** Server-checked folder access. Codes are omitted until this is true. */
+  foldersUnlocked?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -123,7 +126,9 @@ export default function DemoMapSiteBuilderClient({
               >
                 {d.hero.headline}
               </h1>
-              {slotsPanel ? <FastCodeSlotsPanel data={slotsPanel} /> : null}
+              {slotsPanel ? (
+                <FastCodeSlotsPanel data={slotsPanel} foldersUnlocked={foldersUnlocked} />
+              ) : null}
             </div>
           </div>
         </section>

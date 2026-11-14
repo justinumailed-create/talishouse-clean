@@ -74,9 +74,9 @@ export const TALISU_FAQ: {
         "It is a map-based online navigation system that can be deployed industry adjacent and adds flexibility to how you promote major purchase products (those that typically exceed $10,000 per unit and are immobile, roll, float or fly).",
     },
     {
-      question: "What does Talis“U” mean?",
+      question: "What does TSPLITS stand for?",
       answer:
-        "The “U” represents a play on words: “University” — we educate registrants to enlarge their marketing comfort zones and empower them to get their platforms out there, quickly and competently.",
+        "Talisman Simple Project Lead & Income Tracking System. Talisman, because we want to be your good luck charms. SPLITS because we share advertising revenue generated from your account.",
     },
     {
       question: "What is the meaning of PMC?",

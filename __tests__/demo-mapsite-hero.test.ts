@@ -41,7 +41,7 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
   });
 
   it("puts the FAST Codes inside the write-up, with no side card (Arun, Nov 4)", () => {
-    expect(builder).toContain("<FastCodeSlotsPanel data={slotsPanel} />");
+    expect(builder).toContain("<FastCodeSlotsPanel");
     expect(builder).not.toContain("lg:grid-cols-[minmax(0,1fr)_19rem]");
     expect(builder).not.toContain("d.hero.body1");
     expect(builder).not.toContain("d.hero.body2");
