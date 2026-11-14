@@ -1089,8 +1089,8 @@
    }
   },
   "/privacy": {
-   "kind": "public",
-   "noindex": false,
+   "kind": "utility",
+   "noindex": true,
    "image": "/og/pages/privacy",
    "en": {
     "title": "Privacy Policy | Tsplits™",
@@ -1104,8 +1104,8 @@
    }
   },
   "/terms": {
-   "kind": "public",
-   "noindex": false,
+   "kind": "utility",
+   "noindex": true,
    "image": "/og/pages/terms",
    "en": {
     "title": "Terms of Service | Tsplits™",

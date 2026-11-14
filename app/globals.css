@@ -586,6 +586,58 @@ p {
   }
 }
 
+.ralf-legal-wordmark {
+  background-image: linear-gradient(180deg, #4c97ea 0%, #0c4ea8 58%, #062f66 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media print {
+  header,
+  footer,
+  nav,
+  .aisha-convai-slot,
+  elevenlabs-convai,
+  .th-storefront-chrome,
+  .legal-print-hide,
+  .cookie-banner,
+  [data-cookie-banner] {
+    display: none !important;
+  }
+
+  .ralf-legal,
+  .ralf-legal main {
+    max-width: none !important;
+    background: #fff !important;
+    color: #000 !important;
+    padding: 0 !important;
+  }
+
+  .ralf-legal-cover {
+    background: #fff !important;
+  }
+
+  .ralf-legal-wordmark {
+    background: none !important;
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+  }
+
+  .ralf-legal h2,
+  .ralf-legal h3 {
+    break-after: avoid;
+    page-break-after: avoid;
+    color: #000 !important;
+  }
+
+  .ralf-legal p,
+  .ralf-legal li,
+  .ralf-legal address {
+    color: #000 !important;
+  }
+}
+
 .img-cover {
   object-fit: cover;
   width: 100%;

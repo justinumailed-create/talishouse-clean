@@ -1,21 +1,11 @@
-import PublicLegalPage from "@/components/legal/PublicLegalPage";
-import { termsDocument } from "@/content/legal/terms";
-import { getLocale } from "@/lib/i18n/server";
+import RalfLegalPage from "@/components/legal/RalfLegalPage";
+import { RALF_TERMS } from "@/content/legal/ralf-terms";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 
 export async function generateMetadata() {
   return pageMetadata("/terms");
 }
 
-export default async function TermsPage() {
-  const doc = termsDocument(await getLocale());
-  return (
-    <PublicLegalPage
-      testId="terms-page"
-      kicker={doc.kicker}
-      title={doc.title}
-      meta={doc.meta}
-      sections={doc.sections}
-    />
-  );
+export default function TermsPage() {
+  return <RalfLegalPage document={RALF_TERMS} />;
 }

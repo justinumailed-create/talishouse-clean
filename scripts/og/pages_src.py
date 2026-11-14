@@ -525,14 +525,14 @@ add("/talisu/blog", "talisu-blog", "public", BRAND,
      "TSPLITS™  ·  SEA-CANS", ["TalisU™", "Sea-Cans", "Blog"], []))
 
 # ---------- legal ----------
-add("/privacy", "privacy", "public", BRAND,
+add("/privacy", "privacy", "utility", BRAND,
     ("Privacy Policy | Tsplits™",
      "How Tsplits™ collects, uses and protects your personal information.",
      "TSPLITS™  ·  LEGAL", ["Privacy", "policy", ""], []),
     ("Datenschutzerklärung | Tsplits™",
      "Wie Tsplits™ Ihre personenbezogenen Daten erhebt, nutzt und schützt.",
      "TSPLITS™  ·  RECHTLICHES", ["Datenschutz-", "erklärung", ""], []))
-add("/terms", "terms", "public", BRAND,
+add("/terms", "terms", "utility", BRAND,
     ("Terms of Service | Tsplits™",
      "The terms of service that govern your use of the Tsplits™ website and services.",
      "TSPLITS™  ·  LEGAL", ["Terms", "of service", ""], []),

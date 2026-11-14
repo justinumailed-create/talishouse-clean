@@ -52,6 +52,10 @@ export const en = {
     hideSecret: "Hide",
   },
 
+  legal: {
+    printMe: "Print Me",
+  },
+
   nav: {
     tagline: TALISU_MKTS_HEADER_TAGLINE,
     brandSr: "Brand: Tsplits™",
