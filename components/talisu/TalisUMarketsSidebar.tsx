@@ -1,7 +1,10 @@
 "use client";
 
 import type { ReactElement } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import type { TalisUMktsPin } from "@/lib/talisu/markets-pins";
+import { TALISU_MKTS_DEMO_HREF } from "@/lib/talisu/markets-pins";
 import { useT } from "@/lib/i18n/client";
 import { ADVISER_METAL_BG } from "@/components/talisu/AdviserLayout";
 import {
@@ -46,12 +49,14 @@ const TalisUMarketsSidebar: (props: Props) => ReactElement = ({ region = "ca" })
     >
       <div className="pointer-events-auto flex min-h-0 flex-col overflow-y-auto rounded-2xl bg-white shadow-[0_12px_36px_rgba(0,0,0,0.18)] ring-1 ring-black/5">
         <div className="px-4 pb-4 pt-3.5">
-          <h1 className="text-[17px] font-semibold tracking-tight text-neutral-950">
-            {m.pmcTitle}
-          </h1>
-          <p className="mt-0.5 text-[11px] font-medium tracking-wide text-neutral-500">
-            {m.pmcTagline}
-          </p>
+          <Image
+            src="/talisu/mkts/talisu-mark.png"
+            alt={m.logoAlt}
+            width={72}
+            height={78}
+            className="h-16 w-auto rounded-md object-contain"
+            data-testid="mkts-windswept-logo"
+          />
           {/* Canada / USA Markets, both native pages on this site. Plain
               anchors (full load) so each map mounts with its own PINs. */}
           <nav className="mt-3 flex flex-col gap-2.5" data-testid="mkts-site-links">
@@ -76,6 +81,13 @@ const TalisUMarketsSidebar: (props: Props) => ReactElement = ({ region = "ca" })
               <span className={METAL_TAB_LABEL}>{m.usaMarkets}</span>
             </a>
           </nav>
+          <Link
+            href={TALISU_MKTS_DEMO_HREF}
+            data-testid="mkts-claim-market"
+            className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#046BD9] px-4 text-[16px] font-semibold text-white"
+          >
+            {m.claimMarket}
+          </Link>
           <ul className="mt-3.5 space-y-1.5">
             {m.pmcBullets.map((bullet) => (
               <li

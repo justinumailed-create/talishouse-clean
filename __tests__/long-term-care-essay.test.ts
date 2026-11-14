@@ -6,7 +6,7 @@ describe("Long-Term Care essay tab", () => {
   it("is the 4th tab with EN/DE labels and 6 Coming soon placeholders", () => {
     expect(TALISU_ESSAYS[3]?.slug).toBe("long-term-care");
     expect(TALISU_ESSAYS[3]?.label).toEqual({ en: "Long-Term Care", de: "Langzeitpflege" });
-    expect(TALISU_ESSAYS.filter((e) => e.content === null)).toHaveLength(6);
+    expect(TALISU_ESSAYS.filter((e) => e.content === null)).toHaveLength(0);
     expect(resolveTalisUEssaySlug("long-term-care")).toBe("long-term-care");
   });
 

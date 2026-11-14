@@ -2293,18 +2293,20 @@ body.mapsite-gallery-open [data-paypal-button] {
  * left and right pages do not bleed together. Overlay only — the book
  * width and aspect ratio stay fixed. Hidden with the gutter on solo covers.
  */
-@media (min-width: 1025px) {
-  .talisbooks-viewer-book__gutter::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 8px;
-    transform: translateX(-50%);
-    background: #ffffff;
-    z-index: 1;
-  }
+/* Centerfold spreads are one photograph. No white fold line, no gutter wash. */
+.talisbooks-viewer-book:has(.talisbooks-viewer-page--spread-mat) .talisbooks-viewer-book__gutter {
+  background: none;
+  width: 0;
+}
+
+.talisbooks-viewer-book:has(.talisbooks-viewer-page--spread-mat) .talisbooks-viewer-book__gutter::before,
+.talisbooks-viewer-book:has(.talisbooks-viewer-page--spread-mat) .talisbooks-viewer-book__gutter::after {
+  content: none;
+}
+
+.talisbooks-viewer--magazine .talisbooks-viewer-book:has(.talisbooks-viewer-page--spread-mat) .talisbooks-viewer-book__page--left,
+.talisbooks-viewer--magazine .talisbooks-viewer-book:has(.talisbooks-viewer-page--spread-mat) .talisbooks-viewer-book__page--right {
+  box-shadow: none;
 }
 
 .talisbooks-viewer-book__face {

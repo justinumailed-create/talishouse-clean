@@ -33,6 +33,7 @@ import {
   type TalisBooksViewerViewMode,
 } from "@/lib/talisbooks/viewer";
 import DemoClaimMarketButton from "@/components/talispros/mapsite/DemoClaimMarketButton";
+import EbookPlatformLinks from "@/components/talisbooks/viewer/EbookPlatformLinks";
 import { CATALOGUE_BOOKSHELF_PATH } from "@/lib/talisbooks/viewer/origin";
 
 function TalisBooksViewerClaimCta({ mapsiteId }: { mapsiteId: string }) {
@@ -59,6 +60,8 @@ interface TalisBooksViewerShellProps {
   initialViewMode?: TalisBooksViewerViewMode;
   /** First paint index (a spread index, or a page index in single view). */
   initialNavIndex?: number;
+  /** Server-checked registered owner. Platform files stay locked until this is true. */
+  platformLinksUnlocked?: boolean;
 }
 
 function withCoverBranding(book: TalisBooksViewerBook): TalisBooksViewerBook {
@@ -77,6 +80,7 @@ export default function TalisBooksViewerShell({
   singleOnMobile = false,
   initialViewMode = "spread",
   initialNavIndex = 0,
+  platformLinksUnlocked = false,
 }: TalisBooksViewerShellProps) {
   const showClaim = !fromBookshelf && !hideClaim;
   const tv = useT().viewer;
@@ -424,7 +428,7 @@ export default function TalisBooksViewerShell({
               {tv.product}
             </Link>
           ) : null}
-          {book.pdfDownloadUrl ? (
+          {isPinnedShowcase && book.pdfDownloadUrl ? (
             <a
               href={book.pdfDownloadUrl}
               download={book.pdfDownloadFileName || true}
@@ -433,6 +437,9 @@ export default function TalisBooksViewerShell({
               {tv.downloadPdf}
             </a>
           ) : null}
+          {isPinnedShowcase ? null : (
+            <EbookPlatformLinks unlocked={platformLinksUnlocked} />
+          )}
           {isPinnedShowcase ? (
             <Link href={MAPSITE_APP_PATH} className="talisbooks-viewer__back">
               {tv.markets}
