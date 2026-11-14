@@ -19,8 +19,10 @@ describe("Aisha Convai widget on the homepage", () => {
     const page = read("components/talispros/TalisprosGatePage.tsx");
     const shell = read("components/RootShell.tsx");
     expect(page).toContain("<AishaConvaiWidget");
-    expect(widget).toContain("agent-id={persona.agentId}");
+    expect(widget).toContain("agent-id={agentId}");
+    expect(widget).toContain("agentIdOverride?.trim() || persona.agentId");
     expect(ASSISTANT_PERSONAS.aisha.agentId).toBe("agent_0401m7cxgba1fhwb35aqr43acnv1");
+    expect(page).not.toContain("agent_0201m7dr7y7bfy99sz2ywxcbshm4");
     expect(ASSISTANT_PERSONAS.aisha.portraitSrc).toBe("/images/mapsites/aisha-c.webp");
     expect(widget).toContain("https://unpkg.com/@elevenlabs/convai-widget-embed");
     expect(widget).toContain('strategy="lazyOnload"');
