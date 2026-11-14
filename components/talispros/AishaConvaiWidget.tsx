@@ -52,11 +52,43 @@ const BUBBLE_STYLE = `
   -webkit-backdrop-filter: saturate(160%) blur(16px);
   backdrop-filter: saturate(160%) blur(16px);
 }
+.aisha-convai-bubble { position: relative; }
+.aisha-convai-dismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.aisha-convai-slot[data-surface="open"] .aisha-convai-bubble,
 .aisha-convai-slot[data-surface="open"] .aisha-convai-label {
   display: none !important;
 }
 .aisha-convai-slot elevenlabs-convai {
   z-index: 2;
+}
+.aisha-convai-slot[data-surface="open"] elevenlabs-convai {
+  top: var(--aisha-panel-top, 0px) !important;
+  right: var(--aisha-panel-right, 0px) !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: auto !important;
+  height: auto !important;
 }
 .aisha-bubble-stroke {
   position: absolute;
@@ -73,6 +105,37 @@ function usePageOrigin(): string {
     () => () => {},
     () => window.location.origin,
     () => "",
+  );
+}
+
+const BUBBLE_DISMISS_KEY = "aisha-bubble-dismissed";
+const bubbleDismissListeners = new Set<() => void>();
+
+function readBubbleDismissed(): boolean {
+  try {
+    return sessionStorage.getItem(BUBBLE_DISMISS_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function dismissAishaBubble() {
+  try {
+    sessionStorage.setItem(BUBBLE_DISMISS_KEY, "1");
+  } catch {
+    /* private browsing can block storage; the click still hides it */
+  }
+  bubbleDismissListeners.forEach((listener) => listener());
+}
+
+function useBubbleDismissed(): boolean {
+  return useSyncExternalStore(
+    (listener) => {
+      bubbleDismissListeners.add(listener);
+      return () => bubbleDismissListeners.delete(listener);
+    },
+    readBubbleDismissed,
+    () => false,
   );
 }
 
@@ -111,20 +174,23 @@ export default function AishaConvaiWidget({
 }: {
   persona?: AssistantPersona;
   /** Homepage greeting, or the call-back line used on an allowlisted Mapsite. */
-  invitation?: "greeting" | "callback";
+  invitation?: "greeting" | "callback" | "mapsite";
   placement?: "bottom-left" | "bottom-right";
   /** Mapsite pages pass their own agent. Other pages keep the homepage agent. */
   agentId?: string;
   /** JSON for the Mapsite agent. Omitted on the homepage. */
   dynamicVariables?: string;
 }) {
-  const copy = useT().home.assistants[persona.id];
+  const t = useT();
+  const copy = t.home.assistants[persona.id];
+  const closeLabel = t.mapsite.close;
   const origin = usePageOrigin();
   const host = usePortalHost();
   const slotRef = useRef<HTMLDivElement>(null);
   const labelRef = useRef<HTMLButtonElement>(null);
   const [bubbleSize, setBubbleSize] = useState({ width: 0, height: 0 });
   const [surfaceOpen, setSurfaceOpen] = useState(false);
+  const bubbleDismissed = useBubbleDismissed();
   const avatar = origin ? `${origin}${persona.portraitSrc}` : persona.portraitSrc;
 
   useEffect(() => {
@@ -133,7 +199,38 @@ export default function AishaConvaiWidget({
     return watchPoweredByBanner(slot, setSurfaceOpen);
   }, [host]);
 
-  const line = !copy ? "" : invitation === "callback" ? copy.callback : copy.greeting;
+  useLayoutEffect(() => {
+    const slot = slotRef.current;
+    if (!slot) return;
+    const apply = () => {
+      const header = document.querySelector(
+        "[data-testid='site-header'], [data-testid='personal-home-header']",
+      );
+      const subnav = document.querySelector("[data-testid='personal-home-subnav']");
+      const headerBottom = header?.getBoundingClientRect().bottom ?? 0;
+      const subnavBottom = subnav?.getBoundingClientRect().bottom ?? 0;
+      const top = Math.max(0, Math.ceil(Math.max(headerBottom, subnavBottom)));
+      const zoom = document.querySelector("[data-testid='mapsite-zoom-controls']");
+      const zoomBox = zoom?.getBoundingClientRect();
+      const right =
+        zoomBox && zoomBox.width > 8
+          ? Math.max(0, Math.ceil(window.innerWidth - zoomBox.left + 8))
+          : 0;
+      slot.style.setProperty("--aisha-panel-top", `${top}px`);
+      slot.style.setProperty("--aisha-panel-right", `${right}px`);
+    };
+    apply();
+    window.addEventListener("resize", apply);
+    return () => window.removeEventListener("resize", apply);
+  }, [host, surfaceOpen]);
+
+  const line = !copy
+    ? ""
+    : invitation === "callback"
+      ? copy.callback
+      : invitation === "mapsite"
+        ? copy.mapsite
+        : copy.greeting;
   const bubbleSide = placement === "bottom-right" ? "right" : "left";
 
   useLayoutEffect(() => {
@@ -171,6 +268,8 @@ export default function AishaConvaiWidget({
       data-surface={surfaceOpen ? "open" : "idle"}
     >
       <style>{BUBBLE_STYLE}</style>
+      {bubbleDismissed ? null : (
+      <div className="aisha-convai-bubble">
       <button
         ref={labelRef}
         type="button"
@@ -205,6 +304,20 @@ export default function AishaConvaiWidget({
           ) : null}
         </span>
       </button>
+      <button
+        type="button"
+        className="aisha-convai-dismiss"
+        aria-label={closeLabel}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          dismissAishaBubble();
+        }}
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+      </div>
+      )}
       <elevenlabs-convai
         agent-id={agentId}
         dynamic-variables={dynamicVariables || undefined}

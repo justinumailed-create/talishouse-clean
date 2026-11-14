@@ -571,8 +571,46 @@ p {
   z-index: 2;
 }
 
+.aisha-convai-bubble {
+  position: relative;
+}
+
+.aisha-convai-dismiss {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #1d1d1f;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.aisha-convai-slot[data-surface="open"] .aisha-convai-bubble,
 .aisha-convai-slot[data-surface="open"] .aisha-convai-label {
   display: none !important;
+}
+
+/* Open chat and call stay under the sticky bars and clear of zoom. */
+.aisha-convai-slot[data-surface="open"] elevenlabs-convai {
+  top: var(--aisha-panel-top, 0px) !important;
+  right: var(--aisha-panel-right, 0px) !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  width: auto !important;
+  height: auto !important;
 }
 
 .aisha-convai-label {

@@ -26,17 +26,18 @@ import {
   stickyChromeOverlap,
 } from "@/lib/talispros/mapsite-overlay-layout";
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
-import { MAPSITE_LISTING_TILE_TOP_FALLBACK_PX } from "@/lib/talispros/mapsite-listing-media";
+import { MAPSITE_LISTING_TILE_TOP_FALLBACK_PX, mapsiteCardLogoUrl } from "@/lib/talispros/mapsite-listing-media";
 import {
   accountTypeForAudience,
   type MapSiteCapabilityAccountType,
 } from "@/lib/talispros/account-capabilities";
-import { mapsiteShowsAisha } from "@/lib/talispros/aisha-mapsites";
+import { mapsiteAishaInvitation, mapsiteShowsAisha } from "@/lib/talispros/aisha-mapsites";
 import {
   AISHA_MAPSITE_AGENT_ID,
   aishaMapsiteDynamicVariables,
 } from "@/lib/talispros/aisha-mapsite-agent";
 import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
+import { additionalPinMapLabel } from "@/lib/talispros/mapsite-additional-pins";
 import type { MapsiteFlagIdentity } from "@/lib/talispros/flag-identity";
 import {
   isClaimable,
@@ -335,12 +336,12 @@ export default function MapSiteApplication({
         metadata: styleMetadata,
         category: rootContext.mainPinCategory,
       },
-      ...pinDashboard.pins.map((pin, index) => ({
+      ...pinDashboard.pins.map((pin) => ({
         id: pin.id,
         latitude: pin.latitude,
         longitude: pin.longitude,
         color: savedPin.pinColor,
-        label: pin.label.trim() || `PIN ${index + 2}`,
+        label: additionalPinMapLabel(pin.label),
         featured: false,
         metadata: { ...styleMetadata, additional: true },
         category: pin.category ?? null,
@@ -560,9 +561,9 @@ export default function MapSiteApplication({
         personalHomeNav={personalHomeNav}
         belowWriteUp={belowWriteUp}
       />
-      {mapsiteShowsAisha(mapsite.fast_code) ? (
+      {mapsiteShowsAisha(mapsite.status) ? (
         <AishaConvaiWidget
-          invitation="callback"
+          invitation={mapsiteAishaInvitation(mapsite.fast_code)}
           placement="bottom-right"
           agentId={AISHA_MAPSITE_AGENT_ID}
           dynamicVariables={aishaMapsiteDynamicVariables({
@@ -1231,6 +1232,7 @@ function MapSiteChrome({
                   cardRef={listingCardRef}
                   paid={paid}
                   cardTitle={ownerCustomizations.cardTitle}
+                  brandLogoUrl={mapsiteCardLogoUrl(branding.logoUrl, branding.overridden.logo)}
                   cardAddress={ownerCustomizations.cardAddress}
                   cardPhone={ownerCustomizations.cardPhone}
                   dashboardItems={dashboardManageable ? DASHBOARD_MENU : undefined}

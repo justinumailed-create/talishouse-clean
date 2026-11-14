@@ -7,8 +7,10 @@ import {
   listingImageUrlsFromEbookPages,
   MAPSITE_DEMO_GALLERY,
   MAPSITE_DEMO_LISTING_IMAGE,
+  MAPSITE_TREE_LOGO,
   mapsiteAgencyDisplayName,
   mapsiteAgencyLogoUrl,
+  mapsiteCardLogoUrl,
   shouldReplaceDemoListingMedia,
   withEbookListingMedia,
 } from "../lib/talispros/mapsite-listing-media";
@@ -195,12 +197,23 @@ describe("Mapsite listing media", () => {
     expect(mapsiteAgencyLogoUrl(null)).toBe(MAPSITE_HEADER_FALLBACK_LOGO);
     expect(mapsiteAgencyLogoUrl("/logo.png")).toBe(MAPSITE_HEADER_FALLBACK_LOGO);
     expect(mapsiteAgencyDisplayName(null)).toBe("TSplits");
+    expect(mapsiteAgencyDisplayName(null, "Taliswebs")).toBe("");
+    expect(mapsiteAgencyDisplayName(null, "Chagatown")).toBe("Chagatown");
     expect(mapsiteAgencyDisplayName("/uploads/agency.png", "Cape Realty")).toBe(
       "Cape Realty",
     );
     expect(mapsiteAgencyDisplayName("/uploads/agency.png", "For-Sale-By-Owner")).toBe(
       "TSplits",
     );
+    expect(
+      mapsiteCardLogoUrl(
+        "https://cdn.example/auto-draft/rm22/logo.webp",
+        false,
+      ),
+    ).toBe(MAPSITE_TREE_LOGO);
+    expect(
+      mapsiteCardLogoUrl("https://cdn.example/auto-draft/dc06/tree.webp", true),
+    ).toBe("https://cdn.example/auto-draft/dc06/tree.webp");
     expect(createFallbackDemoMapSite().logo_url).toBeNull();
   });
 

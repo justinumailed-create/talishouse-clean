@@ -12,7 +12,7 @@ import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin
 import { isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { ROUTES } from "@/lib/routes";
-import { fastCodeEntryHref } from "@/lib/talispros/aisha-mapsites";
+import { fastCodeEntryHref, isClaimedMapSiteStatus } from "@/lib/talispros/aisha-mapsites";
 import { personalHomePath } from "@/lib/talispros/personal-home";
 import { systemFastCodeEntryCookieAction } from "@/lib/talispros/system-fast-code-gate";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
@@ -220,8 +220,8 @@ export async function openClaimedMapSiteFromHomeFastCode(
     await setMapSiteOwnerSession(resolvedCode);
   }
 
-  // Allowlisted Mapsites (DC06) open the claimed Mapsite directly.
-  // Every other code still lands on the personal home page first.
+  // Claimed codes open that Mapsite's map. Unclaimed codes still open
+  // the personal home page. The path segment comes from the plan.
   if (mapsite.id) {
     const segment = await resolveClaimedMapSiteAccountTypeSegment({
       fastCode: resolvedCode,
@@ -229,7 +229,11 @@ export async function openClaimedMapSiteFromHomeFastCode(
     });
     return {
       success: true,
-      href: fastCodeEntryHref({ fastCode: resolvedCode, accountType: segment }),
+      href: fastCodeEntryHref({
+        fastCode: resolvedCode,
+        accountType: segment,
+        claimed: isClaimedMapSiteStatus(mapsite.status),
+      }),
     };
   }
   return { success: true, href: personalHomePath(resolvedCode) };
