@@ -119,9 +119,9 @@ export const de: Dictionary = {
     learnMore: "Mehr erfahren",
     assistants: {
       aisha: {
-        label: "Aisha, T-Splits Mapsites- und Fulfilment-Teamleiterin",
+        label: "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen",
         greeting:
-          "Hallo, ich bin Aisha, Ihre T-Splits Mapsites- und Fulfilment-Teamleiterin. Darf ich Ihren Namen erfahren?",
+          "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen",
         startCall: "Anruf starten",
         endCall: "Anruf beenden",
         openChat: "Chat öffnen",

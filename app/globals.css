@@ -562,8 +562,11 @@ p {
   pointer-events: none;
 }
 
+/* The embed sizes its host to the viewport and positions it fixed.
+   Leaving pointer-events on that host swallows every homepage click.
+   Shadow buttons keep the default and still receive clicks. */
 .aisha-convai-slot elevenlabs-convai {
-  pointer-events: auto;
+  pointer-events: none !important;
 }
 
 .aisha-convai-label {
@@ -571,12 +574,16 @@ p {
   border-radius: 999px;
   background: #fff;
   padding: 0.4rem 0.8rem;
+  font: inherit;
   font-size: 16px;
   font-weight: 600;
   line-height: 1.3;
+  text-align: left;
   color: #171717;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
   border: 1px solid rgba(0, 0, 0, 0.14);
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 @media (min-width: 1024px) {

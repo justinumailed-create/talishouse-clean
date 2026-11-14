@@ -1,7 +1,7 @@
 "use client";
 
 import Script from "next/script";
-import { useSyncExternalStore } from "react";
+import { useSyncExternalStore, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n/client";
 import {
@@ -25,6 +25,20 @@ function usePortalHost(): HTMLElement | null {
   );
 }
 
+/** The pop-up and the launcher both start the call. The terms sheet may still appear. */
+function startAishaConversation(event: MouseEvent<HTMLButtonElement>) {
+  const slot = event.currentTarget.closest("[data-testid='aisha-convai']");
+  const widget = slot?.querySelector("elevenlabs-convai");
+  const root = widget && "shadowRoot" in widget ? widget.shadowRoot : null;
+  if (!root) return;
+  const wanted = (event.currentTarget.dataset.startLabel ?? "").trim().toLowerCase();
+  const buttons = [...root.querySelectorAll("button")];
+  const match = buttons.find(
+    (button) => button.textContent?.trim().toLowerCase() === wanted,
+  );
+  (match ?? buttons[0])?.click();
+}
+
 /**
  * Public voice and chat widget. The embed script loads after the page is
  * interactive. The spoken first message is set in ElevenLabs, not here.
@@ -42,7 +56,14 @@ export default function AishaConvaiWidget({
 
   return createPortal(
     <div className="aisha-convai-slot" data-testid="aisha-convai" data-persona={persona.id}>
-      <p className="aisha-convai-label">{copy.label}</p>
+      <button
+        type="button"
+        className="aisha-convai-label"
+        data-start-label={copy.startCall}
+        onClick={startAishaConversation}
+      >
+        {copy.greeting}
+      </button>
       <elevenlabs-convai
         agent-id={persona.agentId}
         action-text={copy.greeting}
