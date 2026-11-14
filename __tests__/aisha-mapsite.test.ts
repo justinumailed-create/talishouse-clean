@@ -8,7 +8,7 @@ import {
   mapsiteShowsAisha,
 } from "../lib/talispros/aisha-mapsites";
 import { mapsiteDashboardViewEnabled } from "../lib/talispros/mapsite-dashboard-view";
-import { HIDDEN_MAPSITE_PARTNER_CODES } from "../lib/talispros/mapsite-root-partners-service";
+import { HIDDEN_PARTNERS_ON_PAGE } from "../lib/talispros/mapsite-root-partners-service";
 
 const read = (path: string) => readFileSync(resolve(path), "utf8");
 
@@ -51,7 +51,8 @@ describe("Aisha on an allowlisted Mapsite", () => {
     expect(mapsiteDashboardViewEnabled(undefined)).toBe(true);
     expect(mapsiteDashboardViewEnabled(true)).toBe(true);
     expect(mapsiteDashboardViewEnabled(false)).toBe(false);
-    expect(HIDDEN_MAPSITE_PARTNER_CODES).toContain("dc05b");
+    expect(HIDDEN_PARTNERS_ON_PAGE.dc06).toEqual(["dc05"]);
+    expect(HIDDEN_PARTNERS_ON_PAGE.dc05).toBeUndefined();
     expect(read("components/talispros/mapsite/MapSiteApplication.tsx")).toContain(
       "setSelectedPinId(mapsite.id)",
     );

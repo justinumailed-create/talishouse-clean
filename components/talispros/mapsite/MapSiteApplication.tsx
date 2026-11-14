@@ -481,9 +481,7 @@ export default function MapSiteApplication({
       preserveViewport
       onPinSelect={(pinId) => {
         if (!pinId) return;
-        // A partner pin used to leave the page, so DC05 and DC06 only swapped
-        // and the flag never opened. Open the flag here. The partner control
-        // still switches projects.
+        // Open this Mapsite's flag. Partner pages are not loaded from a pin click.
         setSelectedPinId(mapsite.id);
       }}
       onMapClick={(coordinates) => {
