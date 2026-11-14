@@ -551,7 +551,10 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(de.talisu.register).not.toHaveProperty("partnerHeading");
     expect(checkout).toContain('href={ROUTES.TERMS}');
     expect(checkout).toContain('href={ROUTES.PRIVACY}');
+    expect(checkout).toContain("copy.leaderLine");
     expect(checkout).toContain("register-checkout-terms");
+    expect(checkout).toContain("h-11");
+    expect(checkout).not.toContain("min-h-14");
     expect(checkout).toContain("register-checkout-privacy");
     const actions = readFileSync(resolve("components/talisu/RegisterActions.tsx"), "utf8");
     expect(actions).not.toContain("pinNote");

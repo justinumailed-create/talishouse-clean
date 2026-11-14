@@ -111,7 +111,7 @@ export const de: Dictionary = {
     motto: "BEWERBEN – VERWALTEN – KOOPERIEREN",
     openAccount: "Ihr Konto eröffnen*",
     systemDemo: "Mapsite beanspruchen",
-    legalSecondary: "*Vorherige Registrierung erforderlich.",
+    legalSecondary: "*Registrierung erforderlich.",
     bannerTitle: "Branchennahe Abwicklungsoptionen",
     structuresTagline: "Transaktionsstrukturen erkunden",
     ownershipAria: "Eigentumsmodelle",

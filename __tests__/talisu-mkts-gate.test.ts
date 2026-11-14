@@ -14,6 +14,11 @@ describe("Markets page gate (admins, superadmins and signed-in agents only)", ()
     expect(gate).toContain("<MarketsAdminGate");
     expect(gate).not.toContain('redirect("/")');
     expect(action).toContain("acceptGlobalAdminPassword");
+    const form = read("components/talisu/MarketsAdminGate.tsx");
+    expect(form).toContain("min-h-full");
+    expect(form).toContain("max-w-[28rem]");
+    expect(form).toContain("/assets/windswept-tree-logo.png");
+    expect(form).not.toContain("min-h-[70vh]");
     expect(page).toContain("index: false");
   });
 

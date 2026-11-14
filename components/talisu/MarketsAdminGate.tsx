@@ -15,11 +15,11 @@ export default function MarketsAdminGate() {
   const [pending, start] = useTransition();
 
   return (
-    <div className="talis-working-bg flex min-h-[70vh] items-center justify-center px-4 py-16 text-neutral-950">
+    <div className="talis-working-bg flex min-h-full w-full flex-1 items-center justify-center px-4 py-10 text-neutral-950">
       <form
         data-testid="markets-admin-gate"
         method="post"
-        className="w-full max-w-md rounded-2xl bg-white px-6 py-8 shadow-[0_12px_40px_rgba(0,0,0,0.12)] ring-1 ring-black/5"
+        className="mx-auto w-full max-w-[28rem] rounded-2xl bg-white px-8 py-8 shadow-[0_12px_40px_rgba(0,0,0,0.12)] ring-1 ring-black/5"
         onSubmit={(event) => {
           event.preventDefault();
           setError(null);
@@ -34,8 +34,16 @@ export default function MarketsAdminGate() {
           });
         }}
       >
-        <h1 className="m-0 text-[22px] font-semibold tracking-tight text-neutral-950">{t.title}</h1>
-        <p className="mt-2 text-[14px] leading-relaxed text-neutral-600">{t.body}</p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/assets/windswept-tree-logo.png"
+          alt=""
+          width={72}
+          height={78}
+          className="mx-auto mb-5 h-[4.5rem] w-auto"
+        />
+        <h1 className="m-0 text-center text-[22px] font-semibold tracking-tight text-neutral-950">{t.title}</h1>
+        <p className="mt-2 text-center text-[14px] leading-relaxed text-neutral-600">{t.body}</p>
         <label className="mt-5 block text-[13px] font-semibold text-neutral-700">
           {t.label}
           <SecretTextField

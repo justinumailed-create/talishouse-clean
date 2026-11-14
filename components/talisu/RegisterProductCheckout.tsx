@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import RegisterCheckoutAlign from "@/components/talisu/RegisterCheckoutAlign";
 import SamCartWebCheckout from "@/components/talisu/SamCartWebCheckout";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
@@ -35,17 +36,23 @@ export default async function RegisterProductCheckout({
 
   const copy = getDictionary(await getLocale()).talisu.register;
   const checkout = copy.actions.checkouts.find((item) => item.id === product);
-  const label = checkout?.label ?? product;
   const sidebar = (checkout && "sidebar" in checkout ? checkout.sidebar : "").trim();
 
   return (
     <div className="talis-working-bg text-neutral-950" data-testid={`register-checkout-${product}`}>
-      <div className="mx-auto grid w-full max-w-[1600px] grid-cols-1 lg:grid-cols-4 lg:items-start">
-        <aside className="flex flex-col bg-[#f6f3ee] lg:sticky lg:top-16 lg:col-span-1 lg:max-h-[calc(100dvh-4.5rem)] lg:min-h-[calc(100dvh-4.5rem)] lg:overflow-y-auto">
+      <RegisterCheckoutAlign />
+      <div
+        className="register-checkout-grid mx-auto grid w-full max-w-[1600px] grid-cols-1 lg:grid-cols-4 lg:items-start"
+        data-testid="register-checkout-grid"
+      >
+        <aside
+          className="register-checkout-aside flex flex-col bg-[#f6f3ee] lg:col-span-1"
+          data-testid="register-checkout-aside"
+        >
           <div className="relative h-[220px] shrink-0 sm:h-[260px] lg:h-[300px]">
             <Image
               src={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
-              alt="Aisha, AMBA"
+              alt={copy.leaderLine}
               fill
               priority
               sizes="(min-width: 1024px) 25vw, 100vw"
@@ -53,8 +60,7 @@ export default async function RegisterProductCheckout({
               style={{ objectPosition: "center 20%" }}
             />
             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/45 to-transparent px-4 pb-4 pt-14 text-white">
-              <div className="text-[18px] font-semibold leading-tight">{copy.partnerName}</div>
-              <div className="mt-1 text-[13px] leading-snug text-white/90">{label}</div>
+              <div className="text-[18px] font-semibold leading-tight">{copy.leaderLine}</div>
             </div>
           </div>
           {sidebar ? (
@@ -65,18 +71,19 @@ export default async function RegisterProductCheckout({
               {sidebar}
             </div>
           ) : null}
-          <div className="mt-auto flex flex-1 flex-col justify-end gap-3 px-4 pb-5 pt-2">
+          <div className="min-h-8 flex-1" aria-hidden="true" />
+          <div className="flex flex-col gap-3 px-4 pb-5 pt-2">
             <Link
               href={ROUTES.TERMS}
               data-testid="register-checkout-terms"
-              className="inline-flex min-h-14 flex-1 items-center justify-center rounded-2xl bg-[#046BD9] px-4 py-4 text-center text-[15px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.28)] transition hover:bg-[#0358b3]"
+              className="inline-flex h-11 items-center justify-center rounded-lg bg-[#046BD9] px-6 text-center text-[15px] font-semibold leading-none text-white shadow-[0_6px_14px_rgba(4,107,217,0.28)] transition hover:bg-[#0358b3]"
             >
               {copy.actions.consentTerms}
             </Link>
             <Link
               href={ROUTES.PRIVACY}
               data-testid="register-checkout-privacy"
-              className="inline-flex min-h-14 flex-1 items-center justify-center rounded-2xl border-2 border-[#046BD9] bg-white px-4 py-4 text-center text-[15px] font-semibold text-[#046BD9] transition hover:bg-[#EAF3FF]"
+              className="inline-flex h-11 items-center justify-center rounded-lg border border-[#046BD9] bg-white px-6 text-center text-[15px] font-semibold leading-none text-[#046BD9] transition hover:bg-[#EAF3FF]"
             >
               {copy.actions.consentPrivacy}
             </Link>
