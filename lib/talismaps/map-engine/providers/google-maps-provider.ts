@@ -667,6 +667,7 @@ export class GoogleMapsProvider implements MapProvider {
       },
       setViewport(viewport: Partial<MapViewport>) {
         suppressCameraGestureEvents = true;
+        let holdSuppress = false;
         try {
           if (lockedCenter) {
             // Center stays fixed — only zoom may change.
@@ -677,11 +678,23 @@ export class GoogleMapsProvider implements MapProvider {
             return;
           }
           if (viewport.center && viewport.zoom !== undefined) {
-            map.setCenter({
+            // Zoom first, then glide. The pin click uses this so the card
+            // can settle above the pin. Hold gesture events until the pan ends
+            // so the move itself does not close the card.
+            holdSuppress = true;
+            map.setZoom(viewport.zoom);
+            map.panTo({
               lat: viewport.center.latitude,
               lng: viewport.center.longitude,
             });
-            map.setZoom(viewport.zoom);
+            const release = () => {
+              suppressCameraGestureEvents = false;
+            };
+            const timer = window.setTimeout(release, 900);
+            google.maps.event.addListenerOnce(map, "idle", () => {
+              window.clearTimeout(timer);
+              release();
+            });
             return;
           }
           if (viewport.center) {
@@ -694,8 +707,8 @@ export class GoogleMapsProvider implements MapProvider {
             map.setZoom(viewport.zoom);
           }
         } finally {
-          // zoom_changed / related listeners fire synchronously during setZoom.
-          suppressCameraGestureEvents = false;
+          // zoom_changed fires synchronously during setZoom.
+          if (!holdSuppress) suppressCameraGestureEvents = false;
         }
       },
       getViewport,
