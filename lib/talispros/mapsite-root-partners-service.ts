@@ -17,6 +17,15 @@ import {
 } from "@/lib/talispros/mapsite-root-partners";
 import { sortPartnerPair } from "@/lib/talispros/mapsite-partner-links";
 
+/**
+ * Partner FAST Codes kept in the database and hidden on one Mapsite only.
+ * Doug's page (DC06) shows itself. DC05 remains a real Mapsite and still
+ * appears everywhere else.
+ */
+export const HIDDEN_PARTNERS_ON_PAGE: Record<string, readonly string[]> = {
+  dc06: ["dc05"],
+};
+
 const LINKS = "mapsite_partner_links";
 const CATEGORIES = "mapsite_pin_categories";
 const PAID = new Set(["completed", "paid", "complete", "succeeded"]);
@@ -193,13 +202,15 @@ export async function loadMapSiteRootContext(input: {
       mapsiteId: input.mapsiteId,
       accountType: me?.accountType,
     });
-    const rootFastCode = rootOfDerivative(links, code);
-    const partnerCodes = links.map((l) => otherSideOfLink(l, code));
+    const hidden = new Set(HIDDEN_PARTNERS_ON_PAGE[code] ?? []);
+    const visibleLinks = links.filter((link) => !hidden.has(otherSideOfLink(link, code)));
+    const rootFastCode = rootOfDerivative(visibleLinks, code);
+    const partnerCodes = visibleLinks.map((l) => otherSideOfLink(l, code));
     const partnerSites = await readMapSitesByCodes(partnerCodes);
     const byCode = new Map(partnerSites.map((s) => [s.fastCode, s]));
 
     const partners: MapSiteRootPartner[] = await Promise.all(
-      links.map(async (link) => {
+      visibleLinks.map(async (link) => {
         const other = otherSideOfLink(link, code);
         const site = byCode.get(other);
         const relation = partnerRelation(link, code);

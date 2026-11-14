@@ -111,6 +111,14 @@ export async function loadMapSiteApplicationState(options?: {
     });
   }
 
+  const { readMapsiteDashboardViewEnabled } = await import(
+    "@/lib/talispros/mapsite-dashboard-view"
+  );
+  mapsite = {
+    ...mapsite,
+    dashboard_view_enabled: await readMapsiteDashboardViewEnabled(mapsite.id),
+  };
+
   return mapsite;
 }
 

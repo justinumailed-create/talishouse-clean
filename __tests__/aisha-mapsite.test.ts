@@ -7,6 +7,8 @@ import {
   fastCodeEntryHref,
   mapsiteShowsAisha,
 } from "../lib/talispros/aisha-mapsites";
+import { mapsiteDashboardViewEnabled } from "../lib/talispros/mapsite-dashboard-view";
+import { HIDDEN_PARTNERS_ON_PAGE } from "../lib/talispros/mapsite-root-partners-service";
 
 const read = (path: string) => readFileSync(resolve(path), "utf8");
 
@@ -23,11 +25,13 @@ describe("Aisha on an allowlisted Mapsite", () => {
 
   it("uses the call-back invitation in English and German", () => {
     expect(en.home.assistants.aisha.callback).toBe(
-      "Hi, I'm Aisha. Would you like a call back?",
+      "Propose a Project. Just start a call and tell me what you can see for here.",
     );
     expect(de.home.assistants.aisha.callback).toBe(
-      "Hallo, ich bin Aisha. Möchten Sie einen Rückruf?",
+      "Schlagen Sie ein Projekt vor. Starten Sie einfach einen Anruf und erzählen Sie mir, was Sie hier sehen.",
     );
+    expect(en.mapsite.leftCard.inventory).toBe("I represent this Inventory");
+    expect(de.mapsite.leftCard.inventory).toBe("Ich vertrete dieses Inventar");
     expect(en.home.assistants.aisha.greeting).not.toBe(en.home.assistants.aisha.callback);
   });
 
@@ -41,5 +45,19 @@ describe("Aisha on an allowlisted Mapsite", () => {
     const actions = read("app/talispros/mapsites/actions.ts");
     expect(actions).toContain("fastCodeEntryHref");
     expect(actions).toContain("personalHomePath(resolvedCode)");
+  });
+
+  it("keeps the dashboard view on unless an admin turns it off", () => {
+    expect(mapsiteDashboardViewEnabled(undefined)).toBe(true);
+    expect(mapsiteDashboardViewEnabled(true)).toBe(true);
+    expect(mapsiteDashboardViewEnabled(false)).toBe(false);
+    expect(HIDDEN_PARTNERS_ON_PAGE.dc06).toEqual(["dc05"]);
+    expect(HIDDEN_PARTNERS_ON_PAGE.dc05).toBeUndefined();
+    expect(read("components/talispros/mapsite/MapSiteApplication.tsx")).toContain(
+      "setSelectedPinId(mapsite.id)",
+    );
+    expect(read("app/admin/mapsites/[fastCode]/page.tsx")).toContain(
+      "MapSiteDashboardViewToggle",
+    );
   });
 });

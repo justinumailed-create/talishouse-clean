@@ -15,11 +15,14 @@ const secondaryLinkClass =
 interface MarketingPartnerInterestLinksProps {
   className?: string;
   align?: "start" | "center";
+  /** Doug's card keeps the links and drops the Team Member heading. */
+  hideRole?: boolean;
 }
 
 export default function MarketingPartnerInterestLinks({
   className = "",
   align = "center",
+  hideRole = false,
 }: MarketingPartnerInterestLinksProps) {
   const alignment = align === "start" ? "items-start text-left" : "items-center text-center";
   // Ralf (Oct 17): these still reach Ralf, identified as a "Team Member".
@@ -27,16 +30,18 @@ export default function MarketingPartnerInterestLinks({
 
   return (
     <div className={`${alignment} flex flex-col ${className}`} data-testid="team-member-links">
-      <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
-        {teamMember}
-      </p>
+      {hideRole ? null : (
+        <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
+          {teamMember}
+        </p>
+      )}
       <div className="flex flex-wrap gap-2">
         <a
           href={MARKETING_PARTNER_WHATSAPP_HREF}
           target="_blank"
           rel="noopener noreferrer"
           className={primaryLinkClass}
-          aria-label={`WhatsApp — ${teamMember}`}
+          aria-label="WhatsApp"
         >
           WhatsApp
         </a>
@@ -45,7 +50,7 @@ export default function MarketingPartnerInterestLinks({
           target="_blank"
           rel="noopener noreferrer"
           className={secondaryLinkClass}
-          aria-label={`Telegram — ${teamMember}`}
+          aria-label="Telegram"
         >
           Telegram
         </a>

@@ -299,11 +299,14 @@ export default function MapSiteMarketPartnerCard({
   );
   const partnerName =
     partnerNameOverride?.trim() || defaultMapSitePartnerName(mapsite);
+  const representInventory = (mapsite.fast_code || "").trim().toLowerCase() === "dc06";
   const ownerTagline = partnerTagline?.trim();
-  const partnerLabel =
-    ownerTagline && ownerTagline !== DEFAULT_MAPSITE_PARTNER_TAGLINE
+  const partnerLabel = representInventory
+    ? t.mapsite.leftCard.inventory
+    : ownerTagline && ownerTagline !== DEFAULT_MAPSITE_PARTNER_TAGLINE
       ? ownerTagline
       : t.mapsite.partnerIntro;
+  const shownPhone = representInventory ? null : phone;
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (!onSelect) return;
@@ -369,11 +372,15 @@ export default function MapSiteMarketPartnerCard({
               <p className="text-[12px] font-semibold leading-snug text-black">
                 {partnerLabel}
               </p>
-              {phone ? <CardPhone phone={phone} label={t.mapsite.leftCard.call} /> : null}
+              {shownPhone ? <CardPhone phone={shownPhone} label={t.mapsite.leftCard.call} /> : null}
             </div>
           </div>
         </div>
-        <MarketingPartnerInterestLinks align="start" className="mt-3" />
+        <MarketingPartnerInterestLinks
+          align="start"
+          hideRole={representInventory}
+          className="mt-3"
+        />
         {tools}
         {isOwner ? (
           <MapSiteOwnerLogoutButton
@@ -415,9 +422,9 @@ export default function MapSiteMarketPartnerCard({
               {address}
             </p>
           ) : null}
-          {phone ? (
+          {shownPhone ? (
             <p className="mt-1.5">
-              <CardPhone phone={phone} label={t.mapsite.leftCard.call} />
+              <CardPhone phone={shownPhone} label={t.mapsite.leftCard.call} />
             </p>
           ) : null}
 
@@ -439,7 +446,10 @@ export default function MapSiteMarketPartnerCard({
             {partnerLabel}
           </p>
         </div>
-        <MarketingPartnerInterestLinks className="mt-4" />
+        <MarketingPartnerInterestLinks
+          hideRole={representInventory}
+          className="mt-4"
+        />
         {tools}
         {isOwner ? (
           <MapSiteOwnerLogoutButton

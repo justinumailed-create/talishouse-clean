@@ -122,7 +122,8 @@ export const de: Dictionary = {
         label: "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen",
         greeting:
           "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen",
-        callback: "Hallo, ich bin Aisha. Möchten Sie einen Rückruf?",
+        callback:
+          "Schlagen Sie ein Projekt vor. Starten Sie einfach einen Anruf und erzählen Sie mir, was Sie hier sehen.",
         startCall: "Anruf starten",
         endCall: "Anruf beenden",
         openChat: "Chat öffnen",
@@ -763,6 +764,7 @@ export const de: Dictionary = {
       mainPin: "Haupt-PIN",
       selectPin: "PIN auswählen…",
       teamMember: "Teammitglied",
+      inventory: "Ich vertrete dieses Inventar",
       selectCategory: "Kategorie wählen",
       allCategories: "Alle Kategorien",
       categoryEmpty: "Keine PINs in dieser Kategorie",

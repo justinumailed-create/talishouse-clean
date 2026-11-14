@@ -13,6 +13,8 @@ import { getMapSiteAdminWritesState } from "@/lib/supabaseAdmin";
 import { getMapSiteByFastCodeResult } from "@/lib/mapsite-service";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import { getMapSiteEbookContext } from "@/lib/talisbooks/mapsite-ebook-service";
+import { readMapsiteDashboardViewEnabled } from "@/lib/talispros/mapsite-dashboard-view";
+import MapSiteDashboardViewToggle from "@/components/talispros-admin/MapSiteDashboardViewToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +42,8 @@ export default async function AdminMapSiteEditorPage({
   const adminAccount = await getAdminSessionAccount();
   const canGrantFreePins =
     accountHasAdminScope(adminAccount, "mapsites") && adminAccount?.access !== "agent";
-  const [paymentReceived, ebookContext, freePinSnapshot, freePinGrants] = await Promise.all([
+  const [paymentReceived, ebookContext, freePinSnapshot, freePinGrants, dashboardViewEnabled] =
+    await Promise.all([
     hasCompletedMapSiteActivationPayment({
       email: mapsite.email,
       mapsiteId: mapsite.id,
@@ -52,6 +55,7 @@ export default async function AdminMapSiteEditorPage({
     canGrantFreePins
       ? listFreePinGrants({ mapsiteId: mapsite.id, limit: 20 })
       : Promise.resolve([]),
+    readMapsiteDashboardViewEnabled(mapsite.id),
   ]);
 
   return (
@@ -64,7 +68,14 @@ export default async function AdminMapSiteEditorPage({
       paymentReceived={paymentReceived}
       ebook={ebookContext?.primaryEbook ?? null}
       extraPanels={
-        canGrantFreePins ? (
+        <>
+          {accountHasAdminScope(adminAccount, "mapsites") && adminAccount?.access !== "agent" ? (
+            <MapSiteDashboardViewToggle
+              fastCode={mapsite.fastCode}
+              initialEnabled={dashboardViewEnabled}
+            />
+          ) : null}
+          {canGrantFreePins ? (
           <AdminFreePinCreditsPanel
             fastCode={mapsite.fastCode}
             lockFastCode
@@ -72,7 +83,8 @@ export default async function AdminMapSiteEditorPage({
             initialGrants={freePinGrants}
             disabled={!writesState.enabled}
           />
-        ) : null
+          ) : null}
+        </>
       }
     />
   );
