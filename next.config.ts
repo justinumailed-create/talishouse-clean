@@ -14,6 +14,14 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/terms",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
+        source: "/privacy",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+      {
         source: "/talisu/tsplits-playbook",
         headers: [
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
@@ -144,6 +152,26 @@ const nextConfig: NextConfig = {
         source: "/talisu/blog/:path*",
         destination: "/catalogue",
         permanent: false,
+      },
+      {
+        source: "/talisu/terms",
+        destination: "/terms",
+        permanent: true,
+      },
+      {
+        source: "/talisu/privacy",
+        destination: "/privacy",
+        permanent: true,
+      },
+      {
+        source: "/terms-of-service",
+        destination: "/terms",
+        permanent: true,
+      },
+      {
+        source: "/privacy-policy",
+        destination: "/privacy",
+        permanent: true,
       },
       {
         source: "/talispros/start",

@@ -31,6 +31,10 @@ export const de: Dictionary = {
     hideSecret: "Verbergen",
   },
 
+  legal: {
+    printMe: "Ausdrucken",
+  },
+
   nav: {
     tagline: "Branchennahe Mapsite-Märkte",
     brandSr: "Marke: Tsplits™",
