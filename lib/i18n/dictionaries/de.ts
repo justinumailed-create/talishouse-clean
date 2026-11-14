@@ -113,6 +113,13 @@ export const de: Dictionary = {
     ownershipAria: "Eigentumsmodelle",
     closeDetails: "Details zu {title} schließen",
     learnMore: "Mehr erfahren",
+    aisha: {
+      label: "Aisha, Teamleiterin von Tsplits™",
+      action: "Mit Aisha sprechen",
+      startCall: "Anruf starten",
+      endCall: "Anruf beenden",
+      openChat: "Chat öffnen",
+    },
     samcartReturn: {
       confirming: "Zahlungsrückmeldung wird bestätigt …",
       received: "Zahlungsrückmeldung erhalten – Ihre Mapsite wird freigeschaltet.",
