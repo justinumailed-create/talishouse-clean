@@ -14,7 +14,7 @@ export function isTalisprosStartPath(pathname: string | null | undefined) {
 /** Removed from homepage gate — kept empty so secondary disclaimer can stand alone. */
 export const TALISPROS_LEGAL_PRIMARY_COPY = "";
 
-export const TALISPROS_LEGAL_SECONDARY_COPY = "*Prior registration required.";
+export const TALISPROS_LEGAL_SECONDARY_COPY = "*Registration required.";
 
 /** Same default Home PIN as Claim a Market / Build A Mapsite. */
 export const TALISPROS_HOME_MAP_FALLBACK = {

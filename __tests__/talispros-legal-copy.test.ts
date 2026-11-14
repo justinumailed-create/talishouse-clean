@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { de } from "../lib/i18n/dictionaries/de";
 import { DEMO_MAPSITE_BUILD_PATH } from "../lib/talispros/demo-mapsite";
 import {
   TALISPROS_HOME_MAP_FALLBACK,
@@ -21,7 +22,8 @@ import {
 describe("Tsplits™ legal copy and homepage products", () => {
   it("keeps the exact shared legal strings", () => {
     expect(TALISPROS_LEGAL_PRIMARY_COPY).toBe("");
-    expect(TALISPROS_LEGAL_SECONDARY_COPY).toBe("*Prior registration required.");
+    expect(TALISPROS_LEGAL_SECONDARY_COPY).toBe("*Registration required.");
+    expect(de.home.legalSecondary).toBe("*Registrierung erforderlich.");
   });
 
   it("explains Mapsite on the homepage map card without a demo link", () => {
