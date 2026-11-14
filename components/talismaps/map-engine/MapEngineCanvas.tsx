@@ -11,6 +11,7 @@ import {
   type MapPinDragStartEvent,
   type MapViewportChangeEvent,
 } from "@/lib/talismaps/map-engine";
+import { zoomToApplyWhileCenterLocked } from "@/lib/talismaps/map-engine/locked-center-zoom";
 import { useMapEngine } from "./MapEngineProvider";
 
 interface MapEngineCanvasProps {
@@ -220,14 +221,23 @@ export default function MapEngineCanvas({ className = "h-full w-full" }: MapEngi
   }, [pins, draggablePinIds]);
 
   // Apply programmatic viewport changes (e.g. claim-form address geocode → pan map).
-  // Skip when center is locked (Mapsite pin under tip) — that path owns the camera.
+  // A locked center keeps the Mapsite pin under the card, but zoom must still
+  // move: the + / − buttons update viewport.zoom and the provider applies only
+  // that zoom while the pin stays locked. Skipping the whole update left those
+  // clicks changing React state and not the map.
   // Skip when gestures are disabled so the published map stays at build zoom.
   // Skip when the instance already matches to avoid fighting user pan/zoom echoes.
   useEffect(() => {
-    if (lockCenter || !interactive) return;
+    if (!interactive) return;
     const instance = instanceRef.current;
     if (!instance) return;
     const current = instance.getViewport();
+    if (lockCenter) {
+      const zoom = zoomToApplyWhileCenterLocked(current.zoom, viewport.zoom);
+      if (zoom == null) return;
+      instance.setViewport({ zoom });
+      return;
+    }
     const sameCenter =
       Math.abs(current.center.latitude - viewport.center.latitude) < 1e-7 &&
       Math.abs(current.center.longitude - viewport.center.longitude) < 1e-7;
