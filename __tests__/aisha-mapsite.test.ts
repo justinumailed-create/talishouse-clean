@@ -21,11 +21,10 @@ describe("Aisha on a claimed Mapsite", () => {
     expect(isClaimedMapSiteStatus("draft")).toBe(true);
     expect(mapsiteShowsAisha("UNCLAIMED")).toBe(false);
     expect(mapsiteShowsAisha("")).toBe(false);
-    expect(mapsiteAishaInvitation("DC06")).toBe("callback");
-    expect(mapsiteAishaInvitation(" rm22 ")).toBe("mapsite");
+    expect(mapsiteAishaInvitation()).toBe("callback");
     const app = read("components/talispros/mapsite/MapSiteApplication.tsx");
     expect(app).toContain("mapsiteShowsAisha(mapsite.status)");
-    expect(app).toContain("mapsiteAishaInvitation(mapsite.fast_code)");
+    expect(app).toContain("mapsiteAishaInvitation()");
     expect(app).toContain('placement="bottom-right"');
     expect(app).toContain("agentId={AISHA_MAPSITE_AGENT_ID}");
     expect(app).toContain("additionalPinMapLabel(pin.label)");
@@ -38,17 +37,13 @@ describe("Aisha on a claimed Mapsite", () => {
     expect(de.home.assistants.aisha.callback).toBe(
       "Schlagen Sie ein Projekt vor. Starten Sie einfach einen Anruf und erzählen Sie mir, was Sie hier sehen.",
     );
-    expect(en.home.assistants.aisha.mapsite).toBe(
-      "Start a call and tell me what you can see.",
-    );
-    expect(de.home.assistants.aisha.mapsite).toBe(
-      "Starten Sie einen Anruf und erzählen Sie mir, was Sie sehen.",
-    );
     expect(en.mapsite.leftCard.inventory).toBe("I represent this Inventory");
     expect(de.mapsite.leftCard.inventory).toBe("Ich vertrete dieses Inventar");
     expect(en.home.assistants.aisha.greeting).not.toBe(en.home.assistants.aisha.callback);
-    expect(en.home.assistants.aisha.mapsite).not.toContain("—");
-    expect(de.home.assistants.aisha.mapsite).not.toContain("—");
+    expect(en.home.assistants.aisha.callback).not.toContain("—");
+    expect(de.home.assistants.aisha.callback).not.toContain("—");
+    expect("mapsite" in en.home.assistants.aisha).toBe(false);
+    expect("mapsite" in de.home.assistants.aisha).toBe(false);
   });
 
   it("sends any claimed FAST Code to that Mapsite", () => {

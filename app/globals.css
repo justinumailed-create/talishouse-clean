@@ -575,6 +575,19 @@ p {
   position: relative;
 }
 
+.aisha-convai-bubble--aligned {
+  position: fixed;
+  margin: 0;
+  max-width: none;
+}
+
+.aisha-convai-bubble--aligned .aisha-convai-label {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  box-sizing: border-box;
+}
+
 .aisha-convai-dismiss {
   position: absolute;
   top: 8px;

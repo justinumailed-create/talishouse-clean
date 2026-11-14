@@ -17,8 +17,10 @@ describe("Aisha bubble while the widget panel is open", () => {
     expect(banner).toContain("function convaiSurfaceOpen");
     expect(banner).toContain(".terms");
     expect(banner).not.toContain("attributes: true");
-    expect(widget).toContain("aisha-bubble-dismissed");
+    expect(widget).toContain("setBubbleDismissed(true)");
     expect(widget).toContain("aisha-convai-dismiss");
+    expect(widget).not.toContain("sessionStorage");
+    expect(widget).not.toContain("localStorage");
     expect(css).toContain("--aisha-panel-top");
     expect(banner).toContain('[data-variant="expanded"].sheet');
   });
