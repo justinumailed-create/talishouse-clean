@@ -4,6 +4,7 @@ import TalisprosHomeShowcase from "@/components/talispros/TalisprosHomeShowcase"
 import TalisprosSamCartReturnBanner from "@/components/talispros/TalisprosSamCartReturnBanner";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import TalisprosHomeCornerLinks from "@/components/talispros/TalisprosHomeCornerLinks";
+import AishaConvaiWidget from "@/components/talispros/AishaConvaiWidget";
 
 /**
  * Homepage gate (`/`): TalisU blue navbar; Login + Build Demo + FAST on the
@@ -30,6 +31,7 @@ export default function TalisprosGatePage() {
           <TalisprosHomeShowcase />
         </div>
       </div>
+      <AishaConvaiWidget />
     </div>
   );
 }

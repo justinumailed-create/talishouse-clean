@@ -134,6 +134,13 @@ export const en = {
     ownershipAria: "Ownership models",
     closeDetails: "Close {title} details",
     learnMore: "Learn More",
+    aisha: {
+      label: "Aisha, Tsplits™ team leader",
+      action: "Talk with Aisha",
+      startCall: "Start a call",
+      endCall: "End call",
+      openChat: "Open chat",
+    },
     samcartReturn: {
       confirming: "Confirming payment return…",
       received: "Payment return received — Mapsite unlock in progress.",

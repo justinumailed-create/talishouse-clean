@@ -547,6 +547,52 @@ p {
   aspect-ratio: 16 / 9;
 }
 
+/* Aisha sits above the homepage ownership buttons on a phone, and in the
+   open corner of the left column on a wide screen. */
+.aisha-convai-slot {
+  position: fixed;
+  z-index: 35;
+  right: 0.75rem;
+  bottom: 9.75rem;
+  left: auto;
+  display: flex;
+  max-width: min(18rem, calc(100vw - 1.5rem));
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+  pointer-events: none;
+}
+
+.aisha-convai-slot elevenlabs-convai {
+  position: static !important;
+  right: auto !important;
+  bottom: auto !important;
+  left: auto !important;
+  pointer-events: auto;
+}
+
+.aisha-convai-label {
+  margin: 0;
+  border-radius: 999px;
+  background: #fff;
+  padding: 0.4rem 0.8rem;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: #171717;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+}
+
+@media (min-width: 1024px) {
+  .aisha-convai-slot {
+    right: auto;
+    left: 1.25rem;
+    bottom: 1.25rem;
+    align-items: flex-start;
+  }
+}
+
 .img-cover {
   object-fit: cover;
   width: 100%;
