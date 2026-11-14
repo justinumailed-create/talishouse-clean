@@ -20,6 +20,7 @@ export default function MarketsAdminGate() {
         data-testid="markets-admin-gate"
         method="post"
         className="mx-auto w-full max-w-[28rem] rounded-2xl bg-white px-8 py-8 shadow-[0_12px_40px_rgba(0,0,0,0.12)] ring-1 ring-black/5"
+        style={{ width: "min(100%, 28rem)", maxWidth: "28rem" }}
         onSubmit={(event) => {
           event.preventDefault();
           setError(null);
