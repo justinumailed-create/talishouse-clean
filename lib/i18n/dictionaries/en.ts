@@ -268,7 +268,7 @@ export const en = {
     pageSubmit: "Share Your Vision",
     pageNote: "All quotes and payments are in Canadian dollars (CAD).",
     pageImageAlt:
-      "Staked-out building lot beside a lake in a Canadian forest, with a modular cabin set on its foundation at sunrise",
+      "Four quieter scenes: a house for sale, a lease-to-own handshake, a shared development, and a tokenized building",
     pageDoneBack: "Back to Tsplits™",
     topicHint: "(choose with the buttons)",
     openPage: "Open as a full page with a Google-recognized location →",
