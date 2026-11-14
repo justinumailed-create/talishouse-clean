@@ -567,12 +567,17 @@ p {
    Shadow buttons keep the default and still receive clicks. */
 .aisha-convai-slot elevenlabs-convai {
   pointer-events: none !important;
-  z-index: 1;
+  /* Above our write-up so the terms sheet, call, and chat cover the bubble. */
+  z-index: 2;
+}
+
+.aisha-convai-slot[data-surface="open"] .aisha-convai-label {
+  display: none !important;
 }
 
 .aisha-convai-label {
   position: relative;
-  z-index: 2;
+  z-index: 1;
   margin: 0 0 10px;
   max-width: min(18.5rem, calc(100vw - 2rem));
   border: 0;
@@ -603,9 +608,9 @@ p {
 .aisha-bubble-glass {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.55);
-  -webkit-backdrop-filter: saturate(180%) blur(28px);
-  backdrop-filter: saturate(180%) blur(28px);
+  background: rgba(255, 255, 255, 0.94);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  backdrop-filter: saturate(160%) blur(16px);
 }
 
 .aisha-bubble-stroke {
