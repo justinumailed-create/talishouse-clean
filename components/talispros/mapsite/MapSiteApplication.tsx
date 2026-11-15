@@ -39,7 +39,11 @@ import {
 import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
 import { additionalPinMapLabel } from "@/lib/talispros/mapsite-additional-pins";
 import {
+  CLOSE_PAIR_FOCUS_ZOOM,
+  clampFitPadding,
   distanceMeters,
+  EBOOK_PIN_MAX_METERS,
+  mapsitePinFitPadding,
   mapsitePinFitPaddingForViewport,
   presentMapSitePins,
   shiftCameraForNeighbors,
@@ -764,7 +768,13 @@ function MapSiteChrome({
     const pin = visiblePins.find((item) => item.id === selectedPinId);
     if (!pin) return;
     lastFocusedForSelectionRef.current = selectedPinId;
-    const zoom = pinFocusZoom(viewportZoomRef.current);
+    const closeNeighbor = visiblePins.some(
+      (other) => other.id !== pin.id && distanceMeters(other, pin) <= EBOOK_PIN_MAX_METERS,
+    );
+    const zoom = Math.max(
+      pinFocusZoom(viewportZoomRef.current),
+      closeNeighbor ? CLOSE_PAIR_FOCUS_ZOOM : 0,
+    );
     focusZoomRef.current = zoom;
     beginFocusGuard();
     // One pin: the center stays locked and the offset keeps it under the tip.
@@ -1123,17 +1133,26 @@ function MapSiteChrome({
       // Several pins: frame every pin inside the clear area (card, nav, zoom, Aisha).
       // One pin keeps the system opening zoom. A single-point fit would jump to 15.
       if (visiblePins.length > 1 && useOpeningZoom) {
+        const card = listingCardRef.current?.getBoundingClientRect();
+        const rootBox = rootRef.current?.getBoundingClientRect();
+        if (card && rootBox && card.height < 40) return;
+        let pad = mapsitePinFitPadding({ width, compact: width < 900 });
+        if (card && rootBox && card.height > 80 && card.width > 80) {
+          const cardBottom = card.bottom - rootBox.top;
+          const cardRight = card.right - rootBox.left;
+          if (card.width > rootBox.width * 0.55 && cardBottom > 0) {
+            pad = { ...pad, top: Math.max(pad.top, Math.round(cardBottom) + 56) };
+          } else if (card.left - rootBox.left < 80) {
+            pad = { ...pad, left: Math.max(pad.left, Math.round(cardRight) + 28) };
+          }
+        }
         beginFocusGuard();
         fitToCoordinates(
           visiblePins.map((pin) => ({
             latitude: pin.latitude,
             longitude: pin.longitude,
           })),
-          mapsitePinFitPaddingForViewport({
-            width,
-            height,
-            compact: width < 900,
-          }),
+          clampFitPadding(pad, width, height),
         );
       } else {
         setViewport({
@@ -1150,6 +1169,7 @@ function MapSiteChrome({
     if (!root || fitted) return;
     const observer = new ResizeObserver(apply);
     observer.observe(root);
+    if (listingCardRef.current) observer.observe(listingCardRef.current);
     return () => observer.disconnect();
     // Re-apply when the PIN set changes (or the editor closes), not on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps

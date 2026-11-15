@@ -7,7 +7,10 @@ export const EBOOK_PIN_MAX_METERS = 400;
 export const CLOSE_PIN_METERS = 250;
 
 /** Screen shift so a stacked pin stays clickable. */
-export const CLOSE_PIN_NUDGE_PX = 56;
+export const CLOSE_PIN_NUDGE_PX = 96;
+
+/** Zoom that puts a pin ~150 m away beside the card instead of under it. */
+export const CLOSE_PAIR_FOCUS_ZOOM = 18;
 
 export type PinPoint = {
   id: string;
@@ -118,14 +121,9 @@ export function mapsitePinFitPadding(input: { width: number; compact: boolean })
 }
 
 /** Shrink the insets when the map is shorter than the overlays stacked together. */
-export function mapsitePinFitPaddingForViewport(input: {
-  width: number;
-  height: number;
-  compact: boolean;
-}): FitPadding {
-  const pad = mapsitePinFitPadding(input);
-  const maxX = Math.max(48, input.width - 80);
-  const maxY = Math.max(48, input.height - 80);
+export function clampFitPadding(pad: FitPadding, width: number, height: number): FitPadding {
+  const maxX = Math.max(48, width - 80);
+  const maxY = Math.max(48, height - 80);
   const scaleX = pad.left + pad.right > maxX ? maxX / (pad.left + pad.right) : 1;
   const scaleY = pad.top + pad.bottom > maxY ? maxY / (pad.top + pad.bottom) : 1;
   const scale = Math.min(1, scaleX, scaleY);
@@ -135,6 +133,14 @@ export function mapsitePinFitPaddingForViewport(input: {
     bottom: Math.round(pad.bottom * scale),
     left: Math.round(pad.left * scale),
   };
+}
+
+export function mapsitePinFitPaddingForViewport(input: {
+  width: number;
+  height: number;
+  compact: boolean;
+}): FitPadding {
+  return clampFitPadding(mapsitePinFitPadding(input), input.width, input.height);
 }
 
 /**
