@@ -3,63 +3,71 @@
 import { useMemo, useState } from "react";
 import { useLocale, useT } from "@/lib/i18n/client";
 import {
-  addDays,
-  halfHourLabels,
-  isoWeek,
-  sameLocalDay,
-  startOfIsoWeek,
-} from "@/lib/talispros/iso-week";
-
-const SLOTS = halfHourLabels();
+  canadaSourcedTime,
+  civilKey,
+  neighboringLeadWeek,
+  preferredDay,
+  type SourcedLead,
+} from "@/lib/talispros/canada-calendar";
+import { addDays, isoWeek, sameLocalDay } from "@/lib/talispros/iso-week";
 
 function localeTag(locale: string): string {
   return locale === "de" ? "de-DE" : "en-CA";
 }
 
+function leadPlace(lead: SourcedLead): string {
+  return lead.province ? `${lead.town}, ${lead.province}` : lead.town;
+}
+
 /**
- * Date-driven week calendar for the Mapsites rail.
- * Half-hour slots belong to the selected day. The ISO week number selects that week.
+ * Week calendar for sourced leads. Weeks with no leads are skipped.
+ * Each lead sits on its Canada day.
  */
 export default function MapsitesWeekCalendar({
   weekStart,
   onWeekStart,
+  leadDays,
+  counts,
+  leads,
+  unlocked,
+  onAskUnlock,
 }: {
   weekStart: Date;
   onWeekStart: (next: Date) => void;
+  leadDays: readonly string[];
+  counts: ReadonlyMap<string, number>;
+  leads: readonly SourcedLead[];
+  unlocked: boolean;
+  onAskUnlock: () => void;
 }) {
   const locale = useLocale();
   const copy = useT().demo.slots;
   const tag = localeTag(locale);
   const today = useMemo(() => new Date(), []);
-  const [selectedDay, setSelectedDay] = useState(() => new Date());
-  const [selectedSlot, setSelectedSlot] = useState(() => {
-    const now = new Date();
-    const hour = now.getHours();
-    const minute = now.getMinutes() < 30 ? "00" : "30";
-    return `${String(hour).padStart(2, "0")}:${minute}`;
-  });
+  const leadDayKey = leadDays.join("|");
+  const weekId = weekStart.getTime();
+  const [picked, setPicked] = useState<{ weekId: number; dayKey: string; day: Date } | null>(null);
+  const selectedDay =
+    picked && picked.weekId === weekId && picked.dayKey === leadDayKey
+      ? picked.day
+      : preferredDay(weekStart, leadDays);
 
   const days = Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
   const { week } = isoWeek(weekStart);
-  const dayInWeek = days.some((day) => sameLocalDay(day, selectedDay))
-    ? selectedDay
-    : days[0];
+  const dayInWeek = days.some((day) => sameLocalDay(day, selectedDay)) ? selectedDay : days[0]!;
+  const selectedKey = civilKey(dayInWeek);
+  const selectedCount = counts.get(selectedKey) ?? 0;
+  const selectedLeads = leads.filter((lead) => lead.day === selectedKey);
+  const prev = neighboringLeadWeek(weekStart, -1, leadDays);
+  const next = neighboringLeadWeek(weekStart, 1, leadDays);
+  const fromLabel = days[0]!.toLocaleDateString(tag, { month: "short", day: "numeric" });
+  const toLabel = days[6]!.toLocaleDateString(tag, { month: "short", day: "numeric" });
+  const range = copy.weekRange.replace("{from}", fromLabel).replace("{to}", toLabel);
 
-  function go(delta: number) {
-    onWeekStart(addDays(weekStart, delta * 7));
-    setSelectedDay(addDays(dayInWeek, delta * 7));
+  function go(target: Date | null) {
+    if (!target) return;
+    onWeekStart(target);
   }
-
-  function selectThisWeek() {
-    onWeekStart(startOfIsoWeek(weekStart));
-    document.getElementById("mapsites-week-folder")?.scrollIntoView({ block: "nearest" });
-  }
-
-  const dayLabel = dayInWeek.toLocaleDateString(tag, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
 
   return (
     <section
@@ -70,25 +78,27 @@ export default function MapsitesWeekCalendar({
       <div className="flex items-center justify-between gap-2">
         <button
           type="button"
-          onClick={() => go(-1)}
-          className="inline-flex h-10 min-w-10 items-center justify-center rounded-full text-[18px] font-semibold text-neutral-950 ring-1 ring-neutral-300 hover:bg-neutral-100"
+          onClick={() => go(prev)}
+          disabled={!prev}
+          className="inline-flex h-10 min-w-10 items-center justify-center rounded-full text-[18px] font-semibold text-neutral-950 ring-1 ring-neutral-300 hover:bg-neutral-100 disabled:opacity-30"
           aria-label={copy.prevWeek}
           data-testid="mapsites-week-prev"
         >
           ‹
         </button>
+        <div className="text-center">
+          <div className="text-[16px] font-semibold text-[#0356b0]" data-testid="mapsites-week-number">
+            {copy.weekNumber.replace("{week}", String(week))}
+          </div>
+          <div className="text-[13px] text-neutral-600" data-testid="mapsites-week-range">
+            {range}
+          </div>
+        </div>
         <button
           type="button"
-          onClick={selectThisWeek}
-          className="rounded-full px-3 py-1.5 text-[16px] font-semibold text-[#0356b0] underline decoration-[#0356b0]/40 underline-offset-2 hover:bg-[#e8f1fc]"
-          data-testid="mapsites-week-number"
-        >
-          {copy.weekNumber.replace("{week}", String(week))}
-        </button>
-        <button
-          type="button"
-          onClick={() => go(1)}
-          className="inline-flex h-10 min-w-10 items-center justify-center rounded-full text-[18px] font-semibold text-neutral-950 ring-1 ring-neutral-300 hover:bg-neutral-100"
+          onClick={() => go(next)}
+          disabled={!next}
+          className="inline-flex h-10 min-w-10 items-center justify-center rounded-full text-[18px] font-semibold text-neutral-950 ring-1 ring-neutral-300 hover:bg-neutral-100 disabled:opacity-30"
           aria-label={copy.nextWeek}
           data-testid="mapsites-week-next"
         >
@@ -97,15 +107,20 @@ export default function MapsitesWeekCalendar({
       </div>
       <div className="mt-3 grid grid-cols-7 gap-1" role="listbox" aria-label={copy.calendarLabel}>
         {days.map((day) => {
+          const key = civilKey(day);
           const selected = sameLocalDay(day, dayInWeek);
           const isToday = sameLocalDay(day, today);
+          const count = counts.get(key) ?? 0;
           return (
             <button
-              key={day.toISOString()}
+              key={key}
               type="button"
               role="option"
               aria-selected={selected}
-              onClick={() => setSelectedDay(day)}
+              onClick={() => {
+                setPicked({ weekId, dayKey: leadDayKey, day });
+                if (!unlocked && count > 0) onAskUnlock();
+              }}
               className={`flex min-h-12 flex-col items-center justify-center rounded-xl text-[13px] font-semibold leading-tight ${
                 selected
                   ? "bg-[#046BD9] text-white"
@@ -117,40 +132,60 @@ export default function MapsitesWeekCalendar({
                 {day.toLocaleDateString(tag, { weekday: "narrow" })}
               </span>
               <span>{day.getDate()}</span>
+              {count > 0 ? (
+                <span
+                  className={`mt-0.5 text-[10px] font-semibold ${selected ? "text-white" : "text-[#0356b0]"}`}
+                  data-testid="sourced-day-count"
+                >
+                  {count}
+                </span>
+              ) : (
+                <span className="mt-0.5 text-[10px] font-medium opacity-50" aria-hidden>
+                  ·
+                </span>
+              )}
               {isToday ? <span className="sr-only">{copy.addedToday}</span> : null}
             </button>
           );
         })}
       </div>
-      <p className="m-0 mt-3 text-[15px] font-medium text-neutral-950" data-testid="mapsites-slot-caption">
-        {copy.slotLabel.replace("{date}", dayLabel).replace("{time}", selectedSlot)}
-      </p>
-      <div
-        className="mt-2 max-h-40 overflow-y-auto rounded-xl ring-1 ring-neutral-200"
-        data-testid="mapsites-half-hours"
-      >
-        <ul className="m-0 list-none p-1">
-          {SLOTS.map((slot) => {
-            const selected = slot === selectedSlot;
-            return (
-              <li key={slot}>
-                <button
-                  type="button"
-                  onClick={() => setSelectedSlot(slot)}
-                  aria-pressed={selected}
-                  className={`flex h-9 w-full items-center rounded-lg px-3 text-left text-[15px] tabular-nums ${
-                    selected
-                      ? "bg-[#046BD9] font-semibold text-white"
-                      : "text-neutral-950 hover:bg-neutral-100"
-                  }`}
-                  data-testid="mapsites-half-hour"
+      <div className="mt-3" data-testid="sourced-day-leads">
+        <p className="m-0 text-[15px] font-medium text-neutral-950">
+          {dayInWeek.toLocaleDateString(tag, { weekday: "long", month: "long", day: "numeric" })}
+        </p>
+        {selectedCount === 0 ? (
+          <p className="m-0 mt-1 text-[14px] text-neutral-600">{copy.sourcedNone}</p>
+        ) : unlocked ? (
+          <ul className="m-0 mt-1 max-h-36 list-none overflow-y-auto p-0">
+            {selectedLeads.map((lead) => {
+              const place = leadPlace(lead);
+              return (
+                <li
+                  key={lead.id}
+                  className="border-b border-neutral-100 py-1.5 text-[14px] leading-snug text-neutral-950"
+                  data-testid="sourced-lead"
                 >
-                  {slot}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                  <span className="font-medium">{lead.brokerage}</span>
+                  {place ? <span className="text-neutral-600">{`, ${place}`}</span> : null}
+                  <span className="ml-2 tabular-nums text-neutral-500">
+                    {canadaSourcedTime(lead.sourcedAt, locale)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        ) : (
+          <button
+            type="button"
+            onClick={onAskUnlock}
+            className="mt-1 text-left text-[14px] font-semibold text-[#0356b0] underline decoration-[#0356b0]/40 underline-offset-2"
+            data-testid="sourced-day-locked"
+          >
+            {copy.sourcedCount.replace("{count}", String(selectedCount))}
+            {". "}
+            {copy.sourcedLocked}
+          </button>
+        )}
       </div>
     </section>
   );
