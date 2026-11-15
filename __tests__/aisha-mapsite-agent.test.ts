@@ -20,6 +20,13 @@ describe("Aisha agent by page", () => {
     expect(home).not.toContain(AISHA_MAPSITE_AGENT_ID);
     expect(mapsite).toContain("agentId={AISHA_MAPSITE_AGENT_ID}");
     expect(mapsite).toContain("aishaMapsiteDynamicVariables");
+    const account = read("components/talispros/MapsiteAisha.tsx");
+    expect(account).toContain("AISHA_MAPSITE_AGENT_ID");
+    expect(account).toContain("aishaMapsiteDynamicVariables");
+    expect(account).not.toContain("AISHA_HOMEPAGE_AGENT_ID");
+    expect(read("app/talispros/home/[fastCode]/page.tsx")).toContain("<MapsiteAisha");
+    expect(read("app/talispros/client/dashboard/page.tsx")).toContain("<MapsiteAisha");
+    expect(read("app/talispros/mapsites/[fastCode]/edit/page.tsx")).toContain("<MapsiteAisha");
   });
 
   it("uses the stored first name, then the display name, and never a guessed split", () => {

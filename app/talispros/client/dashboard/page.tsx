@@ -1,4 +1,5 @@
 import ClientSignOutButton from "@/app/talispros/client/ClientSignOutButton";
+import MapsiteAisha from "@/components/talispros/MapsiteAisha";
 import DailyChecklistFeed from "@/components/client-analytics/DailyChecklistFeed";
 import MetricsOverview from "@/components/client-analytics/MetricsOverview";
 import WeeklyReportsList from "@/components/client-analytics/WeeklyReportsList";
@@ -54,6 +55,11 @@ export default async function ClientDashboardPage() {
         <WeeklyReportsList reports={context.weeklyReports} />
         <DailyChecklistFeed entries={context.recentChecklists} />
       </div>
+      <MapsiteAisha
+        agentName={context.ownerName}
+        fastCode={context.fastCode}
+        mapsiteTitle={context.propertyTitle}
+      />
     </div>
   );
 }

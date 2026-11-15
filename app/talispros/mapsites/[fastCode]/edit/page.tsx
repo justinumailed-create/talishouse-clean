@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
+import MapsiteAisha from "@/components/talispros/MapsiteAisha";
 import MapSiteAdminEditor from "@/components/talispros-admin/MapSiteAdminEditor";
+import { mapsiteShowsAisha } from "@/lib/talispros/aisha-mapsites";
 import MapSiteAdminMissing from "@/components/talispros-admin/MapSiteAdminMissing";
 import { canEditMapSite } from "@/lib/mapsite-edit-auth";
 import { CLIENT_LOGIN_PATH } from "@/lib/mapsite-account-session";
@@ -54,6 +56,14 @@ export default async function MapSiteOwnerEditPage({
         paymentReceived={paymentReceived}
         ebook={ebookContext?.primaryEbook ?? null}
       />
+      {mapsiteShowsAisha(mapsite.status) ? (
+        <MapsiteAisha
+          ownerFirstName={mapsite.ownerFirstName}
+          agentName={mapsite.agentName}
+          fastCode={mapsite.fastCode}
+          mapsiteTitle={mapsite.propertyTitle}
+        />
+      ) : null}
     </div>
   );
 }

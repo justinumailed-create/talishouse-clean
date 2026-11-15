@@ -5,6 +5,8 @@ import PersonalHomeEditor from "@/components/talispros/personal-home/PersonalHom
 import PersonalHomeMapsite from "@/components/talispros/personal-home/PersonalHomeMapsite";
 import LegalLinks from "@/components/legal/LegalLinks";
 import PersonalHomeNav from "@/components/talispros/personal-home/PersonalHomeNav";
+import MapsiteAisha from "@/components/talispros/MapsiteAisha";
+import { mapsiteShowsAisha } from "@/lib/talispros/aisha-mapsites";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
 import { ROUTES } from "@/lib/routes";
@@ -221,6 +223,14 @@ export default async function PersonalHomePage({
           saved={data.saved}
           defaults={data.defaults}
           initialOpen={query.edit === "1"}
+        />
+      ) : null}
+      {mapsiteShowsAisha(data.view.status) ? (
+        <MapsiteAisha
+          ownerFirstName={data.view.ownerFirstName}
+          agentName={data.view.agentName}
+          fastCode={data.view.fastCode}
+          mapsiteTitle={data.view.propertyTitle}
         />
       ) : null}
     </div>
