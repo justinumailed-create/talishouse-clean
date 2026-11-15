@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { getSupabaseReadClient } from "@/lib/supabaseClient";
 import type { MapSiteSavedPinStyle } from "@/lib/mapsite-pin-style";
 import { getMapSiteTalisMapPinStyle } from "@/lib/talismaps/map-service";
 import { HOME_PIN_DEFAULT_MAP_ZOOM, clampMapZoom } from "@/lib/home-pin-coordinates";
@@ -879,20 +880,20 @@ export const getMapSitePlatformByFastCode = cache(async function getMapSitePlatf
   fastCode: string
 ): Promise<MapSitePlatformRecord | null> {
   if (!fastCode.trim()) return null;
+  const reader = getSupabaseReadClient();
+  if (reader) {
+    const { data, error } = await reader
+      .from("mapsites")
+      .select(SELECT_COLUMNS)
+      .ilike("fast_code", fastCode.trim())
+      .maybeSingle();
+    if (!error && data) return mapRow(data as MapSiteRow);
+  }
   if (!isSupabaseAdminConfigured()) {
     return createFallbackDemoMapSite({
       fast_code: fastCode.trim().toUpperCase(),
       status: "BUILD_REQUEST_SUBMITTED",
     });
   }
-
-  const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from("mapsites")
-    .select(SELECT_COLUMNS)
-    .ilike("fast_code", fastCode.trim())
-    .maybeSingle();
-
-  if (error || !data) return null;
-  return mapRow(data as MapSiteRow);
+  return null;
 });

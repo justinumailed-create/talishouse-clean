@@ -1,5 +1,6 @@
 import type Stripe from "stripe";
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
+import { getSupabaseReadClient } from "@/lib/supabaseClient";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { isDemonstrationListing } from "@/lib/talispros/demo-mapsite";
 import {
@@ -85,10 +86,10 @@ export async function loadMapSitePinDashboard(
 ): Promise<MapSitePinDashboardState> {
   const empty = defaultMapSitePinDashboard();
   const id = mapsiteId.trim();
-  if (!id || !isSupabaseAdminConfigured()) return empty;
+  const supabase = getSupabaseReadClient();
+  if (!id || !supabase) return empty;
 
   try {
-    const supabase = getSupabaseAdmin();
     const [{ data: row, error: rowError }, { data: pinRows, error: pinError }] =
       await Promise.all([
         supabase

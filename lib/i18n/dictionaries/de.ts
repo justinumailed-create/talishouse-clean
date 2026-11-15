@@ -792,6 +792,7 @@ export const de: Dictionary = {
       resourceUnavailable: "{label} nicht verfügbar",
       resourceNotConfigured: "{label} ist noch nicht eingerichtet",
       fastCodeLabel: "FAST Code: {code}",
+      pinnedLocation: "Markierter Ort",
     },
     pinActions: {
       url: "Ein Link, den der Inhaber diesem PIN hinzufügt, etwa die eigene Website oder eine Angebotsseite.",

@@ -1,4 +1,5 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -19,3 +20,12 @@ export const supabase = createClient(clientUrl, clientKey, {
     autoRefreshToken: false,
   },
 });
+
+/** Service role when it is configured, otherwise the public key for tables anon may read. */
+export function getSupabaseReadClient(): SupabaseClient | null {
+  if (isSupabaseAdminConfigured()) {
+    return getSupabaseAdmin() as unknown as SupabaseClient;
+  }
+  if (!isSupabaseConfigured) return null;
+  return supabase;
+}

@@ -182,6 +182,11 @@ interface MapSitePropertyPopupProps {
   widthPx?: number;
   /** Shorter hero, used when this flag sits in a half-page map. */
   dense?: boolean;
+  /**
+   * Extra pin: its own title and address. Null image means this pin has no
+   * photo, so the main listing photo is not reused.
+   */
+  pinCard?: { title: string; detail: string } | null;
   onClose: () => void;
 }
 
@@ -205,6 +210,7 @@ export default function MapSitePropertyPopup({
   compact = false,
   widthPx,
   dense = false,
+  pinCard = null,
   onClose,
 }: MapSitePropertyPopupProps) {
   const t = useT();
@@ -229,9 +235,11 @@ export default function MapSitePropertyPopup({
     RESOURCES.find((resource) => resource.key === "teb")?.resolveHref(
       mapsite,
     ) ?? null;
-  const popupHeroImage = useGenericCard ? genericHeroImage : heroImage;
+  const popupHeroImage = pinCard ? null : useGenericCard ? genericHeroImage : heroImage;
   // Claimed / live cards prefer the property address — never stay stuck on a demo title.
-  const popupTitle = useGenericCard
+  const popupTitle = pinCard
+    ? pinCard.title
+    : useGenericCard
     ? p.genericTitle
     : propertyAddress || (demoishTitle ? address : propertyTitle) || p.yourMapsite;
   const rawDescription = mapsite.property_description?.trim() || "";
@@ -243,7 +251,9 @@ export default function MapSitePropertyPopup({
     fastCode && demoNotIssuedCopy
       ? null
       : rawDescription || null;
-  const popupWriteup = useGenericCard
+  const popupWriteup = pinCard
+    ? pinCard.detail
+    : useGenericCard
     ? p.genericWriteup
     : (propertyAddress && !demoishTitle && propertyTitle && propertyTitle !== propertyAddress
         ? propertyTitle
@@ -267,7 +277,8 @@ export default function MapSitePropertyPopup({
     <>
       <div
         role="dialog"
-        aria-label={mapsite.property_title}
+        aria-label={popupTitle}
+        data-testid="mapsite-pin-card"
         className={`pointer-events-none absolute z-30 ${widthPx ? "" : MAPSITE_LISTING_CARD_WIDTH_CLASS} -translate-x-1/2`}
         style={{
           width: widthPx,
@@ -298,17 +309,21 @@ export default function MapSitePropertyPopup({
             }`}
           >
             <div className="absolute inset-0 z-0">
-              <span className="relative block h-full w-full">
-                <Image
-                  src={popupHeroImage}
-                  alt={popupTitle}
-                  fill
-                  className={MAPSITE_LISTING_IMAGE_CLASS}
-                  sizes="352px"
-                  unoptimized
-                  priority
-                />
-              </span>
+              {popupHeroImage ? (
+                <span className="relative block h-full w-full">
+                  <Image
+                    src={popupHeroImage}
+                    alt={popupTitle}
+                    fill
+                    className={MAPSITE_LISTING_IMAGE_CLASS}
+                    sizes="352px"
+                    unoptimized
+                    priority
+                  />
+                </span>
+              ) : (
+                <span className="block h-full w-full bg-neutral-200" />
+              )}
             </div>
 
             <button
@@ -323,7 +338,10 @@ export default function MapSitePropertyPopup({
 
           <div className="flex flex-col bg-gradient-to-b from-white/65 to-white/75 px-4 pb-3 pt-1.5">
             <div className="shrink-0">
-              <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">
+              <h2
+                className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black"
+                data-testid="mapsite-pin-card-title"
+              >
                 {popupTitle}
               </h2>
               {useGenericCard ? null : fastCode ? (

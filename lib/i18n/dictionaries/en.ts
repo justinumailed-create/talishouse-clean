@@ -476,6 +476,7 @@ export const en = {
       resourceUnavailable: "{label} unavailable",
       resourceNotConfigured: "{label} not configured yet",
       fastCodeLabel: "FAST Code: {code}",
+      pinnedLocation: "Pinned location",
     },
     /** Hover / focus / tap explainers on PIN card actions (URL 1, URL 2, TEB™, TTV™). */
     pinActions: {
