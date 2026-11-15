@@ -39,6 +39,12 @@ import {
 import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
 import { additionalPinMapLabel } from "@/lib/talispros/mapsite-additional-pins";
 import {
+  distanceMeters,
+  mapsitePinFitPaddingForViewport,
+  presentMapSitePins,
+  shiftCameraForNeighbors,
+} from "@/lib/talispros/mapsite-pin-presentation";
+import {
   additionalPinCardCopy,
   cameraCenterForScreenOffset,
   pinFocusZoom,
@@ -303,6 +309,7 @@ export default function MapSiteApplication({
   const focusTimerRef = useRef<number | null>(null);
   const showClaimedNav = !isClaimable(mapsite.status);
 
+  const pinCopy = useT();
   const pinLabel = mapsitePublicPinLabel({
     propertyTitle: mapsite.property_title,
     address: mapsite.property_address,
@@ -330,26 +337,38 @@ export default function MapSiteApplication({
       animated: savedPin.pinAnimated,
       categoryBadge: savedPin.pinCategoryBadge,
     };
+    const hasEbook = Boolean(mapsite.teb_url?.trim() || mapsite.teb_own_book_href?.trim());
+    const presented = presentMapSitePins({
+      mapsiteId: mapsite.id,
+      latitude: mapsite.lat,
+      longitude: mapsite.lng,
+      mainLabel: pinLabel,
+      addressLabel: mapsite.property_address?.trim() || pinLabel,
+      hasEbook,
+      blankLabel: pinCopy.mapsite.popup.pinnedLocation,
+      additional: pinDashboard.pins.map((pin) => ({
+        id: pin.id,
+        latitude: pin.latitude,
+        longitude: pin.longitude,
+        label: additionalPinMapLabel(pin.label),
+        category: pin.category ?? null,
+      })),
+    });
     return [
-      {
-        id: mapsite.id,
-        latitude: mapsite.lat,
-        longitude: mapsite.lng,
-        color: savedPin.pinColor,
-        label: pinLabel,
-        featured: true,
-        metadata: styleMetadata,
-        category: rootContext.mainPinCategory,
-      },
-      ...pinDashboard.pins.map((pin) => ({
+      ...presented.map((pin) => ({
         id: pin.id,
         latitude: pin.latitude,
         longitude: pin.longitude,
         color: savedPin.pinColor,
-        label: additionalPinMapLabel(pin.label),
-        featured: false,
-        metadata: { ...styleMetadata, additional: true },
-        category: pin.category ?? null,
+        label: pin.label,
+        featured: pin.role === "main",
+        metadata: {
+          ...styleMetadata,
+          additional: pin.role !== "main",
+          geocode: pin.role === "address",
+          screenNudgeX: pin.screenNudgeX,
+        },
+        category: pin.role === "main" ? rootContext.mainPinCategory : (pin.category ?? null),
       })),
       // Root map: every Derivative account holder's PINs (click opens that Mapsite).
       ...rootContext.partnerPins.map((pin) => ({
@@ -363,7 +382,7 @@ export default function MapSiteApplication({
         category: pin.category,
       })),
     ];
-  }, [mapsite, phase, pinLabel, pinDashboard.pins, rootContext.mainPinCategory, rootContext.partnerPins]);
+  }, [mapsite, phase, pinLabel, pinDashboard.pins, rootContext.mainPinCategory, rootContext.partnerPins, pinCopy]);
 
   const allPins = useMemo(
     () =>
@@ -673,7 +692,7 @@ function MapSiteChrome({
   } | null;
   belowWriteUp: ReactNode;
 }) {
-  const { setViewport, isReady, viewport } = useMapEngine();
+  const { setViewport, isReady, viewport, fitToCoordinates } = useMapEngine();
   const router = useRouter();
   const t = useT();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -685,6 +704,8 @@ function MapSiteChrome({
   const cameraKeyRef = useRef<string | null>(null);
   const viewportZoomRef = useRef(viewport.zoom);
   viewportZoomRef.current = viewport.zoom;
+  const selectedPinIdRef = useRef(selectedPinId);
+  selectedPinIdRef.current = selectedPinId;
 
   const [compact, setCompact] = useState(false);
   const [mobileOverlay, setMobileOverlay] = useState(false);
@@ -713,9 +734,12 @@ function MapSiteChrome({
   const focusPinAndOpen = useCallback(() => {
     beginFocusGuard();
     lastFocusedForSelectionRef.current = mapsite.id;
+    const main = visiblePins.find((pin) => pin.id === mapsite.id);
+    const latitude = main?.latitude ?? mapsite.lat;
+    const longitude = main?.longitude ?? mapsite.lng;
     setViewport({
-      center: { latitude: mapsite.lat, longitude: mapsite.lng },
-      zoom: pinZoom(mapsite.lat),
+      center: { latitude, longitude },
+      zoom: pinZoom(latitude),
     });
     setSelectedPinId(mapsite.id);
   }, [
@@ -726,6 +750,7 @@ function MapSiteChrome({
     pinZoom,
     setSelectedPinId,
     setViewport,
+    visiblePins,
   ]);
 
   useEffect(() => {
@@ -837,12 +862,33 @@ function MapSiteChrome({
         onLockCenterOffsetChange(placed.pinOffset);
         if (visiblePins.length > 1 && selectedMapPin && focusZoomRef.current != null) {
           const zoom = focusZoomRef.current;
-          const center = cameraCenterForScreenOffset(
+          const nudgeX =
+            typeof selectedMapPin.metadata?.screenNudgeX === "number"
+              ? selectedMapPin.metadata.screenNudgeX
+              : 0;
+          const offset = { x: placed.pinOffset.x - nudgeX, y: placed.pinOffset.y };
+          const aimed = cameraCenterForScreenOffset(
             { latitude: selectedMapPin.latitude, longitude: selectedMapPin.longitude },
             zoom,
-            placed.pinOffset,
+            offset,
           );
-          const cameraKey = `${selectedMapPin.id}|${zoom}|${placed.pinOffset.x}|${placed.pinOffset.y}`;
+          const neighbors = visiblePins.filter(
+            (pin) =>
+              pin.id !== selectedMapPin.id && distanceMeters(pin, selectedMapPin) <= 2000,
+          );
+          const center = shiftCameraForNeighbors({
+            camera: aimed,
+            zoom,
+            neighbors,
+            width: rootRect.width,
+            height: rootRect.height,
+            padding: mapsitePinFitPaddingForViewport({
+              width: rootRect.width,
+              height: rootRect.height,
+              compact: compactCard,
+            }),
+          });
+          const cameraKey = `${selectedMapPin.id}|${zoom}|${offset.x}|${offset.y}|${center.latitude.toFixed(5)}|${center.longitude.toFixed(5)}`;
           if (cameraKeyRef.current !== cameraKey) {
             cameraKeyRef.current = cameraKey;
             beginFocusGuard();
@@ -1064,52 +1110,99 @@ function MapSiteChrome({
     if (!isReady || pinEditor.kind !== "idle") return;
     // ?view=pin style deep links keep their focused PIN card.
     if (openPinOnLoad) return;
-    // Every Mapsite opens on the pin. fitBounds was replacing the saved zoom
-    // and, before the map had its real size, framed the whole region.
-    // An editor zoom (map_zoom_explicit) is the only exception.
-    const rect = rootRef.current?.getBoundingClientRect();
-    const minSide =
-      rect && rect.width > 200 && rect.height > 200
-        ? Math.min(rect.width, rect.height)
-        : 0;
-    setViewport({
-      center: { latitude: mapsite.lat, longitude: mapsite.lng },
-      zoom: useOpeningZoom
-        ? minSide > 0
-          ? systemMapsiteOpeningZoom(mapsite.lat, minSide)
-          : pinZoom(mapsite.lat)
-        : mapsite.map_zoom,
-    });
+    let fitted = false;
+    const apply = () => {
+      if (fitted || selectedPinIdRef.current) return;
+      const rect = rootRef.current?.getBoundingClientRect();
+      const width = rect && rect.width > 200 ? rect.width : 0;
+      const height = rect && rect.height > 200 ? rect.height : 0;
+      if (!width || !height) return;
+      const main = visiblePins.find((pin) => pin.id === mapsite.id);
+      const latitude = main?.latitude ?? mapsite.lat;
+      const longitude = main?.longitude ?? mapsite.lng;
+      // Several pins: frame every pin inside the clear area (card, nav, zoom, Aisha).
+      // One pin keeps the system opening zoom. A single-point fit would jump to 15.
+      if (visiblePins.length > 1 && useOpeningZoom) {
+        beginFocusGuard();
+        fitToCoordinates(
+          visiblePins.map((pin) => ({
+            latitude: pin.latitude,
+            longitude: pin.longitude,
+          })),
+          mapsitePinFitPaddingForViewport({
+            width,
+            height,
+            compact: width < 900,
+          }),
+        );
+      } else {
+        setViewport({
+          center: { latitude, longitude },
+          zoom: useOpeningZoom
+            ? systemMapsiteOpeningZoom(latitude, Math.min(width, height))
+            : mapsite.map_zoom,
+        });
+      }
+      fitted = true;
+    };
+    apply();
+    const root = rootRef.current;
+    if (!root || fitted) return;
+    const observer = new ResizeObserver(apply);
+    observer.observe(root);
+    return () => observer.disconnect();
     // Re-apply when the PIN set changes (or the editor closes), not on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady, pinEditor.kind, pinFitKey, useOpeningZoom]);
+  }, [isReady, pinEditor.kind, pinFitKey, useOpeningZoom, openPinOnLoad]);
 
   // Ralf (Oct 17): no "Show all PINs" option — every PIN shows until one is
   // picked; the empty value is the "Select a PIN…" placeholder.
   const [activePinId, setActivePinId] = useState<string>("");
-  const pinOptions = useMemo(
-    () => [
+  const pinOptions = useMemo(() => {
+    const shown = new Set(visiblePins.map((pin) => pin.id));
+    return [
       {
         id: mapsite.id,
-        label: `${t.mapsite.leftCard.mainPin} · ${mapsite.property_address?.trim() || mapsite.fast_code || ""}`,
+        label: `${t.mapsite.leftCard.mainPin} · ${
+          visiblePins.find((pin) => pin.id === mapsite.id)?.label ||
+          mapsite.property_address?.trim() ||
+          mapsite.fast_code ||
+          ""
+        }`,
       },
-      ...pinDashboard.pins.map((pin, index) => ({
-        id: pin.id,
-        label: `PIN ${index + 2} · ${pin.label || `${pin.latitude.toFixed(3)}, ${pin.longitude.toFixed(3)}`}`,
-      })),
+      ...pinDashboard.pins
+        .filter((pin) => shown.has(pin.id))
+        .map((pin, index) => ({
+          id: pin.id,
+          label: `PIN ${index + 2} · ${pin.label || t.mapsite.popup.pinnedLocation}`,
+        })),
+      ...visiblePins
+        .filter((pin) => pin.metadata?.geocode === true)
+        .map((pin) => ({ id: pin.id, label: pin.label || t.mapsite.popup.pinnedLocation })),
       ...rootContext.partnerPins.map((pin) => ({ id: pin.id, label: pin.label })),
-    ],
-    [mapsite.id, mapsite.property_address, mapsite.fast_code, pinDashboard.pins, rootContext.partnerPins, t],
-  );
+    ];
+  }, [
+    mapsite.id,
+    mapsite.property_address,
+    mapsite.fast_code,
+    pinDashboard.pins,
+    rootContext.partnerPins,
+    t,
+    visiblePins,
+  ]);
 
   const switchPin = useCallback(
     (id: string) => {
       setActivePinId(id);
       if (!id) {
         setSelectedPinId(null);
+        const main = visiblePins.find((pin) => pin.id === mapsite.id);
         setViewport({
-          center: { latitude: mapsite.lat, longitude: mapsite.lng },
-          zoom: pinZoom(mapsite.lat),
+          center: {
+            latitude: main?.latitude ?? mapsite.lat,
+            longitude: main?.longitude ?? mapsite.lng,
+          },
+          zoom: pinZoom(main?.latitude ?? mapsite.lat),
         });
         return;
       }
@@ -1130,6 +1223,7 @@ function MapSiteChrome({
     },
     [
       beginFocusGuard,
+      mapsite.id,
       mapsite.lat,
       mapsite.lng,
       mapsite.map_zoom,
@@ -1138,6 +1232,7 @@ function MapSiteChrome({
       rootContext.partnerPins,
       setSelectedPinId,
       setViewport,
+      visiblePins,
     ],
   );
 
@@ -1397,12 +1492,22 @@ function MapSiteChrome({
               mapsite={cardMapSite}
               pinCard={(() => {
                 const extra = pinDashboard.pins.find((pin) => pin.id === selectedPinId);
-                if (!extra) return null;
-                const copy = additionalPinCardCopy(extra);
-                return {
-                  title: copy.untitled ? t.mapsite.popup.pinnedLocation : copy.title,
-                  detail: copy.detail,
-                };
+                if (extra) {
+                  const copy = additionalPinCardCopy(extra);
+                  return {
+                    title: copy.untitled ? t.mapsite.popup.pinnedLocation : copy.title,
+                    detail: copy.detail,
+                  };
+                }
+                if (selectedPinId?.startsWith("geocode:")) {
+                  const pin = visiblePins.find((item) => item.id === selectedPinId);
+                  const title =
+                    pin?.label?.trim() ||
+                    mapsite.property_address?.trim() ||
+                    t.mapsite.popup.pinnedLocation;
+                  return { title, detail: title };
+                }
+                return null;
               })()}
               claimHref={claimHref}
               claimLabel={claimLabel}
