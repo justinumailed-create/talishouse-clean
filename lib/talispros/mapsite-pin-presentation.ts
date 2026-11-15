@@ -181,6 +181,19 @@ export function shiftCameraForNeighbors(input: {
   return cameraCenterForScreenOffset(input.camera, input.zoom, { x: shiftX, y: shiftY });
 }
 
+/** Pixel offset of `to` from `from` at this zoom. Positive x is east. */
+export function screenDeltaPx(
+  from: { latitude: number; longitude: number },
+  to: { latitude: number; longitude: number },
+  zoom: number,
+): { x: number; y: number } {
+  const scale = 2 ** zoom;
+  return {
+    x: (mercatorX(to.longitude) - mercatorX(from.longitude)) * scale,
+    y: (mercatorY(to.latitude) - mercatorY(from.latitude)) * scale,
+  };
+}
+
 function mercatorX(longitude: number): number {
   return ((longitude + 180) / 360) * 256;
 }

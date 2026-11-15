@@ -43,6 +43,7 @@ import {
   clampFitPadding,
   distanceMeters,
   EBOOK_PIN_MAX_METERS,
+  screenDeltaPx,
   mapsitePinFitPadding,
   mapsitePinFitPaddingForViewport,
   presentMapSitePins,
@@ -882,10 +883,16 @@ function MapSiteChrome({
             zoom,
             offset,
           );
-          const neighbors = visiblePins.filter(
-            (pin) =>
-              pin.id !== selectedMapPin.id && distanceMeters(pin, selectedMapPin) <= 2000,
-          );
+          const neighbors = visiblePins.filter((pin) => {
+            if (pin.id === selectedMapPin.id) return false;
+            if (distanceMeters(pin, selectedMapPin) > 2000) return false;
+            const delta = screenDeltaPx(selectedMapPin, pin, zoom);
+            const extra =
+              (typeof pin.metadata?.screenNudgeX === "number" ? pin.metadata.screenNudgeX : 0) -
+              nudgeX;
+            // A pin already well clear of this one stays where the zoom put it.
+            return Math.hypot(delta.x + extra, delta.y) < 140;
+          });
           const center = shiftCameraForNeighbors({
             camera: aimed,
             zoom,
