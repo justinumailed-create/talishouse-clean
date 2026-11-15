@@ -112,6 +112,7 @@ type PinOverlay = {
     anchorY: number
   ) => void;
   setDraggable: (draggable: boolean) => void;
+  setScreenNudge: (pixels: number) => void;
   setHandlers: (handlers: {
     onClick?: () => void;
     onDragStart?: () => void;
