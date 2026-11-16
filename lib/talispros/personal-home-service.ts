@@ -144,8 +144,9 @@ export async function savePersonalHomeContent(input: {
     console.error("[personal-home] save failed:", saved.error.message);
     return { error: isMissingTable(saved.error.message) ? "storage" : "save" };
   }
-  const content = rowToContent(saved.data as Row | null);
-  if (content && !saved.data?.contact_name && input.contactName) {
+  const row = saved.data as Row | null;
+  const content = rowToContent(row);
+  if (content && !row?.contact_name && input.contactName) {
     content.contactName = input.contactName;
   }
   return { content };
