@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import AdviserLayout from "@/components/talisu/AdviserLayout";
+import PersonalHomeBody from "@/components/talispros/personal-home/PersonalHomeBody";
 import PersonalHomeEditor from "@/components/talispros/personal-home/PersonalHomeEditor";
 import PersonalHomeMapsite from "@/components/talispros/personal-home/PersonalHomeMapsite";
 import LegalLinks from "@/components/legal/LegalLinks";
@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: PersonalHomePageProps) {
     const m = getDictionary(lang).meta.personalHome;
     const name =
       lookup.kind === "ok"
-        ? lookup.data.resolved.headline
+        ? lookup.data.resolved.headline || lookup.data.displayName
         : getDictionary(lang).personalHome.fallbackName;
     return {
       title: clampSeoText(fillPersonalHomeCopy(m.title, { name }), 70),
@@ -105,11 +105,6 @@ export default async function PersonalHomePage({
     ? resolved.buttons.filter((button) => !isOwnerOnlyPersonalHomeHref(button.href))
     : resolved.buttons;
   const paragraphs = resolved.writeUp.split(/\n{2,}/).filter((part) => part.trim());
-  const contactName = data.displayName.trim();
-  const showContactName =
-    Boolean(contactName) &&
-    contactName !== resolved.headline &&
-    contactName !== getDictionary(locale).personalHome.fallbackName;
 
   return (
     <div
@@ -125,7 +120,7 @@ export default async function PersonalHomePage({
         owner={
           canEdit
             ? {
-                name: resolved.headline,
+                name: resolved.headline || data.displayName,
                 imageUrl: resolved.imageUrl,
                 editHref: personalHomeEditPath(data.code),
               }
@@ -133,15 +128,15 @@ export default async function PersonalHomePage({
         }
       />
       <main className="flex-1">
-        <AdviserLayout
-          testId="personal-home"
+        <PersonalHomeBody
+          kicker={resolved.kicker}
+          headline={resolved.headline}
+          contactName={resolved.contactName}
+          ownerName={data.displayName}
           imageSrc={resolved.imageUrl}
           imageAlt={fillPersonalHomeCopy(getDictionary(locale).personalHome.photoAlt, {
-            name: resolved.headline,
+            name: resolved.headline || data.displayName,
           })}
-          imagePosition="center 22%"
-          kicker={resolved.kicker}
-          title={resolved.headline}
           media={
             homeMap ? (
               <div id="mapsite" className="absolute inset-0">
@@ -166,16 +161,6 @@ export default async function PersonalHomePage({
               </div>
             ))}
           </div>
-          {showContactName ? (
-            <section className="mt-6 max-w-[60ch]" data-testid="personal-home-contact">
-              <h2 className="text-[13px] font-semibold uppercase tracking-[0.14em] text-neutral-500">
-                {getDictionary(locale).personalHome.contactHeading}
-              </h2>
-              <p className="mt-2 text-[15px] font-medium text-neutral-950 sm:text-[16px]">
-                {contactName}
-              </p>
-            </section>
-          ) : null}
           {buttons.length ? (
             <div
               className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8"
@@ -210,7 +195,7 @@ export default async function PersonalHomePage({
               })}
             </div>
           ) : null}
-        </AdviserLayout>
+        </PersonalHomeBody>
       </main>
       <footer className="border-t border-black/10 bg-white px-4 py-4">
         <div className="flex justify-center">

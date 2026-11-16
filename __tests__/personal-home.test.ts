@@ -21,6 +21,7 @@ const defaults = {
   imageUrl: "/default.jpg",
   kicker: "Welcome",
   headline: "Jane Doe",
+  contactName: "Jane Doe",
   writeUp: "Default write-up",
   buttons: [{ label: "Open Mapsite", href: "/talispros/mapsite/brokers/xx00" }],
 };
@@ -58,7 +59,8 @@ describe("personal home helpers", () => {
 
   it("falls back to Mapsite defaults field by field", () => {
     const none = resolvePersonalHome(defaults, null);
-    expect(none.headline).toBe("Jane Doe");
+    expect(none.headline).toBe("");
+    expect(none.contactName).toBe("Jane Doe");
     expect(none.buttons).toEqual(defaults.buttons);
     expect(none.customized.headline).toBe(false);
 
@@ -66,11 +68,13 @@ describe("personal home helpers", () => {
       imageUrl: null,
       kicker: null,
       headline: "Custom",
+      contactName: "Tsplits",
       writeUp: "  ",
       buttons: [],
       updatedAt: null,
     });
     expect(some.headline).toBe("Custom");
+    expect(some.contactName).toBe("Tsplits");
     expect(some.writeUp).toBe("Default write-up");
     expect(some.imageUrl).toBe("/default.jpg");
     expect(some.customized.headline).toBe(true);
@@ -149,7 +153,16 @@ describe("personal home wiring", () => {
 
   it("keeps edit controls owner-only and adds the Mapsite navbar", () => {
     const page = readFileSync(join(root, "app/talispros/home/[fastCode]/page.tsx"), "utf8");
-    expect(page).toContain("AdviserLayout");
+    expect(page).toContain("PersonalHomeBody");
+    expect(
+      readFileSync(join(root, "components/talispros/personal-home/PersonalHomeBody.tsx"), "utf8"),
+    ).toContain("AdviserLayout");
+    expect(
+      readFileSync(join(root, "components/talispros/personal-home/PersonalHomeEditor.tsx"), "utf8"),
+    ).toContain("personal-home-headline");
+    expect(
+      readFileSync(join(root, "components/talispros/personal-home/PersonalHomeEditor.tsx"), "utf8"),
+    ).toContain("personal-home-contact-name");
     expect(page).toContain("canEdit ?");
     expect(page).toContain("generateMetadata");
     const app = readFileSync(
