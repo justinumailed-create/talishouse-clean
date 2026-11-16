@@ -37,6 +37,7 @@ export async function savePersonalHomeAction(input: {
   imageUrl?: string | null;
   kicker?: string | null;
   headline?: string | null;
+  contactName?: string | null;
   writeUp?: string | null;
   buttons?: Array<{ label?: string; href?: string }> | null;
 }): Promise<PersonalHomeActionResult> {
@@ -60,6 +61,7 @@ export async function savePersonalHomeAction(input: {
     imageUrl,
     kicker: cleanPersonalHomeText(input.kicker, PERSONAL_HOME_LIMITS.kicker),
     headline: cleanPersonalHomeText(input.headline, PERSONAL_HOME_LIMITS.headline),
+    contactName: cleanPersonalHomeText(input.contactName, PERSONAL_HOME_LIMITS.contactName),
     writeUp: cleanPersonalHomeText(input.writeUp, PERSONAL_HOME_LIMITS.writeUp, {
       multiline: true,
     }),

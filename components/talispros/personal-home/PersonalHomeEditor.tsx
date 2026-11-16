@@ -5,12 +5,15 @@ import { useRouter } from "next/navigation";
 import { useT } from "@/lib/i18n/client";
 import { optimizeImageFileForUpload } from "@/lib/media/client-optimize-upload-image";
 import {
+  PERSONAL_HOME_DRAFT_EVENT,
   PERSONAL_HOME_LIMITS,
   PERSONAL_HOME_OPEN_EDITOR_EVENT,
   type PersonalHomeButton,
   type PersonalHomeContent,
   type PersonalHomeDefaults,
+  type PersonalHomeDraft,
 } from "@/lib/talispros/personal-home";
+import { fmt } from "@/lib/i18n/format";
 import {
   resetPersonalHomeAction,
   savePersonalHomeAction,
@@ -62,6 +65,7 @@ export default function PersonalHomeEditor({
   const [imageUrl, setImageUrl] = useState<string | null>(saved.imageUrl);
   const [kicker, setKicker] = useState(saved.kicker ?? "");
   const [headline, setHeadline] = useState(saved.headline ?? "");
+  const [contactName, setContactName] = useState(saved.contactName ?? "");
   const [writeUp, setWriteUp] = useState(saved.writeUp ?? "");
   const [buttons, setButtons] = useState<ButtonDraft[]>(
     toDrafts(saved.buttons.length ? saved.buttons : defaults.buttons),
@@ -120,6 +124,7 @@ export default function PersonalHomeEditor({
         imageUrl,
         kicker,
         headline,
+        contactName,
         writeUp,
         buttons,
       });
@@ -146,12 +151,20 @@ export default function PersonalHomeEditor({
       setImageUrl(null);
       setKicker("");
       setHeadline("");
+      setContactName("");
       setWriteUp("");
       setButtons(toDrafts(defaults.buttons));
       setMessage({ tone: "ok", text: t.saved });
       router.refresh();
     });
   }
+
+  useEffect(() => {
+    const detail: PersonalHomeDraft = open
+      ? { headline, contactName }
+      : { headline: saved.headline ?? "", contactName: saved.contactName ?? "" };
+    window.dispatchEvent(new CustomEvent(PERSONAL_HOME_DRAFT_EVENT, { detail }));
+  }, [open, headline, contactName, saved.headline, saved.contactName]);
 
   const busy = pending || uploading;
   const previewSrc = imageUrl || defaults.imageUrl;
@@ -260,11 +273,27 @@ export default function PersonalHomeEditor({
             <input
               value={headline}
               maxLength={PERSONAL_HOME_LIMITS.headline}
-              placeholder={defaults.headline}
               disabled={busy}
+              data-testid="personal-home-headline"
               onChange={(event) => setHeadline(event.target.value)}
               className={INPUT}
             />
+            <span className="mt-1 block text-[12px] leading-snug text-neutral-500">{t.headlineHint}</span>
+          </label>
+
+          <label className="block">
+            <span className={LABEL}>{t.contactName}</span>
+            <input
+              value={contactName}
+              maxLength={PERSONAL_HOME_LIMITS.contactName}
+              disabled={busy}
+              data-testid="personal-home-contact-name"
+              onChange={(event) => setContactName(event.target.value)}
+              className={INPUT}
+            />
+            <span className="mt-1 block text-[12px] leading-snug text-neutral-500">
+              {fmt(t.contactHint, { name: defaults.contactName })}
+            </span>
           </label>
 
           <label className="block">

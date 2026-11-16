@@ -9,6 +9,7 @@ export const PERSONAL_HOME_PATH = "/talispros/home";
 export const PERSONAL_HOME_LIMITS = {
   kicker: 80,
   headline: 120,
+  contactName: 80,
   writeUp: 2000,
   buttonLabel: 40,
   buttonHref: 500,
@@ -25,6 +26,8 @@ export type PersonalHomeContent = {
   imageUrl: string | null;
   kicker: string | null;
   headline: string | null;
+  /** Null means the page uses the owner name. */
+  contactName: string | null;
   writeUp: string | null;
   buttons: PersonalHomeButton[];
   updatedAt: string | null;
@@ -34,13 +37,16 @@ export type PersonalHomeContent = {
 export type ResolvedPersonalHome = {
   imageUrl: string;
   kicker: string;
+  /** Empty when the owner has not written a headline. */
   headline: string;
+  contactName: string;
   writeUp: string;
   buttons: PersonalHomeButton[];
   customized: {
     image: boolean;
     kicker: boolean;
     headline: boolean;
+    contactName: boolean;
     writeUp: boolean;
     buttons: boolean;
   };
@@ -51,6 +57,7 @@ export function emptyPersonalHomeContent(): PersonalHomeContent {
     imageUrl: null,
     kicker: null,
     headline: null,
+    contactName: null,
     writeUp: null,
     buttons: [],
     updatedAt: null,
@@ -65,6 +72,14 @@ export function personalHomePath(fastCode: string): string {
 
 /** Event the navbar account pill fires to open the editor on the home page. */
 export const PERSONAL_HOME_OPEN_EDITOR_EVENT = "talispros:personal-home-open-editor";
+
+/** Unsaved headline and contact name, so the page can preview them before a save. */
+export const PERSONAL_HOME_DRAFT_EVENT = "talispros:personal-home-draft";
+
+export type PersonalHomeDraft = {
+  headline: string;
+  contactName: string;
+};
 
 /** Personal home page with the owner editor opened on arrival. */
 export function personalHomeEditPath(fastCode: string): string {
@@ -167,6 +182,7 @@ export type PersonalHomeDefaults = {
   imageUrl: string;
   kicker: string;
   headline: string;
+  contactName: string;
   writeUp: string;
   buttons: PersonalHomeButton[];
 };
@@ -276,13 +292,15 @@ export function resolvePersonalHome(
   return {
     imageUrl: content.imageUrl?.trim() || defaults.imageUrl,
     kicker: content.kicker?.trim() || defaults.kicker,
-    headline: content.headline?.trim() || defaults.headline,
+    headline: content.headline?.trim() || "",
+    contactName: content.contactName?.trim() || defaults.contactName,
     writeUp: content.writeUp?.trim() || defaults.writeUp,
     buttons: buttons.length ? buttons : defaults.buttons,
     customized: {
       image: Boolean(content.imageUrl?.trim()),
       kicker: Boolean(content.kicker?.trim()),
       headline: Boolean(content.headline?.trim()),
+      contactName: Boolean(content.contactName?.trim()),
       writeUp: Boolean(content.writeUp?.trim()),
       buttons: buttons.length > 0,
     },

@@ -9,6 +9,7 @@ import {
 /** Storage: supabase/migrations/113_mapsite_personal_home.sql */
 const TABLE = "mapsite_personal_home";
 const COLUMNS = "mapsite_id, fast_code, image_url, kicker, headline, write_up, buttons, updated_at";
+const COLUMNS_WITH_CONTACT = COLUMNS.replace("headline,", "headline, contact_name,");
 
 type Row = {
   mapsite_id: string;
@@ -16,6 +17,7 @@ type Row = {
   image_url: string | null;
   kicker: string | null;
   headline: string | null;
+  contact_name?: string | null;
   write_up: string | null;
   buttons: unknown;
   updated_at: string | null;
@@ -27,6 +29,7 @@ function rowToContent(row: Row | null | undefined): PersonalHomeContent {
     imageUrl: row.image_url?.trim() || null,
     kicker: row.kicker?.trim() || null,
     headline: row.headline?.trim() || null,
+    contactName: row.contact_name?.trim() || null,
     writeUp: row.write_up?.trim() || null,
     buttons: normalizePersonalHomeButtons(row.buttons),
     updatedAt: row.updated_at ?? null,
@@ -35,6 +38,10 @@ function rowToContent(row: Row | null | undefined): PersonalHomeContent {
 
 function isMissingTable(message: string | undefined): boolean {
   return /relation|does not exist|schema cache/i.test(message || "");
+}
+
+function isMissingContactColumn(message: string | undefined): boolean {
+  return /contact_name/i.test(message || "") && isMissingTable(message);
 }
 
 /**
@@ -47,20 +54,29 @@ export async function loadPersonalHomeContent(
   const code = fastCode?.trim().toLowerCase() || "";
   if (!code || !isSupabaseAdminConfigured()) return emptyPersonalHomeContent();
   try {
-    const { data, error } = await getSupabaseAdmin()
+    const first = await getSupabaseAdmin()
       .from(TABLE)
-      .select(COLUMNS)
+      .select(COLUMNS_WITH_CONTACT)
       .ilike("fast_code", code)
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (error) {
-      if (!isMissingTable(error.message)) {
-        console.error("[personal-home] load failed:", error.message);
+    const query = first.error && isMissingContactColumn(first.error.message)
+      ? await getSupabaseAdmin()
+          .from(TABLE)
+          .select(COLUMNS)
+          .ilike("fast_code", code)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : first;
+    if (query.error) {
+      if (!isMissingTable(query.error.message)) {
+        console.error("[personal-home] load failed:", query.error.message);
       }
       return emptyPersonalHomeContent();
     }
-    return rowToContent(data as Row | null);
+    return rowToContent(query.data as Row | null);
   } catch {
     return emptyPersonalHomeContent();
   }
@@ -97,32 +113,42 @@ export async function savePersonalHomeContent(input: {
   imageUrl: string | null;
   kicker: string | null;
   headline: string | null;
+  contactName: string | null;
   writeUp: string | null;
   buttons: PersonalHomeButton[];
 }): Promise<{ content?: PersonalHomeContent; error?: "storage" | "save" }> {
   if (!isSupabaseAdminConfigured()) return { error: "storage" };
-  const { data, error } = await getSupabaseAdmin()
+  const base = {
+    mapsite_id: input.mapsiteId,
+    fast_code: input.fastCode.trim().toLowerCase(),
+    image_url: input.imageUrl,
+    kicker: input.kicker,
+    headline: input.headline,
+    write_up: input.writeUp,
+    buttons: input.buttons,
+    updated_at: new Date().toISOString(),
+  };
+  const withContact = await getSupabaseAdmin()
     .from(TABLE)
-    .upsert(
-      {
-        mapsite_id: input.mapsiteId,
-        fast_code: input.fastCode.trim().toLowerCase(),
-        image_url: input.imageUrl,
-        kicker: input.kicker,
-        headline: input.headline,
-        write_up: input.writeUp,
-        buttons: input.buttons,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "mapsite_id" },
-    )
-    .select(COLUMNS)
+    .upsert({ ...base, contact_name: input.contactName }, { onConflict: "mapsite_id" })
+    .select(COLUMNS_WITH_CONTACT)
     .maybeSingle();
-  if (error) {
-    console.error("[personal-home] save failed:", error.message);
-    return { error: isMissingTable(error.message) ? "storage" : "save" };
+  const saved = withContact.error && isMissingContactColumn(withContact.error.message)
+    ? await getSupabaseAdmin()
+        .from(TABLE)
+        .upsert(base, { onConflict: "mapsite_id" })
+        .select(COLUMNS)
+        .maybeSingle()
+    : withContact;
+  if (saved.error) {
+    console.error("[personal-home] save failed:", saved.error.message);
+    return { error: isMissingTable(saved.error.message) ? "storage" : "save" };
   }
-  return { content: rowToContent(data as Row | null) };
+  const content = rowToContent(saved.data as Row | null);
+  if (content && !saved.data?.contact_name && input.contactName) {
+    content.contactName = input.contactName;
+  }
+  return { content };
 }
 
 /** Remove the owner's content so the Mapsite defaults show again. */

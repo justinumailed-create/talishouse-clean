@@ -24,6 +24,7 @@ export default function AdviserLayout({
   kicker,
   kickerClassName,
   title,
+  titleClassName,
   media,
   children,
 }: {
@@ -36,6 +37,8 @@ export default function AdviserLayout({
   /** Replaces the default small-caps kicker so the words keep their written case. */
   kickerClassName?: string;
   title: ReactNode;
+  /** Extra classes for the page title. An empty title is not rendered. */
+  titleClassName?: string;
   /** Replaces the portrait. Used for the personal-home Mapsite. */
   media?: ReactNode;
   children?: ReactNode;
@@ -72,12 +75,18 @@ export default function AdviserLayout({
           >
             {kicker}
           </div>
-          <h1
-            className="mt-2 mb-0! text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-neutral-950! sm:mt-3 sm:text-[28px] sm:leading-[1.25]"
-            style={{ textWrap: "pretty" }}
-          >
-            {title}
-          </h1>
+          {title ? (
+            <h1
+              className={
+                titleClassName ??
+                "mt-2 mb-0! text-[18px] font-semibold leading-[1.3] tracking-[-0.02em] text-neutral-950! sm:mt-3 sm:text-[28px] sm:leading-[1.25]"
+              }
+              data-testid={`${testId}-title`}
+              style={{ textWrap: "pretty" }}
+            >
+              {title}
+            </h1>
+          ) : null}
           {children}
         </div>
       </article>

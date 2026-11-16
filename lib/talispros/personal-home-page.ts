@@ -128,6 +128,7 @@ function defaultsFor(
       }),
       kicker: copy.kicker,
       headline: brokerageName,
+      contactName: displayName,
       writeUp,
       buttons: [
         { label: copy.openMapsite, href: mapsiteHref },
@@ -201,7 +202,7 @@ export async function loadPersonalHomeOwnerPill(
     const lookup = await loadPersonalHomePage(code, locale);
     if (lookup.kind !== "ok") return null;
     return {
-      name: lookup.data.resolved.headline,
+      name: lookup.data.resolved.headline || lookup.data.displayName,
       imageUrl: lookup.data.resolved.imageUrl,
       editHref: personalHomeEditPath(code),
     };
