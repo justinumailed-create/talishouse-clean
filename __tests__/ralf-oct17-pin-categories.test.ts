@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   MANDATORY_PIN_CATEGORIES,
   filterPinsByCategory,
+  selectedPinAfterCategory,
   normalizeCustomPinCategories,
   parsePinCategory,
   pinCategoryLabel,
@@ -64,6 +65,9 @@ describe("PIN categories (Ralf, Oct 17)", () => {
     ];
     expect(filterPinsByCategory(pins, "")).toHaveLength(3);
     expect(filterPinsByCategory(pins, "luxury").map((p) => p.id)).toEqual(["a"]);
+    expect(selectedPinAfterCategory(pins, "luxury", "b")).toBe("a");
+    expect(selectedPinAfterCategory(pins, "luxury", "a")).toBe("a");
+    expect(selectedPinAfterCategory(pins, "", "b")).toBe("b");
   });
 });
 
