@@ -26,6 +26,7 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     pathname === "/mapsites" ||
     pathname.startsWith("/mapsites/") ||
     pathname === "/webster" ||
+    pathname.startsWith("/webster/") ||
     pathname === "/thorsten" ||
     pathname === "/aisha" ||
     pathname.startsWith("/home/") ||

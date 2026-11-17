@@ -33,7 +33,7 @@ export default async function ThorstenGuidePage({ searchParams }: GuidePageProps
   return (
     <GuideConversationPage
       persona={ASSISTANT_PERSONAS.thorsten}
-      title={copy.title}
+      title={copy.panelTitle}
       call={query.call === "1"}
       dynamicVariables={dynamicVariables}
       testId="thorsten-guide"
