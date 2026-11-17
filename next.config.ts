@@ -124,12 +124,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/talisu/demo",
-        destination: "/talispros/demo-mapsite",
+        destination: "/demo",
         permanent: true,
       },
       {
         source: "/talisu/demo/",
-        destination: "/talispros/demo-mapsite",
+        destination: "/demo",
         permanent: true,
       },
       // Sea-Can pages are not ready. Send them to the Talishouse™ Product Catalogue.

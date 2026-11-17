@@ -4,21 +4,28 @@ import {
 } from "@/lib/talisbooks/library/pinned-catalog";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
+import {
+  DEMO_MAPSITE_BUILD_PATH,
+  DEMO_MAPSITE_PUBLIC_PATH,
+} from "@/lib/talispros/demo-mapsite-paths";
 import { DEMO_MAPSITE_ID, MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
-/** Public demo Mapsite builder (no FAST Code issuance). */
-export const DEMO_MAPSITE_BUILD_PATH = "/talispros/demo-mapsite";
+export {
+  DEMO_MAPSITE_BUILD_PATH,
+  DEMO_MAPSITE_PUBLIC_PATH,
+  isRetiredDemoMapSitePath,
+} from "@/lib/talispros/demo-mapsite-paths";
 
 /** Centerfold sample PDF offered from Markets / Demo builder (clean download name). */
 export const DEMO_MAPSITE_PDF_HREF = "/talispros/demo-mapsite/Demo-PDF.pdf";
 export const DEMO_MAPSITE_PDF_FILE_NAME = "Demo-PDF.pdf";
 
-/** True for the demo builder and its follow-on pages (e.g. /ebook). */
+/** True for /demo, the retired builder URL, and follow-on pages (e.g. /ebook). */
 export function isDemoMapSitePath(pathname: string | null | undefined): boolean {
   const path = pathname?.split("?")[0]?.split("#")[0]?.trim() || "";
-  return (
-    path === DEMO_MAPSITE_BUILD_PATH ||
-    path.startsWith(`${DEMO_MAPSITE_BUILD_PATH}/`)
+  if (!path) return false;
+  return [DEMO_MAPSITE_PUBLIC_PATH, DEMO_MAPSITE_BUILD_PATH].some(
+    (base) => path === base || path.startsWith(`${base}/`),
   );
 }
 

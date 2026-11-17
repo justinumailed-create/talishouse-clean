@@ -7,7 +7,7 @@ import {
   getRegisteredMapSiteFastCode,
   isMapSiteAdmin,
 } from "@/lib/mapsite-edit-auth";
-import { isDemoMapSiteCode, DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
+import { isDemoMapSiteCode, DEMO_MAPSITE_PUBLIC_PATH } from "@/lib/talispros/demo-mapsite";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import {
@@ -25,7 +25,7 @@ import { PMC_PATHS, normalizeFastCodeParam, pmcHref } from "@/lib/talispros/maps
  * Paid Mapsites and Mapsite admins are never gated.
  */
 
-export const PMC_CLAIM_START = DEMO_MAPSITE_BUILD_PATH;
+export const PMC_CLAIM_START = DEMO_MAPSITE_PUBLIC_PATH;
 
 export type ClaimedMapSite = { id: string; fastCode: string };
 

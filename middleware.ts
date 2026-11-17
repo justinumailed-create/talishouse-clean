@@ -16,6 +16,10 @@ import {
   persistLocaleCookie,
   withLocaleRequestHeader,
 } from "@/lib/i18n/middleware";
+import {
+  DEMO_MAPSITE_PUBLIC_PATH,
+  isRetiredDemoMapSitePath,
+} from "@/lib/talispros/demo-mapsite-paths";
 
 const PUBLIC_ROUTES = ["/business-office/apply"];
 
@@ -27,6 +31,13 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   // `?lang=de|en` — crawlable German alternates without a /[locale] segment.
   const locale = localeFromRequestUrl(request.nextUrl);
+
+  // Retired builder URL. 301 (not 308) and the query string stays on the clone.
+  if (isRetiredDemoMapSitePath(path)) {
+    const url = request.nextUrl.clone();
+    url.pathname = DEMO_MAPSITE_PUBLIC_PATH;
+    return persistLocaleCookie(NextResponse.redirect(url, 301), locale);
+  }
 
   if (isAdminAppPath(path)) {
     // Admin idle cap (Global / granted FAST-code admins): no recent activity
@@ -88,6 +99,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/talispros/demo-mapsite",
+    "/talispros/demo-mapsite/",
     "/business-office/:path*",
     "/admin",
     "/admin/:path*",

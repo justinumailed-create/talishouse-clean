@@ -233,5 +233,5 @@ export async function requireProspectAccessForCode(code: string | null | undefin
   if (!(await resolvePreparedHrefByCode(value))) return;
   if (await hasProspectAccess()) return;
   const { redirect } = await import("next/navigation");
-  redirect(`/talispros/demo-mapsite?gate=${encodeURIComponent(value.toLowerCase())}#fast-code-slots`);
+  redirect(`/demo?gate=${encodeURIComponent(value.toLowerCase())}#fast-code-slots`);
 }
