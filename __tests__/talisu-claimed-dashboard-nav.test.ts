@@ -47,7 +47,9 @@ describe("Claimed FAST Mapsite header Dashboard nav", () => {
     // Claimed Mapsites: no selling-tool buttons in the navbar; the Dashboard
     // lives on the left Marketing card.
     expect(app).not.toContain("sellingTools");
-    expect(app).toContain("dashboardItems={dashboardManageable ? DASHBOARD_MENU : undefined}");
+    expect(app).not.toContain("dashboardItems=");
+    expect(app).not.toContain("MapSiteOwnerDashboardToggle");
+    expect(app).toContain('new URLSearchParams(window.location.search).get("dashboard")');
 
     expect(app).toContain('variant="claimed-mapsite"');
     expect(app).toContain(
@@ -57,7 +59,7 @@ describe("Claimed FAST Mapsite header Dashboard nav", () => {
     expect(app).toContain("onOpenDashboard={openOwnerDashboard}");
     expect(app).toContain("focusPinAndOpen()");
     expect(app).toContain("MapSitePinDashboard");
-    expect(app).toContain("showKnowledgeBaseManage={dashboardUnlocked}");
+    expect(app).not.toContain("showKnowledgeBaseManage=");
 
     // Ralf: the Knowledge Base pill is gone from account pages (KB lives under TalisU).
     expect(partner).not.toContain("TALISU_KB_MANAGE_PATH");
