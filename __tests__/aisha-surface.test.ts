@@ -10,7 +10,7 @@ describe("Aisha bubble while the widget panel is open", () => {
     const css = read("app/globals.css");
     const banner = read("lib/talispros/hide-elevenlabs-banner.ts");
     expect(widget).toContain('data-surface={surfaceOpen ? "open" : "idle"}');
-    expect(widget).toContain("watchPoweredByBanner(slot, setSurfaceOpen)");
+    expect(widget).toContain("watchPoweredByBanner(slot, setSurfaceOpen, embed === \"inline\")");
     expect(css).toContain('[data-surface="open"] .aisha-convai-label');
     expect(css).toContain("rgba(255, 255, 255, 0.94)");
     expect(css).toContain("-webkit-backdrop-filter");

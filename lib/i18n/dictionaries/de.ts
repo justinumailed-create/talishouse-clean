@@ -128,6 +128,7 @@ export const de: Dictionary = {
         startCall: "Anruf starten",
         endCall: "Anruf beenden",
         openChat: "Chat öffnen",
+        tapToTalk: "Tippen, um mit Aisha zu sprechen",
       },
     },
     samcartReturn: {

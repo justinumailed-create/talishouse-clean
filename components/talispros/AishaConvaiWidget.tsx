@@ -2,7 +2,7 @@
 
 import Script from "next/script";
 import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type MouseEvent } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n/client";
 import { aishaInvitationParts } from "@/lib/talispros/aisha-invitation";
@@ -153,6 +153,8 @@ export default function AishaConvaiWidget({
   agentId: agentIdOverride,
   dynamicVariables,
   startHref,
+  embed = "floating",
+  autoStart = false,
 }: {
   persona?: AssistantPersona;
   /** Homepage greeting, or the call-back line used on an allowlisted Mapsite. */
@@ -164,6 +166,10 @@ export default function AishaConvaiWidget({
   dynamicVariables?: string;
   /** Homepage Start a call opens this page first. Other pages start the call. */
   startHref?: string;
+  /** Floating corner widget, or the conversation filling its column. */
+  embed?: "floating" | "inline";
+  /** Open the call after a homepage Start a call click. */
+  autoStart?: boolean;
 }) {
   const t = useT();
   const router = useRouter();
@@ -176,6 +182,8 @@ export default function AishaConvaiWidget({
   const [bubbleSize, setBubbleSize] = useState({ width: 0, height: 0 });
   const [surfaceOpen, setSurfaceOpen] = useState(false);
   const [bubbleDismissed, setBubbleDismissed] = useState(false);
+  const [needsTap, setNeedsTap] = useState(false);
+  const startedRef = useRef(false);
   const [pillFrame, setPillFrame] = useState<{
     left: number;
     width: number;
@@ -187,8 +195,57 @@ export default function AishaConvaiWidget({
   useEffect(() => {
     const slot = slotRef.current;
     if (!slot) return;
-    return watchPoweredByBanner(slot, setSurfaceOpen);
-  }, [host]);
+    return watchPoweredByBanner(slot, setSurfaceOpen, embed === "inline");
+  }, [embed, host]);
+
+  const pressStart = useCallback(() => {
+    const slot = slotRef.current;
+    const hostEl = slot?.querySelector("elevenlabs-convai");
+    const root = hostEl && "shadowRoot" in hostEl ? hostEl.shadowRoot : null;
+    if (!root) return false;
+    const terms = root.querySelector(".terms");
+    if (terms instanceof HTMLElement && terms.getBoundingClientRect().height > 8) return true;
+    const wanted = (copy?.startCall ?? "").trim().toLowerCase();
+    // The page-layout phone control keeps the embed's English name even on /de.
+    const names = new Set([wanted, "start a call", "anruf starten"].filter(Boolean));
+    const start = [...root.querySelectorAll("button")].find((button) => {
+      const text = button.textContent?.replace(/\s+/g, " ").trim().toLowerCase() ?? "";
+      const label = button.getAttribute("aria-label")?.replace(/\s+/g, " ").trim().toLowerCase() ?? "";
+      return names.has(text) || names.has(label);
+    });
+    if (!start) return false;
+    start.click();
+    return true;
+  }, [copy?.startCall]);
+
+  useEffect(() => {
+    if (embed !== "inline" || !autoStart) return;
+    const termsOpen = () => {
+      const slot = slotRef.current;
+      const hostEl = slot?.querySelector("elevenlabs-convai");
+      const root = hostEl && "shadowRoot" in hostEl ? hostEl.shadowRoot : null;
+      const terms = root?.querySelector(".terms");
+      return terms instanceof HTMLElement && terms.getBoundingClientRect().height > 8;
+    };
+    const timer = window.setInterval(() => {
+      if (termsOpen()) {
+        startedRef.current = true;
+        setNeedsTap(false);
+        window.clearInterval(timer);
+        return;
+      }
+      if (startedRef.current) return;
+      if (pressStart()) startedRef.current = true;
+    }, 400);
+    const stop = window.setTimeout(() => {
+      window.clearInterval(timer);
+      if (!termsOpen()) setNeedsTap(true);
+    }, 3500);
+    return () => {
+      window.clearInterval(timer);
+      window.clearTimeout(stop);
+    };
+  }, [autoStart, embed, pressStart]);
 
   useEffect(() => {
     if (!startHref) return;
@@ -324,6 +381,53 @@ export default function AishaConvaiWidget({
     return () => observer.disconnect();
   }, [host, line, placement]);
 
+  const agentId = agentIdOverride?.trim() || persona.agentId;
+  if (embed === "inline") {
+    if (!copy) return null;
+    return (
+      <div
+        ref={slotRef}
+        className="aisha-convai-inline"
+        data-testid="aisha-convai"
+        data-embed="inline"
+        data-call={autoStart ? "1" : "0"}
+      >
+        <elevenlabs-convai
+          agent-id={agentId}
+          dynamic-variables={dynamicVariables || undefined}
+          action-text={line}
+          aria-label={line}
+          start-call-text={copy.startCall}
+          end-call-text={copy.endCall}
+          expand-text={copy.openChat}
+          avatar-image-url={avatar}
+          avatar-orb-color-1="#046BD9"
+          avatar-orb-color-2="#d6e8fb"
+          variant="expanded"
+          layout="page"
+        />
+        {autoStart && needsTap ? (
+          <button
+            type="button"
+            className="absolute inset-x-6 bottom-8 z-10 mx-auto flex min-h-14 max-w-sm items-center justify-center rounded-full bg-black px-6 text-[16px] font-semibold text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)]"
+            data-testid="aisha-tap-to-talk"
+            onClick={() => {
+              startedRef.current = true;
+              if (pressStart()) setNeedsTap(false);
+            }}
+          >
+            {copy.tapToTalk}
+          </button>
+        ) : null}
+        <Script
+          src="https://unpkg.com/@elevenlabs/convai-widget-embed"
+          strategy="lazyOnload"
+          async
+        />
+      </div>
+    );
+  }
+
   if (!host || !copy) return null;
   const invitationParts = aishaInvitationParts(line);
   const bubblePath =
@@ -337,7 +441,6 @@ export default function AishaConvaiWidget({
             : null,
         )
       : "";
-  const agentId = agentIdOverride?.trim() || persona.agentId;
 
   return createPortal(
     <div

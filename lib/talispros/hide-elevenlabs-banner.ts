@@ -36,6 +36,63 @@ button.aisha-call-pill {
 }
 `;
 
+/** Page embed: the conversation fills its column instead of docking to the screen. */
+export const POWERED_BY_INLINE_STYLE = `
+p.whitespace-nowrap:has(a[href*="elevenlabs.io"]) {
+  display: none !important;
+}
+/* Page layout is a row: a large avatar beside a narrow transcript.
+   This page already shows the portrait, so the transcript uses the column
+   and the call button stays beside the composer. */
+.basis-3\\/5 {
+  position: absolute !important;
+  left: auto !important;
+  top: auto !important;
+  right: 4.5rem !important;
+  bottom: 1.15rem !important;
+  width: 3.25rem !important;
+  height: 3.25rem !important;
+  flex: none !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+  z-index: 30 !important;
+}
+.basis-3\\/5 .w-72,
+.basis-3\\/5 .rounded-full {
+  display: none !important;
+}
+.basis-3\\/5 .absolute {
+  position: static !important;
+  transform: none !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+div:has(> .sheet) {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100% !important;
+}
+.sheet,
+[data-variant="expanded"].sheet,
+[data-variant="fullscreen"].sheet,
+[data-variant="page"].sheet {
+  position: absolute !important;
+  inset: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+}
+`;
+
 const OPEN_LABEL = /^(terms and conditions|end call|anruf beenden)$/i;
 
 function elementIsShown(el: HTMLElement): boolean {
@@ -78,15 +135,16 @@ export function markAishaCallPill(root: ShadowRoot) {
   }
 }
 
-export function hidePoweredByBanner(root: ShadowRoot) {
+export function hidePoweredByBanner(root: ShadowRoot, inline = false) {
+  const css = inline ? POWERED_BY_INLINE_STYLE : POWERED_BY_BANNER_STYLE;
   let style = root.getElementById(STYLE_ID);
   if (!style) {
     style = document.createElement("style");
     style.id = STYLE_ID;
-    style.textContent = POWERED_BY_BANNER_STYLE;
+    style.textContent = css;
     root.appendChild(style);
-  } else if (style.textContent !== POWERED_BY_BANNER_STYLE) {
-    style.textContent = POWERED_BY_BANNER_STYLE;
+  } else if (style.textContent !== css) {
+    style.textContent = css;
   }
   for (const node of root.querySelectorAll("p")) {
     if (!isPoweredByBanner(node.textContent)) continue;
@@ -99,6 +157,7 @@ export function hidePoweredByBanner(root: ShadowRoot) {
 export function watchPoweredByBanner(
   slot: ParentNode,
   onSurface?: (open: boolean) => void,
+  inline = false,
 ): () => void {
   let shadowObserver: MutationObserver | undefined;
   let watched: ShadowRoot | undefined;
@@ -107,13 +166,13 @@ export function watchPoweredByBanner(
     const host = slot.querySelector("elevenlabs-convai");
     const root = host && "shadowRoot" in host ? host.shadowRoot : null;
     if (!root) return;
-    hidePoweredByBanner(root);
+    hidePoweredByBanner(root, inline);
     onSurface?.(convaiSurfaceOpen(root));
     if (watched === root) return;
     shadowObserver?.disconnect();
     watched = root;
     shadowObserver = new MutationObserver(() => {
-      hidePoweredByBanner(root);
+      hidePoweredByBanner(root, inline);
       onSurface?.(convaiSurfaceOpen(root));
     });
     // The orb rewrites attributes every frame. Watching those and then

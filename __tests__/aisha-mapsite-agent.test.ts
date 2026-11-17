@@ -16,13 +16,16 @@ describe("Aisha agent by page", () => {
     expect(AISHA_MAPSITE_AGENT_ID).toBe("agent_0201m7dr7y7bfy99sz2ywxcbshm4");
     const home = read("components/talispros/TalisprosGatePage.tsx");
     const mapsite = read("components/talispros/mapsite/MapSiteApplication.tsx");
-    expect(home).toContain('startHref="/talispros/aisha"');
+    expect(home).toContain('startHref="/talispros/aisha?call=1"');
     expect(home).not.toContain("agentId=");
     expect(home).not.toContain(AISHA_MAPSITE_AGENT_ID);
     const aishaHome = read("app/talispros/aisha/page.tsx");
-    expect(aishaHome).toContain("<AishaConvaiWidget");
+    expect(aishaHome).toContain('embed="inline"');
+    expect(aishaHome).toContain("autoStart={call}");
     expect(aishaHome).not.toContain("agentId=");
     expect(aishaHome).not.toContain(AISHA_MAPSITE_AGENT_ID);
+    expect(aishaHome).not.toContain("aisha-home-greeting");
+    expect(aishaHome).toContain("Aisha C., AMBA");
     expect(aishaHome).toContain("persona.portraitSrc");
     expect(mapsite).toContain("agentId={AISHA_MAPSITE_AGENT_ID}");
     expect(mapsite).toContain("aishaMapsiteDynamicVariables");
