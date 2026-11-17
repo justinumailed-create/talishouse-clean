@@ -39,7 +39,7 @@ function fixtureHtml(): string {
   </header>
   <main>
     <button class="cta" id="account" type="button">Open your Account</button>
-    <a class="cta" id="claim" href="#claim">Claim Mapsite</a>
+    <a class="cta" id="claim" href="#claim">Build Mapsite</a>
   </main>
   <div class="aisha-convai-slot" data-testid="aisha-convai">
     <button type="button" class="aisha-convai-label" data-start-label="Start a call">

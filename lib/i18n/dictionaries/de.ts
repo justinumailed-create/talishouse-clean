@@ -110,7 +110,7 @@ export const de: Dictionary = {
   home: {
     motto: "BEWERBEN – VERWALTEN – KOOPERIEREN",
     openAccount: "Ihr Konto eröffnen*",
-    systemDemo: "Mapsite beanspruchen",
+    systemDemo: "Mapsite erstellen",
     legalSecondary: "*Registrierung erforderlich.",
     bannerTitle: "Branchennahe Abwicklungsoptionen",
     structuresTagline: "Transaktionsstrukturen erkunden",
@@ -274,7 +274,7 @@ export const de: Dictionary = {
           question: "Wie reiche ich einen Marktantrag ein?",
           answer: "Bitte gehen Sie auf Talispros.com in dieser Reihenfolge vor:",
           bullets: [
-            "Wählen Sie „Mapsite beanspruchen“.",
+            "Wählen Sie „Mapsite erstellen“.",
             "Wählen Sie den PIN, der Ihrem Heimatstandort am nächsten liegt.",
             "Wählen Sie „Nächster Schritt“ und erstellen Sie ein Demo-eBook.",
             "Füllen Sie das Formular aus: Die Initialen Ihres Vor- und Nachnamens bilden die eine Hälfte Ihres FAST Code™ (Free Access, Standard Tracking). Die andere Hälfte ist eine Zahl zwischen 01 und 99, die Sie in unserem System eindeutig macht. Ihre Straßenadresse positioniert Ihren Home-PIN auf Ihrer Beispiel-Mapsite. Die Beispiel-Mapsite zeigt uns, ob es Überschneidungen mit anderen Heimatmärkten gibt.",
@@ -393,7 +393,7 @@ export const de: Dictionary = {
       actions: {
         label: "Wählen Sie ein Konto oder setzen Sie einen PIN:",
         propose: "Projekt vorschlagen",
-        claim: "Mapsite beanspruchen",
+        claim: "Mapsite erstellen",
         terms: "Nutzungsbedingungen",
         register: "Registrieren",
         checkouts: [
@@ -1041,8 +1041,8 @@ export const de: Dictionary = {
       fastCode: "FAST Code (Ihre beanspruchte Mapsite)",
       signAnother: "Für einen anderen FAST Code unterschreiben",
       fastCodeHint: "Verwenden Sie den FAST Code Ihrer eigenen beanspruchten Mapsite.",
-      fastCodeClaim: "Noch kein FAST Code? Mapsite beanspruchen",
-      needFastCode: "Beanspruchen Sie zuerst Ihre Mapsite – der Vertrag wird für ihren FAST Code unterschrieben.",
+      fastCodeClaim: "Noch kein FAST Code? Mapsite erstellen",
+      needFastCode: "Erstellen Sie zuerst Ihre Mapsite. Der Vertrag wird für ihren FAST Code unterschrieben.",
       typed: "Unterschrift tippen",
       drawn: "Unterschrift zeichnen",
       typedHint: "Ihr getippter Name gilt als Unterschrift.",
