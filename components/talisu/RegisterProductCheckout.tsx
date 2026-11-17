@@ -74,7 +74,7 @@ export default async function RegisterProductCheckout({
               data-testid={`register-checkout-sidebar-${product}`}
             >
               {sidebar.map((block, index) =>
-                block.kind === "list" ? (
+                "items" in block ? (
                   <ul key={index} className="m-0 list-disc space-y-1 pl-5">
                     {block.items.map((item) => (
                       <li key={item}>{item}</li>
