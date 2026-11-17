@@ -13,6 +13,7 @@ import {
 import { createDemoMapSiteAction } from "@/app/talispros/demo-mapsite/actions";
 import WorkingPageShell from "@/components/talispros/WorkingPageShell";
 import DemoHeroMap from "@/components/talispros/demo-mapsite/DemoHeroMap";
+import DemoPdfEntry from "@/components/talispros/demo-mapsite/DemoPdfEntry";
 import FastCodeSlotsPanel from "@/components/talispros/demo-mapsite/FastCodeSlotsPanel";
 import type { FastCodeSlotsPanelData } from "@/lib/talispros/fast-code-slots";
 import type { SourcedLeadCalendar } from "@/lib/talispros/canada-calendar";
@@ -115,6 +116,7 @@ export default function DemoMapSiteBuilderClient({
           data-testid="demo-hero"
           aria-labelledby="demo-hero-title"
         >
+          <DemoPdfEntry />
           <div className="demo-hero__panel grid min-w-0 overflow-hidden rounded-[20px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.05),0_18px_48px_rgba(0,0,0,0.10)]">
             <div className="demo-hero__media relative min-w-0">
               <DemoHeroMap />

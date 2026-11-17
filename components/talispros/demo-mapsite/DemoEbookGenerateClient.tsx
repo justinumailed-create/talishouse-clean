@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { generateDemoEbookAction } from "@/app/talispros/demo-mapsite/actions";
 import {
   PINNED_TALISBOOK_SLUG,
@@ -148,6 +148,9 @@ export default function DemoEbookGenerateClient({
   templateAvailability,
   initialFinish = false,
   keepHref = "/",
+  compact = false,
+  inlineFinish = false,
+  pendingFiles = null,
 }: {
   mapsiteId: string;
   title: string;
@@ -156,6 +159,12 @@ export default function DemoEbookGenerateClient({
   /** The build already finished. Show attach-or-demo instead of the upload step. */
   initialFinish?: boolean;
   keepHref?: string;
+  /** Upload control on /demo: progress and the choice, without this page's chrome. */
+  compact?: boolean;
+  /** After the PDF is ready, build here and show the choice on this page. */
+  inlineFinish?: boolean;
+  /** PDF already chosen on /demo. Processed with the same pipeline as this page. */
+  pendingFiles?: File[] | null;
 }) {
   const demoCopy = useT().demo;
   const copy = demoCopy.ebookPage;
@@ -183,7 +192,9 @@ export default function DemoEbookGenerateClient({
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const runIdRef = useRef(0);
-  const finish = initialFinish ? { keepHref } : null;
+  const pendingStarted = useRef(false);
+  const [inlineDone, setInlineDone] = useState<{ keepHref: string } | null>(null);
+  const finish = inlineDone ?? (initialFinish ? { keepHref } : null);
   const busy = phase !== "idle";
   const sourceReady = pages.length > 0 && Boolean(coverFiles);
   const optimizedReady = optimized.length > 0 && Boolean(optimizedCovers);
@@ -420,7 +431,10 @@ export default function DemoEbookGenerateClient({
         uploadLabelFromFiles(files, copy.pdfUploaded),
       );
       if (runId !== runIdRef.current) return;
-      await optimizePages(assets, runId);
+      const prepared = await optimizePages(assets, runId);
+      if (inlineFinish && prepared && runId === runIdRef.current) {
+        await buildEbook(prepared);
+      }
     } catch (caught) {
       if (runId !== runIdRef.current) return;
       resetBookAssets();
@@ -435,8 +449,13 @@ export default function DemoEbookGenerateClient({
     }
   }
 
-  async function buildEbook() {
-    if (!optimizedReady || !optimizedCovers) {
+  async function buildEbook(prepared?: {
+    interiors: OptimizedAsset[];
+    covers: { front: OptimizedAsset; back: OptimizedAsset };
+  }) {
+    const images = prepared?.interiors ?? optimized;
+    const covers = prepared?.covers ?? optimizedCovers;
+    if (images.length === 0 || !covers) {
       setError(copy.errNotReady);
       return;
     }
@@ -454,9 +473,9 @@ export default function DemoEbookGenerateClient({
       const result = await withTimeout(
         generateDemoEbookAction({
           mapsiteId,
-          optimizedImages: optimized,
-          frontCover: optimizedCovers.front,
-          backCover: optimizedCovers.back,
+          optimizedImages: images,
+          frontCover: covers.front,
+          backCover: covers.back,
         }),
         ONBOARDING_JOB_TIMEOUT_MS,
         copy.errTimeout,
@@ -470,6 +489,10 @@ export default function DemoEbookGenerateClient({
       // Stay on this page so a refresh still shows the choice. Keep as a demo
       // opens the personal home first (result.homeHref).
       const keepHref = result.homeHref || result.mapsiteHref || result.viewerUrl;
+      if (inlineFinish) {
+        setInlineDone({ keepHref });
+        return;
+      }
       const url = new URL(window.location.href);
       url.searchParams.set("finish", "1");
       if (
@@ -511,8 +534,48 @@ export default function DemoEbookGenerateClient({
     );
   }
 
+  useEffect(() => {
+    if (!pendingFiles?.length || pendingStarted.current) return;
+    pendingStarted.current = true;
+    void handleBookFilesSelected(pendingFiles);
+    // Start once from the files chosen on /demo. The handler identity changes every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingFiles]);
+
   const cardClass =
     "overflow-hidden rounded-[28px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)]";
+
+  if (compact) {
+    return (
+      <div data-testid="demo-pdf-build">
+        {finish ? (
+          <DemoFinishChoice
+            mapsiteId={mapsiteId}
+            fastCode={fastCode}
+            keepHref={finish.keepHref}
+          />
+        ) : (
+          <div className={`${cardClass} px-6 py-6`}>
+            {progress ? (
+              <DemoVisaProgress
+                label={progress.label}
+                detail={progress.detail}
+                current={progress.current}
+                total={progress.total}
+              />
+            ) : stage ? (
+              <p className="text-center text-[13px] text-neutral-500">{stage}</p>
+            ) : (
+              <p className="text-center text-[13px] text-neutral-500">{copy.building}</p>
+            )}
+            {error ? (
+              <p className="text-center text-[13px] leading-relaxed text-red-600">{error}</p>
+            ) : null}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-dvh flex-col items-center bg-[#f5f5f7] px-6 py-16 text-neutral-950 antialiased sm:py-24">

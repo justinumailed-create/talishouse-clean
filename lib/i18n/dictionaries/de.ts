@@ -1261,6 +1261,13 @@ export const de: Dictionary = {
         openEbook: "North Shore Nature Centre TEB™ öffnen",
       },
     },
+    pdfEntry: {
+      title: "Laden Sie Ihr PDF hoch, um Ihre Mapsite zu erstellen",
+      hint: "Wir machen daraus Ihr Talisbook™ und Ihren FAST Code. Danach können Sie ihn einem bestehenden Konto zuordnen oder als Demo behalten.",
+      button: "PDF hochladen",
+      starting: "Ihre Mapsite wird gestartet…",
+      error: "Ihre Mapsite konnte nicht gestartet werden. Bitte versuchen Sie das PDF erneut.",
+    },
     slots: {
       title: "Kürzlich hinzugefügte Mapsites",
       empty: "Noch keine Mapsites vorbereitet",

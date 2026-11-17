@@ -110,8 +110,9 @@ describe("demo ebook wrap cover", () => {
     expect(action).toContain("frontCover: input.frontCover");
     expect(action).toContain("backCover: input.backCover");
     expect(client).toContain("applyWrapCoverFromFiles");
-    expect(client).toContain("frontCover: optimizedCovers.front");
-    expect(client).toContain("backCover: optimizedCovers.back");
+    expect(client).toContain("const covers = prepared?.covers ?? optimizedCovers");
+    expect(client).toContain("frontCover: covers.front");
+    expect(client).toContain("backCover: covers.back");
   });
 
   it("collapses create flow: blue upload, auto-optimize, single Build", () => {
