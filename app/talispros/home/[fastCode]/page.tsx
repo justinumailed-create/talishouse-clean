@@ -14,7 +14,7 @@ import { dynamicPageMetadata } from "@/lib/seo/page-metadata";
 import {
   clampSeoText,
   fillPersonalHomeCopy,
-  isExternalPersonalHomeHref,
+  personalHomeOpensNewWindow,
   personalHomeEditPath,
 } from "@/lib/talispros/personal-home";
 import { loadPersonalHomeMap } from "@/lib/talispros/personal-home-map";
@@ -168,7 +168,7 @@ export default async function PersonalHomePage({
             >
               {buttons.map((button, index) => {
                 const className = index === 0 ? CTA_PRIMARY : CTA_SECONDARY;
-                return isExternalPersonalHomeHref(button.href) ? (
+                return personalHomeOpensNewWindow(button.href) ? (
                   <a
                     key={`${index}-${button.href}`}
                     href={button.href}

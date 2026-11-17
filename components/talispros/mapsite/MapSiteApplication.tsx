@@ -103,6 +103,7 @@ import { mapsiteAgencyLogoUrl } from "@/lib/talispros/mapsite-listing-media";
 import { useLocale } from "@/lib/i18n/client";
 import {
   filterPinsByCategory,
+  selectedPinAfterCategory,
   pinCategoryOptions,
   type PinCategoryOption,
 } from "@/lib/talispros/mapsite-pin-categories";
@@ -379,6 +380,20 @@ export default function MapSiteApplication({
     return allPins.filter((pin) => kept.has(pin.id));
   }, [pins, allPins, categoryFilter]);
 
+  const appliedCategoryQuery = useRef(false);
+  useEffect(() => {
+    if (appliedCategoryQuery.current) return;
+    const requested = new URLSearchParams(window.location.search).get("category");
+    if (!requested) {
+      appliedCategoryQuery.current = true;
+      return;
+    }
+    if (!categoryOptions.some((option) => option.value === requested)) return;
+    appliedCategoryQuery.current = true;
+    setCategoryFilter(requested);
+    setSelectedPinId((current) => selectedPinAfterCategory(pins, requested, current));
+  }, [categoryOptions, pins]);
+
   const useOpeningZoom = !mapZoomExplicit;
   const viewport = useMemo(
     () => ({
@@ -563,7 +578,14 @@ export default function MapSiteApplication({
         totalPinCount={pins.length}
         categoryOptions={categoryOptions}
         categoryFilter={categoryFilter}
-        onCategoryFilterChange={setCategoryFilter}
+        onCategoryFilterChange={(category) => {
+          setCategoryFilter(category);
+          setSelectedPinId((current) => selectedPinAfterCategory(pins, category, current));
+          const url = new URL(window.location.href);
+          if (category) url.searchParams.set("category", category);
+          else url.searchParams.delete("category");
+          window.history.replaceState(null, "", url);
+        }}
         personalHomeNav={personalHomeNav}
         belowWriteUp={belowWriteUp}
       />
@@ -1272,7 +1294,6 @@ function MapSiteChrome({
                   categoryOptions={totalPinCount > 1 ? categoryOptions : undefined}
                   activeCategory={categoryFilter}
                   onCategoryChange={(category) => {
-                    setSelectedPinId(null);
                     onCategoryFilterChange(category);
                   }}
                   categoryEmpty={Boolean(categoryFilter) && visiblePins.length === 0}

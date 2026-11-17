@@ -158,3 +158,17 @@ export function filterPinsByCategory<T extends { category?: string | null }>(
   if (!category) return [...pins];
   return pins.filter((pin) => pin.category === category);
 }
+
+/**
+ * Category filters stay on this Mapsite. Keep the open pin when it still
+ * matches; otherwise open the first pin in the filtered set.
+ */
+export function selectedPinAfterCategory<T extends { id: string; category?: string | null }>(
+  pins: ReadonlyArray<T>,
+  category: string | null | undefined,
+  currentId: string | null,
+): string | null {
+  const matching = filterPinsByCategory(pins, category);
+  if (currentId && matching.some((pin) => pin.id === currentId)) return currentId;
+  return matching[0]?.id ?? null;
+}

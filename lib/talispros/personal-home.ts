@@ -147,6 +147,19 @@ export function isExternalPersonalHomeHref(href: string): boolean {
   return /^https?:\/\//i.test(href);
 }
 
+/** Category and Mapsite links stay in this window. Other web links open a new one. */
+export function personalHomeOpensNewWindow(href: string): boolean {
+  if (!isExternalPersonalHomeHref(href)) return false;
+  try {
+    const url = new URL(href);
+    if (url.searchParams.has("category")) return false;
+    if (/\/talispros\/(mapsite|home)(\/|$)/.test(url.pathname)) return false;
+  } catch {
+    return true;
+  }
+  return true;
+}
+
 /** Validated, de-duplicated, capped button list (bad rows are dropped). */
 export function normalizePersonalHomeButtons(value: unknown): PersonalHomeButton[] {
   if (!Array.isArray(value)) return [];
