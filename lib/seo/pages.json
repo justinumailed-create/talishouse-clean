@@ -1388,6 +1388,17 @@
   "/talisbooks/viewer/[slug]": {
    "kind": "dynamic"
   },
+  "/talispros/aisha": {
+   "kind": "dynamic"
+  },
+  "/talispros/webster": {
+   "kind": "dynamic",
+   "noindex": true
+  },
+  "/talispros/thorsten": {
+   "kind": "dynamic",
+   "noindex": true
+  },
   "/talispros/build-mapsite": {
    "kind": "public",
    "noindex": false,

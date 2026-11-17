@@ -668,6 +668,9 @@ for r, en_t, de_t in [
     ("/ttvaccess/[fastCode]", "TalisTV™ access", "TalisTV™ Zugang"),
     ("/talisbooks/fast/[fastCode]", "Mapsite bookshelf", "Mapsite-Bücherregal"),
     ("/talisbooks/viewer/[slug]", "Talisbook™ (title from record)", "Talisbook™"),
+    ("/talispros/aisha", "Aisha C., AMBA", "Aisha C., AMBA"),
+    ("/talispros/webster", "Webster, Tsplits Guide", "Webster, Tsplits-Guide"),
+    ("/talispros/thorsten", "Thorsten, Tsplits Guide", "Thorsten, Tsplits-Guide"),
 ]:
     P.append(dict(route=r, slug=None, kind="dynamic", photo=None, en=(en_t,), de=(de_t,)))
 
