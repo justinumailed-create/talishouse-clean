@@ -14,7 +14,7 @@ export const PMC_PATHS = {
   talispros: "/talisu/talispros",
   mediaDirectory: "/talisu/media-directory",
   contract: "/talisu/contract",
-  register: "/talisu/reg",
+  register: "/register",
   terms: "/talisu/terms",
   privacy: "/talisu/privacy",
 } as const;

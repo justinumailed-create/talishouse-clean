@@ -54,7 +54,7 @@ export function viewerMapsiteHref(
   if (!code || code === "demo") return MAPSITE_APP_PATH;
   // ALLPINS / isolated shelf → live /talisu/mkts Markets map.
   if (code === ALLPINS_FAST_CODE || book.isolatedBookshelf) {
-    return "/talisu/mkts";
+    return "/markets";
   }
   return buildClaimedMapSitePath({
     fastCode: code,
@@ -72,7 +72,7 @@ export function viewerBackToMapsiteHref(
   const code = viewerMapsiteFastCode(book);
   if (!code) return MAPSITE_APP_PATH;
   if (code === ALLPINS_FAST_CODE || book.isolatedBookshelf) {
-    return "/talisu/mkts";
+    return "/markets";
   }
   return mapsiteBackFromScheduleHref(code);
 }

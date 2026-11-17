@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/seo/page-metadata";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
-  const meta = await pageMetadata("/talisu/mkts");
+  const meta = await pageMetadata("/markets");
   // Admin-only page: keep the EN/DE SEO + OG tags, but never index it.
   return { ...meta, robots: { index: false, follow: false } };
 }

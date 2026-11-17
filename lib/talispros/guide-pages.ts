@@ -1,6 +1,6 @@
 /** Pages that use the photo-and-conversation layout and bring their own header. */
 export const GUIDE_CONVERSATION_PATHS = [
-  "/talispros/aisha",
+  "/aisha",
   "/webster",
   "/thorsten",
 ] as const;

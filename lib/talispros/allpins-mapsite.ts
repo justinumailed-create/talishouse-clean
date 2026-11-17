@@ -510,7 +510,7 @@ export async function ensureAllPinsMapSite(): Promise<AllPinsAggregation | null>
 
 /** ALLPINS map view is the live /talisu/mkts Markets map. */
 export function allPinsClaimedHref(): string {
-  return "/talisu/mkts";
+  return "/markets";
 }
 
 export function allPinsPublishedHref(): string {

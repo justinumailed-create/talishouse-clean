@@ -19,10 +19,10 @@ const root = process.cwd();
 describe("homepage FAST Code → claimed Mapsite", () => {
   it("matches existing claimed listings navigation", () => {
     expect(buildClaimedMapSitePath({ fastCode: "LG01", accountType: "listings" })).toBe(
-      "/talispros/mapsite/listings/lg01",
+      "/map/lg01",
     );
     expect(mapsiteBackFromScheduleHref("LG01")).toBe(
-      "/talispros/mapsite/listings/lg01",
+      "/map/lg01",
     );
   });
 
@@ -37,7 +37,7 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(claimedMapSiteSegmentForAccountOrPlan("fsbo")).toBe("fsbos");
     expect(
       buildClaimedMapSitePath({ fastCode: "rm22", accountType: "brokers" }),
-    ).toBe("/talispros/mapsite/brokers/rm22");
+    ).toBe("/map/rm22");
   });
 
   it("wires homepage Login gate (not /start) to openClaimedMapSiteFromHomeFastCode", () => {
@@ -157,7 +157,7 @@ describe("homepage FAST Code → claimed Mapsite", () => {
       "utf8",
     );
     const page = readFileSync(
-      join(root, "app/talispros/mapsite/[accountType]/[fastCode]/page.tsx"),
+      join(root, "app/map/[fastCode]/page.tsx"),
       "utf8",
     );
 

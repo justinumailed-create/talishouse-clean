@@ -59,13 +59,13 @@ describe("TalisU blue header dropdown", () => {
     ]);
     expect(TALISU_MKTS_HEADER_NAV.map((i) => i.href)).toEqual([
       "/",
-      "/talisu/reg",
+      "/register",
     ]);
     // Markets is its own navbar dropdown (USA, then Canada), not a TalisU admin row.
     expect(TALISU_MKTS_HEADER_NAV.some((i) => (i.label as string) === "Markets")).toBe(false);
     expect(TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((i) => [i.label, i.href])).toEqual([
-      ["USA", "/talisu/mkts/usa"],
-      ["Canada", "/talisu/mkts"],
+      ["USA", "/markets/usa"],
+      ["Canada", "/markets"],
     ]);
     expect(header).toContain("<MarketsNavDropdown");
     expect(header).toContain("TALISU_MKTS_HEADER_MARKETS_DROPDOWN");
@@ -99,7 +99,7 @@ describe("TalisU blue header dropdown", () => {
       "utf8",
     );
     expect(card).toContain("openClaimedMapSiteFromHomeFastCode");
-    expect(card).not.toContain('href="/talisu/reg"');
+    expect(card).not.toContain('href="/register"');
     expect(card).not.toContain("demo-register-link");
     const builder = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx"),

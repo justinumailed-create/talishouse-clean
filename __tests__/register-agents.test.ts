@@ -64,6 +64,6 @@ describe("register-agents routes", () => {
         mapsiteId: "map-1",
         requestId: "req-1",
       }),
-    ).toBe("/talispros/mapsite/fsbos/ar01?view=pin&requestId=req-1&mapsiteId=map-1");
+    ).toBe("/map/ar01?view=pin&requestId=req-1&mapsiteId=map-1");
   });
 });

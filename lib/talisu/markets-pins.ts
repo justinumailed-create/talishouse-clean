@@ -107,13 +107,13 @@ export const TALISU_MKTS_HEADER_LOGO_HREF = "/";
 export const TALISU_MKTS_HEADER_NAV = [
   /** Plain Home link (client request) — first item, even though the logo also links home. */
   { href: "/", label: "Home" },
-  { href: "/talisu/reg", label: "Register" },
+  { href: "/register", label: "Register" },
 ] as const;
 
 /** Markets navbar dropdown: USA (30 market pins) then Canada (15 market pins). */
 export const TALISU_MKTS_HEADER_MARKETS_DROPDOWN = [
-  { href: "/talisu/mkts/usa", label: "USA", menuKey: "usa" },
-  { href: "/talisu/mkts", label: "Canada", menuKey: "canada" },
+  { href: "/markets/usa", label: "USA", menuKey: "usa" },
+  { href: "/markets", label: "Canada", menuKey: "canada" },
 ] as const;
 
 /** Placeholder marker — Mapsites dropdown is rendered in TalisUMktsHeader. */

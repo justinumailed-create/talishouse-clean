@@ -14,6 +14,6 @@ export const RALF_RM22_ROOT_CHECKOUT = {
   audience: "brokers",
   amountTotalCents: 114,
   currency: "cad",
-  claimedPath: "/talispros/mapsite/brokers/rm22",
+  claimedPath: "/map/rm22",
   publishedPath: "/mapsite/rm22",
 } as const;

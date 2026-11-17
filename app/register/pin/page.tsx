@@ -4,9 +4,9 @@ import { pageMetadata } from "@/lib/seo/page-metadata";
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
-  return pageMetadata("/talisu/reg/checkout/adpro");
+  return pageMetadata("/register/pin");
 }
 
-export default function AdproCheckoutPage() {
-  return <RegisterProductCheckout product="adpro" />;
+export default function PinCheckoutPage() {
+  return <RegisterProductCheckout product="pin" />;
 }

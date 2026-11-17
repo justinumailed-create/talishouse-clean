@@ -123,14 +123,84 @@ const nextConfig: NextConfig = {
         statusCode: 301,
       },
       {
+        source: "/talispros/aisha",
+        destination: "/aisha",
+        statusCode: 301,
+      },
+      {
+        source: "/talispros/aisha/",
+        destination: "/aisha",
+        statusCode: 301,
+      },
+      {
+        source: "/talispros/home/:fastCode",
+        destination: "/home/:fastCode",
+        statusCode: 301,
+      },
+      {
+        source: "/talispros/mapsite/:accountType/:fastCode",
+        destination: "/map/:fastCode",
+        statusCode: 301,
+      },
+      {
+        source: "/a/:fastCode",
+        destination: "/home/:fastCode",
+        statusCode: 301,
+      },
+      {
+        source: "/ma/:fastcode",
+        destination: "/map/:fastcode",
+        statusCode: 301,
+      },
+      {
+        source: "/talisu/mkts/usa",
+        destination: "/markets/usa",
+        statusCode: 301,
+      },
+      {
+        source: "/talisu/mkts/usa/",
+        destination: "/markets/usa",
+        statusCode: 301,
+      },
+      {
+        source: "/talisu/mkts",
+        destination: "/markets",
+        statusCode: 301,
+      },
+      {
+        source: "/talisu/mkts/",
+        destination: "/markets",
+        statusCode: 301,
+      },
+      {
+        source: "/talisu/reg/checkout/:product",
+        destination: "/register/:product",
+        statusCode: 301,
+      },
+      {
+        source: "/talisu/reg",
+        destination: "/register",
+        statusCode: 301,
+      },
+      {
+        source: "/talisu/reg/",
+        destination: "/register",
+        statusCode: 301,
+      },
+      {
+        source: "/register/success",
+        destination: "/talispros/register-your-account/success",
+        statusCode: 301,
+      },
+      {
         source: "/talisu/demo",
-        destination: "/talispros/demo-mapsite",
-        permanent: true,
+        destination: "/demo",
+        statusCode: 301,
       },
       {
         source: "/talisu/demo/",
-        destination: "/talispros/demo-mapsite",
-        permanent: true,
+        destination: "/demo",
+        statusCode: 301,
       },
       // Sea-Can pages are not ready. Send them to the Talishouse™ Product Catalogue.
       {

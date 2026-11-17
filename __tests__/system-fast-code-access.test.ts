@@ -55,7 +55,7 @@ describe("system FAST Code feature gate", () => {
   });
 
   it("drops dashboard, editor, and password-gate links from the public home", () => {
-    expect(isOwnerOnlyPersonalHomeHref("/talispros/mapsite/brokers/dw01")).toBe(true);
+    expect(isOwnerOnlyPersonalHomeHref("/map/dw01")).toBe(true);
     expect(isOwnerOnlyPersonalHomeHref("/talispros/demo-mapsite?gate=dw01")).toBe(true);
     expect(isOwnerOnlyPersonalHomeHref("/talispros/mapsites/dw01/ebooks/new")).toBe(true);
     expect(isOwnerOnlyPersonalHomeHref("/chat")).toBe(true);
@@ -94,7 +94,7 @@ describe("system FAST Code feature gate", () => {
   });
 
   it("gates owner APIs and shows the existing map on the public home", () => {
-    const page = read("app/talispros/home/[fastCode]/page.tsx");
+    const page = read("app/home/[fastCode]/page.tsx");
     expect(page).toContain("readSystemFastCodeFacts");
     expect(page).toContain("restrictSystemFastCodeFeatures");
     expect(page).toContain("data-gate={facts.trace}");
@@ -126,7 +126,7 @@ describe("system FAST Code feature gate", () => {
     expect(access).toContain("hasOwnActivationPayment");
     expect(access).not.toContain("hasCompletedMapSiteActivationPayment");
     expect(access).toContain("claim@talispros.com");
-    const mapsitePage = read("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx");
+    const mapsitePage = read("app/map/[fastCode]/page.tsx");
     expect(mapsitePage).toContain("hasProspectAccess()");
     expect(mapsitePage).toContain("isPreparedSlotMapsite");
   });
@@ -160,7 +160,7 @@ describe("system FAST Code feature gate", () => {
     expect(systemFastCodeEntryCookieAction({ publicSystem: false, paid: true })).toBe("paid-session");
     expect(systemFastCodeEntryCookieAction({ publicSystem: false, paid: false })).toBe("owner-session");
 
-    const home = read("app/talispros/home/[fastCode]/page.tsx");
+    const home = read("app/home/[fastCode]/page.tsx");
     expect(home).not.toContain("cookies()");
     expect(home).not.toContain("MAPSITE_OWNER_COOKIE");
     expect(home).toContain("restrictSystemFastCodeFeatures");
@@ -177,8 +177,8 @@ describe("system FAST Code feature gate", () => {
     expect(read("lib/mapsite-edit-auth.ts")).not.toContain("!isRegisteredOwner");
 
     const renderSurfaces = [
-      "app/talispros/home/[fastCode]/page.tsx",
-      "app/talispros/mapsite/[accountType]/[fastCode]/page.tsx",
+      "app/home/[fastCode]/page.tsx",
+      "app/map/[fastCode]/page.tsx",
       "app/talispros/mapsite/page.tsx",
       "app/talispros/mapsite/layout.tsx",
       "app/talispros/mapsites/layout.tsx",

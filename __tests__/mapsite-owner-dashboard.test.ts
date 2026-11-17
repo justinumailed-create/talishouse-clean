@@ -55,7 +55,7 @@ describe("Mapsite owner Dashboard menu", () => {
     );
     const header = readFileSync(resolve("components/talisu/TalisUMktsHeader.tsx"), "utf8");
     const page = readFileSync(
-      resolve("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx"),
+      resolve("app/map/[fastCode]/page.tsx"),
       "utf8",
     );
     const actions = readFileSync(resolve("app/talispros/mapsite/dashboard-actions.ts"), "utf8");

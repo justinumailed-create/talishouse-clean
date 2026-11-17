@@ -431,7 +431,7 @@ describe("Stripe $1 Root checkout matching", () => {
     );
     expect(RALF_RM22_ROOT_CHECKOUT.amountTotalCents).toBe(114);
     expect(RALF_RM22_ROOT_CHECKOUT.claimedPath).toBe(
-      "/talispros/mapsite/brokers/rm22",
+      "/map/rm22",
     );
   });
 

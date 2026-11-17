@@ -14,7 +14,10 @@ export default function TalisUChrome({
   const pathname = usePathname() || "/talisu";
   const t = useT();
   const isMkts =
-    pathname === "/talisu/mkts" || pathname.startsWith("/talisu/mkts/");
+    pathname === "/markets" ||
+    pathname.startsWith("/markets/") ||
+    pathname === "/talisu/mkts" ||
+    pathname.startsWith("/talisu/mkts/");
 
   // Markets: full-bleed Atlist-style shell (header + map). Do not alter
   // fit-bounds / pin sizing — only the shared blue header wraps the map app.

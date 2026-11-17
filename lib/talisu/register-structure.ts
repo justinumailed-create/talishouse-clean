@@ -76,7 +76,7 @@ export function selectRegisterStructure(
 /** Aisha's landing with the given tab selected: /talisu/reg?structure=<id>. */
 export function talisURegisterStructureHref(structure: unknown): string {
   const id = parseSingleRegisterStructure(structure);
-  return id ? `/talisu/reg?${REGISTER_STRUCTURE_PARAM}=${id}` : "/talisu/reg";
+  return id ? `/register?${REGISTER_STRUCTURE_PARAM}=${id}` : "/register";
 }
 
 /**
@@ -99,7 +99,7 @@ export function registerLockedHref(fastCode?: string | null): string {
   const params = new URLSearchParams({ [REGISTER_LOCK_PARAM]: "structure" });
   const code = fastCode?.trim();
   if (code) params.set("fastCode", code);
-  return `/talisu/reg?${params.toString()}`;
+  return `/register?${params.toString()}`;
 }
 
 /** Adds the one structure as structure + utm_term to the SamCart register URL. */

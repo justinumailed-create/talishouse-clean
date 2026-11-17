@@ -32,7 +32,7 @@ describe("checkout agent codes", () => {
     expect(body).toContain("isCheckoutAgentCode(code)");
     expect(body).not.toContain("acceptSecret(");
     const page = readFileSync(resolve("components/talisu/RegisterProductCheckout.tsx"), "utf8");
-    expect(page).toContain('redirect(`/talisu/reg?locked=code&product=${product}`)');
+    expect(page).toContain('redirect(`/register?locked=code&product=${product}`)');
     expect(page.indexOf("hasCheckoutAccess()")).toBeLessThan(page.indexOf("<SamCartWebCheckout"));
   });
 });

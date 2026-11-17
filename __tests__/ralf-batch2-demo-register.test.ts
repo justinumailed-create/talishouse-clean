@@ -29,14 +29,14 @@ describe("Ralf batch 2 — demo → registration", () => {
     expect(builder).toContain("d.homePinNameHint");
   });
 
-  it("sends the Mapsite URL flag + gate to /talisu/reg (same tab), not SamCart", () => {
-    expect(MAPSITE_DEFAULT_REGISTER_URL).toBe("/talisu/reg");
-    expect(resolvePublishedUrlButtonHref("demo-abc12345", null)).toBe("/talisu/reg");
-    expect(resolvePublishedUrlButtonHref("dc01", null)).toBe("/talisu/reg");
+  it("sends the Mapsite URL flag + gate to /register (same tab), not SamCart", () => {
+    expect(MAPSITE_DEFAULT_REGISTER_URL).toBe("/register");
+    expect(resolvePublishedUrlButtonHref("demo-abc12345", null)).toBe("/register");
+    expect(resolvePublishedUrlButtonHref("dc01", null)).toBe("/register");
     // Prepared demo Mapsites keep the town's official site as URL 1 (Arun, Nov 4).
     expect(resolvePublishedUrlButtonHref("demo-cornwall", "https://www.cornwall.ca/")).toBe("https://www.cornwall.ca/");
-    expect(resolvePublishedUrlButtonHref("demo-cornwall", "/talisu/reg")).toBe("/talisu/reg");
-    expect(resolvePublishedUrlButtonHref("lrg1", "https://example.ca/")).toBe("/talisu/reg");
+    expect(resolvePublishedUrlButtonHref("demo-cornwall", "/register")).toBe("/register");
+    expect(resolvePublishedUrlButtonHref("lrg1", "https://example.ca/")).toBe("/register");
     const gate = readFileSync(
       resolve("app/talispros/register-your-mapsite/[fastCode]/page.tsx"),
       "utf8",
@@ -49,7 +49,7 @@ describe("Ralf batch 2 — demo → registration", () => {
     expect(isTalisURegisterCheckoutStep(undefined)).toBe(false);
     expect(isTalisURegisterCheckoutStep("register")).toBe(true);
     expect(isTalisUEngageCheckoutStep(["pay"])).toBe(true);
-    expect(talisURegisterCheckoutHref()).toBe("/talisu/reg?step=register");
+    expect(talisURegisterCheckoutHref()).toBe("/register?step=register");
     expect(talisUEngageCheckoutHref("P07")).toBe("/talisu/engage?step=pay&product=P07");
     expect(talisUEngageCheckoutHref(null)).toBe("/talisu/engage?step=pay");
 
@@ -61,7 +61,7 @@ describe("Ralf batch 2 — demo → registration", () => {
     expect(en.talisu.engage.ctaNote).not.toMatch(/\$|USD/);
     expect(de.talisu.engage.ctaNote).not.toMatch(/\$|USD/);
 
-    for (const file of ["app/talisu/reg/page.tsx", "app/talisu/engage/page.tsx"]) {
+    for (const file of ["app/register/page.tsx", "app/talisu/engage/page.tsx"]) {
       const page = readFileSync(resolve(file), "utf8");
       expect(page).toContain("AdviserLayout");
       expect(page).not.toMatch(/window\.location|setTimeout/);
@@ -78,10 +78,10 @@ describe("Ralf batch 2 — demo → registration", () => {
 });
 
 describe("Ralf follow-ups — blue navbar Register + Webster CAD", () => {
-  it("keeps every blue navbar Register entry on /talisu/reg (same tab)", async () => {
+  it("keeps every blue navbar Register entry on /register (same tab)", async () => {
     const pins = await import("../lib/talisu/markets-pins");
     const register = pins.TALISU_MKTS_HEADER_NAV.find((i) => i.label === "Register");
-    expect(register?.href).toBe("/talisu/reg");
+    expect(register?.href).toBe("/register");
     expect(pins.TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((i) => i.label)).toEqual(["USA", "Canada"]);
     for (const item of [...pins.TALISU_MKTS_HEADER_NAV, ...pins.TALISU_MKTS_HEADER_MARKETS_DROPDOWN]) {
       expect(item.href).not.toContain("mysamcart");

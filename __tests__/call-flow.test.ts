@@ -34,7 +34,7 @@ const vars = {
   fastCode: "LS01",
   mapsiteUrl: "/talispros/mapsite/root/ls01",
   tebUrl: "/talisbooks/fast/ls01",
-  registerUrl: "/talisu/reg?fastCode=LS01",
+  registerUrl: "/register?fastCode=LS01",
   agentCount: 8,
 };
 
@@ -103,7 +103,7 @@ describe("call flow copy", () => {
     expect(en.find((step) => step.key === "value")?.goal).toMatch(/80 kilometres/);
     expect(en.find((step) => step.key === "value")?.goal).toMatch(/CAD/);
     const open = buildStepViews("en", vars, ["opener", "hook", "how", "walkthrough", "value", "time"].map((step) => saved(step as SavedStep["step"])));
-    expect(open.find((step) => step.key === "register")?.script).toMatch(/\/talisu\/reg/);
+    expect(open.find((step) => step.key === "register")?.script).toMatch(/\/register/);
     const de = buildStepViews("de", { ...vars, agentName: "Enanko" }, [saved("opener")]);
     expect(de[0]?.script).toContain("Enanko");
     expect(de[1]?.script).toMatch(/einnahmen/i);

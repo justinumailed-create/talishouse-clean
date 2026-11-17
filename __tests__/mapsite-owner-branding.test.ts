@@ -134,7 +134,7 @@ describe("logo override applies everywhere", () => {
     expect(read("components/mapsite/PublishedMapSiteView.tsx")).toContain(
       "resolveBrandedMapSiteOgImage(",
     );
-    expect(read("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx")).toContain(
+    expect(read("app/map/[fastCode]/page.tsx")).toContain(
       "resolveBrandedMapSiteOgImage(",
     );
     expect(read("app/mapsite/[slug]/map/page.tsx")).toContain("resolveBrandedMapSiteOgImage(");

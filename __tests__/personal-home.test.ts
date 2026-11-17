@@ -26,13 +26,13 @@ const defaults = {
   headline: "Jane Doe",
   contactName: "Jane Doe",
   writeUp: "Default write-up",
-  buttons: [{ label: "Open Mapsite", href: "/talispros/mapsite/brokers/xx00", kind: "link" as const }],
+  buttons: [{ label: "Open Mapsite", href: "/map/xx00", kind: "link" as const }],
 };
 
 describe("personal home helpers", () => {
   it("builds lowercase /talispros/home paths", () => {
-    expect(personalHomePath(" AB12 ")).toBe("/talispros/home/ab12");
-    expect(isPersonalHomePath("/talispros/home/ab12")).toBe(true);
+    expect(personalHomePath(" AB12 ")).toBe("/home/ab12");
+    expect(isPersonalHomePath("/home/ab12")).toBe(true);
     expect(isPersonalHomePath("/talispros/mapsite")).toBe(false);
   });
 
@@ -48,7 +48,7 @@ describe("personal home helpers", () => {
 
   it("keeps an older plain link and stores a PIN choice beside it", () => {
     const context = {
-      mapsiteHref: "/talispros/mapsite/brokers/dc06",
+      mapsiteHref: "/map/dc06",
       bookshelfHref: "/talisbooks/fast/dc06",
       tebHref: "https://books.example/teb",
       pinIds: ["home-pin", "pin-2"],
@@ -65,9 +65,9 @@ describe("personal home helpers", () => {
       context,
     );
     expect(buttons.map((button) => button.href)).toEqual([
-      "/talispros/mapsite/brokers/dc06?pin=pin-2",
+      "/map/dc06?pin=pin-2",
       "/talisbooks/fast/dc06",
-      "/talispros/mapsite/brokers/dc06?dashboard=ebooks",
+      "/map/dc06?dashboard=ebooks",
     ]);
     expect(buttons[0]?.pinId).toBe("pin-2");
     expect(invalidPersonalHomeButtons([{ label: "Listing", kind: "pin", pinId: "nope" }], context)).toEqual([0]);
@@ -135,7 +135,7 @@ describe("personal home helpers", () => {
       "player.vimeo.com/video/123456789",
     );
     expect(normalizePersonalHomeSideMedia({ kind: "video", url: "not a url" })).toBeNull();
-    const page = readFileSync(join(root, "app/talispros/home/[fastCode]/page.tsx"), "utf8");
+    const page = readFileSync(join(root, "app/home/[fastCode]/page.tsx"), "utf8");
     expect(page).toContain("PersonalHomeSide");
     const body = readFileSync(
       join(root, "components/talispros/personal-home/PersonalHomeBody.tsx"),
@@ -221,12 +221,13 @@ describe("personal home wiring", () => {
       "utf8",
     );
     expect(client).toContain("result.homeHref ||");
-    const shortLink = readFileSync(join(root, "app/a/[fastCode]/page.tsx"), "utf8");
-    expect(shortLink).toContain("personalHomePath");
+    const redirects = readFileSync(join(root, "next.config.ts"), "utf8");
+    expect(redirects).toContain('source: "/a/:fastCode"');
+    expect(redirects).toContain('destination: "/home/:fastCode"');
   });
 
   it("keeps edit controls owner-only and adds the Mapsite navbar", () => {
-    const page = readFileSync(join(root, "app/talispros/home/[fastCode]/page.tsx"), "utf8");
+    const page = readFileSync(join(root, "app/home/[fastCode]/page.tsx"), "utf8");
     expect(page).toContain("PersonalHomeBody");
     expect(
       readFileSync(join(root, "components/talispros/personal-home/PersonalHomeBody.tsx"), "utf8"),
@@ -276,7 +277,7 @@ describe("personal home v2: entry points, account pill, logo", () => {
     expect(nav).toContain('data-testid="personal-home-nav-owner"');
     expect(nav.indexOf("{ownerPill}")).toBeLessThan(nav.indexOf('key: "home"'));
     expect(nav).toContain("rounded-xl bg-white/20");
-    const page = read("app/talispros/home/[fastCode]/page.tsx");
+    const page = read("app/home/[fastCode]/page.tsx");
     expect(page).toContain("canEdit\n            ? {");
     expect(page).toContain('initialOpen={query.edit === "1"}');
     const helper = read("lib/talispros/personal-home-page.ts");

@@ -107,7 +107,7 @@ export default function TalisUMktsHeader({
   dashboardMenuItems,
   onSelectDashboardItem,
 }: TalisUMktsHeaderProps = {}) {
-  const pathname = usePathname() || "/talisu/mkts";
+  const pathname = usePathname() || "/markets";
   const router = useRouter();
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -692,8 +692,8 @@ export default function TalisUMktsHeader({
                 renderMobileLink(
                   item.href,
                   item.menuKey === "usa" ? t.nav.marketsMenu.usa : t.nav.marketsMenu.canada,
-                  item.href === "/talisu/mkts"
-                    ? pathname === "/talisu/mkts"
+                  item.href === "/markets"
+                    ? pathname === "/markets"
                     : pathname === item.href || pathname.startsWith(`${item.href}/`),
                   true,
                 ),

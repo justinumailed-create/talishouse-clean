@@ -385,7 +385,7 @@ describe("Mapsite and viewer share image selection", () => {
     const meta = createMetadata({
       title: "Mapsite DC02",
       description: "Tsplits™ Mapsite for FAST Code DC02.",
-      path: "/talispros/mapsite/fsbos/dc02",
+      path: "/map/dc02",
       image: mapsiteImage,
     });
     expect(meta.openGraph?.images).toEqual([mapsiteImage]);

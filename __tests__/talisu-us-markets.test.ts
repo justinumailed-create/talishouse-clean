@@ -16,16 +16,16 @@ import pages from "@/lib/seo/pages.json";
 
 const read = (p: string) => readFileSync(resolve(p), "utf8");
 
-describe("USA Markets (/talisu/mkts/usa): native page, no Taliswebs redirect", () => {
+describe("USA Markets (/markets/usa): native page, no Taliswebs redirect", () => {
   it("is a Tsplits™ route gated exactly like Canada Markets", () => {
-    expect(ROUTES.TALISU_US_MARKETS).toBe("/talisu/mkts/usa");
-    const page = read("app/talisu/mkts/usa/page.tsx");
+    expect(ROUTES.TALISU_US_MARKETS).toBe("/markets/usa");
+    const page = read("app/markets/usa/page.tsx");
     expect(page).toContain('export const dynamic = "force-dynamic"');
     expect(page).toContain("<MarketsMapOrGate region=\"us\" />");
     expect(read("components/talisu/MarketsMapOrGate.tsx")).toContain("await getAdminSessionAccount()");
     expect(page).not.toContain('redirect("/")');
     expect(page).toContain("index: false");
-    expect(page).toContain('pageMetadata("/talisu/mkts/usa")');
+    expect(page).toContain('pageMetadata("/markets/usa")');
     expect(page.toLowerCase()).not.toContain("taliswebs.com");
   });
 
@@ -72,7 +72,7 @@ describe("USA Markets (/talisu/mkts/usa): native page, no Taliswebs redirect", (
       pages as unknown as {
         pages: Record<string, { image: string; en: { title: string }; de: { title: string } }>;
       }
-    ).pages["/talisu/mkts/usa"];
+    ).pages["/markets/usa"];
     expect(entry.en.title).toContain("USA Markets");
     expect(entry.de.title).toContain("Märkte USA");
     for (const lang of ["en", "de"]) {

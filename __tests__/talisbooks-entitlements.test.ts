@@ -34,7 +34,7 @@ describe("Talisbooks™ activation entitlements", () => {
       activated: false,
       accountKind: "root",
       bookCount: 0,
-      registrationHref: "/talispros/mapsite/listings/demo",
+      registrationHref: "/map/demo",
     });
 
     expect(entitlements.bookQuota).toBe(TALISBOOKS_UNACTIVATED_BOOK_QUOTA);

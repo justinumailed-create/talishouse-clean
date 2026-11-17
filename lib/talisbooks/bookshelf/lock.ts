@@ -5,7 +5,7 @@
  */
 
 /** Same-tab Register destination for locked shelves. */
-export const BOOKSHELF_REGISTER_PATH = "/talisu/reg";
+export const BOOKSHELF_REGISTER_PATH = "/register";
 
 /** Locked right shelf: 4 rows × 10 dummy covers, no links. */
 export const LOCKED_SHELF_ROWS = 4;

@@ -28,7 +28,7 @@ describe("Ralf Oct 17 catalogue spec sheets", () => {
     }
   });
 
-  it("Catalogue says Plan your Project (Webster → /talisu/engage); Mapsites says Register a Mapsite (Aisha → /talisu/reg)", () => {
+  it("Catalogue says Plan your Project (Webster → /talisu/engage); Mapsites says Register a Mapsite (Aisha → /register)", () => {
     const catalogue = readFileSync(resolve("app/catalogue/page.tsx"), "utf8");
     expect(catalogue).toContain("ROUTES.TALISU_ENGAGE");
     expect(catalogue).toContain("WEBSTER_AVATAR_SRC");

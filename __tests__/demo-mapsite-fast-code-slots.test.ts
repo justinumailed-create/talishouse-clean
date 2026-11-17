@@ -76,14 +76,14 @@ describe("FAST Code slots on the Mapsites page (Ralf, Nov 3)", () => {
   });
 
   it("keeps the prospect gate and does not mount the start panel on Mapsites", () => {
-    const page = read("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx");
+    const page = read("app/map/[fastCode]/page.tsx");
     expect(page).toContain("isPreparedSlotMapsite(mapsite.id)");
     expect(page).toContain("url1_opens_broker_url: preparedSlotMapsite");
     expect(page).toContain("hasProspectAccess()");
     expect(page).not.toContain("RegisterActions");
     expect(page).not.toContain("mapsite-register-actions");
     expect(page).not.toContain("How would you like to start");
-    const reg = read("app/talisu/reg/page.tsx");
+    const reg = read("app/register/page.tsx");
     expect(reg).toContain("RegisterActions");
     expect(reg).toContain("propose: talisuHref(TALISU_DISCUSS_PATH)");
   });

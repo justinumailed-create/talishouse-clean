@@ -10,5 +10,5 @@ export function isRegisterCheckoutId(value: string | null | undefined): value is
 
 /** First-party page that embeds the product checkout after the agent-code gate. */
 export function registerCheckoutPath(id: RegisterCheckoutId): string {
-  return `/talisu/reg/checkout/${id}`;
+  return `/register/${id}`;
 }

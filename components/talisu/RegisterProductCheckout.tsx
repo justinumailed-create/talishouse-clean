@@ -29,7 +29,7 @@ export default async function RegisterProductCheckout({
 }) {
   if (!isRegisterCheckoutId(product)) notFound();
   if (!(await hasCheckoutAccess())) {
-    redirect(`/talisu/reg?locked=code&product=${product}`);
+    redirect(`/register?locked=code&product=${product}`);
   }
   const samcartProduct = registerCheckoutProduct(product);
   if (!samcartProduct) notFound();

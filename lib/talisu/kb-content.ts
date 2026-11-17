@@ -78,7 +78,7 @@ export const TALISU_KB_DEFAULT_LEARNING: readonly TalisUKbItem[] = [
     id: "lm-markets",
     title: "Markets Overview",
     description: "Explore industry-adjacent markets on the TalisU™ map.",
-    href: "/talisu/mkts",
+    href: "/markets",
     kind: "Guide",
   },
 ] as const;

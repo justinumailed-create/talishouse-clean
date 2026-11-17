@@ -40,7 +40,7 @@ describe("locked catalogue bookshelf", () => {
     expect(normalizeBookshelfFastCodeInput("")).toEqual({ ok: false, reason: "empty" });
     expect(normalizeBookshelfFastCodeInput("ab&c")).toEqual({ ok: false, reason: "format" });
     expect(connectedBookshelfPath("XyZ9")).toBe("/talisbooks/fast/xyz9");
-    expect(BOOKSHELF_REGISTER_PATH).toBe("/talisu/reg");
+    expect(BOOKSHELF_REGISTER_PATH).toBe("/register");
     expect(LOCKED_SHELF_DUMMY_COUNT).toBe(LOCKED_SHELF_ROWS * LOCKED_SHELF_COLUMNS);
     expect(LOCKED_SHELF_ROWS).toBeGreaterThanOrEqual(3);
     expect(LOCKED_SHELF_ROWS).toBeLessThanOrEqual(4);

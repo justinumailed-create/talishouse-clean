@@ -38,7 +38,7 @@ describe("Claimed FAST Mapsite header Dashboard nav", () => {
     expect(header).toMatch(/t\.nav\.dashboardLocked\.cta\}\s*<\/a>/);
     expect(en.nav.dashboardLocked.cta).toBe("Register");
     expect(header).toContain("registerHref");
-    // Locked-Dashboard Register: /talisu/reg in the same tab, never SamCart in a new tab.
+    // Locked-Dashboard Register: /register in the same tab, never SamCart in a new tab.
     expect(header).toContain("registerHref = ROUTES.TALISU_REGISTER");
     expect(header).not.toContain("TALISU_REGISTER.samcartUrl");
     // Only external selling tools (e.g. an MLS® listing URL) open a new tab.

@@ -161,7 +161,7 @@ describe("isolated bookshelf ALLPINS / viewer back link", () => {
     expect(mod).toContain("ensureAllPinsMapSite");
     expect(mod).toContain("listAllPinsAggregatedPins");
     const page = readFileSync(
-      resolve("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx"),
+      resolve("app/map/[fastCode]/page.tsx"),
       "utf8",
     );
     expect(page).toContain("isAllPinsFastCode");

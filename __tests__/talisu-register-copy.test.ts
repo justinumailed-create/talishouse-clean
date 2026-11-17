@@ -128,7 +128,7 @@ describe("TalisU Register → Product (Thorsten P) copy", () => {
 });
 
 describe("Register page without catalogue purchase section", () => {
-  const page = readFileSync(resolve("app/talisu/reg/page.tsx"), "utf8");
+  const page = readFileSync(resolve("app/register/page.tsx"), "utf8");
   const welcome = readFileSync(resolve("app/talisu/page.tsx"), "utf8");
   const config = readFileSync(resolve("next.config.ts"), "utf8");
 
@@ -163,12 +163,12 @@ describe("Register page without catalogue purchase section", () => {
     ]) {
       expect(config).toContain(`source: ${source}`);
     }
-    expect(config).not.toContain('destination: "/talisu/reg"');
-    expect(config).not.toContain('destination: "/talisu/reg#catalogue"');
     const seaCan = config.slice(
       config.indexOf("Sea-Can pages are not ready"),
       config.indexOf('source: "/talispros/start"'),
     );
+    expect(seaCan).not.toContain('destination: "/register"');
+    expect(config).not.toContain('destination: "/register#catalogue"');
     expect(seaCan.match(/destination: "\/catalogue"/g)).toHaveLength(8);
   });
 });

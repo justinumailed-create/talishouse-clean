@@ -12,10 +12,10 @@ export type TalisUNavItem = {
 
 export const TALISU_PRIMARY_NAV: TalisUNavItem[] = [
   { href: "/talisu", label: "Welcome", section: "primary" },
-  { href: "/talisu/mkts", label: "Markets", section: "primary" },
+  { href: "/markets", label: "Markets", section: "primary" },
   { href: "/catalogue/bookshelf", label: "E-Book", section: "primary" },
   { href: "/talisu/au", label: "Audio", section: "primary" },
-  { href: "/talisu/reg", label: "Register", section: "primary" },
+  { href: "/register", label: "Register", section: "primary" },
   { href: "/talispros/demo-mapsite", label: "Demo", section: "primary" },
   { href: "/catalogue", label: "Catalogue", section: "primary" },
   { href: "/talisu/engage", label: "Engage", section: "primary" },
