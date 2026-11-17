@@ -9,9 +9,9 @@ import { isPoweredByBanner } from "../lib/talispros/hide-elevenlabs-banner";
 const read = (path: string) => readFileSync(resolve(path), "utf8");
 
 const EN_GREETING =
-  "Hi, I'm Aisha. I can help make your advertising revenue producing";
+  "Hi, I'm Aisha. I can help make your advertising revenue producing. Ask me how?";
 const DE_GREETING =
-  "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen";
+  "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen. Fragen Sie mich, wie?";
 
 describe("Aisha Convai widget on the homepage", () => {
   it("loads the public embed after the page is interactive, with no key", () => {

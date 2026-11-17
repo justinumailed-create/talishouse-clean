@@ -31,7 +31,7 @@ export default function TalisprosGatePage() {
           <TalisprosHomeShowcase />
         </div>
       </div>
-      <AishaConvaiWidget />
+      <AishaConvaiWidget startHref="/talispros/aisha" />
     </div>
   );
 }

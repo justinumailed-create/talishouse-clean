@@ -140,9 +140,9 @@ export const en = {
     learnMore: "Learn More",
     assistants: {
       aisha: {
-        label: "Hi, I'm Aisha. I can help make your advertising revenue producing",
+        label: "Hi, I'm Aisha. I can help make your advertising revenue producing. Ask me how?",
         greeting:
-          "Hi, I'm Aisha. I can help make your advertising revenue producing",
+          "Hi, I'm Aisha. I can help make your advertising revenue producing. Ask me how?",
         callback:
           "Propose a Project. Just start a call and tell me what you can see for here.",
         startCall: "Start a call",

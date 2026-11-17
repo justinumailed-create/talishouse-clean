@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type MouseEvent } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n/client";
@@ -151,6 +152,7 @@ export default function AishaConvaiWidget({
   placement = "bottom-left",
   agentId: agentIdOverride,
   dynamicVariables,
+  startHref,
 }: {
   persona?: AssistantPersona;
   /** Homepage greeting, or the call-back line used on an allowlisted Mapsite. */
@@ -160,8 +162,11 @@ export default function AishaConvaiWidget({
   agentId?: string;
   /** JSON for the Mapsite agent. Omitted on the homepage. */
   dynamicVariables?: string;
+  /** Homepage Start a call opens this page first. Other pages start the call. */
+  startHref?: string;
 }) {
   const t = useT();
+  const router = useRouter();
   const copy = t.home.assistants[persona.id];
   const closeLabel = t.mapsite.close;
   const origin = usePageOrigin();
@@ -184,6 +189,28 @@ export default function AishaConvaiWidget({
     if (!slot) return;
     return watchPoweredByBanner(slot, setSurfaceOpen);
   }, [host]);
+
+  useEffect(() => {
+    if (!startHref) return;
+    const slot = slotRef.current;
+    if (!slot) return;
+    const wanted = (copy?.startCall ?? "").trim().toLowerCase();
+    const onClick = (event: Event) => {
+      const path = event.composedPath();
+      const fromBubble = path.some(
+        (node) => node instanceof HTMLElement && node.classList.contains("aisha-convai-label"),
+      );
+      if (fromBubble) return;
+      const button = path.find((node): node is HTMLButtonElement => node instanceof HTMLButtonElement);
+      const text = button?.textContent?.replace(/\s+/g, " ").trim().toLowerCase() ?? "";
+      if (!wanted || text !== wanted) return;
+      event.preventDefault();
+      event.stopPropagation();
+      router.push(startHref);
+    };
+    slot.addEventListener("click", onClick, true);
+    return () => slot.removeEventListener("click", onClick, true);
+  }, [copy?.startCall, host, router, startHref]);
 
   useLayoutEffect(() => {
     const slot = slotRef.current;
@@ -338,7 +365,14 @@ export default function AishaConvaiWidget({
         type="button"
         className="aisha-convai-label"
         data-start-label={copy.startCall}
-        onClick={startAishaConversation}
+        onClick={(event) => {
+          if (startHref) {
+            event.preventDefault();
+            router.push(startHref);
+            return;
+          }
+          startAishaConversation(event);
+        }}
       >
         {bubblePath ? (
           <span className="aisha-bubble-shape" aria-hidden="true">

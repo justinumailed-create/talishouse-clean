@@ -26,7 +26,8 @@ export default function TalisprosLayoutClient({
     pathname === "/talispros/mapsite" ||
     pathname?.startsWith("/talispros/mapsite/") ||
     // Personal home page (/talispros/home/<code>) brings its own Home / Mapsite navbar.
-    pathname?.startsWith("/talispros/home/");
+    pathname?.startsWith("/talispros/home/") ||
+    pathname === "/talispros/aisha";
 
   if (isMapSiteApp) {
     return <>{children}</>;
