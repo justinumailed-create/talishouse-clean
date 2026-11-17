@@ -26,6 +26,11 @@ type PersonalHomeEditorProps = {
   defaults: PersonalHomeDefaults;
   /** Open the editor on arrival (navbar account pill from the Mapsite). */
   initialOpen?: boolean;
+  /** Same-window links into the Mapsite dashboard and page buttons. */
+  mapsiteTools?: {
+    panels: { id: string; label: string; href: string }[];
+    pageButtons: { id: string; label: string; href: string }[];
+  } | null;
 };
 
 type ButtonDraft = { label: string; href: string };
@@ -48,6 +53,7 @@ export default function PersonalHomeEditor({
   saved,
   defaults,
   initialOpen = false,
+  mapsiteTools = null,
 }: PersonalHomeEditorProps) {
   const { personalHome } = useT();
   const t = personalHome.edit;
@@ -358,6 +364,33 @@ export default function PersonalHomeEditor({
                 </button>
               </div>
             ))}
+            {mapsiteTools?.pageButtons.length ? (
+              <label className="block">
+                <span className="text-[12px] font-medium text-neutral-600">{t.addPageButton}</span>
+                <span className="mt-1 block text-[12px] leading-snug text-neutral-500">{t.addPageButtonHint}</span>
+                <select
+                  defaultValue=""
+                  disabled={busy || buttons.length >= PERSONAL_HOME_LIMITS.buttons}
+                  data-testid="personal-home-add-page-button"
+                  onChange={(event) => {
+                    const item = mapsiteTools.pageButtons.find((entry) => entry.id === event.target.value);
+                    event.target.value = "";
+                    if (!item) return;
+                    setButtons((rows) =>
+                      rows.some((row) => row.href === item.href) || rows.length >= PERSONAL_HOME_LIMITS.buttons
+                        ? rows
+                        : [...rows, { label: item.label, href: item.href }],
+                    );
+                  }}
+                  className={INPUT}
+                >
+                  <option value="">{t.addPageButton}</option>
+                  {mapsiteTools.pageButtons.map((item) => (
+                    <option key={item.id} value={item.id}>{item.label}</option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
             {buttons.length < PERSONAL_HOME_LIMITS.buttons ? (
               <button
                 type="button"
@@ -369,6 +402,25 @@ export default function PersonalHomeEditor({
               </button>
             ) : null}
           </fieldset>
+
+          {mapsiteTools?.panels.length ? (
+            <fieldset className="space-y-2">
+              <legend className={LABEL}>{t.dashboard}</legend>
+              <div className="text-[12px] leading-snug text-neutral-500">{t.dashboardHint}</div>
+              <div className="flex flex-col gap-1.5">
+                {mapsiteTools.panels.map((panel) => (
+                  <a
+                    key={panel.id}
+                    href={panel.href}
+                    data-testid={`personal-home-dashboard-${panel.id}`}
+                    className="inline-flex min-h-9 items-center rounded-lg border border-neutral-200 px-3 text-[14px] font-medium text-neutral-900 hover:bg-neutral-50"
+                  >
+                    {panel.label}
+                  </a>
+                ))}
+              </div>
+            </fieldset>
+          ) : null}
         </div>
 
         <div className="space-y-2 border-t border-neutral-200 px-5 py-4">

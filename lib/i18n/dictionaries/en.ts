@@ -1074,6 +1074,17 @@ export const en = {
       removeButton: "Remove",
       buttonsHint:
         "Up to 3 buttons. A link can be a page on this site (starting with /), a full web address, mailto: or tel:.",
+      dashboard: "Mapsite dashboard",
+      dashboardHint: "Opens on your Mapsite in this window.",
+      panelPins: "PIN Dashboard",
+      panelCategories: "PIN Categories",
+      panelEbooks: "Ebook Editor",
+      panelBookshelf: "Bookshelf",
+      panelBranding: "Logo and card",
+      panelPartners: "Partner Mapsites",
+      addPageButton: "Add a page button",
+      addPageButtonHint:
+        "Turn a Mapsite feature into a button on this page. Internal pins, TEB and the Bookshelf stay on this site.",
       save: "Save changes",
       saving: "Saving…",
       saved: "Saved. Your home page is updated.",
