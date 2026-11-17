@@ -527,6 +527,7 @@ export const en = {
       purchased: "Purchased",
       readyToPlace: "Ready to place",
       buyHeading: "Buy PINs · {price} CAD each",
+      checkoutNote: "Each extra PIN is $7 CAD. This is the same checkout as the PIN option on Register.",
       atLimit: "This Mapsite is at the 100 PIN limit.",
       quantity: "Quantity",
       startingCheckout: "Starting checkout…",
