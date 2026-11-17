@@ -30,6 +30,7 @@ import {
 } from "@/lib/talispros/system-fast-code-gate";
 import { readSystemFastCodeFacts } from "@/lib/talispros/system-fast-code-access";
 import { isFastCodeDisqualified } from "@/lib/talispros/market-disqualify-server";
+import { pinCategoryOptions } from "@/lib/talispros/mapsite-pin-categories";
 
 export const dynamic = "force-dynamic";
 
@@ -208,6 +209,38 @@ export default async function PersonalHomePage({
           saved={data.saved}
           defaults={data.defaults}
           initialOpen={query.edit === "1"}
+          mapsiteTools={{
+            panels: (
+              [
+                ["pins", "panelPins"],
+                ["categories", "panelCategories"],
+                ["ebooks", "panelEbooks"],
+                ["bookshelf", "panelBookshelf"],
+                ["branding", "panelBranding"],
+                ["partners", "panelPartners"],
+              ] as const
+            ).map(([id, key]) => ({
+              id,
+              label: getDictionary(locale).personalHome.edit[key],
+              href: `${mapsiteHref}?dashboard=${id}`,
+            })),
+            pageButtons: [
+              { id: "mapsite", label: getDictionary(locale).personalHome.openMapsite, href: mapsiteHref },
+              {
+                id: "bookshelf",
+                label: getDictionary(locale).personalHome.edit.panelBookshelf,
+                href: `/talisbooks/fast/${data.code}`,
+              },
+              ...(data.view.tebUrl
+                ? [{ id: "teb", label: "TEB", href: data.view.tebUrl }]
+                : []),
+              ...pinCategoryOptions([], locale === "de" ? "de" : "en").map((category) => ({
+                id: category.value,
+                label: category.label,
+                href: `${mapsiteHref}?category=${encodeURIComponent(category.value)}`,
+              })),
+            ],
+          }}
         />
       ) : null}
       {mapsiteShowsAisha(data.view.status) ? (

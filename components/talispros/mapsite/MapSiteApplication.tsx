@@ -1034,6 +1034,13 @@ function MapSiteChrome({
     setDashboardPanel("pins");
   }, [dashboardManageable]);
 
+  useEffect(() => {
+    if (!dashboardManageable) return;
+    const requested = new URLSearchParams(window.location.search).get("dashboard");
+    const item = MAPSITE_DASHBOARD_MENU_ITEMS.find((entry) => entry.id === requested);
+    if (item) setDashboardPanel(item.id);
+  }, [dashboardManageable]);
+
   const defaultPartnerImage = defaultMapSitePartnerImage(audience);
   const defaultPartnerName = defaultMapSitePartnerName(mapsite);
   // One resolver for logo + partner photo/name/tagline (owner overrides win).

@@ -1385,6 +1385,17 @@ export const de: Dictionary = {
       removeButton: "Entfernen",
       buttonsHint:
         "Bis zu 3 Schaltflächen. Ein Link kann eine Seite dieser Website (beginnend mit /), eine vollständige Webadresse, mailto: oder tel: sein.",
+      dashboard: "Mapsite-Dashboard",
+      dashboardHint: "Öffnet sich auf Ihrer Mapsite in diesem Fenster.",
+      panelPins: "PIN-Dashboard",
+      panelCategories: "PIN-Kategorien",
+      panelEbooks: "eBook-Editor",
+      panelBookshelf: "Bücherregal",
+      panelBranding: "Logo und Karte",
+      panelPartners: "Partner-Mapsites",
+      addPageButton: "Seitenschaltfläche hinzufügen",
+      addPageButtonHint:
+        "Macht aus einer Mapsite-Funktion eine Schaltfläche auf dieser Seite. Interne PINs, TEB und das Bücherregal bleiben auf dieser Website.",
       save: "Änderungen speichern",
       saving: "Wird gespeichert…",
       saved: "Gespeichert. Ihre Startseite ist aktualisiert.",
