@@ -43,7 +43,7 @@ function fixtureHtml(): string {
   </main>
   <div class="aisha-convai-slot" data-testid="aisha-convai">
     <button type="button" class="aisha-convai-label" data-start-label="Start a call">
-      Hi, I'm Aisha. I can help make your advertising revenue producing. Ask me how?
+      Hi, I'm Aisha. I can help make your advertising revenue producing. Ask me how.
     </button>
     <elevenlabs-convai></elevenlabs-convai>
   </div>

@@ -23,18 +23,31 @@ describe("Aisha speech bubble outline", () => {
     expect(aishaSpeechBubblePath(168, 110, "right", 36)).toContain(String(aimed));
   });
 
-  it("matches the call pill's left and right edges", () => {
+  it("widens past the call pill and stays on the screen", () => {
     const frame = aishaBubbleFrame({
-      pillLeft: 835,
+      pillLeft: 24,
       pillTop: 820,
-      pillWidth: 168,
-      avatarCenter: 853,
+      pillWidth: 220,
+      avatarCenter: 52,
       viewportHeight: 900,
+      viewportWidth: 1440,
     });
-    expect(frame.left).toBe(835);
-    expect(frame.left + frame.width).toBe(1003);
+    expect(frame.width).toBe(448);
+    expect(frame.left).toBe(24);
     expect(frame.tip).toBeGreaterThan(10);
-    expect(frame.tip).toBeLessThan(40);
+    expect(frame.tip).toBeLessThan(80);
+
+    const phone = aishaBubbleFrame({
+      pillLeft: 32,
+      pillTop: 700,
+      pillWidth: 220,
+      avatarCenter: 56,
+      viewportHeight: 844,
+      viewportWidth: 390,
+    });
+    expect(phone.width).toBe(374);
+    expect(phone.left).toBeGreaterThanOrEqual(8);
+    expect(phone.left + phone.width).toBeLessThanOrEqual(382);
   });
 
   it("does not use a detached rotated square for the tail", () => {
