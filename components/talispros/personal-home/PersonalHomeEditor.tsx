@@ -8,10 +8,13 @@ import {
   PERSONAL_HOME_DRAFT_EVENT,
   PERSONAL_HOME_LIMITS,
   PERSONAL_HOME_OPEN_EDITOR_EVENT,
+  PERSONAL_HOME_VIDEO_MAX_BYTES,
   type PersonalHomeButton,
+  type PersonalHomeSideMedia,
   type PersonalHomeContent,
   type PersonalHomeDefaults,
   type PersonalHomeDraft,
+  type PersonalHomeOpenKind,
 } from "@/lib/talispros/personal-home";
 import { fmt } from "@/lib/i18n/format";
 import {
@@ -26,21 +29,67 @@ type PersonalHomeEditorProps = {
   defaults: PersonalHomeDefaults;
   /** Open the editor on arrival (navbar account pill from the Mapsite). */
   initialOpen?: boolean;
-  /** Same-window links into the Mapsite dashboard and page buttons. */
-  mapsiteTools?: {
-    panels: { id: string; label: string; href: string }[];
-    pageButtons: { id: string; label: string; href: string }[];
+  /** Targets the Button opens menu can point at. */
+  homeOpens?: {
+    tebHref: string | null;
+    pins: { id: string; label: string }[];
   } | null;
 };
 
-type ButtonDraft = { label: string; href: string };
+type ButtonDraft = {
+  label: string;
+  kind: PersonalHomeOpenKind;
+  href: string;
+  pinId: string;
+};
 
 const INPUT =
   "mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-[15px] text-neutral-900 outline-none focus:border-[#046BD9] focus:ring-2 focus:ring-[#046BD9]/20 disabled:opacity-60";
 const LABEL = "block text-[13px] font-semibold text-neutral-700";
 
+function openOptions(
+  t: {
+    openLink: string;
+    openPin: string;
+    panelEbooks: string;
+    panelBookshelf: string;
+    panelPins: string;
+    panelCategories: string;
+    panelBranding: string;
+    panelPartners: string;
+  },
+  teb: boolean,
+) {
+  const options: { id: PersonalHomeOpenKind; label: string }[] = [
+    { id: "link", label: t.openLink },
+    { id: "pin", label: t.openPin },
+    { id: "ebooks", label: t.panelEbooks },
+    { id: "bookshelf", label: t.panelBookshelf },
+  ];
+  if (teb) options.push({ id: "teb", label: "TEB" });
+  options.push(
+    { id: "pins", label: t.panelPins },
+    { id: "categories", label: t.panelCategories },
+    { id: "branding", label: t.panelBranding },
+    { id: "partners", label: t.panelPartners },
+  );
+  return options;
+}
+
+function openLabel(
+  t: Parameters<typeof openOptions>[0],
+  kind: PersonalHomeOpenKind,
+): string {
+  return openOptions(t, true).find((option) => option.id === kind)?.label || t.openLink;
+}
+
 function toDrafts(buttons: PersonalHomeButton[]): ButtonDraft[] {
-  return buttons.map((button) => ({ label: button.label, href: button.href }));
+  return buttons.map((button) => ({
+    label: button.label,
+    kind: button.kind || "link",
+    href: button.href,
+    pinId: button.pinId || "",
+  }));
 }
 
 /**
@@ -53,12 +102,14 @@ export default function PersonalHomeEditor({
   saved,
   defaults,
   initialOpen = false,
-  mapsiteTools = null,
+  homeOpens = null,
 }: PersonalHomeEditorProps) {
   const { personalHome } = useT();
   const t = personalHome.edit;
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+  const sideImageRef = useRef<HTMLInputElement>(null);
+  const sideVideoRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(initialOpen);
 
   useEffect(() => {
@@ -69,6 +120,10 @@ export default function PersonalHomeEditor({
   const [pending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(saved.imageUrl);
+  const [sideKind, setSideKind] = useState<"" | PersonalHomeSideMedia["kind"]>(
+    saved.sideMedia?.kind ?? "",
+  );
+  const [sideUrl, setSideUrl] = useState(saved.sideMedia?.url ?? "");
   const [kicker, setKicker] = useState(saved.kicker ?? "");
   const [headline, setHeadline] = useState(saved.headline ?? "");
   const [contactName, setContactName] = useState(saved.contactName ?? "");
@@ -76,6 +131,7 @@ export default function PersonalHomeEditor({
   const [buttons, setButtons] = useState<ButtonDraft[]>(
     toDrafts(saved.buttons.length ? saved.buttons : defaults.buttons),
   );
+  const [openMenu, setOpenMenu] = useState<{ index: number; which: "opens" | "pin" } | null>(null);
   const [invalid, setInvalid] = useState<number[]>([]);
   const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(
     null,
@@ -85,6 +141,8 @@ export default function PersonalHomeEditor({
     if (error === "auth") return t.errAuth;
     if (error === "buttons") return t.errButtons;
     if (error === "photo") return t.errPhoto;
+    if (error === "video") return t.errVideo;
+    if (error === "media") return t.errMedia;
     return t.errSave;
   }
 
@@ -121,6 +179,82 @@ export default function PersonalHomeEditor({
     }
   }
 
+  function sidePayload(): PersonalHomeSideMedia | null {
+    const url = sideUrl.trim();
+    if (!sideKind || !url) return null;
+    if (sideKind === "embed") return { kind: "embed", url, provider: "youtube" };
+    return { kind: sideKind, url };
+  }
+
+  async function handleSideImage(file: File | undefined) {
+    if (!file) return;
+    setMessage(null);
+    setUploading(true);
+    try {
+      const optimized = await optimizeImageFileForUpload(file, {
+        kind: "agent",
+        label: t.sidePicture,
+      });
+      const body = new FormData();
+      body.set("fastCode", fastCode);
+      body.set("file", optimized);
+      const response = await fetch("/api/talispros/personal-home/upload-image", {
+        method: "POST",
+        body,
+      });
+      const result = (await response.json().catch(() => null)) as
+        | { ok: true; url: string }
+        | { ok: false; error: string }
+        | null;
+      if (!result || !result.ok) {
+        setMessage({ tone: "error", text: errorText(result?.ok === false ? result.error : "photo") });
+        return;
+      }
+      setSideKind("image");
+      setSideUrl(result.url);
+    } catch {
+      setMessage({ tone: "error", text: t.errPhoto });
+    } finally {
+      setUploading(false);
+      if (sideImageRef.current) sideImageRef.current.value = "";
+    }
+  }
+
+  async function handleSideVideo(file: File | undefined) {
+    if (!file) return;
+    setMessage(null);
+    if (file.size > PERSONAL_HOME_VIDEO_MAX_BYTES) {
+      setMessage({ tone: "error", text: t.errVideo });
+      if (sideVideoRef.current) sideVideoRef.current.value = "";
+      return;
+    }
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.set("fastCode", fastCode);
+      body.set("file", file);
+      const response = await fetch("/api/talispros/personal-home/upload-image", {
+        method: "POST",
+        body,
+      });
+      const result = (await response.json().catch(() => null)) as
+        | { ok: true; url: string }
+        | { ok: false; error: string }
+        | null;
+      if (!result || !result.ok) {
+        setMessage({ tone: "error", text: errorText(result?.ok === false ? result.error : "video") });
+        return;
+      }
+      setSideKind("video");
+      setSideUrl(result.url);
+    } catch {
+      setMessage({ tone: "error", text: t.errVideo });
+    } finally {
+      setUploading(false);
+      if (sideVideoRef.current) sideVideoRef.current.value = "";
+    }
+  }
+
   function handleSave() {
     setMessage(null);
     setInvalid([]);
@@ -133,6 +267,7 @@ export default function PersonalHomeEditor({
         contactName,
         writeUp,
         buttons,
+        sideMedia: sidePayload(),
       });
       if (!result.ok) {
         setInvalid(result.invalidButtons ?? []);
@@ -155,6 +290,8 @@ export default function PersonalHomeEditor({
         return;
       }
       setImageUrl(null);
+      setSideKind("");
+      setSideUrl("");
       setKicker("");
       setHeadline("");
       setContactName("");
@@ -223,7 +360,8 @@ export default function PersonalHomeEditor({
           <div className="text-[13px] text-neutral-500">{t.defaultHint}</div>
 
           <div>
-            <div className={LABEL}>{t.photo}</div>
+            <div className={LABEL}>{t.buttonPhoto}</div>
+            <div className="mt-1 text-[12px] text-neutral-500">{t.buttonPhotoHint}</div>
             <div className="mt-2 flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -260,6 +398,95 @@ export default function PersonalHomeEditor({
                 ) : null}
               </div>
             </div>
+          </div>
+
+          <div data-testid="personal-home-side-fields">
+            <div className={LABEL}>{t.sideMedia}</div>
+            <div className="mt-1 text-[12px] leading-snug text-neutral-500">{t.sideHint}</div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {(
+                [
+                  ["", t.sideSame],
+                  ["image", t.sidePicture],
+                  ["video", t.sideVideo],
+                  ["embed", t.sideEmbed],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id || "same"}
+                  type="button"
+                  disabled={busy}
+                  data-testid={`personal-home-side-${id || "same"}`}
+                  onClick={() => {
+                    if (id !== sideKind) setSideUrl("");
+                    setSideKind(id);
+                  }}
+                  className={`rounded-full border px-3 py-1.5 text-[13px] font-semibold ${
+                    sideKind === id
+                      ? "border-[#046BD9] bg-[#046BD9] text-white"
+                      : "border-neutral-300 bg-white text-neutral-800"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {sideKind === "image" ? (
+              <div className="mt-3">
+                <input
+                  ref={sideImageRef}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  className="sr-only"
+                  data-testid="personal-home-side-image-input"
+                  onChange={(event) => handleSideImage(event.target.files?.[0])}
+                />
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => sideImageRef.current?.click()}
+                  className="inline-flex min-h-9 items-center rounded-full bg-[#046BD9] px-4 text-[14px] font-semibold text-white hover:bg-[#0358b3] disabled:opacity-60"
+                >
+                  {uploading ? t.uploading : sideUrl ? t.replacePhoto : t.uploadPhoto}
+                </button>
+              </div>
+            ) : null}
+            {sideKind === "video" ? (
+              <div className="mt-3">
+                <input
+                  ref={sideVideoRef}
+                  type="file"
+                  accept="video/mp4"
+                  className="sr-only"
+                  data-testid="personal-home-side-video-input"
+                  onChange={(event) => handleSideVideo(event.target.files?.[0])}
+                />
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => sideVideoRef.current?.click()}
+                  className="inline-flex min-h-9 items-center rounded-full bg-[#046BD9] px-4 text-[14px] font-semibold text-white hover:bg-[#0358b3] disabled:opacity-60"
+                >
+                  {uploading ? t.uploading : t.sideVideo}
+                </button>
+                {sideUrl ? (
+                  <div className="mt-2 text-[12px] text-neutral-600">{t.sideVideoReady}</div>
+                ) : null}
+              </div>
+            ) : null}
+            {sideKind === "embed" ? (
+              <label className="mt-3 block">
+                <span className={LABEL}>{t.sideAddress}</span>
+                <input
+                  value={sideUrl}
+                  disabled={busy}
+                  placeholder="https://www.youtube.com/watch?v="
+                  data-testid="personal-home-side-url"
+                  onChange={(event) => setSideUrl(event.target.value)}
+                  className={INPUT}
+                />
+              </label>
+            ) : null}
           </div>
 
           <label className="block">
@@ -339,21 +566,142 @@ export default function PersonalHomeEditor({
                     className={INPUT}
                   />
                 </label>
-                <label className="block">
-                  <span className="text-[12px] font-medium text-neutral-600">{t.buttonLink}</span>
-                  <input
-                    value={button.href}
-                    maxLength={PERSONAL_HOME_LIMITS.buttonHref}
+                <div>
+                  <span className="text-[12px] font-medium text-neutral-600">{t.buttonOpens}</span>
+                  <button
+                    type="button"
                     disabled={busy}
-                    inputMode="url"
-                    onChange={(event) =>
-                      setButtons((rows) =>
-                        rows.map((row, i) => (i === index ? { ...row, href: event.target.value } : row)),
+                    aria-expanded={openMenu?.index === index && openMenu.which === "opens"}
+                    data-testid={index === 0 ? "personal-home-button-opens" : undefined}
+                    onClick={() =>
+                      setOpenMenu((current) =>
+                        current?.index === index && current.which === "opens"
+                          ? null
+                          : { index, which: "opens" },
                       )
                     }
-                    className={INPUT}
-                  />
-                </label>
+                    className={`${INPUT} flex items-center justify-between text-left`}
+                  >
+                    <span>{openLabel(t, button.kind)}</span>
+                    <span aria-hidden>▾</span>
+                  </button>
+                  {openMenu?.index === index && openMenu.which === "opens" ? (
+                    <ul
+                      role="listbox"
+                      data-testid="personal-home-button-opens-menu"
+                      className="mt-1 overflow-hidden rounded-lg border border-neutral-200 bg-white"
+                    >
+                      {openOptions(t, Boolean(homeOpens?.tebHref)).map((option) => (
+                        <li key={option.id}>
+                          <button
+                            type="button"
+                            role="option"
+                            aria-selected={button.kind === option.id}
+                            onClick={() => {
+                              setButtons((rows) =>
+                                rows.map((row, i) =>
+                                  i === index
+                                    ? {
+                                        ...row,
+                                        kind: option.id,
+                                        pinId:
+                                          option.id === "pin"
+                                            ? row.pinId || homeOpens?.pins[0]?.id || ""
+                                            : "",
+                                      }
+                                    : row,
+                                ),
+                              );
+                              setOpenMenu(null);
+                            }}
+                            className={`block w-full px-3 py-2 text-left text-[15px] hover:bg-neutral-50 ${
+                              button.kind === option.id ? "bg-[#046BD9]/10 font-medium" : ""
+                            }`}
+                          >
+                            {option.label}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+                {button.kind === "link" ? (
+                  <label className="block">
+                    <span className="text-[12px] font-medium text-neutral-600">{t.buttonLink}</span>
+                    <input
+                      value={button.href}
+                      maxLength={PERSONAL_HOME_LIMITS.buttonHref}
+                      disabled={busy}
+                      inputMode="url"
+                      onChange={(event) =>
+                        setButtons((rows) =>
+                          rows.map((row, i) => (i === index ? { ...row, href: event.target.value } : row)),
+                        )
+                      }
+                      className={INPUT}
+                    />
+                  </label>
+                ) : null}
+                {button.kind === "pin" ? (
+                  <div>
+                    <span className="text-[12px] font-medium text-neutral-600">{t.choosePin}</span>
+                    {homeOpens?.pins.length ? (
+                      <>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          aria-expanded={openMenu?.index === index && openMenu.which === "pin"}
+                          data-testid={index === 0 ? "personal-home-pin-picker" : undefined}
+                          onClick={() =>
+                            setOpenMenu((current) =>
+                              current?.index === index && current.which === "pin"
+                                ? null
+                                : { index, which: "pin" },
+                            )
+                          }
+                          className={`${INPUT} flex items-center justify-between text-left`}
+                        >
+                          <span>
+                            {homeOpens.pins.find((pin) => pin.id === button.pinId)?.label || t.choosePin}
+                          </span>
+                          <span aria-hidden>▾</span>
+                        </button>
+                        {openMenu?.index === index && openMenu.which === "pin" ? (
+                          <ul
+                            role="listbox"
+                            data-testid="personal-home-pin-menu"
+                            className="mt-1 max-h-48 overflow-auto rounded-lg border border-neutral-200 bg-white"
+                          >
+                            {homeOpens.pins.map((pin) => (
+                              <li key={pin.id}>
+                                <button
+                                  type="button"
+                                  role="option"
+                                  aria-selected={button.pinId === pin.id}
+                                  onClick={() => {
+                                    setButtons((rows) =>
+                                      rows.map((row, i) =>
+                                        i === index ? { ...row, pinId: pin.id } : row,
+                                      ),
+                                    );
+                                    setOpenMenu(null);
+                                  }}
+                                  className={`block w-full px-3 py-2 text-left text-[15px] hover:bg-neutral-50 ${
+                                    button.pinId === pin.id ? "bg-[#046BD9]/10 font-medium" : ""
+                                  }`}
+                                >
+                                  {pin.label}
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </>
+                    ) : (
+                      <p className="mt-1 text-[12px] leading-snug text-neutral-500">{t.noPins}</p>
+                    )}
+                  </div>
+                ) : null}
                 <button
                   type="button"
                   disabled={busy}
@@ -364,63 +712,19 @@ export default function PersonalHomeEditor({
                 </button>
               </div>
             ))}
-            {mapsiteTools?.pageButtons.length ? (
-              <label className="block">
-                <span className="text-[12px] font-medium text-neutral-600">{t.addPageButton}</span>
-                <span className="mt-1 block text-[12px] leading-snug text-neutral-500">{t.addPageButtonHint}</span>
-                <select
-                  defaultValue=""
-                  disabled={busy || buttons.length >= PERSONAL_HOME_LIMITS.buttons}
-                  data-testid="personal-home-add-page-button"
-                  onChange={(event) => {
-                    const item = mapsiteTools.pageButtons.find((entry) => entry.id === event.target.value);
-                    event.target.value = "";
-                    if (!item) return;
-                    setButtons((rows) =>
-                      rows.some((row) => row.href === item.href) || rows.length >= PERSONAL_HOME_LIMITS.buttons
-                        ? rows
-                        : [...rows, { label: item.label, href: item.href }],
-                    );
-                  }}
-                  className={INPUT}
-                >
-                  <option value="">{t.addPageButton}</option>
-                  {mapsiteTools.pageButtons.map((item) => (
-                    <option key={item.id} value={item.id}>{item.label}</option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
             {buttons.length < PERSONAL_HOME_LIMITS.buttons ? (
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => setButtons((rows) => [...rows, { label: "", href: "" }])}
+                onClick={() =>
+                  setButtons((rows) => [...rows, { label: "", kind: "link", href: "", pinId: "" }])
+                }
                 className="inline-flex min-h-9 items-center rounded-full border border-neutral-300 px-4 text-[14px] font-medium text-neutral-800 hover:bg-neutral-50 disabled:opacity-60"
               >
                 {t.addButton}
               </button>
             ) : null}
           </fieldset>
-
-          {mapsiteTools?.panels.length ? (
-            <fieldset className="space-y-2">
-              <legend className={LABEL}>{t.dashboard}</legend>
-              <div className="text-[12px] leading-snug text-neutral-500">{t.dashboardHint}</div>
-              <div className="flex flex-col gap-1.5">
-                {mapsiteTools.panels.map((panel) => (
-                  <a
-                    key={panel.id}
-                    href={panel.href}
-                    data-testid={`personal-home-dashboard-${panel.id}`}
-                    className="inline-flex min-h-9 items-center rounded-lg border border-neutral-200 px-3 text-[14px] font-medium text-neutral-900 hover:bg-neutral-50"
-                  >
-                    {panel.label}
-                  </a>
-                ))}
-              </div>
-            </fieldset>
-          ) : null}
         </div>
 
         <div className="space-y-2 border-t border-neutral-200 px-5 py-4">

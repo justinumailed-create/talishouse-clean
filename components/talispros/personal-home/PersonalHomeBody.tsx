@@ -19,6 +19,7 @@ type PersonalHomeBodyProps = {
   imageSrc: string;
   imageAlt: string;
   media?: ReactNode;
+  mediaFit?: "map" | "cover";
   children: ReactNode;
 };
 
@@ -31,6 +32,7 @@ export default function PersonalHomeBody({
   imageSrc,
   imageAlt,
   media,
+  mediaFit,
   children,
 }: PersonalHomeBodyProps) {
   const { personalHome } = useT();
@@ -61,6 +63,8 @@ export default function PersonalHomeBody({
       title={shownHeadline}
       titleClassName={TITLE}
       media={media}
+      mediaFit={mediaFit}
+      split="home"
     >
       {parts[0]}
       {shownContact ? (

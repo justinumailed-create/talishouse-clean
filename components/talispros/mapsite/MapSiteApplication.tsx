@@ -1017,6 +1017,18 @@ function MapSiteChrome({
     if (item) setDashboardPanel(item.id);
   }, [dashboardManageable]);
 
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("pin");
+    if (!requested) return;
+    const known =
+      requested === mapsite.id ||
+      pinDashboard.pins.some((pin) => pin.id === requested) ||
+      rootContext.partnerPins.some((pin) => pin.id === requested);
+    if (!known) return;
+    setDashboardPanel(null);
+    setSelectedPinId(requested);
+  }, [mapsite.id, pinDashboard.pins, rootContext.partnerPins, setSelectedPinId]);
+
   const defaultPartnerImage = defaultMapSitePartnerImage(audience);
   const defaultPartnerName = defaultMapSitePartnerName(mapsite);
   // One resolver for logo + partner photo/name/tagline (owner overrides win).

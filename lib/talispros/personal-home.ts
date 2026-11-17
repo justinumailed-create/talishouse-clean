@@ -16,10 +16,127 @@ export const PERSONAL_HOME_LIMITS = {
   buttons: 3,
 } as const;
 
+/** What a home-page button opens. Missing `kind` on older rows means a web link. */
+export const PERSONAL_HOME_OPEN_KINDS = [
+  "link",
+  "pin",
+  "bookshelf",
+  "teb",
+  "ebooks",
+  "pins",
+  "categories",
+  "branding",
+  "partners",
+] as const;
+
+export type PersonalHomeOpenKind = (typeof PERSONAL_HOME_OPEN_KINDS)[number];
+
+/** Targets a visitor may see. Owner tools stay on the owner's own view. */
+export const PERSONAL_HOME_VISITOR_OPENS = new Set<PersonalHomeOpenKind>([
+  "link",
+  "pin",
+  "bookshelf",
+  "teb",
+]);
+
 export type PersonalHomeButton = {
   label: string;
   href: string;
+  kind: PersonalHomeOpenKind;
+  pinId?: string;
 };
+
+export type PersonalHomeButtonContext = {
+  mapsiteHref: string;
+  bookshelfHref: string;
+  tebHref: string | null;
+  pinIds: readonly string[];
+};
+
+export function isPersonalHomeOpenKind(value: unknown): value is PersonalHomeOpenKind {
+  return (
+    typeof value === "string" &&
+    (PERSONAL_HOME_OPEN_KINDS as readonly string[]).includes(value)
+  );
+}
+
+export function isVisitorPersonalHomeOpen(kind: PersonalHomeOpenKind): boolean {
+  return PERSONAL_HOME_VISITOR_OPENS.has(kind);
+}
+
+/** MP4 uploads stay under the 4.5 MB Vercel request cap. No charge for video. */
+export const PERSONAL_HOME_VIDEO_MAX_BYTES = 4 * 1024 * 1024;
+
+export type PersonalHomeSideMedia =
+  | { kind: "image"; url: string }
+  | { kind: "video"; url: string }
+  | { kind: "embed"; url: string; provider: "youtube" | "vimeo" };
+
+const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
+
+/** YouTube or Vimeo page address, or null when it is neither. */
+export function parsePersonalHomeEmbed(
+  value: string,
+): { provider: "youtube" | "vimeo"; id: string } | null {
+  const raw = value.trim();
+  if (!raw || raw.length > 500) return null;
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") return null;
+  const host = url.hostname.replace(/^www\./, "").toLowerCase();
+  if (host === "youtu.be") {
+    const id = url.pathname.split("/").filter(Boolean)[0] || "";
+    return YOUTUBE_ID.test(id) ? { provider: "youtube", id } : null;
+  }
+  if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+    const fromQuery = url.searchParams.get("v") || "";
+    const fromPath = url.pathname.split("/").filter(Boolean).pop() || "";
+    const id = YOUTUBE_ID.test(fromQuery) ? fromQuery : fromPath;
+    return YOUTUBE_ID.test(id) ? { provider: "youtube", id } : null;
+  }
+  if (host === "vimeo.com" || host === "player.vimeo.com") {
+    const id = url.pathname.split("/").filter((part) => /^\d+$/.test(part)).pop() || "";
+    return id ? { provider: "vimeo", id } : null;
+  }
+  return null;
+}
+
+export function personalHomeEmbedSrc(media: { provider: "youtube" | "vimeo"; url: string }): string | null {
+  const parsed = parsePersonalHomeEmbed(media.url);
+  if (!parsed) return null;
+  if (parsed.provider === "youtube") {
+    const params = new URLSearchParams({
+      autoplay: "1",
+      mute: "1",
+      loop: "1",
+      playlist: parsed.id,
+      playsinline: "1",
+      controls: "0",
+      rel: "0",
+    });
+    return `https://www.youtube-nocookie.com/embed/${parsed.id}?${params.toString()}`;
+  }
+  return `https://player.vimeo.com/video/${parsed.id}?autoplay=1&muted=1&loop=1&background=1`;
+}
+
+export function normalizePersonalHomeSideMedia(value: unknown): PersonalHomeSideMedia | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const row = value as Record<string, unknown>;
+  const url = typeof row.url === "string" ? row.url.trim() : "";
+  if (!url) return null;
+  if (row.kind === "image" || row.kind === "video") {
+    if (!/^https?:\/\//i.test(url) || url.length > 2048) return null;
+    return { kind: row.kind, url };
+  }
+  if (row.kind === "embed" && parsePersonalHomeEmbed(url)) {
+    return { kind: "embed", url, provider: parsePersonalHomeEmbed(url)!.provider };
+  }
+  return null;
+}
 
 /** What the owner saved (every field optional; null = use the default). */
 export type PersonalHomeContent = {
@@ -30,6 +147,8 @@ export type PersonalHomeContent = {
   contactName: string | null;
   writeUp: string | null;
   buttons: PersonalHomeButton[];
+  /** Null uses the top-button photo, then the Mapsite photo. */
+  sideMedia: PersonalHomeSideMedia | null;
   updatedAt: string | null;
 };
 
@@ -42,6 +161,7 @@ export type ResolvedPersonalHome = {
   contactName: string;
   writeUp: string;
   buttons: PersonalHomeButton[];
+  sideMedia: PersonalHomeSideMedia | null;
   customized: {
     image: boolean;
     kicker: boolean;
@@ -49,6 +169,7 @@ export type ResolvedPersonalHome = {
     contactName: boolean;
     writeUp: boolean;
     buttons: boolean;
+    side: boolean;
   };
 };
 
@@ -60,6 +181,7 @@ export function emptyPersonalHomeContent(): PersonalHomeContent {
     contactName: null,
     writeUp: null,
     buttons: [],
+    sideMedia: null,
     updatedAt: null,
   };
 }
@@ -147,33 +269,95 @@ export function isExternalPersonalHomeHref(href: string): boolean {
   return /^https?:\/\//i.test(href);
 }
 
+function readOpenKind(value: unknown): PersonalHomeOpenKind {
+  return isPersonalHomeOpenKind(value) ? value : "link";
+}
+
+/** Href for a button. Web links use the saved address. Every other kind is rebuilt here. */
+export function personalHomeOpenHref(
+  button: { kind: PersonalHomeOpenKind; href?: string | null; pinId?: string | null },
+  context: PersonalHomeButtonContext,
+): string | null {
+  if (button.kind === "link") return normalizePersonalHomeHref(button.href);
+  if (button.kind === "pin") {
+    const pinId = button.pinId?.trim() || "";
+    if (!pinId || !context.pinIds.includes(pinId)) return null;
+    const base = context.mapsiteHref.split("#")[0] || context.mapsiteHref;
+    const [path, query = ""] = base.split("?");
+    const params = new URLSearchParams(query);
+    params.set("pin", pinId);
+    return `${path}?${params.toString()}`;
+  }
+  if (button.kind === "bookshelf") return normalizePersonalHomeHref(context.bookshelfHref);
+  if (button.kind === "teb") return normalizePersonalHomeHref(context.tebHref);
+  if (!context.mapsiteHref.startsWith("/")) return null;
+  const base = context.mapsiteHref.split("#")[0] || context.mapsiteHref;
+  const [path, query = ""] = base.split("?");
+  const params = new URLSearchParams(query);
+  params.set("dashboard", button.kind);
+  return `${path}?${params.toString()}`;
+}
+
 /** Validated, de-duplicated, capped button list (bad rows are dropped). */
-export function normalizePersonalHomeButtons(value: unknown): PersonalHomeButton[] {
+export function normalizePersonalHomeButtons(
+  value: unknown,
+  context?: PersonalHomeButtonContext,
+): PersonalHomeButton[] {
   if (!Array.isArray(value)) return [];
   const out: PersonalHomeButton[] = [];
   for (const raw of value) {
     if (!raw || typeof raw !== "object") continue;
     const row = raw as Record<string, unknown>;
     const label = cleanPersonalHomeText(row.label, PERSONAL_HOME_LIMITS.buttonLabel);
-    const href = normalizePersonalHomeHref(row.href);
-    if (!label || !href) continue;
-    out.push({ label, href });
+    if (!label) continue;
+    const kind = readOpenKind(row.kind);
+    const pinId = typeof row.pinId === "string" ? row.pinId.trim() : "";
+    const href = context
+      ? personalHomeOpenHref({ kind, href: typeof row.href === "string" ? row.href : "", pinId }, context)
+      : kind === "link"
+        ? normalizePersonalHomeHref(row.href)
+        : normalizePersonalHomeHref(row.href);
+    if (!href) continue;
+    out.push(kind === "pin" && pinId ? { label, href, kind, pinId } : { label, href, kind });
     if (out.length >= PERSONAL_HOME_LIMITS.buttons) break;
   }
   return out;
 }
 
+function buttonRowIsBlank(row: Record<string, unknown>): boolean {
+  const labelRaw = typeof row.label === "string" ? row.label.trim() : "";
+  const hrefRaw = typeof row.href === "string" ? row.href.trim() : "";
+  const pinId = typeof row.pinId === "string" ? row.pinId.trim() : "";
+  const kind = readOpenKind(row.kind);
+  return !labelRaw && !hrefRaw && !pinId && kind === "link";
+}
+
 /** Validation for an owner save; returns field keys that were rejected. */
-export function invalidPersonalHomeButtons(value: unknown): number[] {
+export function invalidPersonalHomeButtons(
+  value: unknown,
+  context?: PersonalHomeButtonContext,
+): number[] {
   if (!Array.isArray(value)) return [];
   const bad: number[] = [];
   value.forEach((raw, index) => {
     const row = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+    if (buttonRowIsBlank(row)) return;
     const labelRaw = typeof row.label === "string" ? row.label.trim() : "";
-    const hrefRaw = typeof row.href === "string" ? row.href.trim() : "";
-    if (!labelRaw && !hrefRaw) return; // empty row = ignored
-    if (!cleanPersonalHomeText(labelRaw, PERSONAL_HOME_LIMITS.buttonLabel)) bad.push(index);
-    else if (!normalizePersonalHomeHref(hrefRaw)) bad.push(index);
+    if (!cleanPersonalHomeText(labelRaw, PERSONAL_HOME_LIMITS.buttonLabel)) {
+      bad.push(index);
+      return;
+    }
+    const kind = readOpenKind(row.kind);
+    const pinId = typeof row.pinId === "string" ? row.pinId.trim() : "";
+    const href = context
+      ? personalHomeOpenHref(
+          { kind, href: typeof row.href === "string" ? row.href : "", pinId },
+          context,
+        )
+      : kind === "link"
+        ? normalizePersonalHomeHref(row.href)
+        : normalizePersonalHomeHref(row.href);
+    if (!href) bad.push(index);
   });
   return bad;
 }
@@ -296,6 +480,7 @@ export function resolvePersonalHome(
     contactName: content.contactName?.trim() || defaults.contactName,
     writeUp: content.writeUp?.trim() || defaults.writeUp,
     buttons: buttons.length ? buttons : defaults.buttons,
+    sideMedia: content.sideMedia,
     customized: {
       image: Boolean(content.imageUrl?.trim()),
       kicker: Boolean(content.kicker?.trim()),
@@ -303,6 +488,7 @@ export function resolvePersonalHome(
       contactName: Boolean(content.contactName?.trim()),
       writeUp: Boolean(content.writeUp?.trim()),
       buttons: buttons.length > 0,
+      side: Boolean(content.sideMedia),
     },
   };
 }

@@ -9,6 +9,7 @@ import {
   TALISBOOKS_IMAGE_STORAGE_BUCKET,
 } from "@/lib/talisbooks/image-engine";
 import { assertAllowedEbookImageBuffer } from "@/lib/talisbooks/ebook-upload-formats-server";
+import { PERSONAL_HOME_VIDEO_MAX_BYTES } from "@/lib/talispros/personal-home";
 import { canEditPersonalHome } from "@/lib/talispros/personal-home-page";
 import { findMapSiteIdentityByFastCode } from "@/lib/talispros/personal-home-service";
 
@@ -50,6 +51,22 @@ export async function POST(request: Request) {
     if (!isUploadBlob(fileEntry)) {
       return Response.json({ ok: false, error: "photo" }, { status: 400 });
     }
+    const fileName = typeof fileEntry.name === "string" ? fileEntry.name : "";
+    const fileType = typeof fileEntry.type === "string" ? fileEntry.type : "";
+    const video = fileType === "video/mp4" || fileName.toLowerCase().endsWith(".mp4");
+    if (video) {
+      if (fileEntry.size > PERSONAL_HOME_VIDEO_MAX_BYTES) {
+        return Response.json({ ok: false, error: "video" }, { status: 413 });
+      }
+      const buffer = Buffer.from(await fileEntry.arrayBuffer());
+      if (buffer.length < 12 || buffer.subarray(4, 8).toString("ascii") !== "ftyp") {
+        return Response.json({ ok: false, error: "video" }, { status: 415 });
+      }
+      const videoPath = `personal-home/${identity.id}/video-${crypto.randomUUID()}.mp4`;
+      const uploaded = await uploadBuffer(videoPath, buffer, "video/mp4");
+      if (!uploaded) return Response.json({ ok: false, error: "video" }, { status: 500 });
+      return Response.json({ ok: true, url: uploaded, kind: "video" });
+    }
     if (fileEntry.size > VERCEL_FUNCTION_BODY_LIMIT_BYTES) {
       return Response.json({ ok: false, error: "photo" }, { status: 413 });
     }
@@ -67,26 +84,7 @@ export async function POST(request: Request) {
     const optimized = await optimizeUploadImage(source, "agent");
     const ext = extensionForOptimizedMime(optimized.mimeType);
     const path = `personal-home/${identity.id}/${crypto.randomUUID()}.${ext}`;
-    const supabase = getSupabaseAdmin();
-    let bucket = TALISBOOKS_IMAGE_STORAGE_BUCKET;
-    const options = {
-      contentType: optimized.mimeType,
-      cacheControl: TALISBOOKS_ASSET_CACHE_CONTROL,
-      upsert: false,
-    };
-    const primary = await supabase.storage.from(bucket).upload(path, optimized.buffer, options);
-    if (primary.error) {
-      if (!/bucket|not found|does not exist/i.test(primary.error.message || "")) {
-        console.error("[personal-home-upload] Upload failed:", primary.error.message);
-        return Response.json({ ok: false, error: "photo" }, { status: 500 });
-      }
-      bucket = "mapsite-assets";
-      const fallback = await supabase.storage.from(bucket).upload(path, optimized.buffer, options);
-      if (fallback.error) {
-        return Response.json({ ok: false, error: "photo" }, { status: 500 });
-      }
-    }
-    const url = supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl || "";
+    const url = await uploadBuffer(path, optimized.buffer, optimized.mimeType);
     if (!url) return Response.json({ ok: false, error: "photo" }, { status: 500 });
     return Response.json({ ok: true, url });
   } catch (error) {
@@ -96,4 +94,25 @@ export async function POST(request: Request) {
     );
     return Response.json({ ok: false, error: "photo" }, { status: 500 });
   }
+}
+
+async function uploadBuffer(path: string, buffer: Buffer, contentType: string): Promise<string | null> {
+  const supabase = getSupabaseAdmin();
+  const options = {
+    contentType,
+    cacheControl: TALISBOOKS_ASSET_CACHE_CONTROL,
+    upsert: false,
+  };
+  let bucket = TALISBOOKS_IMAGE_STORAGE_BUCKET;
+  const primary = await supabase.storage.from(bucket).upload(path, buffer, options);
+  if (primary.error) {
+    if (!/bucket|not found|does not exist/i.test(primary.error.message || "")) {
+      console.error("[personal-home-upload] Upload failed:", primary.error.message);
+      return null;
+    }
+    bucket = "mapsite-assets";
+    const fallback = await supabase.storage.from(bucket).upload(path, buffer, options);
+    if (fallback.error) return null;
+  }
+  return supabase.storage.from(bucket).getPublicUrl(path).data.publicUrl || null;
 }

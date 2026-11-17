@@ -2,13 +2,19 @@
 
 import { revalidatePath } from "next/cache";
 import { isAllowedOwnerImageUrl } from "@/lib/talispros/mapsite-owner-customizations";
+import { getMapSiteByFastCode } from "@/lib/mapsite-service";
+import { listMapSiteAdditionalPins } from "@/lib/talispros/mapsite-additional-pins-service";
+import { personalHomeMapsiteHref } from "@/lib/talispros/personal-home-page";
 import {
   PERSONAL_HOME_LIMITS,
   cleanPersonalHomeText,
   invalidPersonalHomeButtons,
   normalizePersonalHomeButtons,
+  normalizePersonalHomeSideMedia,
   personalHomePath,
+  type PersonalHomeButtonContext,
   type PersonalHomeContent,
+  type PersonalHomeSideMedia,
 } from "@/lib/talispros/personal-home";
 import {
   findMapSiteIdentityByFastCode,
@@ -17,11 +23,22 @@ import {
 } from "@/lib/talispros/personal-home-service";
 import { canEditPersonalHome } from "@/lib/talispros/personal-home-page";
 
-export type PersonalHomeActionError = "auth" | "buttons" | "photo" | "save";
+export type PersonalHomeActionError = "auth" | "buttons" | "photo" | "media" | "save";
 
 export type PersonalHomeActionResult =
   | { ok: true; content: PersonalHomeContent | null }
   | { ok: false; error: PersonalHomeActionError; invalidButtons?: number[] };
+
+async function buttonContext(mapsiteId: string, fastCode: string): Promise<PersonalHomeButtonContext> {
+  const view = await getMapSiteByFastCode(fastCode).catch(() => null);
+  const extra = await listMapSiteAdditionalPins(mapsiteId).catch(() => []);
+  return {
+    mapsiteHref: view ? await personalHomeMapsiteHref(view) : personalHomePath(fastCode),
+    bookshelfHref: `/talisbooks/fast/${encodeURIComponent(fastCode)}`,
+    tebHref: view?.tebUrl?.trim() || null,
+    pinIds: [mapsiteId, ...extra.map((pin) => pin.id)],
+  };
+}
 
 async function authorize(fastCode: string) {
   const code = fastCode?.trim().toLowerCase() || "";
@@ -39,10 +56,12 @@ export async function savePersonalHomeAction(input: {
   headline?: string | null;
   contactName?: string | null;
   writeUp?: string | null;
-  buttons?: Array<{ label?: string; href?: string }> | null;
+  buttons?: Array<{ label?: string; href?: string; kind?: string; pinId?: string }> | null;
+  sideMedia?: PersonalHomeSideMedia | null;
 }): Promise<PersonalHomeActionResult> {
   const identity = await authorize(input.fastCode);
   if (!identity) return { ok: false, error: "auth" };
+  const context = await buttonContext(identity.id, identity.fastCode);
 
   const imageUrl = input.imageUrl?.trim() || null;
   if (imageUrl && !isAllowedOwnerImageUrl(imageUrl, process.env.NEXT_PUBLIC_SUPABASE_URL)) {
@@ -50,9 +69,19 @@ export async function savePersonalHomeAction(input: {
   }
 
   const rawButtons = Array.isArray(input.buttons) ? input.buttons : [];
-  const invalidButtons = invalidPersonalHomeButtons(rawButtons);
+  const invalidButtons = invalidPersonalHomeButtons(rawButtons, context);
   if (invalidButtons.length) {
     return { ok: false, error: "buttons", invalidButtons };
+  }
+
+  const sideMedia = normalizePersonalHomeSideMedia(input.sideMedia);
+  if (input.sideMedia && !sideMedia) return { ok: false, error: "media" };
+  if (
+    sideMedia &&
+    sideMedia.kind !== "embed" &&
+    !isAllowedOwnerImageUrl(sideMedia.url, process.env.NEXT_PUBLIC_SUPABASE_URL)
+  ) {
+    return { ok: false, error: "media" };
   }
 
   const result = await savePersonalHomeContent({
@@ -65,8 +94,10 @@ export async function savePersonalHomeAction(input: {
     writeUp: cleanPersonalHomeText(input.writeUp, PERSONAL_HOME_LIMITS.writeUp, {
       multiline: true,
     }),
-    buttons: normalizePersonalHomeButtons(rawButtons),
+    buttons: normalizePersonalHomeButtons(rawButtons, context),
+    sideMedia,
   });
+  if (result.error === "media") return { ok: false, error: "media" };
   if (result.error || !result.content) return { ok: false, error: "save" };
 
   revalidatePath(personalHomePath(identity.fastCode));

@@ -131,9 +131,10 @@ function defaultsFor(
       contactName: displayName,
       writeUp,
       buttons: [
-        { label: copy.openMapsite, href: mapsiteHref },
+        { label: copy.openMapsite, href: mapsiteHref, kind: "link" },
         {
           label: copy.claimMarket,
+          kind: "link",
           // A demonstration is claimed in place on its own Mapsite.
           href: isDemo ? mapsiteHref : personalHomeClaimMarketHref(view.claimAudience),
         },

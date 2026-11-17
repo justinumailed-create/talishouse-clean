@@ -3,6 +3,9 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   clampSeoText,
+  normalizePersonalHomeSideMedia,
+  parsePersonalHomeEmbed,
+  personalHomeEmbedSrc,
   fillPersonalHomeCopy,
   invalidPersonalHomeButtons,
   isPersonalHomePath,
@@ -23,7 +26,7 @@ const defaults = {
   headline: "Jane Doe",
   contactName: "Jane Doe",
   writeUp: "Default write-up",
-  buttons: [{ label: "Open Mapsite", href: "/talispros/mapsite/brokers/xx00" }],
+  buttons: [{ label: "Open Mapsite", href: "/talispros/mapsite/brokers/xx00", kind: "link" as const }],
 };
 
 describe("personal home helpers", () => {
@@ -43,6 +46,33 @@ describe("personal home helpers", () => {
     expect(normalizePersonalHomeHref("")).toBeNull();
   });
 
+  it("keeps an older plain link and stores a PIN choice beside it", () => {
+    const context = {
+      mapsiteHref: "/talispros/mapsite/brokers/dc06",
+      bookshelfHref: "/talisbooks/fast/dc06",
+      tebHref: "https://books.example/teb",
+      pinIds: ["home-pin", "pin-2"],
+    };
+    expect(
+      normalizePersonalHomeButtons([{ label: "Call", href: "https://example.com/a" }], context)[0]?.kind,
+    ).toBe("link");
+    const buttons = normalizePersonalHomeButtons(
+      [
+        { label: "Listing", kind: "pin", pinId: "pin-2", href: "https://evil.example" },
+        { label: "Books", kind: "bookshelf", href: "https://evil.example" },
+        { label: "Tools", kind: "ebooks", href: "https://evil.example" },
+      ],
+      context,
+    );
+    expect(buttons.map((button) => button.href)).toEqual([
+      "/talispros/mapsite/brokers/dc06?pin=pin-2",
+      "/talisbooks/fast/dc06",
+      "/talispros/mapsite/brokers/dc06?dashboard=ebooks",
+    ]);
+    expect(buttons[0]?.pinId).toBe("pin-2");
+    expect(invalidPersonalHomeButtons([{ label: "Listing", kind: "pin", pinId: "nope" }], context)).toEqual([0]);
+  });
+
   it("drops invalid buttons and reports the bad rows", () => {
     const raw = [
       { label: "Call me", href: "tel:+14165550100" },
@@ -54,7 +84,7 @@ describe("personal home helpers", () => {
     expect(invalidPersonalHomeButtons(raw)).toEqual([2]);
     const buttons = normalizePersonalHomeButtons(raw);
     expect(buttons).toHaveLength(3);
-    expect(buttons[0]).toEqual({ label: "Call me", href: "tel:+14165550100" });
+    expect(buttons[0]).toEqual({ label: "Call me", href: "tel:+14165550100", kind: "link" });
   });
 
   it("falls back to Mapsite defaults field by field", () => {
@@ -71,6 +101,7 @@ describe("personal home helpers", () => {
       contactName: "Tsplits",
       writeUp: "  ",
       buttons: [],
+      sideMedia: null,
       updatedAt: null,
     });
     expect(some.headline).toBe("Custom");
@@ -78,6 +109,49 @@ describe("personal home helpers", () => {
     expect(some.writeUp).toBe("Default write-up");
     expect(some.imageUrl).toBe("/default.jpg");
     expect(some.customized.headline).toBe(true);
+    expect(some.sideMedia).toBeNull();
+  });
+
+  it("keeps the left side on the current photo until an image, MP4 or embed is saved", () => {
+    expect(parsePersonalHomeEmbed("https://www.youtube.com/watch?v=dQw4w9WgXcQ")).toEqual({
+      provider: "youtube",
+      id: "dQw4w9WgXcQ",
+    });
+    expect(parsePersonalHomeEmbed("https://youtu.be/dQw4w9WgXcQ")).toEqual({
+      provider: "youtube",
+      id: "dQw4w9WgXcQ",
+    });
+    expect(parsePersonalHomeEmbed("https://vimeo.com/123456789")).toEqual({
+      provider: "vimeo",
+      id: "123456789",
+    });
+    expect(parsePersonalHomeEmbed("https://example.com/watch?v=dQw4w9WgXcQ")).toBeNull();
+    const embed = normalizePersonalHomeSideMedia({
+      kind: "embed",
+      url: "https://player.vimeo.com/video/123456789",
+    });
+    expect(embed?.kind).toBe("embed");
+    expect(embed && embed.kind === "embed" ? personalHomeEmbedSrc(embed) : "").toContain(
+      "player.vimeo.com/video/123456789",
+    );
+    expect(normalizePersonalHomeSideMedia({ kind: "video", url: "not a url" })).toBeNull();
+    const page = readFileSync(join(root, "app/talispros/home/[fastCode]/page.tsx"), "utf8");
+    expect(page).toContain("PersonalHomeSide");
+    const body = readFileSync(
+      join(root, "components/talispros/personal-home/PersonalHomeBody.tsx"),
+      "utf8",
+    );
+    expect(body).toContain('split="home"');
+    const layout = readFileSync(join(root, "components/talisu/AdviserLayout.tsx"), "utf8");
+    expect(layout).toContain("minmax(0,2fr)_minmax(0,3fr)");
+    const migration = readFileSync(
+      join(root, "supabase/migrations/129_personal_home_side_media.sql"),
+      "utf8",
+    );
+    expect(migration).toContain("side_media jsonb");
+    expect(migration).toContain("Not applied");
+    expect(en.personalHome.edit.sideHint).not.toMatch(/[—–]/);
+    expect(de.personalHome.edit.sideHint).not.toMatch(/[—–]/);
   });
 
   it("uses the brokerage on a FAST Code home page and falls back to the person", () => {
