@@ -36,7 +36,7 @@ export default async function AishaHomePage() {
           imageSrc={persona.portraitSrc}
           imageAlt="Aisha"
           imagePosition="center 18%"
-          kicker="Aisha, AMBA"
+          kicker="Aisha C., AMBA"
           title="Aisha"
         >
           <div

@@ -221,7 +221,7 @@ export const TALISU_AUDIO_LIBRARY: readonly TalisUAudioLibraryItem[] = [
 
 export const TALISU_REGISTER = {
   title: "Register Account",
-  partnerName: "Aisha, AMBA",
+  partnerName: "Aisha C., AMBA",
   partnerIntro:
     "My team and I help grow your real estate adjacent marketing initiatives along four broad parameters:",
   bullets: [
@@ -256,7 +256,7 @@ export const TALISU_REGISTER = {
   adviserKicker: "Registration options",
   adviserTitle:
     "Register your Mapsite with Tsplits™. Aisha and her team will promote it globally and enable you to save or make money on your advertising.",
-  leaderLine: "Team Leader: Aisha, AMBA",
+  leaderLine: "Team Leader: Aisha C., AMBA",
   structuresLabel: "Choose your structure",
   structures: [
     {
@@ -302,32 +302,79 @@ export const TALISU_REGISTER = {
         id: "broker",
         label: "Broker or Team Leader",
         listLabel: "Broker",
-        sidebar:
-          "You are a Broker or Team Leader providing a Mapsite to your Agents. You can place one Home PIN and an unlimited number of Listing PINs per Agent, although we recommend you limit inclusion by introducing service floors: only Listing that pay your minimum for your minimum term get included.",
+        directoryLabel: "",
+        sidebar: [
+          { kind: "p", text: "You are a Broker or Team Leader, who has registered a Mapsite account annually and maintains it monthly." },
+          { kind: "p", text: "You open it to Real Estate Professionals trading in real estate under your umbrella, or for FSBO and Adpro advertisers you that prospectively save or make money." },
+          { kind: "p", text: "You place one Home PIN yourself, then license an unlimited number of Listing PINs for a monthly maintenance insertion fee, plus a small advertising participation fee." },
+          { kind: "p", text: "We share a percentage of monthly and PIN fees, which means you break even, if seven of your agents opt in and average 10 PINs per day, each." },
+        ],
       },
       {
         id: "agent",
         label: "Agent",
-        sidebar:
-          "You are an Agent working as part of a brokerage or team. You can place an unlimited number of Listing PINs that pay your brokerage minimum in Real Estate Fees and Term Lengths. You require your Broker or Team Account FAST Code to place those PINs.",
+        directoryLabel: "",
+        sidebar: [
+          { kind: "p", text: "You are a Real Estate Professional working as part of a brokerage or team." },
+          { kind: "p", text: "Your account is linked to a that Mapsite ID. You are entitled to place an unlimited number of Listing PINs for a small participation fee." },
+          { kind: "p", text: "Only PINs that meet the minimum real estate fees and term lengths as established by platform administration are placed." },
+          {
+            kind: "list",
+            items: [
+              "Specifically, you place Listings to apply service floors.",
+              "FSBO place PINs to set up Buyer\u2019s Agencies.",
+              "Adpro (favourite service providers, like mortgage brokers, lawyers, inspectors, etc.) place PINs to formalize referral or co-promotion networks.",
+            ],
+          },
+        ],
       },
       {
         id: "fsbo",
         label: "FSBO",
-        sidebar:
-          "You are a For-Sale-By-Owner having reached an agreement with your favourite participating Broker or Team to place a PIN on their Mapsite. You still save on your Real Estate Fees, but you set them up for Buyer's Agency transactions on Your Mere Posting listing.",
+        directoryLabel: "",
+        sidebar: [
+          { kind: "p", text: "You are a For-Sale-By-Owner placing one PIN on a \u2018single PIN Mapsite\u2019, which communicates with you directly." },
+          { kind: "p", text: "Optionally, you mirror that PIN to a Broker Account, where it communicates with an agent to set up \u2018Mere Posting\u2019 or \u2018Buyer\u2019s Agency\u2019 status transactions." },
+          { kind: "p", text: "Your objective, to save money and maintain greater control over alternative transaction structures, is achieved either way:" },
+          {
+            kind: "list",
+            items: [
+              "Mere Posting & Buyer\u2019s Agency - an Agent is involved.",
+              "Live: location visible, object identifiable.",
+              "Blind: location generalized, object NOT identifiable.",
+              "Lease-To-Own, Fractionalized or Tokenized.",
+            ],
+          },
+        ],
       },
       {
         id: "adpro",
         label: "Adpro",
-        sidebar:
-          "You are an advertiser on the Broker or Team Mapsite, using your presence there to redirect their clients to your own website, or Mapsite. If the latter, it is included at no additional charge and you might develop your very own virtual market or monopoly.",
+        directoryLabel: "",
+        sidebar: [
+          { kind: "p", text: "You are an advertiser on the Broker Mapsite. You are (broadly classified):" },
+          {
+            kind: "list",
+            items: [
+              "A Source Service Provider: a Broker, who has his/her own Mapsite. You cooperate with this Broker to establish a geographically larger shared virtual monopoly.",
+              "A Primary Service Provider: products and services you offer are usually necessary to close transactions.",
+              "A Secondary Service Provider: products and services you offer are advisable, but not necessary to close transactions.",
+              "An Ancillary Service Provider (ASP): products and services you offer often follow major purchases, like real estate.",
+            ],
+          },
+        ],
       },
       {
         id: "pin",
         label: "PIN",
-        sidebar:
-          "Additional PINs are $7 CAD each. Buy them from PIN Dashboard on your Mapsite.",
+        directoryLabel: "Syndication Directory",
+        sidebar: [
+          { kind: "p", text: "PIN Placement is an important function as part of the Mapsite platform advertising process." },
+          { kind: "p", text: "How often would you \u201cforget\u201d to delete a PIN, when the Listing sells? Yes, same here ;-)\u2026!" },
+          { kind: "p", text: "How often would you \u201cforget\u201d to cancel a subscription, when you do not need it any more? Again, same here ;-)\u2026!" },
+          { kind: "p", text: "A weekly subscription cycle almost guarantees that sold Listings will not be pinned for more than six days, once they are no longer available." },
+          { kind: "p", text: "Also, pinned Listing amounts help Admin. to syndicate your Listings globally. Select the button below to see our syndication directory." },
+        ],
       },
     ],
     consentBefore: "Registration means you agree to the",

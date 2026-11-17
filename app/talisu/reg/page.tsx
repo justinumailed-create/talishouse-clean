@@ -98,7 +98,7 @@ export default async function TalisURegisterPage({
         <AdviserLayout
           testId="talisu-register-landing"
           imageSrc={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
-          imageAlt="Aisha, AMBA"
+          imageAlt={TALISU_REGISTER.partnerName}
           imagePosition="center 20%"
           kicker={TALISU_REGISTER.adviserKicker}
           kickerClassName="text-[15px] font-semibold leading-snug text-neutral-950 sm:text-[16px]"
@@ -130,7 +130,7 @@ export default async function TalisURegisterPage({
       <AdviserLayout
         testId="talisu-register-landing"
         imageSrc={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
-        imageAlt="Aisha, AMBA"
+        imageAlt={TALISU_REGISTER.partnerName}
         imagePosition="center 20%"
         kicker={TALISU_REGISTER.adviserKicker}
         kickerClassName="text-[15px] font-semibold leading-snug text-neutral-950 sm:text-[16px]"
@@ -189,7 +189,7 @@ export default async function TalisURegisterPage({
           <div className="mb-3 flex justify-center">
             <Image
               src={MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE}
-              alt="Aisha, AMBA"
+              alt={TALISU_REGISTER.partnerName}
               width={896}
               height={1200}
               className="h-auto w-full max-w-[108px] rounded-lg object-cover shadow-sm"

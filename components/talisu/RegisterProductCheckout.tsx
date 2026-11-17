@@ -1,9 +1,11 @@
 import Image from "next/image";
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import RegisterCheckoutAlign from "@/components/talisu/RegisterCheckoutAlign";
 import SamCartWebCheckout from "@/components/talisu/SamCartWebCheckout";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
+import { PMC_PATHS } from "@/lib/talispros/mapsite-contract";
 import { MAPSITE_MARKET_PARTNER_FALLBACK_IMAGE } from "@/lib/talispros/market-pages";
 import { hasCheckoutAccess } from "@/lib/talisu/register-entry";
 import {
@@ -34,7 +36,9 @@ export default async function RegisterProductCheckout({
 
   const copy = getDictionary(await getLocale()).talisu.register;
   const checkout = copy.actions.checkouts.find((item) => item.id === product);
-  const sidebar = (checkout && "sidebar" in checkout ? checkout.sidebar : "").trim();
+  const sidebar = checkout && "sidebar" in checkout ? checkout.sidebar : [];
+  const directoryLabel =
+    checkout && "directoryLabel" in checkout ? checkout.directoryLabel.trim() : "";
 
   return (
     <div
@@ -64,12 +68,31 @@ export default async function RegisterProductCheckout({
               <div className="text-[18px] font-semibold leading-tight">{copy.leaderLine}</div>
             </div>
           </div>
-          {sidebar ? (
+          {sidebar.length ? (
             <div
-              className="px-4 py-4 text-[15px] leading-[1.45] text-neutral-800 sm:px-5 sm:py-5 sm:text-[16px] sm:leading-[1.5]"
+              className="space-y-3 px-4 py-4 text-[15px] leading-[1.45] text-neutral-800 sm:px-5 sm:py-5"
               data-testid={`register-checkout-sidebar-${product}`}
             >
-              {sidebar}
+              {sidebar.map((block, index) =>
+                block.kind === "list" ? (
+                  <ul key={index} className="m-0 list-disc space-y-1 pl-5">
+                    {block.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div key={index}>{block.text}</div>
+                ),
+              )}
+              {directoryLabel ? (
+                <Link
+                  href={PMC_PATHS.mediaDirectory}
+                  data-testid="register-checkout-directory"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full bg-neutral-950 px-4 text-[14px] font-semibold text-white no-underline hover:bg-neutral-800"
+                >
+                  {directoryLabel}
+                </Link>
+              ) : null}
             </div>
           ) : null}
         </aside>
