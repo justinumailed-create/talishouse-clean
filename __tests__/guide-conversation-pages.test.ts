@@ -33,7 +33,7 @@ describe("unlisted Webster and Thorsten guide pages", () => {
       ["webster", WEBSTER_GUIDE_AGENT_ID],
       ["thorsten", THORSTEN_GUIDE_AGENT_ID],
     ] as const) {
-      const page = read(`app/talispros/${id}/page.tsx`);
+      const page = read(`app/${id}/page.tsx`);
       expect(page).toContain("<GuideConversationPage");
       expect(page).toContain(`ASSISTANT_PERSONAS.${id}`);
       expect(page).toContain("guideDynamicVariables(query.code)");
@@ -52,13 +52,21 @@ describe("unlisted Webster and Thorsten guide pages", () => {
       "components/talisu/TalisUMktsHeader.tsx",
       "components/talispros/TalisprosFooter.tsx",
     ].map(read).join("\n");
-    expect(linked).not.toContain("/talispros/webster");
-    expect(linked).not.toContain("/talispros/thorsten");
+    expect(linked).not.toContain("/webster");
+    expect(linked).not.toContain("/thorsten");
     const routes = indexablePageRoutes();
+    expect(routes).not.toContain("/webster");
+    expect(routes).not.toContain("/thorsten");
     expect(routes).not.toContain("/talispros/webster");
     expect(routes).not.toContain("/talispros/thorsten");
-    expect(GUIDE_CONVERSATION_PATHS).toContain("/talispros/webster");
-    expect(GUIDE_CONVERSATION_PATHS).toContain("/talispros/thorsten");
+    expect(GUIDE_CONVERSATION_PATHS).toContain("/webster");
+    expect(GUIDE_CONVERSATION_PATHS).toContain("/thorsten");
+    const redirects = read("next.config.ts");
+    expect(redirects).toContain('source: "/talispros/webster"');
+    expect(redirects).toContain('destination: "/webster"');
+    expect(redirects).toContain('source: "/talispros/thorsten"');
+    expect(redirects).toContain('destination: "/thorsten"');
+    expect(redirects).toContain("statusCode: 301");
     expect(read("components/talispros/TalisprosLayoutClient.tsx")).toContain("isGuideConversationPath");
   });
 
