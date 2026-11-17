@@ -15,6 +15,7 @@ import {
 
 const read = (p: string) => readFileSync(resolve(p), "utf8");
 const builder = read("components/talispros/demo-mapsite/DemoMapSiteBuilderClient.tsx");
+const mapsites = read("components/talispros/demo-mapsite/DemoMapsitesPanel.tsx");
 const map = read("components/talispros/demo-mapsite/DemoHeroMap.tsx");
 const address = read("components/build-mapsite/GoogleAddressInput.tsx");
 const section = read("components/build-mapsite/HomePinLocationSection.tsx");
@@ -29,10 +30,13 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(builder).not.toContain("revealBuilder");
   });
 
-  it("puts the PDF upload above the Demo Mapsites panel", () => {
-    expect(builder.indexOf("<DemoPdfEntry />")).toBeGreaterThan(-1);
-    expect(builder.indexOf("<DemoPdfEntry />")).toBeLessThan(builder.indexOf("demo-hero__panel"));
-    expect(builder.indexOf("demo-hero__panel")).toBeLessThan(builder.indexOf("<DemoHeroMap />"));
+  it("keeps the PDF upload on Build Mapsite and the panel on Mapsites", () => {
+    expect(builder).toContain("<DemoPdfEntry />");
+    expect(builder).not.toContain("<DemoHeroMap");
+    expect(builder).not.toContain("<FastCodeSlotsPanel");
+    expect(mapsites).not.toContain("DemoPdfEntry");
+    expect(mapsites).toContain("<DemoHeroMap />");
+    expect(mapsites).toContain("<FastCodeSlotsPanel");
     expect(en.demo.pdfEntry.title).toBe("Upload your PDF to build your Mapsite");
     expect(de.demo.pdfEntry.title).toBe("Laden Sie Ihr PDF hoch, um Ihre Mapsite zu erstellen");
     const copy = `${en.demo.pdfEntry.title} ${en.demo.pdfEntry.hint} ${de.demo.pdfEntry.title} ${de.demo.pdfEntry.hint}`;
@@ -46,7 +50,8 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
   it("shows the hero first; deep links still open the step 1-3 card", () => {
     expect(builder).toContain("useState(initialOpen)");
     expect(builder).toContain("{!showCard ? (");
-    expect(builder).toContain('data-testid="demo-hero"');
+    expect(mapsites).toContain('data-testid="demo-hero"');
+    expect(builder).toContain("<DemoPdfEntry />");
     expect(builder).not.toContain('data-testid="demo-hero-build"');
     expect(builder).not.toContain("d.hero.cta");
     expect(builder).toContain('addEventListener("popstate"');
@@ -55,15 +60,16 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
   });
 
   it("puts the FAST Codes inside the write-up, with no side card (Arun, Nov 4)", () => {
-    expect(builder).toContain("<FastCodeSlotsPanel");
-    expect(builder).not.toContain("lg:grid-cols-[minmax(0,1fr)_19rem]");
-    expect(builder).not.toContain("d.hero.body1");
-    expect(builder).not.toContain("d.hero.body2");
-    expect(builder.indexOf("{d.hero.headline}")).toBeLessThan(builder.indexOf("<FastCodeSlotsPanel"));
-    expect(builder.indexOf("<FastCodeSlotsPanel")).toBeLessThan(builder.indexOf("</section>"));
-    const page = read("app/talispros/demo-mapsite/page.tsx");
+    expect(mapsites).toContain("<FastCodeSlotsPanel");
+    expect(mapsites).not.toContain("lg:grid-cols-[minmax(0,1fr)_19rem]");
+    expect(mapsites).not.toContain("d.hero.body1");
+    expect(mapsites).not.toContain("d.hero.body2");
+    expect(mapsites.indexOf("{d.hero.headline}")).toBeLessThan(mapsites.indexOf("<FastCodeSlotsPanel"));
+    expect(mapsites.indexOf("<FastCodeSlotsPanel")).toBeLessThan(mapsites.indexOf("</section>"));
+    const page = read("app/mapsites/page.tsx");
     expect(page).toContain("loadFastCodeSlotsPanel()");
     expect(page).toContain("slotsPanel={slotsPanel}");
+    expect(page).toContain('pageMetadata("/mapsites")');
   });
 
   it("opens the card directly for deep links or Back that carry build/address/PIN state", () => {
@@ -88,11 +94,11 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
   });
 
   it("shows one Mapsite display map and an open PIN card, with no slider or feature links", () => {
-    expect(builder).toContain("<DemoHeroMap />");
+    expect(mapsites).toContain("<DemoHeroMap />");
     expect(builder).not.toContain("DemoMapsiteSlides");
     expect(builder).not.toContain("demo-hero-feature");
     expect(builder).not.toContain("<nav");
-    const writeup = builder.slice(builder.indexOf('id="demo-hero-title"'), builder.indexOf("</section>"));
+    const writeup = mapsites.slice(mapsites.indexOf('id="demo-hero-title"'), mapsites.indexOf("</section>"));
     expect(writeup).not.toContain("<a");
     expect(existsSync(resolve("components/talispros/demo-mapsite/DemoMapsiteSlides.tsx"))).toBe(false);
     for (const name of ["mapsite", "ebooks", "bookshelf", "knowledge", "pins"]) {
@@ -139,8 +145,8 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
   });
 
   it("stacks the map above the write-up on mobile, a wider rail on desktop", () => {
-    expect(builder).not.toContain("lg:grid-cols-2");
-    expect(builder.indexOf("<DemoHeroMap")).toBeLessThan(builder.indexOf("{d.hero.headline}"));
+    expect(mapsites).not.toContain("lg:grid-cols-2");
+    expect(mapsites.indexOf("<DemoHeroMap")).toBeLessThan(mapsites.indexOf("{d.hero.headline}"));
     const css = read("app/globals.css");
     expect(css).toContain(".demo-hero__media {\n  height: 32rem;");
     expect(css).toContain("grid-template-columns: minmax(0, 0.9fr) minmax(26rem, 1.15fr);");

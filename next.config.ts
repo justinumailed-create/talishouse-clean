@@ -194,12 +194,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: "/talisu/demo",
-        destination: "/demo",
+        destination: "/mapsites",
         statusCode: 301,
       },
       {
         source: "/talisu/demo/",
-        destination: "/demo",
+        destination: "/mapsites",
         statusCode: 301,
       },
       // Sea-Can pages are not ready. Send them to the Talishouse™ Product Catalogue.

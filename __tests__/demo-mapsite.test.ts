@@ -62,6 +62,7 @@ describe("demo mapsite codes", () => {
   });
 
   it("identifies the public demo Mapsite builder routes", () => {
+    expect(isDemoMapSitePath("/mapsites")).toBe(true);
     expect(isDemoMapSitePath("/demo")).toBe(true);
     expect(isDemoMapSitePath("/demo/ebook")).toBe(true);
     expect(isDemoMapSitePath("/demonstration")).toBe(false);

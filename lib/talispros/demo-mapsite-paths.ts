@@ -1,5 +1,8 @@
-/** Public Build Mapsite address. The browser stays on this path. */
+/** Public Build Mapsite address. Upload and builder only. */
 export const DEMO_MAPSITE_PUBLIC_PATH = "/demo";
+
+/** Public Mapsites address. Sample card and week calendar, no upload. */
+export const MAPSITES_PANEL_PATH = "/mapsites";
 
 /** File route for the builder. Requests here 301 to the public address. */
 export const DEMO_MAPSITE_BUILD_PATH = "/talispros/demo-mapsite";
