@@ -1,5 +1,5 @@
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
-import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
+import { DEMO_MAPSITE_PUBLIC_PATH } from "@/lib/talispros/demo-mapsite";
 import { BUILD_MAPSITE_PREVIEW_LOCATION } from "@/components/build-mapsite/home-pin-types";
 
 /** Full-bleed chrome paths: homepage gate (`/`) + former homepage (`/start`). */
@@ -76,10 +76,9 @@ export const TALISPROS_START_SEGMENTS = [
 ] as const;
 
 /**
- * Home-page Build Mapsite control. Same destination as the blue-bar Mapsites
- * link: the demo page, where FAST Codes are found.
+ * Home-page Build Mapsite control. Opens the public demo builder at /demo.
  */
-export const TALISPROS_HOME_SYSTEM_DEMO_HREF = DEMO_MAPSITE_BUILD_PATH;
+export const TALISPROS_HOME_SYSTEM_DEMO_HREF = DEMO_MAPSITE_PUBLIC_PATH;
 
 export type TalisprosHomeDemoPrivacyMask = {
   id: string;

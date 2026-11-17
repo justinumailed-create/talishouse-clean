@@ -92,7 +92,7 @@ describe("TalisU blue header dropdown", () => {
       "utf8",
     );
     expect(header).not.toContain("MapsitesNavDropdown");
-    expect(header).toContain("DEMO_MAPSITE_BUILD_PATH");
+    expect(header).toContain("DEMO_MAPSITE_PUBLIC_PATH");
     expect(header).toContain('data-testid="nav-mapsites-link"');
     const card = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoFastCodeCard.tsx"),

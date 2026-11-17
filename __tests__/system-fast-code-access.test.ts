@@ -57,6 +57,8 @@ describe("system FAST Code feature gate", () => {
   it("drops dashboard, editor, and password-gate links from the public home", () => {
     expect(isOwnerOnlyPersonalHomeHref("/talispros/mapsite/brokers/dw01")).toBe(true);
     expect(isOwnerOnlyPersonalHomeHref("/talispros/demo-mapsite?gate=dw01")).toBe(true);
+    expect(isOwnerOnlyPersonalHomeHref("/demo")).toBe(true);
+    expect(isOwnerOnlyPersonalHomeHref("/demo?build=1")).toBe(true);
     expect(isOwnerOnlyPersonalHomeHref("/talispros/mapsites/dw01/ebooks/new")).toBe(true);
     expect(isOwnerOnlyPersonalHomeHref("/chat")).toBe(true);
     expect(isOwnerOnlyPersonalHomeHref("/talispros/markets/claim-a-market")).toBe(false);

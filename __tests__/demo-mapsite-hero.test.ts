@@ -69,7 +69,7 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(page).toContain("initialOpen={demoBuilderStartsOpen(params)}");
     expect(page).toContain('pageMetadata("/talispros/demo-mapsite")');
     expect(read("components/talispros/demo-mapsite/DemoEbookGenerateClient.tsx")).toContain(
-      "href={`${DEMO_MAPSITE_BUILD_PATH}?build=1`}",
+      "href={`${DEMO_MAPSITE_PUBLIC_PATH}?build=1`}",
     );
   });
 

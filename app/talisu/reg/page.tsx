@@ -14,7 +14,7 @@ import AdviserLayout from "@/components/talisu/AdviserLayout";
 import RegisterStructureTabs from "@/components/talisu/RegisterStructureTabs";
 import RegisterActions from "@/components/talisu/RegisterActions";
 import { hasCheckoutAccess, hasRegisterEntry } from "@/lib/talisu/register-entry";
-import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
+import { DEMO_MAPSITE_PUBLIC_PATH } from "@/lib/talispros/demo-mapsite";
 import { PMC_PATHS } from "@/lib/talispros/mapsite-contract";
 import { isTalisURegisterCheckoutStep } from "@/lib/talisu/ask-step";
 import {
@@ -111,7 +111,7 @@ export default async function TalisURegisterPage({
             initialOpen={wantsStructures || lockedParam === REGISTER_ENTRY_LOCK}
             hrefs={{
               propose: talisuHref(TALISU_DISCUSS_PATH),
-              claim: DEMO_MAPSITE_BUILD_PATH,
+              claim: DEMO_MAPSITE_PUBLIC_PATH,
               terms: PMC_PATHS.contract,
               register: `/talisu/reg?step=${REGISTER_CHOOSE_STEP}`,
             }}

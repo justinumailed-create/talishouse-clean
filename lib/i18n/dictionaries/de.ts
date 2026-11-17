@@ -1354,6 +1354,15 @@ export const de: Dictionary = {
       errPrepare: "Ihre Seiten konnten nicht vorbereitet werden. Bitte versuchen Sie es erneut.",
       errSample: "Die Beispielseiten konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
     },
+    finish: {
+      eyebrow: "Tsplits™",
+      title: "Ihre Demo-Mapsite ist fertig",
+      lead: "Ordnen Sie diesen FAST Code einem bestehenden Konto zu, oder behalten Sie ihn als Demo.",
+      codeLabel: "FAST Code",
+      attach: "Einem bestehenden Konto zuordnen",
+      keep: "Als Demo behalten",
+      keeping: "Ihre Demo wird geöffnet…",
+    },
     claimDescribe: "Was beschreibt Sie am besten?",
     claimChooseError:
       "Wählen Sie vor dem Beanspruchen aus, wer Sie sind (dieselben Optionen wie unter /start).",

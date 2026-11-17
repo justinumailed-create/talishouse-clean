@@ -56,7 +56,7 @@ import MapSitePartnerButtons, {
 } from "@/components/talispros/mapsite/MapSitePartnerButtons";
 import { loadMapSiteRootContext } from "@/lib/talispros/mapsite-root-partners-service";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite";
-import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
+import { DEMO_MAPSITE_PUBLIC_PATH } from "@/lib/talispros/demo-mapsite";
 import { isPreparedSlotMapsite } from "@/lib/talispros/fast-code-slots-server";
 import { readMapZoomExplicit } from "@/lib/talispros/system-mapsite-zoom-server";
 import { hasProspectAccess } from "@/lib/talispros/prospect-gate-server";
@@ -245,7 +245,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
   // Prospect FAST Codes open only behind the agent password gate (Arun, Nov 5).
   const preparedSlotMapsite = await preparedSlotPromise;
   if (preparedSlotMapsite && !(await hasProspectAccess())) {
-    redirect(`${DEMO_MAPSITE_BUILD_PATH}?gate=${encodeURIComponent(fastCode.toLowerCase())}#fast-code-slots`);
+    redirect(`${DEMO_MAPSITE_PUBLIC_PATH}?gate=${encodeURIComponent(fastCode.toLowerCase())}#fast-code-slots`);
   }
 
   // Real owner/paid browser session.

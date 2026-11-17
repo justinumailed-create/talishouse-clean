@@ -308,6 +308,21 @@
     "alt": "Tsplits™ Baumlogo: TalisTV™ hauseigener Online-TV-Sender"
    }
   },
+  "/demo": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/demo-mapsite",
+   "en": {
+    "title": "Demo Mapsites | Tsplits™",
+    "description": "Demo Mapsites on Tsplits™. See the North Shore Nature Centre flag on the map and open the pinned Talisbook™.",
+    "alt": "Tsplits™ tree logo: Show your market on the map"
+   },
+   "de": {
+    "title": "Demo-Mapsites | Tsplits™",
+    "description": "Demo-Mapsites auf Tsplits™. Sehen Sie das Fähnchen des North Shore Nature Centre auf der Karte und öffnen Sie das Talisbook™.",
+    "alt": "Tsplits™ Baumlogo: Zeigen Sie Ihren Markt auf der Karte"
+   }
+  },
   "/talispros/demo-mapsite": {
    "kind": "public",
    "noindex": false,

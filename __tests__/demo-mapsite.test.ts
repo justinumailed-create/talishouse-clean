@@ -5,6 +5,7 @@ import {
   isDemonstrationListing,
   isDemoMapSitePath,
   isProtectedPlatformDemoMapSite,
+  isRetiredDemoMapSitePath,
   shouldKeepPlatformDemoMapSite,
   demoMapSiteApplicationHref,
   demoMapSiteEbookHref,
@@ -61,6 +62,9 @@ describe("demo mapsite codes", () => {
   });
 
   it("identifies the public demo Mapsite builder routes", () => {
+    expect(isDemoMapSitePath("/demo")).toBe(true);
+    expect(isDemoMapSitePath("/demo/ebook")).toBe(true);
+    expect(isDemoMapSitePath("/demonstration")).toBe(false);
     expect(isDemoMapSitePath("/talispros/demo-mapsite")).toBe(true);
     expect(isDemoMapSitePath("/talispros/demo-mapsite/ebook")).toBe(true);
     expect(isDemoMapSitePath("/talispros/demo-mapsite/ebook?mapsiteId=1")).toBe(
@@ -68,6 +72,11 @@ describe("demo mapsite codes", () => {
     );
     expect(isDemoMapSitePath("/talispros")).toBe(false);
     expect(isDemoMapSitePath("/talispros/mapsite")).toBe(false);
+    expect(isRetiredDemoMapSitePath("/talispros/demo-mapsite")).toBe(true);
+    expect(isRetiredDemoMapSitePath("/talispros/demo-mapsite/")).toBe(true);
+    expect(isRetiredDemoMapSitePath("/talispros/demo-mapsite?gate=dw01")).toBe(true);
+    expect(isRetiredDemoMapSitePath("/talispros/demo-mapsite/ebook")).toBe(false);
+    expect(isRetiredDemoMapSitePath("/demo")).toBe(false);
   });
 
   it("protects the platform demonstration Mapsite id", () => {
