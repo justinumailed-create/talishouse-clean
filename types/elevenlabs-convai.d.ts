@@ -15,7 +15,9 @@ type ElevenLabsConvaiProps = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTML
   "avatar-image-url"?: string;
   "avatar-orb-color-1"?: string;
   "avatar-orb-color-2"?: string;
-  variant?: "compact" | "expanded";
+  variant?: "compact" | "expanded" | "full";
+  /** `page` fills the parent with the conversation and its transcript. */
+  layout?: "default" | "page";
   placement?:
     | "bottom-right"
     | "bottom-left"

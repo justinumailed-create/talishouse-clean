@@ -565,6 +565,19 @@ p {
 /* The embed sizes its host to the viewport and positions it fixed.
    Leaving pointer-events on that host swallows every homepage click.
    Shadow buttons keep the default and still receive clicks. */
+.aisha-convai-inline {
+  position: relative;
+  height: 100%;
+  min-height: 28rem;
+  width: 100%;
+}
+.aisha-convai-inline elevenlabs-convai {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: auto !important;
+}
 .aisha-convai-slot elevenlabs-convai {
   pointer-events: none !important;
   /* Above our write-up so the terms sheet, call, and chat cover the bubble. */

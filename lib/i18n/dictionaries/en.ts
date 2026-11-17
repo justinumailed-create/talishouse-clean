@@ -148,6 +148,7 @@ export const en = {
         startCall: "Start a call",
         endCall: "End call",
         openChat: "Open chat",
+        tapToTalk: "Tap to talk to Aisha",
       },
     },
     samcartReturn: {
