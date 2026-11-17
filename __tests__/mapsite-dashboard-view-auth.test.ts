@@ -13,14 +13,16 @@ describe("mapsite dashboard view ownership", () => {
     expect(canChangeMapsiteDashboardView({ isMapsAdmin: false, isOwner: false })).toBe(false);
   });
 
-  it("checks ownership on the server and keeps the switch when the view is off", () => {
+  it("keeps the server check and does not render the switch on a Mapsite", () => {
     const action = readFileSync(resolve("app/admin/mapsites/dashboard-view-actions.ts"), "utf8");
     const app = readFileSync(resolve("components/talispros/mapsite/MapSiteApplication.tsx"), "utf8");
+    const card = readFileSync(resolve("components/talispros/mapsite/MapSiteMarketPartnerCard.tsx"), "utf8");
     expect(action).toContain("isOwnMapSite");
     expect(action).toContain("canChangeMapsiteDashboardView");
     expect(action).not.toContain("override-config");
-    expect(app).toContain("canToggleDashboardView");
-    expect(app).toContain("MapSiteOwnerDashboardToggle");
+    expect(app).not.toContain("MapSiteOwnerDashboardToggle");
+    expect(app).not.toContain("dashboardItems=");
+    expect(card).toContain("data-testid=\"mapsite-card-dashboard\"");
     expect(app).toContain("MapSiteZoomControls");
     expect(en.mapsite.zoomIn).toBe("Zoom in");
     expect(en.mapsite.zoomOut).toBe("Zoom out");

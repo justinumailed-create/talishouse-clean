@@ -69,7 +69,6 @@ import PersonalHomeNav from "@/components/talispros/personal-home/PersonalHomeNa
 import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
 import MapSiteZoomControls from "./MapSiteZoomControls";
-import MapSiteOwnerDashboardToggle from "./MapSiteOwnerDashboardToggle";
 import PmcContractGateCard from "@/components/talisu/pmc/PmcContractGateCard";
 import { mapsiteAgencyDisplayName } from "@/lib/talispros/mapsite-listing-media";
 import { useT } from "@/lib/i18n/client";
@@ -130,8 +129,6 @@ const EMPTY_ROOT_CONTEXT: MapSiteRootContext = {
 };
 
 /** Owner Dashboard dropdown: Ebook Editor, Logo & Card Editor, PIN Dashboard, Bookshelf Editor. */
-const DASHBOARD_MENU = MAPSITE_DASHBOARD_MENU_ITEMS;
-
 /** Map always frames every PIN of the FAST Code plus this buffer (kilometres). */
 export const MAPSITE_PIN_BUFFER_KM = 32;
 const KM_PER_DEGREE_LAT = 111.0;
@@ -219,11 +216,6 @@ interface MapSiteApplicationProps {
    * actions still re-check requireMapSiteEditAccess (owner + paid, or admin).
    */
   canManageDashboard?: boolean;
-  /**
-   * This Mapsite's owner, or a Mapsites admin, may show or hide the dashboard.
-   * Visitors never see the switch. The owner still sees it when the view is off.
-   */
-  canToggleDashboardView?: boolean;
   /** Logo / left-card image overrides and saved bookshelf order. */
   initialOwnerCustomizations?: MapSiteOwnerCustomizations | null;
   /** PIN categories + Root ↔ Derivative Partner Mapsites (migration 109). */
@@ -267,7 +259,6 @@ export default function MapSiteApplication({
   pinCheckoutStatus = null,
   pinCheckoutSessionId = null,
   canManageDashboard,
-  canToggleDashboardView = false,
   initialOwnerCustomizations = null,
   initialRootContext = null,
   personalHomeNav = null,
@@ -555,7 +546,6 @@ export default function MapSiteApplication({
         onPinDashboardChange={setPinDashboard}
         onPinEditorChange={setPinEditor}
         canManageDashboard={canManageDashboard ?? isOwner}
-        canToggleDashboardView={canToggleDashboardView}
         initialOwnerCustomizations={initialOwnerCustomizations}
         rootContext={rootContext}
         onRootContextChange={setRootContext}
@@ -615,7 +605,6 @@ function MapSiteChrome({
   onPinDashboardChange,
   onPinEditorChange,
   canManageDashboard,
-  canToggleDashboardView,
   initialOwnerCustomizations,
   rootContext,
   onRootContextChange,
@@ -657,7 +646,6 @@ function MapSiteChrome({
   onPinDashboardChange: (dashboard: MapSitePinDashboardState) => void;
   onPinEditorChange: (editor: PinEditorState) => void;
   canManageDashboard: boolean;
-  canToggleDashboardView: boolean;
   initialOwnerCustomizations: MapSiteOwnerCustomizations | null;
   rootContext: MapSiteRootContext;
   onRootContextChange: (context: MapSiteRootContext) => void;
@@ -1006,18 +994,6 @@ function MapSiteChrome({
     }
   }, [dashboardManageable, setSelectedPinId]);
 
-  const selectDashboardItem = useCallback(
-    (id: string) => {
-      if (!dashboardManageable) return;
-      const item = MAPSITE_DASHBOARD_MENU_ITEMS.find((entry) => entry.id === id);
-      if (!item) return;
-      setSelectedPinId(null);
-      onPinEditorChange({ kind: "idle" });
-      setDashboardPanel(item.id);
-    },
-    [dashboardManageable, onPinEditorChange, setSelectedPinId],
-  );
-
   const closeDashboardPanel = useCallback(() => {
     setDashboardPanel(null);
     onPinEditorChange({ kind: "idle" });
@@ -1271,8 +1247,6 @@ function MapSiteChrome({
                   brandLogoUrl={mapsiteCardLogoUrl(branding.logoUrl, branding.overridden.logo)}
                   cardAddress={ownerCustomizations.cardAddress}
                   cardPhone={ownerCustomizations.cardPhone}
-                  dashboardItems={dashboardManageable ? DASHBOARD_MENU : undefined}
-                  onSelectDashboardItem={selectDashboardItem}
                   pinOptions={isOwner || dashboardManageable ? pinOptions : undefined}
                   activePinId={activePinId}
                   onSwitchPin={switchPin}
@@ -1285,15 +1259,6 @@ function MapSiteChrome({
                   categoryEmpty={Boolean(categoryFilter) && visiblePins.length === 0}
                   isOwner={isOwner}
                   accountTypeSegment={accountTypeSegment}
-                  showKnowledgeBaseManage={dashboardUnlocked}
-                  dashboardViewToggle={
-                    canToggleDashboardView ? (
-                      <MapSiteOwnerDashboardToggle
-                        fastCode={mapsite.fast_code || ""}
-                        initialEnabled={dashboardViewEnabled}
-                      />
-                    ) : null
-                  }
                 />
               ) : null
             }
