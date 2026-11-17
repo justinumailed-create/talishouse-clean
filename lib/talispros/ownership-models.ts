@@ -76,7 +76,7 @@ export const HOME_OWNERSHIP_SECTIONS: readonly OwnershipModelSection[] = [
     id: "tokenization",
     title: "Tokenization",
     body:
-      "Tokenization takes an interest—whole or fractional—and records it as a transferable digital asset. This is the cleanest, most auditable ownership and transaction structure and accounting option over time.",
+      "Tokenization takes an interest, whole or fractional, and records it as a transferable digital asset. This is the cleanest, most auditable ownership and transaction structure and accounting option over time.",
     result:
       "The result: it is easy to bring in co-owners while keeping stakes proportional and raising capital without touching the underlying asset.",
     learnMoreLabel: "Learn More",

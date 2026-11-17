@@ -168,7 +168,7 @@ export const de: Dictionary = {
         title: "Konventionell",
         body: "So wurden Immobilien schon immer erworben: Sie wählen eine Immobilie aus, geben ein Angebot ab, das Angebot wird angenommen, und Sie zahlen bar oder finanzieren. In beiden Fällen geht das Eigentum erst über, wenn der letzte Cent bezahlt ist.",
         result:
-          "Das Ergebnis: Bis zur vollständigen Bezahlung haben Sie keinerlei Eigentumsrechte – nach Abschluss der Transaktion dafür die vollen Eigentumsrechte.",
+          "Das Ergebnis: Bis zur vollständigen Bezahlung haben Sie keinerlei Eigentumsrechte, nach Abschluss der Transaktion dafür die vollen Eigentumsrechte.",
         learnMoreLabel: "Mehr erfahren",
         learnMoreHref: "/talisu/discuss?topic=conventional",
       },
@@ -193,7 +193,7 @@ export const de: Dictionary = {
       {
         id: "tokenization",
         title: "Tokenisierung",
-        body: "Bei der Tokenisierung wird ein Interesse – ganz oder anteilig – als übertragbarer digitaler Vermögenswert erfasst. Langfristig ist dies die sauberste und am besten prüfbare Option für Eigentums- und Transaktionsstruktur sowie Buchführung.",
+        body: "Bei der Tokenisierung wird ein Interesse, ganz oder anteilig, als übertragbarer digitaler Vermögenswert erfasst. Langfristig ist dies die sauberste und am besten prüfbare Option für Eigentums- und Transaktionsstruktur sowie Buchführung.",
         result:
           "Das Ergebnis: Miteigentümer lassen sich leicht aufnehmen, die Anteile bleiben proportional, und Kapital kann beschafft werden, ohne den zugrunde liegenden Vermögenswert anzutasten.",
         learnMoreLabel: "Mehr erfahren",
