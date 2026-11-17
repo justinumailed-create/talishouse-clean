@@ -97,6 +97,13 @@ add("/talisu/contract", "talisu-contract", "utility", BRAND,
     ("Dienstleistungsvertrag mit Agenten-Code signieren",
      "Öffnen Sie den TalisALL PMC Dienstleistungsvertrag mit Ihrem Agenten-Code, unterschreiben Sie elektronisch und fahren Sie mit der Registrierung fort.",
      "TSPLITS™  ·  VERTRAG", ["Ihren", "Dienstleistungs-", "vertrag signieren"], ["Agenten-Code", "E-Signatur", "Dann registrieren"]))
+add("/vision", "talisu-discuss", "public", WEBSTER,
+    ("TalisU Home Page | Tsplits™",
+     "Tell us where your project is and what you imagine. An advisor from Tsplits™ will contact you.",
+     "TSPLITS™  ·  TALISU", ["TalisU", "Home", "Page"], ["Share your vision", "An advisor calls", "Talk to Webster"]),
+    ("TalisU-Startseite | Tsplits™",
+     "Sagen Sie uns, wo Ihr Projekt liegt und was Sie sich vorstellen. Ein Berater von Tsplits™ meldet sich bei Ihnen.",
+     "TSPLITS™  ·  TALISU", ["TalisU", "Startseite"], ["Vision teilen", "Ein Berater ruft an", "Mit Webster sprechen"]))
 add("/talisu/discuss", "talisu-discuss", "public", WEBSTER,
     ("Share a Project Vision | Tsplits™",
      "Explore Conventional, Lease-to-Own, Fractionalization and Tokenization structures and share your project vision with an advisor. No registration needed.",

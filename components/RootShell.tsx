@@ -35,6 +35,7 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/markets/") ||
     pathname === "/register" ||
     pathname.startsWith("/register/") ||
+    pathname === "/vision" ||
     pathname.startsWith("/talispros") ||
     pathname.startsWith("/talisu") ||
     pathname === "/terms" ||

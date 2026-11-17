@@ -149,13 +149,28 @@
    "image": "/og/pages/talisu-discuss",
    "en": {
     "title": "Share a Project Vision | Tsplits™",
-    "description": "Explore Conventional, Lease-to-Own, Fractionalization and Tokenization structures and share your project vision with an advisor. No registration needed.",
+    "description": "Tell us where your project is and what you imagine. An advisor from Tsplits™ will contact you.",
     "alt": "Thorsten P, Team Leader with the Tsplits™ tree logo: Share a Project Vision"
    },
    "de": {
     "title": "Projektvision teilen | Tsplits™",
-    "description": "Entdecken Sie Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung und teilen Sie Ihre Projektvision mit einem Berater. Ohne Registrierung.",
+    "description": "Sagen Sie uns, wo Ihr Projekt liegt und was Sie sich vorstellen. Ein Berater von Tsplits™ meldet sich bei Ihnen.",
     "alt": "Thorsten P, Team Leader mit dem Tsplits™ Baumlogo: Projektvision teilen"
+   }
+  },
+  "/vision": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/talisu-discuss",
+   "en": {
+    "title": "TalisU Home Page | Tsplits™",
+    "description": "Tell us where your project is and what you imagine. An advisor from Tsplits™ will contact you.",
+    "alt": "Thorsten P, Team Leader with the Tsplits™ tree logo: TalisU home page"
+   },
+   "de": {
+    "title": "TalisU-Startseite | Tsplits™",
+    "description": "Sagen Sie uns, wo Ihr Projekt liegt und was Sie sich vorstellen. Ein Berater von Tsplits™ meldet sich bei Ihnen.",
+    "alt": "Thorsten P, Team Leader mit dem Tsplits™ Baumlogo: TalisU-Startseite"
    }
   },
   "/talisu/value-added": {

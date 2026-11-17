@@ -282,11 +282,11 @@ export const en = {
     pageSubtitle:
       "Every project starts with a vision and the right transaction structure",
     pageIntro:
-      "Explore Conventional, Lease-to-Own, Fractionalization and Tokenization, choose the structure that fits your project, then share your vision. An advisor will contact you; no registration or FAST Code needed.",
+      "Explore Conventional, Lease-to-Own, Fractionalization and Tokenization, choose the structure that fits your project, then share your vision. An advisor will contact you.",
     /** Beside the read-only structure chip on the page form. */
     pageKicker: "Tsplits™ · Advisors",
     pageLead:
-      "Tell us where your project is and what you imagine. An advisor will contact you; no registration or FAST Code needed.",
+      "Tell us where your project is and what you imagine. An advisor will contact you.",
     pageVision: "Your vision",
     pageSubmit: "Share Your Vision",
     pageNote: "All quotes and payments are in Canadian dollars (CAD).",
@@ -295,7 +295,12 @@ export const en = {
     pageDoneBack: "Back to Tsplits™",
     topicHint: "(choose with the buttons)",
     openPage: "Open as a full page with a Google-recognized location →",
-    topic: "Transaction structure",
+    topic: "Preferred Transaction Structure",
+    structuresAbout: "About these structures",
+    structuresPanelTitle: "Transaction structures",
+    structuresClose: "Close",
+    talkWebster: "Talk to Webster",
+    websterRole: "Fulfilment Manager",
     location: "Location",
     locationPlaceholder: "Search a city, address or place",
     locationFallbackPlaceholder: "City, Province / State, Country",

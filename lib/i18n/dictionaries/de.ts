@@ -653,10 +653,10 @@ export const de: Dictionary = {
     pageSubtitle:
       "Jedes Projekt beginnt mit einer Vision und der passenden Transaktionsstruktur",
     pageIntro:
-      "Entdecken Sie Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung, wählen Sie die Struktur, die zu Ihrem Projekt passt, und teilen Sie dann Ihre Vision. Ein Berater meldet sich bei Ihnen – ohne Registrierung und ohne FAST Code.",
+      "Entdecken Sie Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung, wählen Sie die Struktur, die zu Ihrem Projekt passt, und teilen Sie dann Ihre Vision. Ein Berater meldet sich bei Ihnen.",
     pageKicker: "Tsplits™ · Berater",
     pageLead:
-      "Sagen Sie uns, wo Ihr Projekt liegt und was Sie sich vorstellen. Ein Berater meldet sich bei Ihnen – ohne Registrierung und ohne FAST Code.",
+      "Sagen Sie uns, wo Ihr Projekt liegt und was Sie sich vorstellen. Ein Berater meldet sich bei Ihnen.",
     pageVision: "Ihre Vision",
     pageSubmit: "Vision teilen",
     pageNote: "Alle Angebote und Zahlungen erfolgen in kanadischen Dollar (CAD).",
@@ -665,7 +665,12 @@ export const de: Dictionary = {
     pageDoneBack: "Zurück zu Tsplits™",
     topicHint: "(mit den Schaltflächen wählen)",
     openPage: "Als ganze Seite mit Google-erkanntem Standort öffnen →",
-    topic: "Transaktionsstruktur",
+    topic: "Bevorzugte Transaktionsstruktur",
+    structuresAbout: "Zu diesen Strukturen",
+    structuresPanelTitle: "Transaktionsstrukturen",
+    structuresClose: "Schließen",
+    talkWebster: "Mit Webster sprechen",
+    websterRole: "Fulfilment-Manager",
     location: "Standort",
     locationPlaceholder: "Stadt, Adresse oder Ort suchen",
     locationFallbackPlaceholder: "Stadt, Provinz / Bundesstaat, Land",

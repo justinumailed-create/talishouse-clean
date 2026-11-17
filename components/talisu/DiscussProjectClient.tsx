@@ -17,6 +17,7 @@ import { en } from "@/lib/i18n/dictionaries/en";
 import { useT } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/format";
 import { ADVISER_METAL_BG } from "@/components/talisu/AdviserLayout";
+import StructureExplainerDrawer from "@/components/talisu/StructureExplainerDrawer";
 import {
   METAL_TAB,
   METAL_TAB_LABEL,
@@ -40,7 +41,14 @@ export const DISCUSS_VISION_IMAGE = "/talisu/discuss-project-vision.webp";
  * primary button. Submits to /api/ownership-contact (channel "discuss-page"),
  * which saves the lead and emails the team.
  */
-export default function DiscussProjectClient({ topic: initialTopic }: { topic: OwnershipContactTopic }) {
+export default function DiscussProjectClient({
+  topic: initialTopic,
+  code,
+}: {
+  topic: OwnershipContactTopic;
+  /** FAST Code already on the address, forwarded to Webster. */
+  code?: string | null;
+}) {
   const t = useT();
   const c = t.contactForm;
   const id = useId();
@@ -56,6 +64,11 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState(false);
+  const [structuresOpen, setStructuresOpen] = useState(false);
+  const websterCode = code?.trim();
+  const websterHref = websterCode
+    ? `/webster?call=1&code=${encodeURIComponent(websterCode)}`
+    : "/webster?call=1";
 
   const phoneInvalid = phoneTouched && !isValidNanpPhone(phone);
   const topicLabel = (c.topics as Record<string, string>)[topic] ?? topic;
@@ -151,10 +164,28 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
                   {c.pageTitle}.
                 </h1>
                 <p className="mt-5 text-[19px] leading-relaxed text-neutral-600">{c.pageLead}</p>
+                <Link
+                  href={websterHref}
+                  data-testid="discuss-webster"
+                  className="mt-6 inline-flex min-h-11 items-center rounded-full bg-[#046BD9] px-5 text-[15px] font-semibold text-white hover:bg-[#0358b3]"
+                >
+                  {c.talkWebster}
+                  <span className="ml-2 font-medium text-white/85">{c.websterRole}</span>
+                </Link>
 
                 <form onSubmit={submit} noValidate={false} className="mt-14 space-y-7">
                   <fieldset data-testid="discuss-topic" data-topic={topic}>
-                    <legend className={LABEL}>{c.topic}</legend>
+                    <legend className="flex flex-wrap items-center justify-between gap-2">
+                      <span className={LABEL}>{c.topic}</span>
+                      <button
+                        type="button"
+                        data-testid="discuss-structures-open"
+                        onClick={() => setStructuresOpen(true)}
+                        className="text-[13px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
+                      >
+                        {c.structuresAbout}
+                      </button>
+                    </legend>
                     <div className="mt-2 grid grid-cols-2 gap-2.5">
                       {OWNERSHIP_CONTACT_TOPICS.map((option) => {
                         const on = option === topic;
@@ -267,6 +298,7 @@ export default function DiscussProjectClient({ topic: initialTopic }: { topic: O
           </div>
         </div>
       </article>
+      <StructureExplainerDrawer open={structuresOpen} onClose={() => setStructuresOpen(false)} />
     </div>
   );
 }
