@@ -22,7 +22,7 @@ const BUBBLE_STYLE = `
   position: relative;
   z-index: 1;
   margin: 0 0 10px;
-  max-width: min(18.5rem, calc(100vw - 2rem));
+  max-width: min(448px, calc(100vw - 16px));
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -110,6 +110,9 @@ const BUBBLE_STYLE = `
 .aisha-convai-copy { position: relative; z-index: 1; }
 .aisha-convai-lead { font-weight: 500; }
 .aisha-convai-rest { font-weight: 400; }
+@media (max-width: 1023px) {
+  .aisha-convai-label { font-size: 15px; }
+}
 `;
 
 function usePageOrigin(): string {
@@ -334,6 +337,7 @@ export default function AishaConvaiWidget({
         pillWidth: box.width,
         avatarCenter,
         viewportHeight: window.innerHeight,
+        viewportWidth: window.innerWidth,
       });
       setPillFrame((current) =>
         current &&

@@ -65,9 +65,15 @@ export function aishaSpeechBubbleTipX(
   return Math.min(maxTip, Math.max(minTip, aimed));
 }
 
+/** Wide enough for the English and German greetings to sit on two lines. */
+export const AISHA_BUBBLE_TARGET_WIDTH = 448;
+/** Space kept between the bubble and the screen edge. */
+export const AISHA_BUBBLE_SCREEN_GUTTER = 8;
+
 /**
- * Place the write-up on the same left and right edges as the call pill.
- * The tail aims at the avatar when that center is known, otherwise the middle.
+ * Place the write-up above the call pill, wider than the pill so the greeting
+ * stays on two lines. The tail still aims at the avatar. A narrow screen
+ * shrinks the bubble so it stays inside the viewport.
  */
 export function aishaBubbleFrame(input: {
   pillLeft: number;
@@ -75,18 +81,26 @@ export function aishaBubbleFrame(input: {
   pillWidth: number;
   avatarCenter: number | null;
   viewportHeight: number;
+  viewportWidth?: number;
 }): { left: number; width: number; bottom: number; tip: number } {
-  const left = Math.round(input.pillLeft);
-  const width = Math.max(1, Math.round(input.pillWidth));
+  const gutter = AISHA_BUBBLE_SCREEN_GUTTER;
+  const viewport = Math.max(1, Math.round(input.viewportWidth ?? 1440));
+  const width = Math.max(
+    1,
+    Math.min(AISHA_BUBBLE_TARGET_WIDTH, viewport - gutter * 2),
+  );
+  let left = Math.round(input.pillLeft);
+  if (left + width > viewport - gutter) left = viewport - gutter - width;
+  if (left < gutter) left = gutter;
   const bottom = Math.max(0, Math.round(input.viewportHeight - input.pillTop));
-  const raw =
+  const anchor =
     input.avatarCenter == null
-      ? width / 2
-      : input.avatarCenter - input.pillLeft;
+      ? input.pillLeft + input.pillWidth / 2
+      : input.avatarCenter;
   return {
     left,
     width,
     bottom,
-    tip: aishaSpeechBubbleTipX(width, "left", raw),
+    tip: aishaSpeechBubbleTipX(width, "left", anchor - left),
   };
 }
