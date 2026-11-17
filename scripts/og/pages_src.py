@@ -174,6 +174,13 @@ add("/talistv", "talistv", "public", LAPTOP,
     ("TalisTV™ | Hauseigener Online-TV-Sender",
      "TalisTV™ ist der hauseigene Online-TV-Sender von Tsplits™. Im Programmführer sehen Sie, was live läuft und was als Nächstes kommt.",
      "TALISTV™  ·  PROGRAMMFÜHRER", ["TalisTV™", "hauseigener", "Online-TV-Sender"], ["Live", "Als Nächstes", "Programm"]))
+add("/demo", "demo-mapsite", "public", NSNC_SHARE,
+    ("Demo Mapsites | Tsplits™",
+     "Demo Mapsites on Tsplits™. See the North Shore Nature Centre flag on the map and open the pinned Talisbook™.",
+     "TSPLITS™  ·  DEMO", ["Show your", "market on", "the map"], ["North Shore", "Flag", "Talisbook™"]),
+    ("Demo-Mapsites | Tsplits™",
+     "Demo-Mapsites auf Tsplits™. Sehen Sie das Fähnchen des North Shore Nature Centre auf der Karte und öffnen Sie das Talisbook™.",
+     "TSPLITS™  ·  DEMO", ["Zeigen Sie", "Ihren Markt", "auf der Karte"], ["North Shore", "Fähnchen", "Talisbook™"]))
 add("/talispros/demo-mapsite", "demo-mapsite", "public", NSNC_SHARE,
     ("Demo Mapsites | Tsplits™",
      "Demo Mapsites on Tsplits™. See the North Shore Nature Centre flag on the map and open the pinned Talisbook™.",

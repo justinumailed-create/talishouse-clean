@@ -8,7 +8,7 @@ import {
   marketingUpdateDemoMapSite,
 } from "../actions";
 import type { DemoMapSiteRecord } from "@/lib/talispros/demo-mapsite-service";
-import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
+import { DEMO_MAPSITE_PUBLIC_PATH } from "@/lib/talispros/demo-mapsite";
 import { MAPSITE_APP_PATH, publishedMapSitePath } from "@/lib/talispros/mapsite-state";
 
 export default function MarketingAdminDemosClient() {
@@ -75,7 +75,7 @@ export default function MarketingAdminDemosClient() {
         </div>
         <div className="flex gap-2">
           <Link
-            href={DEMO_MAPSITE_BUILD_PATH}
+            href={DEMO_MAPSITE_PUBLIC_PATH}
             className="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white"
           >
             New demo

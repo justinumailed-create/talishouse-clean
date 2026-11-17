@@ -4,7 +4,7 @@
  * Demo builder link (+ optional demo rows) remain available.
  */
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
-import { isDemoMapSiteCode, DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
+import { isDemoMapSiteCode, DEMO_MAPSITE_PUBLIC_PATH } from "@/lib/talispros/demo-mapsite";
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
 export type NavMapSiteLink = {
@@ -39,7 +39,7 @@ export async function listNavMapSites(): Promise<NavMapSitesPayload> {
   const empty: NavMapSitesPayload = {
     claimed: [],
     demos: [],
-    newDemoHref: DEMO_MAPSITE_BUILD_PATH,
+    newDemoHref: DEMO_MAPSITE_PUBLIC_PATH,
   };
   if (!isSupabaseAdminConfigured()) return empty;
 
@@ -83,5 +83,5 @@ export async function listNavMapSites(): Promise<NavMapSitesPayload> {
     });
   }
 
-  return { claimed: [], demos, newDemoHref: DEMO_MAPSITE_BUILD_PATH };
+  return { claimed: [], demos, newDemoHref: DEMO_MAPSITE_PUBLIC_PATH };
 }

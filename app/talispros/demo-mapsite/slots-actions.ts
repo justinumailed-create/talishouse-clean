@@ -12,7 +12,10 @@ import {
 import { verifyProspectGate, type GateResult } from "@/lib/talispros/prospect-gate-server";
 import { normalizeSlotFastCode } from "@/lib/talispros/fast-code-slots";
 import type { OwnSlotList } from "@/lib/talispros/fast-code-slots";
-import { DEMO_MAPSITE_BUILD_PATH } from "@/lib/talispros/demo-mapsite";
+import {
+  DEMO_MAPSITE_BUILD_PATH,
+  DEMO_MAPSITE_PUBLIC_PATH,
+} from "@/lib/talispros/demo-mapsite";
 
 type SlotActionResult = { ok: true; list: OwnSlotList } | { ok: false; error: SlotMutationError };
 
@@ -23,6 +26,7 @@ export async function addFastCodeSlotAction(input: { code: string }): Promise<Sl
   const res = await addFastCodeSlot(agent, input?.code);
   if (!res.ok) return res;
   revalidatePath(DEMO_MAPSITE_BUILD_PATH);
+  revalidatePath(DEMO_MAPSITE_PUBLIC_PATH);
   return { ok: true, list: await loadOwnSlotList(agent) };
 }
 
@@ -33,6 +37,7 @@ export async function removeFastCodeSlotAction(input: { slotId: string }): Promi
   const res = await removeFastCodeSlot(agent, input?.slotId);
   if (!res.ok) return res;
   revalidatePath(DEMO_MAPSITE_BUILD_PATH);
+  revalidatePath(DEMO_MAPSITE_PUBLIC_PATH);
   return { ok: true, list: await loadOwnSlotList(agent) };
 }
 

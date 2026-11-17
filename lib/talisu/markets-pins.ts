@@ -33,7 +33,7 @@ export const TALISU_MKTS_MARKET_HERO = "/talisu/mkts/PIN-Map-1920L.jpeg";
 
 export const TALISU_MKTS_MODULAR_HERO = "/talisu/mkts/T-Dome-elevateNF.jpg";
 
-/** Demo path — app/talisu/demo redirects to /talispros/demo-mapsite. */
+/** Demo path. /talisu/demo redirects to /demo. */
 export const TALISU_MKTS_DEMO_HREF = "/talisu/demo";
 
 export const TALISU_MKTS_HEADER_BLUE = "#046BD9";

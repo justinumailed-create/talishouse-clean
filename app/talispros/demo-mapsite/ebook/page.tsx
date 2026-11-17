@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import DemoEbookGenerateClient from "@/components/talispros/demo-mapsite/DemoEbookGenerateClient";
 import { loadDemoMapSiteForEbook } from "@/lib/talispros/demo-mapsite-service";
+import { personalHomePath } from "@/lib/talispros/personal-home";
+import { isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import { pageMetadata } from "@/lib/seo/page-metadata";
 import { replaceImageTemplateAvailability } from "@/lib/talispros/replace-image-templates.server";
 
@@ -26,14 +28,43 @@ export default async function DemoMapSiteEbookPage({
 }) {
   const params = await searchParams;
   const mapsiteId = firstParam(params.mapsiteId)?.trim() || "";
+  const finished = firstParam(params.finish) === "1";
   const mapsite = mapsiteId ? await loadDemoMapSiteForEbook(mapsiteId) : null;
-  if (!mapsite) notFound();
+  if (!mapsite) {
+    // Storage is off, so there is no saved demo to look up. Still show the
+    // choice when the build step asked for it.
+    if (finished && !isSupabaseAdminConfigured()) {
+      const code = firstParam(params.code)?.trim() || "demo";
+      return (
+        <DemoEbookGenerateClient
+          mapsiteId={mapsiteId}
+          title="Demo Mapsite"
+          fastCode={code}
+          initialFinish
+          keepHref="/"
+        />
+      );
+    }
+    notFound();
+  }
+
+  const next = firstParam(params.next)?.trim() || "";
+  const keepHref =
+    next.startsWith("/") &&
+    !next.startsWith("//") &&
+    !next.includes("\\") &&
+    !next.includes("://")
+      ? next
+      : personalHomePath(mapsite.code);
 
   return (
     <DemoEbookGenerateClient
       mapsiteId={mapsite.mapsiteId}
       title={mapsite.title}
+      fastCode={mapsite.code}
       templateAvailability={replaceImageTemplateAvailability()}
+      initialFinish={finished}
+      keepHref={keepHref}
     />
   );
 }

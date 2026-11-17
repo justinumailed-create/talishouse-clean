@@ -17,9 +17,10 @@ import { EBOOK_UPLOAD_ACCEPT } from "@/lib/talisbooks/ebook-upload-formats";
 import { SELF_SERVICE_MAX_UPLOAD_IMAGES } from "@/lib/talisbooks/self-service-page-plan";
 import { postEbookGenerateOptimizedImage } from "@/lib/media/client-upload-ebook-image";
 import {
-  DEMO_MAPSITE_BUILD_PATH,
+  DEMO_MAPSITE_PUBLIC_PATH,
   publicDemoGenerateError,
 } from "@/lib/talispros/demo-mapsite";
+import DemoFinishChoice from "@/components/talispros/demo-mapsite/DemoFinishChoice";
 import { TALISBOOKS_ROUTES } from "@/lib/talisbooks/routes";
 import { ONBOARDING_JOB_TIMEOUT_MS } from "@/lib/onboarding-timing";
 import { TALISU_MKTS_HEADER_BLUE } from "@/lib/talisu/markets-pins";
@@ -143,11 +144,18 @@ function uploadLabelFromFiles(files: File[], fallback: string): string {
 export default function DemoEbookGenerateClient({
   mapsiteId,
   title,
+  fastCode,
   templateAvailability,
+  initialFinish = false,
+  keepHref = "/",
 }: {
   mapsiteId: string;
   title: string;
+  fastCode: string;
   templateAvailability?: TemplateAvailability;
+  /** The build already finished. Show attach-or-demo instead of the upload step. */
+  initialFinish?: boolean;
+  keepHref?: string;
 }) {
   const demoCopy = useT().demo;
   const copy = demoCopy.ebookPage;
@@ -175,6 +183,7 @@ export default function DemoEbookGenerateClient({
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const runIdRef = useRef(0);
+  const finish = initialFinish ? { keepHref } : null;
   const busy = phase !== "idle";
   const sourceReady = pages.length > 0 && Boolean(coverFiles);
   const optimizedReady = optimized.length > 0 && Boolean(optimizedCovers);
@@ -456,17 +465,22 @@ export default function DemoEbookGenerateClient({
       if (!result.ok) {
         throw new Error(result.error);
       }
-      setStage(copy.opening);
-      setProgress({
-        label: copy.opening,
-        detail: copy.ready,
-        current: 1,
-        total: 1,
-      });
-      // Full navigation avoids a failed App Router RSC render leaving this
-      // page stuck on the building status. The personal home page comes
-      // first; its Home / Mapsite navbar opens the Mapsite.
-      window.location.assign(result.homeHref || result.mapsiteHref || result.viewerUrl);
+      setStage(copy.ready);
+      setProgress(null);
+      // Stay on this page so a refresh still shows the choice. Keep as a demo
+      // opens the personal home first (result.homeHref).
+      const keepHref = result.homeHref || result.mapsiteHref || result.viewerUrl;
+      const url = new URL(window.location.href);
+      url.searchParams.set("finish", "1");
+      if (
+        keepHref.startsWith("/") &&
+        !keepHref.startsWith("//") &&
+        !keepHref.includes("\\") &&
+        !keepHref.includes("://")
+      ) {
+        url.searchParams.set("next", keepHref);
+      }
+      window.location.assign(`${url.pathname}${url.search}`);
     } catch (caught) {
       if (runId !== runIdRef.current) return;
       setError(publicDemoGenerateError(caught));
@@ -503,7 +517,7 @@ export default function DemoEbookGenerateClient({
   return (
     <div className="relative flex min-h-dvh flex-col items-center bg-[#f5f5f7] px-6 py-16 text-neutral-950 antialiased sm:py-24">
       <Link
-        href={`${DEMO_MAPSITE_BUILD_PATH}?build=1`}
+        href={`${DEMO_MAPSITE_PUBLIC_PATH}?build=1`}
         className="absolute left-6 top-6 text-[12px] tracking-tight text-neutral-400 transition hover:text-neutral-600"
       >
         {copy.backToPins}
@@ -515,6 +529,14 @@ export default function DemoEbookGenerateClient({
         {copy.viewSample}
       </a>
       <div className="w-full max-w-[480px]">
+        {finish ? (
+          <DemoFinishChoice
+            mapsiteId={mapsiteId}
+            fastCode={fastCode}
+            keepHref={finish.keepHref}
+          />
+        ) : (
+        <>
         <div className="text-center">
           <p className="text-[12px] font-medium tracking-[0.22em] text-neutral-400">
             {copy.eyebrow}
@@ -685,6 +707,8 @@ export default function DemoEbookGenerateClient({
             {copy.footer}
           </p>
         </div>
+        </>
+        )}
       </div>
     </div>
   );
