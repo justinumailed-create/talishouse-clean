@@ -220,8 +220,8 @@ export async function openClaimedMapSiteFromHomeFastCode(
     await setMapSiteOwnerSession(resolvedCode);
   }
 
-  // Claimed codes open that Mapsite's map. Unclaimed codes still open
-  // the personal home page. The path segment comes from the plan.
+  // Every FAST Code opens the personal homepage first. The Mapsite
+  // stays linked from that page.
   if (mapsite.id) {
     const segment = await resolveClaimedMapSiteAccountTypeSegment({
       fastCode: resolvedCode,
