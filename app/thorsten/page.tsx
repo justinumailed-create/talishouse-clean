@@ -17,7 +17,7 @@ export async function generateMetadata() {
     return {
       title: copy.title,
       description: copy.greeting,
-      path: "/talispros/thorsten",
+      path: "/thorsten",
       image: ASSISTANT_PERSONAS.thorsten.portraitSrc,
       alt: copy.title,
       noindex: true,

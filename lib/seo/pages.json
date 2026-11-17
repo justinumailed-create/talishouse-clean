@@ -1406,11 +1406,11 @@
   "/talispros/aisha": {
    "kind": "dynamic"
   },
-  "/talispros/webster": {
+  "/webster": {
    "kind": "dynamic",
    "noindex": true
   },
-  "/talispros/thorsten": {
+  "/thorsten": {
    "kind": "dynamic",
    "noindex": true
   },

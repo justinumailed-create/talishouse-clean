@@ -103,6 +103,26 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: "/talispros/webster",
+        destination: "/webster",
+        statusCode: 301,
+      },
+      {
+        source: "/talispros/webster/",
+        destination: "/webster",
+        statusCode: 301,
+      },
+      {
+        source: "/talispros/thorsten",
+        destination: "/thorsten",
+        statusCode: 301,
+      },
+      {
+        source: "/talispros/thorsten/",
+        destination: "/thorsten",
+        statusCode: 301,
+      },
+      {
         source: "/talisu/demo",
         destination: "/demo",
         permanent: true,
