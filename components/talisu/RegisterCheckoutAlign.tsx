@@ -31,9 +31,9 @@ function checkoutCard(host: Element | null): HTMLElement | null {
 }
 
 /**
- * Lines Aisha's column up with the SamCart card: photo top with the card top,
- * column bottom with the card bottom. The write-up stays put; the gap under
- * it grows or shrinks with the card.
+ * Lines the top of Aisha's column with the SamCart card. The write-up keeps
+ * its own height so a long paragraph stays visible without stretching the
+ * column or leaving a dark band under the card.
  */
 export default function RegisterCheckoutAlign() {
   useLayoutEffect(() => {
@@ -42,9 +42,9 @@ export default function RegisterCheckoutAlign() {
     if (!grid || !aside) return;
 
     const apply = () => {
+      aside.style.minHeight = "";
       if (window.innerWidth < 1024) {
         aside.style.marginTop = "";
-        aside.style.minHeight = "";
         return;
       }
       const card = checkoutCard(grid.querySelector("sc-checkout"));
@@ -53,7 +53,6 @@ export default function RegisterCheckoutAlign() {
       if (box.height < 80) return;
       const offset = Math.max(0, Math.round(box.top - grid.getBoundingClientRect().top));
       aside.style.marginTop = `${offset}px`;
-      aside.style.minHeight = `${Math.round(box.height)}px`;
     };
 
     apply();
