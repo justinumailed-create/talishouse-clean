@@ -20,10 +20,7 @@ import {
 import { TALISU_KB_PATH } from "@/lib/talisu/kb-content";
 import TalisBrandMark from "@/components/talisu/TalisBrandMark";
 import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
-import {
-  DEMO_MAPSITE_PUBLIC_PATH,
-  isDemoMapSitePath,
-} from "@/lib/talispros/demo-mapsite";
+import { MAPSITES_PANEL_PATH } from "@/lib/talispros/demo-mapsite";
 import MarketsNavDropdown from "@/components/talisu/MarketsNavDropdown";
 import LanguageSwitch from "@/components/i18n/LanguageSwitch";
 import { useT } from "@/lib/i18n/client";
@@ -145,7 +142,8 @@ export default function TalisUMktsHeader({
   const mapsitesActive =
     pathname.startsWith("/talispros/mapsite") ||
     pathname.startsWith("/mapsite") ||
-    isDemoMapSitePath(pathname);
+    pathname === MAPSITES_PANEL_PATH ||
+    pathname.startsWith(`${MAPSITES_PANEL_PATH}/`);
 
   useEffect(() => {
     function closeKbPanel() {
@@ -490,7 +488,7 @@ export default function TalisUMktsHeader({
           )}
           {/* Mapsites: direct link to the Demo Mapsite page (FAST Code card lives there). */}
           <Link
-            href={DEMO_MAPSITE_PUBLIC_PATH}
+            href={MAPSITES_PANEL_PATH}
             data-testid="nav-mapsites-link"
             className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
               mapsitesActive
@@ -623,7 +621,7 @@ export default function TalisUMktsHeader({
                 ),
               )}
               {renderMobileLink(
-                DEMO_MAPSITE_PUBLIC_PATH,
+                MAPSITES_PANEL_PATH,
                 t.nav.mapsites,
                 mapsitesActive,
               )}

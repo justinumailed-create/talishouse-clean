@@ -7,12 +7,14 @@ import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import {
   DEMO_MAPSITE_BUILD_PATH,
   DEMO_MAPSITE_PUBLIC_PATH,
+  MAPSITES_PANEL_PATH,
 } from "@/lib/talispros/demo-mapsite-paths";
 import { DEMO_MAPSITE_ID, MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
 
 export {
   DEMO_MAPSITE_BUILD_PATH,
   DEMO_MAPSITE_PUBLIC_PATH,
+  MAPSITES_PANEL_PATH,
   isRetiredDemoMapSitePath,
 } from "@/lib/talispros/demo-mapsite-paths";
 
@@ -24,7 +26,7 @@ export const DEMO_MAPSITE_PDF_FILE_NAME = "Demo-PDF.pdf";
 export function isDemoMapSitePath(pathname: string | null | undefined): boolean {
   const path = pathname?.split("?")[0]?.split("#")[0]?.trim() || "";
   if (!path) return false;
-  return [DEMO_MAPSITE_PUBLIC_PATH, DEMO_MAPSITE_BUILD_PATH].some(
+  return [DEMO_MAPSITE_PUBLIC_PATH, DEMO_MAPSITE_BUILD_PATH, MAPSITES_PANEL_PATH].some(
     (base) => path === base || path.startsWith(`${base}/`),
   );
 }

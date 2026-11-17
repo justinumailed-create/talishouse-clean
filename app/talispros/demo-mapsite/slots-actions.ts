@@ -15,6 +15,7 @@ import type { OwnSlotList } from "@/lib/talispros/fast-code-slots";
 import {
   DEMO_MAPSITE_BUILD_PATH,
   DEMO_MAPSITE_PUBLIC_PATH,
+  MAPSITES_PANEL_PATH,
 } from "@/lib/talispros/demo-mapsite";
 
 type SlotActionResult = { ok: true; list: OwnSlotList } | { ok: false; error: SlotMutationError };
@@ -27,6 +28,7 @@ export async function addFastCodeSlotAction(input: { code: string }): Promise<Sl
   if (!res.ok) return res;
   revalidatePath(DEMO_MAPSITE_BUILD_PATH);
   revalidatePath(DEMO_MAPSITE_PUBLIC_PATH);
+  revalidatePath(MAPSITES_PANEL_PATH);
   return { ok: true, list: await loadOwnSlotList(agent) };
 }
 
@@ -38,6 +40,7 @@ export async function removeFastCodeSlotAction(input: { slotId: string }): Promi
   if (!res.ok) return res;
   revalidatePath(DEMO_MAPSITE_BUILD_PATH);
   revalidatePath(DEMO_MAPSITE_PUBLIC_PATH);
+  revalidatePath(MAPSITES_PANEL_PATH);
   return { ok: true, list: await loadOwnSlotList(agent) };
 }
 

@@ -16,7 +16,7 @@ export const TALISU_PRIMARY_NAV: TalisUNavItem[] = [
   { href: "/catalogue/bookshelf", label: "E-Book", section: "primary" },
   { href: "/talisu/au", label: "Audio", section: "primary" },
   { href: "/register", label: "Register", section: "primary" },
-  { href: "/talispros/demo-mapsite", label: "Demo", section: "primary" },
+  { href: "/mapsites", label: "Demo", section: "primary" },
   { href: "/catalogue", label: "Catalogue", section: "primary" },
   { href: "/talisu/engage", label: "Engage", section: "primary" },
 ];
@@ -170,7 +170,7 @@ export const TALISU_FAQ: {
 export const TALISU_MARKETS_COPY = {
   title: "Markets served",
   body: "Select the PIN nearest you to claim a market of 80 kilometres around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.",
-  /** Demo path. /talisu/demo redirects to /demo. */
+  /** Mapsites panel. /talisu/demo redirects to /mapsites. */
   claimHref: "/talisu/demo",
 } as const;
 
