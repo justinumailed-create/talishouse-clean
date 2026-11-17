@@ -842,6 +842,7 @@ export const de: Dictionary = {
       purchased: "Gekauft",
       readyToPlace: "Bereit zum Setzen",
       buyHeading: "PINs kaufen · {price} CAD pro Stück",
+      checkoutNote: "Jede zusätzliche PIN kostet 7 CAD. Das ist dieselbe Kasse wie die PIN-Option bei der Registrierung.",
       atLimit: "Diese Mapsite hat das Limit von 100 PINs erreicht.",
       quantity: "Anzahl",
       startingCheckout: "Checkout wird gestartet …",

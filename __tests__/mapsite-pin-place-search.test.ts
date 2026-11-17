@@ -46,6 +46,18 @@ describe("PIN Dashboard place-and-fix flow", () => {
     expect(panel).toContain("d.undo");
   });
 
+  it("buys extra PINs through the Register listpin checkout, in CAD", () => {
+    const panel = read("components/talispros/mapsite/MapSitePinDashboard.tsx");
+    expect(panel).toContain('product="listpin"');
+    expect(panel).toContain('subdomain="talispros"');
+    expect(panel).toContain("SamCartWebCheckout");
+    expect(panel).not.toContain("window.location.assign");
+    expect(en.mapsite.pinDashboard.checkoutNote).toContain("$7 CAD");
+    expect(de.mapsite.pinDashboard.checkoutNote).toContain("7 CAD");
+    expect(en.mapsite.pinDashboard.checkoutNote).not.toMatch(/USD|—/);
+    expect(de.mapsite.pinDashboard.checkoutNote).not.toMatch(/USD|—/);
+  });
+
   it("keeps placement ready: map clicks place while PINs remain, extra PINs are draggable", () => {
     const app = read("components/talispros/mapsite/MapSiteApplication.tsx");
     expect(app).toContain('pinEditor.kind === "place" && pinDashboard.remainingToPlace > 0');

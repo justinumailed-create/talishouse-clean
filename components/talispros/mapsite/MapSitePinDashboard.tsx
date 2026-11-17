@@ -20,6 +20,7 @@ import MapSitePlaceSearch, {
   type MapSitePlaceSelection,
 } from "@/components/talispros/mapsite/MapSitePlaceSearch";
 import type { PinCategoryOption } from "@/lib/talispros/mapsite-pin-categories";
+import SamCartWebCheckout from "@/components/talisu/SamCartWebCheckout";
 
 export type PinEditorState =
   | { kind: "idle" }
@@ -63,6 +64,7 @@ export default function MapSitePinDashboard({
   const [latitude, setLatitude] = useState("");
   const [longitude, setLongitude] = useState("");
   const [message, setMessage] = useState<string | null>(null);
+  const [samcartOpen, setSamcartOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const [paused, setPaused] = useState(false);
@@ -125,25 +127,27 @@ export default function MapSitePinDashboard({
   function buyPins() {
     setError(null);
     setMessage(null);
+    if (split.paid > 0) {
+      setSamcartOpen(true);
+      if (split.free === 0) return;
+    }
     startTransition(async () => {
       const result = await createAdditionalPinCheckout({
         mapsiteId,
         fastCode,
-        quantity: safeQuantity,
+        quantity: split.paid > 0 ? split.free : safeQuantity,
         accountTypeSegment,
       });
-      if (result.url) {
-        window.location.assign(result.url);
-        return;
-      }
       if (result.dashboard) {
         onDashboardChange(result.dashboard);
-        setQuantity(1);
-        setMessage(
-          result.freeRedeemed === 1
-            ? d.freeAddedOne
-            : fmt(d.freeAddedMany, { count: result.freeRedeemed }),
-        );
+        if (split.paid === 0) {
+          setQuantity(1);
+          setMessage(
+            result.freeRedeemed === 1
+              ? d.freeAddedOne
+              : fmt(d.freeAddedMany, { count: result.freeRedeemed }),
+          );
+        }
         return;
       }
       setError(result.error || d.errCheckout);
@@ -385,6 +389,19 @@ export default function MapSitePinDashboard({
           <p className="text-[11px] text-neutral-500">
             {room === 1 ? d.leftOne : fmt(d.leftMany, { count: room })}
           </p>
+          {samcartOpen ? (
+            <div className="space-y-2" data-testid="additional-pin-samcart">
+              <p className="text-[12px] leading-snug text-neutral-700">{d.checkoutNote}</p>
+              <SamCartWebCheckout product="listpin" subdomain="talispros" />
+              <button
+                type="button"
+                className="text-[12px] font-medium text-neutral-600 underline"
+                onClick={() => setSamcartOpen(false)}
+              >
+                {d.cancel}
+              </button>
+            </div>
+          ) : null}
         </div>
 
         <div className="space-y-2">
