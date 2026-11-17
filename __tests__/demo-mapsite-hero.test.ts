@@ -29,6 +29,20 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(builder).not.toContain("revealBuilder");
   });
 
+  it("puts the PDF upload above the Demo Mapsites panel", () => {
+    expect(builder.indexOf("<DemoPdfEntry />")).toBeGreaterThan(-1);
+    expect(builder.indexOf("<DemoPdfEntry />")).toBeLessThan(builder.indexOf("demo-hero__panel"));
+    expect(builder.indexOf("demo-hero__panel")).toBeLessThan(builder.indexOf("<DemoHeroMap />"));
+    expect(en.demo.pdfEntry.title).toBe("Upload your PDF to build your Mapsite");
+    expect(de.demo.pdfEntry.title).toBe("Laden Sie Ihr PDF hoch, um Ihre Mapsite zu erstellen");
+    const copy = `${en.demo.pdfEntry.title} ${en.demo.pdfEntry.hint} ${de.demo.pdfEntry.title} ${de.demo.pdfEntry.hint}`;
+    expect(copy).not.toMatch(/—|Mapsites?™|FAST Code™/);
+    expect(copy).not.toContain("Tsplits™");
+    expect(read("components/talispros/demo-mapsite/DemoPdfEntry.tsx")).toContain("DemoEbookGenerateClient");
+    expect(read("components/talispros/demo-mapsite/DemoPdfEntry.tsx")).toContain("inlineFinish");
+    expect(read("app/talispros/demo-mapsite/ebook/page.tsx")).toContain("DemoEbookGenerateClient");
+  });
+
   it("shows the hero first; deep links still open the step 1-3 card", () => {
     expect(builder).toContain("useState(initialOpen)");
     expect(builder).toContain("{!showCard ? (");

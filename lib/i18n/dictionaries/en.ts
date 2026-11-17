@@ -903,6 +903,13 @@ export const en = {
         openEbook: "Open the North Shore Nature Centre TEB™",
       },
     },
+    pdfEntry: {
+      title: "Upload your PDF to build your Mapsite",
+      hint: "We turn it into your Talisbook™ and your FAST Code. Then attach it to an existing account, or keep it as a demo.",
+      button: "Upload PDF",
+      starting: "Starting your Mapsite…",
+      error: "We couldn't start your Mapsite. Please try the PDF again.",
+    },
     /** FAST Code slots panel beside the Mapsite card (one list per sales associate). */
     slots: {
       title: "Recently added Mapsites",
