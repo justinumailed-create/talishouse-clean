@@ -168,7 +168,7 @@ export const de: Dictionary = {
         title: "Konventionell",
         body: "So wurden Immobilien schon immer erworben: Sie wählen eine Immobilie aus, geben ein Angebot ab, das Angebot wird angenommen, und Sie zahlen bar oder finanzieren. In beiden Fällen geht das Eigentum erst über, wenn der letzte Cent bezahlt ist.",
         result:
-          "Das Ergebnis: Bis zur vollständigen Bezahlung haben Sie keinerlei Eigentumsrechte – nach Abschluss der Transaktion dafür die vollen Eigentumsrechte.",
+          "Das Ergebnis: Bis zur vollständigen Bezahlung haben Sie keinerlei Eigentumsrechte, nach Abschluss der Transaktion dafür die vollen Eigentumsrechte.",
         learnMoreLabel: "Mehr erfahren",
         learnMoreHref: "/talisu/discuss?topic=conventional",
       },
@@ -193,7 +193,7 @@ export const de: Dictionary = {
       {
         id: "tokenization",
         title: "Tokenisierung",
-        body: "Bei der Tokenisierung wird ein Interesse – ganz oder anteilig – als übertragbarer digitaler Vermögenswert erfasst. Langfristig ist dies die sauberste und am besten prüfbare Option für Eigentums- und Transaktionsstruktur sowie Buchführung.",
+        body: "Bei der Tokenisierung wird ein Interesse, ganz oder anteilig, als übertragbarer digitaler Vermögenswert erfasst. Langfristig ist dies die sauberste und am besten prüfbare Option für Eigentums- und Transaktionsstruktur sowie Buchführung.",
         result:
           "Das Ergebnis: Miteigentümer lassen sich leicht aufnehmen, die Anteile bleiben proportional, und Kapital kann beschafft werden, ohne den zugrunde liegenden Vermögenswert anzutasten.",
         learnMoreLabel: "Mehr erfahren",
@@ -653,10 +653,10 @@ export const de: Dictionary = {
     pageSubtitle:
       "Jedes Projekt beginnt mit einer Vision und der passenden Transaktionsstruktur",
     pageIntro:
-      "Entdecken Sie Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung, wählen Sie die Struktur, die zu Ihrem Projekt passt, und teilen Sie dann Ihre Vision. Ein Berater meldet sich bei Ihnen – ohne Registrierung und ohne FAST Code.",
+      "Entdecken Sie Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung, wählen Sie die Struktur, die zu Ihrem Projekt passt, und teilen Sie dann Ihre Vision. Ein Berater meldet sich bei Ihnen.",
     pageKicker: "Tsplits™ · Berater",
     pageLead:
-      "Sagen Sie uns, wo Ihr Projekt liegt und was Sie sich vorstellen. Ein Berater meldet sich bei Ihnen – ohne Registrierung und ohne FAST Code.",
+      "Sagen Sie uns, wo Ihr Projekt liegt und was Sie sich vorstellen. Ein Berater meldet sich bei Ihnen.",
     pageVision: "Ihre Vision",
     pageSubmit: "Vision teilen",
     pageNote: "Alle Angebote und Zahlungen erfolgen in kanadischen Dollar (CAD).",
@@ -665,7 +665,12 @@ export const de: Dictionary = {
     pageDoneBack: "Zurück zu Tsplits™",
     topicHint: "(mit den Schaltflächen wählen)",
     openPage: "Als ganze Seite mit Google-erkanntem Standort öffnen →",
-    topic: "Transaktionsstruktur",
+    topic: "Bevorzugte Transaktionsstruktur",
+    structuresAbout: "Zu diesen Strukturen",
+    structuresPanelTitle: "Transaktionsstrukturen",
+    structuresClose: "Schließen",
+    talkWebster: "Mit Webster sprechen",
+    websterRole: "Fulfilment-Manager",
     location: "Standort",
     locationPlaceholder: "Stadt, Adresse oder Ort suchen",
     locationFallbackPlaceholder: "Stadt, Provinz / Bundesstaat, Land",

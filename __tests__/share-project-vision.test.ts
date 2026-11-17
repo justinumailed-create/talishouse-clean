@@ -45,11 +45,26 @@ describe("Share a Project Vision (/talisu/discuss) redesign", () => {
     expect(ui).toContain("isValidNanpPhone");
     expect(ui).toContain("MapSitePlaceSearch");
     expect(ui).toContain('data-testid="discuss-topic"');
+    expect(ui).toContain('data-testid="discuss-structures-open"');
+    expect(ui).toContain('data-testid="discuss-webster"');
+    expect(ui).toContain("/webster?call=1");
+    expect(readFileSync(resolve("app/vision/page.tsx"), "utf8")).toContain('pageMetadata("/vision")');
   });
 
   it("has EN/DE copy in CAD with no dev text", () => {
     expect(en.contactForm.pageSubmit).toBe("Share Your Vision");
     expect(de.contactForm.pageSubmit).toBe("Vision teilen");
+    expect(en.contactForm.pageLead).toBe(
+      "Tell us where your project is and what you imagine. An advisor will contact you.",
+    );
+    expect(en.contactForm.pageLead).not.toMatch(/no registration|FAST Code/i);
+    expect(de.contactForm.pageLead).not.toMatch(/ohne Registrierung|FAST Code/i);
+    expect(en.contactForm.topic).toBe("Preferred Transaction Structure");
+    expect(de.contactForm.topic).toBe("Bevorzugte Transaktionsstruktur");
+    expect(de.home.ownershipSections[3].body).toContain("Interesse, ganz oder anteilig,");
+    expect(
+      de.home.ownershipSections.map((section) => `${section.body} ${section.result}`).join("\n"),
+    ).not.toMatch(/[—–]/);
     expect(en.contactForm.pageNote).toContain("CAD");
     expect(de.contactForm.pageNote).toContain("CAD");
     const all = JSON.stringify([en.contactForm, de.contactForm]);

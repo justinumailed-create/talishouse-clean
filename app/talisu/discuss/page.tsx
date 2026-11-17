@@ -15,9 +15,12 @@ export async function generateMetadata() {
 export default async function TalisUDiscussPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ topic?: string | string[] }>;
+  searchParams?: Promise<{ topic?: string | string[]; code?: string | string[] }>;
 }) {
-  const raw = (await searchParams)?.topic;
+  const query = (await searchParams) ?? {};
+  const raw = query.topic;
+  const rawCode = query.code;
   const topic = ownershipTopicFromId(Array.isArray(raw) ? raw[0] : raw);
-  return <DiscussProjectClient topic={topic} />;
+  const code = (Array.isArray(rawCode) ? rawCode[0] : rawCode)?.trim() || null;
+  return <DiscussProjectClient topic={topic} code={code} />;
 }
