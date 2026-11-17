@@ -1,5 +1,4 @@
 import { personalHomePath } from "@/lib/talispros/personal-home";
-import { buildClaimedMapSitePath } from "@/lib/talispros/mapsite-state";
 
 /** A stored status that is no longer an open, unclaimed slot. */
 export function isClaimedMapSiteStatus(status: string | null | undefined): boolean {
@@ -21,21 +20,13 @@ export function mapsiteAishaInvitation(): "callback" {
 }
 
 /**
- * Homepage FAST Code Open. A claimed code goes to that Mapsite's map.
- * The account-type segment comes from the Mapsite's own plan, not a
- * hardcoded code list. Unclaimed codes still open the personal home page.
+ * Homepage FAST Code Open. Every code opens that owner's personal homepage
+ * first. The Mapsite stays one click away from that page.
  */
 export function fastCodeEntryHref(options: {
   fastCode: string;
   accountType?: string | null;
   claimed?: boolean;
 }): string {
-  const code = options.fastCode.trim().toLowerCase();
-  if (options.claimed) {
-    return buildClaimedMapSitePath({
-      fastCode: code,
-      accountType: options.accountType,
-    });
-  }
-  return personalHomePath(code);
+  return personalHomePath(options.fastCode);
 }
