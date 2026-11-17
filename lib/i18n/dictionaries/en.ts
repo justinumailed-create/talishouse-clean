@@ -315,6 +315,7 @@ export const en = {
     openPage: "Open as a full page with a Google-recognized location →",
     topic: "Preferred Transaction Structure",
     structuresAbout: "About these structures",
+    structuresHint: "Tap to compare structures",
     structuresPanelTitle: "Transaction structures",
     structuresClose: "Close",
     talkWebster: "Talk to Webster",

@@ -196,14 +196,14 @@ describe("Mapsite listing media", () => {
     expect(mapsiteAgencyLogoUrl("/uploads/agency.png")).toBe("/uploads/agency.png");
     expect(mapsiteAgencyLogoUrl(null)).toBe(MAPSITE_HEADER_FALLBACK_LOGO);
     expect(mapsiteAgencyLogoUrl("/logo.png")).toBe(MAPSITE_HEADER_FALLBACK_LOGO);
-    expect(mapsiteAgencyDisplayName(null)).toBe("TSplits");
+    expect(mapsiteAgencyDisplayName(null)).toBe("Tsplits™");
     expect(mapsiteAgencyDisplayName(null, "Taliswebs")).toBe("");
     expect(mapsiteAgencyDisplayName(null, "Chagatown")).toBe("Chagatown");
     expect(mapsiteAgencyDisplayName("/uploads/agency.png", "Cape Realty")).toBe(
       "Cape Realty",
     );
     expect(mapsiteAgencyDisplayName("/uploads/agency.png", "For-Sale-By-Owner")).toBe(
-      "TSplits",
+      "Tsplits™",
     );
     expect(
       mapsiteCardLogoUrl(

@@ -74,7 +74,7 @@ export const TALISU_FAQ: {
         "It is a map-based online navigation system that can be deployed industry adjacent and adds flexibility to how you promote major purchase products (those that typically exceed $10,000 per unit and are immobile, roll, float or fly).",
     },
     {
-      question: "What does TSPLITS stand for?",
+      question: "What does Tsplits™ stand for?",
       answer:
         "Talisman Simple Project Lead & Income Tracking System. Talisman, because we want to be your good luck charms. SPLITS because we share advertising revenue generated from your account.",
     },

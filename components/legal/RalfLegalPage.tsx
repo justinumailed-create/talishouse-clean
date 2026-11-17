@@ -63,7 +63,7 @@ export default function RalfLegalPage({ document }: { document: RalfLegalDocumen
           <p className="text-[16px] font-semibold tracking-wide text-[#046BD9]">{document.coverDate}</p>
           <p className="mt-8 text-[1.35rem] font-bold tracking-wide text-[#046BD9]">{document.coverTitle}</p>
           <p className="ralf-legal-wordmark mt-2 text-[3.4rem] font-bold leading-none tracking-tight sm:text-[4.5rem]">
-            TSPLITS™
+            Tsplits™
           </p>
         </header>
         <article className="mt-10 space-y-4">
