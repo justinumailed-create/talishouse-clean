@@ -8,7 +8,9 @@ import {
   PERSONAL_HOME_DRAFT_EVENT,
   PERSONAL_HOME_LIMITS,
   PERSONAL_HOME_OPEN_EDITOR_EVENT,
+  PERSONAL_HOME_VIDEO_MAX_BYTES,
   type PersonalHomeButton,
+  type PersonalHomeSideMedia,
   type PersonalHomeContent,
   type PersonalHomeDefaults,
   type PersonalHomeDraft,
@@ -106,6 +108,8 @@ export default function PersonalHomeEditor({
   const t = personalHome.edit;
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+  const sideImageRef = useRef<HTMLInputElement>(null);
+  const sideVideoRef = useRef<HTMLInputElement>(null);
   const [open, setOpen] = useState(initialOpen);
 
   useEffect(() => {
@@ -116,6 +120,10 @@ export default function PersonalHomeEditor({
   const [pending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(saved.imageUrl);
+  const [sideKind, setSideKind] = useState<"" | PersonalHomeSideMedia["kind"]>(
+    saved.sideMedia?.kind ?? "",
+  );
+  const [sideUrl, setSideUrl] = useState(saved.sideMedia?.url ?? "");
   const [kicker, setKicker] = useState(saved.kicker ?? "");
   const [headline, setHeadline] = useState(saved.headline ?? "");
   const [contactName, setContactName] = useState(saved.contactName ?? "");
@@ -133,6 +141,8 @@ export default function PersonalHomeEditor({
     if (error === "auth") return t.errAuth;
     if (error === "buttons") return t.errButtons;
     if (error === "photo") return t.errPhoto;
+    if (error === "video") return t.errVideo;
+    if (error === "media") return t.errMedia;
     return t.errSave;
   }
 
@@ -169,6 +179,82 @@ export default function PersonalHomeEditor({
     }
   }
 
+  function sidePayload(): PersonalHomeSideMedia | null {
+    const url = sideUrl.trim();
+    if (!sideKind || !url) return null;
+    if (sideKind === "embed") return { kind: "embed", url, provider: "youtube" };
+    return { kind: sideKind, url };
+  }
+
+  async function handleSideImage(file: File | undefined) {
+    if (!file) return;
+    setMessage(null);
+    setUploading(true);
+    try {
+      const optimized = await optimizeImageFileForUpload(file, {
+        kind: "agent",
+        label: t.sidePicture,
+      });
+      const body = new FormData();
+      body.set("fastCode", fastCode);
+      body.set("file", optimized);
+      const response = await fetch("/api/talispros/personal-home/upload-image", {
+        method: "POST",
+        body,
+      });
+      const result = (await response.json().catch(() => null)) as
+        | { ok: true; url: string }
+        | { ok: false; error: string }
+        | null;
+      if (!result || !result.ok) {
+        setMessage({ tone: "error", text: errorText(result?.ok === false ? result.error : "photo") });
+        return;
+      }
+      setSideKind("image");
+      setSideUrl(result.url);
+    } catch {
+      setMessage({ tone: "error", text: t.errPhoto });
+    } finally {
+      setUploading(false);
+      if (sideImageRef.current) sideImageRef.current.value = "";
+    }
+  }
+
+  async function handleSideVideo(file: File | undefined) {
+    if (!file) return;
+    setMessage(null);
+    if (file.size > PERSONAL_HOME_VIDEO_MAX_BYTES) {
+      setMessage({ tone: "error", text: t.errVideo });
+      if (sideVideoRef.current) sideVideoRef.current.value = "";
+      return;
+    }
+    setUploading(true);
+    try {
+      const body = new FormData();
+      body.set("fastCode", fastCode);
+      body.set("file", file);
+      const response = await fetch("/api/talispros/personal-home/upload-image", {
+        method: "POST",
+        body,
+      });
+      const result = (await response.json().catch(() => null)) as
+        | { ok: true; url: string }
+        | { ok: false; error: string }
+        | null;
+      if (!result || !result.ok) {
+        setMessage({ tone: "error", text: errorText(result?.ok === false ? result.error : "video") });
+        return;
+      }
+      setSideKind("video");
+      setSideUrl(result.url);
+    } catch {
+      setMessage({ tone: "error", text: t.errVideo });
+    } finally {
+      setUploading(false);
+      if (sideVideoRef.current) sideVideoRef.current.value = "";
+    }
+  }
+
   function handleSave() {
     setMessage(null);
     setInvalid([]);
@@ -181,6 +267,7 @@ export default function PersonalHomeEditor({
         contactName,
         writeUp,
         buttons,
+        sideMedia: sidePayload(),
       });
       if (!result.ok) {
         setInvalid(result.invalidButtons ?? []);
@@ -203,6 +290,8 @@ export default function PersonalHomeEditor({
         return;
       }
       setImageUrl(null);
+      setSideKind("");
+      setSideUrl("");
       setKicker("");
       setHeadline("");
       setContactName("");
@@ -271,7 +360,8 @@ export default function PersonalHomeEditor({
           <div className="text-[13px] text-neutral-500">{t.defaultHint}</div>
 
           <div>
-            <div className={LABEL}>{t.photo}</div>
+            <div className={LABEL}>{t.buttonPhoto}</div>
+            <div className="mt-1 text-[12px] text-neutral-500">{t.buttonPhotoHint}</div>
             <div className="mt-2 flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -308,6 +398,95 @@ export default function PersonalHomeEditor({
                 ) : null}
               </div>
             </div>
+          </div>
+
+          <div data-testid="personal-home-side-fields">
+            <div className={LABEL}>{t.sideMedia}</div>
+            <div className="mt-1 text-[12px] leading-snug text-neutral-500">{t.sideHint}</div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {(
+                [
+                  ["", t.sideSame],
+                  ["image", t.sidePicture],
+                  ["video", t.sideVideo],
+                  ["embed", t.sideEmbed],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id || "same"}
+                  type="button"
+                  disabled={busy}
+                  data-testid={`personal-home-side-${id || "same"}`}
+                  onClick={() => {
+                    if (id !== sideKind) setSideUrl("");
+                    setSideKind(id);
+                  }}
+                  className={`rounded-full border px-3 py-1.5 text-[13px] font-semibold ${
+                    sideKind === id
+                      ? "border-[#046BD9] bg-[#046BD9] text-white"
+                      : "border-neutral-300 bg-white text-neutral-800"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {sideKind === "image" ? (
+              <div className="mt-3">
+                <input
+                  ref={sideImageRef}
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  className="sr-only"
+                  data-testid="personal-home-side-image-input"
+                  onChange={(event) => handleSideImage(event.target.files?.[0])}
+                />
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => sideImageRef.current?.click()}
+                  className="inline-flex min-h-9 items-center rounded-full bg-[#046BD9] px-4 text-[14px] font-semibold text-white hover:bg-[#0358b3] disabled:opacity-60"
+                >
+                  {uploading ? t.uploading : sideUrl ? t.replacePhoto : t.uploadPhoto}
+                </button>
+              </div>
+            ) : null}
+            {sideKind === "video" ? (
+              <div className="mt-3">
+                <input
+                  ref={sideVideoRef}
+                  type="file"
+                  accept="video/mp4"
+                  className="sr-only"
+                  data-testid="personal-home-side-video-input"
+                  onChange={(event) => handleSideVideo(event.target.files?.[0])}
+                />
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => sideVideoRef.current?.click()}
+                  className="inline-flex min-h-9 items-center rounded-full bg-[#046BD9] px-4 text-[14px] font-semibold text-white hover:bg-[#0358b3] disabled:opacity-60"
+                >
+                  {uploading ? t.uploading : t.sideVideo}
+                </button>
+                {sideUrl ? (
+                  <div className="mt-2 text-[12px] text-neutral-600">{t.sideVideoReady}</div>
+                ) : null}
+              </div>
+            ) : null}
+            {sideKind === "embed" ? (
+              <label className="mt-3 block">
+                <span className={LABEL}>{t.sideAddress}</span>
+                <input
+                  value={sideUrl}
+                  disabled={busy}
+                  placeholder="https://www.youtube.com/watch?v="
+                  data-testid="personal-home-side-url"
+                  onChange={(event) => setSideUrl(event.target.value)}
+                  className={INPUT}
+                />
+              </label>
+            ) : null}
           </div>
 
           <label className="block">

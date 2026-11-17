@@ -26,6 +26,8 @@ export default function AdviserLayout({
   title,
   titleClassName,
   media,
+  mediaFit = "map",
+  split = "half",
   children,
 }: {
   testId: string;
@@ -41,6 +43,10 @@ export default function AdviserLayout({
   titleClassName?: string;
   /** Replaces the portrait. Used for the personal-home Mapsite. */
   media?: ReactNode;
+  /** Map keeps the tall map box. Cover fills the portrait box without growing it. */
+  mediaFit?: "map" | "cover";
+  /** Home uses a 40/60 split. Other adviser pages stay half and half. */
+  split?: "half" | "home";
   children?: ReactNode;
 }) {
   return (
@@ -48,9 +54,15 @@ export default function AdviserLayout({
       className="talis-working-bg talis-adviser flex flex-col text-neutral-950 antialiased"
       data-testid={testId}
     >
-      <article className="talis-adviser__grid mx-auto grid w-full max-w-[1400px] flex-1 lg:grid-cols-2">
+      <article
+        className={`talis-adviser__grid mx-auto grid w-full max-w-[1400px] flex-1 ${
+          split === "home" ? "lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]" : "lg:grid-cols-2"
+        }`}
+      >
         <div
-          className={`talis-adviser__photo relative shrink-0 overflow-hidden bg-[#2a2a2a] ${media ? "talis-adviser__photo--map" : ""}`}
+          className={`talis-adviser__photo relative shrink-0 overflow-hidden bg-[#2a2a2a] ${
+            media && mediaFit === "map" ? "talis-adviser__photo--map" : ""
+          }`}
           data-testid={`${testId}-photo`}
         >
           {media ?? (

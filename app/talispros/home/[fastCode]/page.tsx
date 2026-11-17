@@ -5,6 +5,7 @@ import PersonalHomeEditor from "@/components/talispros/personal-home/PersonalHom
 import PersonalHomeMapsite from "@/components/talispros/personal-home/PersonalHomeMapsite";
 import LegalLinks from "@/components/legal/LegalLinks";
 import PersonalHomeNav from "@/components/talispros/personal-home/PersonalHomeNav";
+import PersonalHomeSide from "@/components/talispros/personal-home/PersonalHomeSide";
 import MapsiteAisha from "@/components/talispros/MapsiteAisha";
 import { mapsiteShowsAisha } from "@/lib/talispros/aisha-mapsites";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -152,7 +153,10 @@ export default async function PersonalHomePage({
           headline={resolved.headline}
           contactName={resolved.contactName}
           ownerName={data.displayName}
-          imageSrc={resolved.imageUrl}
+          imageSrc={
+            resolved.sideMedia?.kind === "image" ? resolved.sideMedia.url : resolved.imageUrl
+          }
+          mediaFit={homeMap ? "map" : "cover"}
           imageAlt={fillPersonalHomeCopy(getDictionary(locale).personalHome.photoAlt, {
             name: resolved.headline || data.displayName,
           })}
@@ -167,6 +171,8 @@ export default async function PersonalHomePage({
                   claimHref={personalHomeClaimMarketHref(data.view.claimAudience)}
                 />
               </div>
+            ) : resolved.sideMedia && resolved.sideMedia.kind !== "image" ? (
+              <PersonalHomeSide media={resolved.sideMedia} />
             ) : null
           }
         >

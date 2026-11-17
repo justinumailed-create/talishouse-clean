@@ -2,14 +2,17 @@ import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin
 import {
   emptyPersonalHomeContent,
   normalizePersonalHomeButtons,
+  normalizePersonalHomeSideMedia,
   type PersonalHomeButton,
   type PersonalHomeContent,
+  type PersonalHomeSideMedia,
 } from "@/lib/talispros/personal-home";
 
 /** Storage: supabase/migrations/113_mapsite_personal_home.sql */
 const TABLE = "mapsite_personal_home";
 const COLUMNS = "mapsite_id, fast_code, image_url, kicker, headline, write_up, buttons, updated_at";
 const COLUMNS_WITH_CONTACT = COLUMNS.replace("headline,", "headline, contact_name,");
+const COLUMNS_WITH_SIDE = COLUMNS_WITH_CONTACT.replace("buttons,", "buttons, side_media,");
 
 type Row = {
   mapsite_id: string;
@@ -20,6 +23,7 @@ type Row = {
   contact_name?: string | null;
   write_up: string | null;
   buttons: unknown;
+  side_media?: unknown;
   updated_at: string | null;
 };
 
@@ -32,6 +36,7 @@ function rowToContent(row: Row | null | undefined): PersonalHomeContent {
     contactName: row.contact_name?.trim() || null,
     writeUp: row.write_up?.trim() || null,
     buttons: normalizePersonalHomeButtons(row.buttons),
+    sideMedia: normalizePersonalHomeSideMedia(row.side_media),
     updatedAt: row.updated_at ?? null,
   };
 }
@@ -42,6 +47,10 @@ function isMissingTable(message: string | undefined): boolean {
 
 function isMissingContactColumn(message: string | undefined): boolean {
   return /contact_name/i.test(message || "") && isMissingTable(message);
+}
+
+function isMissingSideColumn(message: string | undefined): boolean {
+  return /side_media/i.test(message || "") && isMissingTable(message);
 }
 
 /**
@@ -56,12 +65,21 @@ export async function loadPersonalHomeContent(
   try {
     const first = await getSupabaseAdmin()
       .from(TABLE)
-      .select(COLUMNS_WITH_CONTACT)
+      .select(COLUMNS_WITH_SIDE)
       .ilike("fast_code", code)
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    const query = first.error && isMissingContactColumn(first.error.message)
+    const withContact = first.error && isMissingSideColumn(first.error.message)
+      ? await getSupabaseAdmin()
+          .from(TABLE)
+          .select(COLUMNS_WITH_CONTACT)
+          .ilike("fast_code", code)
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : first;
+    const query = withContact.error && isMissingContactColumn(withContact.error.message)
       ? await getSupabaseAdmin()
           .from(TABLE)
           .select(COLUMNS)
@@ -69,7 +87,7 @@ export async function loadPersonalHomeContent(
           .order("updated_at", { ascending: false })
           .limit(1)
           .maybeSingle()
-      : first;
+      : withContact;
     if (query.error) {
       if (!isMissingTable(query.error.message)) {
         console.error("[personal-home] load failed:", query.error.message);
@@ -116,7 +134,8 @@ export async function savePersonalHomeContent(input: {
   contactName: string | null;
   writeUp: string | null;
   buttons: PersonalHomeButton[];
-}): Promise<{ content?: PersonalHomeContent; error?: "storage" | "save" }> {
+  sideMedia: PersonalHomeSideMedia | null;
+}): Promise<{ content?: PersonalHomeContent; error?: "storage" | "media" | "save" }> {
   if (!isSupabaseAdminConfigured()) return { error: "storage" };
   const base = {
     mapsite_id: input.mapsiteId,
@@ -128,11 +147,24 @@ export async function savePersonalHomeContent(input: {
     buttons: input.buttons,
     updated_at: new Date().toISOString(),
   };
-  const withContact = await getSupabaseAdmin()
+  const withSide = await getSupabaseAdmin()
     .from(TABLE)
-    .upsert({ ...base, contact_name: input.contactName }, { onConflict: "mapsite_id" })
-    .select(COLUMNS_WITH_CONTACT)
+    .upsert(
+      { ...base, contact_name: input.contactName, side_media: input.sideMedia },
+      { onConflict: "mapsite_id" },
+    )
+    .select(COLUMNS_WITH_SIDE)
     .maybeSingle();
+  if (withSide.error && isMissingSideColumn(withSide.error.message) && input.sideMedia) {
+    return { error: "media" };
+  }
+  const withContact = withSide.error && isMissingSideColumn(withSide.error.message)
+    ? await getSupabaseAdmin()
+        .from(TABLE)
+        .upsert({ ...base, contact_name: input.contactName }, { onConflict: "mapsite_id" })
+        .select(COLUMNS_WITH_CONTACT)
+        .maybeSingle()
+    : withSide;
   const saved = withContact.error && isMissingContactColumn(withContact.error.message)
     ? await getSupabaseAdmin()
         .from(TABLE)

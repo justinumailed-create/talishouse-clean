@@ -10,9 +10,11 @@ import {
   cleanPersonalHomeText,
   invalidPersonalHomeButtons,
   normalizePersonalHomeButtons,
+  normalizePersonalHomeSideMedia,
   personalHomePath,
   type PersonalHomeButtonContext,
   type PersonalHomeContent,
+  type PersonalHomeSideMedia,
 } from "@/lib/talispros/personal-home";
 import {
   findMapSiteIdentityByFastCode,
@@ -21,7 +23,7 @@ import {
 } from "@/lib/talispros/personal-home-service";
 import { canEditPersonalHome } from "@/lib/talispros/personal-home-page";
 
-export type PersonalHomeActionError = "auth" | "buttons" | "photo" | "save";
+export type PersonalHomeActionError = "auth" | "buttons" | "photo" | "media" | "save";
 
 export type PersonalHomeActionResult =
   | { ok: true; content: PersonalHomeContent | null }
@@ -55,6 +57,7 @@ export async function savePersonalHomeAction(input: {
   contactName?: string | null;
   writeUp?: string | null;
   buttons?: Array<{ label?: string; href?: string; kind?: string; pinId?: string }> | null;
+  sideMedia?: PersonalHomeSideMedia | null;
 }): Promise<PersonalHomeActionResult> {
   const identity = await authorize(input.fastCode);
   if (!identity) return { ok: false, error: "auth" };
@@ -71,6 +74,16 @@ export async function savePersonalHomeAction(input: {
     return { ok: false, error: "buttons", invalidButtons };
   }
 
+  const sideMedia = normalizePersonalHomeSideMedia(input.sideMedia);
+  if (input.sideMedia && !sideMedia) return { ok: false, error: "media" };
+  if (
+    sideMedia &&
+    sideMedia.kind !== "embed" &&
+    !isAllowedOwnerImageUrl(sideMedia.url, process.env.NEXT_PUBLIC_SUPABASE_URL)
+  ) {
+    return { ok: false, error: "media" };
+  }
+
   const result = await savePersonalHomeContent({
     mapsiteId: identity.id,
     fastCode: identity.fastCode,
@@ -82,7 +95,9 @@ export async function savePersonalHomeAction(input: {
       multiline: true,
     }),
     buttons: normalizePersonalHomeButtons(rawButtons, context),
+    sideMedia,
   });
+  if (result.error === "media") return { ok: false, error: "media" };
   if (result.error || !result.content) return { ok: false, error: "save" };
 
   revalidatePath(personalHomePath(identity.fastCode));
