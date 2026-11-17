@@ -147,7 +147,7 @@ describe("Thorsten P down-payment checkout is open to everyone", () => {
 
   it("keeps the PMC gate on every other registration page", () => {
     for (const file of [
-      "app/talisu/reg/page.tsx",
+      "app/register/page.tsx",
       "app/register/page.tsx",
       "app/subscription/page.tsx",
       "app/talispros/register/page.tsx",
@@ -263,7 +263,7 @@ describe("Thorsten P catalogue landing", () => {
     expect(markup).not.toContain('data-testid="engage-lock-reason-structure"');
     expect(markup).not.toContain('data-testid="engage-selected-structure"');
     expect(markup).not.toContain("Structure:");
-    expect(hrefsOf(markup).some((h) => h.startsWith("/talisu/reg"))).toBe(false);
+    expect(hrefsOf(markup).some((h) => h.startsWith("/register"))).toBe(false);
     const multi = html(await renderEngage({ product: "P03,P07" }));
     expect(checkoutHrefs(multi)).toEqual(["/talisu/engage?step=pay&product=P03,P07"]);
     expect(multi).toContain("Selected: P03, P07");
@@ -317,13 +317,13 @@ describe("Thorsten P catalogue landing", () => {
   it("checkout Change goes back to the landing with the designs (no structure, no Aisha link)", async () => {
     const markup = renderToStaticMarkup((await renderEngage({ step: "pay", product: "P07" })) as ReactElement);
     expect(hrefsOf(markup)).toContain("/talisu/engage?product=P07");
-    expect(hrefsOf(markup).some((h) => h.startsWith("/talisu/reg"))).toBe(false);
+    expect(hrefsOf(markup).some((h) => h.startsWith("/register"))).toBe(false);
     expect(markup).not.toContain("#structures");
     expect(markup).toContain("Thorsten P");
     expect(markup).not.toContain("Webster");
   });
 
-  it("leaves the pill and big CTA props unused on Aisha's /talisu/reg landing", () => {
-    expect(read("app/talisu/reg/page.tsx")).not.toMatch(/headlineCtaHref|mainCta/);
+  it("leaves the pill and big CTA props unused on Aisha's /register landing", () => {
+    expect(read("app/register/page.tsx")).not.toMatch(/headlineCtaHref|mainCta/);
   });
 });

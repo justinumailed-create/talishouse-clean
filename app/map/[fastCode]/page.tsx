@@ -19,10 +19,6 @@ import {
   accountTypeForAudience,
   type MapSiteCapabilityAccountType,
 } from "@/lib/talispros/account-capabilities";
-import {
-  mapsiteAccountTypeSegment,
-  MAPSITE_APP_PATH,
-} from "@/lib/talispros/mapsite-state";
 import { getMapSiteEditToolbarState, isOwnMapSite } from "@/lib/mapsite-edit-auth";
 import { loadMapSiteOwnerCustomizations } from "@/lib/talispros/mapsite-owner-customizations-service";
 import {
@@ -30,7 +26,8 @@ import {
   resolveMapSitePaymentPlanType,
   resolveMapSiteRequestId,
   getMapSiteActivationPaymentStatus,
-} from "../../actions";
+} from "@/app/talispros/mapsite/actions";
+import { resolveClaimedMapSiteAccountTypeSegment } from "@/app/talispros/mapsites/actions";
 import {
   reconcileMapSiteStripeForViewer,
   shouldReconcileClaimedMapSiteFromStripe,
@@ -65,7 +62,7 @@ import { isFastCodeDisqualified } from "@/lib/talispros/market-disqualify-server
 
 export const dynamic = "force-dynamic";
 
-type RouteParams = Promise<{ accountType: string; fastCode: string }>;
+type RouteParams = Promise<{ fastCode: string }>;
 
 function firstParam(
   value: string | string[] | undefined
@@ -94,9 +91,9 @@ export async function generateMetadata({
 }: {
   params: RouteParams;
 }): Promise<Metadata> {
-  const { accountType, fastCode } = await params;
+  const { fastCode } = await params;
   const code = fastCode.trim().toUpperCase();
-  const path = `${MAPSITE_APP_PATH}/${mapsiteAccountTypeSegment(accountType)}/${fastCode.trim().toLowerCase()}`;
+  const path = `/map/${fastCode.trim().toLowerCase()}`;
   const ogImage = isAllPinsFastCode(fastCode)
     ? resolveMapSiteOgImage(fastCode)
     : await resolveBrandedMapSiteOgImage(fastCode);
@@ -142,14 +139,14 @@ export default async function ClaimedMapSiteByAccountTypePage({
   params: RouteParams;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { accountType: rawAccountType, fastCode: rawFastCode } = await params;
+  const { fastCode: rawFastCode } = await params;
   const query = await searchParams;
-  const accountType = mapsiteAccountTypeSegment(rawAccountType);
   const fastCode = rawFastCode?.trim() || "";
 
   if (!fastCode || fastCode.toLowerCase() === "demo") {
     notFound();
   }
+  const accountType = await resolveClaimedMapSiteAccountTypeSegment({ fastCode });
 
   const showActivatePayment = isTruthyParam(firstParam(query[ACTIVATE_QUERY]));
   const checkoutStatus = parseCheckoutStatus(firstParam(query[CHECKOUT_QUERY]));
@@ -369,7 +366,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       initialRootContext={rootContext}
       personalHomeNav={{
         homeHref: personalHomePath(fastCode),
-        mapsiteHref: `${MAPSITE_APP_PATH}/${accountType}/${fastCode.toLowerCase()}`,
+        mapsiteHref: `/map/${fastCode.toLowerCase()}`,
         owner: ownerPill,
       }}
     />

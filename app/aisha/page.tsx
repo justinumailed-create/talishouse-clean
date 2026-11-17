@@ -15,9 +15,10 @@ export async function generateMetadata() {
     return {
       title: "Aisha C., AMBA",
       description: line,
-      path: "/talispros/aisha",
+      path: "/aisha",
       image: ASSISTANT_PERSONAS.aisha.portraitSrc,
       alt: "Aisha C., AMBA",
+      noindex: true,
     };
   });
 }

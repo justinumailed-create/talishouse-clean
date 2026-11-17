@@ -6,7 +6,7 @@ const read = (p: string) => readFileSync(resolve(p), "utf8");
 
 describe("Markets page gate (admins, superadmins and signed-in agents only)", () => {
   it("asks for the existing Global Admin password instead of sending visitors Home", () => {
-    const page = read("app/talisu/mkts/page.tsx");
+    const page = read("app/markets/page.tsx");
     const gate = read("components/talisu/MarketsMapOrGate.tsx");
     const action = read("app/talisu/mkts/actions.ts");
     expect(page).toContain("<MarketsMapOrGate");

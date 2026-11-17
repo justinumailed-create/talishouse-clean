@@ -22,7 +22,7 @@ export function safeMapSiteBackHref(
     value.startsWith("/") &&
     !value.startsWith("//") &&
     !value.includes("\\") &&
-    (value.startsWith("/talispros/mapsite") || value.startsWith("/mapsite/"))
+    (value.startsWith("/talispros/mapsite") || value.startsWith("/mapsite/") || value.startsWith("/map/"))
   ) {
     return value;
   }

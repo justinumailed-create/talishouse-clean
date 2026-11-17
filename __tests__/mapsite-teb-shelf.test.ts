@@ -53,13 +53,13 @@ describe("Mapsite TTV™ schedule href", () => {
 
   it("returns to that FAST code’s listings Mapsite from the schedule", () => {
     expect(mapsiteBackFromScheduleHref("lg01")).toBe(
-      "/talispros/mapsite/listings/lg01",
+      "/map/lg01",
     );
     expect(mapsiteBackFromScheduleHref("RM22")).toBe(
-      "/talispros/mapsite/listings/rm22",
+      "/map/rm22",
     );
     expect(mapsiteBackFromScheduleHref("demo-d697325b")).toBe(
-      "/talispros/mapsite/listings/demo-d697325b",
+      "/map/demo-d697325b",
     );
     expect(mapsiteBackFromScheduleHref("")).toBe("/talispros/mapsite");
     expect(mapsiteBackFromScheduleHref("demo")).toBe("/talispros/mapsite");

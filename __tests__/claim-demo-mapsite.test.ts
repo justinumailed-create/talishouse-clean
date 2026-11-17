@@ -12,7 +12,7 @@ describe("claim demo Mapsite → live claimed URL", () => {
     expect(segment).toBe("brokers");
     expect(
       buildClaimedMapSitePath({ fastCode: "ar01", accountType: segment }),
-    ).toBe("/talispros/mapsite/brokers/ar01");
+    ).toBe("/map/ar01");
     expect(isIssuedFastCode("ar01")).toBe(true);
     expect(isIssuedFastCode("demo-abc12")).toBe(false);
   });
@@ -28,7 +28,7 @@ describe("claim demo Mapsite → live claimed URL", () => {
     expect(accountTypeForAudience("adpro")).toBe("adpro");
     expect(
       buildClaimedMapSitePath({ fastCode: "ar01", accountType: "fsbos" }),
-    ).toBe("/talispros/mapsite/fsbos/ar01");
+    ).toBe("/map/ar01");
   });
 
   it("keeps platform DEMO seed protected and converts demo-* in place", () => {

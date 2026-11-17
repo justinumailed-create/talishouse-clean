@@ -225,7 +225,7 @@ describe("viewer edge chrome", () => {
 
   it("sends the Tsplits™ logo to the claimed Mapsite", () => {
     expect(viewerMapsiteHref({ fastCode: "rm22", accountType: "root" })).toBe(
-      "/talispros/mapsite/root/rm22",
+      "/map/rm22",
     );
   });
 
@@ -241,22 +241,22 @@ describe("viewer edge chrome", () => {
         fastCode: "admin123",
         isolatedBookshelf: true,
       }),
-    ).toBe("/talisu/mkts");
+    ).toBe("/markets");
     expect(
       viewerMapsiteHref({
         fastCode: "ADMIN123",
         accountType: "root",
         isolatedBookshelf: true,
       }),
-    ).toBe("/talisu/mkts");
+    ).toBe("/markets");
 
     // Normal FAST books keep their own listings code.
     expect(
       viewerBackToMapsiteHref({ fastCode: "rm22", isolatedBookshelf: false }),
-    ).toBe("/talispros/mapsite/listings/rm22");
+    ).toBe("/map/rm22");
     expect(
       viewerBackToMapsiteHref({ fastCode: "lg01" }),
-    ).toBe("/talispros/mapsite/listings/lg01");
+    ).toBe("/map/lg01");
 
     const shellSrc = readSource(
       "components/talisbooks/viewer/TalisBooksViewerShell.tsx",

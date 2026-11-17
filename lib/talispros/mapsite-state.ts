@@ -198,17 +198,14 @@ export function mapsiteBackFromScheduleHref(
   });
 }
 
-/** Short claimed Mapsite URL: /talispros/mapsite/{accountType}/{fastCode} */
+/** Public Mapsite URL. The account type is resolved from the FAST Code. */
 export function buildClaimedMapSitePath(options: {
   fastCode: string;
   accountType?: string | null;
   audience?: string | null;
 }): string {
   const fastCode = options.fastCode.trim().toLowerCase();
-  const accountType = mapsiteAccountTypeSegment(
-    options.audience || options.accountType
-  );
-  return `${MAPSITE_APP_PATH}/${encodeURIComponent(accountType)}/${encodeURIComponent(fastCode)}`;
+  return `/map/${encodeURIComponent(fastCode)}`;
 }
 
 /**

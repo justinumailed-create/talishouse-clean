@@ -90,8 +90,8 @@ describe("owner ebook editor routes and gating", () => {
   it("only accepts same-site Mapsite back links", () => {
     const fallback = { fastCode: "RM22", accountType: "FSBO" };
     expect(safeMapSiteBackHref("/talispros/mapsite/fsbo/rm22", fallback)).toBe("/talispros/mapsite/fsbo/rm22");
-    expect(safeMapSiteBackHref("https://evil.example", fallback)).toMatch(/^\/talispros\/mapsite\//);
-    expect(safeMapSiteBackHref("//evil.example", fallback)).toMatch(/^\/talispros\/mapsite\//);
+    expect(safeMapSiteBackHref("https://evil.example", fallback)).toBe("/map/rm22");
+    expect(safeMapSiteBackHref("//evil.example", fallback)).toBe("/map/rm22");
     expect(ownerEbookEditorPath("RM22", "b1")).toBe("/talispros/mapsites/rm22/ebooks/b1");
   });
 

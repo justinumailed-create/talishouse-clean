@@ -275,7 +275,7 @@ describe("getMapSiteByFastCode", () => {
         requestId: result!.requestId,
         audience: result!.claimAudience,
       })
-    ).toContain("/talispros/mapsite/listings/lg01");
+    ).toContain("/map/lg01");
     expect(
       buildClaimedMapSiteHref({
         mapsiteId: result!.id,
@@ -295,7 +295,7 @@ describe("buildClaimedMapSiteHref", () => {
       requestId: "da2ffada-d634-4759-8cd0-92428e1aac50",
       audience: "listings",
     });
-    expect(href).toBe("/talispros/mapsite/listings/lg01");
+    expect(href).toBe("/map/lg01");
   });
 
   it("normalizes root-1 claims to /root/{fastCode} when no audience is set", () => {
@@ -305,7 +305,7 @@ describe("buildClaimedMapSiteHref", () => {
         fastCode: "RC08",
         accountType: "root-1",
       })
-    ).toBe("/talispros/mapsite/root/rc08");
+    ).toBe("/map/rc08");
   });
 });
 

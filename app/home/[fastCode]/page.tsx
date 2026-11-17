@@ -51,7 +51,7 @@ export async function generateMetadata({ params }: PersonalHomePageProps) {
   const { fastCode } = await params;
   const locale = await getLocale();
   const lookup = await loadPersonalHomePage(fastCode, locale);
-  const path = lookup.kind === "ok" ? lookup.data.homeHref : `/talispros/home/${fastCode}`;
+  const path = lookup.kind === "ok" ? lookup.data.homeHref : `/home/${fastCode}`;
   return dynamicPageMetadata((lang) => {
     const m = getDictionary(lang).meta.personalHome;
     const name =

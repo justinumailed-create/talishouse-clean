@@ -26,7 +26,7 @@ describe("system-built Mapsite opening zoom", () => {
 
   it("uses that zoom for every Mapsite and keeps an editor zoom", () => {
     const app = read("components/talispros/mapsite/MapSiteApplication.tsx");
-    const page = read("app/talispros/mapsite/[accountType]/[fastCode]/page.tsx");
+    const page = read("app/map/[fastCode]/page.tsx");
     const queryPage = read("app/talispros/mapsite/page.tsx");
     const reader = read("lib/talispros/system-mapsite-zoom-server.ts");
     expect(page).toContain("readMapZoomExplicit(mapsite.id)");

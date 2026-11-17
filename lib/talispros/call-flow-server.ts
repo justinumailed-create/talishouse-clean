@@ -575,7 +575,7 @@ export async function loadLeadFlow(rawCode: string, actor: FlowActor, locale: Fl
   const accountType = (mapRow.data as { account_type?: string | null } | null)?.account_type ?? null;
   const mapsiteHref = mapsiteHrefForSlot(accountType, code);
   const tebHref = teb || `/talisbooks/fast/${code}`;
-  const registerUrl = `/talisu/reg?fastCode=${encodeURIComponent(code.toUpperCase())}`;
+  const registerUrl = `/register?fastCode=${encodeURIComponent(code.toUpperCase())}`;
   const canEdit = canEditFlowLead(actor.access, actor.agentId, tracked.agentId);
   const entryCode = canEdit && tracked.agentId ? await getAgentContractCode(tracked.agentId).catch(() => null) : null;
   const comments: FlowComment[] = [];

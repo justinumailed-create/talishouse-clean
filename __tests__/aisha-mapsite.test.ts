@@ -49,13 +49,13 @@ describe("Aisha on a claimed Mapsite", () => {
   it("sends every FAST Code to that personal homepage first", () => {
     expect(
       fastCodeEntryHref({ fastCode: "DC06", accountType: "brokers", claimed: true }),
-    ).toBe("/talispros/home/dc06");
+    ).toBe("/home/dc06");
     expect(
       fastCodeEntryHref({ fastCode: "rm22", accountType: "brokers", claimed: true }),
-    ).toBe("/talispros/home/rm22");
+    ).toBe("/home/rm22");
     expect(
       fastCodeEntryHref({ fastCode: "rm22", accountType: "brokers", claimed: false }),
-    ).toBe("/talispros/home/rm22");
+    ).toBe("/home/rm22");
     const actions = read("app/talispros/mapsites/actions.ts");
     expect(actions).toContain("fastCodeEntryHref");
     expect(actions).toContain("isClaimedMapSiteStatus(mapsite.status)");

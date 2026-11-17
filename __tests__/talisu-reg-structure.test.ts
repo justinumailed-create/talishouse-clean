@@ -36,7 +36,7 @@ vi.mock("next/headers", () => ({
   }),
 }));
 
-import TalisURegisterPage from "../app/talisu/reg/page";
+import TalisURegisterPage from "../app/register/page";
 import SamCartEmbed from "../components/talisu/SamCartEmbed";
 import AdviserLayout from "../components/talisu/AdviserLayout";
 import RegisterStructureTabs from "../components/talisu/RegisterStructureTabs";
@@ -131,15 +131,15 @@ describe("Aisha's register structure ids", () => {
   });
 
   it("builds the tab, checkout, bounce and SamCart links with exactly one ?structure=", () => {
-    expect(talisURegisterStructureHref("lease-to-own")).toBe("/talisu/reg?structure=lease-to-own");
-    expect(talisURegisterStructureHref("lease-to-own,tokenization")).toBe("/talisu/reg");
-    expect(talisURegisterStructureHref("nope")).toBe("/talisu/reg");
-    expect(talisURegisterCheckoutHref()).toBe("/talisu/reg?step=register");
-    expect(talisURegisterCheckoutHref("Tokenization")).toBe("/talisu/reg?step=register&structure=tokenization");
-    expect(talisURegisterCheckoutHref(["lease-to-own", "tokenization"])).toBe("/talisu/reg?step=register");
-    expect(talisURegisterCheckoutHref("lease-to-own,tokenization")).toBe("/talisu/reg?step=register");
-    expect(talisURegisterCheckoutHref("evil")).toBe("/talisu/reg?step=register");
-    expect(registerLockedHref()).toBe("/talisu/reg?locked=structure");
+    expect(talisURegisterStructureHref("lease-to-own")).toBe("/register?structure=lease-to-own");
+    expect(talisURegisterStructureHref("lease-to-own,tokenization")).toBe("/register");
+    expect(talisURegisterStructureHref("nope")).toBe("/register");
+    expect(talisURegisterCheckoutHref()).toBe("/register?step=register");
+    expect(talisURegisterCheckoutHref("Tokenization")).toBe("/register?step=register&structure=tokenization");
+    expect(talisURegisterCheckoutHref(["lease-to-own", "tokenization"])).toBe("/register?step=register");
+    expect(talisURegisterCheckoutHref("lease-to-own,tokenization")).toBe("/register?step=register");
+    expect(talisURegisterCheckoutHref("evil")).toBe("/register?step=register");
+    expect(registerLockedHref()).toBe("/register?locked=structure");
     expect(normalizeRegisterLockReason("Structure")).toBe("structure");
     expect(normalizeRegisterLockReason("design")).toBeNull();
     expect(registerStructureCheckoutUrl(BASE, null)).toBe(BASE);
@@ -172,7 +172,7 @@ describe("Aisha's register structure ids", () => {
   });
 });
 
-describe("Aisha's /talisu/reg landing", () => {
+describe("Aisha's /register landing", () => {
   beforeEach(() => {
     env.enforce.mockClear();
     env.locale = "en";
@@ -225,7 +225,7 @@ describe("Aisha's /talisu/reg landing", () => {
       expect(html.match(/-check"/g)).toHaveLength(1);
       expect(html).toContain(`data-testid="register-structures-${id}-check"`);
       expect(html).toContain(`data-testid="register-structures-panel" data-structure-id="${id}"`);
-      expect(hrefs(html)).toContain(`/talisu/reg?step=register&structure=${id}`);
+      expect(hrefs(html)).toContain(`/register?step=register&structure=${id}`);
       expect(html).not.toContain('data-locked="structure"');
       expect(html).not.toContain("Choose a structure");
       expect(html).toContain("Selected structure:");
@@ -284,7 +284,7 @@ describe("Aisha's register checkout keeps the structure", () => {
     expect(html).toMatch(/data-testid="register-structure" data-structure-id="lease-to-own"/);
     expect(html).toContain("Selected structure:");
     expect(html).toContain("Lease-to-Own");
-    expect(hrefs(html)).toContain("/talisu/reg?structure=lease-to-own");
+    expect(hrefs(html)).toContain("/register?structure=lease-to-own");
   });
 
   it("server redirect: a checkout URL with no valid structure goes back to the page with the reason", async () => {
@@ -296,10 +296,10 @@ describe("Aisha's register checkout keeps the structure", () => {
       { step: "register", structure: "conventional%2Ctokenization" },
     ];
     for (const params of bypasses) {
-      await expect(renderReg(params)).rejects.toThrow("NEXT_REDIRECT;/talisu/reg?locked=structure");
+      await expect(renderReg(params)).rejects.toThrow("NEXT_REDIRECT;/register?locked=structure");
     }
     await expect(renderReg({ step: "register", fastCode: "ABC123" })).rejects.toThrow(
-      "NEXT_REDIRECT;/talisu/reg?locked=structure&fastCode=ABC123",
+      "NEXT_REDIRECT;/register?locked=structure&fastCode=ABC123",
     );
     // Redirected before the PMC gate runs.
     expect(env.enforce).not.toHaveBeenCalled();
@@ -309,7 +309,7 @@ describe("Aisha's register checkout keeps the structure", () => {
     env.cookie = "conventional";
     for (const structure of ["lease-to-own,tokenization", "tokenization,", "evil"]) {
       await expect(renderReg({ step: "register", structure })).rejects.toThrow(
-        "NEXT_REDIRECT;/talisu/reg?locked=structure",
+        "NEXT_REDIRECT;/register?locked=structure",
       );
     }
     expect(env.enforce).not.toHaveBeenCalled();
@@ -317,7 +317,7 @@ describe("Aisha's register checkout keeps the structure", () => {
 
   it("an old multi-value cookie does not unlock the checkout", async () => {
     env.cookie = "lease-to-own%2Ctokenization";
-    await expect(renderReg({ step: "register" })).rejects.toThrow("NEXT_REDIRECT;/talisu/reg?locked=structure");
+    await expect(renderReg({ step: "register" })).rejects.toThrow("NEXT_REDIRECT;/register?locked=structure");
   });
 
   it("falls back to the remembered structure after the PMC sequence", async () => {
@@ -333,7 +333,7 @@ describe("Aisha's register checkout keeps the structure", () => {
     expect(String(findAll(tree, (el) => el.type === SamCartEmbed)[0].props.src)).toContain("structure=tokenization");
     env.cookie = "bogus";
     await expect(renderReg({ step: "register", structure: "https://evil.example" })).rejects.toThrow(
-      "NEXT_REDIRECT;/talisu/reg?locked=structure",
+      "NEXT_REDIRECT;/register?locked=structure",
     );
   });
 
@@ -382,7 +382,7 @@ describe("Aisha's register checkout keeps the structure", () => {
   });
 });
 
-describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
+describe("Aisha's /register four buttons + agent entry code (Oct 31)", () => {
   beforeEach(() => {
     env.enforce.mockClear();
     env.locale = "en";
@@ -402,13 +402,13 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
       expect(order).toEqual(["broker", "agent", "fsbo", "adpro", "pin"]);
       expect(html).not.toContain("mysamcart");
       if (entry) {
-        expect(html).toContain('href="/talisu/reg/checkout/broker"');
-        expect(html).toContain('href="/talisu/reg/checkout/agent"');
-        expect(html).toContain('href="/talisu/reg/checkout/fsbo"');
-        expect(html).toContain('href="/talisu/reg/checkout/adpro"');
-        expect(html).toContain('href="/talisu/reg/checkout/pin"');
+        expect(html).toContain('href="/register/broker"');
+        expect(html).toContain('href="/register/agent"');
+        expect(html).toContain('href="/register/fsbo"');
+        expect(html).toContain('href="/register/adpro"');
+        expect(html).toContain('href="/register/pin"');
       } else {
-        expect(html).not.toContain("/talisu/reg/checkout/");
+        expect(html).not.toContain("/register/");
       }
       expect(html).toContain(">Broker<");
       expect(html).not.toContain(">Broker or Team Leader<");
@@ -450,13 +450,13 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
 
   it("server side: the register checkout redirects to the code prompt before any other gate", async () => {
     await expect(renderReg({ step: "register", structure: "tokenization" })).rejects.toThrow(
-      "NEXT_REDIRECT;/talisu/reg?locked=code",
+      "NEXT_REDIRECT;/register?locked=code",
     );
     await expect(renderReg({ step: "register", structure: "conventional", fastCode: "ABC123" })).rejects.toThrow(
-      "NEXT_REDIRECT;/talisu/reg?locked=code&fastCode=ABC123",
+      "NEXT_REDIRECT;/register?locked=code&fastCode=ABC123",
     );
     env.cookie = "fractionalization";
-    await expect(renderReg({ step: "register" })).rejects.toThrow("NEXT_REDIRECT;/talisu/reg?locked=code");
+    await expect(renderReg({ step: "register" })).rejects.toThrow("NEXT_REDIRECT;/register?locked=code");
     expect(env.enforce).not.toHaveBeenCalled();
   });
 
@@ -554,7 +554,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(de.talisu.register.actions).not.toHaveProperty("pinNote");
     expect(en.talisu.register.partnerName).toBe("Aisha C., AMBA");
     expect(de.talisu.register.partnerName).toBe("Aisha C., AMBA");
-    const registerPage = readFileSync(resolve("app/talisu/reg/page.tsx"), "utf8");
+    const registerPage = readFileSync(resolve("app/register/page.tsx"), "utf8");
     const checkout = readFileSync(resolve("components/talisu/RegisterProductCheckout.tsx"), "utf8");
     expect(registerPage).not.toContain("partnerHeading");
     expect(checkout).not.toContain("partnerHeading");
@@ -569,7 +569,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(checkout).toContain("register-checkout-directory");
     expect(checkout).toContain("PMC_PATHS.mediaDirectory");
     for (const id of ["broker", "agent", "fsbo", "adpro", "pin"]) {
-      const page = readFileSync(resolve(`app/talisu/reg/checkout/${id}/page.tsx`), "utf8");
+      const page = readFileSync(resolve(`app/register/${id}/page.tsx`), "utf8");
       expect(page).toContain("RegisterProductCheckout");
       expect(page).not.toContain("register-checkout-terms");
       expect(page).not.toContain("ROUTES.TERMS");

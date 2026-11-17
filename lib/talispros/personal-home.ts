@@ -4,7 +4,7 @@
  * Storage lives in supabase/migrations/113_mapsite_personal_home.sql.
  */
 
-export const PERSONAL_HOME_PATH = "/talispros/home";
+export const PERSONAL_HOME_PATH = "/home";
 
 export const PERSONAL_HOME_LIMITS = {
   kicker: 80,

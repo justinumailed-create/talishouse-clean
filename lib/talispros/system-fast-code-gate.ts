@@ -71,6 +71,8 @@ export function isOwnerOnlyPersonalHomeHref(href: string | null | undefined): bo
   return (
     path === "/talispros/mapsite" ||
     path.startsWith("/talispros/mapsite/") ||
+    path === "/map" ||
+    path.startsWith("/map/") ||
     path === "/demo" ||
     path.startsWith("/demo/") ||
     path === "/talispros/demo-mapsite" ||

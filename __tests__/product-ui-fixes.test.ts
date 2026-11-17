@@ -70,10 +70,10 @@ describe("home right rail audience labels", () => {
 describe("Back to Mapsite from a FAST-scoped page", () => {
   it("opens the listings Mapsite for that FAST code", () => {
     expect(mapsiteBackFromScheduleHref("lg01")).toBe(
-      "/talispros/mapsite/listings/lg01",
+      "/map/lg01",
     );
     expect(mapsiteBackFromScheduleHref("rm22")).toBe(
-      "/talispros/mapsite/listings/rm22",
+      "/map/rm22",
     );
     expect(mapsiteBackFromScheduleHref("")).toBe("/talispros/mapsite");
     expect(mapsiteBackFromScheduleHref("demo")).toBe("/talispros/mapsite");

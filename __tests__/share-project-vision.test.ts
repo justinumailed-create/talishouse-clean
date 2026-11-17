@@ -7,7 +7,7 @@ import { de } from "../lib/i18n/dictionaries/de";
 describe("Share a Project Vision (/talisu/discuss) redesign", () => {
   const ui = readFileSync(resolve("components/talisu/DiscussProjectClient.tsx"), "utf8");
 
-  it("is a split layout like Aisha's /talisu/reg: photo left, form right, stacked on phones", () => {
+  it("is a split layout like Aisha's /register: photo left, form right, stacked on phones", () => {
     expect(ui).toContain('className="grid w-full lg:grid-cols-2"');
     const photo = ui.indexOf('data-testid="talisu-discuss-photo"');
     const form = ui.indexOf("<form");
@@ -57,7 +57,7 @@ describe("Share a Project Vision (/talisu/discuss) redesign", () => {
   });
 
   it("Aisha's Propose Project button and Value-Added link point here", () => {
-    const reg = readFileSync(resolve("app/talisu/reg/page.tsx"), "utf8");
+    const reg = readFileSync(resolve("app/register/page.tsx"), "utf8");
     expect(reg).toContain("propose: talisuHref(TALISU_DISCUSS_PATH)");
     const va = readFileSync(resolve("app/talisu/value-added/page.tsx"), "utf8");
     expect(va).toContain("talisuHref(TALISU_DISCUSS_PATH)");

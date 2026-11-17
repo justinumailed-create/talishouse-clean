@@ -30,7 +30,7 @@
     "alt": "Tsplits™ Baumlogo: Sichern Sie Ihren Markt auf Tsplits™"
    }
   },
-  "/talisu/mkts": {
+  "/markets": {
    "kind": "public",
    "noindex": false,
    "image": "/og/pages/talisu-mkts",
@@ -45,7 +45,7 @@
     "alt": "Tsplits™ Baumlogo: Sichern Sie einen 80-km-Markt in Ihrer Nähe"
    }
   },
-  "/talisu/mkts/usa": {
+  "/markets/usa": {
    "kind": "public",
    "noindex": false,
    "image": "/og/pages/talisu-mkts-usa",
@@ -75,7 +75,7 @@
     "alt": "Tsplits™ Baumlogo: Talishouse™ Produktkatalog"
    }
   },
-  "/talisu/reg": {
+  "/register": {
    "kind": "custom",
    "image": "/og/talisu-reg"
   },
@@ -728,7 +728,7 @@
     "alt": "Tsplits™ Baumlogo: Registrieren und aktivieren Sie Ihre Mapsite"
    }
   },
-  "/register": {
+  "/talispros/register-your-account": {
    "kind": "public",
    "noindex": false,
    "image": "/og/pages/register-legacy",
@@ -1148,7 +1148,7 @@
     "alt": "Tsplits™ Baumlogo: Ihre Mapsite ist bereit"
    }
   },
-  "/register/success": {
+  "/talispros/register-your-account/success": {
    "kind": "utility",
    "noindex": true,
    "image": "/og/pages/register-success",
@@ -1382,13 +1382,13 @@
   "/ma/[fastcode]": {
    "kind": "dynamic"
   },
-  "/talispros/mapsite/[accountType]/[fastCode]": {
+  "/map/[fastCode]": {
    "kind": "dynamic"
   },
   "/talispros/mapsites/[fastCode]": {
    "kind": "dynamic"
   },
-  "/talispros/home/[fastCode]": {
+  "/home/[fastCode]": {
    "kind": "dynamic"
   },
   "/talispros/register-your-mapsite/[fastCode]": {
@@ -1403,8 +1403,9 @@
   "/talisbooks/viewer/[slug]": {
    "kind": "dynamic"
   },
-  "/talispros/aisha": {
-   "kind": "dynamic"
+  "/aisha": {
+   "kind": "dynamic",
+   "noindex": true
   },
   "/webster": {
    "kind": "dynamic",
@@ -1429,7 +1430,7 @@
     "alt": "Tsplits™ Baumlogo: Meine Mapsite erstellen"
    }
   },
-  "/talisu/reg/checkout/broker": {
+  "/register/broker": {
    "kind": "utility",
    "noindex": true,
    "image": "/og/pages/talisu-reg-broker",
@@ -1444,7 +1445,7 @@
     "alt": "Aisha C., Team Leader mit dem Tsplits™ Baumlogo: Makler-Konto jetzt registrieren"
    }
   },
-  "/talisu/reg/checkout/agent": {
+  "/register/agent": {
    "kind": "utility",
    "noindex": true,
    "image": "/og/pages/talisu-reg-agent",
@@ -1459,7 +1460,7 @@
     "alt": "Aisha C., Team Leader mit dem Tsplits™ Baumlogo: Agenten-Konto jetzt registrieren"
    }
   },
-  "/talisu/reg/checkout/fsbo": {
+  "/register/fsbo": {
    "kind": "utility",
    "noindex": true,
    "image": "/og/pages/talisu-reg-fsbo",
@@ -1474,7 +1475,7 @@
     "alt": "Aisha C., Team Leader mit dem Tsplits™ Baumlogo: FSBO-Konto jetzt registrieren"
    }
   },
-  "/talisu/reg/checkout/adpro": {
+  "/register/adpro": {
    "kind": "utility",
    "noindex": true,
    "image": "/og/pages/talisu-reg-adpro",
@@ -1489,7 +1490,7 @@
     "alt": "Aisha C., Team Leader mit dem Tsplits™ Baumlogo: Adpro-Konto jetzt registrieren"
    }
   },
-  "/talisu/reg/checkout/pin": {
+  "/register/pin": {
    "kind": "utility",
    "noindex": true,
    "image": "/og/pages/talisu-reg-pin",
