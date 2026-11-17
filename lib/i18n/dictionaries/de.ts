@@ -304,7 +304,7 @@ export const de: Dictionary = {
     register: {
       ...TALISU_REGISTER,
       title: "Konto registrieren",
-      partnerName: "Aisha, AMBA",
+      partnerName: "Aisha C., AMBA",
       partnerIntro:
         "Mein Team und ich helfen Ihnen, Ihre immobiliennahen Marketinginitiativen entlang von vier großen Schwerpunkten auszubauen:",
       bullets: [
@@ -337,7 +337,7 @@ export const de: Dictionary = {
       adviserKicker: "Registrierungsoptionen",
       adviserTitle:
         "Registrieren Sie Ihre Mapsite mit Tsplits™. Aisha und ihr Team bewerben sie weltweit und ermöglichen Ihnen, bei Ihrer Werbung Geld zu sparen oder zu verdienen.",
-      leaderLine: "Teamleiterin: Aisha, AMBA",
+      leaderLine: "Teamleiterin: Aisha C., AMBA",
       structuresLabel: "Wählen Sie Ihre Struktur",
       structures: [
         {
@@ -380,32 +380,79 @@ export const de: Dictionary = {
             id: "broker",
             label: "Makler oder Teamleiter",
             listLabel: "Broker",
-            sidebar:
-              "Sie sind Makler oder Teamleiter und stellen Ihren Agenten eine Mapsite bereit. Sie können einen Home-PIN und unbegrenzt viele Listing-PINs pro Agent setzen. Wir empfehlen jedoch, die Aufnahme über Leistungsuntergrenzen zu begrenzen: Aufgenommen wird nur ein Listing, das Ihr Minimum für Ihre Mindestlaufzeit zahlt.",
+            directoryLabel: "",
+            sidebar: [
+              { kind: "p", text: "Sie sind Makler oder Teamleiter, haben ein Mapsite-Konto jährlich registriert und pflegen es monatlich." },
+              { kind: "p", text: "Sie öffnen es für Immobilienprofis, die unter Ihrem Dach mit Immobilien handeln, oder für FSBO- und Adpro-Werbekunden, bei denen Sie voraussichtlich Geld sparen oder verdienen." },
+              { kind: "p", text: "Sie setzen selbst einen Home-PIN und lizenzieren dann unbegrenzt viele Listing-PINs gegen eine monatliche Pflegegebühr für die Einstellung plus eine kleine Werbe-Teilnahmegebühr." },
+              { kind: "p", text: "Wir teilen einen Prozentsatz der monatlichen Gebühren und der PIN-Gebühren. So erreichen Sie die Gewinnschwelle, wenn sieben Ihrer Agenten mitmachen und im Schnitt je 10 PINs pro Tag setzen." },
+            ],
           },
           {
             id: "agent",
             label: "Agent",
-            sidebar:
-              "Sie sind Agent und arbeiten in einer Maklerfirma oder einem Team. Sie können unbegrenzt viele Listing-PINs setzen, die das Minimum Ihrer Maklerfirma bei Immobiliengebühren und Laufzeiten erfüllen. Zum Setzen dieser PINs benötigen Sie den FAST Code des Makler- oder Teamkontos.",
+            directoryLabel: "",
+            sidebar: [
+              { kind: "p", text: "Sie sind Immobilienprofi und arbeiten in einer Maklerfirma oder einem Team." },
+              { kind: "p", text: "Ihr Konto ist mit dieser Mapsite-ID verknüpft. Sie dürfen unbegrenzt viele Listing-PINs gegen eine kleine Teilnahmegebühr setzen." },
+              { kind: "p", text: "Gesetzt werden nur PINs, die die Mindest-Immobiliengebühren und Laufzeiten erfüllen, die die Plattformverwaltung festlegt." },
+              {
+                kind: "list",
+                items: [
+                  "Sie setzen Angebote, um Leistungsuntergrenzen anzuwenden.",
+                  "FSBO setzen PINs, um Käufervertretungen einzurichten.",
+                  "Adpro (bevorzugte Dienstleister wie Hypothekenmakler, Anwälte, Gutachter usw.) setzen PINs, um Empfehlungs- oder Co-Promotion-Netze festzulegen.",
+                ],
+              },
+            ],
           },
           {
             id: "fsbo",
             label: "FSBO",
-            sidebar:
-              "Sie verkaufen als Eigentümer (For-Sale-By-Owner) und haben mit Ihrem bevorzugten teilnehmenden Makler oder Team vereinbart, einen PIN auf dessen Mapsite zu setzen. Sie sparen weiterhin bei den Immobiliengebühren, ermöglichen aber Käufervertretungsgeschäfte (Buyer's Agency) für Ihr Mere-Posting-Inserat.",
+            directoryLabel: "",
+            sidebar: [
+              { kind: "p", text: "Sie sind ein For-Sale-By-Owner und setzen einen PIN auf einer \u201esingle PIN Mapsite\u201c, die direkt mit Ihnen spricht." },
+              { kind: "p", text: "Optional spiegeln Sie diesen PIN auf ein Maklerkonto, wo er mit einem Agenten spricht, um Transaktionen mit dem Status \u201eMere Posting\u201c oder \u201eBuyer\u2019s Agency\u201c einzurichten." },
+              { kind: "p", text: "Ihr Ziel, Geld zu sparen und mehr Kontrolle über alternative Transaktionsstrukturen zu behalten, erreichen Sie so oder so:" },
+              {
+                kind: "list",
+                items: [
+                  "Mere Posting und Buyer\u2019s Agency: ein Agent ist beteiligt.",
+                  "Live: Standort sichtbar, Objekt erkennbar.",
+                  "Blind: Standort verallgemeinert, Objekt NICHT erkennbar.",
+                  "Mietkauf, fraktionalisiert oder tokenisiert.",
+                ],
+              },
+            ],
           },
           {
             id: "adpro",
             label: "Adpro",
-            sidebar:
-              "Sie werben auf der Mapsite eines Maklers oder Teams und nutzen Ihre Präsenz dort, um deren Kunden auf Ihre eigene Website oder Ihre eigene Mapsite zu leiten. Letztere ist ohne Mehrkosten enthalten, und so kann Ihr eigener virtueller Markt oder Ihr eigenes Monopol entstehen.",
+            directoryLabel: "",
+            sidebar: [
+              { kind: "p", text: "Sie werben auf der Makler-Mapsite. Sie sind (grob eingeordnet):" },
+              {
+                kind: "list",
+                items: [
+                  "Ein Quell-Dienstleister: ein Makler mit eigener Mapsite. Sie arbeiten mit diesem Makler zusammen, um ein geografisch größeres gemeinsames virtuelles Monopol aufzubauen.",
+                  "Ein primärer Dienstleister: Produkte und Leistungen, die Sie anbieten, sind in der Regel nötig, um Transaktionen abzuschließen.",
+                  "Ein sekundärer Dienstleister: Produkte und Leistungen, die Sie anbieten, sind ratsam, aber nicht nötig, um Transaktionen abzuschließen.",
+                  "Ein ergänzender Dienstleister (ASP): Produkte und Leistungen, die Sie anbieten, folgen oft auf große Käufe, etwa Immobilien.",
+                ],
+              },
+            ],
           },
           {
             id: "pin",
             label: "PIN",
-            sidebar:
-              "Zusätzliche PINs kosten je 7 CAD. Kaufen Sie sie im PIN-Dashboard Ihrer Mapsite.",
+            directoryLabel: "Syndizierungsverzeichnis",
+            sidebar: [
+              { kind: "p", text: "Das Setzen von PINs ist eine wichtige Funktion im Werbeablauf der Mapsite-Plattform." },
+              { kind: "p", text: "Wie oft würden Sie \u201evergessen\u201c, einen PIN zu löschen, wenn das Angebot verkauft ist? Ja, hier genauso ;-)\u2026!" },
+              { kind: "p", text: "Wie oft würden Sie \u201evergessen\u201c, ein Abonnement zu kündigen, wenn Sie es nicht mehr brauchen? Wieder genauso ;-)\u2026!" },
+              { kind: "p", text: "Ein wöchentlicher Abo-Zyklus sorgt fast dafür, dass verkaufte Angebote nicht länger als sechs Tage angepinnt bleiben, sobald sie nicht mehr verfügbar sind." },
+              { kind: "p", text: "Außerdem helfen die Beträge der angepinnten Angebote der Verwaltung, Ihre Angebote weltweit zu syndizieren. Wählen Sie die Schaltfläche unten, um unser Syndizierungsverzeichnis zu sehen." },
+            ],
           },
         ],
         consentBefore: "Die Registrierung bedeutet, dass Sie den",
