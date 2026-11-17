@@ -16,10 +16,53 @@ export const PERSONAL_HOME_LIMITS = {
   buttons: 3,
 } as const;
 
+/** What a home-page button opens. Missing `kind` on older rows means a web link. */
+export const PERSONAL_HOME_OPEN_KINDS = [
+  "link",
+  "pin",
+  "bookshelf",
+  "teb",
+  "ebooks",
+  "pins",
+  "categories",
+  "branding",
+  "partners",
+] as const;
+
+export type PersonalHomeOpenKind = (typeof PERSONAL_HOME_OPEN_KINDS)[number];
+
+/** Targets a visitor may see. Owner tools stay on the owner's own view. */
+export const PERSONAL_HOME_VISITOR_OPENS = new Set<PersonalHomeOpenKind>([
+  "link",
+  "pin",
+  "bookshelf",
+  "teb",
+]);
+
 export type PersonalHomeButton = {
   label: string;
   href: string;
+  kind: PersonalHomeOpenKind;
+  pinId?: string;
 };
+
+export type PersonalHomeButtonContext = {
+  mapsiteHref: string;
+  bookshelfHref: string;
+  tebHref: string | null;
+  pinIds: readonly string[];
+};
+
+export function isPersonalHomeOpenKind(value: unknown): value is PersonalHomeOpenKind {
+  return (
+    typeof value === "string" &&
+    (PERSONAL_HOME_OPEN_KINDS as readonly string[]).includes(value)
+  );
+}
+
+export function isVisitorPersonalHomeOpen(kind: PersonalHomeOpenKind): boolean {
+  return PERSONAL_HOME_VISITOR_OPENS.has(kind);
+}
 
 /** What the owner saved (every field optional; null = use the default). */
 export type PersonalHomeContent = {
@@ -147,33 +190,95 @@ export function isExternalPersonalHomeHref(href: string): boolean {
   return /^https?:\/\//i.test(href);
 }
 
+function readOpenKind(value: unknown): PersonalHomeOpenKind {
+  return isPersonalHomeOpenKind(value) ? value : "link";
+}
+
+/** Href for a button. Web links use the saved address. Every other kind is rebuilt here. */
+export function personalHomeOpenHref(
+  button: { kind: PersonalHomeOpenKind; href?: string | null; pinId?: string | null },
+  context: PersonalHomeButtonContext,
+): string | null {
+  if (button.kind === "link") return normalizePersonalHomeHref(button.href);
+  if (button.kind === "pin") {
+    const pinId = button.pinId?.trim() || "";
+    if (!pinId || !context.pinIds.includes(pinId)) return null;
+    const base = context.mapsiteHref.split("#")[0] || context.mapsiteHref;
+    const [path, query = ""] = base.split("?");
+    const params = new URLSearchParams(query);
+    params.set("pin", pinId);
+    return `${path}?${params.toString()}`;
+  }
+  if (button.kind === "bookshelf") return normalizePersonalHomeHref(context.bookshelfHref);
+  if (button.kind === "teb") return normalizePersonalHomeHref(context.tebHref);
+  if (!context.mapsiteHref.startsWith("/")) return null;
+  const base = context.mapsiteHref.split("#")[0] || context.mapsiteHref;
+  const [path, query = ""] = base.split("?");
+  const params = new URLSearchParams(query);
+  params.set("dashboard", button.kind);
+  return `${path}?${params.toString()}`;
+}
+
 /** Validated, de-duplicated, capped button list (bad rows are dropped). */
-export function normalizePersonalHomeButtons(value: unknown): PersonalHomeButton[] {
+export function normalizePersonalHomeButtons(
+  value: unknown,
+  context?: PersonalHomeButtonContext,
+): PersonalHomeButton[] {
   if (!Array.isArray(value)) return [];
   const out: PersonalHomeButton[] = [];
   for (const raw of value) {
     if (!raw || typeof raw !== "object") continue;
     const row = raw as Record<string, unknown>;
     const label = cleanPersonalHomeText(row.label, PERSONAL_HOME_LIMITS.buttonLabel);
-    const href = normalizePersonalHomeHref(row.href);
-    if (!label || !href) continue;
-    out.push({ label, href });
+    if (!label) continue;
+    const kind = readOpenKind(row.kind);
+    const pinId = typeof row.pinId === "string" ? row.pinId.trim() : "";
+    const href = context
+      ? personalHomeOpenHref({ kind, href: typeof row.href === "string" ? row.href : "", pinId }, context)
+      : kind === "link"
+        ? normalizePersonalHomeHref(row.href)
+        : normalizePersonalHomeHref(row.href);
+    if (!href) continue;
+    out.push(kind === "pin" && pinId ? { label, href, kind, pinId } : { label, href, kind });
     if (out.length >= PERSONAL_HOME_LIMITS.buttons) break;
   }
   return out;
 }
 
+function buttonRowIsBlank(row: Record<string, unknown>): boolean {
+  const labelRaw = typeof row.label === "string" ? row.label.trim() : "";
+  const hrefRaw = typeof row.href === "string" ? row.href.trim() : "";
+  const pinId = typeof row.pinId === "string" ? row.pinId.trim() : "";
+  const kind = readOpenKind(row.kind);
+  return !labelRaw && !hrefRaw && !pinId && kind === "link";
+}
+
 /** Validation for an owner save; returns field keys that were rejected. */
-export function invalidPersonalHomeButtons(value: unknown): number[] {
+export function invalidPersonalHomeButtons(
+  value: unknown,
+  context?: PersonalHomeButtonContext,
+): number[] {
   if (!Array.isArray(value)) return [];
   const bad: number[] = [];
   value.forEach((raw, index) => {
     const row = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+    if (buttonRowIsBlank(row)) return;
     const labelRaw = typeof row.label === "string" ? row.label.trim() : "";
-    const hrefRaw = typeof row.href === "string" ? row.href.trim() : "";
-    if (!labelRaw && !hrefRaw) return; // empty row = ignored
-    if (!cleanPersonalHomeText(labelRaw, PERSONAL_HOME_LIMITS.buttonLabel)) bad.push(index);
-    else if (!normalizePersonalHomeHref(hrefRaw)) bad.push(index);
+    if (!cleanPersonalHomeText(labelRaw, PERSONAL_HOME_LIMITS.buttonLabel)) {
+      bad.push(index);
+      return;
+    }
+    const kind = readOpenKind(row.kind);
+    const pinId = typeof row.pinId === "string" ? row.pinId.trim() : "";
+    const href = context
+      ? personalHomeOpenHref(
+          { kind, href: typeof row.href === "string" ? row.href : "", pinId },
+          context,
+        )
+      : kind === "link"
+        ? normalizePersonalHomeHref(row.href)
+        : normalizePersonalHomeHref(row.href);
+    if (!href) bad.push(index);
   });
   return bad;
 }

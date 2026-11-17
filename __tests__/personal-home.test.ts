@@ -23,7 +23,7 @@ const defaults = {
   headline: "Jane Doe",
   contactName: "Jane Doe",
   writeUp: "Default write-up",
-  buttons: [{ label: "Open Mapsite", href: "/talispros/mapsite/brokers/xx00" }],
+  buttons: [{ label: "Open Mapsite", href: "/talispros/mapsite/brokers/xx00", kind: "link" as const }],
 };
 
 describe("personal home helpers", () => {
@@ -43,6 +43,33 @@ describe("personal home helpers", () => {
     expect(normalizePersonalHomeHref("")).toBeNull();
   });
 
+  it("keeps an older plain link and stores a PIN choice beside it", () => {
+    const context = {
+      mapsiteHref: "/talispros/mapsite/brokers/dc06",
+      bookshelfHref: "/talisbooks/fast/dc06",
+      tebHref: "https://books.example/teb",
+      pinIds: ["home-pin", "pin-2"],
+    };
+    expect(
+      normalizePersonalHomeButtons([{ label: "Call", href: "https://example.com/a" }], context)[0]?.kind,
+    ).toBe("link");
+    const buttons = normalizePersonalHomeButtons(
+      [
+        { label: "Listing", kind: "pin", pinId: "pin-2", href: "https://evil.example" },
+        { label: "Books", kind: "bookshelf", href: "https://evil.example" },
+        { label: "Tools", kind: "ebooks", href: "https://evil.example" },
+      ],
+      context,
+    );
+    expect(buttons.map((button) => button.href)).toEqual([
+      "/talispros/mapsite/brokers/dc06?pin=pin-2",
+      "/talisbooks/fast/dc06",
+      "/talispros/mapsite/brokers/dc06?dashboard=ebooks",
+    ]);
+    expect(buttons[0]?.pinId).toBe("pin-2");
+    expect(invalidPersonalHomeButtons([{ label: "Listing", kind: "pin", pinId: "nope" }], context)).toEqual([0]);
+  });
+
   it("drops invalid buttons and reports the bad rows", () => {
     const raw = [
       { label: "Call me", href: "tel:+14165550100" },
@@ -54,7 +81,7 @@ describe("personal home helpers", () => {
     expect(invalidPersonalHomeButtons(raw)).toEqual([2]);
     const buttons = normalizePersonalHomeButtons(raw);
     expect(buttons).toHaveLength(3);
-    expect(buttons[0]).toEqual({ label: "Call me", href: "tel:+14165550100" });
+    expect(buttons[0]).toEqual({ label: "Call me", href: "tel:+14165550100", kind: "link" });
   });
 
   it("falls back to Mapsite defaults field by field", () => {

@@ -11,10 +11,13 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
 import { ROUTES } from "@/lib/routes";
 import { dynamicPageMetadata } from "@/lib/seo/page-metadata";
+import { listMapSiteAdditionalPins } from "@/lib/talispros/mapsite-additional-pins-service";
 import {
   clampSeoText,
   fillPersonalHomeCopy,
   isExternalPersonalHomeHref,
+  isVisitorPersonalHomeOpen,
+  normalizePersonalHomeButtons,
   personalHomeEditPath,
 } from "@/lib/talispros/personal-home";
 import { loadPersonalHomeMap } from "@/lib/talispros/personal-home-map";
@@ -30,7 +33,6 @@ import {
 } from "@/lib/talispros/system-fast-code-gate";
 import { readSystemFastCodeFacts } from "@/lib/talispros/system-fast-code-access";
 import { isFastCodeDisqualified } from "@/lib/talispros/market-disqualify-server";
-import { pinCategoryOptions } from "@/lib/talispros/mapsite-pin-categories";
 
 export const dynamic = "force-dynamic";
 
@@ -102,9 +104,25 @@ export default async function PersonalHomePage({
   if (!canEdit && (await isFastCodeDisqualified(data.code))) notFound();
   const homeMap = publicSystem ? await loadPersonalHomeMap(data.code) : null;
   const mapsiteHref = publicSystem ? `${data.homeHref}#mapsite` : data.mapsiteHref;
-  const buttons = publicSystem
-    ? resolved.buttons.filter((button) => !isOwnerOnlyPersonalHomeHref(button.href))
-    : resolved.buttons;
+  const extraPins = await listMapSiteAdditionalPins(data.view.id).catch(() => []);
+  const copy = getDictionary(locale).personalHome.edit;
+  const homePins = [
+    {
+      id: data.view.id,
+      label: data.view.propertyTitle?.trim() || data.view.propertyAddress?.trim() || copy.homePin,
+    },
+    ...extraPins.map((pin) => ({ id: pin.id, label: pin.label.trim() || "PIN" })),
+  ];
+  const buttons = normalizePersonalHomeButtons(resolved.buttons, {
+    mapsiteHref: data.mapsiteHref,
+    bookshelfHref: `/talisbooks/fast/${encodeURIComponent(data.code)}`,
+    tebHref: data.view.tebUrl?.trim() || null,
+    pinIds: homePins.map((pin) => pin.id),
+  }).filter((button) => {
+    if (!canEdit && !isVisitorPersonalHomeOpen(button.kind)) return false;
+    if (publicSystem && button.kind === "link" && isOwnerOnlyPersonalHomeHref(button.href)) return false;
+    return true;
+  });
   const paragraphs = resolved.writeUp.split(/\n{2,}/).filter((part) => part.trim());
 
   return (
@@ -209,37 +227,9 @@ export default async function PersonalHomePage({
           saved={data.saved}
           defaults={data.defaults}
           initialOpen={query.edit === "1"}
-          mapsiteTools={{
-            panels: (
-              [
-                ["pins", "panelPins"],
-                ["categories", "panelCategories"],
-                ["ebooks", "panelEbooks"],
-                ["bookshelf", "panelBookshelf"],
-                ["branding", "panelBranding"],
-                ["partners", "panelPartners"],
-              ] as const
-            ).map(([id, key]) => ({
-              id,
-              label: getDictionary(locale).personalHome.edit[key],
-              href: `${mapsiteHref}?dashboard=${id}`,
-            })),
-            pageButtons: [
-              { id: "mapsite", label: getDictionary(locale).personalHome.openMapsite, href: mapsiteHref },
-              {
-                id: "bookshelf",
-                label: getDictionary(locale).personalHome.edit.panelBookshelf,
-                href: `/talisbooks/fast/${data.code}`,
-              },
-              ...(data.view.tebUrl
-                ? [{ id: "teb", label: "TEB", href: data.view.tebUrl }]
-                : []),
-              ...pinCategoryOptions([], locale === "de" ? "de" : "en").map((category) => ({
-                id: category.value,
-                label: category.label,
-                href: `${mapsiteHref}?category=${encodeURIComponent(category.value)}`,
-              })),
-            ],
+          homeOpens={{
+            tebHref: data.view.tebUrl?.trim() || null,
+            pins: homePins,
           }}
         />
       ) : null}
