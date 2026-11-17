@@ -1,6 +1,6 @@
 import Image from "next/image";
 import LegalLinks from "@/components/legal/LegalLinks";
-import AishaConvaiWidget from "@/components/talispros/AishaConvaiWidget";
+import GuideConversationPanel from "@/components/talispros/GuideConversationPanel";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import type { AssistantPersona } from "@/lib/talispros/assistant-personas";
 
@@ -15,6 +15,7 @@ export default function GuideConversationPage({
   dynamicVariables,
   testId,
   imagePosition = "center 18%",
+  agentId,
 }: {
   persona: AssistantPersona;
   title: string;
@@ -22,6 +23,8 @@ export default function GuideConversationPage({
   dynamicVariables?: string;
   testId: string;
   imagePosition?: string;
+  /** Webster TWO uses its own agent. Other pages use the persona agent. */
+  agentId?: string;
 }) {
   return (
     <div
@@ -49,9 +52,9 @@ export default function GuideConversationPage({
           className="relative min-h-[70dvh] lg:min-h-[calc(100dvh-4.25rem)]"
           data-testid={`${testId}-conversation`}
         >
-          <AishaConvaiWidget
-            persona={persona}
-            embed="inline"
+          <GuideConversationPanel
+            agentId={agentId || persona.agentId}
+            title={title}
             autoStart={call}
             dynamicVariables={dynamicVariables}
           />

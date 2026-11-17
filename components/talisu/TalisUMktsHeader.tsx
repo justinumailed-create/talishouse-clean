@@ -63,6 +63,9 @@ export type TalisUMktsHeaderProps = {
   dashboardUnlocked?: boolean;
   /** Destination when locked Dashboard → Register. Always Aisha's /talisu/reg, same tab. */
   registerHref?: string;
+  /** Registered Mapsites offer Webster TWO here instead of Register. */
+  projectHref?: string | null;
+  projectLabel?: string;
   /** When Dashboard is unlocked, open the Mapsite pin dashboard. */
   onOpenDashboard?: () => void;
   /**
@@ -103,6 +106,8 @@ export default function TalisUMktsHeader({
   variant = "default",
   dashboardUnlocked = false,
   registerHref = ROUTES.TALISU_REGISTER,
+  projectHref = null,
+  projectLabel = "",
   onOpenDashboard,
   dashboardMenuItems,
   onSelectDashboardItem,
@@ -426,13 +431,23 @@ export default function TalisUMktsHeader({
               <p className="mt-1.5 text-[12px] leading-snug text-white/90">
                 {t.nav.dashboardLocked.body}
               </p>
-              <a
-                href={registerHref}
-                className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-white px-3 py-2 text-[13px] font-semibold text-[#035bb8] transition hover:bg-white/95"
-                onClick={() => setRegisterPromptOpen(false)}
-              >
-                {t.nav.dashboardLocked.cta}
-              </a>
+              {projectHref ? (
+                <a
+                  href={projectHref}
+                  className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-white px-3 py-2 text-[13px] font-semibold text-[#035bb8] transition hover:bg-white/95"
+                  onClick={() => setRegisterPromptOpen(false)}
+                >
+                  {projectLabel}
+                </a>
+              ) : (
+                <a
+                  href={registerHref}
+                  className="mt-3 inline-flex w-full items-center justify-center rounded-md bg-white px-3 py-2 text-[13px] font-semibold text-[#035bb8] transition hover:bg-white/95"
+                  onClick={() => setRegisterPromptOpen(false)}
+                >
+                  {t.nav.dashboardLocked.cta}
+                </a>
+              )}
             </div>
           ) : null}
         </div>
@@ -502,13 +517,11 @@ export default function TalisUMktsHeader({
               the PMC sequence (Media Directory → Contract) lives in TalisU;
               the Tsplits™ page is the header logo link. */}
           {/* Paid Mapsite (real activation payment): never show Register. */}
-          {claimedMapsite &&
-          dashboardUnlocked &&
-          !dashboardHasMenu ? null : claimedMapsite && dashboardHasMenu ? (
+          {claimedMapsite && dashboardHasMenu ? (
             TALISU_MKTS_HEADER_NAV.filter(
               (item) => item.label === "Register",
             ).map((item) => renderNavLink(item))
-          ) : (
+          ) : claimedMapsite ? null : (
             <Link
               href={ROUTES.TALISU_REGISTER}
               data-testid="nav-register-link"
@@ -660,13 +673,23 @@ export default function TalisUMktsHeader({
                   <div className="mt-1.5 text-[13px] leading-snug text-white">
                     {t.nav.dashboardLocked.body}
                   </div>
-                  <a
-                    href={registerHref}
-                    onClick={() => setMobileOpen(false)}
-                    className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-white px-3 text-[14px] font-semibold text-[#035bb8]"
-                  >
-                    {t.nav.dashboardLocked.cta}
-                  </a>
+                  {projectHref ? (
+                    <a
+                      href={projectHref}
+                      onClick={() => setMobileOpen(false)}
+                      className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-white px-3 text-center text-[14px] font-semibold text-[#035bb8]"
+                    >
+                      {projectLabel}
+                    </a>
+                  ) : (
+                    <a
+                      href={registerHref}
+                      onClick={() => setMobileOpen(false)}
+                      className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-white px-3 text-[14px] font-semibold text-[#035bb8]"
+                    >
+                      {t.nav.dashboardLocked.cta}
+                    </a>
+                  )}
                 </div>
               ) : claimedMapsite ? null : (
                 renderMobileLink(

@@ -138,6 +138,21 @@ export const en = {
     ownershipAria: "Ownership models",
     closeDetails: "Close {title} details",
     learnMore: "Learn More",
+    conversation: {
+      startCall: "Start a call",
+      endCall: "End call",
+      connecting: "Connecting",
+      listening: "Listening",
+      speaking: "Speaking",
+      ended: "Call ended",
+      placeholder: "Type a message",
+      send: "Send",
+      transcriptEmpty: "The conversation appears here as it happens.",
+      feedback: "How was this call?",
+      feedbackThanks: "Thank you.",
+      callFailed: "The call could not start. Please try again.",
+      describeProject: "Describe your project with Webster",
+    },
     assistants: {
       aisha: {
         label: "Hi, I'm Aisha. I can help make your advertising revenue producing. Ask me how.",
@@ -149,9 +164,11 @@ export const en = {
         endCall: "End call",
         openChat: "Open chat",
         tapToTalk: "Tap to talk to Aisha",
+        panelTitle: "Aisha C., AMBA",
       },
       webster: {
         title: "Webster, Tsplits Guide",
+        panelTitle: "Webster, Fulfilment Manager",
         label: "Webster, Tsplits Guide",
         greeting: "Webster, Tsplits Guide",
         callback: "Webster, Tsplits Guide",
@@ -162,6 +179,7 @@ export const en = {
       },
       thorsten: {
         title: "Thorsten, Tsplits Guide",
+        panelTitle: "Thorsten P, Team Leader",
         label: "Thorsten, Tsplits Guide",
         greeting: "Thorsten, Tsplits Guide",
         callback: "Thorsten, Tsplits Guide",

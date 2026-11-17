@@ -34,6 +34,7 @@ import {
 } from "@/lib/talispros/system-fast-code-gate";
 import { readSystemFastCodeFacts } from "@/lib/talispros/system-fast-code-access";
 import { isFastCodeDisqualified } from "@/lib/talispros/market-disqualify-server";
+import { isRegistrationOfferHref, websterProjectHref } from "@/lib/talispros/webster-project";
 
 export const dynamic = "force-dynamic";
 
@@ -119,9 +120,12 @@ export default async function PersonalHomePage({
     bookshelfHref: `/talisbooks/fast/${encodeURIComponent(data.code)}`,
     tebHref: data.view.tebUrl?.trim() || null,
     pinIds: homePins.map((pin) => pin.id),
-  }).filter((button) => {
+  });
+  const offerProject = !data.isDemo && (canEdit || facts.registeredOrClaimed);
+  const visibleButtons = buttons.filter((button) => {
     if (!canEdit && !isVisitorPersonalHomeOpen(button.kind)) return false;
     if (publicSystem && button.kind === "link" && isOwnerOnlyPersonalHomeHref(button.href)) return false;
+    if (offerProject && isRegistrationOfferHref(button.href)) return false;
     return true;
   });
   const paragraphs = resolved.writeUp.split(/\n{2,}/).filter((part) => part.trim());
@@ -186,12 +190,24 @@ export default async function PersonalHomePage({
               </div>
             ))}
           </div>
-          {buttons.length ? (
+          {offerProject ? (
+            <div className="mt-6 sm:mt-8">
+              <Link
+                href={websterProjectHref(data.code)}
+                prefetch={false}
+                data-testid="describe-project-webster"
+                className="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#046BD9] px-6 text-center text-[17px] font-semibold text-white! no-underline shadow-[0_8px_20px_rgba(4,107,217,0.28)] hover:bg-[#0358b3] sm:w-auto sm:min-w-[20rem]"
+              >
+                {getDictionary(locale).home.conversation.describeProject}
+              </Link>
+            </div>
+          ) : null}
+          {visibleButtons.length ? (
             <div
               className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8"
               data-testid="personal-home-buttons"
             >
-              {buttons.map((button, index) => {
+              {visibleButtons.map((button, index) => {
                 const className = index === 0 ? CTA_PRIMARY : CTA_SECONDARY;
                 return isExternalPersonalHomeHref(button.href) ? (
                   <a

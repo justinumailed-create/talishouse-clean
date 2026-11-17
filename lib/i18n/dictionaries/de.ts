@@ -117,6 +117,21 @@ export const de: Dictionary = {
     ownershipAria: "Eigentumsmodelle",
     closeDetails: "Details zu {title} schließen",
     learnMore: "Mehr erfahren",
+    conversation: {
+      startCall: "Anruf starten",
+      endCall: "Anruf beenden",
+      connecting: "Verbindung wird aufgebaut",
+      listening: "Hört zu",
+      speaking: "Spricht",
+      ended: "Anruf beendet",
+      placeholder: "Nachricht schreiben",
+      send: "Senden",
+      transcriptEmpty: "Das Gespräch erscheint hier, während es läuft.",
+      feedback: "Wie war dieser Anruf?",
+      feedbackThanks: "Danke.",
+      callFailed: "Der Anruf konnte nicht gestartet werden. Bitte versuchen Sie es erneut.",
+      describeProject: "Beschreiben Sie Ihr Projekt mit Webster",
+    },
     assistants: {
       aisha: {
         label:
@@ -129,9 +144,11 @@ export const de: Dictionary = {
         endCall: "Anruf beenden",
         openChat: "Chat öffnen",
         tapToTalk: "Tippen, um mit Aisha zu sprechen",
+        panelTitle: "Aisha C., AMBA",
       },
       webster: {
         title: "Webster, Tsplits-Guide",
+        panelTitle: "Webster, Fulfilment-Manager",
         label: "Webster, Tsplits-Guide",
         greeting: "Webster, Tsplits-Guide",
         callback: "Webster, Tsplits-Guide",
@@ -142,6 +159,7 @@ export const de: Dictionary = {
       },
       thorsten: {
         title: "Thorsten, Tsplits-Guide",
+        panelTitle: "Thorsten P, Teamleiter",
         label: "Thorsten, Tsplits-Guide",
         greeting: "Thorsten, Tsplits-Guide",
         callback: "Thorsten, Tsplits-Guide",

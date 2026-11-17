@@ -25,8 +25,9 @@ describe("unlisted Webster and Thorsten guide pages", () => {
     expect(ASSISTANT_PERSONAS.aisha.agentId).toBe(AISHA_HOMEPAGE_AGENT_ID);
 
     const layout = read("components/talispros/GuideConversationPage.tsx");
-    expect(layout).toContain('embed="inline"');
+    expect(layout).toContain("<GuideConversationPanel");
     expect(layout).toContain("autoStart={call}");
+    expect(layout).not.toContain('embed="inline"');
     expect(layout).not.toContain("placement=");
 
     for (const [id, agentId] of [
@@ -60,7 +61,13 @@ describe("unlisted Webster and Thorsten guide pages", () => {
     expect(routes).not.toContain("/talispros/webster");
     expect(routes).not.toContain("/talispros/thorsten");
     expect(GUIDE_CONVERSATION_PATHS).toContain("/webster");
+    expect(GUIDE_CONVERSATION_PATHS).toContain("/webster/project");
     expect(GUIDE_CONVERSATION_PATHS).toContain("/thorsten");
+    const project = read("app/webster/project/page.tsx");
+    expect(project).toContain("WEBSTER_PROJECT_AGENT_ID");
+    expect(project).toContain("guideDynamicVariables(query.code)");
+    expect(project).toContain("noindex: true");
+    expect(project).not.toContain("agent_0701m7kv74mnf12btd49nv64t3cg");
     const redirects = read("next.config.ts");
     expect(redirects).toContain('source: "/talispros/webster"');
     expect(redirects).toContain('destination: "/webster"');
@@ -73,6 +80,9 @@ describe("unlisted Webster and Thorsten guide pages", () => {
   it("uses short English and German headings without a trademark on the guide name", () => {
     expect(en.home.assistants.webster.title).toBe("Webster, Tsplits Guide");
     expect(de.home.assistants.webster.title).toBe("Webster, Tsplits-Guide");
+    expect(en.home.assistants.webster.panelTitle).toBe("Webster, Fulfilment Manager");
+    expect(de.home.assistants.webster.panelTitle).toBe("Webster, Fulfilment-Manager");
+    expect(en.home.assistants.aisha.panelTitle).toBe("Aisha C., AMBA");
     expect(en.home.assistants.thorsten.title).toBe("Thorsten, Tsplits Guide");
     expect(de.home.assistants.thorsten.title).toBe("Thorsten, Tsplits-Guide");
     for (const copy of [

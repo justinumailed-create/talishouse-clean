@@ -33,7 +33,7 @@ export default async function WebsterGuidePage({ searchParams }: GuidePageProps)
   return (
     <GuideConversationPage
       persona={ASSISTANT_PERSONAS.webster}
-      title={copy.title}
+      title={copy.panelTitle}
       call={query.call === "1"}
       dynamicVariables={dynamicVariables}
       testId="webster-guide"

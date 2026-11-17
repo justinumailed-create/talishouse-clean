@@ -2,6 +2,7 @@
 export const GUIDE_CONVERSATION_PATHS = [
   "/aisha",
   "/webster",
+  "/webster/project",
   "/thorsten",
 ] as const;
 

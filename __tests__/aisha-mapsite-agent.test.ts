@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { en } from "../lib/i18n/dictionaries/en";
 import {
   AISHA_HOMEPAGE_AGENT_ID,
   AISHA_MAPSITE_AGENT_ID,
@@ -23,12 +24,13 @@ describe("Aisha agent by page", () => {
     const guide = read("components/talispros/GuideConversationPage.tsx");
     expect(aishaHome).toContain("<GuideConversationPage");
     expect(aishaHome).toContain("ASSISTANT_PERSONAS.aisha");
-    expect(guide).toContain('embed="inline"');
+    expect(guide).toContain("<GuideConversationPanel");
     expect(guide).toContain("autoStart={call}");
     expect(aishaHome).not.toContain("agentId=");
     expect(aishaHome).not.toContain(AISHA_MAPSITE_AGENT_ID);
     expect(aishaHome).not.toContain("aisha-home-greeting");
-    expect(aishaHome).toContain("Aisha C., AMBA");
+    expect(aishaHome).toContain("copy.panelTitle");
+    expect(en.home.assistants.aisha.panelTitle).toBe("Aisha C., AMBA");
     expect(guide).toContain("persona.portraitSrc");
     expect(mapsite).toContain("agentId={AISHA_MAPSITE_AGENT_ID}");
     expect(mapsite).toContain("aishaMapsiteDynamicVariables");
