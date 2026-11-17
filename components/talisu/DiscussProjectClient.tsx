@@ -159,7 +159,7 @@ export default function DiscussProjectClient({
               </div>
             ) : (
               <>
-                <p className="text-[12px] font-semibold uppercase tracking-[0.18em] text-neutral-600">{c.pageKicker}</p>
+                <p className="text-[12px] font-semibold tracking-[0.18em] text-neutral-600">{c.pageKicker}</p>
                 <h1 className="mt-3 text-[40px] font-semibold leading-[1.05] tracking-[-0.035em] sm:text-[52px]">
                   {c.pageTitle}.
                 </h1>
@@ -175,16 +175,21 @@ export default function DiscussProjectClient({
 
                 <form onSubmit={submit} noValidate={false} className="mt-14 space-y-7">
                   <fieldset data-testid="discuss-topic" data-topic={topic}>
-                    <legend className="flex flex-wrap items-center justify-between gap-2">
-                      <span className={LABEL}>{c.topic}</span>
-                      <button
-                        type="button"
-                        data-testid="discuss-structures-open"
-                        onClick={() => setStructuresOpen(true)}
-                        className="text-[13px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
-                      >
-                        {c.structuresAbout}
-                      </button>
+                    <legend className="block">
+                      <span className="flex flex-wrap items-center justify-between gap-2">
+                        <span className={LABEL}>{c.topic}</span>
+                        <button
+                          type="button"
+                          data-testid="discuss-structures-open"
+                          onClick={() => setStructuresOpen(true)}
+                          className="discuss-structures-pulse inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[#046BD9] bg-white px-3.5 text-[13px] font-semibold text-[#046BD9] hover:bg-[#046BD9]/8"
+                        >
+                          <span aria-hidden className="text-[15px] leading-none">ⓘ</span>
+                          {c.structuresAbout}
+                          <span aria-hidden>→</span>
+                        </button>
+                      </span>
+                      <span className="mt-1.5 block text-[12px] font-medium text-neutral-500">{c.structuresHint}</span>
                     </legend>
                     <div className="mt-2 grid grid-cols-2 gap-2.5">
                       {OWNERSHIP_CONTACT_TOPICS.map((option) => {

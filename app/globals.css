@@ -6086,6 +6086,16 @@ body.mapsite-gallery-open [data-paypal-button] {
   background: linear-gradient(180deg, #fbfaf7 0%, #f4f1eb 100%);
 }
 
+@keyframes discuss-structures-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(4, 107, 217, 0.28); }
+  70% { box-shadow: 0 0 0 8px rgba(4, 107, 217, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(4, 107, 217, 0); }
+}
+
+.discuss-structures-pulse {
+  animation: discuss-structures-pulse 1.4s ease-out 1;
+}
+
 .talis-adviser {
   min-height: calc(100dvh - 68px);
   /* Scroll with the page so the beige surface covers tall phone layouts. */

@@ -248,7 +248,7 @@ export const de: Dictionary = {
             "Eine Mapsite ist ein kartenbasiertes Online-Navigationssystem, das branchennah eingesetzt werden kann und Ihnen mehr Flexibilität bei der Vermarktung hochpreisiger Produkte verschafft (also solcher, die in der Regel mehr als 10.000 $ pro Einheit kosten und ortsfest sind, rollen, schwimmen oder fliegen).",
         },
         {
-          question: "Wofür steht TSPLITS?",
+          question: "Wofür steht Tsplits™?",
           answer:
             "Talisman Simple Project Lead & Income Tracking System. Talisman, weil wir Ihr Glücksbringer sein möchten. SPLITS, weil wir die Werbeeinnahmen teilen, die über Ihr Konto entstehen.",
         },
@@ -685,6 +685,7 @@ export const de: Dictionary = {
     openPage: "Als ganze Seite mit Google-erkanntem Standort öffnen →",
     topic: "Bevorzugte Transaktionsstruktur",
     structuresAbout: "Zu diesen Strukturen",
+    structuresHint: "Tippen, um die Strukturen zu vergleichen",
     structuresPanelTitle: "Transaktionsstrukturen",
     structuresClose: "Schließen",
     talkWebster: "Mit Webster sprechen",

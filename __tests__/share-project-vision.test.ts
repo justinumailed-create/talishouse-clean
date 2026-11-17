@@ -61,6 +61,14 @@ describe("Share a Project Vision (/talisu/discuss) redesign", () => {
     expect(de.contactForm.pageLead).not.toMatch(/ohne Registrierung|FAST Code/i);
     expect(en.contactForm.topic).toBe("Preferred Transaction Structure");
     expect(de.contactForm.topic).toBe("Bevorzugte Transaktionsstruktur");
+    expect(en.contactForm.structuresAbout).toBe("About these structures");
+    expect(de.contactForm.structuresAbout).toBe("Zu diesen Strukturen");
+    expect(en.contactForm.structuresHint).toBe("Tap to compare structures");
+    expect(de.contactForm.structuresHint).toBe("Tippen, um die Strukturen zu vergleichen");
+    expect(`${en.contactForm.structuresAbout} ${en.contactForm.structuresHint}`).not.toMatch(/[—–]/);
+    expect(`${de.contactForm.structuresAbout} ${de.contactForm.structuresHint}`).not.toMatch(/[—–]/);
+    expect(ui).toContain("discuss-structures-pulse");
+    expect(ui).toContain("c.structuresHint");
     expect(de.home.ownershipSections[3].body).toContain("Interesse, ganz oder anteilig,");
     expect(
       de.home.ownershipSections.map((section) => `${section.body} ${section.result}`).join("\n"),

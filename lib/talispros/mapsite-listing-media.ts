@@ -9,7 +9,7 @@ export const MAPSITE_LISTING_IMAGE_CLASS =
 /** Shared card width for the left tile and pin popup. */
 export const MAPSITE_LISTING_CARD_WIDTH_CLASS = "w-[min(92vw,22rem)]";
 
-export const MAPSITE_FALLBACK_AGENCY_NAME = "TSplits";
+export const MAPSITE_FALLBACK_AGENCY_NAME = "Tsplits™";
 
 /** Windswept tree used on a claimed card when the stored mark is a placeholder. */
 export const MAPSITE_TREE_LOGO = "/assets/windswept-tree-logo.png";
