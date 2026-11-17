@@ -430,7 +430,7 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
       expect(html).toContain(`>${label}<`);
     }
     expect(html).toContain("Wählen Sie ein Konto oder setzen Sie einen PIN:");
-    expect(html).toContain("Teamleiterin: Aisha, AMBA");
+    expect(html).toContain("Teamleiterin: Aisha C., AMBA");
     expect(html).not.toContain("Makler oder Teamleiter");
     expect(html).toContain("Nutzungsbedingungen");
     expect(html).toContain("Datenschutzerklärung");
@@ -494,55 +494,66 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(entry).toContain("hasCheckoutAccess");
   });
 
-  it("uses Ralf's Aisha sidebar copy word for word, with a German translation, and the PIN price on PIN only", () => {
+  it("uses Ralf's Nov 16 sidebar copy word for word, with a German translation", () => {
     const enCopy = en.talisu.register.actions.checkouts;
     const deCopy = de.talisu.register.actions.checkouts;
-    const exact: Record<string, string> = {
-      broker:
-        "You are a Broker or Team Leader providing a Mapsite to your Agents. You can place one Home PIN and an unlimited number of Listing PINs per Agent, although we recommend you limit inclusion by introducing service floors: only Listing that pay your minimum for your minimum term get included.",
-      agent:
-        "You are an Agent working as part of a brokerage or team. You can place an unlimited number of Listing PINs that pay your brokerage minimum in Real Estate Fees and Term Lengths. You require your Broker or Team Account FAST Code to place those PINs.",
-      fsbo:
-        "You are a For-Sale-By-Owner having reached an agreement with your favourite participating Broker or Team to place a PIN on their Mapsite. You still save on your Real Estate Fees, but you set them up for Buyer's Agency transactions on Your Mere Posting listing.",
-      adpro:
-        "You are an advertiser on the Broker or Team Mapsite, using your presence there to redirect their clients to your own website, or Mapsite. If the latter, it is included at no additional charge and you might develop your very own virtual market or monopoly.",
-    };
-    for (const [id, text] of Object.entries(exact)) {
-      expect(enCopy.find((item) => item.id === id)?.sidebar).toBe(text);
-      expect(text).not.toMatch(/™|TODO|TBD/);
-      const german = deCopy.find((item) => item.id === id)?.sidebar ?? "";
-      expect(german.length).toBeGreaterThan(40);
-      expect(german).not.toBe(text);
-      expect(german).not.toMatch(/TODO|TBD|™/);
-    }
-    const pinEn = enCopy.find((item) => item.id === "pin")?.sidebar ?? "";
-    const pinDe = deCopy.find((item) => item.id === "pin")?.sidebar ?? "";
-    expect(pinEn).toBe(
-      "Additional PINs are $7 CAD each. Buy them from PIN Dashboard on your Mapsite.",
+    const flat = (
+      blocks: ReadonlyArray<{ kind: string; text?: string; items?: readonly string[] }>,
+    ) =>
+      blocks
+        .flatMap((block) => (block.kind === "list" ? (block.items ?? []) : [block.text ?? ""]))
+        .join("\n");
+    const broker = flat(enCopy.find((item) => item.id === "broker")?.sidebar ?? []);
+    expect(broker).toContain(
+      "You are a Broker or Team Leader, who has registered a Mapsite account annually and maintains it monthly.",
     );
-    expect(pinEn).not.toMatch(/USD|TODO|TBD/);
-    expect(pinDe.length).toBeGreaterThan(20);
-    expect(pinDe).toContain("CAD");
-    expect(pinDe).not.toBe(pinEn);
-    expect(pinDe).not.toMatch(/USD|TODO|TBD/);
+    expect(broker).toContain("you that prospectively save or make money.");
+    expect(broker).toContain("average 10 PINs per day, each.");
+    const agent = enCopy.find((item) => item.id === "agent")?.sidebar ?? [];
+    const agentList = agent.find((block) => block.kind === "list");
+    expect(agentList && "items" in agentList ? agentList.items : []).toEqual([
+      "Specifically, you place Listings to apply service floors.",
+      "FSBO place PINs to set up Buyer\u2019s Agencies.",
+      "Adpro (favourite service providers, like mortgage brokers, lawyers, inspectors, etc.) place PINs to formalize referral or co-promotion networks.",
+    ]);
+    const pin = flat(enCopy.find((item) => item.id === "pin")?.sidebar ?? []);
+    expect(pin).toContain("same here ;-)\u2026!");
+    expect(pin).toContain("Select the button below to see our syndication directory.");
+    expect(enCopy.find((item) => item.id === "pin")?.directoryLabel).toBe("Syndication Directory");
+    expect(enCopy.filter((item) => item.id !== "pin").every((item) => item.directoryLabel === "")).toBe(true);
+    for (const item of [...enCopy, ...deCopy]) {
+      const text = flat(item.sidebar);
+      expect(text).not.toMatch(/TODO|TBD|character count|Account Types|Effective Date/i);
+      expect(text).not.toMatch(/\u2014/);
+    }
+    for (const id of ["broker", "agent", "fsbo", "adpro", "pin"]) {
+      const german = flat(deCopy.find((item) => item.id === id)?.sidebar ?? []);
+      const english = flat(enCopy.find((item) => item.id === id)?.sidebar ?? []);
+      expect(german.length).toBeGreaterThan(40);
+      expect(german).not.toBe(english);
+      expect(deCopy.find((item) => item.id === id)?.sidebar.some((block) => block.kind === "list")).toBe(
+        enCopy.find((item) => item.id === id)?.sidebar.some((block) => block.kind === "list"),
+      );
+    }
+    expect(deCopy.find((item) => item.id === "pin")?.directoryLabel).toBe("Syndizierungsverzeichnis");
     expect(en.talisu.register.adviserTitle).toBe(
       "Register your Mapsite with Tsplits™. Aisha and her team will promote it globally and enable you to save or make money on your advertising.",
     );
     expect(en.talisu.register.adviserKicker).toBe("Registration options");
     expect(en.talisu.register.actions.label).toBe("Choose an account or place a PIN:");
-    expect(en.talisu.register.leaderLine).toBe("Team Leader: Aisha, AMBA");
+    expect(en.talisu.register.leaderLine).toBe("Team Leader: Aisha C., AMBA");
     expect(en.talisu.register.actions.consentBefore).toBe("Registration means you agree to the");
     expect(de.talisu.register.adviserTitle).toContain("Tsplits™");
     expect(de.talisu.register.adviserTitle).not.toBe(en.talisu.register.adviserTitle);
-    expect(de.talisu.register.leaderLine).toBe("Teamleiterin: Aisha, AMBA");
+    expect(de.talisu.register.leaderLine).toBe("Teamleiterin: Aisha C., AMBA");
     expect(de.talisu.register.actions.checkouts.find((item) => item.id === "broker")?.listLabel).toBe("Broker");
     expect(en.talisu.register.actions.checkouts.find((item) => item.id === "broker")?.label).toBe(
       "Broker or Team Leader",
     );
     expect(en.talisu.register.actions).not.toHaveProperty("pinNote");
     expect(de.talisu.register.actions).not.toHaveProperty("pinNote");
-    expect(en.talisu.register.partnerName).toBe("Aisha, AMBA");
-    expect(de.talisu.register.partnerName).toBe("Aisha, AMBA");
+    expect(en.talisu.register.partnerName).toBe("Aisha C., AMBA");
+    expect(de.talisu.register.partnerName).toBe("Aisha C., AMBA");
     const registerPage = readFileSync(resolve("app/talisu/reg/page.tsx"), "utf8");
     const checkout = readFileSync(resolve("components/talisu/RegisterProductCheckout.tsx"), "utf8");
     expect(registerPage).not.toContain("partnerHeading");
@@ -555,6 +566,14 @@ describe("Aisha's /talisu/reg four buttons + agent entry code (Oct 31)", () => {
     expect(checkout).not.toContain("register-checkout-terms");
     expect(checkout).not.toContain("register-checkout-privacy");
     expect(checkout).toContain("register-checkout-sidebar-");
+    expect(checkout).toContain("register-checkout-directory");
+    expect(checkout).toContain("PMC_PATHS.mediaDirectory");
+    for (const id of ["broker", "agent", "fsbo", "adpro", "pin"]) {
+      const page = readFileSync(resolve(`app/talisu/reg/checkout/${id}/page.tsx`), "utf8");
+      expect(page).toContain("RegisterProductCheckout");
+      expect(page).not.toContain("register-checkout-terms");
+      expect(page).not.toContain("ROUTES.TERMS");
+    }
     expect(checkout).toContain("min-h-[calc(100dvh-7.5rem)]");
     const actions = readFileSync(resolve("components/talisu/RegisterActions.tsx"), "utf8");
     expect(actions).not.toContain("pinNote");

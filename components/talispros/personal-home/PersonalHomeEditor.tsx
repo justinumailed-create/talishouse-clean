@@ -181,7 +181,7 @@ export default function PersonalHomeEditor({
         type="button"
         onClick={() => setOpen(true)}
         data-testid="personal-home-edit-open"
-        className="fixed bottom-5 left-4 z-40 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-black px-4 py-2 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)] transition hover:bg-neutral-800 sm:bottom-6 sm:left-6"
+        className="fixed bottom-56 left-4 z-40 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-black px-4 py-2 text-[15px] font-semibold text-white shadow-[0_8px_24px_rgba(0,0,0,0.28)] transition hover:bg-neutral-800 sm:bottom-6 sm:left-6"
       >
         <svg aria-hidden viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor">
           <path d="M13.6 2.6a2 2 0 0 1 2.8 2.8l-9.3 9.3-3.6.8.8-3.6 9.3-9.3Z" />
