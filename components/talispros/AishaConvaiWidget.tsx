@@ -27,7 +27,7 @@ const BUBBLE_STYLE = `
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  padding: 14px 16px 26px;
+  padding: 14px 44px 26px 16px;
   font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   font-size: 16px;
   font-weight: 500;

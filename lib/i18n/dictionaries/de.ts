@@ -120,9 +120,9 @@ export const de: Dictionary = {
     assistants: {
       aisha: {
         label:
-          "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen. Fragen Sie mich, wie?",
+          "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen. Fragen Sie mich, wie.",
         greeting:
-          "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen. Fragen Sie mich, wie?",
+          "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen. Fragen Sie mich, wie.",
         callback:
           "Schlagen Sie ein Projekt vor. Starten Sie einfach einen Anruf und erzählen Sie mir, was Sie hier sehen.",
         startCall: "Anruf starten",
