@@ -2,6 +2,7 @@ import GuideConversationPage from "@/components/talispros/GuideConversationPage"
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
 import { dynamicPageMetadata } from "@/lib/seo/page-metadata";
+import { loadAishaCallVariables } from "@/lib/talispros/aisha-owner-session";
 import { ASSISTANT_PERSONAS } from "@/lib/talispros/assistant-personas";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +30,7 @@ export default async function AishaHomePage({ searchParams }: AishaHomePageProps
   const query = (await searchParams) ?? {};
   const call = query.call === "1";
   const copy = getDictionary(await getLocale()).home.assistants.aisha;
+  const dynamicVariables = await loadAishaCallVariables();
 
   return (
     <GuideConversationPage
@@ -36,6 +38,7 @@ export default async function AishaHomePage({ searchParams }: AishaHomePageProps
       title={copy.panelTitle}
       call={call}
       recordsPitch
+      dynamicVariables={dynamicVariables}
       testId="aisha-home"
     />
   );

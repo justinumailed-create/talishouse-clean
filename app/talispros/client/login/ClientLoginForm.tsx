@@ -7,7 +7,7 @@ import { establishClientAnalyticsSession } from "@/app/talispros/client/actions"
 import { CLIENT_DASHBOARD_PATH } from "@/lib/mapsite-account-session";
 import SecretTextField from "@/components/talispros/SecretTextField";
 
-export default function ClientLoginForm() {
+export default function ClientLoginForm({ nextPath = null }: { nextPath?: string | null }) {
   const l = useT().login;
   const [email, setEmail] = useState("");
   const [fastCode, setFastCode] = useState("");
@@ -27,7 +27,7 @@ export default function ClientLoginForm() {
         return;
       }
 
-      router.push(CLIENT_DASHBOARD_PATH);
+      router.push(nextPath || CLIENT_DASHBOARD_PATH);
       router.refresh();
     } finally {
       setLoading(false);

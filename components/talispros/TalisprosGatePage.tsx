@@ -8,6 +8,7 @@ import AishaConvaiWidget from "@/components/talispros/AishaConvaiWidget";
 import HomePitchLock from "@/components/talispros/HomePitchLock";
 import { cookies } from "next/headers";
 import { MAPSITE_OWNER_COOKIE, MAPSITE_ROOT_ACCOUNT_COOKIE } from "@/lib/mapsite-account-session";
+import { readOwnerSessionFastCodes } from "@/lib/talispros/aisha-owner-session";
 import { HOMEPAGE_AISHA_WIDGET } from "@/lib/talispros/homepage-aisha-widget";
 import { websterOneHref } from "@/lib/talispros/webster-project";
 
@@ -28,7 +29,9 @@ export default async function TalisprosGatePage({ searchParams }: GatePageProps 
   const query = (await searchParams) ?? {};
   const jar = await cookies();
   const ownerCode = jar.get(MAPSITE_OWNER_COOKIE)?.value?.trim() || "";
-  const pitchExempt = Boolean(ownerCode || jar.get(MAPSITE_ROOT_ACCOUNT_COOKIE)?.value?.trim());
+  const sessionCodes = await readOwnerSessionFastCodes();
+  const signedIn = sessionCodes.length > 0;
+  const pitchExempt = signedIn || Boolean(jar.get(MAPSITE_ROOT_ACCOUNT_COOKIE)?.value?.trim());
   const websterHref = websterOneHref(query.code?.trim() || ownerCode);
   return (
     <HomePitchLock exempt={pitchExempt}>
@@ -39,7 +42,7 @@ export default async function TalisprosGatePage({ searchParams }: GatePageProps 
       >
         <div className="flex flex-none flex-col border-b border-neutral-200 lg:min-h-0 lg:border-b-0 lg:overflow-y-auto lg:overscroll-contain lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
           <TalisprosSamCartReturnBanner />
-          <TalisprosHomeGate pitchExempt={pitchExempt} websterHref={websterHref} />
+          <TalisprosHomeGate pitchExempt={pitchExempt} signedIn={signedIn} websterHref={websterHref} />
           <TalisprosHomeCornerLinks />
         </div>
         <div className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">

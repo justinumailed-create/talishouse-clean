@@ -141,6 +141,7 @@ export const en = {
     pitch: {
       note: "Start a call to open the rest of the site.",
       registered: "I've already registered",
+      talkToAisha: "Talk to Aisha, your team leader",
     },
     conversation: {
       startCall: "Start a call",

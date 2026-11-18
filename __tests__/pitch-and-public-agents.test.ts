@@ -24,7 +24,7 @@ describe("first-time pitch and public agent codes", () => {
     expect(page).toContain("HomePitchLock");
     expect(page).toContain("MAPSITE_OWNER_COOKIE");
     expect(page).toContain("pitchExempt");
-    expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain('href="/register"');
+    expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("aishaSignInPath()");
     expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain('data-testid="home-pitch-start"');
     expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("websterHref");
     expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("t.home.assistants.webster.startCall");
