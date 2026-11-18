@@ -8,6 +8,12 @@ import AishaConvaiWidget from "@/components/talispros/AishaConvaiWidget";
 import HomePitchLock from "@/components/talispros/HomePitchLock";
 import { cookies } from "next/headers";
 import { MAPSITE_OWNER_COOKIE, MAPSITE_ROOT_ACCOUNT_COOKIE } from "@/lib/mapsite-account-session";
+import { HOMEPAGE_AISHA_WIDGET } from "@/lib/talispros/homepage-aisha-widget";
+import { websterOneHref } from "@/lib/talispros/webster-project";
+
+type GatePageProps = {
+  searchParams?: Promise<{ code?: string }>;
+};
 
 /**
  * Homepage gate (`/`): TalisU blue navbar; Login + Build Demo + FAST on the
@@ -18,11 +24,12 @@ import { MAPSITE_OWNER_COOKIE, MAPSITE_ROOT_ACCOUNT_COOKIE } from "@/lib/mapsite
  * Blue navbar sits outside Libre Baskerville so it matches Bookshelf/inner
  * Poppins typography (shared TalisUMktsHeader + font-sans).
  */
-export default async function TalisprosGatePage() {
+export default async function TalisprosGatePage({ searchParams }: GatePageProps = {}) {
+  const query = (await searchParams) ?? {};
   const jar = await cookies();
-  const pitchExempt = Boolean(
-    jar.get(MAPSITE_OWNER_COOKIE)?.value?.trim() || jar.get(MAPSITE_ROOT_ACCOUNT_COOKIE)?.value?.trim(),
-  );
+  const ownerCode = jar.get(MAPSITE_OWNER_COOKIE)?.value?.trim() || "";
+  const pitchExempt = Boolean(ownerCode || jar.get(MAPSITE_ROOT_ACCOUNT_COOKIE)?.value?.trim());
+  const websterHref = websterOneHref(query.code?.trim() || ownerCode);
   return (
     <HomePitchLock exempt={pitchExempt}>
     <div className="flex min-h-dvh flex-col bg-white text-neutral-900 lg:h-dvh lg:min-h-0 lg:overflow-hidden">
@@ -32,14 +39,14 @@ export default async function TalisprosGatePage() {
       >
         <div className="flex flex-none flex-col border-b border-neutral-200 lg:min-h-0 lg:border-b-0 lg:overflow-y-auto lg:overscroll-contain lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
           <TalisprosSamCartReturnBanner />
-          <TalisprosHomeGate pitchExempt={pitchExempt} />
+          <TalisprosHomeGate pitchExempt={pitchExempt} websterHref={websterHref} />
           <TalisprosHomeCornerLinks />
         </div>
         <div className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
           <TalisprosHomeShowcase />
         </div>
       </div>
-      <AishaConvaiWidget startHref="/aisha?call=1" />
+      {HOMEPAGE_AISHA_WIDGET ? <AishaConvaiWidget startHref="/aisha?call=1" /> : null}
     </div>
     </HomePitchLock>
   );

@@ -26,7 +26,15 @@ describe("first-time pitch and public agent codes", () => {
     expect(page).toContain("pitchExempt");
     expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain('href="/register"');
     expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain('data-testid="home-pitch-start"');
-    expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain('href="/aisha?call=1"');
+    expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("websterHref");
+    expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("t.home.assistants.webster.startCall");
+    expect(page).toContain("websterOneHref");
+    expect(page).toContain("HOMEPAGE_AISHA_WIDGET");
+    expect(read("lib/talispros/homepage-aisha-widget.ts")).toContain("HOMEPAGE_AISHA_WIDGET: boolean = false");
+    expect(read("app/webster/page.tsx")).toContain("recordsPitch");
+    expect(read("app/webster/project/page.tsx")).toContain("recordsPitch");
+    expect(read("app/home/[fastCode]/page.tsx")).toContain("<MapsiteAisha");
+    expect(read("components/talispros/personal-home/PersonalHomeEditor.tsx")).toContain("bottom-56");
     expect(en.home.pitch.registered).toBe("I've already registered");
     expect(de.home.pitch.registered).toBe("Ich bin bereits registriert");
     expect(`${en.home.pitch.note} ${de.home.pitch.note}`).not.toMatch(/[—–]/);

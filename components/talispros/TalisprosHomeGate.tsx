@@ -13,7 +13,14 @@ import { useT } from "@/lib/i18n/client";
  * Homepage gate left column: Tsplits™ logo + Login (reveals FAST Code) + Build Demo.
  * Keeps the existing claimed-Mapsite cookie/session FAST flow.
  */
-export default function TalisprosHomeGate({ pitchExempt = false }: { pitchExempt?: boolean }) {
+export default function TalisprosHomeGate({
+  pitchExempt = false,
+  websterHref = "/webster?call=1",
+}: {
+  pitchExempt?: boolean;
+  /** Webster ONE. Includes a FAST Code when the homepage already has one. */
+  websterHref?: string;
+}) {
   const [loginOpen, setLoginOpen] = useState(false);
   const [pitchLocked, setPitchLocked] = useState(false);
   const t = useT();
@@ -57,11 +64,11 @@ export default function TalisprosHomeGate({ pitchExempt = false }: { pitchExempt
           {pitchLocked ? (
             <div data-pitch-free data-testid="home-pitch-start-wrap" className="flex flex-col gap-3">
               <Link
-                href="/aisha?call=1"
+                href={websterHref}
                 data-testid="home-pitch-start"
                 className="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#046BD9] px-6 text-center text-[18px] font-semibold text-white shadow-[0_8px_22px_rgba(4,107,217,0.35)] hover:bg-[#0358b3]"
               >
-                {t.home.assistants.aisha.startCall}
+                {t.home.assistants.webster.startCall}
               </Link>
               <div className="text-center">
                 <div className="text-[13px] leading-snug text-neutral-800">{t.home.pitch.note}</div>
