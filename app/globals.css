@@ -580,12 +580,13 @@ p {
 }
 .aisha-convai-slot elevenlabs-convai {
   pointer-events: none !important;
-  /* Above our write-up so the terms sheet, call, and chat cover the bubble. */
-  z-index: 2;
+  /* Above the greeting bubble so Start a call stays visible. */
+  z-index: 5;
 }
 
 .aisha-convai-bubble {
   position: relative;
+  z-index: 1;
 }
 
 .aisha-convai-bubble--aligned {

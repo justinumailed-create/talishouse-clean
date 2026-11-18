@@ -54,6 +54,26 @@ export default function TalisprosHomeGate({ pitchExempt = false }: { pitchExempt
         </div>
 
         <div className="flex flex-col gap-3">
+          {pitchLocked ? (
+            <div data-pitch-free data-testid="home-pitch-start-wrap" className="flex flex-col gap-3">
+              <Link
+                href="/aisha?call=1"
+                data-testid="home-pitch-start"
+                className="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#046BD9] px-6 text-center text-[18px] font-semibold text-white shadow-[0_8px_22px_rgba(4,107,217,0.35)] hover:bg-[#0358b3]"
+              >
+                {t.home.assistants.aisha.startCall}
+              </Link>
+              <div className="text-center">
+                <div className="text-[13px] leading-snug text-neutral-800">{t.home.pitch.note}</div>
+                <Link
+                  href="/register"
+                  className="mt-2 inline-block text-[13px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
+                >
+                  {t.home.pitch.registered}
+                </Link>
+              </div>
+            </div>
+          ) : null}
           <button
             type="button"
             aria-expanded={loginOpen}
@@ -93,17 +113,6 @@ export default function TalisprosHomeGate({ pitchExempt = false }: { pitchExempt
           >
             {t.home.systemDemo}
           </Link>
-          {pitchLocked ? (
-            <div data-pitch-free className="mt-4 text-center" data-testid="home-pitch-pass">
-              <p className="text-[13px] leading-snug text-neutral-700">{t.home.pitch.note}</p>
-              <Link
-                href="/register"
-                className="mt-2 inline-block text-[13px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
-              >
-                {t.home.pitch.registered}
-              </Link>
-            </div>
-          ) : null}
         </div>
 
         <TalisprosLegalCopy

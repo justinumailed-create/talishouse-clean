@@ -9,21 +9,17 @@ export const POWERED_BY_BANNER_STYLE = `
 p.whitespace-nowrap:has(a[href*="elevenlabs.io"]) {
   display: none !important;
 }
-/* Notes and transcript stay dark on white, never grey on the blue sheet. */
+/* Homepage call sheet: notes stay near-black on white, not grey on the blue theme. */
 .sheet,
 [data-variant="expanded"].sheet,
-[data-variant="fullscreen"].sheet,
-[data-variant="page"].sheet {
+[data-variant="fullscreen"].sheet {
   background: #ffffff !important;
   color: #1a1a1a !important;
 }
 .sheet p,
 .sheet li,
-.sheet label,
-.sheet textarea,
-[data-variant="page"].sheet p,
-[data-variant="page"].sheet li,
-[data-variant="page"].sheet textarea {
+.sheet span,
+.sheet textarea {
   color: #1a1a1a !important;
 }
 button.aisha-call-pill {
@@ -62,9 +58,10 @@ export const POWERED_BY_INLINE_STYLE = `
 }
 .sheet p,
 .sheet li,
+.sheet span,
 .sheet textarea,
 [data-variant="page"].sheet p,
-[data-variant="page"].sheet li,
+[data-variant="page"].sheet span,
 [data-variant="page"].sheet textarea {
   color: #1a1a1a !important;
 }
