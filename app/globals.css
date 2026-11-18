@@ -6082,6 +6082,63 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 /* /talisu/discuss: warm ivory beside the muted structures grid. */
+[data-pitch-locked="1"] a,
+[data-pitch-locked="1"] button {
+  pointer-events: none;
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+[data-pitch-locked="1"] [data-pitch-free],
+[data-pitch-locked="1"] [data-pitch-free] * {
+  pointer-events: auto;
+  opacity: 1;
+  cursor: auto;
+}
+
+[data-pitch-locked="1"] [data-pitch-free] a,
+[data-pitch-locked="1"] [data-pitch-free] button {
+  cursor: pointer;
+}
+
+/* Unlayered so this beats the global `p { color }` rule. */
+p.guide-agent {
+  background: #f4f4f5 !important;
+  color: #1a1a1a !important;
+}
+
+p.guide-user {
+  background: #083e86 !important;
+  color: #ffffff !important;
+}
+
+.guide-transcript {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+}
+
+.guide-transcript > p {
+  color: #3f3f46 !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .guide-transcript {
+    background: #111827 !important;
+    color: #f9fafb !important;
+  }
+  .guide-transcript > p {
+    color: #e5e7eb !important;
+  }
+  p.guide-agent {
+    background: #1f2937 !important;
+    color: #f9fafb !important;
+  }
+  p.guide-user {
+    background: #1d4ed8 !important;
+    color: #ffffff !important;
+  }
+}
+
 .talis-discuss-surface {
   background: linear-gradient(180deg, #fbfaf7 0%, #f4f1eb 100%);
 }

@@ -138,6 +138,10 @@ export const en = {
     ownershipAria: "Ownership models",
     closeDetails: "Close {title} details",
     learnMore: "Learn More",
+    pitch: {
+      note: "Start a call to open the rest of the site.",
+      registered: "I've already registered",
+    },
     conversation: {
       startCall: "Start a call",
       endCall: "End call",

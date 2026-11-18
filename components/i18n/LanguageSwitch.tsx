@@ -56,6 +56,7 @@ export default function LanguageSwitch({
       role="group"
       aria-label={t.langSwitch.groupLabel}
       data-testid="language-switch"
+      data-pitch-free=""
       className={`inline-flex shrink-0 items-center rounded-md text-[12px] font-semibold leading-none sm:text-[13px] ${
         pending ? "opacity-70" : ""
       } ${className}`}

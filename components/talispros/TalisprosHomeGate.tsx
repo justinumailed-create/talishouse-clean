@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { PITCH_DONE_EVENT, readPitchDone } from "@/lib/talispros/pitch-gate";
 import TalisprosHomeFastCodeEntry from "@/components/talispros/TalisprosHomeFastCodeEntry";
 import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
 import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
@@ -12,9 +13,25 @@ import { useT } from "@/lib/i18n/client";
  * Homepage gate left column: Tsplits™ logo + Login (reveals FAST Code) + Build Demo.
  * Keeps the existing claimed-Mapsite cookie/session FAST flow.
  */
-export default function TalisprosHomeGate() {
+export default function TalisprosHomeGate({ pitchExempt = false }: { pitchExempt?: boolean }) {
   const [loginOpen, setLoginOpen] = useState(false);
+  const [pitchLocked, setPitchLocked] = useState(false);
   const t = useT();
+
+  useEffect(() => {
+    if (pitchExempt) {
+      setPitchLocked(false);
+      return;
+    }
+    const sync = () => setPitchLocked(!readPitchDone(window.localStorage));
+    sync();
+    window.addEventListener(PITCH_DONE_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(PITCH_DONE_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, [pitchExempt]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-white px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
@@ -76,6 +93,17 @@ export default function TalisprosHomeGate() {
           >
             {t.home.systemDemo}
           </Link>
+          {pitchLocked ? (
+            <div data-pitch-free className="mt-4 text-center" data-testid="home-pitch-pass">
+              <p className="text-[13px] leading-snug text-neutral-700">{t.home.pitch.note}</p>
+              <Link
+                href="/register"
+                className="mt-2 inline-block text-[13px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
+              >
+                {t.home.pitch.registered}
+              </Link>
+            </div>
+          ) : null}
         </div>
 
         <TalisprosLegalCopy

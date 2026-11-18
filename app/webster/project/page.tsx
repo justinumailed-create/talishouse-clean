@@ -38,6 +38,7 @@ export default async function WebsterProjectPage({ searchParams }: ProjectPagePr
       agentId={WEBSTER_PROJECT_AGENT_ID}
       title={copy.panelTitle}
       call={query.call === "1"}
+      recordsPitch
       dynamicVariables={dynamicVariables}
       testId="webster-project"
       imagePosition="center 18%"

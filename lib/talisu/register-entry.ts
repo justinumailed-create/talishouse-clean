@@ -5,6 +5,7 @@ import {
   getContractAgentById,
   verifyCookieValue,
 } from "@/lib/talispros/mapsite-contract-service";
+import { PUBLIC_AGENT_CODES } from "@/lib/talisu/checkout-codes";
 
 /**
  * Register entry gate (Arun, Oct 31): Aisha's registration (/talisu/reg
@@ -28,6 +29,10 @@ export const CHECKOUT_CODE_SCOPE = "checkout-code";
 export const CHECKOUT_CODE_GRANT_ID = "c0de0000-0000-4000-8000-0000000000de";
 export const CHECKOUT_CODE_MAX_AGE = REGISTER_ENTRY_COOKIE_MAX_AGE;
 
+/** Which public agent code (Websterr or Aishaa) opened Register. */
+export const PUBLIC_AGENT_COOKIE = "talisu_public_agent";
+export const PUBLIC_AGENT_SCOPE = "public-agent";
+
 /**
  * True when this browser holds a valid entry for an agent who is still
  * active: the register entry cookie, or the contract unlock cookie (the same
@@ -50,4 +55,12 @@ export async function hasCheckoutAccess(): Promise<boolean> {
   const jar = await cookies();
   const grant = verifyCookieValue(CHECKOUT_CODE_SCOPE, jar.get(CHECKOUT_CODE_COOKIE)?.value);
   return grant === CHECKOUT_CODE_GRANT_ID;
+}
+
+/** Ralf for Websterr, Jonathan for Aishaa, or null when no public code was used. */
+export async function readPublicAgentFollowUp(): Promise<"Ralf" | "Jonathan" | null> {
+  const jar = await cookies();
+  const id = verifyCookieValue(PUBLIC_AGENT_SCOPE, jar.get(PUBLIC_AGENT_COOKIE)?.value);
+  const match = PUBLIC_AGENT_CODES.find((item) => item.id === id);
+  return match ? match.followUp : null;
 }

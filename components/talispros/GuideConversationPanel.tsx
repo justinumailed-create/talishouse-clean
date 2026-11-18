@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import { useT } from "@/lib/i18n/client";
+import { markPitchDone } from "@/lib/talispros/pitch-gate";
 import { type SpokenLine } from "@/lib/talispros/spoken-transcript";
 
 type AgentChunk = { chars: string[]; shown: number };
@@ -15,6 +16,7 @@ type GuideConversationPanelProps = {
   title: string;
   autoStart: boolean;
   dynamicVariables?: string;
+  recordsPitch?: boolean;
 };
 
 function parseVariables(raw: string | undefined): Record<string, string> | undefined {
@@ -33,7 +35,7 @@ function parseVariables(raw: string | undefined): Record<string, string> | undef
   }
 }
 
-function Panel({ agentId, title, autoStart, dynamicVariables }: GuideConversationPanelProps) {
+function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = false }: GuideConversationPanelProps) {
   const { home } = useT();
   const copy = home.conversation;
   const [lines, setLines] = useState<SpokenLine[]>([]);
@@ -46,6 +48,7 @@ function Panel({ agentId, title, autoStart, dynamicVariables }: GuideConversatio
   const chainEnd = useRef(0);
   const transcriptRef = useRef<HTMLDivElement>(null);
   const boot = useRef(false);
+  const connectedOnce = useRef(false);
 
   const clearTimers = () => {
     timers.current.forEach((id) => window.clearTimeout(id));
@@ -97,11 +100,13 @@ function Panel({ agentId, title, autoStart, dynamicVariables }: GuideConversatio
 
   const conversation = useConversation({
     onConnect: () => {
+      connectedOnce.current = true;
       setFailed(false);
       setEnded(false);
     },
     onDisconnect: () => {
       clearTimers();
+      if (recordsPitch && connectedOnce.current) markPitchDone(window.localStorage);
       setEnded(true);
     },
     onError: () => {
@@ -202,7 +207,7 @@ function Panel({ agentId, title, autoStart, dynamicVariables }: GuideConversatio
       </button>
       <p
         data-testid="guide-status"
-        className="mt-2 min-h-5 text-center text-[14px] font-medium text-neutral-600"
+        className="mt-2 min-h-5 text-center text-[14px] font-medium text-[#1a1a1a]"
       >
         {status}
       </p>
@@ -212,10 +217,10 @@ function Panel({ agentId, title, autoStart, dynamicVariables }: GuideConversatio
       <div
         ref={transcriptRef}
         data-testid="guide-transcript"
-        className="mt-5 w-full max-w-[560px] min-h-40 max-h-[40vh] overflow-y-auto rounded-2xl bg-white px-4 py-3 text-left shadow-[0_10px_30px_rgba(0,0,0,0.08)] ring-1 ring-black/5"
+        className="guide-transcript mt-5 w-full max-w-[560px] min-h-40 max-h-[40vh] overflow-y-auto rounded-2xl bg-white px-4 py-3 text-left text-[#1a1a1a] shadow-[0_10px_30px_rgba(0,0,0,0.08)] ring-1 ring-black/5"
       >
         {lines.length === 0 ? (
-          <p className="m-0 text-[14px] text-neutral-400">{copy.transcriptEmpty}</p>
+          <p className="m-0 text-[14px] text-[#3f3f46]">{copy.transcriptEmpty}</p>
         ) : (
           <div className="flex flex-col gap-2">
             {lines.map((line) => (
@@ -223,8 +228,8 @@ function Panel({ agentId, title, autoStart, dynamicVariables }: GuideConversatio
                 key={line.id}
                 className={`m-0 max-w-[90%] rounded-2xl px-3 py-2 text-[15px] leading-snug ${
                   line.role === "user"
-                    ? "self-end bg-[#046BD9] text-white"
-                    : "self-start bg-neutral-100 text-neutral-900"
+                    ? "guide-user self-end bg-[#083E86] text-white"
+                    : "guide-agent self-start bg-[#f4f4f5] text-[#1a1a1a]"
                 }`}
               >
                 {line.text}

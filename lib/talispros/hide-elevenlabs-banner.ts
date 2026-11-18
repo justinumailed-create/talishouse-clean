@@ -9,6 +9,23 @@ export const POWERED_BY_BANNER_STYLE = `
 p.whitespace-nowrap:has(a[href*="elevenlabs.io"]) {
   display: none !important;
 }
+/* Notes and transcript stay dark on white, never grey on the blue sheet. */
+.sheet,
+[data-variant="expanded"].sheet,
+[data-variant="fullscreen"].sheet,
+[data-variant="page"].sheet {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+}
+.sheet p,
+.sheet li,
+.sheet label,
+.sheet textarea,
+[data-variant="page"].sheet p,
+[data-variant="page"].sheet li,
+[data-variant="page"].sheet textarea {
+  color: #1a1a1a !important;
+}
 button.aisha-call-pill {
   font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
   font-size: 15px !important;
@@ -38,6 +55,19 @@ button.aisha-call-pill {
 
 /** Page embed: the conversation fills its column instead of docking to the screen. */
 export const POWERED_BY_INLINE_STYLE = `
+.sheet,
+[data-variant="page"].sheet {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+}
+.sheet p,
+.sheet li,
+.sheet textarea,
+[data-variant="page"].sheet p,
+[data-variant="page"].sheet li,
+[data-variant="page"].sheet textarea {
+  color: #1a1a1a !important;
+}
 p.whitespace-nowrap:has(a[href*="elevenlabs.io"]) {
   display: none !important;
 }

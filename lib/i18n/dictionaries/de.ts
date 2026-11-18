@@ -117,6 +117,10 @@ export const de: Dictionary = {
     ownershipAria: "Eigentumsmodelle",
     closeDetails: "Details zu {title} schließen",
     learnMore: "Mehr erfahren",
+    pitch: {
+      note: "Starten Sie einen Anruf, um den Rest der Seite zu öffnen.",
+      registered: "Ich bin bereits registriert",
+    },
     conversation: {
       startCall: "Anruf starten",
       endCall: "Anruf beenden",

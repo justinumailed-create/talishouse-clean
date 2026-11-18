@@ -16,6 +16,7 @@ export default function GuideConversationPage({
   testId,
   imagePosition = "center 18%",
   agentId,
+  recordsPitch = false,
 }: {
   persona: AssistantPersona;
   title: string;
@@ -25,6 +26,8 @@ export default function GuideConversationPage({
   imagePosition?: string;
   /** Webster TWO uses its own agent. Other pages use the persona agent. */
   agentId?: string;
+  /** A finished call on this page counts as the homepage pitch. */
+  recordsPitch?: boolean;
 }) {
   return (
     <div
@@ -57,6 +60,7 @@ export default function GuideConversationPage({
             title={title}
             autoStart={call}
             dynamicVariables={dynamicVariables}
+            recordsPitch={recordsPitch}
           />
         </div>
       </main>
