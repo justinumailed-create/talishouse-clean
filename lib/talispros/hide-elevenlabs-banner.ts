@@ -9,6 +9,19 @@ export const POWERED_BY_BANNER_STYLE = `
 p.whitespace-nowrap:has(a[href*="elevenlabs.io"]) {
   display: none !important;
 }
+/* Homepage call sheet: notes stay near-black on white, not grey on the blue theme. */
+.sheet,
+[data-variant="expanded"].sheet,
+[data-variant="fullscreen"].sheet {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+}
+.sheet p,
+.sheet li,
+.sheet span,
+.sheet textarea {
+  color: #1a1a1a !important;
+}
 button.aisha-call-pill {
   font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
   font-size: 15px !important;
@@ -38,6 +51,20 @@ button.aisha-call-pill {
 
 /** Page embed: the conversation fills its column instead of docking to the screen. */
 export const POWERED_BY_INLINE_STYLE = `
+.sheet,
+[data-variant="page"].sheet {
+  background: #ffffff !important;
+  color: #1a1a1a !important;
+}
+.sheet p,
+.sheet li,
+.sheet span,
+.sheet textarea,
+[data-variant="page"].sheet p,
+[data-variant="page"].sheet span,
+[data-variant="page"].sheet textarea {
+  color: #1a1a1a !important;
+}
 p.whitespace-nowrap:has(a[href*="elevenlabs.io"]) {
   display: none !important;
 }

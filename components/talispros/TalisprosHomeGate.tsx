@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { PITCH_DONE_EVENT, readPitchDone } from "@/lib/talispros/pitch-gate";
 import TalisprosHomeFastCodeEntry from "@/components/talispros/TalisprosHomeFastCodeEntry";
 import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
 import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
@@ -12,9 +13,32 @@ import { useT } from "@/lib/i18n/client";
  * Homepage gate left column: Tsplits™ logo + Login (reveals FAST Code) + Build Demo.
  * Keeps the existing claimed-Mapsite cookie/session FAST flow.
  */
-export default function TalisprosHomeGate() {
+export default function TalisprosHomeGate({
+  pitchExempt = false,
+  websterHref = "/webster?call=1",
+}: {
+  pitchExempt?: boolean;
+  /** Webster ONE. Includes a FAST Code when the homepage already has one. */
+  websterHref?: string;
+}) {
   const [loginOpen, setLoginOpen] = useState(false);
+  const [pitchLocked, setPitchLocked] = useState(false);
   const t = useT();
+
+  useEffect(() => {
+    if (pitchExempt) {
+      setPitchLocked(false);
+      return;
+    }
+    const sync = () => setPitchLocked(!readPitchDone(window.localStorage));
+    sync();
+    window.addEventListener(PITCH_DONE_EVENT, sync);
+    window.addEventListener("storage", sync);
+    return () => {
+      window.removeEventListener(PITCH_DONE_EVENT, sync);
+      window.removeEventListener("storage", sync);
+    };
+  }, [pitchExempt]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-white px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
@@ -37,6 +61,26 @@ export default function TalisprosHomeGate() {
         </div>
 
         <div className="flex flex-col gap-3">
+          {pitchLocked ? (
+            <div data-pitch-free data-testid="home-pitch-start-wrap" className="flex flex-col gap-3">
+              <Link
+                href={websterHref}
+                data-testid="home-pitch-start"
+                className="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#046BD9] px-6 text-center text-[18px] font-semibold text-white shadow-[0_8px_22px_rgba(4,107,217,0.35)] hover:bg-[#0358b3]"
+              >
+                {t.home.assistants.webster.startCall}
+              </Link>
+              <div className="text-center">
+                <div className="text-[13px] leading-snug text-neutral-800">{t.home.pitch.note}</div>
+                <Link
+                  href="/register"
+                  className="mt-2 inline-block text-[13px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
+                >
+                  {t.home.pitch.registered}
+                </Link>
+              </div>
+            </div>
+          ) : null}
           <button
             type="button"
             aria-expanded={loginOpen}

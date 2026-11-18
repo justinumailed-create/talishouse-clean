@@ -35,6 +35,7 @@ export default async function WebsterGuidePage({ searchParams }: GuidePageProps)
       persona={ASSISTANT_PERSONAS.webster}
       title={copy.panelTitle}
       call={query.call === "1"}
+      recordsPitch
       dynamicVariables={dynamicVariables}
       testId="webster-guide"
       imagePosition="center 18%"

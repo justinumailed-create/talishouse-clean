@@ -5,22 +5,34 @@ import {
   CHECKOUT_AGENT_CODES,
   isCheckoutAgentCode,
   normalizeCheckoutAgentCode,
+  publicAgentFollowUp,
 } from "../lib/talisu/checkout-codes";
 
 describe("checkout agent codes", () => {
   it("allows exactly the memorable names plus demo", () => {
-    expect([...CHECKOUT_AGENT_CODES]).toEqual(["aritri", "enanko", "ralf", "arun", "demo"]);
+    expect([...CHECKOUT_AGENT_CODES]).toEqual([
+      "aritri",
+      "enanko",
+      "ralf",
+      "arun",
+      "demo",
+      "websterr",
+      "aishaa",
+    ]);
   });
 
   it("matches case-insensitively and trims surrounding spaces", () => {
-    for (const code of ["aritri", "  Aritri", "ENANKO", " ralf ", "Arun", "DeMo"]) {
+    for (const code of ["aritri", "  Aritri", "ENANKO", " ralf ", "Arun", "DeMo", "Websterr", "Aishaa"]) {
       expect(isCheckoutAgentCode(code)).toBe(true);
     }
+    expect(publicAgentFollowUp("Websterr")).toBe("Ralf");
+    expect(publicAgentFollowUp("Aishaa")).toBe("Jonathan");
+    expect(publicAgentFollowUp("ralf")).toBe(null);
     expect(normalizeCheckoutAgentCode("  Ralf\n")).toBe("ralf");
   });
 
   it("rejects anything outside the list", () => {
-    for (const code of ["", "   ", "jonathan", "en anko", "demo1", "not-a-code", null, 3]) {
+    for (const code of ["", "   ", "jonathan", "webster", "aisha", "en anko", "demo1", "not-a-code", null, 3]) {
       expect(isCheckoutAgentCode(code)).toBe(false);
     }
   });

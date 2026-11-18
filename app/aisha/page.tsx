@@ -35,6 +35,7 @@ export default async function AishaHomePage({ searchParams }: AishaHomePageProps
       persona={ASSISTANT_PERSONAS.aisha}
       title={copy.panelTitle}
       call={call}
+      recordsPitch
       testId="aisha-home"
     />
   );

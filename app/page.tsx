@@ -6,11 +6,15 @@ export async function generateMetadata() {
   return pageMetadata("/");
 }
 
-export default function Home() {
+export default function Home({
+  searchParams,
+}: {
+  searchParams?: Promise<{ code?: string }>;
+}) {
   return (
     <div className="min-h-dvh lg:h-full lg:min-h-0">
       <Suspense fallback={null}>
-        <TalisprosGatePage />
+        <TalisprosGatePage searchParams={searchParams} />
       </Suspense>
     </div>
   );

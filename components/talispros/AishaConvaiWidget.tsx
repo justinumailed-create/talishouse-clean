@@ -53,7 +53,7 @@ const BUBBLE_STYLE = `
   -webkit-backdrop-filter: saturate(160%) blur(16px);
   backdrop-filter: saturate(160%) blur(16px);
 }
-.aisha-convai-bubble { position: relative; }
+.aisha-convai-bubble { position: relative; z-index: 1; }
 .aisha-convai-bubble--aligned {
   position: fixed;
   margin: 0;
@@ -92,7 +92,7 @@ const BUBBLE_STYLE = `
   display: none !important;
 }
 .aisha-convai-slot elevenlabs-convai {
-  z-index: 2;
+  z-index: 5;
 }
 .aisha-convai-slot[data-surface="open"] elevenlabs-convai {
   top: var(--aisha-panel-top, 0px) !important;

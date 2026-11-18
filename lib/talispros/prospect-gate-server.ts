@@ -9,12 +9,14 @@ import { getAdminSessionAccount, matchesGlobalAdminPassword, writeAdminSessionCo
 import { getActiveAdminGrant } from "@/lib/admin-access-grants";
 import { normalizeAgentCode } from "@/lib/talispros/mapsite-contract";
 import { normalizeSlotFastCode } from "@/lib/talispros/fast-code-slots";
-import { isCheckoutAgentCode, normalizeCheckoutAgentCode } from "@/lib/talisu/checkout-codes";
+import { isCheckoutAgentCode, normalizeCheckoutAgentCode, publicAgentGrantId } from "@/lib/talisu/checkout-codes";
 import {
   CHECKOUT_CODE_COOKIE,
   CHECKOUT_CODE_GRANT_ID,
   CHECKOUT_CODE_MAX_AGE,
   CHECKOUT_CODE_SCOPE,
+  PUBLIC_AGENT_COOKIE,
+  PUBLIC_AGENT_SCOPE,
   REGISTER_ENTRY_COOKIE,
   REGISTER_ENTRY_COOKIE_MAX_AGE,
   REGISTER_ENTRY_COOKIE_SCOPE,
@@ -187,13 +189,20 @@ export async function acceptAgentGateSecret(raw: unknown): Promise<{ ok: true } 
     return { ok: false, error: "wrong" };
   }
   const jar = await cookies();
-  jar.set(CHECKOUT_CODE_COOKIE, signCookieValue(CHECKOUT_CODE_SCOPE, CHECKOUT_CODE_GRANT_ID, CHECKOUT_CODE_MAX_AGE), {
+  const cookie = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax" as const,
     path: "/",
     maxAge: CHECKOUT_CODE_MAX_AGE,
-  });
+  };
+  jar.set(CHECKOUT_CODE_COOKIE, signCookieValue(CHECKOUT_CODE_SCOPE, CHECKOUT_CODE_GRANT_ID, CHECKOUT_CODE_MAX_AGE), cookie);
+  const followUpId = publicAgentGrantId(code);
+  if (followUpId) {
+    jar.set(PUBLIC_AGENT_COOKIE, signCookieValue(PUBLIC_AGENT_SCOPE, followUpId, CHECKOUT_CODE_MAX_AGE), cookie);
+  } else {
+    jar.delete(PUBLIC_AGENT_COOKIE);
+  }
   if (isSupabaseAdminConfigured()) await recordGateAttempt(true);
   return { ok: true };
 }

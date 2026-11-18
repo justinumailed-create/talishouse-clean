@@ -8,6 +8,7 @@ import {
   WEBSTER_PROJECT_AGENT_ID,
   WEBSTER_PROJECT_PATH,
   isRegistrationOfferHref,
+  websterOneHref,
   websterProjectHref,
 } from "../lib/talispros/webster-project";
 import { addUserLine, appendPlayedChars } from "../lib/talispros/spoken-transcript";
@@ -19,6 +20,8 @@ describe("Webster TWO", () => {
     expect(WEBSTER_PROJECT_AGENT_ID).toBe("agent_5701m7n1n436fzs98pnepf37gk3q");
     expect(websterProjectHref("DC06")).toBe("/webster/project?call=1&code=DC06");
     expect(websterProjectHref("")).toBe("/webster/project?call=1");
+    expect(websterOneHref("DC06")).toBe("/webster?call=1&code=DC06");
+    expect(websterOneHref("")).toBe("/webster?call=1");
     expect(isRegistrationOfferHref("/webster?call=1")).toBe(true);
     expect(isRegistrationOfferHref("/register")).toBe(true);
     expect(isRegistrationOfferHref("/talispros/markets/claim-a-market")).toBe(true);
