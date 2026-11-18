@@ -6108,6 +6108,12 @@ p.guide-agent {
   color: #1a1a1a !important;
 }
 
+p.guide-agent a.guide-site-link {
+  color: #046bd9 !important;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
 p.guide-user {
   background: #083e86 !important;
   color: #ffffff !important;
@@ -6133,6 +6139,9 @@ p.guide-user {
   p.guide-agent {
     background: #1f2937 !important;
     color: #f9fafb !important;
+  }
+  p.guide-agent a.guide-site-link {
+    color: #93c5fd !important;
   }
   p.guide-user {
     background: #1d4ed8 !important;

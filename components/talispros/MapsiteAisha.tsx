@@ -5,15 +5,21 @@ import {
   type AishaMapsiteDynamicInput,
 } from "@/lib/talispros/aisha-mapsite-agent";
 import { mapsiteAishaInvitation } from "@/lib/talispros/aisha-mapsites";
+import { mapsiteAishaVariables } from "@/lib/talispros/aisha-owner-session";
 
 /** The Mapsite Aisha. The public homepage keeps its own agent. */
-export default function MapsiteAisha(input: AishaMapsiteDynamicInput) {
+export default async function MapsiteAisha(input: AishaMapsiteDynamicInput) {
+  const agentId: string = AISHA_MAPSITE_AGENT_ID;
+  const dynamicVariables = await mapsiteAishaVariables(
+    agentId,
+    aishaMapsiteDynamicVariables(input),
+  );
   return (
     <AishaConvaiWidget
       invitation={mapsiteAishaInvitation()}
       placement="bottom-right"
-      agentId={AISHA_MAPSITE_AGENT_ID}
-      dynamicVariables={aishaMapsiteDynamicVariables(input)}
+      agentId={agentId}
+      dynamicVariables={dynamicVariables}
     />
   );
 }

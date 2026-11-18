@@ -120,6 +120,7 @@ export const de: Dictionary = {
     pitch: {
       note: "Starten Sie einen Anruf, um den Rest der Seite zu öffnen.",
       registered: "Ich bin bereits registriert",
+      talkToAisha: "Sprechen Sie mit Aisha, Ihrer Teamleiterin",
     },
     conversation: {
       startCall: "Anruf starten",

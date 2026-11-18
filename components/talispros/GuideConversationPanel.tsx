@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { ConversationProvider, useConversation } from "@elevenlabs/react";
 import { useT } from "@/lib/i18n/client";
+import AgentTranscriptLine from "@/components/talispros/AgentTranscriptLine";
 import { markPitchDone } from "@/lib/talispros/pitch-gate";
 import { type SpokenLine } from "@/lib/talispros/spoken-transcript";
 
@@ -232,7 +233,7 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
                     : "guide-agent self-start bg-[#f4f4f5] text-[#1a1a1a]"
                 }`}
               >
-                {line.text}
+                {line.role === "agent" ? <AgentTranscriptLine text={line.text} /> : line.text}
               </p>
             ))}
           </div>
