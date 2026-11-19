@@ -268,7 +268,7 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
         data-testid="guide-call"
         onClick={() => (connected ? conversation.endSession() : begin())}
         disabled={connecting}
-        className={`mt-6 inline-flex min-h-14 min-w-[220px] items-center justify-center rounded-full px-8 text-[17px] font-semibold text-white shadow-[0_8px_20px_rgba(4,107,217,0.28)] transition disabled:opacity-70 ${
+        className={`mt-6 inline-flex min-h-14 min-w-[220px] items-center justify-center rounded-full px-8 text-[19px] lg:text-[17px] font-semibold text-white shadow-[0_8px_20px_rgba(4,107,217,0.28)] transition disabled:opacity-70 ${
           connected ? "bg-neutral-950 hover:bg-neutral-800" : "bg-[#046BD9] hover:bg-[#0358b3]"
         }`}
       >
@@ -276,7 +276,7 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
       </button>
       <p
         data-testid="guide-status"
-        className="mt-2 min-h-5 text-center text-[14px] font-medium text-[#1a1a1a]"
+        className="mt-2 min-h-5 text-center text-[16px] lg:text-[14px] font-medium text-[#1a1a1a]"
       >
         {status}
       </p>
@@ -299,12 +299,12 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
         </div>
       ) : null}
       {micBlocked ? (
-        <p data-testid="guide-mic-blocked" className="mt-1 max-w-[560px] text-center text-[13px] text-neutral-600">
+        <p data-testid="guide-mic-blocked" className="mt-1 max-w-[560px] text-center text-[16px] lg:text-[13px] text-neutral-600">
           {copy.micBlocked}
         </p>
       ) : null}
       {failed && !connected ? (
-        <p className="mt-1 max-w-[560px] text-center text-[13px] text-neutral-600">{copy.callFailed}</p>
+        <p className="mt-1 max-w-[560px] text-center text-[16px] lg:text-[13px] text-neutral-600">{copy.callFailed}</p>
       ) : null}
       <div
         ref={transcriptRef}
@@ -312,13 +312,13 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
         className="guide-transcript mt-5 w-full max-w-[560px] min-h-40 max-h-[40vh] overflow-y-auto rounded-2xl bg-white px-4 py-3 text-left text-[#1a1a1a] shadow-[0_10px_30px_rgba(0,0,0,0.08)] ring-1 ring-black/5"
       >
         {lines.length === 0 ? (
-          <p className="m-0 text-[14px] text-[#3f3f46]">{copy.transcriptEmpty}</p>
+          <p className="m-0 text-[16px] lg:text-[14px] text-[#3f3f46]">{copy.transcriptEmpty}</p>
         ) : (
           <div className="flex flex-col gap-2">
             {lines.map((line) => (
               <p
                 key={line.id}
-                className={`m-0 max-w-[90%] rounded-2xl px-3 py-2 text-[15px] leading-snug ${
+                className={`m-0 max-w-[90%] rounded-2xl px-3 py-2 text-[17px] lg:text-[15px] leading-snug ${
                   line.role === "user"
                     ? "guide-user self-end bg-[#083E86] text-white"
                     : "guide-agent self-start bg-[#f4f4f5] text-[#1a1a1a]"
@@ -340,12 +340,12 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
           onChange={(event) => setDraft(event.target.value)}
           disabled={!connected}
           placeholder={copy.placeholder}
-          className="min-h-12 min-w-0 flex-1 rounded-full border border-neutral-300 bg-white px-4 text-[15px] text-neutral-950 outline-none placeholder:text-neutral-400 focus:border-[#046BD9] disabled:bg-neutral-100"
+          className="min-h-12 min-w-0 flex-1 rounded-full border border-neutral-300 bg-white px-4 text-[17px] lg:text-[15px] text-neutral-950 outline-none placeholder:text-neutral-400 focus:border-[#046BD9] disabled:bg-neutral-100"
         />
         <button
           type="submit"
           disabled={!connected || !draft.trim()}
-          className="inline-flex min-h-12 items-center justify-center rounded-full bg-neutral-950 px-4 text-[14px] font-semibold text-white disabled:opacity-40"
+          className="inline-flex min-h-12 items-center justify-center rounded-full bg-neutral-950 px-4 text-[16px] lg:text-[14px] font-semibold text-white disabled:opacity-40"
         >
           {copy.send}
         </button>
@@ -354,7 +354,7 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
         <div data-testid="guide-feedback" className="mt-4 text-center">
           {rating == null ? (
             <>
-              <p className="m-0 text-[13px] text-neutral-600">{copy.feedback}</p>
+              <p className="m-0 text-[16px] lg:text-[13px] text-neutral-600">{copy.feedback}</p>
               <div className="mt-1 flex items-center justify-center gap-1">
                 {[1, 2, 3, 4, 5].map((score) => (
                   <button
@@ -370,7 +370,7 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
               </div>
             </>
           ) : (
-            <p className="m-0 text-[13px] font-medium text-neutral-700">{copy.feedbackThanks}</p>
+            <p className="m-0 text-[16px] lg:text-[13px] font-medium text-neutral-700">{copy.feedbackThanks}</p>
           )}
         </div>
       ) : null}
