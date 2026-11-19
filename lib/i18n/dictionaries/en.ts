@@ -146,14 +146,6 @@ export const en = {
     registrar: {
       pointer: "New here? Make your advertising revenue producing.",
       dismiss: "Dismiss",
-      title:
-        "Three ways to make your advertising revenue producing: service floors, buyer's agencies and network creation",
-      floors:
-        "Service floors: minimum fees and terms to place pins, supporting higher fees instead of competing on price.",
-      buyers:
-        "Buyer's agencies: represent the buyer and keep the relationship, and the fee, with you.",
-      network:
-        "Network creation: link partners so referrals and co-promotion run through your Mapsite.",
     },
     conversation: {
       startCall: "Start a call",
@@ -186,6 +178,7 @@ export const en = {
       webster: {
         title: "Webster, Tsplits Guide",
         panelTitle: "Webster, Fulfilment Manager",
+        projectTitle: "Webster M., Fulfilment Manager",
         projectIntro: "Got a project? Talk to me. I'm Webster, your Fulfilment Manager…!",
         label: "Webster, Tsplits Guide",
         greeting: "Webster, Tsplits Guide",

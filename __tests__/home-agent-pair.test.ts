@@ -32,5 +32,10 @@ describe("homepage Aisha and Webster", () => {
     const gate = read("components/talispros/TalisprosGatePage.tsx");
     expect(gate).not.toContain("readOwnerSessionFastCodes");
     expect(gate).not.toContain("AishaConvaiWidget");
+    expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("<HomeAgentPair");
+    expect(read("components/talispros/TalisprosHomeShowcase.tsx")).not.toContain("HomeAgentPair");
+    const aisha = read("app/aisha/page.tsx");
+    expect(aisha).not.toContain("aisha-registrar-pitch");
+    expect(aisha).not.toContain("intro=");
   });
 });

@@ -125,14 +125,6 @@ export const de: Dictionary = {
     registrar: {
       pointer: "Neu hier? Machen Sie Ihre Werbung umsatzbringend.",
       dismiss: "Schließen",
-      title:
-        "Drei Wege, Ihre Werbung umsatzbringend zu machen: Servicefloors, Käuferagenturen und Netzwerkaufbau",
-      floors:
-        "Servicefloors: Mindestgebühren und Laufzeiten, um PINs zu setzen, damit höhere Gebühren gelten, statt über den Preis zu konkurrieren.",
-      buyers:
-        "Käuferagenturen: Sie vertreten den Käufer und behalten die Beziehung und die Gebühr bei sich.",
-      network:
-        "Netzwerkaufbau: Verbinden Sie Partner, damit Empfehlungen und gemeinsame Werbung über Ihre Mapsite laufen.",
     },
     conversation: {
       startCall: "Anruf starten",
@@ -166,6 +158,7 @@ export const de: Dictionary = {
       webster: {
         title: "Webster, Tsplits-Guide",
         panelTitle: "Webster, Fulfilment-Manager",
+        projectTitle: "Webster M., Fulfilment-Manager",
         projectIntro: "Haben Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster, Ihr Fulfilment Manager…!",
         label: "Webster, Tsplits-Guide",
         greeting: "Webster, Tsplits-Guide",
