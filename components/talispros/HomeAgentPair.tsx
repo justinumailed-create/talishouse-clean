@@ -79,7 +79,7 @@ function AgentCard({
       </Link>
       <Link
         href={href}
-        className="relative mb-1 mt-1.5 flex h-full min-h-[4rem] w-[11.5rem] items-center justify-center rounded-2xl bg-[#f4f6f8] px-3 text-center font-sans text-[12.5px] font-medium leading-[1.3] text-neutral-950 no-underline shadow-[0_4px_12px_rgba(0,0,0,0.08)] ring-1 ring-black/10"
+        className="relative mb-1 mt-1.5 flex h-full min-h-[4rem] w-[12.75rem] items-center justify-center rounded-2xl bg-[#f4f6f8] px-3 whitespace-pre-line text-center font-sans text-[12.5px] font-medium leading-[1.3] text-neutral-950 no-underline shadow-[0_4px_12px_rgba(0,0,0,0.08)] ring-1 ring-black/10"
       >
         {line}
         <span

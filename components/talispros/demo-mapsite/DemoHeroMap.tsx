@@ -123,9 +123,10 @@ export default function DemoHeroMap() {
         style={{ top: `calc(50% + ${pinOffsetY}px)` }}
       />
 
-      <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4">
+      <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4 lg:top-48">
         <article
           ref={cardRef}
+          data-pin-flag
           className="pointer-events-auto w-[min(92%,16.5rem)]"
           data-testid="demo-hero-pin-card"
           aria-label={NSNC_TITLE}

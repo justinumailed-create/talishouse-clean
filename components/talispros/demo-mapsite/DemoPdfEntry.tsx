@@ -7,6 +7,7 @@ import { BUILD_MAPSITE_PREVIEW_LOCATION } from "@/components/build-mapsite/home-
 import { EBOOK_UPLOAD_ACCEPT } from "@/lib/talisbooks/ebook-upload-formats";
 import { SELF_SERVICE_MAX_UPLOAD_IMAGES } from "@/lib/talisbooks/self-service-page-plan";
 import { useT } from "@/lib/i18n/client";
+import { NSNC_PDF_FILE_NAME, NSNC_PDF_PATH } from "@/lib/talispros/nsnc-book";
 import { TALISU_MKTS_HEADER_BLUE } from "@/lib/talisu/markets-pins";
 
 function titleFromFile(file: File | undefined): string {
@@ -20,6 +21,7 @@ function titleFromFile(file: File | undefined): string {
  */
 export default function DemoPdfEntry() {
   const copy = useT().demo.pdfEntry;
+  const sampleCopy = useT().demo.downloadSamplePdf;
   const help = useT().demo.ebookPage.uploadHelp.replace(
     "{max}",
     String(SELF_SERVICE_MAX_UPLOAD_IMAGES),
@@ -98,6 +100,14 @@ export default function DemoPdfEntry() {
             {pending ? copy.starting : copy.button}
           </button>
           <p className="mt-3 text-[13px] leading-relaxed text-neutral-500">{help}</p>
+          <a
+            href={NSNC_PDF_PATH}
+            download={NSNC_PDF_FILE_NAME}
+            data-testid="demo-sample-pdf-download"
+            className="mt-2 inline-block text-[13px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
+          >
+            {sampleCopy}
+          </a>
           {error ? (
             <p role="alert" className="mt-3 text-[13px] leading-relaxed text-red-600">
               {error}

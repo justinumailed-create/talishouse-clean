@@ -74,8 +74,14 @@ export default function PinActionExplainer({
       const margin = 8;
       const width = pop?.width || 280;
       const height = pop?.height || 96;
-      let top = trigger.top - height - margin;
-      if (top < NAV_CLEAR_PX) top = trigger.bottom + margin;
+      // Sit above the whole PIN card (the flag) when the control lives in one,
+      // so the explainer never covers the card's other buttons.
+      const flag = rootRef.current
+        ?.closest("[data-pin-flag]")
+        ?.getBoundingClientRect();
+      const above = flag ?? trigger;
+      let top = above.top - height - margin;
+      if (top < NAV_CLEAR_PX) top = (flag ?? trigger).bottom + margin;
       if (top + height > window.innerHeight - margin) {
         top = Math.max(NAV_CLEAR_PX, window.innerHeight - height - margin);
       }

@@ -149,7 +149,7 @@ export const de: Dictionary = {
           "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen. Fragen Sie mich, wie.",
         greeting:
           "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen. Fragen Sie mich, wie.",
-        homeBubble: "Neu hier? Ich bin Aisha. Machen Sie Ihre Werbung umsatzbringend.",
+        homeBubble: "Neu hier? Ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzbringend zu machen.",
         callback: "Starten Sie einen Anruf und schlagen Sie ein Projekt vor.",
         startCall: "Anruf starten",
         endCall: "Anruf beenden",
@@ -161,7 +161,7 @@ export const de: Dictionary = {
         title: "Webster, Tsplits-Guide",
         panelTitle: "Webster, Fulfilment-Manager",
         projectTitle: "Webster M., Fulfilment-Manager",
-        projectIntro: "Haben Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster, Ihr Fulfilment Manager…!",
+        projectIntro: "Haben Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster,\nIhr Fulfilment Manager…!",
         label: "Webster, Tsplits-Guide",
         greeting: "Webster, Tsplits-Guide",
         callback: "Webster, Tsplits-Guide",
@@ -1267,6 +1267,8 @@ export const de: Dictionary = {
 
   demo: {
     downloadPdf: "Demo-PDF herunterladen",
+    /** Ralf (Nov 19): sample PDF link next to Upload PDF. */
+    downloadSamplePdf: "PDF herunterladen (North Shore Nature Centre)",
     downloadMenuPdf: "Demo-PDF",
     downloadMenuTemplates: "Vorlagen zum Bilder-Ersetzen",
     downloadMenuLocked: "Vorlagen für PowerPoint, Keynote und Google Slides sind in registrierten Mapsites enthalten.",

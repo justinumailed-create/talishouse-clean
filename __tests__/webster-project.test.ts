@@ -27,10 +27,10 @@ describe("Webster TWO", () => {
     expect(isRegistrationOfferHref("/talispros/markets/claim-a-market")).toBe(true);
     expect(isRegistrationOfferHref("/webster/project?call=1")).toBe(false);
     expect(en.home.assistants.webster.projectIntro).toBe(
-      "Got a project? Talk to me. I'm Webster, your Fulfilment Manager…!",
+      "Got a project? Talk to me. I'm Webster,\nyour Fulfilment Manager…!",
     );
     expect(de.home.assistants.webster.projectIntro).toBe(
-      "Haben Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster, Ihr Fulfilment Manager…!",
+      "Haben Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster,\nIhr Fulfilment Manager…!",
     );
     expect(en.home.assistants.webster.projectTitle).toBe("Webster M., Fulfilment Manager");
     expect(de.home.assistants.webster.projectTitle).toBe("Webster M., Fulfilment-Manager");

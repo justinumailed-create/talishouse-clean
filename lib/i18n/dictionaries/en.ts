@@ -169,7 +169,7 @@ export const en = {
         label: "Hi, I'm Aisha. I can help make your advertising revenue producing. Ask me how.",
         greeting:
           "Hi, I'm Aisha. I can help make your advertising revenue producing. Ask me how.",
-        homeBubble: "New here? I'm Aisha. Make your advertising revenue producing.",
+        homeBubble: "New here? I'm Aisha. I help you make your advertising revenue producing.",
         callback: "Start a call and propose a project.",
         startCall: "Start a call",
         endCall: "End call",
@@ -181,7 +181,7 @@ export const en = {
         title: "Webster, Tsplits Guide",
         panelTitle: "Webster, Fulfilment Manager",
         projectTitle: "Webster M., Fulfilment Manager",
-        projectIntro: "Got a project? Talk to me. I'm Webster, your Fulfilment Manager…!",
+        projectIntro: "Got a project? Talk to me. I'm Webster,\nyour Fulfilment Manager…!",
         label: "Webster, Tsplits Guide",
         greeting: "Webster, Tsplits Guide",
         callback: "Webster, Tsplits Guide",
@@ -904,6 +904,8 @@ export const en = {
 
   demo: {
     downloadPdf: "Download Demo PDF",
+    /** Ralf (Nov 19): sample PDF link next to Upload PDF. */
+    downloadSamplePdf: "Download PDF (North Shore Nature Centre)",
     downloadMenuPdf: "Demo PDF",
     downloadMenuTemplates: "Replace Image templates",
     downloadMenuLocked: "PowerPoint, Keynote and Google Slides templates are included with registered Mapsites.",

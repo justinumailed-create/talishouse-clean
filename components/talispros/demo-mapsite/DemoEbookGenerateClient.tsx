@@ -27,6 +27,7 @@ import { TALISU_MKTS_HEADER_BLUE } from "@/lib/talisu/markets-pins";
 import Link from "next/link";
 import DemoDownloadMenu, { type TemplateAvailability } from "@/components/talispros/demo-mapsite/DemoDownloadMenu";
 import { useT } from "@/lib/i18n/client";
+import { NSNC_PDF_FILE_NAME, NSNC_PDF_PATH } from "@/lib/talispros/nsnc-book";
 import { DemoVisaProgress } from "@/components/talispros/demo-mapsite/DemoVisaProgress";
 
 type OptimizedAsset = {
@@ -675,6 +676,14 @@ export default function DemoEbookGenerateClient({
                 <p className="text-center text-[12px] leading-relaxed text-neutral-400">
                   {fill(copy.uploadHelp, { max: SELF_SERVICE_MAX_UPLOAD_IMAGES })}
                 </p>
+                <a
+                  href={NSNC_PDF_PATH}
+                  download={NSNC_PDF_FILE_NAME}
+                  data-testid="demo-ebook-sample-pdf-download"
+                  className="text-center text-[13px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
+                >
+                  {demoCopy.downloadSamplePdf}
+                </a>
               </>
             ) : (
               <div
