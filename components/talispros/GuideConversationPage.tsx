@@ -46,18 +46,32 @@ export default function GuideConversationPage({
       {intro}
       <main className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
         <div
-          className="relative h-44 shrink-0 overflow-hidden bg-[#2a2a2a] sm:h-64 lg:h-auto lg:min-h-[calc(100dvh-4.25rem)]"
+          className="relative flex shrink-0 justify-center pt-6 lg:block lg:h-auto lg:min-h-[calc(100dvh-4.25rem)] lg:overflow-hidden lg:bg-[#2a2a2a] lg:pt-0"
           data-testid={`${testId}-photo`}
         >
-          <Image
-            src={persona.portraitSrc}
-            alt={title}
-            fill
-            priority
-            sizes="(min-width: 1024px) 50vw, 100vw"
-            className="object-cover"
-            style={{ objectPosition: imagePosition }}
-          />
+          {/* Phones and tablets: a small profile photo, like on the homepage. */}
+          <div className="relative h-24 w-24 overflow-hidden rounded-full bg-neutral-200 shadow-[0_6px_14px_rgba(0,0,0,0.14)] ring-1 ring-black/10 lg:hidden">
+            <Image
+              src={persona.portraitSrc}
+              alt={title}
+              fill
+              priority
+              sizes="96px"
+              className="object-cover"
+              style={{ objectPosition: "center 16%" }}
+            />
+          </div>
+          {/* Desktop: the full photo panel on the left. */}
+          <div className="absolute inset-0 hidden lg:block">
+            <Image
+              src={persona.portraitSrc}
+              alt=""
+              fill
+              sizes="50vw"
+              className="object-cover"
+              style={{ objectPosition: imagePosition }}
+            />
+          </div>
         </div>
         <div
           className="relative min-h-[70dvh] lg:min-h-[calc(100dvh-4.25rem)]"

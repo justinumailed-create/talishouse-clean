@@ -18,26 +18,28 @@ export default function TalisprosHomeGate() {
   const t = useT();
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-white px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:pb-3.5 lg:pt-12">
+    <div className="flex min-h-0 flex-1 flex-col bg-white px-5 pb-8 pt-5 sm:px-10 sm:pb-10 sm:pt-6 lg:px-12 lg:pb-3.5 lg:pt-12">
       <div className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center lg:justify-between">
         {/* On desktop the top block stays centred and the bots sit at the bottom,
             level with the four transaction tiles on the right. */}
         <div className="lg:flex lg:flex-1 lg:flex-col lg:justify-center">
-        <div className="mb-8 text-center sm:mb-10">
+        <div className="mb-6 flex items-center gap-3 text-left lg:mb-10 lg:block lg:text-center">
           <Image
             src="/logo.png"
             alt="Tsplits™"
             width={72}
             height={72}
-            className="mx-auto mb-4 h-14 w-14 object-contain sm:h-16 sm:w-16"
+            className="h-12 w-12 flex-none object-contain lg:mx-auto lg:mb-4 lg:h-16 lg:w-16"
             priority
           />
-          <h1 className="text-[28px] leading-[1.1] tracking-[0.14em] text-neutral-900 sm:text-[34px]">
+          <div>
+          <h1 className="text-[24px] leading-[1.1] tracking-[0.14em] text-neutral-900 lg:text-[34px]">
             Tsplits™
           </h1>
-          <p className="mt-2 text-sm font-medium tracking-[0.14em] text-neutral-500 sm:text-[15px]">
+          <p className="mt-1 text-[11px] font-medium tracking-[0.14em] text-neutral-500 lg:mt-2 lg:text-[15px]">
             {t.home.motto}
           </p>
+          </div>
         </div>
 
         <div className="flex flex-col gap-3">

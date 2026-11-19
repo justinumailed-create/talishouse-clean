@@ -46,6 +46,47 @@ export default function TalisprosHomeShowcase() {
     };
   }, [openId, close]);
 
+  const renderDetails = (section: (typeof sections)[number]) => (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <h2
+          id={`${baseId}-title-${section.id}`}
+          className="text-[16px] font-semibold tracking-wide text-neutral-900 sm:text-[17px]"
+        >
+          {section.title}
+        </h2>
+        <button
+          type="button"
+          onClick={close}
+          className="shrink-0 rounded-full px-2 py-0.5 text-sm font-medium text-neutral-500 transition hover:bg-neutral-200/70 hover:text-neutral-800"
+          aria-label={fmt(t.home.closeDetails, { title: section.title })}
+        >
+          ✕
+        </button>
+      </div>
+      <p className="mt-2.5 text-[13.5px] leading-relaxed text-neutral-800 sm:text-[14.5px]">
+        {section.body}
+      </p>
+      <p className="mt-2.5 text-[13.5px] leading-relaxed text-neutral-700 sm:text-[14.5px]">
+        {section.result}
+      </p>
+      {section.learnMoreHref ? (
+        <p className="mt-3.5">
+          {/* Level 2 → TalisU "Discuss a Project without first registering" page. */}
+          <Link
+            href={talisuHref(section.learnMoreHref)}
+            data-testid="ownership-learn-more"
+            onClick={close}
+            className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
+          >
+            {section.learnMoreLabel ?? t.home.learnMore}
+            <span aria-hidden>→</span>
+          </Link>
+        </p>
+      ) : null}
+    </>
+  );
+
   return (
     <aside
       ref={rootRef}
@@ -69,61 +110,26 @@ export default function TalisprosHomeShowcase() {
             role="dialog"
             aria-modal="false"
             aria-labelledby={`${baseId}-title-${openSection.id}`}
-            className="absolute bottom-[calc(100%+0.65rem)] left-3 right-3 z-20 mx-auto max-h-[min(48vh,22rem)] max-w-[36rem] overflow-y-auto rounded-2xl border border-neutral-200/90 bg-[#fafaf7] px-4 py-4 text-neutral-900 shadow-[0_18px_50px_rgba(0,0,0,0.35)] sm:left-4 sm:right-4 sm:px-5 sm:py-5"
+            className="absolute bottom-[calc(100%+0.65rem)] left-3 right-3 z-20 mx-auto hidden lg:block max-h-[min(48vh,22rem)] max-w-[36rem] overflow-y-auto rounded-2xl border border-neutral-200/90 bg-[#fafaf7] px-4 py-4 text-neutral-900 shadow-[0_18px_50px_rgba(0,0,0,0.35)] sm:left-4 sm:right-4 sm:px-5 sm:py-5"
           >
             {/* Bubble pointer toward the button row */}
             <span
               className="pointer-events-none absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-[10px] border-t-[12px] border-x-transparent border-t-[#fafaf7] drop-shadow-sm"
               aria-hidden
             />
-            <div className="flex items-start justify-between gap-3">
-              <h2
-                id={`${baseId}-title-${openSection.id}`}
-                className="text-[16px] font-semibold tracking-wide text-neutral-900 sm:text-[17px]"
-              >
-                {openSection.title}
-              </h2>
-              <button
-                type="button"
-                onClick={close}
-                className="shrink-0 rounded-full px-2 py-0.5 text-sm font-medium text-neutral-500 transition hover:bg-neutral-200/70 hover:text-neutral-800"
-                aria-label={fmt(t.home.closeDetails, { title: openSection.title })}
-              >
-                ✕
-              </button>
-            </div>
-            <p className="mt-2.5 text-[13.5px] leading-relaxed text-neutral-800 sm:text-[14.5px]">
-              {openSection.body}
-            </p>
-            <p className="mt-2.5 text-[13.5px] leading-relaxed text-neutral-700 sm:text-[14.5px]">
-              {openSection.result}
-            </p>
-            {openSection.learnMoreHref ? (
-              <p className="mt-3.5">
-                {/* Level 2 → TalisU "Discuss a Project without first registering" page. */}
-                <Link
-                  href={talisuHref(openSection.learnMoreHref)}
-                  data-testid="ownership-learn-more"
-                  onClick={close}
-                  className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
-                >
-                  {openSection.learnMoreLabel ?? t.home.learnMore}
-                  <span aria-hidden>→</span>
-                </Link>
-              </p>
-            ) : null}
+            {renderDetails(openSection)}
           </div>
         ) : null}
 
         <p className="mb-2 text-center text-[9px] font-semibold uppercase tracking-[0.18em] text-neutral-700/90 sm:mb-2.5 sm:text-[10px]">
           {t.home.structuresTagline}
         </p>
-        <div className="mx-auto grid max-w-3xl grid-cols-2 gap-2.5 sm:grid-cols-4 sm:gap-3">
+        <div className="mx-auto grid max-w-3xl grid-cols-1 gap-2.5 lg:grid-cols-4 lg:gap-3">
           {sections.map((section) => {
             const isOpen = openId === section.id;
             return (
+              <div key={section.id} className="min-w-0">
               <button
-                key={section.id}
                 type="button"
                 aria-expanded={isOpen}
                 aria-controls={
@@ -135,7 +141,7 @@ export default function TalisprosHomeShowcase() {
                   )
                 }
                 className={[
-                  "group relative aspect-square w-full overflow-hidden rounded-xl",
+                  "group relative h-14 w-full overflow-hidden rounded-xl lg:aspect-square lg:h-auto",
                   "border border-white/55",
                   "shadow-[inset_0_1px_0_rgba(255,255,255,0.75),inset_0_-1px_0_rgba(0,0,0,0.22),0_6px_14px_rgba(0,0,0,0.22)]",
                   "transition duration-200",
@@ -155,10 +161,21 @@ export default function TalisprosHomeShowcase() {
                   className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/35 via-transparent to-black/20"
                   aria-hidden
                 />
-                <span className="relative z-10 flex h-full items-center justify-center px-2 text-center text-[12px] font-semibold tracking-wide text-neutral-900 sm:text-[13px] md:text-[14px]">
+                <span className="relative z-10 flex h-full items-center justify-center px-2 text-center text-[15px] font-semibold tracking-wide text-neutral-900 lg:text-[14px]">
                   {section.title}
                 </span>
               </button>
+              {/* Phones and tablets: the description opens right under its button. */}
+              {isOpen ? (
+                <div
+                  id={`${baseId}-inline-${section.id}`}
+                  data-testid="ownership-inline-card"
+                  className="mt-2 rounded-2xl border border-neutral-200/90 bg-[#fafaf7] px-4 py-4 text-neutral-900 shadow-[0_10px_30px_rgba(0,0,0,0.25)] lg:hidden"
+                >
+                  {renderDetails(section)}
+                </div>
+              ) : null}
+              </div>
             );
           })}
         </div>

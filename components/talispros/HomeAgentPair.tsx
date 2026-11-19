@@ -17,7 +17,7 @@ export default function HomeAgentPair() {
 
   return (
     <div
-      className="mx-auto mt-6 grid w-full max-w-[24rem] grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 sm:grid-rows-[auto_auto_auto] sm:gap-x-4 sm:gap-y-1.5 lg:mt-4"
+      className="mx-auto mt-7 grid w-full grid-cols-1 gap-4 lg:mt-4 lg:max-w-[24rem] lg:grid-cols-2 lg:grid-rows-[auto_auto_auto] lg:justify-items-center lg:gap-x-4 lg:gap-y-1.5"
       data-testid="home-agent-pair"
     >
       <AgentCard
@@ -62,11 +62,11 @@ function AgentCard({
   return (
     <div
       data-testid={testId}
-      className="col-span-1 grid justify-items-center text-center sm:row-span-3 sm:grid-rows-subgrid"
+      className="col-span-1 grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2 rounded-2xl bg-white p-3 text-left shadow-[0_4px_14px_rgba(0,0,0,0.07)] ring-1 ring-black/5 lg:row-span-3 lg:grid-cols-1 lg:grid-rows-subgrid lg:justify-items-center lg:gap-0 lg:bg-transparent lg:p-0 lg:text-center lg:shadow-none lg:ring-0"
     >
       <Link
         href={callHref}
-        className="relative block h-20 w-20 overflow-hidden rounded-2xl bg-neutral-200 shadow-[0_6px_14px_rgba(0,0,0,0.14)] ring-1 ring-black/10"
+        className="relative row-span-2 block h-[4.5rem] w-[4.5rem] overflow-hidden rounded-full bg-neutral-200 shadow-[0_6px_14px_rgba(0,0,0,0.14)] ring-1 ring-black/10 lg:row-span-1 lg:h-20 lg:w-20 lg:rounded-2xl"
       >
         <Image
           src={src}
@@ -79,18 +79,22 @@ function AgentCard({
       </Link>
       <Link
         href={callHref}
-        className="relative mb-1 mt-1.5 flex h-full min-h-[4rem] w-[12.75rem] items-center justify-center rounded-2xl bg-[#f4f6f8] px-3 whitespace-pre-line text-center font-sans text-[12.5px] font-medium leading-[1.3] text-neutral-950 no-underline shadow-[0_4px_12px_rgba(0,0,0,0.08)] ring-1 ring-black/10"
+        className="relative flex h-full w-full items-center rounded-2xl bg-[#f4f6f8] px-3 py-2 whitespace-pre-line font-sans text-[13.5px] font-medium leading-[1.35] text-neutral-950 no-underline ring-1 ring-black/10 lg:mb-1 lg:mt-1.5 lg:min-h-[4rem] lg:w-[12.75rem] lg:justify-center lg:py-0 lg:text-center lg:text-[12.5px] lg:leading-[1.3] lg:shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
       >
         {line}
         <span
-          className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-[7px] border-t-[8px] border-x-transparent border-t-[#f4f6f8]"
+          className="absolute right-full top-1/2 h-0 w-0 -translate-y-1/2 border-y-[7px] border-r-[8px] border-y-transparent border-r-[#f4f6f8] lg:hidden"
+          aria-hidden
+        />
+        <span
+          className="absolute left-1/2 top-full hidden h-0 w-0 -translate-x-1/2 border-x-[7px] border-t-[8px] border-x-transparent border-t-[#f4f6f8] lg:block"
           aria-hidden
         />
       </Link>
       <Link
         href={callHref}
         data-testid={`${testId}-call`}
-        className="mt-1 inline-flex min-h-8 items-center justify-center rounded-full bg-[#046BD9] px-4 font-sans text-[13px] font-semibold text-white no-underline shadow-[0_4px_10px_rgba(4,107,217,0.25)]"
+        className="col-start-2 inline-flex min-h-9 items-center justify-center justify-self-start rounded-full bg-[#046BD9] px-5 font-sans text-[14px] font-semibold text-white no-underline shadow-[0_4px_10px_rgba(4,107,217,0.25)] lg:col-start-1 lg:mt-1 lg:min-h-8 lg:justify-self-center lg:px-4 lg:text-[13px]"
       >
         {call}
       </Link>

@@ -19,7 +19,7 @@ describe("Tokenization Learn More", () => {
       join(root, "components/talispros/TalisprosHomeShowcase.tsx"),
       "utf8",
     );
-    expect(showcase).toContain("talisuHref(openSection.learnMoreHref)");
+    expect(showcase).toContain("talisuHref(section.learnMoreHref)");
     expect(showcase).toContain("t.home.learnMore");
     expect(en.home.learnMore).toBe("Learn More");
     // Level 2 (transaction structures) never reverts to TalisBOT (Level 1).
