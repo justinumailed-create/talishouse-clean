@@ -51,23 +51,23 @@ export default function TalisprosHomeShowcase() {
       <div className="flex items-start justify-between gap-3">
         <h2
           id={`${baseId}-title-${section.id}`}
-          className="text-[19px] font-semibold tracking-wide text-neutral-900 lg:text-[17px]"
+          className="text-[16px] font-semibold tracking-wide text-neutral-900 sm:text-[17px]"
         >
           {section.title}
         </h2>
         <button
           type="button"
           onClick={close}
-          className="shrink-0 rounded-full px-2 py-0.5 text-base lg:text-sm font-medium text-neutral-500 transition hover:bg-neutral-200/70 hover:text-neutral-800"
+          className="shrink-0 rounded-full px-2 py-0.5 text-sm font-medium text-neutral-500 transition hover:bg-neutral-200/70 hover:text-neutral-800"
           aria-label={fmt(t.home.closeDetails, { title: section.title })}
         >
           ✕
         </button>
       </div>
-      <p className="mt-2.5 text-[17px] leading-relaxed text-neutral-800 lg:text-[14.5px]">
+      <p className="mt-2.5 text-[13.5px] leading-relaxed text-neutral-800 sm:text-[14.5px]">
         {section.body}
       </p>
-      <p className="mt-2.5 text-[17px] leading-relaxed text-neutral-700 lg:text-[14.5px]">
+      <p className="mt-2.5 text-[13.5px] leading-relaxed text-neutral-700 sm:text-[14.5px]">
         {section.result}
       </p>
       {section.learnMoreHref ? (
@@ -77,7 +77,7 @@ export default function TalisprosHomeShowcase() {
             href={talisuHref(section.learnMoreHref)}
             data-testid="ownership-learn-more"
             onClick={close}
-            className="inline-flex items-center gap-1 text-[17px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline lg:text-[14.5px]"
+            className="inline-flex items-center gap-1 text-[13.5px] font-semibold text-[#046BD9] underline-offset-2 transition hover:underline sm:text-[14.5px]"
           >
             {section.learnMoreLabel ?? t.home.learnMore}
             <span aria-hidden>→</span>
@@ -121,7 +121,7 @@ export default function TalisprosHomeShowcase() {
           </div>
         ) : null}
 
-        <p className="mb-2 text-center text-[12px] font-semibold uppercase tracking-[0.18em] text-neutral-700/90 sm:mb-2.5 lg:text-[10px]">
+        <p className="mb-2 text-center text-[9px] font-semibold uppercase tracking-[0.18em] text-neutral-700/90 sm:mb-2.5 sm:text-[10px]">
           {t.home.structuresTagline}
         </p>
         <div className="mx-auto grid max-w-3xl grid-cols-1 gap-2.5 lg:grid-cols-4 lg:gap-3">
@@ -161,7 +161,7 @@ export default function TalisprosHomeShowcase() {
                   className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/35 via-transparent to-black/20"
                   aria-hidden
                 />
-                <span className="relative z-10 flex h-full items-center justify-center px-2 text-center text-[18px] font-semibold tracking-wide text-neutral-900 lg:text-[14px]">
+                <span className="relative z-10 flex h-full items-center justify-center px-2 text-center text-[15px] font-semibold tracking-wide text-neutral-900 lg:text-[14px]">
                   {section.title}
                 </span>
               </button>

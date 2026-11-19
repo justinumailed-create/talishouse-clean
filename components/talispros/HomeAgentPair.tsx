@@ -79,7 +79,7 @@ function AgentCard({
       </Link>
       <Link
         href={callHref}
-        className="relative flex h-full w-full items-center rounded-2xl bg-[#f4f6f8] px-3.5 py-2.5 whitespace-pre-line font-sans text-[17px] font-medium leading-[1.4] text-neutral-950 no-underline ring-1 ring-black/10 lg:mb-1 lg:mt-1.5 lg:min-h-[4rem] lg:w-[12.75rem] lg:justify-center lg:py-0 lg:text-center lg:text-[12.5px] lg:leading-[1.3] lg:shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
+        className="relative flex h-full w-full items-center rounded-2xl bg-[#f4f6f8] px-3 py-2 whitespace-pre-line font-sans text-[13.5px] font-medium leading-[1.35] text-neutral-950 no-underline ring-1 ring-black/10 lg:mb-1 lg:mt-1.5 lg:min-h-[4rem] lg:w-[12.75rem] lg:justify-center lg:py-0 lg:text-center lg:text-[12.5px] lg:leading-[1.3] lg:shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
       >
         {line}
         <span
@@ -94,7 +94,7 @@ function AgentCard({
       <Link
         href={callHref}
         data-testid={`${testId}-call`}
-        className="col-start-2 inline-flex min-h-11 items-center justify-center justify-self-start rounded-full bg-[#046BD9] px-6 font-sans text-[17px] font-semibold text-white no-underline shadow-[0_4px_10px_rgba(4,107,217,0.25)] lg:col-start-1 lg:mt-1 lg:min-h-8 lg:justify-self-center lg:px-4 lg:text-[13px]"
+        className="col-start-2 inline-flex min-h-9 items-center justify-center justify-self-start rounded-full bg-[#046BD9] px-5 font-sans text-[14px] font-semibold text-white no-underline shadow-[0_4px_10px_rgba(4,107,217,0.25)] lg:col-start-1 lg:mt-1 lg:min-h-8 lg:justify-self-center lg:px-4 lg:text-[13px]"
       >
         {call}
       </Link>

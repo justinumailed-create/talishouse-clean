@@ -36,7 +36,7 @@ export default function TalisprosHomeGate() {
           <h1 className="text-[24px] leading-[1.1] tracking-[0.14em] text-neutral-900 lg:text-[34px]">
             Tsplits™
           </h1>
-          <p className="mt-1 text-[13px] font-medium tracking-[0.06em] lg:tracking-[0.14em] text-neutral-500 lg:mt-2 lg:text-[15px]">
+          <p className="mt-1 text-[11px] font-medium tracking-[0.14em] text-neutral-500 lg:mt-2 lg:text-[15px]">
             {t.home.motto}
           </p>
           </div>
@@ -48,7 +48,7 @@ export default function TalisprosHomeGate() {
             aria-expanded={loginOpen}
             aria-controls="start-login-fast-code"
             onClick={() => setLoginOpen((open) => !open)}
-            className={`w-full border-2 px-4 py-3.5 text-center text-[18px] font-medium tracking-wide transition active:scale-[0.99] lg:text-base ${
+            className={`w-full border-2 px-4 py-3.5 text-center text-[15px] font-medium tracking-wide transition active:scale-[0.99] sm:text-base ${
               loginOpen
                 ? "border-[var(--talis-nav-blue)] bg-[var(--talis-nav-blue)] text-white"
                 : "border-[var(--talis-nav-blue)] bg-white text-[var(--talis-nav-blue)] hover:bg-[var(--talis-nav-blue)] hover:text-white"
@@ -78,7 +78,7 @@ export default function TalisprosHomeGate() {
 
           <Link
             href={TALISPROS_HOME_SYSTEM_DEMO_HREF}
-            className="w-full border-2 border-neutral-300 bg-white px-4 py-3.5 text-center text-[18px] font-medium tracking-wide text-neutral-900 transition hover:border-neutral-900 hover:bg-neutral-50 active:scale-[0.99] lg:text-base"
+            className="w-full border-2 border-neutral-300 bg-white px-4 py-3.5 text-center text-[15px] font-medium tracking-wide text-neutral-900 transition hover:border-neutral-900 hover:bg-neutral-50 active:scale-[0.99] sm:text-base"
           >
             {t.home.systemDemo}
           </Link>
@@ -86,8 +86,8 @@ export default function TalisprosHomeGate() {
 
         <TalisprosLegalCopy
           className="mt-6 text-center sm:mt-6"
-          primaryClassName="text-[15px] font-medium leading-snug text-neutral-600 lg:text-sm"
-          secondaryClassName="mt-1.5 text-[14px] lg:text-xs font-medium text-neutral-500"
+          primaryClassName="text-xs font-medium leading-snug text-neutral-600 sm:text-sm"
+          secondaryClassName="mt-1.5 text-xs font-medium text-neutral-500"
         />
         </div>
         <HomeAgentPair />
