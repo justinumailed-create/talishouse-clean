@@ -122,8 +122,8 @@ describe("Tokenization Learn More", () => {
     const shell = readFileSync(join(root, "components/RootShell.tsx"), "utf8");
     expect(shell).not.toContain("showHomeTalisBot");
     expect(shell).not.toContain('<TalisBotChat position="left" />');
-    expect(readFileSync(join(root, "components/talispros/TalisprosGatePage.tsx"), "utf8")).toContain(
-      "<AishaConvaiWidget",
+    expect(readFileSync(join(root, "components/talispros/HomeAgentPair.tsx"), "utf8")).toContain(
+      'href="/aisha"',
     );
     // /learn-more remains embed without the home-only bot flag
     expect(shell).toMatch(/isEmbed[\s\S]*pathname === "\/learn-more"/);

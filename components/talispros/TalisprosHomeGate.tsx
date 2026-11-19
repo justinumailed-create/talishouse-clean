@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { AISHA_CALL_PATH } from "@/lib/talispros/aisha-call-path";
 import TalisprosHomeFastCodeEntry from "@/components/talispros/TalisprosHomeFastCodeEntry";
 import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
 import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
@@ -13,15 +12,7 @@ import { useT } from "@/lib/i18n/client";
  * Homepage gate left column: Tsplits™ logo + Login (reveals FAST Code) + Build Demo.
  * Keeps the existing claimed-Mapsite cookie/session FAST flow.
  */
-export default function TalisprosHomeGate({
-  signedIn = false,
-  websterHref = "/webster/project?call=1",
-}: {
-  /** Owner session. Offers Aisha and Webster instead of the registrar bubble. */
-  signedIn?: boolean;
-  /** Webster TWO. Includes a FAST Code when the session already has one. */
-  websterHref?: string;
-}) {
+export default function TalisprosHomeGate() {
   const [loginOpen, setLoginOpen] = useState(false);
   const t = useT();
 
@@ -46,24 +37,6 @@ export default function TalisprosHomeGate({
         </div>
 
         <div className="flex flex-col gap-3">
-          {signedIn ? (
-            <>
-              <Link
-                href={AISHA_CALL_PATH}
-                data-testid="home-talk-aisha"
-                className="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#046BD9] px-6 text-center text-[18px] font-semibold text-white shadow-[0_8px_22px_rgba(4,107,217,0.35)] hover:bg-[#0358b3]"
-              >
-                {t.home.pitch.talkToAisha}
-              </Link>
-              <Link
-                href={websterHref}
-                data-testid="home-describe-project"
-                className="inline-flex min-h-14 w-full items-center justify-center rounded-full border-2 border-[#046BD9] bg-white px-6 text-center text-[17px] font-semibold text-[#046BD9] hover:bg-[#046BD9]/5"
-              >
-                {t.home.conversation.describeProject}
-              </Link>
-            </>
-          ) : null}
           <button
             type="button"
             aria-expanded={loginOpen}

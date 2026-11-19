@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/format";
+import HomeAgentPair from "@/components/talispros/HomeAgentPair";
 import HomeMountainMotion from "@/components/talispros/HomeMountainMotion";
 import { talisuHref } from "@/lib/talisu/talisu-links";
 
@@ -54,7 +55,7 @@ export default function TalisprosHomeShowcase() {
     >
       {/* Upper: looping mountain motion (Fulfilment Options title lives in blue nav) */}
       <div
-        className="relative min-h-[240px] flex-1 basis-[58%]"
+        className="relative min-h-[9rem] flex-1 lg:min-h-0"
         onClick={openId ? close : undefined}
         role={openId ? "presentation" : undefined}
       >
@@ -162,6 +163,7 @@ export default function TalisprosHomeShowcase() {
             );
           })}
         </div>
+        <HomeAgentPair />
       </div>
     </aside>
   );
