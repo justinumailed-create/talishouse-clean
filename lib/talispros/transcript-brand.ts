@@ -7,6 +7,45 @@ const SITE =
 const BRAND = /\bT-?splits\b/gi;
 const TRAILING = /[.,;:!?)\]"']+$/;
 
+/** Voice emotion tags such as [happy] are shown as an emoji. */
+const TAG_EMOJI: Record<string, string> = {
+  happy: "😊",
+  cheerful: "😊",
+  warm: "🙂",
+  friendly: "🙂",
+  calm: "🙂",
+  excited: "🤩",
+  enthusiastic: "🤩",
+  laughs: "😄",
+  laughing: "😄",
+  chuckles: "😄",
+  giggles: "😄",
+  curious: "🤔",
+  thoughtful: "🤔",
+  thinking: "🤔",
+  surprised: "😮",
+  sad: "😔",
+  sighs: "😌",
+  relieved: "😌",
+  whispers: "🤫",
+  confident: "😎",
+  proud: "😎",
+};
+const TAG = /\[([a-z][a-z \-]*)\]\s?/gi;
+const OPEN_TAG = /\[[a-z \-]*$/i;
+const TALIS_TV = /\bTalis[\s-]*T-?V\b/gi;
+
+/** Emotion tags become emojis, and "Talis T-V" is written TalisTV. */
+export function displayText(text: string): string {
+  return text
+    .replace(TAG, (_, name: string) => {
+      const emoji = TAG_EMOJI[name.trim().toLowerCase()];
+      return emoji ? `${emoji} ` : "";
+    })
+    .replace(OPEN_TAG, "")
+    .replace(TALIS_TV, "TalisTV");
+}
+
 function trimTail(raw: string): string {
   return raw.replace(TRAILING, "");
 }
@@ -17,7 +56,8 @@ function trimTail(raw: string): string {
  * A bare brand becomes "Tsplits™" without a second mark.
  * The spoken audio is left unchanged.
  */
-export function transcriptParts(text: string): TranscriptPart[] {
+export function transcriptParts(raw: string): TranscriptPart[] {
+  const text = displayText(raw);
   type Span = { start: number; end: number; kind: "link" | "brand" };
   const spans: Span[] = [];
 
