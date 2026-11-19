@@ -9,16 +9,16 @@ const read = (path: string) => readFileSync(resolve(path), "utf8");
 describe("homepage Aisha and Webster", () => {
   it("uses the short bubbles and opens the guide pages without a call", () => {
     expect(en.home.assistants.aisha.homeBubble).toBe(
-      "New here? I'm Aisha. I help you make your advertising revenue producing.",
+      "New here? I'm Aisha. I can help make in-house advertising revenue producing. Ask me how.",
     );
     expect(de.home.assistants.aisha.homeBubble).toBe(
-      "Neu hier? Ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzbringend zu machen.",
+      "Neu hier? Ich bin Aisha. Ich kann helfen, hauseigene Werbung umsatzbringend zu machen. Fragen Sie mich, wie.",
     );
     expect(en.home.assistants.webster.projectIntro).toBe(
-      "Got a project? Talk to me. I'm Webster,\nyour Fulfilment Manager…!",
+      "Considering a project? Talk to me. I'm Webster,\nyour free-of-charge Fulfilment Advisor.",
     );
     expect(de.home.assistants.webster.projectIntro).toBe(
-      "Haben Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster,\nIhr Fulfilment Manager…!",
+      "Planen Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster,\nIhr kostenloser Fulfilment-Berater.",
     );
     const pair = read("components/talispros/HomeAgentPair.tsx");
     expect(pair).toContain('href="/aisha"');

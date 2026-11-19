@@ -22,7 +22,7 @@ export const maxDuration = 300;
 
 const DESCRIPTIONS: Record<string, string> = {
   "/admin/meetings/aisha": "Calls with Aisha, the registrar and team leader.",
-  "/admin/meetings/webster": "Project calls with Webster, the Fulfilment Manager.",
+  "/admin/meetings/webster": "Project calls with Webster, the Fulfilment Advisor.",
   "/admin/follow-ups": "Callers who left a real phone number or email.",
   "/admin/todos": "Callbacks, negotiation requests and Agent Codes.",
   "/admin/notifications": "Alerts and recent platform events.",

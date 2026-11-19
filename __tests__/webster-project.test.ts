@@ -27,13 +27,13 @@ describe("Webster TWO", () => {
     expect(isRegistrationOfferHref("/talispros/markets/claim-a-market")).toBe(true);
     expect(isRegistrationOfferHref("/webster/project?call=1")).toBe(false);
     expect(en.home.assistants.webster.projectIntro).toBe(
-      "Got a project? Talk to me. I'm Webster,\nyour Fulfilment Manager…!",
+      "Considering a project? Talk to me. I'm Webster,\nyour free-of-charge Fulfilment Advisor.",
     );
     expect(de.home.assistants.webster.projectIntro).toBe(
-      "Haben Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster,\nIhr Fulfilment Manager…!",
+      "Planen Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster,\nIhr kostenloser Fulfilment-Berater.",
     );
-    expect(en.home.assistants.webster.projectTitle).toBe("Webster M., Fulfilment Manager");
-    expect(de.home.assistants.webster.projectTitle).toBe("Webster M., Fulfilment-Manager");
+    expect(en.home.assistants.webster.projectTitle).toBe("Webster M., Fulfilment Advisor");
+    expect(de.home.assistants.webster.projectTitle).toBe("Webster M., Fulfilment-Berater");
     expect(read("app/webster/project/page.tsx")).toContain("title={copy.projectTitle}");
     expect(read("app/webster/project/page.tsx")).not.toContain("heading=");
     expect(read("app/webster/page.tsx")).toContain("copy.panelTitle");

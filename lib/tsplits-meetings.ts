@@ -38,7 +38,7 @@ export const MEETING_BOTS: Record<
   webster: {
     key: "webster",
     name: "Webster",
-    role: "Fulfilment Manager",
+    role: "Fulfilment Advisor",
     agentId: WEBSTER_PROJECT_AGENT_ID,
     href: "/admin/meetings/webster",
     fields: [

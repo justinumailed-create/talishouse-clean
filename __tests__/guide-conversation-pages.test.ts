@@ -80,8 +80,8 @@ describe("unlisted Webster and Thorsten guide pages", () => {
   it("uses short English and German headings without a trademark on the guide name", () => {
     expect(en.home.assistants.webster.title).toBe("Webster, Tsplits Guide");
     expect(de.home.assistants.webster.title).toBe("Webster, Tsplits-Guide");
-    expect(en.home.assistants.webster.panelTitle).toBe("Webster, Fulfilment Manager");
-    expect(de.home.assistants.webster.panelTitle).toBe("Webster, Fulfilment-Manager");
+    expect(en.home.assistants.webster.panelTitle).toBe("Webster, Fulfilment Advisor");
+    expect(de.home.assistants.webster.panelTitle).toBe("Webster, Fulfilment-Berater");
     expect(en.home.assistants.aisha.panelTitle).toBe("Aisha C., AMBA");
     expect(en.home.assistants.thorsten.title).toBe("Thorsten, Tsplits Guide");
     expect(de.home.assistants.thorsten.title).toBe("Thorsten, Tsplits-Guide");
