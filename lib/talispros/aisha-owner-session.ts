@@ -170,18 +170,23 @@ export async function loadAishaCallVariables(): Promise<string> {
     ordered.push(code);
   }
 
-  const rows: AishaOwnedMapsite[] = [];
-  for (const code of ordered) {
-    const mapsite = await getMapSiteByFastCode(code);
-    if (!mapsite?.fastCode) continue;
-    const dashboard = mapsite.id ? await loadMapSitePinDashboard(mapsite.id) : null;
-    const placed = mapsite.pins?.length ?? dashboard?.placedPins ?? 0;
-    rows.push({
-      fastCode: mapsite.fastCode,
-      firstName: mapsite.ownerFirstName?.trim() || "",
-      pinCount: placed,
-      pinAllowance: dashboard?.pinQuota ?? placed,
-    });
-  }
+  // Load every Mapsite at once, not one after another, so a signed-in
+  // owner with several FAST Codes does not wait for each lookup in turn
+  // before Aisha's page can open (Ralf, Nov 19: "takes forever to load").
+  const loaded = await Promise.all(
+    ordered.map(async (code): Promise<AishaOwnedMapsite | null> => {
+      const mapsite = await getMapSiteByFastCode(code);
+      if (!mapsite?.fastCode) return null;
+      const dashboard = mapsite.id ? await loadMapSitePinDashboard(mapsite.id) : null;
+      const placed = mapsite.pins?.length ?? dashboard?.placedPins ?? 0;
+      return {
+        fastCode: mapsite.fastCode,
+        firstName: mapsite.ownerFirstName?.trim() || "",
+        pinCount: placed,
+        pinAllowance: dashboard?.pinQuota ?? placed,
+      };
+    }),
+  );
+  const rows = loaded.filter((row): row is AishaOwnedMapsite => row !== null);
   return serializeAishaVariables(aishaOwnerVariables(rows));
 }

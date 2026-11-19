@@ -7,41 +7,15 @@ const SITE =
 const BRAND = /\bT-?splits\b/gi;
 const TRAILING = /[.,;:!?)\]"']+$/;
 
-/** Voice emotion tags such as [happy] are shown as an emoji. */
-const TAG_EMOJI: Record<string, string> = {
-  happy: "😊",
-  cheerful: "😊",
-  warm: "🙂",
-  friendly: "🙂",
-  calm: "🙂",
-  excited: "🤩",
-  enthusiastic: "🤩",
-  laughs: "😄",
-  laughing: "😄",
-  chuckles: "😄",
-  giggles: "😄",
-  curious: "🤔",
-  thoughtful: "🤔",
-  thinking: "🤔",
-  surprised: "😮",
-  sad: "😔",
-  sighs: "😌",
-  relieved: "😌",
-  whispers: "🤫",
-  confident: "😎",
-  proud: "😎",
-};
+/** Voice emotion tags such as [happy] are hidden. Aisha is a consultant: no emojis (Ralf, Nov 19). */
 const TAG = /\[([a-z][a-z \-]*)\]\s?/gi;
 const OPEN_TAG = /\[[a-z \-]*$/i;
 const TALIS_TV = /\bTalis[\s-]*T-?V\b/gi;
 
-/** Emotion tags become emojis, and "Talis T-V" is written TalisTV. */
+/** Emotion tags are removed, and "Talis T-V" is written TalisTV. */
 export function displayText(text: string): string {
   return text
-    .replace(TAG, (_, name: string) => {
-      const emoji = TAG_EMOJI[name.trim().toLowerCase()];
-      return emoji ? `${emoji} ` : "";
-    })
+    .replace(TAG, "")
     .replace(OPEN_TAG, "")
     .replace(TALIS_TV, "TalisTV");
 }
