@@ -7,7 +7,7 @@ import { ASSISTANT_PERSONAS } from "@/lib/talispros/assistant-personas";
 
 /**
  * Aisha and Webster in the homepage left column, under Build Mapsite.
- * The photo and bubble open the guide page. Start a call opens it with the call
+ * The photo, the bubble and Start a call all open the guide page with the call
  * already starting, so the bot speaks first with no second click.
  */
 export default function HomeAgentPair() {
@@ -65,7 +65,7 @@ function AgentCard({
       className="col-span-1 grid justify-items-center text-center sm:row-span-3 sm:grid-rows-subgrid"
     >
       <Link
-        href={href}
+        href={callHref}
         className="relative block h-20 w-20 overflow-hidden rounded-2xl bg-neutral-200 shadow-[0_6px_14px_rgba(0,0,0,0.14)] ring-1 ring-black/10"
       >
         <Image
@@ -78,7 +78,7 @@ function AgentCard({
         />
       </Link>
       <Link
-        href={href}
+        href={callHref}
         className="relative mb-1 mt-1.5 flex h-full min-h-[4rem] w-[12.75rem] items-center justify-center rounded-2xl bg-[#f4f6f8] px-3 whitespace-pre-line text-center font-sans text-[12.5px] font-medium leading-[1.3] text-neutral-950 no-underline shadow-[0_4px_12px_rgba(0,0,0,0.08)] ring-1 ring-black/10"
       >
         {line}

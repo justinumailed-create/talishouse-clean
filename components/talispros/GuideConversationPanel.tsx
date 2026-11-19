@@ -101,8 +101,18 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
     });
   };
 
+  const warmMic = useRef<MediaStream | null>(null);
+  const warmMicTimer = useRef<number | null>(null);
+  const releaseWarmMic = () => {
+    if (warmMicTimer.current) window.clearTimeout(warmMicTimer.current);
+    warmMicTimer.current = null;
+    warmMic.current?.getTracks().forEach((track) => track.stop());
+    warmMic.current = null;
+  };
+
   const conversation = useConversation({
     onConnect: () => {
+      window.setTimeout(releaseWarmMic, 1500);
       connectedOnce.current = true;
       setFailed(false);
       setEnded(false);
@@ -113,6 +123,7 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
       setEnded(true);
     },
     onError: () => {
+      releaseWarmMic();
       setFailed(true);
     },
     onMessage: (payload) => {
@@ -137,7 +148,14 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
     },
   });
 
-  useEffect(() => () => clearTimers(), []);
+  useEffect(
+    () => () => {
+      clearTimers();
+      releaseWarmMic();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
   useEffect(() => {
     const node = transcriptRef.current;
@@ -157,7 +175,12 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
         audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
       });
       const deviceId = stream.getAudioTracks()[0]?.getSettings().deviceId ?? null;
-      stream.getTracks().forEach((track) => track.stop());
+      // Keep this mic open until the call is connected. Closing it and letting
+      // the call reopen it made headsets switch modes twice, which delayed the
+      // agent's greeting by several seconds.
+      releaseWarmMic();
+      warmMic.current = stream;
+      warmMicTimer.current = window.setTimeout(releaseWarmMic, 15000);
       return deviceId;
     } catch {
       return false;
