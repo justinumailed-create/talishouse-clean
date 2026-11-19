@@ -602,6 +602,87 @@ p {
   box-sizing: border-box;
 }
 
+.aisha-registrar-pointer {
+  position: absolute;
+  z-index: 4;
+  left: calc(100% - 1.5rem);
+  top: auto;
+  bottom: calc(100% + 8px);
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  width: max-content;
+  max-width: min(16rem, 42vw);
+  pointer-events: auto;
+}
+
+.aisha-registrar-pointer__link {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #1d1d1f !important;
+  font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  text-decoration: none;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+}
+
+.aisha-registrar-pointer__arrow {
+  display: inline-block;
+  color: #046bd9 !important;
+  font-size: 18px;
+  line-height: 1;
+  animation: aisha-pointer-bob 1.8s ease-in-out infinite;
+}
+
+.aisha-registrar-pointer__dismiss {
+  display: inline-flex;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #1d1d1f;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes aisha-pointer-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+@media (max-width: 1023px) {
+  .aisha-registrar-pointer {
+    left: 4.75rem;
+    right: auto;
+    top: auto;
+    bottom: calc(100% + 8px);
+    max-width: min(18rem, calc(100vw - 6.5rem));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aisha-registrar-pointer__arrow {
+    animation: none;
+  }
+}
+
 .aisha-convai-dismiss {
   position: absolute;
   top: 8px;

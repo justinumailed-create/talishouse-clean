@@ -32,8 +32,8 @@ describe("Aisha team leader", () => {
     expect(safeAishaReturnPath("/aisha?code=dc06")).toBeNull();
     expect(safeAishaReturnPath("//tsplits.com")).toBeNull();
     const gate = read("components/talispros/TalisprosHomeGate.tsx");
-    expect(gate).toContain("aishaSignInPath()");
     expect(gate).toContain('data-testid="home-talk-aisha"');
+    expect(gate).toContain('data-testid="home-describe-project"');
     expect(gate).toContain("t.home.pitch.talkToAisha");
     expect(en.home.pitch.talkToAisha).toBe("Talk to Aisha, your team leader");
     expect(de.home.pitch.talkToAisha).toBe("Sprechen Sie mit Aisha, Ihrer Teamleiterin");

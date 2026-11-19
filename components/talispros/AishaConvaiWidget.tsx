@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore, type MouseEvent } from "react";
@@ -158,6 +159,7 @@ export default function AishaConvaiWidget({
   startHref,
   embed = "floating",
   autoStart = false,
+  registrarPointer = false,
 }: {
   persona?: AssistantPersona;
   /** Homepage greeting, or the call-back line used on an allowlisted Mapsite. */
@@ -173,6 +175,8 @@ export default function AishaConvaiWidget({
   embed?: "floating" | "inline";
   /** Open the call after a homepage Start a call click. */
   autoStart?: boolean;
+  /** Anonymous homepage: a dismissible pointer beside the greeting. */
+  registrarPointer?: boolean;
 }) {
   const t = useT();
   const router = useRouter();
@@ -185,6 +189,7 @@ export default function AishaConvaiWidget({
   const [bubbleSize, setBubbleSize] = useState({ width: 0, height: 0 });
   const [surfaceOpen, setSurfaceOpen] = useState(false);
   const [bubbleDismissed, setBubbleDismissed] = useState(false);
+  const [pointerDismissed, setPointerDismissed] = useState(false);
   const [needsTap, setNeedsTap] = useState(false);
   const startedRef = useRef(false);
   const [pillFrame, setPillFrame] = useState<{
@@ -194,6 +199,17 @@ export default function AishaConvaiWidget({
     tip: number;
   } | null>(null);
   const avatar = origin ? `${origin}${persona.portraitSrc}` : persona.portraitSrc;
+
+  useEffect(() => {
+    if (!registrarPointer) return;
+    try {
+      if (window.localStorage.getItem("tsplits.aisha.pointer.dismissed") === "1") {
+        setPointerDismissed(true);
+      }
+    } catch {
+      /* storage can be blocked */
+    }
+  }, [registrarPointer]);
 
   useEffect(() => {
     const slot = slotRef.current;
@@ -520,6 +536,36 @@ export default function AishaConvaiWidget({
       >
         <span aria-hidden="true">×</span>
       </button>
+      {registrarPointer && startHref && !pointerDismissed ? (
+        <div className="aisha-registrar-pointer" data-testid="aisha-registrar-pointer">
+          <Link
+            href={startHref}
+            className="aisha-registrar-pointer__link"
+          >
+            <span className="aisha-registrar-pointer__arrow" aria-hidden="true">
+              ↓
+            </span>
+            <span>{t.home.registrar.pointer}</span>
+          </Link>
+          <button
+            type="button"
+            className="aisha-registrar-pointer__dismiss"
+            aria-label={t.home.registrar.dismiss}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              setPointerDismissed(true);
+              try {
+                window.localStorage.setItem("tsplits.aisha.pointer.dismissed", "1");
+              } catch {
+                /* storage can be blocked */
+              }
+            }}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        </div>
+      ) : null}
       </div>
       )}
       <elevenlabs-convai

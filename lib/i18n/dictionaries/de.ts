@@ -122,6 +122,18 @@ export const de: Dictionary = {
       registered: "Ich bin bereits registriert",
       talkToAisha: "Sprechen Sie mit Aisha, Ihrer Teamleiterin",
     },
+    registrar: {
+      pointer: "Neu hier? Machen Sie Ihre Werbung umsatzbringend.",
+      dismiss: "Schließen",
+      title:
+        "Drei Wege, Ihre Werbung umsatzbringend zu machen: Servicefloors, Käuferagenturen und Netzwerkaufbau",
+      floors:
+        "Servicefloors: Mindestgebühren und Laufzeiten, um PINs zu setzen, damit höhere Gebühren gelten, statt über den Preis zu konkurrieren.",
+      buyers:
+        "Käuferagenturen: Sie vertreten den Käufer und behalten die Beziehung und die Gebühr bei sich.",
+      network:
+        "Netzwerkaufbau: Verbinden Sie Partner, damit Empfehlungen und gemeinsame Werbung über Ihre Mapsite laufen.",
+    },
     conversation: {
       startCall: "Anruf starten",
       endCall: "Anruf beenden",
