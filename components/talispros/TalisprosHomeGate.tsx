@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import HomeAgentPair from "@/components/talispros/HomeAgentPair";
 import TalisprosHomeFastCodeEntry from "@/components/talispros/TalisprosHomeFastCodeEntry";
 import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
 import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
@@ -83,6 +84,7 @@ export default function TalisprosHomeGate() {
           primaryClassName="text-xs font-medium leading-snug text-neutral-600 sm:text-sm"
           secondaryClassName="mt-1.5 text-xs font-medium text-neutral-500"
         />
+        <HomeAgentPair />
       </div>
     </div>
   );

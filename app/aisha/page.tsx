@@ -29,9 +29,7 @@ export async function generateMetadata() {
 export default async function AishaHomePage({ searchParams }: AishaHomePageProps) {
   const query = (await searchParams) ?? {};
   const call = query.call === "1";
-  const dictionary = getDictionary(await getLocale());
-  const copy = dictionary.home.assistants.aisha;
-  const pitch = dictionary.home.registrar;
+  const copy = getDictionary(await getLocale()).home.assistants.aisha;
   const dynamicVariables = await loadAishaCallVariables();
 
   return (
@@ -42,23 +40,6 @@ export default async function AishaHomePage({ searchParams }: AishaHomePageProps
       recordsPitch
       dynamicVariables={dynamicVariables}
       testId="aisha-home"
-      intro={
-        <section
-          className="border-b border-black/10 bg-white px-5 py-5 sm:px-8"
-          data-testid="aisha-registrar-pitch"
-        >
-          <div className="mx-auto max-w-3xl">
-            <h2 className="m-0 text-[20px] font-semibold leading-snug tracking-[-0.02em] text-neutral-950 sm:text-[24px]">
-              {pitch.title}
-            </h2>
-            <ul className="mt-3 space-y-2 text-[15px] leading-relaxed text-neutral-800 sm:text-[16px]">
-              <li>{pitch.floors}</li>
-              <li>{pitch.buyers}</li>
-              <li>{pitch.network}</li>
-            </ul>
-          </div>
-        </section>
-      }
     />
   );
 }
