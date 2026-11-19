@@ -26,6 +26,14 @@ describe("Webster TWO", () => {
     expect(isRegistrationOfferHref("/register")).toBe(true);
     expect(isRegistrationOfferHref("/talispros/markets/claim-a-market")).toBe(true);
     expect(isRegistrationOfferHref("/webster/project?call=1")).toBe(false);
+    expect(en.home.assistants.webster.projectIntro).toBe(
+      "Got a project? Talk to me. I'm Webster, your Fulfilment Manager…!",
+    );
+    expect(de.home.assistants.webster.projectIntro).toBe(
+      "Haben Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster, Ihr Fulfilment Manager…!",
+    );
+    expect(read("app/webster/project/page.tsx")).toContain("heading={copy.projectIntro}");
+    expect(read("app/webster/page.tsx")).toContain("copy.panelTitle");
     expect(en.home.conversation.describeProject).toBe("Describe your project with Webster");
     expect(de.home.conversation.describeProject).toBe("Beschreiben Sie Ihr Projekt mit Webster");
     expect(en.home.conversation.describeProject).not.toMatch(/—|–/);
