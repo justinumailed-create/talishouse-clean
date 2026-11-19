@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { isDemoMapSitePath } from "@/lib/talispros/demo-mapsite";
+import { isFsboMockPath } from "@/lib/fsbo/mock-paths";
 import { isGuideConversationPath } from "@/lib/talispros/guide-pages";
 import { isTalisprosMarketLayoutPath } from "@/lib/talispros/market-pages";
 import { isTalisprosStartPath } from "@/lib/talispros/start-content";
@@ -28,7 +29,8 @@ export default function TalisprosLayoutClient({
     pathname?.startsWith("/talispros/mapsite/") ||
     // Personal home page (/talispros/home/<code>) brings its own Home / Mapsite navbar.
     pathname?.startsWith("/talispros/home/") ||
-    isGuideConversationPath(pathname);
+    isGuideConversationPath(pathname) ||
+    isFsboMockPath(pathname);
 
   if (isMapSiteApp) {
     return <>{children}</>;
