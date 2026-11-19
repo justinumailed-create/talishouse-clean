@@ -52,8 +52,11 @@ export function getAgentNavItems(scopes: readonly string[] | null | undefined): 
   return items;
 }
 
-/** Sidebar items for any admin account, from its scopes (never from a role name). */
-export function getAdminNavItems(account: AdminAccount | null | undefined): AdminNavItem[] {
+/**
+ * Full scope-derived nav (every section the account may open). Currently hidden
+ * from the sidebar by ADMIN_FLOW_NAV; kept so routes, permissions and tests stay intact.
+ */
+export function getFullAdminNavItems(account: AdminAccount | null | undefined): AdminNavItem[] {
   if (!account) return [];
   if (account.access === "agent") {
     const items = getAgentNavItems(account.scopes);
@@ -66,6 +69,32 @@ export function getAdminNavItems(account: AdminAccount | null | undefined): Admi
   // Chat stays available to every FAST-code admin (as before).
   items.push({ href: "/chat", label: "Chat" });
   return items;
+}
+
+/**
+ * The ONLY sidebar items for now, following the Tsplits™ call flow
+ * (Aisha → Webster → follow ups). Everything else is hidden, not deleted:
+ * routes still work by URL and keep their scope checks.
+ */
+export const ADMIN_FLOW_NAV: ReadonlyArray<AdminNavItem & { scope: AdminScope }> = [
+  { href: "/admin/dashboard", label: "Dashboard", scope: "dashboard" },
+  { href: "/admin/meetings/aisha", label: "Meetings by Aisha", scope: "dashboard" },
+  { href: "/admin/meetings/webster", label: "Meetings by Webster", scope: "dashboard" },
+  { href: "/admin/follow-ups", label: "Follow Ups", scope: "dashboard" },
+  { href: "/admin/todos", label: "To-dos", scope: "dashboard" },
+];
+
+/** Agent Admins: their own dashboard and their daily task notes (as To-dos). Calls stay admin-only. */
+export const AGENT_FLOW_NAV: readonly AdminNavItem[] = [
+  { href: "/admin/agent", label: "Dashboard" },
+  { href: "/admin/agent/notes", label: "To-dos" },
+];
+
+/** Sidebar items for any admin account, from its scopes (never from a role name). */
+export function getAdminNavItems(account: AdminAccount | null | undefined): AdminNavItem[] {
+  if (!account) return [];
+  if (account.access === "agent") return AGENT_FLOW_NAV.map((item) => ({ ...item }));
+  return ADMIN_FLOW_NAV.filter((item) => accountHasAdminScope(account, item.scope)).map(({ href, label }) => ({ href, label }));
 }
 
 export function isAdminNavItemActive(href: string, pathname: string): boolean {
@@ -83,6 +112,10 @@ export function isAdminNavItemActive(href: string, pathname: string): boolean {
     ) {
       return true;
     }
+  }
+
+  if (href.startsWith("/admin/meetings/") && pathname.startsWith(`${href}/`)) {
+    return true;
   }
 
   if (href === "/admin/notifications" && pathname.startsWith("/admin/notifications")) {

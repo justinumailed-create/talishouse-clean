@@ -3,6 +3,10 @@ import type { AdminNavItem } from "@/lib/admin-nav";
 /** Visual grouping for the admin sidebar. Items still come from getAdminNavItems (permissions unchanged). */
 const GROUP_OF: Record<string, string> = {
   "/admin/dashboard": "Overview",
+  "/admin/meetings/aisha": "Meetings",
+  "/admin/meetings/webster": "Meetings",
+  "/admin/follow-ups": "Follow up",
+  "/admin/todos": "Follow up",
   "/admin/notifications": "Overview",
   "/admin/agent": "Workspace",
   "/admin/agent/notes": "Workspace",
@@ -23,7 +27,7 @@ const GROUP_OF: Record<string, string> = {
   "/admin/agents": "Administration",
   "/admin/access": "Administration",
 };
-const ORDER = ["Overview", "Workspace", "Operations", "Mapsites & content", "Administration", "More"];
+const ORDER = ["Overview", "Meetings", "Follow up", "Workspace", "Operations", "Mapsites & content", "Administration", "More"];
 
 export function groupAdminNav(items: readonly AdminNavItem[]): Array<{ title: string; items: AdminNavItem[] }> {
   const map = new Map<string, AdminNavItem[]>();
@@ -42,6 +46,10 @@ export const NAV_ICON: Record<string, string> = {
   "/admin/agent": "M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z",
   "/admin/agent/notes": "M7 3h7l5 5v13H7V3Zm7 0v5h5M10 13h6M10 17h6",
   "/chat": "M4 5h16v11H8l-4 4V5Z",
+  "/admin/meetings/aisha": "M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Zm-7 9a7 7 0 0 0 14 0M12 19v3",
+  "/admin/meetings/webster": "M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Zm-7 9a7 7 0 0 0 14 0M12 19v3",
+  "/admin/follow-ups": "M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z",
+  "/admin/todos": "M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2",
   "/admin/build-requests": "M4 7h16M4 12h16M4 17h10",
   "/admin/registrations": "M9 5h6M9 3h6v4H9V3ZM6 5H5v16h14V5h-1M9 12h6M9 16h4",
   "/admin/marketing": "M3 11v2l13 5V6L3 11Zm13-5 4-2v16l-4-2",

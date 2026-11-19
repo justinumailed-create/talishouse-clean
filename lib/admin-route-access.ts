@@ -27,6 +27,10 @@ const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | nu
   { prefix: "/admin/products", scope: "platform-content" },
   { prefix: "/admin/notifications", scope: "dashboard" },
   { prefix: "/admin/dashboard", scope: "dashboard" },
+  // Tsplits™ call flow (ElevenLabs calls): admin consoles only, not Agent Admins.
+  { prefix: "/admin/meetings", scope: "dashboard" },
+  { prefix: "/admin/follow-ups", scope: "dashboard" },
+  { prefix: "/admin/todos", scope: "dashboard" },
   { prefix: "/admin/talisbot", scope: "full-console" },
   { prefix: "/admin/leads-simulation", scope: "full-console" },
   { prefix: "/admin/leads", scope: "leads" },

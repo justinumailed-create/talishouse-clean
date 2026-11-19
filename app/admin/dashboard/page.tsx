@@ -15,11 +15,16 @@ import MarketSourcePanel from "@/components/admin/MarketSourcePanel";
 import LeadsToApproveSection from "@/components/admin/LeadsToApproveSection";
 import TalisbotMessagesSection from "@/components/admin/TalisbotMessagesSection";
 import { getLocale } from "@/lib/i18n/server";
+import FlowSummary from "@/components/admin/meetings/FlowSummary";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 const DESCRIPTIONS: Record<string, string> = {
+  "/admin/meetings/aisha": "Calls with Aisha, the registrar and team leader.",
+  "/admin/meetings/webster": "Project calls with Webster, the Fulfilment Manager.",
+  "/admin/follow-ups": "Callers who left a real phone number or email.",
+  "/admin/todos": "Callbacks, negotiation requests and Agent Codes.",
   "/admin/notifications": "Alerts and recent platform events.",
   "/admin/build-requests": "Incoming Mapsite build requests.",
   "/admin/mapsites": "Edit Mapsites, content and media.",
@@ -81,6 +86,8 @@ export default async function AdminDashboardPage({
         title={account ? `Welcome back, ${account.name.split(" ")[0]}` : "Dashboard"}
         subtitle="Tsplits™ administration: Mapsites, Talisbooks™, Talismaps™ and agents."
       />
+
+      <FlowSummary />
 
       {canAgents ? (
         <>

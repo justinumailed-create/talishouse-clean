@@ -18,7 +18,7 @@ import {
   scopesForGrantPermissions,
 } from "../lib/admin-constants";
 import { accountCanAccessAdminPath, getRequiredAdminScopeForPath } from "../lib/admin-route-access";
-import { getAdminNavItems, isAdminNavItemActive } from "../lib/admin-nav";
+import { getFullAdminNavItems as getAdminNavItems, isAdminNavItemActive } from "../lib/admin-nav";
 import { isGrantableAdminFastCode } from "../lib/admin-access-grants";
 
 const ralf = grantToAdminAccount({

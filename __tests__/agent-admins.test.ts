@@ -11,7 +11,7 @@ import {
   type AdminAccount,
 } from "../lib/admin-constants";
 import { accountCanAccessAdminPath } from "../lib/admin-route-access";
-import { getAdminNavItems } from "../lib/admin-nav";
+import { getFullAdminNavItems as getAdminNavItems } from "../lib/admin-nav";
 import { resolveAdminRequestGate } from "../lib/admin-request-gate";
 
 function readSource(relativePath: string) {

@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { AGENT_SCOPE_LABELS, accountHasAdminScope, sanitizeAgentScopes, type AdminAccount } from "@/lib/admin-constants";
 import { accountCanAccessAdminPath } from "@/lib/admin-route-access";
-import { getAdminNavItems } from "@/lib/admin-nav";
+import { getFullAdminNavItems as getAdminNavItems } from "@/lib/admin-nav";
 import { crmCopy } from "@/lib/crm-leads/copy";
 import {
   applyMapping,
