@@ -12,6 +12,7 @@ import type { AssistantPersona } from "@/lib/talispros/assistant-personas";
 export default function GuideConversationPage({
   persona,
   title,
+  heading,
   call,
   dynamicVariables,
   testId,
@@ -22,6 +23,8 @@ export default function GuideConversationPage({
 }: {
   persona: AssistantPersona;
   title: string;
+  /** Visible heading. The photo alt stays on `title`. */
+  heading?: string;
   call: boolean;
   dynamicVariables?: string;
   testId: string;
@@ -62,7 +65,7 @@ export default function GuideConversationPage({
         >
           <GuideConversationPanel
             agentId={agentId || persona.agentId}
-            title={title}
+            title={heading ?? title}
             autoStart={call}
             dynamicVariables={dynamicVariables}
             recordsPitch={recordsPitch}

@@ -185,6 +185,7 @@ export const en = {
       webster: {
         title: "Webster, Tsplits Guide",
         panelTitle: "Webster, Fulfilment Manager",
+        projectIntro: "Got a project? Talk to me. I'm Webster, your Fulfilment Manager…!",
         label: "Webster, Tsplits Guide",
         greeting: "Webster, Tsplits Guide",
         callback: "Webster, Tsplits Guide",

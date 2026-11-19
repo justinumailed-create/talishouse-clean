@@ -165,6 +165,7 @@ export const de: Dictionary = {
       webster: {
         title: "Webster, Tsplits-Guide",
         panelTitle: "Webster, Fulfilment-Manager",
+        projectIntro: "Haben Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster, Ihr Fulfilment Manager…!",
         label: "Webster, Tsplits-Guide",
         greeting: "Webster, Tsplits-Guide",
         callback: "Webster, Tsplits-Guide",
