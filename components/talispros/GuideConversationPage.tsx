@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 import LegalLinks from "@/components/legal/LegalLinks";
 import GuideConversationPanel from "@/components/talispros/GuideConversationPanel";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
@@ -17,6 +18,7 @@ export default function GuideConversationPage({
   imagePosition = "center 18%",
   agentId,
   recordsPitch = false,
+  intro,
 }: {
   persona: AssistantPersona;
   title: string;
@@ -28,6 +30,8 @@ export default function GuideConversationPage({
   agentId?: string;
   /** A finished call on this page counts as the homepage pitch. */
   recordsPitch?: boolean;
+  /** Written note under the header, before the photo and the call. */
+  intro?: ReactNode;
 }) {
   return (
     <div
@@ -36,6 +40,7 @@ export default function GuideConversationPage({
       data-call={call ? "1" : "0"}
     >
       <TalisUMktsHeader />
+      {intro}
       <main className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
         <div
           className="relative h-44 shrink-0 overflow-hidden bg-[#2a2a2a] sm:h-64 lg:h-auto lg:min-h-[calc(100dvh-4.25rem)]"

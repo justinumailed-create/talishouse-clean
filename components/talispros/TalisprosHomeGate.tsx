@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { AISHA_CALL_PATH, aishaSignInPath } from "@/lib/talispros/aisha-call-path";
-import { PITCH_DONE_EVENT, readPitchDone } from "@/lib/talispros/pitch-gate";
+import { useState } from "react";
+import { AISHA_CALL_PATH } from "@/lib/talispros/aisha-call-path";
 import TalisprosHomeFastCodeEntry from "@/components/talispros/TalisprosHomeFastCodeEntry";
 import TalisprosLegalCopy from "@/components/talispros/TalisprosLegalCopy";
 import { TALISPROS_HOME_SYSTEM_DEMO_HREF } from "@/lib/talispros/start-content";
@@ -15,34 +14,16 @@ import { useT } from "@/lib/i18n/client";
  * Keeps the existing claimed-Mapsite cookie/session FAST flow.
  */
 export default function TalisprosHomeGate({
-  pitchExempt = false,
   signedIn = false,
-  websterHref = "/webster?call=1",
+  websterHref = "/webster/project?call=1",
 }: {
-  pitchExempt?: boolean;
-  /** Owner session. Unlocks the page and offers Aisha. */
+  /** Owner session. Offers Aisha and Webster instead of the registrar bubble. */
   signedIn?: boolean;
-  /** Webster ONE. Includes a FAST Code when the homepage already has one. */
+  /** Webster TWO. Includes a FAST Code when the session already has one. */
   websterHref?: string;
 }) {
   const [loginOpen, setLoginOpen] = useState(false);
-  const [pitchLocked, setPitchLocked] = useState(false);
   const t = useT();
-
-  useEffect(() => {
-    if (pitchExempt) {
-      setPitchLocked(false);
-      return;
-    }
-    const sync = () => setPitchLocked(!readPitchDone(window.localStorage));
-    sync();
-    window.addEventListener(PITCH_DONE_EVENT, sync);
-    window.addEventListener("storage", sync);
-    return () => {
-      window.removeEventListener(PITCH_DONE_EVENT, sync);
-      window.removeEventListener("storage", sync);
-    };
-  }, [pitchExempt]);
 
   return (
     <div className="flex min-h-0 flex-1 flex-col bg-white px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
@@ -66,34 +47,22 @@ export default function TalisprosHomeGate({
 
         <div className="flex flex-col gap-3">
           {signedIn ? (
-            <Link
-              href={AISHA_CALL_PATH}
-              data-testid="home-talk-aisha"
-              className="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#046BD9] px-6 text-center text-[18px] font-semibold text-white shadow-[0_8px_22px_rgba(4,107,217,0.35)] hover:bg-[#0358b3]"
-            >
-              {t.home.pitch.talkToAisha}
-            </Link>
-          ) : null}
-          {pitchLocked ? (
-            <div data-pitch-free data-testid="home-pitch-start-wrap" className="flex flex-col gap-3">
+            <>
               <Link
-                href={websterHref}
-                data-testid="home-pitch-start"
+                href={AISHA_CALL_PATH}
+                data-testid="home-talk-aisha"
                 className="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#046BD9] px-6 text-center text-[18px] font-semibold text-white shadow-[0_8px_22px_rgba(4,107,217,0.35)] hover:bg-[#0358b3]"
               >
-                {t.home.assistants.webster.startCall}
+                {t.home.pitch.talkToAisha}
               </Link>
-              <div className="text-center">
-                <div className="text-[13px] leading-snug text-neutral-800">{t.home.pitch.note}</div>
-                <Link
-                  href={aishaSignInPath()}
-                  data-testid="home-already-registered"
-                  className="mt-2 inline-block text-[13px] font-semibold text-[#046BD9] underline-offset-2 hover:underline"
-                >
-                  {t.home.pitch.registered}
-                </Link>
-              </div>
-            </div>
+              <Link
+                href={websterHref}
+                data-testid="home-describe-project"
+                className="inline-flex min-h-14 w-full items-center justify-center rounded-full border-2 border-[#046BD9] bg-white px-6 text-center text-[17px] font-semibold text-[#046BD9] hover:bg-[#046BD9]/5"
+              >
+                {t.home.conversation.describeProject}
+              </Link>
+            </>
           ) : null}
           <button
             type="button"

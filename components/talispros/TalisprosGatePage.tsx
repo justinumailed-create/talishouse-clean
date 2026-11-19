@@ -5,12 +5,11 @@ import TalisprosSamCartReturnBanner from "@/components/talispros/TalisprosSamCar
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import TalisprosHomeCornerLinks from "@/components/talispros/TalisprosHomeCornerLinks";
 import AishaConvaiWidget from "@/components/talispros/AishaConvaiWidget";
-import HomePitchLock from "@/components/talispros/HomePitchLock";
 import { cookies } from "next/headers";
-import { MAPSITE_OWNER_COOKIE, MAPSITE_ROOT_ACCOUNT_COOKIE } from "@/lib/mapsite-account-session";
+import { MAPSITE_OWNER_COOKIE } from "@/lib/mapsite-account-session";
 import { readOwnerSessionFastCodes } from "@/lib/talispros/aisha-owner-session";
 import { HOMEPAGE_AISHA_WIDGET } from "@/lib/talispros/homepage-aisha-widget";
-import { websterOneHref } from "@/lib/talispros/webster-project";
+import { websterProjectHref } from "@/lib/talispros/webster-project";
 
 type GatePageProps = {
   searchParams?: Promise<{ code?: string }>;
@@ -31,10 +30,8 @@ export default async function TalisprosGatePage({ searchParams }: GatePageProps 
   const ownerCode = jar.get(MAPSITE_OWNER_COOKIE)?.value?.trim() || "";
   const sessionCodes = await readOwnerSessionFastCodes();
   const signedIn = sessionCodes.length > 0;
-  const pitchExempt = signedIn || Boolean(jar.get(MAPSITE_ROOT_ACCOUNT_COOKIE)?.value?.trim());
-  const websterHref = websterOneHref(query.code?.trim() || ownerCode);
+  const websterHref = websterProjectHref(query.code?.trim() || ownerCode || sessionCodes[0]);
   return (
-    <HomePitchLock exempt={pitchExempt}>
     <div className="flex min-h-dvh flex-col bg-white text-neutral-900 lg:h-dvh lg:min-h-0 lg:overflow-hidden">
       <TalisUMktsHeader />
       <div
@@ -42,15 +39,16 @@ export default async function TalisprosGatePage({ searchParams }: GatePageProps 
       >
         <div className="flex flex-none flex-col border-b border-neutral-200 lg:min-h-0 lg:border-b-0 lg:overflow-y-auto lg:overscroll-contain lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
           <TalisprosSamCartReturnBanner />
-          <TalisprosHomeGate pitchExempt={pitchExempt} signedIn={signedIn} websterHref={websterHref} />
+          <TalisprosHomeGate signedIn={signedIn} websterHref={websterHref} />
           <TalisprosHomeCornerLinks />
         </div>
         <div className="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
           <TalisprosHomeShowcase />
         </div>
       </div>
-      {HOMEPAGE_AISHA_WIDGET ? <AishaConvaiWidget startHref="/aisha?call=1" /> : null}
+      {HOMEPAGE_AISHA_WIDGET && !signedIn ? (
+        <AishaConvaiWidget startHref="/aisha" registrarPointer />
+      ) : null}
     </div>
-    </HomePitchLock>
   );
 }
