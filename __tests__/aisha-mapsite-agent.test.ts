@@ -15,11 +15,12 @@ describe("Aisha agent by page", () => {
   it("keeps the homepage agent and uses a different one on a Mapsite", () => {
     expect(AISHA_HOMEPAGE_AGENT_ID).toBe("agent_0401m7cxgba1fhwb35aqr43acnv1");
     expect(AISHA_MAPSITE_AGENT_ID).toBe("agent_0201m7dr7y7bfy99sz2ywxcbshm4");
-    const home = read("components/talispros/TalisprosGatePage.tsx");
+    const home = read("components/talispros/HomeAgentPair.tsx");
     const mapsite = read("components/talispros/mapsite/MapSiteApplication.tsx");
-    expect(home).toContain('startHref="/aisha"');
+    expect(home).toContain('href="/aisha"');
     expect(home).not.toContain("agentId=");
     expect(home).not.toContain(AISHA_MAPSITE_AGENT_ID);
+    expect(read("components/talispros/TalisprosGatePage.tsx")).not.toContain(AISHA_MAPSITE_AGENT_ID);
     const aishaHome = read("app/aisha/page.tsx");
     const guide = read("components/talispros/GuideConversationPage.tsx");
     expect(aishaHome).toContain("<GuideConversationPage");

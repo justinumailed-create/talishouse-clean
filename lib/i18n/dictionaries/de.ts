@@ -155,6 +155,7 @@ export const de: Dictionary = {
           "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen. Fragen Sie mich, wie.",
         greeting:
           "Hallo, ich bin Aisha. Ich helfe Ihnen, Ihre Werbung umsatzwirksam zu machen. Fragen Sie mich, wie.",
+        homeBubble: "Neu hier? Ich bin Aisha. Machen Sie Ihre Werbung umsatzbringend.",
         callback: "Starten Sie einen Anruf und schlagen Sie ein Projekt vor.",
         startCall: "Anruf starten",
         endCall: "Anruf beenden",

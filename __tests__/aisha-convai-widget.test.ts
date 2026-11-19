@@ -18,7 +18,9 @@ describe("Aisha Convai widget on the homepage", () => {
     const widget = read("components/talispros/AishaConvaiWidget.tsx");
     const page = read("components/talispros/TalisprosGatePage.tsx");
     const shell = read("components/RootShell.tsx");
-    expect(page).toContain("<AishaConvaiWidget");
+    expect(page).not.toContain("<AishaConvaiWidget");
+    expect(read("components/talispros/HomeAgentPair.tsx")).toContain('href="/aisha"');
+    expect(read("components/talispros/MapsiteAisha.tsx")).toContain("<AishaConvaiWidget");
     expect(widget).toContain("agent-id={agentId}");
     expect(widget).toContain("agentIdOverride?.trim() || persona.agentId");
     expect(ASSISTANT_PERSONAS.aisha.agentId).toBe("agent_0401m7cxgba1fhwb35aqr43acnv1");

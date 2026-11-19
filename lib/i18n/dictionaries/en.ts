@@ -175,6 +175,7 @@ export const en = {
         label: "Hi, I'm Aisha. I can help make your advertising revenue producing. Ask me how.",
         greeting:
           "Hi, I'm Aisha. I can help make your advertising revenue producing. Ask me how.",
+        homeBubble: "New here? I'm Aisha. Make your advertising revenue producing.",
         callback: "Start a call and propose a project.",
         startCall: "Start a call",
         endCall: "End call",

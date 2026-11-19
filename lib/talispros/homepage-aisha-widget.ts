@@ -1,5 +1,5 @@
 /**
- * Public homepage Aisha widget for visitors who are not signed in.
- * The bubble and pointer open /aisha. Signed-in owners use the team-leader button.
+ * Floating homepage Aisha widget. Off: Aisha and Webster sit under the
+ * structure tiles instead, and both open their pages without a call.
  */
-export const HOMEPAGE_AISHA_WIDGET: boolean = true;
+export const HOMEPAGE_AISHA_WIDGET: boolean = false;
