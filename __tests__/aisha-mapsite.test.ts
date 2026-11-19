@@ -32,10 +32,10 @@ describe("Aisha on a claimed Mapsite", () => {
 
   it("uses the call-back invitation in English and German", () => {
     expect(en.home.assistants.aisha.callback).toBe(
-      "Propose a Project. Just start a call and tell me what you can see for here.",
+      "Start a call and propose a project.",
     );
     expect(de.home.assistants.aisha.callback).toBe(
-      "Schlagen Sie ein Projekt vor. Starten Sie einfach einen Anruf und erzählen Sie mir, was Sie hier sehen.",
+      "Starten Sie einen Anruf und schlagen Sie ein Projekt vor.",
     );
     expect(en.mapsite.leftCard.inventory).toBe("I represent this Inventory");
     expect(de.mapsite.leftCard.inventory).toBe("Ich vertrete dieses Inventar");
