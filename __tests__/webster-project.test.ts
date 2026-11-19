@@ -32,7 +32,10 @@ describe("Webster TWO", () => {
     expect(de.home.assistants.webster.projectIntro).toBe(
       "Haben Sie ein Projekt? Sprechen Sie mit mir. Ich bin Webster, Ihr Fulfilment Manager…!",
     );
-    expect(read("app/webster/project/page.tsx")).toContain("heading={copy.projectIntro}");
+    expect(en.home.assistants.webster.projectTitle).toBe("Webster M., Fulfilment Manager");
+    expect(de.home.assistants.webster.projectTitle).toBe("Webster M., Fulfilment-Manager");
+    expect(read("app/webster/project/page.tsx")).toContain("title={copy.projectTitle}");
+    expect(read("app/webster/project/page.tsx")).not.toContain("heading=");
     expect(read("app/webster/page.tsx")).toContain("copy.panelTitle");
     expect(en.home.conversation.describeProject).toBe("Describe your project with Webster");
     expect(de.home.conversation.describeProject).toBe("Beschreiben Sie Ihr Projekt mit Webster");

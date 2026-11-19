@@ -16,11 +16,11 @@ export async function generateMetadata() {
   return dynamicPageMetadata((locale) => {
     const copy = getDictionary(locale).home.assistants.webster;
     return {
-      title: copy.panelTitle,
+      title: copy.projectTitle,
       description: getDictionary(locale).home.conversation.describeProject,
       path: "/webster/project",
       image: ASSISTANT_PERSONAS.webster.portraitSrc,
-      alt: copy.panelTitle,
+      alt: copy.projectTitle,
       noindex: true,
     };
   });
@@ -36,8 +36,7 @@ export default async function WebsterProjectPage({ searchParams }: ProjectPagePr
     <GuideConversationPage
       persona={ASSISTANT_PERSONAS.webster}
       agentId={WEBSTER_PROJECT_AGENT_ID}
-      title={copy.panelTitle}
-      heading={copy.projectIntro}
+      title={copy.projectTitle}
       call={query.call === "1"}
       recordsPitch
       dynamicVariables={dynamicVariables}
