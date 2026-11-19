@@ -160,6 +160,8 @@ export const en = {
       feedback: "How was this call?",
       feedbackThanks: "Thank you.",
       callFailed: "The call could not start. Please try again.",
+      micBlocked: "Allow the microphone in your browser, then press Start a call again.",
+      micLevel: "Your microphone level",
       describeProject: "Describe your project with Webster",
     },
     assistants: {

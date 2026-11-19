@@ -23,7 +23,8 @@ describe("homepage Aisha and Webster", () => {
     const pair = read("components/talispros/HomeAgentPair.tsx");
     expect(pair).toContain('href="/aisha"');
     expect(pair).toContain('href="/webster/project"');
-    expect(pair).not.toContain("?call=1");
+    expect(pair).toContain('callHref="/aisha?call=1"');
+    expect(pair).toContain('callHref="/webster/project?call=1"');
     expect(pair).toContain("aisha.homeBubble");
     expect(pair).toContain("webster.projectIntro");
     expect(`${en.home.assistants.aisha.homeBubble} ${de.home.assistants.aisha.homeBubble}`).not.toMatch(

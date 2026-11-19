@@ -43,6 +43,8 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
   const [draft, setDraft] = useState("");
   const [ended, setEnded] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [micBlocked, setMicBlocked] = useState(false);
+  const [micLevel, setMicLevel] = useState(0);
   const [rating, setRating] = useState<number | null>(null);
   const segments = useRef<Segment[]>([]);
   const timers = useRef<number[]>([]);
@@ -142,14 +144,41 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
     if (node) node.scrollTop = node.scrollHeight;
   }, [lines]);
 
-  const begin = () => {
+  /**
+   * Ask for the microphone before the call starts, with echo cancelling, noise
+   * suppression and automatic gain on, and hand that exact mic to the call.
+   * Before this the call could open with no usable mic and the agent heard
+   * silence. A blocked mic now shows a clear message instead.
+   */
+  const openMicrophone = async (): Promise<string | null | false> => {
+    if (typeof navigator === "undefined" || !navigator.mediaDevices?.getUserMedia) return null;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+      const deviceId = stream.getAudioTracks()[0]?.getSettings().deviceId ?? null;
+      stream.getTracks().forEach((track) => track.stop());
+      return deviceId;
+    } catch {
+      return false;
+    }
+  };
+
+  const begin = async () => {
     setFailed(false);
+    setMicBlocked(false);
     setEnded(false);
     setRating(null);
+    const deviceId = await openMicrophone();
+    if (deviceId === false) {
+      setMicBlocked(true);
+      return;
+    }
     const variables = parseVariables(dynamicVariables);
     conversation.startSession({
       agentId,
       connectionType: "webrtc",
+      ...(deviceId ? { inputDeviceId: deviceId } : {}),
       ...(variables ? { dynamicVariables: variables } : {}),
     });
   };
@@ -164,6 +193,22 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
 
   const connected = conversation.status === "connected";
   const connecting = conversation.status === "connecting";
+
+  // Keep the mic open for the whole call and show its live level, so the
+  // caller can see the agent is receiving their voice.
+  useEffect(() => {
+    if (!connected) {
+      setMicLevel(0);
+      return;
+    }
+    if (conversation.isMuted) conversation.setMuted(false);
+    const timer = window.setInterval(() => {
+      setMicLevel(Math.min(1, conversation.getInputVolume() * 3));
+    }, 120);
+    return () => window.clearInterval(timer);
+    // conversation is stable for this provider.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connected]);
   const status = connecting
     ? copy.connecting
     : connected && conversation.mode === "speaking"
@@ -212,6 +257,29 @@ function Panel({ agentId, title, autoStart, dynamicVariables, recordsPitch = fal
       >
         {status}
       </p>
+      {connected ? (
+        <div
+          data-testid="guide-mic-level"
+          aria-label={copy.micLevel}
+          title={copy.micLevel}
+          className="mt-1 flex h-3 items-end gap-[3px]"
+        >
+          {[0.15, 0.35, 0.55, 0.75, 0.95].map((step) => (
+            <span
+              key={step}
+              className={`w-[4px] rounded-full transition-[height,background-color] duration-100 ${
+                micLevel >= step ? "bg-[#046BD9]" : "bg-neutral-300"
+              }`}
+              style={{ height: `${4 + step * 8}px` }}
+            />
+          ))}
+        </div>
+      ) : null}
+      {micBlocked ? (
+        <p data-testid="guide-mic-blocked" className="mt-1 max-w-[560px] text-center text-[13px] text-neutral-600">
+          {copy.micBlocked}
+        </p>
+      ) : null}
       {failed && !connected ? (
         <p className="mt-1 max-w-[560px] text-center text-[13px] text-neutral-600">{copy.callFailed}</p>
       ) : null}

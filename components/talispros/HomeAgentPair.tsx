@@ -7,7 +7,8 @@ import { ASSISTANT_PERSONAS } from "@/lib/talispros/assistant-personas";
 
 /**
  * Aisha and Webster in the homepage left column, under Build Mapsite.
- * The bubble and Start a call open the guide page. They do not place a call.
+ * The photo and bubble open the guide page. Start a call opens it with the call
+ * already starting, so the bot speaks first with no second click.
  */
 export default function HomeAgentPair() {
   const t = useT();
@@ -16,20 +17,21 @@ export default function HomeAgentPair() {
 
   return (
     <div
-      className="mt-8 grid w-full grid-cols-1 gap-8 sm:mt-10 sm:grid-cols-2 sm:grid-rows-[auto_auto_auto] sm:gap-x-3 sm:gap-y-2"
+      className="mx-auto mt-6 grid w-full max-w-[24rem] grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 sm:grid-rows-[auto_auto_auto] sm:gap-x-4 sm:gap-y-1.5 lg:mt-4"
       data-testid="home-agent-pair"
     >
       <AgentCard
         href="/aisha"
+        callHref="/aisha?call=1"
         testId="home-aisha-card"
         name={aisha.panelTitle}
         src={ASSISTANT_PERSONAS.aisha.portraitSrc}
         line={aisha.homeBubble}
         call={aisha.startCall}
-        compact
       />
       <AgentCard
         href="/webster/project"
+        callHref="/webster/project?call=1"
         testId="home-webster-card"
         name={webster.panelTitle}
         src={ASSISTANT_PERSONAS.webster.portraitSrc}
@@ -42,52 +44,56 @@ export default function HomeAgentPair() {
 
 function AgentCard({
   href,
+  callHref,
   testId,
   name,
   src,
   line,
   call,
-  compact = false,
 }: {
   href: string;
+  callHref: string;
   testId: string;
   name: string;
   src: string;
   line: string;
   call: string;
-  compact?: boolean;
 }) {
   return (
-    <Link
-      href={href}
+    <div
       data-testid={testId}
-      className="col-span-1 grid justify-items-center text-center no-underline sm:row-span-3 sm:grid-rows-subgrid"
+      className="col-span-1 grid justify-items-center text-center sm:row-span-3 sm:grid-rows-subgrid"
     >
-      <span className="relative block h-36 w-36 overflow-hidden rounded-2xl bg-neutral-200 shadow-[0_8px_18px_rgba(0,0,0,0.16)] ring-1 ring-black/10 sm:h-32 sm:w-32">
+      <Link
+        href={href}
+        className="relative block h-20 w-20 overflow-hidden rounded-2xl bg-neutral-200 shadow-[0_6px_14px_rgba(0,0,0,0.14)] ring-1 ring-black/10"
+      >
         <Image
           src={src}
           alt={name}
           fill
-          sizes="144px"
+          sizes="80px"
           className="object-cover"
           style={{ objectPosition: "center 16%" }}
         />
-      </span>
-      <span
-        className={`relative mb-1 inline-flex w-fit items-center justify-center self-center justify-self-center rounded-2xl bg-[#f4f6f8] text-center font-sans font-medium leading-snug text-neutral-950 shadow-[0_4px_12px_rgba(0,0,0,0.08)] ring-1 ring-black/10 ${
-          compact ? "px-2.5 py-1 text-[12px] sm:text-[13px]" : "px-2.5 py-1.5 text-[12px] sm:px-3 sm:text-[13px]"
-        }`}
-        style={{ maxWidth: compact ? "15.5rem" : "100%", width: "fit-content" }}
+      </Link>
+      <Link
+        href={href}
+        className="relative mb-1 mt-1.5 flex h-full min-h-[4rem] w-[11.5rem] items-center justify-center rounded-2xl bg-[#f4f6f8] px-3 text-center font-sans text-[12.5px] font-medium leading-[1.3] text-neutral-950 no-underline shadow-[0_4px_12px_rgba(0,0,0,0.08)] ring-1 ring-black/10"
       >
         {line}
         <span
           className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-x-[7px] border-t-[8px] border-x-transparent border-t-[#f4f6f8]"
           aria-hidden
         />
-      </span>
-      <span className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#046BD9] px-4 font-sans text-[14px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.28)] sm:text-[15px]">
+      </Link>
+      <Link
+        href={callHref}
+        data-testid={`${testId}-call`}
+        className="mt-1 inline-flex min-h-8 items-center justify-center rounded-full bg-[#046BD9] px-4 font-sans text-[13px] font-semibold text-white no-underline shadow-[0_4px_10px_rgba(4,107,217,0.25)]"
+      >
         {call}
-      </span>
-    </Link>
+      </Link>
+    </div>
   );
 }

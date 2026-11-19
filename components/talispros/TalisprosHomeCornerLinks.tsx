@@ -8,7 +8,7 @@ export const HOME_TALISBOT_SLOT_ID = "home-talisbot-slot";
 export default function TalisprosHomeCornerLinks() {
   return (
     <div
-      className="flex shrink-0 flex-col items-start pb-3 pl-6 pr-4 pt-1 font-sans"
+      className="flex shrink-0 flex-col items-start pb-3 pl-6 pr-4 pt-1 font-sans lg:pointer-events-none lg:absolute lg:bottom-0 lg:left-0 [&>*]:pointer-events-auto"
       data-testid="home-corner-links"
     >
       <div

@@ -139,6 +139,8 @@ export const de: Dictionary = {
       feedback: "Wie war dieser Anruf?",
       feedbackThanks: "Danke.",
       callFailed: "Der Anruf konnte nicht gestartet werden. Bitte versuchen Sie es erneut.",
+      micBlocked: "Bitte erlauben Sie das Mikrofon im Browser und starten Sie den Anruf erneut.",
+      micLevel: "Ihr Mikrofonpegel",
       describeProject: "Beschreiben Sie Ihr Projekt mit Webster",
     },
     assistants: {

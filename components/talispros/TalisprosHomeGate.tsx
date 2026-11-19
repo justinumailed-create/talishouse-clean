@@ -18,8 +18,11 @@ export default function TalisprosHomeGate() {
   const t = useT();
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-white px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-12">
-      <div className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center">
+    <div className="flex min-h-0 flex-1 flex-col bg-white px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:pb-3.5 lg:pt-12">
+      <div className="mx-auto flex w-full max-w-[26rem] flex-1 flex-col justify-center lg:justify-between">
+        {/* On desktop the top block stays centred and the bots sit at the bottom,
+            level with the four transaction tiles on the right. */}
+        <div className="lg:flex lg:flex-1 lg:flex-col lg:justify-center">
         <div className="mb-8 text-center sm:mb-10">
           <Image
             src="/logo.png"
@@ -80,10 +83,11 @@ export default function TalisprosHomeGate() {
         </div>
 
         <TalisprosLegalCopy
-          className="mt-8 text-center sm:mt-10"
+          className="mt-6 text-center sm:mt-6"
           primaryClassName="text-xs font-medium leading-snug text-neutral-600 sm:text-sm"
           secondaryClassName="mt-1.5 text-xs font-medium text-neutral-500"
         />
+        </div>
         <HomeAgentPair />
       </div>
     </div>

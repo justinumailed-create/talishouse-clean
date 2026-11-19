@@ -21,7 +21,7 @@ export default function TalisprosGatePage() {
       <div
         className={`${libreBaskerville.className} flex min-h-0 flex-1 flex-col lg:grid lg:grid-cols-[40%_60%] lg:overflow-hidden`}
       >
-        <div className="flex flex-none flex-col border-b border-neutral-200 lg:min-h-0 lg:border-b-0 lg:overflow-y-auto lg:overscroll-contain lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
+        <div className="flex flex-none flex-col border-b border-neutral-200 lg:relative lg:min-h-0 lg:border-b-0 lg:overflow-y-auto lg:overscroll-contain lg:[&::-webkit-scrollbar]:hidden lg:[-ms-overflow-style:none] lg:[scrollbar-width:none]">
           <TalisprosSamCartReturnBanner />
           <TalisprosHomeGate />
           <TalisprosHomeCornerLinks />
