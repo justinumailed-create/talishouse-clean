@@ -19,6 +19,11 @@ type ListenerMap = Map<MapEngineEvent, Set<MapEngineEventHandler>>;
 
 const CONTAINER_OWNER_KEY = "__talismapsMapOwner" as const;
 
+function screenNudgeOf(pin: MapEnginePin): number {
+  const value = pin.metadata?.screenNudgeX;
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
 export function getGoogleMapsApiKey(): string {
   return (
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim() ||
@@ -107,6 +112,7 @@ type PinOverlay = {
     anchorY: number
   ) => void;
   setDraggable: (draggable: boolean) => void;
+  setScreenNudge: (pixels: number) => void;
   setHandlers: (handlers: {
     onClick?: () => void;
     onDragStart?: () => void;
@@ -127,6 +133,7 @@ function createHtmlPinOverlayClass() {
     private onDragStart: (() => void) | null = null;
     private onDragEnd: ((latLng: google.maps.LatLng) => void) | null = null;
     private dragging = false;
+    private screenNudgeX = 0;
 
     constructor(options: {
       position: google.maps.LatLng;
@@ -184,6 +191,11 @@ function createHtmlPinOverlayClass() {
       this.container.style.height = `${height}px`;
       this.container.style.transform = `translate(${-anchorX}px, ${-anchorY}px)`;
       this.container.innerHTML = html;
+    }
+
+    setScreenNudge(pixels: number) {
+      this.screenNudgeX = Number.isFinite(pixels) ? pixels : 0;
+      this.draw();
     }
 
     setPosition(position: google.maps.LatLng) {
@@ -312,8 +324,9 @@ function createHtmlPinOverlayClass() {
       if (!projection) return;
       const point = projection.fromLatLngToDivPixel(this.position);
       if (!point) return;
-      this.container.style.left = `${point.x}px`;
+      this.container.style.left = `${point.x + this.screenNudgeX}px`;
       this.container.style.top = `${point.y}px`;
+      this.container.style.zIndex = this.screenNudgeX ? "560" : "500";
     }
 
     onRemove() {
@@ -522,6 +535,7 @@ export class GoogleMapsProvider implements MapProvider {
       const position = new google.maps.LatLng(pin.latitude, pin.longitude);
       const markerHtml = buildPinMarkerHtml(pin, highlighted);
 
+      const nudge = screenNudgeOf(pin);
       const existing = markers.get(pin.id);
       if (existing) {
         const iconChanged = markerIconKeys.get(pin.id) !== iconKey;
@@ -542,6 +556,7 @@ export class GoogleMapsProvider implements MapProvider {
           existing.setDraggable(shouldDrag);
           markerDraggable.set(pin.id, shouldDrag);
         }
+        existing.setScreenNudge(nudge);
         return;
       }
 
@@ -569,6 +584,7 @@ export class GoogleMapsProvider implements MapProvider {
           }),
       });
 
+      overlay.setScreenNudge(nudge);
       overlay.setMap(map);
       markers.set(pin.id, overlay);
       markerIconKeys.set(pin.id, iconKey);
@@ -760,6 +776,15 @@ export class GoogleMapsProvider implements MapProvider {
       },
       fitToCoordinates(coordinates: MapCoordinates[], padding: MapFitPadding = 60) {
         if (coordinates.length === 0) return;
+        suppressCameraGestureEvents = true;
+        const release = () => {
+          suppressCameraGestureEvents = false;
+        };
+        const timer = window.setTimeout(release, 900);
+        google.maps.event.addListenerOnce(map, "idle", () => {
+          window.clearTimeout(timer);
+          release();
+        });
         if (coordinates.length === 1) {
           map.setCenter({
             lat: coordinates[0]!.latitude,

@@ -26,6 +26,11 @@ type ListenerMap = Map<MapEngineEvent, Set<MapEngineEventHandler>>;
 type MapLibreMap = import("maplibre-gl").Map;
 type MapLibreMarker = import("maplibre-gl").Marker;
 
+function screenNudgeX(pin: MapEnginePin): number {
+  const value = pin.metadata?.screenNudgeX;
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
 function coordinatesMatch(
   left: { latitude: number; longitude: number },
   right: { latitude: number; longitude: number }
@@ -365,7 +370,7 @@ export class MapLibreProvider implements MapProvider {
         draggable: shouldDrag,
         anchor: "center",
         offset: [
-          markerHtml.iconSize[0] / 2 - markerHtml.iconAnchor[0],
+          markerHtml.iconSize[0] / 2 - markerHtml.iconAnchor[0] + screenNudgeX(pin),
           markerHtml.iconSize[1] / 2 - markerHtml.iconAnchor[1],
         ],
       })
@@ -439,6 +444,11 @@ export class MapLibreProvider implements MapProvider {
           if (current.lat !== pin.latitude || current.lng !== pin.longitude) {
             existing.setLngLat([pin.longitude, pin.latitude]);
           }
+          const placed = buildPinMarkerHtml(pin, highlighted);
+          existing.setOffset([
+            placed.iconSize[0] / 2 - placed.iconAnchor[0] + screenNudgeX(pin),
+            placed.iconSize[1] / 2 - placed.iconAnchor[1],
+          ]);
 
           const iconChanged = markerIconKeys.get(pin.id) !== nextIconKey;
           const dragChanged = markerDraggable.get(pin.id) !== shouldDrag;
