@@ -79,7 +79,7 @@ function AgentCard({
       </Link>
       <Link
         href={callHref}
-        className="relative flex h-full w-full items-center rounded-2xl bg-[#f4f6f8] px-3 py-2 whitespace-pre-line font-sans text-[13.5px] font-medium leading-[1.35] text-neutral-950 no-underline ring-1 ring-black/10 lg:mb-1 lg:mt-1.5 lg:min-h-[4rem] lg:w-[12.75rem] lg:justify-center lg:py-0 lg:text-center lg:text-[12.5px] lg:leading-[1.3] lg:shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
+        className="relative flex h-full w-full items-center rounded-2xl bg-[#f4f6f8] px-3 py-2 whitespace-pre-line font-sans text-[13.5px] font-medium leading-[1.35] text-[var(--text-secondary)] no-underline ring-1 ring-black/10 lg:mb-1 lg:mt-1.5 lg:min-h-[4rem] lg:w-[12.75rem] lg:justify-center lg:py-0 lg:text-center lg:text-[12.5px] lg:leading-[1.3] lg:shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
       >
         {line}
         <span
