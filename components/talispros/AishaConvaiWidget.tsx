@@ -148,7 +148,8 @@ function startAishaConversation(event: MouseEvent<HTMLButtonElement>) {
 
 /**
  * Public voice and chat widget. The embed script loads after the page is
- * interactive. The spoken first message is set in ElevenLabs, not here.
+ * interactive. The spoken first message is set in ElevenLabs; only the
+ * Build Mapsite call passes its own (firstMessage).
  */
 export default function AishaConvaiWidget({
   persona = DEFAULT_ASSISTANT_PERSONA,
@@ -156,6 +157,7 @@ export default function AishaConvaiWidget({
   placement = "bottom-left",
   agentId: agentIdOverride,
   dynamicVariables,
+  firstMessage,
   startHref,
   embed = "floating",
   autoStart = false,
@@ -169,6 +171,8 @@ export default function AishaConvaiWidget({
   agentId?: string;
   /** JSON for the Mapsite agent. Omitted on the homepage. */
   dynamicVariables?: string;
+  /** Spoken opening for this call only (Build Mapsite). Omitted elsewhere. */
+  firstMessage?: string;
   /** Homepage Start a call opens this page first. Other pages start the call. */
   startHref?: string;
   /** Floating corner widget, or the conversation filling its column. */
@@ -415,6 +419,7 @@ export default function AishaConvaiWidget({
         <elevenlabs-convai
           agent-id={agentId}
           dynamic-variables={dynamicVariables || undefined}
+          override-first-message={firstMessage || undefined}
           action-text={line}
           aria-label={line}
           start-call-text={copy.startCall}
@@ -571,6 +576,7 @@ export default function AishaConvaiWidget({
       <elevenlabs-convai
         agent-id={agentId}
         dynamic-variables={dynamicVariables || undefined}
+        override-first-message={firstMessage || undefined}
         action-text={line}
         aria-label={line}
         start-call-text={copy.startCall}

@@ -9,7 +9,7 @@
  * with Aisha's public Agent Code ready to enter.
  */
 
-import type { HomeMarketPin } from "@/lib/talisu/north-america-markets";
+import { homeMarketDisplayName, type HomeMarketPin } from "@/lib/talisu/north-america-markets";
 
 export const HOME_MARKET_ACCOUNT_TYPES = ["broker", "agent", "fsbo", "adpro"] as const;
 export type HomeMarketAccountType = (typeof HOME_MARKET_ACCOUNT_TYPES)[number];
@@ -99,18 +99,35 @@ export function homeMarketRegisterHref(accountType: HomeMarketAccountType, marke
   return `/register?${params.toString()}`;
 }
 
-/**
- * Aisha widget dynamic variables for the moment after Build Mapsite.
- * Off until Aisha's ElevenLabs agent declares these variables (needs Arun's
- * OK). Until then the page shows her line as text and offers the normal call.
- */
-export const HOME_MARKET_AISHA_VARIABLES_ENABLED = false;
+/** Tells Aisha's agent (v9) this call follows Build Mapsite. */
+export const HOME_MARKET_AISHA_ENTRY_CONTEXT = "build_complete";
 
-export function homeMarketAishaDynamicVariables(firstName: string, market: HomeMarketPin): string {
+/**
+ * Aisha's spoken opening after Build Mapsite. Her agent speaks English, so
+ * this stays English on every locale. It ends with the v8 pricing question.
+ */
+export function homeMarketAishaFirstMessage(firstName: string): string {
+  const name = cleanFirstName(firstName);
+  const hello = name ? `Good job, ${name}.` : "Good job.";
+  return `${hello} Your market is available. We look forward to working with you. Would you like me to explain pricing?`;
+}
+
+/**
+ * Dynamic variables for Aisha's live call after Build Mapsite. The names match
+ * the placeholders on her agent; ordinary calls get the defaults
+ * (entry_context "standard"), so only this call takes the post-build path.
+ */
+export function homeMarketAishaDynamicVariables(
+  firstName: string,
+  market: HomeMarketPin,
+  accountType: HomeMarketAccountType | null,
+): string {
   const vars = {
-    build_event: "build_mapsite_submitted",
-    builder_first_name: cleanFirstName(firstName),
-    market_name: market.name,
+    signed_in: "no",
+    first_name: cleanFirstName(firstName),
+    home_market: homeMarketDisplayName(market),
+    account_type: accountType ?? "",
+    entry_context: HOME_MARKET_AISHA_ENTRY_CONTEXT,
   };
   return JSON.stringify(vars).replace(/</g, "\\u003c");
 }

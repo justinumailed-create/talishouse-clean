@@ -18,9 +18,10 @@ import {
 import {
   EMPTY_HOME_MARKET_DRAFT,
   HOME_MARKET_AGENT_CODE,
-  HOME_MARKET_AISHA_VARIABLES_ENABLED,
+  HOME_MARKET_AISHA_ENTRY_CONTEXT,
   HOME_MARKET_PREVIEW_MIN_OPACITY,
   homeMarketAishaDynamicVariables,
+  homeMarketAishaFirstMessage,
   homeMarketGoodJob,
   homeMarketPreviewOpacity,
   homeMarketRegisterHref,
@@ -173,14 +174,36 @@ describe("Personalize flow", () => {
     expect(flow).not.toContain("createDemoMapSiteAction");
   });
 
-  it("keeps Aisha's widget variables off until her agent declares them", () => {
-    expect(HOME_MARKET_AISHA_VARIABLES_ENABLED).toBe(false);
-    expect(JSON.parse(homeMarketAishaDynamicVariables("<Sam>", market))).toEqual({
-      build_event: "build_mapsite_submitted",
-      builder_first_name: "<Sam>",
-      market_name: "Pacific Northwest & Alaska",
+  it("passes Aisha's v9 Build Mapsite variables and opening line", () => {
+    expect(HOME_MARKET_AISHA_ENTRY_CONTEXT).toBe("build_complete");
+    const vars = JSON.parse(homeMarketAishaDynamicVariables("  Sam ", market, "agent"));
+    expect(vars).toEqual({
+      signed_in: "no",
+      first_name: "Sam",
+      home_market: homeMarketDisplayName(market),
+      account_type: "agent",
+      entry_context: "build_complete",
     });
-    expect(homeMarketAishaDynamicVariables("<Sam>", market)).not.toContain("<");
+    expect(JSON.parse(homeMarketAishaDynamicVariables("", market, null)).account_type).toBe("");
+    expect(homeMarketAishaDynamicVariables("<Sam>", market, null)).not.toContain("<");
+    expect(homeMarketAishaFirstMessage("Sam")).toBe(
+      "Good job, Sam. Your market is available. We look forward to working with you. Would you like me to explain pricing?",
+    );
+    expect(homeMarketAishaFirstMessage("  ")).toMatch(/^Good job\. Your market is available\./);
+    expect(homeMarketAishaFirstMessage("Sam")).not.toMatch(/[—–]/);
+  });
+
+  it("starts the live call only from the Hear Aisha click and keeps the text", () => {
+    const flow = read("components/talispros/home-market/HomeMarketPersonalize.tsx");
+    expect(flow).toContain('data-testid="home-market-hear-aisha"');
+    expect(flow).toContain("setAishaLive(true)");
+    expect(flow).toMatch(/aishaLive \? \(/);
+    expect(flow).toContain("firstMessage={homeMarketAishaFirstMessage(firstName)}");
+    expect(flow).toContain('data-testid="home-market-good-job-text"');
+    const widget = read("components/talispros/AishaConvaiWidget.tsx");
+    expect(widget.match(/override-first-message=\{firstMessage \|\| undefined\}/g)).toHaveLength(2);
+    expect(en.homeMarket.hearAisha).toBe("Hear Aisha");
+    expect(de.homeMarket.hearAisha).toBe("Aisha anhören");
   });
 });
 

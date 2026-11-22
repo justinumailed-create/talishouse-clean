@@ -1239,7 +1239,7 @@ export const en = {
     missingSteps: "Add your first name, account type and Home PIN to continue.",
     goodJob: "Good job, {name}. Your market is available. We look forward to working with you.",
     registerHint: "Register using my Agent Code, Aishaa. It is already filled in for you.",
-    talkToAisha: "Talk with Aisha",
+    hearAisha: "Hear Aisha",
     editDetails: "Change details",
     previewLabel: "Your Home Page",
     previewMarket: "Home Market",

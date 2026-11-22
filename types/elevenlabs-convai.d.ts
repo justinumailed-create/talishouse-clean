@@ -8,6 +8,8 @@ type ElevenLabsConvaiProps = DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTML
   "agent-id": string;
   /** JSON object. Omitted when the page has no Mapsite variables. */
   "dynamic-variables"?: string;
+  /** Spoken opening for this call. Needs the first_message override on the agent. */
+  "override-first-message"?: string;
   "action-text"?: string;
   "start-call-text"?: string;
   "end-call-text"?: string;

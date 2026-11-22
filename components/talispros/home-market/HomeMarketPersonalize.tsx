@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useMemo, useRef, useState } from "react";
 import HomePinLocationSection from "@/components/build-mapsite/HomePinLocationSection";
@@ -11,15 +10,14 @@ import {
 } from "@/components/build-mapsite/home-pin-types";
 import AishaConvaiWidget from "@/components/talispros/AishaConvaiWidget";
 import { useT } from "@/lib/i18n/client";
-import { AISHA_CALL_PATH } from "@/lib/talispros/aisha-call-path";
 import { ASSISTANT_PERSONAS } from "@/lib/talispros/assistant-personas";
 import {
   HOME_MARKET_ACCOUNT_TYPES,
-  HOME_MARKET_AISHA_VARIABLES_ENABLED,
   HOME_MARKET_BROKERAGE_MAX,
   HOME_MARKET_FIRST_NAME_MAX,
   HOME_MARKET_REQUIRED_STEPS,
   homeMarketAishaDynamicVariables,
+  homeMarketAishaFirstMessage,
   homeMarketGoodJob,
   homeMarketRegisterHref,
   homeMarketStage,
@@ -74,6 +72,8 @@ export default function HomeMarketPersonalize({
   const [brokerage, setBrokerage] = useState("");
   const [pin, setPin] = useState<HomePinLocationValues>(() => startPin(market));
   const [built, setBuilt] = useState(false);
+  /** The live call mounts only after a click, so the browser lets it play sound. */
+  const [aishaLive, setAishaLive] = useState(false);
   const [nudge, setNudge] = useState(false);
 
   const draft = useMemo<HomeMarketDraft>(
@@ -161,17 +161,44 @@ export default function HomeMarketPersonalize({
                   </p>
                 </div>
               </div>
-              <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold">
-                <Link href={AISHA_CALL_PATH} className="text-[#046BD9] underline-offset-2 hover:underline" data-testid="home-market-talk-aisha">
-                  {h.talkToAisha}
-                </Link>
-                <button type="button" onClick={() => setBuilt(false)} className="text-neutral-600 underline-offset-2 hover:underline">
+              {aishaLive ? (
+                <div
+                  className="relative mt-4 h-[26rem] overflow-hidden rounded-2xl bg-white ring-1 ring-black/10"
+                  data-testid="home-market-aisha-live"
+                >
+                  <AishaConvaiWidget
+                    embed="inline"
+                    autoStart
+                    dynamicVariables={homeMarketAishaDynamicVariables(firstName, market, accountType)}
+                    firstMessage={homeMarketAishaFirstMessage(firstName)}
+                  />
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAishaLive(true)}
+                  data-testid="home-market-hear-aisha"
+                  className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-[#046BD9] bg-white text-[15px] font-semibold text-[#046BD9] transition hover:bg-[#046BD9]/5"
+                >
+                  <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
+                    <path d="M11 5 6 9H3v6h3l5 4V5Z" strokeLinejoin="round" />
+                    <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" strokeLinecap="round" />
+                  </svg>
+                  {h.hearAisha}
+                </button>
+              )}
+              <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAishaLive(false);
+                    setBuilt(false);
+                  }}
+                  className="text-neutral-600 underline-offset-2 hover:underline"
+                >
                   {h.editDetails}
                 </button>
               </div>
-              {HOME_MARKET_AISHA_VARIABLES_ENABLED ? (
-                <AishaConvaiWidget dynamicVariables={homeMarketAishaDynamicVariables(firstName, market)} />
-              ) : null}
             </div>
           ) : (
             <div className="mt-6 space-y-6">
