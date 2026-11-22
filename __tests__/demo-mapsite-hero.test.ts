@@ -70,6 +70,9 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(page).toContain("loadFastCodeSlotsPanel()");
     expect(page).toContain("slotsPanel={slotsPanel}");
     expect(page).toContain('pageMetadata("/mapsites")');
+    expect(page).toContain("getAdminSessionAccount");
+    expect(page).toContain("<MarketsAdminGate");
+    expect(page).toContain("index: false");
   });
 
   it("opens the card directly for deep links or Back that carry build/address/PIN state", () => {

@@ -78,6 +78,7 @@ export const en = {
     marketsMenu: {
       usa: "USA",
       canada: "Canada",
+      marketing: "Marketing",
     },
     talisuMenu: {
       tsplits: "Tsplits™",

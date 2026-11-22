@@ -114,6 +114,7 @@ export const TALISU_MKTS_HEADER_NAV = [
 export const TALISU_MKTS_HEADER_MARKETS_DROPDOWN = [
   { href: "/markets/usa", label: "USA", menuKey: "usa" },
   { href: "/markets", label: "Canada", menuKey: "canada" },
+  { href: "/mapsites", label: "Marketing", menuKey: "marketing" },
 ] as const;
 
 /** Placeholder marker — Mapsites dropdown is rendered in TalisUMktsHeader. */

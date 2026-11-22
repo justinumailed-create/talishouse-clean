@@ -66,11 +66,13 @@ describe("TalisU blue header dropdown", () => {
     expect(TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((i) => [i.label, i.href])).toEqual([
       ["USA", "/markets/usa"],
       ["Canada", "/markets"],
+      ["Marketing", "/mapsites"],
     ]);
     expect(header).toContain("<MarketsNavDropdown");
     expect(header).toContain("TALISU_MKTS_HEADER_MARKETS_DROPDOWN");
     expect(header).toContain("t.nav.marketsMenu.usa");
     expect(header).toContain("t.nav.marketsMenu.canada");
+    expect(header).toContain("t.nav.marketsMenu.marketing");
     expect(header).not.toContain('fetch("/api/talisu/admin-status"');
     expect(header).toContain("t.nav.markets");
     expect(TALISU_MKTS_HEADER_NAV.some((i) => i.label === "Bookshelf")).toBe(false);
@@ -85,14 +87,15 @@ describe("TalisU blue header dropdown", () => {
   });
 
 
-  it("links Mapsites straight to the Demo Mapsite page, which hosts the FAST Code™ card", () => {
+  it("links Mapsites straight to the Home Market page", () => {
     expect(TALISU_MKTS_HEADER_MAPSITES_LABEL).toBe("Mapsites");
     const header = readFileSync(
       resolve("components/talisu/TalisUMktsHeader.tsx"),
       "utf8",
     );
     expect(header).not.toContain("MapsitesNavDropdown");
-    expect(header).toContain("MAPSITES_PANEL_PATH");
+    expect(header).toContain("HOME_MARKET_PATH");
+    expect(header).not.toContain("MAPSITES_PANEL_PATH");
     expect(header).toContain('data-testid="nav-mapsites-link"');
     const card = readFileSync(
       resolve("components/talispros/demo-mapsite/DemoFastCodeCard.tsx"),

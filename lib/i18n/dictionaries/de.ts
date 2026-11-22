@@ -57,6 +57,7 @@ export const de: Dictionary = {
     marketsMenu: {
       usa: "USA",
       canada: "Kanada",
+      marketing: "Marketing",
     },
     talisuMenu: {
       tsplits: "Tsplits™",

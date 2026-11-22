@@ -61,13 +61,24 @@ export default function MarketsNavDropdown() {
           className="absolute right-0 z-50 mt-1.5 min-w-[9.5rem] overflow-hidden rounded-lg border border-white/20 bg-[#035bb8] py-1 shadow-lg"
         >
           {TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((item) => {
-            const label = item.menuKey === "usa" ? t.nav.marketsMenu.usa : t.nav.marketsMenu.canada;
+            const label =
+              item.menuKey === "usa"
+                ? t.nav.marketsMenu.usa
+                : item.menuKey === "canada"
+                  ? t.nav.marketsMenu.canada
+                  : t.nav.marketsMenu.marketing;
             return (
               <Link
                 key={item.href}
                 href={item.href}
                 role="menuitem"
-                data-testid={item.menuKey === "usa" ? "nav-markets-usa" : "nav-markets-canada"}
+                data-testid={
+                  item.menuKey === "usa"
+                    ? "nav-markets-usa"
+                    : item.menuKey === "canada"
+                      ? "nav-markets-canada"
+                      : "nav-markets-marketing"
+                }
                 onClick={() => setOpen(false)}
                 className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${
                   itemActive(item.href, pathname) ? "bg-white/20 text-white" : "text-white/95 hover:bg-white/15"

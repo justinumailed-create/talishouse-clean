@@ -20,7 +20,7 @@ import {
 import { TALISU_KB_PATH } from "@/lib/talisu/kb-content";
 import TalisBrandMark from "@/components/talisu/TalisBrandMark";
 import TalisUKbUnlockForm from "@/components/talisu/TalisUKbUnlockForm";
-import { MAPSITES_PANEL_PATH } from "@/lib/talispros/demo-mapsite";
+import { HOME_MARKET_PATH } from "@/lib/talisu/home-market-path";
 import MarketsNavDropdown from "@/components/talisu/MarketsNavDropdown";
 import LanguageSwitch from "@/components/i18n/LanguageSwitch";
 import { useT } from "@/lib/i18n/client";
@@ -145,10 +145,11 @@ export default function TalisUMktsHeader({
     Boolean(onSelectDashboardItem);
 
   const mapsitesActive =
+    pathname === HOME_MARKET_PATH ||
+    pathname.startsWith(`${HOME_MARKET_PATH}/`) ||
     pathname.startsWith("/talispros/mapsite") ||
-    pathname.startsWith("/mapsite") ||
-    pathname === MAPSITES_PANEL_PATH ||
-    pathname.startsWith(`${MAPSITES_PANEL_PATH}/`);
+    pathname === "/mapsite" ||
+    pathname.startsWith("/mapsite/");
 
   useEffect(() => {
     function closeKbPanel() {
@@ -501,9 +502,9 @@ export default function TalisUMktsHeader({
           {TALISU_MKTS_HEADER_NAV.filter((item) => item.label === "Home").map(
             (item) => renderNavLink(item),
           )}
-          {/* Mapsites: direct link to the Demo Mapsite page (FAST Code card lives there). */}
+          {/* Mapsites: public Home Market / Build Mapsite page. */}
           <Link
-            href={MAPSITES_PANEL_PATH}
+            href={HOME_MARKET_PATH}
             data-testid="nav-mapsites-link"
             className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition sm:text-[15px] ${
               mapsitesActive
@@ -634,7 +635,7 @@ export default function TalisUMktsHeader({
                 ),
               )}
               {renderMobileLink(
-                MAPSITES_PANEL_PATH,
+                HOME_MARKET_PATH,
                 t.nav.mapsites,
                 mapsitesActive,
               )}
@@ -715,7 +716,11 @@ export default function TalisUMktsHeader({
               {TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((item) =>
                 renderMobileLink(
                   item.href,
-                  item.menuKey === "usa" ? t.nav.marketsMenu.usa : t.nav.marketsMenu.canada,
+                  item.menuKey === "usa"
+                    ? t.nav.marketsMenu.usa
+                    : item.menuKey === "canada"
+                      ? t.nav.marketsMenu.canada
+                      : t.nav.marketsMenu.marketing,
                   item.href === "/markets"
                     ? pathname === "/markets"
                     : pathname === item.href || pathname.startsWith(`${item.href}/`),

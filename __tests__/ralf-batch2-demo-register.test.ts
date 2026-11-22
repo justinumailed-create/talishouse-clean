@@ -82,7 +82,7 @@ describe("Ralf follow-ups — blue navbar Register + Webster CAD", () => {
     const pins = await import("../lib/talisu/markets-pins");
     const register = pins.TALISU_MKTS_HEADER_NAV.find((i) => i.label === "Register");
     expect(register?.href).toBe("/register");
-    expect(pins.TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((i) => i.label)).toEqual(["USA", "Canada"]);
+    expect(pins.TALISU_MKTS_HEADER_MARKETS_DROPDOWN.map((i) => i.label)).toEqual(["USA", "Canada", "Marketing"]);
     for (const item of [...pins.TALISU_MKTS_HEADER_NAV, ...pins.TALISU_MKTS_HEADER_MARKETS_DROPDOWN]) {
       expect(item.href).not.toContain("mysamcart");
     }
