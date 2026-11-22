@@ -63,8 +63,12 @@ describe("USA Markets (/markets/usa): native page, no Taliswebs redirect", () =>
       }
       expect(dict.markets.us.footer).not.toMatch(/\$|USD/);
     }
-    const de1 = localizeTalisUUsMktsPins(TALISU_US_MKTS_PINS, de.markets)[0];
-    expect(de1.description).toContain("8,5 Millionen");
+    // No population figures on any view (Ralf, Nov 22).
+    for (const dict of [en, de]) {
+      const pins = localizeTalisUUsMktsPins(TALISU_US_MKTS_PINS, dict.markets);
+      for (const pin of pins) expect(pin.description).not.toMatch(/million|Millionen|Einwohner|population/i);
+      expect(dict.markets.us.footer).not.toMatch(/million|Millionen/i);
+    }
   });
 
   it("has EN/DE SEO + OG cards", () => {

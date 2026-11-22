@@ -66,6 +66,7 @@ export default function RegisterActions({
   entryGranted,
   initialOpen = false,
   nextProduct = null,
+  initialCode = "",
 }: {
   labels: RegisterActionLabels;
   hrefs: RegisterActionHrefs;
@@ -74,6 +75,8 @@ export default function RegisterActions({
   initialOpen?: boolean;
   /** Product the visitor was sent back from, when the checkout was locked. */
   nextProduct?: string | null;
+  /** Entry code typed in for the visitor (Home Market, Aisha's public code). */
+  initialCode?: string;
 }) {
   const router = useRouter();
   const baseId = useId();
@@ -81,7 +84,7 @@ export default function RegisterActions({
   const [chosen, setChosen] = useState<string | null>(
     nextProduct && isRegisterCheckoutId(nextProduct) ? nextProduct : null,
   );
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 

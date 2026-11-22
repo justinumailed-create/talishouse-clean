@@ -51,6 +51,7 @@ type TalisURegisterPageProps = {
     structure?: string | string[];
     locked?: string | string[];
     product?: string | string[];
+    code?: string | string[];
   }>;
 };
 
@@ -85,6 +86,9 @@ export default async function TalisURegisterPage({
   const step = firstParam(params.step)?.trim().toLowerCase() ?? "";
   const lockedParam = firstParam(params.locked)?.trim().toLowerCase() ?? "";
   const nextProduct = firstParam(params.product)?.trim().toLowerCase() ?? null;
+  // Home Market "Register this Market" (Nov 22): the public Agent Code is
+  // typed in for the visitor. Letters and digits only; still checked on submit.
+  const prefillCode = (firstParam(params.code)?.trim() ?? "").match(/^[A-Za-z0-9]{1,24}$/)?.[0] ?? "";
 
   if (!isTalisURegisterCheckoutStep(params.step)) {
     // Landing: Aisha's portrait + five SamCart checkouts, in this order:
@@ -108,6 +112,7 @@ export default async function TalisURegisterPage({
             labels={TALISU_REGISTER.actions}
             entryGranted={checkoutGranted}
             nextProduct={nextProduct}
+            initialCode={prefillCode}
             initialOpen={wantsStructures || lockedParam === REGISTER_ENTRY_LOCK}
             hrefs={{
               propose: talisuHref(TALISU_DISCUSS_PATH),

@@ -14,7 +14,11 @@ import {
   DEMO_PIN_CARD_ACTIONS,
   demoHeroPinScreenOffset,
 } from "@/lib/talispros/demo-builder";
-import { NSNC_BOOK_HREF, NSNC_PIN_IMAGE, NSNC_TITLE } from "@/lib/talispros/nsnc-book";
+import {
+  CENTREFOLD_BOOK_HREF,
+  CENTREFOLD_PIN_IMAGE,
+  CENTREFOLD_TITLE,
+} from "@/lib/talispros/centrefold-book";
 import PinActionExplainer, {
   type PinActionExplainerId,
 } from "@/components/talispros/mapsite/PinActionExplainer";
@@ -27,7 +31,7 @@ const MapEngineCanvas = dynamic(
   },
 );
 
-/** The PIN's TEB™ (North Shore Nature Centre eBook) and its lake photo. */
+/** The PIN's TEB™ (the 20 page green-screen Centrefolds eBook, Ralf Nov 22). */
 const TEB_LABEL = "TEB™";
 
 /**
@@ -116,7 +120,7 @@ export default function DemoHeroMap() {
 
       {/* The PIN itself opens its TEB™ (the map stays display only). */}
       <Link
-        href={NSNC_BOOK_HREF}
+        href={CENTREFOLD_BOOK_HREF}
         aria-label={card.openEbook}
         data-testid="demo-hero-pin-link"
         className="absolute left-1/2 z-[5] block h-[78px] w-[78px] -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
@@ -129,18 +133,18 @@ export default function DemoHeroMap() {
           data-pin-flag
           className="pointer-events-auto w-[min(92%,16.5rem)]"
           data-testid="demo-hero-pin-card"
-          aria-label={NSNC_TITLE}
+          aria-label={CENTREFOLD_TITLE}
         >
           <div className="overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm">
             <Link
-              href={NSNC_BOOK_HREF}
+              href={CENTREFOLD_BOOK_HREF}
               className="relative block h-16 w-full bg-neutral-200/80 sm:h-20 lg:h-28"
               aria-label={card.openEbook}
               data-testid="demo-hero-pin-image"
             >
               <Image
-                src={NSNC_PIN_IMAGE}
-                alt={NSNC_TITLE}
+                src={CENTREFOLD_PIN_IMAGE}
+                alt={CENTREFOLD_TITLE}
                 fill
                 className={MAPSITE_LISTING_IMAGE_CLASS}
                 sizes="280px"
@@ -148,7 +152,7 @@ export default function DemoHeroMap() {
               />
             </Link>
             <div className="bg-gradient-to-b from-white/70 to-white/80 px-3.5 pb-3 pt-2">
-              <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">{NSNC_TITLE}</h2>
+              <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">{CENTREFOLD_TITLE}</h2>
               <p className="m-0 mt-0.5 text-[12px] leading-snug text-neutral-800">{card.body}</p>
               <div className="mt-2.5 grid grid-cols-2 gap-1.5">
                 {DEMO_PIN_CARD_ACTIONS.map((label) => {
@@ -161,7 +165,7 @@ export default function DemoHeroMap() {
                     <PinActionExplainer key={label} action={explainer}>
                       {label === TEB_LABEL ? (
                         <Link
-                          href={NSNC_BOOK_HREF}
+                          href={CENTREFOLD_BOOK_HREF}
                           aria-label={card.openEbook}
                           data-testid="demo-hero-pin-action"
                           data-action="teb"

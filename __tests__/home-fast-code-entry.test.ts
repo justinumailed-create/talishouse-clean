@@ -96,8 +96,8 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(actions).toContain('return { success: true, href: "/" }');
   });
 
-  it("points Build Mapsite at the public demo builder", () => {
-    expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/demo");
+  it("points Build Mapsite at the public Home Market map (Ralf, Nov 22)", () => {
+    expect(TALISPROS_HOME_SYSTEM_DEMO_HREF).toBe("/home-market");
   });
 
   it("uses ownership models over photo on homepage right rail (not Markets map)", () => {

@@ -338,6 +338,21 @@
     "alt": "Tsplits™ Baumlogo: Laden Sie ein PDF hoch, um Ihre Mapsite zu erstellen"
    }
   },
+  "/home-market": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/demo-mapsite",
+   "en": {
+    "title": "Claim your Home Market | Tsplits™",
+    "description": "Select the PIN nearest you on the North American Markets map, personalize your Mapsite, and register your market with Tsplits™.",
+    "alt": "Tsplits™ tree logo: Claim your Home Market"
+   },
+   "de": {
+    "title": "Heimatmarkt sichern | Tsplits™",
+    "description": "Wählen Sie den PIN in Ihrer Nähe auf der Karte der Märkte Nordamerikas, personalisieren Sie Ihre Mapsite und registrieren Sie Ihren Markt bei Tsplits™.",
+    "alt": "Tsplits™ Baumlogo: Sichern Sie sich Ihren Heimatmarkt"
+   }
+  },
   "/mapsites": {
    "kind": "public",
    "noindex": false,

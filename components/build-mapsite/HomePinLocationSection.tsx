@@ -156,6 +156,8 @@ export interface HomePinLocationSectionProps {
   /** Demo variant: highlight the address box (message shown by the page). */
   addressInvalid?: boolean;
   errors?: Partial<Record<keyof HomePinLocationValues | "pinImage", string>>;
+  /** Demo variant: keep steps 1 and 2 stacked at every width (narrow side panels). */
+  stacked?: boolean;
 }
 
 export default function HomePinLocationSection({
@@ -173,6 +175,7 @@ export default function HomePinLocationSection({
   addressInputName,
   addressInvalid = false,
   errors = {},
+  stacked = false,
 }: HomePinLocationSectionProps) {
   const pinImageInputRef = useRef<HTMLInputElement>(null);
   const coordsEditedRef = useRef(false);
@@ -463,7 +466,13 @@ export default function HomePinLocationSection({
         className="rounded-[24px] bg-white px-5 py-5 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_12px_40px_rgba(0,0,0,0.06)] sm:px-7 sm:py-6"
       >
         {leadSlot}
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,23rem)_minmax(0,1fr)] lg:gap-8">
+        <div
+          className={
+            stacked
+              ? "grid gap-6"
+              : "grid gap-6 lg:grid-cols-[minmax(0,23rem)_minmax(0,1fr)] lg:gap-8"
+          }
+        >
           <div className="min-w-0" data-testid="demo-step-address">
             <DemoStepHeading step={1} title={copy?.step1Title ?? "Home PIN Address"} hint={copy?.step1Hint} />
             <div className="mt-3">

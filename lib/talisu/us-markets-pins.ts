@@ -122,14 +122,14 @@ export type TalisUUsMktsCopy = {
   marketDescription: string;
   nextLabel: string;
   us: {
-    populationLabel: string;
-    millionUnit: string;
-    decimalMark: string;
     anchorsLabel: string;
   };
 };
 
-/** "Population 8.5 million. Anchor cities: …. Claim …" (no price). */
+/**
+ * "Anchor cities: …. Claim …" (no price, no population: Ralf, Nov 22 says
+ * population figures must not appear on any view).
+ */
 export function localizeTalisUUsMktsPins(
   pins: readonly TalisUUsMktsPin[],
   copy: TalisUUsMktsCopy,
@@ -142,12 +142,9 @@ export function localizeTalisUUsMktsPins(
         description: copy.doMoreDescriptions[pin.id] ?? pin.description,
       };
     }
-    const millions = ((pin.population ?? 0) / 1e6)
-      .toFixed(1)
-      .replace(".", copy.us.decimalMark);
     return {
       ...pin,
-      description: `${copy.us.populationLabel} ${millions} ${copy.us.millionUnit}. ${copy.us.anchorsLabel}: ${pin.anchors.join(", ")}. ${copy.marketDescription}`,
+      description: `${copy.us.anchorsLabel}: ${pin.anchors.join(", ")}. ${copy.marketDescription}`,
       nextLabel: copy.nextLabel,
     };
   });

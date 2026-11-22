@@ -1,6 +1,6 @@
 import { MAPSITE_APP_PATH } from "@/lib/talispros/mapsite-state";
-import { DEMO_MAPSITE_PUBLIC_PATH } from "@/lib/talispros/demo-mapsite";
 import { BUILD_MAPSITE_PREVIEW_LOCATION } from "@/components/build-mapsite/home-pin-types";
+import { HOME_MARKET_PATH } from "@/lib/talisu/home-market-path";
 
 /** Full-bleed chrome paths: homepage gate (`/`) + former homepage (`/start`). */
 export function isTalisprosStartPath(pathname: string | null | undefined) {
@@ -78,7 +78,8 @@ export const TALISPROS_START_SEGMENTS = [
 /**
  * Home-page Build Mapsite control. Opens the public demo builder at /demo.
  */
-export const TALISPROS_HOME_SYSTEM_DEMO_HREF = DEMO_MAPSITE_PUBLIC_PATH;
+/** Homepage "Build Mapsite": the public Home Market map (Ralf, Nov 22). */
+export const TALISPROS_HOME_SYSTEM_DEMO_HREF = HOME_MARKET_PATH;
 
 export type TalisprosHomeDemoPrivacyMask = {
   id: string;

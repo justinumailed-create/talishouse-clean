@@ -188,6 +188,13 @@ add("/demo", "demo-mapsite", "public", NSNC_SHARE,
     ("Mapsite erstellen | Tsplits™",
      "Laden Sie ein PDF hoch, um Ihre Mapsite auf Tsplits™ zu erstellen. Ordnen Sie den FAST Code einem Konto zu oder behalten Sie ihn als Demo.",
      "TSPLITS™  ·  DEMO", ["PDF hochladen", "Mapsite", "erstellen"], ["FAST Code", "Talisbook™"]))
+add("/home-market", "demo-mapsite", "public", NSNC_SHARE,
+    ("Claim your Home Market | Tsplits™",
+     "Select the PIN nearest you on the North American Markets map, personalize your Mapsite, and register your market with Tsplits™.",
+     "TSPLITS™  ·  MARKETS", ["Claim your", "Home", "Market"], ["45 PINs", "Personalize", "Register"]),
+    ("Heimatmarkt sichern | Tsplits™",
+     "Wählen Sie den PIN in Ihrer Nähe auf der Karte der Märkte Nordamerikas, personalisieren Sie Ihre Mapsite und registrieren Sie Ihren Markt bei Tsplits™.",
+     "TSPLITS™  ·  MÄRKTE", ["Sichern Sie", "Ihren", "Heimatmarkt"], ["45 PINs", "Personalisieren", "Registrieren"]))
 add("/mapsites", "demo-mapsite", "public", NSNC_SHARE,
     ("Mapsites | Tsplits™",
      "Demo Mapsites on Tsplits™. See the North Shore Nature Centre flag on the map and open the pinned Talisbook™.",

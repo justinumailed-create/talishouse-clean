@@ -22,6 +22,7 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/fast-code") ||
     pathname.startsWith("/partner-access") ||
     pathname === "/demo" ||
+    pathname === "/home-market" ||
     pathname.startsWith("/demo/") ||
     pathname === "/mapsites" ||
     pathname.startsWith("/mapsites/") ||

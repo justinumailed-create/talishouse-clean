@@ -392,6 +392,13 @@ export async function resolveViewerBookBySlug(
     return createNsncViewerBook(locale);
   }
 
+  const { CENTREFOLD_BOOK_SLUG, createCentrefoldViewerBook } = await import(
+    "@/lib/talispros/centrefold-book"
+  );
+  if (slug.trim() === CENTREFOLD_BOOK_SLUG) {
+    return createCentrefoldViewerBook(locale);
+  }
+
   const demoSlugs = new Set(["sample-ebook", "demo", "preview"]);
   if (demoSlugs.has(slug)) {
     const demo = createDemoViewerBook();

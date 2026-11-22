@@ -114,12 +114,12 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     // the panel. The PIN is offset down to sit under the pointer.
     expect(map).toContain("top-4");
     expect(map).toContain("demoHeroPinScreenOffset");
-    // The PIN, its photo and its TEB™ button open the North Shore Nature
-    // Centre eBook; the other actions stay display only.
+    // The PIN, its photo and its TEB™ button open the 20 page Centrefolds
+    // eBook (Ralf, Nov 22); the other actions stay display only.
     expect(map).toContain('data-testid="demo-hero-pin-link"');
     expect(map).toContain("calc(50% + ${pinOffsetY}px)");
-    expect(map.match(/href={NSNC_BOOK_HREF}/g)).toHaveLength(3);
-    expect(map).toContain("src={NSNC_PIN_IMAGE}");
+    expect(map.match(/href={CENTREFOLD_BOOK_HREF}/g)).toHaveLength(3);
+    expect(map).toContain("src={CENTREFOLD_PIN_IMAGE}");
     expect(map).not.toContain("img-11-1280x720");
     expect(map).toContain("pointer-events-none");
     expect(map).toContain("bg-[#046BD9]");
