@@ -219,6 +219,19 @@ describe("Personalize flow", () => {
     expect(live).toContain("overflow-visible");
     expect(live).not.toContain("h-[26rem]");
     expect(live).not.toContain("overflow-hidden");
+    const banner = read("lib/talispros/hide-elevenlabs-banner.ts");
+    const inline = banner.slice(
+      banner.indexOf("POWERED_BY_INLINE_STYLE"),
+      banner.indexOf("const OPEN_LABEL"),
+    );
+    expect(inline).toContain('div:has(> [data-pane="speech"]) .sheet');
+    expect(inline).toContain("padding-bottom: 6rem");
+    expect(inline).toContain("min-height: 5.5rem");
+    expect(inline).toContain('data-pane="speech"');
+    expect(inline).not.toContain("right: 4.5rem");
+    expect(inline).not.toContain("bottom: 1.15rem");
+    expect(inline).not.toContain("width: 3.25rem");
+    expect(inline).not.toContain("height: 3.25rem");
   });
 
   it("builds their Mapsite preview with the Home PIN card open", () => {

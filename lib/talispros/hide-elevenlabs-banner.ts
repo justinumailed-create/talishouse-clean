@@ -69,21 +69,51 @@ p.whitespace-nowrap:has(a[href*="elevenlabs.io"]) {
   display: none !important;
 }
 /* Page layout is a row: a large avatar beside a narrow transcript.
-   This page already shows the portrait, so the transcript uses the column
-   and the call button stays beside the composer. */
+   This page already shows the portrait, so the transcript uses the column.
+   The speech pane (start/end, mute, "Talk to interrupt") sits in a reserved
+   footer under the composer, so those controls never cover the text box. */
+div:has(> [data-pane="speech"]) .sheet,
+div:has(> [data-pane="speech"]) [data-variant="page"].sheet {
+  padding-bottom: 6rem !important;
+  box-sizing: border-box !important;
+}
 .basis-3\\/5 {
   position: absolute !important;
-  left: auto !important;
+  left: 0 !important;
+  right: 0 !important;
   top: auto !important;
-  right: 4.5rem !important;
-  bottom: 1.15rem !important;
-  width: 3.25rem !important;
-  height: 3.25rem !important;
+  bottom: 0.25rem !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 5.5rem !important;
   flex: none !important;
   min-width: 0 !important;
   overflow: visible !important;
   background: transparent !important;
   z-index: 30 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.35rem 0.75rem !important;
+  box-sizing: border-box !important;
+  padding: 0.25rem 0.75rem 0.4rem !important;
+  pointer-events: none !important;
+}
+.basis-3\\/5 button,
+.basis-3\\/5 [role="button"] {
+  pointer-events: auto !important;
+}
+.basis-3\\/5 > .relative {
+  display: contents !important;
+}
+/* Status pill ("Talk to interrupt") on its own row under the buttons. */
+.basis-3\\/5 .w-max {
+  flex: 1 0 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  order: 3 !important;
 }
 .basis-3\\/5 .w-72,
 .basis-3\\/5 .rounded-full {
