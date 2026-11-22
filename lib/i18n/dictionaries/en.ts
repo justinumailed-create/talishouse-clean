@@ -1240,7 +1240,7 @@ export const en = {
     goodJob: "Good job, {name}. Your market is available. We look forward to working with you.",
     registerHint: "Register using my Agent Code, Aishaa. It is already filled in for you.",
     editDetails: "Change details",
-    previewLabel: "Your Home Page",
+    previewLabel: "Your Mapsite",
     previewMarket: "Home Market",
     previewHomePin: "Home PIN",
     previewBookshelf: "Bookshelf",

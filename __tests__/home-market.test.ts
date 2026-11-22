@@ -205,7 +205,40 @@ describe("Personalize flow", () => {
     expect(widget.match(/override-first-message=\{firstMessage \|\| undefined\}/g)).toHaveLength(2);
     expect("hearAisha" in en.homeMarket).toBe(false);
   });
+
+  it("keeps the start and end call controls fully visible", () => {
+    const flow = read("components/talispros/home-market/HomeMarketPersonalize.tsx");
+    const live = flow.slice(
+      flow.indexOf('data-testid="home-market-aisha-live"') - 180,
+      flow.indexOf('data-testid="home-market-aisha-live"') + 80,
+    );
+    expect(live).toContain("h-[36rem]");
+    expect(live).toContain("min-h-[36rem]");
+    expect(live).toContain("overflow-visible");
+    expect(live).not.toContain("h-[26rem]");
+    expect(live).not.toContain("overflow-hidden");
+  });
+
+  it("builds their Mapsite preview with the Home PIN card open", () => {
+    const preview = read("components/talispros/home-market/HomePagePreview.tsx");
+    const flow = read("components/talispros/home-market/HomeMarketPersonalize.tsx");
+    expect(preview).toContain("DemoHeroMap");
+    expect(preview).toContain('testId="home-market-preview"');
+    expect(preview).toContain("accountLabel={account}");
+    expect(preview).not.toContain("TALISU_MKTS_MARKET_HERO");
+    expect(preview).not.toContain("previewBookshelf");
+    expect(preview).not.toContain("previewManager");
+    expect(flow).toContain("pin={pin}");
+    expect(preview).not.toMatch(/TODO|PLACEHOLDER|lorem/i);
+    const hero = read("components/talispros/demo-mapsite/DemoHeroMap.tsx");
+    expect(hero).toContain("gm-err-container");
+    expect(hero).toContain("map-idle-backdrop");
+    expect(hero).toContain("map-idle-pin");
+    expect(en.homeMarket.previewLabel).toBe("Your Mapsite");
+    expect(de.homeMarket.previewLabel).toBe("Ihre Mapsite");
+  });
 });
+
 
 describe("Centrefolds demo eBook (20 pages)", () => {
   it("has 20 slides on disk and opens in the viewer", () => {

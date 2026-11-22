@@ -2,7 +2,7 @@
  * Home Market "Personalize" flow (Ralf, Nov 21 and 22).
  *
  * The visitor picks a market PIN, then personalizes: first name, account type,
- * optional brokerage name, and a Home PIN. A preview of their own Home Page
+ * optional brokerage name, and a Home PIN. A preview of their own Mapsite
  * builds up behind the form as they go. Nothing is saved on the server here.
  * When every step is done, "Build Mapsite" shows Aisha's line, and the button
  * becomes "Register this Market", which opens the matching Register button

@@ -3,8 +3,8 @@
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { MapEngineProvider } from "@/components/talismaps/map-engine/MapEngineProvider";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { MapEngineProvider, useMapEngine } from "@/components/talismaps/map-engine/MapEngineProvider";
 import type { MapEnginePin } from "@/lib/talismaps/map-engine/types";
 import { useT } from "@/lib/i18n/client";
 import { mapSitePinVisualFields } from "@/lib/mapsite-pin-style";
@@ -41,18 +41,60 @@ const TEB_LABEL = "TEB™";
 const PIN_ACTION_CLASS =
   "inline-flex min-h-9 w-full items-center justify-center whitespace-nowrap rounded-full bg-[#046BD9] px-1.5 text-center text-[11px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] sm:min-h-10 sm:px-2 sm:text-[13px]";
 
-export default function DemoHeroMap() {
+export type DemoHeroMapPin = {
+  id: string;
+  latitude: number;
+  longitude: number;
+  zoom: number;
+};
+
+/**
+ * A Mapsite display map with the Home PIN card open (URL 1, URL 2, TEB™, TTV™).
+ * The Mapsites hero uses the sample Bay St. Lawrence PIN; Home Market passes
+ * the visitor's own pin and particulars. When Google Maps cannot load, the
+ * card and a fallback pin stay on a neutral map background.
+ */
+export default function DemoHeroMap({
+  pin = DEMO_DISPLAY_PIN,
+  title,
+  body,
+  accountLabel,
+  testId = "demo-hero",
+  cardOffsetClass = "top-4 lg:top-48",
+}: {
+  pin?: DemoHeroMapPin;
+  title?: string;
+  body?: string;
+  accountLabel?: string;
+  testId?: string;
+  /** Placement of the open PIN card over the map. */
+  cardOffsetClass?: string;
+} = {}) {
   const card = useT().demo.hero.pinCard;
   const rootRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLElement>(null);
   const [pinOffsetY, setPinOffsetY] = useState(0);
+  const [mapFailed, setMapFailed] = useState(false);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const check = () => {
+      if (root.querySelector(".gm-err-container, .gm-err-heading")) setMapFailed(true);
+    };
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(root, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [pin.id, pin.latitude, pin.longitude, pin.zoom]);
+
   const pins: MapEnginePin[] = useMemo(() => {
     const visual = mapSitePinVisualFields();
     return [
       {
-        id: DEMO_DISPLAY_PIN.id,
-        latitude: DEMO_DISPLAY_PIN.latitude,
-        longitude: DEMO_DISPLAY_PIN.longitude,
+        id: pin.id,
+        latitude: pin.latitude,
+        longitude: pin.longitude,
         color: visual.pinColor,
         featured: true,
         metadata: {
@@ -63,17 +105,17 @@ export default function DemoHeroMap() {
         },
       },
     ];
-  }, []);
+  }, [pin.id, pin.latitude, pin.longitude]);
 
   const viewport = useMemo(
     () => ({
       center: {
-        latitude: DEMO_DISPLAY_PIN.latitude,
-        longitude: DEMO_DISPLAY_PIN.longitude,
+        latitude: pin.latitude,
+        longitude: pin.longitude,
       },
-      zoom: DEMO_DISPLAY_PIN.zoom,
+      zoom: pin.zoom,
     }),
-    [],
+    [pin.latitude, pin.longitude, pin.zoom],
   );
 
   useLayoutEffect(() => {
@@ -94,21 +136,25 @@ export default function DemoHeroMap() {
     observer.observe(root);
     observer.observe(article);
     return () => observer.disconnect();
-  }, []);
+  }, [title, body, accountLabel]);
+
+  const cardTitle = title ?? CENTREFOLD_TITLE;
+  const cardBody = body ?? card.body;
 
   return (
     <div
       ref={rootRef}
       className="relative h-full w-full overflow-hidden bg-[#c9c3b8]"
-      data-testid="demo-hero-map"
+      data-testid={`${testId}-map`}
       data-pin-offset={pinOffsetY}
       aria-label={card.mapLabel}
     >
       <MapEngineProvider
+        key={`${pin.id}:${pin.latitude}:${pin.longitude}:${pin.zoom}`}
         basemapView="satellite"
         initialPins={pins}
         initialViewport={viewport}
-        selectedPinId={DEMO_DISPLAY_PIN.id}
+        selectedPinId={pin.id}
         lockCenter
         lockCenterOffset={{ x: 0, y: pinOffsetY }}
         interactive={false}
@@ -116,31 +162,41 @@ export default function DemoHeroMap() {
         preserveViewport
       >
         <MapEngineCanvas className="absolute inset-0 h-full w-full" />
+        <MapIdleBackdrop forced={mapFailed} />
+        <FallbackHomePin offsetY={pinOffsetY} forced={mapFailed} />
       </MapEngineProvider>
+      <style>{`
+        [data-testid="${testId}-map"] .gm-err-container,
+        [data-testid="${testId}-map"] .gm-err-heading,
+        [data-testid="${testId}-map"] .gm-err-message,
+        [data-testid="${testId}-map"] .gm-err-autocomplete {
+          display: none !important;
+        }
+      `}</style>
 
       {/* The PIN itself opens its TEB™ (the map stays display only). */}
       <Link
         href={CENTREFOLD_BOOK_HREF}
         aria-label={card.openEbook}
-        data-testid="demo-hero-pin-link"
+        data-testid={`${testId}-pin-link`}
         className="absolute left-1/2 z-[5] block h-[78px] w-[78px] -translate-x-1/2 -translate-y-1/2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
         style={{ top: `calc(50% + ${pinOffsetY}px)` }}
       />
 
-      <div className="pointer-events-none absolute inset-x-0 top-4 z-10 flex justify-center px-4 lg:top-48">
+      <div className={`pointer-events-none absolute inset-x-0 z-10 flex justify-center px-4 ${cardOffsetClass}`}>
         <article
           ref={cardRef}
           data-pin-flag
           className="pointer-events-auto w-[min(92%,16.5rem)]"
-          data-testid="demo-hero-pin-card"
-          aria-label={CENTREFOLD_TITLE}
+          data-testid={`${testId}-pin-card`}
+          aria-label={cardTitle}
         >
           <div className="overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm">
             <Link
               href={CENTREFOLD_BOOK_HREF}
               className="relative block h-16 w-full bg-neutral-200/80 sm:h-20 lg:h-28"
               aria-label={card.openEbook}
-              data-testid="demo-hero-pin-image"
+              data-testid={`${testId}-pin-image`}
             >
               <Image
                 src={CENTREFOLD_PIN_IMAGE}
@@ -152,8 +208,13 @@ export default function DemoHeroMap() {
               />
             </Link>
             <div className="bg-gradient-to-b from-white/70 to-white/80 px-3.5 pb-3 pt-2">
-              <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">{CENTREFOLD_TITLE}</h2>
-              <p className="m-0 mt-0.5 text-[12px] leading-snug text-neutral-800">{card.body}</p>
+              <h2 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black">{cardTitle}</h2>
+              {accountLabel ? (
+                <p className="m-0 mt-0.5 text-[11px] font-medium uppercase leading-tight tracking-[0.08em] text-neutral-500">
+                  {accountLabel}
+                </p>
+              ) : null}
+              <p className="m-0 mt-0.5 text-[12px] leading-snug text-neutral-800">{cardBody}</p>
               <div className="mt-2.5 grid grid-cols-2 gap-1.5">
                 {DEMO_PIN_CARD_ACTIONS.map((label) => {
                   const explainer: PinActionExplainerId = label.startsWith("TEB")
@@ -167,7 +228,7 @@ export default function DemoHeroMap() {
                         <Link
                           href={CENTREFOLD_BOOK_HREF}
                           aria-label={card.openEbook}
-                          data-testid="demo-hero-pin-action"
+                          data-testid={`${testId}-pin-action`}
                           data-action="teb"
                           className={`${PIN_ACTION_CLASS} transition hover:bg-[#0558b3]`}
                         >
@@ -176,7 +237,7 @@ export default function DemoHeroMap() {
                       ) : (
                         <button
                           type="button"
-                          data-testid="demo-hero-pin-action"
+                          data-testid={`${testId}-pin-action`}
                           className={PIN_ACTION_CLASS}
                         >
                           {label}
@@ -195,5 +256,42 @@ export default function DemoHeroMap() {
         </article>
       </div>
     </div>
+  );
+}
+
+/** Neutral map field used when the live map has not become ready, or has failed. */
+function MapIdleBackdrop({ forced = false }: { forced?: boolean }) {
+  const { isReady } = useMapEngine();
+  if (isReady && !forced) return null;
+  return (
+    <div
+      className="absolute inset-0 z-[1]"
+      data-testid="map-idle-backdrop"
+      aria-hidden
+      style={{
+        backgroundColor: "#c9c3b8",
+        backgroundImage:
+          "linear-gradient(rgba(255,255,255,0.28) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.28) 1px, transparent 1px)",
+        backgroundSize: "48px 48px",
+      }}
+    />
+  );
+}
+
+/** Keeps the Home PIN visible under the open card when the map does not load. */
+function FallbackHomePin({ offsetY, forced = false }: { offsetY: number; forced?: boolean }) {
+  const { isReady } = useMapEngine();
+  if (isReady && !forced) return null;
+  return (
+    <span
+      className="absolute left-1/2 z-[4] flex h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+      style={{ top: `calc(50% + ${offsetY}px)` }}
+      data-testid="map-idle-pin"
+      aria-hidden
+    >
+      <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#1A73E8] shadow-[0_4px_10px_rgba(0,0,0,0.28)] ring-4 ring-[#1A73E8]/25">
+        <span className="h-3 w-3 rounded-full bg-white" />
+      </span>
+    </span>
   );
 }

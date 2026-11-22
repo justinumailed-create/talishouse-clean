@@ -11,7 +11,7 @@ import HomeMarketPersonalize from "./HomeMarketPersonalize";
 /**
  * Public Home Market page (Ralf, Nov 21 and 22): Aisha and example Brokerage
  * and Agent particulars on the left, the North American Markets map on the
- * right. A market PIN opens Personalize, where the visitor's own Home Page
+ * right. A market PIN opens Personalize, where the visitor's own Mapsite
  * builds up behind the form. `?market=<id>` reopens Personalize directly.
  */
 export default function HomeMarketPage({ initialMarketId = null }: { initialMarketId?: string | null }) {

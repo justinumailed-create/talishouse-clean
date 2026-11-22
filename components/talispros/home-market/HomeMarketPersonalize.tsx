@@ -51,7 +51,7 @@ function pinWasPlaced(pin: HomePinLocationValues, market: HomeMarketPin): boolea
 
 /**
  * Personalize: the form on the left (desktop floats over the page, phones
- * stack it first) and the visitor's own Home Page building up behind it.
+ * stack it first) and the visitor's own Mapsite building up behind it.
  * Personalize → Build Mapsite → Register this Market.
  */
 export default function HomeMarketPersonalize({
@@ -109,9 +109,9 @@ export default function HomeMarketPersonalize({
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col lg:block" data-testid="home-market-personalize-flow" data-stage={stage}>
-      {/* Desktop: the Home Page fills the area behind the form. Phones: below it. */}
+      {/* Desktop: the Mapsite fills the area behind the form. Phones: below it. */}
       <div className="order-2 h-[34rem] lg:absolute lg:inset-0 lg:h-auto lg:pl-[min(34rem,42vw)]">
-        <HomePagePreview market={market} draft={draft} built={built} />
+        <HomePagePreview market={market} draft={draft} built={built} pin={pin} />
       </div>
 
       <div className="order-1 w-full bg-white lg:absolute lg:inset-y-0 lg:left-0 lg:z-10 lg:w-[min(34rem,42vw)] lg:overflow-y-auto lg:border-r lg:border-black/5 lg:shadow-[12px_0_40px_rgba(0,0,0,0.12)]">
@@ -165,7 +165,7 @@ export default function HomeMarketPersonalize({
               </div>
               {aishaLive ? (
                 <div
-                  className="relative mt-4 h-[26rem] overflow-hidden rounded-2xl bg-white ring-1 ring-black/10"
+                  className="relative mt-4 h-[36rem] min-h-[36rem] overflow-visible rounded-2xl bg-white ring-1 ring-black/10"
                   data-testid="home-market-aisha-live"
                 >
                   <AishaConvaiWidget

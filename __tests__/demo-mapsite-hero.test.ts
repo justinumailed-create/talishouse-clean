@@ -108,15 +108,16 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(map).toContain('basemapView="satellite"');
     expect(map).toContain("MapEngineProvider");
     expect(map).toContain("interactive={false}");
-    expect(map).toContain("selectedPinId={DEMO_DISPLAY_PIN.id}");
-    expect(map).toContain('data-testid="demo-hero-pin-card"');
+    expect(map).toContain("selectedPinId={pin.id}");
+    expect(map).toContain("data-testid={`${testId}-pin-card`}");
+    expect(map).toContain('testId = "demo-hero"');
     // The open card hangs from the top of the map so its photo stays inside
     // the panel. The PIN is offset down to sit under the pointer.
     expect(map).toContain("top-4");
     expect(map).toContain("demoHeroPinScreenOffset");
     // The PIN, its photo and its TEB™ button open the 20 page Centrefolds
     // eBook (Ralf, Nov 22); the other actions stay display only.
-    expect(map).toContain('data-testid="demo-hero-pin-link"');
+    expect(map).toContain("data-testid={`${testId}-pin-link`}");
     expect(map).toContain("calc(50% + ${pinOffsetY}px)");
     expect(map.match(/href={CENTREFOLD_BOOK_HREF}/g)).toHaveLength(3);
     expect(map).toContain("src={CENTREFOLD_PIN_IMAGE}");
@@ -126,7 +127,7 @@ describe("Mapsites page hero + hidden builder card (Ralf, Oct 26)", () => {
     expect(map).toContain("rounded-full");
     expect(map).toContain("shadow-[0_6px_14px_rgba(4,107,217,0.3)]");
     expect(DEMO_PIN_CARD_ACTIONS).toEqual(["URL 1", "URL 2", "TEB™", "TTV™"]);
-    expect(map.match(/data-testid="demo-hero-pin-action"/g)).toHaveLength(2);
+    expect(map.match(/data-testid=\{\`\$\{testId\}-pin-action\`\}/g)).toHaveLength(2);
     // Bay St. Lawrence, Nova Scotia B0C 1R0 (near the North Shore Nature Centre).
     expect(DEMO_DISPLAY_PIN.latitude).toBeCloseTo(46.993, 2);
     expect(DEMO_DISPLAY_PIN.longitude).toBeCloseTo(-60.465, 2);

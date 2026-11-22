@@ -1598,7 +1598,7 @@ export const de: Dictionary = {
     goodJob: "Gut gemacht, {name}. Ihr Markt ist verfügbar. Wir freuen uns auf die Zusammenarbeit mit Ihnen.",
     registerHint: "Registrieren Sie sich mit meinem Agent Code, Aishaa. Er ist bereits für Sie eingetragen.",
     editDetails: "Angaben ändern",
-    previewLabel: "Ihre Startseite",
+    previewLabel: "Ihre Mapsite",
     previewMarket: "Heimatmarkt",
     previewHomePin: "Home-PIN",
     previewBookshelf: "Bücherregal",
