@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import HomePinLocationSection from "@/components/build-mapsite/HomePinLocationSection";
 import {
   defaultHomePinLocationValues,
@@ -67,9 +67,11 @@ export default function HomeMarketPersonalize({
   const router = useRouter();
   const ids = useId();
   const firstNameRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [firstName, setFirstName] = useState("");
   const [accountType, setAccountType] = useState<HomeMarketDraft["accountType"]>(null);
   const [brokerage, setBrokerage] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
   const [pin, setPin] = useState<HomePinLocationValues>(() => startPin(market));
   const [built, setBuilt] = useState(false);
   /** Aisha's post-build call. Mounted by the Build Mapsite click. */
@@ -81,13 +83,28 @@ export default function HomeMarketPersonalize({
       firstName,
       accountType,
       brokerage,
+      photoUrl,
       pinPlaced: pinWasPlaced(pin, market),
       homeAddress: (pin.streetAddress.trim() || pin.reverseGeocodedAddress.trim()).split(",").slice(0, 2).join(","),
     }),
-    [firstName, accountType, brokerage, pin, market],
+    [firstName, accountType, brokerage, photoUrl, pin, market],
   );
   const stage = homeMarketStage(draft, built);
   const done = homeMarketStepsDone(draft);
+
+  useEffect(() => {
+    return () => {
+      if (photoUrl.startsWith("blob:")) URL.revokeObjectURL(photoUrl);
+    };
+  }, [photoUrl]);
+
+  function handlePhotoFile(file: File | undefined) {
+    if (!file || !file.type.startsWith("image/")) return;
+    setPhotoUrl((current) => {
+      if (current.startsWith("blob:")) URL.revokeObjectURL(current);
+      return URL.createObjectURL(file);
+    });
+  }
 
   function handleAction() {
     if (stage === "personalize") {
@@ -111,7 +128,13 @@ export default function HomeMarketPersonalize({
     <div className="relative flex min-h-0 flex-1 flex-col lg:block" data-testid="home-market-personalize-flow" data-stage={stage}>
       {/* Desktop: the Mapsite fills the area behind the form. Phones: below it. */}
       <div className="order-2 h-[34rem] lg:absolute lg:inset-0 lg:h-auto lg:pl-[min(34rem,42vw)]">
-        <HomePagePreview market={market} draft={draft} built={built} pin={pin} />
+        <HomePagePreview
+          market={market}
+          draft={draft}
+          built={built}
+          pin={pin}
+          onUpdatePicture={() => photoInputRef.current?.click()}
+        />
       </div>
 
       <div className="order-1 w-full bg-white lg:absolute lg:inset-y-0 lg:left-0 lg:z-10 lg:w-[min(34rem,42vw)] lg:overflow-y-auto lg:border-r lg:border-black/5 lg:shadow-[12px_0_40px_rgba(0,0,0,0.12)]">
@@ -249,6 +272,25 @@ export default function HomeMarketPersonalize({
                   placeholder={h.brokeragePlaceholder}
                   data-testid="home-market-brokerage"
                   className="mt-1.5 h-11 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20"
+                />
+              </div>
+
+              <div>
+                <label htmlFor={`${ids}-photo`} className="text-sm font-medium text-neutral-800">
+                  {h.photoLabel}
+                </label>
+                <p className="mt-0.5 text-[12px] leading-snug text-neutral-500">{h.photoHint}</p>
+                <input
+                  id={`${ids}-photo`}
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  data-testid="home-market-photo"
+                  onChange={(event) => {
+                    handlePhotoFile(event.target.files?.[0]);
+                    event.target.value = "";
+                  }}
+                  className="mt-1.5 block w-full text-[13px] text-neutral-700 file:mr-3 file:rounded-full file:border-0 file:bg-[#046BD9] file:px-4 file:py-2 file:text-[13px] file:font-semibold file:text-white hover:file:bg-[#0558b3]"
                 />
               </div>
 

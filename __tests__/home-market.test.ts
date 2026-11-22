@@ -18,6 +18,8 @@ import {
 import {
   EMPTY_HOME_MARKET_DRAFT,
   HOME_MARKET_AGENT_CODE,
+  HOME_MARKET_PHOTO_FALLBACK,
+  HOME_MARKET_REQUIRED_STEPS,
   HOME_MARKET_AISHA_ENTRY_CONTEXT,
   HOME_MARKET_PREVIEW_MIN_OPACITY,
   homeMarketAishaDynamicVariables,
@@ -230,6 +232,18 @@ describe("Personalize flow", () => {
     expect(preview).not.toContain("previewManager");
     expect(flow).toContain("pin={pin}");
     expect(preview).not.toMatch(/TODO|PLACEHOLDER|lorem/i);
+    expect(HOME_MARKET_PHOTO_FALLBACK).toBe("/talisbooks/centrefold/pages/page-08.webp");
+    expect(existsSync(resolve("public", HOME_MARKET_PHOTO_FALLBACK.slice(1)))).toBe(true);
+    expect(preview).toContain("HOME_MARKET_PHOTO_FALLBACK");
+    expect(preview).toContain('data-testid="home-market-preview-photo"');
+    expect(preview).toContain('data-testid="home-market-preview-brokerage"');
+    expect(preview).toContain('data-testid="home-market-update-picture"');
+    expect(flow).toContain('data-testid="home-market-photo"');
+    expect(flow).toContain("onUpdatePicture");
+    expect(homeMarketStepsDone({ ...EMPTY_HOME_MARKET_DRAFT, photoUrl: "/tmp/photo.jpg" })).toBe(0);
+    expect(HOME_MARKET_REQUIRED_STEPS).toBe(3);
+    expect(en.homeMarket.photoLabel.toLowerCase()).toContain("optional");
+    expect(de.homeMarket.photoLabel.toLowerCase()).toContain("optional");
     const hero = read("components/talispros/demo-mapsite/DemoHeroMap.tsx");
     expect(hero).toContain("gm-err-container");
     expect(hero).toContain("map-idle-backdrop");

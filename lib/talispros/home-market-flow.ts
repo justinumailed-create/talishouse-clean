@@ -24,10 +24,19 @@ export const HOME_MARKET_AGENT_CODE = "Aishaa";
 export const HOME_MARKET_FIRST_NAME_MAX = 40;
 export const HOME_MARKET_BROKERAGE_MAX = 80;
 
+/**
+ * Green-screen portrait when the visitor has not uploaded a photo yet.
+ * The book back cover is Aisha, so this uses a Centrefold green page.
+ * Ralf will send a standalone image later — swap this one constant.
+ */
+export const HOME_MARKET_PHOTO_FALLBACK = "/talisbooks/centrefold/pages/page-08.webp";
+
 export type HomeMarketDraft = {
   firstName: string;
   accountType: HomeMarketAccountType | null;
   brokerage: string;
+  /** Object-URL or empty; client-side only, not required to register. */
+  photoUrl: string;
   /** The visitor searched an address or placed the Home PIN. */
   pinPlaced: boolean;
   homeAddress: string;
@@ -37,6 +46,7 @@ export const EMPTY_HOME_MARKET_DRAFT: HomeMarketDraft = {
   firstName: "",
   accountType: null,
   brokerage: "",
+  photoUrl: "",
   pinPlaced: false,
   homeAddress: "",
 };
