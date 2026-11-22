@@ -72,7 +72,7 @@ export default function HomeMarketPersonalize({
   const [brokerage, setBrokerage] = useState("");
   const [pin, setPin] = useState<HomePinLocationValues>(() => startPin(market));
   const [built, setBuilt] = useState(false);
-  /** The live call mounts only after a click, so the browser lets it play sound. */
+  /** Aisha's post-build call. Mounted by the Build Mapsite click. */
   const [aishaLive, setAishaLive] = useState(false);
   const [nudge, setNudge] = useState(false);
 
@@ -98,6 +98,8 @@ export default function HomeMarketPersonalize({
     if (stage === "build") {
       setNudge(false);
       setBuilt(true);
+      // Start Aisha's call from this click, so the browser counts it as the gesture for audio and mic.
+      setAishaLive(true);
       return;
     }
     if (accountType) router.push(homeMarketRegisterHref(accountType, market));
@@ -173,20 +175,7 @@ export default function HomeMarketPersonalize({
                     firstMessage={homeMarketAishaFirstMessage(firstName)}
                   />
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setAishaLive(true)}
-                  data-testid="home-market-hear-aisha"
-                  className="mt-4 flex h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-[#046BD9] bg-white text-[15px] font-semibold text-[#046BD9] transition hover:bg-[#046BD9]/5"
-                >
-                  <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2}>
-                    <path d="M11 5 6 9H3v6h3l5 4V5Z" strokeLinejoin="round" />
-                    <path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" strokeLinecap="round" />
-                  </svg>
-                  {h.hearAisha}
-                </button>
-              )}
+              ) : null}
               <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[13px] font-semibold">
                 <button
                   type="button"

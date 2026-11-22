@@ -1597,7 +1597,6 @@ export const de: Dictionary = {
     missingSteps: "Geben Sie Vorname, Kontotyp und Home-PIN ein, um fortzufahren.",
     goodJob: "Gut gemacht, {name}. Ihr Markt ist verfügbar. Wir freuen uns auf die Zusammenarbeit mit Ihnen.",
     registerHint: "Registrieren Sie sich mit meinem Agent Code, Aishaa. Er ist bereits für Sie eingetragen.",
-    hearAisha: "Aisha anhören",
     editDetails: "Angaben ändern",
     previewLabel: "Ihre Startseite",
     previewMarket: "Heimatmarkt",

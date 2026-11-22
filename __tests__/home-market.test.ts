@@ -193,17 +193,17 @@ describe("Personalize flow", () => {
     expect(homeMarketAishaFirstMessage("Sam")).not.toMatch(/[—–]/);
   });
 
-  it("starts the live call only from the Hear Aisha click and keeps the text", () => {
+  it("starts the live call from the Build Mapsite click and keeps the text", () => {
     const flow = read("components/talispros/home-market/HomeMarketPersonalize.tsx");
-    expect(flow).toContain('data-testid="home-market-hear-aisha"');
-    expect(flow).toContain("setAishaLive(true)");
+    expect(flow).not.toContain("home-market-hear-aisha");
+    expect(flow).toMatch(/setBuilt\(true\);[\s\S]{0,160}setAishaLive\(true\);/);
+    expect(flow.match(/setAishaLive\(true\)/g)).toHaveLength(1);
     expect(flow).toMatch(/aishaLive \? \(/);
     expect(flow).toContain("firstMessage={homeMarketAishaFirstMessage(firstName)}");
     expect(flow).toContain('data-testid="home-market-good-job-text"');
     const widget = read("components/talispros/AishaConvaiWidget.tsx");
     expect(widget.match(/override-first-message=\{firstMessage \|\| undefined\}/g)).toHaveLength(2);
-    expect(en.homeMarket.hearAisha).toBe("Hear Aisha");
-    expect(de.homeMarket.hearAisha).toBe("Aisha anhören");
+    expect("hearAisha" in en.homeMarket).toBe(false);
   });
 });
 
