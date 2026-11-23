@@ -60,6 +60,21 @@
     "alt": "Tsplits™ Baumlogo: Sichern Sie einen von 30 US-Märkten in Ihrer Region"
    }
   },
+  "/markets/mapsites": {
+   "kind": "utility",
+   "noindex": true,
+   "image": "/og/pages/markets-mapsites",
+   "en": {
+    "title": "Mapsites Built | Tsplits™",
+    "description": "Every built Mapsite as a PIN on one map, with its account and CRM record.",
+    "alt": "Tsplits™ tree logo: Mapsites built, at a glance"
+   },
+   "de": {
+    "title": "Erstellte Mapsites | Tsplits™",
+    "description": "Jede erstellte Mapsite als PIN auf einer Karte, mit Konto und CRM-Eintrag.",
+    "alt": "Tsplits™ Baumlogo: Erstellte Mapsites auf einen Blick"
+   }
+  },
   "/catalogue": {
    "kind": "public",
    "noindex": false,
@@ -344,13 +359,28 @@
    "image": "/og/pages/demo-mapsite",
    "en": {
     "title": "Claim your Home Market | Tsplits™",
-    "description": "Select the PIN nearest you on the North American Markets map, personalize your Mapsite, and register your market with Tsplits™.",
+    "description": "Place your PIN to claim a Home Market of about 100,000 people, personalize your Mapsite, and register your market with Tsplits™.",
     "alt": "Tsplits™ tree logo: Claim your Home Market"
    },
    "de": {
     "title": "Heimatmarkt sichern | Tsplits™",
-    "description": "Wählen Sie den PIN in Ihrer Nähe auf der Karte der Märkte Nordamerikas, personalisieren Sie Ihre Mapsite und registrieren Sie Ihren Markt bei Tsplits™.",
+    "description": "Setzen Sie Ihren PIN für einen Heimatmarkt mit etwa 100.000 Menschen, personalisieren Sie Ihre Mapsite und registrieren Sie sich bei Tsplits™.",
     "alt": "Tsplits™ Baumlogo: Sichern Sie sich Ihren Heimatmarkt"
+   }
+  },
+  "/income-units": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/income-units",
+   "en": {
+    "title": "Income Units, Proposal by Webster | Talishouse™",
+    "description": "Short-term rentals, in-law suites and home office units: Talishouse™ Glasshouse™ designs, from shipping only to turn key.",
+    "alt": "Tsplits™ tree logo: Income Units Proposal by Webster"
+   },
+   "de": {
+    "title": "Income Units, ein Angebot von Webster | Talishouse™",
+    "description": "Ferienvermietung, Einliegerwohnung oder Homeoffice: Talishouse™ Glasshouse™ Designs, vom reinen Versand bis schlüsselfertig.",
+    "alt": "Tsplits™ Baumlogo: Income Units ein Angebot von Webster"
    }
   },
   "/mapsites": {

@@ -190,11 +190,27 @@ add("/demo", "demo-mapsite", "public", NSNC_SHARE,
      "TSPLITS™  ·  DEMO", ["PDF hochladen", "Mapsite", "erstellen"], ["FAST Code", "Talisbook™"]))
 add("/home-market", "demo-mapsite", "public", NSNC_SHARE,
     ("Claim your Home Market | Tsplits™",
-     "Select the PIN nearest you on the North American Markets map, personalize your Mapsite, and register your market with Tsplits™.",
-     "TSPLITS™  ·  MARKETS", ["Claim your", "Home", "Market"], ["45 PINs", "Personalize", "Register"]),
+     "Place your PIN to claim a Home Market of about 100,000 people, personalize your Mapsite, and register your market with Tsplits™.",
+     "TSPLITS™  ·  MARKETS", ["Claim your", "Home", "Market"], ["Place your PIN", "Personalize", "Register"]),
     ("Heimatmarkt sichern | Tsplits™",
-     "Wählen Sie den PIN in Ihrer Nähe auf der Karte der Märkte Nordamerikas, personalisieren Sie Ihre Mapsite und registrieren Sie Ihren Markt bei Tsplits™.",
-     "TSPLITS™  ·  MÄRKTE", ["Sichern Sie", "Ihren", "Heimatmarkt"], ["45 PINs", "Personalisieren", "Registrieren"]))
+     "Setzen Sie Ihren PIN für einen Heimatmarkt mit etwa 100.000 Menschen, personalisieren Sie Ihre Mapsite und registrieren Sie sich bei Tsplits™.",
+     "TSPLITS™  ·  MÄRKTE", ["Sichern Sie", "Ihren", "Heimatmarkt"], ["PIN setzen", "Personalisieren", "Registrieren"]))
+# Webster's Income Units web book on the Talishouse™ (Windswept) PIN (Ralf, Nov 23).
+add("/income-units", "income-units", "public", ("talisbooks/webster/pages/page-01.webp", 0.5, None, None),
+    ("Income Units, Proposal by Webster | Talishouse™",
+     "Short-term rentals, in-law suites and home office units: Talishouse™ Glasshouse™ designs, from shipping only to turn key.",
+     "TALISHOUSE™  ·  WEBSTER", ["Income Units", "Proposal by", "Webster"], ["Short-term rentals", "In-law suites", "Home offices"]),
+    ("Income Units, ein Angebot von Webster | Talishouse™",
+     "Ferienvermietung, Einliegerwohnung oder Homeoffice: Talishouse™ Glasshouse™ Designs, vom reinen Versand bis schlüsselfertig.",
+     "TALISHOUSE™  ·  WEBSTER", ["Income Units", "ein Angebot", "von Webster"], ["Ferienvermietung", "Einliegerwohnung", "Homeoffice"]))
+# Markets → Mapsites Built: admin map of every built Mapsite (Ralf, Nov 23).
+add("/markets/mapsites", "markets-mapsites", "utility", MAP,
+    ("Mapsites Built | Tsplits™",
+     "Every built Mapsite as a PIN on one map, with its account and CRM record.",
+     "TSPLITS™  ·  MARKETS", ["Mapsites", "built,", "at a glance"], ["Accounts", "CRM", "Talismaps™"]),
+    ("Erstellte Mapsites | Tsplits™",
+     "Jede erstellte Mapsite als PIN auf einer Karte, mit Konto und CRM-Eintrag.",
+     "TSPLITS™  ·  MÄRKTE", ["Erstellte", "Mapsites", "auf einen Blick"], ["Konten", "CRM", "Talismaps™"]))
 add("/mapsites", "demo-mapsite", "public", NSNC_SHARE,
     ("Mapsites | Tsplits™",
      "Demo Mapsites on Tsplits™. See the North Shore Nature Centre flag on the map and open the pinned Talisbook™.",
