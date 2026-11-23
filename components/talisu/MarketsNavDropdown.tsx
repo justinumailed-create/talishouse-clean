@@ -66,7 +66,9 @@ export default function MarketsNavDropdown() {
                 ? t.nav.marketsMenu.usa
                 : item.menuKey === "canada"
                   ? t.nav.marketsMenu.canada
-                  : t.nav.marketsMenu.marketing;
+                  : item.menuKey === "built"
+                    ? t.nav.marketsMenu.built
+                    : t.nav.marketsMenu.marketing;
             return (
               <Link
                 key={item.href}
@@ -77,7 +79,9 @@ export default function MarketsNavDropdown() {
                     ? "nav-markets-usa"
                     : item.menuKey === "canada"
                       ? "nav-markets-canada"
-                      : "nav-markets-marketing"
+                      : item.menuKey === "built"
+                        ? "nav-markets-built"
+                        : "nav-markets-marketing"
                 }
                 onClick={() => setOpen(false)}
                 className={`block px-3.5 py-2 text-[13px] font-medium transition sm:text-[14px] ${

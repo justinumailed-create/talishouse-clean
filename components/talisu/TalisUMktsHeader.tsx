@@ -720,7 +720,9 @@ export default function TalisUMktsHeader({
                     ? t.nav.marketsMenu.usa
                     : item.menuKey === "canada"
                       ? t.nav.marketsMenu.canada
-                      : t.nav.marketsMenu.marketing,
+                      : item.menuKey === "built"
+                        ? t.nav.marketsMenu.built
+                        : t.nav.marketsMenu.marketing,
                   item.href === "/markets"
                     ? pathname === "/markets"
                     : pathname === item.href || pathname.startsWith(`${item.href}/`),

@@ -67,6 +67,7 @@ describe("TalisU blue header dropdown", () => {
       ["USA", "/markets/usa"],
       ["Canada", "/markets"],
       ["Marketing", "/mapsites"],
+      ["Mapsites Built", "/markets/mapsites"],
     ]);
     expect(header).toContain("<MarketsNavDropdown");
     expect(header).toContain("TALISU_MKTS_HEADER_MARKETS_DROPDOWN");
