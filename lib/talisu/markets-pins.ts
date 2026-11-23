@@ -78,7 +78,7 @@ export const TALISU_MKTS_DO_MORE_PIN_SIZE = 58;
 
 /** Markets page bottom write-up (Arun, Oct 31): ends at "...around a centre point." */
 export const TALISU_MKTS_FOOTER =
-  "Select the PIN nearest you to claim a market of 80 kilometres around a centre point.";
+  "Claim your Home Market by placing your own PIN on the Mapsites map.";
 
 export const TALISU_MKTS_PMC_TITLE = "Tsplits™ PMC";
 

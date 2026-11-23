@@ -35,14 +35,14 @@
    "noindex": false,
    "image": "/og/pages/talisu-mkts",
    "en": {
-    "title": "Markets Served: Claim an 80 km Market | Tsplits™",
-    "description": "Select the PIN nearest you to claim a semi-exclusive market of 80 km around a centre point on the Talismaps™ market map.",
-    "alt": "Tsplits™ tree logo: Claim an 80 km market near you"
+    "title": "Markets Served: Claim Your Home Market | Tsplits™",
+    "description": "Place your own PIN in Canada or the USA to claim a Home Market of 100,000 people (+/-) on the Tsplits™ Mapsites map.",
+    "alt": "Tsplits™ tree logo: Claim your Home Market with your PIN"
    },
    "de": {
-    "title": "Bediente Märkte: 80-km-Markt sichern | Tsplits™",
-    "description": "Wählen Sie den PIN in Ihrer Nähe und sichern Sie einen semi-exklusiven Markt im Umkreis von 80 km um einen Mittelpunkt auf Talismaps™.",
-    "alt": "Tsplits™ Baumlogo: Sichern Sie einen 80-km-Markt in Ihrer Nähe"
+    "title": "Bediente Märkte: Heimatmarkt sichern | Tsplits™",
+    "description": "Setzen Sie Ihren eigenen PIN in Kanada oder den USA und sichern Sie einen Heimatmarkt mit 100.000 Menschen (+/-) auf der Tsplits™ Mapsites-Karte.",
+    "alt": "Tsplits™ Baumlogo: Sichern Sie Ihren Heimatmarkt mit Ihrem PIN"
    }
   },
   "/markets/usa": {
@@ -50,14 +50,14 @@
    "noindex": false,
    "image": "/og/pages/talisu-mkts-usa",
    "en": {
-    "title": "USA Markets: Claim One of 30 US Markets | Tsplits™",
-    "description": "Select your region's PIN to claim one of 30 proprietary US markets, each a contiguous region of about 8 to 12 million people, on Talismaps™.",
-    "alt": "Tsplits™ tree logo: Claim one of 30 US markets in your region"
+    "title": "USA Markets: Claim Your Home Market | Tsplits™",
+    "description": "Place your own PIN anywhere in the USA to claim a Home Market of 100,000 people (+/-) on the Tsplits™ Mapsites map.",
+    "alt": "Tsplits™ tree logo: Claim your US Home Market with your PIN"
    },
    "de": {
-    "title": "Märkte USA: Einen von 30 US-Märkten sichern | Tsplits™",
-    "description": "Wählen Sie den PIN Ihrer Region und sichern Sie einen von 30 US-Märkten, je eine Region mit etwa 8 bis 12 Mio. Einwohnern, auf Talismaps™.",
-    "alt": "Tsplits™ Baumlogo: Sichern Sie einen von 30 US-Märkten in Ihrer Region"
+    "title": "Märkte USA: Heimatmarkt sichern | Tsplits™",
+    "description": "Setzen Sie Ihren eigenen PIN irgendwo in den USA und sichern Sie einen Heimatmarkt mit 100.000 Menschen (+/-) auf der Tsplits™ Mapsites-Karte.",
+    "alt": "Tsplits™ Baumlogo: Sichern Sie Ihren US-Heimatmarkt mit Ihrem PIN"
    }
   },
   "/markets/mapsites": {

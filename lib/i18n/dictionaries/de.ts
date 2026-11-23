@@ -767,7 +767,7 @@ export const de: Dictionary = {
     ],
     pmcTagline: "Bewerben - Verwalten - Kooperieren",
     footer:
-      "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 80 Kilometern um einen Mittelpunkt zu beanspruchen.",
+      "Sichern Sie Ihren Heimatmarkt, indem Sie Ihren eigenen PIN auf der Mapsites-Karte setzen.",
     canada: "Kanada",
     canadaMarkets: "Märkte Kanada",
     usaMarkets: "Märkte USA",
@@ -784,7 +784,7 @@ export const de: Dictionary = {
       failed: "Die Karte ist gerade nicht verfügbar. Bitte versuchen Sie es in Kürze erneut.",
     },
     us: {
-      footer: "Wählen Sie den PIN Ihrer Region, um einen von 30 US-Märkten zu beanspruchen.",
+      footer: "Sichern Sie Ihren Heimatmarkt, indem Sie Ihren eigenen PIN auf der Mapsites-Karte setzen.",
       anchorsLabel: "Ankerstädte",
     },
     noMatches: "Keine Treffer",
@@ -1697,7 +1697,7 @@ export const de: Dictionary = {
     talisuMarkets: {
       title: "Tsplits™ | Unsere Märkte",
       description:
-        "Wählen Sie den PIN, der Ihnen am nächsten liegt, um einen Markt im Umkreis von 80 Kilometern als teilexklusives Gebiet zu beanspruchen.",
+        "Setzen Sie Ihren eigenen PIN in Kanada oder den USA und sichern Sie einen Heimatmarkt mit 100.000 Menschen (+/-) auf der Tsplits™ Mapsites-Karte.",
     },
     root: {
       title: "Talishouse | Häuser & Cottages",

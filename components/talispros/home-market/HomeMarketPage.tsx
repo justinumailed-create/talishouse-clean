@@ -49,17 +49,20 @@ export default function HomeMarketPage({ initialMarket = null }: { initialMarket
         <AishaColumn />
       </aside>
       <section className="order-1 flex min-h-0 flex-col lg:order-2">
-        {/* The Tsplits™ Mapsites header stays; the map takes the old headline row (Ralf, Nov 23). */}
-        <div className="bg-white px-5 py-2.5 text-center sm:px-6 lg:py-2">
+        {/* Header, then the headline directly above the map on every screen size (Ralf, Nov 23). */}
+        <div className="bg-white px-5 pb-2 pt-2.5 text-center sm:px-6">
           <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500" data-testid="home-market-kicker">
             {t.kicker}
           </p>
-          {/* Phones: the map comes first, so the headline sits above it. */}
-          <p className="m-0 mt-1 text-[17px] font-semibold leading-snug text-neutral-950 lg:hidden" data-testid="home-market-select-pin-mobile">
+          <h1
+            className="m-0 mt-1 text-[17px] font-semibold leading-snug text-neutral-950 sm:text-[20px]"
+            style={{ color: "#0a0a0a", fontSize: "clamp(17px, 1.6vw, 20px)", marginBottom: 0 }}
+            data-testid="home-market-select-pin"
+          >
             {t.selectPin}
-          </p>
+          </h1>
         </div>
-        <div className="relative h-[66dvh] min-h-[22rem] lg:h-auto lg:min-h-0 lg:flex-1">
+        <div className="relative h-[70dvh] min-h-[24rem] lg:h-auto lg:min-h-0 lg:flex-1">
           <HomeMarketMap placed={placed} onPlace={setPlaced} onPersonalize={setMarket} />
         </div>
       </section>
@@ -89,12 +92,6 @@ function AishaColumn() {
           <p className="m-0 mt-0.5 text-[22px] font-semibold text-neutral-950">{t.aishaName}</p>
         </div>
       </div>
-      <h1
-        className="m-0 mt-4 hidden rounded-2xl rounded-tl-sm bg-[#f4f6f8] px-4 py-3 text-[18px] font-semibold leading-snug text-neutral-950 lg:block"
-        data-testid="home-market-select-pin"
-      >
-        {t.selectPin}
-      </h1>
 
       <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow-[0_4px_18px_rgba(0,0,0,0.08)] ring-1 ring-black/5" data-testid="home-market-sample">
         <div className="flex items-center justify-between bg-[#046BD9] px-4 py-2.5 text-white">

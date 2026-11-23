@@ -414,7 +414,7 @@ export const en = {
     },
     /** USA Markets page (/talisu/mkts/usa): footer + US market card copy. */
     us: {
-      footer: "Select your region's PIN to claim one of 30 US markets.",
+      footer: "Claim your Home Market by placing your own PIN on the Mapsites map.",
       anchorsLabel: "Anchor cities",
     },
     noMatches: "No matches",
@@ -1339,7 +1339,7 @@ export const en = {
     talisuMarkets: {
       title: "Tsplits™ | Markets served",
       description:
-        "Select the PIN nearest you to claim a market of 80 kilometres around a centre point as semi-exclusive territory. Semi-exclusive means no other markets will be granted within that circle, but neighbouring markets will not be prevented from pinning Listings for which they have written and verified listing documentation.",
+        "Place your own PIN in Canada or the USA to claim a Home Market of 100,000 people (+/-) on the Tsplits™ Mapsites map.",
     },
     root: {
       title: "Talishouse | Homes & Cottages",
