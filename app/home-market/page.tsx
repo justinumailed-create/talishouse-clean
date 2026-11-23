@@ -1,7 +1,7 @@
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import HomeMarketPage from "@/components/talispros/home-market/HomeMarketPage";
 import { pageMetadata } from "@/lib/seo/page-metadata";
-import { homeMarketById } from "@/lib/talisu/north-america-markets";
+import { homeMarketFromParams } from "@/lib/talisu/north-america-markets";
 
 export async function generateMetadata() {
   return pageMetadata("/home-market");
@@ -19,12 +19,12 @@ export default async function HomeMarketRoute({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const raw = Array.isArray(params.market) ? params.market[0] : params.market;
-  const initialMarketId = homeMarketById(raw)?.id ?? null;
+  const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
+  const initialMarket = homeMarketFromParams(first(params.market), first(params.place));
   return (
     <div className="flex min-h-dvh flex-col bg-white lg:h-dvh lg:min-h-0 lg:overflow-hidden">
       <TalisUMktsHeader />
-      <HomeMarketPage initialMarketId={initialMarketId} />
+      <HomeMarketPage initialMarket={initialMarket} />
     </div>
   );
 }

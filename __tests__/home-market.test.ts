@@ -74,7 +74,7 @@ describe("Home Market map (Ralf, Nov 22)", () => {
     }
     const us = homeMarketById("us07");
     expect(us?.flagUrl).toBe(TALISU_US_MKTS_FLAG);
-    expect(us && homeMarketDisplayName(us)).toBe("Rocky Mountain Region (Laramie, WY)");
+    expect(us && homeMarketDisplayName(us)).toBe("Rocky Mountain Region");
     expect(homeMarketById("ca-nl")?.name).toBe("Newfoundland & Labrador");
     expect(homeMarketById("talishouse")).toBeNull();
   });
@@ -97,12 +97,12 @@ describe("Home Market map (Ralf, Nov 22)", () => {
     expect(page).toContain('pageMetadata("/home-market")');
     const entry = (pages as unknown as { pages: Record<string, { en: { title: string } }> }).pages["/home-market"];
     expect(entry.en.title).toContain("Home Market");
-    expect(en.homeMarket.selectPin).toBe("Select the PIN nearest you to claim your Home Market");
+    expect(en.homeMarket.selectPin).toBe("Place your PIN to claim a Home Market of 100,000 people (+/-)");
   });
 
-  it("opens Personalize straight from a market PIN, without Aisha's script", () => {
+  it("opens Personalize straight from the visitor's own PIN, without Aisha's script", () => {
     const map = read("components/talispros/home-market/HomeMarketMap.tsx");
-    expect(map).toContain("onPersonalize(selected)");
+    expect(map).toContain("onPersonalize(selectedPlaced)");
     expect(map).not.toContain("AishaConvaiWidget");
     expect(read("components/talispros/home-market/HomeMarketPage.tsx")).not.toContain("AishaConvaiWidget");
   });
@@ -287,5 +287,96 @@ describe("Centrefolds demo eBook (20 pages)", () => {
     expect(hero).toContain("CENTREFOLD_BOOK_HREF");
     expect(hero).not.toContain("NSNC_");
     expect(en.demo.hero.pinCard.openEbook).toBe("Open the Centrefolds TEB™");
+  });
+});
+
+describe("Ralf, Nov 23: place your own PIN, zoom, Webster book, celebration, Mapsites Built", () => {
+  it("shows no fixed market PINs on the public map, only the Talishouse™ PIN", async () => {
+    const mod = await import("@/lib/talisu/north-america-markets");
+    expect(mod.HOME_MARKET_PUBLIC_PINS.map((pin) => pin.id)).toEqual(["talishouse"]);
+    expect(mod.homeMarketPublicEnginePins(null).map((pin) => pin.id)).toEqual(["talishouse"]);
+    const map = read("components/talispros/home-market/HomeMarketMap.tsx");
+    expect(map).toContain("homeMarketPublicEnginePins");
+    expect(map).not.toContain("HOME_MARKET_MAP_PINS");
+  });
+
+  it("turns a placed PIN into the visitor's Home Market and back from the URL", async () => {
+    const mod = await import("@/lib/talisu/north-america-markets");
+    const placed = mod.placedHomeMarket({
+      latitude: 46.0878123,
+      longitude: -64.7782456,
+      address: "123 Main St, Moncton, NB E1C 1A1, Canada",
+    })!;
+    expect(placed.id).toBe("pin-46.08781_-64.77825");
+    expect(placed.country).toBe("CA");
+    expect(placed.name).toBe("Moncton, NB E1C 1A1");
+    expect(mod.isPlacedHomeMarket(placed)).toBe(true);
+    const back = mod.homeMarketFromParams(placed.id, placed.address);
+    expect(back?.latitude).toBe(46.08781);
+    expect(back?.name).toBe("Moncton, NB E1C 1A1");
+    expect(mod.homeMarketFromParams("pin-99_-500", "")).toBeNull();
+    expect(mod.homeMarketFromParams("us07", null)?.name).toBe("Rocky Mountain Region");
+    expect(mod.placedHomeMarket({ latitude: 40.7, longitude: -74, address: "Newark, NJ 07102, USA" })?.country).toBe("US");
+    const href = new URL(homeMarketRegisterHref("broker", placed), "https://x.invalid");
+    expect(href.searchParams.get("market")).toBe(placed.id);
+  });
+
+  it("counts the placed PIN as a done step in Personalize", () => {
+    const flow = read("components/talispros/home-market/HomeMarketPersonalize.tsx");
+    expect(flow).toContain("if (isPlacedHomeMarket(market)) return true;");
+    expect(flow).toContain('streetAddress: market.address ?? ""');
+  });
+
+  it("has always-visible zoom in, zoom out and reset buttons", () => {
+    const map = read("components/talispros/home-market/HomeMarketMap.tsx");
+    for (const id of ["home-market-zoom-in", "home-market-zoom-out", "home-market-zoom-reset"]) {
+      expect(map).toContain(`data-testid="${id}"`);
+    }
+    expect(en.homeMarket.zoomOut).toBe("Zoom out");
+    expect(de.homeMarket.zoomOut).toBe("Verkleinern");
+  });
+
+  it("keeps one headline, the Tsplits™ Mapsites header, and drops the old left line", () => {
+    const page = read("components/talispros/home-market/HomeMarketPage.tsx");
+    expect(page).not.toContain("aishaLine");
+    expect("aishaLine" in en.homeMarket).toBe(false);
+    expect(en.homeMarket.kicker).toBe("Tsplits™ Mapsites");
+    expect(en.homeMarket.selectPin).toContain("Home Market of 100,000 people (+/-)");
+    expect(de.homeMarket.selectPin).toContain("100.000 Menschen (+/-)");
+    for (const dict of [en, de]) {
+      expect(dict.homeMarket.intro).not.toMatch(/Each PIN is one market|Jeder PIN ist ein Markt/);
+    }
+  });
+
+  it("opens Webster's Income Units book from the Talishouse™ PIN, Catalogue next", async () => {
+    const book = await import("@/lib/talispros/webster-book");
+    expect(book.WEBSTER_BOOK_HREF).toBe("/income-units");
+    expect(book.websterBookPages()).toHaveLength(8);
+    for (const page of book.websterBookPages()) {
+      expect(existsSync(resolve("public", page.src.slice(1)))).toBe(true);
+    }
+    const map = read("components/talispros/home-market/HomeMarketMap.tsx");
+    expect(map).toContain("WEBSTER_BOOK_HREF");
+    expect(map).toContain('href="/catalogue"');
+    const viewer = read("components/talispros/webster-book/WebsterBook.tsx");
+    expect(viewer).toContain("CATALOGUE_HREF");
+    expect(viewer).toContain("WEBSTER_CALL_HREF");
+    expect(viewer).toContain("IncomeLostBand");
+    expect(en.homeMarket.bookLossTitle).not.toMatch(/\d/);
+    expect(en.homeMarket.bookLossBody).not.toMatch(/\$\s?\d/);
+    expect(en.homeMarket.seeCatalogue).toBe("See the Catalogue");
+  });
+
+  it("celebrates Build Mapsite and invites them to register and add PINs", () => {
+    const flow = read("components/talispros/home-market/HomeMarketPersonalize.tsx");
+    expect(flow).toMatch(/setAishaLive\(true\);\s*setCelebrate\(true\);/);
+    expect(flow).toContain("<HomeMarketCelebration");
+    const preview = read("components/talispros/home-market/HomePagePreview.tsx");
+    expect(preview).toContain('data-testid="home-market-add-pins"');
+    expect(en.homeMarket.congratsTitleName).toBe("Congratulations, {name}!");
+  });
+
+  it("removes US anchor-city names from public market names and map cards", () => {
+    expect(read("lib/talisu/us-markets-pins.ts")).not.toContain("copy.us.anchorsLabel}: ${pin.anchors");
   });
 });

@@ -1,6 +1,13 @@
 /**
  * North American Markets for the public Home Market page (/home-market).
  *
+ * Ralf, Nov 23: the public map no longer shows fixed market PINs. One old
+ * regional PIN covered 4 (Canada) to 11+ (USA) Home Markets of about 100,000
+ * people each, so visitors now place their own PIN (address, postal code or a
+ * tap on the map) and that PIN defines their Home Market. The only fixed
+ * marker left on the map is the Talishouse™ (Windswept) PIN. The regional rows
+ * below stay for old `?market=` links and the admin maps.
+ *
  * Canada: the 15 existing Canada market PINs from `markets-pins.ts`, unchanged
  * (Ralf, Nov 22: geography does not allow a grid there).
  * USA: 30 rural anchor-town PINs (Arun, Nov 22). Approximate town-centre
@@ -78,6 +85,8 @@ export type HomeMarketPin = {
   name: string;
   /** US anchor town, for example "Ellensburg, WA". Empty for Canada. */
   anchor: string;
+  /** Visitor-placed PIN only: the address or place they searched / tapped. */
+  address?: string;
   latitude: number;
   longitude: number;
   mapZoom: number;
@@ -130,10 +139,10 @@ export const HOME_MARKET_TALISHOUSE_PIN: HomeMarketPin | null = TALISHOUSE_SOURC
     }
   : null;
 
-/** 15 Canada + 30 US = 45 market PINs. */
+/** 15 Canada + 30 US regional rows (old links and admin only; not on the public map). */
 export const HOME_MARKET_MARKETS: readonly HomeMarketPin[] = [...CANADA_MARKETS, ...US_MARKETS];
 
-/** Every marker on the map: 45 markets plus the single Talishouse™ PIN. */
+/** All regional rows plus the Talishouse™ PIN (admin and tests; the public map uses HOME_MARKET_PUBLIC_PINS). */
 export const HOME_MARKET_MAP_PINS: readonly HomeMarketPin[] = HOME_MARKET_TALISHOUSE_PIN
   ? [...HOME_MARKET_MARKETS, HOME_MARKET_TALISHOUSE_PIN]
   : HOME_MARKET_MARKETS;
@@ -148,9 +157,12 @@ export function homeMarketById(id: string | null | undefined): HomeMarketPin | n
   return HOME_MARKET_MARKETS.find((pin) => pin.id === id) ?? null;
 }
 
-/** "Pacific Northwest & Alaska" or "Pacific Northwest & Alaska (Ellensburg, WA)". */
+/**
+ * "Pacific Northwest & Alaska": no anchor-city names on public views, the USA
+ * like Canada (Ralf, Nov 23). A placed PIN shows the visitor's own place.
+ */
 export function homeMarketDisplayName(pin: HomeMarketPin): string {
-  return pin.anchor ? `${pin.name} (${pin.anchor})` : pin.name;
+  return pin.name;
 }
 
 export function homeMarketFitCoordinates(): { latitude: number; longitude: number }[] {
@@ -178,4 +190,147 @@ export function homeMarketEnginePins(): MapEnginePin[] {
         },
       }) satisfies MapEnginePin,
   );
+}
+
+/* ---------------------------------------------------------------------------
+ * Visitor-placed Home Market PINs (Ralf, Nov 23)
+ * ------------------------------------------------------------------------- */
+
+/** Map zoom after the visitor places their PIN (town scale, roughly 100,000 people). */
+export const HOME_MARKET_PLACED_ZOOM = 10;
+
+/** Prefix of a visitor-placed market id: `pin-<lat>_<lng>`. */
+export const HOME_MARKET_PLACED_PREFIX = "pin-";
+
+const PLACED_ID = /^pin-(-?\d{1,2}(?:\.\d+)?)_(-?\d{1,3}(?:\.\d+)?)$/;
+const PLACE_MAX = 120;
+
+function roundCoord(value: number): number {
+  return Math.round(value * 1e5) / 1e5;
+}
+
+function validLatLng(latitude: number, longitude: number): boolean {
+  return (
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    Math.abs(latitude) <= 90 &&
+    Math.abs(longitude) <= 180
+  );
+}
+
+export function homeMarketPlacedId(latitude: number, longitude: number): string {
+  return `${HOME_MARKET_PLACED_PREFIX}${roundCoord(latitude)}_${roundCoord(longitude)}`;
+}
+
+/** Best guess at the country from the geocoded address, then the latitude. */
+export function homeMarketCountryFor(address: string, latitude: number): HomeMarketCountry {
+  if (/\b(USA|United States|Vereinigte Staaten)\b/i.test(address)) return "US";
+  if (/\b(Canada|Kanada)\b/i.test(address)) return "CA";
+  return latitude >= 49 ? "CA" : "US";
+}
+
+/** "123 Main St, Moncton, NB E1C 1A1, Canada" → "Moncton, NB E1C 1A1" style short label. */
+export function homeMarketPlaceLabel(address: string): string {
+  const parts = address
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .filter((part) => !/^(USA|United States|Canada|Kanada)$/i.test(part));
+  if (parts.length === 0) return "";
+  const short = parts.length > 2 ? parts.slice(-2) : parts;
+  return short.join(", ").slice(0, PLACE_MAX);
+}
+
+/** The visitor's own PIN as a Home Market (nothing saved; client and URL only). */
+export function placedHomeMarket({
+  latitude,
+  longitude,
+  address = "",
+}: {
+  latitude: number;
+  longitude: number;
+  address?: string;
+}): HomeMarketPin | null {
+  if (!validLatLng(latitude, longitude)) return null;
+  const lat = roundCoord(latitude);
+  const lng = roundCoord(longitude);
+  const cleanAddress = address.replace(/\s+/g, " ").trim().slice(0, PLACE_MAX * 2);
+  const country = homeMarketCountryFor(cleanAddress, lat);
+  const label = homeMarketPlaceLabel(cleanAddress) || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  return {
+    id: homeMarketPlacedId(lat, lng),
+    kind: "market",
+    country,
+    currency: country === "US" ? "USD" : "CAD",
+    name: label,
+    anchor: "",
+    address: cleanAddress,
+    latitude: lat,
+    longitude: lng,
+    mapZoom: HOME_MARKET_PLACED_ZOOM,
+    flagUrl: country === "US" ? TALISU_US_MKTS_FLAG : TALISU_MKTS_FLAG_CA,
+  };
+}
+
+export function isPlacedHomeMarket(pin: HomeMarketPin | null | undefined): boolean {
+  return Boolean(pin?.id.startsWith(HOME_MARKET_PLACED_PREFIX));
+}
+
+/**
+ * `?market=pin-45.1_-64.2&place=Moncton, NB` (placed PIN) or an old
+ * `?market=us07` regional link.
+ */
+export function homeMarketFromParams(
+  market: string | null | undefined,
+  place?: string | null,
+): HomeMarketPin | null {
+  const id = market?.trim() ?? "";
+  const match = PLACED_ID.exec(id);
+  if (match) {
+    return placedHomeMarket({
+      latitude: Number.parseFloat(match[1]),
+      longitude: Number.parseFloat(match[2]),
+      address: place ?? "",
+    });
+  }
+  return homeMarketById(id);
+}
+
+/** The public map's fixed markers: only the Talishouse™ (Windswept) PIN. */
+export const HOME_MARKET_PUBLIC_PINS: readonly HomeMarketPin[] = HOME_MARKET_TALISHOUSE_PIN
+  ? [HOME_MARKET_TALISHOUSE_PIN]
+  : [];
+
+/** North America at a glance (the public map's reset view). */
+export const HOME_MARKET_NORTH_AMERICA_FIT: readonly { latitude: number; longitude: number }[] = [
+  { latitude: 60.5, longitude: -135 },
+  { latitude: 25.5, longitude: -80.5 },
+  { latitude: 47.5, longitude: -52.7 },
+  { latitude: 32.5, longitude: -117.1 },
+];
+
+/** Engine pin for the visitor's own Home PIN (blue, pulsing, draggable). */
+export function homeMarketPlacedEnginePin(pin: HomeMarketPin): MapEnginePin {
+  return {
+    id: pin.id,
+    latitude: pin.latitude,
+    longitude: pin.longitude,
+    color: "#046BD9",
+    featured: true,
+    metadata: {
+      icon: "dot",
+      whiteCenter: true,
+      customLogoUrl: pin.flagUrl,
+      pinBorderColor: "#046BD9",
+      pinSize: TALISU_MKTS_MARKET_PIN_SIZE,
+      animated: true,
+      label: pin.name,
+    },
+  } satisfies MapEnginePin;
+}
+
+/** Talishouse™ PIN plus, once placed, the visitor's own Home PIN. */
+export function homeMarketPublicEnginePins(placed: HomeMarketPin | null): MapEnginePin[] {
+  const base = homeMarketEnginePins().filter((pin) => pin.id === HOME_MARKET_TALISHOUSE_PIN?.id);
+  return placed ? [...base, homeMarketPlacedEnginePin(placed)] : base;
 }

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import HomePinLocationSection from "@/components/build-mapsite/HomePinLocationSection";
 import {
   defaultHomePinLocationValues,
@@ -24,7 +24,12 @@ import {
   homeMarketStepsDone,
   type HomeMarketDraft,
 } from "@/lib/talispros/home-market-flow";
-import { homeMarketDisplayName, type HomeMarketPin } from "@/lib/talisu/north-america-markets";
+import {
+  homeMarketDisplayName,
+  isPlacedHomeMarket,
+  type HomeMarketPin,
+} from "@/lib/talisu/north-america-markets";
+import HomeMarketCelebration from "./HomeMarketCelebration";
 import HomePagePreview from "./HomePagePreview";
 
 const HOME_MARKET_ADDRESS_INPUT_ID = "home-market-location-street";
@@ -34,14 +39,17 @@ const PIN_ZOOM = 9;
 function startPin(market: HomeMarketPin): HomePinLocationValues {
   return {
     ...defaultHomePinLocationValues,
+    // The visitor already placed this PIN on the map (Ralf, Nov 23).
+    streetAddress: market.address ?? "",
     latitude: String(market.latitude),
     longitude: String(market.longitude),
-    mapZoom: PIN_ZOOM,
+    mapZoom: isPlacedHomeMarket(market) ? Math.max(PIN_ZOOM, market.mapZoom) : PIN_ZOOM,
   };
 }
 
 /** The visitor searched an address or moved the Home PIN off the market point. */
 function pinWasPlaced(pin: HomePinLocationValues, market: HomeMarketPin): boolean {
+  if (isPlacedHomeMarket(market)) return true;
   if (pin.streetAddress.trim() || pin.reverseGeocodedAddress.trim()) return true;
   const lat = Number.parseFloat(pin.latitude);
   const lng = Number.parseFloat(pin.longitude);
@@ -77,6 +85,8 @@ export default function HomeMarketPersonalize({
   /** Aisha's post-build call. Mounted by the Build Mapsite click. */
   const [aishaLive, setAishaLive] = useState(false);
   const [nudge, setNudge] = useState(false);
+  /** Congratulations moment right after Build Mapsite (Ralf, Nov 23). */
+  const [celebrate, setCelebrate] = useState(false);
 
   const draft = useMemo<HomeMarketDraft>(
     () => ({
@@ -117,25 +127,38 @@ export default function HomeMarketPersonalize({
       setBuilt(true);
       // Start Aisha's call from this click, so the browser counts it as the gesture for audio and mic.
       setAishaLive(true);
+      setCelebrate(true);
       return;
     }
     if (accountType) router.push(homeMarketRegisterHref(accountType, market));
   }
+
+  const registerHref = accountType ? homeMarketRegisterHref(accountType, market) : null;
+  const previewRef = useRef<HTMLDivElement>(null);
+  /** Close the Congratulations moment and land on their Mapsite (phones scroll to it). */
+  const endCelebration = useCallback(() => {
+    setCelebrate(false);
+    if (window.matchMedia("(max-width: 1023px)").matches) {
+      previewRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, []);
 
   const actionLabel = stage === "register" ? h.registerMarket : stage === "build" ? h.buildMapsite : h.personalize;
 
   return (
     <div className="relative flex min-h-0 flex-1 flex-col lg:block" data-testid="home-market-personalize-flow" data-stage={stage}>
       {/* Desktop: the Mapsite fills the area behind the form. Phones: below it. */}
-      <div className="order-2 h-[34rem] lg:absolute lg:inset-0 lg:h-auto lg:pl-[min(34rem,42vw)]">
+      <div ref={previewRef} className="order-2 h-[34rem] lg:absolute lg:inset-0 lg:h-auto lg:pl-[min(34rem,42vw)]">
         <HomePagePreview
           market={market}
           draft={draft}
           built={built}
           pin={pin}
           onUpdatePicture={() => photoInputRef.current?.click()}
+          registerHref={registerHref}
         />
       </div>
+      {celebrate ? <HomeMarketCelebration firstName={firstName} onDone={endCelebration} /> : null}
 
       <div className="order-1 w-full bg-white lg:absolute lg:inset-y-0 lg:left-0 lg:z-10 lg:w-[min(34rem,42vw)] lg:overflow-y-auto lg:border-r lg:border-black/5 lg:shadow-[12px_0_40px_rgba(0,0,0,0.12)]">
         <div className="px-5 pb-6 pt-5 sm:px-7">
@@ -204,6 +227,7 @@ export default function HomeMarketPersonalize({
                   type="button"
                   onClick={() => {
                     setAishaLive(false);
+                    setCelebrate(false);
                     setBuilt(false);
                   }}
                   className="text-neutral-600 underline-offset-2 hover:underline"

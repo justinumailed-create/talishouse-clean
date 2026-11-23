@@ -4,24 +4,35 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useT } from "@/lib/i18n/client";
 import { ASSISTANT_PERSONAS } from "@/lib/talispros/assistant-personas";
-import { homeMarketById, type HomeMarketPin } from "@/lib/talisu/north-america-markets";
+import { isPlacedHomeMarket, type HomeMarketPin } from "@/lib/talisu/north-america-markets";
 import HomeMarketMap from "./HomeMarketMap";
 import HomeMarketPersonalize from "./HomeMarketPersonalize";
 
 /**
- * Public Home Market page (Ralf, Nov 21 and 22): Aisha and example Brokerage
- * and Agent particulars on the left, the North American Markets map on the
- * right. A market PIN opens Personalize, where the visitor's own Mapsite
- * builds up behind the form. `?market=<id>` reopens Personalize directly.
+ * Public Home Market page (Ralf, Nov 21, 22 and 23): Aisha with the one
+ * headline and example Brokerage and Agent particulars on the left, the map
+ * on the right. The visitor places their own PIN (no fixed market PINs), then
+ * Personalize builds their Mapsite behind the form.
+ * `?market=pin-<lat>_<lng>&place=<label>` reopens Personalize directly.
  */
-export default function HomeMarketPage({ initialMarketId = null }: { initialMarketId?: string | null }) {
+export default function HomeMarketPage({ initialMarket = null }: { initialMarket?: HomeMarketPin | null }) {
   const t = useT().homeMarket;
-  const [market, setMarket] = useState<HomeMarketPin | null>(() => homeMarketById(initialMarketId));
+  const [market, setMarket] = useState<HomeMarketPin | null>(initialMarket);
+  /** The visitor's own PIN, kept when they go back to the map. */
+  const [placed, setPlaced] = useState<HomeMarketPin | null>(() =>
+    isPlacedHomeMarket(initialMarket) ? initialMarket : null,
+  );
 
   useEffect(() => {
     const url = new URL(window.location.href);
-    if (market) url.searchParams.set("market", market.id);
-    else url.searchParams.delete("market");
+    if (market) {
+      url.searchParams.set("market", market.id);
+      if (market.address) url.searchParams.set("place", market.address);
+      else url.searchParams.delete("place");
+    } else {
+      url.searchParams.delete("market");
+      url.searchParams.delete("place");
+    }
     window.history.replaceState(window.history.state, "", url.toString());
   }, [market]);
 
@@ -38,14 +49,18 @@ export default function HomeMarketPage({ initialMarketId = null }: { initialMark
         <AishaColumn />
       </aside>
       <section className="order-1 flex min-h-0 flex-col lg:order-2">
-        <div className="bg-white px-5 py-3.5 text-center sm:px-6">
-          <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500">{t.kicker}</p>
-          <h1 className="m-0 mt-1 text-[18px] font-semibold leading-snug text-neutral-950 sm:text-[21px]" data-testid="home-market-select-pin">
+        {/* The Tsplits™ Mapsites header stays; the map takes the old headline row (Ralf, Nov 23). */}
+        <div className="bg-white px-5 py-2.5 text-center sm:px-6 lg:py-2">
+          <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-500" data-testid="home-market-kicker">
+            {t.kicker}
+          </p>
+          {/* Phones: the map comes first, so the headline sits above it. */}
+          <p className="m-0 mt-1 text-[17px] font-semibold leading-snug text-neutral-950 lg:hidden" data-testid="home-market-select-pin-mobile">
             {t.selectPin}
-          </h1>
+          </p>
         </div>
-        <div className="relative h-[62dvh] min-h-[20rem] lg:h-auto lg:min-h-0 lg:flex-1">
-          <HomeMarketMap onPersonalize={setMarket} />
+        <div className="relative h-[66dvh] min-h-[22rem] lg:h-auto lg:min-h-0 lg:flex-1">
+          <HomeMarketMap placed={placed} onPlace={setPlaced} onPersonalize={setMarket} />
         </div>
       </section>
     </div>
@@ -74,9 +89,12 @@ function AishaColumn() {
           <p className="m-0 mt-0.5 text-[22px] font-semibold text-neutral-950">{t.aishaName}</p>
         </div>
       </div>
-      <p className="mt-4 rounded-2xl rounded-tl-sm bg-[#f4f6f8] px-4 py-3 text-[15px] leading-relaxed text-neutral-800">
-        {t.aishaLine}
-      </p>
+      <h1
+        className="m-0 mt-4 hidden rounded-2xl rounded-tl-sm bg-[#f4f6f8] px-4 py-3 text-[18px] font-semibold leading-snug text-neutral-950 lg:block"
+        data-testid="home-market-select-pin"
+      >
+        {t.selectPin}
+      </h1>
 
       <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow-[0_4px_18px_rgba(0,0,0,0.08)] ring-1 ring-black/5" data-testid="home-market-sample">
         <div className="flex items-center justify-between bg-[#046BD9] px-4 py-2.5 text-white">

@@ -48,6 +48,12 @@ interface GoogleAddressInputProps {
    * "Enable Password AutoFill" prompt appears under it.
    */
   ignorePasswordManagers?: boolean;
+  /** Places result types (default street addresses only). */
+  placeTypes?: string[];
+  /** ISO country codes to limit suggestions to, for example ["ca", "us"]. */
+  countries?: string[];
+  /** Extra classes for the input (default keeps the form look). */
+  inputClassName?: string;
 }
 
 /**
@@ -74,7 +80,12 @@ export default function GoogleAddressInput({
   name,
   autoComplete = "street-address",
   ignorePasswordManagers = false,
+  placeTypes,
+  countries,
+  inputClassName,
 }: GoogleAddressInputProps) {
+  const typesKey = (placeTypes ?? ["address"]).join(",");
+  const countriesKey = (countries ?? []).join(",");
   const inputRef = useRef<HTMLInputElement>(null);
   const onPlaceSelectedRef = useRef(onPlaceSelected);
 
@@ -106,7 +117,8 @@ export default function GoogleAddressInput({
 
         autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
           fields: ["formatted_address", "geometry", "name"],
-          types: ["address"],
+          types: typesKey.split(","),
+          ...(countriesKey ? { componentRestrictions: { country: countriesKey.split(",") } } : {}),
         });
 
         listener = autocomplete.addListener("place_changed", () => {
@@ -140,7 +152,7 @@ export default function GoogleAddressInput({
         listener.remove();
       }
     };
-  }, [apiKey]);
+  }, [apiKey, typesKey, countriesKey]);
 
   return (
     <div>
@@ -174,7 +186,7 @@ export default function GoogleAddressInput({
         data-bwignore={ignorePasswordManagers ? "true" : undefined}
         data-form-type={ignorePasswordManagers ? "other" : undefined}
         placeholder={placeholder}
-        className={`w-full h-11 px-4 bg-white border text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-xl ${
+        className={inputClassName ?? `w-full h-11 px-4 bg-white border text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/20 transition-all rounded-xl ${
           error || invalid ? "border-red-300" : "border-neutral-200"
         }`}
       />

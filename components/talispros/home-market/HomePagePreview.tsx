@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo } from "react";
 import DemoHeroMap, { type DemoHeroMapPin } from "@/components/talispros/demo-mapsite/DemoHeroMap";
 import type { HomePinLocationValues } from "@/components/build-mapsite/home-pin-types";
@@ -27,12 +28,15 @@ export default function HomePagePreview({
   built,
   pin,
   onUpdatePicture,
+  registerHref = null,
 }: {
   market: HomeMarketPin;
   draft: HomeMarketDraft;
   built: boolean;
   pin: HomePinLocationValues;
   onUpdatePicture?: () => void;
+  /** After Build Mapsite: Register (with Aisha's code) to place more PINs. */
+  registerHref?: string | null;
 }) {
   const t = useT().homeMarket;
   const opacity = homeMarketPreviewOpacity(draft, built);
@@ -107,6 +111,24 @@ export default function HomePagePreview({
             testId="home-market-preview"
             cardOffsetClass="top-4 lg:top-8"
           />
+          {built && registerHref ? (
+            <div
+              className="absolute inset-x-3 bottom-4 mx-auto max-w-[34rem] rounded-2xl bg-white/95 p-4 shadow-[0_16px_40px_rgba(0,0,0,0.32)] ring-2 ring-[#046BD9]/40 backdrop-blur-sm sm:p-5"
+              style={{ zIndex: 40 }}
+              data-testid="home-market-add-pins"
+            >
+              <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#046BD9]">{t.addPinsKicker}</p>
+              <p className="m-0 mt-1 text-[18px] font-semibold leading-snug text-neutral-950 sm:text-[20px]">{t.addPinsTitle}</p>
+              <p className="m-0 mt-1 text-[14px] leading-snug text-neutral-700">{t.addPinsBody}</p>
+              <Link
+                href={registerHref}
+                data-testid="home-market-add-pins-register"
+                className="mt-3 flex h-12 w-full items-center justify-center rounded-full bg-[#046BD9] text-[16px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] transition hover:bg-[#0558b3]"
+              >
+                {t.addPinsCta}
+              </Link>
+            </div>
+          ) : null}
         </div>
       </div>
     </section>

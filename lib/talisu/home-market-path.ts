@@ -1,2 +1,2 @@
-/** Public Home Market page (45 PIN map + Personalize). */
+/** Public Home Market page (place-your-own-PIN map + Personalize). */
 export const HOME_MARKET_PATH = "/home-market";

@@ -144,7 +144,8 @@ export function localizeTalisUUsMktsPins(
     }
     return {
       ...pin,
-      description: `${copy.us.anchorsLabel}: ${pin.anchors.join(", ")}. ${copy.marketDescription}`,
+      // No city names on the map cards; Canada shows none either (Ralf, Nov 23).
+      description: copy.marketDescription,
       nextLabel: copy.nextLabel,
     };
   });
