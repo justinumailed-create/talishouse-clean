@@ -114,12 +114,13 @@ export const HOME_MARKET_AISHA_ENTRY_CONTEXT = "build_complete";
 
 /**
  * Aisha's spoken opening after Build Mapsite. Her agent speaks English, so
- * this stays English on every locale. It ends with the v8 pricing question.
+ * this stays English on every locale. It asks whether they want to register
+ * and add more PINs, before pricing.
  */
 export function homeMarketAishaFirstMessage(firstName: string): string {
   const name = cleanFirstName(firstName);
   const hello = name ? `Good job, ${name}.` : "Good job.";
-  return `${hello} Your market is available. We look forward to working with you. Would you like me to explain pricing?`;
+  return `${hello} Your Mapsite is ready. Would you like to register now so you can add more PINs?`;
 }
 
 /**

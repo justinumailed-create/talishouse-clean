@@ -1295,7 +1295,7 @@ export const en = {
     bookPageOf: "Page {page} of {total}",
     bookCallTitle: "Questions about Talishouse™ units?",
     bookCallBody: "Talk to Webster about your property, pricing and the right level of finish.",
-    bookCallCta: "Book a call with Webster",
+    bookCallCta: "Talk to Webster about a project",
     bookLossTitle: "Every empty night is income lost.",
     bookLossBody: "A luxury Talishouse™ unit on your property could be earning short-term rental income every night. Each month without one is income you never get back.",
   },

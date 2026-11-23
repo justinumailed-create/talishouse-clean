@@ -7,7 +7,7 @@
  * from Ralf's PDF of Nov 23. Only the book itself is used: the Aisha call
  * script and Q&A that followed it in the PDF are not part of the web book.
  * On the Pricing page the blank Notes lines are replaced, for the web, by a
- * "Book a call with Webster" button over that area. Webster's portrait
+ * "Talk to Webster about a project" button over that area. Webster's portrait
  * (last page) uses the same passport-style grey backdrop as Aisha's portrait.
  */
 
@@ -18,8 +18,8 @@ export const WEBSTER_BOOK_PAGE_COUNT = 8;
 export const WEBSTER_BOOK_PRICING_PAGE = 7;
 /** First full photo page after the pitch: the "income lost" line sits on it (Ralf, Nov 23). */
 export const WEBSTER_BOOK_LOSS_PAGE = 3;
-/** Webster's call page (his guide with the live call opened). */
-export const WEBSTER_CALL_HREF = "/webster?call=1";
+/** Webster TWO (projects) with the live call opened. */
+export const WEBSTER_CALL_HREF = "/webster/project?call=1";
 export const WEBSTER_BOOK_COVER = websterBookPageSrc(1);
 
 /** Same in every language (proper title of Ralf's book). */

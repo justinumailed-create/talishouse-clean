@@ -173,7 +173,7 @@ export default function WebsterBook() {
   );
 }
 
-/** Web version of the Pricing page: "Book a call with Webster" where the print Notes lines were. */
+/** Web version of the Pricing page: "Talk to Webster about a project" where the print Notes lines were. */
 function CallWebsterPanel() {
   const t = useT().homeMarket;
   return (

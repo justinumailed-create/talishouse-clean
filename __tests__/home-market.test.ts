@@ -189,9 +189,9 @@ describe("Personalize flow", () => {
     expect(JSON.parse(homeMarketAishaDynamicVariables("", market, null)).account_type).toBe("");
     expect(homeMarketAishaDynamicVariables("<Sam>", market, null)).not.toContain("<");
     expect(homeMarketAishaFirstMessage("Sam")).toBe(
-      "Good job, Sam. Your market is available. We look forward to working with you. Would you like me to explain pricing?",
+      "Good job, Sam. Your Mapsite is ready. Would you like to register now so you can add more PINs?",
     );
-    expect(homeMarketAishaFirstMessage("  ")).toMatch(/^Good job\. Your market is available\./);
+    expect(homeMarketAishaFirstMessage("  ")).toMatch(/^Good job\. Your Mapsite is ready\./);
     expect(homeMarketAishaFirstMessage("Sam")).not.toMatch(/[—–]/);
   });
 
@@ -389,6 +389,9 @@ describe("Ralf, Nov 23: place your own PIN, zoom, Webster book, celebration, Map
     const viewer = read("components/talispros/webster-book/WebsterBook.tsx");
     expect(viewer).toContain("CATALOGUE_HREF");
     expect(viewer).toContain("WEBSTER_CALL_HREF");
+    expect(book.WEBSTER_CALL_HREF).toBe("/webster/project?call=1");
+    expect(en.homeMarket.bookCallCta).toBe("Talk to Webster about a project");
+    expect(de.homeMarket.bookCallCta).toBe("Mit Webster über ein Projekt sprechen");
     expect(viewer).toContain("IncomeLostBand");
     expect(viewer).toContain("100cqh");
     expect(viewer).toContain('aspectRatio: "792 / 612"');

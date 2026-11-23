@@ -1653,7 +1653,7 @@ export const de: Dictionary = {
     bookPageOf: "Seite {page} von {total}",
     bookCallTitle: "Fragen zu Talishouse™ Einheiten?",
     bookCallBody: "Sprechen Sie mit Webster über Ihr Grundstück, die Preise und die passende Ausbaustufe.",
-    bookCallCta: "Gespräch mit Webster buchen",
+    bookCallCta: "Mit Webster über ein Projekt sprechen",
     bookLossTitle: "Jede leere Nacht ist verlorenes Einkommen.",
     bookLossBody: "Eine luxuriöse Talishouse™ Einheit auf Ihrem Grundstück könnte jede Nacht Einnahmen aus Kurzzeitvermietung bringen. Jeder Monat ohne sie ist Einkommen, das nie zurückkommt.",
   },
