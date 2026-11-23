@@ -109,10 +109,16 @@ describe("bookshelf portrait OG", () => {
       path: "/catalogue/bookshelf",
       image,
     });
-    expect(meta.openGraph?.images).toEqual([image]);
+    const shared = {
+      url: "https://www.tsplits.com/og/tsplits-windswept.jpg",
+      width: 1200,
+      height: 630,
+      alt: "Tsplits™ Windswept tree logo",
+    };
+    expect(meta.openGraph?.images).toEqual([shared]);
     expect(meta.twitter).toMatchObject({
       card: "summary_large_image",
-      images: [image.url],
+      images: [shared.url],
     });
   });
 });

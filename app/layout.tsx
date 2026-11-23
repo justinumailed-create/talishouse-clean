@@ -10,6 +10,11 @@ import { LocaleProvider } from "@/lib/i18n/client";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { LOCALE_HTML_LANG } from "@/lib/i18n/config";
+import {
+  PAGE_SEO_SITE_URL,
+  TSPLITS_OG_IMAGE_ALT,
+  TSPLITS_OG_IMAGE_URL,
+} from "@/lib/seo/page-seo";
 
 /** Supabase production is ca-central-1. Keep functions in Montreal (yul1). */
 export const preferredRegion = "yul1";
@@ -29,13 +34,33 @@ const ROOT_ICONS: Metadata["icons"] = {
 
 export async function generateMetadata(): Promise<Metadata> {
   const d = getDictionary(await getLocale());
+  const ogImage = {
+    url: TSPLITS_OG_IMAGE_URL,
+    width: 1200,
+    height: 630,
+    alt: TSPLITS_OG_IMAGE_ALT,
+  };
   return {
-    metadataBase: new URL("https://www.talishouse.com"),
+    metadataBase: new URL(PAGE_SEO_SITE_URL),
     title: d.meta.root.title,
     description: d.meta.root.description,
     keywords:
-      "modular homes,cottages,prefab homes,tiny homes,affordable housing,lease to own homes",
+      "tsplits, mapsites, home market, FAST codes, real estate marketing, Talisbooks, TalisTV",
     icons: ROOT_ICONS,
+    openGraph: {
+      title: d.meta.root.title,
+      description: d.meta.root.description,
+      url: PAGE_SEO_SITE_URL,
+      siteName: "Tsplits™",
+      type: "website",
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: d.meta.root.title,
+      description: d.meta.root.description,
+      images: [TSPLITS_OG_IMAGE_URL],
+    },
   };
 }
 

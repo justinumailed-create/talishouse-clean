@@ -110,7 +110,14 @@ describe("Tsplits™ brand OG (homepage + T-All catalogue)", () => {
     expect(chroma).toBeGreaterThan(10);
   });
 
-  it("emits absolute talispros.com OG metadata for homepage and catalogue", () => {
+  it("emits the shared Windswept Tsplits™ card for homepage and catalogue metadata", () => {
+    const shared = {
+      url: "https://www.tsplits.com/og/tsplits-windswept.jpg",
+      width: 1200,
+      height: 630,
+      alt: "Tsplits™ Windswept tree logo",
+    };
+    // Legacy helper still describes the old /api/og card; metadata ignores it.
     expect(resolveTalisprosBrandOgImage()).toBe(
       "https://www.talispros.com/api/og/talispros",
     );
@@ -130,10 +137,10 @@ describe("Tsplits™ brand OG (homepage + T-All catalogue)", () => {
       path: "/",
       image,
     });
-    expect(home.openGraph?.images).toEqual([image]);
+    expect(home.openGraph?.images).toEqual([shared]);
     expect(home.twitter).toMatchObject({
       card: "summary_large_image",
-      images: [image.url],
+      images: [shared.url],
     });
 
     const catalogue = createMetadata({
@@ -142,13 +149,6 @@ describe("Tsplits™ brand OG (homepage + T-All catalogue)", () => {
       path: "/catalogue",
       image: talisprosBrandOgMetadataImage("T-All Catalogue | Tsplits™"),
     });
-    expect(catalogue.openGraph?.images).toEqual([
-      {
-        url: "https://www.talispros.com/api/og/talispros",
-        width: TALISPROS_OG_WIDTH,
-        height: TALISPROS_OG_HEIGHT,
-        alt: "T-All Catalogue | Tsplits™",
-      },
-    ]);
+    expect(catalogue.openGraph?.images).toEqual([shared]);
   });
 });

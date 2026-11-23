@@ -1320,12 +1320,12 @@ export const en = {
     catalogue: {
       title: "Catalogue | Talishouse™ Product Catalogue",
       description:
-        "Talishouse™ Product Catalogue design ideas. Every design is numbered (P01, P02…) — tap one to register for that product.",
+        "Talishouse™ Product Catalogue design ideas. Every design is numbered (P01, P02…). Tap one to register for that product.",
     },
     talisuKb: {
       title: "Tsplits™ | Knowledge Base",
       description:
-        "Tsplits™ Knowledge Base — Audios, Videos, and Learning Material for Mapsites and FAST Codes™.",
+        "Tsplits™ Knowledge Base: audios, videos, and learning material for Mapsites and FAST Codes™.",
     },
     talisuVideo: {
       title: "Tsplits™ | Video",
@@ -1335,7 +1335,7 @@ export const en = {
     talisuAudio: {
       title: "Tsplits™ | Audio",
       description:
-        "Listen to Tsplits™ audio — a short welcome autoplays, plus Aisha & Thorsten P on digital property fractionalization.",
+        "Listen to Tsplits™ audio: a short welcome autoplays, plus Aisha and Thorsten P on digital property fractionalization.",
     },
     talisuMarkets: {
       title: "Tsplits™ | Markets served",
@@ -1343,9 +1343,9 @@ export const en = {
         "Place your own PIN in Canada or the USA to claim a Home Market of 100,000 people (+/-) on the Tsplits™ Mapsites map.",
     },
     root: {
-      title: "Talishouse | Homes & Cottages",
+      title: "Tsplits™ | Claim Your Market, Open Your Mapsite",
       description:
-        "Modern homes and cottages starting from $58.50 per sq.ft. . Built in a day, move-in ready in a week. Lease-to-own options available.",
+        "Tsplits™ is the Talisman Simple Project Lead & Income Tracking System. Claim your market and open your Mapsite.",
     },
     home: {
       title: "Tsplits™",
@@ -1354,18 +1354,18 @@ export const en = {
     talisuLayout: {
       title: "Tsplits™",
       description:
-        "Industry adjacent fulfilment options — Conventional, Lease-to-Own, Fractionalization, and Tokenization.",
+        "Industry adjacent fulfilment options: Conventional, Lease-to-Own, Fractionalization, and Tokenization.",
     },
     talisuFaq: {
       title: "Tsplits™ | FAQ",
       description:
-        "Frequently asked questions about Tsplits™, Mapsites, and Tsplits™.",
+        "Frequently asked questions about Tsplits™, Mapsites, FAST Codes, Talisbooks™ and TalisTV™.",
     },
     talisuRegister: {
       title: "Register Your Tsplits™ Mapsite and Get Global Exposure | Tsplits™",
       description:
         "Industry adjacent marketing that gets your Mapsite global exposure: Mapsites, Talisbooks™ (TEB), listing analysis (TVA) and TalisTV™ (TTV). Register today and work with Aisha C.'s team.",
-      ogImage: "/og/talisu-reg-en.jpg",
+      ogImage: "/og/tsplits-windswept.jpg",
       ogImageAlt:
         "Aisha C., Team Leader, with the Tsplits™ tree logo: Register your Mapsite and get global exposure with industry adjacent marketing",
     },
@@ -1373,7 +1373,7 @@ export const en = {
       title: "Engage Thorsten P and His Fulfilment Team | Tsplits™",
       description:
         "Every project starts with your vision. Choose a Talishouse™ design from the catalogue and engage Thorsten P and his Fulfilment Team. Your $2,000 CAD down payment is credited in full.",
-      ogImage: "/og/talisu-engage-en.jpg",
+      ogImage: "/og/tsplits-windswept.jpg",
       ogImageAlt:
         "Thorsten P, Team Leader for fulfilment options, with the Tsplits™ tree logo: Engage Thorsten P and his Fulfilment Team to bring your project vision to life",
     },

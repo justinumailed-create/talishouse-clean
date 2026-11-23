@@ -48,18 +48,18 @@ describe("/register share metadata", () => {
       const og = meta.openGraph as Record<string, unknown>;
       const [image] = og.images as Array<Record<string, unknown>>;
       expect(image).toMatchObject({
-        url: `https://www.talispros.com${m.ogImage}`,
+        url: "https://www.tsplits.com/og/tsplits-windswept.jpg",
         width: 1200,
         height: 630,
-        alt: m.ogImageAlt,
+        alt: "Tsplits™ Windswept tree logo",
       });
       expect(og.siteName).toBe("Tsplits™");
       expect(og.locale).toBe(locale === "de" ? "de_DE" : "en_US");
       expect(og.alternateLocale).toEqual([locale === "de" ? "en_US" : "de_DE"]);
       expect(og.url).toBe(
         locale === "de"
-          ? "https://www.talispros.com/register?lang=de"
-          : "https://www.talispros.com/register",
+          ? "https://www.tsplits.com/register?lang=de"
+          : "https://www.tsplits.com/register",
       );
       expect((meta.twitter as Record<string, unknown>).card).toBe(
         "summary_large_image",

@@ -10,9 +10,9 @@ import {
 } from "../lib/seo/page-seo";
 
 /**
- * Standing rule: every page gets its own title, description and a dedicated
- * 1200×630 share card (EN + DE). A new app/**\/page.tsx fails here until it is
- * registered in scripts/og/pages_src.py (then `python3 scripts/og/generate.py`)
+ * Standing rule: every page gets its own title and description (EN + DE).
+ * Every page shares one 1200×630 Windswept Tsplits™ card. A new
+ * app/**\/page.tsx fails here until it is registered in lib/seo/pages.json
  * and calls pageMetadata("<route>"), or is an internal tool under an
  * adminMetadata() layout.
  */
@@ -114,10 +114,6 @@ describe("every page has page-specific SEO and a share card", () => {
       }
       if (entry.kind === "custom") {
         expect(src).toMatch(/generateMetadata/);
-        expect(src).toMatch(/ogImage/);
-        for (const locale of ["en", "de"]) {
-          expect(existsSync(path.join(PUBLIC, `${entry.image}-${locale}.jpg`))).toBe(true);
-        }
         return;
       }
       expect(src).toContain(`pageMetadata("${route}")`);
@@ -126,8 +122,8 @@ describe("every page has page-specific SEO and a share card", () => {
         expect(copy.title.length, copy.title).toBeLessThanOrEqual(60);
         expect(copy.description.length, copy.description).toBeLessThanOrEqual(155);
         const text = `${copy.title} ${copy.description} ${copy.alt}`;
-        expect(text).not.toMatch(/Mapsites?™|USD|\$/);
-        const img = path.join(PUBLIC, pageOgImagePath(entry.image!, locale));
+        expect(text).not.toMatch(/Mapsites?™|USD|\$|talispros|taliswebs/i);
+        const img = path.join(PUBLIC, pageOgImagePath(entry.image, locale));
         expect(existsSync(img), img).toBe(true);
         expect(jpegSize(img)).toEqual({ width: 1200, height: 630 });
 
@@ -138,13 +134,13 @@ describe("every page has page-specific SEO and a share card", () => {
         expect(og.title).toBe(copy.title);
         expect(og.description).toBe(copy.description);
         expect(image).toMatchObject({
-          url: `https://www.talispros.com/og/pages/${path.basename(img)}`,
+          url: "https://www.tsplits.com/og/tsplits-windswept.jpg",
           width: 1200,
           height: 630,
-          alt: copy.alt,
+          alt: "Tsplits™ Windswept tree logo",
         });
         expect(og.locale).toBe(locale === "de" ? "de_DE" : "en_US");
-        expect(String(og.url)).toMatch(locale === "de" ? /\?lang=de$/ : /^https:\/\/www\.talispros\.com/);
+        expect(String(og.url)).toMatch(locale === "de" ? /\?lang=de$/ : /^https:\/\/www\.tsplits\.com/);
         expect((meta.twitter as Record<string, unknown>).card).toBe("summary_large_image");
         const robots = meta.robots as { index: boolean };
         expect(robots.index).toBe(entry.kind === "public");
@@ -152,13 +148,21 @@ describe("every page has page-specific SEO and a share card", () => {
     });
   }
 
-  it("admin card is shared, noindex, 1200×630 in EN and DE", () => {
+  it("admin card is shared, noindex, and uses the Windswept image in EN and DE", () => {
+    const img = path.join(PUBLIC, pageOgImagePath());
+    expect(existsSync(img), img).toBe(true);
+    expect(jpegSize(img)).toEqual({ width: 1200, height: 630 });
     for (const locale of ["en", "de"] as const) {
       const meta = buildAdminMetadata(locale, "Leads");
       expect(meta.title).toBe("Leads | Tsplits™ Admin");
       expect((meta.robots as { index: boolean }).index).toBe(false);
-      const img = path.join(PUBLIC, `og/pages/admin-${locale}.jpg`);
-      expect(jpegSize(img)).toEqual({ width: 1200, height: 630 });
+      const og = meta.openGraph as Record<string, unknown>;
+      const [image] = og.images as Array<Record<string, unknown>>;
+      expect(image).toMatchObject({
+        url: "https://www.tsplits.com/og/tsplits-windswept.jpg",
+        width: 1200,
+        height: 630,
+      });
     }
   });
 });

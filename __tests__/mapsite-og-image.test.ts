@@ -388,10 +388,16 @@ describe("Mapsite and viewer share image selection", () => {
       path: "/map/dc02",
       image: mapsiteImage,
     });
-    expect(meta.openGraph?.images).toEqual([mapsiteImage]);
+    const shared = {
+      url: "https://www.tsplits.com/og/tsplits-windswept.jpg",
+      width: 1200,
+      height: 630,
+      alt: "Tsplits™ Windswept tree logo",
+    };
+    expect(meta.openGraph?.images).toEqual([shared]);
     expect(meta.twitter).toMatchObject({
       card: "summary_large_image",
-      images: [mapsiteImage.url],
+      images: [shared.url],
     });
   });
 

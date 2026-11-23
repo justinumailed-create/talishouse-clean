@@ -9,16 +9,19 @@ import {
 import data from "./pages.json";
 
 /**
- * Page-specific SEO for every route (Arun's standing rule): own title,
- * description and a dedicated 1200×630 share card in EN and DE.
+ * Page-specific SEO for every route: own title and description in EN and DE.
+ * Every page shares one Open Graph / Twitter image, the Windswept tree logo
+ * on white with the Tsplits™ wordmark (`public/og/tsplits-windswept.jpg`).
+ * Canonical and og:url always use https://www.tsplits.com.
  *
- * Copy + card design live in scripts/og/pages_src.py; `python3
- * scripts/og/generate.py` renders public/og/pages/<slug>-<locale>.jpg and
- * writes ./pages.json. Static JPGs only, so no OG route reads the filesystem.
- * Internal admin/agent pages share one "Tsplits™ Admin" card and are noindex.
+ * Copy lives in ./pages.json. Internal admin/agent pages share the same
+ * image, use "Tsplits™ Admin" titles, and are noindex.
  */
 
-export const PAGE_SEO_SITE_URL = "https://www.talispros.com";
+export const PAGE_SEO_SITE_URL = "https://www.tsplits.com";
+export const TSPLITS_OG_IMAGE_PATH = "/og/tsplits-windswept.jpg";
+export const TSPLITS_OG_IMAGE_URL = `${PAGE_SEO_SITE_URL}${TSPLITS_OG_IMAGE_PATH}`;
+export const TSPLITS_OG_IMAGE_ALT = "Tsplits™ Windswept tree logo";
 
 type LocaleCopy = { title: string; description: string; alt: string };
 export type PageSeoEntry = {
@@ -38,9 +41,20 @@ const ADMIN_SEO = data.admin as {
 
 export type PageSeoRoute = keyof typeof data.pages;
 
-/** Root-relative share card path for a page in a locale. */
-export function pageOgImagePath(image: string, locale: Locale): string {
-  return `${image}-${locale}.jpg`;
+/** Shared Windswept share-card path. Locale arguments are ignored. */
+export function pageOgImagePath(image?: string, locale?: Locale): string {
+  void image;
+  void locale;
+  return TSPLITS_OG_IMAGE_PATH;
+}
+
+function ogImage(alt = TSPLITS_OG_IMAGE_ALT) {
+  return {
+    url: TSPLITS_OG_IMAGE_URL,
+    width: 1200,
+    height: 630,
+    alt,
+  };
 }
 
 function build(input: {
@@ -48,15 +62,13 @@ function build(input: {
   description: string;
   path: string;
   locale: Locale;
-  image: string;
-  alt: string;
+  alt?: string;
   noindex: boolean;
   siteName?: string;
 }): Metadata {
   const url =
     input.path === "/" ? PAGE_SEO_SITE_URL : `${PAGE_SEO_SITE_URL}${input.path}`;
-  const imageUrl = `${PAGE_SEO_SITE_URL}${input.image}`;
-  const image = { url: imageUrl, width: 1200, height: 630, alt: input.alt };
+  const image = ogImage(input.alt ?? TSPLITS_OG_IMAGE_ALT);
   return {
     metadataBase: new URL(PAGE_SEO_SITE_URL),
     title: input.title,
@@ -76,7 +88,7 @@ function build(input: {
       card: "summary_large_image",
       title: input.title,
       description: input.description,
-      images: [{ url: imageUrl, alt: input.alt }],
+      images: [{ url: image.url, alt: image.alt }],
     },
     robots: input.noindex
       ? { index: false, follow: false }
@@ -101,14 +113,14 @@ export function buildPageMetadata(
 ): Metadata {
   const entry = PAGE_SEO[route];
   const copy = entry?.[locale];
-  if (!entry?.image || !copy) {
+  if (!entry || !copy) {
     throw new Error(`No page SEO registered for ${route}`);
   }
   return build({
-    ...copy,
+    title: copy.title,
+    description: copy.description,
     path: route,
     locale,
-    image: pageOgImagePath(entry.image, locale),
     noindex: Boolean(entry.noindex),
     siteName: "Tsplits™",
   });
@@ -126,39 +138,29 @@ export function buildAdminMetadata(
     description: copy.description,
     path,
     locale,
-    image: pageOgImagePath(ADMIN_SEO.image, locale),
-    alt: copy.alt,
     noindex: true,
   });
 }
 
 /**
- * Per-record pages (individual Mapsites, books): name-based title with a
- * generated share card (e.g. /api/og/mapsite/<code>).
+ * Per-record pages (individual Mapsites, books): name-based title and
+ * description, always with the shared Windswept share card.
  */
 export function buildDynamicMetadata(input: {
   title: string;
   description: string;
   path: string;
   locale: Locale;
-  /** Absolute URL or root-relative path of the generated 1200×630 card. */
-  image: string;
+  /** Ignored: every page uses the shared Windswept card. */
+  image?: string;
   alt?: string;
   noindex?: boolean;
 }): Metadata {
-  const meta = build({
+  return build({
     title: input.title,
     description: input.description,
     path: input.path,
     locale: input.locale,
-    image: input.image,
-    alt: input.alt ?? input.title,
     noindex: Boolean(input.noindex),
   });
-  if (/^https?:\/\//.test(input.image)) {
-    const image = { url: input.image, width: 1200, height: 630, alt: input.alt ?? input.title };
-    meta.openGraph = { ...meta.openGraph, images: [image] };
-    meta.twitter = { ...meta.twitter, images: [{ url: image.url, alt: image.alt }] };
-  }
-  return meta;
 }

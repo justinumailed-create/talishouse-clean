@@ -23,7 +23,7 @@ describe("admin SEO metadata", () => {
 });
 
 describe("createMetadata", () => {
-  it("omits Open Graph and Twitter images when image is false", () => {
+  it("uses the shared Windswept card even when a caller passes image: false", () => {
     const meta = createMetadata({
       title: "Mapsite AL02",
       description: "Tsplits™ Mapsite for FAST Code AL02.",
@@ -31,28 +31,38 @@ describe("createMetadata", () => {
       image: false,
     });
 
-    expect(meta.openGraph?.images).toEqual([]);
+    const images = meta.openGraph?.images as Array<{ url: string }>;
+    expect(images?.[0]?.url).toBe("https://www.tsplits.com/og/tsplits-windswept.jpg");
     expect(meta.twitter).toMatchObject({
-      card: "summary",
+      card: "summary_large_image",
       title: "Mapsite AL02",
       description: "Tsplits™ Mapsite for FAST Code AL02.",
     });
-    expect(meta.twitter && "images" in meta.twitter ? meta.twitter.images : undefined).toBeUndefined();
-    expect(meta.alternates?.canonical).toBe("https://www.talishouse.com/mapsite/al02");
+    expect(meta.twitter && "images" in meta.twitter ? meta.twitter.images : undefined).toEqual([
+      "https://www.tsplits.com/og/tsplits-windswept.jpg",
+    ]);
+    expect(meta.alternates?.canonical).toBe("https://www.tsplits.com/mapsite/al02");
   });
 });
 
 describe("Talisbooks™ viewer share metadata", () => {
-  it("points og:image at the front cover and description at the book meta description", () => {
+  it("keeps unique book titles and descriptions, and uses the shared Windswept card", () => {
     const page = readFileSync(
       resolve("app/talisbooks/viewer/[slug]/page.tsx"),
       "utf8",
     );
-    expect(page).toContain("resolveViewerShareCoverUrl");
+    expect(page).toContain("createMetadata");
     expect(page).toContain("description: book.description");
-    expect(page).toContain("frontCoverImageUrl: book.frontCoverImageUrl");
-    // Parting-shot OG path stays as fallback only.
-    expect(page).toContain("talisbooksViewerShareOgPath");
-    expect(page).toMatch(/coverUrl\s*\?[\s\S]*mapsiteOgMetadataImage\(coverUrl/);
+    const meta = createMetadata({
+      title: "Example Book | Talisbooks™",
+      description: "A Talisbook on Tsplits™.",
+      path: "/talisbooks/viewer/example",
+      image: { url: "https://cdn.example/cover.jpg", width: 1200, height: 630, alt: "Cover" },
+    });
+    const images = meta.openGraph?.images as Array<{ url: string }>;
+    expect(images?.[0]?.url).toBe("https://www.tsplits.com/og/tsplits-windswept.jpg");
+    expect(meta.alternates?.canonical).toBe(
+      "https://www.tsplits.com/talisbooks/viewer/example",
+    );
   });
 });

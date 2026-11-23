@@ -1678,12 +1678,12 @@ export const de: Dictionary = {
     catalogue: {
       title: "Katalog | Talishouse™ Produktkatalog",
       description:
-        "Designideen aus dem Talishouse™ Produktkatalog. Jedes Design ist nummeriert (P01, P02 …) – tippen Sie auf ein Design, um sich für dieses Produkt zu registrieren.",
+        "Designideen aus dem Talishouse™ Produktkatalog. Jedes Design ist nummeriert (P01, P02 …). Tippen Sie auf ein Design, um sich für dieses Produkt zu registrieren.",
     },
     talisuKb: {
       title: "Tsplits™ | Wissensdatenbank",
       description:
-        "Tsplits™-Wissensdatenbank – Audios, Videos und Lernmaterial für Mapsites und FAST Codes™.",
+        "Tsplits™-Wissensdatenbank: Audios, Videos und Lernmaterial für Mapsites und FAST Codes™.",
     },
     talisuVideo: {
       title: "Tsplits™ | Video",
@@ -1693,7 +1693,7 @@ export const de: Dictionary = {
     talisuAudio: {
       title: "Tsplits™ | Audio",
       description:
-        "Hören Sie Tsplits™-Audios – eine kurze Begrüßung startet automatisch, dazu Aisha & Thorsten P über die digitale Fraktionalisierung von Immobilien.",
+        "Hören Sie Tsplits™-Audios: eine kurze Begrüßung startet automatisch, dazu Aisha und Thorsten P über die digitale Fraktionalisierung von Immobilien.",
     },
     talisuMarkets: {
       title: "Tsplits™ | Unsere Märkte",
@@ -1701,9 +1701,9 @@ export const de: Dictionary = {
         "Setzen Sie Ihren eigenen PIN in Kanada oder den USA und sichern Sie einen Heimatmarkt mit 100.000 Menschen (+/-) auf der Tsplits™ Mapsites-Karte.",
     },
     root: {
-      title: "Talishouse | Häuser & Cottages",
+      title: "Tsplits™ | Markt sichern, Mapsite eröffnen",
       description:
-        "Moderne Häuser und Cottages ab 58,50 $ pro Quadratfuß. An einem Tag gebaut, in einer Woche bezugsfertig. Mietkauf-Optionen verfügbar.",
+        "Tsplits™ ist das Talisman Simple Project Lead & Income Tracking System. Sichern Sie Ihren Markt und eröffnen Sie Ihre Mapsite.",
     },
     home: {
       title: "Tsplits™",
@@ -1712,26 +1712,26 @@ export const de: Dictionary = {
     talisuLayout: {
       title: "Tsplits™",
       description:
-        "Branchennahe Abwicklungsoptionen – Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung.",
+        "Branchennahe Abwicklungsoptionen: Konventionell, Mietkauf, Fraktionalisierung und Tokenisierung.",
     },
     talisuFaq: {
       title: "Tsplits™ | FAQ",
       description:
-        "Häufig gestellte Fragen zu Tsplits™, Mapsites und Tsplits™.",
+        "Häufig gestellte Fragen zu Tsplits™, Mapsites, FAST Codes, Talisbooks™ und TalisTV™.",
     },
     talisuRegister: {
       title: "Registrieren Sie Ihre Tsplits™ Mapsite: globale Sichtbarkeit | Tsplits™",
       description:
         "Branchennahes Marketing für die globale Sichtbarkeit Ihrer Mapsite: Mapsites, Talisbooks™ (TEB), Angebotsanalyse (TVA) und TalisTV™ (TTV). Registrieren Sie sich jetzt und arbeiten Sie mit dem Team von Aisha C.",
-      ogImage: "/og/talisu-reg-de.jpg",
+      ogImage: "/og/tsplits-windswept.jpg",
       ogImageAlt:
-        "Aisha C., Teamleiterin, mit dem Tsplits™-Baumlogo – Registrieren Sie Ihre Mapsite: globale Sichtbarkeit durch branchennahes Marketing",
+        "Aisha C., Teamleiterin, mit dem Tsplits™-Baumlogo. Registrieren Sie Ihre Mapsite: globale Sichtbarkeit durch branchennahes Marketing",
     },
     talisuEngage: {
       title: "Thorsten P und sein Fulfilment-Team beauftragen | Tsplits™",
       description:
         "Jedes Projekt beginnt mit Ihrer Vision. Wählen Sie ein Talishouse™-Design aus dem Katalog und beauftragen Sie Thorsten P und sein Fulfilment-Team. Ihre Anzahlung von 2.000 CAD wird vollständig angerechnet.",
-      ogImage: "/og/talisu-engage-de.jpg",
+      ogImage: "/og/tsplits-windswept.jpg",
       ogImageAlt:
         "Thorsten P, Teamleiter für Fulfilment-Optionen, mit dem Tsplits™-Baumlogo: Beauftragen Sie Thorsten P und sein Fulfilment-Team für Ihre Projektvision",
     },

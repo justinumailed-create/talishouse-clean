@@ -5,22 +5,26 @@ import {
   ogAlternateLocales,
   ogLocale,
 } from "@/lib/i18n/metadata";
+import {
+  PAGE_SEO_SITE_URL,
+  TSPLITS_OG_IMAGE_ALT,
+  TSPLITS_OG_IMAGE_URL,
+} from "@/lib/seo/page-seo";
 
-const SITE_URL = "https://www.talishouse.com";
+const SITE_URL = PAGE_SEO_SITE_URL;
 const SITE_NAME = "Tsplits™";
 /**
- * Sitewide default Open Graph / Twitter preview when a page omits `image`.
- * Must be the composed homepage brand card (logo+partner+map) — never the
- * oversized standalone /logo.png or /seo/talispros-og.jpg poster.
+ * Sitewide Open Graph / Twitter preview: the shared Windswept tree logo
+ * on white with the Tsplits™ wordmark. Per-page and /api/og cards are not used.
  */
-const OG_IMAGE = "https://www.talispros.com/api/og/talispros";
+const OG_IMAGE = TSPLITS_OG_IMAGE_URL;
 
 export const siteConfig = {
   url: SITE_URL,
   name: SITE_NAME,
   ogImage: OG_IMAGE,
   keywords: [
-    "talispros",
+    "tsplits",
     "mapsites",
     "real estate marketing",
     "referral networks",
@@ -52,34 +56,18 @@ export function createMetadata(overrides: {
   locale?: Locale;
   /**
    * Open Graph / Twitter preview image.
-   * Pass `false` to omit images (title + description only).
+   * Ignored: every page uses the shared Windswept card. The argument is
+   * kept so existing callers compile without change.
    */
   image?: string | CreateMetadataImage | false;
 }): Metadata {
   const url = `${SITE_URL}${overrides.path}`;
-  const omitImage = overrides.image === false;
-  const image = omitImage
-    ? null
-    : typeof overrides.image === "string"
-      ? {
-          url: overrides.image,
-          width: 1200,
-          height: 630,
-          alt: overrides.title,
-        }
-      : overrides.image
-        ? {
-            url: overrides.image.url,
-            width: overrides.image.width ?? 1200,
-            height: overrides.image.height ?? 630,
-            alt: overrides.image.alt ?? overrides.title,
-          }
-        : {
-            url: OG_IMAGE,
-            width: 1200,
-            height: 630,
-            alt: overrides.title,
-          };
+  const image = {
+    url: OG_IMAGE,
+    width: 1200,
+    height: 630,
+    alt: TSPLITS_OG_IMAGE_ALT,
+  };
 
   const robots = overrides.private
     ? { index: false as const, follow: false as const }
@@ -113,20 +101,14 @@ export function createMetadata(overrides: {
       ...(overrides.locale
         ? { alternateLocale: ogAlternateLocales(overrides.locale) }
         : {}),
-      ...(omitImage ? { images: [] } : { images: [image!] }),
+      images: [image],
     },
-    twitter: omitImage
-      ? {
-          card: "summary",
-          title: overrides.title,
-          description: overrides.description,
-        }
-      : {
-          card: "summary_large_image",
-          title: overrides.title,
-          description: overrides.description,
-          images: [image!.url],
-        },
+    twitter: {
+      card: "summary_large_image",
+      title: overrides.title,
+      description: overrides.description,
+      images: [image.url],
+    },
     robots,
   };
 }

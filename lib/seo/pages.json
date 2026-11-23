@@ -6,12 +6,12 @@
    "image": "/og/pages/home",
    "en": {
     "title": "Tsplits™ | Claim Your Market, Open Your Mapsite",
-    "description": "Claim your market on Tsplits™. Your Mapsite pins your place on the map so buyers and partners can find you, with Talisbooks™ and TalisTV™.",
+    "description": "Tsplits™ (Talisman Simple Project Lead & Income Tracking System). Claim your market. Your Mapsite pins you on the map, with Talisbooks™ and TalisTV™.",
     "alt": "Tsplits™ tree logo: Claim your market. Open your Mapsite"
    },
    "de": {
     "title": "Tsplits™ | Markt sichern, Mapsite eröffnen",
-    "description": "Sichern Sie Ihren Markt auf Tsplits™. Ihre Mapsite setzt Sie auf die Karte, damit Käufer und Partner Sie finden – mit Talisbooks™ und TalisTV™.",
+    "description": "Tsplits™ (Talisman Simple Project Lead & Income Tracking System). Sichern Sie Ihren Markt. Ihre Mapsite setzt Sie auf die Karte, mit Talisbooks™, TalisTV™.",
     "alt": "Tsplits™ Baumlogo: Markt sichern. Ihre Mapsite eröffnen"
    }
   },
@@ -208,13 +208,13 @@
    "noindex": false,
    "image": "/og/pages/talisu-tsplits",
    "en": {
-    "title": "Tsplits™ eBook – from Vision to Implementation | Tsplits™",
+    "title": "Tsplits™ eBook: from Vision to Implementation | Tsplits™",
     "description": "Read the Tsplits™ eBook page by page: turn a listing vision into a project with Conventional, Lease-to-Own, Fractionalization or Tokenization.",
     "alt": "Tsplits™ tree logo: Tsplits™ From Vision to Implementation"
    },
    "de": {
-    "title": "Tsplits™ eBook – von der Vision zur Umsetzung | Tsplits™",
-    "description": "Das Tsplits™ eBook zum Blättern: aus einer Listing-Vision wird ein Projekt – Konventionell, Mietkauf, Fraktionalisierung oder Tokenisierung.",
+    "title": "Tsplits™ eBook: von der Vision zur Umsetzung | Tsplits™",
+    "description": "Das Tsplits™ eBook zum Blättern: aus einer Listing-Vision wird ein Projekt, Konventionell, Mietkauf, Fraktionalisierung oder Tokenisierung.",
     "alt": "Tsplits™ Baumlogo: Tsplits™ Von der Vision zur Umsetzung"
    }
   },
@@ -254,12 +254,12 @@
    "image": "/og/pages/talisu-privacy",
    "en": {
     "title": "Privacy Policy | TalisALL (Tsplits™, TalisU)",
-    "description": "How TalisALL collects, uses, shares and protects information across talispros.com, talisu.com, taliswebs.com and talishouse.com, and your privacy rights.",
+    "description": "The Tsplits™ privacy policy: how TalisALL collects, uses, shares and protects your information, and your privacy rights.",
     "alt": "Tsplits™ tree logo: Privacy Policy"
    },
    "de": {
     "title": "Datenschutzerklärung | TalisALL (Tsplits™, TalisU)",
-    "description": "Wie TalisALL Informationen auf talispros.com, talisu.com, taliswebs.com und talishouse.com erhebt, nutzt, teilt und schützt – und Ihre Datenschutzrechte.",
+    "description": "Die Tsplits™-Datenschutzerklärung: wie TalisALL Ihre Daten erhebt, nutzt, teilt und schützt, und Ihre Datenschutzrechte.",
     "alt": "Tsplits™ Baumlogo: Datenschutzerklärung"
    }
   },
@@ -373,12 +373,12 @@
    "noindex": false,
    "image": "/og/pages/income-units",
    "en": {
-    "title": "Income Units, Proposal by Webster | Talishouse™",
+    "title": "Income Units, Proposal by Webster | Tsplits™",
     "description": "Short-term rentals, in-law suites and home office units: Talishouse™ Glasshouse™ designs, from shipping only to turn key.",
     "alt": "Tsplits™ tree logo: Income Units Proposal by Webster"
    },
    "de": {
-    "title": "Income Units, ein Angebot von Webster | Talishouse™",
+    "title": "Income Units, ein Angebot von Webster | Tsplits™",
     "description": "Ferienvermietung, Einliegerwohnung oder Homeoffice: Talishouse™ Glasshouse™ Designs, vom reinen Versand bis schlüsselfertig.",
     "alt": "Tsplits™ Baumlogo: Income Units ein Angebot von Webster"
    }
@@ -1483,6 +1483,10 @@
    "noindex": true
   },
   "/webster": {
+   "kind": "dynamic",
+   "noindex": true
+  },
+  "/webster/project": {
    "kind": "dynamic",
    "noindex": true
   },

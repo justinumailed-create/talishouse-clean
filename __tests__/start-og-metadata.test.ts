@@ -9,7 +9,7 @@ import {
 } from "../lib/talispros/mapsite-og-image";
 
 describe("homepage Open Graph image", () => {
-  it("uses the dedicated home share card (EN + DE), not the brand logo", () => {
+  it("uses the shared Windswept Tsplits™ card (EN + DE), not a per-page or poster image", () => {
     const page = readFileSync(resolve("app/page.tsx"), "utf8");
     expect(page).toContain('pageMetadata("/")');
     expect(page).not.toContain("/logo.png");
@@ -18,13 +18,13 @@ describe("homepage Open Graph image", () => {
       const meta = buildPageMetadata("/", locale);
       const [image] = meta.openGraph?.images as Array<{ url: string; width: number; height: number }>;
       expect(image).toMatchObject({
-        url: `https://www.talispros.com/og/pages/home-${locale}.jpg`,
+        url: "https://www.tsplits.com/og/tsplits-windswept.jpg",
         width: 1200,
         height: 630,
       });
       expect(meta.twitter).toMatchObject({ card: "summary_large_image" });
     }
-    // The old screenshot card stays valid for any external references.
+    // Helper still absolutizes legacy paths against its public origin.
     expect(toAbsoluteHttpsOgUrl("/assets/start-og.png?v=5")).toBe(
       "https://www.talispros.com/assets/start-og.png?v=5",
     );
@@ -40,12 +40,12 @@ describe("homepage Open Graph image", () => {
 
 describe("sitewide default OG", () => {
   it("defaults to the composed brand card, never the oversized standalone logo poster", () => {
-    expect(siteConfig.ogImage).toBe("https://www.talispros.com/api/og/talispros");
+    expect(siteConfig.ogImage).toBe("https://www.tsplits.com/og/tsplits-windswept.jpg");
     expect(isLargeBrandLogoUrl("/logo.png")).toBe(true);
     expect(isLargeBrandLogoUrl("/seo/talispros-og.jpg")).toBe(true);
-    expect(isLargeBrandLogoUrl(siteConfig.ogImage)).toBe(true); // flagged for mapsite scenic only
     expect(siteConfig.ogImage).not.toContain("/logo.png");
     expect(siteConfig.ogImage).not.toContain("/seo/talispros-og");
+    expect(siteConfig.ogImage).not.toContain("/api/og/talispros");
 
     const meta = createMetadata({
       title: "Example",

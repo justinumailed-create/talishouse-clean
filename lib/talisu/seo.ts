@@ -6,9 +6,14 @@ import {
   ogAlternateLocales,
   ogLocale,
 } from "@/lib/i18n/metadata";
-import { TALISU_SITE_URL } from "@/lib/talisu/content";
+import {
+  PAGE_SEO_SITE_URL,
+  TSPLITS_OG_IMAGE_ALT,
+  TSPLITS_OG_IMAGE_URL,
+} from "@/lib/seo/page-seo";
 
-const OG_IMAGE = "https://www.talispros.com/api/og/talispros";
+const SITE_URL = PAGE_SEO_SITE_URL;
+const OG_IMAGE = TSPLITS_OG_IMAGE_URL;
 
 export function createTalisUMetadata(overrides: {
   title: string;
@@ -21,28 +26,22 @@ export function createTalisUMetadata(overrides: {
    */
   locale?: Locale;
   /**
-   * Page-specific Open Graph / Twitter image (absolute URL or root-relative
-   * path under /public). Defaults to the shared Tsplits™ brand card.
+   * Ignored: every page uses the shared Windswept Tsplits™ card.
    */
   image?: { url: string; width?: number; height?: number; alt?: string };
 }): Metadata {
   const path = overrides.path.startsWith("/")
     ? overrides.path
     : `/${overrides.path}`;
-  const url = `${TALISU_SITE_URL}${path}`;
+  const url = `${SITE_URL}${path}`;
   const ogUrl = overrides.locale
     ? localizedUrl(url, overrides.locale)
     : url;
-  const imageUrl = overrides.image
-    ? overrides.image.url.startsWith("http")
-      ? overrides.image.url
-      : `${TALISU_SITE_URL}${overrides.image.url}`
-    : OG_IMAGE;
   const image = {
-    url: imageUrl,
-    width: overrides.image?.width ?? 1200,
-    height: overrides.image?.height ?? 630,
-    alt: overrides.image?.alt ?? overrides.title,
+    url: OG_IMAGE,
+    width: 1200,
+    height: 630,
+    alt: TSPLITS_OG_IMAGE_ALT,
   };
   const robots = overrides.private
     ? { index: false as const, follow: false as const }
@@ -59,7 +58,7 @@ export function createTalisUMetadata(overrides: {
       };
 
   return {
-    metadataBase: new URL(TALISU_SITE_URL),
+    metadataBase: new URL(SITE_URL),
     title: overrides.title,
     description: overrides.description,
     alternates: overrides.locale

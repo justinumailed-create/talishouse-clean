@@ -100,11 +100,11 @@ describe("?lang= alternates", () => {
       },
     });
     const meta = createTalisUMetadata({ title: "t", description: "d", path: "/talisu", locale: "de" });
-    expect(meta.alternates?.canonical).toBe("https://www.talispros.com/talisu?lang=de");
+    expect(meta.alternates?.canonical).toBe("https://www.tsplits.com/talisu?lang=de");
     expect((meta.openGraph as { locale?: string }).locale).toBe("de_DE");
     // Untranslated pages keep their plain English canonical.
     const plain = createMetadata({ title: "t", description: "d", path: "/x" });
-    expect(plain.alternates).toEqual({ canonical: "https://www.talishouse.com/x" });
+    expect(plain.alternates).toEqual({ canonical: "https://www.tsplits.com/x" });
   });
 
   it("middleware forwards ?lang= as a header and persists the cookie", () => {
