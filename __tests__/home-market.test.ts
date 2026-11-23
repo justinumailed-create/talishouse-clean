@@ -348,6 +348,17 @@ describe("Ralf, Nov 23: place your own PIN, zoom, Webster book, celebration, Map
     }
   });
 
+  it("uses Zip / Postal Code wording on the Home Market search (Ralf, Nov 23)", () => {
+    expect(en.homeMarket.intro).toContain("zip / postal code");
+    expect(en.homeMarket.searchLabel).toBe("Search your address or zip / postal code");
+    expect(en.homeMarket.searchPlaceholder).toBe("Your address or zip / postal code");
+    expect(en.homeMarket.searchNotFound).toContain("zip / postal code");
+    expect(de.homeMarket.intro).toContain("PLZ / Postleitzahl");
+    expect(de.homeMarket.searchLabel).toBe("Suchen Sie Ihre Adresse oder PLZ / Postleitzahl");
+    expect(de.homeMarket.searchPlaceholder).toBe("Ihre Adresse oder PLZ / Postleitzahl");
+    expect(de.homeMarket.searchNotFound).toContain("PLZ / Postleitzahl");
+  });
+
   it("draws the visitor's own PIN as solid red with a white circular centre", async () => {
     const mod = await import("@/lib/talisu/north-america-markets");
     const placed = mod.placedHomeMarket({
