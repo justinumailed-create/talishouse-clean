@@ -56,6 +56,14 @@ export function cleanFirstName(value: string): string {
   return value.replace(/\s+/g, " ").trim().slice(0, HOME_MARKET_FIRST_NAME_MAX);
 }
 
+/**
+ * Only the first word of the name entered, for what Aisha says and shows
+ * ("Ralf Meyer" -> "Ralf"). Ralf, Nov 23: never the full or last name.
+ */
+export function spokenFirstName(value: string): string {
+  return cleanFirstName(value).split(/\s+/)[0] ?? "";
+}
+
 /** Required steps: first name, account type, Home PIN. */
 export const HOME_MARKET_REQUIRED_STEPS = 3;
 
@@ -91,7 +99,7 @@ export function homeMarketStage(draft: HomeMarketDraft, built: boolean): HomeMar
 
 /** "Good job, Sam. Your market is available. We look forward to working with you." */
 export function homeMarketGoodJob(firstName: string, template: string): string {
-  const name = cleanFirstName(firstName);
+  const name = spokenFirstName(firstName);
   return template.replace("{name}", name).replace(/ ,/g, ",");
 }
 
@@ -113,14 +121,14 @@ export function homeMarketRegisterHref(accountType: HomeMarketAccountType, marke
 export const HOME_MARKET_AISHA_ENTRY_CONTEXT = "build_complete";
 
 /**
- * Aisha's spoken opening after Build Mapsite. Her agent speaks English, so
- * this stays English on every locale. It asks whether they want to register
- * and add more PINs, before pricing.
+ * Aisha's spoken opening after Build Mapsite (Ralf's script, Nov 24). Her
+ * agent speaks English, so this stays English on every locale. After a pause
+ * she asks whether to explain pricing.
  */
 export function homeMarketAishaFirstMessage(firstName: string): string {
-  const name = cleanFirstName(firstName);
+  const name = spokenFirstName(firstName);
   const hello = name ? `Good job, ${name}.` : "Good job.";
-  return `${hello} Your Mapsite is ready. Would you like to register now so you can add more PINs?`;
+  return `${hello} Your market is available. We look forward to working with you.`;
 }
 
 /**
@@ -135,7 +143,7 @@ export function homeMarketAishaDynamicVariables(
 ): string {
   const vars = {
     signed_in: "no",
-    first_name: cleanFirstName(firstName),
+    first_name: spokenFirstName(firstName),
     home_market: homeMarketDisplayName(market),
     account_type: accountType ?? "",
     entry_context: HOME_MARKET_AISHA_ENTRY_CONTEXT,

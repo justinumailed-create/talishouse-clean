@@ -60,7 +60,8 @@ export function aishaOwnerVariables(
 ): AishaCallVariables {
   const rows = mapsites.filter((row) => CODE.test(row.fastCode.trim().toLowerCase()));
   if (rows.length === 0) return aishaAnonymousVariables();
-  const first = rows.find((row) => row.firstName.trim())?.firstName.trim() || AISHA_NOT_SIGNED_IN;
+  const first =
+    rows.find((row) => row.firstName.trim())?.firstName.trim().split(/\s+/)[0] || AISHA_NOT_SIGNED_IN;
   const codes = rows.map((row) => row.fastCode.trim().toLowerCase());
   const abs = (path: string) => toShareableAbsoluteUrl(path, origin);
   const pinCount = rows.reduce((sum, row) => sum + Math.max(0, Math.trunc(row.pinCount) || 0), 0);

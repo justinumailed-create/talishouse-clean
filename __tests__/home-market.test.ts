@@ -189,9 +189,17 @@ describe("Personalize flow", () => {
     expect(JSON.parse(homeMarketAishaDynamicVariables("", market, null)).account_type).toBe("");
     expect(homeMarketAishaDynamicVariables("<Sam>", market, null)).not.toContain("<");
     expect(homeMarketAishaFirstMessage("Sam")).toBe(
-      "Good job, Sam. Your Mapsite is ready. Would you like to register now so you can add more PINs?",
+      "Good job, Sam. Your market is available. We look forward to working with you.",
     );
-    expect(homeMarketAishaFirstMessage("  ")).toMatch(/^Good job\. Your Mapsite is ready\./);
+    expect(homeMarketAishaFirstMessage("  ")).toMatch(/^Good job\. Your market is available\./);
+    expect(homeMarketAishaFirstMessage("Ralf Meyer")).toBe(
+      "Good job, Ralf. Your market is available. We look forward to working with you.",
+    );
+    expect(homeMarketAishaFirstMessage("Ralf Meyer")).not.toContain("Meyer");
+    expect(JSON.parse(homeMarketAishaDynamicVariables(" Ralf  Meyer ", market, null)).first_name).toBe("Ralf");
+    expect(homeMarketGoodJob("Ralf Meyer", en.homeMarket.goodJob)).toBe(
+      "Good job, Ralf. Your market is available. We look forward to working with you.",
+    );
     expect(homeMarketAishaFirstMessage("Sam")).not.toMatch(/[—–]/);
   });
 

@@ -400,8 +400,8 @@ export const TALISU_MKTS_PINS: readonly TalisUMktsPin[] = [
     id: "modular-spaces",
     kind: "do-more",
     label: "Talishouse™ Modular Spaces",
-    latitude: 58.806958,
-    longitude: -95.409728,
+    latitude: 46.713445,
+    longitude: -92.117706,
     mapZoom: 5,
     description:
       "Every registered market includes supply side access to a broad array of structures for DIY construction.",

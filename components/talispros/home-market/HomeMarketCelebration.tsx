@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useT } from "@/lib/i18n/client";
-import { cleanFirstName } from "@/lib/talispros/home-market-flow";
+import { spokenFirstName } from "@/lib/talispros/home-market-flow";
 
 const CONFETTI_COLORS = ["#046BD9", "#CC8800", "#16A34A", "#F59E0B", "#E11D48", "#FFFFFF"] as const;
 const CONFETTI_COUNT = 72;
@@ -28,7 +28,7 @@ export default function HomeMarketCelebration({
   onDone: () => void;
 }) {
   const t = useT().homeMarket;
-  const name = cleanFirstName(firstName);
+  const name = spokenFirstName(firstName);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const pieces = useMemo(
     () =>
