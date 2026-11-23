@@ -20,7 +20,7 @@ const CATALOGUE_HREF = "/catalogue";
 
 /**
  * One page at a time, with arrows, swipe, keyboard and page thumbnails.
- * The Catalogue follows the last page (Ralf, Nov 23).
+ * The last page offers Propose a Project (Ralf, Nov 23).
  */
 export default function WebsterBook() {
   const t = useT().homeMarket;
@@ -161,11 +161,11 @@ export default function WebsterBook() {
       {last ? (
         <div className="px-4 pb-5 text-center">
           <Link
-            href={CATALOGUE_HREF}
-            data-testid="webster-book-catalogue-end"
+            href={WEBSTER_CALL_HREF}
+            data-testid="webster-book-propose-end"
             className="inline-flex h-12 items-center justify-center rounded-full bg-[#046BD9] px-8 text-[16px] font-semibold text-white shadow-[0_8px_20px_rgba(4,107,217,0.4)] transition hover:bg-[#0558b3]"
           >
-            {t.seeCatalogue} →
+            {t.proposeProject}
           </Link>
         </div>
       ) : null}

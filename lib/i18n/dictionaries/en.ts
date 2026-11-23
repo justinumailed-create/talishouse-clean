@@ -1281,6 +1281,7 @@ export const en = {
     websterTitle: "Income Units, Proposal by Webster",
     websterOpen: "Open the book",
     seeCatalogue: "See the Catalogue",
+    proposeProject: "Propose a Project",
     congratsTitle: "Congratulations!",
     congratsTitleName: "Congratulations, {name}!",
     congratsBody: "Your Mapsite is built and your Home Market is available.",

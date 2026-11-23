@@ -1639,6 +1639,7 @@ export const de: Dictionary = {
     websterTitle: "Income Units, ein Angebot von Webster",
     websterOpen: "Buch öffnen",
     seeCatalogue: "Zum Katalog",
+    proposeProject: "Projekt vorschlagen",
     congratsTitle: "Herzlichen Glückwunsch!",
     congratsTitleName: "Herzlichen Glückwunsch, {name}!",
     congratsBody: "Ihre Mapsite ist erstellt und Ihr Heimatmarkt ist verfügbar.",

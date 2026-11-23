@@ -399,6 +399,13 @@ describe("Ralf, Nov 23: place your own PIN, zoom, Webster book, celebration, Map
     expect(en.homeMarket.bookLossTitle).not.toMatch(/\d/);
     expect(en.homeMarket.bookLossBody).not.toMatch(/\$\s?\d/);
     expect(en.homeMarket.seeCatalogue).toBe("See the Catalogue");
+    expect(de.homeMarket.seeCatalogue).toBe("Zum Katalog");
+    expect(en.homeMarket.proposeProject).toBe("Propose a Project");
+    expect(de.homeMarket.proposeProject).toBe("Projekt vorschlagen");
+    expect(viewer).toContain('data-testid="webster-book-catalogue"');
+    expect(viewer).toContain('data-testid="webster-book-propose-end"');
+    expect(viewer).toContain('data-testid="webster-book-call-cta"');
+    expect(viewer).not.toContain("webster-book-catalogue-end");
   });
 
   it("celebrates Build Mapsite and invites them to register and add PINs", () => {
