@@ -348,6 +348,23 @@ describe("Ralf, Nov 23: place your own PIN, zoom, Webster book, celebration, Map
     }
   });
 
+  it("draws the visitor's own PIN as solid red with a white circular centre", async () => {
+    const mod = await import("@/lib/talisu/north-america-markets");
+    const placed = mod.placedHomeMarket({
+      latitude: 46.08,
+      longitude: -64.78,
+      address: "Moncton, NB, Canada",
+    })!;
+    const engine = mod.homeMarketPlacedEnginePin(placed);
+    expect(mod.HOME_MARKET_OWN_PIN_COLOR).toBe("#E53935");
+    expect(engine.color).toBe(mod.HOME_MARKET_OWN_PIN_COLOR);
+    expect(engine.metadata).not.toHaveProperty("customLogoUrl");
+    expect(engine.metadata?.icon).toBe("none");
+    expect(engine.metadata?.whiteCenter).toBe(true);
+    expect(read("components/talisu/MarketsMapsitesMap.tsx")).toContain("HOME_MARKET_OWN_PIN_COLOR");
+    expect(read("components/talispros/home-market/HomePagePreview.tsx")).toContain("HOME_MARKET_OWN_PIN_COLOR");
+  });
+
   it("opens Webster's Income Units book from the Talishouse™ PIN, Catalogue next", async () => {
     const book = await import("@/lib/talispros/webster-book");
     expect(book.WEBSTER_BOOK_HREF).toBe("/income-units");
@@ -362,6 +379,9 @@ describe("Ralf, Nov 23: place your own PIN, zoom, Webster book, celebration, Map
     expect(viewer).toContain("CATALOGUE_HREF");
     expect(viewer).toContain("WEBSTER_CALL_HREF");
     expect(viewer).toContain("IncomeLostBand");
+    expect(viewer).toContain("100cqh");
+    expect(viewer).toContain('aspectRatio: "792 / 612"');
+    expect(viewer).not.toContain("100dvh-15rem");
     expect(en.homeMarket.bookLossTitle).not.toMatch(/\d/);
     expect(en.homeMarket.bookLossBody).not.toMatch(/\$\s?\d/);
     expect(en.homeMarket.seeCatalogue).toBe("See the Catalogue");

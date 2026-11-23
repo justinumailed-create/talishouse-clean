@@ -61,7 +61,7 @@ export default function WebsterBook() {
         </Link>
       </div>
 
-      <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 pb-2 sm:px-16">
+      <div className="relative min-h-0 flex-1">
         <button
           type="button"
           onClick={() => go(-1)}
@@ -73,7 +73,17 @@ export default function WebsterBook() {
           ‹
         </button>
         <div
-          className="relative aspect-[792/612] w-full max-w-[min(100%,calc((100dvh-15rem)*1.294))] overflow-hidden rounded-md bg-white shadow-[0_24px_60px_rgba(0,0,0,0.55)]"
+          className="absolute inset-0 flex items-center justify-center px-2 pb-2 sm:px-16"
+          style={{ containerType: "size" }}
+        >
+        <div
+          data-testid="webster-book-page"
+          className="relative overflow-hidden rounded-md bg-white shadow-[0_24px_60px_rgba(0,0,0,0.55)]"
+          style={{
+            aspectRatio: "792 / 612",
+            width: "min(100%, calc(100cqh * 792 / 612))",
+            height: "auto",
+          }}
           onTouchStart={(event) => {
             touchX.current = event.touches[0]?.clientX ?? null;
           }}
@@ -96,6 +106,7 @@ export default function WebsterBook() {
           />
           {page.page === WEBSTER_BOOK_PRICING_PAGE ? <CallWebsterPanel /> : null}
           {page.page === WEBSTER_BOOK_LOSS_PAGE ? <IncomeLostBand /> : null}
+        </div>
         </div>
         {last ? (
           <Link

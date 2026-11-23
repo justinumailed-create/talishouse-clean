@@ -46,6 +46,8 @@ export type DemoHeroMapPin = {
   latitude: number;
   longitude: number;
   zoom: number;
+  /** When set, the Home PIN uses this fill (Mapsite home uses the red own-PIN). */
+  color?: string;
 };
 
 /**
@@ -89,7 +91,11 @@ export default function DemoHeroMap({
   }, [pin.id, pin.latitude, pin.longitude, pin.zoom]);
 
   const pins: MapEnginePin[] = useMemo(() => {
-    const visual = mapSitePinVisualFields();
+    const visual = mapSitePinVisualFields(
+      pin.color
+        ? { pinColor: pin.color, pinIcon: "none", pinWhiteCenter: true }
+        : undefined,
+    );
     return [
       {
         id: pin.id,
@@ -105,7 +111,7 @@ export default function DemoHeroMap({
         },
       },
     ];
-  }, [pin.id, pin.latitude, pin.longitude]);
+  }, [pin.id, pin.latitude, pin.longitude, pin.color]);
 
   const viewport = useMemo(
     () => ({
@@ -163,7 +169,7 @@ export default function DemoHeroMap({
       >
         <MapEngineCanvas className="absolute inset-0 h-full w-full" />
         <MapIdleBackdrop forced={mapFailed} />
-        <FallbackHomePin offsetY={pinOffsetY} forced={mapFailed} />
+        <FallbackHomePin offsetY={pinOffsetY} forced={mapFailed} color={pin.color} />
       </MapEngineProvider>
       <style>{`
         [data-testid="${testId}-map"] .gm-err-container,
@@ -279,9 +285,18 @@ function MapIdleBackdrop({ forced = false }: { forced?: boolean }) {
 }
 
 /** Keeps the Home PIN visible under the open card when the map does not load. */
-function FallbackHomePin({ offsetY, forced = false }: { offsetY: number; forced?: boolean }) {
+function FallbackHomePin({
+  offsetY,
+  forced = false,
+  color,
+}: {
+  offsetY: number;
+  forced?: boolean;
+  color?: string;
+}) {
   const { isReady } = useMapEngine();
   if (isReady && !forced) return null;
+  const fill = color?.trim() || "#1A73E8";
   return (
     <span
       className="absolute left-1/2 z-[4] flex h-[46px] w-[46px] -translate-x-1/2 -translate-y-1/2 items-center justify-center"
@@ -289,7 +304,10 @@ function FallbackHomePin({ offsetY, forced = false }: { offsetY: number; forced?
       data-testid="map-idle-pin"
       aria-hidden
     >
-      <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-[#1A73E8] shadow-[0_4px_10px_rgba(0,0,0,0.28)] ring-4 ring-[#1A73E8]/25">
+      <span
+        className="relative flex h-10 w-10 items-center justify-center rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.28)]"
+        style={{ backgroundColor: fill, boxShadow: `0 4px 10px rgba(0,0,0,0.28), 0 0 0 4px ${fill}40` }}
+      >
         <span className="h-3 w-3 rounded-full bg-white" />
       </span>
     </span>

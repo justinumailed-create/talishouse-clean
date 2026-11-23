@@ -309,23 +309,41 @@ export const HOME_MARKET_NORTH_AMERICA_FIT: readonly { latitude: number; longitu
   { latitude: 32.5, longitude: -117.1 },
 ];
 
-/** Engine pin for the visitor's own Home PIN (blue, pulsing, draggable). */
+/**
+ * The visitor's own Home PIN: solid red with a neat white circular centre.
+ * No flag or logo in the middle (that read as a white square on a blue pin).
+ */
+export const HOME_MARKET_OWN_PIN_COLOR = "#E53935";
+
+/** Shared marker style for the visitor's own PIN on every map that shows it. */
+export function homeMarketOwnPinMetadata(options?: {
+  animated?: boolean;
+  label?: string;
+  pinSize?: number;
+}): NonNullable<MapEnginePin["metadata"]> {
+  return {
+    icon: "none",
+    whiteCenter: true,
+    pinBorderColor: HOME_MARKET_OWN_PIN_COLOR,
+    pinSize: options?.pinSize ?? TALISU_MKTS_MARKET_PIN_SIZE,
+    animated: Boolean(options?.animated),
+    ...(options?.label ? { label: options.label } : {}),
+  };
+}
+
+/** Engine pin for the visitor's own Home PIN (red, pulsing, draggable). */
 export function homeMarketPlacedEnginePin(pin: HomeMarketPin): MapEnginePin {
   return {
     id: pin.id,
     latitude: pin.latitude,
     longitude: pin.longitude,
-    color: "#046BD9",
+    color: HOME_MARKET_OWN_PIN_COLOR,
     featured: true,
-    metadata: {
-      icon: "dot",
-      whiteCenter: true,
-      customLogoUrl: pin.flagUrl,
-      pinBorderColor: "#046BD9",
-      pinSize: TALISU_MKTS_MARKET_PIN_SIZE,
+    metadata: homeMarketOwnPinMetadata({
       animated: true,
       label: pin.name,
-    },
+      pinSize: TALISU_MKTS_MARKET_PIN_SIZE,
+    }),
   } satisfies MapEnginePin;
 }
 

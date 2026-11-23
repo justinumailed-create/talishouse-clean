@@ -8,7 +8,11 @@ import { MapEngineProvider, useMapEngine } from "@/components/talismaps/map-engi
 import { HomeMarketZoomControls } from "@/components/talispros/home-market/HomeMarketMap";
 import { useT } from "@/lib/i18n/client";
 import type { MapEnginePin } from "@/lib/talismaps/map-engine/types";
-import { HOME_MARKET_NORTH_AMERICA_FIT } from "@/lib/talisu/north-america-markets";
+import {
+  HOME_MARKET_NORTH_AMERICA_FIT,
+  HOME_MARKET_OWN_PIN_COLOR,
+  homeMarketOwnPinMetadata,
+} from "@/lib/talisu/north-america-markets";
 import type { MarketsMapsitePin } from "@/lib/talisu/markets-mapsites.server";
 
 const MapEngineCanvas = dynamic(
@@ -26,16 +30,13 @@ function enginePin(pin: MarketsMapsitePin): MapEnginePin {
     id: pin.id,
     latitude: pin.latitude,
     longitude: pin.longitude,
-    color: "#046BD9",
+    color: HOME_MARKET_OWN_PIN_COLOR,
     featured: false,
-    metadata: {
-      icon: "dot",
-      whiteCenter: true,
-      pinBorderColor: "#046BD9",
-      pinSize: 30,
+    metadata: homeMarketOwnPinMetadata({
       animated: false,
       label: pin.title,
-    },
+      pinSize: 30,
+    }),
   };
 }
 

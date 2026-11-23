@@ -11,7 +11,11 @@ import {
   HOME_MARKET_PHOTO_FALLBACK,
   type HomeMarketDraft,
 } from "@/lib/talispros/home-market-flow";
-import { homeMarketDisplayName, type HomeMarketPin } from "@/lib/talisu/north-america-markets";
+import {
+  HOME_MARKET_OWN_PIN_COLOR,
+  homeMarketDisplayName,
+  type HomeMarketPin,
+} from "@/lib/talisu/north-america-markets";
 
 /**
  * The visitor's own Mapsite, built from the Personalize form as they type
@@ -53,6 +57,7 @@ export default function HomePagePreview({
       latitude: Number.isFinite(lat) ? lat : market.latitude,
       longitude: Number.isFinite(lng) ? lng : market.longitude,
       zoom: Number.isFinite(zoom) && zoom > 0 ? zoom : market.mapZoom || 9,
+      color: HOME_MARKET_OWN_PIN_COLOR,
     };
   }, [pin.latitude, pin.longitude, pin.mapZoom, market.latitude, market.longitude, market.mapZoom]);
 
