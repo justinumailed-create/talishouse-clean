@@ -30,6 +30,21 @@
     "alt": "Tsplits™ Baumlogo: Sichern Sie Ihren Markt auf Tsplits™"
    }
   },
+  "/app": {
+   "kind": "public",
+   "noindex": false,
+   "image": "/og/pages/home",
+   "en": {
+    "title": "Tsplits™ | Open your site",
+    "description": "Enter your FAST Code™ on Tsplits™ to open your home page. This device can remember the code for the next visit.",
+    "alt": "Tsplits™ tree logo: Open your site with your FAST Code™"
+   },
+   "de": {
+    "title": "Tsplits™ | Öffnen Sie Ihre Seite",
+    "description": "Geben Sie Ihren FAST Code™ auf Tsplits™ ein, um Ihre Startseite zu öffnen. Dieses Gerät kann den Code für den nächsten Besuch merken.",
+    "alt": "Tsplits™ Baumlogo: Öffnen Sie Ihre Seite mit Ihrem FAST Code™"
+   }
+  },
   "/markets": {
    "kind": "public",
    "noindex": false,

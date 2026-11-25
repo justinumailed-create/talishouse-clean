@@ -16,10 +16,10 @@ import {
 const root = process.cwd();
 
 describe("SamCart → homepage gate return", () => {
-  it("documents the SamCart Custom URL success redirect", () => {
-    expect(SAMCART_SUCCESS_RETURN_PATH).toBe("/");
+  it("documents the SamCart Custom URL success redirect to /app", () => {
+    expect(SAMCART_SUCCESS_RETURN_PATH).toBe("/app");
     expect(SAMCART_SUCCESS_RETURN_URL).toContain(
-      "https://www.talispros.com/?orderid=##orderid##&email=##email##",
+      "https://www.tsplits.com/app?orderid=##orderid##&email=##email##",
     );
   });
 
@@ -61,6 +61,20 @@ describe("SamCart → homepage gate return", () => {
     expect(formerHome).toContain("TalisprosHomeMapPreview");
     expect(formerHome).toContain("TalisprosStartSidebar");
     expect(formerHome).not.toContain("TalisprosHomeGate");
+  });
+
+  it("makes /app ready to receive a SamCart return and remember a FAST Code on this device", () => {
+    const page = readFileSync(join(root, "app/app/page.tsx"), "utf8");
+    const entry = readFileSync(
+      join(root, "components/talispros/ClientAppEntry.tsx"),
+      "utf8",
+    );
+    expect(page).toContain("ClientAppEntry");
+    expect(entry).toContain("TalisprosSamCartReturnBanner");
+    expect(entry).toContain("setFastCode");
+    expect(entry).toContain("getFastCode");
+    expect(entry).not.toContain("prisma");
+    expect(entry).not.toContain("migrate");
   });
 });
 

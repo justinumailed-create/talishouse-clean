@@ -1486,6 +1486,18 @@ export const de: Dictionary = {
     secureCodeLabel: "Sicherheitscode",
   },
 
+  appPage: {
+    title: "Öffnen Sie Ihre Tsplits™-Seite",
+    intro:
+      "Geben Sie Ihren FAST Code™ einmal auf diesem Gerät ein. Beim nächsten Besuch dieser Seite ist er für Sie bereit.",
+    label: "FAST Code™",
+    placeholder: "Geben Sie Ihren FAST Code™ ein",
+    submit: "Meine Seite öffnen",
+    opening: "Wird geöffnet…",
+    rememberedCta: "Weiter zu Ihrer Seite",
+    errEmpty: "Bitte geben Sie einen FAST Code™ ein.",
+    errOpen: "Diese Seite konnte nicht geöffnet werden. Prüfen Sie den FAST Code™ und versuchen Sie es erneut.",
+  },
   personalHome: {
     navLabel: "Persönliche Startseite und Mapsite",
     navHome: "Startseite",

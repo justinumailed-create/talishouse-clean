@@ -1127,6 +1127,18 @@ export const en = {
     secureCodeLabel: "Secure code",
   },
 
+  appPage: {
+    title: "Open your Tsplits™ site",
+    intro:
+      "Enter your FAST Code™ once on this device. The next time you open this page, it will be ready for you.",
+    label: "FAST Code™",
+    placeholder: "Enter your FAST Code™",
+    submit: "Open my site",
+    opening: "Opening…",
+    rememberedCta: "Continue to your site",
+    errEmpty: "Please enter a FAST Code™.",
+    errOpen: "We could not open that site. Check the FAST Code™ and try again.",
+  },
   personalHome: {
     navLabel: "Personal home and Mapsite",
     navHome: "Home",
