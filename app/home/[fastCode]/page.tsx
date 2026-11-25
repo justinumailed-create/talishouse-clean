@@ -6,8 +6,6 @@ import PersonalHomeMapsite from "@/components/talispros/personal-home/PersonalHo
 import LegalLinks from "@/components/legal/LegalLinks";
 import PersonalHomeNav from "@/components/talispros/personal-home/PersonalHomeNav";
 import PersonalHomeSide from "@/components/talispros/personal-home/PersonalHomeSide";
-import MapsiteAisha from "@/components/talispros/MapsiteAisha";
-import { mapsiteShowsAisha } from "@/lib/talispros/aisha-mapsites";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
 import { ROUTES } from "@/lib/routes";
@@ -34,7 +32,7 @@ import {
 } from "@/lib/talispros/system-fast-code-gate";
 import { readSystemFastCodeFacts } from "@/lib/talispros/system-fast-code-access";
 import { isFastCodeDisqualified } from "@/lib/talispros/market-disqualify-server";
-import { isRegistrationOfferHref, websterProjectHref } from "@/lib/talispros/webster-project";
+import { isRegistrationOfferHref } from "@/lib/talispros/webster-project";
 
 export const dynamic = "force-dynamic";
 
@@ -190,18 +188,6 @@ export default async function PersonalHomePage({
               </div>
             ))}
           </div>
-          {offerProject ? (
-            <div className="mt-6 sm:mt-8">
-              <Link
-                href={websterProjectHref(data.code)}
-                prefetch={false}
-                data-testid="describe-project-webster"
-                className="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#046BD9] px-6 text-center text-[17px] font-semibold text-white! no-underline shadow-[0_8px_20px_rgba(4,107,217,0.28)] hover:bg-[#0358b3] sm:w-auto sm:min-w-[20rem]"
-              >
-                {getDictionary(locale).home.conversation.describeProject}
-              </Link>
-            </div>
-          ) : null}
           {visibleButtons.length ? (
             <div
               className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8"
@@ -253,14 +239,6 @@ export default async function PersonalHomePage({
             tebHref: data.view.tebUrl?.trim() || null,
             pins: homePins,
           }}
-        />
-      ) : null}
-      {mapsiteShowsAisha(data.view.status) ? (
-        <MapsiteAisha
-          ownerFirstName={data.view.ownerFirstName}
-          agentName={data.view.agentName}
-          fastCode={data.view.fastCode}
-          mapsiteTitle={data.view.propertyTitle}
         />
       ) : null}
     </div>

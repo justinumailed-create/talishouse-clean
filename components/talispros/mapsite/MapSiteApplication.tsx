@@ -2,9 +2,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import dynamic from "next/dynamic";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import AishaConvaiWidget from "@/components/talispros/AishaConvaiWidget";
 import {
   MapEngineProvider,
   useMapEngine,
@@ -32,11 +30,6 @@ import {
   accountTypeForAudience,
   type MapSiteCapabilityAccountType,
 } from "@/lib/talispros/account-capabilities";
-import { mapsiteAishaInvitation, mapsiteShowsAisha } from "@/lib/talispros/aisha-mapsites";
-import {
-  AISHA_MAPSITE_AGENT_ID,
-  aishaMapsiteDynamicVariables,
-} from "@/lib/talispros/aisha-mapsite-agent";
 import { mapsitePublicPinLabel } from "@/lib/mapsite-pin-label";
 import { additionalPinMapLabel } from "@/lib/talispros/mapsite-additional-pins";
 import {
@@ -73,7 +66,6 @@ import MapSiteZoomControls from "./MapSiteZoomControls";
 import PmcContractGateCard from "@/components/talisu/pmc/PmcContractGateCard";
 import { mapsiteAgencyDisplayName } from "@/lib/talispros/mapsite-listing-media";
 import { useT } from "@/lib/i18n/client";
-import { websterProjectHref } from "@/lib/talispros/webster-project";
 import MapSiteStartHereOverlay from "./MapSiteStartHereOverlay";
 import TalisUMktsHeader from "@/components/talisu/TalisUMktsHeader";
 import { getMapSiteActivationPaymentStatus } from "@/app/talispros/mapsite/actions";
@@ -559,19 +551,6 @@ export default function MapSiteApplication({
         personalHomeNav={personalHomeNav}
         belowWriteUp={belowWriteUp}
       />
-      {mapsiteShowsAisha(mapsite.status) ? (
-        <AishaConvaiWidget
-          invitation={mapsiteAishaInvitation()}
-          placement="bottom-right"
-          agentId={AISHA_MAPSITE_AGENT_ID}
-          dynamicVariables={aishaMapsiteDynamicVariables({
-            ownerFirstName: mapsite.owner_first_name,
-            agentName: mapsite.agent_name,
-            fastCode: mapsite.fast_code,
-            mapsiteTitle: mapsite.property_title,
-          })}
-        />
-      ) : null}
     </MapEngineProvider>
   );
 }
@@ -1204,21 +1183,6 @@ function MapSiteChrome({
       />
     ) : null;
 
-  const describeHref =
-    !isDemoListing && claimed && mapsite.fast_code?.trim()
-      ? websterProjectHref(mapsite.fast_code)
-      : null;
-  const describeButton = describeHref ? (
-    <Link
-      href={describeHref}
-      prefetch={false}
-      data-testid="describe-project-webster"
-      className="pointer-events-auto mb-3 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#046BD9] px-4 text-center text-[16px] font-semibold text-white no-underline shadow-[0_8px_20px_rgba(4,107,217,0.28)] hover:bg-[#0358b3]"
-    >
-      {t.home.conversation.describeProject}
-    </Link>
-  ) : null;
-
   return (
     <div className="relative flex h-dvh max-h-dvh w-screen flex-col overflow-hidden overscroll-none bg-neutral-900">
       {claimed ? (
@@ -1226,8 +1190,6 @@ function MapSiteChrome({
           variant="claimed-mapsite"
           dashboardUnlocked={dashboardUnlocked}
           registerHref={ROUTES.TALISU_REGISTER}
-          projectHref={describeHref}
-          projectLabel={t.home.conversation.describeProject}
           onOpenDashboard={openOwnerDashboard}
         />
       ) : null}
@@ -1267,7 +1229,6 @@ function MapSiteChrome({
             aboveCard={
               claimed ? (
                 <>
-                {describeButton}
                 <MapSiteMarketPartnerCard
                   audience={audience}
                   mapsite={cardMapSite}

@@ -51,8 +51,10 @@ describe("Webster TWO", () => {
       "components/talisu/TalisUMktsHeader.tsx",
     ].map(read).join("\n");
     expect(linked).not.toContain(WEBSTER_PROJECT_PATH);
-    expect(read("app/home/[fastCode]/page.tsx")).toContain("websterProjectHref");
-    expect(read("components/talispros/mapsite/MapSiteApplication.tsx")).toContain("describe-project-webster");
+    expect(read("app/home/[fastCode]/page.tsx")).not.toContain("websterProjectHref");
+    expect(read("app/home/[fastCode]/page.tsx")).not.toContain("describe-project-webster");
+    expect(read("components/talispros/mapsite/MapSiteApplication.tsx")).not.toContain("describe-project-webster");
+    expect(read("components/talispros/mapsite/MapSiteApplication.tsx")).not.toContain("websterProjectHref");
   });
 
   it("shows a visitor line immediately and keeps agent audio unplayed until chars arrive", () => {

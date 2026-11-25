@@ -547,6 +547,7 @@ export default function PersonalHomeEditor({
               onChange={(event) => setWriteUp(event.target.value)}
               className={`${INPUT} resize-y leading-relaxed`}
             />
+            <span className="mt-1 block text-[12px] leading-snug text-neutral-500">{t.writeUpHint}</span>
           </label>
 
           <fieldset className="space-y-3">

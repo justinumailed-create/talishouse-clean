@@ -32,7 +32,7 @@ describe("first-time pitch and public agent codes", () => {
     expect(read("lib/talispros/homepage-aisha-widget.ts")).toContain("HOMEPAGE_AISHA_WIDGET: boolean = false");
     expect(read("app/webster/page.tsx")).toContain("recordsPitch");
     expect(read("app/webster/project/page.tsx")).toContain("recordsPitch");
-    expect(read("app/home/[fastCode]/page.tsx")).toContain("<MapsiteAisha");
+    expect(read("app/home/[fastCode]/page.tsx")).not.toContain("<MapsiteAisha");
     expect(read("components/talispros/personal-home/PersonalHomeEditor.tsx")).toContain("bottom-56");
     expect(en.home.pitch.registered).toBe("I've already registered");
     expect(de.home.pitch.registered).toBe("Ich bin bereits registriert");
