@@ -1164,7 +1164,7 @@ export const en = {
       headline: "Headline",
       headlineHint: "Large text at the top of the page. Leave this empty to show no headline.",
       contactName: "Contact name",
-      contactHint: "Shown under Contact. Leave this empty to use {name}.",
+      contactHint: "Shown under Contact. This starts as {name} and can be changed. Leave it empty to use that name again.",
       writeUp: "Write-up",
       buttons: "Buttons",
       buttonLabel: "Button label",

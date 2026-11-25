@@ -251,6 +251,21 @@ describe("personal home wiring", () => {
       "utf8",
     );
     expect(migration).toContain("ENABLE ROW LEVEL SECURITY");
+    const editor = readFileSync(
+      join(root, "components/talispros/personal-home/PersonalHomeEditor.tsx"),
+      "utf8",
+    );
+    expect(editor).toContain('data-testid="personal-home-close"');
+    expect(editor).toContain("personal-home-save");
+    // Close sits to the right of Save changes in the bottom bar, not the header.
+    expect(editor.indexOf('data-testid="personal-home-save"')).toBeLessThan(
+      editor.indexOf('data-testid="personal-home-close"'),
+    );
+    expect(editor).toContain("saved.contactName?.trim() || defaults.contactName");
+    // Save must not stay pending on a hanging router.refresh().
+    expect(editor).not.toContain("useTransition");
+    expect(editor).toContain("setSaving(false)");
+    expect(editor).toMatch(/setSaving\(false\);\s*\}\s*router\.refresh\(\)/);
   });
 });
 

@@ -1523,7 +1523,7 @@ export const de: Dictionary = {
       headline: "Überschrift",
       headlineHint: "Großer Text oben auf der Seite. Leer lassen, dann erscheint keine Überschrift.",
       contactName: "Kontaktname",
-      contactHint: "Steht unter Kontakt. Leer lassen, dann wird {name} verwendet.",
+      contactHint: "Steht unter Kontakt. Das Feld beginnt mit {name} und kann geändert werden. Leer lassen, dann wird dieser Name wieder verwendet.",
       writeUp: "Text",
       buttons: "Schaltflächen",
       buttonLabel: "Beschriftung",

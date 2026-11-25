@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useT } from "@/lib/i18n/client";
 import { optimizeImageFileForUpload } from "@/lib/media/client-optimize-upload-image";
@@ -117,7 +117,7 @@ export default function PersonalHomeEditor({
     window.addEventListener(PERSONAL_HOME_OPEN_EDITOR_EVENT, openEditor);
     return () => window.removeEventListener(PERSONAL_HOME_OPEN_EDITOR_EVENT, openEditor);
   }, []);
-  const [pending, startTransition] = useTransition();
+  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(saved.imageUrl);
   const [sideKind, setSideKind] = useState<"" | PersonalHomeSideMedia["kind"]>(
@@ -126,7 +126,9 @@ export default function PersonalHomeEditor({
   const [sideUrl, setSideUrl] = useState(saved.sideMedia?.url ?? "");
   const [kicker, setKicker] = useState(saved.kicker ?? "");
   const [headline, setHeadline] = useState(saved.headline ?? "");
-  const [contactName, setContactName] = useState(saved.contactName ?? "");
+  const [contactName, setContactName] = useState(
+    saved.contactName?.trim() || defaults.contactName || "",
+  );
   const [writeUp, setWriteUp] = useState(saved.writeUp ?? "");
   const [buttons, setButtons] = useState<ButtonDraft[]>(
     toDrafts(saved.buttons.length ? saved.buttons : defaults.buttons),
@@ -255,10 +257,14 @@ export default function PersonalHomeEditor({
     }
   }
 
-  function handleSave() {
+  async function handleSave() {
+    // Saving is a local flag so the button does not stay on "Saving…" if
+    // router.refresh() is slow or hangs (heavy Mapsite / widget rerender).
+    if (saving || uploading) return;
     setMessage(null);
     setInvalid([]);
-    startTransition(async () => {
+    setSaving(true);
+    try {
       const result = await savePersonalHomeAction({
         fastCode,
         imageUrl,
@@ -275,15 +281,21 @@ export default function PersonalHomeEditor({
         return;
       }
       setMessage({ tone: "ok", text: t.saved });
-      router.refresh();
-    });
+    } catch {
+      setMessage({ tone: "error", text: t.errSave });
+    } finally {
+      setSaving(false);
+    }
+    router.refresh();
   }
 
-  function handleReset() {
+  async function handleReset() {
+    if (saving || uploading) return;
     if (!window.confirm(t.resetConfirm)) return;
     setMessage(null);
     setInvalid([]);
-    startTransition(async () => {
+    setSaving(true);
+    try {
       const result = await resetPersonalHomeAction({ fastCode });
       if (!result.ok) {
         setMessage({ tone: "error", text: errorText(result.error) });
@@ -294,12 +306,16 @@ export default function PersonalHomeEditor({
       setSideUrl("");
       setKicker("");
       setHeadline("");
-      setContactName("");
+      setContactName(defaults.contactName || "");
       setWriteUp("");
       setButtons(toDrafts(defaults.buttons));
       setMessage({ tone: "ok", text: t.saved });
-      router.refresh();
-    });
+    } catch {
+      setMessage({ tone: "error", text: t.errSave });
+    } finally {
+      setSaving(false);
+    }
+    router.refresh();
   }
 
   useEffect(() => {
@@ -309,7 +325,7 @@ export default function PersonalHomeEditor({
     window.dispatchEvent(new CustomEvent(PERSONAL_HOME_DRAFT_EVENT, { detail }));
   }, [open, headline, contactName, saved.headline, saved.contactName]);
 
-  const busy = pending || uploading;
+  const busy = saving || uploading;
   const previewSrc = imageUrl || defaults.imageUrl;
 
   if (!open) {
@@ -337,23 +353,14 @@ export default function PersonalHomeEditor({
       data-testid="personal-home-editor"
     >
       <div className="flex h-full w-full max-w-[460px] flex-col overflow-hidden bg-white shadow-2xl">
-        <div className="flex items-start justify-between gap-3 border-b border-neutral-200 px-5 py-4">
-          <div>
-            <h2
-              id="personal-home-edit-title"
-              className="m-0! text-[18px] font-semibold text-neutral-950!"
-            >
-              {t.title}
-            </h2>
-            <div className="mt-1 text-[13px] leading-snug text-neutral-600">{t.intro}</div>
-          </div>
-          <button
-            type="button"
-            onClick={() => setOpen(false)}
-            className="rounded-md px-2 py-1 text-[14px] font-medium text-neutral-600 hover:bg-neutral-100"
+        <div className="border-b border-neutral-200 px-5 py-4">
+          <h2
+            id="personal-home-edit-title"
+            className="m-0! text-[18px] font-semibold text-neutral-950!"
           >
-            {t.close}
-          </button>
+            {t.title}
+          </h2>
+          <div className="mt-1 text-[13px] leading-snug text-neutral-600">{t.intro}</div>
         </div>
 
         <div className="flex-1 space-y-5 overflow-y-auto px-5 py-5">
@@ -745,15 +752,25 @@ export default function PersonalHomeEditor({
             >
               {t.reset}
             </button>
-            <button
-              type="button"
-              disabled={busy}
-              onClick={handleSave}
-              data-testid="personal-home-save"
-              className="inline-flex min-h-11 items-center rounded-full bg-[#046BD9] px-6 text-[15px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] hover:bg-[#0358b3] disabled:opacity-60"
-            >
-              {pending ? t.saving : t.save}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={handleSave}
+                data-testid="personal-home-save"
+                className="inline-flex min-h-11 items-center rounded-full bg-[#046BD9] px-6 text-[15px] font-semibold text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] hover:bg-[#0358b3] disabled:opacity-60"
+              >
+                {saving ? t.saving : t.save}
+              </button>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                data-testid="personal-home-close"
+                className="inline-flex min-h-11 items-center rounded-full border border-neutral-300 bg-white px-6 text-[15px] font-semibold text-neutral-800 hover:bg-neutral-50"
+              >
+                {t.close}
+              </button>
+            </div>
           </div>
         </div>
       </div>
