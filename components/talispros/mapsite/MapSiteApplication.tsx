@@ -47,6 +47,7 @@ import {
   getMapSiteOnboardingPhase,
 } from "@/lib/talispros/mapsite-onboarding-phase";
 import { ROUTES } from "@/lib/routes";
+import { MARKETING_PARTNER_WHATSAPP_HREF } from "@/lib/talispros/marketing-partner-contact";
 import { isDemonstrationListing } from "@/lib/talispros/demo-mapsite";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
 import MapSiteMarketPartnerCard, {
@@ -60,6 +61,7 @@ import MapSiteBookshelfEditor from "./MapSiteBookshelfEditor";
 import MapSiteEbookEditorPanel from "./MapSiteEbookEditorPanel";
 import DemoClaimMarketButton from "./DemoClaimMarketButton";
 import PersonalHomeNav from "@/components/talispros/personal-home/PersonalHomeNav";
+import MapSiteOwnerIdleLogout from "@/components/talispros/mapsite/MapSiteOwnerIdleLogout";
 import MapSitePaymentCard from "./MapSitePaymentCard";
 import MapSitePropertyPopup from "./MapSitePropertyPopup";
 import MapSiteZoomControls from "./MapSiteZoomControls";
@@ -1197,7 +1199,7 @@ function MapSiteChrome({
 
   return (
     <div className="relative flex h-dvh max-h-dvh w-screen flex-col overflow-hidden overscroll-none bg-neutral-900">
-      {claimed ? (
+      {claimed && !personalHomeNav ? (
         <TalisUMktsHeader
           variant="claimed-mapsite"
           dashboardUnlocked={dashboardUnlocked}
@@ -1211,7 +1213,20 @@ function MapSiteChrome({
           mapsiteHref={personalHomeNav.mapsiteHref}
           owner={personalHomeNav.owner ?? null}
           active="mapsite"
-          variant={claimed ? "sub" : "full"}
+          variant="full"
+          dashboard={
+            canManageDashboard
+              ? { unlocked: dashboardUnlocked, onOpen: openOwnerDashboard }
+              : null
+          }
+          talkHref={MARKETING_PARTNER_WHATSAPP_HREF}
+        />
+      ) : null}
+      {isOwner ? (
+        <MapSiteOwnerIdleLogout
+          enabled
+          fastCode={mapsite.fast_code}
+          accountType={accountTypeSegment}
         />
       ) : null}
       <div

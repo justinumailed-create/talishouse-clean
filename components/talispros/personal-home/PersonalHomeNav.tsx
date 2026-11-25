@@ -26,6 +26,10 @@ type PersonalHomeNavProps = {
   variant?: "full" | "sub";
   /** Account holder pill before Home; passed for the signed-in owner only. */
   owner?: PersonalHomeOwnerPill | null;
+  /** Owner/editor: place pins and enter their links. Hidden for public visitors. */
+  dashboard?: { unlocked: boolean; onOpen: () => void } | null;
+  /** Talk to us. A WhatsApp (or other) href enables the button; otherwise it is grey. */
+  talkHref?: string | null;
 };
 
 const LINK =
@@ -38,6 +42,8 @@ export default function PersonalHomeNav({
   active,
   variant = "full",
   owner = null,
+  dashboard = null,
+  talkHref = null,
 }: PersonalHomeNavProps) {
   const { personalHome: t, nav } = useT();
 
@@ -97,6 +103,50 @@ export default function PersonalHomeNav({
           </Link>
         );
       })}
+      {dashboard ? (
+        dashboard.unlocked ? (
+          <button
+            type="button"
+            onClick={dashboard.onOpen}
+            data-testid="personal-home-nav-dashboard"
+            className={`${LINK} hover:bg-white/15`}
+          >
+            {nav.dashboard}
+          </button>
+        ) : (
+          <span
+            data-testid="personal-home-nav-dashboard"
+            aria-disabled="true"
+            title={nav.dashboardLocked.title}
+            className="inline-flex min-h-9 cursor-not-allowed items-center rounded-md px-3 py-1.5 text-[13px] font-medium text-white/45 sm:text-[15px]"
+          >
+            {nav.dashboard}
+          </span>
+        )
+      ) : null}
+      {talkHref != null ? (
+        talkHref ? (
+          <a
+            href={talkHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            data-testid="personal-home-nav-talk"
+            aria-label={t.navTalkAria}
+            className={`${LINK} hover:bg-white/15`}
+          >
+            {t.navTalk}
+          </a>
+        ) : (
+          <span
+            data-testid="personal-home-nav-talk"
+            aria-disabled="true"
+            aria-label={t.navTalk}
+            className="inline-flex min-h-9 cursor-not-allowed items-center rounded-md px-3 py-1.5 text-[13px] font-medium text-white/45 sm:text-[15px]"
+          >
+            {t.navTalk}
+          </span>
+        )
+      ) : null}
     </nav>
   );
 

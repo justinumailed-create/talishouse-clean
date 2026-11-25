@@ -144,17 +144,21 @@ describe("homepage FAST Code → claimed Mapsite", () => {
     expect(TALISU_MKTS_HEADER_BLUE).toBe("#046BD9");
   });
 
-  it("shows Logout on paid owner claimed Mapsite chrome", () => {
+  it("removes the red Logout button and ends an idle owner session after 15 minutes", () => {
     const partner = readFileSync(
       join(root, "components/talispros/mapsite/MapSiteMarketPartnerCard.tsx"),
       "utf8",
     );
-    const logout = readFileSync(
-      join(root, "components/talispros/mapsite/MapSiteOwnerLogoutButton.tsx"),
-      "utf8",
-    );
     const application = readFileSync(
       join(root, "components/talispros/mapsite/MapSiteApplication.tsx"),
+      "utf8",
+    );
+    const idle = readFileSync(
+      join(root, "components/talispros/mapsite/MapSiteOwnerIdleLogout.tsx"),
+      "utf8",
+    );
+    const constants = readFileSync(
+      join(root, "lib/talispros/mapsite-owner-idle.ts"),
       "utf8",
     );
     const page = readFileSync(
@@ -162,17 +166,14 @@ describe("homepage FAST Code → claimed Mapsite", () => {
       "utf8",
     );
 
-    expect(partner).toContain("MapSiteOwnerLogoutButton");
-    expect(partner).toContain("isOwner");
-    expect(partner).not.toContain("paid && isOwner");
-    expect(partner.match(/\{isOwner \?/g)).toHaveLength(2);
-    expect(logout).toContain("logoutMapSiteOwnerSession");
-    expect(logout).toContain("Logout");
-    expect(logout).toContain("LogOut");
-    expect(logout).toContain("bg-red-600");
-    expect(partner).toContain("absolute top-2 right-2");
+    expect(partner).not.toContain("MapSiteOwnerLogoutButton");
+    expect(application).toContain("MapSiteOwnerIdleLogout");
     expect(application).toContain("isOwner={isOwner}");
-    expect(application).toContain("accountTypeSegment={accountTypeSegment}");
+    expect(idle).toContain("logoutMapSiteOwnerSession");
+    expect(idle).toContain("ownerIdle");
+    expect(idle).toContain("Continue");
+    expect(constants).toContain("15 * 60 * 1000");
+    expect(constants).toContain("2 * 60 * 1000");
     expect(page).toContain("isOwner={isOwner}");
     expect(page).toContain("accountTypeSegment={accountType}");
     expect(page).toContain("const isOwner = await isOwnMapSite(fastCode)");

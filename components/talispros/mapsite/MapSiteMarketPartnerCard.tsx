@@ -18,7 +18,6 @@ import { MAPSITE_LISTING_CARD_WIDTH_CLASS } from "@/lib/talispros/mapsite-listin
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
-import MapSiteOwnerLogoutButton from "./MapSiteOwnerLogoutButton";
 import { useT } from "@/lib/i18n/client";
 
 export type MapSitePinSwitchOption = { id: string; label: string };
@@ -224,8 +223,8 @@ export default function MapSiteMarketPartnerCard({
   cardRef,
   onSelect,
   paid = false,
-  isOwner = false,
-  accountTypeSegment = null,
+  isOwner: _isOwner = false,
+  accountTypeSegment: _accountTypeSegment = null,
   partnerImageUrl = null,
   partnerName: partnerNameOverride = null,
   cardTitle = null,
@@ -343,13 +342,6 @@ export default function MapSiteMarketPartnerCard({
         />
         {tools}
         {dashboardViewToggle}
-        {isOwner ? (
-          <MapSiteOwnerLogoutButton
-            fastCode={fastCode}
-            accountType={accountTypeSegment}
-            className="absolute top-2 right-2 z-20 inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
-          />
-        ) : null}
       </div>
 
       <div className={desktopPanel}>
@@ -399,13 +391,6 @@ export default function MapSiteMarketPartnerCard({
         />
         {tools}
         {dashboardViewToggle}
-        {isOwner ? (
-          <MapSiteOwnerLogoutButton
-            fastCode={fastCode}
-            accountType={accountTypeSegment}
-            className="absolute top-2 right-2 z-20 inline-flex items-center gap-1 rounded-full bg-red-600 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white shadow-sm transition hover:bg-red-700 disabled:opacity-50"
-          />
-        ) : null}
       </div>
     </div>
   );
