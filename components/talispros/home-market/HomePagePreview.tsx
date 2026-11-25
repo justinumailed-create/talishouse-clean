@@ -125,6 +125,12 @@ export default function HomePagePreview({
               <p className="m-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#046BD9]">{t.addPinsKicker}</p>
               <p className="m-0 mt-1 text-[18px] font-semibold leading-snug text-neutral-950 sm:text-[20px]">{t.addPinsTitle}</p>
               <p className="m-0 mt-1 text-[14px] leading-snug text-neutral-700">{t.addPinsBody}</p>
+              <p
+                className="m-0 mt-3 text-[13px] font-semibold text-neutral-900"
+                data-testid="home-market-add-listing-id"
+              >
+                {t.addListingId}
+              </p>
               <Link
                 href={registerHref}
                 data-testid="home-market-add-pins-register"

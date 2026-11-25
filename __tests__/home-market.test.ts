@@ -429,3 +429,21 @@ describe("Ralf, Nov 23: place your own PIN, zoom, Webster book, celebration, Map
     expect(read("lib/talisu/us-markets-pins.ts")).not.toContain("copy.us.anchorsLabel}: ${pin.anchors");
   });
 });
+
+
+describe("Home Market listing labels", () => {
+  it("uses Desired Mapsite Name and shows Add Listing ID after the Mapsite is built", async () => {
+    const { en } = await import("../lib/i18n/dictionaries/en");
+    const { de } = await import("../lib/i18n/dictionaries/de");
+    expect(en.homeMarket.sampleRole).toBe("Desired Mapsite Name");
+    expect(de.homeMarket.sampleRole).toBe("Gewünschter Mapsite-Name");
+    expect(en.homeMarket.addListingId).toBe("Add Listing ID.");
+    expect(de.homeMarket.addListingId).toBe("Angebots-ID hinzufügen.");
+    const preview = require("node:fs").readFileSync(
+      require("node:path").join(process.cwd(), "components/talispros/home-market/HomePagePreview.tsx"),
+      "utf8",
+    );
+    expect(preview).toContain("t.addListingId");
+    expect(preview).toContain("home-market-add-listing-id");
+  });
+});
