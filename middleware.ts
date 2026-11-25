@@ -20,6 +20,7 @@ import {
   DEMO_MAPSITE_PUBLIC_PATH,
   isRetiredDemoMapSitePath,
 } from "@/lib/talispros/demo-mapsite-paths";
+import { isShortHomeFastCode } from "@/lib/talispros/fast-code-shape";
 
 const PUBLIC_ROUTES = ["/business-office/apply"];
 
@@ -31,6 +32,13 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   // `?lang=de|en` — crawlable German alternates without a /[locale] segment.
   const locale = localeFromRequestUrl(request.nextUrl);
+
+  const shortCode = path.split("/").filter(Boolean);
+  if (shortCode.length === 1 && isShortHomeFastCode(shortCode[0])) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/home/${shortCode[0].toLowerCase()}`;
+    return persistLocaleCookie(NextResponse.rewrite(url), locale);
+  }
 
   // Retired builder URL. 301 (not 308) and the query string stays on the clone.
   if (isRetiredDemoMapSitePath(path)) {
@@ -104,6 +112,10 @@ export const config = {
     "/business-office/:path*",
     "/admin",
     "/admin/:path*",
+    // Short client FAST Code links (/dc06 → /home/dc06), including case variants.
+    "/:fastCode([a-zA-Z]{2,3}[0-9]{2})",
+    "/lrg1",
+    "/LRG1",
     // Any page URL carrying ?lang= (language alternates / shared German links).
     {
       source: "/((?!api|_next/static|_next/image|favicon).*)",

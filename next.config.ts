@@ -58,6 +58,16 @@ const nextConfig: NextConfig = {
     // at the clean URL, with or without a trailing slash.
     return {
       beforeFiles: [
+        // Short client links: /dc06 → /home/dc06. Only issued FAST Code shapes,
+        // so reserved routes such as /app, /map and /home are never rewritten.
+        {
+          source: "/:fastCode([a-zA-Z]{2,3}[0-9]{2})",
+          destination: "/home/:fastCode",
+        },
+        {
+          source: "/lrg1",
+          destination: "/home/lrg1",
+        },
         {
           source: "/talisu/deck/growth-call-2026-11",
           destination: "/talisu/deck/growth-call-2026-11/index.html",
