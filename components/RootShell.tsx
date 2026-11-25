@@ -7,11 +7,16 @@ import CartDrawer from "@/components/CartDrawer";
 import TalisBotChat from "@/components/TalisBotChat";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 import { isProductCataloguePath } from "@/lib/product-flipbook/paths";
+import { isShortHomeFastCode } from "@/lib/talispros/fast-code-shape";
 
 export default function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const hideStorefrontChrome = shouldHidePublicStorefrontChrome(pathname);
   const productCatalogue = isProductCataloguePath(pathname);
+  const pathSegments = pathname.split("/").filter(Boolean);
+  const isShortHomeLink =
+    pathSegments.length === 1 && isShortHomeFastCode(pathSegments[0]);
+  const isAppEntry = pathname === "/app" || pathname.startsWith("/app/");
   const isEmbed =
     hideStorefrontChrome ||
     productCatalogue ||
@@ -48,7 +53,9 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/talistv") ||
     pathname.startsWith("/ma/") ||
     pathname.startsWith("/mapsite") ||
-    pathname.startsWith("/crm/");
+    pathname.startsWith("/crm/") ||
+    isShortHomeLink ||
+    isAppEntry;
   const hideTalisBot =
     hideStorefrontChrome ||
     productCatalogue ||

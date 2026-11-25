@@ -100,7 +100,9 @@ export async function savePersonalHomeAction(input: {
   if (result.error === "media") return { ok: false, error: "media" };
   if (result.error || !result.content) return { ok: false, error: "save" };
 
+  const code = identity.fastCode.trim().toLowerCase();
   revalidatePath(personalHomePath(identity.fastCode));
+  revalidatePath(`/${encodeURIComponent(code)}`);
   return { ok: true, content: result.content };
 }
 
