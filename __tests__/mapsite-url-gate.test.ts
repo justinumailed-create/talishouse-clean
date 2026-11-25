@@ -21,6 +21,7 @@ import {
   normalizeUrlGatePin,
   registerYourMapSiteFastCodeFromPath,
   resolveMapsiteListingUrl,
+  resolvePinListingUrl,
   resolvePublishedUrlButtonHref,
   urlGateExpiresAt,
 } from "@/lib/talispros/mapsite-url-gate";
@@ -71,7 +72,7 @@ describe("Mapsite URL gate", () => {
     ).toBe(false);
   });
 
-  it("routes claimed Mapsite URL to Register or multipin Dashboard (no dead-end gate)", () => {
+  it("routes the claimed Mapsite URL button to an MLS or brokerage link, grey until set", () => {
     const popup = readFileSync(
       join(
         process.cwd(),
@@ -79,10 +80,9 @@ describe("Mapsite URL gate", () => {
       ),
       "utf8",
     );
-    expect(popup).toContain("resolvePublishedUrlButtonHref");
-    expect(popup).toContain("canBuyAdditionalPins");
-    expect(popup).toContain("onOpenAdditionalPins");
-    expect(popup).toContain("MAPSITE_URL_ADDITIONAL_PINS_SENTINEL");
+    expect(popup).toContain("resolvePinListingUrl");
+    expect(popup).not.toContain("resolvePublishedUrlButtonHref");
+    expect(popup).not.toContain("onOpenAdditionalPins={");
     expect(popup).not.toContain("MapSiteUrlGateDialog");
     expect(popup).not.toContain("MAPSITE_URL_GATE_SENTINEL");
     expect(popup).not.toContain(
@@ -311,5 +311,19 @@ describe("Mapsite URL gate", () => {
     expect(migration).toContain("admin_notifications");
     expect(migration).toContain("expires_at");
     expect(migration).toContain("consumed_at");
+  });
+});
+
+describe("PIN card URL button (MLS or brokerage)", () => {
+  it("prefers mls_url, then broker_url, and stays grey without a real listing link", () => {
+    expect(
+      resolvePinListingUrl("https://mls.example/listing/1", "https://broker.example"),
+    ).toBe("https://mls.example/listing/1");
+    expect(resolvePinListingUrl(null, "https://broker.example")).toBe(
+      "https://broker.example",
+    );
+    expect(resolvePinListingUrl(null, MAPSITE_DEFAULT_REGISTER_URL)).toBeNull();
+    expect(resolvePinListingUrl("", "")).toBeNull();
+    expect(resolvePinListingUrl(null, "/talispros/register-your-mapsite/dc06")).toBeNull();
   });
 });

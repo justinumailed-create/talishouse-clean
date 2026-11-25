@@ -1067,6 +1067,8 @@ body.mapsite-gallery-open [data-paypal-button] {
   align-items: center;
   gap: 4px;
   pointer-events: none;
+  position: relative;
+  overflow: visible;
 }
 
 .talismaps-pin-body {
@@ -1112,6 +1114,14 @@ body.mapsite-gallery-open [data-paypal-button] {
 }
 
 .talismaps-pin-label {
+  /* Hidden until the pin is selected so the map stays clean; the card
+     also shows the same label when it opens. */
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  margin-top: 4px;
   max-width: 200px;
   width: max-content;
   padding: 4px 10px;
@@ -1132,6 +1142,11 @@ body.mapsite-gallery-open [data-paypal-button] {
   text-overflow: clip;
   word-break: break-word;
   backdrop-filter: blur(8px);
+  z-index: 2;
+}
+
+.talismaps-pin--selected .talismaps-pin-label {
+  display: block;
 }
 
 

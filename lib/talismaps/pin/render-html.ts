@@ -17,16 +17,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 const PIN_LABEL_MAX_WIDTH = 200;
 const PIN_BADGE_HEIGHT = 18;
-const PIN_LABEL_LINE_HEIGHT = 14;
-const PIN_LABEL_VERTICAL_PAD = 8;
 const PIN_MARKER_GAP = 4;
-/** Approx. chars per wrapped line at 11px / 200px max-width. */
-const PIN_LABEL_CHARS_PER_LINE = 26;
-
-function estimatePinLabelHeight(label: string): number {
-  const lines = Math.max(1, Math.ceil(label.length / PIN_LABEL_CHARS_PER_LINE));
-  return lines * PIN_LABEL_LINE_HEIGHT + PIN_LABEL_VERTICAL_PAD;
-}
 
 export function escapePinHtml(value: string): string {
   return value
@@ -180,10 +171,9 @@ export function renderPinMarkerHtml(
 
   const markerWidth = Math.max(size, PIN_LABEL_MAX_WIDTH);
   const badgeBlockHeight = badge ? PIN_BADGE_HEIGHT + PIN_MARKER_GAP : 0;
-  const labelBlockHeight = label
-    ? estimatePinLabelHeight(label) + PIN_MARKER_GAP
-    : 0;
-  const totalHeight = badgeBlockHeight + size + labelBlockHeight;
+  // Label is absolutely positioned and only visible when the pin is selected,
+  // so it must not change the marker box or the pin would jump on click.
+  const totalHeight = badgeBlockHeight + size;
   const pinBodyTop = badgeBlockHeight;
   // Anchor is the centre of the round body, which is the address.
   const anchorY = pinBodyTop + size / 2;

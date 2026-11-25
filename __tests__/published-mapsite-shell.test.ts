@@ -83,11 +83,13 @@ describe("published Mapsite shell", () => {
     expect(application).toContain("scrollZoom={false}");
   });
 
-  it("crops the pin popup listing photo the same way as other FAST Codes", () => {
+  it("claimed pin cards show the label and buttons only, with no listing photo or write-up", () => {
     const popup = repoSource(
       "components/talispros/mapsite/MapSitePropertyPopup.tsx",
     );
-    expect(popup).toContain("MAPSITE_LISTING_IMAGE_CLASS");
-    expect(popup).not.toContain("object-contain object-center");
+    expect(popup).toContain("data-testid=\"mapsite-pin-card-title\"");
+    expect(popup).toContain("{popupTitle}");
+    expect(popup).not.toContain("popupWriteup");
+    expect(popup).toContain("useGenericCard ? genericHeroImage : null");
   });
 });

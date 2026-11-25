@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import {
-  getMapSiteListingHeroImage,
   MAPSITE_LISTING_CARD_WIDTH_CLASS,
   MAPSITE_LISTING_IMAGE_CLASS,
   MAPSITE_LISTING_TILE_TOP_FALLBACK_PX,
@@ -16,14 +15,11 @@ import { ROUTES } from "@/lib/routes";
 import { useT } from "@/lib/i18n/client";
 import { fmt } from "@/lib/i18n/format";
 import { isClaimable } from "@/lib/talispros/mapsite-state";
-import { mapsiteScheduleHref } from "@/lib/mapsite-layout";
 import {
-  listingResourceHref,
   MAPSITE_URL_ADDITIONAL_PINS_SENTINEL,
-  resolvePublishedUrlButtonHref,
+  resolvePinListingUrl,
 } from "@/lib/talispros/mapsite-url-gate";
 import {
-  capabilitiesForAccountType,
   type MapSiteCapabilityAccountType,
   type MapSiteResourceKey,
 } from "@/lib/talispros/account-capabilities";
@@ -49,22 +45,13 @@ const RESOURCES: {
 }[] = [
   {
     key: "url",
-    // Ralf (Oct 18): URL 1 = sales tool, URL 2 = document repository or MLS®
-    // (URL 2 keeps the existing mls_url column).
-    label: "URL 1",
-    // Resolved in render: Register for visitors, multipin Dashboard for paid owners.
-    resolveHref: (site) =>
-      resolvePublishedUrlButtonHref(site.fast_code, site.broker_url, {
-        opensBrokerUrl: site.url1_opens_broker_url,
-      }),
-  },
-  {
-    key: "mls",
-    label: "URL 2",
-    resolveHref: (site) => listingResourceHref(site.mls_url),
+    // Ralf (Nov 25): URL = MLS or brokerage listing, grey until a link is set.
+    label: "URL",
+    resolveHref: (site) => resolvePinListingUrl(site.mls_url, site.broker_url),
   },
   {
     key: "teb",
+    // Was URL 2. TEB™ is the eBook.
     label: "TEB™",
     resolveHref: (site) => {
       const custom = site.teb_url?.trim() || "";
@@ -82,9 +69,16 @@ const RESOURCES: {
     },
   },
   {
+    key: "mls",
+    // Was the TEB™ slot. TVA™ is not yet available, so it stays grey.
+    label: "TVA™",
+    resolveHref: () => null,
+  },
+  {
     key: "ttv",
+    // TTV™ stays in the fourth slot and stays grey for now.
     label: "TTV™",
-    resolveHref: (site) => mapsiteScheduleHref(site.fast_code || ""),
+    resolveHref: () => null,
   },
 ];
 
@@ -202,8 +196,8 @@ export default function MapSitePropertyPopup({
   accountType = "derivative",
   onboardingPhase,
   talisBookHref = null,
-  canBuyAdditionalPins = false,
-  onOpenAdditionalPins,
+  canBuyAdditionalPins: _canBuyAdditionalPins = false,
+  onOpenAdditionalPins: _onOpenAdditionalPins,
   alignTop = MAPSITE_LISTING_TILE_TOP_FALLBACK_PX,
   centerX = null,
   cardHeight = null,
@@ -217,11 +211,8 @@ export default function MapSitePropertyPopup({
   const p = t.mapsite.popup;
   const claimable = isClaimable(mapsite.status);
   const showResourceButtons = showsPinResourceButtons(onboardingPhase);
-  const capabilities = capabilitiesForAccountType(accountType);
-  const heroImage = getMapSiteListingHeroImage(mapsite);
   const genericHeroImage = "/talisbooks/sample/img-11-1280x720.jpeg";
   const useGenericCard = genericOnboardingCard || claimable;
-  const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
   const propertyAddress = mapsite.property_address?.trim() || null;
   const propertyTitle = mapsite.property_title?.trim() || null;
   const demoishTitle =
@@ -235,34 +226,13 @@ export default function MapSitePropertyPopup({
     RESOURCES.find((resource) => resource.key === "teb")?.resolveHref(
       mapsite,
     ) ?? null;
-  const popupHeroImage = pinCard ? null : useGenericCard ? genericHeroImage : heroImage;
+  const popupHeroImage = useGenericCard ? genericHeroImage : null;
   // Claimed / live cards prefer the property address — never stay stuck on a demo title.
   const popupTitle = pinCard
     ? pinCard.title
     : useGenericCard
     ? p.genericTitle
     : propertyAddress || (demoishTitle ? address : propertyTitle) || p.yourMapsite;
-  const rawDescription = mapsite.property_description?.trim() || "";
-  const demoNotIssuedCopy =
-    /no fast code is issued/i.test(rawDescription) ||
-    /^demonstration mapsite/i.test(rawDescription);
-  // After FAST Code™ issue, never keep demonstration “not issued” pin copy.
-  const issuedDescription =
-    fastCode && demoNotIssuedCopy
-      ? null
-      : rawDescription || null;
-  const popupWriteup = pinCard
-    ? pinCard.detail
-    : useGenericCard
-    ? p.genericWriteup
-    : (propertyAddress && !demoishTitle && propertyTitle && propertyTitle !== propertyAddress
-        ? propertyTitle
-        : null) ||
-      issuedDescription ||
-      (propertyAddress ? propertyAddress : null) ||
-      (fastCode
-        ? fmt(p.claimedFallback, { code: fastCode })
-        : p.welcomeFallback);
   const localizedClaimLabel =
     claimLabel === "Register Account now"
       ? t.mapsite.registerAccountNow
@@ -295,17 +265,12 @@ export default function MapSitePropertyPopup({
           className="mapsite-popup-card pointer-events-auto flex flex-col overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm"
           style={cardHeight ? { height: cardHeight } : undefined}
         >
+          {useGenericCard ? (
           <div
             className={`mapsite-popup-hero relative w-full shrink-0 bg-neutral-200/80 ${
               dense
                 ? "h-20 sm:h-24"
-                : useGenericCard
-                ? "aspect-video"
-                : showResourceButtons
-                ? "aspect-[16/9]"
-                : compact
-                  ? "h-28"
-                  : "h-36"
+                : "aspect-video"
             }`}
           >
             <div className="absolute inset-0 z-0">
@@ -335,28 +300,25 @@ export default function MapSitePropertyPopup({
               ×
             </button>
           </div>
+          ) : null}
 
           <div className="flex flex-col bg-gradient-to-b from-white/65 to-white/75 px-4 pb-3 pt-1.5">
-            <div className="shrink-0">
+            <div className="relative shrink-0 pr-10">
               <h2
                 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black"
                 data-testid="mapsite-pin-card-title"
               >
                 {popupTitle}
               </h2>
-              {useGenericCard ? null : fastCode ? (
-                <p className="m-0 text-[11px] font-medium uppercase leading-tight tracking-[0.08em] text-neutral-500">
-                  FAST Code: {fastCode}
-                </p>
-              ) : (
-                <p className="m-0 text-[11px] font-medium uppercase leading-tight tracking-[0.08em] text-neutral-500">
-                  {capabilities.displayName}
-                </p>
-              )}
               {useGenericCard ? null : (
-                <p className="m-0 text-[12px] leading-tight text-black line-clamp-2">
-                  {popupWriteup}
-                </p>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full bg-white/70 text-[17px] leading-none text-neutral-700 shadow-sm ring-1 ring-black/5 transition hover:bg-white"
+                  aria-label={t.mapsite.close}
+                >
+                  ×
+                </button>
               )}
             </div>
 
@@ -389,27 +351,12 @@ export default function MapSitePropertyPopup({
                 ) : null}
                 <div className="grid grid-cols-2 gap-1.5">
                   {RESOURCES.map((resource) => {
-                    const href =
-                      resource.key === "url"
-                        ? resolvePublishedUrlButtonHref(
-                            mapsite.fast_code,
-                            mapsite.broker_url,
-                            {
-                              canBuyAdditionalPins,
-                              opensBrokerUrl: mapsite.url1_opens_broker_url,
-                            },
-                          )
-                        : resource.resolveHref(mapsite);
+                    const href = resource.resolveHref(mapsite);
                     return (
                       <PinActionExplainer key={resource.key} action={PIN_EXPLAINER[resource.key]}>
                         <ResourceButton
                           href={href}
                           label={resource.label}
-                          onActionClick={
-                            resource.key === "url" && canBuyAdditionalPins
-                              ? onOpenAdditionalPins
-                              : undefined
-                          }
                         />
                       </PinActionExplainer>
                     );

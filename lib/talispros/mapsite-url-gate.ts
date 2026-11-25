@@ -73,6 +73,33 @@ export function listingResourceHref(value: string | null | undefined): string | 
   return `https://${href}`;
 }
 
+
+/**
+ * MLS or brokerage listing link for the published PIN "URL" button.
+ * Prefers mls_url, then broker_url. Grey (null) until a real listing link
+ * is saved — never Register, never the additional-PIN Dashboard.
+ */
+export function resolvePinListingUrl(
+  mlsUrl?: string | null,
+  brokerUrl?: string | null,
+): string | null {
+  for (const value of [mlsUrl, brokerUrl]) {
+    const href = listingResourceHref(value);
+    if (!href) continue;
+    if (href === MAPSITE_DEFAULT_REGISTER_URL) continue;
+    let path = href.split("?")[0]?.toLowerCase() || "";
+    try {
+      path = new URL(href, "https://talispros.local").pathname.toLowerCase();
+    } catch {
+      // keep the trimmed path
+    }
+    if (path.includes("/talisu/reg")) continue;
+    if (path.startsWith("/talispros/register-your-mapsite")) continue;
+    return href;
+  }
+  return null;
+}
+
 /**
  * Effective listing/payment URL: FAST-code override wins over stored broker_url.
  */

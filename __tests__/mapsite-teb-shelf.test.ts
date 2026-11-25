@@ -67,25 +67,28 @@ describe("Mapsite TTV™ schedule href", () => {
 });
 
 describe("Mapsite pin resource buttons", () => {
-  it("enables URL and MLS® only when Build form or Admin saved a link; gold only on TTV™", () => {
+  it("shows URL, TEB™, TVA™ and TTV™, with URL grey until a listing link is set", () => {
     const popup = readFileSync(
       join(process.cwd(), "components/talispros/mapsite/MapSitePropertyPopup.tsx"),
       "utf8",
     );
-    expect(popup).toContain("listingResourceHref(site.mls_url)");
-    expect(popup).toContain("resolvePublishedUrlButtonHref(site.fast_code, site.broker_url, {");
-    expect(popup).toContain("opensBrokerUrl: site.url1_opens_broker_url");
-    expect(popup).not.toContain("listingResourceHref(site.broker_url)");
-    expect(popup).toContain("listingResourceHref(site.mls_url)");
+    expect(popup).toContain('label: "URL"');
+    expect(popup).toContain('label: "TEB™"');
+    expect(popup).toContain('label: "TVA™"');
+    expect(popup).toContain('label: "TTV™"');
+    expect(popup).not.toContain('label: "URL 1"');
+    expect(popup).not.toContain('label: "URL 2"');
+    expect(popup).toContain("resolvePinListingUrl(site.mls_url, site.broker_url)");
+    expect(popup).not.toContain("resolvePublishedUrlButtonHref");
     expect(popup).not.toContain("listingSearchHref");
     expect(popup).not.toContain("google.com/search");
     expect(popup).not.toContain("realtor.ca/map");
     expect(popup).toContain("bg-[#046BD9]");
+    expect(popup).toContain("bg-neutral-300");
     expect(popup).not.toContain('variant: "gold"');
     expect(popup).not.toContain("#ffc439");
-    expect(popup).not.toContain("resource.key === \"ttv\"");
-    expect(popup).toContain("canBuyAdditionalPins");
-    expect(popup).toContain("onOpenAdditionalPins");
+    expect(popup).not.toContain("mapsiteScheduleHref");
+    expect(popup).not.toContain("onOpenAdditionalPins={");
 
     const css = readFileSync(join(process.cwd(), "app/globals.css"), "utf8");
     expect(css).toContain(".mapsite-paypal-btn--gold");

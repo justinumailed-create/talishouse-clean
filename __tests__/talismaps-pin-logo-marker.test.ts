@@ -150,3 +150,15 @@ describe("Talismaps™ logo marker CSS", () => {
     expect(block).toMatch(/border-radius:\s*0/);
   });
 });
+
+describe("Talismaps™ pin labels", () => {
+  it("hides the pin label until the pin is selected", () => {
+    const css = readFileSync(resolve("app/globals.css"), "utf8");
+    const label = css.slice(css.indexOf(".talismaps-pin-label {"));
+    expect(label).toContain("display: none");
+    expect(css).toContain(".talismaps-pin--selected .talismaps-pin-label");
+    const render = readFileSync(resolve("lib/talismaps/pin/render-html.ts"), "utf8");
+    expect(render).toContain("const totalHeight = badgeBlockHeight + size");
+    expect(render).not.toContain("labelBlockHeight");
+  });
+});
