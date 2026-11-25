@@ -298,14 +298,62 @@ export function personalHomeOpenHref(
   return `${path}?${params.toString()}`;
 }
 
+/**
+ * Fallback store for the contact name when mapsite_personal_home.contact_name
+ * has not been applied yet (migration 128). The visible buttons stay in `items`.
+ */
+export const PERSONAL_HOME_CONTACT_PACK = "contact-v1";
+
+type PersonalHomeButtonsPack = {
+  _ph: typeof PERSONAL_HOME_CONTACT_PACK;
+  contactName: string | null;
+  items: unknown;
+};
+
+export function isPersonalHomeContactPack(
+  value: unknown,
+): value is PersonalHomeButtonsPack {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const row = value as Record<string, unknown>;
+  return row._ph === PERSONAL_HOME_CONTACT_PACK && Array.isArray(row.items);
+}
+
+/** Wrap buttons so a contact name can be saved without the contact_name column. */
+export function packPersonalHomeButtonsForContact(
+  buttons: PersonalHomeButton[],
+  contactName: string | null,
+): PersonalHomeButtonsPack {
+  return {
+    _ph: PERSONAL_HOME_CONTACT_PACK,
+    contactName: contactName?.trim() || null,
+    items: buttons,
+  };
+}
+
+/** Prefer the contact_name column; otherwise the buttons pack used before that column exists. */
+export function contactNameFromPersonalHomeRow(
+  contactName: string | null | undefined,
+  buttonsRaw: unknown,
+): string | null {
+  const fromColumn = contactName?.trim() || "";
+  if (fromColumn) return fromColumn;
+  if (isPersonalHomeContactPack(buttonsRaw)) {
+    const packed =
+      typeof buttonsRaw.contactName === "string" ? buttonsRaw.contactName.trim() : "";
+    return packed || null;
+  }
+  return null;
+}
+
 /** Validated, de-duplicated, capped button list (bad rows are dropped). */
 export function normalizePersonalHomeButtons(
   value: unknown,
   context?: PersonalHomeButtonContext,
 ): PersonalHomeButton[] {
-  if (!Array.isArray(value)) return [];
+  const list = isPersonalHomeContactPack(value) ? value.items : value;
+  if (!Array.isArray(list)) return [];
   const out: PersonalHomeButton[] = [];
-  for (const raw of value) {
+  for (const raw of list) {
     if (!raw || typeof raw !== "object") continue;
     const row = raw as Record<string, unknown>;
     const label = cleanPersonalHomeText(row.label, PERSONAL_HOME_LIMITS.buttonLabel);

@@ -1,8 +1,10 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
+  contactNameFromPersonalHomeRow,
   emptyPersonalHomeContent,
   normalizePersonalHomeButtons,
   normalizePersonalHomeSideMedia,
+  packPersonalHomeButtonsForContact,
   type PersonalHomeButton,
   type PersonalHomeContent,
   type PersonalHomeSideMedia,
@@ -33,7 +35,7 @@ function rowToContent(row: Row | null | undefined): PersonalHomeContent {
     imageUrl: row.image_url?.trim() || null,
     kicker: row.kicker?.trim() || null,
     headline: row.headline?.trim() || null,
-    contactName: row.contact_name?.trim() || null,
+    contactName: contactNameFromPersonalHomeRow(row.contact_name, row.buttons),
     writeUp: row.write_up?.trim() || null,
     buttons: normalizePersonalHomeButtons(row.buttons),
     sideMedia: normalizePersonalHomeSideMedia(row.side_media),
@@ -168,7 +170,17 @@ export async function savePersonalHomeContent(input: {
   const saved = withContact.error && isMissingContactColumn(withContact.error.message)
     ? await getSupabaseAdmin()
         .from(TABLE)
-        .upsert(base, { onConflict: "mapsite_id" })
+        .upsert(
+          {
+            ...base,
+            // buttons is jsonb. This pack is used only when contact_name is missing.
+            buttons: packPersonalHomeButtonsForContact(
+              normalizePersonalHomeButtons(input.buttons),
+              input.contactName,
+            ),
+          } as unknown as typeof base,
+          { onConflict: "mapsite_id" },
+        )
         .select(COLUMNS)
         .maybeSingle()
     : withContact;
@@ -178,9 +190,6 @@ export async function savePersonalHomeContent(input: {
   }
   const row = saved.data as Row | null;
   const content = rowToContent(row);
-  if (content && !row?.contact_name && input.contactName) {
-    content.contactName = input.contactName;
-  }
   return { content };
 }
 

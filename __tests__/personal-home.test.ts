@@ -11,6 +11,8 @@ import {
   isPersonalHomePath,
   normalizePersonalHomeButtons,
   normalizePersonalHomeHref,
+  packPersonalHomeButtonsForContact,
+  contactNameFromPersonalHomeRow,
   mapsiteBrokerageDisplayName,
   personalHomePath,
   resolvePersonalHome,
@@ -28,6 +30,41 @@ const defaults = {
   writeUp: "Default write-up",
   buttons: [{ label: "Open Mapsite", href: "/map/xx00", kind: "link" as const }],
 };
+
+describe("contact name pack (fallback when contact_name column is missing)", () => {
+  const buttons = [{ label: "Open Mapsite", href: "/map/dc06", kind: "link" as const }];
+
+  it("packs and reads the contact name from the buttons column", () => {
+    const packed = packPersonalHomeButtonsForContact(buttons, "Ralf");
+    expect(packed._ph).toBe("contact-v1");
+    expect(packed.contactName).toBe("Ralf");
+    expect(normalizePersonalHomeButtons(packed)).toEqual(buttons);
+    expect(contactNameFromPersonalHomeRow(null, packed)).toBe("Ralf");
+  });
+
+  it("prefers the contact_name column over the pack", () => {
+    const packed = packPersonalHomeButtonsForContact(buttons, "Ralf");
+    expect(contactNameFromPersonalHomeRow("Doug Copp", packed)).toBe("Doug Copp");
+  });
+
+  it("lets resolvePersonalHome use the packed contact name instead of the owner default", () => {
+    const packed = packPersonalHomeButtonsForContact(buttons, "Ralf");
+    const resolved = resolvePersonalHome(defaults, {
+      imageUrl: null,
+      kicker: null,
+      headline: 'My "Chagatown" Project',
+      contactName: contactNameFromPersonalHomeRow(null, packed),
+      writeUp: null,
+      buttons: normalizePersonalHomeButtons(packed),
+      sideMedia: null,
+      updatedAt: null,
+    });
+    expect(resolved.contactName).toBe("Ralf");
+    expect(resolved.customized.contactName).toBe(true);
+    expect(resolved.buttons).toEqual(buttons);
+  });
+});
+
 
 describe("personal home helpers", () => {
   it("builds lowercase /talispros/home paths", () => {
@@ -266,6 +303,17 @@ describe("personal home wiring", () => {
     expect(editor).not.toContain("useTransition");
     expect(editor).toContain("setSaving(false)");
     expect(editor).toMatch(/setSaving\(false\);\s*\}\s*router\.refresh\(\)/);
+    // Close reloads the page after a successful save so the public name updates.
+    expect(editor).toContain("function handleClose()");
+    expect(editor).toContain("window.location.reload()");
+    expect(editor).toContain("onClick={handleClose}");
+    const service = readFileSync(
+      join(root, "lib/talispros/personal-home-service.ts"),
+      "utf8",
+    );
+    expect(service).toContain("packPersonalHomeButtonsForContact");
+    expect(service).toContain("contactNameFromPersonalHomeRow");
+    expect(service).not.toMatch(/content\.contactName = input\.contactName/);
   });
 });
 

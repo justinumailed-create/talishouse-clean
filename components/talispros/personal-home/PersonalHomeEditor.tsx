@@ -118,6 +118,7 @@ export default function PersonalHomeEditor({
     return () => window.removeEventListener(PERSONAL_HOME_OPEN_EDITOR_EVENT, openEditor);
   }, []);
   const [saving, setSaving] = useState(false);
+  const [reloadOnClose, setReloadOnClose] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(saved.imageUrl);
   const [sideKind, setSideKind] = useState<"" | PersonalHomeSideMedia["kind"]>(
@@ -281,12 +282,20 @@ export default function PersonalHomeEditor({
         return;
       }
       setMessage({ tone: "ok", text: t.saved });
+      setReloadOnClose(true);
     } catch {
       setMessage({ tone: "error", text: t.errSave });
     } finally {
       setSaving(false);
     }
     router.refresh();
+  }
+
+  function handleClose() {
+    setOpen(false);
+    if (reloadOnClose) {
+      window.location.reload();
+    }
   }
 
   async function handleReset() {
@@ -310,6 +319,7 @@ export default function PersonalHomeEditor({
       setWriteUp("");
       setButtons(toDrafts(defaults.buttons));
       setMessage({ tone: "ok", text: t.saved });
+      setReloadOnClose(true);
     } catch {
       setMessage({ tone: "error", text: t.errSave });
     } finally {
@@ -765,7 +775,7 @@ export default function PersonalHomeEditor({
               </button>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={handleClose}
                 data-testid="personal-home-close"
                 className="inline-flex min-h-11 items-center rounded-full border border-neutral-300 bg-white px-6 text-[15px] font-semibold text-neutral-800 hover:bg-neutral-50"
               >
