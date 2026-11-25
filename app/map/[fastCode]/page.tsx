@@ -36,7 +36,10 @@ import { getMapSiteEbookContext, resolveEbookListingImageUrls } from "@/lib/tali
 import { ROUTES } from "@/lib/routes";
 import { DEMO_PINNED_EBOOK_HREF, isDemoMapSiteCode } from "@/lib/talispros/demo-mapsite";
 import { personalHomePath } from "@/lib/talispros/personal-home";
-import { loadPersonalHomeOwnerPill } from "@/lib/talispros/personal-home-page";
+import {
+  loadPersonalHomeOwnerPill,
+  loadPersonalHomePublicCard,
+} from "@/lib/talispros/personal-home-page";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { ACTIVATE_QUERY, BOOK_PENDING_QUERY, CHECKOUT_QUERY, CHECKOUT_SESSION_QUERY, parseCheckoutSessionId, parseCheckoutStatus } from "@/lib/talispros/ebook-choice";
 import {
@@ -297,7 +300,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
     mapsite.teb_url?.trim() ||
     (treatAsDemoUnlock ? DEMO_PINNED_EBOOK_HREF : null);
   const hasTalisBook = Boolean(talisBookHref || ebookContext?.books?.length);
-  const [listingImageUrls, contractRow, ownerPill] = await Promise.all([
+  const [listingImageUrls, contractRow, ownerPill, clientCard] = await Promise.all([
     resolveEbookListingImageUrls({
       listingImageUrls: ebookContext?.primaryEbook?.listingImageUrls,
       bookSlug: primarySlug,
@@ -307,6 +310,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       ? Promise.resolve(true)
       : getSignedContractForFastCode(mapsite.fast_code || fastCode).then(Boolean),
     loadPersonalHomeOwnerPill(fastCode, locale),
+    loadPersonalHomePublicCard(fastCode, locale),
   ]);
   const contractSigned = paymentReceived || !showActivatePayment || contractRow;
   // The PIN card opens only when a PIN is clicked. Explicit deep links
@@ -364,6 +368,7 @@ export default async function ClaimedMapSiteByAccountTypePage({
       canManageDashboard={canManageDashboard}
       initialOwnerCustomizations={ownerCustomizations}
       initialRootContext={rootContext}
+      clientCard={clientCard}
       personalHomeNav={{
         homeHref: personalHomePath(fastCode),
         mapsiteHref: `/map/${fastCode.toLowerCase()}`,

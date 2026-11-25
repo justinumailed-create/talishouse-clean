@@ -214,7 +214,7 @@ function CardTools({
 
 /**
  * Claimed Mapsite left card:
- * FAST CODE → address → partner photo → name → Marketing Partner → WhatsApp / Telegram.
+ * FAST CODE → partner photo → client name → WhatsApp / Telegram.
  * The photo block is a div (not a tall <button>) so the parent sidebar can scroll.
  * Interest links sit outside that control so they are not nested buttons.
  */
@@ -229,7 +229,7 @@ export default function MapSiteMarketPartnerCard({
   partnerImageUrl = null,
   partnerName: partnerNameOverride = null,
   cardTitle = null,
-  cardAddress = null,
+  cardAddress: _cardAddress = null,
   dashboardItems,
   onSelectDashboardItem,
   pinOptions,
@@ -245,8 +245,6 @@ export default function MapSiteMarketPartnerCard({
   const t = useT();
   const content = contentForAudience(audience);
   const fastCode = mapsite.fast_code?.trim().toUpperCase() || null;
-  const address =
-    (cardAddress?.trim() || mapsite.property_address?.trim())?.toUpperCase() || null;
   const agencyName = cardTitle?.trim() || mapsite.agency_name;
   const toolLabels = {
     dashboard: t.mapsite.leftCard.dashboard,
@@ -277,7 +275,6 @@ export default function MapSiteMarketPartnerCard({
   );
   const partnerName =
     partnerNameOverride?.trim() || defaultMapSitePartnerName(mapsite);
-  const partnerLabel = t.mapsite.leftCard.inventory;
   const markUrl = brandLogoUrl ?? mapsite.logo_url;
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -333,16 +330,8 @@ export default function MapSiteMarketPartnerCard({
               <p className="text-[13px] font-bold uppercase tracking-wide text-black">
                 {fastCode ? `FAST CODE: ${fastCode}` : t.mapsite.claimReceived}
               </p>
-              {address ? (
-                <p className="mt-0.5 truncate text-[11px] font-bold uppercase tracking-wide text-black">
-                  {address}
-                </p>
-              ) : null}
               <p className="mt-1 text-[13px] font-semibold leading-snug text-black">
                 {partnerName}
-              </p>
-              <p className="text-[12px] font-semibold leading-snug text-black">
-                {partnerLabel}
               </p>
             </div>
           </div>
@@ -389,12 +378,6 @@ export default function MapSiteMarketPartnerCard({
             </p>
           )}
 
-          {address ? (
-            <p className="mt-2 text-[12px] font-bold uppercase leading-snug tracking-wide text-black">
-              {address}
-            </p>
-          ) : null}
-
           <div className="relative mx-auto mt-4 max-w-[150px]">
             <Image
               src={partnerImage}
@@ -408,9 +391,6 @@ export default function MapSiteMarketPartnerCard({
 
           <p className="mt-4 text-[14px] font-semibold leading-snug text-black">
             {partnerName}
-          </p>
-          <p className="mt-1 text-[13px] font-semibold leading-snug text-black">
-            {partnerLabel}
           </p>
         </div>
         <MarketingPartnerInterestLinks

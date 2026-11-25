@@ -23,10 +23,9 @@ describe("Aisha on a claimed Mapsite", () => {
     expect(mapsiteShowsAisha("")).toBe(false);
     expect(mapsiteAishaInvitation()).toBe("callback");
     const app = read("components/talispros/mapsite/MapSiteApplication.tsx");
-    expect(app).toContain("mapsiteShowsAisha(mapsite.status)");
-    expect(app).toContain("mapsiteAishaInvitation()");
-    expect(app).toContain('placement="bottom-right"');
-    expect(app).toContain("agentId={AISHA_MAPSITE_AGENT_ID}");
+    expect(app).not.toContain("mapsiteShowsAisha(mapsite.status)");
+    expect(app).not.toContain("AishaConvaiWidget");
+    expect(app).toContain("clientCard");
     expect(app).toContain("additionalPinMapLabel(pin.label)");
   });
 
@@ -39,6 +38,10 @@ describe("Aisha on a claimed Mapsite", () => {
     );
     expect(en.mapsite.leftCard.inventory).toBe("I represent this Inventory");
     expect(de.mapsite.leftCard.inventory).toBe("Ich vertrete dieses Inventar");
+    const card = read("components/talispros/mapsite/MapSiteMarketPartnerCard.tsx");
+    expect(card).not.toContain("leftCard.inventory");
+    expect(card).not.toContain("I represent this Inventory");
+    expect(read("app/map/[fastCode]/page.tsx")).toContain("loadPersonalHomePublicCard");
     expect(en.home.assistants.aisha.greeting).not.toBe(en.home.assistants.aisha.callback);
     expect(en.home.assistants.aisha.callback).not.toContain("—");
     expect(de.home.assistants.aisha.callback).not.toContain("—");

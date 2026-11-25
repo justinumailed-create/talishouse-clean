@@ -223,6 +223,8 @@ interface MapSiteApplicationProps {
     mapsiteHref: string;
     owner?: PersonalHomeOwnerPill | null;
   } | null;
+  /** Client home-page photo and contact name for the left card (public). */
+  clientCard?: { name: string; imageUrl: string } | null;
   /** Rendered under the Mapsite write-up card (e.g. Aisha's four buttons). */
   belowWriteUp?: ReactNode;
 }
@@ -256,6 +258,7 @@ export default function MapSiteApplication({
   initialOwnerCustomizations = null,
   initialRootContext = null,
   personalHomeNav = null,
+  clientCard = null,
   belowWriteUp = null,
 }: MapSiteApplicationProps) {
   const [mapsite] = useState(initialMapSite);
@@ -549,6 +552,7 @@ export default function MapSiteApplication({
         categoryFilter={categoryFilter}
         onCategoryFilterChange={setCategoryFilter}
         personalHomeNav={personalHomeNav}
+        clientCard={clientCard}
         belowWriteUp={belowWriteUp}
       />
     </MapEngineProvider>
@@ -595,6 +599,7 @@ function MapSiteChrome({
   categoryFilter,
   onCategoryFilterChange,
   personalHomeNav,
+  clientCard,
   belowWriteUp,
 }: {
   mapsite: MapSitePlatformRecord;
@@ -640,6 +645,7 @@ function MapSiteChrome({
     mapsiteHref: string;
     owner?: PersonalHomeOwnerPill | null;
   } | null;
+  clientCard: { name: string; imageUrl: string } | null;
   belowWriteUp: ReactNode;
 }) {
   const { setViewport, isReady, viewport } = useMapEngine();
@@ -1010,22 +1016,28 @@ function MapSiteChrome({
     setSelectedPinId(requested);
   }, [mapsite.id, pinDashboard.pins, rootContext.partnerPins, setSelectedPinId]);
 
-  const defaultPartnerImage = defaultMapSitePartnerImage(audience);
-  const defaultPartnerName = defaultMapSitePartnerName(mapsite);
-  // One resolver for logo + partner photo/name/tagline (owner overrides win).
-  const branding = useMemo(
-    () =>
-      resolveMapSiteBranding(
-        {
-          logoUrl: mapsite.logo_url,
-          partnerImageUrl: defaultPartnerImage,
-          partnerName: defaultPartnerName,
-          partnerTagline: DEFAULT_MAPSITE_PARTNER_TAGLINE,
-        },
-        ownerCustomizations,
-      ),
-    [mapsite.logo_url, defaultPartnerImage, defaultPartnerName, ownerCustomizations],
-  );
+  const defaultPartnerImage =
+    clientCard?.imageUrl?.trim() || defaultMapSitePartnerImage(audience);
+  const defaultPartnerName =
+    clientCard?.name?.trim() || defaultMapSitePartnerName(mapsite);
+  // Home-page photo and name are the source of truth for the left card.
+  // Owner logo/title overrides still apply; partner photo/name follow the home page.
+  const branding = useMemo(() => {
+    const resolved = resolveMapSiteBranding(
+      {
+        logoUrl: mapsite.logo_url,
+        partnerImageUrl: defaultPartnerImage,
+        partnerName: defaultPartnerName,
+        partnerTagline: DEFAULT_MAPSITE_PARTNER_TAGLINE,
+      },
+      ownerCustomizations,
+    );
+    return {
+      ...resolved,
+      partnerImageUrl: defaultPartnerImage || resolved.partnerImageUrl,
+      partnerName: defaultPartnerName || resolved.partnerName,
+    };
+  }, [mapsite.logo_url, defaultPartnerImage, defaultPartnerName, ownerCustomizations]);
   // Branded record (owner logo override) for the left card, sidebar and popup.
   const cardMapSite = useMemo(
     () => withOwnerLogo(mapsite, ownerCustomizations),

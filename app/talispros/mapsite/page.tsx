@@ -32,6 +32,8 @@ import {
   isDemoMapSiteCode,
 } from "@/lib/talispros/demo-mapsite";
 import { personalHomePath } from "@/lib/talispros/personal-home";
+import { loadPersonalHomePublicCard } from "@/lib/talispros/personal-home-page";
+import { getLocale } from "@/lib/i18n/server";
 import { isAllPinsFastCode } from "@/lib/talispros/allpins-mapsite-constants";
 import { isIssuedFastCode } from "@/lib/talispros/fast-code-shape";
 import { isFastCodeDisqualified } from "@/lib/talispros/market-disqualify-server";
@@ -302,6 +304,11 @@ export default async function TalisprosMapSitePage({
     listingImageUrls,
     { hideSecondInterior: paymentReceived },
   );
+  const locale = await getLocale();
+  const clientCard =
+    fastCode && !isAllPinsFastCode(fastCode)
+      ? await loadPersonalHomePublicCard(fastCode, locale)
+      : null;
 
   return (
     <MapSiteApplication
@@ -329,6 +336,7 @@ export default async function TalisprosMapSitePage({
       pinCheckoutSessionId={pinCheckoutSessionId}
       canManageDashboard={canManageDashboard}
       initialOwnerCustomizations={ownerCustomizations}
+      clientCard={clientCard}
       personalHomeNav={
         fastCode && !isAllPinsFastCode(fastCode)
           ? {
