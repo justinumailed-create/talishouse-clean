@@ -33,7 +33,6 @@ export default function MapSiteOwnerIdleLogout({
     const start = Date.now();
     lastActive.current = start;
     loggingOut.current = false;
-    setWarning(false);
 
     async function signOut() {
       if (loggingOut.current) return;

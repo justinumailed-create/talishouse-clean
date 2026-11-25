@@ -29,16 +29,19 @@ function ClientAppForm() {
   const t = useT().appPage;
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState("");
-  const [remembered, setRemembered] = useState<string | null>(null);
+  const [remembered, setRemembered] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const stored = getFastCode()?.trim() || "";
-    if (stored) {
+    if (!stored) return;
+    // After hydration, so the server render of this page stays empty.
+    const id = window.requestAnimationFrame(() => {
       setRemembered(stored);
       setValue(stored);
-    }
+    });
+    return () => window.cancelAnimationFrame(id);
   }, []);
 
   async function openSite(raw: string) {
