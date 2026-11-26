@@ -21,7 +21,7 @@ PAGES = [
     ("pmc", "/talisu/talispros"), ("media", "/talisu/media-directory"),
     ("contract", "/talisu/contract"), ("terms", "/talisu/terms"),
     ("privacy", "/talisu/privacy"), ("talisu", "/talisu"), ("kb", "/talisu/kb"),
-    ("mapsite", "/mapsite/rm22"), ("agent-login", "/agent/login"),
+    ("mapsite", "/mapsite/rm22"), ("associate-login", "/associate"),
     ("admin-login", "/admin/login"),
 ]
 DE = {"home", "engage", "reg", "discuss", "catalogue", "talisu"}

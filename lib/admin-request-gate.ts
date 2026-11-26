@@ -45,7 +45,7 @@ export function resolveAdminRequestGate(input: {
     return { action: "next" };
   }
 
-  // Agents sign in at /agent/login; send them back to the page they asked for.
+  // Associates sign in at /associate; send them back to the page they asked for.
   if (isAgentPortalPath(pathname) && !isStandaloneAdminPath(pathname)) {
     return { action: "redirect", to: agentLoginPath(`${pathname}${input.search || ""}`) };
   }

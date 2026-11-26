@@ -34,5 +34,5 @@ export function isStandaloneAdminPath(pathname: string | null | undefined): bool
  */
 export function shouldHidePublicStorefrontChrome(pathname: string | null | undefined): boolean {
   const path = normalizeAppPath(pathname);
-  return isAdminAppPath(path) || path === "/agent" || path.startsWith("/agent/") || path === "/chat" || path.startsWith("/chat/");
+  return isAdminAppPath(path) || path === "/agent" || path.startsWith("/agent/") || path === "/associate" || path.startsWith("/associate/") || path === "/chat" || path.startsWith("/chat/");
 }

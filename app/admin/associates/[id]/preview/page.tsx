@@ -8,7 +8,7 @@ import { listManualPayments } from "@/lib/manual-payments";
 export const dynamic = "force-dynamic";
 
 /**
- * Superadmin "View as agent": renders the agent's dashboard read-only inside
+ * Superadmin "View as associate": renders the associate's dashboard read-only inside
  * the admin shell. Does not touch the agent's or the viewer's session.
  */
 export default async function AdminAgentPreviewPage({ params }: { params: Promise<{ id: string }> }) {
@@ -29,7 +29,7 @@ export default async function AdminAgentPreviewPage({ params }: { params: Promis
         <span>
           Viewing as <strong>{agent.name}</strong> ({agent.loginId}) — read-only preview. Forms are disabled.
         </span>
-        <Link href={`/admin/agents/${agent.id}`} className="font-medium underline">
+        <Link href={`/admin/associates/${agent.id}`} className="font-medium underline">
           Back to edit
         </Link>
       </div>

@@ -22,6 +22,9 @@ const PUBLIC = path.join(process.cwd(), "public");
 
 /** Pages that only redirect() and never render. */
 const REDIRECT_ONLY = new Set([
+  "/agent/login",
+  "/agent/change-password",
+  "/associate/login",
   "/a/[fastCode]",
   "/admin/bookshelves",
   "/business-office/propose-project",

@@ -30,6 +30,10 @@ describe("admin path helpers", () => {
     expect(shouldHidePublicStorefrontChrome("/admin")).toBe(true);
     expect(shouldHidePublicStorefrontChrome("/admin/login")).toBe(true);
     expect(shouldHidePublicStorefrontChrome("/admin/dashboard")).toBe(true);
+    expect(shouldHidePublicStorefrontChrome("/associate")).toBe(true);
+    expect(shouldHidePublicStorefrontChrome("/associate/login")).toBe(true);
+    expect(shouldHidePublicStorefrontChrome("/associate/change-password")).toBe(true);
+    expect(shouldHidePublicStorefrontChrome("/agent/login")).toBe(true);
     expect(shouldHidePublicStorefrontChrome("/catalogue")).toBe(false);
     expect(shouldHidePublicStorefrontChrome("/talishouse")).toBe(false);
   });

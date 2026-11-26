@@ -104,7 +104,7 @@ describe("chat privacy (static)", () => {
       }
       return out;
     };
-    for (const file of walk(path.join(process.cwd(), "app", "admin", "agents"))) {
+    for (const file of walk(path.join(process.cwd(), "app", "admin", "associates"))) {
       expect(readFileSync(file, "utf8")).not.toMatch(/agent_chat|readChatThread|listChatContacts/);
     }
     const server = readFileSync(path.join(process.cwd(), "lib", "chat", "server.ts"), "utf8");

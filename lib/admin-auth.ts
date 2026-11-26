@@ -110,7 +110,7 @@ export async function matchesGlobalAdminPassword(raw: string): Promise<boolean> 
 }
 
 /**
- * FAST-code login: Global Admin or an active grant (agents use /agent/login).
+ * FAST-code login: Global Admin or an active grant (associates use /associate).
  * After the code check, a server-side session is created and only its random
  * token goes into the cookie.
  */

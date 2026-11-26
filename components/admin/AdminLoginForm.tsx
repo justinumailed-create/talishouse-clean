@@ -87,8 +87,8 @@ export default function AdminLoginForm({ notice = null }: { notice?: string | nu
           </button>
         </form>
         <p className="mt-4 text-center text-xs text-[#6e6e73]">
-          Agent?{" "}
-          <a href="/agent/login" className="underline hover:text-[#111]">
+          Associate?{" "}
+          <a href="/associate" className="underline hover:text-[#111]">
             Sign in with your login ID
           </a>
         </p>

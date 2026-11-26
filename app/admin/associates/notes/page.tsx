@@ -41,13 +41,13 @@ export default async function AdminAgentNotesPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        kicker="Agents"
+        kicker="Associates"
         title="Daily notes"
-        subtitle="Task notes and documents agents posted, by day (IST). Defaults to today."
-        actions={<Link href="/admin/agents" className="text-sm font-medium text-[#1E4ED8] hover:underline">← All agents</Link>}
+        subtitle="Task notes and documents associates posted, by day (IST). Defaults to today."
+        actions={<Link href="/admin/associates" className="text-sm font-medium text-[#1E4ED8] hover:underline">← All associates</Link>}
       />
       <AgentFilterBar
-        action="/admin/agents/notes"
+        action="/admin/associates/notes"
         agents={agents.map((a) => ({ id: a.id, name: a.name, loginId: a.loginId }))}
         values={{ agent: agentId ?? "", from: from ?? "", to: to ?? "" }}
       />

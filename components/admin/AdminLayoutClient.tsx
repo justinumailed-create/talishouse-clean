@@ -74,7 +74,7 @@ function AdminSidebar({
             <div>
               <h1 className="text-[15px] font-semibold leading-tight tracking-tight text-neutral-900">Tsplits™</h1>
               <p className="text-[10px] text-[#1E4ED8] font-bold uppercase tracking-widest mt-0.5">
-                {serverAccountIsAgent ? "Agent Console" : "Admin Console"}
+                {serverAccountIsAgent ? "Associate Console" : "Admin Console"}
               </p>
             </div>
           </div>
@@ -302,7 +302,7 @@ export default function AdminLayoutClient({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <span className="text-sm font-medium text-gray-900">{serverAccount?.access === "agent" ? "Agent Console" : "Admin Console"}</span>
+            <span className="text-sm font-medium text-gray-900">{serverAccount?.access === "agent" ? "Associate Console" : "Admin Console"}</span>
           </header>
 
           <main className={isLoginPage ? "flex-1" : "admin-main flex-1 bg-[#f6f8fb] px-4 py-6 lg:px-10 lg:py-10 overflow-y-auto pb-[120px]"}>

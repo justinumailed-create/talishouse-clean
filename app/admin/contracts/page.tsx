@@ -46,18 +46,18 @@ export default async function AdminContractsPage() {
           <Link href={PMC_PATHS.contract} className="text-[#1E4ED8] underline" target="_blank">
             {PMC_PATHS.contract}
           </Link>{" "}
-          with their agent&apos;s permanent agent code. Every signature (and its FAST Code) is attributed to that agent.
+          with their associate&apos;s permanent associate code. Every signature (and its FAST Code) is attributed to that associate.
           Registration payment requires a signed agreement.
         </p>
       </div>
 
       <section className="rounded-2xl border border-neutral-200 bg-white p-5">
-        <h2 className="text-sm font-semibold text-neutral-900">Agent codes</h2>
+        <h2 className="text-sm font-semibold text-neutral-900">Associate codes</h2>
         <table className="mt-3 w-full text-left text-sm">
           <thead className="text-[12px] uppercase text-neutral-500">
             <tr>
-              <th className="py-1.5">Agent</th>
-              <th className="py-1.5">Agent code</th>
+              <th className="py-1.5">Associate</th>
+              <th className="py-1.5">Associate code</th>
               <th className="py-1.5">Status</th>
               <th className="py-1.5 text-right">Signed clients</th>
             </tr>
@@ -91,7 +91,7 @@ export default async function AdminContractsPage() {
                   <th className="py-1.5 pr-3">Client</th>
                   <th className="py-1.5 pr-3">Business</th>
                   <th className="py-1.5 pr-3">Email</th>
-                  <th className="py-1.5 pr-3">Agent</th>
+                  <th className="py-1.5 pr-3">Associate</th>
                   <th className="py-1.5">Record</th>
                 </tr>
               </thead>

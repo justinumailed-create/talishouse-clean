@@ -11,7 +11,7 @@ import {
   type AdminAccount,
 } from "../lib/admin-constants";
 import { accountCanAccessAdminPath } from "../lib/admin-route-access";
-import { getFullAdminNavItems as getAdminNavItems } from "../lib/admin-nav";
+import { getFullAdminNavItems } from "../lib/admin-nav";
 import { resolveAdminRequestGate } from "../lib/admin-request-gate";
 
 function readSource(relativePath: string) {
@@ -48,8 +48,8 @@ describe("agent privileges", () => {
     expect(accountCanAccessAdminPath(a, "/admin/agent")).toBe(true);
     expect(accountCanAccessAdminPath(a, "/admin/mapsites/rm22")).toBe(true);
     expect(accountCanAccessAdminPath(a, "/admin/leads")).toBe(true);
-    expect(accountCanAccessAdminPath(a, "/admin/agents")).toBe(false);
-    expect(accountCanAccessAdminPath(a, "/admin/agents/x/preview")).toBe(false);
+    expect(accountCanAccessAdminPath(a, "/admin/associates")).toBe(false);
+    expect(accountCanAccessAdminPath(a, "/admin/associates/x/preview")).toBe(false);
     expect(accountCanAccessAdminPath(a, "/admin/fast-codes")).toBe(false);
     expect(accountCanAccessAdminPath(a, "/admin/dashboard")).toBe(false);
     expect(accountCanAccessAdminPath(a, "/admin/notifications")).toBe(false);
@@ -60,15 +60,15 @@ describe("agent privileges", () => {
     expect(adminHomePath(a)).toBe("/admin/agent");
   });
 
-  it("gives the Global Admin (ARUN) the Agents section", () => {
+  it("gives the Global Admin (ARUN) the Associates section", () => {
     expect(accountHasAdminScope(getAdminAccountByFastCode("ARUN"), "agents")).toBe(true);
-    expect(getAdminNavItems(getAdminAccountByFastCode("ARUN")).map((i) => i.href)).toContain("/admin/agents");
+    expect(getFullAdminNavItems(getAdminAccountByFastCode("ARUN")).map((i) => i.href)).toContain("/admin/associates");
     expect(ADMIN_ACCOUNTS.map((a) => a.fastCode)).toEqual(["ARUN"]);
   });
 
   it("builds agent nav only from granted privileges", () => {
-    expect(getAdminNavItems(agent([])).map((i) => i.href)).toEqual(["/admin/agent", "/admin/agent/notes", "/chat"]);
-    const hrefs = getAdminNavItems(agent(["agent-pages", "build-requests"] as string[])).map((i) => i.href);
+    expect(getFullAdminNavItems(agent([])).map((i) => i.href)).toEqual(["/admin/agent", "/admin/agent/notes", "/chat"]);
+    const hrefs = getFullAdminNavItems(agent(["agent-pages", "build-requests"] as string[])).map((i) => i.href);
     expect(hrefs).toEqual(["/admin/agent", "/admin/agent/notes", "/chat", "/admin/build-requests"]);
   });
 });
@@ -81,7 +81,7 @@ describe("agent session gate", () => {
     ).toEqual({ action: "next" });
     expect(
       resolveAdminRequestGate({ pathname: "/admin/agent", agentSessionCookie: "short" }),
-    ).toEqual({ action: "redirect", to: "/agent/login?next=%2Fadmin%2Fagent" });
+    ).toEqual({ action: "redirect", to: "/associate?next=%2Fadmin%2Fagent" });
     // admin_session now also holds an opaque token, so the edge lets it through;
     // the layout looks it up in admin_sessions only (agent tokens are read solely
     // from agent_session), so an agent token in admin_session resolves to nobody.
@@ -90,7 +90,7 @@ describe("agent session gate", () => {
     ).toEqual({ action: "next" });
     expect(
       resolveAdminRequestGate({ pathname: "/admin/agent", adminSessionCookie: "ARUN" }),
-    ).toEqual({ action: "redirect", to: "/agent/login?next=%2Fadmin%2Fagent" });
+    ).toEqual({ action: "redirect", to: "/associate?next=%2Fadmin%2Fagent" });
   });
 
   it("re-validates agents against the DB and keeps them out of builtin-only checks", () => {
@@ -98,7 +98,7 @@ describe("agent session gate", () => {
     expect(auth).toContain("getAgentBySessionToken(token)");
     expect(auth).not.toContain("getAgentByFastCode");
     expect(auth).toContain("return isGlobalAdmin(await resolveAdminSessionAccount());");
-    const actions = readSource("app/admin/agents/actions.ts");
+    const actions = readSource("app/admin/associates/actions.ts");
     expect(actions).toContain('requireAdminScope("agents")');
     expect(actions).toContain('account.access === "agent" ? null : account');
     expect(readSource("lib/talispros/mapsite-free-pin-admin-actions.ts")).toContain(

@@ -24,7 +24,7 @@ const GROUP_OF: Record<string, string> = {
   "/admin/pmc": "Mapsites & content",
   "/admin/payments": "Operations",
   "/admin/fast-codes": "Administration",
-  "/admin/agents": "Administration",
+  "/admin/associates": "Administration",
   "/admin/access": "Administration",
 };
 const ORDER = ["Overview", "Meetings", "Follow up", "Workspace", "Operations", "Mapsites & content", "Administration", "More"];
@@ -64,5 +64,5 @@ export const NAV_ICON: Record<string, string> = {
   "/admin/fast-codes": "M15 7a4 4 0 1 1-3.9 5H8v3H5v-3H3V9h8.1A4 4 0 0 1 15 7Z",
   "/admin/access": "M12 3 4.5 6v6c0 4.5 3.2 8 7.5 9 4.3-1 7.5-4.5 7.5-9V6L12 3Zm-3 9 2 2 4-4",
   "/admin/payments": "M3 6h18v12H3V6Zm0 4h18M7 15h3",
-  "/admin/agents": "M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-6 9a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-4-5.7",
+  "/admin/associates": "M9 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm-6 9a6 6 0 0 1 12 0M17 11a3 3 0 1 0 0-6M21 20a6 6 0 0 0-4-5.7",
 };

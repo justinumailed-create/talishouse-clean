@@ -81,7 +81,7 @@ describe("admin access grants", () => {
 describe("admin nav + routes follow scopes", () => {
   it("shows Global Admin every section incl. Admin access", () => {
     const hrefs = getAdminNavItems(getAdminAccountByFastCode("ARUN")).map((i) => i.href);
-    for (const h of ["/admin/mapsites", "/admin/fast-codes", "/admin/agents", "/admin/access", "/admin/payments", "/admin/registrations"]) {
+    for (const h of ["/admin/mapsites", "/admin/fast-codes", "/admin/associates", "/admin/access", "/admin/payments", "/admin/registrations"]) {
       expect(hrefs).toContain(h);
     }
   });
@@ -89,7 +89,7 @@ describe("admin nav + routes follow scopes", () => {
   it("shows a grant only its ticked sections", () => {
     const hrefs = getAdminNavItems(ralf).map((i) => i.href);
     expect(hrefs).toContain("/admin/fast-codes");
-    expect(hrefs).toContain("/admin/agents");
+    expect(hrefs).toContain("/admin/associates");
     expect(hrefs).not.toContain("/admin/access");
     expect(hrefs).not.toContain("/admin/payments");
     const seoOnly = grantToAdminAccount({ fastCode: "AB12", displayName: null, permissions: ["seo"] });

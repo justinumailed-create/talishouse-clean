@@ -81,6 +81,43 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // Associate Portal: /associate is the entry URL. Old bookmarks keep working.
+      // Next.js preserves query strings (including ?next=) on these redirects.
+      {
+        source: "/agent/login",
+        destination: "/associate",
+        permanent: false,
+      },
+      {
+        source: "/associate/login",
+        destination: "/associate",
+        permanent: false,
+      },
+      {
+        source: "/agent/change-password",
+        destination: "/associate/change-password",
+        permanent: false,
+      },
+      {
+        source: "/admin/agents",
+        destination: "/admin/associates",
+        permanent: false,
+      },
+      {
+        source: "/admin/agents/:path*",
+        destination: "/admin/associates/:path*",
+        permanent: false,
+      },
+      {
+        source: "/admin/associate",
+        destination: "/admin/agent",
+        permanent: false,
+      },
+      {
+        source: "/admin/associate/:path*",
+        destination: "/admin/agent/:path*",
+        permanent: false,
+      },
       // Retired Supabase email/password admin console → FAST-code Global Admin.
       {
         source: "/talispros/admin",

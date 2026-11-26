@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { agentChangePasswordPath, agentLoginPath } from "@/lib/agent-return-path";
 import LeadCrmClient from "@/components/admin/agents/LeadCrmClient";
 import { getAdminSessionAccount } from "@/lib/admin-auth";
 import { flowAccess } from "@/lib/talispros/call-flow";
@@ -10,12 +11,12 @@ import { getLocale } from "@/lib/i18n/server";
 export const dynamic = "force-dynamic";
 
 export default async function AgentLeadFlowPage({ params }: { params: Promise<{ code: string }> }) {
+  const { code } = await params;
   const account = await getAdminSessionAccount();
-  if (!account) redirect("/agent/login");
+  if (!account) redirect(agentLoginPath(`/admin/agent/flow/${code}`));
   const access = flowAccess(account);
   if (!access) redirect(adminHomePath(account));
-  if (account.access === "agent" && account.mustChangePassword) redirect("/agent/change-password");
-  const { code } = await params;
+  if (account.access === "agent" && account.mustChangePassword) redirect(agentChangePasswordPath(`/admin/agent/flow/${code}`));
   const locale = (await getLocale()) === "de" ? "de" : "en";
   const bundle = await loadLeadFlow(
     code,

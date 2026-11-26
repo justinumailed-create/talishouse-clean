@@ -18,7 +18,7 @@ export default async function AdminAgentEditPage({ params }: { params: Promise<{
   return (
     <div className="space-y-8">
       <PageHeader
-        kicker="Agent"
+        kicker="Associate"
         title={agent.name}
         subtitle={
           <>
@@ -28,10 +28,10 @@ export default async function AdminAgentEditPage({ params }: { params: Promise<{
         }
         actions={
           <>
-            <LinkButton href="/admin/agents">← All agents</LinkButton>
-            <LinkButton href={`/admin/agents/activity?agent=${agent.id}`}>Activity</LinkButton>
-            <LinkButton href={`/admin/agents/notes?agent=${agent.id}`}>Notes</LinkButton>
-            <LinkButton href={`/admin/agents/${agent.id}/preview`}>View as agent</LinkButton>
+            <LinkButton href="/admin/associates">← All associates</LinkButton>
+            <LinkButton href={`/admin/associates/activity?agent=${agent.id}`}>Activity</LinkButton>
+            <LinkButton href={`/admin/associates/notes?agent=${agent.id}`}>Notes</LinkButton>
+            <LinkButton href={`/admin/associates/${agent.id}/preview`}>View as associate</LinkButton>
             <AgentStatusButton id={agent.id} status={agent.status} />
           </>
         }

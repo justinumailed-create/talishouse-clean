@@ -19,6 +19,13 @@ There is no password on this screen. The FAST code *is* the credential, matching
 
 Arun was not given a customer FAST code, so `ARUN` is the admin login code. Ralf’s `rm22` is also his live Root Mapsite code; using it at `/admin/login` opens admin. Entering `rm22` on a Mapsite / business-office gate does **not** grant admin (only `RETIRED-LEGACY-CODE` still does there).
 
+
+## Associate Portal (Aritri, Enanko, and other associates)
+
+Associates sign in at `/associate` with the login ID and password issued under Admin → Associates (`/admin/associates`). Existing bookmarks to `/agent/login` and `/associate/login` redirect to `/associate` (a safe `?next=` return path is preserved). Forced password changes use `/associate/change-password` (`/agent/change-password` redirects there).
+
+After sign-in, associates land on their dashboard at `/admin/agent`. Global Admins manage associate accounts at `/admin/associates` (legacy `/admin/agents` redirects there) and can “View as associate”. Internal session auth is unchanged (`access: "agent"`, `agent_session` cookie). Global Admin login remains `/admin/login`.
+
 ## What each person can edit
 
 After login, the sidebar lists the tools below. Ralf sees SUPERADMIN product tools (not pricing, payments, or user CRM). Arun sees those plus the rest of the existing console. Authorization is enforced server-side (middleware + page/action checks), not only by hiding nav.

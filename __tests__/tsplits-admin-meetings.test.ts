@@ -187,7 +187,7 @@ describe("admin nav follows the call flow", () => {
     expect(getFullAdminNavItems(seoOnly).map((i) => i.href)).toContain("/admin/seo");
   });
 
-  it("gives Agent Admins their dashboard and To-dos, but not the call pages", () => {
+  it("gives Associate Admins their dashboard and To-dos, but not the call pages", () => {
     const agent: AdminAccount = { name: "A", fastCode: "", email: null, access: "agent", scopes: ["mapsites", "leads-crm"], agentId: "x" };
     expect(getAdminNavItems(agent)).toEqual([
       { href: "/admin/agent", label: "Dashboard" },

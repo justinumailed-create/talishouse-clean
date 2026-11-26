@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 /**
  * Shared chrome for /agent/* sign-in pages: soft background, centred
- * ~400px card, logo + "Agent Portal" label, and a quiet footer.
+ * ~400px card, logo + "Associate Portal" label, and a quiet footer.
  */
 export default function AgentAuthShell({
   title,
@@ -30,7 +30,7 @@ export default function AgentAuthShell({
               <Image src="/logo-mark.png" alt="Tsplits™" width={44} height={47} priority className="h-11 w-auto" />
             </Link>
             <span className="rounded-full border border-[#1E4ED8]/15 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1E4ED8] shadow-sm">
-              Agent Portal
+              Associate Portal
             </span>
           </div>
 

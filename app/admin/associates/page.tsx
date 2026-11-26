@@ -19,14 +19,14 @@ export default async function AdminAgentsPage() {
     <div className="space-y-8">
       <PageHeader
         kicker="Superadmin"
-        title="Agents"
-        subtitle="Agents sign in at /agent/login with their login ID and password and only see the privileges you grant."
+        title="Associates"
+        subtitle="Associates sign in at /associate with their login ID and password and only see the privileges you grant."
         actions={
           <>
-            <LinkButton href="/admin/agents/activity">Activity log</LinkButton>
-            <LinkButton href="/admin/agents/notes">Daily notes</LinkButton>
-            <LinkButton href="/admin/agents/payments">Cash payments</LinkButton>
-            <LinkButton href="#create-agent" variant="primary">New agent</LinkButton>
+            <LinkButton href="/admin/associates/activity">Activity log</LinkButton>
+            <LinkButton href="/admin/associates/notes">Daily notes</LinkButton>
+            <LinkButton href="/admin/associates/payments">Cash payments</LinkButton>
+            <LinkButton href="#create-agent" variant="primary">New associate</LinkButton>
           </>
         }
       />
@@ -37,12 +37,12 @@ export default async function AdminAgentsPage() {
 
       <section className={`${cardClass} overflow-hidden`}>
         {agents.length === 0 ? (
-          <p className="p-6 text-sm text-neutral-500">No agents yet. Create the first one below.</p>
+          <p className="p-6 text-sm text-neutral-500">No associates yet. Create the first one below.</p>
         ) : (
           <table className="w-full text-left text-sm">
             <thead className="border-b border-neutral-200 bg-neutral-50/70 text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
               <tr>
-                <th className="px-4 py-3">Agent</th>
+                <th className="px-4 py-3">Associate</th>
                 <th className="px-4 py-3">Login ID</th>
                 <th className="px-4 py-3">Privileges</th>
                 <th className="px-4 py-3">Status</th>
@@ -71,11 +71,11 @@ export default async function AdminAgentsPage() {
                     <StatusPill tone={agent.status === "active" ? "green" : "red"}>{agent.status === "active" ? "Active" : "Disabled"}</StatusPill>
                   </td>
                   <td className="px-4 py-3 text-right whitespace-nowrap space-x-3">
-                    <Link href={`/admin/agents/${agent.id}`} className="font-semibold text-[#1E4ED8] hover:underline">
+                    <Link href={`/admin/associates/${agent.id}`} className="font-semibold text-[#1E4ED8] hover:underline">
                       Edit
                     </Link>
-                    <Link href={`/admin/agents/${agent.id}/preview`} className="font-semibold text-[#1E4ED8] hover:underline">
-                      View as agent
+                    <Link href={`/admin/associates/${agent.id}/preview`} className="font-semibold text-[#1E4ED8] hover:underline">
+                      View as associate
                     </Link>
                     <AgentStatusButton id={agent.id} status={agent.status} />
                   </td>
@@ -87,7 +87,7 @@ export default async function AdminAgentsPage() {
       </section>
 
       <section id="create-agent" className="scroll-mt-6 space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-500">Create agent</h2>
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-500">Create associate</h2>
         <AgentForm initial={EMPTY_AGENT_FORM} />
       </section>
     </div>

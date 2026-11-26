@@ -64,7 +64,7 @@ export type AdminAccount = {
 };
 
 /**
- * Privileges an admin with the Agents permission may grant to an Agent Admin, in display order.
+ * Privileges an admin with the Associates permission may grant to an Associate Admin, in display order.
  * `dashboard` is the agent's own dashboard (/admin/agent) and is always on.
  * Admin-management scopes (`agents`, `fast-codes`, `platform-content`,
  * `site-content`, `full-console`) are deliberately NOT grantable.
@@ -151,7 +151,7 @@ export const ADMIN_GRANT_PERMISSION_LABELS: Record<AdminGrantPermission, string>
   bookshelves: "Bookshelves / Talisbooks™",
   "pmc-pins": "PMC pins & platform content",
   "fast-codes": "FAST Codes",
-  agents: "Agents (incl. agent cash payments)",
+  agents: "Associates (incl. associate cash payments)",
   payments: "Payments",
 };
 
@@ -320,7 +320,7 @@ export function accountHasAdminScope(
 export function adminAccessLabel(account: AdminAccount | null | undefined): string {
   if (!account) return "";
   if (account.access === "global") return "Global Admin";
-  if (account.access === "agent") return "Agent";
+  if (account.access === "agent") return "Associate";
   return "Admin";
 }
 

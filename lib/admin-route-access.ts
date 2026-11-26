@@ -10,6 +10,7 @@ const ADMIN_ROUTE_SCOPES: ReadonlyArray<{ prefix: string; scope: AdminScope | nu
   { prefix: "/admin/agent/flow", scope: null },
   { prefix: "/admin/agent/review", scope: null },
   { prefix: "/admin/agent/leads", scope: "leads-crm" },
+  { prefix: "/admin/associates", scope: "agents" },
   { prefix: "/admin/agents", scope: "agents" },
   { prefix: "/admin/access", scope: "admin-access" },
   { prefix: "/admin/talismaps", scope: "mapsites" },

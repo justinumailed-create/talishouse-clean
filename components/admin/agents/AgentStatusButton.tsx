@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { setAgentStatusAction } from "@/app/admin/agents/actions";
+import { setAgentStatusAction } from "@/app/admin/associates/actions";
 
 export default function AgentStatusButton({ id, status }: { id: string; status: "active" | "disabled" }) {
   const router = useRouter();

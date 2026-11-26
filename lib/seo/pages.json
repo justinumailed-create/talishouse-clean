@@ -1304,12 +1304,12 @@
    "image": "/og/pages/admin-login",
    "en": {
     "title": "Admin Login | Tsplits™",
-    "description": "Sign in to the Tsplits™ admin console to manage Mapsites, Talisbooks™, agents and payments.",
+    "description": "Sign in to the Tsplits™ admin console to manage Mapsites, Talisbooks™, associates and payments.",
     "alt": "Tsplits™ tree logo: Admin sign in"
    },
    "de": {
     "title": "Admin-Anmeldung | Tsplits™",
-    "description": "Melden Sie sich in der Tsplits™ Admin-Konsole an, um Mapsites, Talisbooks™, Agenten und Zahlungen zu verwalten.",
+    "description": "Melden Sie sich in der Tsplits™ Admin-Konsole an, um Mapsites, Talisbooks™, Associates und Zahlungen zu verwalten.",
     "alt": "Tsplits™ Baumlogo: Admin-Anmeldung"
    }
   },
@@ -1318,14 +1318,14 @@
    "noindex": true,
    "image": "/og/pages/agent-login",
    "en": {
-    "title": "Agent Login | Tsplits™ Agent Portal",
-    "description": "Sign in to your Tsplits™ agent account with the login ID and password from your administrator.",
-    "alt": "Tsplits™ tree logo: Sign in to your agent account"
+    "title": "Associate Login | Tsplits™ Associate Portal",
+    "description": "Sign in to your Tsplits™ associate account with the login ID and password from your administrator.",
+    "alt": "Tsplits™ tree logo: Sign in to your associate account"
    },
    "de": {
-    "title": "Agenten-Anmeldung | Tsplits™ Agent Portal",
-    "description": "Melden Sie sich mit der Login-ID und dem Passwort Ihres Administrators bei Ihrem Tsplits™ Agentenkonto an.",
-    "alt": "Tsplits™ Baumlogo: Melden Sie sich bei Ihrem Agentenkonto an"
+    "title": "Associate-Anmeldung | Tsplits™ Associate Portal",
+    "description": "Melden Sie sich mit der Login-ID und dem Passwort Ihres Administrators bei Ihrem Tsplits™ Associate-Konto an.",
+    "alt": "Tsplits™ Baumlogo: Melden Sie sich bei Ihrem Associate-Konto an"
    }
   },
   "/agent/change-password": {
@@ -1333,13 +1333,13 @@
    "noindex": true,
    "image": "/og/pages/agent-change-password",
    "en": {
-    "title": "Change Password | Tsplits™ Agent Portal",
-    "description": "Choose a new password for your Tsplits™ agent account.",
+    "title": "Change Password | Tsplits™ Associate Portal",
+    "description": "Choose a new password for your Tsplits™ associate account.",
     "alt": "Tsplits™ tree logo: Choose a new password"
    },
    "de": {
-    "title": "Passwort ändern | Tsplits™ Agent Portal",
-    "description": "Wählen Sie ein neues Passwort für Ihr Tsplits™ Agentenkonto.",
+    "title": "Passwort ändern | Tsplits™ Associate Portal",
+    "description": "Wählen Sie ein neues Passwort für Ihr Tsplits™ Associate-Konto.",
     "alt": "Tsplits™ Baumlogo: Neues Passwort wählen"
    }
   },
@@ -1348,13 +1348,13 @@
    "noindex": true,
    "image": "/og/pages/chat",
    "en": {
-    "title": "Chat | Tsplits™ Agent Portal",
-    "description": "Private messages and team updates for Tsplits™ agents and admins.",
+    "title": "Chat | Tsplits™ Associate Portal",
+    "description": "Private messages and team updates for Tsplits™ associates and admins.",
     "alt": "Tsplits™ tree logo: Team chat & updates"
    },
    "de": {
-    "title": "Chat | Tsplits™ Agent Portal",
-    "description": "Private Nachrichten und Team-Updates für Tsplits™ Agenten und Admins.",
+    "title": "Chat | Tsplits™ Associate Portal",
+    "description": "Private Nachrichten und Team-Updates für Tsplits™ Associates und Admins.",
     "alt": "Tsplits™ Baumlogo: Team-Chat & Updates"
    }
   },
@@ -1393,13 +1393,13 @@
    "noindex": true,
    "image": "/og/pages/agent-leads",
    "en": {
-    "title": "Brokerage Leads | Tsplits™ Agent Portal",
-    "description": "Search, filter and export brokerage contacts agents prospect in Canada and the USA.",
+    "title": "Brokerage Leads | Tsplits™ Associate Portal",
+    "description": "Search, filter and export brokerage contacts associates prospect in Canada and the USA.",
     "alt": "Tsplits™ tree logo: Brokerage leads for your market"
    },
    "de": {
-    "title": "Makler-Leads | Tsplits™ Agentenportal",
-    "description": "Maklerkontakte suchen, filtern und exportieren, die Agenten in Kanada und den USA ansprechen.",
+    "title": "Makler-Leads | Tsplits™ Associate Portal",
+    "description": "Maklerkontakte suchen, filtern und exportieren, die Associates in Kanada und den USA ansprechen.",
     "alt": "Tsplits™ Baumlogo: Makler-Leads für Ihren Markt"
    }
   },
@@ -1409,12 +1409,12 @@
    "image": "/og/pages/agent-leads-new",
    "en": {
     "title": "Add a Brokerage Lead | Tsplits™",
-    "description": "Add a decision maker at an independent brokerage. The lead is saved to the agent who enters it.",
+    "description": "Add a decision maker at an independent brokerage. The lead is saved to the associate who enters it.",
     "alt": "Tsplits™ tree logo: Add a brokerage lead"
    },
    "de": {
     "title": "Makler-Lead hinzufügen | Tsplits™",
-    "description": "Einen Entscheider eines unabhängigen Maklerbüros hinzufügen. Der Lead gehört dem Agenten, der ihn erfasst.",
+    "description": "Einen Entscheider eines unabhängigen Maklerbüros hinzufügen. Der Lead gehört dem Associate, der ihn erfasst.",
     "alt": "Tsplits™ Baumlogo: Makler-Lead hinzufügen"
    }
   },
@@ -1444,7 +1444,7 @@
    },
    "de": {
     "title": "Makler-Lead bearbeiten | Tsplits™",
-    "description": "Einen Makler-Lead aktualisieren und den Verlauf lesen. Agenten können einen Lead nicht löschen.",
+    "description": "Einen Makler-Lead aktualisieren und den Verlauf lesen. Associates können einen Lead nicht löschen.",
     "alt": "Tsplits™ Baumlogo: Makler-Lead bearbeiten"
    }
   },
@@ -1597,6 +1597,36 @@
     "title": "PIN-Checkout | Tsplits™",
     "description": "Registrieren Sie einen PIN. Aisha C. bleibt an Ihrer Seite. Der Checkout öffnet sich nach dem Agenten-Code. Die Gebühr steht in CAD.",
     "alt": "Aisha C., Team Leader mit dem Tsplits™ Baumlogo: Einen PIN zum Konto hinzufügen"
+   }
+  },
+  "/associate": {
+   "kind": "login",
+   "noindex": true,
+   "image": "/og/pages/associate-login",
+   "en": {
+    "title": "Associate Login | Tsplits™ Associate Portal",
+    "description": "Sign in to your Tsplits™ associate account with the login ID and password from your administrator.",
+    "alt": "Tsplits™ tree logo: Sign in to your associate account"
+   },
+   "de": {
+    "title": "Associate-Anmeldung | Tsplits™ Associate Portal",
+    "description": "Melden Sie sich mit der Login-ID und dem Passwort Ihres Administrators bei Ihrem Tsplits™ Associate-Konto an.",
+    "alt": "Tsplits™ Baumlogo: Melden Sie sich bei Ihrem Associate-Konto an"
+   }
+  },
+  "/associate/change-password": {
+   "kind": "login",
+   "noindex": true,
+   "image": "/og/pages/associate-change-password",
+   "en": {
+    "title": "Change Password | Tsplits™ Associate Portal",
+    "description": "Choose a new password for your Tsplits™ associate account.",
+    "alt": "Tsplits™ tree logo: Choose a new password"
+   },
+   "de": {
+    "title": "Passwort ändern | Tsplits™ Associate Portal",
+    "description": "Wählen Sie ein neues Passwort für Ihr Tsplits™ Associate-Konto.",
+    "alt": "Tsplits™ Baumlogo: Neues Passwort wählen"
    }
   }
  },

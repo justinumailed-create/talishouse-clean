@@ -1,13 +1,16 @@
 /**
- * Agent portal (`/admin/agent/*`) sign-in routing. Safe for Edge middleware.
+ * Associate portal (`/admin/agent/*`) sign-in routing. Safe for Edge middleware.
  *
- * Signed-out visitors to the agent portal go to `/agent/login?next=<path>`;
+ * Signed-out visitors to the associate portal go to `/associate?next=<path>`;
  * `next` is only ever honoured as a same-origin relative path inside
  * `/admin/agent`, so it cannot become an open redirect.
+ *
+ * Internal session auth remains `access: "agent"` and the dashboard stays at
+ * `/admin/agent`. `/agent/login` and `/associate/login` redirect to `/associate`.
  */
 
-export const AGENT_LOGIN_PATH = "/agent/login";
-export const AGENT_CHANGE_PASSWORD_PATH = "/agent/change-password";
+export const AGENT_LOGIN_PATH = "/associate";
+export const AGENT_CHANGE_PASSWORD_PATH = "/associate/change-password";
 export const AGENT_RETURN_PARAM = "next";
 
 const AGENT_PORTAL_PREFIX = "/admin/agent";
@@ -51,12 +54,12 @@ function withReturn(base: string, returnTo: string | null | undefined): string {
   return safe ? `${base}?${AGENT_RETURN_PARAM}=${encodeURIComponent(safe)}` : base;
 }
 
-/** `/agent/login`, with `?next=` when `returnTo` is a safe agent portal path. */
+/** `/associate`, with `?next=` when `returnTo` is a safe associate portal path. */
 export function agentLoginPath(returnTo?: string | null): string {
   return withReturn(AGENT_LOGIN_PATH, returnTo);
 }
 
-/** `/agent/change-password`, carrying a safe `?next=` through the forced change. */
+/** `/associate/change-password`, carrying a safe `?next=` through the forced change. */
 export function agentChangePasswordPath(returnTo?: string | null): string {
   return withReturn(AGENT_CHANGE_PASSWORD_PATH, returnTo);
 }

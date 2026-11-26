@@ -6,7 +6,7 @@ import {
   createAgentAction,
   updateAgentAction,
   type AgentActionResult,
-} from "@/app/admin/agents/actions";
+} from "@/app/admin/associates/actions";
 import { AGENT_GRANTABLE_SCOPES, AGENT_SCOPE_LABELS } from "@/lib/admin-constants";
 
 export type AgentFormValues = {
@@ -90,7 +90,7 @@ export default function AgentForm({ initial }: { initial: AgentFormValues }) {
       }
       setSaved(true);
       if (!initial.id && result.id) {
-        router.push(`/admin/agents/${result.id}`);
+        router.push(`/admin/associates/${result.id}`);
       }
       router.refresh();
     });
@@ -104,7 +104,7 @@ export default function AgentForm({ initial }: { initial: AgentFormValues }) {
           <input className={inputClass} value={values.name} onChange={(e) => set("name", e.target.value)} required />
         </label>
         <label className="text-sm text-neutral-700">
-          Login ID * <span className="text-xs text-neutral-400">(agent signs in at /agent/login)</span>
+          Login ID * <span className="text-xs text-neutral-400">(associate signs in at /associate)</span>
           <input
             className={`${inputClass} font-mono`}
             value={values.loginId}
@@ -138,7 +138,7 @@ export default function AgentForm({ initial }: { initial: AgentFormValues }) {
       <fieldset>
         <legend className="text-sm font-medium text-neutral-900">Privileges</legend>
         <p className="text-xs text-neutral-500">
-          My dashboard is always on. Agents can never manage agents, admins, FAST Codes, pricing or payments.
+          My dashboard is always on. Associates can never manage associates, admins, FAST Codes, pricing or payments.
         </p>
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
           {AGENT_GRANTABLE_SCOPES.map((scope) => (
@@ -183,11 +183,11 @@ export default function AgentForm({ initial }: { initial: AgentFormValues }) {
         disabled={pending}
         className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-50"
       >
-        {pending ? "Saving…" : isEdit ? "Save agent" : "Create agent"}
+        {pending ? "Saving…" : isEdit ? "Save associate" : "Create associate"}
       </button>
       {!isEdit ? (
         <p className="text-xs text-neutral-500">
-          After creating, set a temporary password on the agent&apos;s page. They must change it at first login.
+          After creating, set a temporary password on the associate&apos;s page. They must change it at first login.
         </p>
       ) : null}
     </form>

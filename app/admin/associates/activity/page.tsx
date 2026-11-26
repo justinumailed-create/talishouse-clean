@@ -59,10 +59,10 @@ export default async function AgentActivityPage({
   return (
     <div className="space-y-6">
       <PageHeader
-        kicker="Agents"
+        kicker="Associates"
         title="Activity log"
-        subtitle="Sign-ins, sign-outs, session expiries and agent work. Times in IST. Chat messages are private and never logged."
-        actions={<Link href="/admin/agents" className="text-sm font-medium text-[#1E4ED8] hover:underline">← All agents</Link>}
+        subtitle="Sign-ins, sign-outs, session expiries and associate work. Times in IST. Chat messages are private and never logged."
+        actions={<Link href="/admin/associates" className="text-sm font-medium text-[#1E4ED8] hover:underline">← All associates</Link>}
       />
 
       <section className={`${cardClass} p-4`}>
@@ -83,7 +83,7 @@ export default async function AgentActivityPage({
       </section>
 
       <AgentFilterBar
-        action="/admin/agents/activity"
+        action="/admin/associates/activity"
         agents={agents.map((a) => ({ id: a.id, name: a.name, loginId: a.loginId }))}
         values={{ agent: agentId ?? "", type: type ?? "", from: from ?? "", to: to ?? "" }}
         actionOptions={Object.entries(AGENT_ACTIVITY_LABELS).map(([value, label]) => ({ value, label }))}
@@ -97,7 +97,7 @@ export default async function AgentActivityPage({
             <thead className="bg-neutral-50 text-xs uppercase tracking-wide text-neutral-500">
               <tr>
                 <th className="px-4 py-3">Time (IST)</th>
-                <th className="px-4 py-3">Agent</th>
+                <th className="px-4 py-3">Associate</th>
                 <th className="px-4 py-3">Action</th>
                 <th className="px-4 py-3">Details</th>
               </tr>
@@ -110,7 +110,7 @@ export default async function AgentActivityPage({
                     <td className="whitespace-nowrap px-4 py-3 text-neutral-700">{formatIst(e.createdAt)}</td>
                     <td className="px-4 py-3">
                       {a ? (
-                        <Link href={`/admin/agents/${a.id}`} className="font-medium text-neutral-900 hover:underline">{a.name}</Link>
+                        <Link href={`/admin/associates/${a.id}`} className="font-medium text-neutral-900 hover:underline">{a.name}</Link>
                       ) : <span className="font-medium text-neutral-900">{e.performedBy || "—"}</span>}
                     </td>
                     <td className="px-4 py-3">

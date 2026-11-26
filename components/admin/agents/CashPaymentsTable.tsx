@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { reverseCashPaymentAction } from "@/app/admin/agents/actions";
+import { reverseCashPaymentAction } from "@/app/admin/associates/actions";
 import type { ManualPaymentRecord } from "@/lib/manual-payments";
 
 export default function CashPaymentsTable({
@@ -59,7 +59,7 @@ export default function CashPaymentsTable({
               <td className="px-3 py-2">{payment.paidOn}</td>
               <td className="px-3 py-2">
                 {payment.recordedByAgentId && agentNames[payment.recordedByAgentId]
-                  ? `${agentNames[payment.recordedByAgentId]} (agent)`
+                  ? `${agentNames[payment.recordedByAgentId]} (associate)`
                   : payment.recordedBy}
               </td>
               <td className="px-3 py-2 text-neutral-600">{payment.note || "—"}</td>

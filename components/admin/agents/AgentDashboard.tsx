@@ -21,9 +21,9 @@ function initials(name: string): string {
 }
 
 /**
- * Agent Admin dashboard. Rendered for the signed-in agent (/admin/agent) and,
- * read-only, for superadmin "View as agent" (/admin/agents/[id]/preview).
- * Shows only agent tasks, each behind its privilege. Agents have no public
+ * Associate Admin dashboard. Rendered for the signed-in associate (/admin/agent) and,
+ * read-only, for superadmin "View as associate" (/admin/associates/[id]/preview).
+ * Shows only associate tasks, each behind its privilege. Associates have no public
  * page of their own and cannot edit one.
  */
 export default async function AgentDashboard({

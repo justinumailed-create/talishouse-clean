@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { setAgentPasswordAction } from "@/app/admin/agents/actions";
+import { setAgentPasswordAction } from "@/app/admin/associates/actions";
 import SecretTextField from "@/components/talispros/SecretTextField";
 import { useT } from "@/lib/i18n/client";
 
@@ -38,7 +38,7 @@ export default function AgentPasswordPanel({
       }
       setPassword("");
       setShown(result.temporaryPassword);
-      setMessage("Password set. The agent must change it at next login; other sessions were signed out.");
+      setMessage("Password set. The associate must change it at next login; other sessions were signed out.");
     });
   }
 
@@ -46,7 +46,7 @@ export default function AgentPasswordPanel({
     <section className="space-y-3 rounded-2xl border border-neutral-200 bg-white p-6">
       <h2 className="text-lg font-semibold text-neutral-900">Login &amp; password</h2>
       <p className="text-sm text-neutral-600">
-        {hasPassword ? "Password set" : "No password yet — the agent cannot sign in."}
+        {hasPassword ? "Password set" : "No password yet — the associate cannot sign in."}
         {mustChangePassword && hasPassword ? " · must change at next login" : ""}
         {isLocked ? " · temporarily locked after failed attempts (a reset unlocks)" : ""}
         {lastLoginAt ? ` · last login ${new Date(lastLoginAt).toLocaleString("en-US")}` : ""}

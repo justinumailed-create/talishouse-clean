@@ -63,7 +63,7 @@ describe("agent work privileges", () => {
 
   it("cash payments reuse the shared activation step and are reversible by managers only", () => {
     expect(read("lib/manual-payments.ts")).toMatch(/ensureMapSiteActiveAfterPayment\(/);
-    const manager = read("app/admin/agents/actions.ts");
+    const manager = read("app/admin/associates/actions.ts");
     expect(manager).toMatch(/export async function reverseCashPaymentAction[\s\S]*requireAgentManager\(\)/);
   });
 

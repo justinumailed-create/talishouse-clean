@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { agentLoginPath } from "@/lib/agent-return-path";
 import { getChatIdentity, getChatOnLogin, listInbox, readThread, type ChatThreadView, type InboxItem } from "@/lib/chat/server";
 import type { ChatViewer } from "@/components/chat/ChatApp";
 
@@ -15,7 +16,7 @@ export interface ChatInitialData {
  */
 export async function loadChat(conversationId: string | null): Promise<ChatInitialData> {
   const id = await getChatIdentity();
-  if (!id) redirect("/agent/login");
+  if (!id) redirect(agentLoginPath());
   const [items, thread, chatOnLogin] = await Promise.all([
     listInbox(id).catch((err) => { console.error("[chat] inbox SSR failed", err); return null; }),
     conversationId ? readThread(id, conversationId, true).catch((err) => { console.error("[chat] thread SSR failed", err); return null; }) : Promise.resolve(null),

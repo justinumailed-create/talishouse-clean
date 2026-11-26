@@ -14,10 +14,10 @@ export default async function AgentCashPaymentsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        kicker="Agents"
+        kicker="Associates"
         title="Cash payments"
         subtitle="FAST Codes marked paid in cash (CAD). Reversing marks the payment reversed and restores the Mapsite’s previous status."
-        actions={<LinkButton href="/admin/agents">← All agents</LinkButton>}
+        actions={<LinkButton href="/admin/associates">← All associates</LinkButton>}
       />
       <section className={`${cardClass} p-6`}>
         <CashPaymentsTable payments={payments} agentNames={agentNames} canReverse={account.access !== "agent"} />

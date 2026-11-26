@@ -7,7 +7,7 @@ import { accountHasAdminScope, type AdminAccount, type AdminScope } from "@/lib/
 import { agentCanEditMapSite } from "@/lib/mapsite-edit-auth";
 import { parseCadAmount, parsePaidOnDate, recordManualCashPayment } from "@/lib/manual-payments";
 import { grantFreePinCreditsForFastCode } from "@/lib/talispros/mapsite-additional-pins-service";
-import type { AgentActionResult } from "@/app/admin/agents/actions";
+import type { AgentActionResult } from "@/app/admin/associates/actions";
 
 const AGENT_MAX_PINS_PER_ACTION = 25;
 
@@ -110,7 +110,7 @@ export async function agentRecordCashPaymentAction(input: {
     manual_payment_id: result.payment.id,
   });
   revalidatePath("/admin/agent");
-  revalidatePath("/admin/agents/payments");
+  revalidatePath("/admin/associates/payments");
   revalidatePath(`/admin/mapsites/${result.payment.fastCode}`);
   revalidatePath(`/mapsite/${result.payment.fastCode.toLowerCase()}`);
   return {

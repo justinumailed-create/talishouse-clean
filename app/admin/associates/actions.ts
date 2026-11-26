@@ -31,10 +31,10 @@ function actorLabel(account: AdminAccount): string {
 }
 
 function revalidateAgents(id?: string) {
-  revalidatePath("/admin/agents");
+  revalidatePath("/admin/associates");
   if (id) {
-    revalidatePath(`/admin/agents/${id}`);
-    revalidatePath(`/admin/agents/${id}/preview`);
+    revalidatePath(`/admin/associates/${id}`);
+    revalidatePath(`/admin/associates/${id}/preview`);
   }
 }
 
@@ -98,7 +98,7 @@ export async function reverseCashPaymentAction(input: {
     note: input.note,
   });
   if (!result.ok) return result;
-  revalidatePath("/admin/agents/payments");
+  revalidatePath("/admin/associates/payments");
   revalidatePath("/admin/mapsites");
   return { ok: true, id };
 }

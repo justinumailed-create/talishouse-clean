@@ -49,34 +49,34 @@ describe("agent portal return path", () => {
   });
 
   it("builds login and change-password links only with safe returns", () => {
-    expect(agentLoginPath("/admin/agent/leads")).toBe("/agent/login?next=%2Fadmin%2Fagent%2Fleads");
-    expect(agentLoginPath("https://evil.example")).toBe("/agent/login");
-    expect(agentLoginPath()).toBe("/agent/login");
+    expect(agentLoginPath("/admin/agent/leads")).toBe("/associate?next=%2Fadmin%2Fagent%2Fleads");
+    expect(agentLoginPath("https://evil.example")).toBe("/associate");
+    expect(agentLoginPath()).toBe("/associate");
     expect(agentChangePasswordPath("/admin/agent/leads/new")).toBe(
-      "/agent/change-password?next=%2Fadmin%2Fagent%2Fleads%2Fnew",
+      "/associate/change-password?next=%2Fadmin%2Fagent%2Fleads%2Fnew",
     );
-    expect(agentChangePasswordPath("//evil")).toBe("/agent/change-password");
+    expect(agentChangePasswordPath("//evil")).toBe("/associate/change-password");
     expect(agentReturnFromSearchParams({ next: ["/admin/agent/leads", "/x"] })).toBe("/admin/agent/leads");
     expect(agentReturnFromSearchParams({ next: "/admin/dashboard" })).toBeNull();
   });
 });
 
 describe("admin request gate for the agent portal", () => {
-  it("sends signed-out agent portal visitors to /agent/login with a return path", () => {
+  it("sends signed-out associate portal visitors to /associate with a return path", () => {
     expect(resolveAdminRequestGate({ pathname: "/admin/agent/leads" })).toEqual({
       action: "redirect",
-      to: "/agent/login?next=%2Fadmin%2Fagent%2Fleads",
+      to: "/associate?next=%2Fadmin%2Fagent%2Fleads",
     });
     expect(resolveAdminRequestGate({ pathname: "/admin/agent/leads/new" })).toEqual({
       action: "redirect",
-      to: "/agent/login?next=%2Fadmin%2Fagent%2Fleads%2Fnew",
+      to: "/associate?next=%2Fadmin%2Fagent%2Fleads%2Fnew",
     });
     expect(
       resolveAdminRequestGate({ pathname: "/admin/agent/leads/abc", search: "?edit=1" }),
-    ).toEqual({ action: "redirect", to: "/agent/login?next=%2Fadmin%2Fagent%2Fleads%2Fabc%3Fedit%3D1" });
+    ).toEqual({ action: "redirect", to: "/associate?next=%2Fadmin%2Fagent%2Fleads%2Fabc%3Fedit%3D1" });
     expect(resolveAdminRequestGate({ pathname: "/admin/agent" })).toEqual({
       action: "redirect",
-      to: "/agent/login?next=%2Fadmin%2Fagent",
+      to: "/associate?next=%2Fadmin%2Fagent",
     });
   });
 

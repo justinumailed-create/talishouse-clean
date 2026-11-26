@@ -16,9 +16,9 @@ export default function AgentFilterBar({
   return (
     <form method="get" action={action} className={`${cardClass} grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_160px_160px_auto] lg:items-end`}>
       <div>
-        <label className={label} htmlFor="f-agent">Agent</label>
+        <label className={label} htmlFor="f-agent">Associate</label>
         <select id="f-agent" name="agent" defaultValue={values.agent ?? ""} className={fieldClass}>
-          <option value="">All agents</option>
+          <option value="">All associates</option>
           {agents.map((a) => <option key={a.id} value={a.id}>{a.name} ({a.loginId})</option>)}
         </select>
       </div>

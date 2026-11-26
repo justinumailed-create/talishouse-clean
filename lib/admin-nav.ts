@@ -26,11 +26,11 @@ export const ADMIN_SCOPED_NAV: ReadonlyArray<AdminNavItem & { scope: AdminScope 
   { href: "/admin/pmc", label: "PMC pins", scope: "pmc-pins" },
   { href: "/admin/payments", label: "Payments", scope: "payments" },
   { href: "/admin/fast-codes", label: "FAST Codes", scope: "fast-codes" },
-  { href: "/admin/agents", label: "Agents", scope: "agents" },
+  { href: "/admin/associates", label: "Associates", scope: "agents" },
   { href: "/admin/access", label: "Admin access", scope: "admin-access" },
 ];
 
-/** Agent Admin nav: own dashboard plus one entry per granted privilege. */
+/** Associate Admin nav: own dashboard plus one entry per granted privilege. */
 export function getAgentNavItems(scopes: readonly string[] | null | undefined): AdminNavItem[] {
   const granted = new Set<AdminScope>(sanitizeAgentScopes(scopes ?? []));
   const items: AdminNavItem[] = [
@@ -84,7 +84,7 @@ export const ADMIN_FLOW_NAV: ReadonlyArray<AdminNavItem & { scope: AdminScope }>
   { href: "/admin/todos", label: "To-dos", scope: "dashboard" },
 ];
 
-/** Agent Admins: their own dashboard and their daily task notes (as To-dos). Calls stay admin-only. */
+/** Associate Admins: their own dashboard and their daily task notes (as To-dos). Calls stay admin-only. */
 export const AGENT_FLOW_NAV: readonly AdminNavItem[] = [
   { href: "/admin/agent", label: "Dashboard" },
   { href: "/admin/agent/notes", label: "To-dos" },
@@ -100,7 +100,10 @@ export function getAdminNavItems(account: AdminAccount | null | undefined): Admi
 export function isAdminNavItemActive(href: string, pathname: string): boolean {
   if (pathname === href) return true;
 
-  if (href === "/admin/agents" && pathname.startsWith("/admin/agents/")) {
+  if (
+    href === "/admin/associates" &&
+    (pathname.startsWith("/admin/associates/") || pathname.startsWith("/admin/agents/"))
+  ) {
     return true;
   }
 

@@ -21,21 +21,21 @@ export default async function AgentHomePage() {
     return (
       <div className="space-y-6">
       <div className="rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">
-        This is the Agent Admin dashboard. You are signed in as a built-in admin ({account.name}).
+        This is the Associate Admin dashboard. You are signed in as a built-in admin ({account.name}).
         {accountHasAdminScope(account, "agents") ? (
           <>
             {" "}
             Use{" "}
-            <Link href="/admin/agents" className="text-[#1E4ED8] underline">
-              Agents
+            <Link href="/admin/associates" className="text-[#1E4ED8] underline">
+              Associates
             </Link>{" "}
-            to manage agents or “View as agent”.
+            to manage associates or “View as associate”.
           </>
         ) : null}
       </div>
       {canContracts ? (
         <div className="rounded-2xl border border-neutral-200 bg-white p-6 text-sm text-neutral-600">
-          Agent codes are permanent per agent. See every agent&apos;s code and the clients who signed with it in{" "}
+          Associate codes are permanent per associate. See every associate&apos;s code and the clients who signed with it in{" "}
           <Link href="/admin/contracts" className="text-[#1E4ED8] underline">
             Contracts
           </Link>

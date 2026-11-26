@@ -100,7 +100,7 @@ export default function ChatApp({ viewer, conversationId, initialItems = null, i
   const loadInbox = useCallback(async () => {
     try {
       const res = await getJson("/api/chat?view=inbox");
-      if (res.status === 401) { router.replace("/agent/login"); return; }
+      if (res.status === 401) { router.replace("/associate"); return; }
       const data = (await res.json()) as { items?: InboxItem[] };
       if (data.items) setItems(data.items);
     } catch { /* offline: keep last list */ }
@@ -259,7 +259,7 @@ function Thread({ viewer, conversationId, initial, onChanged }: { viewer: ChatVi
       const visible = document.visibilityState === "visible";
       const res = await getJson(`/api/chat?view=thread&c=${conversationId}${visible ? "" : "&read=0"}`);
       if (res.status === 404) { setMissing(true); return; }
-      if (res.status === 401) { router.replace("/agent/login"); return; }
+      if (res.status === 401) { router.replace("/associate"); return; }
       const data = (await res.json()) as { thread?: ChatThreadView };
       if (data.thread) {
         // Keep each attachment's signed URL stable between polls (no image flicker); refresh after 30 min.
