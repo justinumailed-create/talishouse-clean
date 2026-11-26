@@ -10,6 +10,8 @@ export const PERSONAL_HOME_LIMITS = {
   kicker: 80,
   headline: 120,
   contactName: 80,
+  contactPhone: 40,
+  contactEmail: 160,
   writeUp: 2000,
   buttonLabel: 40,
   buttonHref: 500,
@@ -145,6 +147,10 @@ export type PersonalHomeContent = {
   headline: string | null;
   /** Null means the page uses the owner name. */
   contactName: string | null;
+  /** Null hides the phone line. */
+  contactPhone: string | null;
+  /** Null hides the email line. */
+  contactEmail: string | null;
   writeUp: string | null;
   buttons: PersonalHomeButton[];
   /** Null uses the top-button photo, then the Mapsite photo. */
@@ -159,6 +165,8 @@ export type ResolvedPersonalHome = {
   /** Empty when the owner has not written a headline. */
   headline: string;
   contactName: string;
+  contactPhone: string;
+  contactEmail: string;
   writeUp: string;
   buttons: PersonalHomeButton[];
   sideMedia: PersonalHomeSideMedia | null;
@@ -167,6 +175,8 @@ export type ResolvedPersonalHome = {
     kicker: boolean;
     headline: boolean;
     contactName: boolean;
+    contactPhone: boolean;
+    contactEmail: boolean;
     writeUp: boolean;
     buttons: boolean;
     side: boolean;
@@ -179,6 +189,8 @@ export function emptyPersonalHomeContent(): PersonalHomeContent {
     kicker: null,
     headline: null,
     contactName: null,
+    contactPhone: null,
+    contactEmail: null,
     writeUp: null,
     buttons: [],
     sideMedia: null,
@@ -201,6 +213,8 @@ export const PERSONAL_HOME_DRAFT_EVENT = "talispros:personal-home-draft";
 export type PersonalHomeDraft = {
   headline: string;
   contactName: string;
+  contactPhone: string;
+  contactEmail: string;
 };
 
 /** Personal home page with the owner editor opened on arrival. */
@@ -299,14 +313,95 @@ export function personalHomeOpenHref(
 }
 
 /**
- * Fallback store for the contact name when mapsite_personal_home.contact_name
- * has not been applied yet (migration 128). The visible buttons stay in `items`.
+ * Fallback store for contact fields when mapsite_personal_home.contact_name
+ * (or the later phone/email columns) has not been applied yet.
+ * The visible buttons stay in `items`.
  */
 export const PERSONAL_HOME_CONTACT_PACK = "contact-v1";
+
+const CONTACT_EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/;
+const CONTACT_PHONE_RE =
+  /(?:\+?1[\s.-]*)?(?:\(?\d{3}\)?[\s.-]*)\d{3}[\s.-]*\d{4}/;
+
+export type PersonalHomeContactFields = {
+  contactName: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
+};
+
+/** Pull a name, phone and email out of a single combined contact_name string. */
+export function parseCombinedContactName(
+  raw: string | null | undefined,
+): PersonalHomeContactFields {
+  const text = (raw ?? "").replace(/\s+/g, " ").trim();
+  if (!text) {
+    return { contactName: null, contactPhone: null, contactEmail: null };
+  }
+  const email = text.match(CONTACT_EMAIL_RE)?.[0] ?? null;
+  let rest = email ? text.replace(email, " ") : text;
+  rest = rest.replace(/\b(?:EM|E-?MAIL|EMAIL)\s*[:\-–]?\s*/gi, " ");
+  const phone = rest.match(CONTACT_PHONE_RE)?.[0]?.trim() ?? null;
+  if (phone) rest = rest.replace(phone, " ");
+  const contactName =
+    rest
+      .replace(/[,;|/]+/g, " ")
+      .replace(/[\s,\-–]+$/g, "")
+      .replace(/^[\s,\-–]+/g, "")
+      .replace(/\s+/g, " ")
+      .trim() || null;
+  return { contactName, contactPhone: phone, contactEmail: email };
+}
+
+/**
+ * Prefer dedicated phone/email columns. If only contact_name is set and it
+ * still holds a combined name + phone + email, split it for display.
+ */
+export function coalescePersonalHomeContact(input: {
+  contactName?: string | null;
+  contactPhone?: string | null;
+  contactEmail?: string | null;
+}): PersonalHomeContactFields {
+  const phone = input.contactPhone?.trim() || null;
+  const email = input.contactEmail?.trim() || null;
+  const name = input.contactName?.trim() || null;
+  if (phone || email) {
+    if (name && (CONTACT_EMAIL_RE.test(name) || CONTACT_PHONE_RE.test(name))) {
+      const parsed = parseCombinedContactName(name);
+      return {
+        contactName: parsed.contactName || name,
+        contactPhone: phone || parsed.contactPhone,
+        contactEmail: email || parsed.contactEmail,
+      };
+    }
+    return { contactName: name, contactPhone: phone, contactEmail: email };
+  }
+  if (!name) return { contactName: null, contactPhone: null, contactEmail: null };
+  const parsed = parseCombinedContactName(name);
+  if (parsed.contactPhone || parsed.contactEmail) return parsed;
+  return { contactName: name, contactPhone: null, contactEmail: null };
+}
+
+/** tel: href, or null when the value has too few digits to call. */
+export function personalHomeTelHref(phone: string | null | undefined): string | null {
+  const raw = phone?.trim() || "";
+  if (!raw) return null;
+  const digits = raw.replace(/[^\d+]/g, "");
+  if (digits.replace(/\+/g, "").length < 7) return null;
+  return `tel:${digits}`;
+}
+
+/** mailto: href, or null when the value is not a simple email address. */
+export function personalHomeMailtoHref(email: string | null | undefined): string | null {
+  const raw = email?.trim() || "";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) return null;
+  return `mailto:${raw}`;
+}
 
 type PersonalHomeButtonsPack = {
   _ph: typeof PERSONAL_HOME_CONTACT_PACK;
   contactName: string | null;
+  contactPhone?: string | null;
+  contactEmail?: string | null;
   items: unknown;
 };
 
@@ -318,16 +413,44 @@ export function isPersonalHomeContactPack(
   return row._ph === PERSONAL_HOME_CONTACT_PACK && Array.isArray(row.items);
 }
 
-/** Wrap buttons so a contact name can be saved without the contact_name column. */
+/** Wrap buttons so contact fields can be saved without the later columns. */
 export function packPersonalHomeButtonsForContact(
   buttons: PersonalHomeButton[],
   contactName: string | null,
+  contactPhone?: string | null,
+  contactEmail?: string | null,
 ): PersonalHomeButtonsPack {
   return {
     _ph: PERSONAL_HOME_CONTACT_PACK,
     contactName: contactName?.trim() || null,
+    contactPhone: contactPhone?.trim() || null,
+    contactEmail: contactEmail?.trim() || null,
     items: buttons,
   };
+}
+
+/** Prefer the contact columns; otherwise the buttons pack used before they exist. */
+export function contactFieldsFromPersonalHomeRow(
+  contactName: string | null | undefined,
+  contactPhone: string | null | undefined,
+  contactEmail: string | null | undefined,
+  buttonsRaw: unknown,
+): PersonalHomeContactFields {
+  const packed = isPersonalHomeContactPack(buttonsRaw)
+    ? {
+        contactName:
+          typeof buttonsRaw.contactName === "string" ? buttonsRaw.contactName : null,
+        contactPhone:
+          typeof buttonsRaw.contactPhone === "string" ? buttonsRaw.contactPhone : null,
+        contactEmail:
+          typeof buttonsRaw.contactEmail === "string" ? buttonsRaw.contactEmail : null,
+      }
+    : { contactName: null, contactPhone: null, contactEmail: null };
+  return coalescePersonalHomeContact({
+    contactName: contactName?.trim() || packed.contactName,
+    contactPhone: contactPhone?.trim() || packed.contactPhone,
+    contactEmail: contactEmail?.trim() || packed.contactEmail,
+  });
 }
 
 /** Prefer the contact_name column; otherwise the buttons pack used before that column exists. */
@@ -335,14 +458,7 @@ export function contactNameFromPersonalHomeRow(
   contactName: string | null | undefined,
   buttonsRaw: unknown,
 ): string | null {
-  const fromColumn = contactName?.trim() || "";
-  if (fromColumn) return fromColumn;
-  if (isPersonalHomeContactPack(buttonsRaw)) {
-    const packed =
-      typeof buttonsRaw.contactName === "string" ? buttonsRaw.contactName.trim() : "";
-    return packed || null;
-  }
-  return null;
+  return contactFieldsFromPersonalHomeRow(contactName, null, null, buttonsRaw).contactName;
 }
 
 /** Validated, de-duplicated, capped button list (bad rows are dropped). */
@@ -521,11 +637,18 @@ export function resolvePersonalHome(
 ): ResolvedPersonalHome {
   const content = saved ?? emptyPersonalHomeContent();
   const buttons = normalizePersonalHomeButtons(content.buttons);
+  const contact = coalescePersonalHomeContact({
+    contactName: content.contactName,
+    contactPhone: content.contactPhone,
+    contactEmail: content.contactEmail,
+  });
   return {
     imageUrl: content.imageUrl?.trim() || defaults.imageUrl,
     kicker: content.kicker?.trim() || defaults.kicker,
     headline: content.headline?.trim() || "",
-    contactName: content.contactName?.trim() || defaults.contactName,
+    contactName: contact.contactName || defaults.contactName,
+    contactPhone: contact.contactPhone || "",
+    contactEmail: contact.contactEmail || "",
     writeUp: content.writeUp?.trim() || defaults.writeUp,
     buttons: buttons.length ? buttons : defaults.buttons,
     sideMedia: content.sideMedia,
@@ -534,6 +657,8 @@ export function resolvePersonalHome(
       kicker: Boolean(content.kicker?.trim()),
       headline: Boolean(content.headline?.trim()),
       contactName: Boolean(content.contactName?.trim()),
+      contactPhone: Boolean(contact.contactPhone),
+      contactEmail: Boolean(contact.contactEmail),
       writeUp: Boolean(content.writeUp?.trim()),
       buttons: buttons.length > 0,
       side: Boolean(content.sideMedia),

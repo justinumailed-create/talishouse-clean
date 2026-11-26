@@ -5,6 +5,8 @@ import AdviserLayout from "@/components/talisu/AdviserLayout";
 import { useT } from "@/lib/i18n/client";
 import {
   PERSONAL_HOME_DRAFT_EVENT,
+  personalHomeMailtoHref,
+  personalHomeTelHref,
   type PersonalHomeDraft,
 } from "@/lib/talispros/personal-home";
 
@@ -15,6 +17,8 @@ type PersonalHomeBodyProps = {
   kicker: string;
   headline: string;
   contactName: string;
+  contactPhone?: string;
+  contactEmail?: string;
   ownerName: string;
   imageSrc: string;
   imageAlt: string;
@@ -28,6 +32,8 @@ export default function PersonalHomeBody({
   kicker,
   headline,
   contactName,
+  contactPhone = "",
+  contactEmail = "",
   ownerName,
   imageSrc,
   imageAlt,
@@ -51,6 +57,10 @@ export default function PersonalHomeBody({
   const shownHeadline = (draft ? draft.headline : headline).trim();
   const typedContact = (draft ? draft.contactName : contactName).trim();
   const shownContact = typedContact || ownerName.trim();
+  const shownPhone = (draft ? draft.contactPhone ?? "" : contactPhone).trim();
+  const shownEmail = (draft ? draft.contactEmail ?? "" : contactEmail).trim();
+  const phoneHref = personalHomeTelHref(shownPhone);
+  const emailHref = personalHomeMailtoHref(shownEmail);
   const parts = Children.toArray(children);
 
   return (
@@ -75,6 +85,28 @@ export default function PersonalHomeBody({
           <p className="mt-2 text-[15px] font-medium text-neutral-950 sm:text-[16px]" data-testid="personal-home-contact-value">
             {shownContact}
           </p>
+          {shownPhone ? (
+            <p className="mt-1 text-[15px] text-neutral-800 sm:text-[16px]" data-testid="personal-home-contact-phone">
+              {phoneHref ? (
+                <a href={phoneHref} className="underline-offset-2 hover:underline">
+                  {shownPhone}
+                </a>
+              ) : (
+                shownPhone
+              )}
+            </p>
+          ) : null}
+          {shownEmail ? (
+            <p className="mt-1 text-[15px] text-neutral-800 sm:text-[16px]" data-testid="personal-home-contact-email">
+              {emailHref ? (
+                <a href={emailHref} className="underline-offset-2 hover:underline">
+                  {shownEmail}
+                </a>
+              ) : (
+                shownEmail
+              )}
+            </p>
+          ) : null}
         </section>
       ) : null}
       {parts.slice(1)}

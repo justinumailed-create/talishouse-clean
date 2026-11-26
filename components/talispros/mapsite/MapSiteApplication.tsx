@@ -106,6 +106,7 @@ import {
 } from "@/lib/talispros/mapsite-pin-categories";
 import type { MapSiteRootContext } from "@/lib/talispros/mapsite-root-partners-service";
 import type { PersonalHomeOwnerPill } from "@/lib/talispros/personal-home";
+import type { PersonalHomePublicCard } from "@/lib/talispros/personal-home-page";
 import { MapSiteCategoryEditor, MapSitePartnerPanel } from "./MapSiteRootPanels";
 import { systemMapsiteOpeningZoom } from "@/lib/talispros/system-mapsite-zoom";
 
@@ -228,8 +229,8 @@ interface MapSiteApplicationProps {
     mapsiteHref: string;
     owner?: PersonalHomeOwnerPill | null;
   } | null;
-  /** Client home-page photo and contact name for the left card (public). */
-  clientCard?: { name: string; imageUrl: string } | null;
+  /** Client home-page photo and contact fields for the left card (public). */
+  clientCard?: PersonalHomePublicCard | null;
   /** Rendered under the Mapsite write-up card (e.g. Aisha's four buttons). */
   belowWriteUp?: ReactNode;
 }
@@ -650,7 +651,7 @@ function MapSiteChrome({
     mapsiteHref: string;
     owner?: PersonalHomeOwnerPill | null;
   } | null;
-  clientCard: { name: string; imageUrl: string } | null;
+  clientCard: PersonalHomePublicCard | null;
   belowWriteUp: ReactNode;
 }) {
   const { setViewport, isReady, viewport } = useMapEngine();
@@ -1315,6 +1316,8 @@ function MapSiteChrome({
                   mapsite={cardMapSite}
                   partnerImageUrl={branding.partnerImageUrl}
                   partnerName={branding.partnerName}
+                  contactPhone={clientCard?.phone}
+                  contactEmail={clientCard?.email}
                   partnerTagline={branding.partnerTagline}
                   cardRef={listingCardRef}
                   paid={paid}

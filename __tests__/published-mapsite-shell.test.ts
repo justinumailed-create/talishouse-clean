@@ -63,6 +63,12 @@ describe("published Mapsite shell", () => {
     expect(partnerCard).toContain("bg-[#f2f2f0]");
     expect(partnerCard).not.toContain("mapsite-cloud-vignette");
     expect(partnerCard).not.toContain("backdrop-blur");
+    expect(partnerCard).toContain("mapsite-card-contact");
+    expect(partnerCard).toContain("mapsite-card-contact-name");
+    expect(partnerCard).toContain("mapsite-card-contact-phone");
+    expect(partnerCard).toContain("mapsite-card-contact-email");
+    expect(application).toContain("contactPhone={clientCard?.phone}");
+    expect(application).toContain("contactEmail={clientCard?.email}");
   });
 
   it("scroll-locks the claimed Mapsite viewport", () => {

@@ -154,6 +154,8 @@ export default async function PersonalHomePage({
           kicker={resolved.kicker}
           headline={resolved.headline}
           contactName={resolved.contactName}
+          contactPhone={resolved.contactPhone}
+          contactEmail={resolved.contactEmail}
           ownerName={data.displayName}
           imageSrc={
             resolved.sideMedia?.kind === "image" ? resolved.sideMedia.url : resolved.imageUrl

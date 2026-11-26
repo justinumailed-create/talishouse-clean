@@ -1,6 +1,6 @@
 import { getSupabaseAdmin, isSupabaseAdminConfigured } from "@/lib/supabaseAdmin";
 import {
-  contactNameFromPersonalHomeRow,
+  contactFieldsFromPersonalHomeRow,
   emptyPersonalHomeContent,
   normalizePersonalHomeButtons,
   normalizePersonalHomeSideMedia,
@@ -14,7 +14,12 @@ import {
 const TABLE = "mapsite_personal_home";
 const COLUMNS = "mapsite_id, fast_code, image_url, kicker, headline, write_up, buttons, updated_at";
 const COLUMNS_WITH_CONTACT = COLUMNS.replace("headline,", "headline, contact_name,");
-const COLUMNS_WITH_SIDE = COLUMNS_WITH_CONTACT.replace("buttons,", "buttons, side_media,");
+const COLUMNS_WITH_CONTACT_DETAILS = COLUMNS_WITH_CONTACT.replace(
+  "contact_name,",
+  "contact_name, contact_phone, contact_email,",
+);
+const COLUMNS_WITH_SIDE_LEGACY = COLUMNS_WITH_CONTACT.replace("buttons,", "buttons, side_media,");
+const COLUMNS_WITH_SIDE = COLUMNS_WITH_CONTACT_DETAILS.replace("buttons,", "buttons, side_media,");
 
 type Row = {
   mapsite_id: string;
@@ -23,6 +28,8 @@ type Row = {
   kicker: string | null;
   headline: string | null;
   contact_name?: string | null;
+  contact_phone?: string | null;
+  contact_email?: string | null;
   write_up: string | null;
   buttons: unknown;
   side_media?: unknown;
@@ -31,11 +38,19 @@ type Row = {
 
 function rowToContent(row: Row | null | undefined): PersonalHomeContent {
   if (!row) return emptyPersonalHomeContent();
+  const contact = contactFieldsFromPersonalHomeRow(
+    row.contact_name,
+    row.contact_phone,
+    row.contact_email,
+    row.buttons,
+  );
   return {
     imageUrl: row.image_url?.trim() || null,
     kicker: row.kicker?.trim() || null,
     headline: row.headline?.trim() || null,
-    contactName: contactNameFromPersonalHomeRow(row.contact_name, row.buttons),
+    contactName: contact.contactName,
+    contactPhone: contact.contactPhone,
+    contactEmail: contact.contactEmail,
     writeUp: row.write_up?.trim() || null,
     buttons: normalizePersonalHomeButtons(row.buttons),
     sideMedia: normalizePersonalHomeSideMedia(row.side_media),
@@ -49,6 +64,10 @@ function isMissingTable(message: string | undefined): boolean {
 
 function isMissingContactColumn(message: string | undefined): boolean {
   return /contact_name/i.test(message || "") && isMissingTable(message);
+}
+
+function isMissingContactDetailsColumn(message: string | undefined): boolean {
+  return /contact_phone|contact_email/i.test(message || "") && isMissingTable(message);
 }
 
 function isMissingSideColumn(message: string | undefined): boolean {
@@ -72,24 +91,48 @@ export async function loadPersonalHomeContent(
       .order("updated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    const withContact = first.error && isMissingSideColumn(first.error.message)
-      ? await getSupabaseAdmin()
-          .from(TABLE)
-          .select(COLUMNS_WITH_CONTACT)
-          .ilike("fast_code", code)
-          .order("updated_at", { ascending: false })
-          .limit(1)
-          .maybeSingle()
-      : first;
-    const query = withContact.error && isMissingContactColumn(withContact.error.message)
-      ? await getSupabaseAdmin()
-          .from(TABLE)
-          .select(COLUMNS)
-          .ilike("fast_code", code)
-          .order("updated_at", { ascending: false })
-          .limit(1)
-          .maybeSingle()
-      : withContact;
+    const withSideLegacy =
+      first.error && isMissingContactDetailsColumn(first.error.message)
+        ? await getSupabaseAdmin()
+            .from(TABLE)
+            .select(COLUMNS_WITH_SIDE_LEGACY)
+            .ilike("fast_code", code)
+            .order("updated_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        : first;
+    const withDetails =
+      withSideLegacy.error && isMissingSideColumn(withSideLegacy.error.message)
+        ? await getSupabaseAdmin()
+            .from(TABLE)
+            .select(COLUMNS_WITH_CONTACT_DETAILS)
+            .ilike("fast_code", code)
+            .order("updated_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        : withSideLegacy;
+    const withContact =
+      withDetails.error &&
+      (isMissingSideColumn(withDetails.error.message) ||
+        isMissingContactDetailsColumn(withDetails.error.message))
+        ? await getSupabaseAdmin()
+            .from(TABLE)
+            .select(COLUMNS_WITH_CONTACT)
+            .ilike("fast_code", code)
+            .order("updated_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        : withDetails;
+    const query =
+      withContact.error && isMissingContactColumn(withContact.error.message)
+        ? await getSupabaseAdmin()
+            .from(TABLE)
+            .select(COLUMNS)
+            .ilike("fast_code", code)
+            .order("updated_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        : withContact;
     if (query.error) {
       if (!isMissingTable(query.error.message)) {
         console.error("[personal-home] load failed:", query.error.message);
@@ -134,6 +177,8 @@ export async function savePersonalHomeContent(input: {
   kicker: string | null;
   headline: string | null;
   contactName: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
   writeUp: string | null;
   buttons: PersonalHomeButton[];
   sideMedia: PersonalHomeSideMedia | null;
@@ -149,41 +194,84 @@ export async function savePersonalHomeContent(input: {
     buttons: input.buttons,
     updated_at: new Date().toISOString(),
   };
+  const contact = {
+    contact_name: input.contactName,
+    contact_phone: input.contactPhone,
+    contact_email: input.contactEmail,
+  };
+  const packedButtons = packPersonalHomeButtonsForContact(
+    normalizePersonalHomeButtons(input.buttons),
+    input.contactName,
+    input.contactPhone,
+    input.contactEmail,
+  );
   const withSide = await getSupabaseAdmin()
     .from(TABLE)
     .upsert(
-      { ...base, contact_name: input.contactName, side_media: input.sideMedia },
+      { ...base, ...contact, side_media: input.sideMedia },
       { onConflict: "mapsite_id" },
     )
     .select(COLUMNS_WITH_SIDE)
     .maybeSingle();
-  if (withSide.error && isMissingSideColumn(withSide.error.message) && input.sideMedia) {
+  const withSideLegacy =
+    withSide.error && isMissingContactDetailsColumn(withSide.error.message)
+      ? await getSupabaseAdmin()
+          .from(TABLE)
+          .upsert(
+            {
+              ...base,
+              contact_name: input.contactName,
+              side_media: input.sideMedia,
+              buttons: packedButtons,
+            } as unknown as typeof base,
+            { onConflict: "mapsite_id" },
+          )
+          .select(COLUMNS_WITH_SIDE_LEGACY)
+          .maybeSingle()
+      : withSide;
+  if (withSideLegacy.error && isMissingSideColumn(withSideLegacy.error.message) && input.sideMedia) {
     return { error: "media" };
   }
-  const withContact = withSide.error && isMissingSideColumn(withSide.error.message)
-    ? await getSupabaseAdmin()
-        .from(TABLE)
-        .upsert({ ...base, contact_name: input.contactName }, { onConflict: "mapsite_id" })
-        .select(COLUMNS_WITH_CONTACT)
-        .maybeSingle()
-    : withSide;
-  const saved = withContact.error && isMissingContactColumn(withContact.error.message)
-    ? await getSupabaseAdmin()
-        .from(TABLE)
-        .upsert(
-          {
-            ...base,
-            // buttons is jsonb. This pack is used only when contact_name is missing.
-            buttons: packPersonalHomeButtonsForContact(
-              normalizePersonalHomeButtons(input.buttons),
-              input.contactName,
-            ),
-          } as unknown as typeof base,
-          { onConflict: "mapsite_id" },
-        )
-        .select(COLUMNS)
-        .maybeSingle()
-    : withContact;
+  const withDetails =
+    withSideLegacy.error && isMissingSideColumn(withSideLegacy.error.message)
+      ? await getSupabaseAdmin()
+          .from(TABLE)
+          .upsert({ ...base, ...contact }, { onConflict: "mapsite_id" })
+          .select(COLUMNS_WITH_CONTACT_DETAILS)
+          .maybeSingle()
+      : withSideLegacy;
+  const withContact =
+    withDetails.error &&
+    (isMissingSideColumn(withDetails.error.message) ||
+      isMissingContactDetailsColumn(withDetails.error.message))
+      ? await getSupabaseAdmin()
+          .from(TABLE)
+          .upsert(
+            {
+              ...base,
+              contact_name: input.contactName,
+              buttons: packedButtons,
+            } as unknown as typeof base,
+            { onConflict: "mapsite_id" },
+          )
+          .select(COLUMNS_WITH_CONTACT)
+          .maybeSingle()
+      : withDetails;
+  const saved =
+    withContact.error && isMissingContactColumn(withContact.error.message)
+      ? await getSupabaseAdmin()
+          .from(TABLE)
+          .upsert(
+            {
+              ...base,
+              // buttons is jsonb. This pack is used only when contact columns are missing.
+              buttons: packedButtons,
+            } as unknown as typeof base,
+            { onConflict: "mapsite_id" },
+          )
+          .select(COLUMNS)
+          .maybeSingle()
+      : withContact;
   if (saved.error) {
     console.error("[personal-home] save failed:", saved.error.message);
     return { error: isMissingTable(saved.error.message) ? "storage" : "save" };

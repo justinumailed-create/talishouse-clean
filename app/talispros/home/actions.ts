@@ -55,6 +55,8 @@ export async function savePersonalHomeAction(input: {
   kicker?: string | null;
   headline?: string | null;
   contactName?: string | null;
+  contactPhone?: string | null;
+  contactEmail?: string | null;
   writeUp?: string | null;
   buttons?: Array<{ label?: string; href?: string; kind?: string; pinId?: string }> | null;
   sideMedia?: PersonalHomeSideMedia | null;
@@ -91,6 +93,8 @@ export async function savePersonalHomeAction(input: {
     kicker: cleanPersonalHomeText(input.kicker, PERSONAL_HOME_LIMITS.kicker),
     headline: cleanPersonalHomeText(input.headline, PERSONAL_HOME_LIMITS.headline),
     contactName: cleanPersonalHomeText(input.contactName, PERSONAL_HOME_LIMITS.contactName),
+    contactPhone: cleanPersonalHomeText(input.contactPhone, PERSONAL_HOME_LIMITS.contactPhone),
+    contactEmail: cleanPersonalHomeText(input.contactEmail, PERSONAL_HOME_LIMITS.contactEmail),
     writeUp: cleanPersonalHomeText(input.writeUp, PERSONAL_HOME_LIMITS.writeUp, {
       multiline: true,
     }),
@@ -103,6 +107,7 @@ export async function savePersonalHomeAction(input: {
   const code = identity.fastCode.trim().toLowerCase();
   revalidatePath(personalHomePath(identity.fastCode));
   revalidatePath(`/${encodeURIComponent(code)}`);
+  revalidatePath(`/map/${encodeURIComponent(code)}`);
   return { ok: true, content: result.content };
 }
 
@@ -114,6 +119,9 @@ export async function resetPersonalHomeAction(input: {
   if (!identity) return { ok: false, error: "auth" };
   const result = await resetPersonalHomeContent(identity.id);
   if (!result.ok) return { ok: false, error: "save" };
+  const code = identity.fastCode.trim().toLowerCase();
   revalidatePath(personalHomePath(identity.fastCode));
+  revalidatePath(`/${encodeURIComponent(code)}`);
+  revalidatePath(`/map/${encodeURIComponent(code)}`);
   return { ok: true, content: null };
 }

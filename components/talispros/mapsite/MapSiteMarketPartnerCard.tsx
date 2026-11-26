@@ -19,6 +19,10 @@ import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import { useT } from "@/lib/i18n/client";
+import {
+  personalHomeMailtoHref,
+  personalHomeTelHref,
+} from "@/lib/talispros/personal-home";
 
 export type MapSitePinSwitchOption = { id: string; label: string };
 
@@ -74,6 +78,9 @@ interface MapSiteMarketPartnerCardProps {
   partnerImageUrl?: string | null;
   /** Resolved partner name / tagline (owner overrides via resolveMapSiteBranding). */
   partnerName?: string | null;
+  /** Home-page phone and email, shown as their own lines under the name. */
+  contactPhone?: string | null;
+  contactEmail?: string | null;
   partnerTagline?: string | null;
   /** Owner overrides: title under the logo (e.g. "TSplits"), address, phone. */
   cardTitle?: string | null;
@@ -211,6 +218,61 @@ function CardTools({
   );
 }
 
+
+function PartnerContactLines({
+  name,
+  phone,
+  email,
+  nameClassName,
+}: {
+  name: string;
+  phone?: string | null;
+  email?: string | null;
+  nameClassName: string;
+}) {
+  const shownPhone = phone?.trim() || "";
+  const shownEmail = email?.trim() || "";
+  const telHref = personalHomeTelHref(shownPhone);
+  const mailHref = personalHomeMailtoHref(shownEmail);
+  return (
+    <div data-testid="mapsite-card-contact">
+      <p className={nameClassName} data-testid="mapsite-card-contact-name">
+        {name}
+      </p>
+      {shownPhone ? (
+        <p className="mt-1 text-[13px] leading-snug text-black" data-testid="mapsite-card-contact-phone">
+          {telHref ? (
+            <a
+              href={telHref}
+              onClick={(event) => event.stopPropagation()}
+              className="underline-offset-2 hover:underline"
+            >
+              {shownPhone}
+            </a>
+          ) : (
+            shownPhone
+          )}
+        </p>
+      ) : null}
+      {shownEmail ? (
+        <p className="mt-1 text-[13px] leading-snug text-black" data-testid="mapsite-card-contact-email">
+          {mailHref ? (
+            <a
+              href={mailHref}
+              onClick={(event) => event.stopPropagation()}
+              className="underline-offset-2 hover:underline"
+            >
+              {shownEmail}
+            </a>
+          ) : (
+            shownEmail
+          )}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
 /**
  * Claimed Mapsite left card:
  * FAST CODE → partner photo → client name → Talk to us.
@@ -225,6 +287,8 @@ export default function MapSiteMarketPartnerCard({
   paid = false,
   partnerImageUrl = null,
   partnerName: partnerNameOverride = null,
+  contactPhone = null,
+  contactEmail = null,
   cardTitle = null,
   dashboardItems,
   onSelectDashboardItem,
@@ -326,9 +390,12 @@ export default function MapSiteMarketPartnerCard({
               <p className="text-[13px] font-bold uppercase tracking-wide text-black">
                 {fastCode ? `FAST CODE: ${fastCode}` : t.mapsite.claimReceived}
               </p>
-              <p className="mt-1 text-[13px] font-semibold leading-snug text-black">
-                {partnerName}
-              </p>
+              <PartnerContactLines
+                name={partnerName}
+                phone={contactPhone}
+                email={contactEmail}
+                nameClassName="mt-1 text-[13px] font-semibold leading-snug text-black"
+              />
             </div>
           </div>
         </div>
@@ -378,9 +445,12 @@ export default function MapSiteMarketPartnerCard({
             />
           </div>
 
-          <p className="mt-4 text-[14px] font-semibold leading-snug text-black">
-            {partnerName}
-          </p>
+          <PartnerContactLines
+            name={partnerName}
+            phone={contactPhone}
+            email={contactEmail}
+            nameClassName="mt-4 text-[14px] font-semibold leading-snug text-black"
+          />
         </div>
         <MarketingPartnerInterestLinks
           hideRole

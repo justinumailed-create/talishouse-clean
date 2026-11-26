@@ -13,6 +13,11 @@ import {
   normalizePersonalHomeHref,
   packPersonalHomeButtonsForContact,
   contactNameFromPersonalHomeRow,
+  contactFieldsFromPersonalHomeRow,
+  parseCombinedContactName,
+  coalescePersonalHomeContact,
+  personalHomeTelHref,
+  personalHomeMailtoHref,
   mapsiteBrokerageDisplayName,
   personalHomePath,
   resolvePersonalHome,
@@ -54,6 +59,8 @@ describe("contact name pack (fallback when contact_name column is missing)", () 
       kicker: null,
       headline: 'My "Chagatown" Project',
       contactName: contactNameFromPersonalHomeRow(null, packed),
+      contactPhone: null,
+      contactEmail: null,
       writeUp: null,
       buttons: normalizePersonalHomeButtons(packed),
       sideMedia: null,
@@ -136,6 +143,8 @@ describe("personal home helpers", () => {
       kicker: null,
       headline: "Custom",
       contactName: "Tsplits",
+      contactPhone: null,
+      contactEmail: null,
       writeUp: "  ",
       buttons: [],
       sideMedia: null,
@@ -299,6 +308,9 @@ describe("personal home wiring", () => {
       editor.indexOf('data-testid="personal-home-close"'),
     );
     expect(editor).toContain("saved.contactName?.trim() || defaults.contactName");
+    expect(editor).toContain("personal-home-contact-phone");
+    expect(editor).toContain("personal-home-contact-email");
+    expect(editor).toContain("coalescePersonalHomeContact");
     // Save must not stay pending on a hanging router.refresh().
     expect(editor).not.toContain("useTransition");
     expect(editor).toContain("setSaving(false)");
@@ -312,8 +324,134 @@ describe("personal home wiring", () => {
       "utf8",
     );
     expect(service).toContain("packPersonalHomeButtonsForContact");
-    expect(service).toContain("contactNameFromPersonalHomeRow");
+    expect(service).toContain("contactFieldsFromPersonalHomeRow");
     expect(service).not.toMatch(/content\.contactName = input\.contactName/);
+    const contactMigration = readFileSync(
+      join(root, "supabase/migrations/130_personal_home_contact_phone_email.sql"),
+      "utf8",
+    );
+    expect(contactMigration).toContain("contact_phone text");
+    expect(contactMigration).toContain("contact_email text");
+    const body = readFileSync(
+      join(root, "components/talispros/personal-home/PersonalHomeBody.tsx"),
+      "utf8",
+    );
+    expect(body).toContain("personal-home-contact-phone");
+    expect(body).toContain("personal-home-contact-email");
+    expect(body).toContain("personalHomeTelHref");
+    const card = readFileSync(
+      join(root, "components/talispros/mapsite/MapSiteMarketPartnerCard.tsx"),
+      "utf8",
+    );
+    expect(card).toContain("mapsite-card-contact-name");
+    expect(card).toContain("mapsite-card-contact-phone");
+    expect(card).toContain("mapsite-card-contact-email");
+    expect(card).toContain("stopPropagation");
+    const pageHelper = readFileSync(join(root, "lib/talispros/personal-home-page.ts"), "utf8");
+    expect(pageHelper).toContain("phone");
+    expect(pageHelper).toContain("email");
+  });
+});
+
+describe("personal home contact phone and email", () => {
+  it("splits combined contact_name values without dropping any piece", () => {
+    expect(
+      parseCombinedContactName("Jonathan M., 902-578-0167 - EM: jonathan@tsplits.com"),
+    ).toEqual({
+      contactName: "Jonathan M.",
+      contactPhone: "902-578-0167",
+      contactEmail: "jonathan@tsplits.com",
+    });
+    expect(
+      parseCombinedContactName("Jonathan M., 902-578-0167, EM jonathan@tsplits.com"),
+    ).toEqual({
+      contactName: "Jonathan M.",
+      contactPhone: "902-578-0167",
+      contactEmail: "jonathan@tsplits.com",
+    });
+    expect(
+      parseCombinedContactName("Jonathan M. +1-902-578-0167 EM: chagatown@gmail.com"),
+    ).toEqual({
+      contactName: "Jonathan M.",
+      contactPhone: "+1-902-578-0167",
+      contactEmail: "chagatown@gmail.com",
+    });
+    expect(parseCombinedContactName("Ralf")).toEqual({
+      contactName: "Ralf",
+      contactPhone: null,
+      contactEmail: null,
+    });
+    expect(parseCombinedContactName("")).toEqual({
+      contactName: null,
+      contactPhone: null,
+      contactEmail: null,
+    });
+  });
+
+  it("prefers dedicated phone and email columns, and splits a combined name as a fallback", () => {
+    expect(
+      coalescePersonalHomeContact({
+        contactName: "Jonathan M.",
+        contactPhone: "902-578-0167",
+        contactEmail: "jonathan@tsplits.com",
+      }),
+    ).toEqual({
+      contactName: "Jonathan M.",
+      contactPhone: "902-578-0167",
+      contactEmail: "jonathan@tsplits.com",
+    });
+    expect(
+      coalescePersonalHomeContact({
+        contactName: "Jonathan M., 902-578-0167 - EM: jonathan@tsplits.com",
+        contactPhone: null,
+        contactEmail: null,
+      }),
+    ).toEqual({
+      contactName: "Jonathan M.",
+      contactPhone: "902-578-0167",
+      contactEmail: "jonathan@tsplits.com",
+    });
+    expect(
+      contactFieldsFromPersonalHomeRow(
+        null,
+        null,
+        null,
+        packPersonalHomeButtonsForContact(
+          [{ label: "Open Mapsite", href: "/map/dc06", kind: "link" }],
+          "Jonathan M.",
+          "902-578-0167",
+          "jonathan@tsplits.com",
+        ),
+      ),
+    ).toEqual({
+      contactName: "Jonathan M.",
+      contactPhone: "902-578-0167",
+      contactEmail: "jonathan@tsplits.com",
+    });
+  });
+
+  it("builds tel and mailto links and resolves saved phone and email onto the page", () => {
+    expect(personalHomeTelHref("902-578-0167")).toBe("tel:9025780167");
+    expect(personalHomeTelHref("+1-902-578-0167")).toBe("tel:+19025780167");
+    expect(personalHomeMailtoHref("jonathan@tsplits.com")).toBe("mailto:jonathan@tsplits.com");
+    expect(personalHomeMailtoHref("not-an-email")).toBeNull();
+    const resolved = resolvePersonalHome(defaults, {
+      imageUrl: null,
+      kicker: null,
+      headline: null,
+      contactName: "Jonathan M.",
+      contactPhone: "902-578-0167",
+      contactEmail: "jonathan@tsplits.com",
+      writeUp: null,
+      buttons: [],
+      sideMedia: null,
+      updatedAt: null,
+    });
+    expect(resolved.contactName).toBe("Jonathan M.");
+    expect(resolved.contactPhone).toBe("902-578-0167");
+    expect(resolved.contactEmail).toBe("jonathan@tsplits.com");
+    expect(resolved.customized.contactPhone).toBe(true);
+    expect(resolved.customized.contactEmail).toBe(true);
   });
 });
 

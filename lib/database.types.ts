@@ -726,6 +726,8 @@ export interface Database {
           kicker: string | null
           headline: string | null
           contact_name: string | null
+          contact_phone: string | null
+          contact_email: string | null
           write_up: string | null
           buttons: Array<{ label: string; href: string }>
           created_at: string
@@ -738,6 +740,8 @@ export interface Database {
           kicker?: string | null
           headline?: string | null
           contact_name?: string | null
+          contact_phone?: string | null
+          contact_email?: string | null
           write_up?: string | null
           buttons?: Array<{ label: string; href: string }>
           created_at?: string
@@ -750,6 +754,8 @@ export interface Database {
           kicker?: string | null
           headline?: string | null
           contact_name?: string | null
+          contact_phone?: string | null
+          contact_email?: string | null
           write_up?: string | null
           buttons?: Array<{ label: string; href: string }>
           created_at?: string

@@ -190,23 +190,33 @@ export async function canEditPersonalHome(code: string): Promise<boolean> {
 }
 
 
+/** Public left-card identity for a Mapsite (photo, name, phone, email). */
+export type PersonalHomePublicCard = {
+  name: string;
+  imageUrl: string;
+  phone: string | null;
+  email: string | null;
+};
+
 /**
  * Public left-card identity for a Mapsite: the client's home-page photo and
- * contact name. Visitors see this too. Falls back to Mapsite defaults when
+ * contact fields. Visitors see this too. Falls back to Mapsite defaults when
  * the owner has not customised the home page.
  */
 export async function loadPersonalHomePublicCard(
   rawCode: string,
   locale: Locale,
-): Promise<{ name: string; imageUrl: string } | null> {
+): Promise<PersonalHomePublicCard | null> {
   try {
     const lookup = await loadPersonalHomePage(rawCode, locale);
     if (lookup.kind !== "ok") return null;
     const { resolved, displayName } = lookup.data;
     const name = (resolved.contactName || displayName || "").trim();
     const imageUrl = (resolved.imageUrl || "").trim();
-    if (!name && !imageUrl) return null;
-    return { name, imageUrl };
+    const phone = (resolved.contactPhone || "").trim() || null;
+    const email = (resolved.contactEmail || "").trim() || null;
+    if (!name && !imageUrl && !phone && !email) return null;
+    return { name, imageUrl, phone, email };
   } catch {
     return null;
   }

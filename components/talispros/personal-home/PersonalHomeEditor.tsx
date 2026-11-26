@@ -9,6 +9,7 @@ import {
   PERSONAL_HOME_LIMITS,
   PERSONAL_HOME_OPEN_EDITOR_EVENT,
   PERSONAL_HOME_VIDEO_MAX_BYTES,
+  coalescePersonalHomeContact,
   type PersonalHomeButton,
   type PersonalHomeSideMedia,
   type PersonalHomeContent,
@@ -127,9 +128,16 @@ export default function PersonalHomeEditor({
   const [sideUrl, setSideUrl] = useState(saved.sideMedia?.url ?? "");
   const [kicker, setKicker] = useState(saved.kicker ?? "");
   const [headline, setHeadline] = useState(saved.headline ?? "");
+  const initialContact = coalescePersonalHomeContact({
+    contactName: saved.contactName,
+    contactPhone: saved.contactPhone,
+    contactEmail: saved.contactEmail,
+  });
   const [contactName, setContactName] = useState(
-    saved.contactName?.trim() || defaults.contactName || "",
+    initialContact.contactName?.trim() || saved.contactName?.trim() || defaults.contactName || "",
   );
+  const [contactPhone, setContactPhone] = useState(initialContact.contactPhone ?? "");
+  const [contactEmail, setContactEmail] = useState(initialContact.contactEmail ?? "");
   const [writeUp, setWriteUp] = useState(saved.writeUp ?? "");
   const [buttons, setButtons] = useState<ButtonDraft[]>(
     toDrafts(saved.buttons.length ? saved.buttons : defaults.buttons),
@@ -272,6 +280,8 @@ export default function PersonalHomeEditor({
         kicker,
         headline,
         contactName,
+        contactPhone,
+        contactEmail,
         writeUp,
         buttons,
         sideMedia: sidePayload(),
@@ -316,6 +326,8 @@ export default function PersonalHomeEditor({
       setKicker("");
       setHeadline("");
       setContactName(defaults.contactName || "");
+      setContactPhone("");
+      setContactEmail("");
       setWriteUp("");
       setButtons(toDrafts(defaults.buttons));
       setMessage({ tone: "ok", text: t.saved });
@@ -330,10 +342,25 @@ export default function PersonalHomeEditor({
 
   useEffect(() => {
     const detail: PersonalHomeDraft = open
-      ? { headline, contactName }
-      : { headline: saved.headline ?? "", contactName: saved.contactName ?? "" };
+      ? { headline, contactName, contactPhone, contactEmail }
+      : {
+          headline: saved.headline ?? "",
+          contactName: saved.contactName ?? "",
+          contactPhone: saved.contactPhone ?? "",
+          contactEmail: saved.contactEmail ?? "",
+        };
     window.dispatchEvent(new CustomEvent(PERSONAL_HOME_DRAFT_EVENT, { detail }));
-  }, [open, headline, contactName, saved.headline, saved.contactName]);
+  }, [
+    open,
+    headline,
+    contactName,
+    contactPhone,
+    contactEmail,
+    saved.headline,
+    saved.contactName,
+    saved.contactPhone,
+    saved.contactEmail,
+  ]);
 
   const busy = saving || uploading;
   const previewSrc = imageUrl || defaults.imageUrl;
@@ -544,6 +571,34 @@ export default function PersonalHomeEditor({
             <span className="mt-1 block text-[12px] leading-snug text-neutral-500">
               {fmt(t.contactHint, { name: defaults.contactName })}
             </span>
+          </label>
+
+          <label className="block">
+            <span className={LABEL}>{t.contactPhone}</span>
+            <input
+              type="tel"
+              value={contactPhone}
+              maxLength={PERSONAL_HOME_LIMITS.contactPhone}
+              disabled={busy}
+              data-testid="personal-home-contact-phone"
+              onChange={(event) => setContactPhone(event.target.value)}
+              className={INPUT}
+            />
+            <span className="mt-1 block text-[12px] leading-snug text-neutral-500">{t.contactPhoneHint}</span>
+          </label>
+
+          <label className="block">
+            <span className={LABEL}>{t.contactEmail}</span>
+            <input
+              type="email"
+              value={contactEmail}
+              maxLength={PERSONAL_HOME_LIMITS.contactEmail}
+              disabled={busy}
+              data-testid="personal-home-contact-email"
+              onChange={(event) => setContactEmail(event.target.value)}
+              className={INPUT}
+            />
+            <span className="mt-1 block text-[12px] leading-snug text-neutral-500">{t.contactEmailHint}</span>
           </label>
 
           <label className="block">
