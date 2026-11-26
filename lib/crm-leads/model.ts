@@ -7,7 +7,7 @@
  * a column that names another agent is ignored.
  */
 
-export const LEAD_POSITIONS = ["broker", "acting_broker", "managing_broker", "team_leader"] as const;
+export const LEAD_POSITIONS = ["broker", "acting_broker", "managing_broker", "team_leader", "prospect"] as const;
 export type LeadPosition = (typeof LEAD_POSITIONS)[number];
 
 export const LEAD_COUNTRIES = ["Canada", "USA"] as const;
@@ -94,7 +94,7 @@ export type NormalizedLead = {
   officePhone: string | null;
   latitude: number | null;
   longitude: number | null;
-  country: LeadCountry;
+  country: LeadCountry | null;
   market: string | null;
   status: LeadStatus;
   notes: string | null;
@@ -258,6 +258,7 @@ export function normalizePosition(raw: string | undefined): LeadPosition | null 
   if (v === "acting broker") return "acting_broker";
   if (v === "managing broker") return "managing_broker";
   if (v === "team leader") return "team_leader";
+  if (v === "prospect") return "prospect";
   return null;
 }
 
@@ -305,7 +306,10 @@ function optionalPhone(raw: string, field: "cell_phone" | "office_phone", errors
   return v.slice(0, 40);
 }
 
-export function validateLeadValues(values: Partial<Record<LeadField, string>>): {
+export function validateLeadValues(
+  values: Partial<Record<LeadField, string>>,
+  options: { countryOptional?: boolean } = {},
+): {
   lead: NormalizedLead | null;
   errors: LeadIssue[];
 } {
@@ -326,7 +330,7 @@ export function validateLeadValues(values: Partial<Record<LeadField, string>>): 
   const position = normalizePosition(values.position);
   if (!position) errors.push({ code: "position" });
   const country = normalizeCountry(values.country);
-  if (!country) errors.push({ code: "country" });
+  if (!country && !options.countryOptional) errors.push({ code: "country" });
   const status = normalizeStatus(values.status);
   if (!status) errors.push({ code: "status" });
 

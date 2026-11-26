@@ -38,6 +38,8 @@ const en = {
   edit: "Edit",
   view: "View",
   readOnly: "Read-only",
+  lockedField: "Captured — view only",
+  addNote: "Add a remark",
   delete: "Delete",
   deleteTitle: "Delete this lead?",
   deleteBody: "This removes the lead and its edit history. The activity log keeps who deleted it. This cannot be undone.",
@@ -67,6 +69,7 @@ const en = {
     acting_broker: "Acting broker",
     managing_broker: "Managing broker",
     team_leader: "Team leader",
+    prospect: "Prospect",
   },
   statuses: {
     new: "New",
@@ -187,6 +190,8 @@ const de: Localized<typeof en> = {
   edit: "Bearbeiten",
   view: "Ansehen",
   readOnly: "Schreibgeschützt",
+  lockedField: "Erfasst — nur Ansicht",
+  addNote: "Bemerkung hinzufügen",
   delete: "Löschen",
   deleteTitle: "Diesen Lead löschen?",
   deleteBody: "Der Lead und sein Bearbeitungsverlauf werden entfernt. Das Aktivitätsprotokoll behält, wer gelöscht hat. Das kann nicht rückgängig gemacht werden.",
@@ -216,6 +221,7 @@ const de: Localized<typeof en> = {
     acting_broker: "Acting Broker",
     managing_broker: "Managing Broker",
     team_leader: "Teamleiter",
+    prospect: "Interessent",
   },
   statuses: {
     new: "Neu",
@@ -345,6 +351,6 @@ export function statusLabel(copy: CrmCopy, status: LeadStatus): string {
   return copy.statuses[status];
 }
 
-export function countryLabel(copy: CrmCopy, country: LeadCountry): string {
-  return copy.countries[country];
+export function countryLabel(copy: CrmCopy, country: LeadCountry | null | undefined): string {
+  return country ? copy.countries[country] : "—";
 }

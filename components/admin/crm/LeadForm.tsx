@@ -20,10 +20,12 @@ export default function LeadForm({
   leadId = null,
   initial,
   readOnly = false,
+  lockedFields = [],
 }: {
   leadId?: string | null;
   initial: Record<LeadField, string>;
   readOnly?: boolean;
+  lockedFields?: readonly LeadField[];
 }) {
   const copy = crmCopy(useLocale());
   const router = useRouter();
@@ -32,6 +34,8 @@ export default function LeadForm({
   const [issues, setIssues] = useState<string[]>([]);
   const [saved, setSaved] = useState(false);
   const [pending, startTransition] = useTransition();
+  const locked = new Set<LeadField>(lockedFields);
+  const isLocked = (name: LeadField) => readOnly || locked.has(name);
 
   function set(field: LeadField, value: string) {
     setSaved(false);
@@ -66,7 +70,7 @@ export default function LeadForm({
     <label className="block text-sm text-neutral-800">
       <span className={labelClass}>
         {copy.fields[name]}
-        {hint ? <span className="ml-2 font-normal text-neutral-400">{hint}</span> : null}
+        {isLocked(name) && !readOnly ? <span className="ml-2 font-normal text-neutral-400">{copy.lockedField}</span> : hint ? <span className="ml-2 font-normal text-neutral-400">{hint}</span> : null}
       </span>
       {control}
     </label>
@@ -77,12 +81,12 @@ export default function LeadForm({
       <div className="grid gap-4 sm:grid-cols-2">
         {field(
           "decision_maker_name",
-          <input className={fieldClass} value={values.decision_maker_name} disabled={readOnly} required autoComplete="name" onChange={(e) => set("decision_maker_name", e.target.value)} />,
+          <input className={fieldClass} value={values.decision_maker_name} disabled={isLocked("decision_maker_name")} required autoComplete="name" onChange={(e) => set("decision_maker_name", e.target.value)} />,
           copy.required,
         )}
         {field(
           "position",
-          <select className={fieldClass} value={values.position} disabled={readOnly} required onChange={(e) => set("position", e.target.value)}>
+          <select className={fieldClass} value={values.position} disabled={isLocked("position")} required onChange={(e) => set("position", e.target.value)}>
             <option value="">{copy.any}</option>
             {LEAD_POSITIONS.map((position) => (
               <option key={position} value={position}>{positionLabel(copy, position)}</option>
@@ -92,28 +96,28 @@ export default function LeadForm({
         )}
         {field(
           "cell_phone",
-          <input className={fieldClass} inputMode="tel" autoComplete="tel" value={values.cell_phone} disabled={readOnly} onChange={(e) => set("cell_phone", e.target.value)} />,
+          <input className={fieldClass} inputMode="tel" autoComplete="tel" value={values.cell_phone} disabled={isLocked("cell_phone")} onChange={(e) => set("cell_phone", e.target.value)} />,
         )}
         {field(
           "email",
-          <input type="email" className={fieldClass} autoComplete="email" value={values.email} disabled={readOnly} onChange={(e) => set("email", e.target.value)} />,
+          <input type="email" className={fieldClass} autoComplete="email" value={values.email} disabled={isLocked("email")} onChange={(e) => set("email", e.target.value)} />,
         )}
         {field(
           "brokerage_name",
-          <input className={fieldClass} value={values.brokerage_name} disabled={readOnly} required autoComplete="organization" onChange={(e) => set("brokerage_name", e.target.value)} />,
+          <input className={fieldClass} value={values.brokerage_name} disabled={isLocked("brokerage_name")} required autoComplete="organization" onChange={(e) => set("brokerage_name", e.target.value)} />,
           copy.required,
         )}
         {field(
           "brokerage_website",
-          <input className={fieldClass} inputMode="url" autoComplete="url" placeholder="https://" value={values.brokerage_website} disabled={readOnly} onChange={(e) => set("brokerage_website", e.target.value)} />,
+          <input className={fieldClass} inputMode="url" autoComplete="url" placeholder="https://" value={values.brokerage_website} disabled={isLocked("brokerage_website")} onChange={(e) => set("brokerage_website", e.target.value)} />,
         )}
         {field(
           "office_phone",
-          <input className={fieldClass} inputMode="tel" value={values.office_phone} disabled={readOnly} onChange={(e) => set("office_phone", e.target.value)} />,
+          <input className={fieldClass} inputMode="tel" value={values.office_phone} disabled={isLocked("office_phone")} onChange={(e) => set("office_phone", e.target.value)} />,
         )}
         {field(
           "country",
-          <select className={fieldClass} value={values.country} disabled={readOnly} required onChange={(e) => set("country", e.target.value)}>
+          <select className={fieldClass} value={values.country} disabled={isLocked("country")} required onChange={(e) => set("country", e.target.value)}>
             <option value="">{copy.any}</option>
             {LEAD_COUNTRIES.map((country) => (
               <option key={country} value={country}>{countryLabel(copy, country)}</option>
@@ -123,11 +127,11 @@ export default function LeadForm({
         )}
         {field(
           "market",
-          <input className={fieldClass} value={values.market} disabled={readOnly} onChange={(e) => set("market", e.target.value)} />,
+          <input className={fieldClass} value={values.market} disabled={isLocked("market")} onChange={(e) => set("market", e.target.value)} />,
         )}
         {field(
           "status",
-          <select className={fieldClass} value={values.status} disabled={readOnly} onChange={(e) => set("status", e.target.value)}>
+          <select className={fieldClass} value={values.status} disabled={isLocked("status")} onChange={(e) => set("status", e.target.value)}>
             {LEAD_STATUSES.map((status) => (
               <option key={status} value={status}>{statusLabel(copy, status)}</option>
             ))}
@@ -136,17 +140,17 @@ export default function LeadForm({
         <div className="sm:col-span-2">
           {field(
             "brokerage_address",
-            <textarea className={textareaClass} rows={2} autoComplete="street-address" value={values.brokerage_address} disabled={readOnly} onChange={(e) => set("brokerage_address", e.target.value)} />,
+            <textarea className={textareaClass} rows={2} autoComplete="street-address" value={values.brokerage_address} disabled={isLocked("brokerage_address")} onChange={(e) => set("brokerage_address", e.target.value)} />,
           )}
         </div>
         {field(
           "latitude",
-          <input className={fieldClass} inputMode="decimal" value={values.latitude} disabled={readOnly} onChange={(e) => set("latitude", e.target.value)} />,
+          <input className={fieldClass} inputMode="decimal" value={values.latitude} disabled={isLocked("latitude")} onChange={(e) => set("latitude", e.target.value)} />,
           copy.optional,
         )}
         {field(
           "longitude",
-          <input className={fieldClass} inputMode="decimal" value={values.longitude} disabled={readOnly} onChange={(e) => set("longitude", e.target.value)} />,
+          <input className={fieldClass} inputMode="decimal" value={values.longitude} disabled={isLocked("longitude")} onChange={(e) => set("longitude", e.target.value)} />,
           copy.latLngHint,
         )}
         <div className="sm:col-span-2">

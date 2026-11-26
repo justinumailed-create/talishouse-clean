@@ -11,6 +11,7 @@ import {
   type LeadIssue,
   type LeadListFilters,
 } from "@/lib/crm-leads/model";
+import { isAishaSourcedLead } from "@/lib/crm-leads/field-permissions";
 import {
   createBrokerageLead,
   deleteBrokerageLead,
@@ -18,6 +19,7 @@ import {
   importBrokerageLeads,
   parseLeadFilters,
   previewLeadImport,
+  getBrokerageLead,
   requireCrmActor,
   updateBrokerageLead,
 } from "@/lib/crm-leads/server";
@@ -40,7 +42,10 @@ export async function saveLeadAction(
   const copy = crmCopy(await getLocale());
   const actor = await requireCrmActor();
   if (!actor) return { ok: false, error: copy.unauthorized, issues: [] };
-  const parsed = validateLeadValues(values);
+  const current = id ? await getBrokerageLead(actor, id) : null;
+  const parsed = validateLeadValues(values, {
+    countryOptional: Boolean(current && isAishaSourcedLead(current) && !(values.country ?? "").trim()),
+  });
   if (!parsed.lead) return { ok: false, error: copy.genericError, issues: parsed.errors };
   if (!id) {
     const created = await createBrokerageLead(actor, parsed.lead, "create");

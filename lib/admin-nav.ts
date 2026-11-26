@@ -1,5 +1,6 @@
 import type { AdminAccount, AdminScope } from "./admin-constants";
 import { accountHasAdminScope, sanitizeAgentScopes } from "./admin-constants";
+import { AISHA_TRANSCRIPTS_SCOPE } from "./aisha-transcript-routing";
 
 export type AdminNavItem = {
   href: string;
@@ -49,6 +50,7 @@ export function getAgentNavItems(scopes: readonly string[] | null | undefined): 
   }
   if (granted.has("leads")) items.push({ href: "/admin/leads", label: "Leads" });
   if (granted.has("leads-crm")) items.push({ href: "/admin/agent/leads", label: "Leads (CRM)" });
+  if (granted.has(AISHA_TRANSCRIPTS_SCOPE)) items.push({ href: "/admin/agent/transcripts", label: "Aisha transcripts" });
   return items;
 }
 
@@ -93,7 +95,13 @@ export const AGENT_FLOW_NAV: readonly AdminNavItem[] = [
 /** Sidebar items for any admin account, from its scopes (never from a role name). */
 export function getAdminNavItems(account: AdminAccount | null | undefined): AdminNavItem[] {
   if (!account) return [];
-  if (account.access === "agent") return AGENT_FLOW_NAV.map((item) => ({ ...item }));
+  if (account.access === "agent") {
+    const items = AGENT_FLOW_NAV.map((item) => ({ ...item }));
+    if (accountHasAdminScope(account, AISHA_TRANSCRIPTS_SCOPE)) {
+      items.push({ href: "/admin/agent/transcripts", label: "Aisha transcripts" });
+    }
+    return items;
+  }
   return ADMIN_FLOW_NAV.filter((item) => accountHasAdminScope(account, item.scope)).map(({ href, label }) => ({ href, label }));
 }
 

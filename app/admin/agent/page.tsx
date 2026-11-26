@@ -9,6 +9,9 @@ import { getAgentById, listAgentMapSites } from "@/lib/agent-admins";
 import { listManualPayments } from "@/lib/manual-payments";
 import { countUnreadForAgent } from "@/lib/chat/server";
 import { agentLoginPath } from "@/lib/agent-return-path";
+import AishaTranscriptsList from "@/components/admin/agent/AishaTranscriptsList";
+import { AISHA_TRANSCRIPTS_SCOPE } from "@/lib/aisha-transcript-routing";
+import { listRoutedAishaTranscripts } from "@/lib/aisha-transcript-ingest";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +51,7 @@ export default async function AgentHomePage() {
 
   const agent = await getAgentById(account.agentId);
   if (!agent || agent.status !== "active") redirect("/admin/login");
-  const [mapsites, payments, chatUnread, contractCode, signedClients] = await Promise.all([
+  const [mapsites, payments, chatUnread, contractCode, signedClients, routedTranscripts] = await Promise.all([
     listAgentMapSites(agent.assignedMapSites),
     agent.privileges.includes("cash-payments") && !agent.mustChangePassword
       ? listManualPayments({ agentId: agent.id, limit: 50 })
@@ -58,6 +61,9 @@ export default async function AgentHomePage() {
       : countUnreadForAgent(agent.id).catch(() => 0),
     getAgentContractCode(agent.id),
     listSignedContracts({ agentId: agent.id, limit: 100 }),
+    accountHasAdminScope(account, AISHA_TRANSCRIPTS_SCOPE) && !agent.mustChangePassword
+      ? listRoutedAishaTranscripts({ assigneeId: agent.id, limit: 8 })
+      : Promise.resolve([]),
   ]);
   return (
     <div className="space-y-6">
@@ -74,6 +80,20 @@ export default async function AgentHomePage() {
           }))}
         />
       )}
+      {accountHasAdminScope(account, AISHA_TRANSCRIPTS_SCOPE) && !agent.mustChangePassword ? (
+        <section className="space-y-3">
+          <div className="flex items-baseline justify-between gap-3">
+            <h2 className="text-lg font-semibold text-neutral-900">Aisha transcripts</h2>
+            <Link href="/admin/agent/transcripts" className="text-sm font-semibold text-[#1E4ED8]">
+              View all
+            </Link>
+          </div>
+          <AishaTranscriptsList
+            transcripts={routedTranscripts}
+            emptyLabel="No new Aisha transcripts have been routed yet. Qualifying ended calls will appear here."
+          />
+        </section>
+      ) : null}
     </div>
   );
 }

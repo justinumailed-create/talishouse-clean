@@ -5,6 +5,7 @@ import LeadForm from "@/components/admin/crm/LeadForm";
 import { PageHeader, cardClass } from "@/components/admin/agents/ui";
 import { crmCopy, fill } from "@/lib/crm-leads/copy";
 import { canDeleteLeads, canEditLead } from "@/lib/crm-leads/model";
+import { lockedLeadFormFields, isAishaSourcedLead } from "@/lib/crm-leads/field-permissions";
 import { getBrokerageLead, leadFormValues, listLeadEdits, requireCrmActor } from "@/lib/crm-leads/server";
 import { getLocale } from "@/lib/i18n/server";
 import { pageMetadata } from "@/lib/seo/page-metadata";
@@ -32,6 +33,7 @@ export default async function BrokerageLeadPage({ params }: { params: Promise<{ 
   const locale = await getLocale();
   const copy = crmCopy(locale);
   const editable = canEditLead(actor, lead);
+  const lockedFields = lockedLeadFormFields(actor, lead);
   const edits = await listLeadEdits(lead.id);
   const actionLabel = { create: copy.historyCreate, update: copy.historyUpdate, import: copy.historyImport };
 
@@ -51,9 +53,17 @@ export default async function BrokerageLeadPage({ params }: { params: Promise<{ 
       {!editable ? <p className="rounded-xl bg-neutral-100 px-4 py-2 text-sm text-neutral-700">{copy.readOnly}</p> : null}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className={`${cardClass} p-4 sm:p-6`}>
-          <LeadForm leadId={lead.id} initial={leadFormValues(lead)} readOnly={!editable} />
+          <LeadForm leadId={lead.id} initial={leadFormValues(lead)} readOnly={!editable} lockedFields={lockedFields} />
         </div>
         <aside className={`${cardClass} h-fit p-4`}>
+          {isAishaSourcedLead(lead) ? (
+            <div className="mb-4 space-y-1 text-sm text-neutral-700">
+              <p><span className="text-xs uppercase tracking-wider text-neutral-500">Source</span><br />Aisha Call</p>
+              {lead.sourceConversationId ? <p><span className="text-xs uppercase tracking-wider text-neutral-500">Call reference</span><br />{lead.sourceConversationId}</p> : null}
+              {lead.fastCode ? <p><span className="text-xs uppercase tracking-wider text-neutral-500">FAST Code</span><br />{lead.fastCode}</p> : null}
+              <p><span className="text-xs uppercase tracking-wider text-neutral-500">Created</span><br />{when(lead.createdAt, locale)}</p>
+            </div>
+          ) : null}
           <h2 className="text-xs font-semibold uppercase tracking-wider text-neutral-500">{copy.history}</h2>
           {edits.length === 0 ? <p className="mt-3 text-sm text-neutral-500">{copy.historyEmpty}</p> : (
             <ol className="mt-3 space-y-3">

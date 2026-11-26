@@ -23,6 +23,7 @@ import {
   type LeadStatus,
   type NormalizedLead,
 } from "@/lib/crm-leads/model";
+import { applyCrmFieldPermissions } from "@/lib/crm-leads/field-permissions";
 
 /**
  * Brokerage CRM data access. RLS is on and the Data API cannot read or write
@@ -46,6 +47,9 @@ export type BrokerageLead = NormalizedLead & {
   updatedByName: string | null;
   createdAt: string;
   updatedAt: string;
+  source: string | null;
+  sourceConversationId: string | null;
+  fastCode: string | null;
 };
 
 export type LeadEdit = {
@@ -69,7 +73,7 @@ type LeadRow = {
   office_phone: string | null;
   latitude: number | null;
   longitude: number | null;
-  country: LeadCountry;
+  country: LeadCountry | null;
   market: string | null;
   status: LeadStatus;
   notes: string | null;
@@ -79,6 +83,9 @@ type LeadRow = {
   updated_by_name: string | null;
   created_at: string;
   updated_at: string;
+  source: string | null;
+  source_conversation_id: string | null;
+  fast_code: string | null;
 };
 
 function db(): SupabaseClient {
@@ -108,6 +115,9 @@ function toLead(row: LeadRow): BrokerageLead {
     updatedByName: row.updated_by_name,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    source: row.source ?? null,
+    sourceConversationId: row.source_conversation_id ?? null,
+    fastCode: row.fast_code ?? null,
   };
 }
 
@@ -259,7 +269,7 @@ export function leadFormValues(lead: BrokerageLead): Record<LeadField, string> {
     office_phone: lead.officePhone ?? "",
     latitude: lead.latitude === null ? "" : String(lead.latitude),
     longitude: lead.longitude === null ? "" : String(lead.longitude),
-    country: lead.country,
+    country: lead.country ?? "",
     market: lead.market ?? "",
     status: lead.status,
     notes: lead.notes ?? "",
@@ -406,6 +416,8 @@ export async function updateBrokerageLead(
   const current = await getBrokerageLead(actor, id);
   if (!current) return { ok: false, error: "not_found" };
   if (!canEditLead(actor, current)) return { ok: false, error: "forbidden" };
+  const applied = applyCrmFieldPermissions({ actor, current, proposed: lead });
+  lead = applied.lead;
   const changes = diffLead(current, lead);
   if (Object.keys(changes).length === 0) return { ok: true };
   const { error } = await db()
