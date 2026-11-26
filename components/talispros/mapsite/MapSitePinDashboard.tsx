@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, useTransition, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import {
   createAdditionalPinCheckout,
   deleteMapSiteAdditionalPin,
@@ -53,104 +53,88 @@ type PinDraft = {
   editAssign: string;
 };
 
-export type PinStepNumber = 1 | 2 | 3 | 4 | 5;
+/** One visible screen in the sequential Add Pin flow. */
+type FlowScreen = 1 | 2 | 3 | 4;
 
-/** 1 Add PIN, 2 Assign to Mapsite, 3 Find and place, 4 Name and category, 5 Review. */
-export const PIN_STEP_NUMBERS: ReadonlyArray<PinStepNumber> = [1, 2, 3, 4, 5];
+function initialFlowScreen(draft: PinDraft | null): FlowScreen {
+  if (!draft) return 1;
+  if (draft.editingId) return 3;
+  if (draft.label.trim() || draft.latitude.trim() || draft.longitude.trim()) return 2;
+  return 1;
+}
 
-/** One color per step so the sequence reads at a glance (Ralf, Nov 26). */
-export const PIN_STEP_STYLES: Record<
-  PinStepNumber,
-  { badge: string; card: string; title: string; border: string }
-> = {
-  1: {
-    badge: "bg-[#046BD9] text-white",
-    card: "bg-[#046BD9]/10 text-[#035bb8]",
-    title: "text-[#035bb8]",
-    border: "border-[#046BD9]/40 bg-[#046BD9]/5",
-  },
-  2: {
-    badge: "bg-teal-600 text-white",
-    card: "bg-teal-100 text-teal-900",
-    title: "text-teal-900",
-    border: "border-teal-300 bg-teal-50/70",
-  },
-  3: {
-    badge: "bg-amber-500 text-white",
-    card: "bg-amber-100 text-amber-900",
-    title: "text-amber-900",
-    border: "border-amber-300 bg-amber-50/70",
-  },
-  4: {
-    badge: "bg-violet-600 text-white",
-    card: "bg-violet-100 text-violet-900",
-    title: "text-violet-900",
-    border: "border-violet-300 bg-violet-50/70",
-  },
-  5: {
-    badge: "bg-emerald-600 text-white",
-    card: "bg-emerald-100 text-emerald-900",
-    title: "text-emerald-900",
-    border: "border-emerald-300 bg-emerald-50/70",
-  },
-};
-
-function PinStep({
-  step,
-  title,
-  body,
-  current,
-  done,
-  labels,
-  headerAction = null,
-  children,
+/** Slim progress bar for the one-screen-at-a-time Add Pin flow. Not a numbered card stepper. */
+function PinFlowProgress({
+  screen,
+  label,
+  status,
 }: {
-  step: PinStepNumber;
-  title: string;
-  body: string;
-  current: boolean;
-  done: boolean;
-  labels: { done: string; now: string };
-  headerAction?: ReactNode;
-  children?: ReactNode;
+  screen: FlowScreen;
+  label: string;
+  status: string;
 }) {
-  const style = PIN_STEP_STYLES[step];
   return (
-    <section
-      data-testid={`pin-step-${step}`}
-      aria-current={current ? "step" : undefined}
-      className={`space-y-2 rounded-2xl border-2 p-3 transition ${
-        current ? `${style.border} shadow-sm` : "border-neutral-200 bg-white"
-      }`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex items-start gap-2.5">
-          <span
-            aria-hidden
-            className={`inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[13px] font-bold ${style.badge}`}
-          >
-            {done ? "✓" : step}
-          </span>
-          <div>
-            <h3 className={`text-[14px] font-semibold ${current ? style.title : "text-neutral-900"}`}>
-              {title}
-              {current ? (
-                <span className={`ml-2 rounded-full px-2 py-0.5 align-middle text-[10px] font-semibold ${style.badge}`}>
-                  {labels.now}
-                </span>
-              ) : done ? (
-                <span className="ml-2 rounded-full bg-neutral-100 px-2 py-0.5 align-middle text-[10px] font-semibold text-neutral-600">
-                  {labels.done}
-                </span>
-              ) : null}
-            </h3>
-            <p className="mt-0.5 text-[12px] leading-snug text-neutral-600">{body}</p>
-          </div>
-        </div>
-        {headerAction}
+    <div className="space-y-2" data-testid="pin-flow-progress">
+      <div className="flex items-baseline justify-between gap-2">
+        <h3 className="text-[15px] font-semibold tracking-tight text-neutral-900">{label}</h3>
+        <p className="shrink-0 text-[11px] font-medium tabular-nums text-neutral-500">{status}</p>
       </div>
-      {children}
-    </section>
+      <div
+        className="h-1.5 overflow-hidden rounded-full bg-neutral-200"
+        role="progressbar"
+        aria-valuemin={1}
+        aria-valuemax={4}
+        aria-valuenow={screen}
+        aria-label={label}
+      >
+        <div
+          className="h-full rounded-full bg-[#046BD9] transition-[width] duration-300 ease-out"
+          style={{ width: `${(screen / 4) * 100}%` }}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PinFlowNav({
+  backLabel,
+  continueLabel,
+  continueDisabled = false,
+  onBack,
+  onContinue,
+}: {
+  backLabel?: string;
+  continueLabel?: string;
+  continueDisabled?: boolean;
+  onBack?: () => void;
+  onContinue?: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2 pt-1" data-testid="pin-flow-nav">
+      {onBack && backLabel ? (
+        <button
+          type="button"
+          onClick={onBack}
+          data-testid="pin-flow-back"
+          className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50"
+        >
+          {backLabel}
+        </button>
+      ) : (
+        <span />
+      )}
+      {onContinue && continueLabel ? (
+        <button
+          type="button"
+          onClick={onContinue}
+          disabled={continueDisabled}
+          data-testid="pin-flow-continue"
+          className="ml-auto rounded-full bg-[#046BD9] px-5 py-2 text-[13px] font-semibold text-white shadow-sm hover:bg-[#0358b3] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {continueLabel}
+        </button>
+      ) : null}
+    </div>
   );
 }
 
@@ -241,6 +225,7 @@ export default function MapSitePinDashboard({
   const [placeCategory, setPlaceCategory] = useState(initialDraft?.placeCategory ?? "");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [lastPlacedId, setLastPlacedId] = useState<string | null>(null);
+  const [flowScreen, setFlowScreen] = useState<FlowScreen>(() => initialFlowScreen(initialDraft));
   const knownPinIdsRef = useRef<Set<string> | null>(null);
   const { setViewport } = useMapEngine();
 
@@ -249,24 +234,24 @@ export default function MapSitePinDashboard({
     ownFastCode: fastCode,
     assignedFastCode: assignFastCode,
   });
-  // Agents cannot place until a Broker FAST Code is entered (step 2).
+  // Agents cannot place until a Broker FAST Code is entered.
   const placementReady = assignCheck.ok;
   const placeAssignment = assignCheck.ok ? assignCheck.assignedFastCode : null;
   const editorAssignment = editor.kind === "place" ? editor.assignedFastCode ?? null : null;
 
-  // Placement is always ready while the panel is open (unless the owner pauses it
-  // or an Agent still has to assign a Mapsite): map clicks drop the next PIN,
-  // tied to the Assign to Mapsite FAST Code, and every placed PIN can be dragged.
+  // Map-click placement is only active on the Find a place screen, unless the
+  // owner pauses it or an Agent still has to assign a Mapsite.
   useEffect(() => {
-    if (!open || paused) return;
-    if (!placementReady) {
+    if (!open) return;
+    const placing = !paused && placementReady && flowScreen === 2;
+    if (!placing) {
       if (editor.kind === "place") onEditorChange({ kind: "idle" });
       return;
     }
     if (editor.kind === "idle" || (editor.kind === "place" && editorAssignment !== placeAssignment)) {
       onEditorChange({ kind: "place", assignedFastCode: placeAssignment });
     }
-  }, [open, paused, placementReady, placeAssignment, editor.kind, editorAssignment, onEditorChange]);
+  }, [open, paused, flowScreen, placementReady, placeAssignment, editor.kind, editorAssignment, onEditorChange]);
 
   // Keep the draft in step with the form; nothing in progress clears it.
   useEffect(() => {
@@ -313,6 +298,7 @@ export default function MapSitePinDashboard({
     setEditAssign((pin?.assignedFastCode || "").toUpperCase());
     setConfirmDeleteId(null);
     setMessage(null);
+    setFlowScreen(3);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pinIdsKey]);
 
@@ -420,9 +406,10 @@ export default function MapSitePinDashboard({
     setEditCategory(pin?.category || "");
     setEditAssign((pin?.assignedFastCode || "").toUpperCase());
     setEditingId(pinId);
+    setFlowScreen(3);
   }
 
-  function saveLabel(pinId: string) {
+  function saveLabel(pinId: string, advanceToReview = false) {
     const pin = dashboard.pins.find((item) => item.id === pinId);
     if (!pin) return;
     setError(null);
@@ -445,6 +432,7 @@ export default function MapSitePinDashboard({
       setDraftRestored(false);
       clearFormDraft(draftKey);
       setMessage(d.updated);
+      if (advanceToReview) setFlowScreen(4);
     });
   }
 
@@ -478,6 +466,7 @@ export default function MapSitePinDashboard({
     setLastPlacedId(null);
     setError(null);
     setMessage(null);
+    setFlowScreen(1);
   }
 
   function togglePaused() {
@@ -485,8 +474,17 @@ export default function MapSitePinDashboard({
     const next = !paused;
     setPaused(next);
     onEditorChange(
-      next || !placementReady ? { kind: "idle" } : { kind: "place", assignedFastCode: placeAssignment },
+      next || !placementReady || flowScreen !== 2
+        ? { kind: "idle" }
+        : { kind: "place", assignedFastCode: placeAssignment },
     );
+  }
+
+  function goAddAnotherPin() {
+    setEditingId(null);
+    setConfirmDeleteId(null);
+    setError(null);
+    setFlowScreen(1);
   }
 
   const checkoutNote =
@@ -496,28 +494,10 @@ export default function MapSitePinDashboard({
         ? d.checkoutCancelled
         : null;
 
-  const pinsPlaced = dashboard.pins.length > 0;
   const editingPin = editingId
     ? dashboard.pins.find((pin) => pin.id === editingId) ?? null
     : null;
   const editingIndex = editingPin ? dashboard.pins.indexOf(editingPin) : -1;
-  // Where the owner is right now: naming a PIN, placing one, or reviewing.
-  const currentStep: PinStepNumber = editingPin
-    ? 4
-    : dashboard.remainingToPlace > 0 && !paused
-      ? placementReady
-        ? 3
-        : 2
-      : pinsPlaced
-        ? 5
-        : 1;
-  const stepTitles: Record<PinStepNumber, string> = {
-    1: d.step1Title,
-    2: d.step2Title,
-    3: d.step3Title,
-    4: d.step4Title,
-    5: d.step5Title,
-  };
   const assignHelp =
     accountLevel === "agent"
       ? d.assignHelpAgent
@@ -548,475 +528,16 @@ export default function MapSitePinDashboard({
     : assignRule.ownMapsite
       ? d.assignShowsOwn
       : d.assignNeeded;
-  const stepLabels = { done: d.stepDone, now: d.stepNow };
+  const flowTitle =
+    flowScreen === 1
+      ? d.step1Title
+      : flowScreen === 2
+        ? d.step3Title
+        : flowScreen === 3
+          ? d.step4Title
+          : d.step5Title;
 
-  const body = (
-      <div className={embedded ? "space-y-4 text-sm" : "space-y-4 overflow-y-auto px-4 py-3 text-sm"}>
-        <ol
-          className="grid grid-cols-5 gap-1"
-          aria-label={d.stepsLabel}
-          data-testid="pin-stepper"
-        >
-          {PIN_STEP_NUMBERS.map((step) => {
-            const done = step < currentStep;
-            const now = step === currentStep;
-            return (
-              <li
-                key={step}
-                data-testid={`pin-stepper-${step}`}
-                aria-current={now ? "step" : undefined}
-                className={`flex flex-col items-center gap-1 rounded-xl px-1 py-1.5 text-center text-[10px] font-semibold leading-tight sm:text-[11px] ${
-                  now ? PIN_STEP_STYLES[step].card : "bg-neutral-50 text-neutral-500"
-                }`}
-              >
-                <span
-                  aria-hidden
-                  className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[12px] ${
-                    now || done ? PIN_STEP_STYLES[step].badge : "bg-neutral-200 text-neutral-600"
-                  }`}
-                >
-                  {done ? "✓" : step}
-                </span>
-                <span className={now ? PIN_STEP_STYLES[step].title : ""}>{stepTitles[step]}</span>
-              </li>
-            );
-          })}
-        </ol>
-
-        {draftRestored ? (
-          <div
-            className="flex items-center justify-between gap-2 rounded-xl bg-sky-50 px-3 py-2 text-xs text-sky-900"
-            data-testid="pin-draft-restored"
-          >
-            <span>{d.draftRestored}</span>
-            <button
-              type="button"
-              onClick={startOver}
-              data-testid="pin-draft-start-over"
-              className="shrink-0 font-semibold underline underline-offset-2"
-            >
-              {d.startOver}
-            </button>
-          </div>
-        ) : null}
-        {checkoutNote ? (
-          <p className="rounded-md bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
-            {checkoutNote}
-          </p>
-        ) : null}
-        {message ? (
-          <p className="rounded-md bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-            {message}
-          </p>
-        ) : null}
-        {error ? (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700" role="alert">
-            {error}
-          </p>
-        ) : null}
-
-        <PinStep
-          step={1}
-          title={d.step1Title}
-          body={d.step1Body}
-          current={currentStep === 1}
-          done={dashboard.remainingToPlace > 0 || pinsPlaced}
-          labels={stepLabels}
-        >
-          <p
-            className={`text-[12px] font-medium ${dashboard.remainingToPlace > 0 ? "text-[#035bb8]" : "text-neutral-600"}`}
-            data-testid="pin-step-add-status"
-          >
-            {dashboard.remainingToPlace > 0
-              ? dashboard.remainingToPlace === 1
-                ? d.readyOne
-                : fmt(d.readyMany, { count: dashboard.remainingToPlace })
-              : d.allPlaced}
-          </p>
-          {dashboard.remainingToPlace <= 0 ? (
-            <a
-              href="#additional-pins"
-              className="inline-flex min-h-8 items-center rounded-full bg-[#046BD9] px-4 text-[12px] font-semibold text-white no-underline hover:bg-[#0358b3] hover:text-white"
-            >
-              {d.moreTitle}
-            </a>
-          ) : null}
-        </PinStep>
-
-        <PinStep
-          step={2}
-          title={d.step2Title}
-          body={assignHelp}
-          current={currentStep === 2}
-          done={currentStep > 2 && Boolean(placeAssignment)}
-          labels={stepLabels}
-          headerAction={
-            <span
-              data-testid="pin-assign-badge"
-              className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                assignRule.required ? "bg-red-600 text-white" : "bg-white text-neutral-700 ring-1 ring-neutral-200"
-              }`}
-            >
-              {assignRule.required ? d.assignRequired : d.assignOptional}
-            </span>
-          }
-        >
-          <label className="block text-xs text-neutral-600" data-testid="pin-assign-to-mapsite">
-            <span className="flex items-center justify-between gap-2">
-              <span>{d.assignLabel}</span>
-              <span className="text-[11px] text-neutral-500">{fmt(d.assignLevel, { level: assignLevelName })}</span>
-            </span>
-            <input
-              value={assignFastCode}
-              onChange={(event) => setAssignFastCode(event.target.value.toUpperCase())}
-              maxLength={30}
-              required={assignRule.required}
-              aria-required={assignRule.required}
-              aria-invalid={Boolean(assignError) || (assignRule.required && !placementReady)}
-              autoComplete="off"
-              spellCheck={false}
-              placeholder={d.assignPlaceholder}
-              data-testid="pin-assign-input"
-              className={`mt-1 block w-full rounded-md border bg-white px-2 py-1.5 font-mono text-sm uppercase tracking-wide ${
-                assignError || (assignRule.required && !placementReady)
-                  ? "border-red-400"
-                  : "border-neutral-300"
-              }`}
-            />
-          </label>
-          {assignError ? (
-            <p className="text-[11px] font-medium text-red-700" role="alert">
-              {assignError}
-            </p>
-          ) : null}
-          <p
-            className={`text-[11px] font-semibold ${placementReady ? "text-teal-800" : "text-red-700"}`}
-            data-testid="pin-assign-shows"
-          >
-            {assignShows}
-          </p>
-          {assignRule.ownMapsite && assignFastCode ? (
-            <button
-              type="button"
-              onClick={() => setAssignFastCode("")}
-              className="text-[11px] font-semibold text-neutral-600 underline underline-offset-2"
-            >
-              {d.assignUseOwn}
-            </button>
-          ) : null}
-        </PinStep>
-
-        <PinStep
-          step={3}
-          title={d.step3Title}
-          body={searchAvailable ? d.step3Body : d.placeHelpMapOnly}
-          current={currentStep === 3}
-          done={pinsPlaced && currentStep > 3}
-          labels={stepLabels}
-          headerAction={
-            dashboard.remainingToPlace > 0 || paused ? (
-              <button
-                type="button"
-                onClick={togglePaused}
-                className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50"
-              >
-                {paused ? d.resumePlacing : d.stopPlacing}
-              </button>
-            ) : null
-          }
-        >
-          {dashboard.remainingToPlace > 0 && !placementReady ? (
-            <p className="rounded-md bg-teal-50 px-3 py-2 text-[12px] font-medium text-teal-900" data-testid="pin-assign-needed">
-              {d.assignNeeded}
-            </p>
-          ) : dashboard.remainingToPlace > 0 ? (
-            <>
-              {!paused ? (
-                <MapSitePlaceSearch
-                  label={d.searchLabel}
-                  placeholder={d.searchPlaceholder}
-                  noResults={d.searchNoResults}
-                  disabled={pending}
-                  onSelect={placeFromSearch}
-                  onAvailabilityChange={setSearchAvailable}
-                />
-              ) : null}
-              {paused ? (
-                <p className="text-[11px] font-medium text-neutral-500">{d.pausedHint}</p>
-              ) : null}
-              {!paused ? (
-                <details className="rounded-md border border-neutral-200 bg-white px-2 py-1.5">
-                  <summary className="cursor-pointer text-[11px] font-medium text-neutral-600">
-                    {d.advancedCoords}
-                  </summary>
-                  <div className="mt-2 space-y-2">
-                    <label className="block text-xs text-neutral-600">
-                      {d.label}
-                      <input
-                        value={label}
-                        onChange={(event) => setLabel(event.target.value)}
-                        maxLength={80}
-                        placeholder={d.labelPlaceholder}
-                        className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
-                      />
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="block text-xs text-neutral-600">
-                        {d.latitude}
-                        <input
-                          value={latitude}
-                          onChange={(event) => setLatitude(event.target.value)}
-                          inputMode="decimal"
-                          className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
-                        />
-                      </label>
-                      <label className="block text-xs text-neutral-600">
-                        {d.longitude}
-                        <input
-                          value={longitude}
-                          onChange={(event) => setLongitude(event.target.value)}
-                          inputMode="decimal"
-                          className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
-                        />
-                      </label>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={placeFromForm}
-                      disabled={pending}
-                      className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
-                    >
-                      {d.placeAtCoords}
-                    </button>
-                  </div>
-                </details>
-              ) : null}
-            </>
-          ) : (
-            <p className="text-[12px] text-neutral-600">{d.allPlaced}</p>
-          )}
-          {dashboard.remainingToPlace > 0 && categoryOptions.length > 0 && !paused && placementReady ? (
-            <label className="block text-xs text-neutral-600">
-              {d.nextCategory}
-              <select
-                data-testid="pin-place-category"
-                value={placeCategory}
-                onChange={(event) => setPlaceCategory(event.target.value)}
-                className="mt-1 block w-full rounded-md border border-neutral-300 bg-white px-2 py-1 text-sm"
-              >
-                <option value="">{d.noCategory}</option>
-                {categoryOptions.map((option) => (
-                  <option key={option.value} value={option.value} title={option.description ?? undefined}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          ) : null}
-          {lastPlacedId && dashboard.pins.some((pin) => pin.id === lastPlacedId) ? (
-            <div className="flex items-center justify-between gap-2 rounded-md bg-emerald-50 px-3 py-1.5 text-xs text-emerald-800">
-              <span>{d.placed}</span>
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => removePin(lastPlacedId)}
-                className="font-semibold underline underline-offset-2 disabled:opacity-60"
-              >
-                {d.undo}
-              </button>
-            </div>
-          ) : null}
-        </PinStep>
-
-        <PinStep
-          step={4}
-          title={d.step4Title}
-          body={editingPin ? d.step4Body : d.step4Idle}
-          current={currentStep === 4}
-          done={false}
-          labels={stepLabels}
-        >
-          {editingPin ? (
-            <div className="space-y-2" data-testid="pin-step-edit">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-violet-800">
-                {editingPin.label.trim() || `PIN ${editingIndex + 2}`}
-              </p>
-              <label className="block text-xs text-neutral-600">
-                {d.label}
-                <input
-                  value={editLabel}
-                  onChange={(event) => setEditLabel(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") {
-                      event.preventDefault();
-                      saveLabel(editingPin.id);
-                    } else if (event.key === "Escape") {
-                      setEditingId(null);
-                    }
-                  }}
-                  maxLength={80}
-                  autoFocus
-                  placeholder={d.labelPlaceholder}
-                  className="mt-1 block w-full rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm"
-                />
-              </label>
-              {categoryOptions.length > 0 ? (
-                <label className="block text-xs text-neutral-600">
-                  {d.category}
-                  <select
-                    data-testid="pin-edit-category"
-                    value={editCategory}
-                    onChange={(event) => setEditCategory(event.target.value)}
-                    className="mt-1 block w-full rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm"
-                  >
-                    <option value="">{d.noCategory}</option>
-                    {categoryOptions.map((option) => (
-                      <option key={option.value} value={option.value} title={option.description ?? undefined}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : null}
-              <label className="block text-xs text-neutral-600" data-testid="pin-edit-assign">
-                {d.step2Title}
-                <span
-                  className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                    assignRule.required ? "bg-red-600 text-white" : "bg-neutral-100 text-neutral-700"
-                  }`}
-                >
-                  {assignRule.required ? d.assignRequired : d.assignOptional}
-                </span>
-                <input
-                  value={editAssign}
-                  onChange={(event) => setEditAssign(event.target.value.toUpperCase())}
-                  maxLength={30}
-                  required={assignRule.required}
-                  autoComplete="off"
-                  spellCheck={false}
-                  placeholder={d.assignPlaceholder}
-                  className="mt-1 block w-full rounded-md border border-neutral-300 bg-white px-2 py-1.5 font-mono text-sm uppercase tracking-wide"
-                />
-              </label>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => saveLabel(editingPin.id)}
-                  data-testid="pin-step-save"
-                  className="rounded-full bg-violet-600 px-4 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:bg-violet-700 disabled:opacity-60"
-                >
-                  {d.save}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditingId(null)}
-                  className="rounded-full border border-neutral-300 bg-white px-4 py-1.5 text-[12px] font-semibold"
-                >
-                  {d.cancel}
-                </button>
-              </div>
-            </div>
-          ) : null}
-        </PinStep>
-
-        <PinStep
-          step={5}
-          title={d.step5Title}
-          body={d.step5Body}
-          current={currentStep === 5}
-          done={false}
-          labels={stepLabels}
-        >
-          {dashboard.pins.length === 0 ? (
-            <p className="text-xs text-neutral-500">{d.noneYet}</p>
-          ) : (
-            <ul className="space-y-1.5">
-              {dashboard.pins.map((pin, index) => (
-                <li
-                  key={pin.id}
-                  className={`rounded-lg border px-2 py-1.5 ${
-                    editingId === pin.id
-                      ? "border-violet-300 bg-violet-50"
-                      : "border-neutral-200 bg-white"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="min-w-0">
-                      <span className="block truncate text-xs font-medium">
-                        {pin.label.trim() || `PIN ${index + 2}`}
-                      </span>
-                      {editingId === pin.id ? (
-                        <span className="mt-0.5 inline-block rounded bg-violet-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                          {d.editingNow}
-                        </span>
-                      ) : null}
-                      {pin.createdByKind === "admin" || pin.createdByKind === "agent" ? (
-                        <span
-                          className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900"
-                          data-testid="pin-placed-by-staff"
-                        >
-                          {pin.createdByKind === "admin" ? d.placedByAdmin : d.placedByAgent}
-                        </span>
-                      ) : null}
-                      {pin.assignedFastCode ? (
-                        <span
-                          className="mt-0.5 mr-1 inline-block rounded bg-teal-100 px-1.5 py-0.5 text-[10px] font-semibold text-teal-900"
-                          data-testid="pin-assigned-chip"
-                        >
-                          {fmt(d.assignedChip, { code: pin.assignedFastCode.toUpperCase() })}
-                        </span>
-                      ) : null}
-                      {pin.category ? (
-                        <span
-                          className="mt-0.5 inline-block rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-900"
-                          data-testid="pin-category-chip"
-                        >
-                          {categoryOptions.find((option) => option.value === pin.category)?.label ??
-                            pin.category.replace(/^custom:/, "")}
-                        </span>
-                      ) : null}
-                      <span className="block font-mono text-[10px] text-neutral-500">
-                        {pin.latitude.toFixed(5)}, {pin.longitude.toFixed(5)}
-                      </span>
-                    </span>
-                    <span className="flex shrink-0 gap-1">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(pin.id)}
-                        className="rounded-md border border-neutral-300 bg-white px-2 py-1 text-[11px] font-semibold"
-                      >
-                        {d.edit}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={pending}
-                        onClick={() => {
-                          if (confirmDeleteId === pin.id) {
-                            removePin(pin.id);
-                          } else {
-                            setConfirmDeleteId(pin.id);
-                          }
-                        }}
-                        onBlur={() =>
-                          setConfirmDeleteId((current) => (current === pin.id ? null : current))
-                        }
-                        className={`rounded-md border px-2 py-1 text-[11px] font-semibold disabled:opacity-60 ${
-                          confirmDeleteId === pin.id
-                            ? "border-red-600 bg-red-600 text-white"
-                            : "border-neutral-300 bg-white text-red-700"
-                        }`}
-                      >
-                        {confirmDeleteId === pin.id ? d.confirmDelete : d.delete}
-                      </button>
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </PinStep>
-
+  const morePinsSection = (
         <section
           id="additional-pins"
           className="space-y-2 rounded-2xl border border-neutral-200 bg-neutral-50 p-3"
@@ -1124,6 +645,482 @@ export default function MapSitePinDashboard({
             </div>
           ) : null}
         </section>
+  );
+
+  const body = (
+      <div className={embedded ? "space-y-4 text-sm" : "space-y-4 overflow-y-auto px-4 py-3 text-sm"}>
+        <PinFlowProgress
+          screen={flowScreen}
+          label={flowTitle}
+          status={fmt(d.flowOf, { current: flowScreen, total: 4 })}
+        />
+        {draftRestored ? (
+          <div
+            className="flex items-center justify-between gap-2 rounded-xl bg-sky-50 px-3 py-2 text-xs text-sky-900"
+            data-testid="pin-draft-restored"
+          >
+            <span>{d.draftRestored}</span>
+            <button
+              type="button"
+              onClick={startOver}
+              data-testid="pin-draft-start-over"
+              className="shrink-0 font-semibold underline underline-offset-2"
+            >
+              {d.startOver}
+            </button>
+          </div>
+        ) : null}
+        {checkoutNote ? (
+          <p className="rounded-md bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
+            {checkoutNote}
+          </p>
+        ) : null}
+        {message ? (
+          <p className="rounded-md bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+            {message}
+          </p>
+        ) : null}
+        {error ? (
+          <p className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700" role="alert">
+            {error}
+          </p>
+        ) : null}
+
+        {flowScreen === 1 ? (
+        <section data-testid="pin-step-1" className="space-y-3">
+          <p className="text-[12px] leading-snug text-neutral-600">{d.step1Body}</p>
+          <p
+            className={`text-[12px] font-medium ${dashboard.remainingToPlace > 0 ? "text-[#035bb8]" : "text-neutral-600"}`}
+            data-testid="pin-step-add-status"
+          >
+            {dashboard.remainingToPlace > 0
+              ? dashboard.remainingToPlace === 1
+                ? d.readyOne
+                : fmt(d.readyMany, { count: dashboard.remainingToPlace })
+              : d.allPlaced}
+          </p>
+          {dashboard.pins.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setFlowScreen(4)}
+              data-testid="pin-flow-view-existing"
+              className="text-[12px] font-medium text-neutral-600 underline underline-offset-2 hover:text-neutral-900"
+            >
+              {fmt(d.viewExistingPins, { count: dashboard.pins.length })}
+            </button>
+          ) : null}
+
+          <div data-testid="pin-step-2" className="space-y-2 rounded-xl border border-neutral-200 bg-neutral-50 p-3">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <h4 className="text-[13px] font-semibold text-neutral-900">{d.step2Title}</h4>
+                <p className="mt-0.5 text-[12px] leading-snug text-neutral-600">{assignHelp}</p>
+              </div>
+              <span
+                data-testid="pin-assign-badge"
+                className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                  assignRule.required ? "bg-red-600 text-white" : "bg-white text-neutral-700 ring-1 ring-neutral-200"
+                }`}
+              >
+                {assignRule.required ? d.assignRequired : d.assignOptional}
+              </span>
+            </div>
+            <label className="block text-xs text-neutral-600" data-testid="pin-assign-to-mapsite">
+              <span className="flex items-center justify-between gap-2">
+                <span>{d.assignLabel}</span>
+                <span className="text-[11px] text-neutral-500">{fmt(d.assignLevel, { level: assignLevelName })}</span>
+              </span>
+              <input
+                value={assignFastCode}
+                onChange={(event) => setAssignFastCode(event.target.value.toUpperCase())}
+                maxLength={30}
+                required={assignRule.required}
+                aria-required={assignRule.required}
+                aria-invalid={Boolean(assignError) || (assignRule.required && !placementReady)}
+                autoComplete="off"
+                spellCheck={false}
+                placeholder={d.assignPlaceholder}
+                data-testid="pin-assign-input"
+                className={`mt-1 block w-full rounded-md border bg-white px-2 py-1.5 font-mono text-sm uppercase tracking-wide ${
+                  assignError || (assignRule.required && !placementReady)
+                    ? "border-red-400"
+                    : "border-neutral-300"
+                }`}
+              />
+            </label>
+            {assignError ? (
+              <p className="text-[11px] font-medium text-red-700" role="alert">
+                {assignError}
+              </p>
+            ) : null}
+            <p
+              className={`text-[11px] font-semibold ${placementReady ? "text-teal-800" : "text-red-700"}`}
+              data-testid="pin-assign-shows"
+            >
+              {assignShows}
+            </p>
+            {assignRule.ownMapsite && assignFastCode ? (
+              <button
+                type="button"
+                onClick={() => setAssignFastCode("")}
+                className="text-[11px] font-semibold text-neutral-600 underline underline-offset-2"
+              >
+                {d.assignUseOwn}
+              </button>
+            ) : null}
+          </div>
+
+          {!placementReady ? (
+            <p className="rounded-md bg-teal-50 px-3 py-2 text-[12px] font-medium text-teal-900" data-testid="pin-assign-needed">
+              {d.assignNeeded}
+            </p>
+          ) : null}
+
+          {dashboard.remainingToPlace <= 0 ? morePinsSection : null}
+
+          <PinFlowNav
+            continueLabel={d.continue}
+            continueDisabled={!placementReady || dashboard.remainingToPlace <= 0}
+            onContinue={() => setFlowScreen(2)}
+          />
+        </section>
+        ) : null}
+
+        {flowScreen === 2 ? (
+        <section data-testid="pin-step-3" className="space-y-3">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-[12px] leading-snug text-neutral-600">
+              {searchAvailable ? d.step3Body : d.placeHelpMapOnly}
+            </p>
+            {dashboard.remainingToPlace > 0 || paused ? (
+              <button
+                type="button"
+                onClick={togglePaused}
+                className="shrink-0 rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50"
+              >
+                {paused ? d.resumePlacing : d.stopPlacing}
+              </button>
+            ) : null}
+          </div>
+          {dashboard.remainingToPlace > 0 && !placementReady ? (
+            <p className="rounded-md bg-teal-50 px-3 py-2 text-[12px] font-medium text-teal-900">
+              {d.assignNeeded}
+            </p>
+          ) : dashboard.remainingToPlace > 0 ? (
+            <>
+              {!paused ? (
+                <MapSitePlaceSearch
+                  label={d.searchLabel}
+                  placeholder={d.searchPlaceholder}
+                  noResults={d.searchNoResults}
+                  disabled={pending}
+                  onSelect={placeFromSearch}
+                  onAvailabilityChange={setSearchAvailable}
+                />
+              ) : null}
+              {paused ? (
+                <p className="text-[11px] font-medium text-neutral-500">{d.pausedHint}</p>
+              ) : null}
+              {!paused ? (
+                <details className="rounded-md border border-neutral-200 bg-white px-2 py-1.5">
+                  <summary className="cursor-pointer text-[11px] font-medium text-neutral-600">
+                    {d.advancedCoords}
+                  </summary>
+                  <div className="mt-2 space-y-2">
+                    <label className="block text-xs text-neutral-600">
+                      {d.label}
+                      <input
+                        value={label}
+                        onChange={(event) => setLabel(event.target.value)}
+                        maxLength={80}
+                        placeholder={d.labelPlaceholder}
+                        className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
+                      />
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <label className="block text-xs text-neutral-600">
+                        {d.latitude}
+                        <input
+                          value={latitude}
+                          onChange={(event) => setLatitude(event.target.value)}
+                          inputMode="decimal"
+                          className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
+                        />
+                      </label>
+                      <label className="block text-xs text-neutral-600">
+                        {d.longitude}
+                        <input
+                          value={longitude}
+                          onChange={(event) => setLongitude(event.target.value)}
+                          inputMode="decimal"
+                          className="mt-1 block w-full rounded-md border border-neutral-300 px-2 py-1 text-sm"
+                        />
+                      </label>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={placeFromForm}
+                      disabled={pending}
+                      className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+                    >
+                      {d.placeAtCoords}
+                    </button>
+                  </div>
+                </details>
+              ) : null}
+            </>
+          ) : (
+            <p className="text-[12px] text-neutral-600">{d.allPlaced}</p>
+          )}
+          {dashboard.remainingToPlace > 0 && categoryOptions.length > 0 && !paused && placementReady ? (
+            <label className="block text-xs text-neutral-600">
+              {d.nextCategory}
+              <select
+                data-testid="pin-place-category"
+                value={placeCategory}
+                onChange={(event) => setPlaceCategory(event.target.value)}
+                className="mt-1 block w-full rounded-md border border-neutral-300 bg-white px-2 py-1 text-sm"
+              >
+                <option value="">{d.noCategory}</option>
+                {categoryOptions.map((option) => (
+                  <option key={option.value} value={option.value} title={option.description ?? undefined}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : null}
+          {lastPlacedId && dashboard.pins.some((pin) => pin.id === lastPlacedId) ? (
+            <div className="flex items-center justify-between gap-2 rounded-md bg-emerald-50 px-3 py-1.5 text-xs text-emerald-800">
+              <span>{d.placed}</span>
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => removePin(lastPlacedId)}
+                className="font-semibold underline underline-offset-2 disabled:opacity-60"
+              >
+                {d.undo}
+              </button>
+            </div>
+          ) : null}
+          <PinFlowNav
+            backLabel={d.back}
+            onBack={() => setFlowScreen(1)}
+            continueLabel={d.continue}
+            onContinue={() => setFlowScreen(3)}
+          />
+        </section>
+        ) : null}
+
+        {flowScreen === 3 ? (
+        <section data-testid="pin-step-4" className="space-y-3">
+          <p className="text-[12px] leading-snug text-neutral-600">
+            {editingPin ? d.step4Body : d.step4Idle}
+          </p>
+          {editingPin ? (
+            <div className="space-y-2" data-testid="pin-step-edit">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-violet-800">
+                {editingPin.label.trim() || `PIN ${editingIndex + 2}`}
+              </p>
+              <label className="block text-xs text-neutral-600">
+                {d.label}
+                <input
+                  value={editLabel}
+                  onChange={(event) => setEditLabel(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      saveLabel(editingPin.id);
+                    } else if (event.key === "Escape") {
+                      setEditingId(null);
+                    }
+                  }}
+                  maxLength={80}
+                  autoFocus
+                  placeholder={d.labelPlaceholder}
+                  className="mt-1 block w-full rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm"
+                />
+              </label>
+              {categoryOptions.length > 0 ? (
+                <label className="block text-xs text-neutral-600">
+                  {d.category}
+                  <select
+                    data-testid="pin-edit-category"
+                    value={editCategory}
+                    onChange={(event) => setEditCategory(event.target.value)}
+                    className="mt-1 block w-full rounded-md border border-neutral-300 bg-white px-2 py-1.5 text-sm"
+                  >
+                    <option value="">{d.noCategory}</option>
+                    {categoryOptions.map((option) => (
+                      <option key={option.value} value={option.value} title={option.description ?? undefined}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : null}
+              <label className="block text-xs text-neutral-600" data-testid="pin-edit-assign">
+                {d.step2Title}
+                <span
+                  className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    assignRule.required ? "bg-red-600 text-white" : "bg-neutral-100 text-neutral-700"
+                  }`}
+                >
+                  {assignRule.required ? d.assignRequired : d.assignOptional}
+                </span>
+                <input
+                  value={editAssign}
+                  onChange={(event) => setEditAssign(event.target.value.toUpperCase())}
+                  maxLength={30}
+                  required={assignRule.required}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder={d.assignPlaceholder}
+                  className="mt-1 block w-full rounded-md border border-neutral-300 bg-white px-2 py-1.5 font-mono text-sm uppercase tracking-wide"
+                />
+              </label>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => saveLabel(editingPin.id)}
+                  data-testid="pin-step-save"
+                  className="rounded-full bg-violet-600 px-4 py-1.5 text-[12px] font-semibold text-white shadow-sm hover:bg-violet-700 disabled:opacity-60"
+                >
+                  {d.save}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingId(null)}
+                  className="rounded-full border border-neutral-300 bg-white px-4 py-1.5 text-[12px] font-semibold"
+                >
+                  {d.cancel}
+                </button>
+              </div>
+            </div>
+          ) : null}
+          <PinFlowNav
+            backLabel={d.back}
+            onBack={() => setFlowScreen(2)}
+            continueLabel={editingPin ? d.saveAndContinue : d.continue}
+            continueDisabled={pending}
+            onContinue={
+              editingPin ? () => saveLabel(editingPin.id, true) : () => setFlowScreen(4)
+            }
+          />
+        </section>
+        ) : null}
+
+        {flowScreen === 4 ? (
+        <section data-testid="pin-step-5" className="space-y-3">
+          <p className="text-[12px] leading-snug text-neutral-600">{d.step5Body}</p>
+          {dashboard.pins.length === 0 ? (
+            <p className="text-xs text-neutral-500">{d.noneYet}</p>
+          ) : (
+            <ul className="space-y-1.5">
+              {dashboard.pins.map((pin, index) => (
+                <li
+                  key={pin.id}
+                  className={`rounded-lg border px-2 py-1.5 ${
+                    editingId === pin.id
+                      ? "border-violet-300 bg-violet-50"
+                      : "border-neutral-200 bg-white"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="min-w-0">
+                      <span className="block truncate text-xs font-medium">
+                        {pin.label.trim() || `PIN ${index + 2}`}
+                      </span>
+                      {editingId === pin.id ? (
+                        <span className="mt-0.5 inline-block rounded bg-violet-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                          {d.editingNow}
+                        </span>
+                      ) : null}
+                      {pin.createdByKind === "admin" || pin.createdByKind === "agent" ? (
+                        <span
+                          className="mt-0.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900"
+                          data-testid="pin-placed-by-staff"
+                        >
+                          {pin.createdByKind === "admin" ? d.placedByAdmin : d.placedByAgent}
+                        </span>
+                      ) : null}
+                      {pin.assignedFastCode ? (
+                        <span
+                          className="mt-0.5 mr-1 inline-block rounded bg-teal-100 px-1.5 py-0.5 text-[10px] font-semibold text-teal-900"
+                          data-testid="pin-assigned-chip"
+                        >
+                          {fmt(d.assignedChip, { code: pin.assignedFastCode.toUpperCase() })}
+                        </span>
+                      ) : null}
+                      {pin.category ? (
+                        <span
+                          className="mt-0.5 inline-block rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-900"
+                          data-testid="pin-category-chip"
+                        >
+                          {categoryOptions.find((option) => option.value === pin.category)?.label ??
+                            pin.category.replace(/^custom:/, "")}
+                        </span>
+                      ) : null}
+                      <span className="block font-mono text-[10px] text-neutral-500">
+                        {pin.latitude.toFixed(5)}, {pin.longitude.toFixed(5)}
+                      </span>
+                    </span>
+                    <span className="flex shrink-0 gap-1">
+                      <button
+                        type="button"
+                        onClick={() => startEdit(pin.id)}
+                        className="rounded-md border border-neutral-300 bg-white px-2 py-1 text-[11px] font-semibold"
+                      >
+                        {d.edit}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => {
+                          if (confirmDeleteId === pin.id) {
+                            removePin(pin.id);
+                          } else {
+                            setConfirmDeleteId(pin.id);
+                          }
+                        }}
+                        onBlur={() =>
+                          setConfirmDeleteId((current) => (current === pin.id ? null : current))
+                        }
+                        className={`rounded-md border px-2 py-1 text-[11px] font-semibold disabled:opacity-60 ${
+                          confirmDeleteId === pin.id
+                            ? "border-red-600 bg-red-600 text-white"
+                            : "border-neutral-300 bg-white text-red-700"
+                        }`}
+                      >
+                        {confirmDeleteId === pin.id ? d.confirmDelete : d.delete}
+                      </button>
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+            <button
+              type="button"
+              onClick={() => setFlowScreen(3)}
+              data-testid="pin-flow-back"
+              className="rounded-full border border-neutral-300 bg-white px-4 py-2 text-[13px] font-semibold text-neutral-700 hover:bg-neutral-50"
+            >
+              {d.back}
+            </button>
+            <button
+              type="button"
+              onClick={goAddAnotherPin}
+              data-testid="pin-flow-add-another"
+              className="rounded-full bg-[#046BD9] px-5 py-2 text-[13px] font-semibold text-white shadow-sm hover:bg-[#0358b3]"
+            >
+              {d.addAnotherPin}
+            </button>
+          </div>
+        </section>
+        ) : null}
       </div>
   );
 

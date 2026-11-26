@@ -137,34 +137,87 @@ describe("Mapsite Logout", () => {
   });
 });
 
-describe("Add Pin step-by-step flow", () => {
+describe("PIN Dashboard sequential one-screen flow", () => {
   const panel = read("components/talispros/mapsite/MapSitePinDashboard.tsx");
 
-  it("renders five colored, numbered steps with a progress bar", () => {
-    expect(panel).toContain('data-testid="pin-stepper"');
-    expect(panel).toContain("PIN_STEP_NUMBERS.map");
+  it("uses a 4-screen Continue flow with a progress bar, not numbered cards", () => {
+    expect(panel).not.toContain('data-testid="pin-stepper"');
+    expect(panel).not.toContain("PIN_STEP_NUMBERS");
+    expect(panel).not.toContain("PIN_STEP_STYLES");
+    expect(panel).not.toContain("PinStepNumber");
+    expect(panel).not.toContain("currentStep");
+    expect(panel).not.toContain("aria-current");
+    expect(panel).not.toContain("d.stepNow");
+    expect(panel).not.toContain("d.stepDone");
+    expect(panel).not.toContain("d.stepsLabel");
+    expect(panel).not.toMatch(/step=\{[1-5]\}/);
+    expect(panel).not.toContain("function PinPanel");
+    expect(panel).toContain('data-testid="pin-flow-progress"');
+    expect(panel).toContain('data-testid="pin-flow-continue"');
+    expect(panel).toContain('data-testid="pin-flow-back"');
+    expect(panel).toContain('data-testid="pin-flow-add-another"');
+    expect(panel).toContain('data-testid="pin-flow-view-existing"');
+    expect(panel).toContain("flowScreen === 1");
+    expect(panel).toContain("flowScreen === 2");
+    expect(panel).toContain("flowScreen === 3");
+    expect(panel).toContain("flowScreen === 4");
+    expect(panel).toContain("role=\"progressbar\"");
     for (const step of [1, 2, 3, 4, 5]) {
-      expect(panel).toContain(`step={${step}}`);
+      expect(panel).toContain(`data-testid="pin-step-${step}"`);
     }
-    for (const color of ["bg-[#046BD9]", "bg-teal-600", "bg-amber-500", "bg-violet-600", "bg-emerald-600"]) {
-      expect(panel).toContain(color);
-    }
-    expect(en.mapsite.pinDashboard.step1Title).toBe("Add PIN");
+    expect(en.mapsite.pinDashboard.step1Title).toBe("Add a pin");
     expect(en.mapsite.pinDashboard.step2Title).toBe("Assign to Mapsite");
-    expect(en.mapsite.pinDashboard.step3Title).toBe("Find and place on the map");
+    expect(en.mapsite.pinDashboard.step3Title).toBe("Find a place on the map");
     expect(en.mapsite.pinDashboard.step4Title).toBe("Name and category");
-    expect(en.mapsite.pinDashboard.step5Title).toBe("Review your PINs");
-    for (const key of ["step1Title", "step2Title", "step3Title", "step4Title", "step5Title", "startOver", "draftRestored"] as const) {
+    expect(en.mapsite.pinDashboard.step5Title).toBe("Review your pins");
+    expect(en.mapsite.pinDashboard.continue).toBe("Continue");
+    expect(en.mapsite.pinDashboard.back).toBe("Back");
+    expect(en.mapsite.pinDashboard.saveAndContinue).toBe("Save & Continue");
+    expect(en.mapsite.pinDashboard.addAnotherPin).toBe("Add another pin");
+    for (const key of [
+      "step1Title",
+      "step2Title",
+      "step3Title",
+      "step4Title",
+      "step5Title",
+      "startOver",
+      "draftRestored",
+      "continue",
+      "back",
+      "saveAndContinue",
+      "addAnotherPin",
+      "viewExistingPins",
+      "flowOf",
+    ] as const) {
       expect(de.mapsite.pinDashboard[key]).toBeTruthy();
     }
   });
 
-  it("keeps search in the place step, coordinates behind Advanced, and buying PINs in CAD", () => {
-    expect(panel.indexOf("<MapSitePlaceSearch")).toBeGreaterThan(panel.indexOf("step={3}"));
-    expect(panel.indexOf("<MapSitePlaceSearch")).toBeLessThan(panel.indexOf("step={4}"));
+  it("shows only the active screen and keeps Assign, search, review, and CAD checkout", () => {
+    const add = panel.indexOf('data-testid="pin-step-1"');
+    const assign = panel.indexOf('data-testid="pin-assign-to-mapsite"');
+    const place = panel.indexOf('data-testid="pin-step-3"');
+    const name = panel.indexOf('data-testid="pin-step-4"');
+    const review = panel.indexOf('data-testid="pin-step-5"');
+    expect(add).toBeGreaterThan(0);
+    expect(assign).toBeGreaterThan(add);
+    expect(assign).toBeLessThan(place);
+    expect(panel.indexOf("<MapSitePlaceSearch")).toBeGreaterThan(place);
+    expect(panel.indexOf("<MapSitePlaceSearch")).toBeLessThan(name);
+    expect(name).toBeGreaterThan(place);
+    expect(review).toBeGreaterThan(name);
     expect(panel).toMatch(/<details[\s\S]*d\.advancedCoords[\s\S]*d\.placeAtCoords[\s\S]*<\/details>/);
     expect(panel).toContain('id="additional-pins"');
     expect(panel).toContain('product="listpin"');
+    expect(panel).toContain("dashboard.remainingToPlace <= 0 ? morePinsSection");
+    expect(panel).toContain('data-testid="pin-flow-view-existing"');
+    expect(panel).toContain("setFlowScreen(4)");
+    expect(panel).toContain("goAddAnotherPin");
+    expect(panel).not.toContain("MapSiteListingLinksEditor");
+    expect(panel).not.toContain("MapSiteBrandingEditor");
+    expect(panel).not.toContain("Edit My Home Page");
+    expect(panel).toContain("flowScreen === 2");
+    expect(panel).toContain("setFlowScreen(3)");
   });
 
   it("persists the in-progress draft per Mapsite and clears it on save or Start over", () => {

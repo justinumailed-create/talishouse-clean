@@ -152,14 +152,15 @@ describe("Broker Mapsite displays assigned PINs", () => {
 describe("Assign to Mapsite field in the Add Pin flow", () => {
   const panel = read("components/talispros/mapsite/MapSitePinDashboard.tsx");
 
-  it("is step 2, right after Add PIN, for every account level", () => {
-    const add = panel.indexOf("title={d.step1Title}");
+  it("sits on the Add a pin screen, for every account level", () => {
+    const add = panel.indexOf('data-testid="pin-step-1"');
     const assign = panel.indexOf('data-testid="pin-assign-to-mapsite"');
-    const place = panel.indexOf("title={d.step3Title}");
+    const place = panel.indexOf('data-testid="pin-step-3"');
     expect(add).toBeGreaterThan(0);
     expect(assign).toBeGreaterThan(add);
     expect(assign).toBeLessThan(place);
-    expect(panel).toContain("step={2}\n          title={d.step2Title}");
+    expect(panel).toContain("{d.step2Title}");
+    expect(panel).toContain("flowScreen === 1");
     // Rendered unconditionally: no account-level guard around the field.
     expect(panel).not.toMatch(/accountLevel === "[a-z]+" \?\s*\(\s*<label[^>]*pin-assign-to-mapsite/);
     expect(panel).toContain("PIN_ASSIGNMENT_RULES[accountLevel]");
@@ -171,6 +172,9 @@ describe("Assign to Mapsite field in the Add Pin flow", () => {
     expect(panel).toContain("assignRule.required ? d.assignRequired : d.assignOptional");
     expect(panel).toContain('data-testid="pin-assign-needed"');
     expect(panel).toContain("const placementReady = assignCheck.ok;");
+    expect(panel).toContain("continueDisabled={!placementReady || dashboard.remainingToPlace <= 0}");
+    expect(panel).toContain("const placing = !paused && placementReady && flowScreen === 2");
+
     expect(en.mapsite.pinDashboard.assignRequired).toBe("Required");
     expect(en.mapsite.pinDashboard.assignOptional).toBe("Optional");
     for (const key of ["assignHelpBroker", "assignHelpFsbo", "assignHelpAdpro", "assignHelpAgent"] as const) {
