@@ -10,6 +10,7 @@ import {
 } from "@/lib/talispros/mapsite-listing-media";
 import {
   MAPSITE_PIN_TIP_CLEARANCE_PX,
+  MAPSITE_POPUP_TIP_HEIGHT_PX,
 } from "@/lib/talispros/mapsite-overlay-layout";
 import { ROUTES } from "@/lib/routes";
 import { useT } from "@/lib/i18n/client";
@@ -97,7 +98,7 @@ function ResourceButton({
     "inline-flex min-h-9 w-full items-center justify-center whitespace-nowrap rounded-full px-1.5 text-center text-[11px] font-semibold sm:min-h-10 sm:px-2 sm:text-[13px]",
     disabled
       ? "cursor-not-allowed bg-neutral-300 text-neutral-500 shadow-none"
-      : "bg-[#046BD9] text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)]",
+      : "bg-[#046BD9] text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] transition hover:bg-[#0558b3]",
   ].join(" ");
 
   if (disabled) {
@@ -185,8 +186,9 @@ interface MapSitePropertyPopupProps {
 }
 
 /**
- * Floating listing card. Top + height match the FAST Code card on wide screens;
- * on compact screens it sits below the left stack with the tip above the pin.
+ * Floating listing card shrink-wraps the title and 2x2 action buttons, with
+ * its tip sitting directly above the map pin — the same compact flag treatment
+ * as the /mapsites demo PIN card, minus the photo and write-up.
  */
 export default function MapSitePropertyPopup({
   mapsite,
@@ -245,22 +247,25 @@ export default function MapSitePropertyPopup({
         role="dialog"
         aria-label={popupTitle}
         data-testid="mapsite-pin-card"
-        className={`pointer-events-none absolute z-30 ${widthPx ? "" : MAPSITE_LISTING_CARD_WIDTH_CLASS} -translate-x-1/2`}
+        data-pin-flag
+        className={`pointer-events-none absolute z-30 ${widthPx ? "" : MAPSITE_LISTING_CARD_WIDTH_CLASS} -translate-x-1/2${cardHeight ? " -translate-y-full" : ""}`}
         style={{
           width: widthPx,
           left: centerX == null ? "50%" : centerX,
           ...(cardHeight
-            ? { top: alignTop }
+            ? {
+                // Anchor the shrink-wrapped card by its tip: the pin is already
+                // placed under alignTop + cardHeight + tip, so sit the tip there
+                // instead of stretching a frosted void down to the marker.
+                top: alignTop + cardHeight + MAPSITE_POPUP_TIP_HEIGHT_PX,
+              }
             : {
                 top: "auto",
                 bottom: `calc(50% + ${MAPSITE_PIN_TIP_CLEARANCE_PX}px)`,
               }),
         }}
       >
-        <div
-          className="mapsite-popup-card pointer-events-auto flex flex-col overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm"
-          style={cardHeight ? { height: cardHeight } : undefined}
-        >
+        <div className="mapsite-popup-card pointer-events-auto flex flex-col overflow-hidden rounded-2xl bg-white/75 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-black/5 backdrop-blur-sm">
           {useGenericCard ? (
           <div
             className={`mapsite-popup-hero relative w-full shrink-0 bg-neutral-200/80 ${
@@ -298,7 +303,7 @@ export default function MapSitePropertyPopup({
           </div>
           ) : null}
 
-          <div className="flex flex-col bg-gradient-to-b from-white/65 to-white/75 px-4 pb-3 pt-1.5">
+          <div className="flex flex-col bg-gradient-to-b from-white/70 to-white/80 px-3.5 pb-3 pt-2">
             <div className="relative shrink-0 pr-10">
               <h2
                 className="m-0 text-[15px] font-semibold leading-tight tracking-tight text-black"
@@ -339,7 +344,7 @@ export default function MapSitePropertyPopup({
             ) : null}
 
             {!useGenericCard && showResourceButtons ? (
-              <div className="mt-2 flex shrink-0 flex-col gap-2">
+              <div className="mt-2.5 flex shrink-0 flex-col gap-2">
                 {showPendingActions && !tebHref ? (
                   <p className="text-[12px] leading-snug text-neutral-600">
                     {p.tebPreparing}

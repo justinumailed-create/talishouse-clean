@@ -99,7 +99,9 @@ describe("PIN action explainers", () => {
     const demo = read("components/talispros/demo-mapsite/DemoHeroMap.tsx");
     const popup = read("components/talispros/mapsite/MapSitePropertyPopup.tsx");
     expect(demo).toContain("PinActionExplainer");
+    expect(demo).toContain("data-pin-flag");
     expect(popup).toContain("PinActionExplainer");
+    expect(popup).toContain("data-pin-flag");
     const explainer = read("components/talispros/mapsite/PinActionExplainer.tsx");
     expect(explainer).toContain("createPortal");
     expect(explainer).toContain('zIndex: 80');

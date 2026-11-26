@@ -91,5 +91,14 @@ describe("published Mapsite shell", () => {
     expect(popup).toContain("{popupTitle}");
     expect(popup).not.toContain("popupWriteup");
     expect(popup).toContain("useGenericCard ? genericHeroImage : null");
+    // Shrink-wrap the flag above the pin; do not stretch a frosted gap to a fixed height.
+    expect(popup).not.toContain("height: cardHeight");
+    expect(popup).toContain("data-pin-flag");
+    expect(popup).toContain("-translate-y-full");
+    expect(popup).toContain("alignTop + cardHeight + MAPSITE_POPUP_TIP_HEIGHT_PX");
+    // Match /mapsites (DemoHeroMap) button hover and inner spacing.
+    expect(popup).toContain("transition hover:bg-[#0558b3]");
+    expect(popup).toContain("px-3.5 pb-3 pt-2");
+    expect(popup).toContain("mt-2.5");
   });
 });
