@@ -93,9 +93,13 @@ import {
 } from "@/lib/talispros/mapsite-owner-customizations";
 import { resolvePinListingUrl } from "@/lib/talispros/mapsite-url-gate";
 import MapSiteOwnerDashboard, {
-  isMapSiteDashboardSectionId,
   type MapSiteDashboardSectionId,
 } from "@/components/talispros/mapsite/MapSiteOwnerDashboard";
+import { resolveMapSiteDashboardSection } from "@/lib/talispros/mapsite-dashboard-tabs";
+import MapSiteOwnerLogoutButton from "@/components/talispros/mapsite/MapSiteOwnerLogoutButton";
+import { clearFormDraft, formDraftKey } from "@/lib/talispros/form-drafts";
+import { MAPSITE_LINKS_DRAFT_SCOPE } from "@/components/talispros/mapsite/MapSiteListingLinksEditor";
+import { MAPSITE_PIN_DRAFT_SCOPE } from "@/components/talispros/mapsite/MapSitePinDashboard";
 import MapSiteListingLinksEditor from "@/components/talispros/mapsite/MapSiteListingLinksEditor";
 import { mapsiteAgencyLogoUrl } from "@/lib/talispros/mapsite-listing-media";
 import { useLocale } from "@/lib/i18n/client";
@@ -994,8 +998,10 @@ function MapSiteChrome({
   }, []);
 
   const openDashboardSection = useCallback(
-    (section: MapSiteDashboardSectionId, options?: { replace?: boolean }) => {
+    (requested: MapSiteDashboardSectionId, options?: { replace?: boolean }) => {
       if (!dashboardManageable) return;
+      // Hidden tools (until the first 20 subscribers) fall back to the PIN Dashboard.
+      const section = resolveMapSiteDashboardSection(requested);
       setSelectedPinId(null);
       setDashboardPanel((current) => {
         if (!options?.replace && current && current !== section) {
@@ -1034,6 +1040,23 @@ function MapSiteChrome({
     });
   }, [onPinEditorChange, syncDashboardQuery]);
 
+  // Restore to previous: drop unsaved drafts for this Mapsite and remount the tools.
+  const restoreDashboard = useCallback(() => {
+    const draftId = mapsite.id || mapsite.fast_code;
+    clearFormDraft(formDraftKey(MAPSITE_PIN_DRAFT_SCOPE, draftId));
+    clearFormDraft(formDraftKey(MAPSITE_LINKS_DRAFT_SCOPE, draftId));
+    setDashboardRestoreKey((key) => key + 1);
+  }, [mapsite.id, mapsite.fast_code]);
+
+  // Owners can sign out right away to switch codes (e.g. DC 06 to RM 22)
+  // instead of waiting for the idle auto-logout.
+  const ownerLogout = isOwner ? (
+    <MapSiteOwnerLogoutButton
+      fastCode={mapsite.fast_code}
+      accountType={accountTypeSegment}
+    />
+  ) : null;
+
   useEffect(() => {
     if (!pinCheckoutStatus || !dashboardManageable) return;
     openDashboardSection("pins", { replace: true });
@@ -1049,11 +1072,8 @@ function MapSiteChrome({
     if (!dashboardManageable) return;
     const requested = new URLSearchParams(window.location.search).get("dashboard");
     if (!requested) return;
-    if (requested === "1" || requested === "true") {
-      setDashboardPanel("pins");
-      return;
-    }
-    if (isMapSiteDashboardSectionId(requested)) setDashboardPanel(requested);
+    // Resume the section this tab was on; hidden or unknown sections open the PIN Dashboard.
+    setDashboardPanel(resolveMapSiteDashboardSection(requested));
   }, [dashboardManageable]);
 
   useEffect(() => {
@@ -1264,15 +1284,7 @@ function MapSiteChrome({
           owner={personalHomeNav.owner ?? null}
           active="mapsite"
           variant="full"
-          dashboard={
-            canManageDashboard
-              ? {
-                  unlocked: dashboardUnlocked,
-                  onOpen: openOwnerDashboard,
-                  active: dashboardOpen,
-                }
-              : null
-          }
+          logout={ownerLogout}
         />
       ) : null}
       {isOwner ? (
@@ -1337,6 +1349,9 @@ function MapSiteChrome({
                   categoryEmpty={Boolean(categoryFilter) && visiblePins.length === 0}
                   isOwner={isOwner}
                   accountTypeSegment={accountTypeSegment}
+                  onAddPin={canManageDashboard ? openOwnerDashboard : undefined}
+                  addPinLocked={canManageDashboard ? !dashboardManageable : false}
+                  footerActions={!personalHomeNav ? ownerLogout : null}
                 />
                 </>
               ) : null
@@ -1379,8 +1394,9 @@ function MapSiteChrome({
             onSection={(next) => openDashboardSection(next)}
             onBack={backDashboard}
             onClose={closeDashboardPanel}
-            onRestore={() => setDashboardRestoreKey((key) => key + 1)}
+            onRestore={restoreDashboard}
             showMap={dashboardPanel === "pins"}
+            headerActions={ownerLogout}
           >
             {dashboardPanel === "pins" ? (
               <MapSitePinDashboard

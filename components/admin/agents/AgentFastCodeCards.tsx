@@ -85,10 +85,10 @@ function Card({ card, locale, readOnly }: { card: AgentFastCodeCard; locale: "en
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        <a href={card.mapsiteHref} target="_blank" rel="noreferrer" className="rounded-lg bg-[#1E4ED8] px-3 py-1.5 text-xs font-semibold text-white">
+        <a href={card.mapsiteHref} data-testid="associate-open-mapsite" className="rounded-lg bg-[#1E4ED8] px-3 py-1.5 text-xs font-semibold text-white">
           {t.openMapsite}
         </a>
-        <a href={card.tebHref} target="_blank" rel="noreferrer" className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-50">
+        <a href={card.tebHref} className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-semibold text-neutral-800 hover:bg-neutral-50">
           {t.openTeb}
         </a>
       </div>

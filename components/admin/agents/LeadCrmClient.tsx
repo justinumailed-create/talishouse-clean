@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type ChangeEvent } from "react";
+import { useEffect, useRef, useState, useTransition, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { saveCheckpointCommentAction, saveLeadAction, saveStepAction } from "@/app/admin/agent/flow-actions";
 import { LEAD_POSITIONS } from "@/lib/crm-leads/model";
@@ -8,6 +8,8 @@ import { CHECKPOINT_LABEL, type FlowLocale, type FlowUi } from "@/lib/talispros/
 import type { CheckpointKey } from "@/lib/talispros/call-flow";
 import type { LeadBundle } from "@/lib/talispros/call-flow-server";
 import { FAST_CODE_STAGE_LABELS } from "@/lib/talispros/fast-code-tracker";
+import { clearFormDraft, formDraftKey, readFormDraft, writeFormDraft } from "@/lib/talispros/form-drafts";
+import { ASSOCIATE_LEAD_DRAFT_SCOPE, leadDraftChanges, mergeLeadDraft } from "@/lib/talispros/lead-form-draft";
 import DisqualifyBrokerageControl from "./DisqualifyBrokerageControl";
 import { fieldClass, primaryButton, secondaryButton, textareaClass } from "./ui";
 
@@ -33,15 +35,48 @@ export default function LeadCrmClient({ bundle, ui, locale }: { bundle: LeadBund
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
   const [lead, setLead] = useState(bundle.lead);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const draftKey = formDraftKey(ASSOCIATE_LEAD_DRAFT_SCOPE, bundle.fastCode);
+  const draftLoadedRef = useRef(false);
   const set = (key: keyof typeof lead) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setLead((current) => ({ ...current, [key]: event.target.value }));
+
+  // Resume unsaved lead edits for this FAST Code after the page loads (e.g.
+  // after opening the Mapsite in the same tab and coming back).
+  useEffect(() => {
+    if (draftLoadedRef.current) return;
+    draftLoadedRef.current = true;
+    if (!bundle.canEdit) return;
+    const draft = readFormDraft(draftKey);
+    if (!draft) return;
+    const merged = mergeLeadDraft(bundle.lead, draft);
+    if (Object.keys(leadDraftChanges(bundle.lead, merged)).length === 0) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time restore from localStorage after hydration
+    setLead(merged);
+    setDraftRestored(true);
+  }, [bundle.canEdit, bundle.lead, draftKey]);
+
+  useEffect(() => {
+    if (!draftLoadedRef.current || !bundle.canEdit) return;
+    writeFormDraft(draftKey, leadDraftChanges(bundle.lead, lead));
+  }, [bundle.canEdit, bundle.lead, draftKey, lead]);
+
+  const discardDraft = () => {
+    clearFormDraft(draftKey);
+    setLead(bundle.lead);
+    setDraftRestored(false);
+  };
 
   const saveLead = () => {
     setMsg(null);
     start(async () => {
       const res = await saveLeadAction({ code: bundle.fastCode, ...lead });
       setMsg(res.ok ? ui.saved : ui.failed);
-      if (res.ok) router.refresh();
+      if (res.ok) {
+        clearFormDraft(draftKey);
+        setDraftRestored(false);
+        router.refresh();
+      }
     });
   };
 
@@ -69,10 +104,11 @@ export default function LeadCrmClient({ bundle, ui, locale }: { bundle: LeadBund
           <DisqualifyBrokerageControl locale={locale} fastCode={bundle.fastCode} />
         ) : null}
         <div className="mt-4 flex flex-wrap gap-2">
-          <a href={bundle.mapsiteHref} target="_blank" rel="noreferrer" className={primaryButton}>
+          {/* Same tab, never a popup window: unsaved lead edits are kept as a draft. */}
+          <a href={bundle.mapsiteHref} data-testid="associate-open-mapsite" className={primaryButton}>
             {ui.mapsite}
           </a>
-          <a href={bundle.tebHref} target="_blank" rel="noreferrer" className={secondaryButton}>
+          <a href={bundle.tebHref} className={secondaryButton}>
             {ui.teb}
           </a>
           <a href={bundle.registerUrl} target="_blank" rel="noreferrer" className={secondaryButton}>
@@ -83,12 +119,20 @@ export default function LeadCrmClient({ bundle, ui, locale }: { bundle: LeadBund
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <form
-          className="space-y-3 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5"
+          className="space-y-3 rounded-2xl border border-neutral-200 border-t-4 border-t-[#1E4ED8] bg-white p-4 sm:p-5"
           onSubmit={(event) => {
             event.preventDefault();
             if (bundle.canEdit) saveLead();
           }}
         >
+          {draftRestored ? (
+            <div className="flex items-center justify-between gap-2 rounded-xl bg-sky-50 px-3 py-2 text-[13px] text-sky-900" data-testid="lead-draft-restored">
+              <span>{locale === "de" ? "Ihre ungespeicherten Änderungen sind wieder da." : "Your unsaved changes are back."}</span>
+              <button type="button" onClick={discardDraft} className="shrink-0 font-semibold underline underline-offset-2">
+                {locale === "de" ? "Verwerfen" : "Discard"}
+              </button>
+            </div>
+          ) : null}
           <Field label={ui.brokerage} value={lead.brokerageName} onChange={set("brokerageName")} disabled={!bundle.canEdit} />
           <Field label={ui.decision} value={lead.decisionMakerName} onChange={set("decisionMakerName")} disabled={!bundle.canEdit} />
           <label className="block text-[13px] font-medium text-neutral-700">

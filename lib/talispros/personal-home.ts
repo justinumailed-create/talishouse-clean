@@ -279,8 +279,25 @@ export function normalizePersonalHomeHref(value: unknown): string | null {
   }
 }
 
+/** Our own hosts: links here stay in the same tab (no stray new windows). */
+export const PERSONAL_HOME_SAME_SITE_HOSTS: ReadonlyArray<string> = [
+  "tsplits.com",
+  "www.tsplits.com",
+];
+
+/**
+ * Only links to other websites open in a new tab. Tsplits™ links (Open
+ * Mapsite, a PIN, the TEB™) navigate in place, so an associate working many
+ * listings does not end up with a window per listing (Ralf, Nov 26).
+ */
 export function isExternalPersonalHomeHref(href: string): boolean {
-  return /^https?:\/\//i.test(href);
+  if (!/^https?:\/\//i.test(href)) return false;
+  try {
+    const host = new URL(href).hostname.toLowerCase();
+    return !PERSONAL_HOME_SAME_SITE_HOSTS.includes(host);
+  } catch {
+    return true;
+  }
 }
 
 function readOpenKind(value: unknown): PersonalHomeOpenKind {

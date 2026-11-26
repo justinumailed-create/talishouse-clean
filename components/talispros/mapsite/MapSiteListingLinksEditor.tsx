@@ -1,9 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { saveMapSiteListingLinksAction } from "@/app/talispros/mapsite/dashboard-actions";
 import { useT } from "@/lib/i18n/client";
+import {
+  clearFormDraft,
+  draftString,
+  formDraftKey,
+  readFormDraft,
+  writeFormDraft,
+} from "@/lib/talispros/form-drafts";
+import { isMapSiteDashboardSectionVisible } from "@/lib/talispros/mapsite-dashboard-tabs";
 import { DashboardNotice } from "./MapSiteDashboardPanel";
+
+/** localStorage scope for an unsaved listing URL, keyed per Mapsite. */
+export const MAPSITE_LINKS_DRAFT_SCOPE = "mapsite-links";
 
 type MapSiteListingLinksEditorProps = {
   mapsiteId: string;
@@ -22,7 +33,20 @@ export default function MapSiteListingLinksEditor({
   onSaved,
 }: MapSiteListingLinksEditorProps) {
   const copy = useT().mapsite.dashboardPage;
-  const [listingUrl, setListingUrl] = useState(initialListingUrl ?? "");
+  const draftKey = formDraftKey(MAPSITE_LINKS_DRAFT_SCOPE, mapsiteId || fastCode);
+  const savedUrl = initialListingUrl ?? "";
+  // Resume an unsaved URL typed in this or another tab.
+  const [listingUrl, setListingUrl] = useState(() => {
+    const draft = readFormDraft<{ listingUrl: string }>(draftKey);
+    return draft ? draftString(draft.listingUrl, savedUrl) : savedUrl;
+  });
+  const showEbook = isMapSiteDashboardSectionVisible("ebooks");
+  const showBookshelf = isMapSiteDashboardSectionVisible("bookshelf");
+
+  useEffect(() => {
+    if (listingUrl === savedUrl) clearFormDraft(draftKey);
+    else writeFormDraft(draftKey, { listingUrl });
+  }, [draftKey, listingUrl, savedUrl]);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -40,6 +64,7 @@ export default function MapSiteListingLinksEditor({
         setError(result.error);
         return;
       }
+      clearFormDraft(draftKey);
       setListingUrl(result.listingUrl ?? "");
       onSaved?.(result.listingUrl);
       setMessage(copy.linksSaved);
@@ -75,7 +100,9 @@ export default function MapSiteListingLinksEditor({
       >
         {pending ? copy.saving : copy.saveLinks}
       </button>
+      {showEbook || showBookshelf ? (
       <div className="flex flex-wrap gap-2 border-t border-neutral-200 pt-4">
+        {showEbook ? (
         <button
           type="button"
           onClick={() => onOpenSection("ebooks")}
@@ -83,6 +110,8 @@ export default function MapSiteListingLinksEditor({
         >
           {copy.openEbook}
         </button>
+        ) : null}
+        {showBookshelf ? (
         <button
           type="button"
           onClick={() => onOpenSection("bookshelf")}
@@ -90,7 +119,9 @@ export default function MapSiteListingLinksEditor({
         >
           {copy.openBookshelf}
         </button>
+        ) : null}
       </div>
+      ) : null}
     </div>
   );
 }

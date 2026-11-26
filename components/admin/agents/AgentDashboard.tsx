@@ -7,9 +7,41 @@ import { flowUi } from "@/lib/talispros/call-flow-copy";
 import { loadAgentBoard, loadAgentStats, loadLeaderboard, loadReviewBoard } from "@/lib/talispros/call-flow-server";
 import { AssignedMapsites, Leaderboard } from "./CallFlowPanels";
 import AgentWorkPanel from "./AgentWorkPanel";
+import AssociateLogoutButton from "./AssociateLogoutButton";
 import CashPaymentsTable from "./CashPaymentsTable";
 
 const card = "rounded-2xl border border-neutral-200 bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]";
+
+/**
+ * Associate Dashboard "Start here" steps: one color per step so a new
+ * associate (e.g. Rishav) sees what to do first, next and last.
+ */
+export const ASSOCIATE_START_STEPS = [
+  {
+    step: 1,
+    href: "#agent-lead-list",
+    accent: "border-[#1E4ED8]/30 bg-[#1E4ED8]/5",
+    badge: "bg-[#1E4ED8] text-white",
+    title: { en: "Call your FAST Codes", de: "FAST Codes anrufen" },
+    text: { en: "Open a card below and follow the call steps.", de: "Öffnen Sie unten eine Karte und folgen Sie den Gesprächsschritten." },
+  },
+  {
+    step: 2,
+    href: "#agent-tasks",
+    accent: "border-amber-300 bg-amber-50",
+    badge: "bg-amber-500 text-white",
+    title: { en: "Do today's tasks", de: "Heutige Aufgaben erledigen" },
+    text: { en: "Manage a Mapsite, add PINs or record a payment.", de: "Mapsite bearbeiten, PINs hinzufügen oder eine Zahlung erfassen." },
+  },
+  {
+    step: 3,
+    href: "#agent-quick-links",
+    accent: "border-emerald-300 bg-emerald-50",
+    badge: "bg-emerald-600 text-white",
+    title: { en: "Log notes and leads", de: "Notizen und Leads erfassen" },
+    text: { en: "Write your daily notes and update the CRM.", de: "Tagesnotizen schreiben und das CRM aktualisieren." },
+  },
+] as const;
 
 function initials(name: string): string {
   return name
@@ -56,7 +88,10 @@ export default async function AgentDashboard({
 
   return (
     <div className="space-y-6">
-      <header className={`${card} flex flex-wrap items-center justify-between gap-4 p-6`}>
+      <header
+        className={`${card} flex flex-wrap items-center justify-between gap-4 border-t-4 border-t-[#1E4ED8] bg-gradient-to-r from-[#1E4ED8]/5 via-white to-white p-6`}
+        data-testid="associate-dashboard-header"
+      >
         <div className="flex items-center gap-4">
           <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1E4ED8] text-base font-semibold text-white">
             {initials(agent.name) || "A"}
@@ -97,8 +132,40 @@ export default async function AgentDashboard({
             <span className={`h-1.5 w-1.5 rounded-full ${active ? "bg-green-600" : "bg-red-600"}`} />
             {active ? ui.active : ui.disabled}
           </span>
+          {readOnly ? null : (
+            <AssociateLogoutButton
+              label={locale === "de" ? "Abmelden" : "Logout"}
+              pendingLabel={locale === "de" ? "Abmelden…" : "Logging out…"}
+            />
+          )}
         </div>
       </header>
+
+      <nav
+        aria-label={locale === "de" ? "So starten Sie" : "Start here"}
+        className="grid gap-3 sm:grid-cols-3"
+        data-testid="associate-start-steps"
+      >
+        {ASSOCIATE_START_STEPS.map((item) => (
+          <a
+            key={item.step}
+            href={item.href}
+            data-testid={`associate-start-step-${item.step}`}
+            className={`flex items-start gap-3 rounded-2xl border-2 p-4 no-underline transition hover:shadow-sm ${item.accent}`}
+          >
+            <span
+              aria-hidden
+              className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${item.badge}`}
+            >
+              {item.step}
+            </span>
+            <span>
+              <span className="block text-[15px] font-semibold text-neutral-900">{item.title[locale]}</span>
+              <span className="mt-0.5 block text-[13px] leading-5 text-neutral-600">{item.text[locale]}</span>
+            </span>
+          </a>
+        ))}
+      </nav>
 
       <div data-testid="agent-dashboard-home" className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
         <AssignedMapsites
@@ -107,12 +174,16 @@ export default async function AgentDashboard({
           locale={locale}
           hrefFor={(code) => `/admin/agent/flow/${code.toLowerCase()}`}
           showDisqualify={!readOnly && !agent.reviewer}
+          step={1}
         />
         <Leaderboard rows={board} ui={ui} />
       </div>
 
-      <div>
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-neutral-500">{ui.tasks}</h2>
+      <div id="agent-tasks" className="scroll-mt-6">
+        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+          <span aria-hidden className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-500 text-xs font-bold text-white">2</span>
+          {ui.tasks}
+        </h2>
         {readOnly ? (
           <p className="mb-3 rounded-xl bg-neutral-100 px-4 py-2 text-sm text-neutral-600">{ui.readOnly}</p>
         ) : null}
@@ -150,7 +221,7 @@ export default async function AgentDashboard({
                       {locale === "de" ? "Bearbeiten" : "Edit"}
                     </Link>
                   ) : (
-                    <span className="shrink-0 text-xs uppercase text-neutral-400">{site.status ?? "—"}</span>
+                    <span className="shrink-0 text-xs uppercase text-neutral-400">{site.status ?? (locale === "de" ? "Nicht gefunden" : "Not found")}</span>
                   )}
                 </li>
               ))}
@@ -168,7 +239,7 @@ export default async function AgentDashboard({
           <CashPaymentsTable payments={payments} />
         </section>
       ) : null}
-      <div className="grid gap-5 sm:grid-cols-2" data-testid="agent-quick-links">
+      <div id="agent-quick-links" className="grid scroll-mt-6 gap-5 sm:grid-cols-2" data-testid="agent-quick-links">
         {[
           { href: "/admin/agent/notes", title: locale === "de" ? "Tagesnotizen" : "Daily notes", text: locale === "de" ? "Heutige Aufgaben und Dokumente." : "Log today’s tasks and upload documents.", badge: 0 },
           ...(canLeads
@@ -191,7 +262,7 @@ export default async function AgentDashboard({
           return readOnly ? (
             <div key={item.href} className={`${card} flex items-center justify-between gap-3 p-5`}>{inner}</div>
           ) : (
-            <Link key={item.href} href={item.href} className={`${card} flex items-center justify-between gap-3 p-5 transition hover:border-[#1E4ED8]/40`}>
+            <Link key={item.href} href={item.href} className={`${card} flex items-center justify-between gap-3 border-l-4 border-l-emerald-500 p-5 transition hover:border-[#1E4ED8]/40`}>
               {inner}
             </Link>
           );

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import LanguageSwitch from "@/components/i18n/LanguageSwitch";
 import TalisBrandMark from "@/components/talisu/TalisBrandMark";
 import { useT } from "@/lib/i18n/client";
@@ -30,6 +31,8 @@ type PersonalHomeNavProps = {
   dashboard?: { unlocked: boolean; onOpen: () => void; active?: boolean } | null;
   /** Talk to us. A WhatsApp (or other) href enables the button; otherwise it is grey. */
   talkHref?: string | null;
+  /** Signed-in owner: Logout button so they can switch codes right away. */
+  logout?: ReactNode;
 };
 
 const LINK =
@@ -44,6 +47,7 @@ export default function PersonalHomeNav({
   owner = null,
   dashboard = null,
   talkHref = null,
+  logout = null,
 }: PersonalHomeNavProps) {
   const { personalHome: t, nav } = useT();
 
@@ -147,6 +151,11 @@ export default function PersonalHomeNav({
             {t.navTalk}
           </span>
         )
+      ) : null}
+      {logout ? (
+        <span className="ml-1 inline-flex items-center" data-testid="personal-home-nav-logout">
+          {logout}
+        </span>
       ) : null}
     </nav>
   );

@@ -50,21 +50,29 @@ export function AssignedMapsites({
   locale,
   hrefFor,
   showDisqualify = false,
+  step,
 }: {
   cards: BoardCard[];
   ui: FlowUi;
   locale: FlowLocale;
   hrefFor: (fastCode: string) => string;
   showDisqualify?: boolean;
+  /** Associate Dashboard "Start here" step number shown before the heading. */
+  step?: number;
 }) {
   return (
-    <section data-testid="agent-lead-list">
-      <h2 className="text-sm font-semibold uppercase tracking-wider text-neutral-500">{ui.assigned}</h2>
+    <section id="agent-lead-list" className="scroll-mt-6" data-testid="agent-lead-list">
+      <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-neutral-500">
+        {step ? (
+          <span aria-hidden className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#1E4ED8] text-xs font-bold text-white">{step}</span>
+        ) : null}
+        {ui.assigned}
+      </h2>
       <p className="mt-1 text-sm text-neutral-500">{ui.assignedHint}</p>
       {cards.length === 0 ? <p className="mt-3 text-sm text-neutral-500">{ui.empty}</p> : null}
       <ol className="mt-4 space-y-3">
         {cards.map((item) => (
-          <li key={item.fastCode} className={`${card} p-4`} data-testid="agent-fast-code-card">
+          <li key={item.fastCode} className={`${card} border-l-4 border-l-[#1E4ED8] p-4`} data-testid="agent-fast-code-card">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-mono text-[12px] font-semibold uppercase tracking-wide text-[#1E4ED8]">{item.fastCode}</p>

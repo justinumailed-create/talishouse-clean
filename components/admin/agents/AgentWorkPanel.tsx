@@ -42,6 +42,14 @@ const ICONS: Record<string, ReactNode> = {
   cash: <path d="M3 7h18v10H3V7Zm9 7.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM6 10v.01M18 14v.01" />,
 };
 
+/** One color per task so the cards are easy to tell apart at a glance. */
+export const TASK_CARD_ACCENTS: Record<keyof typeof ICONS, { border: string; chip: string }> = {
+  map: { border: "border-t-[#1E4ED8]", chip: "bg-[#1E4ED8]/10 text-[#1E4ED8]" },
+  book: { border: "border-t-violet-600", chip: "bg-violet-100 text-violet-700" },
+  pin: { border: "border-t-amber-500", chip: "bg-amber-100 text-amber-700" },
+  cash: { border: "border-t-emerald-600", chip: "bg-emerald-100 text-emerald-700" },
+};
+
 export function TaskCard({
   icon,
   title,
@@ -53,10 +61,14 @@ export function TaskCard({
   description: string;
   children: ReactNode;
 }) {
+  const accent = TASK_CARD_ACCENTS[icon];
   return (
-    <section className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+    <section
+      data-testid={`associate-task-${icon}`}
+      className={`flex flex-col rounded-2xl border border-t-4 border-neutral-200 bg-white p-6 shadow-[0_1px_2px_rgba(16,24,40,0.04)] ${accent.border}`}
+    >
       <div className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1E4ED8]/10 text-[#1E4ED8]">
+        <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${accent.chip}`}>
           <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
             {ICONS[icon]}
           </svg>
@@ -189,7 +201,7 @@ export default function AgentWorkPanel({
       ) : null}
 
       {canPins ? (
-        <TaskCard icon="pin" title="Add PINs to a Mapsite" description="Adds 1–25 free PIN credits (no Stripe). Then place them on the map.">
+        <TaskCard icon="pin" title="Add PINs to a Mapsite" description="Adds 1 to 25 free PIN credits (no Stripe). Then place them on the map.">
           <form onSubmit={onPins} className="space-y-3">
             <div className="grid grid-cols-[1fr_96px] gap-2">
               <div>
@@ -210,7 +222,8 @@ export default function AgentWorkPanel({
                 disabled={readOnly}
                 onClick={(e) => {
                   const code = (e.currentTarget.form?.elements.namedItem("fastCode") as HTMLInputElement | null)?.value || "";
-                  if (code.trim()) window.open(`/mapsite/${slug(code)}`, "_blank", "noopener");
+                  // Same tab, no popup window. Cmd/Ctrl-click a Mapsite link to use a new tab.
+                  if (code.trim()) router.push(`/mapsite/${slug(code)}`);
                 }}
               >
                 Place PINs

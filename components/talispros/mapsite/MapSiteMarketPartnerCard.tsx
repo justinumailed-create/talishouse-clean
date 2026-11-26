@@ -102,6 +102,15 @@ interface MapSiteMarketPartnerCardProps {
   dashboardViewToggle?: ReactNode;
   /** Tree or owner logo. A generated placeholder is already replaced. */
   brandLogoUrl?: string | null;
+  /**
+   * Owner / admin: bottom "Add Pin" button next to Talk to us. Opens the PIN
+   * Dashboard (replaces the old top Dashboard button, Ralf Nov 26).
+   */
+  onAddPin?: () => void;
+  /** Add Pin shows greyed out until the activation payment unlocks the dashboard. */
+  addPinLocked?: boolean;
+  /** Extra actions in the bottom row, e.g. the owner Logout button. */
+  footerActions?: ReactNode;
 }
 
 function CardTools({
@@ -301,6 +310,9 @@ export default function MapSiteMarketPartnerCard({
   categoryEmpty = false,
   dashboardViewToggle = null,
   brandLogoUrl = null,
+  onAddPin,
+  addPinLocked = false,
+  footerActions = null,
 }: MapSiteMarketPartnerCardProps) {
   const t = useT();
   const content = contentForAudience(audience);
@@ -403,6 +415,9 @@ export default function MapSiteMarketPartnerCard({
           align="start"
           hideRole
           className="mt-3"
+          onAddPin={onAddPin}
+          addPinLocked={addPinLocked}
+          extraActions={footerActions}
         />
         {tools}
         {dashboardViewToggle}
@@ -455,6 +470,9 @@ export default function MapSiteMarketPartnerCard({
         <MarketingPartnerInterestLinks
           hideRole
           className="mt-4"
+          onAddPin={onAddPin}
+          addPinLocked={addPinLocked}
+          extraActions={footerActions}
         />
         {tools}
         {dashboardViewToggle}

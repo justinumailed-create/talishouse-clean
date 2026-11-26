@@ -6,19 +6,29 @@ import {
   MAPSITE_DASHBOARD_MENU_ITEMS,
   type MapSiteDashboardPanelId,
 } from "@/lib/talispros/mapsite-owner-customizations";
+import {
+  isMapSiteDashboardSectionVisible,
+  MAPSITE_DASHBOARD_TAB_ACCENTS,
+  type MapSiteDashboardSectionId,
+} from "@/lib/talispros/mapsite-dashboard-tabs";
 import { MapSiteDashboardChrome } from "./MapSiteDashboardChrome";
 
-export type MapSiteDashboardSectionId = MapSiteDashboardPanelId | "links";
+export type { MapSiteDashboardSectionId };
 
+/**
+ * Every dashboard tool, in tab order. Core tools (pins, links, branding) are
+ * always shown; the rest stay hidden until SHOW_ADVANCED_MAPSITE_TABS is on
+ * (see lib/talispros/mapsite-dashboard-tabs.ts). Nothing here is deleted.
+ */
 export const MAPSITE_DASHBOARD_SECTIONS: ReadonlyArray<{
   id: MapSiteDashboardSectionId;
   menuId?: MapSiteDashboardPanelId;
 }> = [
   { id: "pins", menuId: "pins" },
   { id: "links" },
+  { id: "branding", menuId: "branding" },
   { id: "ebooks", menuId: "ebooks" },
   { id: "bookshelf", menuId: "bookshelf" },
-  { id: "branding", menuId: "branding" },
   { id: "categories", menuId: "categories" },
   { id: "partners", menuId: "partners" },
 ];
@@ -30,6 +40,15 @@ export function isMapSiteDashboardSectionId(
   return MAPSITE_DASHBOARD_SECTIONS.some((item) => item.id === value);
 }
 
+/** Tabs the owner can see right now (core tools, plus advanced when enabled). */
+export function visibleMapSiteDashboardTabs(
+  showAdvanced?: boolean,
+): ReadonlyArray<{ id: MapSiteDashboardSectionId; menuId?: MapSiteDashboardPanelId }> {
+  return MAPSITE_DASHBOARD_SECTIONS.filter((item) =>
+    isMapSiteDashboardSectionVisible(item.id, showAdvanced),
+  );
+}
+
 type MapSiteOwnerDashboardProps = {
   fastCode: string;
   section: MapSiteDashboardSectionId;
@@ -39,6 +58,8 @@ type MapSiteOwnerDashboardProps = {
   onRestore: () => void;
   /** Pins section keeps the map visible on the right for place/fix. */
   showMap?: boolean;
+  /** Header actions, e.g. the owner Logout button. */
+  headerActions?: ReactNode;
   children: ReactNode;
 };
 
@@ -54,6 +75,7 @@ export default function MapSiteOwnerDashboard({
   onClose,
   onRestore,
   showMap = false,
+  headerActions = null,
   children,
 }: MapSiteOwnerDashboardProps) {
   const t = useT();
@@ -93,13 +115,20 @@ export default function MapSiteOwnerDashboard({
         aria-modal="true"
         aria-labelledby="mapsite-dashboard-title"
       >
-        <div className="border-b border-neutral-200 px-5 py-4">
-          <h2
-            id="mapsite-dashboard-title"
-            className="m-0! text-[18px] font-semibold text-neutral-950!"
-          >
-            {copy.title}
-          </h2>
+        <div className="border-b border-neutral-200 bg-gradient-to-r from-[#046BD9]/10 via-white to-white px-5 py-4">
+          <div className="flex items-start justify-between gap-3">
+            <h2
+              id="mapsite-dashboard-title"
+              className="m-0! text-[18px] font-semibold text-neutral-950!"
+            >
+              {copy.title}
+            </h2>
+            {headerActions ? (
+              <div className="flex shrink-0 items-center gap-2" data-testid="mapsite-dashboard-header-actions">
+                {headerActions}
+              </div>
+            ) : null}
+          </div>
           <p className="mt-1 text-[13px] leading-snug text-neutral-600">
             {copy.intro}{" "}
             <span className="font-mono text-neutral-500">
@@ -111,7 +140,7 @@ export default function MapSiteOwnerDashboard({
             role="tablist"
             aria-label={copy.title}
           >
-            {MAPSITE_DASHBOARD_SECTIONS.map((item) => {
+            {visibleMapSiteDashboardTabs().map((item, index) => {
               const active = item.id === section;
               return (
                 <button
@@ -121,12 +150,20 @@ export default function MapSiteOwnerDashboard({
                   aria-selected={active}
                   data-testid={`mapsite-dashboard-tab-${item.id}`}
                   onClick={() => onSection(item.id)}
-                  className={`inline-flex min-h-8 items-center rounded-full px-3 text-[12px] font-semibold transition sm:text-[13px] ${
+                  className={`inline-flex min-h-9 items-center gap-1.5 rounded-full px-3 text-[12px] font-semibold transition sm:text-[13px] ${
                     active
-                      ? "bg-[#046BD9] text-white"
+                      ? `${MAPSITE_DASHBOARD_TAB_ACCENTS[item.id]} shadow-sm`
                       : "bg-neutral-100 text-neutral-800 hover:bg-neutral-200"
                   }`}
                 >
+                  <span
+                    aria-hidden
+                    className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
+                      active ? "bg-white/25" : MAPSITE_DASHBOARD_TAB_ACCENTS[item.id]
+                    }`}
+                  >
+                    {index + 1}
+                  </span>
                   {sectionLabel(item.id)}
                 </button>
               );

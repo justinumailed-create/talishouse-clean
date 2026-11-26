@@ -491,7 +491,7 @@ describe("personal home v2: entry points, account pill, logo", () => {
     expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("Tsplits™\n");
   });
 
-  it("puts Home, Mapsite and Dashboard in the main Mapsite nav, without Talk to us or a lower bar", () => {
+  it("puts Home and Mapsite in the main Mapsite nav, with Add Pin at the bottom instead of a top Dashboard", () => {
     const app = read("components/talispros/mapsite/MapSiteApplication.tsx");
     expect(app).toContain('variant="full"');
     expect(app).not.toContain('variant={claimed ? "sub" : "full"}');
@@ -499,6 +499,7 @@ describe("personal home v2: entry points, account pill, logo", () => {
     expect(app).not.toContain("talkHref=");
     expect(app).not.toContain("personal-home-subnav");
     expect(app).toContain("MapSiteOwnerDashboard");
+    expect(app).toContain("onAddPin={canManageDashboard ? openOwnerDashboard : undefined}");
     const nav = read("components/talispros/personal-home/PersonalHomeNav.tsx");
     expect(nav).toContain('data-testid="personal-home-nav-dashboard"');
     const card = read("components/talispros/mapsite/MarketingPartnerInterestLinks.tsx");
