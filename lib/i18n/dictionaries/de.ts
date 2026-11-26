@@ -941,7 +941,7 @@ export const de: Dictionary = {
       url: "Ein Link zu einer externen Quelle für diesen PIN, etwa eine Website oder Angebotsseite.",
       teb: "Digitale Lead-Magneten, die Interessenten anziehen und sich in umkämpften Märkten abheben.",
       tva: "Eine Remote-Besichtigung: bis zu zehn Räume/Szenen mit Ihnen als Erzähler des Rundgangs.",
-      ttv: "Hauseigenes Online-TV - Infomercials zu Angeboten, Green Screen, Sie als Host oder Co-Host.",
+      ttv: "Hauseigenes Online-TV - Infomercials und Green-Screen-Technologie, Sie sind der Host oder Co-Host.",
       learnMore: "Mehr erfahren",
       learnMoreHref: "/talisu?essay=tokenization",
     },

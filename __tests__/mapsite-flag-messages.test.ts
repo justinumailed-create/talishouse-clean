@@ -31,7 +31,7 @@ describe("Mapsite Flag messages", () => {
       "A remote showing: up to ten rooms/scenes with you narrating a virtual walk-through.",
     );
     expect(en.mapsite.pinActions.ttv).toBe(
-      "In-house online TV - Infomercials about Listings, green screen, you as host or co-host.",
+      "In-house online TV - Infomercials, green screen technology, you are the host or co-host.",
     );
   });
 

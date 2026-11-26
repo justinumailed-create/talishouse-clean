@@ -17,7 +17,7 @@ export const RALF_FLAG_MESSAGES = {
   url: "A link to an outside resource for this PIN, such as a website or listing page.",
   teb: "Digital lead magnets that attract prospects and differentiate in competitive markets.",
   tva: "A remote showing: up to ten rooms/scenes with you narrating a virtual walk-through.",
-  ttv: "In-house online TV - Infomercials about Listings, green screen, you as host or co-host.",
+  ttv: "In-house online TV - Infomercials, green screen technology, you are the host or co-host.",
 } as const;
 
 export function countWrappedLines(
