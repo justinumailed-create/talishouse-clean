@@ -117,22 +117,30 @@ describe("Bottom Add Pin replaces the top Dashboard button", () => {
 });
 
 describe("Mapsite Logout", () => {
-  it("shows a Logout button in the navbar and dashboard header for owners", () => {
+  it("shows a single icon-only Logout control in the navbar, not in the dashboard header", () => {
     const app = read("components/talispros/mapsite/MapSiteApplication.tsx");
     expect(app).toContain("const ownerLogout = isOwner ? (");
     expect(app).toContain("<MapSiteOwnerLogoutButton");
-    expect(app).toContain("headerActions={ownerLogout}");
-    expect(app).toContain("footerActions={!personalHomeNav ? ownerLogout : null}");
+    expect(app).toContain("logout={ownerLogout}");
+    expect(app).not.toContain("headerActions={ownerLogout}");
+    expect(app).toContain("footerActions={!personalHomeNav ? ownerLogoutOnLight : null}");
     const nav = read("components/talispros/personal-home/PersonalHomeNav.tsx");
     expect(nav).toContain('data-testid="personal-home-nav-logout"');
     const dash = read("components/talispros/mapsite/MapSiteOwnerDashboard.tsx");
-    expect(dash).toContain('data-testid="mapsite-dashboard-header-actions"');
+    expect(dash).not.toContain('data-testid="mapsite-dashboard-header-actions"');
+    expect(dash).not.toContain("headerActions");
   });
 
-  it("wires the button to the existing owner logout action", () => {
+  it("wires the button to the existing owner logout action as an icon-only control", () => {
     const button = read("components/talispros/mapsite/MapSiteOwnerLogoutButton.tsx");
     expect(button).toContain("logoutMapSiteOwnerSession");
     expect(button).toContain("window.location.assign(result.href)");
+    expect(button).toContain("aria-label={label}");
+    expect(button).toContain("title={label}");
+    expect(button).toContain("hover:bg-white/15");
+    expect(button).not.toContain("bg-red-600");
+    expect(button).not.toContain("hover:bg-red-700");
+    expect(button).not.toContain("{isPending ? t.mapsite.loggingOut : t.mapsite.logout}");
     expect(en.mapsite.logout).toBe("Logout");
   });
 });

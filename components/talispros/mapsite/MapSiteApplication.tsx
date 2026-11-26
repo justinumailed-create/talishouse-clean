@@ -1058,6 +1058,13 @@ function MapSiteChrome({
       accountType={accountTypeSegment}
     />
   ) : null;
+  const ownerLogoutOnLight = isOwner ? (
+    <MapSiteOwnerLogoutButton
+      variant="light"
+      fastCode={mapsite.fast_code}
+      accountType={accountTypeSegment}
+    />
+  ) : null;
 
   useEffect(() => {
     if (!pinCheckoutStatus || !dashboardManageable) return;
@@ -1353,7 +1360,7 @@ function MapSiteChrome({
                   accountTypeSegment={accountTypeSegment}
                   onAddPin={canManageDashboard ? openOwnerDashboard : undefined}
                   addPinLocked={canManageDashboard ? !dashboardManageable : false}
-                  footerActions={!personalHomeNav ? ownerLogout : null}
+                  footerActions={!personalHomeNav ? ownerLogoutOnLight : null}
                 />
                 </>
               ) : null
@@ -1398,7 +1405,6 @@ function MapSiteChrome({
             onClose={closeDashboardPanel}
             onRestore={restoreDashboard}
             showMap={dashboardPanel === "pins"}
-            headerActions={ownerLogout}
           >
             {dashboardPanel === "pins" ? (
               <MapSitePinDashboard

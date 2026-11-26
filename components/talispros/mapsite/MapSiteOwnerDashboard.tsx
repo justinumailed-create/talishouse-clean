@@ -58,8 +58,6 @@ type MapSiteOwnerDashboardProps = {
   onRestore: () => void;
   /** Pins section keeps the map visible on the right for place/fix. */
   showMap?: boolean;
-  /** Header actions, e.g. the owner Logout button. */
-  headerActions?: ReactNode;
   children: ReactNode;
 };
 
@@ -75,7 +73,6 @@ export default function MapSiteOwnerDashboard({
   onClose,
   onRestore,
   showMap = false,
-  headerActions = null,
   children,
 }: MapSiteOwnerDashboardProps) {
   const t = useT();
@@ -116,19 +113,12 @@ export default function MapSiteOwnerDashboard({
         aria-labelledby="mapsite-dashboard-title"
       >
         <div className="border-b border-neutral-200 bg-gradient-to-r from-[#046BD9]/10 via-white to-white px-5 py-4">
-          <div className="flex items-start justify-between gap-3">
-            <h2
-              id="mapsite-dashboard-title"
-              className="m-0! text-[18px] font-semibold text-neutral-950!"
-            >
-              {copy.title}
-            </h2>
-            {headerActions ? (
-              <div className="flex shrink-0 items-center gap-2" data-testid="mapsite-dashboard-header-actions">
-                {headerActions}
-              </div>
-            ) : null}
-          </div>
+          <h2
+            id="mapsite-dashboard-title"
+            className="m-0! text-[18px] font-semibold text-neutral-950!"
+          >
+            {copy.title}
+          </h2>
           <p className="mt-1 text-[13px] leading-snug text-neutral-600">
             {copy.intro}{" "}
             <span className="font-mono text-neutral-500">
