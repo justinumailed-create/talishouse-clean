@@ -573,12 +573,12 @@ export const en = {
       fastCodeLabel: "FAST Code: {code}",
       pinnedLocation: "Pinned location",
     },
-    /** Hover / focus / tap explainers on PIN card actions (URL 1, URL 2, TEB™, TTV™). */
+    /** Hover / focus / tap explainers on PIN card actions (URL, TEB™, TVA™, TTV™). */
     pinActions: {
-      url: "A link the owner adds to this PIN, such as their website or a listing page.",
-      // TEB™ meaning, TalisU FAQ (“What is the meaning of PMC?”), with the mark used on the button.
-      teb: "TEB™: Talis EBooks™ are digital lead magnets and authority-building tools that attract clients and help you stand out in competitive markets.",
-      ttv: "TTV™: TalisTV™ sets up promotions for your In-House Online TV Station that allows for scheduled advertising producing measurable results.",
+      url: "A link to an outside resource for this PIN, such as a website or listing page.",
+      teb: "Digital lead magnets that attract prospects and differentiate in competitive markets.",
+      tva: "A remote showing: up to ten rooms/scenes with you narrating a virtual walk-through.",
+      ttv: "In-house online TV - Infomercials about Listings, green screen, you as host or co-host.",
       learnMore: "Learn more",
       learnMoreHref: "/talisu?essay=tokenization",
     },

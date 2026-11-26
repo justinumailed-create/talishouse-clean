@@ -1,20 +1,22 @@
 "use client";
 
-import Link from "next/link";
 import {
   useEffect,
   useId,
   useRef,
   useState,
   type FocusEvent,
-  type KeyboardEvent as ReactKeyboardEvent,
   type MouseEvent,
   type ReactElement,
 } from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/lib/i18n/client";
+import {
+  FLAG_MESSAGE_POPOVER_WIDTH_CLASS,
+  FLAG_MESSAGE_TEXT_CLASS,
+} from "@/lib/talispros/mapsite-flag-messages";
 
-export type PinActionExplainerId = "url" | "teb" | "ttv";
+export type PinActionExplainerId = "url" | "teb" | "tva" | "ttv";
 
 const NAV_CLEAR_PX = 72;
 
@@ -46,7 +48,7 @@ export default function PinActionExplainer({
   const [mounted, setMounted] = useState(false);
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
 
-  const text = action === "teb" ? copy.teb : action === "ttv" ? copy.ttv : copy.url;
+  const text = copy[action];
 
   useEffect(() => {
     setMounted(true);
@@ -72,8 +74,8 @@ export default function PinActionExplainer({
       const pop = popRef.current?.getBoundingClientRect();
       if (!trigger) return;
       const margin = 8;
-      const width = pop?.width || 280;
-      const height = pop?.height || 96;
+      const width = pop?.width || 320;
+      const height = pop?.height || 120;
       // Sit above the whole PIN card (the flag) when the control lives in one,
       // so the explainer never covers the card's other buttons.
       const flag = rootRef.current
@@ -135,21 +137,13 @@ export default function PinActionExplainer({
     show();
   }
 
-  function onKeyDown(event: ReactKeyboardEvent<HTMLSpanElement>) {
-    if (event.key !== "Tab" || event.shiftKey || action === "teb" || !open) return;
-    const link = popRef.current?.querySelector("a");
-    if (!link) return;
-    event.preventDefault();
-    link.focus();
-  }
-
   const popover = open ? (
     <div
       ref={popRef}
       id={popoverId}
-      role={action === "teb" ? "tooltip" : "dialog"}
+      role="tooltip"
       data-testid={`pin-action-explainer-${action}`}
-      className="pointer-events-auto w-[min(22rem,calc(100vw-1rem))] rounded-xl bg-white px-4 py-3 text-[16px] leading-relaxed text-neutral-950 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-neutral-900/15"
+      className={`pointer-events-auto ${FLAG_MESSAGE_POPOVER_WIDTH_CLASS} rounded-xl bg-white px-4 py-3 text-[16px] leading-relaxed text-neutral-950 shadow-[0_12px_40px_rgba(0,0,0,0.28)] ring-1 ring-neutral-900/15`}
       style={{
         position: "fixed",
         top: pos?.top ?? -9999,
@@ -159,16 +153,7 @@ export default function PinActionExplainer({
       onMouseEnter={show}
       onMouseLeave={scheduleHide}
     >
-      <p className="m-0">{text}</p>
-      {action === "teb" ? null : (
-        <Link
-          href={copy.learnMoreHref}
-          className="mt-2 inline-flex text-[16px] font-semibold text-[#0356b0] underline decoration-[#0356b0] underline-offset-2"
-          data-testid={`pin-action-${action}-learn-more`}
-        >
-          {copy.learnMore}
-        </Link>
-      )}
+      <p className={FLAG_MESSAGE_TEXT_CLASS}>{text}</p>
     </div>
   ) : null;
 
@@ -183,7 +168,6 @@ export default function PinActionExplainer({
       onFocusCapture={show}
       onBlurCapture={onBlurCapture}
       onClickCapture={onClickCapture}
-      onKeyDown={onKeyDown}
     >
       {children}
       {mounted && popover ? createPortal(popover, document.body) : null}

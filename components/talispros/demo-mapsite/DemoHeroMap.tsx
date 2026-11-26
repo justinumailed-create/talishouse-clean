@@ -225,9 +225,11 @@ export default function DemoHeroMap({
                 {DEMO_PIN_CARD_ACTIONS.map((label) => {
                   const explainer: PinActionExplainerId = label.startsWith("TEB")
                     ? "teb"
-                    : label.startsWith("TTV")
-                      ? "ttv"
-                      : "url";
+                    : label.startsWith("TVA")
+                      ? "tva"
+                      : label.startsWith("TTV")
+                        ? "ttv"
+                        : "url";
                   return (
                     <PinActionExplainer key={label} action={explainer}>
                       {label === TEB_LABEL ? (

@@ -938,9 +938,10 @@ export const de: Dictionary = {
       pinnedLocation: "Markierter Ort",
     },
     pinActions: {
-      url: "Ein Link, den der Inhaber diesem PIN hinzufügt, etwa die eigene Website oder eine Angebotsseite.",
-      teb: "TEB™: Talis EBooks™ sind digitale Lead-Magneten und Werkzeuge zum Aufbau von Autorität, die Kunden anziehen und Ihnen helfen, sich in umkämpften Märkten abzuheben.",
-      ttv: "TTV™: TalisTV™ richtet Werbeaktionen für Ihren hauseigenen Online-TV-Sender ein und ermöglicht so geplante Werbung mit messbaren Ergebnissen.",
+      url: "Ein Link zu einer externen Quelle für diesen PIN, etwa eine Website oder Angebotsseite.",
+      teb: "Digitale Lead-Magneten, die Interessenten anziehen und sich in umkämpften Märkten abheben.",
+      tva: "Eine Remote-Besichtigung: bis zu zehn Räume/Szenen mit Ihnen als Erzähler des Rundgangs.",
+      ttv: "Hauseigenes Online-TV - Infomercials zu Angeboten, Green Screen, Sie als Host oder Co-Host.",
       learnMore: "Mehr erfahren",
       learnMoreHref: "/talisu?essay=tokenization",
     },

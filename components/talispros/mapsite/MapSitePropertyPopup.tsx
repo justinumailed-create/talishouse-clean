@@ -34,7 +34,7 @@ type ResourceKey = MapSiteResourceKey;
 
 const PIN_EXPLAINER: Record<ResourceKey, PinActionExplainerId> = {
   url: "url",
-  mls: "url",
+  mls: "tva",
   teb: "teb",
   ttv: "ttv",
 };

@@ -3,20 +3,15 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { en } from "../lib/i18n/dictionaries/en";
 import { de } from "../lib/i18n/dictionaries/de";
-import { TALISU_FAQ } from "../lib/talisu/content";
 import {
   ebookLogoFromBookMetadata,
   pickSlotLogoUrl,
   slotBrokerageName,
   slotInitials,
 } from "../lib/talispros/fast-code-slots";
+import { RALF_FLAG_MESSAGES } from "../lib/talispros/mapsite-flag-messages";
 
 const read = (p: string) => readFileSync(resolve(p), "utf8");
-
-const FAQ_TEB =
-  TALISU_FAQ.items
-    .flatMap((item) => item.bullets ?? [])
-    .find((bullet) => bullet.startsWith("TEB™:")) ?? "";
 
 describe("Demo Mapsite rail (FAST Codes)", () => {
   it("scrolls the list on its own and keeps the password box above it", () => {
@@ -72,27 +67,18 @@ describe("Demo Mapsite rail (FAST Codes)", () => {
 });
 
 describe("PIN action explainers", () => {
-  it("uses the TalisU FAQ TEB™ sentence and a tokenization learn-more link", () => {
-    expect(FAQ_TEB.startsWith("TEB™:")).toBe(true);
-    expect(en.mapsite.pinActions.teb).toBe(FAQ_TEB);
-    expect(en.mapsite.pinActions.teb).toContain("Talis EBooks™");
-    expect(en.mapsite.pinActions.teb).toContain("help you stand out");
-    expect(de.mapsite.pinActions.teb.startsWith("TEB™:")).toBe(true);
-    expect(de.mapsite.pinActions.teb).toContain("Talis EBooks™");
-    expect(de.talisu.faq.items.flatMap((item) => item.bullets ?? []).find((b) => b.startsWith("TEB™:"))).toBe(
-      de.mapsite.pinActions.teb,
-    );
-    expect(en.mapsite.pinActions.learnMoreHref).toBe("/talisu?essay=tokenization");
-    expect(de.mapsite.pinActions.learnMoreHref).toBe(en.mapsite.pinActions.learnMoreHref);
-    expect(en.mapsite.pinActions.ttv).toBe(
-      "TTV™: TalisTV™ sets up promotions for your In-House Online TV Station that allows for scheduled advertising producing measurable results.",
-    );
-    expect(de.mapsite.pinActions.ttv).toContain("TalisTV™");
-    expect(de.mapsite.pinActions.ttv).toContain("messbaren Ergebnissen");
+  it("uses Ralf's Flag messages for URL, TEB™, TVA, and TTV", () => {
+    expect(en.mapsite.pinActions.url).toBe(RALF_FLAG_MESSAGES.url);
+    expect(en.mapsite.pinActions.teb).toBe(RALF_FLAG_MESSAGES.teb);
+    expect(en.mapsite.pinActions.tva).toBe(RALF_FLAG_MESSAGES.tva);
+    expect(en.mapsite.pinActions.ttv).toBe(RALF_FLAG_MESSAGES.ttv);
+    expect(de.mapsite.pinActions.url).not.toBe(en.mapsite.pinActions.url);
+    expect(de.mapsite.pinActions.teb).not.toBe(en.mapsite.pinActions.teb);
+    expect(de.mapsite.pinActions.tva).not.toBe(en.mapsite.pinActions.tva);
+    expect(de.mapsite.pinActions.ttv).not.toBe(en.mapsite.pinActions.ttv);
     expect(en.mapsite.pinActions.ttv).not.toMatch(/month|TBD|TODO|token value/i);
     expect(de.mapsite.pinActions.ttv).not.toMatch(/Monat|TBD|TODO/i);
     expect(en.mapsite.pinActions.url).not.toMatch(/Mapsite™|TODO|TBD/);
-    expect(de.mapsite.pinActions.url).not.toBe(en.mapsite.pinActions.url);
   });
 
   it("is on the demo PIN card and on Mapsite PIN cards", () => {
@@ -102,11 +88,12 @@ describe("PIN action explainers", () => {
     expect(demo).toContain("data-pin-flag");
     expect(popup).toContain("PinActionExplainer");
     expect(popup).toContain("data-pin-flag");
+    expect(popup).toContain('mls: "tva"');
     const explainer = read("components/talispros/mapsite/PinActionExplainer.tsx");
     expect(explainer).toContain("createPortal");
     expect(explainer).toContain('zIndex: 80');
-    expect(explainer).toContain("pin-action-${action}-learn-more");
-    expect(explainer).toContain('action === "teb" ? null');
     expect(explainer).toContain("coarsePointer");
+    expect(explainer).not.toContain("learn-more");
+    expect(explainer).not.toContain("copy.learnMore");
   });
 });
