@@ -84,6 +84,7 @@ import {
   postMapSitePaymentRedirectHref,
   shouldRegisterAgentsAfterPayment,
 } from "@/lib/talispros/register-agents";
+import { pinAccountLevelForAccountType } from "@/lib/talispros/mapsite-pin-assignment";
 import MapSitePinDashboard, {
   type PinEditorState,
 } from "@/components/talispros/mapsite/MapSitePinDashboard";
@@ -436,6 +437,7 @@ export default function MapSiteApplication({
           fastCode: code,
           latitude,
           longitude,
+          assignedFastCode: pinEditor.assignedFastCode ?? null,
         });
         if ("dashboard" in result && result.dashboard) {
           setPinDashboard(result.dashboard);
@@ -447,7 +449,7 @@ export default function MapSiteApplication({
         placeLockRef.current = false;
       }
     },
-    [mapsite.fast_code, mapsite.id, pinEditor.kind],
+    [mapsite.fast_code, mapsite.id, pinEditor],
   );
 
   const fixAdditionalAt = useCallback(
@@ -1405,6 +1407,7 @@ function MapSiteChrome({
                 mapsiteId={mapsite.id}
                 fastCode={mapsite.fast_code || ""}
                 accountTypeSegment={accountTypeSegment}
+                accountLevel={pinAccountLevelForAccountType(accountType)}
                 dashboard={pinDashboard}
                 categoryOptions={categoryOptions}
                 editor={pinEditor}

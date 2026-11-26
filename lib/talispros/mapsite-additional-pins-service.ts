@@ -26,6 +26,11 @@ import {
 } from "@/lib/talispros/stripe-mapsite-session";
 import { DEMO_MAPSITE_ID } from "@/lib/talispros/mapsite-state";
 import { getMapSiteByFastCode } from "@/lib/mapsite-service";
+import { isMissingAssignmentColumn } from "@/lib/talispros/mapsite-pin-assignment";
+
+const PIN_COLUMNS = "id, latitude, longitude, label, sort_order, created_by_kind, category";
+const ASSIGNMENT_NOT_READY =
+  "Assign to Mapsite is not ready yet. Apply supabase/migrations/132_mapsite_pin_assigned_fast_code.sql.";
 
 const MIGRATION_HINT =
   "Additional PIN storage is not ready. Apply supabase/migrations/092_mapsite_additional_pins.sql and 095_mapsite_free_pin_credits.sql.";
@@ -90,19 +95,35 @@ export async function loadMapSitePinDashboard(
   if (!id || !supabase) return empty;
 
   try {
-    const [{ data: row, error: rowError }, { data: pinRows, error: pinError }] =
-      await Promise.all([
-        supabase
-          .from("mapsites")
-          .select("pin_quota, purchased_pins, free_pin_credits")
-          .eq("id", id)
-          .maybeSingle(),
-        supabase
-          .from("mapsite_additional_pins")
-          .select("id, latitude, longitude, label, sort_order, created_by_kind, category")
-          .eq("mapsite_id", id)
-          .order("sort_order", { ascending: true }),
-      ]);
+    const readPins = (columns: string) =>
+      supabase
+        .from("mapsite_additional_pins")
+        .select(columns)
+        .eq("mapsite_id", id)
+        .order("sort_order", { ascending: true });
+    const [{ data: row, error: rowError }, firstPins] = await Promise.all([
+      supabase
+        .from("mapsites")
+        .select("pin_quota, purchased_pins, free_pin_credits")
+        .eq("id", id)
+        .maybeSingle(),
+      readPins(`${PIN_COLUMNS}, assigned_fast_code`),
+    ]);
+    // Before migration 132 the column is missing: fall back to the old columns.
+    const pinResult = isMissingAssignmentColumn(firstPins.error?.message)
+      ? await readPins(PIN_COLUMNS)
+      : firstPins;
+    const pinRows = pinResult.data as unknown as Array<{
+      id: string;
+      latitude: number;
+      longitude: number;
+      label: string | null;
+      sort_order: number | null;
+      created_by_kind: string | null;
+      category: string | null;
+      assigned_fast_code?: string | null;
+    }> | null;
+    const pinError = pinResult.error;
 
     const message = rowError?.message || pinError?.message || "";
     if (message) {
@@ -120,6 +141,7 @@ export async function loadMapSitePinDashboard(
       sortOrder: pin.sort_order || 0,
       createdByKind: (pin.created_by_kind as MapSiteAdditionalPin["createdByKind"]) ?? null,
       category: pin.category ?? null,
+      assignedFastCode: pin.assigned_fast_code ?? null,
     }));
 
     return capacityFromCounts({
@@ -252,6 +274,25 @@ export async function readMapSiteForPinPurchase(mapsiteId: string): Promise<{
   };
 }
 
+/** Assign to Mapsite target lookup: the Mapsite holding this FAST Code, if any. */
+export async function readMapSiteByFastCodeForAssignment(fastCode: string): Promise<{
+  id: string;
+  fastCode: string;
+  accountType: string;
+} | null> {
+  const code = fastCode.trim().toLowerCase();
+  if (!code || !isSupabaseAdminConfigured()) return null;
+  const { data, error } = await getSupabaseAdmin()
+    .from("mapsites")
+    .select("id, fast_code, account_type, updated_at")
+    .in("fast_code", [code, code.toUpperCase()])
+    .order("updated_at", { ascending: false })
+    .limit(1);
+  const row = !error && data?.length ? data[0] : null;
+  if (!row?.id) return null;
+  return { id: row.id, fastCode: row.fast_code, accountType: row.account_type };
+}
+
 export async function recordPendingPinPurchase(input: {
   mapsiteId: string;
   quantity: number;
@@ -283,6 +324,8 @@ export async function placeAdditionalPinRecord(input: {
   label?: string | null;
   /** Already validated with parsePinCategory. */
   category?: string | null;
+  /** Already validated Broker FAST Code (Assign to Mapsite); null = own Mapsite only. */
+  assignedFastCode?: string | null;
   createdBy?: { label: string; kind: "owner" | "admin" | "agent" } | null;
 }): Promise<{ pin?: MapSiteAdditionalPin; dashboard?: MapSitePinDashboardState; error?: string }> {
   const latitude = normalizePinCoordinate(input.latitude, "lat");
@@ -317,6 +360,8 @@ export async function placeAdditionalPinRecord(input: {
       created_by: input.createdBy?.label ?? null,
       created_by_kind: input.createdBy?.kind ?? null,
       category: input.category ?? null,
+      // Only sent when set, so PINs still place before migration 132 is applied.
+      ...(input.assignedFastCode ? { assigned_fast_code: input.assignedFastCode } : {}),
     })
     .select("id, latitude, longitude, label, sort_order")
     .single();
@@ -326,6 +371,7 @@ export async function placeAdditionalPinRecord(input: {
     if (/quota exceeded/i.test(message)) {
       return { error: "Buy another PIN before placing more." };
     }
+    if (isMissingAssignmentColumn(message)) return { error: ASSIGNMENT_NOT_READY };
     if (isMissingPinSchema(message)) return { error: MIGRATION_HINT };
     return { error: "Could not place PIN." };
   }
@@ -351,6 +397,8 @@ export async function fixAdditionalPinRecord(input: {
   label?: string | null;
   /** Already validated with parsePinCategory; undefined = unchanged. */
   category?: string | null;
+  /** Already validated Broker FAST Code; undefined = unchanged, null = own Mapsite only. */
+  assignedFastCode?: string | null;
 }): Promise<{ pin?: MapSiteAdditionalPin; dashboard?: MapSitePinDashboardState; error?: string }> {
   const latitude = normalizePinCoordinate(input.latitude, "lat");
   const longitude = normalizePinCoordinate(input.longitude, "lng");
@@ -368,6 +416,7 @@ export async function fixAdditionalPinRecord(input: {
     updated_at: string;
     label?: string;
     category?: string | null;
+    assigned_fast_code?: string | null;
   } = {
     latitude,
     longitude,
@@ -379,16 +428,28 @@ export async function fixAdditionalPinRecord(input: {
   if (input.category !== undefined) {
     patch.category = input.category;
   }
+  if (input.assignedFastCode !== undefined) {
+    patch.assigned_fast_code = input.assignedFastCode;
+  }
 
-  const { data, error } = await supabase
-    .from("mapsite_additional_pins")
-    .update(patch)
-    .eq("id", input.pinId)
-    .eq("mapsite_id", input.mapsiteId)
-    .select("id, latitude, longitude, label, sort_order")
-    .maybeSingle();
+  const runUpdate = (values: typeof patch) =>
+    supabase
+      .from("mapsite_additional_pins")
+      .update(values)
+      .eq("id", input.pinId)
+      .eq("mapsite_id", input.mapsiteId)
+      .select("id, latitude, longitude, label, sort_order")
+      .maybeSingle();
+  let { data, error } = await runUpdate(patch);
+  // Before migration 132: clearing an assignment is a no-op, so retry without it.
+  if (error && isMissingAssignmentColumn(error.message) && !input.assignedFastCode) {
+    const rest = { ...patch };
+    delete rest.assigned_fast_code;
+    ({ data, error } = await runUpdate(rest));
+  }
 
   if (error) {
+    if (isMissingAssignmentColumn(error.message)) return { error: ASSIGNMENT_NOT_READY };
     if (isMissingPinSchema(error.message)) return { error: MIGRATION_HINT };
     return { error: "Could not update PIN." };
   }

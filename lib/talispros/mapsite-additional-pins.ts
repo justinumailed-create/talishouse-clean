@@ -28,6 +28,8 @@ export type MapSiteAdditionalPin = {
   createdByKind?: "owner" | "admin" | "agent" | null;
   /** PIN category (mandatory id or "custom:<label>"); null = uncategorised. */
   category?: string | null;
+  /** Assign to Mapsite: Broker FAST Code this PIN also shows on; null = own Mapsite only. */
+  assignedFastCode?: string | null;
 };
 
 export type MapSitePinCapacity = {

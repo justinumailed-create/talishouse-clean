@@ -23,6 +23,12 @@ import type { PinCategoryOption } from "@/lib/talispros/mapsite-pin-categories";
 import SamCartWebCheckout from "@/components/talisu/SamCartWebCheckout";
 import { useMapSiteDashboardEmbedded } from "@/components/talispros/mapsite/MapSiteDashboardChrome";
 import {
+  PIN_ASSIGNMENT_RULES,
+  normalizeAssignedFastCode,
+  validatePinAssignment,
+  type PinAccountLevel,
+} from "@/lib/talispros/mapsite-pin-assignment";
+import {
   clearFormDraft,
   draftString,
   formDraftKey,
@@ -41,11 +47,16 @@ type PinDraft = {
   editingId: string;
   editLabel: string;
   editCategory: string;
+  /** Assign to Mapsite: FAST Code for the next PIN (kept across tabs). */
+  assignFastCode: string;
+  /** Assign to Mapsite while editing a placed PIN. */
+  editAssign: string;
 };
 
-export type PinStepNumber = 1 | 2 | 3 | 4;
+export type PinStepNumber = 1 | 2 | 3 | 4 | 5;
 
-export const PIN_STEP_NUMBERS: ReadonlyArray<PinStepNumber> = [1, 2, 3, 4];
+/** 1 Add PIN, 2 Assign to Mapsite, 3 Find and place, 4 Name and category, 5 Review. */
+export const PIN_STEP_NUMBERS: ReadonlyArray<PinStepNumber> = [1, 2, 3, 4, 5];
 
 /** One color per step so the sequence reads at a glance (Ralf, Nov 26). */
 export const PIN_STEP_STYLES: Record<
@@ -59,18 +70,24 @@ export const PIN_STEP_STYLES: Record<
     border: "border-[#046BD9]/40 bg-[#046BD9]/5",
   },
   2: {
+    badge: "bg-teal-600 text-white",
+    card: "bg-teal-100 text-teal-900",
+    title: "text-teal-900",
+    border: "border-teal-300 bg-teal-50/70",
+  },
+  3: {
     badge: "bg-amber-500 text-white",
     card: "bg-amber-100 text-amber-900",
     title: "text-amber-900",
     border: "border-amber-300 bg-amber-50/70",
   },
-  3: {
+  4: {
     badge: "bg-violet-600 text-white",
     card: "bg-violet-100 text-violet-900",
     title: "text-violet-900",
     border: "border-violet-300 bg-violet-50/70",
   },
-  4: {
+  5: {
     badge: "bg-emerald-600 text-white",
     card: "bg-emerald-100 text-emerald-900",
     title: "text-emerald-900",
@@ -139,7 +156,8 @@ function PinStep({
 
 export type PinEditorState =
   | { kind: "idle" }
-  | { kind: "place" }
+  /** assignedFastCode: Assign to Mapsite value used for map-click placement. */
+  | { kind: "place"; assignedFastCode?: string | null }
   | { kind: "fix"; pinId: string };
 
 type MapSitePinDashboardProps = {
@@ -148,6 +166,8 @@ type MapSitePinDashboardProps = {
   fastCode: string;
   accountTypeSegment?: string | null;
   dashboard: MapSitePinDashboardState;
+  /** Broker, FSBO, Ad Pro or Agent: drives the Assign to Mapsite rules. */
+  accountLevel?: PinAccountLevel;
   /** Five mandatory + the Root's custom categories (Ralf, Oct 17). */
   categoryOptions?: ReadonlyArray<PinCategoryOption>;
   editor: PinEditorState;
@@ -163,6 +183,7 @@ export default function MapSitePinDashboard({
   fastCode,
   accountTypeSegment = null,
   dashboard,
+  accountLevel = "broker",
   categoryOptions = [],
   editor,
   checkoutStatus,
@@ -190,10 +211,18 @@ export default function MapSitePinDashboard({
       editingId: editing && dashboard.pins.some((pin) => pin.id === editing) ? editing : "",
       editLabel: draftString(draft.editLabel),
       editCategory: draftString(draft.editCategory),
+      assignFastCode: draftString(draft.assignFastCode),
+      editAssign: draftString(draft.editAssign),
     };
     return pinDraftHasWork(restored) ? restored : null;
   });
-  const [draftRestored, setDraftRestored] = useState(Boolean(initialDraft));
+  // Only unsaved PIN work shows the notice; a remembered assignment alone does not.
+  const [draftRestored, setDraftRestored] = useState(
+    pinDraftHasWork(initialDraft, { includeAssignment: false }),
+  );
+  const assignRule = PIN_ASSIGNMENT_RULES[accountLevel];
+  const [assignFastCode, setAssignFastCode] = useState(initialDraft?.assignFastCode ?? "");
+  const [editAssign, setEditAssign] = useState(initialDraft?.editingId ? initialDraft.editAssign : "");
   const [quantity, setQuantity] = useState(1);
   const [label, setLabel] = useState(initialDraft?.label ?? "");
   const [latitude, setLatitude] = useState(initialDraft?.latitude ?? "");
@@ -215,13 +244,29 @@ export default function MapSitePinDashboard({
   const knownPinIdsRef = useRef<Set<string> | null>(null);
   const { setViewport } = useMapEngine();
 
-  // Placement is always ready while the panel is open (unless the owner pauses it):
-  // map clicks drop the next PIN and every placed PIN can be dragged.
+  const assignCheck = validatePinAssignment({
+    level: accountLevel,
+    ownFastCode: fastCode,
+    assignedFastCode: assignFastCode,
+  });
+  // Agents cannot place until a Broker FAST Code is entered (step 2).
+  const placementReady = assignCheck.ok;
+  const placeAssignment = assignCheck.ok ? assignCheck.assignedFastCode : null;
+  const editorAssignment = editor.kind === "place" ? editor.assignedFastCode ?? null : null;
+
+  // Placement is always ready while the panel is open (unless the owner pauses it
+  // or an Agent still has to assign a Mapsite): map clicks drop the next PIN,
+  // tied to the Assign to Mapsite FAST Code, and every placed PIN can be dragged.
   useEffect(() => {
-    if (open && !paused && editor.kind === "idle") {
-      onEditorChange({ kind: "place" });
+    if (!open || paused) return;
+    if (!placementReady) {
+      if (editor.kind === "place") onEditorChange({ kind: "idle" });
+      return;
     }
-  }, [open, paused, editor.kind, onEditorChange]);
+    if (editor.kind === "idle" || (editor.kind === "place" && editorAssignment !== placeAssignment)) {
+      onEditorChange({ kind: "place", assignedFastCode: placeAssignment });
+    }
+  }, [open, paused, placementReady, placeAssignment, editor.kind, editorAssignment, onEditorChange]);
 
   // Keep the draft in step with the form; nothing in progress clears it.
   useEffect(() => {
@@ -233,10 +278,23 @@ export default function MapSitePinDashboard({
       editingId: editingId ?? "",
       editLabel: editingId ? editLabel : "",
       editCategory: editingId ? editCategory : "",
+      assignFastCode,
+      editAssign: editingId ? editAssign : "",
     };
     if (pinDraftHasWork(draft)) writeFormDraft(draftKey, draft);
     else clearFormDraft(draftKey);
-  }, [draftKey, label, latitude, longitude, placeCategory, editingId, editLabel, editCategory]);
+  }, [
+    draftKey,
+    label,
+    latitude,
+    longitude,
+    placeCategory,
+    editingId,
+    editLabel,
+    editCategory,
+    assignFastCode,
+    editAssign,
+  ]);
 
   // A newly placed PIN (search, coordinates or map click) opens for naming + Undo.
   const pinIdsKey = dashboard.pins.map((pin) => pin.id).join("|");
@@ -252,6 +310,7 @@ export default function MapSitePinDashboard({
     setEditingId(added[0]);
     setEditLabel(pin?.label || "");
     setEditCategory(pin?.category || "");
+    setEditAssign((pin?.assignedFastCode || "").toUpperCase());
     setConfirmDeleteId(null);
     setMessage(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -317,6 +376,7 @@ export default function MapSitePinDashboard({
         longitude: lng,
         label: pinLabel,
         category: placeCategory || null,
+        assignedFastCode: placeAssignment,
       });
       if (!("dashboard" in result)) {
         setError(result.error);
@@ -358,6 +418,7 @@ export default function MapSitePinDashboard({
     setConfirmDeleteId(null);
     setEditLabel(pin?.label || "");
     setEditCategory(pin?.category || "");
+    setEditAssign((pin?.assignedFastCode || "").toUpperCase());
     setEditingId(pinId);
   }
 
@@ -374,11 +435,13 @@ export default function MapSitePinDashboard({
         longitude: pin.longitude,
         label: editLabel,
         category: editCategory || null,
+        assignedFastCode: editAssign,
       });
       if (!report(result)) return;
       setEditingId(null);
       setEditLabel("");
       setEditCategory("");
+      setEditAssign("");
       setDraftRestored(false);
       clearFormDraft(draftKey);
       setMessage(d.updated);
@@ -409,6 +472,8 @@ export default function MapSitePinDashboard({
     setEditingId(null);
     setEditLabel("");
     setEditCategory("");
+    setEditAssign("");
+    setAssignFastCode("");
     setConfirmDeleteId(null);
     setLastPlacedId(null);
     setError(null);
@@ -419,7 +484,9 @@ export default function MapSitePinDashboard({
     setError(null);
     const next = !paused;
     setPaused(next);
-    onEditorChange(next ? { kind: "idle" } : { kind: "place" });
+    onEditorChange(
+      next || !placementReady ? { kind: "idle" } : { kind: "place", assignedFastCode: placeAssignment },
+    );
   }
 
   const checkoutNote =
@@ -436,24 +503,57 @@ export default function MapSitePinDashboard({
   const editingIndex = editingPin ? dashboard.pins.indexOf(editingPin) : -1;
   // Where the owner is right now: naming a PIN, placing one, or reviewing.
   const currentStep: PinStepNumber = editingPin
-    ? 3
+    ? 4
     : dashboard.remainingToPlace > 0 && !paused
-      ? 1
+      ? placementReady
+        ? 3
+        : 2
       : pinsPlaced
-        ? 4
+        ? 5
         : 1;
   const stepTitles: Record<PinStepNumber, string> = {
     1: d.step1Title,
     2: d.step2Title,
     3: d.step3Title,
     4: d.step4Title,
+    5: d.step5Title,
   };
+  const assignHelp =
+    accountLevel === "agent"
+      ? d.assignHelpAgent
+      : accountLevel === "fsbo"
+        ? d.assignHelpFsbo
+        : accountLevel === "adpro"
+          ? d.assignHelpAdpro
+          : d.assignHelpBroker;
+  const assignLevelName =
+    accountLevel === "agent"
+      ? d.levelAgent
+      : accountLevel === "fsbo"
+        ? d.levelFsbo
+        : accountLevel === "adpro"
+          ? d.levelAdpro
+          : d.levelBroker;
+  const assignError = assignCheck.ok
+    ? null
+    : assignCheck.error === "required"
+      ? null
+      : assignCheck.error === "self"
+        ? d.assignSelf
+        : d.assignInvalid;
+  const assignShows = placeAssignment
+    ? fmt(assignRule.ownMapsite ? d.assignShowsOn : d.assignShowsOnly, {
+        code: placeAssignment.toUpperCase(),
+      })
+    : assignRule.ownMapsite
+      ? d.assignShowsOwn
+      : d.assignNeeded;
   const stepLabels = { done: d.stepDone, now: d.stepNow };
 
   const body = (
       <div className={embedded ? "space-y-4 text-sm" : "space-y-4 overflow-y-auto px-4 py-3 text-sm"}>
         <ol
-          className="grid grid-cols-4 gap-1.5"
+          className="grid grid-cols-5 gap-1"
           aria-label={d.stepsLabel}
           data-testid="pin-stepper"
         >
@@ -520,10 +620,116 @@ export default function MapSitePinDashboard({
           title={d.step1Title}
           body={d.step1Body}
           current={currentStep === 1}
-          done={currentStep > 1}
+          done={dashboard.remainingToPlace > 0 || pinsPlaced}
           labels={stepLabels}
         >
-          {dashboard.remainingToPlace > 0 ? (
+          <p
+            className={`text-[12px] font-medium ${dashboard.remainingToPlace > 0 ? "text-[#035bb8]" : "text-neutral-600"}`}
+            data-testid="pin-step-add-status"
+          >
+            {dashboard.remainingToPlace > 0
+              ? dashboard.remainingToPlace === 1
+                ? d.readyOne
+                : fmt(d.readyMany, { count: dashboard.remainingToPlace })
+              : d.allPlaced}
+          </p>
+          {dashboard.remainingToPlace <= 0 ? (
+            <a
+              href="#additional-pins"
+              className="inline-flex min-h-8 items-center rounded-full bg-[#046BD9] px-4 text-[12px] font-semibold text-white no-underline hover:bg-[#0358b3] hover:text-white"
+            >
+              {d.moreTitle}
+            </a>
+          ) : null}
+        </PinStep>
+
+        <PinStep
+          step={2}
+          title={d.step2Title}
+          body={assignHelp}
+          current={currentStep === 2}
+          done={currentStep > 2 && Boolean(placeAssignment)}
+          labels={stepLabels}
+          headerAction={
+            <span
+              data-testid="pin-assign-badge"
+              className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                assignRule.required ? "bg-red-600 text-white" : "bg-white text-neutral-700 ring-1 ring-neutral-200"
+              }`}
+            >
+              {assignRule.required ? d.assignRequired : d.assignOptional}
+            </span>
+          }
+        >
+          <label className="block text-xs text-neutral-600" data-testid="pin-assign-to-mapsite">
+            <span className="flex items-center justify-between gap-2">
+              <span>{d.assignLabel}</span>
+              <span className="text-[11px] text-neutral-500">{fmt(d.assignLevel, { level: assignLevelName })}</span>
+            </span>
+            <input
+              value={assignFastCode}
+              onChange={(event) => setAssignFastCode(event.target.value.toUpperCase())}
+              maxLength={30}
+              required={assignRule.required}
+              aria-required={assignRule.required}
+              aria-invalid={Boolean(assignError) || (assignRule.required && !placementReady)}
+              autoComplete="off"
+              spellCheck={false}
+              placeholder={d.assignPlaceholder}
+              data-testid="pin-assign-input"
+              className={`mt-1 block w-full rounded-md border bg-white px-2 py-1.5 font-mono text-sm uppercase tracking-wide ${
+                assignError || (assignRule.required && !placementReady)
+                  ? "border-red-400"
+                  : "border-neutral-300"
+              }`}
+            />
+          </label>
+          {assignError ? (
+            <p className="text-[11px] font-medium text-red-700" role="alert">
+              {assignError}
+            </p>
+          ) : null}
+          <p
+            className={`text-[11px] font-semibold ${placementReady ? "text-teal-800" : "text-red-700"}`}
+            data-testid="pin-assign-shows"
+          >
+            {assignShows}
+          </p>
+          {assignRule.ownMapsite && assignFastCode ? (
+            <button
+              type="button"
+              onClick={() => setAssignFastCode("")}
+              className="text-[11px] font-semibold text-neutral-600 underline underline-offset-2"
+            >
+              {d.assignUseOwn}
+            </button>
+          ) : null}
+        </PinStep>
+
+        <PinStep
+          step={3}
+          title={d.step3Title}
+          body={searchAvailable ? d.step3Body : d.placeHelpMapOnly}
+          current={currentStep === 3}
+          done={pinsPlaced && currentStep > 3}
+          labels={stepLabels}
+          headerAction={
+            dashboard.remainingToPlace > 0 || paused ? (
+              <button
+                type="button"
+                onClick={togglePaused}
+                className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50"
+              >
+                {paused ? d.resumePlacing : d.stopPlacing}
+              </button>
+            ) : null
+          }
+        >
+          {dashboard.remainingToPlace > 0 && !placementReady ? (
+            <p className="rounded-md bg-teal-50 px-3 py-2 text-[12px] font-medium text-teal-900" data-testid="pin-assign-needed">
+              {d.assignNeeded}
+            </p>
+          ) : dashboard.remainingToPlace > 0 ? (
             <>
               {!paused ? (
                 <MapSitePlaceSearch
@@ -535,15 +741,9 @@ export default function MapSitePinDashboard({
                   onAvailabilityChange={setSearchAvailable}
                 />
               ) : null}
-              <p
-                className={`text-[11px] font-medium ${paused ? "text-neutral-500" : "text-sky-800"}`}
-              >
-                {paused
-                  ? d.pausedHint
-                  : dashboard.remainingToPlace === 1
-                    ? d.readyOne
-                    : fmt(d.readyMany, { count: dashboard.remainingToPlace })}
-              </p>
+              {paused ? (
+                <p className="text-[11px] font-medium text-neutral-500">{d.pausedHint}</p>
+              ) : null}
               {!paused ? (
                 <details className="rounded-md border border-neutral-200 bg-white px-2 py-1.5">
                   <summary className="cursor-pointer text-[11px] font-medium text-neutral-600">
@@ -595,28 +795,7 @@ export default function MapSitePinDashboard({
           ) : (
             <p className="text-[12px] text-neutral-600">{d.allPlaced}</p>
           )}
-        </PinStep>
-
-        <PinStep
-          step={2}
-          title={d.step2Title}
-          body={searchAvailable ? d.step2Body : d.placeHelpMapOnly}
-          current={false}
-          done={pinsPlaced}
-          labels={stepLabels}
-          headerAction={
-            dashboard.remainingToPlace > 0 || paused ? (
-              <button
-                type="button"
-                onClick={togglePaused}
-                className="rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-neutral-700 ring-1 ring-neutral-200 hover:bg-neutral-50"
-              >
-                {paused ? d.resumePlacing : d.stopPlacing}
-              </button>
-            ) : null
-          }
-        >
-          {dashboard.remainingToPlace > 0 && categoryOptions.length > 0 && !paused ? (
+          {dashboard.remainingToPlace > 0 && categoryOptions.length > 0 && !paused && placementReady ? (
             <label className="block text-xs text-neutral-600">
               {d.nextCategory}
               <select
@@ -650,10 +829,10 @@ export default function MapSitePinDashboard({
         </PinStep>
 
         <PinStep
-          step={3}
-          title={d.step3Title}
-          body={editingPin ? d.step3Body : d.step3Idle}
-          current={currentStep === 3}
+          step={4}
+          title={d.step4Title}
+          body={editingPin ? d.step4Body : d.step4Idle}
+          current={currentStep === 4}
           done={false}
           labels={stepLabels}
         >
@@ -699,6 +878,26 @@ export default function MapSitePinDashboard({
                   </select>
                 </label>
               ) : null}
+              <label className="block text-xs text-neutral-600" data-testid="pin-edit-assign">
+                {d.step2Title}
+                <span
+                  className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                    assignRule.required ? "bg-red-600 text-white" : "bg-neutral-100 text-neutral-700"
+                  }`}
+                >
+                  {assignRule.required ? d.assignRequired : d.assignOptional}
+                </span>
+                <input
+                  value={editAssign}
+                  onChange={(event) => setEditAssign(event.target.value.toUpperCase())}
+                  maxLength={30}
+                  required={assignRule.required}
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder={d.assignPlaceholder}
+                  className="mt-1 block w-full rounded-md border border-neutral-300 bg-white px-2 py-1.5 font-mono text-sm uppercase tracking-wide"
+                />
+              </label>
               <div className="flex gap-2">
                 <button
                   type="button"
@@ -722,10 +921,10 @@ export default function MapSitePinDashboard({
         </PinStep>
 
         <PinStep
-          step={4}
-          title={d.step4Title}
-          body={d.step4Body}
-          current={currentStep === 4}
+          step={5}
+          title={d.step5Title}
+          body={d.step5Body}
+          current={currentStep === 5}
           done={false}
           labels={stepLabels}
         >
@@ -758,6 +957,14 @@ export default function MapSitePinDashboard({
                           data-testid="pin-placed-by-staff"
                         >
                           {pin.createdByKind === "admin" ? d.placedByAdmin : d.placedByAgent}
+                        </span>
+                      ) : null}
+                      {pin.assignedFastCode ? (
+                        <span
+                          className="mt-0.5 mr-1 inline-block rounded bg-teal-100 px-1.5 py-0.5 text-[10px] font-semibold text-teal-900"
+                          data-testid="pin-assigned-chip"
+                        >
+                          {fmt(d.assignedChip, { code: pin.assignedFastCode.toUpperCase() })}
                         </span>
                       ) : null}
                       {pin.category ? (
@@ -963,12 +1170,17 @@ export default function MapSitePinDashboard({
 }
 
 /** True when the Add Pin form holds unsaved input worth resuming. */
-export function pinDraftHasWork(draft: Partial<PinDraft> | null | undefined): boolean {
+export function pinDraftHasWork(
+  draft: Partial<PinDraft> | null | undefined,
+  options: { includeAssignment?: boolean } = {},
+): boolean {
   if (!draft) return false;
+  const includeAssignment = options.includeAssignment ?? true;
   return Boolean(
     draft.label?.trim() ||
       draft.latitude?.trim() ||
       draft.longitude?.trim() ||
-      draft.editingId,
+      draft.editingId ||
+      (includeAssignment && normalizeAssignedFastCode(draft.assignFastCode)),
   );
 }

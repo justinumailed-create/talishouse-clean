@@ -687,6 +687,7 @@ export interface Database {
           created_by: string | null
           created_by_kind: string | null
           category: string | null
+          assigned_fast_code: string | null
         }
         Insert: {
           id?: string
@@ -700,6 +701,7 @@ export interface Database {
           created_by?: string | null
           created_by_kind?: string | null
           category?: string | null
+          assigned_fast_code?: string | null
         }
         Update: {
           id?: string
@@ -713,6 +715,7 @@ export interface Database {
           created_by?: string | null
           created_by_kind?: string | null
           category?: string | null
+          assigned_fast_code?: string | null
         }
         Relationships: [
           { foreignKeyName: "mapsite_additional_pins_mapsite_id_fkey"; columns: ["mapsite_id"]; referencedRelation: "mapsites"; referencedColumns: ["id"] }

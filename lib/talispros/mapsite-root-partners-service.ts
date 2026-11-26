@@ -16,6 +16,13 @@ import {
   type MapSiteRootPartner,
 } from "@/lib/talispros/mapsite-root-partners";
 import { sortPartnerPair } from "@/lib/talispros/mapsite-partner-links";
+import {
+  assignedPinsForBroker,
+  isMissingAssignmentColumn,
+  pinAccountLevelForAccountType,
+  type AssignedPinRow,
+  type AssignedPinSource,
+} from "@/lib/talispros/mapsite-pin-assignment";
 
 /**
  * Partner FAST Codes kept in the database and hidden on one Mapsite only.
@@ -76,6 +83,66 @@ async function readMapSitesByCodes(codes: string[]): Promise<MapSiteLite[]> {
     });
   }
   return out;
+}
+
+/**
+ * Assign to Mapsite: PINs from Agent, FSBO and Ad Pro Mapsites assigned to
+ * this Broker's FAST Code. Empty before migration 132 or on any error.
+ */
+async function loadPinsAssignedTo(input: {
+  fastCode: string;
+  mapsiteId: string;
+  skipMapsiteIds: ReadonlySet<string>;
+}): Promise<MapSitePartnerPin[]> {
+  const { data, error } = await db()
+    .from("mapsite_additional_pins")
+    .select("id, mapsite_id, latitude, longitude, label, category, assigned_fast_code, sort_order")
+    .eq("assigned_fast_code", input.fastCode)
+    .order("sort_order", { ascending: true });
+  if (error) {
+    if (!isMissingAssignmentColumn(error.message)) {
+      console.warn("[mapsite-root-partners] assigned PINs failed:", error.message);
+    }
+    return [];
+  }
+  const rows = ((data || []) as AssignedPinRow[]).filter(
+    (row) => !input.skipMapsiteIds.has(row.mapsite_id),
+  );
+  if (rows.length === 0) return [];
+  const ids = [...new Set(rows.map((row) => row.mapsite_id))];
+  const { data: siteRows } = await db()
+    .from("mapsites")
+    .select("id, fast_code, account_type")
+    .in("id", ids);
+  const sources: AssignedPinSource[] = ((siteRows || []) as Array<Record<string, string | null>>).map(
+    (row) => {
+      const accountType = row.account_type || "";
+      const fastCode = norm(row.fast_code);
+      return {
+        id: row.id as string,
+        fastCode,
+        level: pinAccountLevelForAccountType(accountType),
+        href: buildClaimedMapSitePath({
+          fastCode,
+          accountType: claimedMapSiteSegmentForAccountOrPlan(accountType),
+        }),
+      };
+    },
+  );
+  return assignedPinsForBroker({
+    brokerFastCode: input.fastCode,
+    brokerMapsiteId: input.mapsiteId,
+    rows,
+    sources,
+  }).map((pin) => ({
+    id: pin.id,
+    fastCode: pin.fastCode,
+    latitude: pin.latitude,
+    longitude: pin.longitude,
+    label: pin.label,
+    category: pin.category,
+    href: pin.href,
+  }));
 }
 
 async function paidPlanType(fastCode: string, mapsiteId: string | null): Promise<string | null> {
@@ -270,6 +337,21 @@ export async function loadMapSiteRootContext(input: {
           });
         }
       }
+    }
+
+    // Broker Mapsite: also every Agent, FSBO and Ad Pro PIN assigned to this FAST Code.
+    const isBroker = role === "root" || pinAccountLevelForAccountType(me?.accountType) === "broker";
+    if (isBroker) {
+      const linkedIds = new Set(
+        derivatives.map((p) => byCode.get(p.fastCode)?.id).filter((id): id is string => Boolean(id)),
+      );
+      partnerPins.push(
+        ...(await loadPinsAssignedTo({
+          fastCode: code,
+          mapsiteId: input.mapsiteId,
+          skipMapsiteIds: linkedIds,
+        }).catch(() => [])),
+      );
     }
 
     const ownCustomCategories = await loadOwnCustomPinCategories(input.mapsiteId);

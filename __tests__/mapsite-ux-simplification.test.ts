@@ -140,26 +140,28 @@ describe("Mapsite Logout", () => {
 describe("Add Pin step-by-step flow", () => {
   const panel = read("components/talispros/mapsite/MapSitePinDashboard.tsx");
 
-  it("renders four colored, numbered steps with a progress bar", () => {
+  it("renders five colored, numbered steps with a progress bar", () => {
     expect(panel).toContain('data-testid="pin-stepper"');
     expect(panel).toContain("PIN_STEP_NUMBERS.map");
-    for (const step of [1, 2, 3, 4]) {
+    for (const step of [1, 2, 3, 4, 5]) {
       expect(panel).toContain(`step={${step}}`);
     }
-    for (const color of ["bg-[#046BD9]", "bg-amber-500", "bg-violet-600", "bg-emerald-600"]) {
+    for (const color of ["bg-[#046BD9]", "bg-teal-600", "bg-amber-500", "bg-violet-600", "bg-emerald-600"]) {
       expect(panel).toContain(color);
     }
-    expect(en.mapsite.pinDashboard.step1Title).toBe("Find the address");
-    expect(en.mapsite.pinDashboard.step2Title).toBe("Place and fix on the map");
-    expect(en.mapsite.pinDashboard.step3Title).toBe("Name and category");
-    expect(en.mapsite.pinDashboard.step4Title).toBe("Review your PINs");
-    for (const key of ["step1Title", "step2Title", "step3Title", "step4Title", "startOver", "draftRestored"] as const) {
+    expect(en.mapsite.pinDashboard.step1Title).toBe("Add PIN");
+    expect(en.mapsite.pinDashboard.step2Title).toBe("Assign to Mapsite");
+    expect(en.mapsite.pinDashboard.step3Title).toBe("Find and place on the map");
+    expect(en.mapsite.pinDashboard.step4Title).toBe("Name and category");
+    expect(en.mapsite.pinDashboard.step5Title).toBe("Review your PINs");
+    for (const key of ["step1Title", "step2Title", "step3Title", "step4Title", "step5Title", "startOver", "draftRestored"] as const) {
       expect(de.mapsite.pinDashboard[key]).toBeTruthy();
     }
   });
 
-  it("keeps search first, coordinates behind Advanced, and buying PINs in CAD", () => {
-    expect(panel.indexOf("<MapSitePlaceSearch")).toBeLessThan(panel.indexOf("step={2}"));
+  it("keeps search in the place step, coordinates behind Advanced, and buying PINs in CAD", () => {
+    expect(panel.indexOf("<MapSitePlaceSearch")).toBeGreaterThan(panel.indexOf("step={3}"));
+    expect(panel.indexOf("<MapSitePlaceSearch")).toBeLessThan(panel.indexOf("step={4}"));
     expect(panel).toMatch(/<details[\s\S]*d\.advancedCoords[\s\S]*d\.placeAtCoords[\s\S]*<\/details>/);
     expect(panel).toContain('id="additional-pins"');
     expect(panel).toContain('product="listpin"');

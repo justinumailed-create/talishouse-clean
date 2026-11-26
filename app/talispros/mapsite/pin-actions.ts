@@ -23,12 +23,23 @@ import {
   loadMapSitePinDashboard,
   mapsiteCannotSellAdditionalPins,
   placeAdditionalPinRecord,
+  readMapSiteByFastCodeForAssignment,
   readMapSiteForPinPurchase,
   recordPendingPinPurchase,
   redeemFreePinCredits,
 } from "@/lib/talispros/mapsite-additional-pins-service";
 import { parsePinCategory } from "@/lib/talispros/mapsite-pin-categories";
-import { loadEffectiveCustomPinCategories } from "@/lib/talispros/mapsite-root-partners-service";
+import {
+  loadEffectiveCustomPinCategories,
+  resolveMapSitePlanRole,
+} from "@/lib/talispros/mapsite-root-partners-service";
+import {
+  PIN_ASSIGNMENT_ERRORS,
+  brokerTargetError,
+  pinAccountLevelForAccountType,
+  validatePinAssignment,
+  type PinAccountLevel,
+} from "@/lib/talispros/mapsite-pin-assignment";
 import {
   buildClaimedMapSitePath,
   toShareableAbsoluteUrl,
@@ -82,6 +93,46 @@ async function validatePinCategory(
   if (value == null || value === "") return null;
   const { categories } = await loadEffectiveCustomPinCategories({ mapsiteId, fastCode });
   return parsePinCategory(value, categories);
+}
+
+async function pinAccountLevel(site: {
+  id: string;
+  fastCode: string;
+  accountType: string | null;
+}): Promise<PinAccountLevel> {
+  const role = await resolveMapSitePlanRole({
+    fastCode: site.fastCode,
+    mapsiteId: site.id,
+    accountType: site.accountType,
+  });
+  if (role === "root") return "broker";
+  if (role === "derivative") return "agent";
+  return pinAccountLevelForAccountType(site.accountType);
+}
+
+/**
+ * Assign to Mapsite: Agents must name a Broker FAST Code; Broker, FSBO and
+ * Ad Pro may (null = own Mapsite only). The target must be a Broker Mapsite.
+ */
+async function resolvePinAssignment(
+  mapsite: { id: string; fastCode: string; accountType: string },
+  value: string | null | undefined,
+): Promise<{ assignedFastCode: string | null } | PinActionError> {
+  const level = await pinAccountLevel(mapsite);
+  const checked = validatePinAssignment({
+    level,
+    ownFastCode: mapsite.fastCode,
+    assignedFastCode: value ?? "",
+  });
+  if (!checked.ok) return { error: PIN_ASSIGNMENT_ERRORS[checked.error] };
+  if (!checked.assignedFastCode) return { assignedFastCode: null };
+  const target = await readMapSiteByFastCodeForAssignment(checked.assignedFastCode);
+  const targetError = brokerTargetError({
+    exists: Boolean(target),
+    level: target ? await pinAccountLevel(target) : null,
+  });
+  if (targetError) return { error: targetError };
+  return { assignedFastCode: checked.assignedFastCode };
 }
 
 async function authorizePinEdit(fastCode: string): Promise<PinActionError | null> {
@@ -266,6 +317,8 @@ export async function placeMapSiteAdditionalPin(input: {
   longitude: number;
   label?: string | null;
   category?: string | null;
+  /** Assign to Mapsite: Broker FAST Code (required for Agents). */
+  assignedFastCode?: string | null;
 }): Promise<PinActionOk | PinActionError> {
   const fastCode = input.fastCode.trim();
   const denied = await authorizePinEdit(fastCode);
@@ -284,6 +337,8 @@ export async function placeMapSiteAdditionalPin(input: {
     isDemonstration: mapsite.isDemonstration,
   });
   if (blocked) return { error: blocked };
+  const assignment = await resolvePinAssignment(mapsite, input.assignedFastCode);
+  if ("error" in assignment) return { error: assignment.error };
 
   const placed = await placeAdditionalPinRecord({
     mapsiteId: mapsite.id,
@@ -291,12 +346,14 @@ export async function placeMapSiteAdditionalPin(input: {
     longitude: input.longitude,
     label: input.label,
     category,
+    assignedFastCode: assignment.assignedFastCode,
     createdBy: await resolvePinActor(fastCode),
   });
   if (placed.error || !placed.dashboard) {
     return { error: placed.error || "Could not place PIN." };
   }
   revalidateMapSite(fastCode);
+  if (assignment.assignedFastCode) revalidateMapSite(assignment.assignedFastCode);
   return { dashboard: placed.dashboard };
 }
 
@@ -309,6 +366,8 @@ export async function fixMapSiteAdditionalPin(input: {
   label?: string | null;
   /** undefined = unchanged; null / "" = uncategorised. */
   category?: string | null;
+  /** Assign to Mapsite. undefined = unchanged; "" = own Mapsite only (not allowed for Agents). */
+  assignedFastCode?: string | null;
 }): Promise<PinActionOk | PinActionError> {
   const fastCode = input.fastCode.trim();
   const denied = await authorizePinEdit(fastCode);
@@ -327,6 +386,13 @@ export async function fixMapSiteAdditionalPin(input: {
     return { error: "Choose one of the listed categories." };
   }
 
+  let assignedFastCode: string | null | undefined;
+  if (input.assignedFastCode !== undefined) {
+    const assignment = await resolvePinAssignment(mapsite, input.assignedFastCode);
+    if ("error" in assignment) return { error: assignment.error };
+    assignedFastCode = assignment.assignedFastCode;
+  }
+
   const fixed = await fixAdditionalPinRecord({
     mapsiteId: mapsite.id,
     pinId: input.pinId,
@@ -334,11 +400,13 @@ export async function fixMapSiteAdditionalPin(input: {
     longitude: input.longitude,
     label: input.label,
     category,
+    assignedFastCode,
   });
   if (fixed.error || !fixed.dashboard) {
     return { error: fixed.error || "Could not update PIN." };
   }
   revalidateMapSite(fastCode);
+  if (assignedFastCode) revalidateMapSite(assignedFastCode);
   return { dashboard: fixed.dashboard };
 }
 
