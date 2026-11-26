@@ -27,7 +27,7 @@ type PersonalHomeNavProps = {
   /** Account holder pill before Home; passed for the signed-in owner only. */
   owner?: PersonalHomeOwnerPill | null;
   /** Owner/editor: place pins and enter their links. Hidden for public visitors. */
-  dashboard?: { unlocked: boolean; onOpen: () => void } | null;
+  dashboard?: { unlocked: boolean; onOpen: () => void; active?: boolean } | null;
   /** Talk to us. A WhatsApp (or other) href enables the button; otherwise it is grey. */
   talkHref?: string | null;
 };
@@ -109,7 +109,8 @@ export default function PersonalHomeNav({
             type="button"
             onClick={dashboard.onOpen}
             data-testid="personal-home-nav-dashboard"
-            className={`${LINK} hover:bg-white/15`}
+            aria-current={dashboard.active ? "page" : undefined}
+            className={`${LINK} ${dashboard.active ? "bg-white/20" : "hover:bg-white/15"}`}
           >
             {nav.dashboard}
           </button>

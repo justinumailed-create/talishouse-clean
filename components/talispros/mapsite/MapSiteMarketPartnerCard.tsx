@@ -213,7 +213,7 @@ function CardTools({
 
 /**
  * Claimed Mapsite left card:
- * FAST CODE → partner photo → client name → WhatsApp / Telegram.
+ * FAST CODE → partner photo → client name → Talk to us.
  * The photo block is a div (not a tall <button>) so the parent sidebar can scroll.
  * Interest links sit outside that control so they are not nested buttons.
  */

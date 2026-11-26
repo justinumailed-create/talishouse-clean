@@ -47,7 +47,6 @@ import {
   getMapSiteOnboardingPhase,
 } from "@/lib/talispros/mapsite-onboarding-phase";
 import { ROUTES } from "@/lib/routes";
-import { MARKETING_PARTNER_WHATSAPP_HREF } from "@/lib/talispros/marketing-partner-contact";
 import { isDemonstrationListing } from "@/lib/talispros/demo-mapsite";
 import MapSiteListingSidebar from "./MapSiteListingSidebar";
 import MapSiteMarketPartnerCard, {
@@ -89,11 +88,15 @@ import MapSitePinDashboard, {
   type PinEditorState,
 } from "@/components/talispros/mapsite/MapSitePinDashboard";
 import {
-  MAPSITE_DASHBOARD_MENU_ITEMS,
   emptyMapSiteOwnerCustomizations,
-  type MapSiteDashboardPanelId,
   type MapSiteOwnerCustomizations,
 } from "@/lib/talispros/mapsite-owner-customizations";
+import { resolvePinListingUrl } from "@/lib/talispros/mapsite-url-gate";
+import MapSiteOwnerDashboard, {
+  isMapSiteDashboardSectionId,
+  type MapSiteDashboardSectionId,
+} from "@/components/talispros/mapsite/MapSiteOwnerDashboard";
+import MapSiteListingLinksEditor from "@/components/talispros/mapsite/MapSiteListingLinksEditor";
 import { mapsiteAgencyLogoUrl } from "@/lib/talispros/mapsite-listing-media";
 import { useLocale } from "@/lib/i18n/client";
 import {
@@ -674,7 +677,12 @@ function MapSiteChrome({
     null
   );
   const [dashboardPanel, setDashboardPanel] =
-    useState<MapSiteDashboardPanelId | null>(null);
+    useState<MapSiteDashboardSectionId | null>(null);
+  const [, setDashboardHistory] = useState<MapSiteDashboardSectionId[]>([]);
+  const [dashboardRestoreKey, setDashboardRestoreKey] = useState(0);
+  const [listingUrl, setListingUrl] = useState(
+    () => resolvePinListingUrl(mapsite.mls_url, mapsite.broker_url) ?? "",
+  );
   const dashboardOpen = dashboardPanel !== null;
   const [ownerCustomizations, setOwnerCustomizations] =
     useState<MapSiteOwnerCustomizations>(
@@ -976,34 +984,75 @@ function MapSiteChrome({
   const dashboardManageable = dashboardUnlocked && canManageDashboard;
 
   // The PIN card opens only when a PIN is clicked — never from the Dashboard.
-  const openOwnerDashboard = useCallback(() => {
-    if (dashboardManageable) {
+  const syncDashboardQuery = useCallback((section: MapSiteDashboardSectionId | null) => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (section) url.searchParams.set("dashboard", section);
+    else url.searchParams.delete("dashboard");
+    window.history.replaceState(window.history.state, "", url);
+  }, []);
+
+  const openDashboardSection = useCallback(
+    (section: MapSiteDashboardSectionId, options?: { replace?: boolean }) => {
+      if (!dashboardManageable) return;
       setSelectedPinId(null);
-      setDashboardPanel("pins");
-    }
-  }, [dashboardManageable, setSelectedPinId]);
+      setDashboardPanel((current) => {
+        if (!options?.replace && current && current !== section) {
+          setDashboardHistory((history) => [...history, current]);
+        }
+        return section;
+      });
+      syncDashboardQuery(section);
+    },
+    [dashboardManageable, setSelectedPinId, syncDashboardQuery],
+  );
+
+  const openOwnerDashboard = useCallback(() => {
+    openDashboardSection("pins", { replace: true });
+  }, [openDashboardSection]);
 
   const closeDashboardPanel = useCallback(() => {
     setDashboardPanel(null);
+    setDashboardHistory([]);
     onPinEditorChange({ kind: "idle" });
-  }, [onPinEditorChange]);
+    syncDashboardQuery(null);
+  }, [onPinEditorChange, syncDashboardQuery]);
+
+  const backDashboard = useCallback(() => {
+    setDashboardHistory((history) => {
+      const previous = history.length ? history[history.length - 1] : null;
+      if (previous) {
+        setDashboardPanel(previous);
+        syncDashboardQuery(previous);
+        return history.slice(0, -1);
+      }
+      setDashboardPanel(null);
+      onPinEditorChange({ kind: "idle" });
+      syncDashboardQuery(null);
+      return [];
+    });
+  }, [onPinEditorChange, syncDashboardQuery]);
 
   useEffect(() => {
     if (!pinCheckoutStatus || !dashboardManageable) return;
-    setDashboardPanel("pins");
-  }, [pinCheckoutStatus, dashboardManageable]);
+    openDashboardSection("pins", { replace: true });
+  }, [pinCheckoutStatus, dashboardManageable, openDashboardSection]);
 
   useEffect(() => {
     if (!dashboardManageable) return;
     if (window.location.hash !== "#additional-pins") return;
-    setDashboardPanel("pins");
-  }, [dashboardManageable]);
+    openDashboardSection("pins", { replace: true });
+  }, [dashboardManageable, openDashboardSection]);
 
   useEffect(() => {
     if (!dashboardManageable) return;
     const requested = new URLSearchParams(window.location.search).get("dashboard");
-    const item = MAPSITE_DASHBOARD_MENU_ITEMS.find((entry) => entry.id === requested);
-    if (item) setDashboardPanel(item.id);
+    if (!requested) return;
+    if (requested === "1" || requested === "true") {
+      setDashboardPanel("pins");
+      return;
+    }
+    if (isMapSiteDashboardSectionId(requested)) setDashboardPanel(requested);
   }, [dashboardManageable]);
 
   useEffect(() => {
@@ -1216,10 +1265,13 @@ function MapSiteChrome({
           variant="full"
           dashboard={
             canManageDashboard
-              ? { unlocked: dashboardUnlocked, onOpen: openOwnerDashboard }
+              ? {
+                  unlocked: dashboardUnlocked,
+                  onOpen: openOwnerDashboard,
+                  active: dashboardOpen,
+                }
               : null
           }
-          talkHref={MARKETING_PARTNER_WHATSAPP_HREF}
         />
       ) : null}
       {isOwner ? (
@@ -1240,7 +1292,9 @@ function MapSiteChrome({
         <div
           ref={sidebarStackRef}
           className={
-            mobileOverlay
+            dashboardOpen
+              ? "hidden"
+              : mobileOverlay
               ? "pointer-events-none absolute inset-0 z-20 p-3"
               : compact
                 ? "pointer-events-none absolute inset-x-0 top-0 z-20 h-[min(52%,30rem)] p-3 sm:h-[min(48%,28rem)]"
@@ -1315,74 +1369,97 @@ function MapSiteChrome({
           </div>
         ) : null}
 
-        {dashboardPanel === "pins" && dashboardManageable ? (
-          <MapSitePinDashboard
-            open
-            mapsiteId={mapsite.id}
+        {dashboardPanel && dashboardManageable ? (
+          <MapSiteOwnerDashboard
             fastCode={mapsite.fast_code || ""}
-            accountTypeSegment={accountTypeSegment}
-            dashboard={pinDashboard}
-            categoryOptions={categoryOptions}
-            editor={pinEditor}
-            checkoutStatus={pinCheckoutStatus}
+            section={dashboardPanel}
+            onSection={(next) => openDashboardSection(next)}
+            onBack={backDashboard}
             onClose={closeDashboardPanel}
-            onDashboardChange={onPinDashboardChange}
-            onEditorChange={onPinEditorChange}
-          />
-        ) : null}
-
-        {dashboardPanel === "branding" && dashboardManageable ? (
-          <MapSiteLogoImageEditor
-            mapsiteId={mapsite.id}
-            fastCode={mapsite.fast_code || ""}
-            currentLogoUrl={mapsiteAgencyLogoUrl(branding.logoUrl)}
-            currentPartnerImageUrl={branding.partnerImageUrl}
-            defaultLogoUrl={mapsiteAgencyLogoUrl(mapsite.logo_url)}
-            defaultPartnerImageUrl={defaultPartnerImage}
-            defaultPartnerName={defaultPartnerName}
-            defaultPartnerTagline={DEFAULT_MAPSITE_PARTNER_TAGLINE}
-            defaultCardTitle={mapsiteAgencyDisplayName(mapsite.logo_url, mapsite.agency_name)}
-            defaultCardAddress={mapsite.property_address?.trim() || ""}
-            customizations={ownerCustomizations}
-            onClose={closeDashboardPanel}
-            onSaved={setOwnerCustomizations}
-          />
-        ) : null}
-
-        {dashboardPanel === "ebooks" && dashboardManageable ? (
-          <MapSiteEbookEditorPanel
-            mapsiteId={mapsite.id}
-            fastCode={mapsite.fast_code || ""}
-            onClose={closeDashboardPanel}
-          />
-        ) : null}
-
-        {dashboardPanel === "categories" && dashboardManageable ? (
-          <MapSiteCategoryEditor
-            mapsiteId={mapsite.id}
-            fastCode={mapsite.fast_code || ""}
-            context={rootContext}
-            onClose={closeDashboardPanel}
-            onContextChange={onRootContextChange}
-          />
-        ) : null}
-
-        {dashboardPanel === "partners" && dashboardManageable ? (
-          <MapSitePartnerPanel
-            mapsiteId={mapsite.id}
-            fastCode={mapsite.fast_code || ""}
-            context={rootContext}
-            onClose={closeDashboardPanel}
-            onContextChange={onRootContextChange}
-          />
-        ) : null}
-
-        {dashboardPanel === "bookshelf" && dashboardManageable ? (
-          <MapSiteBookshelfEditor
-            mapsiteId={mapsite.id}
-            fastCode={mapsite.fast_code || ""}
-            onClose={closeDashboardPanel}
-          />
+            onRestore={() => setDashboardRestoreKey((key) => key + 1)}
+            showMap={dashboardPanel === "pins"}
+          >
+            {dashboardPanel === "pins" ? (
+              <MapSitePinDashboard
+                key={`pins-${dashboardRestoreKey}`}
+                open
+                mapsiteId={mapsite.id}
+                fastCode={mapsite.fast_code || ""}
+                accountTypeSegment={accountTypeSegment}
+                dashboard={pinDashboard}
+                categoryOptions={categoryOptions}
+                editor={pinEditor}
+                checkoutStatus={pinCheckoutStatus}
+                onClose={closeDashboardPanel}
+                onDashboardChange={onPinDashboardChange}
+                onEditorChange={onPinEditorChange}
+              />
+            ) : null}
+            {dashboardPanel === "links" ? (
+              <MapSiteListingLinksEditor
+                key={`links-${dashboardRestoreKey}`}
+                mapsiteId={mapsite.id}
+                fastCode={mapsite.fast_code || ""}
+                initialListingUrl={listingUrl || null}
+                onOpenSection={(next) => openDashboardSection(next)}
+                onSaved={(url) => setListingUrl(url ?? "")}
+              />
+            ) : null}
+            {dashboardPanel === "branding" ? (
+              <MapSiteLogoImageEditor
+                key={`branding-${dashboardRestoreKey}`}
+                mapsiteId={mapsite.id}
+                fastCode={mapsite.fast_code || ""}
+                currentLogoUrl={mapsiteAgencyLogoUrl(branding.logoUrl)}
+                currentPartnerImageUrl={branding.partnerImageUrl}
+                defaultLogoUrl={mapsiteAgencyLogoUrl(mapsite.logo_url)}
+                defaultPartnerImageUrl={defaultPartnerImage}
+                defaultPartnerName={defaultPartnerName}
+                defaultPartnerTagline={DEFAULT_MAPSITE_PARTNER_TAGLINE}
+                defaultCardTitle={mapsiteAgencyDisplayName(mapsite.logo_url, mapsite.agency_name)}
+                defaultCardAddress={mapsite.property_address?.trim() || ""}
+                customizations={ownerCustomizations}
+                onClose={closeDashboardPanel}
+                onSaved={setOwnerCustomizations}
+              />
+            ) : null}
+            {dashboardPanel === "ebooks" ? (
+              <MapSiteEbookEditorPanel
+                key={`ebooks-${dashboardRestoreKey}`}
+                mapsiteId={mapsite.id}
+                fastCode={mapsite.fast_code || ""}
+                onClose={closeDashboardPanel}
+              />
+            ) : null}
+            {dashboardPanel === "categories" ? (
+              <MapSiteCategoryEditor
+                key={`categories-${dashboardRestoreKey}`}
+                mapsiteId={mapsite.id}
+                fastCode={mapsite.fast_code || ""}
+                context={rootContext}
+                onClose={closeDashboardPanel}
+                onContextChange={onRootContextChange}
+              />
+            ) : null}
+            {dashboardPanel === "partners" ? (
+              <MapSitePartnerPanel
+                key={`partners-${dashboardRestoreKey}`}
+                mapsiteId={mapsite.id}
+                fastCode={mapsite.fast_code || ""}
+                context={rootContext}
+                onClose={closeDashboardPanel}
+                onContextChange={onRootContextChange}
+              />
+            ) : null}
+            {dashboardPanel === "bookshelf" ? (
+              <MapSiteBookshelfEditor
+                key={`bookshelf-${dashboardRestoreKey}`}
+                mapsiteId={mapsite.id}
+                fastCode={mapsite.fast_code || ""}
+                onClose={closeDashboardPanel}
+              />
+            ) : null}
+          </MapSiteOwnerDashboard>
         ) : null}
 
         {visiblePins.some((pin) => pin.id === selectedPinId) && !dashboardOpen ? (

@@ -3,6 +3,7 @@
 import { useEffect, useId, type ReactNode } from "react";
 import { useT } from "@/lib/i18n/client";
 import { MAPSITE_DASHBOARD_MENU_ITEMS } from "@/lib/talispros/mapsite-owner-customizations";
+import { useMapSiteDashboardEmbedded } from "@/components/talispros/mapsite/MapSiteDashboardChrome";
 
 type MapSiteDashboardPanelProps = {
   title: string;
@@ -28,6 +29,7 @@ export default function MapSiteDashboardPanel({
 }: MapSiteDashboardPanelProps) {
   const titleId = useId();
   const t = useT();
+  const embedded = useMapSiteDashboardEmbedded();
   const menuId = MAPSITE_DASHBOARD_MENU_ITEMS.find((item) => item.label === title)?.id;
   const localizedTitle = menuId ? t.mapsite.dashboardMenu[menuId] : title;
 
@@ -38,6 +40,17 @@ export default function MapSiteDashboardPanel({
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [onClose]);
+
+  if (embedded) {
+    return (
+      <div role="region" aria-labelledby={titleId} className="space-y-4 text-sm">
+        <div className="sr-only" id={titleId}>
+          {localizedTitle}
+        </div>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <section

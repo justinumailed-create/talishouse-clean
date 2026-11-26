@@ -18,6 +18,7 @@ import {
 } from "@/lib/talispros/mapsite-pin-categories";
 import { derivativeNeedsRoot } from "@/lib/talispros/mapsite-root-partners";
 import type { MapSiteRootContext } from "@/lib/talispros/mapsite-root-partners-service";
+import { useMapSiteDashboardEmbedded } from "@/components/talispros/mapsite/MapSiteDashboardChrome";
 
 type PanelProps = {
   mapsiteId: string;
@@ -42,6 +43,15 @@ function PanelShell({
 }) {
   const t = useT();
   const titleId = useId();
+  const embedded = useMapSiteDashboardEmbedded();
+  if (embedded) {
+    return (
+      <div role="region" aria-labelledby={titleId} data-testid={testId} className="space-y-4 text-sm">
+        <div className="sr-only" id={titleId}>{title}</div>
+        {children}
+      </div>
+    );
+  }
   return (
     <section
       role="dialog"

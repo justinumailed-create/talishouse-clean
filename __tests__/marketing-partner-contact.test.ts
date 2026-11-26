@@ -19,7 +19,7 @@ describe("marketing partner contact", () => {
     expect(MARKETING_PARTNER_TELEGRAM_HREF).toBe("https://t.me/+19023172223");
   });
 
-  it("keeps Marketing Partner WhatsApp / Telegram on Mapsite cards only", () => {
+  it("keeps Talk to us (WhatsApp) on Mapsite cards only", () => {
     const card = readFileSync(
       join(
         process.cwd(),
@@ -47,6 +47,10 @@ describe("marketing partner contact", () => {
     expect(sidebar).not.toContain("MARKETING_PARTNER_ROLE_LABEL");
     expect(links).not.toContain("Express an Interest");
     expect(links).toContain("MARKETING_PARTNER_WHATSAPP_HREF");
-    expect(links).toContain("MARKETING_PARTNER_TELEGRAM_HREF");
+    expect(links).toContain("mapsite-card-talk");
+    expect(links).toContain("navTalk");
+    expect(links).not.toContain("MARKETING_PARTNER_TELEGRAM_HREF");
+    expect(links).not.toContain(">Telegram<");
+    expect(links).not.toContain(">WhatsApp<");
   });
 });

@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { updateMapSiteResources } from "@/lib/talispros/mapsite-platform";
+import { personalHomePath } from "@/lib/talispros/personal-home";
 import { requireMapSiteEditAccess } from "@/lib/mapsite-edit-auth";
 import { getTalisBooksBookshelf } from "@/lib/talisbooks/library";
 import { displayShelfBookTitle } from "@/lib/talisbooks/book-title";
@@ -37,6 +39,9 @@ function revalidateOwnerSurfaces(fastCode: string) {
   if (!code) return;
   revalidatePath(`/mapsite/${code}`);
   revalidatePath(`/mapsite/${code}/map`);
+  revalidatePath(`/map/${code}`);
+  revalidatePath(personalHomePath(code));
+  revalidatePath(`/${code}`);
   revalidatePath(`/talispros/mapsites/${code}`);
   revalidatePath(`/talisbooks/fast/${code}`);
 }
@@ -189,4 +194,43 @@ export async function saveBookshelfOrderAction(input: {
   if (!saved.customizations) return { error: saved.error || "Could not save order." };
   revalidateOwnerSurfaces(auth.fastCode);
   return { books: await loadShelfBooks(auth.fastCode) };
+}
+
+function normalizeOwnerListingUrl(value: string): { url: string | null; invalid: boolean } {
+  const raw = value.trim();
+  if (!raw) return { url: null, invalid: false };
+  const href = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  try {
+    const parsed = new URL(href);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return { url: null, invalid: true };
+    }
+    if (parsed.hostname.length < 1) return { url: null, invalid: true };
+    return { url: parsed.toString(), invalid: false };
+  } catch {
+    return { url: null, invalid: true };
+  }
+}
+
+/**
+ * Owner: set the PIN-card URL button (MLS / brokerage). Empty clears it
+ * (the button stays grey). Writes mls_url; clearing also drops broker_url
+ * so a leftover brokerage link does not keep the button live.
+ */
+export async function saveMapSiteListingLinksAction(input: {
+  mapsiteId: string;
+  fastCode: string;
+  listingUrl: string;
+}): Promise<{ listingUrl: string | null } | ActionError> {
+  const auth = await authorizeOwner(input);
+  if ("error" in auth) return auth;
+  const parsed = normalizeOwnerListingUrl(input.listingUrl);
+  if (parsed.invalid) return { error: "Enter a valid https:// web address." };
+  const result = await updateMapSiteResources(auth.mapsiteId, {
+    mls_url: parsed.url,
+    ...(parsed.url ? {} : { broker_url: null }),
+  });
+  if (!result.ok) return { error: result.error };
+  revalidateOwnerSurfaces(auth.fastCode);
+  return { listingUrl: result.mapsite.mls_url || result.mapsite.broker_url };
 }

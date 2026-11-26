@@ -21,6 +21,7 @@ import MapSitePlaceSearch, {
 } from "@/components/talispros/mapsite/MapSitePlaceSearch";
 import type { PinCategoryOption } from "@/lib/talispros/mapsite-pin-categories";
 import SamCartWebCheckout from "@/components/talisu/SamCartWebCheckout";
+import { useMapSiteDashboardEmbedded } from "@/components/talispros/mapsite/MapSiteDashboardChrome";
 
 export type PinEditorState =
   | { kind: "idle" }
@@ -57,6 +58,7 @@ export default function MapSitePinDashboard({
 }: MapSitePinDashboardProps) {
   const titleId = useId();
   const t = useT();
+  const embedded = useMapSiteDashboardEmbedded();
   const d = t.mapsite.pinDashboard;
   const quantityId = useId();
   const [quantity, setQuantity] = useState(1);
@@ -256,34 +258,8 @@ export default function MapSitePinDashboard({
         ? d.checkoutCancelled
         : null;
 
-  return (
-    <section
-      role="dialog"
-      aria-labelledby={titleId}
-      className="pointer-events-auto absolute left-3 top-3 z-30 flex max-h-[min(calc(100%-1.5rem),44rem)] w-[min(calc(100%-1.5rem),22rem)] flex-col overflow-hidden rounded-2xl bg-white text-neutral-900 shadow-xl ring-1 ring-black/5 sm:left-4 sm:top-4"
-    >
-      <header className="flex items-start justify-between gap-3 border-b border-neutral-200 px-4 py-3">
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
-            Mapsites
-          </p>
-          <h2 id={titleId} className="text-sm font-semibold">
-            {d.title}
-          </h2>
-          <p className="mt-0.5 font-mono text-[11px] text-neutral-500">
-            FAST Code™ {fastCode.trim().toUpperCase()}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-md px-2 py-1 text-xs font-medium text-neutral-500 hover:bg-neutral-100"
-        >
-          {t.mapsite.close}
-        </button>
-      </header>
-
-      <div className="space-y-4 overflow-y-auto px-4 py-3 text-sm">
+  const body = (
+      <div className={embedded ? "space-y-4 text-sm" : "space-y-4 overflow-y-auto px-4 py-3 text-sm"}>
         {checkoutNote ? (
           <p className="rounded-md bg-neutral-50 px-3 py-2 text-xs text-neutral-600">
             {checkoutNote}
@@ -657,6 +633,46 @@ export default function MapSitePinDashboard({
           )}
         </div>
       </div>
+  );
+
+  if (embedded) {
+    return (
+      <div role="region" aria-labelledby={titleId}>
+        <div className="sr-only" id={titleId}>
+          {d.title}
+        </div>
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <section
+      role="dialog"
+      aria-labelledby={titleId}
+      className="pointer-events-auto absolute left-3 top-3 z-30 flex max-h-[min(calc(100%-1.5rem),44rem)] w-[min(calc(100%-1.5rem),22rem)] flex-col overflow-hidden rounded-2xl bg-white text-neutral-900 shadow-xl ring-1 ring-black/5 sm:left-4 sm:top-4"
+    >
+      <header className="flex items-start justify-between gap-3 border-b border-neutral-200 px-4 py-3">
+        <div>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+            Mapsites
+          </p>
+          <h2 id={titleId} className="text-sm font-semibold">
+            {d.title}
+          </h2>
+          <p className="mt-0.5 font-mono text-[11px] text-neutral-500">
+            FAST Code™ {fastCode.trim().toUpperCase()}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-md px-2 py-1 text-xs font-medium text-neutral-500 hover:bg-neutral-100"
+        >
+          {t.mapsite.close}
+        </button>
+      </header>
+      {body}
     </section>
   );
 }

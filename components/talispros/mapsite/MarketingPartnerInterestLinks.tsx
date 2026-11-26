@@ -1,60 +1,50 @@
 "use client";
 
-import {
-  MARKETING_PARTNER_TELEGRAM_HREF,
-  MARKETING_PARTNER_WHATSAPP_HREF,
-} from "@/lib/talispros/marketing-partner-contact";
+import { MARKETING_PARTNER_WHATSAPP_HREF } from "@/lib/talispros/marketing-partner-contact";
 import { useT } from "@/lib/i18n/client";
-
-const primaryLinkClass =
-  "inline-flex min-h-8 items-center justify-center rounded-full bg-neutral-900 px-3 text-[12px] font-medium text-white transition hover:bg-neutral-800";
-
-const secondaryLinkClass =
-  "inline-flex min-h-8 items-center justify-center rounded-full bg-white px-3 text-[12px] font-medium text-neutral-900 ring-1 ring-black/10 transition hover:bg-neutral-50";
 
 interface MarketingPartnerInterestLinksProps {
   className?: string;
   align?: "start" | "center";
-  /** Doug's card keeps the links and drops the Team Member heading. */
+  /** Kept for callers; the Team Member heading is no longer shown. */
   hideRole?: boolean;
 }
 
+/**
+ * Left-card contact: a single Talk to us button (WhatsApp), replacing the
+ * previous separate chat buttons.
+ */
 export default function MarketingPartnerInterestLinks({
   className = "",
   align = "center",
-  hideRole = false,
 }: MarketingPartnerInterestLinksProps) {
-  const alignment = align === "start" ? "items-start text-left" : "items-center text-center";
-  // Ralf (Oct 17): these still reach Ralf, identified as a "Team Member".
-  const teamMember = useT().mapsite.leftCard.teamMember;
+  const t = useT();
+  const alignment = align === "start" ? "justify-start" : "justify-center";
+  const href = MARKETING_PARTNER_WHATSAPP_HREF;
 
   return (
-    <div className={`${alignment} flex flex-col ${className}`} data-testid="team-member-links">
-      {hideRole ? null : (
-        <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-neutral-500">
-          {teamMember}
-        </p>
+    <div className={`flex ${alignment} ${className}`} data-testid="team-member-links">
+      {href ? (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-testid="mapsite-card-talk"
+          aria-label={t.personalHome.navTalkAria}
+          className="inline-flex min-h-8 items-center justify-center rounded-full bg-[#046BD9] px-4 text-[12px] font-semibold text-white transition hover:bg-[#0358b3]"
+        >
+          {t.personalHome.navTalk}
+        </a>
+      ) : (
+        <span
+          data-testid="mapsite-card-talk"
+          aria-disabled="true"
+          aria-label={t.personalHome.navTalk}
+          className="inline-flex min-h-8 cursor-not-allowed items-center justify-center rounded-full bg-neutral-200 px-4 text-[12px] font-semibold text-neutral-500"
+        >
+          {t.personalHome.navTalk}
+        </span>
       )}
-      <div className="flex flex-wrap gap-2">
-        <a
-          href={MARKETING_PARTNER_WHATSAPP_HREF}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={primaryLinkClass}
-          aria-label="WhatsApp"
-        >
-          WhatsApp
-        </a>
-        <a
-          href={MARKETING_PARTNER_TELEGRAM_HREF}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={secondaryLinkClass}
-          aria-label="Telegram"
-        >
-          Telegram
-        </a>
-      </div>
     </div>
   );
 }

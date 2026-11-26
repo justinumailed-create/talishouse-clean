@@ -353,16 +353,20 @@ describe("personal home v2: entry points, account pill, logo", () => {
     expect(read("components/talispros/TalisprosHomeGate.tsx")).toContain("Tsplits™\n");
   });
 
-  it("puts Home, Mapsite, Dashboard and Talk to us in the main Mapsite nav, without a lower bar", () => {
+  it("puts Home, Mapsite and Dashboard in the main Mapsite nav, without Talk to us or a lower bar", () => {
     const app = read("components/talispros/mapsite/MapSiteApplication.tsx");
     expect(app).toContain('variant="full"');
     expect(app).not.toContain('variant={claimed ? "sub" : "full"}');
     expect(app).toContain("canManageDashboard");
-    expect(app).toContain("MARKETING_PARTNER_WHATSAPP_HREF");
+    expect(app).not.toContain("talkHref=");
     expect(app).not.toContain("personal-home-subnav");
+    expect(app).toContain("MapSiteOwnerDashboard");
     const nav = read("components/talispros/personal-home/PersonalHomeNav.tsx");
     expect(nav).toContain('data-testid="personal-home-nav-dashboard"');
-    expect(nav).toContain('data-testid="personal-home-nav-talk"');
-    expect(nav).toContain("navTalk");
+    const card = read("components/talispros/mapsite/MarketingPartnerInterestLinks.tsx");
+    expect(card).toContain("mapsite-card-talk");
+    expect(card).toContain("navTalk");
+    expect(card).toContain("MARKETING_PARTNER_WHATSAPP_HREF");
+    expect(card).not.toContain("Telegram");
   });
 });
