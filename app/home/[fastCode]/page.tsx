@@ -151,21 +151,22 @@ export default async function PersonalHomePage({
       data-gate={facts.trace}
       data-agent={agentAccess ? "1" : "0"}
     >
-      <PersonalHomeNav
-        homeHref={data.homeHref}
-        mapsiteHref={mapsiteHref}
-        active="home"
-        owner={
-          canEdit
-            ? {
-                name: resolved.headline || data.displayName,
-                imageUrl: resolved.imageUrl,
-                editHref: personalHomeEditPath(data.code),
-              }
-            : null
-        }
-      />
-      <main className="flex-1">
+      <div className="flex min-h-dvh flex-col">
+        <PersonalHomeNav
+          homeHref={data.homeHref}
+          mapsiteHref={mapsiteHref}
+          active="home"
+          owner={
+            canEdit
+              ? {
+                  name: resolved.headline || data.displayName,
+                  imageUrl: resolved.imageUrl,
+                  editHref: personalHomeEditPath(data.code),
+                }
+              : null
+          }
+        />
+        <main className="flex flex-1 flex-col [&>.talis-adviser]:flex-1">
         <PersonalHomeBody
           fastCode={data.code}
           kicker={resolved.kicker}
@@ -236,7 +237,8 @@ export default async function PersonalHomePage({
             </div>
           ) : null}
         </PersonalHomeBody>
-      </main>
+        </main>
+      </div>
       <footer className="border-t border-black/10 bg-white px-4 py-4">
         <div className="flex justify-center">
           <LegalLinks />

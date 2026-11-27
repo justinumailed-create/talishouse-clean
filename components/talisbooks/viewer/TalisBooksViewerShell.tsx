@@ -62,6 +62,12 @@ interface TalisBooksViewerShellProps {
   initialNavIndex?: number;
   /** Server-checked registered owner. Platform files stay locked until this is true. */
   platformLinksUnlocked?: boolean;
+  /** Custom back link target (e.g. the hidden bookshelf). Shows the back link when set. */
+  backHref?: string;
+  /** Label for `backHref`. Defaults to "Back to Bookshelf". */
+  backLabel?: string;
+  /** Hide the PowerPoint / Keynote / Google Slides header controls. */
+  hidePlatformLinks?: boolean;
 }
 
 function withCoverBranding(book: TalisBooksViewerBook): TalisBooksViewerBook {
@@ -81,6 +87,9 @@ export default function TalisBooksViewerShell({
   initialViewMode = "spread",
   initialNavIndex = 0,
   platformLinksUnlocked = false,
+  backHref,
+  backLabel,
+  hidePlatformLinks = false,
 }: TalisBooksViewerShellProps) {
   const showClaim = !fromBookshelf && !hideClaim;
   const tv = useT().viewer;
@@ -383,7 +392,7 @@ export default function TalisBooksViewerShell({
       <header
         className={[
           "talisbooks-viewer__header",
-          fromBookshelf ? "talisbooks-viewer__header--with-back" : "",
+          fromBookshelf || backHref ? "talisbooks-viewer__header--with-back" : "",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -396,6 +405,15 @@ export default function TalisBooksViewerShell({
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             <span>{tv.backToBookshelf}</span>
+          </Link>
+        ) : backHref ? (
+          <Link
+            href={backHref}
+            className="talisbooks-viewer__back talisbooks-viewer__back--bookshelf"
+            data-testid="viewer-back-link"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <span>{backLabel ?? tv.backToBookshelf}</span>
           </Link>
         ) : null}
         <div className="talisbooks-viewer__heading">
@@ -437,7 +455,7 @@ export default function TalisBooksViewerShell({
               {tv.downloadPdf}
             </a>
           ) : null}
-          {isPinnedShowcase ? null : (
+          {isPinnedShowcase || hidePlatformLinks ? null : (
             <EbookPlatformLinks unlocked={platformLinksUnlocked} />
           )}
           {isPinnedShowcase ? (

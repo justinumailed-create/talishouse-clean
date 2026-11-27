@@ -480,15 +480,19 @@ describe("personal home v2: entry points, account pill, logo", () => {
     expect(read("app/talisbooks/fast/actions.ts")).toContain("connectedBookshelfPath");
   });
 
-  it("shows the account pill before Home for owners only and opens the editor", () => {
+  it("shows the account pill before Home for owners only as non-clickable display", () => {
     const nav = read("components/talispros/personal-home/PersonalHomeNav.tsx");
     expect(nav).toContain('data-testid="personal-home-nav-owner"');
     expect(nav.indexOf("{ownerPill}")).toBeLessThan(nav.indexOf('key: "home"'));
     expect(nav).toContain("rounded-xl bg-white/20");
     expect(nav).toContain("h-7 w-7 shrink-0 rounded-full bg-white object-cover ring-1 ring-white/40");
+    expect(nav).not.toContain("owner.editHref");
+    expect(nav).not.toContain("PERSONAL_HOME_OPEN_EDITOR_EVENT");
     expect(read("components/talisu/AdviserLayout.tsx")).toContain('bg-[#2a2a2a]');
     const page = read("app/home/[fastCode]/page.tsx");
-    expect(page).toContain("canEdit\n            ? {");
+    expect(page).toMatch(/canEdit\s*\?\s*\{/);
+    expect(page).toContain("<div className=\"flex min-h-dvh flex-col\">");
+    expect(page).toContain("[&>.talis-adviser]:flex-1");
     expect(page).toContain('initialOpen={query.edit === "1"}');
     const helper = read("lib/talispros/personal-home-page.ts");
     expect(helper).toContain("if (!(await canEditPersonalHome(code))) return null;");

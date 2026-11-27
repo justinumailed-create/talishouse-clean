@@ -8,6 +8,7 @@ import TalisBotChat from "@/components/TalisBotChat";
 import { shouldHidePublicStorefrontChrome } from "@/lib/admin-paths";
 import { isProductCataloguePath } from "@/lib/product-flipbook/paths";
 import { isShortHomeFastCode } from "@/lib/talispros/fast-code-shape";
+import { isHiddenBookshelfPath } from "@/lib/talisbooks/hidden-bookshelf-paths";
 
 export default function RootShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -55,6 +56,7 @@ export default function RootShell({ children }: { children: React.ReactNode }) {
     pathname.startsWith("/mapsite") ||
     pathname.startsWith("/crm/") ||
     isShortHomeLink ||
+    isHiddenBookshelfPath(pathname) ||
     isAppEntry;
   const hideTalisBot =
     hideStorefrontChrome ||
