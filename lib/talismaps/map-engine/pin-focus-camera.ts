@@ -1,18 +1,15 @@
-/** One Google zoom step is 2×. Four steps zooms a regional overview in close on a pin. */
-export const PIN_FOCUS_ZOOM_STEP = 4;
-/** Floor so a wide auto-fit still opens a tight, readable satellite view. */
-export const PIN_FOCUS_MIN_ZOOM = 15;
+/** Target zoom when clicking a Mapsite pin (regional overview at zoom 8). */
+export const PIN_FOCUS_TARGET_ZOOM = 8;
+/** Kept for compatibility with callers/tests referencing zoom constants. */
+export const PIN_FOCUS_ZOOM_STEP = 0;
+export const PIN_FOCUS_MIN_ZOOM = PIN_FOCUS_TARGET_ZOOM;
 /** Satellite stays readable; do not step past this. */
 export const PIN_FOCUS_MAX_ZOOM = 19;
 
 const TILE = 256;
 
-export function pinFocusZoom(currentZoom: number): number {
-  if (!Number.isFinite(currentZoom)) return PIN_FOCUS_MIN_ZOOM;
-  return Math.min(
-    PIN_FOCUS_MAX_ZOOM,
-    Math.max(PIN_FOCUS_MIN_ZOOM, currentZoom + PIN_FOCUS_ZOOM_STEP),
-  );
+export function pinFocusZoom(_currentZoom: number): number {
+  return PIN_FOCUS_TARGET_ZOOM;
 }
 
 function worldPoint(latitude: number, longitude: number): { x: number; y: number } {

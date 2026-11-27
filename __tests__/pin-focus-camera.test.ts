@@ -13,19 +13,16 @@ import {
 const read = (path: string) => readFileSync(resolve(path), "utf8");
 
 describe("pin focus camera", () => {
-  it("steps four zoom levels, stays at least 15, and stops at the satellite cap", () => {
-    expect(PIN_FOCUS_ZOOM_STEP).toBe(4);
-    expect(PIN_FOCUS_MIN_ZOOM).toBe(15);
+  it("sets pin click-zoom to level 8 regardless of current zoom", () => {
+    expect(PIN_FOCUS_ZOOM_STEP).toBe(0);
+    expect(PIN_FOCUS_MIN_ZOOM).toBe(8);
     expect(PIN_FOCUS_MAX_ZOOM).toBe(19);
-    // Old step of 2: 12 -> 14, 13 -> 15, 15 -> 17, 18 -> 19.
-    // New step of 4 plus a floor of 15: tighter on the clicked pin.
-    expect(pinFocusZoom(9)).toBe(15);  // was 11 (wide auto-fit)
-    expect(pinFocusZoom(11)).toBe(15); // was 13
-    expect(pinFocusZoom(12)).toBe(16); // was 14
-    expect(pinFocusZoom(13)).toBe(17); // was 15
-    expect(pinFocusZoom(15)).toBe(19); // was 17
-    expect(pinFocusZoom(18)).toBe(19);
-    expect(pinFocusZoom(19)).toBe(19);
+    expect(pinFocusZoom(6)).toBe(8);
+    expect(pinFocusZoom(8)).toBe(8);
+    expect(pinFocusZoom(10)).toBe(8);
+    expect(pinFocusZoom(15)).toBe(8);
+    expect(pinFocusZoom(19)).toBe(8);
+    expect(pinFocusZoom(Number.NaN)).toBe(8);
   });
 
   it("moves the camera north when the pin must sit below center", () => {
