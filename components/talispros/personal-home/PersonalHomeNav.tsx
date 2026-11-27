@@ -73,7 +73,7 @@ export default function PersonalHomeNav({
         alt=""
         width={28}
         height={28}
-        className="h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-white/40"
+        className="h-7 w-7 shrink-0 rounded-full bg-white object-cover ring-1 ring-white/40"
         draggable={false}
       />
       <span className="hidden min-w-0 truncate sm:inline">{owner.name}</span>

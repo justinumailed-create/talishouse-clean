@@ -7,7 +7,7 @@
 export const PERSONAL_HOME_PATH = "/home";
 
 export const PERSONAL_HOME_LIMITS = {
-  kicker: 80,
+  kicker: 120,
   headline: 120,
   contactName: 80,
   contactPhone: 40,
@@ -17,6 +17,34 @@ export const PERSONAL_HOME_LIMITS = {
   buttonHref: 500,
   buttons: 3,
 } as const;
+
+/** Visual wrap for the public kicker: at most 70 characters per line. */
+export const PERSONAL_HOME_KICKER_WRAP = 70;
+
+/**
+ * Word-aware kicker wrap. Lines longer than 70 characters break at the last
+ * space at or before 70. A single word longer than 70 is hard-broken at 70.
+ */
+export function formatPersonalHomeKicker(text: string): string {
+  const value = text.replace(/\s+/g, " ").trim();
+  if (value.length <= PERSONAL_HOME_KICKER_WRAP) return value;
+  const lines: string[] = [];
+  let rest = value;
+  while (rest.length > PERSONAL_HOME_KICKER_WRAP) {
+    const head = rest.slice(0, PERSONAL_HOME_KICKER_WRAP);
+    const space = head.lastIndexOf(" ");
+    if (space > 0) {
+      lines.push(head.slice(0, space));
+      rest = rest.slice(space + 1);
+    } else {
+      lines.push(rest.slice(0, PERSONAL_HOME_KICKER_WRAP));
+      rest = rest.slice(PERSONAL_HOME_KICKER_WRAP);
+    }
+  }
+  if (rest) lines.push(rest);
+  return lines.join("\n");
+}
+
 
 /** What a home-page button opens. Missing `kind` on older rows means a web link. */
 export const PERSONAL_HOME_OPEN_KINDS = [

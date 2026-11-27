@@ -18,6 +18,9 @@ import {
   coalescePersonalHomeContact,
   personalHomeTelHref,
   personalHomeMailtoHref,
+  formatPersonalHomeKicker,
+  PERSONAL_HOME_KICKER_WRAP,
+  PERSONAL_HOME_LIMITS,
   mapsiteBrokerageDisplayName,
   personalHomePath,
   resolvePersonalHome,
@@ -346,7 +349,11 @@ describe("personal home wiring", () => {
     expect(card).toContain("mapsite-card-contact-name");
     expect(card).toContain("mapsite-card-contact-phone");
     expect(card).toContain("mapsite-card-contact-email");
-    expect(card).toContain("stopPropagation");
+    expect(card).toContain("ProtectedContactReveal");
+    expect(card).not.toContain("personalHomeMailtoHref");
+    expect(
+      readFileSync(join(root, "components/talispros/personal-home/ProtectedContactReveal.tsx"), "utf8"),
+    ).toContain("stopPropagation");
     const pageHelper = readFileSync(join(root, "lib/talispros/personal-home-page.ts"), "utf8");
     expect(pageHelper).toContain("phone");
     expect(pageHelper).toContain("email");
@@ -478,6 +485,8 @@ describe("personal home v2: entry points, account pill, logo", () => {
     expect(nav).toContain('data-testid="personal-home-nav-owner"');
     expect(nav.indexOf("{ownerPill}")).toBeLessThan(nav.indexOf('key: "home"'));
     expect(nav).toContain("rounded-xl bg-white/20");
+    expect(nav).toContain("h-7 w-7 shrink-0 rounded-full bg-white object-cover ring-1 ring-white/40");
+    expect(read("components/talisu/AdviserLayout.tsx")).toContain('bg-[#2a2a2a]');
     const page = read("app/home/[fastCode]/page.tsx");
     expect(page).toContain("canEdit\n            ? {");
     expect(page).toContain('initialOpen={query.edit === "1"}');
@@ -507,5 +516,28 @@ describe("personal home v2: entry points, account pill, logo", () => {
     expect(card).toContain("navTalk");
     expect(card).toContain("MARKETING_PARTNER_WHATSAPP_HREF");
     expect(card).not.toContain("Telegram");
+  });
+  it("allows a 120-character kicker and wraps word-aware at 70 characters", () => {
+    expect(PERSONAL_HOME_LIMITS.kicker).toBe(120);
+    expect(PERSONAL_HOME_KICKER_WRAP).toBe(70);
+    expect(formatPersonalHomeKicker("Welcome")).toBe("Welcome");
+    expect(formatPersonalHomeKicker("  short line  ")).toBe("short line");
+    const seventy = "x".repeat(70);
+    expect(formatPersonalHomeKicker(seventy)).toBe(seventy);
+    const words =
+      "Welcome to the personal home page of a long introduction that should wrap before seventy characters here";
+    const wrapped = formatPersonalHomeKicker(words);
+    const [first, ...rest] = wrapped.split("\n");
+    expect(first.length).toBeLessThanOrEqual(70);
+    expect(rest.join(" ").length).toBeGreaterThan(0);
+    expect(wrapped.replace(/\n/g, " ")).toBe(words);
+    const longWord = "A " + "w".repeat(80) + " end";
+    const hard = formatPersonalHomeKicker(longWord);
+    const lines = hard.split("\n");
+    expect(lines[0].length).toBeLessThanOrEqual(70);
+    expect(lines.some((line) => line.startsWith("w"))).toBe(true);
+    expect(formatPersonalHomeKicker("a".repeat(120)).split("\n").every((line) => line.length <= 70)).toBe(
+      true,
+    );
   });
 });

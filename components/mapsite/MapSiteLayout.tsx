@@ -30,7 +30,10 @@ export default function MapSiteLayout({
         <MapSiteTopBar
           propertyTitle={data.propertyTitle}
           logoUrl={data.logoUrl}
-          agent={data.agent}
+          agent={{ ...data.agent, email: "", phone: "" }}
+          fastCode={data.fastCode}
+          hasPhone={Boolean(data.agent.phone?.trim())}
+          hasEmail={Boolean(data.agent.email?.trim())}
         />
 
         <main className="flex flex-col">
@@ -56,7 +59,7 @@ export default function MapSiteLayout({
         <MapSiteFooter
           fastCode={data.fastCode}
           agentName={data.agent.name}
-          email={data.agent.email}
+          hasEmail={Boolean(data.agent.email?.trim())}
           updatedAt={data.updatedAt}
         />
       </div>

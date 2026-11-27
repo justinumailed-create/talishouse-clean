@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import {
@@ -114,6 +114,15 @@ import type { PersonalHomeOwnerPill } from "@/lib/talispros/personal-home";
 import type { PersonalHomePublicCard } from "@/lib/talispros/personal-home-page";
 import { MapSiteCategoryEditor, MapSitePartnerPanel } from "./MapSiteRootPanels";
 import { systemMapsiteOpeningZoom } from "@/lib/talispros/system-mapsite-zoom";
+import {
+  MAPSITE_PIN_BUFFER_KM,
+  bufferedPinBounds,
+  mapsiteInitialFitPadding,
+  shouldApplyMapsiteOpeningFit,
+  viewportForMapsitePins,
+} from "@/lib/talispros/mapsite-initial-bounds";
+
+export { MAPSITE_PIN_BUFFER_KM, bufferedPinBounds };
 
 const MapEngineCanvas = dynamic(
   () => import("@/components/talismaps/map-engine/MapEngineCanvas"),
@@ -134,35 +143,6 @@ const EMPTY_ROOT_CONTEXT: MapSiteRootContext = {
 };
 
 /** Owner Dashboard dropdown: Ebook Editor, Logo & Card Editor, PIN Dashboard, Bookshelf Editor. */
-/** Map always frames every PIN of the FAST Code plus this buffer (kilometres). */
-export const MAPSITE_PIN_BUFFER_KM = 32;
-const KM_PER_DEGREE_LAT = 111.0;
-
-/**
- * Bounding corners of `points` padded by `km` on every side (used with
- * fitToCoordinates so all PINs show with a ~32 km buffer around them).
- */
-export function bufferedPinBounds(
-  points: ReadonlyArray<{ latitude: number; longitude: number }>,
-  km = MAPSITE_PIN_BUFFER_KM,
-): Array<{ latitude: number; longitude: number }> {
-  const valid = points.filter(
-    (p) => Number.isFinite(p.latitude) && Number.isFinite(p.longitude),
-  );
-  if (valid.length === 0) return [];
-  const lats = valid.map((p) => p.latitude);
-  const lngs = valid.map((p) => p.longitude);
-  const minLat = Math.min(...lats);
-  const maxLat = Math.max(...lats);
-  const midLat = (minLat + maxLat) / 2;
-  const dLat = km / KM_PER_DEGREE_LAT;
-  const dLng =
-    km / (KM_PER_DEGREE_LAT * Math.max(0.05, Math.cos((midLat * Math.PI) / 180)));
-  return [
-    { latitude: Math.max(-85, minLat - dLat), longitude: Math.min(...lngs) - dLng },
-    { latitude: Math.min(85, maxLat + dLat), longitude: Math.max(...lngs) + dLng },
-  ];
-}
 
 /** Ignore residual camera events right after programmatic pin focus. */
 const FOCUS_GESTURE_GUARD_MS = 900;
@@ -299,6 +279,7 @@ export default function MapSiteApplication({
     [],
   );
   const focusingRef = useRef(false);
+  const userMovedMapRef = useRef(false);
   const focusTimerRef = useRef<number | null>(null);
   const showClaimedNav = !isClaimable(mapsite.status);
 
@@ -408,6 +389,7 @@ export default function MapSiteApplication({
 
   const dismissIfUserGesture = useCallback(() => {
     if (focusingRef.current) return;
+    userMovedMapRef.current = true;
     setSelectedPinId(null);
   }, []);
 
@@ -547,6 +529,7 @@ export default function MapSiteApplication({
         selectedPinId={selectedPinId}
         setSelectedPinId={setSelectedPinId}
         beginFocusGuard={beginFocusGuard}
+        userMovedMapRef={userMovedMapRef}
         showClaimedNav={showClaimedNav}
         onLockCenterOffsetChange={setLockCenterOffsetSafe}
         pinDashboard={pinDashboard}
@@ -594,6 +577,7 @@ function MapSiteChrome({
   selectedPinId,
   setSelectedPinId,
   beginFocusGuard,
+  userMovedMapRef,
   showClaimedNav,
   onLockCenterOffsetChange,
   pinDashboard,
@@ -636,6 +620,7 @@ function MapSiteChrome({
   selectedPinId: string | null;
   setSelectedPinId: (id: string | null) => void;
   beginFocusGuard: () => void;
+  userMovedMapRef: MutableRefObject<boolean>;
   showClaimedNav: boolean;
   onLockCenterOffsetChange: (offset: { x: number; y: number }) => void;
   pinDashboard: MapSitePinDashboardState;
@@ -680,6 +665,8 @@ function MapSiteChrome({
   const [popupCenterX, setPopupCenterX] = useState<number | null>(null);
   const [zoomTop, setZoomTop] = useState(12);
   const [mapAnchor, setMapAnchor] = useState({ top: 120, right: 12 });
+  const [mapSize, setMapSize] = useState({ width: 0, height: 0 });
+  const prevPinEditorKindRef = useRef(pinEditor.kind);
   const [expandedCardHeight, setExpandedCardHeight] = useState<number | null>(
     null
   );
@@ -759,6 +746,11 @@ function MapSiteChrome({
         top: Math.round(rect.top),
         right: Math.round(window.innerWidth - rect.right),
       });
+      const width = Math.round(rect.width);
+      const height = Math.round(rect.height);
+      setMapSize((prev) =>
+        prev.width === width && prev.height === height ? prev : { width, height },
+      );
     };
     place();
     const observer = new ResizeObserver(place);
@@ -1129,29 +1121,59 @@ function MapSiteChrome({
     .map((pin) => `${pin.id}:${pin.latitude}:${pin.longitude}`)
     .join("|");
 
-  useEffect(() => {
-    if (!isReady || pinEditor.kind !== "idle") return;
-    // ?view=pin style deep links keep their focused PIN card.
-    if (openPinOnLoad) return;
-    // Every Mapsite opens on the pin. fitBounds was replacing the saved zoom
-    // and, before the map had its real size, framed the whole region.
-    // An editor zoom (map_zoom_explicit) is the only exception.
-    const rect = rootRef.current?.getBoundingClientRect();
-    const minSide =
-      rect && rect.width > 200 && rect.height > 200
-        ? Math.min(rect.width, rect.height)
-        : 0;
-    setViewport({
-      center: { latitude: mapsite.lat, longitude: mapsite.lng },
-      zoom: useOpeningZoom
-        ? minSide > 0
-          ? systemMapsiteOpeningZoom(mapsite.lat, minSide)
-          : pinZoom(mapsite.lat)
-        : mapsite.map_zoom,
+  const openingViewport = useCallback(() => {
+    const listingCardRight = listingCardRef.current
+      ? Math.round(
+          listingCardRef.current.getBoundingClientRect().right -
+            (rootRef.current?.getBoundingClientRect().left ?? 0),
+        )
+      : 0;
+    return viewportForMapsitePins({
+      pins: visiblePins,
+      fallbackCenter: { latitude: mapsite.lat, longitude: mapsite.lng },
+      mapWidth: mapSize.width,
+      mapHeight: mapSize.height,
+      padding: mapsiteInitialFitPadding({
+        mapWidth: mapSize.width,
+        mapHeight: mapSize.height,
+        listingRight: listingCardRight || undefined,
+      }),
+      singlePinZoom: pinZoom(mapsite.lat),
+      emptyZoom: pinZoom(mapsite.lat),
     });
-    // Re-apply when the PIN set changes (or the editor closes), not on every render.
+  }, [visiblePins, mapsite.lat, mapsite.lng, mapSize.width, mapSize.height, pinZoom]);
+
+  const mapOpening =
+    visiblePins.length > 1 ? "fit-pins" : useOpeningZoom ? "80km" : "saved";
+
+  useEffect(() => {
+    if (prevPinEditorKindRef.current !== "idle" && pinEditor.kind === "idle") {
+      // Re-frame after Add / Fix Pin so newly placed pins are included.
+      userMovedMapRef.current = false;
+    }
+    prevPinEditorKindRef.current = pinEditor.kind;
+  }, [pinEditor.kind, userMovedMapRef]);
+
+  useEffect(() => {
+    if (
+      !shouldApplyMapsiteOpeningFit({
+        isReady,
+        mapWidth: mapSize.width,
+        mapHeight: mapSize.height,
+        pinEditorIdle: pinEditor.kind === "idle",
+        openPinOnLoad,
+        userMovedMap: userMovedMapRef.current,
+        selectedPinId,
+      })
+    ) {
+      return;
+    }
+    const next = openingViewport();
+    beginFocusGuard();
+    setViewport({ center: next.center, zoom: next.zoom });
+    // Re-apply when the PIN set or measured map size changes, not on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady, pinEditor.kind, pinFitKey, useOpeningZoom]);
+  }, [isReady, pinEditor.kind, pinFitKey, useOpeningZoom, mapSize.width, mapSize.height]);
 
   // Ralf (Oct 17): no "Show all PINs" option — every PIN shows until one is
   // picked; the empty value is the "Select a PIN…" placeholder.
@@ -1176,10 +1198,10 @@ function MapSiteChrome({
       setActivePinId(id);
       if (!id) {
         setSelectedPinId(null);
-        setViewport({
-          center: { latitude: mapsite.lat, longitude: mapsite.lng },
-          zoom: pinZoom(mapsite.lat),
-        });
+        userMovedMapRef.current = false;
+        const next = openingViewport();
+        beginFocusGuard();
+        setViewport({ center: next.center, zoom: next.zoom });
         return;
       }
       if (rootContext.partnerPins.some((pin) => pin.id === id)) {
@@ -1202,6 +1224,7 @@ function MapSiteChrome({
       mapsite.lat,
       mapsite.lng,
       mapsite.map_zoom,
+      openingViewport,
       pinZoom,
       useOpeningZoom,
       rootContext.partnerPins,
@@ -1305,11 +1328,17 @@ function MapSiteChrome({
       ) : null}
       <div
         ref={rootRef}
-        data-map-opening={useOpeningZoom ? "80km" : "saved"}
+        data-map-opening={mapOpening}
         className="relative min-h-0 flex-1 overflow-hidden bg-neutral-900"
       >
         <MapEngineCanvas className="h-full w-full" />
-        <MapSiteZoomControls top={mapAnchor.top + zoomTop} right={mapAnchor.right + 12} />
+        <MapSiteZoomControls
+          top={mapAnchor.top + zoomTop}
+          right={mapAnchor.right + 12}
+          onUserZoom={() => {
+            userMovedMapRef.current = true;
+          }}
+        />
 
         <div
           ref={sidebarStackRef}
@@ -1337,8 +1366,8 @@ function MapSiteChrome({
                   mapsite={cardMapSite}
                   partnerImageUrl={branding.partnerImageUrl}
                   partnerName={branding.partnerName}
-                  contactPhone={clientCard?.phone}
-                  contactEmail={clientCard?.email}
+                  hasPhone={Boolean(clientCard?.hasPhone)}
+                  hasEmail={Boolean(clientCard?.hasEmail)}
                   partnerTagline={branding.partnerTagline}
                   cardRef={listingCardRef}
                   paid={paid}

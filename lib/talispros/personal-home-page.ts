@@ -190,17 +190,17 @@ export async function canEditPersonalHome(code: string): Promise<boolean> {
 }
 
 
-/** Public left-card identity for a Mapsite (photo, name, phone, email). */
+/** Public left-card identity for a Mapsite (photo, name, and contact flags). */
 export type PersonalHomePublicCard = {
   name: string;
   imageUrl: string;
-  phone: string | null;
-  email: string | null;
+  hasPhone: boolean;
+  hasEmail: boolean;
 };
 
 /**
  * Public left-card identity for a Mapsite: the client's home-page photo and
- * contact fields. Visitors see this too. Falls back to Mapsite defaults when
+ * name, plus flags for click-to-reveal phone and email. Visitors see this too. Falls back to Mapsite defaults when
  * the owner has not customised the home page.
  */
 export async function loadPersonalHomePublicCard(
@@ -213,10 +213,10 @@ export async function loadPersonalHomePublicCard(
     const { resolved, displayName } = lookup.data;
     const name = (resolved.contactName || displayName || "").trim();
     const imageUrl = (resolved.imageUrl || "").trim();
-    const phone = (resolved.contactPhone || "").trim() || null;
-    const email = (resolved.contactEmail || "").trim() || null;
-    if (!name && !imageUrl && !phone && !email) return null;
-    return { name, imageUrl, phone, email };
+    const hasPhone = Boolean((resolved.contactPhone || "").trim());
+    const hasEmail = Boolean((resolved.contactEmail || "").trim());
+    if (!name && !imageUrl && !hasPhone && !hasEmail) return null;
+    return { name, imageUrl, hasPhone, hasEmail };
   } catch {
     return null;
   }

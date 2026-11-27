@@ -1,7 +1,9 @@
+import ProtectedContactReveal from "@/components/talispros/personal-home/ProtectedContactReveal";
+
 interface MapSiteFooterProps {
   fastCode: string;
   agentName: string;
-  email: string;
+  hasEmail?: boolean;
   updatedAt: string;
 }
 
@@ -16,7 +18,7 @@ function formatUpdatedAt(value: string): string {
 export default function MapSiteFooter({
   fastCode,
   agentName,
-  email,
+  hasEmail = false,
   updatedAt,
 }: MapSiteFooterProps) {
   return (
@@ -25,7 +27,15 @@ export default function MapSiteFooter({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-semibold text-neutral-900">{agentName}</p>
-            {email && <p className="text-sm text-neutral-500 mt-1">{email}</p>}
+            {hasEmail ? (
+              <ProtectedContactReveal
+                code={fastCode}
+                field="email"
+                surface="mapsite"
+                className="text-sm text-neutral-500 mt-1"
+                testId="mapsite-footer-contact-email"
+              />
+            ) : null}
             <p className="text-xs font-mono text-neutral-400 mt-3">{fastCode}</p>
           </div>
           <p className="text-xs text-neutral-400">

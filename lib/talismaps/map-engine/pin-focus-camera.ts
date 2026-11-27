@@ -1,13 +1,18 @@
-/** One Google zoom step is 2×. Two steps is the “about 70% closer” click. */
-export const PIN_FOCUS_ZOOM_STEP = 2;
+/** One Google zoom step is 2×. Four steps zooms a regional overview in close on a pin. */
+export const PIN_FOCUS_ZOOM_STEP = 4;
+/** Floor so a wide auto-fit still opens a tight, readable satellite view. */
+export const PIN_FOCUS_MIN_ZOOM = 15;
 /** Satellite stays readable; do not step past this. */
 export const PIN_FOCUS_MAX_ZOOM = 19;
 
 const TILE = 256;
 
 export function pinFocusZoom(currentZoom: number): number {
-  if (!Number.isFinite(currentZoom)) return PIN_FOCUS_MAX_ZOOM;
-  return Math.min(PIN_FOCUS_MAX_ZOOM, currentZoom + PIN_FOCUS_ZOOM_STEP);
+  if (!Number.isFinite(currentZoom)) return PIN_FOCUS_MIN_ZOOM;
+  return Math.min(
+    PIN_FOCUS_MAX_ZOOM,
+    Math.max(PIN_FOCUS_MIN_ZOOM, currentZoom + PIN_FOCUS_ZOOM_STEP),
+  );
 }
 
 function worldPoint(latitude: number, longitude: number): { x: number; y: number } {

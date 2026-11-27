@@ -2,9 +2,11 @@
 
 import { Children, useEffect, useState, type ReactNode } from "react";
 import AdviserLayout from "@/components/talisu/AdviserLayout";
+import ProtectedContactReveal from "@/components/talispros/personal-home/ProtectedContactReveal";
 import { useT } from "@/lib/i18n/client";
 import {
   PERSONAL_HOME_DRAFT_EVENT,
+  formatPersonalHomeKicker,
   personalHomeMailtoHref,
   personalHomeTelHref,
   type PersonalHomeDraft,
@@ -14,11 +16,12 @@ const TITLE =
   "mt-2 mb-0! text-[34px] font-semibold leading-[1.15] tracking-[-0.03em] text-neutral-950! sm:mt-3 sm:text-[48px] sm:leading-[1.1]";
 
 type PersonalHomeBodyProps = {
+  fastCode: string;
   kicker: string;
   headline: string;
   contactName: string;
-  contactPhone?: string;
-  contactEmail?: string;
+  hasPhone?: boolean;
+  hasEmail?: boolean;
   ownerName: string;
   imageSrc: string;
   imageAlt: string;
@@ -29,11 +32,12 @@ type PersonalHomeBodyProps = {
 
 /** Right-hand copy. An open editor can preview a headline and contact name before saving. */
 export default function PersonalHomeBody({
+  fastCode,
   kicker,
   headline,
   contactName,
-  contactPhone = "",
-  contactEmail = "",
+  hasPhone = false,
+  hasEmail = false,
   ownerName,
   imageSrc,
   imageAlt,
@@ -57,11 +61,12 @@ export default function PersonalHomeBody({
   const shownHeadline = (draft ? draft.headline : headline).trim();
   const typedContact = (draft ? draft.contactName : contactName).trim();
   const shownContact = typedContact || ownerName.trim();
-  const shownPhone = (draft ? draft.contactPhone ?? "" : contactPhone).trim();
-  const shownEmail = (draft ? draft.contactEmail ?? "" : contactEmail).trim();
-  const phoneHref = personalHomeTelHref(shownPhone);
-  const emailHref = personalHomeMailtoHref(shownEmail);
+  const draftPhone = (draft?.contactPhone ?? "").trim();
+  const draftEmail = (draft?.contactEmail ?? "").trim();
+  const phoneHref = personalHomeTelHref(draftPhone);
+  const emailHref = personalHomeMailtoHref(draftEmail);
   const parts = Children.toArray(children);
+  const shownKicker = formatPersonalHomeKicker(kicker);
 
   return (
     <AdviserLayout
@@ -69,7 +74,7 @@ export default function PersonalHomeBody({
       imageSrc={imageSrc}
       imageAlt={imageAlt}
       imagePosition="center 22%"
-      kicker={kicker}
+      kicker={shownKicker}
       title={shownHeadline}
       titleClassName={TITLE}
       media={media}
@@ -85,27 +90,43 @@ export default function PersonalHomeBody({
           <p className="mt-2 text-[15px] font-medium text-neutral-950 sm:text-[16px]" data-testid="personal-home-contact-value">
             {shownContact}
           </p>
-          {shownPhone ? (
+          {draftPhone ? (
             <p className="mt-1 text-[15px] text-neutral-800 sm:text-[16px]" data-testid="personal-home-contact-phone">
               {phoneHref ? (
                 <a href={phoneHref} className="underline-offset-2 hover:underline">
-                  {shownPhone}
+                  {draftPhone}
                 </a>
               ) : (
-                shownPhone
+                draftPhone
               )}
             </p>
+          ) : hasPhone ? (
+            <ProtectedContactReveal
+              code={fastCode}
+              field="phone"
+              surface="home"
+              className="mt-1 text-[15px] text-neutral-800 sm:text-[16px]"
+              testId="personal-home-contact-phone"
+            />
           ) : null}
-          {shownEmail ? (
+          {draftEmail ? (
             <p className="mt-1 text-[15px] text-neutral-800 sm:text-[16px]" data-testid="personal-home-contact-email">
               {emailHref ? (
                 <a href={emailHref} className="underline-offset-2 hover:underline">
-                  {shownEmail}
+                  {draftEmail}
                 </a>
               ) : (
-                shownEmail
+                draftEmail
               )}
             </p>
+          ) : hasEmail ? (
+            <ProtectedContactReveal
+              code={fastCode}
+              field="email"
+              surface="home"
+              className="mt-1 text-[15px] text-neutral-800 sm:text-[16px]"
+              testId="personal-home-contact-email"
+            />
           ) : null}
         </section>
       ) : null}

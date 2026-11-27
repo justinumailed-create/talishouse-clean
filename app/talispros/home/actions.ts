@@ -16,6 +16,7 @@ import {
   type PersonalHomeContent,
   type PersonalHomeSideMedia,
 } from "@/lib/talispros/personal-home";
+import { stripWriteUpHtml } from "@/lib/talispros/write-up-format";
 import {
   findMapSiteIdentityByFastCode,
   resetPersonalHomeContent,
@@ -95,9 +96,11 @@ export async function savePersonalHomeAction(input: {
     contactName: cleanPersonalHomeText(input.contactName, PERSONAL_HOME_LIMITS.contactName),
     contactPhone: cleanPersonalHomeText(input.contactPhone, PERSONAL_HOME_LIMITS.contactPhone),
     contactEmail: cleanPersonalHomeText(input.contactEmail, PERSONAL_HOME_LIMITS.contactEmail),
-    writeUp: cleanPersonalHomeText(input.writeUp, PERSONAL_HOME_LIMITS.writeUp, {
-      multiline: true,
-    }),
+    writeUp: cleanPersonalHomeText(
+      typeof input.writeUp === "string" ? stripWriteUpHtml(input.writeUp) : input.writeUp,
+      PERSONAL_HOME_LIMITS.writeUp,
+      { multiline: true },
+    ),
     buttons: normalizePersonalHomeButtons(rawButtons, context),
     sideMedia,
   });

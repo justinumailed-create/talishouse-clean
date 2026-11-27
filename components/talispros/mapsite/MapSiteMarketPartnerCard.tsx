@@ -19,10 +19,7 @@ import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
 import MapSiteAgencyLogo from "./MapSiteAgencyLogo";
 import MarketingPartnerInterestLinks from "./MarketingPartnerInterestLinks";
 import { useT } from "@/lib/i18n/client";
-import {
-  personalHomeMailtoHref,
-  personalHomeTelHref,
-} from "@/lib/talispros/personal-home";
+import ProtectedContactReveal from "@/components/talispros/personal-home/ProtectedContactReveal";
 
 export type MapSitePinSwitchOption = { id: string; label: string };
 
@@ -78,9 +75,9 @@ interface MapSiteMarketPartnerCardProps {
   partnerImageUrl?: string | null;
   /** Resolved partner name / tagline (owner overrides via resolveMapSiteBranding). */
   partnerName?: string | null;
-  /** Home-page phone and email, shown as their own lines under the name. */
-  contactPhone?: string | null;
-  contactEmail?: string | null;
+  /** Whether a home-page phone or email can be revealed under the name. */
+  hasPhone?: boolean;
+  hasEmail?: boolean;
   partnerTagline?: string | null;
   /** Owner overrides: title under the logo (e.g. "TSplits"), address, phone. */
   cardTitle?: string | null;
@@ -230,53 +227,39 @@ function CardTools({
 
 function PartnerContactLines({
   name,
-  phone,
-  email,
+  code,
+  hasPhone,
+  hasEmail,
   nameClassName,
 }: {
   name: string;
-  phone?: string | null;
-  email?: string | null;
+  code: string;
+  hasPhone?: boolean;
+  hasEmail?: boolean;
   nameClassName: string;
 }) {
-  const shownPhone = phone?.trim() || "";
-  const shownEmail = email?.trim() || "";
-  const telHref = personalHomeTelHref(shownPhone);
-  const mailHref = personalHomeMailtoHref(shownEmail);
   return (
     <div data-testid="mapsite-card-contact">
       <p className={nameClassName} data-testid="mapsite-card-contact-name">
         {name}
       </p>
-      {shownPhone ? (
-        <p className="mt-1 text-[13px] leading-snug text-black" data-testid="mapsite-card-contact-phone">
-          {telHref ? (
-            <a
-              href={telHref}
-              onClick={(event) => event.stopPropagation()}
-              className="underline-offset-2 hover:underline"
-            >
-              {shownPhone}
-            </a>
-          ) : (
-            shownPhone
-          )}
-        </p>
+      {hasPhone && code ? (
+        <ProtectedContactReveal
+          code={code}
+          field="phone"
+          surface="home"
+          className="mt-1 text-[13px] leading-snug text-black"
+          testId="mapsite-card-contact-phone"
+        />
       ) : null}
-      {shownEmail ? (
-        <p className="mt-1 text-[13px] leading-snug text-black" data-testid="mapsite-card-contact-email">
-          {mailHref ? (
-            <a
-              href={mailHref}
-              onClick={(event) => event.stopPropagation()}
-              className="underline-offset-2 hover:underline"
-            >
-              {shownEmail}
-            </a>
-          ) : (
-            shownEmail
-          )}
-        </p>
+      {hasEmail && code ? (
+        <ProtectedContactReveal
+          code={code}
+          field="email"
+          surface="home"
+          className="mt-1 text-[13px] leading-snug text-black"
+          testId="mapsite-card-contact-email"
+        />
       ) : null}
     </div>
   );
@@ -296,8 +279,8 @@ export default function MapSiteMarketPartnerCard({
   paid = false,
   partnerImageUrl = null,
   partnerName: partnerNameOverride = null,
-  contactPhone = null,
-  contactEmail = null,
+  hasPhone = false,
+  hasEmail = false,
   cardTitle = null,
   dashboardItems,
   onSelectDashboardItem,
@@ -404,8 +387,9 @@ export default function MapSiteMarketPartnerCard({
               </p>
               <PartnerContactLines
                 name={partnerName}
-                phone={contactPhone}
-                email={contactEmail}
+                code={mapsite.fast_code || ""}
+                hasPhone={hasPhone}
+                hasEmail={hasEmail}
                 nameClassName="mt-1 text-[13px] font-semibold leading-snug text-black"
               />
             </div>
@@ -462,8 +446,9 @@ export default function MapSiteMarketPartnerCard({
 
           <PartnerContactLines
             name={partnerName}
-            phone={contactPhone}
-            email={contactEmail}
+            code={mapsite.fast_code || ""}
+            hasPhone={hasPhone}
+            hasEmail={hasEmail}
             nameClassName="mt-4 text-[14px] font-semibold leading-snug text-black"
           />
         </div>

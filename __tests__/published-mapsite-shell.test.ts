@@ -67,8 +67,12 @@ describe("published Mapsite shell", () => {
     expect(partnerCard).toContain("mapsite-card-contact-name");
     expect(partnerCard).toContain("mapsite-card-contact-phone");
     expect(partnerCard).toContain("mapsite-card-contact-email");
-    expect(application).toContain("contactPhone={clientCard?.phone}");
-    expect(application).toContain("contactEmail={clientCard?.email}");
+    expect(partnerCard).toContain("ProtectedContactReveal");
+    expect(partnerCard).not.toContain("personalHomeMailtoHref");
+    expect(application).toContain("hasPhone={Boolean(clientCard?.hasPhone)}");
+    expect(application).toContain("hasEmail={Boolean(clientCard?.hasEmail)}");
+    expect(application).not.toContain("contactPhone={clientCard?.phone}");
+    expect(application).not.toContain("contactEmail={clientCard?.email}");
   });
 
   it("scroll-locks the claimed Mapsite viewport", () => {

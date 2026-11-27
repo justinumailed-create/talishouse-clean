@@ -35,8 +35,9 @@ describe("system-built Mapsite opening zoom", () => {
     expect(app).not.toContain("systemBuilt");
     expect(app).toContain("const useOpeningZoom = !mapZoomExplicit");
     expect(app).toContain("useOpeningZoom ? systemMapsiteOpeningZoom(mapsite.lat) : mapsite.map_zoom");
+    expect(app).toContain("viewportForMapsitePins");
+    expect(app).toContain('visiblePins.length > 1 ? "fit-pins" : useOpeningZoom ? "80km" : "saved"');
     expect(app).not.toContain("fitAllFastCodePins");
-    expect(app).toContain('data-map-opening={useOpeningZoom ? "80km" : "saved"}');
     expect(reader).not.toContain("application/openapi+json");
     expect(reader).not.toContain('cache: "no-store"');
     expect(reader).toContain("select(\"map_zoom_explicit\")");

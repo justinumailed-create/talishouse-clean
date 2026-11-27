@@ -81,7 +81,7 @@ export default function AdviserLayout({
           <div
             className={
               kickerClassName ??
-              "text-[12px] font-semibold uppercase tracking-[0.16em] text-neutral-600 sm:text-[13px]"
+              "whitespace-pre-line text-[12px] font-semibold uppercase tracking-[0.16em] text-neutral-600 sm:text-[13px]"
             }
             data-testid={`${testId}-kicker`}
           >

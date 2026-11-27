@@ -41,10 +41,13 @@ const BUTTON_STYLE: CSSProperties = {
 export default function MapSiteZoomControls({
   top,
   right,
+  onUserZoom,
 }: {
   /** Viewport offset. Already clear of the navbar, the left card, and Aisha. */
   top: number;
   right: number;
+  /** Marks a manual +/- click so the opening auto-fit does not fight it. */
+  onUserZoom?: () => void;
 }) {
   const { viewport, setViewport, isReady } = useMapEngine();
   const t = useT();
@@ -56,6 +59,7 @@ export default function MapSiteZoomControls({
   }, []);
 
   function step(delta: number) {
+    onUserZoom?.();
     setViewport({
       center: viewport.center,
       zoom: clampMapZoom(zoom + delta),

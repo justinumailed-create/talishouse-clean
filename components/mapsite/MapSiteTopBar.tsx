@@ -4,11 +4,15 @@ import {
   type MapSiteAgentData,
 } from "@/lib/mapsite-layout";
 import MapSiteAgentPhoto from "./MapSiteAgentPhoto";
+import ProtectedContactReveal from "@/components/talispros/personal-home/ProtectedContactReveal";
 
 interface MapSiteTopBarProps {
   propertyTitle: string;
   logoUrl: string | null;
   agent: MapSiteAgentData;
+  fastCode: string;
+  hasPhone?: boolean;
+  hasEmail?: boolean;
 }
 
 const AVATAR_SIZE =
@@ -35,31 +39,36 @@ function LogoMark({ logoUrl }: { logoUrl: string }) {
   );
 }
 
-function ContactRow({ agent }: { agent: MapSiteAgentData }) {
-  const phone = agent.phone?.trim();
-  const email = agent.email?.trim();
-
-  if (!phone && !email) return null;
+function ContactRow({
+  fastCode,
+  hasPhone,
+  hasEmail,
+}: {
+  fastCode: string;
+  hasPhone: boolean;
+  hasEmail: boolean;
+}) {
+  if (!hasPhone && !hasEmail) return null;
 
   return (
     <div className="mt-3 flex flex-col gap-2 text-sm text-neutral-600 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-6 md:mt-4">
-      {phone ? (
-        <a
-          href={`tel:${phone.replace(/[^\d+]/g, "")}`}
+      {hasPhone ? (
+        <ProtectedContactReveal
+          code={fastCode}
+          field="phone"
+          surface="mapsite"
           className="hover:text-neutral-900 transition-colors"
-        >
-          Text me at{" "}
-          <span className="font-medium text-neutral-800">{phone}</span>
-        </a>
+          testId="mapsite-topbar-contact-phone"
+        />
       ) : null}
-      {email ? (
-        <a
-          href={`mailto:${email}`}
+      {hasEmail ? (
+        <ProtectedContactReveal
+          code={fastCode}
+          field="email"
+          surface="mapsite"
           className="hover:text-neutral-900 transition-colors"
-        >
-          Email:{" "}
-          <span className="font-medium text-neutral-800">{email}</span>
-        </a>
+          testId="mapsite-topbar-contact-email"
+        />
       ) : null}
     </div>
   );
@@ -69,6 +78,9 @@ export default function MapSiteTopBar({
   propertyTitle,
   logoUrl,
   agent,
+  fastCode,
+  hasPhone = false,
+  hasEmail = false,
 }: MapSiteTopBarProps) {
   const headerLogo = logoUrl?.trim() || MAPSITE_HEADER_FALLBACK_LOGO;
 
@@ -80,7 +92,7 @@ export default function MapSiteTopBar({
           <h1 className="text-xl sm:text-2xl font-semibold text-neutral-900 leading-snug tracking-tight px-1">
             {propertyTitle}
           </h1>
-          <ContactRow agent={agent} />
+          <ContactRow fastCode={fastCode} hasPhone={hasPhone} hasEmail={hasEmail} />
           <MapSiteAgentPhoto agent={agent} className={AVATAR_SIZE} />
         </div>
 
@@ -91,7 +103,7 @@ export default function MapSiteTopBar({
             <h1 className="text-2xl lg:text-3xl xl:text-4xl font-semibold text-neutral-900 leading-tight tracking-tight">
               {propertyTitle}
             </h1>
-            <ContactRow agent={agent} />
+            <ContactRow fastCode={fastCode} hasPhone={hasPhone} hasEmail={hasEmail} />
           </div>
 
           <MapSiteAgentPhoto agent={agent} className={`shrink-0 ${AVATAR_SIZE}`} />

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import PersonalHomeBody from "@/components/talispros/personal-home/PersonalHomeBody";
+import PersonalHomeWriteUp from "@/components/talispros/personal-home/PersonalHomeWriteUp";
 import PersonalHomeEditor from "@/components/talispros/personal-home/PersonalHomeEditor";
 import PersonalHomeMapsite from "@/components/talispros/personal-home/PersonalHomeMapsite";
 import LegalLinks from "@/components/legal/LegalLinks";
@@ -126,7 +127,6 @@ export default async function PersonalHomePage({
     if (offerProject && isRegistrationOfferHref(button.href)) return false;
     return true;
   });
-  const paragraphs = resolved.writeUp.split(/\n{2,}/).filter((part) => part.trim());
 
   return (
     <div
@@ -151,11 +151,12 @@ export default async function PersonalHomePage({
       />
       <main className="flex-1">
         <PersonalHomeBody
+          fastCode={data.code}
           kicker={resolved.kicker}
           headline={resolved.headline}
           contactName={resolved.contactName}
-          contactPhone={resolved.contactPhone}
-          contactEmail={resolved.contactEmail}
+          hasPhone={Boolean(resolved.contactPhone)}
+          hasEmail={Boolean(resolved.contactEmail)}
           ownerName={data.displayName}
           imageSrc={
             resolved.sideMedia?.kind === "image" ? resolved.sideMedia.url : resolved.imageUrl
@@ -180,16 +181,10 @@ export default async function PersonalHomePage({
             ) : null
           }
         >
-          <div
+          <PersonalHomeWriteUp
+            text={resolved.writeUp}
             className="mt-4 max-w-[60ch] space-y-3 text-[15px] leading-relaxed text-neutral-800 sm:mt-5 sm:text-[17px]"
-            data-testid="personal-home-write-up"
-          >
-            {paragraphs.map((paragraph, index) => (
-              <div key={index} className="whitespace-pre-line">
-                {paragraph}
-              </div>
-            ))}
-          </div>
+          />
           {visibleButtons.length ? (
             <div
               className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8"

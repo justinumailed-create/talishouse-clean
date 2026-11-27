@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useT } from "@/lib/i18n/client";
 import { optimizeImageFileForUpload } from "@/lib/media/client-optimize-upload-image";
@@ -17,6 +17,12 @@ import {
   type PersonalHomeDraft,
   type PersonalHomeOpenKind,
 } from "@/lib/talispros/personal-home";
+import PersonalHomeWriteUp from "@/components/talispros/personal-home/PersonalHomeWriteUp";
+import {
+  WRITE_UP_TOKENS,
+  wrapWriteUpSelection,
+  type WriteUpMark,
+} from "@/lib/talispros/write-up-format";
 import { fmt } from "@/lib/i18n/format";
 import {
   resetPersonalHomeAction,
@@ -111,6 +117,7 @@ export default function PersonalHomeEditor({
   const fileRef = useRef<HTMLInputElement>(null);
   const sideImageRef = useRef<HTMLInputElement>(null);
   const sideVideoRef = useRef<HTMLInputElement>(null);
+  const writeUpRef = useRef<HTMLTextAreaElement>(null);
   const [open, setOpen] = useState(initialOpen);
 
   useEffect(() => {
@@ -265,6 +272,29 @@ export default function PersonalHomeEditor({
       if (sideVideoRef.current) sideVideoRef.current.value = "";
     }
   }
+
+  function applyWriteUpMark(kind: WriteUpMark) {
+    const field = writeUpRef.current;
+    const start = field?.selectionStart ?? writeUp.length;
+    const end = field?.selectionEnd ?? writeUp.length;
+    const next = wrapWriteUpSelection(writeUp, start, end, WRITE_UP_TOKENS[kind]);
+    setWriteUp(next.value);
+    requestAnimationFrame(() => {
+      field?.focus();
+      field?.setSelectionRange(next.start, next.end);
+    });
+  }
+
+  function onWriteUpKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+    const key = event.key.toLowerCase();
+    const kind: WriteUpMark | null =
+      key === "b" ? "bold" : key === "i" ? "italic" : key === "u" ? "underline" : null;
+    if (!kind) return;
+    event.preventDefault();
+    applyWriteUpMark(kind);
+  }
+
 
   async function handleSave() {
     // Saving is a local flag so the button does not stay on "Saving…" if
@@ -543,6 +573,7 @@ export default function PersonalHomeEditor({
               onChange={(event) => setKicker(event.target.value)}
               className={INPUT}
             />
+            <span className="mt-1 block text-[12px] leading-snug text-neutral-500">{t.kickerHint}</span>
           </label>
 
           <label className="block">
@@ -603,16 +634,52 @@ export default function PersonalHomeEditor({
 
           <label className="block">
             <span className={LABEL}>{t.writeUp}</span>
+            <div className="mt-1 flex flex-wrap items-center gap-1" data-testid="personal-home-writeup-toolbar">
+              {(
+                [
+                  ["bold", t.writeUpBold],
+                  ["italic", t.writeUpItalic],
+                  ["underline", t.writeUpUnderline],
+                ] as const
+              ).map(([kind, label]) => (
+                <button
+                  key={kind}
+                  type="button"
+                  disabled={busy}
+                  onClick={() => applyWriteUpMark(kind)}
+                  data-testid={`personal-home-writeup-${kind}`}
+                  className={`inline-flex min-h-8 items-center rounded-md border border-neutral-300 bg-white px-2.5 text-[13px] font-semibold text-neutral-800 hover:bg-neutral-50 disabled:opacity-60 ${
+                    kind === "bold" ? "font-bold" : kind === "italic" ? "italic" : "underline"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
             <textarea
+              ref={writeUpRef}
               value={writeUp}
               rows={6}
               maxLength={PERSONAL_HOME_LIMITS.writeUp}
               placeholder={defaults.writeUp}
               disabled={busy}
               onChange={(event) => setWriteUp(event.target.value)}
+              onKeyDown={onWriteUpKeyDown}
+              data-testid="personal-home-writeup-input"
               className={`${INPUT} resize-y leading-relaxed`}
             />
             <span className="mt-1 block text-[12px] leading-snug text-neutral-500">{t.writeUpHint}</span>
+            <span className="mt-1 block text-[12px] leading-snug text-neutral-500">{t.writeUpFormatHint}</span>
+            {writeUp.trim() ? (
+              <div className="mt-3 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2">
+                <span className="block text-[12px] font-semibold text-neutral-600">{t.writeUpPreview}</span>
+                <PersonalHomeWriteUp
+                  text={writeUp}
+                  className="mt-1 space-y-2 text-[15px] leading-relaxed text-neutral-900"
+                  testId="personal-home-writeup-preview"
+                />
+              </div>
+            ) : null}
           </label>
 
           <fieldset className="space-y-3">
