@@ -3,6 +3,8 @@ import { getLocale } from "@/lib/i18n/server";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { createMetadata } from "@/lib/seo";
+import { applyBrandedFastCodeShareMetadata } from "@/lib/talispros/branded-fast-code-media";
+import { loadBrandedFastCodeHomeImageUrl } from "@/lib/talispros/branded-fast-code-media-server";
 import {
   allpinsSeoCopy,
   mapsiteOgMetadataImage,
@@ -121,12 +123,17 @@ export async function generateMetadata({
   });
   const title = fields?.metaTitle?.trim() || live.title;
   const description = fields?.metaDescription?.trim() || live.description;
-  return createMetadata({
-      locale: await getLocale(),
+  const metadata = createMetadata({
+    locale: await getLocale(),
     title,
     description,
     path,
     image: mapsiteOgMetadataImage(ogImage, title),
+  });
+  return applyBrandedFastCodeShareMetadata(metadata, {
+    fastCode,
+    homeImageUrl: await loadBrandedFastCodeHomeImageUrl(fastCode),
+    alt: title,
   });
 }
 

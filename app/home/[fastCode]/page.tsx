@@ -11,6 +11,7 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getLocale } from "@/lib/i18n/server";
 import { ROUTES } from "@/lib/routes";
 import { dynamicPageMetadata } from "@/lib/seo/page-metadata";
+import { applyBrandedFastCodeShareMetadata } from "@/lib/talispros/branded-fast-code-media";
 import { listMapSiteAdditionalPins } from "@/lib/talispros/mapsite-additional-pins-service";
 import {
   clampSeoText,
@@ -52,22 +53,37 @@ export async function generateMetadata({ params }: PersonalHomePageProps) {
   const locale = await getLocale();
   const lookup = await loadPersonalHomePage(fastCode, locale);
   const path = lookup.kind === "ok" ? lookup.data.homeHref : `/home/${fastCode}`;
-  return dynamicPageMetadata((lang) => {
+  const name =
+    lookup.kind === "ok"
+      ? lookup.data.resolved.headline || lookup.data.displayName
+      : getDictionary(locale).personalHome.fallbackName;
+  const code = lookup.kind === "ok" ? lookup.data.code : fastCode;
+  const alt = fillPersonalHomeCopy(
+    getDictionary(locale).meta.personalHome.ogImageAlt,
+    { name },
+  );
+  const metadata = await dynamicPageMetadata((lang) => {
     const m = getDictionary(lang).meta.personalHome;
-    const name =
+    const pageName =
       lookup.kind === "ok"
         ? lookup.data.resolved.headline || lookup.data.displayName
         : getDictionary(lang).personalHome.fallbackName;
     return {
-      title: clampSeoText(fillPersonalHomeCopy(m.title, { name }), 70),
-      description: clampSeoText(fillPersonalHomeCopy(m.description, { name }), 160),
+      title: clampSeoText(fillPersonalHomeCopy(m.title, { name: pageName }), 70),
+      description: clampSeoText(
+        fillPersonalHomeCopy(m.description, { name: pageName }),
+        160,
+      ),
       path,
-      image: `/api/og/personal-home/${encodeURIComponent(
-        lookup.kind === "ok" ? lookup.data.code : fastCode,
-      )}`,
-      alt: fillPersonalHomeCopy(m.ogImageAlt, { name }),
+      image: `/api/og/personal-home/${encodeURIComponent(code)}`,
+      alt: fillPersonalHomeCopy(m.ogImageAlt, { name: pageName }),
       noindex: lookup.kind !== "ok" || lookup.data.isDemo,
     };
+  });
+  return applyBrandedFastCodeShareMetadata(metadata, {
+    fastCode: code,
+    homeImageUrl: lookup.kind === "ok" ? lookup.data.resolved.imageUrl : null,
+    alt,
   });
 }
 

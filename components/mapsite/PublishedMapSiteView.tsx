@@ -2,6 +2,8 @@ import { getLocale } from "@/lib/i18n/server";
 import MapSiteLayout from "@/components/mapsite/MapSiteLayout";
 import { buildMapSiteLayoutData } from "@/lib/mapsite-layout";
 import { createMetadata } from "@/lib/seo";
+import { applyBrandedFastCodeShareMetadata } from "@/lib/talispros/branded-fast-code-media";
+import { loadBrandedFastCodeHomeImageUrl } from "@/lib/talispros/branded-fast-code-media-server";
 import {
   allpinsSeoCopy,
   mapsiteOgMetadataImage,
@@ -227,12 +229,17 @@ export async function publishedMapSiteMetadata(mapsite: MapSiteView) {
   });
   const title = layoutData.metaTitle?.trim() || copy.title;
   const description = layoutData.metaDescription?.trim() || copy.description;
-  return createMetadata({
+  const metadata = createMetadata({
     locale: await getLocale(),
     title,
     description,
     path: `/mapsite/${slug}`,
     image: mapsiteOgMetadataImage(ogImage, title),
+  });
+  return applyBrandedFastCodeShareMetadata(metadata, {
+    fastCode: mapsite.fastCode,
+    homeImageUrl: await loadBrandedFastCodeHomeImageUrl(mapsite.fastCode),
+    alt: title,
   });
 }
 
