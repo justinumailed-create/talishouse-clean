@@ -35,6 +35,12 @@ import {
 import { readSystemFastCodeFacts } from "@/lib/talispros/system-fast-code-access";
 import { isFastCodeDisqualified } from "@/lib/talispros/market-disqualify-server";
 import { isRegistrationOfferHref } from "@/lib/talispros/webster-project";
+import { HOME_MARKET_PATH } from "@/lib/talisu/home-market-path";
+import {
+  applyGetOwnMapsiteButton,
+  isGetOwnMapsiteButton,
+} from "@/lib/talispros/get-own-mapsite";
+import { getGetOwnMapsiteButtonEnabled } from "@/lib/talispros/get-own-mapsite-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -100,10 +106,11 @@ export default async function PersonalHomePage({
   const { fastCode } = await params;
   const query = (await searchParams) ?? {};
   const locale = await getLocale();
-  const [lookup, facts, agentAccess] = await Promise.all([
+  const [lookup, facts, agentAccess, showGetOwnMapsite] = await Promise.all([
     loadPersonalHomePage(fastCode, locale),
     readSystemFastCodeFacts(fastCode),
     hasProspectAccess().catch(() => false),
+    getGetOwnMapsiteButtonEnabled(),
   ]);
   const publicSystem = restrictSystemFastCodeFeatures({
     systemGenerated: facts.systemGenerated,
@@ -122,7 +129,8 @@ export default async function PersonalHomePage({
   const homeMap = publicSystem ? await loadPersonalHomeMap(data.code) : null;
   const mapsiteHref = publicSystem ? `${data.homeHref}#mapsite` : data.mapsiteHref;
   const extraPins = await listMapSiteAdditionalPins(data.view.id).catch(() => []);
-  const copy = getDictionary(locale).personalHome.edit;
+  const homeCopy = getDictionary(locale).personalHome;
+  const copy = homeCopy.edit;
   const homePins = [
     {
       id: data.view.id,
@@ -130,12 +138,19 @@ export default async function PersonalHomePage({
     },
     ...extraPins.map((pin) => ({ id: pin.id, label: pin.label.trim() || "PIN" })),
   ];
-  const buttons = normalizePersonalHomeButtons(resolved.buttons, {
-    mapsiteHref: data.mapsiteHref,
-    bookshelfHref: `/talisbooks/fast/${encodeURIComponent(data.code)}`,
-    tebHref: data.view.tebUrl?.trim() || null,
-    pinIds: homePins.map((pin) => pin.id),
-  });
+  const buttons = applyGetOwnMapsiteButton(
+    normalizePersonalHomeButtons(resolved.buttons, {
+      mapsiteHref: data.mapsiteHref,
+      bookshelfHref: `/talisbooks/fast/${encodeURIComponent(data.code)}`,
+      tebHref: data.view.tebUrl?.trim() || null,
+      pinIds: homePins.map((pin) => pin.id),
+    }),
+    {
+      enabled: showGetOwnMapsite,
+      label: homeCopy.getOwnMapsite,
+      href: HOME_MARKET_PATH,
+    },
+  );
   const offerProject = !data.isDemo && (canEdit || facts.registeredOrClaimed);
   const visibleButtons = buttons.filter((button) => {
     if (!canEdit && !isVisitorPersonalHomeOpen(button.kind)) return false;
@@ -208,7 +223,9 @@ export default async function PersonalHomePage({
               data-testid="personal-home-buttons"
             >
               {visibleButtons.map((button, index) => {
-                const className = index === 0 ? CTA_PRIMARY : CTA_SECONDARY;
+                const isGetOwn = isGetOwnMapsiteButton(button, [homeCopy.getOwnMapsite]);
+                const className = isGetOwn || index !== 0 ? CTA_SECONDARY : CTA_PRIMARY;
+                const testId = isGetOwn ? "personal-home-get-own-mapsite" : undefined;
                 return isExternalPersonalHomeHref(button.href) ? (
                   <a
                     key={`${index}-${button.href}`}
@@ -216,6 +233,7 @@ export default async function PersonalHomePage({
                     target="_blank"
                     rel="noopener noreferrer"
                     className={className}
+                    data-testid={testId}
                   >
                     {button.label}
                   </a>
@@ -225,11 +243,17 @@ export default async function PersonalHomePage({
                     href={button.href}
                     prefetch={false}
                     className={className}
+                    data-testid={testId}
                   >
                     {button.label}
                   </Link>
                 ) : (
-                  <a key={`${index}-${button.href}`} href={button.href} className={className}>
+                  <a
+                    key={`${index}-${button.href}`}
+                    href={button.href}
+                    className={className}
+                    data-testid={testId}
+                  >
                     {button.label}
                   </a>
                 );

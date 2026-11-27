@@ -37,7 +37,9 @@ export default function ContentPage() {
       return;
     }
 
-    const mappedData = ((data || []) as GlobalContentRow[]).map((item) => ({
+    const mappedData = ((data || []) as GlobalContentRow[])
+      .filter((item) => (item.displayType || "text") !== "toggle")
+      .map((item) => ({
       id: String(item.id),
       title: item.title || "",
       summary: item.summary || "",

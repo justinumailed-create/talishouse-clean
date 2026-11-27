@@ -17,6 +17,9 @@ import {
 import { canManageMapSiteEbooks } from "@/lib/mapsite-edit-auth";
 import { hasCompletedMapSiteActivationPayment } from "@/lib/talispros/mapsite-payment";
 import BookshelfUnregisteredNotice from "@/components/talisbooks/library/BookshelfUnregisteredNotice";
+import BookshelfTebDownloads from "@/components/talisbooks/library/BookshelfTebDownloads";
+import { canDownloadReplaceImageTemplates } from "@/lib/talispros/replace-image-templates.server";
+import { loadMapSiteFlagAttachments } from "@/lib/talispros/mapsite-flag-attachments-service";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +76,16 @@ export default async function FastCodeBookshelfPage({
       ? true
       : await hasCompletedMapSiteActivationPayment({ fastCode: code });
 
+  // TEB downloads (Ralf, Nov 27): PowerPoint, Keynote, Google Slides and the
+  // owner's TEB PDF, for registered owners only. ALLPINS is the platform shelf.
+  const showTebDownloads =
+    Boolean(code) && !isAllPinsFastCode(code)
+      ? await canDownloadReplaceImageTemplates(code).catch(() => false)
+      : false;
+  const flagAttachments = showTebDownloads
+    ? await loadMapSiteFlagAttachments(code)
+    : { teb: null, tva: null };
+
   const bookshelf = canManageEbook
     ? await getTalisBooksBookshelf({ fastCode: code || null })
     : await getPublicTalisBooksBookshelf({
@@ -96,6 +109,13 @@ export default async function FastCodeBookshelfPage({
       headerExtra={
         canManageEbook ? (
           <div className="flex flex-wrap items-center gap-2">
+            {showTebDownloads ? (
+              <BookshelfTebDownloads
+                fastCode={code}
+                tebPdfUrl={flagAttachments.teb}
+                canAttach
+              />
+            ) : null}
             {editViewerHref ? (
               <Link
                 href={editViewerHref}
@@ -113,6 +133,8 @@ export default async function FastCodeBookshelfPage({
               </Link>
             ) : null}
           </div>
+        ) : showTebDownloads ? (
+          <BookshelfTebDownloads fastCode={code} tebPdfUrl={flagAttachments.teb} />
         ) : !registered ? (
           <BookshelfUnregisteredNotice />
         ) : null

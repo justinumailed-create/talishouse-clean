@@ -26,10 +26,11 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+// Padded square tree mark (Ralf, Nov 27). Bump ?v= when the files change.
 const ROOT_ICONS: Metadata["icons"] = {
-  icon: "/favicon-v2.ico",
-  shortcut: "/favicon-v2.ico",
-  apple: "/favicon-v2.png",
+  icon: "/favicon-v2.ico?v=3",
+  shortcut: "/favicon-v2.ico?v=3",
+  apple: "/favicon-v2.png?v=3",
 };
 
 export async function generateMetadata(): Promise<Metadata> {

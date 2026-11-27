@@ -546,7 +546,9 @@ export const en = {
       addPinAria: "Add a new PIN to your Mapsite",
       dashboard: "Dashboard",
       call: "Call",
-      switchPin: "Switch PIN",
+      /** Ralf (Nov 27): replaces "Switch PIN"; fits every PIN plus 10 miles. */
+      showAll: "Show All",
+      showAllAria: "Show every PIN on this Mapsite",
       mainPin: "Main PIN",
       /** PIN switcher placeholder: every PIN shows until one is picked. */
       selectPin: "Select a PIN…",
@@ -581,6 +583,46 @@ export const en = {
       ttv: "In-house online TV - Infomercials, green screen technology, you are the host or co-host.",
       learnMore: "Learn more",
       learnMoreHref: "/talisu?essay=tokenization",
+    },
+    /** Duplicate PINs on one spot (Ralf, Nov 27): white halo + count. */
+    pinStack: {
+      title: "{count} PINs at this spot",
+      hint: "Choose a PIN to open it.",
+      close: "Close",
+      untitled: "PIN {n}",
+    },
+    /** Owners unlink a misplaced PIN and drag it to the exact spot. */
+    pinMove: {
+      start: "Unlink & Move PINs",
+      done: "Done",
+      banner: "Drag any PIN to its exact spot. It is unlinked from its address location and saves as soon as you drop it.",
+      saving: "Saving the new PIN location...",
+      saved: "PIN location saved.",
+      failed: "The PIN could not be moved. Please try again.",
+    },
+    /** Owner one-click actions on grey PIN card links (no eBook editing). */
+    flagActions: {
+      close: "Close",
+      urlTitle: "Add the URL for this PIN",
+      urlBody: "Paste the listing or website address. The URL button turns blue once it is saved.",
+      urlSave: "Save URL",
+      urlSaved: "URL saved. The URL button is now live.",
+      tebTitle: "Attach your TEB PDF",
+      tebBody: "Choose a PDF. It appears on your bookshelf for download.",
+      tvaTitle: "Attach your TEB summary",
+      tvaBody: "Choose a PDF or text file with the summary. The TVA button opens it once it is attached.",
+      choose: "Choose file",
+      upload: "Attach file",
+      uploading: "Attaching...",
+      uploaded: "File attached.",
+      ttvTitle: "TTV needs additional setup",
+      ttvBody: "TTV is set up with you by the Tsplits™ team. Ask Aisha or your Team Member and we will arrange it for this PIN.",
+      saving: "Saving...",
+    },
+    /** TEB bookshelf: files owners can download for this category. */
+    bookshelfDownloads: {
+      title: "Downloads",
+      tebPdf: "TEB PDF",
     },
     startHere: {
       aria: "Start here. Continue to choose your E-Book.",
@@ -1218,6 +1260,7 @@ export const en = {
     defaultWriteUpWithAddress:
       "Welcome to my personal home page. Open my Mapsite to explore my listings around {address}, read my Talisbooks™ and get to know the market I serve.",
     openMapsite: "Open Mapsite",
+    getOwnMapsite: "Get your own Mapsite",
     claimMarket: "Claim Your Market™",
     contactHeading: "Contact",
     showPhone: "Show phone",
@@ -1309,10 +1352,10 @@ export const en = {
   homeMarket: {
     kicker: "Tsplits™ Mapsites",
     title: "Claim your Home Market",
-    selectPin: "Place your PIN to claim a Home Market of 100,000 people (+/-)",
-    intro: "Search your address or zip / postal code, or tap the map. Your PIN is the centre of your Home Market of about 100,000 people. Then personalize your Mapsite.",
+    selectPin: "Your Home Pin will be the geographic centre to about 50 miles / 80 kilometres.",
+    intro: "Search your address or zip / postal code, or tap the map. Your Home Pin will be the geographic centre to about 50 miles / 80 kilometres. Then personalize your Mapsite.",
     aishaName: "Aisha C.",
-    aishaRole: "Your Marketing Manager",
+    aishaRole: "Your Customer Service Rep.",
     sampleTag: "Example",
     sampleBrokerage: "Your Mapsite ID",
     sampleAgent: "Your Name",
@@ -1358,7 +1401,7 @@ export const en = {
     homePinHint: "Search your address, or tap the map to place your Home PIN.",
     missingSteps: "Add your first name, account type and Home PIN to continue.",
     goodJob: "Good job, {name}. Your market is available. We look forward to working with you.",
-    registerHint: "Register using my Agent Code, Aishaa. It is already filled in for you.",
+    registerHint: "Register using my registration code, Aishaa. It is already filled in for you.",
     editDetails: "Change details",
     previewLabel: "Your Mapsite",
     previewMarket: "Home Market",
@@ -1441,7 +1484,7 @@ export const en = {
     talisuMarkets: {
       title: "Tsplits™ | Markets served",
       description:
-        "Place your own PIN in Canada or the USA to claim a Home Market of 100,000 people (+/-) on the Tsplits™ Mapsites map.",
+        "Place your own PIN in Canada or the USA. Your Home Pin will be the geographic centre to about 50 miles / 80 kilometres on the Tsplits™ Mapsites map.",
     },
     root: {
       title: "Tsplits™ | Claim Your Market, Open Your Mapsite",

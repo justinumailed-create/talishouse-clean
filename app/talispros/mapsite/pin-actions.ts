@@ -29,6 +29,8 @@ import {
   redeemFreePinCredits,
 } from "@/lib/talispros/mapsite-additional-pins-service";
 import { parsePinCategory } from "@/lib/talispros/mapsite-pin-categories";
+import { moveMapSiteMainPinLocation } from "@/lib/talispros/mapsite-platform";
+import { normalizePinCoordinate } from "@/lib/talispros/mapsite-additional-pins";
 import {
   loadEffectiveCustomPinCategories,
   resolveMapSitePlanRole,
@@ -408,6 +410,39 @@ export async function fixMapSiteAdditionalPin(input: {
   revalidateMapSite(fastCode);
   if (assignedFastCode) revalidateMapSite(assignedFastCode);
   return { dashboard: fixed.dashboard };
+}
+
+/**
+ * Unlink & move (Ralf, Nov 27 item #7): the owner dragged the main PIN off
+ * its geocoded address to the exact spot. Saves only latitude / longitude on
+ * the existing mapsites row (no schema change); the address text stays.
+ */
+export async function moveMapSiteMainPin(input: {
+  mapsiteId: string;
+  fastCode: string;
+  latitude: number;
+  longitude: number;
+}): Promise<{ latitude: number; longitude: number } | PinActionError> {
+  const fastCode = input.fastCode.trim();
+  const denied = await authorizePinEdit(fastCode);
+  if (denied) return denied;
+  const latitude = normalizePinCoordinate(input.latitude, "lat");
+  const longitude = normalizePinCoordinate(input.longitude, "lng");
+  if (latitude == null || longitude == null) return { error: "That spot is not on the map." };
+  const mapsite = await readMapSiteForPinPurchase(input.mapsiteId);
+  if (!mapsite) return { error: "Mapsite was not found." };
+  if (mapsite.fastCode.trim().toLowerCase() !== fastCode.toLowerCase()) {
+    return { error: "FAST Code™ does not match this Mapsite." };
+  }
+  const result = await moveMapSiteMainPinLocation({
+    mapsiteId: mapsite.id,
+    fastCode,
+    latitude,
+    longitude,
+  });
+  if (!result.ok) return { error: result.error };
+  revalidateMapSite(fastCode);
+  return { latitude, longitude };
 }
 
 export async function deleteMapSiteAdditionalPin(input: {

@@ -16,6 +16,8 @@ import LeadsToApproveSection from "@/components/admin/LeadsToApproveSection";
 import TalisbotMessagesSection from "@/components/admin/TalisbotMessagesSection";
 import { getLocale } from "@/lib/i18n/server";
 import FlowSummary from "@/components/admin/meetings/FlowSummary";
+import GetOwnMapsiteToggle from "@/components/admin/GetOwnMapsiteToggle";
+import { getGetOwnMapsiteButtonEnabled } from "@/lib/talispros/get-own-mapsite-settings";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -78,6 +80,7 @@ export default async function AdminDashboardPage({
   const canAgents = accountHasAdminScope(account, "agents");
   const summary = canAgents ? await agentSummary() : null;
   const shortcuts = getAdminNavItems(account).filter((i) => i.href !== "/admin/dashboard");
+  const showGetOwnMapsite = await getGetOwnMapsiteButtonEnabled();
 
   return (
     <div className="space-y-10">
@@ -88,6 +91,8 @@ export default async function AdminDashboardPage({
       />
 
       <FlowSummary />
+
+      <GetOwnMapsiteToggle initialEnabled={showGetOwnMapsite} />
 
       {canAgents ? (
         <>

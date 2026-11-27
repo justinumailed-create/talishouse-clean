@@ -86,10 +86,12 @@ interface MapSiteMarketPartnerCardProps {
   /** Owner / admin Dashboard (moved here from the navbar). */
   dashboardItems?: ReadonlyArray<{ id: string; label: string }>;
   onSelectDashboardItem?: (id: string) => void;
-  /** FAST Code PIN switcher (owner / admin): main PIN + additional PINs. */
-  pinOptions?: ReadonlyArray<MapSitePinSwitchOption>;
-  activePinId?: string | null;
-  onSwitchPin?: (id: string) => void;
+  /**
+   * "Show All" (Ralf, Nov 27; replaces the old "Switch PIN" picker): fits
+   * every PIN on the Mapsite plus a 10 mile buffer. Shown with 2+ PINs.
+   */
+  showAllPinCount?: number;
+  onShowAll?: () => void;
   /** Public "Select Category" filter (Ralf, Oct 17): hides PINs outside it. */
   categoryOptions?: ReadonlyArray<PinCategoryOption>;
   activeCategory?: string;
@@ -113,9 +115,8 @@ interface MapSiteMarketPartnerCardProps {
 function CardTools({
   dashboardItems,
   onSelectDashboardItem,
-  pinOptions,
-  activePinId,
-  onSwitchPin,
+  showAllPinCount = 0,
+  onShowAll,
   categoryOptions,
   activeCategory = "",
   onCategoryChange,
@@ -124,17 +125,16 @@ function CardTools({
 }: {
   dashboardItems?: ReadonlyArray<{ id: string; label: string }>;
   onSelectDashboardItem?: (id: string) => void;
-  pinOptions?: ReadonlyArray<MapSitePinSwitchOption>;
-  activePinId?: string | null;
-  onSwitchPin?: (id: string) => void;
+  showAllPinCount?: number;
+  onShowAll?: () => void;
   categoryOptions?: ReadonlyArray<PinCategoryOption>;
   activeCategory?: string;
   onCategoryChange?: (category: string) => void;
   categoryEmpty?: boolean;
   labels: {
     dashboard: string;
-    switchPin: string;
-    selectPin: string;
+    showAll: string;
+    showAllAria: string;
     selectCategory: string;
     allCategories: string;
     categoryEmpty: string;
@@ -142,7 +142,7 @@ function CardTools({
   };
 }) {
   const showDashboard = Boolean(dashboardItems?.length && onSelectDashboardItem);
-  const showPins = Boolean(pinOptions && pinOptions.length > 1 && onSwitchPin);
+  const showPins = Boolean(showAllPinCount > 1 && onShowAll);
   const showCategories = Boolean(categoryOptions?.length && onCategoryChange);
   if (!showDashboard && !showPins && !showCategories) return null;
   const activeOption = categoryOptions?.find((option) => option.value === activeCategory);
@@ -184,22 +184,15 @@ function CardTools({
         </label>
       ) : null}
       {showPins ? (
-        <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500">
-          {labels.switchPin}
-          <select
-            data-testid="mapsite-pin-switcher"
-            value={activePinId ?? ""}
-            onChange={(event) => onSwitchPin!(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-2 py-1.5 text-[12px] font-semibold normal-case tracking-normal text-neutral-900"
-          >
-            <option value="">{labels.selectPin}</option>
-            {pinOptions!.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+        <button
+          type="button"
+          data-testid="mapsite-show-all-pins"
+          aria-label={labels.showAllAria}
+          onClick={() => onShowAll!()}
+          className="w-full rounded-lg bg-white px-2 py-1.5 text-[12px] font-semibold text-neutral-900 ring-1 ring-neutral-300 transition hover:bg-[#035bb8] hover:text-white"
+        >
+          {labels.showAll}
+        </button>
       ) : null}
       {showDashboard ? (
         <div>
@@ -284,9 +277,8 @@ export default function MapSiteMarketPartnerCard({
   cardTitle = null,
   dashboardItems,
   onSelectDashboardItem,
-  pinOptions,
-  activePinId = null,
-  onSwitchPin,
+  showAllPinCount = 0,
+  onShowAll,
   categoryOptions,
   activeCategory = "",
   onCategoryChange,
@@ -303,8 +295,8 @@ export default function MapSiteMarketPartnerCard({
   const agencyName = cardTitle?.trim() || mapsite.agency_name;
   const toolLabels = {
     dashboard: t.mapsite.leftCard.dashboard,
-    switchPin: t.mapsite.leftCard.switchPin,
-    selectPin: t.mapsite.leftCard.selectPin,
+    showAll: t.mapsite.leftCard.showAll,
+    showAllAria: t.mapsite.leftCard.showAllAria,
     selectCategory: t.mapsite.leftCard.selectCategory,
     allCategories: t.mapsite.leftCard.allCategories,
     categoryEmpty: t.mapsite.leftCard.categoryEmpty,
@@ -314,9 +306,8 @@ export default function MapSiteMarketPartnerCard({
     <CardTools
       dashboardItems={dashboardItems}
       onSelectDashboardItem={onSelectDashboardItem}
-      pinOptions={pinOptions}
-      activePinId={activePinId}
-      onSwitchPin={onSwitchPin}
+      showAllPinCount={showAllPinCount}
+      onShowAll={onShowAll}
       categoryOptions={categoryOptions}
       activeCategory={activeCategory}
       onCategoryChange={onCategoryChange}

@@ -73,8 +73,12 @@ import { getMapSiteActivationPaymentStatus } from "@/app/talispros/mapsite/actio
 import {
   confirmAdditionalPinCheckout,
   fixMapSiteAdditionalPin,
+  moveMapSiteMainPin,
   placeMapSiteAdditionalPin,
 } from "@/app/talispros/mapsite/pin-actions";
+import { applyPinStacks, stackForPin, type PinStack } from "@/lib/talismaps/map-engine/pin-stacks";
+import MapSitePinStackPicker from "./MapSitePinStackPicker";
+import MapSitePinMoveToolbar, { type PinMoveStatus } from "./MapSitePinMoveToolbar";
 import {
   defaultMapSitePinDashboard,
   normalizePinCoordinate,
@@ -120,6 +124,7 @@ import {
   mapsiteInitialFitPadding,
   shouldApplyMapsiteOpeningFit,
   viewportForMapsitePins,
+  viewportForMapsiteShowAll,
 } from "@/lib/talispros/mapsite-initial-bounds";
 
 export { MAPSITE_PIN_BUFFER_KM, bufferedPinBounds };
@@ -269,6 +274,14 @@ export default function MapSiteApplication({
   const [pinEditor, setPinEditor] = useState<PinEditorState>({ kind: "idle" });
   const placeLockRef = useRef(false);
   const [selectedPinId, setSelectedPinId] = useState<string | null>(null);
+  /** Main PIN dropped somewhere new this session (unlinked from its address). */
+  const [mainPinOverride, setMainPinOverride] = useState<{ latitude: number; longitude: number } | null>(null);
+  /** Owner "Unlink & Move PINs" mode (Ralf, Nov 27 item #7). */
+  const [pinMoveMode, setPinMoveMode] = useState(false);
+  const [pinMoveStatus, setPinMoveStatus] = useState<PinMoveStatus>(null);
+  /** Stacked duplicate PINs picked from the map (item #6). */
+  const [openStack, setOpenStack] = useState<PinStack | null>(null);
+  const canMovePins = Boolean(canManageDashboard ?? isOwner) && !isClaimable(initialMapSite.status);
   const [lockCenterOffset, setLockCenterOffset] = useState({ x: 0, y: 0 });
   const setLockCenterOffsetSafe = useCallback(
     (next: { x: number; y: number }) => {
@@ -313,8 +326,8 @@ export default function MapSiteApplication({
     return [
       {
         id: mapsite.id,
-        latitude: mapsite.lat,
-        longitude: mapsite.lng,
+        latitude: mainPinOverride?.latitude ?? mapsite.lat,
+        longitude: mainPinOverride?.longitude ?? mapsite.lng,
         color: savedPin.pinColor,
         label: pinLabel,
         featured: true,
@@ -343,7 +356,7 @@ export default function MapSiteApplication({
         category: pin.category,
       })),
     ];
-  }, [mapsite, phase, pinLabel, pinDashboard.pins, rootContext.mainPinCategory, rootContext.partnerPins]);
+  }, [mapsite, mainPinOverride, phase, pinLabel, pinDashboard.pins, rootContext.mainPinCategory, rootContext.partnerPins]);
 
   const allPins = useMemo(
     () =>
@@ -358,6 +371,21 @@ export default function MapSiteApplication({
     const kept = new Set(filterPinsByCategory(pins, categoryFilter).map((pin) => pin.id));
     return allPins.filter((pin) => kept.has(pin.id));
   }, [pins, allPins, categoryFilter]);
+
+  // Duplicate PINs on one spot collapse into one haloed marker with a count.
+  // While moving PINs every marker stays so each one can be dragged apart.
+  const stackedPins = useMemo(
+    () => applyPinStacks(visiblePins, { collapse: !pinMoveMode }),
+    [visiblePins, pinMoveMode],
+  );
+  const engineSelectedPinId = useMemo(() => {
+    if (!selectedPinId || pinMoveMode) return selectedPinId;
+    return stackForPin(stackedPins.stacks, selectedPinId)?.leaderId ?? selectedPinId;
+  }, [selectedPinId, pinMoveMode, stackedPins.stacks]);
+  const movablePinIds = useMemo(
+    () => (pinMoveMode ? [mapsite.id, ...pinDashboard.pins.map((pin) => pin.id)] : []),
+    [pinMoveMode, mapsite.id, pinDashboard.pins],
+  );
 
   const useOpeningZoom = !mapZoomExplicit;
   const viewport = useMemo(
@@ -394,7 +422,7 @@ export default function MapSiteApplication({
   }, []);
 
   const pinEditorActive = pinEditor.kind !== "idle";
-  const lockMapCenter = visiblePins.length <= 1 && !pinEditorActive;
+  const lockMapCenter = visiblePins.length <= 1 && !pinEditorActive && !pinMoveMode;
 
   useEffect(() => {
     if (pinCheckoutStatus !== "success" || !pinCheckoutSessionId) return;
@@ -462,15 +490,70 @@ export default function MapSiteApplication({
     [mapsite.fast_code, mapsite.id, pinEditor],
   );
 
+  /** Owner dropped a PIN in "Unlink & Move PINs" mode: save its exact spot. */
+  const movePinTo = useCallback(
+    async (pinId: string, latitude: number, longitude: number) => {
+      const code = mapsite.fast_code?.trim();
+      if (!code || !pinMoveMode || !canMovePins) return;
+      setPinMoveStatus("saving");
+      try {
+        if (pinId === mapsite.id) {
+          setMainPinOverride({ latitude, longitude });
+          const result = await moveMapSiteMainPin({
+            mapsiteId: mapsite.id,
+            fastCode: code,
+            latitude,
+            longitude,
+          });
+          if ("error" in result) {
+            setPinMoveStatus("failed");
+            return;
+          }
+          setMainPinOverride({ latitude: result.latitude, longitude: result.longitude });
+          setPinMoveStatus("saved");
+          return;
+        }
+        if (!pinDashboard.pins.some((pin) => pin.id === pinId)) {
+          setPinMoveStatus(null);
+          return;
+        }
+        setPinDashboard((current) => ({
+          ...current,
+          pins: current.pins.map((pin) =>
+            pin.id === pinId ? { ...pin, latitude, longitude } : pin,
+          ),
+        }));
+        const result = await fixMapSiteAdditionalPin({
+          mapsiteId: mapsite.id,
+          fastCode: code,
+          pinId,
+          latitude,
+          longitude,
+        });
+        if ("dashboard" in result && result.dashboard) {
+          setPinDashboard(result.dashboard);
+          setPinMoveStatus("saved");
+        } else {
+          setPinMoveStatus("failed");
+        }
+      } catch {
+        setPinMoveStatus("failed");
+      }
+    },
+    [canMovePins, mapsite.fast_code, mapsite.id, pinDashboard.pins, pinMoveMode],
+  );
+
   return (
     <MapEngineProvider
       key={`${mapsite.lat.toFixed(6)}-${mapsite.lng.toFixed(6)}`}
       providerId="google-maps"
-      initialPins={visiblePins}
+      initialPins={stackedPins.pins}
       initialViewport={viewport}
-      selectedPinId={selectedPinId}
+      selectedPinId={engineSelectedPinId}
       draggablePinIds={
-        pinEditor.kind === "fix"
+        pinMoveMode
+          ? movablePinIds
+          : pinEditor.kind === "fix"
           ? [pinEditor.pinId]
           : pinEditor.kind === "place"
             ? pinDashboard.pins.map((pin) => pin.id)
@@ -483,6 +566,14 @@ export default function MapSiteApplication({
         if (!pinId) return;
         // Partner pins stay on this map. Their pages are not loaded from a click.
         if (rootContext.partnerPins.some((pin) => pin.id === pinId)) return;
+        const stack = pinMoveMode ? null : stackForPin(stackedPins.stacks, pinId);
+        if (stack && stack.pinIds.length > 1) {
+          // Several PINs share this spot: list them so each one can be opened.
+          setSelectedPinId(null);
+          setOpenStack(stack);
+          return;
+        }
+        setOpenStack(null);
         setSelectedPinId(pinId);
       }}
       onMapClick={(coordinates) => {
@@ -499,6 +590,10 @@ export default function MapSiteApplication({
         const latitude = normalizePinCoordinate(coordinates.latitude, "lat");
         const longitude = normalizePinCoordinate(coordinates.longitude, "lng");
         if (latitude == null || longitude == null) return;
+        if (pinMoveMode) {
+          void movePinTo(pinId, latitude, longitude);
+          return;
+        }
         void fixAdditionalAt(pinId, latitude, longitude);
       }}
       onMapDragStart={dismissIfUserGesture}
@@ -550,6 +645,29 @@ export default function MapSiteApplication({
         clientCard={clientCard}
         belowWriteUp={belowWriteUp}
       />
+      {openStack && !pinMoveMode ? (
+        <MapSitePinStackPicker
+          stack={openStack}
+          pins={visiblePins}
+          onPick={(pinId) => {
+            setOpenStack(null);
+            setSelectedPinId(pinId);
+          }}
+          onClose={() => setOpenStack(null)}
+        />
+      ) : null}
+      {canMovePins && pinEditor.kind === "idle" ? (
+        <MapSitePinMoveToolbar
+          active={pinMoveMode}
+          status={pinMoveStatus}
+          onToggle={() => {
+            setPinMoveMode((on) => !on);
+            setPinMoveStatus(null);
+            setOpenStack(null);
+            setSelectedPinId(null);
+          }}
+        />
+      ) : null}
     </MapEngineProvider>
   );
 }
@@ -1175,63 +1293,42 @@ function MapSiteChrome({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady, pinEditor.kind, pinFitKey, useOpeningZoom, mapSize.width, mapSize.height]);
 
-  // Ralf (Oct 17): no "Show all PINs" option — every PIN shows until one is
-  // picked; the empty value is the "Select a PIN…" placeholder.
-  const [activePinId, setActivePinId] = useState<string>("");
-  const pinOptions = useMemo(
-    () => [
-      {
-        id: mapsite.id,
-        label: `${t.mapsite.leftCard.mainPin} · ${mapsite.property_address?.trim() || mapsite.fast_code || ""}`,
-      },
-      ...pinDashboard.pins.map((pin, index) => ({
-        id: pin.id,
-        label: `PIN ${index + 2} · ${pin.label || `${pin.latitude.toFixed(3)}, ${pin.longitude.toFixed(3)}`}`,
-      })),
-      ...rootContext.partnerPins.map((pin) => ({ id: pin.id, label: pin.label })),
-    ],
-    [mapsite.id, mapsite.property_address, mapsite.fast_code, pinDashboard.pins, rootContext.partnerPins, t],
-  );
-
-  const switchPin = useCallback(
-    (id: string) => {
-      setActivePinId(id);
-      if (!id) {
-        setSelectedPinId(null);
-        userMovedMapRef.current = false;
-        const next = openingViewport();
-        beginFocusGuard();
-        setViewport({ center: next.center, zoom: next.zoom });
-        return;
-      }
-      if (rootContext.partnerPins.some((pin) => pin.id === id)) {
-        setSelectedPinId(null);
-        const partner = rootContext.partnerPins.find((pin) => pin.id === id);
-        if (!partner) return;
-        beginFocusGuard();
-        setViewport({
-          center: { latitude: partner.latitude, longitude: partner.longitude },
-          zoom: useOpeningZoom
-            ? systemMapsiteOpeningZoom(partner.latitude)
-            : Math.max(mapsite.map_zoom ?? 12, 12),
-        });
-        return;
-      }
-      setSelectedPinId(id);
-    },
-    [
-      beginFocusGuard,
-      mapsite.lat,
-      mapsite.lng,
-      mapsite.map_zoom,
-      openingViewport,
-      pinZoom,
-      useOpeningZoom,
-      rootContext.partnerPins,
-      setSelectedPinId,
-      setViewport,
-    ],
-  );
+  // Ralf (Nov 27): "Show All" replaces the old "Switch PIN" picker. It closes
+  // any open PIN card and fits every PIN on this Mapsite plus a 10 mile buffer.
+  const showAllPins = useCallback(() => {
+    setSelectedPinId(null);
+    // Keep the opening fit from snapping back over the Show All camera.
+    userMovedMapRef.current = true;
+    const listingCardRight = listingCardRef.current
+      ? Math.round(
+          listingCardRef.current.getBoundingClientRect().right -
+            (rootRef.current?.getBoundingClientRect().left ?? 0),
+        )
+      : 0;
+    const next = viewportForMapsiteShowAll({
+      pins: visiblePins,
+      fallbackCenter: { latitude: mapsite.lat, longitude: mapsite.lng },
+      mapWidth: mapSize.width,
+      mapHeight: mapSize.height,
+      padding: mapsiteInitialFitPadding({
+        mapWidth: mapSize.width,
+        mapHeight: mapSize.height,
+        listingRight: listingCardRight || undefined,
+      }),
+    });
+    beginFocusGuard();
+    setViewport({ center: next.center, zoom: next.zoom });
+  }, [
+    beginFocusGuard,
+    mapSize.height,
+    mapSize.width,
+    mapsite.lat,
+    mapsite.lng,
+    setSelectedPinId,
+    setViewport,
+    userMovedMapRef,
+    visiblePins,
+  ]);
 
   const bookHref =
     talisBookHref ||
@@ -1375,9 +1472,8 @@ function MapSiteChrome({
                   brandLogoUrl={mapsiteCardLogoUrl(branding.logoUrl, branding.overridden.logo)}
                   cardAddress={ownerCustomizations.cardAddress}
                   cardPhone={ownerCustomizations.cardPhone}
-                  pinOptions={isOwner || dashboardManageable ? pinOptions : undefined}
-                  activePinId={activePinId}
-                  onSwitchPin={switchPin}
+                  showAllPinCount={visiblePins.length}
+                  onShowAll={showAllPins}
                   categoryOptions={totalPinCount > 1 ? categoryOptions : undefined}
                   activeCategory={categoryFilter}
                   onCategoryChange={(category) => {
@@ -1544,6 +1640,9 @@ function MapSiteChrome({
               centerX={popupCenterX}
               cardHeight={expandedCardHeight}
               compact={compact}
+              canManageFlags={dashboardManageable}
+              listingUrl={listingUrl || null}
+              onListingUrlSaved={(url) => setListingUrl(url ?? "")}
               onClose={() => setSelectedPinId(null)}
             />
             <MapSiteStartHereOverlay

@@ -95,9 +95,14 @@ describe("Home Market map (Ralf, Nov 22)", () => {
     expect(page).not.toContain("MarketsMapOrGate");
     expect(page).not.toContain("getAdminSessionAccount");
     expect(page).toContain('pageMetadata("/home-market")');
-    const entry = (pages as unknown as { pages: Record<string, { en: { title: string } }> }).pages["/home-market"];
+    const entry = (pages as unknown as { pages: Record<string, { en: { title: string; description: string }; de: { description: string } }> }).pages["/home-market"];
     expect(entry.en.title).toContain("Home Market");
-    expect(en.homeMarket.selectPin).toBe("Place your PIN to claim a Home Market of 100,000 people (+/-)");
+    expect(entry.en.description).toContain("50 miles / 80 kilometres");
+    expect(entry.de.description).toContain("50 Meilen / 80 Kilometern");
+    expect(entry.en.description).not.toMatch(/100,000 people/);
+    expect(en.homeMarket.selectPin).toBe("Your Home Pin will be the geographic centre to about 50 miles / 80 kilometres.");
+    expect(en.meta.talisuMarkets.description).toContain("50 miles / 80 kilometres");
+    expect(de.meta.talisuMarkets.description).toContain("50 Meilen / 80 Kilometern");
   });
 
   it("opens Personalize straight from the visitor's own PIN, without Aisha's script", () => {
@@ -349,8 +354,19 @@ describe("Ralf, Nov 23: place your own PIN, zoom, Webster book, celebration, Map
     expect(page).not.toContain("aishaLine");
     expect("aishaLine" in en.homeMarket).toBe(false);
     expect(en.homeMarket.kicker).toBe("Tsplits™ Mapsites");
-    expect(en.homeMarket.selectPin).toContain("Home Market of 100,000 people (+/-)");
-    expect(de.homeMarket.selectPin).toContain("100.000 Menschen (+/-)");
+    expect(en.homeMarket.selectPin).toBe(
+      "Your Home Pin will be the geographic centre to about 50 miles / 80 kilometres.",
+    );
+    expect(de.homeMarket.selectPin).toBe(
+      "Ihr Home-PIN wird der geografische Mittelpunkt von etwa 50 Meilen / 80 Kilometern sein.",
+    );
+    expect(en.homeMarket.intro).toContain("50 miles / 80 kilometres");
+    expect(de.homeMarket.intro).toContain("50 Meilen / 80 Kilometern");
+    expect(en.homeMarket.aishaRole).toBe("Your Customer Service Rep.");
+    expect(de.homeMarket.aishaRole).toBe("Ihre Kundenbetreuerin.");
+    expect(en.homeMarket.previewManager).toBe("Your Marketing Manager");
+    expect(JSON.stringify(en.homeMarket)).not.toMatch(/100,000 people/);
+    expect(JSON.stringify(de.homeMarket)).not.toMatch(/100\.000 Menschen/);
     for (const dict of [en, de]) {
       expect(dict.homeMarket.intro).not.toMatch(/Each PIN is one market|Jeder PIN ist ein Markt/);
     }

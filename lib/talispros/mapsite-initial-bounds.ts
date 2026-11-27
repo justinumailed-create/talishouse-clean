@@ -251,3 +251,36 @@ export function viewportForMapsitePins(input: {
   const fitted = viewportForBounds(pins, width, height, padding);
   return { ...fitted, mode: "multi" };
 }
+
+/** "Show All" (Ralf, Nov 27): every PIN plus a 10 mile margin around the outer PINs. */
+export const MAPSITE_SHOW_ALL_BUFFER_MILES = 10;
+export const MAPSITE_SHOW_ALL_BUFFER_KM = MAPSITE_SHOW_ALL_BUFFER_MILES * 1.609344;
+
+/**
+ * Camera for the PIN card "Show All" button: fits every PIN on the Mapsite
+ * with a 10 mile (about 16.09 km) buffer beyond the outermost PINs. A single
+ * PIN still gets a 10 mile box around it so the result is never a street view.
+ */
+export function viewportForMapsiteShowAll(input: {
+  pins: ReadonlyArray<{ latitude: number; longitude: number }>;
+  fallbackCenter: { latitude: number; longitude: number };
+  mapWidth?: number;
+  mapHeight?: number;
+  padding?: MapsiteFitPadding;
+  bufferKm?: number;
+}): MapsiteOpeningViewport {
+  const pins = validPins(input.pins);
+  const width =
+    input.mapWidth && input.mapWidth > 0 ? input.mapWidth : SYSTEM_MAPSITE_FALLBACK_PX;
+  const height =
+    input.mapHeight && input.mapHeight > 0 ? input.mapHeight : SYSTEM_MAPSITE_FALLBACK_PX;
+  const source = pins.length > 0 ? pins : [input.fallbackCenter];
+  const corners = bufferedPinBounds(source, input.bufferKm ?? MAPSITE_SHOW_ALL_BUFFER_KM);
+  const padding =
+    input.padding ?? mapsiteInitialFitPadding({ mapWidth: width, mapHeight: height });
+  const fitted = viewportForBounds(corners, width, height, padding);
+  return {
+    ...fitted,
+    mode: pins.length > 1 ? "multi" : pins.length === 1 ? "single" : "empty",
+  };
+}

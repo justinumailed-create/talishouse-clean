@@ -51,12 +51,12 @@
    "image": "/og/pages/talisu-mkts",
    "en": {
     "title": "Markets Served: Claim Your Home Market | Tsplits™",
-    "description": "Place your own PIN in Canada or the USA to claim a Home Market of 100,000 people (+/-) on the Tsplits™ Mapsites map.",
+    "description": "Place your PIN in Canada or the USA. Your Home Pin is the geographic centre to about 50 miles / 80 kilometres on Tsplits™ Mapsites.",
     "alt": "Tsplits™ tree logo: Claim your Home Market with your PIN"
    },
    "de": {
     "title": "Bediente Märkte: Heimatmarkt sichern | Tsplits™",
-    "description": "Setzen Sie Ihren eigenen PIN in Kanada oder den USA und sichern Sie einen Heimatmarkt mit 100.000 Menschen (+/-) auf der Tsplits™ Mapsites-Karte.",
+    "description": "Setzen Sie Ihren PIN in Kanada oder den USA. Ihr Home-PIN ist der geografische Mittelpunkt von ca. 50 Meilen / 80 Kilometern auf Tsplits™.",
     "alt": "Tsplits™ Baumlogo: Sichern Sie Ihren Heimatmarkt mit Ihrem PIN"
    }
   },
@@ -66,12 +66,12 @@
    "image": "/og/pages/talisu-mkts-usa",
    "en": {
     "title": "USA Markets: Claim Your Home Market | Tsplits™",
-    "description": "Place your own PIN anywhere in the USA to claim a Home Market of 100,000 people (+/-) on the Tsplits™ Mapsites map.",
+    "description": "Place your PIN anywhere in the USA. Your Home Pin is the geographic centre to about 50 miles / 80 kilometres on Tsplits™ Mapsites.",
     "alt": "Tsplits™ tree logo: Claim your US Home Market with your PIN"
    },
    "de": {
     "title": "Märkte USA: Heimatmarkt sichern | Tsplits™",
-    "description": "Setzen Sie Ihren eigenen PIN irgendwo in den USA und sichern Sie einen Heimatmarkt mit 100.000 Menschen (+/-) auf der Tsplits™ Mapsites-Karte.",
+    "description": "Setzen Sie Ihren PIN irgendwo in den USA. Ihr Home-PIN ist der geografische Mittelpunkt von ca. 50 Meilen / 80 Kilometern auf Tsplits™.",
     "alt": "Tsplits™ Baumlogo: Sichern Sie Ihren US-Heimatmarkt mit Ihrem PIN"
    }
   },
@@ -374,12 +374,12 @@
    "image": "/og/pages/demo-mapsite",
    "en": {
     "title": "Claim your Home Market | Tsplits™",
-    "description": "Place your PIN to claim a Home Market of about 100,000 people, personalize your Mapsite, and register your market with Tsplits™.",
+    "description": "Place your PIN to claim a Home Market (geographic centre to about 50 miles / 80 kilometres), personalize your Mapsite, and register with Tsplits™.",
     "alt": "Tsplits™ tree logo: Claim your Home Market"
    },
    "de": {
     "title": "Heimatmarkt sichern | Tsplits™",
-    "description": "Setzen Sie Ihren PIN für einen Heimatmarkt mit etwa 100.000 Menschen, personalisieren Sie Ihre Mapsite und registrieren Sie sich bei Tsplits™.",
+    "description": "Setzen Sie Ihren PIN für einen Heimatmarkt (Mittelpunkt von ca. 50 Meilen / 80 Kilometern), personalisieren Sie Ihre Mapsite und registrieren Sie sich.",
     "alt": "Tsplits™ Baumlogo: Sichern Sie sich Ihren Heimatmarkt"
    }
   },

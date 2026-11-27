@@ -13,7 +13,14 @@ const FORMATS = ["pptx", "key", "slides"] as const;
  * Locked visitors see disabled controls. The files are fetched only after
  * the server has confirmed a registered owner.
  */
-export default function EbookPlatformLinks({ unlocked }: { unlocked: boolean }) {
+export default function EbookPlatformLinks({
+  unlocked,
+  fastCode = null,
+}: {
+  unlocked: boolean;
+  /** Bookshelf (TEB) flow: check this FAST Code's registration. */
+  fastCode?: string | null;
+}) {
   const d = useT().demo;
   const [busy, setBusy] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
@@ -28,7 +35,8 @@ export default function EbookPlatformLinks({ unlocked }: { unlocked: boolean }) 
     setNote(null);
     setBusy(format);
     try {
-      const response = await fetch(`/api/templates/${format}`, { credentials: "same-origin" });
+      const query = fastCode?.trim() ? `?fastCode=${encodeURIComponent(fastCode.trim().toLowerCase())}` : "";
+      const response = await fetch(`/api/templates/${format}${query}`, { credentials: "same-origin" });
       if (response.status === 403) {
         setNote(d.downloadMenuRegister);
         return;

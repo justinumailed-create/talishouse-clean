@@ -515,6 +515,40 @@ export async function getMapSiteLocationFromBuildRequest(options: {
   return null;
 }
 
+/**
+ * Unlink & move the main PIN (Ralf, Nov 27 item #7). The Mapsite pin is
+ * normally locked to the geocoded build-request location, which wins over
+ * mapsites.latitude on every load. Write the owner's dropped spot to both
+ * existing coordinate columns so the move sticks. Address text is unchanged.
+ */
+export async function moveMapSiteMainPinLocation(input: {
+  mapsiteId: string;
+  fastCode: string;
+  latitude: number;
+  longitude: number;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const updated = await updateMapSiteResources(input.mapsiteId, {
+    latitude: input.latitude,
+    longitude: input.longitude,
+  });
+  if (!updated.ok) return { ok: false, error: updated.error };
+  const supabase = getSupabaseAdmin();
+  const coords = { latitude: input.latitude, longitude: input.longitude };
+  const [byMapsite, byCode] = await Promise.all([
+    supabase.from("build_requests").update(coords).eq("linked_mapsite_id", input.mapsiteId),
+    input.fastCode.trim()
+      ? supabase
+          .from("build_requests")
+          .update(coords)
+          .ilike("requested_fast_code", input.fastCode.trim())
+      : Promise.resolve({ error: null }),
+  ]);
+  if (byMapsite.error || byCode.error) {
+    return { ok: false, error: "The PIN moved, but its saved location could not be updated." };
+  }
+  return { ok: true };
+}
+
 export async function mergeMapSiteWithSubmittedLocation(
   mapsite: MapSitePlatformRecord,
   options: {

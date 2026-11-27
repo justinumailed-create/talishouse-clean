@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { MapSitePlatformRecord } from "@/lib/talispros/mapsite-platform";
@@ -29,8 +30,19 @@ import {
   type MapSiteOnboardingPhase,
 } from "@/lib/talispros/mapsite-onboarding-phase";
 import PinActionExplainer, { type PinActionExplainerId } from "@/components/talispros/mapsite/PinActionExplainer";
+import MapSiteGreyFlagAction from "@/components/talispros/mapsite/MapSiteGreyFlagAction";
+import { loadMapSiteFlagAttachmentsAction } from "@/app/talispros/mapsite/flag-actions";
+import { greyFlagActionFor, type GreyFlagAction } from "@/lib/talispros/mapsite-flag-attachments";
 
 type ResourceKey = MapSiteResourceKey;
+
+/** PIN-card slot → grey flag one-click action (the "mls" slot is TVA™). */
+const GREY_FLAG_ACTION: Record<ResourceKey, GreyFlagAction> = {
+  url: "url",
+  mls: "tva",
+  teb: "teb",
+  ttv: "ttv",
+};
 
 const PIN_EXPLAINER: Record<ResourceKey, PinActionExplainerId> = {
   url: "url",
@@ -87,10 +99,13 @@ function ResourceButton({
   href,
   label,
   onActionClick,
+  onGreyClick,
 }: {
   href: string | null;
   label: string;
   onActionClick?: () => void;
+  /** Owner / editor: a grey link opens its one-click action instead. */
+  onGreyClick?: () => void;
 }) {
   const t = useT();
   const disabled = !href;
@@ -100,6 +115,20 @@ function ResourceButton({
       ? "cursor-not-allowed bg-neutral-300 text-neutral-500 shadow-none"
       : "bg-[#046BD9] text-white shadow-[0_6px_14px_rgba(4,107,217,0.3)] transition hover:bg-[#0558b3]",
   ].join(" ");
+
+  if (disabled && onGreyClick) {
+    return (
+      <button
+        type="button"
+        className={className.replace("cursor-not-allowed", "cursor-pointer hover:bg-neutral-400")}
+        aria-label={label}
+        data-grey-flag-action="true"
+        onClick={onGreyClick}
+      >
+        {label}
+      </button>
+    );
+  }
 
   if (disabled) {
     return (
@@ -182,6 +211,14 @@ interface MapSitePropertyPopupProps {
    * photo, so the main listing photo is not reused.
    */
   pinCard?: { title: string; detail: string } | null;
+  /**
+   * Owner / editor (Ralf, Nov 27 item #8): clicking a grey URL, TEB, TVA or
+   * TTV link opens one focused action. Visitors keep the hover message only.
+   */
+  canManageFlags?: boolean;
+  /** Current listing URL (live after a save from the Dashboard or a grey flag). */
+  listingUrl?: string | null;
+  onListingUrlSaved?: (url: string | null) => void;
   onClose: () => void;
 }
 
@@ -203,10 +240,37 @@ export default function MapSitePropertyPopup({
   widthPx,
   dense = false,
   pinCard = null,
+  canManageFlags = false,
+  listingUrl,
+  onListingUrlSaved,
   onClose,
 }: MapSitePropertyPopupProps) {
   const t = useT();
   const p = t.mapsite.popup;
+  const [greyAction, setGreyAction] = useState<GreyFlagAction | null>(null);
+  const [attachments, setAttachments] = useState<{ teb: string | null; tva: string | null }>({
+    teb: null,
+    tva: null,
+  });
+  const fastCode = mapsite.fast_code?.trim() || "";
+  useEffect(() => {
+    if (!fastCode) return;
+    let cancelled = false;
+    void loadMapSiteFlagAttachmentsAction({ fastCode })
+      .then((found) => {
+        if (!cancelled) setAttachments(found);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [fastCode]);
+  const resourceHref = (key: ResourceKey, resolved: string | null): string | null => {
+    if (key === "url" && listingUrl !== undefined) return listingUrl?.trim() || resolved;
+    // TVA™ opens the attached TEB summary once the owner has added one.
+    if (key === "mls") return attachments.tva || resolved;
+    return resolved;
+  };
   const claimable = isClaimable(mapsite.status);
   const showResourceButtons = showsPinResourceButtons(onboardingPhase);
   const genericHeroImage = "/talisbooks/sample/img-11-1280x720.jpeg";
@@ -352,17 +416,36 @@ export default function MapSitePropertyPopup({
                 ) : null}
                 <div className="grid grid-cols-2 gap-1.5">
                   {RESOURCES.map((resource) => {
-                    const href = resource.resolveHref(mapsite);
+                    const href = resourceHref(resource.key, resource.resolveHref(mapsite));
+                    const action = greyFlagActionFor({
+                      flag: GREY_FLAG_ACTION[resource.key],
+                      live: Boolean(href),
+                      canManage: canManageFlags && Boolean(fastCode),
+                    });
                     return (
                       <PinActionExplainer key={resource.key} action={PIN_EXPLAINER[resource.key]}>
                         <ResourceButton
                           href={href}
                           label={resource.label}
+                          onGreyClick={action ? () => setGreyAction(action) : undefined}
                         />
                       </PinActionExplainer>
                     );
                   })}
                 </div>
+                {greyAction && canManageFlags ? (
+                  <MapSiteGreyFlagAction
+                    key={greyAction}
+                    action={greyAction}
+                    mapsiteId={mapsite.id}
+                    fastCode={fastCode}
+                    onClose={() => setGreyAction(null)}
+                    onUrlSaved={(url) => onListingUrlSaved?.(url)}
+                    onAttached={(kind, url) =>
+                      setAttachments((current) => ({ ...current, [kind]: url }))
+                    }
+                  />
+                ) : null}
               </div>
             ) : null}
           </div>

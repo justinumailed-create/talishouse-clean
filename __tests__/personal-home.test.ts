@@ -545,3 +545,13 @@ describe("personal home v2: entry points, account pill, logo", () => {
     );
   });
 });
+
+describe("Get your own Mapsite platform button", () => {
+  it("is wired on the personal home page and localized in EN/DE", () => {
+    const page = readFileSync(join(root, "app/home/[fastCode]/page.tsx"), "utf8");
+    expect(page).toContain("applyGetOwnMapsiteButton");
+    expect(page).toContain("CTA_SECONDARY");
+    expect(en.personalHome.getOwnMapsite).toBe("Get your own Mapsite");
+    expect(de.personalHome.getOwnMapsite).toBe("Holen Sie sich Ihre eigene Mapsite");
+  });
+});

@@ -1,4 +1,5 @@
 import type { MapEnginePin } from "./types";
+import { decorateStackedPinHtml, readPinStackCount } from "./pin-stacks";
 import {
   pinVisualCacheKey,
   renderPinMarkerHtml,
@@ -71,7 +72,9 @@ function toPinVisualProps(
 }
 
 export function pinStyleCacheKey(pin: MapEnginePin, highlighted: boolean): string {
-  return pinVisualCacheKey(toPinVisualProps(pin, highlighted));
+  const stack = readPinStackCount(pin);
+  const key = pinVisualCacheKey(toPinVisualProps(pin, highlighted));
+  return stack ? `${key}|stack:${stack}` : key;
 }
 
 /** @deprecated Prefer renderPinMarkerHtml via the pin engine. Kept for SVG callers. */
@@ -100,5 +103,8 @@ export function buildPinMarkerHtml(
   iconSize: [number, number];
   iconAnchor: [number, number];
 } {
-  return renderPinMarkerHtml(toPinVisualProps(pin, highlighted));
+  const rendered = renderPinMarkerHtml(toPinVisualProps(pin, highlighted));
+  const stack = readPinStackCount(pin);
+  // Duplicate PINs on one spot: white halo + count badge (Ralf, Nov 27).
+  return stack ? { ...rendered, html: decorateStackedPinHtml(rendered.html, stack) } : rendered;
 }

@@ -21,9 +21,9 @@ export const metadata: Metadata = {
     image: talisprosBrandOgMetadataImage("Tsplits™ | Claim your market"),
   }),
   icons: {
-    icon: "/favicon-v2.ico",
-    shortcut: "/favicon-v2.ico",
-    apple: "/favicon-v2.png",
+    icon: "/favicon-v2.ico?v=3",
+    shortcut: "/favicon-v2.ico?v=3",
+    apple: "/favicon-v2.png?v=3",
   },
 };
 
